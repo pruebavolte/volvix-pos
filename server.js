@@ -2,7 +2,6 @@ require('dotenv').config();
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { WebSocketServer } = require('ws');
 const { createClient } = require('@supabase/supabase-js');
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zhvwmzkcqngcaqpdxtwr.supabase.co';
@@ -101,7 +100,6 @@ async function handleAPI(req, res, method, pathname, parsed) {
       const body = await bodyJSON(req);
       const { data, error } = await supabase.from('volvix_tenants').insert(body).select().single();
       if (error) return json(res, 400, { error: error.message });
-      broadcast({ event: 'tenant_created', data });
       return json(res, 201, data);
     }
   }
@@ -140,7 +138,6 @@ async function handleAPI(req, res, method, pathname, parsed) {
       const body = await bodyJSON(req);
       const { data, error } = await supabase.from('volvix_features').upsert(body).select().single();
       if (error) return json(res, 400, { error: error.message });
-      broadcast({ event: 'feature_updated', data });
       return json(res, 200, data);
     }
   }
@@ -159,7 +156,6 @@ async function handleAPI(req, res, method, pathname, parsed) {
       const body = await bodyJSON(req);
       const { data, error } = await supabase.from('volvix_tickets').insert(body).select().single();
       if (error) return json(res, 400, { error: error.message });
-      broadcast({ event: 'ticket_created', data });
       return json(res, 201, data);
     }
   }
@@ -215,7 +211,6 @@ async function handleAPI(req, res, method, pathname, parsed) {
       const body = await bodyJSON(req);
       const { data, error } = await supabase.from('volvix_ventas').insert(body).select().single();
       if (error) return json(res, 400, { error: error.message });
-      broadcast({ event: 'venta_created', data });
       return json(res, 201, data);
     }
   }
@@ -278,7 +273,6 @@ async function aiActivateFeatures({ tenant_id, tipo_negocio, datos_uso }) {
     ai_ultimo_analisis: new Date().toISOString(),
   }).eq('id', tenant_id);
 
-  broadcast({ event: 'ai_activation', tenant_id, features });
   return { ok: true, features_activados: features, total: features.length };
 }
 
@@ -308,24 +302,6 @@ async function getStats(tenant_id) {
     runQ('volvix_tickets'),
   ]);
   return { tenants, ventas, productos, tickets, ts: Date.now() };
-}
-
-// ─── WEBSOCKET ─────────────────────────────────────────────────────────────────
-const wss = new WebSocketServer({ server });
-const clients = new Set();
-
-wss.on('connection', (ws) => {
-  clients.add(ws);
-  ws.send(JSON.stringify({ event: 'connected', ts: Date.now() }));
-  ws.on('close', () => clients.delete(ws));
-  ws.on('error', () => clients.delete(ws));
-});
-
-function broadcast(msg) {
-  const payload = JSON.stringify(msg);
-  for (const ws of clients) {
-    if (ws.readyState === 1) ws.send(payload);
-  }
 }
 
 // ─── START ─────────────────────────────────────────────────────────────────────

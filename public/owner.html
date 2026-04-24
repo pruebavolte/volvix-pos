@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Volvix — Panel del Propietario</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0a0a0f">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   :root{
@@ -347,27 +349,49 @@ document.querySelectorAll('[data-section]').forEach(el => {
   el.addEventListener('click', () => showSection(el.dataset.section));
 });
 
-// WEBSOCKET
+// REALTIME via Supabase (reemplaza WebSocket — compatible con Vercel serverless)
 function connectWS() {
-  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-  ws = new WebSocket(`${proto}://${location.host}`);
-  ws.onopen = () => {
-    document.getElementById('wsBadge').textContent = '● Conectado';
-    document.getElementById('wsBadge').className = 'badge-ws ws-on';
+  const SUPA_URL = 'https://zhvwmzkcqngcaqpdxtwr.supabase.co';
+  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpodndtemtjcW5nY2FxcGR4dHdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxNjcwMTgsImV4cCI6MjA3OTc0MzAxOH0.ygTc754INgqYJEMD0wc_CzRCzRxUfp4hq3rYvJRpjkk';
+
+  const script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+  script.onload = () => {
+    const { createClient } = supabase;
+    const client = createClient(SUPA_URL, SUPA_KEY);
+
+    document.getElementById('wsBadge').textContent = '● Conectando...';
+    document.getElementById('wsBadge').className = 'badge-ws';
+
+    ['volvix_ventas','volvix_tickets','volvix_productos','volvix_features'].forEach(table => {
+      client.channel(`rt-${table}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table }, (payload) => {
+          document.getElementById('wsBadge').textContent = '● Conectado';
+          document.getElementById('wsBadge').className = 'badge-ws ws-on';
+          const evt = payload.eventType || 'change';
+          feed.unshift(`[${new Date().toLocaleTimeString()}] ${table}:${evt}: ${JSON.stringify(payload.new || payload.old || '').slice(0,60)}`);
+          if (feed.length > 20) feed.pop();
+          document.getElementById('activityFeed').innerHTML = feed.slice(0,8).map(f =>
+            `<div style="padding:.3rem 0;border-bottom:1px solid var(--border);font-family:monospace">${f}</div>`
+          ).join('') || '<div style="color:var(--muted)">Sin actividad</div>';
+          // Auto-refresh relevant section
+          if (table === 'volvix_ventas') loadVentas();
+          if (table === 'volvix_tickets') loadTickets();
+          if (table === 'volvix_productos') loadProductos();
+        })
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            document.getElementById('wsBadge').textContent = '● Conectado';
+            document.getElementById('wsBadge').className = 'badge-ws ws-on';
+          }
+          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+            document.getElementById('wsBadge').textContent = '● Desconectado';
+            document.getElementById('wsBadge').className = 'badge-ws ws-off';
+          }
+        });
+    });
   };
-  ws.onclose = () => {
-    document.getElementById('wsBadge').textContent = '● Desconectado';
-    document.getElementById('wsBadge').className = 'badge-ws ws-off';
-    setTimeout(connectWS, 3000);
-  };
-  ws.onmessage = (e) => {
-    const msg = JSON.parse(e.data);
-    if (msg.event !== 'connected') {
-      feed.unshift(`[${new Date().toLocaleTimeString()}] ${msg.event}: ${JSON.stringify(msg.data || '').slice(0,60)}`);
-      if (feed.length > 20) feed.pop();
-      document.getElementById('activityFeed').innerHTML = feed.slice(0,8).map(f => `<div style="padding:.3rem 0;border-bottom:1px solid var(--border);font-family:monospace">${f}</div>`).join('') || '<div style="color:var(--muted)">Sin actividad</div>';
-    }
-  };
+  document.head.appendChild(script);
 }
 
 // STATS
