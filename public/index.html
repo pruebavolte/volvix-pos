@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volvix POS — Sistema Multi-Tenant con IA</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --primary:#6c47ff;--primary-dark:#4f2fe0;--accent:#00d4aa;
+    --bg:#0a0a0f;--bg2:#12121a;--bg3:#1a1a28;
+    --text:#e8e8f0;--muted:#8888a8;--border:#2a2a3f;
+  }
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+  a{color:inherit;text-decoration:none}
+
+  /* NAV */
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,15,.85);
+    backdrop-filter:blur(12px);border-bottom:1px solid var(--border);
+    display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:64px}
+  .logo{font-size:1.4rem;font-weight:800;color:#fff;letter-spacing:-1px}
+  .logo span{color:var(--primary)}
+  nav ul{display:flex;gap:2rem;list-style:none}
+  nav a{color:var(--muted);font-size:.9rem;transition:color .2s}
+  nav a:hover{color:#fff}
+  .nav-cta{background:var(--primary);color:#fff!important;padding:.45rem 1.1rem;border-radius:8px;font-weight:600}
+  .nav-cta:hover{background:var(--primary-dark)!important}
+
+  /* HERO */
+  .hero{min-height:100vh;display:flex;align-items:center;justify-content:center;
+    text-align:center;padding:6rem 2rem 4rem;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;inset:0;
+    background:radial-gradient(ellipse 80% 60% at 50% 30%,rgba(108,71,255,.18),transparent 70%);
+    pointer-events:none}
+  .badge{display:inline-block;background:rgba(108,71,255,.15);border:1px solid rgba(108,71,255,.35);
+    color:var(--primary);padding:.3rem .9rem;border-radius:20px;font-size:.8rem;font-weight:600;
+    margin-bottom:1.5rem;letter-spacing:.5px}
+  h1{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:900;line-height:1.1;letter-spacing:-2px;margin-bottom:1.5rem}
+  h1 span{background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .hero-sub{font-size:1.2rem;color:var(--muted);max-width:600px;margin:0 auto 2.5rem;line-height:1.6}
+  .hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+  .btn{padding:.85rem 2rem;border-radius:10px;font-weight:700;font-size:1rem;cursor:pointer;
+    border:none;transition:all .2s;display:inline-block}
+  .btn-primary{background:var(--primary);color:#fff}
+  .btn-primary:hover{background:var(--primary-dark);transform:translateY(-1px)}
+  .btn-outline{background:transparent;color:#fff;border:1px solid var(--border)}
+  .btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+
+  /* STATS */
+  .stats{display:flex;gap:2rem;justify-content:center;flex-wrap:wrap;margin-top:4rem}
+  .stat{text-align:center}
+  .stat strong{display:block;font-size:2rem;font-weight:800;color:var(--accent)}
+  .stat span{font-size:.85rem;color:var(--muted)}
+
+  /* SECTION */
+  section{padding:5rem 2rem;max-width:1200px;margin:0 auto}
+  .section-title{font-size:2.2rem;font-weight:800;text-align:center;margin-bottom:.75rem}
+  .section-sub{color:var(--muted);text-align:center;margin-bottom:3rem;font-size:1.05rem}
+
+  /* TIPOS */
+  .tipos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem}
+  .tipo-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;
+    padding:1.4rem;cursor:pointer;transition:all .2s;text-align:center}
+  .tipo-card:hover{border-color:var(--primary);background:var(--bg3);transform:translateY(-2px)}
+  .tipo-icon{font-size:2rem;margin-bottom:.6rem}
+  .tipo-name{font-size:.9rem;font-weight:600}
+  .tipo-count{font-size:.75rem;color:var(--muted);margin-top:.2rem}
+
+  /* FEATURES */
+  .features-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.5rem}
+  .feat{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:1.8rem}
+  .feat-icon{font-size:1.8rem;margin-bottom:.8rem}
+  .feat h3{font-size:1.05rem;font-weight:700;margin-bottom:.5rem}
+  .feat p{font-size:.88rem;color:var(--muted);line-height:1.5}
+
+  /* PRICING */
+  .pricing-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1.5rem}
+  .plan{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:2rem}
+  .plan.featured{border-color:var(--primary);background:var(--bg3);position:relative}
+  .plan-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+    background:var(--primary);color:#fff;padding:.25rem .8rem;border-radius:20px;font-size:.75rem;font-weight:700}
+  .plan-name{font-size:1.1rem;font-weight:700;margin-bottom:.5rem}
+  .plan-price{font-size:2.5rem;font-weight:900;margin:.75rem 0}
+  .plan-price sup{font-size:1rem;vertical-align:super}
+  .plan-price sub{font-size:.9rem;color:var(--muted)}
+  .plan-desc{font-size:.85rem;color:var(--muted);margin-bottom:1.5rem}
+  .plan ul{list-style:none;margin-bottom:1.5rem}
+  .plan li{font-size:.88rem;padding:.35rem 0;border-bottom:1px solid var(--border);color:var(--muted)}
+  .plan li::before{content:'✓ ';color:var(--accent)}
+
+  /* CTA */
+  .cta-section{text-align:center;background:linear-gradient(135deg,rgba(108,71,255,.12),rgba(0,212,170,.08));
+    border:1px solid var(--border);border-radius:20px;padding:4rem 2rem;margin:2rem auto;max-width:800px}
+
+  /* FOOTER */
+  footer{border-top:1px solid var(--border);padding:2rem;text-align:center;color:var(--muted);font-size:.85rem}
+
+  /* PANEL LINKS */
+  .panel-links{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:1.5rem}
+  .panel-link{background:var(--bg2);border:1px solid var(--border);border-radius:10px;
+    padding:.8rem 1.5rem;font-size:.9rem;font-weight:600;transition:all .2s}
+  .panel-link:hover{border-color:var(--primary);color:var(--primary)}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">Vol<span>vix</span></div>
+  <ul>
+    <li><a href="#tipos">Sectores</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#precios">Precios</a></li>
+    <li><a href="owner.html" class="nav-cta">Panel Propietario</a></li>
+  </ul>
+</nav>
+
+<div class="hero">
+  <div>
+    <div class="badge">Sistema POS con IA — Multi-Tenant</div>
+    <h1>El POS que se adapta<br><span>solo a tu negocio</span></h1>
+    <p class="hero-sub">Volvix detecta tu tipo de negocio y activa automáticamente las funciones que necesitas. Sin configuraciones complejas. Sin curvas de aprendizaje.</p>
+    <div class="hero-btns">
+      <a href="owner.html" class="btn btn-primary">Iniciar ahora — Gratis</a>
+      <a href="#features" class="btn btn-outline">Ver funciones</a>
+    </div>
+    <div class="stats">
+      <div class="stat"><strong>200+</strong><span>Tipos de negocio</span></div>
+      <div class="stat"><strong>IA</strong><span>Auto-configuración</span></div>
+      <div class="stat"><strong>100%</strong><span>Multi-tenant</span></div>
+      <div class="stat"><strong>Sin</strong><span>Config manual</span></div>
+    </div>
+    <div class="panel-links">
+      <a href="owner.html" class="panel-link">Panel Propietario</a>
+      <a href="ai.html" class="panel-link">Motor IA</a>
+      <a href="pos.html" class="panel-link">POS Ventas</a>
+      <a href="inventario.html" class="panel-link">Inventario</a>
+      <a href="soporte.html" class="panel-link">Soporte</a>
+    </div>
+  </div>
+</div>
+
+<section id="tipos">
+  <div class="section-title">Para todo tipo de negocio</div>
+  <div class="section-sub">La IA detecta tu sector y activa las funciones correctas de inmediato</div>
+  <div class="tipos-grid" id="tiposGrid"></div>
+</section>
+
+<section id="features">
+  <div class="section-title">Todo lo que necesitas</div>
+  <div class="section-sub">Funcionalidades que se activan automáticamente según tu negocio</div>
+  <div class="features-grid">
+    <div class="feat"><div class="feat-icon">🤖</div><h3>Motor IA Autónomo</h3><p>Analiza tu negocio y activa funciones automáticamente. Sin configuración manual.</p></div>
+    <div class="feat"><div class="feat-icon">🏪</div><h3>POS Multi-negocio</h3><p>Punto de venta adaptado a retail, restaurantes, salud, servicios y más.</p></div>
+    <div class="feat"><div class="feat-icon">📦</div><h3>Inventario Inteligente</h3><p>Control de stock con alertas automáticas y predicción de reorden.</p></div>
+    <div class="feat"><div class="feat-icon">📊</div><h3>Analytics en tiempo real</h3><p>Dashboard con métricas clave actualizadas al instante vía WebSocket.</p></div>
+    <div class="feat"><div class="feat-icon">🌐</div><h3>Multi-tenant</h3><p>Una sola instancia soporta cientos de negocios completamente aislados.</p></div>
+    <div class="feat"><div class="feat-icon">📱</div><h3>PWA + Offline</h3><p>Funciona sin internet. Sincroniza automáticamente cuando hay conexión.</p></div>
+    <div class="feat"><div class="feat-icon">🎫</div><h3>Soporte Integrado</h3><p>Sistema de tickets con resolución IA para clientes y operadores.</p></div>
+    <div class="feat"><div class="feat-icon">💳</div><h3>Facturación CFDI</h3><p>Generación automática de facturas electrónicas por cada venta.</p></div>
+    <div class="feat"><div class="feat-icon">🔗</div><h3>Integraciones</h3><p>WhatsApp, Stripe, MercadoPago, y más conectados desde el panel.</p></div>
+  </div>
+</section>
+
+<section id="precios">
+  <div class="section-title">Planes transparentes</div>
+  <div class="section-sub">Sin sorpresas. Cancela cuando quieras.</div>
+  <div class="pricing-grid">
+    <div class="plan">
+      <div class="plan-name">Starter</div>
+      <div class="plan-price"><sup>$</sup>0<sub>/mes</sub></div>
+      <div class="plan-desc">Para probar Volvix sin compromiso</div>
+      <ul>
+        <li>1 negocio</li>
+        <li>Hasta 100 productos</li>
+        <li>POS básico</li>
+        <li>Soporte comunidad</li>
+      </ul>
+      <a href="owner.html" class="btn btn-outline" style="width:100%;text-align:center">Empezar gratis</a>
+    </div>
+    <div class="plan featured">
+      <div class="plan-badge">Popular</div>
+      <div class="plan-name">Pro</div>
+      <div class="plan-price"><sup>$</sup>499<sub>/mes</sub></div>
+      <div class="plan-desc">Para negocios en crecimiento</div>
+      <ul>
+        <li>3 negocios</li>
+        <li>Productos ilimitados</li>
+        <li>Motor IA completo</li>
+        <li>WhatsApp + Facturación</li>
+        <li>Soporte prioritario</li>
+      </ul>
+      <a href="owner.html" class="btn btn-primary" style="width:100%;text-align:center">Comenzar Pro</a>
+    </div>
+    <div class="plan">
+      <div class="plan-name">Enterprise</div>
+      <div class="plan-price"><sup>$</sup>1,999<sub>/mes</sub></div>
+      <div class="plan-desc">Para cadenas y franquicias</div>
+      <ul>
+        <li>Negocios ilimitados</li>
+        <li>SLA garantizado</li>
+        <li>IA personalizada</li>
+        <li>Integraciones custom</li>
+        <li>Soporte 24/7</li>
+      </ul>
+      <a href="soporte.html" class="btn btn-outline" style="width:100%;text-align:center">Contactar ventas</a>
+    </div>
+  </div>
+</section>
+
+<div style="padding:0 2rem">
+  <div class="cta-section">
+    <h2 style="font-size:2rem;font-weight:800;margin-bottom:1rem">Empieza hoy mismo</h2>
+    <p style="color:var(--muted);margin-bottom:2rem">Sin tarjeta de crédito. Sin configuración. La IA hace el trabajo por ti.</p>
+    <a href="owner.html" class="btn btn-primary">Crear mi negocio — Gratis</a>
+  </div>
+</div>
+
+<footer>
+  <p>Volvix POS &copy; 2024 — Sistema multi-tenant autónomo con IA</p>
+  <p style="margin-top:.5rem"><a href="owner.html">Panel</a> &nbsp;·&nbsp; <a href="soporte.html">Soporte</a> &nbsp;·&nbsp; <a href="ai.html">Motor IA</a></p>
+</footer>
+
+<script>
+const TIPOS = [
+  {icon:'🛒',name:'Tienda Retail',key:'retail'},
+  {icon:'🍔',name:'Restaurante',key:'alimentos'},
+  {icon:'💊',name:'Farmacia/Salud',key:'salud'},
+  {icon:'💈',name:'Belleza/Spa',key:'belleza'},
+  {icon:'🏠',name:'Rentas',key:'rentas'},
+  {icon:'🔧',name:'Servicios/Taller',key:'servicios'},
+  {icon:'💪',name:'Gimnasio',key:'gym'},
+  {icon:'📚',name:'Educación',key:'educacion'},
+  {icon:'🚗',name:'Automotriz',key:'servicios'},
+  {icon:'🐾',name:'Veterinaria',key:'salud'},
+  {icon:'👗',name:'Boutique/Moda',key:'retail'},
+  {icon:'☕',name:'Café/Panadería',key:'alimentos'},
+];
+
+const grid = document.getElementById('tiposGrid');
+TIPOS.forEach(t => {
+  const card = document.createElement('div');
+  card.className = 'tipo-card';
+  card.innerHTML = `<div class="tipo-icon">${t.icon}</div><div class="tipo-name">${t.name}</div>`;
+  card.onclick = () => window.location.href = `landing-${t.key}.html`;
+  grid.appendChild(card);
+});
+</script>
+</body>
+</html>

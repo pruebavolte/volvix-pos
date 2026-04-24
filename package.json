@@ -1,0 +1,20 @@
+{
+  "name": "volvix-pos",
+  "version": "1.0.0",
+  "description": "Volvix - Sistema POS multi-tenant autónomo con IA",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build": "echo 'No build step needed'"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "ws": "^8.16.0",
+    "open": "^10.1.0",
+    "dotenv": "^16.4.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

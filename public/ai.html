@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volvix — Motor IA</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --primary:#6c47ff;--primary-dark:#4f2fe0;--accent:#00d4aa;--danger:#ff4757;
+    --bg:#0a0a0f;--bg2:#12121a;--bg3:#1a1a28;--text:#e8e8f0;--muted:#8888a8;--border:#2a2a3f;
+  }
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+  a{color:var(--muted);text-decoration:none}a:hover{color:#fff}
+
+  header{background:var(--bg2);border-bottom:1px solid var(--border);padding:.9rem 2rem;
+    display:flex;align-items:center;gap:1rem}
+  .logo{font-size:1.2rem;font-weight:800}
+  .logo span{color:var(--primary)}
+  header nav{display:flex;gap:1rem;margin-left:auto}
+  .nav-link{font-size:.85rem;padding:.35rem .8rem;border-radius:7px;transition:all .2s}
+  .nav-link:hover{background:var(--bg3);color:#fff}
+
+  .container{max-width:1100px;margin:0 auto;padding:2rem}
+  h1{font-size:1.8rem;font-weight:800;margin-bottom:.4rem}
+  .subtitle{color:var(--muted);margin-bottom:2rem}
+
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+  @media(max-width:768px){.grid-2{grid-template-columns:1fr}}
+
+  .card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:1.6rem}
+  .card-title{font-size:1rem;font-weight:700;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+  .card-title .icon{font-size:1.3rem}
+
+  label{font-size:.8rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.4rem}
+  input,select,textarea{background:var(--bg3);border:1px solid var(--border);color:#fff;
+    padding:.65rem .9rem;border-radius:8px;font-size:.88rem;outline:none;width:100%;font-family:inherit;margin-bottom:.9rem}
+  input:focus,select:focus,textarea:focus{border-color:var(--primary)}
+  select option{background:var(--bg3)}
+
+  .btn{padding:.6rem 1.3rem;border-radius:8px;font-size:.88rem;font-weight:600;cursor:pointer;border:none;transition:all .2s}
+  .btn-primary{background:var(--primary);color:#fff}
+  .btn-primary:hover{background:var(--primary-dark)}
+  .btn-accent{background:var(--accent);color:#000}
+  .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+  .btn-ghost:hover{color:#fff;border-color:var(--primary)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+
+  .feature-pills{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.5rem}
+  .pill{display:inline-flex;align-items:center;gap:.4rem;padding:.3rem .75rem;border-radius:20px;
+    font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s;border:1px solid var(--border);
+    background:var(--bg3);color:var(--muted)}
+  .pill.active{background:rgba(108,71,255,.2);border-color:var(--primary);color:#fff}
+  .pill.recommended{background:rgba(0,212,170,.1);border-color:var(--accent);color:var(--accent)}
+
+  .log-box{background:var(--bg3);border:1px solid var(--border);border-radius:10px;
+    padding:1rem;font-family:monospace;font-size:.8rem;height:280px;overflow-y:auto;color:var(--accent)}
+  .log-entry{padding:.15rem 0;border-bottom:1px solid rgba(42,42,63,.4)}
+  .log-entry.err{color:var(--danger)}
+  .log-entry.info{color:var(--muted)}
+  .log-entry.ok{color:var(--accent)}
+  .log-entry.warn{color:#ffa502}
+
+  .stat-row{display:flex;gap:1rem;margin-bottom:1.2rem;flex-wrap:wrap}
+  .mini-stat{background:var(--bg3);border:1px solid var(--border);border-radius:10px;
+    padding:.8rem 1rem;flex:1;min-width:100px;text-align:center}
+  .mini-stat strong{display:block;font-size:1.5rem;font-weight:800;color:var(--accent)}
+  .mini-stat span{font-size:.75rem;color:var(--muted)}
+
+  .tipo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.6rem;margin-bottom:1rem}
+  .tipo-btn{background:var(--bg3);border:1px solid var(--border);border-radius:10px;
+    padding:.8rem;text-align:center;cursor:pointer;transition:all .2s;font-size:.85rem}
+  .tipo-btn:hover,.tipo-btn.active{border-color:var(--primary);background:rgba(108,71,255,.12);color:#fff}
+  .tipo-btn .t-icon{font-size:1.5rem;margin-bottom:.3rem}
+
+  .progress-bar{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin:.4rem 0}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));
+    border-radius:3px;transition:width .5s ease}
+
+  .chip{display:inline-block;padding:.2rem .55rem;border-radius:6px;font-size:.72rem;font-weight:600}
+  .chip-green{background:rgba(0,212,170,.15);color:var(--accent)}
+  .chip-purple{background:rgba(108,71,255,.15);color:var(--primary)}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Vol<span>vix</span> <span style="font-size:.75rem;color:var(--muted)">Motor IA</span></div>
+  <nav>
+    <a href="owner.html" class="nav-link">Panel</a>
+    <a href="pos.html" class="nav-link">POS</a>
+    <a href="index.html" class="nav-link">Inicio</a>
+  </nav>
+</header>
+
+<div class="container">
+  <h1>🤖 Motor IA</h1>
+  <p class="subtitle">Análisis y activación automática de features según el tipo de negocio</p>
+
+  <div class="stat-row">
+    <div class="mini-stat"><strong id="st-activations">0</strong><span>Activaciones</span></div>
+    <div class="mini-stat"><strong id="st-tenants">—</strong><span>Negocios</span></div>
+    <div class="mini-stat"><strong id="st-features">0</strong><span>Features activos</span></div>
+    <div class="mini-stat"><strong>8</strong><span>Sectores</span></div>
+  </div>
+
+  <div class="grid-2">
+    <!-- LEFT: Activación -->
+    <div>
+      <div class="card" style="margin-bottom:1.2rem">
+        <div class="card-title"><span class="icon">⚡</span>Activación por tipo de negocio</div>
+
+        <div class="tipo-grid" id="tipoGrid"></div>
+
+        <label>Tenant ID (opcional)</label>
+        <input id="ai-tenant" placeholder="uuid del negocio o dejar vacío para todos">
+
+        <label>Features sugeridos para el tipo seleccionado</label>
+        <div class="feature-pills" id="suggestedPills">
+          <span style="color:var(--muted);font-size:.85rem">Selecciona un tipo de negocio</span>
+        </div>
+
+        <div style="margin-top:1.2rem;display:flex;gap:.7rem">
+          <button class="btn btn-primary" id="btnActivate" onclick="runActivation()">Activar features</button>
+          <button class="btn btn-ghost" onclick="loadSuggestions()">Recargar sugerencias</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">📊</span>Features por sector</div>
+        <div id="sectorList"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Log -->
+    <div>
+      <div class="card" style="margin-bottom:1.2rem">
+        <div class="card-title"><span class="icon">📋</span>Log de activaciones</div>
+        <div class="log-box" id="logBox">
+          <div class="log-entry info">[sistema] Motor IA listo</div>
+        </div>
+        <div style="margin-top:.8rem;display:flex;gap:.7rem">
+          <button class="btn btn-ghost" onclick="clearLog()">Limpiar log</button>
+          <button class="btn btn-accent" onclick="runAllTenants()">Activar todos los negocios</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">🧠</span>Análisis de negocio</div>
+        <label>Describe tu negocio (el IA detectará el tipo)</label>
+        <textarea id="ai-desc" rows="3" placeholder="Ej: Vendo ropa para dama, tengo 3 empleados, manejo efectivo y tarjeta..."></textarea>
+        <button class="btn btn-primary" onclick="analyzeDescription()">Analizar y activar</button>
+        <div id="analysisResult" style="margin-top:.8rem;font-size:.85rem;color:var(--muted)"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const TIPOS = [
+  {icon:'🛒',name:'Retail',key:'retail'},
+  {icon:'🍔',name:'Alimentos',key:'alimentos'},
+  {icon:'💊',name:'Salud',key:'salud'},
+  {icon:'💈',name:'Belleza',key:'belleza'},
+  {icon:'🏠',name:'Rentas',key:'rentas'},
+  {icon:'🔧',name:'Servicios',key:'servicios'},
+  {icon:'💪',name:'Gym',key:'gym'},
+  {icon:'📚',name:'Educación',key:'educacion'},
+];
+
+const FEATURE_MAP = {
+  retail:    ['pos','inventario','proveedores','descuentos','codigo_barras','facturacion'],
+  salud:     ['citas','expediente','recetas','historial','recordatorios','telemedicina'],
+  belleza:   ['citas','servicios','fidelidad','galeria','whatsapp','pagos_online'],
+  alimentos: ['menu','pedidos','delivery','mesas','cocina_display','propinas'],
+  rentas:    ['contratos','pagos','mantenimiento','calendario','inquilinos','reportes'],
+  servicios: ['ordenes','tecnicos','garantias','diagnostico','refacciones','cobros'],
+  gym:       ['membresias','asistencia','clases','locker','pagos','rutinas'],
+  educacion: ['alumnos','calificaciones','pagos','horarios','comunicados','tareas'],
+};
+
+const KEYWORDS = {
+  retail:['tienda','ropa','zapatos','abarrotes','ferretería','farmacia local','papelería'],
+  alimentos:['restaurante','taquería','fonda','café','panadería','comida'],
+  salud:['clínica','médico','dentista','psicólogo','fisioterapia','doctor'],
+  belleza:['estética','peluquería','spa','uñas','masajes','barbería'],
+  rentas:['renta','departamento','cuarto','inmueble','arrendamiento'],
+  servicios:['taller','reparación','plomero','electricista','técnico','servicio'],
+  gym:['gimnasio','gym','fitness','aeróbics','yoga','crossfit'],
+  educacion:['escuela','academia','cursos','clases','enseñanza','alumnos'],
+};
+
+let selectedTipo = 'retail';
+let activationsCount = 0;
+
+function log(msg, type='ok') {
+  const box = document.getElementById('logBox');
+  const d = document.createElement('div');
+  d.className = `log-entry ${type}`;
+  d.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+  box.appendChild(d);
+  box.scrollTop = box.scrollHeight;
+}
+
+function clearLog() {
+  document.getElementById('logBox').innerHTML = '<div class="log-entry info">[sistema] Log limpiado</div>';
+}
+
+// Build tipo grid
+const tipoGrid = document.getElementById('tipoGrid');
+TIPOS.forEach(t => {
+  const btn = document.createElement('div');
+  btn.className = 'tipo-btn' + (t.key === selectedTipo ? ' active' : '');
+  btn.dataset.key = t.key;
+  btn.innerHTML = `<div class="t-icon">${t.icon}</div><div>${t.name}</div>`;
+  btn.onclick = () => {
+    document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedTipo = t.key;
+    loadSuggestions();
+  };
+  tipoGrid.appendChild(btn);
+});
+
+function loadSuggestions() {
+  const features = FEATURE_MAP[selectedTipo] || [];
+  const container = document.getElementById('suggestedPills');
+  container.innerHTML = features.map(f =>
+    `<span class="pill recommended">${f}</span>`
+  ).join('');
+  document.getElementById('st-features').textContent = features.length;
+}
+
+// Build sector list
+function buildSectorList() {
+  const container = document.getElementById('sectorList');
+  container.innerHTML = Object.entries(FEATURE_MAP).map(([tipo, feats]) => `
+    <div style="margin-bottom:1rem">
+      <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:.2rem">
+        <span>${TIPOS.find(t=>t.key===tipo)?.icon||''} ${tipo}</span>
+        <span style="color:var(--muted)">${feats.length} features</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${(feats.length/8)*100}%"></div></div>
+      <div class="feature-pills">${feats.map(f=>`<span class="chip chip-purple">${f}</span>`).join('')}</div>
+    </div>`).join('');
+}
+
+async function runActivation() {
+  const tenant_id = document.getElementById('ai-tenant').value.trim();
+  const btn = document.getElementById('btnActivate');
+  btn.disabled = true;
+  log(`Iniciando activación para tipo: ${selectedTipo}${tenant_id ? ` (tenant: ${tenant_id})` : ''}`, 'info');
+
+  try {
+    const body = { tipo_negocio: selectedTipo };
+    if (tenant_id) body.tenant_id = tenant_id;
+    else {
+      // get first tenant
+      const tr = await fetch('/api/tenants');
+      const tenants = await tr.json();
+      if (!tenants.length) { log('No hay negocios registrados', 'err'); btn.disabled = false; return; }
+      body.tenant_id = tenants[0].id;
+    }
+
+    const r = await fetch('/api/ai/activate', {
+      method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body)
+    });
+    const data = await r.json();
+    if (data.error) { log(`Error: ${data.error}`, 'err'); }
+    else {
+      activationsCount++;
+      document.getElementById('st-activations').textContent = activationsCount;
+      log(`✓ Activados ${data.total} features: ${data.features_activados?.join(', ')}`, 'ok');
+    }
+  } catch(e) { log(`Error de red: ${e.message}`, 'err'); }
+  btn.disabled = false;
+}
+
+async function runAllTenants() {
+  log('Activando features para todos los negocios...', 'info');
+  try {
+    const tr = await fetch('/api/tenants');
+    const tenants = await tr.json();
+    if (!tenants.length) { log('No hay negocios registrados', 'warn'); return; }
+    for (const t of tenants) {
+      const r = await fetch('/api/ai/activate', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ tenant_id: t.id, tipo_negocio: t.tipo_negocio || 'retail' })
+      });
+      const data = await r.json();
+      if (data.error) log(`${t.nombre}: Error - ${data.error}`, 'err');
+      else log(`${t.nombre || t.id}: ${data.total} features activados`, 'ok');
+      activationsCount++;
+    }
+    document.getElementById('st-activations').textContent = activationsCount;
+    log(`Proceso completo: ${tenants.length} negocios procesados`, 'ok');
+  } catch(e) { log(`Error: ${e.message}`, 'err'); }
+}
+
+function analyzeDescription() {
+  const desc = document.getElementById('ai-desc').value.toLowerCase();
+  if (!desc.trim()) { log('Ingresa una descripción primero', 'warn'); return; }
+
+  let detected = 'retail';
+  let maxScore = 0;
+  Object.entries(KEYWORDS).forEach(([tipo, words]) => {
+    const score = words.filter(w => desc.includes(w)).length;
+    if (score > maxScore) { maxScore = score; detected = tipo; }
+  });
+
+  const features = FEATURE_MAP[detected];
+  document.getElementById('analysisResult').innerHTML = `
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.9rem">
+      <div style="margin-bottom:.5rem"><strong>Tipo detectado:</strong> <span class="chip chip-green">${detected}</span></div>
+      <div style="margin-bottom:.5rem"><strong>Features a activar:</strong></div>
+      <div class="feature-pills">${features.map(f=>`<span class="pill active">${f}</span>`).join('')}</div>
+    </div>`;
+
+  // update selection
+  selectedTipo = detected;
+  document.querySelectorAll('.tipo-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.key === detected);
+  });
+  loadSuggestions();
+  log(`Análisis: tipo "${detected}" detectado con score ${maxScore}`, 'ok');
+}
+
+async function loadStats() {
+  const r = await fetch('/api/stats');
+  const d = await r.json();
+  document.getElementById('st-tenants').textContent = d.tenants ?? '—';
+}
+
+loadSuggestions();
+buildSectorList();
+loadStats();
+</script>
+</body>
+</html>
