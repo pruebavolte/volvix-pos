@@ -1,21 +1,37 @@
 {
   "name": "Volvix POS",
   "short_name": "Volvix",
-  "description": "Punto de venta multi-tenant con IA para cualquier tipo de negocio",
-  "start_url": "/",
+  "description": "Sistema de punto de venta multi-giro offline-first",
+  "start_url": "/pos.html",
   "display": "standalone",
-  "background_color": "#0a0a0f",
-  "theme_color": "#0a0a0f",
-  "orientation": "any",
-  "lang": "es",
-  "categories": ["business", "productivity"],
+  "background_color": "#0A0A0A",
+  "theme_color": "#1a237e",
+  "orientation": "landscape-primary",
   "icons": [
-    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ],
   "shortcuts": [
-    { "name": "POS", "url": "/pos.html", "description": "Punto de venta" },
-    { "name": "Inventario", "url": "/inventario.html", "description": "Gestión de stock" }
-  ]
+    {
+      "name": "Nueva venta",
+      "url": "/pos.html",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Inventario",
+      "url": "/pos-inventario.html",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "categories": ["business", "finance", "productivity"]
 }
