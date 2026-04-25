@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar sesión · Volvix</title>
+  <meta name="theme-color" content="#0A0A0A">
+
+  <!-- Config (necesaria para SUPABASE_URL y SUPABASE_ANON_KEY) -->
+  <script src="/config.js"></script>
+
+  <!-- Fuentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Design tokens -->
+  <link rel="stylesheet" href="/volvix-tokens.css">
+
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+<style>
+/* ── BASE ── */
+*, *::before, *::after { box-sizing: border-box; }
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-primary);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* ── FONDO ── */
+.login-bg {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  background: radial-gradient(ellipse at 30% 20%, #1E3A8A 0%, #0A0A0A 65%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Partículas decorativas (CSS only) */
+.login-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1.5px 1.5px at 20% 30%, rgba(251,191,36,0.25) 0%, transparent 100%),
+    radial-gradient(1px 1px at 60% 70%, rgba(251,191,36,0.15) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 80% 20%, rgba(59,130,246,0.2) 0%, transparent 100%),
+    radial-gradient(1px 1px at 40% 80%, rgba(59,130,246,0.15) 0%, transparent 100%),
+    radial-gradient(2px 2px at 10% 60%, rgba(251,191,36,0.1) 0%, transparent 100%),
+    radial-gradient(1px 1px at 90% 50%, rgba(255,255,255,0.08) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+/* ── CARD ── */
+.login-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 400px;
+  background: rgba(18, 18, 18, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: var(--radius-3xl);
+  padding: 40px 36px;
+  box-shadow:
+    0 32px 80px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255,255,255,0.04) inset;
+  animation: vlx-fade-up 0.4s var(--ease-out) both;
+}
+
+/* ── LOGO ── */
+.login-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+.login-logo-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #FBBF24, #F59E0B);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  box-shadow:
+    0 0 0 1px rgba(251,191,36,0.3),
+    0 8px 24px rgba(251,191,36,0.35);
+  animation: vlx-bounce 3s ease-in-out infinite;
+}
+
+/* ── TEXTOS ── */
+.login-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #FAFAF9;
+  text-align: center;
+  letter-spacing: -0.5px;
+  margin-bottom: 6px;
+  line-height: var(--lh-tight);
+}
+.login-sub {
+  font-size: 13.5px;
+  color: #78716C;
+  text-align: center;
+  margin-bottom: 28px;
+  line-height: var(--lh-normal);
+}
+
+/* ── TABS (email / magic link) ── */
+.login-tabs {
+  display: flex;
+  background: rgba(255,255,255,0.05);
+  border-radius: var(--radius-lg);
+  padding: 3px;
+  margin-bottom: 22px;
+  gap: 3px;
+}
+.login-tab {
+  flex: 1;
+  padding: 8px;
+  text-align: center;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #78716C;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--t-base);
+  user-select: none;
+}
+.login-tab.active {
+  background: rgba(255,255,255,0.10);
+  color: #FAFAF9;
+}
+.login-tab:hover:not(.active) {
+  color: #A8A29E;
+}
+
+/* ── FORMULARIO ── */
+.form-group {
+  margin-bottom: 14px;
+}
+.form-label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #A8A29E;
+  margin-bottom: 6px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+.form-input {
+  width: 100%;
+  height: 46px;
+  padding: 0 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid rgba(255,255,255,0.10);
+  border-radius: var(--radius-lg);
+  font-size: 14px;
+  font-weight: 500;
+  color: #FAFAF9;
+  font-family: var(--font-primary);
+  outline: none;
+  transition: border-color var(--t-base), box-shadow var(--t-base), background var(--t-base);
+}
+.form-input::placeholder { color: #52524E; }
+.form-input:focus {
+  border-color: #3B82F6;
+  background: rgba(59,130,246,0.06);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+}
+.form-input.error {
+  border-color: #EF4444;
+  box-shadow: 0 0 0 3px rgba(239,68,68,0.12);
+}
+
+/* Input de contraseña con ojo */
+.input-wrap {
+  position: relative;
+}
+.input-wrap .form-input {
+  padding-right: 44px;
+}
+.toggle-pw {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #52524E;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  transition: color var(--t-base);
+  line-height: 1;
+}
+.toggle-pw:hover { color: #A8A29E; }
+
+/* ── BOTÓN PRIMARY ── */
+.btn-primary {
+  width: 100%;
+  height: 46px;
+  background: #3B82F6;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: 14.5px;
+  font-weight: 600;
+  font-family: var(--font-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 6px;
+  transition: background var(--t-base), transform var(--t-base), box-shadow var(--t-base);
+  letter-spacing: -0.1px;
+}
+.btn-primary:hover:not(:disabled) {
+  background: #2563EB;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(59,130,246,0.35);
+}
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Spinner dentro del botón */
+.btn-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: vlx-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+/* ── LINKS ── */
+.login-link-row {
+  text-align: center;
+  margin-top: 14px;
+}
+.login-link {
+  font-size: 12.5px;
+  color: #3B82F6;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: var(--font-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color var(--t-base);
+}
+.login-link:hover { color: #60A5FA; }
+
+/* ── SEPARADOR ── */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0;
+  color: #3A3A38;
+  font-size: 11.5px;
+}
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,0.07);
+}
+
+/* ── ALERTA ── */
+.alert {
+  padding: 10px 14px;
+  border-radius: var(--radius-lg);
+  font-size: 12.5px;
+  line-height: 1.5;
+  margin-bottom: 14px;
+  display: none;
+}
+.alert.show { display: block; }
+.alert.error {
+  background: rgba(239,68,68,0.10);
+  border: 1px solid rgba(239,68,68,0.25);
+  color: #FCA5A5;
+}
+.alert.success {
+  background: rgba(34,197,94,0.10);
+  border: 1px solid rgba(34,197,94,0.25);
+  color: #86EFAC;
+}
+.alert.info {
+  background: rgba(59,130,246,0.10);
+  border: 1px solid rgba(59,130,246,0.25);
+  color: #93C5FD;
+}
+
+/* ── SELECTOR DE TENANT (post-login) ── */
+.tenant-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+}
+.tenant-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1.5px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius-xl);
+  cursor: pointer;
+  transition: all var(--t-base);
+}
+.tenant-item:hover {
+  background: rgba(59,130,246,0.08);
+  border-color: rgba(59,130,246,0.35);
+  transform: translateY(-1px);
+}
+.tenant-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.tenant-info { flex: 1; min-width: 0; }
+.tenant-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #FAFAF9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tenant-meta {
+  font-size: 11px;
+  color: #78716C;
+  margin-top: 1px;
+}
+.tenant-arrow {
+  color: #52524E;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+/* ── FOOTER ── */
+.login-footer {
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 11px;
+  color: #3A3A38;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 420px) {
+  .login-card { padding: 32px 24px; }
+}
+</style>
+</head>
+<body>
+
+<div class="login-bg">
+  <div class="login-card" id="loginCard">
+
+    <!-- Logo -->
+    <div class="login-logo">
+      <div class="login-logo-icon" id="logoIcon">🧠</div>
+    </div>
+
+    <!-- Título (se actualiza con VOLVIX_BRAND) -->
+    <div class="login-title" id="loginTitle">Bienvenido de vuelta</div>
+    <div class="login-sub" id="loginSub">Inicia sesión en tu sistema</div>
+
+    <!-- Alerta (errores / éxito) -->
+    <div class="alert" id="loginAlert"></div>
+
+    <!-- ── PASO 1: Login ── -->
+    <div id="stepLogin">
+
+      <!-- Tabs: Contraseña / Magic link -->
+      <div class="login-tabs">
+        <div class="login-tab active" id="tabPassword" onclick="switchTab('password')">
+          🔑 Contraseña
+        </div>
+        <div class="login-tab" id="tabMagic" onclick="switchTab('magic')">
+          ✨ Link mágico
+        </div>
+      </div>
+
+      <!-- Email (siempre visible) -->
+      <div class="form-group">
+        <label class="form-label" for="emailInput">Correo electrónico</label>
+        <input
+          class="form-input"
+          id="emailInput"
+          type="email"
+          placeholder="tu@correo.com"
+          autocomplete="email"
+          autofocus
+        >
+      </div>
+
+      <!-- Contraseña (solo en tab password) -->
+      <div class="form-group" id="passwordGroup">
+        <label class="form-label" for="passwordInput">Contraseña</label>
+        <div class="input-wrap">
+          <input
+            class="form-input"
+            id="passwordInput"
+            type="password"
+            placeholder="••••••••"
+            autocomplete="current-password"
+          >
+          <button class="toggle-pw" type="button" onclick="togglePassword()" tabindex="-1" aria-label="Mostrar contraseña">
+            👁
+          </button>
+        </div>
+      </div>
+
+      <!-- Botón principal -->
+      <button class="btn-primary" id="btnLogin" onclick="handleLogin()">
+        Entrar
+      </button>
+
+      <!-- Links secundarios -->
+      <div class="login-link-row">
+        <button class="login-link" onclick="showForgot()">
+          ¿Olvidaste tu contraseña?
+        </button>
+      </div>
+
+    </div><!-- /stepLogin -->
+
+    <!-- ── PASO 2: Selector de tenant ── -->
+    <div id="stepTenant" style="display:none">
+      <div class="login-title" style="margin-bottom:6px">¿A cuál negocio entras?</div>
+      <div class="login-sub" id="tenantWelcome" style="margin-bottom:18px"></div>
+      <div class="tenant-list" id="tenantList"></div>
+      <div class="login-link-row" style="margin-top:16px">
+        <button class="login-link" onclick="logout()">Cerrar sesión</button>
+      </div>
+    </div>
+
+    <!-- ── PASO 3: Magic link enviado ── -->
+    <div id="stepMagicSent" style="display:none">
+      <div style="text-align:center;padding:10px 0 20px">
+        <div style="font-size:52px;margin-bottom:14px">📬</div>
+        <div class="login-title" style="margin-bottom:8px">Revisa tu correo</div>
+        <div class="login-sub">
+          Enviamos un link de acceso a<br>
+          <strong style="color:#FAFAF9" id="magicEmailSent"></strong>
+        </div>
+      </div>
+      <div class="alert info show" style="display:block">
+        El link expira en 60 minutos. Revisa también tu carpeta de spam.
+      </div>
+      <button class="btn-primary" onclick="showStep('stepLogin')" style="margin-top:8px;background:rgba(255,255,255,0.08);color:#FAFAF9">
+        ← Volver
+      </button>
+    </div>
+
+    <!-- ── PASO 4: Recuperar contraseña ── -->
+    <div id="stepForgot" style="display:none">
+      <div class="login-title" style="margin-bottom:6px">Recuperar contraseña</div>
+      <div class="login-sub" style="margin-bottom:20px">
+        Te enviamos un link para crear una nueva contraseña.
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="forgotEmail">Correo electrónico</label>
+        <input
+          class="form-input"
+          id="forgotEmail"
+          type="email"
+          placeholder="tu@correo.com"
+          autocomplete="email"
+        >
+      </div>
+      <button class="btn-primary" id="btnForgot" onclick="handleForgot()">
+        Enviar link de recuperación
+      </button>
+      <div class="login-link-row" style="margin-top:12px">
+        <button class="login-link" onclick="showStep('stepLogin')">← Volver</button>
+      </div>
+    </div>
+
+  </div><!-- /loginCard -->
+
+  <!-- Footer -->
+  <div class="login-footer" id="loginFooter">
+    Volvix · v7.0.0
+  </div>
+
+</div><!-- /login-bg -->
+
+<script>
+'use strict';
+
+// ── Supabase client ──
+let sb = null;
+function getClient() {
+  if (sb) return sb;
+  if (!window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) {
+    showAlert('No se encontró la configuración de Supabase. Verifica config.js', 'error');
+    return null;
+  }
+  sb = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+  return sb;
+}
+
+// ── Branding dinámico ──
+(function applyBranding() {
+  const b = window.VOLVIX_BRAND || {};
+  const title   = document.getElementById('loginTitle');
+  const sub     = document.getElementById('loginSub');
+  const logo    = document.getElementById('logoIcon');
+  const footer  = document.getElementById('loginFooter');
+  if (title)  title.textContent  = 'Bienvenido a ' + (b.name || 'Volvix');
+  if (sub)    sub.textContent    = b.productName || 'Inicia sesión en tu sistema';
+  if (logo)   logo.textContent   = b.logoEmoji || '🧠';
+  if (footer) footer.textContent = (b.name || 'Volvix') + ' · v' + (b.version || '7.0.0');
+})();
+
+// ── Verificar sesión existente al cargar ──
+(async function checkExistingSession() {
+  const raw = localStorage.getItem('volvix:session');
+  if (raw) {
+    try {
+      const s = JSON.parse(raw);
+      if (s.expires_at && s.expires_at > Date.now() && s.user_id && s.role) {
+        // Sesión válida → redirigir
+        redirectByRole(s.role);
+        return;
+      }
+    } catch {}
+    localStorage.removeItem('volvix:session');
+  }
+
+  // Verificar sesión de Supabase activa
+  const client = getClient();
+  if (!client) return;
+  try {
+    const { data: { session } } = await client.auth.getSession();
+    if (session) {
+      await buildVolvixSession(session);
+    }
+  } catch {}
+})();
+
+// ── Tabs ──
+let currentTab = 'password';
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('tabPassword').classList.toggle('active', tab === 'password');
+  document.getElementById('tabMagic').classList.toggle('active', tab === 'magic');
+  const pwGroup = document.getElementById('passwordGroup');
+  pwGroup.style.display = tab === 'password' ? 'block' : 'none';
+  const btn = document.getElementById('btnLogin');
+  btn.textContent = tab === 'password' ? 'Entrar' : 'Enviar link mágico';
+  clearAlert();
+}
+
+// ── Toggle contraseña ──
+function togglePassword() {
+  const inp = document.getElementById('passwordInput');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+// ── Mostrar paso ──
+function showStep(stepId) {
+  ['stepLogin','stepTenant','stepMagicSent','stepForgot'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+  document.getElementById(stepId).style.display = 'block';
+  clearAlert();
+}
+
+// ── Alertas ──
+function showAlert(msg, type = 'error') {
+  const el = document.getElementById('loginAlert');
+  el.textContent = msg;
+  el.className = 'alert ' + type + ' show';
+}
+function clearAlert() {
+  const el = document.getElementById('loginAlert');
+  el.className = 'alert';
+}
+
+// ── Loading state del botón ──
+function setLoading(btnId, loading, text) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  btn.disabled = loading;
+  if (loading) {
+    btn.innerHTML = '<div class="btn-spinner"></div> ' + (text || 'Cargando...');
+  } else {
+    btn.innerHTML = text || 'Entrar';
+  }
+}
+
+// ── LOGIN PRINCIPAL ──
+async function handleLogin() {
+  const email    = (document.getElementById('emailInput').value || '').trim();
+  const password = (document.getElementById('passwordInput').value || '').trim();
+  clearAlert();
+
+  // Validación básica
+  if (!email || !email.includes('@')) {
+    document.getElementById('emailInput').classList.add('error');
+    showAlert('Ingresa un correo electrónico válido.', 'error');
+    document.getElementById('emailInput').focus();
+    return;
+  }
+  document.getElementById('emailInput').classList.remove('error');
+
+  const client = getClient();
+  if (!client) return;
+
+  if (currentTab === 'magic') {
+    // Magic link
+    setLoading('btnLogin', true, 'Enviando...');
+    try {
+      const { error } = await client.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: location.origin + '/login.html' },
+      });
+      if (error) throw error;
+      document.getElementById('magicEmailSent').textContent = email;
+      showStep('stepMagicSent');
+    } catch (err) {
+      showAlert('No se pudo enviar el link: ' + err.message, 'error');
+    } finally {
+      setLoading('btnLogin', false, 'Enviar link mágico');
+    }
+    return;
+  }
+
+  // Email + password
+  if (!password) {
+    document.getElementById('passwordInput').classList.add('error');
+    showAlert('Ingresa tu contraseña.', 'error');
+    document.getElementById('passwordInput').focus();
+    return;
+  }
+  document.getElementById('passwordInput').classList.remove('error');
+
+  setLoading('btnLogin', true, 'Entrando...');
+  try {
+    const { data, error } = await client.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    await buildVolvixSession(data.session);
+  } catch (err) {
+    let msg = err.message || 'Error al iniciar sesión.';
+    if (msg.includes('Invalid login')) msg = 'Correo o contraseña incorrectos.';
+    if (msg.includes('Email not confirmed')) msg = 'Confirma tu correo antes de entrar.';
+    showAlert(msg, 'error');
+    document.getElementById('passwordInput').value = '';
+  } finally {
+    setLoading('btnLogin', false, 'Entrar');
+  }
+}
+
+// ── CONSTRUIR SESIÓN VOLVIX desde sesión de Supabase ──
+async function buildVolvixSession(supabaseSession) {
+  const client = getClient();
+  if (!client || !supabaseSession) return;
+
+  const supaUser = supabaseSession.user;
+
+  // Buscar usuario en volvix_usuarios para obtener rol y tenant
+  let volvixUser = null;
+  try {
+    const { data, error } = await client
+      .from('volvix_usuarios')
+      .select('*')
+      .eq('user_id', supaUser.id)
+      .maybeSingle();
+    if (!error && data) volvixUser = data;
+  } catch {}
+
+  // Si no existe en volvix_usuarios → crear como owner de demo
+  // (en producción esto se manejaría vía onboarding)
+  if (!volvixUser) {
+    volvixUser = {
+      user_id:   supaUser.id,
+      email:     supaUser.email,
+      role:      'owner',
+      tenant_id: null,
+    };
+  }
+
+  // Buscar tenants asociados a este usuario
+  let tenants = [];
+  try {
+    if (volvixUser.role === 'superadmin') {
+      // Superadmin ve todos los tenants
+      const { data } = await client
+        .from('volvix_tenants')
+        .select('id, name, giro, plan, status')
+        .eq('status', 'active')
+        .limit(50);
+      tenants = data || [];
+    } else if (volvixUser.tenant_id) {
+      // Usuario con tenant específico
+      const { data } = await client
+        .from('volvix_tenants')
+        .select('id, name, giro, plan, status')
+        .eq('id', volvixUser.tenant_id)
+        .maybeSingle();
+      if (data) tenants = [data];
+    } else {
+      // Owner sin tenant → buscar por owner_user_id
+      const { data } = await client
+        .from('volvix_tenants')
+        .select('id, name, giro, plan, status')
+        .eq('owner_user_id', supaUser.id)
+        .eq('status', 'active');
+      tenants = data || [];
+    }
+  } catch {}
+
+  // Si no hay tenants → sesión igualmente válida (superadmin sin tenants)
+  const sessionBase = {
+    user_id:      supaUser.id,
+    email:        supaUser.email,
+    role:         volvixUser.role || 'owner',
+    access_token: supabaseSession.access_token,
+    expires_at:   supabaseSession.expires_at
+      ? new Date(supabaseSession.expires_at).getTime()
+      : Date.now() + 3600 * 1000,
+  };
+
+  if (tenants.length === 0) {
+    // Sin tenants → entrar de todos modos (superadmin o usuario nuevo)
+    saveAndRedirect({ ...sessionBase, tenant_id: null, tenant_name: '' });
+    return;
+  }
+
+  if (tenants.length === 1) {
+    // Un solo tenant → entrar directo
+    const t = tenants[0];
+    saveAndRedirect({
+      ...sessionBase,
+      tenant_id:   t.id,
+      tenant_name: t.name,
+      plan:        t.plan || 'basico',
+    });
+    return;
+  }
+
+  // Múltiples tenants → mostrar selector
+  showTenantSelector(tenants, sessionBase);
+}
+
+// ── SELECTOR DE TENANT ──
+const GIRO_EMOJIS = {
+  abarrotes:'🏪', restaurante:'🍽️', barberia:'💈', farmacia:'💊',
+  gimnasio:'🏋️', colegio:'🏫', taller_mecanico:'🔧', estetica:'✂️',
+  default:'🏢',
+};
+
+function showTenantSelector(tenants, sessionBase) {
+  const welcome = document.getElementById('tenantWelcome');
+  if (welcome) welcome.textContent = 'Hola ' + (sessionBase.email?.split('@')[0] || '') + ' 👋';
+
+  const list = document.getElementById('tenantList');
+  list.innerHTML = tenants.map(t => {
+    const emoji = GIRO_EMOJIS[t.giro] || GIRO_EMOJIS.default;
+    const colors = {
+      abarrotes:'#EA580C', restaurante:'#DC2626', barberia:'#1E40AF',
+      farmacia:'#059669', gimnasio:'#DC2626', colegio:'#1D4ED8',
+      taller_mecanico:'#1E3A8A',
+    };
+    const bg = colors[t.giro] || '#3B82F6';
+    return `
+      <div class="tenant-item" onclick="selectTenant('${escHtml(t.id)}', '${escHtml(t.name)}', '${escHtml(t.plan || 'basico')}')">
+        <div class="tenant-icon" style="background:${bg}20;border:1px solid ${bg}40">
+          ${emoji}
+        </div>
+        <div class="tenant-info">
+          <div class="tenant-name">${escHtml(t.name)}</div>
+          <div class="tenant-meta">${escHtml(t.giro || '')} · Plan ${escHtml(t.plan || 'básico')}</div>
+        </div>
+        <div class="tenant-arrow">›</div>
+      </div>`;
+  }).join('');
+
+  // Guardar sessionBase en memoria para usarlo al elegir tenant
+  window._pendingSession = sessionBase;
+  showStep('stepTenant');
+}
+
+function selectTenant(tenantId, tenantName, plan) {
+  const base = window._pendingSession;
+  if (!base) { showStep('stepLogin'); return; }
+  saveAndRedirect({
+    ...base,
+    tenant_id:   tenantId,
+    tenant_name: tenantName,
+    plan,
+  });
+}
+
+// ── GUARDAR SESIÓN Y REDIRIGIR ──
+function saveAndRedirect(session) {
+  localStorage.setItem('volvix:session', JSON.stringify(session));
+  window._pendingSession = null;
+
+  // Redirigir según rol o al ?redirect= de la URL
+  const params = new URLSearchParams(location.search);
+  const redirectTo = params.get('redirect');
+  if (redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//')) {
+    location.replace(redirectTo);
+  } else {
+    redirectByRole(session.role);
+  }
+}
+
+function redirectByRole(role) {
+  const map = {
+    superadmin: '/volvix_owner_panel_v7.html',
+    owner:      '/volvix_owner_panel_v7.html',
+    cajero:     '/pos.html',
+    soporte:    '/volvix_ai_support.html',
+  };
+  location.replace(map[role] || '/pos.html');
+}
+
+// ── RECUPERAR CONTRASEÑA ──
+function showForgot() {
+  const email = document.getElementById('emailInput').value;
+  const fe    = document.getElementById('forgotEmail');
+  if (fe && email) fe.value = email;
+  showStep('stepForgot');
+  setTimeout(() => fe?.focus(), 80);
+}
+
+async function handleForgot() {
+  const email = (document.getElementById('forgotEmail').value || '').trim();
+  if (!email || !email.includes('@')) {
+    showAlert('Ingresa un correo válido.', 'error');
+    return;
+  }
+  const client = getClient();
+  if (!client) return;
+  setLoading('btnForgot', true, 'Enviando...');
+  try {
+    const { error } = await client.auth.resetPasswordForEmail(email, {
+      redirectTo: location.origin + '/login.html?recovery=1',
+    });
+    if (error) throw error;
+    showAlert('Link enviado a ' + email + '. Revisa tu bandeja.', 'success');
+    setTimeout(() => showStep('stepLogin'), 3000);
+  } catch (err) {
+    showAlert('Error: ' + err.message, 'error');
+  } finally {
+    setLoading('btnForgot', false, 'Enviar link de recuperación');
+  }
+}
+
+// ── MAGIC LINK (token en URL) ──
+(async function handleMagicLinkCallback() {
+  if (!location.hash.includes('access_token') && !location.search.includes('code=')) return;
+  const client = getClient();
+  if (!client) return;
+  try {
+    const { data, error } = await client.auth.getSession();
+    if (error || !data.session) return;
+    await buildVolvixSession(data.session);
+  } catch {}
+})();
+
+// ── LOGOUT (desde selector de tenant) ──
+async function logout() {
+  const client = getClient();
+  try { if (client) await client.auth.signOut(); } catch {}
+  localStorage.removeItem('volvix:session');
+  showStep('stepLogin');
+}
+
+// ── HELPER anti-XSS ──
+function escHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  })[c]);
+}
+
+// ── RECOVERY MODE (reseteo de password desde link de correo) ──
+(function checkRecoveryMode() {
+  const params = new URLSearchParams(location.search);
+  if (!params.has('recovery')) return;
+  // En una versión completa aquí se mostraría el formulario de nueva contraseña
+  // Por ahora mostramos aviso
+  showAlert('Ingresa tu nuevo correo para recibir las instrucciones de cambio de contraseña.', 'info');
+})();
+
+// ── ENTER en inputs ──
+document.getElementById('emailInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('passwordInput')?.focus();
+});
+document.getElementById('passwordInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') handleLogin();
+});
+</script>
+
+</body>
+</html>
