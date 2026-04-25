@@ -102,6 +102,10 @@ const schemas = {
     tipo_negocio:  z.string().optional(),
     datos_uso:     z.record(z.any()).optional(),
   }),
+  login: z.object({
+    email:    z.string().email(),
+    password: z.string().min(1),
+  }),
 };
 
 function validate(schema, data) {
@@ -210,6 +214,87 @@ async function handleAPI(req, res, method, pathname, parsed) {
   // /api/health
   if (pathname === '/api/health') {
     return json(res, 200, { ok: true, ts: Date.now(), version: '2.0.0' });
+  }
+
+  // /api/test
+  if (pathname === '/api/test') {
+    return json(res, 200, { test: 'endpoint works', method, pathname });
+  }
+
+  // /api/login
+  if (pathname === '/api/login' && method === 'POST') {
+    try {
+      const body = await bodyJSON(req);
+      const v = validate(schemas.login, body);
+      if (!v.ok) return json(res, 400, { error: 'Validación fallida', details: v.errors });
+
+      const { email, password } = v.data;
+
+      // Use anon key client for auth (same as browser)
+      const ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpodndtemtjcW5nY2FxcGR4dHdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxNjcwMTgsImV4cCI6MjA3OTc0MzAxOH0.ygTc754INgqYJEMD0wc_CzRCzRxUfp4hq3rYvJRpjkk';
+      const authClient = createClient(SUPABASE_URL, ANON_KEY);
+
+      // Authenticate user
+      const { data: authData, error: authError } = await authClient.auth.signInWithPassword({
+        email, password,
+      });
+
+      if (authError || !authData.user) {
+        return json(res, 401, { error: 'Credenciales inválidas' });
+      }
+
+      const supaUser = authData.user;
+      const supaSession = authData.session;
+
+      // Get volvix user data (role, tenant)
+      const { data: volvixUser, error: userError } = await supabase
+        .from('volvix_usuarios')
+        .select('rol, tenant_id')
+        .eq('user_id', supaUser.id)
+        .maybeSingle();
+
+      if (userError) {
+        captureError(userError, { context: 'login_get_volvix_user' });
+        return json(res, 500, { error: 'Error consultando usuario' });
+      }
+
+      // If user not in volvix_usuarios, create default owner session
+      let rol = volvixUser?.rol || 'owner';
+      let tenantId = volvixUser?.tenant_id;
+
+      // Get tenant info
+      let tenant = null;
+      if (tenantId) {
+        const { data: t, error: tenantError } = await supabase
+          .from('volvix_tenants')
+          .select('id, nombre, plan, owner_user_id')
+          .eq('id', tenantId)
+          .single();
+
+        if (tenantError) {
+          captureError(tenantError, { context: 'login_get_tenant' });
+        } else {
+          tenant = t;
+        }
+      }
+
+      // Build session object
+      const session = {
+        user_id: supaUser.id,
+        email: supaUser.email,
+        role: rol,
+        tenant_id: tenantId || null,
+        tenant_name: tenant?.nombre || 'Mi Negocio',
+        access_token: supaSession?.access_token || '',
+        expires_at: Date.now() + (3600 * 1000), // 1 hour in milliseconds
+        plan: tenant?.plan || 'free',
+      };
+
+      return json(res, 200, { ok: true, session });
+    } catch (err) {
+      captureError(err, { context: 'login_handler', pathname });
+      return json(res, 500, { error: 'Error en login' });
+    }
   }
 
   // /api/tenants

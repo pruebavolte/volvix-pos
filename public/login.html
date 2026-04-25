@@ -670,13 +670,29 @@ async function handleLogin() {
 
   setLoading('btnLogin', true, 'Entrando...');
   try {
-    const { data, error } = await client.auth.signInWithPassword({ email, password });
-    if (error) throw error;
-    await buildVolvixSession(data.session);
+    // Call /api/login endpoint instead of client-side auth
+    const apiUrl = (window.VOLVIX_API_URL || '') + '/api/login';
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!response.ok) {
+      const errData = await response.json();
+      throw new Error(errData.error || 'Error al iniciar sesión');
+    }
+
+    const result = await response.json();
+    if (!result.ok || !result.session) {
+      throw new Error(result.error || 'Sesión no válida');
+    }
+
+    // Save session and redirect
+    saveAndRedirect(result.session);
   } catch (err) {
     let msg = err.message || 'Error al iniciar sesión.';
-    if (msg.includes('Invalid login')) msg = 'Correo o contraseña incorrectos.';
-    if (msg.includes('Email not confirmed')) msg = 'Confirma tu correo antes de entrar.';
+    if (msg.includes('Credenciales inválidas')) msg = 'Correo o contraseña incorrectos.';
     showAlert(msg, 'error');
     document.getElementById('passwordInput').value = '';
   } finally {
