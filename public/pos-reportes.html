@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reportes · Volvix</title>
+  <meta name="theme-color" content="#1a237e">
+
+  <!-- 1. Auth gate -->
+  <script src="/auth-gate.js" data-roles="superadmin,owner"></script>
+
+  <!-- 2. Config -->
+  <script src="/config.js"></script>
+
+  <!-- 3. Fuentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+
+  <!-- 4. Design tokens -->
+  <link rel="stylesheet" href="/volvix-tokens.css">
+
+  <!-- 5. API + Sync + Widget -->
+  <script src="/volvix-api.js"></script>
+  <script src="/volvix-sync.js"></script>
+  <script src="/volvix-sync-widget.js"></script>
+
+  <!-- 6. Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<style>
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; }
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-primary);
+  font-size: 14px;
+  color: var(--text);
+  background: var(--bg-2);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* ── APP ── */
+.app { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+/* ── TOPBAR ── */
+.topbar {
+  background: var(--navy);
+  color: #fff;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.tb-brand { font-weight: 800; font-size: 15px; color: #fff; letter-spacing: -0.3px; }
+.tb-brand span { color: #90caf9; }
+.tb-section { font-size: 12px; color: #b3c5ff; padding: 2px 8px; background: rgba(255,255,255,0.1); border-radius: 4px; }
+.tb-sep { flex: 1; }
+.tb-tenant { font-size: 11.5px; color: #90caf9; }
+.tb-btn {
+  padding: 4px 11px; border-radius: 4px; font-size: 12px; font-weight: 600;
+  cursor: pointer; border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.08); color: #fff;
+  font-family: var(--font-primary); transition: background var(--t-base);
+}
+.tb-btn:hover { background: rgba(255,255,255,0.15); }
+.tb-exit { background: var(--danger); border-color: var(--danger); }
+.tb-exit:hover { background: var(--danger-2); }
+
+/* ── TABS ── */
+.tabs {
+  background: var(--surface);
+  border-bottom: 2px solid var(--border);
+  display: flex;
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+.tabs::-webkit-scrollbar { height: 0; }
+.tab {
+  padding: 8px 18px; font-size: 13px; font-weight: 600;
+  color: var(--text-3); cursor: pointer;
+  border-bottom: 2px solid transparent; margin-bottom: -2px;
+  white-space: nowrap; transition: all var(--t-base);
+}
+.tab:hover { color: var(--navy); background: #f3f4ff; }
+.tab.active { color: var(--navy); border-bottom-color: var(--navy); }
+
+/* ── TOOLBAR ── */
+.toolbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+.period-group {
+  display: flex;
+  background: var(--bg-2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.period-btn {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text-3);
+  background: transparent;
+  border: none;
+  font-family: var(--font-primary);
+  transition: all var(--t-fast);
+  white-space: nowrap;
+}
+.period-btn:hover { color: var(--navy); background: #e8eaf6; }
+.period-btn.active { background: var(--navy); color: #fff; }
+
+.date-input {
+  padding: 5px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  font-size: 12px;
+  font-family: var(--font-primary);
+  color: var(--text-2);
+  background: var(--surface);
+  outline: none;
+  cursor: pointer;
+}
+.date-input:focus { border-color: var(--navy); }
+
+.tb-sep { flex: 1; }
+
+.btn {
+  padding: 6px 14px; border-radius: var(--radius-lg); font-size: 12.5px;
+  font-weight: 600; cursor: pointer; border: 1px solid var(--border);
+  background: var(--surface); color: var(--text-2);
+  font-family: var(--font-primary); transition: all var(--t-base);
+  display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;
+}
+.btn:hover { border-color: var(--border-2); color: var(--text); }
+.btn.primary { background: var(--navy); color: #fff; border-color: var(--navy); }
+.btn.primary:hover { background: var(--navy2); }
+.btn.sm { padding: 4px 10px; font-size: 11.5px; }
+
+/* ── MAIN ── */
+.main { flex: 1; overflow-y: auto; padding: 20px; background: var(--bg-2); }
+.main::-webkit-scrollbar { width: 6px; }
+.main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* ── KPI GRID ── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.kpi {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 16px 18px;
+  transition: border-color var(--t-fast);
+}
+.kpi:hover { border-color: var(--border-2); }
+.kpi-label { font-size: 10.5px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 5px; }
+.kpi-value { font-size: 24px; font-weight: 900; letter-spacing: -1px; }
+.kpi-value.gold   { color: var(--layer-owner); }
+.kpi-value.green  { color: var(--green); }
+.kpi-value.blue   { color: var(--layer-support); }
+.kpi-value.orange { color: var(--orange); }
+.kpi-sub { font-size: 11px; color: var(--text-3); margin-top: 4px; }
+.kpi-up   { color: var(--success); font-weight: 600; }
+.kpi-down { color: var(--danger);  font-weight: 600; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.card-head {
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  background: var(--bg-2);
+}
+.card-title { font-size: 13.5px; font-weight: 700; }
+.card-sub   { font-size: 11.5px; color: var(--text-3); margin-top: 2px; }
+.card-body  { padding: 18px; }
+
+/* ── CHART CONTAINER ── */
+.chart-wrap {
+  position: relative;
+  height: 260px;
+  width: 100%;
+}
+
+/* ── GRID 2 columnas ── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+@media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+/* ── TABLA DE DATOS ── */
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th {
+  padding: 8px 14px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-2);
+  white-space: nowrap;
+}
+.data-table td {
+  padding: 10px 14px;
+  font-size: 12.5px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: var(--bg-2); }
+.data-table td.right { text-align: right; }
+.data-table td.mono  { font-family: var(--font-mono); font-size: 11.5px; }
+
+/* ── RANKING BAR ── */
+.rank-bar-wrap { height: 6px; background: var(--bg-3); border-radius: 100px; margin-top: 4px; overflow: hidden; }
+.rank-bar      { height: 6px; border-radius: 100px; transition: width 0.6s var(--ease-out); }
+
+/* ── PILLS ── */
+.pill {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 2px 8px; border-radius: var(--radius-full);
+  font-size: 11px; font-weight: 600;
+}
+.pill.green  { background: var(--success-soft); color: var(--success-2); }
+.pill.orange { background: var(--warn-soft);    color: var(--warn-2);    }
+.pill.red    { background: var(--danger-soft);  color: var(--danger-2);  }
+.pill.blue   { background: var(--info-soft);    color: var(--info-2);    }
+.pill.gray   { background: var(--bg-3);         color: var(--text-3);    }
+
+/* ── EMPTY ── */
+.empty { padding: 60px 20px; text-align: center; color: var(--text-3); }
+.empty-icon  { font-size: 48px; opacity: 0.35; margin-bottom: 12px; }
+.empty-title { font-size: 14px; font-weight: 600; color: var(--text-2); margin-bottom: 5px; }
+.empty-sub   { font-size: 12.5px; }
+
+/* ── LOADING ── */
+.spinner {
+  display: inline-block; width: 18px; height: 18px;
+  border: 2px solid var(--border); border-top-color: var(--navy);
+  border-radius: 50%; animation: vlx-spin 0.8s linear infinite;
+  vertical-align: middle; margin-right: 7px;
+}
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 72px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--navy); color: #fff;
+  padding: 9px 20px; border-radius: var(--radius-full);
+  font-size: 13px; font-weight: 500;
+  z-index: var(--z-toast); opacity: 0;
+  transition: all var(--t-slow); pointer-events: none;
+  white-space: nowrap; box-shadow: var(--shadow-lg);
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.ok   { background: var(--green); }
+.toast.err  { background: var(--red);   }
+.toast.warn { background: var(--orange); }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ── TOPBAR ── -->
+  <div class="topbar">
+    <div class="tb-brand">Vol<span>vix</span></div>
+    <div class="tb-section">📊 Reportes</div>
+    <div class="tb-sep"></div>
+    <div class="tb-tenant" id="tbTenant">Cargando...</div>
+    <button class="tb-btn" onclick="location.href='/pos.html'">🛒 POS</button>
+    <button class="tb-btn" onclick="location.href='/volvix_owner_panel_v7.html'">▦ Panel</button>
+    <button class="tb-btn tb-exit" onclick="window.volvixLogout()">⏻ Salir</button>
+  </div>
+
+  <!-- ── TABS ── -->
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('ventas', this)">📈 Ventas</div>
+    <div class="tab" onclick="switchTab('productos', this)">📦 Productos</div>
+    <div class="tab" onclick="switchTab('clientes', this)">👥 Clientes</div>
+    <div class="tab" onclick="switchTab('metodos', this)">💳 Métodos de pago</div>
+    <div class="tab" onclick="switchTab('cajeros', this)">👤 Cajeros</div>
+  </div>
+
+  <!-- ── TOOLBAR ── -->
+  <div class="toolbar">
+    <!-- Selector de período -->
+    <div class="period-group">
+      <button class="period-btn" onclick="setPeriod('hoy', this)">Hoy</button>
+      <button class="period-btn active" onclick="setPeriod('semana', this)">7 días</button>
+      <button class="period-btn" onclick="setPeriod('mes', this)">Este mes</button>
+      <button class="period-btn" onclick="setPeriod('mes_ant', this)">Mes ant.</button>
+      <button class="period-btn" onclick="setPeriod('anio', this)">Este año</button>
+      <button class="period-btn" onclick="setPeriod('custom', this)">Personalizado</button>
+    </div>
+
+    <!-- Fechas custom -->
+    <div id="customDates" style="display:none;gap:6px;align-items:center;display:none">
+      <input type="date" class="date-input" id="dateFrom">
+      <span style="color:var(--text-3);font-size:12px">a</span>
+      <input type="date" class="date-input" id="dateTo">
+      <button class="btn sm primary" onclick="loadCurrentTab()">Aplicar</button>
+    </div>
+
+    <div class="tb-sep"></div>
+
+    <button class="btn" onclick="exportarReporte()">⬇ Exportar CSV</button>
+    <button class="btn" onclick="window.print()">🖨 Imprimir</button>
+  </div>
+
+  <!-- ── MAIN ── -->
+  <div class="main" id="mainContent">
+    <div class="empty">
+      <div class="empty-icon"><span class="spinner"></span></div>
+      <div class="empty-title">Cargando reporte...</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+
+// ── Helpers ──
+const esc    = (s) => window.volvix?.utils?.esc(s) ?? String(s ?? '');
+const money  = (n) => window.volvix?.utils?.money(n) ?? ('$' + Number(n||0).toFixed(2));
+const fmtNum = (n, d=0) => Number(n||0).toLocaleString('es-MX', {minimumFractionDigits:d, maximumFractionDigits:d});
+const fmtDate = (d) => window.volvix?.utils?.date(d, {day:'2-digit',month:'short'}) ?? new Date(d).toLocaleDateString('es-MX');
+const fmtDateFull = (d) => window.volvix?.utils?.datetime(new Date(d)) ?? new Date(d).toLocaleString('es-MX');
+
+// ── Estado ──
+let currentTab    = 'ventas';
+let currentPeriod = 'semana';
+let chartInstance = null;
+
+// ── Init sesión ──
+(function initSession() {
+  const u = window.VOLVIX_USER;
+  if (!u) return;
+  const el = document.getElementById('tbTenant');
+  if (el) el.textContent = u.tenant_name || u.email || '—';
+})();
+
+// ── Rango de fechas por período ──
+function getRange() {
+  const now   = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  switch (currentPeriod) {
+    case 'hoy':
+      return { from: today, to: new Date(today.getTime() + 86399999) };
+    case 'semana':
+      return { from: new Date(today.getTime() - 6 * 86400000), to: new Date(today.getTime() + 86399999) };
+    case 'mes':
+      return { from: new Date(now.getFullYear(), now.getMonth(), 1), to: new Date(today.getTime() + 86399999) };
+    case 'mes_ant': {
+      const f = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const t = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+      return { from: f, to: t };
+    }
+    case 'anio':
+      return { from: new Date(now.getFullYear(), 0, 1), to: new Date(today.getTime() + 86399999) };
+    case 'custom': {
+      const f = document.getElementById('dateFrom')?.value;
+      const t = document.getElementById('dateTo')?.value;
+      return {
+        from: f ? new Date(f) : new Date(today.getTime() - 6 * 86400000),
+        to:   t ? new Date(t + 'T23:59:59') : new Date(today.getTime() + 86399999),
+      };
+    }
+    default:
+      return { from: new Date(today.getTime() - 6 * 86400000), to: new Date(today.getTime() + 86399999) };
+  }
+}
+
+// ── Datos demo ──
+function generateDemoVentas() {
+  const ventas = [];
+  const productos = ['Coca-Cola 600ml','Pan dulce','Leche Lala 1L','Arroz 1kg','Frijol negro 1kg','Queso fresco 250g','Agua 1.5L','Sabritas Original'];
+  const cajeros   = ['María López','Carlos Ruiz','Ana Torres'];
+  const metodos   = ['efectivo','tarjeta','transferencia'];
+  const { from }  = getRange();
+  const dias      = currentPeriod === 'hoy' ? 1 : currentPeriod === 'semana' ? 7 : currentPeriod === 'mes' ? 30 : currentPeriod === 'anio' ? 365 : 7;
+
+  for (let d = 0; d < dias; d++) {
+    const fechaDia = new Date(from.getTime() + d * 86400000);
+    const ticketsDia = Math.floor(8 + Math.random() * 20);
+    for (let t = 0; t < ticketsDia; t++) {
+      const items = [];
+      const numItems = Math.floor(1 + Math.random() * 6);
+      let total = 0;
+      for (let i = 0; i < numItems; i++) {
+        const prod = productos[Math.floor(Math.random() * productos.length)];
+        const qty  = Math.floor(1 + Math.random() * 4);
+        const precio = 8 + Math.random() * 120;
+        items.push({ nombre: prod, qty, precio: Math.round(precio * 100) / 100 });
+        total += qty * precio;
+      }
+      ventas.push({
+        id:      'V' + String(d * 100 + t).padStart(4,'0'),
+        fecha:   new Date(fechaDia.getTime() + Math.random() * 50000000),
+        total:   Math.round(total * 100) / 100,
+        items,
+        metodo:  metodos[Math.floor(Math.random() * metodos.length)],
+        cajero:  cajeros[Math.floor(Math.random() * cajeros.length)],
+      });
+    }
+  }
+  return ventas;
+}
+
+// ── Tabs ──
+function switchTab(tab, el) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  loadCurrentTab();
+}
+
+function loadCurrentTab() {
+  if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+  const fns = { ventas: renderVentas, productos: renderProductos, clientes: renderClientes, metodos: renderMetodos, cajeros: renderCajeros };
+  if (fns[currentTab]) fns[currentTab]();
+}
+
+// ── Período ──
+function setPeriod(p, el) {
+  currentPeriod = p;
+  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  const custom = document.getElementById('customDates');
+  if (custom) custom.style.display = p === 'custom' ? 'flex' : 'none';
+  if (p !== 'custom') loadCurrentTab();
+}
+
+// ══════════════════════════════════════════════
+// TAB: VENTAS
+// ══════════════════════════════════════════════
+function renderVentas() {
+  const ventas = generateDemoVentas();
+  const total  = ventas.reduce((s, v) => s + v.total, 0);
+  const ticket = total / (ventas.length || 1);
+  const { from } = getRange();
+
+  // Agrupar por día
+  const byDia = {};
+  ventas.forEach(v => {
+    const key = fmtDate(v.fecha);
+    if (!byDia[key]) byDia[key] = { label: key, ventas: 0, total: 0 };
+    byDia[key].ventas++;
+    byDia[key].total += v.total;
+  });
+  const dias = Object.values(byDia);
+
+  const content = document.getElementById('mainContent');
+  content.innerHTML = `
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-label">Ventas totales</div>
+        <div class="kpi-value gold">${money(total)}</div>
+        <div class="kpi-sub"><span class="kpi-up">↑ 12.4%</span> vs período anterior</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Tickets</div>
+        <div class="kpi-value green">${fmtNum(ventas.length)}</div>
+        <div class="kpi-sub"><span class="kpi-up">↑ 8.1%</span> más transacciones</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Ticket promedio</div>
+        <div class="kpi-value blue">${money(ticket)}</div>
+        <div class="kpi-sub"><span class="kpi-up">↑ 3.9%</span> vs período anterior</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Mayor venta del día</div>
+        <div class="kpi-value orange">${money(Math.max(...dias.map(d => d.total)))}</div>
+        <div class="kpi-sub">Mejor día del período</div>
+      </div>
+    </div>
+
+    <!-- Gráfica principal -->
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Ventas por día</div>
+          <div class="card-sub">${fmtDate(from)} — hoy</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="chart-wrap"><canvas id="chartVentas"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Tabla de ventas recientes -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Últimas ventas</div>
+        <div style="font-size:12px;color:var(--text-3)">${ventas.length} tickets en el período</div>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="data-table">
+          <thead><tr><th>Ticket</th><th>Fecha</th><th>Artículos</th><th>Método</th><th>Cajero</th><th class="right">Total</th></tr></thead>
+          <tbody>
+            ${ventas.slice(-20).reverse().map(v => `
+              <tr>
+                <td class="mono">#${esc(v.id)}</td>
+                <td style="font-size:11.5px;color:var(--text-3)">${fmtDateFull(v.fecha)}</td>
+                <td>${v.items.length} art.</td>
+                <td><span class="pill ${v.metodo === 'efectivo' ? 'green' : v.metodo === 'tarjeta' ? 'blue' : 'orange'}">${esc(v.metodo)}</span></td>
+                <td style="font-size:12px">${esc(v.cajero)}</td>
+                <td class="right" style="font-weight:700">${money(v.total)}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+
+  // Dibujar gráfica
+  setTimeout(() => {
+    const ctx = document.getElementById('chartVentas');
+    if (!ctx || !window.Chart) return;
+    chartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: dias.map(d => d.label),
+        datasets: [
+          {
+            label: 'Ventas ($)',
+            data: dias.map(d => parseFloat(d.total.toFixed(2))),
+            backgroundColor: 'rgba(26,35,126,0.75)',
+            borderRadius: 6,
+            yAxisID: 'y',
+          },
+          {
+            label: 'Tickets',
+            data: dias.map(d => d.ventas),
+            type: 'line',
+            borderColor: '#FBBF24',
+            backgroundColor: 'rgba(251,191,36,0.12)',
+            borderWidth: 2.5,
+            pointRadius: 4,
+            tension: 0.35,
+            fill: true,
+            yAxisID: 'y1',
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { intersect: false, mode: 'index' },
+        plugins: {
+          legend: { position: 'bottom', labels: { font: { family:'Inter', size:11 }, padding:16 } },
+          tooltip: {
+            callbacks: {
+              label: ctx => ctx.datasetIndex === 0
+                ? ' ' + money(ctx.raw)
+                : ' ' + ctx.raw + ' tickets',
+            },
+          },
+        },
+        scales: {
+          y:  { position:'left',  grid:{ color:'rgba(0,0,0,0.04)' }, ticks:{ callback: v => money(v), font:{size:11} } },
+          y1: { position:'right', grid:{ drawOnChartArea:false }, ticks:{ font:{size:11} } },
+          x:  { grid:{ display:false }, ticks:{ font:{size:11} } },
+        },
+      },
+    });
+  }, 50);
+}
+
+// ══════════════════════════════════════════════
+// TAB: PRODUCTOS
+// ══════════════════════════════════════════════
+function renderProductos() {
+  const productos = [
+    { nombre:'Coca-Cola 600ml',  categoria:'Bebidas',  vendidos:284, ingresos:7100, margen:38 },
+    { nombre:'Leche Lala 1L',    categoria:'Lácteos',  vendidos:196, ingresos:6272, margen:22 },
+    { nombre:'Pan dulce',        categoria:'Panadería',vendidos:412, ingresos:3502, margen:55 },
+    { nombre:'Arroz 1kg',        categoria:'Básicos',  vendidos:143, ingresos:4004, margen:30 },
+    { nombre:'Frijol negro 1kg', categoria:'Básicos',  vendidos:118, ingresos:4130, margen:28 },
+    { nombre:'Queso fresco 250g',categoria:'Lácteos',  vendidos:87,  ingresos:10440,margen:35 },
+    { nombre:'Sabritas Original',categoria:'Snacks',   vendidos:203, ingresos:3654, margen:42 },
+    { nombre:'Agua 1.5L',        categoria:'Bebidas',  vendidos:347, ingresos:4164, margen:20 },
+  ];
+
+  // Por categoría
+  const cats = {};
+  productos.forEach(p => {
+    if (!cats[p.categoria]) cats[p.categoria] = { vendidos:0, ingresos:0 };
+    cats[p.categoria].vendidos += p.vendidos;
+    cats[p.categoria].ingresos += p.ingresos;
+  });
+  const catArr = Object.entries(cats).map(([k,v]) => ({ nombre:k, ...v })).sort((a,b) => b.ingresos - a.ingresos);
+
+  const maxVendidos = Math.max(...productos.map(p => p.vendidos));
+  const maxIngresos = Math.max(...productos.map(p => p.ingresos));
+
+  const content = document.getElementById('mainContent');
+  content.innerHTML = `
+    <div class="kpi-grid">
+      <div class="kpi"><div class="kpi-label">SKUs vendidos</div><div class="kpi-value gold">${productos.length}</div><div class="kpi-sub">productos distintos</div></div>
+      <div class="kpi"><div class="kpi-label">Unidades vendidas</div><div class="kpi-value green">${fmtNum(productos.reduce((s,p)=>s+p.vendidos,0))}</div></div>
+      <div class="kpi"><div class="kpi-label">Ingresos por productos</div><div class="kpi-value blue">${money(productos.reduce((s,p)=>s+p.ingresos,0))}</div></div>
+      <div class="kpi"><div class="kpi-label">Margen promedio</div><div class="kpi-value orange">${Math.round(productos.reduce((s,p)=>s+p.margen,0)/productos.length)}%</div></div>
+    </div>
+
+    <div class="grid-2">
+      <!-- Top por unidades -->
+      <div class="card">
+        <div class="card-head"><div class="card-title">🏆 Top por unidades vendidas</div></div>
+        <div class="card-body">
+          ${productos.sort((a,b)=>b.vendidos-a.vendidos).map((p,i) => `
+            <div style="margin-bottom:12px">
+              <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:3px">
+                <span><strong style="color:var(--text-3);margin-right:6px">#${i+1}</strong>${esc(p.nombre)}</span>
+                <span style="font-weight:700">${fmtNum(p.vendidos)} uds</span>
+              </div>
+              <div class="rank-bar-wrap"><div class="rank-bar" style="width:${Math.round(p.vendidos/maxVendidos*100)}%;background:var(--navy)"></div></div>
+            </div>`).join('')}
+        </div>
+      </div>
+
+      <!-- Top por ingresos -->
+      <div class="card">
+        <div class="card-head"><div class="card-title">💰 Top por ingresos</div></div>
+        <div class="card-body">
+          ${productos.sort((a,b)=>b.ingresos-a.ingresos).map((p,i) => `
+            <div style="margin-bottom:12px">
+              <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:3px">
+                <span><strong style="color:var(--text-3);margin-right:6px">#${i+1}</strong>${esc(p.nombre)}</span>
+                <span style="font-weight:700">${money(p.ingresos)}</span>
+              </div>
+              <div class="rank-bar-wrap"><div class="rank-bar" style="width:${Math.round(p.ingresos/maxIngresos*100)}%;background:var(--layer-owner)"></div></div>
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <!-- Por categoría -->
+    <div class="card">
+      <div class="card-head"><div class="card-title">🗂 Ventas por categoría</div></div>
+      <div class="card-body">
+        <div class="chart-wrap" style="height:220px"><canvas id="chartCats"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Tabla completa -->
+    <div class="card">
+      <div class="card-head"><div class="card-title">Detalle de productos</div></div>
+      <div style="overflow-x:auto">
+        <table class="data-table">
+          <thead><tr><th>#</th><th>Producto</th><th>Categoría</th><th class="right">Unidades</th><th class="right">Ingresos</th><th class="right">Margen</th></tr></thead>
+          <tbody>
+            ${productos.sort((a,b)=>b.ingresos-a.ingresos).map((p,i) => `
+              <tr>
+                <td style="color:var(--text-3);font-size:12px">${i+1}</td>
+                <td style="font-weight:600">${esc(p.nombre)}</td>
+                <td><span class="pill gray">${esc(p.categoria)}</span></td>
+                <td class="right">${fmtNum(p.vendidos)}</td>
+                <td class="right" style="font-weight:700">${money(p.ingresos)}</td>
+                <td class="right">
+                  <span class="pill ${p.margen>=40?'green':p.margen>=25?'orange':'red'}">${p.margen}%</span>
+                </td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+
+  setTimeout(() => {
+    const ctx = document.getElementById('chartCats');
+    if (!ctx || !window.Chart) return;
+    const COLORS = ['#1a237e','#2e7d32','#1565c0','#e65100','#6a1b9a','#c62828','#00695c','#f57f17'];
+    chartInstance = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: catArr.map(c => c.nombre),
+        datasets: [{
+          data: catArr.map(c => parseFloat(c.ingresos.toFixed(2))),
+          backgroundColor: COLORS,
+          borderWidth: 2,
+          borderColor: '#fff',
+        }],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { position:'right', labels:{ font:{family:'Inter',size:11}, padding:14 } },
+          tooltip: { callbacks: { label: ctx => ' ' + money(ctx.raw) } },
+        },
+        cutout: '60%',
+      },
+    });
+  }, 50);
+}
+
+// ══════════════════════════════════════════════
+// TAB: CLIENTES
+// ══════════════════════════════════════════════
+function renderClientes() {
+  const clientes = [
+    { nombre:'Ana Lucía Martínez', compras:156, total:94000, ticket:602, puntos:4720, ultima: Date.now()-43200000 },
+    { nombre:'María Elena Torres', compras:83,  total:28900, ticket:348, puntos:1250, ultima: Date.now()-86400000 },
+    { nombre:'Roberto García López',compras:47, total:12480, ticket:265, puntos:840,  ultima: Date.now()-259200000 },
+    { nombre:'Juan Antonio Pérez', compras:18,  total:4200,  ticket:233, puntos:320,  ultima: Date.now()-1209600000 },
+    { nombre:'Carlos Hernández',   compras:3,   total:280,   ticket:93,  puntos:0,    ultima: Date.now()-5184000000 },
+  ];
+
+  const content = document.getElementById('mainContent');
+  content.innerHTML = `
+    <div class="kpi-grid">
+      <div class="kpi"><div class="kpi-label">Clientes activos</div><div class="kpi-value gold">${clientes.length}</div><div class="kpi-sub">compraron en el período</div></div>
+      <div class="kpi"><div class="kpi-label">Clientes nuevos</div><div class="kpi-value green">2</div><div class="kpi-sub">registrados en el período</div></div>
+      <div class="kpi"><div class="kpi-label">Ticket promedio</div><div class="kpi-value blue">${money(clientes.reduce((s,c)=>s+c.ticket,0)/clientes.length)}</div></div>
+      <div class="kpi"><div class="kpi-label">Puntos emitidos</div><div class="kpi-value orange">${fmtNum(clientes.reduce((s,c)=>s+c.puntos,0))}</div></div>
+    </div>
+
+    <!-- Top clientes -->
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-head"><div class="card-title">🏆 Top clientes por compras</div></div>
+      <div style="overflow-x:auto">
+        <table class="data-table">
+          <thead><tr><th>#</th><th>Cliente</th><th class="right">Tickets</th><th class="right">Total comprado</th><th class="right">Ticket prom.</th><th class="right">Puntos</th><th>Última compra</th></tr></thead>
+          <tbody>
+            ${clientes.map((c,i) => `<tr>
+              <td style="color:var(--text-3);font-size:12px">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</td>
+              <td><strong>${esc(c.nombre)}</strong></td>
+              <td class="right">${c.compras}</td>
+              <td class="right" style="font-weight:700;color:var(--navy)">${money(c.total)}</td>
+              <td class="right">${money(c.ticket)}</td>
+              <td class="right"><span style="color:var(--orange);font-weight:700">⭐ ${fmtNum(c.puntos)}</span></td>
+              <td style="font-size:11.5px;color:var(--text-3)">${window.volvix?.utils?.relativeTime(new Date(c.ultima)) || '—'}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Gráfica retención -->
+    <div class="card">
+      <div class="card-head"><div class="card-title">📊 Frecuencia de compra</div></div>
+      <div class="card-body">
+        <div class="chart-wrap" style="height:200px"><canvas id="chartClientes"></canvas></div>
+      </div>
+    </div>`;
+
+  setTimeout(() => {
+    const ctx = document.getElementById('chartClientes');
+    if (!ctx || !window.Chart) return;
+    chartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: clientes.map(c => c.nombre.split(' ')[0]),
+        datasets: [{
+          label: 'Total comprado ($)',
+          data: clientes.map(c => c.total),
+          backgroundColor: ['#FBBF24','#1a237e','#2e7d32','#1565c0','#e0e0e0'],
+          borderRadius: 8,
+        }],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display:false },
+          tooltip: { callbacks: { label: ctx => ' ' + money(ctx.raw) } },
+        },
+        scales: {
+          y: { grid:{ color:'rgba(0,0,0,0.04)' }, ticks:{ callback:v => money(v), font:{size:11} } },
+          x: { grid:{ display:false }, ticks:{ font:{size:11} } },
+        },
+      },
+    });
+  }, 50);
+}
+
+// ══════════════════════════════════════════════
+// TAB: MÉTODOS DE PAGO
+// ══════════════════════════════════════════════
+function renderMetodos() {
+  const ventas = generateDemoVentas();
+  const metodos = { efectivo:{ label:'Efectivo', emoji:'💵', color:'#2e7d32' }, tarjeta:{ label:'Tarjeta', emoji:'💳', color:'#1565c0' }, transferencia:{ label:'Transferencia', emoji:'📲', color:'#6a1b9a' } };
+  const stats = {};
+  ventas.forEach(v => {
+    if (!stats[v.metodo]) stats[v.metodo] = { total:0, count:0 };
+    stats[v.metodo].total += v.total;
+    stats[v.metodo].count++;
+  });
+  const totalGeneral = Object.values(stats).reduce((s,m) => s+m.total, 0);
+
+  const content = document.getElementById('mainContent');
+  content.innerHTML = `
+    <div class="kpi-grid">
+      ${Object.entries(stats).map(([k,v]) => {
+        const m = metodos[k] || { label:k, emoji:'💰', color:'#757575' };
+        return `<div class="kpi">
+          <div class="kpi-label">${m.emoji} ${esc(m.label)}</div>
+          <div class="kpi-value" style="color:${m.color}">${money(v.total)}</div>
+          <div class="kpi-sub">${v.count} tickets · ${Math.round(v.total/totalGeneral*100)}% del total</div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <div class="grid-2">
+      <!-- Gráfica de pastel -->
+      <div class="card">
+        <div class="card-head"><div class="card-title">Distribución por método</div></div>
+        <div class="card-body">
+          <div class="chart-wrap"><canvas id="chartMetodos"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Detalle en tabla -->
+      <div class="card">
+        <div class="card-head"><div class="card-title">Detalle</div></div>
+        <div style="overflow-x:auto">
+          <table class="data-table">
+            <thead><tr><th>Método</th><th class="right">Tickets</th><th class="right">Total</th><th class="right">% del total</th><th class="right">Promedio</th></tr></thead>
+            <tbody>
+              ${Object.entries(stats).sort((a,b)=>b[1].total-a[1].total).map(([k,v]) => {
+                const m = metodos[k] || { label:k, emoji:'💰', color:'#757575' };
+                const pct = Math.round(v.total / totalGeneral * 100);
+                return `<tr>
+                  <td><span style="font-size:15px;margin-right:7px">${m.emoji}</span><strong>${esc(m.label)}</strong></td>
+                  <td class="right">${v.count}</td>
+                  <td class="right" style="font-weight:700">${money(v.total)}</td>
+                  <td class="right">
+                    <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px">
+                      ${pct}%
+                      <div style="width:60px"><div class="rank-bar-wrap"><div class="rank-bar" style="width:${pct}%;background:${m.color}"></div></div></div>
+                    </div>
+                  </td>
+                  <td class="right">${money(v.total/v.count)}</td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+
+  setTimeout(() => {
+    const ctx = document.getElementById('chartMetodos');
+    if (!ctx || !window.Chart) return;
+    const sorted = Object.entries(stats).sort((a,b) => b[1].total - a[1].total);
+    chartInstance = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: sorted.map(([k]) => metodos[k]?.label || k),
+        datasets: [{
+          data: sorted.map(([,v]) => parseFloat(v.total.toFixed(2))),
+          backgroundColor: sorted.map(([k]) => metodos[k]?.color || '#757575'),
+          borderWidth: 3, borderColor:'#fff',
+        }],
+      },
+      options: {
+        responsive:true, maintainAspectRatio:false,
+        plugins: {
+          legend: { position:'bottom', labels:{ font:{family:'Inter',size:12}, padding:16 } },
+          tooltip: { callbacks: { label: ctx => ' ' + money(ctx.raw) + ' (' + Math.round(ctx.raw/totalGeneral*100) + '%)' } },
+        },
+      },
+    });
+  }, 50);
+}
+
+// ══════════════════════════════════════════════
+// TAB: CAJEROS
+// ══════════════════════════════════════════════
+function renderCajeros() {
+  const cajeros = [
+    { nombre:'María López',  turno:'Mañana', tickets:187, total:48900, promedio:261, devoluciones:3 },
+    { nombre:'Carlos Ruiz',  turno:'Tarde',  tickets:143, total:38400, promedio:268, devoluciones:1 },
+    { nombre:'Ana Torres',   turno:'Mixto',  tickets:98,  total:22100, promedio:225, devoluciones:2 },
+  ];
+
+  const content = document.getElementById('mainContent');
+  content.innerHTML = `
+    <div class="kpi-grid">
+      <div class="kpi"><div class="kpi-label">Cajeros activos</div><div class="kpi-value gold">${cajeros.length}</div></div>
+      <div class="kpi"><div class="kpi-label">Tickets total</div><div class="kpi-value green">${fmtNum(cajeros.reduce((s,c)=>s+c.tickets,0))}</div></div>
+      <div class="kpi"><div class="kpi-label">Mejor cajero</div><div class="kpi-value blue" style="font-size:16px">${esc(cajeros[0].nombre)}</div><div class="kpi-sub">${money(cajeros[0].total)}</div></div>
+      <div class="kpi"><div class="kpi-label">Total devoluciones</div><div class="kpi-value orange">${cajeros.reduce((s,c)=>s+c.devoluciones,0)}</div></div>
+    </div>
+
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-head"><div class="card-title">📊 Rendimiento por cajero</div></div>
+      <div class="card-body">
+        <div class="chart-wrap" style="height:220px"><canvas id="chartCajeros"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="card-title">Detalle por cajero</div></div>
+      <div style="overflow-x:auto">
+        <table class="data-table">
+          <thead><tr><th>#</th><th>Cajero</th><th>Turno</th><th class="right">Tickets</th><th class="right">Total vendido</th><th class="right">Ticket prom.</th><th class="right">Devoluciones</th></tr></thead>
+          <tbody>
+            ${cajeros.sort((a,b)=>b.total-a.total).map((c,i) => `<tr>
+              <td style="color:var(--text-3)">${i+1}</td>
+              <td><strong>${esc(c.nombre)}</strong></td>
+              <td><span class="pill gray">${esc(c.turno)}</span></td>
+              <td class="right">${fmtNum(c.tickets)}</td>
+              <td class="right" style="font-weight:700">${money(c.total)}</td>
+              <td class="right">${money(c.promedio)}</td>
+              <td class="right"><span class="pill ${c.devoluciones===0?'green':c.devoluciones<=2?'orange':'red'}">${c.devoluciones}</span></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+
+  setTimeout(() => {
+    const ctx = document.getElementById('chartCajeros');
+    if (!ctx || !window.Chart) return;
+    chartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: cajeros.map(c => c.nombre.split(' ')[0]),
+        datasets: [
+          { label:'Total vendido ($)', data:cajeros.map(c=>c.total), backgroundColor:'rgba(26,35,126,0.75)', borderRadius:8, yAxisID:'y' },
+          { label:'Tickets', data:cajeros.map(c=>c.tickets), type:'line', borderColor:'#FBBF24', backgroundColor:'rgba(251,191,36,0.1)', borderWidth:2.5, pointRadius:5, yAxisID:'y1' },
+        ],
+      },
+      options: {
+        responsive:true, maintainAspectRatio:false,
+        plugins: {
+          legend:{ position:'bottom', labels:{ font:{family:'Inter',size:11}, padding:14 } },
+          tooltip:{ callbacks:{ label: ctx => ctx.datasetIndex===0 ? ' '+money(ctx.raw) : ' '+ctx.raw+' tickets' } },
+        },
+        scales: {
+          y:  { position:'left',  grid:{color:'rgba(0,0,0,0.04)'}, ticks:{callback:v=>money(v),font:{size:11}} },
+          y1: { position:'right', grid:{drawOnChartArea:false}, ticks:{font:{size:11}} },
+          x:  { grid:{display:false}, ticks:{font:{size:11}} },
+        },
+      },
+    });
+  }, 50);
+}
+
+// ── Exportar CSV ──
+function exportarReporte() {
+  const lines = [`Reporte: ${currentTab} · Período: ${currentPeriod} · ${new Date().toLocaleString('es-MX')}`];
+  const blob  = new Blob([lines.join('\n')], { type:'text/csv;charset=utf-8;' });
+  const url   = URL.createObjectURL(blob);
+  const a     = document.createElement('a');
+  a.href = url;
+  a.download = `reporte_volvix_${currentTab}_${currentPeriod}_${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  toast('✓ Reporte exportado', 'ok');
+}
+
+// ── Toast ──
+function toast(msg, type='info') {
+  if (window.volvix?.utils?.toast) { window.volvix.utils.toast(msg, type); return; }
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = 'toast show ' + type;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.className = 'toast', 2800);
+}
+
+// ── Keyboard ──
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.modal-bg.open').forEach(m=>m.classList.remove('open'));
+});
+
+// ── INIT ──
+window.volvix.ready(() => { renderVentas(); });
+</script>
+</body>
+</html>
