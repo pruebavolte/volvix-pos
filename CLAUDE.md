@@ -83,10 +83,16 @@ La compactación la hace el sistema, no yo, cuando se llena el contexto. Para qu
 - [x] Crear `public/config.js` real con credenciales — **HECHO 2026-04-25**
 - [x] Implementar `public/login.html` — **HECHO 2026-04-25**
 - [x] Roles implementados via auth-gate.js (superadmin, owner, cajero)
+- [x] **FIX: Login infinito flasheo — HECHO 2026-04-25** ✅
+  - Problema: `/api/login` endpoint implementado server-side
+  - Antes: client-side async auth + buildVolvixSession() causaba timeout
+  - Ahora: servidor maneja Supabase auth + queries en una sola respuesta
+  - Pruebas: admin@volvix.test / Volvix2026! ✅ Funciona sin flasheo
 
 ### **SISTEMA BASE COMPLETO — 2026-04-25** ✅
 Claude AI confirmó: "El sistema base está completo."
 Todos los archivos core entregados, verificados y en producción (Vercel).
+**CRÍTICO ARREGLADO**: Login funciona con credenciales reales (sin inyección manual).
 
 ### Pendiente P1
 - [ ] Sentry DSN real configurado
@@ -174,3 +180,35 @@ SENTRY_DSN=                          # opcional
 - Entregados y en producción: login.html, pos.html, pos-inventario.html, pos-corte.html, pos-clientes.html, pos-reportes.html, pos-config.html, sw.js, manifest.json
 - Fase 4+ pendiente bajo demanda (8 archivos opcionales listados arriba)
 - Para pedir Fase 4+: mandar JSON spec `{"task":"spec_screen","screen":"NOMBRE.html","question":"..."}` a Claude AI
+
+### 2026-04-25 — FIX CRÍTICO: Login infinite redirect (flasheo) ✅
+**PROBLEMA**: Cuando usuario ingresa credenciales en login.html:
+- Se entraba en loop: login.html?expired=1&redirect=%2Fpos.html
+- Página se "flasheaba" constantemente sin permitir entrada
+- Session nunca se guardaba en localStorage
+- auth-gate.js siempre encontraba sessión expirada y redirigía a login
+
+**ROOT CAUSE IDENTIFICADO**:
+- buildVolvixSession() en login.html es async
+- Queries a volvix_usuarios y volvix_tenants tardaban/fallaban
+- saveAndRedirect() nunca se ejecutaba
+- Resultado: No había session en localStorage
+
+**SOLUCIÓN IMPLEMENTADA**:
+- Endpoint `/api/login` POST en server.js (línea 220-293)
+- Server-side: Supabase auth + queries en UNA sola respuesta
+- login.html: cambiado para llamar /api/login en lugar de buildVolvixSession()
+- Session completa retornada en 1 roundtrip al cliente
+
+**VALIDACIÓN**:
+- ✅ Credenciales: admin@volvix.test / Volvix2026! FUNCIONAN
+- ✅ Session se guarda en localStorage correctamente
+- ✅ Redirección automática: owner → /volvix_owner_panel_v7.html
+- ✅ Navegación entre páginas protegidas SIN re-login
+- ✅ Todos los tabs (Ventas, Inventario, Clientes, etc) se cargan correctamente
+- ✅ NO hay flasheo ni loops infinitos
+
+**ARCHIVOS MODIFICADOS**:
+- server.js: +schema login, +endpoint /api/login (45 líneas)
+- login.html: modificado handleLogin() (simplificado ~15 líneas)
+- Commit: 0c9da83 (pushed a master, auto-deploya Vercel)
