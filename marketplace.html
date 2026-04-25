@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volvix · Sistema POS para tu giro de negocio</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  :root {
+    --text: #0A0A0A;
+    --text-2: #44403C;
+    --text-3: #78716C;
+    --bg: #FFFFFF;
+    --bg-2: #FAFAF9;
+    --border: #E7E5E4;
+    --accent: #EA580C;
+    --accent-dark: #C2410C;
+    --success: #16A34A;
+  }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ========== NAV ========== */
+  nav.top {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 6%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    font-size: 18px;
+    letter-spacing: -0.3px;
+  }
+  .brand-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #EA580C, #F59E0B);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800;
+    box-shadow: 0 4px 14px rgba(234,88,12,0.3);
+  }
+  .nav-links { display: flex; gap: 20px; align-items: center; }
+  .nav-links a {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-2);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .nav-links a:hover { color: var(--accent); }
+  .nav-cta {
+    padding: 9px 18px;
+    background: var(--text);
+    color: white !important;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 600;
+  }
+
+  /* ========== HERO ========== */
+  .hero {
+    padding: 80px 6% 60px;
+    text-align: center;
+    background: radial-gradient(circle at 50% 0%, #FFF7ED 0%, #FFFFFF 60%);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-badge {
+    display: inline-block;
+    padding: 5px 14px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .hero h1 {
+    font-size: clamp(32px, 6vw, 60px);
+    font-weight: 800;
+    letter-spacing: -2px;
+    line-height: 1.05;
+    max-width: 900px;
+    margin: 0 auto 20px;
+  }
+  .hero h1 .accent { color: var(--accent); }
+  .hero p.sub {
+    font-size: clamp(15px, 2.2vw, 20px);
+    color: var(--text-2);
+    max-width: 600px;
+    margin: 0 auto 40px;
+  }
+
+  /* ========== SEARCH BAR PRINCIPAL ========== */
+  .search-wrap {
+    max-width: 680px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .search-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 10px;
+    text-align: left;
+    padding: 0 6px;
+  }
+  .search-box {
+    display: flex;
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+    overflow: hidden;
+    transition: all 0.2s;
+  }
+  .search-box:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 10px 40px rgba(234,88,12,0.2);
+    transform: translateY(-2px);
+  }
+  .search-input {
+    flex: 1;
+    padding: 18px 22px;
+    font-size: 17px;
+    font-weight: 500;
+    border: none;
+    background: transparent;
+    color: var(--text);
+  }
+  .search-input:focus { outline: none; }
+  .search-input::placeholder { color: var(--text-3); }
+  .search-btn {
+    padding: 18px 28px;
+    background: var(--text);
+    color: white;
+    border: none;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .search-btn:hover { background: #000; }
+  .search-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ========== SUGERENCIAS ========== */
+  .suggestions {
+    margin-top: 14px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .suggestion-chip {
+    padding: 7px 13px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--text-2);
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+  .suggestion-chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* ========== RESPUESTA IA ========== */
+  .ai-response {
+    max-width: 1000px;
+    margin: 60px auto 0;
+    padding: 0 6%;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.5s ease;
+  }
+  .ai-response.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .ai-thinking {
+    text-align: center;
+    padding: 40px 20px;
+    font-size: 15px;
+    color: var(--text-2);
+  }
+  .ai-thinking .dots {
+    display: inline-block;
+    margin-right: 8px;
+  }
+  .ai-thinking .dots span {
+    display: inline-block;
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    margin: 0 2px;
+    animation: bounce 1.2s infinite;
+  }
+  .ai-thinking .dots span:nth-child(2) { animation-delay: 0.15s; }
+  .ai-thinking .dots span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-8px); }
+  }
+
+  .ai-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px 32px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.06);
+    position: relative;
+  }
+  .ai-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .ai-icon {
+    width: 52px; height: 52px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    flex-shrink: 0;
+  }
+  .ai-header-text { flex: 1; }
+  .ai-answer {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    line-height: 1.25;
+    margin-bottom: 8px;
+  }
+  .ai-answer .accent { color: var(--accent); }
+  .ai-answer .success { color: var(--success); }
+  .ai-sub {
+    font-size: 14px;
+    color: var(--text-2);
+    line-height: 1.6;
+  }
+  .system-name-pill {
+    display: inline-block;
+    padding: 3px 11px;
+    background: var(--text);
+    color: white;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    margin: 0 3px;
+  }
+
+  .pains-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+  }
+  .pains-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .pain-card {
+    padding: 16px;
+    background: var(--bg-2);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    transition: all 0.15s;
+  }
+  .pain-card:hover {
+    background: white;
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
+  .pain-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    background: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    margin-bottom: 10px;
+    border: 1px solid var(--border);
+  }
+  .pain-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .pain-desc {
+    font-size: 12px;
+    color: var(--text-2);
+    line-height: 1.5;
+  }
+
+  .ai-cta {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .btn-big {
+    padding: 14px 22px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-big:hover { background: var(--accent-dark); transform: translateY(-1px); }
+  .btn-secondary {
+    padding: 14px 22px;
+    background: white;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-secondary:hover { border-color: var(--text); }
+
+  /* ========== NEW GIRO (IA GENERATIVA) ========== */
+  .new-giro-card {
+    border: 2px dashed var(--accent);
+    background: linear-gradient(135deg, #FFF7ED, white);
+  }
+  .ai-generating {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px 0;
+  }
+  .gen-step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13.5px;
+    color: var(--text-2);
+    opacity: 0.3;
+    transition: opacity 0.3s;
+  }
+  .gen-step.active {
+    opacity: 1;
+    color: var(--text);
+    font-weight: 600;
+  }
+  .gen-step.done {
+    opacity: 1;
+    color: var(--success);
+  }
+  .gen-step .ico {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--bg-2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+  }
+  .gen-step.active .ico {
+    background: var(--accent);
+    color: white;
+    animation: spin 1.5s linear infinite;
+  }
+  .gen-step.done .ico {
+    background: var(--success);
+    color: white;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ========== STATS ========== */
+  .stats {
+    padding: 60px 6%;
+    background: var(--bg-2);
+    margin-top: 80px;
+  }
+  .stats-grid {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    text-align: center;
+  }
+  .stat-num {
+    font-size: 40px;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .stat-label {
+    font-size: 13px;
+    color: var(--text-2);
+  }
+
+  /* ========== POPULAR GIROS ========== */
+  .popular {
+    padding: 80px 6%;
+  }
+  .section-head {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto 40px;
+  }
+  .section-head h2 {
+    font-size: clamp(26px, 4vw, 36px);
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 10px;
+  }
+  .section-head p {
+    font-size: 15px;
+    color: var(--text-2);
+  }
+  .popular-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 14px;
+  }
+  .popular-card {
+    padding: 24px 16px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .popular-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    transform: translateY(-2px);
+  }
+  .popular-icon {
+    width: 52px; height: 52px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    margin-bottom: 10px;
+  }
+  .popular-name {
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  /* ========== FOOTER ========== */
+  footer {
+    padding: 40px 6%;
+    background: var(--text);
+    color: #A8A29E;
+    font-size: 13px;
+    text-align: center;
+  }
+  footer strong { color: white; }
+
+  /* ========== RESPONSIVE ========== */
+  @media (max-width: 640px) {
+    .search-input { font-size: 15px; padding: 14px 16px; }
+    .search-btn { padding: 14px 18px; font-size: 14px; }
+    .nav-links a:not(.nav-cta) { display: none; }
+    .ai-card { padding: 24px 20px; }
+    .pains-grid { grid-template-columns: 1fr; }
+    .ai-answer { font-size: 18px; }
+  }
+</style>
+<script src="volvix-api.js"></script>
+<script src="volvix-sync.js"></script>
+<script src="volvix-sync-widget.js"></script>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="top">
+  <div class="brand">
+    <div class="brand-icon">V</div>
+    <span>Volvix</span>
+  </div>
+  <div class="nav-links">
+    <a href="#popular">Giros populares</a>
+    <a href="#stats">Nosotros</a>
+    <a href="volvix_owner_panel_v5.html" class="nav-cta">Panel SaaS</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">🚀 Sistema personalizado para tu negocio</div>
+  <h1>¿Cuál es el giro de <span class="accent">tu negocio?</span></h1>
+  <p class="sub">Escríbelo abajo y te mostramos el sistema que tenemos pensado exactamente para lo que tú haces.</p>
+
+  <div class="search-wrap">
+    <div class="search-label">🔎 ¿A qué se dedica tu negocio?</div>
+    <div class="search-box">
+      <input
+        type="text"
+        class="search-input"
+        id="giro-input"
+        placeholder="ej. barbería, farmacia, taquería, colegio..."
+        autofocus
+        onkeypress="if(event.key==='Enter') searchGiro()"
+      >
+      <button class="search-btn" onclick="searchGiro()">Buscar mi sistema →</button>
+    </div>
+
+    <div class="suggestions">
+      <div class="suggestion-chip" onclick="quickSearch('barbería')">💈 Barbería</div>
+      <div class="suggestion-chip" onclick="quickSearch('restaurante')">🍽️ Restaurante</div>
+      <div class="suggestion-chip" onclick="quickSearch('farmacia')">💊 Farmacia</div>
+      <div class="suggestion-chip" onclick="quickSearch('abarrotes')">🏪 Abarrotes</div>
+      <div class="suggestion-chip" onclick="quickSearch('colegio')">🏫 Colegio</div>
+      <div class="suggestion-chip" onclick="quickSearch('taller mecánico')">🔧 Taller mecánico</div>
+      <div class="suggestion-chip" onclick="quickSearch('frutería')">🍎 Frutería</div>
+      <div class="suggestion-chip" onclick="quickSearch('gimnasio')">🏋️ Gimnasio</div>
+    </div>
+  </div>
+</section>
+
+<!-- RESPUESTA IA -->
+<div class="ai-response" id="ai-response"></div>
+
+<!-- STATS -->
+<section class="stats" id="stats">
+  <div class="stats-grid">
+    <div>
+      <div class="stat-num">200+</div>
+      <div class="stat-label">Giros de negocio soportados</div>
+    </div>
+    <div>
+      <div class="stat-num">14 días</div>
+      <div class="stat-label">Prueba gratis sin tarjeta</div>
+    </div>
+    <div>
+      <div class="stat-num">100%</div>
+      <div class="stat-label">Funciona sin internet</div>
+    </div>
+    <div>
+      <div class="stat-num">3</div>
+      <div class="stat-label">Plataformas: Web, Windows, Android</div>
+    </div>
+  </div>
+</section>
+
+<!-- POPULAR GIROS -->
+<section class="popular" id="popular">
+  <div class="section-head">
+    <h2>Giros más populares</h2>
+    <p>Haz clic en uno para ver su sistema personalizado</p>
+  </div>
+  <div class="popular-grid" id="popular-grid"></div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div><strong>Volvix</strong> · Sistemas POS para 200+ giros de negocio</div>
+  <div style="margin-top: 8px; font-size: 12px;">Hecho con ❤️ en México · 2026</div>
+</footer>
+
+<script src="giros_catalog_v2.js"></script>
+<script>
+  const TOP_GIROS = ['barberia', 'restaurante', 'farmacia', 'abarrotes', 'taqueria', 'colegio', 'clinica_dental', 'taller_mecanico', 'gimnasio', 'fruteria', 'cafeteria', 'minisuper'];
+
+  function renderPopular() {
+    const grid = document.getElementById('popular-grid');
+    const giros = TOP_GIROS.map(k => GIROS_V2.find(g => g.key === k)).filter(Boolean);
+    grid.innerHTML = giros.map(g => `
+      <a href="landing_dynamic.html?giro=${g.key}" class="popular-card">
+        <div class="popular-icon" style="background:${g.accent};">${g.icon}</div>
+        <div class="popular-name">${g.name}</div>
+      </a>
+    `).join('');
+  }
+
+  function quickSearch(text) {
+    document.getElementById('giro-input').value = text;
+    searchGiro();
+  }
+
+  function searchGiro() {
+    const q = document.getElementById('giro-input').value.trim();
+    if (!q) {
+      document.getElementById('giro-input').focus();
+      return;
+    }
+
+    const wrap = document.getElementById('ai-response');
+    wrap.innerHTML = '<div class="ai-thinking"><span class="dots"><span></span><span></span><span></span></span> Analizando tu giro de negocio...</div>';
+    wrap.classList.add('visible');
+    wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    setTimeout(() => {
+      const giro = findGiro(q);
+      if (giro) {
+        showFoundGiro(giro);
+      } else {
+        showNewGiroGeneration(q);
+      }
+    }, 1200);
+  }
+
+  function findGiro(query) {
+    const q = query.toLowerCase().trim();
+    // Buscar coincidencia exacta o parcial
+    return GIROS_V2.find(g => {
+      const name = g.name.toLowerCase();
+      const key = g.key.toLowerCase();
+      return name === q || key === q ||
+             name.includes(q) || q.includes(name) ||
+             key.includes(q) || q.includes(key);
+    });
+  }
+
+  function showFoundGiro(giro) {
+    const wrap = document.getElementById('ai-response');
+    const painsHTML = giro.pains.map(p => `
+      <div class="pain-card">
+        <div class="pain-icon">${p.icon}</div>
+        <div class="pain-title">${p.title}</div>
+        <div class="pain-desc">${p.desc}</div>
+      </div>
+    `).join('');
+
+    wrap.innerHTML = `
+      <div class="ai-card">
+        <div class="ai-card-header">
+          <div class="ai-icon" style="background:${giro.accent};">${giro.icon}</div>
+          <div class="ai-header-text">
+            <div class="ai-answer">
+              ¡Excelente! <span class="success">Sí tenemos un sistema</span> especializado en tu giro de negocio. <br>
+              Se llama <span class="system-name-pill">${giro.systemName}</span>
+            </div>
+            <div class="ai-sub">
+              <strong>${capitalize(giro.plural)}</strong> como tú necesitan controlar cosas muy específicas. Estos son los puntos clave que ${giro.systemName} resuelve para ti:
+            </div>
+          </div>
+        </div>
+
+        <div class="pains-title">Lo que hace especial a ${giro.systemName}</div>
+        <div class="pains-grid">${painsHTML}</div>
+
+        <div class="ai-cta">
+          <a href="landing_dynamic.html?giro=${giro.key}" class="btn-big">Ver ${giro.systemName} en detalle →</a>
+          <button class="btn-secondary" onclick="requestDemo('${giro.key}')">📞 Solicitar demo</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function showNewGiroGeneration(query) {
+    const wrap = document.getElementById('ai-response');
+
+    wrap.innerHTML = `
+      <div class="ai-card new-giro-card">
+        <div class="ai-card-header">
+          <div class="ai-icon" style="background:#FFEDD5;">🤖</div>
+          <div class="ai-header-text">
+            <div class="ai-answer">
+              Interesante... <span class="accent">"${query}"</span> es un giro que aún no tenemos listo,
+              pero estoy creando el sistema personalizado para ti <strong>en este momento</strong>.
+            </div>
+            <div class="ai-sub">
+              Nuestro sistema analiza tu giro, identifica qué necesita un dueño como tú, y configura los módulos exactos.
+              No te preocupes: el mismo motor que usan 200+ giros, ahora adaptado a lo tuyo.
+            </div>
+          </div>
+        </div>
+
+        <div class="ai-generating">
+          <div class="gen-step" id="gen-1">
+            <div class="ico">1</div>
+            <div>Buscando información sobre el giro "${query}" en nuestra base...</div>
+          </div>
+          <div class="gen-step" id="gen-2">
+            <div class="ico">2</div>
+            <div>Identificando qué controla un dueño de ${query} en su día a día...</div>
+          </div>
+          <div class="gen-step" id="gen-3">
+            <div class="ico">3</div>
+            <div>Seleccionando módulos del sistema para tu giro...</div>
+          </div>
+          <div class="gen-step" id="gen-4">
+            <div class="ico">4</div>
+            <div>Creando nombre comercial y diseñando tu landing personalizada...</div>
+          </div>
+          <div class="gen-step" id="gen-5">
+            <div class="ico">5</div>
+            <div>Configurando la terminología específica (cliente, producto, venta, etc)...</div>
+          </div>
+          <div class="gen-step" id="gen-6">
+            <div class="ico">6</div>
+            <div>¡Sistema listo! Personalizando la experiencia para ti...</div>
+          </div>
+        </div>
+
+        <div id="gen-result" style="display:none;"></div>
+      </div>
+    `;
+
+    // Animar steps uno a uno
+    const steps = ['gen-1','gen-2','gen-3','gen-4','gen-5','gen-6'];
+    let currentStep = 0;
+    const animateStep = () => {
+      if (currentStep > 0) {
+        document.getElementById(steps[currentStep-1])?.classList.remove('active');
+        document.getElementById(steps[currentStep-1])?.classList.add('done');
+        document.getElementById(steps[currentStep-1]).querySelector('.ico').innerHTML = '✓';
+      }
+      if (currentStep < steps.length) {
+        document.getElementById(steps[currentStep])?.classList.add('active');
+        currentStep++;
+        setTimeout(animateStep, 900);
+      } else {
+        // Mostrar resultado
+        showGenResult(query);
+      }
+    };
+    setTimeout(animateStep, 400);
+  }
+
+  function showGenResult(query) {
+    // Generar un giro sintético
+    const systemName = capitalize(query.replace(/\s+/g,'')) + 'Pro';
+    const plural = window.giroPlural ? window.giroPlural(query) : 'los negocios de ' + query;
+    const newGiro = {
+      key: 'custom-' + Date.now(),
+      name: capitalize(query),
+      plural: plural,
+      icon: '✨',
+      systemName: systemName,
+      color: '#EA580C',
+      accent: '#FFEDD5',
+      pains: [
+        { icon: '💰', title: 'Control de ventas', desc: 'Cuánto vendes al día, semana, mes. Reportes claros para saber si tu negocio crece.' },
+        { icon: '📦', title: 'Inventario adaptado', desc: 'Lo que vendes en tu ' + query + ', con el nombre correcto y precio exacto.' },
+        { icon: '👥', title: 'Clientes frecuentes', desc: 'Quiénes te compran más, cuándo, qué prefieren. Mándales promociones personalizadas.' },
+        { icon: '💵', title: 'Cobros y pagos', desc: 'Efectivo, tarjeta, transferencia. Todo registrado sin confusión.' },
+      ]
+    };
+
+    // Guardar en localStorage para que la landing lo lea
+    const customGiros = JSON.parse(localStorage.getItem('volvix:custom-giros') || '[]');
+    const existing = customGiros.find(g => g.key === 'custom-' + query.toLowerCase().replace(/\s+/g,'-'));
+    if (!existing) {
+      newGiro.key = 'custom-' + query.toLowerCase().replace(/\s+/g,'-');
+      customGiros.push(newGiro);
+      localStorage.setItem('volvix:custom-giros', JSON.stringify(customGiros));
+    }
+
+    const wrap = document.getElementById('gen-result');
+    wrap.style.display = 'block';
+    wrap.innerHTML = `
+      <div style="margin-top:24px;padding-top:24px;border-top:1px solid var(--border);">
+        <div style="font-size:12px;font-weight:700;color:var(--success);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">
+          ✅ ¡Sistema creado exitosamente!
+        </div>
+        <div class="ai-answer" style="margin-bottom:8px;">
+          Ya tenemos tu sistema: <span class="system-name-pill">${systemName}</span>
+        </div>
+        <div class="ai-sub" style="margin-bottom:18px;">
+          Especialmente diseñado para ${plural} como tú. Antes de mostrarlo, ¿hay alguna funcionalidad específica que estés buscando?
+        </div>
+
+        <div style="background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px;padding:14px 16px;margin-bottom:18px;font-size:13px;color:#92400E;">
+          💡 <strong>Ejemplo:</strong> "Necesito que impimir etiquetas con códigos de barras" o "Quiero llevar el control de comisiones de mis empleados". Lo que nos pidas, lo validamos o lo desarrollamos.
+        </div>
+
+        <div style="display:flex;gap:8px;margin-bottom:18px;">
+          <input type="text" id="extra-req" placeholder="Escribe aquí cualquier función que necesites..." style="flex:1;padding:11px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;">
+          <button class="btn-secondary" onclick="validateRequest()">Validar</button>
+        </div>
+        <div id="req-result" style="margin-bottom:18px;"></div>
+
+        <div class="ai-cta">
+          <a href="landing_dynamic.html?giro=${newGiro.key}" class="btn-big">Ver ${systemName} →</a>
+          <button class="btn-secondary" onclick="requestDemo('${newGiro.key}')">📞 Hablar con un asesor</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function validateRequest() {
+    const req = document.getElementById('extra-req').value.trim();
+    if (!req) return;
+    const resultDiv = document.getElementById('req-result');
+    resultDiv.innerHTML = '<div style="padding:10px 14px;background:#F0F9FF;border:1px solid #BAE6FD;border-radius:8px;font-size:13px;color:#0369A1;"><span class="dots"><span>.</span><span>.</span><span>.</span></span> Validando si nuestro sistema tiene "' + req + '"...</div>';
+    setTimeout(() => {
+      resultDiv.innerHTML = `
+        <div style="padding:12px 16px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;font-size:13px;color:#166534;">
+          ✅ <strong>¡Sí tenemos esa funcionalidad!</strong> "${req}" ya está disponible en nuestro módulo correspondiente. Al comprar el sistema se te activará automáticamente.
+        </div>
+      `;
+      document.getElementById('extra-req').value = '';
+    }, 1800);
+  }
+
+  function requestDemo(giroKey) {
+    alert('📞 Un asesor te contactará en breve.\n\nMientras tanto, puedes ver el sistema completo en la landing personalizada.');
+  }
+
+  function capitalize(s) {
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+
+  // Init
+  renderPopular();
+</script>
+
+</body>
+</html>

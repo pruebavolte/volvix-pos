@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar sesión · Volvix</title>
+  <meta name="theme-color" content="#0A0A0A">
+
+  <!-- Fuentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+/* ── BASE ── */
+*, *::before, *::after { box-sizing: border-box; }
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* ── FONDO ── */
+.login-bg {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  background: radial-gradient(ellipse at 30% 20%, #1E3A8A 0%, #0A0A0A 65%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Partículas decorativas */
+.login-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1.5px 1.5px at 20% 30%, rgba(251,191,36,0.25) 0%, transparent 100%),
+    radial-gradient(1px 1px at 60% 70%, rgba(251,191,36,0.15) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 80% 20%, rgba(59,130,246,0.2) 0%, transparent 100%),
+    radial-gradient(1px 1px at 40% 80%, rgba(59,130,246,0.15) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+/* ── CARD ── */
+.login-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 400px;
+  background: rgba(18, 18, 18, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 24px;
+  padding: 40px 36px;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.04) inset;
+  animation: fadeUp 0.4s ease-out both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── LOGO ── */
+.login-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+.login-logo-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #FBBF24, #F59E0B);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  box-shadow: 0 0 0 1px rgba(251,191,36,0.3), 0 8px 24px rgba(251,191,36,0.35);
+  animation: bounce 3s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* ── TEXTOS ── */
+.login-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #FAFAF9;
+  text-align: center;
+  letter-spacing: -0.5px;
+  margin-bottom: 6px;
+}
+.login-sub {
+  font-size: 13.5px;
+  color: #78716C;
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+/* ── FORMULARIO ── */
+.form-group {
+  margin-bottom: 14px;
+}
+.form-label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #A8A29E;
+  margin-bottom: 6px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+.form-input {
+  width: 100%;
+  height: 46px;
+  padding: 0 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid rgba(255,255,255,0.10);
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #FAFAF9;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.form-input::placeholder { color: #52524E; }
+.form-input:focus {
+  border-color: #3B82F6;
+  background: rgba(59,130,246,0.06);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+}
+.form-input.error {
+  border-color: #EF4444;
+  box-shadow: 0 0 0 3px rgba(239,68,68,0.12);
+}
+
+/* ── BOTONES ── */
+.btn-primary {
+  width: 100%;
+  height: 46px;
+  background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0A0A0A;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px rgba(251,191,36,0.3);
+}
+.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.btn-primary.loading {
+  position: relative;
+  color: transparent;
+}
+.btn-primary.loading::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(10,10,10,0.3);
+  border-top-color: #0A0A0A;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── ALERTS ── */
+.alert {
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  display: none;
+  animation: slideIn 0.3s ease-out;
+}
+.alert.show { display: block; }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.alert.error {
+  background: rgba(239,68,68,0.15);
+  color: #FCA5A5;
+  border: 1px solid rgba(239,68,68,0.3);
+}
+.alert.success {
+  background: rgba(34,197,94,0.15);
+  color: #86EFAC;
+  border: 1px solid rgba(34,197,94,0.3);
+}
+.alert.info {
+  background: rgba(59,130,246,0.15);
+  color: #93C5FD;
+  border: 1px solid rgba(59,130,246,0.3);
+}
+
+/* ── LINKS ── */
+.login-link-row {
+  text-align: center;
+  margin-top: 16px;
+}
+.login-link-row a {
+  font-size: 12px;
+  color: #3B82F6;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+.login-link-row a:hover {
+  color: #60A5FA;
+}
+
+/* ── TEST CREDENTIALS ── */
+.test-creds {
+  background: rgba(59,130,246,0.1);
+  border: 1px solid rgba(59,130,246,0.3);
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 20px;
+  font-size: 11px;
+  color: #93C5FD;
+  line-height: 1.6;
+}
+.test-creds strong {
+  color: #FAFAF9;
+}
+
+</style>
+</head>
+<body>
+  <div class="login-bg">
+    <div class="login-card">
+      <!-- Logo -->
+      <div class="login-logo">
+        <div class="login-logo-icon">⚡</div>
+      </div>
+
+      <!-- Títulos -->
+      <div class="login-title">Bienvenido a Volvix</div>
+      <div class="login-sub">Punto de venta inteligente · Offline-first</div>
+
+      <!-- Alert -->
+      <div id="alert" class="alert"></div>
+
+      <!-- Formulario -->
+      <form onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label class="form-label">Correo</label>
+          <input type="email" id="emailInput" class="form-input" placeholder="admin@volvix.test" autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Contraseña</label>
+          <input type="password" id="passwordInput" class="form-input" placeholder="Contraseña" autocomplete="current-password">
+        </div>
+
+        <button type="submit" class="btn-primary" id="btnLogin">Entrar</button>
+      </form>
+
+      <!-- Test credentials info -->
+      <div class="test-creds">
+        <strong>Test:</strong> admin@volvix.test / Volvix2026!
+      </div>
+    </div>
+  </div>
+
+  <script>
+function showAlert(msg, type = 'info') {
+  const alert = document.getElementById('alert');
+  alert.textContent = msg;
+  alert.className = `alert show ${type}`;
+  setTimeout(() => alert.classList.remove('show'), 4000);
+}
+
+function setLoading(btn, loading, text) {
+  const button = document.getElementById(btn);
+  button.disabled = loading;
+  if (loading) {
+    button.classList.add('loading');
+  } else {
+    button.classList.remove('loading');
+    button.textContent = text || 'Entrar';
+  }
+}
+
+async function handleLogin(event) {
+  event.preventDefault();
+
+  const email = (document.getElementById('emailInput').value || '').trim();
+  const password = (document.getElementById('passwordInput').value || '').trim();
+
+  // Validar
+  if (!email || !email.includes('@')) {
+    document.getElementById('emailInput').classList.add('error');
+    showAlert('Ingresa un correo válido', 'error');
+    return;
+  }
+  document.getElementById('emailInput').classList.remove('error');
+
+  if (!password) {
+    document.getElementById('passwordInput').classList.add('error');
+    showAlert('Ingresa tu contraseña', 'error');
+    return;
+  }
+  document.getElementById('passwordInput').classList.remove('error');
+
+  setLoading('btnLogin', true, 'Entrando...');
+
+  try {
+    const response = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error || 'Error al iniciar sesión');
+    }
+
+    const result = await response.json();
+    if (!result.ok || !result.session) {
+      throw new Error(result.error || 'Sesión no válida');
+    }
+
+    // Guardar sesión
+    localStorage.setItem('volvixSession', JSON.stringify(result.session));
+    showAlert('¡Bienvenido!', 'success');
+
+    // Redirigir a SalvadoreX POS
+    setTimeout(() => {
+      window.location.href = '/salvadorex_web_v25.html';
+    }, 600);
+  } catch (err) {
+    let msg = err.message || 'Error al iniciar sesión';
+    if (msg.includes('Credenciales')) msg = 'Correo o contraseña incorrectos';
+    showAlert(msg, 'error');
+  } finally {
+    setLoading('btnLogin', false, 'Entrar');
+  }
+}
+
+// Enter en inputs
+document.getElementById('emailInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('passwordInput')?.focus();
+});
+document.getElementById('passwordInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('btnLogin')?.click();
+});
+  </script>
+</body>
+</html>

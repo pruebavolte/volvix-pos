@@ -1,0 +1,185 @@
+{
+  "tenants": [
+    {
+      "id": "TNT001",
+      "name": "Abarrotes Don Chucho",
+      "giro": "abarrotes",
+      "plan": "pro",
+      "status": "active",
+      "mrr": 799,
+      "created": 1773267889860
+    },
+    {
+      "id": "TNT002",
+      "name": "Restaurante Los Compadres",
+      "giro": "restaurante",
+      "plan": "enterprise",
+      "status": "active",
+      "mrr": 1499,
+      "created": 1774563889860
+    },
+    {
+      "id": "TNT003",
+      "name": "BarberShop Ruiz",
+      "giro": "barberia",
+      "plan": "pro",
+      "status": "active",
+      "mrr": 799,
+      "created": 1776119089860
+    }
+  ],
+  "features": [
+    {
+      "id": "FEAT-0001",
+      "name": "Cobrar ticket",
+      "module": "pos",
+      "status": "stable",
+      "usage": 1843,
+      "created": 1745619889860
+    },
+    {
+      "id": "FEAT-0002",
+      "name": "Agregar producto por código",
+      "module": "pos",
+      "status": "stable",
+      "usage": 1843,
+      "created": 1745619889860
+    },
+    {
+      "id": "FEAT-0030",
+      "name": "Corte de caja estándar",
+      "module": "corte",
+      "status": "stable",
+      "usage": 1843,
+      "created": 1745619889860
+    },
+    {
+      "id": "FEAT-0031",
+      "name": "Corte · campo temperatura",
+      "module": "corte",
+      "status": "extended",
+      "parent": "FEAT-0030",
+      "usage": 1,
+      "created": 1777145089860
+    },
+    {
+      "id": "FEAT-0050",
+      "name": "Factura CFDI 4.0",
+      "module": "facturacion",
+      "status": "stable",
+      "usage": 892,
+      "created": 1759875889860
+    },
+    {
+      "id": "FEAT-0080",
+      "name": "Comanda a cocina (KDS)",
+      "module": "restaurante",
+      "status": "stable",
+      "usage": 347,
+      "created": 1759875889860
+    },
+    {
+      "id": "FEAT-0120",
+      "name": "Control de colegiaturas",
+      "module": "educacion",
+      "status": "stable",
+      "usage": 48,
+      "created": 1761603889860
+    },
+    {
+      "id": "FEAT-0150",
+      "name": "Diseñador drag-and-drop etiquetas",
+      "module": "etiquetas",
+      "status": "stable",
+      "usage": 234,
+      "created": 1766787889860
+    },
+    {
+      "id": "FEAT-0240",
+      "name": "Envío de ticket a WhatsApp automático",
+      "module": "pos",
+      "status": "new",
+      "usage": 23,
+      "createdByAI": true,
+      "created": 1776896689860
+    }
+  ],
+  "tickets": [
+    {
+      "id": "TKT-1047",
+      "tenant": "TNT001",
+      "title": "Impresora térmica no imprime",
+      "status": "open",
+      "aiHandling": true,
+      "opened": 1777155769860
+    },
+    {
+      "id": "TKT-1046",
+      "tenant": "TNT002",
+      "title": "Error 301 al timbrar factura",
+      "status": "solved",
+      "solvedBy": "ai",
+      "solvedInSec": 18,
+      "opened": 1777154989860
+    }
+  ],
+  "knowledge": [
+    {
+      "id": "KB-001",
+      "problem": "Impresora térmica Epson TM-T20III no imprime",
+      "cases": 47,
+      "mostCommonFix": "Cambio de puerto USB003 → USB001",
+      "successRate": 0.89,
+      "avgTimeSec": 52
+    },
+    {
+      "id": "KB-002",
+      "problem": "Error 301 al timbrar factura",
+      "cases": 23,
+      "mostCommonFix": "Renovar certificado SAT",
+      "successRate": 1,
+      "avgTimeSec": 18
+    },
+    {
+      "id": "KB-003",
+      "problem": "Báscula bluetooth no conecta",
+      "cases": 8,
+      "mostCommonFix": "Reemparejar + driver v2.1",
+      "successRate": 0.75,
+      "avgTimeSec": 252
+    }
+  ],
+  "features_custom": [],
+  "licenses": [],
+  "ai_decisions": [],
+  "remote_sessions": [],
+  "users": [
+    {
+      "id": "USR001",
+      "email": "admin@volvix.test",
+      "password": "Volvix2026!",
+      "role": "superadmin",
+      "tenant_id": "TNT001",
+      "status": "active",
+      "created": 1745619889860
+    },
+    {
+      "id": "USR002",
+      "email": "owner@volvix.test",
+      "password": "Volvix2026!",
+      "role": "owner",
+      "tenant_id": "TNT002",
+      "status": "active",
+      "created": 1769379889860
+    },
+    {
+      "id": "USR003",
+      "email": "cajero@volvix.test",
+      "password": "Volvix2026!",
+      "role": "cajero",
+      "tenant_id": "TNT001",
+      "status": "active",
+      "created": 1774563889860
+    }
+  ]
+}

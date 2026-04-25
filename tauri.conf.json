@@ -1,0 +1,49 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Volvix",
+  "version": "7.0.0",
+  "identifier": "mx.volvix.app",
+  "build": {
+    "frontendDist": "./public",
+    "devUrl": "http://localhost:3000",
+    "beforeDevCommand": "node server.js",
+    "beforeBuildCommand": "echo 'Construyendo Volvix...'"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Volvix",
+        "width": 1400,
+        "height": 900,
+        "minWidth": 900,
+        "minHeight": 600,
+        "resizable": true,
+        "decorations": true,
+        "theme": "Dark",
+        "url": "volvix_owner_panel_v7.html"
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["msi", "nsis", "deb", "rpm", "appimage", "dmg"],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "windows": {
+      "certificateThumbprint": null,
+      "digestAlgorithm": "sha256",
+      "timestampUrl": ""
+    },
+    "publisher": "GrupoVolvix",
+    "shortDescription": "Sistema POS multi-giro · IA autónoma",
+    "longDescription": "Volvix es un sistema de punto de venta SaaS multi-giro con IA autónoma. Funciona offline-first, se reprograma solo, y soporta 200+ giros de negocio."
+  }
+}

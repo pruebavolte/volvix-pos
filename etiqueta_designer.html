@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diseñador de Etiquetas · Volvix</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
+  body {
+    background: #F5F5F4;
+    color: #1C1917;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+    height: 100vh;
+  }
+  :root {
+    --bg: #F5F5F4;
+    --surface: #FFFFFF;
+    --border: #E7E5E4;
+    --text: #1C1917;
+    --text-2: #57534E;
+    --text-3: #A8A29E;
+    --accent: #EA580C;
+    --accent-soft: #FFF7ED;
+    --success: #16A34A;
+  }
+
+  /* ========== LAYOUT ========== */
+  .app {
+    display: grid;
+    grid-template-columns: 260px 1fr 280px;
+    grid-template-rows: 56px 1fr;
+    height: 100vh;
+  }
+
+  /* ========== TOPBAR ========== */
+  .topbar {
+    grid-column: 1 / -1;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .brand-ico {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: var(--accent);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .topbar-sep { flex: 1; }
+  .tb-btn {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .tb-btn:hover { background: #FAFAF9; }
+  .tb-btn.primary {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+  .tb-btn.primary:hover { background: #C2410C; }
+
+  /* ========== SIDEBAR IZQ: COMPONENTES ========== */
+  .components-panel {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 16px;
+  }
+  .panel-section { margin-bottom: 20px; }
+  .panel-title {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    padding: 0 4px;
+  }
+  .component-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .comp-item {
+    padding: 14px 8px;
+    background: #FAFAF9;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: grab;
+    text-align: center;
+    transition: all 0.15s;
+  }
+  .comp-item:hover {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
+  .comp-item:active { cursor: grabbing; }
+  .comp-icon {
+    font-size: 22px;
+    margin-bottom: 4px;
+    display: block;
+  }
+  .comp-name {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--text-2);
+    line-height: 1.2;
+  }
+
+  /* ========== CANVAS ========== */
+  .canvas-area {
+    background:
+      linear-gradient(0deg, #F5F5F4 0%, #EFEFEE 100%),
+      radial-gradient(circle at 50% 50%, white 0%, #F5F5F4 100%);
+    overflow: auto;
+    padding: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .canvas-wrap {
+    position: relative;
+    display: inline-block;
+  }
+  .canvas {
+    background: white;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.06);
+    position: relative;
+    overflow: hidden;
+    background-image:
+      linear-gradient(45deg, #FAFAF9 25%, transparent 25%),
+      linear-gradient(-45deg, #FAFAF9 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #FAFAF9 75%),
+      linear-gradient(-45deg, transparent 75%, #FAFAF9 75%);
+    background-size: 16px 16px;
+    background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+  }
+  .canvas-ruler {
+    position: absolute;
+    left: -26px;
+    top: 0;
+    bottom: 0;
+    width: 20px;
+    background: #F1F5F9;
+    border-right: 1px solid var(--border);
+    font-size: 9px;
+    color: var(--text-3);
+    font-family: monospace;
+  }
+  .canvas-label {
+    position: absolute;
+    top: -28px;
+    left: 0;
+    font-size: 11px;
+    color: var(--text-3);
+    font-weight: 500;
+  }
+
+  .element {
+    position: absolute;
+    cursor: move;
+    border: 1px dashed transparent;
+    transition: border-color 0.1s;
+    padding: 2px;
+  }
+  .element:hover {
+    border-color: #D1D5DB;
+  }
+  .element.selected {
+    border: 2px solid var(--accent);
+    border-style: solid;
+    z-index: 10;
+  }
+  .element.selected::after {
+    content: '';
+    position: absolute;
+    right: -5px; bottom: -5px;
+    width: 10px; height: 10px;
+    background: var(--accent);
+    border: 2px solid white;
+    border-radius: 50%;
+    cursor: se-resize;
+  }
+  .element-delete {
+    position: absolute;
+    top: -8px; right: -8px;
+    width: 18px; height: 18px;
+    background: #DC2626;
+    color: white;
+    border-radius: 50%;
+    border: 2px solid white;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .element.selected .element-delete { display: flex; }
+
+  /* ========== SIDEBAR DER: PROPIEDADES ========== */
+  .props-panel {
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 16px;
+  }
+  .prop-field { margin-bottom: 14px; }
+  .prop-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+    display: block;
+  }
+  .prop-input {
+    width: 100%;
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+  }
+  .prop-input:focus { outline: none; border-color: var(--accent); }
+  .prop-row { display: flex; gap: 6px; }
+  .prop-row .prop-input { flex: 1; }
+
+  .size-presets {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .size-preset {
+    padding: 10px 8px;
+    border: 1px solid var(--border);
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    font-size: 11px;
+    transition: all 0.15s;
+  }
+  .size-preset:hover { background: #FAFAF9; }
+  .size-preset.active {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .size-preset .dim {
+    display: block;
+    font-size: 10px;
+    color: var(--text-3);
+    margin-top: 2px;
+  }
+
+  .empty-props {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-3);
+    font-size: 13px;
+  }
+  .empty-props .icon { font-size: 34px; margin-bottom: 10px; opacity: 0.4; }
+
+  /* ========== SAMPLES ========== */
+  .samples-list {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .sample-chip {
+    padding: 4px 10px;
+    background: #FAFAF9;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .sample-chip:hover { background: var(--accent-soft); color: var(--accent); }
+
+  /* ========== TOAST ========== */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--text);
+    color: white;
+    padding: 10px 18px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0;
+    transition: all 0.25s;
+    z-index: 1000;
+    pointer-events: none;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .app { grid-template-columns: 1fr; grid-template-rows: 56px auto 1fr auto; }
+    .components-panel, .props-panel { max-height: 200px; border: none; border-bottom: 1px solid var(--border); }
+  }
+</style>
+<script src="volvix-api.js"></script>
+<script src="volvix-sync.js"></script>
+<script src="volvix-sync-widget.js"></script>
+</head>
+<body>
+
+<div class="app">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-ico">🏷️</div>
+      <span>Diseñador de Etiquetas</span>
+    </div>
+    <div class="topbar-sep"></div>
+    <button class="tb-btn" onclick="clearCanvas()">🗑️ Limpiar</button>
+    <button class="tb-btn" onclick="saveTemplate()">💾 Guardar plantilla</button>
+    <button class="tb-btn primary" onclick="printEtiqueta()">🖨️ Imprimir</button>
+  </div>
+
+  <!-- SIDEBAR IZQ: COMPONENTES -->
+  <div class="components-panel">
+    <div class="panel-section">
+      <div class="panel-title">Arrastra componentes</div>
+      <div class="component-list">
+        <div class="comp-item" draggable="true" data-type="text">
+          <span class="comp-icon">📝</span>
+          <div class="comp-name">Texto</div>
+        </div>
+        <div class="comp-item" draggable="true" data-type="name">
+          <span class="comp-icon">🏷️</span>
+          <div class="comp-name">Nombre</div>
+        </div>
+        <div class="comp-item" draggable="true" data-type="price">
+          <span class="comp-icon">💰</span>
+          <div class="comp-name">Precio</div>
+        </div>
+        <div class="comp-item" draggable="true" data-type="barcode">
+          <span class="comp-icon">📊</span>
+          <div class="comp-name">Código barras</div>
+        </div>
+        <div class="comp-item" draggable="true" data-type="qr">
+          <span class="comp-icon">⬛</span>
+          <div class="comp-name">Código QR</div>
+        </div>
+        <div class="comp-item" draggable="true" data-type="logo">
+          <span class="comp-icon">🏆</span>
+          <div class="comp-name">Logo</div>
+        </div>
+        <div class="comp-item" draggable="true" data-type="sku">
+          <span class="comp-icon">#</span>
+          <div class="comp-name">SKU</div>
+        </div>
+        <div class="comp-item" draggable="true" data-type="line">
+          <span class="comp-icon">━</span>
+          <div class="comp-name">Línea</div>
+        </div>
+        <div class="comp-item" draggable="true" data-type="box">
+          <span class="comp-icon">▭</span>
+          <div class="comp-name">Caja</div>
+        </div>
+        <div class="comp-item" draggable="true" data-type="date">
+          <span class="comp-icon">📅</span>
+          <div class="comp-name">Fecha</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-title">Plantillas rápidas</div>
+      <div class="samples-list">
+        <div class="sample-chip" onclick="loadTemplate('basica')">Básica</div>
+        <div class="sample-chip" onclick="loadTemplate('producto')">Producto</div>
+        <div class="sample-chip" onclick="loadTemplate('granel')">Granel</div>
+        <div class="sample-chip" onclick="loadTemplate('oferta')">Oferta</div>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-title">Impresora destino</div>
+      <select class="prop-input">
+        <option>Térmica 58mm (Bluetooth)</option>
+        <option>Térmica 80mm (USB)</option>
+        <option>Zebra ZD230 (Red)</option>
+        <option>Laser/Inkjet A4</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- CANVAS -->
+  <div class="canvas-area">
+    <div class="canvas-wrap">
+      <div class="canvas-label">Etiqueta <span id="size-label">50mm × 30mm</span></div>
+      <div
+        class="canvas"
+        id="canvas"
+        style="width: 300px; height: 180px;"
+        ondragover="onDragOver(event)"
+        ondrop="onDrop(event)"
+        onclick="if(event.target === this) deselect()"
+      ></div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR DER: PROPIEDADES -->
+  <div class="props-panel">
+    <div class="panel-title">Medida de etiqueta</div>
+    <div class="size-presets">
+      <div class="size-preset active" onclick="setSize(300, 180, this)">Pequeña<span class="dim">50×30mm</span></div>
+      <div class="size-preset" onclick="setSize(360, 240, this)">Mediana<span class="dim">60×40mm</span></div>
+      <div class="size-preset" onclick="setSize(480, 300, this)">Grande<span class="dim">80×50mm</span></div>
+      <div class="size-preset" onclick="setSize(240, 360, this)">Vertical<span class="dim">40×60mm</span></div>
+    </div>
+
+    <div class="panel-title">Propiedades del elemento</div>
+    <div id="props-content">
+      <div class="empty-props">
+        <div class="icon">👆</div>
+        <div>Selecciona un elemento del diseño para editar sus propiedades</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let elements = [];
+  let selected = null;
+  let draggedElement = null;
+  let dragOffset = { x: 0, y: 0 };
+  let elementId = 0;
+
+  // ===== DRAG & DROP DESDE SIDEBAR =====
+  document.querySelectorAll('.comp-item').forEach(item => {
+    item.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('type', item.dataset.type);
+    });
+  });
+
+  function onDragOver(e) { e.preventDefault(); }
+
+  function onDrop(e) {
+    e.preventDefault();
+    const type = e.dataTransfer.getData('type');
+    if (!type) return;
+
+    const canvas = document.getElementById('canvas');
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    addElement(type, x, y);
+  }
+
+  // ===== AGREGAR ELEMENTO =====
+  function addElement(type, x, y) {
+    const id = ++elementId;
+    const defaults = {
+      text: { w: 100, h: 20, text: 'Texto', fontSize: 14, bold: false },
+      name: { w: 160, h: 24, text: 'Nombre del Producto', fontSize: 14, bold: true },
+      price: { w: 80, h: 32, text: '$99.00', fontSize: 22, bold: true, color: '#EA580C' },
+      barcode: { w: 140, h: 46, value: '7501234567890' },
+      qr: { w: 60, h: 60, value: 'https://volvix.com' },
+      logo: { w: 60, h: 40 },
+      sku: { w: 100, h: 16, text: 'SKU-00001', fontSize: 10 },
+      line: { w: 140, h: 2 },
+      box: { w: 80, h: 50 },
+      date: { w: 100, h: 16, text: new Date().toLocaleDateString('es-MX'), fontSize: 10 },
+    };
+    const def = defaults[type] || { w: 100, h: 20, text: type };
+
+    const el = {
+      id, type,
+      x: Math.max(0, x - def.w/2),
+      y: Math.max(0, y - def.h/2),
+      ...def
+    };
+    elements.push(el);
+    renderCanvas();
+    selectElement(id);
+  }
+
+  // ===== RENDER CANVAS =====
+  function renderCanvas() {
+    const canvas = document.getElementById('canvas');
+    const existing = canvas.querySelectorAll('.element');
+    existing.forEach(e => e.remove());
+
+    elements.forEach(el => {
+      const node = document.createElement('div');
+      node.className = 'element' + (selected === el.id ? ' selected' : '');
+      node.dataset.id = el.id;
+      node.style.left = el.x + 'px';
+      node.style.top = el.y + 'px';
+      node.style.width = el.w + 'px';
+      node.style.height = el.h + 'px';
+
+      node.innerHTML = renderElementContent(el) +
+        '<div class="element-delete" onclick="deleteElement(event, ' + el.id + ')">✕</div>';
+
+      node.onmousedown = (e) => onElementMouseDown(e, el.id);
+      canvas.appendChild(node);
+    });
+  }
+
+  function renderElementContent(el) {
+    switch (el.type) {
+      case 'text':
+      case 'name':
+      case 'price':
+      case 'sku':
+      case 'date':
+        return `<div style="
+          font-size: ${el.fontSize}px;
+          font-weight: ${el.bold ? '700' : '400'};
+          color: ${el.color || '#000'};
+          text-align: ${el.align || 'left'};
+          width: 100%; height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: ${el.align === 'center' ? 'center' : el.align === 'right' ? 'flex-end' : 'flex-start'};
+          line-height: 1.1;
+          overflow: hidden;
+          white-space: nowrap;
+        ">${el.text || '—'}</div>`;
+      case 'barcode':
+        return renderBarcode(el.value || '0000000000000');
+      case 'qr':
+        return renderQR(el.value || 'https://volvix.com');
+      case 'logo':
+        return `<div style="
+          width: 100%; height: 100%;
+          background: linear-gradient(135deg, #EA580C, #F59E0B);
+          border-radius: 4px;
+          display: flex; align-items: center; justify-content: center;
+          color: white; font-weight: 800; font-size: 16px;
+        ">LOGO</div>`;
+      case 'line':
+        return `<div style="width: 100%; height: 2px; background: #000; margin-top: ${Math.max(0, el.h/2 - 1)}px;"></div>`;
+      case 'box':
+        return `<div style="width: 100%; height: 100%; border: 1.5px solid #000; border-radius: 2px;"></div>`;
+      default:
+        return '?';
+    }
+  }
+
+  function renderBarcode(value) {
+    // Generar barras pseudo-aleatorias pero deterministas basadas en el valor
+    const bars = [];
+    let seed = 0;
+    for (let i = 0; i < value.length; i++) seed += value.charCodeAt(i);
+    for (let i = 0; i < 48; i++) {
+      const r = (seed * (i+1) * 13) % 100;
+      const w = r < 30 ? 2 : r < 60 ? 3 : r < 85 ? 1 : 4;
+      const h = r < 50 ? 1 : 0.95;
+      bars.push(`<div style="flex: ${w}; background: #000; height: ${h*100}%; margin-right: 1px;"></div>`);
+    }
+    return `
+      <div style="width: 100%; height: 100%; display: flex; flex-direction: column;">
+        <div style="flex: 1; display: flex; align-items: stretch;">${bars.join('')}</div>
+        <div style="font-family: monospace; font-size: 9px; text-align: center; margin-top: 2px;">${value}</div>
+      </div>
+    `;
+  }
+
+  function renderQR(value) {
+    // Crear un patrón QR visual (decorativo, no funcional)
+    let grid = '';
+    let seed = 0;
+    for (let i = 0; i < value.length; i++) seed += value.charCodeAt(i);
+    const size = 10;
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        // Esquinas con patrón de detección
+        const isCorner = (x < 3 && y < 3) || (x < 3 && y > size - 4) || (x > size - 4 && y < 3);
+        const isCornerBorder = (x === 0 || x === 2 || y === 0 || y === 2) ||
+                               (y === size - 3 || y === size - 1 || x === 0 || x === 2) ||
+                               (x === size - 3 || x === size - 1 || y === 0 || y === 2);
+        let black;
+        if (isCorner) {
+          if (x === 1 && y === 1) black = true;
+          else if (y === size - 2 && x === 1) black = true;
+          else if (x === size - 2 && y === 1) black = true;
+          else black = isCornerBorder && !((x > 0 && x < 2 && y > 0 && y < 2) || (y > size - 3 && y < size - 1 && x > 0 && x < 2) || (x > size - 3 && x < size - 1 && y > 0 && y < 2));
+        } else {
+          const r = (seed * (x+1) * (y+1) * 31) % 100;
+          black = r < 50;
+        }
+        grid += `<div style="background: ${black ? '#000' : '#FFF'};"></div>`;
+      }
+    }
+    return `
+      <div style="
+        width: 100%; height: 100%;
+        display: grid;
+        grid-template-columns: repeat(${size}, 1fr);
+        grid-template-rows: repeat(${size}, 1fr);
+        gap: 0;
+        background: white;
+      ">${grid}</div>
+    `;
+  }
+
+  // ===== SELECCIÓN =====
+  function selectElement(id) {
+    selected = id;
+    renderCanvas();
+    renderProps();
+  }
+
+  function deselect() {
+    selected = null;
+    renderCanvas();
+    renderProps();
+  }
+
+  function deleteElement(event, id) {
+    event.stopPropagation();
+    elements = elements.filter(e => e.id !== id);
+    selected = null;
+    renderCanvas();
+    renderProps();
+    showToast('Elemento eliminado');
+  }
+
+  // ===== MOVER ELEMENTOS =====
+  function onElementMouseDown(e, id) {
+    if (e.target.classList.contains('element-delete')) return;
+    e.stopPropagation();
+    selectElement(id);
+
+    const el = elements.find(x => x.id === id);
+    const canvas = document.getElementById('canvas');
+    const canvasRect = canvas.getBoundingClientRect();
+    dragOffset = {
+      x: e.clientX - canvasRect.left - el.x,
+      y: e.clientY - canvasRect.top - el.y,
+    };
+    draggedElement = id;
+
+    const onMove = (ev) => {
+      if (draggedElement === null) return;
+      const target = elements.find(x => x.id === draggedElement);
+      if (!target) return;
+      const rect = canvas.getBoundingClientRect();
+      target.x = Math.max(0, Math.min(canvas.offsetWidth - target.w, ev.clientX - rect.left - dragOffset.x));
+      target.y = Math.max(0, Math.min(canvas.offsetHeight - target.h, ev.clientY - rect.top - dragOffset.y));
+      renderCanvas();
+    };
+    const onUp = () => {
+      draggedElement = null;
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  }
+
+  // ===== PROPS PANEL =====
+  function renderProps() {
+    const panel = document.getElementById('props-content');
+    if (!selected) {
+      panel.innerHTML = '<div class="empty-props"><div class="icon">👆</div><div>Selecciona un elemento del diseño para editar sus propiedades</div></div>';
+      return;
+    }
+    const el = elements.find(e => e.id === selected);
+    if (!el) return;
+
+    let fields = '';
+
+    // Posición y tamaño (todos tienen)
+    fields += `
+      <div class="prop-field">
+        <label class="prop-label">Posición (px)</label>
+        <div class="prop-row">
+          <input class="prop-input" type="number" value="${Math.round(el.x)}" onchange="updateProp('x', +this.value)" placeholder="X">
+          <input class="prop-input" type="number" value="${Math.round(el.y)}" onchange="updateProp('y', +this.value)" placeholder="Y">
+        </div>
+      </div>
+      <div class="prop-field">
+        <label class="prop-label">Tamaño (px)</label>
+        <div class="prop-row">
+          <input class="prop-input" type="number" value="${Math.round(el.w)}" onchange="updateProp('w', +this.value)" placeholder="Ancho">
+          <input class="prop-input" type="number" value="${Math.round(el.h)}" onchange="updateProp('h', +this.value)" placeholder="Alto">
+        </div>
+      </div>
+    `;
+
+    // Propiedades por tipo
+    if (['text','name','price','sku','date'].includes(el.type)) {
+      fields += `
+        <div class="prop-field">
+          <label class="prop-label">Texto</label>
+          <input class="prop-input" value="${el.text || ''}" onchange="updateProp('text', this.value)">
+        </div>
+        <div class="prop-field">
+          <label class="prop-label">Tamaño de letra</label>
+          <input class="prop-input" type="number" value="${el.fontSize || 14}" onchange="updateProp('fontSize', +this.value)">
+        </div>
+        <div class="prop-field">
+          <label class="prop-label">Color</label>
+          <input class="prop-input" type="color" value="${el.color || '#000000'}" onchange="updateProp('color', this.value)">
+        </div>
+        <div class="prop-field">
+          <label class="prop-label">Alineación</label>
+          <div class="prop-row">
+            <button class="tb-btn ${el.align !== 'center' && el.align !== 'right' ? 'primary' : ''}" onclick="updateProp('align','left')" style="flex:1;">⇤</button>
+            <button class="tb-btn ${el.align === 'center' ? 'primary' : ''}" onclick="updateProp('align','center')" style="flex:1;">⇔</button>
+            <button class="tb-btn ${el.align === 'right' ? 'primary' : ''}" onclick="updateProp('align','right')" style="flex:1;">⇥</button>
+          </div>
+        </div>
+        <div class="prop-field">
+          <label class="prop-label">Peso</label>
+          <div class="prop-row">
+            <button class="tb-btn ${!el.bold ? 'primary' : ''}" onclick="updateProp('bold',false)" style="flex:1;">Normal</button>
+            <button class="tb-btn ${el.bold ? 'primary' : ''}" onclick="updateProp('bold',true)" style="flex:1;">Negrita</button>
+          </div>
+        </div>
+      `;
+    }
+
+    if (el.type === 'barcode' || el.type === 'qr') {
+      fields += `
+        <div class="prop-field">
+          <label class="prop-label">${el.type === 'qr' ? 'URL o texto' : 'Valor (13 dígitos)'}</label>
+          <input class="prop-input" value="${el.value || ''}" onchange="updateProp('value', this.value)">
+        </div>
+      `;
+    }
+
+    panel.innerHTML = fields;
+  }
+
+  function updateProp(key, value) {
+    const el = elements.find(e => e.id === selected);
+    if (!el) return;
+    el[key] = value;
+    renderCanvas();
+  }
+
+  // ===== CANVAS SIZE =====
+  function setSize(w, h, btn) {
+    document.getElementById('canvas').style.width = w + 'px';
+    document.getElementById('canvas').style.height = h + 'px';
+    document.querySelectorAll('.size-preset').forEach(p => p.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    document.getElementById('size-label').textContent = Math.round(w/6) + 'mm × ' + Math.round(h/6) + 'mm';
+  }
+
+  // ===== ACCIONES =====
+  function clearCanvas() {
+    if (elements.length > 0 && !confirm('¿Limpiar todo el diseño?')) return;
+    elements = [];
+    selected = null;
+    renderCanvas();
+    renderProps();
+    showToast('Diseño limpiado');
+  }
+
+  function saveTemplate() {
+    const data = {
+      elements,
+      canvasW: document.getElementById('canvas').offsetWidth,
+      canvasH: document.getElementById('canvas').offsetHeight,
+    };
+    localStorage.setItem('volvix:etiqueta-template', JSON.stringify(data));
+    showToast('✓ Plantilla guardada');
+  }
+
+  function printEtiqueta() {
+    showToast('🖨️ Enviando a la impresora...');
+    setTimeout(() => {
+      window.print();
+    }, 500);
+  }
+
+  function loadTemplate(name) {
+    const templates = {
+      basica: [
+        { type: 'name', x: 20, y: 15, w: 180, h: 24, text: 'Coca Cola 600ml', fontSize: 14, bold: true },
+        { type: 'price', x: 20, y: 50, w: 100, h: 32, text: '$25.00', fontSize: 22, bold: true, color: '#EA580C' },
+        { type: 'barcode', x: 20, y: 100, w: 160, h: 50, value: '7501055303045' },
+      ],
+      producto: [
+        { type: 'logo', x: 10, y: 10, w: 50, h: 34 },
+        { type: 'name', x: 70, y: 12, w: 220, h: 22, text: 'Producto ABC', fontSize: 13, bold: true },
+        { type: 'sku', x: 70, y: 36, w: 120, h: 14, text: 'SKU-00001', fontSize: 10 },
+        { type: 'price', x: 200, y: 36, w: 90, h: 22, text: '$99.00', fontSize: 18, bold: true, color: '#EA580C', align: 'right' },
+        { type: 'barcode', x: 10, y: 85, w: 200, h: 45, value: '7501234567890' },
+        { type: 'qr', x: 220, y: 85, w: 60, h: 60, value: 'https://v.mx/p/1' },
+      ],
+      granel: [
+        { type: 'name', x: 15, y: 12, w: 200, h: 22, text: 'Queso Oaxaca', fontSize: 14, bold: true },
+        { type: 'text', x: 15, y: 38, w: 140, h: 16, text: 'Peso: 0.540 kg', fontSize: 11 },
+        { type: 'text', x: 15, y: 58, w: 140, h: 16, text: 'Precio/kg: $180', fontSize: 11 },
+        { type: 'price', x: 15, y: 82, w: 160, h: 36, text: '$97.20', fontSize: 26, bold: true, color: '#EA580C' },
+        { type: 'barcode', x: 15, y: 130, w: 260, h: 40, value: '2100540972003' },
+      ],
+      oferta: [
+        { type: 'box', x: 10, y: 10, w: 280, h: 160 },
+        { type: 'text', x: 20, y: 18, w: 260, h: 20, text: '¡OFERTA ESPECIAL!', fontSize: 13, bold: true, color: '#DC2626', align: 'center' },
+        { type: 'name', x: 20, y: 46, w: 260, h: 22, text: 'Producto Destacado', fontSize: 14, bold: true, align: 'center' },
+        { type: 'price', x: 20, y: 80, w: 260, h: 40, text: '$49.00', fontSize: 32, bold: true, color: '#DC2626', align: 'center' },
+        { type: 'text', x: 20, y: 130, w: 260, h: 16, text: 'Antes: $99.00', fontSize: 12, align: 'center' },
+      ],
+    };
+    elements = (templates[name] || []).map(e => ({ ...e, id: ++elementId }));
+    renderCanvas();
+    selected = null;
+    renderProps();
+    showToast('✓ Plantilla "' + name + '" cargada');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(window._tt);
+    window._tt = setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  // ===== INIT =====
+  loadTemplate('producto');
+</script>
+
+</body>
+</html>

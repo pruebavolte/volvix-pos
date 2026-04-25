@@ -1,0 +1,3183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2D5F8F">
+<title>SalvadoreX · Punto de Venta</title>
+<script src="/auth-gate.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F5F5F4;
+    --surface: #FFFFFF;
+    --surface-2: #FAFAF9;
+    --surface-3: #F3F3F2;
+    --border: #E0DEDB;
+    --border-strong: #C9C7C3;
+    --text: #1C1917;
+    --text-2: #57534E;
+    --text-3: #A8A29E;
+
+    /* Eleventa accent colors - respetados pero refinados */
+    --eleventa-blue: #2D5F8F;
+    --eleventa-blue-soft: #E8F1FA;
+    --eleventa-green: #1E7E34;
+    --eleventa-green-soft: #D4F4DD;
+    --eleventa-green-cell: #E8F7ED;
+
+    --accent: #EA580C;
+    --accent-soft: #FFF7ED;
+    --success: #16A34A;
+    --success-soft: #F0FDF4;
+    --warn: #D97706;
+    --warn-soft: #FFFBEB;
+    --danger: #DC2626;
+    --danger-soft: #FEF2F2;
+    --info: #2563EB;
+    --info-soft: #EFF6FF;
+
+    --r-sm: 6px;
+    --r: 8px;
+    --r-lg: 10px;
+    --r-xl: 14px;
+    --r-pill: 100px;
+
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow: 0 2px 8px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+    --shadow-lg: 0 10px 30px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+  }
+
+  * { box-sizing: border-box; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+  html, body { margin: 0; padding: 0; height: 100vh; overflow: hidden; background: var(--bg); color: var(--text); font-size: 13px; -webkit-font-smoothing: antialiased; }
+  button, input, select, textarea { font-family: inherit; outline: none; }
+  button { cursor: pointer; border: none; background: none; color: inherit; }
+
+  .hidden { display: none !important; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* ============ LOGIN ============ */
+  .login-screen {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #1E3A8A 0%, #2D5F8F 40%, #EA580C 100%);
+    padding: 20px;
+    z-index: 1000;
+  }
+  .login-card {
+    background: var(--surface);
+    border-radius: var(--r-xl);
+    width: 100%; max-width: 400px;
+    padding: 36px 30px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .login-logo {
+    width: 60px; height: 60px;
+    border-radius: var(--r-lg);
+    background: linear-gradient(135deg, #EA580C, #F59E0B);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: 800; font-size: 26px;
+    margin: 0 auto 16px;
+    box-shadow: 0 4px 12px rgba(234,88,12,0.3);
+  }
+  .login-title { font-size: 20px; font-weight: 700; text-align: center; margin: 0 0 4px; letter-spacing: -0.2px; }
+  .login-sub { font-size: 12px; color: var(--text-3); text-align: center; margin-bottom: 24px; }
+  .input-group { margin-bottom: 12px; }
+  .input-label { display: block; font-size: 11.5px; color: var(--text-2); font-weight: 500; margin-bottom: 5px; }
+  .input-field {
+    width: 100%;
+    padding: 10px 13px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    font-size: 13px;
+    transition: all 0.15s;
+  }
+  .input-field:focus { border-color: var(--eleventa-blue); background: var(--surface); box-shadow: 0 0 0 3px rgba(45,95,143,0.1); }
+  .btn-login {
+    width: 100%;
+    padding: 12px 18px;
+    background: var(--accent);
+    color: white;
+    border-radius: var(--r);
+    font-weight: 600; font-size: 13px;
+    margin-top: 6px;
+    transition: all 0.15s;
+    box-shadow: 0 4px 14px rgba(234,88,12,0.25);
+  }
+  .btn-login:hover { background: #C2410C; transform: translateY(-1px); }
+  .login-footer { text-align: center; margin-top: 16px; font-size: 11px; color: var(--text-3); }
+
+  /* ============ APP LAYOUT ============ */
+  .app { display: flex; flex-direction: column; height: 100vh; }
+  .app.login-active { display: none; }
+
+  /* ============ TOPBAR ============ */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 6px 12px;
+    display: flex; align-items: center; gap: 10px;
+    flex-shrink: 0;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    height: 46px;
+  }
+  .topbar::-webkit-scrollbar { display: none; }
+
+  .brand-chip {
+    display: flex; align-items: center; gap: 8px;
+    flex-shrink: 0;
+  }
+  .brand-logo {
+    width: 28px; height: 28px;
+    background: linear-gradient(135deg, #EA580C, #F59E0B);
+    border-radius: var(--r-sm);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: 800; font-size: 13px;
+  }
+  .brand-info { line-height: 1.1; }
+  .brand-info .name { font-weight: 700; font-size: 13px; color: var(--text); }
+  .brand-info .sub { font-size: 10px; color: var(--text-3); margin-top: 1px; }
+
+  .breadcrumb {
+    display: flex; align-items: center; gap: 8px;
+    flex-shrink: 0;
+    padding-left: 10px;
+    border-left: 1px solid var(--border);
+    margin-left: 6px;
+  }
+  .crumb {
+    font-size: 11.5px;
+    color: var(--text-2);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .sync-indicator {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 9px;
+    border-radius: var(--r-pill);
+    background: var(--success-soft);
+    color: #166534;
+    font-size: 10px; font-weight: 600;
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  .sync-indicator:hover { background: #DCFCE7; }
+  .sync-indicator .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--success);
+    box-shadow: 0 0 0 0 rgba(22,163,74,0.6);
+    animation: pulse-green 2s infinite;
+  }
+  @keyframes pulse-green {
+    0% { box-shadow: 0 0 0 0 rgba(22,163,74,0.5); }
+    70% { box-shadow: 0 0 0 6px rgba(22,163,74,0); }
+    100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); }
+  }
+
+  .topbar-spacer { flex: 1; min-width: 10px; }
+
+  .vendor-info {
+    text-align: right;
+    line-height: 1.15;
+    margin-right: 6px;
+    flex-shrink: 0;
+  }
+  .vendor-info .url { font-size: 11px; font-weight: 600; color: var(--info); }
+  .vendor-info .lbl { font-size: 10px; color: var(--text-3); }
+  .vendor-info .name { font-size: 11.5px; font-weight: 600; color: var(--text); }
+
+  /* Topbar action buttons */
+  .tb-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 9px;
+    border-radius: var(--r-sm);
+    font-size: 11px;
+    font-weight: 600;
+    transition: all 0.12s;
+    white-space: nowrap;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .tb-btn:hover { background: var(--surface-2); }
+  .tb-btn.notif { padding: 5px; }
+  .tb-btn.notif .badge {
+    position: absolute;
+    top: -2px; right: -2px;
+    background: var(--danger);
+    color: white;
+    font-size: 9px;
+    font-weight: 700;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tb-btn.rapido {
+    background: linear-gradient(180deg, #3B82F6, #1D4ED8);
+    color: white;
+    box-shadow: 0 1px 2px rgba(29,78,216,0.2);
+  }
+  .tb-btn.rapido:hover { background: linear-gradient(180deg, #2563EB, #1E40AF); transform: translateY(-1px); }
+  .tb-btn.saas {
+    background: linear-gradient(180deg, #1E293B, #0F172A);
+    color: #FBBF24;
+    border: 1px solid rgba(251,191,36,0.35);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+  .tb-btn.saas:hover { background: linear-gradient(180deg, #0F172A, #020617); }
+  .tb-btn.movil {
+    background: linear-gradient(180deg, #A855F7, #DB2777);
+    color: white;
+  }
+  .tb-btn.movil:hover { background: linear-gradient(180deg, #9333EA, #BE185D); transform: translateY(-1px); }
+  .tb-btn.livesync {
+    background: var(--success-soft);
+    border: 1px solid #BBF7D0;
+    color: #166534;
+    padding: 4px 10px;
+    border-radius: var(--r-pill);
+  }
+  .tb-btn.livesync:hover { background: #DCFCE7; }
+  .tb-btn.livesync .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--success);
+    animation: pulse-green 2s infinite;
+  }
+  .tb-btn.perfil { padding: 3px 8px 3px 3px; }
+  .tb-btn.perfil .ava {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3B82F6, #1E40AF);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 10px;
+  }
+  .tb-btn.salir {
+    color: var(--danger);
+    font-weight: 600;
+    margin-left: 4px;
+  }
+  .tb-btn.salir:hover { background: var(--danger-soft); }
+
+  /* Platform toggle (windows/android/web) */
+  .platform-toggle {
+    display: inline-flex;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 2px;
+    flex-shrink: 0;
+  }
+  .platform-toggle-btn {
+    padding: 4px 8px;
+    border-radius: var(--r-sm);
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--text-3);
+    display: inline-flex; align-items: center; gap: 4px;
+    transition: all 0.1s;
+  }
+  .platform-toggle-btn:hover { color: var(--text-2); }
+  .platform-toggle-btn.active {
+    background: var(--text);
+    color: white;
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* ============ ELEVENTA MENU BAR ============ */
+  .menubar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: stretch;
+    overflow-x: auto;
+    flex-shrink: 0;
+    height: 40px;
+  }
+  .menubar::-webkit-scrollbar { height: 0; }
+  .menubar-divider {
+    width: 1px;
+    background: var(--border);
+    margin: 6px 2px;
+    flex-shrink: 0;
+  }
+  .menu-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 0 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-2);
+    border-right: 1px solid var(--border);
+    transition: all 0.1s;
+    white-space: nowrap;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .menu-btn:hover { background: var(--surface-2); color: var(--text); }
+  .menu-btn.active {
+    background: var(--eleventa-blue-soft);
+    color: var(--eleventa-blue);
+    font-weight: 600;
+    box-shadow: inset 0 -3px 0 var(--eleventa-blue);
+  }
+  .menu-btn .ico { width: 16px; height: 16px; flex-shrink: 0; }
+  .menu-btn.locked { opacity: 0.45; cursor: not-allowed; }
+  .menu-btn.locked::after {
+    content: '🔒';
+    position: absolute;
+    top: 4px; right: 4px;
+    font-size: 9px;
+  }
+  .menu-btn.more {
+    background: linear-gradient(180deg, #FEF3C7, #FDE68A);
+    color: #92400E;
+    font-weight: 600;
+  }
+
+  /* ============ MAIN CONTENT ============ */
+  .main {
+    flex: 1;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    background: var(--bg);
+    position: relative;
+  }
+
+  /* ============ FEATURE FLAGS (controlado por el dueño del sistema) ============ */
+  .ff-off { display: none !important; }
+
+  /* Pantalla de licencia revocada/suspendida */
+  .license-block {
+    position: fixed; inset: 0;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: center; justify-content: center;
+    z-index: 500;
+    padding: 20px;
+  }
+  .license-block.active { display: flex; }
+  .license-block-card {
+    background: var(--surface);
+    border-radius: var(--r-xl);
+    max-width: 440px;
+    width: 100%;
+    padding: 36px 28px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+  .license-block-icon {
+    width: 72px; height: 72px;
+    background: var(--danger-soft);
+    border: 2px solid var(--danger);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 34px;
+  }
+  .license-block-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--danger);
+    margin: 0 0 8px;
+  }
+  .license-block-text {
+    font-size: 13.5px;
+    color: var(--text-2);
+    line-height: 1.6;
+    margin: 0 0 16px;
+  }
+  .license-block-info {
+    background: var(--surface-2);
+    border-radius: var(--r);
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 12px;
+    margin: 16px 0;
+  }
+  .license-block-info .row {
+    display: flex; justify-content: space-between;
+    padding: 4px 0;
+    color: var(--text-2);
+  }
+
+  /* Indicador de mensaje del owner (toast especial arriba) */
+  .owner-msg-banner {
+    position: fixed;
+    top: 10px; left: 50%;
+    transform: translateX(-50%) translateY(-100%);
+    background: linear-gradient(180deg, #1E293B, #0F172A);
+    color: #FBBF24;
+    padding: 10px 18px;
+    border-radius: var(--r);
+    border: 1px solid rgba(251,191,36,0.4);
+    box-shadow: var(--shadow-lg);
+    font-size: 12.5px;
+    font-weight: 500;
+    display: flex; align-items: center; gap: 10px;
+    z-index: 300;
+    transition: transform 0.3s ease;
+    max-width: calc(100% - 40px);
+  }
+  .owner-msg-banner.show { transform: translateX(-50%) translateY(0); }
+  .owner-msg-banner::before { content: '👑'; font-size: 16px; }
+
+  /* Badge de cambios recibidos en tiempo real */
+  .live-update-flash {
+    animation: flashUpdate 1.2s ease;
+  }
+  @keyframes flashUpdate {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(234,88,12,0); }
+    20%, 70% { box-shadow: 0 0 0 3px rgba(234,88,12,0.35); }
+  }
+  .pos-screen {
+    flex: 1;
+    display: flex; flex-direction: row;
+    background: var(--bg);
+    overflow: hidden;
+  }
+  .pos-main-area {
+    flex: 1;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  /* Panel derecho: Categorías + Quick-pick */
+  .pos-sidebar-right {
+    width: 260px;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    overflow-y: auto;
+    flex-shrink: 0;
+    display: flex; flex-direction: column;
+    padding: 12px;
+  }
+  .pos-sidebar-right::-webkit-scrollbar { width: 6px; }
+  .pos-sidebar-right::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .pos-sidebar-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-3);
+    padding: 8px 6px 6px;
+  }
+  .cat-list { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
+  .cat-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--text);
+    text-align: left;
+    transition: all 0.1s;
+    cursor: pointer;
+    width: 100%;
+  }
+  .cat-item:hover { background: var(--surface-2); border-color: var(--border-strong); }
+  .cat-item.active {
+    background: #FEF3C7;
+    border-color: #F59E0B;
+    color: #92400E;
+    font-weight: 600;
+  }
+  .cat-item .ico { font-size: 14px; flex-shrink: 0; }
+
+  .qp-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .qp-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 12px 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    cursor: pointer;
+    transition: all 0.1s;
+  }
+  .qp-card:hover {
+    border-color: var(--text);
+    background: var(--surface-2);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+  }
+  .qp-card:active { transform: translateY(0); }
+  .qp-icon {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    margin-bottom: 6px;
+  }
+  .qp-name {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.2;
+    margin-bottom: 3px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+  .qp-price {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--success);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Toggle button for mobile */
+  .pos-sidebar-toggle {
+    display: none;
+    position: absolute;
+    top: 10px; right: 10px;
+    z-index: 10;
+    width: 36px; height: 36px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    align-items: center; justify-content: center;
+    font-size: 16px;
+    box-shadow: var(--shadow);
+  }
+
+  /* Banner azul VENTA — Ticket 1 */
+  .pos-banner {
+    background: linear-gradient(180deg, #2D5F8F, #1E4065);
+    color: white;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    flex-shrink: 0;
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  /* Barra código del producto */
+  .pos-code-bar {
+    background: var(--surface);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+  .pos-code-bar label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .pos-code-input-wrap {
+    flex: 1; min-width: 200px;
+    max-width: 520px;
+    position: relative;
+  }
+  .pos-code-input {
+    width: 100%;
+    padding: 8px 12px 8px 34px;
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px;
+    background: var(--surface);
+    transition: all 0.1s;
+  }
+  .pos-code-input:focus { border-color: var(--eleventa-blue); box-shadow: 0 0 0 3px rgba(45,95,143,0.1); }
+  .pos-code-input-wrap .icon {
+    position: absolute; left: 10px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-3);
+  }
+  .btn-enter {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px;
+    background: linear-gradient(180deg, #FFFFFF, #EBEBEB);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-sm);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    transition: all 0.1s;
+    white-space: nowrap;
+  }
+  .btn-enter:hover { background: linear-gradient(180deg, #FFFFFF, #E0E0E0); border-color: #A8A29E; }
+
+  /* Barra de acciones (botones con teclas F) */
+  .pos-actions {
+    background: var(--surface);
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex; gap: 4px;
+    overflow-x: auto;
+    flex-shrink: 0;
+  }
+  .pos-actions::-webkit-scrollbar { height: 4px; }
+  .pos-actions::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .action-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 6px 10px;
+    background: linear-gradient(180deg, #FDFDFD, #F0F0EF);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--text);
+    transition: all 0.1s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .action-btn:hover { background: linear-gradient(180deg, #FFFFFF, #E7E5E4); border-color: var(--border-strong); }
+  .action-btn .ico { width: 14px; height: 14px; flex-shrink: 0; }
+  .action-btn.variant-warm { background: linear-gradient(180deg, #FEF3C7, #FDE68A); border-color: #F59E0B30; color: #78350F; }
+  .action-btn.variant-warm:hover { background: linear-gradient(180deg, #FEF3C7, #FCD34D); }
+  .action-btn.variant-orange { background: linear-gradient(180deg, #FFFFFF, #FFF3E8); }
+  .action-btn.variant-green { background: linear-gradient(180deg, #FFFFFF, #E8F5E8); }
+  .action-btn.variant-red { background: linear-gradient(180deg, #FFFFFF, #FAEEE8); }
+  .action-btn.variant-blue { background: linear-gradient(180deg, #FFFFFF, #E8F0FC); }
+  .action-btn.variant-purple { background: linear-gradient(180deg, #FFFFFF, #F3E8FC); }
+  .action-btn-divider {
+    width: 1px;
+    background: var(--border);
+    margin: 4px 4px;
+    flex-shrink: 0;
+  }
+
+  /* Tabs de Tickets */
+  .pos-tabs {
+    background: var(--surface);
+    padding: 0 14px;
+    display: flex; align-items: flex-end;
+    border-bottom: 1px solid var(--border-strong);
+    flex-shrink: 0;
+    min-height: 32px;
+  }
+  .ticket-tab {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 14px;
+    border: 1px solid var(--border-strong);
+    border-bottom: 0;
+    background: var(--surface);
+    border-radius: var(--r-sm) var(--r-sm) 0 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: -1px;
+    position: relative;
+    z-index: 1;
+  }
+  .btn-new-ticket {
+    padding: 4px 10px;
+    font-size: 11.5px;
+    color: var(--text-3);
+    margin-left: 4px;
+  }
+  .btn-new-ticket:hover { color: var(--text); }
+
+  /* Tabla del carrito */
+  .pos-cart-wrap {
+    flex: 1;
+    overflow: auto;
+    background: var(--surface);
+    min-height: 180px;
+  }
+  .pos-cart-wrap::-webkit-scrollbar { width: 8px; height: 8px; }
+  .pos-cart-wrap::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+
+  table.pos-cart { width: 100%; border-collapse: collapse; }
+  table.pos-cart thead th {
+    background: #E8E8E8;
+    color: #333;
+    font-weight: 600;
+    font-size: 11.5px;
+    padding: 8px 12px;
+    text-align: left;
+    position: sticky; top: 0;
+    border-bottom: 1px solid #BFBFBF;
+    white-space: nowrap;
+  }
+  table.pos-cart thead th.num { text-align: right; }
+  table.pos-cart thead th.center { text-align: center; }
+  table.pos-cart thead th.importe-col {
+    background: var(--eleventa-green-soft);
+    color: var(--eleventa-green);
+  }
+  table.pos-cart tbody td {
+    padding: 9px 12px;
+    border-bottom: 1px solid #F0F0F0;
+    font-size: 13px;
+    color: #333;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  table.pos-cart tbody td.desc {
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+  }
+  table.pos-cart tbody tr:hover { background: #FFFCF0; }
+  table.pos-cart td.importe {
+    background: var(--eleventa-green-cell);
+    font-weight: 700;
+    color: var(--eleventa-green);
+    text-align: right;
+  }
+  table.pos-cart td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  table.pos-cart td.center { text-align: center; }
+  .cart-del-btn {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    color: var(--danger);
+    font-size: 14px;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: background 0.1s;
+  }
+  .cart-del-btn:hover { background: var(--danger-soft); }
+  .cart-empty-block {
+    min-height: 200px;
+    background: var(--surface-2);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-3);
+    font-size: 12.5px;
+    padding: 40px;
+  }
+  .cart-empty-block .icon { font-size: 28px; margin-bottom: 8px; opacity: 0.4; }
+
+  /* Barra inferior de acciones (F5, F6, Eliminar, Asignar cliente, F12 Cobrar, Total) */
+  .pos-bottom {
+    background: var(--surface);
+    padding: 10px 14px;
+    border-top: 1px solid var(--border-strong);
+    display: flex; align-items: center; gap: 8px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+  .item-counter {
+    display: inline-flex; align-items: center; gap: 7px;
+    flex-shrink: 0;
+  }
+  .item-counter-num {
+    width: 26px; height: 26px;
+    background: var(--danger);
+    color: white;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 12px;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .item-counter-txt {
+    font-size: 12.5px;
+    color: var(--text);
+  }
+  .pos-bottom-spacer { flex: 1; min-width: 10px; }
+
+  .bottom-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 7px 12px;
+    background: linear-gradient(180deg, #FFFFFF, #EBEBEB);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-sm);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+    transition: all 0.1s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .bottom-btn:hover { background: linear-gradient(180deg, #FFFFFF, #E0E0E0); border-color: #999; }
+  .bottom-btn .ico { width: 14px; height: 14px; }
+
+  /* Botón F12 Cobrar grande */
+  .btn-cobrar {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 14px 26px;
+    background: linear-gradient(180deg, #FFFFFF 0%, #F0F0F0 100%);
+    border: 1.5px solid var(--border-strong);
+    border-radius: var(--r);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    margin-left: 8px;
+    transition: all 0.12s;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    flex-shrink: 0;
+  }
+  .btn-cobrar:hover {
+    background: linear-gradient(180deg, #FFFFFF 0%, #E8F7ED 100%);
+    border-color: var(--success);
+    box-shadow: 0 4px 12px rgba(22,163,74,0.2);
+    transform: translateY(-1px);
+  }
+
+  /* Total gigante azul */
+  .total-big {
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--eleventa-blue);
+    letter-spacing: -1px;
+    line-height: 1;
+    margin-left: 16px;
+    min-width: 200px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
+
+  /* Barra Total / Pagó Con / Cambio */
+  .pos-summary {
+    background: var(--surface-2);
+    padding: 8px 14px;
+    display: flex; align-items: center; gap: 18px;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+  .summary-item {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px;
+  }
+  .summary-item .lbl {
+    font-weight: 700;
+    color: var(--text);
+  }
+  .summary-item .val {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    color: var(--danger);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .summary-item .val.cambio { text-decoration: none; color: var(--success); }
+  .pay-method-indicator {
+    padding: 3px 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-2);
+  }
+  .pos-summary-spacer { flex: 1; min-width: 10px; }
+
+  /* Footer */
+  .pos-footer {
+    background: var(--surface-2);
+    border-top: 1px solid var(--border);
+    padding: 5px 14px;
+    font-size: 10.5px;
+    color: var(--text-3);
+    display: flex; justify-content: space-between; gap: 12px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+
+  /* ============ OTHER SCREENS ============ */
+  .screen-pad {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+  }
+  .screen-pad::-webkit-scrollbar { width: 6px; }
+  .screen-pad::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .page-head {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .page-title { font-size: 20px; font-weight: 700; margin: 0; letter-spacing: -0.3px; }
+  .page-sub { font-size: 12.5px; color: var(--text-2); margin-top: 3px; }
+
+  /* Botones */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px;
+    border-radius: var(--r);
+    font-size: 12.5px;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    transition: all 0.12s;
+    white-space: nowrap;
+  }
+  .btn:hover { border-color: var(--border-strong); background: var(--surface-2); }
+  .btn.primary { background: var(--eleventa-blue); color: white; border-color: var(--eleventa-blue); }
+  .btn.primary:hover { background: #1E4065; color: white; }
+  .btn.accent { background: var(--accent); color: white; border-color: var(--accent); }
+  .btn.accent:hover { background: #C2410C; color: white; }
+  .btn.success { background: var(--success); color: white; border-color: var(--success); }
+  .btn.sm { padding: 5px 10px; font-size: 11.5px; }
+  .btn.lg { padding: 11px 20px; font-size: 14px; }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+  }
+  .card-head {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .card-title { font-size: 13px; font-weight: 600; margin: 0; }
+  .card-pad { padding: 18px; }
+
+  /* KPI */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 14px 16px;
+  }
+  .kpi-label { font-size: 10.5px; color: var(--text-3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .kpi-value { font-size: 22px; font-weight: 700; margin-top: 5px; letter-spacing: -0.5px; }
+  .kpi-sub { font-size: 11.5px; color: var(--text-3); margin-top: 2px; }
+  .trend-up { color: var(--success); font-weight: 500; }
+  .trend-dn { color: var(--danger); font-weight: 500; }
+
+  /* Tables */
+  .tbl-wrap { overflow-x: auto; }
+  .tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .tbl thead th {
+    background: var(--surface-2);
+    font-size: 10.5px; font-weight: 600;
+    color: var(--text-3);
+    text-transform: uppercase; letter-spacing: 0.4px;
+    text-align: left;
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .tbl tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .tbl tbody tr:last-child td { border-bottom: none; }
+  .tbl tbody tr:hover { background: var(--surface-2); }
+  .tbl .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .tbl .primary-col { font-weight: 500; }
+
+  /* Chips */
+  .chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px;
+    border-radius: var(--r-pill);
+    font-size: 10.5px;
+    font-weight: 500;
+    background: var(--surface-2);
+    color: var(--text-2);
+    border: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .chip.ok { background: var(--success-soft); color: #166534; border-color: #BBF7D0; }
+  .chip.warn { background: var(--warn-soft); color: #854D0E; border-color: #FEF08A; }
+  .chip.err { background: var(--danger-soft); color: #991B1B; border-color: #FECACA; }
+  .chip.info { background: var(--info-soft); color: #1E40AF; border-color: #BFDBFE; }
+  .chip.accent { background: var(--accent-soft); color: #9A3412; border-color: #FED7AA; }
+  .chip .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  /* Toggle */
+  .toggle {
+    position: relative;
+    width: 32px; height: 18px;
+    background: var(--border-strong);
+    border-radius: 9px;
+    flex-shrink: 0;
+    transition: background 0.15s;
+    cursor: pointer;
+  }
+  .toggle.on { background: var(--eleventa-blue); }
+  .toggle.disabled { opacity: 0.5; cursor: not-allowed; }
+  .toggle::after {
+    content: '';
+    position: absolute; top: 2px; left: 2px;
+    width: 14px; height: 14px;
+    background: white;
+    border-radius: 50%;
+    transition: left 0.15s;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+  }
+  .toggle.on::after { left: 16px; }
+
+  /* Modal */
+  .modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center; justify-content: center;
+    z-index: 100;
+    padding: 20px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border-radius: var(--r-xl);
+    width: 100%; max-width: 540px;
+    max-height: calc(100vh - 40px);
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    box-shadow: var(--shadow-lg);
+    animation: modalIn 0.2s ease;
+  }
+  @keyframes modalIn { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
+  .modal-head {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+  .modal-foot {
+    padding: 12px 20px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: flex-end; gap: 8px;
+    background: var(--surface-2);
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 40px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--text);
+    color: white;
+    padding: 10px 18px;
+    border-radius: var(--r-pill);
+    font-size: 12.5px; font-weight: 500;
+    opacity: 0;
+    transition: all 0.25s ease;
+    z-index: 200;
+    box-shadow: var(--shadow-lg);
+    pointer-events: none;
+    max-width: 90vw;
+    text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* Placeholder */
+  .placeholder {
+    padding: 60px 20px;
+    text-align: center;
+  }
+  .placeholder-icon {
+    width: 70px; height: 70px;
+    margin: 0 auto 16px;
+    border-radius: var(--r-xl);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 30px;
+  }
+  .placeholder-title { font-size: 17px; font-weight: 600; margin: 0 0 6px; }
+  .placeholder-text { font-size: 12.5px; color: var(--text-2); max-width: 440px; margin: 0 auto; line-height: 1.6; }
+
+  /* Config tabs */
+  .config-layout {
+    display: grid;
+    grid-template-columns: 210px 1fr;
+    gap: 14px;
+  }
+  .config-tabs {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 8px;
+    height: fit-content;
+  }
+  .config-tab {
+    width: 100%;
+    padding: 8px 11px;
+    border-radius: var(--r-sm);
+    color: var(--text-2);
+    font-size: 12px; font-weight: 500;
+    text-align: left;
+    transition: background 0.1s;
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 2px;
+  }
+  .config-tab:hover { background: var(--surface-2); color: var(--text); }
+  .config-tab.active { background: var(--eleventa-blue); color: white; }
+
+  /* FF Tree */
+  .ff-banner {
+    background: var(--info-soft);
+    border: 1px solid #BFDBFE;
+    border-radius: var(--r-lg);
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    display: flex; align-items: center; gap: 12px;
+    font-size: 12.5px;
+  }
+  .ff-banner .ico-box {
+    width: 30px; height: 30px;
+    background: var(--info);
+    color: white;
+    border-radius: var(--r-sm);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .ff-module {
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    margin-bottom: 8px;
+    background: var(--surface);
+    overflow: hidden;
+  }
+  .ff-module-head {
+    display: flex; align-items: center;
+    padding: 12px 14px;
+    gap: 11px;
+    cursor: pointer;
+  }
+  .ff-module-head:hover { background: var(--surface-2); }
+  .ff-ico {
+    width: 32px; height: 32px;
+    border-radius: var(--r-sm);
+    background: var(--surface-2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+  .ff-module-title { flex: 1; }
+  .ff-module-title .name { font-weight: 600; font-size: 12.5px; }
+  .ff-module-title .desc { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+  .ff-children {
+    padding: 0 14px 12px 57px;
+    display: flex; flex-direction: column;
+    gap: 2px;
+    border-top: 1px solid var(--border);
+  }
+  .ff-child {
+    display: flex; align-items: center;
+    padding: 7px 0;
+    gap: 10px;
+  }
+  .ff-child .lbl { flex: 1; font-size: 11.5px; color: var(--text-2); }
+  .ff-child .hint { font-size: 10px; color: var(--text-3); }
+
+  /* Quick POS (Caja rápida) */
+  .quickpos-wrap {
+    padding: 30px 20px;
+    max-width: 560px;
+    margin: 0 auto;
+  }
+  .quickpos-display {
+    background: var(--text);
+    color: white;
+    padding: 28px;
+    border-radius: var(--r-lg);
+    font-size: 42px;
+    font-weight: 700;
+    text-align: right;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+    font-variant-numeric: tabular-nums;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .quickpos-pad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .quickpos-key {
+    padding: 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    font-size: 19px; font-weight: 600;
+    transition: all 0.1s;
+  }
+  .quickpos-key:hover { background: var(--surface-2); border-color: var(--border-strong); }
+  .quickpos-key:active { transform: scale(0.97); }
+  .quickpos-key.accent { background: var(--accent); color: white; border-color: var(--accent); }
+  .quickpos-key.accent:hover { background: #C2410C; }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 1100px) {
+    .total-big { font-size: 32px; min-width: 150px; }
+    .btn-cobrar { padding: 12px 20px; font-size: 15px; }
+    .pos-sidebar-right { width: 220px; }
+  }
+  @media (max-width: 880px) {
+    .pos-sidebar-right {
+      position: absolute;
+      top: 0; right: 0; bottom: 0;
+      width: 260px;
+      z-index: 15;
+      box-shadow: -4px 0 20px rgba(0,0,0,0.1);
+      transform: translateX(100%);
+      transition: transform 0.25s ease;
+    }
+    .pos-sidebar-right.open { transform: translateX(0); }
+    .pos-sidebar-toggle { display: inline-flex; }
+    .breadcrumb, .vendor-info { display: none; }
+    .platform-toggle { display: none; }
+    .tb-btn.notif, .tb-btn.ayuda { display: none; }
+    .brand-info .sub { display: none; }
+    .config-layout { grid-template-columns: 1fr; }
+    .config-tabs { display: flex; overflow-x: auto; padding: 6px; }
+    .config-tab { white-space: nowrap; margin-bottom: 0; margin-right: 4px; }
+  }
+  @media (max-width: 640px) {
+    .topbar { padding: 6px 10px; gap: 6px; }
+    .tb-btn span { display: none; }
+    .tb-btn.rapido span, .tb-btn.saas span, .tb-btn.movil span { display: inline; font-size: 10px; }
+    .menu-btn span { font-size: 11px; }
+    .menu-btn { padding: 0 9px; }
+    .pos-banner { font-size: 12px; padding: 6px 12px; }
+    .total-big { font-size: 26px; min-width: 120px; margin-left: 8px; }
+    .btn-cobrar { padding: 10px 16px; font-size: 13px; }
+    .btn-cobrar .ico { width: 20px; height: 20px; }
+    .pos-bottom { gap: 6px; }
+    .item-counter-txt { display: none; }
+    .screen-pad { padding: 14px; }
+    .page-title { font-size: 17px; }
+    table.pos-cart thead th, table.pos-cart tbody td { padding: 7px 8px; font-size: 11.5px; }
+    .pos-code-bar label { font-size: 11.5px; }
+    .action-btn { padding: 5px 8px; font-size: 10.5px; }
+    .action-btn span { display: inline; }
+  }
+  @media (max-width: 480px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .pos-summary { gap: 10px; padding: 6px 10px; }
+    .summary-item { font-size: 11px; }
+    .bottom-btn span { display: none; }
+  }
+</style>
+<script src="volvix-api.js"></script>
+<script src="volvix-sync.js"></script>
+<script src="volvix-sync-widget.js"></script>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div id="login-screen" class="login-screen">
+  <div class="login-card">
+    <div class="login-logo">S</div>
+    <h1 class="login-title">SalvadoreX</h1>
+    <p class="login-sub">Abarrotes Don Chucho · Caja 1</p>
+
+    <div class="input-group">
+      <label class="input-label">Usuario</label>
+      <input id="login-email" class="input-field" type="email" value="admin@volvix.test" autocomplete="username" placeholder="tu@email.com">
+    </div>
+    <div class="input-group">
+      <label class="input-label">Contraseña</label>
+      <input id="login-password" class="input-field" type="password" value="Volvix2026!" autocomplete="current-password" placeholder="Contraseña">
+    </div>
+
+    <button class="btn-login" id="btn-login-submit" onclick="handleLogin(event)">Iniciar sesión</button>
+
+    <div class="login-footer">
+      <span class="chip ok" style="margin-top: 4px;"><span class="dot"></span>SQLite local · v1.0.0</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div class="app login-active" id="app-root">
+
+  <!-- ============ TOPBAR ============ -->
+  <header class="topbar">
+    <div class="brand-chip">
+      <div class="brand-logo">S</div>
+      <div class="brand-info">
+        <div class="name">SalvadoreX</div>
+        <div class="sub">Don Chucho · Caja 1</div>
+      </div>
+    </div>
+
+    <div class="breadcrumb">
+      <span class="crumb" id="today-date">20 Abr 2026</span>
+      <div class="sync-indicator" onclick="openSyncPanel()" id="sync-indicator">
+        <div class="dot"></div>
+        <span>EN LÍNEA</span>
+      </div>
+    </div>
+
+    <div class="topbar-spacer"></div>
+
+    <div class="vendor-info">
+      <div class="url">salvadorex.com</div>
+      <div><span class="lbl">Le atiende:</span> <span class="name">Administrador</span></div>
+    </div>
+
+    <button class="tb-btn notif" onclick="showToast('3 notificaciones nuevas')" title="Notificaciones">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="#EF4444"><circle cx="12" cy="12" r="10"/><text x="12" y="17" text-anchor="middle" fill="white" font-size="14" font-weight="bold">!</text></svg>
+      <span class="badge">3</span>
+    </button>
+
+    <div class="platform-toggle">
+      <button class="platform-toggle-btn" onclick="selectPlatform(this, 'windows')" title="Vista Windows">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.479 10 4.5V11H3V5.479zM3 18.521 10 19.5V13H3v5.521zM11 19.635 21 21V13H11v6.635zM11 4.365V11h10V3L11 4.365z"/></svg>
+        <span>Windows</span>
+      </button>
+      <button class="platform-toggle-btn" onclick="selectPlatform(this, 'android')" title="Vista Android">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+        <span>Android</span>
+      </button>
+      <button class="platform-toggle-btn active" onclick="selectPlatform(this, 'web')" title="Vista Web">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        <span>Web</span>
+      </button>
+    </div>
+
+    <button class="tb-btn rapido" onclick="showScreen('quickpos')" title="Modo caja rápida">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      <span>RÁPIDO</span>
+    </button>
+
+    <button class="tb-btn saas" data-feature="ui.saas_btn" onclick="openOwnerPanel()" title="Panel SaaS Admin (dueño del sistema)">
+      👑 <span>SAAS</span>
+    </button>
+
+    <button class="tb-btn movil" onclick="showScreen('mobile-apps')" title="Preview apps móviles">
+      📱 <span>MÓVIL</span>
+    </button>
+
+    <button class="tb-btn livesync" onclick="showScreen('salud')" title="Panel de salud del sistema">
+      <span class="dot"></span>
+      <span>LIVE SYNC</span>
+    </button>
+
+    <button class="tb-btn perfil" onclick="showScreen('perfil')" title="Mi perfil">
+      <div class="ava">AD</div>
+    </button>
+
+    <button class="tb-btn ayuda" onclick="showScreen('ayuda')" title="Ayuda">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    </button>
+
+    <button class="tb-btn salir" onclick="doLogout()" title="Cerrar sesión">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+      <span>Salir</span>
+    </button>
+  </header>
+
+  <!-- ============ MENU BAR HORIZONTAL (Eleventa style) ============ -->
+  <nav class="menubar">
+    <button class="menu-btn active" data-feature="module.pos" data-menu="pos" onclick="showScreen('pos')">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#E67E22" stroke-width="2"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+      <span>F1 Ventas</span>
+    </button>
+    <button class="menu-btn" data-feature="module.credito" data-menu="credito" onclick="showScreen('credito')">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+      <span>F2 Créditos</span>
+    </button>
+    <button class="menu-btn" data-feature="module.clientes" data-menu="clientes" onclick="showScreen('clientes')">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#3498DB" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>
+      <span>Clientes</span>
+    </button>
+    <button class="menu-btn" data-feature="module.inventario" data-menu="inventario" onclick="showScreen('inventario')">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#2C3E50" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="1"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="3" x2="21" y1="15" y2="15"/></svg>
+      <span>F3 Productos</span>
+    </button>
+    <button class="menu-btn" data-feature="module.kardex" data-menu="kardex" onclick="showScreen('kardex')">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#2C3E50" stroke-width="2"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
+      <span>F4 Inventario</span>
+    </button>
+    <button class="menu-btn" data-feature="module.proveedores" data-menu="proveedores" onclick="showScreen('proveedores')">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#8E44AD" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+      <span>Compras</span>
+    </button>
+    <button class="menu-btn" data-feature="module.config" data-menu="config" onclick="showScreen('config')">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#7F8C8D" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>Configuración</span>
+    </button>
+    <button class="menu-btn" data-feature="module.facturacion" data-menu="facturacion" onclick="showScreen('facturacion')">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#16A085" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+      <span>Facturas</span>
+    </button>
+    <button class="menu-btn" data-feature="module.corte" data-menu="corte" onclick="showScreen('corte')">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></svg>
+      <span>Corte</span>
+    </button>
+    <button class="menu-btn" data-feature="module.reportes" data-menu="reportes" onclick="showScreen('reportes')">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#3498DB" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span>Reportes</span>
+    </button>
+
+    <div class="menubar-divider"></div>
+
+    <button class="menu-btn" data-feature="module.dashboard" data-menu="dashboard" onclick="showScreen('dashboard')">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#E74C3C" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+      <span>Dashboard</span>
+    </button>
+    <button class="menu-btn" data-feature="module.apertura" data-menu="apertura" onclick="showScreen('apertura')">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#F39C12" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>
+      <span>Apertura</span>
+    </button>
+    <button class="menu-btn" data-feature="module.cotizaciones" data-menu="cotizaciones" onclick="showScreen('cotizaciones')">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#9B59B6" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
+      <span>Cotizaciones</span>
+    </button>
+    <button class="menu-btn" data-feature="module.devoluciones" data-menu="devoluciones" onclick="showScreen('devoluciones')">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#E67E22" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+      <span>Devoluciones</span>
+    </button>
+    <button class="menu-btn" data-feature="module.ventas" data-menu="ventas" onclick="showScreen('ventas')">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#34495E" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span>Historial</span>
+    </button>
+    <button class="menu-btn" data-feature="module.usuarios" data-menu="usuarios" onclick="showScreen('usuarios')">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#16A085" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Usuarios</span>
+    </button>
+
+    <div class="menubar-divider"></div>
+
+    <button class="menu-btn" data-feature="module.recargas" data-menu="recargas" onclick="showScreen('recargas')">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#3498DB" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/></svg>
+      <span>📱 Recargas</span>
+    </button>
+    <button class="menu-btn" data-feature="module.servicios" data-menu="servicios" onclick="showScreen('servicios')">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#F39C12" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      <span>💡 Servicios</span>
+    </button>
+    <button class="menu-btn locked" data-feature="module.tarjetas" data-menu="tarjetas" onclick="showLocked('Tarjetas virtuales')">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#E74C3C" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="7" y1="15" x2="7.01" y2="15"/><line x1="11" y1="15" x2="13" y2="15"/></svg>
+      <span>🎬 Tarjetas</span>
+    </button>
+    <button class="menu-btn" data-feature="module.promociones" data-menu="promociones" onclick="showScreen('promociones')">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#DB2777" stroke-width="2"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
+      <span>🏷️ Promos</span>
+    </button>
+    <button class="menu-btn" data-feature="module.departamentos" data-menu="departamentos" onclick="showScreen('departamentos')">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#8E44AD" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      <span>🏢 Depto.</span>
+    </button>
+    <button class="menu-btn locked" data-feature="module.sugeridas" data-menu="sugeridas" onclick="showLocked('Compras sugeridas (IA)')">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      <span>🛒 Sugeridas</span>
+    </button>
+    <button class="menu-btn" data-feature="module.actualizador" data-menu="actualizador" onclick="showScreen('actualizador')">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#E67E22" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      <span>💱 Actualizar</span>
+    </button>
+
+    <div class="menubar-divider"></div>
+
+    <button class="menu-btn more" onclick="openMasModulos()">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2.5"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+      <span>⋯ Más</span>
+    </button>
+  </nav>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+
+    <!-- ============ POS SCREEN ============ -->
+    <section id="screen-pos" class="pos-screen">
+
+      <!-- Botón para abrir/cerrar panel derecho en móvil -->
+      <button class="pos-sidebar-toggle" onclick="togglePosSidebar()" title="Categorías">☰</button>
+
+      <div class="pos-main-area">
+
+      <!-- Banner azul VENTA — Ticket 1 -->
+      <div class="pos-banner">
+        VENTA — Ticket <span id="currentFolio">1</span>
+      </div>
+
+      <!-- Fila: Código del Producto + ENTER -->
+      <div class="pos-code-bar">
+        <label>Código del Producto:</label>
+        <div class="pos-code-input-wrap">
+          <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5v14"/><path d="M8 5v14"/><path d="M12 5v14"/><path d="M17 5v14"/><path d="M21 5v14"/></svg>
+          <input id="barcode-input" class="pos-code-input" type="text" placeholder="Escanear o escribir código…" onkeypress="if(event.key==='Enter')searchProduct(this.value)">
+        </div>
+        <button class="btn-enter" onclick="searchProduct(document.getElementById('barcode-input').value)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          ENTER — Agregar Producto
+        </button>
+      </div>
+
+      <!-- Barra de acciones -->
+      <div class="pos-actions">
+        <button class="action-btn" data-feature="pos.ins_varios" onclick="openVarios()" title="Artículos varios / Kits">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          <span>INS Varios</span>
+        </button>
+        <button class="action-btn" data-feature="pos.art_comun" onclick="addCommonProduct()" title="Producto común (sin código)">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#3498DB" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span>CTRL+P Art. Común</span>
+        </button>
+        <button class="action-btn" data-feature="pos.buscar" onclick="openSearch()" title="Buscar producto">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#3498DB" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <span>F10 Buscar</span>
+        </button>
+        <button class="action-btn" data-feature="pos.mayoreo" onclick="showToast('Precio mayoreo')" title="Precio mayoreo">
+          <svg class="ico" viewBox="0 0 24 24" fill="#F39C12" stroke="#F39C12" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <span>F11 Mayoreo</span>
+        </button>
+        <button class="action-btn" data-feature="pos.entradas" onclick="cashIn()" title="Entradas de efectivo">
+          <svg class="ico" viewBox="0 0 24 24" fill="#27AE60" stroke="#27AE60" stroke-width="2"><circle cx="12" cy="12" r="10" fill="#27AE60"/><path d="M8 12l3 3 5-5" stroke="white" fill="none"/></svg>
+          <span>F7 Entradas</span>
+        </button>
+        <button class="action-btn" data-feature="pos.salidas" onclick="cashOut()" title="Salidas de efectivo">
+          <svg class="ico" viewBox="0 0 24 24" fill="#E67E22" stroke="#E67E22" stroke-width="2"><circle cx="12" cy="12" r="10" fill="#E67E22"/><path d="M8 12h8" stroke="white" fill="none" stroke-width="3"/></svg>
+          <span>F8 Salidas</span>
+        </button>
+        <button class="action-btn" data-feature="pos.borrar" onclick="deleteCartItem()" title="Borrar artículo seleccionado">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#E74C3C" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          <span>DEL Borrar Art.</span>
+        </button>
+        <button class="action-btn" data-feature="pos.verificador" onclick="priceChecker()" title="Verificador de precios">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#2C3E50" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+          <span>F9 - Verificador</span>
+        </button>
+
+        <div class="action-btn-divider"></div>
+
+        <button class="action-btn variant-warm" data-feature="pos.panel" onclick="showToast('Panel catálogo rápido')" title="Panel catálogo">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#92400E" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+          <span>📒 Panel</span>
+        </button>
+        <button class="action-btn variant-orange" data-feature="pos.catalogo" onclick="showToast('Catálogo visual')" title="Catálogo visual">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#E67E22" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          <span>🖼️ Catálogo</span>
+        </button>
+        <button class="action-btn variant-green" data-feature="pos.granel" onclick="openGranel()" title="Venta a granel">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+          <span>⚖ Granel</span>
+        </button>
+        <button class="action-btn variant-red" data-feature="pos.descuento" onclick="applyDiscount()" title="Aplicar descuento">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
+          <span>% Descuento</span>
+        </button>
+        <button class="action-btn variant-blue" data-feature="pos.recargas_btn" onclick="showScreen('recargas')" title="Venta de tiempo aire">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#3498DB" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          <span>📱 Recargas</span>
+        </button>
+        <button class="action-btn variant-orange" data-feature="pos.servicios_btn" onclick="showScreen('servicios')" title="Pago de servicios">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#F39C12" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <span>💡 Servicios</span>
+        </button>
+        <button class="action-btn variant-purple" data-feature="pos.calculadora" onclick="openCalc()" title="Calculadora">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#8E44AD" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="14" x2="8.01" y2="14"/><line x1="12" y1="14" x2="12.01" y2="14"/><line x1="16" y1="14" x2="16.01" y2="14"/></svg>
+          <span>🧮 Calc</span>
+        </button>
+      </div>
+
+      <!-- Tab Ticket 1 + Nuevo -->
+      <div class="pos-tabs">
+        <div class="ticket-tab">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#2D5F8F" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Ticket 1
+        </div>
+        <button class="btn-new-ticket" onclick="newTicket()">+ Nuevo</button>
+      </div>
+
+      <!-- Tabla del Carrito -->
+      <div class="pos-cart-wrap">
+        <table class="pos-cart">
+          <thead>
+            <tr>
+              <th style="width: 160px;">Código de Barras</th>
+              <th>Descripción del Producto</th>
+              <th style="width: 130px;" class="num">Precio Venta</th>
+              <th style="width: 80px;" class="center">Cant.</th>
+              <th style="width: 130px;" class="num importe-col">Importe</th>
+              <th style="width: 90px;" class="center">Existencia</th>
+              <th style="width: 40px;"></th>
+            </tr>
+          </thead>
+          <tbody id="cart-body"></tbody>
+        </table>
+      </div>
+
+      <!-- Barra inferior: contador + F5/F6/Eliminar/Asignar + F12 Cobrar + Total -->
+      <div class="pos-bottom">
+        <div class="item-counter">
+          <div class="item-counter-num" id="item-count">0</div>
+          <span class="item-counter-txt">Productos en la venta actual.</span>
+        </div>
+
+        <div class="pos-bottom-spacer"></div>
+
+        <button class="bottom-btn" data-feature="pos.cambiar" onclick="showToast('Cambiar precio del producto')" title="Cambiar precio">
+          <svg class="ico" viewBox="0 0 24 24" fill="#27AE60" stroke="#27AE60" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8" stroke="white" fill="none" stroke-width="2"/><path d="M8 12h8" stroke="white" fill="none" stroke-width="2"/></svg>
+          <span>F5 - Cambiar</span>
+        </button>
+        <button class="bottom-btn" data-feature="pos.pendiente" onclick="showToast('Venta pendiente guardada')" title="Venta pendiente">
+          <svg class="ico" viewBox="0 0 24 24" fill="#F39C12" stroke="#F39C12" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <span>F6 - Pendiente</span>
+        </button>
+        <button class="bottom-btn" onclick="clearCart()" title="Eliminar venta">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#E74C3C" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          <span>Eliminar</span>
+        </button>
+        <button class="bottom-btn" onclick="showToast('Selector de cliente…')" title="Asignar cliente">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#3498DB" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          <span>Asignar cliente</span>
+        </button>
+
+        <button class="btn-cobrar" onclick="openPayment()">
+          <svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="#27AE60" stroke="#27AE60" stroke-width="2"><circle cx="12" cy="12" r="10" fill="#27AE60"/><path d="M12 6v12M9 9h6M9 15h6" stroke="white" fill="none" stroke-width="2"/></svg>
+          <span>F12 - Cobrar</span>
+        </button>
+
+        <div class="total-big" id="total-big">$0.00</div>
+      </div>
+
+      <!-- Total / Pagó Con / Cambio + Reimprimir / Ventas del día -->
+      <div class="pos-summary">
+        <div class="summary-item">
+          <span class="lbl">Total:</span>
+          <span class="val" id="footer-total">$0.00</span>
+        </div>
+        <div class="summary-item">
+          <span class="lbl">Pagó Con:</span>
+          <span class="val" id="footer-pago">$0.00</span>
+        </div>
+        <div class="summary-item">
+          <span class="lbl">Cambio:</span>
+          <span class="val cambio" id="footer-cambio">$0.00</span>
+        </div>
+        <div class="pay-method-indicator" title="Método de pago">💵 Efectivo</div>
+
+        <div class="pos-summary-spacer"></div>
+
+        <button class="bottom-btn" onclick="showToast('Reimprimiendo último ticket…')" title="Reimprimir último ticket">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#3498DB" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          <span>Reimprimir Último Ticket</span>
+        </button>
+        <button class="bottom-btn" onclick="showScreen('ventas')" title="Ventas y devoluciones del día">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#9B59B6" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/></svg>
+          <span>Ventas del día y Devoluciones</span>
+        </button>
+      </div>
+
+      <!-- Footer -->
+      <div class="pos-footer">
+        <div>SalvadoreX (1.0.0). Derechos reservados (2026) GrupoVolvix S.A. de C.V. (soporte@salvadorex.mx)</div>
+        <div style="display: flex; gap: 14px;">
+          <span>Ver. 1.0.0</span>
+          <span class="mono" id="footer-date">20 - Abr 1:04 pm</span>
+        </div>
+      </div>
+
+      </div><!-- /pos-main-area -->
+
+      <!-- ============ PANEL DERECHO: Categorías + Quick-pick ============ -->
+      <aside class="pos-sidebar-right" data-feature="pos.quickpick_panel" id="pos-sidebar-right">
+        <div class="pos-sidebar-title">Categorías</div>
+        <div class="cat-list" id="cat-list"></div>
+
+        <div class="pos-sidebar-title">Quick-pick</div>
+        <div class="qp-grid" id="qp-grid"></div>
+      </aside>
+
+    </section>
+
+    <!-- ============ DASHBOARD ============ -->
+    <section id="screen-dashboard" class="screen-pad hidden">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">Dashboard</h1>
+          <p class="page-sub">Resumen del día · 20/04/2026 · 14:35 hrs</p>
+        </div>
+        <div class="btn-row">
+          <button class="btn">Exportar</button>
+          <button class="btn primary">Imprimir resumen</button>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-label">Ventas hoy</div><div class="kpi-value">$4,820</div><div class="kpi-sub"><span class="trend-up">▲ 12%</span> vs ayer</div></div>
+        <div class="kpi"><div class="kpi-label">Tickets</div><div class="kpi-value">18</div><div class="kpi-sub">Promedio $267.78</div></div>
+        <div class="kpi"><div class="kpi-label">Efectivo en caja</div><div class="kpi-value">$2,145</div><div class="kpi-sub">Falta cortar</div></div>
+        <div class="kpi"><div class="kpi-label">Crédito otorgado</div><div class="kpi-value">$890</div><div class="kpi-sub">3 clientes</div></div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px;" id="dash-grid">
+        <div class="card">
+          <div class="card-head"><div class="card-title">Productos más vendidos hoy</div></div>
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <thead><tr><th>Producto</th><th class="num">Vendidos</th><th class="num">Ingresos</th></tr></thead>
+              <tbody>
+                <tr><td class="primary-col">🥤 Coca Cola 600ml</td><td class="num">42</td><td class="num">$1,050</td></tr>
+                <tr><td class="primary-col">🍞 Pan dulce</td><td class="num">38</td><td class="num">$323</td></tr>
+                <tr><td class="primary-col">🥛 Leche Lala 1L</td><td class="num">22</td><td class="num">$616</td></tr>
+                <tr><td class="primary-col">🌾 Arroz</td><td class="num">14</td><td class="num">$448</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card card-pad">
+          <div class="card-title" style="margin-bottom: 12px;">Alertas</div>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="padding: 10px; background: var(--warn-soft); border-radius: var(--r-sm); border-left: 3px solid var(--warn);"><strong style="font-size: 11.5px;">Stock bajo</strong><div style="font-size: 10.5px; color: var(--text-2); margin-top: 3px;">8 productos bajo mínimo</div></div>
+            <div style="padding: 10px; background: var(--danger-soft); border-radius: var(--r-sm); border-left: 3px solid var(--danger);"><strong style="font-size: 11.5px;">Cliente moroso</strong><div style="font-size: 10.5px; color: var(--text-2); margin-top: 3px;">Carlos R. · $1,200 vencidos</div></div>
+            <div style="padding: 10px; background: var(--info-soft); border-radius: var(--r-sm); border-left: 3px solid var(--info);"><strong style="font-size: 11.5px;">Corte pendiente</strong><div style="font-size: 10.5px; color: var(--text-2); margin-top: 3px;">Sin corte desde ayer</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ INVENTARIO ============ -->
+    <section id="screen-inventario" class="screen-pad hidden">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">Inventario de Productos</h1>
+          <p class="page-sub">1,247 productos · 8 con stock bajo</p>
+        </div>
+        <div class="btn-row">
+          <button class="btn">📤 Exportar</button>
+          <button class="btn">📥 Importar</button>
+          <button class="btn accent">+ Nuevo producto</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Código</th><th>Producto</th><th>Categoría</th><th class="num">Precio</th><th class="num">Stock</th><th>Estado</th><th></th></tr></thead>
+            <tbody id="inv-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CLIENTES ============ -->
+    <section id="screen-clientes" class="screen-pad hidden">
+      <div class="page-head">
+        <div><h1 class="page-title">Clientes</h1><p class="page-sub">847 clientes registrados</p></div>
+        <button class="btn accent">+ Nuevo cliente</button>
+      </div>
+      <div class="card">
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Cliente</th><th>Teléfono</th><th class="num">Crédito</th><th class="num">Saldo</th><th class="num">Puntos</th><th>Última compra</th><th></th></tr></thead>
+            <tbody id="cli-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CRÉDITO ============ -->
+    <section id="screen-credito" class="screen-pad hidden">
+      <div class="page-head">
+        <div><h1 class="page-title">Cuentas por cobrar</h1><p class="page-sub">6 clientes con crédito · $4,810 por cobrar</p></div>
+        <button class="btn accent">+ Registrar abono</button>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-label">Total crédito</div><div class="kpi-value">$11,700</div></div>
+        <div class="kpi"><div class="kpi-label">Por cobrar</div><div class="kpi-value">$4,810</div></div>
+        <div class="kpi"><div class="kpi-label">Vencido</div><div class="kpi-value" style="color: var(--danger);">$1,760</div></div>
+        <div class="kpi"><div class="kpi-label">Al día</div><div class="kpi-value">4</div></div>
+      </div>
+      <div class="card">
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Cliente</th><th class="num">Límite</th><th class="num">Saldo</th><th class="num">Pagado</th><th>Último abono</th><th>Estado</th><th></th></tr></thead>
+            <tbody id="cred-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ VENTAS (Historial) ============ -->
+    <section id="screen-ventas" class="screen-pad hidden">
+      <div class="page-head">
+        <div><h1 class="page-title">Historial de ventas y devoluciones</h1><p class="page-sub">Últimas ventas procesadas</p></div>
+        <div class="btn-row">
+          <button class="btn">📅 Filtrar fecha</button>
+          <button class="btn">📤 Exportar</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Ticket</th><th>Fecha</th><th>Cliente</th><th>Cajero</th><th>Pago</th><th class="num">Total</th><th>Estado</th><th></th></tr></thead>
+            <tbody id="vnt-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ REPORTES ============ -->
+    <section id="screen-reportes" class="screen-pad hidden">
+      <div class="page-head">
+        <div><h1 class="page-title">Reportes</h1><p class="page-sub">Ventas, productos, clientes, inventario</p></div>
+        <button class="btn primary">📥 Exportar todo</button>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px;">
+        <div class="card card-pad" style="cursor: pointer;" onclick="showToast('Ventas por día…')">
+          <div style="font-size: 22px; margin-bottom: 8px;">📈</div>
+          <strong style="font-size: 13px;">Ventas por día</strong>
+          <p style="font-size: 11.5px; color: var(--text-3); margin: 3px 0 0;">Gráfica diaria</p>
+        </div>
+        <div class="card card-pad" style="cursor: pointer;" onclick="showToast('Top productos…')">
+          <div style="font-size: 22px; margin-bottom: 8px;">🏆</div>
+          <strong style="font-size: 13px;">Top productos</strong>
+          <p style="font-size: 11.5px; color: var(--text-3); margin: 3px 0 0;">Los más vendidos</p>
+        </div>
+        <div class="card card-pad" style="cursor: pointer;" onclick="showToast('Clientes top…')">
+          <div style="font-size: 22px; margin-bottom: 8px;">👥</div>
+          <strong style="font-size: 13px;">Clientes top</strong>
+          <p style="font-size: 11.5px; color: var(--text-3); margin: 3px 0 0;">Quiénes compran más</p>
+        </div>
+        <div class="card card-pad" style="cursor: pointer;" onclick="showToast('Rotación…')">
+          <div style="font-size: 22px; margin-bottom: 8px;">🔄</div>
+          <strong style="font-size: 13px;">Rotación</strong>
+          <p style="font-size: 11.5px; color: var(--text-3); margin: 3px 0 0;">Sin movimiento</p>
+        </div>
+        <div class="card card-pad" style="cursor: pointer;" onclick="showToast('Ganancias…')">
+          <div style="font-size: 22px; margin-bottom: 8px;">💰</div>
+          <strong style="font-size: 13px;">Ganancias</strong>
+          <p style="font-size: 11.5px; color: var(--text-3); margin: 3px 0 0;">Margen por producto</p>
+        </div>
+        <div class="card card-pad" style="cursor: pointer;" onclick="showToast('Por cajero…')">
+          <div style="font-size: 22px; margin-bottom: 8px;">🧑‍💼</div>
+          <strong style="font-size: 13px;">Por cajero</strong>
+          <p style="font-size: 11.5px; color: var(--text-3); margin: 3px 0 0;">Productividad</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CORTE ============ -->
+    <section id="screen-corte" class="screen-pad hidden">
+      <div class="page-head">
+        <div><h1 class="page-title">Corte de caja</h1><p class="page-sub">Cierre del turno · Administrador · Caja 1</p></div>
+        <button class="btn" onclick="showToast('Historial de cortes…')">📜 Historial</button>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="card">
+          <div class="card-head"><div class="card-title">Resumen del turno</div></div>
+          <div class="card-pad">
+            <div class="summary-item" style="justify-content: space-between; width: 100%; padding: 4px 0;"><span style="color: var(--text-2);">Apertura</span><span class="mono">$500.00</span></div>
+            <div class="summary-item" style="justify-content: space-between; width: 100%; padding: 4px 0;"><span style="color: var(--text-2);">Ventas efectivo</span><span class="mono">$2,145.00</span></div>
+            <div class="summary-item" style="justify-content: space-between; width: 100%; padding: 4px 0;"><span style="color: var(--text-2);">Ventas tarjeta</span><span class="mono">$1,820.50</span></div>
+            <div class="summary-item" style="justify-content: space-between; width: 100%; padding: 4px 0;"><span style="color: var(--text-2);">Transferencia</span><span class="mono">$854.50</span></div>
+            <div class="summary-item" style="justify-content: space-between; width: 100%; padding: 4px 0;"><span style="color: var(--text-2);">Abonos</span><span class="mono">$340.00</span></div>
+            <div class="summary-item" style="justify-content: space-between; width: 100%; padding: 4px 0;"><span style="color: var(--text-2);">Gastos</span><span class="mono" style="color: var(--danger);">-$125.00</span></div>
+            <div class="summary-item" style="justify-content: space-between; width: 100%; padding: 12px 0 0; border-top: 1px dashed var(--border-strong); margin-top: 4px; font-size: 14px;"><span style="font-weight: 700;">Efectivo esperado</span><span class="mono" style="font-weight: 700; color: var(--eleventa-blue); font-size: 18px;">$2,860.00</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">Conteo físico</div></div>
+          <div class="card-pad">
+            <div class="input-group"><label class="input-label">Billetes de $500</label><input class="input-field" type="number" value="4"></div>
+            <div class="input-group"><label class="input-label">Billetes de $200</label><input class="input-field" type="number" value="3"></div>
+            <div class="input-group"><label class="input-label">Billetes de $100</label><input class="input-field" type="number" value="2"></div>
+            <div class="input-group"><label class="input-label">Monedas</label><input class="input-field" type="text" value="$60.00"></div>
+            <button class="btn success" style="width: 100%; justify-content: center; margin-top: 8px;" onclick="showToast('✓ Corte guardado en SQLite local')">Cerrar corte</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CONFIG ============ -->
+    <section id="screen-config" class="screen-pad hidden">
+      <div class="page-head">
+        <div><h1 class="page-title">Configuración</h1><p class="page-sub">Preferencias y control de funciones</p></div>
+      </div>
+      <div class="config-layout">
+        <div class="config-tabs">
+          <button class="config-tab active" onclick="showCfg('general', this)">⚙️ General</button>
+          <button class="config-tab" onclick="showCfg('negocio', this)">🏪 Datos del negocio</button>
+          <button class="config-tab" onclick="showCfg('impuestos', this)">💰 Impuestos</button>
+          <button class="config-tab" onclick="showCfg('impresion', this)">🖨️ Impresión</button>
+          <button class="config-tab" onclick="showCfg('modulos', this)">🧩 Módulos y funciones</button>
+          <button class="config-tab" onclick="showCfg('licencia', this)">🔑 Licencia</button>
+          <button class="config-tab" onclick="showCfg('sync', this)">🔄 Sincronización</button>
+        </div>
+
+        <div>
+          <div id="cfg-general" class="card card-pad">
+            <h3 style="margin: 0 0 14px; font-size: 14px;">Preferencias generales</h3>
+            <div class="input-group"><label class="input-label">Idioma</label><select class="input-field"><option>Español (México)</option></select></div>
+            <div class="input-group"><label class="input-label">Moneda</label><select class="input-field"><option>Peso Mexicano (MXN)</option></select></div>
+            <div class="input-group"><label class="input-label">Zona horaria</label><select class="input-field"><option>America/Mexico_City (GMT-6)</option></select></div>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-top: 1px solid var(--border); margin-top: 12px;"><div><strong style="font-size: 12.5px;">Sonido al cobrar</strong><div style="font-size: 11px; color: var(--text-3);">Reproduce sonido al completar venta</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-top: 1px solid var(--border);"><div><strong style="font-size: 12.5px;">Abrir cajón al cobrar</strong><div style="font-size: 11px; color: var(--text-3);">Manda señal al cajón automático</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+          </div>
+
+          <div id="cfg-negocio" class="card card-pad hidden">
+            <h3 style="margin: 0 0 14px; font-size: 14px;">Datos del negocio</h3>
+            <div class="input-group"><label class="input-label">Nombre comercial</label><input class="input-field" value="Abarrotes Don Chucho"></div>
+            <div class="input-group"><label class="input-label">Razón social</label><input class="input-field" value="Jesús González Pérez"></div>
+            <div class="input-group"><label class="input-label">RFC</label><input class="input-field" value="GOPJ850315ABC"></div>
+            <div class="input-group"><label class="input-label">Dirección</label><input class="input-field" value="Av. Revolución 123"></div>
+            <div class="input-group"><label class="input-label">Teléfono</label><input class="input-field" value="55 1234 5678"></div>
+          </div>
+
+          <div id="cfg-impuestos" class="card card-pad hidden">
+            <h3 style="margin: 0 0 14px; font-size: 14px;">Impuestos</h3>
+            <div class="input-group"><label class="input-label">IVA estándar</label><input class="input-field" value="16%"></div>
+            <div class="input-group"><label class="input-label">IEPS</label><input class="input-field" value="8%"></div>
+          </div>
+
+          <div id="cfg-impresion" class="card card-pad hidden">
+            <h3 style="margin: 0 0 14px; font-size: 14px;">Impresión</h3>
+            <div class="input-group"><label class="input-label">Impresora</label><select class="input-field"><option>EPSON TM-T20III (USB)</option></select></div>
+            <div class="input-group"><label class="input-label">Ancho ticket</label><select class="input-field"><option>80mm</option><option>58mm</option></select></div>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-top: 1px solid var(--border); margin-top: 12px;"><div><strong style="font-size: 12.5px;">Imprimir ticket auto</strong></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-top: 1px solid var(--border);"><div><strong style="font-size: 12.5px;">Enviar por WhatsApp</strong></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+          </div>
+
+          <div id="cfg-modulos" class="hidden">
+            <div class="ff-banner">
+              <div class="ico-box">🔒</div>
+              <div style="flex: 1;">
+                <strong>Controlado por el propietario del sistema</strong>
+                <div style="font-size: 11.5px; color: var(--text-2); margin-top: 2px;">Tu plan actual tiene <strong>9 de 18 módulos</strong> activos. Solicita cambios a tu proveedor.</div>
+              </div>
+              <button class="btn sm" onclick="openOwnerPanel()">Solicitar</button>
+            </div>
+            <div id="ff-tree"></div>
+          </div>
+
+          <div id="cfg-licencia" class="card card-pad hidden">
+            <h3 style="margin: 0 0 14px; font-size: 14px;">Información de licencia</h3>
+            <div style="display: grid; gap: 8px;">
+              <div class="summary-item" style="justify-content: space-between; width: 100%;"><span style="color: var(--text-2);">Plan</span><span class="chip accent">Pro</span></div>
+              <div class="summary-item" style="justify-content: space-between; width: 100%;"><span style="color: var(--text-2);">Licencia</span><code class="mono" style="color: var(--accent);">VLVX-A3F9-C2E1-B8D4</code></div>
+              <div class="summary-item" style="justify-content: space-between; width: 100%;"><span style="color: var(--text-2);">Vence</span><span>15/01/2027</span></div>
+              <div class="summary-item" style="justify-content: space-between; width: 100%;"><span style="color: var(--text-2);">Seats Web</span><span>3 / 3</span></div>
+              <div class="summary-item" style="justify-content: space-between; width: 100%;"><span style="color: var(--text-2);">Seats Windows</span><span>2 / 2</span></div>
+              <div class="summary-item" style="justify-content: space-between; width: 100%;"><span style="color: var(--text-2);">Seats Android</span><span>1 / 2</span></div>
+            </div>
+          </div>
+
+          <div id="cfg-sync" class="card card-pad hidden">
+            <h3 style="margin: 0 0 14px; font-size: 14px;">Sincronización offline</h3>
+            <div class="summary-item" style="justify-content: space-between; width: 100%; padding: 6px 0;"><span style="color: var(--text-2);">Estado</span><span class="chip ok"><span class="dot"></span>Sincronizado</span></div>
+            <div class="summary-item" style="justify-content: space-between; width: 100%; padding: 6px 0;"><span style="color: var(--text-2);">Última sync</span><span>Hace 2 segundos</span></div>
+            <div class="summary-item" style="justify-content: space-between; width: 100%; padding: 6px 0;"><span style="color: var(--text-2);">Operaciones en cola</span><span>0</span></div>
+            <div class="summary-item" style="justify-content: space-between; width: 100%; padding: 6px 0;"><span style="color: var(--text-2);">Base de datos local</span><span>SQLite · 12.4 MB</span></div>
+            <div class="summary-item" style="justify-content: space-between; width: 100%; padding: 6px 0;"><span style="color: var(--text-2);">Versión de la app</span><span>v1.0.0</span></div>
+            <div style="margin-top: 14px; display: flex; gap: 8px;">
+              <button class="btn" onclick="showToast('Forzando sincronización…')">🔄 Forzar sync</button>
+              <button class="btn" onclick="showToast('Respaldando base local…')">💾 Respaldar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ USUARIOS ============ -->
+    <section id="screen-usuarios" class="screen-pad hidden">
+      <div class="page-head">
+        <div><h1 class="page-title">Usuarios</h1><p class="page-sub">5 usuarios · permisos y roles</p></div>
+        <button class="btn accent">+ Nuevo usuario</button>
+      </div>
+      <div class="card">
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Usuario</th><th>Rol</th><th>Email</th><th>Última conexión</th><th>Estado</th><th></th></tr></thead>
+            <tbody id="usr-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ APERTURA ============ -->
+    <section id="screen-apertura" class="screen-pad hidden">
+      <div class="page-head">
+        <div><h1 class="page-title">Apertura de caja</h1><p class="page-sub">Registra el efectivo inicial del turno</p></div>
+      </div>
+      <div class="card card-pad" style="max-width: 480px;">
+        <div class="input-group"><label class="input-label">Cajero</label><input class="input-field" value="Administrador" disabled></div>
+        <div class="input-group"><label class="input-label">Turno</label><select class="input-field"><option>Matutino (06:00 - 14:00)</option><option>Vespertino (14:00 - 22:00)</option></select></div>
+        <div class="input-group"><label class="input-label">Monto inicial</label><input class="input-field" type="text" value="$500.00"></div>
+        <div class="input-group"><label class="input-label">Observaciones</label><textarea class="input-field" rows="3" placeholder="Notas…"></textarea></div>
+        <button class="btn accent lg" style="width: 100%; justify-content: center; margin-top: 6px;" onclick="showToast('✓ Apertura registrada')">Abrir caja</button>
+      </div>
+    </section>
+
+    <!-- ============ QUICK POS (Caja rápida) ============ -->
+    <section id="screen-quickpos" class="screen-pad hidden" style="background: linear-gradient(135deg, #EFF6FF, #FAFAF9);">
+      <div class="quickpos-wrap">
+        <div style="text-align: center; margin-bottom: 18px;">
+          <h1 class="page-title">Caja rápida</h1>
+          <p class="page-sub">Modo calculadora · sin inventario</p>
+        </div>
+        <div class="card card-pad">
+          <div class="quickpos-display" id="qp-display">$0.00</div>
+          <div class="quickpos-pad">
+            <button class="quickpos-key" onclick="qpKey('7')">7</button>
+            <button class="quickpos-key" onclick="qpKey('8')">8</button>
+            <button class="quickpos-key" onclick="qpKey('9')">9</button>
+            <button class="quickpos-key" onclick="qpKey('4')">4</button>
+            <button class="quickpos-key" onclick="qpKey('5')">5</button>
+            <button class="quickpos-key" onclick="qpKey('6')">6</button>
+            <button class="quickpos-key" onclick="qpKey('1')">1</button>
+            <button class="quickpos-key" onclick="qpKey('2')">2</button>
+            <button class="quickpos-key" onclick="qpKey('3')">3</button>
+            <button class="quickpos-key" onclick="qpKey('0')">0</button>
+            <button class="quickpos-key" onclick="qpKey('.')">.</button>
+            <button class="quickpos-key" onclick="qpKey('C')">C</button>
+            <button class="quickpos-key accent" style="grid-column: span 3;" onclick="showToast('✓ Cobro registrado')">Cobrar</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PERFIL ============ -->
+    <section id="screen-perfil" class="screen-pad hidden">
+      <div class="page-head"><h1 class="page-title">Mi perfil</h1></div>
+      <div class="card card-pad" style="max-width: 480px;">
+        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 18px;">
+          <div class="tb-btn perfil"><div class="ava" style="width: 54px; height: 54px; font-size: 18px;">AD</div></div>
+          <div>
+            <strong style="font-size: 15px;">Administrador</strong>
+            <div style="font-size: 11.5px; color: var(--text-3);">Activo desde 2024</div>
+          </div>
+        </div>
+        <div class="input-group"><label class="input-label">Nombre completo</label><input class="input-field" value="Administrador de la Tienda"></div>
+        <div class="input-group"><label class="input-label">Email</label><input class="input-field" value="admin@donchucho.mx"></div>
+        <button class="btn accent" style="margin-top: 6px;">Guardar cambios</button>
+      </div>
+    </section>
+
+    <!-- ============ PLACEHOLDERS ============ -->
+    <section id="screen-kardex" class="screen-pad hidden"><div class="placeholder"><div class="placeholder-icon">📋</div><h2 class="placeholder-title">Kardex</h2><p class="placeholder-text">Movimientos detallados por producto: entradas, salidas, ajustes, transferencias.</p></div></section>
+    <section id="screen-proveedores" class="screen-pad hidden"><div class="placeholder"><div class="placeholder-icon">🚚</div><h2 class="placeholder-title">Compras / Proveedores</h2><p class="placeholder-text">Gestiona proveedores, órdenes de compra y pagos.</p></div></section>
+    <section id="screen-facturacion" class="screen-pad hidden"><div class="placeholder"><div class="placeholder-icon">📄</div><h2 class="placeholder-title">Facturación CFDI</h2><p class="placeholder-text">Emisión de facturas 4.0 al SAT. Timbrado fiscal en tiempo real.</p></div></section>
+    <section id="screen-cotizaciones" class="screen-pad hidden"><div class="placeholder"><div class="placeholder-icon">📝</div><h2 class="placeholder-title">Cotizaciones</h2><p class="placeholder-text">Genera cotizaciones y conviértelas en venta con un clic.</p></div></section>
+    <section id="screen-devoluciones" class="screen-pad hidden"><div class="placeholder"><div class="placeholder-icon">↩️</div><h2 class="placeholder-title">Devoluciones</h2><p class="placeholder-text">Devoluciones totales o parciales de cualquier ticket.</p></div></section>
+    <section id="screen-recargas" class="screen-pad hidden"><div class="placeholder"><div class="placeholder-icon">📱</div><h2 class="placeholder-title">Recargas electrónicas</h2><p class="placeholder-text">Telcel, Movistar, AT&T, Unefon, Bait. Comisión automática.</p></div></section>
+    <section id="screen-servicios" class="screen-pad hidden"><div class="placeholder"><div class="placeholder-icon">💡</div><h2 class="placeholder-title">Pago de servicios</h2><p class="placeholder-text">CFE, agua, teléfono, internet, gas. Paga desde tu caja.</p></div></section>
+    <section id="screen-promociones" class="screen-pad hidden"><div class="placeholder"><div class="placeholder-icon">🎁</div><h2 class="placeholder-title">Promociones</h2><p class="placeholder-text">Crea 2x1, descuentos por volumen, cupones y combos.</p></div></section>
+    <section id="screen-departamentos" class="screen-pad hidden"><div class="placeholder"><div class="placeholder-icon">🏷️</div><h2 class="placeholder-title">Departamentos</h2><p class="placeholder-text">Organiza el inventario por departamentos con reglas fiscales.</p></div></section>
+    <section id="screen-actualizador" class="screen-pad hidden"><div class="placeholder"><div class="placeholder-icon">💱</div><h2 class="placeholder-title">Actualizador masivo</h2><p class="placeholder-text">Sube precios, cambia stock o modifica categorías en lote.</p></div></section>
+    <section id="screen-salud" class="screen-pad hidden"><div class="placeholder"><div class="placeholder-icon">💚</div><h2 class="placeholder-title">Panel de Salud · LIVE SYNC</h2><p class="placeholder-text">Estado en tiempo real: latencia, operaciones por minuto, cola de sync, última actualización recibida.</p></div></section>
+    <section id="screen-mobile-apps" class="screen-pad hidden"><div class="placeholder"><div class="placeholder-icon">📱</div><h2 class="placeholder-title">Preview apps móviles</h2><p class="placeholder-text">Vista previa de la app en Android e iOS, con el mismo layout y funcionalidades.</p></div></section>
+    <section id="screen-ayuda" class="screen-pad hidden"><div class="placeholder"><div class="placeholder-icon">❓</div><h2 class="placeholder-title">Centro de ayuda</h2><p class="placeholder-text">Documentación, tutoriales, atajos de teclado y contacto con soporte.</p></div></section>
+
+  </main>
+</div>
+
+<!-- ============ MODAL: Cobrar ============ -->
+<div id="modal-pay" class="modal-backdrop" onclick="if(event.target===this)closeModal('modal-pay')">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <strong style="font-size: 15px;">Cobrar ticket #<span id="pay-folio">1</span></strong>
+        <div style="font-size: 11.5px; color: var(--text-3); margin-top: 2px;">Público en general · <span id="pay-items">0</span> items</div>
+      </div>
+      <button class="btn sm" onclick="closeModal('modal-pay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="background: var(--eleventa-blue); color: white; padding: 22px; border-radius: var(--r-lg); text-align: center; margin-bottom: 16px;">
+        <div style="font-size: 11px; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px;">Total a cobrar</div>
+        <div style="font-size: 38px; font-weight: 800; margin-top: 4px; letter-spacing: -1px;" id="pay-total">$0.00</div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 14px;">
+        <button class="btn" onclick="setPayMethod(this)" style="flex-direction: column; height: 64px; border-color: var(--accent); background: var(--accent-soft); color: var(--accent);">💵<span style="font-size: 10px; margin-top: 2px;">Efectivo</span></button>
+        <button class="btn" onclick="setPayMethod(this)" style="flex-direction: column; height: 64px;">💳<span style="font-size: 10px; margin-top: 2px;">Tarjeta</span></button>
+        <button class="btn" onclick="setPayMethod(this)" style="flex-direction: column; height: 64px;">📱<span style="font-size: 10px; margin-top: 2px;">Transfer</span></button>
+        <button class="btn" onclick="setPayMethod(this)" style="flex-direction: column; height: 64px;">✂️<span style="font-size: 10px; margin-top: 2px;">Mixto</span></button>
+      </div>
+      <div class="input-group"><label class="input-label">Recibido del cliente</label><input class="input-field" id="pay-recibido" type="text" value="$0.00" style="font-size: 16px; font-weight: 600;" oninput="calcChange()"></div>
+      <div class="summary-item" style="justify-content: space-between; width: 100%; padding: 10px 12px; background: var(--success-soft); border-radius: var(--r); margin-top: 8px;">
+        <span style="color: #166534; font-weight: 600;">Cambio a entregar</span>
+        <span style="color: #166534; font-weight: 700; font-size: 16px;" id="pay-cambio">$0.00</span>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('modal-pay')">Cancelar</button>
+      <button class="btn success" onclick="completePay()">✓ F12 - Completar cobro</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: BÚSQUEDA ============ -->
+<div id="modal-search" class="modal-backdrop" onclick="if(event.target===this)closeModal('modal-search')">
+  <div class="modal" style="max-width: 600px;">
+    <div class="modal-head">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:20px;">🔎</span>
+        <strong style="font-size:15px;">Buscar producto</strong>
+      </div>
+      <button class="btn sm" onclick="closeModal('modal-search')">✕</button>
+    </div>
+    <div class="modal-body" style="padding:16px 20px;">
+      <input type="text" id="search-input" placeholder="Nombre, código o SKU..." style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;" oninput="filterSearch()" autofocus>
+      <div id="search-results" style="margin-top:12px;max-height:300px;overflow-y:auto;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: ENTRADA/SALIDA EFECTIVO ============ -->
+<div id="modal-cash" class="modal-backdrop" onclick="if(event.target===this)closeModal('modal-cash')">
+  <div class="modal" style="max-width: 420px;">
+    <div class="modal-head">
+      <strong id="cash-title" style="font-size:15px;">Entrada de efectivo</strong>
+      <button class="btn sm" onclick="closeModal('modal-cash')">✕</button>
+    </div>
+    <div class="modal-body" style="padding:20px;">
+      <label style="font-size:12px;font-weight:600;color:var(--text-2);">Concepto</label>
+      <input id="cash-concept" style="width:100%;margin:6px 0 14px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;" placeholder="Ej. Pago de luz, Cambio, etc.">
+      <label style="font-size:12px;font-weight:600;color:var(--text-2);">Monto</label>
+      <input id="cash-amount" type="number" style="width:100%;margin:6px 0;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:18px;font-weight:700;" placeholder="$0.00">
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('modal-cash')">Cancelar</button>
+      <button class="btn primary" onclick="registerCash()">Registrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: CALCULADORA ============ -->
+<div id="modal-calc" class="modal-backdrop" onclick="if(event.target===this)closeModal('modal-calc')">
+  <div class="modal" style="max-width: 320px;">
+    <div class="modal-head">
+      <strong style="font-size:15px;">🧮 Calculadora</strong>
+      <button class="btn sm" onclick="closeModal('modal-calc')">✕</button>
+    </div>
+    <div class="modal-body" style="padding:16px;">
+      <div id="calc-display" style="background:#0A0A0A;color:#FBBF24;padding:16px;border-radius:8px;font-family:monospace;font-size:26px;font-weight:700;text-align:right;margin-bottom:12px;min-height:60px;">0</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
+        <button class="btn" onclick="calcInput('C')" style="background:#FEE2E2;color:#991B1B;">C</button>
+        <button class="btn" onclick="calcInput('/')">/</button>
+        <button class="btn" onclick="calcInput('*')">×</button>
+        <button class="btn" onclick="calcInput('←')">⌫</button>
+        <button class="btn" onclick="calcInput('7')">7</button>
+        <button class="btn" onclick="calcInput('8')">8</button>
+        <button class="btn" onclick="calcInput('9')">9</button>
+        <button class="btn" onclick="calcInput('-')">−</button>
+        <button class="btn" onclick="calcInput('4')">4</button>
+        <button class="btn" onclick="calcInput('5')">5</button>
+        <button class="btn" onclick="calcInput('6')">6</button>
+        <button class="btn" onclick="calcInput('+')">+</button>
+        <button class="btn" onclick="calcInput('1')">1</button>
+        <button class="btn" onclick="calcInput('2')">2</button>
+        <button class="btn" onclick="calcInput('3')">3</button>
+        <button class="btn primary" onclick="calcInput('=')" style="grid-row:span 2;">=</button>
+        <button class="btn" onclick="calcInput('0')" style="grid-column:span 2;">0</button>
+        <button class="btn" onclick="calcInput('.')">.</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: GRANEL / BÁSCULA ============ -->
+<div id="modal-granel" class="modal-backdrop" onclick="if(event.target===this)closeModal('modal-granel')">
+  <div class="modal" style="max-width: 480px;">
+    <div class="modal-head">
+      <strong style="font-size:15px;">⚖️ Venta a granel</strong>
+      <button class="btn sm" onclick="closeModal('modal-granel')">✕</button>
+    </div>
+    <div class="modal-body" style="padding:20px;">
+      <label style="font-size:12px;font-weight:600;color:var(--text-2);">Producto</label>
+      <select id="granel-product" style="width:100%;margin:6px 0 14px;padding:10px;border:1px solid var(--border);border-radius:8px;">
+        <option>Queso Oaxaca · $180/kg</option>
+        <option>Jamón Virginia · $220/kg</option>
+        <option>Manzana · $45/kg</option>
+        <option>Tomate · $30/kg</option>
+      </select>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div>
+          <label style="font-size:12px;font-weight:600;">Peso (kg)</label>
+          <input id="granel-peso" type="number" step="0.001" value="0.540" style="width:100%;margin-top:6px;padding:12px;border:1px solid var(--border);border-radius:8px;font-size:20px;font-weight:700;" oninput="calcGranel()">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;">Total</label>
+          <input id="granel-total" readonly value="$97.20" style="width:100%;margin-top:6px;padding:12px;border:1px solid var(--border);border-radius:8px;font-size:20px;font-weight:700;background:var(--accent-soft);color:var(--accent);">
+        </div>
+      </div>
+      <div style="padding:10px 14px;background:#F0F9FF;border-radius:8px;font-size:12px;color:#0369A1;">
+        💡 <strong>Báscula conectada:</strong> Coloca el producto y pulsa "Leer báscula" para captura automática.
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="readBascula()">📡 Leer báscula</button>
+      <button class="btn primary" onclick="addGranelToCart()">+ Agregar al ticket</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TOAST ============ -->
+<div id="toast" class="toast"></div>
+
+<script>
+  /* ============================================================
+     VOLVIX BRIDGE · Comunicación con el panel del dueño del sistema
+     Usa localStorage (persistencia) + BroadcastChannel (tiempo real)
+     ============================================================ */
+  const TENANT_ID = 'TNT001';
+  const STORAGE_KEY = 'volvix:tenant:' + TENANT_ID;
+  const CHANNEL_NAME = 'volvix-saas';
+
+  const DEFAULT_TENANT_STATE = {
+    id: TENANT_ID,
+    name: 'Abarrotes Don Chucho',
+    brand: 'SalvadoreX',
+    plan: 'Pro',
+    status: 'active', // 'active' | 'suspended' | 'revoked' | 'expired'
+    licenseKey: 'VLVX-A3F9-C2E1-B8D4',
+    licenseExpires: '2027-01-15',
+    seats: { web: 3, windows: 2, android: 1 },
+    modules: {
+      pos: true, dashboard: true, apertura: true, corte: true,
+      inventario: true, kardex: true, clientes: true, credito: true,
+      proveedores: true, cotizaciones: true, devoluciones: true,
+      ventas: true, reportes: true, facturacion: false,
+      recargas: true, servicios: true, tarjetas: false,
+      promociones: true, departamentos: true, sugeridas: false,
+      actualizador: true, usuarios: true, config: true
+    },
+    features: {
+      'pos.ins_varios': true, 'pos.art_comun': true, 'pos.buscar': true,
+      'pos.mayoreo': true, 'pos.entradas': true, 'pos.salidas': true,
+      'pos.borrar': true, 'pos.verificador': true, 'pos.panel': true,
+      'pos.catalogo': true, 'pos.granel': true, 'pos.descuento': true,
+      'pos.recargas_btn': true, 'pos.servicios_btn': true, 'pos.calculadora': true,
+      'pos.cambiar': true, 'pos.pendiente': true, 'pos.quickpick_panel': true,
+      'ui.saas_btn': true
+    },
+    broadcast: null
+  };
+
+  const VOLVIX = {
+    channel: null,
+
+    init() {
+      // Inicializar estado si no existe
+      if (!localStorage.getItem(STORAGE_KEY)) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_TENANT_STATE));
+      }
+      // BroadcastChannel para tiempo real entre tabs
+      try {
+        this.channel = new BroadcastChannel(CHANNEL_NAME);
+        this.channel.onmessage = (e) => this.handleMessage(e.data);
+      } catch (err) {
+        console.warn('BroadcastChannel no disponible, usando storage events');
+      }
+      // Fallback: storage event
+      window.addEventListener('storage', (e) => {
+        if (e.key === STORAGE_KEY && e.newValue) {
+          this.handleMessage({ type: 'state-update', state: JSON.parse(e.newValue) });
+        }
+      });
+    },
+
+    getState() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || DEFAULT_TENANT_STATE; }
+      catch { return DEFAULT_TENANT_STATE; }
+    },
+
+    setState(state) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      if (this.channel) {
+        this.channel.postMessage({ type: 'state-update', tenantId: TENANT_ID, state });
+      }
+    },
+
+    handleMessage(msg) {
+      if (msg.type === 'state-update' && msg.tenantId === TENANT_ID) {
+        this.applyState(msg.state, true);
+      }
+      if (msg.type === 'owner-message' && msg.tenantId === TENANT_ID) {
+        this.showOwnerMessage(msg.text, msg.severity);
+      }
+      if (msg.type === 'force-action' && msg.tenantId === TENANT_ID) {
+        this.handleForceAction(msg.action);
+      }
+    },
+
+    isFeatureOn(state, key) {
+      if (!state) return true;
+      if (key.startsWith('module.')) {
+        return state.modules?.[key.replace('module.', '')] !== false;
+      }
+      return state.features?.[key] !== false;
+    },
+
+    applyState(state, fromLive = false) {
+      // Licencia revocada/suspendida: bloquear toda la app
+      if (state.status === 'revoked' || state.status === 'suspended' || state.status === 'expired') {
+        this.showLicenseBlock(state);
+        return;
+      } else {
+        const block = document.getElementById('license-block');
+        if (block) block.classList.remove('active');
+      }
+
+      // Aplicar flags a cada elemento con data-feature
+      document.querySelectorAll('[data-feature]').forEach(el => {
+        const key = el.dataset.feature;
+        const enabled = this.isFeatureOn(state, key);
+        if (enabled) {
+          el.classList.remove('ff-off');
+        } else {
+          el.classList.add('ff-off');
+        }
+      });
+
+      // Actualizar info visible del tenant
+      const brandName = document.querySelector('.brand-info .name');
+      if (brandName) brandName.textContent = state.brand || 'SalvadoreX';
+      const brandSub = document.querySelector('.brand-info .sub');
+      if (brandSub) brandSub.textContent = (state.name || 'Don Chucho') + ' · Caja 1';
+
+      // Efecto visual si el cambio vino del owner en vivo
+      if (fromLive) {
+        this.flashUpdate();
+        this.showOwnerMessage('Tu proveedor actualizó la configuración del sistema', 'info');
+      }
+    },
+
+    showLicenseBlock(state) {
+      let block = document.getElementById('license-block');
+      if (!block) {
+        block = document.createElement('div');
+        block.id = 'license-block';
+        block.className = 'license-block';
+        document.body.appendChild(block);
+      }
+      const titles = {
+        suspended: 'Servicio suspendido',
+        revoked: 'Licencia revocada',
+        expired: 'Licencia vencida'
+      };
+      const messages = {
+        suspended: 'Tu proveedor suspendió temporalmente el acceso al sistema. Probablemente por falta de pago o mantenimiento.',
+        revoked: 'Tu licencia fue revocada. Contacta a tu proveedor para más información.',
+        expired: 'Tu licencia venció. Renuévala para continuar usando el sistema.'
+      };
+      block.innerHTML = `
+        <div class="license-block-card">
+          <div class="license-block-icon">${state.status === 'revoked' ? '🔒' : state.status === 'expired' ? '⏰' : '⚠️'}</div>
+          <h2 class="license-block-title">${titles[state.status]}</h2>
+          <p class="license-block-text">${messages[state.status]}</p>
+          <div class="license-block-info">
+            <div class="row"><span>Negocio</span><strong>${state.name}</strong></div>
+            <div class="row"><span>Licencia</span><span class="mono">${state.licenseKey}</span></div>
+            <div class="row"><span>Estado</span><span class="chip err"><span class="dot"></span>${titles[state.status]}</span></div>
+          </div>
+          <p class="license-block-text">Comunícate con tu proveedor para reactivar el servicio.</p>
+          <button class="btn accent lg" style="width:100%;justify-content:center;" onclick="window.location.reload()">Reintentar</button>
+        </div>
+      `;
+      block.classList.add('active');
+    },
+
+    showOwnerMessage(text, severity = 'info') {
+      let banner = document.getElementById('owner-msg-banner');
+      if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'owner-msg-banner';
+        banner.className = 'owner-msg-banner';
+        document.body.appendChild(banner);
+      }
+      banner.innerHTML = `<span>${text}</span>`;
+      banner.classList.add('show');
+      clearTimeout(window._ob);
+      window._ob = setTimeout(() => banner.classList.remove('show'), 4500);
+    },
+
+    handleForceAction(action) {
+      if (action === 'force-logout') {
+        alert('Tu proveedor cerró tu sesión remotamente.');
+        location.reload();
+      }
+      if (action === 'force-update') {
+        this.showOwnerMessage('Actualización disponible. La app se reiniciará.', 'warn');
+      }
+    },
+
+    flashUpdate() {
+      document.querySelectorAll('[data-feature]').forEach(el => {
+        el.classList.add('live-update-flash');
+        setTimeout(() => el.classList.remove('live-update-flash'), 1200);
+      });
+    }
+  };
+
+  // Inicializar el bridge inmediatamente
+  VOLVIX.init();
+
+  /* ============ DATA ============ */
+  const CATALOG = [
+    {code:'7501055303045', name:'Coca Cola 600ml', price:25, stock:124},
+    {code:'7501030411025', name:'Pan dulce', price:8.5, stock:48},
+    {code:'7501058634511', name:'Queso fresco 250g', price:120, stock:12},
+    {code:'7501234567890', name:'Palomitas', price:15, stock:67},
+    {code:'7501456789012', name:'Manzanas kg', price:35, stock:89},
+    {code:'7501000001234', name:'Mantequilla', price:45, stock:23},
+    {code:'7501000005555', name:'Leche Lala 1L', price:28, stock:54},
+    {code:'7501000008888', name:'Arroz Verde Valle', price:32, stock:76},
+  ];
+  let CART = [
+    {code:'7501055303045', name:'Coca Cola 600ml', price:25, qty:2, stock:124},
+    {code:'7501030411025', name:'Pan dulce', price:8.5, qty:3, stock:48},
+    {code:'7501058634511', name:'Queso fresco 250g', price:120, qty:1, stock:12},
+  ];
+  const CUSTOMERS = [
+    ['María López García', '55 1234 5678', 2000, 450, 120, '15/04/2026'],
+    ['Carlos Ramírez Torres', '55 4567 8901', 3000, 1200, 35, '10/04/2026'],
+    ['Ana Rodríguez Martínez', '55 3456 7890', 1000, 320, 210, '18/04/2026'],
+    ['Roberto Gutiérrez', '55 6789 0123', 2500, 780, 89, '12/04/2026'],
+  ];
+  const CREDIT = [
+    ['María López García', 2000, 450, 1550, '15/04/2026', 'ok'],
+    ['Carlos Ramírez Torres', 3000, 1200, 1800, '10/04/2026', 'vencido'],
+    ['Ana Rodríguez', 1000, 320, 680, '18/04/2026', 'ok'],
+    ['Roberto Gutiérrez', 2500, 780, 1720, '12/04/2026', 'ok'],
+    ['Miguel Castro', 1200, 560, 640, '08/04/2026', 'vencido'],
+    ['Adriana Flores', 1500, 1500, 0, '—', 'sin_abonos'],
+  ];
+  const SALES = [
+    ['#000152', 'Hoy 14:32', 'Público general', 'Admin', 'Efectivo', 222.47, 'completed'],
+    ['#000151', 'Hoy 14:15', 'Ana Rodríguez', 'Admin', 'Tarjeta', 487.00, 'completed'],
+    ['#000150', 'Hoy 13:58', 'Público general', 'Admin', 'Efectivo', 45.50, 'completed'],
+    ['#000149', 'Hoy 13:42', 'Carlos Ramírez', 'Admin', 'Crédito', 890.00, 'completed'],
+    ['#000148', 'Hoy 13:20', 'Público general', 'Admin', 'Efectivo', 125.00, 'refunded'],
+  ];
+  const USERS = [
+    ['admin', 'Administrador', 'admin@donchucho.mx', 'En línea', 'online'],
+    ['maria.lopez', 'Cajero', 'maria.lopez@donchucho.mx', 'Hace 2 min', 'online'],
+    ['juan.perez', 'Gerente', 'juan.perez@donchucho.mx', 'Hoy 08:15 am', 'online'],
+    ['ana.rodriguez', 'Cajero', 'ana.r@donchucho.mx', 'Ayer 20:30', 'offline'],
+  ];
+
+  /* ============ CATEGORÍAS Y QUICK-PICK (panel derecho POS) ============ */
+  const CATEGORIES = [
+    {key:'lacteos',    icon:'🥛', name:'Lácteos'},
+    {key:'bebidas',    icon:'🥤', name:'Bebidas'},
+    {key:'snacks',     icon:'🍿', name:'Snacks'},
+    {key:'enlatados',  icon:'🥫', name:'Enlatados'},
+    {key:'panaderia',  icon:'🍞', name:'Panadería'},
+    {key:'limpieza',   icon:'🧽', name:'Limpieza'},
+    {key:'frutas',     icon:'🍎', name:'Frutas y Verduras'},
+  ];
+
+  const QUICKPICK = [
+    // Lácteos
+    {cat:'lacteos',    icon:'🥛', name:'Leche Lala',    price:26, code:'750105', stock:54},
+    {cat:'lacteos',    icon:'🧀', name:'Queso Oax',     price:120, code:'750402', stock:12},
+    {cat:'lacteos',    icon:'🥣', name:'Yogurt',        price:18, code:'750420', stock:38},
+    {cat:'lacteos',    icon:'🥚', name:'Huevos',        price:32, code:'750500', stock:44},
+    {cat:'lacteos',    icon:'🧈', name:'Mantequilla',   price:45, code:'750430', stock:23},
+    {cat:'lacteos',    icon:'🍦', name:'Crema',         price:38, code:'750440', stock:17},
+    // Bebidas
+    {cat:'bebidas',    icon:'🥤', name:'Coca Cola',     price:38, code:'750205', stock:124},
+    {cat:'bebidas',    icon:'🍹', name:'Del Valle',     price:22, code:'750220', stock:58},
+    {cat:'bebidas',    icon:'💧', name:'Ciel 1L',       price:14, code:'750210', stock:96},
+    {cat:'bebidas',    icon:'🧃', name:'Boing',         price:12, code:'750215', stock:72},
+    // Snacks
+    {cat:'snacks',     icon:'🍿', name:'Palomitas',     price:15, code:'750701', stock:67},
+    {cat:'snacks',     icon:'🍪', name:'Galletas',      price:20, code:'750720', stock:45},
+    {cat:'snacks',     icon:'🥜', name:'Cacahuates',    price:18, code:'750730', stock:33},
+    {cat:'snacks',     icon:'🍫', name:'Chocolate',     price:24, code:'750740', stock:52},
+    // Enlatados
+    {cat:'enlatados',  icon:'🥫', name:'Atún',          price:35, code:'750801', stock:88},
+    {cat:'enlatados',  icon:'🫘', name:'Frijoles',      price:28, code:'750802', stock:63},
+    {cat:'enlatados',  icon:'🌽', name:'Elote',         price:22, code:'750803', stock:41},
+    {cat:'enlatados',  icon:'🍅', name:'Chiles',        price:26, code:'750804', stock:37},
+    // Panadería
+    {cat:'panaderia',  icon:'🍞', name:'Pan Bimbo',     price:24, code:'750600', stock:48},
+    {cat:'panaderia',  icon:'🥖', name:'Baguette',      price:18, code:'750610', stock:22},
+    {cat:'panaderia',  icon:'🥐', name:'Cuernito',      price:12, code:'750620', stock:36},
+    {cat:'panaderia',  icon:'🧁', name:'Mantecada',     price:8,  code:'750630', stock:54},
+    // Limpieza
+    {cat:'limpieza',   icon:'🧽', name:'Fabuloso',      price:42, code:'750901', stock:41},
+    {cat:'limpieza',   icon:'🧼', name:'Jabón',         price:15, code:'750910', stock:78},
+    {cat:'limpieza',   icon:'🧴', name:'Shampoo',       price:68, code:'750920', stock:25},
+    // Frutas
+    {cat:'frutas',     icon:'🍎', name:'Manzana kg',    price:35, code:'750302', stock:89},
+    {cat:'frutas',     icon:'🍌', name:'Plátano kg',    price:18, code:'750303', stock:112},
+    {cat:'frutas',     icon:'🍊', name:'Naranja kg',    price:22, code:'750304', stock:94},
+    {cat:'frutas',     icon:'🥑', name:'Aguacate',      price:15, code:'750305', stock:67},
+  ];
+
+  let selectedCategory = 'lacteos';
+
+  const FF_TREE = [
+    { key:'pos', icon:'🛒', name:'Punto de venta (F1)', desc:'Caja, cobro, tickets', on:true, children:[
+      {key:'pos.discount', label:'Botón Descuento (%)', on:true, hint:''},
+      {key:'pos.mayoreo', label:'Precio mayoreo (F11)', on:true, hint:''},
+      {key:'pos.granel', label:'Venta a granel (⚖)', on:true, hint:''},
+      {key:'pos.kit', label:'Kits / Artículos varios (INS)', on:true, hint:''},
+      {key:'pos.common', label:'Artículo común (CTRL+P)', on:true, hint:''},
+      {key:'pos.wa', label:'Enviar ticket WhatsApp', on:false, hint:'Requiere WhatsApp CRM'},
+    ]},
+    { key:'inv', icon:'📦', name:'Inventario (F3, F4)', desc:'Productos, stock', on:true, children:[
+      {key:'inv.import', label:'Importar masivo', on:true},
+      {key:'inv.cost', label:'Ver costo de productos', on:false, hint:'Solo gerentes'},
+    ]},
+    { key:'credit', icon:'💳', name:'Créditos (F2)', desc:'Cuentas por cobrar', on:true },
+    { key:'clientes', icon:'👥', name:'Clientes', desc:'Base de datos', on:true },
+    { key:'compras', icon:'🚚', name:'Compras / Proveedores', desc:'Órdenes de compra', on:true },
+    { key:'reportes', icon:'📈', name:'Reportes', desc:'Analytics y KPIs', on:true },
+    { key:'corte', icon:'💼', name:'Corte de caja', desc:'Cierre de turno', on:true },
+    { key:'apertura', icon:'🔓', name:'Apertura de caja', desc:'Registro inicial', on:true },
+    { key:'devoluciones', icon:'↩️', name:'Devoluciones', desc:'Totales o parciales', on:true },
+    { key:'cotizaciones', icon:'📝', name:'Cotizaciones', desc:'Convertir a venta', on:true },
+    { key:'recargas', icon:'📱', name:'Recargas electrónicas', desc:'Tiempo aire', on:true },
+    { key:'servicios', icon:'💡', name:'Pago de servicios', desc:'CFE, agua, etc.', on:true },
+    { key:'tarjetas', icon:'🎬', name:'Tarjetas virtuales', desc:'Streaming, gaming', on:false, hint:'No incluido' },
+    { key:'facturacion', icon:'📄', name:'Facturación CFDI', desc:'Timbrado SAT', on:false, hint:'+$49/mes' },
+    { key:'whatsapp', icon:'💬', name:'WhatsApp CRM', desc:'Mensajería', on:false, hint:'+$49/mes' },
+    { key:'promociones', icon:'🎁', name:'Promociones', desc:'2x1, combos', on:true },
+    { key:'departamentos', icon:'🏢', name:'Departamentos', desc:'Agrupación fiscal', on:true },
+    { key:'sugeridas', icon:'🧠', name:'Compras sugeridas (IA)', desc:'Predicción de demanda', on:false, hint:'+$99/mes · Beta' },
+    { key:'actualizador', icon:'💱', name:'Actualizador masivo', desc:'Edición en lote', on:true },
+    { key:'dashboard', icon:'📊', name:'Dashboard', desc:'Resumen ejecutivo', on:true },
+    { key:'usuarios', icon:'👤', name:'Gestión de usuarios', desc:'Roles y permisos', on:true },
+  ];
+
+  /* ============ UTILS ============ */
+  const $ = s => document.querySelector(s);
+  const $$ = s => document.querySelectorAll(s);
+  const fmt = n => '$' + n.toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2});
+  const parse$ = s => parseFloat(String(s).replace(/[$,\s]/g,'')) || 0;
+
+  /* ============ LOGIN ============ */
+  async function handleLogin(event) {
+    event?.preventDefault();
+    const email = document.getElementById('login-email').value?.trim();
+    const password = document.getElementById('login-password').value?.trim();
+
+    if (!email || !password) {
+      showToast('Ingresa email y contraseña', 'error');
+      return;
+    }
+
+    const btn = document.getElementById('btn-login-submit');
+    btn.disabled = true;
+    btn.textContent = 'Validando...';
+
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        showToast(err.error || 'Credenciales inválidas', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Iniciar sesión';
+        return;
+      }
+
+      const { ok, session } = await res.json();
+      if (ok && session) {
+        // Guardar sesión en localStorage para offline
+        localStorage.setItem('volvixSession', JSON.stringify(session));
+        // Guardar tenant state
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          tenantId: session.tenant_id,
+          tenantName: session.tenant_name,
+          userRole: session.role,
+          userId: session.user_id,
+          plan: session.plan
+        }));
+
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('app-root').classList.remove('login-active');
+        showToast(`Bienvenido, ${session.role === 'superadmin' ? 'Administrador' : session.role} ✓`);
+        setTimeout(() => document.getElementById('barcode-input')?.focus(), 100);
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      showToast('Error conectando al servidor. Verifica conexión.', 'error');
+      btn.disabled = false;
+      btn.textContent = 'Iniciar sesión';
+    }
+  }
+
+  function doLogin() {
+    handleLogin();
+  }
+  function doLogout() {
+    if (!confirm('¿Cerrar sesión?')) return;
+    $('#app-root').classList.add('login-active');
+    $('#login-screen').classList.remove('hidden');
+  }
+
+  /* ============ NAV ============ */
+  function showScreen(name) {
+    $$('section[id^="screen-"]').forEach(s => s.classList.add('hidden'));
+    // La POS screen tiene su propia clase .pos-screen, no screen-pad
+    const isPos = name === 'pos';
+    const el = $('#screen-' + name);
+    if (el) el.classList.remove('hidden');
+    $$('.menu-btn').forEach(b => b.classList.toggle('active', b.dataset.menu === name));
+  }
+
+  /* ============ TOAST ============ */
+  function showToast(msg) {
+    const t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(window._tt);
+    window._tt = setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  /* ============ POS ============ */
+  function searchProduct(code) {
+    if (!code) return;
+    const p = CATALOG.find(x => x.code === code || x.name.toLowerCase().includes(code.toLowerCase()));
+    if (!p) { showToast('❌ Producto no encontrado: ' + code); return; }
+    addToCart(p);
+    $('#barcode-input').value = '';
+    $('#barcode-input').focus();
+  }
+  function addToCart(p) {
+    const existing = CART.find(c => c.code === p.code);
+    if (existing) existing.qty++;
+    else CART.push({...p, qty:1});
+    renderCart();
+  }
+  function renderCart() {
+    const body = $('#cart-body');
+    if (CART.length === 0) {
+      body.innerHTML = `<tr><td colspan="7"><div class="cart-empty-block"><div><div class="icon">🛒</div>Escanea o escribe el código de un producto para comenzar</div></div></td></tr>`;
+    } else {
+      body.innerHTML = CART.map((item, i) => `
+        <tr>
+          <td class="mono">${item.code}</td>
+          <td class="desc">${item.name}</td>
+          <td class="num">${fmt(item.price)}</td>
+          <td class="center">${item.qty}</td>
+          <td class="importe">${fmt(item.price * item.qty)}</td>
+          <td class="center">${item.stock}</td>
+          <td class="center"><button class="cart-del-btn" onclick="removeFromCart(${i})" title="Eliminar">×</button></td>
+        </tr>
+      `).join('');
+    }
+    updateTotals();
+  }
+  function removeFromCart(i) {
+    CART.splice(i, 1);
+    renderCart();
+  }
+  function deleteCartItem() {
+    if (CART.length === 0) { showToast('No hay artículos'); return; }
+    CART.pop();
+    renderCart();
+    showToast('Último artículo eliminado');
+  }
+  function clearCart() {
+    if (CART.length === 0) return;
+    if (!confirm('¿Eliminar toda la venta actual?')) return;
+    CART = []; renderCart();
+    showToast('Venta eliminada');
+  }
+  function newTicket() {
+    if (CART.length > 0 && !confirm('El ticket actual tiene productos. ¿Iniciar uno nuevo y descartar este?')) return;
+    CART = []; renderCart();
+    showToast('✓ Nuevo ticket iniciado');
+  }
+  function updateTotals() {
+    const total = CART.reduce((s,i) => s + i.price * i.qty, 0);
+    const count = CART.reduce((s,i) => s + i.qty, 0);
+    $('#item-count').textContent = count;
+    $('#total-big').textContent = fmt(total);
+    $('#footer-total').textContent = fmt(total);
+  }
+
+  /* ============ PAYMENT ============ */
+  function openPayment() {
+    if (CART.length === 0) { showToast('No hay productos en el ticket'); return; }
+    const total = CART.reduce((s,i) => s + i.price * i.qty, 0);
+    $('#pay-total').textContent = fmt(total);
+    $('#pay-items').textContent = CART.reduce((s,i) => s + i.qty, 0);
+    $('#pay-recibido').value = fmt(total);
+    calcChange();
+    $('#modal-pay').classList.add('open');
+  }
+  function closeModal(id) { $('#'+id).classList.remove('open'); }
+  function setPayMethod(el) {
+    el.parentElement.querySelectorAll('.btn').forEach(b => {
+      b.style.borderColor = '';
+      b.style.background = '';
+      b.style.color = '';
+    });
+    el.style.borderColor = 'var(--accent)';
+    el.style.background = 'var(--accent-soft)';
+    el.style.color = 'var(--accent)';
+  }
+  function calcChange() {
+    const total = parse$($('#pay-total').textContent);
+    const recibido = parse$($('#pay-recibido').value);
+    const cambio = Math.max(0, recibido - total);
+    $('#pay-cambio').textContent = fmt(cambio);
+    $('#footer-pago').textContent = fmt(recibido);
+    $('#footer-cambio').textContent = fmt(cambio);
+  }
+  function completePay() {
+    closeModal('modal-pay');
+    showToast('✓ Venta completada · guardada en SQLite local');
+    CART = [];
+    renderCart();
+    $('#footer-pago').textContent = '$0.00';
+    $('#footer-cambio').textContent = '$0.00';
+    const folio = parseInt($('#currentFolio').textContent) + 1;
+    $('#currentFolio').textContent = folio;
+    $('#pay-folio').textContent = folio;
+  }
+
+  /* ============ OTHER SCREENS RENDER ============ */
+  function renderInv() {
+    $('#inv-body').innerHTML = CATALOG.map((p, i) => `
+      <tr>
+        <td class="mono" style="font-size: 11px; color: var(--text-3);">${p.code}</td>
+        <td class="primary-col">${p.name}</td>
+        <td><span class="chip">General</span></td>
+        <td class="num">${fmt(p.price)}</td>
+        <td class="num">${p.stock}</td>
+        <td>${p.stock < 20 ? '<span class="chip warn"><span class="dot"></span>Stock bajo</span>' : '<span class="chip ok"><span class="dot"></span>OK</span>'}</td>
+        <td style="text-align: right;"><button class="btn sm">Editar</button></td>
+      </tr>`).join('');
+  }
+  function renderClientes() {
+    $('#cli-body').innerHTML = CUSTOMERS.map(c => `
+      <tr>
+        <td class="primary-col">${c[0]}</td>
+        <td style="color: var(--text-3);">${c[1]}</td>
+        <td class="num">${fmt(c[2])}</td>
+        <td class="num" style="color: ${c[3]>0?'var(--danger)':'inherit'};">${fmt(c[3])}</td>
+        <td class="num">${c[4]}</td>
+        <td style="color: var(--text-3); font-size: 11px;">${c[5]}</td>
+        <td style="text-align: right;"><button class="btn sm">Ver</button></td>
+      </tr>`).join('');
+  }
+  function renderCredito() {
+    $('#cred-body').innerHTML = CREDIT.map(c => {
+      const chip = c[5]==='ok'?'ok':c[5]==='vencido'?'err':'warn';
+      const lbl = c[5]==='ok'?'Al corriente':c[5]==='vencido'?'Vencido':'Sin abonos';
+      return `<tr>
+        <td class="primary-col">${c[0]}</td>
+        <td class="num">${fmt(c[1])}</td>
+        <td class="num" style="color: var(--danger); font-weight: 600;">${fmt(c[2])}</td>
+        <td class="num" style="color: var(--success);">${fmt(c[3])}</td>
+        <td style="color: var(--text-3); font-size: 11px;">${c[4]}</td>
+        <td><span class="chip ${chip}"><span class="dot"></span>${lbl}</span></td>
+        <td style="text-align: right;"><button class="btn sm">💵 Abonar</button></td>
+      </tr>`;
+    }).join('');
+  }
+  function renderVentas() {
+    $('#vnt-body').innerHTML = SALES.map(s => {
+      const chip = s[6]==='completed'?'ok':'warn';
+      const lbl = s[6]==='completed'?'Completada':'Devuelta';
+      return `<tr>
+        <td class="mono" style="font-weight: 600;">${s[0]}</td>
+        <td style="color: var(--text-3); font-size: 11px;">${s[1]}</td>
+        <td class="primary-col">${s[2]}</td>
+        <td style="color: var(--text-3);">${s[3]}</td>
+        <td><span class="chip">${s[4]}</span></td>
+        <td class="num" style="font-weight: 600;">${fmt(s[5])}</td>
+        <td><span class="chip ${chip}"><span class="dot"></span>${lbl}</span></td>
+        <td style="text-align: right;"><button class="btn sm">👁️</button></td>
+      </tr>`;
+    }).join('');
+  }
+  function renderUsuarios() {
+    $('#usr-body').innerHTML = USERS.map(u => {
+      const roleChip = u[1]==='Administrador'?'info':u[1]==='Gerente'?'accent':'ok';
+      const ss = u[4]==='online'?'ok':'';
+      return `<tr>
+        <td><div style="display: flex; align-items: center; gap: 10px;"><div class="tb-btn perfil" style="pointer-events:none;"><div class="ava" style="width:26px;height:26px;font-size:9px;background:linear-gradient(135deg,#3B82F6,#1E40AF);">${u[0].substring(0,2).toUpperCase()}</div></div><strong>${u[0]}</strong></div></td>
+        <td><span class="chip ${roleChip}">${u[1]}</span></td>
+        <td style="color: var(--text-3); font-size: 11px;">${u[2]}</td>
+        <td style="color: var(--text-3); font-size: 11px;">${u[3]}</td>
+        <td><span class="chip ${ss}"><span class="dot"></span>${u[4]==='online'?'Activo':'Inactivo'}</span></td>
+        <td style="text-align: right;"><button class="btn sm">Editar</button></td>
+      </tr>`;
+    }).join('');
+  }
+  function renderFFTree() {
+    $('#ff-tree').innerHTML = FF_TREE.map(m => {
+      const children = m.children ? `
+        <div class="ff-children">
+          ${m.children.map(c => `
+            <div class="ff-child">
+              <span class="lbl">${c.label}</span>
+              ${c.hint ? `<span class="hint">${c.hint}</span>` : ''}
+              <div class="toggle disabled ${c.on?'on':''}"></div>
+            </div>
+          `).join('')}
+        </div>
+      ` : '';
+      return `<div class="ff-module">
+        <div class="ff-module-head">
+          <div class="ff-ico">${m.icon}</div>
+          <div class="ff-module-title">
+            <div class="name">${m.name} ${!m.on ? `<span class="chip" style="font-size: 9.5px; margin-left: 5px;">🔒 ${m.hint || 'No incluido'}</span>` : ''}</div>
+            <div class="desc">${m.desc}</div>
+          </div>
+          <div class="toggle disabled ${m.on?'on':''}"></div>
+        </div>
+        ${children}
+      </div>`;
+    }).join('');
+  }
+
+  /* ============ CONFIG ============ */
+  function showCfg(tab, btn) {
+    $$('.config-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    ['general','negocio','impuestos','impresion','modulos','licencia','sync'].forEach(t => {
+      const el = $('#cfg-' + t);
+      if (el) el.classList.toggle('hidden', t !== tab);
+    });
+  }
+
+  /* ============ QUICK POS ============ */
+  let qpVal = '';
+  function qpKey(k) {
+    if (k === 'C') qpVal = '';
+    else qpVal += k;
+    $('#qp-display').textContent = qpVal ? ('$' + qpVal) : '$0.00';
+  }
+
+  /* ============ PLATFORM TOGGLE ============ */
+  function selectPlatform(btn, plat) {
+    $$('.platform-toggle-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    showToast(`Vista ${plat.toUpperCase()} · previsualizando layout`);
+  }
+
+  /* ============ OWNER PANEL ============ */
+  function openOwnerPanel() {
+    showToast('Abriendo Volvix Core en nueva pestaña…');
+    setTimeout(() => window.open('volvix_owner_panel_v2.html', '_blank'), 300);
+  }
+  function openSyncPanel() {
+    showToast('✓ Sincronizado · última sync hace 2 seg · 0 en cola');
+  }
+  function showLocked(name) {
+    showToast(`🔒 "${name}" no está activo — solicítalo a tu proveedor`);
+  }
+  function openMasModulos() {
+    showToast('Abriendo catálogo de módulos adicionales…');
+  }
+
+  /* ============ OFFLINE DETECTION ============ */
+  window.addEventListener('online', () => {
+    showToast('✓ Conexión restablecida · sincronizando cola…');
+    const ind = $('#sync-indicator');
+    if (ind) {
+      ind.innerHTML = '<div class="dot"></div><span>EN LÍNEA</span>';
+      ind.style.background = 'var(--success-soft)';
+      ind.style.color = '#166534';
+    }
+  });
+  window.addEventListener('offline', () => {
+    showToast('⚠ Sin internet · sigues cobrando, se sincronizará al volver');
+    const ind = $('#sync-indicator');
+    if (ind) {
+      ind.innerHTML = '<div class="dot" style="background:var(--warn);"></div><span>OFFLINE</span>';
+      ind.style.background = 'var(--warn-soft)';
+      ind.style.color = '#854D0E';
+    }
+  });
+
+  /* ============ KEYBOARD SHORTCUTS ============ */
+  document.addEventListener('keydown', (e) => {
+    if ($('#login-screen') && !$('#login-screen').classList.contains('hidden')) return;
+    if (e.key === 'F1') { e.preventDefault(); showScreen('pos'); }
+    if (e.key === 'F2' && !$('#screen-pos').classList.contains('hidden')) { e.preventDefault(); openPayment(); }
+    if (e.key === 'F3') { e.preventDefault(); showScreen('inventario'); }
+    if (e.key === 'F4') { e.preventDefault(); showScreen('kardex'); }
+    if (e.key === 'F12') { e.preventDefault(); openPayment(); }
+    if (e.key === 'Escape') { $$('.modal-backdrop.open').forEach(m => m.classList.remove('open')); }
+  });
+
+  /* ============ CATEGORÍAS Y QUICK-PICK ============ */
+  function renderCategories() {
+    $('#cat-list').innerHTML = CATEGORIES.map(c => `
+      <button class="cat-item ${c.key === selectedCategory ? 'active' : ''}" data-cat="${c.key}" onclick="selectCategory('${c.key}')">
+        <span class="ico">${c.icon}</span>
+        <span>${c.name}</span>
+      </button>
+    `).join('');
+  }
+  function selectCategory(key) {
+    selectedCategory = key;
+    renderCategories();
+    renderQuickPick();
+  }
+  function renderQuickPick() {
+    const items = QUICKPICK.filter(p => p.cat === selectedCategory);
+    $('#qp-grid').innerHTML = items.length === 0
+      ? '<div style="grid-column: span 2; padding: 20px; text-align: center; color: var(--text-3); font-size: 11.5px;">Sin productos en esta categoría</div>'
+      : items.map(p => `
+        <button class="qp-card" onclick="addQuickPick('${p.code}')" title="${p.name} - ${fmt(p.price)}">
+          <div class="qp-icon">${p.icon}</div>
+          <div class="qp-name">${p.name}</div>
+          <div class="qp-price">${fmt(p.price)}</div>
+        </button>
+      `).join('');
+  }
+  function addQuickPick(code) {
+    const p = QUICKPICK.find(x => x.code === code);
+    if (!p) return;
+    const existing = CART.find(c => c.code === code);
+    if (existing) existing.qty++;
+    else CART.push({code:p.code, name:p.name, price:p.price, qty:1, stock:p.stock});
+    renderCart();
+    // Cerrar panel en móvil después de agregar
+    if (window.innerWidth < 880) {
+      $('#pos-sidebar-right').classList.remove('open');
+    }
+  }
+  function togglePosSidebar() {
+    $('#pos-sidebar-right').classList.toggle('open');
+  }
+
+  /* ============ INIT ============ */
+  window.addEventListener('DOMContentLoaded', () => {
+    renderCart();
+    renderInv();
+    renderClientes();
+    renderCredito();
+    renderVentas();
+    renderUsuarios();
+    renderFFTree();
+    renderCategories();
+    renderQuickPick();
+    // Aplicar estado del tenant (controlado por el dueño del sistema)
+    VOLVIX.applyState(VOLVIX.getState());
+    setTimeout(() => $('#barcode-input')?.focus(), 200);
+  });
+
+  /* ============ MODAL ACTIONS ============ */
+
+  // BUSCAR
+  function openSearch() {
+    $('#modal-search').classList.add('open');
+    $('#search-input').value = '';
+    filterSearch();
+    setTimeout(() => $('#search-input').focus(), 100);
+  }
+  function filterSearch() {
+    const q = ($('#search-input').value || '').toLowerCase();
+    const results = CATALOG.filter(p =>
+      p.name.toLowerCase().includes(q) ||
+      p.code.toLowerCase().includes(q)
+    );
+    $('#search-results').innerHTML = results.length === 0
+      ? '<div style="padding:30px;text-align:center;color:var(--text-3);font-size:13px;">Sin resultados</div>'
+      : results.slice(0, 50).map(p => `
+        <div onclick="pickSearchResult('${p.code}')" style="padding:10px 12px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;gap:10px;align-items:center;" onmouseover="this.style.background='var(--accent-soft)'" onmouseout="this.style.background=''">
+          <div style="flex:1;">
+            <div style="font-weight:600;font-size:13px;">${p.name}</div>
+            <div style="font-family:monospace;font-size:11px;color:var(--text-3);">${p.code} · Stock: ${p.stock}</div>
+          </div>
+          <div style="font-weight:700;color:var(--accent);">${fmt(p.price)}</div>
+        </div>
+      `).join('');
+  }
+  function pickSearchResult(code) {
+    const p = CATALOG.find(x => x.code === code);
+    if (p) {
+      const existing = CART.find(c => c.code === code);
+      if (existing) existing.qty++;
+      else CART.push({ ...p, qty: 1 });
+      renderCart();
+      showToast('+ ' + p.name);
+    }
+    closeModal('modal-search');
+  }
+
+  // DESCUENTO
+  function applyDiscount() {
+    if (CART.length === 0) { showToast('El ticket está vacío'); return; }
+    const pct = prompt('¿Qué descuento aplicar al ticket completo? (%)');
+    if (pct === null) return;
+    const pctNum = parseFloat(pct);
+    if (isNaN(pctNum) || pctNum < 0 || pctNum > 100) {
+      showToast('Descuento inválido');
+      return;
+    }
+    CART.forEach(item => {
+      item.originalPrice = item.originalPrice || item.price;
+      item.price = item.originalPrice * (1 - pctNum / 100);
+      item.discount = pctNum;
+    });
+    renderCart();
+    showToast('✓ Descuento del ' + pctNum + '% aplicado');
+  }
+
+  // ARTÍCULOS VARIOS
+  function openVarios() {
+    const items = [
+      { name: 'Bolsa extra', price: 3 },
+      { name: 'Hielo', price: 15 },
+      { name: 'Servicio', price: 20 },
+      { name: 'Otro', price: 0 },
+    ];
+    const list = items.map((i, idx) => `${idx+1}. ${i.name} (${fmt(i.price)})`).join('\n');
+    const sel = prompt('Seleccionar artículo vario:\n' + list + '\n\nEscribe el número:');
+    const idx = parseInt(sel) - 1;
+    if (isNaN(idx) || !items[idx]) return;
+    const item = items[idx];
+    let price = item.price;
+    if (price === 0) {
+      const p = prompt('Precio:');
+      price = parseFloat(p);
+      if (isNaN(price)) return;
+    }
+    CART.push({ code: 'VAR' + Date.now(), name: item.name, price, qty: 1, stock: 999 });
+    renderCart();
+    showToast('+ ' + item.name);
+  }
+
+  // PRODUCTO COMÚN
+  function addCommonProduct() {
+    const name = prompt('Nombre del producto:');
+    if (!name) return;
+    const priceStr = prompt('Precio:');
+    const price = parseFloat(priceStr);
+    if (isNaN(price) || price < 0) { showToast('Precio inválido'); return; }
+    CART.push({ code: 'COM' + Date.now(), name, price, qty: 1, stock: 999 });
+    renderCart();
+    showToast('+ ' + name + ' · ' + fmt(price));
+  }
+
+  // ENTRADA / SALIDA DE EFECTIVO
+  let cashMode = 'in';
+  function cashIn() {
+    cashMode = 'in';
+    $('#cash-title').textContent = '💰 Entrada de efectivo';
+    $('#cash-concept').value = '';
+    $('#cash-amount').value = '';
+    $('#modal-cash').classList.add('open');
+    setTimeout(() => $('#cash-concept').focus(), 100);
+  }
+  function cashOut() {
+    cashMode = 'out';
+    $('#cash-title').textContent = '💸 Salida de efectivo';
+    $('#cash-concept').value = '';
+    $('#cash-amount').value = '';
+    $('#modal-cash').classList.add('open');
+    setTimeout(() => $('#cash-concept').focus(), 100);
+  }
+  function registerCash() {
+    const concept = $('#cash-concept').value.trim();
+    const amount = parseFloat($('#cash-amount').value);
+    if (!concept) { showToast('Falta concepto'); return; }
+    if (isNaN(amount) || amount <= 0) { showToast('Monto inválido'); return; }
+    closeModal('modal-cash');
+    const label = cashMode === 'in' ? 'Entrada' : 'Salida';
+    showToast('✓ ' + label + ' registrada · ' + concept + ' · ' + fmt(amount));
+  }
+
+  // VERIFICADOR DE PRECIOS
+  function priceChecker() {
+    const code = prompt('🔎 Verificador de precios\n\nEscanea o escribe el código:');
+    if (!code) return;
+    const p = CATALOG.find(x => x.code === code.trim() || x.name.toLowerCase().includes(code.toLowerCase()));
+    if (p) {
+      alert('✓ PRODUCTO ENCONTRADO\n\n' + p.name + '\nCódigo: ' + p.code + '\nPrecio: ' + fmt(p.price) + '\nStock: ' + p.stock + ' unidades');
+    } else {
+      alert('❌ Producto no encontrado: "' + code + '"');
+    }
+  }
+
+  // CALCULADORA
+  let calcExpr = '';
+  function calcInput(key) {
+    const disp = $('#calc-display');
+    if (key === 'C') { calcExpr = ''; disp.textContent = '0'; return; }
+    if (key === '←') { calcExpr = calcExpr.slice(0, -1); disp.textContent = calcExpr || '0'; return; }
+    if (key === '=') {
+      try {
+        const r = Function('"use strict";return (' + calcExpr + ')')();
+        disp.textContent = r;
+        calcExpr = String(r);
+      } catch { disp.textContent = 'Error'; calcExpr = ''; }
+      return;
+    }
+    calcExpr += key;
+    disp.textContent = calcExpr;
+  }
+  function openCalc() {
+    calcExpr = '';
+    $('#calc-display').textContent = '0';
+    $('#modal-calc').classList.add('open');
+  }
+
+  // GRANEL
+  function openGranel() {
+    $('#modal-granel').classList.add('open');
+    calcGranel();
+  }
+  function calcGranel() {
+    const sel = $('#granel-product').selectedIndex;
+    const prices = [180, 220, 45, 30];
+    const peso = parseFloat($('#granel-peso').value) || 0;
+    const total = peso * prices[sel];
+    $('#granel-total').value = fmt(total);
+  }
+  function readBascula() {
+    // Simula lectura de báscula
+    const peso = (0.100 + Math.random() * 2).toFixed(3);
+    $('#granel-peso').value = peso;
+    calcGranel();
+    showToast('📡 Báscula: ' + peso + ' kg');
+  }
+  function addGranelToCart() {
+    const sel = $('#granel-product').selectedIndex;
+    const names = ['Queso Oaxaca', 'Jamón Virginia', 'Manzana', 'Tomate'];
+    const prices = [180, 220, 45, 30];
+    const peso = parseFloat($('#granel-peso').value) || 0;
+    if (peso <= 0) { showToast('Peso inválido'); return; }
+    const total = peso * prices[sel];
+    CART.push({
+      code: 'GRN' + Date.now(),
+      name: names[sel] + ' (' + peso + ' kg)',
+      price: total,
+      qty: 1,
+      stock: 999,
+    });
+    renderCart();
+    closeModal('modal-granel');
+    showToast('+ ' + names[sel] + ' · ' + peso + 'kg');
+  }
+
+  // Atajos F5-F12
+  document.addEventListener('keydown', (e) => {
+    if (e.target.matches('input, textarea, select')) return;
+    if (e.key === 'F5') { e.preventDefault(); openSearch(); }
+    if (e.key === 'F12') { e.preventDefault(); openPayment(); }
+    if (e.key === 'F9') { e.preventDefault(); openCalc(); }
+    if (e.key === 'F11') { e.preventDefault(); applyDiscount(); }
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-backdrop.open').forEach(m => m.classList.remove('open'));
+    }
+  });
+
+</script>
+
+</body>
+</html>
