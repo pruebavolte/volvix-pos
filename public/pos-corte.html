@@ -381,7 +381,7 @@ html, body {
 
 <div class="app">
 
-  <!-- ── TOPBAR ── */
+  <!-- ── TOPBAR ── -->
   <div class="topbar">
     <div class="tb-brand">Vol<span>vix</span></div>
     <div class="tb-section">💰 Corte de caja</div>
@@ -711,4 +711,544 @@ let salidas  = [];
 // ── Init sesión ──
 (function initSession() {
   const u = window.VOLVIX_USER;
-  if (!u) return
+  if (!u) return;
+  const el = document.getElementById('tbTenant');
+  if (el) el.textContent = u.tenant_name || u.email || '—';
+  const ap = document.getElementById('aperCajero');
+  if (ap) ap.value = u.email || u.role || '—';
+})();
+
+// ── Tabs ──
+function switchTab(tab, el) {
+  ['corte','arqueo','historial'].forEach(t => {
+    document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  if (el) el.classList.add('active');
+  if (tab === 'historial') loadHistorial();
+  if (tab === 'arqueo')    updateArqueo();
+}
+
+// ── Cargar datos del turno ──
+async function loadTurno() {
+  // Leer turno de localStorage (offline-first)
+  try {
+    const stored = localStorage.getItem(TURNO_KEY);
+    if (stored) turno = JSON.parse(stored);
+  } catch { turno = null; }
+
+  // Cargar ventas del día desde API
+  try {
+    const data = await window.volvix.api.ventas.list({
+      tenant_id: window.VOLVIX_USER?.tenant_id,
+    });
+    if (Array.isArray(data)) {
+      ventas = data;
+    }
+  } catch {
+    ventas = window.volvix?.offline?.list?.('ventas') || [];
+  }
+
+  // Filtrar ventas del turno actual
+  if (turno?.inicio) {
+    ventas = ventas.filter(v => {
+      const ts = new Date(v.created_at || v.timestamp || 0).getTime();
+      return ts >= new Date(turno.inicio).getTime();
+    });
+  }
+
+  // Cargar movimientos
+  try {
+    const stored = JSON.parse(localStorage.getItem('volvix:movimientos:' + (window.VOLVIX_USER?.tenant_id || 'local')) || '[]');
+    entradas = stored.filter(m => m.tipo === 'entrada' && (!turno || !m.turnoId || m.turnoId === turno.id));
+    salidas  = stored.filter(m => m.tipo === 'salida'  && (!turno || !m.turnoId || m.turnoId === turno.id));
+  } catch { entradas = []; salidas = []; }
+
+  renderTurno();
+  renderKPIs();
+  renderPMs();
+  renderMovimientos();
+}
+
+// ── Render banner de turno ──
+function renderTurno() {
+  const banner = document.getElementById('turnoBanner');
+  const meta   = document.getElementById('turnoMeta');
+  const btnCerrar  = document.getElementById('btnCerrarTurno');
+  const btnAbrir   = document.getElementById('btnAbrirTurno');
+
+  if (!turno || turno.estado === 'cerrado') {
+    banner.className = 'turno-banner none';
+    banner.innerHTML = `
+      <div class="turno-icon">🔒</div>
+      <div class="turno-info">
+        <div class="turno-title">No hay turno abierto</div>
+        <div class="turno-meta">Abre un turno para comenzar a registrar ventas</div>
+      </div>
+      <div class="turno-actions">
+        <button class="btn primary" onclick="confirmarAbrirTurno()">🔓 Abrir turno</button>
+      </div>`;
+    if (btnCerrar) btnCerrar.style.display = 'none';
+    if (btnAbrir)  btnAbrir.style.display  = 'inline-flex';
+  } else {
+    const dur = turno.inicio ? formatDuracion(Date.now() - new Date(turno.inicio).getTime()) : '—';
+    banner.className = 'turno-banner open';
+    banner.innerHTML = `
+      <div class="turno-icon">🟢</div>
+      <div class="turno-info">
+        <div class="turno-title">Turno abierto · ${esc(turno.cajero || '—')}</div>
+        <div class="turno-meta">Inicio: ${esc(fmtDt(turno.inicio))} · Duración: ${esc(dur)} · Fondo: ${money(turno.fondoInicial || 0)}</div>
+      </div>`;
+    if (btnCerrar) btnCerrar.style.display = 'inline-flex';
+    if (btnAbrir)  btnAbrir.style.display  = 'none';
+  }
+}
+
+// ── Render KPIs ──
+function renderKPIs() {
+  const totalVentas = ventas.reduce((s, v) => s + Number(v.total || 0), 0);
+  const txCount     = ventas.length;
+  const totalEnt    = entradas.reduce((s, e) => s + Number(e.monto || 0), 0);
+  const totalSal    = salidas.reduce((s,  s2) => s + Number(s2.monto || 0), 0);
+  const descuentos  = ventas.reduce((s, v) => s + Number(v.descuento_monto || 0), 0);
+  const fondo       = turno?.fondoInicial || 0;
+  const efectivoVentas = ventas.filter(v => v.metodo_pago === 'efectivo').reduce((s, v) => s + Number(v.total || 0), 0);
+  const efectivoCaja   = fondo + efectivoVentas + totalEnt - totalSal;
+
+  document.getElementById('kpiVentas').textContent        = money(totalVentas);
+  document.getElementById('kpiVentasCount').textContent   = `${txCount} transacción${txCount !== 1 ? 'es' : ''}`;
+  document.getElementById('kpiEntradas').textContent      = money(totalEnt);
+  document.getElementById('kpiEntradasCount').textContent = `${entradas.length} movimiento${entradas.length !== 1 ? 's' : ''}`;
+  document.getElementById('kpiSalidas').textContent       = money(totalSal);
+  document.getElementById('kpiSalidasCount').textContent  = `${salidas.length} movimiento${salidas.length !== 1 ? 's' : ''}`;
+  document.getElementById('kpiDescuentos').textContent    = money(descuentos);
+  document.getElementById('kpiEfectivoCaja').textContent  = money(efectivoCaja);
+}
+
+// ── Render por método de pago ──
+function renderPMs() {
+  const pms = { efectivo: 0, tarjeta: 0, transferencia: 0 };
+  const cnt = { efectivo: 0, tarjeta: 0, transferencia: 0 };
+  for (const v of ventas) {
+    const pm = v.metodo_pago || 'efectivo';
+    if (pm in pms) { pms[pm] += Number(v.total || 0); cnt[pm]++; }
+  }
+  document.getElementById('pmEfectivo').textContent      = money(pms.efectivo);
+  document.getElementById('pmEfectivoCount').textContent = `${cnt.efectivo} venta${cnt.efectivo !== 1 ? 's' : ''}`;
+  document.getElementById('pmTarjeta').textContent       = money(pms.tarjeta);
+  document.getElementById('pmTarjetaCount').textContent  = `${cnt.tarjeta} venta${cnt.tarjeta !== 1 ? 's' : ''}`;
+  document.getElementById('pmTransfer').textContent      = money(pms.transferencia);
+  document.getElementById('pmTransferCount').textContent = `${cnt.transferencia} venta${cnt.transferencia !== 1 ? 's' : ''}`;
+}
+
+// ── Render movimientos ──
+function renderMovimientos() {
+  renderMovList('listaEntradas', entradas, 'green');
+  renderMovList('listaSalidas',  salidas,  'red');
+  document.getElementById('totalEntradas').textContent = money(entradas.reduce((s, e) => s + Number(e.monto || 0), 0));
+  document.getElementById('totalSalidas').textContent  = money(salidas.reduce((s, e)  => s + Number(e.monto || 0), 0));
+}
+
+function renderMovList(containerId, movs, colorCls) {
+  const el = document.getElementById(containerId);
+  if (!movs.length) { el.innerHTML = '<div class="mov-empty">Sin movimientos</div>'; return; }
+  el.innerHTML = movs.map(m => `
+    <div class="mov-item">
+      <span class="mov-concepto">${esc(m.concepto || '—')}</span>
+      <span class="mov-monto ${colorCls}">${money(m.monto)}</span>
+    </div>`).join('');
+}
+
+// ── Apertura de turno ──
+function confirmarAbrirTurno() {
+  openModal('modalApertura');
+  setTimeout(() => document.getElementById('aperFondo').focus(), 80);
+}
+
+function abrirTurno() {
+  const fondo = parseFloat(document.getElementById('aperFondo').value || '0');
+  if (fondo < 0) { toast('El fondo no puede ser negativo', 'err'); return; }
+  const u = window.VOLVIX_USER;
+  turno = {
+    id:           'TRN-' + Date.now(),
+    cajero:       u?.email || u?.role || 'Cajero',
+    cajeroEmail:  u?.email || '',
+    tenant_id:    u?.tenant_id,
+    inicio:       new Date().toISOString(),
+    fondoInicial: fondo,
+    estado:       'abierto',
+    notas:        document.getElementById('aperNotas').value,
+  };
+  saveTurno();
+  entradas = []; salidas = []; ventas = [];
+  closeModal('modalApertura');
+  renderTurno(); renderKPIs(); renderPMs(); renderMovimientos();
+  toast('✓ Turno abierto · Fondo: ' + money(fondo), 'ok');
+}
+
+// ── Cierre de turno (Corte Z) ──
+function confirmarCerrarTurno() {
+  if (!turno || turno.estado !== 'abierto') { toast('No hay turno abierto', 'err'); return; }
+  document.getElementById('corteTicketText').textContent = generarTicketTexto();
+  document.getElementById('corteEfectivoFisico').value   = '';
+  document.getElementById('corteDiffBox').style.display  = 'none';
+  document.getElementById('corteObs').value              = '';
+  openModal('modalCorteZ');
+}
+
+function calcDiferenciaCorte() {
+  const fisico     = parseFloat(document.getElementById('corteEfectivoFisico').value || '0');
+  const efectivoVentas = ventas.filter(v => v.metodo_pago === 'efectivo').reduce((s, v) => s + Number(v.total || 0), 0);
+  const totalEnt   = entradas.reduce((s, e) => s + Number(e.monto || 0), 0);
+  const totalSal   = salidas.reduce((s, e)  => s + Number(e.monto || 0), 0);
+  const esperado   = (turno?.fondoInicial || 0) + efectivoVentas + totalEnt - totalSal;
+  const diff       = fisico - esperado;
+  const box        = document.getElementById('corteDiffBox');
+  const val        = document.getElementById('corteDiffVal');
+  const lbl        = document.getElementById('corteDiffLabel');
+  box.style.display = 'flex';
+  val.textContent  = money(Math.abs(diff));
+  if (Math.abs(diff) < 1) {
+    box.className = 'diff-box ok';
+    lbl.textContent = '✓ Cuadrado · sin diferencia';
+  } else if (diff > 0) {
+    box.className = 'diff-box warn';
+    lbl.textContent = '⚠ Sobrante en caja';
+  } else {
+    box.className = 'diff-box err';
+    lbl.textContent = '✗ Faltante en caja';
+  }
+}
+
+async function ejecutarCorteZ() {
+  if (!turno) return;
+  turno.estado   = 'cerrado';
+  turno.fin      = new Date().toISOString();
+  turno.efectivoFisico = parseFloat(document.getElementById('corteEfectivoFisico').value || '0');
+  turno.observaciones  = document.getElementById('corteObs').value;
+  turno.totalVentas    = ventas.reduce((s, v) => s + Number(v.total || 0), 0);
+  turno.ticket         = generarTicketTexto();
+
+  // Guardar en historial
+  const histKey = 'volvix:historial-cortes:' + (window.VOLVIX_USER?.tenant_id || 'local');
+  const hist    = JSON.parse(localStorage.getItem(histKey) || '[]');
+  hist.unshift({ ...turno });
+  localStorage.setItem(histKey, JSON.stringify(hist.slice(0, 100)));
+
+  // Sync al server
+  try {
+    await window.volvix.sync.execute({
+      type:     'create',
+      table:    'cortes',
+      data:     turno,
+      endpoint: '/api/cortes',
+      body:     turno,
+    });
+  } catch {}
+
+  // Limpiar turno actual
+  localStorage.removeItem(TURNO_KEY);
+  turno = null; ventas = []; entradas = []; salidas = [];
+  closeModal('modalCorteZ');
+  renderTurno(); renderKPIs(); renderPMs(); renderMovimientos();
+  toast('✓ Turno cerrado · Corte Z registrado', 'ok');
+}
+
+// ── Generar texto del ticket ──
+function generarTicketTexto() {
+  const u       = window.VOLVIX_USER;
+  const brand   = window.VOLVIX_BRAND?.name || 'VOLVIX';
+  const now     = new Date();
+  const sep     = '================================';
+  const sep2    = '--------------------------------';
+  const totalV  = ventas.reduce((s, v) => s + Number(v.total || 0), 0);
+  const pms     = { efectivo: 0, tarjeta: 0, transferencia: 0 };
+  ventas.forEach(v => { const pm = v.metodo_pago || 'efectivo'; if (pm in pms) pms[pm] += Number(v.total || 0); });
+  const totalEnt = entradas.reduce((s, e) => s + Number(e.monto || 0), 0);
+  const totalSal = salidas.reduce((s, e)  => s + Number(e.monto || 0), 0);
+  const fondo    = turno?.fondoInicial || 0;
+  const efectivoCaja = fondo + pms.efectivo + totalEnt - totalSal;
+
+  const pad = (label, value) => (label + ' ').padEnd(24, '.') + ' ' + money(value);
+  const padN = (label, value) => (label + ' ').padEnd(24, '.') + ' ' + value;
+
+  return [
+    sep,
+    `         ${brand}`,
+    `       CORTE DE CAJA`,
+    `   ${turno?.id || 'SIN-TURNO'}`,
+    sep2,
+    `Cajero: ${turno?.cajero || u?.email || '—'}`,
+    `Apertura: ${turno?.inicio ? fmtDt(turno.inicio) : '—'}`,
+    `Cierre:   ${fmtDt(now)}`,
+    sep2,
+    padN('Transacciones', ventas.length),
+    pad('TOTAL VENTAS', totalV),
+    sep2,
+    pad('Efectivo', pms.efectivo),
+    pad('Tarjeta', pms.tarjeta),
+    pad('Transferencia', pms.transferencia),
+    sep2,
+    pad('Fondo inicial', fondo),
+    pad('+ Entradas', totalEnt),
+    pad('- Salidas', totalSal),
+    sep2,
+    pad('EFECTIVO EN CAJA', efectivoCaja),
+    sep,
+    '   Volvix POS · Gracias',
+    sep,
+  ].join('\n');
+}
+
+// ── Imprimir ──
+function imprimirCorte() {
+  const ticket = generarTicketTexto();
+  const win = window.open('', '_blank', 'width=400,height=600');
+  win.document.write(`<pre style="font-family:Courier New,monospace;font-size:12px;padding:20px;line-height:1.6">${ticket}</pre>`);
+  win.document.close();
+  win.print();
+}
+
+// ── Movimientos (entrada/salida) ──
+let movTipo = 'entrada';
+function openMovimiento(tipo) {
+  movTipo = tipo;
+  document.getElementById('movTitulo').textContent = tipo === 'entrada' ? '📥 Registrar entrada de efectivo' : '📤 Registrar salida de efectivo';
+  document.getElementById('movConcepto').value  = '';
+  document.getElementById('movMonto').value     = '';
+  document.getElementById('movAutorizo').value  = '';
+  openModal('modalMovimiento');
+  setTimeout(() => document.getElementById('movConcepto').focus(), 80);
+}
+
+function guardarMovimiento() {
+  const concepto  = document.getElementById('movConcepto').value.trim();
+  const monto     = parseFloat(document.getElementById('movMonto').value || '0');
+  const autorizo  = document.getElementById('movAutorizo').value.trim();
+  if (!concepto)    { toast('El concepto es obligatorio', 'err'); return; }
+  if (monto <= 0)   { toast('El monto debe ser mayor a 0', 'err'); return; }
+
+  const mov = {
+    id:       'MOV-' + Date.now(),
+    tipo:     movTipo,
+    concepto,
+    monto,
+    autorizo,
+    turnoId:  turno?.id,
+    tenant_id: window.VOLVIX_USER?.tenant_id,
+    usuario:  window.VOLVIX_USER?.email,
+    fecha:    new Date().toISOString(),
+  };
+
+  if (movTipo === 'entrada') entradas.push(mov);
+  else salidas.push(mov);
+
+  // Persistir
+  const key  = 'volvix:movimientos:' + (window.VOLVIX_USER?.tenant_id || 'local');
+  const all  = JSON.parse(localStorage.getItem(key) || '[]');
+  all.push(mov);
+  localStorage.setItem(key, JSON.stringify(all));
+
+  closeModal('modalMovimiento');
+  renderKPIs();
+  renderMovimientos();
+  toast(`✓ ${movTipo === 'entrada' ? 'Entrada' : 'Salida'} registrada · ${money(monto)}`, 'ok');
+}
+
+// ── Arqueo ──
+const DENOMINACIONES = [
+  { val: 1000, label: '$1,000' }, { val: 500, label: '$500' },
+  { val: 200,  label: '$200'  }, { val: 100, label: '$100' },
+  { val:  50,  label: '$50'   }, { val:  20, label: '$20'  },
+  { val:  10,  label: '$10'   }, { val:   5, label: '$5'   },
+  { val:   2,  label: '$2'    }, { val:   1, label: '$1'   },
+  { val: 0.50, label: '$0.50' }, { val: 0.20, label: '$0.20' },
+  { val: 0.10, label: '$0.10' },
+];
+
+function renderArqueo() {
+  const tbody = document.getElementById('arqueoCuerpo');
+  tbody.innerHTML = DENOMINACIONES.map(d => `
+    <tr>
+      <td style="font-weight:600">${esc(d.label)}</td>
+      <td class="right">
+        <input class="denom-input" id="denom-${d.val.toString().replace('.','_')}"
+          type="number" min="0" step="1" value="0"
+          oninput="calcArqueoTotal()"
+          placeholder="0">
+      </td>
+      <td class="right" id="denom-total-${d.val.toString().replace('.','_')}" style="font-family:var(--font-mono)">$0.00</td>
+    </tr>`).join('');
+}
+
+function calcArqueoTotal() {
+  let total = 0;
+  let totalBills = 0;
+  for (const d of DENOMINACIONES) {
+    const id  = 'denom-' + d.val.toString().replace('.','_');
+    const cnt = parseInt(document.getElementById(id)?.value || '0') || 0;
+    const subtotal = cnt * d.val;
+    total += subtotal;
+    totalBills += cnt;
+    const tdId = 'denom-total-' + d.val.toString().replace('.','_');
+    const td = document.getElementById(tdId);
+    if (td) td.textContent = money(subtotal);
+  }
+  document.getElementById('arqueoTotal').textContent      = money(total);
+  document.getElementById('arqueoTotalBills').textContent = totalBills + ' piezas';
+  updateArqueo(total);
+}
+
+function updateArqueo(totalContado) {
+  if (totalContado === undefined) {
+    totalContado = 0;
+    for (const d of DENOMINACIONES) {
+      const id = 'denom-' + d.val.toString().replace('.','_');
+      totalContado += (parseInt(document.getElementById(id)?.value || '0') || 0) * d.val;
+    }
+  }
+  const efectivoVentas = ventas.filter(v => v.metodo_pago === 'efectivo').reduce((s, v) => s + Number(v.total || 0), 0);
+  const totalEnt   = entradas.reduce((s, e) => s + Number(e.monto || 0), 0);
+  const totalSal   = salidas.reduce((s, e)  => s + Number(e.monto || 0), 0);
+  const esperado   = (turno?.fondoInicial || 0) + efectivoVentas + totalEnt - totalSal;
+  const diff       = totalContado - esperado;
+  const box        = document.getElementById('diffBox');
+  const val        = document.getElementById('diffVal');
+  if (Math.abs(diff) < 0.01) {
+    box.className = 'diff-box ok';
+    val.textContent = '✓ Cuadrado';
+  } else {
+    box.className = diff > 0 ? 'diff-box warn' : 'diff-box err';
+    val.textContent = (diff > 0 ? '+' : '') + money(diff);
+  }
+}
+
+function limpiarArqueo() {
+  DENOMINACIONES.forEach(d => {
+    const el = document.getElementById('denom-' + d.val.toString().replace('.','_'));
+    if (el) el.value = '0';
+    const tel = document.getElementById('denom-total-' + d.val.toString().replace('.','_'));
+    if (tel) tel.textContent = '$0.00';
+  });
+  document.getElementById('arqueoTotal').textContent      = '$0.00';
+  document.getElementById('arqueoTotalBills').textContent = '—';
+  updateArqueo(0);
+}
+
+function copiarArqueo() {
+  let total = 0;
+  const lines = DENOMINACIONES.map(d => {
+    const cnt = parseInt(document.getElementById('denom-' + d.val.toString().replace('.','_'))?.value || '0') || 0;
+    if (!cnt) return null;
+    const sub = cnt * d.val;
+    total += sub;
+    return `${d.label} × ${cnt} = ${money(sub)}`;
+  }).filter(Boolean);
+  const text = `ARQUEO DE EFECTIVO\n${lines.join('\n')}\nTOTAL: ${money(total)}`;
+  navigator.clipboard?.writeText(text).then(() => toast('✓ Copiado al portapapeles', 'ok')).catch(() => toast('No se pudo copiar', 'err'));
+}
+
+function usarArqueoEnCorte() {
+  let total = 0;
+  DENOMINACIONES.forEach(d => {
+    total += (parseInt(document.getElementById('denom-' + d.val.toString().replace('.','_'))?.value || '0') || 0) * d.val;
+  });
+  switchTab('corte', document.querySelectorAll('.tab')[0]);
+  setTimeout(() => {
+    confirmarCerrarTurno();
+    setTimeout(() => {
+      const el = document.getElementById('corteEfectivoFisico');
+      if (el) { el.value = total.toFixed(2); calcDiferenciaCorte(); }
+    }, 200);
+  }, 100);
+}
+
+// ── Historial ──
+function loadHistorial() {
+  const key  = 'volvix:historial-cortes:' + (window.VOLVIX_USER?.tenant_id || 'local');
+  const hist = JSON.parse(localStorage.getItem(key) || '[]');
+  const lista = document.getElementById('listaHistorial');
+  if (!hist.length) {
+    lista.innerHTML = `<div style="padding:60px;text-align:center;color:var(--text-3)">
+      <div style="font-size:44px;margin-bottom:12px;opacity:0.4">📋</div>
+      <div style="font-size:14px;font-weight:600;margin-bottom:6px;color:var(--text-2)">Sin cortes registrados</div>
+      <div style="font-size:13px">Los cortes de caja aparecerán aquí</div>
+    </div>`;
+    return;
+  }
+  lista.innerHTML = hist.map((c, i) => {
+    const diff = c.efectivoFisico - ((c.fondoInicial || 0) + (c.totalVentas || 0));
+    const pillCls = Math.abs(diff) < 1 ? 'green' : diff > 0 ? 'orange' : 'red';
+    const pillLbl = Math.abs(diff) < 1 ? 'Cuadrado' : diff > 0 ? 'Sobrante' : 'Faltante';
+    return `<div class="hist-row" onclick="verCorte(${i})">
+      <div class="hist-icon" style="background:${Math.abs(diff) < 1 ? '#2e7d32' : '#c62828'}">
+        ${Math.abs(diff) < 1 ? '✓' : '✗'}
+      </div>
+      <div class="hist-info">
+        <div class="hist-title">${esc(c.id || 'Corte')} · ${esc(c.cajero || '—')}</div>
+        <div class="hist-meta">
+          Apertura: ${esc(fmtDt(c.inicio))} · Cierre: ${esc(fmtDt(c.fin))} · ${c.ventas?.length || 0} ventas
+        </div>
+      </div>
+      <span class="pill ${pillCls}" style="margin-right:10px">${pillLbl}</span>
+      <div class="hist-total">${money(c.totalVentas || 0)}</div>
+    </div>`;
+  }).join('');
+}
+
+function verCorte(idx) {
+  const key  = 'volvix:historial-cortes:' + (window.VOLVIX_USER?.tenant_id || 'local');
+  const hist = JSON.parse(localStorage.getItem(key) || '[]');
+  const c    = hist[idx];
+  if (!c) return;
+  const win  = window.open('', '_blank', 'width=400,height=600');
+  win.document.write(`<pre style="font-family:Courier New,monospace;font-size:12px;padding:20px;line-height:1.6">${c.ticket || 'Sin ticket'}</pre>`);
+  win.document.close();
+}
+
+// ── Persistir turno ──
+function saveTurno() {
+  if (turno) localStorage.setItem(TURNO_KEY, JSON.stringify(turno));
+  else localStorage.removeItem(TURNO_KEY);
+}
+
+// ── Formato duración ──
+function formatDuracion(ms) {
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  return `${h}h ${m}min`;
+}
+
+// ── Modal helpers ──
+function openModal(id)  { document.getElementById(id)?.classList.add('open'); }
+function closeModal(id) { document.getElementById(id)?.classList.remove('open'); }
+
+// ── Toast ──
+function toast(msg, type = 'info') {
+  if (window.volvix?.utils?.toast) { window.volvix.utils.toast(msg, type); return; }
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className   = 'toast show ' + type;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.className = 'toast', 2800);
+}
+
+// ── Keyboard ──
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-bg.open').forEach(m => m.classList.remove('open'));
+  }
+});
+
+// ── INIT ──
+window.volvix.ready(() => {
+  renderArqueo();
+  loadTurno();
+  // Fecha default en historial = hoy
+  const hoy = new Date().toISOString().slice(0, 10);
+  const fi  = document.getElementById('filtroFecha');
+  if (fi) fi.value = hoy;
+});
+</script>
+</body>
+</html>
