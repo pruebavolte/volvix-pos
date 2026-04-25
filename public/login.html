@@ -546,7 +546,7 @@ function getClient() {
 })();
 
 // ── Verificar sesión existente al cargar ──
-(async function checkExistingSession() {
+(function checkExistingSession() {
   const raw = localStorage.getItem('volvix:session');
   if (raw) {
     try {
@@ -560,15 +560,8 @@ function getClient() {
     localStorage.removeItem('volvix:session');
   }
 
-  // Verificar sesión de Supabase activa
-  const client = getClient();
-  if (!client) return;
-  try {
-    const { data: { session } } = await client.auth.getSession();
-    if (session) {
-      await buildVolvixSession(session);
-    }
-  } catch {}
+  // No hacer verificación de Supabase al cargar login
+  // El usuario debe usar /api/login para autenticarse
 })();
 
 // ── Tabs ──
@@ -701,95 +694,27 @@ async function handleLogin() {
 }
 
 // ── CONSTRUIR SESIÓN VOLVIX desde sesión de Supabase ──
+// Versión simplificada: solo redirige basado en rol (queries complejas en /api/login)
 async function buildVolvixSession(supabaseSession) {
-  const client = getClient();
-  if (!client || !supabaseSession) return;
-
+  if (!supabaseSession) return;
   const supaUser = supabaseSession.user;
 
-  // Buscar usuario en volvix_usuarios para obtener rol y tenant
-  let volvixUser = null;
-  try {
-    const { data, error } = await client
-      .from('volvix_usuarios')
-      .select('*')
-      .eq('user_id', supaUser.id)
-      .maybeSingle();
-    if (!error && data) volvixUser = data;
-  } catch {}
-
-  // Si no existe en volvix_usuarios → crear como owner de demo
-  // (en producción esto se manejaría vía onboarding)
-  if (!volvixUser) {
-    volvixUser = {
-      user_id:   supaUser.id,
-      email:     supaUser.email,
-      role:      'owner',
-      tenant_id: null,
-    };
-  }
-
-  // Buscar tenants asociados a este usuario
-  let tenants = [];
-  try {
-    if (volvixUser.role === 'superadmin') {
-      // Superadmin ve todos los tenants
-      const { data } = await client
-        .from('volvix_tenants')
-        .select('id, name, giro, plan, status')
-        .eq('status', 'active')
-        .limit(50);
-      tenants = data || [];
-    } else if (volvixUser.tenant_id) {
-      // Usuario con tenant específico
-      const { data } = await client
-        .from('volvix_tenants')
-        .select('id, name, giro, plan, status')
-        .eq('id', volvixUser.tenant_id)
-        .maybeSingle();
-      if (data) tenants = [data];
-    } else {
-      // Owner sin tenant → buscar por owner_user_id
-      const { data } = await client
-        .from('volvix_tenants')
-        .select('id, name, giro, plan, status')
-        .eq('owner_user_id', supaUser.id)
-        .eq('status', 'active');
-      tenants = data || [];
-    }
-  } catch {}
-
-  // Si no hay tenants → sesión igualmente válida (superadmin sin tenants)
-  const sessionBase = {
+  // Crear sesión mínima basada en Supabase
+  // El servidor manejará roles y tenants via /api/login
+  const session = {
     user_id:      supaUser.id,
     email:        supaUser.email,
-    role:         volvixUser.role || 'owner',
+    role:         'owner', // Default role
+    tenant_id:    null,
+    tenant_name:  '',
     access_token: supabaseSession.access_token,
     expires_at:   supabaseSession.expires_at
       ? new Date(supabaseSession.expires_at).getTime()
       : Date.now() + 3600 * 1000,
+    plan:         'free',
   };
 
-  if (tenants.length === 0) {
-    // Sin tenants → entrar de todos modos (superadmin o usuario nuevo)
-    saveAndRedirect({ ...sessionBase, tenant_id: null, tenant_name: '' });
-    return;
-  }
-
-  if (tenants.length === 1) {
-    // Un solo tenant → entrar directo
-    const t = tenants[0];
-    saveAndRedirect({
-      ...sessionBase,
-      tenant_id:   t.id,
-      tenant_name: t.name,
-      plan:        t.plan || 'basico',
-    });
-    return;
-  }
-
-  // Múltiples tenants → mostrar selector
-  showTenantSelector(tenants, sessionBase);
+  saveAndRedirect(session);
 }
 
 // ── SELECTOR DE TENANT ──
