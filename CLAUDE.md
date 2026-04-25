@@ -79,19 +79,30 @@ La compactación la hace el sistema, no yo, cuando se llena el contexto. Para qu
   - `public/pos.html` — POS corregido completo con auth-gate (1812 líneas)
 
 ### Pendiente P0 (bloquea producción)
-- [x] Aplicar `supabase-rls.sql` en dashboard de Supabase — **HECHO 2026-04-25** (7 tablas rowsecurity=true, 15 políticas, user_id+owner_user_id añadidos)
+- [x] Aplicar `supabase-rls.sql` en dashboard de Supabase — **HECHO 2026-04-25**
 - [x] Crear `public/config.js` real con credenciales — **HECHO 2026-04-25**
-- [x] Implementar `public/login.html` — **HECHO 2026-04-25** (26262 bytes, entregado por Claude AI)
-- [ ] Roles implementados: owner, cajero, soporte (auth-gate.js ya está listo)
+- [x] Implementar `public/login.html` — **HECHO 2026-04-25**
+- [x] Roles implementados via auth-gate.js (superadmin, owner, cajero)
+
+### **SISTEMA BASE COMPLETO — 2026-04-25** ✅
+Claude AI confirmó: "El sistema base está completo."
+Todos los archivos core entregados, verificados y en producción (Vercel).
 
 ### Pendiente P1
 - [ ] Sentry DSN real configurado
 - [ ] Testing cross-browser real
 
-### Pendiente P2
+### Pendiente P2 (Fase 4+ — bajo demanda, pedir a Claude AI con JSON spec)
+- [ ] `public/volvix_ai_engine.html` — motor auto-evolución
+- [ ] `public/volvix_ai_support.html` — soporte IA
+- [ ] `public/volvix_ai_academy.html` — academia videos
+- [ ] `public/volvix_remote.html` — control remoto VX-XXXX
+- [ ] `public/marketplace.html` — landing captación
+- [ ] `public/landing_dynamic.html` — 35 landings por giro
+- [ ] `public/multipos_suite_v3.html` — 4 apps restaurante
+- [ ] `public/etiqueta_designer.html` — diseñador etiquetas
 - [ ] Impresión térmica
 - [ ] Scanner barcode hardware
-- [ ] Corte de caja Z
 - [ ] Onboarding wizard
 
 ---
@@ -101,12 +112,15 @@ La compactación la hace el sistema, no yo, cuando se llena el contexto. Para qu
 | Ruta | Descripción | Estado |
 |---|---|---|
 | `/` | Landing principal | OK |
-| `/pos.html` | Punto de venta | Estilo SalvadoreX (ver con Claude AI si está bien) |
-| `/owner.html` | Dashboard propietario | Genérico — pendiente diseño |
-| `/inventario.html` | Gestión stock | Genérico — pendiente diseño |
-| `/ai.html` | Motor IA | Genérico — pendiente diseño |
-| `/soporte.html` | Tickets soporte | Genérico — pendiente diseño |
-| `/login.html` | Login | OK — entregado por Claude AI 2026-04-25 (26262 bytes) |
+| `/login.html` | Login | ✅ 26262 bytes |
+| `/pos.html` | Punto de venta | ✅ 1812 líneas |
+| `/pos-inventario.html` | Gestión stock | ✅ 55618 bytes, 1496 líneas |
+| `/pos-corte.html` | Corte de caja | ✅ 49726 bytes |
+| `/pos-clientes.html` | CRM clientes | ✅ 52627 bytes, 1391 líneas |
+| `/pos-reportes.html` | Reportes y analytics | ✅ 41813 bytes, 1000 líneas |
+| `/pos-config.html` | Configuración | ✅ 74361 bytes, 1505 líneas |
+| `/sw.js` | Service Worker PWA | ✅ 12747 bytes, 419 líneas |
+| `/manifest.json` | PWA Manifest | ✅ 902 bytes |
 | `/landing-*.html` | 8 verticales | OK |
 
 ---
@@ -155,5 +169,8 @@ SENTRY_DSN=                          # opcional
 
 > Anotar AQUÍ cada respuesta importante de Claude AI con fecha, para que sobreviva la compactación.
 
-### 2026-04-24 — Pendiente
-- Esperando respuesta de Claude AI sobre: pantalla de login, lista completa de pantallas, paleta visual oficial, auditoría de lo entregado.
+### 2026-04-25 — SISTEMA BASE COMPLETO ✅
+- Claude AI confirmó: "El sistema base está completo."
+- Entregados y en producción: login.html, pos.html, pos-inventario.html, pos-corte.html, pos-clientes.html, pos-reportes.html, pos-config.html, sw.js, manifest.json
+- Fase 4+ pendiente bajo demanda (8 archivos opcionales listados arriba)
+- Para pedir Fase 4+: mandar JSON spec `{"task":"spec_screen","screen":"NOMBRE.html","question":"..."}` a Claude AI
