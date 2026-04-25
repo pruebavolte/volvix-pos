@@ -182,7 +182,23 @@ SENTRY_DSN=                          # opcional
 - Fase 4+ pendiente bajo demanda (8 archivos opcionales listados arriba)
 - Para pedir Fase 4+: mandar JSON spec `{"task":"spec_screen","screen":"NOMBRE.html","question":"..."}` a Claude AI
 
-### 2026-04-25 — FIX CRÍTICO: Login infinite redirect (flasheo) ✅
+### 2026-04-25 — FIX CRÍTICO #1: Login infinite redirect (flasheo) ✅
+**SOLUCIONADO**: Implementación de /api/login server-side
+
+### 2026-04-25 — FIX CRÍTICO #2: Login page congelamiento ("flasheo") ✅
+**PROBLEMA**: Cuando usuario ingresaba credenciales, página se congelaba (renderer inresponsive)
+**ROOT CAUSE**: `checkExistingSession()` llamaba a función antigua `buildVolvixSession()` que hacía queries complejas a Supabase y se colgaba
+**SOLUCIÓN**:
+- Removido el llamado a `buildVolvixSession()` desde `checkExistingSession()`
+- Simplificado `buildVolvixSession()` para no hacer queries complejas
+- /api/login maneja toda la lógica de roles y tenants server-side
+
+**RESULTADO**:
+- ✅ Login responde instantáneamente
+- ✅ Sin congelamiento, sin "flasheo"
+- ✅ Credenciales se ingresan sin problemas
+- ✅ Redirige automáticamente al entrar
+- Commit: 5984258
 **PROBLEMA**: Cuando usuario ingresa credenciales en login.html:
 - Se entraba en loop: login.html?expired=1&redirect=%2Fpos.html
 - Página se "flasheaba" constantemente sin permitir entrada
