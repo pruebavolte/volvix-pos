@@ -89,10 +89,11 @@ La compactación la hace el sistema, no yo, cuando se llena el contexto. Para qu
   - Ahora: servidor maneja Supabase auth + queries en una sola respuesta
   - Pruebas: admin@volvix.test / Volvix2026! ✅ Funciona sin flasheo
 
-### **SISTEMA BASE COMPLETO — 2026-04-25** ✅
+### **SISTEMA BASE COMPLETO + DISEÑO OFICIAL — 2026-04-25** ✅
 Claude AI confirmó: "El sistema base está completo."
 Todos los archivos core entregados, verificados y en producción (Vercel).
 **CRÍTICO ARREGLADO**: Login funciona con credenciales reales (sin inyección manual).
+**DISEÑO ACTUALIZADO**: login.html reemplazado con diseño profesional oficial (glassmorphism, modern UI).
 
 ### Pendiente P1
 - [ ] Sentry DSN real configurado
