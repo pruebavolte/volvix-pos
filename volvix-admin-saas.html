@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volvix Admin SaaS — Super Admin Panel</title>
+<style>
+:root{
+  --bg:#0a0e1a;--bg2:#111827;--card:#1a2235;--card2:#222d44;
+  --border:#2a3653;--text:#e6edf7;--muted:#8b97b3;
+  --primary:#6366f1;--primary2:#8b5cf6;--success:#10b981;--warn:#f59e0b;--danger:#ef4444;--info:#06b6d4;
+  --grad:linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+
+/* Sidebar */
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:20px 0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.logo{padding:0 20px 24px;border-bottom:1px solid var(--border);margin-bottom:16px}
+.logo h1{font-size:18px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:800}
+.logo span{font-size:11px;color:var(--muted);letter-spacing:1px}
+.nav-section{padding:8px 16px;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-top:12px}
+.nav a{display:flex;align-items:center;gap:10px;padding:10px 20px;color:var(--muted);text-decoration:none;font-size:13px;border-left:3px solid transparent;transition:all .15s}
+.nav a:hover{background:var(--card);color:var(--text)}
+.nav a.active{background:var(--card);color:var(--text);border-left-color:var(--primary)}
+.nav a .ic{width:18px;text-align:center}
+.nav a .badge{margin-left:auto;background:var(--danger);color:#fff;font-size:10px;padding:2px 6px;border-radius:10px}
+
+/* Main */
+.main{display:flex;flex-direction:column;min-width:0}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:10}
+.search{flex:1;max-width:480px;position:relative}
+.search input{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:9px 14px 9px 36px;border-radius:8px;font-size:13px;outline:none}
+.search input:focus{border-color:var(--primary)}
+.search::before{content:"🔍";position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:12px}
+.tb-actions{display:flex;gap:10px;align-items:center}
+.icon-btn{background:var(--card);border:1px solid var(--border);color:var(--text);width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:14px;position:relative}
+.icon-btn .dot{position:absolute;top:6px;right:6px;width:8px;height:8px;background:var(--danger);border-radius:50%}
+.user{display:flex;align-items:center;gap:10px;padding:4px 10px 4px 4px;background:var(--card);border-radius:24px;border:1px solid var(--border)}
+.avatar{width:30px;height:30px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px}
+.user-info{font-size:12px}
+.user-info .role{color:var(--muted);font-size:10px}
+
+/* Content */
+.content{padding:28px;flex:1}
+.page-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;flex-wrap:wrap;gap:16px}
+.page-head h2{font-size:24px;font-weight:700;margin-bottom:4px}
+.page-head p{color:var(--muted);font-size:13px}
+.btn{padding:9px 16px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:500;transition:opacity .15s}
+.btn:hover{opacity:.85}
+.btn-primary{background:var(--grad);color:#fff}
+.btn-ghost{background:var(--card);color:var(--text);border:1px solid var(--border)}
+.btn-success{background:var(--success);color:#fff}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap}
+
+/* KPI Grid */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:28px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;position:relative;overflow:hidden}
+.kpi::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad)}
+.kpi.green::before{background:var(--success)}
+.kpi.orange::before{background:var(--warn)}
+.kpi.red::before{background:var(--danger)}
+.kpi.cyan::before{background:var(--info)}
+.kpi-label{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.kpi-value{font-size:28px;font-weight:700;margin-bottom:4px}
+.kpi-trend{font-size:12px;display:flex;align-items:center;gap:6px}
+.kpi-trend.up{color:var(--success)}
+.kpi-trend.down{color:var(--danger)}
+.kpi-sub{color:var(--muted);font-size:11px;margin-top:8px}
+
+/* Two-column rows */
+.row{display:grid;gap:18px;margin-bottom:24px}
+.row-2{grid-template-columns:2fr 1fr}
+.row-3{grid-template-columns:1fr 1fr 1fr}
+@media(max-width:1100px){.row-2,.row-3{grid-template-columns:1fr}}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
+.card-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.card-h h3{font-size:15px;font-weight:600}
+.card-h .more{color:var(--muted);font-size:18px;cursor:pointer}
+
+/* Chart placeholder (CSS bars) */
+.chart{height:220px;display:flex;align-items:flex-end;gap:8px;padding:10px 0;border-bottom:1px solid var(--border)}
+.bar{flex:1;background:var(--grad);border-radius:6px 6px 0 0;position:relative;min-height:8px;transition:opacity .15s}
+.bar:hover{opacity:.8}
+.bar span{position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--muted);white-space:nowrap}
+.chart-x{display:flex;gap:8px;padding-top:8px;color:var(--muted);font-size:10px}
+.chart-x div{flex:1;text-align:center}
+
+/* Donut (pure css) */
+.donut{width:160px;height:160px;border-radius:50%;background:conic-gradient(var(--primary) 0 45%,var(--primary2) 45% 70%,var(--info) 70% 88%,var(--warn) 88% 100%);position:relative;margin:0 auto}
+.donut::after{content:"";position:absolute;inset:22px;background:var(--card);border-radius:50%}
+.donut-c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1}
+.donut-c b{font-size:22px}
+.donut-c span{font-size:10px;color:var(--muted)}
+.legend{margin-top:16px}
+.legend div{display:flex;justify-content:space-between;padding:6px 0;font-size:12px;border-bottom:1px solid var(--border)}
+.legend div:last-child{border:none}
+.legend .sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:8px;vertical-align:middle}
+
+/* Tables */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:10px 12px;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);font-weight:500}
+td{padding:12px;border-bottom:1px solid var(--border)}
+tr:last-child td{border:none}
+tr:hover td{background:var(--card2)}
+.tag{display:inline-block;padding:3px 9px;border-radius:12px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.tag.ok{background:rgba(16,185,129,.15);color:var(--success)}
+.tag.warn{background:rgba(245,158,11,.15);color:var(--warn)}
+.tag.err{background:rgba(239,68,68,.15);color:var(--danger)}
+.tag.info{background:rgba(6,182,212,.15);color:var(--info)}
+.tag.purple{background:rgba(139,92,246,.15);color:var(--primary2)}
+.t-mini{font-size:11px;color:var(--muted)}
+.tcell{display:flex;align-items:center;gap:10px}
+.t-avatar{width:32px;height:32px;border-radius:8px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0}
+
+/* Health bars */
+.health-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.health-row:last-child{border:none}
+.health-row .lbl{flex:0 0 130px;font-size:13px}
+.health-row .progress{flex:1;height:8px;background:var(--bg);border-radius:4px;overflow:hidden}
+.health-row .progress > div{height:100%;background:var(--success);border-radius:4px}
+.health-row .v{flex:0 0 70px;text-align:right;font-size:12px;color:var(--muted)}
+
+/* Activity feed */
+.feed-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.feed-item:last-child{border:none}
+.feed-ic{width:32px;height:32px;border-radius:8px;background:var(--card2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
+.feed-c{flex:1;font-size:13px}
+.feed-c b{color:var(--text)}
+.feed-c .meta{color:var(--muted);font-size:11px;margin-top:2px}
+
+/* Deploys */
+.deploy{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--card2);border:1px solid var(--border);border-radius:8px;margin-bottom:8px}
+.deploy .stat{width:8px;height:8px;border-radius:50%}
+.deploy .stat.ok{background:var(--success);box-shadow:0 0 8px var(--success)}
+.deploy .stat.run{background:var(--info);box-shadow:0 0 8px var(--info);animation:pulse 1.2s infinite}
+.deploy .stat.err{background:var(--danger)}
+@keyframes pulse{50%{opacity:.4}}
+.deploy b{font-size:13px}
+.deploy .meta{color:var(--muted);font-size:11px}
+.deploy .right{margin-left:auto;text-align:right;font-size:11px;color:var(--muted)}
+
+/* Tickets */
+.ticket{padding:12px;background:var(--card2);border-radius:8px;border-left:3px solid var(--info);margin-bottom:10px}
+.ticket.urgent{border-left-color:var(--danger)}
+.ticket.high{border-left-color:var(--warn)}
+.ticket-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.ticket-h b{font-size:13px}
+.ticket p{color:var(--muted);font-size:12px}
+.ticket .meta{margin-top:8px;display:flex;gap:8px;align-items:center;font-size:11px;color:var(--muted)}
+
+/* Footer */
+.footer{padding:18px 28px;border-top:1px solid var(--border);color:var(--muted);font-size:12px;display:flex;justify-content:space-between}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <h1>VOLVIX</h1>
+      <span>SUPER ADMIN SAAS</span>
+    </div>
+    <div class="nav-section">Principal</div>
+    <nav class="nav">
+      <a href="#" class="active"><span class="ic">📊</span>Dashboard</a>
+      <a href="#"><span class="ic">🏢</span>Tenants<span class="badge">847</span></a>
+      <a href="#"><span class="ic">👥</span>Usuarios</a>
+      <a href="#"><span class="ic">💳</span>Billing Global</a>
+      <a href="#"><span class="ic">📈</span>Analytics</a>
+    </nav>
+    <div class="nav-section">Operaciones</div>
+    <nav class="nav">
+      <a href="#"><span class="ic">🚀</span>Deploys</a>
+      <a href="#"><span class="ic">🛟</span>Soporte<span class="badge">23</span></a>
+      <a href="#"><span class="ic">⚡</span>System Health</a>
+      <a href="#"><span class="ic">🔔</span>Alertas<span class="badge">5</span></a>
+      <a href="#"><span class="ic">🗄️</span>Base de Datos</a>
+    </nav>
+    <div class="nav-section">Configuración</div>
+    <nav class="nav">
+      <a href="#"><span class="ic">🎨</span>Planes &amp; Precios</a>
+      <a href="#"><span class="ic">🔐</span>Seguridad</a>
+      <a href="#"><span class="ic">🧩</span>Integraciones</a>
+      <a href="#"><span class="ic">📜</span>Audit Logs</a>
+      <a href="#"><span class="ic">⚙️</span>Ajustes</a>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="search"><input placeholder="Buscar tenants, usuarios, transacciones..."></div>
+      <div class="tb-actions">
+        <button class="icon-btn" title="Comando"><span>⌘</span></button>
+        <button class="icon-btn" title="Notificaciones">🔔<span class="dot"></span></button>
+        <button class="icon-btn" title="Tema">🌙</button>
+        <div class="user">
+          <div class="avatar">JD</div>
+          <div class="user-info">
+            <div>Juan Devs</div>
+            <div class="role">Super Admin</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <div class="page-head">
+        <div>
+          <h2>Dashboard Global</h2>
+          <p>Panorama multi-tenant en tiempo real · última actualización hace 2 min</p>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost">📥 Exportar</button>
+          <button class="btn btn-ghost">📅 Últimos 30 días</button>
+          <button class="btn btn-primary">+ Nuevo Tenant</button>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="kpi-label">MRR (Recurrente Mensual)</div>
+          <div class="kpi-value">$284,750</div>
+          <div class="kpi-trend up">▲ 12.4% vs mes anterior</div>
+          <div class="kpi-sub">Proyectado: $312k al cierre</div>
+        </div>
+        <div class="kpi green">
+          <div class="kpi-label">ARR (Recurrente Anual)</div>
+          <div class="kpi-value">$3.42M</div>
+          <div class="kpi-trend up">▲ 18.7% YoY</div>
+          <div class="kpi-sub">Meta 2026: $4.2M</div>
+        </div>
+        <div class="kpi cyan">
+          <div class="kpi-label">Tenants Activos</div>
+          <div class="kpi-value">847</div>
+          <div class="kpi-trend up">▲ 34 nuevos este mes</div>
+          <div class="kpi-sub">12,438 usuarios totales</div>
+        </div>
+        <div class="kpi orange">
+          <div class="kpi-label">Churn Rate</div>
+          <div class="kpi-value">2.8%</div>
+          <div class="kpi-trend down">▼ 0.4% vs mes anterior</div>
+          <div class="kpi-sub">24 cancelaciones · meta &lt;3%</div>
+        </div>
+        <div class="kpi red">
+          <div class="kpi-label">Incidentes Abiertos</div>
+          <div class="kpi-value">5</div>
+          <div class="kpi-trend down">▼ 3 resueltos hoy</div>
+          <div class="kpi-sub">2 P1 · 3 P2</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">NPS Score</div>
+          <div class="kpi-value">72</div>
+          <div class="kpi-trend up">▲ 5 pts trim.</div>
+          <div class="kpi-sub">Promotores 78% · Detractores 6%</div>
+        </div>
+      </div>
+
+      <!-- Row: Revenue chart + Plan distribution -->
+      <div class="row row-2">
+        <div class="card">
+          <div class="card-h">
+            <div>
+              <h3>Crecimiento de Ingresos · MRR</h3>
+              <div class="t-mini">Últimos 12 meses · USD</div>
+            </div>
+            <div class="btn-row">
+              <button class="btn btn-ghost" style="padding:6px 12px;font-size:11px">MRR</button>
+              <button class="btn btn-ghost" style="padding:6px 12px;font-size:11px">ARR</button>
+              <button class="btn btn-ghost" style="padding:6px 12px;font-size:11px">Net New</button>
+            </div>
+          </div>
+          <div class="chart">
+            <div class="bar" style="height:38%"><span>$112k</span></div>
+            <div class="bar" style="height:42%"><span>$128k</span></div>
+            <div class="bar" style="height:48%"><span>$142k</span></div>
+            <div class="bar" style="height:54%"><span>$158k</span></div>
+            <div class="bar" style="height:58%"><span>$172k</span></div>
+            <div class="bar" style="height:62%"><span>$184k</span></div>
+            <div class="bar" style="height:68%"><span>$198k</span></div>
+            <div class="bar" style="height:72%"><span>$214k</span></div>
+            <div class="bar" style="height:78%"><span>$232k</span></div>
+            <div class="bar" style="height:84%"><span>$248k</span></div>
+            <div class="bar" style="height:90%"><span>$265k</span></div>
+            <div class="bar" style="height:96%"><span>$284k</span></div>
+          </div>
+          <div class="chart-x">
+            <div>May</div><div>Jun</div><div>Jul</div><div>Ago</div><div>Sep</div><div>Oct</div>
+            <div>Nov</div><div>Dic</div><div>Ene</div><div>Feb</div><div>Mar</div><div>Abr</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-h"><h3>Distribución por Plan</h3><span class="more">⋯</span></div>
+          <div style="position:relative">
+            <div class="donut"></div>
+            <div class="donut-c" style="top:0;height:160px"><b>847</b><span>tenants</span></div>
+          </div>
+          <div class="legend">
+            <div><span><span class="sw" style="background:var(--primary)"></span>Starter</span><b>381 · 45%</b></div>
+            <div><span><span class="sw" style="background:var(--primary2)"></span>Pro</span><b>212 · 25%</b></div>
+            <div><span><span class="sw" style="background:var(--info)"></span>Business</span><b>152 · 18%</b></div>
+            <div><span><span class="sw" style="background:var(--warn)"></span>Enterprise</span><b>102 · 12%</b></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row: System Health + Deploys -->
+      <div class="row row-2">
+        <div class="card">
+          <div class="card-h">
+            <h3>System Health · Infraestructura</h3>
+            <span class="tag ok">● Todos los servicios operativos</span>
+          </div>
+          <div class="health-row"><div class="lbl">API Gateway</div><div class="progress"><div style="width:99%"></div></div><div class="v">99.98%</div></div>
+          <div class="health-row"><div class="lbl">Auth Service</div><div class="progress"><div style="width:100%"></div></div><div class="v">100%</div></div>
+          <div class="health-row"><div class="lbl">PostgreSQL</div><div class="progress"><div style="width:97%;background:var(--warn)"></div></div><div class="v">97.2%</div></div>
+          <div class="health-row"><div class="lbl">Redis Cache</div><div class="progress"><div style="width:100%"></div></div><div class="v">100%</div></div>
+          <div class="health-row"><div class="lbl">CDN (Cloudflare)</div><div class="progress"><div style="width:99%"></div></div><div class="v">99.9%</div></div>
+          <div class="health-row"><div class="lbl">Email (SendGrid)</div><div class="progress"><div style="width:98%"></div></div><div class="v">98.4%</div></div>
+          <div class="health-row"><div class="lbl">Storage S3</div><div class="progress"><div style="width:100%"></div></div><div class="v">100%</div></div>
+          <div class="health-row"><div class="lbl">Workers Queue</div><div class="progress"><div style="width:94%;background:var(--warn)"></div></div><div class="v">94.1%</div></div>
+          <div style="display:flex;gap:18px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)">
+            <span>⚡ Latencia P95: <b style="color:var(--text)">142ms</b></span>
+            <span>📊 Req/min: <b style="color:var(--text)">8.4k</b></span>
+            <span>💾 DB conex: <b style="color:var(--text)">324/500</b></span>
+            <span>🔥 CPU avg: <b style="color:var(--text)">38%</b></span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-h"><h3>Deploys Recientes</h3><button class="btn btn-primary" style="padding:6px 12px;font-size:11px">+ Deploy</button></div>
+          <div class="deploy">
+            <div class="stat ok"></div>
+            <div><b>v4.12.3</b> → producción<br><span class="meta">main · #a8f2c1 · feat: nuevo billing dashboard</span></div>
+            <div class="right">hace 14 min<br><span class="tag ok">success</span></div>
+          </div>
+          <div class="deploy">
+            <div class="stat run"></div>
+            <div><b>v4.12.4-rc1</b> → staging<br><span class="meta">develop · #b3e991 · fix: webhook retry logic</span></div>
+            <div class="right">en curso · 2:34<br><span class="tag info">building</span></div>
+          </div>
+          <div class="deploy">
+            <div class="stat ok"></div>
+            <div><b>v4.12.2</b> → producción<br><span class="meta">main · #c1d847 · perf: query optimization</span></div>
+            <div class="right">hace 6h<br><span class="tag ok">success</span></div>
+          </div>
+          <div class="deploy">
+            <div class="stat err"></div>
+            <div><b>v4.12.1</b> → staging<br><span class="meta">hotfix · #f4a233 · revert payment provider</span></div>
+            <div class="right">hace 9h<br><span class="tag err">failed</span></div>
+          </div>
+          <div class="deploy">
+            <div class="stat ok"></div>
+            <div><b>v4.12.0</b> → producción<br><span class="meta">release · #91bc55 · release: minor v4.12</span></div>
+            <div class="right">hace 1d<br><span class="tag ok">success</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tenants Table -->
+      <div class="card" style="margin-bottom:24px">
+        <div class="card-h">
+          <div>
+            <h3>Top Tenants por Ingresos</h3>
+            <div class="t-mini">Mostrando 8 de 847 · ordenado por MRR</div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-ghost" style="padding:6px 12px;font-size:11px">Filtros</button>
+            <button class="btn btn-ghost" style="padding:6px 12px;font-size:11px">Ver todos</button>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Tenant</th><th>Plan</th><th>Usuarios</th><th>MRR</th><th>Estado</th><th>Región</th><th>Última actividad</th><th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="tcell"><div class="t-avatar">AC</div><div><b>Acme Corp</b><div class="t-mini">acme.volvix.io</div></div></div></td>
+              <td><span class="tag purple">Enterprise</span></td>
+              <td>248</td><td><b>$4,800</b></td>
+              <td><span class="tag ok">Activo</span></td>
+              <td>US-East</td><td class="t-mini">hace 3 min</td>
+              <td><span class="more" style="cursor:pointer">⋯</span></td>
+            </tr>
+            <tr>
+              <td><div class="tcell"><div class="t-avatar" style="background:linear-gradient(135deg,#10b981,#06b6d4)">GV</div><div><b>Grupo Volvix</b><div class="t-mini">volvix.volvix.io</div></div></div></td>
+              <td><span class="tag purple">Enterprise</span></td>
+              <td>184</td><td><b>$4,200</b></td>
+              <td><span class="tag ok">Activo</span></td>
+              <td>LatAm</td><td class="t-mini">hace 1 min</td>
+              <td><span class="more" style="cursor:pointer">⋯</span></td>
+            </tr>
+            <tr>
+              <td><div class="tcell"><div class="t-avatar" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">SL</div><div><b>SalvadoreX Labs</b><div class="t-mini">salvadorex.volvix.io</div></div></div></td>
+              <td><span class="tag info">Business</span></td>
+              <td>92</td><td><b>$2,400</b></td>
+              <td><span class="tag ok">Activo</span></td>
+              <td>LatAm</td><td class="t-mini">hace 12 min</td>
+              <td><span class="more" style="cursor:pointer">⋯</span></td>
+            </tr>
+            <tr>
+              <td><div class="tcell"><div class="t-avatar" style="background:linear-gradient(135deg,#8b5cf6,#ec4899)">NX</div><div><b>NextWave Tech</b><div class="t-mini">nextwave.volvix.io</div></div></div></td>
+              <td><span class="tag info">Business</span></td>
+              <td>76</td><td><b>$2,200</b></td>
+              <td><span class="tag warn">Trial</span></td>
+              <td>EU-West</td><td class="t-mini">hace 28 min</td>
+              <td><span class="more" style="cursor:pointer">⋯</span></td>
+            </tr>
+            <tr>
+              <td><div class="tcell"><div class="t-avatar" style="background:linear-gradient(135deg,#06b6d4,#3b82f6)">FL</div><div><b>FlowLogic SA</b><div class="t-mini">flowlogic.volvix.io</div></div></div></td>
+              <td><span class="tag info">Business</span></td>
+              <td>64</td><td><b>$1,950</b></td>
+              <td><span class="tag ok">Activo</span></td>
+              <td>EU-West</td><td class="t-mini">hace 1h</td>
+              <td><span class="more" style="cursor:pointer">⋯</span></td>
+            </tr>
+            <tr>
+              <td><div class="tcell"><div class="t-avatar" style="background:linear-gradient(135deg,#ef4444,#f59e0b)">RT</div><div><b>RetailTrust</b><div class="t-mini">retailtrust.volvix.io</div></div></div></td>
+              <td><span class="tag" style="background:rgba(99,102,241,.15);color:var(--primary)">Pro</span></td>
+              <td>42</td><td><b>$1,180</b></td>
+              <td><span class="tag err">Pago pendiente</span></td>
+              <td>US-West</td><td class="t-mini">hace 2h</td>
+              <td><span class="more" style="cursor:pointer">⋯</span></td>
+            </tr>
+            <tr>
+              <td><div class="tcell"><div class="t-avatar" style="background:linear-gradient(135deg,#10b981,#84cc16)">QM</div><div><b>QuantumMed</b><div class="t-mini">quantummed.volvix.io</div></div></div></td>
+              <td><span class="tag" style="background:rgba(99,102,241,.15);color:var(--primary)">Pro</span></td>
+              <td>38</td><td><b>$980</b></td>
+              <td><span class="tag ok">Activo</span></td>
+              <td>US-East</td><td class="t-mini">hace 4h</td>
+              <td><span class="more" style="cursor:pointer">⋯</span></td>
+            </tr>
+            <tr>
+              <td><div class="tcell"><div class="t-avatar" style="background:linear-gradient(135deg,#3b82f6,#8b5cf6)">CB</div><div><b>CodeBros Inc</b><div class="t-mini">codebros.volvix.io</div></div></div></td>
+              <td><span class="tag" style="background:rgba(99,102,241,.15);color:var(--primary)">Pro</span></td>
+              <td>31</td><td><b>$890</b></td>
+              <td><span class="tag ok">Activo</span></td>
+              <td>APAC</td><td class="t-mini">hace 6h</td>
+              <td><span class="more" style="cursor:pointer">⋯</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Row: Activity feed + Support tickets + Billing summary -->
+      <div class="row row-3">
+        <div class="card">
+          <div class="card-h"><h3>Actividad Global</h3><span class="more">⋯</span></div>
+          <div class="feed-item">
+            <div class="feed-ic">💰</div>
+            <div class="feed-c"><b>Acme Corp</b> renovó plan Enterprise <span class="tag ok">$4,800</span><div class="meta">hace 8 min · invoice INV-28447</div></div>
+          </div>
+          <div class="feed-item">
+            <div class="feed-ic">👤</div>
+            <div class="feed-c">Nuevo tenant: <b>BlueSky Studios</b> registrado en plan Pro<div class="meta">hace 22 min · trial 14 días</div></div>
+          </div>
+          <div class="feed-item">
+            <div class="feed-ic">🚀</div>
+            <div class="feed-c">Deploy <b>v4.12.3</b> publicado en producción<div class="meta">hace 14 min · juan@volvix.io</div></div>
+          </div>
+          <div class="feed-item">
+            <div class="feed-ic">⚠️</div>
+            <div class="feed-c"><b>RetailTrust</b> pago fallido — reintentando<span class="tag warn"> $1,180</span><div class="meta">hace 1h · Stripe error: card_declined</div></div>
+          </div>
+          <div class="feed-item">
+            <div class="feed-ic">🔐</div>
+            <div class="feed-c">Login sospechoso bloqueado · tenant <b>FlowLogic</b><div class="meta">hace 2h · IP 185.220.101.x</div></div>
+          </div>
+          <div class="feed-item">
+            <div class="feed-ic">📈</div>
+            <div class="feed-c"><b>NextWave Tech</b> upgrade Trial → Business<div class="meta">hace 3h · +$2,200 MRR</div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-h"><h3>Tickets de Soporte</h3><span class="tag err">23 abiertos</span></div>
+          <div class="ticket urgent">
+            <div class="ticket-h"><b>#8472 · API timeout en webhooks</b><span class="tag err">P1</span></div>
+            <p>Cliente Enterprise reporta latencia &gt;30s en endpoints de billing</p>
+            <div class="meta">Acme Corp · 2h sin respuesta · @sara</div>
+          </div>
+          <div class="ticket urgent">
+            <div class="ticket-h"><b>#8471 · No puedo cambiar plan</b><span class="tag err">P1</span></div>
+            <p>Botón de upgrade no responde, error 500 en consola</p>
+            <div class="meta">QuantumMed · 45 min · sin asignar</div>
+          </div>
+          <div class="ticket high">
+            <div class="ticket-h"><b>#8469 · SSO con Okta no funciona</b><span class="tag warn">P2</span></div>
+            <p>Configuración SAML aparentemente correcta pero rechaza login</p>
+            <div class="meta">FlowLogic SA · 4h · @miguel</div>
+          </div>
+          <div class="ticket high">
+            <div class="ticket-h"><b>#8465 · Reportes PDF salen sin logo</b><span class="tag warn">P2</span></div>
+            <p>Logo personalizado del tenant no aparece en exports</p>
+            <div class="meta">Grupo Volvix · 6h · @ana</div>
+          </div>
+          <div class="ticket">
+            <div class="ticket-h"><b>#8460 · Solicitud feature: dark mode</b><span class="tag info">P3</span></div>
+            <p>Varios usuarios pidiendo modo oscuro en mobile</p>
+            <div class="meta">Múltiples tenants · 1d · backlog</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-h"><h3>Billing Resumen</h3><span class="more">⋯</span></div>
+          <div style="padding:14px;background:var(--card2);border-radius:8px;margin-bottom:12px">
+            <div class="t-mini">Cobrado este mes</div>
+            <div style="font-size:24px;font-weight:700;margin:4px 0">$284,750</div>
+            <div style="font-size:11px;color:var(--success)">▲ 824 transacciones exitosas</div>
+          </div>
+          <div style="padding:14px;background:var(--card2);border-radius:8px;margin-bottom:12px">
+            <div class="t-mini">Pendiente / fallido</div>
+            <div style="font-size:24px;font-weight:700;margin:4px 0;color:var(--warn)">$8,420</div>
+            <div style="font-size:11px;color:var(--muted)">12 invoices · 4 reintentos automáticos</div>
+          </div>
+          <div style="padding:14px;background:var(--card2);border-radius:8px;margin-bottom:12px">
+            <div class="t-mini">Reembolsos</div>
+            <div style="font-size:24px;font-weight:700;margin:4px 0">$1,240</div>
+            <div style="font-size:11px;color:var(--muted)">3 casos · 0.4% del total</div>
+          </div>
+          <table style="margin-top:8px">
+            <tbody>
+              <tr><td style="padding:8px 4px">Stripe</td><td style="text-align:right;padding:8px 4px"><b>$248k</b></td></tr>
+              <tr><td style="padding:8px 4px">PayPal</td><td style="text-align:right;padding:8px 4px"><b>$22k</b></td></tr>
+              <tr><td style="padding:8px 4px">Wire/Manual</td><td style="text-align:right;padding:8px 4px"><b>$14k</b></td></tr>
+            </tbody>
+          </table>
+          <button class="btn btn-primary" style="width:100%;margin-top:12px">Ver Billing completo →</button>
+        </div>
+      </div>
+
+      <!-- Row: Geo + Plans pricing -->
+      <div class="row row-2">
+        <div class="card">
+          <div class="card-h"><h3>Distribución Geográfica</h3><span class="more">⋯</span></div>
+          <table>
+            <thead><tr><th>Región</th><th>Tenants</th><th>MRR</th><th>Crecimiento</th><th>Latencia</th></tr></thead>
+            <tbody>
+              <tr><td>🇺🇸 US-East</td><td>312</td><td>$108k</td><td><span class="tag ok">+14%</span></td><td>98ms</td></tr>
+              <tr><td>🇺🇸 US-West</td><td>184</td><td>$62k</td><td><span class="tag ok">+9%</span></td><td>112ms</td></tr>
+              <tr><td>🇪🇺 EU-West</td><td>156</td><td>$54k</td><td><span class="tag ok">+22%</span></td><td>134ms</td></tr>
+              <tr><td>🌎 LatAm</td><td>121</td><td>$38k</td><td><span class="tag ok">+31%</span></td><td>178ms</td></tr>
+              <tr><td>🌏 APAC</td><td>74</td><td>$22k</td><td><span class="tag warn">+4%</span></td><td>224ms</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="card-h"><h3>Planes &amp; Conversión</h3><button class="btn btn-ghost" style="padding:6px 12px;font-size:11px">Editar</button></div>
+          <table>
+            <thead><tr><th>Plan</th><th>Precio</th><th>Tenants</th><th>Conv. Trial→Paid</th></tr></thead>
+            <tbody>
+              <tr><td><b>Starter</b><div class="t-mini">$29 / mo</div></td><td>$29</td><td>381</td><td><span class="tag ok">68%</span></td></tr>
+              <tr><td><b>Pro</b><div class="t-mini">$99 / mo</div></td><td>$99</td><td>212</td><td><span class="tag ok">54%</span></td></tr>
+              <tr><td><b>Business</b><div class="t-mini">$299 / mo</div></td><td>$299</td><td>152</td><td><span class="tag warn">38%</span></td></tr>
+              <tr><td><b>Enterprise</b><div class="t-mini">custom</div></td><td>$1.5k+</td><td>102</td><td><span class="tag info">sales</span></td></tr>
+            </tbody>
+          </table>
+          <div style="margin-top:14px;padding:12px;background:var(--card2);border-radius:8px;font-size:12px;color:var(--muted)">
+            💡 <b style="color:var(--text)">Insight:</b> conversión Pro→Business cayó 6% este mes. Revisar onboarding del plan Business.
+          </div>
+        </div>
+      </div>
+
+      <!-- Row: Security + API usage + Feature flags -->
+      <div class="row row-3">
+        <div class="card">
+          <div class="card-h"><h3>Seguridad &amp; Auditoría</h3><span class="tag ok">SOC2 ✓</span></div>
+          <div class="health-row"><div class="lbl">2FA habilitado</div><div class="progress"><div style="width:87%"></div></div><div class="v">87%</div></div>
+          <div class="health-row"><div class="lbl">SSO configurado</div><div class="progress"><div style="width:42%;background:var(--warn)"></div></div><div class="v">42%</div></div>
+          <div class="health-row"><div class="lbl">Backups OK</div><div class="progress"><div style="width:100%"></div></div><div class="v">100%</div></div>
+          <div class="health-row"><div class="lbl">Encriptación TLS</div><div class="progress"><div style="width:100%"></div></div><div class="v">A+</div></div>
+          <div style="margin-top:14px;padding:12px;background:var(--card2);border-radius:8px">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Eventos críticos 24h</div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0">
+              <span>🔒 Logins bloqueados</span><b>147</b>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0">
+              <span>⚠️ Tokens expirados</span><b>32</b>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0">
+              <span>🚫 IPs bloqueadas</span><b>18</b>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0">
+              <span>📋 Cambios de permisos</span><b>54</b>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-h"><h3>Uso de API</h3><span class="more">⋯</span></div>
+          <div style="text-align:center;padding:14px 0">
+            <div style="font-size:30px;font-weight:700">12.4M</div>
+            <div class="t-mini">requests procesados (24h)</div>
+          </div>
+          <div class="chart" style="height:120px">
+            <div class="bar" style="height:42%"></div>
+            <div class="bar" style="height:58%"></div>
+            <div class="bar" style="height:74%"></div>
+            <div class="bar" style="height:88%"></div>
+            <div class="bar" style="height:96%"></div>
+            <div class="bar" style="height:82%"></div>
+            <div class="bar" style="height:64%"></div>
+            <div class="bar" style="height:48%"></div>
+          </div>
+          <div class="chart-x">
+            <div>0h</div><div>3h</div><div>6h</div><div>9h</div><div>12h</div><div>15h</div><div>18h</div><div>21h</div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:14px;font-size:11px;color:var(--muted)">
+            <span>2xx <b style="color:var(--success)">98.2%</b></span>
+            <span>4xx <b style="color:var(--warn)">1.4%</b></span>
+            <span>5xx <b style="color:var(--danger)">0.4%</b></span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-h"><h3>Feature Flags</h3><button class="btn btn-ghost" style="padding:6px 12px;font-size:11px">+ Nueva</button></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+            <div><b style="font-size:13px">new-billing-ui</b><div class="t-mini">100% rollout</div></div>
+            <span class="tag ok">ON</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+            <div><b style="font-size:13px">ai-assistant-v2</b><div class="t-mini">25% rollout · beta</div></div>
+            <span class="tag info">PARTIAL</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+            <div><b style="font-size:13px">webhook-retry-v3</b><div class="t-mini">Enterprise only</div></div>
+            <span class="tag purple">SCOPED</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+            <div><b style="font-size:13px">dark-mode-mobile</b><div class="t-mini">staging only</div></div>
+            <span class="tag warn">DEV</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+            <div><b style="font-size:13px">legacy-export</b><div class="t-mini">deprecated</div></div>
+            <span class="tag err">OFF</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0">
+            <div><b style="font-size:13px">multi-region-db</b><div class="t-mini">internal · 5 tenants</div></div>
+            <span class="tag info">CANARY</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick actions -->
+      <div class="card" style="margin-bottom:24px">
+        <div class="card-h"><h3>Acciones Rápidas</h3><span class="t-mini">Operaciones de Super Admin</span></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">
+          <button class="btn btn-ghost" style="padding:14px;text-align:left">🏢<br><b>Crear Tenant</b><br><span class="t-mini">Provisión manual</span></button>
+          <button class="btn btn-ghost" style="padding:14px;text-align:left">📨<br><b>Email Masivo</b><br><span class="t-mini">A todos los admins</span></button>
+          <button class="btn btn-ghost" style="padding:14px;text-align:left">💸<br><b>Aplicar Crédito</b><br><span class="t-mini">Compensación</span></button>
+          <button class="btn btn-ghost" style="padding:14px;text-align:left">🚀<br><b>Trigger Deploy</b><br><span class="t-mini">CI/CD pipeline</span></button>
+          <button class="btn btn-ghost" style="padding:14px;text-align:left">🔄<br><b>Restart Workers</b><br><span class="t-mini">Queue maintenance</span></button>
+          <button class="btn btn-ghost" style="padding:14px;text-align:left">📊<br><b>Generar Reporte</b><br><span class="t-mini">Mensual ejecutivo</span></button>
+          <button class="btn btn-ghost" style="padding:14px;text-align:left">🛟<br><b>Modo Mantenimiento</b><br><span class="t-mini">Banner global</span></button>
+          <button class="btn btn-danger" style="padding:14px;text-align:left">🚨<br><b>Kill Switch</b><br><span style="font-size:11px;opacity:.85">Emergencia P0</span></button>
+        </div>
+      </div>
+
+    </div>
+
+    <footer class="footer">
+      <div>Volvix SaaS Admin v4.12.3 · © 2026 Grupo Volvix</div>
+      <div>Status: <span style="color:var(--success)">● Todos los sistemas operativos</span></div>
+    </footer>
+
+  </div>
+</div>
+</body>
+</html>
