@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="Volvix Hub - Plataforma SaaS todo-en-uno para gestión, automatización y crecimiento. 130+ funciones integradas." />
+<title>Volvix Hub — La plataforma todo-en-uno para tu negocio</title>
+<style>
+  :root{
+    --primary:#6366f1;
+    --primary-dark:#4f46e5;
+    --primary-light:#818cf8;
+    --secondary:#10b981;
+    --accent:#f59e0b;
+    --dark:#0f172a;
+    --darker:#020617;
+    --gray-900:#111827;
+    --gray-800:#1f2937;
+    --gray-700:#374151;
+    --gray-600:#4b5563;
+    --gray-500:#6b7280;
+    --gray-400:#9ca3af;
+    --gray-300:#d1d5db;
+    --gray-200:#e5e7eb;
+    --gray-100:#f3f4f6;
+    --gray-50:#f9fafb;
+    --white:#ffffff;
+    --gradient-primary:linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#ec4899 100%);
+    --gradient-secondary:linear-gradient(135deg,#10b981 0%,#06b6d4 100%);
+    --gradient-dark:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);
+    --shadow-sm:0 1px 2px rgba(0,0,0,0.05);
+    --shadow:0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -2px rgba(0,0,0,0.1);
+    --shadow-md:0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -4px rgba(0,0,0,0.1);
+    --shadow-lg:0 20px 25px -5px rgba(0,0,0,0.1),0 8px 10px -6px rgba(0,0,0,0.1);
+    --shadow-xl:0 25px 50px -12px rgba(0,0,0,0.25);
+    --radius-sm:6px;
+    --radius:10px;
+    --radius-lg:16px;
+    --radius-xl:24px;
+    --radius-full:9999px;
+    --transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{
+    font-family:'Inter','Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;
+    font-size:16px;line-height:1.6;color:var(--gray-800);
+    background:var(--white);overflow-x:hidden;
+  }
+  img{max-width:100%;display:block}
+  a{color:inherit;text-decoration:none;transition:var(--transition)}
+  button{font-family:inherit;cursor:pointer;border:none;background:none}
+  ul{list-style:none}
+
+  .container{max-width:1280px;margin:0 auto;padding:0 24px}
+
+  /* ─────── NAV ─────── */
+  .nav{
+    position:fixed;top:0;left:0;right:0;z-index:1000;
+    background:rgba(255,255,255,0.85);backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--gray-200);
+    transition:var(--transition);
+  }
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:72px}
+  .nav-logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:22px;color:var(--dark)}
+  .nav-logo-mark{
+    width:36px;height:36px;border-radius:10px;
+    background:var(--gradient-primary);
+    display:flex;align-items:center;justify-content:center;
+    color:white;font-weight:900;font-size:18px;
+    box-shadow:var(--shadow-md);
+  }
+  .nav-links{display:flex;align-items:center;gap:32px}
+  .nav-links a{font-weight:500;color:var(--gray-700);font-size:15px}
+  .nav-links a:hover{color:var(--primary)}
+  .nav-cta{display:flex;align-items:center;gap:12px}
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    padding:12px 24px;border-radius:var(--radius);
+    font-weight:600;font-size:15px;
+    transition:var(--transition);white-space:nowrap;
+  }
+  .btn-primary{background:var(--gradient-primary);color:white;box-shadow:var(--shadow-md)}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+  .btn-secondary{background:white;color:var(--gray-800);border:1px solid var(--gray-300)}
+  .btn-secondary:hover{border-color:var(--primary);color:var(--primary)}
+  .btn-ghost{color:var(--gray-700)}
+  .btn-ghost:hover{color:var(--primary)}
+  .btn-lg{padding:16px 32px;font-size:16px}
+
+  /* ─────── HERO ─────── */
+  .hero{
+    position:relative;padding:160px 0 120px;
+    background:radial-gradient(ellipse at top,rgba(99,102,241,0.15),transparent 50%),
+               radial-gradient(ellipse at bottom right,rgba(236,72,153,0.1),transparent 50%),
+               var(--white);
+    overflow:hidden;
+  }
+  .hero::before{
+    content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+    background-image:
+      linear-gradient(rgba(99,102,241,0.05) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(99,102,241,0.05) 1px,transparent 1px);
+    background-size:40px 40px;
+    mask-image:radial-gradient(ellipse at center,black 30%,transparent 70%);
+    pointer-events:none;
+  }
+  .hero-inner{position:relative;text-align:center;max-width:880px;margin:0 auto}
+  .hero-badge{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:6px 16px;border-radius:var(--radius-full);
+    background:rgba(99,102,241,0.1);color:var(--primary-dark);
+    font-size:13px;font-weight:600;margin-bottom:24px;
+    border:1px solid rgba(99,102,241,0.2);
+  }
+  .hero-badge-dot{width:8px;height:8px;border-radius:50%;background:var(--secondary);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+  .hero h1{
+    font-size:clamp(36px,6vw,72px);font-weight:800;line-height:1.1;
+    color:var(--dark);letter-spacing:-0.02em;margin-bottom:24px;
+  }
+  .hero h1 .gradient-text{
+    background:var(--gradient-primary);-webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;background-clip:text;
+  }
+  .hero p{
+    font-size:clamp(17px,2vw,21px);color:var(--gray-600);
+    max-width:680px;margin:0 auto 40px;line-height:1.6;
+  }
+  .hero-actions{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:48px}
+  .hero-stats{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:32px;
+    max-width:760px;margin:0 auto;padding-top:48px;
+    border-top:1px solid var(--gray-200);
+  }
+  .stat-num{font-size:32px;font-weight:800;color:var(--dark);background:var(--gradient-primary);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .stat-label{font-size:13px;color:var(--gray-500);font-weight:500;margin-top:4px}
+
+  /* ─────── LOGOS ─────── */
+  .logos{padding:60px 0;background:var(--gray-50);border-top:1px solid var(--gray-200);border-bottom:1px solid var(--gray-200)}
+  .logos-title{text-align:center;font-size:13px;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:32px}
+  .logos-grid{display:flex;align-items:center;justify-content:space-around;flex-wrap:wrap;gap:32px;opacity:0.6}
+  .logo-item{font-size:22px;font-weight:700;color:var(--gray-600);font-family:Georgia,serif}
+
+  /* ─────── SECTION ─────── */
+  .section{padding:120px 0}
+  .section-head{text-align:center;max-width:720px;margin:0 auto 80px}
+  .section-tag{
+    display:inline-block;padding:6px 14px;border-radius:var(--radius-full);
+    background:rgba(16,185,129,0.1);color:var(--secondary);
+    font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:1px;
+    margin-bottom:16px;
+  }
+  .section-title{
+    font-size:clamp(30px,4vw,48px);font-weight:800;color:var(--dark);
+    line-height:1.15;letter-spacing:-0.02em;margin-bottom:20px;
+  }
+  .section-desc{font-size:18px;color:var(--gray-600);line-height:1.6}
+
+  /* ─────── FEATURES ─────── */
+  .features{background:var(--white)}
+  .features-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:24px}
+  .feature-card{
+    padding:32px;border-radius:var(--radius-lg);background:var(--white);
+    border:1px solid var(--gray-200);transition:var(--transition);position:relative;overflow:hidden;
+  }
+  .feature-card::before{
+    content:'';position:absolute;top:0;left:0;right:0;height:3px;
+    background:var(--gradient-primary);transform:scaleX(0);transform-origin:left;
+    transition:transform .4s ease;
+  }
+  .feature-card:hover{border-color:transparent;box-shadow:var(--shadow-lg);transform:translateY(-4px)}
+  .feature-card:hover::before{transform:scaleX(1)}
+  .feature-icon{
+    width:56px;height:56px;border-radius:var(--radius);
+    background:rgba(99,102,241,0.1);color:var(--primary);
+    display:flex;align-items:center;justify-content:center;
+    font-size:28px;margin-bottom:20px;
+  }
+  .feature-card h3{font-size:19px;font-weight:700;color:var(--dark);margin-bottom:10px}
+  .feature-card p{color:var(--gray-600);font-size:15px;line-height:1.6}
+  .feature-tag{
+    display:inline-block;margin-top:14px;padding:4px 10px;
+    background:var(--gray-100);color:var(--gray-700);border-radius:var(--radius-sm);
+    font-size:12px;font-weight:600;
+  }
+
+  .features-grid-mini{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:40px}
+  .feature-mini{
+    padding:16px 18px;border-radius:var(--radius);
+    background:var(--gray-50);border:1px solid var(--gray-200);
+    display:flex;align-items:center;gap:10px;font-size:14px;font-weight:500;color:var(--gray-700);
+    transition:var(--transition);
+  }
+  .feature-mini:hover{background:rgba(99,102,241,0.05);border-color:var(--primary-light);color:var(--primary-dark);transform:translateX(2px)}
+  .feature-mini-dot{width:6px;height:6px;border-radius:50%;background:var(--secondary);flex-shrink:0}
+
+  /* ─────── BIG SHOWCASE ─────── */
+  .showcase{background:var(--gradient-dark);color:white;border-radius:var(--radius-xl);padding:80px 60px;margin:80px 0;position:relative;overflow:hidden}
+  .showcase::before{
+    content:'';position:absolute;top:-50%;right:-20%;width:80%;height:200%;
+    background:radial-gradient(circle,rgba(99,102,241,0.4) 0%,transparent 50%);
+    pointer-events:none;
+  }
+  .showcase-content{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+  .showcase h2{font-size:42px;font-weight:800;line-height:1.15;margin-bottom:24px}
+  .showcase p{font-size:18px;color:var(--gray-300);margin-bottom:32px;line-height:1.7}
+  .showcase-list{display:flex;flex-direction:column;gap:14px}
+  .showcase-list li{display:flex;align-items:flex-start;gap:12px;color:var(--gray-200);font-size:15px}
+  .showcase-check{
+    flex-shrink:0;width:22px;height:22px;border-radius:50%;
+    background:var(--secondary);color:white;
+    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold;
+  }
+  .showcase-mock{
+    background:rgba(255,255,255,0.05);backdrop-filter:blur(10px);
+    border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-lg);
+    padding:24px;box-shadow:var(--shadow-xl);
+  }
+  .mock-bar{display:flex;gap:6px;margin-bottom:20px}
+  .mock-dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.2)}
+  .mock-rows{display:flex;flex-direction:column;gap:10px}
+  .mock-row{height:14px;border-radius:4px;background:linear-gradient(90deg,rgba(255,255,255,0.1) 0%,rgba(99,102,241,0.4) 100%)}
+  .mock-row.short{width:60%}
+  .mock-row.medium{width:80%}
+
+  /* ─────── PRICING ─────── */
+  .pricing{background:var(--gray-50)}
+  .pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:1100px;margin:0 auto}
+  .price-card{
+    background:white;border-radius:var(--radius-lg);padding:40px 32px;
+    border:1px solid var(--gray-200);transition:var(--transition);position:relative;
+  }
+  .price-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-4px)}
+  .price-card.featured{
+    border:2px solid var(--primary);box-shadow:var(--shadow-xl);
+    transform:scale(1.04);
+  }
+  .price-card.featured::before{
+    content:'MÁS POPULAR';position:absolute;top:-14px;left:50%;transform:translateX(-50%);
+    background:var(--gradient-primary);color:white;
+    padding:6px 16px;border-radius:var(--radius-full);
+    font-size:11px;font-weight:700;letter-spacing:1px;
+  }
+  .price-name{font-size:14px;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+  .price-tagline{font-size:14px;color:var(--gray-600);margin-bottom:24px;min-height:40px}
+  .price-amount{display:flex;align-items:baseline;gap:6px;margin-bottom:8px}
+  .price-amount .currency{font-size:24px;font-weight:600;color:var(--gray-700)}
+  .price-amount .num{font-size:54px;font-weight:800;color:var(--dark);line-height:1}
+  .price-amount .period{font-size:15px;color:var(--gray-500)}
+  .price-billed{font-size:13px;color:var(--gray-500);margin-bottom:28px}
+  .price-features{display:flex;flex-direction:column;gap:12px;margin-bottom:32px}
+  .price-features li{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--gray-700)}
+  .price-features li::before{
+    content:'✓';color:var(--secondary);font-weight:bold;flex-shrink:0;
+    width:20px;height:20px;border-radius:50%;background:rgba(16,185,129,0.1);
+    display:flex;align-items:center;justify-content:center;font-size:11px;
+  }
+  .price-card .btn{width:100%}
+
+  /* ─────── TESTIMONIALS ─────── */
+  .testimonials{background:white}
+  .testimonials-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+  .testimonial{
+    background:var(--gray-50);border-radius:var(--radius-lg);padding:32px;
+    border:1px solid var(--gray-200);transition:var(--transition);
+  }
+  .testimonial:hover{box-shadow:var(--shadow-md);background:white}
+  .testimonial-stars{color:var(--accent);font-size:18px;margin-bottom:18px;letter-spacing:2px}
+  .testimonial-quote{font-size:16px;color:var(--gray-800);line-height:1.7;margin-bottom:24px;font-style:italic}
+  .testimonial-author{display:flex;align-items:center;gap:14px}
+  .testimonial-avatar{
+    width:48px;height:48px;border-radius:50%;
+    background:var(--gradient-primary);color:white;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;font-size:18px;
+  }
+  .testimonial-name{font-weight:700;color:var(--dark);font-size:15px}
+  .testimonial-role{font-size:13px;color:var(--gray-500)}
+
+  /* ─────── FAQ ─────── */
+  .faq{background:var(--gray-50)}
+  .faq-list{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+  .faq-item{
+    background:white;border-radius:var(--radius);padding:24px 28px;
+    border:1px solid var(--gray-200);cursor:pointer;
+  }
+  .faq-q{display:flex;justify-content:space-between;align-items:center;font-weight:600;color:var(--dark);font-size:16px}
+  .faq-q::after{content:'+';font-size:24px;color:var(--primary);font-weight:300;transition:var(--transition)}
+  .faq-item[open] .faq-q::after{transform:rotate(45deg)}
+  .faq-a{margin-top:14px;color:var(--gray-600);font-size:15px;line-height:1.7}
+
+  /* ─────── CTA FINAL ─────── */
+  .cta-final{
+    padding:100px 0;
+    background:var(--gradient-primary);position:relative;overflow:hidden;
+  }
+  .cta-final::before{
+    content:'';position:absolute;inset:0;
+    background-image:radial-gradient(circle at 20% 50%,rgba(255,255,255,0.15),transparent 40%),
+                     radial-gradient(circle at 80% 80%,rgba(255,255,255,0.1),transparent 40%);
+    pointer-events:none;
+  }
+  .cta-final-inner{position:relative;text-align:center;max-width:720px;margin:0 auto;color:white}
+  .cta-final h2{font-size:clamp(32px,4vw,48px);font-weight:800;line-height:1.15;margin-bottom:20px}
+  .cta-final p{font-size:18px;opacity:.95;margin-bottom:36px;line-height:1.6}
+  .cta-final .btn-primary{background:white;color:var(--primary-dark)}
+  .cta-final .btn-primary:hover{background:var(--gray-100)}
+  .cta-final .btn-secondary{background:transparent;color:white;border-color:rgba(255,255,255,0.4)}
+  .cta-final .btn-secondary:hover{background:rgba(255,255,255,0.1);color:white;border-color:white}
+
+  /* ─────── FOOTER ─────── */
+  .footer{background:var(--darker);color:var(--gray-400);padding:80px 0 40px}
+  .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:48px;margin-bottom:60px}
+  .footer-brand .nav-logo{color:white;margin-bottom:16px}
+  .footer-tagline{font-size:14px;line-height:1.7;margin-bottom:20px;max-width:300px}
+  .footer-social{display:flex;gap:10px}
+  .social-link{
+    width:38px;height:38px;border-radius:var(--radius);
+    background:rgba(255,255,255,0.05);
+    display:flex;align-items:center;justify-content:center;
+    transition:var(--transition);font-size:16px;
+  }
+  .social-link:hover{background:var(--primary);color:white;transform:translateY(-2px)}
+  .footer-col h4{color:white;font-size:14px;font-weight:700;margin-bottom:18px;text-transform:uppercase;letter-spacing:1px}
+  .footer-col ul{display:flex;flex-direction:column;gap:10px}
+  .footer-col a{font-size:14px;color:var(--gray-400)}
+  .footer-col a:hover{color:white}
+  .footer-bottom{
+    border-top:1px solid var(--gray-800);padding-top:32px;
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;
+    font-size:13px;
+  }
+  .footer-legal{display:flex;gap:24px}
+
+  /* ─────── RESPONSIVE ─────── */
+  @media (max-width:1024px){
+    .pricing-grid,.testimonials-grid{grid-template-columns:repeat(2,1fr)}
+    .price-card.featured{transform:none}
+    .showcase-content{grid-template-columns:1fr;gap:40px}
+    .footer-grid{grid-template-columns:1fr 1fr 1fr;gap:32px}
+    .footer-brand{grid-column:span 3}
+  }
+  @media (max-width:768px){
+    .nav-links{display:none}
+    .hero{padding:120px 0 80px}
+    .hero-stats{grid-template-columns:repeat(2,1fr);gap:24px}
+    .section{padding:80px 0}
+    .pricing-grid,.testimonials-grid{grid-template-columns:1fr}
+    .showcase{padding:48px 24px}
+    .showcase h2{font-size:30px}
+    .footer-grid{grid-template-columns:1fr 1fr;gap:32px}
+    .footer-brand{grid-column:span 2}
+    .footer-bottom{flex-direction:column;text-align:center}
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ NAV ═══════════ -->
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="#" class="nav-logo">
+      <span class="nav-logo-mark">V</span>
+      Volvix Hub
+    </a>
+    <ul class="nav-links">
+      <li><a href="#features">Funciones</a></li>
+      <li><a href="#showcase">Soluciones</a></li>
+      <li><a href="#pricing">Precios</a></li>
+      <li><a href="#testimonials">Clientes</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="#login" class="btn btn-ghost">Iniciar sesión</a>
+      <a href="#signup" class="btn btn-primary">Empezar gratis</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════ HERO ═══════════ -->
+<header class="hero">
+  <div class="container hero-inner">
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      Nuevo: Volvix AI Copilot ya disponible
+    </div>
+    <h1>La plataforma <span class="gradient-text">todo-en-uno</span> que tu negocio merece</h1>
+    <p>POS, CRM, facturación, inventario, marketing y más de 130 funciones integradas. Una sola suscripción. Cero fricción. Resultados desde el día uno.</p>
+    <div class="hero-actions">
+      <a href="#signup" class="btn btn-primary btn-lg">Empezar 14 días gratis →</a>
+      <a href="#demo" class="btn btn-secondary btn-lg">▶ Ver demo (2 min)</a>
+    </div>
+    <div class="hero-stats">
+      <div><div class="stat-num">130+</div><div class="stat-label">Funciones integradas</div></div>
+      <div><div class="stat-num">12K+</div><div class="stat-label">Empresas activas</div></div>
+      <div><div class="stat-num">99.99%</div><div class="stat-label">Uptime garantizado</div></div>
+      <div><div class="stat-num">4.9★</div><div class="stat-label">Calificación promedio</div></div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════ LOGOS ═══════════ -->
+<section class="logos">
+  <div class="container">
+    <div class="logos-title">Empresas que confían en Volvix</div>
+    <div class="logos-grid">
+      <span class="logo-item">SalvadoreX</span>
+      <span class="logo-item">GrupoVolvix</span>
+      <span class="logo-item">Acme Corp</span>
+      <span class="logo-item">Stellar Co</span>
+      <span class="logo-item">Northwind</span>
+      <span class="logo-item">Globex</span>
+      <span class="logo-item">Initech</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ FEATURES ═══════════ -->
+<section class="section features" id="features">
+  <div class="container">
+    <div class="section-head">
+      <span class="section-tag">Funciones</span>
+      <h2 class="section-title">Más de 130 herramientas en una sola plataforma</h2>
+      <p class="section-desc">Olvídate de pagar 15 SaaS diferentes. Volvix Hub centraliza todo lo que tu empresa necesita para operar, vender y crecer.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🛒</div>
+        <h3>POS Inteligente</h3>
+        <p>Punto de venta multiusuario con cobros en línea, tickets digitales y sincronización en tiempo real entre sucursales.</p>
+        <span class="feature-tag">Ventas</span>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>CRM 360°</h3>
+        <p>Gestiona clientes, leads, pipelines y oportunidades con automatizaciones inteligentes y scoring por IA.</p>
+        <span class="feature-tag">Clientes</span>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📦</div>
+        <h3>Inventario Multi-bodega</h3>
+        <p>Control de stock por lote, caducidad y serie. Alertas automáticas, reposición predictiva y kardex en vivo.</p>
+        <span class="feature-tag">Operaciones</span>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💳</div>
+        <h3>Facturación Electrónica</h3>
+        <p>Emisión fiscal cumpliendo SAT, DGII, SRI y más. Plantillas profesionales y envío automático por correo.</p>
+        <span class="feature-tag">Finanzas</span>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🤖</div>
+        <h3>Volvix AI Copilot</h3>
+        <p>Asistente de IA que responde preguntas, redacta reportes, analiza datos y automatiza tareas repetitivas.</p>
+        <span class="feature-tag">IA</span>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📧</div>
+        <h3>Email & SMS Marketing</h3>
+        <p>Crea campañas segmentadas, flujos automáticos y mide resultados con dashboards en tiempo real.</p>
+        <span class="feature-tag">Marketing</span>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📱</div>
+        <h3>App Móvil Nativa</h3>
+        <p>Tu negocio en el bolsillo. iOS y Android, modo offline, notificaciones push y firma digital.</p>
+        <span class="feature-tag">Movilidad</span>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔐</div>
+        <h3>Seguridad Empresarial</h3>
+        <p>SSO, 2FA, roles granulares, auditoría completa y cifrado AES-256 en reposo y tránsito.</p>
+        <span class="feature-tag">Seguridad</span>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📈</div>
+        <h3>Business Intelligence</h3>
+        <p>Dashboards personalizables, KPIs en vivo, reportes programados y exportación a Excel/PDF.</p>
+        <span class="feature-tag">Analítica</span>
+      </div>
+    </div>
+
+    <div style="margin-top:80px">
+      <h3 style="text-align:center;font-size:24px;font-weight:700;color:var(--dark);margin-bottom:8px">Y muchas más funciones incluidas</h3>
+      <p style="text-align:center;color:var(--gray-500);margin-bottom:32px">Todo en tu plan, sin costos ocultos.</p>
+      <div class="features-grid-mini">
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Cotizaciones</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Órdenes de compra</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Cuentas por cobrar</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Cuentas por pagar</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Conciliación bancaria</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Caja chica</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Tesorería</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Presupuestos</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Centros de costo</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Activos fijos</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Nómina y RRHH</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Control de asistencia</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Vacaciones</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Evaluación 360</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Reclutamiento</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Onboarding</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Capacitaciones</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Reservas online</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Gestión de citas</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Mesas y meseros</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Cocina KDS</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Delivery integrado</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Pickup & curbside</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>QR menú digital</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Programa de lealtad</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Cupones y promos</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Gift cards</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Wallet digital</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Pasarela de pagos</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Links de pago</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Suscripciones</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Cobros recurrentes</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Split de pagos</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Multi-moneda</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Multi-idioma</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Multi-empresa</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Multi-sucursal</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Tienda online</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Marketplace</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Dropshipping</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Catálogo digital</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Códigos de barra</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Etiquetas RFID</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Escaneo móvil</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Picking y packing</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Envíos y guías</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Tracking en vivo</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Devoluciones RMA</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Garantías</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Servicio técnico</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Tickets de soporte</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Helpdesk</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Chat en vivo</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Chatbot WhatsApp</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Bot Messenger</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Bot Instagram</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Telegram Business</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Llamadas VoIP</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Centro de llamadas</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Grabación de llamadas</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Calendario unificado</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Sync Google Calendar</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Sync Outlook</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Videoconferencias</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Firma electrónica</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Contratos digitales</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Plantillas legales</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Gestión documental</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>OCR inteligente</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Workflow approvals</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Procesos BPMN</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Automatizaciones</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Triggers & webhooks</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>API REST completa</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>GraphQL</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Integración Zapier</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Integración Make</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>SDK JavaScript</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>SDK Python</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Webhooks personalizados</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Importador CSV</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Exportador Excel</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Backups automáticos</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Restauración 1-click</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Auditoría completa</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Logs de actividad</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Roles y permisos</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>SSO Google</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>SSO Microsoft</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>SAML 2.0</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>2FA biométrico</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Cumplimiento GDPR</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>SOC 2 Type II</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>ISO 27001</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>PCI DSS Level 1</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>HIPAA ready</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Hosting US/EU/LATAM</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>CDN global</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>99.99% uptime SLA</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Soporte 24/7</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Onboarding gratis</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Migración asistida</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Capacitación incluida</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Academy online</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Certificaciones</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Comunidad activa</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Marketplace de apps</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Plantillas pre-armadas</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Temas personalizables</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>White label</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Dominio propio</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Branding total</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Custom fields</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Custom workflows</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Reportes ad-hoc</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Forecasting IA</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Detección anomalías</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Predicción demanda</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Recomendaciones IA</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Análisis sentimiento</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Resumen automático</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Traducción 50+ idiomas</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Voice-to-text</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Text-to-voice</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Generación contenido IA</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Imágenes IA</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Mockups productos</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Editor drag & drop</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Landing builder</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Form builder</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Encuestas NPS</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Reseñas y reviews</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>SEO tools</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Analytics web</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Heatmaps</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>Session replay</div>
+        <div class="feature-mini"><span class="feature-mini-dot"></span>A/B testing</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ SHOWCASE ═══════════ -->
+<section class="container" id="showcase">
+  <div class="showcase">
+    <div class="showcase-content">
+      <div>
+        <span class="section-tag" style="background:rgba(16,185,129,0.2);color:var(--secondary)">Solución integral</span>
+        <h2>Reemplaza 15+ herramientas con una sola plataforma</h2>
+        <p>Deja de pagar suscripciones separadas para POS, CRM, contabilidad, marketing y RRHH. Volvix Hub lo unifica todo con datos que fluyen en tiempo real entre módulos.</p>
+        <ul class="showcase-list">
+          <li><span class="showcase-check">✓</span><span>Ahorra hasta <strong style="color:white">73%</strong> vs. tu stack actual de SaaS dispersos</span></li>
+          <li><span class="showcase-check">✓</span><span>Implementación en <strong style="color:white">menos de 7 días</strong> con migración asistida gratuita</span></li>
+          <li><span class="showcase-check">✓</span><span>Una sola pantalla, un solo login, un solo proveedor</span></li>
+          <li><span class="showcase-check">✓</span><span>Soporte 24/7 en español, inglés y portugués</span></li>
+          <li><span class="showcase-check">✓</span><span>Sin contratos forzosos, cancela cuando quieras</span></li>
+        </ul>
+      </div>
+      <div class="showcase-mock">
+        <div class="mock-bar">
+          <span class="mock-dot"></span><span class="mock-dot"></span><span class="mock-dot"></span>
+        </div>
+        <div class="mock-rows">
+          <div class="mock-row"></div>
+          <div class="mock-row medium"></div>
+          <div class="mock-row short"></div>
+          <div class="mock-row"></div>
+          <div class="mock-row medium"></div>
+          <div class="mock-row short"></div>
+          <div class="mock-row"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ PRICING ═══════════ -->
+<section class="section pricing" id="pricing">
+  <div class="container">
+    <div class="section-head">
+      <span class="section-tag">Precios</span>
+      <h2 class="section-title">Planes simples para cualquier tamaño de empresa</h2>
+      <p class="section-desc">Sin costos ocultos. Sin sorpresas. Cancela cuando quieras. 14 días gratis en todos los planes.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-name">Starter</div>
+        <div class="price-tagline">Ideal para emprendedores y negocios pequeños que están comenzando.</div>
+        <div class="price-amount">
+          <span class="currency">$</span><span class="num">29</span><span class="period">/mes</span>
+        </div>
+        <div class="price-billed">Por usuario · facturado anual</div>
+        <ul class="price-features">
+          <li>Hasta 3 usuarios</li>
+          <li>POS + CRM básico</li>
+          <li>Facturación electrónica</li>
+          <li>1 sucursal</li>
+          <li>Soporte por chat</li>
+          <li>5 GB almacenamiento</li>
+        </ul>
+        <a href="#signup" class="btn btn-secondary">Empezar gratis</a>
+      </div>
+      <div class="price-card featured">
+        <div class="price-name">Business</div>
+        <div class="price-tagline">Para empresas en crecimiento que necesitan automatizar y escalar.</div>
+        <div class="price-amount">
+          <span class="currency">$</span><span class="num">79</span><span class="period">/mes</span>
+        </div>
+        <div class="price-billed">Por usuario · facturado anual</div>
+        <ul class="price-features">
+          <li>Hasta 25 usuarios</li>
+          <li>Todas las funciones (130+)</li>
+          <li>Multi-sucursal</li>
+          <li>AI Copilot incluido</li>
+          <li>Automatizaciones avanzadas</li>
+          <li>Soporte 24/7 prioritario</li>
+          <li>100 GB almacenamiento</li>
+          <li>Integraciones API</li>
+        </ul>
+        <a href="#signup" class="btn btn-primary">Empezar 14 días gratis</a>
+      </div>
+      <div class="price-card">
+        <div class="price-name">Enterprise</div>
+        <div class="price-tagline">Para grandes corporativos con necesidades específicas y SLA dedicado.</div>
+        <div class="price-amount">
+          <span class="num" style="font-size:42px">A medida</span>
+        </div>
+        <div class="price-billed">Contáctanos para cotización</div>
+        <ul class="price-features">
+          <li>Usuarios ilimitados</li>
+          <li>Multi-empresa & multi-país</li>
+          <li>SSO + SAML</li>
+          <li>SLA 99.99% garantizado</li>
+          <li>Customer Success Manager</li>
+          <li>Onboarding white-glove</li>
+          <li>Almacenamiento ilimitado</li>
+          <li>Hosting dedicado</li>
+          <li>White-label disponible</li>
+        </ul>
+        <a href="#contact" class="btn btn-secondary">Contactar ventas</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ TESTIMONIALS ═══════════ -->
+<section class="section testimonials" id="testimonials">
+  <div class="container">
+    <div class="section-head">
+      <span class="section-tag">Testimonios</span>
+      <h2 class="section-title">Más de 12,000 empresas crecen con Volvix</h2>
+      <p class="section-desc">Desde startups hasta corporativos, equipos de todos los tamaños eligen Volvix Hub para operar mejor.</p>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testimonial">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-quote">"Cambiamos 7 herramientas por Volvix Hub. Ahorramos $2,400/mes y nuestro equipo ahora trabaja en una sola plataforma. El ROI fue inmediato."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">MR</div>
+          <div>
+            <div class="testimonial-name">María Rodríguez</div>
+            <div class="testimonial-role">CEO · SalvadoreX</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-quote">"El AI Copilot de Volvix es una bestia. Genera reportes que antes nos tomaban días en minutos. La facturación electrónica funciona perfecta."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">JM</div>
+          <div>
+            <div class="testimonial-name">Juan Mendoza</div>
+            <div class="testimonial-role">CFO · GrupoVolvix</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-quote">"Implementamos Volvix en 5 sucursales en menos de 2 semanas. El soporte fue impecable y el equipo se adaptó sin fricción. Lo recomiendo cerrado."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">AL</div>
+          <div>
+            <div class="testimonial-name">Andrea López</div>
+            <div class="testimonial-role">COO · Retail Plus</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-quote">"Los dashboards en tiempo real cambiaron cómo tomamos decisiones. Ya no esperamos al cierre de mes para saber qué pasa en la operación."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">CP</div>
+          <div>
+            <div class="testimonial-name">Carlos Pérez</div>
+            <div class="testimonial-role">Director · Acme Corp</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-quote">"Probamos 4 plataformas antes y todas se quedaban cortas. Volvix tiene TODO. Punto. Y a un precio que ningún competidor logra igualar."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">SF</div>
+          <div>
+            <div class="testimonial-name">Sofía Fernández</div>
+            <div class="testimonial-role">Founder · Stellar Co</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-quote">"La integración con WhatsApp y la pasarela de pagos nos disparó las ventas un 38% en el primer trimestre. Volvix paga solito."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">DG</div>
+          <div>
+            <div class="testimonial-name">Diego Guzmán</div>
+            <div class="testimonial-role">Owner · Northwind</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ FAQ ═══════════ -->
+<section class="section faq" id="faq">
+  <div class="container">
+    <div class="section-head">
+      <span class="section-tag">FAQ</span>
+      <h2 class="section-title">Preguntas frecuentes</h2>
+      <p class="section-desc">Resolvemos las dudas más comunes. ¿Tienes otra? Escríbenos al chat.</p>
+    </div>
+    <div class="faq-list">
+      <details class="faq-item">
+        <summary class="faq-q">¿Realmente son 14 días gratis sin tarjeta?</summary>
+        <div class="faq-a">Correcto. No te pedimos tarjeta para empezar. Tienes acceso completo a todas las funciones por 14 días. Si te gusta, eliges plan; si no, simplemente no haces nada.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">¿Puedo migrar mis datos desde otro sistema?</summary>
+        <div class="faq-a">Sí, y es gratis. Nuestro equipo de migración te ayuda a importar clientes, productos, inventario, facturas y más desde Excel, QuickBooks, Odoo, Shopify, etc.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">¿Volvix funciona en mi país?</summary>
+        <div class="faq-a">Operamos en más de 18 países de Latinoamérica, EE.UU. y España. La facturación electrónica está homologada con SAT (México), DGII (RD), SRI (Ecuador), DIAN (Colombia) y más.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">¿Qué pasa si necesito cancelar?</summary>
+        <div class="faq-a">Sin contratos forzosos. Cancelas cuando quieras desde tu panel. Te exportamos toda tu data en formatos estándar (CSV, Excel, JSON) sin costo.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">¿Mis datos están seguros?</summary>
+        <div class="faq-a">Estamos certificados SOC 2 Type II, ISO 27001 y PCI DSS Level 1. Cifrado AES-256 en reposo y TLS 1.3 en tránsito. Backups automáticos cada 6 horas en 3 regiones geográficas.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">¿Cómo funciona el soporte 24/7?</summary>
+        <div class="faq-a">Plan Business y Enterprise incluyen soporte 24/7 vía chat, email y teléfono en español, inglés y portugués. Tiempo de respuesta promedio: 90 segundos. Plan Starter incluye soporte por chat en horario comercial.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">¿Volvix se integra con mis herramientas actuales?</summary>
+        <div class="faq-a">Sí. Tenemos integraciones nativas con Stripe, PayPal, Mercado Pago, Shopify, WooCommerce, Mailchimp, Google Workspace, Microsoft 365, Slack, WhatsApp Business y más de 200 apps vía Zapier/Make.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ CTA FINAL ═══════════ -->
+<section class="cta-final">
+  <div class="container cta-final-inner">
+    <h2>Empieza a operar mejor hoy mismo</h2>
+    <p>Únete a las 12,000+ empresas que ya usan Volvix Hub para vender más, gastar menos y crecer sin fricción.</p>
+    <div class="hero-actions" style="justify-content:center">
+      <a href="#signup" class="btn btn-primary btn-lg">Empezar 14 días gratis →</a>
+      <a href="#demo" class="btn btn-secondary btn-lg">Agendar demo personalizado</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#" class="nav-logo">
+          <span class="nav-logo-mark">V</span>
+          Volvix Hub
+        </a>
+        <p class="footer-tagline">La plataforma todo-en-uno que une POS, CRM, facturación, inventario, marketing e IA en una sola suscripción.</p>
+        <div class="footer-social">
+          <a href="#" class="social-link" title="Twitter">𝕏</a>
+          <a href="#" class="social-link" title="LinkedIn">in</a>
+          <a href="#" class="social-link" title="YouTube">▶</a>
+          <a href="#" class="social-link" title="Instagram">◉</a>
+          <a href="#" class="social-link" title="Facebook">f</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Producto</h4>
+        <ul>
+          <li><a href="#features">Funciones</a></li>
+          <li><a href="#pricing">Precios</a></li>
+          <li><a href="#">Integraciones</a></li>
+          <li><a href="#">Roadmap</a></li>
+          <li><a href="#">Changelog</a></li>
+          <li><a href="#">Status</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Soluciones</h4>
+        <ul>
+          <li><a href="#">Retail</a></li>
+          <li><a href="#">Restaurantes</a></li>
+          <li><a href="#">Servicios</a></li>
+          <li><a href="#">E-commerce</a></li>
+          <li><a href="#">Manufactura</a></li>
+          <li><a href="#">Salud</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Academy</a></li>
+          <li><a href="#">Documentación</a></li>
+          <li><a href="#">API Docs</a></li>
+          <li><a href="#">Comunidad</a></li>
+          <li><a href="#">Webinars</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Empresa</h4>
+        <ul>
+          <li><a href="#">Sobre nosotros</a></li>
+          <li><a href="#">Carreras</a></li>
+          <li><a href="#">Prensa</a></li>
+          <li><a href="#">Partners</a></li>
+          <li><a href="#">Contacto</a></li>
+          <li><a href="#">Soporte</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2026 Volvix Hub · Todos los derechos reservados.</div>
+      <div class="footer-legal">
+        <a href="#">Términos</a>
+        <a href="#">Privacidad</a>
+        <a href="#">Cookies</a>
+        <a href="#">Seguridad</a>
+        <a href="#">DPA</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Nav scroll effect
+  const nav = document.querySelector('.nav');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 20) {
+      nav.style.boxShadow = 'var(--shadow)';
+    } else {
+      nav.style.boxShadow = 'none';
+    }
+  });
+</script>
+
+</body>
+</html>
