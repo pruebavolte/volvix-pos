@@ -207,6 +207,8 @@
       <button class="nav-item" data-page="loyalty"><span class="nav-icon">★</span> Puntos Loyalty</button>
       <button class="nav-item" data-page="credit"><span class="nav-icon">$</span> Mi crédito</button>
       <button class="nav-item" data-page="addresses"><span class="nav-icon">◇</span> Direcciones</button>
+      <button class="nav-item" data-page="payments"><span class="nav-icon">▭</span> Métodos de pago</button>
+      <button class="nav-item" data-page="favorites"><span class="nav-icon">♡</span> Favoritos</button>
       <button class="nav-item" data-page="notifications"><span class="nav-icon">◈</span> Notificaciones</button>
       <button class="nav-item" data-page="support"><span class="nav-icon">◔</span> Soporte</button>
       <button class="nav-item" data-page="profile"><span class="nav-icon">◐</span> Mi perfil</button>
@@ -459,6 +461,17 @@ const DB = {
       {id:5,icon:"🎉",name:"Cupón $500",desc:"Descuento mayor",cost:4500},
       {id:6,icon:"💎",name:"Membresía Gold",desc:"Acceso 6 meses VIP",cost:8000},
     ]},
+  addresses:[
+    {id:1,alias:"Casa",name:"Juan Domínguez",addr:"Av. Reforma 123, Col. Centro",city:"CDMX",cp:"06700",phone:"55 1234 5678",default:true},
+    {id:2,alias:"Oficina",name:"Juan Domínguez",addr:"Insurgentes Sur 456, Piso 8",city:"CDMX",cp:"03100",phone:"55 1234 5678",default:false},
+  ],
+  notifs:[
+    {id:1,icon:"🛍️",title:"Tu pedido V-10458 fue entregado",time:"Hace 2 horas",read:false},
+    {id:2,icon:"⭐",title:"Ganaste 184 puntos por tu última compra",time:"Hace 2 horas",read:false},
+    {id:3,icon:"💳",title:"Tu próximo pago vence el 10/05/2026",time:"Ayer",read:false},
+    {id:4,icon:"🎁",title:"Promo exclusiva: 15% de descuento este fin de semana",time:"Hace 2 días",read:true},
+    {id:5,icon:"📄",title:"Factura F-A2045 disponible para descarga",time:"Hace 3 días",read:true},
+  ],
   credit:{limit:15000,debt:3450.50,due:"2026-05-10",
     history:[
       {date:"2026-04-15",concept:"Compra V-10422",charge:648.50,credit:0,balance:3450.50},
@@ -490,8 +503,25 @@ function renderAll(){
   $("#userName").textContent=DB.user.name;
   $("#userAvatar").textContent=initials(DB.user.name);
   $("#greetName").textContent=DB.user.name.split(" ")[0];
-  renderDashboard();renderPurchases();renderInvoices();renderLoyalty();renderCredit();loadProfile();
+  renderDashboard();renderPurchases();renderInvoices();renderLoyalty();renderCredit();loadProfile();renderAddresses();renderNotifs();
 }
+function renderAddresses(){
+  const c=$("#addrList");c.innerHTML="";
+  if(!DB.addresses.length){c.innerHTML='<div class="empty"><div class="empty-icon">◇</div><p>No tienes direcciones guardadas</p></div>';return;}
+  DB.addresses.forEach(a=>{
+    c.insertAdjacentHTML("beforeend",`<div style="border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:12px;display:flex;justify-content:space-between;gap:14px;align-items:flex-start"><div><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><strong>${a.alias}</strong>${a.default?'<span class="badge badge-info">Predeterminada</span>':''}</div><div style="color:var(--text-muted);font-size:14px;line-height:1.7">${a.name}<br>${a.addr}<br>${a.city} · CP ${a.cp}<br>Tel: ${a.phone}</div></div><div style="display:flex;flex-direction:column;gap:6px"><button class="btn btn-ghost" style="padding:5px 12px;font-size:12px" onclick="toast('Editando ${a.alias}')">Editar</button>${a.default?'':'<button class="btn btn-ghost" style="padding:5px 12px;font-size:12px" onclick="setDefaultAddr('+a.id+')">Predeterminar</button><button class="btn btn-danger" style="padding:5px 12px;font-size:12px" onclick="delAddr('+a.id+')">Eliminar</button>'}</div></div>`);
+  });
+}
+function setDefaultAddr(id){DB.addresses.forEach(a=>a.default=(a.id===id));renderAddresses();toast("Predeterminada actualizada","success");}
+function delAddr(id){if(!confirm("¿Eliminar dirección?"))return;DB.addresses=DB.addresses.filter(a=>a.id!==id);renderAddresses();toast("Dirección eliminada","success");}
+function addAddr(){const al=prompt("Alias (Casa, Oficina, etc):");if(!al)return;const ad=prompt("Dirección completa:");if(!ad)return;DB.addresses.push({id:Date.now(),alias:al,name:DB.user.name,addr:ad,city:"CDMX",cp:"00000",phone:DB.user.phone,default:false});renderAddresses();toast("Dirección agregada","success");}
+function renderNotifs(){
+  const c=$("#notifList");c.innerHTML="";
+  if(!DB.notifs.length){c.innerHTML='<div class="empty">Sin notificaciones</div>';return;}
+  DB.notifs.forEach(n=>{c.insertAdjacentHTML("beforeend",`<div style="display:flex;gap:14px;padding:14px;border-bottom:1px solid var(--border);${n.read?'opacity:.6':'background:#f8fafc'};border-radius:6px;align-items:flex-start"><div style="font-size:24px">${n.icon}</div><div style="flex:1"><div style="font-weight:${n.read?'500':'600'};color:var(--text)">${n.title}</div><div style="font-size:12px;color:var(--text-muted);margin-top:3px">${n.time}</div></div>${n.read?'':'<span style="width:8px;height:8px;border-radius:50%;background:var(--primary-light);margin-top:8px"></span>'}</div>`);});
+}
+function markAllRead(){DB.notifs.forEach(n=>n.read=true);renderNotifs();toast("Notificaciones leídas","success");}
+function sendTicket(){const s=$("#tkSubject").value,d=$("#tkDesc").value;if(!s||!d){toast("Completa todos los campos","error");return;}$("#tkSubject").value="";$("#tkDesc").value="";toast("Ticket enviado. Te contactaremos pronto","success");}
 function renderDashboard(){
   const tot=DB.purchases.reduce((s,p)=>s+p.total,0);
   $("#dashTotal").textContent=fmt(tot);
