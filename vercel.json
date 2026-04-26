@@ -1,14 +1,18 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
   "builds": [
-    { "src": "api/index.js", "use": "@vercel/node" }
+    { "src": "api/index.js", "use": "@vercel/node", "config": { "includeFiles": ["**/*.html", "**/*.js", "**/*.json", "db/**"] } }
   ],
   "routes": [
+    { "src": "/api/(.*)", "dest": "/api/index.js" },
+    { "src": "/(.*\\.html)", "dest": "/api/index.js" },
+    { "src": "/(.*\\.js)", "dest": "/api/index.js" },
+    { "src": "/(.*\\.css)", "dest": "/api/index.js" },
+    { "src": "/(.*\\.json)", "dest": "/api/index.js" },
+    { "src": "/", "dest": "/api/index.js" },
     { "src": "/(.*)", "dest": "/api/index.js" }
   ],
   "env": {
     "NODE_ENV": "production"
-  },
-  "regions": ["iad1"]
+  }
 }
