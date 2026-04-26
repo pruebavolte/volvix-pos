@@ -1276,6 +1276,7 @@
 <script src="volvix-api.js"></script>
 <script src="volvix-sync.js"></script>
 <script src="volvix-sync-widget.js"></script>
+<script src="volvix-wiring.js" defer></script>
 </head>
 <body>
 
@@ -2602,6 +2603,30 @@
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('app-root').classList.remove('login-active');
         showToast(`Bienvenido, ${session.role === 'superadmin' ? 'Administrador' : session.role} ✓`);
+
+        // ===== CABLEADO: Cargar productos desde la base de datos =====
+        try {
+          const prodRes = await fetch('/api/products?tenant_id=' + session.tenant_id);
+          if (prodRes.ok) {
+            const products = await prodRes.json();
+            if (products && products.length > 0 && typeof CATALOG !== 'undefined') {
+              CATALOG.length = 0;
+              products.forEach(p => CATALOG.push({
+                code: p.code,
+                name: p.name,
+                price: p.price,
+                cost: p.cost || 0,
+                stock: p.stock || 0,
+                id: p.id
+              }));
+              console.log('[VOLVIX] ' + products.length + ' productos cargados desde DB');
+            }
+          }
+        } catch(e) { console.warn('[VOLVIX] No se pudieron cargar productos:', e); }
+
+        // Disparar evento para que volvix-wiring.js se reinicialice
+        document.dispatchEvent(new CustomEvent('volvix:login', { detail: session }));
+
         setTimeout(() => document.getElementById('barcode-input')?.focus(), 100);
       }
     } catch (err) {
@@ -2732,16 +2757,63 @@
     $('#footer-pago').textContent = fmt(recibido);
     $('#footer-cambio').textContent = fmt(cambio);
   }
-  function completePay() {
+  async function completePay() {
+    // ===== CABLEADO: Guardar venta en base de datos =====
+    const session = JSON.parse(localStorage.getItem('volvixSession') || 'null');
+    const total = CART.reduce((s, i) => s + i.price * i.qty, 0);
+    const folio = parseInt($('#currentFolio').textContent);
+
+    const saleData = {
+      tenant_id: session?.tenant_id || 'TNT001',
+      user_id: session?.user_id || 'USR001',
+      cashier_email: session?.email || 'unknown',
+      ticket_number: 'TKT-' + folio,
+      items: CART.map(i => ({
+        product_id: i.id || null,
+        code: i.code,
+        name: i.name,
+        price: i.price,
+        qty: i.qty,
+        subtotal: i.price * i.qty
+      })),
+      total: total,
+      payment_method: 'efectivo',
+      timestamp: Date.now()
+    };
+
+    try {
+      const res = await fetch('/api/sales', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(saleData)
+      });
+      if (res.ok) {
+        const saved = await res.json();
+        showToast('✓ Venta ' + saved.id + ' guardada en DB');
+        console.log('[VOLVIX] Venta guardada:', saved);
+      } else {
+        // Si falla la API, guardar en queue offline
+        const queue = JSON.parse(localStorage.getItem('volvix:wiring:queue') || '[]');
+        queue.push({ type: 'sale', endpoint: '/api/sales', method: 'POST', data: saleData, queued_at: Date.now() });
+        localStorage.setItem('volvix:wiring:queue', JSON.stringify(queue));
+        showToast('⚠ Venta guardada offline - se sincronizará');
+      }
+    } catch(err) {
+      // Offline: guardar en queue
+      const queue = JSON.parse(localStorage.getItem('volvix:wiring:queue') || '[]');
+      queue.push({ type: 'sale', endpoint: '/api/sales', method: 'POST', data: saleData, queued_at: Date.now() });
+      localStorage.setItem('volvix:wiring:queue', JSON.stringify(queue));
+      showToast('⚠ Sin conexión - venta en cola offline');
+    }
+
     closeModal('modal-pay');
-    showToast('✓ Venta completada · guardada en SQLite local');
     CART = [];
     renderCart();
     $('#footer-pago').textContent = '$0.00';
     $('#footer-cambio').textContent = '$0.00';
-    const folio = parseInt($('#currentFolio').textContent) + 1;
-    $('#currentFolio').textContent = folio;
-    $('#pay-folio').textContent = folio;
+    const newFolio = folio + 1;
+    $('#currentFolio').textContent = newFolio;
+    $('#pay-folio').textContent = newFolio;
   }
 
   /* ============ OTHER SCREENS RENDER ============ */
