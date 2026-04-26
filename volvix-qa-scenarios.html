@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>🧪 Volvix QA - Escenarios de Prueba</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,Segoe UI,sans-serif}
+body{background:linear-gradient(135deg,#0f172a,#1e293b);color:#f1f5f9;min-height:100vh;padding:20px}
+.container{max-width:1400px;margin:0 auto}
+header{background:rgba(30,41,59,.8);padding:24px;border-radius:16px;border:1px solid #334155;margin-bottom:20px;backdrop-filter:blur(10px)}
+h1{font-size:28px;margin-bottom:8px;background:linear-gradient(90deg,#3b82f6,#8b5cf6,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sub{color:#94a3b8;font-size:14px}
+.toolbar{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.btn{padding:8px 16px;background:#3b82f6;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;transition:all .2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(59,130,246,.4)}
+.btn.success{background:#22c55e}
+.btn.danger{background:#ef4444}
+.btn.warn{background:#f59e0b}
+.btn.purple{background:#8b5cf6}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:20px}
+.stat{background:rgba(30,41,59,.7);padding:20px;border-radius:12px;border:1px solid #334155}
+.stat-val{font-size:32px;font-weight:800;background:linear-gradient(90deg,#3b82f6,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-lbl{font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-top:4px}
+.search-box{width:100%;padding:12px 16px;background:rgba(15,23,42,.7);border:1px solid #334155;color:#fff;border-radius:8px;font-size:14px;margin-bottom:16px}
+.search-box:focus{outline:none;border-color:#3b82f6}
+.tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;border-bottom:1px solid #334155;padding-bottom:0}
+.tab{padding:10px 16px;background:transparent;color:#94a3b8;border:none;cursor:pointer;font-size:13px;font-weight:600;border-bottom:2px solid transparent;transition:all .2s}
+.tab:hover{color:#fff}
+.tab.active{color:#3b82f6;border-bottom-color:#3b82f6}
+.section{display:none}
+.section.active{display:block}
+.module{background:rgba(30,41,59,.7);border:1px solid #334155;border-radius:12px;padding:20px;margin-bottom:16px;transition:all .2s}
+.module:hover{border-color:#475569}
+.module-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px}
+.module-title{font-size:18px;font-weight:700}
+.module-meta{font-size:12px;color:#64748b}
+.module-actions{display:flex;gap:8px;flex-wrap:wrap}
+.test-list{margin-top:14px}
+.test{display:flex;align-items:flex-start;gap:10px;padding:10px;background:rgba(15,23,42,.5);border-radius:8px;margin-bottom:6px;cursor:pointer;transition:all .2s}
+.test:hover{background:rgba(15,23,42,.8)}
+.test.passed{border-left:3px solid #22c55e}
+.test.failed{border-left:3px solid #ef4444}
+.test.pending{border-left:3px solid #94a3b8}
+.checkbox{width:20px;height:20px;border:2px solid #475569;border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}
+.test.passed .checkbox{background:#22c55e;border-color:#22c55e;color:#fff}
+.test.passed .checkbox::after{content:"✓"}
+.test.failed .checkbox{background:#ef4444;border-color:#ef4444;color:#fff}
+.test.failed .checkbox::after{content:"✗"}
+.test-info{flex:1}
+.test-name{font-size:13px;font-weight:600;margin-bottom:3px}
+.test-desc{font-size:11px;color:#94a3b8}
+.test-actions{display:flex;gap:4px}
+.test-btn{padding:4px 10px;background:rgba(59,130,246,.15);color:#60a5fa;border:1px solid rgba(59,130,246,.3);border-radius:4px;cursor:pointer;font-size:11px;font-weight:600}
+.test-btn:hover{background:rgba(59,130,246,.3)}
+.test-btn.pass{background:rgba(34,197,94,.15);color:#86efac;border-color:rgba(34,197,94,.3)}
+.test-btn.fail{background:rgba(239,68,68,.15);color:#fca5a5;border-color:rgba(239,68,68,.3)}
+.progress-bar{height:8px;background:#1e293b;border-radius:4px;overflow:hidden;margin-top:10px}
+.progress-fill{height:100%;background:linear-gradient(90deg,#3b82f6,#22c55e);transition:width .5s}
+.creds-box{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);padding:12px;border-radius:8px;font-family:ui-monospace,monospace;font-size:12px;line-height:1.7;margin-bottom:16px;color:#93c5fd}
+.urls-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px}
+.url-card{background:rgba(15,23,42,.7);padding:14px;border-radius:8px;border:1px solid #334155;transition:all .2s}
+.url-card:hover{border-color:#3b82f6;transform:translateY(-2px)}
+.url-card a{color:#60a5fa;text-decoration:none;font-size:13px;font-weight:600;word-break:break-all}
+.url-card .desc{font-size:11px;color:#94a3b8;margin-top:4px}
+.export-bar{position:fixed;bottom:20px;right:20px;background:rgba(30,41,59,.95);padding:12px;border-radius:12px;border:1px solid #334155;z-index:100;backdrop-filter:blur(10px);display:flex;gap:8px}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>🧪 Volvix POS - QA Test Scenarios</h1>
+    <div class="sub">Plan completo de pruebas manuales con TODOS los módulos, botones y escenarios</div>
+    <div class="creds-box" style="margin-top:14px;">
+      <strong>🔐 Credenciales de prueba:</strong><br>
+      • <strong>admin@volvix.test</strong> / Volvix2026! → superadmin<br>
+      • <strong>owner@volvix.test</strong> / Volvix2026! → owner<br>
+      • <strong>cajero@volvix.test</strong> / Volvix2026! → cajero<br>
+      <strong>🌐 URL Base:</strong> <a href="https://volvix-pos.vercel.app" target="_blank" style="color:#60a5fa;">https://volvix-pos.vercel.app</a>
+    </div>
+    <div class="toolbar">
+      <button class="btn success" onclick="markAllPassed()">✓ Marcar todo OK</button>
+      <button class="btn danger" onclick="resetAll()">🔄 Reset</button>
+      <button class="btn warn" onclick="exportResults()">📥 Export JSON</button>
+      <button class="btn purple" onclick="exportCSV()">📊 Export CSV</button>
+      <button class="btn" onclick="window.print()">🖨️ Imprimir</button>
+    </div>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-val" id="totalTests">0</div><div class="stat-lbl">Total Tests</div></div>
+    <div class="stat"><div class="stat-val" id="passedTests" style="background:linear-gradient(90deg,#22c55e,#86efac);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">0</div><div class="stat-lbl">✓ Pasados</div></div>
+    <div class="stat"><div class="stat-val" id="failedTests" style="background:linear-gradient(90deg,#ef4444,#fca5a5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">0</div><div class="stat-lbl">✗ Fallidos</div></div>
+    <div class="stat"><div class="stat-val" id="pendingTests" style="background:linear-gradient(90deg,#64748b,#94a3b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">0</div><div class="stat-lbl">⏳ Pendientes</div></div>
+    <div class="stat"><div class="stat-val" id="progress">0%</div><div class="stat-lbl">Progreso</div><div class="progress-bar" style="margin-top:8px;"><div class="progress-fill" id="progressBar" style="width:0%;"></div></div></div>
+  </div>
+
+  <input type="text" class="search-box" placeholder="🔍 Buscar test, módulo o escenario..." id="searchInput" oninput="filterTests()">
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('all',this)">📋 Todos</button>
+    <button class="tab" onclick="showTab('auth',this)">🔐 Auth</button>
+    <button class="tab" onclick="showTab('pos',this)">🛒 POS</button>
+    <button class="tab" onclick="showTab('owner',this)">👨‍💼 Owner</button>
+    <button class="tab" onclick="showTab('multipos',this)">🏢 MultiPOS</button>
+    <button class="tab" onclick="showTab('verticales',this)">🏪 Verticales</button>
+    <button class="tab" onclick="showTab('ui',this)">🎨 UI</button>
+    <button class="tab" onclick="showTab('workflows',this)">⚙️ Workflows</button>
+    <button class="tab" onclick="showTab('apis',this)">🔌 APIs</button>
+    <button class="tab" onclick="showTab('urls',this)">🌐 URLs</button>
+  </div>
+
+  <div id="tests-container"></div>
+</div>
+
+<div class="export-bar">
+  <span style="color:#94a3b8;font-size:12px;align-self:center;">💾 Auto-save activo</span>
+</div>
+
+<script>
+const TEST_DATA = {
+  auth: {
+    name: "🔐 Autenticación",
+    modules: [
+      { id:"auth-1", title:"Login admin@volvix.test", action:"Ir a /login.html, ingresar admin@volvix.test/Volvix2026!", expected:"Redirige a SalvadoreX, role=superadmin", url:"/login.html" },
+      { id:"auth-2", title:"Login owner@volvix.test", action:"Login con owner@volvix.test/Volvix2026!", expected:"Redirige, role=owner, tenant=Restaurante Los Compadres", url:"/login.html" },
+      { id:"auth-3", title:"Login cajero@volvix.test", action:"Login con cajero@volvix.test/Volvix2026!", expected:"Redirige, role=cajero, tenant=Abarrotes Don Chucho", url:"/login.html" },
+      { id:"auth-4", title:"Login credenciales inválidas", action:"Login con email/password inválido", expected:"Mensaje de error 'Credenciales inválidas'", url:"/login.html" },
+      { id:"auth-5", title:"Sesión persiste tras reload", action:"Login, F5/recargar página", expected:"Sigue autenticado, redirige a app", url:"/" },
+      { id:"auth-6", title:"Logout limpia sesión", action:"Click en botón salir", expected:"Vuelve a /login.html", url:"/" },
+      { id:"auth-7", title:"Auth-gate protege páginas", action:"Sin login ir a /salvadorex_web_v25.html directo", expected:"Redirige a /login.html", url:"/salvadorex_web_v25.html" }
+    ]
+  },
+  pos: {
+    name: "🛒 POS SalvadoreX",
+    modules: [
+      { id:"pos-1", title:"Carga productos desde DB", action:"Login admin → SalvadoreX abre", expected:"5 productos visibles (Coca, Pan, Queso, Tortillas, Leche)", url:"/salvadorex_web_v25.html" },
+      { id:"pos-2", title:"Buscar producto por código", action:"Escribir 7501055303045 → Enter", expected:"Coca Cola se agrega al carrito", url:"/salvadorex_web_v25.html" },
+      { id:"pos-3", title:"Buscar producto por nombre", action:"Escribir 'pan' → Enter", expected:"Pan dulce se agrega al carrito", url:"/salvadorex_web_v25.html" },
+      { id:"pos-4", title:"Aumentar cantidad producto", action:"Click + en cantidad", expected:"Cantidad sube y total se recalcula", url:"/salvadorex_web_v25.html" },
+      { id:"pos-5", title:"Eliminar producto del carrito", action:"Click X en producto", expected:"Producto desaparece, total baja", url:"/salvadorex_web_v25.html" },
+      { id:"pos-6", title:"F12 Cobrar - Modal abre", action:"Presionar F12", expected:"Modal de pago aparece con métodos", url:"/salvadorex_web_v25.html" },
+      { id:"pos-7", title:"Cobrar Efectivo guarda en DB", action:"F12 → Efectivo → Confirmar", expected:"Toast '✓ Venta guardada SLE-...', va a Supabase", url:"/salvadorex_web_v25.html" },
+      { id:"pos-8", title:"Cobrar Tarjeta", action:"F12 → Tarjeta → Confirmar", expected:"Venta con payment_method=tarjeta", url:"/salvadorex_web_v25.html" },
+      { id:"pos-9", title:"F1 Ventas (volver POS)", action:"Click F1", expected:"Vuelve a pantalla ventas POS", url:"/salvadorex_web_v25.html" },
+      { id:"pos-10", title:"F2 Créditos", action:"Click F2", expected:"Pantalla de créditos cliente", url:"/salvadorex_web_v25.html" },
+      { id:"pos-11", title:"F3 Productos / Inventario", action:"Click F3", expected:"Lista de productos con stock", url:"/salvadorex_web_v25.html" },
+      { id:"pos-12", title:"F4 Inventario", action:"Click F4", expected:"Pantalla inventario completa", url:"/salvadorex_web_v25.html" },
+      { id:"pos-13", title:"Agregar nuevo producto", action:"F4 → '+ Agregar producto'", expected:"Prompt → guarda en /api/products", url:"/salvadorex_web_v25.html" },
+      { id:"pos-14", title:"Clientes", action:"Click 'Clientes'", expected:"Lista 16 clientes desde DB", url:"/salvadorex_web_v25.html" },
+      { id:"pos-15", title:"Agregar cliente", action:"Clientes → '+ Agregar cliente'", expected:"Prompt → guarda en /api/customers", url:"/salvadorex_web_v25.html" },
+      { id:"pos-16", title:"Reportes ventas", action:"Click reportes", expected:"Modal con totales del día", url:"/salvadorex_web_v25.html" },
+      { id:"pos-17", title:"Corte de caja", action:"Click 'Corte de caja'", expected:"Cálculo de efectivo/tarjeta del día", url:"/salvadorex_web_v25.html" },
+      { id:"pos-18", title:"Apertura de caja", action:"Click 'Apertura caja'", expected:"Prompt monto inicial", url:"/salvadorex_web_v25.html" },
+      { id:"pos-19", title:"Devoluciones", action:"Click 'Devolución'", expected:"Modal devolución con folio", url:"/salvadorex_web_v25.html" },
+      { id:"pos-20", title:"Cotizaciones", action:"Click 'Cotizar'", expected:"Guarda cotización en localStorage", url:"/salvadorex_web_v25.html" },
+      { id:"pos-21", title:"Promociones", action:"Click 'Promociones'", expected:"Crear nueva promoción", url:"/salvadorex_web_v25.html" },
+      { id:"pos-22", title:"Recargas celular", action:"Click 'Recargas'", expected:"Form número + monto", url:"/salvadorex_web_v25.html" },
+      { id:"pos-23", title:"Servicios (luz, agua)", action:"Click 'Servicios'", expected:"Lista servicios disponibles", url:"/salvadorex_web_v25.html" },
+      { id:"pos-24", title:"Departamentos", action:"Click 'Departamentos'", expected:"Listado categorías", url:"/salvadorex_web_v25.html" },
+      { id:"pos-25", title:"Kardex", action:"Click 'Kardex'", expected:"Movimientos inventario", url:"/salvadorex_web_v25.html" },
+      { id:"pos-26", title:"Proveedores", action:"Click 'Proveedores'", expected:"Lista proveedores", url:"/salvadorex_web_v25.html" },
+      { id:"pos-27", title:"Facturación CFDI", action:"Click 'Facturación'", expected:"Form CFDI 4.0", url:"/salvadorex_web_v25.html" },
+      { id:"pos-28", title:"Configuración POS", action:"Click 'Config'", expected:"Pantalla settings", url:"/salvadorex_web_v25.html" },
+      { id:"pos-29", title:"Chat IA flotante", action:"Click 🤖 botón flotante", expected:"Chat overlay aparece, responde", url:"/salvadorex_web_v25.html" },
+      { id:"pos-30", title:"Notificaciones campana", action:"Click 🔔", expected:"Panel notif con badge", url:"/salvadorex_web_v25.html" }
+    ]
+  },
+  owner: {
+    name: "👨‍💼 Owner Panel",
+    modules: [
+      { id:"owner-1", title:"Dashboard métricas", action:"Login admin → /volvix_owner_panel_v7.html", expected:"MRR, ARR, ventas, productos, clientes en vivo", url:"/volvix_owner_panel_v7.html" },
+      { id:"owner-2", title:"Lista tenants", action:"Click 'Tenants'", expected:"3 tenants (Don Chucho, Compadres, BarberShop)", url:"/volvix_owner_panel_v7.html" },
+      { id:"owner-3", title:"Crear tenant nuevo", action:"Click '+ Nuevo Tenant'", expected:"Prompt → guarda en pos_companies", url:"/volvix_owner_panel_v7.html" },
+      { id:"owner-4", title:"Suspender tenant", action:"Click ⏸ en tenant", expected:"is_active=false en DB", url:"/volvix_owner_panel_v7.html" },
+      { id:"owner-5", title:"Lista usuarios", action:"Click 'Users'", expected:"8 usuarios con last_login_at", url:"/volvix_owner_panel_v7.html" },
+      { id:"owner-6", title:"Crear usuario nuevo", action:"Click '+ Nuevo Usuario'", expected:"Form → POST /api/owner/users", url:"/volvix_owner_panel_v7.html" },
+      { id:"owner-7", title:"Crear licencia", action:"Click '+ Licencia'", expected:"License key generada", url:"/volvix_owner_panel_v7.html" },
+      { id:"owner-8", title:"Ver dominios", action:"Click 'Domains'", expected:"Lista dominios", url:"/volvix_owner_panel_v7.html" },
+      { id:"owner-9", title:"Ver billing", action:"Click 'Billing'", expected:"Reporte facturación", url:"/volvix_owner_panel_v7.html" },
+      { id:"owner-10", title:"Stock bajo alerta", action:"Click 'Low stock'", expected:"12 productos con stock<20", url:"/volvix_owner_panel_v7.html" },
+      { id:"owner-11", title:"Sync queue", action:"Click 'Sync'", expected:"Cola de sincronización", url:"/volvix_owner_panel_v7.html" },
+      { id:"owner-12", title:"Solicitar feature IA", action:"Click 'Solicitar feature'", expected:"Prompt → IA decide", url:"/volvix_owner_panel_v7.html" },
+      { id:"owner-13", title:"Crear ticket soporte", action:"Click '+ Ticket'", expected:"IA intenta resolver", url:"/volvix_owner_panel_v7.html" },
+      { id:"owner-14", title:"Export CSV", action:"Click 'Export'", expected:"Descarga CSV", url:"/volvix_owner_panel_v7.html" }
+    ]
+  },
+  multipos: {
+    name: "🏢 MultiPOS Suite",
+    modules: [
+      { id:"mp-1", title:"Lista sucursales", action:"Ir a /multipos_suite_v3.html", expected:"3 sucursales con plan/estado", url:"/multipos_suite_v3.html" },
+      { id:"mp-2", title:"Ver sucursal específica", action:"Click 'Ver' en sucursal", expected:"Métricas de esa sucursal", url:"/multipos_suite_v3.html" },
+      { id:"mp-3", title:"Comparar sucursales", action:"Click 'Comparar'", expected:"Tabla comparativa", url:"/multipos_suite_v3.html" },
+      { id:"mp-4", title:"Transferir stock", action:"Click 'Transferir'", expected:"Form origen→destino+producto", url:"/multipos_suite_v3.html" },
+      { id:"mp-5", title:"Dashboard consolidado", action:"Click 'Dashboard consolidado'", expected:"Modal con 8 métricas globales", url:"/multipos_suite_v3.html" },
+      { id:"mp-6", title:"Crear empleado", action:"Click '+ Empleado'", expected:"Form con sucursal", url:"/multipos_suite_v3.html" },
+      { id:"mp-7", title:"Permisos por rol", action:"Click 'Permisos'", expected:"Matriz cajero/manager", url:"/multipos_suite_v3.html" },
+      { id:"mp-8", title:"Cajas múltiples", action:"Click 'Cajas'", expected:"Lista cajas abiertas/cerradas", url:"/multipos_suite_v3.html" },
+      { id:"mp-9", title:"Alertas globales", action:"Click 'Alertas'", expected:"Stock bajo + sucursales inactivas", url:"/multipos_suite_v3.html" },
+      { id:"mp-10", title:"Backup sucursal", action:"Click 'Backup'", expected:"Descarga JSON con datos", url:"/multipos_suite_v3.html" },
+      { id:"mp-11", title:"Sync realtime", action:"Auto-actualiza cada 30s", expected:"Métricas se refrescan solas", url:"/multipos_suite_v3.html" },
+      { id:"mp-12", title:"Reporte ventas/sucursal", action:"Click 'Reporte por sucursal'", expected:"Ingresos por sucursal", url:"/multipos_suite_v3.html" }
+    ]
+  },
+  verticales: {
+    name: "🏪 Verticales POS",
+    modules: [
+      { id:"v-1", title:"Farmacia (window.FarmaciaAPI)", action:"Console: window.FarmaciaAPI.altaCliente({...})", expected:"Cliente con alergias guardado", url:"/salvadorex_web_v25.html" },
+      { id:"v-2", title:"Veterinaria (window.VetAPI)", action:"Console: window.VetAPI.createPet({...})", expected:"Mascota con vacunas/peso", url:"/salvadorex_web_v25.html" },
+      { id:"v-3", title:"Estética (EsteticaAPI)", action:"window.EsteticaAPI.bookCita({...})", expected:"Cita agendada con staff", url:"/salvadorex_web_v25.html" },
+      { id:"v-4", title:"Gimnasio (GymAPI)", action:"window.GymAPI.sellMembership({...})", expected:"Membresía activa", url:"/salvadorex_web_v25.html" },
+      { id:"v-5", title:"Lavandería (LavanderiaAPI)", action:"window.LavanderiaAPI.crear({...})", expected:"Orden con folio", url:"/salvadorex_web_v25.html" },
+      { id:"v-6", title:"Cafetería (CafeAPI)", action:"window.CafeAPI.newOrder({...})", expected:"Bebida con custom", url:"/salvadorex_web_v25.html" },
+      { id:"v-7", title:"Pizzería (PizzaAPI)", action:"window.PizzaAPI.createPizza()", expected:"Pizza mitad/mitad", url:"/salvadorex_web_v25.html" },
+      { id:"v-8", title:"Hotel (HotelAPI)", action:"window.HotelAPI.createReservation({...})", expected:"Reserva con check-in/out", url:"/salvadorex_web_v25.html" },
+      { id:"v-9", title:"Tienda Ropa (RopaAPI)", action:"window.RopaAPI.matriz()", expected:"Matrix talla×color", url:"/salvadorex_web_v25.html" },
+      { id:"v-10", title:"Ferretería (FerreteriaAPI)", action:"window.FerreteriaAPI.calcCorte()", expected:"Conversión medidas", url:"/salvadorex_web_v25.html" },
+      { id:"v-11", title:"Florería (FloreriaAPI)", action:"window.FloreriaAPI.crearOrden()", expected:"Arreglo con recargo", url:"/salvadorex_web_v25.html" },
+      { id:"v-12", title:"Heladería (HeladoAPI)", action:"window.HeladoAPI.crearHelado()", expected:"Helado con sabores", url:"/salvadorex_web_v25.html" },
+      { id:"v-13", title:"Joyería (JoyeriaAPI)", action:"window.JoyeriaAPI.registrarPieza()", expected:"Pieza con certificado", url:"/salvadorex_web_v25.html" },
+      { id:"v-14", title:"Carnicería (CarniceriaAPI)", action:"window.CarniceriaAPI.lotes()", expected:"FIFO con caducidad", url:"/salvadorex_web_v25.html" },
+      { id:"v-15", title:"Panadería (PanaderiaAPI)", action:"window.PanaderiaAPI.descuento()", expected:"30% fin del día", url:"/salvadorex_web_v25.html" },
+      { id:"v-16", title:"Spa (SpaAPI)", action:"window.SpaAPI.bookAppointment()", expected:"Cita con cabina", url:"/salvadorex_web_v25.html" },
+      { id:"v-17", title:"Vinatería (VinateriaAPI)", action:"window.VinateriaAPI.validarEdad()", expected:"Bloqueo por edad/horario", url:"/salvadorex_web_v25.html" },
+      { id:"v-18", title:"Librería (LibreriaAPI)", action:"window.LibreriaAPI.validarISBN()", expected:"ISBN-13 checksum", url:"/salvadorex_web_v25.html" },
+      { id:"v-19", title:"Zapatería (ZapateriaAPI)", action:"window.ZapateriaAPI.matrizTallas()", expected:"Stock por talla/color", url:"/salvadorex_web_v25.html" },
+      { id:"v-20", title:"Buffet (BuffetAPI)", action:"window.BuffetAPI.abrirMesa()", expected:"Llave electrónica", url:"/salvadorex_web_v25.html" },
+      { id:"v-21", title:"Food Truck (FoodTruckAPI)", action:"window.FoodTruckAPI.updateLocation()", expected:"GPS tracking", url:"/salvadorex_web_v25.html" },
+      { id:"v-22", title:"Sushi (SushiAPI)", action:"window.SushiAPI.AYCE()", expected:"All you can eat 90min", url:"/salvadorex_web_v25.html" },
+      { id:"v-23", title:"Tabaquería (TabaqueriaAPI)", action:"window.TabaqueriaAPI.verificarEdad()", expected:"Bloqueo edad estricto", url:"/salvadorex_web_v25.html" },
+      { id:"v-24", title:"Papelería (PapeleriaAPI)", action:"window.PapeleriaAPI.copiarBN()", expected:"Servicio agregado", url:"/salvadorex_web_v25.html" },
+      { id:"v-25", title:"Tlapalería (TlapaleriaAPI)", action:"window.TlapaleriaAPI.crearTonoCustom()", expected:"Tono custom guardado", url:"/salvadorex_web_v25.html" },
+      { id:"v-26", title:"Educación (EducacionAPI)", action:"window.EducacionAPI.generarMensualidad()", expected:"Cobro mensual con beca", url:"/salvadorex_web_v25.html" },
+      { id:"v-27", title:"Eventos (EventosAPI)", action:"window.EventosAPI.crearEvento()", expected:"Boda/XV con paquete", url:"/salvadorex_web_v25.html" },
+      { id:"v-28", title:"Mecánica (MecanicaAPI)", action:"window.MecanicaAPI.crearOrdenTrabajo()", expected:"OT con diagnóstico", url:"/salvadorex_web_v25.html" },
+      { id:"v-29", title:"Café Internet (CafeInternetAPI)", action:"window.CafeInternetAPI.iniciarSesionPC()", expected:"PC ocupada con timer", url:"/salvadorex_web_v25.html" },
+      { id:"v-30", title:"Guardería (GuarderiaAPI)", action:"window.GuarderiaAPI.checkIn()", expected:"Niño con asistencia", url:"/salvadorex_web_v25.html" },
+      { id:"v-31", title:"Inmobiliaria (InmobiliariaAPI)", action:"window.InmobiliariaAPI.addProperty()", expected:"Propiedad listada", url:"/salvadorex_web_v25.html" }
+    ]
+  },
+  ui: {
+    name: "🎨 UI Components",
+    modules: [
+      { id:"ui-1", title:"DatePicker", action:"window.DatePicker.attach(input)", expected:"Calendario popup", url:"/salvadorex_web_v25.html" },
+      { id:"ui-2", title:"ColorPicker", action:"new ColorPicker().mount()", expected:"HSL/RGB/HEX picker", url:"/salvadorex_web_v25.html" },
+      { id:"ui-3", title:"Modal", action:"Modal.alert('test')", expected:"Modal aparece", url:"/salvadorex_web_v25.html" },
+      { id:"ui-4", title:"Drawer", action:"Drawer.create({position:'right'})", expected:"Drawer derecho", url:"/salvadorex_web_v25.html" },
+      { id:"ui-5", title:"Tabs", action:"Tabs.create(container)", expected:"Tabs funcionales", url:"/salvadorex_web_v25.html" },
+      { id:"ui-6", title:"DataTable", action:"new DataTable(container,{...})", expected:"Tabla sortable", url:"/salvadorex_web_v25.html" },
+      { id:"ui-7", title:"FormBuilder", action:"FormBuilder.render({...})", expected:"Form con validación", url:"/salvadorex_web_v25.html" },
+      { id:"ui-8", title:"Skeleton loader", action:"Skeleton.card(target)", expected:"Shimmer animation", url:"/salvadorex_web_v25.html" },
+      { id:"ui-9", title:"Animations confetti", action:"Animations.confetti()", expected:"Confetti animation", url:"/salvadorex_web_v25.html" },
+      { id:"ui-10", title:"Splash screen", action:"Splash.show()", expected:"Logo con loading", url:"/salvadorex_web_v25.html" },
+      { id:"ui-11", title:"Tour interactivo", action:"Tour.start('cajero')", expected:"Tutorial overlay", url:"/salvadorex_web_v25.html" },
+      { id:"ui-12", title:"EmptyState", action:"EmptyState.render(target,'no-data')", expected:"Ilustración SVG", url:"/salvadorex_web_v25.html" },
+      { id:"ui-13", title:"ErrorHandler 404", action:"ErrorHandler.show404()", expected:"Página 404 chévere", url:"/salvadorex_web_v25.html" },
+      { id:"ui-14", title:"Slider", action:"new Slider(container,{...})", expected:"Range slider dual", url:"/salvadorex_web_v25.html" },
+      { id:"ui-15", title:"Toggle", action:"Toggle.create(container)", expected:"Switch on/off", url:"/salvadorex_web_v25.html" },
+      { id:"ui-16", title:"Progress", action:"Progress.linear({...})", expected:"Barra animada", url:"/salvadorex_web_v25.html" },
+      { id:"ui-17", title:"Accordion", action:"Accordion.init('.accordion')", expected:"Expand/collapse", url:"/salvadorex_web_v25.html" },
+      { id:"ui-18", title:"Dropdown searchable", action:"new Dropdown(sel,{multi:true})", expected:"Multi-select tags", url:"/salvadorex_web_v25.html" },
+      { id:"ui-19", title:"Pagination", action:"Pagination.create({total:1000})", expected:"Paginación con jump", url:"/salvadorex_web_v25.html" },
+      { id:"ui-20", title:"Tooltip", action:"data-tooltip='hello'", expected:"Tooltip con flip", url:"/salvadorex_web_v25.html" },
+      { id:"ui-21", title:"Card", action:"Card.create({...})", expected:"Card con imagen", url:"/salvadorex_web_v25.html" },
+      { id:"ui-22", title:"Badge", action:"Badge.count(el,99)", expected:"Badge con número", url:"/salvadorex_web_v25.html" },
+      { id:"ui-23", title:"Avatar", action:"Avatar.create({name:'JD'})", expected:"Initials avatar", url:"/salvadorex_web_v25.html" },
+      { id:"ui-24", title:"Snackbar", action:"Snackbar.success('OK')", expected:"Toast verde", url:"/salvadorex_web_v25.html" },
+      { id:"ui-25", title:"Banner", action:"Banner.info('msg')", expected:"Banner top sticky", url:"/salvadorex_web_v25.html" },
+      { id:"ui-26", title:"List virtual", action:"List.create(...)", expected:"Virtual scroll", url:"/salvadorex_web_v25.html" },
+      { id:"ui-27", title:"Wizard multi-step", action:"Wizard.create({steps:[...]})", expected:"Stepper validación", url:"/salvadorex_web_v25.html" },
+      { id:"ui-28", title:"Carousel", action:"data-carousel autoplay", expected:"Slides con dots", url:"/salvadorex_web_v25.html" },
+      { id:"ui-29", title:"ImageViewer zoom", action:"ImageViewer.open(imgs)", expected:"Lightbox zoom/pan", url:"/salvadorex_web_v25.html" },
+      { id:"ui-30", title:"ContextMenu", action:"ContextMenu.bind(el,items)", expected:"Right-click menu", url:"/salvadorex_web_v25.html" },
+      { id:"ui-31", title:"Spinner", action:"Spinner.show()", expected:"Loading overlay", url:"/salvadorex_web_v25.html" },
+      { id:"ui-32", title:"Steps visual", action:"Steps.create({...})", expected:"Stepper visual", url:"/salvadorex_web_v25.html" },
+      { id:"ui-33", title:"Timeline", action:"new Timeline({events})", expected:"Timeline vertical", url:"/salvadorex_web_v25.html" },
+      { id:"ui-34", title:"TreeView", action:"TreeView.create({...})", expected:"Árbol drag-drop", url:"/salvadorex_web_v25.html" },
+      { id:"ui-35", title:"Kanban", action:"Kanban.mount(target)", expected:"Board con columnas", url:"/salvadorex_web_v25.html" },
+      { id:"ui-36", title:"Editor rich text", action:"Editor.create(target)", expected:"Toolbar B/I/U", url:"/salvadorex_web_v25.html" },
+      { id:"ui-37", title:"SearchBox global", action:"Ctrl+K", expected:"Cmd+K search abre", url:"/salvadorex_web_v25.html" },
+      { id:"ui-38", title:"FileUpload drag-drop", action:"new FileUpload('#div')", expected:"Drop zone con preview", url:"/salvadorex_web_v25.html" }
+    ]
+  },
+  workflows: {
+    name: "⚙️ Workflows Operacionales",
+    modules: [
+      { id:"wf-1", title:"OpenDay - Apertura", action:"OpenDayWorkflow.run()", expected:"6 pasos: check, fund, open, products, staff, ready", url:"/salvadorex_web_v25.html" },
+      { id:"wf-2", title:"CloseDay - Cierre", action:"CloseDayWorkflow.startCount()", expected:"Conteo, diferencia, depósito, reportes, backup, lock", url:"/salvadorex_web_v25.html" },
+      { id:"wf-3", title:"Reconciliation bancaria", action:"ReconciliationWorkflow.autoMatch()", expected:"Match automático con score", url:"/volvix_owner_panel_v7.html" },
+      { id:"wf-4", title:"Collections cobranza", action:"CollectionsWorkflow.runDaily()", expected:"SMS/Email/WhatsApp + aging", url:"/volvix_owner_panel_v7.html" },
+      { id:"wf-5", title:"Restock automático", action:"RestockWorkflow.runWorkflow()", expected:"Detect bajo stock + EOQ + PO", url:"/volvix_owner_panel_v7.html" },
+      { id:"wf-6", title:"Onboarding nuevo tenant", action:"OnboardingWorkflow.start()", expected:"6 stages: setup, staff, products, sale, training, cert", url:"/volvix-onboarding-wizard.html" }
+    ]
+  },
+  apis: {
+    name: "🔌 APIs REST",
+    modules: [
+      { id:"api-1", title:"GET /api/health", action:"curl https://volvix-pos.vercel.app/api/health", expected:"{ok:true, supabase_connected:true}", url:"https://volvix-pos.vercel.app/api/health" },
+      { id:"api-2", title:"POST /api/login", action:"POST credenciales", expected:"{ok:true, session:{...}}", url:"https://volvix-pos.vercel.app/api/login" },
+      { id:"api-3", title:"GET /api/products", action:"GET productos", expected:"Array 5 productos", url:"https://volvix-pos.vercel.app/api/products" },
+      { id:"api-4", title:"POST /api/products", action:"Crear producto", expected:"{id, ...}", url:"https://volvix-pos.vercel.app/api/products" },
+      { id:"api-5", title:"GET /api/sales", action:"GET ventas", expected:"Array sales", url:"https://volvix-pos.vercel.app/api/sales" },
+      { id:"api-6", title:"POST /api/sales", action:"Crear venta", expected:"{id, total}", url:"https://volvix-pos.vercel.app/api/sales" },
+      { id:"api-7", title:"GET /api/customers", action:"GET clientes", expected:"16 customers", url:"https://volvix-pos.vercel.app/api/customers" },
+      { id:"api-8", title:"GET /api/tenants", action:"GET tenants", expected:"3 companies", url:"https://volvix-pos.vercel.app/api/tenants" },
+      { id:"api-9", title:"GET /api/owner/dashboard", action:"GET métricas", expected:"MRR, ARR, etc", url:"https://volvix-pos.vercel.app/api/owner/dashboard" },
+      { id:"api-10", title:"GET /api/owner/users", action:"GET usuarios", expected:"8 users", url:"https://volvix-pos.vercel.app/api/owner/users" },
+      { id:"api-11", title:"GET /api/features", action:"GET features", expected:"8 features", url:"https://volvix-pos.vercel.app/api/features" },
+      { id:"api-12", title:"POST /api/ai/decide", action:"POST con prompt", expected:"Response Claude API", url:"https://volvix-pos.vercel.app/api/ai/decide" },
+      { id:"api-13", title:"POST /api/sync", action:"POST cola offline", expected:"{ok:true, synced}", url:"https://volvix-pos.vercel.app/api/sync" },
+      { id:"api-14", title:"GET /api/inventory", action:"GET inventario", expected:"Array productos", url:"https://volvix-pos.vercel.app/api/inventory" },
+      { id:"api-15", title:"GET /api/reports/daily", action:"GET reporte diario", expected:"Array días", url:"https://volvix-pos.vercel.app/api/reports/daily" }
+    ]
+  },
+  urls: {
+    name: "🌐 URLs del Sistema",
+    modules: [
+      { id:"url-public", title:"PÁGINAS PÚBLICAS", action:"", expected:"", url:"" },
+      { id:"url-1", title:"🌐 Hub Landing", action:"Visitar", expected:"957 líneas, hero+features+pricing+FAQ", url:"https://volvix-pos.vercel.app/volvix-hub-landing.html" },
+      { id:"url-2", title:"🎪 Grand Tour", action:"Visitar", expected:"1004 líneas, demo interactivo", url:"https://volvix-pos.vercel.app/volvix-grand-tour.html" },
+      { id:"url-3", title:"🗺️ Sitemap", action:"Visitar", expected:"110+ enlaces categorizados", url:"https://volvix-pos.vercel.app/volvix-sitemap.html" },
+      { id:"url-4", title:"💰 Pricing Page", action:"Visitar", expected:"3 planes + comparison", url:"https://volvix-pos.vercel.app/volvix-pricing-page.html" },
+      { id:"url-5", title:"📊 Status Page", action:"Visitar", expected:"Uptime servicios", url:"https://volvix-pos.vercel.app/volvix-status-page.html" },
+      { id:"url-6", title:"📝 Blog", action:"Visitar", expected:"Blog template", url:"https://volvix-pos.vercel.app/volvix-blog.html" },
+      { id:"url-7", title:"🛣️ Roadmap", action:"Visitar", expected:"Public roadmap", url:"https://volvix-pos.vercel.app/volvix-roadmap.html" },
+      { id:"url-8", title:"📋 Changelog", action:"Visitar", expected:"Timeline releases", url:"https://volvix-pos.vercel.app/volvix-changelog.html" },
+      { id:"url-9", title:"💼 Investors", action:"Visitar", expected:"Pitch deck", url:"https://volvix-pos.vercel.app/volvix-investor.html" },
+      { id:"url-10", title:"👥 Careers", action:"Visitar", expected:"Lista posiciones", url:"https://volvix-pos.vercel.app/volvix-careers.html" },
+      { id:"url-11", title:"📰 Press Kit", action:"Visitar", expected:"Logos, screenshots", url:"https://volvix-pos.vercel.app/volvix-press.html" },
+      { id:"url-12", title:"⚖️ Compare", action:"Visitar", expected:"Volvix vs competencia", url:"https://volvix-pos.vercel.app/volvix-compare.html" },
+      { id:"url-13", title:"🔒 Security", action:"Visitar", expected:"SOC2, ISO, GDPR", url:"https://volvix-pos.vercel.app/volvix-security.html" },
+      { id:"url-14", title:"📜 Legal", action:"Visitar", expected:"Terms, Privacy, Cookies", url:"https://volvix-pos.vercel.app/volvix-legal.html" },
+      { id:"url-15", title:"🔌 Integrations", action:"Visitar", expected:"30+ integraciones", url:"https://volvix-pos.vercel.app/volvix-integrations.html" },
+      { id:"url-16", title:"🌟 Showcase", action:"Visitar", expected:"Customer testimonials", url:"https://volvix-pos.vercel.app/volvix-showcase.html" },
+      { id:"url-17", title:"📞 Contact Sales", action:"Visitar", expected:"Form complejo", url:"https://volvix-pos.vercel.app/volvix-contact-sales.html" },
+      { id:"url-18", title:"❌ 404 Page", action:"Visitar", expected:"404 chévere", url:"https://volvix-pos.vercel.app/volvix-404.html" },
+      { id:"url-apps", title:"APPS FUNCIONALES", action:"", expected:"", url:"" },
+      { id:"url-20", title:"🛒 SalvadoreX POS", action:"Login → POS", expected:"POS completo funcional", url:"https://volvix-pos.vercel.app/salvadorex_web_v25.html" },
+      { id:"url-21", title:"👨‍💼 Owner Panel", action:"Login admin", expected:"Dashboard métricas", url:"https://volvix-pos.vercel.app/volvix_owner_panel_v7.html" },
+      { id:"url-22", title:"🏢 MultiPOS Suite", action:"Visitar", expected:"Multi-sucursal", url:"https://volvix-pos.vercel.app/multipos_suite_v3.html" },
+      { id:"url-23", title:"🤖 AI Engine", action:"Visitar", expected:"Motor IA features", url:"https://volvix-pos.vercel.app/volvix_ai_engine.html" },
+      { id:"url-24", title:"💬 AI Support", action:"Visitar", expected:"Chat soporte", url:"https://volvix-pos.vercel.app/volvix_ai_support.html" },
+      { id:"url-25", title:"🎓 AI Academy", action:"Visitar", expected:"Capacitación", url:"https://volvix-pos.vercel.app/volvix_ai_academy.html" },
+      { id:"url-26", title:"🎯 Marketplace", action:"Visitar", expected:"Catálogo features", url:"https://volvix-pos.vercel.app/marketplace.html" },
+      { id:"url-27", title:"🏷️ Etiqueta Designer", action:"Visitar", expected:"Drag-drop labels", url:"https://volvix-pos.vercel.app/etiqueta_designer.html" },
+      { id:"url-28", title:"🖥️ Remote Control", action:"Visitar", expected:"Soporte remoto", url:"https://volvix-pos.vercel.app/volvix_remote.html" },
+      { id:"url-portals", title:"PORTALES ESPECIALIZADOS", action:"", expected:"", url:"" },
+      { id:"url-30", title:"👤 Customer Portal", action:"Visitar", expected:"605 líneas, login cliente", url:"https://volvix-pos.vercel.app/volvix-customer-portal.html" },
+      { id:"url-31", title:"🚛 Vendor Portal", action:"Visitar", expected:"1223 líneas, POs vendor", url:"https://volvix-pos.vercel.app/volvix-vendor-portal.html" },
+      { id:"url-32", title:"👑 Admin SaaS", action:"Visitar", expected:"717 líneas, super admin", url:"https://volvix-pos.vercel.app/volvix-admin-saas.html" },
+      { id:"url-33", title:"🤝 Partner Portal", action:"Visitar", expected:"Programa partners", url:"https://volvix-pos.vercel.app/volvix-partner-portal.html" },
+      { id:"url-34", title:"🎓 Onboarding Wizard", action:"Visitar", expected:"7 pasos setup", url:"https://volvix-pos.vercel.app/volvix-onboarding-wizard.html" },
+      { id:"url-35", title:"📊 Mega Dashboard", action:"Visitar", expected:"845 líneas all-in-one", url:"https://volvix-pos.vercel.app/volvix-mega-dashboard.html" },
+      { id:"url-36", title:"📋 API Docs", action:"Visitar", expected:"43 endpoints", url:"https://volvix-pos.vercel.app/volvix-api-docs.html" },
+      { id:"url-37", title:"📊 Bitácora viva", action:"Visitar", expected:"Auto-refresh 5s", url:"https://volvix-pos.vercel.app/BITACORA_LIVE.html" }
+    ]
+  }
+};
+
+let currentTab = 'all';
+let testStates = {};
+
+function loadStates() {
+  try { testStates = JSON.parse(localStorage.getItem('volvix-qa-states') || '{}'); }
+  catch { testStates = {}; }
+}
+
+function saveStates() {
+  localStorage.setItem('volvix-qa-states', JSON.stringify(testStates));
+}
+
+function render() {
+  const container = document.getElementById('tests-container');
+  let html = '';
+  let total = 0, passed = 0, failed = 0, pending = 0;
+
+  Object.entries(TEST_DATA).forEach(([key, section]) => {
+    if (currentTab !== 'all' && currentTab !== key) return;
+
+    if (key === 'urls') {
+      html += `<div class="module"><div class="module-header"><div class="module-title">${section.name}</div></div><div class="urls-grid">`;
+      section.modules.forEach(m => {
+        if (!m.url) {
+          html += `</div><h3 style="color:#94a3b8;margin:16px 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:1px;">${m.title}</h3><div class="urls-grid">`;
+          return;
+        }
+        const state = testStates[m.id] || 'pending';
+        if (state==='passed') passed++; else if (state==='failed') failed++; else pending++;
+        total++;
+        html += `<div class="url-card"><a href="${m.url}" target="_blank">${m.title}</a><div class="desc">${m.expected}</div><div style="display:flex;gap:6px;margin-top:8px;"><button class="test-btn pass" onclick="setState('${m.id}','passed')">✓</button><button class="test-btn fail" onclick="setState('${m.id}','failed')">✗</button></div></div>`;
+      });
+      html += `</div></div>`;
+      return;
+    }
+
+    html += `<div class="module"><div class="module-header"><div><div class="module-title">${section.name}</div><div class="module-meta">${section.modules.length} tests</div></div></div><div class="test-list">`;
+
+    section.modules.forEach(m => {
+      const state = testStates[m.id] || 'pending';
+      if (state==='passed') passed++; else if (state==='failed') failed++; else pending++;
+      total++;
+
+      html += `<div class="test ${state}" data-search="${(m.title+' '+m.action+' '+m.expected).toLowerCase()}">
+        <div class="checkbox"></div>
+        <div class="test-info">
+          <div class="test-name">${m.title}</div>
+          <div class="test-desc">▶ <strong>Acción:</strong> ${m.action}<br>✓ <strong>Esperado:</strong> ${m.expected}</div>
+        </div>
+        <div class="test-actions">
+          ${m.url ? `<a class="test-btn" href="${m.url}" target="_blank">↗ Abrir</a>` : ''}
+          <button class="test-btn pass" onclick="setState('${m.id}','passed')">✓ OK</button>
+          <button class="test-btn fail" onclick="setState('${m.id}','failed')">✗ Falla</button>
+        </div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+
+  container.innerHTML = html;
+
+  document.getElementById('totalTests').textContent = total;
+  document.getElementById('passedTests').textContent = passed;
+  document.getElementById('failedTests').textContent = failed;
+  document.getElementById('pendingTests').textContent = pending;
+  const pct = total > 0 ? Math.round((passed/total)*100) : 0;
+  document.getElementById('progress').textContent = pct + '%';
+  document.getElementById('progressBar').style.width = pct + '%';
+}
+
+function setState(id, state) {
+  testStates[id] = state;
+  saveStates();
+  render();
+}
+
+function showTab(tab, btn) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function markAllPassed() {
+  if (!confirm('¿Marcar TODOS los tests como pasados?')) return;
+  Object.values(TEST_DATA).forEach(s => s.modules.forEach(m => {
+    if (m.url !== '') testStates[m.id] = 'passed';
+  }));
+  saveStates();
+  render();
+}
+
+function resetAll() {
+  if (!confirm('¿Resetear TODOS los tests?')) return;
+  testStates = {};
+  saveStates();
+  render();
+}
+
+function exportResults() {
+  const data = {
+    project: 'Volvix POS QA',
+    timestamp: new Date().toISOString(),
+    summary: {
+      total: document.getElementById('totalTests').textContent,
+      passed: document.getElementById('passedTests').textContent,
+      failed: document.getElementById('failedTests').textContent,
+      pending: document.getElementById('pendingTests').textContent,
+      progress: document.getElementById('progress').textContent
+    },
+    states: testStates,
+    tests: TEST_DATA
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `volvix-qa-${Date.now()}.json`; a.click();
+}
+
+function exportCSV() {
+  let csv = 'Categoria,ID,Test,Accion,Esperado,Estado,URL\n';
+  Object.entries(TEST_DATA).forEach(([key, section]) => {
+    section.modules.forEach(m => {
+      const state = testStates[m.id] || 'pending';
+      csv += `"${section.name}","${m.id}","${m.title}","${(m.action||'').replace(/"/g,'""')}","${(m.expected||'').replace(/"/g,'""')}","${state}","${m.url||''}"\n`;
+    });
+  });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `volvix-qa-${Date.now()}.csv`; a.click();
+}
+
+function filterTests() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  document.querySelectorAll('.test').forEach(el => {
+    const text = el.dataset.search || '';
+    el.style.display = text.includes(q) ? 'flex' : 'none';
+  });
+}
+
+loadStates();
+render();
+</script>
+</body>
+</html>
