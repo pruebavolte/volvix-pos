@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>📋 Bitácora Volvix POS - EN VIVO</title>
+<meta http-equiv="refresh" content="10">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, "Segoe UI", system-ui, sans-serif; }
+body {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #f1f5f9;
+  min-height: 100vh;
+  padding: 20px;
+}
+.container { max-width: 1400px; margin: 0 auto; }
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: rgba(30,41,59,.7);
+  border-radius: 16px;
+  border: 1px solid #334155;
+  margin-bottom: 20px;
+  backdrop-filter: blur(10px);
+}
+header h1 { font-size: 24px; font-weight: 800; }
+header .status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #94a3b8;
+}
+.live-dot {
+  width: 10px; height: 10px;
+  background: #22c55e;
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .3; }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.card {
+  background: rgba(30,41,59,.7);
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+}
+.card h3 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+.card .value {
+  font-size: 32px;
+  font-weight: 800;
+  color: #fff;
+}
+.card .sub {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.progress-section {
+  background: rgba(30,41,59,.7);
+  border: 1px solid #334155;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+.progress-section h2 {
+  font-size: 18px;
+  margin-bottom: 16px;
+}
+.progress-bar {
+  width: 100%;
+  height: 24px;
+  background: #1e293b;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #22c55e);
+  border-radius: 12px;
+  transition: width .5s;
+}
+
+.modules {
+  display: grid;
+  gap: 8px;
+}
+.module {
+  display: grid;
+  grid-template-columns: 200px 1fr 100px 80px;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 14px;
+  background: rgba(15,23,42,.5);
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-size: 13px;
+}
+.module:hover { border-color: #475569; }
+.module .name { font-weight: 600; }
+.module .progress-mini {
+  flex: 1;
+  height: 6px;
+  background: #1e293b;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.module .progress-mini-fill {
+  height: 100%;
+  background: #3b82f6;
+}
+.module .count { font-size: 11px; color: #94a3b8; text-align: right; }
+.badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  text-align: center;
+}
+.badge.done { background: rgba(34,197,94,.2); color: #22c55e; }
+.badge.progress { background: rgba(59,130,246,.2); color: #3b82f6; }
+.badge.pending { background: rgba(148,163,184,.2); color: #94a3b8; }
+.badge.error { background: rgba(239,68,68,.2); color: #ef4444; }
+
+.log {
+  background: #000;
+  color: #22c55e;
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+  padding: 16px;
+  border-radius: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #1e293b;
+}
+.log-line { padding: 2px 0; }
+.log-line.ok { color: #22c55e; }
+.log-line.info { color: #60a5fa; }
+.log-line.warn { color: #fbbf24; }
+.log-line.error { color: #ef4444; }
+
+.task {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  margin-bottom: 4px;
+  background: rgba(15,23,42,.3);
+}
+.task.done { opacity: .6; }
+.task.in_progress { background: rgba(59,130,246,.1); border-left: 3px solid #3b82f6; }
+.task .check {
+  width: 18px; height: 18px;
+  border: 2px solid #475569;
+  border-radius: 4px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.task.done .check {
+  background: #22c55e;
+  border-color: #22c55e;
+  color: #fff;
+}
+.task.done .check::after { content: "✓"; font-weight: 800; font-size: 12px; }
+.task.in_progress .check {
+  border-color: #3b82f6;
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.task .text { font-size: 13px; }
+.task .meta { font-size: 11px; color: #64748b; margin-top: 3px; }
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+@media (max-width: 768px) {
+  .two-col { grid-template-columns: 1fr; }
+}
+.section-title {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #94a3b8;
+  margin-bottom: 12px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div>
+      <h1>📋 Bitácora Volvix POS</h1>
+      <div class="status">
+        <span class="live-dot"></span>
+        <span>EN VIVO · Auto-refresh cada 10s</span>
+        <span id="ts" style="margin-left:auto;"></span>
+      </div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:24px;font-weight:800;" id="overall-pct">0%</div>
+      <div style="font-size:11px;color:#94a3b8;">PROGRESO TOTAL</div>
+    </div>
+  </header>
+
+  <!-- Quick stats -->
+  <div class="grid">
+    <div class="card">
+      <h3>🎯 Tareas totales</h3>
+      <div class="value" id="total-tasks">0</div>
+      <div class="sub">Total cableado completo</div>
+    </div>
+    <div class="card">
+      <h3>✅ Completadas</h3>
+      <div class="value" style="color:#22c55e;" id="done-tasks">0</div>
+      <div class="sub" id="done-pct">0% del total</div>
+    </div>
+    <div class="card">
+      <h3>🔄 En progreso</h3>
+      <div class="value" style="color:#3b82f6;" id="progress-tasks">0</div>
+      <div class="sub">Trabajo activo</div>
+    </div>
+    <div class="card">
+      <h3>⏳ Pendientes</h3>
+      <div class="value" style="color:#94a3b8;" id="pending-tasks">0</div>
+      <div class="sub" id="time-left">Tiempo restante</div>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-section">
+    <h2>🚀 Progreso por sistema</h2>
+    <div class="modules" id="modules-list"></div>
+  </div>
+
+  <!-- Activity log + Tasks -->
+  <div class="two-col">
+    <div class="progress-section">
+      <div class="section-title">📜 Log de actividad</div>
+      <div class="log" id="activity-log">Cargando...</div>
+    </div>
+    <div class="progress-section">
+      <div class="section-title">📋 Tareas activas</div>
+      <div id="tasks-list"></div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="progress-section" style="margin-top:20px;">
+    <div class="section-title">ℹ️ Información del proyecto</div>
+    <div style="font-size:13px;color:#cbd5e1;line-height:1.8;">
+      <strong>URL Producción:</strong> <a href="https://volvix-pos.vercel.app" style="color:#60a5fa;" target="_blank">https://volvix-pos.vercel.app</a><br>
+      <strong>Base de datos:</strong> Supabase (zhvwmzkcqngcaqpdxtwr)<br>
+      <strong>Deploy:</strong> Vercel Serverless<br>
+      <strong>Inicio:</strong> <span id="start-time">2026-04-25 19:00</span><br>
+      <strong>Última actualización:</strong> <span id="last-update">-</span><br>
+      <strong>Hora estimada finalización:</strong> <span id="eta">Calculando...</span>
+    </div>
+  </div>
+</div>
+
+<script>
+async function loadStatus() {
+  try {
+    const res = await fetch('status.json?t=' + Date.now());
+    const data = await res.json();
+
+    // Stats
+    document.getElementById('total-tasks').textContent = data.stats.total;
+    document.getElementById('done-tasks').textContent = data.stats.done;
+    document.getElementById('progress-tasks').textContent = data.stats.in_progress;
+    document.getElementById('pending-tasks').textContent = data.stats.pending;
+    const pct = Math.round((data.stats.done / data.stats.total) * 100);
+    document.getElementById('overall-pct').textContent = pct + '%';
+    document.getElementById('done-pct').textContent = pct + '% del total';
+
+    // Time calculations
+    const remaining = data.stats.total - data.stats.done;
+    const minutesPerTask = 8; // promedio
+    const minLeft = remaining * minutesPerTask;
+    const hrs = Math.floor(minLeft/60);
+    const min = minLeft % 60;
+    document.getElementById('time-left').textContent = `~${hrs}h ${min}m restantes`;
+
+    const now = new Date();
+    const eta = new Date(now.getTime() + minLeft * 60000);
+    document.getElementById('eta').textContent = eta.toLocaleString('es-MX');
+    document.getElementById('last-update').textContent = now.toLocaleString('es-MX');
+    document.getElementById('ts').textContent = '⏰ ' + now.toLocaleTimeString('es-MX');
+
+    // Modules
+    const modulesEl = document.getElementById('modules-list');
+    modulesEl.innerHTML = data.modules.map(m => {
+      const mPct = Math.round((m.done / m.total) * 100);
+      const status = m.done === m.total ? 'done' :
+                     m.in_progress > 0 ? 'progress' :
+                     m.done > 0 ? 'progress' : 'pending';
+      const statusText = m.done === m.total ? 'COMPLETO' :
+                         m.in_progress > 0 ? 'EN PROGRESO' :
+                         m.done > 0 ? 'PARCIAL' : 'PENDIENTE';
+      return `
+        <div class="module">
+          <div class="name">${m.name}</div>
+          <div class="progress-mini">
+            <div class="progress-mini-fill" style="width:${mPct}%;"></div>
+          </div>
+          <div class="count">${m.done}/${m.total}</div>
+          <span class="badge ${status}">${statusText}</span>
+        </div>
+      `;
+    }).join('');
+
+    // Tasks active
+    const tasksEl = document.getElementById('tasks-list');
+    tasksEl.innerHTML = (data.active_tasks || []).map(t => `
+      <div class="task ${t.status}">
+        <div class="check"></div>
+        <div>
+          <div class="text">${t.title}</div>
+          <div class="meta">${t.detail || ''}</div>
+        </div>
+      </div>
+    `).join('');
+
+    // Log
+    const logEl = document.getElementById('activity-log');
+    logEl.innerHTML = (data.log || []).slice(-30).reverse().map(l =>
+      `<div class="log-line ${l.type}">[${l.time}] ${l.text}</div>`
+    ).join('');
+
+  } catch (e) {
+    document.getElementById('activity-log').innerHTML =
+      '<div class="log-line error">Error cargando status.json: ' + e.message + '</div>';
+  }
+}
+
+loadStatus();
+setInterval(loadStatus, 5000); // Auto-refresh cada 5s
+</script>
+</body>
+</html>
