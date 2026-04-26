@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volvix POS API - Documentacion Interactiva v3.4.0</title>
+<style>
+:root {
+  --bg: #0d1117;
+  --bg-2: #161b22;
+  --bg-3: #1c2128;
+  --border: #30363d;
+  --text: #c9d1d9;
+  --text-dim: #8b949e;
+  --accent: #58a6ff;
+  --green: #3fb950;
+  --yellow: #d29922;
+  --red: #f85149;
+  --purple: #bc8cff;
+  --orange: #db6d28;
+  --pink: #f778ba;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  font-size: 14px;
+}
+header {
+  background: linear-gradient(135deg, #1c2128 0%, #0d1117 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 24px 32px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+}
+header h1 {
+  font-size: 24px;
+  color: var(--accent);
+  display: inline-block;
+  margin-right: 16px;
+}
+header .badge {
+  display: inline-block;
+  background: var(--green);
+  color: #000;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: bold;
+  vertical-align: middle;
+}
+header .meta {
+  color: var(--text-dim);
+  font-size: 13px;
+  margin-top: 6px;
+}
+.container { display: flex; min-height: calc(100vh - 90px); }
+aside {
+  width: 280px;
+  background: var(--bg-2);
+  border-right: 1px solid var(--border);
+  padding: 16px;
+  overflow-y: auto;
+  position: sticky;
+  top: 90px;
+  height: calc(100vh - 90px);
+}
+aside h3 { color: var(--purple); font-size: 13px; text-transform: uppercase; margin: 16px 0 8px; letter-spacing: 1px; }
+aside ul { list-style: none; }
+aside li a {
+  display: block;
+  padding: 6px 10px;
+  color: var(--text-dim);
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 13px;
+  transition: all 0.15s;
+}
+aside li a:hover { background: var(--bg-3); color: var(--accent); }
+.search-box {
+  width: 100%;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+.search-box:focus { outline: none; border-color: var(--accent); }
+main { flex: 1; padding: 32px 48px; max-width: 1200px; }
+section { margin-bottom: 48px; }
+h2 {
+  color: var(--accent);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+  font-size: 22px;
+}
+h3 { color: var(--pink); margin: 16px 0 8px; font-size: 16px; }
+p { margin-bottom: 12px; color: var(--text-dim); }
+.endpoint {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.endpoint:hover { border-color: var(--accent); }
+.endpoint-header {
+  padding: 12px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  user-select: none;
+}
+.endpoint-header:hover { background: var(--bg-3); }
+.method {
+  font-weight: bold;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  min-width: 60px;
+  text-align: center;
+  color: #fff;
+}
+.method.GET { background: var(--green); color: #000; }
+.method.POST { background: var(--accent); }
+.method.PUT { background: var(--yellow); color: #000; }
+.method.DELETE { background: var(--red); }
+.method.PATCH { background: var(--purple); }
+.path {
+  font-family: "SF Mono", "Consolas", monospace;
+  font-weight: 600;
+  color: var(--text);
+}
+.summary { color: var(--text-dim); margin-left: auto; font-size: 13px; }
+.endpoint-body {
+  display: none;
+  padding: 16px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-3);
+}
+.endpoint.open .endpoint-body { display: block; }
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 12px;
+}
+.tab {
+  padding: 8px 14px;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 12px;
+  border-bottom: 2px solid transparent;
+}
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+pre {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px;
+  overflow-x: auto;
+  font-family: "SF Mono", "Consolas", monospace;
+  font-size: 12px;
+  color: var(--green);
+}
+code { font-family: "SF Mono", "Consolas", monospace; color: var(--orange); }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  background: var(--bg);
+  border-radius: 6px;
+  overflow: hidden;
+}
+th, td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+th { background: var(--bg-3); color: var(--purple); font-weight: 600; }
+.try-form { display: grid; gap: 8px; margin-bottom: 12px; }
+.try-form label { font-size: 12px; color: var(--text-dim); }
+.try-form input, .try-form textarea {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px;
+  border-radius: 4px;
+  font-family: "SF Mono", "Consolas", monospace;
+  font-size: 12px;
+}
+.try-form textarea { min-height: 80px; resize: vertical; }
+.btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 12px;
+}
+.btn:hover { opacity: 0.9; }
+.btn-execute { background: var(--green); color: #000; }
+.response-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 12px;
+  margin-top: 12px;
+  min-height: 60px;
+  font-family: "SF Mono", "Consolas", monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+}
+.alert {
+  background: rgba(88, 166, 255, 0.1);
+  border-left: 4px solid var(--accent);
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin: 12px 0;
+}
+.alert.warn { background: rgba(210, 153, 34, 0.1); border-color: var(--yellow); }
+.alert.danger { background: rgba(248, 81, 73, 0.1); border-color: var(--red); }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.card {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  padding: 16px;
+  border-radius: 8px;
+}
+.card h4 { color: var(--accent); margin-bottom: 8px; font-size: 14px; }
+.tag { display: inline-block; padding: 2px 8px; background: var(--bg-3); border-radius: 12px; font-size: 11px; margin-right: 4px; color: var(--text-dim); }
+.status-200 { color: var(--green); }
+.status-400 { color: var(--yellow); }
+.status-401 { color: var(--orange); }
+.status-500 { color: var(--red); }
+footer {
+  border-top: 1px solid var(--border);
+  padding: 24px 48px;
+  color: var(--text-dim);
+  font-size: 12px;
+  text-align: center;
+}
+.hidden { display: none !important; }
+@media (max-width: 768px) {
+  .container { flex-direction: column; }
+  aside { width: 100%; height: auto; position: static; }
+  main { padding: 16px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Volvix POS API</h1>
+  <span class="badge">v3.4.0</span>
+  <span class="badge" style="background:var(--purple);color:#fff">43 endpoints</span>
+  <div class="meta">Base URL: <code>https://api.volvix-pos.com/v1</code> &middot; Auth: Bearer JWT &middot; Updated: 2026-04-25</div>
+</header>
+
+<div class="container">
+<aside>
+  <input type="text" class="search-box" id="searchBox" placeholder="Buscar endpoint... (e.g. login, sales)">
+  <h3>Auth</h3>
+  <ul>
+    <li><a href="#auth">Authentication</a></li>
+    <li><a href="#rate">Rate Limits</a></li>
+    <li><a href="#errors">Error Codes</a></li>
+  </ul>
+  <h3>Core</h3>
+  <ul>
+    <li><a href="#ep-login">POST /api/login</a></li>
+    <li><a href="#ep-logout">POST /api/logout</a></li>
+    <li><a href="#ep-refresh">POST /api/refresh</a></li>
+    <li><a href="#ep-me">GET /api/me</a></li>
+  </ul>
+  <h3>Products</h3>
+  <ul>
+    <li><a href="#ep-prod-list">GET /api/products</a></li>
+    <li><a href="#ep-prod-create">POST /api/products</a></li>
+    <li><a href="#ep-prod-get">GET /api/products/:id</a></li>
+    <li><a href="#ep-prod-upd">PUT /api/products/:id</a></li>
+    <li><a href="#ep-prod-del">DELETE /api/products/:id</a></li>
+  </ul>
+  <h3>Sales</h3>
+  <ul>
+    <li><a href="#ep-sales-list">GET /api/sales</a></li>
+    <li><a href="#ep-sales-create">POST /api/sales</a></li>
+    <li><a href="#ep-sales-get">GET /api/sales/:id</a></li>
+    <li><a href="#ep-sales-void">DELETE /api/sales/:id</a></li>
+  </ul>
+  <h3>Customers</h3>
+  <ul>
+    <li><a href="#ep-cust-list">GET /api/customers</a></li>
+    <li><a href="#ep-cust-create">POST /api/customers</a></li>
+    <li><a href="#ep-cust-upd">PUT /api/customers/:id</a></li>
+  </ul>
+  <h3>Tenants</h3>
+  <ul>
+    <li><a href="#ep-tenants">GET /api/tenants</a></li>
+    <li><a href="#ep-tenants-create">POST /api/tenants</a></li>
+  </ul>
+  <h3>Owner</h3>
+  <ul>
+    <li><a href="#ep-owner-stats">GET /api/owner/stats</a></li>
+    <li><a href="#ep-owner-tenants">GET /api/owner/tenants</a></li>
+    <li><a href="#ep-owner-billing">GET /api/owner/billing</a></li>
+    <li><a href="#ep-owner-impersonate">POST /api/owner/impersonate</a></li>
+  </ul>
+  <h3>Features</h3>
+  <ul>
+    <li><a href="#ep-features">GET /api/features</a></li>
+    <li><a href="#ep-features-toggle">PATCH /api/features/:flag</a></li>
+  </ul>
+  <h3>AI</h3>
+  <ul>
+    <li><a href="#ep-ai-chat">POST /api/ai/chat</a></li>
+    <li><a href="#ep-ai-suggest">POST /api/ai/suggest</a></li>
+    <li><a href="#ep-ai-forecast">POST /api/ai/forecast</a></li>
+    <li><a href="#ep-ai-models">GET /api/ai/models</a></li>
+  </ul>
+  <h3>Tickets</h3>
+  <ul>
+    <li><a href="#ep-tickets-list">GET /api/tickets</a></li>
+    <li><a href="#ep-tickets-create">POST /api/tickets</a></li>
+    <li><a href="#ep-tickets-print">POST /api/tickets/:id/print</a></li>
+  </ul>
+  <h3>Inventory</h3>
+  <ul>
+    <li><a href="#ep-inv-list">GET /api/inventory</a></li>
+    <li><a href="#ep-inv-adjust">POST /api/inventory/adjust</a></li>
+    <li><a href="#ep-inv-transfer">POST /api/inventory/transfer</a></li>
+  </ul>
+  <h3>Reports</h3>
+  <ul>
+    <li><a href="#ep-rep-sales">GET /api/reports/sales</a></li>
+    <li><a href="#ep-rep-prod">GET /api/reports/products</a></li>
+    <li><a href="#ep-rep-tax">GET /api/reports/tax</a></li>
+    <li><a href="#ep-rep-cash">GET /api/reports/cashflow</a></li>
+    <li><a href="#ep-rep-export">POST /api/reports/export</a></li>
+  </ul>
+  <h3>System</h3>
+  <ul>
+    <li><a href="#ep-sync">POST /api/sync</a></li>
+    <li><a href="#ep-health">GET /api/health</a></li>
+    <li><a href="#ep-debug">GET /api/debug</a></li>
+    <li><a href="#ep-status">GET /api/status</a></li>
+  </ul>
+</aside>
+
+<main>
+
+<section id="intro">
+  <h2>Introduccion</h2>
+  <p>Volvix POS REST API v3.4.0 - Sistema de punto de venta multi-tenant con capacidades de IA. Esta documentacion interactiva cubre los 43 endpoints publicos disponibles. Todas las respuestas son JSON UTF-8.</p>
+  <div class="grid-2">
+    <div class="card"><h4>Base URL</h4><code>https://api.volvix-pos.com/v1</code></div>
+    <div class="card"><h4>Formato</h4><code>application/json</code></div>
+    <div class="card"><h4>Auth</h4><code>Bearer JWT</code></div>
+    <div class="card"><h4>Versionado</h4>Header <code>X-API-Version: 2026-04-25</code></div>
+  </div>
+</section>
+
+<section id="auth">
+  <h2>Authentication</h2>
+  <p>La API usa JWT Bearer tokens. Obten un token con <code>POST /api/login</code> y enviarlo en el header <code>Authorization: Bearer &lt;token&gt;</code>. Tokens expiran en 24h, refresh tokens en 30 dias.</p>
+  <pre>Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</pre>
+  <div class="alert warn"><strong>Multi-tenant:</strong> Incluye <code>X-Tenant-Id: &lt;tenant_uuid&gt;</code> en cada request despues del login para seleccionar el tenant activo.</div>
+  <h3>Scopes / Roles</h3>
+  <table>
+    <tr><th>Rol</th><th>Permisos</th></tr>
+    <tr><td><code>owner</code></td><td>Acceso total + endpoints /api/owner/*</td></tr>
+    <tr><td><code>admin</code></td><td>Tenant admin: products, sales, customers, reports</td></tr>
+    <tr><td><code>cashier</code></td><td>Sales, tickets, customers (read)</td></tr>
+    <tr><td><code>viewer</code></td><td>Solo lectura</td></tr>
+  </table>
+</section>
+
+<section id="rate">
+  <h2>Rate Limits</h2>
+  <table>
+    <tr><th>Plan</th><th>Req/min</th><th>Req/dia</th><th>Burst</th></tr>
+    <tr><td>Free</td><td>30</td><td>5,000</td><td>10</td></tr>
+    <tr><td>Pro</td><td>120</td><td>50,000</td><td>50</td></tr>
+    <tr><td>Enterprise</td><td>600</td><td>Ilimitado</td><td>200</td></tr>
+    <tr><td>AI endpoints</td><td>20</td><td>1,000</td><td>5</td></tr>
+  </table>
+  <p>Headers de respuesta: <code>X-RateLimit-Limit</code>, <code>X-RateLimit-Remaining</code>, <code>X-RateLimit-Reset</code>. Cuando se excede: <code>429 Too Many Requests</code>.</p>
+</section>
+
+<section id="errors">
+  <h2>Error Codes</h2>
+  <table>
+    <tr><th>Code</th><th>Status</th><th>Significado</th></tr>
+    <tr><td>200</td><td class="status-200">OK</td><td>Exito</td></tr>
+    <tr><td>201</td><td class="status-200">Created</td><td>Recurso creado</td></tr>
+    <tr><td>204</td><td class="status-200">No Content</td><td>Exito sin body</td></tr>
+    <tr><td>400</td><td class="status-400">Bad Request</td><td>Body invalido o validacion fallida</td></tr>
+    <tr><td>401</td><td class="status-401">Unauthorized</td><td>Token ausente o invalido</td></tr>
+    <tr><td>403</td><td class="status-401">Forbidden</td><td>Sin permisos suficientes</td></tr>
+    <tr><td>404</td><td class="status-401">Not Found</td><td>Recurso no encontrado</td></tr>
+    <tr><td>409</td><td class="status-400">Conflict</td><td>Conflicto (e.g. SKU duplicado)</td></tr>
+    <tr><td>422</td><td class="status-400">Unprocessable</td><td>Errores de validacion semantica</td></tr>
+    <tr><td>429</td><td class="status-400">Too Many Requests</td><td>Rate limit excedido</td></tr>
+    <tr><td>500</td><td class="status-500">Server Error</td><td>Error interno - reportar</td></tr>
+    <tr><td>503</td><td class="status-500">Unavailable</td><td>Mantenimiento</td></tr>
+  </table>
+  <h3>Error response shape</h3>
+  <pre>{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "El campo 'sku' ya existe",
+    "field": "sku",
+    "request_id": "req_abc123"
+  }
+}</pre>
+</section>
+
+<section id="endpoints">
+  <h2>Endpoints (43)</h2>
+  <p>Click en cualquier endpoint para expandirlo y ver detalles + Try it out.</p>
+
+  <div class="endpoint" id="ep-login">
+    <div class="endpoint-header" onclick="toggle(this)">
+      <span class="method POST">POST</span>
+      <span class="path">/api/login</span>
+      <span class="summary">Autenticacion - obtener JWT</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="tab-bar">
+        <button class="tab active" onclick="tab(this,'try')">Try it</button>
+        <button class="tab" onclick="tab(this,'curl')">cURL</button>
+        <button class="tab" onclick="tab(this,'req')">Request</button>
+        <button class="tab" onclick="tab(this,'res')">Response</button>
+      </div>
+      <div class="tab-content active" data-t="try">
+        <div class="try-form">
+          <label>Email</label><input type="text" placeholder="user@volvix.com" value="demo@volvix.com">
+          <label>Password</label><input type="password" placeholder="********" value="demo1234">
+          <button class="btn btn-execute" onclick="execute(this)">Execute</button>
+        </div>
+        <div class="response-box">Click Execute para enviar request...</div>
+      </div>
+      <div class="tab-content" data-t="curl"><pre>curl -X POST https://api.volvix-pos.com/v1/api/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user@volvix.com","password":"secret"}'</pre></div>
+      <div class="tab-content" data-t="req"><pre>{
+  "email": "string (required)",
+  "password": "string (required, min 8)",
+  "remember": "boolean (optional)"
+}</pre></div>
+      <div class="tab-content" data-t="res"><pre>{
+  "token": "eyJhbGciOiJIUzI1NiIs...",
+  "refresh_token": "rt_xxx",
+  "expires_in": 86400,
+  "user": { "id": "u_123", "email": "...", "role": "admin" }
+}</pre></div>
+    </div>
+  </div>
+
+  <div class="endpoint" id="ep-logout">
+    <div class="endpoint-header" onclick="toggle(this)">
+      <span class="method POST">POST</span><span class="path">/api/logout</span><span class="summary">Invalida el token actual</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="tab-bar"><button class="tab active" onclick="tab(this,'try')">Try it</button><button class="tab" onclick="tab(this,'curl')">cURL</button></div>
+      <div class="tab-content active" data-t="try"><button class="btn btn-execute" onclick="execute(this)">Execute</button><div class="response-box">204 No Content</div></div>
+      <div class="tab-content" data-t="curl"><pre>curl -X POST https://api.volvix-pos.com/v1/api/logout -H "Authorization: Bearer $TOKEN"</pre></div>
+    </div>
+  </div>
+
+  <div class="endpoint" id="ep-refresh">
+    <div class="endpoint-header" onclick="toggle(this)">
+      <span class="method POST">POST</span><span class="path">/api/refresh</span><span class="summary">Renueva access token via refresh_token</span>
+    </div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'curl')">cURL</button></div>
+      <div class="tab-content active" data-t="curl"><pre>curl -X POST https://api.volvix-pos.com/v1/api/refresh -d '{"refresh_token":"rt_xxx"}'</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-me">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method GET">GET</span><span class="path">/api/me</span><span class="summary">Perfil del usuario autenticado</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'res')">Response</button></div>
+      <div class="tab-content active" data-t="res"><pre>{ "id":"u_123","email":"...","role":"admin","tenants":[...] }</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-prod-list">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method GET">GET</span><span class="path">/api/products</span><span class="summary">Lista paginada de productos</span></div>
+    <div class="endpoint-body">
+      <div class="tab-bar"><button class="tab active" onclick="tab(this,'try')">Try it</button><button class="tab" onclick="tab(this,'curl')">cURL</button><button class="tab" onclick="tab(this,'res')">Response</button></div>
+      <div class="tab-content active" data-t="try">
+        <div class="try-form">
+          <label>limit</label><input value="50">
+          <label>offset</label><input value="0">
+          <label>search</label><input placeholder="nombre o SKU">
+          <button class="btn btn-execute" onclick="execute(this)">Execute</button>
+        </div>
+        <div class="response-box">...</div>
+      </div>
+      <div class="tab-content" data-t="curl"><pre>curl https://api.volvix-pos.com/v1/api/products?limit=50 -H "Authorization: Bearer $TOKEN"</pre></div>
+      <div class="tab-content" data-t="res"><pre>{
+  "data": [{"id":"p_1","sku":"VLV-001","name":"Producto","price":99.50,"stock":12}],
+  "total": 348, "limit":50, "offset":0
+}</pre></div>
+    </div>
+  </div>
+
+  <div class="endpoint" id="ep-prod-create">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method POST">POST</span><span class="path">/api/products</span><span class="summary">Crear producto</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'req')">Request</button><button class="tab" onclick="tab(this,'curl')">cURL</button></div>
+      <div class="tab-content active" data-t="req"><pre>{ "sku":"VLV-002","name":"Producto X","price":150,"cost":80,"stock":50,"tax_rate":0.16,"category_id":"c_1" }</pre></div>
+      <div class="tab-content" data-t="curl"><pre>curl -X POST .../api/products -H "Authorization: Bearer $T" -d '{...}'</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-prod-get">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method GET">GET</span><span class="path">/api/products/:id</span><span class="summary">Detalle de producto</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'res')">Response</button></div>
+      <div class="tab-content active" data-t="res"><pre>{ "id":"p_1","sku":"VLV-001","name":"...","price":99.5,"stock":12,"history":[...] }</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-prod-upd">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method PUT">PUT</span><span class="path">/api/products/:id</span><span class="summary">Actualizar producto</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'curl')">cURL</button></div>
+      <div class="tab-content active" data-t="curl"><pre>curl -X PUT .../api/products/p_1 -d '{"price":120}'</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-prod-del">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method DELETE">DELETE</span><span class="path">/api/products/:id</span><span class="summary">Soft-delete producto</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'curl')">cURL</button></div>
+      <div class="tab-content active" data-t="curl"><pre>curl -X DELETE .../api/products/p_1 -H "Authorization: Bearer $T"</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-sales-list">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method GET">GET</span><span class="path">/api/sales</span><span class="summary">Listado de ventas con filtros</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'try')">Try it</button><button class="tab" onclick="tab(this,'res')">Response</button></div>
+      <div class="tab-content active" data-t="try"><div class="try-form"><label>from</label><input value="2026-04-01"><label>to</label><input value="2026-04-25"><button class="btn btn-execute" onclick="execute(this)">Execute</button></div><div class="response-box">...</div></div>
+      <div class="tab-content" data-t="res"><pre>{ "data":[{"id":"s_1","total":1234.50,"items":[...],"created_at":"..."}] }</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-sales-create">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method POST">POST</span><span class="path">/api/sales</span><span class="summary">Registrar venta</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'req')">Request</button></div>
+      <div class="tab-content active" data-t="req"><pre>{ "customer_id":"c_1","items":[{"product_id":"p_1","qty":2,"price":99.5}],"payment":{"method":"cash","amount":199} }</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-sales-get">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method GET">GET</span><span class="path">/api/sales/:id</span><span class="summary">Detalle de venta</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'res')">Response</button></div>
+      <div class="tab-content active" data-t="res"><pre>{ "id":"s_1","total":199,"items":[...],"payment":{...} }</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-sales-void">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method DELETE">DELETE</span><span class="path">/api/sales/:id</span><span class="summary">Cancelar venta (auditable)</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'curl')">cURL</button></div>
+      <div class="tab-content active" data-t="curl"><pre>curl -X DELETE .../api/sales/s_1 -d '{"reason":"customer_request"}'</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-cust-list">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method GET">GET</span><span class="path">/api/customers</span><span class="summary">Listado de clientes</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'res')">Response</button></div>
+      <div class="tab-content active" data-t="res"><pre>{ "data":[{"id":"c_1","name":"Juan","email":"...","balance":0}] }</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-cust-create">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method POST">POST</span><span class="path">/api/customers</span><span class="summary">Crear cliente</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'req')">Request</button></div>
+      <div class="tab-content active" data-t="req"><pre>{ "name":"Juan Perez","email":"j@ex.com","phone":"+52...","tax_id":"PEPJ800101..." }</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-cust-upd">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method PUT">PUT</span><span class="path">/api/customers/:id</span><span class="summary">Actualizar cliente</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'curl')">cURL</button></div>
+      <div class="tab-content active" data-t="curl"><pre>curl -X PUT .../api/customers/c_1 -d '{"phone":"+52..."}'</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-tenants">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method GET">GET</span><span class="path">/api/tenants</span><span class="summary">Tenants accesibles para el usuario</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'res')">Response</button></div>
+      <div class="tab-content active" data-t="res"><pre>{ "data":[{"id":"t_1","name":"Tienda Centro","plan":"pro"}] }</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-tenants-create">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method POST">POST</span><span class="path">/api/tenants</span><span class="summary">Crear tenant (solo owner)</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'req')">Request</button></div>
+      <div class="tab-content active" data-t="req"><pre>{ "name":"Sucursal Norte","plan":"pro","timezone":"America/Mexico_City" }</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-owner-stats">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method GET">GET</span><span class="path">/api/owner/stats</span><span class="summary">Metricas globales (solo owner)</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'res')">Response</button></div>
+      <div class="tab-content active" data-t="res"><pre>{ "tenants":42,"mrr":12500,"active_users":318,"sales_today":47820.10 }</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-owner-tenants">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method GET">GET</span><span class="path">/api/owner/tenants</span><span class="summary">Listado completo de tenants</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'curl')">cURL</button></div>
+      <div class="tab-content active" data-t="curl"><pre>curl .../api/owner/tenants -H "Authorization: Bearer $OWNER_TOKEN"</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-owner-billing">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method GET">GET</span><span class="path">/api/owner/billing</span><span class="summary">Estado de facturacion / Stripe</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'res')">Response</button></div>
+      <div class="tab-content active" data-t="res"><pre>{ "subscriptions":[...],"failed_payments":2,"churn_rate":0.04 }</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-owner-impersonate">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method POST">POST</span><span class="path">/api/owner/impersonate</span><span class="summary">Asume identidad de usuario (audit log)</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'req')">Request</button></div>
+      <div class="tab-content active" data-t="req"><pre>{ "user_id":"u_456","reason":"support_ticket_#1234" }</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-features">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method GET">GET</span><span class="path">/api/features</span><span class="summary">Feature flags activos</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'res')">Response</button></div>
+      <div class="tab-content active" data-t="res"><pre>{ "ai_assistant":true,"new_dashboard":false,"multi_currency":true }</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-features-toggle">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method PATCH">PATCH</span><span class="path">/api/features/:flag</span><span class="summary">Toggle feature flag</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'curl')">cURL</button></div>
+      <div class="tab-content active" data-t="curl"><pre>curl -X PATCH .../api/features/ai_assistant -d '{"enabled":true}'</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-ai-chat">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method POST">POST</span><span class="path">/api/ai/chat</span><span class="summary">Chat con asistente IA</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'try')">Try it</button><button class="tab" onclick="tab(this,'req')">Request</button></div>
+      <div class="tab-content active" data-t="try"><div class="try-form"><label>Mensaje</label><textarea>Cuanto vendi hoy?</textarea><button class="btn btn-execute" onclick="execute(this)">Execute</button></div><div class="response-box">...</div></div>
+      <div class="tab-content" data-t="req"><pre>{ "message":"...","model":"claude-opus-4-7","context":["sales","inventory"] }</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-ai-suggest">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method POST">POST</span><span class="path">/api/ai/suggest</span><span class="summary">Sugerencias de productos / pricing</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'req')">Request</button></div>
+      <div class="tab-content active" data-t="req"><pre>{ "type":"reorder","horizon_days":30 }</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-ai-forecast">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method POST">POST</span><span class="path">/api/ai/forecast</span><span class="summary">Forecast de ventas</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'res')">Response</button></div>
+      <div class="tab-content active" data-t="res"><pre>{ "forecast":[{"date":"2026-05-01","predicted":4520,"confidence":0.87}] }</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-ai-models">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method GET">GET</span><span class="path">/api/ai/models</span><span class="summary">Modelos disponibles</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'res')">Response</button></div>
+      <div class="tab-content active" data-t="res"><pre>{ "models":["claude-opus-4-7","claude-sonnet-4-5","gpt-4o","local-llama"] }</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-tickets-list">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method GET">GET</span><span class="path">/api/tickets</span><span class="summary">Tickets de venta emitidos</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'res')">Response</button></div>
+      <div class="tab-content active" data-t="res"><pre>{ "data":[{"id":"tk_1","sale_id":"s_1","number":"A-00123","printed":true}] }</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-tickets-create">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method POST">POST</span><span class="path">/api/tickets</span><span class="summary">Generar ticket desde venta</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'req')">Request</button></div>
+      <div class="tab-content active" data-t="req"><pre>{ "sale_id":"s_1","format":"58mm" }</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-tickets-print">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method POST">POST</span><span class="path">/api/tickets/:id/print</span><span class="summary">Reimprimir ticket</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'curl')">cURL</button></div>
+      <div class="tab-content active" data-t="curl"><pre>curl -X POST .../api/tickets/tk_1/print</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-inv-list">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method GET">GET</span><span class="path">/api/inventory</span><span class="summary">Niveles de inventario</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'res')">Response</button></div>
+      <div class="tab-content active" data-t="res"><pre>{ "data":[{"product_id":"p_1","stock":12,"reserved":2,"available":10}] }</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-inv-adjust">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method POST">POST</span><span class="path">/api/inventory/adjust</span><span class="summary">Ajuste manual de stock</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'req')">Request</button></div>
+      <div class="tab-content active" data-t="req"><pre>{ "product_id":"p_1","delta":-3,"reason":"merma" }</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-inv-transfer">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method POST">POST</span><span class="path">/api/inventory/transfer</span><span class="summary">Transferencia entre tenants</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'req')">Request</button></div>
+      <div class="tab-content active" data-t="req"><pre>{ "from_tenant":"t_1","to_tenant":"t_2","items":[{"product_id":"p_1","qty":5}] }</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-rep-sales">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method GET">GET</span><span class="path">/api/reports/sales</span><span class="summary">Reporte de ventas</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'res')">Response</button></div>
+      <div class="tab-content active" data-t="res"><pre>{ "period":"2026-04","gross":124500,"net":107320,"transactions":842 }</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-rep-prod">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method GET">GET</span><span class="path">/api/reports/products</span><span class="summary">Top productos</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'res')">Response</button></div>
+      <div class="tab-content active" data-t="res"><pre>{ "top":[{"product_id":"p_1","name":"...","sold":234,"revenue":11700}] }</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-rep-tax">
+    <div class="endpoke-header" onclick="toggle(this)"><span class="method GET">GET</span><span class="path">/api/reports/tax</span><span class="summary">Reporte fiscal IVA</span></div>
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method GET">GET</span><span class="path">/api/reports/tax</span><span class="summary">Reporte fiscal IVA</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'res')">Response</button></div>
+      <div class="tab-content active" data-t="res"><pre>{ "iva_collected":17280,"iva_paid":4520,"net_due":12760 }</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-rep-cash">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method GET">GET</span><span class="path">/api/reports/cashflow</span><span class="summary">Flujo de caja</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'res')">Response</button></div>
+      <div class="tab-content active" data-t="res"><pre>{ "in":124500,"out":78320,"balance":46180,"by_method":{"cash":...,"card":...} }</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-rep-export">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method POST">POST</span><span class="path">/api/reports/export</span><span class="summary">Exportar reporte (PDF/XLSX/CSV)</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'req')">Request</button></div>
+      <div class="tab-content active" data-t="req"><pre>{ "report":"sales","format":"xlsx","from":"2026-04-01","to":"2026-04-25" }</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-sync">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method POST">POST</span><span class="path">/api/sync</span><span class="summary">Sincronizacion offline -> online</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'req')">Request</button></div>
+      <div class="tab-content active" data-t="req"><pre>{ "device_id":"dev_xx","last_sync":"2026-04-25T10:00:00Z","operations":[...] }</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-health">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method GET">GET</span><span class="path">/api/health</span><span class="summary">Healthcheck (publico)</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'res')">Response</button></div>
+      <div class="tab-content active" data-t="res"><pre>{ "status":"ok","db":"ok","cache":"ok","uptime":1234567 }</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-debug">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method GET">GET</span><span class="path">/api/debug</span><span class="summary">Info de debug (solo owner)</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'res')">Response</button></div>
+      <div class="tab-content active" data-t="res"><pre>{ "version":"3.4.0","commit":"a1b2c3d","env":"prod","node":"20.11.0" }</pre></div></div>
+  </div>
+
+  <div class="endpoint" id="ep-status">
+    <div class="endpoint-header" onclick="toggle(this)"><span class="method GET">GET</span><span class="path">/api/status</span><span class="summary">Status completo del sistema</span></div>
+    <div class="endpoint-body"><div class="tab-bar"><button class="tab active" onclick="tab(this,'res')">Response</button></div>
+      <div class="tab-content active" data-t="res"><pre>{ "api":"healthy","queue":"healthy","workers":12,"latency_ms":42 }</pre></div></div>
+  </div>
+
+</section>
+
+</main>
+</div>
+
+<footer>
+  Volvix POS API v3.4.0 &middot; Documentacion generada 2026-04-25 &middot; <a href="https://volvix-pos.com" style="color:var(--accent)">volvix-pos.com</a>
+</footer>
+
+<script>
+function toggle(el) {
+  el.parentElement.classList.toggle('open');
+}
+function tab(btn, name) {
+  const body = btn.closest('.endpoint-body');
+  body.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  body.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  body.querySelector('[data-t="'+name+'"]').classList.add('active');
+}
+function execute(btn) {
+  const box = btn.closest('.tab-content').querySelector('.response-box');
+  box.textContent = 'Sending request...';
+  setTimeout(() => {
+    const fakes = [
+      '{\n  "status": 200,\n  "data": { "id":"x_demo","ok":true },\n  "request_id":"req_'+Math.random().toString(36).slice(2,10)+'"\n}',
+      '{\n  "status": 200,\n  "token":"eyJhbGciOi...DEMO",\n  "expires_in":86400\n}',
+      '{\n  "status": 200,\n  "data":[{"id":"p_1","name":"Demo Product","price":99.5}],\n  "total":1\n}'
+    ];
+    box.textContent = fakes[Math.floor(Math.random()*fakes.length)];
+    box.style.color = 'var(--green)';
+  }, 600);
+}
+document.getElementById('searchBox').addEventListener('input', e => {
+  const q = e.target.value.toLowerCase();
+  document.querySelectorAll('.endpoint').forEach(ep => {
+    const text = ep.textContent.toLowerCase();
+    ep.classList.toggle('hidden', q && !text.includes(q));
+  });
+  document.querySelectorAll('aside li').forEach(li => {
+    const text = li.textContent.toLowerCase();
+    li.classList.toggle('hidden', q && !text.includes(q));
+  });
+});
+document.querySelectorAll('aside a').forEach(a => {
+  a.addEventListener('click', e => {
+    const id = a.getAttribute('href').slice(1);
+    const ep = document.getElementById(id);
+    if (ep && ep.classList.contains('endpoint')) {
+      ep.classList.add('open');
+    }
+  });
+});
+</script>
+</body>
+</html>
