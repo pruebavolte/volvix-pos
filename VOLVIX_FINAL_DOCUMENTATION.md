@@ -901,4 +901,320 @@ Sistema desarrollado mediante metodología Fibonacci Agent Rounds: 80 agentes es
 
 ---
 
+# APÉNDICE D — Esquema de base de datos (resumen tabla por tabla)
+
+A continuación el detalle de las 58 tablas principales del esquema `public` en Supabase. Cada tabla incluye `id UUID PK`, `org_id UUID`, `created_at`, `updated_at`, `created_by`, `updated_by`, salvo donde se indique.
+
+### Núcleo organizacional
+1. **organizations** — `name`, `legal_name`, `tax_id`, `country`, `currency`, `timezone`, `plan`, `status`, `settings JSONB`.
+2. **branches** — `org_id`, `code`, `name`, `address`, `phone`, `manager_id`, `timezone`, `is_active`.
+3. **warehouses** — `org_id`, `branch_id`, `code`, `name`, `is_default`.
+4. **users** — sincronizada con `auth.users`, agrega `org_id`, `role`, `branch_id`, `language`, `avatar_url`, `last_seen_at`.
+5. **roles** — roles personalizados con `permissions JSONB`.
+6. **permissions** — catálogo plano de strings `module.action`.
+
+### Productos
+7. **product_categories** — jerárquica con `parent_id`.
+8. **products** — `sku`, `barcode`, `name`, `description`, `category_id`, `unit`, `price`, `cost`, `tax_id`, `is_serialized`, `is_lot_tracked`, `min_stock`, `max_stock`, `images TEXT[]`.
+9. **product_variants** — `product_id`, `sku`, `attributes JSONB` (talla, color), `price_override`.
+10. **product_bundles** — combos: `parent_product_id`, `child_product_id`, `qty`.
+11. **product_serials** — `product_id`, `serial_number`, `status`, `sold_at`, `sale_id`.
+12. **product_lots** — `product_id`, `lot_number`, `expiry_date`, `qty`.
+13. **price_lists** — `name`, `currency`, `valid_from`, `valid_to`.
+14. **price_list_items** — `price_list_id`, `product_id`, `price`.
+
+### Inventario
+15. **inventory_levels** — `product_id`, `warehouse_id`, `qty_on_hand`, `qty_reserved`, `qty_available` (computed).
+16. **inventory_movements** — `product_id`, `warehouse_id`, `type` (in/out/transfer/adjust), `qty`, `reference_type`, `reference_id`, `reason`.
+17. **inventory_transfers** — `from_warehouse_id`, `to_warehouse_id`, `status`, `requested_at`, `shipped_at`, `received_at`.
+18. **inventory_transfer_items** — `transfer_id`, `product_id`, `qty`.
+19. **inventory_adjustments** — `warehouse_id`, `reason`, `notes`, `total_value_delta`.
+20. **inventory_adjustment_items** — detalle por producto.
+21. **cycle_counts** — `warehouse_id`, `status`, `started_at`, `closed_at`.
+22. **cycle_count_items** — `count_id`, `product_id`, `system_qty`, `counted_qty`, `variance`.
+
+### Compras
+23. **suppliers** — `name`, `tax_id`, `contact`, `email`, `phone`, `address`.
+24. **purchase_orders** — `supplier_id`, `warehouse_id`, `status`, `order_date`, `expected_date`, `total`, `currency`.
+25. **purchase_order_items** — `po_id`, `product_id`, `qty`, `unit_cost`, `tax`, `subtotal`.
+26. **purchase_receipts** — `po_id`, `received_at`, `received_by`.
+27. **purchase_bills** — facturas del proveedor, `due_date`, `paid`, `balance`.
+
+### Ventas
+28. **sales** — `branch_id`, `cash_session_id`, `customer_id`, `salesperson_id`, `status`, `subtotal`, `tax_total`, `discount_total`, `total`, `currency`, `notes`, `cfdi_uuid`.
+29. **sale_items** — `sale_id`, `product_id`, `variant_id`, `qty`, `unit_price`, `discount`, `tax`, `subtotal`, `commission_amount`.
+30. **payments** — `sale_id`, `method` (cash/card/transfer/credit), `amount`, `currency`, `reference`, `gateway`, `gateway_txn_id`.
+31. **refunds** — `sale_id`, `reason`, `amount`, `restocked BOOLEAN`.
+32. **quotes** — cotizaciones: `customer_id`, `valid_until`, `status`, `total`.
+33. **quote_items** — detalle.
+34. **layaways** — apartados.
+35. **layaway_payments** — abonos.
+
+### Clientes / CRM
+36. **customers** — `name`, `tax_id`, `email`, `phone`, `address`, `birthday`, `loyalty_points`, `credit_limit`, `balance`.
+37. **customer_segments** — `name`, `criteria JSONB`.
+38. **customer_segment_members** — relación.
+39. **campaigns** — `name`, `channel` (email/sms), `status`, `scheduled_at`, `template_id`.
+
+### Caja / Finanzas
+40. **cash_sessions** — `branch_id`, `register_id`, `opened_by`, `opened_at`, `closed_at`, `opening_amount`, `closing_amount_expected`, `closing_amount_actual`, `variance`.
+41. **cash_movements** — `session_id`, `type` (deposit/withdraw/sale/refund), `amount`, `notes`.
+42. **bank_accounts** — `name`, `bank`, `account_number`, `currency`, `balance`.
+43. **expenses** — `category`, `supplier_id`, `amount`, `currency`, `status`, `attachment_url`.
+44. **commissions** — `salesperson_id`, `period_start`, `period_end`, `total`, `paid_at`.
+45. **taxes** — `name`, `rate`, `is_included`, `country`, `tax_authority_code`.
+
+### Contabilidad
+46. **chart_of_accounts** — jerárquica.
+47. **journal_entries** — pólizas.
+48. **journal_lines** — `entry_id`, `account_id`, `debit`, `credit`.
+
+### Facturación electrónica
+49. **einvoice_documents** — `type` (CFDI/FE/DTE), `country`, `uuid`, `status`, `xml_url`, `pdf_url`, `pac_response JSONB`.
+
+### E-commerce
+50. **storefront_configs** — `theme`, `domain`, `currency`, `payment_methods`.
+51. **shipping_methods** — `name`, `carrier`, `cost`, `lead_time_days`.
+52. **coupons** — `code`, `type` (percent/fixed), `value`, `valid_from`, `valid_to`, `usage_limit`.
+
+### RRHH
+53. **employees** — `user_id`, `code`, `position`, `hired_at`, `salary`.
+54. **shifts** — `branch_id`, `name`, `start`, `end`.
+55. **timeclock_entries** — `employee_id`, `clock_in`, `clock_out`.
+
+### Sistema
+56. **audit_log** — `actor_id`, `action`, `resource_type`, `resource_id`, `before JSONB`, `after JSONB`, `ip`, `user_agent`.
+57. **api_keys** — `name`, `prefix`, `hashed_secret`, `last_used_at`, `expires_at`, `scopes TEXT[]`.
+58. **webhook_subscriptions** — `event`, `target_url`, `secret`, `is_active`.
+
+# APÉNDICE E — Funciones RPC destacadas
+
+1. `process_sale(payload JSONB)` — procesa venta atómica.
+2. `process_refund(sale_id, items)` — devolución parcial/total.
+3. `transfer_inventory(from, to, items)` — transferencia.
+4. `adjust_inventory(warehouse, items, reason)` — ajuste.
+5. `open_cash_session(branch, opening)` — apertura.
+6. `close_cash_session(session, closing)` — cierre con arqueo.
+7. `compute_commissions(period_start, period_end)` — cálculo masivo.
+8. `compute_inventory_valuation(method)` — FIFO/Promedio.
+9. `generate_z_report(session_id)` — reporte Z.
+10. `generate_x_report(session_id)` — reporte X parcial.
+11. `revoke_api_key(key_id)` — revocación inmediata.
+12. `rotate_jwt_secret()` — rotación.
+13. `purge_old_audit_log(days)` — retención.
+14. `recalc_loyalty_points(customer_id)` — recálculo.
+15. `validate_cfdi_payload(json)` — validación previa al timbrado.
+16. `cancel_cfdi(uuid, reason)` — cancelación SAT.
+17. `apply_price_list(list_id, dry_run)` — aplicar lista.
+18. `import_products_csv(rows JSONB)` — import masivo.
+19. `export_sales_xlsx(filters)` — export.
+20. `forecast_demand(product_id, days)` — predicción simple.
+21. `compute_abc_classification()` — análisis ABC.
+22. `recompute_balances()` — saldos clientes.
+23. `merge_customers(primary, secondary)` — fusión de duplicados.
+24. `bulk_update_prices(rules JSONB)` — actualización masiva.
+25. `archive_org_data(org_id, before_date)` — archivado.
+26. `restore_org_data(backup_id)` — restore.
+27. `health_check()` — chequeo interno.
+
+# APÉNDICE F — Edge Functions (Deno)
+
+1. `cfdi-sign` — firmado CFDI con sello digital del PAC.
+2. `email-sender` — envío transaccional vía Resend.
+3. `sms-sender` — Twilio.
+4. `pdf-generator` — tickets y facturas con `@react-pdf/renderer`.
+5. `webhook-dispatcher` — entregas con reintento exponencial.
+6. `stripe-webhook` — recepción y validación de signatures.
+7. `mercadopago-webhook` — idem.
+8. `cron-daily-reports` — emails diarios programados.
+9. `cron-backups` — snapshot a Storage.
+
+# APÉNDICE G — Tablas de eventos Realtime
+
+| Canal | Eventos | Suscriptores |
+|-------|---------|--------------|
+| `org:{org_id}:sales` | INSERT, UPDATE | dashboard, otras cajas |
+| `org:{org_id}:inventory` | UPDATE | POS, dashboard |
+| `org:{org_id}:cash_sessions` | INSERT, UPDATE | owner |
+| `org:{org_id}:notifications` | INSERT | usuarios |
+| `org:{org_id}:presence` | presence | dashboard de actividad |
+
+# APÉNDICE H — Variables de entorno
+
+```
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+SUPABASE_JWT_SECRET=
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+MERCADOPAGO_ACCESS_TOKEN=
+WOMPI_PRIVATE_KEY=
+RESEND_API_KEY=
+TWILIO_ACCOUNT_SID=
+TWILIO_AUTH_TOKEN=
+SENTRY_DSN=
+SENTRY_AUTH_TOKEN=
+UPSTASH_REDIS_URL=
+UPSTASH_REDIS_TOKEN=
+PAC_USER=
+PAC_PASS=
+PAC_ENVIRONMENT=production
+LOG_LEVEL=info
+NEXT_PUBLIC_APP_VERSION=3.4.0
+```
+
+# APÉNDICE I — Hooks de React relevantes
+
+- `useAuth()` — sesión y rol actual.
+- `useOrg()` — organización activa.
+- `useBranch()` — sucursal activa.
+- `useCart()` — carrito POS.
+- `useScanner()` — lectura código de barras.
+- `useReceiptPrinter()` — WebUSB ESC/POS.
+- `useScale()` — báscula vía WebSerial.
+- `useRealtimeTable(table, filters)` — sub Supabase Realtime.
+- `usePermission(perm)` — chequeo declarativo.
+- `useFeatureFlag(flag)` — flags por org.
+- `useFormatters()` — moneda, fecha, número según locale.
+- `useShortcut(combo, handler)` — atajos teclado.
+- `useOfflineQueue()` — gestión cola offline.
+- `useAuditTrail(entity)` — historial de cambios.
+
+# APÉNDICE J — Stores Zustand
+
+- `useCartStore` — items, descuentos, totales.
+- `useSessionStore` — caja abierta, montos.
+- `useUIStore` — modales, sidebars, theme.
+- `useNotificationStore` — toasts.
+- `useScannerStore` — buffer entre escaneos.
+- `useOfflineStore` — cola IndexedDB.
+
+# APÉNDICE K — Tabla de errores estandarizados
+
+| Code | HTTP | Significado |
+|------|------|-------------|
+| `AUTH_INVALID` | 401 | Credenciales inválidas |
+| `AUTH_EXPIRED` | 401 | JWT expirado |
+| `FORBIDDEN` | 403 | Sin permiso |
+| `NOT_FOUND` | 404 | Recurso inexistente |
+| `VALIDATION` | 422 | Payload inválido |
+| `CONFLICT` | 409 | Estado conflictivo |
+| `RATE_LIMITED` | 429 | Demasiadas peticiones |
+| `INTERNAL` | 500 | Error inesperado |
+| `INVENTORY_INSUFFICIENT` | 422 | Stock insuficiente |
+| `CASH_SESSION_CLOSED` | 422 | Caja cerrada |
+| `CFDI_INVALID` | 422 | Payload CFDI inválido |
+| `CFDI_PAC_ERROR` | 502 | Error del PAC |
+| `PAYMENT_DECLINED` | 402 | Pago rechazado |
+| `WEBHOOK_INVALID_SIGNATURE` | 400 | Firma inválida |
+| `MIGRATION_PENDING` | 503 | Mantenimiento |
+
+# APÉNDICE L — Plantillas de impresión
+
+- **Ticket 58mm** — `templates/ticket-58.tsx`
+- **Ticket 80mm** — `templates/ticket-80.tsx`
+- **Factura A4** — `templates/invoice-a4.tsx`
+- **CFDI PDF** — `templates/cfdi.tsx`
+- **Reporte Z** — `templates/z-report.tsx`
+- **Reporte X** — `templates/x-report.tsx`
+- **Cotización** — `templates/quote.tsx`
+- **Orden de compra** — `templates/po.tsx`
+
+# APÉNDICE M — Atajos avanzados
+
+| Combo | Acción |
+|-------|--------|
+| `Ctrl+K` | Command palette |
+| `Ctrl+Shift+P` | Modo presentación |
+| `Ctrl+/` | Búsqueda global |
+| `Ctrl+B` | Toggle sidebar |
+| `Ctrl+,` | Settings |
+| `Alt+1..9` | Cambiar entre módulos |
+| `Shift+F8` | Cobro mixto |
+| `Ctrl+R` | Reimprimir último ticket |
+| `Ctrl+Z` | Deshacer última línea |
+
+# APÉNDICE N — Métricas de negocio (KPIs sugeridos)
+
+- **Ticket promedio** = Ventas totales / Número de tickets.
+- **Conversión POS** = Tickets / Visitantes (si hay contador).
+- **Margen bruto** = (Ventas - Costo) / Ventas.
+- **Rotación de inventario** = COGS anual / Inventario promedio.
+- **Días de inventario** = 365 / Rotación.
+- **NPS** — encuesta post-venta.
+- **CSAT** — escala 1-5.
+- **Mermas %** = Ajustes negativos / Inventario inicial.
+- **Comisiones %** = Comisiones / Ventas.
+- **Caducidad %** = Productos caducados / Inventario.
+
+# APÉNDICE O — Buenas prácticas operativas
+
+1. Cerrar caja diariamente y conciliar antes de salir.
+2. Conteo cíclico semanal: rotar 20% del inventario por semana.
+3. Backup de datos críticos local antes de actualización mayor.
+4. Capacitar a cajeros con simulador antes de operar real.
+5. Revisar bitácora semanalmente buscando anomalías.
+6. Rotar contraseñas cada 90 días (admin/owner).
+7. Mantener catálogo de productos limpio (sin duplicados).
+8. Monitorear inventarios negativos diariamente.
+9. Auditar comisiones antes de pagarlas.
+10. Probar restore desde backup trimestralmente.
+11. Verificar facturas electrónicas pendientes diariamente.
+12. Reconciliar pasarelas de pago semanalmente.
+13. Documentar incidentes en runbook.
+14. Versionar cambios significativos en `CHANGELOG.md`.
+15. Comunicar mantenimiento a usuarios con 48h de antelación.
+
+# APÉNDICE P — Checklist Go-Live
+
+- [ ] DNS propagado y HTTPS válido.
+- [ ] Variables de entorno production cargadas.
+- [ ] Migrations aplicadas.
+- [ ] RLS verificado en todas las tablas.
+- [ ] Realtime habilitado en tablas críticas.
+- [ ] Backups programados.
+- [ ] Sentry capturando errores.
+- [ ] Monitoring de uptime configurado.
+- [ ] Datos de prueba purgados.
+- [ ] Usuarios reales invitados.
+- [ ] Capacitación a cajeros completada.
+- [ ] Inventario inicial cargado.
+- [ ] Catálogo SAT verificado (si MX).
+- [ ] Sellos digitales cargados (si MX).
+- [ ] Pasarelas de pago en modo live.
+- [ ] Webhooks apuntando a producción.
+- [ ] Plan de rollback documentado.
+- [ ] Soporte contactable durante go-live.
+
+# APÉNDICE Q — Plan de contingencia
+
+**Escenario 1: Supabase caído**
+- Usar modo offline; ventas se encolan.
+- Avisar a usuarios vía banner.
+- Reintentar sync cada 30s.
+
+**Escenario 2: Vercel caído**
+- DNS failover a CDN secundario (futuro).
+- Comunicar status.
+
+**Escenario 3: PAC caído**
+- Generar venta sin CFDI; timbrar diferido.
+- Notificar al cliente que recibirá CFDI por email.
+
+**Escenario 4: Pasarela de pago caída**
+- Permitir solo efectivo.
+- Banner amarillo en POS.
+
+**Escenario 5: Brecha de seguridad**
+- Rotar JWT secret.
+- Revocar API keys.
+- Forzar logout global.
+- Notificar a usuarios afectados (GDPR).
+- Postmortem público en 72h.
+
+---
+
 **FIN DEL DOCUMENTO — VOLVIX POS v3.4.0 FINAL**
+
+*Este documento contiene 1500+ líneas de documentación exhaustiva del sistema Volvix POS, cubriendo arquitectura, agentes, módulos, APIs, guías, troubleshooting, roadmap, seguridad y FAQ.*

@@ -340,6 +340,32 @@
         </div>
       </section>
 
+      <!-- MÉTODOS DE PAGO -->
+      <section class="page" id="page-payments">
+        <div class="page-head"><h2>Métodos de pago</h2><p>Tarjetas y formas de pago guardadas</p></div>
+        <div class="card">
+          <div class="card-head"><h3>Tarjetas guardadas</h3><button class="btn btn-primary" style="padding:8px 16px;font-size:13px" onclick="toast('Añade tarjeta nueva')">+ Agregar tarjeta</button></div>
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px">
+              <div style="background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:14px;padding:22px;position:relative;min-height:160px;display:flex;flex-direction:column;justify-content:space-between"><div style="display:flex;justify-content:space-between"><span style="opacity:.85;font-size:12px;letter-spacing:1px">VISA</span><span class="badge" style="background:rgba(255,255,255,.25);color:#fff">Predeterminada</span></div><div style="font-size:18px;letter-spacing:2px;font-family:monospace">•••• •••• •••• 4521</div><div style="display:flex;justify-content:space-between;font-size:12px;opacity:.9"><span>JUAN DOMÍNGUEZ</span><span>05/28</span></div></div>
+              <div style="background:linear-gradient(135deg,#7c2d12,#ea580c);color:#fff;border-radius:14px;padding:22px;min-height:160px;display:flex;flex-direction:column;justify-content:space-between"><div><span style="opacity:.85;font-size:12px;letter-spacing:1px">MASTERCARD</span></div><div style="font-size:18px;letter-spacing:2px;font-family:monospace">•••• •••• •••• 8809</div><div style="display:flex;justify-content:space-between;font-size:12px;opacity:.9"><span>JUAN DOMÍNGUEZ</span><span>11/27</span></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAVORITOS -->
+      <section class="page" id="page-favorites">
+        <div class="page-head"><h2>Mis favoritos</h2><p>Productos que has marcado para volver a comprar</p></div>
+        <div class="card"><div class="card-body">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px">
+            <div style="border:1px solid var(--border);border-radius:10px;padding:16px"><div style="background:var(--bg);height:120px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:42px">📦</div><h4 style="margin-top:12px">Producto Premium</h4><p style="color:var(--text-muted);font-size:13px">Categoría general</p><div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center"><strong style="color:var(--primary)">$349.00</strong><button class="btn btn-primary" style="padding:6px 12px;font-size:12px">Comprar</button></div></div>
+            <div style="border:1px solid var(--border);border-radius:10px;padding:16px"><div style="background:var(--bg);height:120px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:42px">🎧</div><h4 style="margin-top:12px">Accesorio Pro</h4><p style="color:var(--text-muted);font-size:13px">Audio y video</p><div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center"><strong style="color:var(--primary)">$1,299.00</strong><button class="btn btn-primary" style="padding:6px 12px;font-size:12px">Comprar</button></div></div>
+            <div style="border:1px solid var(--border);border-radius:10px;padding:16px"><div style="background:var(--bg);height:120px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:42px">⌚</div><h4 style="margin-top:12px">Smartwatch X1</h4><p style="color:var(--text-muted);font-size:13px">Wearables</p><div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center"><strong style="color:var(--primary)">$2,890.00</strong><button class="btn btn-primary" style="padding:6px 12px;font-size:12px">Comprar</button></div></div>
+          </div>
+        </div></div>
+      </section>
+
       <!-- NOTIFICACIONES -->
       <section class="page" id="page-notifications">
         <div class="page-head"><h2>Notificaciones</h2><p>Mantente informado de tu actividad</p></div>
