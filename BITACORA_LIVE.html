@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <title>📋 Bitácora Volvix POS - EN VIVO</title>
-<meta http-equiv="refresh" content="10">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, "Segoe UI", system-ui, sans-serif; }
 body {
@@ -26,16 +25,12 @@ header {
 }
 header h1 { font-size: 24px; font-weight: 800; }
 header .status {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: #94a3b8;
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: #94a3b8;
 }
 .live-dot {
   width: 10px; height: 10px;
-  background: #22c55e;
-  border-radius: 50%;
+  background: #22c55e; border-radius: 50%;
   animation: pulse 1.5s infinite;
 }
 @keyframes pulse {
@@ -46,8 +41,7 @@ header .status {
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: 16px; margin-bottom: 20px;
 }
 .card {
   background: rgba(30,41,59,.7);
@@ -55,93 +49,83 @@ header .status {
   border-radius: 12px;
   padding: 20px;
   backdrop-filter: blur(10px);
+  transition: transform .2s;
 }
+.card:hover { transform: translateY(-2px); border-color: #475569; }
 .card h3 {
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: #94a3b8;
-  margin-bottom: 8px;
+  font-size: 12px; text-transform: uppercase; letter-spacing: 1px;
+  color: #94a3b8; margin-bottom: 8px;
 }
-.card .value {
-  font-size: 32px;
-  font-weight: 800;
-  color: #fff;
-}
-.card .sub {
-  font-size: 12px;
-  color: #64748b;
-  margin-top: 4px;
-}
+.card .value { font-size: 32px; font-weight: 800; color: #fff; }
+.card .sub { font-size: 12px; color: #64748b; margin-top: 4px; }
 
 .progress-section {
   background: rgba(30,41,59,.7);
   border: 1px solid #334155;
   border-radius: 16px;
-  padding: 24px;
-  margin-bottom: 20px;
+  padding: 24px; margin-bottom: 20px;
 }
-.progress-section h2 {
-  font-size: 18px;
-  margin-bottom: 16px;
-}
+.progress-section h2 { font-size: 18px; margin-bottom: 16px; }
 .progress-bar {
-  width: 100%;
-  height: 24px;
+  width: 100%; height: 24px;
   background: #1e293b;
-  border-radius: 12px;
-  overflow: hidden;
+  border-radius: 12px; overflow: hidden;
   margin-bottom: 12px;
 }
 .progress-fill {
   height: 100%;
   background: linear-gradient(90deg, #3b82f6, #22c55e);
   border-radius: 12px;
-  transition: width .5s;
+  transition: width .8s ease;
+  position: relative;
+}
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.2), transparent);
+  animation: shine 2s infinite;
+}
+@keyframes shine {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
-.modules {
-  display: grid;
-  gap: 8px;
-}
+.modules { display: grid; gap: 8px; }
 .module {
   display: grid;
-  grid-template-columns: 200px 1fr 100px 80px;
-  gap: 12px;
-  align-items: center;
+  grid-template-columns: 200px 1fr 100px 110px;
+  gap: 12px; align-items: center;
   padding: 10px 14px;
   background: rgba(15,23,42,.5);
   border-radius: 8px;
   border: 1px solid transparent;
   font-size: 13px;
+  transition: all .2s;
 }
-.module:hover { border-color: #475569; }
+.module:hover { border-color: #475569; transform: translateX(4px); }
 .module .name { font-weight: 600; }
 .module .progress-mini {
-  flex: 1;
-  height: 6px;
+  flex: 1; height: 6px;
   background: #1e293b;
-  border-radius: 3px;
-  overflow: hidden;
+  border-radius: 3px; overflow: hidden;
 }
 .module .progress-mini-fill {
   height: 100%;
   background: #3b82f6;
+  transition: width .5s;
 }
-.module .count { font-size: 11px; color: #94a3b8; text-align: right; }
+.module .count { font-size: 11px; color: #94a3b8; text-align: right; font-family: ui-monospace, monospace; }
 .badge {
   display: inline-block;
   padding: 3px 8px;
   border-radius: 4px;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  text-align: center;
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; text-align: center;
 }
 .badge.done { background: rgba(34,197,94,.2); color: #22c55e; }
 .badge.progress { background: rgba(59,130,246,.2); color: #3b82f6; }
 .badge.pending { background: rgba(148,163,184,.2); color: #94a3b8; }
-.badge.error { background: rgba(239,68,68,.2); color: #ef4444; }
 
 .log {
   background: #000;
@@ -161,39 +145,27 @@ header .status {
 .log-line.error { color: #ef4444; }
 
 .task {
-  display: flex;
-  align-items: flex-start;
+  display: flex; align-items: flex-start;
   gap: 10px;
   padding: 10px 14px;
   border-radius: 6px;
   margin-bottom: 4px;
   background: rgba(15,23,42,.3);
+  font-size: 13px;
 }
-.task.done { opacity: .6; }
 .task.in_progress { background: rgba(59,130,246,.1); border-left: 3px solid #3b82f6; }
 .task .check {
   width: 18px; height: 18px;
   border: 2px solid #475569;
   border-radius: 4px;
-  flex-shrink: 0;
-  margin-top: 2px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-shrink: 0; margin-top: 2px;
 }
-.task.done .check {
-  background: #22c55e;
-  border-color: #22c55e;
-  color: #fff;
-}
-.task.done .check::after { content: "✓"; font-weight: 800; font-size: 12px; }
 .task.in_progress .check {
   border-color: #3b82f6;
   border-top-color: transparent;
   animation: spin 1s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-.task .text { font-size: 13px; }
 .task .meta { font-size: 11px; color: #64748b; margin-top: 3px; }
 
 .two-col {
@@ -205,108 +177,197 @@ header .status {
   .two-col { grid-template-columns: 1fr; }
 }
 .section-title {
-  font-size: 14px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: #94a3b8;
-  margin-bottom: 12px;
+  font-size: 14px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px;
+  color: #94a3b8; margin-bottom: 12px;
 }
+
+.agent-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+.agent-card {
+  padding: 12px;
+  background: rgba(15,23,42,.5);
+  border: 1px solid #334155;
+  border-radius: 8px;
+  font-size: 12px;
+}
+.agent-card.active { border-color: #22c55e; background: rgba(34,197,94,.05); }
+.agent-card.idle { opacity: .5; }
+.agent-name { font-weight: 700; margin-bottom: 4px; font-size: 13px; }
+.agent-task { color: #94a3b8; font-size: 11px; }
+.agent-status {
+  display: inline-block; padding: 2px 6px;
+  border-radius: 3px; font-size: 9px;
+  font-weight: 700; margin-top: 6px;
+}
+.agent-status.running { background: rgba(34,197,94,.2); color: #22c55e; }
+.agent-status.idle { background: rgba(148,163,184,.2); color: #94a3b8; }
+.agent-status.done { background: rgba(59,130,246,.2); color: #3b82f6; }
+
+.error-banner {
+  background: rgba(239,68,68,.1);
+  border: 1px solid rgba(239,68,68,.3);
+  color: #fca5a5;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  display: none;
+}
+.error-banner.show { display: block; }
 </style>
 </head>
 <body>
 <div class="container">
   <header>
     <div>
-      <h1>📋 Bitácora Volvix POS</h1>
+      <h1>📋 Bitácora Volvix POS - EN VIVO</h1>
       <div class="status">
         <span class="live-dot"></span>
-        <span>EN VIVO · Auto-refresh cada 10s</span>
+        <span>EN VIVO · Auto-refresh cada 5s</span>
         <span id="ts" style="margin-left:auto;"></span>
       </div>
     </div>
     <div style="text-align:right;">
-      <div style="font-size:24px;font-weight:800;" id="overall-pct">0%</div>
+      <div style="font-size:32px;font-weight:800;" id="overall-pct">--</div>
       <div style="font-size:11px;color:#94a3b8;">PROGRESO TOTAL</div>
     </div>
   </header>
+
+  <div class="error-banner" id="error-banner"></div>
 
   <!-- Quick stats -->
   <div class="grid">
     <div class="card">
       <h3>🎯 Tareas totales</h3>
-      <div class="value" id="total-tasks">0</div>
-      <div class="sub">Total cableado completo</div>
+      <div class="value" id="total-tasks">--</div>
+      <div class="sub">Total cableado</div>
     </div>
     <div class="card">
       <h3>✅ Completadas</h3>
-      <div class="value" style="color:#22c55e;" id="done-tasks">0</div>
-      <div class="sub" id="done-pct">0% del total</div>
+      <div class="value" style="color:#22c55e;" id="done-tasks">--</div>
+      <div class="sub" id="done-pct">-- del total</div>
     </div>
     <div class="card">
       <h3>🔄 En progreso</h3>
-      <div class="value" style="color:#3b82f6;" id="progress-tasks">0</div>
+      <div class="value" style="color:#3b82f6;" id="progress-tasks">--</div>
       <div class="sub">Trabajo activo</div>
     </div>
     <div class="card">
       <h3>⏳ Pendientes</h3>
-      <div class="value" style="color:#94a3b8;" id="pending-tasks">0</div>
+      <div class="value" style="color:#94a3b8;" id="pending-tasks">--</div>
       <div class="sub" id="time-left">Tiempo restante</div>
     </div>
   </div>
 
-  <!-- Progress -->
+  <!-- Overall Progress Bar -->
   <div class="progress-section">
-    <h2>🚀 Progreso por sistema</h2>
+    <h2>🚀 Progreso global</h2>
+    <div class="progress-bar">
+      <div class="progress-fill" id="overall-progress" style="width:0%;"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:#94a3b8;">
+      <span id="progress-text">Cargando...</span>
+      <span id="velocity">--</span>
+    </div>
+  </div>
+
+  <!-- Modules -->
+  <div class="progress-section">
+    <h2>📊 Progreso por sistema</h2>
     <div class="modules" id="modules-list"></div>
+  </div>
+
+  <!-- Agents -->
+  <div class="progress-section">
+    <h2>🤖 Agentes en paralelo (Fibonacci)</h2>
+    <div class="agent-grid" id="agents-grid">
+      <div class="agent-card idle">
+        <div class="agent-name">Coordinador</div>
+        <div class="agent-task">Yo (esta IA)</div>
+        <div class="agent-status running">RUNNING</div>
+      </div>
+    </div>
   </div>
 
   <!-- Activity log + Tasks -->
   <div class="two-col">
     <div class="progress-section">
       <div class="section-title">📜 Log de actividad</div>
-      <div class="log" id="activity-log">Cargando...</div>
+      <div class="log" id="activity-log">Cargando logs...</div>
     </div>
     <div class="progress-section">
       <div class="section-title">📋 Tareas activas</div>
-      <div id="tasks-list"></div>
+      <div id="tasks-list">Cargando...</div>
     </div>
   </div>
 
   <!-- Footer -->
   <div class="progress-section" style="margin-top:20px;">
-    <div class="section-title">ℹ️ Información del proyecto</div>
+    <div class="section-title">ℹ️ Información</div>
     <div style="font-size:13px;color:#cbd5e1;line-height:1.8;">
-      <strong>URL Producción:</strong> <a href="https://volvix-pos.vercel.app" style="color:#60a5fa;" target="_blank">https://volvix-pos.vercel.app</a><br>
-      <strong>Base de datos:</strong> Supabase (zhvwmzkcqngcaqpdxtwr)<br>
-      <strong>Deploy:</strong> Vercel Serverless<br>
-      <strong>Inicio:</strong> <span id="start-time">2026-04-25 19:00</span><br>
+      <strong>URL:</strong> <a href="https://volvix-pos.vercel.app" style="color:#60a5fa;" target="_blank">https://volvix-pos.vercel.app</a><br>
+      <strong>Bitácora:</strong> <a href="https://volvix-pos.vercel.app/BITACORA_LIVE.html" style="color:#60a5fa;" target="_blank">/BITACORA_LIVE.html</a><br>
+      <strong>Status JSON:</strong> <a href="https://volvix-pos.vercel.app/api/status" style="color:#60a5fa;" target="_blank">/api/status</a><br>
+      <strong>DB:</strong> Supabase (PostgreSQL)<br>
       <strong>Última actualización:</strong> <span id="last-update">-</span><br>
-      <strong>Hora estimada finalización:</strong> <span id="eta">Calculando...</span>
+      <strong>ETA finalización:</strong> <span id="eta">Calculando...</span>
     </div>
   </div>
 </div>
 
 <script>
+// Detectar si estamos local o remoto
+const STATUS_URL = location.protocol === 'file:'
+  ? 'https://volvix-pos.vercel.app/api/status'
+  : '/api/status';
+
+let lastDone = 0;
+let velocityHistory = [];
+
 async function loadStatus() {
   try {
-    const res = await fetch('status.json?t=' + Date.now());
+    document.getElementById('error-banner').classList.remove('show');
+
+    const res = await fetch(STATUS_URL + '?t=' + Date.now());
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+
     const data = await res.json();
 
     // Stats
-    document.getElementById('total-tasks').textContent = data.stats.total;
-    document.getElementById('done-tasks').textContent = data.stats.done;
-    document.getElementById('progress-tasks').textContent = data.stats.in_progress;
-    document.getElementById('pending-tasks').textContent = data.stats.pending;
-    const pct = Math.round((data.stats.done / data.stats.total) * 100);
+    const stats = data.stats || {};
+    document.getElementById('total-tasks').textContent = stats.total || 0;
+    document.getElementById('done-tasks').textContent = stats.done || 0;
+    document.getElementById('progress-tasks').textContent = stats.in_progress || 0;
+    document.getElementById('pending-tasks').textContent = stats.pending || 0;
+
+    const pct = Math.round(((stats.done || 0) / (stats.total || 1)) * 100);
     document.getElementById('overall-pct').textContent = pct + '%';
     document.getElementById('done-pct').textContent = pct + '% del total';
+    document.getElementById('overall-progress').style.width = pct + '%';
+    document.getElementById('progress-text').textContent =
+      `${stats.done}/${stats.total} botones cableados`;
 
-    // Time calculations
-    const remaining = data.stats.total - data.stats.done;
-    const minutesPerTask = 8; // promedio
-    const minLeft = remaining * minutesPerTask;
-    const hrs = Math.floor(minLeft/60);
+    // Velocidad
+    if (lastDone > 0 && stats.done > lastDone) {
+      const newDone = stats.done - lastDone;
+      velocityHistory.push({ time: Date.now(), count: newDone });
+      velocityHistory = velocityHistory.filter(v => Date.now() - v.time < 60000);
+      const totalRecent = velocityHistory.reduce((s, v) => s + v.count, 0);
+      document.getElementById('velocity').textContent =
+        `📈 ${totalRecent} botones/min`;
+    }
+    lastDone = stats.done;
+
+    // Time left
+    const remaining = (stats.total || 0) - (stats.done || 0);
+    const minutesPerTask = 0.5;
+    const minLeft = Math.round(remaining * minutesPerTask);
+    const hrs = Math.floor(minLeft / 60);
     const min = minLeft % 60;
     document.getElementById('time-left').textContent = `~${hrs}h ${min}m restantes`;
 
@@ -318,14 +379,12 @@ async function loadStatus() {
 
     // Modules
     const modulesEl = document.getElementById('modules-list');
-    modulesEl.innerHTML = data.modules.map(m => {
-      const mPct = Math.round((m.done / m.total) * 100);
+    modulesEl.innerHTML = (data.modules || []).map(m => {
+      const mPct = Math.round((m.done / (m.total || 1)) * 100);
       const status = m.done === m.total ? 'done' :
-                     m.in_progress > 0 ? 'progress' :
                      m.done > 0 ? 'progress' : 'pending';
       const statusText = m.done === m.total ? 'COMPLETO' :
-                         m.in_progress > 0 ? 'EN PROGRESO' :
-                         m.done > 0 ? 'PARCIAL' : 'PENDIENTE';
+                         m.done > 0 ? `${mPct}%` : 'PENDIENTE';
       return `
         <div class="module">
           <div class="name">${m.name}</div>
@@ -340,30 +399,54 @@ async function loadStatus() {
 
     // Tasks active
     const tasksEl = document.getElementById('tasks-list');
-    tasksEl.innerHTML = (data.active_tasks || []).map(t => `
-      <div class="task ${t.status}">
-        <div class="check"></div>
-        <div>
-          <div class="text">${t.title}</div>
-          <div class="meta">${t.detail || ''}</div>
+    const tasks = data.active_tasks || [];
+    if (tasks.length > 0) {
+      tasksEl.innerHTML = tasks.map(t => `
+        <div class="task ${t.status || 'pending'}">
+          <div class="check"></div>
+          <div>
+            <div>${t.title}</div>
+            <div class="meta">${t.detail || ''}</div>
+          </div>
         </div>
-      </div>
-    `).join('');
+      `).join('');
+    } else {
+      tasksEl.innerHTML = '<div style="color:#64748b;font-size:13px;">No hay tareas activas</div>';
+    }
+
+    // Agents
+    if (data.agents) {
+      const agentsEl = document.getElementById('agents-grid');
+      agentsEl.innerHTML = data.agents.map(a => `
+        <div class="agent-card ${a.status === 'running' ? 'active' : a.status === 'done' ? '' : 'idle'}">
+          <div class="agent-name">${a.name}</div>
+          <div class="agent-task">${a.task || 'idle'}</div>
+          <div class="agent-status ${a.status || 'idle'}">${(a.status || 'IDLE').toUpperCase()}</div>
+        </div>
+      `).join('');
+    }
 
     // Log
     const logEl = document.getElementById('activity-log');
-    logEl.innerHTML = (data.log || []).slice(-30).reverse().map(l =>
-      `<div class="log-line ${l.type}">[${l.time}] ${l.text}</div>`
-    ).join('');
+    const logs = (data.log || []).slice(-30).reverse();
+    if (logs.length > 0) {
+      logEl.innerHTML = logs.map(l =>
+        `<div class="log-line ${l.type || 'info'}">[${l.time}] ${l.text}</div>`
+      ).join('');
+    } else {
+      logEl.innerHTML = '<div class="log-line info">Sin logs</div>';
+    }
 
   } catch (e) {
-    document.getElementById('activity-log').innerHTML =
-      '<div class="log-line error">Error cargando status.json: ' + e.message + '</div>';
+    document.getElementById('error-banner').classList.add('show');
+    document.getElementById('error-banner').textContent =
+      '⚠️ Error: ' + e.message + ' (intentando ' + STATUS_URL + ')';
+    console.error('Error:', e);
   }
 }
 
 loadStatus();
-setInterval(loadStatus, 5000); // Auto-refresh cada 5s
+setInterval(loadStatus, 5000);
 </script>
 </body>
 </html>
