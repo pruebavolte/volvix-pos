@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volvix Sandbox - Playground Interactivo</title>
+<style>
+  :root{
+    --bg:#0a0e1a; --panel:#111726; --panel2:#1a2236; --border:#26304a;
+    --text:#e8ecf4; --muted:#8a94ab; --accent:#5b8cff; --accent2:#7b5bff;
+    --ok:#34d399; --warn:#fbbf24; --err:#f87171; --info:#60a5fa;
+    --grad:linear-gradient(135deg,#5b8cff 0%,#7b5bff 50%,#d946ef 100%);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;min-height:100vh}
+  .topbar{background:var(--panel);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(10px)}
+  .logo{font-size:20px;font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .topbar-actions{display:flex;gap:8px;align-items:center}
+  .badge{padding:4px 10px;border-radius:12px;font-size:11px;font-weight:600;background:var(--panel2);border:1px solid var(--border)}
+  .badge.ok{background:rgba(52,211,153,.15);color:var(--ok);border-color:rgba(52,211,153,.3)}
+  .layout{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 57px)}
+  .sidebar{background:var(--panel);border-right:1px solid var(--border);padding:16px 0;overflow-y:auto;position:sticky;top:57px;height:calc(100vh - 57px)}
+  .nav-group{margin-bottom:16px}
+  .nav-title{padding:8px 20px;font-size:11px;text-transform:uppercase;color:var(--muted);font-weight:700;letter-spacing:.5px}
+  .nav-item{display:block;padding:8px 20px;color:var(--text);text-decoration:none;cursor:pointer;font-size:14px;border-left:3px solid transparent;transition:all .15s}
+  .nav-item:hover{background:var(--panel2);border-left-color:var(--accent)}
+  .nav-item.active{background:var(--panel2);border-left-color:var(--accent);color:var(--accent)}
+  .main{padding:32px;overflow-y:auto}
+  .panel-title{font-size:24px;font-weight:700;margin-bottom:6px}
+  .panel-sub{color:var(--muted);margin-bottom:24px;font-size:14px}
+  .tab-content{display:none;animation:fadeIn .25s}
+  .tab-content.active{display:block}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .grid{display:grid;gap:16px}
+  .grid-2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+  .grid-3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+  .grid-4{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px;transition:all .2s}
+  .card:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .card-title{font-size:16px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+  .card-desc{color:var(--muted);font-size:13px;margin-bottom:12px}
+  .btn{padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--panel2);color:var(--text);cursor:pointer;font-size:13px;font-weight:500;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+  .btn:hover{background:var(--accent);border-color:var(--accent)}
+  .btn-primary{background:var(--grad);border:none;color:white;font-weight:600}
+  .btn-ghost{background:transparent}
+  .btn-sm{padding:5px 10px;font-size:12px}
+  .input,.select,.textarea{width:100%;padding:10px 12px;background:var(--panel2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:14px}
+  .input:focus,.select:focus,.textarea:focus{outline:none;border-color:var(--accent)}
+  .textarea{resize:vertical;min-height:80px;font-family:'Consolas','Monaco',monospace;font-size:13px}
+  .label{display:block;margin-bottom:6px;font-size:13px;color:var(--muted);font-weight:500}
+  .field{margin-bottom:14px}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .stat{background:var(--panel2);border-radius:10px;padding:14px;border:1px solid var(--border)}
+  .stat-val{font-size:24px;font-weight:700;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .stat-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+  .console{background:#000;border-radius:8px;padding:12px;font-family:'Consolas','Monaco',monospace;font-size:12px;color:#0f0;max-height:280px;overflow-y:auto;border:1px solid var(--border);margin-top:12px}
+  .console-line{padding:2px 0;white-space:pre-wrap;word-break:break-word}
+  .console-line.err{color:var(--err)}
+  .console-line.warn{color:var(--warn)}
+  .console-line.info{color:var(--info)}
+  .pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;margin-right:4px}
+  .pill.retail{background:rgba(91,140,255,.2);color:var(--accent)}
+  .pill.farma{background:rgba(52,211,153,.2);color:var(--ok)}
+  .pill.resto{background:rgba(251,191,36,.2);color:var(--warn)}
+  .pill.taller{background:rgba(248,113,113,.2);color:var(--err)}
+  .pill.spa{background:rgba(217,70,239,.2);color:#d946ef}
+  .product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:12px}
+  .product{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:10px;cursor:pointer;text-align:center;transition:all .15s}
+  .product:hover{border-color:var(--accent);transform:scale(1.03)}
+  .product-emoji{font-size:32px}
+  .product-name{font-size:12px;font-weight:600;margin-top:4px}
+  .product-price{font-size:11px;color:var(--accent);margin-top:2px}
+  .cart{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:12px;min-height:120px}
+  .cart-item{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px}
+  .cart-total{display:flex;justify-content:space-between;padding-top:8px;margin-top:6px;border-top:2px solid var(--accent);font-weight:700;font-size:16px}
+  .toggle{position:relative;display:inline-block;width:44px;height:24px}
+  .toggle input{opacity:0;width:0;height:0}
+  .slider{position:absolute;cursor:pointer;inset:0;background:var(--border);border-radius:24px;transition:.3s}
+  .slider:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background:white;border-radius:50%;transition:.3s}
+  input:checked+.slider{background:var(--accent)}
+  input:checked+.slider:before{transform:translateX(20px)}
+  .table{width:100%;border-collapse:collapse;margin-top:12px}
+  .table th,.table td{padding:10px;text-align:left;border-bottom:1px solid var(--border);font-size:13px}
+  .table th{background:var(--panel2);color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase}
+  .progress{height:8px;background:var(--panel2);border-radius:4px;overflow:hidden;margin-top:6px}
+  .progress-bar{height:100%;background:var(--grad);transition:width .5s}
+  .alert{padding:12px;border-radius:8px;margin:12px 0;border-left:4px solid;font-size:13px}
+  .alert.ok{background:rgba(52,211,153,.1);border-color:var(--ok)}
+  .alert.warn{background:rgba(251,191,36,.1);border-color:var(--warn)}
+  .alert.err{background:rgba(248,113,113,.1);border-color:var(--err)}
+  .alert.info{background:rgba(91,140,255,.1);border-color:var(--info)}
+  .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;max-width:240px}
+  .key{padding:18px;background:var(--panel2);border:1px solid var(--border);border-radius:8px;text-align:center;cursor:pointer;font-size:18px;font-weight:600;transition:all .1s}
+  .key:hover{background:var(--accent);transform:scale(0.95)}
+  .key.wide{grid-column:span 2}
+  .chat{background:var(--panel2);border-radius:10px;padding:12px;height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+  .msg{max-width:80%;padding:8px 12px;border-radius:12px;font-size:13px}
+  .msg.user{align-self:flex-end;background:var(--accent);color:white}
+  .msg.bot{align-self:flex-start;background:var(--panel)}
+  .scanline{height:2px;background:var(--err);position:absolute;width:100%;animation:scan 2s linear infinite}
+  @keyframes scan{0%{top:0}100%{top:100%}}
+  .barcode-box{position:relative;background:#000;height:120px;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;color:#0f0;font-family:monospace;letter-spacing:2px}
+  .qr{display:grid;grid-template-columns:repeat(20,1fr);width:160px;height:160px;gap:0;background:white;padding:8px;border-radius:8px;margin:12px auto}
+  .qr div{aspect-ratio:1}
+  .qr div.b{background:#000}
+  code{background:var(--panel2);padding:2px 6px;border-radius:4px;font-size:12px;color:var(--accent)}
+  .swatches{display:flex;gap:8px;flex-wrap:wrap}
+  .swatch{width:40px;height:40px;border-radius:8px;cursor:pointer;border:2px solid var(--border)}
+  .swatch.sel{border-color:white}
+  details{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin:8px 0}
+  summary{cursor:pointer;font-weight:600;font-size:14px}
+  details[open]{padding-bottom:14px}
+  .tag{display:inline-block;background:var(--panel2);border:1px solid var(--border);padding:3px 8px;border-radius:4px;font-size:11px;margin:2px}
+  hr{border:none;border-top:1px solid var(--border);margin:18px 0}
+  .floating{position:fixed;bottom:20px;right:20px;background:var(--grad);color:white;padding:14px 20px;border-radius:50px;box-shadow:0 8px 24px rgba(0,0,0,.4);cursor:pointer;font-weight:600;z-index:50;display:flex;align-items:center;gap:8px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:14px">
+    <div class="logo">VOLVIX SANDBOX</div>
+    <span class="badge">v3.40</span>
+    <span class="badge ok">● Live</span>
+  </div>
+  <div class="topbar-actions">
+    <button class="btn btn-sm" onclick="toggleTheme()">Tema</button>
+    <button class="btn btn-sm" onclick="resetSandbox()">Reset</button>
+    <button class="btn btn-sm btn-primary" onclick="exportState()">Exportar</button>
+  </div>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="nav-group">
+      <div class="nav-title">Componentes UI</div>
+      <a class="nav-item active" data-tab="overview">Vista General</a>
+      <a class="nav-item" data-tab="buttons">Botones & Forms</a>
+      <a class="nav-item" data-tab="cards">Cards & Stats</a>
+      <a class="nav-item" data-tab="tables">Tablas & Listas</a>
+      <a class="nav-item" data-tab="alerts">Alertas & Modales</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-title">POS Core</div>
+      <a class="nav-item" data-tab="pos">POS Demo</a>
+      <a class="nav-item" data-tab="keypad">Keypad/Calculadora</a>
+      <a class="nav-item" data-tab="barcode">Lector Códigos</a>
+      <a class="nav-item" data-tab="receipt">Ticket/Recibo</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-title">Verticales</div>
+      <a class="nav-item" data-tab="retail">Retail</a>
+      <a class="nav-item" data-tab="farma">Farmacia</a>
+      <a class="nav-item" data-tab="resto">Restaurante</a>
+      <a class="nav-item" data-tab="taller">Taller Mecánico</a>
+      <a class="nav-item" data-tab="spa">Spa/Belleza</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-title">Integraciones</div>
+      <a class="nav-item" data-tab="payments">Pagos</a>
+      <a class="nav-item" data-tab="ai">IA Assistant</a>
+      <a class="nav-item" data-tab="sync">Sync/Cloud</a>
+      <a class="nav-item" data-tab="webhooks">Webhooks/API</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-title">Dev Tools</div>
+      <a class="nav-item" data-tab="theme">Theme Builder</a>
+      <a class="nav-item" data-tab="console">Console/Logs</a>
+      <a class="nav-item" data-tab="state">State Inspector</a>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- OVERVIEW -->
+    <section class="tab-content active" id="overview">
+      <h1 class="panel-title">Volvix Sandbox</h1>
+      <p class="panel-sub">Playground interactivo estilo Storybook para probar todos los componentes, verticales e integraciones.</p>
+      <div class="grid grid-4" style="margin-bottom:24px">
+        <div class="stat"><div class="stat-val">42</div><div class="stat-lbl">Componentes</div></div>
+        <div class="stat"><div class="stat-val">5</div><div class="stat-lbl">Verticales</div></div>
+        <div class="stat"><div class="stat-val">12</div><div class="stat-lbl">Integraciones</div></div>
+        <div class="stat"><div class="stat-val">∞</div><div class="stat-lbl">Combinaciones</div></div>
+      </div>
+      <div class="grid grid-2">
+        <div class="card">
+          <div class="card-title">Inicio rápido</div>
+          <p class="card-desc">Navega por la barra lateral. Cada sección es un componente interactivo aislado.</p>
+          <ol style="padding-left:20px;font-size:13px;color:var(--muted);line-height:1.8">
+            <li>Selecciona vertical (Retail, Farma, etc.)</li>
+            <li>Prueba componente POS</li>
+            <li>Inspecciona estado/console</li>
+            <li>Exporta configuración</li>
+          </ol>
+        </div>
+        <div class="card">
+          <div class="card-title">Estado actual</div>
+          <p class="card-desc">Snapshot del sandbox</p>
+          <div id="overview-state" style="font-family:monospace;font-size:12px;color:var(--accent)"></div>
+        </div>
+      </div>
+      <h3 style="margin-top:28px;margin-bottom:14px">Verticales soportadas</h3>
+      <div class="grid grid-3">
+        <div class="card"><span class="pill retail">Retail</span><div class="card-title" style="margin-top:8px">Tienda General</div><p class="card-desc">Inventario, códigos de barra, descuentos</p></div>
+        <div class="card"><span class="pill farma">Farmacia</span><div class="card-title" style="margin-top:8px">Farmacia</div><p class="card-desc">Receta, lotes, vencimientos, controlados</p></div>
+        <div class="card"><span class="pill resto">Restaurante</span><div class="card-title" style="margin-top:8px">Restaurante</div><p class="card-desc">Mesas, comandas, KDS, propinas</p></div>
+        <div class="card"><span class="pill taller">Taller</span><div class="card-title" style="margin-top:8px">Taller Mecánico</div><p class="card-desc">OTs, refacciones, mano de obra</p></div>
+        <div class="card"><span class="pill spa">Spa</span><div class="card-title" style="margin-top:8px">Spa/Belleza</div><p class="card-desc">Citas, servicios, comisiones</p></div>
+      </div>
+    </section>
+
+    <!-- BUTTONS -->
+    <section class="tab-content" id="buttons">
+      <h1 class="panel-title">Botones & Formularios</h1>
+      <p class="panel-sub">Variantes de botones, inputs y controles.</p>
+      <div class="card">
+        <div class="card-title">Botones</div>
+        <div class="row">
+          <button class="btn">Default</button>
+          <button class="btn btn-primary">Primary</button>
+          <button class="btn btn-ghost">Ghost</button>
+          <button class="btn btn-sm">Small</button>
+          <button class="btn" disabled style="opacity:.4;cursor:not-allowed">Disabled</button>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="card-title">Formulario completo</div>
+        <div class="grid grid-2">
+          <div class="field"><label class="label">Nombre</label><input class="input" placeholder="Juan Pérez"></div>
+          <div class="field"><label class="label">Email</label><input class="input" type="email" placeholder="juan@volvix.com"></div>
+          <div class="field"><label class="label">Vertical</label><select class="select"><option>Retail</option><option>Farmacia</option><option>Restaurante</option><option>Taller</option><option>Spa</option></select></div>
+          <div class="field"><label class="label">Plan</label><select class="select"><option>Free</option><option>Pro</option><option>Enterprise</option></select></div>
+        </div>
+        <div class="field"><label class="label">Notas</label><textarea class="textarea" placeholder="Comentarios..."></textarea></div>
+        <div class="row">
+          <label class="row" style="gap:8px"><span class="toggle"><input type="checkbox" checked><span class="slider"></span></span>Notificaciones</label>
+          <label class="row" style="gap:8px"><span class="toggle"><input type="checkbox"><span class="slider"></span></span>Modo oscuro</label>
+        </div>
+      </div>
+    </section>
+
+    <!-- CARDS -->
+    <section class="tab-content" id="cards">
+      <h1 class="panel-title">Cards & Stats</h1>
+      <p class="panel-sub">Tarjetas de información, estadísticas y KPIs.</p>
+      <div class="grid grid-4">
+        <div class="stat"><div class="stat-val">$24,580</div><div class="stat-lbl">Ventas hoy</div><div class="progress"><div class="progress-bar" style="width:78%"></div></div></div>
+        <div class="stat"><div class="stat-val">142</div><div class="stat-lbl">Tickets</div><div class="progress"><div class="progress-bar" style="width:62%"></div></div></div>
+        <div class="stat"><div class="stat-val">$172</div><div class="stat-lbl">Ticket prom.</div><div class="progress"><div class="progress-bar" style="width:45%"></div></div></div>
+        <div class="stat"><div class="stat-val">98%</div><div class="stat-lbl">Uptime</div><div class="progress"><div class="progress-bar" style="width:98%"></div></div></div>
+      </div>
+    </section>
+
+    <!-- TABLES -->
+    <section class="tab-content" id="tables">
+      <h1 class="panel-title">Tablas</h1>
+      <div class="card">
+        <table class="table">
+          <thead><tr><th>SKU</th><th>Producto</th><th>Stock</th><th>Precio</th><th></th></tr></thead>
+          <tbody id="tbl-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ALERTS -->
+    <section class="tab-content" id="alerts">
+      <h1 class="panel-title">Alertas & Notificaciones</h1>
+      <div class="alert ok">✓ Operación exitosa</div>
+      <div class="alert info">ℹ Sincronización en curso</div>
+      <div class="alert warn">⚠ Stock bajo en 3 productos</div>
+      <div class="alert err">✗ Error de conexión con backend</div>
+      <button class="btn btn-primary" onclick="showToast()">Mostrar Toast</button>
+    </section>
+
+    <!-- POS -->
+    <section class="tab-content" id="pos">
+      <h1 class="panel-title">POS Demo Interactivo</h1>
+      <p class="panel-sub">Sistema punto de venta completo. Click en productos para añadir al carrito.</p>
+      <div class="grid grid-2">
+        <div class="card">
+          <div class="card-title">Catálogo</div>
+          <div class="product-grid" id="pos-products"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Carrito</div>
+          <div class="cart" id="pos-cart"><p style="color:var(--muted);text-align:center;padding:30px 0">Carrito vacío</p></div>
+          <div class="row" style="margin-top:12px">
+            <button class="btn" onclick="clearCart()">Limpiar</button>
+            <button class="btn btn-primary" onclick="checkout()">Cobrar</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- KEYPAD -->
+    <section class="tab-content" id="keypad">
+      <h1 class="panel-title">Keypad / Calculadora</h1>
+      <div class="card" style="max-width:320px">
+        <input class="input" id="keypad-display" readonly value="0" style="text-align:right;font-size:24px;font-weight:700;margin-bottom:12px">
+        <div class="keypad" id="keypad"></div>
+      </div>
+    </section>
+
+    <!-- BARCODE -->
+    <section class="tab-content" id="barcode">
+      <h1 class="panel-title">Lector de Códigos</h1>
+      <div class="card">
+        <div class="barcode-box"><div class="scanline"></div><span id="bc-text">7501031311309</span></div>
+        <div class="row" style="margin-top:12px">
+          <input class="input" id="bc-input" placeholder="Escanea o escribe código" style="flex:1">
+          <button class="btn btn-primary" onclick="scan()">Buscar</button>
+        </div>
+        <div id="bc-result" style="margin-top:12px"></div>
+        <hr>
+        <h4 style="margin-bottom:8px">QR Code (demo)</h4>
+        <div class="qr" id="qr"></div>
+      </div>
+    </section>
+
+    <!-- RECEIPT -->
+    <section class="tab-content" id="receipt">
+      <h1 class="panel-title">Ticket / Recibo</h1>
+      <div class="card" style="max-width:380px;margin:0 auto;background:white;color:#000;font-family:'Courier New',monospace">
+        <div style="text-align:center;border-bottom:2px dashed #000;padding-bottom:10px">
+          <h3 style="color:#000">VOLVIX STORE</h3>
+          <p style="font-size:12px">Av. Reforma 123, CDMX</p>
+          <p style="font-size:12px">RFC: VOL010101ABC</p>
+        </div>
+        <div style="padding:10px 0;font-size:12px">
+          <div>Ticket: #00142</div>
+          <div>Fecha: 2026-04-26 14:32</div>
+          <div>Cajero: Ana M.</div>
+        </div>
+        <table style="width:100%;font-size:12px;border-top:1px dashed #000;border-bottom:1px dashed #000;padding:8px 0">
+          <tr><td>2x Coca 600ml</td><td style="text-align:right">$36.00</td></tr>
+          <tr><td>1x Pan blanco</td><td style="text-align:right">$28.00</td></tr>
+          <tr><td>3x Yogurt</td><td style="text-align:right">$45.00</td></tr>
+        </table>
+        <div style="padding:10px 0;font-size:13px">
+          <div style="display:flex;justify-content:space-between"><span>Subtotal</span><span>$109.00</span></div>
+          <div style="display:flex;justify-content:space-between"><span>IVA 16%</span><span>$17.44</span></div>
+          <div style="display:flex;justify-content:space-between;font-weight:700;font-size:15px;border-top:1px solid #000;padding-top:6px"><span>TOTAL</span><span>$126.44</span></div>
+        </div>
+        <div style="text-align:center;font-size:11px;border-top:2px dashed #000;padding-top:10px">¡Gracias por tu compra!<br>volvix.com</div>
+      </div>
+    </section>
+
+    <!-- RETAIL -->
+    <section class="tab-content" id="retail">
+      <h1 class="panel-title"><span class="pill retail">Retail</span> Tienda General</h1>
+      <div class="grid grid-2">
+        <div class="card"><div class="card-title">Inventario rápido</div><div class="field"><label class="label">SKU</label><input class="input" placeholder="00012345"></div><div class="field"><label class="label">Stock actual</label><input class="input" type="number" value="48"></div><button class="btn btn-primary">Actualizar</button></div>
+        <div class="card"><div class="card-title">Promociones activas</div><div class="alert info">2x1 en bebidas</div><div class="alert ok">10% off Premium</div><button class="btn">Crear promo</button></div>
+      </div>
+    </section>
+
+    <!-- FARMA -->
+    <section class="tab-content" id="farma">
+      <h1 class="panel-title"><span class="pill farma">Farmacia</span> Punto de Venta Farmacéutico</h1>
+      <div class="grid grid-2">
+        <div class="card"><div class="card-title">Receta médica</div><div class="field"><label class="label">Folio receta</label><input class="input" placeholder="RX-2026-001"></div><div class="field"><label class="label">Médico</label><input class="input" placeholder="Dr. García"></div><div class="alert warn">⚠ Medicamento controlado Grupo IV</div></div>
+        <div class="card"><div class="card-title">Lote y vencimiento</div><table class="table"><thead><tr><th>Lote</th><th>Vence</th><th>Stock</th></tr></thead><tbody><tr><td>L2410A</td><td>2027-03</td><td>120</td></tr><tr><td>L2402B</td><td>2026-08</td><td>45</td></tr><tr><td>L2312C</td><td>2026-05</td><td style="color:var(--err)">12 ⚠</td></tr></tbody></table></div>
+      </div>
+    </section>
+
+    <!-- RESTO -->
+    <section class="tab-content" id="resto">
+      <h1 class="panel-title"><span class="pill resto">Restaurante</span> Mesas y Comandas</h1>
+      <div class="card">
+        <div class="card-title">Plano de mesas</div>
+        <div class="grid grid-4" id="tables-grid"></div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="card-title">KDS - Cocina</div>
+        <div class="grid grid-3">
+          <div class="card" style="background:var(--panel2)"><strong>Mesa 4</strong><div style="font-size:12px;color:var(--muted);margin:6px 0">14:32 (3 min)</div>2x Tacos<br>1x Agua horchata</div>
+          <div class="card" style="background:var(--panel2);border-color:var(--warn)"><strong>Mesa 7</strong><div style="font-size:12px;color:var(--warn);margin:6px 0">14:20 (15 min)</div>1x Pizza grande<br>2x Cerveza</div>
+          <div class="card" style="background:var(--panel2);border-color:var(--err)"><strong>Mesa 2</strong><div style="font-size:12px;color:var(--err);margin:6px 0">14:05 (30 min) ⚠</div>3x Pasta carbonara</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TALLER -->
+    <section class="tab-content" id="taller">
+      <h1 class="panel-title"><span class="pill taller">Taller</span> Órdenes de Trabajo</h1>
+      <div class="card">
+        <div class="card-title">Nueva OT</div>
+        <div class="grid grid-2">
+          <div class="field"><label class="label">Cliente</label><input class="input" placeholder="Juan Pérez"></div>
+          <div class="field"><label class="label">Vehículo</label><input class="input" placeholder="Toyota Corolla 2020"></div>
+          <div class="field"><label class="label">Placas</label><input class="input" placeholder="ABC-123-X"></div>
+          <div class="field"><label class="label">Kilometraje</label><input class="input" type="number" placeholder="45000"></div>
+        </div>
+        <div class="field"><label class="label">Diagnóstico</label><textarea class="textarea" placeholder="Cliente reporta..."></textarea></div>
+        <details><summary>Refacciones requeridas</summary><table class="table"><tr><td>Aceite 5W30</td><td>4L</td><td>$680</td></tr><tr><td>Filtro aceite</td><td>1</td><td>$150</td></tr><tr><td>Mano de obra</td><td>2hrs</td><td>$600</td></tr></table></details>
+      </div>
+    </section>
+
+    <!-- SPA -->
+    <section class="tab-content" id="spa">
+      <h1 class="panel-title"><span class="pill spa">Spa</span> Citas y Servicios</h1>
+      <div class="grid grid-2">
+        <div class="card"><div class="card-title">Agenda hoy</div><table class="table"><tr><td>10:00</td><td>María L.</td><td>Facial</td></tr><tr><td>11:30</td><td>Ana T.</td><td>Masaje</td></tr><tr><td>13:00</td><td>Sofía R.</td><td>Manicure</td></tr><tr><td>15:00</td><td>Laura M.</td><td>Tinte</td></tr></table></div>
+        <div class="card"><div class="card-title">Comisiones estilistas</div><table class="table"><tr><td>Carla</td><td>40%</td><td>$3,200</td></tr><tr><td>Diego</td><td>35%</td><td>$2,450</td></tr><tr><td>Eva</td><td>40%</td><td>$1,890</td></tr></table></div>
+      </div>
+    </section>
+
+    <!-- PAYMENTS -->
+    <section class="tab-content" id="payments">
+      <h1 class="panel-title">Integraciones de Pago</h1>
+      <div class="grid grid-3">
+        <div class="card"><div class="card-title">💳 Stripe</div><span class="badge ok">● Conectado</span><p class="card-desc" style="margin-top:8px">Tarjetas, Apple/Google Pay</p><button class="btn btn-sm">Configurar</button></div>
+        <div class="card"><div class="card-title">💵 MercadoPago</div><span class="badge ok">● Conectado</span><p class="card-desc" style="margin-top:8px">LATAM, QR, Tarjetas</p><button class="btn btn-sm">Configurar</button></div>
+        <div class="card"><div class="card-title">🏦 PayPal</div><span class="badge">○ Inactivo</span><p class="card-desc" style="margin-top:8px">Internacional</p><button class="btn btn-sm">Conectar</button></div>
+        <div class="card"><div class="card-title">📱 SPEI/CoDi</div><span class="badge ok">● Conectado</span><p class="card-desc" style="margin-top:8px">Transferencias MX</p><button class="btn btn-sm">Configurar</button></div>
+        <div class="card"><div class="card-title">💴 Efectivo</div><span class="badge ok">● Activo</span><p class="card-desc" style="margin-top:8px">Caja física</p><button class="btn btn-sm">Configurar</button></div>
+        <div class="card"><div class="card-title">🪙 Crypto</div><span class="badge">○ Beta</span><p class="card-desc" style="margin-top:8px">BTC, USDT, USDC</p><button class="btn btn-sm">Conectar</button></div>
+      </div>
+    </section>
+
+    <!-- AI -->
+    <section class="tab-content" id="ai">
+      <h1 class="panel-title">IA Assistant</h1>
+      <div class="card">
+        <div class="card-title">Chat con Volvix AI</div>
+        <div class="chat" id="chat">
+          <div class="msg bot">¡Hola! Soy Volvix AI. ¿En qué te ayudo hoy?</div>
+        </div>
+        <div class="row" style="margin-top:12px">
+          <input class="input" id="chat-input" placeholder="Escribe..." style="flex:1" onkeydown="if(event.key==='Enter')sendChat()">
+          <button class="btn btn-primary" onclick="sendChat()">Enviar</button>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <span class="tag">Sugerir productos</span>
+          <span class="tag">Analizar ventas</span>
+          <span class="tag">Predicción stock</span>
+          <span class="tag">Crear promo</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SYNC -->
+    <section class="tab-content" id="sync">
+      <h1 class="panel-title">Sync / Cloud</h1>
+      <div class="grid grid-2">
+        <div class="card"><div class="card-title">Estado de sincronización</div><div class="alert ok">✓ Última sync: hace 32 segundos</div><table class="table"><tr><td>Productos</td><td>1,240</td><td>✓</td></tr><tr><td>Ventas</td><td>89</td><td>✓</td></tr><tr><td>Clientes</td><td>340</td><td>⏳</td></tr></table></div>
+        <div class="card"><div class="card-title">Backups</div><table class="table"><tr><td>2026-04-26 14:00</td><td>Auto</td><td>2.4MB</td></tr><tr><td>2026-04-26 06:00</td><td>Auto</td><td>2.3MB</td></tr><tr><td>2026-04-25 23:00</td><td>Manual</td><td>2.3MB</td></tr></table><button class="btn btn-primary" style="margin-top:8px">Backup ahora</button></div>
+      </div>
+    </section>
+
+    <!-- WEBHOOKS -->
+    <section class="tab-content" id="webhooks">
+      <h1 class="panel-title">Webhooks & API</h1>
+      <div class="card">
+        <div class="card-title">Endpoints registrados</div>
+        <table class="table">
+          <thead><tr><th>Evento</th><th>URL</th><th>Estado</th></tr></thead>
+          <tbody>
+            <tr><td><code>sale.created</code></td><td>https://hook.example.com/sale</td><td><span class="badge ok">200</span></td></tr>
+            <tr><td><code>stock.low</code></td><td>https://slack.com/...</td><td><span class="badge ok">200</span></td></tr>
+            <tr><td><code>customer.new</code></td><td>https://crm.example.com/c</td><td><span class="badge" style="background:rgba(248,113,113,.2);color:var(--err)">500</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="card-title">API Tester</div>
+        <div class="row" style="margin-bottom:8px"><select class="select" style="max-width:120px"><option>GET</option><option>POST</option><option>PUT</option><option>DELETE</option></select><input class="input" value="/api/v1/products" style="flex:1"></div>
+        <textarea class="textarea" placeholder='{"sku":"123","name":"..."}'></textarea>
+        <button class="btn btn-primary" style="margin-top:8px" onclick="apiTest()">Send Request</button>
+        <div class="console" id="api-console"><div class="console-line info">▸ API Tester ready</div></div>
+      </div>
+    </section>
+
+    <!-- THEME -->
+    <section class="tab-content" id="theme">
+      <h1 class="panel-title">Theme Builder</h1>
+      <div class="card">
+        <div class="card-title">Color primario</div>
+        <div class="swatches">
+          <div class="swatch sel" style="background:#5b8cff" onclick="setAccent('#5b8cff',this)"></div>
+          <div class="swatch" style="background:#34d399" onclick="setAccent('#34d399',this)"></div>
+          <div class="swatch" style="background:#f87171" onclick="setAccent('#f87171',this)"></div>
+          <div class="swatch" style="background:#fbbf24" onclick="setAccent('#fbbf24',this)"></div>
+          <div class="swatch" style="background:#d946ef" onclick="setAccent('#d946ef',this)"></div>
+          <div class="swatch" style="background:#06b6d4" onclick="setAccent('#06b6d4',this)"></div>
+        </div>
+        <hr>
+        <div class="field"><label class="label">Border radius</label><input type="range" min="0" max="20" value="12" class="input" oninput="document.documentElement.style.setProperty('--r',this.value+'px');this.nextElementSibling.textContent=this.value+'px'"><span style="font-size:12px;color:var(--muted)">12px</span></div>
+      </div>
+    </section>
+
+    <!-- CONSOLE -->
+    <section class="tab-content" id="console">
+      <h1 class="panel-title">Console / Logs</h1>
+      <div class="card">
+        <div class="row" style="margin-bottom:10px">
+          <button class="btn btn-sm" onclick="logEvent('info','Evento info disparado')">Log info</button>
+          <button class="btn btn-sm" onclick="logEvent('warn','Advertencia simulada')">Log warn</button>
+          <button class="btn btn-sm" onclick="logEvent('err','Error capturado')">Log error</button>
+          <button class="btn btn-sm" onclick="document.getElementById('main-console').innerHTML=''">Clear</button>
+        </div>
+        <div class="console" id="main-console"></div>
+      </div>
+    </section>
+
+    <!-- STATE -->
+    <section class="tab-content" id="state">
+      <h1 class="panel-title">State Inspector</h1>
+      <div class="card">
+        <div class="card-title">Sandbox State (live)</div>
+        <pre id="state-json" style="background:#000;padding:14px;border-radius:8px;overflow:auto;font-size:12px;color:#0f0;max-height:500px"></pre>
+        <button class="btn btn-primary" style="margin-top:10px" onclick="updateStateView()">Refrescar</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div class="floating" onclick="alert('Volvix Sandbox v3.40\\n\\nPlayground completo de componentes interactivos.\\nUsa la barra lateral para navegar.')">? Ayuda</div>
+
+<script>
+const STATE={
+  currentTab:'overview',
+  cart:[],
+  console:[],
+  accent:'#5b8cff',
+  vertical:'retail',
+  products:[
+    {id:1,name:'Coca 600',price:18,emoji:'🥤'},
+    {id:2,name:'Pan',price:28,emoji:'🍞'},
+    {id:3,name:'Yogurt',price:15,emoji:'🥛'},
+    {id:4,name:'Manzana',price:8,emoji:'🍎'},
+    {id:5,name:'Café',price:45,emoji:'☕'},
+    {id:6,name:'Pizza',price:120,emoji:'🍕'},
+    {id:7,name:'Galletas',price:22,emoji:'🍪'},
+    {id:8,name:'Helado',price:35,emoji:'🍦'}
+  ]
+};
+
+// Tabs
+document.querySelectorAll('.nav-item').forEach(n=>{
+  n.addEventListener('click',()=>{
+    document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));
+    n.classList.add('active');
+    const tab=n.dataset.tab;
+    document.getElementById(tab).classList.add('active');
+    STATE.currentTab=tab;
+    logEvent('info','Tab: '+tab);
+    updateOverview();
+  });
+});
+
+// POS
+function renderProducts(){
+  const g=document.getElementById('pos-products');
+  g.innerHTML=STATE.products.map(p=>`<div class="product" onclick="addToCart(${p.id})"><div class="product-emoji">${p.emoji}</div><div class="product-name">${p.name}</div><div class="product-price">$${p.price}</div></div>`).join('');
+}
+function addToCart(id){
+  const p=STATE.products.find(x=>x.id===id);
+  const e=STATE.cart.find(x=>x.id===id);
+  if(e)e.qty++;else STATE.cart.push({...p,qty:1});
+  renderCart();
+  logEvent('info','+ '+p.name);
+}
+function renderCart(){
+  const c=document.getElementById('pos-cart');
+  if(!STATE.cart.length){c.innerHTML='<p style="color:var(--muted);text-align:center;padding:30px 0">Carrito vacío</p>';return}
+  let total=0;
+  c.innerHTML=STATE.cart.map(i=>{total+=i.price*i.qty;return `<div class="cart-item"><span>${i.qty}x ${i.name}</span><span>$${i.price*i.qty}</span></div>`}).join('')+`<div class="cart-total"><span>Total</span><span>$${total.toFixed(2)}</span></div>`;
+}
+function clearCart(){STATE.cart=[];renderCart();logEvent('warn','Carrito limpio')}
+function checkout(){if(!STATE.cart.length)return;const t=STATE.cart.reduce((s,i)=>s+i.price*i.qty,0);logEvent('info','✓ Cobro: $'+t.toFixed(2));alert('Cobro exitoso: $'+t.toFixed(2));clearCart()}
+
+// Keypad
+const keys=['7','8','9','4','5','6','1','2','3','0','C','='];
+document.getElementById('keypad').innerHTML=keys.map(k=>`<div class="key" onclick="press('${k}')">${k}</div>`).join('');
+function press(k){
+  const d=document.getElementById('keypad-display');
+  if(k==='C')d.value='0';
+  else if(k==='='){try{d.value=eval(d.value)}catch(e){d.value='ERR'}}
+  else d.value=d.value==='0'?k:d.value+k;
+}
+
+// Tables fake data
+const tblData=[['00012','Coca 600',48,18],['00045','Pan blanco',12,28],['00078','Yogurt 1L',5,52],['00102','Café Premium',24,165],['00156','Pizza congelada',8,98]];
+document.getElementById('tbl-body').innerHTML=tblData.map(r=>`<tr><td><code>${r[0]}</code></td><td>${r[1]}</td><td>${r[2]<10?'<span style=color:var(--err)>'+r[2]+' ⚠</span>':r[2]}</td><td>$${r[3]}</td><td><button class="btn btn-sm">Edit</button></td></tr>`).join('');
+
+// Restaurant tables
+const tablesHtml=[];
+for(let i=1;i<=12;i++){
+  const s=['ok','warn','err',''][Math.floor(Math.random()*4)];
+  const c=s==='ok'?'var(--ok)':s==='warn'?'var(--warn)':s==='err'?'var(--err)':'var(--muted)';
+  tablesHtml.push(`<div class="card" style="text-align:center;border-color:${c}"><strong>Mesa ${i}</strong><div style="color:${c};font-size:12px;margin-top:4px">${s||'libre'}</div></div>`);
+}
+document.getElementById('tables-grid').innerHTML=tablesHtml.join('');
+
+// QR fake
+const qr=document.getElementById('qr');
+let qh='';for(let i=0;i<400;i++)qh+=`<div class="${Math.random()>.5?'b':''}"></div>`;
+qr.innerHTML=qh;
+
+// Barcode
+function scan(){
+  const v=document.getElementById('bc-input').value||'7501031311309';
+  document.getElementById('bc-text').textContent=v;
+  document.getElementById('bc-result').innerHTML='<div class="alert ok">✓ Producto: Coca 600ml — $18.00 — Stock: 48</div>';
+  logEvent('info','Scan: '+v);
+}
+
+// Chat
+function sendChat(){
+  const i=document.getElementById('chat-input');
+  if(!i.value)return;
+  const c=document.getElementById('chat');
+  c.innerHTML+=`<div class="msg user">${i.value}</div>`;
+  const q=i.value;i.value='';
+  setTimeout(()=>{
+    const replies=['Analizando tus ventas...','Tu producto top es Coca 600ml con 142 unidades.','Sugiero promoción 2x1 los martes.','Stock crítico detectado en 3 SKUs.'];
+    c.innerHTML+=`<div class="msg bot">${replies[Math.floor(Math.random()*replies.length)]}</div>`;
+    c.scrollTop=c.scrollHeight;
+  },600);
+  c.scrollTop=c.scrollHeight;
+}
+
+// Console
+function logEvent(t,m){
+  const ts=new Date().toLocaleTimeString();
+  STATE.console.push({t,m,ts});
+  const c=document.getElementById('main-console');
+  if(c)c.innerHTML+=`<div class="console-line ${t}">[${ts}] ${t.toUpperCase()}: ${m}</div>`,c.scrollTop=c.scrollHeight;
+}
+
+// API Tester
+function apiTest(){
+  const c=document.getElementById('api-console');
+  c.innerHTML+='<div class="console-line info">▸ Sending request...</div>';
+  setTimeout(()=>{
+    c.innerHTML+='<div class="console-line">◂ HTTP/1.1 200 OK</div><div class="console-line">{"ok":true,"data":[{"sku":"00012","name":"Coca 600"}]}</div>';
+    c.scrollTop=c.scrollHeight;
+  },500);
+}
+
+// Theme
+function setAccent(c,el){
+  document.documentElement.style.setProperty('--accent',c);
+  STATE.accent=c;
+  document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('sel'));
+  el.classList.add('sel');
+  logEvent('info','Theme: '+c);
+}
+function toggleTheme(){
+  const r=document.documentElement;
+  const dark=getComputedStyle(r).getPropertyValue('--bg').trim()==='#0a0e1a';
+  if(dark){r.style.setProperty('--bg','#f4f6fb');r.style.setProperty('--panel','#fff');r.style.setProperty('--panel2','#eef2f9');r.style.setProperty('--text','#0a0e1a');r.style.setProperty('--border','#d1d8e6')}
+  else{r.style.setProperty('--bg','#0a0e1a');r.style.setProperty('--panel','#111726');r.style.setProperty('--panel2','#1a2236');r.style.setProperty('--text','#e8ecf4');r.style.setProperty('--border','#26304a')}
+}
+
+// Toast
+function showToast(){
+  const t=document.createElement('div');
+  t.className='alert ok';
+  t.style.cssText='position:fixed;top:80px;right:20px;z-index:200;animation:fadeIn .3s';
+  t.textContent='✓ Toast notification';
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),3000);
+}
+
+// Reset / Export / State
+function resetSandbox(){STATE.cart=[];renderCart();document.getElementById('main-console').innerHTML='';logEvent('warn','Sandbox reset')}
+function exportState(){const blob=new Blob([JSON.stringify(STATE,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='volvix-sandbox-state.json';a.click()}
+function updateOverview(){const e=document.getElementById('overview-state');if(e)e.textContent=JSON.stringify({tab:STATE.currentTab,cart:STATE.cart.length,accent:STATE.accent},null,2)}
+function updateStateView(){document.getElementById('state-json').textContent=JSON.stringify(STATE,null,2)}
+
+// Init
+renderProducts();
+renderCart();
+updateOverview();
+updateStateView();
+logEvent('info','Volvix Sandbox v3.40 ready');
+logEvent('info','42 components loaded');
+</script>
+</body>
+</html>
