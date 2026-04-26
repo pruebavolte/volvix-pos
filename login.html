@@ -5,6 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Iniciar sesión · Volvix</title>
   <meta name="theme-color" content="#0A0A0A">
+  <meta name="description" content="Sistema POS SaaS multi-vertical Volvix. Login seguro para comerciantes.">
+  <link rel="canonical" href="https://volvix-pos.vercel.app/login.html">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Iniciar sesión · Volvix">
+  <meta property="og:description" content="Sistema POS SaaS multi-vertical. Accede a tu cuenta Volvix.">
+  <meta property="og:image" content="https://volvix-pos.vercel.app/og-default.png">
+  <meta property="og:url" content="https://volvix-pos.vercel.app/login.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Iniciar sesión · Volvix">
+  <meta name="twitter:description" content="Sistema POS SaaS multi-vertical. Accede a tu cuenta Volvix.">
+  <meta name="twitter:image" content="https://volvix-pos.vercel.app/og-default.png">
 
   <!-- Fuentes -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -258,6 +269,20 @@ html, body {
   color: #FAFAF9;
 }
 
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .login-card { padding: 32px 24px; max-width: 92%; }
+  .login-title { font-size: 20px; }
+}
+@media (max-width: 480px) {
+  html, body { overflow: auto; }
+  .login-bg { padding: 16px 12px; min-height: 100dvh; }
+  .login-card { padding: 24px 18px; border-radius: 18px; }
+  .form-input { height: 48px; font-size: 16px; /* evita zoom iOS */ }
+  .btn-primary { height: 48px; font-size: 16px; }
+  .login-title { font-size: 18px; }
+  .login-sub { font-size: 12.5px; }
+}
 </style>
 </head>
 <body>
@@ -278,13 +303,13 @@ html, body {
       <!-- Formulario -->
       <form onsubmit="handleLogin(event)">
         <div class="form-group">
-          <label class="form-label">Correo</label>
-          <input type="email" id="emailInput" class="form-input" placeholder="admin@volvix.test" autocomplete="email">
+          <label class="form-label" for="emailInput">Correo</label>
+          <input type="email" id="emailInput" class="form-input" placeholder="admin@volvix.test" autocomplete="email" aria-label="Correo electrónico">
         </div>
 
         <div class="form-group">
-          <label class="form-label">Contraseña</label>
-          <input type="password" id="passwordInput" class="form-input" placeholder="Contraseña" autocomplete="current-password">
+          <label class="form-label" for="passwordInput">Contraseña</label>
+          <input type="password" id="passwordInput" class="form-input" placeholder="Contraseña" autocomplete="current-password" aria-label="Contraseña">
         </div>
 
         <button type="submit" class="btn-primary" id="btnLogin">Entrar</button>
@@ -292,7 +317,7 @@ html, body {
 
       <!-- Test credentials info -->
       <div class="test-creds">
-        <strong>Test:</strong> admin@volvix.test / Volvix2026!
+        <strong>Test:</strong> admin@volvix.test / &lt;&lt;test-password-via-env&gt;&gt;
       </div>
     </div>
   </div>
@@ -356,8 +381,17 @@ async function handleLogin(event) {
       throw new Error(result.error || 'Sesión no válida');
     }
 
-    // Guardar sesión
+    // Guardar sesión (legacy)
     localStorage.setItem('volvixSession', JSON.stringify(result.session));
+
+    // Guardar JWT Bearer token (R13 hardening)
+    const jwt = result.token || (result.session && result.session.token) || null;
+    if (jwt && window.Volvix && window.Volvix.auth) {
+      window.Volvix.auth.saveToken(jwt);
+    } else if (jwt) {
+      try { localStorage.setItem('volvixAuthToken', jwt); } catch (e) {}
+    }
+
     showAlert('¡Bienvenido!', 'success');
 
     // Redirigir a SalvadoreX POS
@@ -381,6 +415,7 @@ document.getElementById('passwordInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') document.getElementById('btnLogin')?.click();
 });
   </script>
+<script src="auth-helper.js"></script>
 <script src="volvix-pwa-wiring.js" defer></script>
 <script src="volvix-i18n-wiring.js" defer></script>
 <script src="volvix-theme-wiring.js" defer></script>

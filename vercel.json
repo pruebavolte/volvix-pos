@@ -1,9 +1,15 @@
 {
   "version": 2,
   "builds": [
-    { "src": "api/index.js", "use": "@vercel/node", "config": { "includeFiles": ["**/*.html", "**/*.js", "**/*.json", "db/**"] } }
+    { "src": "api/index.js", "use": "@vercel/node", "config": { "includeFiles": ["**/*.html", "**/*.js", "**/*.json", "**/*.yaml", "**/*.yml", "**/*.xml", "**/*.txt", "openapi.yaml", "sitemap.xml", "robots.txt", "db/**"] } }
   ],
   "routes": [
+    { "src": "/volvix-qa-scenarios\\.html", "status": 404, "dest": "/404" },
+    { "src": "/BITACORA_LIVE\\.html", "status": 404, "dest": "/404" },
+    { "src": "/BITACORA_PRUEBAS\\.md", "status": 404, "dest": "/404" },
+    { "src": "/status\\.json", "status": 404, "dest": "/404" },
+    { "src": "/TASKS_FOR_NEXT_AI\\.md", "status": 404, "dest": "/404" },
+    { "src": "/VOLVIX_(.*)\\.md", "status": 404, "dest": "/404" },
     { "src": "/api/(.*)", "dest": "/api/index.js" },
     { "src": "/(.*\\.html)", "dest": "/api/index.js" },
     { "src": "/(.*\\.js)", "dest": "/api/index.js" },
@@ -14,5 +20,18 @@
   ],
   "env": {
     "NODE_ENV": "production"
-  }
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "geolocation=(), camera=(), microphone=(), payment=()" },
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; connect-src 'self' https://*.supabase.co; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; frame-ancestors 'none'; base-uri 'self'" }
+      ]
+    }
+  ]
 }
