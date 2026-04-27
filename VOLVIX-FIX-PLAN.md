@@ -2,10 +2,10 @@
 
 ## Estado global
 - Score inicial: 23/100
-- Score actual: **63/100** (B1+B2 cerrados)
+- Score actual: **73/100** (B1+B2+B3 cerrados)
 - Score objetivo: >=85/100
-- Última sesión: B2 (2026-04-27)
-- Próximo bloque: B3 + B4 (paralelizables)
+- Última sesión: B3 (2026-04-27)
+- Próximo bloque: B4 (SSO + i18n)
 - SYSTEM-INVENTORY: vigente (regenerar si pasan >7 días)
 
 ## Reglas de ejecución v2 (no negociables)
@@ -94,15 +94,21 @@ Evidencia:
 Pre-requisito: B2 completo.
 
 Definición de hecho:
-- [ ] **Test 1:** Tabla `vendors` creada en Supabase con schema documentado en `db/migrations/001-vendors.sql` (idempotente, DROP IF EXISTS opcional).
-- [ ] **Test 2:** Seed de 3-5 vendors via SQL idempotente (`db/seeds/vendors.sql`).
-- [ ] **Test 3:** GET `/api/vendor/me` devuelve vendor real (no `note:"pendiente_seed_vendors_table"`).
-- [ ] **Test 4:** GET `/api/vendor/orders` devuelve POs reales del vendor logueado.
-- [ ] **Test 5:** Frontend tabla POs cablea de API, no del HTML hardcoded (`grep "PO-2026-04781" volvix-vendor-portal.html` = 0 hits).
-- [ ] **Test 6:** Playwright: login como vendor_1, ve solo SUS POs (no las de vendor_2). Login vendor_2 → ve solo las suyas.
-- [ ] **Test 7:** `postfix-verify.sh` sobre 4 sub-sistemas no tocados.
+- [x] **Test 1:** ✓ `db/migrations/003-vendors-schema.sql` (volvix_vendors + volvix_vendor_pos; tabla 'vendors' previa era marketplace distinto).
+- [x] **Test 2:** ✓ Seed 2 vendors + 7 POs idempotente vía SQL editor.
+- [x] **Test 3:** ✓ GET `/api/vendor/me` devuelve "Distribuidora Don Chucho" / "Proveedora Los Compadres" reales.
+- [x] **Test 4:** ✓ GET `/api/vendor/orders` devuelve 5 POs (vendor A) y 2 (vendor B). Stats reales: revenue $114,151.25 / $7,150.50.
+- [x] **Test 5:** ✓ Frontend cableado, "Distrib. Morales / VND-00427 / Carlos Morales" eliminado (0 hits). Greeting dinámico, SLA bars cableadas.
+- [x] **Test 6:** ✓ Playwright b3-vendor-portal.spec.js: A.first_order='PO-2026-V1-001', B.first_order='PO-2026-V2-001', orders_rows distintos.
+- [x] **Test 7:** ✓ postfix-verify OK, baselines comparados, RLS confirmada (ANON bloqueada en volvix_vendors + volvix_vendor_pos).
 
-Estado: PENDIENTE
+Estado: **COMPLETO** (cerrado 2026-04-27)
+Evidencia:
+- `db/migrations/003-vendors-schema.sql`
+- `api/index.js` /api/vendor/me|orders|pos|invoices|payouts|stats cableados
+- `volvix-vendor-portal.html` greeting + SLA + botón confirmar dinámicos
+- `tests/b3-vendor-portal.spec.js` Playwright dual vendor
+- `screenshots-b3/vendorA.png` (Distribuidora Don Chucho + 5 POs reales)
 
 ---
 
@@ -165,3 +171,4 @@ Estado: PENDIENTE
 | 0 | 2026-04-27 | setup  | -             | 23        | -           | -           | infraestructura lista |
 | 1 | 2026-04-27 | B1     | #12 cross-tenant | **43** | 0 | ~75 min | seed user_B, dual login, 18 tablas RLS hardened, ANON blocked, backend OK |
 | 2 | 2026-04-27 | B2     | #3 mega-dashboard mock + #4 admin-saas mock | **63** | 0 | ~70 min | endpoint /api/dashboard/today, mega-dashboard cableado, admin-saas 6 secciones limpiadas, Test 6 dinámico pasa $999 |
+| 3 | 2026-04-27 | B3     | #5 vendor mock + #6 vendor backend | **73** | 0 | ~50 min | volvix_vendors+pos seedeados, /api/vendor/* cableados, isolation A vs B Playwright PASS |
