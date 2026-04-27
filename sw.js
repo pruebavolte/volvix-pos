@@ -12,7 +12,7 @@
 // reemplazar VERSION manual por hash generado del contenido de STATIC_FILES.
 // Ej: const VERSION = '__BUILD_HASH__'; sustituido en build.
 // Mientras tanto: bumpear VERSION manualmente en cada deploy con cambios.
-const VERSION   = 'v1.2.0';
+const VERSION   = 'v1.3.0-b32';
 const CACHE     = `volvix-${VERSION}`;
 const API_CACHE = `volvix-api-${VERSION}`;
 const RT_CACHE  = `volvix-rt-${VERSION}`;
@@ -49,6 +49,7 @@ const STATIC_FILES = [
   '/volvix-offline-queue.js',
   '/volvix-pwa-wiring.js',
   '/volvix-pwa-install-prompt.js',
+  '/volvix-error-reporter.js',
   '/volvix-i18n-wiring.js',
   '/volvix-theme-wiring.js',
   '/volvix-notifications-wiring.js',

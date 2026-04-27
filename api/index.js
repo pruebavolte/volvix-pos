@@ -1174,6 +1174,36 @@ const handlers = {
     }
   },
 
+  // B32.4: /api/log/client — recibir errores JS del frontend (rate-limited, sin auth)
+  'POST /api/log/client': async (req, res) => {
+    try {
+      // rate-limit: 30/min/IP para evitar abuso
+      const ip = clientIp(req);
+      if (!rateLimit('client_log:' + ip, 30, 60_000)) {
+        return send429(res, rateLimitRetryMs('client_log:' + ip, 60_000), 'rate_limited');
+      }
+      const body = await readBody(req, { maxBytes: 8 * 1024, strictJson: true });
+      if (checkBodyError(req, res)) return;
+      const safe = {
+        level: ['error', 'warn', 'info'].includes(body.level) ? body.level : 'error',
+        message: String(body.message || '').slice(0, 500),
+        stack: String(body.stack || '').slice(0, 2000),
+        url: String(body.url || '').slice(0, 300),
+        user_agent: String((req.headers['user-agent'] || '')).slice(0, 200),
+        ip,
+        ts: new Date().toISOString(),
+        meta: (body.meta && typeof body.meta === 'object') ? body.meta : {}
+      };
+      // Persistir best-effort en client_errors (si tabla existe)
+      try {
+        await supabaseRequest('POST', '/client_errors', safe).catch(() => {});
+      } catch (_) {}
+      // Tambien log estructurado para captura en Vercel logs
+      try { (typeof logErr === 'function' ? logErr : console.error)('[client]', { ...safe, stack: undefined }); } catch (_) {}
+      sendJSON(res, { ok: true });
+    } catch (err) { sendError(res, err); }
+  },
+
   // B31.4: /api/openapi.json — spec abreviada (publica, cacheada 1h)
   'GET /api/openapi.json': async (req, res) => {
     const allRoutes = Object.keys(handlers || {})
