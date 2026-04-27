@@ -836,6 +836,26 @@ function resolveTenant(req, queryTenant) {
   return req.user?.tenant_id;
 }
 
+// B13: logAudit — fire-and-forget INSERT en volvix_audit_log para feed admin-saas
+function logAudit(req, action, resource, details) {
+  try {
+    const u = req.user || {};
+    const row = {
+      user_id: u.id || u.email || 'anon',
+      tenant_id: u.tenant_id || null,
+      action: String(action || 'unknown').slice(0, 64),
+      resource: String(resource || '').slice(0, 64),
+      resource_id: details && details.id ? String(details.id).slice(0, 64) : null,
+      before: details && details.before ? details.before : null,
+      after: details && details.after ? details.after : null,
+    };
+    // Fire-and-forget — no esperar respuesta
+    if (typeof supabaseRequest === 'function') {
+      supabaseRequest('POST', '/volvix_audit_log', row).catch(() => {});
+    }
+  } catch (_) {}
+}
+
 // B7: resolvePosUserId — preferir el ID del JWT (real) sobre el mapeo legacy hardcoded.
 // Si req.user.id existe y es UUID, lo usamos directamente (cada user ve sus propios datos).
 // Sino, fallback al mapeo TNT001/TNT002 → user-A/user-B (compatibilidad con sesiones antiguas).
@@ -1040,6 +1060,12 @@ const handlers = {
 
       // R22 FIX 5: httpOnly cookie
       setAuthCookie(res, token, JWT_EXPIRES_SECONDS);
+
+      // B13: registrar evento auth.login_success en audit-log
+      try {
+        const fakeReq = { user: { id: user.id, email: user.email, role: volvixRole, tenant_id: tenantId } };
+        logAudit(fakeReq, 'auth.login_success', 'pos_users', { id: user.id });
+      } catch(_){}
 
       sendJSON(res, {
         ok: true,
@@ -1440,6 +1466,8 @@ const handlers = {
       try { dispatchWebhook(resolveTenant(req), 'sale.created', saleRow); } catch (_) {}
       // R18 MARKETPLACE: revenue split por item.vendor_id
       try { if (global.__mpRegisterSaleSplits) await global.__mpRegisterSaleSplits(saleRow, itemsIn); } catch (_) {}
+      // B13: audit-log
+      try { logAudit(req, 'sale.created', 'pos_sales', { id: saleRow.id, after: { total: saleRow.total, items: (itemsIn||[]).length } }); } catch(_){}
       sendJSON(res, saleRow);
     } catch (err) { sendError(res, err); }
   })),
