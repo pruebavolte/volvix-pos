@@ -477,48 +477,62 @@ async function safeFetch(url, mock){
   }catch(e){ return mock; }
 }
 
+// MOCK reemplazado por valores vacíos. Si la API falla, se muestra "Sin datos".
 const MOCK = {
-  dashboard:{ sales_today:142850, tickets:387, conversion:24.6 },
-  products: Array.from({length:1247},(_,i)=>({id:i,name:'P'+i})),
-  sales: Array.from({length:387},(_,i)=>({id:i,total:Math.random()*500})),
-  customers: Array.from({length:2483},(_,i)=>({id:i})),
-  tenants:[
-    {name:'Volvix Centro',sales:48200,tickets:142},
-    {name:'Volvix Norte',sales:38900,tickets:118},
-    {name:'Volvix Sur',sales:29400,tickets:87},
-    {name:'Volvix Plaza',sales:18200,tickets:54},
-    {name:'Volvix Express',sales:8150,tickets:32}
-  ],
-  health:{ status:'ok', uptime:99.7, latency:142 }
+  dashboard:{ sales_today:0, tickets:0, conversion:0 },
+  products: [],
+  sales: [],
+  customers: [],
+  tenants:[],
+  health:{ status:'unknown', uptime:0, latency:0 }
 };
 
 async function loadAll(){
+  const tid = (window.Volvix && Volvix.session && Volvix.session.tenant_id) || 'TNT001';
+  const q = '?tenant_id=' + encodeURIComponent(tid);
   const [d,p,s,c,t,h] = await Promise.all([
-    safeFetch('/api/owner/dashboard',MOCK.dashboard),
-    safeFetch('/api/products',MOCK.products),
-    safeFetch('/api/sales',MOCK.sales),
-    safeFetch('/api/customers',MOCK.customers),
-    safeFetch('/api/tenants',MOCK.tenants),
+    safeFetch('/api/owner/dashboard'+q,MOCK.dashboard),
+    safeFetch('/api/products'+q,MOCK.products),
+    safeFetch('/api/sales'+q,MOCK.sales),
+    safeFetch('/api/customers'+q,MOCK.customers),
+    safeFetch('/api/tenants'+q,MOCK.tenants),
     safeFetch('/api/health',MOCK.health)
   ]);
-  animateNum('m-sales','$'+(d.sales_today||142850).toLocaleString());
-  animateNum('m-tickets',(d.tickets||387).toLocaleString());
-  animateNum('m-prods',(p.length||1247).toLocaleString());
-  animateNum('m-cust',(c.length||2483).toLocaleString());
-  animateNum('m-ten',(t.length||5).toLocaleString());
-  animateNum('m-conv',(d.conversion||24.6).toFixed(1)+'%');
-  renderTenants(t);
+  const pArr = Array.isArray(p) ? p : (p && Array.isArray(p.items) ? p.items : []);
+  const cArr = Array.isArray(c) ? c : (c && Array.isArray(c.items) ? c.items : []);
+  const sArr = Array.isArray(s) ? s : (s && Array.isArray(s.items) ? s.items : []);
+  const tArr = Array.isArray(t) ? t : (t && Array.isArray(t.items) ? t.items : []);
+  const _salesT = (d&&d.sales_today)||0;
+  animateNum('m-sales', _salesT? '$'+_salesT.toLocaleString() : 'Sin datos');
+  const _tk = (d&&d.tickets)||sArr.length||0;
+  animateNum('m-tickets', _tk? _tk.toLocaleString() : 'Sin datos');
+  animateNum('m-prods',pArr.length.toLocaleString());
+  animateNum('m-cust',cArr.length.toLocaleString());
+  animateNum('m-ten',tArr.length.toLocaleString());
+  animateNum('m-conv',((d&&d.conversion)||0).toFixed(1)+'%');
+  renderTenants(tArr.length?tArr:MOCK.tenants);
 }
 function animateNum(id,val){ document.getElementById(id).textContent = val; }
 
-// ============ BAR CHART ============
-function renderBars(){
-  const data = [
-    {d:'Lun',v:82},{d:'Mar',v:95},{d:'Mie',v:71},{d:'Jue',v:108},
-    {d:'Vie',v:142},{d:'Sab',v:168},{d:'Dom',v:124}
-  ];
-  const max = Math.max(...data.map(x=>x.v));
+// ============ BAR CHART (datos reales /api/reports/sales/daily) ============
+async function renderBars(){
+  const tid = (window.Volvix && Volvix.session && Volvix.session.tenant_id) || 'TNT001';
+  let data = [];
+  try{
+    const r = await fetch('/api/reports/sales/daily?tenant_id='+encodeURIComponent(tid)+'&days=7',{headers:{'Accept':'application/json'},credentials:'include'});
+    if(r.ok){
+      const j = await r.json();
+      const arr = Array.isArray(j)?j:(j.items||j.data||[]);
+      const labels=['Dom','Lun','Mar','Mie','Jue','Vie','Sab'];
+      data = arr.slice(-7).map(x=>{
+        const d = new Date(x.date||x.day||Date.now());
+        return { d: labels[d.getDay()]||'-', v: Math.round((Number(x.total||x.sales||0))/1000) };
+      });
+    }
+  }catch(e){}
   const c = document.getElementById('bar-chart');
+  if(!data.length){ c.innerHTML = '<div style="color:#888;padding:20px;font-size:13px">Sin datos de ventas semanales</div>'; return; }
+  const max = Math.max(...data.map(x=>x.v),1);
   c.innerHTML = data.map(x=>`
     <div class="bar" style="height:${(x.v/max*100)}%">
       <span class="bar-val">$${x.v}k</span>
@@ -527,16 +541,25 @@ function renderBars(){
 }
 renderBars();
 
-// ============ LINE CHART ============
-function renderLine(){
-  const pts=[];
-  for(let i=0;i<24;i++){
-    const v = 30 + Math.sin(i/3)*25 + Math.random()*20 + i*1.5;
-    pts.push([i*(600/23), 200-v*1.6]);
-  }
+// ============ LINE CHART (datos reales /api/reports/sales/hourly) ============
+async function renderLine(){
+  const tid = (window.Volvix && Volvix.session && Volvix.session.tenant_id) || 'TNT001';
+  let series = [];
+  try{
+    const r = await fetch('/api/reports/sales/hourly?tenant_id='+encodeURIComponent(tid),{headers:{'Accept':'application/json'},credentials:'include'});
+    if(r.ok){
+      const j = await r.json();
+      const arr = Array.isArray(j)?j:(j.items||j.data||[]);
+      series = arr.slice(0,24).map(x=>Number(x.total||x.sales||0));
+    }
+  }catch(e){}
+  const el = document.getElementById('line-chart');
+  if(!series.length){ if(el) el.innerHTML=''; return; }
+  const max = Math.max(...series,1);
+  const pts = series.map((v,i)=>[i*(600/Math.max(series.length-1,1)), 200-(v/max)*180]);
   const path = 'M '+pts.map(p=>p.join(',')).join(' L ');
   const area = path+` L 600,200 L 0,200 Z`;
-  document.getElementById('line-chart').innerHTML = `
+  el.innerHTML = `
     <defs><linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
       <stop offset="0%" stop-color="#5b9dff" stop-opacity=".4"/>
       <stop offset="100%" stop-color="#5b9dff" stop-opacity="0"/>
@@ -841,5 +864,10 @@ setInterval(()=>{
   });
 },4000);
 </script>
+  <script defer src="auth-helper.js"></script>
+<link rel="stylesheet" href="volvix-modals.css">
+<script defer src="volvix-modals.js"></script>
+  <script defer src="volvix-i18n-wiring.js"></script>
+  <script defer src="volvix-real-data-loader.js"></script>
 </body>
 </html>

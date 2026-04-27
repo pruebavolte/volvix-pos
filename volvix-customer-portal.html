@@ -3,7 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Volvix - Portal del Cliente</title>
+<title>Volvix — Portal del Cliente</title>
+<meta name="description" content="Portal del Cliente Volvix: gestiona tus pedidos, fidelidad, facturas y datos en una sola plataforma POS SaaS segura.">
+<meta name="theme-color" content="#1e3a8a">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://volvix-pos.vercel.app/volvix-customer-portal.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Volvix — Portal del Cliente">
+<meta property="og:description" content="Gestiona tus pedidos, fidelidad y datos en el Portal del Cliente Volvix.">
+<meta property="og:image" content="https://volvix-pos.vercel.app/og-default.png">
+<meta property="og:url" content="https://volvix-pos.vercel.app/volvix-customer-portal.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Volvix — Portal del Cliente">
+<meta name="twitter:description" content="Gestiona tus pedidos, fidelidad y datos en el Portal del Cliente Volvix.">
+<meta name="twitter:image" content="https://volvix-pos.vercel.app/og-default.png">
 <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   :root{
@@ -177,7 +190,7 @@
       <div class="divider">o</div>
       <button type="button" class="btn btn-ghost btn-block" onclick="demoLogin()">Entrar como demo</button>
       <div class="login-foot">
-        ¿No tienes cuenta? <a href="#" onclick="alert('Solicita registro en sucursal');return false;">Regístrate</a>
+        ¿No tienes cuenta? <a href="#" onclick="VolvixUI.toast({type:'info', message:'Solicita registro en sucursal'});return false;">Regístrate</a>
       </div>
     </form>
   </div>
@@ -325,7 +338,7 @@
             <div class="actions">
               <button class="btn btn-primary" onclick="saveProfile()">Guardar cambios</button>
               <button class="btn btn-ghost" onclick="loadProfile()">Cancelar</button>
-              <button class="btn btn-danger" onclick="if(confirm('¿Cerrar sesión en todos los dispositivos?'))toast('Sesiones cerradas','success')">Cerrar todas las sesiones</button>
+              <button class="btn btn-danger" onclick="closeAllSessions()">Cerrar todas las sesiones</button>
             </div>
           </div>
         </div>
@@ -452,61 +465,50 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// =========== DATA MOCK ===========
-const DB = {
-  user:{name:"Juan Domínguez",email:"juan@demo.com",phone:"55 1234 5678",birth:"1990-05-12",rfc:"DOJ900512ABC",razon:"Juan Domínguez",reg:"612 - Personas Físicas",cp:"06700",addr:"Av. Reforma 123, CDMX"},
-  purchases:[
-    {folio:"V-10458",date:"2026-04-22",items:5,total:1845.00,pay:"Tarjeta",status:"Entregada"},
-    {folio:"V-10422",date:"2026-04-15",items:3,total:648.50,pay:"Crédito",status:"Entregada"},
-    {folio:"V-10389",date:"2026-04-08",items:8,total:2390.00,pay:"Efectivo",status:"Entregada"},
-    {folio:"V-10355",date:"2026-03-29",items:2,total:299.00,pay:"Tarjeta",status:"Entregada"},
-    {folio:"V-10301",date:"2026-03-18",items:6,total:1567.80,pay:"Crédito",status:"Entregada"},
-    {folio:"V-10288",date:"2026-03-10",items:4,total:920.00,pay:"SPEI",status:"Entregada"},
-    {folio:"V-10210",date:"2026-02-28",items:1,total:189.00,pay:"Tarjeta",status:"Entregada"},
-  ],
-  invoices:[
-    {folio:"F-A2045",date:"2026-04-22",rfc:"DOJ900512ABC",total:1845.00,status:"Vigente"},
-    {folio:"F-A2031",date:"2026-04-15",rfc:"DOJ900512ABC",total:648.50,status:"Vigente"},
-    {folio:"F-A2018",date:"2026-04-08",rfc:"DOJ900512ABC",total:2390.00,status:"Vigente"},
-    {folio:"F-A1998",date:"2026-03-29",rfc:"DOJ900512ABC",total:299.00,status:"Vigente"},
-    {folio:"F-A1972",date:"2026-03-18",rfc:"DOJ900512ABC",total:1567.80,status:"Vigente"},
-  ],
-  loyalty:{points:2840,tier:"Silver",next:"Gold",nextAt:5000,
-    history:[
-      {date:"2026-04-22",concept:"Compra V-10458",delta:+184,balance:2840},
-      {date:"2026-04-15",concept:"Compra V-10422",delta:+64,balance:2656},
-      {date:"2026-04-10",concept:"Canje café gratis",delta:-500,balance:2592},
-      {date:"2026-04-08",concept:"Compra V-10389",delta:+239,balance:3092},
-      {date:"2026-03-29",concept:"Compra V-10355",delta:+29,balance:2853},
-    ],
-    rewards:[
-      {id:1,icon:"☕",name:"Café gratis",desc:"Cualquier bebida mediana",cost:500},
-      {id:2,icon:"🎁",name:"Cupón $100",desc:"Descuento próxima compra",cost:1000},
-      {id:3,icon:"🚚",name:"Envío gratis",desc:"En tu siguiente pedido",cost:800},
-      {id:4,icon:"🏷️",name:"15% descuento",desc:"En toda tu compra",cost:2000},
-      {id:5,icon:"🎉",name:"Cupón $500",desc:"Descuento mayor",cost:4500},
-      {id:6,icon:"💎",name:"Membresía Gold",desc:"Acceso 6 meses VIP",cost:8000},
-    ]},
-  addresses:[
-    {id:1,alias:"Casa",name:"Juan Domínguez",addr:"Av. Reforma 123, Col. Centro",city:"CDMX",cp:"06700",phone:"55 1234 5678",default:true},
-    {id:2,alias:"Oficina",name:"Juan Domínguez",addr:"Insurgentes Sur 456, Piso 8",city:"CDMX",cp:"03100",phone:"55 1234 5678",default:false},
-  ],
-  notifs:[
-    {id:1,icon:"🛍️",title:"Tu pedido V-10458 fue entregado",time:"Hace 2 horas",read:false},
-    {id:2,icon:"⭐",title:"Ganaste 184 puntos por tu última compra",time:"Hace 2 horas",read:false},
-    {id:3,icon:"💳",title:"Tu próximo pago vence el 10/05/2026",time:"Ayer",read:false},
-    {id:4,icon:"🎁",title:"Promo exclusiva: 15% de descuento este fin de semana",time:"Hace 2 días",read:true},
-    {id:5,icon:"📄",title:"Factura F-A2045 disponible para descarga",time:"Hace 3 días",read:true},
-  ],
-  credit:{limit:15000,debt:3450.50,due:"2026-05-10",
-    history:[
-      {date:"2026-04-15",concept:"Compra V-10422",charge:648.50,credit:0,balance:3450.50},
-      {date:"2026-04-05",concept:"Abono mensualidad",charge:0,credit:1500,balance:2802},
-      {date:"2026-03-18",concept:"Compra V-10301",charge:1567.80,credit:0,balance:4302},
-      {date:"2026-03-01",concept:"Abono mensualidad",charge:0,credit:2000,balance:2734.20},
-      {date:"2026-02-20",concept:"Compra inicial",charge:4734.20,credit:0,balance:4734.20},
-    ]},
+// =========== DATA (cargado desde Supabase vía /api/customer/*) ===========
+let DB = {
+  user:{name:"",email:"",phone:"",birth:"",rfc:"",razon:"",reg:"",cp:"",addr:""},
+  purchases:[],
+  invoices:[],
+  loyalty:{points:0,tier:"Bronze",next:"Silver",nextAt:1000,history:[],rewards:[]},
+  addresses:[],
+  notifs:[],
+  credit:{limit:0,debt:0,due:"",history:[]},
 };
+
+// ========= CARGA DESDE API =========
+async function loadCustomerData(){
+  const token = localStorage.getItem('volvix_customer_token') || localStorage.getItem('customer_token');
+  const headers = { 'Accept':'application/json' };
+  if(token) headers['Authorization'] = 'Bearer ' + token;
+  async function gj(url){ try{ const r = await fetch(url,{headers, credentials:'include'}); if(!r.ok) return null; return await r.json(); }catch(e){ return null; } }
+  const [me, orders, loyalty, pmethods] = await Promise.all([
+    gj('/api/customer/me'),
+    gj('/api/customer/orders'),
+    gj('/api/customer/loyalty'),
+    gj('/api/customer/payment-methods')
+  ]);
+  if(me && me.user){ Object.assign(DB.user, me.user); }
+  else if(me && me.email){ Object.assign(DB.user, me); }
+  if(orders){
+    const arr = Array.isArray(orders)?orders:(orders.items||orders.orders||[]);
+    DB.purchases = arr.map(o=>({folio:o.folio||o.id, date:(o.date||o.created_at||'').slice(0,10), items:o.items_count||(o.items?o.items.length:0), total:Number(o.total||0), pay:o.payment_method||o.pay||'-', status:o.status||'Entregada'}));
+    DB.invoices = arr.filter(o=>o.invoice_folio||o.cfdi_uuid).map(o=>({folio:o.invoice_folio||o.cfdi_uuid, date:(o.date||o.created_at||'').slice(0,10), rfc:o.rfc||DB.user.rfc||'', total:Number(o.total||0), status:o.invoice_status||'Vigente'}));
+  }
+  if(loyalty){
+    DB.loyalty.points = Number(loyalty.points||0);
+    DB.loyalty.tier = loyalty.tier||'Bronze';
+    DB.loyalty.next = loyalty.next_tier||loyalty.next||'Silver';
+    DB.loyalty.nextAt = Number(loyalty.next_at||loyalty.nextAt||1000);
+    DB.loyalty.history = Array.isArray(loyalty.history)?loyalty.history:[];
+    DB.loyalty.rewards = Array.isArray(loyalty.rewards)?loyalty.rewards:[];
+  }
+  // payment-methods could feed credit card list; credit account is inferred from orders
+  if(typeof renderAll==='function' && document.getElementById('app') && document.getElementById('app').classList.contains('active')){
+    try{ renderAll(); }catch(e){}
+  }
+}
+window.addEventListener('DOMContentLoaded',()=>{ loadCustomerData(); });
 
 // ========= UTILS =========
 const $ = s => document.querySelector(s);
@@ -517,7 +519,7 @@ function toast(msg,type=""){const t=$("#toast");t.textContent=msg;t.className="t
 // ========= LOGIN =========
 $("#loginForm").addEventListener("submit",e=>{e.preventDefault();const em=$("#loginEmail").value,pw=$("#loginPass").value;if(em&&pw.length>=4){enterApp(em);}else toast("Credenciales inválidas","error");});
 function demoLogin(){enterApp("juan@demo.com");}
-function enterApp(email){DB.user.email=email;$("#loginScreen").style.display="none";$("#app").classList.add("active");renderAll();toast("Bienvenido a Volvix","success");}
+function enterApp(email){DB.user.email=email;$("#loginScreen").style.display="none";$("#app").classList.add("active");loadCustomerData().then(()=>renderAll()).catch(()=>renderAll());toast("Bienvenido a Volvix","success");}
 function logout(){$("#app").classList.remove("active");$("#loginScreen").style.display="flex";$("#loginPass").value="";}
 
 // ========= NAV =========
@@ -539,8 +541,44 @@ function renderAddresses(){
   });
 }
 function setDefaultAddr(id){DB.addresses.forEach(a=>a.default=(a.id===id));renderAddresses();toast("Predeterminada actualizada","success");}
-function delAddr(id){if(!confirm("¿Eliminar dirección?"))return;DB.addresses=DB.addresses.filter(a=>a.id!==id);renderAddresses();toast("Dirección eliminada","success");}
-function addAddr(){const al=prompt("Alias (Casa, Oficina, etc):");if(!al)return;const ad=prompt("Dirección completa:");if(!ad)return;DB.addresses.push({id:Date.now(),alias:al,name:DB.user.name,addr:ad,city:"CDMX",cp:"00000",phone:DB.user.phone,default:false});renderAddresses();toast("Dirección agregada","success");}
+async function delAddr(id){
+  let ok=false;
+  if(window.VolvixUI && typeof window.VolvixUI.confirm==='function'){
+    ok=await window.VolvixUI.confirm({title:'Eliminar dirección',message:'¿Eliminar dirección?',danger:true,confirmText:'Eliminar'});
+  } else { ok=confirm("¿Eliminar dirección?"); }
+  if(!ok)return;
+  DB.addresses=DB.addresses.filter(a=>a.id!==id);renderAddresses();toast("Dirección eliminada","success");
+}
+async function closeAllSessions(){
+  let ok=false;
+  if(window.VolvixUI && typeof window.VolvixUI.confirm==='function'){
+    ok=await window.VolvixUI.confirm({title:'Cerrar sesiones',message:'¿Cerrar sesión en todos los dispositivos?',danger:true,confirmText:'Cerrar todas'});
+  } else { ok=confirm('¿Cerrar sesión en todos los dispositivos?'); }
+  if(ok) toast('Sesiones cerradas','success');
+}
+async function addAddr(){
+  let al="", ad="";
+  if (window.VolvixUI && typeof window.VolvixUI.form === 'function') {
+    const r = await window.VolvixUI.form({
+      title: 'Agregar dirección',
+      size: 'sm',
+      fields: [
+        { name: 'alias', type: 'text',     label: 'Alias',              required: true, placeholder: 'Casa, Oficina, etc.' },
+        { name: 'addr',  type: 'textarea', label: 'Dirección completa', required: true, rows: 2, placeholder: 'Calle, número, colonia, ciudad, CP' }
+      ],
+      submitText: 'Agregar'
+    });
+    if (!r) return;
+    al = String(r.alias).trim(); ad = String(r.addr).trim();
+  } else {
+    al = prompt("Alias (Casa, Oficina, etc):"); if(!al) return;
+    ad = prompt("Dirección completa:"); if(!ad) return;
+  }
+  if (!al || !ad) return;
+  DB.addresses.push({id:Date.now(),alias:al,name:DB.user.name,addr:ad,city:"CDMX",cp:"00000",phone:DB.user.phone,default:false});
+  renderAddresses();
+  toast("Dirección agregada","success");
+}
 function renderNotifs(){
   const c=$("#notifList");c.innerHTML="";
   if(!DB.notifs.length){c.innerHTML='<div class="empty">Sin notificaciones</div>';return;}
@@ -601,5 +639,9 @@ function confirmRedeem(){if(!redeemId)return;const r=DB.loyalty.rewards.find(x=>
 // inicialización
 $("#loginEmail").value="juan@demo.com";$("#loginPass").value="demo";
 </script>
+  <script defer src="auth-helper.js"></script>
+<link rel="stylesheet" href="volvix-modals.css">
+<script defer src="volvix-modals.js"></script>
+  <script defer src="volvix-i18n-wiring.js"></script>
 </body>
 </html>

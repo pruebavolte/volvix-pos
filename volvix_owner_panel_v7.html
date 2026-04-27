@@ -586,6 +586,25 @@
     0%,100% { box-shadow: 0 0 0 0 rgba(22,163,74,0.5); }
     70% { box-shadow: 0 0 0 6px rgba(22,163,74,0); }
   }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .app { flex-direction: column; height: auto; min-height: 100vh; overflow: visible; }
+    .sidebar { width: 100%; flex-direction: row; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--border); }
+    .main { overflow: visible; }
+    .topbar { padding: 0 16px; gap: 10px; height: auto; min-height: 56px; flex-wrap: wrap; }
+    .search { max-width: 100%; margin-left: 0; }
+    .nav-item { min-height: 44px; white-space: nowrap; }
+    .modal { width: 94%; max-width: 94%; }
+    .arch-row { flex-wrap: wrap; }
+    .tabs { overflow-x: auto; flex-wrap: nowrap; }
+  }
+  @media (max-width: 480px) {
+    .topbar { padding: 0 12px; }
+    button, .nav-item { min-height: 44px; }
+    .search input { padding: 10px 12px 10px 32px; font-size: 14px; }
+    .modal-head, .modal-foot { padding: 12px 14px; }
+  }
 </style>
 <script src="volvix-api.js"></script>
 <script src="volvix-sync.js"></script>
@@ -705,7 +724,7 @@
       </div>
       <div class="search">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        <input type="text" placeholder="Buscar marca, tenant, licencia…">
+        <input type="text" placeholder="Buscar marca, tenant, licencia…" aria-label="Buscar marca, tenant o licencia">
       </div>
       <button class="btn">Exportar</button>
       <button class="btn primary">+ Crear</button>
@@ -831,23 +850,23 @@
       <div class="kpi mb-6">
         <div class="kpi-cell">
           <div class="kpi-label">MRR total</div>
-          <div class="kpi-value">$184,240</div>
-          <div class="kpi-sub"><span class="trend-up">▲ 18.2%</span> vs mes anterior</div>
+          <div class="kpi-value" data-kpi="mrr">--</div>
+          <div class="kpi-sub"><span class="trend-up" data-kpi="mrr_trend">--</span> vs mes anterior</div>
         </div>
         <div class="kpi-cell">
           <div class="kpi-label">Marcas blancas</div>
-          <div class="kpi-value">14</div>
-          <div class="kpi-sub">6 oficiales · 8 de clientes</div>
+          <div class="kpi-value" data-kpi="brands_total">--</div>
+          <div class="kpi-sub" data-kpi="brands_breakdown">Cargando...</div>
         </div>
         <div class="kpi-cell">
           <div class="kpi-label">Tenants activos</div>
-          <div class="kpi-value">247</div>
-          <div class="kpi-sub">en 14 marcas · <span class="trend-up">▲ 23</span> este mes</div>
+          <div class="kpi-value" data-kpi="active_tenants">--</div>
+          <div class="kpi-sub" data-kpi="tenants_growth">Cargando...</div>
         </div>
         <div class="kpi-cell">
           <div class="kpi-label">Dispositivos online</div>
-          <div class="kpi-value">891 <span style="font-size: 13px; color: var(--text-3); font-weight: 400;">/ 1,024</span></div>
-          <div class="kpi-sub">87% sincronizados</div>
+          <div class="kpi-value" data-kpi="devices_online">--</div>
+          <div class="kpi-sub" data-kpi="devices_sync_pct">Cargando...</div>
         </div>
       </div>
 
@@ -1043,7 +1062,7 @@
 
       <!-- Barra de control -->
       <div class="giros-toolbar">
-        <input type="text" class="giros-search" id="giros-search" placeholder="🔎 Buscar giro..." oninput="renderGirosGrid()">
+        <input type="text" class="giros-search" id="giros-search" placeholder="🔎 Buscar giro..." oninput="renderGirosGrid()" aria-label="Buscar giro">
         <div class="giros-cat-filter" id="giros-cat-filter"></div>
       </div>
 
@@ -1151,22 +1170,22 @@
       <div class="kpi mb-6" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
         <div class="kpi-cell">
           <div class="kpi-label">Tenants usando Suite</div>
-          <div class="kpi-value">28</div>
-          <div class="kpi-sub"><span class="trend-up">▲ 6</span> este mes</div>
+          <div class="kpi-value" data-kpi="suite_tenants">--</div>
+          <div class="kpi-sub" data-kpi="suite_tenants_growth">Cargando...</div>
         </div>
         <div class="kpi-cell">
           <div class="kpi-label">Dispositivos activos</div>
-          <div class="kpi-value">152</div>
-          <div class="kpi-sub">48 Comandera · 28 KDS · 48 Manager · 28 CDS</div>
+          <div class="kpi-value" data-kpi="suite_devices_active">--</div>
+          <div class="kpi-sub" data-kpi="suite_devices_breakdown">Cargando...</div>
         </div>
         <div class="kpi-cell">
           <div class="kpi-label">Comandas / día</div>
-          <div class="kpi-value">3.4K</div>
+          <div class="kpi-value" data-kpi="suite_orders_day">--</div>
           <div class="kpi-sub">Promedio de órdenes enviadas a cocina</div>
         </div>
         <div class="kpi-cell">
           <div class="kpi-label">MRR suite</div>
-          <div class="kpi-value">$39,200</div>
+          <div class="kpi-value" data-kpi="suite_mrr">--</div>
           <div class="kpi-sub">Pro + Enterprise</div>
         </div>
       </div>
@@ -1196,22 +1215,22 @@
       <div class="kpi mb-6" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
         <div class="kpi-cell">
           <div class="kpi-label">Features totales</div>
-          <div class="kpi-value">247</div>
-          <div class="kpi-sub"><span class="trend-up">+12</span> auto-programadas esta semana</div>
+          <div class="kpi-value" data-kpi="ai_features_total">--</div>
+          <div class="kpi-sub" data-kpi="ai_features_new">Cargando...</div>
         </div>
         <div class="kpi-cell">
           <div class="kpi-label">Activaciones (no duplicó)</div>
-          <div class="kpi-value" style="color:#16A34A;">1,843</div>
-          <div class="kpi-sub">De 1,912 peticiones recibidas</div>
+          <div class="kpi-value" style="color:#16A34A;" data-kpi="ai_activations">--</div>
+          <div class="kpi-sub" data-kpi="ai_activations_sub">Cargando...</div>
         </div>
         <div class="kpi-cell">
           <div class="kpi-label">Extensiones</div>
-          <div class="kpi-value">64</div>
+          <div class="kpi-value" data-kpi="ai_extensions">--</div>
           <div class="kpi-sub">Features existentes ampliados</div>
         </div>
         <div class="kpi-cell">
           <div class="kpi-label">Ahorro vs programar todo</div>
-          <div class="kpi-value" style="color:#F59E0B;">$312K</div>
+          <div class="kpi-value" style="color:#F59E0B;" data-kpi="ai_savings">--</div>
           <div class="kpi-sub">Sin duplicar trabajo</div>
         </div>
       </div>
@@ -1305,22 +1324,22 @@
       <div class="kpi mb-6" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
         <div class="kpi-cell">
           <div class="kpi-label">Tickets resueltos por IA</div>
-          <div class="kpi-value">1,247</div>
-          <div class="kpi-sub"><span class="trend-up">94.2%</span> sin intervención humana</div>
+          <div class="kpi-value" data-kpi="ai_tickets_resolved">0</div>
+          <div class="kpi-sub"><span class="trend-up" data-kpi="ai_tickets_pct">0%</span> sin intervención humana</div>
         </div>
         <div class="kpi-cell">
           <div class="kpi-label">Tiempo promedio</div>
-          <div class="kpi-value" style="color:#16A34A;">52 seg</div>
+          <div class="kpi-value" style="color:#16A34A;" data-kpi="ai_avg_time">--</div>
           <div class="kpi-sub">vs 1h 12min de un técnico humano</div>
         </div>
         <div class="kpi-cell">
           <div class="kpi-label">Sesiones de control remoto</div>
-          <div class="kpi-value">342</div>
+          <div class="kpi-value" data-kpi="ai_remote_sessions">--</div>
           <div class="kpi-sub">Sistema propio · sin AnyDesk</div>
         </div>
         <div class="kpi-cell">
           <div class="kpi-label">Ahorro en soporte humano</div>
-          <div class="kpi-value" style="color:#F59E0B;">$186K</div>
+          <div class="kpi-value" style="color:#F59E0B;" data-kpi="ai_support_savings">--</div>
           <div class="kpi-sub">Este mes</div>
         </div>
       </div>
@@ -1384,22 +1403,22 @@
       <div class="kpi mb-6" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
         <div class="kpi-cell">
           <div class="kpi-label">Videos generados</div>
-          <div class="kpi-value">187</div>
+          <div class="kpi-value" data-kpi="academy_videos">--</div>
           <div class="kpi-sub">Todos por IA</div>
         </div>
         <div class="kpi-cell">
           <div class="kpi-label">Manuales PDF</div>
-          <div class="kpi-value">94</div>
+          <div class="kpi-value" data-kpi="academy_pdfs">--</div>
           <div class="kpi-sub">Actualizados automáticamente</div>
         </div>
         <div class="kpi-cell">
           <div class="kpi-label">Reutilizaciones</div>
-          <div class="kpi-value" style="color:#16A34A;">12,486</div>
+          <div class="kpi-value" style="color:#16A34A;" data-kpi="academy_reuses">--</div>
           <div class="kpi-sub">Este mes · sin generar nuevos</div>
         </div>
         <div class="kpi-cell">
           <div class="kpi-label">Costo de duplicados</div>
-          <div class="kpi-value" style="color:#F59E0B;">$0</div>
+          <div class="kpi-value" style="color:#F59E0B;" data-kpi="academy_dup_cost">--</div>
           <div class="kpi-sub">Nunca generamos lo mismo 2 veces</div>
         </div>
       </div>
@@ -1460,22 +1479,22 @@
       <div class="kpi mb-6" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
         <div class="kpi-cell">
           <div class="kpi-label">Nivel 0 · Volvix Core</div>
-          <div class="kpi-value">1</div>
+          <div class="kpi-value" data-kpi="hier_level_0">--</div>
           <div class="kpi-sub">Tu empresa · propietario del SaaS</div>
         </div>
         <div class="kpi-cell">
           <div class="kpi-label">Nivel 1 · Marcas oficiales</div>
-          <div class="kpi-value">5</div>
-          <div class="kpi-sub">SalvadoreX, BarberPro, FarmaciasPro, etc.</div>
+          <div class="kpi-value" data-kpi="hier_level_1">--</div>
+          <div class="kpi-sub" data-kpi="hier_level_1_names">Cargando...</div>
         </div>
         <div class="kpi-cell">
           <div class="kpi-label">Nivel 2 · Revendedores</div>
-          <div class="kpi-value">14</div>
-          <div class="kpi-sub">BarberLuisita, EsteticaPluz, etc.</div>
+          <div class="kpi-value" data-kpi="hier_level_2">--</div>
+          <div class="kpi-sub" data-kpi="hier_level_2_names">Cargando...</div>
         </div>
         <div class="kpi-cell">
           <div class="kpi-label">Nivel 3+ · Sub-revendedores</div>
-          <div class="kpi-value">8</div>
+          <div class="kpi-value" data-kpi="hier_level_3">--</div>
           <div class="kpi-sub">Jerarquía profunda</div>
         </div>
       </div>
@@ -1507,7 +1526,7 @@
         <!-- Lista de giros -->
         <div class="card" style="max-height: 80vh; overflow-y: auto;">
           <div style="padding: 14px 16px; border-bottom: 1px solid #E7E5E4; background: #FAFAF9;">
-            <input type="text" id="we-search" placeholder="🔎 Buscar giro..." style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;" oninput="filterWEList()">
+            <input type="text" id="we-search" aria-label="Buscar giro en editor" placeholder="🔎 Buscar giro..." style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;" oninput="filterWEList()">
           </div>
           <div id="we-list"></div>
         </div>
@@ -1545,21 +1564,21 @@
       <div class="kpi mb-6" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
         <div class="kpi-cell">
           <div class="kpi-label">Clientes con módulo etiquetas</div>
-          <div class="kpi-value">47</div>
-          <div class="kpi-sub">14 solo etiquetas · 33 en plan completo</div>
+          <div class="kpi-value" data-kpi="labels_clients">--</div>
+          <div class="kpi-sub" data-kpi="labels_clients_breakdown">Cargando...</div>
         </div>
         <div class="kpi-cell">
           <div class="kpi-label">Etiquetas impresas (mes)</div>
-          <div class="kpi-value">28.4K</div>
+          <div class="kpi-value" data-kpi="labels_printed_month">--</div>
         </div>
         <div class="kpi-cell">
           <div class="kpi-label">Plantillas creadas</div>
-          <div class="kpi-value">156</div>
+          <div class="kpi-value" data-kpi="labels_templates">--</div>
           <div class="kpi-sub">Compartidas y privadas</div>
         </div>
         <div class="kpi-cell">
           <div class="kpi-label">MRR del módulo</div>
-          <div class="kpi-value">$7,003</div>
+          <div class="kpi-value" data-kpi="labels_mrr">--</div>
         </div>
       </div>
 
@@ -1678,16 +1697,16 @@
               <h3 style="font-size: 14px;">Web</h3>
               <div class="muted" style="font-size: 12px;">Navegador / PWA</div>
             </div>
-            <span class="chip ok"><span class="dot"></span> 412</span>
+            <span class="chip ok"><span class="dot"></span> <span data-seat="web_inuse">--</span></span>
           </div>
           <div class="row" style="justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
-            <span class="muted">Vendidos</span><strong>512 seats</strong>
+            <span class="muted">Vendidos</span><strong><span data-seat="web_sold">--</span> seats</strong>
           </div>
           <div class="row" style="justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
-            <span class="muted">En uso</span><strong>412</strong>
+            <span class="muted">En uso</span><strong data-seat="web_inuse2">--</strong>
           </div>
           <div class="row" style="justify-content: space-between; font-size: 13px; margin-bottom: 10px;">
-            <span class="muted">Precio por seat</span><strong>$149/mo</strong>
+            <span class="muted">Precio por seat</span><strong data-plan-price="web">--</strong>
           </div>
           <div class="sync-bar"><div class="sync-fill" style="width: 80%;"></div></div>
         </div>
@@ -1699,16 +1718,16 @@
               <h3 style="font-size: 14px;">Windows</h3>
               <div class="muted" style="font-size: 12px;">Electron · .exe instalable</div>
             </div>
-            <span class="chip ok"><span class="dot"></span> 287</span>
+            <span class="chip ok"><span class="dot"></span> <span data-seat="windows_inuse">--</span></span>
           </div>
           <div class="row" style="justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
-            <span class="muted">Vendidos</span><strong>320 seats</strong>
+            <span class="muted">Vendidos</span><strong><span data-seat="windows_sold">--</span> seats</strong>
           </div>
           <div class="row" style="justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
-            <span class="muted">En uso</span><strong>287</strong>
+            <span class="muted">En uso</span><strong data-seat="windows_inuse2">--</strong>
           </div>
           <div class="row" style="justify-content: space-between; font-size: 13px; margin-bottom: 10px;">
-            <span class="muted">Precio por seat</span><strong>$199/mo</strong>
+            <span class="muted">Precio por seat</span><strong data-plan-price="windows">--</strong>
           </div>
           <div class="sync-bar"><div class="sync-fill" style="width: 90%;"></div></div>
         </div>
@@ -1720,16 +1739,16 @@
               <h3 style="font-size: 14px;">Android</h3>
               <div class="muted" style="font-size: 12px;">Nativo · APK + Play Store</div>
             </div>
-            <span class="chip ok"><span class="dot"></span> 192</span>
+            <span class="chip ok"><span class="dot"></span> <span data-seat="android_inuse">--</span></span>
           </div>
           <div class="row" style="justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
-            <span class="muted">Vendidos</span><strong>240 seats</strong>
+            <span class="muted">Vendidos</span><strong><span data-seat="android_sold">--</span> seats</strong>
           </div>
           <div class="row" style="justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
-            <span class="muted">En uso</span><strong>192</strong>
+            <span class="muted">En uso</span><strong data-seat="android_inuse2">--</strong>
           </div>
           <div class="row" style="justify-content: space-between; font-size: 13px; margin-bottom: 10px;">
-            <span class="muted">Precio por seat</span><strong>$99/mo</strong>
+            <span class="muted">Precio por seat</span><strong data-plan-price="android">--</strong>
           </div>
           <div class="sync-bar"><div class="sync-fill" style="width: 80%;"></div></div>
         </div>
@@ -1758,22 +1777,22 @@
       <div class="kpi mb-6">
         <div class="kpi-cell">
           <div class="kpi-label">Clients sincronizados</div>
-          <div class="kpi-value">891 <span style="font-size: 13px; color: var(--text-3); font-weight: 400;">/ 1,024</span></div>
-          <div class="kpi-sub">87% en vivo</div>
+          <div class="kpi-value" data-kpi="sync_clients">--</div>
+          <div class="kpi-sub" data-kpi="sync_clients_pct">Cargando...</div>
         </div>
         <div class="kpi-cell">
           <div class="kpi-label">Operaciones/min</div>
-          <div class="kpi-value">3,420</div>
-          <div class="kpi-sub">Pico hoy: 8,140</div>
+          <div class="kpi-value" data-kpi="sync_ops_per_min">--</div>
+          <div class="kpi-sub" data-kpi="sync_ops_peak">Cargando...</div>
         </div>
         <div class="kpi-cell">
           <div class="kpi-label">Latencia promedio</div>
-          <div class="kpi-value">84<span style="font-size: 16px; color: var(--text-3); font-weight: 400;">ms</span></div>
-          <div class="kpi-sub">p99: 340ms</div>
+          <div class="kpi-value" data-kpi="sync_latency_avg">--</div>
+          <div class="kpi-sub" data-kpi="sync_latency_p99">Cargando...</div>
         </div>
         <div class="kpi-cell">
           <div class="kpi-label">Conflictos hoy</div>
-          <div class="kpi-value">12</div>
+          <div class="kpi-value" data-kpi="sync_conflicts_today">--</div>
           <div class="kpi-sub">Todos resueltos automáticamente</div>
         </div>
       </div>
@@ -1818,10 +1837,10 @@
         </div>
       </div>
       <div class="kpi mb-6">
-        <div class="kpi-cell"><div class="kpi-label">Facturado mes</div><div class="kpi-value">$184,240</div></div>
-        <div class="kpi-cell"><div class="kpi-label">Cobrado</div><div class="kpi-value">$162,180</div></div>
-        <div class="kpi-cell"><div class="kpi-label">Revshare pagado</div><div class="kpi-value">$28,400</div></div>
-        <div class="kpi-cell"><div class="kpi-label">Margen neto</div><div class="kpi-value" style="color: var(--ok);">$133,780</div></div>
+        <div class="kpi-cell"><div class="kpi-label">Facturado mes</div><div class="kpi-value" data-kpi="billing_invoiced">--</div></div>
+        <div class="kpi-cell"><div class="kpi-label">Cobrado</div><div class="kpi-value" data-kpi="billing_collected">--</div></div>
+        <div class="kpi-cell"><div class="kpi-label">Revshare pagado</div><div class="kpi-value" data-kpi="billing_revshare">--</div></div>
+        <div class="kpi-cell"><div class="kpi-label">Margen neto</div><div class="kpi-value" style="color: var(--ok);" data-kpi="billing_margin">--</div></div>
       </div>
       <div class="card card-pad" style="height: 280px;"><canvas id="billingChart"></canvas></div>
     </section>
@@ -2618,15 +2637,15 @@ function ctrlSendMessage() {
   $('#ctrl-msg-input').value = '';
   showCtrlToast('Mensaje enviado al POS del tenant');
 }
-function ctrlForceAction(action) {
-  if (action === 'force-logout' && !confirm('¿Cerrar la sesión del cajero remotamente?')) return;
+async function ctrlForceAction(action) {
+  if (action === 'force-logout' && !await VolvixUI.destructiveConfirm({ title: 'Cerrar sesión remota', message: '¿Cerrar la sesión del cajero remotamente?', confirmText: 'Cerrar sesión', requireText: 'ELIMINAR' })) return;
   if (ownerChannel) {
     ownerChannel.postMessage({ type: 'force-action', tenantId: TENANT_ID_OWNER, action });
   }
   showCtrlToast(action === 'force-logout' ? 'Sesión cerrada remotamente' : 'Forzando actualización…');
 }
-function ctrlResetDefaults() {
-  if (!confirm('¿Restaurar el tenant a configuración por defecto?')) return;
+async function ctrlResetDefaults() {
+  if (!await VolvixUI.destructiveConfirm({ title: 'Restaurar tenant', message: '¿Restaurar el tenant a configuración por defecto?', confirmText: 'Restaurar', requireText: 'ELIMINAR' })) return;
   saveTenantState(JSON.parse(JSON.stringify(DEFAULT_STATE)));
   renderControlModal(getTenantState());
   showCtrlToast('✓ Restaurado · todos los módulos y funciones activos');
@@ -2716,23 +2735,22 @@ function renderVerticals() {
     </div>`).join('');
 }
 
-const BRANDS = [
-  {name:'BarberPro.com', vertical:'Belleza', type:'own', tenants:32, mrr:28400, rev:'100% tuyo'},
-  {name:'FarmaciasPro.com', vertical:'Salud', type:'own', tenants:21, mrr:19800, rev:'100% tuyo'},
-  {name:'RestaurantMan.com', vertical:'Alimentos', type:'own', tenants:18, mrr:17200, rev:'100% tuyo'},
-  {name:'EsteticaPluz.com', vertical:'Belleza', type:'own', tenants:14, mrr:13600, rev:'100% tuyo'},
-  {name:'SalvadoreX', vertical:'Retail', type:'own', tenants:47, mrr:47820, rev:'100% tuyo'},
-  {name:'RentaFácil.mx', vertical:'Rentas', type:'own', tenants:12, mrr:11400, rev:'100% tuyo'},
-  {name:'BarberLuisita.com', vertical:'Belleza', type:'reseller', tenants:8, mrr:7200, rev:'70/30'},
-  {name:'LuisIvanEstilismoSistemas.com', vertical:'Belleza', type:'reseller', tenants:3, mrr:2700, rev:'70/30'},
-  {name:'FarmaciaCentro.systems', vertical:'Salud', type:'reseller', tenants:4, mrr:3800, rev:'65/35'},
-  {name:'MiTiendaApp.mx', vertical:'Retail', type:'reseller', tenants:12, mrr:9600, rev:'70/30'},
-  {name:'RestauroSoft.com', vertical:'Alimentos', type:'reseller', tenants:5, mrr:4800, rev:'65/35'},
-  {name:'SpaBelleza.app', vertical:'Belleza', type:'reseller', tenants:4, mrr:3600, rev:'70/30'},
-  {name:'AutoRentaSys.mx', vertical:'Rentas', type:'reseller', tenants:3, mrr:2700, rev:'65/35'},
-  {name:'TortilleríaDigital.com', vertical:'Alimentos', type:'reseller', tenants:2, mrr:1700, rev:'70/30'},
-];
+// BRANDS · empieza vacío, se hidrata desde GET /api/owner/brands
+let BRANDS = [];
+async function loadBrandsFromAPI() {
+  try {
+    const fetchFn = (window.Volvix && window.Volvix.auth && window.Volvix.auth.fetch) ? window.Volvix.auth.fetch : fetch;
+    const res = await fetchFn(location.origin + '/api/owner/brands');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    BRANDS = Array.isArray(data) ? data : (data.brands || []);
+  } catch (e) { console.warn('[brands] API no disponible:', e.message); BRANDS = []; }
+  renderBrands(window.__brandFilter || 'all');
+}
 function renderBrands(filter='all') {
+  window.__brandFilter = filter;
+  const tb = $('#brandsBody');
+  if (!BRANDS.length) { if (tb) tb.innerHTML = '<tr><td colspan="7" class="muted" style="padding:20px;text-align:center;">Cargando marcas...</td></tr>'; return; }
   const list = filter === 'all' ? BRANDS : BRANDS.filter(b => b.type === filter);
   $('#brandsBody').innerHTML = list.map(b => `
     <tr>
@@ -2791,22 +2809,29 @@ function renderModules() {
     </div>`).join('');
 }
 
-const TENANTS = [
-  {name:'Barbería Luisita Centro',    brand:'BarberLuisita.com', mods:7,  web:3, win:1, and:2, mrr:1096, status:'ok',       vertical:'beauty'},
-  {name:'Barbería Luisita Sur',       brand:'BarberLuisita.com', mods:6,  web:2, win:1, and:1, mrr:824,  status:'ok',       vertical:'beauty'},
-  {name:'Estética Pluz Polanco',      brand:'EsteticaPluz.com',  mods:9,  web:4, win:2, and:3, mrr:1687, status:'ok',       vertical:'beauty'},
-  {name:'Farmacia San Miguel',        brand:'FarmaciasPro.com',  mods:11, web:6, win:3, and:4, mrr:2340, status:'ok',       vertical:'health'},
-  {name:'Don Chucho · Sucursal 1',    brand:'SalvadoreX',        mods:10, web:2, win:2, and:2, mrr:1299, status:'ok',       vertical:'retail'},
-  {name:'Don Chucho · Sucursal 2',    brand:'SalvadoreX',        mods:10, web:2, win:2, and:2, mrr:1299, status:'ok',       vertical:'retail'},
-  {name:'Don Chucho · Sucursal 3',    brand:'SalvadoreX',        mods:10, web:1, win:2, and:1, mrr:1099, status:'ok',       vertical:'retail'},
-  {name:'Restaurante La Bonita',      brand:'RestaurantMan.com', mods:8,  web:3, win:2, and:5, mrr:1540, status:'ok',       vertical:'food'},
-  {name:'Restaurante Los Compadres',  brand:'MultiPOS',          mods:12, web:1, win:1, and:6, mrr:2890, status:'ok',       vertical:'food', note:'Suite completa · 4 apps', suite:true},
-  {name:'Carnitas El Maestro',        brand:'SalvadoreX',        mods:4,  web:1, win:1, and:0, mrr:449,  status:'ok',       vertical:'retail', note:'Solo caja'},
-  {name:'AutoRentas GDL',             brand:'AutoRentaSys.mx',   mods:7,  web:2, win:1, and:2, mrr:1140, status:'ok',       vertical:'rental'},
-  {name:'Minisuper La Esquina',       brand:'SalvadoreX',        mods:8,  web:1, win:1, and:1, mrr:699,  status:'overdue',  vertical:'retail'},
-  {name:'Abarrotes Don Pepe',         brand:'SalvadoreX',        mods:8,  web:1, win:1, and:0, mrr:499,  status:'offline',  vertical:'retail'},
-];
+// TENANTS · empieza vacío, se hidrata desde GET /api/owner/tenants
+let TENANTS = [];
+async function loadTenantsFromAPI() {
+  try {
+    const fetchFn = (window.Volvix && window.Volvix.auth && window.Volvix.auth.fetch) ? window.Volvix.auth.fetch : fetch;
+    const res = await fetchFn(location.origin + '/api/owner/tenants');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const list = Array.isArray(data) ? data : (data.tenants || []);
+    TENANTS = list.map(t => ({
+      name: t.name || '', brand: t.brand || t.plan || '',
+      mods: t.modules_count || 0,
+      web: t.web_devices || 0, win: t.windows_devices || 0, and: t.android_devices || 0,
+      mrr: t.mrr || 0,
+      status: t.is_active === false ? 'suspended' : (t.status || 'ok'),
+      vertical: t.vertical || '', note: t.note, suite: !!t.suite, id: t.id
+    }));
+  } catch (e) { console.warn('[tenants-render] API no disponible:', e.message); TENANTS = []; }
+  renderTenants();
+}
 function renderTenants() {
+  const tb = $('#tenantsBody');
+  if (!TENANTS.length) { if (tb) tb.innerHTML = '<tr><td colspan="7" class="muted" style="padding:20px;text-align:center;">Cargando tenants...</td></tr>'; return; }
   $('#tenantsBody').innerHTML = TENANTS.map((t,i) => {
     const statusChip = t.status==='ok'?'ok':t.status==='overdue'?'warn':t.status==='suspended'?'err':'err';
     const statusLabel = t.status==='ok'?'Activo':t.status==='overdue'?'Moroso':t.status==='suspended'?'Suspendido':'Offline';
@@ -2831,17 +2856,21 @@ function renderTenants() {
   }).join('');
 }
 
-const DEVICES = [
-  {id:'WEB-a3f9c2', type:'🌐 Web',     tenant:'Barbería Luisita Centro', version:'v2.1.4', last:'hace 3 seg',  status:'online'},
-  {id:'WIN-7b8d4f', type:'🖥 Windows', tenant:'Don Chucho S1',          version:'v2.1.4', last:'hace 12 seg', status:'online'},
-  {id:'AND-c1e5a9', type:'📱 Android', tenant:'Farmacia San Miguel',     version:'v2.1.3', last:'hace 1 min',  status:'online'},
-  {id:'WEB-9d2f7c', type:'🌐 Web',     tenant:'Estética Pluz',           version:'v2.1.4', last:'hace 2 min',  status:'online'},
-  {id:'WIN-2a6e8b', type:'🖥 Windows', tenant:'Restaurante La Bonita',   version:'v2.1.4', last:'hace 4 min',  status:'online'},
-  {id:'AND-f4c8d1', type:'📱 Android', tenant:'AutoRentas GDL',          version:'v2.1.2', last:'hace 23 min', status:'syncing'},
-  {id:'WIN-e9a1b5', type:'🖥 Windows', tenant:'Abarrotes Don Pepe',      version:'v2.1.3', last:'hace 2 horas',status:'offline'},
-  {id:'AND-b3f7c9', type:'📱 Android', tenant:'Minisuper La Esquina',    version:'v2.1.3', last:'hace 45 min', status:'syncing'},
-];
+// DEVICES · empieza vacío, se hidrata desde GET /api/owner/devices
+let DEVICES = [];
+async function loadDevicesFromAPI() {
+  try {
+    const fetchFn = (window.Volvix && window.Volvix.auth && window.Volvix.auth.fetch) ? window.Volvix.auth.fetch : fetch;
+    const res = await fetchFn(location.origin + '/api/owner/devices');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    DEVICES = Array.isArray(data) ? data : (data.devices || []);
+  } catch (e) { console.warn('[devices] API no disponible:', e.message); DEVICES = []; }
+  renderDevices();
+}
 function renderDevices() {
+  const tb = $('#devicesBody');
+  if (!DEVICES.length) { if (tb) tb.innerHTML = '<tr><td colspan="6" class="muted" style="padding:20px;text-align:center;">Cargando dispositivos...</td></tr>'; return; }
   $('#devicesBody').innerHTML = DEVICES.map(d => {
     const chip = d.status==='online'?'ok':d.status==='syncing'?'warn':'err';
     const label = d.status==='online'?'Online':d.status==='syncing'?'Sincronizando':'Offline';
@@ -2856,15 +2885,21 @@ function renderDevices() {
   }).join('');
 }
 
-const DEPLOYS = [
-  {v:'v2.1.4', canal:'stable',  plat:'Web',     date:'17/04/2026', cov:'412/412', status:'ok'},
-  {v:'v2.1.4', canal:'stable',  plat:'Windows', date:'17/04/2026', cov:'287/320', status:'ok'},
-  {v:'v2.1.4', canal:'stable',  plat:'Android', date:'17/04/2026', cov:'174/240', status:'rolling'},
-  {v:'v2.1.3', canal:'stable',  plat:'All',     date:'28/03/2026', cov:'1024/1024', status:'ok'},
-  {v:'v2.2.0-beta', canal:'beta', plat:'Web',   date:'20/04/2026', cov:'12/412', status:'ok'},
-  {v:'v2.1.5-rc1', canal:'rc',  plat:'All',     date:'22/04/2026', cov:'3/1024', status:'rolling'},
-];
+// DEPLOYS · empieza vacío, se hidrata desde GET /api/owner/deploys
+let DEPLOYS = [];
+async function loadDeploysFromAPI() {
+  try {
+    const fetchFn = (window.Volvix && window.Volvix.auth && window.Volvix.auth.fetch) ? window.Volvix.auth.fetch : fetch;
+    const res = await fetchFn(location.origin + '/api/owner/deploys');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    DEPLOYS = Array.isArray(data) ? data : (data.deploys || []);
+  } catch (e) { console.warn('[deploys] API no disponible:', e.message); DEPLOYS = []; }
+  renderDeploys();
+}
 function renderDeploys() {
+  const tb = $('#deploysBody');
+  if (!DEPLOYS.length) { if (tb) tb.innerHTML = '<tr><td colspan="6" class="muted" style="padding:20px;text-align:center;">Cargando deploys...</td></tr>'; return; }
   $('#deploysBody').innerHTML = DEPLOYS.map(d => {
     const chip = d.status==='ok'?'ok':'warn';
     const label = d.status==='ok'?'Exitoso':'Desplegando…';
@@ -2879,18 +2914,24 @@ function renderDeploys() {
   }).join('');
 }
 
-const LIVE = [
-  {type:'venta',  text:'Don Chucho S2 · ticket #004231 · $456.50',  time:'hace 3 seg',  platform:'🖥'},
-  {type:'login',  text:'admin@farmaciasm.mx · Web',                 time:'hace 18 seg', platform:'🌐'},
-  {type:'cita',   text:'Barbería Luisita · cita agendada · 18:00',  time:'hace 32 seg', platform:'📱'},
-  {type:'venta',  text:'Estética Pluz · ticket #000876 · $890',     time:'hace 1 min',  platform:'🌐'},
-  {type:'sync',   text:'Don Pepe · 24 operaciones sincronizadas',   time:'hace 2 min',  platform:'🖥'},
-  {type:'venta',  text:'Restaurante La Bonita · mesa 7 · $1,240',   time:'hace 2 min',  platform:'🖥'},
-  {type:'dev',    text:'El Martillo · devolución aprobada · $180',  time:'hace 3 min',  platform:'🌐'},
-];
+// LIVE feed · empieza vacío, se hidrata desde GET /api/owner/live-events
+let LIVE = [];
+async function loadLiveFromAPI() {
+  try {
+    const fetchFn = (window.Volvix && window.Volvix.auth && window.Volvix.auth.fetch) ? window.Volvix.auth.fetch : fetch;
+    const res = await fetchFn(location.origin + '/api/owner/live-events');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    LIVE = Array.isArray(data) ? data : (data.events || []);
+  } catch (e) { console.warn('[live] API no disponible:', e.message); LIVE = []; }
+  renderLive();
+}
 function renderLive() {
+  const cont = $('#live-feed');
+  if (!cont) return;
+  if (!LIVE.length) { cont.innerHTML = '<div class="muted" style="padding:14px;text-align:center;">Esperando eventos en vivo...</div>'; return; }
   const colors = {venta:'ok',login:'info',cita:'accent',sync:'info',dev:'warn'};
-  $('#live-feed').innerHTML = LIVE.map(e => `
+  cont.innerHTML = LIVE.map(e => `
     <div class="row gap-3" style="padding: 6px 0; border-bottom: 1px solid var(--border);">
       <span class="chip ${colors[e.type]}" style="min-width: 46px; justify-content: center;">${e.type}</span>
       <div style="flex: 1; font-size: 12.5px;">
@@ -2900,18 +2941,23 @@ function renderLive() {
     </div>`).join('');
 }
 
-const SYNC_LOG = [
-  {t:'14:35:42', p:'🖥 Win', msg:'Don Chucho · push 4 ops → merged', lvl:'ok'},
-  {t:'14:35:38', p:'🌐 Web', msg:'Farmacia SM · pull 12 ops from cloud', lvl:'info'},
-  {t:'14:35:21', p:'📱 And', msg:'AutoRentas · outbox flush 23 ops', lvl:'info'},
-  {t:'14:35:12', p:'🖥 Win', msg:'La Bonita · conflict on product.price — LWW wins', lvl:'warn'},
-  {t:'14:34:58', p:'🌐 Web', msg:'Estética Pluz · full sync 240ms', lvl:'ok'},
-  {t:'14:34:32', p:'📱 And', msg:'Don Pepe · reconnect · 156 ops queued', lvl:'warn'},
-  {t:'14:34:01', p:'🖥 Win', msg:'Minisuper · delta pull 18 ops', lvl:'info'},
-  {t:'14:33:45', p:'🌐 Web', msg:'BarberLuisita · push 2 ops + 1 image', lvl:'ok'},
-];
+// SYNC_LOG · empieza vacío, se hidrata desde GET /api/owner/sync-log
+let SYNC_LOG = [];
+async function loadSyncLogFromAPI() {
+  try {
+    const fetchFn = (window.Volvix && window.Volvix.auth && window.Volvix.auth.fetch) ? window.Volvix.auth.fetch : fetch;
+    const res = await fetchFn(location.origin + '/api/owner/sync-log');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    SYNC_LOG = Array.isArray(data) ? data : (data.entries || []);
+  } catch (e) { console.warn('[sync-log] API no disponible:', e.message); SYNC_LOG = []; }
+  renderSyncLog();
+}
 function renderSyncLog() {
-  $('#sync-log').innerHTML = SYNC_LOG.map(l => `
+  const cont = $('#sync-log');
+  if (!cont) return;
+  if (!SYNC_LOG.length) { cont.innerHTML = '<div class="muted" style="padding:14px;text-align:center;">Esperando eventos de sync...</div>'; return; }
+  cont.innerHTML = SYNC_LOG.map(l => `
     <div class="log-line">
       <span class="log-time">${l.t}</span>
       <span style="flex-shrink: 0;">${l.p}</span>
@@ -2969,54 +3015,84 @@ function mTab(e, tab) {
   $('#mtab-'+tab).classList.remove('hidden');
 }
 
-// ========== CHARTS ==========
+// ========== CHARTS (data-driven) ==========
+async function fetchChartData(path) {
+  try {
+    const fetchFn = (window.Volvix && window.Volvix.auth && window.Volvix.auth.fetch) ? window.Volvix.auth.fetch : fetch;
+    const res = await fetchFn(location.origin + path);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return await res.json();
+  } catch (e) {
+    console.warn('[charts] fallo cargando', path, e.message);
+    return null;
+  }
+}
+
 function initCharts() {
   if (typeof Chart === 'undefined') return setTimeout(initCharts, 200);
   Chart.defaults.color = '#A8A29E';
   Chart.defaults.font.family = 'Inter';
   Chart.defaults.borderColor = '#E7E5E4';
 
-  const mrr = $('#mrrChart');
-  if (mrr) new Chart(mrr, {
-    type: 'line',
-    data: {
-      labels: ['Nov','Dic','Ene','Feb','Mar','Abr'],
-      datasets: [
-        {label:'BarberPro',    data:[18,21,23,25,27,28.4], borderColor:'#0C0A09', backgroundColor:'rgba(12,10,9,0.08)', fill:false, tension:0.4, borderWidth:2},
-        {label:'SalvadoreX',   data:[32,36,39,42,45,47.8], borderColor:'#EA580C', backgroundColor:'rgba(234,88,12,0.08)', fill:false, tension:0.4, borderWidth:2},
-        {label:'FarmaciasPro', data:[12,14,15,17,18,19.8], borderColor:'#2563EB', backgroundColor:'rgba(37,99,235,0.08)', fill:false, tension:0.4, borderWidth:2},
-      ]
-    },
-    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom', labels:{boxWidth:10,padding:14,font:{size:11}}}}, scales:{y:{grid:{color:'#F5F5F4'}, border:{display:false}, ticks:{callback:v=>'$'+v+'K'}}, x:{grid:{display:false}, border:{display:false}}} }
-  });
+  const emptyDs = (label, color) => ({ label, data:[], borderColor:color, backgroundColor:color+'14', fill:false, tension:0.4, borderWidth:2 });
 
-  const sync = $('#syncChart');
-  if (sync) new Chart(sync, {
-    type: 'bar',
-    data: {
-      labels: ['00','04','08','12','16','20'],
-      datasets: [
-        {label:'🌐 Web',     data:[120,80,340,520,680,420], backgroundColor:'#0C0A09', borderRadius:3},
-        {label:'🖥 Windows', data:[80,40,280,440,580,320],  backgroundColor:'#EA580C', borderRadius:3},
-        {label:'📱 Android', data:[60,30,180,280,380,260],  backgroundColor:'#2563EB', borderRadius:3},
-      ]
-    },
-    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom', labels:{boxWidth:10,padding:14,font:{size:11}}}}, scales:{y:{stacked:true, grid:{color:'#F5F5F4'}, border:{display:false}}, x:{stacked:true, grid:{display:false}, border:{display:false}}} }
-  });
+  // MRR por marca · GET /api/reports/mrr-by-brand
+  const mrrEl = $('#mrrChart');
+  if (mrrEl) {
+    const chart = new Chart(mrrEl, {
+      type: 'line',
+      data: { labels: [], datasets: [] },
+      options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom', labels:{boxWidth:10,padding:14,font:{size:11}}}}, scales:{y:{grid:{color:'#F5F5F4'}, border:{display:false}, ticks:{callback:v=>'$'+v+'K'}}, x:{grid:{display:false}, border:{display:false}}} }
+    });
+    fetchChartData('/api/reports/mrr-by-brand').then(d => {
+      if (!d) return;
+      chart.data.labels = d.labels || [];
+      chart.data.datasets = (d.series || []).map((s, i) => ({
+        label: s.label, data: s.data,
+        borderColor: s.color || ['#0C0A09','#EA580C','#2563EB','#16A34A'][i % 4],
+        backgroundColor: 'rgba(0,0,0,0.06)', fill:false, tension:0.4, borderWidth:2
+      }));
+      chart.update();
+    });
+  }
 
-  const bill = $('#billingChart');
-  if (bill) new Chart(bill, {
-    type: 'bar',
-    data: {
-      labels: ['Nov','Dic','Ene','Feb','Mar','Abr'],
-      datasets: [
-        {label:'Facturado', data:[120,142,156,168,174,184], backgroundColor:'#0C0A09', borderRadius:4},
-        {label:'Cobrado',   data:[110,132,144,158,164,162], backgroundColor:'#16A34A', borderRadius:4},
-        {label:'Revshare',  data:[18,21,23,25,27,28],       backgroundColor:'#EA580C', borderRadius:4},
-      ]
-    },
-    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom', labels:{boxWidth:10,padding:14,font:{size:11}}}}, scales:{y:{grid:{color:'#F5F5F4'}, border:{display:false}, ticks:{callback:v=>'$'+v+'K'}}, x:{grid:{display:false}, border:{display:false}}} }
-  });
+  // Sync por plataforma · GET /api/reports/sync-by-platform
+  const syncEl = $('#syncChart');
+  if (syncEl) {
+    const chart = new Chart(syncEl, {
+      type: 'bar',
+      data: { labels: [], datasets: [] },
+      options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom', labels:{boxWidth:10,padding:14,font:{size:11}}}}, scales:{y:{stacked:true, grid:{color:'#F5F5F4'}, border:{display:false}}, x:{stacked:true, grid:{display:false}, border:{display:false}}} }
+    });
+    fetchChartData('/api/reports/sync-by-platform').then(d => {
+      if (!d) return;
+      chart.data.labels = d.labels || [];
+      chart.data.datasets = (d.series || []).map((s, i) => ({
+        label: s.label, data: s.data,
+        backgroundColor: s.color || ['#0C0A09','#EA580C','#2563EB'][i % 3], borderRadius: 3
+      }));
+      chart.update();
+    });
+  }
+
+  // Facturación · GET /api/reports/billing-trend
+  const billEl = $('#billingChart');
+  if (billEl) {
+    const chart = new Chart(billEl, {
+      type: 'bar',
+      data: { labels: [], datasets: [] },
+      options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom', labels:{boxWidth:10,padding:14,font:{size:11}}}}, scales:{y:{grid:{color:'#F5F5F4'}, border:{display:false}, ticks:{callback:v=>'$'+v+'K'}}, x:{grid:{display:false}, border:{display:false}}} }
+    });
+    fetchChartData('/api/reports/billing-trend').then(d => {
+      if (!d) return;
+      chart.data.labels = d.labels || [];
+      chart.data.datasets = (d.series || []).map((s, i) => ({
+        label: s.label, data: s.data,
+        backgroundColor: s.color || ['#0C0A09','#16A34A','#EA580C'][i % 3], borderRadius: 4
+      }));
+      chart.update();
+    });
+  }
 }
 
 /* ============================================================
@@ -3277,9 +3353,9 @@ function duplicateLanding() {
   showCtrlToast('💡 Duplicación requiere backend · por ahora edita manualmente');
 }
 
-function resetLanding() {
+async function resetLanding() {
   if (!editingGiroKey) return;
-  if (!confirm('¿Eliminar todas las personalizaciones de este giro?')) return;
+  if (!await VolvixUI.destructiveConfirm({ title: 'Eliminar personalizaciones', message: '¿Eliminar todas las personalizaciones de este giro?', confirmText: 'Eliminar', requireText: 'ELIMINAR' })) return;
   localStorage.removeItem(LANDING_PREFIX + editingGiroKey);
   if (lanChannel) lanChannel.postMessage({ type: 'landing-update', giroKey: editingGiroKey });
   closeLanding();
@@ -3293,7 +3369,7 @@ function openLandingsBulkAction() {
     const c = getLandingCustom(g.key);
     return c.published !== false;
   }).length;
-  alert(`📊 ESTADÍSTICAS DE LANDINGS\n\n• Total de giros: ${total}\n• Landings publicadas: ${pub}\n• Landings ocultas: ${total - pub}\n\nPróximamente: acciones masivas (publicar/ocultar/resetear múltiples a la vez).`);
+  VolvixUI.toast({type:'info', message:`📊 ESTADÍSTICAS DE LANDINGS\n\n• Total de giros: ${total}\n• Landings publicadas: ${pub}\n• Landings ocultas: ${total - pub}\n\nPróximamente: acciones masivas (publicar/ocultar/resetear múltiples a la vez).`});
 }
 
 /* ============================================================
@@ -3462,8 +3538,8 @@ function appsSendMessage() {
   $('#apps-msg-input').value = '';
   showCtrlToast('📣 Mensaje enviado a las 4 apps del tenant');
 }
-function appsResetDefaults() {
-  if (!confirm('¿Restaurar toda la Suite a configuración por defecto?')) return;
+async function appsResetDefaults() {
+  if (!await VolvixUI.destructiveConfirm({ title: 'Restaurar Suite', message: '¿Restaurar toda la Suite a configuración por defecto?', confirmText: 'Restaurar', requireText: 'ELIMINAR' })) return;
   saveAppsState(JSON.parse(JSON.stringify(APPS_DEFAULT)));
   renderAppsModal();
   showCtrlToast('✓ Suite restaurada');
@@ -3645,8 +3721,8 @@ function renderBrandNode(node, depth) {
         ${giros ? `<div style="margin-top:6px;">${giros}${moreGiros}</div>` : ''}
       </div>
       <div style="display:flex;gap:4px;flex-shrink:0;">
-        <button class="btn sm" onclick="manageBrand('${node.id}')" title="Gestionar">⚙️</button>
-        ${node.level > 0 ? `<button class="btn sm" onclick="addChildBrand('${node.id}')" title="+ Sub-marca">➕</button>` : ''}
+        <button class="btn sm" onclick="manageBrand('${node.id}')" aria-label="Gestionar" title="Gestionar">⚙️</button>
+        ${node.level > 0 ? `<button class="btn sm" onclick="addChildBrand('${node.id}')" aria-label="+ Sub-marca" title="+ Sub-marca">➕</button>` : ''}
       </div>
     </div>
   `;
@@ -3669,7 +3745,7 @@ function expandAllHierarchy() {
 function manageBrand(id) {
   const found = findBrandInTree(BRAND_HIERARCHY, id);
   if (!found) return;
-  alert(`⚙️ GESTIÓN DE MARCA\n\n${found.name}\nSubdominio: ${found.subdomain || '—'}\nNivel: ${found.level}\nTenants: ${found.tenants}\nMRR: ${fmt(found.mrr)}\nRevshare al padre: ${found.revshare}%\n\nAquí podrás editar:\n• Precios y planes\n• Giros habilitados\n• Comisión al padre\n• Usuarios y permisos\n• Landing personalizada\n• Terminología y textos`);
+  VolvixUI.toast({type:'info', message:`⚙️ GESTIÓN DE MARCA\n\n${found.name}\nSubdominio: ${found.subdomain || '—'}\nNivel: ${found.level}\nTenants: ${found.tenants}\nMRR: ${fmt(found.mrr)}\nRevshare al padre: ${found.revshare}%\n\nAquí podrás editar:\n• Precios y planes\n• Giros habilitados\n• Comisión al padre\n• Usuarios y permisos\n• Landing personalizada\n• Terminología y textos`});
 }
 
 function addChildBrand(parentId) {
@@ -3721,10 +3797,10 @@ function createNewBrand() {
   const giroKey = document.getElementById('nb-giro').value;
   const revshare = parseFloat(document.getElementById('nb-revshare').value);
 
-  if (!name || !subdomain) { alert('Completa nombre y subdominio'); return; }
+  if (!name || !subdomain) { VolvixUI.toast({type:'info', message:'Completa nombre y subdominio'}); return; }
 
   const parent = findBrandInTree(BRAND_HIERARCHY, parentId);
-  if (!parent) { alert('Padre no encontrado'); return; }
+  if (!parent) { VolvixUI.toast({type:'info', message:'Padre no encontrado'}); return; }
 
   const newBrand = {
     id: 'brand-' + Date.now(),
@@ -3989,6 +4065,7 @@ function renderLabelTemplates() {
 // ========== INIT RESTANTE ==========
 window.addEventListener('DOMContentLoaded', () => {
   renderVerticals();
+  // Render placeholders inmediatamente (estados "Cargando...")
   renderBrands();
   renderModules();
   renderTenants();
@@ -4004,12 +4081,25 @@ window.addEventListener('DOMContentLoaded', () => {
   renderWEList();
   renderLabelTemplates();
   setTimeout(initCharts, 50);
+
+  // Hidratar con datos reales desde el API (R26)
+  setTimeout(() => {
+    if (typeof loadBrandsFromAPI === 'function') loadBrandsFromAPI();
+    if (typeof loadTenantsFromAPI === 'function') loadTenantsFromAPI();
+    if (typeof loadDevicesFromAPI === 'function') loadDevicesFromAPI();
+    if (typeof loadDeploysFromAPI === 'function') loadDeploysFromAPI();
+    if (typeof loadLiveFromAPI === 'function') loadLiveFromAPI();
+    if (typeof loadSyncLogFromAPI === 'function') loadSyncLogFromAPI();
+  }, 200);
 });
 </script>
+<script defer src="auth-helper.js"></script>
+<link rel="stylesheet" href="volvix-modals.css">
+<script defer src="volvix-modals.js"></script>
+<script defer src="volvix-ai-assistant.js"></script>
 <script src="volvix-owner-wiring.js" defer></script>
 <script src="volvix-owner-extra-wiring.js" defer></script>
 <script src="volvix-ai-real-wiring.js" defer></script>
-<script src="volvix-tests-wiring.js" defer></script>
 <script src="volvix-charts-wiring.js" defer></script>
 <script src="volvix-notifications-wiring.js" defer></script>
 <script src="volvix-backup-wiring.js" defer></script>
@@ -4247,9 +4337,6 @@ window.addEventListener('DOMContentLoaded', () => {
 <script src="volvix-notion-wiring.js" defer></script>
 <script src="volvix-trello-wiring.js" defer></script>
 <script src="volvix-asana-wiring.js" defer></script>
-<script src="volvix-cypress-tests.js" defer></script>
-<script src="volvix-playwright-tests.js" defer></script>
-<script src="volvix-loadtest-wiring.js" defer></script>
 <script src="volvix-lighthouse-lite.js" defer></script>
 <script src="volvix-security-scan.js" defer></script>
 <script src="volvix-seo-wiring.js" defer></script>
@@ -4258,5 +4345,6 @@ window.addEventListener('DOMContentLoaded', () => {
 <script src="volvix-crypto-wiring.js" defer></script>
 <script src="volvix-print-hub.js" defer></script>
 <script src="volvix-offline-queue.js" defer></script>
+<script src="volvix-real-data-loader.js" defer></script>
 </body>
 </html>
