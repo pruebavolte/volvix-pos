@@ -290,6 +290,26 @@ function verifyMfaToken(token) {
 // FIX R13 (#12): Rate limiting in-memory
 // =============================================================
 const rateBuckets = new Map(); // key -> { count, resetAt }
+// B31.5: structured logging — JSON con request_id correlation
+function logStructured(level, msg, meta) {
+  try {
+    const line = {
+      ts: new Date().toISOString(),
+      level: level || 'info',
+      msg: String(msg || '').slice(0, 500),
+      ...(meta || {})
+    };
+    if (level === 'error' || level === 'warn') console.error(JSON.stringify(line));
+    else console.log(JSON.stringify(line));
+  } catch (_) {
+    if (level === 'error') console.error(level, msg);
+    else console.log(level, msg);
+  }
+}
+function logInfo(msg, meta) { logStructured('info', msg, meta); }
+function logWarn(msg, meta) { logStructured('warn', msg, meta); }
+function logErr(msg, meta) { logStructured('error', msg, meta); }
+
 function rateLimit(key, max, windowMs) {
   const now = Date.now();
   const b = rateBuckets.get(key);
@@ -650,13 +670,30 @@ function sendJSON(res, data, status = 200) {
 }
 
 // B29.4: Cache-Control para endpoints publicos read-only (catalogos, planes, health)
-function sendJSONPublic(res, data, ttlSec, status = 200) {
+// B31.1: ETag support con If-None-Match -> 304 Not Modified
+function sendJSONPublic(res, data, ttlSec, status = 200, req = null) {
   res.statusCode = status;
   setSecurityHeaders(res);
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   const t = Math.max(0, parseInt(ttlSec, 10) || 60);
   res.setHeader('Cache-Control', `public, max-age=${t}, s-maxage=${t}, stale-while-revalidate=${t * 2}`);
-  res.end(JSON.stringify(data));
+  // B31.1: ETag weak-hash basado en payload
+  try {
+    const body = JSON.stringify(data);
+    const etag = 'W/"' + crypto.createHash('sha1').update(body).digest('base64').slice(0, 22) + '"';
+    res.setHeader('ETag', etag);
+    res.setHeader('Vary', 'Accept-Encoding');
+    if (req) {
+      const inm = req.headers && req.headers['if-none-match'];
+      if (inm && inm === etag) {
+        res.statusCode = 304;
+        return res.end();
+      }
+    }
+    res.end(body);
+  } catch (_) {
+    res.end(JSON.stringify(data));
+  }
 }
 
 // FIX R13 (#11): error genérico en prod
@@ -1137,6 +1174,50 @@ const handlers = {
     }
   },
 
+  // B31.4: /api/openapi.json — spec abreviada (publica, cacheada 1h)
+  'GET /api/openapi.json': async (req, res) => {
+    const allRoutes = Object.keys(handlers || {})
+      .filter(k => /^(GET|POST|PATCH|PUT|DELETE) \/api\//.test(k))
+      .map(k => {
+        const sp = k.split(' ');
+        return { method: sp[0], path: sp[1] };
+      })
+      .sort((a, b) => a.path.localeCompare(b.path) || a.method.localeCompare(b.method));
+    const paths = {};
+    for (const r of allRoutes) {
+      paths[r.path] = paths[r.path] || {};
+      paths[r.path][r.method.toLowerCase()] = {
+        summary: `${r.method} ${r.path}`,
+        responses: {
+          '200': { description: 'Success' },
+          '401': { description: 'Unauthorized' },
+          '429': { description: 'Rate limit' },
+          '503': { description: 'Service unavailable' }
+        }
+      };
+    }
+    sendJSONPublic(res, {
+      openapi: '3.0.3',
+      info: {
+        title: 'Volvix POS API',
+        version: '7.2.0',
+        description: 'Multi-tenant POS API. Auth via Bearer JWT or httpOnly cookie. See /api/api-docs.',
+        contact: { name: 'Volvix Support', url: 'https://volvix-pos.vercel.app' }
+      },
+      servers: [{ url: 'https://volvix-pos.vercel.app', description: 'Production' }],
+      components: {
+        securitySchemes: {
+          bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+          cookieAuth: { type: 'apiKey', in: 'cookie', name: 'vlx_auth' }
+        }
+      },
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }],
+      paths,
+      'x-total-endpoints': allRoutes.length,
+      'x-generated_at': new Date().toISOString()
+    }, 3600, 200, req); // 1 hora cache + ETag
+  },
+
   // B30.3: /api/health/full — self-check de subsistemas (publico, sin auth)
   'GET /api/health/full': async (req, res) => {
     const start = Date.now();
@@ -1277,6 +1358,11 @@ const handlers = {
 
   'POST /api/products': requireAuth(async (req, res) => {
     try {
+      // B31.3: rate-limit per-tenant — 120 productos/min/tenant
+      const tnt = (req.user && req.user.tenant_id) || 'anon';
+      if (!rateLimit('products:tenant:' + tnt, 120, 60_000)) {
+        return send429(res, rateLimitRetryMs('products:tenant:' + tnt, 60_000), 'Limite de productos/min alcanzado para tenant');
+      }
       const body = await readBody(req, { maxBytes: 100 * 1024, strictJson: true });
       if (checkBodyError(req, res)) return;
       const safe = pickFields(body, ALLOWED_FIELDS_PRODUCTS); // FIX R13 (#9)
@@ -1434,6 +1520,11 @@ const handlers = {
 
   'POST /api/sales': requireAuth(withIdempotency('POST /api/sales', async (req, res) => {
     try {
+      // B31.3: rate-limit per-tenant — 600 ventas/min/tenant (10/seg)
+      const tnt = (req.user && req.user.tenant_id) || 'anon';
+      if (!rateLimit('sales:tenant:' + tnt, 600, 60_000)) {
+        return send429(res, rateLimitRetryMs('sales:tenant:' + tnt, 60_000), 'Limite de ventas/min alcanzado para tenant');
+      }
       const body = await readBody(req, { maxBytes: 200 * 1024, strictJson: true });
       if (checkBodyError(req, res)) return;
       const safe = pickFields(body, ALLOWED_FIELDS_SALES); // FIX R13 (#9)
@@ -5385,7 +5476,7 @@ handlers['GET /api/billing/plans'] = async (req, res) => {
   try {
     const rows = await supabaseRequest('GET',
       '/subscription_plans?active=eq.true&select=*&order=price_monthly_cents.asc');
-    sendJSONPublic(res, { ok: true, plans: rows || [] }, 300); // B29.4: 5 min cache
+    sendJSONPublic(res, { ok: true, plans: rows || [] }, 300, 200, req); // B29.4 + B31.1
   } catch (err) { sendError(res, err); }
 };
 
@@ -5968,6 +6059,15 @@ handlers['POST /api/payments/stripe/webhook'] = async (req, res) => {
         await supabaseRequest('PATCH',
           `/payments?provider_payment_id=eq.${encodeURIComponent(providerId)}`,
           { status: newStatus, updated_at: new Date().toISOString() });
+      } catch (_) {}
+      // B31.2: logAudit en eventos de pago via webhook (sistema, sin user)
+      try {
+        const pseudoReq = { user: { id: 'stripe-webhook', tenant_id: (obj.metadata && obj.metadata.tenant_id) || null } };
+        const action = newStatus === 'succeeded' ? 'payment.succeeded'
+                     : newStatus === 'failed' ? 'payment.failed'
+                     : newStatus === 'refunded' ? 'payment.refunded'
+                     : 'payment.updated';
+        logAudit(pseudoReq, action, 'payments', { id: providerId, after: { status: newStatus, sale_id: obj.metadata && obj.metadata.sale_id } });
       } catch (_) {}
     }
     sendJSON(res, { received: true });
@@ -6887,14 +6987,14 @@ handlers['GET /api/config/public'] = async (req, res) => {
   handlers['GET /api/billing/plans'] = async (req, res) => {
     try {
       const rows = await supabaseRequest('GET', '/billing_plans?select=*&order=price.asc');
-      if (rows && rows.length) return sendJSONPublic(res, { ok: true, plans: rows }, 300);
+      if (rows && rows.length) return sendJSONPublic(res, { ok: true, plans: rows }, 300, 200, req);
     } catch (_) {}
     sendJSONPublic(res, { ok: true, plans: [
       { id: 'free', name: 'Free', price: 0, currency: 'MXN', features: ['Hasta 50 productos','1 sucursal'] },
       { id: 'starter', name: 'Starter', price: 299, currency: 'MXN', features: ['Productos ilimitados','3 usuarios'] },
       { id: 'pro', name: 'Pro', price: 799, currency: 'MXN', features: ['Multi-sucursal','Reportes BI','API'] },
       { id: 'enterprise', name: 'Enterprise', price: 2499, currency: 'MXN', features: ['SLA','SSO','Soporte 24/7'] },
-    ]}, 300); // B29.4: 5 min cache
+    ]}, 300, 200, req); // B29.4 + B31.1
   };
 
   // GET /api/billing/invoices — fallback empty
@@ -8987,7 +9087,7 @@ handlers['GET /api/config/public'] = async (req, res) => {
           icon: p.icon || '📦'
         })),
         total: inStock.length
-      }, 60); // B29.4: 60s cache catalogo publico
+      }, 60, 200, req); // B29.4: 60s cache + B31.1 ETag
     } catch (err) { sendError(res, err); }
   };
 
