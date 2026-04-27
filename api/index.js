@@ -1177,14 +1177,18 @@ const handlers = {
       };
     } catch (_) { checks.memory = { ok: true }; }
 
+    // Critical checks: solo supabase + audit_log + memory determinan 503
+    const critical = ['supabase', 'audit_log', 'memory'];
+    const criticalOk = critical.every(k => checks[k] && checks[k].ok);
     const allOk = Object.values(checks).every(c => c.ok);
     sendJSON(res, {
-      ok: allOk,
+      ok: criticalOk,
+      degraded: criticalOk && !allOk,
       time: Date.now(),
       version: '7.2.0',
       total_latency_ms: Date.now() - start,
       checks
-    }, allOk ? 200 : 503);
+    }, criticalOk ? 200 : 503);
   },
 
   // ============ TENANTS / COMPANIES ============
