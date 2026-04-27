@@ -2,10 +2,10 @@
 
 ## Estado global
 - Score inicial: 23/100
-- Score actual: **90/100** ✓ OBJETIVO SUPERADO
+- Score actual: **92/100** ✓ OBJETIVO SUPERADO con margen
 - Score objetivo: >=85/100
-- Última sesión: B7-B12 deuda técnica (2026-04-27)
-- Próximo bloque: ninguno (plan completo + deuda técnica resuelta)
+- Última sesión: B13-B16 final audit (2026-04-27)
+- Próximo bloque: ninguno (plan + deuda + audit final completos)
 - SYSTEM-INVENTORY: vigente (regenerar si pasan >7 días)
 
 ## Reglas de ejecución v2 (no negociables)
@@ -193,3 +193,4 @@ Evidencia:
 | 5 | 2026-04-27 | B5     | #1 tema funcional + #15 i18n grande | **84** | 0 | ~55 min | theme-wiring inyectado en 4 HTMLs, dict es:1071/en:1226, cobertura 90%, switch tema diff bytes 99% |
 | 6 | 2026-04-27 | **B6**     | **#7,#9,#10,#11,#13,#14 limpieza final** | **86** ✓ | 0 | ~30 min | /api/kiosk/products público (15 items), tests previos ya verificados, score objetivo 85 ALCANZADO |
 | 7 | 2026-04-27 | **B7-B12** | deuda técnica (cross-tenant real, owner panel, i18n EN, contraste, salvadorex theme, tests CI) | **90** ✓ | 0 | ~50 min | resolvePosUserId helper (9 reemplazos), owner KPIs +13 cableados, 19 EN reales, theme respeta gradient, salvadorex 5 vars, tests-e2e/smoke.spec.js |
+| 8 | 2026-04-27 | **B13-B16** | audit-log + salvadorex extra + i18n EN +185 + final audit | **92** ✓ | 0 | ~40 min | logAudit helper (auth+sales), salvadorex --surface-2/--text-3, dict EN +185 strings, Playwright 8/8 final tests pasan |
