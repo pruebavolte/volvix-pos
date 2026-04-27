@@ -11,14 +11,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #F5F5F4;
-    --surface: #FFFFFF;
+    /* B11: caen a Volvix theme vars cuando theme-wiring las setea */
+    --bg: var(--vlx-bg, #F5F5F4);
+    --surface: var(--vlx-surface, #FFFFFF);
     --surface-2: #FAFAF9;
     --surface-3: #F3F3F2;
-    --border: #E0DEDB;
+    --border: var(--vlx-border, #E0DEDB);
     --border-strong: #C9C7C3;
-    --text: #1C1917;
-    --text-2: #57534E;
+    --text: var(--vlx-text, #1C1917);
+    --text-2: var(--vlx-text-2, #57534E);
     --text-3: #A8A29E;
 
     /* Eleventa accent colors - respetados pero refinados */
@@ -1272,6 +1273,33 @@
     .summary-item { font-size: 11px; }
     .bottom-btn span { display: none; }
   }
+  /* R28 fix mobile: header overflow + tabs scroll horizontal + modales fit */
+  @media (max-width: 768px) {
+    .topbar, .pos-tabs, .config-tabs {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      flex-wrap: nowrap;
+      white-space: nowrap;
+    }
+    .topbar::-webkit-scrollbar, .pos-tabs::-webkit-scrollbar { height: 0; }
+    .pos-tabs .tab, .config-tab { flex: 0 0 auto; }
+    .modal, .dialog, [class*="modal"][class*="content"] {
+      max-width: calc(100vw - 24px) !important;
+      max-height: calc(100vh - 96px) !important;
+      overflow-y: auto;
+    }
+    /* Banner cookie en mobile: ocupar máximo 50vh y poder cerrar */
+    #volvix-cookie-banner {
+      max-height: 50vh;
+      overflow-y: auto;
+      padding: 12px 14px !important;
+      font-size: 12.5px !important;
+    }
+    #volvix-cookie-banner > div { gap: 10px !important; }
+    #volvix-cookie-banner button { padding: 8px 12px !important; font-size: 12px !important; }
+    /* Hamburger-friendly: ocultar labels largos en topbar y dejar solo iconos */
+    .tb-btn span:not(.tb-icon), .tb-text-only { display: none; }
+  }
 </style>
 <script src="volvix-api.js"></script>
 <script src="volvix-sync.js"></script>
@@ -1324,7 +1352,7 @@
     </div>
 
     <div class="breadcrumb">
-      <span class="crumb" id="today-date">20 Abr 2026</span>
+      <span class="crumb" id="today-date">—</span><script>(function(){try{var d=new Date();var meses=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];var s=d.getDate()+' '+meses[d.getMonth()]+' '+d.getFullYear();var el=document.getElementById('today-date');if(el)el.textContent=s;}catch(e){}})();</script>
       <div class="sync-indicator" onclick="openSyncPanel()" id="sync-indicator">
         <div class="dot"></div>
         <span>EN LÍNEA</span>
@@ -2571,17 +2599,25 @@
 
   /* ============ SSO (Volvix → SalvadoreX) ============ */
   // Si ya hay JWT Volvix válido, saltar el login local de SalvadoreX.
+  // R29: si NO hay token, redirigir a login Volvix central (UX uniforme)
   (function ssoCheck(){
     try {
       const token = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
-      if (!token) return; // sin token → mostrar login local
+      if (!token) {
+        // Sin sesión → ir al login Volvix central, NO mostrar form local
+        const back = encodeURIComponent(location.pathname + location.search);
+        location.replace('/login.html?redirect=' + back);
+        return;
+      }
       const parts = token.split('.');
       if (parts.length < 2) return;
       const payload = JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')));
       if (!payload.exp || payload.exp * 1000 <= Date.now()) {
-        // expirado → limpiar y mostrar login
+        // expirado → limpiar y redirigir a login Volvix
         localStorage.removeItem('volvix_token');
         localStorage.removeItem('volvixAuthToken');
+        const back = encodeURIComponent(location.pathname + location.search);
+        location.replace('/login.html?expired=1&redirect=' + back);
         return;
       }
       // Token Volvix válido → simular login local exitoso

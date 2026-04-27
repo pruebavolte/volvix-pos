@@ -836,6 +836,20 @@ function resolveTenant(req, queryTenant) {
   return req.user?.tenant_id;
 }
 
+// B7: resolvePosUserId — preferir el ID del JWT (real) sobre el mapeo legacy hardcoded.
+// Si req.user.id existe y es UUID, lo usamos directamente (cada user ve sus propios datos).
+// Sino, fallback al mapeo TNT001/TNT002 → user-A/user-B (compatibilidad con sesiones antiguas).
+function resolvePosUserId(req, tenantId) {
+  const u = req.user || {};
+  // Si JWT trae un UUID válido, eso es la verdad
+  if (u.id && typeof u.id === 'string' && /^[0-9a-fA-F-]{32,36}$/.test(u.id.replace(/-/g,''))) {
+    return u.id;
+  }
+  // Fallback legacy
+  if (tenantId === 'TNT002') return 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1';
+  return 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1';
+}
+
 // =============================================================
 // ARCHIVOS ESTÁTICOS
 // =============================================================
@@ -1111,8 +1125,7 @@ const handlers = {
       const limit = Math.min(parseInt(parsed.query.limit) || 1000, 5000);
       // FIX R13 (#6): tenant del JWT, no del query
       const tenantId = resolveTenant(req, parsed.query.tenant_id);
-      let posUserId = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1';
-      if (tenantId === 'TNT002') posUserId = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1';
+      let posUserId = resolvePosUserId(req, tenantId);
 
       let qs = `/pos_products?pos_user_id=eq.${posUserId}&select=*&order=name.asc&limit=${limit}`;
       if (q) {
@@ -1186,7 +1199,7 @@ const handlers = {
       }
       // FIX slice_38: pos_user_id derivado del JWT, NUNCA del body (impide cross-tenant write)
       const tenantId = resolveTenant(req);
-      const ownerUserId = tenantId === 'TNT002' ? 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1' : 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1';
+      const ownerUserId = resolvePosUserId(req, tenantId);
       const result = await supabaseRequest('POST', '/pos_products', {
         pos_user_id: ownerUserId,
         code: safe.code, name: safe.name, category: safe.category || 'general',
@@ -1213,7 +1226,7 @@ const handlers = {
       if (!existing || existing.length === 0) return sendJSON(res, { error: 'not found' }, 404);
       // FIX slice_38: tenant ownership check
       const tenantId = resolveTenant(req);
-      const expectedUserId = tenantId === 'TNT002' ? 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1' : 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1';
+      const expectedUserId = resolvePosUserId(req, tenantId);
       if (req.user.role !== 'superadmin' && existing[0].pos_user_id && existing[0].pos_user_id !== expectedUserId) {
         return sendJSON(res, { error: 'not found' }, 404);
       }
@@ -1271,7 +1284,7 @@ const handlers = {
       if (!existing || existing.length === 0) return sendJSON(res, { error: 'not found' }, 404);
       // FIX slice_38: tenant ownership check
       const tenantId = resolveTenant(req);
-      const expectedUserId = tenantId === 'TNT002' ? 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1' : 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1';
+      const expectedUserId = resolvePosUserId(req, tenantId);
       if (req.user.role !== 'superadmin' && existing[0].pos_user_id && existing[0].pos_user_id !== expectedUserId) {
         return sendJSON(res, { error: 'not found' }, 404);
       }
@@ -1287,7 +1300,7 @@ const handlers = {
       // FIX slice_38: filtrar SIEMPRE por tenant (vía pos_user_id derivado).
       // Solo superadmin puede pasar user_id arbitrario.
       const tenantId = resolveTenant(req);
-      const ownerUserId = tenantId === 'TNT002' ? 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1' : 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1';
+      const ownerUserId = resolvePosUserId(req, tenantId);
       let posUserId = ownerUserId;
       if (req.user.role === 'superadmin' && parsed.query.user_id && isUuid(parsed.query.user_id)) {
         posUserId = parsed.query.user_id;
@@ -1697,9 +1710,7 @@ const handlers = {
 
       // posUserId derivado del JWT (igual que /api/sales) — NO se acepta del query string
       const tenantId = (typeof resolveTenant === 'function') ? resolveTenant(req) : null;
-      const ownerUserId = tenantId === 'TNT002'
-        ? 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1'
-        : 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1';
+      const ownerUserId = resolvePosUserId(req, tenantId);
       const posUserId = (req.user && req.user.role === 'superadmin' && (typeof url !== 'undefined' && url.parse(req.url, true).query.user_id))
         ? url.parse(req.url, true).query.user_id
         : ownerUserId;
@@ -2113,7 +2124,7 @@ const handlers = {
     try {
       // FIX slice_38: filtro por tenant
       const tenantId = resolveTenant(req);
-      const ownerUserId = tenantId === 'TNT002' ? 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1' : 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1';
+      const ownerUserId = resolvePosUserId(req, tenantId);
       let qs = `?pos_user_id=eq.${ownerUserId}&select=id,code,name,stock,cost,price&order=name.asc`;
       if (req.user.role === 'superadmin') qs = '?select=id,code,name,stock,cost,price&order=name.asc';
       const products = await supabaseRequest('GET', '/pos_products' + qs);
@@ -2130,7 +2141,7 @@ const handlers = {
       const existing = await supabaseRequest('GET', `/pos_products?id=eq.${body.product_id}&select=id,pos_user_id`);
       if (!existing || existing.length === 0) return sendJSON(res, { error: 'not found' }, 404);
       const tenantId = resolveTenant(req);
-      const expectedUserId = tenantId === 'TNT002' ? 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1' : 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1';
+      const expectedUserId = resolvePosUserId(req, tenantId);
       if (req.user.role !== 'superadmin' && existing[0].pos_user_id && existing[0].pos_user_id !== expectedUserId) {
         return sendJSON(res, { error: 'not found' }, 404);
       }
@@ -2157,7 +2168,7 @@ const handlers = {
     try {
       // FIX slice_38: filtro por tenant (vía pos_user_id)
       const tenantId = resolveTenant(req);
-      const ownerUserId = tenantId === 'TNT002' ? 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1' : 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1';
+      const ownerUserId = resolvePosUserId(req, tenantId);
       let qs = `?pos_user_id=eq.${ownerUserId}&select=*&order=created_at.desc&limit=200`;
       if (req.user.role === 'superadmin') qs = '?select=*&order=created_at.desc&limit=200';
       const sales = await supabaseRequest('GET', '/pos_sales' + qs);
