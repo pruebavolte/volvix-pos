@@ -145,33 +145,32 @@ async function openSession(){
 
 /* ============== Catálogo ============== */
 async function loadCatalog(){
-  // Stub local + fetch real si endpoint disponible
-  const fallback = [
-    { id:1, name:'Café Americano', price:35, icon:'☕' },
-    { id:2, name:'Sandwich Jamón', price:65, icon:'🥪' },
-    { id:3, name:'Refresco 600ml', price:25, icon:'🥤' },
-    { id:4, name:'Donut Glaseado', price:30, icon:'🍩' },
-    { id:5, name:'Ensalada César', price:90, icon:'🥗' },
-    { id:6, name:'Pizza Slice', price:55, icon:'🍕' },
-    { id:7, name:'Hot Dog', price:50, icon:'🌭' },
-    { id:8, name:'Galleta', price:18, icon:'🍪' },
-    { id:9, name:'Agua 1L', price:20, icon:'💧' },
-    { id:10,name:'Hamburguesa', price:95, icon:'🍔' }
-  ];
+  // B6: usar endpoint público /api/kiosk/products (rate-limited 60/min/IP, sin auth)
+  products = [];
   try{
-    const r = await fetch(`${API}/api/products?limit=60`, { headers: token ? {Authorization:'Bearer '+token} : {} });
+    const r = await fetch(`${API}/api/kiosk/products`);
     if (r.ok){
       const j = await r.json();
       const items = (j && (j.items || j.products)) || [];
-      products = items.length ? items.map(p => ({
+      products = items.map(p => ({
         id: p.id, name: p.name, price: Number(p.price||0), icon: p.icon || '📦'
-      })) : fallback;
-    } else products = fallback;
-  }catch(_){ products = fallback; }
+      }));
+    }
+  }catch(_){}
   renderCatalog();
 }
 function renderCatalog(){
   const g = document.getElementById('grid'); g.innerHTML = '';
+  if (!products || !products.length){
+    // R28: empty state cuando kiosko no tiene productos reales
+    const empty = document.createElement('div');
+    empty.style.cssText = 'grid-column:1/-1;text-align:center;padding:60px 20px;color:#94a3b8;';
+    empty.innerHTML = '<div style="font-size:48px;margin-bottom:12px">🛒</div>'
+      + '<div style="font-size:18px;font-weight:600;color:#e2e8f0;margin-bottom:6px">Catálogo no disponible</div>'
+      + '<div style="font-size:13px">El operador del kiosko debe configurar productos en el panel.</div>';
+    g.appendChild(empty);
+    return;
+  }
   for (const p of products){
     const c = document.createElement('div'); c.className='card';
     c.innerHTML = `<div class="icon">${p.icon||'📦'}</div>
