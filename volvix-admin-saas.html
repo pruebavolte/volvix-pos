@@ -6,10 +6,20 @@
 <title>Volvix Admin SaaS — Super Admin Panel</title>
 <style>
 :root{
-  --bg:#0a0e1a;--bg2:#111827;--card:#1a2235;--card2:#222d44;
-  --border:#2a3653;--text:#e6edf7;--muted:#8b97b3;
+  /* R29: caen a Volvix theme vars cuando theme wiring las setea */
+  --bg: var(--vlx-bg, #0a0e1a);
+  --bg2:#111827;
+  --card: var(--vlx-surface, #1a2235);
+  --card2:#222d44;
+  --border: var(--vlx-border, #2a3653);
+  --text: var(--vlx-text, #e6edf7);
+  --muted: var(--vlx-text-2, #8b97b3);
   --primary:#6366f1;--primary2:#8b5cf6;--success:#10b981;--warn:#f59e0b;--danger:#ef4444;--info:#06b6d4;
   --grad:linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%);
+}
+[data-vlx-theme="light"] {
+  --bg2:#f3f4f6;
+  --card2:#f9fafb;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
@@ -168,7 +178,7 @@ tr:hover td{background:var(--card2)}
     <div class="nav-section">Principal</div>
     <nav class="nav">
       <a href="#" class="active"><span class="ic">📊</span>Dashboard</a>
-      <a href="#"><span class="ic">🏢</span>Tenants<span class="badge">847</span></a>
+      <a href="#"><span class="ic">🏢</span>Tenants<span class="badge" data-kpi="tenants-badge">—</span></a>
       <a href="#"><span class="ic">👥</span>Usuarios</a>
       <a href="#"><span class="ic">💳</span>Billing Global</a>
       <a href="#"><span class="ic">📈</span>Analytics</a>
@@ -202,10 +212,10 @@ tr:hover td{background:var(--card2)}
         <button class="icon-btn" title="Notificaciones">🔔<span class="dot"></span></button>
         <button class="icon-btn" title="Tema">🌙</button>
         <div class="user">
-          <div class="avatar">JD</div>
+          <div class="avatar" id="adm-avatar">—</div>
           <div class="user-info">
-            <div>Juan Devs</div>
-            <div class="role">Super Admin</div>
+            <div id="adm-name">—</div>
+            <div class="role" id="adm-role">—</div>
           </div>
         </div>
       </div>
@@ -230,39 +240,39 @@ tr:hover td{background:var(--card2)}
       <div class="kpi-grid">
         <div class="kpi">
           <div class="kpi-label">MRR (Recurrente Mensual)</div>
-          <div class="kpi-value">$284,750</div>
-          <div class="kpi-trend up">▲ 12.4% vs mes anterior</div>
-          <div class="kpi-sub">Proyectado: $312k al cierre</div>
+          <div class="kpi-value" data-kpi="mrr">—</div>
+          <div class="kpi-trend" data-kpi-trend="mrr"></div>
+          <div class="kpi-sub" data-kpi-sub="mrr"></div>
         </div>
         <div class="kpi green">
           <div class="kpi-label">ARR (Recurrente Anual)</div>
-          <div class="kpi-value">$3.42M</div>
-          <div class="kpi-trend up">▲ 18.7% YoY</div>
-          <div class="kpi-sub">Meta 2026: $4.2M</div>
+          <div class="kpi-value" data-kpi="arr">—</div>
+          <div class="kpi-trend" data-kpi-trend="arr"></div>
+          <div class="kpi-sub" data-kpi-sub="arr"></div>
         </div>
         <div class="kpi cyan">
           <div class="kpi-label">Tenants Activos</div>
-          <div class="kpi-value">847</div>
-          <div class="kpi-trend up">▲ 34 nuevos este mes</div>
-          <div class="kpi-sub">12,438 usuarios totales</div>
+          <div class="kpi-value" data-kpi="tenants">—</div>
+          <div class="kpi-trend" data-kpi-trend="tenants"></div>
+          <div class="kpi-sub" data-kpi-sub="tenants"></div>
         </div>
         <div class="kpi orange">
           <div class="kpi-label">Churn Rate</div>
-          <div class="kpi-value">2.8%</div>
-          <div class="kpi-trend down">▼ 0.4% vs mes anterior</div>
-          <div class="kpi-sub">24 cancelaciones · meta &lt;3%</div>
+          <div class="kpi-value" data-kpi="churn">—</div>
+          <div class="kpi-trend" data-kpi-trend="churn"></div>
+          <div class="kpi-sub" data-kpi-sub="churn"></div>
         </div>
         <div class="kpi red">
           <div class="kpi-label">Incidentes Abiertos</div>
-          <div class="kpi-value">5</div>
-          <div class="kpi-trend down">▼ 3 resueltos hoy</div>
-          <div class="kpi-sub">2 P1 · 3 P2</div>
+          <div class="kpi-value" data-kpi="incidents">—</div>
+          <div class="kpi-trend" data-kpi-trend="incidents"></div>
+          <div class="kpi-sub" data-kpi-sub="incidents"></div>
         </div>
         <div class="kpi">
           <div class="kpi-label">NPS Score</div>
-          <div class="kpi-value">72</div>
-          <div class="kpi-trend up">▲ 5 pts trim.</div>
-          <div class="kpi-sub">Promotores 78% · Detractores 6%</div>
+          <div class="kpi-value" data-kpi="nps">—</div>
+          <div class="kpi-trend" data-kpi-trend="nps"></div>
+          <div class="kpi-sub" data-kpi-sub="nps"></div>
         </div>
       </div>
 
@@ -280,37 +290,20 @@ tr:hover td{background:var(--card2)}
               <button class="btn btn-ghost" style="padding:6px 12px;font-size:11px">Net New</button>
             </div>
           </div>
-          <div class="chart">
-            <div class="bar" style="height:38%"><span>$112k</span></div>
-            <div class="bar" style="height:42%"><span>$128k</span></div>
-            <div class="bar" style="height:48%"><span>$142k</span></div>
-            <div class="bar" style="height:54%"><span>$158k</span></div>
-            <div class="bar" style="height:58%"><span>$172k</span></div>
-            <div class="bar" style="height:62%"><span>$184k</span></div>
-            <div class="bar" style="height:68%"><span>$198k</span></div>
-            <div class="bar" style="height:72%"><span>$214k</span></div>
-            <div class="bar" style="height:78%"><span>$232k</span></div>
-            <div class="bar" style="height:84%"><span>$248k</span></div>
-            <div class="bar" style="height:90%"><span>$265k</span></div>
-            <div class="bar" style="height:96%"><span>$284k</span></div>
+          <div class="chart" id="adm-mrr-chart">
+            <div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:30px 10px;font-size:12px">Cargando…</div>
           </div>
-          <div class="chart-x">
-            <div>May</div><div>Jun</div><div>Jul</div><div>Ago</div><div>Sep</div><div>Oct</div>
-            <div>Nov</div><div>Dic</div><div>Ene</div><div>Feb</div><div>Mar</div><div>Abr</div>
-          </div>
+          <div class="chart-x" id="adm-mrr-x"></div>
         </div>
 
         <div class="card">
           <div class="card-h"><h3>Distribución por Plan</h3><span class="more">⋯</span></div>
           <div style="position:relative">
-            <div class="donut"></div>
-            <div class="donut-c" style="top:0;height:160px"><b>847</b><span>tenants</span></div>
+            <div class="donut" id="adm-plan-donut" style="background:conic-gradient(var(--muted) 0 100%)"></div>
+            <div class="donut-c" style="top:0;height:160px"><b id="adm-plan-total">—</b><span>tenants</span></div>
           </div>
-          <div class="legend">
-            <div><span><span class="sw" style="background:var(--primary)"></span>Starter</span><b>381 · 45%</b></div>
-            <div><span><span class="sw" style="background:var(--primary2)"></span>Pro</span><b>212 · 25%</b></div>
-            <div><span><span class="sw" style="background:var(--info)"></span>Business</span><b>152 · 18%</b></div>
-            <div><span><span class="sw" style="background:var(--warn)"></span>Enterprise</span><b>102 · 12%</b></div>
+          <div class="legend" id="adm-plan-legend">
+            <div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:6px;font-size:12px">Sin datos de planes</div>
           </div>
         </div>
       </div>
@@ -386,71 +379,8 @@ tr:hover td{background:var(--card2)}
               <th>Tenant</th><th>Plan</th><th>Usuarios</th><th>MRR</th><th>Estado</th><th>Región</th><th>Última actividad</th><th></th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td><div class="tcell"><div class="t-avatar">AC</div><div><b>Acme Corp</b><div class="t-mini">acme.volvix.io</div></div></div></td>
-              <td><span class="tag purple">Enterprise</span></td>
-              <td>248</td><td><b>$4,800</b></td>
-              <td><span class="tag ok">Activo</span></td>
-              <td>US-East</td><td class="t-mini">hace 3 min</td>
-              <td><span class="more" style="cursor:pointer">⋯</span></td>
-            </tr>
-            <tr>
-              <td><div class="tcell"><div class="t-avatar" style="background:linear-gradient(135deg,#10b981,#06b6d4)">GV</div><div><b>Grupo Volvix</b><div class="t-mini">volvix.volvix.io</div></div></div></td>
-              <td><span class="tag purple">Enterprise</span></td>
-              <td>184</td><td><b>$4,200</b></td>
-              <td><span class="tag ok">Activo</span></td>
-              <td>LatAm</td><td class="t-mini">hace 1 min</td>
-              <td><span class="more" style="cursor:pointer">⋯</span></td>
-            </tr>
-            <tr>
-              <td><div class="tcell"><div class="t-avatar" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">SL</div><div><b>SalvadoreX Labs</b><div class="t-mini">salvadorex.volvix.io</div></div></div></td>
-              <td><span class="tag info">Business</span></td>
-              <td>92</td><td><b>$2,400</b></td>
-              <td><span class="tag ok">Activo</span></td>
-              <td>LatAm</td><td class="t-mini">hace 12 min</td>
-              <td><span class="more" style="cursor:pointer">⋯</span></td>
-            </tr>
-            <tr>
-              <td><div class="tcell"><div class="t-avatar" style="background:linear-gradient(135deg,#8b5cf6,#ec4899)">NX</div><div><b>NextWave Tech</b><div class="t-mini">nextwave.volvix.io</div></div></div></td>
-              <td><span class="tag info">Business</span></td>
-              <td>76</td><td><b>$2,200</b></td>
-              <td><span class="tag warn">Trial</span></td>
-              <td>EU-West</td><td class="t-mini">hace 28 min</td>
-              <td><span class="more" style="cursor:pointer">⋯</span></td>
-            </tr>
-            <tr>
-              <td><div class="tcell"><div class="t-avatar" style="background:linear-gradient(135deg,#06b6d4,#3b82f6)">FL</div><div><b>FlowLogic SA</b><div class="t-mini">flowlogic.volvix.io</div></div></div></td>
-              <td><span class="tag info">Business</span></td>
-              <td>64</td><td><b>$1,950</b></td>
-              <td><span class="tag ok">Activo</span></td>
-              <td>EU-West</td><td class="t-mini">hace 1h</td>
-              <td><span class="more" style="cursor:pointer">⋯</span></td>
-            </tr>
-            <tr>
-              <td><div class="tcell"><div class="t-avatar" style="background:linear-gradient(135deg,#ef4444,#f59e0b)">RT</div><div><b>RetailTrust</b><div class="t-mini">retailtrust.volvix.io</div></div></div></td>
-              <td><span class="tag" style="background:rgba(99,102,241,.15);color:var(--primary)">Pro</span></td>
-              <td>42</td><td><b>$1,180</b></td>
-              <td><span class="tag err">Pago pendiente</span></td>
-              <td>US-West</td><td class="t-mini">hace 2h</td>
-              <td><span class="more" style="cursor:pointer">⋯</span></td>
-            </tr>
-            <tr>
-              <td><div class="tcell"><div class="t-avatar" style="background:linear-gradient(135deg,#10b981,#84cc16)">QM</div><div><b>QuantumMed</b><div class="t-mini">quantummed.volvix.io</div></div></div></td>
-              <td><span class="tag" style="background:rgba(99,102,241,.15);color:var(--primary)">Pro</span></td>
-              <td>38</td><td><b>$980</b></td>
-              <td><span class="tag ok">Activo</span></td>
-              <td>US-East</td><td class="t-mini">hace 4h</td>
-              <td><span class="more" style="cursor:pointer">⋯</span></td>
-            </tr>
-            <tr>
-              <td><div class="tcell"><div class="t-avatar" style="background:linear-gradient(135deg,#3b82f6,#8b5cf6)">CB</div><div><b>CodeBros Inc</b><div class="t-mini">codebros.volvix.io</div></div></div></td>
-              <td><span class="tag" style="background:rgba(99,102,241,.15);color:var(--primary)">Pro</span></td>
-              <td>31</td><td><b>$890</b></td>
-              <td><span class="tag ok">Activo</span></td>
-              <td>APAC</td><td class="t-mini">hace 6h</td>
-              <td><span class="more" style="cursor:pointer">⋯</span></td>
-            </tr>
+          <tbody id="adm-tenants-tbody">
+            <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:30px">Cargando tenants…</td></tr>
           </tbody>
         </table>
       </div>
@@ -459,58 +389,15 @@ tr:hover td{background:var(--card2)}
       <div class="row row-3">
         <div class="card">
           <div class="card-h"><h3>Actividad Global</h3><span class="more">⋯</span></div>
-          <div class="feed-item">
-            <div class="feed-ic">💰</div>
-            <div class="feed-c"><b>Acme Corp</b> renovó plan Enterprise <span class="tag ok">$4,800</span><div class="meta">hace 8 min · invoice INV-28447</div></div>
-          </div>
-          <div class="feed-item">
-            <div class="feed-ic">👤</div>
-            <div class="feed-c">Nuevo tenant: <b>BlueSky Studios</b> registrado en plan Pro<div class="meta">hace 22 min · trial 14 días</div></div>
-          </div>
-          <div class="feed-item">
-            <div class="feed-ic">🚀</div>
-            <div class="feed-c">Deploy <b>v4.12.3</b> publicado en producción<div class="meta">hace 14 min · juan@volvix.io</div></div>
-          </div>
-          <div class="feed-item">
-            <div class="feed-ic">⚠️</div>
-            <div class="feed-c"><b>RetailTrust</b> pago fallido — reintentando<span class="tag warn"> $1,180</span><div class="meta">hace 1h · Stripe error: card_declined</div></div>
-          </div>
-          <div class="feed-item">
-            <div class="feed-ic">🔐</div>
-            <div class="feed-c">Login sospechoso bloqueado · tenant <b>FlowLogic</b><div class="meta">hace 2h · IP 185.220.101.x</div></div>
-          </div>
-          <div class="feed-item">
-            <div class="feed-ic">📈</div>
-            <div class="feed-c"><b>NextWave Tech</b> upgrade Trial → Business<div class="meta">hace 3h · +$2,200 MRR</div></div>
+          <div id="adm-feed">
+            <div style="padding:30px;text-align:center;color:var(--muted);font-size:13px">Cargando actividad…</div>
           </div>
         </div>
 
         <div class="card">
-          <div class="card-h"><h3>Tickets de Soporte</h3><span class="tag err">23 abiertos</span></div>
-          <div class="ticket urgent">
-            <div class="ticket-h"><b>#8472 · API timeout en webhooks</b><span class="tag err">P1</span></div>
-            <p>Cliente Enterprise reporta latencia &gt;30s en endpoints de billing</p>
-            <div class="meta">Acme Corp · 2h sin respuesta · @sara</div>
-          </div>
-          <div class="ticket urgent">
-            <div class="ticket-h"><b>#8471 · No puedo cambiar plan</b><span class="tag err">P1</span></div>
-            <p>Botón de upgrade no responde, error 500 en consola</p>
-            <div class="meta">QuantumMed · 45 min · sin asignar</div>
-          </div>
-          <div class="ticket high">
-            <div class="ticket-h"><b>#8469 · SSO con Okta no funciona</b><span class="tag warn">P2</span></div>
-            <p>Configuración SAML aparentemente correcta pero rechaza login</p>
-            <div class="meta">FlowLogic SA · 4h · @miguel</div>
-          </div>
-          <div class="ticket high">
-            <div class="ticket-h"><b>#8465 · Reportes PDF salen sin logo</b><span class="tag warn">P2</span></div>
-            <p>Logo personalizado del tenant no aparece en exports</p>
-            <div class="meta">Grupo Volvix · 6h · @ana</div>
-          </div>
-          <div class="ticket">
-            <div class="ticket-h"><b>#8460 · Solicitud feature: dark mode</b><span class="tag info">P3</span></div>
-            <p>Varios usuarios pidiendo modo oscuro en mobile</p>
-            <div class="meta">Múltiples tenants · 1d · backlog</div>
+          <div class="card-h"><h3>Tickets de Soporte</h3><span class="tag" id="adm-tickets-badge">—</span></div>
+          <div id="adm-tickets-list">
+            <div style="padding:30px;text-align:center;color:var(--muted);font-size:13px">Sin tickets registrados</div>
           </div>
         </div>
 
@@ -518,24 +405,22 @@ tr:hover td{background:var(--card2)}
           <div class="card-h"><h3>Billing Resumen</h3><span class="more">⋯</span></div>
           <div style="padding:14px;background:var(--card2);border-radius:8px;margin-bottom:12px">
             <div class="t-mini">Cobrado este mes</div>
-            <div style="font-size:24px;font-weight:700;margin:4px 0">$284,750</div>
-            <div style="font-size:11px;color:var(--success)">▲ 824 transacciones exitosas</div>
+            <div style="font-size:24px;font-weight:700;margin:4px 0" data-bill="charged_month">—</div>
+            <div style="font-size:11px;color:var(--success)" data-bill="charged_count">—</div>
           </div>
           <div style="padding:14px;background:var(--card2);border-radius:8px;margin-bottom:12px">
             <div class="t-mini">Pendiente / fallido</div>
-            <div style="font-size:24px;font-weight:700;margin:4px 0;color:var(--warn)">$8,420</div>
-            <div style="font-size:11px;color:var(--muted)">12 invoices · 4 reintentos automáticos</div>
+            <div style="font-size:24px;font-weight:700;margin:4px 0;color:var(--warn)" data-bill="pending_amount">—</div>
+            <div style="font-size:11px;color:var(--muted)" data-bill="pending_count">—</div>
           </div>
           <div style="padding:14px;background:var(--card2);border-radius:8px;margin-bottom:12px">
             <div class="t-mini">Reembolsos</div>
-            <div style="font-size:24px;font-weight:700;margin:4px 0">$1,240</div>
-            <div style="font-size:11px;color:var(--muted)">3 casos · 0.4% del total</div>
+            <div style="font-size:24px;font-weight:700;margin:4px 0" data-bill="refunds_amount">—</div>
+            <div style="font-size:11px;color:var(--muted)" data-bill="refunds_count">—</div>
           </div>
-          <table style="margin-top:8px">
+          <table style="margin-top:8px" id="adm-payments-table">
             <tbody>
-              <tr><td style="padding:8px 4px">Stripe</td><td style="text-align:right;padding:8px 4px"><b>$248k</b></td></tr>
-              <tr><td style="padding:8px 4px">PayPal</td><td style="text-align:right;padding:8px 4px"><b>$22k</b></td></tr>
-              <tr><td style="padding:8px 4px">Wire/Manual</td><td style="text-align:right;padding:8px 4px"><b>$14k</b></td></tr>
+              <tr><td colspan="2" style="padding:14px;text-align:center;color:var(--muted);font-size:12px">Sin datos de gateways</td></tr>
             </tbody>
           </table>
           <button class="btn btn-primary" style="width:100%;margin-top:12px">Ver Billing completo →</button>
@@ -661,29 +546,19 @@ tr:hover td{background:var(--card2)}
           <div class="card-h"><h3>Retención por Cohorte</h3><span class="t-mini">Tenants registrados por mes</span></div>
           <table>
             <thead><tr><th>Cohorte</th><th>M0</th><th>M1</th><th>M2</th><th>M3</th><th>M6</th><th>M12</th></tr></thead>
-            <tbody>
-              <tr><td><b>Abr 2025</b></td><td>100%</td><td>92%</td><td>88%</td><td>84%</td><td>78%</td><td>71%</td></tr>
-              <tr><td><b>May 2025</b></td><td>100%</td><td>94%</td><td>89%</td><td>85%</td><td>80%</td><td>72%</td></tr>
-              <tr><td><b>Jun 2025</b></td><td>100%</td><td>91%</td><td>87%</td><td>83%</td><td>77%</td><td>—</td></tr>
-              <tr><td><b>Jul 2025</b></td><td>100%</td><td>95%</td><td>91%</td><td>87%</td><td>82%</td><td>—</td></tr>
-              <tr><td><b>Ago 2025</b></td><td>100%</td><td>96%</td><td>92%</td><td>88%</td><td>—</td><td>—</td></tr>
-              <tr><td><b>Sep 2025</b></td><td>100%</td><td>93%</td><td>89%</td><td>85%</td><td>—</td><td>—</td></tr>
-              <tr><td><b>Oct 2025</b></td><td>100%</td><td>97%</td><td>93%</td><td>—</td><td>—</td><td>—</td></tr>
+            <tbody id="adm-cohort-tbody">
+              <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px">Sin datos de cohortes</td></tr>
             </tbody>
           </table>
-          <div style="margin-top:12px;font-size:11px;color:var(--muted)">📈 Cohorte Oct'25 supera promedio histórico en +4 pts a los 2 meses</div>
+          <div style="margin-top:12px;font-size:11px;color:var(--muted)" id="adm-cohort-note"></div>
         </div>
 
         <div class="card">
           <div class="card-h"><h3>Top Power Users</h3><span class="more">⋯</span></div>
           <table>
             <thead><tr><th>Usuario</th><th>Tenant</th><th>Sesiones</th><th>API calls</th></tr></thead>
-            <tbody>
-              <tr><td><div class="tcell"><div class="t-avatar">MR</div><div><b>maria.r@acme.io</b><div class="t-mini">Owner</div></div></div></td><td>Acme Corp</td><td>847</td><td>184k</td></tr>
-              <tr><td><div class="tcell"><div class="t-avatar" style="background:linear-gradient(135deg,#10b981,#06b6d4)">CS</div><div><b>carlos@volvix.io</b><div class="t-mini">Admin</div></div></div></td><td>Grupo Volvix</td><td>721</td><td>142k</td></tr>
-              <tr><td><div class="tcell"><div class="t-avatar" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">AL</div><div><b>ana@salvadorex.io</b><div class="t-mini">Dev</div></div></div></td><td>SalvadoreX</td><td>654</td><td>98k</td></tr>
-              <tr><td><div class="tcell"><div class="t-avatar" style="background:linear-gradient(135deg,#8b5cf6,#ec4899)">JN</div><div><b>j.nguyen@nextwave</b><div class="t-mini">Owner</div></div></div></td><td>NextWave</td><td>512</td><td>76k</td></tr>
-              <tr><td><div class="tcell"><div class="t-avatar" style="background:linear-gradient(135deg,#06b6d4,#3b82f6)">PK</div><div><b>p.klein@flowlogic</b><div class="t-mini">Admin</div></div></div></td><td>FlowLogic</td><td>438</td><td>62k</td></tr>
+            <tbody id="adm-poweruser-tbody">
+              <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:30px">Sin datos de power users</td></tr>
             </tbody>
           </table>
         </div>
@@ -707,12 +582,182 @@ tr:hover td{background:var(--card2)}
     </div>
 
     <footer class="footer">
-      <div>Volvix SaaS Admin v4.12.3 · © 2026 Grupo Volvix</div>
+      <div>Volvix SaaS Admin · © 2026 Grupo Volvix</div>
       <div>Status: <span style="color:var(--success)">● Todos los sistemas operativos</span></div>
     </footer>
 
   </div>
 </div>
+<script>
+// R28: cablear KPIs a /api/owner/dashboard + /api/me
+(async function loadAdminSaas(){
+  function tk(){ return localStorage.getItem('volvix_token')||localStorage.getItem('volvixAuthToken')||''; }
+  function setText(sel, v){ var e=document.querySelector(sel); if(e) e.textContent=(v==null||v===''?'—':String(v)); }
+  function setKpi(name, value, trend, sub){
+    var v=document.querySelector('[data-kpi="'+name+'"]'); if(v) v.textContent=(value==null||value===''?'—':value);
+    var t=document.querySelector('[data-kpi-trend="'+name+'"]'); if(t) t.textContent=trend||'';
+    var s=document.querySelector('[data-kpi-sub="'+name+'"]'); if(s) s.textContent=sub||'';
+  }
+  function fmt$(n){ return '$'+Number(n||0).toLocaleString('es-MX'); }
+  function ini(s){ return (s||'').split(' ').slice(0,2).map(x=>(x[0]||'').toUpperCase()).join('') || '—'; }
+  var t=tk(); if(!t) return;
+  var headers={ 'Authorization':'Bearer '+t };
+  // /api/me para topbar usuario
+  try{
+    var rm = await fetch('/api/me',{ headers });
+    if (rm.ok){
+      var me = await rm.json();
+      var u = me.user || me;
+      setText('#adm-name', u.full_name || u.email || '—');
+      setText('#adm-role', u.role || '—');
+      setText('#adm-avatar', ini(u.full_name || u.email || ''));
+    }
+  }catch(e){}
+  // /api/owner/dashboard para KPIs
+  try{
+    var rd = await fetch('/api/owner/dashboard',{ headers });
+    if (rd.ok){
+      var d = await rd.json();
+      var m = d.metrics || d || {};
+      var tenants = m.companies || m.tenants || 0;
+      var users = m.users || 0;
+      var revenue = m.total_revenue || m.revenue || 0;
+      setKpi('mrr', fmt$(revenue), '', 'Ingresos del periodo');
+      setKpi('arr', fmt$(revenue*12), '', 'Anualizado (estimado)');
+      setKpi('tenants', tenants, '', users + ' usuarios totales');
+      setKpi('churn', '—', '', '');
+      setKpi('incidents', '—', '', '');
+      setKpi('nps', '—', '', '');
+      var tb = document.querySelector('[data-kpi="tenants-badge"]'); if(tb) tb.textContent = tenants;
+      // Donut total
+      var pt = document.getElementById('adm-plan-total'); if(pt) pt.textContent = tenants;
+    }
+  }catch(e){ console.warn('[admin-saas] dashboard fail', e); }
+
+  // R29: cablear gráfica MRR a /api/reports/sales/daily (12 meses no, pero usamos lo disponible)
+  try {
+    var rb = await fetch('/api/reports/sales/daily?days=12', { headers });
+    var chart = document.getElementById('adm-mrr-chart');
+    var xaxis = document.getElementById('adm-mrr-x');
+    if (chart) chart.innerHTML = '';
+    if (xaxis) xaxis.innerHTML = '';
+    if (rb.ok) {
+      var jb = await rb.json();
+      var arr = (jb && (jb.items || jb.daily || jb.data)) || [];
+      if (!arr.length) {
+        if (chart) chart.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:30px 10px;font-size:12px">Sin datos del periodo</div>';
+      } else {
+        var maxV = Math.max.apply(null, arr.map(function(x){ return Number(x.total||x.sales||0); })) || 1;
+        arr.forEach(function(x){
+          var v = Number(x.total || x.sales || 0);
+          var h = Math.max(2, Math.round(v / maxV * 96));
+          var bar = document.createElement('div');
+          bar.className = 'bar';
+          bar.style.height = h + '%';
+          bar.innerHTML = '<span>$' + (v >= 1000 ? Math.round(v/1000)+'k' : v.toFixed(0)) + '</span>';
+          if (chart) chart.appendChild(bar);
+          if (xaxis) {
+            var lbl = document.createElement('div');
+            try { var d2 = new Date(x.date || x.day); lbl.textContent = d2.getDate() + '/' + (d2.getMonth()+1); }
+            catch(e2){ lbl.textContent = ''; }
+            xaxis.appendChild(lbl);
+          }
+        });
+      }
+    } else {
+      if (chart) chart.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:30px 10px;font-size:12px">Endpoint no disponible</div>';
+    }
+  } catch(e){ console.warn('[admin-saas] mrr chart fail', e); }
+
+  // B2: cablear tabla tenants a /api/owner/tenants
+  try {
+    var rt = await fetch('/api/owner/tenants', { headers });
+    var tbody = document.getElementById('adm-tenants-tbody');
+    if (rt.ok && tbody) {
+      var tenants = await rt.json();
+      if (!Array.isArray(tenants) || !tenants.length) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:30px">Sin tenants registrados</td></tr>';
+      } else {
+        var planBadge = function(plan){
+          var p = (plan||'').toLowerCase();
+          if (p === 'enterprise') return '<span class="tag purple">Enterprise</span>';
+          if (p === 'business') return '<span class="tag info">Business</span>';
+          if (p === 'pro') return '<span class="tag" style="background:rgba(99,102,241,.15);color:var(--primary)">Pro</span>';
+          if (p === 'trial') return '<span class="tag warn">Trial</span>';
+          return '<span class="tag">' + (plan || '—') + '</span>';
+        };
+        var initials = function(name){
+          return (name||'').split(' ').slice(0,2).map(function(w){return (w[0]||'').toUpperCase();}).join('') || '—';
+        };
+        tbody.innerHTML = tenants.map(function(t){
+          var st = t.is_active === false ? '<span class="tag err">Inactivo</span>' : '<span class="tag ok">Activo</span>';
+          return '<tr>' +
+            '<td><div class="tcell"><div class="t-avatar">' + initials(t.name) + '</div><div><b>' + (t.name || '—') + '</b><div class="t-mini">' + (t.subdomain || t.id || '—') + '</div></div></div></td>' +
+            '<td>' + planBadge(t.plan) + '</td>' +
+            '<td>' + (t.users_count != null ? t.users_count : '—') + '</td>' +
+            '<td><b>' + (t.mrr != null ? '$'+Number(t.mrr).toLocaleString('es-MX') : '—') + '</b></td>' +
+            '<td>' + st + '</td>' +
+            '<td>' + (t.region || '—') + '</td>' +
+            '<td class="t-mini">' + (t.last_activity || '—') + '</td>' +
+            '<td><span class="more" style="cursor:pointer">⋯</span></td>' +
+          '</tr>';
+        }).join('');
+      }
+    }
+  } catch(e){ console.warn('[admin-saas] tenants fail', e); }
+
+  // B2: cablear feed actividad a /api/audit-log o vacío
+  try {
+    var rf = await fetch('/api/audit-log?limit=8', { headers });
+    var feed = document.getElementById('adm-feed');
+    if (feed) {
+      if (rf.ok) {
+        var jf = await rf.json();
+        var events = (jf && (jf.items || jf)) || [];
+        if (!Array.isArray(events) || !events.length) {
+          feed.innerHTML = '<div style="padding:30px;text-align:center;color:var(--muted);font-size:13px">Sin actividad registrada</div>';
+        } else {
+          feed.innerHTML = events.slice(0,6).map(function(e){
+            return '<div class="feed-item"><div class="feed-ic">📌</div><div class="feed-c">' + (e.action || e.event || '—') + ' <div class="meta">' + (e.created_at ? new Date(e.created_at).toLocaleString('es-MX') : '—') + '</div></div></div>';
+          }).join('');
+        }
+      } else {
+        feed.innerHTML = '<div style="padding:30px;text-align:center;color:var(--muted);font-size:13px">Endpoint audit-log no disponible</div>';
+      }
+    }
+  } catch(e){}
+
+  // R29: cablear distribución por plan a /api/billing/plans + /api/owner/seats si existen
+  try {
+    var rp = await fetch('/api/billing/plans', { headers });
+    var legend = document.getElementById('adm-plan-legend');
+    var donut = document.getElementById('adm-plan-donut');
+    if (rp.ok && legend) {
+      var jp = await rp.json();
+      var plans = (jp && (jp.plans || jp.items || jp)) || [];
+      if (!Array.isArray(plans) || !plans.length) {
+        legend.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:6px;font-size:12px">Sin datos de planes</div>';
+      } else {
+        var totalCount = plans.reduce(function(a,p){return a + (Number(p.count||0));}, 0);
+        legend.innerHTML = plans.map(function(p,i){
+          var pct = totalCount ? Math.round((Number(p.count||0)/totalCount)*100) : 0;
+          var color = ['var(--primary)','var(--primary2)','var(--info)','var(--warn)'][i % 4];
+          return '<div><span><span class="sw" style="background:'+color+'"></span>'+(p.name||'Plan')+'</span><b>'+(p.count||0)+' · '+pct+'%</b></div>';
+        }).join('');
+        // Donut conic-gradient
+        var stops = [], acc = 0;
+        plans.forEach(function(p,i){
+          var color = ['var(--primary)','var(--primary2)','var(--info)','var(--warn)'][i % 4];
+          var pct = totalCount ? (Number(p.count||0)/totalCount)*100 : 0;
+          stops.push(color + ' ' + acc + '% ' + (acc+pct) + '%');
+          acc += pct;
+        });
+        if (donut && stops.length) donut.style.background = 'conic-gradient(' + stops.join(',') + ')';
+      }
+    }
+  } catch(e){ console.warn('[admin-saas] plans fail', e); }
+})();
+</script>
   <script defer src="auth-helper.js"></script>
 <link rel="stylesheet" href="volvix-modals.css">
 <script defer src="volvix-modals.js"></script>

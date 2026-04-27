@@ -3,16 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Volvix MEGA Dashboard - Agent-47 Ronda 8</title>
+<title>Volvix MEGA Dashboard</title>
 <style>
 :root{
-  --bg:#0a0e1a; --bg2:#111827; --bg3:#1a2332; --card:#151c2c;
-  --border:#26314a; --text:#e6edf7; --muted:#8b95ad;
-  --accent:#5b9dff; --accent2:#a78bfa; --green:#34d399; --yellow:#fbbf24;
+  /* R29: variables locales caen a Volvix theme vars cuando existen */
+  --bg: var(--vlx-bg, #0a0e1a);
+  --bg2:#111827; --bg3:#1a2332;
+  --card: var(--vlx-surface, #151c2c);
+  --border: var(--vlx-border, #26314a);
+  --text: var(--vlx-text, #e6edf7);
+  --muted: var(--vlx-text-2, #8b95ad);
+  --accent: var(--vlx-accent, #5b9dff);
+  --accent2:#a78bfa; --green:#34d399; --yellow:#fbbf24;
   --red:#f87171; --pink:#f472b6; --cyan:#22d3ee;
   --grad:linear-gradient(135deg,#5b9dff 0%,#a78bfa 100%);
   --grad2:linear-gradient(135deg,#34d399 0%,#22d3ee 100%);
   --grad3:linear-gradient(135deg,#f472b6 0%,#fbbf24 100%);
+}
+[data-vlx-theme="light"] {
+  --bg2:#f3f4f6; --bg3:#e5e7eb;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;line-height:1.5}
@@ -185,7 +194,7 @@ body{min-height:100vh;background:radial-gradient(circle at 20% 0%,#1a2540 0%,var
     <div class="logo">V</div>
     <div>
       <h1>Volvix MEGA Dashboard</h1>
-      <small>Agent-47 · Ronda 8 Fibonacci · ALL-IN-ONE</small>
+      <small>Plataforma multi-tenant · Vista en tiempo real</small>
     </div>
   </div>
   <div class="header-right">
@@ -202,38 +211,38 @@ body{min-height:100vh;background:radial-gradient(circle at 20% 0%,#1a2540 0%,var
     <div class="metric">
       <div class="metric-icon">$</div>
       <div class="metric-label">Ventas Hoy</div>
-      <div class="metric-val" id="m-sales">$0</div>
-      <div class="metric-trend">+18.2% vs ayer</div>
+      <div class="metric-val" id="m-sales">—</div>
+      <div class="metric-trend" id="m-sales-trend"></div>
     </div>
     <div class="metric green">
       <div class="metric-icon">#</div>
       <div class="metric-label">Tickets</div>
-      <div class="metric-val" id="m-tickets">0</div>
-      <div class="metric-trend">+24 ultima hora</div>
+      <div class="metric-val" id="m-tickets">—</div>
+      <div class="metric-trend" id="m-tickets-trend"></div>
     </div>
     <div class="metric pink">
       <div class="metric-icon">P</div>
       <div class="metric-label">Productos</div>
-      <div class="metric-val" id="m-prods">0</div>
-      <div class="metric-trend">12 bajo stock</div>
+      <div class="metric-val" id="m-prods">—</div>
+      <div class="metric-trend" id="m-prods-trend"></div>
     </div>
     <div class="metric">
       <div class="metric-icon">C</div>
       <div class="metric-label">Customers</div>
-      <div class="metric-val" id="m-cust">0</div>
-      <div class="metric-trend">+38 nuevos hoy</div>
+      <div class="metric-val" id="m-cust">—</div>
+      <div class="metric-trend" id="m-cust-trend"></div>
     </div>
     <div class="metric green">
       <div class="metric-icon">T</div>
       <div class="metric-label">Tenants Activos</div>
-      <div class="metric-val" id="m-ten">0</div>
-      <div class="metric-trend">+2 esta semana</div>
+      <div class="metric-val" id="m-ten">—</div>
+      <div class="metric-trend" id="m-ten-trend"></div>
     </div>
     <div class="metric pink">
       <div class="metric-icon">%</div>
       <div class="metric-label">Conversion</div>
-      <div class="metric-val" id="m-conv">0%</div>
-      <div class="metric-trend">+2.1pts</div>
+      <div class="metric-val" id="m-conv">—</div>
+      <div class="metric-trend" id="m-conv-trend">—</div>
     </div>
   </div>
 
@@ -260,13 +269,13 @@ body{min-height:100vh;background:radial-gradient(circle at 20% 0%,#1a2540 0%,var
       </div>
       <div class="donut">
         <div class="donut-text">
-          <div class="donut-num">99.7%</div>
-          <div class="donut-lbl">Uptime 30d</div>
+          <div class="donut-num" id="m-uptime">—</div>
+          <div class="donut-lbl">Uptime</div>
         </div>
       </div>
       <div style="display:flex;justify-content:space-around;margin-top:20px;text-align:center">
-        <div><div style="font-size:18px;font-weight:800;color:var(--green)">142ms</div><div style="font-size:11px;color:var(--muted)">Latencia avg</div></div>
-        <div><div style="font-size:18px;font-weight:800;color:var(--accent)">3.2k</div><div style="font-size:11px;color:var(--muted)">Req/min</div></div>
+        <div><div style="font-size:18px;font-weight:800;color:var(--green)" id="m-latency">—</div><div style="font-size:11px;color:var(--muted)">Latencia avg</div></div>
+        <div><div style="font-size:18px;font-weight:800;color:var(--accent)" id="m-rpm">—</div><div style="font-size:11px;color:var(--muted)">Req/min</div></div>
       </div>
     </div>
   </div>
@@ -303,7 +312,7 @@ body{min-height:100vh;background:radial-gradient(circle at 20% 0%,#1a2540 0%,var
   </div>
 
   <!-- AGENTS -->
-  <div class="section-title">Agents y Modulos Disponibles</div>
+  <div class="section-title">Módulos disponibles</div>
   <div class="card">
     <div class="agents-grid" id="agents-grid"></div>
   </div>
@@ -338,13 +347,13 @@ body{min-height:100vh;background:radial-gradient(circle at 20% 0%,#1a2540 0%,var
   </div>
 
   <!-- TIMELINE + PERF -->
-  <div class="section-title">Ronda 8 Fibonacci</div>
+  <div class="section-title">Actividad reciente</div>
   <div class="grid-2">
     <div class="card">
       <div class="card-head">
         <div>
-          <div class="card-title">Timeline Agents Fibonacci</div>
-          <div class="card-sub">47 agents en paralelo</div>
+          <div class="card-title">Cronología</div>
+          <div class="card-sub">Eventos del sistema</div>
         </div>
       </div>
       <div class="timeline" id="timeline"></div>
@@ -455,7 +464,7 @@ body{min-height:100vh;background:radial-gradient(circle at 20% 0%,#1a2540 0%,var
   </div>
 
   <div class="footer">
-    <strong>Volvix POS MEGA Dashboard</strong> · Agent-47 (ULTIMO) · Ronda 8 Fibonacci · Generado 2026-04-25
+    <strong>Volvix POS MEGA Dashboard</strong> · Vista global multi-tenant en vivo
     <br>Endpoints: /api/owner/dashboard · /api/products · /api/sales · /api/customers · /api/tenants · /api/health
   </div>
 </div>
@@ -490,29 +499,46 @@ const MOCK = {
 async function loadAll(){
   const tid = (window.Volvix && Volvix.session && Volvix.session.tenant_id) || 'TNT001';
   const q = '?tenant_id=' + encodeURIComponent(tid);
-  const [d,p,s,c,t,h] = await Promise.all([
-    safeFetch('/api/owner/dashboard'+q,MOCK.dashboard),
-    safeFetch('/api/products'+q,MOCK.products),
-    safeFetch('/api/sales'+q,MOCK.sales),
-    safeFetch('/api/customers'+q,MOCK.customers),
-    safeFetch('/api/tenants'+q,MOCK.tenants),
-    safeFetch('/api/health',MOCK.health)
+  const tk = (function(){ try{ return localStorage.getItem('volvix_token')||localStorage.getItem('volvixAuthToken')||''; }catch(e){return '';} })();
+  const headers = tk ? { 'Authorization': 'Bearer '+tk } : {};
+  const safeAuth = (path) => fetch(path, { headers, credentials:'include' }).then(r => r.ok ? r.json() : null).catch(()=>null);
+  // B2 fix: usar /api/dashboard/today para KPIs hoy + /api/owner/dashboard para totales
+  const [d, today, p, s, c, t, h] = await Promise.all([
+    safeAuth('/api/owner/dashboard'+q),
+    safeAuth('/api/dashboard/today'),
+    safeAuth('/api/products'+q),
+    safeAuth('/api/sales'+q),
+    safeAuth('/api/customers'+q),
+    safeAuth('/api/tenants'+q),
+    safeAuth('/api/health'),
   ]);
   const pArr = Array.isArray(p) ? p : (p && Array.isArray(p.items) ? p.items : []);
   const cArr = Array.isArray(c) ? c : (c && Array.isArray(c.items) ? c.items : []);
   const sArr = Array.isArray(s) ? s : (s && Array.isArray(s.items) ? s.items : []);
   const tArr = Array.isArray(t) ? t : (t && Array.isArray(t.items) ? t.items : []);
-  const _salesT = (d&&d.sales_today)||0;
-  animateNum('m-sales', _salesT? '$'+_salesT.toLocaleString() : 'Sin datos');
-  const _tk = (d&&d.tickets)||sArr.length||0;
-  animateNum('m-tickets', _tk? _tk.toLocaleString() : 'Sin datos');
-  animateNum('m-prods',pArr.length.toLocaleString());
-  animateNum('m-cust',cArr.length.toLocaleString());
-  animateNum('m-ten',tArr.length.toLocaleString());
-  animateNum('m-conv',((d&&d.conversion)||0).toFixed(1)+'%');
-  renderTenants(tArr.length?tArr:MOCK.tenants);
+  const dash = d || {};
+  const metrics = dash.metrics || dash || {};
+  const tdy = today || {};
+  // KPIs HOY desde /api/dashboard/today
+  const _salesT = (tdy.sales_today != null) ? tdy.sales_today : 0;
+  animateNum('m-sales', '$' + Number(_salesT).toLocaleString('es-MX', {maximumFractionDigits: 2}));
+  animateNum('m-tickets', (tdy.tickets_today != null ? tdy.tickets_today : 0).toLocaleString());
+  // Totales / acumulados desde /api/owner/dashboard
+  animateNum('m-prods', (metrics.total_products || metrics.products || pArr.length || 0).toLocaleString());
+  animateNum('m-cust', (metrics.total_customers || metrics.customers || cArr.length || 0).toLocaleString());
+  animateNum('m-ten', (metrics.active_tenants || metrics.total_tenants || metrics.companies || tArr.length || 0).toLocaleString());
+  animateNum('m-conv', tdy.conversion_today != null ? Number(tdy.conversion_today).toFixed(1) + '%' : '—');
+  // System health real
+  const health = h || {};
+  const upt = health.uptime || metrics.uptime;
+  animateNum('m-uptime', upt != null ? Number(upt).toFixed(1) + '%' : '—');
+  const lat = health.latency_ms || health.latency || tdy.latency_p50;
+  animateNum('m-latency', lat != null ? Math.round(lat) + 'ms' : '—');
+  const rpm = health.rpm || health.req_per_min;
+  animateNum('m-rpm', rpm != null ? rpm.toLocaleString() : '—');
+  renderTenants(tArr.length ? tArr : []);
 }
-function animateNum(id,val){ document.getElementById(id).textContent = val; }
+function animateNum(id,val){ const el = document.getElementById(id); if (el) el.textContent = val; }
 
 // ============ BAR CHART (datos reales /api/reports/sales/daily) ============
 async function renderBars(){
@@ -673,23 +699,22 @@ function renderTests(){
 }
 renderTests();
 
-// ============ TIMELINE ============
-const TL = [
-  {t:'Ronda 1 - Foundation',m:'Agent-1 a Agent-1',d:'Setup inicial estructura proyecto',s:'done'},
-  {t:'Ronda 2 - Models',m:'Agent-1 a Agent-2',d:'Schemas Prisma + migraciones',s:'done'},
-  {t:'Ronda 3 - API Layer',m:'Agent-1 a Agent-3',d:'Endpoints REST + auth',s:'done'},
-  {t:'Ronda 4 - UI Core',m:'Agent-1 a Agent-5',d:'Componentes POS + checkout',s:'done'},
-  {t:'Ronda 5 - Multi-Tenant',m:'Agent-1 a Agent-8',d:'Aislamiento + RLS',s:'done'},
-  {t:'Ronda 6 - Reports',m:'Agent-1 a Agent-13',d:'Analytics + dashboards',s:'done'},
-  {t:'Ronda 7 - Integraciones',m:'Agent-1 a Agent-21',d:'Pagos, CFDI, delivery, ML',s:'done'},
-  {t:'Ronda 8 - Polish',m:'Agent-1 a Agent-47',d:'Esta ronda - dashboards, tests, docs',s:'current'}
-];
-document.getElementById('timeline').innerHTML = TL.map(x=>`
-  <div class="timeline-item ${x.s}">
-    <div class="timeline-title">${x.t}</div>
-    <div class="timeline-meta">${x.m}</div>
-    <div class="timeline-desc">${x.d}</div>
-  </div>`).join('');
+// ============ TIMELINE (placeholder; se hidrata desde /api/audit-log) ============
+const TL = [];
+(function renderTL(){
+  const el = document.getElementById('timeline');
+  if (!el) return;
+  if (!TL.length) {
+    el.innerHTML = '<div style="opacity:.6;padding:18px;text-align:center;font-size:13px">Sin eventos en el periodo.</div>';
+    return;
+  }
+  el.innerHTML = TL.map(x=>`
+    <div class="timeline-item ${x.s}">
+      <div class="timeline-title">${x.t}</div>
+      <div class="timeline-meta">${x.m}</div>
+      <div class="timeline-desc">${x.d}</div>
+    </div>`).join('');
+})();
 
 // ============ PERF ============
 const PERF = [
