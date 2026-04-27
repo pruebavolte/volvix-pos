@@ -148,6 +148,13 @@
 
   function wsConnect() {
     if (OFFLINE) return;
+    // B17: Vercel serverless NO soporta WebSocket — abortar silenciosamente
+    try {
+      if (typeof location !== 'undefined' && /\.vercel\.app$/i.test(location.hostname)) {
+        console.log('[volvix] WS skip on Vercel (serverless)');
+        return;
+      }
+    } catch (_) {}
     const wsUrl = getWsUrl(API_URL);
     if (!wsUrl) return;
 
