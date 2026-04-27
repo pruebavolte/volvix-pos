@@ -6270,6 +6270,85 @@ handlers['GET /api/reports/sales/daily'] = requireAuth(async (req, res) => {
   } catch (err) { sendError(res, err); }
 }, ['admin', 'owner', 'superadmin']);
 
+// B19: external-lookup proxy (CORS-safe) — OpenFoodFacts + UPCitemDB en paralelo
+handlers['GET /api/products/external-lookup'] = async (req, res) => {
+  try {
+    const ip = clientIp(req);
+    if (!rateLimit('external_lookup:' + ip, 30, 60_000)) {
+      return send429(res, 60_000, 'Demasiadas búsquedas externas');
+    }
+    const q = url.parse(req.url, true).query;
+    const barcode = String(q.barcode || '').replace(/\D/g, '');
+    if (!barcode || barcode.length < 4) {
+      return sendJSON(res, { ok: false, error: 'invalid_barcode' }, 400);
+    }
+
+    function withTimeout(p, ms) {
+      return Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
+    }
+    async function nodeFetch(u, opts) {
+      // Node 18+ tiene fetch global
+      if (typeof fetch !== 'undefined') return fetch(u, opts);
+      // Fallback https
+      const https = require('https');
+      return new Promise((resolve, reject) => {
+        const r = https.get(u, (resp) => {
+          let data = '';
+          resp.on('data', d => data += d);
+          resp.on('end', () => resolve({
+            ok: resp.statusCode >= 200 && resp.statusCode < 300,
+            status: resp.statusCode,
+            json: async () => JSON.parse(data),
+            text: async () => data
+          }));
+        });
+        r.on('error', reject);
+        r.setTimeout(2000, () => { r.destroy(); reject(new Error('timeout')); });
+      });
+    }
+
+    const sources = [
+      // OpenFoodFacts
+      withTimeout(nodeFetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`).then(async r => {
+        if (!r.ok) return null;
+        const j = await r.json();
+        if (j.status !== 1 || !j.product) return null;
+        return {
+          nombre: j.product.product_name || j.product.product_name_es || '',
+          marca: j.product.brands || '',
+          imagen: j.product.image_url || j.product.image_front_url || '',
+          _source: 'openfoodfacts'
+        };
+      }), 1500).catch(() => null),
+      // UPCitemDB
+      withTimeout(nodeFetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${barcode}`).then(async r => {
+        if (!r.ok) return null;
+        const j = await r.json();
+        if (!j.items || !j.items.length) return null;
+        const p = j.items[0];
+        return {
+          nombre: p.title || '',
+          marca: p.brand || '',
+          imagen: (p.images && p.images[0]) || '',
+          _source: 'upcitemdb'
+        };
+      }), 1500).catch(() => null),
+    ];
+
+    const results = (await Promise.all(sources)).filter(r => r && r.nombre);
+    if (!results.length) {
+      return sendJSON(res, { ok: false, error: 'not_found_external', barcode }, 404);
+    }
+    // Priorizar nombre + imagen + marca
+    results.sort((a, b) => {
+      const sa = (a.nombre ? 3 : 0) + (a.imagen ? 2 : 0) + (a.marca ? 1 : 0);
+      const sb = (b.nombre ? 3 : 0) + (b.imagen ? 2 : 0) + (b.marca ? 1 : 0);
+      return sb - sa;
+    });
+    sendJSON(res, { ok: true, product: { ...results[0], codigo_barras: barcode } });
+  } catch (err) { sendError(res, err); }
+};
+
 // B17: ventas por hora — agregadas por hour del día actual
 handlers['GET /api/reports/sales/hourly'] = requireAuth(async (req, res) => {
   try {

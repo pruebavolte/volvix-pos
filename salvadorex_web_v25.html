@@ -1311,6 +1311,31 @@
 <script defer src="volvix-ai-assistant.js"></script>
 <script src="volvix-pos-wiring.js" defer></script>
 <script src="volvix-pos-extra-wiring.js" defer></script>
+<!-- B19: búsqueda inteligente offline-first + barcode cascade -->
+<script src="volvix-product-search.js" defer></script>
+<script src="volvix-barcode-resolver.js" defer></script>
+<script defer>
+  // Wire autocomplete al input cuando todo cargue
+  document.addEventListener('DOMContentLoaded', function() {
+    function tryMount() {
+      if (!window.VolvixProductSearch) return setTimeout(tryMount, 200);
+      const inp = document.getElementById('barcode-input');
+      if (!inp) return;
+      window.VolvixProductSearch.mountAutocomplete(inp, {
+        debounce: 200, limit: 8,
+        onSelect: function(p) {
+          // searchProduct ya valida precio re-fetch
+          if (typeof searchProduct === 'function') {
+            searchProduct(p.code || p.id);
+          } else {
+            inp.value = p.code || '';
+          }
+        }
+      });
+    }
+    tryMount();
+  });
+</script>
 </head>
 <body>
 
@@ -2838,14 +2863,62 @@
     window._tt = setTimeout(() => t.classList.remove('show'), 2500);
   }
 
-  /* ============ POS ============ */
-  function searchProduct(code) {
+  /* ============ POS — B19: cascade local→central→external ============ */
+  async function searchProduct(code) {
     if (!code) return;
-    const p = CATALOG.find(x => x.code === code || x.name.toLowerCase().includes(code.toLowerCase()));
-    if (!p) { showToast('❌ Producto no encontrado: ' + code); return; }
-    addToCart(p);
-    $('#barcode-input').value = '';
-    $('#barcode-input').focus();
+    const trimmed = String(code).trim();
+    if (!trimmed) return;
+
+    // 1. Si el query parece un código numérico → cascade barcode resolver
+    const isBarcode = /^\d{6,}$/.test(trimmed);
+    if (isBarcode && window.VolvixBarcodeResolver) {
+      try {
+        const result = await window.VolvixBarcodeResolver.scan(trimmed);
+        if (result.found && result.product) {
+          const p = result.product;
+          // B19: validar precio re-fetch desde local antes de agregar
+          let final = p;
+          if (window.VolvixProductSearch && p.id) {
+            const fresh = await window.VolvixProductSearch.getById(p.id);
+            if (fresh) final = fresh;
+          }
+          addToCart(normalizeProductForCart(final));
+          if (result.source === 'external_captured') {
+            showToast('✓ Producto nuevo guardado: ' + (final.name || final.nombre));
+          } else {
+            showToast('✓ ' + (final.name || final.nombre) + ' (' + result.source + ')');
+          }
+          $('#barcode-input').value = '';
+          $('#barcode-input').focus();
+          return;
+        }
+        if (result.error === 'user_cancelled') {
+          $('#barcode-input').value = '';
+          $('#barcode-input').focus();
+          return;
+        }
+      } catch (e) { console.warn('[searchProduct] resolver fail', e); }
+    }
+
+    // 2. Fallback: catálogo legacy en memoria
+    const p = (typeof CATALOG !== 'undefined') ? CATALOG.find(x => x.code === trimmed || (x.name||'').toLowerCase().includes(trimmed.toLowerCase())) : null;
+    if (p) {
+      addToCart(p);
+      $('#barcode-input').value = '';
+      $('#barcode-input').focus();
+      return;
+    }
+    showToast('❌ Producto no encontrado: ' + trimmed);
+  }
+  function normalizeProductForCart(p) {
+    return {
+      id: p.id,
+      code: p.code || p.codigo_barras || '',
+      name: p.name || p.nombre || '',
+      price: Number(p.price || p.precio || 0),
+      stock: Number(p.stock || 0),
+      icon: p.icon || '📦'
+    };
   }
   function addToCart(p) {
     const existing = CART.find(c => c.code === p.code);
