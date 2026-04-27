@@ -617,10 +617,15 @@ function setSecurityHeaders(res) {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  res.setHeader('Permissions-Policy', 'geolocation=(), camera=(), microphone=(), payment=()');
+  // B30.2: Permissions-Policy ampliada (FLoC, interest-cohort, USB, etc)
+  res.setHeader('Permissions-Policy',
+    'geolocation=(), camera=(), microphone=(), payment=(self), usb=(), magnetometer=(), accelerometer=(), gyroscope=(), interest-cohort=(), browsing-topics=()');
+  // B30.2: Cross-Origin policies
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+  res.setHeader('Cross-Origin-Resource-Policy', 'same-site');
   res.setHeader(
     'Content-Security-Policy',
-    "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://js.stripe.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.ipify.org https://api.exchangerate.host https://api.anthropic.com https://api.stripe.com https://api.openai.com https://api.sendgrid.com https://api.twilio.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com; frame-ancestors 'none'; base-uri 'self'"
+    "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://js.stripe.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.ipify.org https://api.exchangerate.host https://api.anthropic.com https://api.stripe.com https://api.openai.com https://api.sendgrid.com https://api.twilio.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
   );
 }
 
@@ -1130,6 +1135,56 @@ const handlers = {
     } catch (err) {
       sendJSON(res, { ok: true, time: Date.now(), supabase_connected: false });
     }
+  },
+
+  // B30.3: /api/health/full — self-check de subsistemas (publico, sin auth)
+  'GET /api/health/full': async (req, res) => {
+    const start = Date.now();
+    const checks = {};
+    // Supabase / DB
+    try {
+      const t0 = Date.now();
+      const r = await supabaseRequest('GET', '/pos_users?limit=1&select=id');
+      checks.supabase = { ok: Array.isArray(r), latency_ms: Date.now() - t0 };
+    } catch (e) {
+      checks.supabase = { ok: false, error: String(e && e.message || e).slice(0, 120) };
+    }
+    // Audit-log table (B27 dep)
+    try {
+      const t0 = Date.now();
+      const r = await supabaseRequest('GET', '/volvix_audit_log?limit=1&select=id');
+      checks.audit_log = { ok: Array.isArray(r), latency_ms: Date.now() - t0 };
+    } catch (e) {
+      checks.audit_log = { ok: false, error: String(e && e.message || e).slice(0, 120) };
+    }
+    // Stripe (solo si configurado, sin hacer request real)
+    checks.stripe = {
+      ok: !!STRIPE_SECRET_KEY,
+      configured: !!STRIPE_SECRET_KEY,
+      webhook_configured: !!STRIPE_WEBHOOK_SECRET
+    };
+    // VAPID (push notifications)
+    checks.push_vapid = { ok: !!(VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) };
+    // Email (SendGrid configured)
+    checks.email = { ok: !!process.env.SENDGRID_API_KEY };
+    // Memory snapshot
+    try {
+      const m = process.memoryUsage();
+      checks.memory = {
+        ok: m.rss < 512 * 1024 * 1024,
+        rss_mb: Math.round(m.rss / 1024 / 1024),
+        heap_used_mb: Math.round(m.heapUsed / 1024 / 1024)
+      };
+    } catch (_) { checks.memory = { ok: true }; }
+
+    const allOk = Object.values(checks).every(c => c.ok);
+    sendJSON(res, {
+      ok: allOk,
+      time: Date.now(),
+      version: '7.2.0',
+      total_latency_ms: Date.now() - start,
+      checks
+    }, allOk ? 200 : 503);
   },
 
   // ============ TENANTS / COMPANIES ============
@@ -7303,9 +7358,39 @@ handlers['GET /api/config/public'] = async (req, res) => {
       const bk = Array.isArray(rows) ? rows[0] : null;
       if (!bk) return sendJSON(res, { ok: false, error: 'backup_not_found' }, 404);
       const jobId = crypto.randomUUID();
+      try { logAudit(req, 'backup.restore_queued', 'cloud_backups', { id: params.id, after: { location: bk.location } }); } catch(_){}
       sendJSON(res, { ok: true, job_id: jobId, backup_id: params.id, status: 'queued', location: bk.location, queued_at: Date.now() });
     } catch (err) { sendError(res, err); }
   }, ['superadmin']);
+
+  // B30.4: backup verification — comprueba existencia de backup reciente (<= 24h)
+  handlers['GET /api/admin/backup/verify'] = requireAuth(async (req, res) => {
+    try {
+      const tenantId = req.user && req.user.tenant_id;
+      const isSuper = req.user && req.user.role === 'superadmin';
+      const filter = isSuper ? '' : `tenant_id=eq.${encodeURIComponent(tenantId || '')}&`;
+      const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+      const rows = await supabaseRequest('GET',
+        `/cloud_backups?${filter}started_at=gte.${since}&select=id,started_at,size_bytes,location,status&order=started_at.desc&limit=10`
+      ).catch(() => []);
+      const arr = Array.isArray(rows) ? rows : [];
+      const successful = arr.filter(b => (b.status || '').toLowerCase() === 'success' || b.location);
+      const recent = successful.length > 0;
+      const last = successful[0] || null;
+      sendJSON(res, {
+        ok: recent,
+        recent_24h: recent,
+        successful_count: successful.length,
+        last_backup: last ? {
+          id: last.id,
+          started_at: last.started_at,
+          size_bytes: Number(last.size_bytes || 0),
+          age_hours: last.started_at ? Math.round((Date.now() - new Date(last.started_at).getTime()) / 3600000 * 10) / 10 : null
+        } : null,
+        cloud_configured: _s3Configured()
+      }, recent ? 200 : 503);
+    } catch (err) { sendError(res, err); }
+  }, ['admin', 'owner', 'superadmin']);
 
   // ---- CASH / SESSION ----
   handlers['GET /api/cash/session'] = requireAuth(async (req, res) => {

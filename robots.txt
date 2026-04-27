@@ -2,4 +2,30 @@ User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /admin
+Disallow: /volvix-admin-saas.html
+Disallow: /volvix-mega-dashboard.html
+Disallow: /volvix-fraud-dashboard.html
+Disallow: /volvix-audit-viewer.html
+Disallow: /volvix-kds.html
+Disallow: /etiqueta_designer.html
+Disallow: /BITACORA_LIVE.html
+Disallow: /MATRIZ_PRUEBAS_LOCAL.html
+Disallow: /MATRIZ_PRUEBAS_LOCAL_v1_backup.html
+
+User-agent: GPTBot
+Disallow: /api/
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
 Sitemap: https://volvix-pos.vercel.app/sitemap.xml
