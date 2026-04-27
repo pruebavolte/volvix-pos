@@ -1,3 +1,7 @@
+// B17 fix: guard contra doble carga (giros_catalog.js + giros_catalog_v2.js)
+(function() {
+  if (typeof window !== 'undefined' && window.GIROS_V2 && window.GIROS_V2.length > 0) return;
+
 /* ============================================================
    VOLVIX · Catálogo de Giros v2
    Cada giro tiene:
@@ -577,3 +581,5 @@ if (typeof window !== 'undefined') {
 if (typeof module !== 'undefined') {
   module.exports = { GIROS_V2, GIROS_CATEGORIES_V2, giroPlural };
 }
+
+})();
