@@ -7364,45 +7364,119 @@ handlers['GET /api/config/public'] = async (req, res) => {
     sendJSON(res, { ok: true, latency_ms: 0, ts: Date.now() });
   };
 
-  // R28: Vendor portal stubs (D10 fix). Devolvemos shape vacío hasta que exista
-  // tabla `vendors` real. Cualquier role autenticado puede leer su propio scope.
+  // B3: Vendor portal endpoints (cableados a volvix_vendors + volvix_vendor_pos)
+  // Cada user con role 'vendor', 'admin' u 'owner' ve SOLO los datos del vendor
+  // asociado a SU user_id. No se acepta vendor_id del query string.
+  async function _resolveVendorByUser(userId) {
+    if (!userId) return null;
+    const rows = await supabaseRequest('GET',
+      `/volvix_vendors?user_id=eq.${userId}&select=*&limit=1`).catch(() => []);
+    return Array.isArray(rows) && rows[0] ? rows[0] : null;
+  }
+
   handlers['GET /api/vendor/me'] = requireAuth(async (req, res) => {
-    sendJSON(res, {
-      ok: true,
-      vendor: {
-        id: req.user.id,
-        name: req.user.full_name || req.user.email || 'Vendor',
-        email: req.user.email || null,
-        tier: 'standard',
-        verified: false,
-        note: 'pendiente_seed_vendors_table'
+    try {
+      const vendor = await _resolveVendorByUser(req.user.id);
+      if (!vendor) {
+        return sendJSON(res, {
+          ok: true,
+          vendor: null,
+          note: 'no_vendor_record_for_user'
+        });
       }
-    });
+      sendJSON(res, { ok: true, vendor });
+    } catch (err) { sendError(res, err); }
   });
-  handlers['GET /api/vendor/pos'] = requireAuth(async (req, res) => {
-    sendJSON(res, { ok: true, items: [], total: 0, note: 'pendiente_seed_vendors_table' });
-  });
+
   handlers['GET /api/vendor/orders'] = requireAuth(async (req, res) => {
-    sendJSON(res, { ok: true, items: [], total: 0, note: 'pendiente_seed_vendors_table' });
+    try {
+      const vendor = await _resolveVendorByUser(req.user.id);
+      if (!vendor) return sendJSON(res, { ok: true, items: [], total: 0 });
+      const items = await supabaseRequest('GET',
+        `/volvix_vendor_pos?vendor_id=eq.${vendor.id}&select=*&order=created_at.desc&limit=200`)
+        .catch(() => []);
+      const arr = Array.isArray(items) ? items : [];
+      sendJSON(res, { ok: true, items: arr, total: arr.length });
+    } catch (err) { sendError(res, err); }
   });
+  // Alias: /api/vendor/pos = /api/vendor/orders
+  handlers['GET /api/vendor/pos'] = handlers['GET /api/vendor/orders'];
+
   handlers['GET /api/vendor/invoices'] = requireAuth(async (req, res) => {
-    sendJSON(res, { ok: true, items: [], total: 0, note: 'pendiente_seed_vendors_table' });
+    try {
+      const vendor = await _resolveVendorByUser(req.user.id);
+      if (!vendor) return sendJSON(res, { ok: true, items: [], total: 0 });
+      // facturas son las POs en estado 'invoiced'
+      const items = await supabaseRequest('GET',
+        `/volvix_vendor_pos?vendor_id=eq.${vendor.id}&status=eq.invoiced&select=*&order=created_at.desc&limit=200`)
+        .catch(() => []);
+      const arr = Array.isArray(items) ? items : [];
+      sendJSON(res, { ok: true, items: arr, total: arr.length });
+    } catch (err) { sendError(res, err); }
   });
+
   handlers['GET /api/vendor/payouts'] = requireAuth(async (req, res) => {
-    sendJSON(res, { ok: true, items: [], total: 0, note: 'pendiente_seed_vendors_table' });
+    try {
+      const vendor = await _resolveVendorByUser(req.user.id);
+      if (!vendor) return sendJSON(res, { ok: true, items: [], total: 0 });
+      // payouts = POs facturadas y entregadas
+      const items = await supabaseRequest('GET',
+        `/volvix_vendor_pos?vendor_id=eq.${vendor.id}&or=(status.eq.invoiced,status.eq.delivered)&select=id,po_number,amount,status,delivery_date&order=created_at.desc&limit=200`)
+        .catch(() => []);
+      const arr = Array.isArray(items) ? items : [];
+      const total_amount = arr.reduce((s, x) => s + Number(x.amount || 0), 0);
+      sendJSON(res, { ok: true, items: arr, total: arr.length, total_amount });
+    } catch (err) { sendError(res, err); }
   });
+
   handlers['GET /api/vendor/stats'] = requireAuth(async (req, res) => {
-    sendJSON(res, {
-      ok: true,
-      pos_active: 0,
-      revenue_month: 0,
-      pending_confirmations: 0,
-      avg_delivery_days: 0,
-      sla_confirm_under_24h_pct: 0,
-      sla_on_time_pct: 0,
-      quality_no_rejects_pct: 0,
-      note: 'pendiente_seed_vendors_table'
-    });
+    try {
+      const vendor = await _resolveVendorByUser(req.user.id);
+      if (!vendor) {
+        return sendJSON(res, {
+          ok: true,
+          pos_active: 0, revenue_month: 0, pending_confirmations: 0, avg_delivery_days: 0,
+          sla_confirm_under_24h_pct: 0, sla_on_time_pct: 0, quality_no_rejects_pct: 0,
+          note: 'no_vendor_record_for_user'
+        });
+      }
+      const allPOs = await supabaseRequest('GET',
+        `/volvix_vendor_pos?vendor_id=eq.${vendor.id}&select=amount,status,delivery_date,created_at&limit=500`)
+        .catch(() => []);
+      const arr = Array.isArray(allPOs) ? allPOs : [];
+
+      const pos_active = arr.filter(p => p.status === 'pending' || p.status === 'transit').length;
+      const startMonth = new Date();
+      startMonth.setUTCDate(1); startMonth.setUTCHours(0,0,0,0);
+      const revenue_month = arr.filter(p => new Date(p.created_at) >= startMonth)
+        .reduce((s, p) => s + Number(p.amount || 0), 0);
+      const pending_confirmations = arr.filter(p => p.status === 'pending').length;
+
+      // Tiempo promedio de entrega: POs delivered con delivery_date no null
+      const delivered = arr.filter(p => p.status === 'delivered' && p.delivery_date && p.created_at);
+      const avg_delivery_days = delivered.length
+        ? Math.round(delivered.reduce((s, p) => {
+            const d1 = new Date(p.created_at), d2 = new Date(p.delivery_date);
+            return s + Math.max(0, (d2 - d1) / 86400000);
+          }, 0) / delivered.length * 10) / 10
+        : 0;
+
+      const totalCompleted = arr.filter(p => p.status !== 'pending' && p.status !== 'transit').length;
+      const noRejects = arr.filter(p => p.status !== 'rejected').length;
+      const quality_no_rejects_pct = arr.length ? Math.round(100 * noRejects / arr.length) : 100;
+      const sla_on_time_pct = totalCompleted ? Math.round(100 * arr.filter(p => p.status === 'delivered' || p.status === 'invoiced').length / totalCompleted) : 0;
+
+      sendJSON(res, {
+        ok: true,
+        pos_active,
+        revenue_month: Number(revenue_month.toFixed(2)),
+        pending_confirmations,
+        avg_delivery_days,
+        sla_confirm_under_24h_pct: 0, // requiere tracking de timestamps de confirmación
+        sla_on_time_pct,
+        quality_no_rejects_pct
+      });
+    } catch (err) { sendError(res, err); }
   });
   // R28: rate limit en pings públicos (60 req/min/IP) para evitar abuso/DoS
   const _pingRL = (handler) => async (req, res) => {
