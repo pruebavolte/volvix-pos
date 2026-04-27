@@ -8610,6 +8610,32 @@ handlers['GET /api/config/public'] = async (req, res) => {
     } catch (err) { sendJSON(res, { ok: false, error: String(err && err.message || err) }, 500); }
   });
 
+  // B6: catálogo público de kiosko (sin auth, rate-limited)
+  handlers['GET /api/kiosk/products'] = async (req, res) => {
+    try {
+      const ip = clientIp(req);
+      if (!rateLimit('kiosk_products:' + ip, 60, 60_000)) {
+        return send429(res, 60_000, 'Demasiadas solicitudes');
+      }
+      // Catalogo del tenant default (Don Chucho) — productos publicables
+      const items = await supabaseRequest('GET',
+        '/pos_products?pos_user_id=eq.aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1&select=id,name,price,icon,stock&limit=60')
+        .catch(() => []);
+      const arr = Array.isArray(items) ? items : [];
+      const inStock = arr.filter(p => Number(p.stock || 0) > 0);
+      sendJSON(res, {
+        ok: true,
+        items: inStock.map(p => ({
+          id: p.id,
+          name: p.name,
+          price: Number(p.price || 0),
+          icon: p.icon || '📦'
+        })),
+        total: inStock.length
+      });
+    } catch (err) { sendError(res, err); }
+  };
+
   // ============================================================
   // R17 KIOSK: sesión sin login + creación de órdenes
   // ============================================================
