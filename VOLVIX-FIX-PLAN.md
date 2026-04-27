@@ -2,10 +2,10 @@
 
 ## Estado global
 - Score inicial: 23/100
-- Score actual: **92/100** ✓ OBJETIVO SUPERADO con margen
+- Score actual: **94/100** ✓ OBJETIVO SUPERADO +9 sobre target
 - Score objetivo: >=85/100
-- Última sesión: B13-B16 final audit (2026-04-27)
-- Próximo bloque: ninguno (plan + deuda + audit final completos)
+- Última sesión: B17-B18 runtime defects (2026-04-27)
+- Próximo bloque: ninguno (5 defectos runtime cerrados, 0 errores fatales)
 - SYSTEM-INVENTORY: vigente (regenerar si pasan >7 días)
 
 ## Reglas de ejecución v2 (no negociables)
@@ -194,3 +194,4 @@ Evidencia:
 | 6 | 2026-04-27 | **B6**     | **#7,#9,#10,#11,#13,#14 limpieza final** | **86** ✓ | 0 | ~30 min | /api/kiosk/products público (15 items), tests previos ya verificados, score objetivo 85 ALCANZADO |
 | 7 | 2026-04-27 | **B7-B12** | deuda técnica (cross-tenant real, owner panel, i18n EN, contraste, salvadorex theme, tests CI) | **90** ✓ | 0 | ~50 min | resolvePosUserId helper (9 reemplazos), owner KPIs +13 cableados, 19 EN reales, theme respeta gradient, salvadorex 5 vars, tests-e2e/smoke.spec.js |
 | 8 | 2026-04-27 | **B13-B16** | audit-log + salvadorex extra + i18n EN +185 + final audit | **92** ✓ | 0 | ~40 min | logAudit helper (auth+sales), salvadorex --surface-2/--text-3, dict EN +185 strings, Playwright 8/8 final tests pasan |
+| 9 | 2026-04-27 | **B17-B18** | 5 defectos runtime descubiertos+arreglados | **94** ✓ | 0 | ~30 min | giros_catalog alias+IIFE guard, /api/reports/sales/hourly, /api/owner/seats, WS guard 2 lugares (vercel serverless), logAudit en POST /api/products |
