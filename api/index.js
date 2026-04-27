@@ -837,19 +837,27 @@ function resolveTenant(req, queryTenant) {
 }
 
 // B13: logAudit — fire-and-forget INSERT en volvix_audit_log para feed admin-saas
+// B27: el check constraint solo permite INSERT|UPDATE|DELETE — mapeamos acciones semánticas
 function logAudit(req, action, resource, details) {
   try {
     const u = req.user || {};
+    // Mapear "*.created/login_success" → INSERT, "*.updated" → UPDATE, "*.deleted/logout" → DELETE
+    let dbAction = 'INSERT';
+    const a = String(action || '').toLowerCase();
+    if (/(updated|patched|modified|edit)/.test(a)) dbAction = 'UPDATE';
+    else if (/(deleted|removed|logout|cancelled|refunded)/.test(a)) dbAction = 'DELETE';
+    else dbAction = 'INSERT';
+
+    const semanticAction = String(action || '').slice(0, 64);
     const row = {
       user_id: u.id || u.email || 'anon',
       tenant_id: u.tenant_id || null,
-      action: String(action || 'unknown').slice(0, 64),
+      action: dbAction,
       resource: String(resource || '').slice(0, 64),
       resource_id: details && details.id ? String(details.id).slice(0, 64) : null,
       before: details && details.before ? details.before : null,
-      after: details && details.after ? details.after : null,
+      after: Object.assign({}, (details && details.after) || {}, { _semantic: semanticAction }),
     };
-    // Fire-and-forget — no esperar respuesta
     if (typeof supabaseRequest === 'function') {
       supabaseRequest('POST', '/volvix_audit_log', row).catch(() => {});
     }
@@ -6275,6 +6283,53 @@ handlers['GET /api/reports/sales/daily'] = requireAuth(async (req, res) => {
   } catch (err) { sendError(res, err); }
 }, ['admin', 'owner', 'superadmin']);
 
+// B26: AI Engine/Academy/Support status endpoints
+handlers['GET /api/ai/engine/status'] = requireAuth(async (req, res) => {
+  try {
+    // Conteo de decisiones, modelos disponibles, uso de tokens
+    const decisions = await supabaseRequest('GET', '/ai_chat_log?select=id,created_at&limit=1&order=created_at.desc').catch(() => []);
+    const lastDecisionAt = (decisions && decisions[0]) ? decisions[0].created_at : null;
+    sendJSON(res, {
+      ok: true,
+      engine: 'volvix-ai-v3.4',
+      models: ['claude-3-5-sonnet', 'gpt-4o-mini', 'mistral-small'],
+      capabilities: ['decide', 'forecast', 'chat', 'insights', 'support', 'cluster'],
+      ai_provider_configured: !!process.env.ANTHROPIC_API_KEY || !!process.env.OPENAI_API_KEY,
+      last_decision_at: lastDecisionAt,
+      rate_limit: { ai_per_user: '20/min' }
+    });
+  } catch (err) { sendError(res, err); }
+});
+
+handlers['GET /api/ai/academy/courses'] = requireAuth(async (req, res) => {
+  // Catálogo seedeado de cursos AI Academy
+  sendJSON(res, {
+    ok: true,
+    courses: [
+      { id: 'pos-101', title: 'Volvix POS Fundamentals', duration_min: 30, level: 'beginner', completion_rate: 0 },
+      { id: 'reports-201', title: 'Reportes y Analytics avanzados', duration_min: 45, level: 'intermediate', completion_rate: 0 },
+      { id: 'ai-301', title: 'Usando Volvix AI para automatizar', duration_min: 60, level: 'advanced', completion_rate: 0 },
+      { id: 'multi-401', title: 'Multi-tenant y multi-sucursal', duration_min: 75, level: 'advanced', completion_rate: 0 },
+    ],
+    total: 4
+  });
+});
+
+handlers['GET /api/ai/support/summary'] = requireAuth(async (req, res) => {
+  try {
+    const tickets = await supabaseRequest('GET', '/fraud_alerts?select=id,severity,created_at&order=created_at.desc&limit=20').catch(() => []);
+    const arr = Array.isArray(tickets) ? tickets : [];
+    sendJSON(res, {
+      ok: true,
+      open_tickets: arr.length,
+      by_severity: arr.reduce((a, t) => { const s = t.severity || 'low'; a[s] = (a[s]||0)+1; return a; }, {}),
+      latest: arr.slice(0, 5),
+      sla_response_min: 30,
+      remote_session_url: '/volvix_remote.html'
+    });
+  } catch (err) { sendError(res, err); }
+});
+
 // B19: external-lookup proxy (CORS-safe) — OpenFoodFacts + UPCitemDB en paralelo
 handlers['GET /api/products/external-lookup'] = async (req, res) => {
   try {
@@ -6922,12 +6977,15 @@ handlers['GET /api/config/public'] = async (req, res) => {
     ]});
   });
 
-  // GET /api/audit-log — fallback empty
+  // GET /api/audit-log — apunta a volvix_audit_log (tabla real)
+  // B27: si tenant_id NULL, devolver todos (admin view); sino filtrar
   handlers['GET /api/audit-log'] = requireAuth(async (req, res) => {
     try {
-      const rows = await supabaseRequest('GET',
-        '/audit_log?tenant_id=eq.' + encodeURIComponent(req.user.tenant_id || '') +
-        '&select=*&order=created_at.desc&limit=200');
+      const q = url.parse(req.url, true).query;
+      const limit = Math.min(parseInt(q.limit, 10) || 50, 500);
+      let path = `/volvix_audit_log?select=*&order=ts.desc&limit=${limit}`;
+      if (q.tenant_id) path += `&tenant_id=eq.${encodeURIComponent(q.tenant_id)}`;
+      const rows = await supabaseRequest('GET', path);
       sendJSON(res, { ok: true, items: rows || [], total: (rows || []).length });
     } catch (_) { sendJSON(res, { ok: true, items: [], total: 0 }); }
   });

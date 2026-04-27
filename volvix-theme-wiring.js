@@ -137,6 +137,7 @@
 
     // R28: overrides agresivos para que el toggle afecte pantallas con CSS hardcoded
     // B10: respetar elementos con [data-theme-skip] y .metric-val (gradient text)
+    // B28: mejorar contraste — texto secundario más oscuro en light, más claro en dark
     const common = `
       html, body, main, section, article, header, footer, aside, nav {
         background-color: var(--vlx-bg) !important;
@@ -149,7 +150,8 @@
         border-color: var(--vlx-border) !important;
       }
       /* B10: NO sobreescribir elementos con gradient text */
-      .metric-val, .kpi-value, [class*="grad-text"], [data-theme-skip] {
+      .metric-val, .kpi-value, [class*="grad-text"], [data-theme-skip],
+      [data-theme-skip] *, .donut, .donut *, .chart .bar, [class*="logo"] {
         background: revert;
         color: revert;
       }
@@ -158,6 +160,20 @@
         color: var(--vlx-text) !important;
         border: 1px solid var(--vlx-border) !important;
       }
+      /* B28: contraste WCAG — labels secundarios más legibles */
+      .muted, .text-muted, .secondary, small.muted, .meta, .hint, [class*="muted"], [class*="secondary"] {
+        color: var(--vlx-text-2) !important;
+        opacity: 1 !important;
+      }
+      label, .label, .form-label {
+        color: var(--vlx-text) !important;
+        opacity: 1 !important;
+      }
+      th, td, .table-cell {
+        color: var(--vlx-text) !important;
+      }
+      th { color: var(--vlx-text-2) !important; font-weight: 600 !important; }
+      ::placeholder { color: var(--vlx-text-2) !important; opacity: 0.7 !important; }
       input::placeholder, textarea::placeholder { color: var(--vlx-text-2) !important; }
       .modal, .dialog, .popup, [class*="modal"]:not([class*="backdrop"]),
       [class*="dialog"]:not([class*="backdrop"]) {

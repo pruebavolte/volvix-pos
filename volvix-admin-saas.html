@@ -706,7 +706,7 @@ tr:hover td{background:var(--card2)}
     }
   } catch(e){ console.warn('[admin-saas] tenants fail', e); }
 
-  // B2: cablear feed actividad a /api/audit-log o vacío
+  // B2/B27: cablear feed actividad a /api/audit-log con _semantic enriquecido
   try {
     var rf = await fetch('/api/audit-log?limit=8', { headers });
     var feed = document.getElementById('adm-feed');
@@ -717,8 +717,35 @@ tr:hover td{background:var(--card2)}
         if (!Array.isArray(events) || !events.length) {
           feed.innerHTML = '<div style="padding:30px;text-align:center;color:var(--muted);font-size:13px">Sin actividad registrada</div>';
         } else {
+          var icon = function(action, semantic) {
+            var s = (semantic || action || '').toLowerCase();
+            if (s.indexOf('login') >= 0) return '🔐';
+            if (s.indexOf('logout') >= 0) return '🚪';
+            if (s.indexOf('sale') >= 0) return '💰';
+            if (s.indexOf('product') >= 0) return '📦';
+            if (s.indexOf('customer') >= 0) return '👤';
+            if (s.indexOf('vendor') >= 0) return '🏭';
+            if (s.indexOf('tenant') >= 0) return '🏢';
+            if (s.indexOf('deploy') >= 0) return '🚀';
+            if (s.indexOf('delete') >= 0) return '🗑️';
+            return '📌';
+          };
+          var label = function(e) {
+            var sem = e.after && e.after._semantic ? e.after._semantic : null;
+            if (sem) return sem.replace(/[._]/g, ' ');
+            return (e.action || 'evento') + ' ' + (e.resource || '');
+          };
           feed.innerHTML = events.slice(0,6).map(function(e){
-            return '<div class="feed-item"><div class="feed-ic">📌</div><div class="feed-c">' + (e.action || e.event || '—') + ' <div class="meta">' + (e.created_at ? new Date(e.created_at).toLocaleString('es-MX') : '—') + '</div></div></div>';
+            var sem = e.after && e.after._semantic;
+            return '<div class="feed-item">'
+              + '<div class="feed-ic">' + icon(e.action, sem) + '</div>'
+              + '<div class="feed-c">'
+              + '<b>' + label(e) + '</b>'
+              + '<div class="meta">'
+              + (e.user_id ? (e.user_id.length > 12 ? e.user_id.slice(0,8) + '… · ' : e.user_id + ' · ') : '')
+              + (e.ts ? new Date(e.ts).toLocaleString('es-MX') : '')
+              + '</div>'
+              + '</div></div>';
           }).join('');
         }
       } else {
