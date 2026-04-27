@@ -284,6 +284,8 @@ html, body {
   .login-sub { font-size: 12.5px; }
 }
 </style>
+  <script src="/volvix-uplift-wiring.js" defer></script>
+  <script src="/volvix-error-reporter.js" defer></script>
 </head>
 <body>
   <div class="login-bg">
@@ -336,6 +338,7 @@ html, body {
 })();
 
 // Auto-redirect si ya hay sesión válida (evita login forzado tras F5)
+// R29: respetar parámetro ?redirect= si viene desde otra página protegida
 (function checkExistingSession(){
   try {
     const token = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
@@ -343,7 +346,17 @@ html, body {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       if (payload.exp && payload.exp * 1000 > Date.now()) {
-        location.href = '/salvadorex_web_v25.html';
+        // R29: si vino con ?redirect=/xxx.html lo respetamos, sino default a SalvadoreX
+        let dest = '/salvadorex_web_v25.html';
+        try {
+          const params = new URLSearchParams(location.search);
+          const r = params.get('redirect');
+          // Solo aceptar paths internos (que empiecen con / y no //)
+          if (r && r.startsWith('/') && !r.startsWith('//') && !r.includes(':')) {
+            dest = decodeURIComponent(r);
+          }
+        } catch(e){}
+        location.href = dest;
         return;
       }
     } catch(e) {}
@@ -423,10 +436,16 @@ async function handleLogin(event) {
 
     showAlert('¡Bienvenido!', 'success');
 
-    // Redirigir a SalvadoreX POS
-    setTimeout(() => {
-      window.location.href = '/salvadorex_web_v25.html';
-    }, 600);
+    // R29: respetar redirect= en URL si viene de otra página protegida
+    let dest = '/salvadorex_web_v25.html';
+    try {
+      const params = new URLSearchParams(location.search);
+      const r = params.get('redirect');
+      if (r && r.startsWith('/') && !r.startsWith('//') && !r.includes(':')) {
+        dest = decodeURIComponent(r);
+      }
+    } catch(e){}
+    setTimeout(() => { window.location.href = dest; }, 600);
   } catch (err) {
     let msg = err.message || 'Error al iniciar sesión';
     if (msg.includes('Credenciales')) msg = 'Correo o contraseña incorrectos';
