@@ -2,10 +2,10 @@
 
 ## Estado global
 - Score inicial: 23/100
-- Score actual: **100/100** ✓✓ OBJETIVO MAXIMO +15 sobre target
+- Score actual: **100/100** ✓✓ OBJETIVO MAXIMO MANTENIDO + B32 enterprise extras
 - Score objetivo: >=85/100
-- Última sesión: B31 ETag + rate-limit per-tenant + OpenAPI + structured logging (2026-04-27)
-- Próximo bloque: ninguno (TODO el plan + deuda + B19 + B25-B30 + B31 enterprise-grade)
+- Última sesión: B32 client error reporter + PWA bump + verify a11y/perf wiring (2026-04-27)
+- Próximo bloque: ninguno (TODO el plan + B1-B32 production-grade enterprise)
 - SYSTEM-INVENTORY: vigente (regenerar si pasan >7 días)
 - **Total: 16/16 tests Playwright PASAN** (8 final + 6 mobile + 1 dual-login + 1 vendor)
 
@@ -202,3 +202,4 @@ Evidencia:
 | 13 | 2026-04-27 | **B29** | logAudit ampliado (7) + Cache-Control publico + i18n EN v3 + verify rate-limit | **98** ✓ | 0 | ~20 min | logAudit en customer.deleted/billing.subscribed/cancelled/upgraded/downgraded/owner.user_created/settings.updated/payment.created/auth.logout. sendJSONPublic helper con public,max-age=N,s-maxage=N,stale-while-revalidate. /api/kiosk/products 60s + /api/billing/plans 300s. Rate-limit /api/login confirmado (60/15min IP + 15/15min email + lockout 30min tras 10 fails). 16/16 Playwright PASS. audit-log API muestra 9 eventos. deploy dpl_CwbHmXD6bnPRP3y6yuBnegUKwQAf |
 | 14 | 2026-04-27 | **B30** | SEO + security hardening + health/full + backup verify | **99** ✓ | 0 | ~25 min | robots.txt expandido (allow GPTBot/Claude-Web/anthropic-ai/Perplexity, deny /admin/*, BITACORA, MATRIZ, audit-viewer). sitemap.xml +3 URLs con lastmod. Permissions-Policy ampliada (FLoC, browsing-topics, USB, sensors). COOP same-origin + CORP same-site + form-action 'self' + object-src 'none'. /api/health/full self-check (supabase 247ms + audit_log 207ms + Stripe + VAPID + email + memory) con criticidad por subsistema. /api/admin/backup/verify (24h check). 16/16 Playwright PASS. deploy volvix-mmfbzrvsm |
 | 15 | 2026-04-27 | **B31** | ETag + rate-limit per-tenant + OpenAPI 3.0.3 + structured logging + Stripe audit | **100** ✓✓ | 0 | ~25 min | sendJSONPublic con ETag W/"sha1[22]" + If-None-Match -> 304. POST /api/sales 600/min/tenant + POST /api/products 120/min/tenant. /api/openapi.json publico (1h cache + ETag) genera spec con 502 endpoints, bearerAuth + cookieAuth schemes. logStructured/logInfo/logWarn/logErr JSON helpers. Stripe webhook logAudit en payment.succeeded/failed/refunded (sistema). HMAC verify confirmado solido (timestamp 5min tolerance + timingSafeEqual + anti-replay nonce via event.id). 16/16 Playwright PASS. deploy volvix-b776sdi2t |
+| 16 | 2026-04-27 | **B32** | Client error reporter + PWA bump + verify a11y/perf wiring | **100** ✓✓ | 0 | ~20 min | POST /api/log/client (rate-limit 30/min/IP, sin auth) recibe JS errors -> tabla client_errors + log estructurado. volvix-error-reporter.js NUEVO (3.5kb) hookea window.error + unhandledrejection con sendBeacon, dedup hash, rate-limit cliente 10/min, opt-in console.error con ?errReport=1. SW bump v1.3.0-b32 + precache error-reporter. Verificado existente: PWA manifest comprehensive (shortcuts POS/Owner/Bitacora, share_target), sw.js 345 lineas (cache-first static + network-first API + offline fallback), volvix-a11y-wiring 371 lineas (high contrast, font scale, skip-links, ARIA live-region, focus indicators, reduced motion), volvix-perf-wiring 439 lineas. 16/16 Playwright PASS. deploy volvix-5ntgpd3gf |
