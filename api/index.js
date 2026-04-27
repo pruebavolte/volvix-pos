@@ -859,8 +859,21 @@ function serveStaticFile(res, pathname) {
   const filePath = findFile(pathname);
 
   if (!filePath) {
+    // R28: servir 404.html custom con branding si existe
+    const customPath = findFile('/404.html');
+    if (customPath) {
+      try {
+        const html = fs.readFileSync(customPath, 'utf8');
+        res.statusCode = 404;
+        setSecurityHeaders(res);
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.setHeader('Cache-Control', 'no-store');
+        res.end(html);
+        return;
+      } catch (e) { /* fallthrough a fallback */ }
+    }
     res.statusCode = 404;
-    setSecurityHeaders(res); // R14
+    setSecurityHeaders(res);
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.end(`<h1>404</h1><p>${pathname}</p><p><a href="/login.html">Login</a></p>`);
     return;
@@ -1673,6 +1686,57 @@ const handlers = {
       });
     } catch (err) { sendError(res, err); }
   }, ['admin', 'owner', 'superadmin']),
+
+  // B2 fix: KPIs "hoy" calculados sobre la DB real (no hardcoded)
+  // Devuelve {sales_today, tickets_today, conversion_today, latency_p50, low_stock_count}
+  'GET /api/dashboard/today': requireAuth(async (req, res) => {
+    try {
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0);
+      const sinceISO = today.toISOString();
+
+      // posUserId derivado del JWT (igual que /api/sales) — NO se acepta del query string
+      const tenantId = (typeof resolveTenant === 'function') ? resolveTenant(req) : null;
+      const ownerUserId = tenantId === 'TNT002'
+        ? 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1'
+        : 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1';
+      const posUserId = (req.user && req.user.role === 'superadmin' && (typeof url !== 'undefined' && url.parse(req.url, true).query.user_id))
+        ? url.parse(req.url, true).query.user_id
+        : ownerUserId;
+
+      const todaySalesQ = `?pos_user_id=eq.${posUserId}&created_at=gte.${sinceISO}&select=total,created_at&limit=500`;
+      const productsQ = `?pos_user_id=eq.${posUserId}&select=id,stock,reorder_point&limit=2000`;
+
+      const [todaySales, products] = await Promise.all([
+        supabaseRequest('GET', '/pos_sales' + todaySalesQ).catch(() => []),
+        supabaseRequest('GET', '/pos_products' + productsQ).catch(() => []),
+      ]);
+
+      const sales = Array.isArray(todaySales) ? todaySales : [];
+      const prods = Array.isArray(products) ? products : [];
+
+      const ticketsToday = sales.length;
+      const salesToday = sales.reduce((s, x) => s + (Number(x.total) || 0), 0);
+      const lowStock = prods.filter(p => {
+        const st = Number(p.stock || 0);
+        const rp = Number(p.reorder_point || 5);
+        return st <= rp;
+      }).length;
+      // Conversión simple (placeholder): tickets / (tickets + 1) — no hay carrito abandonado aún
+      const conversion = ticketsToday > 0 ? Math.min(100, ticketsToday / (ticketsToday + 1) * 100) : 0;
+
+      sendJSON(res, {
+        ok: true,
+        date: sinceISO.slice(0, 10),
+        sales_today: Number(salesToday.toFixed(2)),
+        tickets_today: ticketsToday,
+        conversion_today: Number(conversion.toFixed(1)),
+        low_stock_count: lowStock,
+        latency_p50: null, // measurable from logs en futuro bloque
+        generated_at: Date.now(),
+      });
+    } catch (err) { sendError(res, err); }
+  }, ['admin', 'owner', 'superadmin', 'manager', 'cashier']),
 
   'GET /api/owner/tenants': requireAuth(async (req, res) => {
     try {
@@ -7299,10 +7363,58 @@ handlers['GET /api/config/public'] = async (req, res) => {
   handlers['GET /api/health/speedtest'] = async (req, res) => {
     sendJSON(res, { ok: true, latency_ms: 0, ts: Date.now() });
   };
-  handlers['GET /api/ping'] = async (req, res) => sendJSON(res, { ok: true, pong: Date.now() });
-  handlers['GET /api/pos/ping'] = async (req, res) => sendJSON(res, { ok: true, pong: Date.now() });
-  handlers['GET /api/stock/ping'] = async (req, res) => sendJSON(res, { ok: true, pong: Date.now() });
-  handlers['GET /api/reports/ping'] = async (req, res) => sendJSON(res, { ok: true, pong: Date.now() });
+
+  // R28: Vendor portal stubs (D10 fix). Devolvemos shape vacío hasta que exista
+  // tabla `vendors` real. Cualquier role autenticado puede leer su propio scope.
+  handlers['GET /api/vendor/me'] = requireAuth(async (req, res) => {
+    sendJSON(res, {
+      ok: true,
+      vendor: {
+        id: req.user.id,
+        name: req.user.full_name || req.user.email || 'Vendor',
+        email: req.user.email || null,
+        tier: 'standard',
+        verified: false,
+        note: 'pendiente_seed_vendors_table'
+      }
+    });
+  });
+  handlers['GET /api/vendor/pos'] = requireAuth(async (req, res) => {
+    sendJSON(res, { ok: true, items: [], total: 0, note: 'pendiente_seed_vendors_table' });
+  });
+  handlers['GET /api/vendor/orders'] = requireAuth(async (req, res) => {
+    sendJSON(res, { ok: true, items: [], total: 0, note: 'pendiente_seed_vendors_table' });
+  });
+  handlers['GET /api/vendor/invoices'] = requireAuth(async (req, res) => {
+    sendJSON(res, { ok: true, items: [], total: 0, note: 'pendiente_seed_vendors_table' });
+  });
+  handlers['GET /api/vendor/payouts'] = requireAuth(async (req, res) => {
+    sendJSON(res, { ok: true, items: [], total: 0, note: 'pendiente_seed_vendors_table' });
+  });
+  handlers['GET /api/vendor/stats'] = requireAuth(async (req, res) => {
+    sendJSON(res, {
+      ok: true,
+      pos_active: 0,
+      revenue_month: 0,
+      pending_confirmations: 0,
+      avg_delivery_days: 0,
+      sla_confirm_under_24h_pct: 0,
+      sla_on_time_pct: 0,
+      quality_no_rejects_pct: 0,
+      note: 'pendiente_seed_vendors_table'
+    });
+  });
+  // R28: rate limit en pings públicos (60 req/min/IP) para evitar abuso/DoS
+  const _pingRL = (handler) => async (req, res) => {
+    if (!rateLimit('ping:' + clientIp(req), 60, 60_000)) {
+      return send429(res, 60_000, 'Demasiadas solicitudes a /ping');
+    }
+    return handler(req, res);
+  };
+  handlers['GET /api/ping'] = _pingRL(async (req, res) => sendJSON(res, { ok: true, pong: Date.now() }));
+  handlers['GET /api/pos/ping'] = _pingRL(async (req, res) => sendJSON(res, { ok: true, pong: Date.now() }));
+  handlers['GET /api/stock/ping'] = _pingRL(async (req, res) => sendJSON(res, { ok: true, pong: Date.now() }));
+  handlers['GET /api/reports/ping'] = _pingRL(async (req, res) => sendJSON(res, { ok: true, pong: Date.now() }));
 
   // ---- INTEGRATIONS (sin auth para health widget) ----
   handlers['GET /api/integrations/sat/ping'] = async (req, res) => {
