@@ -395,6 +395,14 @@
   // CONEXIÓN
   // ───────────────────────────────────────────────────────────────────────
   function connect() {
+    // B17: Vercel serverless NO soporta WebSocket — abortar silenciosamente
+    try {
+      if (typeof location !== 'undefined' && /\.vercel\.app$/i.test(location.hostname)) {
+        setStatus('disabled');
+        log('WS disabled on Vercel (serverless no soporta WS persistente)');
+        return;
+      }
+    } catch (_) {}
     if (state.ws && (state.ws.readyState === 0 || state.ws.readyState === 1)) {
       log('connect() ignored — already', state.status);
       return;
