@@ -1,0 +1,2598 @@
+{
+  "generated_at": "2026-04-27T15:32:05Z",
+  "repo_root": "C:\\Users\\DELL\\Downloads\\verion 340",
+  "deploy_url": "https://volvix-pos.vercel.app",
+  "subsystems": [
+    {
+      "name": "Volvix Hub Landing",
+      "html": "volvix-hub-landing.html",
+      "role_required": "public",
+      "public": true,
+      "purpose": "Marketing / landing principal"
+    },
+    {
+      "name": "Login Volvix",
+      "html": "login.html",
+      "role_required": "public",
+      "public": true,
+      "purpose": "Auth gateway central"
+    },
+    {
+      "name": "Volvix Admin SaaS",
+      "html": "volvix-admin-saas.html",
+      "role_required": "superadmin",
+      "public": false,
+      "purpose": "Dueño de plataforma"
+    },
+    {
+      "name": "Volvix MEGA Dashboard",
+      "html": "volvix-mega-dashboard.html",
+      "role_required": "superadmin",
+      "public": false,
+      "purpose": "KPIs globales multi-tenant"
+    },
+    {
+      "name": "Owner Panel",
+      "html": "volvix_owner_panel_v7.html",
+      "role_required": "owner",
+      "public": false,
+      "purpose": "Dueño de UN negocio individual"
+    },
+    {
+      "name": "SalvadoreX POS",
+      "html": "salvadorex_web_v25.html",
+      "role_required": "cashier|manager|owner",
+      "public": false,
+      "purpose": "Punto de venta"
+    },
+    {
+      "name": "MultiPOS Suite",
+      "html": "multipos_suite_v3.html",
+      "role_required": "manager",
+      "public": false,
+      "purpose": "Multi-sucursal"
+    },
+    {
+      "name": "KDS Kitchen",
+      "html": "volvix-kds.html",
+      "role_required": "kitchen",
+      "public": false,
+      "purpose": "Pantalla de cocina"
+    },
+    {
+      "name": "Kiosko",
+      "html": "volvix-kiosk.html",
+      "role_required": "kiosk",
+      "public": true,
+      "purpose": "Self-service en local"
+    },
+    {
+      "name": "Customer Portal",
+      "html": "volvix-customer-portal.html",
+      "role_required": "customer",
+      "public": false,
+      "purpose": "Comprador final"
+    },
+    {
+      "name": "Vendor Portal",
+      "html": "volvix-vendor-portal.html",
+      "role_required": "vendor",
+      "public": false,
+      "purpose": "Proveedor"
+    },
+    {
+      "name": "Marketplace",
+      "html": "marketplace.html",
+      "role_required": "public",
+      "public": true,
+      "purpose": "Selector de giro"
+    },
+    {
+      "name": "GDPR Portal",
+      "html": "volvix-gdpr-portal.html",
+      "role_required": "public",
+      "public": true,
+      "purpose": "Solicitudes Art.15/17/20"
+    },
+    {
+      "name": "Fraud Dashboard",
+      "html": "public/volvix-fraud-dashboard.html",
+      "role_required": "superadmin",
+      "public": false,
+      "purpose": "Vigilancia de fraude"
+    }
+  ],
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/api/search",
+      "file": "api/index.js",
+      "line": 3162
+    },
+    {
+      "method": "POST",
+      "path": "/api/search",
+      "file": "api/index.js",
+      "line": 3172
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/inventory",
+      "file": "api/index.js",
+      "line": 3176
+    },
+    {
+      "method": "POST",
+      "path": "/api/owner/settings",
+      "file": "api/index.js",
+      "line": 3183
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/settings",
+      "file": "api/index.js",
+      "line": 3192
+    },
+    {
+      "method": "GET",
+      "path": "/api/inventory/locations",
+      "file": "api/index.js",
+      "line": 3234
+    },
+    {
+      "method": "POST",
+      "path": "/api/inventory/locations",
+      "file": "api/index.js",
+      "line": 3246
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/inventory/locations/:id",
+      "file": "api/index.js",
+      "line": 3268
+    },
+    {
+      "method": "GET",
+      "path": "/api/inventory/stock",
+      "file": "api/index.js",
+      "line": 3285
+    },
+    {
+      "method": "POST",
+      "path": "/api/inventory/movements",
+      "file": "api/index.js",
+      "line": 3309
+    },
+    {
+      "method": "POST",
+      "path": "/api/inventory/adjust",
+      "file": "api/index.js",
+      "line": 3352
+    },
+    {
+      "method": "POST",
+      "path": "/api/inventory/counts/start",
+      "file": "api/index.js",
+      "line": 3380
+    },
+    {
+      "method": "POST",
+      "path": "/api/inventory/counts/:id/lines",
+      "file": "api/index.js",
+      "line": 3397
+    },
+    {
+      "method": "POST",
+      "path": "/api/inventory/counts/:id/finalize",
+      "file": "api/index.js",
+      "line": 3427
+    },
+    {
+      "method": "GET",
+      "path": "/api/onboarding/sat-lookup",
+      "file": "api/index.js",
+      "line": 3540
+    },
+    {
+      "method": "GET",
+      "path": "/api/onboarding/template",
+      "file": "api/index.js",
+      "line": 3551
+    },
+    {
+      "method": "GET",
+      "path": "/api/onboarding/sat-regimenes",
+      "file": "api/index.js",
+      "line": 3560
+    },
+    {
+      "method": "POST",
+      "path": "/api/onboarding/start",
+      "file": "api/index.js",
+      "line": 3564
+    },
+    {
+      "method": "POST",
+      "path": "/api/onboarding/step",
+      "file": "api/index.js",
+      "line": 3620
+    },
+    {
+      "method": "POST",
+      "path": "/api/onboarding/complete",
+      "file": "api/index.js",
+      "line": 3637
+    },
+    {
+      "method": "POST",
+      "path": "/api/onboarding/import-products",
+      "file": "api/index.js",
+      "line": 3657
+    },
+    {
+      "method": "GET",
+      "path": "/api/currencies",
+      "file": "api/index.js",
+      "line": 3739
+    },
+    {
+      "method": "GET",
+      "path": "/api/fx/rates",
+      "file": "api/index.js",
+      "line": 3748
+    },
+    {
+      "method": "POST",
+      "path": "/api/fx/refresh",
+      "file": "api/index.js",
+      "line": 3768
+    },
+    {
+      "method": "GET",
+      "path": "/api/webhooks",
+      "file": "api/index.js",
+      "line": 3922
+    },
+    {
+      "method": "POST",
+      "path": "/api/webhooks",
+      "file": "api/index.js",
+      "line": 3933
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/webhooks/:id",
+      "file": "api/index.js",
+      "line": 3955
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/webhooks/:id",
+      "file": "api/index.js",
+      "line": 3975
+    },
+    {
+      "method": "POST",
+      "path": "/api/webhooks/:id/test",
+      "file": "api/index.js",
+      "line": 3983
+    },
+    {
+      "method": "GET",
+      "path": "/api/webhooks/:id/deliveries",
+      "file": "api/index.js",
+      "line": 3998
+    },
+    {
+      "method": "GET",
+      "path": "/api/ml/inventory/forecast",
+      "file": "api/index.js",
+      "line": 4076
+    },
+    {
+      "method": "GET",
+      "path": "/api/ml/inventory/reorder-suggestions",
+      "file": "api/index.js",
+      "line": 4110
+    },
+    {
+      "method": "GET",
+      "path": "/api/ml/sales/anomalies",
+      "file": "api/index.js",
+      "line": 4141
+    },
+    {
+      "method": "POST",
+      "path": "/api/ml/products/cluster",
+      "file": "api/index.js",
+      "line": 4171
+    },
+    {
+      "method": "GET",
+      "path": "/api/discord/webhooks",
+      "file": "api/index.js",
+      "line": 4355
+    },
+    {
+      "method": "POST",
+      "path": "/api/discord/webhooks",
+      "file": "api/index.js",
+      "line": 4366
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/discord/webhooks/:id",
+      "file": "api/index.js",
+      "line": 4386
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/discord/webhooks/:id",
+      "file": "api/index.js",
+      "line": 4403
+    },
+    {
+      "method": "POST",
+      "path": "/api/discord/notify",
+      "file": "api/index.js",
+      "line": 4411
+    },
+    {
+      "method": "POST",
+      "path": "/api/discord/webhooks/:id/test",
+      "file": "api/index.js",
+      "line": 4423
+    },
+    {
+      "method": "POST",
+      "path": "/api/nft/collections",
+      "file": "api/index.js",
+      "line": 4485
+    },
+    {
+      "method": "POST",
+      "path": "/api/nft/mint",
+      "file": "api/index.js",
+      "line": 4526
+    },
+    {
+      "method": "GET",
+      "path": "/api/customer/nfts",
+      "file": "api/index.js",
+      "line": 4561
+    },
+    {
+      "method": "POST",
+      "path": "/api/blockchain/anchor-receipt",
+      "file": "api/index.js",
+      "line": 4572
+    },
+    {
+      "method": "GET",
+      "path": "/api/blockchain/receipts/:id/verify",
+      "file": "api/index.js",
+      "line": 4599
+    },
+    {
+      "method": "GET",
+      "path": "/api/mobile/version",
+      "file": "api/index.js",
+      "line": 4630
+    },
+    {
+      "method": "GET",
+      "path": "/api/mobile/config",
+      "file": "api/index.js",
+      "line": 4647
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/password-reset/request",
+      "file": "api/index.js",
+      "line": 4882
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/password-reset/confirm",
+      "file": "api/index.js",
+      "line": 4911
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/jobs/low-stock-alert",
+      "file": "api/index.js",
+      "line": 4937
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs",
+      "file": "api/index.js",
+      "line": 4984
+    },
+    {
+      "method": "POST",
+      "path": "/api/printer/raw",
+      "file": "api/index.js",
+      "line": 4999
+    },
+    {
+      "method": "GET",
+      "path": "/api/billing/plans",
+      "file": "api/index.js",
+      "line": 5166
+    },
+    {
+      "method": "GET",
+      "path": "/api/billing/subscription",
+      "file": "api/index.js",
+      "line": 5174
+    },
+    {
+      "method": "POST",
+      "path": "/api/billing/subscribe",
+      "file": "api/index.js",
+      "line": 5181
+    },
+    {
+      "method": "POST",
+      "path": "/api/billing/cancel",
+      "file": "api/index.js",
+      "line": 5236
+    },
+    {
+      "method": "POST",
+      "path": "/api/billing/upgrade",
+      "file": "api/index.js",
+      "line": 5287
+    },
+    {
+      "method": "POST",
+      "path": "/api/billing/downgrade",
+      "file": "api/index.js",
+      "line": 5291
+    },
+    {
+      "method": "GET",
+      "path": "/api/billing/invoices",
+      "file": "api/index.js",
+      "line": 5295
+    },
+    {
+      "method": "GET",
+      "path": "/api/billing/usage",
+      "file": "api/index.js",
+      "line": 5304
+    },
+    {
+      "method": "POST",
+      "path": "/api/products",
+      "file": "api/index.js",
+      "line": 5322
+    },
+    {
+      "method": "POST",
+      "path": "/api/owner/users",
+      "file": "api/index.js",
+      "line": 5323
+    },
+    {
+      "method": "POST",
+      "path": "/api/sales",
+      "file": "api/index.js",
+      "line": 5325
+    },
+    {
+      "method": "GET",
+      "path": "/api/push/vapid-public-key",
+      "file": "api/index.js",
+      "line": 5461
+    },
+    {
+      "method": "POST",
+      "path": "/api/push/subscribe",
+      "file": "api/index.js",
+      "line": 5468
+    },
+    {
+      "method": "POST",
+      "path": "/api/push/unsubscribe",
+      "file": "api/index.js",
+      "line": 5519
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/push/subscribe",
+      "file": "api/index.js",
+      "line": 5532
+    },
+    {
+      "method": "GET",
+      "path": "/api/push/subscriptions",
+      "file": "api/index.js",
+      "line": 5554
+    },
+    {
+      "method": "POST",
+      "path": "/api/push/send",
+      "file": "api/index.js",
+      "line": 5571
+    },
+    {
+      "method": "POST",
+      "path": "/api/payments/stripe/intent",
+      "file": "api/index.js",
+      "line": 5654
+    },
+    {
+      "method": "POST",
+      "path": "/api/payments/stripe/webhook",
+      "file": "api/index.js",
+      "line": 5692
+    },
+    {
+      "method": "GET",
+      "path": "/api/payments/:id/status",
+      "file": "api/index.js",
+      "line": 5754
+    },
+    {
+      "method": "GET",
+      "path": "/api/payments/wallets/config",
+      "file": "api/index.js",
+      "line": 5771
+    },
+    {
+      "method": "POST",
+      "path": "/api/payments/wallets/validate-merchant",
+      "file": "api/index.js",
+      "line": 5785
+    },
+    {
+      "method": "GET",
+      "path": "/api/customer-subscriptions",
+      "file": "api/index.js",
+      "line": 5859
+    },
+    {
+      "method": "POST",
+      "path": "/api/customer-subscriptions",
+      "file": "api/index.js",
+      "line": 5875
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/customer-subscriptions/:id",
+      "file": "api/index.js",
+      "line": 5905
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/customer-subscriptions/:id",
+      "file": "api/index.js",
+      "line": 5922
+    },
+    {
+      "method": "POST",
+      "path": "/api/customer-subscriptions/:id/charge",
+      "file": "api/index.js",
+      "line": 5966
+    },
+    {
+      "method": "GET",
+      "path": "/api/customer-subscriptions/due-today",
+      "file": "api/index.js",
+      "line": 5979
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/jobs/process-recurring",
+      "file": "api/index.js",
+      "line": 5994
+    },
+    {
+      "method": "GET",
+      "path": "/api/loyalty/customers/:id",
+      "file": "api/index.js",
+      "line": 6019
+    },
+    {
+      "method": "POST",
+      "path": "/api/loyalty/redeem",
+      "file": "api/index.js",
+      "line": 6057
+    },
+    {
+      "method": "GET",
+      "path": "/api/loyalty/tiers",
+      "file": "api/index.js",
+      "line": 6081
+    },
+    {
+      "method": "POST",
+      "path": "/api/loyalty/tiers",
+      "file": "api/index.js",
+      "line": 6092
+    },
+    {
+      "method": "POST",
+      "path": "/api/loyalty/adjust",
+      "file": "api/index.js",
+      "line": 6107
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/sales/daily",
+      "file": "api/index.js",
+      "line": 6141
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/sales/by-product",
+      "file": "api/index.js",
+      "line": 6152
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/sales/by-cashier",
+      "file": "api/index.js",
+      "line": 6164
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/inventory/value",
+      "file": "api/index.js",
+      "line": 6174
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/customers/cohort",
+      "file": "api/index.js",
+      "line": 6184
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/profit",
+      "file": "api/index.js",
+      "line": 6193
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/abc-analysis",
+      "file": "api/index.js",
+      "line": 6203
+    },
+    {
+      "method": "POST",
+      "path": "/api/reports/refresh",
+      "file": "api/index.js",
+      "line": 6213
+    },
+    {
+      "method": "GET",
+      "path": "/api/audit-log",
+      "file": "api/index.js",
+      "line": 6223
+    },
+    {
+      "method": "POST",
+      "path": "/api/gdpr/access",
+      "file": "api/index.js",
+      "line": 6298
+    },
+    {
+      "method": "POST",
+      "path": "/api/gdpr/erasure",
+      "file": "api/index.js",
+      "line": 6299
+    },
+    {
+      "method": "POST",
+      "path": "/api/gdpr/portability",
+      "file": "api/index.js",
+      "line": 6300
+    },
+    {
+      "method": "POST",
+      "path": "/api/invoices/cfdi",
+      "file": "api/index.js",
+      "line": 6326
+    },
+    {
+      "method": "POST",
+      "path": "/api/cfdi/generate",
+      "file": "api/index.js",
+      "line": 6380
+    },
+    {
+      "method": "POST",
+      "path": "/api/invoices/cfdi/cancel",
+      "file": "api/index.js",
+      "line": 6382
+    },
+    {
+      "method": "GET",
+      "path": "/api/invoices/cfdi/:uuid/status",
+      "file": "api/index.js",
+      "line": 6409
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/public",
+      "file": "api/index.js",
+      "line": 6440
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/api-keys",
+      "file": "api/index.js",
+      "line": 6717
+    },
+    {
+      "method": "POST",
+      "path": "/api/mfa/setup",
+      "file": "api/index.js",
+      "line": 6753
+    },
+    {
+      "method": "POST",
+      "path": "/api/mfa/verify",
+      "file": "api/index.js",
+      "line": 6757
+    },
+    {
+      "method": "POST",
+      "path": "/api/customers",
+      "file": "api/index.js",
+      "line": 6763
+    },
+    {
+      "method": "POST",
+      "path": "/api/tenants",
+      "file": "api/index.js",
+      "line": 6801
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/session",
+      "file": "api/index.js",
+      "line": 6819
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "file": "api/index.js",
+      "line": 6828
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/register",
+      "file": "api/index.js",
+      "line": 6829
+    },
+    {
+      "method": "GET",
+      "path": "/api/me",
+      "file": "api/index.js",
+      "line": 6833
+    },
+    {
+      "method": "POST",
+      "path": "/api/refresh",
+      "file": "api/index.js",
+      "line": 6836
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/models",
+      "file": "api/index.js",
+      "line": 6848
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/forecast",
+      "file": "api/index.js",
+      "line": 6853
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/suggest",
+      "file": "api/index.js",
+      "line": 6857
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/backup/trigger",
+      "file": "api/index.js",
+      "line": 6863
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/backup/cloud",
+      "file": "api/index.js",
+      "line": 6914
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/backup/list",
+      "file": "api/index.js",
+      "line": 6965
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/backup/restore/:id",
+      "file": "api/index.js",
+      "line": 6976
+    },
+    {
+      "method": "GET",
+      "path": "/api/cash/session",
+      "file": "api/index.js",
+      "line": 6994
+    },
+    {
+      "method": "POST",
+      "path": "/api/cash/session",
+      "file": "api/index.js",
+      "line": 6997
+    },
+    {
+      "method": "POST",
+      "path": "/api/cfdi/stamp",
+      "file": "api/index.js",
+      "line": 7003
+    },
+    {
+      "method": "GET",
+      "path": "/api/config",
+      "file": "api/index.js",
+      "line": 7009
+    },
+    {
+      "method": "GET",
+      "path": "/api/customers/:id/history",
+      "file": "api/index.js",
+      "line": 7019
+    },
+    {
+      "method": "POST",
+      "path": "/api/email/send",
+      "file": "api/index.js",
+      "line": 7064
+    },
+    {
+      "method": "POST",
+      "path": "/api/email/schedule",
+      "file": "api/index.js",
+      "line": 7074
+    },
+    {
+      "method": "POST",
+      "path": "/api/sms/send",
+      "file": "api/index.js",
+      "line": 7082
+    },
+    {
+      "method": "POST",
+      "path": "/api/segments",
+      "file": "api/index.js",
+      "line": 7107
+    },
+    {
+      "method": "GET",
+      "path": "/api/segments",
+      "file": "api/index.js",
+      "line": 7141
+    },
+    {
+      "method": "POST",
+      "path": "/api/segments/:id/recompute",
+      "file": "api/index.js",
+      "line": 7158
+    },
+    {
+      "method": "GET",
+      "path": "/api/segments/:id/members",
+      "file": "api/index.js",
+      "line": 7176
+    },
+    {
+      "method": "POST",
+      "path": "/api/segments/:id/campaign",
+      "file": "api/index.js",
+      "line": 7198
+    },
+    {
+      "method": "POST",
+      "path": "/api/errors/report",
+      "file": "api/index.js",
+      "line": 7279
+    },
+    {
+      "method": "POST",
+      "path": "/api/logs",
+      "file": "api/index.js",
+      "line": 7283
+    },
+    {
+      "method": "GET",
+      "path": "/api/logs",
+      "file": "api/index.js",
+      "line": 7287
+    },
+    {
+      "method": "POST",
+      "path": "/api/fb/capi",
+      "file": "api/index.js",
+      "line": 7292
+    },
+    {
+      "method": "GET",
+      "path": "/api/features/ai_assistant",
+      "file": "api/index.js",
+      "line": 7298
+    },
+    {
+      "method": "POST",
+      "path": "/api/feedback",
+      "file": "api/index.js",
+      "line": 7303
+    },
+    {
+      "method": "GET",
+      "path": "/api/feedback",
+      "file": "api/index.js",
+      "line": 7307
+    },
+    {
+      "method": "GET",
+      "path": "/api/health/speedtest",
+      "file": "api/index.js",
+      "line": 7312
+    },
+    {
+      "method": "GET",
+      "path": "/api/vendor/me",
+      "file": "api/index.js",
+      "line": 7318
+    },
+    {
+      "method": "GET",
+      "path": "/api/vendor/pos",
+      "file": "api/index.js",
+      "line": 7331
+    },
+    {
+      "method": "GET",
+      "path": "/api/vendor/orders",
+      "file": "api/index.js",
+      "line": 7334
+    },
+    {
+      "method": "GET",
+      "path": "/api/vendor/invoices",
+      "file": "api/index.js",
+      "line": 7337
+    },
+    {
+      "method": "GET",
+      "path": "/api/vendor/payouts",
+      "file": "api/index.js",
+      "line": 7340
+    },
+    {
+      "method": "GET",
+      "path": "/api/vendor/stats",
+      "file": "api/index.js",
+      "line": 7343
+    },
+    {
+      "method": "GET",
+      "path": "/api/ping",
+      "file": "api/index.js",
+      "line": 7363
+    },
+    {
+      "method": "GET",
+      "path": "/api/pos/ping",
+      "file": "api/index.js",
+      "line": 7364
+    },
+    {
+      "method": "GET",
+      "path": "/api/stock/ping",
+      "file": "api/index.js",
+      "line": 7365
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/ping",
+      "file": "api/index.js",
+      "line": 7366
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/sat/ping",
+      "file": "api/index.js",
+      "line": 7369
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/whatsapp/ping",
+      "file": "api/index.js",
+      "line": 7372
+    },
+    {
+      "method": "GET",
+      "path": "/api/healthcheck/api-root",
+      "file": "api/index.js",
+      "line": 7381
+    },
+    {
+      "method": "GET",
+      "path": "/api/healthcheck/api-auth",
+      "file": "api/index.js",
+      "line": 7382
+    },
+    {
+      "method": "GET",
+      "path": "/api/healthcheck/api-pos",
+      "file": "api/index.js",
+      "line": 7383
+    },
+    {
+      "method": "GET",
+      "path": "/api/healthcheck/api-stock",
+      "file": "api/index.js",
+      "line": 7384
+    },
+    {
+      "method": "GET",
+      "path": "/api/healthcheck/api-reports",
+      "file": "api/index.js",
+      "line": 7385
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/supabase/health",
+      "file": "api/index.js",
+      "line": 7388
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/stripe/health",
+      "file": "api/index.js",
+      "line": 7407
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/sat-cfdi/health",
+      "file": "api/index.js",
+      "line": 7424
+    },
+    {
+      "method": "POST",
+      "path": "/api/inventory",
+      "file": "api/index.js",
+      "line": 7432
+    },
+    {
+      "method": "POST",
+      "path": "/api/inventory/transfer",
+      "file": "api/index.js",
+      "line": 7436
+    },
+    {
+      "method": "GET",
+      "path": "/api/inventory/transfer",
+      "file": "api/index.js",
+      "line": 7440
+    },
+    {
+      "method": "GET",
+      "path": "/api/inventory/movements",
+      "file": "api/index.js",
+      "line": 7443
+    },
+    {
+      "method": "GET",
+      "path": "/api/inventory/counts",
+      "file": "api/index.js",
+      "line": 7449
+    },
+    {
+      "method": "GET",
+      "path": "/api/warehouses",
+      "file": "api/index.js",
+      "line": 7470
+    },
+    {
+      "method": "POST",
+      "path": "/api/warehouses",
+      "file": "api/index.js",
+      "line": 7482
+    },
+    {
+      "method": "GET",
+      "path": "/api/warehouses/:id/stock",
+      "file": "api/index.js",
+      "line": 7509
+    },
+    {
+      "method": "POST",
+      "path": "/api/warehouses/transfer",
+      "file": "api/index.js",
+      "line": 7519
+    },
+    {
+      "method": "GET",
+      "path": "/api/warehouses/optimal",
+      "file": "api/index.js",
+      "line": 7546
+    },
+    {
+      "method": "GET",
+      "path": "/api/knowledge",
+      "file": "api/index.js",
+      "line": 7597
+    },
+    {
+      "method": "GET",
+      "path": "/api/knowledge/search",
+      "file": "api/index.js",
+      "line": 7598
+    },
+    {
+      "method": "POST",
+      "path": "/api/knowledge/search",
+      "file": "api/index.js",
+      "line": 7599
+    },
+    {
+      "method": "POST",
+      "path": "/api/mercadopago",
+      "file": "api/index.js",
+      "line": 7605
+    },
+    {
+      "method": "POST",
+      "path": "/api/conekta",
+      "file": "api/index.js",
+      "line": 7609
+    },
+    {
+      "method": "POST",
+      "path": "/api/twilio",
+      "file": "api/index.js",
+      "line": 7613
+    },
+    {
+      "method": "GET",
+      "path": "/api/payments",
+      "file": "api/index.js",
+      "line": 7617
+    },
+    {
+      "method": "POST",
+      "path": "/api/payments",
+      "file": "api/index.js",
+      "line": 7620
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/brands",
+      "file": "api/index.js",
+      "line": 7626
+    },
+    {
+      "method": "POST",
+      "path": "/api/owner/brands",
+      "file": "api/index.js",
+      "line": 7629
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/deploys",
+      "file": "api/index.js",
+      "line": 7633
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/hierarchy",
+      "file": "api/index.js",
+      "line": 7636
+    },
+    {
+      "method": "POST",
+      "path": "/api/owner/impersonate",
+      "file": "api/index.js",
+      "line": 7639
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/landings",
+      "file": "api/index.js",
+      "line": 7643
+    },
+    {
+      "method": "POST",
+      "path": "/api/owner/landings",
+      "file": "api/index.js",
+      "line": 7646
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/logs",
+      "file": "api/index.js",
+      "line": 7650
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/modules",
+      "file": "api/index.js",
+      "line": 7653
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/stats",
+      "file": "api/index.js",
+      "line": 7661
+    },
+    {
+      "method": "POST",
+      "path": "/api/owner/sync-force",
+      "file": "api/index.js",
+      "line": 7664
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner",
+      "file": "api/index.js",
+      "line": 7667
+    },
+    {
+      "method": "GET",
+      "path": "/api/print",
+      "file": "api/index.js",
+      "line": 7672
+    },
+    {
+      "method": "POST",
+      "path": "/api/print",
+      "file": "api/index.js",
+      "line": 7673
+    },
+    {
+      "method": "GET",
+      "path": "/api/printers",
+      "file": "api/index.js",
+      "line": 7677
+    },
+    {
+      "method": "POST",
+      "path": "/api/printers",
+      "file": "api/index.js",
+      "line": 7678
+    },
+    {
+      "method": "GET",
+      "path": "/api/products/today",
+      "file": "api/index.js",
+      "line": 7684
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/products",
+      "file": "api/index.js",
+      "line": 7691
+    },
+    {
+      "method": "POST",
+      "path": "/api/remote/connect",
+      "file": "api/index.js",
+      "line": 7694
+    },
+    {
+      "method": "POST",
+      "path": "/api/remote/start",
+      "file": "api/index.js",
+      "line": 7698
+    },
+    {
+      "method": "GET",
+      "path": "/api/reorder",
+      "file": "api/index.js",
+      "line": 7704
+    },
+    {
+      "method": "POST",
+      "path": "/api/reorder",
+      "file": "api/index.js",
+      "line": 7705
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/login",
+      "file": "api/index.js",
+      "line": 7714
+    },
+    {
+      "method": "GET",
+      "path": "/api/pos",
+      "file": "api/index.js",
+      "line": 7717
+    },
+    {
+      "method": "GET",
+      "path": "/api/stock",
+      "file": "api/index.js",
+      "line": 7720
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports",
+      "file": "api/index.js",
+      "line": 7725
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/cashflow",
+      "file": "api/index.js",
+      "line": 7731
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/export",
+      "file": "api/index.js",
+      "line": 7734
+    },
+    {
+      "method": "POST",
+      "path": "/api/reports/export",
+      "file": "api/index.js",
+      "line": 7737
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/products",
+      "file": "api/index.js",
+      "line": 7741
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/tax",
+      "file": "api/index.js",
+      "line": 7747
+    },
+    {
+      "method": "GET",
+      "path": "/api/roadmap",
+      "file": "api/index.js",
+      "line": 7752
+    },
+    {
+      "method": "POST",
+      "path": "/api/roadmap/vote",
+      "file": "api/index.js",
+      "line": 7759
+    },
+    {
+      "method": "POST",
+      "path": "/api/sales/create",
+      "file": "api/index.js",
+      "line": 7765
+    },
+    {
+      "method": "GET",
+      "path": "/api/sales/latest",
+      "file": "api/index.js",
+      "line": 7766
+    },
+    {
+      "method": "GET",
+      "path": "/api/sales/list",
+      "file": "api/index.js",
+      "line": 7774
+    },
+    {
+      "method": "GET",
+      "path": "/api/ventas",
+      "file": "api/index.js",
+      "line": 7775
+    },
+    {
+      "method": "POST",
+      "path": "/api/ventas",
+      "file": "api/index.js",
+      "line": 7776
+    },
+    {
+      "method": "POST",
+      "path": "/api/sales/:id/cancel",
+      "file": "api/index.js",
+      "line": 7779
+    },
+    {
+      "method": "GET",
+      "path": "/api/sales/:id/receipt",
+      "file": "api/index.js",
+      "line": 7789
+    },
+    {
+      "method": "GET",
+      "path": "/api/tips/by-staff",
+      "file": "api/index.js",
+      "line": 7810
+    },
+    {
+      "method": "GET",
+      "path": "/api/tips/pools",
+      "file": "api/index.js",
+      "line": 7853
+    },
+    {
+      "method": "POST",
+      "path": "/api/tips/pools",
+      "file": "api/index.js",
+      "line": 7862
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/tips/pools/:id",
+      "file": "api/index.js",
+      "line": 7884
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/tips/pools/:id",
+      "file": "api/index.js",
+      "line": 7902
+    },
+    {
+      "method": "POST",
+      "path": "/api/tips/distribute",
+      "file": "api/index.js",
+      "line": 7911
+    },
+    {
+      "method": "GET",
+      "path": "/api/sales/:id/escpos",
+      "file": "api/index.js",
+      "line": 7930
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff/onshift",
+      "file": "api/index.js",
+      "line": 7948
+    },
+    {
+      "method": "GET",
+      "path": "/api/stats",
+      "file": "api/index.js",
+      "line": 7953
+    },
+    {
+      "method": "GET",
+      "path": "/api/status",
+      "file": "api/index.js",
+      "line": 7956
+    },
+    {
+      "method": "POST",
+      "path": "/api/subscribe",
+      "file": "api/index.js",
+      "line": 7961
+    },
+    {
+      "method": "GET",
+      "path": "/api/support/tickets",
+      "file": "api/index.js",
+      "line": 7967
+    },
+    {
+      "method": "POST",
+      "path": "/api/support/tickets",
+      "file": "api/index.js",
+      "line": 7970
+    },
+    {
+      "method": "GET",
+      "path": "/api/tax/mx/catalogs",
+      "file": "api/index.js",
+      "line": 7976
+    },
+    {
+      "method": "POST",
+      "path": "/api/tickets/:id/print",
+      "file": "api/index.js",
+      "line": 7981
+    },
+    {
+      "method": "GET",
+      "path": "/api/tickets/:id/print",
+      "file": "api/index.js",
+      "line": 7984
+    },
+    {
+      "method": "GET",
+      "path": "/api/openapi",
+      "file": "api/index.js",
+      "line": 7989
+    },
+    {
+      "method": "GET",
+      "path": "/api/gdpr",
+      "file": "api/index.js",
+      "line": 7992
+    },
+    {
+      "method": "GET",
+      "path": "/api/loyalty",
+      "file": "api/index.js",
+      "line": 7997
+    },
+    {
+      "method": "GET",
+      "path": "/api/branches",
+      "file": "api/index.js",
+      "line": 8012
+    },
+    {
+      "method": "POST",
+      "path": "/api/branches",
+      "file": "api/index.js",
+      "line": 8013
+    },
+    {
+      "method": "GET",
+      "path": "/api/branches/cashboxes",
+      "file": "api/index.js",
+      "line": 8014
+    },
+    {
+      "method": "POST",
+      "path": "/api/branches/cashboxes",
+      "file": "api/index.js",
+      "line": 8015
+    },
+    {
+      "method": "GET",
+      "path": "/api/branches/permissions",
+      "file": "api/index.js",
+      "line": 8016
+    },
+    {
+      "method": "POST",
+      "path": "/api/branches/permissions",
+      "file": "api/index.js",
+      "line": 8017
+    },
+    {
+      "method": "GET",
+      "path": "/api/branch_inventory/transfers",
+      "file": "api/index.js",
+      "line": 8018
+    },
+    {
+      "method": "POST",
+      "path": "/api/branch_inventory/transfers",
+      "file": "api/index.js",
+      "line": 8019
+    },
+    {
+      "method": "GET",
+      "path": "/api/crm",
+      "file": "api/index.js",
+      "line": 8022
+    },
+    {
+      "method": "POST",
+      "path": "/api/crm",
+      "file": "api/index.js",
+      "line": 8023
+    },
+    {
+      "method": "GET",
+      "path": "/api/leads",
+      "file": "api/index.js",
+      "line": 8024
+    },
+    {
+      "method": "POST",
+      "path": "/api/leads",
+      "file": "api/index.js",
+      "line": 8025
+    },
+    {
+      "method": "GET",
+      "path": "/api/suppliers",
+      "file": "api/index.js",
+      "line": 8030
+    },
+    {
+      "method": "POST",
+      "path": "/api/suppliers",
+      "file": "api/index.js",
+      "line": 8031
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/suppliers/:id",
+      "file": "api/index.js",
+      "line": 8032
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/suppliers/:id",
+      "file": "api/index.js",
+      "line": 8033
+    },
+    {
+      "method": "GET",
+      "path": "/api/purchases",
+      "file": "api/index.js",
+      "line": 8034
+    },
+    {
+      "method": "POST",
+      "path": "/api/purchases",
+      "file": "api/index.js",
+      "line": 8035
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/purchases/:id",
+      "file": "api/index.js",
+      "line": 8036
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/purchases/:id",
+      "file": "api/index.js",
+      "line": 8037
+    },
+    {
+      "method": "GET",
+      "path": "/api/forecasts",
+      "file": "api/index.js",
+      "line": 8040
+    },
+    {
+      "method": "POST",
+      "path": "/api/forecasts",
+      "file": "api/index.js",
+      "line": 8041
+    },
+    {
+      "method": "GET",
+      "path": "/api/tax",
+      "file": "api/index.js",
+      "line": 8044
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin",
+      "file": "api/index.js",
+      "line": 8047
+    },
+    {
+      "method": "GET",
+      "path": "/api/debug",
+      "file": "api/index.js",
+      "line": 8048
+    },
+    {
+      "method": "GET",
+      "path": "/api/private",
+      "file": "api/index.js",
+      "line": 8049
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth",
+      "file": "api/index.js",
+      "line": 8050
+    },
+    {
+      "method": "GET",
+      "path": "/api/audit_log",
+      "file": "api/index.js",
+      "line": 8053
+    },
+    {
+      "method": "GET",
+      "path": "/api/payroll/periods",
+      "file": "api/index.js",
+      "line": 8056
+    },
+    {
+      "method": "GET",
+      "path": "/api/payroll/receipts",
+      "file": "api/index.js",
+      "line": 8062
+    },
+    {
+      "method": "GET",
+      "path": "/api/cfdi/list",
+      "file": "api/index.js",
+      "line": 8068
+    },
+    {
+      "method": "GET",
+      "path": "/api/onboarding/status",
+      "file": "api/index.js",
+      "line": 8074
+    },
+    {
+      "method": "GET",
+      "path": "/api/i18n/locales",
+      "file": "api/index.js",
+      "line": 8077
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/fiscal",
+      "file": "api/index.js",
+      "line": 8088
+    },
+    {
+      "method": "GET",
+      "path": "/api/products/import",
+      "file": "api/index.js",
+      "line": 8100
+    },
+    {
+      "method": "GET",
+      "path": "/api/audit/logs",
+      "file": "api/index.js",
+      "line": 8101
+    },
+    {
+      "method": "POST",
+      "path": "/api/test/seed",
+      "file": "api/index.js",
+      "line": 8104
+    },
+    {
+      "method": "POST",
+      "path": "/api/test/clean",
+      "file": "api/index.js",
+      "line": 8105
+    },
+    {
+      "method": "POST",
+      "path": "/api/test/sale",
+      "file": "api/index.js",
+      "line": 8106
+    },
+    {
+      "method": "GET",
+      "path": "/api/services",
+      "file": "api/index.js",
+      "line": 8116
+    },
+    {
+      "method": "POST",
+      "path": "/api/services",
+      "file": "api/index.js",
+      "line": 8120
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/services/:id",
+      "file": "api/index.js",
+      "line": 8130
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/services/:id",
+      "file": "api/index.js",
+      "line": 8137
+    },
+    {
+      "method": "GET",
+      "path": "/api/appointments",
+      "file": "api/index.js",
+      "line": 8142
+    },
+    {
+      "method": "POST",
+      "path": "/api/appointments",
+      "file": "api/index.js",
+      "line": 8151
+    },
+    {
+      "method": "POST",
+      "path": "/api/appointments/:id/confirm",
+      "file": "api/index.js",
+      "line": 8180
+    },
+    {
+      "method": "POST",
+      "path": "/api/appointments/:id/cancel",
+      "file": "api/index.js",
+      "line": 8181
+    },
+    {
+      "method": "POST",
+      "path": "/api/appointments/:id/complete",
+      "file": "api/index.js",
+      "line": 8182
+    },
+    {
+      "method": "POST",
+      "path": "/api/appointments/:id/no-show",
+      "file": "api/index.js",
+      "line": 8183
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/appointments/:id",
+      "file": "api/index.js",
+      "line": 8184
+    },
+    {
+      "method": "GET",
+      "path": "/api/availability",
+      "file": "api/index.js",
+      "line": 8203
+    },
+    {
+      "method": "POST",
+      "path": "/api/voice/parse",
+      "file": "api/index.js",
+      "line": 8235
+    },
+    {
+      "method": "GET",
+      "path": "/api/sales/today",
+      "file": "api/index.js",
+      "line": 8265
+    },
+    {
+      "method": "GET",
+      "path": "/api/sales/range",
+      "file": "api/index.js",
+      "line": 8266
+    },
+    {
+      "method": "GET",
+      "path": "/api/credits",
+      "file": "api/index.js",
+      "line": 8271
+    },
+    {
+      "method": "POST",
+      "path": "/api/credits",
+      "file": "api/index.js",
+      "line": 8272
+    },
+    {
+      "method": "GET",
+      "path": "/api/quotations",
+      "file": "api/index.js",
+      "line": 8273
+    },
+    {
+      "method": "POST",
+      "path": "/api/quotations",
+      "file": "api/index.js",
+      "line": 8274
+    },
+    {
+      "method": "GET",
+      "path": "/api/returns",
+      "file": "api/index.js",
+      "line": 8275
+    },
+    {
+      "method": "POST",
+      "path": "/api/returns",
+      "file": "api/index.js",
+      "line": 8276
+    },
+    {
+      "method": "GET",
+      "path": "/api/products/categories",
+      "file": "api/index.js",
+      "line": 8279
+    },
+    {
+      "method": "GET",
+      "path": "/api/products/departments",
+      "file": "api/index.js",
+      "line": 8280
+    },
+    {
+      "method": "POST",
+      "path": "/api/products/import",
+      "file": "api/index.js",
+      "line": 8282
+    },
+    {
+      "method": "GET",
+      "path": "/api/products/export",
+      "file": "api/index.js",
+      "line": 8323
+    },
+    {
+      "method": "POST",
+      "path": "/api/gift-cards",
+      "file": "api/index.js",
+      "line": 8366
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/gift-cards/:id",
+      "file": "api/index.js",
+      "line": 8402
+    },
+    {
+      "method": "GET",
+      "path": "/api/gift-cards/:code",
+      "file": "api/index.js",
+      "line": 8427
+    },
+    {
+      "method": "POST",
+      "path": "/api/gift-cards/:code/redeem",
+      "file": "api/index.js",
+      "line": 8447
+    },
+    {
+      "method": "GET",
+      "path": "/api/gift-cards",
+      "file": "api/index.js",
+      "line": 8477
+    },
+    {
+      "method": "POST",
+      "path": "/api/kiosk/session",
+      "file": "api/index.js",
+      "line": 8491
+    },
+    {
+      "method": "POST",
+      "path": "/api/kiosk/orders",
+      "file": "api/index.js",
+      "line": 8530
+    },
+    {
+      "method": "GET",
+      "path": "/api/bundles",
+      "file": "api/index.js",
+      "line": 8580
+    },
+    {
+      "method": "POST",
+      "path": "/api/bundles",
+      "file": "api/index.js",
+      "line": 8595
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/bundles/:id",
+      "file": "api/index.js",
+      "line": 8625
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/bundles/:id",
+      "file": "api/index.js",
+      "line": 8654
+    },
+    {
+      "method": "POST",
+      "path": "/api/bundles/:id/expand",
+      "file": "api/index.js",
+      "line": 8672
+    },
+    {
+      "method": "GET",
+      "path": "/api/promotions",
+      "file": "api/index.js",
+      "line": 8746
+    },
+    {
+      "method": "POST",
+      "path": "/api/promotions",
+      "file": "api/index.js",
+      "line": 8760
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/promotions/:id",
+      "file": "api/index.js",
+      "line": 8786
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/promotions/:id",
+      "file": "api/index.js",
+      "line": 8799
+    },
+    {
+      "method": "POST",
+      "path": "/api/promotions/validate",
+      "file": "api/index.js",
+      "line": 8807
+    },
+    {
+      "method": "POST",
+      "path": "/api/telegram/webhook",
+      "file": "api/index.js",
+      "line": 8987
+    },
+    {
+      "method": "GET",
+      "path": "/api/fraud/alerts",
+      "file": "api/index.js",
+      "line": 9164
+    },
+    {
+      "method": "GET",
+      "path": "/api/fraud/rules",
+      "file": "api/index.js",
+      "line": 9178
+    },
+    {
+      "method": "POST",
+      "path": "/api/fraud/evaluate",
+      "file": "api/index.js",
+      "line": 9185
+    },
+    {
+      "method": "POST",
+      "path": "/api/fraud/review/:sale_id",
+      "file": "api/index.js",
+      "line": 9194
+    },
+    {
+      "method": "POST",
+      "path": "/api/qr/codi/generate",
+      "file": "api/index.js",
+      "line": 9304
+    },
+    {
+      "method": "POST",
+      "path": "/api/qr/spei/generate",
+      "file": "api/index.js",
+      "line": 9334
+    },
+    {
+      "method": "GET",
+      "path": "/api/qr/payments/:id/status",
+      "file": "api/index.js",
+      "line": 9359
+    },
+    {
+      "method": "POST",
+      "path": "/api/whatsapp/send",
+      "file": "api/index.js",
+      "line": 9640
+    },
+    {
+      "method": "GET",
+      "path": "/api/whatsapp/webhook",
+      "file": "api/index.js",
+      "line": 9661
+    },
+    {
+      "method": "POST",
+      "path": "/api/whatsapp/webhook",
+      "file": "api/index.js",
+      "line": 9678
+    },
+    {
+      "method": "GET",
+      "path": "/api/whatsapp/messages",
+      "file": "api/index.js",
+      "line": 9706
+    },
+    {
+      "method": "GET",
+      "path": "/api/whatsapp/templates",
+      "file": "api/index.js",
+      "line": 9713
+    },
+    {
+      "method": "GET",
+      "path": "/api/reviews",
+      "file": "api/index.js",
+      "line": 9726
+    },
+    {
+      "method": "GET",
+      "path": "/api/reviews/stats",
+      "file": "api/index.js",
+      "line": 9746
+    },
+    {
+      "method": "POST",
+      "path": "/api/reviews",
+      "file": "api/index.js",
+      "line": 9769
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/reviews/:id",
+      "file": "api/index.js",
+      "line": 9817
+    },
+    {
+      "method": "POST",
+      "path": "/api/reviews/:id/response",
+      "file": "api/index.js",
+      "line": 9838
+    },
+    {
+      "method": "GET",
+      "path": "/api/reviews/:id/responses",
+      "file": "api/index.js",
+      "line": 9858
+    },
+    {
+      "method": "POST",
+      "path": "/api/integrations/amazon/orders/sync",
+      "file": "api/index.js",
+      "line": 9895
+    },
+    {
+      "method": "POST",
+      "path": "/api/integrations/amazon/inventory/sync",
+      "file": "api/index.js",
+      "line": 9918
+    },
+    {
+      "method": "POST",
+      "path": "/api/integrations/amazon/listings/upload",
+      "file": "api/index.js",
+      "line": 9927
+    },
+    {
+      "method": "POST",
+      "path": "/api/hr/attendance/check-in",
+      "file": "api/index.js",
+      "line": 9957
+    },
+    {
+      "method": "POST",
+      "path": "/api/hr/attendance/check-out",
+      "file": "api/index.js",
+      "line": 9978
+    },
+    {
+      "method": "GET",
+      "path": "/api/hr/attendance",
+      "file": "api/index.js",
+      "line": 9998
+    },
+    {
+      "method": "GET",
+      "path": "/api/hr/time-off",
+      "file": "api/index.js",
+      "line": 10011
+    },
+    {
+      "method": "POST",
+      "path": "/api/hr/time-off",
+      "file": "api/index.js",
+      "line": 10023
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/hr/time-off",
+      "file": "api/index.js",
+      "line": 10036
+    },
+    {
+      "method": "GET",
+      "path": "/api/hr/performance-reviews",
+      "file": "api/index.js",
+      "line": 10049
+    },
+    {
+      "method": "POST",
+      "path": "/api/hr/performance-reviews",
+      "file": "api/index.js",
+      "line": 10061
+    },
+    {
+      "method": "GET",
+      "path": "/api/hr/employees/:id/dashboard",
+      "file": "api/index.js",
+      "line": 10074
+    },
+    {
+      "method": "POST",
+      "path": "/api/kds/tickets",
+      "file": "api/index.js",
+      "line": 10096
+    },
+    {
+      "method": "GET",
+      "path": "/api/kds/tickets/active",
+      "file": "api/index.js",
+      "line": 10108
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/kds/tickets/:id/status",
+      "file": "api/index.js",
+      "line": 10121
+    },
+    {
+      "method": "POST",
+      "path": "/api/kds/stations",
+      "file": "api/index.js",
+      "line": 10136
+    },
+    {
+      "method": "GET",
+      "path": "/api/kds/stations",
+      "file": "api/index.js",
+      "line": 10150
+    },
+    {
+      "method": "POST",
+      "path": "/api/integrations/square/sync",
+      "file": "api/index.js",
+      "line": 10198
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/square/status",
+      "file": "api/index.js",
+      "line": 10252
+    },
+    {
+      "method": "POST",
+      "path": "/api/integrations/square/webhook",
+      "file": "api/index.js",
+      "line": 10278
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/square/health",
+      "file": "api/index.js",
+      "line": 10300
+    },
+    {
+      "method": "POST",
+      "path": "/api/integrations/shopify/import-products",
+      "file": "api/index.js",
+      "line": 10358
+    },
+    {
+      "method": "POST",
+      "path": "/api/integrations/shopify/export-products",
+      "file": "api/index.js",
+      "line": 10389
+    },
+    {
+      "method": "POST",
+      "path": "/api/integrations/shopify/sync-orders",
+      "file": "api/index.js",
+      "line": 10418
+    },
+    {
+      "method": "POST",
+      "path": "/api/integrations/shopify/webhook",
+      "file": "api/index.js",
+      "line": 10460
+    },
+    {
+      "method": "GET",
+      "path": "/api/employees",
+      "file": "api/index.js",
+      "line": 10519
+    },
+    {
+      "method": "POST",
+      "path": "/api/employees",
+      "file": "api/index.js",
+      "line": 10528
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/employees/:id",
+      "file": "api/index.js",
+      "line": 10549
+    },
+    {
+      "method": "POST",
+      "path": "/api/payroll/periods",
+      "file": "api/index.js",
+      "line": 10560
+    },
+    {
+      "method": "POST",
+      "path": "/api/payroll/periods/calculate",
+      "file": "api/index.js",
+      "line": 10572
+    },
+    {
+      "method": "POST",
+      "path": "/api/payroll/periods/:id/calculate",
+      "file": "api/index.js",
+      "line": 10611
+    },
+    {
+      "method": "POST",
+      "path": "/api/payroll/periods/:id/stamp",
+      "file": "api/index.js",
+      "line": 10640
+    },
+    {
+      "method": "GET",
+      "path": "/api/payroll/receipts/:id/xml",
+      "file": "api/index.js",
+      "line": 10675
+    },
+    {
+      "method": "GET",
+      "path": "/api/marketplace/vendors",
+      "file": "api/index.js",
+      "line": 10693
+    },
+    {
+      "method": "POST",
+      "path": "/api/marketplace/vendors",
+      "file": "api/index.js",
+      "line": 10705
+    },
+    {
+      "method": "POST",
+      "path": "/api/marketplace/vendors/:id/kyc",
+      "file": "api/index.js",
+      "line": 10726
+    },
+    {
+      "method": "POST",
+      "path": "/api/marketplace/payouts/calculate",
+      "file": "api/index.js",
+      "line": 10746
+    },
+    {
+      "method": "POST",
+      "path": "/api/marketplace/payouts/:id/pay",
+      "file": "api/index.js",
+      "line": 10778
+    }
+  ],
+  "endpoints_total": 376,
+  "db_tables": [
+    {
+      "name": "api_keys"
+    },
+    {
+      "name": "audit_log"
+    },
+    {
+      "name": "billing_configs"
+    },
+    {
+      "name": "billing_invoices"
+    },
+    {
+      "name": "billing_plans"
+    },
+    {
+      "name": "blockchain_receipts"
+    },
+    {
+      "name": "cloud_backups"
+    },
+    {
+      "name": "companies"
+    },
+    {
+      "name": "customer_segments"
+    },
+    {
+      "name": "customer_subscriptions"
+    },
+    {
+      "name": "customers"
+    },
+    {
+      "name": "daily_sales_report"
+    },
+    {
+      "name": "discord_webhooks"
+    },
+    {
+      "name": "domains"
+    },
+    {
+      "name": "employees"
+    },
+    {
+      "name": "error_log"
+    },
+    {
+      "name": "fraud_rules"
+    },
+    {
+      "name": "gift_cards"
+    },
+    {
+      "name": "inventory_counts"
+    },
+    {
+      "name": "inventory_locations"
+    },
+    {
+      "name": "inventory_movements"
+    },
+    {
+      "name": "inventory_stock"
+    },
+    {
+      "name": "inventory_warehouses"
+    },
+    {
+      "name": "invoices"
+    },
+    {
+      "name": "kiosk_devices"
+    },
+    {
+      "name": "licenses"
+    },
+    {
+      "name": "loyalty_tiers"
+    },
+    {
+      "name": "mv_inventory_value"
+    },
+    {
+      "name": "mv_sales_daily"
+    },
+    {
+      "name": "mv_top_products"
+    },
+    {
+      "name": "nft_collections"
+    },
+    {
+      "name": "ocr_scans"
+    },
+    {
+      "name": "payroll_periods"
+    },
+    {
+      "name": "payroll_receipts"
+    },
+    {
+      "name": "pos_branches"
+    },
+    {
+      "name": "pos_cash_sessions"
+    },
+    {
+      "name": "pos_companies"
+    },
+    {
+      "name": "pos_credits"
+    },
+    {
+      "name": "pos_products"
+    },
+    {
+      "name": "pos_quotations"
+    },
+    {
+      "name": "pos_returns"
+    },
+    {
+      "name": "pos_sales"
+    },
+    {
+      "name": "pos_subscriptions"
+    },
+    {
+      "name": "pos_users"
+    },
+    {
+      "name": "products"
+    },
+    {
+      "name": "push_subscriptions"
+    },
+    {
+      "name": "qr_payments"
+    },
+    {
+      "name": "reviews"
+    },
+    {
+      "name": "sale_items"
+    },
+    {
+      "name": "sales"
+    },
+    {
+      "name": "sat_clave_prodserv"
+    },
+    {
+      "name": "sat_clave_unidad"
+    },
+    {
+      "name": "sat_forma_pago"
+    },
+    {
+      "name": "sat_metodo_pago"
+    },
+    {
+      "name": "sat_regimen_fiscal"
+    },
+    {
+      "name": "sat_uso_cfdi"
+    },
+    {
+      "name": "segment_campaigns"
+    },
+    {
+      "name": "square_sync_log"
+    },
+    {
+      "name": "subscription_invoices"
+    },
+    {
+      "name": "subscription_plans"
+    },
+    {
+      "name": "subscriptions"
+    },
+    {
+      "name": "sync_queue"
+    },
+    {
+      "name": "telegram_admins"
+    },
+    {
+      "name": "tip_pools"
+    },
+    {
+      "name": "vendors"
+    },
+    {
+      "name": "volvix_clientes"
+    },
+    {
+      "name": "volvix_gdpr_requests"
+    },
+    {
+      "name": "webhook_deliveries"
+    },
+    {
+      "name": "webhook_endpoints"
+    },
+    {
+      "name": "webhooks"
+    },
+    {
+      "name": "whatsapp_messages"
+    }
+  ],
+  "db_tables_total": 71,
+  "roles": [
+    "superadmin",
+    "admin",
+    "owner",
+    "manager",
+    "cashier",
+    "customer",
+    "vendor",
+    "kiosk"
+  ],
+  "i18n_strings": {
+    "total_in_code": 2291,
+    "covered_in_es": 246,
+    "covered_in_en": 243,
+    "coverage_es_pct": 10.7,
+    "coverage_en_pct": 10.6
+  },
+  "subsystems_total": 14
+}
