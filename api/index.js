@@ -1232,7 +1232,9 @@ const handlers = {
         cost: costNum, price: safe.price, stock: Number(safe.stock || 0),
         icon: safe.icon || '📦'
       });
-      sendJSON(res, result[0] || result);
+      const created = result && (result[0] || result);
+      try { logAudit(req, 'product.created', 'pos_products', { id: created && created.id, after: { name: safe.name } }); } catch(_){}
+      sendJSON(res, created);
     } catch (err) { sendError(res, err); }
   }),
 
@@ -1869,6 +1871,35 @@ const handlers = {
     try {
       const billing = await supabaseRequest('GET', '/billing_configs?select=*&order=created_at.desc&limit=100');
       sendJSON(res, billing || []);
+    } catch (err) { sendError(res, err); }
+  }, ['admin', 'owner', 'superadmin']),
+
+  // B17: seats — usuarios activos por plataforma (web/windows/android)
+  'GET /api/owner/seats': requireAuth(async (req, res) => {
+    try {
+      const users = await supabaseRequest('GET',
+        '/pos_users?select=id,is_active,role,last_platform&limit=500').catch(() => []);
+      const arr = Array.isArray(users) ? users : [];
+      const active = arr.filter(u => u.is_active);
+      const byPlatform = active.reduce((acc, u) => {
+        const p = (u.last_platform || 'web').toLowerCase();
+        acc[p] = (acc[p] || 0) + 1;
+        return acc;
+      }, {});
+      sendJSON(res, {
+        ok: true,
+        total_users: arr.length,
+        active_users: active.length,
+        web_users: byPlatform.web || 0,
+        windows_users: byPlatform.windows || 0,
+        android_users: byPlatform.android || 0,
+        web_seats: 100,
+        windows_seats: 50,
+        android_seats: 50,
+        web_price: 199,
+        windows_price: 299,
+        android_price: 99,
+      });
     } catch (err) { sendError(res, err); }
   }, ['admin', 'owner', 'superadmin']),
 
@@ -6238,6 +6269,30 @@ handlers['GET /api/reports/sales/daily'] = requireAuth(async (req, res) => {
     sendJSON(res, rows || []);
   } catch (err) { sendError(res, err); }
 }, ['admin', 'owner', 'superadmin']);
+
+// B17: ventas por hora — agregadas por hour del día actual
+handlers['GET /api/reports/sales/hourly'] = requireAuth(async (req, res) => {
+  try {
+    const q = url.parse(req.url, true).query;
+    const tenantId = resolveTenant(req, q.tenant_id);
+    const posUserId = resolvePosUserId(req, tenantId);
+    const today = new Date(); today.setUTCHours(0,0,0,0);
+    const sales = await supabaseRequest('GET',
+      `/pos_sales?pos_user_id=eq.${posUserId}&created_at=gte.${today.toISOString()}&select=total,created_at&limit=500`)
+      .catch(() => []);
+    const hourly = Array.from({length: 24}, (_, h) => ({ hour: h, total: 0, count: 0 }));
+    (Array.isArray(sales) ? sales : []).forEach(s => {
+      try {
+        const h = new Date(s.created_at).getUTCHours();
+        if (h >= 0 && h < 24) {
+          hourly[h].total += Number(s.total || 0);
+          hourly[h].count += 1;
+        }
+      } catch(_){}
+    });
+    sendJSON(res, { ok: true, items: hourly, total: hourly.reduce((s,h)=>s+h.count,0), generated_at: Date.now() });
+  } catch (err) { sendError(res, err); }
+}, ['admin', 'owner', 'superadmin', 'manager']);
 
 handlers['GET /api/reports/sales/by-product'] = requireAuth(async (req, res) => {
   try {
