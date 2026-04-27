@@ -90,9 +90,18 @@
       var arr = asArray(j);
       if (!arr) return;
       window.SALES_REAL = arr;
-      setById('m-tickets', arr.length.toLocaleString());
-      var total = arr.reduce(function (s, x) { return s + (Number(x.total) || 0); }, 0);
-      setById('m-sales', '$' + Math.round(total).toLocaleString());
+      // R29: separar ventas TOTALES vs ventas DE HOY (label "Ventas hoy")
+      var todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      var todaySales = arr.filter(function(s){
+        var d = new Date(s.created_at || s.date || 0);
+        return !isNaN(d) && d >= todayStart;
+      });
+      // m-tickets es contador (cantidad de ventas hoy)
+      setById('m-tickets', todaySales.length.toLocaleString());
+      // m-sales es monto de hoy, NO el total histórico
+      var totalToday = todaySales.reduce(function (s, x) { return s + (Number(x.total) || 0); }, 0);
+      setById('m-sales', '$' + Math.round(totalToday).toLocaleString());
       document.querySelectorAll('.sales-count').forEach(function (el) {
         el.textContent = arr.length + ' ventas';
       });
@@ -114,13 +123,24 @@
   async function loadOwnerDashboard(tid) {
     try {
       var r = await authFetch('/api/owner/dashboard?tenant_id=' + encodeURIComponent(tid));
-      var j = await r.json();
-      if (!j) return;
+      var raw = await r.json();
+      if (!raw) return;
+      // B8: el endpoint envuelve KPIs en raw.metrics; soportar ambas formas
+      var j = raw.metrics ? Object.assign({}, raw, raw.metrics) : raw;
       if (j.mrr != null)              setKpi('mrr', fmtMoney(j.mrr));
+      if (j.arr != null)              setKpi('arr', fmtMoney(j.arr));
+      if (j.total_revenue != null)    setKpi('total_revenue', fmtMoney(j.total_revenue));
       if (j.mrr_trend != null)        setKpi('mrr_trend', (Number(j.mrr_trend)>0?'+':'') + Number(j.mrr_trend).toFixed(1) + '%');
       if (j.brands_total != null)     setKpi('brands_total', Number(j.brands_total).toLocaleString());
       if (j.brands_breakdown != null) setKpi('brands_breakdown', String(j.brands_breakdown));
       if (j.active_tenants != null)   setKpi('active_tenants', Number(j.active_tenants).toLocaleString());
+      if (j.total_tenants != null)    setKpi('total_tenants', Number(j.total_tenants).toLocaleString());
+      if (j.total_users != null)      setKpi('total_users', Number(j.total_users).toLocaleString());
+      if (j.active_users != null)     setKpi('active_users', Number(j.active_users).toLocaleString());
+      if (j.total_products != null)   setKpi('total_products', Number(j.total_products).toLocaleString());
+      if (j.total_customers != null)  setKpi('total_customers', Number(j.total_customers).toLocaleString());
+      if (j.total_sales != null)      setKpi('total_sales', Number(j.total_sales).toLocaleString());
+      if (j.low_stock_count != null)  setKpi('low_stock_count', Number(j.low_stock_count).toLocaleString());
       if (j.tenants_growth != null)   setKpi('tenants_growth', String(j.tenants_growth));
       if (j.devices_online != null)   setKpi('devices_online', Number(j.devices_online).toLocaleString());
       if (j.devices_sync_pct != null) setKpi('devices_sync_pct', Number(j.devices_sync_pct).toFixed(1) + '% sync');
@@ -128,6 +148,14 @@
       if (j.suite_devices_active != null) setKpi('suite_devices_active', Number(j.suite_devices_active).toLocaleString());
       if (j.suite_orders_day != null) setKpi('suite_orders_day', Number(j.suite_orders_day).toLocaleString());
       if (j.suite_mrr != null)        setKpi('suite_mrr', fmtMoney(j.suite_mrr));
+      // B8: si no hay devices_online del API, derivar de active_users
+      if (j.devices_online == null && j.active_users != null) {
+        setKpi('devices_online', Number(j.active_users).toLocaleString());
+      }
+      // B8: si no hay brands_total, usar active_tenants como proxy
+      if (j.brands_total == null && j.active_tenants != null) {
+        setKpi('brands_total', Number(j.active_tenants).toLocaleString());
+      }
     } catch (e) { /* silent */ }
   }
 

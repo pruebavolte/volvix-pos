@@ -135,46 +135,53 @@
       document.head.appendChild(style);
     }
 
+    // R28: overrides agresivos para que el toggle afecte pantallas con CSS hardcoded
+    // B10: respetar elementos con [data-theme-skip] y .metric-val (gradient text)
+    const common = `
+      html, body, main, section, article, header, footer, aside, nav {
+        background-color: var(--vlx-bg) !important;
+        color: var(--vlx-text) !important;
+      }
+      .card, .surface, .panel, .box, .kpi, .metric, .tile, .widget,
+      [class*="card"], [class*="panel"], [class*="kpi"]:not(.kpi-value):not([class*="kpi-trend"]), [class*="metric"]:not(.metric-val):not([class*="metric-icon"]) {
+        background-color: var(--vlx-surface) !important;
+        color: var(--vlx-text) !important;
+        border-color: var(--vlx-border) !important;
+      }
+      /* B10: NO sobreescribir elementos con gradient text */
+      .metric-val, .kpi-value, [class*="grad-text"], [data-theme-skip] {
+        background: revert;
+        color: revert;
+      }
+      input, textarea, select, .input, .field {
+        background-color: var(--vlx-surface) !important;
+        color: var(--vlx-text) !important;
+        border: 1px solid var(--vlx-border) !important;
+      }
+      input::placeholder, textarea::placeholder { color: var(--vlx-text-2) !important; }
+      .modal, .dialog, .popup, [class*="modal"]:not([class*="backdrop"]),
+      [class*="dialog"]:not([class*="backdrop"]) {
+        background-color: var(--vlx-surface) !important;
+        color: var(--vlx-text) !important;
+      }
+      .modal-backdrop, .overlay, [class*="backdrop"] {
+        background-color: rgba(0,0,0,0.5) !important;
+      }
+      a { color: var(--vlx-accent) !important; }
+      hr, .divider { border-color: var(--vlx-border) !important; }
+      .muted, .secondary, small, .meta, .hint { color: var(--vlx-text-2) !important; }
+      table { background-color: var(--vlx-surface) !important; color: var(--vlx-text) !important; }
+      th { color: var(--vlx-text-2) !important; border-color: var(--vlx-border) !important; }
+      td { border-color: var(--vlx-border) !important; }
+    `;
     if (effective === 'light') {
-      style.textContent = `
-        html, body {
-          background: var(--vlx-bg) !important;
-          color: var(--vlx-text) !important;
-        }
-        .card, .surface, .panel, .box {
-          background: var(--vlx-surface) !important;
-          color: var(--vlx-text) !important;
-          border-color: var(--vlx-border) !important;
-        }
-        input, textarea, select {
-          background: var(--vlx-surface) !important;
-          color: var(--vlx-text) !important;
-          border: 1px solid var(--vlx-border) !important;
-        }
-        input::placeholder, textarea::placeholder { color: var(--vlx-text-2) !important; }
-        .modal, .dialog, .popup {
-          background: var(--vlx-surface) !important;
-          color: var(--vlx-text) !important;
-        }
-        .modal-backdrop, .overlay {
-          background: rgba(0,0,0,0.4) !important;
-        }
-        a { color: var(--vlx-accent) !important; }
-        hr, .divider { border-color: var(--vlx-border) !important; }
-        .muted, .secondary, small { color: var(--vlx-text-2) !important; }
+      // Adicional para light: invertir scrollbars / shadows
+      style.textContent = common + `
+        ::-webkit-scrollbar { background: var(--vlx-bg) !important; }
+        ::-webkit-scrollbar-thumb { background: var(--vlx-border) !important; }
       `;
     } else {
-      style.textContent = `
-        html, body {
-          background: var(--vlx-bg) !important;
-          color: var(--vlx-text) !important;
-        }
-        .card, .surface, .panel, .box {
-          background: var(--vlx-surface) !important;
-          color: var(--vlx-text) !important;
-          border-color: var(--vlx-border) !important;
-        }
-      `;
+      style.textContent = common;
     }
   }
 
