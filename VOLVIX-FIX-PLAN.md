@@ -2,11 +2,12 @@
 
 ## Estado global
 - Score inicial: 23/100
-- Score actual: **94/100** ✓ OBJETIVO SUPERADO +9 sobre target
+- Score actual: **96/100** ✓ OBJETIVO SUPERADO +11 sobre target
 - Score objetivo: >=85/100
-- Última sesión: B17-B18 runtime defects (2026-04-27)
-- Próximo bloque: ninguno (5 defectos runtime cerrados, 0 errores fatales)
+- Última sesión: B20-B24 logAudit + i18n + mobile + final audit (2026-04-27)
+- Próximo bloque: ninguno (TODO el plan + deuda + B19 search/barcode + final audit)
 - SYSTEM-INVENTORY: vigente (regenerar si pasan >7 días)
+- **Total: 14/14 tests Playwright PASAN** (8 final + 6 mobile)
 
 ## Reglas de ejecución v2 (no negociables)
 
@@ -195,3 +196,5 @@ Evidencia:
 | 7 | 2026-04-27 | **B7-B12** | deuda técnica (cross-tenant real, owner panel, i18n EN, contraste, salvadorex theme, tests CI) | **90** ✓ | 0 | ~50 min | resolvePosUserId helper (9 reemplazos), owner KPIs +13 cableados, 19 EN reales, theme respeta gradient, salvadorex 5 vars, tests-e2e/smoke.spec.js |
 | 8 | 2026-04-27 | **B13-B16** | audit-log + salvadorex extra + i18n EN +185 + final audit | **92** ✓ | 0 | ~40 min | logAudit helper (auth+sales), salvadorex --surface-2/--text-3, dict EN +185 strings, Playwright 8/8 final tests pasan |
 | 9 | 2026-04-27 | **B17-B18** | 5 defectos runtime descubiertos+arreglados | **94** ✓ | 0 | ~30 min | giros_catalog alias+IIFE guard, /api/reports/sales/hourly, /api/owner/seats, WS guard 2 lugares (vercel serverless), logAudit en POST /api/products |
+| 10 | 2026-04-27 | **B19** | smart product search + barcode cascade NUEVO FEATURE | **94** | 0 | ~50 min | volvix-product-search.js (IndexedDB+autocomplete+ranking), volvix-barcode-resolver.js (cascade local→central→OpenFoodFacts/UPCitemDB), proxy backend, modal captura precio, integración SalvadoreX |
+| 11 | 2026-04-27 | **B20-B24** | logAudit x5 + i18n EN +160 + mobile + noindex + audit final | **96** ✓ | 0 | ~30 min | tenant.created/product.updated/deleted/customer.updated, dict EN +160 traducciones reales, 6/6 mobile sin overflow, 6 páginas test marcadas noindex, 8/8 final audit PASAN |
