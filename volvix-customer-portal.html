@@ -169,30 +169,16 @@
 </head>
 <body>
 
-<!-- ============ LOGIN ============ -->
-<div id="loginScreen" class="login-wrap">
-  <div class="login-card">
+<!-- B4: login local eliminado — SSO redirige a /login.html central. Este loader solo se ve si SSO check tarda. -->
+<div id="loginScreen" class="login-wrap" style="display:flex;">
+  <div class="login-card" style="text-align:center">
     <div class="login-logo">
       <div class="badge">V</div>
       <h1>Volvix</h1>
-      <p>Portal del Cliente</p>
+      <p data-i18n="customer.portal_title">Portal del Cliente</p>
     </div>
-    <form id="loginForm">
-      <div class="form-group">
-        <label>Correo electrónico</label>
-        <input type="email" id="loginEmail" placeholder="tu@email.com" required>
-      </div>
-      <div class="form-group">
-        <label>Contraseña</label>
-        <input type="password" id="loginPass" placeholder="••••••••" required>
-      </div>
-      <button type="submit" class="btn btn-primary btn-block">Iniciar sesión</button>
-      <div class="divider">o</div>
-      <button type="button" class="btn btn-ghost btn-block" onclick="demoLogin()">Entrar como demo</button>
-      <div class="login-foot">
-        ¿No tienes cuenta? <a href="#" onclick="VolvixUI.toast({type:'info', message:'Solicita registro en sucursal'});return false;">Regístrate</a>
-      </div>
-    </form>
+    <p style="color:var(--text-muted);margin:24px 0;font-size:14px" data-i18n="customer.redirecting">Redirigiendo al login…</p>
+    <a href="/login.html" class="btn btn-primary btn-block" data-i18n="customer.go_login">Ir al login</a>
   </div>
 </div>
 
@@ -517,10 +503,37 @@ const initials = n => n.split(" ").slice(0,2).map(x=>x[0]).join("").toUpperCase(
 function toast(msg,type=""){const t=$("#toast");t.textContent=msg;t.className="toast show "+type;setTimeout(()=>t.className="toast",2800);}
 
 // ========= LOGIN =========
-$("#loginForm").addEventListener("submit",e=>{e.preventDefault();const em=$("#loginEmail").value,pw=$("#loginPass").value;if(em&&pw.length>=4){enterApp(em);}else toast("Credenciales inválidas","error");});
-function demoLogin(){enterApp("juan@demo.com");}
+// R29: SSO check — si hay JWT, entrar; si no, redirigir al login Volvix central
+(function customerSSOCheck(){
+  try{
+    const tk=localStorage.getItem('volvix_token')||localStorage.getItem('volvixAuthToken');
+    if(!tk){
+      // Sin sesión → login Volvix central
+      const back=encodeURIComponent(location.pathname+location.search);
+      location.replace('/login.html?redirect='+back);
+      return;
+    }
+    const p=tk.split('.');if(p.length<2)return;
+    const payload=JSON.parse(atob(p[1].replace(/-/g,'+').replace(/_/g,'/')));
+    if(!payload.exp||payload.exp*1000<=Date.now()){
+      localStorage.removeItem('volvix_token');localStorage.removeItem('volvixAuthToken');
+      const back=encodeURIComponent(location.pathname+location.search);
+      location.replace('/login.html?expired=1&redirect='+back);
+      return;
+    }
+    const email=payload.email||payload.sub||'usuario';
+    const go=()=>{ try{ enterApp(email); }catch(e){} };
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',go,{once:true});
+    else go();
+    console.log('[Customer-SSO] token Volvix detectado, login omitido para',email);
+  }catch(e){console.warn('[Customer-SSO] fail',e);}
+})();
+// B4: form login eliminado — SSO ya gestiona auth. Solo helpers para enterApp/logout.
 function enterApp(email){DB.user.email=email;$("#loginScreen").style.display="none";$("#app").classList.add("active");loadCustomerData().then(()=>renderAll()).catch(()=>renderAll());toast("Bienvenido a Volvix","success");}
-function logout(){$("#app").classList.remove("active");$("#loginScreen").style.display="flex";$("#loginPass").value="";}
+function logout(){
+  try { localStorage.removeItem('volvix_token'); localStorage.removeItem('volvixAuthToken'); } catch(e){}
+  location.replace('/login.html');
+}
 
 // ========= NAV =========
 document.querySelectorAll(".nav-item").forEach(b=>b.addEventListener("click",()=>goPage(b.dataset.page)));
@@ -636,8 +649,7 @@ function openRedeem(id){const r=DB.loyalty.rewards.find(x=>x.id===id);if(!r)retu
 function closeRedeem(){$("#redeemModal").classList.remove("active");redeemId=null;}
 function confirmRedeem(){if(!redeemId)return;const r=DB.loyalty.rewards.find(x=>x.id===redeemId);DB.loyalty.points-=r.cost;DB.loyalty.history.unshift({date:new Date().toISOString().slice(0,10),concept:"Canje "+r.name,delta:-r.cost,balance:DB.loyalty.points});closeRedeem();renderLoyalty();renderDashboard();toast("Canjeado: "+r.name,"success");}
 
-// inicialización
-$("#loginEmail").value="juan@demo.com";$("#loginPass").value="demo";
+// B4: form de login local eliminado — el SSO check redirige a /login.html central.
 </script>
   <script defer src="auth-helper.js"></script>
 <link rel="stylesheet" href="volvix-modals.css">
