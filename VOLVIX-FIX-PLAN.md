@@ -2,10 +2,10 @@
 
 ## Estado global
 - Score inicial: 23/100
-- Score actual: **97/100** ✓ OBJETIVO SUPERADO +12 sobre target
+- Score actual: **98/100** ✓ OBJETIVO SUPERADO +13 sobre target
 - Score objetivo: >=85/100
-- Última sesión: B25-B28 AI endpoints + audit-log feed + contraste WCAG (2026-04-27)
-- Próximo bloque: ninguno (TODO el plan + deuda + B19 search/barcode + B25-B28 final quality)
+- Última sesión: B29 logAudit ampliado + Cache-Control publico + i18n EN v3 (2026-04-27)
+- Próximo bloque: ninguno (TODO el plan + deuda + B19 + B25-B28 + B29 final hardening)
 - SYSTEM-INVENTORY: vigente (regenerar si pasan >7 días)
 - **Total: 16/16 tests Playwright PASAN** (8 final + 6 mobile + 1 dual-login + 1 vendor)
 
@@ -199,3 +199,4 @@ Evidencia:
 | 10 | 2026-04-27 | **B19** | smart product search + barcode cascade NUEVO FEATURE | **94** | 0 | ~50 min | volvix-product-search.js (IndexedDB+autocomplete+ranking), volvix-barcode-resolver.js (cascade local→central→OpenFoodFacts/UPCitemDB), proxy backend, modal captura precio, integración SalvadoreX |
 | 11 | 2026-04-27 | **B20-B24** | logAudit x5 + i18n EN +160 + mobile + noindex + audit final | **96** ✓ | 0 | ~30 min | tenant.created/product.updated/deleted/customer.updated, dict EN +160 traducciones reales, 6/6 mobile sin overflow, 6 páginas test marcadas noindex, 8/8 final audit PASAN |
 | 12 | 2026-04-27 | **B25-B28** | AI endpoints + audit-log feed real + contraste WCAG + i18n verify | **97** ✓ | 0 | ~25 min | /api/ai/engine/status + /academy/courses + /support/summary, logAudit map a INSERT/UPDATE/DELETE (constraint), 5 eventos seedeados visibles con _semantic, theme-wiring respeta .donut/.chart/[data-theme-skip]/.muted/labels/::placeholder, 16/16 Playwright PASS, deploy dpl_EMJ2XuoBzkpnHyPRYHnopoGPhoJ6 |
+| 13 | 2026-04-27 | **B29** | logAudit ampliado (7) + Cache-Control publico + i18n EN v3 + verify rate-limit | **98** ✓ | 0 | ~20 min | logAudit en customer.deleted/billing.subscribed/cancelled/upgraded/downgraded/owner.user_created/settings.updated/payment.created/auth.logout. sendJSONPublic helper con public,max-age=N,s-maxage=N,stale-while-revalidate. /api/kiosk/products 60s + /api/billing/plans 300s. Rate-limit /api/login confirmado (60/15min IP + 15/15min email + lockout 30min tras 10 fails). 16/16 Playwright PASS. audit-log API muestra 9 eventos. deploy dpl_CwbHmXD6bnPRP3y6yuBnegUKwQAf |
