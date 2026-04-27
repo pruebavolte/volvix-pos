@@ -103,7 +103,9 @@ Credenciales de demo:
 
 ```
 Email:    admin@volvix.test
-Password: Volvix2026!
+Password: <<test-password>>
+# Nota: la password real NO se publica en el README.
+# Pídela al owner del proyecto o léela de DEV_PASSWORDS_JSON / gestor de secretos.
 ```
 
 > La demo se resetea cada 24 horas a las 03:00 UTC. Tus datos NO persisten.
@@ -132,7 +134,7 @@ pnpm db:seed
 pnpm dev
 ```
 
-Abre `http://localhost:3000` y entra con `admin@volvix.test / Volvix2026!`.
+Abre `http://localhost:3000` y entra con `admin@volvix.test / <<test-password>>` (la password real se carga via env var `DEV_PASSWORDS_JSON`).
 
 ### 3. Deploy a Vercel en 1 click
 

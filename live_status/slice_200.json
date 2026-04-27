@@ -1,0 +1,66 @@
+{
+  "slice": 200,
+  "range": "3000-3020",
+  "topic": "R18_SQUARE_POS_INTEGRATION",
+  "ts": "2026-04-26",
+  "status": "completed",
+  "files_generated": {
+    "api_handlers_added": 4,
+    "api_file": "api/index.js",
+    "sql_migration": "db/R18_SQUARE_SYNC.sql",
+    "client_wiring": "volvix-square-wiring.js",
+    "report": "R18_SQUARE.md"
+  },
+  "endpoints_added": [
+    "POST /api/integrations/square/sync (admin/owner)",
+    "GET /api/integrations/square/status",
+    "POST /api/integrations/square/webhook",
+    "GET /api/integrations/square/health"
+  ],
+  "external_api": {
+    "host": "connect.squareup.com",
+    "version": "2024-10-17",
+    "endpoints_called": [
+      "GET /v2/catalog/list?types=ITEM",
+      "GET /v2/locations"
+    ],
+    "auth": "Bearer SQUARE_ACCESS_TOKEN"
+  },
+  "behavior": {
+    "missing_token_response": 503,
+    "missing_token_error": "square_not_configured",
+    "catalog_mapping": "Square ITEM -> pos_products (upsert by external_id)",
+    "webhooks_handled": [
+      "order.created",
+      "order.updated",
+      "payment.created",
+      "payment.updated"
+    ]
+  },
+  "db_schema": {
+    "table": "square_sync_log",
+    "columns": ["id UUID PK", "type TEXT", "status TEXT", "items_synced INT", "meta JSONB", "ts TIMESTAMPTZ", "tenant_id UUID"],
+    "indexes": 4,
+    "rls": "admin/owner SELECT+INSERT, service_role bypass",
+    "alters": "pos_products + external_id, source"
+  },
+  "client_widget": {
+    "selector": "#owner-integrations",
+    "button_label": "Importar de Square",
+    "shows": ["status_dot", "locations_count", "last_sync_meta"],
+    "auth": "JWT (volvix_jwt) o X-API-Key (volvix_api_key)"
+  },
+  "verification_pending": [
+    "ejecutar SQL en Supabase",
+    "configurar SQUARE_ACCESS_TOKEN en Vercel env",
+    "smoke /api/integrations/square/status (esperar 503 sin token)",
+    "registrar webhook URL en Square Dashboard"
+  ],
+  "next_actions": [
+    "Anadir <script src=volvix-square-wiring.js> al owner panel HTML",
+    "Probar con sandbox token Square Developer",
+    "Considerar firma HMAC del webhook (Square-Hmacsha256-Signature)"
+  ],
+  "score_estimated": 86,
+  "veredict": "R18 Square integration WIRED + DB-ready; pending env config + signature verification"
+}

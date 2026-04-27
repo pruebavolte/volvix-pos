@@ -1277,6 +1277,10 @@
 <script src="volvix-sync.js"></script>
 <script src="volvix-sync-widget.js"></script>
 <script src="volvix-wiring.js" defer></script>
+<script defer src="auth-helper.js"></script>
+<link rel="stylesheet" href="volvix-modals.css">
+<script defer src="volvix-modals.js"></script>
+<script defer src="volvix-ai-assistant.js"></script>
 <script src="volvix-pos-wiring.js" defer></script>
 <script src="volvix-pos-extra-wiring.js" defer></script>
 </head>
@@ -1295,7 +1299,7 @@
     </div>
     <div class="input-group">
       <label class="input-label">Contraseña</label>
-      <input id="login-password" class="input-field" type="password" value="Volvix2026!" autocomplete="current-password" placeholder="Contraseña">
+      <input id="login-password" class="input-field" type="password" value="" autocomplete="current-password" placeholder="Contraseña">
     </div>
 
     <button class="btn-login" id="btn-login-submit" onclick="handleLogin(event)">Iniciar sesión</button>
@@ -1334,53 +1338,53 @@
       <div><span class="lbl">Le atiende:</span> <span class="name">Administrador</span></div>
     </div>
 
-    <button class="tb-btn notif" onclick="showToast('3 notificaciones nuevas')" title="Notificaciones">
+    <button class="tb-btn notif" onclick="showToast('3 notificaciones nuevas')" aria-label="Notificaciones" title="Notificaciones">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="#EF4444"><circle cx="12" cy="12" r="10"/><text x="12" y="17" text-anchor="middle" fill="white" font-size="14" font-weight="bold">!</text></svg>
       <span class="badge">3</span>
     </button>
 
     <div class="platform-toggle">
-      <button class="platform-toggle-btn" onclick="selectPlatform(this, 'windows')" title="Vista Windows">
+      <button class="platform-toggle-btn" onclick="selectPlatform(this, 'windows')" aria-label="Vista Windows" title="Vista Windows">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.479 10 4.5V11H3V5.479zM3 18.521 10 19.5V13H3v5.521zM11 19.635 21 21V13H11v6.635zM11 4.365V11h10V3L11 4.365z"/></svg>
         <span>Windows</span>
       </button>
-      <button class="platform-toggle-btn" onclick="selectPlatform(this, 'android')" title="Vista Android">
+      <button class="platform-toggle-btn" onclick="selectPlatform(this, 'android')" aria-label="Vista Android" title="Vista Android">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
         <span>Android</span>
       </button>
-      <button class="platform-toggle-btn active" onclick="selectPlatform(this, 'web')" title="Vista Web">
+      <button class="platform-toggle-btn active" onclick="selectPlatform(this, 'web')" aria-label="Vista Web" title="Vista Web">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
         <span>Web</span>
       </button>
     </div>
 
-    <button class="tb-btn rapido" onclick="showScreen('quickpos')" title="Modo caja rápida">
+    <button class="tb-btn rapido" onclick="showScreen('quickpos')" aria-label="Modo caja rápida" title="Modo caja rápida">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
       <span>RÁPIDO</span>
     </button>
 
-    <button class="tb-btn saas" data-feature="ui.saas_btn" onclick="openOwnerPanel()" title="Panel SaaS Admin (dueño del sistema)">
+    <button class="tb-btn saas" data-feature="ui.saas_btn" onclick="openOwnerPanel()" aria-label="Panel SaaS Admin (dueño del sistema)" title="Panel SaaS Admin (dueño del sistema)">
       👑 <span>SAAS</span>
     </button>
 
-    <button class="tb-btn movil" onclick="showScreen('mobile-apps')" title="Preview apps móviles">
+    <button class="tb-btn movil" onclick="showScreen('mobile-apps')" aria-label="Preview apps móviles" title="Preview apps móviles">
       📱 <span>MÓVIL</span>
     </button>
 
-    <button class="tb-btn livesync" onclick="showScreen('salud')" title="Panel de salud del sistema">
+    <button class="tb-btn livesync" onclick="showScreen('salud')" aria-label="Panel de salud del sistema" title="Panel de salud del sistema">
       <span class="dot"></span>
       <span>LIVE SYNC</span>
     </button>
 
-    <button class="tb-btn perfil" onclick="showScreen('perfil')" title="Mi perfil">
+    <button class="tb-btn perfil" onclick="showScreen('perfil')" aria-label="Mi perfil" title="Mi perfil">
       <div class="ava">AD</div>
     </button>
 
-    <button class="tb-btn ayuda" onclick="showScreen('ayuda')" title="Ayuda">
+    <button class="tb-btn ayuda" onclick="showScreen('ayuda')" aria-label="Ayuda" title="Ayuda">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
     </button>
 
-    <button class="tb-btn salir" onclick="doLogout()" title="Cerrar sesión">
+    <button class="tb-btn salir" onclick="doLogout()" aria-label="Cerrar sesión" title="Cerrar sesión">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
       <span>Salir</span>
     </button>
@@ -1502,7 +1506,7 @@
     <section id="screen-pos" class="pos-screen">
 
       <!-- Botón para abrir/cerrar panel derecho en móvil -->
-      <button class="pos-sidebar-toggle" onclick="togglePosSidebar()" title="Categorías">☰</button>
+      <button class="pos-sidebar-toggle" onclick="togglePosSidebar()" aria-label="Categorías" title="Categorías">☰</button>
 
       <div class="pos-main-area">
 
@@ -1516,7 +1520,7 @@
         <label>Código del Producto:</label>
         <div class="pos-code-input-wrap">
           <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5v14"/><path d="M8 5v14"/><path d="M12 5v14"/><path d="M17 5v14"/><path d="M21 5v14"/></svg>
-          <input id="barcode-input" class="pos-code-input" type="text" placeholder="Escanear o escribir código…" onkeypress="if(event.key==='Enter')searchProduct(this.value)">
+          <input id="barcode-input" aria-label="Código del producto" class="pos-code-input" type="text" placeholder="Escanear o escribir código…" onkeypress="if(event.key==='Enter')searchProduct(this.value)">
         </div>
         <button class="btn-enter" onclick="searchProduct(document.getElementById('barcode-input').value)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
@@ -1526,66 +1530,66 @@
 
       <!-- Barra de acciones -->
       <div class="pos-actions">
-        <button class="action-btn" data-feature="pos.ins_varios" onclick="openVarios()" title="Artículos varios / Kits">
+        <button class="action-btn" data-feature="pos.ins_varios" onclick="openVarios()" aria-label="Artículos varios / Kits" title="Artículos varios / Kits">
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
           <span>INS Varios</span>
         </button>
-        <button class="action-btn" data-feature="pos.art_comun" onclick="addCommonProduct()" title="Producto común (sin código)">
+        <button class="action-btn" data-feature="pos.art_comun" onclick="addCommonProduct()" aria-label="Producto común (sin código)" title="Producto común (sin código)">
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#3498DB" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
           <span>CTRL+P Art. Común</span>
         </button>
-        <button class="action-btn" data-feature="pos.buscar" onclick="openSearch()" title="Buscar producto">
+        <button class="action-btn" data-feature="pos.buscar" onclick="openSearch()" aria-label="Buscar producto" title="Buscar producto">
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#3498DB" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
           <span>F10 Buscar</span>
         </button>
-        <button class="action-btn" data-feature="pos.mayoreo" onclick="showToast('Precio mayoreo')" title="Precio mayoreo">
+        <button class="action-btn" data-feature="pos.mayoreo" onclick="showToast('Precio mayoreo')" aria-label="Precio mayoreo" title="Precio mayoreo">
           <svg class="ico" viewBox="0 0 24 24" fill="#F39C12" stroke="#F39C12" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           <span>F11 Mayoreo</span>
         </button>
-        <button class="action-btn" data-feature="pos.entradas" onclick="cashIn()" title="Entradas de efectivo">
+        <button class="action-btn" data-feature="pos.entradas" onclick="cashIn()" aria-label="Entradas de efectivo" title="Entradas de efectivo">
           <svg class="ico" viewBox="0 0 24 24" fill="#27AE60" stroke="#27AE60" stroke-width="2"><circle cx="12" cy="12" r="10" fill="#27AE60"/><path d="M8 12l3 3 5-5" stroke="white" fill="none"/></svg>
           <span>F7 Entradas</span>
         </button>
-        <button class="action-btn" data-feature="pos.salidas" onclick="cashOut()" title="Salidas de efectivo">
+        <button class="action-btn" data-feature="pos.salidas" onclick="cashOut()" aria-label="Salidas de efectivo" title="Salidas de efectivo">
           <svg class="ico" viewBox="0 0 24 24" fill="#E67E22" stroke="#E67E22" stroke-width="2"><circle cx="12" cy="12" r="10" fill="#E67E22"/><path d="M8 12h8" stroke="white" fill="none" stroke-width="3"/></svg>
           <span>F8 Salidas</span>
         </button>
-        <button class="action-btn" data-feature="pos.borrar" onclick="deleteCartItem()" title="Borrar artículo seleccionado">
+        <button class="action-btn" data-feature="pos.borrar" onclick="deleteCartItem()" aria-label="Borrar artículo seleccionado" title="Borrar artículo seleccionado">
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#E74C3C" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
           <span>DEL Borrar Art.</span>
         </button>
-        <button class="action-btn" data-feature="pos.verificador" onclick="priceChecker()" title="Verificador de precios">
+        <button class="action-btn" data-feature="pos.verificador" onclick="priceChecker()" aria-label="Verificador de precios" title="Verificador de precios">
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#2C3E50" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
           <span>F9 - Verificador</span>
         </button>
 
         <div class="action-btn-divider"></div>
 
-        <button class="action-btn variant-warm" data-feature="pos.panel" onclick="showToast('Panel catálogo rápido')" title="Panel catálogo">
+        <button class="action-btn variant-warm" data-feature="pos.panel" onclick="showToast('Panel catálogo rápido')" aria-label="Panel catálogo" title="Panel catálogo">
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#92400E" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
           <span>📒 Panel</span>
         </button>
-        <button class="action-btn variant-orange" data-feature="pos.catalogo" onclick="showToast('Catálogo visual')" title="Catálogo visual">
+        <button class="action-btn variant-orange" data-feature="pos.catalogo" onclick="showToast('Catálogo visual')" aria-label="Catálogo visual" title="Catálogo visual">
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#E67E22" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
           <span>🖼️ Catálogo</span>
         </button>
-        <button class="action-btn variant-green" data-feature="pos.granel" onclick="openGranel()" title="Venta a granel">
+        <button class="action-btn variant-green" data-feature="pos.granel" onclick="openGranel()" aria-label="Venta a granel" title="Venta a granel">
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
           <span>⚖ Granel</span>
         </button>
-        <button class="action-btn variant-red" data-feature="pos.descuento" onclick="applyDiscount()" title="Aplicar descuento">
+        <button class="action-btn variant-red" data-feature="pos.descuento" onclick="applyDiscount()" aria-label="Aplicar descuento" title="Aplicar descuento">
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
           <span>% Descuento</span>
         </button>
-        <button class="action-btn variant-blue" data-feature="pos.recargas_btn" onclick="showScreen('recargas')" title="Venta de tiempo aire">
+        <button class="action-btn variant-blue" data-feature="pos.recargas_btn" onclick="showScreen('recargas')" aria-label="Venta de tiempo aire" title="Venta de tiempo aire">
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#3498DB" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
           <span>📱 Recargas</span>
         </button>
-        <button class="action-btn variant-orange" data-feature="pos.servicios_btn" onclick="showScreen('servicios')" title="Pago de servicios">
+        <button class="action-btn variant-orange" data-feature="pos.servicios_btn" onclick="showScreen('servicios')" aria-label="Pago de servicios" title="Pago de servicios">
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#F39C12" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
           <span>💡 Servicios</span>
         </button>
-        <button class="action-btn variant-purple" data-feature="pos.calculadora" onclick="openCalc()" title="Calculadora">
+        <button class="action-btn variant-purple" data-feature="pos.calculadora" onclick="openCalc()" aria-label="Calculadora" title="Calculadora">
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#8E44AD" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="14" x2="8.01" y2="14"/><line x1="12" y1="14" x2="12.01" y2="14"/><line x1="16" y1="14" x2="16.01" y2="14"/></svg>
           <span>🧮 Calc</span>
         </button>
@@ -1627,19 +1631,19 @@
 
         <div class="pos-bottom-spacer"></div>
 
-        <button class="bottom-btn" data-feature="pos.cambiar" onclick="showToast('Cambiar precio del producto')" title="Cambiar precio">
+        <button class="bottom-btn" data-feature="pos.cambiar" onclick="showToast('Cambiar precio del producto')" aria-label="Cambiar precio" title="Cambiar precio">
           <svg class="ico" viewBox="0 0 24 24" fill="#27AE60" stroke="#27AE60" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8" stroke="white" fill="none" stroke-width="2"/><path d="M8 12h8" stroke="white" fill="none" stroke-width="2"/></svg>
           <span>F5 - Cambiar</span>
         </button>
-        <button class="bottom-btn" data-feature="pos.pendiente" onclick="showToast('Venta pendiente guardada')" title="Venta pendiente">
+        <button class="bottom-btn" data-feature="pos.pendiente" onclick="showToast('Venta pendiente guardada')" aria-label="Venta pendiente" title="Venta pendiente">
           <svg class="ico" viewBox="0 0 24 24" fill="#F39C12" stroke="#F39C12" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           <span>F6 - Pendiente</span>
         </button>
-        <button class="bottom-btn" onclick="clearCart()" title="Eliminar venta">
+        <button class="bottom-btn" onclick="clearCart()" aria-label="Eliminar venta" title="Eliminar venta">
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#E74C3C" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
           <span>Eliminar</span>
         </button>
-        <button class="bottom-btn" onclick="showToast('Selector de cliente…')" title="Asignar cliente">
+        <button class="bottom-btn" onclick="showToast('Selector de cliente…')" aria-label="Asignar cliente" title="Asignar cliente">
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#3498DB" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
           <span>Asignar cliente</span>
         </button>
@@ -1670,11 +1674,11 @@
 
         <div class="pos-summary-spacer"></div>
 
-        <button class="bottom-btn" onclick="showToast('Reimprimiendo último ticket…')" title="Reimprimir último ticket">
+        <button class="bottom-btn" onclick="showToast('Reimprimiendo último ticket…')" aria-label="Reimprimir último ticket" title="Reimprimir último ticket">
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#3498DB" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
           <span>Reimprimir Último Ticket</span>
         </button>
-        <button class="bottom-btn" onclick="showScreen('ventas')" title="Ventas y devoluciones del día">
+        <button class="bottom-btn" onclick="showScreen('ventas')" aria-label="Ventas y devoluciones del día" title="Ventas y devoluciones del día">
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#9B59B6" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/></svg>
           <span>Ventas del día y Devoluciones</span>
         </button>
@@ -1753,12 +1757,14 @@
       <div class="page-head">
         <div>
           <h1 class="page-title">Inventario de Productos</h1>
-          <p class="page-sub">1,247 productos · 8 con stock bajo</p>
+          <p class="page-sub" id="inv-sub">0 productos</p>
         </div>
         <div class="btn-row">
-          <button class="btn">📤 Exportar</button>
-          <button class="btn">📥 Importar</button>
-          <button class="btn accent">+ Nuevo producto</button>
+          <input type="text" id="inv-search" placeholder="🔎 Buscar..." class="btn" style="min-width:160px;">
+          <button class="btn" id="btn-export-prod">📤 Exportar</button>
+          <button class="btn" id="btn-import-prod">📥 Importar</button>
+          <input type="file" id="inv-import-file" accept=".csv" style="display:none;">
+          <button class="btn accent" id="btn-new-prod">+ Nuevo producto</button>
         </div>
       </div>
       <div class="card">
@@ -1774,7 +1780,7 @@
     <!-- ============ CLIENTES ============ -->
     <section id="screen-clientes" class="screen-pad hidden">
       <div class="page-head">
-        <div><h1 class="page-title">Clientes</h1><p class="page-sub">847 clientes registrados</p></div>
+        <div><h1 class="page-title">Clientes</h1><p class="page-sub" id="cli-sub">0 clientes registrados</p></div>
         <button class="btn accent">+ Nuevo cliente</button>
       </div>
       <div class="card">
@@ -2127,7 +2133,7 @@
       <button class="btn sm" onclick="closeModal('modal-search')">✕</button>
     </div>
     <div class="modal-body" style="padding:16px 20px;">
-      <input type="text" id="search-input" placeholder="Nombre, código o SKU..." style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;" oninput="filterSearch()" autofocus>
+      <input type="text" id="search-input" aria-label="Buscar producto por nombre, código o SKU" placeholder="Nombre, código o SKU..." style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;" oninput="filterSearch()" autofocus>
       <div id="search-results" style="margin-top:12px;max-height:300px;overflow-y:auto;"></div>
     </div>
   </div>
@@ -2404,7 +2410,11 @@
 
     handleForceAction(action) {
       if (action === 'force-logout') {
-        alert('Tu proveedor cerró tu sesión remotamente.');
+        if (window.VolvixUI && typeof window.VolvixUI.toast === 'function') {
+          window.VolvixUI.toast({ type: 'error', message: 'Tu proveedor cerró tu sesión remotamente.' });
+        } else {
+          VolvixUI.toast({type:'info', message:'Tu proveedor cerró tu sesión remotamente.'});
+        }
         location.reload();
       }
       if (action === 'force-update') {
@@ -2439,7 +2449,7 @@
     {code:'7501030411025', name:'Pan dulce', price:8.5, qty:3, stock:48},
     {code:'7501058634511', name:'Queso fresco 250g', price:120, qty:1, stock:12},
   ];
-  const CUSTOMERS = [
+  let CUSTOMERS = [
     ['María López García', '55 1234 5678', 2000, 450, 120, '15/04/2026'],
     ['Carlos Ramírez Torres', '55 4567 8901', 3000, 1200, 35, '10/04/2026'],
     ['Ana Rodríguez Martínez', '55 3456 7890', 1000, 320, 210, '18/04/2026'],
@@ -2453,7 +2463,7 @@
     ['Miguel Castro', 1200, 560, 640, '08/04/2026', 'vencido'],
     ['Adriana Flores', 1500, 1500, 0, '—', 'sin_abonos'],
   ];
-  const SALES = [
+  let SALES = [
     ['#000152', 'Hoy 14:32', 'Público general', 'Admin', 'Efectivo', 222.47, 'completed'],
     ['#000151', 'Hoy 14:15', 'Ana Rodríguez', 'Admin', 'Tarjeta', 487.00, 'completed'],
     ['#000150', 'Hoy 13:58', 'Público general', 'Admin', 'Efectivo', 45.50, 'completed'],
@@ -2559,6 +2569,66 @@
   const fmt = n => '$' + n.toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2});
   const parse$ = s => parseFloat(String(s).replace(/[$,\s]/g,'')) || 0;
 
+  /* ============ SSO (Volvix → SalvadoreX) ============ */
+  // Si ya hay JWT Volvix válido, saltar el login local de SalvadoreX.
+  (function ssoCheck(){
+    try {
+      const token = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+      if (!token) return; // sin token → mostrar login local
+      const parts = token.split('.');
+      if (parts.length < 2) return;
+      const payload = JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')));
+      if (!payload.exp || payload.exp * 1000 <= Date.now()) {
+        // expirado → limpiar y mostrar login
+        localStorage.removeItem('volvix_token');
+        localStorage.removeItem('volvixAuthToken');
+        return;
+      }
+      // Token Volvix válido → simular login local exitoso
+      const ssoSession = {
+        user_id: payload.sub || payload.user_id || payload.email,
+        email: payload.email,
+        role: payload.role || 'admin',
+        tenant_id: payload.tenant_id || payload.tid || 'don-chucho',
+        tenant_name: payload.tenant_name || 'Abarrotes Don Chucho',
+        plan: payload.plan || 'Pro',
+        via: 'sso'
+      };
+      try { localStorage.setItem('volvixSession', JSON.stringify(ssoSession)); } catch(e){}
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          tenantId: ssoSession.tenant_id,
+          tenantName: ssoSession.tenant_name,
+          userRole: ssoSession.role,
+          userId: ssoSession.user_id,
+          plan: ssoSession.plan
+        }));
+      } catch(e){}
+      try { localStorage.setItem('salvadorex_session', JSON.stringify(ssoSession)); } catch(e){}
+
+      // Esconder login screen apenas se monte el DOM
+      const hideLogin = () => {
+        const lock = document.getElementById('login-screen');
+        if (lock) { lock.classList.add('hidden'); lock.style.display = 'none'; }
+        const root = document.getElementById('app-root');
+        if (root) root.classList.remove('login-active');
+        document.body.classList.add('logged-in');
+        try {
+          window.dispatchEvent(new CustomEvent('salvadorex:logged-in', { detail: ssoSession }));
+          document.dispatchEvent(new CustomEvent('volvix:login', { detail: ssoSession }));
+        } catch(e){}
+      };
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', hideLogin, { once:true });
+      } else {
+        hideLogin();
+      }
+      console.log('[SSO] Login Volvix detectado, login local omitido para', ssoSession.email);
+    } catch (e) {
+      console.warn('[SSO] token inválido, fallback a login local:', e);
+    }
+  })();
+
   /* ============ LOGIN ============ */
   async function handleLogin(event) {
     event?.preventDefault();
@@ -2622,9 +2692,58 @@
                 id: p.id
               }));
               console.log('[VOLVIX] ' + products.length + ' productos cargados desde DB');
+              const lowStock = products.filter(p => (p.stock||0) < 20).length;
+              const sub = document.getElementById('inv-sub');
+              if (sub) sub.textContent = products.length + ' productos · ' + lowStock + ' con stock bajo';
+              if (typeof renderInv === 'function') renderInv();
             }
           }
         } catch(e) { console.warn('[VOLVIX] No se pudieron cargar productos:', e); }
+
+        // ===== CABLEADO: Cargar clientes desde la base de datos =====
+        try {
+          const cliRes = await fetch('/api/customers?tenant_id=' + session.tenant_id);
+          if (cliRes.ok) {
+            const customers = await cliRes.json();
+            if (customers && Array.isArray(customers) && typeof CUSTOMERS !== 'undefined') {
+              CUSTOMERS.length = 0;
+              customers.forEach(c => CUSTOMERS.push([
+                c.name || '',
+                c.phone || '',
+                c.credit_limit || 0,
+                c.credit_balance || 0,
+                c.points || 0,
+                c.last_purchase || '—'
+              ]));
+              const sub = document.getElementById('cli-sub');
+              if (sub) sub.textContent = customers.length + ' clientes registrados';
+              console.log('[VOLVIX] ' + customers.length + ' clientes cargados desde DB');
+              if (typeof renderClientes === 'function') renderClientes();
+            }
+          }
+        } catch(e) { console.warn('[VOLVIX] No se pudieron cargar clientes:', e); }
+
+        // ===== CABLEADO: Cargar ventas desde la base de datos =====
+        try {
+          const saleRes = await fetch('/api/sales?tenant_id=' + session.tenant_id);
+          if (saleRes.ok) {
+            const sales = await saleRes.json();
+            if (sales && Array.isArray(sales) && typeof SALES !== 'undefined') {
+              SALES.length = 0;
+              sales.forEach(s => SALES.push([
+                '#' + (s.folio || s.id),
+                s.created_at || '—',
+                s.customer_name || 'Público general',
+                s.user_name || 'Admin',
+                s.payment_method || 'Efectivo',
+                s.total || 0,
+                s.status || 'completed'
+              ]));
+              console.log('[VOLVIX] ' + sales.length + ' ventas cargadas desde DB');
+              if (typeof renderVentas === 'function') renderVentas();
+            }
+          }
+        } catch(e) { console.warn('[VOLVIX] No se pudieron cargar ventas:', e); }
 
         // Disparar evento para que volvix-wiring.js se reinicialice
         document.dispatchEvent(new CustomEvent('volvix:login', { detail: session }));
@@ -2642,10 +2761,26 @@
   function doLogin() {
     handleLogin();
   }
-  function doLogout() {
-    if (!confirm('¿Cerrar sesión?')) return;
-    $('#app-root').classList.add('login-active');
-    $('#login-screen').classList.remove('hidden');
+  async function doLogout() {
+    let ok = false;
+    if (window.VolvixUI && typeof window.VolvixUI.confirm === 'function') {
+      ok = await window.VolvixUI.confirm({ title: 'Cerrar sesión', message: '¿Cerrar sesión?', confirmText: 'Cerrar sesión', cancelText: 'Cancelar' });
+    } else {
+      ok = confirm('¿Cerrar sesión?');
+    }
+    if (!ok) return;
+    // Limpiar sesión local SalvadoreX
+    try { localStorage.removeItem('salvadorex_session'); } catch(e){}
+    try { localStorage.removeItem('volvixSession'); } catch(e){}
+    // Limpiar JWT Volvix (SSO)
+    try { localStorage.removeItem('volvix_token'); } catch(e){}
+    try { localStorage.removeItem('volvixAuthToken'); } catch(e){}
+    // Pedir al server que invalide la cookie HttpOnly
+    try {
+      await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+    } catch(e) { console.warn('[logout] /api/logout falló:', e); }
+    // Volver al login Volvix unificado
+    window.location.href = '/login.html';
   }
 
   /* ============ NAV ============ */
@@ -2695,7 +2830,7 @@
           <td class="center">${item.qty}</td>
           <td class="importe">${fmt(item.price * item.qty)}</td>
           <td class="center">${item.stock}</td>
-          <td class="center"><button class="cart-del-btn" onclick="removeFromCart(${i})" title="Eliminar">×</button></td>
+          <td class="center"><button class="cart-del-btn" onclick="removeFromCart(${i})" aria-label="Eliminar" title="Eliminar">×</button></td>
         </tr>
       `).join('');
     }
@@ -2711,14 +2846,28 @@
     renderCart();
     showToast('Último artículo eliminado');
   }
-  function clearCart() {
+  async function clearCart() {
     if (CART.length === 0) return;
-    if (!confirm('¿Eliminar toda la venta actual?')) return;
+    let ok = false;
+    if (window.VolvixUI && typeof window.VolvixUI.destructiveConfirm === 'function') {
+      ok = await window.VolvixUI.destructiveConfirm({ title: 'Eliminar venta', message: '¿Eliminar toda la venta actual?', confirmText: 'Eliminar', requireText: 'ELIMINAR' });
+    } else {
+      ok = confirm('¿Eliminar toda la venta actual?');
+    }
+    if (!ok) return;
     CART = []; renderCart();
     showToast('Venta eliminada');
   }
-  function newTicket() {
-    if (CART.length > 0 && !confirm('El ticket actual tiene productos. ¿Iniciar uno nuevo y descartar este?')) return;
+  async function newTicket() {
+    if (CART.length > 0) {
+      let ok = false;
+      if (window.VolvixUI && typeof window.VolvixUI.confirm === 'function') {
+        ok = await window.VolvixUI.confirm({ title: 'Nuevo ticket', message: 'El ticket actual tiene productos. ¿Iniciar uno nuevo y descartar este?', confirmText: 'Iniciar nuevo', cancelText: 'Cancelar' });
+      } else {
+        ok = confirm('El ticket actual tiene productos. ¿Iniciar uno nuevo y descartar este?');
+      }
+      if (!ok) return;
+    }
     CART = []; renderCart();
     showToast('✓ Nuevo ticket iniciado');
   }
@@ -2819,8 +2968,10 @@
   }
 
   /* ============ OTHER SCREENS RENDER ============ */
-  function renderInv() {
-    $('#inv-body').innerHTML = CATALOG.map((p, i) => `
+  function renderInv(filter) {
+    const q = (filter || '').toLowerCase();
+    const list = q ? CATALOG.filter(p => (p.name||'').toLowerCase().includes(q) || (p.code||'').toLowerCase().includes(q)) : CATALOG;
+    $('#inv-body').innerHTML = list.map((p, i) => `
       <tr>
         <td class="mono" style="font-size: 11px; color: var(--text-3);">${p.code}</td>
         <td class="primary-col">${p.name}</td>
@@ -2828,9 +2979,151 @@
         <td class="num">${fmt(p.price)}</td>
         <td class="num">${p.stock}</td>
         <td>${p.stock < 20 ? '<span class="chip warn"><span class="dot"></span>Stock bajo</span>' : '<span class="chip ok"><span class="dot"></span>OK</span>'}</td>
-        <td style="text-align: right;"><button class="btn sm">Editar</button></td>
+        <td style="text-align: right;">
+          <button class="btn sm" data-action="edit-prod" data-code="${p.code}">Editar</button>
+          <button class="btn sm" data-action="del-prod" data-code="${p.code}" data-id="${p.id||''}" style="color:var(--danger);">Eliminar</button>
+        </td>
       </tr>`).join('');
+    const sub = document.getElementById('inv-sub');
+    if (sub) sub.textContent = CATALOG.length + ' productos';
   }
+
+  /* ============ CABLEADO PRODUCTOS A SUPABASE ============ */
+  function _vSession(){ return JSON.parse(localStorage.getItem('volvixSession') || 'null') || {}; }
+  function _vTenant(){ return _vSession().tenant_id || 'TNT001'; }
+  async function loadCatalogReal(){
+    try {
+      const r = await fetch('/api/products?tenant_id=' + encodeURIComponent(_vTenant()));
+      if (!r.ok) return;
+      const data = await r.json();
+      const items = Array.isArray(data) ? data : (data.items || []);
+      CATALOG.length = 0;
+      items.forEach(p => CATALOG.push({ id:p.id, code:p.code, name:p.name, price:Number(p.price)||0, cost:Number(p.cost)||0, stock:Number(p.stock)||0 }));
+      if (typeof renderInv === 'function') renderInv();
+    } catch(e){ console.warn('[VOLVIX] loadCatalogReal:', e); }
+  }
+  async function saveProduct(data, productId){
+    const url = productId ? '/api/products/' + encodeURIComponent(productId) : '/api/products';
+    const method = productId ? 'PUT' : 'POST';
+    const body = Object.assign({ tenant_id: _vTenant() }, data);
+    try {
+      const r = await fetch(url, { method, headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+      if (!r.ok) { showToast('Error al guardar producto', 'error'); return null; }
+      const result = await r.json().catch(()=> ({}));
+      await loadCatalogReal();
+      showToast('Producto guardado' + (result.id ? ': ' + result.id : ''));
+      return result;
+    } catch(e){ showToast('Sin conexión: ' + e.message, 'error'); return null; }
+  }
+  async function deleteProduct(code, id){
+    let ok = false;
+    if (window.VolvixUI && typeof window.VolvixUI.destructiveConfirm === 'function') {
+      ok = await window.VolvixUI.destructiveConfirm({ title: 'Eliminar producto', message: '¿Eliminar producto ' + code + '?', confirmText: 'Eliminar', requireText: 'ELIMINAR' });
+    } else {
+      ok = confirm('¿Eliminar producto ' + code + '?');
+    }
+    if (!ok) return;
+    const url = id ? '/api/products/' + encodeURIComponent(id) : '/api/products?code=' + encodeURIComponent(code) + '&tenant_id=' + encodeURIComponent(_vTenant());
+    try {
+      const r = await fetch(url, { method:'DELETE' });
+      if (!r.ok) { showToast('Error al eliminar', 'error'); return; }
+      await loadCatalogReal();
+      showToast('Producto eliminado');
+    } catch(e){ showToast('Sin conexión: ' + e.message, 'error'); }
+  }
+  function exportProductsCSV(){
+    const tenant = _vTenant();
+    const session = _vSession();
+    const token = session.token || session.access_token || '';
+    // Intento server-side primero
+    const url = '/api/products?export=csv&tenant_id=' + encodeURIComponent(tenant) + (token ? '&token=' + encodeURIComponent(token) : '');
+    fetch(url).then(r => {
+      if (r.ok && (r.headers.get('content-type')||'').includes('csv')) {
+        window.open(url, '_blank');
+      } else {
+        // Fallback: generar CSV en cliente
+        const rows = [['code','name','price','cost','stock']].concat(CATALOG.map(p => [p.code,p.name,p.price,p.cost||0,p.stock||0]));
+        const csv = rows.map(r => r.map(v => '"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+        const blob = new Blob([csv], { type:'text/csv' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob); a.download = 'productos_' + tenant + '.csv'; a.click();
+        setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+      }
+      showToast('Exportación lista');
+    }).catch(()=> showToast('Error al exportar','error'));
+  }
+  function _parseCSV(text){
+    const lines = text.split(/\r?\n/).filter(l => l.trim());
+    if (!lines.length) return [];
+    const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g,'').toLowerCase());
+    return lines.slice(1).map(l => {
+      const cols = l.match(/("([^"]|"")*"|[^,]*)(,|$)/g) || [];
+      const vals = cols.map(c => c.replace(/,$/, '').replace(/^"|"$/g,'').replace(/""/g,'"').trim());
+      const o = {}; headers.forEach((h,i) => o[h] = vals[i] || ''); return o;
+    });
+  }
+  async function importProductsCSV(file){
+    const text = await file.text();
+    const rows = _parseCSV(text);
+    if (!rows.length) { showToast('CSV vacío','error'); return; }
+    const items = rows.map(r => ({ code:r.code||r['código']||'', name:r.name||r.nombre||'', price:Number(r.price||r.precio||0), cost:Number(r.cost||r.costo||0), stock:Number(r.stock||0) })).filter(p => p.code && p.name);
+    try {
+      const r = await fetch('/api/products/import', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ tenant_id:_vTenant(), items }) });
+      if (!r.ok) {
+        // Fallback: POST uno por uno
+        let ok=0; for (const it of items){ const rr = await fetch('/api/products',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({tenant_id:_vTenant()},it))}); if (rr.ok) ok++; }
+        await loadCatalogReal(); showToast('Importados ' + ok + '/' + items.length); return;
+      }
+      await loadCatalogReal();
+      showToast('Importados ' + items.length + ' productos');
+    } catch(e){ showToast('Error import: ' + e.message,'error'); }
+  }
+  async function promptProductForm(prefill){
+    const p = prefill || {};
+    if (window.VolvixUI && typeof window.VolvixUI.form === 'function') {
+      const r = await window.VolvixUI.form({
+        title: prefill ? 'Editar producto' : 'Nuevo producto',
+        size: 'sm',
+        fields: [
+          { name: 'code',  type: 'text',   label: 'Código',  default: p.code || '',     required: true, placeholder: 'SKU o código de barras' },
+          { name: 'name',  type: 'text',   label: 'Nombre',  default: p.name || '',     required: true },
+          { name: 'price', type: 'number', label: 'Precio',  default: p.price ?? 0,     required: true, min: 0, step: 0.01 },
+          { name: 'stock', type: 'number', label: 'Stock',   default: p.stock ?? 0,     required: true, min: 0, step: 1 }
+        ],
+        submitText: prefill ? 'Guardar' : 'Crear'
+      });
+      if (!r) return null;
+      return { code: String(r.code).trim(), name: String(r.name).trim(), price: Number(r.price)||0, stock: parseInt(r.stock,10)||0 };
+    }
+    // Fallback (VolvixUI ausente): usamos diálogos secuenciales mínimos
+    const code = window.prompt('Código:', p.code || ''); if (code===null) return null;
+    const name = window.prompt('Nombre:', p.name || ''); if (name===null) return null;
+    const price = parseFloat(window.prompt('Precio:', p.price ?? '0')); if (isNaN(price)) return null;
+    const stock = parseInt(window.prompt('Stock:', p.stock ?? '0'),10); if (isNaN(stock)) return null;
+    return { code:code.trim(), name:name.trim(), price, stock };
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    const btnNew = document.getElementById('btn-new-prod');
+    if (btnNew) btnNew.addEventListener('click', async () => { const d = await promptProductForm(); if (d) await saveProduct(d); });
+    const btnExp = document.getElementById('btn-export-prod');
+    if (btnExp) btnExp.addEventListener('click', exportProductsCSV);
+    const btnImp = document.getElementById('btn-import-prod');
+    const fileInp = document.getElementById('inv-import-file');
+    if (btnImp && fileInp) { btnImp.addEventListener('click', () => fileInp.click()); fileInp.addEventListener('change', e => { if (e.target.files[0]) importProductsCSV(e.target.files[0]); e.target.value=''; }); }
+    const search = document.getElementById('inv-search');
+    if (search) search.addEventListener('input', e => renderInv(e.target.value));
+    const body = document.getElementById('inv-body');
+    if (body) body.addEventListener('click', async (e) => {
+      const btn = e.target.closest('button[data-action]'); if (!btn) return;
+      const code = btn.dataset.code;
+      if (btn.dataset.action === 'edit-prod') {
+        const cur = CATALOG.find(x => x.code === code); if (!cur) return;
+        const d = await promptProductForm(cur); if (d) await saveProduct(d, cur.id);
+      } else if (btn.dataset.action === 'del-prod') {
+        await deleteProduct(code, btn.dataset.id);
+      }
+    });
+  });
   function renderClientes() {
     $('#cli-body').innerHTML = CUSTOMERS.map(c => `
       <tr>
@@ -3005,7 +3298,7 @@
     $('#qp-grid').innerHTML = items.length === 0
       ? '<div style="grid-column: span 2; padding: 20px; text-align: center; color: var(--text-3); font-size: 11.5px;">Sin productos en esta categoría</div>'
       : items.map(p => `
-        <button class="qp-card" onclick="addQuickPick('${p.code}')" title="${p.name} - ${fmt(p.price)}">
+        <button class="qp-card" onclick="addQuickPick('${p.code}')" aria-label="${p.name} - ${fmt(p.price)}" title="${p.name} - ${fmt(p.price)}">
           <div class="qp-icon">${p.icon}</div>
           <div class="qp-name">${p.name}</div>
           <div class="qp-price">${fmt(p.price)}</div>
@@ -3084,11 +3377,26 @@
   }
 
   // DESCUENTO
-  function applyDiscount() {
+  async function applyDiscount() {
     if (CART.length === 0) { showToast('El ticket está vacío'); return; }
-    const pct = prompt('¿Qué descuento aplicar al ticket completo? (%)');
-    if (pct === null) return;
-    const pctNum = parseFloat(pct);
+    let pctNum = null;
+    if (window.VolvixUI && typeof window.VolvixUI.form === 'function') {
+      const r = await window.VolvixUI.form({
+        title: 'Aplicar descuento al ticket',
+        description: 'Se aplicará a todos los artículos del carrito',
+        size: 'sm',
+        fields: [
+          { name: 'pct', type: 'number', label: 'Descuento (%)', required: true, min: 0, max: 100, step: 0.01, suggestions: [5, 10, 15, 20], placeholder: 'Ej: 10' }
+        ],
+        submitText: 'Aplicar'
+      });
+      if (!r) return;
+      pctNum = parseFloat(r.pct);
+    } else {
+      const pct = prompt('¿Qué descuento aplicar al ticket completo? (%)');
+      if (pct === null) return;
+      pctNum = parseFloat(pct);
+    }
     if (isNaN(pctNum) || pctNum < 0 || pctNum > 100) {
       showToast('Descuento inválido');
       return;
@@ -3103,23 +3411,70 @@
   }
 
   // ARTÍCULOS VARIOS
-  function openVarios() {
+  async function openVarios() {
     const items = [
       { name: 'Bolsa extra', price: 3 },
       { name: 'Hielo', price: 15 },
       { name: 'Servicio', price: 20 },
       { name: 'Otro', price: 0 },
     ];
-    const list = items.map((i, idx) => `${idx+1}. ${i.name} (${fmt(i.price)})`).join('\n');
-    const sel = prompt('Seleccionar artículo vario:\n' + list + '\n\nEscribe el número:');
-    const idx = parseInt(sel) - 1;
-    if (isNaN(idx) || !items[idx]) return;
-    const item = items[idx];
-    let price = item.price;
-    if (price === 0) {
-      const p = prompt('Precio:');
-      price = parseFloat(p);
-      if (isNaN(price)) return;
+    let item = null;
+    let price = 0;
+    if (window.VolvixUI && typeof window.VolvixUI.form === 'function') {
+      const r = await window.VolvixUI.form({
+        title: 'Artículo vario',
+        size: 'sm',
+        fields: [
+          { name: 'sel', type: 'radio', label: 'Tipo', required: true, default: '0',
+            options: items.map((i, idx) => ({ value: String(idx), label: i.name + ' — ' + fmt(i.price) })) },
+          { name: 'customPrice', type: 'number', label: 'Precio personalizado (sólo si "Otro")', required: false, min: 0, step: 0.01, hint: 'Déjalo vacío salvo que selecciones "Otro"' }
+        ],
+        submitText: 'Agregar'
+      });
+      if (!r) return;
+      const idx = parseInt(r.sel, 10);
+      if (isNaN(idx) || !items[idx]) return;
+      item = items[idx];
+      price = item.price;
+      if (price === 0) {
+        price = parseFloat(r.customPrice);
+        if (isNaN(price) || price <= 0) { showToast('Precio inválido','error'); return; }
+      }
+    } else {
+      const list = items.map((i, idx) => `${idx+1}. ${i.name} (${fmt(i.price)})`).join('\n');
+      let sel;
+      if (window.VolvixUI && typeof window.VolvixUI.form === 'function') {
+        const rs = await window.VolvixUI.form({
+          title: 'Artículo vario',
+          description: list,
+          size: 'sm',
+          fields: [{ name: 'n', type: 'number', label: 'Número', required: true, min: 1, step: 1 }],
+          submitText: 'Seleccionar'
+        });
+        if (!rs) return;
+        sel = rs.n;
+      } else {
+        sel = window.prompt('Seleccionar artículo vario:\n' + list + '\n\nEscribe el número:');
+      }
+      const idx = parseInt(sel) - 1;
+      if (isNaN(idx) || !items[idx]) return;
+      item = items[idx];
+      price = item.price;
+      if (price === 0) {
+        if (window.VolvixUI && typeof window.VolvixUI.form === 'function') {
+          const rp = await window.VolvixUI.form({
+            title: 'Precio del artículo',
+            size: 'sm',
+            fields: [{ name: 'price', type: 'number', label: 'Precio', required: true, min: 0, step: 0.01 }],
+            submitText: 'Aceptar'
+          });
+          if (!rp) return;
+          price = parseFloat(rp.price);
+        } else {
+          price = parseFloat(window.prompt('Precio:'));
+        }
+        if (isNaN(price)) return;
+      }
     }
     CART.push({ code: 'VAR' + Date.now(), name: item.name, price, qty: 1, stock: 999 });
     renderCart();
@@ -3127,11 +3482,27 @@
   }
 
   // PRODUCTO COMÚN
-  function addCommonProduct() {
-    const name = prompt('Nombre del producto:');
+  async function addCommonProduct() {
+    let name = '', price = NaN;
+    if (window.VolvixUI && typeof window.VolvixUI.form === 'function') {
+      const r = await window.VolvixUI.form({
+        title: 'Producto común',
+        size: 'sm',
+        fields: [
+          { name: 'name',  type: 'text',   label: 'Nombre del producto', required: true },
+          { name: 'price', type: 'number', label: 'Precio',              required: true, min: 0, step: 0.01 }
+        ],
+        submitText: 'Agregar'
+      });
+      if (!r) return;
+      name = String(r.name).trim();
+      price = parseFloat(r.price);
+    } else {
+      name = prompt('Nombre del producto:');
+      if (!name) return;
+      price = parseFloat(prompt('Precio:'));
+    }
     if (!name) return;
-    const priceStr = prompt('Precio:');
-    const price = parseFloat(priceStr);
     if (isNaN(price) || price < 0) { showToast('Precio inválido'); return; }
     CART.push({ code: 'COM' + Date.now(), name, price, qty: 1, stock: 999 });
     renderCart();
@@ -3167,14 +3538,38 @@
   }
 
   // VERIFICADOR DE PRECIOS
-  function priceChecker() {
-    const code = prompt('🔎 Verificador de precios\n\nEscanea o escribe el código:');
+  async function priceChecker() {
+    let code = '';
+    if (window.VolvixUI && typeof window.VolvixUI.form === 'function') {
+      const r = await window.VolvixUI.form({
+        title: '🔎 Verificador de precios',
+        description: 'Escanea o escribe el código del producto',
+        size: 'sm',
+        fields: [
+          { name: 'code', type: 'text', label: 'Código o nombre', required: true, autocomplete: 'off', placeholder: 'Ej: 7501055363513' }
+        ],
+        submitText: 'Buscar'
+      });
+      if (!r) return;
+      code = String(r.code).trim();
+    } else {
+      code = prompt('🔎 Verificador de precios\n\nEscanea o escribe el código:') || '';
+    }
     if (!code) return;
     const p = CATALOG.find(x => x.code === code.trim() || x.name.toLowerCase().includes(code.toLowerCase()));
     if (p) {
-      alert('✓ PRODUCTO ENCONTRADO\n\n' + p.name + '\nCódigo: ' + p.code + '\nPrecio: ' + fmt(p.price) + '\nStock: ' + p.stock + ' unidades');
+      const msg = p.name + '\nCódigo: ' + p.code + '\nPrecio: ' + fmt(p.price) + '\nStock: ' + p.stock + ' unidades';
+      if (window.VolvixUI && typeof window.VolvixUI.confirm === 'function') {
+        await window.VolvixUI.confirm({ title: '✓ Producto encontrado', message: msg, confirmText: 'Cerrar', cancelText: '' });
+      } else {
+        VolvixUI.toast({type:'success', message:'✓ PRODUCTO ENCONTRADO\n\n' + msg});
+      }
     } else {
-      alert('❌ Producto no encontrado: "' + code + '"');
+      if (window.VolvixUI && typeof window.VolvixUI.toast === 'function') {
+        window.VolvixUI.toast({ type: 'error', message: 'Producto no encontrado: "' + code + '"' });
+      } else {
+        VolvixUI.toast({type:'error', message:'❌ Producto no encontrado: "' + code + '"'});
+      }
     }
   }
 
@@ -3254,7 +3649,6 @@
 </script>
 
 <script src="volvix-ai-real-wiring.js" defer></script>
-<script src="volvix-tests-wiring.js" defer></script>
 <script src="volvix-charts-wiring.js" defer></script>
 <script src="volvix-notifications-wiring.js" defer></script>
 <script src="volvix-backup-wiring.js" defer></script>
@@ -3492,9 +3886,6 @@
 <script src="volvix-notion-wiring.js" defer></script>
 <script src="volvix-trello-wiring.js" defer></script>
 <script src="volvix-asana-wiring.js" defer></script>
-<script src="volvix-cypress-tests.js" defer></script>
-<script src="volvix-playwright-tests.js" defer></script>
-<script src="volvix-loadtest-wiring.js" defer></script>
 <script src="volvix-lighthouse-lite.js" defer></script>
 <script src="volvix-security-scan.js" defer></script>
 <script src="volvix-seo-wiring.js" defer></script>
@@ -3503,5 +3894,6 @@
 <script src="volvix-crypto-wiring.js" defer></script>
 <script src="volvix-print-hub.js" defer></script>
 <script src="volvix-offline-queue.js" defer></script>
+<script src="volvix-real-data-loader.js" defer></script>
 </body>
 </html>

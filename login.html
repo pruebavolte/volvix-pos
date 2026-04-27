@@ -315,14 +315,43 @@ html, body {
         <button type="submit" class="btn-primary" id="btnLogin">Entrar</button>
       </form>
 
-      <!-- Test credentials info -->
-      <div class="test-creds">
-        <strong>Test:</strong> admin@volvix.test / &lt;&lt;test-password-via-env&gt;&gt;
+      <!-- Test credentials info (oculto en producción) -->
+      <div class="test-creds" id="testCreds" hidden>
+        <strong>Test:</strong> admin@volvix.test / Volvix2026!
       </div>
     </div>
   </div>
 
   <script>
+// Mostrar credenciales de prueba sólo en dev (localhost / 127.0.0.1 / *.local)
+(function revealTestCredsInDev(){
+  try {
+    const h = location.hostname;
+    const isDev = h === 'localhost' || h === '127.0.0.1' || h.endsWith('.local') || h === '';
+    if (isDev) {
+      const el = document.getElementById('testCreds');
+      if (el) el.hidden = false;
+    }
+  } catch(e){}
+})();
+
+// Auto-redirect si ya hay sesión válida (evita login forzado tras F5)
+(function checkExistingSession(){
+  try {
+    const token = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+    if (!token) return;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload.exp && payload.exp * 1000 > Date.now()) {
+        location.href = '/salvadorex_web_v25.html';
+        return;
+      }
+    } catch(e) {}
+    localStorage.removeItem('volvix_token');
+    localStorage.removeItem('volvixAuthToken');
+  } catch(e) {}
+})();
+
 function showAlert(msg, type = 'info') {
   const alert = document.getElementById('alert');
   alert.textContent = msg;
@@ -416,6 +445,8 @@ document.getElementById('passwordInput').addEventListener('keydown', e => {
 });
   </script>
 <script src="auth-helper.js"></script>
+<link rel="stylesheet" href="volvix-modals.css">
+<script defer src="volvix-modals.js"></script>
 <script src="volvix-pwa-wiring.js" defer></script>
 <script src="volvix-i18n-wiring.js" defer></script>
 <script src="volvix-theme-wiring.js" defer></script>

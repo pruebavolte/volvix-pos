@@ -1,0 +1,63 @@
+name: Daily Supabase Backup
+
+on:
+  schedule:
+    # 03:00 UTC todos los días
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install postgresql-client (pg_dump 16)
+        run: |
+          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /usr/share/keyrings/postgresql.gpg
+          sudo sh -c 'echo "deb [signed-by=/usr/share/keyrings/postgresql.gpg] http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-16
+
+      - name: Run backup
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
+          BACKUP_DIR: ./dumps
+        run: |
+          chmod +x backups/backup.sh backups/verify.sh
+          ./backups/backup.sh
+          ./backups/verify.sh
+
+      - name: Compute release tag
+        id: tag
+        run: echo "tag=backup-$(date -u +%Y%m%d-%H%M%S)" >> "$GITHUB_OUTPUT"
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: "Backup ${{ steps.tag.outputs.tag }}"
+          body: "Backup automático diario de Supabase Volvix POS."
+          files: |
+            dumps/*.sql.gz
+            dumps/*.meta.json
+          make_latest: false
+
+      - name: Prune old backup releases (>30 días)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          CUTOFF=$(date -u -d '30 days ago' +%s)
+          gh release list --limit 200 --json tagName,createdAt,name | \
+            jq -r --argjson c "$CUTOFF" '.[] | select(.name | startswith("Backup ")) |
+              select((.createdAt | fromdateiso8601) < $c) | .tagName' | \
+            while read -r tag; do
+              echo "Borrando release antigua: $tag"
+              gh release delete "$tag" -y --cleanup-tag || true
+            done

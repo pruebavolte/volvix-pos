@@ -1,0 +1,24 @@
+{
+  "slice": 213,
+  "idx_range": [3260, 3280],
+  "feature": "R18_CLOUD_BACKUP",
+  "status": "implemented",
+  "files": {
+    "api/index.js": "added POST /api/admin/backup/cloud, GET /api/admin/backup/list, POST /api/admin/backup/restore/:id with sigv4 PUT to S3/R2/B2 (503 when AWS_ACCESS_KEY missing)",
+    "db/R18_CLOUD_BACKUP.sql": "table cloud_backups(id, tenant_id, type, size_bytes, location, status, started_at, completed_at, error) + RLS",
+    "public/volvix-cloud-backup-admin.js": "admin client UI: list, trigger full/incremental, restore with confirm",
+    "R18_CLOUD_BACKUP.md": "report"
+  },
+  "endpoints": [
+    "POST /api/admin/backup/cloud (admin)",
+    "GET  /api/admin/backup/list (admin)",
+    "POST /api/admin/backup/restore/:id (superadmin)"
+  ],
+  "providers": ["s3", "r2", "b2"],
+  "env_vars": ["AWS_ACCESS_KEY", "AWS_SECRET", "S3_BUCKET", "S3_ENDPOINT?", "S3_REGION?"],
+  "guards": {
+    "503_when": "missing AWS_ACCESS_KEY/AWS_SECRET/S3_BUCKET",
+    "restore_requires": "role=superadmin AND body.confirm=true"
+  },
+  "ts": "2026-04-26"
+}

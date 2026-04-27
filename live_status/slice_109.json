@@ -1,0 +1,23 @@
+[
+  {"idx": 2180, "status": "done", "note": "slice 109 start — R17_QR_PAYMENTS scope CoDi/SPEI/PIX"},
+  {"idx": 2181, "status": "done", "note": "audit: api/index.js MAIN HANDLER en linea 8032 (pre-insert)"},
+  {"idx": 2182, "status": "done", "note": "audit: convención IIFE attach* confirmada (Bundles, Fraud, WhatsApp)"},
+  {"idx": 2183, "status": "done", "note": "design: TTL 900s, mock probabilístico 60/30/10 y fallback in-memory"},
+  {"idx": 2184, "status": "done", "note": "impl: handler POST /api/qr/codi/generate con buildCodiString + qrSvgFromString"},
+  {"idx": 2185, "status": "done", "note": "impl: handler POST /api/qr/spei/generate con CLABE 18 dig + QR SVG"},
+  {"idx": 2186, "status": "done", "note": "impl: handler GET /api/qr/payments/:id/status con auto-expire + mock"},
+  {"idx": 2187, "status": "done", "note": "impl: persistQrPayment con fallback memStore (global.__qrPaymentsMem)"},
+  {"idx": 2188, "status": "done", "note": "impl: BBVA_API_KEY ausente => provider=mock, UUID v4 nativo crypto"},
+  {"idx": 2189, "status": "done", "note": "impl: qrSvgFromString hash-driven 25x25, base64 data URI inline"},
+  {"idx": 2190, "status": "done", "note": "client: volvix-qr-payments.js Volvix.qrPayments.show(saleId, amount, type?)"},
+  {"idx": 2191, "status": "done", "note": "client: modal full-screen, polling 3000ms, auto-close on paid 1200ms"},
+  {"idx": 2192, "status": "done", "note": "client: emit qr:paid via Volvix.events tras transición a paid"},
+  {"idx": 2193, "status": "done", "note": "sql: db/R17_QR_PAYMENTS.sql tabla qr_payments con CHECKs + 3 indices"},
+  {"idx": 2194, "status": "done", "note": "sql: RLS por tenant_id JWT con bypass superadmin/admin (SELECT/INSERT/UPDATE)"},
+  {"idx": 2195, "status": "done", "note": "report: R17_QR_PAYMENTS.md publicado con endpoints, formato CoDi y curl"},
+  {"idx": 2196, "status": "done", "note": "validation: node --check api/index.js => OK (sin errores de sintaxis)"},
+  {"idx": 2197, "status": "done", "note": "verify: 3 handlers registrados (codi/spei/status) en bloque pre-MAIN HANDLER"},
+  {"idx": 2198, "status": "done", "note": "verify: requireAuth en generate, status público para polling sin JWT"},
+  {"idx": 2199, "status": "done", "note": "verify: tenant_id derivado de req.user.tenant_id || req.user.id en INSERT"},
+  {"idx": 2200, "status": "done", "note": "slice 109 close — siguiente slice 110, idx 2201+"}
+]

@@ -64,11 +64,27 @@
   // ETIQUETA DESIGNER - GUARDAR PLANTILLA
   // =========================================================
   window.etiquetaGuardar = async function() {
-    const name = prompt('Nombre de la plantilla:');
-    if (!name) return;
+    const ui = window.VolvixUI;
+    let name;
+    if (ui && typeof ui.form === 'function') {
+      const res = await Promise.resolve(ui.form({
+        title: 'Guardar plantilla',
+        fields: [{ name: 'name', label: 'Nombre de la plantilla', type: 'text', required: true }],
+        submitText: 'Guardar'
+      })).catch(() => null);
+      if (!res || !res.name) return;
+      name = res.name;
+    } else {
+      name = prompt('Nombre de la plantilla:');
+      if (!name) return;
+    }
 
     const designer = document.querySelector('#designer, .designer-area, [data-designer]');
-    if (!designer) return alert('No hay diseñador');
+    if (!designer) {
+      if (ui && ui.toast) ui.toast({ type: 'error', message: 'No hay diseñador' });
+      else VolvixUI.toast({type:'info', message:'No hay diseñador'});
+      return;
+    }
 
     const template = {
       name,
@@ -77,43 +93,80 @@
       created_at: Date.now()
     };
 
-    // Guardar en localStorage (no hay tabla volvix_label_templates aún)
     const templates = JSON.parse(localStorage.getItem('volvix:label-templates') || '[]');
     templates.push(template);
     localStorage.setItem('volvix:label-templates', JSON.stringify(templates));
 
-    alert('✓ Plantilla guardada: ' + name);
+    if (ui && ui.toast) ui.toast({ type: 'success', message: 'Plantilla guardada: ' + name });
+    else VolvixUI.toast({type:'success', message:'✓ Plantilla guardada: ' + name});
   };
 
   // =========================================================
   // ETIQUETA DESIGNER - CARGAR PLANTILLA
   // =========================================================
-  window.etiquetaCargar = function() {
+  window.etiquetaCargar = async function() {
     const templates = JSON.parse(localStorage.getItem('volvix:label-templates') || '[]');
-    if (templates.length === 0) return alert('No hay plantillas guardadas');
+    const ui = window.VolvixUI;
+    if (templates.length === 0) {
+      if (ui && ui.toast) ui.toast({ type: 'warning', message: 'No hay plantillas guardadas' });
+      else VolvixUI.toast({type:'info', message:'No hay plantillas guardadas'});
+      return;
+    }
 
-    const list = templates.map((t, i) => `${i + 1}. ${t.name}`).join('\n');
-    const choice = prompt(`Plantillas:\n${list}\n\nEscribe el número:`);
-    if (!choice) return;
-
-    const idx = parseInt(choice) - 1;
-    if (idx < 0 || idx >= templates.length) return;
+    let idx;
+    if (ui && typeof ui.form === 'function') {
+      const res = await Promise.resolve(ui.form({
+        title: 'Cargar plantilla',
+        fields: [{
+          name: 'idx', label: 'Plantilla', type: 'select',
+          options: templates.map((t, i) => ({ value: String(i), label: t.name })),
+          required: true
+        }],
+        submitText: 'Cargar'
+      })).catch(() => null);
+      if (!res || res.idx == null) return;
+      idx = parseInt(res.idx, 10);
+    } else {
+      const list = templates.map((t, i) => `${i + 1}. ${t.name}`).join('\n');
+      const choice = prompt(`Plantillas:\n${list}\n\nEscribe el número:`);
+      if (!choice) return;
+      idx = parseInt(choice) - 1;
+    }
+    if (isNaN(idx) || idx < 0 || idx >= templates.length) return;
 
     const designer = document.querySelector('#designer, .designer-area, [data-designer]');
     if (designer) {
       designer.innerHTML = templates[idx].design;
-      alert('✓ Plantilla cargada');
+      if (ui && ui.toast) ui.toast({ type: 'success', message: 'Plantilla cargada' });
+      else VolvixUI.toast({type:'success', message:'✓ Plantilla cargada'});
     }
   };
 
   // =========================================================
   // ETIQUETA - GENERAR CODIGO DE BARRAS
   // =========================================================
-  window.etiquetaGenerarCodigo = function(code, type) {
-    code = code || prompt('Código:');
-    if (!code) return null;
+  window.etiquetaGenerarCodigo = async function(code, type) {
+    if (!code) {
+      const ui = window.VolvixUI;
+      if (ui && typeof ui.form === 'function') {
+        const res = await Promise.resolve(ui.form({
+          title: 'Generar código',
+          fields: [
+            { name: 'code', label: 'Código', type: 'text', required: true },
+            { name: 'type', label: 'Tipo', type: 'radio', options: [{value:'barcode',label:'Código de barras'},{value:'qr',label:'QR'}], default: type || 'barcode' }
+          ],
+          submitText: 'Generar'
+        })).catch(() => null);
+        if (!res || !res.code) return null;
+        code = res.code;
+        type = res.type || type;
+      } else {
+        code = prompt('Código:');
+        if (!code) return null;
+      }
+    }
 
-    type = type || 'barcode'; // 'barcode' o 'qr'
+    type = type || 'barcode';
 
     if (type === 'qr') {
       // SVG simple de QR (placeholder)
@@ -146,7 +199,7 @@
     const code = Array.from(inputs).map(i => i.value).join('');
 
     if (!code || code.length < 6) {
-      alert('Ingresa el código completo');
+      VolvixUI.toast({type:'info', message:'Ingresa el código completo'});
       return;
     }
 
@@ -163,7 +216,7 @@
         showRemoteConnecting();
       }
     } catch (e) {
-      alert('Error: ' + e.message);
+      VolvixUI.toast({type:'error', message:'Error: ' + e.message});
     }
   };
 

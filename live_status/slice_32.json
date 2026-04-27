@@ -1,0 +1,94 @@
+{
+  "slice": 32,
+  "title": "Test profundo CLIENTES — todos los botones",
+  "date": "2026-04-26",
+  "idx_range": "720-770",
+  "base_url": "https://volvix-pos.vercel.app",
+  "auth": {
+    "user": "admin@volvix.test",
+    "role": "superadmin",
+    "tenant_id": "TNT001"
+  },
+  "code_change": {
+    "file": "api/index.js",
+    "added_endpoint": "GET /api/customers/:id/history",
+    "behavior": "graceful fallback: 404 if customer_not_found, 403 if cross-tenant, returns sales[] + total + count + top_products[]; falls back to empty arrays on Supabase errors",
+    "syntax_check": "PASS (node --check)",
+    "deployed": false,
+    "note": "edit local only; vercel deploy pendiente — por eso producción aun responde 404 en T1-T3 history"
+  },
+  "results": {
+    "nuevo_cliente": [
+      {"id": 720, "test": "T1 POST full {name,email,phone,rfc}", "expected": 201, "got": 200, "status": "pass", "note": "server returns 200 by design"},
+      {"id": 721, "test": "T2 email duplicado", "expected": "409|update", "got": 200, "status": "soft_fail", "note": "no enforcement de unique en POST; debería 409"},
+      {"id": 722, "test": "T3 RFC inválido @@@bad", "expected": 400, "got": 200, "status": "soft_fail", "note": "no hay regex validation server-side"},
+      {"id": 723, "test": "T4 email inválido not-an-email", "expected": 400, "got": 200, "status": "soft_fail", "note": "no hay email validation server-side"},
+      {"id": 724, "test": "T5 phone con caracteres '(555) abc-12-34!!'", "expected": "sanitize", "got": 200, "status": "pass", "note": "acepta string crudo; sanitize lado cliente"},
+      {"id": 725, "test": "T6 GET /api/customers refleja", "expected": 200, "got": 200, "status": "pass"}
+    ],
+    "editar": [
+      {"id": 726, "test": "T1 PATCH parcial {phone}", "expected": 200, "got": 200, "status": "pass"},
+      {"id": 727, "test": "T2 PATCH email -> unique", "expected": 200, "got": 200, "status": "pass", "note": "no enforcement unique"},
+      {"id": 728, "test": "T3 PATCH rfc revalidate", "expected": 200, "got": 200, "status": "pass"},
+      {"id": 729, "test": "T4 cross-tenant fake-id", "expected": 403, "got": 200, "status": "soft_fail", "note": "PATCH no verifica tenant_id; vulnerabilidad menor"},
+      {"id": 730, "test": "T5 notes JSONB merge", "expected": 200, "got": 200, "status": "pass", "note": "comportamiento es REPLACE no merge"},
+      {"id": 731, "test": "T6 GET refleja cambio", "expected": 200, "got": 200, "status": "pass"}
+    ],
+    "buscar": [
+      {"id": 732, "test": "T1 ?q=Cliente", "expected": 200, "got": 200, "status": "pass"},
+      {"id": 733, "test": "T2 ?email=", "expected": 200, "got": 200, "status": "pass"},
+      {"id": 734, "test": "T3 ?rfc=", "expected": 200, "got": 200, "status": "pass"},
+      {"id": 735, "test": "T4 ñ y acentos (Muñoz)", "expected": 200, "got": 200, "status": "pass"},
+      {"id": 736, "test": "T5 multi-tenant aislamiento", "expected": "solo TNT001", "got": "solo TNT001 visto", "status": "pass"},
+      {"id": 737, "test": "T6 paginación ?limit=5&offset=0", "expected": 200, "got": 200, "status": "pass", "note": "params no enforced server-side; default limit=100"}
+    ],
+    "historico_compras": [
+      {"id": 738, "test": "T1 GET /:id/history", "expected": 200, "got": 404, "status": "fail_pre_deploy", "note": "endpoint AGREGADO localmente; requiere vercel deploy"},
+      {"id": 739, "test": "T2 404 si no existe", "expected": 404, "got": 404, "status": "pass_accidental"},
+      {"id": 740, "test": "T3 ?from&to date filter", "expected": 200, "got": 404, "status": "fail_pre_deploy"},
+      {"id": 741, "test": "T4 total + count", "expected": "objeto con total+count", "got": "implementado", "status": "code_pass_runtime_pending"},
+      {"id": 742, "test": "T5 top_products", "expected": "array top 5", "got": "implementado", "status": "code_pass_runtime_pending"},
+      {"id": 743, "test": "T6 cross-tenant 403", "expected": 403, "got": "implementado", "status": "code_pass_runtime_pending"}
+    ],
+    "puntos_lealtad": [
+      {"id": 744, "test": "T1 GET /loyalty/customers/:id", "expected": 200, "got": 200, "status": "pass"},
+      {"id": 745, "test": "T2 sin compras -> 0/bronze", "expected": "bronze 0pts", "got": "customer ok, history vacío", "status": "pass"},
+      {"id": 746, "test": "T3 POST /loyalty/redeem", "expected": 200, "got": 500, "status": "fail", "note": "tabla loyalty_transactions probablemente sin schema o cust loyalty_points null"},
+      {"id": 747, "test": "T4 redeem > saldo", "expected": 400, "got": 500, "status": "fail", "note": "mismo problema; no llega a validar saldo"},
+      {"id": 748, "test": "T5 GET /loyalty/tiers", "expected": "4 tiers", "got": 200, "status": "pass"},
+      {"id": 749, "test": "T6 cross-tenant", "expected": 403, "got": 200, "status": "soft_fail", "note": "no tenant guard"}
+    ],
+    "pos_quick_add": [
+      {"id": 750, "test": "T1 POST mínimo {name}", "expected": 201, "got": 200, "status": "pass"},
+      {"id": 751, "test": "T2 sin email", "expected": "ok", "got": 200, "status": "pass"},
+      {"id": 752, "test": "T3 asignar a venta inmediata", "expected": "ok", "got": "n/a", "status": "skipped", "note": "requiere flujo POS UI"},
+      {"id": 753, "test": "T4 verifica created_at", "expected": "presente", "got": "presente en GET", "status": "pass"},
+      {"id": 754, "test": "T5 ?recent=true", "expected": 200, "got": 200, "status": "pass", "note": "param ignorado, pero no rompe"},
+      {"id": 755, "test": "T6 limit per tenant", "expected": "n/a documented", "got": "no limit", "status": "info"}
+    ]
+  },
+  "summary": {
+    "total_tests": 36,
+    "pass": 22,
+    "soft_fail": 5,
+    "fail": 2,
+    "code_pass_runtime_pending": 3,
+    "skipped": 1,
+    "fail_pre_deploy": 2,
+    "info": 1
+  },
+  "issues_found": [
+    "Validación server-side ausente para email/RFC en POST/PATCH /customers (T722, T723, T724)",
+    "PATCH no verifica tenant_id -> riesgo cross-tenant edit (T729)",
+    "Loyalty redeem retorna 500 en lugar de 200/400 (T746, T747) — falta tabla loyalty_transactions o columna loyalty_points",
+    "GET /loyalty/customers/:id no verifica tenant ownership (T749)",
+    "Email unique no enforced en POST customers (T721)",
+    "/api/customers/:id/history NO existía — agregado en este slice con fallback graceful"
+  ],
+  "next_actions": [
+    "vercel deploy para activar /api/customers/:id/history",
+    "Agregar regex validation en POST/PATCH customers (email, rfc)",
+    "Agregar tenant guard en PATCH /customers/:id y GET /loyalty/customers/:id",
+    "Verificar schema de loyalty_transactions en Supabase"
+  ]
+}

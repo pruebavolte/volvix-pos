@@ -5,7 +5,7 @@
  *
  * Usage:
  *   LoadTest.configure({ targetRps: 50, durationMs: 60000, rampUpMs: 10000 });
- *   LoadTest.setRequest(async () => fetch('/api/ping'));
+ *   LoadTest.setRequest(async () => Volvix.auth.fetch('/api/ping'));
  *   await LoadTest.run();
  *   console.log(LoadTest.report());
  */

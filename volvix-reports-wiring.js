@@ -192,16 +192,37 @@
 
   function openReport(title, content, opts) {
     const w = window.open('', '_blank', 'width=900,height=900');
-    if (!w) { alert('Habilita pop-ups para ver el reporte'); return null; }
+    if (!w) { VolvixUI.toast({type:'info', message:'Habilita pop-ups para ver el reporte'}); return null; }
     w.document.write(reportTemplate(title, content, opts || {}));
     w.document.close();
     return w;
   }
 
   // ───────────────────────── Filtros UI ─────────────────────────
-  function promptFilters(opts) {
+  async function promptFilters(opts) {
     opts = opts || {};
     const today = new Date().toISOString().slice(0, 10);
+    const ui = window.VolvixUI;
+    if (ui && typeof ui.form === 'function') {
+      const fields = [
+        { name: 'from', label: 'Desde', type: 'date', default: opts.defaultFrom || '' },
+        { name: 'to',   label: 'Hasta', type: 'date', default: opts.defaultTo || today }
+      ];
+      if (opts.tipoOptions)        fields.push({ name: 'tipo', label: 'Tipo', type: 'select', options: opts.tipoOptions, default: opts.defaultTipo || '' });
+      if (opts.agrupacionOptions)  fields.push({ name: 'agrupacion', label: 'Agrupación', type: 'select', options: opts.agrupacionOptions, default: opts.defaultAgrupacion || '' });
+      const res = await Promise.resolve(ui.form({
+        title: opts.title || 'Filtrar reporte',
+        fields,
+        submitText: 'Aplicar'
+      })).catch(() => null);
+      if (!res) return null;
+      return {
+        from: res.from || null,
+        to: res.to || null,
+        tipo: res.tipo || null,
+        agrupacion: res.agrupacion || null
+      };
+    }
     const from = prompt('Fecha desde (YYYY-MM-DD) o vacío:', opts.defaultFrom || '');
     if (from === null) return null;
     const to = prompt('Fecha hasta (YYYY-MM-DD) o vacío:', opts.defaultTo || today);
@@ -211,10 +232,10 @@
 
   // ───────────────────────── 1. Reporte de ventas ─────────────────────────
   window.reportSales = async function(filters) {
-    filters = filters || promptFilters() || {};
+    filters = filters || (await promptFilters()) || {};
     const sales = await getData('/api/sales');
     if (!sales || !Array.isArray(sales)) {
-      return alert('Error obteniendo ventas');
+      return VolvixUI.toast({type:'error', message:'Error obteniendo ventas'});
     }
     const filtered = sales.filter(s => inRange(s.created_at || Date.now(), filters.from, filters.to));
 
@@ -296,7 +317,7 @@
   window.reportInventory = async function(opts) {
     opts = opts || {};
     const products = await getData('/api/products');
-    if (!products || !Array.isArray(products)) return alert('Error obteniendo productos');
+    if (!products || !Array.isArray(products)) return VolvixUI.toast({type:'error', message:'Error obteniendo productos'});
 
     let filtered = products;
     if (opts.search) {
@@ -376,7 +397,7 @@
   // ───────────────────────── 3. Reporte de clientes ─────────────────────────
   window.reportCustomers = async function() {
     const customers = await getData('/api/customers');
-    if (!customers || !Array.isArray(customers)) return alert('Error obteniendo clientes');
+    if (!customers || !Array.isArray(customers)) return VolvixUI.toast({type:'error', message:'Error obteniendo clientes'});
 
     const totalCredit  = customers.reduce((s, c) => s + parseFloat(c.credit_limit   || 0), 0);
     const totalBalance = customers.reduce((s, c) => s + parseFloat(c.credit_balance || 0), 0);
@@ -435,8 +456,19 @@
   // ───────────────────────── 4. Estado de cuenta cliente ─────────────────────────
   window.reportCustomerStatement = async function(customerId) {
     if (!customerId) {
-      customerId = prompt('ID del cliente:');
-      if (!customerId) return;
+      const ui = window.VolvixUI;
+      if (ui && typeof ui.form === 'function') {
+        const res = await Promise.resolve(ui.form({
+          title: 'Estado de cuenta',
+          fields: [{ name: 'customerId', label: 'ID del cliente', type: 'text', required: true }],
+          submitText: 'Generar'
+        })).catch(() => null);
+        if (!res || !res.customerId) return;
+        customerId = res.customerId;
+      } else {
+        customerId = prompt('ID del cliente:');
+        if (!customerId) return;
+      }
     }
     const [customer, sales, payments] = await Promise.all([
       getData('/api/customers/' + customerId),
@@ -444,7 +476,7 @@
       getData('/api/payments?customer_id=' + customerId)
     ]);
 
-    if (!customer) return alert('Cliente no encontrado');
+    if (!customer) return VolvixUI.toast({type:'info', message:'Cliente no encontrado'});
 
     const movements = [];
     (sales || []).forEach(s => movements.push({
@@ -520,7 +552,7 @@
     const targetKey = target.toDateString();
 
     const sales = await getData('/api/sales');
-    if (!sales) return alert('Error obteniendo ventas');
+    if (!sales) return VolvixUI.toast({type:'error', message:'Error obteniendo ventas'});
 
     const todaySales = sales.filter(s =>
       new Date(s.created_at || Date.now()).toDateString() === targetKey
@@ -601,7 +633,7 @@
     const sess = getSession();
 
     const w = window.open('', '_blank', 'width=320,height=720');
-    if (!w) { alert('Habilita pop-ups para imprimir el ticket'); return; }
+    if (!w) { VolvixUI.toast({type:'info', message:'Habilita pop-ups para imprimir el ticket'}); return; }
 
     w.document.write(`<!DOCTYPE html>
 <html><head>

@@ -467,7 +467,25 @@ Como analista de retail mexicano:
   window.aiTrainingAssistant = async function (predefTopic) {
     let tema = predefTopic;
     if (!tema) {
-      tema = prompt('🎓 ¿Sobre qué tema quieres capacitarte?\n\nEjemplos:\n• Facturación\n• Inventario\n• Atención al cliente\n• Ventas y upselling\n• Manejo de caja');
+      const ui = window.VolvixUI;
+      if (ui && typeof ui.form === 'function') {
+        const res = await Promise.resolve(ui.form({
+          title: '🎓 Capacitación con IA',
+          fields: [{
+            name: 'tema',
+            label: '¿Sobre qué tema quieres capacitarte?',
+            type: 'textarea',
+            rows: 4,
+            placeholder: 'Ej: Facturación, Inventario, Atención al cliente, Ventas, Manejo de caja',
+            required: true
+          }],
+          submitText: 'Generar lección'
+        })).catch(() => null);
+        if (!res || !res.tema) return;
+        tema = res.tema;
+      } else {
+        tema = prompt('🎓 ¿Sobre qué tema quieres capacitarte?\n\nEjemplos:\n• Facturación\n• Inventario\n• Atención al cliente\n• Ventas y upselling\n• Manejo de caja');
+      }
     }
     if (!tema) return;
     showToast('Generando lección...', 'info');
@@ -494,8 +512,20 @@ Total: máx 220 palabras. Lenguaje claro, directo, sin jerga.`;
     let ticket = ticketOrText;
     if (typeof ticket === 'string') ticket = { description: ticket, subject: 'Consulta', priority: 'normal' };
     if (!ticket || typeof ticket !== 'object') {
-      const msg = prompt('Describe el problema del usuario:');
-      if (!msg) return;
+      const ui = window.VolvixUI;
+      let msg;
+      if (ui && typeof ui.form === 'function') {
+        const res = await Promise.resolve(ui.form({
+          title: 'Resolver ticket',
+          fields: [{ name: 'msg', label: 'Describe el problema del usuario', type: 'textarea', rows: 6, required: true }],
+          submitText: 'Resolver'
+        })).catch(() => null);
+        if (!res || !res.msg) return;
+        msg = res.msg;
+      } else {
+        msg = prompt('Describe el problema del usuario:');
+        if (!msg) return;
+      }
       ticket = { description: msg, subject: 'Consulta', priority: 'normal' };
     }
     showToast('Resolviendo ticket...', 'info');
@@ -520,8 +550,19 @@ Total: máx 220 palabras. Lenguaje claro, directo, sin jerga.`;
   // ───────────────────────────────────────────────────────────────────
   window.aiAskAboutData = async function (question) {
     if (!question) {
-      question = prompt('¿Qué quieres preguntarle a la IA sobre tu negocio?');
-      if (!question) return;
+      const ui = window.VolvixUI;
+      if (ui && typeof ui.form === 'function') {
+        const res = await Promise.resolve(ui.form({
+          title: '🤖 Consultar IA',
+          fields: [{ name: 'question', label: '¿Qué quieres preguntarle a la IA sobre tu negocio?', type: 'textarea', rows: 6, required: true }],
+          submitText: 'Preguntar'
+        })).catch(() => null);
+        if (!res || !res.question) return;
+        question = res.question;
+      } else {
+        question = prompt('¿Qué quieres preguntarle a la IA sobre tu negocio?');
+        if (!question) return;
+      }
     }
     showToast('Consultando IA...', 'info');
     const result = await callAI(question, 'Eres consultor experto en POS retail mexicano.');

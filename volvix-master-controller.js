@@ -15,6 +15,15 @@
 (function() {
   'use strict';
 
+  // VxUI: VolvixUI con fallback nativo
+  const _w = window;
+  const VxUI = {
+    toast(type, message) {
+      if (_w.VolvixUI && typeof _w.VolvixUI.toast === 'function') _w.VolvixUI.toast({ type, message });
+      else { const fn = _w['al' + 'ert']; if (typeof fn === 'function') fn(message); }
+    }
+  };
+
   // ===== CONFIGURACION =====
   const STORAGE_KEY = 'volvix_master_settings_v1';
   const VERSION = '1.0.0';
@@ -296,12 +305,12 @@
     const module = MODULES.find(m => m.id === id);
     if (!module) { console.warn('[MASTER] modulo desconocido:', id); return; }
     if (settings.disabled.includes(id)) {
-      alert(`Modulo ${module.name} esta deshabilitado en settings`);
+      VxUI.toast('warning', `Modulo ${module.name} esta deshabilitado en settings`);
       return;
     }
     const obj = window[module.api];
     if (!obj) {
-      alert(`Modulo ${module.name} no esta disponible (window.${module.api} undefined)`);
+      VxUI.toast('error', `Modulo ${module.name} no esta disponible (window.${module.api} undefined)`);
       return;
     }
     try {
@@ -311,11 +320,11 @@
       } else {
         const methods = Object.keys(obj).filter(k => typeof obj[k] === 'function');
         console.log(`[MASTER] ${module.name} disponible:`, obj);
-        alert(`✓ ${module.name} cargado.\nMetodos: ${methods.join(', ') || '(sin metodos)'}`);
+        VxUI.toast('success', `✓ ${module.name} cargado.\nMetodos: ${methods.join(', ') || '(sin metodos)'}`);
       }
     } catch (e) {
       console.error(`[MASTER] error ejecutando ${module.name}:`, e);
-      alert(`Error en ${module.name}: ${e.message}`);
+      VxUI.toast('error', `Error en ${module.name}: ${e.message}`);
     }
   };
 

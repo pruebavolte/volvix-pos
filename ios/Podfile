@@ -1,0 +1,35 @@
+# PLACEHOLDER — Volvix POS iOS wrapper
+# Generado por R18_MOBILE_APP. Reemplaza este archivo ejecutando:
+#   npx cap add ios
+# El comando anterior crea un proyecto Xcode completo (App.xcworkspace,
+# Info.plist, etc.) usando capacitor.config.json.
+#
+# Este placeholder existe para documentar la configuración esperada y
+# evitar directorio ios/ vacío en el repo.
+#
+# Configuración esperada tras `cap add ios`:
+#   bundle id      mx.volvix.app
+#   deployment     iOS 13.0+
+#   versionString  "1.0.0"
+#   buildNumber    "1"
+#
+# Build:
+#   cd ios/App && pod install
+#   open App.xcworkspace   # firmar con Apple Developer + Archive
+#
+# Submit App Store:
+#   Xcode -> Product -> Archive -> Distribute App -> App Store Connect
+
+platform :ios, '13.0'
+use_frameworks!
+
+# workspace 'App.xcworkspace'
+
+def capacitor_pods
+  pod 'Capacitor', :path => '../../node_modules/@capacitor/ios'
+  pod 'CapacitorCordova', :path => '../../node_modules/@capacitor/ios'
+end
+
+target 'App' do
+  capacitor_pods
+end

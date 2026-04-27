@@ -1,0 +1,32 @@
+{
+  "slice": 65,
+  "idx_range": [1640, 1670],
+  "task": "R16 browser automation Playwright headless",
+  "ts": "2026-04-26",
+  "status": "script_generated_not_executed",
+  "reason_not_executed": "playwright module not installed in environment",
+  "files_created": [
+    "tests/browser/run-auto.js",
+    "tests/browser/README.md",
+    "R16_BROWSER_AUTO.md"
+  ],
+  "steps_covered": [
+    {"idx": 1640, "step": "login admin/admin"},
+    {"idx": 1644, "step": "verify redirect salvadorex_web_v25.html"},
+    {"idx": 1648, "step": "F3 productos (>5)"},
+    {"idx": 1652, "step": "+ nuevo producto + verify"},
+    {"idx": 1656, "step": "editar producto + verify"},
+    {"idx": 1660, "step": "eliminar + verify desaparicion"},
+    {"idx": 1665, "step": "F1 venta efectivo + verify ticket"},
+    {"idx": 1670, "step": "exit code 0/1"}
+  ],
+  "outputs_when_run": {
+    "screenshots_dir": "tests/browser/screenshots/",
+    "expected_shots": ["01-login.png","02-pos-loaded.png","03-productos.png","04-form-nuevo.png","05-tras-guardar.png","06-tras-editar.png","07-tras-eliminar.png","08-carrito.png","09-ticket.png"],
+    "summary_json": "tests/browser/last-run.json"
+  },
+  "install_cmd": "npm i -D playwright && npx playwright install chromium && node tests/browser/run-auto.js",
+  "env_vars": ["BASE_URL","VOLVIX_USER","VOLVIX_PASS","HEADLESS"],
+  "screenshots_taken_now": 0,
+  "next_action": "user installs playwright and runs script"
+}

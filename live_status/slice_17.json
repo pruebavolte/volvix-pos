@@ -1,0 +1,64 @@
+{
+  "slice": 17,
+  "title": "Cash sessions / Credits / Quotations / Returns",
+  "status": "implemented",
+  "generated_at": "2026-04-26",
+  "modules": [
+    {
+      "name": "cash_sessions",
+      "sql": "db/R14_CASH_SESSIONS.sql",
+      "table": "pos_cash_sessions",
+      "endpoints": [
+        "POST /api/cash/open",
+        "POST /api/cash/close",
+        "GET /api/cash/current",
+        "GET /api/cash/history"
+      ],
+      "auth": "requireAuth",
+      "graceful_42P01": true
+    },
+    {
+      "name": "credits",
+      "sql": "db/R14_CREDITS.sql",
+      "tables": ["pos_credits", "pos_credit_payments"],
+      "endpoints": [
+        "GET /api/credits",
+        "POST /api/credits",
+        "POST /api/credits/:id/payment"
+      ],
+      "auth": "requireAuth",
+      "graceful_42P01": true
+    },
+    {
+      "name": "quotations",
+      "sql": "db/R14_QUOTATIONS.sql",
+      "table": "pos_quotations",
+      "endpoints": [
+        "GET /api/quotations",
+        "POST /api/quotations",
+        "PATCH /api/quotations/:id",
+        "POST /api/quotations/:id/convert"
+      ],
+      "auth": "requireAuth",
+      "graceful_42P01": true
+    },
+    {
+      "name": "returns",
+      "sql": "db/R14_RETURNS.sql",
+      "table": "pos_returns",
+      "endpoints": [
+        "GET /api/returns",
+        "POST /api/returns"
+      ],
+      "auth": "requireAuth",
+      "graceful_42P01": true
+    }
+  ],
+  "notes": [
+    "SQL idempotente con CREATE TABLE IF NOT EXISTS + CREATE INDEX IF NOT EXISTS.",
+    "Endpoints detectan código 42P01 (tabla no existe) y devuelven {ok:true, items:[], note:'tabla pendiente'} para no romper UI.",
+    "Cierre de caja calcula expected = opening_amount + sum(ventas efectivo del usuario desde opened_at).",
+    "Conversion de cotización a venta inserta en pos_sales y marca quotation.status='converted' con converted_sale_id.",
+    "Sintaxis validada con `node -c api/index.js`."
+  ]
+}

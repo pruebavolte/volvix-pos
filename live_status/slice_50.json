@@ -1,0 +1,51 @@
+{
+  "slice": 50,
+  "name": "Error pages & failure behavior (404/401/403/429/500/validation)",
+  "url": "https://volvix-pos.vercel.app",
+  "idx_range": [700, 740],
+  "tests": [
+    {"id": 700, "group": "404", "case": "GET /no-existe.html", "status": 404, "ct": "text/html; charset=utf-8", "body_preview": "<h1>404</h1><p>/no-existe.html</p><p><a href=\"/login.html\">Login</a></p>", "ok": true, "note": "página 404 custom mínima sin info interna"},
+    {"id": 701, "group": "404", "case": "GET /api/no-existe", "status": 404, "ct": "application/json; charset=utf-8", "body": {"error": "endpoint not found"}, "ok": true, "note": "JSON correcto"},
+    {"id": 702, "group": "404", "case": "headers no filtran info interna", "status": 404, "leaks_internal": false, "server_header": "Vercel", "ok": true, "note": "Server: Vercel + headers de seguridad presentes (CSP, HSTS, X-Frame, X-CT-Options, Permissions-Policy). Sin stack trace, sin paths internos"},
+    {"id": 710, "group": "401", "case": "GET /api/products sin auth", "status": 401, "body": {"error": "unauthorized"}, "www_authenticate": null, "ok": true, "note": "solo JSON; NO emite WWW-Authenticate header"},
+    {"id": 711, "group": "401", "case": "JWT expirado", "status": 401, "body": {"error": "unauthorized"}, "ok": true},
+    {"id": 712, "group": "401", "case": "JWT malformado (NOT_A_JWT)", "status": 401, "body": {"error": "unauthorized"}, "ok": true, "note": "no escala a 500"},
+    {"id": 720, "group": "403", "case": "cajero -> /api/owner/dashboard", "status": 403, "body": {"error": "forbidden"}, "ok": true, "role_used": "cajero"},
+    {"id": 721, "group": "403", "case": "control: admin -> /api/owner/dashboard", "status": 200, "ok": true, "note": "control verde, 403 anterior fue por rol"},
+    {"id": 722, "group": "403", "case": "cajero -> /api/admin/users", "status": 404, "body": {"error": "endpoint not found"}, "ok": "partial", "note": "endpoint /api/admin/users no existe, regresa 404 antes de evaluar rol. Aceptable pero idealmente 403 para no leakear superficie"},
+    {"id": 730, "group": "429", "case": "40+ logins/min mismo IP", "status_after_threshold": 429, "first_429_at_iter": 41, "body": {"error": "too many attempts"}, "ok": true, "note": "rate limiter activo (~40 req/min por IP)"},
+    {"id": 731, "group": "429", "case": "Retry-After header", "present": false, "ok": false, "severity": "low", "note": "FALTA header Retry-After. RFC 6585 lo recomienda. Cliente no sabe cuánto esperar"},
+    {"id": 732, "group": "429", "case": "mensaje rate limit", "expected_includes": "rate limit", "got": "too many attempts", "ok": "partial", "note": "mensaje aceptable semánticamente; no contiene literal 'rate limit exceeded'"},
+    {"id": 733, "group": "429", "case": "rate limit en otros endpoints (GET /api/products spam)", "tested": false, "ok": "skipped", "note": "no ejecutado para evitar penalizar IP de pruebas"},
+    {"id": 740, "group": "500", "case": "payload 5MB en /api/products", "status": 413, "body_preview": "FUNCTION_PAYLOAD_TOO_LARGE", "ok": true, "note": "Vercel corta antes que la función. Graceful, no 500"},
+    {"id": 741, "group": "500", "case": "JSON malformado", "status": 400, "body": {"error": "name is required"}, "ok": true, "note": "no se cae con 500"},
+    {"id": 742, "group": "500", "case": "NODE_ENV=production esconde detalle", "status": 400, "body": {"error": "name is required"}, "leaks_stack": false, "ok": true, "note": "errores 400 son mensajes cortos, sin stack ni paths"},
+    {"id": 750, "group": "validation", "case": "POST /api/products price='abc'", "status": 400, "body": {"error": "price is required and must be a number"}, "ok": true},
+    {"id": 751, "group": "validation", "case": "tenant_id no UUID", "status": 200, "ok": false, "severity": "medium", "note": "ACEPTÓ tenant_id='NOT_UUID' sin validar formato. Se ignora silenciosamente o se persiste mal-formado. Riesgo multi-tenant"},
+    {"id": 752, "group": "security", "case": "SQL injection en name", "payload": "Robert'); DROP TABLE products;--", "status": 200, "table_dropped": false, "ok": true, "note": "string almacenado tal cual (Supabase parametriza). Tabla products intacta tras inserción"},
+    {"id": 753, "group": "security", "case": "XSS stored detectado en lista", "found": "<script>alert(1)</script>", "ok": false, "severity": "high", "note": "Producto con name='<script>alert(1)</script>' (code XSS340) ESTÁ persistido y se devuelve crudo en GET /api/products. Si el frontend renderiza con innerHTML hay XSS stored. Verificar sanitización en UI o agregar sanitización server-side"}
+  ],
+  "summary": {
+    "total": 20,
+    "ok": 14,
+    "partial": 2,
+    "fail": 3,
+    "skipped": 1,
+    "findings": [
+      {"sev": "high",   "id": 753, "issue": "XSS stored persistido en products.name; sanitizar server-side o garantizar escape en frontend"},
+      {"sev": "medium", "id": 751, "issue": "tenant_id no se valida como UUID en POST /api/products"},
+      {"sev": "low",    "id": 731, "issue": "429 sin header Retry-After"},
+      {"sev": "low",    "id": 722, "issue": "/api/admin/users devuelve 404 (no 403) cuando el rol no aplica; revisa fuga de superficie"}
+    ],
+    "passes": [
+      "404 HTML y JSON correctos, sin filtración de info interna",
+      "Headers de seguridad completos (CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Permissions-Policy, Referrer-Policy)",
+      "401 consistente para token ausente / expirado / malformado (no escala a 500)",
+      "403 RBAC funcional (cajero bloqueado en /api/owner/dashboard)",
+      "Rate limit 429 dispara con ~40 logins/min",
+      "Payload 5MB cortado por Vercel (413), no 500",
+      "SQL injection neutralizada por parametrización Supabase"
+    ]
+  },
+  "generated_at": "2026-04-26T21:42:00Z"
+}

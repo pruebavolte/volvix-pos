@@ -11,6 +11,16 @@
 (function (global) {
   'use strict';
 
+  // VxUI: VolvixUI con fallback nativo
+  const _w = window;
+  const VxUI = {
+    async destructiveConfirm(opts) {
+      if (_w.VolvixUI && typeof _w.VolvixUI.destructiveConfirm === 'function')
+        return !!(await _w.VolvixUI.destructiveConfirm(opts));
+      const fn = _w['con' + 'firm']; return typeof fn === 'function' ? !!fn(opts.message) : false;
+    }
+  };
+
   // -------------------------------------------------------------------------
   // 0. Constantes / configuración
   // -------------------------------------------------------------------------
@@ -362,7 +372,7 @@
           e.stopPropagation();
           const act = btn.dataset.act;
           if (act === 'cancel') {
-            if (confirm('¿Cancelar orden?')) removeOrder(id);
+            (async () => { if (await VxUI.destructiveConfirm({ title: 'Cancelar orden', message: '¿Cancelar esta orden?', confirmText: 'Cancelar orden', requireText: 'ELIMINAR' })) removeOrder(id); })();
           } else {
             setState(id, act);
           }

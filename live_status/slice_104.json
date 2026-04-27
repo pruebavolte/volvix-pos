@@ -1,0 +1,44 @@
+{
+  "slice": 104,
+  "range": "2080-2100",
+  "topic": "R17_warehouses_multi_bodega_geo",
+  "ts": "2026-04-26",
+  "status": "implemented",
+  "extends": "R14_INVENTORY",
+  "artifacts": {
+    "sql": "db/R17_WAREHOUSES.sql",
+    "api": "api/index.js (5 handlers added after inventory/counts)",
+    "client": "volvix-warehouses-wiring.js",
+    "report": "R17_WAREHOUSES.md"
+  },
+  "tables_created": [
+    "inventory_warehouses",
+    "warehouse_zones",
+    "stock_per_warehouse",
+    "warehouse_transfers"
+  ],
+  "sql_function": {
+    "name": "nearest_warehouse(customer_lat, customer_lng, p_tenant_id?)",
+    "algorithm": "haversine",
+    "earth_radius_km": 6371,
+    "stable": true
+  },
+  "endpoints": [
+    "GET  /api/warehouses",
+    "POST /api/warehouses",
+    "GET  /api/warehouses/:id/stock",
+    "POST /api/warehouses/transfer",
+    "GET  /api/warehouses/optimal"
+  ],
+  "auth": "requireAuth + resolveTenant (R13 hardening)",
+  "validation": "sendValidation (R15 4xx)",
+  "geocoder": "placeholder deterministic (CDMX/MTY/GDL/Madrid/Bogota/BA/Lima seeds)",
+  "client_map": {
+    "library": "Leaflet 1.9.4",
+    "load_method": "CDN unpkg on-demand",
+    "tiles": "OpenStreetMap"
+  },
+  "rls_pending": true,
+  "deploy_required": true,
+  "notes": "RPC nearest_warehouse con fallback JS haversine si no está instalada. Geocoder placeholder a reemplazar por Google/Mapbox antes de prod global."
+}

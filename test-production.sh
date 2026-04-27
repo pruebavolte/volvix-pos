@@ -23,10 +23,12 @@ echo -e "${BLUE}═════════════════════�
 echo -e "Testing: ${YELLOW}$BASE_URL${NC}\n"
 
 # Test data
+# Password se lee desde env var TEST_USER_PASSWORD (sin default).
+: "${TEST_USER_PASSWORD:?ERROR: exporta TEST_USER_PASSWORD antes de ejecutar este script}"
 USERS=(
-  "admin@volvix.test|Volvix2026!|superadmin|Abarrotes Don Chucho"
-  "owner@volvix.test|Volvix2026!|owner|Restaurante Los Compadres"
-  "cajero@volvix.test|Volvix2026!|cajero|Abarrotes Don Chucho"
+  "admin@volvix.test|${TEST_USER_PASSWORD}|superadmin|Abarrotes Don Chucho"
+  "owner@volvix.test|${TEST_USER_PASSWORD}|owner|Restaurante Los Compadres"
+  "cajero@volvix.test|${TEST_USER_PASSWORD}|cajero|Abarrotes Don Chucho"
 )
 
 PASSED=0

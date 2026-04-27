@@ -194,6 +194,25 @@
     // ── UI actions ───────────────────────────────────────────────
     _uiAdd(parentId) {
       const pid = parentId || this.selectedId || this.rootId;
+      const self = this;
+      const opts = PALETTE.map((c, i) => ({ value: c, label: 'Paleta ' + i }));
+      const ui = global.VolvixUI;
+      if (ui && typeof ui.form === 'function') {
+        Promise.resolve(ui.form({
+          title: 'Nuevo nodo',
+          fields: [
+            { name: 'label', label: 'Nombre del nodo', type: 'text', default: 'New branch', required: true },
+            { name: 'category', label: 'Categoría', type: 'radio', options: [{value:'idea',label:'Idea'},{value:'tarea',label:'Tarea'},{value:'nota',label:'Nota'}], default: 'idea' },
+            { name: 'color', label: 'Color', type: 'color', default: PALETTE[0] }
+          ],
+          submitText: 'Crear'
+        })).then(res => {
+          if (!res || !res.label) return;
+          const id = self.addNode(pid, res.label);
+          if (res.color) { const n = self.nodes.get(id); if (n) { n.color = res.color; self.render(); self._fireChange(); } }
+        }).catch(()=>{});
+        return;
+      }
       const label = prompt('Branch label:', 'New branch');
       if (!label) return;
       this.addNode(pid, label);
@@ -206,12 +225,36 @@
     _uiRename() {
       if (!this.selectedId) return;
       const n = this.nodes.get(this.selectedId);
+      const self = this;
+      const ui = global.VolvixUI;
+      if (ui && typeof ui.form === 'function') {
+        Promise.resolve(ui.form({
+          title: 'Renombrar nodo',
+          fields: [{ name: 'label', label: 'Nombre', type: 'text', default: n.label, required: true }],
+          submitText: 'Guardar'
+        })).then(res => {
+          if (res && res.label) { n.label = res.label; self.render(); self._fireChange(); }
+        }).catch(()=>{});
+        return;
+      }
       const v = prompt('Rename node:', n.label);
       if (v != null && v !== '') { n.label = v; this.render(); this._fireChange(); }
     }
     _uiColor() {
       if (!this.selectedId) return;
       const n = this.nodes.get(this.selectedId);
+      const self = this;
+      const ui = global.VolvixUI;
+      if (ui && typeof ui.form === 'function') {
+        Promise.resolve(ui.form({
+          title: 'Cambiar color',
+          fields: [{ name: 'color', label: 'Color del nodo', type: 'color', default: n.color }],
+          submitText: 'Aplicar'
+        })).then(res => {
+          if (res && res.color) { n.color = res.color; self.render(); self._fireChange(); }
+        }).catch(()=>{});
+        return;
+      }
       const v = prompt('Color (hex or palette idx 0-' + (PALETTE.length-1) + '):', n.color);
       if (v == null) return;
       const idx = parseInt(v, 10);

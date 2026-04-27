@@ -377,16 +377,47 @@
     return el('div', { class: 'vx-fd-toolbar' }, [
       el('button', { onclick: function () {
         const json = JSON.stringify(self.getSchema(), null, 2);
+        const ui = global.VolvixUI;
+        if (ui && typeof ui.form === 'function') {
+          Promise.resolve(ui.form({
+            title: 'JSON Schema',
+            fields: [{ name: 'json', label: 'Schema', type: 'textarea', default: json, rows: 16, readonly: true }],
+            submitText: 'Cerrar'
+          })).catch(()=>{});
+          return;
+        }
         const w = global.open('', '_blank');
         if (w) w.document.write('<pre>' + json.replace(/[<>&]/g, c => ({ '<':'&lt;','>':'&gt;','&':'&amp;' }[c])) + '</pre>');
         else global.prompt('JSON Schema', json);
       } }, ['Ver JSON']),
       el('button', { onclick: function () {
+        const ui = global.VolvixUI;
+        if (ui && typeof ui.form === 'function') {
+          Promise.resolve(ui.form({
+            title: 'Importar JSON Schema',
+            fields: [{ name: 'json', label: 'Pegar JSON Schema', type: 'textarea', rows: 12, required: true }],
+            submitText: 'Importar'
+          })).then(res => {
+            if (!res || !res.json) return;
+            try { self.setSchema(JSON.parse(res.json)); }
+            catch (e) {
+              if (ui.toast) ui.toast({ type: 'error', message: 'JSON inválido: ' + e.message });
+              else global.alert('JSON inválido: ' + e.message);
+            }
+          }).catch(()=>{});
+          return;
+        }
         const txt = global.prompt('Pegar JSON Schema:');
         if (txt) try { self.setSchema(JSON.parse(txt)); } catch (e) { global.alert('JSON inválido: ' + e.message); }
       } }, ['Importar']),
       el('button', { onclick: function () {
-        if (global.confirm('¿Limpiar formulario?')) { self.fields = []; self.selectedId = null; self._fire(); self._render(); }
+        const ui = global.VolvixUI;
+        const doClear = () => { self.fields = []; self.selectedId = null; self._fire(); self._render(); };
+        if (ui && typeof ui.confirm === 'function') {
+          Promise.resolve(ui.confirm({ title: 'Limpiar formulario', message: '¿Limpiar formulario?', danger: true })).then(ok => { if (ok) doClear(); }).catch(()=>{});
+          return;
+        }
+        if (global.confirm('¿Limpiar formulario?')) doClear();
       } }, ['Limpiar'])
     ]);
   };

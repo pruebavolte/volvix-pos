@@ -1,0 +1,22 @@
+{
+  "slice": 101,
+  "idx_range": [2020, 2040],
+  "phase": "R17_ML",
+  "ts": "2026-04-26T00:00:00Z",
+  "status": "done",
+  "added": {
+    "endpoints": [
+      "GET /api/ml/inventory/forecast",
+      "GET /api/ml/inventory/reorder-suggestions",
+      "GET /api/ml/sales/anomalies",
+      "POST /api/ml/products/cluster"
+    ],
+    "sql": ["db/R17_ML.sql:ml_predictions"],
+    "client": ["volvix-ml-wiring.js"],
+    "report": ["R17_ML.md"]
+  },
+  "algorithms": ["moving_avg_7", "linear_regression", "weekly_seasonality", "z_score", "kmeans_k3_1d"],
+  "deps_added": [],
+  "syntax_check": "node -c api/index.js OK",
+  "notes": "Pure-JS ML, no libs. RLS-scoped ml_predictions table. Widget mounts on #volvix-ml-widget or #dashboard."
+}

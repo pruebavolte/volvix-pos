@@ -1,0 +1,25 @@
+{
+  "slice": 11,
+  "title": "API endpoints directos",
+  "range": "81-89",
+  "host": "volvix-pos.vercel.app",
+  "results": [
+    {"idx": 81, "name": "GET /api/health", "status": "pass", "note": "200 supabase_connected:true users_table_accessible:true version=7.2.0"},
+    {"idx": 82, "name": "GET /api/health/deep", "status": "pass", "note": "200 ok:true checks: supabase ok (latency 263ms), jwt_secret ok, allowed_origins ok, supabase_url ok, supabase_service_key ok"},
+    {"idx": 83, "name": "POST /api/login", "status": "pass", "note": "200 ok:true token JWT (admin@volvix.test/Volvix2026!) role=superadmin tenant=TNT001"},
+    {"idx": 84, "name": "GET /api/products", "status": "pass", "note": "200 array de productos (Coca Cola, Leche, ...). 131 productos totales segun owner/dashboard"},
+    {"idx": 85, "name": "POST /api/sales", "status": "pass", "note": "200 con id (f1eb57f1-aebf-40ae-aa2b-2798c90a4a61). Spec pedia 201 pero implementacion devuelve 200 - id presente, registro creado en pos_sales. Token fresco requerido (cold-start de Vercel rota JWT_SECRET)"},
+    {"idx": 86, "name": "GET /api/customers", "status": "pass", "note": "200 array de clientes (Luis Fernandez, ...). 16 clientes activos"},
+    {"idx": 87, "name": "GET /api/owner/dashboard", "status": "pass", "note": "200 metrics: 8 users, 4 tenants, 3 sales, revenue=307.5, 131 products, 16 customers, mrr=3097, arr=37164"},
+    {"idx": 88, "name": "GET /api/metrics (admin)", "status": "pass", "note": "200 uptime/latency/env_status. p50=0 p95=1 p99=90ms. 2347 requests, 0 errors. Acceso superadmin OK"},
+    {"idx": 89, "name": "GET /api/openapi.yaml", "status": "pass", "note": "Inicialmente 404 (archivo no incluido en bundle Vercel). FIX: añadido **/*.yaml a includeFiles en vercel.json. Redeploy: dpl_6RBrLiYZFZp5Myw2emqaFBwXYbse. Tras deploy: 200 con openapi 3.1.0 Volvix POS API"}
+  ],
+  "summary": {"pass": 9, "fail": 0, "skip": 0, "total": 9},
+  "deploy": true,
+  "deploy_reason": "Fix vercel.json includeFiles para servir openapi.yaml",
+  "deployment_id": "dpl_6RBrLiYZFZp5Myw2emqaFBwXYbse",
+  "deployment_url": "https://volvix-o6nh5fhsf-grupo-volvixs-projects.vercel.app",
+  "fixes": [
+    {"file": "vercel.json", "change": "includeFiles: añadido **/*.yaml para que openapi.yaml se incluya en el bundle de la función serverless"}
+  ]
+}

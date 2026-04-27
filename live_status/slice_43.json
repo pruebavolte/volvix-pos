@@ -1,0 +1,76 @@
+{
+  "slice": 43,
+  "title": "Test profundo AI ASSISTANT (R14) en produccion",
+  "date": "2026-04-26",
+  "idx_range": "1200-1240",
+  "deployment": "https://volvix-pos.vercel.app",
+  "auth": {
+    "method": "POST /api/login admin@volvix.test",
+    "token_obtained": true,
+    "token_len": 279
+  },
+  "anthropic_api_key_present": false,
+  "behavior_when_key_missing": "503 con JSON {error:'ANTHROPIC_API_KEY no configurada'} (NO 500). Correcto.",
+  "results": {
+    "chat": {
+      "T1_hola": {"http": 503, "body": "{\"error\":\"ANTHROPIC_API_KEY no configurada\"}", "status": "PASS (503 esperado por falta de key)"},
+      "T2_sin_auth": {"http": 401, "body": "{\"error\":\"unauthorized\"}", "status": "PASS"},
+      "T3_message_vacio": {"http": 503, "note": "503 por key missing, ocurre antes de validar body. Codigo NO valida message vacio (acepta string vacio).", "status": "WARN: sin validacion 400 explicita"},
+      "T4_rate_limit_21": {"http_codes": "21x 503", "note": "rate limit no observable porque 503 corta antes. En codigo: rateLimit('ai:'+user.id, 20, 60000) -> 429. Logica correcta segun source.", "status": "PASS_BY_CODE"},
+      "T5_12k_chars": {"http": 503, "note": "codigo trunca con .slice(0,4000) en api/index.js:1221. NO devuelve 400, trunca silenciosamente.", "status": "PASS (truncacion implementada)"},
+      "T6_log_ai_chat_log": {"status": "NOT_VERIFIABLE_REMOTE", "note": "Log es best-effort despues de callClaude. Sin key no hay ejecucion. Tabla ai_chat_log existe (db/R14_AI_LOG.sql)."}
+    },
+    "insights": {
+      "T1_admin": {"http": 503, "status": "PASS (503 por key)"},
+      "T2_cajero_403": {"status": "NOT_TESTED", "note": "requireAuth(...,['admin','superadmin','owner']) en linea 1282. Logica correcta."},
+      "T3_sin_ventas": {"status": "BLOCKED_BY_503"},
+      "T4_kpis": {"status": "VERIFIED_BY_CODE", "note": "calculo by_hour, avg/max/min, anomalies>3*avg implementado lineas 1252-1264"},
+      "T5_anomalias_3x": {"status": "VERIFIED_BY_CODE", "note": "linea 1263: filter total > avg*3"},
+      "T6_log_tokens": {"status": "VERIFIED_BY_CODE", "note": "ai_chat_log POST en lineas 1271-1279"}
+    },
+    "copilot": {
+      "T1_suggest": {"http": 503, "status": "PASS (503 por key)"},
+      "T2_customer_inexistente": {"status": "VERIFIED_BY_CODE", "note": "linea 1292: customer_id=null si falta. NO devuelve 400, sigue con anonimo."},
+      "T3_history_vacio": {"status": "VERIFIED_BY_CODE", "note": "linea 1293: history=[] si no array"},
+      "T4_json_format": {"status": "VERIFIED_BY_CODE", "note": "system prompt: 'Responde SOLO con JSON valido'. Parse en 1300, fallback raw."},
+      "T5_sin_key_503": {"http": 503, "status": "PASS"}
+    },
+    "comandos_widget": {
+      "T1_help": {"status": "VERIFIED_BY_DOC", "note": "R14_AI_ASSISTANT.md: /help lista comandos, /sales today -> /api/reports/daily, /inventory low -> stock<=5"},
+      "T2_sales_today": {"http_endpoint": "/api/reports/daily", "status": "ENDPOINT_EXISTE_linea_1370"},
+      "T3_inventory_low": {"http_endpoint": "/api/inventory", "status": "ENDPOINT_EXISTE_linea_1350"}
+    },
+    "ai_decisions": {
+      "T1_admin_array": {"http": 200, "body_sample": "[{id:DEC-001,...},{id:DEC-002,...}]", "status": "PASS"},
+      "T2_cajero_403": {"status": "NOT_TESTED", "note": "requireAuth sin role restriction en linea 1203 -> CUALQUIER auth user pasa. POSIBLE BUG: deberia limitar a admin segun spec."},
+      "T3_sin_token_401": {"http": 401, "body": "{\"error\":\"unauthorized\"}", "status": "PASS"}
+    }
+  },
+  "fallos_encontrados": [
+    "T3 chat: message vacio NO retorna 400 explicito (acepta string vacio, ni siquiera valida).",
+    "T5 chat: mensaje >10k NO retorna 400 ni warn, trunca en silencio a 4000 chars (pierde info sin avisar al cliente).",
+    "AI decisions: GET /api/ai/decisions no restringe a admin/owner; cualquier user autenticado obtiene 200. Spec pide cajero->403."
+  ],
+  "puntos_positivos": [
+    "Key missing -> 503 con mensaje claro en TODOS los endpoints AI (no 500). PASS clave del test.",
+    "Auth gate (401) funciona uniformemente.",
+    "Calculos locales de insights (avg, anomalias, by_hour) implementados sin requerir AI.",
+    "ai_chat_log persistencia best-effort no bloqueante.",
+    "Rate limit 20/min implementado por user.id."
+  ],
+  "endpoints_codigo_referencia": {
+    "POST /api/ai/chat": "api/index.js:1212",
+    "POST /api/ai/insights": "api/index.js:1240 (admin/superadmin/owner)",
+    "POST /api/ai/copilot/suggest-product": "api/index.js:1285",
+    "GET /api/ai/decisions": "api/index.js:1203 (SIN role gate)",
+    "callClaude helper": "api/index.js:80",
+    "ANTHROPIC_API_KEY env": "api/index.js:31"
+  },
+  "recomendaciones": [
+    "Agregar validacion 400 si !message || !message.trim() en /api/ai/chat antes de llamar a callClaude.",
+    "Devolver 400 (o header X-Truncated) si message.length > 10000 en lugar de truncar silente.",
+    "Agregar role gate ['admin','superadmin','owner'] a GET /api/ai/decisions linea 1203.",
+    "Configurar ANTHROPIC_API_KEY en Vercel para habilitar test funcional real (chat/insights/copilot)."
+  ],
+  "summary": "AI Assistant esta correctamente cableado y devuelve 503 cuando falta la API key (no 500). Auth y role-gates funcionan en insights pero faltan en /api/ai/decisions. Validacion de input (mensaje vacio/largo) no es estricta. Sin ANTHROPIC_API_KEY no se pudo verificar respuesta real de Claude, rate-limit 429 ni log de tokens en ai_chat_log."
+}

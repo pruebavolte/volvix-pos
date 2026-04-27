@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Volvix Shop</title>
+<style>
+  :root{--bg:#0b1020;--panel:#141a2e;--mut:#8b93a7;--fg:#f5f7ff;--ac:#6ee7b7;--ac2:#7c3aed;--bd:#1f2740;--err:#ef4444}
+  *{box-sizing:border-box}body{margin:0;font:14px/1.5 system-ui,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--fg)}
+  header{position:sticky;top:0;z-index:10;background:rgba(11,16,32,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--bd);padding:12px 20px;display:flex;align-items:center;gap:14px}
+  header h1{font-size:18px;margin:0;flex:1;display:flex;align-items:center;gap:10px}
+  header img{height:28px;border-radius:6px}
+  .btn{cursor:pointer;border:0;border-radius:8px;padding:8px 14px;font-weight:600;background:var(--ac);color:#04221a}
+  .btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--bd)}
+  .btn.purple{background:var(--ac2);color:#fff}
+  .pill{background:var(--ac);color:#04221a;border-radius:999px;padding:2px 8px;font-weight:700;font-size:12px}
+  main{max-width:1200px;margin:0 auto;padding:24px 20px;display:grid;grid-template-columns:240px 1fr;gap:24px}
+  aside{position:sticky;top:72px;align-self:start;background:var(--panel);border:1px solid var(--bd);border-radius:12px;padding:14px}
+  aside h3{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)}
+  aside input,aside select{width:100%;padding:8px;border-radius:8px;border:1px solid var(--bd);background:#0d1326;color:var(--fg);margin-bottom:10px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+  .card{background:var(--panel);border:1px solid var(--bd);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}
+  .card .ph{background:#0d1326;height:140px;border-radius:8px;display:grid;place-items:center;color:var(--mut);font-size:11px;overflow:hidden}
+  .card img{width:100%;height:140px;object-fit:cover;border-radius:8px}
+  .card h4{margin:0;font-size:14px;line-height:1.3}
+  .card .price{color:var(--ac);font-size:18px;font-weight:700}
+  .card .sku{font-size:11px;color:var(--mut)}
+  .mini-cart{position:fixed;right:20px;bottom:20px;width:340px;max-height:70vh;overflow:auto;background:var(--panel);border:1px solid var(--bd);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,.4);z-index:20;transform:translateY(120%);transition:transform .25s}
+  .mini-cart.open{transform:translateY(0)}
+  .mini-cart header{position:static;padding:14px;border-bottom:1px solid var(--bd);background:transparent}
+  .mini-cart .body{padding:14px}
+  .mini-cart .row{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px dashed var(--bd);font-size:13px}
+  .mini-cart .row:last-child{border:0}
+  .mini-cart .qty{display:inline-flex;align-items:center;gap:6px}
+  .mini-cart .qty button{background:#0d1326;border:1px solid var(--bd);color:var(--fg);width:22px;height:22px;border-radius:6px;cursor:pointer}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:30;padding:20px}
+  .modal.open{display:flex}
+  .modal .box{background:var(--panel);border:1px solid var(--bd);border-radius:14px;width:520px;max-width:100%;max-height:90vh;overflow:auto;padding:22px}
+  .modal h2{margin:0 0 14px}
+  .field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+  .field label{font-size:12px;color:var(--mut)}
+  .field input,.field select,.field textarea{padding:9px;border-radius:8px;border:1px solid var(--bd);background:#0d1326;color:var(--fg);font:inherit}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .total{font-size:18px;font-weight:700;color:var(--ac);text-align:right;margin-top:10px}
+  .alert{background:rgba(239,68,68,.12);border:1px solid var(--err);color:#ffb4b4;padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px}
+  .ok{background:rgba(110,231,183,.12);border:1px solid var(--ac);color:var(--ac);padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px}
+  .empty{text-align:center;color:var(--mut);padding:60px 20px}
+  @media(max-width:780px){main{grid-template-columns:1fr}aside{position:static}}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="shopName">Volvix Shop</h1>
+  <button class="btn ghost" onclick="document.getElementById('orderLookup').classList.add('open')">Mi pedido</button>
+  <button class="btn" onclick="toggleCart()">Carrito <span id="cartCount" class="pill">0</span></button>
+</header>
+
+<main>
+  <aside>
+    <h3>Buscar</h3>
+    <input id="qInput" placeholder="Nombre, SKU…" oninput="loadProductsDebounced()" />
+    <h3>Categoría</h3>
+    <select id="catInput" onchange="loadProducts()">
+      <option value="">Todas</option>
+    </select>
+    <button class="btn ghost" onclick="document.getElementById('qInput').value='';document.getElementById('catInput').value='';loadProducts()">Limpiar filtros</button>
+  </aside>
+  <section>
+    <div id="grid" class="grid"></div>
+    <div id="empty" class="empty" style="display:none">No hay productos con esos filtros.</div>
+  </section>
+</main>
+
+<div id="cart" class="mini-cart">
+  <header><strong>Tu carrito</strong> <button class="btn ghost" style="margin-left:auto" onclick="toggleCart()">Cerrar</button></header>
+  <div class="body" id="cartBody"></div>
+</div>
+
+<div id="checkout" class="modal">
+  <div class="box">
+    <h2>Checkout</h2>
+    <div id="coAlert"></div>
+    <div class="row2">
+      <div class="field"><label>Nombre*</label><input id="cName"/></div>
+      <div class="field"><label>Email*</label><input id="cEmail" type="email"/></div>
+    </div>
+    <div class="field"><label>Teléfono</label><input id="cPhone"/></div>
+    <h3>Envío</h3>
+    <div class="field"><label>Dirección</label><input id="sAddr"/></div>
+    <div class="row2">
+      <div class="field"><label>Ciudad</label><input id="sCity"/></div>
+      <div class="field"><label>CP</label><input id="sZip"/></div>
+    </div>
+    <h3>Método de pago</h3>
+    <div class="field"><select id="payMethod">
+      <option value="card">Tarjeta (Stripe)</option>
+      <option value="codi">CoDi (QR MX)</option>
+      <option value="spei">SPEI</option>
+      <option value="transfer">Transferencia manual</option>
+      <option value="cash_on_delivery">Pago contra entrega</option>
+    </select></div>
+    <h3>Descuentos</h3>
+    <div class="row2">
+      <div class="field"><label>Código promo</label><input id="promoCode"/></div>
+      <div class="field"><label>Gift card</label><input id="giftCard"/></div>
+    </div>
+    <div class="total" id="coTotal"></div>
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <button class="btn ghost" style="flex:1" onclick="document.getElementById('checkout').classList.remove('open')">Cancelar</button>
+      <button class="btn purple" style="flex:1" onclick="submitCheckout()">Pagar ahora</button>
+    </div>
+  </div>
+</div>
+
+<div id="orderLookup" class="modal">
+  <div class="box">
+    <h2>Consultar pedido</h2>
+    <div class="field"><label>ID de pedido</label><input id="oId"/></div>
+    <div class="field"><label>Email del pedido</label><input id="oEmail" type="email"/></div>
+    <div id="oResult"></div>
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <button class="btn ghost" style="flex:1" onclick="document.getElementById('orderLookup').classList.remove('open')">Cerrar</button>
+      <button class="btn" style="flex:1" onclick="lookupOrder()">Consultar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const params = new URLSearchParams(location.search);
+const TENANT = params.get('tenant') || params.get('tenant_id') || '';
+const SLUG   = params.get('shop_slug') || params.get('slug') || '';
+const API    = (window.VOLVIX_API_BASE || '').replace(/\/$/, '');
+const CART_KEY = 'volvix_shop_cart_' + (SLUG || TENANT || 'default');
+let SHOP = { id: TENANT, slug: SLUG, name: 'Volvix Shop', currency: 'MXN' };
+let cart = JSON.parse(localStorage.getItem(CART_KEY) || '[]');
+
+function fmt(n){return new Intl.NumberFormat('es-MX',{style:'currency',currency:SHOP.currency||'MXN'}).format(+n||0)}
+function api(path){return fetch(API + path).then(r => r.json())}
+
+async function loadShopInfo(){
+  if (!SLUG) return;
+  try{
+    const r = await api(`/api/shop/${encodeURIComponent(SLUG)}/info`);
+    if (r.ok && r.shop){
+      SHOP = { ...SHOP, ...r.shop, id: r.shop.id, slug: r.shop.shop_slug };
+      const h = document.getElementById('shopName');
+      h.innerHTML = (r.shop.shop_logo ? `<img src="${r.shop.shop_logo}" alt=""/>` : '') + (r.shop.shop_name || 'Volvix Shop');
+      if (r.shop.shop_theme && r.shop.shop_theme.accent) document.documentElement.style.setProperty('--ac', r.shop.shop_theme.accent);
+    }
+  }catch(_){}
+}
+
+let _t;
+function loadProductsDebounced(){clearTimeout(_t);_t=setTimeout(loadProducts,250)}
+async function loadProducts(){
+  const q = document.getElementById('qInput').value.trim();
+  const c = document.getElementById('catInput').value.trim();
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '<div class="empty">Cargando…</div>';
+  try{
+    const slug = SLUG || SHOP.slug;
+    const r = await api(`/api/shop/${encodeURIComponent(slug)}/products?q=${encodeURIComponent(q)}&category=${encodeURIComponent(c)}`);
+    const items = (r && r.products) || [];
+    if (r && r.shop && r.shop.currency) SHOP.currency = r.shop.currency;
+    if (!items.length){grid.innerHTML='';document.getElementById('empty').style.display='block';return}
+    document.getElementById('empty').style.display='none';
+    // populate cats
+    const cats = [...new Set(items.map(p=>p.category).filter(Boolean))].sort();
+    const sel = document.getElementById('catInput');
+    if (sel.children.length <= 1) cats.forEach(cat=>{const o=document.createElement('option');o.value=cat;o.textContent=cat;sel.appendChild(o)});
+    grid.innerHTML = items.map(p => `
+      <div class="card">
+        ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}"/>` : `<div class="ph">Sin imagen</div>`}
+        <h4>${escape(p.name)}</h4>
+        <div class="sku">${p.sku||''} ${p.category?'· '+escape(p.category):''}</div>
+        <div class="price">${fmt(p.price)}</div>
+        <button class="btn" onclick='addToCart(${JSON.stringify(p).replace(/'/g,"&#39;")})'>Agregar</button>
+      </div>`).join('');
+  }catch(e){grid.innerHTML='<div class="alert">Error al cargar productos: '+escape(e.message)+'</div>'}
+}
+function escape(s){return String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+
+function addToCart(p){
+  const existing = cart.find(i => i.product_id === p.id);
+  if (existing) existing.quantity++;
+  else cart.push({ product_id: p.id, name: p.name, price: p.price, sku: p.sku, quantity: 1 });
+  saveCart();renderCart();
+  document.getElementById('cart').classList.add('open');
+}
+function changeQty(idx, d){cart[idx].quantity = Math.max(0, cart[idx].quantity + d);if(!cart[idx].quantity)cart.splice(idx,1);saveCart();renderCart()}
+function saveCart(){localStorage.setItem(CART_KEY, JSON.stringify(cart));document.getElementById('cartCount').textContent = cart.reduce((s,i)=>s+i.quantity,0)}
+function toggleCart(){document.getElementById('cart').classList.toggle('open')}
+
+function renderCart(){
+  const body = document.getElementById('cartBody');
+  if (!cart.length){body.innerHTML = '<div class="empty">Carrito vacío</div>';return}
+  const subtotal = cart.reduce((s,i)=>s+i.price*i.quantity,0);
+  body.innerHTML = cart.map((i,idx)=>`
+    <div class="row">
+      <div><div>${escape(i.name)}</div><div style="color:var(--mut);font-size:11px">${fmt(i.price)} c/u</div></div>
+      <div style="text-align:right">
+        <div class="qty"><button onclick="changeQty(${idx},-1)">-</button>${i.quantity}<button onclick="changeQty(${idx},1)">+</button></div>
+        <div>${fmt(i.price*i.quantity)}</div>
+      </div>
+    </div>`).join('') +
+    `<div class="row" style="font-weight:700"><span>Subtotal</span><span>${fmt(subtotal)}</span></div>
+     <button class="btn purple" style="width:100%;margin-top:10px" onclick="openCheckout()">Ir al checkout</button>`;
+}
+
+function openCheckout(){
+  if (!cart.length) return;
+  document.getElementById('coTotal').textContent = 'Subtotal: ' + fmt(cart.reduce((s,i)=>s+i.price*i.quantity,0));
+  document.getElementById('coAlert').innerHTML = '';
+  document.getElementById('checkout').classList.add('open');
+}
+
+async function submitCheckout(){
+  const alertBox = document.getElementById('coAlert');
+  alertBox.innerHTML='';
+  const name = document.getElementById('cName').value.trim();
+  const email= document.getElementById('cEmail').value.trim();
+  if (!name||!email){alertBox.innerHTML='<div class="alert">Nombre y email son requeridos</div>';return}
+  const body = {
+    tenant_id: SHOP.id || TENANT,
+    shop_slug: SLUG || SHOP.slug,
+    items: cart.map(i=>({product_id:i.product_id, quantity:i.quantity})),
+    customer_info: { name, email, phone: document.getElementById('cPhone').value.trim() },
+    shipping: {
+      address: document.getElementById('sAddr').value.trim(),
+      city:    document.getElementById('sCity').value.trim(),
+      zip:     document.getElementById('sZip').value.trim(),
+    },
+    payment_method: document.getElementById('payMethod').value,
+    promo_code: document.getElementById('promoCode').value.trim() || undefined,
+    gift_card:  document.getElementById('giftCard').value.trim() || undefined,
+  };
+  try{
+    const r = await fetch(API + '/api/shop/checkout', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const d = await r.json();
+    if (!r.ok || !d.ok){alertBox.innerHTML='<div class="alert">'+escape(d.message||d.error||'Error')+'</div>';return}
+    alertBox.innerHTML = `<div class="ok">Pedido creado: <strong>${d.order.id}</strong> — Total ${fmt(d.order.total)}<br/>Guarda este ID con tu email para consultarlo.</div>`;
+    cart = [];saveCart();renderCart();
+    if (d.intent && d.intent.next && d.intent.next.type === 'qr') alertBox.innerHTML += '<div class="ok">Genera QR en: '+d.intent.next.endpoint+'</div>';
+  }catch(e){alertBox.innerHTML='<div class="alert">Red: '+escape(e.message)+'</div>'}
+}
+
+async function lookupOrder(){
+  const id = document.getElementById('oId').value.trim();
+  const email = document.getElementById('oEmail').value.trim();
+  const box = document.getElementById('oResult');
+  box.innerHTML='Buscando…';
+  try{
+    const r = await fetch(API + `/api/shop/orders/${encodeURIComponent(id)}?email=${encodeURIComponent(email)}`);
+    const d = await r.json();
+    if (!r.ok||!d.ok){box.innerHTML='<div class="alert">'+escape(d.message||'No encontrado')+'</div>';return}
+    const o = d.order;
+    box.innerHTML = `<div class="ok"><strong>${o.id}</strong><br/>Estado: ${o.status}<br/>Total: ${fmt(o.total)}<br/>Método: ${o.payment_method}</div>`;
+  }catch(e){box.innerHTML='<div class="alert">'+escape(e.message)+'</div>'}
+}
+
+(async()=>{await loadShopInfo();await loadProducts();renderCart()})();
+</script>
+<link rel="stylesheet" href="volvix-modals.css">
+<script defer src="volvix-modals.js"></script>
+</body>
+</html>

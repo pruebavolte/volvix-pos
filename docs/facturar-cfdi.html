@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Generar factura CFDI 4.0 — Centro de Ayuda Volvix</title>
+<meta name="description" content="Emite facturas electrónicas válidas ante el SAT desde el POS.">
+<meta name="theme-color" content="#6366f1">
+<link rel="stylesheet" href="_article-style.css">
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../docs.html" class="nav-logo"><span class="nav-logo-mark">V</span> Volvix Ayuda</a>
+    <a href="../multipos_suite_v3.html" style="color:#cbd5e1;font-size:14px;font-weight:600">Abrir POS →</a>
+  </div>
+</nav>
+<main class="container">
+  <div class="crumb">
+    <a href="../volvix-hub-landing.html">Inicio</a> / <a href="../docs.html">Ayuda</a> / <a href="../docs.html?cat=facturacion">Facturación</a>
+  </div>
+  <article>
+    <span class="cat-tag">Facturación</span>
+    <h1>Generar factura CFDI 4.0</h1>
+    <p class="lead">Emite facturas electrónicas válidas ante el SAT desde el POS.</p>
+    
+<h2>Requisitos previos</h2>
+<ul>
+  <li>Certificado de Sello Digital (CSD) cargado en el sistema.</li>
+  <li>PAC contratado (Volvix soporta Facturama, Finkok, SW Sapien).</li>
+  <li>Cliente con datos fiscales completos.</li>
+</ul>
+
+<h2>Facturar una venta existente</h2>
+<ol class="steps">
+  <li>Ve a <strong>Ventas → Historial</strong>.</li>
+  <li>Encuentra el ticket a facturar.</li>
+  <li>Pulsa <strong>Facturar</strong> (icono de documento).</li>
+  <li>Selecciona o crea el cliente con RFC.</li>
+  <li>Confirma <strong>Uso de CFDI</strong> y <strong>Forma de pago</strong>.</li>
+  <li>Pulsa <strong>Timbrar</strong>.</li>
+  <li>Descarga el XML y PDF, o envíalos por correo.</li>
+</ol>
+
+<div class="screenshot">Modal de timbrado CFDI</div>
+
+<h2>Cancelar una factura</h2>
+<p>Desde <strong>Facturación → Emitidas</strong>, selecciona la factura y pulsa <strong>Cancelar</strong>. Indica el motivo SAT (01, 02, 03, 04). El receptor debe aceptar la cancelación si tiene más de 24h.</p>
+
+<div class="warn"><strong>Atención:</strong> A partir de 2026 el SAT exige motivo de cancelación obligatorio.</div>
+
+    <div class="next">
+      <a href="../docs.html">← Volver al centro de ayuda</a>
+      <a href="mailto:soporte@volvix.com">¿Necesitas más ayuda? Contáctanos →</a>
+    </div>
+  </article>
+</main>
+<footer>© 2026 Volvix POS · <a href="../docs.html" style="color:#818cf8">Centro de ayuda</a></footer>
+</body>
+</html>

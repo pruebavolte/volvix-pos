@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Matriz de Pruebas Volvix POS — LOCAL v2</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{background:#0f172a;color:#e2e8f0;padding:18px;min-height:100vh}
+.header{background:linear-gradient(135deg,#1e40af,#7c3aed);padding:18px;border-radius:12px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.header h1{font-size:22px}
+.header .badge{background:rgba(255,255,255,.2);padding:6px 14px;border-radius:20px;font-size:13px}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.controls input,.controls select,.controls button{padding:8px 12px;border-radius:8px;border:1px solid #334155;background:#1e293b;color:#e2e8f0;font-size:13px}
+.controls input{flex:1;min-width:200px}
+.controls button{cursor:pointer;background:#3b82f6;border:none;font-weight:600}
+.controls button:hover{background:#2563eb}
+.controls button.toggle{background:#475569}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:14px}
+.stat{background:#1e293b;padding:12px;border-radius:10px;border-left:4px solid #3b82f6}
+.stat .num{font-size:22px;font-weight:700}
+.stat .lbl{font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+.stat.ok{border-left-color:#22c55e}
+.stat.fail{border-left-color:#ef4444}
+.stat.pending{border-left-color:#f59e0b}
+.stat.skip{border-left-color:#64748b}
+table{width:100%;border-collapse:collapse;background:#1e293b;border-radius:10px;overflow:hidden;font-size:12px}
+th{background:#0f172a;padding:10px 8px;text-align:left;font-weight:600;color:#94a3b8;text-transform:uppercase;font-size:10px;letter-spacing:.5px;position:sticky;top:0;z-index:10;cursor:pointer;user-select:none}
+th:hover{color:#e2e8f0}
+td{padding:8px;border-top:1px solid #334155;vertical-align:top}
+tr:hover{background:#293548}
+.url{font-family:"Courier New",monospace;font-size:10px;color:#60a5fa;word-break:break-all;max-width:240px}
+.url a{color:#60a5fa;text-decoration:none}
+.url a:hover{text-decoration:underline}
+.platforms{display:flex;gap:3px;flex-wrap:wrap}
+.plat{padding:2px 6px;border-radius:8px;font-size:9px;font-weight:600}
+.plat.web{background:#1e3a8a;color:#bfdbfe}
+.plat.win{background:#0c4a6e;color:#7dd3fc}
+.plat.and{background:#14532d;color:#86efac}
+.plat.ios{background:#581c87;color:#d8b4fe}
+.sistema{font-size:11px;color:#cbd5e1;font-weight:500}
+.status{display:inline-block;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:600;text-transform:uppercase;cursor:pointer;user-select:none}
+.status.ok{background:#14532d;color:#86efac}
+.status.fail{background:#7f1d1d;color:#fca5a5}
+.status.pending{background:#78350f;color:#fde68a}
+.status.skip{background:#334155;color:#94a3b8}
+.module{font-weight:600;color:#fbbf24;font-size:11px}
+.button-name{color:#a5b4fc;font-weight:500}
+.func{color:#cbd5e1;font-size:11px}
+.notes-cell input{width:100%;background:#0f172a;color:#e2e8f0;border:1px solid #334155;padding:4px 6px;border-radius:4px;font-size:11px}
+details.inline{display:inline-block;margin-top:4px}
+details.inline summary{cursor:pointer;font-size:10px;color:#60a5fa;padding:2px 6px;background:#0f172a;border-radius:4px;list-style:none}
+details.inline summary::-webkit-details-marker{display:none}
+details.inline summary::before{content:'▶ ';font-size:8px}
+details.inline[open] summary::before{content:'▼ '}
+details.inline ul{padding:6px 6px 6px 18px;font-size:11px;color:#cbd5e1;line-height:1.5}
+details.inline li{margin-bottom:3px}
+.f-mode{color:#fca5a5}
+.t-form{color:#86efac}
+.col-toggle{margin-left:6px}
+.hidden-col{display:none !important}
+.legend{margin-top:18px;padding:14px;background:#1e293b;border-radius:10px;font-size:12px;line-height:1.6;color:#94a3b8}
+.legend h3{color:#fbbf24;margin-bottom:8px;font-size:14px}
+.legend code{background:#0f172a;padding:1px 6px;border-radius:3px;color:#86efac;font-size:11px}
+@media(max-width:900px){body{padding:10px}table{font-size:11px}.url{max-width:140px}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>Matriz de Pruebas Volvix POS — LOCAL v2</h1>
+    <div style="font-size:11px;opacity:.85;margin-top:4px">Archivo local · NO se sube a Vercel · live_status/slice_*.json polling 3s</div>
+  </div>
+  <div class="badge" id="liveBadge">⏺ live</div>
+</div>
+
+<div class="controls">
+  <input id="search" placeholder="Buscar URL / módulo / botón / sistema...">
+  <select id="filterSistema"><option value="">Todos sistemas</option></select>
+  <select id="filterPlat"><option value="">Todas plataformas</option><option value="web">Web</option><option value="win">Windows</option><option value="and">Android</option><option value="ios">iOS</option></select>
+  <select id="filterModulo"><option value="">Todos módulos</option></select>
+  <select id="filterStatus"><option value="">Todos estados</option><option value="pending">Pending</option><option value="ok">OK</option><option value="fail">Fail</option><option value="skip">Skip</option></select>
+  <button onclick="exportCSV()">⬇ CSV</button>
+  <button class="toggle" onclick="toggleCol('col-fail')">Modos falla</button>
+  <button class="toggle" onclick="toggleCol('col-test')">Formas prueba</button>
+  <button class="toggle" onclick="toggleCol('col-url')">URL</button>
+  <button onclick="resetAll()" style="background:#dc2626">Reset</button>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="num" id="sTotal">0</div><div class="lbl">Total</div></div>
+  <div class="stat ok"><div class="num" id="sOk">0</div><div class="lbl">OK</div></div>
+  <div class="stat fail"><div class="num" id="sFail">0</div><div class="lbl">Fail</div></div>
+  <div class="stat pending"><div class="num" id="sPending">0</div><div class="lbl">Pending</div></div>
+  <div class="stat skip"><div class="num" id="sSkip">0</div><div class="lbl">Skip</div></div>
+  <div class="stat"><div class="num" id="sShown">0</div><div class="lbl">Visibles</div></div>
+</div>
+
+<table id="matrix">
+<thead><tr>
+<th>#</th>
+<th class="col-url">URL</th>
+<th>Sistema</th>
+<th>Plataforma</th>
+<th>Módulo</th>
+<th>Botón / Funcionalidad</th>
+<th>Funcionalidad esperada</th>
+<th class="col-fail">3 Modos de falla</th>
+<th class="col-test">6 Formas de probar</th>
+<th>Estado</th>
+<th>Notas</th>
+</tr></thead>
+<tbody id="tbody"></tbody>
+</table>
+
+<div class="legend">
+<h3>Convenciones</h3>
+<p><b>F1</b> backend 401/403/500 · <b>F2</b> front llama endpoint incorrecto / dato hardcoded · <b>F3</b> campo no se guarda / se pierde post-refresh.</p>
+<p><b>T1</b> <code>curl + Bearer</code> · <b>T2</b> <code>curl sin auth</code> (debe fallar) · <b>T3</b> click manual en browser · <b>T4</b> payload válido vs inválido · <b>T5</b> edge case (vacío/null/special chars) · <b>T6</b> persistencia post-refresh.</p>
+<p>Click en estado para rotar pending → ok → fail → skip → pending. Notas se guardan en localStorage. Polling automático a <code>live_status/slice_*.json</code> cada 3s para auto-marcar tests vinculados.</p>
+</div>
+
+<script>
+const BASE = 'https://volvix-pos.vercel.app';
+
+// Helpers para generar tests compactamente
+const P_ALL = ['web','win','and','ios'];
+const P_WEB = ['web'];
+const P_WEBWIN = ['web','win'];
+const P_MOB = ['and','ios'];
+
+// modos de falla y formas de probar genéricos
+const FF = (extra) => extra || ['Backend devuelve 401/403/500','Frontend no llama endpoint correcto / muestra dato hardcoded','Campo no se guarda / se pierde al refrescar'];
+const TT = (path, extra) => extra || [
+  `curl -H "Authorization: Bearer $TOKEN" ${BASE}${path}`,
+  `curl ${BASE}${path}  # sin auth → debe 401`,
+  `Click manual en navegador y verificar UI`,
+  `Probar payload válido vs inválido (tipos incorrectos)`,
+  `Edge case: vacío, null, emojis, SQL injection, XSS`,
+  `Refrescar (F5) y verificar persistencia`
+];
+
+const T = (sistema, plats, modulo, boton, url, exp, fall, ways) => ({
+  sistema, plats, modulo, boton, url: url.startsWith('http')?url:BASE+url, exp,
+  fall: fall || FF(), ways: ways || TT(url)
+});
+
+const tests = [];
+
+// ============ LOGIN (3 usuarios x 4 plataformas = 12) ============
+const USERS = [
+  {u:'admin@volvix.com',pw:'Admin2025!',rol:'Owner'},
+  {u:'cajero@volvix.com',pw:'Cajero2025!',rol:'Cajero'},
+  {u:'gerente@volvix.com',pw:'Gerente2025!',rol:'Gerente'}
+];
+USERS.forEach(usr => P_ALL.forEach(p => {
+  tests.push(T('Login',[p],'Auth',`Login ${usr.rol} (${usr.u})`,'/api/auth/login',
+    `POST credenciales válidas → 200 + JWT + redirect a /pos. Cookie httpOnly seteada.`));
+}));
+
+// PIN keypad (4 plats)
+P_ALL.forEach(p => tests.push(T('Login',[p],'Auth','PIN keypad numérico (4 dígitos)','/api/auth/pin',
+  'Ingresar PIN 4 dígitos → valida vs hash en BD → JWT corto.')));
+
+// Logout, refresh token, MFA, recuperar pwd
+P_ALL.forEach(p => tests.push(T('Login',[p],'Auth','Logout','/api/auth/logout','POST → revoca cookie/sesión, redirect /login.')));
+P_WEB.forEach(p => tests.push(T('Login',[p],'Auth','Refresh token','/api/auth/refresh','Renueva JWT antes de expirar usando refresh cookie.')));
+P_WEB.forEach(p => tests.push(T('Login',[p],'Auth','MFA TOTP enroll','/api/auth/mfa/enroll','Genera secret + QR code para Google Authenticator.')));
+P_WEB.forEach(p => tests.push(T('Login',[p],'Auth','MFA TOTP verify','/api/auth/mfa/verify','Acepta código 6-dígitos válido, rechaza expirado.')));
+P_WEB.forEach(p => tests.push(T('Login',[p],'Auth','Recuperar contraseña','/api/auth/forgot','Email con link de reset, token TTL 1h.')));
+P_WEB.forEach(p => tests.push(T('Login',[p],'Auth','Reset password','/api/auth/reset','Cambia hash en BD, invalida sesiones previas.')));
+
+// Rate limit login
+tests.push(T('Login',P_WEB,'Security','Rate limit login (5/min)','/api/auth/login','Tras 5 intentos fallidos en 60s → 429.'));
+tests.push(T('Login',P_WEB,'Security','Brute force lockout','/api/auth/login','Cuenta bloqueada 15 min tras 10 fallos.'));
+
+// ============ POS PRINCIPAL — TABS F1..F12 ============
+const TABS = [
+  ['F1','Recargas','/pos?tab=recargas','Tab recargas TAE/saldo Telcel/Movistar/AT&T'],
+  ['F2','Productos','/pos?tab=productos','Lista productos paginada, click agrega al ticket'],
+  ['F3','Servicios','/pos?tab=servicios','Servicios (corte, instalación, etc) sin stock'],
+  ['F4','Combos','/pos?tab=combos','Combos predefinidos con descuento agrupado'],
+  ['F5','Apartados','/pos?tab=apartados','Layaway: abono parcial, libera al pagar 100%'],
+  ['F6','Cotizaciones','/pos?tab=cotizaciones','Genera PDF cotización sin afectar stock'],
+  ['F7','Facturación','/pos?tab=facturacion','Emite CFDI 4.0 desde ticket'],
+  ['F8','Devoluciones','/pos?tab=devoluciones','Reverso parcial/total con motivo y nota crédito'],
+  ['F9','Clientes','/pos?tab=clientes','Buscar cliente, asociar a ticket'],
+  ['F10','Promociones','/pos?tab=promociones','Aplica cupón / promo automática'],
+  ['F11','Notas','/pos?tab=notas','Nota libre al ticket o producto'],
+  ['F12','Cierre','/pos?tab=cierre','Corte de caja parcial / final del turno']
+];
+TABS.forEach(([k,n,u,e]) => tests.push(T('POS',P_WEBWIN,'POS',`Tab ${k}: ${n}`,u,e)));
+
+// POS acciones core
+[
+  ['Agregar producto al ticket (scan barcode USB)','/api/pos/ticket/add','POST sku → suma o agrega línea, calcula subtotal+IVA'],
+  ['Agregar producto (cámara barcode)','/api/pos/ticket/add','Cámara escanea EAN-13/QR, agrega línea'],
+  ['Quitar línea ticket','/api/pos/ticket/remove','DELETE línea → recalcula totales'],
+  ['Cambiar cantidad línea','/api/pos/ticket/qty','PUT qty → recalcula, valida stock'],
+  ['Aplicar descuento %','/api/pos/ticket/discount','% sobre subtotal antes IVA'],
+  ['Aplicar descuento $','/api/pos/ticket/discount','Monto fijo, valida ≤ subtotal'],
+  ['Cancelar ticket completo','/api/pos/ticket/cancel','Pide motivo, restaura stock reservado'],
+  ['Pago efectivo','/api/pos/payment/cash','Calcula cambio, abre cajón'],
+  ['Pago tarjeta (Stripe terminal)','/api/pos/payment/card','Llama Stripe Terminal, maneja decline'],
+  ['Pago mixto (efectivo+tarjeta)','/api/pos/payment/split','Suma debe igualar total'],
+  ['Pago transferencia','/api/pos/payment/transfer','Captura referencia, confirma manual'],
+  ['Pago vales','/api/pos/payment/voucher','Vales Sí/Edenred/Pluxee, valida saldo'],
+  ['Imprimir ticket térmico','/api/pos/print','ESC/POS a impresora 58/80mm'],
+  ['Reimprimir ticket','/api/pos/print/reprint','Por folio, marca como reimpresión'],
+  ['Buscar producto en POS','/api/products/search','Por nombre/SKU/barcode con typeahead'],
+  ['Stock en tiempo real','/api/products/:id/stock','Muestra existencia por sucursal'],
+  ['Abrir cajón sin venta','/api/pos/drawer/open','Pide motivo + supervisor PIN'],
+  ['Retiro de caja','/api/pos/drawer/withdraw','Captura monto + motivo, log auditoría']
+].forEach(([b,u,e]) => tests.push(T('POS',P_WEBWIN,'Ventas',b,u,e)));
+
+// ============ CRUD PRODUCTOS ============
+[
+  ['Listar productos paginado','/api/products?page=1&limit=50','GET 200, paginación cursor, filtra por tenant'],
+  ['Crear producto (Guardar)','/api/products','POST nombre+sku+precio+stock+iva → 201, ID generado'],
+  ['Editar producto','/api/products/:id','PUT campos modificados, audit log'],
+  ['Eliminar producto','/api/products/:id','DELETE → soft delete (deleted_at)'],
+  ['Restaurar producto eliminado','/api/products/:id/restore','PATCH limpia deleted_at'],
+  ['Buscar producto por SKU','/api/products/search?q=','Match exacto SKU primero, fuzzy nombre'],
+  ['Buscar por barcode EAN-13','/api/products/barcode/:code','Lookup directo, 404 si no existe'],
+  ['Importar CSV productos','/api/products/import','POST multipart, valida headers, reporta errores fila'],
+  ['Exportar CSV productos','/api/products/export','GET descarga CSV con todos los productos'],
+  ['Exportar Excel productos','/api/products/export?fmt=xlsx','GET descarga .xlsx'],
+  ['Stock bajo (alerta)','/api/products/low-stock','GET productos con stock ≤ min_stock'],
+  ['Ajuste de inventario','/api/inventory/adjust','POST motivo + delta, log auditoría'],
+  ['Transferencia entre sucursales','/api/inventory/transfer','POST origen→destino, valida stock'],
+  ['Inventario físico (conteo)','/api/inventory/count','Sesión conteo, compara vs sistema'],
+  ['Categorías CRUD','/api/categories','GET/POST/PUT/DELETE jerárquico'],
+  ['Marcas CRUD','/api/brands','GET/POST/PUT/DELETE'],
+  ['Proveedores CRUD','/api/suppliers','GET/POST/PUT/DELETE con RFC'],
+  ['Subir imagen producto','/api/products/:id/image','POST multipart → S3/Supabase storage'],
+  ['Códigos de barras múltiples','/api/products/:id/barcodes','Array EAN/UPC por producto'],
+  ['Variantes (talla/color)','/api/products/:id/variants','SKUs hijos con stock independiente'],
+  ['Precio por lista','/api/products/:id/prices','Mayoreo/menudeo/especial'],
+  ['Kit / Combo (BOM)','/api/products/:id/kit','Componentes que descuentan stock al vender'],
+  ['Producto a granel (peso)','/api/products?type=weight','Báscula integrada, precio×kg']
+].forEach(([b,u,e]) => tests.push(T('POS',P_WEBWIN,'Productos',b,u,e)));
+
+// ============ CRUD CLIENTES ============
+[
+  ['Listar clientes','/api/customers','GET paginado'],
+  ['Crear cliente','/api/customers','POST nombre+RFC+email+tel'],
+  ['Editar cliente','/api/customers/:id','PUT'],
+  ['Eliminar cliente','/api/customers/:id','DELETE soft'],
+  ['Buscar por RFC','/api/customers/search?rfc=','Validación SAT formato'],
+  ['Histórico compras cliente','/api/customers/:id/purchases','Lista tickets pasados'],
+  ['Saldo cuenta cliente (crédito)','/api/customers/:id/balance','Cuenta corriente, abonos'],
+  ['Importar clientes CSV','/api/customers/import','Masivo'],
+  ['Exportar clientes CSV','/api/customers/export','Descarga'],
+  ['Cliente público genérico','/api/customers/public','Para tickets sin cliente'],
+  ['Direcciones múltiples cliente','/api/customers/:id/addresses','CRUD'],
+  ['Programa lealtad puntos','/api/loyalty/points','Suma/canjea puntos por compra']
+].forEach(([b,u,e]) => tests.push(T('POS',P_WEBWIN,'Clientes',b,u,e)));
+
+// ============ FACTURACIÓN CFDI ============
+[
+  ['Emitir CFDI 4.0 desde ticket','/api/cfdi/emit','POST datos fiscales → PAC → XML+PDF firmado'],
+  ['Cancelar CFDI','/api/cfdi/cancel','POST motivo SAT, sustituto opcional'],
+  ['Descargar XML CFDI','/api/cfdi/:uuid/xml','GET XML firmado'],
+  ['Descargar PDF CFDI','/api/cfdi/:uuid/pdf','GET PDF render'],
+  ['Validar CSD certificado','/api/cfdi/csd/validate','Verifica vigencia y match RFC'],
+  ['Subir CSD (.cer/.key)','/api/cfdi/csd/upload','Multipart con password, encripta en BD'],
+  ['Listar CFDI emitidos','/api/cfdi','GET filtros fecha/estado/cliente'],
+  ['Reenviar CFDI por email','/api/cfdi/:uuid/email','SendGrid template'],
+  ['Complemento de pago (PPD)','/api/cfdi/payment-complement','Para facturas a crédito'],
+  ['Carta porte 3.1','/api/cfdi/carta-porte','Traslado mercancía'],
+  ['Nota de crédito (egreso)','/api/cfdi/credit-note','Por devolución'],
+  ['Reporte mensual CFDI SAT','/api/cfdi/monthly-report','Para contabilidad electrónica']
+].forEach(([b,u,e]) => tests.push(T('POS',P_WEBWIN,'Facturación',b,u,e)));
+
+// ============ CORTE DE CAJA / TURNOS ============
+[
+  ['Abrir turno (apertura caja)','/api/shift/open','POST monto inicial, asigna cajero'],
+  ['Cerrar turno (corte Z)','/api/shift/close','Calcula esperado vs contado, diferencia'],
+  ['Corte parcial X','/api/shift/x-report','Sin cerrar turno, solo reporte'],
+  ['Arqueo billetes/monedas','/api/shift/cash-count','Captura denominaciones'],
+  ['Diferencia caja','/api/shift/:id/diff','Sobrante/faltante, requiere autorización'],
+  ['Histórico cortes','/api/shifts','Lista paginada por sucursal/cajero']
+].forEach(([b,u,e]) => tests.push(T('POS',P_WEBWIN,'Corte',b,u,e)));
+
+// ============ REPORTES / DASHBOARD ============
+[
+  ['Dashboard ventas día','/api/reports/today','Total, tickets, ticket promedio'],
+  ['Ventas por hora (heatmap)','/api/reports/hourly','Para staffing'],
+  ['Top productos','/api/reports/top-products','Por unidades / por ingreso'],
+  ['Ventas por cajero','/api/reports/by-cashier','Ranking, comisiones'],
+  ['Ventas por sucursal','/api/reports/by-branch','Multi-tenant'],
+  ['Ventas por método de pago','/api/reports/by-payment','Pie chart'],
+  ['Margen bruto producto','/api/reports/margin','Costo vs precio'],
+  ['Inventario valorizado','/api/reports/inventory-value','Stock × costo'],
+  ['Productos sin movimiento','/api/reports/dead-stock','Sin venta 60d+'],
+  ['Reporte fiscal IVA','/api/reports/vat','Trasladado / acreditable'],
+  ['Exportar reporte PDF','/api/reports/export?fmt=pdf','Render con logo'],
+  ['Exportar reporte Excel','/api/reports/export?fmt=xlsx','Múltiples hojas'],
+  ['Comparar periodos','/api/reports/compare','Mes vs mes anterior'],
+  ['Predicción ventas (AI)','/api/ai/forecast','LLM analiza tendencia']
+].forEach(([b,u,e]) => tests.push(T('Owner Panel',P_WEB,'Reports',b,u,e)));
+
+// ============ OWNER PANEL ============
+[
+  ['Crear sucursal','/api/branches','POST nombre, dirección, RFC'],
+  ['Editar sucursal','/api/branches/:id','PUT'],
+  ['Eliminar sucursal','/api/branches/:id','DELETE con confirmación'],
+  ['Listar usuarios staff','/api/users','Paginado'],
+  ['Crear usuario','/api/users','POST con rol y sucursal'],
+  ['Editar usuario','/api/users/:id','PUT, rol cambiable'],
+  ['Desactivar usuario','/api/users/:id/disable','Mantiene historial'],
+  ['Asignar permisos rol','/api/roles/:id/permissions','Matriz RBAC'],
+  ['Configuración general','/api/settings','GET/PUT singleton tenant'],
+  ['Configuración impresoras','/api/settings/printers','Por sucursal/estación'],
+  ['Configuración impuestos','/api/settings/taxes','IVA 16/8/0, IEPS'],
+  ['Suscripción Stripe','/api/billing/subscription','Plan, próximo cobro'],
+  ['Cambiar plan','/api/billing/change-plan','Upgrade/downgrade prorrateado'],
+  ['Cancelar suscripción','/api/billing/cancel','Mantiene hasta fin periodo'],
+  ['Histórico facturación SaaS','/api/billing/invoices','Stripe invoices'],
+  ['Webhooks Stripe','/api/webhooks/stripe','Verifica signature'],
+  ['Logs auditoría','/api/audit-logs','Filtra por usuario/acción/fecha'],
+  ['Backup manual','/api/backup/run','Genera dump, sube S3'],
+  ['Restaurar backup','/api/backup/restore','Confirmación + downtime']
+].forEach(([b,u,e]) => tests.push(T('Owner Panel',P_WEB,'Admin',b,u,e)));
+
+// ============ MULTIPOS ============
+[
+  ['Listar terminales POS','/api/multipos/terminals','Por sucursal, online/offline'],
+  ['Registrar terminal','/api/multipos/register','UUID device, par con código'],
+  ['Sync offline → online','/api/multipos/sync','Cola transacciones, conflictos'],
+  ['Modo offline ventas','offline','Indexeddb queue, sync al reconectar'],
+  ['Actualización OTA terminal','/api/multipos/ota','Push nueva versión'],
+  ['Bloquear terminal robada','/api/multipos/:id/lock','Wipe data + revoke token'],
+  ['Heartbeat terminal','/api/multipos/heartbeat','30s ping, alerta si >5min']
+].forEach(([b,u,e]) => tests.push(T('MultiPOS',['win','and','ios'],'MultiPOS',b,u,e)));
+
+// ============ ONBOARDING V2 ============
+[
+  ['Step 1: datos negocio','/onboarding/business','Nombre, RFC, dirección'],
+  ['Step 2: sucursal principal','/onboarding/branch','Auto-crea primera sucursal'],
+  ['Step 3: usuario admin','/onboarding/admin','Email + pwd + 2FA opcional'],
+  ['Step 4: importar productos','/onboarding/import','CSV o catálogo demo'],
+  ['Step 5: impresora','/onboarding/printer','Test print'],
+  ['Step 6: método pago','/onboarding/stripe-connect','OAuth Stripe'],
+  ['Step 7: tour POS','/onboarding/tour','Tooltips guiados'],
+  ['Skip onboarding','/onboarding/skip','Marca como completado parcial'],
+  ['Reanudar onboarding','/onboarding/resume','Recupera step último']
+].forEach(([b,u,e]) => tests.push(T('Onboarding',P_WEB,'Onboarding',b,u,e)));
+
+// ============ CUSTOMER PORTAL ============
+[
+  ['Login OTP email','/portal/login','Pide email, envía 6-dígitos'],
+  ['Verificar OTP','/api/portal/otp/verify','Valida código, expira 10min'],
+  ['Reenviar OTP','/api/portal/otp/resend','Cooldown 60s'],
+  ['Ver mis compras','/portal/orders','Lista tickets/facturas'],
+  ['Descargar factura','/portal/orders/:id/cfdi','XML + PDF'],
+  ['Solicitar factura post-venta','/portal/invoice-request','Envía email autofactura'],
+  ['Saldo puntos lealtad','/portal/loyalty','Puntos + nivel'],
+  ['Canjear puntos','/portal/loyalty/redeem','Genera cupón'],
+  ['Actualizar perfil','/portal/profile','Nombre/tel/dirección'],
+  ['GDPR: solicitar mis datos','/portal/gdpr/export','ZIP con todo'],
+  ['GDPR: borrar mi cuenta','/portal/gdpr/delete','Confirma email, anonimiza']
+].forEach(([b,u,e]) => tests.push(T('Customer Portal',['web','and','ios'],'Portal',b,u,e)));
+
+// ============ GDPR ============
+[
+  ['Export data subject','/api/gdpr/export','ZIP JSON+CSV todos los datos del usuario'],
+  ['Right to erasure','/api/gdpr/delete','Anonimiza PII, conserva fiscal 5 años'],
+  ['Cookie consent banner','/cookies','3 categorías, opt-in granular'],
+  ['Política privacidad versionada','/privacy','Hash + fecha aceptación por usuario'],
+  ['Data Processing Agreement','/dpa','PDF firmable']
+].forEach(([b,u,e]) => tests.push(T('GDPR',P_WEB,'Compliance',b,u,e)));
+
+// ============ PUSH NOTIFICATIONS ============
+[
+  ['Suscribir push web','/api/push/subscribe','Service worker + VAPID'],
+  ['Suscribir push FCM (Android)','/api/push/fcm','Token device → BD'],
+  ['Suscribir push APNs (iOS)','/api/push/apns','Token device → BD'],
+  ['Enviar push test','/api/push/test','Click → abre URL'],
+  ['Notificación stock bajo','/api/push/low-stock','Cron job, push a admins'],
+  ['Notificación venta grande','/api/push/big-sale','>$5000 → owner'],
+  ['Desuscribir push','/api/push/unsubscribe','Limpia token']
+].forEach(([b,u,e]) => tests.push(T('POS',P_ALL,'Push',b,u,e)));
+
+// ============ PWA ============
+[
+  ['Service Worker registrado','/sw.js','GET 200, scope /'],
+  ['Manifest.json','/manifest.json','Icons 192/512, theme_color'],
+  ['Install prompt PWA','PWA install','beforeinstallprompt → botón custom'],
+  ['Offline cache shell','offline','Carga app sin red'],
+  ['Background sync','sync','Queue requests offline'],
+  ['Lighthouse PWA score','/','>90 en audit']
+].forEach(([b,u,e]) => tests.push(T('POS',P_WEB,'PWA',b,u,e)));
+
+// ============ BARCODE / HARDWARE ============
+[
+  ['Cámara barcode (BarcodeDetector API)','/pos/scan','Detecta EAN-13/UPC/QR/Code128'],
+  ['Cámara permission denied','/pos/scan','Muestra fallback teclado'],
+  ['USB barcode scanner (HID keyboard)','/pos/scan','Captura input rápido + Enter'],
+  ['Impresora térmica USB ESC/POS','/api/print/test','58mm/80mm, lógica corte'],
+  ['Impresora térmica red (IP)','/api/print/network','TCP 9100'],
+  ['Impresora bluetooth Android','print-bt','Pairing + print'],
+  ['Cajón de dinero pulse','/api/drawer/open','ESC/POS pulse 1B 70 00 19 FA'],
+  ['Báscula serial','/api/scale/read','Lee peso COM port'],
+  ['Lector NFC tarjetas lealtad','/loyalty/nfc','Web NFC API'],
+  ['Pin pad EMV (Stripe Terminal)','/api/stripe-terminal/connect','BBPOS/WisePOS'],
+  ['Display cliente secundario','/customer-display','Window.open monitor 2']
+].forEach(([b,u,e]) => tests.push(T('POS',P_WEBWIN,'Hardware',b,u,e)));
+
+// ============ INTEGRACIONES ============
+[
+  ['Stripe payment intent','/api/stripe/payment-intent','POST monto+currency → client_secret'],
+  ['Stripe webhook (charge.succeeded)','/api/webhooks/stripe','Verifica signature, idempotente'],
+  ['Stripe Connect onboarding','/api/stripe/connect/start','OAuth express account'],
+  ['SendGrid envío email','/api/email/send','Template + personalización'],
+  ['SendGrid bounce/complaint webhook','/api/webhooks/sendgrid','Marca email inválido'],
+  ['AI assistant chat','/api/ai/chat','Claude/GPT con contexto tenant'],
+  ['AI generación descripción producto','/api/ai/product-desc','Toma nombre+categoría'],
+  ['AI análisis ticket promedio','/api/ai/insights','Recomendaciones'],
+  ['Webhook outgoing (eventos)','/api/webhooks/outgoing','Configurable por tenant, retry exp'],
+  ['Zapier trigger nueva venta','/api/zapier/sale','Polling endpoint con auth'],
+  ['Zapier action crear producto','/api/zapier/product','POST desde Zap'],
+  ['QuickBooks sync','/api/integrations/qbo','Productos+ventas a QBO'],
+  ['Mailchimp sync clientes','/api/integrations/mailchimp','Lista segmentada'],
+  ['Google Analytics 4','/api/integrations/ga4','Eventos purchase'],
+  ['Meta Pixel','/api/integrations/meta','Conversiones'],
+  ['WhatsApp Business notif venta','/api/integrations/whatsapp','Confirma compra'],
+  ['SMS Twilio OTP','/api/integrations/twilio','Backup OTP por SMS']
+].forEach(([b,u,e]) => tests.push(T('Owner Panel',P_WEB,'Integraciones',b,u,e)));
+
+// ============ SECURITY HEADERS / RATE LIMITING / RLS ============
+[
+  ['Header CSP','/','Content-Security-Policy strict'],
+  ['Header HSTS','/','Strict-Transport-Security max-age 1y'],
+  ['Header X-Frame-Options','/','DENY o SAMEORIGIN'],
+  ['Header X-Content-Type-Options','/','nosniff'],
+  ['Header Referrer-Policy','/','strict-origin-when-cross-origin'],
+  ['Header Permissions-Policy','/','camera/microphone/geolocation explícito'],
+  ['CORS allowed origins','/api/health','Solo dominios whitelisted'],
+  ['Rate limit API global','/api/products','100 req/min por IP → 429'],
+  ['Rate limit por usuario','/api/products','1000 req/min por user_id'],
+  ['SQL injection products?q=','/api/products?q=\'OR 1=1--','Sanitizado, no leak'],
+  ['XSS reflejado en search','/search?q=<script>','Escape + CSP bloquea'],
+  ['CSRF token forms','/api/products','Header X-CSRF-Token requerido'],
+  ['RLS multi-tenant productos','/api/products','user de tenant A no ve B'],
+  ['RLS multi-tenant ventas','/api/sales','idem'],
+  ['RLS bypass intent (cambiar tenant_id)','/api/products','POST con tenant_id ajeno → 403'],
+  ['JWT tampering','/api/me','Modifica payload → signature inválida'],
+  ['JWT expirado','/api/me','exp pasado → 401'],
+  ['Replay attack JWT revocado','/api/me','jti en denylist → 401'],
+  ['IDOR /users/:id','/api/users/999','User no-admin → 403'],
+  ['Mass assignment','/api/users','POST con role=owner sin permiso → ignorado/403'],
+  ['Path traversal upload','/api/products/:id/image','../../etc/passwd → rechazado'],
+  ['ZIP slip import','/api/products/import','Archivo malicioso → safe extract'],
+  ['Prototype pollution','/api/settings','__proto__ en body → sanitizado'],
+  ['ReDoS regex','/api/products?q=(a+)+','Timeout regex engine'],
+  ['SSRF webhook URL','/api/webhooks','URL interna 169.254 → blocked'],
+  ['Open redirect','/auth/callback?next=','Solo URLs same-origin']
+].forEach(([b,u,e]) => tests.push(T('Login',P_WEB,'Security',b,u,e)));
+
+// ============ I18N ============
+[
+  ['Idioma ES (default)','/?lang=es','Strings en español'],
+  ['Idioma EN','/?lang=en','English'],
+  ['Idioma PT','/?lang=pt','Português'],
+  ['Currency MXN','/','$1,234.56'],
+  ['Currency USD','/?cur=USD','$1,234.56 con conversión'],
+  ['Date format MX','/','dd/mm/aaaa'],
+  ['Timezone tenant','/','America/Mexico_City'],
+]. forEach(([b,u,e]) => tests.push(T('POS',P_ALL,'i18n',b,u,e)));
+
+// ============ MONITORING / OPENAPI ============
+[
+  ['Health check','/api/health','GET 200 {ok:true,db:true}'],
+  ['Readiness probe','/api/ready','Espera DB+cache up'],
+  ['Metrics Prometheus','/api/metrics','Expone histogramas'],
+  ['OpenAPI spec','/api/openapi.json','Spec 3.1 válido'],
+  ['Swagger UI','/api/docs','Carga UI'],
+  ['Sentry error capture','client-error','Excepción JS → Sentry'],
+  ['Logs estructurados (JSON)','server-logs','pino/winston con request_id']
+].forEach(([b,u,e]) => tests.push(T('Owner Panel',P_WEB,'Monitoring',b,u,e)));
+
+// ============ MULTICURRENCY / LOYALTY ============
+[
+  ['Tipo cambio del día','/api/fx/rates','GET de Banxico/proveedor'],
+  ['Vender en USD','/pos?cur=USD','Convierte a MXN al cobrar'],
+  ['Programa lealtad: regla puntos','/api/loyalty/rules','1pt por $10'],
+  ['Lealtad: nivel cliente','/api/loyalty/tier','Bronze/Silver/Gold'],
+  ['Lealtad: cumpleaños bonus','/api/loyalty/birthday','2x puntos'],
+  ['Lealtad: caducidad puntos','/api/loyalty/expire','12 meses sin uso']
+].forEach(([b,u,e]) => tests.push(T('POS',P_WEB,'Loyalty',b,u,e)));
+
+// ============ MFA / BACKUP ============
+[
+  ['MFA SMS backup','/api/mfa/sms','Cuando TOTP no disponible'],
+  ['MFA recovery codes','/api/mfa/recovery','10 codes one-time'],
+  ['Backup automático diario','cron','3am UTC → S3 encrypted'],
+  ['Backup retention 30d','/api/backup','Lifecycle policy'],
+  ['Restaurar a punto en tiempo','/api/backup/pitr','PITR Postgres']
+].forEach(([b,u,e]) => tests.push(T('Owner Panel',P_WEB,'Security',b,u,e)));
+
+// asegurar URLs absolutas
+tests.forEach(t => { if (!t.url.startsWith('http') && !['offline','sync','print-bt','PWA install','client-error','server-logs','cron'].includes(t.url)) t.url = BASE+t.url; });
+
+// ============ RENDER ============
+const tbody = document.getElementById('tbody');
+const search = document.getElementById('search');
+const fSis = document.getElementById('filterSistema');
+const fPlat = document.getElementById('filterPlat');
+const fMod = document.getElementById('filterModulo');
+const fSt = document.getElementById('filterStatus');
+
+const STATES = ['pending','ok','fail','skip'];
+const LS_KEY = 'matriz_v2_state';
+const stored = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
+
+function tid(i){return 'test-'+i}
+
+function render(){
+  // populate filter dropdowns once
+  if (!fSis.dataset.filled){
+    [...new Set(tests.map(t=>t.sistema))].sort().forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;fSis.appendChild(o)});
+    [...new Set(tests.map(t=>t.modulo))].sort().forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;fMod.appendChild(o)});
+    fSis.dataset.filled='1';
+  }
+  const q = search.value.toLowerCase().trim();
+  const sf = fSis.value, pf = fPlat.value, mf = fMod.value, stf = fSt.value;
+  let html = '', shown = 0, c = {ok:0,fail:0,pending:0,skip:0};
+  tests.forEach((t,i) => {
+    const st = stored[tid(i)]?.status || 'pending';
+    c[st]++;
+    if (q && !(t.url+t.sistema+t.modulo+t.boton+t.exp).toLowerCase().includes(q)) return;
+    if (sf && t.sistema !== sf) return;
+    if (pf && !t.plats.includes(pf)) return;
+    if (mf && t.modulo !== mf) return;
+    if (stf && st !== stf) return;
+    shown++;
+    const platHtml = t.plats.map(p=>`<span class="plat ${p}">${p.toUpperCase()}</span>`).join('');
+    const fallHtml = t.fall.map((f,k)=>`<li><span class="f-mode">F${k+1}:</span> ${f}</li>`).join('');
+    const wayHtml = t.ways.map((w,k)=>`<li><span class="t-form">T${k+1}:</span> <code>${w.replace(/</g,'&lt;')}</code></li>`).join('');
+    const note = stored[tid(i)]?.note || '';
+    html += `<tr data-id="${tid(i)}">
+      <td>${i+1}</td>
+      <td class="col-url url"><a href="${t.url}" target="_blank">${t.url.replace(BASE,'')}</a></td>
+      <td class="sistema">${t.sistema}</td>
+      <td><div class="platforms">${platHtml}</div></td>
+      <td class="module">${t.modulo}</td>
+      <td class="button-name">${t.boton}</td>
+      <td class="func">${t.exp}</td>
+      <td class="col-fail"><details class="inline"><summary>Ver 3</summary><ul>${fallHtml}</ul></details></td>
+      <td class="col-test"><details class="inline"><summary>Ver 6</summary><ul>${wayHtml}</ul></details></td>
+      <td><span class="status ${st}" onclick="rotate(${i})">${st}</span></td>
+      <td class="notes-cell"><input value="${note.replace(/"/g,'&quot;')}" oninput="setNote(${i},this.value)" placeholder="..."></td>
+    </tr>`;
+  });
+  tbody.innerHTML = html;
+  document.getElementById('sTotal').textContent = tests.length;
+  document.getElementById('sOk').textContent = c.ok;
+  document.getElementById('sFail').textContent = c.fail;
+  document.getElementById('sPending').textContent = c.pending;
+  document.getElementById('sSkip').textContent = c.skip;
+  document.getElementById('sShown').textContent = shown;
+}
+
+function rotate(i){
+  const k = tid(i);
+  const cur = stored[k]?.status || 'pending';
+  const next = STATES[(STATES.indexOf(cur)+1)%STATES.length];
+  stored[k] = {...(stored[k]||{}), status: next};
+  localStorage.setItem(LS_KEY, JSON.stringify(stored));
+  render();
+}
+function setNote(i,v){
+  const k = tid(i);
+  stored[k] = {...(stored[k]||{}), note: v};
+  localStorage.setItem(LS_KEY, JSON.stringify(stored));
+}
+function resetAll(){
+  if(!confirm('Borrar TODOS los estados y notas?'))return;
+  localStorage.removeItem(LS_KEY);
+  for(const k in stored) delete stored[k];
+  render();
+}
+function toggleCol(cls){
+  document.querySelectorAll('.'+cls).forEach(el => el.classList.toggle('hidden-col'));
+}
+function exportCSV(){
+  const rows = [['#','URL','Sistema','Plataformas','Modulo','Boton','Funcionalidad','Modos falla','Formas prueba','Estado','Notas']];
+  tests.forEach((t,i) => {
+    const st = stored[tid(i)]?.status || 'pending';
+    const note = stored[tid(i)]?.note || '';
+    rows.push([i+1,t.url,t.sistema,t.plats.join('|'),t.modulo,t.boton,t.exp,t.fall.join(' || '),t.ways.join(' || '),st,note]);
+  });
+  const csv = rows.map(r => r.map(c => '"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `matriz_pruebas_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+[search,fSis,fPlat,fMod,fSt].forEach(el => el.addEventListener('input', render));
+
+// ============ LIVE STATUS POLLING ============
+async function pollLive(){
+  try{
+    // intenta varios slices
+    for(let n=1; n<=10; n++){
+      try{
+        const r = await fetch(`live_status/slice_${n}.json?t=`+Date.now(),{cache:'no-store'});
+        if(!r.ok) continue;
+        const data = await r.json();
+        // formato esperado: {tests: [{match:'/api/products', status:'ok', note:'...'}]}
+        if(data && Array.isArray(data.tests)){
+          data.tests.forEach(entry => {
+            tests.forEach((t,i) => {
+              if(entry.match && (t.url.includes(entry.match) || t.boton.toLowerCase().includes(entry.match.toLowerCase()))){
+                const k = tid(i);
+                if(entry.status) stored[k] = {...(stored[k]||{}), status: entry.status};
+                if(entry.note) stored[k] = {...(stored[k]||{}), note: entry.note};
+              }
+            });
+          });
+          localStorage.setItem(LS_KEY, JSON.stringify(stored));
+        }
+      }catch(e){}
+    }
+    document.getElementById('liveBadge').textContent = '⏺ live ' + new Date().toLocaleTimeString();
+    render();
+  }catch(e){
+    document.getElementById('liveBadge').textContent = '⚠ no live';
+  }
+}
+setInterval(pollLive, 3000);
+pollLive();
+
+render();
+console.log('Matriz cargada con', tests.length, 'tests');
+</script>
+</body>
+</html>

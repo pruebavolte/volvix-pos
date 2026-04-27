@@ -191,15 +191,36 @@
           if (this.selected) {
             this.connectFrom = this.selected;
             this.canvas.style.cursor = 'crosshair';
-          } else alert('Select a shape first');
+          } else VolvixUI.toast({type:'info', message:'Select a shape first'});
           break;
         case 'Delete':
           if (this.selected) this.deleteShape(this.selected.id);
           break;
         case 'Rename':
           if (this.selected) {
-            const t = prompt('Label:', this.selected.text);
-            if (t !== null) { this.selected.text = t; this.render(); }
+            const sel = this.selected;
+            const self = this;
+            const ui = window.VolvixUI;
+            if (ui && typeof ui.form === 'function') {
+              Promise.resolve(ui.form({
+                title: 'Editar nodo',
+                fields: [
+                  { name: 'text', label: 'Nombre', type: 'text', default: sel.text || '', required: true },
+                  { name: 'category', label: 'Categoría', type: 'select', options: [{value:'process',label:'Proceso'},{value:'decision',label:'Decisión'},{value:'start',label:'Inicio/Fin'},{value:'data',label:'Datos'}], default: sel.category || 'process' },
+                  { name: 'color', label: 'Color', type: 'color', default: sel.color || '#3498db' }
+                ],
+                submitText: 'Guardar'
+              })).then(res => {
+                if (!res) return;
+                if (res.text != null) sel.text = res.text;
+                if (res.category) sel.category = res.category;
+                if (res.color) sel.color = res.color;
+                self.render();
+              }).catch(()=>{});
+              break;
+            }
+            const t = prompt('Label:', sel.text);
+            if (t !== null) { sel.text = t; this.render(); }
           }
           break;
         case 'Save JSON': {
@@ -217,7 +238,7 @@
           inp.onchange = e => {
             const f = e.target.files[0]; if (!f) return;
             const r = new FileReader();
-            r.onload = () => { try { this.fromJSON(JSON.parse(r.result)); } catch (err) { alert('Invalid JSON'); } };
+            r.onload = () => { try { this.fromJSON(JSON.parse(r.result)); } catch (err) { VolvixUI.toast({type:'error', message:'Invalid JSON'}); } };
             r.readAsText(f);
           };
           inp.click();
@@ -230,9 +251,17 @@
           a.click();
           break;
         }
-        case 'Clear':
-          if (confirm('Clear flowchart?')) { this.shapes = []; this.connectors = []; this.selected = null; this.render(); }
+        case 'Clear': {
+          const self = this;
+          const doClear = () => { self.shapes = []; self.connectors = []; self.selected = null; self.render(); };
+          const ui = window.VolvixUI;
+          if (ui && typeof ui.confirm === 'function') {
+            Promise.resolve(ui.confirm({ title: 'Limpiar flowchart', message: '¿Borrar todos los nodos y conectores?', danger: true })).then(ok => { if (ok) doClear(); }).catch(()=>{});
+            break;
+          }
+          if (confirm('Clear flowchart?')) doClear();
           break;
+        }
       }
     }
 
@@ -343,6 +372,26 @@
       const p = this._mousePos(e);
       const hit = this._hit(p);
       if (hit) {
+        const self = this;
+        const ui = window.VolvixUI;
+        if (ui && typeof ui.form === 'function') {
+          Promise.resolve(ui.form({
+            title: 'Editar nodo',
+            fields: [
+              { name: 'text', label: 'Nombre', type: 'text', default: hit.text || '', required: true },
+              { name: 'category', label: 'Categoría', type: 'select', options: [{value:'process',label:'Proceso'},{value:'decision',label:'Decisión'},{value:'start',label:'Inicio/Fin'},{value:'data',label:'Datos'}], default: hit.category || 'process' },
+              { name: 'color', label: 'Color', type: 'color', default: hit.color || '#3498db' }
+            ],
+            submitText: 'Guardar'
+          })).then(res => {
+            if (!res) return;
+            if (res.text != null) hit.text = res.text;
+            if (res.category) hit.category = res.category;
+            if (res.color) hit.color = res.color;
+            self.render();
+          }).catch(()=>{});
+          return;
+        }
         const t = prompt('Label:', hit.text);
         if (t !== null) { hit.text = t; this.render(); }
       }

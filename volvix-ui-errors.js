@@ -195,7 +195,7 @@
         const includeLog = dlg.querySelector('#volvix-bug-log').checked;
         await this.reportBug({ message: msg, includeLog });
         dlg.remove();
-        alert('Reporte enviado. Gracias.');
+        VolvixUI.toast({type:'success', message:'Reporte enviado. Gracias.'});
       };
     },
 

@@ -79,6 +79,68 @@
     catch (e) { console.warn('[MULTIPOS-EXTRA] LS write fail', e.message); return false; }
   }
 
+  /* ───────────────────────── VolvixUI helpers ───────────────────────── */
+  function uiAvailable() {
+    return !!(window.VolvixUI && typeof window.VolvixUI.form === 'function');
+  }
+
+  async function uiForm(opts) {
+    const { title, fields, submitText, onSubmit } = opts || {};
+    if (uiAvailable()) {
+      try {
+        return await window.VolvixUI.form({
+          title: title || 'Datos',
+          fields: fields || [],
+          submitText: submitText || 'Aceptar',
+          onSubmit: onSubmit
+        });
+      } catch (e) { console.warn('[MULTIPOS-EXTRA] VolvixUI.form falló, fallback prompt:', e); }
+    } else {
+      console.warn('[MULTIPOS-EXTRA] VolvixUI no cargado, fallback prompt nativo');
+    }
+    const result = {};
+    for (const f of (fields || [])) {
+      const label = f.label || f.name;
+      const def = f.default != null ? String(f.default) : '';
+      const val = prompt(label + (def ? ' (' + def + ')' : '') + ':', def);
+      if (val === null) return null;
+      let v = (val.trim() || def);
+      if (f.type === 'number') v = parseFloat(v) || 0;
+      if (f.type === 'switch' || f.type === 'checkbox') v = /^(s|si|sí|y|yes|true|1)$/i.test(v);
+      result[f.name] = v;
+    }
+    if (typeof onSubmit === 'function') { try { await onSubmit(result); } catch {} }
+    return result;
+  }
+
+  async function uiConfirm(opts) {
+    if (uiAvailable() && typeof window.VolvixUI.confirm === 'function') {
+      try { return !!(await window.VolvixUI.confirm(opts)); }
+      catch (e) { console.warn('[MULTIPOS-EXTRA] VolvixUI.confirm falló:', e); }
+    }
+    return confirm(((opts && opts.title) ? opts.title + '\n\n' : '') + ((opts && opts.message) || '¿Confirmar?'));
+  }
+
+  async function uiDestructiveConfirm(opts) {
+    if (uiAvailable() && typeof window.VolvixUI.destructiveConfirm === 'function') {
+      try { return !!(await window.VolvixUI.destructiveConfirm(opts)); }
+      catch (e) { console.warn('[MULTIPOS-EXTRA] destructiveConfirm falló:', e); }
+    } else if (uiAvailable() && typeof window.VolvixUI.confirm === 'function') {
+      try { return !!(await window.VolvixUI.confirm(Object.assign({ danger: true }, opts || {}))); }
+      catch {}
+    }
+    const expected = (opts && opts.requireText) || 'ELIMINAR';
+    const txt = prompt(((opts && opts.message) ? opts.message + '\n\n' : '') + 'Escribe "' + expected + '" para confirmar:');
+    return txt === expected;
+  }
+
+  function uiToast(msg, kind) {
+    if (window.VolvixUI && typeof window.VolvixUI.toast === 'function') {
+      try { window.VolvixUI.toast({ type: kind === 'warn' ? 'warning' : (kind || 'info'), message: msg }); return; } catch {}
+    }
+    toast(msg, kind);
+  }
+
   /* ───────────────────────── Modal centralizado ───────────────────────── */
   function showModal(title, bodyHtml, opts) {
     const id = 'mp-modal-' + Date.now();
@@ -164,25 +226,41 @@
   /* ───────────────────────── 2) TRANSFERIR STOCK ───────────────────────── */
   window.multiposTransferStock = async function () {
     if (!branches.length) await loadAllBranches();
-    const fromIdx = pickBranchPrompt('Sucursal ORIGEN:');
-    if (fromIdx < 0) return;
-    const toIdx = pickBranchPrompt('Sucursal DESTINO:');
-    if (toIdx < 0 || fromIdx === toIdx) { toast('Origen y destino deben ser distintos', 'warn'); return; }
+    if (!branches.length) { toast('Sin sucursales cargadas', 'warn'); return; }
 
-    const product = prompt('Código o nombre del producto:');
-    if (!product) return;
-    const qty = parseInt(prompt('Cantidad a transferir:'), 10);
+    const branchOptions = branches.map(b => ({ value: b.id, label: b.name || b.id }));
+
+    const data = await uiForm({
+      title: 'Transferencia de stock entre sucursales',
+      submitText: 'Registrar transferencia',
+      fields: [
+        { name: 'from',    label: 'Sucursal ORIGEN',  type: 'select',   options: branchOptions, required: true },
+        { name: 'to',      label: 'Sucursal DESTINO', type: 'select',   options: branchOptions, required: true },
+        { name: 'product', label: 'Producto (código o nombre)', type: 'autocomplete', source: 'catalog', required: true },
+        { name: 'qty',     label: 'Cantidad a transferir', type: 'number', step: 1, min: 1, required: true },
+        { name: 'note',    label: 'Razón / nota (opcional)', type: 'textarea', rows: 2 }
+      ]
+    });
+    if (!data) return;
+    if (!data.from || !data.to) { toast('Selección inválida', 'warn'); return; }
+    if (data.from === data.to) { toast('Origen y destino deben ser distintos', 'warn'); return; }
+    const qty = parseInt(data.qty, 10);
     if (!qty || qty <= 0) { toast('Cantidad inválida', 'warn'); return; }
-    const note = prompt('Nota (opcional):') || '';
+    if (!data.product) { toast('Producto requerido', 'warn'); return; }
+
+    const fromBranch = branches.find(b => b.id === data.from) || {};
+    const toBranch = branches.find(b => b.id === data.to) || {};
 
     const transfers = lsRead(LS.TRANSFERS, []);
     const transfer = {
       id: 'TRF-' + Date.now(),
-      from: branches[fromIdx].id,
-      from_name: branches[fromIdx].name,
-      to: branches[toIdx].id,
-      to_name: branches[toIdx].name,
-      product, qty, note,
+      from: fromBranch.id,
+      from_name: fromBranch.name,
+      to: toBranch.id,
+      to_name: toBranch.name,
+      product: data.product,
+      qty,
+      note: data.note || '',
       status: 'pendiente',
       created_by: session?.user_id || 'unknown',
       date: Date.now()
@@ -192,7 +270,7 @@
 
     // Intentar registro remoto (best-effort)
     apiPost('/api/sync', { type: 'stock_transfer', payload: transfer }).catch(() => {});
-    toast(`Transferencia ${transfer.id} registrada`, 'ok');
+    uiToast(`Transferencia ${transfer.id} registrada`, 'ok');
   };
 
   window.multiposListTransfers = function () {
@@ -251,28 +329,51 @@
   /* ───────────────────────── 4) EMPLEADOS POR SUCURSAL ───────────────────────── */
   window.multiposCreateEmployee = async function () {
     if (!branches.length) await loadAllBranches();
-    const name = prompt('Nombre del empleado:');
-    if (!name) return;
-    const email = prompt('Email:') || '';
-    const role = prompt('Rol (cajero/manager/cocinero/mesero):', 'cajero') || 'cajero';
-    const branchIdx = pickBranchPrompt('Asignar a sucursal:');
-    if (branchIdx < 0) return;
-    const phone = prompt('Teléfono (opcional):') || '';
-    const pin = prompt('PIN de 4 dígitos:') || ('' + Math.floor(1000 + Math.random() * 9000));
+    if (!branches.length) { toast('Sin sucursales cargadas', 'warn'); return; }
 
+    const branchOptions = branches.map(b => ({ value: b.id, label: b.name || b.id }));
+
+    const data = await uiForm({
+      title: 'Crear empleado',
+      submitText: 'Crear empleado',
+      fields: [
+        { name: 'name',          label: 'Nombre del empleado', type: 'text', required: true, minLength: 2, maxLength: 80 },
+        { name: 'email',         label: 'Email', type: 'email' },
+        { name: 'rfc',           label: 'RFC', type: 'text', mask: 'AAAA######XXX', uppercase: true, pattern: '^[A-ZÑ&]{3,4}[0-9]{6}[A-Z0-9]{3}$', placeholder: 'XAXX010101000' },
+        { name: 'role',          label: 'Rol', type: 'radio', required: true, default: 'cajero', options: [
+          { value: 'cajero',   label: 'Cajero' },
+          { value: 'manager',  label: 'Manager' },
+          { value: 'cocinero', label: 'Cocinero' },
+          { value: 'mesero',   label: 'Mesero' }
+        ]},
+        { name: 'sueldo_diario', label: 'Sueldo diario', type: 'number', step: 0.01, min: 0, default: 0 },
+        { name: 'branch',        label: 'Asignar a sucursal', type: 'select', options: branchOptions, required: true },
+        { name: 'phone',         label: 'Teléfono (opcional)', type: 'tel' },
+        { name: 'pin',           label: 'PIN de 4 dígitos', type: 'text', pattern: '^\\d{4}$', placeholder: '1234' }
+      ]
+    });
+    if (!data || !data.name || !data.branch) return;
+
+    const branch = branches.find(b => b.id === data.branch) || {};
     const empleados = lsRead(LS.EMPLOYEES, []);
     const emp = {
       id: 'EMP-' + Date.now(),
-      name, email, role, phone, pin,
-      branch: branches[branchIdx].id,
-      branch_name: branches[branchIdx].name,
+      name: data.name,
+      email: data.email || '',
+      rfc: (data.rfc || '').toUpperCase(),
+      role: data.role || 'cajero',
+      sueldo_diario: parseFloat(data.sueldo_diario) || 0,
+      phone: data.phone || '',
+      pin: data.pin || ('' + Math.floor(1000 + Math.random() * 9000)),
+      branch: branch.id,
+      branch_name: branch.name,
       active: true,
       created: Date.now()
     };
     empleados.push(emp);
     lsWrite(LS.EMPLOYEES, empleados);
     apiPost('/api/sync', { type: 'employee_create', payload: emp }).catch(() => {});
-    toast(`Empleado ${name} registrado en ${emp.branch_name}`, 'ok');
+    uiToast(`Empleado ${emp.name} registrado en ${emp.branch_name}`, 'ok');
   };
 
   window.multiposListEmployees = async function () {
@@ -341,30 +442,44 @@
   };
 
   /* ───────────────────────── 6) CONFIGURACIÓN POR SUCURSAL ───────────────────────── */
-  window.multiposConfigBranch = function () {
+  window.multiposConfigBranch = async function () {
     const config = lsRead(LS.BRANCH_CFG, {});
     const tenantId = session?.tenant_id;
     if (!tenantId) { toast('Sin sesión activa', 'warn'); return; }
     const current = config[tenantId] || {};
 
-    const tax = prompt('IVA (%):', current.tax ?? '16');
-    if (tax === null) return;
-    const currency = prompt('Moneda (MXN/USD/EUR):', current.currency || 'MXN');
-    const printer = prompt('Impresora:', current.printer || 'Térmica USB');
-    const decimals = prompt('Decimales en precio:', current.decimals ?? '2');
-    const allowDiscounts = confirm('¿Permitir descuentos manuales?');
+    const data = await uiForm({
+      title: 'Configuración de sucursal',
+      submitText: 'Guardar configuración',
+      fields: [
+        { name: 'tax',             label: 'IVA aplicable', type: 'radio', required: true, default: String(current.tax ?? 16), options: [
+          { value: '0',  label: '0% (exento)' },
+          { value: '8',  label: '8% (frontera)' },
+          { value: '16', label: '16% (general)' }
+        ]},
+        { name: 'currency',        label: 'Moneda', type: 'select', default: current.currency || 'MXN', options: [
+          { value: 'MXN', label: 'MXN — Peso mexicano' },
+          { value: 'USD', label: 'USD — Dólar' },
+          { value: 'EUR', label: 'EUR — Euro' }
+        ]},
+        { name: 'printer',         label: 'Impresora', type: 'text', default: current.printer || 'Térmica USB' },
+        { name: 'decimals',        label: 'Decimales en precio', type: 'number', step: 1, min: 0, max: 4, default: current.decimals ?? 2 },
+        { name: 'allow_discounts', label: 'Permitir descuentos manuales', type: 'switch', default: !!current.allow_discounts }
+      ]
+    });
+    if (!data) return;
 
     config[tenantId] = {
-      tax: parseFloat(tax),
-      currency,
-      printer,
-      decimals: parseInt(decimals, 10),
-      allow_discounts: allowDiscounts,
+      tax: parseFloat(data.tax),
+      currency: data.currency || 'MXN',
+      printer: data.printer || 'Térmica USB',
+      decimals: parseInt(data.decimals, 10),
+      allow_discounts: !!data.allow_discounts,
       updated: Date.now()
     };
     lsWrite(LS.BRANCH_CFG, config);
     apiPost('/api/sync', { type: 'branch_config', tenant_id: tenantId, payload: config[tenantId] }).catch(() => {});
-    toast('Configuración guardada y sincronizada', 'ok');
+    uiToast('Configuración guardada y sincronizada', 'ok');
   };
 
   /* ───────────────────────── 7) PERMISOS POR SUCURSAL ───────────────────────── */
@@ -396,31 +511,54 @@
     showModal(`Permisos: ${branch.name}`, html);
   };
 
-  window.multiposEditPermission = function (branchId, rol) {
+  window.multiposEditPermission = async function (branchId, rol) {
     const perms = lsRead(LS.PERMISSIONS, {});
     perms[branchId] = perms[branchId] || {};
     perms[branchId][rol] = perms[branchId][rol] || {};
     const flags = ['ventas', 'descuentos', 'devoluciones', 'reportes', 'inventario', 'config'];
-    flags.forEach(f => {
-      perms[branchId][rol][f] = confirm(`${rol} → ¿permitir ${f}?`);
+    const current = flags.filter(f => !!perms[branchId][rol][f]);
+
+    const data = await uiForm({
+      title: `Permisos · ${rol}`,
+      submitText: 'Guardar permisos',
+      fields: [
+        { name: 'scopes', label: 'Permisos otorgados', type: 'multiselect', default: current,
+          options: flags.map(f => ({ value: f, label: f })) }
+      ]
     });
+    if (!data) return;
+    const granted = Array.isArray(data.scopes) ? data.scopes : (data.scopes ? String(data.scopes).split(',') : []);
+    flags.forEach(f => { perms[branchId][rol][f] = granted.includes(f); });
     lsWrite(LS.PERMISSIONS, perms);
-    toast(`Permisos ${rol} actualizados`, 'ok');
+    uiToast(`Permisos ${rol} actualizados`, 'ok');
   };
 
   /* ───────────────────────── 8) CAJAS MÚLTIPLES ───────────────────────── */
   window.multiposOpenCashbox = async function () {
     if (!branches.length) await loadAllBranches();
-    const branchIdx = pickBranchPrompt('Sucursal para abrir caja:');
-    if (branchIdx < 0) return;
-    const initial = parseFloat(prompt('Fondo inicial:', '500')) || 0;
-    const cashier = prompt('Cajero responsable:') || 'sin asignar';
+    if (!branches.length) { toast('Sin sucursales cargadas', 'warn'); return; }
+    const branchOptions = branches.map(b => ({ value: b.id, label: b.name || b.id }));
+
+    const data = await uiForm({
+      title: 'Apertura de caja (multi-sucursal)',
+      submitText: 'Abrir caja',
+      fields: [
+        { name: 'branch',         label: 'Sucursal', type: 'select', options: branchOptions, required: true },
+        { name: 'monto_apertura', label: 'Monto de apertura (fondo inicial)', type: 'number', step: 0.01, min: 0, default: 1000, required: true },
+        { name: 'cashier',        label: 'Cajero responsable', type: 'text', default: 'sin asignar' }
+      ]
+    });
+    if (!data || !data.branch) return;
+
+    const branch = branches.find(b => b.id === data.branch) || {};
+    const initial = parseFloat(data.monto_apertura) || 0;
+    const cashier = data.cashier || 'sin asignar';
 
     const cashboxes = lsRead(LS.CASHBOX, []);
     const cb = {
       id: 'CB-' + Date.now(),
-      branch_id: branches[branchIdx].id,
-      branch_name: branches[branchIdx].name,
+      branch_id: branch.id,
+      branch_name: branch.name,
       cashier, initial,
       opened: Date.now(),
       closed: null,
@@ -430,26 +568,43 @@
     };
     cashboxes.push(cb);
     lsWrite(LS.CASHBOX, cashboxes);
-    toast(`Caja abierta en ${cb.branch_name} con $${initial}`, 'ok');
+    uiToast(`Caja abierta en ${cb.branch_name} con $${initial.toFixed(2)}`, 'ok');
   };
 
-  window.multiposCloseCashbox = function () {
+  window.multiposCloseCashbox = async function () {
     const cashboxes = lsRead(LS.CASHBOX, []);
     const open = cashboxes.filter(c => c.status === 'abierta');
     if (!open.length) { toast('Sin cajas abiertas', 'info'); return; }
-    const list = open.map((c, i) => `${i + 1}. ${c.branch_name} · ${c.cashier} · ${new Date(c.opened).toLocaleTimeString()}`).join('\n');
-    const idx = parseInt(prompt(`Cerrar caja:\n${list}`), 10) - 1;
-    if (isNaN(idx) || !open[idx]) return;
-    const cb = open[idx];
-    const counted = parseFloat(prompt('Efectivo contado al cierre:', '0')) || 0;
+
+    const cbOptions = open.map(c => ({
+      value: c.id,
+      label: `${c.branch_name} · ${c.cashier} · ${new Date(c.opened).toLocaleTimeString()}`
+    }));
+
+    const data = await uiForm({
+      title: 'Cerrar caja',
+      submitText: 'Cerrar caja',
+      fields: [
+        { name: 'cashbox_id',  label: 'Caja a cerrar', type: 'select',   options: cbOptions, required: true },
+        { name: 'monto_cierre',label: 'Efectivo contado al cierre', type: 'number', step: 0.01, min: 0, default: 0, required: true },
+        { name: 'notas',       label: 'Notas (opcional)', type: 'textarea', rows: 2 }
+      ]
+    });
+    if (!data || !data.cashbox_id) return;
+
+    const cb = cashboxes.find(c => c.id === data.cashbox_id);
+    if (!cb) return;
+    const counted = parseFloat(data.monto_cierre) || 0;
+
     cb.closed = Date.now();
     cb.counted = counted;
     cb.expected = cb.initial + cb.total_sales;
     cb.diff = counted - cb.expected;
+    cb.notas = data.notas || '';
     cb.status = 'cerrada';
     lsWrite(LS.CASHBOX, cashboxes);
     apiPost('/api/sync', { type: 'cashbox_close', payload: cb }).catch(() => {});
-    toast(`Caja cerrada. Diferencia: $${cb.diff.toFixed(2)}`, cb.diff === 0 ? 'ok' : 'warn');
+    uiToast(`Caja cerrada. Diferencia: $${cb.diff.toFixed(2)}`, cb.diff === 0 ? 'ok' : 'warn');
   };
 
   window.multiposListCashboxes = function () {
@@ -592,7 +747,7 @@
     if (!branches.length) await loadAllBranches();
     const rows = [];
     for (const branch of branches) {
-      const inv = await apiGet(`/api/inventory?tenant_id=${branch.id}`).catch(() => null);
+      const inv = await apiGet(`/api/inventory?tenant_id=${encodeURIComponent(branch.id)}`).catch(() => null);
       const items = Array.isArray(inv) ? inv : (inv?.items || []);
       const total = items.reduce((s, i) => s + (Number(i.stock) || 0), 0);
       const low = items.filter(i => (Number(i.stock) || 0) < (Number(i.min_stock) || 5)).length;
@@ -615,21 +770,43 @@
 
   /* ───────────────────────── 13) AGREGAR SUCURSAL ───────────────────────── */
   window.multiposAddBranch = async function () {
-    const name = prompt('Nombre de la nueva sucursal:');
-    if (!name) return;
-    const address = prompt('Dirección:') || '';
-    const phone = prompt('Teléfono:') || '';
-    const plan = prompt('Plan (basico/pro/enterprise):', 'basico') || 'basico';
+    const data = await uiForm({
+      title: 'Crear sucursal',
+      submitText: 'Crear sucursal',
+      fields: [
+        { name: 'name',    label: 'Nombre de la sucursal', type: 'text', required: true, minLength: 2, maxLength: 80 },
+        { name: 'address', label: 'Dirección', type: 'textarea', rows: 2 },
+        { name: 'type',    label: 'Tipo', type: 'radio', required: true, default: 'branch', options: [
+          { value: 'warehouse', label: 'Almacén (warehouse)' },
+          { value: 'branch',    label: 'Sucursal (branch)' },
+          { value: 'transit',   label: 'Tránsito (transit)' }
+        ]},
+        { name: 'phone',   label: 'Teléfono', type: 'tel' },
+        { name: 'plan',    label: 'Plan', type: 'radio', default: 'basico', options: [
+          { value: 'basico',     label: 'Básico' },
+          { value: 'pro',        label: 'Pro' },
+          { value: 'enterprise', label: 'Enterprise' }
+        ]}
+      ]
+    });
+    if (!data || !data.name) return;
 
-    const payload = { name, address, phone, plan, is_active: true };
+    const payload = {
+      name: data.name,
+      address: data.address || '',
+      phone: data.phone || '',
+      plan: data.plan || 'basico',
+      type: data.type || 'branch',
+      is_active: true
+    };
     const res = await apiPost('/api/owner/tenants', payload);
     if (res?.ok || res?.id) {
-      toast(`Sucursal "${name}" creada`, 'ok');
+      uiToast(`Sucursal "${payload.name}" creada`, 'ok');
       await loadAllBranches();
     } else {
       // fallback local
       branches.push({ id: 'LOCAL-' + Date.now(), ...payload, created_at: new Date().toISOString() });
-      toast(`Sucursal local agregada (sin sync)`, 'warn');
+      uiToast(`Sucursal local agregada (sin sync)`, 'warn');
     }
   };
 

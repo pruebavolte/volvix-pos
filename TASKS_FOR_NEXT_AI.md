@@ -20,13 +20,20 @@ Vercel CLI:    Ya configurado, usa `vercel --prod --yes` para deploy
 
 Supabase:
   URL:         https://zhvwmzkcqngcaqpdxtwr.supabase.co
-  Service Key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpodndtemtjcW5nY2FxcGR4dHdyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NDE2NzAxOCwiZXhwIjoyMDc5NzQzMDE4fQ.rvPkcyE7Cu1BzAhM_GdZjmqXvQe67gIpPaI7tLESD-Q
-  Anon Key:    eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpodndtemtjcW5nY2FxcGR4dHdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxNjcwMTgsImV4cCI6MjA3OTc0MzAxOH0.ygTc754INgqYJEMD0wc_CzRCzRxUfp4hq3rYvJRpjkk
+  Service Key: <<ROTATE_AND_SET_IN_VERCEL_ENV>>
+  Anon Key:    <<ROTATE_AND_SET_IN_VERCEL_ENV>>
 
-Usuarios de prueba:
-  admin@volvix.test  / Volvix2026!  (superadmin)
-  owner@volvix.test  / Volvix2026!  (owner)
-  cajero@volvix.test / Volvix2026!  (cajero)
+  ⚠️ SEGURIDAD: Las keys originales fueron expuestas en commit anterior y
+  DEBEN rotarse en Supabase Dashboard antes de redeployar.
+  (Dashboard → Settings → API → "Reset service_role key" / "Reset anon key")
+  Después, setear los nuevos valores como env vars en Vercel:
+    SUPABASE_URL, SUPABASE_SERVICE_KEY, SUPABASE_ANON_KEY
+
+Usuarios de prueba (passwords NO se documentan aquí — pedirlas al owner del proyecto
+o leerlas de la env var DEV_PASSWORDS_JSON / del gestor de secretos):
+  admin@volvix.test   (superadmin)
+  owner@volvix.test   (owner)
+  cajero@volvix.test  (cajero)
 ```
 
 ---

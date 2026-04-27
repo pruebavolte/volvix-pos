@@ -269,20 +269,33 @@
             var tag = cmd === 'p' ? 'P' : cmd.toUpperCase();
             document.execCommand('formatBlock', false, tag);
         } else if (cmd === 'createLink') {
-            var url = global.prompt('URL del enlace:', 'https://');
-            if (url) {
+            var self = this;
+            var applyLink = function (url) {
+                if (!url) return;
                 if (!/^https?:\/\//i.test(url) && !/^mailto:/i.test(url)) url = 'https://' + url;
                 document.execCommand('createLink', false, url);
-                // ensure target/rel
                 var sel = global.getSelection();
                 if (sel && sel.anchorNode) {
                     var a = sel.anchorNode.parentNode;
-                    while (a && a !== this.area && a.tagName !== 'A') a = a.parentNode;
+                    while (a && a !== self.area && a.tagName !== 'A') a = a.parentNode;
                     if (a && a.tagName === 'A') {
                         a.setAttribute('target', '_blank');
                         a.setAttribute('rel', 'noopener noreferrer');
                     }
                 }
+            };
+            var ui = global.VolvixUI;
+            if (ui && typeof ui.form === 'function') {
+                Promise.resolve(ui.form({
+                    title: 'Insertar enlace',
+                    fields: [{ name: 'url', label: 'URL', type: 'text', default: 'https://', required: true }],
+                    submitText: 'Insertar'
+                })).then(function (res) { if (res && res.url) applyLink(res.url); }).catch(function(){});
+                return;
+            }
+            var url = global.prompt('URL del enlace:', 'https://');
+            if (url) {
+                applyLink(url);
             }
         } else if (cmd === 'undo') {
             this.undo(); return;

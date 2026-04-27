@@ -367,9 +367,9 @@
             btnDel.style.cursor = 'pointer';
             btnDel.style.fontSize = '12px';
             btnDel.style.lineHeight = '1';
-            btnDel.onclick = function (ev) {
+            btnDel.onclick = async function (ev) {
                 ev.stopPropagation();
-                if (confirm('¿Eliminar foto?')) {
+                if (await VolvixUI.destructiveConfirm({ title: 'Eliminar foto', message: '¿Eliminar esta foto?', confirmText: 'Eliminar', requireText: 'ELIMINAR' })) {
                     remove(target, p.id);
                     renderGallery(elementId, target, options);
                 }

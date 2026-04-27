@@ -234,7 +234,14 @@
         el('button', {
           class: 'vk-btn vk-btn-danger',
           title: 'Eliminar',
-          onclick: () => { if (confirm('¿Eliminar tarea?')) deleteCard(card.id); }
+          onclick: () => {
+            const ui = window.VolvixUI;
+            if (ui && typeof ui.confirm === 'function') {
+              Promise.resolve(ui.confirm({ title: 'Eliminar tarea', message: '¿Eliminar tarea?', danger: true })).then(ok => { if (ok) deleteCard(card.id); }).catch(()=>{});
+              return;
+            }
+            if (confirm('¿Eliminar tarea?')) deleteCard(card.id);
+          }
         }, ['×'])
       ])
     ]);
@@ -331,18 +338,43 @@
     return el('div', { class: 'vk-toolbar' }, [
       el('button', {
         class: 'vk-btn',
-        onclick: () => { const t = prompt('Título columna:'); if (t) addColumn(t); }
+        onclick: () => {
+          const ui = window.VolvixUI;
+          if (ui && typeof ui.form === 'function') {
+            Promise.resolve(ui.form({
+              title: 'Nueva columna',
+              fields: [
+                { name: 'title', label: 'Título', type: 'text', required: true },
+                { name: 'color', label: 'Color', type: 'color', default: '#3b82f6' },
+                { name: 'wip', label: 'Límite WIP (0=sin límite)', type: 'number', default: 0, min: 0 }
+              ],
+              submitText: 'Crear'
+            })).then(res => {
+              if (!res || !res.title) return;
+              addColumn(res.title, { color: res.color, wip: Number(res.wip) || 0 });
+            }).catch(()=>{});
+            return;
+          }
+          const t = prompt('Título columna:'); if (t) addColumn(t);
+        }
       }, ['+ Columna']),
       el('button', {
         class: 'vk-btn',
-        onclick: () => { if (confirm('¿Reiniciar tablero? Se perderán las tareas.')) reset(); }
+        onclick: () => {
+          const ui = window.VolvixUI;
+          if (ui && typeof ui.confirm === 'function') {
+            Promise.resolve(ui.confirm({ title: 'Reiniciar tablero', message: 'Se perderán todas las tareas. ¿Continuar?', danger: true })).then(ok => { if (ok) reset(); }).catch(()=>{});
+            return;
+          }
+          if (confirm('¿Reiniciar tablero? Se perderán las tareas.')) reset();
+        }
       }, ['Reset']),
       el('button', {
         class: 'vk-btn',
         onclick: () => {
           const data = JSON.stringify(state, null, 2);
           navigator.clipboard?.writeText(data);
-          alert('Estado copiado al portapapeles');
+          VolvixUI.toast({type:'info', message:'Estado copiado al portapapeles'});
         }
       }, ['Exportar'])
     ]);

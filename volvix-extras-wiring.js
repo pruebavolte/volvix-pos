@@ -40,6 +40,10 @@
 
   function showToast(msg, type) {
     type = type || 'info';
+    // Preferir VolvixUI.toast si existe
+    if (window.VolvixUI && typeof window.VolvixUI.toast === 'function') {
+      try { window.VolvixUI.toast({ type: type === 'warn' ? 'warning' : type, message: msg }); return; } catch {}
+    }
     if (typeof window.showToast === 'function' && window.showToast !== showToast) {
       try { window.showToast(msg, type); return; } catch {}
     }
@@ -51,6 +55,84 @@
     div.textContent = msg;
     document.body.appendChild(div);
     setTimeout(() => div.remove(), 3500);
+  }
+
+  // ============================================================
+  // VOLVIXUI HELPERS — Migración de prompt/confirm/alert
+  // ============================================================
+  function uiAvailable() {
+    return !!(window.VolvixUI && typeof window.VolvixUI.form === 'function');
+  }
+
+  /**
+   * Muestra un formulario modal único con múltiples campos.
+   * Si VolvixUI no está disponible, hace fallback a prompt() nativos encadenados.
+   * @returns {Promise<Object|null>} valores ingresados o null si se canceló.
+   */
+  async function uiForm(opts) {
+    const { title, fields, submitText, onSubmit } = opts || {};
+    if (uiAvailable()) {
+      try {
+        return await window.VolvixUI.form({
+          title: title || 'Datos',
+          fields: fields || [],
+          submitText: submitText || 'Aceptar',
+          onSubmit: onSubmit
+        });
+      } catch (e) {
+        console.warn('[EXTRAS-WIRING] VolvixUI.form falló, fallback a prompt:', e);
+      }
+    } else {
+      console.warn('[EXTRAS-WIRING] VolvixUI no cargado, usando prompt nativo');
+    }
+    // Fallback: prompts encadenados
+    const result = {};
+    for (const f of (fields || [])) {
+      const label = f.label || f.name;
+      const def = f.default != null ? String(f.default) : '';
+      const val = prompt(label + (def ? ' (' + def + ')' : '') + ':', def);
+      if (val === null) return null;
+      let v = val.trim() || def;
+      if (f.type === 'number') v = parseFloat(v) || 0;
+      if (f.type === 'switch') v = /^(s|si|sí|y|yes|true|1)$/i.test(v);
+      result[f.name] = v;
+    }
+    if (typeof onSubmit === 'function') {
+      try { await onSubmit(result); } catch {}
+    }
+    return result;
+  }
+
+  /**
+   * Confirmación simple. Fallback a confirm() nativo.
+   * @returns {Promise<boolean>}
+   */
+  async function uiConfirm(opts) {
+    if (uiAvailable() && typeof window.VolvixUI.confirm === 'function') {
+      try { return !!(await window.VolvixUI.confirm(opts)); }
+      catch (e) { console.warn('[EXTRAS-WIRING] VolvixUI.confirm falló:', e); }
+    } else {
+      console.warn('[EXTRAS-WIRING] VolvixUI no cargado, fallback a confirm()');
+    }
+    return confirm((opts && (opts.title ? opts.title + '\n\n' : '') + (opts.message || '')) || '¿Confirmar?');
+  }
+
+  /**
+   * Confirmación destructiva (eliminar/anular). Requiere texto.
+   */
+  async function uiDestructiveConfirm(opts) {
+    if (uiAvailable() && typeof window.VolvixUI.destructiveConfirm === 'function') {
+      try { return !!(await window.VolvixUI.destructiveConfirm(opts)); }
+      catch (e) { console.warn('[EXTRAS-WIRING] destructiveConfirm falló:', e); }
+    } else if (uiAvailable() && typeof window.VolvixUI.confirm === 'function') {
+      try { return !!(await window.VolvixUI.confirm(Object.assign({ danger: true }, opts || {}))); }
+      catch (e) { console.warn('[EXTRAS-WIRING] confirm danger falló:', e); }
+    } else {
+      console.warn('[EXTRAS-WIRING] VolvixUI no cargado, fallback a confirm()');
+    }
+    const expected = (opts && opts.requireText) || 'ELIMINAR';
+    const txt = prompt((opts && opts.message ? opts.message + '\n\n' : '') + 'Escribe "' + expected + '" para confirmar:');
+    return txt === expected;
   }
 
   // ============================================================
@@ -145,7 +227,7 @@
   // ============================================================
   // ETIQUETA - APLICAR PLANTILLA
   // ============================================================
-  window.etiquetaUseTemplate = function(templateKey) {
+  window.etiquetaUseTemplate = async function(templateKey) {
     const all = getAllTemplates();
     const tpl = all[templateKey];
     if (!tpl) {
@@ -159,29 +241,37 @@
       return;
     }
 
-    const data = {};
-    const fields = tpl.fields || [];
-    fields.forEach(f => {
-      const labels = {
-        producto: 'Producto:',
-        precio: 'Precio:',
-        codigo: 'Código:',
-        categoria: 'Categoría:',
-        nombre: 'Nombre:',
-        direccion: 'Dirección:',
-        ciudad: 'Ciudad:',
-        cp: 'CP:',
-        telefono: 'Teléfono:',
-        precioAntes: 'Precio anterior:',
-        precioAhora: 'Precio ahora:',
-        descuento: 'Descuento (%):'
-      };
-      data[f] = prompt(labels[f] || (f + ':')) || '';
+    // Mapeo de campos -> tipos de input para VolvixUI
+    const fieldMeta = {
+      producto:    { label: 'Producto',         type: 'text' },
+      precio:      { label: 'Precio',           type: 'number', min: 0, step: 0.01 },
+      codigo:      { label: 'Código',           type: 'text' },
+      categoria:   { label: 'Categoría',        type: 'text' },
+      nombre:      { label: 'Nombre',           type: 'text' },
+      direccion:   { label: 'Dirección',        type: 'textarea' },
+      ciudad:      { label: 'Ciudad',           type: 'text' },
+      cp:          { label: 'CP',               type: 'text' },
+      telefono:    { label: 'Teléfono',         type: 'tel', mask: 'tel-mx' },
+      precioAntes: { label: 'Precio anterior',  type: 'number', min: 0, step: 0.01 },
+      precioAhora: { label: 'Precio ahora',     type: 'number', min: 0, step: 0.01 },
+      descuento:   { label: 'Descuento (%)',    type: 'number', min: 0, max: 100, step: 1 }
+    };
+
+    const fields = (tpl.fields || []).map(name => Object.assign(
+      { name: name, label: name, type: 'text', required: true },
+      fieldMeta[name] || {}
+    ));
+
+    const data = await uiForm({
+      title: 'Plantilla: ' + tpl.name,
+      fields: fields,
+      submitText: 'Aplicar plantilla'
     });
+    if (!data) return; // cancelado
 
     let html = tpl.html;
     Object.keys(data).forEach(k => {
-      html = html.replace(new RegExp('{{' + k + '}}', 'g'), data[k]);
+      html = html.replace(new RegExp('{{' + k + '}}', 'g'), data[k] != null ? data[k] : '');
     });
 
     designer.innerHTML = html;
@@ -194,35 +284,67 @@
   // ============================================================
   // ETIQUETA - MOSTRAR LISTA DE PLANTILLAS
   // ============================================================
-  window.etiquetaShowTemplates = function() {
+  window.etiquetaShowTemplates = async function() {
     const all = getAllTemplates();
     const keys = Object.keys(all);
-    const list = keys.map((k, i) => (i + 1) + '. ' + all[k].name + (all[k].description ? ' — ' + all[k].description : '')).join('\n');
-
-    const choice = prompt('Plantillas disponibles:\n\n' + list + '\n\nElige número:');
-    const idx = parseInt(choice) - 1;
-    if (idx >= 0 && idx < keys.length) {
-      window.etiquetaUseTemplate(keys[idx]);
+    if (keys.length === 0) { showToast('Sin plantillas', 'warn'); return; }
+    const options = keys.map(k => ({
+      value: k,
+      label: all[k].name + (all[k].description ? ' — ' + all[k].description : '')
+    }));
+    // 2-7 opciones -> radio, 8-50 -> select
+    const useRadio = options.length <= 7;
+    const data = await uiForm({
+      title: 'Elige plantilla',
+      fields: [{
+        name: 'tplKey',
+        label: 'Plantilla',
+        type: useRadio ? 'radio' : 'select',
+        options: options,
+        default: keys[0],
+        required: true
+      }],
+      submitText: 'Usar plantilla'
+    });
+    if (data && data.tplKey) {
+      window.etiquetaUseTemplate(data.tplKey);
     }
   };
 
   // ============================================================
   // ETIQUETA - GUARDAR PLANTILLA CUSTOM
   // ============================================================
-  window.etiquetaSaveCurrentAsTemplate = function() {
+  window.etiquetaSaveCurrentAsTemplate = async function() {
     const designer = document.querySelector('#designer, .designer-area, [data-designer], #etiqueta-preview, .preview-area');
     if (!designer || !designer.innerHTML.trim()) {
       showToast('No hay diseño para guardar', 'warn');
       return;
     }
 
-    const name = prompt('Nombre de la plantilla custom:');
+    const data = await uiForm({
+      title: 'Guardar plantilla custom',
+      fields: [{
+        name: 'name',
+        label: 'Nombre de la plantilla',
+        type: 'text',
+        required: true,
+        placeholder: 'Mi plantilla'
+      }, {
+        name: 'description',
+        label: 'Descripción (opcional)',
+        type: 'textarea',
+        default: 'Plantilla personalizada del usuario'
+      }],
+      submitText: 'Guardar'
+    });
+    if (!data || !data.name) return;
+    const name = String(data.name).trim();
     if (!name) return;
 
     const key = 'custom_' + name.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
     const tpl = {
       name: name,
-      description: 'Plantilla personalizada del usuario',
+      description: data.description || 'Plantilla personalizada del usuario',
       fields: [],
       html: designer.innerHTML,
       isCustom: true,
@@ -233,43 +355,75 @@
     showToast('Plantilla guardada: ' + name, 'success');
   };
 
-  window.etiquetaListCustomTemplates = function() {
+  window.etiquetaListCustomTemplates = async function() {
     const customs = getCustomTemplates();
     const keys = Object.keys(customs);
     if (keys.length === 0) {
-      alert('Sin plantillas personalizadas guardadas');
+      showToast('Sin plantillas personalizadas guardadas', 'info');
       return;
     }
-    const list = keys.map((k, i) => (i + 1) + '. ' + customs[k].name).join('\n');
-    const choice = prompt('Plantillas custom:\n\n' + list + '\n\nElige número (o cancela):');
-    const idx = parseInt(choice) - 1;
-    if (idx >= 0 && idx < keys.length) {
-      window.etiquetaUseTemplate(keys[idx]);
+    const options = keys.map(k => ({ value: k, label: customs[k].name }));
+    const useRadio = options.length <= 7;
+    const data = await uiForm({
+      title: 'Plantillas personalizadas',
+      fields: [{
+        name: 'tplKey',
+        label: 'Plantilla',
+        type: useRadio ? 'radio' : 'select',
+        options: options,
+        default: keys[0],
+        required: true
+      }],
+      submitText: 'Usar plantilla'
+    });
+    if (data && data.tplKey) {
+      window.etiquetaUseTemplate(data.tplKey);
     }
   };
 
-  window.etiquetaDeleteCustomTemplate = function() {
+  window.etiquetaDeleteCustomTemplate = async function() {
     const customs = getCustomTemplates();
     const keys = Object.keys(customs);
     if (keys.length === 0) {
-      alert('Sin plantillas custom para borrar');
+      showToast('Sin plantillas custom para borrar', 'info');
       return;
     }
-    const list = keys.map((k, i) => (i + 1) + '. ' + customs[k].name).join('\n');
-    const choice = prompt('Borrar plantilla:\n\n' + list + '\n\nElige número:');
-    const idx = parseInt(choice) - 1;
-    if (idx >= 0 && idx < keys.length) {
-      delete customs[keys[idx]];
-      localStorage.setItem('volvix:etiqueta:custom', JSON.stringify(customs));
-      showToast('Plantilla eliminada', 'success');
-    }
+    const options = keys.map(k => ({ value: k, label: customs[k].name }));
+    const useRadio = options.length <= 7;
+    const data = await uiForm({
+      title: 'Borrar plantilla',
+      fields: [{
+        name: 'tplKey',
+        label: 'Plantilla a borrar',
+        type: useRadio ? 'radio' : 'select',
+        options: options,
+        default: keys[0],
+        required: true
+      }],
+      submitText: 'Continuar'
+    });
+    if (!data || !data.tplKey) return;
+    const ok = await uiDestructiveConfirm({
+      title: 'Eliminar plantilla',
+      message: '¿Borrar definitivamente "' + (customs[data.tplKey] ? customs[data.tplKey].name : data.tplKey) + '"? Esta acción no se puede deshacer.',
+      requireText: 'ELIMINAR',
+      danger: true
+    });
+    if (!ok) return;
+    delete customs[data.tplKey];
+    localStorage.setItem('volvix:etiqueta:custom', JSON.stringify(customs));
+    showToast('Plantilla eliminada', 'success');
   };
 
   // ============================================================
   // ETIQUETA - GENERADOR MASIVO DESDE DB
   // ============================================================
   window.etiquetaGenerateMasive = async function() {
-    if (!confirm('¿Generar etiquetas para TODOS los productos del sistema?')) return;
+    const ok = await uiConfirm({
+      title: 'Generar etiquetas masivas',
+      message: '¿Generar etiquetas para TODOS los productos del sistema? Se abrirá una ventana de impresión.'
+    });
+    if (!ok) return;
 
     try {
       showToast('Cargando productos...', 'info');
@@ -332,8 +486,15 @@
   // ============================================================
   // ETIQUETA - GENERADOR QR (visual)
   // ============================================================
-  window.etiquetaGenerateQR = function(text) {
-    text = text || prompt('Texto/URL para QR:');
+  window.etiquetaGenerateQR = async function(text) {
+    if (!text) {
+      const data = await uiForm({
+        title: 'Generar QR',
+        fields: [{ name: 'text', label: 'Texto / URL para QR', type: 'text', required: true, placeholder: 'https://...' }],
+        submitText: 'Generar'
+      });
+      text = data && data.text;
+    }
     if (!text) return null;
 
     const size = 21;
@@ -368,23 +529,35 @@
             </div>`;
   };
 
-  window.etiquetaInsertQR = function() {
-    const text = prompt('Texto/URL para QR:');
+  window.etiquetaInsertQR = async function() {
+    const data = await uiForm({
+      title: 'Insertar QR',
+      fields: [{ name: 'text', label: 'Texto / URL para QR', type: 'text', required: true, placeholder: 'https://...' }],
+      submitText: 'Insertar'
+    });
+    const text = data && data.text;
     if (!text) return;
     const designer = document.querySelector('#designer, .designer-area, [data-designer], #etiqueta-preview, .preview-area');
     if (!designer) {
       showToast('Área de diseño no encontrada', 'warn');
       return;
     }
-    designer.innerHTML += window.etiquetaGenerateQR(text);
+    designer.innerHTML += await window.etiquetaGenerateQR(text);
     showToast('QR insertado', 'success');
   };
 
   // ============================================================
   // ETIQUETA - GENERADOR BARCODE (visual EAN-like)
   // ============================================================
-  window.etiquetaGenerateBarcode = function(code) {
-    code = code || prompt('Código de barras (numérico):');
+  window.etiquetaGenerateBarcode = async function(code) {
+    if (!code) {
+      const data = await uiForm({
+        title: 'Generar código de barras',
+        fields: [{ name: 'code', label: 'Código numérico', type: 'text', required: true, pattern: '^[0-9]+$', placeholder: '7501234567890' }],
+        submitText: 'Generar'
+      });
+      code = data && data.code;
+    }
     if (!code) return null;
 
     let bars = '';
@@ -402,15 +575,20 @@
             </div>`;
   };
 
-  window.etiquetaInsertBarcode = function() {
-    const code = prompt('Código numérico:');
+  window.etiquetaInsertBarcode = async function() {
+    const data = await uiForm({
+      title: 'Insertar código de barras',
+      fields: [{ name: 'code', label: 'Código numérico', type: 'text', required: true, pattern: '^[0-9]+$', placeholder: '7501234567890' }],
+      submitText: 'Insertar'
+    });
+    const code = data && data.code;
     if (!code) return;
     const designer = document.querySelector('#designer, .designer-area, [data-designer], #etiqueta-preview, .preview-area');
     if (!designer) {
       showToast('Área de diseño no encontrada', 'warn');
       return;
     }
-    designer.innerHTML += window.etiquetaGenerateBarcode(code);
+    designer.innerHTML += await window.etiquetaGenerateBarcode(code);
     showToast('Barcode insertado', 'success');
   };
 
@@ -539,9 +717,16 @@
     showToast('Use "Guardar como PDF" en el diálogo de impresión', 'info');
   };
 
-  window.etiquetaClear = function() {
+  window.etiquetaClear = async function() {
     const designer = document.querySelector('#designer, .designer-area, [data-designer], #etiqueta-preview, .preview-area');
-    if (designer && confirm('¿Limpiar diseño actual?')) {
+    if (!designer) return;
+    const ok = await uiDestructiveConfirm({
+      title: 'Limpiar diseño',
+      message: '¿Limpiar el diseño actual? Se perderá el contenido sin guardar.',
+      requireText: 'ELIMINAR',
+      danger: true
+    });
+    if (ok) {
       designer.innerHTML = '';
       showToast('Diseño limpiado', 'info');
     }
@@ -550,21 +735,39 @@
   // ============================================================
   // LANDING - LEAD CAPTURE
   // ============================================================
-  window.landingCaptureLead = function() {
-    const name = prompt('Nombre completo:');
-    if (!name || !name.trim()) return;
-    const email = prompt('Email:') || '';
-    const phone = prompt('Teléfono:') || '';
-    const company = prompt('Empresa (opcional):') || '';
-    const interest = prompt('¿Qué te interesa? (POS, Inventario, Etiquetas, Demo):') || 'General';
+  window.landingCaptureLead = async function() {
+    const data = await uiForm({
+      title: 'Contáctanos',
+      fields: [
+        { name: 'name',     label: 'Nombre completo', type: 'text',     required: true,  placeholder: 'Juan Pérez' },
+        { name: 'email',    label: 'Email',           type: 'email',    required: false, placeholder: 'tu@correo.com' },
+        { name: 'phone',    label: 'Teléfono',        type: 'tel',      mask: 'tel-mx',  required: false },
+        { name: 'company',  label: 'Empresa (opcional)', type: 'text',  required: false },
+        { name: 'interest', label: '¿Qué te interesa?', type: 'radio',
+          options: [
+            { value: 'POS',         label: 'POS' },
+            { value: 'Inventario',  label: 'Inventario' },
+            { value: 'Etiquetas',   label: 'Etiquetas' },
+            { value: 'Demo',        label: 'Demo' },
+            { value: 'General',     label: 'General' }
+          ],
+          default: 'General', required: true }
+      ],
+      submitText: 'Enviar'
+    });
+    if (!data || !data.name || !String(data.name).trim()) return;
+
+    const name = String(data.name).trim();
+    const email = String(data.email || '').trim();
+    const phone = String(data.phone || '').trim();
 
     const lead = {
       id: 'LEAD-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
-      name: name.trim(),
-      email: email.trim(),
-      phone: phone.trim(),
-      company: company.trim(),
-      interest: interest.trim(),
+      name: name,
+      email: email,
+      phone: phone,
+      company: String(data.company || '').trim(),
+      interest: String(data.interest || 'General').trim(),
       source: location.pathname,
       url: location.href,
       userAgent: navigator.userAgent,
@@ -583,29 +786,51 @@
       body: JSON.stringify(lead)
     }).catch(() => { /* offline ok */ });
 
-    alert('¡Gracias ' + name.split(' ')[0] + '!\n\nTe contactaremos pronto al ' + (email || phone) + '.\n\nID de seguimiento: ' + lead.id);
-    showToast('Lead capturado: ' + lead.id, 'success');
+    showToast('¡Gracias ' + name.split(' ')[0] + '! Te contactaremos pronto. ID: ' + lead.id, 'success');
   };
 
   window.landingRequestDemo = function() {
-    alert('Te llamamos en 24 horas para tu demo personalizada.\n\nMientras tanto, prueba: ' + API + '/login.html\nUsuario demo: demo / demo123');
+    showToast('Te llamamos en 24 h. Demo en: ' + API + '/login.html (demo/demo123)', 'info');
     window.landingCaptureLead();
   };
 
-  window.landingRequestQuote = function() {
-    const product = prompt('¿Para qué producto necesitas cotización?\n(POS, Inventario, Multi-sucursal, Etiquetas, Todo)') || 'Todo';
-    const employees = prompt('¿Cuántos empleados o terminales?') || '1-5';
+  window.landingRequestQuote = async function() {
+    const data = await uiForm({
+      title: 'Solicitar cotización',
+      fields: [
+        { name: 'product', label: 'Producto', type: 'radio',
+          options: [
+            { value: 'POS',           label: 'POS' },
+            { value: 'Inventario',    label: 'Inventario' },
+            { value: 'Multi-sucursal',label: 'Multi-sucursal' },
+            { value: 'Etiquetas',     label: 'Etiquetas' },
+            { value: 'Todo',          label: 'Todo' }
+          ],
+          default: 'Todo', required: true },
+        { name: 'employees', label: 'Empleados o terminales', type: 'radio',
+          options: [
+            { value: '1-5',   label: '1 a 5' },
+            { value: '6-20',  label: '6 a 20' },
+            { value: '21-50', label: '21 a 50' },
+            { value: '50+',   label: 'Más de 50' }
+          ],
+          default: '1-5', required: true }
+      ],
+      submitText: 'Continuar'
+    });
+    if (!data) return;
 
     const quote = {
       id: 'QUOTE-' + Date.now(),
-      product, employees,
+      product: data.product || 'Todo',
+      employees: data.employees || '1-5',
       created: Date.now()
     };
     const quotes = JSON.parse(localStorage.getItem('volvix:quotes') || '[]');
     quotes.push(quote);
     localStorage.setItem('volvix:quotes', JSON.stringify(quotes));
 
-    alert('Solicitud de cotización registrada.\n\nID: ' + quote.id + '\n\nAhora capturamos tus datos para enviarte la propuesta.');
+    showToast('Cotización registrada (' + quote.id + '). Captura tus datos para recibir propuesta.', 'success');
     window.landingCaptureLead();
   };
 
@@ -625,7 +850,7 @@
     localStorage.setItem('volvix:visits', JSON.stringify(visits.slice(-200)));
   };
 
-  window.landingGetStats = function() {
+  window.landingGetStats = async function() {
     const visits = JSON.parse(localStorage.getItem('volvix:visits') || '[]');
     const leads = JSON.parse(localStorage.getItem('volvix:leads') || '[]');
     const quotes = JSON.parse(localStorage.getItem('volvix:quotes') || '[]');
@@ -641,13 +866,17 @@
       .map(p => p + ': ' + pageCount[p])
       .join('\n');
 
-    alert(
-      'STATS LANDING\n\n' +
-      'Visitas totales: ' + visits.length + '\n' +
-      'Leads capturados: ' + leads.length + '\n' +
-      'Cotizaciones: ' + quotes.length + '\n\n' +
-      'Top páginas:\n' + topPages
-    );
+    const summary =
+      'Visitas totales: ' + visits.length + ' | ' +
+      'Leads: ' + leads.length + ' | ' +
+      'Cotizaciones: ' + quotes.length + '. ' +
+      'Top: ' + (topPages.replace(/\n/g, ' · ') || 'sin datos');
+    if (uiAvailable() && typeof window.VolvixUI.alert === 'function') {
+      try { await window.VolvixUI.alert({ title: 'Stats Landing', message: summary }); }
+      catch { showToast(summary, 'info'); }
+    } else {
+      showToast(summary, 'info');
+    }
   };
 
   window.landingExportLeads = function() {
@@ -669,10 +898,23 @@
   // ============================================================
   // REMOTE CONTROL
   // ============================================================
-  window.remoteValidateCode = function() {
-    const code = prompt('Ingresa el código de soporte (6 dígitos):');
+  window.remoteValidateCode = async function() {
+    const data = await uiForm({
+      title: 'Soporte remoto',
+      fields: [{
+        name: 'code',
+        label: 'Código de soporte (4-8 dígitos)',
+        type: 'text',
+        required: true,
+        pattern: '^[0-9]{4,8}$',
+        placeholder: '123456',
+        help: 'Te lo proporciona el técnico de soporte'
+      }],
+      submitText: 'Conectar'
+    });
+    const code = data && data.code;
     if (!code || !/^\d{4,8}$/.test(code)) {
-      showToast('Código inválido (debe ser 4-8 dígitos)', 'error');
+      if (data) showToast('Código inválido (debe ser 4-8 dígitos)', 'error');
       return false;
     }
 
@@ -731,7 +973,7 @@
           if (document.body.contains(overlay)) {
             overlay.remove();
             window.remoteLogSession(code, 'connected');
-            alert('Sesión remota activa.\n\nUn técnico se ha conectado a tu sistema. Cierra esta ventana cuando termines.');
+            showToast('Sesión remota activa: un técnico se conectó a tu sistema.', 'success');
           }
         }, 1000);
       }
@@ -749,16 +991,20 @@
     localStorage.setItem('volvix:remote:log', JSON.stringify(log.slice(-50)));
   };
 
-  window.remoteShowLog = function() {
+  window.remoteShowLog = async function() {
     const log = JSON.parse(localStorage.getItem('volvix:remote:log') || '[]');
     if (log.length === 0) {
-      alert('Sin sesiones remotas registradas');
+      showToast('Sin sesiones remotas registradas', 'info');
       return;
     }
     const lines = log.slice(-10).reverse().map(l =>
       l.timestampISO + ' | ' + l.code + ' | ' + l.status + ' | ' + l.user
     ).join('\n');
-    alert('ÚLTIMAS SESIONES REMOTAS:\n\n' + lines);
+    if (uiAvailable() && typeof window.VolvixUI.alert === 'function') {
+      try { await window.VolvixUI.alert({ title: 'Últimas sesiones remotas', message: lines, monospace: true }); return; }
+      catch {}
+    }
+    showToast('Últimas sesiones: ' + lines.split('\n')[0], 'info');
   };
 
   window.remoteDisconnect = function() {
@@ -771,43 +1017,75 @@
   // ============================================================
   // UTILIDADES - CALCULADORA IVA
   // ============================================================
-  window.utilCalcIVA = function() {
-    const monto = parseFloat(prompt('Monto sin IVA:') || '0');
-    if (!monto || isNaN(monto)) return;
-    const tasaStr = prompt('Tasa IVA % (default 16):') || '16';
-    const tasa = parseFloat(tasaStr) / 100;
+  async function uiInfoAlert(title, message) {
+    if (uiAvailable() && typeof window.VolvixUI.alert === 'function') {
+      try { await window.VolvixUI.alert({ title: title, message: message }); return; }
+      catch {}
+    }
+    showToast(title + ': ' + message.replace(/\n/g, ' · '), 'info');
+  }
+
+  window.utilCalcIVA = async function() {
+    const data = await uiForm({
+      title: 'Calculadora IVA',
+      fields: [
+        { name: 'monto', label: 'Monto sin IVA', type: 'number', required: true, min: 0, step: 0.01 },
+        { name: 'tasa',  label: 'Tasa IVA (%)',  type: 'number', required: true, min: 0, max: 100, step: 0.01, default: 16 }
+      ],
+      submitText: 'Calcular'
+    });
+    if (!data) return;
+    const monto = parseFloat(data.monto) || 0;
+    const tasaPct = parseFloat(data.tasa);
+    if (!monto || isNaN(tasaPct)) return;
+    const tasa = tasaPct / 100;
     const iva = monto * tasa;
     const total = monto + iva;
-    alert(
-      'CÁLCULO IVA\n\n' +
+    await uiInfoAlert('Cálculo IVA',
       'Subtotal: $' + monto.toFixed(2) + '\n' +
-      'IVA (' + (tasa * 100).toFixed(0) + '%): $' + iva.toFixed(2) + '\n' +
+      'IVA (' + tasaPct.toFixed(0) + '%): $' + iva.toFixed(2) + '\n' +
       'TOTAL: $' + total.toFixed(2)
     );
   };
 
-  window.utilCalcComision = function() {
-    const monto = parseFloat(prompt('Monto base:') || '0');
-    if (!monto || isNaN(monto)) return;
-    const pct = parseFloat(prompt('% Comisión (default 10):') || '10');
+  window.utilCalcComision = async function() {
+    const data = await uiForm({
+      title: 'Calculadora de comisión',
+      fields: [
+        { name: 'monto', label: 'Monto base',     type: 'number', required: true, min: 0, step: 0.01 },
+        { name: 'pct',   label: '% Comisión',     type: 'number', required: true, min: 0, max: 100, step: 0.01, default: 10 }
+      ],
+      submitText: 'Calcular'
+    });
+    if (!data) return;
+    const monto = parseFloat(data.monto) || 0;
+    const pct = parseFloat(data.pct);
+    if (!monto || isNaN(pct)) return;
     const comision = monto * pct / 100;
     const neto = monto - comision;
-    alert(
-      'CÁLCULO COMISIÓN\n\n' +
+    await uiInfoAlert('Cálculo Comisión',
       'Bruto: $' + monto.toFixed(2) + '\n' +
       'Comisión (' + pct + '%): $' + comision.toFixed(2) + '\n' +
       'NETO: $' + neto.toFixed(2)
     );
   };
 
-  window.utilCalcDescuento = function() {
-    const precio = parseFloat(prompt('Precio original:') || '0');
-    if (!precio || isNaN(precio)) return;
-    const desc = parseFloat(prompt('% Descuento:') || '0');
+  window.utilCalcDescuento = async function() {
+    const data = await uiForm({
+      title: 'Calculadora de descuento',
+      fields: [
+        { name: 'precio', label: 'Precio original', type: 'number', required: true, min: 0, step: 0.01 },
+        { name: 'desc',   label: '% Descuento',     type: 'number', required: true, min: 0, max: 100, step: 0.01 }
+      ],
+      submitText: 'Calcular'
+    });
+    if (!data) return;
+    const precio = parseFloat(data.precio) || 0;
+    const desc = parseFloat(data.desc);
+    if (!precio || isNaN(desc)) return;
     const ahorro = precio * desc / 100;
     const final = precio - ahorro;
-    alert(
-      'CÁLCULO DESCUENTO\n\n' +
+    await uiInfoAlert('Cálculo Descuento',
       'Precio original: $' + precio.toFixed(2) + '\n' +
       'Descuento (' + desc + '%): -$' + ahorro.toFixed(2) + '\n' +
       'PRECIO FINAL: $' + final.toFixed(2)
@@ -833,26 +1111,50 @@
     temperatura: { C: 'special', F: 'special', K: 'special' }
   };
 
-  window.utilConvertUnit = function() {
+  window.utilConvertUnit = async function() {
     const cats = Object.keys(UNIT_CONVERSIONS);
-    const catChoice = prompt('Categoría:\n' + cats.map((c, i) => (i + 1) + '. ' + c).join('\n') + '\n\nElige número:');
-    const catIdx = parseInt(catChoice) - 1;
-    if (catIdx < 0 || catIdx >= cats.length) return;
-    const cat = cats[catIdx];
+
+    // Paso 1: elegir categoría (radio, son <=7)
+    const step1 = await uiForm({
+      title: 'Conversor de unidades',
+      fields: [{
+        name: 'cat',
+        label: 'Categoría',
+        type: 'radio',
+        options: cats.map(c => ({ value: c, label: c.charAt(0).toUpperCase() + c.slice(1) })),
+        default: cats[0],
+        required: true
+      }],
+      submitText: 'Continuar'
+    });
+    if (!step1 || !step1.cat) return;
+    const cat = step1.cat;
     const units = Object.keys(UNIT_CONVERSIONS[cat]);
 
-    const value = parseFloat(prompt('Valor:') || '0');
-    if (isNaN(value)) return;
+    // Paso 2: valor y unidades (radio si <=7, select si más)
+    const useRadio = units.length <= 7;
+    const step2 = await uiForm({
+      title: 'Conversión: ' + cat,
+      fields: [
+        { name: 'value',    label: 'Valor',          type: 'number', required: true, step: 0.0001 },
+        { name: 'fromUnit', label: 'Unidad origen',  type: useRadio ? 'radio' : 'select',
+          options: units.map(u => ({ value: u, label: u })), default: units[0], required: true },
+        { name: 'toUnit',   label: 'Unidad destino', type: useRadio ? 'radio' : 'select',
+          options: units.map(u => ({ value: u, label: u })), default: units[1] || units[0], required: true }
+      ],
+      submitText: 'Convertir'
+    });
+    if (!step2) return;
 
-    const fromUnit = prompt('Unidad origen (' + units.join(', ') + '):');
-    const toUnit = prompt('Unidad destino (' + units.join(', ') + '):');
+    const value = parseFloat(step2.value);
+    if (isNaN(value)) return;
+    const fromUnit = step2.fromUnit, toUnit = step2.toUnit;
     if (!fromUnit || !toUnit) return;
 
     let result;
     if (cat === 'temperatura') {
-      // C -> F: F = C*9/5+32 ; F -> C: C = (F-32)*5/9 ; C -> K: K = C+273.15
-      const toC = (v, u) => u === 'C' ? v : u === 'F' ? (v - 32) * 5 / 9 : v - 273.15;
-      const fromC = (v, u) => u === 'C' ? v : u === 'F' ? v * 9 / 5 + 32 : v + 273.15;
+      const toC   = (v, u) => u === 'C' ? v : u === 'F' ? (v - 32) * 5 / 9 : v - 273.15;
+      const fromC = (v, u) => u === 'C' ? v : u === 'F' ? v * 9 / 5 + 32   : v + 273.15;
       result = fromC(toC(value, fromUnit), toUnit);
     } else {
       const factorFrom = UNIT_CONVERSIONS[cat][fromUnit];
@@ -864,7 +1166,7 @@
       result = (value * factorFrom) / factorTo;
     }
 
-    alert('CONVERSIÓN\n\n' + value + ' ' + fromUnit + ' = ' + result.toFixed(4) + ' ' + toUnit);
+    await uiInfoAlert('Conversión', value + ' ' + fromUnit + ' = ' + result.toFixed(4) + ' ' + toUnit);
   };
 
   // ============================================================
@@ -915,7 +1217,11 @@
           products.push(product);
         }
 
-        if (!confirm('Encontrados ' + products.length + ' productos en el CSV.\n¿Importar al sistema?')) return;
+        const okImport = await uiConfirm({
+          title: 'Importar CSV',
+          message: 'Encontrados ' + products.length + ' productos en el CSV. ¿Importar al sistema?'
+        });
+        if (!okImport) return;
 
         showToast('Importando ' + products.length + ' productos...', 'info');
         let success = 0, failed = 0;
@@ -934,7 +1240,11 @@
         const local = JSON.parse(localStorage.getItem('volvix:products') || '[]');
         localStorage.setItem('volvix:products', JSON.stringify(local.concat(products)));
 
-        alert('IMPORTACIÓN COMPLETA\n\nÉxito: ' + success + '\nFallaron: ' + failed + '\nTotal: ' + products.length);
+        const summary = 'Éxito: ' + success + ' · Fallaron: ' + failed + ' · Total: ' + products.length;
+        showToast('Importación completa — ' + summary, failed === 0 ? 'success' : 'warn');
+        if (uiAvailable() && typeof window.VolvixUI.alert === 'function') {
+          try { await window.VolvixUI.alert({ title: 'Importación completa', message: 'Éxito: ' + success + '\nFallaron: ' + failed + '\nTotal: ' + products.length }); } catch {}
+        }
       } catch (err) {
         showToast('Error leyendo CSV: ' + err.message, 'error');
       }

@@ -77,13 +77,29 @@
     }
 
     function getSeenVersion() {
-        try { return global.localStorage.getItem(SEEN_KEY) || ''; }
-        catch (e) { return ''; }
+        try {
+            // R26 Bug 4: leer ambas claves para retro-compat (legacy + per-version)
+            var legacy = global.localStorage.getItem(SEEN_KEY) || '';
+            if (legacy) return legacy;
+            // Buscar cualquier clave volvix_news_seen_v* y devolver la mayor
+            var best = '';
+            for (var i = 0; i < global.localStorage.length; i++) {
+                var k = global.localStorage.key(i);
+                if (k && k.indexOf('volvix_news_seen_v') === 0) {
+                    var v = k.replace('volvix_news_seen_v', '');
+                    if (!best || compareVersions(v, best) > 0) best = v;
+                }
+            }
+            return best;
+        } catch (e) { return ''; }
     }
 
     function setSeenVersion(v) {
-        try { global.localStorage.setItem(SEEN_KEY, v); }
-        catch (e) { /* ignore */ }
+        try {
+            global.localStorage.setItem(SEEN_KEY, v);
+            // R26 Bug 4: doble persistencia para sobrevivir limpieza parcial al logout
+            global.localStorage.setItem('volvix_news_seen_v' + v, '1');
+        } catch (e) { /* ignore */ }
     }
 
     // ─────────────────────────────────────────────────────────────────────

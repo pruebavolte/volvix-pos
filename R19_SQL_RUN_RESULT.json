@@ -1,0 +1,121 @@
+{
+  "ok": [
+    "R14_AI_LOG.sql",
+    "R14_AUDIT_GDPR.sql",
+    "R14_CASH_SESSIONS.sql",
+    "R14_CREDITS.sql",
+    "R14_CUSTOMER_AUTH.sql",
+    "R14_EMAIL_LOG.sql",
+    "R14_ERROR_LOG.sql",
+    "R14_MFA.sql",
+    "R14_PAYMENTS.sql",
+    "R14_PRINTERS.sql",
+    "R14_PUSH_SUBS.sql",
+    "R14_QUOTATIONS.sql",
+    "R14_REPORTS_VIEWS.sql",
+    "R14_RETURNS.sql",
+    "R14_SAT_CATALOGS.sql",
+    "R14_SUBSCRIPTIONS.sql",
+    "R14_WEBHOOKS.sql",
+    "R17_APPOINTMENTS.sql",
+    "R17_BUNDLES.sql",
+    "R17_DISCORD.sql",
+    "R17_FRAUD.sql",
+    "R17_GIFTCARDS.sql",
+    "R17_KIOSK.sql",
+    "R17_ML.sql",
+    "R17_OCR.sql",
+    "R17_PROMOTIONS.sql",
+    "R17_QR_PAYMENTS.sql",
+    "R17_RETURNS_EXTENDED.sql",
+    "R17_SEGMENTS.sql",
+    "R17_TELEGRAM.sql",
+    "R17_TIPS.sql",
+    "R17_WALLETS.sql",
+    "R17_WAREHOUSES.sql",
+    "R17_WHATSAPP.sql",
+    "R18_ACCOUNTING_SAT.sql",
+    "R18_CLOUD_BACKUP.sql",
+    "R18_CRM_ADVANCED.sql",
+    "R18_HR.sql",
+    "R18_KDS.sql",
+    "R18_MARKETPLACE.sql",
+    "R18_MERCADOLIBRE.sql",
+    "R18_NFT_LOYALTY.sql",
+    "R18_PAYROLL.sql",
+    "R18_SHOPIFY.sql",
+    "R18_SQUARE_SYNC.sql"
+  ],
+  "fail": [
+    {
+      "file": "R14_INDEXES.sql",
+      "status": 400,
+      "msg": "{\"message\":\"Failed to run sql query: ERROR:  42703: column \\\"pos_user_id\\\" does not exist\\n\"}"
+    },
+    {
+      "file": "R14_CURRENCIES.sql",
+      "status": 400,
+      "msg": "{\"message\":\"Failed to run sql query: ERROR:  42P17: functions in index expression must be marked IMMUTABLE\\n\"}"
+    },
+    {
+      "file": "R14_API_KEYS.sql",
+      "status": 400,
+      "msg": "{\"message\":\"Failed to run sql query: ERROR:  42703: column \\\"revoked_at\\\" does not exist\\nLINE 24: CREATE INDEX IF NOT EXISTS idx_api_keys_tenant       ON api_keys(tenant_id) WHERE revoked_at IS NULL;\\n                                                "
+    },
+    {
+      "file": "R14_CFDI_TABLES.sql",
+      "status": 400,
+      "msg": "{\"message\":\"Failed to run sql query: ERROR:  42883: operator does not exist: text = uuid\\nHINT:  No operator matches the given name and argument types. You might need to add explicit type casts.\\n\"}"
+    },
+    {
+      "file": "R14_INVENTORY.sql",
+      "status": 400,
+      "msg": "{\"message\":\"Failed to run sql query: ERROR:  42883: function app.current_role() does not exist\\nLINE 24:   LANGUAGE sql STABLE AS $$ SELECT app.current_role() = 'manager' $$;\\n                                            ^\\nHINT:  No function matches "
+    },
+    {
+      "file": "R14_LOYALTY.sql",
+      "status": 400,
+      "msg": "{\"message\":\"Failed to run sql query: ERROR:  42703: column \\\"tenant_id\\\" does not exist\\n\"}"
+    },
+    {
+      "file": "R14_REALTIME.sql",
+      "status": 400,
+      "msg": "{\"message\":\"Failed to run sql query: ERROR:  42601: too many parameters specified for RAISE\\nCONTEXT:  compilation of PL/pgSQL function \\\"inline_code_block\\\" near line 13\\n\"}"
+    },
+    {
+      "file": "R14_VERTICAL_TEMPLATES.sql",
+      "status": 400,
+      "msg": "{\"message\":\"Failed to run sql query: ERROR:  42P01: relation \\\"companies\\\" does not exist\\n\"}"
+    },
+    {
+      "file": "R17_GEOFENCE.sql",
+      "status": 400,
+      "msg": "{\"message\":\"Failed to run sql query: ERROR:  42P01: relation \\\"public.pos_branches\\\" does not exist\\n\"}"
+    },
+    {
+      "file": "R17_SMS.sql",
+      "status": 400,
+      "msg": "{\"message\":\"Failed to run sql query: ERROR:  42703: column u.tenant_id does not exist\\n\"}"
+    },
+    {
+      "file": "R18_AMAZON.sql",
+      "status": 400,
+      "msg": "{\"message\":\"Failed to run sql query: ERROR:  42804: foreign key constraint \\\"amazon_orders_mirror_internal_sale_id_fkey\\\" cannot be implemented\\nDETAIL:  Key columns \\\"internal_sale_id\\\" and \\\"id\\\" are of incompatible types: bigint and uuid.\\n\"}"
+    },
+    {
+      "file": "R18_SHOP.sql",
+      "status": 400,
+      "msg": "{\"message\":\"Failed to run sql query: ERROR:  42P01: relation \\\"pos_tenants\\\" does not exist\\n\"}"
+    },
+    {
+      "file": "R13_RLS_POLICIES.sql",
+      "status": 400,
+      "msg": "{\"message\":\"Failed to run sql query: ERROR:  42P01: relation \\\"public.inventory_movements\\\" does not exist\\n\"}"
+    },
+    {
+      "file": "R16_RLS_HARDENING.sql",
+      "status": 400,
+      "msg": "{\"message\":\"Failed to run sql query: ERROR:  P0001: app.current_tenant_id() missing — run R13_RLS_POLICIES.sql first\\nCONTEXT:  PL/pgSQL function inline_code_block line 8 at RAISE\\n\"}"
+    }
+  ]
+}

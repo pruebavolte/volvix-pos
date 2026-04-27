@@ -1,0 +1,32 @@
+{
+  "slice": 211,
+  "idx_range": [3220, 3240],
+  "module": "R18_KDS",
+  "ts": "2026-04-26T00:00:00Z",
+  "summary": "Kitchen Display System: pantalla full-screen 3 columnas con drag&drop, auto-refresh 5s, sound alert y coloreo por urgencia (>15min rojo).",
+  "artifacts": [
+    {"idx": 3220, "path": "volvix-kds.html",                "kind": "ui",     "lines": 165, "features": ["fullscreen","drag-drop","timer","sound","filter-station"]},
+    {"idx": 3221, "path": "db/R18_KDS.sql",                 "kind": "schema", "lines": 50,  "tables": ["kds_stations","kds_tickets"]},
+    {"idx": 3222, "path": "api/index.js",                   "kind": "api",    "added_handlers": 5},
+    {"idx": 3223, "path": "R18_KDS.md",                     "kind": "doc"},
+    {"idx": 3224, "endpoint": "POST /api/kds/tickets"},
+    {"idx": 3225, "endpoint": "GET /api/kds/tickets/active"},
+    {"idx": 3226, "endpoint": "PATCH /api/kds/tickets/:id/status"},
+    {"idx": 3227, "endpoint": "POST /api/kds/stations"},
+    {"idx": 3228, "endpoint": "GET /api/kds/stations"},
+    {"idx": 3229, "trigger": "kds_touch (auto-fills started_at/ready_at/served_at)"},
+    {"idx": 3230, "index": "kds_tickets_active_idx (partial)"},
+    {"idx": 3231, "stations_seed": ["grill","cold","bar","dessert"]},
+    {"idx": 3232, "status_enum": ["received","preparing","ready","served","canceled"]},
+    {"idx": 3233, "ui_threshold": {"warn_min": 10, "urgent_min": 15}},
+    {"idx": 3234, "refresh_interval_ms": 5000},
+    {"idx": 3235, "auth": "Bearer JWT via localStorage volvix_token"},
+    {"idx": 3236, "drag_drop": "HTML5 native dataTransfer"},
+    {"idx": 3237, "sound": "Audio ding on new ticket detected vs prior cycle"},
+    {"idx": 3238, "timer": "1s tick recalculates elapsed since created_at"},
+    {"idx": 3239, "tested": false},
+    {"idx": 3240, "next": "wire-from-sale-confirmed-hook"}
+  ],
+  "status": "delivered",
+  "notes": "Frontend asume window.VOLVIX_API base URL; integrar disparo desde sale confirmada vía hook existente."
+}

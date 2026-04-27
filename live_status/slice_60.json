@@ -1,0 +1,39 @@
+{
+  "slice": 60,
+  "idx_range": [1500, 1540],
+  "task": "pen-test SQL injection",
+  "timestamp": "2026-04-26",
+  "target": "https://volvix-pos.vercel.app",
+  "auth": { "login_ok": true, "role": "superadmin", "tenant_id": "TNT001" },
+  "endpoints_tested": [
+    { "endpoint": "GET /api/products?q=", "payloads": 5, "max_time_s": 0.37, "status": "safe", "notes": "Returns []; parameterized" },
+    { "endpoint": "GET /api/products?tenant_id=", "payloads": 5, "max_time_s": 0.32, "status": "safe", "notes": "Stored as literal string in tenant_id field; query parameterized" },
+    { "endpoint": "GET /api/customers?email=", "payloads": 5, "max_time_s": 0.41, "status": "filter_ignored", "notes": "email param ignored; returns full set regardless. Not SQLi but a filter bug" },
+    { "endpoint": "POST /api/login", "payloads": 3, "max_time_s": 0.31, "status": "safe", "notes": "Returns 401 generic for all SQLi payloads" },
+    { "endpoint": "GET /api/sales/:id", "payloads": 4, "max_time_s": 0.28, "status": "not_implemented", "notes": "404 endpoint not found for /:id route" },
+    { "endpoint": "GET /api/products/:id", "payloads": 4, "max_time_s": 0.28, "status": "not_implemented", "notes": "404 endpoint not found for /:id route" }
+  ],
+  "sleep_test": {
+    "max_observed_s": 0.52,
+    "threshold_s": 2.0,
+    "result": "PASS - no payload caused sleep"
+  },
+  "null_byte_test": { "endpoint": "GET /api/products?q=\\x00", "result": "200, returns full list, no error leak" },
+  "sqli_findings": "NONE - all endpoints use parameterized queries",
+  "fixes_applied": [
+    { "file": "volvix-wiring.js:112", "issue": "tenantId concatenated without encode", "fix": "encodeURIComponent(tenantId)" },
+    { "file": "volvix-pos-wiring.js:267", "issue": "session_id concatenated without encode", "fix": "encodeURIComponent(session_id)" },
+    { "file": "volvix-multipos-wiring.js:69-70", "issue": "tenantId concatenated", "fix": "encodeURIComponent on user_id and tenant_id" },
+    { "file": "volvix-multipos-wiring.js:165", "issue": "tenantId in window.open URL", "fix": "encodeURIComponent(tenantId)" },
+    { "file": "volvix-multipos-extra-wiring.js:595", "issue": "branch.id concatenated", "fix": "encodeURIComponent(branch.id)" },
+    { "file": "volvix-inventory-ai-wiring.js:76", "issue": "days param concatenated", "fix": "encodeURIComponent(days)" },
+    { "file": "volvix-marketing-wiring.js:251", "issue": "landingSlug, cmp.id, c.id in landing URL", "fix": "encodeURIComponent on all three" },
+    { "file": "api/index.js:4306", "issue": "token, row.id in verify_url", "fix": "encodeURIComponent on token and row.id" }
+  ],
+  "non_critical_observations": [
+    "/api/customers?email filter is silently ignored (returns full set). Not SQLi but breaks expected behavior.",
+    "Stored payloads in tenant_id (XSS341 record name='alert(1)SafeName' tenant_id=\"' OR '1'='1\") indicate POST input lacks server-side validation/sanitization (separate issue, not SQLi).",
+    "auth-gate.js redirect already uses encodeURIComponent for redirectUrl; expired is numeric so safe."
+  ],
+  "verdict": "NO SQL INJECTION VULNERABILITY DETECTED"
+}

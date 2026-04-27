@@ -19,9 +19,17 @@
   // ───────────────────────────────────────────────────────────────────────
   // CONFIGURACIÓN
   // ───────────────────────────────────────────────────────────────────────
-  const SUPABASE_URL = 'https://zhvwmzkcqngcaqpdxtwr.supabase.co';
+  // Configuración cargada desde window.* o env. Nunca hardcodear keys aquí.
+  const SUPABASE_URL =
+    (typeof window !== 'undefined' && window.SUPABASE_URL) || '';
   const SUPABASE_ANON_KEY =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpodndtemtjcW5nY2FxcGR4dHdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxNjcwMTgsImV4cCI6MjA3OTc0MzAxOH0.ygTc754INgqYJEMD0wc_CzRCzRxUfp4hq3rYvJRpjkk';
+    (typeof window !== 'undefined' && (window.SUPABASE_ANON_KEY || window.VOLVIX_ANON_KEY)) || null;
+
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    console.warn('[Realtime] SUPABASE_URL/ANON_KEY missing — realtime wiring disabled');
+    if (typeof window !== 'undefined') window.RealtimeAPI = { disabled: true, connect: () => {}, disconnect: () => {} };
+    return;
+  }
 
   const WS_HOST = SUPABASE_URL.replace(/^https?:\/\//, '');
   const WS_URL =
@@ -33,6 +41,7 @@
 
   const RECONNECT_BASE_MS = 1000;
   const RECONNECT_MAX_MS = 30000;
+  const RECONNECT_MAX_ATTEMPTS = 5; // R26 Bug 2: dar up tras 5 intentos
   const HEARTBEAT_INTERVAL_MS = 25000;
   const CONNECT_TIMEOUT_MS = 12000;
 
@@ -487,6 +496,12 @@
   function scheduleReconnect() {
     if (state.manuallyClosed) return;
     if (state.reconnectTimer) return;
+    // R26 Bug 2: dar up tras N intentos para evitar loop infinito cada 3s
+    if (state.reconnectAttempts >= RECONNECT_MAX_ATTEMPTS) {
+      warn('reconnect attempts exhausted (' + RECONNECT_MAX_ATTEMPTS + ') — giving up. Click WS indicator para reintentar manual.');
+      setStatus('error');
+      return;
+    }
     state.reconnectAttempts++;
     state.stats.reconnects++;
     const delay = Math.min(

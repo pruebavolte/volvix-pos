@@ -109,7 +109,7 @@
     const tenantId = session?.tenant_id || 'TNT001';
 
     try {
-      const products = await api(`/api/products?tenant_id=${tenantId}`);
+      const products = await api(`/api/products?tenant_id=${encodeURIComponent(tenantId)}`);
       const cache = loadCache();
       cache.products = products;
       cache.products_synced_at = Date.now();

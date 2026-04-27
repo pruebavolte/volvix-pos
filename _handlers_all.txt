@@ -1,0 +1,81 @@
+1785:    handlers['POST ' + k] = requireAuth(persist(k));
+1786:    handlers['GET '  + k] = requireAuth(list(k));
+1789:    handlers['POST ' + base + '/:sub'] = requireAuth(async (req, res, params) => {
+1792:    handlers['GET ' + base + '/:sub'] = requireAuth(async (req, res, params) => {
+1796:  handlers['GET /api/search'] = requireAuth(async (req, res) => {
+1806:  handlers['POST /api/search'] = requireAuth(async (req, res) => {
+1810:  handlers['GET /api/reports/inventory'] = requireAuth(async (req, res) => {
+1817:  handlers['POST /api/owner/settings'] = requireAuth(async (req, res) => {
+1826:  handlers['GET /api/owner/settings'] = requireAuth(async (req, res) => {
+1834:  delete handlers['__TOP10_PLACEHOLDER__'];
+1868:  handlers['GET /api/inventory/locations'] = requireAuth(async (req, res) => {
+1880:  handlers['POST /api/inventory/locations'] = requireAuth(async (req, res) => {
+1902:  handlers['PATCH /api/inventory/locations/:id'] = requireAuth(async (req, res, params) => {
+1919:  handlers['GET /api/inventory/stock'] = requireAuth(async (req, res) => {
+1943:  handlers['POST /api/inventory/movements'] = requireAuth(async (req, res) => {
+1986:  handlers['POST /api/inventory/adjust'] = requireAuth(async (req, res) => {
+2014:  handlers['POST /api/inventory/counts/start'] = requireAuth(async (req, res) => {
+2031:  handlers['POST /api/inventory/counts/:id/lines'] = requireAuth(async (req, res, params) => {
+2061:  handlers['POST /api/inventory/counts/:id/finalize'] = requireAuth(async (req, res, params) => {
+2174:  handlers['GET /api/onboarding/sat-lookup'] = async (req, res) => {
+2185:  handlers['GET /api/onboarding/template'] = async (req, res) => {
+2194:  handlers['GET /api/onboarding/sat-regimenes'] = async (req, res) => {
+2198:  handlers['POST /api/onboarding/start'] = async (req, res) => {
+2254:  handlers['POST /api/onboarding/step'] = requireAuth(async (req, res) => {
+2271:  handlers['POST /api/onboarding/complete'] = requireAuth(async (req, res) => {
+2291:  handlers['POST /api/onboarding/import-products'] = requireAuth(async (req, res) => {
+2369:  handlers['GET /api/currencies'] = async (req, res) => {
+2378:  handlers['GET /api/fx/rates'] = async (req, res) => {
+2398:  handlers['POST /api/fx/refresh'] = requireAuth(async (req, res) => {
+2552:  handlers['GET /api/webhooks'] = requireAuth(async (req, res) => {
+2563:  handlers['POST /api/webhooks'] = requireAuth(async (req, res) => {
+2585:  handlers['PATCH /api/webhooks/:id'] = requireAuth(async (req, res, params) => {
+2605:  handlers['DELETE /api/webhooks/:id'] = requireAuth(async (req, res, params) => {
+2613:  handlers['POST /api/webhooks/:id/test'] = requireAuth(async (req, res, params) => {
+2628:  handlers['GET /api/webhooks/:id/deliveries'] = requireAuth(async (req, res, params) => {
+2784:handlers['POST /api/auth/password-reset/request'] = async (req, res) => {
+2813:handlers['POST /api/auth/password-reset/confirm'] = async (req, res) => {
+2839:handlers['POST /api/admin/jobs/low-stock-alert'] = requireAuth(async (req, res) => {
+2874:handlers['GET /api/openapi.yaml'] = async (req, res) => {
+2886:handlers['GET /api/docs'] = async (req, res) => {
+2901:handlers['POST /api/printer/raw'] = requireAuth(async (req, res) => {
+3052:handlers['GET /api/billing/plans'] = async (req, res) => {
+3060:handlers['GET /api/billing/subscription'] = requireAuth(async (req, res) => {
+3067:handlers['POST /api/billing/subscribe'] = requireAuth(async (req, res) => {
+3122:handlers['POST /api/billing/cancel'] = requireAuth(async (req, res) => {
+3173:handlers['POST /api/billing/upgrade'] = requireAuth(async (req, res) => {
+3177:handlers['POST /api/billing/downgrade'] = requireAuth(async (req, res) => {
+3181:handlers['GET /api/billing/invoices'] = requireAuth(async (req, res) => {
+3190:handlers['GET /api/billing/usage'] = requireAuth(async (req, res) => {
+3208:if (handlers['POST /api/products'])              handlers['POST /api/products']              = enforcePlanLimits('products')(handlers['POST /api/products']);
+3209:if (handlers['POST /api/owner/users'])           handlers['POST /api/owner/users']           = enforcePlanLimits('users')(handlers['POST /api/owner/users']);
+3210:if (handlers['POST /api/inventory/locations'])   handlers['POST /api/inventory/locations']   = enforcePlanLimits('locations')(handlers['POST /api/inventory/locations']);
+3211:if (handlers['POST /api/sales'])                 handlers['POST /api/sales']                 = enforcePlanLimits('sales')(handlers['POST /api/sales']);
+3347:handlers['GET /api/push/vapid-public-key'] = async (req, res) => {
+3351:handlers['POST /api/push/subscribe'] = requireAuth(async (req, res) => {
+3378:handlers['POST /api/push/unsubscribe'] = requireAuth(async (req, res) => {
+3390:handlers['POST /api/push/send'] = requireAuth(async (req, res) => {
+3473:handlers['POST /api/payments/stripe/intent'] = requireAuth(async (req, res) => {
+3510:handlers['POST /api/payments/stripe/webhook'] = async (req, res) => {
+3556:handlers['GET /api/payments/:id/status'] = requireAuth(async (req, res, params) => {
+3575:handlers['GET /api/loyalty/customers/:id'] = requireAuth(async (req, res, params) => {
+3588:handlers['POST /api/loyalty/redeem'] = requireAuth(async (req, res) => {
+3612:handlers['GET /api/loyalty/tiers'] = requireAuth(async (req, res) => {
+3623:handlers['POST /api/loyalty/tiers'] = requireAuth(async (req, res) => {
+3638:handlers['POST /api/loyalty/adjust'] = async (req, res) => {
+3672:handlers['GET /api/reports/sales/daily'] = requireAuth(async (req, res) => {
+3683:handlers['GET /api/reports/sales/by-product'] = requireAuth(async (req, res) => {
+3695:handlers['GET /api/reports/sales/by-cashier'] = requireAuth(async (req, res) => {
+3705:handlers['GET /api/reports/inventory/value'] = requireAuth(async (req, res) => {
+3715:handlers['GET /api/reports/customers/cohort'] = requireAuth(async (req, res) => {
+3724:handlers['GET /api/reports/profit'] = requireAuth(async (req, res) => {
+3734:handlers['GET /api/reports/abc-analysis'] = requireAuth(async (req, res) => {
+3744:handlers['POST /api/reports/refresh'] = requireAuth(async (req, res) => {
+3754:handlers['GET /api/audit-log'] = requireAuth(async (req, res) => {
+3815:handlers['POST /api/gdpr/access'] = (req, res) => gdprHandler(req, res, 'Art.15');
+3816:handlers['POST /api/gdpr/erasure'] = (req, res) => gdprHandler(req, res, 'Art.17');
+3817:handlers['POST /api/gdpr/portability'] = (req, res) => gdprHandler(req, res, 'Art.20');
+3843:handlers['POST /api/invoices/cfdi'] = requireAuth(async (req, res) => {
+3891:handlers['POST /api/invoices/cfdi/cancel'] = requireAuth(async (req, res) => {
+3918:handlers['GET /api/invoices/cfdi/:uuid/status'] = requireAuth(async (req, res, params) => {
+3949:handlers['GET /api/config/public'] = async (req, res) => {

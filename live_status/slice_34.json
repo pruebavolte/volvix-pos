@@ -1,0 +1,839 @@
+{
+  "summary": {
+    "slice": 34,
+    "module": "REPORTS",
+    "total_tests": 41,
+    "http_500_count": 0,
+    "http_200_count": 27,
+    "http_400_count": 7,
+    "http_403_count": 7,
+    "endpoints_tested": [
+      "/api/reports/sales/daily",
+      "/api/reports/sales/by-product",
+      "/api/reports/sales/by-cashier",
+      "/api/reports/inventory/value",
+      "/api/reports/customers/cohort",
+      "/api/reports/profit",
+      "/api/reports/abc-analysis",
+      "/api/reports/fiscal",
+      "/api/reports/daily"
+    ],
+    "verdict": "PASS_NO_500"
+  },
+  "results": [
+    {
+      "idx": 820,
+      "test": "T1_admin",
+      "method": "GET",
+      "path": "/api/reports/sales/daily",
+      "http": 200,
+      "ok": true,
+      "keys": [
+        "ok",
+        "tenant_id",
+        "period",
+        "items",
+        "data",
+        "total",
+        "note",
+        "generated_at",
+        "daily"
+      ],
+      "tenant_id": "TNT001",
+      "note": "pending mv refresh (mv_sales_daily)"
+    },
+    {
+      "idx": 821,
+      "test": "T2_cajero_403",
+      "method": "GET",
+      "path": "/api/reports/sales/daily",
+      "http": 403,
+      "ok": false,
+      "keys": [
+        "ok",
+        "error",
+        "need",
+        "have"
+      ],
+      "tenant_id": null,
+      "note": null
+    },
+    {
+      "idx": 822,
+      "test": "T3_no_range",
+      "method": "GET",
+      "path": "/api/reports/sales/daily",
+      "http": 200,
+      "ok": true,
+      "keys": [
+        "ok",
+        "tenant_id",
+        "period",
+        "items",
+        "data",
+        "total",
+        "note",
+        "generated_at",
+        "daily"
+      ],
+      "tenant_id": "TNT001",
+      "note": "pending mv refresh (mv_sales_daily)"
+    },
+    {
+      "idx": 823,
+      "test": "T4_inverted_400",
+      "method": "GET",
+      "path": "/api/reports/sales/daily",
+      "http": 400,
+      "ok": false,
+      "keys": [
+        "ok",
+        "error",
+        "from",
+        "to"
+      ],
+      "tenant_id": null,
+      "note": null
+    },
+    {
+      "idx": 824,
+      "test": "T5_range_2y",
+      "method": "GET",
+      "path": "/api/reports/sales/daily",
+      "http": 200,
+      "ok": true,
+      "keys": [
+        "ok",
+        "tenant_id",
+        "period",
+        "items",
+        "data",
+        "total",
+        "note",
+        "generated_at",
+        "daily",
+        "range_limited"
+      ],
+      "tenant_id": "TNT001",
+      "note": "pending mv refresh (mv_sales_daily)"
+    },
+    {
+      "idx": 825,
+      "test": "T6_owner_TNT002",
+      "method": "GET",
+      "path": "/api/reports/sales/daily",
+      "http": 200,
+      "ok": true,
+      "keys": [
+        "ok",
+        "tenant_id",
+        "period",
+        "items",
+        "data",
+        "total",
+        "note",
+        "generated_at",
+        "daily"
+      ],
+      "tenant_id": "TNT002",
+      "note": "pending mv refresh (mv_sales_daily)"
+    },
+    {
+      "idx": 826,
+      "test": "T1_admin",
+      "method": "GET",
+      "path": "/api/reports/sales/by-product",
+      "http": 200,
+      "ok": true,
+      "keys": [
+        "ok",
+        "tenant_id",
+        "period",
+        "items",
+        "data",
+        "total",
+        "note",
+        "generated_at",
+        "by_product"
+      ],
+      "tenant_id": "TNT001",
+      "note": "pending mv refresh (mv_top_products)"
+    },
+    {
+      "idx": 827,
+      "test": "T2_cajero_403",
+      "method": "GET",
+      "path": "/api/reports/sales/by-product",
+      "http": 403,
+      "ok": false,
+      "keys": [
+        "ok",
+        "error",
+        "need",
+        "have"
+      ],
+      "tenant_id": null,
+      "note": null
+    },
+    {
+      "idx": 828,
+      "test": "T3_no_range",
+      "method": "GET",
+      "path": "/api/reports/sales/by-product",
+      "http": 200,
+      "ok": true,
+      "keys": [
+        "ok",
+        "tenant_id",
+        "period",
+        "items",
+        "data",
+        "total",
+        "note",
+        "generated_at",
+        "by_product"
+      ],
+      "tenant_id": "TNT001",
+      "note": "pending mv refresh (mv_top_products)"
+    },
+    {
+      "idx": 829,
+      "test": "T4_inverted_400",
+      "method": "GET",
+      "path": "/api/reports/sales/by-product",
+      "http": 400,
+      "ok": false,
+      "keys": [
+        "ok",
+        "error",
+        "from",
+        "to"
+      ],
+      "tenant_id": null,
+      "note": null
+    },
+    {
+      "idx": 830,
+      "test": "T5_range_2y",
+      "method": "GET",
+      "path": "/api/reports/sales/by-product",
+      "http": 200,
+      "ok": true,
+      "keys": [
+        "ok",
+        "tenant_id",
+        "period",
+        "items",
+        "data",
+        "total",
+        "note",
+        "generated_at",
+        "by_product",
+        "range_limited"
+      ],
+      "tenant_id": "TNT001",
+      "note": "pending mv refresh (mv_top_products)"
+    },
+    {
+      "idx": 831,
+      "test": "T6_owner_TNT002",
+      "method": "GET",
+      "path": "/api/reports/sales/by-product",
+      "http": 200,
+      "ok": true,
+      "keys": [
+        "ok",
+        "tenant_id",
+        "period",
+        "items",
+        "data",
+        "total",
+        "note",
+        "generated_at",
+        "by_product"
+      ],
+      "tenant_id": "TNT002",
+      "note": "pending mv refresh (mv_top_products)"
+    },
+    {
+      "idx": 832,
+      "test": "T1_admin",
+      "method": "GET",
+      "path": "/api/reports/sales/by-cashier",
+      "http": 200,
+      "ok": true,
+      "keys": [
+        "ok",
+        "tenant_id",
+        "period",
+        "items",
+        "data",
+        "total",
+        "note",
+        "generated_at",
+        "by_cashier"
+      ],
+      "tenant_id": "TNT001",
+      "note": "pending mv refresh (report_sales_by_cashier)"
+    },
+    {
+      "idx": 833,
+      "test": "T2_cajero_403",
+      "method": "GET",
+      "path": "/api/reports/sales/by-cashier",
+      "http": 403,
+      "ok": false,
+      "keys": [
+        "ok",
+        "error",
+        "need",
+        "have"
+      ],
+      "tenant_id": null,
+      "note": null
+    },
+    {
+      "idx": 834,
+      "test": "T3_no_range",
+      "method": "GET",
+      "path": "/api/reports/sales/by-cashier",
+      "http": 200,
+      "ok": true,
+      "keys": [
+        "ok",
+        "tenant_id",
+        "period",
+        "items",
+        "data",
+        "total",
+        "note",
+        "generated_at",
+        "by_cashier"
+      ],
+      "tenant_id": "TNT001",
+      "note": "pending mv refresh (report_sales_by_cashier)"
+    },
+    {
+      "idx": 835,
+      "test": "T4_inverted_400",
+      "method": "GET",
+      "path": "/api/reports/sales/by-cashier",
+      "http": 400,
+      "ok": false,
+      "keys": [
+        "ok",
+        "error",
+        "from",
+        "to"
+      ],
+      "tenant_id": null,
+      "note": null
+    },
+    {
+      "idx": 836,
+      "test": "T5_range_2y",
+      "method": "GET",
+      "path": "/api/reports/sales/by-cashier",
+      "http": 200,
+      "ok": true,
+      "keys": [
+        "ok",
+        "tenant_id",
+        "period",
+        "items",
+        "data",
+        "total",
+        "note",
+        "generated_at",
+        "by_cashier",
+        "range_limited"
+      ],
+      "tenant_id": "TNT001",
+      "note": "pending mv refresh (report_sales_by_cashier)"
+    },
+    {
+      "idx": 837,
+      "test": "T6_owner_TNT002",
+      "method": "GET",
+      "path": "/api/reports/sales/by-cashier",
+      "http": 200,
+      "ok": true,
+      "keys": [
+        "ok",
+        "tenant_id",
+        "period",
+        "items",
+        "data",
+        "total",
+        "note",
+        "generated_at",
+        "by_cashier"
+      ],
+      "tenant_id": "TNT002",
+      "note": "pending mv refresh (report_sales_by_cashier)"
+    },
+    {
+      "idx": 838,
+      "test": "T1_admin",
+      "method": "GET",
+      "path": "/api/reports/inventory/value",
+      "http": 200,
+      "ok": true,
+      "keys": [
+        "ok",
+        "tenant_id",
+        "period",
+        "items",
+        "data",
+        "total",
+        "note",
+        "generated_at",
+        "total_value",
+        "by_location"
+      ],
+      "tenant_id": "TNT001",
+      "note": "pending mv refresh (mv_inventory_value)"
+    },
+    {
+      "idx": 839,
+      "test": "T2_cajero_403",
+      "method": "GET",
+      "path": "/api/reports/inventory/value",
+      "http": 403,
+      "ok": false,
+      "keys": [
+        "ok",
+        "error",
+        "need",
+        "have"
+      ],
+      "tenant_id": null,
+      "note": null
+    },
+    {
+      "idx": 840,
+      "test": "T3_no_range",
+      "method": "GET",
+      "path": "/api/reports/inventory/value",
+      "http": 200,
+      "ok": true,
+      "keys": [
+        "ok",
+        "tenant_id",
+        "period",
+        "items",
+        "data",
+        "total",
+        "note",
+        "generated_at",
+        "total_value",
+        "by_location"
+      ],
+      "tenant_id": "TNT001",
+      "note": "pending mv refresh (mv_inventory_value)"
+    },
+    {
+      "idx": 841,
+      "test": "T4_inverted_400",
+      "method": "GET",
+      "path": "/api/reports/inventory/value",
+      "http": 400,
+      "ok": false,
+      "keys": [
+        "ok",
+        "error",
+        "from",
+        "to"
+      ],
+      "tenant_id": null,
+      "note": null
+    },
+    {
+      "idx": 842,
+      "test": "T5_range_2y",
+      "method": "GET",
+      "path": "/api/reports/inventory/value",
+      "http": 200,
+      "ok": true,
+      "keys": [
+        "ok",
+        "tenant_id",
+        "period",
+        "items",
+        "data",
+        "total",
+        "note",
+        "generated_at",
+        "total_value",
+        "by_location",
+        "range_limited"
+      ],
+      "tenant_id": "TNT001",
+      "note": "pending mv refresh (mv_inventory_value)"
+    },
+    {
+      "idx": 843,
+      "test": "T6_owner_TNT002",
+      "method": "GET",
+      "path": "/api/reports/inventory/value",
+      "http": 200,
+      "ok": true,
+      "keys": [
+        "ok",
+        "tenant_id",
+        "period",
+        "items",
+        "data",
+        "total",
+        "note",
+        "generated_at",
+        "total_value",
+        "by_location"
+      ],
+      "tenant_id": "TNT002",
+      "note": "pending mv refresh (mv_inventory_value)"
+    },
+    {
+      "idx": 844,
+      "test": "T1_admin",
+      "method": "GET",
+      "path": "/api/reports/customers/cohort",
+      "http": 200,
+      "ok": true,
+      "keys": [
+        "ok",
+        "tenant_id",
+        "period",
+        "items",
+        "data",
+        "total",
+        "note",
+        "generated_at",
+        "cohorts"
+      ],
+      "tenant_id": "TNT001",
+      "note": "pending RPC (report_customers_cohort)"
+    },
+    {
+      "idx": 845,
+      "test": "T2_cajero_403",
+      "method": "GET",
+      "path": "/api/reports/customers/cohort",
+      "http": 403,
+      "ok": false,
+      "keys": [
+        "ok",
+        "error",
+        "need",
+        "have"
+      ],
+      "tenant_id": null,
+      "note": null
+    },
+    {
+      "idx": 846,
+      "test": "T3_no_range",
+      "method": "GET",
+      "path": "/api/reports/customers/cohort",
+      "http": 200,
+      "ok": true,
+      "keys": [
+        "ok",
+        "tenant_id",
+        "period",
+        "items",
+        "data",
+        "total",
+        "note",
+        "generated_at",
+        "cohorts"
+      ],
+      "tenant_id": "TNT001",
+      "note": "pending RPC (report_customers_cohort)"
+    },
+    {
+      "idx": 847,
+      "test": "T4_inverted_400",
+      "method": "GET",
+      "path": "/api/reports/customers/cohort",
+      "http": 400,
+      "ok": false,
+      "keys": [
+        "ok",
+        "error",
+        "from",
+        "to"
+      ],
+      "tenant_id": null,
+      "note": null
+    },
+    {
+      "idx": 848,
+      "test": "T5_range_2y",
+      "method": "GET",
+      "path": "/api/reports/customers/cohort",
+      "http": 200,
+      "ok": true,
+      "keys": [
+        "ok",
+        "tenant_id",
+        "period",
+        "items",
+        "data",
+        "total",
+        "note",
+        "generated_at",
+        "cohorts",
+        "range_limited"
+      ],
+      "tenant_id": "TNT001",
+      "note": "pending RPC (report_customers_cohort)"
+    },
+    {
+      "idx": 849,
+      "test": "T6_owner_TNT002",
+      "method": "GET",
+      "path": "/api/reports/customers/cohort",
+      "http": 200,
+      "ok": true,
+      "keys": [
+        "ok",
+        "tenant_id",
+        "period",
+        "items",
+        "data",
+        "total",
+        "note",
+        "generated_at",
+        "cohorts"
+      ],
+      "tenant_id": "TNT002",
+      "note": "pending RPC (report_customers_cohort)"
+    },
+    {
+      "idx": 850,
+      "test": "T1_admin",
+      "method": "GET",
+      "path": "/api/reports/profit",
+      "http": 200,
+      "ok": true,
+      "keys": [
+        "ok",
+        "tenant_id",
+        "period",
+        "items",
+        "data",
+        "total",
+        "note",
+        "generated_at",
+        "revenue",
+        "cost",
+        "profit",
+        "margin"
+      ],
+      "tenant_id": "TNT001",
+      "note": "pending RPC (report_profit)"
+    },
+    {
+      "idx": 851,
+      "test": "T2_cajero_403",
+      "method": "GET",
+      "path": "/api/reports/profit",
+      "http": 403,
+      "ok": false,
+      "keys": [
+        "ok",
+        "error",
+        "need",
+        "have"
+      ],
+      "tenant_id": null,
+      "note": null
+    },
+    {
+      "idx": 852,
+      "test": "T3_no_range",
+      "method": "GET",
+      "path": "/api/reports/profit",
+      "http": 200,
+      "ok": true,
+      "keys": [
+        "ok",
+        "tenant_id",
+        "period",
+        "items",
+        "data",
+        "total",
+        "note",
+        "generated_at",
+        "revenue",
+        "cost",
+        "profit",
+        "margin"
+      ],
+      "tenant_id": "TNT001",
+      "note": "pending RPC (report_profit)"
+    },
+    {
+      "idx": 853,
+      "test": "T4_inverted_400",
+      "method": "GET",
+      "path": "/api/reports/profit",
+      "http": 400,
+      "ok": false,
+      "keys": [
+        "ok",
+        "error",
+        "from",
+        "to"
+      ],
+      "tenant_id": null,
+      "note": null
+    },
+    {
+      "idx": 854,
+      "test": "T5_range_2y",
+      "method": "GET",
+      "path": "/api/reports/profit",
+      "http": 200,
+      "ok": true,
+      "keys": [
+        "ok",
+        "tenant_id",
+        "period",
+        "items",
+        "data",
+        "total",
+        "note",
+        "generated_at",
+        "revenue",
+        "cost",
+        "profit",
+        "margin",
+        "range_limited"
+      ],
+      "tenant_id": "TNT001",
+      "note": "pending RPC (report_profit)"
+    },
+    {
+      "idx": 855,
+      "test": "T6_owner_TNT002",
+      "method": "GET",
+      "path": "/api/reports/profit",
+      "http": 200,
+      "ok": true,
+      "keys": [
+        "ok",
+        "tenant_id",
+        "period",
+        "items",
+        "data",
+        "total",
+        "note",
+        "generated_at",
+        "revenue",
+        "cost",
+        "profit",
+        "margin"
+      ],
+      "tenant_id": "TNT002",
+      "note": "pending RPC (report_profit)"
+    },
+    {
+      "idx": 856,
+      "test": "T1_admin",
+      "method": "GET",
+      "path": "/api/reports/abc-analysis",
+      "http": 200,
+      "ok": true,
+      "keys": [
+        "ok",
+        "tenant_id",
+        "period",
+        "items",
+        "data",
+        "total",
+        "note",
+        "generated_at",
+        "classes"
+      ],
+      "tenant_id": "TNT001",
+      "note": "pending RPC (report_abc_analysis)"
+    },
+    {
+      "idx": 857,
+      "test": "T2_cajero_403",
+      "method": "GET",
+      "path": "/api/reports/abc-analysis",
+      "http": 403,
+      "ok": false,
+      "keys": [
+        "ok",
+        "error",
+        "need",
+        "have"
+      ],
+      "tenant_id": null,
+      "note": null
+    },
+    {
+      "idx": 858,
+      "test": "T3_no_range",
+      "method": "GET",
+      "path": "/api/reports/abc-analysis",
+      "http": 200,
+      "ok": true,
+      "keys": [
+        "ok",
+        "tenant_id",
+        "period",
+        "items",
+        "data",
+        "total",
+        "note",
+        "generated_at",
+        "classes"
+      ],
+      "tenant_id": "TNT001",
+      "note": "pending RPC (report_abc_analysis)"
+    },
+    {
+      "idx": 859,
+      "test": "T4_inverted_400",
+      "method": "GET",
+      "path": "/api/reports/abc-analysis",
+      "http": 400,
+      "ok": false,
+      "keys": [
+        "ok",
+        "error",
+        "from",
+        "to"
+      ],
+      "tenant_id": null,
+      "note": null
+    },
+    {
+      "idx": 860,
+      "test": "T5_range_2y",
+      "method": "GET",
+      "path": "/api/reports/abc-analysis",
+      "http": 200,
+      "ok": true,
+      "keys": [
+        "ok",
+        "tenant_id",
+        "period",
+        "items",
+        "data",
+        "total",
+        "note",
+        "generated_at",
+        "classes",
+        "range_limited"
+      ],
+      "tenant_id": "TNT001",
+      "note": "pending RPC (report_abc_analysis)"
+    }
+  ]
+}

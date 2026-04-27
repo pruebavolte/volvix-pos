@@ -66,13 +66,13 @@
   // =========================================================
   window.multiposViewBranch = async function(tenantId) {
     try {
-      const sales = await apiGet(`/api/sales?user_id=${getUserIdForTenant(tenantId)}`);
-      const products = await apiGet(`/api/products?tenant_id=${tenantId}`);
+      const sales = await apiGet(`/api/sales?user_id=${encodeURIComponent(getUserIdForTenant(tenantId))}`);
+      const products = await apiGet(`/api/products?tenant_id=${encodeURIComponent(tenantId)}`);
 
       const total = (sales || []).reduce((s, x) => s + parseFloat(x.total || 0), 0);
-      alert(`📊 Sucursal: ${tenantId}\n\nVentas: ${sales?.length || 0}\nIngresos: $${total.toFixed(2)}\nProductos: ${products?.length || 0}`);
+      VolvixUI.toast({type:'info', message:`📊 Sucursal: ${tenantId}\n\nVentas: ${sales?.length || 0}\nIngresos: $${total.toFixed(2)}\nProductos: ${products?.length || 0}`});
     } catch (e) {
-      alert('Error: ' + e.message);
+      VolvixUI.toast({type:'error', message:'Error: ' + e.message});
     }
   };
 
@@ -88,12 +88,12 @@
   // SINCRONIZAR TODAS LAS SUCURSALES
   // =========================================================
   window.multiposSyncAll = async function() {
-    if (!confirm('¿Sincronizar todas las sucursales con la nube?')) return;
+    if (!await VolvixUI.confirm({ title: 'Sincronizar sucursales', message: '¿Sincronizar todas las sucursales con la nube?', confirmText: 'Sincronizar', danger: false })) return;
 
     try {
       const queue = JSON.parse(localStorage.getItem('volvix:wiring:queue') || '[]');
       if (queue.length === 0) {
-        alert('✓ Todo está sincronizado');
+        VolvixUI.toast({type:'success', message:'✓ Todo está sincronizado'});
         return;
       }
 
@@ -105,9 +105,9 @@
         (result.results || []).filter(r => !r.success)
       ));
 
-      alert(`✓ Sincronizadas ${successCount}/${queue.length} operaciones`);
+      VolvixUI.toast({type:'success', message:`✓ Sincronizadas ${successCount}/${queue.length} operaciones`});
     } catch (e) {
-      alert('Error sync: ' + e.message);
+      VolvixUI.toast({type:'error', message:'Error sync: ' + e.message});
     }
   };
 
@@ -128,9 +128,9 @@
                   `Stock bajo: ${m.low_stock_count}\n` +
                   `MRR: $${m.mrr?.toLocaleString()}\n` +
                   `ARR: $${m.arr?.toLocaleString()}`;
-      alert(msg);
+      VolvixUI.toast({type:'info', message:msg});
     } catch (e) {
-      alert('Error: ' + e.message);
+      VolvixUI.toast({type:'error', message:'Error: ' + e.message});
     }
   };
 
@@ -162,7 +162,7 @@
   // ABRIR POS REMOTO (de otra sucursal)
   // =========================================================
   window.multiposOpenRemote = function(tenantId) {
-    const url = `/salvadorex_web_v25.html?tenant=${tenantId}&remote=1`;
+    const url = `/salvadorex_web_v25.html?tenant=${encodeURIComponent(tenantId)}&remote=1`;
     window.open(url, '_blank', 'width=1200,height=800');
   };
 

@@ -516,7 +516,7 @@
   </main>
 </div>
 
-<div class="floating" onclick="alert('Volvix Sandbox v3.40\\n\\nPlayground completo de componentes interactivos.\\nUsa la barra lateral para navegar.')">? Ayuda</div>
+<div class="floating" onclick="VolvixUI.toast({type:'info', message:'Volvix Sandbox v3.40\\n\\nPlayground completo de componentes interactivos.\\nUsa la barra lateral para navegar.'})">? Ayuda</div>
 
 <script>
 const STATE={
@@ -570,7 +570,7 @@ function renderCart(){
   c.innerHTML=STATE.cart.map(i=>{total+=i.price*i.qty;return `<div class="cart-item"><span>${i.qty}x ${i.name}</span><span>$${i.price*i.qty}</span></div>`}).join('')+`<div class="cart-total"><span>Total</span><span>$${total.toFixed(2)}</span></div>`;
 }
 function clearCart(){STATE.cart=[];renderCart();logEvent('warn','Carrito limpio')}
-function checkout(){if(!STATE.cart.length)return;const t=STATE.cart.reduce((s,i)=>s+i.price*i.qty,0);logEvent('info','✓ Cobro: $'+t.toFixed(2));alert('Cobro exitoso: $'+t.toFixed(2));clearCart()}
+function checkout(){if(!STATE.cart.length)return;const t=STATE.cart.reduce((s,i)=>s+i.price*i.qty,0);logEvent('info','✓ Cobro: $'+t.toFixed(2));VolvixUI.toast({type:'success', message:'Cobro exitoso: $'+t.toFixed(2)});clearCart()}
 
 // Keypad
 const keys=['7','8','9','4','5','6','1','2','3','0','C','='];
@@ -680,5 +680,9 @@ updateStateView();
 logEvent('info','Volvix Sandbox v3.40 ready');
 logEvent('info','42 components loaded');
 </script>
+  <script defer src="auth-helper.js"></script>
+<link rel="stylesheet" href="volvix-modals.css">
+<script defer src="volvix-modals.js"></script>
+  <script defer src="volvix-i18n-wiring.js"></script>
 </body>
 </html>

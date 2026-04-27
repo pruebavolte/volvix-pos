@@ -1,0 +1,67 @@
+{
+  "slice": 123,
+  "title": "R17 Anti-Fraud Rules Engine",
+  "range": "2460-2480",
+  "timestamp": "2026-04-26",
+  "base_url": "https://volvix-pos.vercel.app",
+  "scope": "Rules engine, alerts table, admin review endpoint, dashboard",
+  "deliverables": [
+    {
+      "type": "sql",
+      "path": "db/R17_FRAUD.sql",
+      "tables": ["fraud_rules", "fraud_alerts"],
+      "alters": ["pos_sales.+fraud_review", "pos_sales.+fraud_score"],
+      "seed_rules": 6,
+      "rls": "enabled"
+    },
+    {
+      "type": "api",
+      "path": "api/index.js",
+      "iife": "attachFraudEngine",
+      "middleware": "evaluateFraudRisk(saleData, ctx)",
+      "scoring": "0-100, weighted sum capped at 100",
+      "threshold_env": "FRAUD_THRESHOLD (default 70)",
+      "hook": "wraps POST /api/sales via res.end interception (non-blocking flag)",
+      "endpoints": [
+        "GET  /api/fraud/alerts?status=pending|approved|rejected",
+        "GET  /api/fraud/rules",
+        "POST /api/fraud/evaluate",
+        "POST /api/fraud/review/:sale_id  {action:approve|reject, notes}"
+      ],
+      "rules_evaluated": [
+        "amount_gt (>$10k)",
+        "velocity (>5 sales/customer/1h)",
+        "card_test (multi low-amount)",
+        "geo_mismatch (X-IP-Country vs customer.country)",
+        "new_customer_high (<7d age + total>=$2k)",
+        "refund_freq (>3 refunds/24h)"
+      ]
+    },
+    {
+      "type": "client",
+      "path": "public/volvix-fraud-dashboard.html",
+      "features": [
+        "filter by status (pending/approved/rejected)",
+        "auto-refresh 30s",
+        "approve/reject inline buttons",
+        "score color coding (red >=85, amber 70-84)",
+        "triggered rules pills"
+      ]
+    },
+    {
+      "type": "report",
+      "path": "R17_FRAUD.md"
+    }
+  ],
+  "review_actions": {
+    "approve": "fraud_alerts.status=approved + pos_sales.fraud_review=false",
+    "reject":  "fraud_alerts.status=rejected + pos_sales.status=void"
+  },
+  "auth": {
+    "alerts/rules/review": "admin|owner|superadmin",
+    "evaluate": "any authenticated"
+  },
+  "tenant_isolation": "non-superadmin filtered by tenant_id; superadmin sees all",
+  "status": "implemented",
+  "notes": "Rules cached 5 min in-memory; evaluation runs async post-response so user-facing latency unchanged. Geo lookup expects upstream header X-IP-Country."
+}

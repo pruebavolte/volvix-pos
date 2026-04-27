@@ -1,0 +1,33 @@
+{
+  "slice": 119,
+  "range": "2380-2400",
+  "topic": "tips_system",
+  "ts": "2026-04-26",
+  "status": "implemented",
+  "deliverables": {
+    "sql": "db/R17_TIPS.sql",
+    "api_patch": "api/index.js",
+    "client_patch": "volvix-pos-wiring.js",
+    "report": "R17_TIPS.md"
+  },
+  "schema_changes": {
+    "pos_sales_added": ["tip_amount numeric default 0", "tip_assigned_to uuid", "tip_split jsonb"],
+    "new_tables": ["tip_distributions(id,sale_id,user_id,amount,ts)", "tip_pools(id,tenant_id,name,members uuid[],split_method,config jsonb,active)"],
+    "new_function": "distribute_tips(p_sale_id uuid, p_pool_id uuid default null)",
+    "split_methods": ["equal", "percentage", "role-based"]
+  },
+  "api_endpoints": [
+    "POST /api/sales (extendido: tip_amount, tip_assigned_to, suma al total)",
+    "GET /api/tips/by-staff?from=&to=&user_id=",
+    "GET /api/tips/pools",
+    "POST /api/tips/pools (admin)",
+    "PATCH /api/tips/pools/:id (admin)",
+    "DELETE /api/tips/pools/:id (admin)",
+    "POST /api/tips/distribute"
+  ],
+  "client_helper": "window.posAskTip(subtotal) -> modal con presets 10/15/20% + custom",
+  "rls": "authenticated SELECT; service_role ALL",
+  "deploy_required": true,
+  "deploy_steps": ["1) Run db/R17_TIPS.sql en Supabase", "2) Redeploy api/index.js", "3) Wire posAskTip al checkout"],
+  "notes": "ALLOWED_FIELDS_SALES extendido. tip_amount validado >=0 y sumado al total. distribute_tips es idempotente (borra repartos previos del mismo sale)."
+}

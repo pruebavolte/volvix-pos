@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<title>VOLVIX · KDS</title>
+<link rel="stylesheet" href="volvix-modals.css">
+<script defer src="volvix-modals.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:#0d1117;color:#e6edf3;height:100vh;overflow:hidden}
+  header{display:flex;justify-content:space-between;align-items:center;padding:10px 18px;background:#161b22;border-bottom:1px solid #30363d}
+  header h1{font-size:18px;letter-spacing:1px;color:#ffd43b}
+  header .meta{display:flex;gap:14px;align-items:center;font-size:13px;color:#8b949e}
+  header select,header button{background:#0d1117;color:#e6edf3;border:1px solid #30363d;padding:6px 10px;border-radius:6px;font-size:13px;cursor:pointer}
+  .board{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:10px;height:calc(100vh - 56px);overflow:hidden}
+  .col{background:#161b22;border:1px solid #30363d;border-radius:10px;display:flex;flex-direction:column;overflow:hidden}
+  .col h2{padding:10px;font-size:14px;text-align:center;text-transform:uppercase;letter-spacing:2px;border-bottom:1px solid #30363d}
+  .col[data-st=received]  h2{background:#1f2d3d;color:#58a6ff}
+  .col[data-st=preparing] h2{background:#3d2f1f;color:#ffa657}
+  .col[data-st=ready]     h2{background:#1f3d2f;color:#3fb950}
+  .col-body{flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:8px}
+  .ticket{background:#0d1117;border:1px solid #30363d;border-left:5px solid #58a6ff;border-radius:8px;padding:10px;cursor:grab;transition:.15s}
+  .ticket.dragging{opacity:.4}
+  .ticket .head{display:flex;justify-content:space-between;font-size:12px;color:#8b949e;margin-bottom:6px}
+  .ticket .num{font-size:18px;font-weight:700;color:#fff}
+  .ticket .timer{font-variant-numeric:tabular-nums;font-weight:700}
+  .ticket ul{list-style:none;font-size:14px;line-height:1.5}
+  .ticket ul li::before{content:"• ";color:#ffd43b}
+  .ticket .notes{margin-top:6px;font-size:12px;color:#ffa657;font-style:italic}
+  .ticket.warn   {border-left-color:#ffa657;background:#2d2416}
+  .ticket.urgent {border-left-color:#f85149;background:#3d1f1f;animation:blink 1s infinite}
+  @keyframes blink{50%{background:#5a2828}}
+  .empty{color:#484f58;text-align:center;padding:20px;font-size:13px}
+  .dot{width:8px;height:8px;border-radius:50%;background:#3fb950;display:inline-block;margin-right:6px}
+</style>
+</head>
+<body>
+<header>
+  <h1>VOLVIX · KITCHEN DISPLAY</h1>
+  <div class="meta">
+    <span><span class="dot" id="dot"></span><span id="connStatus">conectado</span></span>
+    <select id="station">
+      <option value="">Todas</option>
+      <option value="grill">Parrilla</option>
+      <option value="cold">Fríos</option>
+      <option value="bar">Bar</option>
+      <option value="dessert">Postres</option>
+    </select>
+    <button id="soundBtn">Sonido: ON</button>
+    <span id="clock"></span>
+  </div>
+</header>
+
+<main class="board">
+  <section class="col" data-st="received"><h2>Recibido</h2><div class="col-body" id="col-received"></div></section>
+  <section class="col" data-st="preparing"><h2>Preparando</h2><div class="col-body" id="col-preparing"></div></section>
+  <section class="col" data-st="ready"><h2>Listo</h2><div class="col-body" id="col-ready"></div></section>
+</main>
+
+<audio id="ding" preload="auto"
+  src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA="></audio>
+
+<script>
+const API = (window.VOLVIX_API || '') + '/api/kds/tickets';
+let tickets = [], soundOn = true, knownIds = new Set(), firstLoad = true;
+
+const $ = s => document.querySelector(s);
+const fmt = sec => `${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
+const tok = () => localStorage.getItem('volvix_token') || '';
+
+async function api(method, path, body){
+  const r = await fetch(API+path, {
+    method, headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok()},
+    body: body ? JSON.stringify(body) : undefined
+  });
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  return r.json();
+}
+
+async function refresh(){
+  try{
+    const st = $('#station').value;
+    const r = await api('GET','/active'+(st?'?station='+st:''));
+    tickets = r.items || r.tickets || [];
+    const newIds = new Set(tickets.map(t=>t.id));
+    const fresh = [...newIds].filter(id => !knownIds.has(id));
+    if(!firstLoad && fresh.length && soundOn) $('#ding').play().catch(()=>{});
+    knownIds = newIds; firstLoad = false;
+    $('#dot').style.background = '#3fb950'; $('#connStatus').textContent = 'conectado';
+    render();
+  }catch(e){
+    $('#dot').style.background = '#f85149'; $('#connStatus').textContent = 'sin conexión';
+  }
+}
+
+function elapsed(t){
+  const start = new Date(t.created_at || t.started_at || Date.now()).getTime();
+  return Math.floor((Date.now()-start)/1000);
+}
+
+function render(){
+  ['received','preparing','ready'].forEach(st => {
+    const box = $('#col-'+st);
+    const list = tickets.filter(t => t.status===st);
+    if(!list.length){ box.innerHTML = '<div class="empty">— sin tickets —</div>'; return; }
+    box.innerHTML = list.map(t => {
+      const sec = elapsed(t), min = sec/60;
+      const cls = min>15 ? 'urgent' : min>10 ? 'warn' : '';
+      const items = (t.items||[]).map(i => `<li>${i.qty||1}× ${escapeHtml(i.name||i.title||'item')}${i.mods?` <em>(${escapeHtml(i.mods)})</em>`:''}</li>`).join('');
+      return `<div class="ticket ${cls}" draggable="true" data-id="${t.id}">
+        <div class="head">
+          <span class="num">#${(t.sale_id||t.id||'').toString().slice(-5)}</span>
+          <span class="timer">${fmt(sec)}</span>
+        </div>
+        <ul>${items}</ul>
+        ${t.notes?`<div class="notes">⚠ ${escapeHtml(t.notes)}</div>`:''}
+      </div>`;
+    }).join('');
+  });
+  bindDrag();
+}
+
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+function bindDrag(){
+  document.querySelectorAll('.ticket').forEach(el=>{
+    el.addEventListener('dragstart',e=>{e.dataTransfer.setData('id',el.dataset.id);el.classList.add('dragging');});
+    el.addEventListener('dragend',()=>el.classList.remove('dragging'));
+  });
+  document.querySelectorAll('.col-body').forEach(box=>{
+    box.addEventListener('dragover',e=>e.preventDefault());
+    box.addEventListener('drop',async e=>{
+      e.preventDefault();
+      const id = e.dataTransfer.getData('id');
+      const newStatus = box.parentElement.dataset.st;
+      let ok=true;
+      if(window.VolvixUI && typeof window.VolvixUI.confirm==='function'){
+        ok = await window.VolvixUI.confirm({
+          title:'Cambiar estado',
+          message:'¿Mover ticket '+id+' a estado "'+newStatus+'"?',
+          confirmText:'Mover'
+        });
+      }
+      if(!ok) return;
+      try{
+        await api('PATCH','/'+id+'/status',{status:newStatus});
+        refresh();
+      }catch(err){ VolvixUI.toast({type:'error', message:'Error: '+err.message}); }
+    });
+  });
+}
+
+$('#soundBtn').onclick=()=>{soundOn=!soundOn;$('#soundBtn').textContent='Sonido: '+(soundOn?'ON':'OFF');};
+$('#station').onchange=refresh;
+
+// Tick clock + timers every second
+setInterval(()=>{
+  $('#clock').textContent = new Date().toLocaleTimeString();
+  document.querySelectorAll('.ticket').forEach(el=>{
+    const t = tickets.find(x=>x.id===el.dataset.id); if(!t) return;
+    const sec = elapsed(t), min = sec/60;
+    el.querySelector('.timer').textContent = fmt(sec);
+    el.classList.toggle('warn',  min>10 && min<=15);
+    el.classList.toggle('urgent',min>15);
+  });
+},1000);
+
+setInterval(refresh, 5000);
+refresh();
+</script>
+</body>
+</html>

@@ -60,6 +60,16 @@
   // UI helpers
   // =========================================================
   function toast(msg, type = 'ok') {
+    // Prefer VolvixUI.toast
+    if (window.VolvixUI && typeof window.VolvixUI.toast === 'function') {
+      try {
+        window.VolvixUI.toast({
+          type: type === 'err' ? 'error' : (type === 'warn' ? 'warning' : 'success'),
+          message: msg
+        });
+        return;
+      } catch {}
+    }
     if (typeof window.showToast === 'function') {
       try { window.showToast(msg); return; } catch {}
     }
@@ -75,6 +85,26 @@
       box-shadow:0 4px 12px rgba(0,0,0,0.15);transition:opacity 0.3s;`;
     document.body.appendChild(t);
     setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2500);
+  }
+
+  // VolvixUI form helper with native fallback
+  async function vuiForm(opts, nativeFallback) {
+    if (window.VolvixUI && typeof window.VolvixUI.form === 'function') {
+      try { return await window.VolvixUI.form(opts); } catch (e) { return null; }
+    }
+    return nativeFallback ? nativeFallback() : null;
+  }
+  async function vuiConfirm(opts, nativeFallback) {
+    if (window.VolvixUI && typeof window.VolvixUI.confirm === 'function') {
+      try { return await window.VolvixUI.confirm(opts); } catch { return false; }
+    }
+    return nativeFallback ? nativeFallback() : confirm(opts.message || '¿Confirmar?');
+  }
+  async function vuiDestructiveConfirm(opts, nativeFallback) {
+    if (window.VolvixUI && typeof window.VolvixUI.destructiveConfirm === 'function') {
+      try { return await window.VolvixUI.destructiveConfirm(opts); } catch { return false; }
+    }
+    return nativeFallback ? nativeFallback() : confirm(opts.message || '¿Confirmar acción destructiva?');
   }
 
   function fmtDate(d) {
@@ -150,12 +180,22 @@
   };
 
   window.ownerCreateModule = async function() {
-    const name = prompt('Nombre del nuevo módulo:');
-    if (!name) return;
-    const price = prompt('Precio mensual ($):', '29');
+    const data = await vuiForm({
+      title: 'Crear módulo',
+      submitLabel: 'Crear',
+      fields: [
+        { name: 'name', label: 'Nombre del módulo', type: 'text', required: true, minLength: 2, maxLength: 60 },
+        { name: 'price', label: 'Precio mensual ($)', type: 'number', min: 0, step: 0.01, default: 29 }
+      ]
+    }, () => {
+      const name = prompt('Nombre del nuevo módulo:'); if (!name) return null;
+      const price = prompt('Precio mensual ($):', '29');
+      return { name, price };
+    });
+    if (!data || !data.name) return;
     try {
-      await apiPost('/api/owner/modules', { name, price: parseFloat(price) || 29 });
-      toast('✓ Módulo creado: ' + name);
+      await apiPost('/api/owner/modules', { name: data.name, price: parseFloat(data.price) || 29 });
+      toast('✓ Módulo creado: ' + data.name);
     } catch (e) { toast('Error: ' + e.message, 'err'); }
   };
 
@@ -187,13 +227,34 @@
   };
 
   window.ownerNewDeploy = async function() {
-    const version = prompt('Versión (ej: v2.1.4):');
-    if (!version) return;
-    const platform = prompt('Plataforma (web/windows/android):', 'web');
-    const channel = prompt('Canal (stable/beta/alpha):', 'beta');
+    const data = await vuiForm({
+      title: 'Nuevo deploy',
+      submitLabel: 'Iniciar deploy',
+      fields: [
+        { name: 'version', label: 'Versión (ej: v2.1.4)', type: 'text', required: true, pattern: '^v?\\d+\\.\\d+\\.\\d+' },
+        { name: 'platform', label: 'Plataforma', type: 'radio', required: true, default: 'web',
+          options: [
+            { value: 'web', label: 'Web' },
+            { value: 'windows', label: 'Windows' },
+            { value: 'android', label: 'Android' }
+          ]
+        },
+        { name: 'channel', label: 'Canal', type: 'radio', required: true, default: 'beta',
+          options: [
+            { value: 'stable', label: 'Stable' },
+            { value: 'beta', label: 'Beta' },
+            { value: 'alpha', label: 'Alpha' }
+          ]
+        }
+      ]
+    }, () => {
+      const version = prompt('Versión (ej: v2.1.4):'); if (!version) return null;
+      return { version, platform: prompt('Plataforma (web/windows/android):', 'web'), channel: prompt('Canal (stable/beta/alpha):', 'beta') };
+    });
+    if (!data || !data.version) return;
     try {
-      await apiPost('/api/owner/deploys', { version, platform, channel, status: 'pending' });
-      toast('✓ Deploy iniciado: ' + version);
+      await apiPost('/api/owner/deploys', { version: data.version, platform: data.platform || 'web', channel: data.channel || 'beta', status: 'pending' });
+      toast('✓ Deploy iniciado: ' + data.version);
       window.ownerViewDeploys();
     } catch (e) { toast('Error: ' + e.message, 'err'); }
   };
@@ -312,31 +373,61 @@
   };
 
   window.ownerCreateBrand = async function() {
-    const name = prompt('Nombre de la marca blanca:');
-    if (!name) return;
-    const domain = prompt('Dominio (ej: barberpro.com):');
-    const vertical = prompt('Vertical (retail/health/beauty/food):', 'retail');
+    const data = await vuiForm({
+      title: 'Nueva marca blanca',
+      submitLabel: 'Crear marca',
+      fields: [
+        { name: 'name', label: 'Nombre de la marca', type: 'text', required: true, minLength: 2 },
+        { name: 'domain', label: 'Dominio (ej: barberpro.com)', type: 'text', pattern: '^[a-z0-9.-]+\\.[a-z]{2,}$' },
+        { name: 'vertical', label: 'Vertical', type: 'radio', required: true, default: 'retail',
+          options: [
+            { value: 'retail', label: 'Retail' },
+            { value: 'health', label: 'Salud' },
+            { value: 'beauty', label: 'Belleza' },
+            { value: 'food', label: 'Alimentos' }
+          ]
+        }
+      ]
+    }, () => {
+      const name = prompt('Nombre de la marca blanca:'); if (!name) return null;
+      return { name, domain: prompt('Dominio (ej: barberpro.com):'), vertical: prompt('Vertical (retail/health/beauty/food):', 'retail') };
+    });
+    if (!data || !data.name) return;
     try {
       await apiPost('/api/owner/brands', {
-        name, domain, vertical: vertical || 'retail', type: 'own'
+        name: data.name, domain: data.domain, vertical: data.vertical || 'retail', type: 'own'
       });
-      toast('✓ Marca creada: ' + name);
+      toast('✓ Marca creada: ' + data.name);
       window.ownerViewBrands();
     } catch (e) { toast('Error: ' + e.message, 'err'); }
   };
 
   window.ownerEditBrand = async function(brandId) {
-    const newName = prompt('Nuevo nombre de la marca:');
-    if (!newName) return;
+    const data = await vuiForm({
+      title: 'Editar marca',
+      submitLabel: 'Guardar',
+      fields: [
+        { name: 'name', label: 'Nuevo nombre de la marca', type: 'text', required: true, minLength: 2 }
+      ]
+    }, () => {
+      const newName = prompt('Nuevo nombre de la marca:'); return newName ? { name: newName } : null;
+    });
+    if (!data || !data.name) return;
     try {
-      await apiPost('/api/owner/brands/' + brandId, { name: newName });
+      await apiPost('/api/owner/brands/' + brandId, { name: data.name });
       toast('✓ Marca actualizada');
       window.ownerViewBrands();
     } catch (e) { toast('Error: ' + e.message, 'err'); }
   };
 
   window.ownerDeleteBrand = async function(brandId) {
-    if (!confirm('¿Eliminar marca?')) return;
+    const ok = await vuiDestructiveConfirm({
+      title: 'Eliminar marca',
+      message: 'Esta acción eliminará la marca de forma permanente.',
+      confirmLabel: 'Eliminar',
+      requireText: 'ELIMINAR'
+    }, () => confirm('¿Eliminar marca?'));
+    if (!ok) return;
     try {
       await fetch(API + '/api/owner/brands/' + brandId, { method: 'DELETE' });
       toast('✓ Marca eliminada');
@@ -378,12 +469,21 @@
   };
 
   window.ownerAddBrandToHierarchy = async function(parentId) {
-    const name = prompt('Nombre de la submarca:');
-    if (!name) return;
-    const commission = prompt('Comisión que paga al padre (%):', '15');
+    const data = await vuiForm({
+      title: 'Añadir submarca',
+      submitLabel: 'Añadir',
+      fields: [
+        { name: 'name', label: 'Nombre de la submarca', type: 'text', required: true, minLength: 2 },
+        { name: 'commission_pct', label: 'Comisión al padre (%)', type: 'number', min: 0, max: 100, step: 0.01, default: 15 }
+      ]
+    }, () => {
+      const name = prompt('Nombre de la submarca:'); if (!name) return null;
+      return { name, commission_pct: prompt('Comisión que paga al padre (%):', '15') };
+    });
+    if (!data || !data.name) return;
     try {
       await apiPost('/api/owner/hierarchy', {
-        name, parent_id: parentId, commission_pct: parseFloat(commission) || 15
+        name: data.name, parent_id: parentId, commission_pct: parseFloat(data.commission_pct) || 15
       });
       toast('✓ Submarca añadida');
       window.ownerViewHierarchy();
@@ -488,13 +588,28 @@
   };
 
   window.ownerIssueSeat = async function() {
-    const platform = prompt('Plataforma (web/windows/android):', 'web');
-    if (!platform) return;
-    const tenantId = prompt('Tenant ID:');
-    if (!tenantId) return;
+    const data = await vuiForm({
+      title: 'Emitir seat',
+      submitLabel: 'Emitir',
+      fields: [
+        { name: 'platform', label: 'Plataforma', type: 'radio', required: true, default: 'web',
+          options: [
+            { value: 'web', label: 'Web' },
+            { value: 'windows', label: 'Windows' },
+            { value: 'android', label: 'Android' }
+          ]
+        },
+        { name: 'tenant_id', label: 'Tenant ID', type: 'text', required: true }
+      ]
+    }, () => {
+      const platform = prompt('Plataforma (web/windows/android):', 'web'); if (!platform) return null;
+      const tenant_id = prompt('Tenant ID:'); if (!tenant_id) return null;
+      return { platform, tenant_id };
+    });
+    if (!data || !data.platform || !data.tenant_id) return;
     try {
       const result = await apiPost('/api/owner/licenses', {
-        platform, tenant_id: tenantId,
+        platform: data.platform, tenant_id: data.tenant_id,
         machine_name: 'seat-' + Date.now(),
         notes: 'Emitido desde Owner Panel'
       });
@@ -551,7 +666,12 @@
   };
 
   window.ownerForceSync = async function() {
-    if (!confirm('¿Forzar sync de toda la cola?')) return;
+    const ok = await vuiConfirm({
+      title: 'Forzar sync',
+      message: '¿Forzar sync de toda la cola?',
+      confirmLabel: 'Forzar'
+    }, () => confirm('¿Forzar sync de toda la cola?'));
+    if (!ok) return;
     try {
       await apiPost('/api/owner/sync-force', { all: true });
       toast('✓ Sync forzado iniciado');
@@ -560,7 +680,12 @@
   };
 
   window.ownerClearSyncQueue = async function() {
-    if (!confirm('¿Limpiar cola completada?')) return;
+    const ok = await vuiConfirm({
+      title: 'Limpiar cola',
+      message: '¿Limpiar cola completada?',
+      confirmLabel: 'Limpiar'
+    }, () => confirm('¿Limpiar cola completada?'));
+    if (!ok) return;
     try {
       await fetch(API + '/api/owner/sync-queue?status=done', { method: 'DELETE' });
       toast('✓ Cola limpiada');

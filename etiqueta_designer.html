@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Diseñador de Etiquetas · Volvix</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="volvix-modals.css">
+<script defer src="volvix-modals.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
   body {
@@ -782,8 +784,14 @@
   }
 
   // ===== ACCIONES =====
-  function clearCanvas() {
-    if (elements.length > 0 && !confirm('¿Limpiar todo el diseño?')) return;
+  async function clearCanvas() {
+    if (elements.length > 0) {
+      let ok=false;
+      if(window.VolvixUI && typeof window.VolvixUI.confirm==='function'){
+        ok = await window.VolvixUI.confirm({title:'Limpiar diseño',message:'¿Limpiar todo el diseño?',danger:true,confirmText:'Limpiar'});
+      } else { ok = confirm('¿Limpiar todo el diseño?'); }
+      if(!ok) return;
+    }
     elements = [];
     selected = null;
     renderCanvas();
@@ -791,11 +799,29 @@
     showToast('Diseño limpiado');
   }
 
-  function saveTemplate() {
+  async function saveTemplate() {
+    let name = '', notes = '';
+    if(window.VolvixUI && typeof window.VolvixUI.form==='function'){
+      const r = await window.VolvixUI.form({
+        title: 'Guardar plantilla',
+        size: 'sm',
+        fields: [
+          { name:'name',  type:'text',     label:'Nombre de la plantilla', required:true, placeholder:'Ej. Etiqueta producto 50x30' },
+          { name:'notes', type:'textarea', label:'Descripción (opcional)', rows:3, placeholder:'Notas internas...' }
+        ],
+        submitText: 'Guardar'
+      });
+      if(!r) return;
+      name = String(r.name).trim();
+      notes = String(r.notes || '').trim();
+    }
     const data = {
+      name: name || 'plantilla',
+      notes,
       elements,
       canvasW: document.getElementById('canvas').offsetWidth,
       canvasH: document.getElementById('canvas').offsetHeight,
+      savedAt: new Date().toISOString()
     };
     localStorage.setItem('volvix:etiqueta-template', JSON.stringify(data));
     showToast('✓ Plantilla guardada');
@@ -857,9 +883,9 @@
   loadTemplate('producto');
 </script>
 
+<script defer src="auth-helper.js"></script>
 <script src="volvix-tools-wiring.js" defer></script>
 <script src="volvix-extras-wiring.js" defer></script>
-<script src="volvix-tests-wiring.js" defer></script>
 <script src="volvix-charts-wiring.js" defer></script>
 <script src="volvix-notifications-wiring.js" defer></script>
 <script src="volvix-backup-wiring.js" defer></script>

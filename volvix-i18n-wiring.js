@@ -1,8 +1,8 @@
 /**
  * volvix-i18n-wiring.js
  * Sistema i18n multi-idioma para Volvix POS
- * Idiomas: Español (es), English (en), Português (pt)
- * Agent-15 - Ronda 7 Fibonacci
+ * Idiomas: Español (es), English (en), Português (pt), Français (fr), Deutsch (de), Italiano (it), 日本語 (ja)
+ * Agent-15 - Ronda 7 Fibonacci - Expandido R17
  */
 (function() {
   'use strict';
@@ -10,431 +10,261 @@
   // ═══════════════════════════════════════════════════════════
   // TRADUCCIONES (100+ keys por idioma)
   // ═══════════════════════════════════════════════════════════
+  // ═══════════════════════════════════════════════════════════
+  // TRADUCCIONES (code-split: es eager, otros 6 lazy via fetch)
+  // ═══════════════════════════════════════════════════════════
   const TRANSLATIONS = {
     es: {
-      // Login
-      'login.title': 'Iniciar sesión',
-      'login.subtitle': 'Bienvenido a Volvix POS',
-      'login.email': 'Correo electrónico',
-      'login.password': 'Contraseña',
-      'login.submit': 'Entrar',
-      'login.forgot': '¿Olvidaste tu contraseña?',
-      'login.register': 'Crear cuenta',
-      'login.remember': 'Recordarme',
-      'login.error.invalid': 'Credenciales inválidas',
-      'login.error.empty': 'Completa todos los campos',
-      'login.loading': 'Iniciando sesión...',
-      'login.logout': 'Cerrar sesión',
-
-      // Navegación
-      'nav.dashboard': 'Panel',
-      'nav.pos': 'Punto de venta',
-      'nav.products': 'Productos',
-      'nav.inventory': 'Inventario',
-      'nav.customers': 'Clientes',
-      'nav.suppliers': 'Proveedores',
-      'nav.reports': 'Reportes',
-      'nav.settings': 'Configuración',
-      'nav.users': 'Usuarios',
-      'nav.help': 'Ayuda',
-      'nav.profile': 'Perfil',
-      'nav.notifications': 'Notificaciones',
-
-      // POS
-      'pos.cart.empty': 'Carrito vacío',
-      'pos.cart.title': 'Carrito',
-      'pos.cart.add': 'Agregar al carrito',
-      'pos.cart.remove': 'Quitar',
-      'pos.cart.clear': 'Vaciar carrito',
-      'pos.cart.items': 'artículos',
-      'pos.subtotal': 'Subtotal',
-      'pos.tax': 'Impuestos',
-      'pos.discount': 'Descuento',
-      'pos.total': 'Total',
-      'pos.checkout': 'Cobrar',
-      'pos.cash': 'Efectivo',
-      'pos.card': 'Tarjeta',
-      'pos.transfer': 'Transferencia',
-      'pos.change': 'Cambio',
-      'pos.payment': 'Pago',
-      'pos.receipt': 'Recibo',
-      'pos.print': 'Imprimir',
-      'pos.scan': 'Escanear código',
-      'pos.search.product': 'Buscar producto',
-      'pos.quantity': 'Cantidad',
-      'pos.price': 'Precio',
-
-      // Productos
-      'product.name': 'Nombre',
-      'product.code': 'Código',
-      'product.barcode': 'Código de barras',
-      'product.category': 'Categoría',
-      'product.brand': 'Marca',
-      'product.stock': 'Stock',
-      'product.cost': 'Costo',
-      'product.price.sale': 'Precio venta',
-      'product.description': 'Descripción',
-      'product.image': 'Imagen',
-      'product.new': 'Nuevo producto',
-      'product.edit': 'Editar producto',
-      'product.delete': 'Eliminar producto',
-
-      // Inventario
-      'inv.title': 'Inventario',
-      'inv.in': 'Entrada',
-      'inv.out': 'Salida',
-      'inv.adjust': 'Ajuste',
-      'inv.transfer': 'Traspaso',
-      'inv.low': 'Stock bajo',
-      'inv.out_of_stock': 'Agotado',
-      'inv.warehouse': 'Almacén',
-
-      // Clientes
-      'customer.name': 'Nombre',
-      'customer.phone': 'Teléfono',
-      'customer.email': 'Correo',
-      'customer.address': 'Dirección',
-      'customer.rfc': 'RFC',
-      'customer.new': 'Nuevo cliente',
-      'customer.balance': 'Saldo',
-      'customer.credit': 'Crédito',
-
-      // Reportes
-      'report.sales': 'Ventas',
-      'report.daily': 'Diario',
-      'report.weekly': 'Semanal',
-      'report.monthly': 'Mensual',
-      'report.yearly': 'Anual',
-      'report.export': 'Exportar',
-      'report.from': 'Desde',
-      'report.to': 'Hasta',
-      'report.generate': 'Generar reporte',
-
-      // Acciones
-      'action.save': 'Guardar',
-      'action.cancel': 'Cancelar',
-      'action.delete': 'Eliminar',
-      'action.edit': 'Editar',
-      'action.add': 'Agregar',
-      'action.search': 'Buscar',
-      'action.filter': 'Filtrar',
-      'action.refresh': 'Actualizar',
-      'action.close': 'Cerrar',
-      'action.confirm': 'Confirmar',
-      'action.back': 'Atrás',
-      'action.next': 'Siguiente',
-      'action.finish': 'Finalizar',
-      'action.yes': 'Sí',
-      'action.no': 'No',
-
-      // Mensajes
-      'msg.success': 'Operación exitosa',
-      'msg.error': 'Ocurrió un error',
-      'msg.loading': 'Cargando...',
-      'msg.saving': 'Guardando...',
-      'msg.confirm.delete': '¿Estás seguro de eliminar?',
-      'msg.no_data': 'Sin datos',
-      'msg.no_results': 'Sin resultados',
-      'msg.welcome': 'Bienvenido',
-      'msg.goodbye': 'Hasta pronto',
-      'msg.required': 'Campo obligatorio',
-      'msg.saved': 'Guardado correctamente',
-      'msg.deleted': 'Eliminado correctamente',
-
-      // Tiempo
-      'time.today': 'Hoy',
-      'time.yesterday': 'Ayer',
-      'time.tomorrow': 'Mañana',
-      'time.now': 'Ahora',
-      'time.minutes': 'minutos',
-      'time.hours': 'horas',
-      'time.days': 'días',
-
-      // Plurales
-      'plural.item.one': '{n} artículo',
-      'plural.item.other': '{n} artículos',
-      'plural.product.one': '{n} producto',
-      'plural.product.other': '{n} productos'
-    },
-
-    en: {
-      'login.title': 'Sign in',
-      'login.subtitle': 'Welcome to Volvix POS',
-      'login.email': 'Email',
-      'login.password': 'Password',
-      'login.submit': 'Login',
-      'login.forgot': 'Forgot password?',
-      'login.register': 'Create account',
-      'login.remember': 'Remember me',
-      'login.error.invalid': 'Invalid credentials',
-      'login.error.empty': 'Fill all fields',
-      'login.loading': 'Signing in...',
-      'login.logout': 'Sign out',
-
-      'nav.dashboard': 'Dashboard',
-      'nav.pos': 'Point of sale',
-      'nav.products': 'Products',
-      'nav.inventory': 'Inventory',
-      'nav.customers': 'Customers',
-      'nav.suppliers': 'Suppliers',
-      'nav.reports': 'Reports',
-      'nav.settings': 'Settings',
-      'nav.users': 'Users',
-      'nav.help': 'Help',
-      'nav.profile': 'Profile',
-      'nav.notifications': 'Notifications',
-
-      'pos.cart.empty': 'Empty cart',
-      'pos.cart.title': 'Cart',
-      'pos.cart.add': 'Add to cart',
-      'pos.cart.remove': 'Remove',
-      'pos.cart.clear': 'Clear cart',
-      'pos.cart.items': 'items',
-      'pos.subtotal': 'Subtotal',
-      'pos.tax': 'Tax',
-      'pos.discount': 'Discount',
-      'pos.total': 'Total',
-      'pos.checkout': 'Checkout',
-      'pos.cash': 'Cash',
-      'pos.card': 'Card',
-      'pos.transfer': 'Transfer',
-      'pos.change': 'Change',
-      'pos.payment': 'Payment',
-      'pos.receipt': 'Receipt',
-      'pos.print': 'Print',
-      'pos.scan': 'Scan code',
-      'pos.search.product': 'Search product',
-      'pos.quantity': 'Quantity',
-      'pos.price': 'Price',
-
-      'product.name': 'Name',
-      'product.code': 'Code',
-      'product.barcode': 'Barcode',
-      'product.category': 'Category',
-      'product.brand': 'Brand',
-      'product.stock': 'Stock',
-      'product.cost': 'Cost',
-      'product.price.sale': 'Sale price',
-      'product.description': 'Description',
-      'product.image': 'Image',
-      'product.new': 'New product',
-      'product.edit': 'Edit product',
-      'product.delete': 'Delete product',
-
-      'inv.title': 'Inventory',
-      'inv.in': 'Inbound',
-      'inv.out': 'Outbound',
-      'inv.adjust': 'Adjustment',
-      'inv.transfer': 'Transfer',
-      'inv.low': 'Low stock',
-      'inv.out_of_stock': 'Out of stock',
-      'inv.warehouse': 'Warehouse',
-
-      'customer.name': 'Name',
-      'customer.phone': 'Phone',
-      'customer.email': 'Email',
-      'customer.address': 'Address',
-      'customer.rfc': 'Tax ID',
-      'customer.new': 'New customer',
-      'customer.balance': 'Balance',
-      'customer.credit': 'Credit',
-
-      'report.sales': 'Sales',
-      'report.daily': 'Daily',
-      'report.weekly': 'Weekly',
-      'report.monthly': 'Monthly',
-      'report.yearly': 'Yearly',
-      'report.export': 'Export',
-      'report.from': 'From',
-      'report.to': 'To',
-      'report.generate': 'Generate report',
-
-      'action.save': 'Save',
-      'action.cancel': 'Cancel',
-      'action.delete': 'Delete',
-      'action.edit': 'Edit',
-      'action.add': 'Add',
-      'action.search': 'Search',
-      'action.filter': 'Filter',
-      'action.refresh': 'Refresh',
-      'action.close': 'Close',
-      'action.confirm': 'Confirm',
-      'action.back': 'Back',
-      'action.next': 'Next',
-      'action.finish': 'Finish',
-      'action.yes': 'Yes',
-      'action.no': 'No',
-
-      'msg.success': 'Operation successful',
-      'msg.error': 'An error occurred',
-      'msg.loading': 'Loading...',
-      'msg.saving': 'Saving...',
-      'msg.confirm.delete': 'Are you sure you want to delete?',
-      'msg.no_data': 'No data',
-      'msg.no_results': 'No results',
-      'msg.welcome': 'Welcome',
-      'msg.goodbye': 'Goodbye',
-      'msg.required': 'Required field',
-      'msg.saved': 'Saved successfully',
-      'msg.deleted': 'Deleted successfully',
-
-      'time.today': 'Today',
-      'time.yesterday': 'Yesterday',
-      'time.tomorrow': 'Tomorrow',
-      'time.now': 'Now',
-      'time.minutes': 'minutes',
-      'time.hours': 'hours',
-      'time.days': 'days',
-
-      'plural.item.one': '{n} item',
-      'plural.item.other': '{n} items',
-      'plural.product.one': '{n} product',
-      'plural.product.other': '{n} products'
-    },
-
-    pt: {
-      'login.title': 'Entrar',
-      'login.subtitle': 'Bem-vindo ao Volvix POS',
-      'login.email': 'E-mail',
-      'login.password': 'Senha',
-      'login.submit': 'Entrar',
-      'login.forgot': 'Esqueceu a senha?',
-      'login.register': 'Criar conta',
-      'login.remember': 'Lembrar-me',
-      'login.error.invalid': 'Credenciais inválidas',
-      'login.error.empty': 'Preencha todos os campos',
-      'login.loading': 'Entrando...',
-      'login.logout': 'Sair',
-
-      'nav.dashboard': 'Painel',
-      'nav.pos': 'Ponto de venda',
-      'nav.products': 'Produtos',
-      'nav.inventory': 'Estoque',
-      'nav.customers': 'Clientes',
-      'nav.suppliers': 'Fornecedores',
-      'nav.reports': 'Relatórios',
-      'nav.settings': 'Configurações',
-      'nav.users': 'Usuários',
-      'nav.help': 'Ajuda',
-      'nav.profile': 'Perfil',
-      'nav.notifications': 'Notificações',
-
-      'pos.cart.empty': 'Carrinho vazio',
-      'pos.cart.title': 'Carrinho',
-      'pos.cart.add': 'Adicionar ao carrinho',
-      'pos.cart.remove': 'Remover',
-      'pos.cart.clear': 'Esvaziar carrinho',
-      'pos.cart.items': 'itens',
-      'pos.subtotal': 'Subtotal',
-      'pos.tax': 'Impostos',
-      'pos.discount': 'Desconto',
-      'pos.total': 'Total',
-      'pos.checkout': 'Cobrar',
-      'pos.cash': 'Dinheiro',
-      'pos.card': 'Cartão',
-      'pos.transfer': 'Transferência',
-      'pos.change': 'Troco',
-      'pos.payment': 'Pagamento',
-      'pos.receipt': 'Recibo',
-      'pos.print': 'Imprimir',
-      'pos.scan': 'Escanear código',
-      'pos.search.product': 'Buscar produto',
-      'pos.quantity': 'Quantidade',
-      'pos.price': 'Preço',
-
-      'product.name': 'Nome',
-      'product.code': 'Código',
-      'product.barcode': 'Código de barras',
-      'product.category': 'Categoria',
-      'product.brand': 'Marca',
-      'product.stock': 'Estoque',
-      'product.cost': 'Custo',
-      'product.price.sale': 'Preço de venda',
-      'product.description': 'Descrição',
-      'product.image': 'Imagem',
-      'product.new': 'Novo produto',
-      'product.edit': 'Editar produto',
-      'product.delete': 'Excluir produto',
-
-      'inv.title': 'Estoque',
-      'inv.in': 'Entrada',
-      'inv.out': 'Saída',
-      'inv.adjust': 'Ajuste',
-      'inv.transfer': 'Transferência',
-      'inv.low': 'Estoque baixo',
-      'inv.out_of_stock': 'Esgotado',
-      'inv.warehouse': 'Armazém',
-
-      'customer.name': 'Nome',
-      'customer.phone': 'Telefone',
-      'customer.email': 'E-mail',
-      'customer.address': 'Endereço',
-      'customer.rfc': 'CNPJ/CPF',
-      'customer.new': 'Novo cliente',
-      'customer.balance': 'Saldo',
-      'customer.credit': 'Crédito',
-
-      'report.sales': 'Vendas',
-      'report.daily': 'Diário',
-      'report.weekly': 'Semanal',
-      'report.monthly': 'Mensal',
-      'report.yearly': 'Anual',
-      'report.export': 'Exportar',
-      'report.from': 'De',
-      'report.to': 'Até',
-      'report.generate': 'Gerar relatório',
-
-      'action.save': 'Salvar',
-      'action.cancel': 'Cancelar',
-      'action.delete': 'Excluir',
-      'action.edit': 'Editar',
-      'action.add': 'Adicionar',
-      'action.search': 'Buscar',
-      'action.filter': 'Filtrar',
-      'action.refresh': 'Atualizar',
-      'action.close': 'Fechar',
-      'action.confirm': 'Confirmar',
-      'action.back': 'Voltar',
-      'action.next': 'Próximo',
-      'action.finish': 'Concluir',
-      'action.yes': 'Sim',
-      'action.no': 'Não',
-
-      'msg.success': 'Operação bem-sucedida',
-      'msg.error': 'Ocorreu um erro',
-      'msg.loading': 'Carregando...',
-      'msg.saving': 'Salvando...',
-      'msg.confirm.delete': 'Tem certeza que deseja excluir?',
-      'msg.no_data': 'Sem dados',
-      'msg.no_results': 'Sem resultados',
-      'msg.welcome': 'Bem-vindo',
-      'msg.goodbye': 'Até logo',
-      'msg.required': 'Campo obrigatório',
-      'msg.saved': 'Salvo com sucesso',
-      'msg.deleted': 'Excluído com sucesso',
-
-      'time.today': 'Hoje',
-      'time.yesterday': 'Ontem',
-      'time.tomorrow': 'Amanhã',
-      'time.now': 'Agora',
-      'time.minutes': 'minutos',
-      'time.hours': 'horas',
-      'time.days': 'dias',
-
-      'plural.item.one': '{n} item',
-      'plural.item.other': '{n} itens',
-      'plural.product.one': '{n} produto',
-      'plural.product.other': '{n} produtos'
+      "login.title": "Iniciar sesión",
+      "login.subtitle": "Bienvenido a Volvix POS",
+      "login.email": "Correo electrónico",
+      "login.password": "Contraseña",
+      "login.submit": "Entrar",
+      "login.forgot": "¿Olvidaste tu contraseña?",
+      "login.register": "Crear cuenta",
+      "login.remember": "Recordarme",
+      "login.error.invalid": "Credenciales inválidas",
+      "login.error.empty": "Completa todos los campos",
+      "login.loading": "Iniciando sesión...",
+      "login.logout": "Cerrar sesión",
+      "nav.dashboard": "Panel",
+      "nav.pos": "Punto de venta",
+      "nav.products": "Productos",
+      "nav.inventory": "Inventario",
+      "nav.customers": "Clientes",
+      "nav.suppliers": "Proveedores",
+      "nav.reports": "Reportes",
+      "nav.settings": "Configuración",
+      "nav.users": "Usuarios",
+      "nav.help": "Ayuda",
+      "nav.profile": "Perfil",
+      "nav.notifications": "Notificaciones",
+      "pos.cart.empty": "Carrito vacío",
+      "pos.cart.title": "Carrito",
+      "pos.cart.add": "Agregar al carrito",
+      "pos.cart.remove": "Quitar",
+      "pos.cart.clear": "Vaciar carrito",
+      "pos.cart.items": "artículos",
+      "pos.subtotal": "Subtotal",
+      "pos.tax": "Impuestos",
+      "pos.discount": "Descuento",
+      "pos.total": "Total",
+      "pos.checkout": "Cobrar",
+      "pos.cash": "Efectivo",
+      "pos.card": "Tarjeta",
+      "pos.transfer": "Transferencia",
+      "pos.change": "Cambio",
+      "pos.payment": "Pago",
+      "pos.receipt": "Recibo",
+      "pos.print": "Imprimir",
+      "pos.scan": "Escanear código",
+      "pos.search.product": "Buscar producto",
+      "pos.quantity": "Cantidad",
+      "pos.price": "Precio",
+      "product.name": "Nombre",
+      "product.code": "Código",
+      "product.barcode": "Código de barras",
+      "product.category": "Categoría",
+      "product.brand": "Marca",
+      "product.stock": "Stock",
+      "product.cost": "Costo",
+      "product.price.sale": "Precio venta",
+      "product.description": "Descripción",
+      "product.image": "Imagen",
+      "product.new": "Nuevo producto",
+      "product.edit": "Editar producto",
+      "product.delete": "Eliminar producto",
+      "inv.title": "Inventario",
+      "inv.in": "Entrada",
+      "inv.out": "Salida",
+      "inv.adjust": "Ajuste",
+      "inv.transfer": "Traspaso",
+      "inv.low": "Stock bajo",
+      "inv.out_of_stock": "Agotado",
+      "inv.warehouse": "Almacén",
+      "customer.name": "Nombre",
+      "customer.phone": "Teléfono",
+      "customer.email": "Correo",
+      "customer.address": "Dirección",
+      "customer.rfc": "RFC",
+      "customer.new": "Nuevo cliente",
+      "customer.balance": "Saldo",
+      "customer.credit": "Crédito",
+      "report.sales": "Ventas",
+      "report.daily": "Diario",
+      "report.weekly": "Semanal",
+      "report.monthly": "Mensual",
+      "report.yearly": "Anual",
+      "report.export": "Exportar",
+      "report.from": "Desde",
+      "report.to": "Hasta",
+      "report.generate": "Generar reporte",
+      "action.save": "Guardar",
+      "action.cancel": "Cancelar",
+      "action.delete": "Eliminar",
+      "action.edit": "Editar",
+      "action.add": "Agregar",
+      "action.search": "Buscar",
+      "action.filter": "Filtrar",
+      "action.refresh": "Actualizar",
+      "action.close": "Cerrar",
+      "action.confirm": "Confirmar",
+      "action.back": "Atrás",
+      "action.next": "Siguiente",
+      "action.finish": "Finalizar",
+      "action.yes": "Sí",
+      "action.no": "No",
+      "msg.success": "Operación exitosa",
+      "msg.error": "Ocurrió un error",
+      "msg.loading": "Cargando...",
+      "msg.saving": "Guardando...",
+      "msg.confirm.delete": "¿Estás seguro de eliminar?",
+      "msg.no_data": "Sin datos",
+      "msg.no_results": "Sin resultados",
+      "msg.welcome": "Bienvenido",
+      "msg.goodbye": "Hasta pronto",
+      "msg.required": "Campo obligatorio",
+      "msg.saved": "Guardado correctamente",
+      "msg.deleted": "Eliminado correctamente",
+      "time.today": "Hoy",
+      "time.yesterday": "Ayer",
+      "time.tomorrow": "Mañana",
+      "time.now": "Ahora",
+      "time.minutes": "minutos",
+      "time.hours": "horas",
+      "time.days": "días",
+      "plural.item.one": "{n} artículo",
+      "plural.item.other": "{n} artículos",
+      "plural.product.one": "{n} producto",
+      "plural.product.other": "{n} productos",
+      "common.save": "Guardar",
+      "common.cancel": "Cancelar",
+      "common.delete": "Eliminar",
+      "common.edit": "Editar",
+      "common.search": "Buscar",
+      "common.export": "Exportar",
+      "common.import": "Importar",
+      "common.close": "Cerrar",
+      "common.open": "Abrir",
+      "common.new": "Nuevo",
+      "common.view": "Ver",
+      "common.status": "Estado",
+      "common.type": "Tipo",
+      "common.date": "Fecha",
+      "common.user": "Usuario",
+      "common.email": "Email",
+      "common.phone": "Teléfono",
+      "common.total": "Total",
+      "common.subtotal": "Subtotal",
+      "common.active": "Activos",
+      "common.inactive": "Inactivos",
+      "common.expires": "Vence",
+      "common.expired": "Vencido",
+      "common.version": "Versión",
+      "common.system": "Sistema",
+      "common.config": "Configuración",
+      "common.logout": "Salir",
+      "common.save_changes": "Guardar cambios",
+      "common.no_results": "Sin resultados",
+      "pos.products": "Productos",
+      "pos.sales": "Ventas",
+      "pos.customers": "Clientes",
+      "pos.inventory": "Inventario",
+      "pos.cash_register": "Caja",
+      "pos.cashier": "Cajero",
+      "pos.shift": "Turno",
+      "pos.opening": "Apertura",
+      "pos.dashboard": "Dashboard",
+      "pos.reports": "Reportes",
+      "pos.returns": "Devoluciones",
+      "pos.quotes": "Cotizaciones",
+      "pos.tickets": "Tickets",
+      "pos.low_stock": "Stock bajo",
+      "sales.new": "Nueva venta",
+      "sales.cobrar": "Cobrar",
+      "sales.cancel": "Cancelar venta",
+      "sales.discount": "Descuento",
+      "sales.today": "Ventas hoy",
+      "sales.cash": "Ventas efectivo",
+      "sales.card": "Ventas tarjeta",
+      "sales.daily": "Ventas por día",
+      "sales.top_products": "Top productos",
+      "sales.total_to_collect": "Total a cobrar",
+      "tenant.title": "Tenant",
+      "tenant.list": "Tenants",
+      "tenant.active": "Tenants activos",
+      "tenant.plan": "Plan",
+      "tenant.modules": "Módulos",
+      "tenant.devices": "Dispositivos",
+      "tenant.domain": "Dominio",
+      "tenant.subdomain": "Subdominio",
+      "tenant.vertical": "Vertical",
+      "tenant.role.admin": "Administrador",
+      "tenant.brand": "Marca",
+      "tenant.commercial_name": "Nombre comercial"
     }
   };
 
-  // ═══════════════════════════════════════════════════════════
+  // Idiomas disponibles (carga lazy salvo es)
+  const AVAILABLE_LANGS = ['es', 'en', 'pt', 'fr', 'de', 'it', 'ja'];
+  const I18N_BASE = (function() {
+    try {
+      const s = document.currentScript && document.currentScript.src;
+      if (s) return s.replace(/[^/]*$/, '') + 'i18n/';
+    } catch (e) {}
+    return 'i18n/';
+  })();
+  const CACHE_PREFIX = 'volvix:i18n:cache:';
+  const CACHE_VERSION = 'v1';
+  const _loading = {}; // lang -> Promise
+
+  function _cacheGet(lang) {
+    try {
+      const raw = localStorage.getItem(CACHE_PREFIX + lang);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.v === CACHE_VERSION && parsed.d) return parsed.d;
+    } catch (e) {}
+    return null;
+  }
+  function _cacheSet(lang, dict) {
+    try {
+      localStorage.setItem(CACHE_PREFIX + lang, JSON.stringify({ v: CACHE_VERSION, d: dict, t: Date.now() }));
+    } catch (e) { /* quota */ }
+  }
+
+  async function loadLanguage(lang) {
+    if (TRANSLATIONS[lang]) return TRANSLATIONS[lang];
+    if (!AVAILABLE_LANGS.includes(lang)) return null;
+    const cached = _cacheGet(lang);
+    if (cached) { TRANSLATIONS[lang] = cached; return cached; }
+    if (_loading[lang]) return _loading[lang];
+    _loading[lang] = fetch(I18N_BASE + lang + '.json', { cache: 'force-cache' })
+      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(dict => {
+        TRANSLATIONS[lang] = dict;
+        _cacheSet(lang, dict);
+        return dict;
+      })
+      .catch(err => {
+        console.warn('[i18n] failed to load ' + lang + ':', err);
+        delete _loading[lang];
+        return null;
+      });
+    return _loading[lang];
+  }
+
+// ═══════════════════════════════════════════════════════════
   // CONFIG locale / moneda
   // ═══════════════════════════════════════════════════════════
   const LOCALES = {
     es: { locale: 'es-MX', currency: 'MXN', flag: '🇲🇽', name: 'Español' },
     en: { locale: 'en-US', currency: 'USD', flag: '🇺🇸', name: 'English' },
-    pt: { locale: 'pt-BR', currency: 'BRL', flag: '🇧🇷', name: 'Português' }
+    pt: { locale: 'pt-BR', currency: 'BRL', flag: '🇧🇷', name: 'Português' },
+    fr: { locale: 'fr-FR', currency: 'EUR', flag: '🇫🇷', name: 'Français' },
+    de: { locale: 'de-DE', currency: 'EUR', flag: '🇩🇪', name: 'Deutsch' },
+    it: { locale: 'it-IT', currency: 'EUR', flag: '🇮🇹', name: 'Italiano' },
+    ja: { locale: 'ja-JP', currency: 'JPY', flag: '🇯🇵', name: '日本語' }
   };
 
   const FALLBACK = 'es';
@@ -442,9 +272,9 @@
 
   // Detectar idioma inicial
   let currentLang = localStorage.getItem(STORAGE_KEY);
-  if (!currentLang || !TRANSLATIONS[currentLang]) {
+  if (!currentLang || !AVAILABLE_LANGS.includes(currentLang)) {
     const navLang = (navigator.language || navigator.userLanguage || FALLBACK).slice(0, 2).toLowerCase();
-    currentLang = TRANSLATIONS[navLang] ? navLang : FALLBACK;
+    currentLang = AVAILABLE_LANGS.includes(navLang) ? navLang : FALLBACK;
   }
 
   // ═══════════════════════════════════════════════════════════
@@ -498,8 +328,12 @@
     } catch (e) { return String(d); }
   };
 
-  window.setLanguage = function(lang) {
-    if (!TRANSLATIONS[lang]) return false;
+  window.setLanguage = async function(lang) {
+    if (!AVAILABLE_LANGS.includes(lang)) return false;
+    if (!TRANSLATIONS[lang]) {
+      const dict = await loadLanguage(lang);
+      if (!dict) return false;
+    }
     currentLang = lang;
     localStorage.setItem(STORAGE_KEY, lang);
     document.documentElement.lang = lang;
@@ -512,7 +346,95 @@
   // ═══════════════════════════════════════════════════════════
   // DOM helpers
   // ═══════════════════════════════════════════════════════════
+  // Build inverse map: lowercased Spanish text → translation key (lazy)
+  let _esIndex = null;
+  function buildEsIndex() {
+    if (_esIndex) return _esIndex;
+    _esIndex = {};
+    const es = TRANSLATIONS.es || {};
+    for (const key in es) {
+      const txt = String(es[key] || '').trim();
+      if (txt && txt.length >= 2 && txt.length <= 60) {
+        const k = txt.toLowerCase();
+        if (!_esIndex[k]) _esIndex[k] = key;
+      }
+    }
+    return _esIndex;
+  }
+
+  // Walk text nodes and translate Spanish text to current language
+  function autoTranslateTextNodes() {
+    if (currentLang === 'es') return; // no-op when in Spanish
+    const idx = buildEsIndex();
+    const dict = TRANSLATIONS[currentLang] || {};
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode(n) {
+        if (!n.nodeValue || !n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        const p = n.parentNode;
+        if (!p) return NodeFilter.FILTER_REJECT;
+        const tag = (p.tagName || '').toUpperCase();
+        if (['SCRIPT','STYLE','NOSCRIPT','TEXTAREA'].includes(tag)) return NodeFilter.FILTER_REJECT;
+        if (p.closest && p.closest('[data-i18n-skip]')) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    const toTranslate = [];
+    let node;
+    while ((node = walker.nextNode())) toTranslate.push(node);
+    toTranslate.forEach(n => {
+      const original = n.nodeValue;
+      const trimmed = original.trim();
+      if (!trimmed) return;
+      const lookup = trimmed.toLowerCase();
+      const key = idx[lookup];
+      if (!key) return;
+      if (!n._volvixOriginal) n._volvixOriginal = original;
+      const translated = dict[key];
+      if (translated && translated !== trimmed) {
+        // preserve whitespace
+        const pre = original.match(/^\s*/)[0];
+        const post = original.match(/\s*$/)[0];
+        n.nodeValue = pre + translated + post;
+      } else if (currentLang === 'es' && n._volvixOriginal) {
+        n.nodeValue = n._volvixOriginal;
+      }
+    });
+    // Also placeholders and titles without data-i18n
+    document.querySelectorAll('input[placeholder], textarea[placeholder]').forEach(el => {
+      if (!el._origPlaceholder) el._origPlaceholder = el.placeholder;
+      const k = idx[String(el._origPlaceholder).trim().toLowerCase()];
+      if (k && dict[k]) el.placeholder = dict[k];
+    });
+    document.querySelectorAll('[title]').forEach(el => {
+      if (!el._origTitle) el._origTitle = el.getAttribute('title') || '';
+      const k = idx[String(el._origTitle).trim().toLowerCase()];
+      if (k && dict[k]) el.setAttribute('title', dict[k]);
+    });
+    document.querySelectorAll('button[value], input[type=button][value], input[type=submit][value]').forEach(el => {
+      if (!el._origValue) el._origValue = el.value;
+      const k = idx[String(el._origValue).trim().toLowerCase()];
+      if (k && dict[k]) el.value = dict[k];
+    });
+  }
+
+  // Restore original Spanish text when switching back to es
+  function restoreSpanish() {
+    document.querySelectorAll('input, textarea, button').forEach(el => {
+      if (el._origPlaceholder !== undefined) el.placeholder = el._origPlaceholder;
+      if (el._origValue !== undefined && 'value' in el) el.value = el._origValue;
+    });
+    document.querySelectorAll('[title]').forEach(el => {
+      if (el._origTitle !== undefined) el.setAttribute('title', el._origTitle);
+    });
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
+    let node;
+    while ((node = walker.nextNode())) {
+      if (node._volvixOriginal) node.nodeValue = node._volvixOriginal;
+    }
+  }
+
   function translateAll() {
+    // 1) Explicit data-i18n elements
     document.querySelectorAll('[data-i18n]').forEach(el => {
       const key = el.dataset.i18n;
       if (!el.dataset.i18nOriginal) el.dataset.i18nOriginal = el.textContent;
@@ -530,6 +452,12 @@
       const key = el.dataset.i18nValue;
       el.value = window.t(key, el.value);
     });
+    // 2) Auto-translate text nodes (NEW)
+    if (currentLang === 'es') {
+      restoreSpanish();
+    } else {
+      try { autoTranslateTextNodes(); } catch(e) { console.warn('[i18n] auto-translate failed:', e); }
+    }
   }
 
   // ═══════════════════════════════════════════════════════════
@@ -605,7 +533,11 @@
   function init() {
     document.documentElement.lang = currentLang;
     createLangSelector();
-    translateAll();
+    if (currentLang !== 'es' && !TRANSLATIONS[currentLang]) {
+      loadLanguage(currentLang).then(() => translateAll()).catch(() => translateAll());
+    } else {
+      translateAll();
+    }
     // Re-traducir periódicamente para SPA dinámicas
     setInterval(translateAll, 3000);
     // MutationObserver para nodos nuevos
@@ -620,14 +552,19 @@
     tPlural: window.tPlural,
     setLanguage: window.setLanguage,
     current: () => currentLang,
-    available: () => Object.keys(TRANSLATIONS),
+    available: () => AVAILABLE_LANGS.slice(),
     locale: () => LOCALES[currentLang],
     formatNumber: window.formatNumber,
     formatCurrency: window.formatCurrency,
     formatDate: window.formatDate,
     formatDateTime: window.formatDateTime,
-    retranslate: translateAll
+    retranslate: translateAll,
+    loadLanguage: loadLanguage
   };
+
+  // Namespace Volvix.i18n (alias) — Volvix.i18n.setLanguage('en') sin reload
+  window.Volvix = window.Volvix || {};
+  window.Volvix.i18n = window.I18nAPI;
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

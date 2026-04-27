@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Volvix — Portal GDPR / Privacidad</title>
+<meta name="description" content="Portal GDPR de Volvix: ejerce tus derechos de acceso, rectificación, supresión y portabilidad de datos personales.">
+<meta name="theme-color" content="#0b0f1a">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://volvix-pos.vercel.app/volvix-gdpr-portal.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Volvix — Portal GDPR / Privacidad">
+<meta property="og:description" content="Ejerce tus derechos GDPR sobre tus datos personales en Volvix.">
+<meta property="og:image" content="https://volvix-pos.vercel.app/og-default.png">
+<meta property="og:url" content="https://volvix-pos.vercel.app/volvix-gdpr-portal.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Volvix — Portal GDPR / Privacidad">
+<meta name="twitter:description" content="Ejerce tus derechos GDPR sobre tus datos personales en Volvix.">
+<meta name="twitter:image" content="https://volvix-pos.vercel.app/og-default.png">
+<style>
+  :root { --bg:#0b0f1a; --card:#141a2b; --fg:#e8ecf4; --muted:#8a93a6; --accent:#5cc8ff; --danger:#ff6b6b; --ok:#4ade80; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--fg); }
+  header { padding:24px; text-align:center; border-bottom:1px solid #1f2740; }
+  header h1 { margin:0; font-size:22px; }
+  header p { margin:4px 0 0; color:var(--muted); font-size:13px; }
+  main { max-width:760px; margin:32px auto; padding:0 16px; }
+  .card { background:var(--card); border:1px solid #1f2740; border-radius:12px; padding:20px; margin-bottom:16px; }
+  .card h2 { margin:0 0 8px; font-size:16px; }
+  .card p { color:var(--muted); font-size:14px; margin:0 0 12px; line-height:1.5; }
+  label { display:block; font-size:12px; color:var(--muted); margin:8px 0 4px; }
+  input, select, textarea {
+    width:100%; padding:10px 12px; background:#0d1322; color:var(--fg);
+    border:1px solid #243056; border-radius:8px; font-size:14px;
+  }
+  button {
+    background:var(--accent); color:#08111f; border:0; padding:10px 16px;
+    border-radius:8px; font-weight:600; cursor:pointer; font-size:14px;
+  }
+  button.danger { background:var(--danger); color:#fff; }
+  button.secondary { background:transparent; color:var(--accent); border:1px solid var(--accent); }
+  .row { display:flex; gap:8px; flex-wrap:wrap; }
+  .row > * { flex:1; min-width:140px; }
+  .badge { display:inline-block; padding:2px 8px; border-radius:99px; font-size:11px; background:#1f2740; color:var(--muted); margin-left:6px; }
+  .badge.ok { background:rgba(74,222,128,0.15); color:var(--ok); }
+  .badge.err { background:rgba(255,107,107,0.15); color:var(--danger); }
+  pre { background:#0d1322; border:1px solid #243056; border-radius:8px; padding:12px; overflow:auto; font-size:12px; max-height:400px; }
+  footer { text-align:center; color:var(--muted); font-size:12px; padding:24px; }
+  .legal { font-size:12px; color:var(--muted); border-left:3px solid var(--accent); padding:8px 12px; margin:12px 0; }
+  .hidden { display:none; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Portal de Privacidad — Volvix</h1>
+  <p>Ejerce tus derechos GDPR: acceso, supresión y portabilidad de datos.</p>
+</header>
+
+<main>
+
+  <!-- Selector de derecho -->
+  <div class="card" id="step-select">
+    <h2>1. ¿Qué derecho deseas ejercer?</h2>
+    <p>Selecciona el tipo de solicitud. Recibirás un enlace de verificación en tu correo.</p>
+    <div class="row">
+      <button onclick="setType('access')">Acceso (Art. 15)</button>
+      <button onclick="setType('portability')">Portabilidad (Art. 20)</button>
+      <button class="danger" onclick="setType('erasure')">Supresión / Olvido (Art. 17)</button>
+    </div>
+    <div class="legal" id="legal-info" style="margin-top:16px;">
+      Selecciona una opción para ver la base legal aplicable.
+    </div>
+  </div>
+
+  <!-- Formulario solicitud -->
+  <div class="card hidden" id="step-form">
+    <h2>2. Datos de contacto <span class="badge" id="type-badge"></span></h2>
+    <p>Tu email es el identificador del cliente. Te enviaremos un enlace de verificación para confirmar la solicitud (válido 60 minutos).</p>
+    <label>Email</label>
+    <input id="email" type="email" placeholder="tu@correo.com" autocomplete="email">
+    <label>Motivo (opcional)</label>
+    <textarea id="reason" rows="2" placeholder="Por ejemplo: deseo eliminar mi cuenta…"></textarea>
+    <div class="row" style="margin-top:12px;">
+      <button class="secondary" onclick="resetFlow()">Cancelar</button>
+      <button onclick="submitRequest()">Enviar solicitud</button>
+    </div>
+  </div>
+
+  <!-- Verificación -->
+  <div class="card hidden" id="step-verify">
+    <h2>3. Verificación</h2>
+    <p id="verify-msg">Hemos registrado tu solicitud. Revisa tu email y haz clic en el enlace de verificación. También puedes pegar el token aquí:</p>
+    <label>Request ID</label>
+    <input id="req-id">
+    <label>Verify token</label>
+    <input id="verify-token">
+    <div class="row" style="margin-top:12px;">
+      <button onclick="confirmRequest()">Confirmar y ejecutar</button>
+    </div>
+  </div>
+
+  <!-- Resultado -->
+  <div class="card hidden" id="step-result">
+    <h2>Resultado <span class="badge ok" id="result-badge">OK</span></h2>
+    <p id="result-msg"></p>
+    <pre id="result-data"></pre>
+    <div class="row">
+      <button class="secondary" onclick="downloadJson()">Descargar JSON</button>
+      <button onclick="resetFlow()">Nueva solicitud</button>
+    </div>
+  </div>
+
+  <div class="legal">
+    <strong>Aviso legal:</strong> Esta plataforma cumple con el Reglamento (UE) 2016/679 (GDPR).
+    El derecho de supresión es irreversible: tus datos personales serán reemplazados por un hash
+    determinista y no podrán ser recuperados. Datos agregados (volúmenes de venta) se mantienen
+    de forma anonimizada para cumplimiento fiscal y estadístico.
+    Conserva el archivo descargado: es la única evidencia de tu solicitud.
+  </div>
+
+</main>
+
+<footer>
+  © Volvix POS — Para reclamaciones contacta a privacy@volvix.mx · Autoridad de control: AEPD / INAI
+</footer>
+
+<script>
+const state = { type: null, lastResult: null };
+
+const LEGAL = {
+  access:       'Art. 15 GDPR — Derecho de acceso: obtienes copia de los datos personales que conservamos sobre ti.',
+  portability:  'Art. 20 GDPR — Portabilidad: recibes tus datos en formato estructurado, JSON, para transferirlos a otro proveedor.',
+  erasure:      'Art. 17 GDPR — Derecho al olvido: tus datos personales son anonimizados con hash determinista. Esta acción es irreversible.',
+};
+
+function setType(t) {
+  state.type = t;
+  document.getElementById('type-badge').textContent = t.toUpperCase();
+  document.getElementById('legal-info').textContent = LEGAL[t];
+  show('step-form');
+}
+
+function show(id) {
+  for (const s of ['step-select','step-form','step-verify','step-result']) {
+    document.getElementById(s).classList.toggle('hidden', s !== id);
+  }
+}
+
+async function api(path, body) {
+  const r = await fetch(path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  return { status: r.status, json: await r.json().catch(()=>({})) };
+}
+
+async function submitRequest() {
+  const email = document.getElementById('email').value.trim();
+  const reason = document.getElementById('reason').value.trim();
+  if (!email) return VolvixUI.toast({type:'error', message:'Email requerido'});
+  const path = `/api/gdpr/${state.type}`;
+  const { status, json } = await api(path, { email, reason });
+  if (!json.ok) return VolvixUI.toast({type:'error', message:'Error: ' + (json.error || status)});
+  document.getElementById('req-id').value = json.request_id;
+  // En producción el token llega por email; en dev viene en la respuesta.
+  if (json.verify_token_dev) {
+    document.getElementById('verify-token').value = json.verify_token_dev;
+    document.getElementById('verify-msg').textContent =
+      'DEV: el token se ha pre-rellenado. En producción lo recibirás por email.';
+  }
+  show('step-verify');
+}
+
+async function confirmRequest() {
+  const request_id = document.getElementById('req-id').value.trim();
+  const verify_token = document.getElementById('verify-token').value.trim();
+  if (!request_id || !verify_token) return VolvixUI.toast({type:'error', message:'Request ID y token requeridos'});
+  const path = `/api/gdpr/${state.type}`;
+  const { status, json } = await api(path, { request_id, verify_token });
+  if (!json.ok) {
+    document.getElementById('result-badge').className = 'badge err';
+    document.getElementById('result-badge').textContent = 'ERROR';
+    document.getElementById('result-msg').textContent = json.error || 'Error desconocido';
+    document.getElementById('result-data').textContent = JSON.stringify(json, null, 2);
+  } else {
+    state.lastResult = json;
+    document.getElementById('result-badge').className = 'badge ok';
+    document.getElementById('result-badge').textContent = json.gdpr_article || 'OK';
+    document.getElementById('result-msg').textContent =
+      state.type === 'erasure'
+        ? 'Tus datos han sido anonimizados. Conserva esta confirmación como evidencia.'
+        : 'Aquí está el export completo de tus datos personales.';
+    document.getElementById('result-data').textContent = JSON.stringify(json.data, null, 2);
+  }
+  show('step-result');
+}
+
+function downloadJson() {
+  if (!state.lastResult) return;
+  const blob = new Blob([JSON.stringify(state.lastResult, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `volvix-gdpr-${state.type}-${Date.now()}.json`;
+  a.click();
+}
+
+function resetFlow() {
+  state.type = null; state.lastResult = null;
+  document.getElementById('email').value = '';
+  document.getElementById('reason').value = '';
+  document.getElementById('req-id').value = '';
+  document.getElementById('verify-token').value = '';
+  show('step-select');
+}
+
+// Auto-fill desde query string (?verify=TOKEN&id=REQ_ID&type=access)
+(function init() {
+  const qs = new URLSearchParams(location.search);
+  const verify = qs.get('verify'), id = qs.get('id'), type = qs.get('type');
+  if (verify && id) {
+    state.type = type || 'access';
+    document.getElementById('type-badge').textContent = state.type.toUpperCase();
+    document.getElementById('req-id').value = id;
+    document.getElementById('verify-token').value = verify;
+    show('step-verify');
+  }
+})();
+</script>
+<link rel="stylesheet" href="volvix-modals.css">
+<script defer src="volvix-modals.js"></script>
+</body>
+</html>

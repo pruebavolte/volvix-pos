@@ -247,7 +247,7 @@
     const lines = ['Atajos disponibles (' + STATE.role + '):'];
     STATE.shortcuts.forEach((_, k) => lines.push('  ' + k));
     if (STATE.vimMode) lines.push('Vim: h/j/k/l, gg, G, n/p');
-    alert(lines.join('\n'));
+    VolvixUI.toast({type:'info', message:lines.join('\n')});
   }
 
   // ─────────────────────────────────────────────────────────

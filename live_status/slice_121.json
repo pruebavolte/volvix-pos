@@ -1,0 +1,38 @@
+{
+  "slice": 121,
+  "idx_range": "2420-2440",
+  "title": "R17 BUNDLES — Combos / Packs de productos",
+  "status": "done",
+  "timestamp": "2026-04-26",
+  "artifacts": {
+    "sql": "db/R17_BUNDLES.sql",
+    "api": "api/index.js (block: wireBundles)",
+    "client": "volvix-bundles-wiring.js",
+    "report": "R17_BUNDLES.md"
+  },
+  "endpoints": [
+    "GET /api/bundles",
+    "POST /api/bundles",
+    "PATCH /api/bundles/:id",
+    "DELETE /api/bundles/:id",
+    "POST /api/bundles/:id/expand"
+  ],
+  "db": {
+    "table": "product_bundles",
+    "columns": ["id", "tenant_id", "name", "sku", "price", "components(jsonb)", "active", "created_at", "updated_at"],
+    "alter": "sale_items.bundle_id (FK -> product_bundles.id)",
+    "triggers": ["fn_bundle_explode_stock (AFTER INSERT sale_items)", "fn_bundles_touch (BEFORE UPDATE)"],
+    "rls": "tenant_id = current_setting('app.tenant_id')",
+    "indexes": ["(tenant_id, active)", "GIN(components)"]
+  },
+  "client_features": [
+    "Tab Combos auto-mounted in F3 products",
+    "Drag-and-drop component picker",
+    "Duplicate components auto-merge qty",
+    "Search filter",
+    "Soft-delete via DELETE"
+  ],
+  "sales_hook": "POST /api/sales wrapped: items with bundle_id expand server-side into multiple sale_items preserving bundle_id and bundle_parent_qty",
+  "notes": "Trigger descuenta stock por componente (comp.qty * sale_item.qty) y registra en stock_movements con reason='bundle_sale'. Fallback in-memory para entornos sin DB.",
+  "next": "R18 — reporte de margen por combo + UI selector de combos en POS"
+}

@@ -1,0 +1,38 @@
+// PLACEHOLDER — Volvix POS Android wrapper
+// Generado por R18_MOBILE_APP. Reemplaza este archivo ejecutando:
+//   npx cap add android
+// El comando anterior crea un proyecto Android Studio completo (settings.gradle,
+// app/build.gradle, AndroidManifest.xml, etc.) usando capacitor.config.json.
+//
+// Este placeholder existe únicamente para que el directorio android/ no esté
+// vacío en el repo y para documentar la configuración esperada.
+//
+// Configuración esperada tras `cap add android`:
+//   applicationId  "mx.volvix.app"
+//   compileSdk     34
+//   minSdk         22
+//   targetSdk      34
+//   versionCode    1
+//   versionName    "1.0.0"
+//
+// Build firmado release:
+//   cd android && ./gradlew assembleRelease
+//   APK: android/app/build/outputs/apk/release/app-release.apk
+//   AAB: ./gradlew bundleRelease  (requerido por Google Play)
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.2.1'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}

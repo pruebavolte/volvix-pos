@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="es" id="root">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Volvix Kiosko</title>
+<style>
+  :root{
+    --bg:#0b1220; --panel:#101a30; --panel2:#162243;
+    --txt:#eaf0ff; --muted:#8aa0c8;
+    --accent:#3b82f6; --accent2:#22c55e; --warn:#ef4444;
+    --card:#1b2748; --border:#243561;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+  html,body{margin:0;padding:0;height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(--txt);
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  body{display:grid;grid-template-rows:64px 1fr 56px;grid-template-columns:1fr 380px}
+  header{grid-column:1 / span 2;display:flex;align-items:center;justify-content:space-between;
+    padding:0 24px;background:var(--panel);border-bottom:1px solid var(--border)}
+  .brand{font-size:22px;font-weight:700;letter-spacing:.5px}
+  .brand small{color:var(--muted);font-weight:400;margin-left:8px}
+  .toolbar{display:flex;gap:12px;align-items:center}
+  .lang{display:flex;background:var(--panel2);border-radius:8px;overflow:hidden}
+  .lang button{background:transparent;color:var(--txt);border:0;padding:8px 14px;font-size:14px;cursor:pointer}
+  .lang button.active{background:var(--accent)}
+  .scan{display:flex;align-items:center;gap:8px;background:var(--panel2);padding:6px 12px;border-radius:8px}
+  .scan input{background:transparent;border:0;color:var(--txt);outline:none;width:160px;font-size:14px}
+  main{padding:18px;overflow:auto}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,200px);gap:18px;justify-content:flex-start}
+  .card{width:200px;height:250px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+    display:flex;flex-direction:column;justify-content:space-between;padding:14px;cursor:pointer;
+    transition:transform .12s ease, border-color .12s ease}
+  .card:active{transform:scale(.97);border-color:var(--accent)}
+  .card .icon{font-size:60px;text-align:center;margin-top:14px}
+  .card .name{font-size:18px;font-weight:600;line-height:1.2;min-height:44px}
+  .card .price{font-size:22px;color:var(--accent2);font-weight:700}
+  aside{grid-row:2;grid-column:2;background:var(--panel);border-left:1px solid var(--border);
+    display:flex;flex-direction:column}
+  aside h2{margin:16px 18px 8px;font-size:18px}
+  .cart{flex:1;overflow:auto;padding:0 14px}
+  .citem{display:flex;justify-content:space-between;gap:8px;padding:10px;border-bottom:1px dashed var(--border);font-size:15px}
+  .citem .qty{display:flex;gap:6px;align-items:center}
+  .qty button{width:32px;height:32px;border-radius:6px;border:0;background:var(--panel2);color:var(--txt);font-size:18px;cursor:pointer}
+  .totals{padding:14px 18px;border-top:1px solid var(--border)}
+  .totals .row{display:flex;justify-content:space-between;font-size:16px;margin:4px 0}
+  .totals .grand{font-size:24px;font-weight:700;color:var(--accent2)}
+  .pay{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px}
+  .pay button{height:60px;border-radius:10px;border:0;font-size:16px;font-weight:700;cursor:pointer;color:#fff}
+  .pay .card-btn{background:var(--accent)}
+  .pay .cash-btn{background:#0ea5a4}
+  footer{grid-column:1 / span 2;display:flex;align-items:center;justify-content:space-between;
+    padding:0 24px;background:var(--panel);border-top:1px solid var(--border);font-size:13px;color:var(--muted)}
+  .modal{position:fixed;inset:0;background:rgba(2,6,23,.85);display:none;align-items:center;justify-content:center;z-index:50}
+  .modal.show{display:flex}
+  .modal .box{background:var(--panel2);border:1px solid var(--border);border-radius:16px;padding:28px;width:520px;text-align:center}
+  .modal h3{margin:0 0 12px;font-size:24px}
+  .modal p{color:var(--muted);font-size:16px;margin:0 0 20px}
+  .modal .ok{padding:14px 28px;background:var(--accent2);border:0;border-radius:8px;font-size:18px;color:#fff;font-weight:700;cursor:pointer}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">VOLVIX <small data-i18n="kiosk">KIOSKO</small></div>
+  <div class="toolbar">
+    <div class="scan">
+      <span>📷</span><input id="barcode" placeholder="Barcode..." autofocus />
+    </div>
+    <div class="lang">
+      <button class="active" data-lang="es">ES</button>
+      <button data-lang="en">EN</button>
+    </div>
+    <button id="fs-btn" style="background:var(--panel2);color:var(--txt);border:0;padding:8px 12px;border-radius:8px;cursor:pointer">⛶</button>
+  </div>
+</header>
+
+<main id="catalog"><div class="grid" id="grid"></div></main>
+
+<aside>
+  <h2 data-i18n="cart">Carrito</h2>
+  <div class="cart" id="cart"></div>
+  <div class="totals">
+    <div class="row"><span data-i18n="subtotal">Subtotal</span><span id="subtotal">$0.00</span></div>
+    <div class="row"><span data-i18n="tax">IVA 16%</span><span id="tax">$0.00</span></div>
+    <div class="row grand"><span data-i18n="total">Total</span><span id="total">$0.00</span></div>
+  </div>
+  <div class="pay">
+    <button class="card-btn" id="pay-card" data-i18n="pay_card">💳 Tarjeta</button>
+    <button class="cash-btn" id="pay-cash" data-i18n="pay_cash">💵 Efectivo</button>
+  </div>
+</aside>
+
+<footer>
+  <span id="status" data-i18n="ready">Listo</span>
+  <span id="idle">Idle: 60s</span>
+</footer>
+
+<div class="modal" id="modal">
+  <div class="box">
+    <h3 id="m-title">¡Gracias!</h3>
+    <p id="m-msg">Pase a caja para confirmar el pago.</p>
+    <button class="ok" id="m-ok" data-i18n="ok">OK</button>
+  </div>
+</div>
+
+<script>
+/* ============== i18n ============== */
+const I18N = {
+  es: { kiosk:'KIOSKO', cart:'Carrito', subtotal:'Subtotal', tax:'IVA 16%', total:'Total',
+        pay_card:'💳 Tarjeta', pay_cash:'💵 Efectivo', ready:'Listo',
+        thanks:'¡Gracias!', go_cashier:'Pase a caja para confirmar.', card_paid:'Pago aprobado.',
+        empty:'Carrito vacío', ok:'OK' },
+  en: { kiosk:'KIOSK', cart:'Cart', subtotal:'Subtotal', tax:'Tax 16%', total:'Total',
+        pay_card:'💳 Card', pay_cash:'💵 Cash', ready:'Ready',
+        thanks:'Thank you!', go_cashier:'Please go to the cashier.', card_paid:'Payment approved.',
+        empty:'Empty cart', ok:'OK' }
+};
+let LANG = localStorage.getItem('kiosk_lang') || 'es';
+function t(k){ return (I18N[LANG] && I18N[LANG][k]) || k; }
+function applyI18n(){
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+}
+
+/* ============== Estado ============== */
+const TENANT_ID = Number(new URLSearchParams(location.search).get('tenant') || 1);
+const KIOSK_ID  = Number(new URLSearchParams(location.search).get('kiosk')  || 1);
+const API = location.origin;
+let token = null;
+let cart = [];           // [{id,name,price,qty,icon}]
+let products = [];       // catálogo cacheado
+const IDLE_MS = 60_000;
+let idleTimer = null;
+
+/* ============== Auth Kiosko ============== */
+async function openSession(){
+  try{
+    const r = await fetch(`${API}/api/kiosk/session`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ tenant_id: TENANT_ID, kiosk_id: KIOSK_ID })
+    });
+    const j = await r.json();
+    if (j.ok) { token = j.token; document.getElementById('status').textContent = t('ready'); }
+    else { document.getElementById('status').textContent = 'Sesión rechazada: ' + (j.error||'?'); }
+  }catch(e){ document.getElementById('status').textContent = 'Offline'; }
+}
+
+/* ============== Catálogo ============== */
+async function loadCatalog(){
+  // Stub local + fetch real si endpoint disponible
+  const fallback = [
+    { id:1, name:'Café Americano', price:35, icon:'☕' },
+    { id:2, name:'Sandwich Jamón', price:65, icon:'🥪' },
+    { id:3, name:'Refresco 600ml', price:25, icon:'🥤' },
+    { id:4, name:'Donut Glaseado', price:30, icon:'🍩' },
+    { id:5, name:'Ensalada César', price:90, icon:'🥗' },
+    { id:6, name:'Pizza Slice', price:55, icon:'🍕' },
+    { id:7, name:'Hot Dog', price:50, icon:'🌭' },
+    { id:8, name:'Galleta', price:18, icon:'🍪' },
+    { id:9, name:'Agua 1L', price:20, icon:'💧' },
+    { id:10,name:'Hamburguesa', price:95, icon:'🍔' }
+  ];
+  try{
+    const r = await fetch(`${API}/api/products?limit=60`, { headers: token ? {Authorization:'Bearer '+token} : {} });
+    if (r.ok){
+      const j = await r.json();
+      const items = (j && (j.items || j.products)) || [];
+      products = items.length ? items.map(p => ({
+        id: p.id, name: p.name, price: Number(p.price||0), icon: p.icon || '📦'
+      })) : fallback;
+    } else products = fallback;
+  }catch(_){ products = fallback; }
+  renderCatalog();
+}
+function renderCatalog(){
+  const g = document.getElementById('grid'); g.innerHTML = '';
+  for (const p of products){
+    const c = document.createElement('div'); c.className='card';
+    c.innerHTML = `<div class="icon">${p.icon||'📦'}</div>
+                   <div class="name">${p.name}</div>
+                   <div class="price">$${p.price.toFixed(2)}</div>`;
+    c.onclick = () => addToCart(p);
+    g.appendChild(c);
+  }
+}
+
+/* ============== Carrito ============== */
+function addToCart(p){
+  resetIdle();
+  const ex = cart.find(x => x.id === p.id);
+  if (ex) ex.qty++; else cart.push({...p, qty:1});
+  renderCart();
+}
+function renderCart(){
+  const c = document.getElementById('cart'); c.innerHTML = '';
+  if (cart.length === 0){ c.innerHTML = `<p style="color:var(--muted);padding:14px">${t('empty')}</p>`; }
+  for (const it of cart){
+    const row = document.createElement('div'); row.className='citem';
+    row.innerHTML = `<div>${it.icon||'📦'} ${it.name}<br><small style="color:var(--muted)">$${it.price.toFixed(2)}</small></div>
+      <div class="qty"><button data-act="-">−</button><span>${it.qty}</span><button data-act="+">+</button></div>`;
+    row.querySelector('[data-act="-"]').onclick = () => { it.qty--; if (it.qty<=0) cart = cart.filter(x => x !== it); renderCart(); };
+    row.querySelector('[data-act="+"]').onclick = () => { it.qty++; renderCart(); };
+    c.appendChild(row);
+  }
+  const sub = cart.reduce((a,x)=>a + x.price * x.qty, 0);
+  const tax = sub * 0.16;
+  document.getElementById('subtotal').textContent = '$' + sub.toFixed(2);
+  document.getElementById('tax').textContent      = '$' + tax.toFixed(2);
+  document.getElementById('total').textContent    = '$' + (sub + tax).toFixed(2);
+}
+
+/* ============== Pago ============== */
+async function submitOrder(payment){
+  if (cart.length === 0) return;
+  const sub = cart.reduce((a,x)=>a + x.price * x.qty, 0);
+  const amount = +(sub * 1.16).toFixed(2);
+  try{
+    const r = await fetch(`${API}/api/kiosk/orders`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body: JSON.stringify({
+        items: cart.map(x => ({ product_id:x.id, name:x.name, qty:x.qty, price:x.price })),
+        amount, payment
+      })
+    });
+    const j = await r.json();
+    if (j.ok){
+      showModal(t('thanks'), payment === 'card' ? t('card_paid') : t('go_cashier'));
+      cart = []; renderCart();
+    } else {
+      showModal('Error', j.error || 'fail');
+    }
+  }catch(e){ showModal('Error', String(e.message||e)); }
+}
+function showModal(title, msg){
+  document.getElementById('m-title').textContent = title;
+  document.getElementById('m-msg').textContent = msg;
+  document.getElementById('modal').classList.add('show');
+}
+
+/* ============== Idle reset ============== */
+function resetIdle(){
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(() => { cart = []; renderCart(); document.getElementById('modal').classList.remove('show'); }, IDLE_MS);
+}
+
+/* ============== Barcode (lector como teclado) ============== */
+const bc = document.getElementById('barcode');
+bc.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter'){
+    const code = bc.value.trim(); bc.value = '';
+    const p = products.find(x => String(x.id) === code || (x.code && x.code === code));
+    if (p) addToCart(p);
+  }
+});
+// Refocus barcode (keyboard wedge readers)
+setInterval(() => { if (document.activeElement !== bc) bc.focus(); }, 1500);
+
+/* ============== Fullscreen ============== */
+document.getElementById('fs-btn').onclick = () => {
+  const el = document.documentElement;
+  if (!document.fullscreenElement){ (el.requestFullscreen||el.webkitRequestFullscreen).call(el); }
+  else document.exitFullscreen();
+};
+
+/* ============== Wiring ============== */
+document.querySelectorAll('.lang button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.lang button').forEach(x => x.classList.remove('active'));
+  b.classList.add('active'); LANG = b.dataset.lang; localStorage.setItem('kiosk_lang', LANG);
+  document.documentElement.lang = LANG; applyI18n(); renderCart();
+});
+document.getElementById('pay-card').onclick = () => submitOrder('card');
+document.getElementById('pay-cash').onclick = () => submitOrder('cash');
+document.getElementById('m-ok').onclick    = () => document.getElementById('modal').classList.remove('show');
+['click','keydown','touchstart'].forEach(ev => document.addEventListener(ev, resetIdle, {passive:true}));
+
+/* ============== Boot ============== */
+(async () => {
+  applyI18n(); renderCart(); resetIdle();
+  await openSession();
+  await loadCatalog();
+})();
+</script>
+<link rel="stylesheet" href="volvix-modals.css">
+<script defer src="volvix-modals.js"></script>
+</body>
+</html>

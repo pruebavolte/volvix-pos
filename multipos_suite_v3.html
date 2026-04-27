@@ -447,6 +447,7 @@ body{font-family:var(--font);background:var(--page);color:var(--black);font-feat
     <button class="app-tab" data-app="manager" onclick="switchApp('manager')"><span class="tab-dot" style="background:var(--c-m)"></span><span>Manager</span></button>
     <button class="app-tab" data-app="cds" onclick="switchApp('cds')"><span class="tab-dot" style="background:var(--c-c)"></span><span>CDS Cliente</span></button>
   </nav>
+  <a href="docs.html" target="_blank" rel="noopener" title="Centro de ayuda" style="margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;background:rgba(99,102,241,.12);color:#4f46e5;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(99,102,241,.25)">? Ayuda</a>
   <button class="logout-btn" onclick="handleLogout()" id="logout-btn" style="display:none">⎋</button>
 </div>
 
@@ -1888,10 +1889,12 @@ state.cart=[{...menu[0],qty:2},{...menu[1],qty:1},{...menu[8],qty:2}];
 updateCart();
 renderMenu();
 </script>
+<script defer src="auth-helper.js"></script>
+<link rel="stylesheet" href="volvix-modals.css">
+<script defer src="volvix-modals.js"></script>
 <script src="volvix-multipos-wiring.js" defer></script>
 <script src="volvix-multipos-extra-wiring.js" defer></script>
 <script src="volvix-ai-real-wiring.js" defer></script>
-<script src="volvix-tests-wiring.js" defer></script>
 <script src="volvix-charts-wiring.js" defer></script>
 <script src="volvix-notifications-wiring.js" defer></script>
 <script src="volvix-backup-wiring.js" defer></script>

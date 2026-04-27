@@ -4,6 +4,8 @@
    - Promociones, Recargas, Servicios, Departamentos
    - Cotizaciones, Apertura, Kardex, Proveedores
    - Configuración, Facturación CFDI, Usuarios, Actualizador
+
+   R20: Migrado de prompt/confirm/alert nativo a VolvixUI.form/.confirm/.toast
 ============================================================ */
 (function () {
   'use strict';
@@ -14,7 +16,7 @@
   console.log(
     '%c[POS-EXTRA-WIRING]',
     'background:#7C3AED;color:#fff;padding:2px 6px;border-radius:3px',
-    'Activo - 12 modulos extra'
+    'Activo - 12 modulos extra (UI modal R20)'
   );
 
   // ---------- session / API helpers ----------
@@ -49,9 +51,76 @@
     }
   }
 
+  // ---------- VolvixUI bridges (con fallback a prompt/confirm/alert) ----------
+  function hasUI() {
+    return typeof window !== 'undefined' && window.VolvixUI &&
+      typeof window.VolvixUI.form === 'function';
+  }
+
+  /**
+   * vxForm({title, fields, submitText, onSubmit?})
+   * Devuelve un objeto con los valores capturados o null si se cancela.
+   * Si VolvixUI no está cargado, usa prompts nativos secuenciales como fallback.
+   */
+  async function vxForm(spec) {
+    if (hasUI()) {
+      try {
+        return await window.VolvixUI.form(spec);
+      } catch (err) {
+        console.warn('[POS-EXTRA-WIRING] VolvixUI.form falló, fallback prompts:', err);
+      }
+    } else {
+      console.warn('[POS-EXTRA-WIRING] VolvixUI no cargado, usando prompts nativos');
+    }
+
+    // Fallback: prompt() encadenado
+    const out = {};
+    for (const f of (spec.fields || [])) {
+      const def = (f.default !== undefined) ? String(f.default) : '';
+      const lbl = (f.label || f.name) + (f.required ? ' *' : '');
+      const v = prompt(lbl + ':', def);
+      if (v === null) return null;
+      if (f.required && !v.trim()) return null;
+      if (f.type === 'number') {
+        const n = parseFloat(v);
+        if (Number.isNaN(n) && f.required) return null;
+        out[f.name] = n;
+      } else {
+        out[f.name] = v;
+      }
+    }
+    return out;
+  }
+
+  async function vxConfirm(spec) {
+    if (hasUI() && typeof window.VolvixUI.confirm === 'function') {
+      try {
+        return await window.VolvixUI.confirm(spec);
+      } catch (err) {
+        console.warn('[POS-EXTRA-WIRING] VolvixUI.confirm falló:', err);
+      }
+    }
+    const msg = (spec.title ? spec.title + '\n\n' : '') + (spec.message || '');
+    return window.confirm(msg);
+  }
+
+  function vxToast(spec) {
+    if (hasUI() && typeof window.VolvixUI.toast === 'function') {
+      try {
+        return window.VolvixUI.toast(spec);
+      } catch (err) {
+        console.warn('[POS-EXTRA-WIRING] VolvixUI.toast falló:', err);
+      }
+    }
+    if (typeof window.showToast === 'function') {
+      return window.showToast(spec.message);
+    }
+    console.log('[TOAST]', (spec.type || 'info').toUpperCase(), spec.message);
+  }
+
+  // Compat: viejo toast(msg) → info
   function toast(msg) {
-    if (typeof window.showToast === 'function') return window.showToast(msg);
-    console.log('[TOAST]', msg);
+    return vxToast({ type: 'success', message: msg });
   }
 
   function lsGet(key, fallback) {
@@ -92,24 +161,35 @@
   // =========================================================
   // PROMOCIONES
   // =========================================================
-  window.posCreatePromocion = function () {
-    const nombre = prompt('Nombre de la promocion:');
-    if (!nombre) return;
-    const tipo = prompt('Tipo (descuento / 2x1 / combo):', 'descuento') || 'descuento';
-    const descuento = parseFloat(prompt('% de descuento o ahorro:') || '0');
-    const vigencia = prompt('Vigencia hasta (YYYY-MM-DD):', '2026-12-31') || '';
+  window.posCreatePromocion = async function () {
+    const v = await vxForm({
+      title: 'Nueva promoción',
+      fields: [
+        { name: 'nombre', label: 'Nombre', type: 'text', required: true, minLength: 3, maxLength: 60 },
+        { name: 'tipo', label: 'Tipo', type: 'radio', required: true, default: 'descuento', options: [
+          { value: 'descuento', label: '% Descuento' },
+          { value: '2x1', label: '2x1' },
+          { value: 'combo', label: 'Combo' }
+        ]},
+        { name: 'descuento', label: '% descuento', type: 'number', min: 0, max: 100, step: 0.01, required: true },
+        { name: 'vigencia', label: 'Vigencia hasta', type: 'date', required: true, minDate: 'today' }
+      ],
+      submitText: 'Crear promoción'
+    });
+    if (!v) return;
+
     const promos = lsGet('volvix:promociones', []);
     promos.push({
       id: 'PRM-' + Date.now(),
-      nombre,
-      tipo,
-      descuento,
-      vigencia,
+      nombre: v.nombre,
+      tipo: v.tipo,
+      descuento: parseFloat(v.descuento) || 0,
+      vigencia: v.vigencia,
       activa: true,
       created: Date.now()
     });
     lsSet('volvix:promociones', promos);
-    toast('Promocion creada');
+    vxToast({ type: 'success', message: 'Promoción creada' });
     window.posListPromociones();
   };
 
@@ -122,11 +202,16 @@
     window.posListPromociones();
   };
 
-  window.posDeletePromocion = function (id) {
-    if (!confirm('Eliminar promocion?')) return;
+  window.posDeletePromocion = async function (id) {
+    const ok = await vxConfirm({
+      title: 'Eliminar promoción',
+      message: '¿Seguro que deseas eliminar esta promoción? Esta acción no se puede deshacer.',
+      danger: true
+    });
+    if (!ok) return;
     const promos = lsGet('volvix:promociones', []).filter((p) => p.id !== id);
     lsSet('volvix:promociones', promos);
-    toast('Promocion eliminada');
+    vxToast({ type: 'success', message: 'Promoción eliminada' });
     window.posListPromociones();
   };
 
@@ -170,26 +255,53 @@
   // =========================================================
   // RECARGAS (tiempo aire)
   // =========================================================
-  window.posRecargaCelular = function () {
-    const numero = prompt('Numero celular (10 digitos):');
-    if (!numero || numero.length < 10) return toast('Numero invalido');
-    const compania =
-      prompt('Compania (Telcel/Movistar/AT&T/Unefon/Bait):', 'Telcel') || 'Telcel';
-    const monto = parseFloat(prompt('Monto ($10/$20/$30/$50/$100/$200/$500):') || '0');
+  window.posRecargaCelular = async function () {
+    const v = await vxForm({
+      title: 'Nueva recarga',
+      fields: [
+        { name: 'numero', label: 'Número celular', type: 'tel', required: true,
+          pattern: '^\\d{10}$', placeholder: '10 dígitos',
+          errorMessage: 'Debe ser un teléfono MX de 10 dígitos' },
+        { name: 'compania', label: 'Compañía', type: 'select', required: true, default: 'Telcel',
+          options: [
+            { value: 'Telcel', label: 'Telcel' },
+            { value: 'Movistar', label: 'Movistar' },
+            { value: 'AT&T', label: 'AT&T' },
+            { value: 'Unefon', label: 'Unefon' },
+            { value: 'Bait', label: 'Bait' }
+          ]},
+        { name: 'monto', label: 'Monto', type: 'select', required: true,
+          options: [
+            { value: '10', label: '$10' }, { value: '20', label: '$20' },
+            { value: '30', label: '$30' }, { value: '50', label: '$50' },
+            { value: '100', label: '$100' }, { value: '200', label: '$200' },
+            { value: '500', label: '$500' }
+          ]}
+      ],
+      submitText: 'Aplicar recarga'
+    });
+    if (!v) return;
+
+    const numero = String(v.numero || '').trim();
+    if (!/^\d{10}$/.test(numero)) {
+      return vxToast({ type: 'error', message: 'Número inválido (10 dígitos)' });
+    }
+    const monto = parseFloat(v.monto);
     if (!monto) return;
+
     const recargas = lsGet('volvix:recargas', []);
     const folio = 'REC-' + Date.now();
     recargas.unshift({
       id: folio,
       numero,
-      compania,
+      compania: v.compania || 'Telcel',
       monto,
       comision: +(monto * 0.05).toFixed(2),
       estado: 'aplicada',
       fecha: Date.now()
     });
     lsSet('volvix:recargas', recargas);
-    toast('Recarga ' + fmtMoney(monto) + ' aplicada');
+    vxToast({ type: 'success', message: 'Recarga ' + fmtMoney(monto) + ' aplicada' });
     window.posListRecargas();
   };
 
@@ -235,25 +347,40 @@
   // =========================================================
   // SERVICIOS (luz, agua, etc.)
   // =========================================================
-  window.posPagoServicio = function () {
-    const tipo =
-      prompt('Servicio (CFE/Agua/Telmex/Gas/Internet):', 'CFE') || 'CFE';
-    const referencia = prompt('Referencia / numero de servicio:');
-    if (!referencia) return;
-    const monto = parseFloat(prompt('Monto a pagar:') || '0');
+  window.posPagoServicio = async function () {
+    const v = await vxForm({
+      title: 'Pago de servicio',
+      fields: [
+        { name: 'tipo', label: 'Servicio', type: 'select', required: true, default: 'CFE',
+          options: [
+            { value: 'CFE', label: 'CFE (Luz)' },
+            { value: 'Agua', label: 'Agua' },
+            { value: 'Telmex', label: 'Telmex' },
+            { value: 'Gas', label: 'Gas' },
+            { value: 'Internet', label: 'Internet' }
+          ]},
+        { name: 'referencia', label: 'Referencia / número de servicio', type: 'text', required: true, minLength: 4 },
+        { name: 'monto', label: 'Monto a pagar', type: 'number', required: true, min: 0.01, step: 0.01 }
+      ],
+      submitText: 'Aplicar pago'
+    });
+    if (!v) return;
+
+    const monto = parseFloat(v.monto);
     if (!monto) return;
+
     const pagos = lsGet('volvix:servicios', []);
     pagos.unshift({
       id: 'SVC-' + Date.now(),
-      tipo,
-      referencia,
+      tipo: v.tipo || 'CFE',
+      referencia: v.referencia,
       monto,
       comision: 8,
       estado: 'pagado',
       fecha: Date.now()
     });
     lsSet('volvix:servicios', pagos);
-    toast('Pago de ' + tipo + ' aplicado');
+    vxToast({ type: 'success', message: 'Pago de ' + (v.tipo || 'CFE') + ' aplicado' });
     window.posListServicios();
   };
 
@@ -298,10 +425,22 @@
   // =========================================================
   // DEPARTAMENTOS
   // =========================================================
-  window.posCreateDepartamento = function () {
-    const nombre = prompt('Nombre del departamento:');
-    if (!nombre) return;
-    const iva = parseFloat(prompt('% IVA aplicable (0/8/16):', '16') || '16');
+  window.posCreateDepartamento = async function () {
+    const v = await vxForm({
+      title: 'Nuevo departamento',
+      fields: [
+        { name: 'nombre', label: 'Nombre del departamento', type: 'text', required: true, minLength: 2, maxLength: 40 },
+        { name: 'iva', label: '% IVA aplicable', type: 'select', required: true, default: '16',
+          options: [
+            { value: '0', label: '0% (Exento)' },
+            { value: '8', label: '8% (Frontera)' },
+            { value: '16', label: '16% (General)' }
+          ]}
+      ],
+      submitText: 'Crear departamento'
+    });
+    if (!v) return;
+
     const deps = lsGet('volvix:departamentos', [
       { id: 'DEP-1', nombre: 'Abarrotes', iva: 16, productos: 0 },
       { id: 'DEP-2', nombre: 'Bebidas', iva: 16, productos: 0 },
@@ -309,18 +448,23 @@
     ]);
     deps.push({
       id: 'DEP-' + Date.now(),
-      nombre,
-      iva,
+      nombre: v.nombre,
+      iva: parseFloat(v.iva) || 16,
       productos: 0,
       created: Date.now()
     });
     lsSet('volvix:departamentos', deps);
-    toast('Departamento creado');
+    vxToast({ type: 'success', message: 'Departamento creado' });
     window.posListDepartamentos();
   };
 
-  window.posDeleteDepartamento = function (id) {
-    if (!confirm('Eliminar departamento?')) return;
+  window.posDeleteDepartamento = async function (id) {
+    const ok = await vxConfirm({
+      title: 'Eliminar departamento',
+      message: '¿Eliminar este departamento? Los productos asignados quedarán sin categoría.',
+      danger: true
+    });
+    if (!ok) return;
     const deps = lsGet('volvix:departamentos', []).filter((d) => d.id !== id);
     lsSet('volvix:departamentos', deps);
     window.posListDepartamentos();
@@ -380,23 +524,30 @@
   // =========================================================
   // COTIZACIONES
   // =========================================================
-  window.posCreateCotizacion = function () {
-    const cliente = prompt('Cliente:');
-    if (!cliente) return;
-    const concepto = prompt('Concepto (1 linea):') || 'Producto';
-    const total = parseFloat(prompt('Total estimado:') || '0');
+  window.posCreateCotizacion = async function () {
+    const v = await vxForm({
+      title: 'Nueva cotización',
+      fields: [
+        { name: 'cliente', label: 'Cliente', type: 'text', required: true, minLength: 2, maxLength: 80 },
+        { name: 'concepto', label: 'Concepto (1 línea)', type: 'text', required: true, default: 'Producto', maxLength: 120 },
+        { name: 'total', label: 'Total estimado', type: 'number', required: true, min: 0, step: 0.01 }
+      ],
+      submitText: 'Crear cotización'
+    });
+    if (!v) return;
+
     const cots = lsGet('volvix:cotizaciones', []);
     cots.unshift({
       id: 'COT-' + Date.now(),
-      cliente,
-      concepto,
-      total,
+      cliente: v.cliente,
+      concepto: v.concepto || 'Producto',
+      total: parseFloat(v.total) || 0,
       vigencia: 7,
       estado: 'pendiente',
       created: Date.now()
     });
     lsSet('volvix:cotizaciones', cots);
-    toast('Cotizacion creada');
+    vxToast({ type: 'success', message: 'Cotización creada' });
     window.posListCotizaciones();
   };
 
@@ -406,7 +557,7 @@
     if (!c) return;
     c.estado = 'convertida';
     lsSet('volvix:cotizaciones', cots);
-    toast('Convertida a venta');
+    vxToast({ type: 'success', message: 'Convertida a venta' });
     window.posListCotizaciones();
   };
 
@@ -475,7 +626,7 @@
     aperturas.unshift(apertura);
     lsSet('volvix:aperturas', aperturas);
     lsSet('volvix:caja_actual', apertura);
-    toast('Apertura registrada - ' + fmtMoney(monto));
+    vxToast({ type: 'success', message: 'Apertura registrada - ' + fmtMoney(monto) });
     window.posListApertura();
   };
 
@@ -530,24 +681,38 @@
   // KARDEX (movimientos de inventario)
   // =========================================================
   window.posKardexAddMov = async function () {
-    const sku = prompt('SKU / codigo del producto:');
-    if (!sku) return;
-    const tipo = prompt('Tipo (entrada/salida/ajuste):', 'entrada') || 'entrada';
-    const cantidad = parseInt(prompt('Cantidad:') || '0', 10);
+    const v = await vxForm({
+      title: 'Nuevo movimiento de kardex',
+      fields: [
+        { name: 'sku', label: 'SKU / código del producto', type: 'text', required: true, minLength: 1, maxLength: 40 },
+        { name: 'tipo', label: 'Tipo de movimiento', type: 'radio', required: true, default: 'entrada',
+          options: [
+            { value: 'entrada', label: 'Entrada' },
+            { value: 'salida', label: 'Salida' },
+            { value: 'ajuste', label: 'Ajuste' }
+          ]},
+        { name: 'cantidad', label: 'Cantidad', type: 'number', required: true, min: 1, step: 1 },
+        { name: 'motivo', label: 'Motivo', type: 'text', required: false, default: 'Movimiento manual', maxLength: 120 }
+      ],
+      submitText: 'Registrar movimiento'
+    });
+    if (!v) return;
+
+    const cantidad = parseInt(v.cantidad, 10);
     if (!cantidad) return;
-    const motivo = prompt('Motivo:', 'Movimiento manual') || '';
+
     const movs = lsGet('volvix:kardex', []);
     movs.unshift({
       id: 'KDX-' + Date.now(),
-      sku,
-      tipo,
+      sku: v.sku,
+      tipo: v.tipo || 'entrada',
       cantidad,
-      motivo,
+      motivo: v.motivo || 'Movimiento manual',
       usuario: (session && session.user) || 'admin',
       fecha: Date.now()
     });
     lsSet('volvix:kardex', movs);
-    toast('Movimiento ' + tipo + ' registrado');
+    vxToast({ type: 'success', message: 'Movimiento ' + (v.tipo || 'entrada') + ' registrado' });
     window.posListKardex();
   };
 
@@ -595,23 +760,33 @@
   // =========================================================
   // PROVEEDORES
   // =========================================================
-  window.posCreateProveedor = function () {
-    const nombre = prompt('Razon social del proveedor:');
-    if (!nombre) return;
-    const rfc = prompt('RFC:') || '';
-    const contacto = prompt('Telefono / contacto:') || '';
+  window.posCreateProveedor = async function () {
+    const v = await vxForm({
+      title: 'Nuevo proveedor',
+      fields: [
+        { name: 'nombre', label: 'Razón social', type: 'text', required: true, minLength: 3, maxLength: 100 },
+        { name: 'rfc', label: 'RFC', type: 'text', required: false,
+          pattern: '^([A-ZÑ&]{3,4})\\d{6}([A-Z\\d]{3})?$',
+          placeholder: 'XAXX010101000', maxLength: 13,
+          errorMessage: 'RFC mexicano inválido (12 o 13 caracteres)' },
+        { name: 'contacto', label: 'Teléfono / contacto', type: 'tel', required: false, maxLength: 60 }
+      ],
+      submitText: 'Agregar proveedor'
+    });
+    if (!v) return;
+
     const provs = lsGet('volvix:proveedores', []);
     provs.push({
       id: 'PRV-' + Date.now(),
-      nombre,
-      rfc,
-      contacto,
+      nombre: v.nombre,
+      rfc: (v.rfc || '').toUpperCase(),
+      contacto: v.contacto || '',
       saldo: 0,
       activo: true,
       created: Date.now()
     });
     lsSet('volvix:proveedores', provs);
-    toast('Proveedor agregado');
+    vxToast({ type: 'success', message: 'Proveedor agregado' });
     window.posListProveedores();
   };
 
@@ -662,7 +837,7 @@
       saved: Date.now()
     };
     lsSet('volvix:config', cfg);
-    toast('Configuracion guardada');
+    vxToast({ type: 'success', message: 'Configuración guardada' });
   };
 
   window.posLoadConfig = function () {
@@ -691,24 +866,38 @@
   // =========================================================
   // FACTURACION CFDI
   // =========================================================
-  window.posTimbrarCFDI = function () {
-    const folio = prompt('Folio de venta a timbrar:');
-    if (!folio) return;
-    const rfc = prompt('RFC del cliente:');
-    if (!rfc) return;
-    const usoCFDI = prompt('Uso CFDI (G03/G01/P01):', 'G03') || 'G03';
+  window.posTimbrarCFDI = async function () {
+    const v = await vxForm({
+      title: 'Timbrar CFDI 4.0',
+      fields: [
+        { name: 'folio', label: 'Folio de venta a timbrar', type: 'text', required: true, minLength: 1, maxLength: 40 },
+        { name: 'rfc', label: 'RFC del cliente', type: 'text', required: true,
+          pattern: '^([A-ZÑ&]{3,4})\\d{6}([A-Z\\d]{3})?$',
+          placeholder: 'XAXX010101000', maxLength: 13,
+          errorMessage: 'RFC mexicano inválido (12 o 13 caracteres)' },
+        { name: 'usoCFDI', label: 'Uso CFDI', type: 'select', required: true, default: 'G03',
+          options: [
+            { value: 'G01', label: 'G01 - Adquisición de mercancías' },
+            { value: 'G03', label: 'G03 - Gastos en general' },
+            { value: 'P01', label: 'P01 - Por definir' }
+          ]}
+      ],
+      submitText: 'Timbrar'
+    });
+    if (!v) return;
+
     const cfdis = lsGet('volvix:cfdi', []);
     cfdis.unshift({
       id: 'CFDI-' + Date.now(),
-      folio,
-      rfc,
-      usoCFDI,
+      folio: v.folio,
+      rfc: (v.rfc || '').toUpperCase(),
+      usoCFDI: v.usoCFDI || 'G03',
       uuid: 'XXXXXXXX-' + Math.random().toString(36).slice(2, 10).toUpperCase(),
       estado: 'timbrado',
       fecha: Date.now()
     });
     lsSet('volvix:cfdi', cfdis);
-    toast('CFDI timbrado');
+    vxToast({ type: 'success', message: 'CFDI timbrado' });
     window.posListCFDI();
   };
 
@@ -749,24 +938,38 @@
   // =========================================================
   // USUARIOS
   // =========================================================
-  window.posCreateUser = function () {
-    const usuario = prompt('Nombre de usuario:');
-    if (!usuario) return;
-    const email = prompt('Email:') || '';
-    const rol =
-      prompt('Rol (admin/cajero/vendedor/supervisor):', 'cajero') || 'cajero';
+  window.posCreateUser = async function () {
+    const v = await vxForm({
+      title: 'Nuevo usuario',
+      fields: [
+        { name: 'usuario', label: 'Nombre de usuario', type: 'text', required: true, minLength: 3, maxLength: 30,
+          pattern: '^[a-zA-Z0-9_.-]+$',
+          errorMessage: 'Solo letras, números, _ . -' },
+        { name: 'email', label: 'Email', type: 'email', required: false, maxLength: 100 },
+        { name: 'rol', label: 'Rol', type: 'select', required: true, default: 'cajero',
+          options: [
+            { value: 'admin', label: 'Administrador' },
+            { value: 'cajero', label: 'Cajero' },
+            { value: 'vendedor', label: 'Vendedor' },
+            { value: 'supervisor', label: 'Supervisor' }
+          ]}
+      ],
+      submitText: 'Crear usuario'
+    });
+    if (!v) return;
+
     const users = lsGet('volvix:users', []);
     users.push({
       id: 'USR-' + Date.now(),
-      usuario,
-      email,
-      rol,
+      usuario: v.usuario,
+      email: v.email || '',
+      rol: v.rol || 'cajero',
       activo: true,
       ultima: null,
       created: Date.now()
     });
     lsSet('volvix:users', users);
-    toast('Usuario creado');
+    vxToast({ type: 'success', message: 'Usuario creado' });
     window.posListUsers();
   };
 
@@ -844,37 +1047,67 @@
   // ACTUALIZADOR MASIVO
   // =========================================================
   window.posActualizarPrecios = async function () {
-    const porcentaje = parseFloat(
-      prompt('% a aplicar a TODOS los precios (positivo aumenta, negativo baja):') ||
-        '0'
-    );
+    const v = await vxForm({
+      title: 'Cambiar precios masivo',
+      fields: [
+        { name: 'porcentaje', label: '% a aplicar a TODOS los precios',
+          type: 'number', required: true, min: -90, max: 500, step: 0.01,
+          placeholder: 'positivo aumenta, negativo baja' }
+      ],
+      submitText: 'Continuar'
+    });
+    if (!v) return;
+
+    const porcentaje = parseFloat(v.porcentaje);
     if (!porcentaje) return;
-    if (
-      !confirm('Aplicar ' + porcentaje + '% a todos los productos?')
-    )
-      return;
+
+    const ok = await vxConfirm({
+      title: 'Confirmar actualización masiva',
+      message: 'Se aplicará ' + porcentaje + '% a TODOS los productos. Esta acción no se puede deshacer fácilmente. ¿Continuar?',
+      danger: true
+    });
+    if (!ok) return;
+
     const productos = (await apiGet('/api/products')) || [];
     const factor = 1 + porcentaje / 100;
-    let ok = 0;
+    let okCount = 0;
     for (const p of productos) {
       const nuevo = +(parseFloat(p.price) * factor).toFixed(2);
       const r = await apiPost('/api/products/' + p.id + '/price', {
         price: nuevo
       });
-      if (!r || !r.error) ok++;
+      if (!r || !r.error) okCount++;
     }
     const log = lsGet('volvix:actualizaciones', []);
     log.unshift({
       id: 'UPD-' + Date.now(),
       tipo: 'precios',
       porcentaje,
-      afectados: ok,
+      afectados: okCount,
       total: productos.length,
       fecha: Date.now()
     });
     lsSet('volvix:actualizaciones', log);
-    toast('Actualizados ' + ok + '/' + productos.length + ' productos');
+    vxToast({
+      type: 'success',
+      message: 'Actualizados ' + okCount + '/' + productos.length + ' productos'
+    });
     window.posListActualizador();
+  };
+
+  // Toasts informativos para botones secundarios del actualizador
+  window.posInfoStock = function () {
+    vxToast({
+      type: 'info',
+      message: 'Función de stock disponible desde inventario por producto.'
+    });
+  };
+
+  window.posInfoCategorias = function () {
+    vxToast({
+      type: 'info',
+      message: 'Cambio masivo de categoría — usa departamentos.'
+    });
   };
 
   window.posListActualizador = function () {
@@ -906,8 +1139,8 @@
         <h3 style="margin:0 0 10px;font-size:14px;">Acciones rapidas</h3>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <button class="btn" onclick="posActualizarPrecios()">Aumentar/bajar precios %</button>
-          <button class="btn" onclick="alert('Funcion de stock disponible desde inventario por producto.')">Ajuste de stock</button>
-          <button class="btn" onclick="alert('Cambio masivo de categoria - usa departamentos.')">Cambiar categorias</button>
+          <button class="btn" onclick="posInfoStock()">Ajuste de stock</button>
+          <button class="btn" onclick="posInfoCategorias()">Cambiar categorias</button>
         </div>
       </div>
       <div class="card">

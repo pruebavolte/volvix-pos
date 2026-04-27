@@ -1,0 +1,68 @@
+{
+  "slice": 35,
+  "idx_range": "860-900",
+  "title": "Test profundo CORTE / APERTURA DE CAJA",
+  "date": "2026-04-26",
+  "target": "https://volvix-pos.vercel.app",
+  "auth": {
+    "user": "admin@volvix.test",
+    "token_obtained": true,
+    "method": "POST /api/login -> JWT Bearer"
+  },
+  "endpoints_descubiertos": {
+    "POST /api/cash/open": "linea 1808 + override linea 5162 (stub)",
+    "POST /api/cash/close": "linea 1833 + override linea 5163 (stub)",
+    "GET /api/cash/current": "linea 1869 (real, lee pos_cash_sessions)",
+    "GET /api/cash/history": "linea 1881 (real)",
+    "GET /api/cash/session": "linea 4636",
+    "GET /api/cash/sessions?date=": "NO EXISTE",
+    "GET /api/cash/report/:id": "NO EXISTE",
+    "GET /api/cash/:id/print": "NO EXISTE"
+  },
+  "hallazgo_critico": {
+    "tipo": "doble registro de handler con override stub",
+    "detalle": "Las lineas 5162-5163 sobrescriben la implementacion real de open/close (lineas 1808-1867) con stubs que SIEMPRE retornan 200 con session_id aleatorio, sin validar duplicado, sin validar negativo, sin calcular expected/variance, sin tocar Supabase",
+    "impacto": "T2 (409 dup), T3 (400 negativo), T1 close (expected vs actual), T2 close (calculo expected), T3 close (variance), T4 close (no_open), T5 close (negativo) NO funcionan; los handlers reales quedan muertos"
+  },
+  "apertura": {
+    "T1_open_1000": {"got": 200, "expected": 201, "result": "PARTIAL", "note": "ok:true session_id devuelto, pero status 200 no 201"},
+    "T2_dup_session": {"got": 200, "expected": 409, "result": "FAIL", "note": "stub crea nueva sesion en vez de retornar conflict"},
+    "T3_negative_amount": {"got": 200, "expected": 400, "result": "FAIL", "note": "stub no valida"},
+    "T4_get_current": {"got": 500, "expected": "200|404", "result": "FAIL", "note": "internal error - tabla pos_cash_sessions probablemente no existe en Supabase y el catch 42P01 no atrapa el error real"},
+    "T5_get_history": {"got": 500, "expected": 200, "result": "FAIL", "note": "mismo problema 500"},
+    "T6_no_auth": {"got": 401, "expected": 401, "result": "PASS"}
+  },
+  "cierre": {
+    "T1_close_1500": {"got": 200, "expected": "200 con expected/variance", "result": "FAIL", "note": "stub solo retorna closed_at, sin expected ni variance"},
+    "T2_calcula_expected": {"result": "FAIL", "note": "stub no calcula"},
+    "T3_variance": {"result": "FAIL", "note": "stub no calcula"},
+    "T4_no_open": {"got": 200, "expected": 400, "result": "FAIL", "note": "stub siempre 200"},
+    "T5_negative": {"got": 200, "expected": 400, "result": "FAIL"},
+    "T6_current_post_close": {"got": 500, "expected": "null|404", "result": "FAIL"}
+  },
+  "reportes_z": {
+    "T1_sessions_by_date": {"got": 404, "result": "MISSING_ENDPOINT"},
+    "T2_report_session_id": {"got": 404, "result": "MISSING_ENDPOINT"},
+    "T3_pdf_print": {"got": 404, "result": "MISSING_ENDPOINT"}
+  },
+  "multi_cajero": {
+    "status": "NO_TESTEADO",
+    "razon": "imposible probar aislamiento por usuario mientras stubs override no consultan Supabase; ademas tabla pos_cash_sessions parece no existir (current/history dan 500)"
+  },
+  "tabla_supabase": {
+    "pos_cash_sessions": "PROBABLE AUSENTE - GET /current y /history retornan 500 en lugar del fallback graceful 'tabla pendiente' (el regex 42P01 no esta atrapando el error real, posiblemente por mensaje distinto o status code distinto)",
+    "R14_CASH_SESSIONS.sql": "no ejecutado o rotura del catch graceful"
+  },
+  "score": {"pass": 1, "partial": 1, "fail": 11, "missing": 3, "not_tested": 3, "total": 19},
+  "veredicto": "RED",
+  "acciones_requeridas": [
+    "1. ELIMINAR las lineas 5161-5163 de api/index.js (override stub que mata los handlers reales)",
+    "2. Ejecutar R14_CASH_SESSIONS.sql en Supabase para crear pos_cash_sessions",
+    "3. Ampliar el catch graceful: actualmente /^42P01/ no atrapa todos los errores; usar try/catch que detecte tambien 'relation does not exist' en el mensaje",
+    "4. Implementar GET /api/cash/sessions?date=YYYY-MM-DD",
+    "5. Implementar GET /api/cash/report/:session_id (detalle ventas+metodos+totales)",
+    "6. Cambiar status code de POST /api/cash/open de 200 a 201",
+    "7. Validar opening_amount<0 y closing_amount<0 -> 400",
+    "8. Despues de fix re-correr suite multi-cajero (cajero1 vs cajero2 vs admin vs owner)"
+  ]
+}

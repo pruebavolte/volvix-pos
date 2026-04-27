@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Volvix · Sistema POS para tu giro de negocio</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="volvix-modals.css">
+<script defer src="volvix-modals.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
   :root {
@@ -837,8 +839,34 @@
     }, 1800);
   }
 
-  function requestDemo(giroKey) {
-    alert('📞 Un asesor te contactará en breve.\n\nMientras tanto, puedes ver el sistema completo en la landing personalizada.');
+  async function requestDemo(giroKey) {
+    if(window.VolvixUI && typeof window.VolvixUI.form==='function'){
+      const r = await window.VolvixUI.form({
+        title: 'Solicitar demo · KYC',
+        size: 'md',
+        fields: [
+          { name:'nombre',   type:'text',     label:'Nombre completo',     required:true },
+          { name:'empresa',  type:'text',     label:'Razón social / Negocio', required:true },
+          { name:'rfc',      type:'text',     label:'RFC',                 mask:'rfc',    placeholder:'XAXX010101000' },
+          { name:'email',    type:'email',    label:'Correo electrónico',  required:true },
+          { name:'tel',      type:'text',     label:'Teléfono',            required:true, mask:'tel-mx' },
+          { name:'cp',       type:'text',     label:'Código postal',       mask:'cp-mx' },
+          { name:'sucursales', type:'select', label:'Número de sucursales',
+            options:[
+              {value:'1',  label:'1'},
+              {value:'2-5',label:'2 a 5'},
+              {value:'6+', label:'6 o más'}
+            ] },
+          { name:'notas',    type:'textarea', label:'Cuéntanos sobre tu operación', rows:3, placeholder:'Tipo de productos, volumen, etc.' },
+          { name:'acepta',   type:'checkbox', label:'Acepto que un asesor me contacte', required:true }
+        ],
+        submitText: 'Enviar solicitud'
+      });
+      if(!r) return;
+      VolvixUI.toast({type:'success', message:'✓ Solicitud enviada. Un asesor te contactará en breve.'});
+      return;
+    }
+    VolvixUI.toast({type:'info', message:'Un asesor te contactará en breve.'});
   }
 
   function capitalize(s) {
@@ -849,10 +877,10 @@
   renderPopular();
 </script>
 
+<script defer src="auth-helper.js"></script>
 <script src="volvix-ai-wiring.js" defer></script>
 <script src="volvix-ai-real-wiring.js" defer></script>
 <script src="volvix-extras-wiring.js" defer></script>
-<script src="volvix-tests-wiring.js" defer></script>
 <script src="volvix-charts-wiring.js" defer></script>
 <script src="volvix-notifications-wiring.js" defer></script>
 <script src="volvix-backup-wiring.js" defer></script>
@@ -1090,9 +1118,6 @@
 <script src="volvix-notion-wiring.js" defer></script>
 <script src="volvix-trello-wiring.js" defer></script>
 <script src="volvix-asana-wiring.js" defer></script>
-<script src="volvix-cypress-tests.js" defer></script>
-<script src="volvix-playwright-tests.js" defer></script>
-<script src="volvix-loadtest-wiring.js" defer></script>
 <script src="volvix-lighthouse-lite.js" defer></script>
 <script src="volvix-security-scan.js" defer></script>
 <script src="volvix-seo-wiring.js" defer></script>

@@ -8,12 +8,17 @@
      - Background Sync: cola de operaciones offline
    ============================================================ */
 
-const VERSION   = 'v1.0.0';
+// TODO(build-step): cuando se agregue build pipeline (esbuild/vite),
+// reemplazar VERSION manual por hash generado del contenido de STATIC_FILES.
+// Ej: const VERSION = '__BUILD_HASH__'; sustituido en build.
+// Mientras tanto: bumpear VERSION manualmente en cada deploy con cambios.
+const VERSION   = 'v1.2.0';
 const CACHE     = `volvix-${VERSION}`;
 const API_CACHE = `volvix-api-${VERSION}`;
 const RT_CACHE  = `volvix-rt-${VERSION}`;
 
 const STATIC_FILES = [
+  // HTML principales
   '/',
   '/login.html',
   '/salvadorex_web_v25.html',
@@ -22,10 +27,67 @@ const STATIC_FILES = [
   '/marketplace.html',
   '/landing_dynamic.html',
   '/etiqueta_designer.html',
+  // CSS compartido
+  '/volvix-shared.css',
+  // Core / auth / catalogos
   '/auth-gate.js',
+  '/giros_catalog_v2.js',
+  '/volvix-api.js',
+  '/volvix-sync.js',
+  '/volvix-sync-widget.js',
+  '/volvix-master-controller.js',
+  // Wirings principales por panel
   '/volvix-wiring.js',
+  '/volvix-pos-wiring.js',
+  '/volvix-pos-extra-wiring.js',
+  '/volvix-owner-wiring.js',
+  '/volvix-owner-extra-wiring.js',
+  '/volvix-multipos-wiring.js',
+  '/volvix-multipos-extra-wiring.js',
+  // Wirings transversales criticos (top 50)
   '/volvix-offline-wiring.js',
-  '/giros_catalog_v2.js'
+  '/volvix-offline-queue.js',
+  '/volvix-pwa-wiring.js',
+  '/volvix-pwa-install-prompt.js',
+  '/volvix-i18n-wiring.js',
+  '/volvix-theme-wiring.js',
+  '/volvix-notifications-wiring.js',
+  '/volvix-push-wiring.js',
+  '/volvix-logger-wiring.js',
+  '/volvix-reports-wiring.js',
+  '/volvix-charts-wiring.js',
+  '/volvix-backup-wiring.js',
+  '/volvix-tests-wiring.js',
+  '/volvix-onboarding-wiring.js',
+  '/volvix-shortcuts-wiring.js',
+  '/volvix-search-wiring.js',
+  '/volvix-voice-wiring.js',
+  '/volvix-gamification-wiring.js',
+  '/volvix-perf-wiring.js',
+  '/volvix-perf-monitor.js',
+  '/volvix-email-wiring.js',
+  '/volvix-webrtc-wiring.js',
+  '/volvix-ai-real-wiring.js',
+  '/volvix-ai-wiring.js',
+  '/volvix-payments-wiring.js',
+  '/volvix-calendar-wiring.js',
+  '/volvix-cache-wiring.js',
+  '/volvix-audit-wiring.js',
+  '/volvix-a11y-wiring.js',
+  '/volvix-categories-wiring.js',
+  '/volvix-coupons-wiring.js',
+  '/volvix-crm-wiring.js',
+  '/volvix-currency-wiring.js',
+  '/volvix-cashdrawer-wiring.js',
+  '/volvix-barcode-wiring.js',
+  '/volvix-bi-wiring.js',
+  '/volvix-compliance-wiring.js',
+  '/volvix-feedback-wiring.js',
+  '/volvix-delivery-wiring.js',
+  '/volvix-drinks-wiring.js',
+  '/volvix-extras-wiring.js',
+  '/volvix-cron-wiring.js',
+  '/volvix-anomaly-wiring.js'
 ];
 
 const ALL_CACHES = [CACHE, API_CACHE, RT_CACHE];
@@ -245,15 +307,37 @@ self.addEventListener('message', (event) => {
   }
 });
 
-/* ---------- PUSH (placeholder) ---------- */
+/* ---------- PUSH (R14 Web Push + VAPID) ---------- */
 self.addEventListener('push', (event) => {
-  const data = event.data ? event.data.json() : { title: 'Volvix', body: 'Notificacion' };
+  let data = { title: 'Volvix POS', body: '' };
+  if (event.data) {
+    try { data = event.data.json(); }
+    catch (_) {
+      try { data = { title: 'Volvix POS', body: event.data.text() }; }
+      catch (__) {}
+    }
+  }
+  const title = data.title || 'Volvix POS';
+  const opts = {
+    body:  data.body  || '',
+    icon:  data.icon  || '/icon-192.png',
+    badge: data.badge || '/badge-72.png',
+    tag:   data.tag   || 'volvix-notif',
+    data:  { url: data.url || '/' },
+    requireInteraction: !!data.requireInteraction,
+  };
+  event.waitUntil(self.registration.showNotification(title, opts));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || '/';
   event.waitUntil(
-    self.registration.showNotification(data.title || 'Volvix POS', {
-      body: data.body || '',
-      icon: '/icon-192.png',
-      badge: '/badge-72.png',
-      tag: data.tag || 'volvix-notif'
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+      for (const c of list) {
+        if (c.url.includes(url) && 'focus' in c) return c.focus();
+      }
+      if (self.clients.openWindow) return self.clients.openWindow(url);
     })
   );
 });

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Volvix · Portal Cliente</title>
+<style>
+  :root { --pri:#1d4ed8; --pri-d:#1e40af; --bg:#f8fafc; --card:#fff; --border:#e2e8f0; --text:#0f172a; --muted:#64748b; --ok:#16a34a; --err:#dc2626; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--text); }
+  header { background:var(--pri); color:#fff; padding:14px 20px; display:flex; justify-content:space-between; align-items:center; }
+  header h1 { margin:0; font-size:18px; font-weight:600; }
+  header .user { font-size:13px; opacity:.9; }
+  main { max-width:960px; margin:24px auto; padding:0 16px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:20px; margin-bottom:18px; }
+  .card h2 { margin:0 0 14px; font-size:16px; }
+  label { display:block; font-size:13px; margin-bottom:4px; color:var(--muted); }
+  input[type=email],input[type=text],input[type=password] {
+    width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:6px; font-size:14px;
+  }
+  button { background:var(--pri); color:#fff; border:0; padding:10px 18px; border-radius:6px; cursor:pointer; font-size:14px; }
+  button:hover { background:var(--pri-d); }
+  button.secondary { background:#fff; color:var(--pri); border:1px solid var(--pri); }
+  button:disabled { opacity:.5; cursor:not-allowed; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; }
+  .row > * { flex:1; min-width:180px; }
+  .msg { padding:10px; border-radius:6px; margin:10px 0; font-size:13px; }
+  .msg.ok { background:#dcfce7; color:#166534; }
+  .msg.err { background:#fee2e2; color:#991b1b; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th,td { padding:8px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background:#f1f5f9; }
+  .hidden { display:none !important; }
+  .tabs { display:flex; gap:4px; margin-bottom:16px; flex-wrap:wrap; }
+  .tabs button { background:#e2e8f0; color:var(--text); }
+  .tabs button.active { background:var(--pri); color:#fff; }
+  .stat { display:inline-block; background:#eff6ff; color:var(--pri); padding:4px 12px; border-radius:20px; font-weight:600; font-size:13px; }
+  a.link { color:var(--pri); text-decoration:none; }
+  a.link:hover { text-decoration:underline; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    main { padding: 0 12px; margin: 16px auto; }
+    .card { padding: 16px; }
+    header { padding: 12px 16px; }
+    header h1 { font-size: 16px; }
+    .row > * { min-width: 140px; }
+    table { font-size: 12px; }
+    th, td { padding: 6px; }
+  }
+  @media (max-width: 480px) {
+    button { padding: 12px 18px; min-height: 44px; font-size: 15px; }
+    .tabs button { padding: 10px 14px; min-height: 44px; }
+    input[type=email],input[type=text],input[type=password] {
+      padding: 12px; font-size: 16px; min-height: 44px;
+    }
+    .row { flex-direction: column; gap: 8px; }
+    .row > * { width: 100%; min-width: 0; }
+    .tabs { gap: 6px; }
+    table { display: block; overflow-x: auto; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Volvix · Portal Cliente</h1>
+  <div class="user" id="userBar"></div>
+</header>
+
+<main>
+
+  <!-- ============ LOGIN ============ -->
+  <section id="loginView" class="card">
+    <h2>Iniciar sesión</h2>
+    <p style="color:var(--muted); font-size:13px;">Te enviaremos un código de 6 dígitos por email.</p>
+
+    <div id="step1">
+      <label>Email</label>
+      <input type="email" id="loginEmail" autocomplete="email" placeholder="tu@email.com" />
+      <div id="loginMsg1"></div>
+      <button id="btnRequestOtp" style="margin-top:12px;">Enviar código</button>
+    </div>
+
+    <div id="step2" class="hidden">
+      <label>Código (6 dígitos)</label>
+      <input type="text" id="loginOtp" maxlength="6" inputmode="numeric" placeholder="123456" />
+      <div id="loginMsg2"></div>
+      <div class="row" style="margin-top:12px;">
+        <button id="btnVerifyOtp">Verificar</button>
+        <button class="secondary" id="btnBackEmail">Cambiar email</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DASHBOARD ============ -->
+  <section id="dashView" class="hidden">
+
+    <div class="tabs">
+      <button data-tab="overview" class="active">Resumen</button>
+      <button data-tab="orders">Compras</button>
+      <button data-tab="loyalty">Lealtad</button>
+      <button data-tab="payments">Métodos pago</button>
+      <button data-tab="appointments">Citas</button>
+      <button data-tab="account">Cuenta</button>
+    </div>
+
+    <!-- Overview -->
+    <section class="card tab-panel" data-panel="overview">
+      <h2>Hola, <span id="ovName">cliente</span></h2>
+      <p>Puntos lealtad: <span class="stat" id="ovPoints">0</span></p>
+      <p>Email: <span id="ovEmail"></span></p>
+    </section>
+
+    <!-- Orders -->
+    <section class="card tab-panel hidden" data-panel="orders">
+      <h2>Historial de compras</h2>
+      <div id="ordersTable">Cargando…</div>
+    </section>
+
+    <!-- Loyalty -->
+    <section class="card tab-panel hidden" data-panel="loyalty">
+      <h2>Programa de lealtad</h2>
+      <p>Saldo actual: <span class="stat" id="loyPoints">0</span></p>
+      <h3 style="font-size:14px; margin-top:18px;">Movimientos</h3>
+      <div id="loyTable">Cargando…</div>
+    </section>
+
+    <!-- Payments -->
+    <section class="card tab-panel hidden" data-panel="payments">
+      <h2>Métodos de pago guardados</h2>
+      <div id="payTable">Cargando…</div>
+    </section>
+
+    <!-- Appointments -->
+    <section class="card tab-panel hidden" data-panel="appointments">
+      <h2>Reservar cita</h2>
+      <p style="color:var(--muted); font-size:13px;">Disponible solo si tu negocio acepta reservaciones.</p>
+      <div class="row">
+        <div>
+          <label>Servicio</label>
+          <input type="text" id="apptService" placeholder="Ej. Corte de cabello" />
+        </div>
+        <div>
+          <label>Fecha y hora</label>
+          <input type="text" id="apptWhen" placeholder="2026-05-01 10:00" />
+        </div>
+      </div>
+      <button id="btnBookAppt" style="margin-top:12px;">Reservar</button>
+      <div id="apptMsg"></div>
+    </section>
+
+    <!-- Account -->
+    <section class="card tab-panel hidden" data-panel="account">
+      <h2>Cuenta</h2>
+
+      <h3 style="font-size:14px;">Cambiar contraseña</h3>
+      <div class="row">
+        <div>
+          <label>Nueva contraseña</label>
+          <input type="password" id="newPass1" />
+        </div>
+        <div>
+          <label>Confirmar</label>
+          <input type="password" id="newPass2" />
+        </div>
+      </div>
+      <button id="btnChangePass" style="margin-top:10px;">Actualizar</button>
+      <div id="passMsg"></div>
+
+      <hr style="margin:24px 0; border:0; border-top:1px solid var(--border);" />
+
+      <h3 style="font-size:14px;">Privacidad (GDPR / LFPDPPP)</h3>
+      <p style="font-size:13px; color:var(--muted);">
+        Solicita exportación o borrado de tus datos personales:
+      </p>
+      <a class="link" id="gdprLink" href="/volvix-gdpr-portal.html" target="_blank">Abrir portal GDPR →</a>
+
+      <hr style="margin:24px 0; border:0; border-top:1px solid var(--border);" />
+
+      <button class="secondary" id="btnLogout">Cerrar sesión</button>
+    </section>
+
+  </section>
+
+</main>
+
+<script src="/volvix-customer-auth-wiring.js"></script>
+<script>
+(function () {
+  const TOKEN_KEY = 'volvix_customer_jwt';
+  const EMAIL_KEY = 'volvix_customer_email';
+
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => document.querySelectorAll(s);
+
+  function token() { return localStorage.getItem(TOKEN_KEY) || ''; }
+  function setToken(t) { localStorage.setItem(TOKEN_KEY, t); }
+  function clearAuth() { localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(EMAIL_KEY); }
+
+  function showMsg(el, text, ok) {
+    el.innerHTML = '<div class="msg ' + (ok ? 'ok' : 'err') + '">' + text + '</div>';
+  }
+
+  async function api(path, opts) {
+    opts = opts || {};
+    opts.headers = opts.headers || {};
+    if (token()) opts.headers['Authorization'] = 'Bearer ' + token();
+    if (opts.body && typeof opts.body !== 'string') {
+      opts.headers['Content-Type'] = 'application/json';
+      opts.body = JSON.stringify(opts.body);
+    }
+    const r = await fetch(path, opts);
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.error || ('HTTP ' + r.status));
+    return j;
+  }
+
+  // -------- LOGIN --------
+  $('#btnRequestOtp').addEventListener('click', async () => {
+    const email = $('#loginEmail').value.trim().toLowerCase();
+    if (!email) { showMsg($('#loginMsg1'), 'Email requerido', false); return; }
+    $('#btnRequestOtp').disabled = true;
+    try {
+      await Volvix.customerAuth.requestOtp(email);
+      localStorage.setItem(EMAIL_KEY, email);
+      showMsg($('#loginMsg1'), 'Código enviado. Revisa tu correo.', true);
+      $('#step1').classList.add('hidden');
+      $('#step2').classList.remove('hidden');
+    } catch (e) {
+      showMsg($('#loginMsg1'), e.message, false);
+    } finally {
+      $('#btnRequestOtp').disabled = false;
+    }
+  });
+
+  $('#btnBackEmail').addEventListener('click', () => {
+    $('#step1').classList.remove('hidden');
+    $('#step2').classList.add('hidden');
+  });
+
+  $('#btnVerifyOtp').addEventListener('click', async () => {
+    const email = localStorage.getItem(EMAIL_KEY) || '';
+    const otp = $('#loginOtp').value.trim();
+    if (otp.length !== 6) { showMsg($('#loginMsg2'), 'Código inválido', false); return; }
+    $('#btnVerifyOtp').disabled = true;
+    try {
+      const r = await Volvix.customerAuth.verifyOtp(email, otp);
+      if (!r.token) throw new Error('No se recibió token');
+      setToken(r.token);
+      enterDashboard();
+    } catch (e) {
+      showMsg($('#loginMsg2'), e.message, false);
+    } finally {
+      $('#btnVerifyOtp').disabled = false;
+    }
+  });
+
+  // -------- DASHBOARD --------
+  function enterDashboard() {
+    $('#loginView').classList.add('hidden');
+    $('#dashView').classList.remove('hidden');
+    loadProfile();
+    loadOrders();
+    loadLoyalty();
+    loadPayments();
+  }
+
+  async function loadProfile() {
+    try {
+      const j = await api('/api/customer/me');
+      const c = j.customer || j;
+      $('#ovName').textContent = c.full_name || c.email || 'cliente';
+      $('#ovEmail').textContent = c.email || '';
+      $('#ovPoints').textContent = c.loyalty_points || 0;
+      $('#userBar').textContent = c.email || '';
+    } catch (e) { console.warn(e); }
+  }
+
+  async function loadOrders() {
+    try {
+      const j = await api('/api/customer/orders');
+      const rows = j.orders || [];
+      if (!rows.length) { $('#ordersTable').innerHTML = '<p style="color:var(--muted);">Sin compras todavía.</p>'; return; }
+      let html = '<table><thead><tr><th>Folio</th><th>Fecha</th><th>Total</th><th>Estado</th><th>Factura</th></tr></thead><tbody>';
+      for (const o of rows) {
+        html += '<tr>'
+          + '<td>' + (o.folio || o.id) + '</td>'
+          + '<td>' + (o.created_at || '').slice(0,10) + '</td>'
+          + '<td>$' + Number(o.total || 0).toFixed(2) + '</td>'
+          + '<td>' + (o.status || '-') + '</td>'
+          + '<td>'
+            + (o.cfdi_uuid ? '<a class="link" href="/api/customer/invoice/'+o.id+'?fmt=pdf">PDF</a> · '
+                          + '<a class="link" href="/api/customer/invoice/'+o.id+'?fmt=xml">XML</a>' : '—')
+          + '</td>'
+          + '</tr>';
+      }
+      html += '</tbody></table>';
+      $('#ordersTable').innerHTML = html;
+    } catch (e) { $('#ordersTable').innerHTML = '<div class="msg err">'+e.message+'</div>'; }
+  }
+
+  async function loadLoyalty() {
+    try {
+      const j = await api('/api/customer/loyalty');
+      $('#loyPoints').textContent = j.points || 0;
+      const mv = j.movements || [];
+      if (!mv.length) { $('#loyTable').innerHTML = '<p style="color:var(--muted);">Sin movimientos.</p>'; return; }
+      let html = '<table><thead><tr><th>Fecha</th><th>Tipo</th><th>Puntos</th><th>Concepto</th></tr></thead><tbody>';
+      for (const m of mv) {
+        html += '<tr><td>' + (m.created_at||'').slice(0,10) + '</td><td>' + (m.kind||'') + '</td><td>' + (m.points||0) + '</td><td>' + (m.note||'') + '</td></tr>';
+      }
+      html += '</tbody></table>';
+      $('#loyTable').innerHTML = html;
+    } catch (e) { $('#loyTable').innerHTML = '<div class="msg err">'+e.message+'</div>'; }
+  }
+
+  async function loadPayments() {
+    try {
+      const j = await api('/api/customer/payment-methods');
+      const rows = j.methods || [];
+      if (!rows.length) { $('#payTable').innerHTML = '<p style="color:var(--muted);">Sin métodos guardados.</p>'; return; }
+      let html = '<table><thead><tr><th>Tipo</th><th>Marca</th><th>Últimos 4</th><th>Vence</th></tr></thead><tbody>';
+      for (const p of rows) {
+        html += '<tr><td>' + (p.type||'card') + '</td><td>' + (p.brand||'') + '</td><td>•••• ' + (p.last4||'') + '</td><td>' + (p.exp||'') + '</td></tr>';
+      }
+      html += '</tbody></table>';
+      $('#payTable').innerHTML = html;
+    } catch (e) { $('#payTable').innerHTML = '<p style="color:var(--muted);">Sin métodos guardados.</p>'; }
+  }
+
+  // Tabs
+  $$('.tabs button').forEach(b => b.addEventListener('click', () => {
+    $$('.tabs button').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    const t = b.dataset.tab;
+    $$('.tab-panel').forEach(p => p.classList.toggle('hidden', p.dataset.panel !== t));
+  }));
+
+  // Reservar cita
+  $('#btnBookAppt').addEventListener('click', async () => {
+    const service = $('#apptService').value.trim();
+    const when = $('#apptWhen').value.trim();
+    if (!service || !when) { showMsg($('#apptMsg'), 'Completa los campos', false); return; }
+    try {
+      await api('/api/customer/appointments', { method:'POST', body:{ service, when }});
+      showMsg($('#apptMsg'), 'Cita solicitada. Te confirmaremos por email.', true);
+    } catch (e) { showMsg($('#apptMsg'), e.message, false); }
+  });
+
+  // Cambiar password
+  $('#btnChangePass').addEventListener('click', async () => {
+    const a = $('#newPass1').value, b = $('#newPass2').value;
+    if (!a || a.length < 8) { showMsg($('#passMsg'), 'Mínimo 8 caracteres', false); return; }
+    if (a !== b) { showMsg($('#passMsg'), 'No coinciden', false); return; }
+    try {
+      await api('/api/customer/password', { method:'POST', body:{ password: a }});
+      showMsg($('#passMsg'), 'Contraseña actualizada.', true);
+      $('#newPass1').value = ''; $('#newPass2').value = '';
+    } catch (e) { showMsg($('#passMsg'), e.message, false); }
+  });
+
+  // Logout
+  $('#btnLogout').addEventListener('click', () => {
+    clearAuth();
+    location.reload();
+  });
+
+  // Auto-login si hay token
+  if (token()) enterDashboard();
+})();
+</script>
+<link rel="stylesheet" href="volvix-modals.css">
+<script defer src="volvix-modals.js"></script>
+</body>
+</html>

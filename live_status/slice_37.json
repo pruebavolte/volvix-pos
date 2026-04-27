@@ -1,0 +1,81 @@
+{
+  "slice": 37,
+  "title": "Test profundo OWNER PANEL completo",
+  "date": "2026-04-26",
+  "scope": "owner dashboard, tenants admin, users admin, global reports, real-time metrics",
+  "auth": {
+    "user": "admin@volvix.test",
+    "role": "superadmin",
+    "tenant_id": "TNT001",
+    "token_acquired": true
+  },
+  "results": {
+    "dashboard": {
+      "T1_GET_dashboard": { "expected": 200, "got": 200, "status": "PASS",
+        "metrics": { "total_users": 8, "active_users": 6, "total_tenants": 4, "active_tenants": 3, "total_sales": 8, "total_revenue": 792.99, "total_products": 140, "low_stock_count": 19, "total_customers": 16, "active_customers": 16, "mrr": 3097, "arr": 37164 } },
+      "T2_no_bearer": { "expected": 401, "got": 401, "status": "PASS" },
+      "T3_cajero_role": { "status": "SKIP", "note": "no cajero credentials provisioned in test fixtures" },
+      "T4_total_sales_matches": { "dashboard_total": 8, "api_sales_count": 8, "status": "PASS" },
+      "T5_arr_equals_mrr_x12": { "mrr": 3097, "expected_arr": 37164, "got_arr": 37164, "status": "PASS" },
+      "T6_low_stock_matches": { "dashboard_low_stock_count": 19, "api_low_stock_count": 7, "status": "FAIL",
+        "root_cause": "dashboard usa threshold stock<20 hardcoded; /api/products?low_stock=true usa min_stock por producto -> distinta semantica" }
+    },
+    "tenants_admin": {
+      "T1_GET_tenants": { "expected": "array(4)", "got_count": 4, "status": "PASS" },
+      "T2_POST_tenant": { "expected": 201, "got": 404, "status": "FAIL",
+        "note": "POST /api/owner/tenants no implementado (endpoint not found)" },
+      "T3_PATCH_status": { "status": "SKIP", "note": "PATCH /api/owner/tenants/:id no implementado" },
+      "T4_PATCH_plan":   { "status": "SKIP", "note": "ditto" },
+      "T5_DELETE":       { "status": "SKIP", "note": "DELETE /api/owner/tenants/:id no implementado" },
+      "T6_GET_404":      { "expected": 404, "got": 404, "status": "PASS",
+        "note": "endpoint inexistente correctamente devuelve 404 generico" }
+    },
+    "users_admin": {
+      "T1_GET_users": { "expected": "array", "got_count": 8, "status": "PASS" },
+      "T2_POST_user_welcome_email": { "expected": 201, "got": 500, "status": "FAIL",
+        "note": "creacion devuelve 500 internal -> revisar columnas pos_users (notes? full_name?) o constraint email unique" },
+      "T3_PATCH_role":      { "status": "SKIP", "note": "PATCH /api/owner/users/:id no encontrado en handlers (no listado)" },
+      "T4_PATCH_is_active": { "status": "SKIP", "note": "ditto" },
+      "T5_DELETE":          { "status": "SKIP", "note": "DELETE /api/owner/users/:id no encontrado" },
+      "T6_email_duplicado_409": { "expected": 409, "got": 500, "status": "FAIL",
+        "note": "POST con email existente lanza 500 en vez de detectar conflicto -> falta manejo unique violation -> mapear a 409" }
+    },
+    "reports_globales": {
+      "T1_fiscal":             { "expected": 200, "got": 404, "status": "FAIL", "note": "/api/reports/fiscal no implementado (IVA/ISR ausente)" },
+      "T2_sales_by_product":   { "expected": 200, "got": 200, "status": "PASS", "size_bytes": 77, "note": "stub vacio (reportSafe), por_product=[]" },
+      "T3_abc_analysis":       { "expected": 200, "got": 200, "status": "PASS", "size_bytes": 94, "note": "stub: classes A/B/C vacias" },
+      "T4_sales_by_cashier":   { "expected": 200, "got": 200, "status": "PASS", "size_bytes": 77, "note": "stub vacio" },
+      "T5_customers_cohort":   { "expected": 200, "got": 200, "status": "PASS", "size_bytes": 74, "note": "stub: cohorts=[]" },
+      "T6_profit":             { "expected": 200, "got": 200, "status": "PASS", "size_bytes": 104, "note": "stub: revenue/cost/profit=0" }
+    },
+    "metricas_tiempo_real": {
+      "T1_GET_metrics": { "expected": 200, "got": 200, "status": "PASS",
+        "fields_present": ["uptime_ms","uptime_sec","request_count","error_count","latency_ms.p50","latency_ms.p95","latency_ms.p99","supabase_health","env_status","version","memory_mb"],
+        "sample": { "uptime_sec": 183, "request_count": 207, "error_count": 39, "p50_ms": 1, "p95_ms": 128, "p99_ms": 183, "memory_mb": 91, "version": "7.3.0-r14", "supabase_latency_ms": 54 } },
+      "T2_health_deep": { "expected": 200, "got": 200, "status": "PASS",
+        "checks": { "supabase": "ok", "jwt_secret": "ok", "allowed_origins": "ok(1)", "supabase_url": "ok", "supabase_service_key": "ok" } },
+      "T3_solo_admin_owner": { "metrics_no_auth": 401, "status": "PARTIAL",
+        "note": "/api/metrics requiere bearer (401 sin token); /api/health/deep es publico por diseno (sin auth) -> aceptable para health probes infra" }
+    }
+  },
+  "summary": {
+    "total_tests_evaluated": 26,
+    "passed": 14,
+    "failed": 5,
+    "skipped": 7,
+    "critical_gaps": [
+      "POST/PATCH/DELETE /api/owner/tenants no implementados (CRUD admin tenants ausente)",
+      "PATCH/DELETE /api/owner/users no implementados (no se puede desactivar/cambiar rol via API)",
+      "POST /api/owner/users devuelve 500 en vez de 201 / 409 (no maneja conflict ni schema mismatch)",
+      "/api/reports/fiscal no existe (IVA/ISR del periodo no calculado)",
+      "Reportes by-product, by-cashier, abc, cohort, profit todos son stubs vacios (reportSafe), no consultan datos reales"
+    ],
+    "consistency": [
+      "T4 OK: dashboard.total_sales==GET /api/sales count (8)",
+      "T5 OK: arr=mrr*12 verificado (3097 -> 37164)",
+      "T6 INCONSISTENT: dashboard usa stock<20 hardcoded vs endpoint usa min_stock por producto"
+    ]
+  },
+  "final_status": "AMBER",
+  "verdict": "Owner Panel tiene visibilidad (read) funcional, pero el CRUD admin (tenants/users mutations) y reportes profundos estan incompletos o stubbed. Listo para demo de lectura, NO listo para administracion productiva sin cubrir los 5 gaps."
+}

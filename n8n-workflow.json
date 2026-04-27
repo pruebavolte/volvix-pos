@@ -1,0 +1,106 @@
+{
+  "name": "Volvix POS — Sync sales & low stock alerts",
+  "nodes": [
+    {
+      "parameters": { "rule": { "interval": [{ "field": "minutes", "minutesInterval": 5 }] } },
+      "id": "trigger-cron",
+      "name": "Every 5 min",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.VOLVIX_URL}}/api/sales",
+        "options": { "timeout": 10000 },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "order", "value": "created_at.desc" },
+            { "name": "limit", "value": "50" }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-API-Key", "value": "={{$env.VOLVIX_API_KEY}}" }
+          ]
+        }
+      },
+      "id": "http-sales",
+      "name": "GET /api/sales",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 200]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.VOLVIX_URL}}/api/products",
+        "sendQuery": true,
+        "queryParameters": { "parameters": [{ "name": "low_stock", "value": "true" }] },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{ "name": "X-API-Key", "value": "={{$env.VOLVIX_API_KEY}}" }]
+        }
+      },
+      "id": "http-lowstock",
+      "name": "GET /api/products?low_stock",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [{ "value1": "={{$json.total}}", "operation": "larger", "value2": 1000 }]
+        }
+      },
+      "id": "if-bigsale",
+      "name": "Big sale?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [720, 200]
+    },
+    {
+      "parameters": {
+        "channel": "#sales",
+        "text": "=🟢 Big sale {{$json.total}} {{$json.currency}} (id={{$json.id}})"
+      },
+      "id": "slack-sale",
+      "name": "Slack: notify big sale",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [960, 160]
+    },
+    {
+      "parameters": {
+        "channel": "#inventory",
+        "text": "=⚠️ Low stock: {{$json.name}} ({{$json.stock}} left)"
+      },
+      "id": "slack-stock",
+      "name": "Slack: low stock",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [720, 400]
+    }
+  ],
+  "connections": {
+    "Every 5 min": {
+      "main": [[
+        { "node": "GET /api/sales", "type": "main", "index": 0 },
+        { "node": "GET /api/products?low_stock", "type": "main", "index": 0 }
+      ]]
+    },
+    "GET /api/sales": { "main": [[{ "node": "Big sale?", "type": "main", "index": 0 }]] },
+    "Big sale?":      { "main": [[{ "node": "Slack: notify big sale", "type": "main", "index": 0 }], []] },
+    "GET /api/products?low_stock": { "main": [[{ "node": "Slack: low stock", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "staticData": null,
+  "meta": {
+    "instanceId": "volvix-template",
+    "templateCredsSetupCompleted": false,
+    "notes": "Set env: VOLVIX_URL=https://app.volvix.com  VOLVIX_API_KEY=vlx_..."
+  },
+  "tags": ["volvix", "pos", "integration"]
+}

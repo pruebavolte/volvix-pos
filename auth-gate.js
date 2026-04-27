@@ -22,22 +22,30 @@
   const isPublic = PUBLIC_PAGES.some(p => pathname === p || pathname.endsWith(p));
   if (isPublic) return;
 
-  // Obtener sesión del localStorage
-  let session = null;
-  try {
-    const stored = localStorage.getItem('volvixSession');
-    if (stored) session = JSON.parse(stored);
-  } catch (e) {
-    console.warn('[auth-gate] Error parsing session:', e);
-  }
+  // Validar sesión vía JWT helper (preferido) con fallback a chequeo legacy
+  let isValid = false;
+  let hadAnySession = false;
 
-  // Validar sesión
-  const isValid = session && session.user_id && session.expires_at > Date.now();
+  if (window.Volvix && window.Volvix.auth && typeof window.Volvix.auth.isLoggedIn === 'function') {
+    hadAnySession = !!window.Volvix.auth.getToken();
+    isValid = window.Volvix.auth.isLoggedIn();
+  } else {
+    // Fallback legacy (auth-helper.js no cargado todavía)
+    let session = null;
+    try {
+      const stored = localStorage.getItem('volvixSession');
+      if (stored) session = JSON.parse(stored);
+    } catch (e) {
+      console.warn('[auth-gate] Error parsing session:', e);
+    }
+    hadAnySession = !!session;
+    isValid = !!(session && session.user_id && session.expires_at > Date.now());
+  }
 
   if (!isValid) {
     // Sesión no válida - redirigir a login
     const redirectUrl = encodeURIComponent(window.location.pathname + window.location.search);
-    const expired = session ? 1 : 0;
+    const expired = hadAnySession ? 1 : 0;
     window.location.replace(`/login.html?expired=${expired}&redirect=${redirectUrl}`);
   }
 })();

@@ -1,0 +1,89 @@
+{
+  "slice": 19,
+  "name": "Currency + Loyalty + MFA + Subscriptions",
+  "tests": [
+    {
+      "id": 93,
+      "endpoint": "GET /api/currencies",
+      "status": 200,
+      "count": 4,
+      "ok": true,
+      "note": "4 monedas (esperado >=8 en DB; fallback estático puede diferir)"
+    },
+    {
+      "id": 94,
+      "endpoint": "GET /api/fx/rates?base=MXN",
+      "status": 200,
+      "ok": true,
+      "rates_count": 5
+    },
+    {
+      "id": 95,
+      "endpoint": "GET /api/loyalty/customers/:id",
+      "status": 200,
+      "ok": true,
+      "points": 200,
+      "tier": "bronze",
+      "customer_id": "b236fab4-0f4c-4acb-801d-27fd3d90235e"
+    },
+    {
+      "id": 96,
+      "endpoint": "GET /api/loyalty/tiers",
+      "status": 200,
+      "ok": true,
+      "tiers_count": 4
+    },
+    {
+      "id": 97,
+      "endpoint": "POST /api/mfa/setup",
+      "status": 200,
+      "ok": true,
+      "has_qr": false,
+      "has_backup": false,
+      "body": {
+        "ok": false,
+        "error": "MFA no disponible (config pendiente)"
+      },
+      "note": "stub fallback activo (mfa no disponible)"
+    },
+    {
+      "id": 98,
+      "endpoint": "GET /api/billing/plans",
+      "status": 200,
+      "ok": true,
+      "plans": [
+        "Free",
+        "Starter",
+        "Pro",
+        "Enterprise"
+      ],
+      "has_free_pro_enterprise": true
+    },
+    {
+      "id": 99,
+      "endpoint": "GET /api/billing/subscription",
+      "status": 200,
+      "ok": true,
+      "subscription": null
+    },
+    {
+      "id": 100,
+      "endpoint": "GET /api/billing/usage",
+      "status": 200,
+      "ok": true,
+      "plan": "None",
+      "usage": {
+        "users": 0,
+        "products": 0,
+        "locations": 0,
+        "sales_mtd": 0
+      }
+    }
+  ],
+  "summary": {
+    "total": 8,
+    "ok": 8,
+    "fail": 0
+  },
+  "generated_at": "2026-04-26T21:17:23.051Z"
+}

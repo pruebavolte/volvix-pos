@@ -302,6 +302,64 @@
   }
 
   // ---------- Public API ----------
+  // ---------- slice_111: API auto-checkin + header branch label ----------
+  var AUTO_CHECKIN_MS = 5 * 60 * 1000;
+  var _autoCheckinTimer = null;
+  var _lastBranch = null;
+
+  function _apiBase() {
+    try { return (global.VOLVIX_API_BASE) || (global.location && global.location.origin) || ''; } catch (_) { return ''; }
+  }
+  function _authToken() {
+    try { return global.localStorage.getItem('volvix_jwt') || global.localStorage.getItem('jwt') || ''; } catch (_) { return ''; }
+  }
+  function _renderBranchHeader(branch, distance) {
+    try {
+      var el = global.document && global.document.getElementById('volvix-current-branch');
+      if (!el) {
+        if (!global.document || !global.document.body) return;
+        el = global.document.createElement('span');
+        el.id = 'volvix-current-branch';
+        el.style.cssText = 'margin-left:12px;padding:2px 8px;border-radius:10px;background:#e6f4ea;color:#0b6b35;font-size:12px;';
+        var hdr = global.document.querySelector('header') || global.document.body;
+        hdr.appendChild(el);
+      }
+      el.textContent = branch ? ('📍 ' + (branch.name || branch.id) + ' (' + distance + 'm)') : '📍 fuera de zona';
+    } catch (_) {}
+  }
+  function autoCheckinOnce() {
+    if (!global.navigator || !global.navigator.geolocation) return;
+    global.navigator.geolocation.getCurrentPosition(function (pos) {
+      var lat = pos.coords.latitude, lng = pos.coords.longitude, acc = pos.coords.accuracy;
+      try {
+        var xhr = new global.XMLHttpRequest();
+        xhr.open('POST', _apiBase() + '/api/geofence/checkin', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        var tok = _authToken();
+        if (tok) xhr.setRequestHeader('Authorization', 'Bearer ' + tok);
+        xhr.onload = function () {
+          try {
+            var r = JSON.parse(xhr.responseText || '{}');
+            if (r && r.ok && r.branch) { _lastBranch = r.branch; _renderBranchHeader(r.branch, r.distance_m); }
+            else { _renderBranchHeader(null, null); }
+          } catch (_) {}
+        };
+        xhr.send(JSON.stringify({ lat: lat, lng: lng, accuracy: acc }));
+      } catch (_) {}
+    }, function () {}, { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
+  }
+  function startAutoCheckin() {
+    stopAutoCheckin();
+    if (global.navigator && global.navigator.permissions) {
+      try { global.navigator.permissions.query({ name: 'geolocation' }); } catch (_) {}
+    }
+    autoCheckinOnce();
+    _autoCheckinTimer = global.setInterval(autoCheckinOnce, AUTO_CHECKIN_MS);
+  }
+  function stopAutoCheckin() {
+    if (_autoCheckinTimer) { global.clearInterval(_autoCheckinTimer); _autoCheckinTimer = null; }
+  }
+
   global.GeofenceAPI = {
     start: start,
     stop: stop,
@@ -317,6 +375,18 @@
     setFenceFromCurrentPosition: setFenceFromCurrentPosition,
     requestNotificationPermission: requestNotificationPermission,
     reset: reset,
-    VERSION: '1.0.0'
+    autoCheckinOnce: autoCheckinOnce,
+    startAutoCheckin: startAutoCheckin,
+    stopAutoCheckin: stopAutoCheckin,
+    getCurrentBranch: function () { return _lastBranch; },
+    VERSION: '1.1.0'
   };
+
+  // Auto-arrancar tras login cajero
+  try {
+    global.addEventListener && global.addEventListener('volvix:login', function (e) {
+      var role = (e && e.detail && e.detail.role) || '';
+      if (role === 'cashier' || role === 'cajero') startAutoCheckin();
+    });
+  } catch (_) {}
 })(typeof window !== 'undefined' ? window : this);

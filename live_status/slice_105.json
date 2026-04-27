@@ -1,0 +1,29 @@
+{
+  "slice": 105,
+  "range": "2100-2120",
+  "topic": "R17_whatsapp_business_api",
+  "ts": "2026-04-26",
+  "status": "implemented",
+  "files": {
+    "api/index.js": "Routes appended (POST/GET /api/whatsapp/send|webhook|messages|templates) + helper sendWhatsAppGraph + global.__waSend; trigger inserted in POST /api/sales for fire-and-forget order_confirmation when customer.phone present.",
+    "db/R17_WHATSAPP.sql": "Tables whatsapp_messages (in/out, status, wa_id, sent_at) + whatsapp_subscribers (phone, tenant_id, customer_id, opt_in_at) with indices and UNIQUE(phone,tenant_id).",
+    "volvix-whatsapp-wiring.js": "Replaced mock with real backend wiring; window.WhatsAppAPI (send/sendQuick/templates/messages); floating widget FAB + panel with template dropdown.",
+    "R17_WHATSAPP.md": "Setup Meta Business Suite, env vars (WHATSAPP_TOKEN, WHATSAPP_PHONE_NUMBER_ID, WHATSAPP_VERIFY_TOKEN), Twilio fallback notes, curl test commands."
+  },
+  "templates_approved": [
+    "order_confirmation",
+    "payment_received",
+    "shipping_update",
+    "low_stock_alert",
+    "appointment_reminder"
+  ],
+  "graph_api": "https://graph.facebook.com/v18.0/{phone_number_id}/messages",
+  "fallback_503_when_token_missing": true,
+  "auth_required": ["POST /api/whatsapp/send", "GET /api/whatsapp/messages", "GET /api/whatsapp/templates"],
+  "public": ["GET /api/whatsapp/webhook", "POST /api/whatsapp/webhook"],
+  "sales_trigger": true,
+  "modified": true,
+  "deploy_required": true,
+  "env_vars_needed": ["WHATSAPP_TOKEN", "WHATSAPP_PHONE_NUMBER_ID", "WHATSAPP_VERIFY_TOKEN"],
+  "notes": "Webhook GET valida hub.verify_token; POST persiste mensajes incoming en whatsapp_messages (direction=in). Idioma template default es_MX. Helpers expuestos en globalThis para reuso por triggers."
+}

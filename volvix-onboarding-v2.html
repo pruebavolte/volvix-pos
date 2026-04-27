@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volvix POS · Onboarding v2</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,sans-serif}
+  body{min-height:100vh;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;padding:20px;color:#1f2937}
+  .wizard{background:#fff;width:100%;max-width:980px;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden}
+  .header{background:linear-gradient(135deg,#1e3c72,#2a5298);color:#fff;padding:28px 40px}
+  .header h1{font-size:26px;margin-bottom:4px}
+  .header p{opacity:.85;font-size:14px}
+  .progress-wrap{padding:22px 40px;background:#f8f9fb;border-bottom:1px solid #e5e7eb}
+  .progress-bar{height:8px;background:#e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:14px}
+  .progress-fill{height:100%;background:linear-gradient(90deg,#1e3c72,#2a5298);transition:width .35s}
+  .steps-row{display:flex;justify-content:space-between;font-size:11px;color:#6b7280;flex-wrap:wrap;gap:6px}
+  .step-pill{padding:4px 10px;border-radius:14px;background:#e5e7eb}
+  .step-pill.active{background:#1e3c72;color:#fff}
+  .step-pill.done{background:#10b981;color:#fff}
+  .body{padding:36px 40px;min-height:380px}
+  .step{display:none}
+  .step.active{display:block;animation:fade .3s}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  h2{font-size:22px;margin-bottom:6px;color:#1e3c72}
+  .subtitle{color:#6b7280;font-size:14px;margin-bottom:22px}
+  label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:#374151}
+  input,select,textarea{width:100%;padding:11px 13px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;outline:none;transition:border .2s}
+  input:focus,select:focus,textarea:focus{border-color:#2a5298;box-shadow:0 0 0 3px rgba(42,82,152,.15)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .field{margin-bottom:16px}
+  .footer{padding:20px 40px;background:#f8f9fb;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between;gap:10px}
+  button{padding:11px 22px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:.2s}
+  .btn-primary{background:linear-gradient(135deg,#1e3c72,#2a5298);color:#fff}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 14px rgba(42,82,152,.4)}
+  .btn-ghost{background:#fff;color:#374151;border:1px solid #d1d5db}
+  .btn-ghost:hover{background:#f3f4f6}
+  .btn-skip{background:transparent;color:#6b7280;text-decoration:underline}
+  .vertical-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:8px}
+  .vertical-card{padding:18px 10px;border:2px solid #e5e7eb;border-radius:10px;cursor:pointer;text-align:center;transition:.2s;background:#fff}
+  .vertical-card:hover{border-color:#2a5298}
+  .vertical-card.selected{border-color:#1e3c72;background:#eef2ff}
+  .vertical-card .icon{font-size:28px;margin-bottom:6px}
+  .vertical-card .label{font-size:13px;font-weight:600}
+  .color-row{display:flex;gap:10px;flex-wrap:wrap}
+  .color-row input[type=color]{width:60px;height:40px;padding:0;border-radius:6px;cursor:pointer}
+  .logo-drop{border:2px dashed #d1d5db;border-radius:10px;padding:30px;text-align:center;cursor:pointer;transition:.2s}
+  .logo-drop:hover{border-color:#2a5298;background:#f8fafc}
+  .logo-drop img{max-height:80px;margin-bottom:8px}
+  .csv-preview{margin-top:14px;border:1px solid #e5e7eb;border-radius:8px;overflow:auto;max-height:240px;font-size:12px}
+  .csv-preview table{width:100%;border-collapse:collapse}
+  .csv-preview th{background:#f3f4f6;padding:8px;text-align:left;font-weight:600;position:sticky;top:0}
+  .csv-preview td{padding:6px 8px;border-top:1px solid #f3f4f6}
+  .map-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px;align-items:center}
+  .map-row .from{color:#6b7280;font-size:13px}
+  .alert{padding:12px;background:#fef3c7;border-left:4px solid #f59e0b;border-radius:6px;font-size:13px;color:#78350f;margin-bottom:14px}
+  .ok{padding:12px;background:#d1fae5;border-left:4px solid #10b981;border-radius:6px;font-size:13px;color:#064e3b;margin-bottom:14px}
+  .tour-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:none;align-items:center;justify-content:center}
+  .tour-overlay.show{display:flex}
+  .tour-card{background:#fff;border-radius:14px;padding:28px;max-width:460px;text-align:center}
+  .tour-card h3{margin-bottom:8px;color:#1e3c72}
+  .tour-card p{color:#4b5563;margin-bottom:18px}
+  .small{font-size:12px;color:#6b7280}
+</style>
+</head>
+<body>
+<div class="wizard">
+  <div class="header">
+    <h1>Bienvenido a Volvix POS</h1>
+    <p>Configura tu negocio en menos de 5 minutos</p>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:14%"></div></div>
+    <div class="steps-row" id="stepsRow"></div>
+  </div>
+
+  <div class="body" id="wizardBody">
+
+    <!-- STEP 1: Negocio -->
+    <div class="step active" data-step="1">
+      <h2>Datos del negocio</h2>
+      <p class="subtitle">Información básica para tu cuenta</p>
+      <div class="field"><label>Nombre comercial *</label><input id="bizName" placeholder="Mi Negocio S.A. de C.V."></div>
+      <div class="grid2">
+        <div class="field"><label>RFC (México)</label><input id="rfc" placeholder="ABC010101XYZ" maxlength="13"></div>
+        <div class="field"><label>Email administrador *</label><input id="adminEmail" type="email" placeholder="admin@mi-negocio.mx"></div>
+      </div>
+      <div class="field"><label>Vertical de negocio *</label>
+        <div class="vertical-grid" id="verticalGrid"></div>
+      </div>
+    </div>
+
+    <!-- STEP 2: Branding -->
+    <div class="step" data-step="2">
+      <h2>Branding</h2>
+      <p class="subtitle">Personaliza la apariencia (puedes saltar)</p>
+      <div class="field"><label>Logo</label>
+        <div class="logo-drop" id="logoDrop">
+          <img id="logoPreview" style="display:none">
+          <div id="logoText">Click o arrastra tu logo (PNG/JPG, máx 1MB)</div>
+        </div>
+        <input id="logoInput" type="file" accept="image/*" style="display:none">
+      </div>
+      <div class="field"><label>Color primario / secundario</label>
+        <div class="color-row">
+          <input type="color" id="colorPrimary" value="#1e3c72">
+          <input type="color" id="colorSecondary" value="#2a5298">
+          <input id="brandSlogan" placeholder="Slogan opcional" style="flex:1">
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: Cajero -->
+    <div class="step" data-step="3">
+      <h2>Primer cajero / usuario</h2>
+      <p class="subtitle">Quien usará el POS día a día</p>
+      <div class="grid2">
+        <div class="field"><label>Nombre completo *</label><input id="cashierName" placeholder="Juan Pérez"></div>
+        <div class="field"><label>Email *</label><input id="cashierEmail" type="email" placeholder="cajero@mi-negocio.mx"></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label>PIN de 4 dígitos *</label><input id="cashierPin" maxlength="4" pattern="[0-9]{4}" placeholder="1234"></div>
+        <div class="field"><label>Rol</label>
+          <select id="cashierRole"><option value="cashier">Cajero</option><option value="manager">Gerente</option></select>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4: Productos -->
+    <div class="step" data-step="4">
+      <h2>Importar productos</h2>
+      <p class="subtitle">CSV o usa la plantilla del vertical seleccionado</p>
+      <div class="field"><label>Cargar CSV</label>
+        <input id="csvInput" type="file" accept=".csv">
+        <div class="small" style="margin-top:6px">Formato esperado: nombre, sku, precio, stock (puedes mapear columnas)</div>
+      </div>
+      <div id="csvMapper" style="display:none">
+        <h4 style="margin:12px 0 8px;font-size:14px">Mapeo de columnas</h4>
+        <div id="mapRows"></div>
+      </div>
+      <div class="csv-preview" id="csvPreview" style="display:none"></div>
+      <div style="margin-top:14px">
+        <button class="btn-ghost" id="useTemplateBtn" type="button">Usar plantilla del vertical</button>
+        <span class="small" id="templateInfo" style="margin-left:10px"></span>
+      </div>
+    </div>
+
+    <!-- STEP 5: Pago -->
+    <div class="step" data-step="5">
+      <h2>Método de pago</h2>
+      <p class="subtitle">Configura tu suscripción (opcional, puedes saltar)</p>
+      <div class="alert">Modo prueba: puedes operar 14 días sin método de pago.</div>
+      <div class="field"><label>Plan</label>
+        <select id="plan">
+          <option value="trial">Prueba gratuita 14 días</option>
+          <option value="basic">Básico — $499/mes</option>
+          <option value="pro">Pro — $999/mes</option>
+        </select>
+      </div>
+      <button class="btn-ghost" id="stripeBtn" type="button">Configurar Stripe (test mode)</button>
+    </div>
+
+    <!-- STEP 6: Fiscal -->
+    <div class="step" data-step="6">
+      <h2>Configuración fiscal</h2>
+      <p class="subtitle">CFDI 4.0 — puedes completar después</p>
+      <div class="grid2">
+        <div class="field"><label>Régimen fiscal</label>
+          <select id="regimen">
+            <option value="">— Seleccionar —</option>
+            <option value="601">601 — General Personas Morales</option>
+            <option value="612">612 — Actividades Empresariales</option>
+            <option value="621">621 — Incorporación Fiscal</option>
+            <option value="626">626 — RESICO</option>
+            <option value="603">603 — Personas Morales sin fines de lucro</option>
+          </select>
+        </div>
+        <div class="field"><label>Modo</label>
+          <select id="fiscalMode"><option value="test">Pruebas</option><option value="prod">Producción</option></select>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label>Certificado .cer (opcional)</label><input type="file" id="cerFile" accept=".cer"></div>
+        <div class="field"><label>Llave .key (opcional)</label><input type="file" id="keyFile" accept=".key"></div>
+      </div>
+      <div class="alert">Si no subes certificados, operarás en modo prueba sin timbrado real.</div>
+    </div>
+
+    <!-- STEP 7: Tour -->
+    <div class="step" data-step="7">
+      <h2>¡Casi listo!</h2>
+      <p class="subtitle">Te mostraremos un tour rápido del sistema</p>
+      <div class="ok">Tu cuenta ha sido creada. Haz clic en "Iniciar tour" para conocer las funciones principales.</div>
+      <ul style="line-height:2;color:#374151;font-size:14px">
+        <li>Punto de venta y cobro rápido</li>
+        <li>Inventario en tiempo real</li>
+        <li>Reportes y BI</li>
+        <li>Facturación CFDI</li>
+        <li>Programa de lealtad</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <button class="btn-ghost" id="prevBtn">← Atrás</button>
+    <div>
+      <button class="btn-skip" id="skipBtn">Saltar este paso</button>
+      <button class="btn-primary" id="nextBtn">Continuar →</button>
+    </div>
+  </div>
+</div>
+
+<div class="tour-overlay" id="tourOverlay">
+  <div class="tour-card">
+    <h3 id="tourTitle">Tour</h3>
+    <p id="tourBody">Texto</p>
+    <button class="btn-primary" id="tourNext">Siguiente</button>
+    <button class="btn-skip" id="tourSkip">Saltar tour</button>
+  </div>
+</div>
+
+<script>
+const API_BASE = (window.VOLVIX_API_BASE || '/api');
+const TOTAL_STEPS = 7;
+const STEP_LABELS = ['Negocio','Branding','Cajero','Productos','Pago','Fiscal','Tour'];
+const VERTICALS = [
+  {id:'farmacia',label:'Farmacia',icon:'💊'},
+  {id:'restaurante',label:'Restaurante',icon:'🍽️'},
+  {id:'gym',label:'Gimnasio',icon:'🏋️'},
+  {id:'salon',label:'Salón',icon:'💇'},
+  {id:'ferreteria',label:'Ferretería',icon:'🔨'},
+  {id:'papeleria',label:'Papelería',icon:'📚'},
+  {id:'abarrotes',label:'Abarrotes',icon:'🛒'},
+  {id:'cafeteria',label:'Cafetería',icon:'☕'},
+];
+const STORAGE_KEY = 'volvix_onboarding_v2';
+
+// ===== State =====
+const state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+state.step = state.step || 1;
+state.data = state.data || {};
+let session = state.session || null;
+
+function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify({...state, session})); }
+
+// ===== Render progress =====
+function renderProgress(){
+  const fill = ((state.step-1)/(TOTAL_STEPS-1))*100;
+  document.getElementById('progressFill').style.width = Math.max(14, fill) + '%';
+  const row = document.getElementById('stepsRow');
+  row.innerHTML = STEP_LABELS.map((l,i)=>{
+    const n = i+1;
+    const cls = n<state.step?'done': n===state.step?'active':'';
+    return `<span class="step-pill ${cls}">${n}. ${l}</span>`;
+  }).join('');
+}
+
+function showStep(n){
+  state.step = n;
+  saveState();
+  document.querySelectorAll('.step').forEach(el=>el.classList.remove('active'));
+  document.querySelector(`.step[data-step="${n}"]`).classList.add('active');
+  document.getElementById('prevBtn').style.visibility = n===1?'hidden':'visible';
+  document.getElementById('nextBtn').textContent = n===TOTAL_STEPS?'Finalizar →':'Continuar →';
+  document.getElementById('skipBtn').style.display = [2,4,5,6].includes(n)?'inline':'none';
+  renderProgress();
+}
+
+// ===== Verticals =====
+function renderVerticals(){
+  const g = document.getElementById('verticalGrid');
+  g.innerHTML = VERTICALS.map(v=>`
+    <div class="vertical-card${state.data.vertical===v.id?' selected':''}" data-vertical="${v.id}">
+      <div class="icon">${v.icon}</div><div class="label">${v.label}</div>
+    </div>`).join('');
+  g.querySelectorAll('.vertical-card').forEach(c=>{
+    c.onclick = ()=>{
+      g.querySelectorAll('.vertical-card').forEach(x=>x.classList.remove('selected'));
+      c.classList.add('selected');
+      state.data.vertical = c.dataset.vertical;
+      saveState();
+    };
+  });
+}
+
+// ===== SAT autocomplete (cliente, simulado: el endpoint puede vivir en el server) =====
+const SAT_RFC_RE = /^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/i;
+document.addEventListener('input', e=>{
+  if(e.target.id==='rfc'){
+    e.target.value = e.target.value.toUpperCase();
+    if(SAT_RFC_RE.test(e.target.value)){
+      // intentar autocompletar (best effort)
+      fetch(`${API_BASE}/onboarding/sat-lookup?rfc=${encodeURIComponent(e.target.value)}`)
+        .then(r=>r.ok?r.json():null).then(d=>{
+          if(d && d.razon_social && !document.getElementById('bizName').value){
+            document.getElementById('bizName').value = d.razon_social;
+          }
+        }).catch(()=>{});
+    }
+  }
+});
+
+// ===== Logo =====
+document.getElementById('logoDrop').onclick = ()=>document.getElementById('logoInput').click();
+document.getElementById('logoInput').onchange = e=>{
+  const f = e.target.files[0]; if(!f) return;
+  if(f.size > 1024*1024){ VolvixUI.toast({type:'info', message:'Máximo 1MB'}); return; }
+  const r = new FileReader();
+  r.onload = ev=>{
+    state.data.logo = ev.target.result;
+    document.getElementById('logoPreview').src = ev.target.result;
+    document.getElementById('logoPreview').style.display = 'block';
+    document.getElementById('logoText').style.display = 'none';
+    saveState();
+  };
+  r.readAsDataURL(f);
+};
+
+// ===== CSV =====
+let csvRows = [], csvHeaders = [], csvMap = {};
+const FIELDS = ['name','sku','price','stock','barcode'];
+document.getElementById('csvInput').onchange = e=>{
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = ev=>{
+    const txt = ev.target.result;
+    const lines = txt.split(/\r?\n/).filter(Boolean);
+    csvHeaders = lines[0].split(',').map(s=>s.trim());
+    csvRows = lines.slice(1, 51).map(l=>l.split(',').map(s=>s.trim()));
+    renderCsvPreview();
+    renderMapper();
+  };
+  r.readAsText(f);
+};
+function renderCsvPreview(){
+  const div = document.getElementById('csvPreview');
+  div.style.display = 'block';
+  const head = '<tr>'+csvHeaders.map(h=>`<th>${h}</th>`).join('')+'</tr>';
+  const body = csvRows.slice(0,8).map(r=>'<tr>'+r.map(c=>`<td>${c||''}</td>`).join('')+'</tr>').join('');
+  div.innerHTML = `<table>${head}${body}</table>`;
+}
+function renderMapper(){
+  const w = document.getElementById('csvMapper'); w.style.display='block';
+  const rows = document.getElementById('mapRows');
+  rows.innerHTML = FIELDS.map(f=>{
+    const opts = '<option value="">— ignorar —</option>' + csvHeaders.map((h,i)=>`<option value="${i}">${h}</option>`).join('');
+    return `<div class="map-row"><div class="from">→ ${f}</div><select data-field="${f}">${opts}</select></div>`;
+  }).join('');
+  // auto-match
+  rows.querySelectorAll('select').forEach(sel=>{
+    const target = sel.dataset.field;
+    const idx = csvHeaders.findIndex(h=>h.toLowerCase().includes(target));
+    if(idx>=0) sel.value = idx;
+    sel.onchange = ()=>{ csvMap[sel.dataset.field] = sel.value===''?null:parseInt(sel.value); };
+    if(idx>=0) csvMap[target] = idx;
+  });
+}
+document.getElementById('useTemplateBtn').onclick = async ()=>{
+  if(!state.data.vertical){ VolvixUI.toast({type:'info', message:'Selecciona vertical primero'}); return; }
+  const r = await fetch(`${API_BASE}/onboarding/template?vertical=${state.data.vertical}`);
+  const d = await r.json().catch(()=>({}));
+  if(d.products){
+    state.data.template_products = d.products;
+    document.getElementById('templateInfo').textContent = `${d.products.length} productos cargados de plantilla "${state.data.vertical}"`;
+    saveState();
+  }
+};
+
+// ===== Navegación =====
+document.getElementById('prevBtn').onclick = ()=>{ if(state.step>1) showStep(state.step-1); };
+document.getElementById('skipBtn').onclick = async ()=>{ await persistStep(); showStep(Math.min(TOTAL_STEPS, state.step+1)); };
+document.getElementById('nextBtn').onclick = async ()=>{
+  if(!validateStep()) return;
+  await persistStep();
+  if(state.step===1 && !session) await startOnboarding();
+  if(state.step<TOTAL_STEPS){ showStep(state.step+1); }
+  else { await completeOnboarding(); }
+};
+
+function validateStep(){
+  if(state.step===1){
+    const name=document.getElementById('bizName').value.trim();
+    const email=document.getElementById('adminEmail').value.trim();
+    if(!name||!email||!state.data.vertical){ VolvixUI.toast({type:'info', message:'Completa nombre, email y vertical'}); return false; }
+    state.data.business = {name,rfc:document.getElementById('rfc').value.trim(),admin_email:email};
+  }
+  if(state.step===2){
+    state.data.branding = {
+      logo: state.data.logo||null,
+      primary: document.getElementById('colorPrimary').value,
+      secondary: document.getElementById('colorSecondary').value,
+      slogan: document.getElementById('brandSlogan').value.trim(),
+    };
+  }
+  if(state.step===3){
+    const n=document.getElementById('cashierName').value.trim();
+    const e=document.getElementById('cashierEmail').value.trim();
+    const p=document.getElementById('cashierPin').value.trim();
+    if(!n||!e||!/^\d{4}$/.test(p)){ VolvixUI.toast({type:'info', message:'Cajero: nombre, email y PIN 4 dígitos'}); return false; }
+    state.data.cashier = {name:n,email:e,pin:p,role:document.getElementById('cashierRole').value};
+  }
+  if(state.step===4){
+    state.data.products_csv = csvRows.length ? {headers:csvHeaders, rows:csvRows, map:csvMap} : null;
+  }
+  if(state.step===5){ state.data.payment = {plan:document.getElementById('plan').value}; }
+  if(state.step===6){
+    state.data.fiscal = {
+      regimen:document.getElementById('regimen').value,
+      mode:document.getElementById('fiscalMode').value,
+    };
+  }
+  saveState(); return true;
+}
+
+async function startOnboarding(){
+  try{
+    const r = await fetch(`${API_BASE}/onboarding/start`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({business: state.data.business, vertical: state.data.vertical})
+    });
+    const d = await r.json();
+    if(d.token){ session = {token:d.token, tenant_id:d.tenant_id, user_id:d.user_id}; saveState(); }
+  }catch(e){ console.warn('start fallo', e); }
+}
+
+async function persistStep(){
+  if(!session) return;
+  try{
+    await fetch(`${API_BASE}/onboarding/step`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.token},
+      body:JSON.stringify({step:state.step, data:state.data})
+    });
+  }catch(e){ console.warn('step persist fallo',e); }
+}
+
+async function importProducts(){
+  if(!session) return;
+  let products = [];
+  if(state.data.products_csv){
+    const {rows, map} = state.data.products_csv;
+    products = rows.map(r=>({
+      name: map.name!=null?r[map.name]:'',
+      sku: map.sku!=null?r[map.sku]:'',
+      price: map.price!=null?parseFloat(r[map.price])||0:0,
+      stock: map.stock!=null?parseInt(r[map.stock])||0:0,
+      barcode: map.barcode!=null?r[map.barcode]:'',
+    })).filter(p=>p.name);
+  } else if(state.data.template_products){
+    products = state.data.template_products;
+  }
+  if(!products.length) return;
+  try{
+    await fetch(`${API_BASE}/onboarding/import-products`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.token},
+      body:JSON.stringify({products})
+    });
+  }catch(e){ console.warn('import fallo',e); }
+}
+
+async function completeOnboarding(){
+  await importProducts();
+  try{
+    await fetch(`${API_BASE}/onboarding/complete`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.token},
+      body:JSON.stringify({})
+    });
+  }catch(e){}
+  startTour();
+}
+
+// ===== Tour estilo intro.js (simple) =====
+const TOUR = [
+  {title:'Punto de venta',body:'Cobra rápido con código de barras o búsqueda inteligente.'},
+  {title:'Inventario',body:'Stock en tiempo real con alertas de mínimos.'},
+  {title:'Reportes',body:'Dashboard con ventas, márgenes, top productos.'},
+  {title:'CFDI 4.0',body:'Timbrado electrónico integrado, modo prueba o producción.'},
+  {title:'¡Listo!',body:'Tu sistema está configurado. Ya puedes empezar a vender.'},
+];
+let tourIdx = 0;
+function startTour(){
+  tourIdx = 0;
+  document.getElementById('tourOverlay').classList.add('show');
+  showTour();
+}
+function showTour(){
+  const t = TOUR[tourIdx];
+  document.getElementById('tourTitle').textContent = t.title;
+  document.getElementById('tourBody').textContent = t.body;
+  document.getElementById('tourNext').textContent = tourIdx===TOUR.length-1?'Ir al POS':'Siguiente';
+}
+document.getElementById('tourNext').onclick = ()=>{
+  tourIdx++;
+  if(tourIdx>=TOUR.length){ finish(); } else showTour();
+};
+document.getElementById('tourSkip').onclick = finish;
+function finish(){
+  localStorage.removeItem(STORAGE_KEY);
+  if(session && session.token) localStorage.setItem('volvix_token', session.token);
+  window.location.href = '/index.html';
+}
+
+// ===== Init =====
+renderVerticals();
+showStep(state.step);
+// Restaurar valores
+if(state.data.business){
+  document.getElementById('bizName').value = state.data.business.name||'';
+  document.getElementById('rfc').value = state.data.business.rfc||'';
+  document.getElementById('adminEmail').value = state.data.business.admin_email||'';
+}
+if(state.data.branding){
+  document.getElementById('colorPrimary').value = state.data.branding.primary||'#1e3c72';
+  document.getElementById('colorSecondary').value = state.data.branding.secondary||'#2a5298';
+  document.getElementById('brandSlogan').value = state.data.branding.slogan||'';
+  if(state.data.branding.logo){
+    document.getElementById('logoPreview').src = state.data.branding.logo;
+    document.getElementById('logoPreview').style.display='block';
+    document.getElementById('logoText').style.display='none';
+  }
+}
+</script>
+<link rel="stylesheet" href="volvix-modals.css">
+<script defer src="volvix-modals.js"></script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+{
+  "slice": 107,
+  "range": "2140-2160",
+  "topic": "R17_discord_notifications",
+  "ts": "2026-04-26",
+  "status": "implemented",
+  "files_modified": [
+    "api/index.js"
+  ],
+  "files_created": [
+    "db/R17_DISCORD.sql",
+    "volvix-discord-config.js",
+    "R17_DISCORD.md"
+  ],
+  "api_endpoints": {
+    "POST /api/discord/notify": "admin {webhook_url, content, embeds[]} -> POST a Discord",
+    "GET /api/discord/webhooks": "lista por tenant, URL enmascarada",
+    "POST /api/discord/webhooks": "crea {name,url,events[],active}",
+    "PATCH /api/discord/webhooks/:id": "actualiza",
+    "DELETE /api/discord/webhooks/:id": "elimina",
+    "POST /api/discord/webhooks/:id/test": "embed de prueba"
+  },
+  "events_supported": [
+    "sale.created (>$1000)",
+    "low_stock",
+    "new_user",
+    "error_critical"
+  ],
+  "helpers": {
+    "sendDiscordEmbed": "valida URL discord.com, arma embed rich (color/fields/footer/timestamp), POST 5s timeout",
+    "dispatchDiscord": "filtra por tenant+evento+activo, sale.created exige total>1000, fan-out a multiples webhooks",
+    "_embedForEvent": "templates por evento con color y fields preformateados",
+    "_isDiscordWebhookUrl": "regex hostname discord(app).com + path /api/webhooks/"
+  },
+  "sql": {
+    "table": "discord_webhooks",
+    "fields": "id uuid pk, tenant_id, name, url CHECK discord.com, events text[], active bool, created_at, updated_at",
+    "indexes": "tenant, (tenant,active), gin(events)",
+    "rls": "tenant_id JWT con override owner/superadmin",
+    "trigger": "updated_at automatico"
+  },
+  "client_ui": {
+    "file": "volvix-discord-config.js",
+    "global": "window.DiscordConfigUI",
+    "mount": "DiscordConfigUI.mount('#discord-config')",
+    "features": "alta + lista + test + activar/desactivar + eliminar, valida URL Discord en cliente"
+  },
+  "auth": "requireAuth con roles [owner, admin, superadmin]",
+  "security": "URL Discord validada por regex hostname+path, tenant aislado por RLS, URL enmascarada en GET",
+  "node_check": "ok",
+  "deploy_required": true,
+  "wiring_pending": "llamar dispatchDiscord junto a dispatchWebhook en handler POST /api/sales (linea 982 aprox)",
+  "notes": "Modulo independiente del sistema de webhooks HMAC R14. Reusa patron tenant+events[] pero sin secret ni reintentos persistidos (Discord garantiza entrega via su infra)."
+}

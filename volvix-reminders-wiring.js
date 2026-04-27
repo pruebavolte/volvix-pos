@@ -389,7 +389,7 @@
     overlay.querySelector('#vrf-cancel').onclick = () => overlay.remove();
     overlay.querySelector('#vrf-save').onclick = () => {
       const title = overlay.querySelector('#vrf-title').value.trim();
-      if (!title) { alert('Título requerido'); return; }
+      if (!title) { VolvixUI.toast({type:'error', message:'Título requerido'}); return; }
       createReminder({
         title,
         dueAt: new Date(overlay.querySelector('#vrf-due').value).toISOString(),

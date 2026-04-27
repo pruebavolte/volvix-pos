@@ -16,7 +16,10 @@
   // CONFIG
   // ============================================================
   const API = location.origin;
-  const PASS = 'Volvix2026!';
+  // Password loaded from env (TEST_USER_PASSWORD) — never hardcode.
+  const PASS = (typeof process !== 'undefined' && process.env && process.env.TEST_USER_PASSWORD)
+    || (typeof window !== 'undefined' && window.TEST_USER_PASSWORD)
+    || ''; // <<test-password-via-env>>
   const USERS = {
     admin:  { email: 'admin@volvix.test',  password: PASS, role: 'superadmin' },
     owner:  { email: 'owner@volvix.test',  password: PASS, role: 'owner' },

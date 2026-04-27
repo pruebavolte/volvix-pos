@@ -374,9 +374,43 @@
     const tpl = getActive();
     if (act === 'select-tpl') setActive(e.target.value);
     else if (act === 'rename') { tpl.name = e.target.value; saveTemplates(); }
-    else if (act === 'new')    newTemplate(prompt('Nombre:', 'Nueva') || 'Nueva');
+    else if (act === 'new')    {
+      const ui = window.VolvixUI;
+      if (ui && typeof ui.form === 'function') {
+        Promise.resolve(ui.form({
+          title: 'Nueva plantilla de recibo',
+          fields: [
+            { name: 'name', label: 'Nombre', type: 'text', default: 'Nueva', required: true },
+            { name: 'header', label: 'Encabezado', type: 'textarea', rows: 4, default: '' },
+            { name: 'footer', label: 'Pie de página', type: 'textarea', rows: 4, default: '' },
+            { name: 'logo', label: 'Logo', type: 'file', accept: 'image/*' }
+          ],
+          submitText: 'Crear'
+        })).then(res => {
+          if (!res || !res.name) return;
+          const tpl = newTemplate(res.name);
+          if (tpl) {
+            if (res.header) tpl.header = res.header;
+            if (res.footer) tpl.footer = res.footer;
+            if (res.logo)   tpl.logo = res.logo;
+            saveTemplates();
+            renderAll();
+          }
+        }).catch(()=>{});
+      } else {
+        newTemplate(prompt('Nombre:', 'Nueva') || 'Nueva');
+      }
+    }
     else if (act === 'dup')    duplicateTemplate(activeId);
-    else if (act === 'del')    { if (confirm('¿Borrar plantilla?')) deleteTemplate(activeId); }
+    else if (act === 'del')    {
+      const ui = window.VolvixUI;
+      if (ui && typeof ui.confirm === 'function') {
+        Promise.resolve(ui.confirm({ title: 'Borrar plantilla', message: '¿Borrar plantilla?', danger: true }))
+          .then(ok => { if (ok) deleteTemplate(activeId); }).catch(()=>{});
+      } else {
+        if (confirm('¿Borrar plantilla?')) deleteTemplate(activeId);
+      }
+    }
     else if (act === 'export') exportJSON();
     else if (act === 'import') importJSONPrompt();
     else if (act === 'print')  printTest();
@@ -417,7 +451,7 @@
         renderPreview();
       }
       if (e.target.getAttribute('data-act') === 'upload-logo') {
-        uploadLogo(e.target.files[0]).catch(err => alert('Error logo: ' + err.message));
+        uploadLogo(e.target.files[0]).catch(err => VolvixUI.toast({type:'error', message:'Error logo: ' + err.message}));
       }
     });
     sb.addEventListener('click', e => {
@@ -547,7 +581,7 @@
           templates.push(obj);
           activeId = obj.id;
           saveTemplates(); renderAll();
-        } catch (e) { alert('JSON inválido'); }
+        } catch (e) { VolvixUI.toast({type:'info', message:'JSON inválido'}); }
       };
       r.readAsText(file);
     };

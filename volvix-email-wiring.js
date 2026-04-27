@@ -431,20 +431,38 @@
       try {
         if (sched) {
           scheduleEmail({ to, subject, body, sendAt: sched, vars: state.vars, templateId: state.templateId, transport });
-          alert('Programado para ' + sched);
+          VolvixUI.toast({type:'success', message:'Programado para ' + sched});
         } else {
           await sendEmail({ to, subject, body, transport, vars: state.vars, templateId: state.templateId });
-          alert('Enviado');
+          VolvixUI.toast({type:'success', message:'Enviado'});
         }
         renderHistory(); renderScheduled();
-      } catch (e) { alert('Error: ' + e.message); renderHistory(); }
+      } catch (e) { VolvixUI.toast({type:'error', message:'Error: ' + e.message}); renderHistory(); }
     };
 
     $('#vm-test', root).onclick = async () => {
-      const to = prompt('Correo de prueba:');
-      if (!to) return;
-      try { await testSend(to, state.templateId, state.vars); alert('Test enviado'); }
-      catch (e) { alert('Error: ' + e.message); }
+      const ui = window.VolvixUI;
+      let to;
+      if (ui && typeof ui.form === 'function') {
+        const res = await Promise.resolve(ui.form({
+          title: 'Enviar correo de prueba',
+          fields: [{ name: 'to', label: 'Correo de prueba', type: 'text', placeholder: 'destinatario@example.com', required: true }],
+          submitText: 'Enviar'
+        })).catch(() => null);
+        if (!res || !res.to) return;
+        to = res.to;
+      } else {
+        to = prompt('Correo de prueba:');
+        if (!to) return;
+      }
+      try {
+        await testSend(to, state.templateId, state.vars);
+        if (ui && ui.toast) ui.toast({ type: 'success', message: 'Test enviado' });
+        else VolvixUI.toast({type:'success', message:'Test enviado'});
+      } catch (e) {
+        if (ui && ui.toast) ui.toast({ type: 'error', message: 'Error: ' + e.message });
+        else VolvixUI.toast({type:'error', message:'Error: ' + e.message});
+      }
       renderHistory();
     };
 

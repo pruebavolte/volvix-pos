@@ -1,0 +1,32 @@
+/* ============================================================
+   Volvix Shared Base CSS
+   Patrones comunes extraidos de:
+     - salvadorex_web_v25.html
+     - volvix_owner_panel_v7.html
+     - multipos_suite_v3.html
+
+   NOTA: Cada HTML conserva su propio :root (paleta) y componentes
+   especificos. Esto solo cubre reset + utilidades + animaciones
+   compartidas. NO modifica visualmente las apps.
+   ============================================================ */
+
+/* ---------- RESET ---------- */
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font-family:inherit;outline:none}
+button{cursor:pointer;border:none;background:none;color:inherit}
+
+/* ---------- UTILIDADES ---------- */
+.hidden{display:none !important}
+.mono{font-family:'JetBrains Mono','Geist Mono',monospace}
+
+/* ---------- ANIMACIONES BASE ---------- */
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+@keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes spinSlow{to{transform:rotate(360deg)}}
+
+/* ---------- SCROLLBAR HIDE COMUN ---------- */
+.no-scrollbar::-webkit-scrollbar{display:none}
+.no-scrollbar{scrollbar-width:none}

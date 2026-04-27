@@ -1,0 +1,29 @@
+{
+  "slice": 212,
+  "range": "3240-3260",
+  "topic": "R18_mobile_app_capacitor_wrapper",
+  "ts": "2026-04-26",
+  "status": "implemented",
+  "platform": "Capacitor 6 (iOS + Android)",
+  "files_created": [
+    "android/build.gradle (placeholder, reemplazable por npx cap add android)",
+    "ios/Podfile (placeholder, reemplazable por npx cap add ios)",
+    "R18_MOBILE_APP.md (guia completa: install, build, firma, submit)"
+  ],
+  "files_existing": {
+    "capacitor.config.json": "ya existia con appId=mx.volvix.app, webDir=public, plugins SplashScreen+StatusBar+Keyboard configurados — NO sobrescrito"
+  },
+  "api_endpoints_added": {
+    "GET /api/mobile/version": "version + min_supported + force_update + store_urls",
+    "GET /api/mobile/config": "api_base + endpoints + feature_flags + branding + support"
+  },
+  "api_index_js": {
+    "modified": true,
+    "insertion_point": "antes de matchRoute() ~linea 4083",
+    "env_vars": ["MOBILE_APP_VERSION", "MOBILE_MIN_SUPPORTED", "MOBILE_FORCE_UPDATE"]
+  },
+  "feature_flags": ["biometric_login", "push_notifications", "barcode_scanner", "offline_mode", "dark_mode", "multi_tenant", "loyalty"],
+  "deploy_required": true,
+  "tests_required": ["curl /api/mobile/version", "curl /api/mobile/config"],
+  "next_steps": ["npx cap add android", "npx cap add ios", "firma keystore", "submit Play+AppStore"]
+}

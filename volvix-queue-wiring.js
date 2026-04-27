@@ -47,7 +47,7 @@
   const state = {
     jobs:         lsGet(STORAGE_KEY,   []),  // pending + in-flight
     dlq:          lsGet(STORAGE_DLQ,   []),
-    cron:         lsGet(STORAGE_CRON,  []),
+    cron:         lsGet(STORAGE_CRON,  []) || [],
     stats:        lsGet(STORAGE_STATS, {
       processed: 0, failed: 0, retries: 0, deadLettered: 0,
       byHandler: {}, lastProcessedAt: null, startedAt: now()
@@ -156,9 +156,10 @@
   // ---------------------------------------------------------------------------
   function pickNextJob() {
     const t = now();
+    if (!state || !Array.isArray(state.jobs)) return null;
     for (let i = 0; i < state.jobs.length; i++) {
       const j = state.jobs[i];
-      if (j.status === 'pending' && j.runAt <= t) return j;
+      if (j && j.status === 'pending' && j.runAt <= t) return j;
     }
     return null;
   }
@@ -310,7 +311,7 @@
   function tickCron() {
     const t = now();
     let dirty = false;
-    for (const c of state.cron) {
+    for (const c of (state.cron || [])) {
       if (!c.enabled) continue;
       if (c.nextRun && c.nextRun <= t) {
         push(c.handler, c.payload, { priority: c.priority, tag: 'cron:' + c.name });
@@ -355,7 +356,7 @@
       pending:  state.jobs.filter(j => j.status === 'pending').length,
       running:  state.jobs.filter(j => j.status === 'running' || j.status === 'reserved').length,
       dlqSize:  state.dlq.length,
-      cronJobs: state.cron.length,
+      cronJobs: (state.cron || []).length,
       uptimeMs: now() - state.stats.startedAt,
       paused:   state.paused,
       concurrency: state.concurrency,
@@ -460,6 +461,10 @@
 
   function renderPanel() {
     if (!panelEl) return;
+    if (!state) state = { jobs: [], dlq: [], cron: [] };
+    if (!Array.isArray(state.jobs)) state.jobs = [];
+    if (!Array.isArray(state.dlq)) state.dlq = [];
+    if (!Array.isArray(state.cron)) state.cron = [];
     const body  = panelEl.querySelector('#vqp-body');
     const tab   = panelEl.dataset.tab;
     const badge = document.getElementById('vqp-badge');
@@ -483,7 +488,7 @@
       });
     } else if (tab === 'cron') {
       if (!state.cron.length) html = '<div style="color:#64748b">No scheduled jobs</div>';
-      state.cron.forEach(c => {
+      (state.cron || []).forEach(c => {
         html += `<div class="vqp-row"><span><span class="h">${c.name}</span> → ${c.handler}<br>
           <span style="color:#94a3b8">next in ${Math.max(0, (c.nextRun||0) - now())}ms ${c.enabled?'':' (off)'}</span></span>
           <button onclick="window.QueueAPI.unschedule('${c.id}')"

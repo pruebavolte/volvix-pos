@@ -440,7 +440,7 @@
           <div class="row"><span>Métodos de pago</span><span id="sumPay">1</span></div>
           <div class="row"><span>Total mensual</span><span id="sumTotal">$699 MXN</span></div>
         </div>
-        <button class="btn btn-primary" onclick="alert('Redirigiendo al dashboard...')">Ir al Dashboard →</button>
+        <button class="btn btn-primary" onclick="VolvixUI.toast({type:'info', message:'Redirigiendo al dashboard...'})">Ir al Dashboard →</button>
       </div>
     </div>
 
@@ -510,7 +510,7 @@
     const n = document.getElementById('prodName').value.trim();
     const s = document.getElementById('prodSku').value.trim();
     const p = document.getElementById('prodPrice').value.trim();
-    if (!n || !p) { alert('Nombre y precio son requeridos'); return; }
+    if (!n || !p) { VolvixUI.toast({type:'error', message:'Nombre y precio son requeridos'}); return; }
     const div = document.createElement('div');
     div.className = 'product-item';
     div.innerHTML = `<div class="info"><strong>${n}</strong> <span>SKU: ${s||'—'} · $${parseFloat(p).toFixed(2)}</span></div>
@@ -525,7 +525,7 @@
     const n = document.getElementById('empName').value.trim();
     const e = document.getElementById('empEmail').value.trim();
     const r = document.getElementById('empRole').value;
-    if (!n || !e) { alert('Nombre y email son requeridos'); return; }
+    if (!n || !e) { VolvixUI.toast({type:'error', message:'Nombre y email son requeridos'}); return; }
     const div = document.createElement('div');
     div.className = 'product-item';
     div.innerHTML = `<div class="info"><strong>${n}</strong> <span>${r} · ${e}</span></div>
@@ -546,5 +546,7 @@
 
   render();
 </script>
+  <script defer src="auth-helper.js"></script>
+  <script defer src="volvix-i18n-wiring.js"></script>
 </body>
 </html>

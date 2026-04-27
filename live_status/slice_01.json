@@ -1,0 +1,38 @@
+{
+  "slice": "01",
+  "scope": "POS principal navegación + tabs (salvadorex_web_v25.html)",
+  "html_file": "salvadorex_web_v25.html",
+  "api_file": "api/index.js",
+  "navigation_function": "showScreen() en línea 2653 - solo togglea visibilidad, NO dispara fetch al activar tab",
+  "endpoints_added": ["/api/credits", "/api/quotations", "/api/returns", "/api/recargas"],
+  "syntax_check": "node --check api/index.js => OK",
+  "tests": [
+    { "idx": 6,  "tab": "PIN (login)",        "status": "pass", "note": "Login funcional. /api/login existe (línea 568) y se invoca con fetch en línea 2579." },
+    { "idx": 7,  "tab": "F1 Ventas (POS)",    "status": "pass", "note": "Tab existe (data-menu=pos). /api/sales existe (líneas 742,753). fetch real en línea 2788." },
+    { "idx": 8,  "tab": "F2 Créditos",        "status": "partial", "note": "Tab existe (data-menu=credito, screen-credito 1792). NO hay fetch al activar. Endpoint /api/credits AÑADIDO como blob genérico." },
+    { "idx": 9,  "tab": "F3 Productos",       "status": "pass", "note": "Tab inventario/productos. /api/products existe (línea 690). fetch real en línea 2612 tras login." },
+    { "idx": 10, "tab": "F4 Inventario",      "status": "pass", "note": "Tab existe (data-menu=inventario). /api/inventory (1290), /api/inventory/stock, /api/inventory/locations existen." },
+    { "idx": 11, "tab": "Clientes",           "status": "partial", "note": "Tab existe (screen-clientes 1776). Endpoint /api/customers existe (línea 778) pero el tab NO hace fetch on-show; requiere wiring frontend." },
+    { "idx": 12, "tab": "Compras",            "status": "pass", "note": "Tab proveedores (placeholder 2070). /api/purchases y /api/suppliers existen vía POSTKEYS (1755)." },
+    { "idx": 13, "tab": "Configuración",      "status": "skip", "note": "UI de pestañas internas (general/negocio/impuestos/etc). Requiere validación manual del usuario." },
+    { "idx": 14, "tab": "Facturas",           "status": "pass", "note": "Tab facturacion (placeholder 2071). /api/invoices existe vía POSTKEYS (1754)." },
+    { "idx": 15, "tab": "Corte",              "status": "pass", "note": "Tab corte (1873). /api/cash/session GET/POST existe (líneas 4252,4255). Frontend usa onclick showToast hardcoded; pendiente wiring." },
+    { "idx": 16, "tab": "Reportes",           "status": "pass", "note": "Tab reportes (1833). /api/reports/daily (1310), /api/reports/sales (1317), /api/reports/inventory (1810) existen. Las cards llaman showToast hardcoded; pendiente wiring." },
+    { "idx": 17, "tab": "Dashboard",          "status": "pass", "note": "Tab dashboard (1707). /api/owner/dashboard (907), /api/metrics (1365) existen." },
+    { "idx": 18, "tab": "Apertura",           "status": "pass", "note": "Tab apertura (2010). Cubierto por /api/cash/session y /api/inventory/cash-open (POSTKEYS 1756)." },
+    { "idx": 19, "tab": "Cotizaciones",       "status": "partial", "note": "Tab placeholder (2072). Endpoint /api/quotations AÑADIDO como blob genérico." },
+    { "idx": 20, "tab": "Devoluciones",       "status": "partial", "note": "Tab placeholder (2073). Endpoint /api/returns AÑADIDO como blob genérico." },
+    { "idx": 21, "tab": "Historial (Ventas)", "status": "pass", "note": "Tab ventas (1814). /api/sales GET (línea 742) sirve historial." },
+    { "idx": 22, "tab": "Usuarios",           "status": "pass", "note": "Tab usuarios (1994). /api/owner/users GET/POST (956,963) existen." },
+    { "idx": 23, "tab": "Recargas",           "status": "partial", "note": "Tab placeholder (2074). Endpoint /api/recargas AÑADIDO como blob genérico." }
+  ],
+  "summary": {
+    "pass": 12,
+    "partial": 5,
+    "skip": 1,
+    "fail": 0,
+    "total": 18,
+    "backend_changes": "POSTKEYS extendido con 4 endpoints (credits, quotations, returns, recargas) usando el patrón generic_blobs ya existente. Sin cambios destructivos.",
+    "frontend_pending": "showScreen() no dispara fetch automático en la mayoría de tabs (clientes, corte, reportes, dashboard, apertura, historial, usuarios). Los datos se cargan estáticos o vía showToast. Requiere wiring frontend en slice posterior."
+  }
+}

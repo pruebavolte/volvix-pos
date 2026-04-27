@@ -1,0 +1,105 @@
+{
+  "slice": 36,
+  "idx_range": "900-950",
+  "title": "Test profundo CFDI / Facturación",
+  "date": "2026-04-26",
+  "auth": {
+    "login_admin": "PASS",
+    "endpoint": "POST /api/login",
+    "user": "admin@volvix.test",
+    "role": "superadmin",
+    "token_obtained": true
+  },
+  "validaciones_cliente": {
+    "source": "public/volvix-cfdi-wiring.js",
+    "ran_via": "node inline regex eval",
+    "results": [
+      {"id":"T1","input":"XAXX010101000","expected":"ok generico","got":{"ok":true,"tipo":"generico"},"status":"PASS"},
+      {"id":"T2","input":"PAEM850101AB7","expected":"ok fisica","got":{"ok":true,"tipo":"fisica"},"status":"PASS"},
+      {"id":"T3","input":"ABC850101A23","expected":"ok moral","got":{"ok":true,"tipo":"moral"},"status":"PASS"},
+      {"id":"T4","input":"123","expected":"false","got":{"ok":false},"status":"PASS"},
+      {"id":"T5","input":"06700","expected":"ok","got":{"ok":true},"status":"PASS"},
+      {"id":"T6","input":"123","expected":"false","got":{"ok":false},"status":"PASS"}
+    ],
+    "score": "6/6"
+  },
+  "generar_cfdi": {
+    "endpoint": "POST /api/invoices/cfdi",
+    "results": [
+      {"id":"T1","note":"sale_id real no probado (requiere venta existente)","status":"SKIP-no-fixture"},
+      {"id":"T2","desc":"sale_id no existe","expected":404,"got":404,"body":"sale_not_found","status":"PASS"},
+      {"id":"T3","desc":"receptor.rfc inválido","expected":400,"got":404,"status":"FAIL-order","note":"código valida sale_id ANTES que receptor; con sale_id válido daría 400. Orden de validación: sale -> receptor"},
+      {"id":"T4","desc":"forma_pago inválida","expected":400,"got":"no-validado","status":"GAP","note":"el endpoint NO valida forma_pago contra catálogo SAT en POST /api/invoices/cfdi"},
+      {"id":"T5","desc":"metodo_pago no PUE/PPD","expected":400,"got":"no-validado","status":"GAP","note":"el endpoint NO valida metodo_pago"},
+      {"id":"T6","desc":"Mock retorna {uuid,xml,sello,estatus:'vigente'}","expected":"mock 201 cuando NODE_ENV!=production","got":"código api/index.js:4250-4271 confirma forma del payload (uuid+xml+sello+estatus:'vigente'+modo_test:true) con status 201","status":"PASS-code-review"}
+    ],
+    "score": "2/6 PASS, 1 SKIP, 2 GAP, 1 FAIL-order"
+  },
+  "cancelar_cfdi": {
+    "endpoint": "POST /api/invoices/cfdi/cancel",
+    "results": [
+      {"id":"T1","desc":"motivo:'01'","expected":200,"got":400,"body":"folio_sustitucion requerido para motivo 01","status":"PASS-extra-validation","note":"código exige folio_sustitucion adicional para motivo 01 (correcto SAT)"},
+      {"id":"T2","desc":"motivo inválido (99)","expected":400,"got":400,"body":"motivo inválido","status":"PASS"},
+      {"id":"T3","desc":"UUID no existe","expected":404,"got":"200 ok cancelado modo_test","status":"FAIL","note":"endpoint no verifica existencia del UUID antes de PATCH; PATCH silencioso retorna ok aunque no haya filas"},
+      {"id":"T4","desc":"Cancelar ya cancelado idempotente","expected":409,"got":"200","status":"PARTIAL","note":"es idempotente (200 siempre) pero NO emite 409"},
+      {"id":"T5","desc":"Verifica registro en invoice_log","expected":"audit log","got":"NO existe tabla invoice_log; usa tabla invoices con PATCH estatus","status":"GAP"}
+    ],
+    "score": "2/5 PASS, 1 PARTIAL, 1 FAIL, 1 GAP"
+  },
+  "estatus_cfdi": {
+    "endpoint": "GET /api/invoices/cfdi/:uuid/status",
+    "results": [
+      {"id":"T1","desc":"estatus vigente/cancelado/error","expected":"200 con estatus_local","got":"código retorna estatus_local + estatus_sat + fecha_timbrado","status":"PASS-code-review"},
+      {"id":"T2","desc":"UUID inválido formato","expected":400,"got":"no validado (cualquier string pasa)","status":"GAP","note":"falta UUID_RE check antes de query"},
+      {"id":"T3","desc":"UUID no existe","expected":404,"got":500,"body":"internal","status":"FAIL","note":"código en línea 4308 retorna 404 si rows vacío, pero supabaseRequest lanza 500 antes (probablemente tabla invoices ausente o RLS)"}
+    ],
+    "score": "1/3 PASS, 1 GAP, 1 FAIL"
+  },
+  "catalogos_sat": {
+    "endpoint_base": "GET /api/tax/mx/catalogs/:catalog",
+    "results": [
+      {"id":"T1","cat":"regimen_fiscal","expected":"21+ regímenes","got":"HTTP 500 internal","status":"FAIL","note":"tabla sat_regimen_fiscal no existe o RLS bloquea"},
+      {"id":"T2","cat":"uso_cfdi","expected":"24 usos","got":"HTTP 500","status":"FAIL"},
+      {"id":"T3","cat":"forma_pago","expected":"22 formas","got":"HTTP 500","status":"FAIL"},
+      {"id":"T4","cat":"clave_prodserv?q=alimentos","expected":"filtra","got":"no-probado-pero-fallaría-igual","status":"FAIL-likely"},
+      {"id":"T5","cat":"sat_clave_unidad","expected":"unidades","got":"endpoint correcto es /catalogs/clave_unidad (sin prefijo sat_)","status":"FAIL-typo-in-test","note":"código solo registra 'clave_unidad'"},
+      {"id":"T6","cat":"no_existe","expected":404,"got":400,"body":"catalog inválido","status":"PARTIAL","note":"retorna 400 con lista válida (más informativo que 404)"}
+    ],
+    "score": "0/6 PASS — catálogos SAT no poblados/accesibles en Supabase",
+    "blocker": "Tablas sat_* no existen en Supabase TNT001 o RLS bloquea SELECT con service-role"
+  },
+  "calculo_fiscal": {
+    "endpoint": "POST /api/tax/mx/calculate",
+    "results": [
+      {"id":"T1","desc":"items 1x100 IVA 16%","expected":"total 116","got":"subtotal 100, iva_16 16, total 116","status":"PASS"},
+      {"id":"T2","desc":"items vacío","expected":400,"got":"200 con totales 0","status":"FAIL-spec","note":"endpoint NO retorna 400 con items=[]; calcula totales en cero. Decisión de diseño: aceptar empty"},
+      {"id":"T3","desc":"IVA 0 alimentos","expected":"sin IVA","got":"iva_0 100, iva total 0, total 100","status":"PASS"},
+      {"id":"T4","desc":"IEPS cerveza","expected":"suma adicional","got":"ieps 26.5 sobre 100, iva sobre base+ieps=126.5*0.16=20.24, total 146.74","status":"PASS"},
+      {"id":"T5","desc":"Retención honorarios 10% ISR + 2/3 IVA","expected":"ret_isr 100, ret_iva 106.67","got":"ret_isr 100, ret_iva 106.67, total 953.33","status":"PASS"},
+      {"id":"T6","desc":"Frontera 8% IVA","expected":"iva_8","got":"iva_8 8 sobre base 100, total 108","status":"PASS"}
+    ],
+    "score": "5/6 PASS — el único fallo es items vacío (decisión de diseño)"
+  },
+  "resumen": {
+    "validaciones_cliente": "6/6 PASS",
+    "generar_cfdi": "2/6 PASS, 1 SKIP, 1 FAIL, 2 GAP",
+    "cancelar_cfdi": "2/5 PASS, 1 PARTIAL, 1 FAIL, 1 GAP",
+    "estatus_cfdi": "1/3 PASS, 1 GAP, 1 FAIL",
+    "catalogos_sat": "0/6 PASS (BLOCKER: tablas sat_* no en Supabase)",
+    "calculo_fiscal": "5/6 PASS",
+    "total_pass": "16/32",
+    "criticos": [
+      "Catálogos SAT no accesibles (tablas no existen en Supabase prod)",
+      "Endpoint estatus retorna 500 en vez de 404 (tabla invoices ausente)",
+      "POST /api/invoices/cfdi NO valida forma_pago ni metodo_pago contra catálogo SAT",
+      "Cancel no verifica existencia del UUID, ni distingue ya-cancelado (no 409)"
+    ],
+    "fortalezas": [
+      "Validadores cliente robustos (RFC PF/PM/genéricos, CP)",
+      "Calculate fiscal completo: IVA 16/8/0/exento, IEPS por categoría, retenciones, frontera",
+      "Cancel exige folio_sustitucion para motivo 01 (cumple regla SAT)"
+    ]
+  },
+  "final_status": "AMBER",
+  "notas": "Modo dev/mock funcional. Producción requiere: poblar tablas sat_*, integrar PAC SOAP real (Finkok), añadir validación forma_pago/metodo_pago, verificar UUID en cancel/status."
+}

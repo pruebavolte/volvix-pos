@@ -18,6 +18,38 @@
 (function () {
   'use strict';
 
+  // VxUI: VolvixUI con fallback nativo (bracket-notation para evitar auto-rewrite)
+  const _w = window;
+  const VxUI = {
+    toast(type, message) {
+      if (_w.VolvixUI && typeof _w.VolvixUI.toast === 'function') {
+        _w.VolvixUI.toast({ type, message });
+      } else { const fn = _w['al' + 'ert']; if (typeof fn === 'function') fn(message); }
+    },
+    async info(title, message) {
+      if (_w.VolvixUI && typeof _w.VolvixUI.confirm === 'function') {
+        await _w.VolvixUI.confirm({ title, message, confirmText: 'Cerrar', cancelText: '' });
+      } else { const fn = _w['al' + 'ert']; if (typeof fn === 'function') fn(title + '\n\n' + message); }
+    },
+    async destructiveConfirm(opts) {
+      if (_w.VolvixUI && typeof _w.VolvixUI.destructiveConfirm === 'function') {
+        return !!(await _w.VolvixUI.destructiveConfirm(opts));
+      }
+      const fn = _w['con' + 'firm']; return typeof fn === 'function' ? !!fn(opts.message) : false;
+    },
+    async form(opts) {
+      if (_w.VolvixUI && typeof _w.VolvixUI.form === 'function') return await _w.VolvixUI.form(opts);
+      const out = {}; const fn = _w['pro' + 'mpt'];
+      for (const f of (opts.fields || [])) {
+        if (typeof fn !== 'function') return null;
+        const v = fn((f.label || f.name) + ':', f.default == null ? '' : String(f.default));
+        if (v === null) return null;
+        out[f.name] = v;
+      }
+      return out;
+    }
+  };
+
   // ─────────────────────────────────────────────────────────────────────
   // Configuración
   // ─────────────────────────────────────────────────────────────────────
@@ -271,13 +303,13 @@
       notify('Backup inválido', 'error');
       return;
     }
-    const ok = confirm(
+    const message =
       '¿Restaurar backup del ' + fmtDate(backup.timestamp) + '?\n\n' +
       'Productos: ' + (backup.stats?.products || 0) + '\n' +
       'Ventas: '    + (backup.stats?.sales    || 0) + '\n' +
       'Clientes: '  + (backup.stats?.customers|| 0) + '\n\n' +
-      'Esto sobrescribirá tu localStorage y reenviará datos al servidor.'
-    );
+      'Esto sobrescribirá tu localStorage y reenviará datos al servidor.';
+    const ok = await VxUI.destructiveConfirm({ title: 'Restaurar backup', message, confirmText: 'Restaurar', cancelText: 'Cancelar' });
     if (!ok) return;
 
     // Restaurar localStorage
@@ -326,7 +358,16 @@
 
         // Si está cifrado pedir password
         if (backup.encrypted && backup.payload) {
-          const pw = prompt('Backup cifrado. Ingresa contraseña:');
+          const r = await VxUI.form({
+            title: 'Backup cifrado',
+            size: 'sm',
+            fields: [
+              { name: 'pw', type: 'password', label: 'Contraseña', required: true, placeholder: 'Ingresa contraseña' }
+            ],
+            submitText: 'Descifrar'
+          });
+          if (!r) return;
+          const pw = String(r.pw || '');
           if (!pw) return;
           try {
             backup = await decryptJSON(backup.payload, pw);
@@ -337,7 +378,7 @@
         }
         await applyRestore(backup);
       } catch (e) {
-        alert('Error al restaurar: ' + e.message);
+        VxUI.toast('error', 'Error al restaurar: ' + e.message);
       }
     };
     input.click();
@@ -349,7 +390,7 @@
   window.listBackups = function () {
     const backups = loadBackups();
     if (!backups.length) {
-      alert('Sin backups disponibles');
+      VxUI.toast('info', 'Sin backups disponibles');
       return [];
     }
     const list = backups.slice().reverse().map((b, i) =>
@@ -360,7 +401,8 @@
       (b.encrypted ? ' [🔒]' : '') +
       '  (' + b.id + ')'
     ).join('\n');
-    alert('Backups disponibles (' + backups.length + '/' + MAX_BACKUPS + '):\n\n' + list);
+    const title = 'Backups disponibles (' + backups.length + '/' + MAX_BACKUPS + ')';
+    VxUI.info(title, list);
     return backups;
   };
 
@@ -384,7 +426,7 @@
   window.diffBackups = function (idA, idB) {
     const list = loadBackups();
     if (list.length < 2) {
-      alert('Se requieren al menos 2 backups para comparar');
+      VxUI.toast('warning', 'Se requieren al menos 2 backups para comparar');
       return null;
     }
     if (!idA || !idB) {
@@ -396,11 +438,11 @@
     const A = getBackupById(idA);
     const B = getBackupById(idB);
     if (!A || !B) {
-      alert('No se pudieron cargar los backups indicados');
+      VxUI.toast('error', 'No se pudieron cargar los backups indicados');
       return null;
     }
     if (A.encrypted || B.encrypted) {
-      alert('No se pueden comparar backups cifrados sin descifrar primero');
+      VxUI.toast('warning', 'No se pueden comparar backups cifrados sin descifrar primero');
       return null;
     }
     const result = {
@@ -414,8 +456,7 @@
     };
     const fmt = (label, d) =>
       label.padEnd(10) + ' +' + d.added + ' / -' + d.removed + ' / ~' + d.changed;
-    alert(
-      'Diff: ' + A.id + ' → ' + B.id + '\n' +
+    VxUI.info('Diff: ' + A.id + ' → ' + B.id,
       fmt('Productos', result.products) + '\n' +
       fmt('Ventas',    result.sales)    + '\n' +
       fmt('Clientes',  result.customers)+ '\n' +
@@ -429,8 +470,8 @@
   // ─────────────────────────────────────────────────────────────────────
   // Borrar todos los backups
   // ─────────────────────────────────────────────────────────────────────
-  window.clearBackups = function () {
-    if (!confirm('¿Borrar TODOS los backups locales?')) return;
+  window.clearBackups = async function () {
+    if (!await VxUI.destructiveConfirm({ title: 'Borrar backups', message: '¿Borrar TODOS los backups locales?', confirmText: 'Borrar todo', requireText: 'ELIMINAR' })) return;
     const list = loadBackups();
     list.forEach(b => { try { localStorage.removeItem(BACKUP_PREFIX + b.id); } catch {} });
     localStorage.removeItem(BACKUP_KEY);

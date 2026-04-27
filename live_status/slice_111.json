@@ -1,0 +1,40 @@
+{
+  "slice": 111,
+  "range": "2220-2240",
+  "topic": "geofence_auto_checkin",
+  "ts": "2026-04-26",
+  "status": "implemented",
+  "files_modified": [
+    "api/index.js",
+    "volvix-geofence-wiring.js"
+  ],
+  "files_created": [
+    "db/R17_GEOFENCE.sql",
+    "R17_GEOFENCE.md"
+  ],
+  "api_endpoints": {
+    "GET /api/geofence/check": "auth - lat,lng query - returns {nearest,distance_m,inside}",
+    "POST /api/geofence/checkin": "auth - body {lat,lng,accuracy} - inserts cashier_checkins if dist<=100m"
+  },
+  "sql": {
+    "table": "cashier_checkins(id,user_id,branch_id,lat,lng,distance_m,accuracy_m,ts)",
+    "indexes": ["user_ts_desc", "branch_ts_desc"],
+    "function": "haversine_distance(lat1,lng1,lat2,lng2) returns double precision",
+    "view": "cashier_last_checkin",
+    "rls": "self select+insert (auth.uid()=user_id)",
+    "alter": "pos_branches add lat,lng (idempotent)"
+  },
+  "client": {
+    "module": "GeofenceAPI v1.1.0",
+    "added": ["startAutoCheckin", "stopAutoCheckin", "autoCheckinOnce", "getCurrentBranch"],
+    "interval_ms": 300000,
+    "auto_start_event": "volvix:login role=cashier|cajero",
+    "header_chip": "#volvix-current-branch"
+  },
+  "fence_radius_m": 100,
+  "haversine_dual": "JS in api/index.js + SQL function (graceful fallback)",
+  "tolerates_missing_table": true,
+  "auth": "requireAuth - user_id from JWT not body",
+  "deploy_required": true,
+  "notes": "Wiring extiende modulo existente (no reemplaza). API tolera 42P01."
+}

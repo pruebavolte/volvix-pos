@@ -1,0 +1,24 @@
+{
+  "slice": 46,
+  "title": "Cablear botones del Owner Panel a Supabase real",
+  "file": "volvix-owner-wiring.js",
+  "range": "540-580",
+  "buttons_wired": [
+    { "idx": 540, "id": "ownerCreateTenant", "label": "+ Nuevo Tenant", "action": "ownerCreateTenant()", "endpoint": "POST /api/owner/tenants", "before": "no existía / sólo localStorage en ctrl*", "after": "POST a Supabase via Volvix.auth.fetch + loadTenants" },
+    { "idx": 545, "id": "ownerEditTenant", "label": "✏️ Editar tenant", "action": "ownerEditTenant(id)", "endpoint": "PATCH /api/owner/tenants/:id", "before": "PATCH /api/tenants/:id (ruta legacy)", "after": "PATCH /api/owner/tenants/:id con auth JWT" },
+    { "idx": 550, "id": "ownerToggleTenant", "label": "⏸️ Pausar / ▶️ Activar", "action": "ownerToggleTenant(id, active)", "endpoint": "PATCH /api/owner/tenants/:id", "before": "saveTenantState→localStorage", "after": "PATCH is_active a Supabase" },
+    { "idx": 555, "id": "ownerChangePlan", "label": "💳 Cambiar plan", "action": "ownerChangePlan(id)", "endpoint": "PATCH /api/owner/tenants/:id", "before": "ctrlUpdatePlan→localStorage", "after": "PATCH plan via API + override de ctrlUpdatePlan" },
+    { "idx": 560, "id": "ownerInviteUser", "label": "+ Invitar usuario", "action": "ownerInviteUser()", "endpoint": "POST /api/owner/users", "before": "prompt+localStorage", "after": "POST a Supabase + loadUsers" },
+    { "idx": 565, "id": "ownerEditUserPermissions", "label": "🔐 Permisos", "action": "ownerEditUserPermissions(id)", "endpoint": "PATCH /api/owner/users/:id", "before": "no existía", "after": "PATCH role real" },
+    { "idx": 570, "id": "ownerRefreshMetrics", "label": "🔄 Refrescar métricas", "action": "ownerRefreshMetrics()", "endpoint": "GET /api/owner/dashboard + GET /api/metrics", "before": "ownerRefreshAll sin métricas live", "after": "loadDashboard + loadLiveMetrics" },
+    { "idx": 575, "id": "ownerExportReport", "label": "📥 Export reporte", "action": "ownerExportReport(type)", "endpoint": "GET /api/reports/:type (cache fallback)", "before": "ownerExportData usaba sólo cache", "after": "GET /api/reports/* con CSV download" },
+    { "idx": 578, "id": "ownerApplyFilters", "label": "Aplicar filtros", "action": "ownerApplyFilters(form)", "endpoint": "GET /api/owner/tenants?... + /api/owner/users?...", "before": "no existía", "after": "Querystring real al API" },
+    { "idx": 580, "id": "live-metrics-widget", "label": "Métricas en vivo (30s)", "action": "setInterval(loadLiveMetrics, 30000)", "endpoint": "GET /api/metrics", "before": "no existía", "after": "Refresh automático cada 30s en data-live-metric" }
+  ],
+  "files_modified": ["volvix-owner-wiring.js"],
+  "lines_added_approx": 180,
+  "api_touched": false,
+  "node_check": "passed (api/index.js + volvix-owner-wiring.js)",
+  "deploy": "skipped (sin acceso a vercel CLI desde el sandbox)",
+  "report": "R15_OWNER_WIRED.md"
+}

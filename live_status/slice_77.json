@@ -1,0 +1,91 @@
+{
+  "slice_id": 77,
+  "topic": "RLS audit — tenant isolation",
+  "idx_range": [1880, 1900],
+  "generated_at": "2026-04-26",
+  "files_audited": [
+    "db/R13_RLS_POLICIES.sql",
+    "db/R14_ALL_COMBINED.sql"
+  ],
+  "helpers": {
+    "schema": "app",
+    "functions": [
+      "app.current_tenant_id() RETURNS uuid — reads JWT claim or app_metadata.tenant_id",
+      "app.current_role() RETURNS text",
+      "app.is_admin() / app.is_owner() / app.is_cajero()",
+      "app.same_tenant(uuid) RETURNS boolean"
+    ],
+    "verdict": "OK — STABLE SQL, planner-inlinable, NULL-safe via NULLIF + COALESCE"
+  },
+  "r13_baseline": {
+    "tables_covered": [
+      "tenants", "users", "products", "customers",
+      "sales", "sale_items", "payments",
+      "inventory_movements", "cash_register", "reports"
+    ],
+    "every_sensitive_table_has_rls": true,
+    "every_policy_filters_by_tenant_and_role": true,
+    "using_true_count": 0,
+    "verdict": "CLEAN"
+  },
+  "r14_extensions_audit": {
+    "create_policy_total": 64,
+    "drop_policy_if_exists_total": 64,
+    "using_true_findings": [
+      {
+        "id": "LEAK-1",
+        "table": "public.payments",
+        "policy": "payments_read_authenticated",
+        "line": 749,
+        "definition": "FOR SELECT TO authenticated USING (true)",
+        "severity": "CRITICAL",
+        "impact": "Any authenticated user reads every payment row across all tenants. Conflicts with R13 payments_cajero_select / payments_owner_all which are tenant-scoped — this permissive policy OR-overrides them.",
+        "fix": "R16_RLS_HARDENING.sql replaces with payments_admin_read + payments_owner_read + payments_cajero_read, all tenant-scoped"
+      },
+      {
+        "id": "LEAK-2",
+        "table": "public.error_log",
+        "policy": "error_log_admin_read",
+        "line": 1441,
+        "definition": "FOR SELECT TO authenticated USING (true)",
+        "severity": "HIGH",
+        "impact": "Cashier in tenant A reads error rows tagged tenant_id=B (PII in meta JSONB, business intel)",
+        "fix": "R16_RLS_HARDENING.sql restricts to is_admin() OR (is_owner() AND tenant_id = current_tenant_id()::text)"
+      },
+      {
+        "id": "OK-1",
+        "table": "public.currencies / public.fx_rates",
+        "policy": "currencies_read / fx_rates_read",
+        "line": "1858, 1861",
+        "definition": "FOR SELECT USING (true)",
+        "severity": "NONE",
+        "impact": "Reference data, intentionally global (no tenant_id column). No leak.",
+        "fix": "none required"
+      },
+      {
+        "id": "OK-2",
+        "table": "public.payments / public.error_log (service_role)",
+        "policy": "payments_write_service / error_log_service_all",
+        "definition": "FOR ALL TO service_role USING (true) WITH CHECK (true)",
+        "severity": "NONE",
+        "impact": "service_role bypasses RLS at the engine level — clause is decorative.",
+        "fix": "none required"
+      }
+    ]
+  },
+  "remediation": {
+    "file": "db/R16_RLS_HARDENING.sql",
+    "actions": [
+      "DROP payments_read_authenticated; create 3 tenant-scoped read policies (admin/owner/cajero)",
+      "Rewrite error_log_admin_read to is_admin() OR same-tenant owner; cashier default-deny",
+      "Sanity-check helpers exist + final assertion that no USING(true) policies remain on the patched tables"
+    ],
+    "idempotent": true
+  },
+  "summary": {
+    "leaks_found": 2,
+    "leaks_fixed": 2,
+    "false_positives": 2,
+    "overall_verdict": "PATCHED_BY_R16"
+  }
+}

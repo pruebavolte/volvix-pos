@@ -63,9 +63,25 @@
   // SUPPORT - Crear ticket con IA
   // =========================================================
   window.aiCreateSupportTicket = async function() {
-    const title = prompt('¿Cuál es tu problema? (título corto)');
-    if (!title) return;
-    const description = prompt('Describe el problema:') || '';
+    const ui = window.VolvixUI;
+    let title, description;
+    if (ui && typeof ui.form === 'function') {
+      const res = await Promise.resolve(ui.form({
+        title: 'Nuevo ticket de soporte',
+        fields: [
+          { name: 'title', label: 'Título', type: 'text', required: true, placeholder: 'Resume tu problema' },
+          { name: 'description', label: 'Descripción', type: 'textarea', rows: 5 }
+        ],
+        submitText: 'Crear'
+      })).catch(() => null);
+      if (!res || !res.title) return;
+      title = res.title;
+      description = res.description || '';
+    } else {
+      title = prompt('¿Cuál es tu problema? (título corto)');
+      if (!title) return;
+      description = prompt('Describe el problema:') || '';
+    }
 
     try {
       const result = await apiPost('/api/tickets', {
@@ -74,13 +90,13 @@
       });
 
       if (result.ticket?.status === 'solved') {
-        alert(`✅ IA resolvió tu problema:\n\n${result.ticket.solution}`);
+        VolvixUI.toast({type:'success', message:`✅ IA resolvió tu problema:\n\n${result.ticket.solution}`});
       } else {
-        alert(`📋 Ticket creado: ${result.ticket?.id}\n\nUn agente humano lo atenderá pronto.`);
+        VolvixUI.toast({type:'success', message:`📋 Ticket creado: ${result.ticket?.id}\n\nUn agente humano lo atenderá pronto.`});
       }
       return result;
     } catch (e) {
-      alert('Error: ' + e.message);
+      VolvixUI.toast({type:'error', message:'Error: ' + e.message});
     }
   };
 
@@ -88,8 +104,22 @@
   // ENGINE - Solicitar feature
   // =========================================================
   window.aiRequestFeature = async function(text) {
-    const request = text || prompt('¿Qué nueva feature necesitas?');
-    if (!request) return;
+    let request = text;
+    if (!request) {
+      const ui = window.VolvixUI;
+      if (ui && typeof ui.form === 'function') {
+        const res = await Promise.resolve(ui.form({
+          title: 'Solicitar feature',
+          fields: [{ name: 'request', label: '¿Qué feature necesitas?', type: 'textarea', rows: 6, required: true }],
+          submitText: 'Enviar'
+        })).catch(() => null);
+        if (!res || !res.request) return;
+        request = res.request;
+      } else {
+        request = prompt('¿Qué nueva feature necesitas?');
+        if (!request) return;
+      }
+    }
 
     try {
       const result = await apiPost('/api/features/request', {
@@ -98,10 +128,10 @@
       });
 
       const msg = `🤖 IA decidió: ${result.decision}\n\nFeature: ${result.feature?.name}\nMódulo: ${result.feature?.module}\nRazón: ${result.feature?.reason}`;
-      alert(msg);
+      VolvixUI.toast({type:'info', message:msg});
       return result;
     } catch (e) {
-      alert('Error: ' + e.message);
+      VolvixUI.toast({type:'error', message:'Error: ' + e.message});
     }
   };
 
@@ -109,16 +139,23 @@
   // MARKETPLACE - Activar feature
   // =========================================================
   window.marketplaceActivate = async function(featureId) {
-    if (!confirm('¿Activar esta feature?')) return;
+    const ui = window.VolvixUI;
+    let ok;
+    if (ui && typeof ui.confirm === 'function') {
+      ok = await Promise.resolve(ui.confirm({ title: 'Activar feature', message: '¿Activar esta feature?' })).catch(() => false);
+    } else {
+      ok = confirm('¿Activar esta feature?');
+    }
+    if (!ok) return;
     try {
       const result = await apiPost('/api/features/activate', {
         featureId,
         tenantId: session?.tenant_id || 'TNT001'
       });
-      alert('✓ ' + result.message);
+      VolvixUI.toast({type:'success', message:'✓ ' + result.message});
       return result;
     } catch (e) {
-      alert('Error: ' + e.message);
+      VolvixUI.toast({type:'error', message:'Error: ' + e.message});
     }
   };
 

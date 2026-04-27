@@ -191,10 +191,29 @@
     }
 
     _promptAdd() {
+      const today = fmtDate(new Date());
+      const defEnd = fmtDate(addDays(today, 3));
+      const self = this;
+      const ui = window.VolvixUI;
+      if (ui && typeof ui.form === 'function') {
+        Promise.resolve(ui.form({
+          title: 'Nueva tarea',
+          fields: [
+            { name: 'name', label: 'Nombre', type: 'text', default: 'New Task', required: true },
+            { name: 'start', label: 'Inicio', type: 'date', default: today },
+            { name: 'end', label: 'Fin', type: 'date', default: defEnd },
+            { name: 'assignee', label: 'Responsable', type: 'autocomplete', source: 'users', default: '' }
+          ],
+          submitText: 'Crear'
+        })).then(res => {
+          if (!res || !res.name) return;
+          self.addTask({ name: res.name, start: res.start || today, end: res.end || defEnd, progress: 0, assignee: res.assignee || '' });
+        }).catch(()=>{});
+        return;
+      }
       const name = prompt('Task name:', 'New Task');
       if (!name) return;
-      const today = fmtDate(new Date());
-      this.addTask({ name, start: today, end: fmtDate(addDays(today, 3)), progress: 0 });
+      this.addTask({ name, start: today, end: defEnd, progress: 0 });
     }
 
     _computeRange() {
@@ -243,6 +262,28 @@
         r.title = `${t.name}\n${t.start} → ${t.end}\n${t.progress}%`;
         r.addEventListener('click', () => this.selectTask(t.id));
         r.addEventListener('dblclick', () => {
+          const self = this;
+          const ui = window.VolvixUI;
+          if (ui && typeof ui.form === 'function') {
+            Promise.resolve(ui.form({
+              title: 'Editar tarea',
+              fields: [
+                { name: 'name', label: 'Nombre', type: 'text', default: t.name, required: true },
+                { name: 'start', label: 'Inicio', type: 'date', default: t.start },
+                { name: 'end', label: 'Fin', type: 'date', default: t.end },
+                { name: 'assignee', label: 'Responsable', type: 'autocomplete', source: 'users', default: t.assignee || '' }
+              ],
+              submitText: 'Guardar'
+            })).then(res => {
+              if (!res) return;
+              if (res.name) t.name = res.name;
+              if (res.start) t.start = res.start;
+              if (res.end) t.end = res.end;
+              if (res.assignee !== undefined) t.assignee = res.assignee;
+              self._render(); self._fireChange();
+            }).catch(()=>{});
+            return;
+          }
           const nn = prompt('Rename:', t.name);
           if (nn) { t.name = nn; this._render(); this._fireChange(); }
         });

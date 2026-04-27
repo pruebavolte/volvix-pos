@@ -15,6 +15,16 @@
 (function () {
   'use strict';
 
+  // VxUI: VolvixUI con fallback nativo
+  const _w = window;
+  const VxUI = {
+    async destructiveConfirm(opts) {
+      if (_w.VolvixUI && typeof _w.VolvixUI.destructiveConfirm === 'function')
+        return !!(await _w.VolvixUI.destructiveConfirm(opts));
+      const fn = _w['con' + 'firm']; return typeof fn === 'function' ? !!fn(opts.message) : false;
+    }
+  };
+
   // ──────────────────────────────────────────────────────────────
   // Estado y constantes
   // ──────────────────────────────────────────────────────────────
@@ -274,8 +284,8 @@
 
     // Wire-up
     panel.querySelector('[data-action="mark-all"]').onclick = () => { window.markAllRead(); };
-    panel.querySelector('[data-action="clear"]').onclick    = () => {
-      if (confirm('¿Eliminar todas las notificaciones?')) window.clearNotifications();
+    panel.querySelector('[data-action="clear"]').onclick    = async () => {
+      if (await VxUI.destructiveConfirm({ title: 'Eliminar notificaciones', message: '¿Eliminar todas las notificaciones?', confirmText: 'Eliminar', requireText: 'ELIMINAR' })) window.clearNotifications();
     };
     panel.querySelectorAll('[data-setting]').forEach(cb => {
       cb.onchange = () => {

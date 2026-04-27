@@ -945,7 +945,8 @@ const handlers = {
     try {
       // R22 FIX 4: rate-limit dual (IP + email) + backoff + lockout
       const ip = clientIp(req);
-      if (!rateLimit('login:ip:' + ip, 20, 15 * 60 * 1000)) {
+      // R26 Bug 3: subir de 20 → 60 intentos/15min por IP (oficinas con NAT)
+      if (!rateLimit('login:ip:' + ip, 60, 15 * 60 * 1000)) {
         return send429(res, 60000, 'Demasiados intentos, intenta más tarde');
       }
 
@@ -955,8 +956,8 @@ const handlers = {
 
       if (!email || !password) return sendJSON(res, { error: 'Email y contraseña requeridos' }, 400);
 
-      // R22 FIX 4: rate-limit por email 5/15min
-      if (!rateLimit('login:email:' + String(email).toLowerCase(), 5, 15 * 60 * 1000)) {
+      // R22 FIX 4: rate-limit por email; R26 Bug 3: 5 → 15/15min
+      if (!rateLimit('login:email:' + String(email).toLowerCase(), 15, 15 * 60 * 1000)) {
         return send429(res, 60000, 'Demasiados intentos para este usuario');
       }
 

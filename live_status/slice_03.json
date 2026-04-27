@@ -1,0 +1,32 @@
+{
+  "slice": "03",
+  "title": "Flujo completo de venta (tests 31-40)",
+  "deployed_url": "https://volvix-pos.vercel.app",
+  "deploy_id": "dpl_G2hgKzJDwpbFGY3NX7F4kJDCdqyE",
+  "fix_applied": "api/index.js enforcePlanLimits ahora parsea JWT/API-Key cuando req.user no existe (antes daba 401 en POST /api/sales)",
+  "results": [
+    {"idx":31,"name":"agregar al carrito","status":"pass","note":"state.cart.push wired en multipos/salvadorex (linea 1742, 1741)"},
+    {"idx":32,"name":"cantidad +/-","status":"pass","note":"qty++ y qty-- presentes (lineas 1742,1749) con remove si qty<=0"},
+    {"idx":33,"name":"quitar linea","status":"pass","note":"filter wired linea 1750"},
+    {"idx":34,"name":"descuento","status":"skip","note":"requiere navegador - logica frontend solamente"},
+    {"idx":35,"name":"cobrar efectivo","status":"pass","note":"POST /api/sales 200, id=2dc7beb6-ba6d-4561-b111-d0344d976dfc, total 150.50"},
+    {"idx":36,"name":"cobrar tarjeta (Stripe)","status":"partial","note":"POST /api/sales con payment_method=tarjeta OK 200 (id=fbe835fe). /api/payments/stripe/intent retorna 503 STRIPE_SECRET_KEY no configurada en Vercel - requiere env var"},
+    {"idx":37,"name":"cobrar mixto","status":"pass","note":"POST /api/sales payment_method=mixto OK 200 (id=0b5f1e13)"},
+    {"idx":38,"name":"imprimir ticket","status":"skip","note":"requiere navegador"},
+    {"idx":39,"name":"guardar venta","status":"pass","note":"GET /api/sales lista incluye la venta creada (4 ventas, found:true)"},
+    {"idx":40,"name":"cancelar venta","status":"skip","note":"requiere navegador (no hay endpoint DELETE /api/sales)"}
+  ],
+  "summary": {"pass":6,"partial":1,"skip":3,"fail":0},
+  "endpoints_verified": [
+    "POST /api/sales -> 200 OK con id + persistencia",
+    "GET /api/sales -> 200 OK lista correcta",
+    "POST /api/payments/stripe/intent -> 503 (falta STRIPE_SECRET_KEY env)"
+  ],
+  "bugs_found_and_fixed": [
+    "enforcePlanLimits envolvia el handler por FUERA de requireAuth y leia req.user?.tenant_id antes de que requireAuth lo poblara, retornando 401 en TODOS los POST /api/sales. Arreglado parseando auth (X-API-Key o Bearer JWT) dentro de enforcePlanLimits cuando req.user no existe."
+  ],
+  "pending": [
+    "Configurar STRIPE_SECRET_KEY en Vercel para test 36 completo",
+    "Ningun endpoint /api/sale_items: items van inline en POST /api/sales (diseno aceptable)"
+  ]
+}

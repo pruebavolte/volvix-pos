@@ -1,614 +1,319 @@
-/**
- * volvix-printer-wiring.js
- * Volvix POS - Printer Integration Module
- *
- * Soporta:
- *  - ESC/POS thermal printers (USB / Bluetooth / Serial)
- *  - Web USB API
- *  - Web Bluetooth API
- *  - Web Serial API (fallback)
- *  - window.print() con CSS 80mm como ultimo recurso
- *
- * API publica: window.PrinterAPI
- *   PrinterAPI.connect(transport)
- *   PrinterAPI.disconnect()
- *   PrinterAPI.printTicket(ticketData)
- *   PrinterAPI.printBarcode(code, type)
- *   PrinterAPI.printQR(data, size)
- *   PrinterAPI.openCashDrawer()
- *   PrinterAPI.cut()
- *   PrinterAPI.status()
+/* volvix-printer-wiring.js — R14 Thermal Receipt Printer drivers
+ * ESC/POS + Bluetooth (Web Bluetooth) + USB (WebUSB) + Network (proxy) + window.print fallback
+ * Compatible: Epson TM-T20/T82/T88, Star TSP143/TSP100, Citizen CT-S310, Bixolon, Xprinter
  */
 (function (global) {
-    'use strict';
+  'use strict';
+  const Volvix = global.Volvix = global.Volvix || {};
+  Volvix.printer = Volvix.printer || {};
 
-    // ============================================================
-    // ESC/POS COMMAND CONSTANTS
-    // ============================================================
-    const ESC = 0x1B;
-    const GS  = 0x1D;
-    const LF  = 0x0A;
-    const FS  = 0x1C;
-    const DLE = 0x10;
-    const EOT = 0x04;
+  // ---------- ESC/POS byte commands ----------
+  const ESC = 0x1b, GS = 0x1d, LF = 0x0a;
+  const CMD = {
+    INIT:        [ESC, 0x40],
+    LF:          [LF],
+    CUT_FULL:    [GS, 0x56, 0x00],
+    CUT_PARTIAL: [GS, 0x56, 0x01],
+    ALIGN_L:     [ESC, 0x61, 0x00],
+    ALIGN_C:     [ESC, 0x61, 0x01],
+    ALIGN_R:     [ESC, 0x61, 0x02],
+    BOLD_ON:     [ESC, 0x45, 0x01],
+    BOLD_OFF:    [ESC, 0x45, 0x00],
+    FONT_A:      [ESC, 0x4d, 0x00],
+    FONT_B:      [ESC, 0x4d, 0x01],
+    SIZE_NORMAL: [GS, 0x21, 0x00],
+    SIZE_DOUBLE: [GS, 0x21, 0x11],
+    DRAWER_KICK: [ESC, 0x70, 0x00, 0x19, 0xfa]
+  };
 
-    const CMD = {
-        INIT:           [ESC, 0x40],
-        LF:             [LF],
-        CUT_FULL:       [GS, 0x56, 0x00],
-        CUT_PARTIAL:    [GS, 0x56, 0x01],
-        CUT_FEED:       [GS, 0x56, 0x42, 0x03],
-        BOLD_ON:        [ESC, 0x45, 0x01],
-        BOLD_OFF:       [ESC, 0x45, 0x00],
-        UNDERLINE_ON:   [ESC, 0x2D, 0x01],
-        UNDERLINE_OFF:  [ESC, 0x2D, 0x00],
-        ALIGN_LEFT:     [ESC, 0x61, 0x00],
-        ALIGN_CENTER:   [ESC, 0x61, 0x01],
-        ALIGN_RIGHT:    [ESC, 0x61, 0x02],
-        SIZE_NORMAL:    [GS, 0x21, 0x00],
-        SIZE_DOUBLE_H:  [GS, 0x21, 0x01],
-        SIZE_DOUBLE_W:  [GS, 0x21, 0x10],
-        SIZE_DOUBLE:    [GS, 0x21, 0x11],
-        SIZE_TRIPLE:    [GS, 0x21, 0x22],
-        FONT_A:         [ESC, 0x4D, 0x00],
-        FONT_B:         [ESC, 0x4D, 0x01],
-        DRAWER_PIN2:    [ESC, 0x70, 0x00, 0x19, 0xFA],
-        DRAWER_PIN5:    [ESC, 0x70, 0x01, 0x19, 0xFA],
-        STATUS:         [DLE, EOT, 0x01],
-        BEEP:           [ESC, 0x42, 0x03, 0x03],
-        CHARSET_LATIN:  [ESC, 0x74, 0x10] // PC858 Euro
-    };
-
-    const BARCODE_TYPES = {
-        UPC_A:   65,
-        UPC_E:   66,
-        EAN13:   67,
-        EAN8:    68,
-        CODE39:  69,
-        ITF:     70,
-        CODABAR: 71,
-        CODE93:  72,
-        CODE128: 73
-    };
-
-    // ============================================================
-    // STATE
-    // ============================================================
-    const state = {
-        transport: null,        // 'usb' | 'bluetooth' | 'serial' | 'browser'
-        device: null,
-        characteristic: null,   // BLE write characteristic
-        endpoint: null,         // USB out endpoint
-        port: null,             // Serial port
-        writer: null,
-        connected: false,
-        paperWidth: 48,         // chars per line (80mm = 48, 58mm = 32)
-        encoding: 'cp858',
-        listeners: []
-    };
-
-    // ============================================================
-    // UTILITIES
-    // ============================================================
-    function emit(event, data) {
-        state.listeners.forEach(fn => {
-            try { fn(event, data); } catch (e) { console.warn('[Printer] listener err', e); }
-        });
-    }
-
-    function bytes(...parts) {
-        const arr = [];
-        for (const p of parts) {
-            if (Array.isArray(p)) arr.push(...p);
-            else if (typeof p === 'number') arr.push(p & 0xFF);
-            else if (typeof p === 'string') {
-                for (let i = 0; i < p.length; i++) arr.push(p.charCodeAt(i) & 0xFF);
-            } else if (p instanceof Uint8Array) arr.push(...p);
-        }
-        return new Uint8Array(arr);
-    }
-
-    function pad(str, len, align = 'left', char = ' ') {
-        str = String(str ?? '');
-        if (str.length >= len) return str.slice(0, len);
-        const diff = len - str.length;
-        if (align === 'right') return char.repeat(diff) + str;
-        if (align === 'center') {
-            const l = Math.floor(diff / 2);
-            return char.repeat(l) + str + char.repeat(diff - l);
-        }
-        return str + char.repeat(diff);
-    }
-
-    function line(char = '-') { return char.repeat(state.paperWidth); }
-
-    function row(left, right) {
-        const space = state.paperWidth - left.length - right.length;
-        if (space < 1) return left + ' ' + right;
-        return left + ' '.repeat(space) + right;
-    }
-
-    function money(n, currency = '$') {
-        const v = Number(n || 0).toFixed(2);
-        return `${currency}${v}`;
-    }
-
-    // ============================================================
-    // TRANSPORT: WEB USB
-    // ============================================================
-    async function connectUSB() {
-        if (!navigator.usb) throw new Error('Web USB no soportado');
-        const filters = [
-            { vendorId: 0x04b8 }, // Epson
-            { vendorId: 0x0519 }, // Star
-            { vendorId: 0x0fe6 }, // ICS
-            { vendorId: 0x154f }, // Citizen
-            { vendorId: 0x1fc9 }, // NXP
-            { vendorId: 0x0416 }, // Winbond
-            { vendorId: 0x28e9 }  // Generic
-        ];
-        const device = await navigator.usb.requestDevice({ filters });
-        await device.open();
-        if (device.configuration === null) await device.selectConfiguration(1);
-        const iface = device.configuration.interfaces.find(i =>
-            i.alternates.some(a => a.interfaceClass === 7)
-        ) || device.configuration.interfaces[0];
-        await device.claimInterface(iface.interfaceNumber);
-        const ep = iface.alternates[0].endpoints.find(e => e.direction === 'out');
-        if (!ep) throw new Error('No se encontro endpoint OUT');
-        state.device = device;
-        state.endpoint = ep.endpointNumber;
-        state.transport = 'usb';
-        state.connected = true;
-        emit('connected', { transport: 'usb', name: device.productName });
-        return true;
-    }
-
-    async function writeUSB(data) {
-        if (!state.device) throw new Error('USB no conectado');
-        await state.device.transferOut(state.endpoint, data);
-    }
-
-    // ============================================================
-    // TRANSPORT: WEB BLUETOOTH
-    // ============================================================
-    const BLE_SERVICE = '000018f0-0000-1000-8000-00805f9b34fb';
-    const BLE_CHAR    = '00002af1-0000-1000-8000-00805f9b34fb';
-
-    async function connectBluetooth() {
-        if (!navigator.bluetooth) throw new Error('Web Bluetooth no soportado');
-        const device = await navigator.bluetooth.requestDevice({
-            filters: [
-                { services: [BLE_SERVICE] },
-                { namePrefix: 'Printer' },
-                { namePrefix: 'POS' },
-                { namePrefix: 'BT' },
-                { namePrefix: 'MTP' },
-                { namePrefix: 'MPT' }
-            ],
-            optionalServices: [BLE_SERVICE]
-        });
-        const server = await device.gatt.connect();
-        const service = await server.getPrimaryService(BLE_SERVICE);
-        const ch = await service.getCharacteristic(BLE_CHAR);
-        state.device = device;
-        state.characteristic = ch;
-        state.transport = 'bluetooth';
-        state.connected = true;
-        device.addEventListener('gattserverdisconnected', () => {
-            state.connected = false;
-            emit('disconnected', { transport: 'bluetooth' });
-        });
-        emit('connected', { transport: 'bluetooth', name: device.name });
-        return true;
-    }
-
-    async function writeBluetooth(data) {
-        if (!state.characteristic) throw new Error('BLE no conectado');
-        // BLE MTU ~ 512, fragmentar en chunks de 100
-        const CHUNK = 100;
-        for (let i = 0; i < data.length; i += CHUNK) {
-            const slice = data.slice(i, i + CHUNK);
-            await state.characteristic.writeValue(slice);
-            await new Promise(r => setTimeout(r, 30));
-        }
-    }
-
-    // ============================================================
-    // TRANSPORT: WEB SERIAL
-    // ============================================================
-    async function connectSerial() {
-        if (!navigator.serial) throw new Error('Web Serial no soportado');
-        const port = await navigator.serial.requestPort();
-        await port.open({ baudRate: 9600 });
-        state.port = port;
-        state.writer = port.writable.getWriter();
-        state.transport = 'serial';
-        state.connected = true;
-        emit('connected', { transport: 'serial' });
-        return true;
-    }
-
-    async function writeSerial(data) {
-        if (!state.writer) throw new Error('Serial no conectado');
-        await state.writer.write(data);
-    }
-
-    // ============================================================
-    // TRANSPORT: BROWSER FALLBACK (window.print)
-    // ============================================================
-    function ensurePrintStyles() {
-        if (document.getElementById('volvix-printer-style')) return;
-        const css = `
-@media print {
-  @page { size: 80mm auto; margin: 0; }
-  body * { visibility: hidden; }
-  #volvix-print-area, #volvix-print-area * { visibility: visible; }
-  #volvix-print-area {
-    position: absolute; left: 0; top: 0;
-    width: 80mm; padding: 4mm;
-    font-family: 'Courier New', monospace;
-    font-size: 11px; line-height: 1.25;
-    color: #000; background: #fff;
+  function concat(parts) {
+    let len = 0;
+    for (const p of parts) len += p.length;
+    const out = new Uint8Array(len);
+    let o = 0;
+    for (const p of parts) { out.set(p, o); o += p.length; }
+    return out;
   }
-  #volvix-print-area .center { text-align: center; }
-  #volvix-print-area .right  { text-align: right; }
-  #volvix-print-area .bold   { font-weight: 700; }
-  #volvix-print-area .big    { font-size: 16px; font-weight: 700; }
-  #volvix-print-area .huge   { font-size: 22px; font-weight: 700; }
-  #volvix-print-area hr      { border: none; border-top: 1px dashed #000; margin: 2mm 0; }
-  #volvix-print-area table   { width: 100%; border-collapse: collapse; }
-  #volvix-print-area td      { padding: 1px 0; vertical-align: top; }
-}`;
-        const el = document.createElement('style');
-        el.id = 'volvix-printer-style';
-        el.textContent = css;
-        document.head.appendChild(el);
-    }
+  function enc(str) { return new TextEncoder().encode(str); }
+  function pad(left, right, width) {
+    const l = String(left || ''), r = String(right || '');
+    const sp = Math.max(1, width - l.length - r.length);
+    return l + ' '.repeat(sp) + r + '\n';
+  }
+  function line(ch, w) { return ch.repeat(w) + '\n'; }
 
-    function browserPrint(html) {
-        ensurePrintStyles();
-        let area = document.getElementById('volvix-print-area');
-        if (!area) {
-            area = document.createElement('div');
-            area.id = 'volvix-print-area';
-            document.body.appendChild(area);
-        }
-        area.innerHTML = html;
-        return new Promise(resolve => {
-            const after = () => { window.removeEventListener('afterprint', after); resolve(true); };
-            window.addEventListener('afterprint', after);
-            window.print();
-            setTimeout(after, 3000);
-        });
-    }
+  function qrPayload(data) {
+    const d = enc(data);
+    const len = d.length + 3;
+    const pL = len & 0xff, pH = (len >> 8) & 0xff;
+    return concat([
+      new Uint8Array([GS, 0x28, 0x6b, 0x04, 0x00, 0x31, 0x41, 0x32, 0x00]),
+      new Uint8Array([GS, 0x28, 0x6b, 0x03, 0x00, 0x31, 0x43, 0x06]),
+      new Uint8Array([GS, 0x28, 0x6b, 0x03, 0x00, 0x31, 0x45, 0x31]),
+      new Uint8Array([GS, 0x28, 0x6b, pL, pH, 0x31, 0x50, 0x30]), d,
+      new Uint8Array([GS, 0x28, 0x6b, 0x03, 0x00, 0x31, 0x51, 0x30])
+    ]);
+  }
 
-    // ============================================================
-    // CORE WRITE DISPATCHER
-    // ============================================================
-    async function send(data) {
-        if (!(data instanceof Uint8Array)) data = bytes(data);
-        switch (state.transport) {
-            case 'usb':       return writeUSB(data);
-            case 'bluetooth': return writeBluetooth(data);
-            case 'serial':    return writeSerial(data);
-            default:          throw new Error('Sin transporte ESC/POS activo');
-        }
-    }
+  // ---------- ESC/POS builder ----------
+  Volvix.printer.escpos = {
+    CMD,
+    build(saleData) {
+      const W = 32;
+      const s = saleData || {};
+      const tenant = s.tenant_name || s.business_name || 'VOLVIX POS';
+      const lines = s.lines || s.items || [];
+      const total = Number(s.total || 0).toFixed(2);
+      const subtotal = Number(s.subtotal || s.total || 0).toFixed(2);
+      const tax = Number(s.tax || 0).toFixed(2);
+      const date = s.created_at || s.date || new Date().toISOString();
+      const folio = s.folio || s.id || '';
 
-    // ============================================================
-    // PUBLIC: connect / disconnect
-    // ============================================================
-    async function connect(transport = 'auto') {
-        if (state.connected) return true;
-        const order = transport === 'auto'
-            ? ['usb', 'bluetooth', 'serial']
-            : [transport];
-        let lastErr = null;
-        for (const t of order) {
-            try {
-                if (t === 'usb' && navigator.usb)             { await connectUSB(); break; }
-                if (t === 'bluetooth' && navigator.bluetooth) { await connectBluetooth(); break; }
-                if (t === 'serial' && navigator.serial)       { await connectSerial(); break; }
-            } catch (e) { lastErr = e; }
-        }
-        if (!state.connected) {
-            state.transport = 'browser';
-            state.connected = true;
-            emit('connected', { transport: 'browser', fallback: true });
-            console.warn('[Printer] Usando fallback window.print()', lastErr?.message);
-        }
-        // init ESC/POS
-        if (state.transport !== 'browser') {
-            try { await send(bytes(CMD.INIT, CMD.CHARSET_LATIN)); } catch (e) { console.warn(e); }
-        }
-        return true;
-    }
+      const parts = [];
+      parts.push(new Uint8Array(CMD.INIT));
+      parts.push(new Uint8Array(CMD.ALIGN_C));
+      parts.push(new Uint8Array(CMD.SIZE_DOUBLE));
+      parts.push(new Uint8Array(CMD.BOLD_ON));
+      parts.push(enc(tenant + '\n'));
+      parts.push(new Uint8Array(CMD.BOLD_OFF));
+      parts.push(new Uint8Array(CMD.SIZE_NORMAL));
+      if (s.address) parts.push(enc(s.address + '\n'));
+      if (s.rfc) parts.push(enc('RFC: ' + s.rfc + '\n'));
+      parts.push(enc(line('-', W)));
 
-    async function disconnect() {
+      parts.push(new Uint8Array(CMD.ALIGN_L));
+      parts.push(enc('Folio: ' + folio + '\n'));
+      parts.push(enc('Fecha: ' + String(date).replace('T', ' ').slice(0, 19) + '\n'));
+      if (s.cashier) parts.push(enc('Cajero: ' + s.cashier + '\n'));
+      if (s.customer) parts.push(enc('Cliente: ' + s.customer + '\n'));
+      parts.push(enc(line('-', W)));
+
+      for (const it of lines) {
+        const name = (it.name || it.product_name || it.code || 'Item').slice(0, W);
+        const qty = Number(it.qty || it.quantity || 1);
+        const price = Number(it.price || it.unit_price || 0);
+        const sub = (qty * price).toFixed(2);
+        parts.push(enc(name + '\n'));
+        parts.push(enc(pad('  ' + qty + ' x ' + price.toFixed(2), '$' + sub, W)));
+      }
+      parts.push(enc(line('-', W)));
+      parts.push(enc(pad('Subtotal:', '$' + subtotal, W)));
+      if (Number(tax) > 0) parts.push(enc(pad('IVA:', '$' + tax, W)));
+      parts.push(new Uint8Array(CMD.BOLD_ON));
+      parts.push(new Uint8Array(CMD.SIZE_DOUBLE));
+      parts.push(enc(pad('TOTAL', '$' + total, Math.floor(W / 2))));
+      parts.push(new Uint8Array(CMD.SIZE_NORMAL));
+      parts.push(new Uint8Array(CMD.BOLD_OFF));
+      parts.push(enc(line('=', W)));
+
+      if (s.payment_method) parts.push(enc('Pago: ' + s.payment_method + '\n'));
+      if (s.payment_received != null) {
+        parts.push(enc(pad('Recibido:', '$' + Number(s.payment_received).toFixed(2), W)));
+        parts.push(enc(pad('Cambio:', '$' + Number(s.change || 0).toFixed(2), W)));
+      }
+
+      parts.push(new Uint8Array(CMD.ALIGN_C));
+      parts.push(enc('\n'));
+      const qrData = s.qr || s.verify_url || ('VOLVIX:' + folio + ':' + total);
+      parts.push(qrPayload(qrData));
+      parts.push(enc('\nGracias por su compra\n'));
+      parts.push(enc((s.footer || 'Powered by Volvix POS') + '\n\n\n'));
+
+      parts.push(new Uint8Array(CMD.CUT_PARTIAL));
+      return concat(parts);
+    },
+    openDrawer() { return new Uint8Array(CMD.DRAWER_KICK); }
+  };
+
+  // ---------- Bluetooth (Web Bluetooth API) ----------
+  const BT_SERVICES = [
+    '000018f0-0000-1000-8000-00805f9b34fb',
+    '49535343-fe7d-4ae5-8fa9-9fafd205e455',
+    'e7810a71-73ae-499d-8c15-faa9aef0c3f2'
+  ];
+  Volvix.printer.bluetooth = {
+    device: null, characteristic: null,
+    async connect() {
+      if (!navigator.bluetooth) throw new Error('Web Bluetooth no soportado en este navegador');
+      const device = await navigator.bluetooth.requestDevice({
+        acceptAllDevices: true,
+        optionalServices: BT_SERVICES
+      });
+      this.device = device;
+      const server = await device.gatt.connect();
+      let writeChar = null;
+      for (const sUuid of BT_SERVICES) {
         try {
-            if (state.transport === 'usb' && state.device) await state.device.close();
-            if (state.transport === 'bluetooth' && state.device?.gatt?.connected) state.device.gatt.disconnect();
-            if (state.transport === 'serial') {
-                if (state.writer) { state.writer.releaseLock(); }
-                if (state.port)   { await state.port.close(); }
-            }
-        } catch (e) { console.warn('[Printer] disconnect err', e); }
-        state.transport = null;
-        state.device = null;
-        state.endpoint = null;
-        state.characteristic = null;
-        state.port = null;
-        state.writer = null;
-        state.connected = false;
-        emit('disconnected', {});
-    }
-
-    // ============================================================
-    // PUBLIC: printTicket
-    // ============================================================
-    async function printTicket(t = {}) {
-        if (!state.connected) await connect('auto');
-
-        const business = t.business || 'VOLVIX POS';
-        const subtitle = t.subtitle || '';
-        const address  = t.address  || '';
-        const phone    = t.phone    || '';
-        const ticketNo = t.ticketNo || ('T-' + Date.now().toString().slice(-6));
-        const cashier  = t.cashier  || 'Cajero';
-        const date     = t.date     || new Date().toLocaleString();
-        const items    = t.items    || [];
-        const subtotal = Number(t.subtotal ?? items.reduce((s,i)=>s + (i.qty||1)*(i.price||0), 0));
-        const tax      = Number(t.tax ?? 0);
-        const discount = Number(t.discount ?? 0);
-        const total    = Number(t.total ?? (subtotal + tax - discount));
-        const paid     = Number(t.paid ?? total);
-        const change   = Number(t.change ?? Math.max(0, paid - total));
-        const payment  = t.payment  || 'EFECTIVO';
-        const footer   = t.footer   || '¡Gracias por su compra!';
-        const currency = t.currency || '$';
-
-        if (state.transport === 'browser') {
-            const rowsHtml = items.map(i => `
-                <tr>
-                  <td>${escapeHtml(i.name)}</td>
-                  <td class="right">${i.qty||1} x ${money(i.price, currency)}</td>
-                  <td class="right">${money((i.qty||1)*(i.price||0), currency)}</td>
-                </tr>`).join('');
-            const html = `
-                <div class="center huge">${escapeHtml(business)}</div>
-                ${subtitle ? `<div class="center">${escapeHtml(subtitle)}</div>` : ''}
-                ${address  ? `<div class="center">${escapeHtml(address)}</div>`  : ''}
-                ${phone    ? `<div class="center">Tel: ${escapeHtml(phone)}</div>` : ''}
-                <hr>
-                <div>Ticket: <b>${escapeHtml(ticketNo)}</b></div>
-                <div>Fecha: ${escapeHtml(date)}</div>
-                <div>Cajero: ${escapeHtml(cashier)}</div>
-                <hr>
-                <table>${rowsHtml}</table>
-                <hr>
-                <table>
-                  <tr><td>Subtotal</td><td class="right">${money(subtotal,currency)}</td></tr>
-                  ${discount>0?`<tr><td>Descuento</td><td class="right">-${money(discount,currency)}</td></tr>`:''}
-                  ${tax>0?`<tr><td>Impuesto</td><td class="right">${money(tax,currency)}</td></tr>`:''}
-                  <tr><td class="bold big">TOTAL</td><td class="right bold big">${money(total,currency)}</td></tr>
-                  <tr><td>${escapeHtml(payment)}</td><td class="right">${money(paid,currency)}</td></tr>
-                  ${change>0?`<tr><td>Cambio</td><td class="right">${money(change,currency)}</td></tr>`:''}
-                </table>
-                <hr>
-                <div class="center">${escapeHtml(footer)}</div>
-                <div class="center">${escapeHtml(ticketNo)}</div>
-            `;
-            return browserPrint(html);
+          const svc = await server.getPrimaryService(sUuid);
+          const chars = await svc.getCharacteristics();
+          writeChar = chars.find(c => c.properties.write || c.properties.writeWithoutResponse);
+          if (writeChar) break;
+        } catch (_) {}
+      }
+      if (!writeChar) throw new Error('No se encontro caracteristica writable');
+      this.characteristic = writeChar;
+      return { name: device.name, id: device.id };
+    },
+    async send(buffer) {
+      if (!this.characteristic) throw new Error('Bluetooth no conectado');
+      const CHUNK = 100;
+      for (let i = 0; i < buffer.length; i += CHUNK) {
+        const slice = buffer.slice(i, i + CHUNK);
+        if (this.characteristic.properties.writeWithoutResponse) {
+          await this.characteristic.writeValueWithoutResponse(slice);
+        } else {
+          await this.characteristic.writeValue(slice);
         }
-
-        // ESC/POS
-        const buf = [];
-        buf.push(...CMD.INIT);
-        buf.push(...CMD.ALIGN_CENTER);
-        buf.push(...CMD.SIZE_DOUBLE);
-        appendText(buf, business + '\n');
-        buf.push(...CMD.SIZE_NORMAL);
-        if (subtitle) appendText(buf, subtitle + '\n');
-        if (address)  appendText(buf, address + '\n');
-        if (phone)    appendText(buf, 'Tel: ' + phone + '\n');
-        buf.push(...CMD.ALIGN_LEFT);
-        appendText(buf, line('=') + '\n');
-        appendText(buf, `Ticket: ${ticketNo}\n`);
-        appendText(buf, `Fecha:  ${date}\n`);
-        appendText(buf, `Cajero: ${cashier}\n`);
-        appendText(buf, line('-') + '\n');
-        for (const it of items) {
-            appendText(buf, (it.name || '') + '\n');
-            const qtyPrice = `${it.qty||1} x ${money(it.price, currency)}`;
-            const lineTot  = money((it.qty||1)*(it.price||0), currency);
-            appendText(buf, row('  ' + qtyPrice, lineTot) + '\n');
-        }
-        appendText(buf, line('-') + '\n');
-        appendText(buf, row('Subtotal', money(subtotal, currency)) + '\n');
-        if (discount > 0) appendText(buf, row('Descuento', '-' + money(discount, currency)) + '\n');
-        if (tax > 0)      appendText(buf, row('Impuesto',  money(tax, currency)) + '\n');
-        buf.push(...CMD.SIZE_DOUBLE_H);
-        buf.push(...CMD.BOLD_ON);
-        appendText(buf, row('TOTAL', money(total, currency)) + '\n');
-        buf.push(...CMD.BOLD_OFF);
-        buf.push(...CMD.SIZE_NORMAL);
-        appendText(buf, row(payment, money(paid, currency)) + '\n');
-        if (change > 0) appendText(buf, row('Cambio', money(change, currency)) + '\n');
-        appendText(buf, line('=') + '\n');
-        buf.push(...CMD.ALIGN_CENTER);
-        appendText(buf, footer + '\n\n');
-        appendText(buf, ticketNo + '\n');
-        buf.push(...CMD.LF, ...CMD.LF, ...CMD.LF);
-        buf.push(...CMD.CUT_FEED);
-
-        await send(bytes(buf));
-        emit('printed', { type: 'ticket', ticketNo });
-        return true;
+      }
+      return { ok: true, bytes: buffer.length };
+    },
+    disconnect() {
+      if (this.device && this.device.gatt && this.device.gatt.connected) this.device.gatt.disconnect();
+      this.device = null; this.characteristic = null;
     }
+  };
 
-    function appendText(buf, txt) {
-        for (let i = 0; i < txt.length; i++) buf.push(txt.charCodeAt(i) & 0xFF);
+  // ---------- USB (WebUSB API) ----------
+  const USB_VENDORS = [
+    { vendorId: 0x04b8 }, // Epson
+    { vendorId: 0x0519 }, // Star
+    { vendorId: 0x1504 }, // Bixolon
+    { vendorId: 0x0fe6 }, // Citizen
+    { vendorId: 0x0416 }, // Xprinter
+    { vendorId: 0x28e9 }
+  ];
+  Volvix.printer.usb = {
+    device: null, endpoint: null, interfaceNumber: null,
+    async connect() {
+      if (!navigator.usb) throw new Error('WebUSB no soportado en este navegador');
+      const device = await navigator.usb.requestDevice({ filters: USB_VENDORS });
+      await device.open();
+      if (device.configuration === null) await device.selectConfiguration(1);
+      const iface = device.configuration.interfaces[0];
+      await device.claimInterface(iface.interfaceNumber);
+      const ep = iface.alternate.endpoints.find(e => e.direction === 'out');
+      if (!ep) throw new Error('No se encontro endpoint OUT en impresora USB');
+      this.device = device;
+      this.endpoint = ep.endpointNumber;
+      this.interfaceNumber = iface.interfaceNumber;
+      return { name: device.productName || 'USB Printer', vendorId: device.vendorId };
+    },
+    async send(buffer) {
+      if (!this.device || this.endpoint == null) throw new Error('USB no conectado');
+      const r = await this.device.transferOut(this.endpoint, buffer);
+      return { ok: r.status === 'ok', bytes: r.bytesWritten };
+    },
+    async disconnect() {
+      if (!this.device) return;
+      try { await this.device.releaseInterface(this.interfaceNumber); } catch (_) {}
+      try { await this.device.close(); } catch (_) {}
+      this.device = null; this.endpoint = null;
     }
+  };
 
-    function escapeHtml(s) {
-        return String(s ?? '').replace(/[&<>"']/g, c =>
-            ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  // ---------- Network (via local print bridge or audit endpoint) ----------
+  Volvix.printer.network = {
+    async send(ip, port, buffer) {
+      const b64 = btoa(String.fromCharCode.apply(null, buffer));
+      try {
+        const r = await fetch('http://127.0.0.1:9101/print', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ip, port: port || 9100, data: b64 })
+        });
+        if (r.ok) return { ok: true, via: 'local-bridge' };
+      } catch (_) {}
+      const token = (Volvix.auth && Volvix.auth.token) || localStorage.getItem('volvix_token') || '';
+      const r2 = await fetch('/api/printer/raw', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? ('Bearer ' + token) : ''
+        },
+        body: JSON.stringify({ ip, port: port || 9100, data: b64, length: buffer.length })
+      });
+      const j = await r2.json().catch(() => ({}));
+      return { ok: r2.ok, audit: true, response: j };
     }
+  };
 
-    // ============================================================
-    // PUBLIC: printBarcode
-    // ============================================================
-    async function printBarcode(code, type = 'CODE128') {
-        if (!state.connected) await connect('auto');
-        code = String(code || '');
-        if (!code) throw new Error('Codigo vacio');
-
-        if (state.transport === 'browser') {
-            const html = `
-                <div class="center bold">${escapeHtml(code)}</div>
-                <div class="center" style="font-family:'Libre Barcode 128',monospace;font-size:48px;">
-                    *${escapeHtml(code)}*
-                </div>
-                <div class="center">${escapeHtml(type)}</div>`;
-            return browserPrint(html);
-        }
-
-        const t = BARCODE_TYPES[type.toUpperCase()] || BARCODE_TYPES.CODE128;
-        const buf = [];
-        buf.push(...CMD.INIT, ...CMD.ALIGN_CENTER);
-        // HRI position: below
-        buf.push(GS, 0x48, 0x02);
-        // HRI font A
-        buf.push(GS, 0x66, 0x00);
-        // height
-        buf.push(GS, 0x68, 80);
-        // width
-        buf.push(GS, 0x77, 2);
-        // print barcode (function B: GS k m n d1..dn)
-        buf.push(GS, 0x6B, t, code.length);
-        for (let i = 0; i < code.length; i++) buf.push(code.charCodeAt(i) & 0xFF);
-        buf.push(LF, LF);
-        buf.push(...CMD.CUT_FEED);
-        await send(bytes(buf));
-        emit('printed', { type: 'barcode', code });
-        return true;
-    }
-
-    // ============================================================
-    // PUBLIC: printQR
-    // ============================================================
-    async function printQR(data, size = 6) {
-        if (!state.connected) await connect('auto');
-        data = String(data || '');
-        if (!data) throw new Error('QR vacio');
-        size = Math.max(1, Math.min(16, size|0));
-
-        if (state.transport === 'browser') {
-            const url = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data)}`;
-            const html = `
-                <div class="center">
-                    <img src="${url}" style="width:50mm;height:50mm;" alt="QR">
-                </div>
-                <div class="center" style="font-size:9px;word-break:break-all;">${escapeHtml(data)}</div>`;
-            return browserPrint(html);
-        }
-
-        const buf = [];
-        buf.push(...CMD.INIT, ...CMD.ALIGN_CENTER);
-        // Model 2
-        buf.push(GS, 0x28, 0x6B, 0x04, 0x00, 0x31, 0x41, 0x32, 0x00);
-        // Module size
-        buf.push(GS, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x43, size);
-        // Error correction L
-        buf.push(GS, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x45, 0x30);
-        // Store data
-        const len = data.length + 3;
-        buf.push(GS, 0x28, 0x6B, len & 0xFF, (len >> 8) & 0xFF, 0x31, 0x50, 0x30);
-        for (let i = 0; i < data.length; i++) buf.push(data.charCodeAt(i) & 0xFF);
-        // Print
-        buf.push(GS, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x51, 0x30);
-        buf.push(LF, LF);
-        buf.push(...CMD.CUT_FEED);
-        await send(bytes(buf));
-        emit('printed', { type: 'qr', data });
-        return true;
-    }
-
-    // ============================================================
-    // PUBLIC: openCashDrawer / cut / status
-    // ============================================================
-    async function openCashDrawer(pin = 2) {
-        if (!state.connected) await connect('auto');
-        if (state.transport === 'browser') {
-            console.warn('[Printer] cashDrawer no disponible en fallback');
-            emit('drawer', { ok: false, reason: 'browser-fallback' });
-            return false;
-        }
-        const cmd = pin === 5 ? CMD.DRAWER_PIN5 : CMD.DRAWER_PIN2;
-        await send(bytes(cmd));
-        emit('drawer', { ok: true, pin });
-        return true;
-    }
-
-    async function cut(partial = false) {
-        if (!state.connected) return false;
-        if (state.transport === 'browser') return true;
-        await send(bytes(partial ? CMD.CUT_PARTIAL : CMD.CUT_FULL));
-        return true;
-    }
-
-    function status() {
-        return {
-            connected: state.connected,
-            transport: state.transport,
-            paperWidth: state.paperWidth,
-            device: state.device?.name || state.device?.productName || null,
-            apis: {
-                usb:       !!navigator.usb,
-                bluetooth: !!navigator.bluetooth,
-                serial:    !!navigator.serial
-            }
-        };
-    }
-
-    function setPaperWidth(chars) {
-        state.paperWidth = Math.max(20, Math.min(64, chars|0));
-    }
-
-    function on(fn) { if (typeof fn === 'function') state.listeners.push(fn); }
-    function off(fn) { state.listeners = state.listeners.filter(f => f !== fn); }
-
-    // ============================================================
-    // EXPORT
-    // ============================================================
-    const PrinterAPI = {
-        connect,
-        disconnect,
-        printTicket,
-        printBarcode,
-        printQR,
-        openCashDrawer,
-        cut,
-        status,
-        setPaperWidth,
-        on,
-        off,
-        // raw helpers expuestos para extension
-        _send: send,
-        _bytes: bytes,
-        _CMD: CMD,
-        version: '1.0.0'
-    };
-
-    global.PrinterAPI = PrinterAPI;
-    if (typeof module !== 'undefined' && module.exports) module.exports = PrinterAPI;
-
-    // auto-event en window cuando este listo
+  // ---------- Configuration ----------
+  function getDefaultConfig() {
     try {
-        global.dispatchEvent(new CustomEvent('volvix:printer:ready', { detail: status() }));
+      const raw = localStorage.getItem('volvix_printer_config');
+      if (raw) return JSON.parse(raw);
     } catch (_) {}
+    return { type: 'fallback' };
+  }
+  Volvix.printer.setConfig = function (cfg) {
+    localStorage.setItem('volvix_printer_config', JSON.stringify(cfg));
+  };
+  Volvix.printer.getConfig = getDefaultConfig;
 
-    console.log('[Volvix Printer] wired v' + PrinterAPI.version, status());
+  // ---------- Fallback HTML/window.print ----------
+  function htmlReceipt(s) {
+    const lines = (s.lines || s.items || []).map(it => {
+      const qty = Number(it.qty || it.quantity || 1);
+      const price = Number(it.price || it.unit_price || 0);
+      return '<tr><td>' + (it.name || it.code || '') + '</td><td>' + qty + '</td><td>$' + (qty * price).toFixed(2) + '</td></tr>';
+    }).join('');
+    return '<!doctype html><html><head><meta charset="utf-8"><title>Recibo ' + (s.folio || '') + '</title>' +
+      '<style>body{font-family:monospace;width:80mm;margin:0;padding:8px;font-size:12px}' +
+      'h1{font-size:16px;text-align:center;margin:4px 0}' +
+      'table{width:100%;border-collapse:collapse}td{padding:2px 0}' +
+      '.tot{font-weight:bold;font-size:14px;border-top:1px dashed #000;padding-top:4px}' +
+      '@media print{@page{size:80mm auto;margin:0}}</style></head>' +
+      '<body><h1>' + (s.tenant_name || 'VOLVIX POS') + '</h1>' +
+      '<div>Folio: ' + (s.folio || s.id || '') + '</div>' +
+      '<div>Fecha: ' + String(s.created_at || new Date().toISOString()).slice(0, 19).replace('T', ' ') + '</div>' +
+      '<hr><table>' + lines + '</table><hr>' +
+      '<div class="tot">TOTAL: $' + Number(s.total || 0).toFixed(2) + '</div>' +
+      '<p style="text-align:center">Gracias por su compra</p>' +
+      '<scr' + 'ipt>window.onload=function(){window.print();setTimeout(function(){window.close()},500)}</scr' + 'ipt>' +
+      '</body></html>';
+  }
+  Volvix.printer.fallbackPrint = function (saleData) {
+    const w = window.open('', '_blank', 'width=400,height=600');
+    if (!w) { VolvixUI.toast({type:'info', message:'Permite popups para imprimir'}); return { ok: false }; }
+    w.document.write(htmlReceipt(saleData));
+    w.document.close();
+    return { ok: true, via: 'window.print' };
+  };
 
+  // ---------- Orchestrator ----------
+  Volvix.printer.printReceipt = async function (saleId) {
+    let sale = saleId;
+    if (typeof saleId === 'string' || typeof saleId === 'number') {
+      try {
+        const token = (Volvix.auth && Volvix.auth.token) || localStorage.getItem('volvix_token') || '';
+        const r = await fetch('/api/sales/' + encodeURIComponent(saleId), {
+          headers: { 'Authorization': token ? ('Bearer ' + token) : '' }
+        });
+        sale = await r.json();
+      } catch (e) {
+        console.warn('[printer] no se pudo cargar venta', e);
+        sale = { id: saleId, total: 0, lines: [] };
+      }
+    }
+    const cfg = getDefaultConfig();
+    const buffer = Volvix.printer.escpos.build(sale);
+    try {
+      if (cfg.type === 'bluetooth') {
+        if (!Volvix.printer.bluetooth.characteristic) await Volvix.printer.bluetooth.connect();
+        return await Volvix.printer.bluetooth.send(buffer);
+      }
+      if (cfg.type === 'usb') {
+        if (!Volvix.printer.usb.device) await Volvix.printer.usb.connect();
+        return await Volvix.printer.usb.send(buffer);
+      }
+      if (cfg.type === 'network') {
+        return await Volvix.printer.network.send(cfg.address, cfg.port || 9100, buffer);
+      }
+    } catch (e) {
+      console.warn('[printer] driver fallo, fallback window.print():', e.message);
+    }
+    return Volvix.printer.fallbackPrint(sale);
+  };
+
+  console.log('[Volvix.printer] R14 wiring ready (escpos+bluetooth+usb+network+fallback)');
 })(typeof window !== 'undefined' ? window : globalThis);

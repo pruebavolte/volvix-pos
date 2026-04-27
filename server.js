@@ -47,6 +47,42 @@ const CONFIG = {
 };
 
 // ============================================================
+// SEED USERS LOADER (DEV-ONLY)
+// Carga los usuarios semilla desde env var, NUNCA desde código.
+// En prod los usuarios viven en Supabase (tabla pos_users).
+// Setear SEED_USERS_JSON='[{"id":"USR001","email":"...","password":"...","role":"...","tenant_id":"...","status":"active"}]'
+// o DEV_PASSWORDS_JSON='{"admin@volvix.test":"...","owner@volvix.test":"...","cajero@volvix.test":"..."}'
+// ============================================================
+function _loadSeedUsers() {
+  // Prioridad 1: SEED_USERS_JSON (array completo)
+  if (process.env.SEED_USERS_JSON) {
+    try {
+      const parsed = JSON.parse(process.env.SEED_USERS_JSON);
+      if (Array.isArray(parsed)) return parsed;
+    } catch (e) {
+      console.warn('[seed] SEED_USERS_JSON inválido:', e.message);
+    }
+  }
+  // Prioridad 2: DEV_PASSWORDS_JSON (mapa email -> password) — DEV-ONLY
+  const devPwMap = (() => {
+    try { return JSON.parse(process.env.DEV_PASSWORDS_JSON || '{}'); }
+    catch { return {}; }
+  })();
+  const mkUser = (id, email, role, tenant_id, ageDays) => ({
+    id, email,
+    password: devPwMap[email] || '',  // vacío si no hay env -> login fallará intencionalmente
+    role, tenant_id, status: 'active',
+    created: Date.now() - 86400000 * ageDays,
+  });
+  // DEV-ONLY: si no hay env vars, los users semilla quedan SIN password (login falla en local sin config)
+  return [
+    mkUser('USR001', 'admin@volvix.test',  'superadmin', 'TNT001', 365),
+    mkUser('USR002', 'owner@volvix.test',  'owner',     'TNT002', 90),
+    mkUser('USR003', 'cajero@volvix.test', 'cajero',    'TNT001', 30),
+  ];
+}
+
+// ============================================================
 // STORAGE LAYER · JSON-based (sin dependencias externas)
 // Si instalas `better-sqlite3`, cambia a SQLite real.
 // Por defecto usa archivos JSON (cero dependencias = arranca en 0 seg)
@@ -100,11 +136,7 @@ class Store {
       licenses: [],
       ai_decisions: [],
       remote_sessions: [],
-      users: [
-        { id: 'USR001', email: 'admin@volvix.test', password: 'Volvix2026!', role: 'superadmin', tenant_id: 'TNT001', status: 'active', created: Date.now() - 86400000*365 },
-        { id: 'USR002', email: 'owner@volvix.test', password: 'Volvix2026!', role: 'owner', tenant_id: 'TNT002', status: 'active', created: Date.now() - 86400000*90 },
-        { id: 'USR003', email: 'cajero@volvix.test', password: 'Volvix2026!', role: 'cajero', tenant_id: 'TNT001', status: 'active', created: Date.now() - 86400000*30 },
-      ],
+      users: _loadSeedUsers(),
     };
   }
   // CRUD helpers
@@ -128,6 +160,113 @@ class Store {
 }
 
 const store = new Store(CONFIG.dbPath);
+
+// ============================================================
+// SESSIONS (in-memory) + role/auth helpers
+// ============================================================
+const _sessions = new Map(); // token -> { user_id, role, tenant_id, email, expires_at }
+function _newToken() { return crypto.randomBytes(24).toString('hex'); }
+function _getSession(req) {
+  const h = req.headers['authorization'] || '';
+  const m = /^Bearer\s+([a-f0-9]+)$/i.exec(h);
+  if (!m) return null;
+  const s = _sessions.get(m[1]);
+  if (!s) return null;
+  if (s.expires_at && s.expires_at < Date.now()) { _sessions.delete(m[1]); return null; }
+  return s;
+}
+function requireRole(roles) {
+  return (handler) => async (req, res, params) => {
+    const s = _getSession(req);
+    if (!s) return json(res, { ok: false, error: 'unauthorized' }, 401);
+    if (roles && roles.length && !roles.includes(s.role)) {
+      return json(res, { ok: false, error: 'forbidden', need: roles, have: s.role }, 403);
+    }
+    req.session = s;
+    return handler(req, res, params);
+  };
+}
+// Reports helpers: range parsing + validation
+function _parseRange(q) {
+  const now = Date.now();
+  const to = q.to ? new Date(q.to) : new Date(now);
+  const from = q.from ? new Date(q.from) : new Date(now - 30 * 86400000);
+  if (isNaN(from.getTime()) || isNaN(to.getTime())) return { error: 'invalid date' };
+  if (from.getTime() > to.getTime()) return { error: 'inverted_range', from: from.toISOString(), to: to.toISOString() };
+  const ONE_YEAR = 366 * 86400000;
+  let limited = false;
+  let actualFrom = from;
+  if (to.getTime() - from.getTime() > ONE_YEAR) {
+    actualFrom = new Date(to.getTime() - ONE_YEAR);
+    limited = true;
+  }
+  return { from: actualFrom.toISOString(), to: to.toISOString(), limited };
+}
+function reportSafe(buildExtra) {
+  return requireRole(['admin', 'owner', 'superadmin'])((req, res) => {
+    try {
+      const q = url.parse(req.url, true).query || {};
+      const r = _parseRange(q);
+      if (r.error === 'inverted_range') {
+        return json(res, { ok: false, error: 'inverted_range', from: r.from, to: r.to }, 400);
+      }
+      if (r.error) return json(res, { ok: false, error: r.error }, 400);
+      const tenant_id = req.session.tenant_id;
+      const extra = (typeof buildExtra === 'function')
+        ? buildExtra({ req, q, range: r, tenant_id })
+        : (buildExtra || {});
+      const payload = {
+        ok: true,
+        tenant_id,
+        period: { from: r.from, to: r.to },
+        items: [], data: [], total: 0,
+        note: 'pending mv refresh',
+        generated_at: Date.now(),
+        ...extra,
+      };
+      if (r.limited) payload.range_limited = true;
+      json(res, payload);
+    } catch (err) {
+      try {
+        json(res, { ok: true, items: [], data: [], note: 'fallback after error: ' + (err && err.message || 'unknown') });
+      } catch (_) {}
+    }
+  });
+}
+
+// ============================================================
+// SUPABASE REST HELPER (lecturas reales para reportes)
+// ============================================================
+const SUPABASE_URL = (process.env.SUPABASE_URL || '').replace(/\/$/, '').replace(/\\n$/, '').trim();
+const SUPABASE_KEY = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || '').replace(/\\n$/, '').trim();
+function _sbReq(method, path, body) {
+  return new Promise((resolve, reject) => {
+    if (!SUPABASE_URL || !SUPABASE_KEY) return reject(new Error('SUPABASE_NOT_CONFIGURED'));
+    const https = require('https');
+    const u = new URL(SUPABASE_URL + '/rest/v1' + path);
+    const data = body ? JSON.stringify(body) : null;
+    const r = https.request({
+      hostname: u.hostname, path: u.pathname + (u.search || ''), method,
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        ...(data ? { 'Content-Length': Buffer.byteLength(data) } : {}),
+      },
+    }, (resp) => {
+      let buf = '';
+      resp.on('data', (c) => (buf += c));
+      resp.on('end', () => {
+        if (resp.statusCode >= 400) return reject(new Error(`SB ${resp.statusCode}: ${buf.slice(0, 200)}`));
+        try { resolve(JSON.parse(buf || '[]')); } catch { resolve([]); }
+      });
+    });
+    r.on('error', reject);
+    if (data) r.write(data);
+    r.end();
+  });
+}
 
 // ============================================================
 // INTEGRACIÓN CON CLAUDE API (llamadas reales si hay API key)
@@ -370,6 +509,10 @@ const api = {
         expires_at: Date.now() + (3600 * 1000), // 1 hora
         plan: tenant?.plan || 'free',
       };
+      // Issue bearer token for API role checks
+      const token = _newToken();
+      _sessions.set(token, session);
+      session.token = token;
 
       json(res, { ok: true, session });
     } catch (err) {
@@ -520,6 +663,342 @@ const api = {
     );
     json(res, result);
   },
+
+  // =============== OWNER PANEL (Slice 07) ===============
+  // Métricas globales para el dashboard del dueño
+  'GET /api/owner/dashboard': async (req, res) => {
+    // R26: lectura REAL contra Supabase (pos_users, pos_companies, pos_sales,
+    // pos_products, customers). Si Supabase falla, fallback graceful al store local.
+    try {
+      const [users, companies, sales, products, customers] = await Promise.all([
+        _sbReq('GET', '/pos_users?select=id,is_active,role'),
+        _sbReq('GET', '/pos_companies?select=id,plan,is_active,name').catch(() => []),
+        _sbReq('GET', '/pos_sales?select=total,created_at'),
+        _sbReq('GET', '/pos_products?select=id,stock,cost'),
+        _sbReq('GET', '/customers?select=id,active').catch(() => []),
+      ]);
+      const totalRevenue = (sales || []).reduce((s, x) => s + parseFloat(x.total || 0), 0);
+      const planPrices = { trial: 0, free: 0, pro: 799, enterprise: 1499 };
+      const activeCompanies = (companies || []).filter(c => c.is_active);
+      const mrr = activeCompanies.reduce((s, c) => s + (planPrices[c.plan] || 0), 0);
+      // sales_chart: agrupar últimos 7 días por fecha
+      const today = new Date();
+      const days = {};
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(today.getTime() - i * 86400000).toISOString().slice(0, 10);
+        days[d] = 0;
+      }
+      (sales || []).forEach(s => {
+        const d = (s.created_at || '').slice(0, 10);
+        if (d in days) days[d] += parseFloat(s.total || 0);
+      });
+      const sales_chart = Object.entries(days).map(([date, revenue]) => ({ date, revenue: Math.round(revenue * 100) / 100 }));
+      return json(res, {
+        ok: true,
+        metrics: {
+          total_users: (users || []).length,
+          active_users: (users || []).filter(u => u.is_active).length,
+          total_tenants: (companies || []).length,
+          active_tenants: activeCompanies.length,
+          total_sales: (sales || []).length,
+          total_revenue: Math.round(totalRevenue * 100) / 100,
+          total_products: (products || []).length,
+          low_stock_count: (products || []).filter(p => (p.stock || 0) < 20).length,
+          total_customers: (customers || []).length,
+          active_customers: (customers || []).filter(c => c.active).length,
+          mrr,
+          arr: mrr * 12,
+        },
+        sales_chart,
+        top_tenants: activeCompanies.slice(0, 5).map(c => ({ id: c.id, name: c.name, plan: c.plan })),
+        generated_at: Date.now(),
+        source: 'supabase',
+      });
+    } catch (err) {
+      // Fallback graceful — datos locales solo si Supabase no responde
+      const tenants = store.all('tenants');
+      const users = store.all('users');
+      const tickets = store.all('tickets');
+      const mrr = tenants.reduce((s, t) => s + (t.mrr || 0), 0);
+      return json(res, {
+        ok: true,
+        metrics: {
+          total_tenants: tenants.length,
+          active_tenants: tenants.filter(t => t.status === 'active').length,
+          total_users: users.length,
+          open_tickets: tickets.filter(t => t.status === 'open').length,
+          mrr, arr: mrr * 12,
+        },
+        sales_chart: [], top_tenants: [],
+        generated_at: Date.now(),
+        source: 'fallback_local',
+        note: 'Supabase no disponible: ' + (err && err.message || 'unknown'),
+      });
+    }
+  },
+
+  // Lista todos los tenants (para owner)
+  'GET /api/owner/tenants': (req, res) => {
+    json(res, { ok: true, tenants: store.all('tenants') });
+  },
+
+  // Crea un nuevo tenant
+  'POST /api/owner/tenants': async (req, res) => {
+    const body = await readBody(req);
+    if (!body.name) return json(res, { ok: false, error: 'name requerido' }, 400);
+    const t = {
+      id: 'TNT' + String(Date.now()).slice(-6),
+      name: body.name,
+      giro: body.giro || 'general',
+      plan: body.plan || 'free',
+      status: 'active',
+      mrr: body.mrr || 0,
+      created: Date.now(),
+    };
+    store.insert('tenants', t);
+    json(res, { ok: true, tenant: t }, 201);
+  },
+
+  // Pausar / reactivar un tenant
+  'PATCH /api/owner/tenants/:id': async (req, res, params) => {
+    const body = await readBody(req);
+    const allowed = {};
+    if (body.status) allowed.status = body.status;
+    if (body.plan) allowed.plan = body.plan;
+    if (typeof body.mrr === 'number') allowed.mrr = body.mrr;
+    const t = store.update('tenants', params.id, allowed);
+    if (!t) return json(res, { ok: false, error: 'tenant no encontrado' }, 404);
+    json(res, { ok: true, tenant: t });
+  },
+
+  // Lista de usuarios (todos los tenants)
+  'GET /api/owner/users': (req, res) => {
+    const users = store.all('users').map(u => ({
+      id: u.id, email: u.email, role: u.role, tenant_id: u.tenant_id,
+      status: u.status, created: u.created,
+    }));
+    json(res, { ok: true, users });
+  },
+
+  // Invita / crea un usuario (envía email simulado)
+  'POST /api/owner/users': async (req, res) => {
+    const body = await readBody(req);
+    if (!body.email) return json(res, { ok: false, error: 'email requerido' }, 400);
+    const exists = store.all('users').find(u => u.email === body.email);
+    if (exists) return json(res, { ok: false, error: 'usuario ya existe' }, 409);
+    const u = {
+      id: 'USR' + String(Date.now()).slice(-6),
+      email: body.email,
+      password: '',
+      role: body.role || 'cajero',
+      tenant_id: body.tenant_id || 'TNT001',
+      status: 'invited',
+      created: Date.now(),
+    };
+    store.insert('users', u);
+    // Email simulado (en prod iría a SendGrid/SES)
+    json(res, {
+      ok: true,
+      user: { id: u.id, email: u.email, role: u.role, tenant_id: u.tenant_id, status: u.status },
+      invite: { sent: true, channel: 'email', to: u.email, note: 'simulated (no SMTP configured locally)' },
+    }, 201);
+  },
+
+  // ============ Reports (Slice 07 + Slice 34) ============
+  // Todos role-gated (admin/owner/superadmin) + tenant aislamiento + range validation
+  'GET /api/reports/fiscal': reportSafe(({ tenant_id }) => {
+    const tenants = store.all('tenants').filter(t => !tenant_id || t.id === tenant_id || t.tenant_id === tenant_id);
+    const totalMrr = tenants.reduce((s, t) => s + (t.mrr || 0), 0);
+    return {
+      ingresos: totalMrr,
+      iva_trasladado: Math.round(totalMrr * 0.16),
+      iva_acreditable: 0,
+      isr_estimado: Math.round(totalMrr * 0.30),
+      note: 'needs materialized view refresh (R14_REPORTS_VIEWS.sql not applied)',
+    };
+  }),
+  // R26: handlers REALES contra Supabase. Cada uno ejecuta lectura PostgREST
+  // en pos_sales/pos_products/customers y agrega en JS. Si Supabase no responde
+  // o la tabla no existe -> fallback graceful con items:[] y note:'pendiente'.
+  'GET /api/reports/sales/by-product': requireRole(['admin','owner','superadmin'])(async (req, res) => {
+    try {
+      const q = url.parse(req.url, true).query || {};
+      const r = _parseRange(q);
+      const top = Math.min(Math.max(parseInt(q.top, 10) || 10, 1), 100);
+      const sales = await _sbReq('GET', `/pos_sales?select=total,items,created_at&created_at=gte.${r.from}&created_at=lte.${r.to}`);
+      const agg = {};
+      (sales || []).forEach(s => {
+        let items = s.items;
+        if (typeof items === 'string') { try { items = JSON.parse(items); } catch { items = []; } }
+        if (!Array.isArray(items)) return;
+        items.forEach(it => {
+          const key = it.product_id || it.id || it.sku || it.name || 'unknown';
+          const name = it.name || key;
+          const qty = parseFloat(it.qty || it.quantity || 1);
+          const rev = parseFloat(it.total || it.subtotal || (it.price || 0) * qty);
+          if (!agg[key]) agg[key] = { product_id: key, name, qty: 0, ingreso: 0 };
+          agg[key].qty += qty;
+          agg[key].ingreso += rev;
+        });
+      });
+      const by_product = Object.values(agg).sort((a, b) => b.ingreso - a.ingreso).slice(0, top);
+      return json(res, { ok: true, items: by_product, by_product, period: { from: r.from, to: r.to }, source: 'supabase', generated_at: Date.now() });
+    } catch (err) {
+      return json(res, { ok: true, items: [], by_product: [], note: 'pendiente: ' + (err && err.message || 'error'), source: 'fallback' });
+    }
+  }),
+  'GET /api/reports/sales/by-cashier': requireRole(['admin','owner','superadmin'])(async (req, res) => {
+    try {
+      const q = url.parse(req.url, true).query || {};
+      const r = _parseRange(q);
+      const sales = await _sbReq('GET', `/pos_sales?select=pos_user_id,total,created_at&created_at=gte.${r.from}&created_at=lte.${r.to}`);
+      const agg = {};
+      (sales || []).forEach(s => {
+        const k = s.pos_user_id || 'unknown';
+        if (!agg[k]) agg[k] = { pos_user_id: k, tickets: 0, revenue: 0 };
+        agg[k].tickets++;
+        agg[k].revenue += parseFloat(s.total || 0);
+      });
+      const by_cashier = Object.values(agg).sort((a, b) => b.revenue - a.revenue);
+      return json(res, { ok: true, items: by_cashier, by_cashier, period: { from: r.from, to: r.to }, source: 'supabase', generated_at: Date.now() });
+    } catch (err) {
+      return json(res, { ok: true, items: [], by_cashier: [], note: 'pendiente: ' + (err && err.message || 'error'), source: 'fallback' });
+    }
+  }),
+  'GET /api/reports/sales/daily': requireRole(['admin','owner','superadmin'])(async (req, res) => {
+    try {
+      const q = url.parse(req.url, true).query || {};
+      const r = _parseRange(q);
+      const sales = await _sbReq('GET', `/pos_sales?select=total,created_at&created_at=gte.${r.from}&created_at=lte.${r.to}`);
+      const agg = {};
+      (sales || []).forEach(s => {
+        const d = (s.created_at || '').slice(0, 10);
+        if (!agg[d]) agg[d] = { dia: d, tickets: 0, revenue: 0 };
+        agg[d].tickets++;
+        agg[d].revenue += parseFloat(s.total || 0);
+      });
+      const daily = Object.values(agg).sort((a, b) => a.dia.localeCompare(b.dia));
+      return json(res, { ok: true, items: daily, daily, period: { from: r.from, to: r.to }, source: 'supabase', generated_at: Date.now() });
+    } catch (err) {
+      return json(res, { ok: true, items: [], daily: [], note: 'pendiente: ' + (err && err.message || 'error'), source: 'fallback' });
+    }
+  }),
+  'GET /api/reports/inventory/value': requireRole(['admin','owner','superadmin'])(async (req, res) => {
+    try {
+      const products = await _sbReq('GET', '/pos_products?select=id,name,stock,cost,price');
+      let total_value = 0, units = 0, retail_value = 0;
+      const items = (products || []).map(p => {
+        const stock = parseFloat(p.stock || 0);
+        const cost = parseFloat(p.cost || 0);
+        const price = parseFloat(p.price || 0);
+        const v = stock * cost;
+        total_value += v;
+        retail_value += stock * price;
+        units += stock;
+        return { id: p.id, name: p.name, stock, cost, value: Math.round(v * 100) / 100 };
+      });
+      return json(res, { ok: true, items, total_value: Math.round(total_value * 100) / 100, retail_value: Math.round(retail_value * 100) / 100, units, by_location: [], source: 'supabase', generated_at: Date.now() });
+    } catch (err) {
+      return json(res, { ok: true, items: [], total_value: 0, by_location: [], note: 'pendiente: ' + (err && err.message || 'error'), source: 'fallback' });
+    }
+  }),
+  'GET /api/reports/customers/cohort': requireRole(['admin','owner','superadmin'])(async (req, res) => {
+    try {
+      const customers = await _sbReq('GET', '/customers?select=id,created_at,active');
+      const agg = {};
+      (customers || []).forEach(c => {
+        const m = (c.created_at || '').slice(0, 7);
+        if (!m) return;
+        if (!agg[m]) agg[m] = { cohort: m, new_customers: 0, active: 0 };
+        agg[m].new_customers++;
+        if (c.active) agg[m].active++;
+      });
+      const cohorts = Object.values(agg).sort((a, b) => a.cohort.localeCompare(b.cohort));
+      return json(res, { ok: true, items: cohorts, cohorts, source: 'supabase', generated_at: Date.now() });
+    } catch (err) {
+      return json(res, { ok: true, items: [], cohorts: [], note: 'pendiente: ' + (err && err.message || 'error'), source: 'fallback' });
+    }
+  }),
+  'GET /api/reports/profit': requireRole(['admin','owner','superadmin'])(async (req, res) => {
+    try {
+      const q = url.parse(req.url, true).query || {};
+      const r = _parseRange(q);
+      const [sales, products] = await Promise.all([
+        _sbReq('GET', `/pos_sales?select=total,items,created_at&created_at=gte.${r.from}&created_at=lte.${r.to}`),
+        _sbReq('GET', '/pos_products?select=id,cost,price'),
+      ]);
+      const costMap = {};
+      (products || []).forEach(p => { costMap[p.id] = parseFloat(p.cost || 0); });
+      let revenue = 0, cost = 0;
+      (sales || []).forEach(s => {
+        revenue += parseFloat(s.total || 0);
+        let items = s.items;
+        if (typeof items === 'string') { try { items = JSON.parse(items); } catch { items = []; } }
+        if (Array.isArray(items)) {
+          items.forEach(it => {
+            const c = costMap[it.product_id || it.id] || 0;
+            const qty = parseFloat(it.qty || it.quantity || 1);
+            cost += c * qty;
+          });
+        }
+      });
+      const profit = revenue - cost;
+      const margin = revenue > 0 ? Math.round((profit / revenue) * 10000) / 100 : 0;
+      return json(res, { ok: true, revenue: Math.round(revenue * 100) / 100, cost: Math.round(cost * 100) / 100, profit: Math.round(profit * 100) / 100, margin, period: { from: r.from, to: r.to }, source: 'supabase', generated_at: Date.now() });
+    } catch (err) {
+      return json(res, { ok: true, revenue: 0, cost: 0, profit: 0, margin: 0, note: 'pendiente: ' + (err && err.message || 'error'), source: 'fallback' });
+    }
+  }),
+  'GET /api/reports/abc-analysis': requireRole(['admin','owner','superadmin'])(async (req, res) => {
+    try {
+      const q = url.parse(req.url, true).query || {};
+      const r = _parseRange(q);
+      const sales = await _sbReq('GET', `/pos_sales?select=items,total,created_at&created_at=gte.${r.from}&created_at=lte.${r.to}`);
+      const agg = {};
+      (sales || []).forEach(s => {
+        let items = s.items;
+        if (typeof items === 'string') { try { items = JSON.parse(items); } catch { items = []; } }
+        if (!Array.isArray(items)) return;
+        items.forEach(it => {
+          const key = it.product_id || it.id || it.name || 'unknown';
+          const rev = parseFloat(it.total || it.subtotal || (it.price || 0) * (it.qty || 1));
+          if (!agg[key]) agg[key] = { product_id: key, name: it.name || key, ingreso: 0 };
+          agg[key].ingreso += rev;
+        });
+      });
+      const sorted = Object.values(agg).sort((a, b) => b.ingreso - a.ingreso);
+      const total = sorted.reduce((s, x) => s + x.ingreso, 0);
+      const classes = { A: [], B: [], C: [] };
+      let acc = 0;
+      sorted.forEach(p => {
+        acc += p.ingreso;
+        const pct = total > 0 ? acc / total : 0;
+        const cls = pct <= 0.8 ? 'A' : pct <= 0.95 ? 'B' : 'C';
+        classes[cls].push({ ...p, cum_pct: Math.round(pct * 10000) / 100 });
+      });
+      return json(res, { ok: true, items: sorted, classes, total_revenue: Math.round(total * 100) / 100, period: { from: r.from, to: r.to }, source: 'supabase', generated_at: Date.now() });
+    } catch (err) {
+      return json(res, { ok: true, items: [], classes: { A: [], B: [], C: [] }, note: 'pendiente: ' + (err && err.message || 'error'), source: 'fallback' });
+    }
+  }),
+  'GET /api/reports/daily': requireRole(['admin','owner','superadmin'])(async (req, res) => {
+    try {
+      const q = url.parse(req.url, true).query || {};
+      const r = _parseRange(q);
+      const sales = await _sbReq('GET', `/pos_sales?select=total,created_at&created_at=gte.${r.from}&created_at=lte.${r.to}`);
+      const agg = {};
+      (sales || []).forEach(s => {
+        const d = (s.created_at || '').slice(0, 10);
+        if (!agg[d]) agg[d] = { dia: d, tickets: 0, revenue: 0 };
+        agg[d].tickets++;
+        agg[d].revenue += parseFloat(s.total || 0);
+      });
+      const daily = Object.values(agg).sort((a, b) => a.dia.localeCompare(b.dia));
+      return json(res, { ok: true, items: daily, daily, period: { from: r.from, to: r.to }, source: 'supabase', generated_at: Date.now() });
+    } catch (err) {
+      return json(res, { ok: true, items: [], daily: [], note: 'pendiente: ' + (err && err.message || 'error'), source: 'fallback' });
+    }
+  }),
 
   // =============== STATS ===============
   'GET /api/stats': (req, res) => {

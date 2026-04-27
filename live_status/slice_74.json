@@ -1,0 +1,36 @@
+{
+  "slice": 74,
+  "title": "Supabase Realtime websocket test",
+  "range": "1820-1840",
+  "results": [
+    {"idx": 1820, "name": "GET /api/config/public existe en server", "status": "pass", "note": "Handler en api/index.js:4445-4452 (handlers['GET /api/config/public'])."},
+    {"idx": 1821, "name": "Endpoint valida JWT role==='anon'", "status": "pass", "note": "jwtRoleClaim() decodifica payload base64url y compara role==='anon' (line 4448-4449). Si no coincide -> 503 'no es role=anon'."},
+    {"idx": 1822, "name": "Endpoint retorna {supabase_url, supabase_anon_key}", "status": "pass", "note": "sendJSON(res, { supabase_url, supabase_anon_key }) line 4450 cuando key valida."},
+    {"idx": 1823, "name": "Endpoint 503 si SUPABASE_ANON_KEY ausente", "status": "pass", "note": "Linea 4447. Mensaje: 'SUPABASE_ANON_KEY no configurada'."},
+    {"idx": 1824, "name": "Llamada live a /api/config/public en produccion", "status": "fail", "note": "curl https://volvix-pos.vercel.app/api/config/public -> HTTP 503 {error: 'SUPABASE_ANON_KEY no configurada'}. Env var falta en Vercel."},
+    {"idx": 1825, "name": "public/js/realtime.js existe", "status": "pass", "note": "284 lineas. Importa createClient desde @supabase/supabase-js@2 (cdn jsdelivr line 11)."},
+    {"idx": 1826, "name": "realtime.js consume /api/config/public", "status": "pass", "note": "fetchPublicConfig() linea 59-65 hace fetch('/api/config/public', { credentials: 'same-origin' }). Lanza error si !ok."},
+    {"idx": 1827, "name": "realtime.js valida campos completos", "status": "pass", "note": "Linea 63-65: throw 'Config publica incompleta' si falta supabase_url o supabase_anon_key."},
+    {"idx": 1828, "name": "Cliente Supabase singleton", "status": "pass", "note": "_clientPromise (line 57) cachea promesa de createClient para reutilizar conexion."},
+    {"idx": 1829, "name": "Sin service_role key en cliente", "status": "pass", "note": "Comentario explicito line 8 'SOLO usa la anon key (NUNCA service key en cliente)'."},
+    {"idx": 1830, "name": "API publica Volvix.realtime documentada", "status": "pass", "note": "Header lines 1-9 documenta subscribeOrders/Notifications, broadcastNotification."},
+    {"idx": 1831, "name": "/api/health responde OK", "status": "pass", "note": "HTTP 200 supabase_connected:true users_table_accessible:true version 7.2.0."},
+    {"idx": 1832, "name": "SUPABASE_URL configurada en Vercel", "status": "pass", "note": "Inferido: /api/health reporta supabase_connected:true."},
+    {"idx": 1833, "name": "SUPABASE_ANON_KEY configurada en Vercel", "status": "fail", "note": "Endpoint 503 confirma ausencia. Usuario debe agregar var en Vercel Dashboard -> Settings -> Environment Variables."},
+    {"idx": 1834, "name": "Derivar anon key desde service_role", "status": "skip", "note": "No factible sin JWT_SECRET de Supabase project. Anon y service_role son JWTs distintos firmados con misma key pero con claims diferentes (role). No se intenta forjar."},
+    {"idx": 1835, "name": "WebSocket realtime conexion (browser)", "status": "skip", "note": "Bloqueado por idx 1824. Sin anon key no se puede instanciar createClient ni abrir wss://<project>.supabase.co/realtime/v1/websocket."},
+    {"idx": 1836, "name": "subscribeOrders/Notifications callable", "status": "skip", "note": "Bloqueado por idx 1835."},
+    {"idx": 1837, "name": "broadcastNotification callable", "status": "skip", "note": "Bloqueado por idx 1835."},
+    {"idx": 1838, "name": "Manejo de errores en createClientOnce", "status": "pass", "note": "Promesa rechazada si fetchPublicConfig falla; consumidor recibe error visible en consola."},
+    {"idx": 1839, "name": "Sin hardcoded keys en realtime.js", "status": "pass", "note": "Grep negativo: no aparecen literales eyJ ni service_role en archivo."}
+  ],
+  "endpoints_verified": [
+    "GET /api/config/public (api/index.js:4445) - codigo OK, retorna 503 en prod por env var"
+  ],
+  "artifacts": [
+    "public/js/realtime.js (284 lineas, fetch /api/config/public + createClient cacheado)"
+  ],
+  "summary": {"pass": 13, "fail": 2, "skip": 4, "total": 19},
+  "deploy": false,
+  "deploy_reason": "Sin cambios al codigo. Endpoint y client ya existen y son correctos. Pendiente: agregar SUPABASE_ANON_KEY en Vercel env vars (accion del usuario en dashboard). No se intenta derivar la key desde service_role por seguridad."
+}

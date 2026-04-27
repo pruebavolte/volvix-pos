@@ -248,7 +248,7 @@
       const tr = _trackingLinks(cmp, c.id);
       const renderedBody = _renderTemplate(body, c, {
         coupon: coupon ? coupon.code : '',
-        landing: cmp.landingSlug ? `${(typeof location!=='undefined'?location.origin:'')}/lp/${cmp.landingSlug}?cid=${cmp.id}&u=${c.id}` : '',
+        landing: cmp.landingSlug ? `${(typeof location!=='undefined'?location.origin:'')}/lp/${encodeURIComponent(cmp.landingSlug)}?cid=${encodeURIComponent(cmp.id)}&u=${encodeURIComponent(c.id)}` : '',
         track_open: tr.open,
         track_click: tr.click
       });

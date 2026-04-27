@@ -1,0 +1,44 @@
+{
+  "slice": 103,
+  "range": "2060-2080",
+  "topic": "voice_pos_r17",
+  "ts": "2026-04-26",
+  "status": "implemented",
+  "files": {
+    "client": "public/volvix-voice-wiring.js",
+    "server": "api/index.js (POST /api/voice/parse, ~L5763)",
+    "report": "R17_VOICE.md"
+  },
+  "stack": "Web Speech API nativa (SpeechRecognition + SpeechSynthesis); sin dependencias externas; sin IA",
+  "endpoint": {
+    "method": "POST",
+    "path": "/api/voice/parse",
+    "auth": "Bearer JWT o X-API-Key",
+    "in": {"text": "string"},
+    "out": {"ok": true, "intent": "string", "entities": "obj", "action": "obj|null", "original": "string"}
+  },
+  "intents": [
+    "add_to_cart  (agregar N producto)",
+    "search       (buscar X)",
+    "checkout     (cobrar efectivo|tarjeta|transferencia)",
+    "sales_today  (cuanto vendi hoy)",
+    "next_customer(siguiente cliente)",
+    "cancel       (cancelar)",
+    "unknown"
+  ],
+  "ui": {
+    "fab": "boton flotante 56px esquina inferior izquierda (#0ea5e9, rojo en escucha)",
+    "waveform": "5 barras animadas con keyframes vlxWave",
+    "tts": "SpeechSynthesisUtterance lang=es-MX, rate=1.0"
+  },
+  "browser_support": {
+    "fully_supported": ["Chrome desktop >=88", "Edge desktop >=90", "Opera/Brave"],
+    "partial":        ["Chrome Android", "Safari macOS 14+", "Safari iOS 14.5+"],
+    "unsupported":    ["Firefox desktop"],
+    "recommended":    "Chrome/Edge desktop con lang=es-MX",
+    "requires_https": true
+  },
+  "public_api": ["Volvix.voice.start()", "Volvix.voice.stop()", "Volvix.voice.speak(t)", "Volvix.voice.process(t)", "Volvix.voice.setLang(l)", "Volvix.voice.setApiBase(b)", "Volvix.voice.onAction(fn)", "Volvix.voice.supported"],
+  "deploy_required": true,
+  "notes": "Parser 100% local por regex; sin coste por minuto. Reconocimiento por turnos (continuous=false) para evitar falsos positivos en tienda."
+}

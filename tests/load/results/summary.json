@@ -1,0 +1,60 @@
+{
+  "base": "https://volvix-pos.vercel.app",
+  "cold_ms": 364.2,
+  "cold_code": 200,
+  "warm_avg_ms": 263.9,
+  "runs": [
+    {
+      "label": "products_get",
+      "total": 100,
+      "ok2xx": 0,
+      "e5xx": 0,
+      "timeouts_gt5s": 0,
+      "p50_ms": 208.4,
+      "p95_ms": 258.8,
+      "p99_ms": 270.6,
+      "codes": {
+        "401": 100
+      }
+    },
+    {
+      "label": "sales_post",
+      "total": 50,
+      "ok2xx": 0,
+      "e5xx": 0,
+      "timeouts_gt5s": 0,
+      "p50_ms": 208.6,
+      "p95_ms": 247.6,
+      "p99_ms": 312.2,
+      "codes": {
+        "401": 50
+      }
+    },
+    {
+      "label": "health_get",
+      "total": 20,
+      "ok2xx": 20,
+      "e5xx": 0,
+      "timeouts_gt5s": 0,
+      "p50_ms": 243.9,
+      "p95_ms": 277.7,
+      "p99_ms": 294.0,
+      "codes": {
+        "200": 20
+      }
+    },
+    {
+      "label": "login_post",
+      "total": 20,
+      "ok2xx": 0,
+      "e5xx": 0,
+      "timeouts_gt5s": 0,
+      "p50_ms": 334.1,
+      "p95_ms": 427.5,
+      "p99_ms": 748.1,
+      "codes": {
+        "401": 20
+      }
+    }
+  ]
+}

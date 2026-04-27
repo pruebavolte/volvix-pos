@@ -1,0 +1,43 @@
+{
+  "slice": 67,
+  "idx_range": [1690, 1710],
+  "task": "Cobertura i18n completa: traducir todos los strings ES",
+  "date": "2026-04-26",
+  "status": "done",
+  "file_modified": "volvix-i18n-wiring.js",
+  "htmls_modified": [],
+  "keys_before_per_lang": 122,
+  "keys_after_per_lang": 187,
+  "total_lines_kv": 561,
+  "namespaces_added": [
+    "common.* (30 keys)",
+    "pos.* extended (14 keys: products, sales, customers, inventory, cash_register, cashier, shift, opening, dashboard, reports, returns, quotes, tickets, low_stock)",
+    "sales.* (10 keys: new, cobrar, cancel, discount, today, cash, card, daily, top_products, total_to_collect)",
+    "tenant.* (12 keys: title, list, active, plan, modules, devices, domain, subdomain, vertical, role.admin, brand, commercial_name)"
+  ],
+  "common_keys_added": [
+    "common.save", "common.cancel", "common.delete", "common.edit",
+    "common.search", "common.export", "common.import", "common.close",
+    "common.open", "common.new", "common.view", "common.status",
+    "common.type", "common.date", "common.user", "common.email",
+    "common.phone", "common.total", "common.subtotal", "common.active",
+    "common.inactive", "common.expires", "common.expired", "common.version",
+    "common.system", "common.config", "common.logout", "common.save_changes",
+    "common.no_results"
+  ],
+  "api_alias": "window.Volvix.i18n = window.I18nAPI",
+  "setLanguage_no_reload": true,
+  "setLanguage_mechanism": "translateAll() + MutationObserver + setInterval(3000ms) + CustomEvent volvix:langchange",
+  "html_invasive_changes": false,
+  "top_es_strings_covered": [
+    "Estado", "Vendidos", "Cancelar", "Total", "Producto", "Editar",
+    "Cliente", "Cerrar", "Activos", "Versión", "Vence", "Vencido",
+    "Tipo", "Plan", "Módulos", "Dispositivos", "Cajero", "Apertura",
+    "Turno", "Salir", "Email", "Sistema", "Configuración", "Eliminar",
+    "Exportar", "Guardar cambios", "Stock bajo", "Devoluciones",
+    "Cotizaciones", "Reportes", "Dashboard", "Tickets", "Subdominio",
+    "Dominio", "Vertical", "Marca", "Nombre comercial"
+  ],
+  "languages": ["es", "en", "pt"],
+  "next_steps": "Opcional: gradualmente añadir data-i18n='common.save' (etc) en HTMLs sin tocar texto - retranslate() los recoge."
+}

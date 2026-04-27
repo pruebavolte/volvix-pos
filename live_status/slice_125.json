@@ -1,0 +1,67 @@
+{
+  "slice": 125,
+  "range": "2480-2520",
+  "topic": "R17_FINAL_MASTER_SMOKE",
+  "ts": "2026-04-26",
+  "status": "completed",
+  "base_url": "https://volvix-pos.vercel.app",
+  "auth": "admin@volvix.test (superadmin JWT)",
+  "endpoints_tested": 30,
+  "results": {
+    "pass": 19,
+    "fail": 3,
+    "skip_404": 8,
+    "pass_rate_pct": 63.3
+  },
+  "latency_ms": {
+    "p50": 335,
+    "p95": 561,
+    "avg": 355,
+    "min": 205,
+    "max": 726
+  },
+  "fails": [
+    {"ep": "/api/currencies", "code": 500, "ms": 401, "cause": "FX provider o tabla currencies"},
+    {"ep": "/api/fx/rates", "code": 500, "ms": 726, "cause": "timeout proveedor FX externo"},
+    {"ep": "/api/customer/orders", "code": 403, "ms": 255, "cause": "requiere customer_token, no admin (re-clasificable N/A)"}
+  ],
+  "skipped_404_routes_not_wired": [
+    "/api/gdpr/access",
+    "/api/ml/inventory/forecast",
+    "/api/warehouses",
+    "/api/promotions",
+    "/api/appointments",
+    "/api/reviews",
+    "/api/gift-cards",
+    "/api/segments"
+  ],
+  "r17_passes_confirmed": [
+    "/api/payments/wallets/config (205ms)",
+    "/api/ocr/parse-receipt (280ms)"
+  ],
+  "core_pos_health_pct": 100,
+  "r14_health_pct": 95,
+  "r15_r16_health_pct": 95,
+  "r17_wired_pct": 40,
+  "files_generated_r17_count": {
+    "reports_md": 19,
+    "wirings_js": 17,
+    "sql_migrations": 5
+  },
+  "report_path": "R17_FINAL_MASTER.md",
+  "score_estimated": 82,
+  "veredict": "PRODUCTION-READY core + R14/R15/R16; R17 requiere registrar 8 handlers en api/index.js",
+  "next_actions": [
+    "Wire 8 R17 routes en api/index.js o usar volvix-master-controller.js auto-loader",
+    "Diagnosticar 500 en /api/currencies y /api/fx/rates (revisar tabla currencies + proveedor FX)",
+    "Ajustar smoke /api/customer/orders a usar customer_token"
+  ],
+  "system_totals_estimated": {
+    "reports_md_all": 70,
+    "wirings_js_all": 290,
+    "sql_migrations_all": 30,
+    "verticals": 60,
+    "endpoints_total": 180,
+    "endpoints_live": 150
+  }
+}

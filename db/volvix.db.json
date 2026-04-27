@@ -23,9 +23,18 @@
       "name": "BarberShop Ruiz",
       "giro": "barberia",
       "plan": "pro",
-      "status": "active",
+      "status": "paused",
       "mrr": 799,
       "created": 1776119089860
+    },
+    {
+      "id": "TNT278925",
+      "name": "Test Tenant Slice07",
+      "giro": "general",
+      "plan": "pro",
+      "status": "active",
+      "mrr": 500,
+      "created": 1777238278925
     }
   ],
   "features": [
@@ -39,7 +48,7 @@
     },
     {
       "id": "FEAT-0002",
-      "name": "Agregar producto por código",
+      "name": "Agregar producto por cÃ³digo",
       "module": "pos",
       "status": "stable",
       "usage": 1843,
@@ -47,7 +56,7 @@
     },
     {
       "id": "FEAT-0030",
-      "name": "Corte de caja estándar",
+      "name": "Corte de caja estÃ¡ndar",
       "module": "corte",
       "status": "stable",
       "usage": 1843,
@@ -55,7 +64,7 @@
     },
     {
       "id": "FEAT-0031",
-      "name": "Corte · campo temperatura",
+      "name": "Corte Â· campo temperatura",
       "module": "corte",
       "status": "extended",
       "parent": "FEAT-0030",
@@ -88,7 +97,7 @@
     },
     {
       "id": "FEAT-0150",
-      "name": "Diseñador drag-and-drop etiquetas",
+      "name": "DiseÃ±ador drag-and-drop etiquetas",
       "module": "etiquetas",
       "status": "stable",
       "usage": 234,
@@ -96,7 +105,7 @@
     },
     {
       "id": "FEAT-0240",
-      "name": "Envío de ticket a WhatsApp automático",
+      "name": "EnvÃ­o de ticket a WhatsApp automÃ¡tico",
       "module": "pos",
       "status": "new",
       "usage": 23,
@@ -108,7 +117,7 @@
     {
       "id": "TKT-1047",
       "tenant": "TNT001",
-      "title": "Impresora térmica no imprime",
+      "title": "Impresora tÃ©rmica no imprime",
       "status": "open",
       "aiHandling": true,
       "opened": 1777155769860
@@ -126,9 +135,9 @@
   "knowledge": [
     {
       "id": "KB-001",
-      "problem": "Impresora térmica Epson TM-T20III no imprime",
+      "problem": "Impresora tÃ©rmica Epson TM-T20III no imprime",
       "cases": 47,
-      "mostCommonFix": "Cambio de puerto USB003 → USB001",
+      "mostCommonFix": "Cambio de puerto USB003 â†’ USB001",
       "successRate": 0.89,
       "avgTimeSec": 52
     },
@@ -142,7 +151,7 @@
     },
     {
       "id": "KB-003",
-      "problem": "Báscula bluetooth no conecta",
+      "problem": "BÃ¡scula bluetooth no conecta",
       "cases": 8,
       "mostCommonFix": "Reemparejar + driver v2.1",
       "successRate": 0.75,
@@ -157,7 +166,7 @@
     {
       "id": "USR001",
       "email": "admin@volvix.test",
-      "password": "Volvix2026!",
+      "password": "admin123",
       "role": "superadmin",
       "tenant_id": "TNT001",
       "status": "active",
@@ -166,7 +175,7 @@
     {
       "id": "USR002",
       "email": "owner@volvix.test",
-      "password": "Volvix2026!",
+      "password": "owner123",
       "role": "owner",
       "tenant_id": "TNT002",
       "status": "active",
@@ -175,11 +184,20 @@
     {
       "id": "USR003",
       "email": "cajero@volvix.test",
-      "password": "Volvix2026!",
+      "password": "cajero123",
       "role": "cajero",
       "tenant_id": "TNT001",
       "status": "active",
       "created": 1774563889860
+    },
+    {
+      "id": "USR278954",
+      "email": "invitee1777238278@test.com",
+      "password": "",
+      "role": "cajero",
+      "tenant_id": "TNT001",
+      "status": "invited",
+      "created": 1777238278954
     }
   ]
 }

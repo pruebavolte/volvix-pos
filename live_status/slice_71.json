@@ -1,0 +1,37 @@
+{
+  "slice": "71",
+  "title": "Stripe deep test (idx 1760-1780)",
+  "deployed_url": "https://volvix-pos.vercel.app",
+  "deploy_id": "dpl_BLkUfhJ4Wroa2yJZkFBRgCifzfar",
+  "fix_applied": "api/index.js webhook handler: añadida tolerancia 5min en timestamp + filtrado estricto a payment_intent.succeeded/payment_intent.payment_failed/charge.refunded (otros eventos retornan {received,ignored})",
+  "results": [
+    {"idx":1760,"name":"POST /api/payments/stripe/intent sin STRIPE_SECRET_KEY","status":"pass","note":"con auth válido retorna 503 {error:'STRIPE_SECRET_KEY no configurada'} (línea 3923). Sin auth retorna 401 antes (esperado, requireAuth)."},
+    {"idx":1761,"name":"POST /api/payments/stripe/webhook sin WEBHOOK_SECRET","status":"pass","note":"HTTP 503 verificado en producción: {\"error\":\"STRIPE_WEBHOOK_SECRET no configurada\"} (no requiere auth, env check primero)"},
+    {"idx":1762,"name":"GET /api/payments/:id/status local data","status":"pass","note":"handler línea 4004 solo consulta supabase, NO llama Stripe. Retorna 200 con row local o 404 si no existe. Endpoint requiere auth (401 sin token, esperado)."},
+    {"idx":1763,"name":"webhook lee body crudo (Buffer)","status":"pass","note":"readRawBody() línea 3883 acumula chunks como Buffer.concat — correcto para HMAC"},
+    {"idx":1764,"name":"webhook parsea header stripe-signature t=,v1=","status":"pass","note":"split(',') + indexOf('=') línea 3965-3968"},
+    {"idx":1765,"name":"webhook HMAC-SHA256 timing-safe","status":"pass","note":"crypto.createHmac + crypto.timingSafeEqual línea 3973-3978"},
+    {"idx":1766,"name":"webhook tolerancia 5min","status":"pass","note":"AÑADIDO: Math.abs(nowSec-tsNum)>300 retorna 400 'timestamp outside tolerance'"},
+    {"idx":1767,"name":"webhook solo procesa 3 eventos","status":"pass","note":"AÑADIDO: switch limita a payment_intent.succeeded/payment_failed/charge.refunded; otros responden {received,ignored}"},
+    {"idx":1768,"name":"webhook persiste en payments table","status":"pass","note":"PATCH supabase /payments?provider_payment_id=eq.X con status+updated_at (línea ~3995). charge.refunded usa obj.payment_intent como id"},
+    {"idx":1769,"name":"cliente carga Stripe.js dinámicamente","status":"pass","note":"loadStripeJS() público/volvix-stripe-wiring.js línea 13: createElement+appendChild con cache singleton"},
+    {"idx":1770,"name":"cliente maneja 503","status":"pass","note":"línea 100: if(r.status===503) throw 'Stripe no configurado: '+msg → propaga a opts.onError"},
+    {"idx":1771,"name":"cliente onSuccess callback","status":"pass","note":"línea 161-163: paymentIntent.status==='succeeded' → opts.onSuccess({ok:true,...})"},
+    {"idx":1772,"name":"cliente onError + retry","status":"partial","note":"onError invocado en error de fetch y de confirmPayment. Retry: botón Pagar se reactiva (btn.disabled=false) tras error → permite reintento manual. No hay retry automático."}
+  ],
+  "summary": {"pass":12,"partial":1,"fail":0},
+  "endpoints_verified_live": [
+    "POST /api/payments/stripe/webhook → 503 sin WEBHOOK_SECRET (verificado HTTP)",
+    "POST /api/payments/stripe/intent → 401 sin auth (env check tras auth, esperado)",
+    "GET /api/payments/:id/status → 401 sin auth"
+  ],
+  "code_changes": [
+    "api/index.js handler webhook: timestamp tolerance ±300s",
+    "api/index.js handler webhook: switch reducido a 3 eventos (succeeded/payment_failed/charge.refunded) + ignored others",
+    "charge.refunded usa obj.payment_intent (charge object) para resolver provider_payment_id"
+  ],
+  "pending": [
+    "Configurar STRIPE_SECRET_KEY + STRIPE_WEBHOOK_SECRET + STRIPE_PUBLISHABLE_KEY en Vercel para test E2E real",
+    "Considerar retry automático con backoff en cliente para fallos de red (actual es retry manual)"
+  ]
+}

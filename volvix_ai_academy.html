@@ -604,7 +604,7 @@ function searchVideo() {
   if (!q) return;
   const found = VIDEOS.find(v => v.title.toLowerCase().includes(q.toLowerCase()));
   if (found) {
-    alert('✅ ¡Encontramos el video!\n\n"' + found.title + '" (' + found.dur + ')\n\nYa se ha usado ' + found.uses + ' veces. No vamos a generar otro igual — usa el existente.');
+    VolvixUI.toast({type:'success', message:'✅ ¡Encontramos el video!\n\n"' + found.title + '" (' + found.dur + ')\n\nYa se ha usado ' + found.uses + ' veces. No vamos a generar otro igual — usa el existente.'});
   } else {
     openGenerate(q);
   }
@@ -640,9 +640,9 @@ renderVideos();
 renderManuals();
 </script>
 
+<script defer src="auth-helper.js"></script>
 <script src="volvix-ai-wiring.js" defer></script>
 <script src="volvix-ai-real-wiring.js" defer></script>
-<script src="volvix-tests-wiring.js" defer></script>
 <script src="volvix-charts-wiring.js" defer></script>
 <script src="volvix-notifications-wiring.js" defer></script>
 <script src="volvix-backup-wiring.js" defer></script>

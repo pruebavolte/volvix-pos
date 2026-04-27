@@ -1,0 +1,77 @@
+{
+  "slice": 49,
+  "idx_range": "660-700",
+  "title": "Test profundo MULTI-CURRENCY + i18n",
+  "date": "2026-04-26",
+  "target": "https://volvix-pos.vercel.app",
+  "auth": {
+    "user": "admin@volvix.test",
+    "token_obtained": true,
+    "method": "POST /api/login -> JWT Bearer (role superadmin)"
+  },
+  "endpoints_descubiertos": {
+    "GET /api/currencies": "linea 2738 (real, /currencies?active=eq.true) Y linea 4456 (override stub)",
+    "GET /api/fx/rates": "linea 2747 (real, lee fx_rates Supabase) Y linea 4470 (override stub)",
+    "POST /api/fx/refresh": "linea 2767 (real, fetch exchangerate.host + upsert) Y linea 4481 (override stub no-op)"
+  },
+  "hallazgo_critico": {
+    "tipo": "doble registro de handler con override stub",
+    "detalle": "Los handlers reales en lineas 2736-2797 quedan sobrescritos por stubs en lineas 4456-4483. La produccion responde con el stub: a) /api/currencies devuelve {code,name,symbol,rate} con 4 monedas y campo 'rate' en lugar del esperado 'decimals'; b) /api/fx/rates ignora el parametro base y siempre devuelve base=MXN; c) /api/fx/refresh es no-op (source:'stub'), no llama exchangerate.host ni toca fx_rates en Supabase",
+    "evidencia": "GET /api/fx/rates?base=USD devuelve identico body que ?base=MXN con base=MXN, source ausente, fetched_at ausente. POST /api/fx/refresh devuelve {source:'stub'} sin tocar BD",
+    "impacto": "T2 currencies (decimals) FAIL, T4 currencies (8 monedas seed) FAIL, T2 fx (base USD) FAIL, T3 fx refresh (exchangerate.host) FAIL, T5 fx triangulacion via MXN imposible verificar en server, T6 fx cached cliente OK (logica esta en wiring.js)"
+  },
+  "currencies": {
+    "T1_array_min_MXN_USD_EUR": {"got": 200, "result": "PASS", "note": "currencies array contiene MXN, USD, EUR, GBP"},
+    "T2_schema_decimals": {"got": "{code,name,symbol,rate}", "expected": "{code,name,symbol,decimals}", "result": "FAIL", "note": "stub usa 'rate' en lugar de 'decimals'; el handler real (linea 2741) si selecciona decimals pero esta sobrescrito"},
+    "T3_publica_sin_auth": {"got": 200, "expected": 200, "result": "PASS", "note": "endpoint publico, sin Authorization header retorna 200"},
+    "T4_8_monedas_seed": {"got": 4, "expected": ">=8", "result": "FAIL", "note": "stub devuelve solo 4 (MXN, USD, EUR, GBP). El frontend wiring.js define 8 DEFAULT_CURRENCIES (incluye COP, ARS, BRL, CAD), pero la API no las expone porque la tabla currencies en Supabase probablemente no tiene seed o el override stub corta la consulta"}
+  },
+  "fx_rates": {
+    "T1_GET_base_MXN": {"got": 200, "result": "PASS", "note": "rates {USD:0.058, EUR:0.054, GBP:0.046, CAD:0.079, JPY:8.7}"},
+    "T2_GET_base_USD": {"got": "base=MXN ignorando query", "expected": "rates desde USD", "result": "FAIL", "note": "stub hardcodea base=MXN, ignora ?base=USD; el handler real (linea 2750) si parsea el query string"},
+    "T3_POST_refresh_admin": {"got": "{ok:true,refreshed_at:...,source:'stub'}", "expected": "fetch real desde exchangerate.host con count y fetched_at", "result": "FAIL", "note": "stub no-op en linea 4481-4483 sobrescribe el handler real (linea 2767) que llama fetchExchangerateHost() y hace upsert en Supabase"},
+    "T4_cache_6h_cliente": {"result": "PASS_CODE", "note": "volvix-currency-wiring.js linea 16: FX_TTL_MS=6*60*60*1000 y guarda en localStorage 'volvix.fx.cache' con timestamp ts; verifica c.ts > 6h antes de re-fetch"},
+    "T5_triangulacion_via_MXN": {"result": "PASS_CODE", "note": "convert() en wiring.js linea 85-88 hace inBase=amount/rates[from]; return inBase*rates[to]. Triangulacion correcta. NO testeable server-side porque /api/fx/rates ignora base"},
+    "T6_offline_usa_cached": {"result": "PASS_CODE", "note": "loadRates() linea 56-65: lee localStorage primero, si TTL OK retorna sin tocar fetch. Si fetch falla (catch _), this.rates queda con valor previo"}
+  },
+  "conversion_frontend": {
+    "T1_convert_100_MXN_USD": {"expected": "~5", "got": "5.8", "result": "PASS", "note": "100 * rates.USD (0.058) = 5.8 (cerca de 5)"},
+    "T2_convert_same_currency": {"result": "PASS", "note": "linea 82: if (from === to) return Number(amount)"},
+    "T3_convert_currency_desconocida": {"got": "Number(amount)", "expected": "null o throw", "result": "FAIL", "note": "linea 89: return Number(amount) (devuelve mismo monto sin conversion ni warning); deberia retornar null o lanzar Error('unknown currency')"}
+  },
+  "i18n": {
+    "T1_setLanguage_en": {"result": "PASS", "note": "window.setLanguage('en') existe (linea 501); cambia currentLang, llama translateAll(), dispara evento volvix:langchange"},
+    "T2_setLanguage_pt": {"result": "PASS", "note": "TRANSLATIONS.pt existe con ~120 keys (linea 387 'action.save':'Salvar')"},
+    "T3_setLanguage_es_default": {"result": "PASS", "note": "FALLBACK='es' (linea 440); si localStorage vacio y navigator.language no es en|pt, cae en es"},
+    "T4_strings_criticos": {"result": "PASS", "note": "TRANSLATIONS contiene login.*, nav.products, nav.customers, sales.*, pos.* en es/en/pt (3 idiomas x ~120 keys)"},
+    "T5_t_common_save": {"got": "fallback al key 'common.save' (no existe)", "expected": "Save/Guardar/Salvar", "result": "FAIL", "note": "el namespace usado es 'action.save' (lineas 114/252/387), NO 'common.save'. t('common.save') retornara 'common.save' como fallback porque no esta en ninguno de los 3 dicts"},
+    "T6_persistencia_localStorage": {"result": "PASS", "note": "setLanguage() linea 504: localStorage.setItem('volvix:lang', lang). Init linea 444 lee de la misma key"}
+  },
+  "selector_ui": {
+    "T1_flotante_esquina_derecha": {"result": "PASS", "note": "createLangSelector() linea 545-565: position:fixed; top:140px; right:20px; width:44px height:44px circular con border 2px #2563eb"},
+    "T2_click_menu_flags": {"result": "PASS", "note": "dropdown linea 567-590 con LOCALES.es flag MX, en flag US, pt flag BR; muestra emoji + nombre"},
+    "T3_cambio_aplica_sin_reload": {"result": "PASS", "note": "setLanguage() llama translateAll() (linea 506) que reescribe data-i18n textContent, placeholders, titles, values via querySelectorAll. NO recarga pagina"}
+  },
+  "deploy_status": {
+    "volvix-i18n-wiring.js": "deployed (HTTP 200, 22659 bytes)",
+    "volvix-currency-wiring.js": "deployed (HTTP 200, 5277 bytes)",
+    "incluido_en_index_html": true,
+    "tag": "<script src=\"volvix-i18n-wiring.js\" defer></script> y <script src=\"volvix-currency-wiring.js\" defer></script>"
+  },
+  "tabla_supabase": {
+    "currencies": "PROBABLE AUSENTE O SIN SEED - si existiera con 8 filas active=true, el handler real devolveria 8; el override stub solo aparece como fallback. Si fueran reales 4 monedas en BD el log indicaria source=db, pero el shape {code,name,symbol,rate} confirma que se ejecuta el stub de fallback (no el de BD que pediria decimals)",
+    "fx_rates": "AUSENTE - el stub en linea 4481 ni siquiera intenta query (a diferencia del de currencies en 4458). Confirmacion: POST refresh devuelve source:'stub' sin count ni fetched_at"
+  },
+  "score": {"pass": 13, "pass_code_only": 3, "fail": 7, "total": 23},
+  "veredicto": "AMBER",
+  "razon_veredicto": "Frontend i18n + currency wiring funcional y desplegado (selector, traducciones es/en/pt, conversion, cache 6h). Backend bloqueado por mismo patron de slice 35: handlers reales sobrescritos por stubs. Schema currencies usa 'rate' donde wiring espera 'decimals'. /api/fx/rates ignora ?base. /api/fx/refresh es no-op.",
+  "acciones_requeridas": [
+    "1. ELIMINAR override stubs lineas 4455-4483 (currencies, fx/rates, fx/refresh) en api/index.js para liberar handlers reales (lineas 2736-2797)",
+    "2. Crear/poblar tabla 'currencies' en Supabase con 8 monedas seed (MXN, USD, EUR, COP, ARS, BRL, GBP, CAD) columnas: code, name, symbol, decimals, active",
+    "3. Crear tabla 'fx_rates' en Supabase con columnas: base_code, quote_code, rate, source, fetched_at",
+    "4. Ejecutar POST /api/fx/refresh inicial para sembrar tasas desde exchangerate.host",
+    "5. Anadir alias 'common.save' -> 'action.save' o normalizar test plan a 'action.save' (decision producto)",
+    "6. Cambiar Volvix.Currency.convert() linea 89: en lugar de 'return Number(amount)' para currencies desconocidas, lanzar Error o retornar null para que T3 conversion frontend pase",
+    "7. Despues de fix re-correr T2 currencies schema, T2 fx base USD, T3 fx refresh y verificar source='exchangerate.host' con count>0"
+  ]
+}

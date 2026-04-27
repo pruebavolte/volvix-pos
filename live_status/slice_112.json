@@ -1,0 +1,34 @@
+{
+  "slice": 112,
+  "range": "2240-2260",
+  "topic": "promotions_coupons",
+  "ts": "2026-04-26",
+  "status": "implemented",
+  "files": {
+    "sql":     "db/R17_PROMOTIONS.sql",
+    "api":     "api/index.js",
+    "client":  "volvix-promotions-wiring.js",
+    "report":  "R17_PROMOTIONS.md"
+  },
+  "schema": {
+    "promotions":      ["id","tenant_id","code","type","value","min_amount","max_uses","used_count","category_id","required_tier","starts_at","ends_at","active"],
+    "promotion_uses":  ["id","promo_id","sale_id","customer_id","discount_applied","ts"],
+    "indexes":         ["uniq(tenant_id,code)","tenant_id","active","ends_at desc","promo_id","customer_id","ts desc"],
+    "function":        "validate_promotion(code, tenant, customer, cart_total)"
+  },
+  "endpoints": [
+    "GET    /api/promotions",
+    "POST   /api/promotions",
+    "PATCH  /api/promotions/:id",
+    "DELETE /api/promotions/:id",
+    "POST   /api/promotions/validate"
+  ],
+  "types_supported": ["percent","fixed","bogo","first_purchase","loyalty_tier"],
+  "validation_messages": ["ok","invalid_code","not_started","expired","max_uses_reached","min_amount_not_met","not_first_purchase","tier_too_low"],
+  "server_side_hook": "global.applyPromoToSale({tenant_id,code,customer_id,cart_total,sale_id})",
+  "client_features": ["checkout input","admin CRUD table","window.volvixPromotions API"],
+  "syntax_check": "node -c api/index.js: SYNTAX_OK",
+  "idempotent_sql": true,
+  "deploy_required": true,
+  "notes": "applyPromoToSale expuesto en global; integrar dentro del handler POST /api/sales para aplicar descuento server-side cuando body.promo_code presente. BOGO usa heurística 50%; refinar con items por categoría en iteración futura."
+}

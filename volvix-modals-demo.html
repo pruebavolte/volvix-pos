@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<title>Volvix UI — Demo</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="volvix-modals.css">
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #f1f5f9; margin: 0; padding: 32px; }
+  h1 { margin-top: 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; max-width: 1100px; }
+  .card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 16px; }
+  .card h3 { margin: 0 0 8px; font-size: 14px; color: #cbd5e1; }
+  .card p  { margin: 0 0 12px; font-size: 12px; color: #94a3b8; }
+  button.demo {
+    background: #3b82f6; color: #fff; border: 0; padding: 8px 14px;
+    border-radius: 6px; cursor: pointer; font-size: 13px; width: 100%;
+  }
+  button.demo:hover { background: #2563eb; }
+  pre { background:#0b1322; padding:12px; border-radius:6px; font-size:12px; overflow:auto; }
+</style>
+</head>
+<body>
+<h1>Volvix UI — Demo de componentes</h1>
+<p style="color:#94a3b8">Vanilla JS. Click cada botón para probar.</p>
+
+<div class="grid">
+
+  <div class="card">
+    <h3>Modal básico</h3>
+    <p>Modal con título, body HTML y close.</p>
+    <button class="demo" onclick="demoModal()">Abrir modal</button>
+  </div>
+
+  <div class="card">
+    <h3>Confirm</h3>
+    <p>Pregunta sí/no.</p>
+    <button class="demo" onclick="demoConfirm()">Confirmar</button>
+  </div>
+
+  <div class="card">
+    <h3>Destructive Confirm</h3>
+    <p>Requiere escribir ELIMINAR.</p>
+    <button class="demo" onclick="demoDestructive()">Eliminar...</button>
+  </div>
+
+  <div class="card">
+    <h3>Form simple</h3>
+    <p>text + email + textarea.</p>
+    <button class="demo" onclick="demoFormSimple()">Form simple</button>
+  </div>
+
+  <div class="card">
+    <h3>Form completo</h3>
+    <p>Casi todos los tipos.</p>
+    <button class="demo" onclick="demoFormCompleto()">Form completo</button>
+  </div>
+
+  <div class="card">
+    <h3>Máscaras MX</h3>
+    <p>tel-mx, RFC, CP, CURP.</p>
+    <button class="demo" onclick="demoMascaras()">Probar máscaras</button>
+  </div>
+
+  <div class="card">
+    <h3>Combobox</h3>
+    <p>Búsqueda en lista local.</p>
+    <button class="demo" onclick="demoCombobox()">Combobox</button>
+  </div>
+
+  <div class="card">
+    <h3>Autocomplete async</h3>
+    <p>Búsqueda con debounce.</p>
+    <button class="demo" onclick="demoAutocomplete()">Autocomplete</button>
+  </div>
+
+  <div class="card">
+    <h3>Multiselect</h3>
+    <p>Chips con X.</p>
+    <button class="demo" onclick="demoMultiselect()">Multiselect</button>
+  </div>
+
+  <div class="card">
+    <h3>Toast success</h3>
+    <button class="demo" onclick="VolvixUI.toast({type:'success', message:'Guardado correctamente'})">Toast OK</button>
+  </div>
+
+  <div class="card">
+    <h3>Toast error</h3>
+    <button class="demo" onclick="VolvixUI.toast({type:'error', message:'No se pudo conectar al servidor'})">Toast error</button>
+  </div>
+
+  <div class="card">
+    <h3>Toast warn / info</h3>
+    <button class="demo" onclick="VolvixUI.toast({type:'warn', message:'Atención: stock bajo'}); VolvixUI.toast({type:'info', message:'Nueva versión disponible'})">Toast warn+info</button>
+  </div>
+
+  <div class="card">
+    <h3>Loading 2s</h3>
+    <button class="demo" onclick="demoLoading()">Loading</button>
+  </div>
+
+  <div class="card">
+    <h3>Submit con error</h3>
+    <p>onSubmit lanza error → banner.</p>
+    <button class="demo" onclick="demoSubmitError()">Probar</button>
+  </div>
+
+</div>
+
+<script src="volvix-modals.js"></script>
+<script>
+function demoModal() {
+  VolvixUI.modal({
+    title: 'Bienvenida',
+    description: 'Este es un modal genérico',
+    body: '<p style="margin:0;line-height:1.5;color:#cbd5e1">Hola, este modal acepta <strong>HTML</strong> o un <code>HTMLElement</code>. Cierra con ESC, click en backdrop, o la X.</p>',
+    size: 'md'
+  });
+}
+
+async function demoConfirm() {
+  var ok = await VolvixUI.confirm({
+    title: '¿Continuar?',
+    message: '¿Deseas marcar este pedido como pagado?',
+    confirmText: 'Sí, marcar',
+    cancelText: 'No'
+  });
+  VolvixUI.toast({ type: ok ? 'success' : 'info', message: ok ? 'Pedido marcado' : 'Cancelado' });
+}
+
+async function demoDestructive() {
+  var ok = await VolvixUI.destructiveConfirm({
+    title: 'Eliminar producto',
+    message: 'Esta acción borrará el producto y su historial. No se puede deshacer.',
+    requireText: 'ELIMINAR'
+  });
+  VolvixUI.toast({ type: ok ? 'success' : 'info', message: ok ? 'Producto eliminado' : 'Cancelado' });
+}
+
+async function demoFormSimple() {
+  var values = await VolvixUI.form({
+    title: 'Nuevo cliente',
+    fields: [
+      { name: 'nombre', label: 'Nombre completo', type: 'text', required: true, placeholder: 'Juan Pérez' },
+      { name: 'email',  label: 'Email', type: 'email', required: true },
+      { name: 'notas',  label: 'Notas', type: 'textarea', maxLength: 200, hint: 'Máx 200 caracteres' }
+    ],
+    onSubmit: async (v) => { await new Promise(r => setTimeout(r, 800)); return v; }
+  });
+  if (values) VolvixUI.toast({ type: 'success', message: 'Guardado: ' + values.nombre });
+}
+
+async function demoFormCompleto() {
+  var values = await VolvixUI.form({
+    title: 'Producto',
+    description: 'Da de alta un producto en el catálogo',
+    size: 'lg',
+    fields: [
+      { name: 'codigo', label: 'Código', type: 'text', required: true, maxLength: 20 },
+      { name: 'nombre', label: 'Nombre', type: 'text', required: true },
+      { name: 'precio', label: 'Precio', type: 'number', required: true, min: 0, step: 0.01, default: 0 },
+      { name: 'tel',    label: 'Teléfono proveedor', type: 'tel', mask: 'tel-mx', placeholder: '(555) 123-4567' },
+      { name: 'rfc',    label: 'RFC proveedor', type: 'text', mask: 'rfc' },
+      { name: 'fecha',  label: 'Fecha alta', type: 'date', required: true, default: new Date().toISOString().slice(0,10) },
+      { name: 'categoria', label: 'Categoría', type: 'select', required: true, options: [
+        { value: 'a', label: 'Alimentos' },
+        { value: 'b', label: 'Bebidas' },
+        { value: 'c', label: 'Limpieza' }
+      ]},
+      { name: 'tipo', label: 'Tipo', type: 'radio', default: 'fisico', options: [
+        { value: 'fisico', label: 'Físico' }, { value: 'digital', label: 'Digital' }
+      ]},
+      { name: 'activo',   label: 'Producto activo', type: 'switch', default: true },
+      { name: 'destacado', label: 'Mostrar en home', type: 'checkbox' },
+      { name: 'pwd', label: 'Password (opcional)', type: 'password', minLength: 6 },
+      { name: 'desc', label: 'Descripción', type: 'textarea' }
+    ],
+    onSubmit: async (v) => v
+  });
+  if (values) {
+    VolvixUI.modal({
+      title: 'Valores recibidos',
+      body: '<pre style="margin:0">'+JSON.stringify(values, null, 2)+'</pre>',
+      size: 'md'
+    });
+  }
+}
+
+async function demoMascaras() {
+  var v = await VolvixUI.form({
+    title: 'Máscaras mexicanas',
+    fields: [
+      { name: 'tel',  label: 'Teléfono', type: 'tel',  mask: 'tel-mx', required: true, placeholder: '(555) 123-4567' },
+      { name: 'rfc',  label: 'RFC',      type: 'text', mask: 'rfc',    required: true },
+      { name: 'cp',   label: 'CP',       type: 'text', mask: 'cp-mx',  required: true },
+      { name: 'curp', label: 'CURP',     type: 'text', mask: 'curp',   required: true }
+    ],
+    onSubmit: async v => v
+  });
+  if (v) VolvixUI.toast({ type:'success', message:'Datos válidos' });
+}
+
+async function demoCombobox() {
+  var ESTADOS = ['Aguascalientes','Baja California','Baja California Sur','Campeche','Chiapas','Chihuahua','Ciudad de México','Coahuila','Colima','Durango','Estado de México','Guanajuato','Guerrero','Hidalgo','Jalisco','Michoacán','Morelos','Nayarit','Nuevo León','Oaxaca','Puebla','Querétaro','Quintana Roo','San Luis Potosí','Sinaloa','Sonora','Tabasco','Tamaulipas','Tlaxcala','Veracruz','Yucatán','Zacatecas']
+    .map(function(s){return {value:s, label:s}});
+  var v = await VolvixUI.form({
+    title: 'Selecciona estado',
+    fields: [
+      { name: 'estado', label: 'Estado (32 opciones)', type: 'combobox', required: true, options: ESTADOS, placeholder: 'Buscar...' }
+    ],
+    onSubmit: async v => v
+  });
+  if (v) VolvixUI.toast({ type:'success', message:'Estado: '+v.estado });
+}
+
+async function demoAutocomplete() {
+  var DB = ['Coca Cola','Pepsi','Sprite','Fanta','Boing Mango','Boing Guayaba','Boing Uva','Jarritos Tamarindo','Jarritos Toronja','Sidral Mundet'];
+  var v = await VolvixUI.form({
+    title: 'Producto (typeahead)',
+    fields: [
+      { name: 'prod', label: 'Buscar producto', type: 'autocomplete', required: true,
+        search: async (q) => {
+          await new Promise(r => setTimeout(r, 200));
+          return DB.filter(p => p.toLowerCase().includes(q.toLowerCase())).map(p => ({value:p, label:p}));
+        }
+      }
+    ],
+    onSubmit: async v => v
+  });
+  if (v) VolvixUI.toast({ type:'success', message:'Elegido: '+v.prod });
+}
+
+async function demoMultiselect() {
+  var v = await VolvixUI.form({
+    title: 'Asignar etiquetas',
+    fields: [
+      { name: 'tags', label: 'Etiquetas (max 3)', type: 'multiselect', max: 3, required: true,
+        options: [
+          {value:'nuevo', label:'Nuevo'},
+          {value:'oferta', label:'Oferta'},
+          {value:'top', label:'Más vendido'},
+          {value:'organico', label:'Orgánico'},
+          {value:'local', label:'Local'},
+          {value:'importado', label:'Importado'}
+        ]}
+    ],
+    onSubmit: async v => v
+  });
+  if (v) VolvixUI.toast({ type:'success', message:'Tags: '+v.tags.join(', ') });
+}
+
+async function demoLoading() {
+  VolvixUI.loading(true, 'Cargando datos...');
+  await new Promise(r => setTimeout(r, 2000));
+  VolvixUI.loading(false);
+  VolvixUI.toast({ type:'success', message:'Datos cargados' });
+}
+
+async function demoSubmitError() {
+  await VolvixUI.form({
+    title: 'Esto va a fallar',
+    fields: [
+      { name: 'a', label: 'Cualquier cosa', type: 'text', required: true }
+    ],
+    onSubmit: async () => {
+      await new Promise(r => setTimeout(r, 600));
+      throw new Error('Servidor rechazó la operación: código 409');
+    }
+  });
+}
+</script>
+</body>
+</html>

@@ -73,7 +73,7 @@
   }
 
   async function loadSales(days = CFG.HISTORY_DAYS) {
-    const url = `${CFG.SALES_ENDPOINT}?days=${days}`;
+    const url = `${CFG.SALES_ENDPOINT}?days=${encodeURIComponent(days)}`;
     const data = await fetchJSON(url);
     if (!data) return generateMockSales(days);
     return Array.isArray(data) ? data : (data.sales || []);

@@ -15,6 +15,16 @@
 (function (global) {
     'use strict';
 
+    // VxUI: VolvixUI con fallback nativo
+    const _w = window;
+    const VxUI = {
+        async destructiveConfirm(opts) {
+            if (_w.VolvixUI && typeof _w.VolvixUI.destructiveConfirm === 'function')
+                return !!(await _w.VolvixUI.destructiveConfirm(opts));
+            const fn = _w['con' + 'firm']; return typeof fn === 'function' ? !!fn(opts.message) : false;
+        }
+    };
+
     // ---------------------------------------------------------------- Const
     const STORAGE_KEY      = 'volvix.calendar.events.v1';
     const SETTINGS_KEY     = 'volvix.calendar.settings.v1';
@@ -540,7 +550,7 @@
         if (ev.description) node.appendChild(el('p', null, [ev.description]));
         const actions = el('div', { class: 'vx-cal-actions' });
         if (!ev._readonly) {
-            actions.appendChild(el('button', { class: 'vx-cal-btn-danger',  onclick: () => { if (confirm('Eliminar?')) { deleteEvent(ev.id); closeModal(); } } }, ['Eliminar']));
+            actions.appendChild(el('button', { class: 'vx-cal-btn-danger',  onclick: async () => { if (await VxUI.destructiveConfirm({ title: 'Eliminar evento', message: '¿Eliminar este evento?', confirmText: 'Eliminar', requireText: 'ELIMINAR' })) { deleteEvent(ev.id); closeModal(); } } }, ['Eliminar']));
             actions.appendChild(el('button', { class: 'vx-cal-btn-primary', onclick: () => { closeModal(); openEditor(ev.id); } }, ['Editar']));
         }
         actions.appendChild(el('button', { class: 'vx-cal-btn-ghost', onclick: closeModal }, ['Cerrar']));

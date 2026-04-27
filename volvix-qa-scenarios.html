@@ -73,9 +73,9 @@ h1{font-size:28px;margin-bottom:8px;background:linear-gradient(90deg,#3b82f6,#8b
     <div class="sub">Plan completo de pruebas manuales con TODOS los módulos, botones y escenarios</div>
     <div class="creds-box" style="margin-top:14px;">
       <strong>🔐 Credenciales de prueba:</strong><br>
-      • <strong>admin@volvix.test</strong> / Volvix2026! → superadmin<br>
-      • <strong>owner@volvix.test</strong> / Volvix2026! → owner<br>
-      • <strong>cajero@volvix.test</strong> / Volvix2026! → cajero<br>
+      • <strong>admin@volvix.test</strong> / &lt;&lt;test-password-via-env&gt;&gt; → superadmin<br>
+      • <strong>owner@volvix.test</strong> / &lt;&lt;test-password-via-env&gt;&gt; → owner<br>
+      • <strong>cajero@volvix.test</strong> / &lt;&lt;test-password-via-env&gt;&gt; → cajero<br>
       <strong>🌐 URL Base:</strong> <a href="https://volvix-pos.vercel.app" target="_blank" style="color:#60a5fa;">https://volvix-pos.vercel.app</a>
     </div>
     <div class="toolbar">
@@ -122,9 +122,9 @@ const TEST_DATA = {
   auth: {
     name: "🔐 Autenticación",
     modules: [
-      { id:"auth-1", title:"Login admin@volvix.test", action:"Ir a /login.html, ingresar admin@volvix.test/Volvix2026!", expected:"Redirige a SalvadoreX, role=superadmin", url:"/login.html" },
-      { id:"auth-2", title:"Login owner@volvix.test", action:"Login con owner@volvix.test/Volvix2026!", expected:"Redirige, role=owner, tenant=Restaurante Los Compadres", url:"/login.html" },
-      { id:"auth-3", title:"Login cajero@volvix.test", action:"Login con cajero@volvix.test/Volvix2026!", expected:"Redirige, role=cajero, tenant=Abarrotes Don Chucho", url:"/login.html" },
+      { id:"auth-1", title:"Login admin@volvix.test", action:"Ir a /login.html, ingresar admin@volvix.test/&lt;&lt;test-password-via-env&gt;&gt;", expected:"Redirige a SalvadoreX, role=superadmin", url:"/login.html" },
+      { id:"auth-2", title:"Login owner@volvix.test", action:"Login con owner@volvix.test/&lt;&lt;test-password-via-env&gt;&gt;", expected:"Redirige, role=owner, tenant=Restaurante Los Compadres", url:"/login.html" },
+      { id:"auth-3", title:"Login cajero@volvix.test", action:"Login con cajero@volvix.test/&lt;&lt;test-password-via-env&gt;&gt;", expected:"Redirige, role=cajero, tenant=Abarrotes Don Chucho", url:"/login.html" },
       { id:"auth-4", title:"Login credenciales inválidas", action:"Login con email/password inválido", expected:"Mensaje de error 'Credenciales inválidas'", url:"/login.html" },
       { id:"auth-5", title:"Sesión persiste tras reload", action:"Login, F5/recargar página", expected:"Sigue autenticado, redirige a app", url:"/" },
       { id:"auth-6", title:"Logout limpia sesión", action:"Click en botón salir", expected:"Vuelve a /login.html", url:"/" },
