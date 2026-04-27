@@ -1119,7 +1119,9 @@ const handlers = {
         name: safe.name, owner_user_id: safe.owner_user_id,
         plan: safe.plan || 'trial', is_active: safe.is_active !== false
       });
-      sendJSON(res, result[0] || result);
+      const created = result[0] || result;
+      try { logAudit(req, 'tenant.created', 'pos_companies', { id: created && created.id, after: { name: safe.name, plan: safe.plan } }); } catch(_){}
+      sendJSON(res, created);
     } catch (err) { sendError(res, err); }
   }, ['admin', 'owner', 'superadmin']),
 
@@ -1300,6 +1302,7 @@ const handlers = {
           expected_version: expectedVersion
         }, 409);
       }
+      try { logAudit(req, 'product.updated', 'pos_products', { id: params.id, after: safe }); } catch(_){}
       sendJSON(res, result);
     } catch (err) { sendError(res, err); }
   }),
@@ -1317,6 +1320,7 @@ const handlers = {
         return sendJSON(res, { error: 'not found' }, 404);
       }
       await supabaseRequest('DELETE', `/pos_products?id=eq.${params.id}`);
+      try { logAudit(req, 'product.deleted', 'pos_products', { id: params.id }); } catch(_){}
       sendJSON(res, { ok: true, deleted: true });
     } catch (err) { sendError(res, err); }
   }),
@@ -1583,6 +1587,7 @@ const handlers = {
           expected_version: expectedVersion
         }, 409);
       }
+      try { logAudit(req, 'customer.updated', 'customers', { id: params.id, after: safe }); } catch(_){}
       sendJSON(res, result);
     } catch (err) { sendError(res, err); }
   }),
