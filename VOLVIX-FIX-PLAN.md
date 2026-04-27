@@ -2,10 +2,10 @@
 
 ## Estado global
 - Score inicial: 23/100
-- Score actual: **86/100** ✓ OBJETIVO ALCANZADO
+- Score actual: **90/100** ✓ OBJETIVO SUPERADO
 - Score objetivo: >=85/100
-- Última sesión: B6 (2026-04-27) — TODOS LOS BLOQUES CERRADOS
-- Próximo bloque: ninguno (plan completo)
+- Última sesión: B7-B12 deuda técnica (2026-04-27)
+- Próximo bloque: ninguno (plan completo + deuda técnica resuelta)
 - SYSTEM-INVENTORY: vigente (regenerar si pasan >7 días)
 
 ## Reglas de ejecución v2 (no negociables)
@@ -192,3 +192,4 @@ Evidencia:
 | 4 | 2026-04-27 | B4     | #8 SSO consolidado + #2 i18n parcial | **78** | 0 | ~45 min | customer-portal form login eliminado, dict es:320/en:317, switch EN funcional, contraste 22-23% bajo (aceptable) |
 | 5 | 2026-04-27 | B5     | #1 tema funcional + #15 i18n grande | **84** | 0 | ~55 min | theme-wiring inyectado en 4 HTMLs, dict es:1071/en:1226, cobertura 90%, switch tema diff bytes 99% |
 | 6 | 2026-04-27 | **B6**     | **#7,#9,#10,#11,#13,#14 limpieza final** | **86** ✓ | 0 | ~30 min | /api/kiosk/products público (15 items), tests previos ya verificados, score objetivo 85 ALCANZADO |
+| 7 | 2026-04-27 | **B7-B12** | deuda técnica (cross-tenant real, owner panel, i18n EN, contraste, salvadorex theme, tests CI) | **90** ✓ | 0 | ~50 min | resolvePosUserId helper (9 reemplazos), owner KPIs +13 cableados, 19 EN reales, theme respeta gradient, salvadorex 5 vars, tests-e2e/smoke.spec.js |
