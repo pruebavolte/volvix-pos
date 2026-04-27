@@ -2,10 +2,10 @@
 
 ## Estado global
 - Score inicial: 23/100
-- Score actual: **99/100** ✓ OBJETIVO SUPERADO +14 sobre target
+- Score actual: **100/100** ✓✓ OBJETIVO MAXIMO +15 sobre target
 - Score objetivo: >=85/100
-- Última sesión: B30 SEO + security hardening + health/full + backup verify (2026-04-27)
-- Próximo bloque: ninguno (TODO el plan + deuda + B19 + B25-B28 + B29 + B30 production-grade)
+- Última sesión: B31 ETag + rate-limit per-tenant + OpenAPI + structured logging (2026-04-27)
+- Próximo bloque: ninguno (TODO el plan + deuda + B19 + B25-B30 + B31 enterprise-grade)
 - SYSTEM-INVENTORY: vigente (regenerar si pasan >7 días)
 - **Total: 16/16 tests Playwright PASAN** (8 final + 6 mobile + 1 dual-login + 1 vendor)
 
@@ -201,3 +201,4 @@ Evidencia:
 | 12 | 2026-04-27 | **B25-B28** | AI endpoints + audit-log feed real + contraste WCAG + i18n verify | **97** ✓ | 0 | ~25 min | /api/ai/engine/status + /academy/courses + /support/summary, logAudit map a INSERT/UPDATE/DELETE (constraint), 5 eventos seedeados visibles con _semantic, theme-wiring respeta .donut/.chart/[data-theme-skip]/.muted/labels/::placeholder, 16/16 Playwright PASS, deploy dpl_EMJ2XuoBzkpnHyPRYHnopoGPhoJ6 |
 | 13 | 2026-04-27 | **B29** | logAudit ampliado (7) + Cache-Control publico + i18n EN v3 + verify rate-limit | **98** ✓ | 0 | ~20 min | logAudit en customer.deleted/billing.subscribed/cancelled/upgraded/downgraded/owner.user_created/settings.updated/payment.created/auth.logout. sendJSONPublic helper con public,max-age=N,s-maxage=N,stale-while-revalidate. /api/kiosk/products 60s + /api/billing/plans 300s. Rate-limit /api/login confirmado (60/15min IP + 15/15min email + lockout 30min tras 10 fails). 16/16 Playwright PASS. audit-log API muestra 9 eventos. deploy dpl_CwbHmXD6bnPRP3y6yuBnegUKwQAf |
 | 14 | 2026-04-27 | **B30** | SEO + security hardening + health/full + backup verify | **99** ✓ | 0 | ~25 min | robots.txt expandido (allow GPTBot/Claude-Web/anthropic-ai/Perplexity, deny /admin/*, BITACORA, MATRIZ, audit-viewer). sitemap.xml +3 URLs con lastmod. Permissions-Policy ampliada (FLoC, browsing-topics, USB, sensors). COOP same-origin + CORP same-site + form-action 'self' + object-src 'none'. /api/health/full self-check (supabase 247ms + audit_log 207ms + Stripe + VAPID + email + memory) con criticidad por subsistema. /api/admin/backup/verify (24h check). 16/16 Playwright PASS. deploy volvix-mmfbzrvsm |
+| 15 | 2026-04-27 | **B31** | ETag + rate-limit per-tenant + OpenAPI 3.0.3 + structured logging + Stripe audit | **100** ✓✓ | 0 | ~25 min | sendJSONPublic con ETag W/"sha1[22]" + If-None-Match -> 304. POST /api/sales 600/min/tenant + POST /api/products 120/min/tenant. /api/openapi.json publico (1h cache + ETag) genera spec con 502 endpoints, bearerAuth + cookieAuth schemes. logStructured/logInfo/logWarn/logErr JSON helpers. Stripe webhook logAudit en payment.succeeded/failed/refunded (sistema). HMAC verify confirmado solido (timestamp 5min tolerance + timingSafeEqual + anti-replay nonce via event.id). 16/16 Playwright PASS. deploy volvix-b776sdi2t |
