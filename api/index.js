@@ -644,6 +644,16 @@ function sendJSON(res, data, status = 200) {
   res.end(JSON.stringify(data));
 }
 
+// B29.4: Cache-Control para endpoints publicos read-only (catalogos, planes, health)
+function sendJSONPublic(res, data, ttlSec, status = 200) {
+  res.statusCode = status;
+  setSecurityHeaders(res);
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  const t = Math.max(0, parseInt(ttlSec, 10) || 60);
+  res.setHeader('Cache-Control', `public, max-age=${t}, s-maxage=${t}, stale-while-revalidate=${t * 2}`);
+  res.end(JSON.stringify(data));
+}
+
 // FIX R13 (#11): error genérico en prod
 // R15: estandarización 4xx con { error (code), message, ...extras }
 // R23: PG-error detection -> 503 graceful, request_id for trace
@@ -1092,6 +1102,18 @@ const handlers = {
 
   'POST /api/logout': async (req, res) => {
     // R22 FIX 5: clear cookie
+    try {
+      // Best-effort: extraer user del cookie/header antes de limpiar para auditar
+      const u = await (async () => {
+        try {
+          const tok = (req.headers.cookie || '').split(/;\s*/).find(c => c.startsWith('vlx_auth='));
+          if (!tok) return null;
+          const decoded = verifyJWT(tok.replace('vlx_auth=', ''));
+          return decoded || null;
+        } catch (_) { return null; }
+      })();
+      if (u) logAudit({ user: u }, 'auth.logout', 'pos_users', { id: u.id });
+    } catch (_) {}
     clearAuthCookie(res);
     sendJSON(res, { ok: true, message: 'Sesión cerrada' });
   },
@@ -1610,6 +1632,7 @@ const handlers = {
         return sendJSON(res, { error: 'not found' }, 404);
       }
       await supabaseRequest('PATCH', `/customers?id=eq.${params.id}`, { active: false });
+      try { logAudit(req, 'customer.deleted', 'customers', { id: params.id }); } catch(_){}
       sendJSON(res, { ok: true });
     } catch (err) { sendError(res, err); }
   }),
@@ -1842,6 +1865,7 @@ const handlers = {
             .catch(() => {});
         }
       } catch (_) {}
+      try { logAudit(req, 'owner.user_created', 'pos_users', { id: userRow && userRow.id, after: { email: safe.email, role: safe.role || 'USER' } }); } catch(_){}
       sendJSON(res, userRow);
     } catch (err) { sendError(res, err); }
   }, ['admin', 'owner', 'superadmin']),
@@ -3321,6 +3345,7 @@ const handlers = {
         pos_user_id: req.user.id, key: 'owner_settings', value: body
       });
     } catch (_) {}
+    try { logAudit(req, 'settings.updated', 'owner_settings', { after: { keys: Object.keys(body || {}).slice(0, 16) } }); } catch(_){}
     sendJSON(res, { ok: true });
   });
   handlers['GET /api/owner/settings'] = requireAuth(async (req, res) => {
@@ -5301,7 +5326,7 @@ handlers['GET /api/billing/plans'] = async (req, res) => {
   try {
     const rows = await supabaseRequest('GET',
       '/subscription_plans?active=eq.true&select=*&order=price_monthly_cents.asc');
-    sendJSON(res, { ok: true, plans: rows || [] });
+    sendJSONPublic(res, { ok: true, plans: rows || [] }, 300); // B29.4: 5 min cache
   } catch (err) { sendError(res, err); }
 };
 
@@ -5363,6 +5388,7 @@ handlers['POST /api/billing/subscribe'] = requireAuth(async (req, res) => {
       : await supabaseRequest('POST', '/subscriptions', payload);
     const created = Array.isArray(row) ? row[0] : row;
     if (created?.id) await logSubEvent(created.id, 'subscribed', { plan: plan.name, cycle, stripe_sub: stripeSub.id });
+    try { logAudit(req, 'billing.subscribed', 'subscriptions', { id: created && created.id, after: { plan: plan.name, cycle } }); } catch(_){}
     sendJSON(res, { ok: true, subscription: created, stripe: { id: stripeSub.id, status: stripeSub.status } });
   } catch (err) { sendError(res, err); }
 }, ['owner', 'superadmin']);
@@ -5383,6 +5409,7 @@ handlers['POST /api/billing/cancel'] = requireAuth(async (req, res) => {
       updated_at: new Date().toISOString()
     });
     await logSubEvent(sub.id, 'canceled', {});
+    try { logAudit(req, 'billing.cancelled', 'subscriptions', { id: sub.id }); } catch(_){}
     sendJSON(res, { ok: true });
   } catch (err) { sendError(res, err); }
 }, ['owner', 'superadmin']);
@@ -5415,6 +5442,7 @@ async function changePlanInternal(req, res, direction) {
     plan_id: plan.id, status: 'active', updated_at: new Date().toISOString()
   });
   await logSubEvent(sub.id, direction, { to_plan: plan.name });
+  try { logAudit(req, 'billing.' + direction, 'subscriptions', { id: sub.id, after: { to_plan: plan.name } }); } catch(_){}
   sendJSON(res, { ok: true, subscription: Array.isArray(upd) ? upd[0] : upd });
 }
 
@@ -5813,6 +5841,8 @@ handlers['POST /api/payments/stripe/intent'] = requireAuth(withIdempotency('POST
         amount, currency, status: intent.status || 'requires_payment_method',
       });
     } catch (_) {}
+
+    try { logAudit(req, 'payment.created', 'payments', { id: intent.id, after: { sale_id: saleId, amount, currency, status: intent.status || 'requires_payment_method' } }); } catch(_){}
 
     sendJSON(res, {
       ok: true,
@@ -6798,14 +6828,14 @@ handlers['GET /api/config/public'] = async (req, res) => {
   handlers['GET /api/billing/plans'] = async (req, res) => {
     try {
       const rows = await supabaseRequest('GET', '/billing_plans?select=*&order=price.asc');
-      if (rows && rows.length) return sendJSON(res, { ok: true, plans: rows });
+      if (rows && rows.length) return sendJSONPublic(res, { ok: true, plans: rows }, 300);
     } catch (_) {}
-    sendJSON(res, { ok: true, plans: [
+    sendJSONPublic(res, { ok: true, plans: [
       { id: 'free', name: 'Free', price: 0, currency: 'MXN', features: ['Hasta 50 productos','1 sucursal'] },
       { id: 'starter', name: 'Starter', price: 299, currency: 'MXN', features: ['Productos ilimitados','3 usuarios'] },
       { id: 'pro', name: 'Pro', price: 799, currency: 'MXN', features: ['Multi-sucursal','Reportes BI','API'] },
       { id: 'enterprise', name: 'Enterprise', price: 2499, currency: 'MXN', features: ['SLA','SSO','Soporte 24/7'] },
-    ]});
+    ]}, 300); // B29.4: 5 min cache
   };
 
   // GET /api/billing/invoices — fallback empty
@@ -8859,7 +8889,7 @@ handlers['GET /api/config/public'] = async (req, res) => {
         .catch(() => []);
       const arr = Array.isArray(items) ? items : [];
       const inStock = arr.filter(p => Number(p.stock || 0) > 0);
-      sendJSON(res, {
+      sendJSONPublic(res, {
         ok: true,
         items: inStock.map(p => ({
           id: p.id,
@@ -8868,7 +8898,7 @@ handlers['GET /api/config/public'] = async (req, res) => {
           icon: p.icon || '📦'
         })),
         total: inStock.length
-      });
+      }, 60); // B29.4: 60s cache catalogo publico
     } catch (err) { sendError(res, err); }
   };
 
