@@ -541,14 +541,14 @@
 
     <div class="vendor-card">
       <div class="vendor-row">
-        <div class="vendor-avatar">DM</div>
+        <div class="vendor-avatar" id="vp-avatar">—</div>
         <div>
-          <div class="vendor-name">Distrib. Morales SA</div>
-          <div class="vendor-id">VND-00427</div>
+          <div class="vendor-name" id="vp-name">—</div>
+          <div class="vendor-id" id="vp-id">—</div>
         </div>
       </div>
       <div class="vendor-status">
-        <span class="vendor-dot"></span> Verificado · Tier Gold
+        <span class="vendor-dot"></span> <span id="vp-status">—</span>
       </div>
     </div>
   </aside>
@@ -568,10 +568,10 @@
       <button class="icon-btn" title="Mensajes">✉</button>
       <div style="width: 1px; height: 24px; background: var(--border);"></div>
       <div class="vendor-row" style="cursor: pointer;">
-        <div class="vendor-avatar" style="width: 32px; height: 32px; font-size: 12px;">DM</div>
+        <div class="vendor-avatar" id="vp-tb-avatar" style="width: 32px; height: 32px; font-size: 12px;">—</div>
         <div>
-          <div style="font-size: 12.5px; color: var(--text-0); font-weight: 600;">Carlos Morales</div>
-          <div style="font-size: 11px; color: var(--text-3);">Admin</div>
+          <div id="vp-tb-name" style="font-size: 12.5px; color: var(--text-0); font-weight: 600;">—</div>
+          <div id="vp-tb-role" style="font-size: 11px; color: var(--text-3);">—</div>
         </div>
       </div>
     </div>
@@ -586,7 +586,7 @@
         <div>
           <div class="breadcrumb"><span>Inicio</span><span>Dashboard</span></div>
           <h1 class="page-title">Resumen General</h1>
-          <p class="page-subtitle">Bienvenido de vuelta, Carlos. Aquí está el estado de tu cuenta hoy.</p>
+          <p class="page-subtitle" id="vp-greeting">Bienvenido de vuelta. Aquí está el estado de tu cuenta hoy.</p>
         </div>
         <div style="display: flex; gap: 8px;">
           <button class="btn btn-ghost">↓ Exportar</button>
@@ -597,23 +597,23 @@
       <div class="kpi-grid">
         <div class="kpi">
           <div class="kpi-label">POs Activas</div>
-          <div class="kpi-value">24</div>
-          <div class="kpi-trend trend-up">▲ 12% vs mes anterior</div>
+          <div class="kpi-value" data-kpi="pos_active">—</div>
+          <div class="kpi-trend"></div>
         </div>
         <div class="kpi success">
           <div class="kpi-label">Ingresos del mes</div>
-          <div class="kpi-value">$487,290</div>
-          <div class="kpi-trend trend-up">▲ 8.4% MoM</div>
+          <div class="kpi-value" data-kpi="revenue_month">—</div>
+          <div class="kpi-trend"></div>
         </div>
         <div class="kpi warning">
           <div class="kpi-label">Por confirmar</div>
-          <div class="kpi-value">7</div>
-          <div class="kpi-trend trend-down">▼ Acción requerida</div>
+          <div class="kpi-value" data-kpi="pending_confirmations">—</div>
+          <div class="kpi-trend"></div>
         </div>
         <div class="kpi info">
           <div class="kpi-label">Tiempo prom. entrega</div>
-          <div class="kpi-value">3.2d</div>
-          <div class="kpi-trend trend-up">▲ Mejor que SLA (5d)</div>
+          <div class="kpi-value" data-kpi="avg_delivery_days">—</div>
+          <div class="kpi-trend"></div>
         </div>
       </div>
 
@@ -628,42 +628,8 @@
               <thead>
                 <tr><th>PO #</th><th>Comprador</th><th>Monto</th><th>Estado</th><th>Entrega</th></tr>
               </thead>
-              <tbody>
-                <tr>
-                  <td class="td-mono">PO-2026-04781</td>
-                  <td>Volvix Centro #04</td>
-                  <td class="td-amount">$24,580.00</td>
-                  <td><span class="badge badge-warning">Pendiente</span></td>
-                  <td>28 abr</td>
-                </tr>
-                <tr>
-                  <td class="td-mono">PO-2026-04772</td>
-                  <td>Volvix Norte #11</td>
-                  <td class="td-amount">$8,140.50</td>
-                  <td><span class="badge badge-info">En tránsito</span></td>
-                  <td>26 abr</td>
-                </tr>
-                <tr>
-                  <td class="td-mono">PO-2026-04766</td>
-                  <td>Volvix Sur #02</td>
-                  <td class="td-amount">$15,920.00</td>
-                  <td><span class="badge badge-success">Entregado</span></td>
-                  <td>24 abr</td>
-                </tr>
-                <tr>
-                  <td class="td-mono">PO-2026-04754</td>
-                  <td>Volvix CEDIS</td>
-                  <td class="td-amount">$62,300.00</td>
-                  <td><span class="badge badge-success">Facturado</span></td>
-                  <td>22 abr</td>
-                </tr>
-                <tr>
-                  <td class="td-mono">PO-2026-04748</td>
-                  <td>Volvix Centro #04</td>
-                  <td class="td-amount">$3,210.75</td>
-                  <td><span class="badge badge-danger">Rechazado</span></td>
-                  <td>21 abr</td>
-                </tr>
+              <tbody id="vp-orders-tbody">
+                <tr><td colspan="5" style="text-align:center;color:var(--text-3);padding:30px">Cargando órdenes…</td></tr>
               </tbody>
             </table>
           </div>
@@ -673,7 +639,7 @@
           <div class="card">
             <div class="card-header"><div class="card-title">Acciones rápidas</div></div>
             <div class="card-body padded" style="display: grid; gap: 10px;">
-              <button class="btn btn-primary" style="justify-content: flex-start; width: 100%;">▤ Confirmar 7 POs pendientes</button>
+              <button class="btn btn-primary" style="justify-content: flex-start; width: 100%;" id="vp-confirm-btn">▤ Confirmar POs pendientes</button>
               <button class="btn btn-ghost" style="justify-content: flex-start; width: 100%;">▣ Subir nueva factura</button>
               <button class="btn btn-ghost" style="justify-content: flex-start; width: 100%;">▥ Actualizar catálogo</button>
               <button class="btn btn-ghost" style="justify-content: flex-start; width: 100%;">◈ Conciliar pagos</button>
@@ -685,27 +651,27 @@
             <div class="card-body padded">
               <div style="margin-bottom: 14px;">
                 <div style="display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 5px;">
-                  <span>Confirmación &lt; 24h</span><span style="color: var(--success);">96%</span>
+                  <span>Confirmación &lt; 24h</span><span style="color: var(--success);" data-sla="confirm">—</span>
                 </div>
-                <div class="progress"><div class="progress-bar success" style="width: 96%;"></div></div>
+                <div class="progress"><div class="progress-bar success" data-sla-bar="confirm" style="width: 0%;"></div></div>
               </div>
               <div style="margin-bottom: 14px;">
                 <div style="display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 5px;">
-                  <span>Entrega a tiempo</span><span style="color: var(--success);">91%</span>
+                  <span>Entrega a tiempo</span><span style="color: var(--success);" data-sla="ontime">—</span>
                 </div>
-                <div class="progress"><div class="progress-bar success" style="width: 91%;"></div></div>
+                <div class="progress"><div class="progress-bar success" data-sla-bar="ontime" style="width: 0%;"></div></div>
               </div>
               <div style="margin-bottom: 14px;">
                 <div style="display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 5px;">
-                  <span>Calidad / sin rechazos</span><span style="color: var(--warning);">82%</span>
+                  <span>Calidad / sin rechazos</span><span style="color: var(--warning);" data-sla="quality">—</span>
                 </div>
-                <div class="progress"><div class="progress-bar warning" style="width: 82%;"></div></div>
+                <div class="progress"><div class="progress-bar warning" data-sla-bar="quality" style="width: 0%;"></div></div>
               </div>
               <div>
                 <div style="display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 5px;">
-                  <span>Facturación correcta</span><span style="color: var(--success);">98%</span>
+                  <span>Facturación correcta</span><span style="color: var(--success);" data-sla="invoicing">—</span>
                 </div>
-                <div class="progress"><div class="progress-bar success" style="width: 98%;"></div></div>
+                <div class="progress"><div class="progress-bar success" data-sla-bar="invoicing" style="width: 0%;"></div></div>
               </div>
             </div>
           </div>
@@ -1085,13 +1051,13 @@
     <section class="panel" id="panel-profile">
       <div class="page-header"><div><h1 class="page-title">Perfil del Proveedor</h1></div></div>
       <div class="card"><div class="card-body padded">
-        <div class="detail-row"><span class="detail-label">Razón social</span><span class="detail-value">Distribuidora Morales SA de CV</span></div>
-        <div class="detail-row"><span class="detail-label">RFC</span><span class="detail-value">DMO940512AB7</span></div>
-        <div class="detail-row"><span class="detail-label">ID proveedor</span><span class="detail-value">VND-00427</span></div>
-        <div class="detail-row"><span class="detail-label">Tier</span><span class="detail-value"><span class="badge badge-warning">Gold</span></span></div>
-        <div class="detail-row"><span class="detail-label">Contacto principal</span><span class="detail-value">Carlos Morales · carlos@morales.mx</span></div>
-        <div class="detail-row"><span class="detail-label">Términos de pago</span><span class="detail-value">30 días netos</span></div>
-        <div class="detail-row"><span class="detail-label">Cuenta bancaria</span><span class="detail-value">BBVA · ****4521</span></div>
+        <div class="detail-row"><span class="detail-label">Razón social</span><span class="detail-value" data-vp="razon_social">—</span></div>
+        <div class="detail-row"><span class="detail-label">RFC</span><span class="detail-value" data-vp="rfc">—</span></div>
+        <div class="detail-row"><span class="detail-label">ID proveedor</span><span class="detail-value" data-vp="id">—</span></div>
+        <div class="detail-row"><span class="detail-label">Tier</span><span class="detail-value" data-vp="tier">—</span></div>
+        <div class="detail-row"><span class="detail-label">Contacto principal</span><span class="detail-value" data-vp="contacto">—</span></div>
+        <div class="detail-row"><span class="detail-label">Términos de pago</span><span class="detail-value" data-vp="terminos">—</span></div>
+        <div class="detail-row"><span class="detail-label">Cuenta bancaria</span><span class="detail-value" data-vp="cuenta">—</span></div>
       </div></div>
     </section>
 
@@ -1218,6 +1184,107 @@
 
   console.log('%cVolvix Vendor Portal', 'color:#4f8cff;font-size:16px;font-weight:bold;');
   console.log('Build 340 · ' + new Date().toISOString());
+
+  // R28: cablear UI a /api/vendor/me y /api/vendor/stats
+  (async function loadVendorData(){
+    function tk(){ return localStorage.getItem('volvix_token')||localStorage.getItem('volvixAuthToken')||''; }
+    function ini(s){ return (s||'').split(' ').slice(0,2).map(x=>(x[0]||'').toUpperCase()).join('') || '—'; }
+    function setText(id, v){ var e=document.getElementById(id); if(e) e.textContent=(v==null||v===''?'—':String(v)); }
+    function fmt$(n){ return '$' + Number(n||0).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+    var t = tk();
+    if (!t) return; // sin sesión, dejar UI con dashes
+    var headers = { 'Authorization': 'Bearer ' + t };
+    try {
+      var r = await fetch('/api/vendor/me', { headers });
+      if (r.ok){
+        var j = await r.json(); var v = j.vendor || {};
+        setText('vp-name', v.name || v.email || '—');
+        setText('vp-id', v.id ? ('VND-' + String(v.id).slice(-6).toUpperCase()) : '—');
+        setText('vp-status', (v.verified ? 'Verificado' : 'Sin verificar') + ' · Tier ' + (v.tier || 'standard'));
+        setText('vp-avatar', ini(v.name || v.email || ''));
+        setText('vp-tb-avatar', ini(v.name || v.email || ''));
+        setText('vp-tb-name', v.name || v.email || '—');
+        setText('vp-tb-role', v.role || (v.tier ? 'Tier ' + v.tier : 'Vendor'));
+      }
+    } catch(e){ console.warn('[vendor-portal] me fail', e); }
+    try {
+      var rs = await fetch('/api/vendor/stats', { headers });
+      if (rs.ok){
+        var s = await rs.json();
+        var posKpi = document.querySelector('[data-kpi="pos_active"]');
+        if (posKpi) posKpi.textContent = s.pos_active || 0;
+        var revKpi = document.querySelector('[data-kpi="revenue_month"]');
+        if (revKpi) revKpi.textContent = fmt$(s.revenue_month || 0);
+        var pcKpi = document.querySelector('[data-kpi="pending_confirmations"]');
+        if (pcKpi) pcKpi.textContent = s.pending_confirmations || 0;
+        var adKpi = document.querySelector('[data-kpi="avg_delivery_days"]');
+        if (adKpi) adKpi.textContent = (s.avg_delivery_days != null ? s.avg_delivery_days + 'd' : '—');
+        // B3: SLA bars + greeting + botón confirmar
+        var slaSet = function(key, pct){
+          var pctNum = Number(pct||0);
+          var lbl = document.querySelector('[data-sla="'+key+'"]');
+          var bar = document.querySelector('[data-sla-bar="'+key+'"]');
+          if (lbl) lbl.textContent = pctNum + '%';
+          if (bar) bar.style.width = pctNum + '%';
+        };
+        slaSet('confirm', s.sla_confirm_under_24h_pct);
+        slaSet('ontime', s.sla_on_time_pct);
+        slaSet('quality', s.quality_no_rejects_pct);
+        // facturación correcta = % POs con status=invoiced sobre las completas
+        var btn = document.getElementById('vp-confirm-btn');
+        if (btn && s.pending_confirmations != null) {
+          btn.textContent = '▤ Confirmar ' + s.pending_confirmations + ' POs pendientes';
+        }
+      }
+    } catch(e){ console.warn('[vendor-portal] stats fail', e); }
+    // B3: greeting personalizado por vendor
+    try {
+      var rm2 = await fetch('/api/vendor/me', { headers });
+      if (rm2.ok) {
+        var jm2 = await rm2.json();
+        var v2 = jm2.vendor || {};
+        var greet = document.getElementById('vp-greeting');
+        if (greet && v2.name) {
+          greet.textContent = 'Bienvenido de vuelta, ' + v2.name + '. Aquí está el estado de tu cuenta hoy.';
+        }
+      }
+    } catch(e){}
+    // R29: cablear tabla POs a /api/vendor/orders (o pos)
+    try {
+      var ro = await fetch('/api/vendor/orders', { headers });
+      var tbody = document.getElementById('vp-orders-tbody');
+      if (!tbody) return;
+      if (ro.ok) {
+        var jo = await ro.json();
+        var orders = (jo && (jo.items || jo.orders || jo.data)) || [];
+        if (!Array.isArray(orders) || !orders.length) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-3);padding:30px">Sin órdenes registradas</td></tr>';
+        } else {
+          tbody.innerHTML = orders.map(function(o){
+            var status = (o.status||'').toLowerCase();
+            var badge = status === 'delivered' || status === 'entregado' ? 'success' :
+                        status === 'transit' || status === 'en_transito' ? 'info' :
+                        status === 'invoiced' || status === 'facturado' ? 'success' :
+                        status === 'rejected' || status === 'rechazado' ? 'danger' : 'warning';
+            var fechaTxt = '—';
+            try { var d=new Date(o.delivery_date || o.due_date || o.created_at); if(!isNaN(d)) fechaTxt = d.getDate()+' '+['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][d.getMonth()]; } catch(e){}
+            return '<tr>' +
+              '<td class="td-mono">' + (o.po_number || o.id || '—') + '</td>' +
+              '<td>' + (o.buyer_name || o.customer || '—') + '</td>' +
+              '<td class="td-amount">' + fmt$(Number(o.amount||o.total||0)) + '</td>' +
+              '<td><span class="badge badge-' + badge + '">' + (o.status_label || o.status || '—') + '</span></td>' +
+              '<td>' + fechaTxt + '</td>' +
+            '</tr>';
+          }).join('');
+        }
+      } else {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-3);padding:30px">Endpoint no disponible</td></tr>';
+      }
+    } catch(e){
+      var tb2 = document.getElementById('vp-orders-tbody');
+      if (tb2) tb2.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-3);padding:30px">Error cargando órdenes</td></tr>';
+    }
+  })();
 </script>
   <script defer src="auth-helper.js"></script>
 <link rel="stylesheet" href="volvix-modals.css">
