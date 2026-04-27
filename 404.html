@@ -29,7 +29,11 @@
       <div class="logo">V</div>
       <h1>404</h1>
       <h2>Página no encontrada</h2>
-      <p>La ruta que solicitaste no existe o fue movida. Puedes regresar al inicio o iniciar sesión.</p>
+      <p id="msg">La ruta que solicitaste no existe o fue movida. Puedes regresar al inicio o iniciar sesión.</p>
+      <div id="suggestion-box" style="display:none;margin:0 0 18px;padding:14px;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);border-radius:10px;text-align:left;">
+        <div style="font-size:12px;color:#94a3b8;margin-bottom:6px;">¿Quizás quisiste decir?</div>
+        <div id="suggestion-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+      </div>
       <div class="actions">
         <a class="btn primary" href="/login.html">Ir al login</a>
         <a class="btn ghost" href="/">Inicio</a>
@@ -39,7 +43,111 @@
     </div>
   </main>
   <script>
-    try { document.getElementById('path').textContent = location.pathname || ''; } catch(e){}
+    (function () {
+      try { document.getElementById('path').textContent = location.pathname || ''; } catch (e) {}
+      // B34: 404 inteligente — sugerir URLs similares y redirect automatico para typos comunes
+      var path = (location.pathname || '').toLowerCase();
+
+      // Mapa de redirects exactos (typos comunes / versiones desactualizadas)
+      var REDIRECTS = {
+        '/volvix_owner_panel_v2.html':  '/volvix_owner_panel_v7.html',
+        '/volvix_owner_panel_v3.html':  '/volvix_owner_panel_v7.html',
+        '/volvix_owner_panel_v4.html':  '/volvix_owner_panel_v7.html',
+        '/volvix_owner_panel_v5.html':  '/volvix_owner_panel_v7.html',
+        '/volvix_owner_panel_v6.html':  '/volvix_owner_panel_v7.html',
+        '/volvix_owner_panel.html':     '/volvix_owner_panel_v7.html',
+        '/owner.html':                  '/volvix_owner_panel_v7.html',
+        '/owner_panel.html':            '/volvix_owner_panel_v7.html',
+        '/multipos.html':               '/multipos_suite_v3.html',
+        '/multipos_suite.html':         '/multipos_suite_v3.html',
+        '/multipos_v1.html':            '/multipos_suite_v3.html',
+        '/multipos_v2.html':            '/multipos_suite_v3.html',
+        '/salvadorex.html':             '/salvadorex_web_v25.html',
+        '/salvadorex_web.html':         '/salvadorex_web_v25.html',
+        '/pos.html':                    '/salvadorex_web_v25.html',
+        '/customer-portal.html':        '/volvix-customer-portal.html',
+        '/customer.html':               '/volvix-customer-portal.html',
+        '/admin.html':                  '/volvix-admin-saas.html',
+        '/admin-saas.html':             '/volvix-admin-saas.html',
+        '/dashboard.html':              '/volvix-mega-dashboard.html',
+        '/kds.html':                    '/volvix-kds.html',
+        '/comandero.html':              '/volvix-kds.html',
+        '/kiosk.html':                  '/volvix-kiosk.html',
+        '/kiosko.html':                 '/volvix-kiosk.html',
+        '/etiquetas.html':              '/etiqueta_designer.html',
+        '/codigos-barras.html':         '/etiqueta_designer.html',
+        '/barcode.html':                '/etiqueta_designer.html',
+        '/vendor.html':                 '/volvix-vendor-portal.html',
+        '/proveedores.html':            '/volvix-vendor-portal.html'
+      };
+
+      if (REDIRECTS[path]) {
+        // Redirect automatico a la URL canonica con flash de aviso
+        document.getElementById('msg').innerHTML =
+          'La URL ha cambiado. Redirigiendo a <strong>' + REDIRECTS[path] + '</strong>…';
+        setTimeout(function () { location.replace(REDIRECTS[path]); }, 1200);
+        return;
+      }
+
+      // Búsqueda fuzzy de páginas similares
+      var KNOWN_PAGES = [
+        ['/login.html', 'Login'],
+        ['/salvadorex_web_v25.html', 'POS SalvadoreX'],
+        ['/volvix_owner_panel_v7.html', 'Panel del Owner'],
+        ['/multipos_suite_v3.html', 'MultiPOS Suite'],
+        ['/volvix-admin-saas.html', 'Admin SaaS'],
+        ['/volvix-mega-dashboard.html', 'Mega Dashboard'],
+        ['/volvix-customer-portal.html', 'Portal de Clientes'],
+        ['/volvix-vendor-portal.html', 'Portal de Proveedores'],
+        ['/volvix-kds.html', 'KDS / Comandero'],
+        ['/volvix-kiosk.html', 'Kiosko Auto-servicio'],
+        ['/marketplace.html', 'Marketplace'],
+        ['/etiqueta_designer.html', 'Diseñador de Etiquetas (códigos de barras)'],
+        ['/volvix_ai_engine.html', 'AI Engine'],
+        ['/volvix_ai_academy.html', 'AI Academy'],
+        ['/volvix_ai_support.html', 'AI Support'],
+        ['/volvix-audit-viewer.html', 'Audit Viewer'],
+        ['/volvix-grand-tour.html', 'Grand Tour'],
+        ['/volvix-onboarding-wizard.html', 'Onboarding Wizard'],
+        ['/volvix-sitemap.html', 'Mapa del sitio'],
+        ['/docs.html', 'Documentación']
+      ];
+
+      function distance(a, b) {
+        // Levenshtein truncado
+        a = a.toLowerCase().replace(/[^a-z0-9]/g, '');
+        b = b.toLowerCase().replace(/[^a-z0-9]/g, '');
+        var m = a.length, n = b.length;
+        if (!m) return n; if (!n) return m;
+        var dp = [];
+        for (var i = 0; i <= m; i++) dp[i] = [i];
+        for (var j = 0; j <= n; j++) dp[0][j] = j;
+        for (var i = 1; i <= m; i++) for (var j = 1; j <= n; j++) {
+          dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1]
+                                       : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+        }
+        return dp[m][n];
+      }
+
+      var pathBase = path.replace(/^\//, '').replace(/\.html$/, '');
+      if (pathBase) {
+        var scored = KNOWN_PAGES.map(function (p) {
+          var base = p[0].replace(/^\//, '').replace(/\.html$/, '');
+          var d = distance(pathBase, base);
+          var contains = base.indexOf(pathBase) >= 0 || pathBase.indexOf(base) >= 0;
+          return { url: p[0], label: p[1], score: contains ? -100 + d : d };
+        }).sort(function (a, b) { return a.score - b.score; }).slice(0, 5);
+
+        if (scored.length && scored[0].score < 12) {
+          var box = document.getElementById('suggestion-box');
+          var list = document.getElementById('suggestion-list');
+          box.style.display = 'block';
+          list.innerHTML = scored.map(function (s) {
+            return '<a href="' + s.url + '" style="color:#3B82F6;text-decoration:none;font-size:13px;padding:6px 8px;border-radius:6px;background:rgba(59,130,246,0.05);"><span style="opacity:0.7">' + s.url + '</span> — <strong>' + s.label + '</strong></a>';
+          }).join('');
+        }
+      }
+    })();
   </script>
 </body>
 </html>

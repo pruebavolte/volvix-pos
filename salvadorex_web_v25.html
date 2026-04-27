@@ -1729,9 +1729,13 @@
 
         <div class="pos-summary-spacer"></div>
 
-        <button class="bottom-btn" onclick="showToast('Reimprimiendo último ticket…')" aria-label="Reimprimir último ticket" title="Reimprimir último ticket">
+        <button class="bottom-btn" onclick="reimprimirUltimoTicket()" aria-label="Reimprimir último ticket" title="Reimprimir último ticket (vista previa + impresora)">
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#3498DB" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
           <span>Reimprimir Último Ticket</span>
+        </button>
+        <button class="bottom-btn" onclick="enviarAImpresora()" aria-label="Enviar a impresora térmica" title="Enviar a impresora térmica conectada">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/><circle cx="18" cy="11" r="1.5" fill="#10B981"/></svg>
+          <span>Enviar a Impresora</span>
         </button>
         <button class="bottom-btn" onclick="showScreen('ventas')" aria-label="Ventas y devoluciones del día" title="Ventas y devoluciones del día">
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#9B59B6" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/></svg>
@@ -1836,7 +1840,7 @@
     <section id="screen-clientes" class="screen-pad hidden">
       <div class="page-head">
         <div><h1 class="page-title">Clientes</h1><p class="page-sub" id="cli-sub">0 clientes registrados</p></div>
-        <button class="btn accent">+ Nuevo cliente</button>
+        <button class="btn accent" onclick="openNewCustomerModal()">+ Nuevo cliente</button>
       </div>
       <div class="card">
         <div class="tbl-wrap">
@@ -2864,6 +2868,247 @@
     clearTimeout(window._tt);
     window._tt = setTimeout(() => t.classList.remove('show'), 2500);
   }
+
+  /* ============================================================
+     B34: Nuevo Cliente · Reimprimir Ticket · Enviar a Impresora
+     ============================================================ */
+  // Abre modal para crear nuevo cliente
+  window.openNewCustomerModal = async function () {
+    // Construir HTML del modal si no existe
+    let modal = document.getElementById('modal-new-customer');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'modal-new-customer';
+      modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:99990;';
+      modal.innerHTML = `
+        <div style="background:#fff;color:#1C1917;border-radius:12px;padding:24px;width:480px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <h2 style="margin:0;font-size:20px;font-weight:700;">+ Nuevo Cliente</h2>
+            <button id="ncc-close" style="background:none;border:none;font-size:24px;cursor:pointer;color:#666;">&times;</button>
+          </div>
+          <form id="ncc-form" style="display:flex;flex-direction:column;gap:12px;">
+            <label style="display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:500;">
+              Nombre completo *
+              <input id="ncc-name" type="text" required maxlength="120" style="padding:10px;border:1px solid #E7E5E4;border-radius:8px;font-size:14px;" placeholder="Juan Pérez">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:500;">
+              Teléfono
+              <input id="ncc-phone" type="tel" maxlength="20" style="padding:10px;border:1px solid #E7E5E4;border-radius:8px;font-size:14px;" placeholder="555 123 4567">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:500;">
+              Email
+              <input id="ncc-email" type="email" maxlength="120" style="padding:10px;border:1px solid #E7E5E4;border-radius:8px;font-size:14px;" placeholder="cliente@ejemplo.com">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:500;">
+              Crédito autorizado (opcional)
+              <input id="ncc-credit" type="number" min="0" step="0.01" style="padding:10px;border:1px solid #E7E5E4;border-radius:8px;font-size:14px;" placeholder="0.00" value="0">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:500;">
+              Notas
+              <textarea id="ncc-notes" maxlength="500" rows="2" style="padding:10px;border:1px solid #E7E5E4;border-radius:8px;font-size:14px;resize:vertical;" placeholder="Información adicional…"></textarea>
+            </label>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">
+              <button type="button" id="ncc-cancel" style="padding:10px 18px;border:1px solid #E7E5E4;background:#fff;border-radius:8px;cursor:pointer;font-weight:500;">Cancelar</button>
+              <button type="submit" style="padding:10px 18px;border:none;background:#3B82F6;color:#fff;border-radius:8px;cursor:pointer;font-weight:600;">Guardar cliente</button>
+            </div>
+            <div id="ncc-msg" style="font-size:12px;color:#EF4444;min-height:16px;"></div>
+          </form>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      const closeIt = () => { modal.style.display = 'none'; };
+      modal.querySelector('#ncc-close').onclick = closeIt;
+      modal.querySelector('#ncc-cancel').onclick = closeIt;
+      modal.addEventListener('click', (e) => { if (e.target === modal) closeIt(); });
+
+      modal.querySelector('#ncc-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const msg = modal.querySelector('#ncc-msg');
+        msg.textContent = '';
+        const payload = {
+          name:    modal.querySelector('#ncc-name').value.trim(),
+          phone:   modal.querySelector('#ncc-phone').value.trim(),
+          email:   modal.querySelector('#ncc-email').value.trim(),
+          credit_limit: parseFloat(modal.querySelector('#ncc-credit').value) || 0,
+          notes:   modal.querySelector('#ncc-notes').value.trim()
+        };
+        if (!payload.name) { msg.textContent = 'Nombre requerido'; return; }
+        try {
+          const tok = (typeof getToken === 'function' ? getToken() : '') || (window.session && window.session.token) || localStorage.getItem('volvix_token') || '';
+          const r = await fetch('/api/customers', {
+            method: 'POST',
+            headers: Object.assign({ 'Content-Type': 'application/json' }, tok ? { Authorization: 'Bearer ' + tok } : {}),
+            body: JSON.stringify(payload)
+          });
+          if (!r.ok) {
+            const err = await r.json().catch(() => ({}));
+            msg.textContent = err.error || err.message || ('HTTP ' + r.status);
+            return;
+          }
+          showToast('✓ Cliente "' + payload.name + '" creado');
+          closeIt();
+          // Recargar lista de clientes si la función existe
+          if (typeof loadCustomersList === 'function') loadCustomersList();
+          // Reset form
+          modal.querySelector('#ncc-form').reset();
+        } catch (err) {
+          msg.textContent = 'Error de red: ' + (err.message || err);
+        }
+      });
+    }
+    modal.style.display = 'flex';
+    setTimeout(() => modal.querySelector('#ncc-name')?.focus(), 50);
+  };
+
+  // Reimprimir último ticket (vista previa + opción de mandar a impresora)
+  window.reimprimirUltimoTicket = async function () {
+    try {
+      const tok = (typeof getToken === 'function' ? getToken() : '') || (window.session && window.session.token) || localStorage.getItem('volvix_token') || '';
+      // Obtener última venta del tenant
+      const r = await fetch('/api/sales?limit=1', {
+        headers: tok ? { Authorization: 'Bearer ' + tok } : {}
+      });
+      if (!r.ok) {
+        showToast('No se pudo obtener última venta');
+        return;
+      }
+      const data = await r.json();
+      const sale = (data.items && data.items[0]) || (Array.isArray(data) && data[0]) || null;
+      if (!sale) { showToast('No hay ventas previas'); return; }
+
+      // Construir HTML del ticket
+      const items = (sale.items || []);
+      const html = `
+        <div style="font-family:'Courier New',monospace;font-size:12px;width:280px;padding:12px;background:#fff;color:#000;">
+          <div style="text-align:center;font-weight:bold;margin-bottom:8px;">
+            <div style="font-size:14px;">VOLVIX POS</div>
+            <div style="font-size:10px;">Ticket: ${sale.id || 'N/A'}</div>
+            <div style="font-size:10px;">${new Date(sale.created_at || Date.now()).toLocaleString('es-MX')}</div>
+          </div>
+          <div style="border-top:1px dashed #000;border-bottom:1px dashed #000;padding:6px 0;margin:6px 0;">
+            ${items.map(it => `
+              <div style="display:flex;justify-content:space-between;font-size:11px;">
+                <span>${(it.qty || 1)}x ${it.name || it.code || 'Item'}</span>
+                <span>$${Number((it.price || 0) * (it.qty || 1)).toFixed(2)}</span>
+              </div>
+            `).join('')}
+          </div>
+          <div style="display:flex;justify-content:space-between;font-weight:bold;font-size:13px;">
+            <span>TOTAL:</span>
+            <span>$${Number(sale.total || 0).toFixed(2)}</span>
+          </div>
+          <div style="text-align:center;margin-top:10px;font-size:10px;">¡Gracias por su compra!</div>
+        </div>
+      `;
+
+      // Vista previa en ventana nueva con opción de imprimir
+      const w = window.open('', '_blank', 'width=400,height=600');
+      if (w) {
+        w.document.write(`
+          <!DOCTYPE html><html><head><title>Ticket #${sale.id || ''}</title>
+          <style>body{margin:0;display:flex;flex-direction:column;align-items:center;background:#f3f4f6;padding:20px;}
+          .actions{margin-top:12px;display:flex;gap:8px;}
+          button{padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-weight:600;}
+          .btn-print{background:#3B82F6;color:#fff;}
+          .btn-thermal{background:#10B981;color:#fff;}
+          .btn-close{background:#9CA3AF;color:#fff;}
+          @media print{.actions{display:none;}}</style>
+          </head><body>
+          ${html}
+          <div class="actions">
+            <button class="btn-print" onclick="window.print()">🖨 Imprimir</button>
+            <button class="btn-thermal" onclick="window.opener && window.opener.enviarAImpresora('${sale.id || ''}'); window.close();">🧾 Térmica</button>
+            <button class="btn-close" onclick="window.close()">Cerrar</button>
+          </div>
+          </body></html>
+        `);
+        w.document.close();
+        showToast('✓ Vista previa abierta');
+      } else {
+        showToast('Bloqueador de ventanas activo. Permite popups.');
+      }
+    } catch (err) {
+      console.error('reimprimir error:', err);
+      showToast('Error: ' + (err.message || err));
+    }
+  };
+
+  // Enviar a impresora térmica via /api/printer/raw (ESC/POS)
+  window.enviarAImpresora = async function (saleId) {
+    try {
+      const tok = (typeof getToken === 'function' ? getToken() : '') || (window.session && window.session.token) || localStorage.getItem('volvix_token') || '';
+      let sale = null;
+      if (saleId) {
+        const r = await fetch('/api/sales/' + encodeURIComponent(saleId), {
+          headers: tok ? { Authorization: 'Bearer ' + tok } : {}
+        });
+        if (r.ok) sale = await r.json();
+      }
+      if (!sale) {
+        const r2 = await fetch('/api/sales?limit=1', {
+          headers: tok ? { Authorization: 'Bearer ' + tok } : {}
+        });
+        if (r2.ok) {
+          const d = await r2.json();
+          sale = (d.items && d.items[0]) || (Array.isArray(d) && d[0]) || null;
+        }
+      }
+      if (!sale) { showToast('No hay venta para imprimir'); return; }
+
+      // Construir comandos ESC/POS para impresora térmica
+      const ESC = '\x1B', GS = '\x1D';
+      const init = ESC + '@';
+      const center = ESC + 'a' + '\x01';
+      const left = ESC + 'a' + '\x00';
+      const bold = ESC + 'E' + '\x01';
+      const noBold = ESC + 'E' + '\x00';
+      const cut = GS + 'V' + '\x01';
+      const lf = '\n';
+
+      let raw = init + center + bold + 'VOLVIX POS' + lf + noBold;
+      raw += 'Ticket: ' + (sale.id || 'N/A') + lf;
+      raw += new Date(sale.created_at || Date.now()).toLocaleString('es-MX') + lf;
+      raw += '--------------------------------' + lf;
+      raw += left;
+      (sale.items || []).forEach(it => {
+        const qty = it.qty || 1;
+        const name = (it.name || it.code || 'Item').slice(0, 22);
+        const total = (Number(it.price || 0) * qty).toFixed(2);
+        raw += qty + 'x ' + name.padEnd(22, ' ') + ' $' + total + lf;
+      });
+      raw += '--------------------------------' + lf;
+      raw += bold + 'TOTAL: $' + Number(sale.total || 0).toFixed(2) + noBold + lf + lf;
+      raw += center + 'Gracias por su compra!' + lf + lf + lf + cut;
+
+      const r = await fetch('/api/printer/raw', {
+        method: 'POST',
+        headers: Object.assign({ 'Content-Type': 'application/json' }, tok ? { Authorization: 'Bearer ' + tok } : {}),
+        body: JSON.stringify({
+          printer_id: 'default',
+          payload: btoa(unescape(encodeURIComponent(raw))),
+          encoding: 'base64',
+          format: 'escpos',
+          sale_id: sale.id
+        })
+      });
+      if (r.ok) {
+        showToast('✓ Enviado a impresora');
+      } else {
+        const err = await r.json().catch(() => ({}));
+        // Fallback: abrir ventana nueva con window.print()
+        if (r.status === 503 || r.status === 404) {
+          showToast('Impresora no configurada. Usando print del navegador…');
+          window.reimprimirUltimoTicket();
+        } else {
+          showToast('Error impresora: ' + (err.error || err.message || ('HTTP ' + r.status)));
+        }
+      }
+    } catch (err) {
+      console.error('impresora error:', err);
+      showToast('Error: ' + (err.message || err));
+    }
+  };
 
   /* ============ POS — B19: cascade local→central→external ============ */
   async function searchProduct(code) {
