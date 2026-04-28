@@ -306,12 +306,12 @@ html, body {
       <form onsubmit="handleLogin(event)">
         <div class="form-group">
           <label class="form-label" for="emailInput">Correo</label>
-          <input type="email" id="emailInput" class="form-input" placeholder="admin@volvix.test" autocomplete="email" aria-label="Correo electrónico">
+          <input type="email" id="emailInput" class="form-input" placeholder="admin@volvix.test" autocomplete="username" aria-label="Correo electrónico" required>
         </div>
 
         <div class="form-group">
           <label class="form-label" for="passwordInput">Contraseña</label>
-          <input type="password" id="passwordInput" class="form-input" placeholder="Contraseña" autocomplete="current-password" aria-label="Contraseña">
+          <input type="password" id="passwordInput" class="form-input" placeholder="Contraseña" autocomplete="current-password" aria-label="Contraseña" required minlength="1">
         </div>
 
         <button type="submit" class="btn-primary" id="btnLogin">Entrar</button>
@@ -347,7 +347,7 @@ html, body {
       const payload = JSON.parse(atob(token.split('.')[1]));
       if (payload.exp && payload.exp * 1000 > Date.now()) {
         // R29: si vino con ?redirect=/xxx.html lo respetamos, sino default a SalvadoreX
-        let dest = '/salvadorex_web_v25.html';
+        let dest = '/volvix-launcher.html';
         try {
           const params = new URLSearchParams(location.search);
           const r = params.get('redirect');
@@ -437,7 +437,7 @@ async function handleLogin(event) {
     showAlert('¡Bienvenido!', 'success');
 
     // R29: respetar redirect= en URL si viene de otra página protegida
-    let dest = '/salvadorex_web_v25.html';
+    let dest = '/volvix-launcher.html';
     try {
       const params = new URLSearchParams(location.search);
       const r = params.get('redirect');

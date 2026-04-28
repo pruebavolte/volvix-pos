@@ -682,9 +682,16 @@
       </button>
 
       <div class="nav-label">Operación</div>
+      <button class="nav-item" onclick="window.location.href='/volvix-user-management.html'">
+        <span>👥</span> Gestión de Usuarios
+      </button>
       <button class="nav-item" onclick="nav('tenants', this)">
         <span>◈</span> Tenants
         <span class="nav-badge">247</span>
+      </button>
+      <button class="nav-item" onclick="nav('branches', this)">
+        <span>🏬</span> Sucursales
+        <span class="nav-badge" id="branches-count-badge">0</span>
       </button>
       <button class="nav-item" onclick="nav('devices', this)">
         <span>▢</span> Dispositivos
@@ -703,12 +710,18 @@
       <button class="nav-item" onclick="nav('logs', this)">
         <span>≡</span> Logs
       </button>
+      <button class="nav-item" onclick="nav('security', this); r8gLoadSecurity();">
+        <span>🔒</span> Seguridad
+        <span class="nav-badge" id="security-unread-badge" style="background:rgba(239,68,68,0.15);color:#EF4444;">0</span>
+      </button>
       <button class="nav-item" onclick="nav('settings', this)">
         <span>⚙</span> Ajustes
       </button>
     </nav>
 
-    <div class="me">
+    <div class="me" onclick="openProfile()" role="button" tabindex="0" aria-label="Abrir mi perfil"
+         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openProfile();}"
+         style="cursor:pointer;">
       <div class="avatar">DV</div>
       <div style="flex: 1;">
         <div style="font-size: 12px; font-weight: 600;">Daniel V.</div>
@@ -728,8 +741,16 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
         <input type="text" placeholder="Buscar marca, tenant, licencia…" aria-label="Buscar marca, tenant o licencia">
       </div>
-      <button class="btn">Exportar</button>
-      <button class="btn primary">+ Crear</button>
+      <!-- R8f: Selector global de Sucursal -->
+      <div class="branch-selector-wrap" style="display:flex; align-items:center; gap:6px;">
+        <span style="font-size:11px; color:var(--text-3); font-weight:600;">🏬</span>
+        <select id="global-branch-selector" onchange="onBranchChange(this.value)" aria-label="Filtrar por sucursal"
+                style="height:32px; border:1px solid var(--border); border-radius:6px; padding:0 8px; font-size:12px; background:var(--surface); color:var(--text); cursor:pointer; min-width:160px;">
+          <option value="">Todas las sucursales</option>
+        </select>
+      </div>
+      <button class="btn" onclick="VolvixOwnerActions.exportCurrentView(this)">Exportar</button>
+      <button class="btn primary" onclick="VolvixOwnerActions.createForCurrentView(this)">+ Crear</button>
     </div>
 
     <div class="content scroll">
@@ -749,7 +770,7 @@
             <div style="font-size: 12.5px; color: #57534E; margin-top: 3px;">Controla el POS web de un tenant de retail tradicional (TNT001).</div>
           </div>
           <button class="btn primary" onclick="openControl(4)">🎛️ Control Center</button>
-          <button class="btn" onclick="window.open('salvadorex_web_v24.html','_blank')">Abrir POS →</button>
+          <button class="btn" onclick="window.open('salvadorex_web_v25.html','_blank')">Abrir POS →</button>
         </div>
       </div>
 
@@ -1043,7 +1064,7 @@
           <h2>Verticales</h2>
           <p class="muted">Plantillas por giro de negocio. Definen la terminología, módulos por defecto y reportes especializados.</p>
         </div>
-        <button class="btn primary">+ Nueva vertical</button>
+        <button class="btn primary" onclick="VolvixOwnerActions.newVertical(this)">+ Nueva vertical</button>
       </div>
 
       <div class="grid-2" id="verticals-grid"></div>
@@ -1058,7 +1079,7 @@
         </div>
         <div class="section-cta">
           <button class="btn" onclick="openLandingsBulkAction()">⚡ Acciones masivas</button>
-          <button class="btn primary" onclick="window.open('landing_template.html','_blank')">🌐 Abrir marketplace</button>
+          <button class="btn primary" onclick="window.open('marketplace.html','_blank')">🌐 Abrir marketplace</button>
         </div>
       </div>
 
@@ -1604,7 +1625,7 @@
           <h2>Marcas blancas</h2>
           <p class="muted">Dominios que venden el sistema. Tus marcas oficiales o las marcas que crean tus clientes revendedores.</p>
         </div>
-        <button class="btn primary">+ Nueva marca</button>
+        <button class="btn primary" onclick="VolvixOwnerActions.newBrand(this)">+ Nueva marca</button>
       </div>
 
       <div class="tabs">
@@ -1638,7 +1659,7 @@
           <h2>Módulos</h2>
           <p class="muted">Catálogo global de funciones. Cada marca y cada tenant decide cuáles activar.</p>
         </div>
-        <button class="btn primary">+ Crear módulo</button>
+        <button class="btn primary" onclick="VolvixOwnerActions.newModule(this)">+ Crear módulo</button>
       </div>
 
       <div class="tabs">
@@ -1658,8 +1679,8 @@
           <p class="muted">Negocios finales. Cada uno pertenece a una marca blanca y paga por módulos y dispositivos.</p>
         </div>
         <div class="row gap-2">
-          <button class="btn">Filtrar</button>
-          <button class="btn primary">+ Nuevo tenant</button>
+          <button class="btn" onclick="VolvixOwnerActions.filterTenants(this)">Filtrar</button>
+          <button class="btn primary" onclick="VolvixOwnerActions.newTenant(this)">+ Nuevo tenant</button>
         </div>
       </div>
 
@@ -1681,6 +1702,89 @@
       </div>
     </section>
 
+    <!-- ======================== R8f: SUCURSALES ======================== -->
+    <section id="v-branches" class="hidden fade-in">
+      <div class="section-head mb-4">
+        <div>
+          <h2>Sucursales</h2>
+          <p class="muted">Cada sucursal tiene su propio inventario, ventas y usuarios. Permisos y reportes se filtran por sucursal.</p>
+        </div>
+        <div class="row gap-2">
+          <button class="btn" onclick="loadBranches()">↻ Refrescar</button>
+          <button class="btn primary" onclick="openBranchModal()">+ Crear sucursal</button>
+        </div>
+      </div>
+
+      <!-- KPI strip -->
+      <div class="grid-4 mb-4" id="branches-kpis">
+        <div class="card card-pad"><div class="muted" style="font-size:12px;">Sucursales activas</div><div style="font-size:24px; font-weight:700;" id="kpi-branches-active">0</div></div>
+        <div class="card card-pad"><div class="muted" style="font-size:12px;">Ventas hoy (todas)</div><div style="font-size:24px; font-weight:700;" id="kpi-branches-sales">$0</div></div>
+        <div class="card card-pad"><div class="muted" style="font-size:12px;">Tickets hoy</div><div style="font-size:24px; font-weight:700;" id="kpi-branches-tickets">0</div></div>
+        <div class="card card-pad"><div class="muted" style="font-size:12px;">Inventario total</div><div style="font-size:24px; font-weight:700;" id="kpi-branches-inv">$0</div></div>
+      </div>
+
+      <div class="card" style="overflow: hidden;">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Dirección</th>
+              <th>Teléfono</th>
+              <th># Usuarios</th>
+              <th>Ventas hoy</th>
+              <th>Estado</th>
+              <th style="width: 220px;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="branchesBody"><tr><td colspan="7" class="muted" style="text-align:center; padding:20px;">Cargando…</td></tr></tbody>
+        </table>
+      </div>
+
+      <!-- Modal de creación/edición de sucursal -->
+      <div id="branch-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+        <div class="card" style="width:90%; max-width:500px; padding:24px; background:var(--surface);">
+          <h3 style="margin-bottom:8px;" id="branch-modal-title">Nueva sucursal</h3>
+          <p class="muted" style="font-size:12px; margin-bottom:18px;">Crea una sucursal nueva para esta cuenta.</p>
+          <form id="branch-form" onsubmit="submitBranchForm(event)">
+            <input type="hidden" id="branch-form-id" />
+            <div style="margin-bottom:12px;">
+              <label style="font-size:12px; font-weight:600; display:block; margin-bottom:4px;">Nombre <span style="color:#DC2626;">*</span></label>
+              <input type="text" id="branch-form-name" required maxlength="120" placeholder="Sucursal Centro"
+                     style="width:100%; height:36px; padding:0 10px; border:1px solid var(--border); border-radius:6px; font-size:13px;" />
+            </div>
+            <div style="margin-bottom:12px;">
+              <label style="font-size:12px; font-weight:600; display:block; margin-bottom:4px;">Dirección</label>
+              <input type="text" id="branch-form-address" maxlength="500" placeholder="Av. Principal 123, CDMX"
+                     style="width:100%; height:36px; padding:0 10px; border:1px solid var(--border); border-radius:6px; font-size:13px;" />
+            </div>
+            <div style="margin-bottom:12px;">
+              <label style="font-size:12px; font-weight:600; display:block; margin-bottom:4px;">Teléfono</label>
+              <input type="tel" id="branch-form-phone" maxlength="60" placeholder="+52 55 1234 5678"
+                     style="width:100%; height:36px; padding:0 10px; border:1px solid var(--border); border-radius:6px; font-size:13px;" />
+            </div>
+            <div style="margin-bottom:18px;">
+              <label style="font-size:12px; font-weight:600; display:block; margin-bottom:4px;">Estado</label>
+              <select id="branch-form-status" style="width:100%; height:36px; padding:0 10px; border:1px solid var(--border); border-radius:6px; font-size:13px;">
+                <option value="active">Activa</option>
+                <option value="suspended">Suspendida</option>
+                <option value="closed">Cerrada (histórico — auditoría)</option>
+                <option value="archived">Archivada (oculta del listado)</option>
+              </select>
+              <p class="muted" style="font-size:11px;margin-top:4px;line-height:1.4">
+                <b>Cerrada</b>: deshabilita ventas nuevas pero conserva histórico para auditoría fiscal.<br>
+                <b>Archivada</b>: oculta del listado activo (no recomendado si tienes ventas).
+              </p>
+            </div>
+            <div id="branch-form-error" style="color:#DC2626; font-size:12px; margin-bottom:12px; display:none;"></div>
+            <div style="display:flex; gap:8px; justify-content:flex-end;">
+              <button type="button" class="btn" onclick="closeBranchModal()">Cancelar</button>
+              <button type="submit" class="btn primary" id="branch-form-submit">Guardar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
     <!-- ======================== DISPOSITIVOS ======================== -->
     <section id="v-devices" class="hidden fade-in">
       <div class="section-head mb-4">
@@ -1688,7 +1792,7 @@
           <h2>Dispositivos</h2>
           <p class="muted">Licencias activas por tipo de app. Cada tenant compra seats por plataforma.</p>
         </div>
-        <button class="btn primary">+ Emitir seat</button>
+        <button class="btn primary" onclick="VolvixOwnerActions.issueSeat(this)">+ Emitir seat</button>
       </div>
 
       <div class="grid-3 mb-6">
@@ -1854,7 +1958,7 @@
           <h2>Deploys</h2>
           <p class="muted">Versiones de Volvix Core. Rollout por marca y por tipo de dispositivo.</p>
         </div>
-        <button class="btn primary">🚀 Nuevo deploy</button>
+        <button class="btn primary" onclick="VolvixOwnerActions.newDeploy(this)">🚀 Nuevo deploy</button>
       </div>
       <div class="card" style="overflow: hidden;">
         <table class="tbl">
@@ -1873,6 +1977,63 @@
         </div>
       </div>
       <div class="card scroll" style="max-height: 600px;" id="logsContainer"></div>
+    </section>
+
+    <!-- ======================== SEGURIDAD (R8g) ======================== -->
+    <section id="v-security" class="hidden fade-in">
+      <div class="section-head mb-4">
+        <div>
+          <h2>Seguridad y Fraude</h2>
+          <p class="muted">Alertas de seguridad, scans automáticos y dashboard de auditoría fiscal (R8g).</p>
+        </div>
+        <div class="row gap-2">
+          <button class="btn sm" onclick="r8gRunFraudScan()">▶ Escanear ahora</button>
+          <button class="btn sm" onclick="r8gExportCsv()">⬇ Exportar CSV</button>
+        </div>
+      </div>
+
+      <!-- KPIs 24h -->
+      <div class="grid-4 mb-4" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+        <div class="card card-pad"><div class="muted" style="font-size:11px;">Alertas 24h</div><div style="font-size:24px;font-weight:600;" id="sec-kpi-total">0</div></div>
+        <div class="card card-pad" style="border-left:3px solid #EF4444;"><div class="muted" style="font-size:11px;">Severidad alta</div><div style="font-size:24px;font-weight:600;color:#EF4444;" id="sec-kpi-high">0</div></div>
+        <div class="card card-pad" style="border-left:3px solid #F59E0B;"><div class="muted" style="font-size:11px;">No leídas</div><div style="font-size:24px;font-weight:600;color:#F59E0B;" id="sec-kpi-unread">0</div></div>
+        <div class="card card-pad" style="border-left:3px solid #10B981;"><div class="muted" style="font-size:11px;">Resueltas</div><div style="font-size:24px;font-weight:600;color:#10B981;" id="sec-kpi-resolved">0</div></div>
+      </div>
+
+      <!-- Filtros -->
+      <div class="card card-pad mb-4">
+        <div class="row gap-2" style="flex-wrap:wrap;">
+          <div>
+            <label class="muted" style="font-size:11px;display:block;margin-bottom:3px;">Severidad</label>
+            <select id="sec-filter-severity" onchange="r8gLoadSecurity()" style="padding:6px 10px;border:1px solid var(--border);border-radius:5px;font-size:12px;">
+              <option value="">Todas</option>
+              <option value="critical">Critical</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+          <div>
+            <label class="muted" style="font-size:11px;display:block;margin-bottom:3px;">Estado</label>
+            <select id="sec-filter-status" onchange="r8gLoadSecurity()" style="padding:6px 10px;border:1px solid var(--border);border-radius:5px;font-size:12px;">
+              <option value="">Todos</option>
+              <option value="unread" selected>Unread</option>
+              <option value="investigating">Investigating</option>
+              <option value="resolved">Resolved</option>
+              <option value="dismissed">Dismissed</option>
+            </select>
+          </div>
+          <div>
+            <label class="muted" style="font-size:11px;display:block;margin-bottom:3px;">Tipo</label>
+            <input id="sec-filter-type" onchange="r8gLoadSecurity()" placeholder="ej. fraud_cashier_high_cancels" style="padding:6px 10px;border:1px solid var(--border);border-radius:5px;font-size:12px;width:240px;">
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista alertas -->
+      <div class="card scroll" style="max-height:600px;" id="sec-alerts-list">
+        <div class="muted" style="padding:20px;text-align:center;">Cargando...</div>
+      </div>
     </section>
 
     <!-- ======================== AJUSTES ======================== -->
@@ -1973,7 +2134,7 @@
     </div>
     <div class="modal-foot">
       <button class="btn" onclick="closeModal('modal-tenant')">Cerrar</button>
-      <button class="btn primary">Guardar cambios</button>
+      <button class="btn primary" onclick="VolvixOwnerActions.saveTenantChanges(this)">Guardar cambios</button>
     </div>
   </div>
 </div>
@@ -2048,6 +2209,14 @@
           <div class="ctrl-row"><div class="lbl">Plan</div><select class="input-field" style="width: 140px; padding: 6px 10px;" id="ctrl-plan" onchange="ctrlUpdatePlan(this.value)"><option value="Básico">Básico</option><option value="Pro" selected>Pro</option><option value="Enterprise">Enterprise</option></select></div>
           <div class="ctrl-row"><div class="lbl">Estado</div><span class="ctrl-badge ok" id="ctrl-status-badge">● Activa</span></div>
           <div class="ctrl-row"><div class="lbl">Vence</div><input type="date" class="input-field" style="width: 160px; padding: 6px 10px;" value="2027-01-15"></div>
+          <!-- R5b GAP-O5: aviso de plan downgrade (solo se muestra cuando bajas plan) -->
+          <div id="ctrl-plan-downgrade-banner" style="display:none;background:#FEF3C7;border:1px solid #F59E0B;color:#92400E;padding:8px 10px;border-radius:8px;font-size:11.5px;margin-top:8px;">
+            ⚠ Al bajar de plan, las funciones premium quedarán bloqueadas con un modal "Actualizar plan". Las ventas previas conservan su acceso.
+          </div>
+          <!-- R5b GAP-O4: aviso de IVA fijo al momento de la venta -->
+          <div style="background:#EFF6FF;border:1px solid #3B82F6;color:#1E40AF;padding:8px 10px;border-radius:8px;font-size:11.5px;margin-top:8px;">
+            ℹ El cambio de IVA aplica desde HOY. Las ventas anteriores conservan la tasa original (auditable en reportes).
+          </div>
         </div>
 
         <div class="ctrl-section">
@@ -2230,7 +2399,7 @@
           <label>Vista previa</label>
           <div style="background:#F5F5F4;border:1px solid #E7E5E4;border-radius:8px;padding:14px;">
             <div style="font-size:11px;color:#78716C;">URL pública:</div>
-            <code style="font-size:13px;color:#EA580C;" id="le-preview-url">landing_template.html?giro=...</code>
+            <code style="font-size:13px;color:#EA580C;" id="le-preview-url">landing_dynamic.html?giro=...</code>
           </div>
         </div>
         <div class="editor-field">
@@ -2618,9 +2787,34 @@ function ctrlSetStatus(status) {
 }
 function ctrlUpdatePlan(plan) {
   const state = getTenantState();
+  // R5b GAP-O5: detect downgrade and show banner / call backend change-plan
+  const planRank = { 'Básico': 1, 'Pro': 2, 'Enterprise': 3 };
+  const prev = state.plan || 'Pro';
+  const isDowngrade = (planRank[plan] || 0) < (planRank[prev] || 0);
   state.plan = plan;
+  state.previous_plan = prev;
+  state.plan_changed_at = new Date().toISOString();
   saveTenantState(state);
-  showCtrlToast(`Plan cambiado a ${plan}`);
+  const banner = document.getElementById('ctrl-plan-downgrade-banner');
+  if (banner) banner.style.display = isDowngrade ? 'block' : 'none';
+  // Persist to backend (best-effort; ignored if endpoint not yet wired)
+  try {
+    const tenantId = state.id || state.tenant_id;
+    if (tenantId && /^[0-9a-f-]{36}$/i.test(tenantId)) {
+      const planMap = { 'Básico': 'basic', 'Pro': 'pro', 'Enterprise': 'enterprise' };
+      const newPlanLower = planMap[plan] || plan.toLowerCase();
+      let token = null;
+      try { token = localStorage.getItem('volvix_token') || localStorage.getItem('volvix.jwt'); } catch (_) {}
+      if (token) {
+        fetch('/api/owner/tenants/' + encodeURIComponent(tenantId) + '/change-plan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ new_plan: newPlanLower })
+        }).catch(() => {});
+      }
+    }
+  } catch (_) {}
+  showCtrlToast(`Plan cambiado a ${plan}` + (isDowngrade ? ' (downgrade — features premium se bloquearán)' : ''));
 }
 function ctrlUpdateIdentity() {
   const state = getTenantState();
@@ -2694,16 +2888,129 @@ function nav(view, btn) {
     brands: ['Marcas blancas','Dominios que venden el sistema'],
     modules: ['Módulos','Catálogo global de funciones'],
     tenants: ['Tenants','Negocios finales que usan el sistema'],
+    branches: ['Sucursales','Multi-sucursal · inventario, ventas y usuarios por sucursal · reportes consolidados'],
     devices: ['Dispositivos','Seats por tipo de plataforma'],
     sync: ['Sincronización','Estado en tiempo real del sync'],
     billing: ['Facturación','Cobros, revshare y márgenes'],
     deploys: ['Deploys','Versiones de Volvix Core'],
     logs: ['Logs','Stream técnico del sistema'],
+    security: ['Seguridad y Fraude','Alertas, scans y auditoría fiscal · R8g'],
     settings: ['Ajustes','Configuración global'],
   };
   const [t, s] = titles[view] || ['',''];
   $('#page-title').textContent = t;
   $('#page-sub').textContent = s;
+}
+
+// ============================================================================
+// R8g — Seguridad/Fraude dashboard
+// ============================================================================
+async function r8gApi(method, path, body) {
+  try {
+    const tok = (typeof getJWT === 'function') ? getJWT() : (localStorage.getItem('volvix_token') || '');
+    const headers = { 'Content-Type': 'application/json' };
+    if (tok) headers['Authorization'] = 'Bearer ' + tok;
+    const r = await fetch(path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+    const t = await r.text();
+    let j = null; try { j = t ? JSON.parse(t) : null; } catch (_) { j = { raw: t }; }
+    return { ok: r.ok, status: r.status, data: j };
+  } catch (e) { return { ok: false, status: 0, error: String(e) }; }
+}
+
+async function r8gLoadSecurity() {
+  const sevEl = document.getElementById('sec-filter-severity');
+  const stEl  = document.getElementById('sec-filter-status');
+  const tyEl  = document.getElementById('sec-filter-type');
+  const sev = sevEl ? sevEl.value : '';
+  const st  = stEl  ? stEl.value  : 'unread';
+  const ty  = tyEl  ? tyEl.value.trim()  : '';
+  const list = document.getElementById('sec-alerts-list');
+  if (list) list.innerHTML = '<div class="muted" style="padding:20px;text-align:center;">Cargando...</div>';
+
+  // Summary
+  const sm = await r8gApi('GET', '/api/admin/security-summary');
+  if (sm.ok && sm.data) {
+    const k = sm.data.kpi_24h || {};
+    const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = String(v||0); };
+    set('sec-kpi-total', k.total_24h);
+    set('sec-kpi-high', k.high_count);
+    set('sec-kpi-unread', k.unread);
+    set('sec-kpi-resolved', k.resolved);
+    const badge = document.getElementById('security-unread-badge');
+    if (badge) badge.textContent = String(k.unread || 0);
+  }
+
+  // Lista
+  let qs = [];
+  if (sev) qs.push('severity=' + encodeURIComponent(sev));
+  if (st)  qs.push('status='   + encodeURIComponent(st));
+  if (ty)  qs.push('type='     + encodeURIComponent(ty));
+  const r = await r8gApi('GET', '/api/admin/fraud-alerts' + (qs.length ? '?' + qs.join('&') : ''));
+  if (!r.ok) {
+    if (list) list.innerHTML = '<div style="padding:20px;color:#EF4444;">Error: ' + (r.data && r.data.error || r.status) + '</div>';
+    return;
+  }
+  const items = (r.data && r.data.items) || [];
+  if (!items.length) {
+    if (list) list.innerHTML = '<div class="muted" style="padding:20px;text-align:center;">Sin alertas para los filtros activos.</div>';
+    return;
+  }
+  const sevColors = { critical: '#DC2626', high: '#EF4444', medium: '#F59E0B', low: '#3B82F6' };
+  const html = items.map(a => {
+    const sev = (a.severity || 'medium').toLowerCase();
+    const c = sevColors[sev] || '#6B7280';
+    const det = a.details ? JSON.stringify(a.details).slice(0, 200) : '';
+    return `<div style="padding:12px;border-bottom:1px solid var(--border);" data-alert-id="${a.id}">
+      <div class="row" style="justify-content:space-between;">
+        <div>
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${c};margin-right:8px;"></span>
+          <strong style="font-size:13px;">${(a.alert_type || 'unknown').replace(/_/g,' ')}</strong>
+          <span class="muted" style="font-size:11px;margin-left:8px;">${new Date(a.ts).toLocaleString()}</span>
+        </div>
+        <div class="row gap-2">
+          <button class="btn sm" onclick="r8gMark('${a.id}','investigating')">Investigar</button>
+          <button class="btn sm" onclick="r8gMark('${a.id}','resolved')">Resolver</button>
+          <button class="btn sm" onclick="r8gMark('${a.id}','dismissed')">Descartar</button>
+        </div>
+      </div>
+      <div class="muted" style="font-size:11px;margin-top:6px;font-family:monospace;">
+        sev=${sev} · resource=${a.resource||'-'} · resource_id=${a.resource_id||'-'} · status=${a.status||'unread'}
+      </div>
+      <div class="muted" style="font-size:11px;margin-top:4px;">${det}</div>
+    </div>`;
+  }).join('');
+  if (list) list.innerHTML = html;
+}
+
+async function r8gMark(id, status) {
+  const r = await r8gApi('PATCH', '/api/admin/fraud-alerts/' + encodeURIComponent(id), { status: status });
+  if (r.ok) r8gLoadSecurity();
+  else alert('Error: ' + (r.data && r.data.error || r.status));
+}
+
+async function r8gRunFraudScan() {
+  const r = await r8gApi('POST', '/api/admin/fraud-scan', {});
+  if (r.ok) {
+    alert('Scan completo. Detectadas ' + (r.data.detected || 0) + ' alertas (insertadas: ' + (r.data.inserted || 0) + ')');
+    r8gLoadSecurity();
+  } else {
+    alert('Error: ' + (r.data && r.data.error || r.status));
+  }
+}
+
+async function r8gExportCsv() {
+  const r = await r8gApi('GET', '/api/admin/fraud-alerts?status=');
+  if (!r.ok) return alert('Error: ' + r.status);
+  const items = (r.data && r.data.items) || [];
+  const headers = ['id','ts','severity','status','alert_type','resource','resource_id','user_id'];
+  const rows = items.map(a => headers.map(h => '"' + String(a[h]||'').replace(/"/g,'""') + '"').join(','));
+  const csv = headers.join(',') + '\n' + rows.join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url2 = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url2; a.download = 'security-alerts-' + new Date().toISOString().slice(0,10) + '.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url2);
 }
 
 // ========== DATA ==========
@@ -2731,8 +3038,8 @@ function renderVerticals() {
       </div>
       <div class="mono mt-3" style="color: var(--text-3); font-size: 11px; padding: 8px; background: var(--surface-2); border-radius: 4px;">${v.terms}</div>
       <div class="row gap-2 mt-3">
-        <button class="btn sm">Editar</button>
-        <button class="btn sm">Ver tenants</button>
+        <button class="btn sm" onclick="VolvixOwnerActions.editVertical('${v.key}', this)">Editar</button>
+        <button class="btn sm" onclick="VolvixOwnerActions.viewVerticalTenants('${v.key}', this)">Ver tenants</button>
       </div>
     </div>`).join('');
 }
@@ -2762,7 +3069,7 @@ function renderBrands(filter='all') {
       <td class="mono">${b.tenants}</td>
       <td class="mono" style="color: var(--ok); font-weight: 500;">${fmt(b.mrr)}</td>
       <td class="muted">${b.rev}</td>
-      <td style="text-align: right;"><button class="btn sm">Abrir</button></td>
+      <td style="text-align: right;"><button class="btn sm" onclick="VolvixOwnerActions.openBrand('${b.id || b.subdomain || b.name}', this)">Abrir</button></td>
     </tr>`).join('');
 }
 function brandTab(e, filter) {
@@ -3193,7 +3500,7 @@ function renderGirosGrid() {
 }
 
 function viewGiroLanding(key) {
-  window.open('landing_template.html?giro=' + key, '_blank');
+  window.open('landing_dynamic.html?giro=' + key, '_blank');
 }
 
 function editGiroLanding(key) {
@@ -3269,7 +3576,7 @@ function editGiroLanding(key) {
   pub.classList.toggle('on', isPub);
   pub.onclick = () => pub.classList.toggle('on');
 
-  $('#le-preview-url').textContent = `landing_template.html?giro=${key}`;
+  $('#le-preview-url').textContent = `landing_dynamic.html?giro=${key}`;
 
   $('#modal-landing').classList.remove('hidden');
 }
@@ -3346,7 +3653,7 @@ function viewLanding() {
 
 function copyLandingUrl() {
   if (!editingGiroKey) return;
-  const url = window.location.origin + window.location.pathname.replace(/[^/]+$/, 'landing_template.html?giro=' + editingGiroKey);
+  const url = window.location.origin + window.location.pathname.replace(/[^/]+$/, 'landing_dynamic.html?giro=' + editingGiroKey);
   navigator.clipboard?.writeText(url);
   showCtrlToast('🔗 URL copiada');
 }
@@ -4064,6 +4371,299 @@ function renderLabelTemplates() {
   `).join('');
 }
 
+// ========================================================================
+// R8f: MULTI-SUCURSAL — branch selector + CRUD UI
+// ========================================================================
+(function () {
+  // Persisted state (localStorage)
+  const LS_KEY = 'volvix_selected_branch_id';
+  let _branchesCache = [];
+  let _selectedBranchId = '';
+  try { _selectedBranchId = localStorage.getItem(LS_KEY) || ''; } catch (_) {}
+
+  function _fetch() {
+    return (window.Volvix && window.Volvix.auth && window.Volvix.auth.fetch) ? window.Volvix.auth.fetch : fetch;
+  }
+
+  window.getSelectedBranchId = function () { return _selectedBranchId || ''; };
+  window.onBranchChange = function (val) {
+    _selectedBranchId = val || '';
+    try { localStorage.setItem(LS_KEY, _selectedBranchId); } catch (_) {}
+    // Refresh dependent sections
+    if (typeof loadTenantsFromAPI === 'function') try { loadTenantsFromAPI(); } catch (_) {}
+    if (typeof refreshDashboardKPIs === 'function') try { refreshDashboardKPIs(); } catch (_) {}
+    if (typeof loadBranches === 'function') loadBranches();
+    document.dispatchEvent(new CustomEvent('volvix:branch-changed', { detail: { branch_id: _selectedBranchId } }));
+  };
+
+  // Populate selector + table
+  window.loadBranches = async function () {
+    try {
+      const fetchFn = _fetch();
+      const res = await fetchFn(location.origin + '/api/branches', { credentials: 'include' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const json = await res.json();
+      const items = (json && json.items) || [];
+      _branchesCache = items;
+      // Update selector
+      const sel = document.getElementById('global-branch-selector');
+      if (sel) {
+        const cur = _selectedBranchId;
+        sel.innerHTML = '<option value="">Todas las sucursales</option>'
+          + items.map(b => `<option value="${b.id}" ${b.id === cur ? 'selected' : ''}>${(b.name || '').replace(/[<>]/g, '')}</option>`).join('');
+      }
+      // Update sidebar badge
+      const badge = document.getElementById('branches-count-badge');
+      if (badge) badge.textContent = items.length;
+      // Update KPIs
+      const kpiActive = document.getElementById('kpi-branches-active');
+      if (kpiActive) kpiActive.textContent = items.filter(b => b.status === 'active').length;
+      // Render table
+      const tbody = document.getElementById('branchesBody');
+      if (tbody) {
+        if (!items.length) {
+          tbody.innerHTML = '<tr><td colspan="7" class="muted" style="text-align:center; padding:20px;">No hay sucursales. Crea la primera con "+ Crear sucursal".</td></tr>';
+        } else {
+          tbody.innerHTML = items.map(b => {
+            const isClosed = b.status === 'closed';
+            const isArchived = b.status === 'archived';
+            const statusClass = b.status === 'active' ? 'success' : (isArchived ? 'danger' : (isClosed ? 'warning' : 'warning'));
+            const statusLabel = b.status === 'active' ? 'Activa' : (isArchived ? 'Archivada' : (isClosed ? 'Cerrada (histórico)' : 'Suspendida'));
+            // FIX-N4-4: si está cerrada solo se permite ver histórico/restaurar; si está activa se ofrece "Cerrar"
+            let actionsHtml = `<button class="btn" style="padding:4px 8px; font-size:11px;" onclick="editBranch('${b.id}')">Editar</button>`;
+            if (isArchived) {
+              actionsHtml += `<button class="btn" style="padding:4px 8px; font-size:11px;" onclick="restoreBranch('${b.id}')">Restaurar</button>`;
+            } else if (isClosed) {
+              actionsHtml += `<button class="btn" style="padding:4px 8px; font-size:11px;" onclick="reopenBranch('${b.id}')">Reabrir</button>`;
+              actionsHtml += `<button class="btn" style="padding:4px 8px; font-size:11px;" onclick="viewBranchHistory('${b.id}')" title="Ver ventas históricas">📊 Histórico</button>`;
+            } else {
+              // FIX-N4-4: botón principal "Cerrar sucursal" (mantiene histórico). "Archivar" queda como opción secundaria.
+              actionsHtml += `<button class="btn" style="padding:4px 8px; font-size:11px; color:#B45309;" onclick="closeBranch('${b.id}')" title="Deshabilita ventas pero mantiene histórico para auditoría">🔒 Cerrar sucursal</button>`;
+              actionsHtml += `<button class="btn" style="padding:4px 8px; font-size:11px; color:#DC2626;" onclick="archiveBranch('${b.id}')" title="Solo oculta de listado">Archivar</button>`;
+            }
+            return `<tr>
+              <td><strong>${(b.name || '').replace(/[<>]/g, '')}</strong>${isClosed && b.closed_at ? '<div class="muted" style="font-size:10px;">cerrada ' + new Date(b.closed_at).toLocaleDateString('es-MX') + '</div>' : ''}</td>
+              <td class="muted">${(b.address || '—').replace(/[<>]/g, '')}</td>
+              <td class="muted">${(b.phone || '—').replace(/[<>]/g, '')}</td>
+              <td><span class="muted" data-branch-users="${b.id}">…</span></td>
+              <td><span class="muted" data-branch-sales="${b.id}">…</span></td>
+              <td><span class="badge ${statusClass}">${statusLabel}</span></td>
+              <td>${actionsHtml}</td>
+            </tr>`;
+          }).join('');
+        }
+      }
+      // Refresh sales counts per branch
+      refreshBranchSalesKPIs(items);
+    } catch (e) {
+      console.error('[branches] load failed', e);
+      const tbody = document.getElementById('branchesBody');
+      if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="muted" style="text-align:center; padding:20px;">Error al cargar sucursales: ${(e.message || '').replace(/[<>]/g, '')}</td></tr>`;
+    }
+  };
+
+  async function refreshBranchSalesKPIs(branches) {
+    try {
+      const fetchFn = _fetch();
+      const today = new Date().toISOString().slice(0, 10);
+      const res = await fetchFn(location.origin + '/api/reports/sales/by-branch?from=' + today + '&to=' + today, { credentials: 'include' });
+      if (!res.ok) return;
+      const json = await res.json();
+      const map = {};
+      ((json && json.branches) || []).forEach(b => { map[b.branch_id] = b; });
+      // Update each cell
+      branches.forEach(b => {
+        const data = map[b.id] || { sales_count: 0, total: 0 };
+        const salesCell = document.querySelector(`[data-branch-sales="${b.id}"]`);
+        if (salesCell) salesCell.innerHTML = `<strong>$${(data.total || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong> · ${data.sales_count || 0} tx`;
+        const usersCell = document.querySelector(`[data-branch-users="${b.id}"]`);
+        if (usersCell) usersCell.textContent = '—';
+      });
+      // Top KPI cards
+      const total = (json && json.tenant_total) || { sales_count: 0, total: 0 };
+      const kpiSales = document.getElementById('kpi-branches-sales');
+      if (kpiSales) kpiSales.textContent = '$' + (total.total || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const kpiTickets = document.getElementById('kpi-branches-tickets');
+      if (kpiTickets) kpiTickets.textContent = total.sales_count || 0;
+    } catch (_) {}
+    try {
+      const fetchFn = _fetch();
+      const res2 = await fetchFn(location.origin + '/api/reports/inventory/by-branch', { credentials: 'include' });
+      if (!res2.ok) return;
+      const json2 = await res2.json();
+      const totalInv = ((json2 && json2.branches) || []).reduce((acc, b) => acc + (b.total_value || 0), 0);
+      const kpiInv = document.getElementById('kpi-branches-inv');
+      if (kpiInv) kpiInv.textContent = '$' + totalInv.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    } catch (_) {}
+  }
+
+  // Modal helpers
+  window.openBranchModal = function () {
+    document.getElementById('branch-form-id').value = '';
+    document.getElementById('branch-form-name').value = '';
+    document.getElementById('branch-form-address').value = '';
+    document.getElementById('branch-form-phone').value = '';
+    document.getElementById('branch-form-status').value = 'active';
+    document.getElementById('branch-form-error').style.display = 'none';
+    document.getElementById('branch-modal-title').textContent = 'Nueva sucursal';
+    document.getElementById('branch-modal').style.display = 'flex';
+  };
+  window.closeBranchModal = function () { document.getElementById('branch-modal').style.display = 'none'; };
+  window.editBranch = function (id) {
+    const b = _branchesCache.find(x => x.id === id);
+    if (!b) return;
+    document.getElementById('branch-form-id').value = b.id;
+    document.getElementById('branch-form-name').value = b.name || '';
+    document.getElementById('branch-form-address').value = b.address || '';
+    document.getElementById('branch-form-phone').value = b.phone || '';
+    document.getElementById('branch-form-status').value = b.status || 'active';
+    document.getElementById('branch-form-error').style.display = 'none';
+    document.getElementById('branch-modal-title').textContent = 'Editar sucursal';
+    document.getElementById('branch-modal').style.display = 'flex';
+  };
+  window.archiveBranch = async function (id) {
+    if (!confirm('¿Archivar esta sucursal? Se ocultará pero no se borrarán datos.')) return;
+    try {
+      const fetchFn = _fetch();
+      const res = await fetchFn(location.origin + '/api/branches/' + encodeURIComponent(id), { method: 'DELETE', credentials: 'include' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      loadBranches();
+    } catch (e) { alert('Error: ' + (e.message || 'no se pudo archivar')); }
+  };
+  window.restoreBranch = async function (id) {
+    try {
+      const fetchFn = _fetch();
+      const res = await fetchFn(location.origin + '/api/branches/' + encodeURIComponent(id), {
+        method: 'PATCH', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'active' })
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      loadBranches();
+    } catch (e) { alert('Error: ' + (e.message || 'no se pudo restaurar')); }
+  };
+
+  // FIX-N4-4: Cerrar sucursal manteniendo histórico (auditoría fiscal)
+  window.closeBranch = async function (id) {
+    const branch = _branchesCache.find(x => x.id === id);
+    const name = branch ? (branch.name || id) : id;
+    // Modal de confirmación con razón
+    const confirmHtml =
+      'Vas a CERRAR la sucursal "' + name + '".\n\n' +
+      '✅ Lo que SÍ pasa:\n' +
+      '   • Las ventas históricas SE MANTIENEN (auditoría fiscal)\n' +
+      '   • Aparece en reportes históricos como "Cerrada"\n' +
+      '   • Puedes reabrirla después si cambias de opinión\n\n' +
+      '❌ Lo que NO pasa:\n' +
+      '   • NO acepta nuevas ventas\n' +
+      '   • NO se puede agregar inventario\n' +
+      '   • Los empleados asignados NO podrán operar en ella\n\n' +
+      '¿Continuar? Escribe la razón del cierre:';
+    const reason = prompt(confirmHtml, '');
+    if (reason === null) return; // canceló
+    if (!reason || reason.trim().length < 10) {
+      alert('La razón es obligatoria (mínimo 10 caracteres).');
+      return;
+    }
+    try {
+      const fetchFn = _fetch();
+      const body = {
+        status: 'closed',
+        closed_at: new Date().toISOString(),
+        closed_reason: reason.trim()
+      };
+      const res = await fetchFn(location.origin + '/api/branches/' + encodeURIComponent(id), {
+        method: 'PATCH', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (res.status === 404 || res.status === 405) {
+        alert('Endpoint PATCH /api/branches/:id { status:"closed" } próximamente.\n\n' +
+              'Mientras tanto el cierre histórico se puede aplicar via SQL manual:\n' +
+              'UPDATE branches SET status=\'closed\', closed_at=NOW(), closed_reason=$1 WHERE id=$2;\n\n' +
+              'Ver runbook: docs/branch-merge-runbook.md');
+        return;
+      }
+      if (!res.ok) {
+        const t = await res.text();
+        throw new Error(t || ('HTTP ' + res.status));
+      }
+      alert('✅ Sucursal "' + name + '" cerrada. El histórico se mantiene para auditoría.');
+      loadBranches();
+    } catch (e) { alert('Error: ' + (e.message || 'no se pudo cerrar')); }
+  };
+
+  // FIX-N4-4: reabrir sucursal cerrada
+  window.reopenBranch = async function (id) {
+    if (!confirm('¿Reabrir esta sucursal? Volverá a aceptar ventas y operaciones.')) return;
+    try {
+      const fetchFn = _fetch();
+      const res = await fetchFn(location.origin + '/api/branches/' + encodeURIComponent(id), {
+        method: 'PATCH', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'active', closed_at: null, closed_reason: null })
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      loadBranches();
+    } catch (e) { alert('Error: ' + (e.message || 'no se pudo reabrir')); }
+  };
+
+  // FIX-N4-4: ver histórico de ventas de sucursal cerrada (redirige a reportes filtrado)
+  window.viewBranchHistory = function (id) {
+    const target = '#v-reports?branch=' + encodeURIComponent(id) + '&include_closed=1';
+    if (typeof nav === 'function') {
+      nav('reports');
+      // intenta también filtrar global selector si existe
+      setTimeout(function(){
+        const sel = document.getElementById('global-branch-selector');
+        if (sel) { sel.value = id; if (typeof onBranchChange === 'function') onBranchChange(id); }
+      }, 200);
+    } else {
+      location.hash = target;
+    }
+  };
+  window.submitBranchForm = async function (ev) {
+    ev.preventDefault();
+    const id = document.getElementById('branch-form-id').value;
+    const name = (document.getElementById('branch-form-name').value || '').trim();
+    const address = (document.getElementById('branch-form-address').value || '').trim();
+    const phone = (document.getElementById('branch-form-phone').value || '').trim();
+    const status = document.getElementById('branch-form-status').value || 'active';
+    const errorEl = document.getElementById('branch-form-error');
+    errorEl.style.display = 'none';
+    if (!name) {
+      errorEl.textContent = 'El nombre es obligatorio.';
+      errorEl.style.display = 'block';
+      return;
+    }
+    const submitBtn = document.getElementById('branch-form-submit');
+    submitBtn.disabled = true; submitBtn.textContent = 'Guardando…';
+    try {
+      const fetchFn = _fetch();
+      const url = id
+        ? location.origin + '/api/branches/' + encodeURIComponent(id)
+        : location.origin + '/api/branches';
+      const method = id ? 'PATCH' : 'POST';
+      const res = await fetchFn(url, {
+        method: method, credentials: 'include',
+        headers: { 'Content-Type': 'application/json', 'Idempotency-Key': 'branch-' + Date.now() + '-' + Math.random().toString(36).slice(2) },
+        body: JSON.stringify({ name: name, address: address || null, phone: phone || null, status: status })
+      });
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(txt || ('HTTP ' + res.status));
+      }
+      closeBranchModal();
+      loadBranches();
+    } catch (e) {
+      errorEl.textContent = 'Error: ' + (e.message || 'no se pudo guardar');
+      errorEl.style.display = 'block';
+    } finally {
+      submitBtn.disabled = false; submitBtn.textContent = 'Guardar';
+    }
+  };
+})();
+
 // ========== INIT RESTANTE ==========
 window.addEventListener('DOMContentLoaded', () => {
   renderVerticals();
@@ -4092,8 +4692,96 @@ window.addEventListener('DOMContentLoaded', () => {
     if (typeof loadDeploysFromAPI === 'function') loadDeploysFromAPI();
     if (typeof loadLiveFromAPI === 'function') loadLiveFromAPI();
     if (typeof loadSyncLogFromAPI === 'function') loadSyncLogFromAPI();
+    // R8f: hydrate branches selector + CRUD
+    if (typeof loadBranches === 'function') loadBranches();
   }, 200);
 });
+
+/* ── FIX-VR-1: Profile modal · openProfile / changePassword / logout ── */
+function openProfile() {
+  // Cierra cualquier modal abierto previamente
+  var prev = document.getElementById('profileModal');
+  if (prev) { prev.remove(); return; }
+  var u = (window.__volvixUser) || {};
+  // Fallback: intenta leer del JWT en localStorage
+  if (!u.email) {
+    try {
+      var tk = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+      if (tk && tk.split('.').length === 3) {
+        var p = JSON.parse(atob(tk.split('.')[1]));
+        u = { email: p.email || p.sub || '', role: p.role || '', tenant_id: p.tenant_id || '', full_name: p.name || p.full_name || '' };
+      }
+    } catch(e) {}
+  }
+  var html =
+    '<div id="profileModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="profileTitle" ' +
+    'style="position:fixed;inset:0;background:rgba(10,10,10,0.55);display:flex;align-items:center;justify-content:center;z-index:9999;">' +
+    '  <div class="modal-content" style="background:var(--surface,#fff);border-radius:14px;padding:24px;min-width:320px;max-width:420px;box-shadow:0 24px 64px rgba(0,0,0,0.25);font-family:Inter,sans-serif;">' +
+    '    <h3 id="profileTitle" style="margin:0 0 14px;font-size:18px;font-weight:700;">Mi perfil</h3>' +
+    '    <p style="margin:6px 0;font-size:13px;"><strong>Nombre:</strong> ' + (u.full_name || u.email || '—') + '</p>' +
+    '    <p style="margin:6px 0;font-size:13px;"><strong>Email:</strong> ' + (u.email || '—') + '</p>' +
+    '    <p style="margin:6px 0;font-size:13px;"><strong>Rol:</strong> ' + (u.role || '—') + '</p>' +
+    '    <p style="margin:6px 0 16px;font-size:13px;"><strong>Tenant:</strong> ' + (u.tenant_id || '—') + '</p>' +
+    '    <div style="display:flex;flex-direction:column;gap:8px;">' +
+    '      <button class="btn" onclick="changePassword()" style="padding:10px 14px;border-radius:8px;border:1px solid var(--border,#E5E5E5);background:#fff;cursor:pointer;font-weight:600;">Cambiar contraseña</button>' +
+    '      <button class="btn" onclick="logout()" style="padding:10px 14px;border-radius:8px;border:1px solid #EF4444;background:#FEF2F2;color:#B91C1C;cursor:pointer;font-weight:600;">Cerrar sesión</button>' +
+    '      <button class="btn" onclick="document.getElementById(\'profileModal\').remove()" style="padding:10px 14px;border-radius:8px;border:1px solid var(--border,#E5E5E5);background:#fff;cursor:pointer;font-weight:500;">Cerrar</button>' +
+    '    </div>' +
+    '  </div>' +
+    '</div>';
+  var div = document.createElement('div');
+  div.innerHTML = html;
+  var modal = div.firstElementChild;
+  document.body.appendChild(modal);
+  // Cerrar al hacer click fuera del contenido
+  modal.addEventListener('click', function (e) {
+    if (e.target === modal) modal.remove();
+  });
+  // Esc cierra
+  document.addEventListener('keydown', function escClose(e) {
+    if (e.key === 'Escape') {
+      var m = document.getElementById('profileModal');
+      if (m) m.remove();
+      document.removeEventListener('keydown', escClose);
+    }
+  });
+}
+
+function changePassword() {
+  var newPwd = prompt('Nueva contraseña (mínimo 8 caracteres):');
+  if (newPwd === null) return;
+  if (!newPwd || newPwd.length < 8) {
+    alert('Contraseña inválida: mínimo 8 caracteres');
+    return;
+  }
+  var token = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+  if (!token) { alert('Sesión expirada. Inicia sesión de nuevo.'); return; }
+  fetch('/api/auth/change-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify({ new_password: newPwd })
+  }).then(function (r) {
+    if (r.ok) {
+      alert('Contraseña actualizada correctamente');
+      var m = document.getElementById('profileModal'); if (m) m.remove();
+    } else {
+      r.json().catch(function(){return{};}).then(function(j){
+        alert('Error: ' + ((j && j.error) || ('HTTP ' + r.status)));
+      });
+    }
+  }).catch(function (e) { alert('Error de red: ' + e.message); });
+}
+
+function logout() {
+  try { localStorage.removeItem('volvix_token'); } catch(e){}
+  try { localStorage.removeItem('volvixAuthToken'); } catch(e){}
+  try { localStorage.removeItem('volvixSession'); } catch(e){}
+  location.href = '/login.html';
+}
+// Exponer globalmente para handlers inline
+window.openProfile = openProfile;
+window.changePassword = changePassword;
+window.logout = logout;
 </script>
 <script defer src="auth-helper.js"></script>
 <link rel="stylesheet" href="volvix-modals.css">
@@ -4348,5 +5036,7 @@ window.addEventListener('DOMContentLoaded', () => {
 <script src="volvix-print-hub.js" defer></script>
 <script src="volvix-offline-queue.js" defer></script>
 <script src="volvix-real-data-loader.js" defer></script>
+<script src="volvix-admin-helpers.js" defer></script>
+<script src="volvix-owner-actions.js" defer></script>
 </body>
 </html>
