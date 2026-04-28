@@ -446,23 +446,80 @@
 
   // ──────────────────────────────────────────────────────────────
   // Web Push permission
+  // FIX-B: NO auto-fire push permission. User must click explicit
+  // "Activar notificaciones" button. Modal "Nombre completo" auto-fire
+  // bug fixed by removing automatic Notification.requestPermission().
   // ──────────────────────────────────────────────────────────────
   function requestPushPermission() {
+    // FIX-B: Auto-fire eliminado. Esta función ahora es no-op por defecto.
+    // Para permitir auto-fire en pantallas legítimas (ej. owner_panel para
+    // alertas críticas), el usuario debe cumplir UNO de:
+    //   1. URL con ?optin=true query param
+    //   2. localStorage.volvix_push_optin === 'true'
     if (!('Notification' in window)) return;
-    if (Notification.permission === 'default') {
-      // Diferir hasta primer click del usuario para evitar bloqueo
-      const handler = () => {
-        try { Notification.requestPermission(); } catch {}
-        document.removeEventListener('click', handler);
-      };
-      document.addEventListener('click', handler, { once: true });
+    if (Notification.permission !== 'default') return;
+
+    let allowAuto = false;
+    try {
+      const qs = (typeof URLSearchParams !== 'undefined')
+        ? new URLSearchParams(window.location.search)
+        : null;
+      const optinQS = qs && qs.get('optin') === 'true';
+      const optinLS = (typeof localStorage !== 'undefined') &&
+                      localStorage.getItem('volvix_push_optin') === 'true';
+      allowAuto = !!(optinQS || optinLS);
+    } catch (_) {}
+
+    if (!allowAuto) {
+      // No-op: solo opt-in explícito vía window.VolvixNotif.requestOptIn()
+      return;
+    }
+
+    // Opt-in detectado: pedir permiso al primer click (sin spammear al cargar)
+    const handler = () => {
+      try { Notification.requestPermission(); } catch {}
+      document.removeEventListener('click', handler);
+    };
+    document.addEventListener('click', handler, { once: true });
+  }
+
+  // FIX-B: API pública para opt-in EXPLÍCITO por click de usuario.
+  // Llamar desde un botón "Activar notificaciones" en la UI.
+  function requestOptIn() {
+    if (!('Notification' in window)) {
+      return Promise.resolve('unsupported');
+    }
+    if (Notification.permission === 'granted') return Promise.resolve('granted');
+    if (Notification.permission === 'denied')  return Promise.resolve('denied');
+    try {
+      try { localStorage.setItem('volvix_push_optin', 'true'); } catch (_) {}
+      return Promise.resolve(Notification.requestPermission());
+    } catch (e) {
+      return Promise.resolve('error');
     }
   }
+  // Exponer global para que botones de UI puedan llamarla
+  window.VolvixNotif = window.VolvixNotif || {};
+  window.VolvixNotif.requestOptIn = requestOptIn;
 
   // ──────────────────────────────────────────────────────────────
   // Init
   // ──────────────────────────────────────────────────────────────
   function init() {
+    // R29: NO disparar auto-monitores en pantallas públicas
+    // (marketplace, login, hub-landing, customer-portal, kiosk, fraud)
+    var publicPages = [
+      '/login.html', '/marketplace.html', '/volvix-hub-landing.html',
+      '/landing_dynamic.html', '/volvix-kiosk.html', '/volvix-shop.html',
+      '/volvix-grand-tour.html', '/volvix-sitemap.html', '/volvix-api-docs.html',
+      '/volvix-gdpr-portal.html', '/404.html'
+    ];
+    var path = (location && location.pathname) || '';
+    var isPublic = publicPages.some(function(p){ return path === p || path.endsWith(p); });
+    if (isPublic) {
+      // Sin bell, sin monitores, solo expone API
+      return;
+    }
     load();
     injectStyles();
     createBellButton();

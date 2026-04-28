@@ -303,6 +303,16 @@
       return c;
     }
     _showWarning(endpoint, ratio) {
+      // R28: warning toast solo en localhost o si volvix_debug=1
+      try {
+        const isProd = !/^(localhost|127\.|\.local$)/.test(location.hostname);
+        const debugFlag = localStorage.getItem('volvix_debug') === '1';
+        if (isProd && !debugFlag) {
+          // En prod: log silencioso a console, no UI
+          console.warn('[RateLimit]', endpoint, Math.round(ratio*100)+'% remaining');
+          return;
+        }
+      } catch (e) {}
       const c = this._ensureContainer();
       if (!c) return;
       const el = document.createElement('div');
@@ -312,6 +322,16 @@
       setTimeout(() => el.remove(), 3000);
     }
     _showCountdown(endpoint, waitMs) {
+      // FIX-D: "Blocked default wait Ns" toasts are noisy internal logs — only show in dev mode.
+      try {
+        const isProd = !/^(localhost|127\.|\.local$)/.test(location.hostname);
+        const debugFlag = (typeof localStorage !== 'undefined' && localStorage.getItem('volvix_debug') === '1');
+        const devFlag = (typeof window !== 'undefined' && window.__volvixDevMode === true);
+        if (isProd && !debugFlag && !devFlag) {
+          console.warn('[RateLimit] Blocked:', endpoint, 'wait', Math.ceil(waitMs/1000)+'s');
+          return;
+        }
+      } catch (e) {}
       const c = this._ensureContainer();
       if (!c) return;
       const el = document.createElement('div');

@@ -374,6 +374,8 @@
   // BOTON FLOTANTE
   // ============================================================
   function addTestButton() {
+    // FIX-D: Hide TEST FAB from regular users; only superadmin/dev can see it.
+    if (!window.__volvixDevMode) return;
     if (document.getElementById('volvix-tests-fab')) return;
     const btn = document.createElement('button');
     btn.id = 'volvix-tests-fab';

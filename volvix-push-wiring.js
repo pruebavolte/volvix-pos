@@ -111,18 +111,40 @@
     getVapidKey,
   };
 
-  // Auto-init: si ya hay permiso concedido, re-asegura suscripcion silenciosamente.
+  // FIX-B: Auto-init NO dispara Notification.requestPermission().
+  // Solo re-asegura suscripción si el permiso YA estaba concedido previamente
+  // por una acción explícita del usuario (botón "Activar notificaciones").
+  // Si permission === 'default', no hacer nada (evita modal auto-fire).
+  // Para permitir auto-subscribe en pantallas legítimas, requiere opt-in explícito:
+  //   - URL con ?optin=true
+  //   - localStorage.volvix_push_optin === 'true'
   document.addEventListener('DOMContentLoaded', async () => {
     try {
       if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
       if (!getToken()) return; // solo usuarios autenticados
-      if (window.Notification && Notification.permission === 'granted') {
-        const s = await status();
-        if (!s.subscribed) {
-          // re-suscribir silenciosamente
-          subscribe().catch(() => {});
-        }
+      if (!window.Notification) return;
+
+      // FIX-B: NO solicitar permiso automáticamente
+      if (Notification.permission !== 'granted') return;
+
+      // Permiso ya concedido (usuario lo aceptó antes): re-asegurar sub silente
+      const s = await status();
+      if (!s.subscribed) {
+        // re-suscribir silenciosamente (no muestra modal — permission ya granted)
+        subscribe().catch(() => {});
       }
     } catch (_) {}
   });
+
+  // FIX-B: API pública opt-in para que botones de UI puedan suscribir
+  // explícitamente (esto SÍ puede mostrar el prompt — pero solo por click usuario).
+  window.VolvixPush = window.VolvixPush || {};
+  window.VolvixPush.requestOptIn = async function () {
+    try {
+      try { localStorage.setItem('volvix_push_optin', 'true'); } catch (_) {}
+      return await subscribe();
+    } catch (e) {
+      return { ok: false, error: String(e && e.message || e) };
+    }
+  };
 })();
