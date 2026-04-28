@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Estado del Sistema — Volvix POS</title>
+<style>
+  :root{
+    --bg:#0f172a; --card:#1e293b; --text:#f1f5f9; --muted:#94a3b8;
+    --ok:#10b981; --warn:#f59e0b; --err:#ef4444; --border:#334155;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:var(--bg); color:var(--text); line-height:1.5;
+    min-height:100vh; padding:24px 16px;
+  }
+  .container{max-width:960px;margin:0 auto}
+  header{margin-bottom:32px;text-align:center}
+  header h1{font-size:1.75rem;font-weight:600;margin-bottom:8px}
+  header .subtitle{color:var(--muted);font-size:.95rem}
+  .global-status{
+    background:var(--card); border-radius:12px; padding:20px 24px; margin-bottom:24px;
+    border:1px solid var(--border); display:flex; align-items:center; gap:16px;
+  }
+  .pulse{
+    width:14px;height:14px;border-radius:50%;background:var(--ok);
+    box-shadow:0 0 0 0 rgba(16,185,129,.7); animation:pulse 2s infinite;
+  }
+  .pulse.warn{background:var(--warn);box-shadow:0 0 0 0 rgba(245,158,11,.7)}
+  .pulse.err{background:var(--err);box-shadow:0 0 0 0 rgba(239,68,68,.7)}
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(16,185,129,.7)}
+    70%{box-shadow:0 0 0 12px rgba(16,185,129,0)}
+    100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}
+  }
+  .gs-text strong{display:block;font-size:1.1rem;margin-bottom:2px}
+  .gs-text span{color:var(--muted);font-size:.85rem}
+  .grid{
+    display:grid; gap:16px;
+    grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+    margin-bottom:32px;
+  }
+  .card{
+    background:var(--card); border:1px solid var(--border);
+    border-radius:10px; padding:18px 20px; position:relative;
+  }
+  .card.ok{border-left:4px solid var(--ok)}
+  .card.warn{border-left:4px solid var(--warn)}
+  .card.err{border-left:4px solid var(--err)}
+  .card h3{font-size:.95rem;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+  .badge{
+    display:inline-block;padding:2px 8px;border-radius:10px;
+    font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;
+  }
+  .badge.ok{background:rgba(16,185,129,.15);color:var(--ok)}
+  .badge.warn{background:rgba(245,158,11,.15);color:var(--warn)}
+  .badge.err{background:rgba(239,68,68,.15);color:var(--err)}
+  .card .latency{color:var(--muted);font-size:.82rem;margin-top:4px}
+  .card .detail{color:var(--muted);font-size:.78rem;margin-top:6px;
+                font-family:monospace;word-break:break-all}
+  .history{margin-bottom:32px}
+  .history h2{font-size:1rem;font-weight:600;margin-bottom:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+  .history-bars{display:flex;gap:3px;height:42px;align-items:flex-end}
+  .bar{flex:1;background:var(--ok);border-radius:2px;min-height:6px;cursor:pointer;transition:opacity .2s}
+  .bar:hover{opacity:.7}
+  .bar.warn{background:var(--warn)}
+  .bar.err{background:var(--err)}
+  .bar.unknown{background:var(--border)}
+  .legend{display:flex;gap:16px;margin-top:8px;font-size:.75rem;color:var(--muted)}
+  .legend span{display:flex;align-items:center;gap:6px}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:2px}
+  .notice{
+    background:#3b3119; border:1px solid #92400e; border-radius:8px;
+    padding:14px 18px; margin-bottom:24px; color:#fde68a; font-size:.9rem;
+  }
+  .notice.hidden{display:none}
+  footer{
+    text-align:center;color:var(--muted);font-size:.8rem;padding-top:16px;
+    border-top:1px solid var(--border);
+  }
+  footer a{color:#60a5fa;text-decoration:none}
+  footer a:hover{text-decoration:underline}
+  .updated{color:var(--muted);font-size:.78rem;margin-top:4px}
+  @media (max-width:600px){
+    body{padding:16px 12px}
+    header h1{font-size:1.4rem}
+    .grid{grid-template-columns:1fr}
+    .global-status{flex-direction:column;text-align:center}
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Estado del Sistema</h1>
+    <p class="subtitle">Monitoreo en tiempo real de Volvix POS</p>
+  </header>
+
+  <div id="ownerMessage" class="notice hidden" role="alert"></div>
+
+  <div class="global-status" role="status" aria-live="polite">
+    <span id="globalPulse" class="pulse" aria-hidden="true"></span>
+    <div class="gs-text">
+      <strong id="globalLabel">Cargando…</strong>
+      <span id="globalDetail">Conectando a /api/health/full</span>
+    </div>
+  </div>
+
+  <div class="grid" id="servicesGrid" aria-label="Servicios"></div>
+
+  <div class="history">
+    <h2>Histórico (últimos 7 días)</h2>
+    <div class="history-bars" id="historyBars" aria-hidden="true"></div>
+    <div class="legend">
+      <span><i style="background:var(--ok)"></i>OK</span>
+      <span><i style="background:var(--warn)"></i>Degradado</span>
+      <span><i style="background:var(--err)"></i>Caído</span>
+      <span><i style="background:var(--border)"></i>Sin datos</span>
+    </div>
+  </div>
+
+  <footer>
+    <div id="lastUpdated" class="updated">Última actualización: —</div>
+    <p style="margin-top:8px">
+      Auto-refresh cada 30s ·
+      <a href="/login.html">Volver al POS</a> ·
+      <a href="mailto:soporte@volvix.com">Soporte</a>
+    </p>
+  </footer>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  // -----------------------------------------------------------------------
+  // Status page (FIX-DR1) — Sin auth, consume /api/health/full + storage local
+  // R3: cada llamada manifesta loading / error / éxito.
+  // -----------------------------------------------------------------------
+  var REFRESH_MS = 30000;
+  var STORAGE_KEY = 'volvix_status_history_v1';
+  var OWNER_MSG_KEY = 'volvix_status_owner_message';
+  var MAX_DAYS = 7;
+
+  var SERVICES = [
+    { key:'supabase',  label:'Base de Datos',     desc:'Supabase / PostgreSQL' },
+    { key:'audit_log', label:'Auditoría',         desc:'Bitácora de eventos' },
+    { key:'memory',    label:'Memoria del Servidor', desc:'Heap / RSS' },
+    { key:'stripe',    label:'Pagos (Stripe)',    desc:'Procesamiento de tarjetas' },
+    { key:'push_vapid',label:'Notificaciones',    desc:'VAPID push' },
+    { key:'email',     label:'Email',             desc:'SendGrid' }
+  ];
+
+  function $(id){ return document.getElementById(id); }
+  function statusFromCheck(c){
+    if (!c) return 'unknown';
+    if (c.ok === true) return 'ok';
+    return 'err';
+  }
+  function getOwnerMessage(){
+    try { return localStorage.getItem(OWNER_MSG_KEY) || ''; }
+    catch(_){ return ''; }
+  }
+  function loadHistory(){
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch(_) { return []; }
+  }
+  function saveHistory(arr){
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr.slice(-200))); }
+    catch(_){}
+  }
+  function recordHistoryPoint(globalStatus){
+    var hist = loadHistory();
+    hist.push({ t: Date.now(), s: globalStatus });
+    saveHistory(hist);
+  }
+  function renderHistory(){
+    var bars = $('historyBars');
+    bars.innerHTML = '';
+    var hist = loadHistory();
+    var now = Date.now();
+    var DAY = 86400000;
+    // 7 días, dividido en 24 buckets cada uno = 168 buckets visuales (1h cada uno)
+    var BUCKETS = 168;
+    var bucketMs = (MAX_DAYS * DAY) / BUCKETS;
+    var startT = now - (MAX_DAYS * DAY);
+    var buckets = new Array(BUCKETS).fill('unknown');
+    hist.forEach(function(p){
+      if (p.t < startT) return;
+      var idx = Math.floor((p.t - startT) / bucketMs);
+      if (idx < 0 || idx >= BUCKETS) return;
+      // Worst-case wins: err > warn > ok > unknown
+      var prev = buckets[idx];
+      var next = p.s;
+      var rank = { unknown:0, ok:1, warn:2, err:3 };
+      if ((rank[next]||0) > (rank[prev]||0)) buckets[idx] = next;
+    });
+    buckets.forEach(function(s){
+      var b = document.createElement('div');
+      b.className = 'bar' + (s === 'unknown' ? ' unknown' :
+                              s === 'err' ? ' err' :
+                              s === 'warn' ? ' warn' : '');
+      b.title = s;
+      bars.appendChild(b);
+    });
+  }
+  function renderOwnerMessage(){
+    var msg = getOwnerMessage();
+    var el = $('ownerMessage');
+    if (msg && msg.trim()){
+      el.textContent = msg;
+      el.classList.remove('hidden');
+    } else {
+      el.classList.add('hidden');
+    }
+  }
+  function renderGlobal(state, totalLatency){
+    var pulse = $('globalPulse');
+    var label = $('globalLabel');
+    var detail = $('globalDetail');
+    pulse.classList.remove('warn','err');
+    if (state === 'ok'){
+      label.textContent = 'Todos los sistemas operativos';
+      detail.textContent = 'Tiempo total de respuesta: ' + totalLatency + ' ms';
+    } else if (state === 'warn'){
+      pulse.classList.add('warn');
+      label.textContent = 'Servicio degradado';
+      detail.textContent = 'Algunos servicios no críticos están fallando';
+    } else {
+      pulse.classList.add('err');
+      label.textContent = 'Sistema con incidencias';
+      detail.textContent = 'Servicios críticos caídos — equipo notificado';
+    }
+  }
+  function renderServices(checks){
+    var grid = $('servicesGrid');
+    grid.innerHTML = '';
+    SERVICES.forEach(function(svc){
+      var c = checks[svc.key] || null;
+      var st = statusFromCheck(c);
+      var card = document.createElement('div');
+      card.className = 'card ' + st;
+      card.setAttribute('role', 'article');
+      var badgeText = st === 'ok' ? 'OK' : st === 'err' ? 'CAÍDO' : '—';
+      var lat = (c && typeof c.latency_ms === 'number') ? (c.latency_ms + ' ms') : '';
+      var detail = '';
+      if (c){
+        if (c.error) detail = c.error;
+        else if (c.rss_mb) detail = 'RSS: ' + c.rss_mb + ' MB · Heap: ' + (c.heap_used_mb||0) + ' MB';
+        else if (c.configured === false) detail = 'No configurado';
+      }
+      card.innerHTML =
+        '<h3>' + svc.label + ' <span class="badge ' + st + '">' + badgeText + '</span></h3>' +
+        '<div class="latency">' + (lat || svc.desc) + '</div>' +
+        (detail ? '<div class="detail">' + escapeHtml(detail) + '</div>' : '');
+      grid.appendChild(card);
+    });
+  }
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
+    });
+  }
+  function renderError(msg){
+    $('globalPulse').classList.remove('warn');
+    $('globalPulse').classList.add('err');
+    $('globalLabel').textContent = 'No se pudo contactar al servidor';
+    $('globalDetail').textContent = msg || 'Error de red';
+    var grid = $('servicesGrid');
+    grid.innerHTML = '<div class="card err"><h3>Sin conexión</h3>' +
+      '<div class="latency">Reintentando en 30s…</div></div>';
+  }
+
+  function fetchStatus(){
+    var t0 = Date.now();
+    fetch('/api/health/full', { cache:'no-store' })
+      .then(function(r){
+        if (!r.ok && r.status !== 503) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function(data){
+        var checks = (data && data.checks) || {};
+        var globalState = data.ok ? (data.degraded ? 'warn' : 'ok') : 'err';
+        renderGlobal(globalState, data.total_latency_ms || (Date.now()-t0));
+        renderServices(checks);
+        recordHistoryPoint(globalState);
+        renderHistory();
+        var d = new Date();
+        $('lastUpdated').textContent =
+          'Última actualización: ' + d.toLocaleString();
+      })
+      .catch(function(err){
+        renderError(err && err.message);
+        recordHistoryPoint('err');
+        renderHistory();
+      });
+  }
+
+  // Auto-refresh
+  fetchStatus();
+  renderOwnerMessage();
+  renderHistory();
+  setInterval(fetchStatus, REFRESH_MS);
+  // Re-leer owner message cada minuto por si lo actualizan otra pestaña
+  setInterval(renderOwnerMessage, 60000);
+})();
+</script>
+</body>
+</html>

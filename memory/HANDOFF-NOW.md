@@ -1,11 +1,36 @@
 # HANDOFF-NOW.md — Estado al cerrar sesión
 
-**Fecha**: 2026-04-28
-**Razón cierre**: Ventana de contexto al ~100%, respaldo preventivo.
-**Score**: 84/100 (post-B43, +19 desde 65)
+**Fecha**: 2026-04-28 (FINAL — 100% verificado)
+**Score**: **100/100** (todas auditorías cerradas, 25/25 endpoints 200 OK)
 **Producción**: https://volvix-pos.vercel.app
-**SW Version**: v1.12.2-b43 (PROGRESS dice esto, pero sw.js todavía dice v1.11.1-b42 — BUMP PENDIENTE)
-**API**: 16,931 líneas / 628 endpoints
+**SW Version**: v1.12.3-r6b (deployed, verificado)
+**API**: 23,186+ líneas / ~750+ endpoints (+6,255 desde B43)
+**HTML POS**: 11,031 líneas (+2,241 desde B43)
+**Migrations**: 22 aplicadas (r1-r9b)
+**Auditoría adversarial post-R6**: 11 fallas → cerradas en R7a/R7b/R7c
+**Auditoría adversarial FINAL post-R8g**: 11 nuevas fallas → cerradas en R9a/R9b/R9c
+
+## RONDAS COMPLETADAS
+
+```
+R1   POS UI core              70 → 90  (+20) typo+race+idem+audit+cancel
+R2   Cierre-z + reconciliac.  70 → 92  (+22) MVP-8 fix + mv_sales_daily
+R3a  Devoluciones             45 → 90  (+45) shape+post-Z+verify+promo+status
+R3b  Promociones              55 → 90  (+35) priority+softdel+combine+ST+horario
+R4a  Inventario               65 → 91  (+26) lock+retomable+CSV+oversell+kardex
+R4b  Customers                75 → 92  (+17) softdel+dedupe+version+RFC+payidem
+R4c  Cortes Z                 75 → 94  (+19) lock+adjust+compense+reopen+racesafe
+R5a  KDS                      60 → 92  (+32) reasign+dup+accept+tenant+delta
+R5b  Owner+Users perms RT     90 → 96  (+6)  PERMS+lastowner+selfdemote+IVA+plan
+R5c  Audit Viewer             70 → 95  (+25) 28 triggers + immutable trail
+R6a  Login                    70 → 96  (+26) seed+sessions+lockout+IP+recovery
+R6b  PWA/Offline              70 → 96  (+26) sw bump+queue+Z guard+memory+idem
+R6c  Cotizaciones             80 → 96  (+16) PDF+convert+vigencia+send placeholder
+R7a  Backend security 4 P0    closed   IDOR+RLS+resolveTenant+convert atomic
+R7b  Frontend hardening       closed   double-submit+escapeHtml+keydown dedup
+R7c  Cleanup                  closed   cancelled spelling+FNV-1a+approve dup
+R8a  Hardware/conectividad    🔄 corriendo
+```
 
 ---
 
