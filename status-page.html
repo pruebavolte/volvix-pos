@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex">
 <title>Estado del Sistema — Volvix POS</title>
+<link rel="stylesheet" href="/volvix-shared.css">
+<script defer src="/volvix-system-monitor.js"></script>
 <style>
   :root{
     --bg:#0f172a; --card:#1e293b; --text:#f1f5f9; --muted:#94a3b8;
@@ -90,6 +92,16 @@
     .grid{grid-template-columns:1fr}
     .global-status{flex-direction:column;text-align:center}
   }
+  /* R10d-C FIX-N4-7: Tu dispositivo */
+  .device-section{margin-bottom:32px}
+  .device-title{
+    font-size:1rem;font-weight:600;margin-bottom:4px;
+    color:var(--muted);text-transform:uppercase;letter-spacing:.5px;
+  }
+  .device-subtitle{color:var(--muted);font-size:.82rem;margin-bottom:12px}
+  #deviceGrid .card .resolution{
+    color:#cbd5e1;font-size:.78rem;margin-top:8px;line-height:1.4;
+  }
 </style>
 </head>
 <body>
@@ -110,6 +122,13 @@
   </div>
 
   <div class="grid" id="servicesGrid" aria-label="Servicios"></div>
+
+  <!-- R10d-C FIX-N4-7: Tu dispositivo (cliente-side health) -->
+  <section class="device-section" aria-label="Tu dispositivo">
+    <h2 class="device-title">Tu dispositivo</h2>
+    <p class="device-subtitle">Diagnóstico local de este navegador. Sólo visible para ti.</p>
+    <div class="grid" id="deviceGrid" aria-live="polite"></div>
+  </section>
 
   <div class="history">
     <h2>Histórico (últimos 7 días)</h2>
@@ -274,6 +293,107 @@
     grid.innerHTML = '<div class="card err"><h3>Sin conexión</h3>' +
       '<div class="latency">Reintentando en 30s…</div></div>';
   }
+
+  // R10d-C FIX-N4-7: render Tu dispositivo
+  var DEVICE_CHECKS = [
+    {
+      key: 'storage', label: 'Almacenamiento local',
+      desc: 'Cuota de disco del navegador',
+      formatOk: function(c){
+        if (c && c.unavailable) return 'API no disponible en este browser';
+        if (c && typeof c.usedPct === 'number'){
+          return 'Uso: ' + c.usedPct.toFixed(0) + '%';
+        }
+        return 'OK';
+      },
+      resolution: 'Libera espacio: DevTools → Application → Clear site data, o limpia cache del navegador.'
+    },
+    {
+      key: 'indexeddb', label: 'IndexedDB',
+      desc: 'Soporte de modo offline',
+      formatOk: function(){ return 'Operativo'; },
+      resolution: 'Sal del modo incógnito/privado. Verifica que cookies y site data estén permitidos.'
+    },
+    {
+      key: 'antivirus', label: 'Recursos del navegador',
+      desc: 'Service worker accesible',
+      formatOk: function(){ return 'Sin bloqueos detectados'; },
+      resolution: 'Antivirus o firewall puede estar bloqueando. Whitelist este dominio.'
+    },
+    {
+      key: 'clock', label: 'Reloj del dispositivo',
+      desc: 'Sincronizado con servidor',
+      formatOk: function(c){
+        if (c && c.unavailable) return 'No verificado';
+        if (c && typeof c.drift === 'number'){
+          var s = Math.round(c.drift / 1000);
+          return s + ' s de diferencia';
+        }
+        return 'OK';
+      },
+      resolution: 'Sincroniza la hora del sistema (Windows: Configuración → Hora; macOS: System Settings → Date & Time).'
+    },
+    {
+      key: 'visibility', label: 'Estado de la pestaña',
+      desc: 'Detección de suspensión',
+      formatOk: function(){ return 'Monitor activo'; },
+      resolution: '—'
+    }
+  ];
+
+  function renderDevice(checks){
+    var grid = $('deviceGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    DEVICE_CHECKS.forEach(function(d){
+      var c = checks ? checks[d.key] : null;
+      var st;
+      if (!c) st = 'unknown';
+      else if (c.ok === true) st = 'ok';
+      else st = 'err';
+
+      var card = document.createElement('div');
+      card.className = 'card ' + (st === 'ok' ? 'ok' : st === 'err' ? 'err' : '');
+      card.setAttribute('role', 'article');
+
+      var badgeText = st === 'ok' ? 'OK' : st === 'err' ? 'REVISAR' : '—';
+      var badgeClass = st === 'ok' ? 'ok' : st === 'err' ? 'err' : 'warn';
+
+      var summary = c ? d.formatOk(c) : 'Cargando…';
+      var html = '<h3>' + d.label + ' <span class="badge ' + badgeClass + '">' + badgeText + '</span></h3>' +
+                 '<div class="latency">' + escapeHtml(summary) + '</div>';
+      if (st === 'err'){
+        var errMsg = (c && c.error) ? c.error : '';
+        if (errMsg) html += '<div class="detail">' + escapeHtml(errMsg) + '</div>';
+        if (d.resolution && d.resolution !== '—'){
+          html += '<div class="resolution">Cómo resolver: ' + escapeHtml(d.resolution) + '</div>';
+        }
+      } else {
+        html += '<div class="detail">' + escapeHtml(d.desc) + '</div>';
+      }
+      card.innerHTML = html;
+      grid.appendChild(card);
+    });
+  }
+
+  // Inicializa cards (estado loading)
+  renderDevice(null);
+
+  // Cuando el monitor publica datos
+  document.addEventListener('volvix-sysmon-update', function(ev){
+    renderDevice(ev.detail || (window.VolvixSysMon && window.VolvixSysMon.checks) || {});
+  });
+
+  // Snapshot inicial si el monitor ya corrió
+  if (window.VolvixSysMon && window.VolvixSysMon.checks && window.VolvixSysMon.checks._lastRun){
+    renderDevice(window.VolvixSysMon.checks);
+  }
+  // Re-disparar runAll cada 60s para mantener actualizado el panel
+  setInterval(function(){
+    if (window.VolvixSysMon && typeof window.VolvixSysMon.runAll === 'function'){
+      window.VolvixSysMon.runAll();
+    }
+  }, 60000);
 
   function fetchStatus(){
     var t0 = Date.now();

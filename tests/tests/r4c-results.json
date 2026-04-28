@@ -1,0 +1,782 @@
+{
+  "config": {
+    "configFile": "C:\\Users\\DELL\\Downloads\\verion 340\\tests\\playwright.r4c.config.js",
+    "rootDir": "C:/Users/DELL/Downloads/verion 340/tests",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/DELL/Downloads/verion 340/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "C:/Users/DELL/Downloads/verion 340/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/r4c-cortes-e2e\\.spec\\.js/"
+        ],
+        "timeout": 180000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.59.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "r4c-cortes-e2e.spec.js",
+      "file": "r4c-cortes-e2e.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "R4C Cortes de Caja E2E",
+          "file": "r4c-cortes-e2e.spec.js",
+          "line": 133,
+          "column": 6,
+          "specs": [
+            {
+              "title": "CT1: POST /api/cuts/open returns 201 + cut_id + opened_at",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "CT1-status",
+                      "description": "201"
+                    },
+                    {
+                      "type": "CT1-body",
+                      "description": "{\"ok\":true,\"cut\":{\"id\":\"b200362e-014e-423c-adc0-64121965a080\",\"tenant_id\":\"TNT001\",\"cashier_id\":\"cccccccc-cccc-cccc-cccc-ccccccccccc1\",\"station_id\":null,\"opening_balance\":500,\"opening_breakdown\":{\"bills\":[{\"qty\":5,\"denom\":100}]},\"closing_balance\":null,\"closing_breakdown\":null,\"total_sales\":0,\"total_cash_sales\":0,\"total_card_sales\":0,\"total_transfer_sales\":0,\"total_other_sales\":0,\"expected_balance\":null,\"discrepancy\":null,\"cash_in\":0,\"cash_out\":0,\"notes_open\":\"Turno mañana\",\"notes_close\":null,\"status\":\"open\",\"opened_at\":\"2026-04-28T03:16:31.559+00:00\",\"closed_at\":null,\"reconciled_at\":null,\"reconciled_by\":null,\"voided_at\":null,\"voided_by\":null,\"void_reason\":null,\"created_at\":\"2026-04-28T03:16:31.577965+00:00\",\"updated_at\":\"2026-04-28T03:16:31.577965+00:00\"}}"
+                    },
+                    {
+                      "type": "CT1-idem",
+                      "description": "CT1-open-1777346183895-e3013a39"
+                    },
+                    {
+                      "type": "CT1-cut_id",
+                      "description": "b200362e-014e-423c-adc0-64121965a080"
+                    },
+                    {
+                      "type": "CT1-opened_at",
+                      "description": "2026-04-28T03:16:31.559+00:00"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 291,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:16:23.092Z",
+                      "annotations": [
+                        {
+                          "type": "CT1-status",
+                          "description": "201"
+                        },
+                        {
+                          "type": "CT1-body",
+                          "description": "{\"ok\":true,\"cut\":{\"id\":\"b200362e-014e-423c-adc0-64121965a080\",\"tenant_id\":\"TNT001\",\"cashier_id\":\"cccccccc-cccc-cccc-cccc-ccccccccccc1\",\"station_id\":null,\"opening_balance\":500,\"opening_breakdown\":{\"bills\":[{\"qty\":5,\"denom\":100}]},\"closing_balance\":null,\"closing_breakdown\":null,\"total_sales\":0,\"total_cash_sales\":0,\"total_card_sales\":0,\"total_transfer_sales\":0,\"total_other_sales\":0,\"expected_balance\":null,\"discrepancy\":null,\"cash_in\":0,\"cash_out\":0,\"notes_open\":\"Turno mañana\",\"notes_close\":null,\"status\":\"open\",\"opened_at\":\"2026-04-28T03:16:31.559+00:00\",\"closed_at\":null,\"reconciled_at\":null,\"reconciled_by\":null,\"voided_at\":null,\"voided_by\":null,\"void_reason\":null,\"created_at\":\"2026-04-28T03:16:31.577965+00:00\",\"updated_at\":\"2026-04-28T03:16:31.577965+00:00\"}}"
+                        },
+                        {
+                          "type": "CT1-idem",
+                          "description": "CT1-open-1777346183895-e3013a39"
+                        },
+                        {
+                          "type": "CT1-cut_id",
+                          "description": "b200362e-014e-423c-adc0-64121965a080"
+                        },
+                        {
+                          "type": "CT1-opened_at",
+                          "description": "2026-04-28T03:16:31.559+00:00"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf5cab6c7c82951c4037-ece501b9ad714e31176b",
+              "file": "r4c-cortes-e2e.spec.js",
+              "line": 160,
+              "column": 3
+            },
+            {
+              "title": "CT2: opening a second cut while one is open returns 409 cut_already_open",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "CT2-status",
+                      "description": "409"
+                    },
+                    {
+                      "type": "CT2-body",
+                      "description": "{\"error\":\"cut_already_open\",\"open_cut_id\":\"b200362e-014e-423c-adc0-64121965a080\"}"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 196,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:16:24.196Z",
+                      "annotations": [
+                        {
+                          "type": "CT2-status",
+                          "description": "409"
+                        },
+                        {
+                          "type": "CT2-body",
+                          "description": "{\"error\":\"cut_already_open\",\"open_cut_id\":\"b200362e-014e-423c-adc0-64121965a080\"}"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf5cab6c7c82951c4037-a8a8c5e380a20d52f176",
+              "file": "r4c-cortes-e2e.spec.js",
+              "line": 210,
+              "column": 3
+            },
+            {
+              "title": "CT3: GET /api/cuts/{cut_id} returns the open cut (closed_at null)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "CT3-status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "CT3-body",
+                      "description": "{\"ok\":true,\"cut\":{\"id\":\"b200362e-014e-423c-adc0-64121965a080\",\"tenant_id\":\"TNT001\",\"cashier_id\":\"cccccccc-cccc-cccc-cccc-ccccccccccc1\",\"station_id\":null,\"opening_balance\":500,\"opening_breakdown\":{\"bills\":[{\"qty\":5,\"denom\":100}]},\"closing_balance\":null,\"closing_breakdown\":null,\"total_sales\":0,\"total_cash_sales\":0,\"total_card_sales\":0,\"total_transfer_sales\":0,\"total_other_sales\":0,\"expected_balance\":null,\"discrepancy\":null,\"cash_in\":0,\"cash_out\":0,\"notes_open\":\"Turno mañana\",\"notes_close\":null,\"status\":\"open\",\"opened_at\":\"2026-04-28T03:16:31.559+00:00\",\"closed_at\":null,\"reconciled_at\":null,\"reconciled_by\":null,\"voided_at\":null,\"voided_by\":null,\"void_reason\":null,\"created_at\":\"2026-04-28T03:16:31.577965+00:00\",\"updated_at\":\"2026-04-28T03:16:31.577965+00:00\"}}"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 158,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:16:24.410Z",
+                      "annotations": [
+                        {
+                          "type": "CT3-status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "CT3-body",
+                          "description": "{\"ok\":true,\"cut\":{\"id\":\"b200362e-014e-423c-adc0-64121965a080\",\"tenant_id\":\"TNT001\",\"cashier_id\":\"cccccccc-cccc-cccc-cccc-ccccccccccc1\",\"station_id\":null,\"opening_balance\":500,\"opening_breakdown\":{\"bills\":[{\"qty\":5,\"denom\":100}]},\"closing_balance\":null,\"closing_breakdown\":null,\"total_sales\":0,\"total_cash_sales\":0,\"total_card_sales\":0,\"total_transfer_sales\":0,\"total_other_sales\":0,\"expected_balance\":null,\"discrepancy\":null,\"cash_in\":0,\"cash_out\":0,\"notes_open\":\"Turno mañana\",\"notes_close\":null,\"status\":\"open\",\"opened_at\":\"2026-04-28T03:16:31.559+00:00\",\"closed_at\":null,\"reconciled_at\":null,\"reconciled_by\":null,\"voided_at\":null,\"voided_by\":null,\"void_reason\":null,\"created_at\":\"2026-04-28T03:16:31.577965+00:00\",\"updated_at\":\"2026-04-28T03:16:31.577965+00:00\"}}"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf5cab6c7c82951c4037-2bf87bec078285889bda",
+              "file": "r4c-cortes-e2e.spec.js",
+              "line": 230,
+              "column": 3
+            },
+            {
+              "title": "CT4: 5 sales (cash, card, transfer) get linked to the open cut",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "CT4-results",
+                      "description": "[{\"idx\":1,\"pm\":\"efectivo\",\"total\":10,\"status\":200,\"ok\":true,\"body_excerpt\":\"{\\\"id\\\":\\\"03a433b2-c176-46c1-92ee-9d39c5060edf\\\",\\\"pos_user_id\\\":\\\"cccccccc-cccc-cccc-cccc-ccccccccccc1\\\",\\\"total\\\":10,\\\"payment_method\\\":\\\"efectivo\\\",\\\"items\\\":[{\\\"qty\\\":1,\\\"name\\\":\\\"R4C-test-item-1\\\",\\\"price\\\":10}],\\\"create\"},{\"idx\":2,\"pm\":\"tarjeta\",\"total\":20,\"status\":200,\"ok\":true,\"body_excerpt\":\"{\\\"id\\\":\\\"07018513-f4ae-43d3-b823-c5684dc5e8da\\\",\\\"pos_user_id\\\":\\\"cccccccc-cccc-cccc-cccc-ccccccccccc1\\\",\\\"total\\\":20,\\\"payment_method\\\":\\\"tarjeta\\\",\\\"items\\\":[{\\\"qty\\\":1,\\\"name\\\":\\\"R4C-test-item-2\\\",\\\"price\\\":20}],\\\"created\"},{\"idx\":3,\"pm\":\"transferencia\",\"total\":30,\"status\":200,\"ok\":true,\"body_excerpt\":\"{\\\"id\\\":\\\"0509c644-0fde-4b9a-86ca-1d1e62c96ccb\\\",\\\"pos_user_id\\\":\\\"cccccccc-cccc-cccc-cccc-ccccccccccc1\\\",\\\"total\\\":30,\\\"payment_method\\\":\\\"transferencia\\\",\\\"items\\\":[{\\\"qty\\\":1,\\\"name\\\":\\\"R4C-test-item-3\\\",\\\"price\\\":30}],\\\"c\"},{\"idx\":4,\"pm\":\"efectivo\",\"total\":40,\"status\":200,\"ok\":true,\"body_excerpt\":\"{\\\"id\\\":\\\"8477b0b0-3179-4c5c-bce7-5ecb2da63abb\\\",\\\"pos_user_id\\\":\\\"cccccccc-cccc-cccc-cccc-ccccccccccc1\\\",\\\"total\\\":40,\\\"payment_method\\\":\\\"efectivo\\\",\\\"items\\\":[{\\\"qty\\\":1,\\\"name\\\":\\\"R4C-test-item-4\\\",\\\"price\\\":40}],\\\"create\"},{\"idx\":5,\"pm\":\"tarjeta\",\"total\":50,\"status\":200,\"ok\":true,\"body_excerpt\":\"{\\\"id\\\":\\\"504d5615-6330-4f82-9841-6b990b7dc0dc\\\",\\\"pos_user_id\\\":\\\"cccccccc-cccc-cccc-cccc-ccccccccccc1\\\",\\\"total\\\":50,\\\"payment_method\\\":\\\"tarjeta\\\",\\\"items\\\":[{\\\"qty\\\":1,\\\"name\\\":\\\"R4C-test-item-5\\\",\\\"price\\"
+                    },
+                    {
+                      "type": "CT4-saleIds",
+                      "description": "[\"03a433b2-c176-46c1-92ee-9d39c5060edf\",\"07018513-f4ae-43d3-b823-c5684dc5e8da\",\"0509c644-0fde-4b9a-86ca-1d1e62c96ccb\",\"8477b0b0-3179-4c5c-bce7-5ecb2da63abb\",\"504d5615-6330-4f82-9841-6b990b7dc0dc\"]"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 968,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:16:24.590Z",
+                      "annotations": [
+                        {
+                          "type": "CT4-results",
+                          "description": "[{\"idx\":1,\"pm\":\"efectivo\",\"total\":10,\"status\":200,\"ok\":true,\"body_excerpt\":\"{\\\"id\\\":\\\"03a433b2-c176-46c1-92ee-9d39c5060edf\\\",\\\"pos_user_id\\\":\\\"cccccccc-cccc-cccc-cccc-ccccccccccc1\\\",\\\"total\\\":10,\\\"payment_method\\\":\\\"efectivo\\\",\\\"items\\\":[{\\\"qty\\\":1,\\\"name\\\":\\\"R4C-test-item-1\\\",\\\"price\\\":10}],\\\"create\"},{\"idx\":2,\"pm\":\"tarjeta\",\"total\":20,\"status\":200,\"ok\":true,\"body_excerpt\":\"{\\\"id\\\":\\\"07018513-f4ae-43d3-b823-c5684dc5e8da\\\",\\\"pos_user_id\\\":\\\"cccccccc-cccc-cccc-cccc-ccccccccccc1\\\",\\\"total\\\":20,\\\"payment_method\\\":\\\"tarjeta\\\",\\\"items\\\":[{\\\"qty\\\":1,\\\"name\\\":\\\"R4C-test-item-2\\\",\\\"price\\\":20}],\\\"created\"},{\"idx\":3,\"pm\":\"transferencia\",\"total\":30,\"status\":200,\"ok\":true,\"body_excerpt\":\"{\\\"id\\\":\\\"0509c644-0fde-4b9a-86ca-1d1e62c96ccb\\\",\\\"pos_user_id\\\":\\\"cccccccc-cccc-cccc-cccc-ccccccccccc1\\\",\\\"total\\\":30,\\\"payment_method\\\":\\\"transferencia\\\",\\\"items\\\":[{\\\"qty\\\":1,\\\"name\\\":\\\"R4C-test-item-3\\\",\\\"price\\\":30}],\\\"c\"},{\"idx\":4,\"pm\":\"efectivo\",\"total\":40,\"status\":200,\"ok\":true,\"body_excerpt\":\"{\\\"id\\\":\\\"8477b0b0-3179-4c5c-bce7-5ecb2da63abb\\\",\\\"pos_user_id\\\":\\\"cccccccc-cccc-cccc-cccc-ccccccccccc1\\\",\\\"total\\\":40,\\\"payment_method\\\":\\\"efectivo\\\",\\\"items\\\":[{\\\"qty\\\":1,\\\"name\\\":\\\"R4C-test-item-4\\\",\\\"price\\\":40}],\\\"create\"},{\"idx\":5,\"pm\":\"tarjeta\",\"total\":50,\"status\":200,\"ok\":true,\"body_excerpt\":\"{\\\"id\\\":\\\"504d5615-6330-4f82-9841-6b990b7dc0dc\\\",\\\"pos_user_id\\\":\\\"cccccccc-cccc-cccc-cccc-ccccccccccc1\\\",\\\"total\\\":50,\\\"payment_method\\\":\\\"tarjeta\\\",\\\"items\\\":[{\\\"qty\\\":1,\\\"name\\\":\\\"R4C-test-item-5\\\",\\\"price\\"
+                        },
+                        {
+                          "type": "CT4-saleIds",
+                          "description": "[\"03a433b2-c176-46c1-92ee-9d39c5060edf\",\"07018513-f4ae-43d3-b823-c5684dc5e8da\",\"0509c644-0fde-4b9a-86ca-1d1e62c96ccb\",\"8477b0b0-3179-4c5c-bce7-5ecb2da63abb\",\"504d5615-6330-4f82-9841-6b990b7dc0dc\"]"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf5cab6c7c82951c4037-564485014684279c6a76",
+              "file": "r4c-cortes-e2e.spec.js",
+              "line": 248,
+              "column": 3
+            },
+            {
+              "title": "CT5: GET /api/cuts/{id}/summary exposes opening, total, expected",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "CT5-status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "CT5-body",
+                      "description": "{\"ok\":true,\"cut_id\":\"b200362e-014e-423c-adc0-64121965a080\",\"opening\":500,\"sales\":[{\"id\":\"03a433b2-c176-46c1-92ee-9d39c5060edf\",\"total\":10,\"payment_method\":\"efectivo\",\"created_at\":\"2026-04-28T03:16:32.202271+00:00\"},{\"id\":\"07018513-f4ae-43d3-b823-c5684dc5e8da\",\"total\":20,\"payment_method\":\"tarjeta\",\"created_at\":\"2026-04-28T03:16:32.387228+00:00\"}],\"total\":30,\"expected\":530,\"counted\":500,\"discrepancy\":-30,\"opened_at\":\"2026-04-28T03:16:31.559+00:00\",\"closed_at\":\"2026-04-28T03:16:32.546+00:00\"}"
+                    },
+                    {
+                      "type": "CT5-opening",
+                      "description": "500"
+                    },
+                    {
+                      "type": "CT5-total",
+                      "description": "30"
+                    },
+                    {
+                      "type": "CT5-expected",
+                      "description": "530"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 173,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:16:25.583Z",
+                      "annotations": [
+                        {
+                          "type": "CT5-status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "CT5-body",
+                          "description": "{\"ok\":true,\"cut_id\":\"b200362e-014e-423c-adc0-64121965a080\",\"opening\":500,\"sales\":[{\"id\":\"03a433b2-c176-46c1-92ee-9d39c5060edf\",\"total\":10,\"payment_method\":\"efectivo\",\"created_at\":\"2026-04-28T03:16:32.202271+00:00\"},{\"id\":\"07018513-f4ae-43d3-b823-c5684dc5e8da\",\"total\":20,\"payment_method\":\"tarjeta\",\"created_at\":\"2026-04-28T03:16:32.387228+00:00\"}],\"total\":30,\"expected\":530,\"counted\":500,\"discrepancy\":-30,\"opened_at\":\"2026-04-28T03:16:31.559+00:00\",\"closed_at\":\"2026-04-28T03:16:32.546+00:00\"}"
+                        },
+                        {
+                          "type": "CT5-opening",
+                          "description": "500"
+                        },
+                        {
+                          "type": "CT5-total",
+                          "description": "30"
+                        },
+                        {
+                          "type": "CT5-expected",
+                          "description": "530"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf5cab6c7c82951c4037-5dbea06cecb61e7ded9e",
+              "file": "r4c-cortes-e2e.spec.js",
+              "line": 279,
+              "column": 3
+            },
+            {
+              "title": "CT6: cash in/out movements during shift (best-effort)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "CT6-results",
+                      "description": "{\"in\":[{\"path\":\"/api/cash-movements\",\"status\":404},{\"path\":\"/api/cash/movement\",\"status\":404},{\"path\":\"/api/cuts/cash-in\",\"status\":404}],\"out\":[{\"path\":\"/api/cash-movements\",\"status\":404},{\"path\":\"/api/cash/movement\",\"status\":404},{\"path\":\"/api/cuts/cash-out\",\"status\":404}]}"
+                    },
+                    {
+                      "type": "CT6-inOk",
+                      "description": "false"
+                    },
+                    {
+                      "type": "CT6-outOk",
+                      "description": "false"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 584,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:16:25.796Z",
+                      "annotations": [
+                        {
+                          "type": "CT6-results",
+                          "description": "{\"in\":[{\"path\":\"/api/cash-movements\",\"status\":404},{\"path\":\"/api/cash/movement\",\"status\":404},{\"path\":\"/api/cuts/cash-in\",\"status\":404}],\"out\":[{\"path\":\"/api/cash-movements\",\"status\":404},{\"path\":\"/api/cash/movement\",\"status\":404},{\"path\":\"/api/cuts/cash-out\",\"status\":404}]}"
+                        },
+                        {
+                          "type": "CT6-inOk",
+                          "description": "false"
+                        },
+                        {
+                          "type": "CT6-outOk",
+                          "description": "false"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf5cab6c7c82951c4037-c47b734dd4745eae1f3f",
+              "file": "r4c-cortes-e2e.spec.js",
+              "line": 311,
+              "column": 3
+            },
+            {
+              "title": "CT7: POST /api/cuts/close returns 200 with discrepancy",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "CT7-status",
+                      "description": "409"
+                    },
+                    {
+                      "type": "CT7-body",
+                      "description": "{\"error\":\"cut_already_closed\"}"
+                    },
+                    {
+                      "type": "CT7-idem",
+                      "description": "CT7-close-1777346186409-c01fbd8c"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 180,
+                      "error": {
+                        "message": "Error: close cut must return 200/201 (got 409, allowed [200,201])\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected value: \u001b[32m409\u001b[39m\nReceived array: \u001b[31m[200, 201]\u001b[39m",
+                        "stack": "Error: close cut must return 200/201 (got 409, allowed [200,201])\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected value: \u001b[32m409\u001b[39m\nReceived array: \u001b[31m[200, 201]\u001b[39m\n    at expectStatusIn (C:\\Users\\DELL\\Downloads\\verion 340\\tests\\r4c-cortes-e2e.spec.js:39:81)\n    at C:\\Users\\DELL\\Downloads\\verion 340\\tests\\r4c-cortes-e2e.spec.js:382:5",
+                        "location": {
+                          "file": "C:\\Users\\DELL\\Downloads\\verion 340\\tests\\r4c-cortes-e2e.spec.js",
+                          "column": 81,
+                          "line": 39
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 37 |\u001b[39m \u001b[36mfunction\u001b[39m isOk(status) { \u001b[36mreturn\u001b[39m status \u001b[33m>=\u001b[39m \u001b[35m200\u001b[39m \u001b[33m&&\u001b[39m status \u001b[33m<\u001b[39m \u001b[35m300\u001b[39m\u001b[33m;\u001b[39m }\n \u001b[90m 38 |\u001b[39m \u001b[36mfunction\u001b[39m expectStatusIn(actual\u001b[33m,\u001b[39m allowed\u001b[33m,\u001b[39m msg \u001b[33m=\u001b[39m \u001b[32m''\u001b[39m) {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 39 |\u001b[39m   expect(allowed\u001b[33m,\u001b[39m \u001b[32m`${msg} (got ${actual}, allowed ${JSON.stringify(allowed)})`\u001b[39m)\u001b[33m.\u001b[39mtoContain(actual)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                                 \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 40 |\u001b[39m }\n \u001b[90m 41 |\u001b[39m\n \u001b[90m 42 |\u001b[39m \u001b[36masync\u001b[39m \u001b[36mfunction\u001b[39m loginViaAPI(baseURL\u001b[33m,\u001b[39m email\u001b[33m,\u001b[39m password) {\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\DELL\\Downloads\\verion 340\\tests\\r4c-cortes-e2e.spec.js",
+                            "column": 81,
+                            "line": 39
+                          },
+                          "message": "Error: close cut must return 200/201 (got 409, allowed [200,201])\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected value: \u001b[32m409\u001b[39m\nReceived array: \u001b[31m[200, 201]\u001b[39m\n\n  37 | function isOk(status) { return status >= 200 && status < 300; }\n  38 | function expectStatusIn(actual, allowed, msg = '') {\n> 39 |   expect(allowed, `${msg} (got ${actual}, allowed ${JSON.stringify(allowed)})`).toContain(actual);\n     |                                                                                 ^\n  40 | }\n  41 |\n  42 | async function loginViaAPI(baseURL, email, password) {\n    at expectStatusIn (C:\\Users\\DELL\\Downloads\\verion 340\\tests\\r4c-cortes-e2e.spec.js:39:81)\n    at C:\\Users\\DELL\\Downloads\\verion 340\\tests\\r4c-cortes-e2e.spec.js:382:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:16:26.399Z",
+                      "annotations": [
+                        {
+                          "type": "CT7-status",
+                          "description": "409"
+                        },
+                        {
+                          "type": "CT7-body",
+                          "description": "{\"error\":\"cut_already_closed\"}"
+                        },
+                        {
+                          "type": "CT7-idem",
+                          "description": "CT7-close-1777346186409-c01fbd8c"
+                        }
+                      ],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\DELL\\Downloads\\verion 340\\test-results\\r4c-cortes-e2e-R4C-Cortes--12750-eturns-200-with-discrepancy-chromium\\error-context.md"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\DELL\\Downloads\\verion 340\\test-results\\r4c-cortes-e2e-R4C-Cortes--12750-eturns-200-with-discrepancy-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\DELL\\Downloads\\verion 340\\tests\\r4c-cortes-e2e.spec.js",
+                        "column": 81,
+                        "line": 39
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "bf5cab6c7c82951c4037-5c51ed474a061fae483c",
+              "file": "r4c-cortes-e2e.spec.js",
+              "line": 362,
+              "column": 3
+            },
+            {
+              "title": "CT8: closing an already-closed cut returns 409 / 400",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:16:26.881Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "bf5cab6c7c82951c4037-2bfc4fa5d5546e08554e",
+              "file": "r4c-cortes-e2e.spec.js",
+              "line": 400,
+              "column": 3
+            },
+            {
+              "title": "CT9: receipt content + POST /api/printer/raw returns ok (audit_only)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:16:26.881Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "bf5cab6c7c82951c4037-a29fc269584a58dd6aa3",
+              "file": "r4c-cortes-e2e.spec.js",
+              "line": 419,
+              "column": 3
+            },
+            {
+              "title": "CT10: GET /api/cuts?from=...&to=... lists past cuts",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:16:26.882Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "bf5cab6c7c82951c4037-425624686ca56cafdefb",
+              "file": "r4c-cortes-e2e.spec.js",
+              "line": 469,
+              "column": 3
+            },
+            {
+              "title": "CT11: discrepancy maths — opening 500 + sale 100 - close 580 = -20",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:16:26.882Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "bf5cab6c7c82951c4037-a12c46e8a6298ffd7547",
+              "file": "r4c-cortes-e2e.spec.js",
+              "line": 495,
+              "column": 3
+            },
+            {
+              "title": "CT12: multi-cashier — admin opens its own cut, both close independently",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:16:26.882Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "bf5cab6c7c82951c4037-94e216380fe5137908ed",
+              "file": "r4c-cortes-e2e.spec.js",
+              "line": 568,
+              "column": 3
+            },
+            {
+              "title": "CT13: UI flow apertura → venta → corte (best-effort)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:16:26.882Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "bf5cab6c7c82951c4037-1f11a1bd713eccf7c0ef",
+              "file": "r4c-cortes-e2e.spec.js",
+              "line": 612,
+              "column": 3
+            },
+            {
+              "title": "CT14: cross-tenant — admin (TNT001) cannot see TNT002 cuts",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:16:26.882Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "bf5cab6c7c82951c4037-05077e88a3c4f04b31d0",
+              "file": "r4c-cortes-e2e.spec.js",
+              "line": 650,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-04-28T03:11:34.346Z",
+    "duration": 292603.44200000004,
+    "expected": 6,
+    "skipped": 7,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

@@ -1,6 +1,14 @@
 # PROGRESS.md — Volvix POS
 
-## Estado actual (2026-04-28, FINAL — 100% verificado producción)
+## Estado FINAL DEFINITIVO (2026-04-28, post R11 — 100% real verificado)
+
+**Smoke E2E final**: **30/30 endpoints → 200 OK** con JWT real
+**Producción**: https://volvix-pos.vercel.app
+**Total rounds**: 35 (R1-R10e + R7a/b/c + R9a/b/c + R11)
+**Auditorías adversariales**: 3 (#1=11 fallas, #2=11 fallas, #3=7 fallas — TODAS cerradas)
+**Total fallas detectadas y cerradas**: 29 (8 P0 + 13 P1 + 8 P2)
+
+## Estado actual (DEPRECATED — ver arriba)
 
 **Producción**: https://volvix-pos.vercel.app
 **SW Version**: v1.12.3-r6b (bumped en R6b)

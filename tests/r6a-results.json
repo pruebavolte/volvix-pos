@@ -1,0 +1,528 @@
+{
+  "run_tag": "49515097",
+  "base": "https://volvix-pos.vercel.app",
+  "page": "/multipos_suite_v3.html",
+  "owner": {
+    "email": "owner@volvix.test",
+    "tenant": "TNT002",
+    "role": "owner"
+  },
+  "admin": {
+    "email": "admin@volvix.test",
+    "tenant": "TNT001",
+    "role": "superadmin"
+  },
+  "reservation": {
+    "id": "local-1777349524656",
+    "name": "R6A Reserva 49515097"
+  },
+  "kitchen_order_id": "local-1777349525879",
+  "kds_paired": true,
+  "cds_paired": true,
+  "score": {
+    "pass": 14,
+    "total": 14,
+    "percent": 100
+  },
+  "results": {
+    "M1": {
+      "pass": true,
+      "detail": "status=200 bytes=147139 authGate=true roleGuard=true 4tabs=true switchApp=true wiring=true",
+      "evidence": {
+        "status": 200,
+        "bytes": 147139,
+        "hasAuthGate": true,
+        "hasRoleGuard": true,
+        "hasFourTabs": true,
+        "hasSwitchApp": true,
+        "hasMultiposJs": true
+      }
+    },
+    "M2": {
+      "pass": true,
+      "detail": "tabs=[{\"app\":\"comandera\",\"hasButton\":true,\"hasContainer\":true},{\"app\":\"kds\",\"hasButton\":true,\"hasContainer\":true},{\"app\":\"manager\",\"hasButton\":true,\"hasContainer\":true},{\"app\":\"cds\",\"hasButton\":true,\"hasContainer\":true}] containers=true mpFns=5/6",
+      "evidence": {
+        "tabs": [
+          {
+            "app": "comandera",
+            "hasButton": true,
+            "hasContainer": true
+          },
+          {
+            "app": "kds",
+            "hasButton": true,
+            "hasContainer": true
+          },
+          {
+            "app": "manager",
+            "hasButton": true,
+            "hasContainer": true
+          },
+          {
+            "app": "cds",
+            "hasButton": true,
+            "hasContainer": true
+          }
+        ],
+        "mpFns": [
+          {
+            "fn": "mpNewReservation",
+            "present": true
+          },
+          {
+            "fn": "mpConfirmReservation",
+            "present": true
+          },
+          {
+            "fn": "mpPairKDS",
+            "present": true
+          },
+          {
+            "fn": "mpPairCDS",
+            "present": true
+          },
+          {
+            "fn": "mpNotifyWaiter",
+            "present": true
+          },
+          {
+            "fn": "mpEditEmployee",
+            "present": false
+          }
+        ]
+      }
+    },
+    "M3": {
+      "pass": true,
+      "detail": "status=201 ok=true body_keys=ok,reservation,persisted reservation_id=local-1777349524656 persisted=false",
+      "evidence": {
+        "status": 201,
+        "body": {
+          "ok": true,
+          "reservation": {
+            "id": "local-1777349524656",
+            "tenant_id": "TNT002",
+            "customer_name": "R6A Reserva 49515097",
+            "phone": "+525555550199",
+            "people": 4,
+            "reservation_at": "2026-04-29T04:11:56.828Z",
+            "table_hint": "T-12",
+            "notes": "R6A M3 reservation test",
+            "status": "pending",
+            "created_by": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1",
+            "created_at": "2026-04-28T04:12:04.611Z"
+          },
+          "persisted": false
+        }
+      }
+    },
+    "M4": {
+      "pass": true,
+      "detail": "status=200 body={\"ok\":true,\"customer_name\":\"R6A Reserva 49515097\",\"status\":\"confirmed\"}",
+      "evidence": {
+        "status": 200,
+        "body": {
+          "ok": true,
+          "customer_name": "R6A Reserva 49515097",
+          "status": "confirmed"
+        }
+      }
+    },
+    "M5": {
+      "pass": true,
+      "detail": "pair_code=R6AK-A4D7 status=200 body={\"ok\":true,\"pairing\":{\"tenant_id\":\"TNT002\",\"pair_code\":\"R6AK-A4D7\",\"station\":\"cocina\",\"paired_by\":\"bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1\",\"paired_at\":\"2026-04-28T04:12:05.145Z\",\"device_type\":\"kds\"}} station_swap=200/parrilla",
+      "evidence": {
+        "status": 200,
+        "body": {
+          "ok": true,
+          "pairing": {
+            "tenant_id": "TNT002",
+            "pair_code": "R6AK-A4D7",
+            "station": "cocina",
+            "paired_by": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1",
+            "paired_at": "2026-04-28T04:12:05.145Z",
+            "device_type": "kds"
+          }
+        }
+      }
+    },
+    "M6": {
+      "pass": true,
+      "detail": "pair_code=R6AC-A4D7 status=200 body={\"ok\":true,\"pairing\":{\"tenant_id\":\"TNT002\",\"pair_code\":\"R6AC-A4D7\",\"orientation\":\"landscape\",\"paired_by\":\"bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1\",\"paired_at\":\"2026-04-28T04:12:05.486Z\",\"device_type\":\"cds\"}} invalid_pair_status=400",
+      "evidence": {
+        "status": 200,
+        "body": {
+          "ok": true,
+          "pairing": {
+            "tenant_id": "TNT002",
+            "pair_code": "R6AC-A4D7",
+            "orientation": "landscape",
+            "paired_by": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1",
+            "paired_at": "2026-04-28T04:12:05.486Z",
+            "device_type": "cds"
+          }
+        }
+      }
+    },
+    "M7": {
+      "pass": true,
+      "detail": "status=201 body={\"ok\":true,\"order\":{\"id\":\"local-1777349525879\",\"tenant_id\":\"TNT002\",\"mesa\":\"12\",\"items\":[{\"qty\":2,\"name\":\"R6A-Tacos\",\"mods\":\"sin cebolla\"},{\"qty\":1,\"name\":\"R6A-Agua\",\"mods\":\"sin hielo\"}],\"status\":\"pending\",\"cashier_id\":\"bbbbbbbb-bbbb-bbbb-b empty_items_status=400",
+      "evidence": {
+        "status": 201,
+        "body": {
+          "ok": true,
+          "order": {
+            "id": "local-1777349525879",
+            "tenant_id": "TNT002",
+            "mesa": "12",
+            "items": [
+              {
+                "qty": 2,
+                "name": "R6A-Tacos",
+                "mods": "sin cebolla"
+              },
+              {
+                "qty": 1,
+                "name": "R6A-Agua",
+                "mods": "sin hielo"
+              }
+            ],
+            "status": "pending",
+            "cashier_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1",
+            "created_at": "2026-04-28T04:12:05.831Z"
+          },
+          "persisted": false
+        }
+      }
+    },
+    "M8": {
+      "pass": true,
+      "detail": "status=200 body={\"ok\":true,\"notification\":{\"tenant_id\":\"TNT002\",\"ticket_id\":\"local-1777349525879\",\"mesa\":\"12\",\"reason\":\"ready\",\"notified_by\":\"bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1\",\"created_at\":\"2026-04-28T04:12:06.166Z\"}}",
+      "evidence": {
+        "status": 200,
+        "body": {
+          "ok": true,
+          "notification": {
+            "tenant_id": "TNT002",
+            "ticket_id": "local-1777349525879",
+            "mesa": "12",
+            "reason": "ready",
+            "notified_by": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1",
+            "created_at": "2026-04-28T04:12:06.166Z"
+          }
+        }
+      }
+    },
+    "M9": {
+      "pass": true,
+      "detail": "status=200 body={\"ok\":true,\"updated\":{\"role\":\"Mesero senior\",\"phone\":\"+525555550111\"}} empty_patch_status=400",
+      "evidence": {
+        "status": 200,
+        "body": {
+          "ok": true,
+          "updated": {
+            "role": "Mesero senior",
+            "phone": "+525555550111"
+          }
+        }
+      }
+    },
+    "M10": {
+      "pass": true,
+      "detail": "pin=1097 status=200 body={\"ok\":true,\"updated\":true} short_pin_status=400",
+      "evidence": {
+        "status": 200,
+        "body": {
+          "ok": true,
+          "updated": true
+        }
+      }
+    },
+    "M11": {
+      "pass": true,
+      "detail": "status=201 body={\"ok\":true,\"purchase\":{\"id\":\"local-1777349527138\",\"tenant_id\":\"TNT002\",\"product_name\":\"R6A Tortillas (M11)\",\"product_id\":null,\"qty\":50,\"supplier\":\"R6A Distribuciones\",\"urgent\":false,\"status\":\"pending\",\"created_by\":\"bbbbbbbb-bbbb-bbbb-bbbb-b zero_qty_status=400",
+      "evidence": {
+        "status": 201,
+        "body": {
+          "ok": true,
+          "purchase": {
+            "id": "local-1777349527138",
+            "tenant_id": "TNT002",
+            "product_name": "R6A Tortillas (M11)",
+            "product_id": null,
+            "qty": 50,
+            "supplier": "R6A Distribuciones",
+            "urgent": false,
+            "status": "pending",
+            "created_by": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1",
+            "created_at": "2026-04-28T04:12:07.087Z"
+          },
+          "persisted": false
+        }
+      }
+    },
+    "M12": {
+      "pass": true,
+      "detail": "o1=201 o2=201 printers=200 pcount=0",
+      "evidence": {
+        "order1": {
+          "status": 201,
+          "id": "local-1777349527585"
+        },
+        "order2": {
+          "status": 201,
+          "id": "local-1777349527771"
+        },
+        "printers": {
+          "status": 200,
+          "count": 0
+        }
+      }
+    },
+    "M13": {
+      "pass": true,
+      "detail": "marker=R6A_M13_MARKER_49515097 marker_id=local-1777349528154 adminLeak=false ownerOverrideLeak=false",
+      "evidence": {
+        "create_status": 201,
+        "markerName": "R6A_M13_MARKER_49515097",
+        "markerId": "local-1777349528154",
+        "adminList": {
+          "status": 200,
+          "count": 0,
+          "leaked": false
+        },
+        "ownerOverride": {
+          "status": 200,
+          "count": 0,
+          "leaked": false
+        }
+      }
+    },
+    "M14": {
+      "pass": true,
+      "detail": "httpStatus=200 onSuite=true hadRedirect=false tabsActive={\"comandera\":{\"clicked\":true,\"viaForce\":true,\"active\":true},\"kds\":{\"clicked\":true,\"viaForce\":true,\"active\":true},\"manager\":{\"clicked\":true,\"viaForce\":true,\"active\":true},\"cds\":{\"clicked\":true,\"viaForce\":true,\"active\":true}} consoleErrs=47 5xx=0",
+      "evidence": {
+        "url": "https://volvix-pos.vercel.app/multipos_suite_v3.html",
+        "httpStatus": 200,
+        "onSuite": true,
+        "hadRedirect": false,
+        "tabsClicked": {
+          "comandera": {
+            "clicked": true,
+            "viaForce": true,
+            "active": true
+          },
+          "kds": {
+            "clicked": true,
+            "viaForce": true,
+            "active": true
+          },
+          "manager": {
+            "clicked": true,
+            "viaForce": true,
+            "active": true
+          },
+          "cds": {
+            "clicked": true,
+            "viaForce": true,
+            "active": true
+          }
+        },
+        "consoleErrCount": 47,
+        "netFailCount": 0,
+        "initialScreenshot": "M14_loaded.png"
+      }
+    }
+  },
+  "console_errors": [
+    {
+      "tag": "M14",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "tag": "M14",
+      "text": "Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled."
+    },
+    {
+      "tag": "M14",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "M14",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "M14",
+      "text": "[ERROR] [VolvixPerf] fetch error: /api/fx/rates?base=MXN Failed to fetch\nTypeError: Failed to fetch\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at window.fetch (https://volvix-pos.vercel.app/volvix-sentry-wiring.js:280:14)\n    at window.fetch (https://volvix-pos.v"
+    },
+    {
+      "tag": "M14",
+      "text": "[VolvixPerf] fetch error: /api/fx/rates?base=MXN TypeError: Failed to fetch\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at window.fetch (https://volvix-pos.vercel.app/volvix-sentry-wiring.js:280:14)\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-"
+    },
+    {
+      "tag": "M14",
+      "text": "[ERROR] API GET /api/fx/rates?base=MXN failed: Failed to fetch {url: /api/fx/rates?base=MXN, method: GET, error: Failed to fetch, stack: TypeError: Failed to fetch\n    at wrapped (https:/…-pos.vercel.app/volvix-currency-wiring.js:134:18)}"
+    },
+    {
+      "tag": "M14",
+      "text": "[ERROR] [VolvixPerf] fetch error: /api/fx/rates?base=MXN Failed to fetch\nTypeError: Failed to fetch\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at window.fetch (https://volvix-pos.vercel.app/volvix-sentry-wiring.js:280:14)\n    at window.fetch (https://volvix-pos.v"
+    },
+    {
+      "tag": "M14",
+      "text": "[VolvixPerf] fetch error: /api/fx/rates?base=MXN TypeError: Failed to fetch\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at window.fetch (https://volvix-pos.vercel.app/volvix-sentry-wiring.js:280:14)\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-"
+    },
+    {
+      "tag": "M14",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "M14",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "M14",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "M14",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "tag": "M14",
+      "text": "Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled."
+    },
+    {
+      "tag": "M14",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "M14",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "tag": "M14",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "M14",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "M14",
+      "text": "[ERROR] API POST https://volvix-pos.vercel.app/api/ai/decide failed: Failed to fetch {url: https://volvix-pos.vercel.app/api/ai/decide, method: POST, error: Failed to fetch, stack: TypeError: Failed to fetch\n    at window.fetch (ht…x-pos.vercel.app/volvix-ai-real-wiring.js:603:25)}"
+    },
+    {
+      "tag": "M14",
+      "text": "[ERROR] [VolvixPerf] fetch error: https://volvix-pos.vercel.app/api/ai/decide Failed to fetch\nTypeError: Failed to fetch\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at global.fetch "
+    },
+    {
+      "tag": "M14",
+      "text": "[VolvixPerf] fetch error: https://volvix-pos.vercel.app/api/ai/decide TypeError: Failed to fetch\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at global.fetch (https://volvix-pos.verc"
+    },
+    {
+      "tag": "M14",
+      "text": "[ERROR] [VolvixPerf] fetch error: https://volvix-pos.vercel.app/api/ai/decide Failed to fetch\nTypeError: Failed to fetch\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at global.fetch "
+    },
+    {
+      "tag": "M14",
+      "text": "[VolvixPerf] fetch error: https://volvix-pos.vercel.app/api/ai/decide TypeError: Failed to fetch\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at global.fetch (https://volvix-pos.verc"
+    },
+    {
+      "tag": "M14",
+      "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Failed to fetch\",\"stack\":\"TypeError: Failed to fetch\\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\\n    at global.fetch (https://volvix"
+    },
+    {
+      "tag": "M14",
+      "text": "[ErrorHandler] {type: fetch, message: Failed to fetch, stack: TypeError: Failed to fetch\n    at window.fetch (ht…x-pos.vercel.app/volvix-ai-real-wiring.js:603:25), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safari/537.36, url: https://volvix-pos"
+    },
+    {
+      "tag": "M14",
+      "text": "[ERROR] [AI-REAL-WIRING] Health-check falló: Failed to fetch {}"
+    },
+    {
+      "tag": "M14",
+      "text": "[AI-REAL-WIRING] Health-check falló: Failed to fetch"
+    },
+    {
+      "tag": "M14",
+      "text": "Failed to load resource: the server responded with a status of 503 (Offline)"
+    },
+    {
+      "tag": "M14",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "tag": "M14",
+      "text": "Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled."
+    },
+    {
+      "tag": "M14",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "M14",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "M14",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "M14",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "M14",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "tag": "M14",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "M14",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "M14",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "M14",
+      "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 215ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 215ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel.ap"
+    },
+    {
+      "tag": "M14",
+      "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 215ms, stack: Error: Rate limit exceeded for default. Retry in 2…vercel.app/volvix-notifications-wiring.js:367:25), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safari"
+    },
+    {
+      "tag": "M14",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "M14",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "M14",
+      "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 228ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 228ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel.ap"
+    },
+    {
+      "tag": "M14",
+      "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 228ms, stack: Error: Rate limit exceeded for default. Retry in 2…vercel.app/volvix-notifications-wiring.js:384:25), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safari"
+    },
+    {
+      "tag": "M14",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "M14",
+      "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 212ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 212ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel.ap"
+    },
+    {
+      "tag": "M14",
+      "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 212ms, stack: Error: Rate limit exceeded for default. Retry in 2…vercel.app/volvix-notifications-wiring.js:405:25), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safari"
+    }
+  ],
+  "network_failures": []
+}

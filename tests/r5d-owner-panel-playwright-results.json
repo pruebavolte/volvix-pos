@@ -1,0 +1,542 @@
+{
+  "config": {
+    "configFile": "C:\\Users\\DELL\\Downloads\\verion 340\\tests\\playwright.r5d.config.js",
+    "rootDir": "C:/Users/DELL/Downloads/verion 340/tests",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/DELL/Downloads/verion 340/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "C:/Users/DELL/Downloads/verion 340/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "r5d-owner-panel-e2e.spec.js"
+        ],
+        "timeout": 120000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "r5d-owner-panel-playwright-results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.59.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "r5d-owner-panel-e2e.spec.js",
+      "file": "r5d-owner-panel-e2e.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "R5D / B42 — Owner Panel E2E",
+          "file": "r5d-owner-panel-e2e.spec.js",
+          "line": 176,
+          "column": 6,
+          "specs": [
+            {
+              "title": "O1 — Owner panel page loads with auth (console errors < 5)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 14228,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:43:50.427Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b563821bae31b442b62a-632e13c3f68ef87ea8bc",
+              "file": "r5d-owner-panel-e2e.spec.js",
+              "line": 194,
+              "column": 3
+            },
+            {
+              "title": "O2 — Navigation menu items work",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 46097,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:44:05.342Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b563821bae31b442b62a-f15f79fd3153c39f2b89",
+              "file": "r5d-owner-panel-e2e.spec.js",
+              "line": 235,
+              "column": 3
+            },
+            {
+              "title": "O3 — Create sub-tenant via POST /api/owner/tenants",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 538,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:44:51.495Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b563821bae31b442b62a-d0a4be0216076d6097a2",
+              "file": "r5d-owner-panel-e2e.spec.js",
+              "line": 305,
+              "column": 3
+            },
+            {
+              "title": "O4 — Create user inside sub-tenant",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 357,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:44:52.081Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b563821bae31b442b62a-1f5f2d82314d3d68172c",
+              "file": "r5d-owner-panel-e2e.spec.js",
+              "line": 336,
+              "column": 3
+            },
+            {
+              "title": "O5 — Assign feature flag (module.recargas disabled) to a user",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 535,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:44:52.469Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b563821bae31b442b62a-01c91ff655f8b74483b7",
+              "file": "r5d-owner-panel-e2e.spec.js",
+              "line": 358,
+              "column": 3
+            },
+            {
+              "title": "O6 — Trigger deploy via POST /api/owner/deploys",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 156,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:44:53.044Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b563821bae31b442b62a-d8b575c7a3a67c401e09",
+              "file": "r5d-owner-panel-e2e.spec.js",
+              "line": 396,
+              "column": 3
+            },
+            {
+              "title": "O7 — View activity log (audit/owner logs endpoint)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 169,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:44:53.230Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b563821bae31b442b62a-be28480e3071e270c221",
+              "file": "r5d-owner-panel-e2e.spec.js",
+              "line": 415,
+              "column": 3
+            },
+            {
+              "title": "O8 — Edit tenant settings (PATCH /api/owner/tenants/:id)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 231,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:44:53.428Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b563821bae31b442b62a-d2c90cbdf09708f9cd47",
+              "file": "r5d-owner-panel-e2e.spec.js",
+              "line": 442,
+              "column": 3
+            },
+            {
+              "title": "O9 — Suspend tenant (PATCH suspended=true ó DELETE soft-suspend)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 384,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:44:53.694Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b563821bae31b442b62a-cb53ab5caca8193eee56",
+              "file": "r5d-owner-panel-e2e.spec.js",
+              "line": 458,
+              "column": 3
+            },
+            {
+              "title": "O10 — Marketing — POST /api/owner/landings persists a landing",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 202,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:44:54.108Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b563821bae31b442b62a-761565a96a1e568fcb5a",
+              "file": "r5d-owner-panel-e2e.spec.js",
+              "line": 494,
+              "column": 3
+            },
+            {
+              "title": "O11 — Verify P0 button references (v25/marketplace/v7) — B40 fixes",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 15373,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:44:54.360Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b563821bae31b442b62a-62a2b58e8b3803d529a7",
+              "file": "r5d-owner-panel-e2e.spec.js",
+              "line": 516,
+              "column": 3
+            },
+            {
+              "title": "O12 — Multi-tenant isolation: owner cannot see admin tenant data",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 620,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "\n=== R5D / B42 OWNER PANEL E2E RESULTS ===\n"
+                        },
+                        {
+                          "text": "O1 [FAIL] Page loads with auth (console errors < 5) — http=200 nav_visible=true console_errors=104 sample=[\"Failed to load resource: the server responded with a status of 404 ()\",\"Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.\",\"Failed to load resource: the server responded with a status of 401 ()\"]\n"
+                        },
+                        {
+                          "text": "O2 [FAIL] Navigation menu items work — nav_ok=0/14 users_wired=true sample_fail=[{\"label\":\"Overview\",\"section\":\"v-overview\",\"ok\":false,\"reason\":\"click_fail\"},{\"label\":\"Arquitectura\",\"section\":\"v-architecture\",\"ok\":false,\"reason\":\"click_fail\"},{\"label\":\"Verticales\",\"section\":\"v-verticals\",\"ok\":false,\"reason\":\"click_fail\"}]\n"
+                        },
+                        {
+                          "text": "O3 [PASS] Crear sub-tenant (POST /api/owner/tenants → 201) — created sub_tenant_id=4e912a42-eee7-453b-b516-fa9d994c2900 name=\"R5D Owner E2E 47830362\" plan=basic listed=true list_count=2\n"
+                        },
+                        {
+                          "text": "O4 [PASS] Crear usuario en sub-tenant (POST /api/sub-tenants/:id/users → 201) — created user_id=307ad541-e2db-4468-a139-cd4b53dfcf1d email=r5d-user+47830362@volvix.test\n"
+                        },
+                        {
+                          "text": "O5 [PASS] Asignar permisos / feature flag a usuario (PATCH /api/users/:id/permissions) — target_user=307ad541-e2db-4468-a139-cd4b53dfcf1d status=200 applied_count=1 flag_present=true body={\"ok\":true,\"applied\":[{\"key\":\"module.recargas\",\"status\":\"disabled\"}],\"errors\":[]}\n"
+                        },
+                        {
+                          "text": "O6 [PASS] Trigger deploy (POST /api/owner/deploys) — status=202 ok=true deploy_id=dep-1777347900588-4d897cb7 body={\"ok\":true,\"deploy_id\":\"dep-1777347900588-4d897cb7\",\"env\":\"staging\",\"branch\":\"main\",\"status\":\"queued\",\"note\":\"Deploy queued (real CI trigger TBD)\"}\n"
+                        },
+                        {
+                          "text": "O7 [PASS] View activity log (audit-log endpoint) — path=/api/audit-log?limit=20 status=200 count=0\n"
+                        },
+                        {
+                          "text": "O8 [FAIL] Edit tenant settings (PATCH /api/owner/tenants/:id) — status=503 plan_back=undefined body={\"ok\":false,\"error\":\"schema_mismatch\",\"message\":\"Esquema de BD desactualizado\",\"request_id\":\"62082808-65e0-44aa-89e8-6da035fa5459\"}\n"
+                        },
+                        {
+                          "text": "O9 [FAIL] Suspender tenant (PATCH suspended=true) — patch_status=503 body={\"ok\":false,\"error\":\"schema_mismatch\",\"message\":\"Esquema de BD desactualizado\",\"request_id\":\"4df41f1c-df8b-46a7-975d-5c96eb5cbc73\"} listed_is_active=true suspended=undefined disabled_at=undefined considered_suspended=false\n"
+                        },
+                        {
+                          "text": "O10 [PASS] Marketing — Crear landing personalizada (POST /api/owner/landings) — status=200 body={\"ok\":true,\"id\":\"f435832b-e6be-4cb7-b90e-743b5d9575ad\"} list_status=200\n"
+                        },
+                        {
+                          "text": "O11 [PASS] P0 button references FIXED (v25 / marketplace.html / panel_v7) — v25=true v24=false marketplace=true landing_template=false panel_v7=true panel_v2=false\n"
+                        },
+                        {
+                          "text": "O12 [PASS] Multi-tenant isolation (owner TNT002 ≠ admin TNT001) — owner_customer_count=0 TNT001_leak=0 cajero_leak=false cross_target=b236fab4-0f4c-4acb-801d-27fd3d90235e cross_status=404 cross_leaked=false\n"
+                        },
+                        {
+                          "text": "SCORE = 8/12 = 67/100\n"
+                        },
+                        {
+                          "text": "=== /R5D RESULTS ===\n\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:45:09.774Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b563821bae31b442b62a-6dfd5a469ddc60366714",
+              "file": "r5d-owner-panel-e2e.spec.js",
+              "line": 551,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-04-28T03:39:00.105Z",
+    "duration": 370676.076,
+    "expected": 12,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

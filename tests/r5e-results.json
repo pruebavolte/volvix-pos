@@ -1,0 +1,861 @@
+{
+  "config": {
+    "configFile": "C:\\Users\\DELL\\Downloads\\verion 340\\tests\\playwright.r5e.config.js",
+    "rootDir": "C:/Users/DELL/Downloads/verion 340/tests",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/DELL/Downloads/verion 340/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "C:/Users/DELL/Downloads/verion 340/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/r5e-promociones-e2e\\.spec\\.js/"
+        ],
+        "timeout": 240000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.59.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "r5e-promociones-e2e.spec.js",
+      "file": "r5e-promociones-e2e.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "R5E Promociones / Cupones / Descuentos E2E",
+          "file": "r5e-promociones-e2e.spec.js",
+          "line": 132,
+          "column": 6,
+          "specs": [
+            {
+              "title": "P1: discover promo endpoints (GET on each candidate route)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "P1-discovery",
+                      "description": "[{\"method\":\"GET\",\"path\":\"/api/promotions\",\"status\":200,\"ok\":true,\"excerpt\":\"{\\\"ok\\\":true,\\\"items\\\":[]}\"},{\"method\":\"GET\",\"path\":\"/api/promotions?active=1\",\"status\":200,\"ok\":true,\"excerpt\":\"{\\\"ok\\\":true,\\\"items\\\":[]}\"},{\"method\":\"POST\",\"path\":\"/api/promotions/validate\",\"status\":400,\"ok\":false,\"excerpt\":\"{\\\"valid\\\":false,\\\"message\\\":\\\"code_required\\\"}\"},{\"method\":\"GET\",\"path\":\"/api/coupons\",\"status\":404,\"ok\":false,\"excerpt\":\"{\\\"error\\\":\\\"endpoint not found\\\"}\"},{\"method\":\"GET\",\"path\":\"/api/discounts\",\"status\":404,\"ok\":false,\"excerpt\":\"{\\\"error\\\":\\\"endpoint not found\\\"}\"},{\"method\":\"GET\",\"path\":\"/api/reports/promotions\",\"status\":404,\"ok\":false,\"excerpt\":\"{\\\"error\\\":\\\"endpoint not found\\\"}\"},{\"method\":\"GET\",\"path\":\"/api/reports/promotions?from=2026-01-01&to=2026-12-31\",\"status\":404,\"ok\":false,\"excerpt\":\"{\\\"error\\\":\\\"endpoint not found\\\"}\"}]"
+                    },
+                    {
+                      "type": "P1-endpointMap",
+                      "description": "{\"GET /api/promotions\":200,\"GET /api/promotions?active=1\":200,\"POST /api/promotions/validate\":400,\"GET /api/coupons\":404,\"GET /api/discounts\":404,\"GET /api/reports/promotions\":404,\"GET /api/reports/promotions?from=2026-01-01&to=2026-12-31\":404}"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 805,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:58:56.690Z",
+                      "annotations": [
+                        {
+                          "type": "P1-discovery",
+                          "description": "[{\"method\":\"GET\",\"path\":\"/api/promotions\",\"status\":200,\"ok\":true,\"excerpt\":\"{\\\"ok\\\":true,\\\"items\\\":[]}\"},{\"method\":\"GET\",\"path\":\"/api/promotions?active=1\",\"status\":200,\"ok\":true,\"excerpt\":\"{\\\"ok\\\":true,\\\"items\\\":[]}\"},{\"method\":\"POST\",\"path\":\"/api/promotions/validate\",\"status\":400,\"ok\":false,\"excerpt\":\"{\\\"valid\\\":false,\\\"message\\\":\\\"code_required\\\"}\"},{\"method\":\"GET\",\"path\":\"/api/coupons\",\"status\":404,\"ok\":false,\"excerpt\":\"{\\\"error\\\":\\\"endpoint not found\\\"}\"},{\"method\":\"GET\",\"path\":\"/api/discounts\",\"status\":404,\"ok\":false,\"excerpt\":\"{\\\"error\\\":\\\"endpoint not found\\\"}\"},{\"method\":\"GET\",\"path\":\"/api/reports/promotions\",\"status\":404,\"ok\":false,\"excerpt\":\"{\\\"error\\\":\\\"endpoint not found\\\"}\"},{\"method\":\"GET\",\"path\":\"/api/reports/promotions?from=2026-01-01&to=2026-12-31\",\"status\":404,\"ok\":false,\"excerpt\":\"{\\\"error\\\":\\\"endpoint not found\\\"}\"}]"
+                        },
+                        {
+                          "type": "P1-endpointMap",
+                          "description": "{\"GET /api/promotions\":200,\"GET /api/promotions?active=1\":200,\"POST /api/promotions/validate\":400,\"GET /api/coupons\":404,\"GET /api/discounts\":404,\"GET /api/reports/promotions\":404,\"GET /api/reports/promotions?from=2026-01-01&to=2026-12-31\":404}"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a04000c333df7b49770b-9e9fc0f5b61b5ad7b0ee",
+              "file": "r5e-promociones-e2e.spec.js",
+              "line": 167,
+              "column": 3
+            },
+            {
+              "title": "P2: POST /api/promotions creates 10% promo",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "P2-status",
+                      "description": "500"
+                    },
+                    {
+                      "type": "P2-body",
+                      "description": "{\"error\":\"internal\",\"message\":\"Error interno del servidor\",\"request_id\":\"c6b3cbe8-d1aa-4b79-9119-cf7de63224ea\"}"
+                    },
+                    {
+                      "type": "P2-code",
+                      "description": "R5EPCT545856"
+                    },
+                    {
+                      "type": "P2-gap",
+                      "description": "POST /api/promotions returned 500 in production — likely the 'promotions' table does not exist in Supabase yet (no migration was applied for R17). Backend agent must add the table + RLS policies + migration. Body: {\"error\":\"internal\",\"message\":\"Error interno del servidor\",\"request_id\":\"c6b3cbe8-d1aa-4b79-9119-cf7de63224ea\"}"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 147,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:58:58.309Z",
+                      "annotations": [
+                        {
+                          "type": "P2-status",
+                          "description": "500"
+                        },
+                        {
+                          "type": "P2-body",
+                          "description": "{\"error\":\"internal\",\"message\":\"Error interno del servidor\",\"request_id\":\"c6b3cbe8-d1aa-4b79-9119-cf7de63224ea\"}"
+                        },
+                        {
+                          "type": "P2-code",
+                          "description": "R5EPCT545856"
+                        },
+                        {
+                          "type": "P2-gap",
+                          "description": "POST /api/promotions returned 500 in production — likely the 'promotions' table does not exist in Supabase yet (no migration was applied for R17). Backend agent must add the table + RLS policies + migration. Body: {\"error\":\"internal\",\"message\":\"Error interno del servidor\",\"request_id\":\"c6b3cbe8-d1aa-4b79-9119-cf7de63224ea\"}"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a04000c333df7b49770b-e3cc7e3f54df40f89a9b",
+              "file": "r5e-promociones-e2e.spec.js",
+              "line": 198,
+              "column": 3
+            },
+            {
+              "title": "P3: create a coupon code (15% off, max_uses 100, future expiry)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "P3-coupons_status",
+                      "description": "404"
+                    },
+                    {
+                      "type": "P3-coupons_body",
+                      "description": "{\"error\":\"endpoint not found\"}"
+                    },
+                    {
+                      "type": "P3-/api/coupons_exists",
+                      "description": "false"
+                    },
+                    {
+                      "type": "P3-fallback_used",
+                      "description": "/api/promotions"
+                    },
+                    {
+                      "type": "P3-promo_status",
+                      "description": "500"
+                    },
+                    {
+                      "type": "P3-promo_body",
+                      "description": "{\"error\":\"internal\",\"message\":\"Error interno del servidor\",\"request_id\":\"fc7e68de-d77f-41b5-84f0-bf704700c6a0\"}"
+                    },
+                    {
+                      "type": "P3-gap",
+                      "description": "Coupon create returned 500. Same root cause as P2 (table missing). Body: {\"error\":\"internal\",\"message\":\"Error interno del servidor\",\"request_id\":\"fc7e68de-d77f-41b5-84f0-bf704700c6a0\"}"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 232,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:58:58.485Z",
+                      "annotations": [
+                        {
+                          "type": "P3-coupons_status",
+                          "description": "404"
+                        },
+                        {
+                          "type": "P3-coupons_body",
+                          "description": "{\"error\":\"endpoint not found\"}"
+                        },
+                        {
+                          "type": "P3-/api/coupons_exists",
+                          "description": "false"
+                        },
+                        {
+                          "type": "P3-fallback_used",
+                          "description": "/api/promotions"
+                        },
+                        {
+                          "type": "P3-promo_status",
+                          "description": "500"
+                        },
+                        {
+                          "type": "P3-promo_body",
+                          "description": "{\"error\":\"internal\",\"message\":\"Error interno del servidor\",\"request_id\":\"fc7e68de-d77f-41b5-84f0-bf704700c6a0\"}"
+                        },
+                        {
+                          "type": "P3-gap",
+                          "description": "Coupon create returned 500. Same root cause as P2 (table missing). Body: {\"error\":\"internal\",\"message\":\"Error interno del servidor\",\"request_id\":\"fc7e68de-d77f-41b5-84f0-bf704700c6a0\"}"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a04000c333df7b49770b-10ccd957c1f56b834aec",
+              "file": "r5e-promociones-e2e.spec.js",
+              "line": 256,
+              "column": 3
+            },
+            {
+              "title": "P4: applying coupon at checkout discounts total + (where supported) increments usage",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "P4-skip-reason",
+                      "description": "No coupon was created in P3 (backend gap)."
+                    },
+                    {
+                      "type": "skip",
+                      "description": "P3 must have created a coupon — skipping P4 due to backend gap.",
+                      "location": {
+                        "file": "C:\\Users\\DELL\\Downloads\\verion 340\\tests\\r5e-promociones-e2e.spec.js",
+                        "line": 330,
+                        "column": 12
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 4,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:58:58.742Z",
+                      "annotations": [
+                        {
+                          "type": "P4-skip-reason",
+                          "description": "No coupon was created in P3 (backend gap)."
+                        },
+                        {
+                          "type": "skip",
+                          "description": "P3 must have created a coupon — skipping P4 due to backend gap.",
+                          "location": {
+                            "file": "C:\\Users\\DELL\\Downloads\\verion 340\\tests\\r5e-promociones-e2e.spec.js",
+                            "line": 330,
+                            "column": 12
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "a04000c333df7b49770b-972da9acfc7c94dab8df",
+              "file": "r5e-promociones-e2e.spec.js",
+              "line": 323,
+              "column": 3
+            },
+            {
+              "title": "P5: 2x1 (bogo) promo applies ~50% discount on cart of 3",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "P5-create_status",
+                      "description": "500"
+                    },
+                    {
+                      "type": "P5-create_body",
+                      "description": "{\"error\":\"internal\",\"message\":\"Error interno del servidor\",\"request_id\":\"f82b935d-d3e1-47ed-8c19-0e9ef5913a29\"}"
+                    },
+                    {
+                      "type": "P5-gap",
+                      "description": "BOGO create 500 — same root cause as P2 (table missing)."
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 168,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:58:58.774Z",
+                      "annotations": [
+                        {
+                          "type": "P5-create_status",
+                          "description": "500"
+                        },
+                        {
+                          "type": "P5-create_body",
+                          "description": "{\"error\":\"internal\",\"message\":\"Error interno del servidor\",\"request_id\":\"f82b935d-d3e1-47ed-8c19-0e9ef5913a29\"}"
+                        },
+                        {
+                          "type": "P5-gap",
+                          "description": "BOGO create 500 — same root cause as P2 (table missing)."
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a04000c333df7b49770b-754bd219759ef4f9f660",
+              "file": "r5e-promociones-e2e.spec.js",
+              "line": 384,
+              "column": 3
+            },
+            {
+              "title": "P6: validating an expired promo returns valid=false / message=expired",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "P6-create_status",
+                      "description": "500"
+                    },
+                    {
+                      "type": "P6-create_body",
+                      "description": "{\"error\":\"internal\",\"message\":\"Error interno del servidor\",\"request_id\":\"a07b9506-6009-41e4-9e51-e6f1c8d71cf7\"}"
+                    },
+                    {
+                      "type": "P6-gap",
+                      "description": "expired promo create 500 — backend gap."
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 151,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:58:58.969Z",
+                      "annotations": [
+                        {
+                          "type": "P6-create_status",
+                          "description": "500"
+                        },
+                        {
+                          "type": "P6-create_body",
+                          "description": "{\"error\":\"internal\",\"message\":\"Error interno del servidor\",\"request_id\":\"a07b9506-6009-41e4-9e51-e6f1c8d71cf7\"}"
+                        },
+                        {
+                          "type": "P6-gap",
+                          "description": "expired promo create 500 — backend gap."
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a04000c333df7b49770b-b97702a151d908a1992c",
+              "file": "r5e-promociones-e2e.spec.js",
+              "line": 424,
+              "column": 3
+            },
+            {
+              "title": "P7: category-scoped promo accepts category_id at create time",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "P7-create_status",
+                      "description": "500"
+                    },
+                    {
+                      "type": "P7-create_body",
+                      "description": "{\"error\":\"internal\",\"message\":\"Error interno del servidor\",\"request_id\":\"edd6f6a5-072d-4fae-8e40-da819bafe420\"}"
+                    },
+                    {
+                      "type": "P7-gap",
+                      "description": "category promo create 500 — backend gap."
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 138,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:58:59.148Z",
+                      "annotations": [
+                        {
+                          "type": "P7-create_status",
+                          "description": "500"
+                        },
+                        {
+                          "type": "P7-create_body",
+                          "description": "{\"error\":\"internal\",\"message\":\"Error interno del servidor\",\"request_id\":\"edd6f6a5-072d-4fae-8e40-da819bafe420\"}"
+                        },
+                        {
+                          "type": "P7-gap",
+                          "description": "category promo create 500 — backend gap."
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a04000c333df7b49770b-1cff51d8afb8c85a71a1",
+              "file": "r5e-promociones-e2e.spec.js",
+              "line": 466,
+              "column": 3
+            },
+            {
+              "title": "P8: GET /api/reports/promotions returns usage + revenue impact (or honest 404)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "P8-status",
+                      "description": "404"
+                    },
+                    {
+                      "type": "P8-body",
+                      "description": "{\"error\":\"endpoint not found\"}"
+                    },
+                    {
+                      "type": "P8-gap",
+                      "description": "/api/reports/promotions is missing in api/index.js. Backend agent must add a handler that reads /promotion_uses + /promotions and returns: { items: [{ promo_id, code, uses, total_discount, revenue_impact }] }."
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 97,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:58:59.313Z",
+                      "annotations": [
+                        {
+                          "type": "P8-status",
+                          "description": "404"
+                        },
+                        {
+                          "type": "P8-body",
+                          "description": "{\"error\":\"endpoint not found\"}"
+                        },
+                        {
+                          "type": "P8-gap",
+                          "description": "/api/reports/promotions is missing in api/index.js. Backend agent must add a handler that reads /promotion_uses + /promotions and returns: { items: [{ promo_id, code, uses, total_discount, revenue_impact }] }."
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a04000c333df7b49770b-1cf9e67e91d483d47839",
+              "file": "r5e-promociones-e2e.spec.js",
+              "line": 508,
+              "column": 3
+            },
+            {
+              "title": "P9: UI — login + reach a screen that lists promotions",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "P9-status",
+                      "description": "logged_in_but_no_promo_section"
+                    },
+                    {
+                      "type": "P9-evidence",
+                      "description": "{\"url_after_login\":\"https://volvix-pos.vercel.app/login.html\",\"has_promo_in_dom\":false,\"screenshot\":\"C:\\\\Users\\\\DELL\\\\Downloads\\\\verion 340\\\\tests\\\\screenshots-r5e\\\\P9-ui-after-login.png\"}"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 28618,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:58:59.437Z",
+                      "annotations": [
+                        {
+                          "type": "P9-status",
+                          "description": "logged_in_but_no_promo_section"
+                        },
+                        {
+                          "type": "P9-evidence",
+                          "description": "{\"url_after_login\":\"https://volvix-pos.vercel.app/login.html\",\"has_promo_in_dom\":false,\"screenshot\":\"C:\\\\Users\\\\DELL\\\\Downloads\\\\verion 340\\\\tests\\\\screenshots-r5e\\\\P9-ui-after-login.png\"}"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a04000c333df7b49770b-b68e5535a026c9b8c486",
+              "file": "r5e-promociones-e2e.spec.js",
+              "line": 537,
+              "column": 3
+            },
+            {
+              "title": "P10: applying a coupon code through the API path used by the UI",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "P10-skip-reason",
+                      "description": "No coupon was created (P3 backend gap)."
+                    },
+                    {
+                      "type": "skip",
+                      "description": "requires P3 coupon — skipping P10 due to backend gap.",
+                      "location": {
+                        "file": "C:\\Users\\DELL\\Downloads\\verion 340\\tests\\r5e-promociones-e2e.spec.js",
+                        "line": 605,
+                        "column": 12
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 2,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:59:28.620Z",
+                      "annotations": [
+                        {
+                          "type": "P10-skip-reason",
+                          "description": "No coupon was created (P3 backend gap)."
+                        },
+                        {
+                          "type": "skip",
+                          "description": "requires P3 coupon — skipping P10 due to backend gap.",
+                          "location": {
+                            "file": "C:\\Users\\DELL\\Downloads\\verion 340\\tests\\r5e-promociones-e2e.spec.js",
+                            "line": 605,
+                            "column": 12
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "a04000c333df7b49770b-c536f9ec43b0bf7977c6",
+              "file": "r5e-promociones-e2e.spec.js",
+              "line": 598,
+              "column": 3
+            },
+            {
+              "title": "P11: TNT002 cannot see promos that live in TNT001",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "P11-list_status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "P11-items_count",
+                      "description": "0"
+                    },
+                    {
+                      "type": "P11-tenants_in_list",
+                      "description": "[]"
+                    },
+                    {
+                      "type": "P11-cross_status",
+                      "description": "500"
+                    },
+                    {
+                      "type": "P11-cross_body",
+                      "description": "{\"error\":\"internal\",\"message\":\"Error interno del servidor\",\"request_id\":\"4b8b2406-634c-42f4-919a-dfe8b5c7344e\"}"
+                    },
+                    {
+                      "type": "P11-cross_gap",
+                      "description": "cross-tenant test inconclusive — backend 500 (table missing)."
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 312,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:59:28.653Z",
+                      "annotations": [
+                        {
+                          "type": "P11-list_status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "P11-items_count",
+                          "description": "0"
+                        },
+                        {
+                          "type": "P11-tenants_in_list",
+                          "description": "[]"
+                        },
+                        {
+                          "type": "P11-cross_status",
+                          "description": "500"
+                        },
+                        {
+                          "type": "P11-cross_body",
+                          "description": "{\"error\":\"internal\",\"message\":\"Error interno del servidor\",\"request_id\":\"4b8b2406-634c-42f4-919a-dfe8b5c7344e\"}"
+                        },
+                        {
+                          "type": "P11-cross_gap",
+                          "description": "cross-tenant test inconclusive — backend 500 (table missing)."
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a04000c333df7b49770b-cef11a3a89b94f1b38ed",
+              "file": "r5e-promociones-e2e.spec.js",
+              "line": 640,
+              "column": 3
+            },
+            {
+              "title": "SUMMARY: roll up backend persistence + endpoint findings",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "SUM-backendCanPersist",
+                      "description": "false"
+                    },
+                    {
+                      "type": "SUM-backendCanValidate",
+                      "description": "null"
+                    },
+                    {
+                      "type": "SUM-honestNotes",
+                      "description": "[\"POST /api/promotions returned 500 in production — likely the 'promotions' table does not exist in Supabase yet (no migration was applied for R17). Backend agent must add the table + RLS policies + migration. Body: {\\\"error\\\":\\\"internal\\\",\\\"message\\\":\\\"Error interno del servidor\\\",\\\"request_id\\\":\\\"c6b3cbe8-d1aa-4b79-9119-cf7de63224ea\\\"}\",\"Coupon create returned 500. Same root cause as P2 (table missing). Body: {\\\"error\\\":\\\"internal\\\",\\\"message\\\":\\\"Error interno del servidor\\\",\\\"request_id\\\":\\\"fc7e68de-d77f-41b5-84f0-bf704700c6a0\\\"}\",\"P4 could not run end-to-end because P3 did not create a coupon (backend persistence gap).\",\"BOGO promo create returned 500 — backend persistence gap.\",\"P10 skipped because no coupon was created (backend persistence gap from P2/P3).\"]"
+                    },
+                    {
+                      "type": "SUM-endpointMap",
+                      "description": "{\"GET /api/promotions\":200,\"GET /api/promotions?active=1\":200,\"POST /api/promotions/validate\":400,\"GET /api/coupons\":404,\"GET /api/discounts\":404,\"GET /api/reports/promotions\":404,\"GET /api/reports/promotions?from=2026-01-01&to=2026-12-31\":404}"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:59:28.994Z",
+                      "annotations": [
+                        {
+                          "type": "SUM-backendCanPersist",
+                          "description": "false"
+                        },
+                        {
+                          "type": "SUM-backendCanValidate",
+                          "description": "null"
+                        },
+                        {
+                          "type": "SUM-honestNotes",
+                          "description": "[\"POST /api/promotions returned 500 in production — likely the 'promotions' table does not exist in Supabase yet (no migration was applied for R17). Backend agent must add the table + RLS policies + migration. Body: {\\\"error\\\":\\\"internal\\\",\\\"message\\\":\\\"Error interno del servidor\\\",\\\"request_id\\\":\\\"c6b3cbe8-d1aa-4b79-9119-cf7de63224ea\\\"}\",\"Coupon create returned 500. Same root cause as P2 (table missing). Body: {\\\"error\\\":\\\"internal\\\",\\\"message\\\":\\\"Error interno del servidor\\\",\\\"request_id\\\":\\\"fc7e68de-d77f-41b5-84f0-bf704700c6a0\\\"}\",\"P4 could not run end-to-end because P3 did not create a coupon (backend persistence gap).\",\"BOGO promo create returned 500 — backend persistence gap.\",\"P10 skipped because no coupon was created (backend persistence gap from P2/P3).\"]"
+                        },
+                        {
+                          "type": "SUM-endpointMap",
+                          "description": "{\"GET /api/promotions\":200,\"GET /api/promotions?active=1\":200,\"POST /api/promotions/validate\":400,\"GET /api/coupons\":404,\"GET /api/discounts\":404,\"GET /api/reports/promotions\":404,\"GET /api/reports/promotions?from=2026-01-01&to=2026-12-31\":404}"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a04000c333df7b49770b-51ea80c85a10bf7d0356",
+              "file": "r5e-promociones-e2e.spec.js",
+              "line": 683,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-04-28T03:55:11.322Z",
+    "duration": 260383.06,
+    "expected": 10,
+    "skipped": 2,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

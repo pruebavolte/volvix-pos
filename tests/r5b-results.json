@@ -1,0 +1,825 @@
+{
+  "config": {
+    "configFile": "C:\\Users\\DELL\\Downloads\\verion 340\\tests\\playwright.r5b.config.js",
+    "rootDir": "C:/Users/DELL/Downloads/verion 340/tests",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/DELL/Downloads/verion 340/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "C:/Users/DELL/Downloads/verion 340/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/r5b-devoluciones-e2e\\.spec\\.js/"
+        ],
+        "timeout": 180000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.59.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "r5b-devoluciones-e2e.spec.js",
+      "file": "r5b-devoluciones-e2e.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "R5B Devoluciones E2E",
+          "file": "r5b-devoluciones-e2e.spec.js",
+          "line": 161,
+          "column": 6,
+          "specs": [
+            {
+              "title": "D1: Discover refund endpoint (200/401/4xx but not 404)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "D1-probe",
+                      "description": "[{\"method\":\"POST\",\"path\":\"/api/returns\",\"status\":200,\"body_excerpt\":\"{\\\"ok\\\":true,\\\"id\\\":\\\"778dc64a-e21a-4fff-8df5-1b2c008f13c5\\\",\\\"created_at\\\":\\\"2026-04-28T04:05:35.165Z\\\"}\"},{\"method\":\"POST\",\"path\":\"/api/refunds\",\"status\":404,\"body_excerpt\":\"{\\\"error\\\":\\\"endpoint not found\\\"}\"},{\"method\":\"POST\",\"path\":\"/api/devoluciones\",\"status\":404,\"body_excerpt\":\"{\\\"error\\\":\\\"endpoint not found\\\"}\"}]"
+                    },
+                    {
+                      "type": "D1-resolved",
+                      "description": "{\"method\":\"POST\",\"path\":\"/api/returns\"}"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 279,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:05:26.561Z",
+                      "annotations": [
+                        {
+                          "type": "D1-probe",
+                          "description": "[{\"method\":\"POST\",\"path\":\"/api/returns\",\"status\":200,\"body_excerpt\":\"{\\\"ok\\\":true,\\\"id\\\":\\\"778dc64a-e21a-4fff-8df5-1b2c008f13c5\\\",\\\"created_at\\\":\\\"2026-04-28T04:05:35.165Z\\\"}\"},{\"method\":\"POST\",\"path\":\"/api/refunds\",\"status\":404,\"body_excerpt\":\"{\\\"error\\\":\\\"endpoint not found\\\"}\"},{\"method\":\"POST\",\"path\":\"/api/devoluciones\",\"status\":404,\"body_excerpt\":\"{\\\"error\\\":\\\"endpoint not found\\\"}\"}]"
+                        },
+                        {
+                          "type": "D1-resolved",
+                          "description": "{\"method\":\"POST\",\"path\":\"/api/returns\"}"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e144d85349cc3cc7ea42-34057140e0edd51d1165",
+              "file": "r5b-devoluciones-e2e.spec.js",
+              "line": 190,
+              "column": 3
+            },
+            {
+              "title": "D2: POST /api/sales creates a sale we can refund (2 items, total 100)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "D2-status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "D2-body",
+                      "description": "{\"id\":\"5b710379-fe8c-4f71-996b-1a0edb3be6d4\",\"pos_user_id\":\"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1\",\"total\":100,\"payment_method\":\"efectivo\",\"items\":[{\"qty\":2,\"name\":\"r5b-item-A\",\"price\":20},{\"qty\":1,\"name\":\"r5b-item-B\",\"price\":60}],\"created_at\":\"2026-04-28T04:05:35.57028+00:00\",\"fraud_review\":false,\"fraud_score\":null,\"tip_amount\":0,\"tip_assigned_to\":null,\"tip_split\":null,\"currency_code\":\"MXN\",\"fx_rate_to_base\":1,\"version\":1,\"change\":0}"
+                    },
+                    {
+                      "type": "D2-sale_id",
+                      "description": "5b710379-fe8c-4f71-996b-1a0edb3be6d4"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 263,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:05:27.952Z",
+                      "annotations": [
+                        {
+                          "type": "D2-status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "D2-body",
+                          "description": "{\"id\":\"5b710379-fe8c-4f71-996b-1a0edb3be6d4\",\"pos_user_id\":\"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1\",\"total\":100,\"payment_method\":\"efectivo\",\"items\":[{\"qty\":2,\"name\":\"r5b-item-A\",\"price\":20},{\"qty\":1,\"name\":\"r5b-item-B\",\"price\":60}],\"created_at\":\"2026-04-28T04:05:35.57028+00:00\",\"fraud_review\":false,\"fraud_score\":null,\"tip_amount\":0,\"tip_assigned_to\":null,\"tip_split\":null,\"currency_code\":\"MXN\",\"fx_rate_to_base\":1,\"version\":1,\"change\":0}"
+                        },
+                        {
+                          "type": "D2-sale_id",
+                          "description": "5b710379-fe8c-4f71-996b-1a0edb3be6d4"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e144d85349cc3cc7ea42-0ee2696522a08b18b374",
+              "file": "r5b-devoluciones-e2e.spec.js",
+              "line": 213,
+              "column": 3
+            },
+            {
+              "title": "D3: Full refund — POST /api/returns sets refund row + (where supported) sale.refunded_at",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "D3-status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "D3-body",
+                      "description": "{\"ok\":true,\"id\":\"e92ad6cf-de7a-4835-a639-5a88a3b54eae\",\"created_at\":\"2026-04-28T04:05:35.784Z\"}"
+                    },
+                    {
+                      "type": "D3-list_status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "D3-found_in_list",
+                      "description": "false"
+                    },
+                    {
+                      "type": "D3-list_count",
+                      "description": "0"
+                    },
+                    {
+                      "type": "D3-FINDING",
+                      "description": "Refund POST returned id but list returns 0 rows — backend uses in-memory fallback (pos_returns table missing)"
+                    },
+                    {
+                      "type": "D3-sale_status",
+                      "description": "404"
+                    },
+                    {
+                      "type": "D3-sale_body",
+                      "description": "{\"error\":\"endpoint not found\"}"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 319,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:05:28.239Z",
+                      "annotations": [
+                        {
+                          "type": "D3-status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "D3-body",
+                          "description": "{\"ok\":true,\"id\":\"e92ad6cf-de7a-4835-a639-5a88a3b54eae\",\"created_at\":\"2026-04-28T04:05:35.784Z\"}"
+                        },
+                        {
+                          "type": "D3-list_status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "D3-found_in_list",
+                          "description": "false"
+                        },
+                        {
+                          "type": "D3-list_count",
+                          "description": "0"
+                        },
+                        {
+                          "type": "D3-FINDING",
+                          "description": "Refund POST returned id but list returns 0 rows — backend uses in-memory fallback (pos_returns table missing)"
+                        },
+                        {
+                          "type": "D3-sale_status",
+                          "description": "404"
+                        },
+                        {
+                          "type": "D3-sale_body",
+                          "description": "{\"error\":\"endpoint not found\"}"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e144d85349cc3cc7ea42-3f57ff80bf0d1f0de09e",
+              "file": "r5b-devoluciones-e2e.spec.js",
+              "line": 245,
+              "column": 3
+            },
+            {
+              "title": "D4: Partial refund — sale of 5 items, refund only 2; verify partial accounting",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "D4-sale_status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "D4-sale_body",
+                      "description": "{\"id\":\"b7b60eee-1819-48e0-8e45-e9a4eff03141\",\"pos_user_id\":\"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1\",\"total\":50,\"payment_method\":\"efectivo\",\"items\":[{\"qty\":5,\"name\":\"r5b-part-A\",\"price\":10}],\"created_at\":\"2026-04-28T04:05:36.208939+00:00\",\"fraud_review\":false,\"fraud_score\":null,\"tip_amount\":0,\"tip_assigned_to\":null,\"tip_split\":null,\"currency_code\":\"MXN\",\"fx_rate_to_base\":1,\"version\":1,\"change\":0}"
+                    },
+                    {
+                      "type": "D4-refund_status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "D4-refund_body",
+                      "description": "{\"ok\":true,\"id\":\"40b6bbbe-784f-4dfd-8310-e64973a72af1\",\"created_at\":\"2026-04-28T04:05:36.357Z\"}"
+                    },
+                    {
+                      "type": "D4-FINDING",
+                      "description": "Partial refund POST returned id but list returns 0 rows — in-memory fallback"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 442,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:05:28.588Z",
+                      "annotations": [
+                        {
+                          "type": "D4-sale_status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "D4-sale_body",
+                          "description": "{\"id\":\"b7b60eee-1819-48e0-8e45-e9a4eff03141\",\"pos_user_id\":\"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1\",\"total\":50,\"payment_method\":\"efectivo\",\"items\":[{\"qty\":5,\"name\":\"r5b-part-A\",\"price\":10}],\"created_at\":\"2026-04-28T04:05:36.208939+00:00\",\"fraud_review\":false,\"fraud_score\":null,\"tip_amount\":0,\"tip_assigned_to\":null,\"tip_split\":null,\"currency_code\":\"MXN\",\"fx_rate_to_base\":1,\"version\":1,\"change\":0}"
+                        },
+                        {
+                          "type": "D4-refund_status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "D4-refund_body",
+                          "description": "{\"ok\":true,\"id\":\"40b6bbbe-784f-4dfd-8310-e64973a72af1\",\"created_at\":\"2026-04-28T04:05:36.357Z\"}"
+                        },
+                        {
+                          "type": "D4-FINDING",
+                          "description": "Partial refund POST returned id but list returns 0 rows — in-memory fallback"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e144d85349cc3cc7ea42-589732bc4e445cb797c4",
+              "file": "r5b-devoluciones-e2e.spec.js",
+              "line": 310,
+              "column": 3
+            },
+            {
+              "title": "D5: Validation — qty>sold→400, double-refund→409 or repeat-pending, cross-tenant→404",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "D5a-status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "D5a-body",
+                      "description": "{\"ok\":true,\"id\":\"06b9ba9a-024d-4c0a-a6cf-0005f84fa49a\",\"created_at\":\"2026-04-28T04:05:36.629Z\"}"
+                    },
+                    {
+                      "type": "D5a-FINDING",
+                      "description": "BACKEND ACCEPTED qty>sold WITH 200 — validation gap or product_id mismatch"
+                    },
+                    {
+                      "type": "D5b-status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "D5b-body",
+                      "description": "{\"ok\":true,\"id\":\"2a82beca-06d6-4d32-8d69-2cfb37297964\",\"created_at\":\"2026-04-28T04:05:36.844Z\"}"
+                    },
+                    {
+                      "type": "D5b-FINDING",
+                      "description": "BACKEND ACCEPTED nonexistent item — validation gap"
+                    },
+                    {
+                      "type": "D5c-status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "D5c-body",
+                      "description": "{\"ok\":true,\"id\":\"dab3209c-9101-4e7f-ba07-b5b490ea00d3\",\"created_at\":\"2026-04-28T04:05:36.945Z\"}"
+                    },
+                    {
+                      "type": "D5c-FINDING",
+                      "description": "BACKEND ACCEPTED missing sale_id with 200 — validation gap"
+                    },
+                    {
+                      "type": "D5d-status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "D5d-body",
+                      "description": "{\"ok\":true,\"id\":\"02952076-a100-4fb7-ab4d-e8b20cfaba4f\",\"created_at\":\"2026-04-28T04:05:37.049Z\"}"
+                    },
+                    {
+                      "type": "D5d-FINDING",
+                      "description": "TNT002 token returned 200 for TNT001 sale_id — likely in-memory fallback (no DB write); investigate via D10"
+                    },
+                    {
+                      "type": "D5d-result",
+                      "description": "{\"status\":200,\"body_excerpt\":\"{\\\"ok\\\":true,\\\"id\\\":\\\"02952076-a100-4fb7-ab4d-e8b20cfaba4f\\\",\\\"created_at\\\":\\\"2026-04-28T04:05:37.049Z\\\"}\"}"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 524,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:05:29.060Z",
+                      "annotations": [
+                        {
+                          "type": "D5a-status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "D5a-body",
+                          "description": "{\"ok\":true,\"id\":\"06b9ba9a-024d-4c0a-a6cf-0005f84fa49a\",\"created_at\":\"2026-04-28T04:05:36.629Z\"}"
+                        },
+                        {
+                          "type": "D5a-FINDING",
+                          "description": "BACKEND ACCEPTED qty>sold WITH 200 — validation gap or product_id mismatch"
+                        },
+                        {
+                          "type": "D5b-status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "D5b-body",
+                          "description": "{\"ok\":true,\"id\":\"2a82beca-06d6-4d32-8d69-2cfb37297964\",\"created_at\":\"2026-04-28T04:05:36.844Z\"}"
+                        },
+                        {
+                          "type": "D5b-FINDING",
+                          "description": "BACKEND ACCEPTED nonexistent item — validation gap"
+                        },
+                        {
+                          "type": "D5c-status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "D5c-body",
+                          "description": "{\"ok\":true,\"id\":\"dab3209c-9101-4e7f-ba07-b5b490ea00d3\",\"created_at\":\"2026-04-28T04:05:36.945Z\"}"
+                        },
+                        {
+                          "type": "D5c-FINDING",
+                          "description": "BACKEND ACCEPTED missing sale_id with 200 — validation gap"
+                        },
+                        {
+                          "type": "D5d-status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "D5d-body",
+                          "description": "{\"ok\":true,\"id\":\"02952076-a100-4fb7-ab4d-e8b20cfaba4f\",\"created_at\":\"2026-04-28T04:05:37.049Z\"}"
+                        },
+                        {
+                          "type": "D5d-FINDING",
+                          "description": "TNT002 token returned 200 for TNT001 sale_id — likely in-memory fallback (no DB write); investigate via D10"
+                        },
+                        {
+                          "type": "D5d-result",
+                          "description": "{\"status\":200,\"body_excerpt\":\"{\\\"ok\\\":true,\\\"id\\\":\\\"02952076-a100-4fb7-ab4d-e8b20cfaba4f\\\",\\\"created_at\\\":\\\"2026-04-28T04:05:37.049Z\\\"}\"}"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e144d85349cc3cc7ea42-6417d1fc5e223a39e634",
+              "file": "r5b-devoluciones-e2e.spec.js",
+              "line": 375,
+              "column": 3
+            },
+            {
+              "title": "D6: GET refunds report with from/to — verify each row has sale_id, qty, total, reason",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "D6-probe",
+                      "description": "[{\"path\":\"/api/reports/devoluciones?from=2024-01-01&to=2026-04-28\",\"status\":404,\"type\":\"object\"},{\"path\":\"/api/reports/returns?from=2024-01-01&to=2026-04-28\",\"status\":404,\"type\":\"object\"},{\"path\":\"/api/reports/refunds?from=2024-01-01&to=2026-04-28\",\"status\":404,\"type\":\"object\"},{\"path\":\"/api/returns/stats?from=2024-01-01&to=2026-04-28\",\"status\":500,\"type\":\"object\"}]"
+                    },
+                    {
+                      "type": "D6-resolved",
+                      "description": "NONE"
+                    },
+                    {
+                      "type": "D6-FINDING",
+                      "description": "NO REPORT ENDPOINT RESPONDED 200 — /api/returns/stats may 500 in prod, /api/reports/devoluciones not implemented"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 471,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:05:29.650Z",
+                      "annotations": [
+                        {
+                          "type": "D6-probe",
+                          "description": "[{\"path\":\"/api/reports/devoluciones?from=2024-01-01&to=2026-04-28\",\"status\":404,\"type\":\"object\"},{\"path\":\"/api/reports/returns?from=2024-01-01&to=2026-04-28\",\"status\":404,\"type\":\"object\"},{\"path\":\"/api/reports/refunds?from=2024-01-01&to=2026-04-28\",\"status\":404,\"type\":\"object\"},{\"path\":\"/api/returns/stats?from=2024-01-01&to=2026-04-28\",\"status\":500,\"type\":\"object\"}]"
+                        },
+                        {
+                          "type": "D6-resolved",
+                          "description": "NONE"
+                        },
+                        {
+                          "type": "D6-FINDING",
+                          "description": "NO REPORT ENDPOINT RESPONDED 200 — /api/returns/stats may 500 in prod, /api/reports/devoluciones not implemented"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e144d85349cc3cc7ea42-6ed8e26867634af59ca0",
+              "file": "r5b-devoluciones-e2e.spec.js",
+              "line": 446,
+              "column": 3
+            },
+            {
+              "title": "D7: ESC/POS receipt for refund — POST /api/printer/raw audit-only",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "D7-status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "D7-body",
+                      "description": "{\"ok\":true,\"audit_only\":true,\"message\":\"Recibido. La impresion debe ejecutarse en el cliente local (Volvix Print Bridge en 127.0.0.1:9101). Este endpoint NO reenvia a internet.\",\"ip\":\"192.168.1.50\",\"port\":9100,\"bytes\":240}"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 159,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:05:30.153Z",
+                      "annotations": [
+                        {
+                          "type": "D7-status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "D7-body",
+                          "description": "{\"ok\":true,\"audit_only\":true,\"message\":\"Recibido. La impresion debe ejecutarse en el cliente local (Volvix Print Bridge en 127.0.0.1:9101). Este endpoint NO reenvia a internet.\",\"ip\":\"192.168.1.50\",\"port\":9100,\"bytes\":240}"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e144d85349cc3cc7ea42-e1eae64000a047243a3d",
+              "file": "r5b-devoluciones-e2e.spec.js",
+              "line": 497,
+              "column": 3
+            },
+            {
+              "title": "D8: UI flow — login + navigate /salvadorex_web_v25.html + Devoluciones menu visible",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "D8-has_devoluciones_menu",
+                      "description": "true"
+                    },
+                    {
+                      "type": "D8-screenshot",
+                      "description": "C:\\Users\\DELL\\Downloads\\verion 340\\tests\\screenshots\\r5b-d8-devoluciones.png"
+                    },
+                    {
+                      "type": "D8-clicked",
+                      "description": "false"
+                    },
+                    {
+                      "type": "D8-screen_visible",
+                      "description": "false"
+                    },
+                    {
+                      "type": "D8-pageError",
+                      "description": "none"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 14898,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:05:30.340Z",
+                      "annotations": [
+                        {
+                          "type": "D8-has_devoluciones_menu",
+                          "description": "true"
+                        },
+                        {
+                          "type": "D8-screenshot",
+                          "description": "C:\\Users\\DELL\\Downloads\\verion 340\\tests\\screenshots\\r5b-d8-devoluciones.png"
+                        },
+                        {
+                          "type": "D8-clicked",
+                          "description": "false"
+                        },
+                        {
+                          "type": "D8-screen_visible",
+                          "description": "false"
+                        },
+                        {
+                          "type": "D8-pageError",
+                          "description": "none"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e144d85349cc3cc7ea42-570b574437f13f0ca704",
+              "file": "r5b-devoluciones-e2e.spec.js",
+              "line": 536,
+              "column": 3
+            },
+            {
+              "title": "D9: Cancellation — try to reject a fresh refund within window",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "D9-probe",
+                      "description": "[{\"path\":\"/api/returns/40b6bbbe-784f-4dfd-8310-e64973a72af1/reject\",\"method\":\"POST\",\"status\":500,\"body_excerpt\":\"{\\\"error\\\":\\\"internal\\\",\\\"message\\\":\\\"Error interno del servidor\\\",\\\"request_id\\\":\\\"023ec5b4-29c2-459a-8305-f2f77b4693bf\\\"}\"},{\"path\":\"/api/returns/40b6bbbe-784f-4dfd-8310-e64973a72af1/cancel\",\"method\":\"POST\",\"status\":404,\"body_excerpt\":\"{\\\"error\\\":\\\"endpoint not found\\\"}\"},{\"path\":\"/api/returns/40b6bbbe-784f-4dfd-8310-e64973a72af1\",\"method\":\"DELETE\",\"status\":404,\"body_excerpt\":\"{\\\"error\\\":\\\"endpoint not found\\\"}\"}]"
+                    },
+                    {
+                      "type": "D9-resolved",
+                      "description": "NONE"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 352,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:05:45.752Z",
+                      "annotations": [
+                        {
+                          "type": "D9-probe",
+                          "description": "[{\"path\":\"/api/returns/40b6bbbe-784f-4dfd-8310-e64973a72af1/reject\",\"method\":\"POST\",\"status\":500,\"body_excerpt\":\"{\\\"error\\\":\\\"internal\\\",\\\"message\\\":\\\"Error interno del servidor\\\",\\\"request_id\\\":\\\"023ec5b4-29c2-459a-8305-f2f77b4693bf\\\"}\"},{\"path\":\"/api/returns/40b6bbbe-784f-4dfd-8310-e64973a72af1/cancel\",\"method\":\"POST\",\"status\":404,\"body_excerpt\":\"{\\\"error\\\":\\\"endpoint not found\\\"}\"},{\"path\":\"/api/returns/40b6bbbe-784f-4dfd-8310-e64973a72af1\",\"method\":\"DELETE\",\"status\":404,\"body_excerpt\":\"{\\\"error\\\":\\\"endpoint not found\\\"}\"}]"
+                        },
+                        {
+                          "type": "D9-resolved",
+                          "description": "NONE"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e144d85349cc3cc7ea42-725a4e19d82311c30af0",
+              "file": "r5b-devoluciones-e2e.spec.js",
+              "line": 610,
+              "column": 3
+            },
+            {
+              "title": "D10: TNT002 owner cannot list TNT001 refunds",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "D10-status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "D10-body_excerpt",
+                      "description": "{\"ok\":true,\"items\":[],\"total\":0}"
+                    },
+                    {
+                      "type": "D10-tnt002_count",
+                      "description": "0"
+                    },
+                    {
+                      "type": "D10-direct_status",
+                      "description": "404"
+                    },
+                    {
+                      "type": "D10-direct_body",
+                      "description": "{\"error\":\"endpoint not found\"}"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 187,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:05:46.133Z",
+                      "annotations": [
+                        {
+                          "type": "D10-status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "D10-body_excerpt",
+                          "description": "{\"ok\":true,\"items\":[],\"total\":0}"
+                        },
+                        {
+                          "type": "D10-tnt002_count",
+                          "description": "0"
+                        },
+                        {
+                          "type": "D10-direct_status",
+                          "description": "404"
+                        },
+                        {
+                          "type": "D10-direct_body",
+                          "description": "{\"error\":\"endpoint not found\"}"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e144d85349cc3cc7ea42-59bae1004b666ff87a6a",
+              "file": "r5b-devoluciones-e2e.spec.js",
+              "line": 655,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-04-28T04:01:29.191Z",
+    "duration": 258065.249,
+    "expected": 10,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

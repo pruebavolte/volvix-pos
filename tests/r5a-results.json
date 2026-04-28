@@ -1,0 +1,903 @@
+{
+  "config": {
+    "configFile": "C:\\Users\\DELL\\Downloads\\verion 340\\tests\\playwright.r5a.config.js",
+    "rootDir": "C:/Users/DELL/Downloads/verion 340/tests",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/DELL/Downloads/verion 340/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "C:/Users/DELL/Downloads/verion 340/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/r5a-etiquetas-e2e\\.spec\\.js/"
+        ],
+        "timeout": 180000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "C:\\Users\\DELL\\Downloads\\verion 340\\tests\\r5a-results.json"
+        }
+      ],
+      [
+        "html",
+        {
+          "open": "never",
+          "outputFolder": "C:\\Users\\DELL\\Downloads\\verion 340\\tests\\r5a-report"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.59.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "r5a-etiquetas-e2e.spec.js",
+      "file": "r5a-etiquetas-e2e.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "R5A Etiqueta Designer E2E",
+          "file": "r5a-etiquetas-e2e.spec.js",
+          "line": 141,
+          "column": 6,
+          "specs": [
+            {
+              "title": "E1: auth-gate redirects to /login when no JWT, OK when authenticated",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "E1-url_no_auth",
+                      "description": "https://volvix-pos.vercel.app/login.html?expired=0&redirect=%2Fetiqueta_designer.html"
+                    },
+                    {
+                      "type": "E1-url_auth",
+                      "description": "https://volvix-pos.vercel.app/etiqueta_designer.html"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4686,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:50:51.337Z",
+                      "annotations": [
+                        {
+                          "type": "E1-url_no_auth",
+                          "description": "https://volvix-pos.vercel.app/login.html?expired=0&redirect=%2Fetiqueta_designer.html"
+                        },
+                        {
+                          "type": "E1-url_auth",
+                          "description": "https://volvix-pos.vercel.app/etiqueta_designer.html"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "007b7f11486f3cfb0b50-3e563139569486340b06",
+              "file": "r5a-etiquetas-e2e.spec.js",
+              "line": 177,
+              "column": 3
+            },
+            {
+              "title": "E2: GET /api/label-templates list returns {ok:true, templates:[...]}",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "E2-status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "E2-shape",
+                      "description": "[\"ok\",\"templates\",\"count\"]"
+                    },
+                    {
+                      "type": "E2-count",
+                      "description": "1"
+                    },
+                    {
+                      "type": "E2-sample",
+                      "description": "[{\"id\":\"24da6665-4510-4b5b-89b7-ef7f3b704fc4\",\"name\":\"FIX TEST\",\"notes\":null,\"elements\":[],\"canvas_w\":300,\"canvas_h\":200,\"paper_size\":null,\"printer_target\":null,\"created_at\":\"2026-04-28T02:54:05.274533+00:00\",\"updated_at\":\"2026-04-28T02:54:05.274533+00:00\",\"user_id\":\"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1\"}]"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 152,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:50:57.028Z",
+                      "annotations": [
+                        {
+                          "type": "E2-status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "E2-shape",
+                          "description": "[\"ok\",\"templates\",\"count\"]"
+                        },
+                        {
+                          "type": "E2-count",
+                          "description": "1"
+                        },
+                        {
+                          "type": "E2-sample",
+                          "description": "[{\"id\":\"24da6665-4510-4b5b-89b7-ef7f3b704fc4\",\"name\":\"FIX TEST\",\"notes\":null,\"elements\":[],\"canvas_w\":300,\"canvas_h\":200,\"paper_size\":null,\"printer_target\":null,\"created_at\":\"2026-04-28T02:54:05.274533+00:00\",\"updated_at\":\"2026-04-28T02:54:05.274533+00:00\",\"user_id\":\"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1\"}]"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "007b7f11486f3cfb0b50-7f473c602f1bf646e472",
+              "file": "r5a-etiquetas-e2e.spec.js",
+              "line": 239,
+              "column": 3
+            },
+            {
+              "title": "E3: POST /api/label-templates creates a template (201 + id)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "E3-idem",
+                      "description": "E3-create-1777348257242-57cb4205"
+                    },
+                    {
+                      "type": "E3-status",
+                      "description": "201"
+                    },
+                    {
+                      "type": "E3-body",
+                      "description": "{\"ok\":true,\"template\":{\"id\":\"bb66778f-da7c-4a7a-be08-d13fe31ad45c\",\"tenant_id\":\"TNT001\",\"user_id\":\"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1\",\"name\":\"[r5a-E3] template-1777348257242\",\"notes\":\"Created by r5a E3\",\"elements\":[{\"h\":24,\"w\":180,\"x\":20,\"y\":15,\"bold\":true,\"text\":\"Producto E2E\",\"type\":\"name\",\"fontSize\":14},{\"h\":32,\"w\":100,\"x\":20,\"y\":50,\"bold\":true,\"text\":\"$25.00\",\"type\":\"price\",\"color\":\"#EA580C\",\"fontSize\":22},{\"h\":14,\"w\":120,\"x\":20,\"y\":90,\"text\":\"SKU-R5A-1\",\"type\":\"sku\",\"fontSize\":10}],\"canvas_w\":300,\"canvas_h\":180,\"paper_size\":\"Pequeña\",\"printer_target\":\"thermal\",\"created_at\":\"2026-04-28T03:51:04.819573+00:00\",\"updated_at\":\"2026-04-28T03:51:04.819573+00:00\",\"deleted_at\":null}}"
+                    },
+                    {
+                      "type": "E3-template_id",
+                      "description": "bb66778f-da7c-4a7a-be08-d13fe31ad45c"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 195,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:50:57.213Z",
+                      "annotations": [
+                        {
+                          "type": "E3-idem",
+                          "description": "E3-create-1777348257242-57cb4205"
+                        },
+                        {
+                          "type": "E3-status",
+                          "description": "201"
+                        },
+                        {
+                          "type": "E3-body",
+                          "description": "{\"ok\":true,\"template\":{\"id\":\"bb66778f-da7c-4a7a-be08-d13fe31ad45c\",\"tenant_id\":\"TNT001\",\"user_id\":\"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1\",\"name\":\"[r5a-E3] template-1777348257242\",\"notes\":\"Created by r5a E3\",\"elements\":[{\"h\":24,\"w\":180,\"x\":20,\"y\":15,\"bold\":true,\"text\":\"Producto E2E\",\"type\":\"name\",\"fontSize\":14},{\"h\":32,\"w\":100,\"x\":20,\"y\":50,\"bold\":true,\"text\":\"$25.00\",\"type\":\"price\",\"color\":\"#EA580C\",\"fontSize\":22},{\"h\":14,\"w\":120,\"x\":20,\"y\":90,\"text\":\"SKU-R5A-1\",\"type\":\"sku\",\"fontSize\":10}],\"canvas_w\":300,\"canvas_h\":180,\"paper_size\":\"Pequeña\",\"printer_target\":\"thermal\",\"created_at\":\"2026-04-28T03:51:04.819573+00:00\",\"updated_at\":\"2026-04-28T03:51:04.819573+00:00\",\"deleted_at\":null}}"
+                        },
+                        {
+                          "type": "E3-template_id",
+                          "description": "bb66778f-da7c-4a7a-be08-d13fe31ad45c"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "007b7f11486f3cfb0b50-2307325fe1c0c1872489",
+              "file": "r5a-etiquetas-e2e.spec.js",
+              "line": 257,
+              "column": 3
+            },
+            {
+              "title": "E4: GET /api/label-templates/:id returns the template with elements intact",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "E4-status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "E4-body",
+                      "description": "{\"ok\":true,\"template\":{\"id\":\"bb66778f-da7c-4a7a-be08-d13fe31ad45c\",\"tenant_id\":\"TNT001\",\"user_id\":\"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1\",\"name\":\"[r5a-E3] template-1777348257242\",\"notes\":\"Created by r5a E3\",\"elements\":[{\"h\":24,\"w\":180,\"x\":20,\"y\":15,\"bold\":true,\"text\":\"Producto E2E\",\"type\":\"name\",\"fontSize\":14},{\"h\":32,\"w\":100,\"x\":20,\"y\":50,\"bold\":true,\"text\":\"$25.00\",\"type\":\"price\",\"color\":\"#EA580C\",\"fontSize\":22},{\"h\":14,\"w\":120,\"x\":20,\"y\":90,\"text\":\"SKU-R5A-1\",\"type\":\"sku\",\"fontSize\":10}],\"canvas_w\":300,\"canvas_h\":180,\"paper_size\":\"Pequeña\",\"printer_target\":\"thermal\",\"created_at\":\"2026-04-28T03:51:04.819573+00:00\",\"updated_at\":\"2026-04-28T03:51:04.819573+00:00\",\"deleted_at\":null}}"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 168,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:50:57.452Z",
+                      "annotations": [
+                        {
+                          "type": "E4-status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "E4-body",
+                          "description": "{\"ok\":true,\"template\":{\"id\":\"bb66778f-da7c-4a7a-be08-d13fe31ad45c\",\"tenant_id\":\"TNT001\",\"user_id\":\"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1\",\"name\":\"[r5a-E3] template-1777348257242\",\"notes\":\"Created by r5a E3\",\"elements\":[{\"h\":24,\"w\":180,\"x\":20,\"y\":15,\"bold\":true,\"text\":\"Producto E2E\",\"type\":\"name\",\"fontSize\":14},{\"h\":32,\"w\":100,\"x\":20,\"y\":50,\"bold\":true,\"text\":\"$25.00\",\"type\":\"price\",\"color\":\"#EA580C\",\"fontSize\":22},{\"h\":14,\"w\":120,\"x\":20,\"y\":90,\"text\":\"SKU-R5A-1\",\"type\":\"sku\",\"fontSize\":10}],\"canvas_w\":300,\"canvas_h\":180,\"paper_size\":\"Pequeña\",\"printer_target\":\"thermal\",\"created_at\":\"2026-04-28T03:51:04.819573+00:00\",\"updated_at\":\"2026-04-28T03:51:04.819573+00:00\",\"deleted_at\":null}}"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "007b7f11486f3cfb0b50-6b398b7f65177b424277",
+              "file": "r5a-etiquetas-e2e.spec.js",
+              "line": 289,
+              "column": 3
+            },
+            {
+              "title": "E5: PATCH /api/label-templates/:id updates name and elements",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "E5-idem",
+                      "description": "E5-patch-1777348257696-aee92564"
+                    },
+                    {
+                      "type": "E5-status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "E5-body",
+                      "description": "{\"ok\":true,\"template\":{\"id\":\"bb66778f-da7c-4a7a-be08-d13fe31ad45c\",\"tenant_id\":\"TNT001\",\"user_id\":\"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1\",\"name\":\"[r5a-E5] renamed-1777348257696\",\"notes\":\"Created by r5a E3\",\"elements\":[{\"h\":24,\"w\":180,\"x\":20,\"y\":15,\"bold\":true,\"text\":\"Producto E2E\",\"type\":\"name\",\"fontSize\":14},{\"h\":32,\"w\":100,\"x\":20,\"y\":50,\"bold\":true,\"text\":\"$25.00\",\"type\":\"price\",\"color\":\"#EA580C\",\"fontSize\":22},{\"h\":14,\"w\":120,\"x\":20,\"y\":90,\"text\":\"SKU-R5A-1\",\"type\":\"sku\",\"fontSize\":10},{\"h\":60,\"w\":60,\"x\":200,\"y\":90,\"type\":\"qr\",\"value\":\"https://volvix.test/p/r5a-e5\"}],\"canvas_w\":300,\"canvas_h\":180,\"paper_size\":\"Pequeña\",\"printer_target\":\"thermal\",\"created_at\":\"2026-04-28T03:51:04.819573+00:00\",\"updated_at\":\"2026-04-28T03:51:05.282602+00:00\",\"deleted_at\":null}}"
+                    },
+                    {
+                      "type": "E5-after_status",
+                      "description": "200"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 392,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:50:57.653Z",
+                      "annotations": [
+                        {
+                          "type": "E5-idem",
+                          "description": "E5-patch-1777348257696-aee92564"
+                        },
+                        {
+                          "type": "E5-status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "E5-body",
+                          "description": "{\"ok\":true,\"template\":{\"id\":\"bb66778f-da7c-4a7a-be08-d13fe31ad45c\",\"tenant_id\":\"TNT001\",\"user_id\":\"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1\",\"name\":\"[r5a-E5] renamed-1777348257696\",\"notes\":\"Created by r5a E3\",\"elements\":[{\"h\":24,\"w\":180,\"x\":20,\"y\":15,\"bold\":true,\"text\":\"Producto E2E\",\"type\":\"name\",\"fontSize\":14},{\"h\":32,\"w\":100,\"x\":20,\"y\":50,\"bold\":true,\"text\":\"$25.00\",\"type\":\"price\",\"color\":\"#EA580C\",\"fontSize\":22},{\"h\":14,\"w\":120,\"x\":20,\"y\":90,\"text\":\"SKU-R5A-1\",\"type\":\"sku\",\"fontSize\":10},{\"h\":60,\"w\":60,\"x\":200,\"y\":90,\"type\":\"qr\",\"value\":\"https://volvix.test/p/r5a-e5\"}],\"canvas_w\":300,\"canvas_h\":180,\"paper_size\":\"Pequeña\",\"printer_target\":\"thermal\",\"created_at\":\"2026-04-28T03:51:04.819573+00:00\",\"updated_at\":\"2026-04-28T03:51:05.282602+00:00\",\"deleted_at\":null}}"
+                        },
+                        {
+                          "type": "E5-after_status",
+                          "description": "200"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "007b7f11486f3cfb0b50-2ccab7a63e68ae799c02",
+              "file": "r5a-etiquetas-e2e.spec.js",
+              "line": 314,
+              "column": 3
+            },
+            {
+              "title": "E6: DELETE /api/label-templates/:id soft-deletes, list hides it",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "E6-del_status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "E6-del_body",
+                      "description": "{\"ok\":true,\"deleted\":true,\"id\":\"f07ec2b6-0535-4dee-91bb-83f33435a284\"}"
+                    },
+                    {
+                      "type": "E6-single_after_delete",
+                      "description": "404"
+                    },
+                    {
+                      "type": "E6-list_count",
+                      "description": "2"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 663,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:50:58.100Z",
+                      "annotations": [
+                        {
+                          "type": "E6-del_status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "E6-del_body",
+                          "description": "{\"ok\":true,\"deleted\":true,\"id\":\"f07ec2b6-0535-4dee-91bb-83f33435a284\"}"
+                        },
+                        {
+                          "type": "E6-single_after_delete",
+                          "description": "404"
+                        },
+                        {
+                          "type": "E6-list_count",
+                          "description": "2"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "007b7f11486f3cfb0b50-9b658341c86c166b467b",
+              "file": "r5a-etiquetas-e2e.spec.js",
+              "line": 348,
+              "column": 3
+            },
+            {
+              "title": "E7: clicking the 4 quick-template chips populates the canvas",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "E7-counts",
+                      "description": "{\"basica\":null,\"basica_canvas\":3,\"producto\":null,\"producto_canvas\":6,\"granel\":null,\"granel_canvas\":5,\"oferta\":null,\"oferta_canvas\":5}"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2711,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:50:58.794Z",
+                      "annotations": [
+                        {
+                          "type": "E7-counts",
+                          "description": "{\"basica\":null,\"basica_canvas\":3,\"producto\":null,\"producto_canvas\":6,\"granel\":null,\"granel_canvas\":5,\"oferta\":null,\"oferta_canvas\":5}"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "007b7f11486f3cfb0b50-b956a7d926f6bb0c36d0",
+              "file": "r5a-etiquetas-e2e.spec.js",
+              "line": 388,
+              "column": 3
+            },
+            {
+              "title": "E8: simulate drop for the 10 components — each lands on canvas",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "E8-elements_on_canvas",
+                      "description": "10"
+                    },
+                    {
+                      "type": "E8-rendered_summary",
+                      "description": "[{\"w\":\"100px\",\"h\":\"20px\",\"innerLen\":428},{\"w\":\"160px\",\"h\":\"24px\",\"innerLen\":442},{\"w\":\"80px\",\"h\":\"32px\",\"innerLen\":432},{\"w\":\"140px\",\"h\":\"46px\",\"innerLen\":4135},{\"w\":\"60px\",\"h\":\"60px\",\"innerLen\":4003},{\"w\":\"60px\",\"h\":\"40px\",\"innerLen\":365},{\"w\":\"100px\",\"h\":\"16px\",\"innerLen\":433},{\"w\":\"140px\",\"h\":\"2px\",\"innerLen\":150},{\"w\":\"80px\",\"h\":\"50px\",\"innerLen\":162},{\"w\":\"100px\",\"h\":\"16px\",\"innerLen\":433}]"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3188,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:51:01.535Z",
+                      "annotations": [
+                        {
+                          "type": "E8-elements_on_canvas",
+                          "description": "10"
+                        },
+                        {
+                          "type": "E8-rendered_summary",
+                          "description": "[{\"w\":\"100px\",\"h\":\"20px\",\"innerLen\":428},{\"w\":\"160px\",\"h\":\"24px\",\"innerLen\":442},{\"w\":\"80px\",\"h\":\"32px\",\"innerLen\":432},{\"w\":\"140px\",\"h\":\"46px\",\"innerLen\":4135},{\"w\":\"60px\",\"h\":\"60px\",\"innerLen\":4003},{\"w\":\"60px\",\"h\":\"40px\",\"innerLen\":365},{\"w\":\"100px\",\"h\":\"16px\",\"innerLen\":433},{\"w\":\"140px\",\"h\":\"2px\",\"innerLen\":150},{\"w\":\"80px\",\"h\":\"50px\",\"innerLen\":162},{\"w\":\"100px\",\"h\":\"16px\",\"innerLen\":433}]"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "007b7f11486f3cfb0b50-d4aa28e95f4aa0bfeb3b",
+              "file": "r5a-etiquetas-e2e.spec.js",
+              "line": 436,
+              "column": 3
+            },
+            {
+              "title": "E9: properties panel updates element attrs (visual update)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "E9-rect",
+                      "description": "{\"left\":\"80px\",\"top\":\"60px\",\"width\":\"220px\",\"height\":\"30px\"}"
+                    },
+                    {
+                      "type": "E9-inner_style",
+                      "description": "\n          font-size: 18px;\n          font-weight: 700;\n          color: #1E40AF;\n          text-align: left;\n          width: 100%; height: 100%;\n          display: flex;\n          align-items: center;\n          justify-content: flex-start;\n          line-height: 1.1;\n          overflow: hidden;\n          white-space: nowrap;\n        "
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2899,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:51:04.769Z",
+                      "annotations": [
+                        {
+                          "type": "E9-rect",
+                          "description": "{\"left\":\"80px\",\"top\":\"60px\",\"width\":\"220px\",\"height\":\"30px\"}"
+                        },
+                        {
+                          "type": "E9-inner_style",
+                          "description": "\n          font-size: 18px;\n          font-weight: 700;\n          color: #1E40AF;\n          text-align: left;\n          width: 100%; height: 100%;\n          display: flex;\n          align-items: center;\n          justify-content: flex-start;\n          line-height: 1.1;\n          overflow: hidden;\n          white-space: nowrap;\n        "
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "007b7f11486f3cfb0b50-08c8fe4d281a5cc92d7b",
+              "file": "r5a-etiquetas-e2e.spec.js",
+              "line": 497,
+              "column": 3
+            },
+            {
+              "title": "E10: setSize resizes canvas to the 4 presets",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "E10-results",
+                      "description": "[{\"name\":\"Pequeña\",\"want_w\":300,\"want_h\":180,\"got_w\":300,\"got_h\":180,\"label\":\"50mm × 30mm\"},{\"name\":\"Mediana\",\"want_w\":360,\"want_h\":240,\"got_w\":360,\"got_h\":240,\"label\":\"60mm × 40mm\"},{\"name\":\"Grande\",\"want_w\":480,\"want_h\":300,\"got_w\":480,\"got_h\":300,\"label\":\"80mm × 50mm\"},{\"name\":\"Vertical\",\"want_w\":240,\"want_h\":360,\"got_w\":240,\"got_h\":360,\"label\":\"40mm × 60mm\"}]"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2555,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:51:07.720Z",
+                      "annotations": [
+                        {
+                          "type": "E10-results",
+                          "description": "[{\"name\":\"Pequeña\",\"want_w\":300,\"want_h\":180,\"got_w\":300,\"got_h\":180,\"label\":\"50mm × 30mm\"},{\"name\":\"Mediana\",\"want_w\":360,\"want_h\":240,\"got_w\":360,\"got_h\":240,\"label\":\"60mm × 40mm\"},{\"name\":\"Grande\",\"want_w\":480,\"want_h\":300,\"got_w\":480,\"got_h\":300,\"label\":\"80mm × 50mm\"},{\"name\":\"Vertical\",\"want_w\":240,\"want_h\":360,\"got_w\":240,\"got_h\":360,\"label\":\"40mm × 60mm\"}]"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "007b7f11486f3cfb0b50-994ca6bdb302b010b87c",
+              "file": "r5a-etiquetas-e2e.spec.js",
+              "line": 567,
+              "column": 3
+            },
+            {
+              "title": "E11: saveTemplate() with a name persists via POST and returns an ID",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "E11-post_status",
+                      "description": "201"
+                    },
+                    {
+                      "type": "E11-post_body",
+                      "description": "{\"ok\":true,\"template\":{\"id\":\"e9be05a3-3001-4a4d-818d-3f159e0d78a0\",\"tenant_id\":\"TNT001\",\"user_id\":\"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1\",\"name\":\"[r5a-E11] from-ui-1777348272514\",\"notes\":\"Saved by E11 via UI walk\",\"elements\":[{\"h\":34,\"w\":50,\"x\":10,\"y\":10,\"id\":1,\"type\":\"logo\"},{\"h\":22,\"w\":220,\"x\":70,\"y\":12,\"id\":2,\"bold\":true,\"text\":\"Producto ABC\",\"type\":\"name\",\"fontSize\":13},{\"h\":14,\"w\":120,\"x\":70,\"y\":36,\"id\":3,\"text\":\"SKU-00001\",\"type\":\"sku\",\"fontSize\":10},{\"h\":22,\"w\":90,\"x\":200,\"y\":36,\"id\":4,\"bold\":true,\"text\":\"$99.00\",\"type\":\"price\",\"align\":\"right\",\"color\":\"#EA580C\",\"fontSize\":18},{\"h\":45,\"w\":200,\"x\":10,\"y\":85,\"id\":5,\"type\":\"barcode\",\"value\":\"7501234567890\"},{\"h\":60,\"w\":60,\"x\":220,\"y\":85,\"id\":6,\"type\":\"qr\",\"value\":\"https://v.mx/p/1\"},{\"h\":24,\"w\":160,\"x\":0,\"y\":8,\"id\":7,\"bold\":true,\"text\":\"Nombre del Producto\",\"type\":\"name\",\"fontSize\":14},{\"h\":32,\"w\":80,\"x\":0,\"y\":44,\"id\":8,\"bold\":true,\"text\":\"$99.00\",\"type\":\"price\",\"color\":\"#EA580C\",\"fontSize\":22}],\"canvas_w\":300,\"canvas_h\":180,\"paper_size\":\"Pequeña50×30mm\",\"printer_target\":\"thermal\",\"created_at\":\"2026-04-28T03:51:20.163538+00:00\",\"updated_at\":\"2026-04-28T03:51:20.163538+00:00\",\"deleted_at\":null}}"
+                    },
+                    {
+                      "type": "E11-exposed_id",
+                      "description": "e9be05a3-3001-4a4d-818d-3f159e0d78a0"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2829,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:51:10.307Z",
+                      "annotations": [
+                        {
+                          "type": "E11-post_status",
+                          "description": "201"
+                        },
+                        {
+                          "type": "E11-post_body",
+                          "description": "{\"ok\":true,\"template\":{\"id\":\"e9be05a3-3001-4a4d-818d-3f159e0d78a0\",\"tenant_id\":\"TNT001\",\"user_id\":\"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1\",\"name\":\"[r5a-E11] from-ui-1777348272514\",\"notes\":\"Saved by E11 via UI walk\",\"elements\":[{\"h\":34,\"w\":50,\"x\":10,\"y\":10,\"id\":1,\"type\":\"logo\"},{\"h\":22,\"w\":220,\"x\":70,\"y\":12,\"id\":2,\"bold\":true,\"text\":\"Producto ABC\",\"type\":\"name\",\"fontSize\":13},{\"h\":14,\"w\":120,\"x\":70,\"y\":36,\"id\":3,\"text\":\"SKU-00001\",\"type\":\"sku\",\"fontSize\":10},{\"h\":22,\"w\":90,\"x\":200,\"y\":36,\"id\":4,\"bold\":true,\"text\":\"$99.00\",\"type\":\"price\",\"align\":\"right\",\"color\":\"#EA580C\",\"fontSize\":18},{\"h\":45,\"w\":200,\"x\":10,\"y\":85,\"id\":5,\"type\":\"barcode\",\"value\":\"7501234567890\"},{\"h\":60,\"w\":60,\"x\":220,\"y\":85,\"id\":6,\"type\":\"qr\",\"value\":\"https://v.mx/p/1\"},{\"h\":24,\"w\":160,\"x\":0,\"y\":8,\"id\":7,\"bold\":true,\"text\":\"Nombre del Producto\",\"type\":\"name\",\"fontSize\":14},{\"h\":32,\"w\":80,\"x\":0,\"y\":44,\"id\":8,\"bold\":true,\"text\":\"$99.00\",\"type\":\"price\",\"color\":\"#EA580C\",\"fontSize\":22}],\"canvas_w\":300,\"canvas_h\":180,\"paper_size\":\"Pequeña50×30mm\",\"printer_target\":\"thermal\",\"created_at\":\"2026-04-28T03:51:20.163538+00:00\",\"updated_at\":\"2026-04-28T03:51:20.163538+00:00\",\"deleted_at\":null}}"
+                        },
+                        {
+                          "type": "E11-exposed_id",
+                          "description": "e9be05a3-3001-4a4d-818d-3f159e0d78a0"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "007b7f11486f3cfb0b50-2f2feb52e288e2a03528",
+              "file": "r5a-etiquetas-e2e.spec.js",
+              "line": 599,
+              "column": 3
+            },
+            {
+              "title": "E12: openTemplatesModal lists templates and Cargar restores canvas",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "E12-list_status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "E12-list_count",
+                      "description": "3"
+                    },
+                    {
+                      "type": "E12-restored_count",
+                      "description": "8"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2263,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:51:13.168Z",
+                      "annotations": [
+                        {
+                          "type": "E12-list_status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "E12-list_count",
+                          "description": "3"
+                        },
+                        {
+                          "type": "E12-restored_count",
+                          "description": "8"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "007b7f11486f3cfb0b50-32b17934199280634d97",
+              "file": "r5a-etiquetas-e2e.spec.js",
+              "line": 667,
+              "column": 3
+            },
+            {
+              "title": "E13: print posts ESC/POS to /api/printer/raw (audit_only acceptable)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "E13-status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "E13-body",
+                      "description": "{\"ok\":true,\"audit_only\":true,\"message\":\"Recibido. La impresion debe ejecutarse en el cliente local (Volvix Print Bridge en 127.0.0.1:9101). Este endpoint NO reenvia a internet.\",\"ip\":\"127.0.0.1\",\"port\":9100,\"bytes\":56}"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 214,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:51:15.455Z",
+                      "annotations": [
+                        {
+                          "type": "E13-status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "E13-body",
+                          "description": "{\"ok\":true,\"audit_only\":true,\"message\":\"Recibido. La impresion debe ejecutarse en el cliente local (Volvix Print Bridge en 127.0.0.1:9101). Este endpoint NO reenvia a internet.\",\"ip\":\"127.0.0.1\",\"port\":9100,\"bytes\":56}"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "007b7f11486f3cfb0b50-f039891f9159f87d315e",
+              "file": "r5a-etiquetas-e2e.spec.js",
+              "line": 730,
+              "column": 3
+            },
+            {
+              "title": "E14: owner (TNT002) does NOT see admin (TNT001) templates",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "E14-owner_status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "E14-owner_count",
+                      "description": "0"
+                    },
+                    {
+                      "type": "E14-cross_id_status",
+                      "description": "404"
+                    },
+                    {
+                      "type": "E14-owner_sample",
+                      "description": "[]"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 307,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:51:15.693Z",
+                      "annotations": [
+                        {
+                          "type": "E14-owner_status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "E14-owner_count",
+                          "description": "0"
+                        },
+                        {
+                          "type": "E14-cross_id_status",
+                          "description": "404"
+                        },
+                        {
+                          "type": "E14-owner_sample",
+                          "description": "[]"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "007b7f11486f3cfb0b50-bff69c17786f5ce45a29",
+              "file": "r5a-etiquetas-e2e.spec.js",
+              "line": 773,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-04-28T03:47:44.220Z",
+    "duration": 214144.891,
+    "expected": 14,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

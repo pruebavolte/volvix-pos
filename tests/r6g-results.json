@@ -1,0 +1,1133 @@
+{
+  "config": {
+    "configFile": "C:\\Users\\DELL\\Downloads\\verion 340\\tests\\playwright.r6g.config.js",
+    "rootDir": "C:/Users/DELL/Downloads/verion 340/tests",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/DELL/Downloads/verion 340/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "C:/Users/DELL/Downloads/verion 340/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/r6g-servicios-e2e\\.spec\\.js/"
+        ],
+        "timeout": 180000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.59.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "r6g-servicios-e2e.spec.js",
+      "file": "r6g-servicios-e2e.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "R6G Pago de Servicios E2E",
+          "file": "r6g-servicios-e2e.spec.js",
+          "line": 224,
+          "column": 6,
+          "specs": [
+            {
+              "title": "S1: discover endpoint surface (sweep all candidates)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "S1-summary",
+                      "description": "{\"catalog\":{\"first_non_404\":\"none\",\"results\":[\"/api/services/categories -> 404 NOT_FOUND\",\"/api/services/providers -> 404 NOT_FOUND\",\"/api/utility-bills/providers -> 404 NOT_FOUND\",\"/api/service-payments/providers -> 404 NOT_FOUND\",\"/api/services/catalog -> 404 NOT_FOUND\",\"/api/utilities/providers -> 404 NOT_FOUND\"]},\"list\":{\"first_non_404\":\"/api/services (200)\",\"results\":[\"/api/services -> 200 OK\",\"/api/service-payments -> 404 NOT_FOUND\",\"/api/utility-bills -> 404 NOT_FOUND\"]},\"verify\":{\"first_non_404\":\"none\",\"results\":[\"/api/services/verify -> 404 NOT_FOUND\",\"/api/service-payments/verify -> 404 NOT_FOUND\",\"/api/utility-bills/verify -> 404 NOT_FOUND\",\"/api/services/reference/verify -> 404 NOT_FOUND\"]},\"pay\":{\"first_non_404\":\"none\",\"results\":[\"/api/services/pay -> 404 NOT_FOUND\",\"/api/service-payments/pay -> 404 NOT_FOUND\",\"/api/service-payments -> 404 NOT_FOUND\",\"/api/utility-bills/pay -> 404 NOT_FOUND\"]},\"receipt\":{\"first_non_404\":\"none\",\"results\":[\"/api/services/receipt -> 404 NOT_FOUND\",\"/api/service-payments/receipt -> 404 NOT_FOUND\",\"/api/utility-bills/receipt -> 404 NOT_FOUND\",\"/api/printer/raw -> 404 NOT_FOUND\"]},\"report\":{\"first_non_404\":\"none\",\"results\":[\"/api/reports/services -> 404 NOT_FOUND\",\"/api/reports/service-payments -> 404 NOT_FOUND\",\"/api/reports/utility-bills -> 404 NOT_FOUND\",\"/api/services/reports -> 404 NOT_FOUND\"]},\"commission\":{\"first_non_404\":\"none\",\"results\":[\"/api/services/commissions -> 404 NOT_FOUND\",\"/api/service-payments/commissions -> 404 NOT"
+                    },
+                    {
+                      "type": "S1-discovered",
+                      "description": "{\"catalog\":null,\"list\":\"/api/services\",\"verify\":null,\"pay\":null,\"receipt\":null,\"report\":null,\"commission\":null,\"reverse\":null}"
+                    },
+                    {
+                      "type": "S1-services_collision_status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "S1-services_collision_keys",
+                      "description": "[\"ok\",\"items\",\"total\"]"
+                    },
+                    {
+                      "type": "S1-services_collision_sample",
+                      "description": "[]"
+                    },
+                    {
+                      "type": "S1-every_missing",
+                      "description": "false"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3559,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:08:20.058Z",
+                      "annotations": [
+                        {
+                          "type": "S1-summary",
+                          "description": "{\"catalog\":{\"first_non_404\":\"none\",\"results\":[\"/api/services/categories -> 404 NOT_FOUND\",\"/api/services/providers -> 404 NOT_FOUND\",\"/api/utility-bills/providers -> 404 NOT_FOUND\",\"/api/service-payments/providers -> 404 NOT_FOUND\",\"/api/services/catalog -> 404 NOT_FOUND\",\"/api/utilities/providers -> 404 NOT_FOUND\"]},\"list\":{\"first_non_404\":\"/api/services (200)\",\"results\":[\"/api/services -> 200 OK\",\"/api/service-payments -> 404 NOT_FOUND\",\"/api/utility-bills -> 404 NOT_FOUND\"]},\"verify\":{\"first_non_404\":\"none\",\"results\":[\"/api/services/verify -> 404 NOT_FOUND\",\"/api/service-payments/verify -> 404 NOT_FOUND\",\"/api/utility-bills/verify -> 404 NOT_FOUND\",\"/api/services/reference/verify -> 404 NOT_FOUND\"]},\"pay\":{\"first_non_404\":\"none\",\"results\":[\"/api/services/pay -> 404 NOT_FOUND\",\"/api/service-payments/pay -> 404 NOT_FOUND\",\"/api/service-payments -> 404 NOT_FOUND\",\"/api/utility-bills/pay -> 404 NOT_FOUND\"]},\"receipt\":{\"first_non_404\":\"none\",\"results\":[\"/api/services/receipt -> 404 NOT_FOUND\",\"/api/service-payments/receipt -> 404 NOT_FOUND\",\"/api/utility-bills/receipt -> 404 NOT_FOUND\",\"/api/printer/raw -> 404 NOT_FOUND\"]},\"report\":{\"first_non_404\":\"none\",\"results\":[\"/api/reports/services -> 404 NOT_FOUND\",\"/api/reports/service-payments -> 404 NOT_FOUND\",\"/api/reports/utility-bills -> 404 NOT_FOUND\",\"/api/services/reports -> 404 NOT_FOUND\"]},\"commission\":{\"first_non_404\":\"none\",\"results\":[\"/api/services/commissions -> 404 NOT_FOUND\",\"/api/service-payments/commissions -> 404 NOT"
+                        },
+                        {
+                          "type": "S1-discovered",
+                          "description": "{\"catalog\":null,\"list\":\"/api/services\",\"verify\":null,\"pay\":null,\"receipt\":null,\"report\":null,\"commission\":null,\"reverse\":null}"
+                        },
+                        {
+                          "type": "S1-services_collision_status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "S1-services_collision_keys",
+                          "description": "[\"ok\",\"items\",\"total\"]"
+                        },
+                        {
+                          "type": "S1-services_collision_sample",
+                          "description": "[]"
+                        },
+                        {
+                          "type": "S1-every_missing",
+                          "description": "false"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7bc34d660378cde1384a-1819531aac28596b5e45",
+              "file": "r6g-servicios-e2e.spec.js",
+              "line": 244,
+              "column": 3
+            },
+            {
+              "title": "S2: list service categories (luz/agua/gas/telefonía/internet)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "S2-probe /api/services/categories",
+                      "description": "404"
+                    },
+                    {
+                      "type": "S2-probe /api/services/providers",
+                      "description": "404"
+                    },
+                    {
+                      "type": "S2-probe /api/utility-bills/providers",
+                      "description": "404"
+                    },
+                    {
+                      "type": "S2-probe /api/service-payments/providers",
+                      "description": "404"
+                    },
+                    {
+                      "type": "S2-probe /api/services/catalog",
+                      "description": "404"
+                    },
+                    {
+                      "type": "S2-probe /api/utilities/providers",
+                      "description": "404"
+                    },
+                    {
+                      "type": "S2-endpoint_hit",
+                      "description": "NONE (mock)"
+                    },
+                    {
+                      "type": "S2-body_shape",
+                      "description": "null"
+                    },
+                    {
+                      "type": "S2-found_count",
+                      "description": "0"
+                    },
+                    {
+                      "type": "S2-found_sample",
+                      "description": "[]"
+                    },
+                    {
+                      "type": "S2-status",
+                      "description": "PLACEHOLDER (no catalogue endpoint)"
+                    },
+                    {
+                      "type": "S2-required_categories",
+                      "description": "[\"luz\",\"agua\",\"gas\",\"telefonía\",\"internet\"]"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 589,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:08:24.651Z",
+                      "annotations": [
+                        {
+                          "type": "S2-probe /api/services/categories",
+                          "description": "404"
+                        },
+                        {
+                          "type": "S2-probe /api/services/providers",
+                          "description": "404"
+                        },
+                        {
+                          "type": "S2-probe /api/utility-bills/providers",
+                          "description": "404"
+                        },
+                        {
+                          "type": "S2-probe /api/service-payments/providers",
+                          "description": "404"
+                        },
+                        {
+                          "type": "S2-probe /api/services/catalog",
+                          "description": "404"
+                        },
+                        {
+                          "type": "S2-probe /api/utilities/providers",
+                          "description": "404"
+                        },
+                        {
+                          "type": "S2-endpoint_hit",
+                          "description": "NONE (mock)"
+                        },
+                        {
+                          "type": "S2-body_shape",
+                          "description": "null"
+                        },
+                        {
+                          "type": "S2-found_count",
+                          "description": "0"
+                        },
+                        {
+                          "type": "S2-found_sample",
+                          "description": "[]"
+                        },
+                        {
+                          "type": "S2-status",
+                          "description": "PLACEHOLDER (no catalogue endpoint)"
+                        },
+                        {
+                          "type": "S2-required_categories",
+                          "description": "[\"luz\",\"agua\",\"gas\",\"telefonía\",\"internet\"]"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7bc34d660378cde1384a-baf64b80a2c0c15021ef",
+              "file": "r6g-servicios-e2e.spec.js",
+              "line": 288,
+              "column": 3
+            },
+            {
+              "title": "S3: list providers per category (Mexican utility brands)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "S3-probe /api/services/providers",
+                      "description": "404"
+                    },
+                    {
+                      "type": "S3-probe /api/utility-bills/providers",
+                      "description": "404"
+                    },
+                    {
+                      "type": "S3-probe /api/service-payments/providers",
+                      "description": "404"
+                    },
+                    {
+                      "type": "S3-probe /api/utilities/providers",
+                      "description": "404"
+                    },
+                    {
+                      "type": "S3-probe /api/services/providers?category=luz",
+                      "description": "404"
+                    },
+                    {
+                      "type": "S3-probe /api/services/providers?category=internet",
+                      "description": "404"
+                    },
+                    {
+                      "type": "S3-endpoint_hit",
+                      "description": "NONE (mock)"
+                    },
+                    {
+                      "type": "S3-found_count",
+                      "description": "0"
+                    },
+                    {
+                      "type": "S3-found_sample",
+                      "description": "[]"
+                    },
+                    {
+                      "type": "S3-expected_mx_providers",
+                      "description": "[\"CFE\",\"Telmex\",\"Megacable\",\"Izzi\",\"Totalplay\",\"Sky\",\"Dish\",\"Gas Natural\",\"Cospel\"]"
+                    },
+                    {
+                      "type": "S3-status",
+                      "description": "PLACEHOLDER (no providers endpoint)"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 596,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:08:25.267Z",
+                      "annotations": [
+                        {
+                          "type": "S3-probe /api/services/providers",
+                          "description": "404"
+                        },
+                        {
+                          "type": "S3-probe /api/utility-bills/providers",
+                          "description": "404"
+                        },
+                        {
+                          "type": "S3-probe /api/service-payments/providers",
+                          "description": "404"
+                        },
+                        {
+                          "type": "S3-probe /api/utilities/providers",
+                          "description": "404"
+                        },
+                        {
+                          "type": "S3-probe /api/services/providers?category=luz",
+                          "description": "404"
+                        },
+                        {
+                          "type": "S3-probe /api/services/providers?category=internet",
+                          "description": "404"
+                        },
+                        {
+                          "type": "S3-endpoint_hit",
+                          "description": "NONE (mock)"
+                        },
+                        {
+                          "type": "S3-found_count",
+                          "description": "0"
+                        },
+                        {
+                          "type": "S3-found_sample",
+                          "description": "[]"
+                        },
+                        {
+                          "type": "S3-expected_mx_providers",
+                          "description": "[\"CFE\",\"Telmex\",\"Megacable\",\"Izzi\",\"Totalplay\",\"Sky\",\"Dish\",\"Gas Natural\",\"Cospel\"]"
+                        },
+                        {
+                          "type": "S3-status",
+                          "description": "PLACEHOLDER (no providers endpoint)"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7bc34d660378cde1384a-e03fe014a2f5ee4b4e99",
+              "file": "r6g-servicios-e2e.spec.js",
+              "line": 339,
+              "column": 3
+            },
+            {
+              "title": "S4: verify reference (POST /api/services/verify)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "S4-probe /api/services/verify",
+                      "description": "404"
+                    },
+                    {
+                      "type": "S4-probe /api/service-payments/verify",
+                      "description": "404"
+                    },
+                    {
+                      "type": "S4-probe /api/utility-bills/verify",
+                      "description": "404"
+                    },
+                    {
+                      "type": "S4-probe /api/services/reference/verify",
+                      "description": "404"
+                    },
+                    {
+                      "type": "S4-endpoint_hit",
+                      "description": "NONE (mock)"
+                    },
+                    {
+                      "type": "S4-status",
+                      "description": "null"
+                    },
+                    {
+                      "type": "S4-body_keys",
+                      "description": "null"
+                    },
+                    {
+                      "type": "S4-body_sample",
+                      "description": "null"
+                    },
+                    {
+                      "type": "S4-final",
+                      "description": "PLACEHOLDER (no verify endpoint)"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 413,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:08:25.902Z",
+                      "annotations": [
+                        {
+                          "type": "S4-probe /api/services/verify",
+                          "description": "404"
+                        },
+                        {
+                          "type": "S4-probe /api/service-payments/verify",
+                          "description": "404"
+                        },
+                        {
+                          "type": "S4-probe /api/utility-bills/verify",
+                          "description": "404"
+                        },
+                        {
+                          "type": "S4-probe /api/services/reference/verify",
+                          "description": "404"
+                        },
+                        {
+                          "type": "S4-endpoint_hit",
+                          "description": "NONE (mock)"
+                        },
+                        {
+                          "type": "S4-status",
+                          "description": "null"
+                        },
+                        {
+                          "type": "S4-body_keys",
+                          "description": "null"
+                        },
+                        {
+                          "type": "S4-body_sample",
+                          "description": "null"
+                        },
+                        {
+                          "type": "S4-final",
+                          "description": "PLACEHOLDER (no verify endpoint)"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7bc34d660378cde1384a-598a88d445d7aa09cca7",
+              "file": "r6g-servicios-e2e.spec.js",
+              "line": 394,
+              "column": 3
+            },
+            {
+              "title": "S5: pay service (POST /api/services/pay)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "S5-probe /api/services/pay",
+                      "description": "404"
+                    },
+                    {
+                      "type": "S5-probe /api/service-payments/pay",
+                      "description": "404"
+                    },
+                    {
+                      "type": "S5-probe /api/service-payments",
+                      "description": "404"
+                    },
+                    {
+                      "type": "S5-probe /api/utility-bills/pay",
+                      "description": "404"
+                    },
+                    {
+                      "type": "S5-endpoint_hit",
+                      "description": "NONE (mock)"
+                    },
+                    {
+                      "type": "S5-status",
+                      "description": "null"
+                    },
+                    {
+                      "type": "S5-payment_id",
+                      "description": "null"
+                    },
+                    {
+                      "type": "S5-body_sample",
+                      "description": "null"
+                    },
+                    {
+                      "type": "S5-final",
+                      "description": "PLACEHOLDER (no pay endpoint)"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 395,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:08:26.342Z",
+                      "annotations": [
+                        {
+                          "type": "S5-probe /api/services/pay",
+                          "description": "404"
+                        },
+                        {
+                          "type": "S5-probe /api/service-payments/pay",
+                          "description": "404"
+                        },
+                        {
+                          "type": "S5-probe /api/service-payments",
+                          "description": "404"
+                        },
+                        {
+                          "type": "S5-probe /api/utility-bills/pay",
+                          "description": "404"
+                        },
+                        {
+                          "type": "S5-endpoint_hit",
+                          "description": "NONE (mock)"
+                        },
+                        {
+                          "type": "S5-status",
+                          "description": "null"
+                        },
+                        {
+                          "type": "S5-payment_id",
+                          "description": "null"
+                        },
+                        {
+                          "type": "S5-body_sample",
+                          "description": "null"
+                        },
+                        {
+                          "type": "S5-final",
+                          "description": "PLACEHOLDER (no pay endpoint)"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7bc34d660378cde1384a-780e826968183e330a92",
+              "file": "r6g-servicios-e2e.spec.js",
+              "line": 444,
+              "column": 3
+            },
+            {
+              "title": "S6: print receipt (ESC/POS via /api/printer/raw, or service-specific)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "S6-printer_status",
+                      "description": "403"
+                    },
+                    {
+                      "type": "S6-printer_body",
+                      "description": "{\"error\":\"forbidden\"}"
+                    },
+                    {
+                      "type": "S6-service_specific_hit",
+                      "description": "NONE"
+                    },
+                    {
+                      "type": "S6-service_specific_status",
+                      "description": "null"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 103,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:08:26.768Z",
+                      "annotations": [
+                        {
+                          "type": "S6-printer_status",
+                          "description": "403"
+                        },
+                        {
+                          "type": "S6-printer_body",
+                          "description": "{\"error\":\"forbidden\"}"
+                        },
+                        {
+                          "type": "S6-service_specific_hit",
+                          "description": "NONE"
+                        },
+                        {
+                          "type": "S6-service_specific_status",
+                          "description": "null"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7bc34d660378cde1384a-666d9520da66ec7cd6b7",
+              "file": "r6g-servicios-e2e.spec.js",
+              "line": 495,
+              "column": 3
+            },
+            {
+              "title": "S7: service payment report",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "S7-probe /api/reports/services",
+                      "description": "404"
+                    },
+                    {
+                      "type": "S7-probe /api/reports/service-payments",
+                      "description": "404"
+                    },
+                    {
+                      "type": "S7-probe /api/reports/utility-bills",
+                      "description": "404"
+                    },
+                    {
+                      "type": "S7-probe /api/services/reports",
+                      "description": "404"
+                    },
+                    {
+                      "type": "S7-endpoint_hit",
+                      "description": "NONE (mock)"
+                    },
+                    {
+                      "type": "S7-status",
+                      "description": "null"
+                    },
+                    {
+                      "type": "S7-body_keys",
+                      "description": "null"
+                    },
+                    {
+                      "type": "S7-final",
+                      "description": "PLACEHOLDER (no report endpoint)"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 382,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:08:26.900Z",
+                      "annotations": [
+                        {
+                          "type": "S7-probe /api/reports/services",
+                          "description": "404"
+                        },
+                        {
+                          "type": "S7-probe /api/reports/service-payments",
+                          "description": "404"
+                        },
+                        {
+                          "type": "S7-probe /api/reports/utility-bills",
+                          "description": "404"
+                        },
+                        {
+                          "type": "S7-probe /api/services/reports",
+                          "description": "404"
+                        },
+                        {
+                          "type": "S7-endpoint_hit",
+                          "description": "NONE (mock)"
+                        },
+                        {
+                          "type": "S7-status",
+                          "description": "null"
+                        },
+                        {
+                          "type": "S7-body_keys",
+                          "description": "null"
+                        },
+                        {
+                          "type": "S7-final",
+                          "description": "PLACEHOLDER (no report endpoint)"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7bc34d660378cde1384a-551cf3f776ecb2828763",
+              "file": "r6g-servicios-e2e.spec.js",
+              "line": 554,
+              "column": 3
+            },
+            {
+              "title": "S8: comisión del negocio per servicio",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "S8-probe /api/services/commissions",
+                      "description": "404"
+                    },
+                    {
+                      "type": "S8-probe /api/service-payments/commissions",
+                      "description": "404"
+                    },
+                    {
+                      "type": "S8-probe /api/utility-bills/commissions",
+                      "description": "404"
+                    },
+                    {
+                      "type": "S8-endpoint_hit",
+                      "description": "NONE (mock)"
+                    },
+                    {
+                      "type": "S8-status",
+                      "description": "null"
+                    },
+                    {
+                      "type": "S8-body_sample",
+                      "description": "null"
+                    },
+                    {
+                      "type": "S8-final",
+                      "description": "PLACEHOLDER (no commission endpoint)"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 268,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:08:27.309Z",
+                      "annotations": [
+                        {
+                          "type": "S8-probe /api/services/commissions",
+                          "description": "404"
+                        },
+                        {
+                          "type": "S8-probe /api/service-payments/commissions",
+                          "description": "404"
+                        },
+                        {
+                          "type": "S8-probe /api/utility-bills/commissions",
+                          "description": "404"
+                        },
+                        {
+                          "type": "S8-endpoint_hit",
+                          "description": "NONE (mock)"
+                        },
+                        {
+                          "type": "S8-status",
+                          "description": "null"
+                        },
+                        {
+                          "type": "S8-body_sample",
+                          "description": "null"
+                        },
+                        {
+                          "type": "S8-final",
+                          "description": "PLACEHOLDER (no commission endpoint)"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7bc34d660378cde1384a-e7cba89dfdc60ada96d4",
+              "file": "r6g-servicios-e2e.spec.js",
+              "line": 588,
+              "column": 3
+            },
+            {
+              "title": "S9: reverse failed payment (POST /api/services/reverse)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "S9-probe /api/services/reverse",
+                      "description": "404"
+                    },
+                    {
+                      "type": "S9-probe /api/service-payments/reverse",
+                      "description": "404"
+                    },
+                    {
+                      "type": "S9-probe /api/services/refund",
+                      "description": "404"
+                    },
+                    {
+                      "type": "S9-probe /api/service-payments/refund",
+                      "description": "404"
+                    },
+                    {
+                      "type": "S9-probe /api/utility-bills/refund",
+                      "description": "404"
+                    },
+                    {
+                      "type": "S9-endpoint_hit",
+                      "description": "NONE (mock)"
+                    },
+                    {
+                      "type": "S9-status",
+                      "description": "null"
+                    },
+                    {
+                      "type": "S9-body_sample",
+                      "description": "null"
+                    },
+                    {
+                      "type": "S9-final",
+                      "description": "PLACEHOLDER (no reverse endpoint)"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 467,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:08:27.612Z",
+                      "annotations": [
+                        {
+                          "type": "S9-probe /api/services/reverse",
+                          "description": "404"
+                        },
+                        {
+                          "type": "S9-probe /api/service-payments/reverse",
+                          "description": "404"
+                        },
+                        {
+                          "type": "S9-probe /api/services/refund",
+                          "description": "404"
+                        },
+                        {
+                          "type": "S9-probe /api/service-payments/refund",
+                          "description": "404"
+                        },
+                        {
+                          "type": "S9-probe /api/utility-bills/refund",
+                          "description": "404"
+                        },
+                        {
+                          "type": "S9-endpoint_hit",
+                          "description": "NONE (mock)"
+                        },
+                        {
+                          "type": "S9-status",
+                          "description": "null"
+                        },
+                        {
+                          "type": "S9-body_sample",
+                          "description": "null"
+                        },
+                        {
+                          "type": "S9-final",
+                          "description": "PLACEHOLDER (no reverse endpoint)"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7bc34d660378cde1384a-63c516e68f4a09ebd69a",
+              "file": "r6g-servicios-e2e.spec.js",
+              "line": 621,
+              "column": 3
+            },
+            {
+              "title": "S10: UI flow — Servicios menu opens placeholder screen",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "S10-page_reached",
+                      "description": "true"
+                    },
+                    {
+                      "type": "S10-final_url",
+                      "description": "https://volvix-pos.vercel.app/salvadorex_web_v25.html"
+                    },
+                    {
+                      "type": "S10-menu_btn_visible",
+                      "description": "false"
+                    },
+                    {
+                      "type": "S10-screen_exists",
+                      "description": "true"
+                    },
+                    {
+                      "type": "S10-placeholder_text",
+                      "description": ""
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 11911,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:08:28.104Z",
+                      "annotations": [
+                        {
+                          "type": "S10-page_reached",
+                          "description": "true"
+                        },
+                        {
+                          "type": "S10-final_url",
+                          "description": "https://volvix-pos.vercel.app/salvadorex_web_v25.html"
+                        },
+                        {
+                          "type": "S10-menu_btn_visible",
+                          "description": "false"
+                        },
+                        {
+                          "type": "S10-screen_exists",
+                          "description": "true"
+                        },
+                        {
+                          "type": "S10-placeholder_text",
+                          "description": ""
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7bc34d660378cde1384a-2a21f8962955bb50919d",
+              "file": "r6g-servicios-e2e.spec.js",
+              "line": 662,
+              "column": 3
+            },
+            {
+              "title": "S11: multi-tenant isolation",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "S11-probes",
+                      "description": "[{\"url\":\"/api/services\",\"tnt001\":{\"status\":200,\"count\":0},\"tnt002\":{\"status\":200,\"count\":0}},{\"url\":\"/api/service-payments\",\"tnt001\":{\"status\":404,\"count\":null},\"tnt002\":{\"status\":404,\"count\":null}},{\"url\":\"/api/utility-bills\",\"tnt001\":{\"status\":404,\"count\":null},\"tnt002\":{\"status\":404,\"count\":null}},{\"url\":\"/api/reports/services\",\"tnt001\":{\"status\":404,\"count\":null},\"tnt002\":{\"status\":404,\"count\":null}},{\"url\":\"/api/reports/service-payments\",\"tnt001\":{\"status\":404,\"count\":null},\"tnt002\":{\"status\":404,\"count\":null}},{\"url\":\"/api/reports/utility-bills\",\"tnt001\":{\"status\":404,\"count\":null},\"tnt002\":{\"status\":404,\"count\":null}},{\"url\":\"/api/services/reports\",\"tnt001\":{\"status\":404,\"count\":null},\"tnt002\":{\"status\":404,\"count\":null}},{\"url\":\"/api/services/commissions\",\"tnt001\":{\"status\":404,\"count\":null},\"tnt002\":{\"status\":404,\"count\":null}},{\"url\":\"/api/service-payments/commissions\",\"tnt001\":{\"status\":404,\"count\":null},\"tnt002\":{\"status\":404,\"count\":null}},{\"url\":\"/api/utility-bills/commissions\",\"tnt001\":{\"status\":404,\"count\":null},\"tnt002\":{\"status\":404,\"count\":null}},{\"url\":\"/api/services/categories\",\"tnt001\":{\"status\":404,\"count\":null},\"tnt002\":{\"status\":404,\"count\":null}},{\"url\":\"/api/services/providers\",\"tnt001\":{\"status\":404,\"count\":null},\"tnt002\":{\"status\":404,\"count\":null}},{\"url\":\"/api/utility-bills/providers\",\"tnt001\":{\"status\":404,\"count\":null},\"tnt002\":{\"status\":404,\"count\":null}},{\"url\":\"/api/service-payments/providers\",\"tnt001\":{\"status\":404,\"count\":null},\"tnt002\":{"
+                    },
+                    {
+                      "type": "S11-cross_tenant_leak",
+                      "description": "NONE"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3126,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:08:40.407Z",
+                      "annotations": [
+                        {
+                          "type": "S11-probes",
+                          "description": "[{\"url\":\"/api/services\",\"tnt001\":{\"status\":200,\"count\":0},\"tnt002\":{\"status\":200,\"count\":0}},{\"url\":\"/api/service-payments\",\"tnt001\":{\"status\":404,\"count\":null},\"tnt002\":{\"status\":404,\"count\":null}},{\"url\":\"/api/utility-bills\",\"tnt001\":{\"status\":404,\"count\":null},\"tnt002\":{\"status\":404,\"count\":null}},{\"url\":\"/api/reports/services\",\"tnt001\":{\"status\":404,\"count\":null},\"tnt002\":{\"status\":404,\"count\":null}},{\"url\":\"/api/reports/service-payments\",\"tnt001\":{\"status\":404,\"count\":null},\"tnt002\":{\"status\":404,\"count\":null}},{\"url\":\"/api/reports/utility-bills\",\"tnt001\":{\"status\":404,\"count\":null},\"tnt002\":{\"status\":404,\"count\":null}},{\"url\":\"/api/services/reports\",\"tnt001\":{\"status\":404,\"count\":null},\"tnt002\":{\"status\":404,\"count\":null}},{\"url\":\"/api/services/commissions\",\"tnt001\":{\"status\":404,\"count\":null},\"tnt002\":{\"status\":404,\"count\":null}},{\"url\":\"/api/service-payments/commissions\",\"tnt001\":{\"status\":404,\"count\":null},\"tnt002\":{\"status\":404,\"count\":null}},{\"url\":\"/api/utility-bills/commissions\",\"tnt001\":{\"status\":404,\"count\":null},\"tnt002\":{\"status\":404,\"count\":null}},{\"url\":\"/api/services/categories\",\"tnt001\":{\"status\":404,\"count\":null},\"tnt002\":{\"status\":404,\"count\":null}},{\"url\":\"/api/services/providers\",\"tnt001\":{\"status\":404,\"count\":null},\"tnt002\":{\"status\":404,\"count\":null}},{\"url\":\"/api/utility-bills/providers\",\"tnt001\":{\"status\":404,\"count\":null},\"tnt002\":{\"status\":404,\"count\":null}},{\"url\":\"/api/service-payments/providers\",\"tnt001\":{\"status\":404,\"count\":null},\"tnt002\":{"
+                        },
+                        {
+                          "type": "S11-cross_tenant_leak",
+                          "description": "NONE"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7bc34d660378cde1384a-daceb2a63ecc6c56e02c",
+              "file": "r6g-servicios-e2e.spec.js",
+              "line": 739,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-04-28T04:08:17.300Z",
+    "duration": 31842.484,
+    "expected": 11,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

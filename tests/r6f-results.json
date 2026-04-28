@@ -1,0 +1,829 @@
+{
+  "config": {
+    "configFile": "C:\\Users\\DELL\\Downloads\\verion 340\\tests\\playwright.r6f.config.js",
+    "rootDir": "C:/Users/DELL/Downloads/verion 340/tests",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/DELL/Downloads/verion 340/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "C:/Users/DELL/Downloads/verion 340/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "r6f-recargas-e2e.spec.js"
+        ],
+        "timeout": 120000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.59.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "r6f-recargas-e2e.spec.js",
+      "file": "r6f-recargas-e2e.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "R6F Recargas E2E — Mexican mobile airtime top-ups",
+          "file": "r6f-recargas-e2e.spec.js",
+          "line": 127,
+          "column": 6,
+          "specs": [
+            {
+              "title": "R1: discover real /api/recargas endpoint surface",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "R1-surface",
+                      "description": "{\"/api/recargas\":200,\"/api/recargas/carriers\":404,\"/api/recargas/providers\":404,\"/api/recargas/vendors\":404,\"/api/recargas/topup\":404,\"/api/recargas/sale\":404,\"/api/recargas/status\":404,\"/api/recargas/report\":404,\"/api/recargas/comision\":404,\"/api/recargas/commission\":404,\"/api/recargas/saldo\":404,\"/api/recargas/balance\":404,\"/api/recargas/receipt\":404,\"/api/airtime\":404,\"/api/airtime/topup\":404,\"/api/airtime/carriers\":404,\"/api/topup\":404,\"/api/topup/sale\":404}"
+                    },
+                    {
+                      "type": "R1-real_endpoints",
+                      "description": "[\"/api/recargas\"]"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1796,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:09:22.489Z",
+                      "annotations": [
+                        {
+                          "type": "R1-surface",
+                          "description": "{\"/api/recargas\":200,\"/api/recargas/carriers\":404,\"/api/recargas/providers\":404,\"/api/recargas/vendors\":404,\"/api/recargas/topup\":404,\"/api/recargas/sale\":404,\"/api/recargas/status\":404,\"/api/recargas/report\":404,\"/api/recargas/comision\":404,\"/api/recargas/commission\":404,\"/api/recargas/saldo\":404,\"/api/recargas/balance\":404,\"/api/recargas/receipt\":404,\"/api/airtime\":404,\"/api/airtime/topup\":404,\"/api/airtime/carriers\":404,\"/api/topup\":404,\"/api/topup/sale\":404}"
+                        },
+                        {
+                          "type": "R1-real_endpoints",
+                          "description": "[\"/api/recargas\"]"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e78d972d45e10c5f3fdf-1bdc4b386eb2a95d508f",
+              "file": "r6f-recargas-e2e.spec.js",
+              "line": 140,
+              "column": 3
+            },
+            {
+              "title": "R2: list carriers and standard amounts",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "R2-carriers_status",
+                      "description": "404"
+                    },
+                    {
+                      "type": "R2-carriers_body",
+                      "description": "{\"error\":\"endpoint not found\"}"
+                    },
+                    {
+                      "type": "R2-expected_carriers",
+                      "description": "[\"Telcel\",\"AT&T\",\"Movistar\",\"Bait\",\"Virgin\",\"Unefon\"]"
+                    },
+                    {
+                      "type": "R2-returned_carriers",
+                      "description": "[]"
+                    },
+                    {
+                      "type": "R2-expected_amounts",
+                      "description": "[10,20,50,100,200,500]"
+                    },
+                    {
+                      "type": "R2-gap",
+                      "description": "NO /api/recargas/carriers endpoint — no real carrier catalog on the backend"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 99,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:09:24.987Z",
+                      "annotations": [
+                        {
+                          "type": "R2-carriers_status",
+                          "description": "404"
+                        },
+                        {
+                          "type": "R2-carriers_body",
+                          "description": "{\"error\":\"endpoint not found\"}"
+                        },
+                        {
+                          "type": "R2-expected_carriers",
+                          "description": "[\"Telcel\",\"AT&T\",\"Movistar\",\"Bait\",\"Virgin\",\"Unefon\"]"
+                        },
+                        {
+                          "type": "R2-returned_carriers",
+                          "description": "[]"
+                        },
+                        {
+                          "type": "R2-expected_amounts",
+                          "description": "[10,20,50,100,200,500]"
+                        },
+                        {
+                          "type": "R2-gap",
+                          "description": "NO /api/recargas/carriers endpoint — no real carrier catalog on the backend"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e78d972d45e10c5f3fdf-ffcc525782cd611ad010",
+              "file": "r6f-recargas-e2e.spec.js",
+              "line": 162,
+              "column": 3
+            },
+            {
+              "title": "R3: list integrated vendors / providers",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "R3-probe",
+                      "description": "{\"/api/recargas/vendors\":{\"status\":404,\"body\":{\"error\":\"endpoint not found\"}},\"/api/recargas/providers\":{\"status\":404,\"body\":{\"error\":\"endpoint not found\"}}}"
+                    },
+                    {
+                      "type": "R3-expected_vendors",
+                      "description": "[\"qpay\",\"telecomm\",\"ingo\",\"recargaki\",\"pagatelo\",\"tendapago\"]"
+                    },
+                    {
+                      "type": "R3-gap",
+                      "description": "NO real vendor/provider integration. /api/recargas is a generic blob store, not bound to qpay/telecomm/ingo/recargaki. No SIM-side calls happen."
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 184,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:09:25.095Z",
+                      "annotations": [
+                        {
+                          "type": "R3-probe",
+                          "description": "{\"/api/recargas/vendors\":{\"status\":404,\"body\":{\"error\":\"endpoint not found\"}},\"/api/recargas/providers\":{\"status\":404,\"body\":{\"error\":\"endpoint not found\"}}}"
+                        },
+                        {
+                          "type": "R3-expected_vendors",
+                          "description": "[\"qpay\",\"telecomm\",\"ingo\",\"recargaki\",\"pagatelo\",\"tendapago\"]"
+                        },
+                        {
+                          "type": "R3-gap",
+                          "description": "NO real vendor/provider integration. /api/recargas is a generic blob store, not bound to qpay/telecomm/ingo/recargaki. No SIM-side calls happen."
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e78d972d45e10c5f3fdf-be674687c76936a57076",
+              "file": "r6f-recargas-e2e.spec.js",
+              "line": 191,
+              "column": 3
+            },
+            {
+              "title": "R4: POST /api/recargas performs a topup",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "R4-status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "R4-body",
+                      "description": "{\"ok\":true,\"key\":\"/api/recargas\",\"stored\":1777349372856}"
+                    },
+                    {
+                      "type": "R4-payload",
+                      "description": "{\"phone\":\"5551234567\",\"carrier\":\"Telcel\",\"amount\":50,\"reference\":\"R6F-1777349365299\"}"
+                    },
+                    {
+                      "type": "R4-has_recarga_id",
+                      "description": "false"
+                    },
+                    {
+                      "type": "R4-gap",
+                      "description": "POST /api/recargas returns generic blob ack — no recarga_id, no carrier echo, no real top-up"
+                    },
+                    {
+                      "type": "R4-bad_input_status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "R4-bad_input_body",
+                      "description": "{\"ok\":true,\"key\":\"/api/recargas\",\"stored\":1777349372988}"
+                    },
+                    {
+                      "type": "R4-validation_gap",
+                      "description": "BAD INPUT ACCEPTED — phone, carrier, and negative amount are not validated server-side"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 275,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:09:25.294Z",
+                      "annotations": [
+                        {
+                          "type": "R4-status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "R4-body",
+                          "description": "{\"ok\":true,\"key\":\"/api/recargas\",\"stored\":1777349372856}"
+                        },
+                        {
+                          "type": "R4-payload",
+                          "description": "{\"phone\":\"5551234567\",\"carrier\":\"Telcel\",\"amount\":50,\"reference\":\"R6F-1777349365299\"}"
+                        },
+                        {
+                          "type": "R4-has_recarga_id",
+                          "description": "false"
+                        },
+                        {
+                          "type": "R4-gap",
+                          "description": "POST /api/recargas returns generic blob ack — no recarga_id, no carrier echo, no real top-up"
+                        },
+                        {
+                          "type": "R4-bad_input_status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "R4-bad_input_body",
+                          "description": "{\"ok\":true,\"key\":\"/api/recargas\",\"stored\":1777349372988}"
+                        },
+                        {
+                          "type": "R4-validation_gap",
+                          "description": "BAD INPUT ACCEPTED — phone, carrier, and negative amount are not validated server-side"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e78d972d45e10c5f3fdf-d8051396c752d2800630",
+              "file": "r6f-recargas-e2e.spec.js",
+              "line": 218,
+              "column": 3
+            },
+            {
+              "title": "R5: GET recarga status",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "R5-probe",
+                      "description": "{\"/api/recargas/status\":{\"status\":404,\"body\":{\"error\":\"endpoint not found\"}},\"/api/recargas/last\":{\"status\":404,\"body\":{\"error\":\"endpoint not found\"}},\"/api/recargas?status=pending\":{\"status\":200,\"body\":{\"phone\":\"NOT_A_PHONE\",\"carrier\":\"FakeCo\",\"amount\":-99999}}}"
+                    },
+                    {
+                      "type": "R5-list_status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "R5-list_body",
+                      "description": "{\"phone\":\"NOT_A_PHONE\",\"carrier\":\"FakeCo\",\"amount\":-99999}"
+                    },
+                    {
+                      "type": "R5-has_status_field",
+                      "description": "false"
+                    },
+                    {
+                      "type": "R5-gap",
+                      "description": "No status tracking — GET /api/recargas returns last raw blob, not a list of recargas with pending/success/failed"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 499,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:09:25.579Z",
+                      "annotations": [
+                        {
+                          "type": "R5-probe",
+                          "description": "{\"/api/recargas/status\":{\"status\":404,\"body\":{\"error\":\"endpoint not found\"}},\"/api/recargas/last\":{\"status\":404,\"body\":{\"error\":\"endpoint not found\"}},\"/api/recargas?status=pending\":{\"status\":200,\"body\":{\"phone\":\"NOT_A_PHONE\",\"carrier\":\"FakeCo\",\"amount\":-99999}}}"
+                        },
+                        {
+                          "type": "R5-list_status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "R5-list_body",
+                          "description": "{\"phone\":\"NOT_A_PHONE\",\"carrier\":\"FakeCo\",\"amount\":-99999}"
+                        },
+                        {
+                          "type": "R5-has_status_field",
+                          "description": "false"
+                        },
+                        {
+                          "type": "R5-gap",
+                          "description": "No status tracking — GET /api/recargas returns last raw blob, not a list of recargas with pending/success/failed"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e78d972d45e10c5f3fdf-f8214d6ead54d4c7cb8b",
+              "file": "r6f-recargas-e2e.spec.js",
+              "line": 257,
+              "column": 3
+            },
+            {
+              "title": "R6: print receipt of recarga",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "R6-probe",
+                      "description": "{\"/api/recargas/receipt\":404,\"/api/recargas/print\":404,\"/api/printer/recarga\":404}"
+                    },
+                    {
+                      "type": "R6-printer_status",
+                      "description": "403"
+                    },
+                    {
+                      "type": "R6-printer_body",
+                      "description": "{\"error\":\"forbidden\"}"
+                    },
+                    {
+                      "type": "R6-gap",
+                      "description": "No recarga-specific receipt endpoint. /api/printer/raw also unavailable for cajero."
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 333,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:09:26.097Z",
+                      "annotations": [
+                        {
+                          "type": "R6-probe",
+                          "description": "{\"/api/recargas/receipt\":404,\"/api/recargas/print\":404,\"/api/printer/recarga\":404}"
+                        },
+                        {
+                          "type": "R6-printer_status",
+                          "description": "403"
+                        },
+                        {
+                          "type": "R6-printer_body",
+                          "description": "{\"error\":\"forbidden\"}"
+                        },
+                        {
+                          "type": "R6-gap",
+                          "description": "No recarga-specific receipt endpoint. /api/printer/raw also unavailable for cajero."
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e78d972d45e10c5f3fdf-8dcec723af3fb5100c67",
+              "file": "r6f-recargas-e2e.spec.js",
+              "line": 287,
+              "column": 3
+            },
+            {
+              "title": "R7: recarga report by date",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "R7-probe",
+                      "description": "{\"/api/recargas/report\":{\"status\":404,\"sample\":{\"error\":\"endpoint not found\"}},\"/api/recargas/reports\":{\"status\":404,\"sample\":{\"error\":\"endpoint not found\"}},\"/api/recargas/report?from=2026-04-28&to=2026-04-28\":{\"status\":404,\"sample\":{\"error\":\"endpoint not found\"}},\"/api/reports/recargas?from=2026-04-28&to=2026-04-28\":{\"status\":404,\"sample\":{\"error\":\"endpoint not found\"}}}"
+                    },
+                    {
+                      "type": "R7-gap",
+                      "description": "No recarga report endpoint. Reports module does not split recargas as a separate channel."
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 396,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:09:26.442Z",
+                      "annotations": [
+                        {
+                          "type": "R7-probe",
+                          "description": "{\"/api/recargas/report\":{\"status\":404,\"sample\":{\"error\":\"endpoint not found\"}},\"/api/recargas/reports\":{\"status\":404,\"sample\":{\"error\":\"endpoint not found\"}},\"/api/recargas/report?from=2026-04-28&to=2026-04-28\":{\"status\":404,\"sample\":{\"error\":\"endpoint not found\"}},\"/api/reports/recargas?from=2026-04-28&to=2026-04-28\":{\"status\":404,\"sample\":{\"error\":\"endpoint not found\"}}}"
+                        },
+                        {
+                          "type": "R7-gap",
+                          "description": "No recarga report endpoint. Reports module does not split recargas as a separate channel."
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e78d972d45e10c5f3fdf-4c0a466ef3011a5546ac",
+              "file": "r6f-recargas-e2e.spec.js",
+              "line": 319,
+              "column": 3
+            },
+            {
+              "title": "R8: comisión percentage per recarga",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "R8-probe",
+                      "description": "{\"/api/recargas/comision\":{\"status\":404,\"body\":{\"error\":\"endpoint not found\"}},\"/api/recargas/commission\":{\"status\":404,\"body\":{\"error\":\"endpoint not found\"}},\"/api/recargas/fees\":{\"status\":404,\"body\":{\"error\":\"endpoint not found\"}}}"
+                    },
+                    {
+                      "type": "R8-gap",
+                      "description": "No comisión configuration endpoint. Margin per recarga (typically 3-5%) is not tracked anywhere on the backend."
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 290,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:09:26.855Z",
+                      "annotations": [
+                        {
+                          "type": "R8-probe",
+                          "description": "{\"/api/recargas/comision\":{\"status\":404,\"body\":{\"error\":\"endpoint not found\"}},\"/api/recargas/commission\":{\"status\":404,\"body\":{\"error\":\"endpoint not found\"}},\"/api/recargas/fees\":{\"status\":404,\"body\":{\"error\":\"endpoint not found\"}}}"
+                        },
+                        {
+                          "type": "R8-gap",
+                          "description": "No comisión configuration endpoint. Margin per recarga (typically 3-5%) is not tracked anywhere on the backend."
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e78d972d45e10c5f3fdf-b56d42931af8fd2a05bb",
+              "file": "r6f-recargas-e2e.spec.js",
+              "line": 347,
+              "column": 3
+            },
+            {
+              "title": "R9: saldo del provider (telecomm/ingo)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "R9-probe",
+                      "description": "{\"/api/recargas/saldo\":{\"status\":404,\"body\":{\"error\":\"endpoint not found\"}},\"/api/recargas/balance\":{\"status\":404,\"body\":{\"error\":\"endpoint not found\"}},\"/api/recargas/wallet\":{\"status\":404,\"body\":{\"error\":\"endpoint not found\"}},\"/api/providers/telecomm/balance\":{\"status\":404,\"body\":{\"error\":\"endpoint not found\"}},\"/api/providers/ingo/balance\":{\"status\":404,\"body\":{\"error\":\"endpoint not found\"}}}"
+                    },
+                    {
+                      "type": "R9-gap",
+                      "description": "No provider balance/saldo endpoint. Without real Telecomm/Ingo/qpay integration the cajero cannot know how much credit is left to sell."
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 528,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:09:27.174Z",
+                      "annotations": [
+                        {
+                          "type": "R9-probe",
+                          "description": "{\"/api/recargas/saldo\":{\"status\":404,\"body\":{\"error\":\"endpoint not found\"}},\"/api/recargas/balance\":{\"status\":404,\"body\":{\"error\":\"endpoint not found\"}},\"/api/recargas/wallet\":{\"status\":404,\"body\":{\"error\":\"endpoint not found\"}},\"/api/providers/telecomm/balance\":{\"status\":404,\"body\":{\"error\":\"endpoint not found\"}},\"/api/providers/ingo/balance\":{\"status\":404,\"body\":{\"error\":\"endpoint not found\"}}}"
+                        },
+                        {
+                          "type": "R9-gap",
+                          "description": "No provider balance/saldo endpoint. Without real Telecomm/Ingo/qpay integration the cajero cannot know how much credit is left to sell."
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e78d972d45e10c5f3fdf-ab02dd4727b99f2032ce",
+              "file": "r6f-recargas-e2e.spec.js",
+              "line": 373,
+              "column": 3
+            },
+            {
+              "title": "R10: UI flow walk-through (login → menu Recargas)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "R10-recargas_button_visible",
+                      "description": "false"
+                    },
+                    {
+                      "type": "R10-screenshot_bytes",
+                      "description": "157473"
+                    },
+                    {
+                      "type": "R10-outcome",
+                      "description": "{\"reached\":false,\"error\":null,\"screenshot\":null}"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5799,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:09:27.729Z",
+                      "annotations": [
+                        {
+                          "type": "R10-recargas_button_visible",
+                          "description": "false"
+                        },
+                        {
+                          "type": "R10-screenshot_bytes",
+                          "description": "157473"
+                        },
+                        {
+                          "type": "R10-outcome",
+                          "description": "{\"reached\":false,\"error\":null,\"screenshot\":null}"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e78d972d45e10c5f3fdf-2f3a619b21d6e5727639",
+              "file": "r6f-recargas-e2e.spec.js",
+              "line": 403,
+              "column": 3
+            },
+            {
+              "title": "R11: tenant isolation on /api/recargas",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "R11-write_status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "R11-write_body",
+                      "description": "{\"ok\":true,\"key\":\"/api/recargas\",\"stored\":1777349381360}"
+                    },
+                    {
+                      "type": "R11-cajero_read_status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "R11-cajero_read_body",
+                      "description": "{\"phone\":\"5559876543\",\"carrier\":\"AT&T\",\"amount\":100,\"_tag\":\"R11-1777349373807\"}"
+                    },
+                    {
+                      "type": "R11-admin_read_status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "R11-admin_read_body",
+                      "description": "[]"
+                    },
+                    {
+                      "type": "R11-note",
+                      "description": "Recargas are stored in generic_blobs keyed by pos_user_id. There is NO tenant-scoped query — each user sees only their own latest blob. Real cross-tenant isolation cannot be verified until a per-recarga row table with tenant_id exists."
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 481,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:09:33.792Z",
+                      "annotations": [
+                        {
+                          "type": "R11-write_status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "R11-write_body",
+                          "description": "{\"ok\":true,\"key\":\"/api/recargas\",\"stored\":1777349381360}"
+                        },
+                        {
+                          "type": "R11-cajero_read_status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "R11-cajero_read_body",
+                          "description": "{\"phone\":\"5559876543\",\"carrier\":\"AT&T\",\"amount\":100,\"_tag\":\"R11-1777349373807\"}"
+                        },
+                        {
+                          "type": "R11-admin_read_status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "R11-admin_read_body",
+                          "description": "[]"
+                        },
+                        {
+                          "type": "R11-note",
+                          "description": "Recargas are stored in generic_blobs keyed by pos_user_id. There is NO tenant-scoped query — each user sees only their own latest blob. Real cross-tenant isolation cannot be verified until a per-recarga row table with tenant_id exists."
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e78d972d45e10c5f3fdf-e34d5cd70cad717dacc3",
+              "file": "r6f-recargas-e2e.spec.js",
+              "line": 459,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-04-28T04:09:20.320Z",
+    "duration": 14160.695,
+    "expected": 11,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}
