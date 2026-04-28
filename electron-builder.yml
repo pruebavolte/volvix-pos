@@ -1,0 +1,36 @@
+appId: com.volvix.pos
+productName: Volvix POS
+copyright: Copyright (c) 2026 Volvix
+directories:
+  output: dist-electron
+  buildResources: electron
+files:
+  - electron/**/*
+  - "!**/node_modules/**/{CHANGELOG.md,README.md,readme.md,test,__tests__,tests,*.map}"
+asar: true
+extraMetadata:
+  main: electron/main.js
+win:
+  target:
+    - nsis
+  icon: electron/icons/icon.ico
+  artifactName: "Volvix POS Setup ${version}.${ext}"
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Volvix POS
+mac:
+  target:
+    - dmg
+  icon: electron/icons/icon.icns
+  category: public.app-category.business
+  artifactName: "Volvix POS ${version}.${ext}"
+linux:
+  target:
+    - AppImage
+  icon: electron/icons/icon.png
+  category: Office
+  artifactName: "Volvix-POS-${version}.${ext}"

@@ -1,0 +1,48 @@
+{
+  "id": "taqueria-first-sale",
+  "title": "Tu primera venta en taqueria",
+  "industry": "taqueria",
+  "duration_min": 3,
+  "modules_required": ["pos", "inventory"],
+  "roles": ["owner", "cashier", "manager"],
+  "demo_catalog_ref": "R12a",
+  "steps": [
+    {
+      "id": "step1",
+      "title": "Tu menu demo de tacos",
+      "text": "Taco Pastor $18, Taco Suadero $20, Taco Bistec $22, Taco Lengua $25, Taco Chorizo $20, Quesadilla Pastor $35, Gringa Pastor $55, Volcanes (3) $60, Vampiros (2) $50, Refresco 600ml $25, Agua Horchata $20, Aguas Frescas Litro $35.",
+      "image": "/tutorials/01-primera-venta.html",
+      "action": "next"
+    },
+    {
+      "id": "step2",
+      "title": "Toma la orden de 5 tacos",
+      "text": "Cliente pide 5 tacos al pastor. Escribe 'pastor' y suma cantidad 5. Total: $90.",
+      "highlight_selector": "#search-input",
+      "action": "wait_for_search",
+      "expected_query": "pastor"
+    },
+    {
+      "id": "step3",
+      "title": "Agrega refresco",
+      "text": "Cliente quiere refresco. Busca 'refresco', agrega 1. Subtotal: $115.",
+      "highlight_selector": ".search-result-item",
+      "action": "wait_for_multiple_items",
+      "expected_items": 2
+    },
+    {
+      "id": "step4",
+      "title": "Cobra rapido",
+      "text": "Cliente paga $200 efectivo. Cambio: $85. Press F12 o click 'Cobrar'.",
+      "highlight_selector": "#btn-cobrar",
+      "action": "wait_for_payment"
+    },
+    {
+      "id": "step5",
+      "title": "Servido!",
+      "text": "Ticket impreso, venta registrada. Sigue atendiendo a los clientes.",
+      "action": "complete",
+      "next_link": "/pos"
+    }
+  ]
+}

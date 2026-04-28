@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tutorial 06 — Mis módulos | Volvix POS</title>
+<link rel="stylesheet" href="_shared.css"></head>
+<body><div class="tutorial-container" id="container">
+<h1>Tutorial 06 — Activar/desactivar módulos</h1>
+<div class="subtitle">Toggle módulos → Preview se actualiza → Guardar configuración</div>
+<div class="stage">
+  <div class="step step-1"><h2>Paso 1 · Abre "Mis módulos"</h2>
+    <div class="mock"><h3>⚙️ Ajustes</h3>
+      <div class="grid"><div class="card">Empresa</div><div class="card hot">Mis módulos</div><div class="card">Usuarios</div><div class="card">Impresoras</div></div>
+      <div class="cursor" style="left:48%;top:35%">👆</div>
+    </div></div>
+  <div class="step step-2"><h2>Paso 2 · Activa los que quieres</h2>
+    <div class="mock"><h3>Módulos disponibles</h3>
+      <div class="row"><span>📦 Inventario</span><span class="toggle on"></span></div>
+      <div class="row"><span>👥 Clientes</span><span class="toggle on"></span></div>
+      <div class="row"><span>🎁 Promociones</span><span class="toggle"></span></div>
+      <div class="row"><span>🍽️ Mesas (restaurante)</span><span class="toggle"></span></div>
+      <div class="cursor" style="left:90%;top:55%">👆</div>
+    </div></div>
+  <div class="step step-3"><h2>Paso 3 · Activa "Promociones"</h2>
+    <div class="mock"><h3>Módulos disponibles</h3>
+      <div class="row"><span>📦 Inventario</span><span class="toggle on"></span></div>
+      <div class="row"><span>👥 Clientes</span><span class="toggle on"></span></div>
+      <div class="row"><span>🎁 Promociones</span><span class="toggle on"></span></div>
+      <div class="row"><span>🍽️ Mesas</span><span class="toggle"></span></div>
+      <div class="banner banner-ok" style="margin-top:8px">+ Promociones activado</div>
+    </div></div>
+  <div class="step step-4"><h2>Paso 4 · El POS refleja el cambio en vivo</h2>
+    <div class="mock">
+      <h3>POS · vista previa</h3>
+      <div class="grid">
+        <div class="card">📦 Inventario</div>
+        <div class="card">👥 Clientes</div>
+        <div class="card hot">🎁 Promociones ✨</div>
+      </div>
+      <p style="font-size:.8rem;color:#475569;margin-top:10px">El módulo de Promociones aparece automáticamente en el menú.</p>
+    </div></div>
+  <div class="step step-5"><h2>Paso 5 · Guardar y listo ✓</h2>
+    <div class="mock">
+      <div class="banner banner-ok">✅ Configuración guardada</div>
+      <h3>Tu POS quedó así</h3>
+      <p style="font-size:.85rem;color:#334155">3 módulos activos · 1 desactivado</p>
+      <p style="font-size:.8rem;color:#475569;margin-top:14px">Puedes volver a cambiarlos cuando quieras desde Ajustes → Mis módulos.</p>
+      <button class="btn">💾 Guardar</button>
+    </div></div>
+</div>
+<div class="progress"><div class="progress-bar"></div></div>
+<div class="caption">Reproduciendo en bucle (25s).</div>
+<div class="controls">
+<button onclick="document.getElementById('container').classList.toggle('paused')">⏯️ Pausar/Reanudar</button>
+<button onclick="location.reload()">🔄 Reiniciar</button>
+</div></div></body></html>

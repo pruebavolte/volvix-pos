@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mis Módulos · Volvix</title>
+<script src="/auth-gate.js"></script>
+<script src="/auth-helper.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAFAF9;
+    --surface: #FFFFFF;
+    --surface-2: #F5F5F4;
+    --border: #E7E5E4;
+    --border-strong: #D6D3D1;
+    --text: #0C0A09;
+    --text-2: #57534E;
+    --text-3: #A8A29E;
+    --accent: #EA580C;
+    --accent-soft: #FFF7ED;
+    --ok: #16A34A;
+    --ok-soft: #F0FDF4;
+    --warn: #CA8A04;
+    --err: #DC2626;
+    --info: #2563EB;
+    --info-soft: #EFF6FF;
+  }
+  * { box-sizing: border-box; font-family: 'Inter', -apple-system, sans-serif; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  .hidden { display: none !important; }
+
+  /* LAYOUT */
+  .page { max-width: 1320px; margin: 0 auto; padding: 28px 32px 80px; }
+  .topbar { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
+  .back { color: var(--text-2); font-size: 13px; text-decoration: none; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); }
+  .back:hover { background: var(--surface-2); }
+  h1 { font-size: 26px; font-weight: 700; margin: 0 0 4px; letter-spacing: -0.4px; }
+  .subtitle { color: var(--text-2); font-size: 14px; margin: 0 0 28px; }
+
+  /* CARDS */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 22px 24px; margin-bottom: 20px; }
+  .card h2 { font-size: 16px; font-weight: 600; margin: 0 0 4px; }
+  .card .help { font-size: 12px; color: var(--text-3); margin: 0 0 16px; }
+
+  /* PRESETS */
+  .preset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+  .preset-btn {
+    display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
+    padding: 14px 14px; border: 1.5px solid var(--border); border-radius: 8px;
+    background: var(--surface); transition: all 0.12s; cursor: pointer; text-align: left;
+  }
+  .preset-btn:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .preset-btn.active { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 3px rgba(234,88,12,0.12); }
+  .preset-emoji { font-size: 22px; line-height: 1; }
+  .preset-name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .preset-desc { font-size: 11px; color: var(--text-3); }
+
+  /* TABS */
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 18px; }
+  .tab { padding: 10px 16px; font-size: 13px; font-weight: 500; color: var(--text-3); border-bottom: 2px solid transparent; margin-bottom: -1px; cursor: pointer; }
+  .tab:hover { color: var(--text-2); }
+  .tab.active { color: var(--text); border-bottom-color: var(--text); }
+
+  /* MODULE GRID */
+  .mod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+  .mod-card {
+    border: 1.5px solid var(--border); border-radius: 10px; padding: 16px 18px; background: var(--surface);
+    display: flex; gap: 14px; align-items: flex-start; transition: all 0.12s;
+  }
+  .mod-card.on { border-color: var(--ok); background: var(--ok-soft); }
+  .mod-card.locked { background: var(--surface-2); opacity: 0.95; }
+  .mod-icon { font-size: 24px; line-height: 1; flex-shrink: 0; width: 32px; text-align: center; }
+  .mod-body { flex: 1; min-width: 0; }
+  .mod-name { font-weight: 600; font-size: 14px; color: var(--text); display: flex; align-items: center; gap: 6px; }
+  .mod-name .lock { font-size: 11px; color: var(--text-3); font-weight: 500; }
+  .mod-desc { font-size: 12px; color: var(--text-2); margin-top: 3px; line-height: 1.4; }
+  .mod-tag { font-size: 10.5px; color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; margin-top: 6px; }
+
+  /* TOGGLE big */
+  .tg {
+    position: relative; width: 46px; height: 26px; background: var(--border-strong);
+    border-radius: 14px; cursor: pointer; transition: all 0.18s; flex-shrink: 0;
+  }
+  .tg.on { background: var(--ok); }
+  .tg.locked { cursor: not-allowed; opacity: 0.7; }
+  .tg::after {
+    content: ''; position: absolute; top: 3px; left: 3px;
+    width: 20px; height: 20px; background: white; border-radius: 50%;
+    transition: all 0.18s; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .tg.on::after { left: 23px; }
+
+  /* PREVIEW */
+  .preview-box {
+    border: 1px solid var(--border); border-radius: 10px; padding: 18px;
+    background: var(--surface-2); max-width: 280px;
+  }
+  .preview-title { font-size: 11px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 10px; }
+  .preview-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 6px; font-size: 13px; color: var(--text); }
+  .preview-item.dim { color: var(--text-3); }
+  .preview-divider { border-top: 1px dashed var(--border-strong); margin: 8px 0; }
+
+  /* BUTTONS */
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; border-radius: 7px; font-size: 13px; font-weight: 600; border: 1px solid var(--border); background: var(--surface); color: var(--text); transition: all 0.1s; cursor: pointer; }
+  .btn:hover { border-color: var(--border-strong); background: var(--surface-2); }
+  .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+  .btn.primary { background: var(--text); color: white; border-color: var(--text); }
+  .btn.primary:hover:not(:disabled) { background: #27272A; }
+  .btn.accent { background: var(--accent); color: white; border-color: var(--accent); }
+  .btn.accent:hover:not(:disabled) { background: #C2410C; }
+  .btn.sm { padding: 6px 12px; font-size: 12px; }
+
+  /* SAVE BAR */
+  .save-bar {
+    position: sticky; bottom: 18px; z-index: 50; display: flex; justify-content: space-between;
+    align-items: center; padding: 12px 18px; border-radius: 10px;
+    background: var(--text); color: white; box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+    margin-top: 22px;
+  }
+  .save-bar .summary { font-size: 13px; }
+  .save-bar .summary strong { color: white; }
+  .save-bar .summary .pulse { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-right: 6px; vertical-align: middle; animation: pulse 1.4s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+  /* TOAST */
+  #toast {
+    position: fixed; top: 24px; right: 24px; z-index: 1000;
+    padding: 12px 18px; border-radius: 8px; font-size: 13px; font-weight: 500;
+    background: var(--text); color: white; opacity: 0; transform: translateY(-10px);
+    transition: all 0.2s; pointer-events: none; box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+  }
+  #toast.show { opacity: 1; transform: translateY(0); }
+  #toast.ok { background: var(--ok); }
+  #toast.err { background: var(--err); }
+  #toast.warn { background: var(--warn); }
+
+  /* MODAL */
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; z-index: 200; }
+  .modal { background: var(--surface); border-radius: 12px; width: 540px; max-width: calc(100vw - 32px); max-height: 84vh; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,0.25); }
+  .modal-head { padding: 18px 22px; border-bottom: 1px solid var(--border); }
+  .modal-head h3 { margin: 0; font-size: 16px; font-weight: 600; }
+  .modal-head .small { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+  .modal-body { padding: 18px 22px; overflow-y: auto; flex: 1; }
+  .modal-foot { padding: 14px 22px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; background: var(--surface-2); }
+
+  /* TABLA USERS */
+  table.tbl { width: 100%; border-collapse: collapse; }
+  table.tbl thead th { font-size: 11px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.5px; text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+  table.tbl tbody td { padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
+  table.tbl tbody tr:last-child td { border-bottom: none; }
+  table.tbl tbody tr:hover { background: var(--surface-2); }
+  .role-pill { display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 11px; font-weight: 600; background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border); }
+  .role-pill.owner { background: var(--accent-soft); color: var(--accent); border-color: #FED7AA; }
+
+  /* CHK list (modal) */
+  .chk-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .chk-row { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border); cursor: pointer; }
+  .chk-row.disabled { opacity: 0.55; cursor: not-allowed; background: var(--surface-2); }
+  .chk-row input { margin: 0; }
+  .chk-row .lbl { font-size: 12.5px; font-weight: 500; }
+
+  .layout-2 { display: grid; grid-template-columns: 1fr 320px; gap: 22px; }
+  @media (max-width: 1100px) { .layout-2 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<div id="loading" style="position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999;">
+  <div style="text-align:center;color:var(--text-3);font-size:13px;">Cargando módulos...</div>
+</div>
+
+<div class="page" id="appRoot" style="display:none;">
+
+  <div class="topbar">
+    <a href="/volvix_owner_panel_v7.html" class="back">&larr; Panel Propietario</a>
+    <div style="flex:1;"></div>
+    <span id="userBadge" style="font-size:12px;color:var(--text-3);"></span>
+  </div>
+
+  <h1>Configura los módulos de tu negocio</h1>
+  <p class="subtitle">Activa solo los que necesitas. Tu equipo verá únicamente lo activado.</p>
+
+  <!-- TABS -->
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-tab="modules">Mis módulos</div>
+    <div class="tab" data-tab="users">Permisos por usuario</div>
+  </div>
+
+  <!-- ====== TAB MODULES ====== -->
+  <div id="tab-modules">
+
+    <!-- PRESETS -->
+    <div class="card">
+      <h2>Aplicar preset por giro</h2>
+      <p class="help">Elige el tipo de negocio y aplicaremos la combinación recomendada. Puedes ajustar después.</p>
+      <div class="preset-grid" id="presetGrid"></div>
+    </div>
+
+    <!-- LAYOUT -->
+    <div class="layout-2">
+      <!-- MÓDULOS -->
+      <div class="card">
+        <h2>Módulos disponibles (18)</h2>
+        <p class="help">Cambia los toggles para activar o desactivar. POS siempre activo.</p>
+        <div class="mod-grid" id="modGrid"></div>
+      </div>
+
+      <!-- PREVIEW -->
+      <div>
+        <div class="card" style="position:sticky;top:18px;">
+          <h2>Preview cajero</h2>
+          <p class="help">Lo que verá tu equipo en el sidebar.</p>
+          <div class="preview-box" id="previewBox"></div>
+          <p class="help" style="margin-top:12px;font-size:11px;">Se actualiza en vivo.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAVE BAR -->
+    <div class="save-bar" id="saveBar">
+      <div class="summary">
+        <span class="pulse"></span>
+        <span id="summaryTxt">Sin cambios</span>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn sm" id="btnReset" type="button" style="background:transparent;color:white;border-color:rgba(255,255,255,0.3);">Deshacer</button>
+        <button class="btn accent sm" id="btnSave" type="button" disabled>Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== TAB USERS ====== -->
+  <div id="tab-users" class="hidden">
+    <div class="card">
+      <h2>Permisos por usuario</h2>
+      <p class="help">Limita qué módulos puede ver cada cajero (solo entre los activos del negocio).</p>
+      <div id="usersBody">
+        <div style="padding:30px;text-align:center;color:var(--text-3);font-size:13px;">Cargando usuarios...</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- USER OVERRIDES MODAL -->
+<div class="modal-bg hidden" id="userModalBg">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="userModalTitle">Permisos del usuario</h3>
+      <div class="small" id="userModalSub"></div>
+    </div>
+    <div class="modal-body">
+      <p class="help" style="margin:0 0 12px;color:var(--text-2);font-size:12px;">
+        Marca los módulos que este usuario podrá usar. Solo aparecen los activos del negocio.
+      </p>
+      <div class="chk-list" id="chkList"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn sm" id="userModalCancel" type="button">Cancelar</button>
+      <button class="btn primary sm" id="userModalSave" type="button">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ================== HELPERS =================
+  function $(sel) { return document.querySelector(sel); }
+  function $all(sel) { return Array.prototype.slice.call(document.querySelectorAll(sel)); }
+  function jwt() {
+    return localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
+  }
+  function authHeaders() {
+    var h = { 'Content-Type': 'application/json' };
+    var t = jwt(); if (t) h['Authorization'] = 'Bearer ' + t;
+    return h;
+  }
+  function jwtPayload() {
+    try {
+      var t = jwt(); if (!t) return null;
+      var p = t.split('.')[1]; if (!p) return null;
+      return JSON.parse(atob(p.replace(/-/g, '+').replace(/_/g, '/')));
+    } catch (_) { return null; }
+  }
+  function isOwnerLike() {
+    var p = jwtPayload();
+    if (!p) return false;
+    var r = String(p.role || '').toLowerCase();
+    return r === 'owner' || r === 'admin' || r === 'superadmin';
+  }
+  function toast(msg, type) {
+    var t = $('#toast');
+    t.textContent = msg;
+    t.className = 'show ' + (type || 'ok');
+    clearTimeout(window.__toastT);
+    window.__toastT = setTimeout(function () { t.className = ''; }, 3200);
+  }
+
+  // ================== CATALOG (must mirror backend KNOWN_MODULES) =================
+  var MODULES = [
+    { key: 'pos',            emoji: '🛒',  name: 'Punto de Venta',         desc: 'Cobra ventas, imprime tickets',                  tag: 'TODOS',           always_on: true, sidebar_label: 'Punto de Venta' },
+    { key: 'inventory',      emoji: '📦',  name: 'Inventario',             desc: 'Productos, stock, alertas low-stock',            tag: 'tiendas, abarrotes', sidebar_label: 'Inventario' },
+    { key: 'customers',      emoji: '👥',  name: 'Clientes + Crédito',     desc: 'Base de clientes, abonos, crédito',              tag: 'recurrencia',     sidebar_label: 'Clientes' },
+    { key: 'cortes',         emoji: '💼',  name: 'Cortes Z / Apertura',    desc: 'Apertura caja, corte Z, conteo de efectivo',     tag: 'control',         sidebar_label: 'Cortes' },
+    { key: 'reportes',       emoji: '📊',  name: 'Reportes financieros',   desc: 'Ventas, márgenes, top productos, tendencias',    tag: 'todos',           sidebar_label: 'Reportes' },
+    { key: 'devoluciones',   emoji: '↩️', name: 'Devoluciones',           desc: 'Aceptar devoluciones con motivo y reposición',   tag: 'recomendado',     sidebar_label: 'Devoluciones' },
+    { key: 'promociones',    emoji: '🎯',  name: 'Promociones',            desc: '2x1, descuentos por % o monto fijo',             tag: 'cafés, boutiques', sidebar_label: 'Promos' },
+    { key: 'cotizaciones',   emoji: '📝',  name: 'Cotizaciones',           desc: 'Generar PDF de cotización para clientes',        tag: 'B2B, mayoristas', sidebar_label: 'Cotizaciones' },
+    { key: 'etiquetas',      emoji: '🏷️', name: 'Etiqueta Designer',      desc: 'Diseñar e imprimir etiquetas de producto',       tag: 'inventario',      sidebar_label: 'Etiquetas' },
+    { key: 'kds',            emoji: '👨‍🍳', name: 'KDS Comandero',  desc: 'Pantalla de cocina, comandas en tiempo real',    tag: 'restaurantes',    sidebar_label: 'KDS' },
+    { key: 'multipos',       emoji: '🏢',  name: 'MultiPOS Suite',         desc: 'Sucursales, franquicias, sincronización',        tag: 'cadenas',         sidebar_label: 'MultiPOS' },
+    { key: 'vendor_portal',  emoji: '🤝',  name: 'Vendor Portal',          desc: 'Proveedores cargan precios y catálogo',          tag: 'mayoristas',      sidebar_label: 'Proveedores' },
+    { key: 'marketplace',    emoji: '🛍️', name: 'Marketplace público',    desc: 'Vende online en el directorio Volvix',           tag: 'opcional',        sidebar_label: 'Marketplace' },
+    { key: 'customer_portal',emoji: '🌐',  name: 'Customer Portal',        desc: 'Clientes ven historial y abonos',                tag: 'opcional',        sidebar_label: 'Portal cliente' },
+    { key: 'ai_modules',     emoji: '🤖',  name: 'AI Modules',             desc: 'Chat IA, sugerencias, predicciones',             tag: 'plan Pro+',       sidebar_label: 'IA' },
+    { key: 'recargas',       emoji: '📱',  name: 'Recargas / Servicios',   desc: 'Tiempo aire, pagos de luz, agua',                tag: 'misceláneas',     sidebar_label: 'Recargas' },
+    { key: 'multi_branch',   emoji: '🌍',  name: 'Multi-sucursal',         desc: 'Gestionar múltiples ubicaciones',                tag: 'cadenas',         sidebar_label: 'Sucursales' },
+    { key: 'approvals',      emoji: '🛡️', name: 'Approvals / Fraud',      desc: 'Aprobar descuentos altos, antifraude',           tag: 'avanzado',        sidebar_label: 'Aprobaciones' }
+  ];
+
+  var PRESETS = [
+    { id: 'restaurante',     emoji: '🍽️', name: 'Restaurante',            desc: 'POS+Inventario+KDS+Cortes+Reportes+Customers',         keys: ['pos','inventory','kds','cortes','reportes','customers','devoluciones'] },
+    { id: 'cafeteria',       emoji: '☕',  name: 'Cafetería',              desc: 'POS+Inventario+Cortes+Reportes+Customers+Promos',      keys: ['pos','inventory','cortes','reportes','customers','promociones'] },
+    { id: 'abarrotes',       emoji: '🏪',  name: 'Abarrotes',              desc: 'POS+Inventario+Cortes+Reportes+Customers',             keys: ['pos','inventory','cortes','reportes','customers'] },
+    { id: 'farmacia',        emoji: '💊',  name: 'Farmacia',               desc: 'POS+Inventario+Cortes+Reportes+Customers',             keys: ['pos','inventory','cortes','reportes','customers','devoluciones'] },
+    { id: 'barberia',        emoji: '✂️', name: 'Barbería',               desc: 'POS+Cortes+Reportes+Customers',                        keys: ['pos','cortes','reportes','customers'] },
+    { id: 'boutique',        emoji: '🛍️', name: 'Boutique',               desc: 'POS+Inventario+Etiquetas+Promos+Cortes+Reportes',      keys: ['pos','inventory','etiquetas','promociones','cortes','reportes'] },
+    { id: 'inventario_solo', emoji: '📦',  name: 'Solo Inventario+Etiquetas', desc: 'Inventario+Etiqueta Designer',                     keys: ['pos','inventory','etiquetas'] },
+    { id: 'personalizado',   emoji: '⚙️', name: 'Personalizado',          desc: 'Configura manualmente',                                keys: null }
+  ];
+
+  // ================== STATE =================
+  var state = {
+    initial: {},   // { key: bool }  -> initial enabled state from server
+    current: {},   // { key: bool }  -> current toggles
+    activePreset: null,
+    users: []
+  };
+
+  // ================== RENDERERS =================
+  function renderPresets() {
+    var html = PRESETS.map(function (p) {
+      var isActive = state.activePreset === p.id;
+      return (
+        '<button type="button" class="preset-btn' + (isActive ? ' active' : '') + '" data-preset="' + p.id + '">' +
+          '<span class="preset-emoji">' + p.emoji + '</span>' +
+          '<span class="preset-name">' + p.name + '</span>' +
+          '<span class="preset-desc">' + p.desc + '</span>' +
+        '</button>'
+      );
+    }).join('');
+    $('#presetGrid').innerHTML = html;
+    $all('#presetGrid .preset-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () { applyPreset(btn.dataset.preset); });
+    });
+  }
+
+  function renderModules() {
+    var html = MODULES.map(function (m) {
+      var on = !!state.current[m.key];
+      var locked = !!m.always_on;
+      var cardCls = 'mod-card' + (on ? ' on' : '') + (locked ? ' locked' : '');
+      var togCls = 'tg' + (on ? ' on' : '') + (locked ? ' locked' : '');
+      return (
+        '<div class="' + cardCls + '" data-key="' + m.key + '">' +
+          '<div class="mod-icon">' + m.emoji + '</div>' +
+          '<div class="mod-body">' +
+            '<div class="mod-name">' + m.name + (locked ? '<span class="lock">· siempre activo</span>' : '') + '</div>' +
+            '<div class="mod-desc">' + m.desc + '</div>' +
+            '<div class="mod-tag">Recomendado: ' + m.tag + '</div>' +
+          '</div>' +
+          '<div class="' + togCls + '" data-key="' + m.key + '" role="switch" aria-checked="' + (on ? 'true' : 'false') + '"></div>' +
+        '</div>'
+      );
+    }).join('');
+    $('#modGrid').innerHTML = html;
+    $all('#modGrid .tg').forEach(function (tg) {
+      tg.addEventListener('click', function () {
+        var key = tg.dataset.key;
+        var mod = MODULES.find(function (x) { return x.key === key; });
+        if (!mod || mod.always_on) {
+          if (mod && mod.always_on) toast('POS no se puede desactivar', 'warn');
+          return;
+        }
+        state.current[key] = !state.current[key];
+        state.activePreset = null; // any manual change clears preset
+        rerender();
+      });
+    });
+  }
+
+  function renderPreview() {
+    var enabledKeys = Object.keys(state.current).filter(function (k) { return state.current[k]; });
+    var enabledMods = MODULES.filter(function (m) { return state.current[m.key]; });
+    var html = '<div class="preview-title">Sidebar del POS</div>';
+    html += '<div class="preview-item"><span>📊</span> Dashboard</div>';
+    enabledMods.forEach(function (m) {
+      html += '<div class="preview-item"><span>' + m.emoji + '</span> ' + m.sidebar_label + '</div>';
+    });
+    html += '<div class="preview-divider"></div>';
+    html += '<div class="preview-item dim"><span>👤</span> Mi cuenta</div>';
+    html += '<div class="preview-item dim"><span>🚪</span> Cerrar sesión</div>';
+    html += '<div style="margin-top:10px;font-size:11px;color:var(--text-3);">' +
+            enabledKeys.length + ' módulos visibles</div>';
+    $('#previewBox').innerHTML = html;
+  }
+
+  function renderSaveBar() {
+    var diffCount = 0;
+    Object.keys(state.current).forEach(function (k) {
+      if (!!state.current[k] !== !!state.initial[k]) diffCount++;
+    });
+    var btn = $('#btnSave');
+    var rst = $('#btnReset');
+    var sum = $('#summaryTxt');
+    if (diffCount === 0) {
+      btn.disabled = true;
+      rst.disabled = true;
+      sum.innerHTML = 'Sin cambios pendientes';
+    } else {
+      btn.disabled = false;
+      rst.disabled = false;
+      sum.innerHTML = '<strong>' + diffCount + '</strong> cambio' + (diffCount === 1 ? '' : 's') + ' sin guardar' +
+                      (state.activePreset ? ' · preset <strong>' + state.activePreset + '</strong>' : '');
+    }
+  }
+
+  function rerender() {
+    renderPresets();
+    renderModules();
+    renderPreview();
+    renderSaveBar();
+  }
+
+  // ================== ACTIONS =================
+  function applyPreset(id) {
+    var p = PRESETS.find(function (x) { return x.id === id; });
+    if (!p) return;
+    if (id === 'personalizado' || !p.keys) {
+      state.activePreset = 'personalizado';
+      rerender();
+      return;
+    }
+    var keySet = {};
+    p.keys.forEach(function (k) { keySet[k] = true; });
+    keySet['pos'] = true;
+    MODULES.forEach(function (m) { state.current[m.key] = !!keySet[m.key]; });
+    state.activePreset = id;
+    rerender();
+    toast('Preset "' + p.name + '" aplicado, recuerda guardar', 'warn');
+  }
+
+  function resetChanges() {
+    state.current = JSON.parse(JSON.stringify(state.initial));
+    state.activePreset = null;
+    rerender();
+    toast('Cambios deshechos', 'ok');
+  }
+
+  async function saveChanges() {
+    var btn = $('#btnSave');
+    btn.disabled = true;
+    btn.textContent = 'Guardando...';
+    var enabled = Object.keys(state.current).filter(function (k) { return state.current[k]; });
+    try {
+      var resp = await fetch('/api/tenant/modules', {
+        method: 'PATCH',
+        headers: authHeaders(),
+        body: JSON.stringify({ enabled_modules: enabled, preset: state.activePreset || null })
+      });
+      var json = await resp.json();
+      if (!resp.ok || !json.ok) throw new Error(json.error_message || json.error || 'Error guardando');
+      // success: update initial to match current
+      state.initial = JSON.parse(JSON.stringify(state.current));
+      state.activePreset = null;
+      btn.textContent = 'Guardar cambios';
+      rerender();
+      var inv = json.invalidated_users || 0;
+      toast('Guardado · ' + inv + ' sesión' + (inv === 1 ? '' : 'es') + ' refrescada' + (inv === 1 ? '' : 's'), 'ok');
+    } catch (e) {
+      btn.disabled = false;
+      btn.textContent = 'Guardar cambios';
+      toast('Error: ' + (e.message || 'no se pudo guardar'), 'err');
+    }
+  }
+
+  // ================== USERS TAB =================
+  function renderUsers() {
+    var rows = state.users.map(function (u) {
+      var enabledOverrides = Object.keys(u.overrides || {}).filter(function (k) {
+        return u.overrides[k] === 'enabled';
+      });
+      var disabledOverrides = Object.keys(u.overrides || {}).filter(function (k) {
+        return u.overrides[k] === 'disabled';
+      });
+      var summary = enabledOverrides.length || disabledOverrides.length
+        ? (enabledOverrides.length + ' permitidos · ' + disabledOverrides.length + ' bloqueados')
+        : '<span style="color:var(--text-3);">sin overrides (hereda del rol)</span>';
+      var roleCls = (String(u.role || '').toLowerCase() === 'owner') ? 'role-pill owner' : 'role-pill';
+      return (
+        '<tr>' +
+          '<td><strong>' + (u.full_name || u.email || u.id) + '</strong><div style="font-size:11px;color:var(--text-3);">' + (u.email || '') + '</div></td>' +
+          '<td><span class="' + roleCls + '">' + (u.role || '—') + '</span></td>' +
+          '<td>' + summary + '</td>' +
+          '<td style="text-align:right;"><button class="btn sm" data-edit-user="' + u.id + '" type="button">Editar permisos</button></td>' +
+        '</tr>'
+      );
+    }).join('');
+
+    if (!state.users.length) {
+      $('#usersBody').innerHTML = '<div style="padding:30px;text-align:center;color:var(--text-3);font-size:13px;">No hay usuarios activos.</div>';
+      return;
+    }
+
+    $('#usersBody').innerHTML =
+      '<table class="tbl"><thead><tr>' +
+        '<th>Usuario</th><th>Rol</th><th>Overrides</th><th></th>' +
+      '</tr></thead><tbody>' + rows + '</tbody></table>';
+
+    $all('#usersBody [data-edit-user]').forEach(function (b) {
+      b.addEventListener('click', function () { openUserModal(b.dataset.editUser); });
+    });
+  }
+
+  function openUserModal(userId) {
+    var user = state.users.find(function (u) { return u.id === userId; });
+    if (!user) return;
+    $('#userModalTitle').textContent = 'Permisos: ' + (user.full_name || user.email);
+    $('#userModalSub').textContent = (user.email || '') + ' · ' + (user.role || '');
+    var enabledTenant = Object.keys(state.current).filter(function (k) { return state.current[k]; });
+    var html = MODULES.map(function (m) {
+      var tenantHas = enabledTenant.indexOf(m.key) >= 0;
+      var ov = (user.overrides || {})[m.key];
+      var checked = ov === 'enabled' || (!ov && tenantHas);
+      var disabled = !tenantHas;
+      return (
+        '<label class="chk-row' + (disabled ? ' disabled' : '') + '">' +
+          '<input type="checkbox" ' + (checked ? 'checked' : '') + (disabled ? ' disabled' : '') +
+            ' data-key="' + m.key + '">' +
+          '<span class="lbl">' + m.emoji + ' ' + m.name + '</span>' +
+        '</label>'
+      );
+    }).join('');
+    $('#chkList').innerHTML = html;
+    $('#userModalSave').dataset.userId = userId;
+    $('#userModalBg').classList.remove('hidden');
+  }
+
+  function closeUserModal() { $('#userModalBg').classList.add('hidden'); }
+
+  async function saveUserOverrides() {
+    var userId = $('#userModalSave').dataset.userId;
+    var saveBtn = $('#userModalSave');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Guardando...';
+    var modules = [];
+    $all('#chkList input[type=checkbox]').forEach(function (chk) {
+      if (chk.disabled) return;
+      modules.push({ key: chk.dataset.key, status: chk.checked ? 'enabled' : 'disabled' });
+    });
+    try {
+      var resp = await fetch('/api/users/' + encodeURIComponent(userId) + '/permissions', {
+        method: 'PATCH', headers: authHeaders(),
+        body: JSON.stringify({ modules: modules })
+      });
+      var json = await resp.json();
+      if (!resp.ok || !json.ok) throw new Error(json.error_message || json.error || 'Error guardando');
+      saveBtn.disabled = false; saveBtn.textContent = 'Guardar';
+      closeUserModal();
+      toast('Permisos del usuario guardados', 'ok');
+      await loadUsers();
+    } catch (e) {
+      saveBtn.disabled = false; saveBtn.textContent = 'Guardar';
+      toast('Error: ' + (e.message || 'no se pudo guardar'), 'err');
+    }
+  }
+
+  // ================== LOAD DATA =================
+  async function loadModules() {
+    try {
+      var resp = await fetch('/api/tenant/modules/active', { headers: authHeaders() });
+      var json = await resp.json();
+      if (!resp.ok || !json.ok) throw new Error(json.error || 'no se pudo leer módulos');
+      var enabled = json.enabled || [];
+      var enabledSet = {}; enabled.forEach(function (k) { enabledSet[k] = true; });
+      enabledSet['pos'] = true;
+      MODULES.forEach(function (m) { enabledSet[m.key] = !!enabledSet[m.key] || !!m.always_on; });
+      state.initial = JSON.parse(JSON.stringify(enabledSet));
+      state.current = JSON.parse(JSON.stringify(enabledSet));
+    } catch (e) {
+      // first-time tenant: default everything off except POS
+      var def = {}; MODULES.forEach(function (m) { def[m.key] = !!m.always_on; });
+      state.initial = JSON.parse(JSON.stringify(def));
+      state.current = JSON.parse(JSON.stringify(def));
+      console.warn('[mis-modulos] fallback to defaults:', e);
+    }
+  }
+
+  async function loadUsers() {
+    try {
+      var resp = await fetch('/api/tenant/users/with-modules', { headers: authHeaders() });
+      var json = await resp.json();
+      if (!resp.ok || !json.ok) throw new Error(json.error || 'no se pudo leer usuarios');
+      state.users = json.users || [];
+    } catch (e) {
+      state.users = [];
+      console.warn('[mis-modulos] users load fail:', e);
+    }
+    renderUsers();
+  }
+
+  // ================== TABS =================
+  function setupTabs() {
+    $all('#tabs .tab').forEach(function (t) {
+      t.addEventListener('click', function () {
+        $all('#tabs .tab').forEach(function (x) { x.classList.remove('active'); });
+        t.classList.add('active');
+        var name = t.dataset.tab;
+        $('#tab-modules').classList.toggle('hidden', name !== 'modules');
+        $('#tab-users').classList.toggle('hidden', name !== 'users');
+        if (name === 'users' && !state.users.length) loadUsers();
+      });
+    });
+  }
+
+  // ================== INIT =================
+  async function init() {
+    if (!isOwnerLike()) {
+      $('#loading').innerHTML = '<div style="text-align:center;color:var(--err);"><strong>Acceso denegado</strong><br><span style="color:var(--text-3);font-size:12px;">Solo el propietario puede configurar módulos.</span><br><a href="/volvix_owner_panel_v7.html" style="color:var(--accent);font-size:12px;">&larr; Volver</a></div>';
+      return;
+    }
+    var p = jwtPayload();
+    if (p) $('#userBadge').textContent = (p.email || '') + ' · ' + (p.tenant_id || '');
+
+    await loadModules();
+    setupTabs();
+    rerender();
+
+    $('#btnSave').addEventListener('click', saveChanges);
+    $('#btnReset').addEventListener('click', resetChanges);
+    $('#userModalCancel').addEventListener('click', closeUserModal);
+    $('#userModalSave').addEventListener('click', saveUserOverrides);
+    $('#userModalBg').addEventListener('click', function (e) {
+      if (e.target === e.currentTarget) closeUserModal();
+    });
+
+    $('#loading').style.display = 'none';
+    $('#appRoot').style.display = 'block';
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+
+</body>
+</html>

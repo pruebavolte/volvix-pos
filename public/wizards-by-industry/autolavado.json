@@ -1,0 +1,55 @@
+{
+  "id": "autolavado-first-sale",
+  "title": "Tu primer servicio en autolavado",
+  "industry": "autolavado",
+  "duration_min": 4,
+  "modules_required": ["pos", "services", "vehicle_registry"],
+  "roles": ["owner", "cashier", "operator"],
+  "demo_catalog_ref": "R12a",
+  "steps": [
+    {
+      "id": "step1",
+      "title": "Tus paquetes y servicios",
+      "text": "Lavado Express (auto) $80, Lavado Completo (auto) $150, Lavado Premium $280, Encerado $120, Aspirado Interior $65, Lavado Camioneta $185, Lavado SUV $220, Lavado Pickup $250, Detallado Total Auto $850, Detallado Total Camioneta $1150, Lavado Motor $185, Pulido Faros $250, Tratamiento Cuero $385. Productos: Aroma Auto $45, Limpiador Tablero $85, Cera Liquida 500ml $185, Toallas Microfibra $65, Shampoo Premium 1L $245.",
+      "image": "/tutorials/01-primera-venta.html",
+      "action": "next"
+    },
+    {
+      "id": "step2",
+      "title": "Registra el vehiculo",
+      "text": "Cliente llega en auto compacto. Captura: placa ABC-123, marca Nissan, modelo Versa, color blanco. Si vuelve, los datos quedan guardados.",
+      "highlight_selector": "#btn-new-vehicle",
+      "action": "wait_for_vehicle_register"
+    },
+    {
+      "id": "step3",
+      "title": "Selecciona Lavado Premium",
+      "text": "Busca 'premium' y selecciona Lavado Premium $280.",
+      "highlight_selector": "#search-input",
+      "action": "wait_for_search",
+      "expected_query": "premium"
+    },
+    {
+      "id": "step4",
+      "title": "Agrega aroma + cera",
+      "text": "Cliente acepta upgrade: Aroma $45 + Cera Liquida $185. Total: $510.",
+      "highlight_selector": ".search-result-item",
+      "action": "wait_for_multiple_items",
+      "expected_items": 3
+    },
+    {
+      "id": "step5",
+      "title": "Cobra y entrega ficha",
+      "text": "Cliente paga $510 con tarjeta. Imprime ficha con numero de turno. Llamalo cuando este listo.",
+      "highlight_selector": "#btn-cobrar",
+      "action": "wait_for_payment"
+    },
+    {
+      "id": "step6",
+      "title": "Servicio en marcha",
+      "text": "Operador inicia servicio. Cliente recibe SMS cuando este listo. Ve a 'En servicio' para tracking.",
+      "action": "complete",
+      "next_link": "/servicios-activos"
+    }
+  ]
+}

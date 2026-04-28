@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tutoriales Volvix POS — Galería</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#e2e8f0;min-height:100vh;padding:24px}
+.wrap{max-width:1100px;margin:0 auto}
+header{text-align:center;margin-bottom:32px}
+h1{font-size:2rem;background:linear-gradient(90deg,#38bdf8,#a78bfa);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:6px}
+.subtitle{color:#94a3b8;margin-bottom:18px}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:24px;background:#1e293b;padding:14px;border-radius:12px}
+.toolbar input,.toolbar select{background:#0b1220;color:#e2e8f0;border:1px solid #334155;border-radius:6px;padding:8px 12px;font-size:.9rem}
+.toolbar input{flex:1;min-width:200px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}
+.card{background:#1e293b;border-radius:12px;overflow:hidden;border:1px solid #334155;transition:.2s;cursor:pointer;display:flex;flex-direction:column}
+.card:hover{transform:translateY(-3px);border-color:#38bdf8;box-shadow:0 8px 24px rgba(56,189,248,.2)}
+.card .preview{height:140px;background:#0b1220;display:flex;align-items:center;justify-content:center;font-size:3rem;border-bottom:1px solid #334155;position:relative;overflow:hidden}
+.card .badge{position:absolute;top:8px;right:8px;background:#3b82f6;color:#fff;font-size:.7rem;padding:2px 8px;border-radius:10px}
+.card .body{padding:14px;flex:1;display:flex;flex-direction:column}
+.card h3{font-size:1rem;margin-bottom:6px;color:#fde047}
+.card p{color:#94a3b8;font-size:.82rem;flex:1}
+.card .meta{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+.tag{background:#334155;color:#cbd5e1;font-size:.7rem;padding:2px 8px;border-radius:10px}
+.tag.giro{background:#7c3aed}
+.tag.lvl{background:#10b981}
+.empty{text-align:center;color:#94a3b8;padding:40px;grid-column:1/-1}
+footer{text-align:center;margin-top:32px;color:#64748b;font-size:.8rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>📚 Tutoriales Volvix POS</h1>
+  <p class="subtitle">10 mini-tutoriales animados · Aprende cada feature en menos de 1 minuto</p>
+</header>
+<div class="toolbar">
+  <input id="q" placeholder="🔍 Buscar tutorial..." oninput="render()">
+  <select id="filterGiro" onchange="render()">
+    <option value="">Todos los giros</option>
+    <option value="general">General</option>
+    <option value="cafeteria">Cafetería</option>
+    <option value="restaurante">Restaurante</option>
+    <option value="tienda">Tienda</option>
+  </select>
+  <select id="filterLvl" onchange="render()">
+    <option value="">Todos los niveles</option>
+    <option value="principiante">Principiante</option>
+    <option value="intermedio">Intermedio</option>
+    <option value="avanzado">Avanzado</option>
+  </select>
+  <select id="filterFeat" onchange="render()">
+    <option value="">Todas las features</option>
+    <option value="ventas">Ventas</option>
+    <option value="inventario">Inventario</option>
+    <option value="config">Configuración</option>
+    <option value="finanzas">Finanzas</option>
+  </select>
+</div>
+<div class="grid" id="grid"></div>
+<footer>
+  <p>Volvix POS · Tutoriales offline · Self-contained HTML + CSS</p>
+</footer>
+</div>
+<script>
+const TUTORIALS=[
+  {id:"01-primera-venta",num:"01",icon:"💳",title:"Tu primera venta",desc:"Buscar producto, agregar al carrito, cobrar e imprimir ticket.",giro:"general",lvl:"principiante",feat:"ventas",dur:"30s"},
+  {id:"02-crear-producto",num:"02",icon:"📦",title:"Crear un producto",desc:"Abrir inventario, llenar formulario y guardar producto nuevo.",giro:"general",lvl:"principiante",feat:"inventario",dur:"25s"},
+  {id:"03-cierre-z",num:"03",icon:"🔒",title:"Cierre Z (fin del día)",desc:"Conciliar ventas, contar caja y cerrar el día.",giro:"general",lvl:"intermedio",feat:"finanzas",dur:"25s"},
+  {id:"04-modo-offline",num:"04",icon:"📴",title:"Modo offline",desc:"Cobrar sin internet y sincronizar al reconectar.",giro:"general",lvl:"intermedio",feat:"ventas",dur:"25s"},
+  {id:"05-cliente-credito",num:"05",icon:"📋",title:"Cliente a crédito",desc:"Vender a crédito, registrar abonos y ver saldo.",giro:"tienda",lvl:"intermedio",feat:"finanzas",dur:"25s"},
+  {id:"06-mis-modulos",num:"06",icon:"⚙️",title:"Activar módulos",desc:"Toggle de módulos según lo que tu negocio necesita.",giro:"general",lvl:"principiante",feat:"config",dur:"25s"},
+  {id:"07-etiqueta-disenar",num:"07",icon:"🏷️",title:"Diseñar etiqueta",desc:"Designer drag-and-drop para etiquetas con código de barras.",giro:"tienda",lvl:"avanzado",feat:"inventario",dur:"25s"},
+  {id:"08-devolucion",num:"08",icon:"↩️",title:"Devolución",desc:"Buscar venta, marcar items y procesar reembolso con nota.",giro:"general",lvl:"intermedio",feat:"ventas",dur:"25s"},
+  {id:"09-promocion",num:"09",icon:"🎁",title:"Crear promoción",desc:"Promo 2x1 con horario y aplicación automática.",giro:"cafeteria",lvl:"avanzado",feat:"ventas",dur:"25s"},
+  {id:"10-registro-3min",num:"10",icon:"🚀",title:"Registro en 3 minutos",desc:"Crea tu cuenta, verifica OTP y comienza a vender.",giro:"general",lvl:"principiante",feat:"config",dur:"25s"}
+];
+function render(){
+  const q=document.getElementById("q").value.toLowerCase();
+  const fg=document.getElementById("filterGiro").value;
+  const fl=document.getElementById("filterLvl").value;
+  const ff=document.getElementById("filterFeat").value;
+  const filtered=TUTORIALS.filter(t=>{
+    if(q && !(t.title.toLowerCase().includes(q)||t.desc.toLowerCase().includes(q))) return false;
+    if(fg && t.giro!==fg && t.giro!=="general") return false;
+    if(fl && t.lvl!==fl) return false;
+    if(ff && t.feat!==ff) return false;
+    return true;
+  });
+  const g=document.getElementById("grid");
+  if(!filtered.length){g.innerHTML='<div class="empty">No hay tutoriales que coincidan con tus filtros.</div>';return}
+  g.innerHTML=filtered.map(t=>`
+    <div class="card" onclick="window.open('${t.id}.html','_blank')">
+      <div class="preview">${t.icon}<span class="badge">#${t.num}</span></div>
+      <div class="body">
+        <h3>${t.title}</h3>
+        <p>${t.desc}</p>
+        <div class="meta">
+          <span class="tag giro">${t.giro}</span>
+          <span class="tag lvl">${t.lvl}</span>
+          <span class="tag">${t.feat}</span>
+          <span class="tag">⏱️ ${t.dur}</span>
+        </div>
+      </div>
+    </div>`).join("");
+}
+render();
+</script>
+</body>
+</html>

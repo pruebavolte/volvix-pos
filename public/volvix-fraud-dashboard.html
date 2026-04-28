@@ -60,15 +60,31 @@
 </main>
 <script>
 const API = (window.API_BASE || '') + '/api/fraud';
-function token() { return localStorage.getItem('volvix_jwt') || ''; }
+// R28: usar la key estándar del sistema; redirigir a login si 401
+function token() {
+  return localStorage.getItem('volvix_token')
+      || localStorage.getItem('volvixAuthToken')
+      || localStorage.getItem('volvix_jwt')
+      || '';
+}
+function gotoLogin() {
+  const back = encodeURIComponent(location.pathname + location.search);
+  location.replace('/login.html?expired=1&redirect=' + back);
+}
 async function call(path, opts) {
   opts = opts || {};
+  const tk = token();
+  if (!tk) { gotoLogin(); throw new Error('sin sesión'); }
   opts.headers = Object.assign({
     'Content-Type':'application/json',
-    'Authorization':'Bearer ' + token()
+    'Authorization':'Bearer ' + tk
   }, opts.headers || {});
   const r = await fetch(API + path, opts);
-  if (!r.ok) throw new Error('HTTP ' + r.status);
+  if (r.status === 401 || r.status === 403) { gotoLogin(); throw new Error('sin permisos'); }
+  if (!r.ok) {
+    const txt = r.status >= 500 ? 'Servicio temporalmente no disponible' : 'No se pudieron cargar las alertas';
+    throw new Error(txt + ' (' + r.status + ')');
+  }
   return r.json();
 }
 function fmtScore(s) {

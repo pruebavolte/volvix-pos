@@ -1,0 +1,213 @@
+{
+  "version": 1,
+  "updated": "2026-04-28",
+  "tours": {
+    "pos-cashier-onboarding": {
+      "name": "Onboarding de cajero",
+      "description": "Aprende a usar el POS en 8 pasos",
+      "audience": "cashier",
+      "steps": [
+        {
+          "title": "Bienvenido al POS Volvix",
+          "text": "Te guiaremos por las funciones esenciales para que empieces a vender de inmediato. Puedes saltar este tour en cualquier momento.",
+          "target": "body",
+          "placement": "bottom"
+        },
+        {
+          "title": "Buscar productos",
+          "text": "Usa esta barra para buscar por nombre, SKU o codigo de barras. Tambien puedes escanear directamente con tu lector.",
+          "target": "#pos-search, [data-tour='pos-search'], input[name='search'], #search-product",
+          "placement": "bottom"
+        },
+        {
+          "title": "Catalogo de productos",
+          "text": "Haz clic en cualquier producto del catalogo para agregarlo al ticket actual. Las categorias te ayudan a filtrar.",
+          "target": "#pos-catalog, [data-tour='pos-catalog'], .product-grid, .pos-products",
+          "placement": "right"
+        },
+        {
+          "title": "Ticket actual",
+          "text": "Aqui veras los productos del ticket. Puedes ajustar cantidades, eliminar lineas o aplicar descuentos.",
+          "target": "#pos-cart, [data-tour='pos-cart'], .cart-items, .ticket-list",
+          "placement": "left"
+        },
+        {
+          "title": "Total y subtotal",
+          "text": "El total se actualiza en tiempo real. Incluye impuestos automaticamente segun tu configuracion fiscal.",
+          "target": "#pos-total, [data-tour='pos-total'], .cart-total, .pos-summary",
+          "placement": "left"
+        },
+        {
+          "title": "Cobrar",
+          "text": "Pulsa este boton para procesar el pago. Soporta efectivo, tarjeta, transferencia y vales.",
+          "target": "#pos-pay, [data-tour='pos-pay'], button.btn-pay, button.checkout-btn",
+          "placement": "top"
+        },
+        {
+          "title": "Apertura y corte de caja",
+          "text": "Cada turno empieza con una apertura y termina con un corte. Tu encargado tiene los reportes consolidados.",
+          "target": "#pos-shift, [data-tour='pos-shift'], .shift-controls, button.btn-shift",
+          "placement": "bottom"
+        },
+        {
+          "title": "Listo para vender",
+          "text": "Has completado el recorrido. Si tienes dudas, abre el menu de Ayuda en cualquier momento. Mucho exito!",
+          "target": "body",
+          "placement": "bottom"
+        }
+      ]
+    },
+
+    "owner-first-time": {
+      "name": "Primer ingreso del propietario",
+      "description": "Conoce el panel de owner en 6 pasos",
+      "audience": "owner",
+      "steps": [
+        {
+          "title": "Bienvenido propietario",
+          "text": "Este es tu panel de control. Desde aqui administras sucursales, modulos y reportes globales.",
+          "target": "body",
+          "placement": "bottom"
+        },
+        {
+          "title": "Mis Modulos",
+          "text": "Aqui activas o desactivas modulos para tu negocio: inventario, KDS, citas, cotizaciones y mas.",
+          "target": "#owner-modules, [data-tour='owner-modules'], .modules-panel, a[href*='modulos']",
+          "placement": "right"
+        },
+        {
+          "title": "Sucursales",
+          "text": "Agrega y administra tus sucursales. Cada una tiene su propio inventario y personal asignado.",
+          "target": "#owner-branches, [data-tour='owner-branches'], .branches-panel, a[href*='sucursales']",
+          "placement": "right"
+        },
+        {
+          "title": "Reportes globales",
+          "text": "Consulta ventas, utilidad, top productos y comparativas entre sucursales en tiempo real.",
+          "target": "#owner-reports, [data-tour='owner-reports'], .reports-panel, a[href*='reportes']",
+          "placement": "right"
+        },
+        {
+          "title": "Equipo y permisos",
+          "text": "Crea usuarios para tus cajeros, gerentes y meseros. Asigna roles y permisos granulares.",
+          "target": "#owner-team, [data-tour='owner-team'], .team-panel, a[href*='usuarios']",
+          "placement": "right"
+        },
+        {
+          "title": "Soporte 24/7",
+          "text": "Si necesitas ayuda, usa el chat de soporte o consulta los tutoriales en video. Estamos contigo.",
+          "target": "body",
+          "placement": "bottom"
+        }
+      ]
+    },
+
+    "inventory-deep-dive": {
+      "name": "Gestion de inventario",
+      "description": "Domina el inventario en 5 pasos",
+      "audience": "manager",
+      "steps": [
+        {
+          "title": "Inventario en Volvix",
+          "text": "Te mostraremos como mantener tu stock al dia, recibir mercancia y detectar mermas.",
+          "target": "body",
+          "placement": "bottom"
+        },
+        {
+          "title": "Lista de productos",
+          "text": "Aqui ves todos tus productos con su stock actual, costo, precio y margen. Filtra por categoria o sucursal.",
+          "target": "#inv-list, [data-tour='inv-list'], .inventory-table, table.products",
+          "placement": "top"
+        },
+        {
+          "title": "Recepcion de mercancia",
+          "text": "Cuando recibas pedidos, registra la entrada aqui para actualizar stock y costos automaticamente.",
+          "target": "#inv-receive, [data-tour='inv-receive'], button.btn-receive, a[href*='recepcion']",
+          "placement": "bottom"
+        },
+        {
+          "title": "Ajustes y conteos",
+          "text": "Realiza conteos fisicos y ajustes de inventario. El sistema registra el motivo de cada ajuste.",
+          "target": "#inv-adjust, [data-tour='inv-adjust'], button.btn-adjust, a[href*='conteo']",
+          "placement": "bottom"
+        },
+        {
+          "title": "Alertas de stock bajo",
+          "text": "Configura limites por producto. Recibiras avisos cuando algo este por agotarse.",
+          "target": "#inv-alerts, [data-tour='inv-alerts'], .stock-alerts, a[href*='alertas']",
+          "placement": "left"
+        }
+      ]
+    },
+
+    "kds-cocina": {
+      "name": "KDS de cocina",
+      "description": "Como atender comandas en 4 pasos",
+      "audience": "kitchen",
+      "steps": [
+        {
+          "title": "Pantalla de cocina (KDS)",
+          "text": "Aqui veras todas las comandas activas en tiempo real. Las nuevas entran automaticamente.",
+          "target": "body",
+          "placement": "bottom"
+        },
+        {
+          "title": "Tarjeta de comanda",
+          "text": "Cada tarjeta es un pedido. Muestra mesa, productos, notas especiales y tiempo transcurrido.",
+          "target": "#kds-card, [data-tour='kds-card'], .kds-ticket, .order-card",
+          "placement": "top"
+        },
+        {
+          "title": "Marcar como listo",
+          "text": "Cuando termines un platillo, toca este boton. El mesero recibe aviso de que esta listo para recoger.",
+          "target": "#kds-ready, [data-tour='kds-ready'], button.btn-ready, button.kds-done",
+          "placement": "top"
+        },
+        {
+          "title": "Tiempos y prioridades",
+          "text": "Las comandas con mas tiempo se resaltan en rojo. Atiende primero las urgentes para mejorar tu rendimiento.",
+          "target": "#kds-timer, [data-tour='kds-timer'], .kds-elapsed, .order-timer",
+          "placement": "bottom"
+        }
+      ]
+    },
+
+    "etiqueta-designer": {
+      "name": "Disenador de etiquetas",
+      "description": "Crea e imprime etiquetas en 5 pasos",
+      "audience": "manager",
+      "steps": [
+        {
+          "title": "Etiquetas y precios",
+          "text": "Disena, guarda e imprime etiquetas de codigo de barras para tu inventario. Compatible con la mayoria de impresoras termicas.",
+          "target": "body",
+          "placement": "bottom"
+        },
+        {
+          "title": "Selecciona productos",
+          "text": "Elige uno o varios productos para imprimir sus etiquetas. Puedes filtrar por categoria.",
+          "target": "#etq-products, [data-tour='etq-products'], .label-products, .label-picker",
+          "placement": "right"
+        },
+        {
+          "title": "Plantilla de etiqueta",
+          "text": "Escoge entre plantillas predefinidas o crea la tuya. Define tamano, campos y posicion de cada elemento.",
+          "target": "#etq-template, [data-tour='etq-template'], .label-template, .template-picker",
+          "placement": "left"
+        },
+        {
+          "title": "Vista previa",
+          "text": "Asegurate de que la informacion se ve bien antes de imprimir. Puedes ajustar el zoom y la cantidad por producto.",
+          "target": "#etq-preview, [data-tour='etq-preview'], .label-preview, .preview-area",
+          "placement": "top"
+        },
+        {
+          "title": "Imprimir",
+          "text": "Envia las etiquetas a tu impresora termica. Volvix recuerda tus configuraciones favoritas para la proxima vez.",
+          "target": "#etq-print, [data-tour='etq-print'], button.btn-print, button.print-labels",
+          "placement": "top"
+        }
+      ]
+    }
+  }
+}

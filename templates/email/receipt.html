@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comprobante de venta</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1a1a1a;">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f4f6f8;">
+  <tr>
+    <td align="center" style="padding:24px 12px;">
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="max-width:600px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+        <tr>
+          <td style="background:#0f766e;padding:28px 24px;color:#ffffff;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+              <tr>
+                <td style="vertical-align:middle;">
+                  <h1 style="margin:0;font-size:22px;font-weight:700;">{{business_name}}</h1>
+                  <p style="margin:4px 0 0;font-size:13px;color:#ccfbf1;">Comprobante de venta</p>
+                </td>
+                <td align="right" style="vertical-align:middle;">
+                  <p style="margin:0;font-size:13px;color:#ccfbf1;">Ticket</p>
+                  <p style="margin:0;font-size:18px;font-weight:700;">#{{sale_number}}</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:24px 28px 8px;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="font-size:14px;color:#6b7280;">
+              <tr>
+                <td><strong style="color:#1a1a1a;">Fecha:</strong> {{date}}</td>
+                <td align="right"><strong style="color:#1a1a1a;">Pago:</strong> {{payment_method}}</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:8px 28px 0;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;font-size:14px;">
+              <thead>
+                <tr style="background:#f3f4f6;">
+                  <th align="left" style="padding:10px 12px;font-weight:600;color:#374151;border-bottom:2px solid #e5e7eb;">Producto</th>
+                  <th align="center" style="padding:10px 8px;font-weight:600;color:#374151;border-bottom:2px solid #e5e7eb;">Cant.</th>
+                  <th align="right" style="padding:10px 12px;font-weight:600;color:#374151;border-bottom:2px solid #e5e7eb;">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{sale_items}}
+              </tbody>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:0 28px;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top:16px;border-top:2px solid #e5e7eb;">
+              <tr>
+                <td style="padding:14px 12px;font-size:18px;font-weight:700;color:#0f766e;">TOTAL</td>
+                <td align="right" style="padding:14px 12px;font-size:22px;font-weight:700;color:#0f766e;">${{total}}</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:8px 28px 24px;">
+            {{cfdi_section}}
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#f9fafb;padding:20px 28px;text-align:center;font-size:13px;color:#6b7280;border-top:1px solid #e5e7eb;">
+            <p style="margin:0 0 6px;font-weight:600;color:#374151;">Gracias por tu compra!</p>
+            <p style="margin:0;">Conserva este comprobante para cualquier aclaracion.</p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,48 @@
+{
+  "id": "abarrotes-first-sale",
+  "title": "Tu primera venta en abarrotes",
+  "industry": "abarrotes",
+  "duration_min": 3,
+  "modules_required": ["pos", "inventory", "barcode"],
+  "roles": ["owner", "cashier", "manager", "stockist"],
+  "demo_catalog_ref": "R12a",
+  "steps": [
+    {
+      "id": "step1",
+      "title": "Catalogo demo: 30 productos basicos",
+      "text": "Coca-Cola 600ml $18, Sabritas Original $17, Pan Bimbo $42, Leche Lala 1L $28, Huevos San Juan 18pz $58, Frijol Bayo 1kg $35, Arroz Verde Valle 1kg $32, Aceite Capullo 1L $48, Azucar Estandar 1kg $26, Sal La Fina 1kg $14, Galletas Marias $22, Cafe Soluble Nescafe 200g $115, Atun Dolores $24, Sardinas El Dorado $18, Mayonesa Hellmans 390g $52, Salsa Valentina 370ml $28, Chile en Polvo Tajin 142g $38, Detergente Ariel 1kg $65, Papel Higienico Suavel 4 rollos $48, Pasta Dental Colgate $32...",
+      "image": "/tutorials/01-primera-venta.html",
+      "action": "next"
+    },
+    {
+      "id": "step2",
+      "title": "Escanea el primer producto",
+      "text": "Conecta tu lector de codigo de barras o escribe el codigo. Demo: codigo 7501234567890 (Coca-Cola).",
+      "highlight_selector": "#barcode-input",
+      "action": "wait_for_barcode",
+      "expected_barcode": "7501234567890"
+    },
+    {
+      "id": "step3",
+      "title": "Agrega mas productos",
+      "text": "Cliente trae: 1 Coca, 2 Sabritas, 1 Pan Bimbo. Busca cada uno o escanea sus codigos.",
+      "highlight_selector": "#search-input",
+      "action": "wait_for_multiple_items",
+      "expected_items": 3
+    },
+    {
+      "id": "step4",
+      "title": "Cobra y entrega cambio",
+      "text": "Total $94. Cliente paga $100. Cambio $6. Press F12.",
+      "highlight_selector": "#btn-cobrar",
+      "action": "wait_for_payment"
+    },
+    {
+      "id": "step5",
+      "title": "Inventario actualizado",
+      "text": "Stock decrementado automaticamente. Si Coca-Cola baja de 5, te avisara para reordenar.",
+      "action": "complete",
+      "next_link": "/inventario"
+    }
+  ]
+}

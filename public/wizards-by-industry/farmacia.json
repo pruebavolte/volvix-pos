@@ -1,0 +1,47 @@
+{
+  "id": "farmacia-first-sale",
+  "title": "Tu primera venta en farmacia",
+  "industry": "farmacia",
+  "duration_min": 4,
+  "modules_required": ["pos", "inventory", "controlled_substances"],
+  "roles": ["owner", "cashier", "pharmacist"],
+  "demo_catalog_ref": "R12a",
+  "steps": [
+    {
+      "id": "step1",
+      "title": "Tu botiquin demo cargado",
+      "text": "Paracetamol 500mg c/20 $48, Ibuprofeno 400mg c/30 $85, Aspirina 100mg c/30 $58, Naproxeno 250mg c/30 $95, Loratadina 10mg c/10 $72, Omeprazol 20mg c/14 $128, Amoxicilina 500mg c/12 $145 (con receta), Metformina 850mg c/30 $115, Losartan 50mg c/30 $165, Vitamina C 1g c/10 $48, Multivitaminico c/30 $185, Suero Vida Suero Oral $14, Termometro Digital $185, Banditas $35, Alcohol 70% 250ml $28.",
+      "image": "/tutorials/01-primera-venta.html",
+      "action": "next"
+    },
+    {
+      "id": "step2",
+      "title": "Cliente pide Paracetamol",
+      "text": "Busca 'paracetamol' y agregalo. Veras precio $48.",
+      "highlight_selector": "#search-input",
+      "action": "wait_for_search",
+      "expected_query": "paracetamol"
+    },
+    {
+      "id": "step3",
+      "title": "Producto controlado? Captura receta",
+      "text": "Si fuera Amoxicilina (antibiotico), el sistema te pediria foto/numero de receta. Paracetamol no lo requiere, asi que sigue.",
+      "highlight_selector": ".search-result-item",
+      "action": "wait_for_cart"
+    },
+    {
+      "id": "step4",
+      "title": "Cobra con tarjeta",
+      "text": "Total $48. Cliente paga con tarjeta. Inserta tarjeta o NFC.",
+      "highlight_selector": "#btn-cobrar",
+      "action": "wait_for_payment"
+    },
+    {
+      "id": "step5",
+      "title": "Listo. CFDI?",
+      "text": "Cliente quiere factura? Presiona 'Generar CFDI', captura RFC. Si no, listo.",
+      "action": "complete",
+      "next_link": "/facturacion"
+    }
+  ]
+}

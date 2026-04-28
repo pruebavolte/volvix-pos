@@ -1,0 +1,53 @@
+/* Volvix Tutorials shared styles */
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+body{background:#0f172a;color:#e2e8f0;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px}
+.tutorial-container{width:100%;max-width:760px;background:#1e293b;border-radius:14px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+h1{font-size:1.4rem;margin-bottom:6px;color:#38bdf8}
+.subtitle{color:#94a3b8;font-size:.85rem}
+.stage{position:relative;height:380px;background:#0b1220;border-radius:10px;border:1px solid #334155;overflow:hidden;margin-top:16px}
+.step{position:absolute;inset:0;padding:20px;opacity:0}
+.step h2{font-size:1.05rem;color:#fde047;margin-bottom:10px}
+.mock{background:#fff;color:#0f172a;border-radius:8px;padding:14px;height:280px;position:relative;overflow:hidden}
+.mock h3{font-size:1rem;margin-bottom:10px}
+.input{width:100%;border:2px solid #cbd5e1;border-radius:6px;padding:8px 12px;font-size:.9rem;margin-bottom:8px}
+.btn{background:#10b981;color:#fff;border:none;padding:10px 18px;border-radius:6px;font-weight:600;font-size:.9rem;cursor:pointer;margin-top:8px}
+.btn-blue{background:#3b82f6}
+.btn-red{background:#ef4444}
+.btn-yellow{background:#f59e0b}
+.row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e2e8f0;font-size:.85rem}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.card{background:#f1f5f9;border-radius:6px;padding:10px;text-align:center;font-size:.78rem;border:1px solid transparent}
+.card.hot{border-color:#3b82f6;background:#dbeafe}
+.cursor{position:absolute;font-size:1.6rem;pointer-events:none;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4));z-index:10}
+.banner{padding:8px 12px;border-radius:6px;font-size:.85rem;margin-bottom:8px;font-weight:500}
+.banner-ok{background:#d1fae5;color:#065f46}
+.banner-warn{background:#fef3c7;color:#78350f}
+.banner-err{background:#fee2e2;color:#7f1d1d}
+.caption{margin-top:14px;text-align:center;color:#94a3b8;font-size:.85rem}
+.controls{display:flex;gap:10px;justify-content:center;margin-top:14px}
+.controls button{background:#334155;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:.85rem}
+.controls button:hover{background:#475569}
+.progress{height:4px;background:#334155;border-radius:2px;margin-top:10px;overflow:hidden}
+.progress-bar{height:100%;background:#38bdf8;width:0;animation:prog 25s linear infinite}
+@keyframes prog{from{width:0}to{width:100%}}
+
+/* 5-step timeline 25s */
+@keyframes s1{0%,18%{opacity:1}19%,100%{opacity:0}}
+@keyframes s2{0%,18%{opacity:0}19%,38%{opacity:1}39%,100%{opacity:0}}
+@keyframes s3{0%,38%{opacity:0}39%,58%{opacity:1}59%,100%{opacity:0}}
+@keyframes s4{0%,58%{opacity:0}59%,78%{opacity:1}79%,100%{opacity:0}}
+@keyframes s5{0%,78%{opacity:0}79%,100%{opacity:1}}
+.step-1{animation:s1 25s infinite}
+.step-2{animation:s2 25s infinite}
+.step-3{animation:s3 25s infinite}
+.step-4{animation:s4 25s infinite}
+.step-5{animation:s5 25s infinite}
+.paused .step,.paused .progress-bar{animation-play-state:paused!important}
+.receipt{background:#fef3c7;color:#0f172a;padding:12px;border-radius:6px;font-family:monospace;font-size:.78rem;line-height:1.5}
+form label{display:block;margin-bottom:8px;font-size:.85rem;color:#475569}
+form input,form select{width:100%;border:1px solid #cbd5e1;border-radius:5px;padding:6px 10px;margin-top:2px;font-size:.85rem}
+.toggle{display:inline-block;width:36px;height:18px;background:#cbd5e1;border-radius:10px;position:relative;cursor:pointer;vertical-align:middle}
+.toggle::after{content:"";position:absolute;width:14px;height:14px;background:#fff;border-radius:50%;top:2px;left:2px;transition:.3s}
+.toggle.on{background:#10b981}
+.toggle.on::after{left:20px}
+@media (max-width:480px){.stage{height:420px}.grid{grid-template-columns:repeat(2,1fr)}}

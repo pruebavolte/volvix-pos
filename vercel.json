@@ -1,7 +1,7 @@
 {
   "version": 2,
   "builds": [
-    { "src": "api/index.js", "use": "@vercel/node", "config": { "includeFiles": ["**/*.html", "**/*.js", "**/*.css", "**/*.json", "**/*.yaml", "**/*.yml", "**/*.xml", "**/*.txt", "openapi.yaml", "sitemap.xml", "robots.txt", "db/**"] } }
+    { "src": "api/index.js", "use": "@vercel/node", "config": { "includeFiles": ["**/*.html", "**/*.js", "**/*.css", "**/*.json", "**/*.yaml", "**/*.yml", "**/*.xml", "**/*.txt", "**/*.svg", "openapi.yaml", "sitemap.xml", "robots.txt", "db/**", "logos-demo/**", "public/logos-demo/**", "public/tutorials/**", "tutorials/**", "templates/**", "docs/**"] } }
   ],
   "routes": [
     { "src": "/volvix-qa-scenarios\\.html", "status": 404, "dest": "/404" },

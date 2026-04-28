@@ -2,8 +2,105 @@
 <html lang="es">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Volvix Shop</title>
+<meta name="viewport" content="width=device-width,initial-scale=1, viewport-fit=cover" />
+
+<!-- ============ SEO PRIMARY ============ -->
+<title>Tienda Volvix · Productos POS, accesorios y servicios</title>
+<meta name="description" content="Tienda online Volvix POS: terminales, impresoras, escáneres, cajones, accesorios y servicios para tu punto de venta. Pagos con tarjeta, CoDi, SPEI, OXXO y más.">
+<meta name="keywords" content="tienda Volvix, accesorios POS, hardware punto de venta, impresora ticketera, escáner código barras, cajón monedero, terminal POS México, accesorios punto de venta">
+<meta name="author" content="Volvix POS">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="theme-color" content="#2D5F8F">
+<link rel="canonical" href="https://volvix-pos.vercel.app/volvix-shop.html">
+
+<!-- ============ OPEN GRAPH ============ -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Volvix POS">
+<meta property="og:locale" content="es_MX">
+<meta property="og:title" content="Tienda Volvix · Productos POS, accesorios y servicios">
+<meta property="og:description" content="Compra hardware y accesorios para tu punto de venta. Impresoras, escáneres, cajones, terminales y más. Envío en México.">
+<meta property="og:image" content="https://volvix-pos.vercel.app/marketplace-assets/og-shop-1200x630.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Tienda Volvix POS — hardware y accesorios para punto de venta">
+<meta property="og:url" content="https://volvix-pos.vercel.app/volvix-shop.html">
+
+<!-- ============ TWITTER CARD ============ -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@VolvixPOS">
+<meta name="twitter:title" content="Tienda Volvix · Productos y accesorios POS">
+<meta name="twitter:description" content="Hardware, impresoras, escáneres y servicios para tu punto de venta. Envío en México.">
+<meta name="twitter:image" content="https://volvix-pos.vercel.app/marketplace-assets/og-shop-1200x630.png">
+<meta name="twitter:image:alt" content="Tienda Volvix POS — hardware y accesorios para punto de venta">
+
+<!-- ============ FAVICON ============ -->
+<link rel="icon" type="image/png" sizes="32x32" href="/marketplace-assets/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/marketplace-assets/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/marketplace-assets/apple-touch-icon.png">
+
+<!-- ============ SCHEMA.ORG JSON-LD: Store ============ -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Store",
+      "@id": "https://volvix-pos.vercel.app/volvix-shop.html#store",
+      "name": "Tienda Volvix POS",
+      "description": "Tienda online de hardware, accesorios y servicios para puntos de venta.",
+      "url": "https://volvix-pos.vercel.app/volvix-shop.html",
+      "image": "https://volvix-pos.vercel.app/marketplace-assets/og-shop-1200x630.png",
+      "currenciesAccepted": "MXN",
+      "paymentAccepted": "Credit Card, Debit Card, CoDi, SPEI, OXXO Pay, Cash on Delivery",
+      "priceRange": "$$",
+      "areaServed": { "@type": "Country", "name": "Mexico" },
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "MX"
+      },
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Catálogo Volvix POS",
+        "itemListElement": [
+          {
+            "@type": "OfferCatalog",
+            "name": "Hardware POS",
+            "itemListElement": [
+              { "@type": "Offer", "itemOffered": { "@type": "Product", "name": "Impresora ticketera térmica", "category": "Impresoras" } },
+              { "@type": "Offer", "itemOffered": { "@type": "Product", "name": "Escáner de código de barras", "category": "Escáneres" } },
+              { "@type": "Offer", "itemOffered": { "@type": "Product", "name": "Cajón monedero", "category": "Cajones" } }
+            ]
+          },
+          {
+            "@type": "OfferCatalog",
+            "name": "Servicios",
+            "itemListElement": [
+              { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Instalación y configuración POS" } },
+              { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Capacitación operativa" } }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://volvix-pos.vercel.app/volvix-shop.html#webpage",
+      "url": "https://volvix-pos.vercel.app/volvix-shop.html",
+      "name": "Tienda Volvix · Productos POS, accesorios y servicios",
+      "isPartOf": { "@id": "https://volvix-pos.vercel.app/#website" },
+      "inLanguage": "es-MX",
+      "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Inicio", "item": "https://volvix-pos.vercel.app/" },
+          { "@type": "ListItem", "position": 2, "name": "Tienda", "item": "https://volvix-pos.vercel.app/volvix-shop.html" }
+        ]
+      }
+    }
+  ]
+}
+</script>
+
 <style>
   :root{--bg:#0b1020;--panel:#141a2e;--mut:#8b93a7;--fg:#f5f7ff;--ac:#6ee7b7;--ac2:#7c3aed;--bd:#1f2740;--err:#ef4444}
   *{box-sizing:border-box}body{margin:0;font:14px/1.5 system-ui,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--fg)}
@@ -45,29 +142,80 @@
   .alert{background:rgba(239,68,68,.12);border:1px solid var(--err);color:#ffb4b4;padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px}
   .ok{background:rgba(110,231,183,.12);border:1px solid var(--ac);color:var(--ac);padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px}
   .empty{text-align:center;color:var(--mut);padding:60px 20px}
-  @media(max-width:780px){main{grid-template-columns:1fr}aside{position:static}}
+  /* ============ RESPONSIVE ============ */
+  @media(max-width:780px){
+    main{grid-template-columns:1fr;padding:18px 14px;gap:18px}
+    aside{position:static;padding:12px}
+    header{padding:10px 14px;flex-wrap:wrap;gap:10px}
+    header h1{font-size:16px}
+    .grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+    .card{padding:10px}
+    .card .ph,.card img{height:120px}
+    .card h4{font-size:13px}
+    .card .price{font-size:16px}
+    .mini-cart{right:10px;left:10px;bottom:10px;width:auto;max-height:78vh}
+    .modal{padding:12px}
+    .modal .box{padding:18px;border-radius:12px}
+    .row2{grid-template-columns:1fr;gap:8px}
+    .btn{padding:9px 12px;font-size:13.5px}
+  }
+  @media(max-width:640px){
+    main{padding:16px 12px;gap:14px}
+    aside{padding:10px}
+    .grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:9px}
+    .card{padding:9px}
+    .card .ph,.card img{height:110px}
+    .card h4{font-size:13px}
+    .card .price{font-size:15px}
+  }
+  @media(max-width:480px){
+    main{padding:14px 10px}
+    .grid{grid-template-columns:1fr 1fr;gap:8px}
+    .card .ph,.card img{height:100px}
+    .card h4{font-size:12.5px;line-height:1.25}
+    .card .sku{font-size:10.5px}
+    .card .price{font-size:14.5px}
+    .card .btn{padding:8px 10px;font-size:12.5px}
+    header h1{font-size:15px;flex:1 1 100%;order:1}
+    header .btn{flex:1;font-size:12.5px;padding:8px 10px}
+  }
+  @media(max-width:380px){
+    .grid{grid-template-columns:1fr}
+    .card .ph,.card img{height:140px}
+  }
 </style>
 </head>
 <body>
-<header>
-  <h1 id="shopName">Volvix Shop</h1>
-  <button class="btn ghost" onclick="document.getElementById('orderLookup').classList.add('open')">Mi pedido</button>
-  <button class="btn" onclick="toggleCart()">Carrito <span id="cartCount" class="pill">0</span></button>
+
+<!-- SEO noscript fallback -->
+<noscript>
+  <div style="background:#141a2e;border-bottom:1px solid #6ee7b7;padding:14px;text-align:center;color:#f5f7ff;font-family:system-ui,sans-serif">
+    <strong>Tienda Volvix POS</strong> · Activa JavaScript para ver el catálogo de productos.
+    <a href="mailto:tienda@volvix-pos.com" style="color:#6ee7b7">Contáctanos directamente</a> si necesitas asistencia.
+  </div>
+</noscript>
+
+<header role="banner">
+  <h1 id="shopName">Tienda Volvix POS</h1>
+  <button class="btn ghost" onclick="document.getElementById('orderLookup').classList.add('open')" aria-label="Consultar mi pedido">Mi pedido</button>
+  <button class="btn" onclick="toggleCart()" aria-label="Ver carrito de compra">Carrito <span id="cartCount" class="pill" aria-live="polite">0</span></button>
 </header>
 
-<main>
-  <aside>
+<main role="main">
+  <aside aria-label="Filtros de búsqueda">
     <h3>Buscar</h3>
-    <input id="qInput" placeholder="Nombre, SKU…" oninput="loadProductsDebounced()" />
+    <label for="qInput" style="display:none">Buscar producto por nombre o SKU</label>
+    <input id="qInput" placeholder="Nombre, SKU…" oninput="loadProductsDebounced()" aria-label="Buscar producto" />
     <h3>Categoría</h3>
-    <select id="catInput" onchange="loadProducts()">
+    <label for="catInput" style="display:none">Filtrar por categoría</label>
+    <select id="catInput" onchange="loadProducts()" aria-label="Categoría">
       <option value="">Todas</option>
     </select>
     <button class="btn ghost" onclick="document.getElementById('qInput').value='';document.getElementById('catInput').value='';loadProducts()">Limpiar filtros</button>
   </aside>
-  <section>
-    <div id="grid" class="grid"></div>
-    <div id="empty" class="empty" style="display:none">No hay productos con esos filtros.</div>
+  <section aria-label="Lista de productos">
+    <div id="grid" class="grid" role="list"></div>
+    <div id="empty" class="empty" style="display:none" role="status">No hay productos con esos filtros.</div>
   </section>
 </main>
 
@@ -169,13 +317,18 @@ async function loadProducts(){
     const sel = document.getElementById('catInput');
     if (sel.children.length <= 1) cats.forEach(cat=>{const o=document.createElement('option');o.value=cat;o.textContent=cat;sel.appendChild(o)});
     grid.innerHTML = items.map(p => `
-      <div class="card">
-        ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}"/>` : `<div class="ph">Sin imagen</div>`}
-        <h4>${escape(p.name)}</h4>
-        <div class="sku">${p.sku||''} ${p.category?'· '+escape(p.category):''}</div>
-        <div class="price">${fmt(p.price)}</div>
-        <button class="btn" onclick='addToCart(${JSON.stringify(p).replace(/'/g,"&#39;")})'>Agregar</button>
-      </div>`).join('');
+      <article class="card" role="listitem" itemscope itemtype="https://schema.org/Product">
+        ${p.image_url ? `<img src="${p.image_url}" alt="${escape(p.name)}" itemprop="image" loading="lazy"/>` : `<div class="ph" aria-hidden="true">Sin imagen</div>`}
+        <h4 itemprop="name">${escape(p.name)}</h4>
+        <div class="sku">${p.sku?`<span itemprop="sku">${escape(p.sku)}</span>`:''} ${p.category?'· <span itemprop="category">'+escape(p.category)+'</span>':''}</div>
+        <div class="price" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+          <meta itemprop="priceCurrency" content="${SHOP.currency||'MXN'}">
+          <meta itemprop="price" content="${Number(p.price)||0}">
+          <meta itemprop="availability" content="https://schema.org/InStock">
+          ${fmt(p.price)}
+        </div>
+        <button class="btn" onclick='addToCart(${JSON.stringify(p).replace(/'/g,"&#39;")})' aria-label="Agregar ${escape(p.name)} al carrito">Agregar</button>
+      </article>`).join('');
   }catch(e){grid.innerHTML='<div class="alert">Error al cargar productos: '+escape(e.message)+'</div>'}
 }
 function escape(s){return String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
@@ -261,6 +414,24 @@ async function lookupOrder(){
 (async()=>{await loadShopInfo();await loadProducts();renderCart()})();
 </script>
 <link rel="stylesheet" href="volvix-modals.css">
+<link rel="stylesheet" href="volvix-shared.css">
 <script defer src="volvix-modals.js"></script>
+<!-- R10c-B FIX-N3-4: i18n wiring -->
+<script src="volvix-i18n-wiring.js" defer></script>
+<!-- R10c-B FIX-N3-5: Accessibility wiring -->
+<script src="volvix-accessibility-wiring.js" defer></script>
+
+<!-- R12b FIX-LEGAL-5: footer legal -->
+<footer style="text-align:center;padding:24px 16px;font-size:12px;color:#8a93a6;border-top:1px solid #1f2740;margin-top:32px;background:#0b0f1a;">
+  <div>© 2026 GrupoVolvix S.A. de C.V. · Tienda Volvix</div>
+  <div style="margin-top:6px;">
+    <a href="/aviso-privacidad.html" style="color:#60a5fa;text-decoration:none;margin:0 6px;">Aviso de Privacidad</a> ·
+    <a href="/terminos-condiciones.html" style="color:#60a5fa;text-decoration:none;margin:0 6px;">Términos</a> ·
+    <a href="/cookies-policy.html" style="color:#60a5fa;text-decoration:none;margin:0 6px;">Cookies</a> ·
+    <a href="/volvix-gdpr-portal.html" style="color:#60a5fa;text-decoration:none;margin:0 6px;">Portal ARCO</a> ·
+    <a href="mailto:soporte@volvix.com" style="color:#60a5fa;text-decoration:none;margin:0 6px;">Soporte</a>
+  </div>
+</footer>
+<script defer src="/volvix-cookie-banner-wiring.js"></script>
 </body>
 </html>
