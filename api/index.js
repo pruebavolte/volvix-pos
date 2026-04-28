@@ -28182,50 +28182,200 @@ if (process.env.NODE_ENV === 'test') {
     try { if (typeof logAudit === 'function') logAudit(req, action, table, payload || {}); } catch (_) {}
   }
 
-  // ---- Envío de OTP (placeholder logging, integración real a SendGrid/Twilio futura) ----
-  function sendOtpNotifications(opts) {
-    // opts: { email, phone, code, business_name }
-    // Si hay SENDGRID_API_KEY → enviar email real. Si no → log + dev hint.
-    // Si hay TWILIO_*  → enviar SMS/WhatsApp. Si no → log.
+  // ---- Envío de OTP (real via Resend + Twilio) ----
+  async function sendOtpNotifications(opts) {
+    // opts: { tenant_id, email, phone, code, business_name }
     try {
       console.log('[R12-O-1 OTP] tenant=' + opts.tenant_id +
         ' email=' + opts.email + ' phone=' + (opts.phone || '-') +
         ' code=' + opts.code + ' (válido 10 min)');
     } catch (_) {}
-    return { email_sent: !!process.env.SENDGRID_API_KEY, phone_sent: !!(process.env.TWILIO_ACCOUNT_SID || process.env.WHATSAPP_TOKEN) };
+
+    var sentChannels = [];
+    var emailOk = false, smsOk = false, waOk = false;
+    var details = {};
+
+    // Email via Resend → SendGrid fallback
+    var sendEmail = (typeof global.__r12o3a_sendEmail === 'function') ? global.__r12o3a_sendEmail : null;
+    if (sendEmail && opts.email && (process.env.RESEND_API_KEY || process.env.SENDGRID_API_KEY)) {
+      try {
+        var html =
+          '<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;padding:20px;">' +
+          '<h2>Tu código de verificación Volvix POS</h2>' +
+          '<p>Hola,</p>' +
+          '<p>Tu código de verificación para registrar <strong>' + (opts.business_name || 'tu negocio') + '</strong> es:</p>' +
+          '<div style="font-size:32px;font-weight:bold;letter-spacing:6px;background:#f5f5f5;padding:16px 24px;display:inline-block;border-radius:8px;">' + opts.code + '</div>' +
+          '<p style="color:#777;font-size:13px;">Este código expira en 10 minutos.</p>' +
+          '<p style="color:#777;font-size:13px;">Si no solicitaste este código, ignora este mensaje.</p>' +
+          '<hr><p style="color:#999;font-size:12px;">Volvix POS — La forma fácil de vender</p>' +
+          '</body></html>';
+        var er = await sendEmail({
+          to: opts.email,
+          toName: opts.business_name || null,
+          subject: 'Tu código Volvix: ' + opts.code,
+          html: html
+        });
+        if (er && er.ok) { emailOk = true; sentChannels.push('email'); }
+        details.email = er;
+      } catch (e) {
+        details.email = { ok: false, error: String(e && e.message || e) };
+      }
+    }
+
+    // SMS via Twilio
+    var sendSms = (typeof global.__r12o3a_sendSms === 'function') ? global.__r12o3a_sendSms : null;
+    var hasSmsFrom = !!(process.env.TWILIO_SMS_FROM || process.env.TWILIO_PHONE_NUMBER || process.env.TWILIO_FROM);
+    if (sendSms && opts.phone && process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && hasSmsFrom) {
+      try {
+        var smsBody = 'Tu codigo Volvix: ' + opts.code + ' (valido 10 min). No lo compartas.';
+        var sr = await sendSms({ to: opts.phone, body: smsBody });
+        if (sr && sr.ok) { smsOk = true; sentChannels.push('sms'); }
+        details.sms = sr;
+      } catch (e) {
+        details.sms = { ok: false, error: String(e && e.message || e) };
+      }
+    }
+
+    // WhatsApp via Twilio (si TWILIO_WHATSAPP_FROM configurado)
+    if (opts.phone && process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_WHATSAPP_FROM) {
+      try {
+        var phone = String(opts.phone || '').replace(/[\s\-\(\)]/g, '');
+        var sid = process.env.TWILIO_ACCOUNT_SID;
+        var token = process.env.TWILIO_AUTH_TOKEN;
+        var fromNum = process.env.TWILIO_WHATSAPP_FROM;
+        var waBody = 'Tu codigo Volvix: ' + opts.code + ' (valido 10 min).';
+        var auth = 'Basic ' + Buffer.from(sid + ':' + token).toString('base64');
+        var qs = 'From=' + encodeURIComponent('whatsapp:' + fromNum) +
+                 '&To=' + encodeURIComponent('whatsapp:' + phone) +
+                 '&Body=' + encodeURIComponent(waBody);
+        var https = require('https');
+        var wr = await new Promise(function (resolve) {
+          var rq = https.request({
+            method: 'POST',
+            hostname: 'api.twilio.com',
+            path: '/2010-04-01/Accounts/' + sid + '/Messages.json',
+            headers: {
+              'Authorization': auth,
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'Content-Length': Buffer.byteLength(qs)
+            },
+            timeout: 15000
+          }, function (resp) {
+            var chunks = [];
+            resp.on('data', function (c) { chunks.push(c); });
+            resp.on('end', function () {
+              var body = Buffer.concat(chunks).toString('utf8');
+              if (resp.statusCode >= 200 && resp.statusCode < 300) {
+                resolve({ ok: true, provider: 'twilio_wa' });
+              } else {
+                resolve({ ok: false, provider: 'twilio_wa', error: 'http_' + resp.statusCode + ' ' + (body || '').slice(0, 200) });
+              }
+            });
+          });
+          rq.on('error', function (e) { resolve({ ok: false, error: String(e && e.message || e) }); });
+          rq.on('timeout', function () { try { rq.destroy(); } catch (_) {} resolve({ ok: false, error: 'timeout' }); });
+          rq.write(qs);
+          rq.end();
+        });
+        if (wr && wr.ok) { waOk = true; sentChannels.push('whatsapp'); }
+        details.whatsapp = wr;
+      } catch (e) {
+        details.whatsapp = { ok: false, error: String(e && e.message || e) };
+      }
+    }
+
+    return {
+      email_sent: emailOk,
+      phone_sent: smsOk || waOk,
+      sms_sent: smsOk,
+      whatsapp_sent: waOk,
+      channels: sentChannels,
+      details: details
+    };
   }
 
   // ---- Bootstrap demo data + tenant_settings (FIX-O1-4) ----
+  // BUG-T2 FIX: Solo inserta productos filtrados por giro
+  // BUG-T3 FIX: Pre-check para evitar duplicados (3x Aceite Barba, 4x Aceite Capullo)
+  // SCHEMA NOTE: pos_products NO tiene tenant_id/company_id/sku — los productos
+  // se aíslan por pos_user_id (cada owner ve solo sus productos).
   async function bootstrapTenant(opts) {
     // opts: { tenant_id, company_id, user_id, business_type, business_name }
-    const products = DEMO_PRODUCTS[opts.business_type] || DEFAULT_DEMO_PRODUCTS;
+    const giro = String(opts.business_type || '').trim();
+    const products = DEMO_PRODUCTS[giro] || DEFAULT_DEMO_PRODUCTS;
     const nowIso = new Date().toISOString();
+    const ownerId = opts.user_id;
 
-    // 1) Productos demo
-    try {
-      const rows = products.map(function (p) {
-        return {
-          name: p.name,
-          price: p.price,
-          sku: p.sku,
-          tenant_id: opts.tenant_id,
-          company_id: opts.company_id,
-          is_active: true,
-          stock: 100,
-          created_at: nowIso
-        };
+    // 1) Productos demo — SOLO los del giro (BUG-T2)
+    // Pre-check: si el owner ya tiene productos, NO re-bootstrappear (BUG-T3 idempotencia)
+    let alreadyHasProducts = false;
+    if (ownerId) {
+      try {
+        const existing = await supabaseRequest('GET',
+          '/pos_products?pos_user_id=eq.' + encodeURIComponent(ownerId) +
+          '&deleted_at=is.null&select=id&limit=1');
+        if (Array.isArray(existing) && existing.length > 0) {
+          alreadyHasProducts = true;
+        }
+      } catch (_) { /* fail-open */ }
+    }
+
+    let insertedCount = 0;
+    let insertErrors = [];
+    if (!alreadyHasProducts && ownerId) {
+      // BUG-T3 FIX: Dedup en lista (por si DEMO_PRODUCTS tuviera duplicados accidentales)
+      const seen = new Set();
+      const uniqueProducts = products.filter(function (p) {
+        const key = String(p.name || '').toLowerCase().trim();
+        if (!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
       });
-      // best-effort: si la tabla no acepta alguna columna, ignoramos error
-      await supabaseRequest('POST', '/pos_products', rows).catch(function () { return null; });
-    } catch (_) {}
 
-    // 2) Cliente "General"
+      // Insertar producto por producto con catch individual (un fallo no tumba todo)
+      for (let i = 0; i < uniqueProducts.length; i++) {
+        const p = uniqueProducts[i];
+        try {
+          // Pre-check por nombre+pos_user_id: defensa contra race conditions
+          let exists = false;
+          try {
+            const dup = await supabaseRequest('GET',
+              '/pos_products?pos_user_id=eq.' + encodeURIComponent(ownerId) +
+              '&name=eq.' + encodeURIComponent(p.name) +
+              '&deleted_at=is.null&select=id&limit=1');
+            exists = Array.isArray(dup) && dup.length > 0;
+          } catch (_) {}
+          if (exists) continue;
+
+          await supabaseRequest('POST', '/pos_products', {
+            pos_user_id: ownerId,
+            name: p.name,
+            code: p.sku,         // schema usa "code" no "sku"
+            price: p.price,
+            cost: Math.max(1, Math.floor(p.price * 0.4)), // costo aproximado 40%
+            stock: 100,
+            category: giro === 'barberia' ? 'Servicios' : 'General',
+            created_at: nowIso
+          });
+          insertedCount++;
+        } catch (e) {
+          const errStr = String(e && e.message || e);
+          // BUG-T3: si conflicto unique (23505), ignorar — ya existe
+          if (errStr.indexOf('23505') !== -1 || errStr.indexOf('duplicate key') !== -1) {
+            continue;
+          }
+          insertErrors.push({ name: p.name, error: errStr.slice(0, 120) });
+          try { console.warn('[bootstrap] product insert failed:', p.name, errStr.slice(0, 120)); } catch (_) {}
+        }
+      }
+    }
+
+    // 2) Cliente "General" (best-effort; schema customers varía entre instalaciones)
     try {
+      // Intentar con pos_user_id (schema actual)
       await supabaseRequest('POST', '/pos_customers', {
+        pos_user_id: ownerId,
         name: 'Cliente General',
-        tenant_id: opts.tenant_id,
-        company_id: opts.company_id,
-        is_active: true,
         created_at: nowIso
       }).catch(function () { return null; });
     } catch (_) {}
@@ -28242,7 +28392,20 @@ if (process.env.NODE_ENV === 'test') {
       }).catch(function () { return null; });
     } catch (_) {}
 
-    return { products: products.length };
+    try {
+      console.log('[bootstrap] tenant=' + opts.tenant_id + ' giro=' + giro +
+        ' inserted=' + insertedCount + '/' + products.length +
+        ' already_had=' + alreadyHasProducts +
+        (insertErrors.length ? ' errors=' + insertErrors.length : ''));
+    } catch (_) {}
+
+    return {
+      giro: giro,
+      products: insertedCount,
+      products_planned: products.length,
+      already_had: alreadyHasProducts,
+      errors: insertErrors.length
+    };
   }
 
   // =================================================================
@@ -28304,7 +28467,24 @@ if (process.env.NODE_ENV === 'test') {
           return sendJSON(res, {
             ok: false, field: 'email',
             error: 'EMAIL_TAKEN',
-            error_message: 'Ese email ya está registrado. ¿Quieres iniciar sesión?'
+            error_code: 'EMAIL_TAKEN',
+            error_message: 'Este email ya está registrado. Haz login o usa otro email.',
+            message: 'Este email ya está registrado. Haz login o usa otro email.'
+          }, 409);
+        }
+      } catch (_) { /* fail-open */ }
+
+      // ---- Phone duplicado (BUG-T1: pre-check) ----
+      try {
+        const existingP = await supabaseRequest('GET',
+          '/pos_users?phone=eq.' + encodeURIComponent(phone) + '&select=id&limit=1');
+        if (Array.isArray(existingP) && existingP.length > 0) {
+          return sendJSON(res, {
+            ok: false, field: 'phone',
+            error: 'PHONE_TAKEN',
+            error_code: 'PHONE_TAKEN',
+            error_message: 'Este teléfono ya está registrado. Intenta otro o haz login.',
+            message: 'Este teléfono ya está registrado. Intenta otro o haz login.'
           }, 409);
         }
       } catch (_) { /* fail-open */ }
@@ -28348,10 +28528,41 @@ if (process.env.NODE_ENV === 'test') {
         });
         if (Array.isArray(insU) && insU.length > 0) userId = insU[0].id;
       } catch (e) {
+        // BUG-T1 FIX: detectar 23505 (unique_violation) y retornar friendly msg en vez de SQL crudo
+        const errStr = String(e && e.message || e);
+        if (errStr.indexOf('23505') !== -1 || errStr.indexOf('duplicate key') !== -1) {
+          // Detectar si es phone, email o genérico
+          if (/phone/i.test(errStr) || /pos_users_phone/i.test(errStr)) {
+            return sendJSON(res, {
+              ok: false, field: 'phone',
+              error: 'PHONE_TAKEN',
+              error_code: 'PHONE_TAKEN',
+              error_message: 'Este teléfono ya está registrado. Intenta otro o haz login.',
+              message: 'Este teléfono ya está registrado. Intenta otro o haz login.'
+            }, 409);
+          }
+          if (/email/i.test(errStr) || /pos_users_email/i.test(errStr)) {
+            return sendJSON(res, {
+              ok: false, field: 'email',
+              error: 'EMAIL_TAKEN',
+              error_code: 'EMAIL_TAKEN',
+              error_message: 'Este email ya está registrado. Haz login o usa otro email.',
+              message: 'Este email ya está registrado. Haz login o usa otro email.'
+            }, 409);
+          }
+          return sendJSON(res, {
+            ok: false,
+            error: 'DUPLICATE',
+            error_code: 'DUPLICATE',
+            error_message: 'Algo ya existe con esos datos. Intenta otros.',
+            message: 'Algo ya existe con esos datos. Intenta otros.'
+          }, 409);
+        }
         return sendJSON(res, {
           ok: false,
           error: 'USER_CREATE_FAILED',
-          error_message: 'No se pudo crear el usuario. ' + (process.env.NODE_ENV !== 'production' ? String(e && e.message || e).slice(0, 200) : '')
+          error_code: 'USER_CREATE_FAILED',
+          error_message: 'No se pudo crear el usuario. ' + (process.env.NODE_ENV !== 'production' ? errStr.slice(0, 200) : '')
         }, 500);
       }
       if (!userId) {
@@ -28417,8 +28628,13 @@ if (process.env.NODE_ENV === 'test') {
         return sendJSON(res, { ok: false, error: 'OTP_CREATE_FAILED', error_message: 'No se pudo enviar el código. Intenta de nuevo.' }, 500);
       }
 
-      // ---- Enviar OTP (placeholder log + futuro real) ----
-      const sentRes = sendOtpNotifications({
+      // ---- Detectar providers configurados ----
+      const hasEmailProvider = !!(process.env.SENDGRID_API_KEY || process.env.RESEND_API_KEY || process.env.SMTP_HOST);
+      const hasWhatsAppProvider = !!(process.env.TWILIO_ACCOUNT_SID || process.env.WASENDER_API_KEY || process.env.WHATSAPP_TOKEN);
+      const providersOffline = !hasEmailProvider && !hasWhatsAppProvider;
+
+      // ---- Enviar OTP (real via Resend + Twilio SMS/WA) ----
+      const sentRes = await sendOtpNotifications({
         tenant_id: tenantId, email: email, phone: phone,
         code: otpCode, business_name: business_name
       });
@@ -28426,17 +28642,47 @@ if (process.env.NODE_ENV === 'test') {
       logAuditSafe({ user: { id: userId, email: email, role: 'owner', tenant_id: tenantId } },
         'auth.tenant_registered', 'pos_companies', { id: companyId, tenant_id: tenantId });
 
-      return sendJSON(res, {
+      // ---- Armar lista real de canales enviados ----
+      const otpSentTo = Array.isArray(sentRes.channels) ? sentRes.channels.slice() : [];
+      // Backwards compat con flags booleanos
+      if (!otpSentTo.length) {
+        if (sentRes.email_sent) otpSentTo.push('email');
+        if (sentRes.sms_sent)   otpSentTo.push('sms');
+        if (sentRes.whatsapp_sent) otpSentTo.push('whatsapp');
+      }
+
+      // ---- Decidir si exponer código en respuesta (modo demo / dev) ----
+      // Si TODOS los providers fallaron al envío real, fallback dev visible.
+      const noChannelDelivered = !sentRes.email_sent && !sentRes.sms_sent && !sentRes.whatsapp_sent;
+      const allowDevVisible = (process.env.ALLOW_OTP_DEV_VISIBLE !== '0') ||
+                              (process.env.NODE_ENV !== 'production');
+      const exposeOtpCode = (providersOffline || noChannelDelivered) && allowDevVisible;
+
+      const respPayload = {
         ok: true,
         tenant_id: tenantId,
         user_id: userId,
         otp_required: true,
-        otp_sent_to: ['email', 'whatsapp'],
+        otp_sent_to: otpSentTo,
         otp_expires_at: expiresAt,
-        // En desarrollo (NODE_ENV !== 'production') exponer el código para QA
-        otp_dev_hint: (process.env.NODE_ENV !== 'production') ? otpCode : undefined,
-        notification: { email_sent: sentRes.email_sent, phone_sent: sentRes.phone_sent }
-      });
+        providers_offline: providersOffline,
+        notification: {
+          email_sent: !!sentRes.email_sent,
+          sms_sent:   !!sentRes.sms_sent,
+          whatsapp_sent: !!sentRes.whatsapp_sent,
+          phone_sent: !!(sentRes.sms_sent || sentRes.whatsapp_sent)
+        }
+      };
+
+      if (exposeOtpCode) {
+        respPayload.otp_dev_visible = otpCode;
+        respPayload.notice = '⚠️ Email y WhatsApp no configurados. Tu código aparece arriba para validar manualmente. Contacta soporte para configurar envío automático.';
+      } else if (process.env.NODE_ENV !== 'production') {
+        // Mantener compat con QA en dev cuando hay providers
+        respPayload.otp_dev_hint = otpCode;
+      }
+
+      return sendJSON(res, respPayload);
     } catch (err) {
       sendError(res, err);
     }
@@ -28710,6 +28956,217 @@ if (process.env.NODE_ENV === 'test') {
       sendError(res, err);
     }
   };
+
+  // =================================================================
+  // FIX-3 ADMIN ENDPOINTS — soporte cuando providers están offline
+  // =================================================================
+
+  // GET /api/admin/otp/recent — superadmin only
+  // Retorna últimos 50 OTPs (no verificados) generados en últimas 24h
+  handlers['GET /api/admin/otp/recent'] = requireAuth(async function (req, res) {
+    try {
+      if (!req.user || req.user.role !== 'superadmin') {
+        return send403(res, { need_role: ['superadmin'], have_role: req.user && req.user.role });
+      }
+      const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      let rows = [];
+      try {
+        rows = await supabaseRequest('GET',
+          '/pos_otp_verifications?created_at=gte.' + encodeURIComponent(since) +
+          '&verified_at=is.null' +
+          '&order=created_at.desc&limit=50' +
+          '&select=tenant_id,user_id,email,phone,otp_code,expires_at,attempts,sent_to_email,sent_to_phone,purpose,created_at');
+      } catch (e) {
+        // Fallback if verified_at column does not exist: just last 50
+        try {
+          rows = await supabaseRequest('GET',
+            '/pos_otp_verifications?created_at=gte.' + encodeURIComponent(since) +
+            '&order=created_at.desc&limit=50');
+        } catch (_) { rows = []; }
+      }
+      const list = (Array.isArray(rows) ? rows : []).map(function (r) {
+        const sentTo = [];
+        if (r.sent_to_email) sentTo.push('email');
+        if (r.sent_to_phone) sentTo.push('whatsapp');
+        return {
+          tenant_id: r.tenant_id,
+          user_id: r.user_id,
+          email: r.email,
+          phone: r.phone,
+          otp_code: r.otp_code,
+          expires_at: r.expires_at,
+          sent_to: sentTo,
+          attempts: r.attempts || 0,
+          purpose: r.purpose,
+          created_at: r.created_at
+        };
+      });
+      logAuditSafe(req, 'admin.otp.list_recent', 'pos_otp_verifications', { count: list.length });
+      return sendJSON(res, { ok: true, count: list.length, otps: list });
+    } catch (err) {
+      sendError(res, err);
+    }
+  });
+
+  // POST /api/admin/otp/resend/:tenant_id — superadmin override
+  // Regenera OTP y lo retorna en la respuesta (para soporte humano)
+  handlers['POST /api/admin/otp/resend/:tenant_id'] = requireAuth(async function (req, res, params) {
+    try {
+      if (!req.user || req.user.role !== 'superadmin') {
+        return send403(res, { need_role: ['superadmin'], have_role: req.user && req.user.role });
+      }
+      const tenantId = String((params && params.tenant_id) || '').trim();
+      if (!tenantId) {
+        return sendValidation(res, 'tenant_id requerido', 'tenant_id');
+      }
+
+      // Buscar último OTP del tenant para reusar email/phone/user_id
+      let last = null;
+      try {
+        const rows = await supabaseRequest('GET',
+          '/pos_otp_verifications?tenant_id=eq.' + encodeURIComponent(tenantId) +
+          '&order=created_at.desc&limit=1');
+        if (Array.isArray(rows) && rows.length > 0) last = rows[0];
+      } catch (_) {}
+      if (!last) {
+        return sendJSON(res, { ok: false, error: 'TENANT_NOT_FOUND', error_message: 'No se encontró registro pendiente para ' + tenantId }, 404);
+      }
+
+      const newCode = genOtp();
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+      try {
+        await supabaseRequest('POST', '/pos_otp_verifications', {
+          tenant_id: tenantId,
+          user_id: last.user_id,
+          email: last.email,
+          phone: last.phone,
+          otp_code: newCode,
+          sent_to_email: true,
+          sent_to_phone: true,
+          attempts: 0,
+          expires_at: expiresAt,
+          ip_address: clientIp(req),
+          user_agent: 'admin-override',
+          purpose: 'admin_resend'
+        });
+      } catch (e) {
+        return sendJSON(res, { ok: false, error: 'OTP_CREATE_FAILED', error_message: 'No se pudo regenerar.' }, 500);
+      }
+
+      // Best effort: intentar enviar también
+      const sentRes = sendOtpNotifications({
+        tenant_id: tenantId, email: last.email, phone: last.phone,
+        code: newCode, business_name: ''
+      });
+
+      logAuditSafe(req, 'admin.otp.resend', 'pos_otp_verifications', { tenant_id: tenantId });
+
+      return sendJSON(res, {
+        ok: true,
+        tenant_id: tenantId,
+        email: last.email,
+        phone: last.phone,
+        otp_code: newCode,            // ← admin override: el código va en respuesta SIEMPRE
+        otp_expires_at: expiresAt,
+        notification: { email_sent: sentRes.email_sent, phone_sent: sentRes.phone_sent },
+        notice: 'Comparte este código con el cliente por canal seguro.'
+      });
+    } catch (err) {
+      sendError(res, err);
+    }
+  });
+
+  // =================================================================
+  // POST /api/admin/cleanup-test-tenants — superadmin only
+  // Soft-delete tenants creados durante tests (business_name LIKE Test/Demo)
+  // NO toca productos demo originales (esos están en otros tenants demo).
+  // Body opcional: { dry_run: true } → solo retorna lo que borraría.
+  // =================================================================
+  handlers['POST /api/admin/cleanup-test-tenants'] = requireAuth(async function (req, res) {
+    try {
+      if (!req.user || req.user.role !== 'superadmin') {
+        return send403(res, { need_role: ['superadmin'], have_role: req.user && req.user.role });
+      }
+      const body = await readBody(req, { maxBytes: 1024 }).catch(function () { return {}; });
+      const dryRun = !!(body && body.dry_run);
+      const nowIso = new Date().toISOString();
+
+      // 1) Identificar empresas test: tenant_id LIKE 'TNT-%' AND name ILIKE '%test%' OR '%demo%'
+      let companies = [];
+      try {
+        companies = await supabaseRequest('GET',
+          '/pos_companies' +
+          '?tenant_id=like.TNT-*' +
+          '&or=(name.ilike.*test*,name.ilike.*demo*,name.ilike.*qa*)' +
+          '&select=id,tenant_id,name,owner_user_id,deleted_at' +
+          '&limit=500');
+      } catch (e) {
+        return sendJSON(res, {
+          ok: false,
+          error: 'CLEANUP_LOOKUP_FAILED',
+          error_message: 'No se pudieron listar tenants de test.',
+          detail: process.env.NODE_ENV !== 'production' ? String(e && e.message || e).slice(0, 200) : undefined
+        }, 500);
+      }
+      const targets = (Array.isArray(companies) ? companies : [])
+        .filter(function (c) { return !c.deleted_at; });
+
+      if (dryRun) {
+        return sendJSON(res, {
+          ok: true,
+          dry_run: true,
+          would_delete: targets.length,
+          tenants: targets.map(function (c) {
+            return { tenant_id: c.tenant_id, name: c.name, company_id: c.id };
+          })
+        });
+      }
+
+      // 2) Soft-delete cada tenant de test
+      let deletedCompanies = 0;
+      let deletedUsers = 0;
+      const errors = [];
+      for (let i = 0; i < targets.length; i++) {
+        const c = targets[i];
+        try {
+          // Soft-delete pos_companies
+          await supabaseRequest('PATCH',
+            '/pos_companies?id=eq.' + encodeURIComponent(c.id),
+            { deleted_at: nowIso, is_active: false, status: 'deleted', updated_at: nowIso });
+          deletedCompanies++;
+        } catch (e) {
+          errors.push({ tenant_id: c.tenant_id, step: 'company_delete', error: String(e && e.message || e).slice(0, 120) });
+          continue;
+        }
+        try {
+          // Soft-delete pos_users del tenant
+          await supabaseRequest('PATCH',
+            '/pos_users?company_id=eq.' + encodeURIComponent(c.id),
+            { deleted_at: nowIso, is_active: false, updated_at: nowIso });
+          deletedUsers++;
+        } catch (e) {
+          errors.push({ tenant_id: c.tenant_id, step: 'users_delete', error: String(e && e.message || e).slice(0, 120) });
+        }
+      }
+
+      logAuditSafe(req, 'admin.cleanup_test_tenants', 'pos_companies', {
+        deleted_companies: deletedCompanies,
+        deleted_users: deletedUsers,
+        targets: targets.length
+      });
+
+      return sendJSON(res, {
+        ok: true,
+        deleted_companies: deletedCompanies,
+        deleted_users: deletedUsers,
+        targeted: targets.length,
+        errors: errors,
+        notice: 'Soft-delete aplicado. Productos demo originales NO afectados.'
+      });
+    } catch (err) {
+      sendError(res, err);
+    }
+  });
 
 })();
 
@@ -29042,6 +29499,57 @@ if (process.env.NODE_ENV === 'test') {
     return s.length > n ? s.slice(0, n) : s;
   }
 
+  // ---- Provider: Resend (preferred for email if RESEND_API_KEY set) ----
+  async function r12o3aSendViaResend(opts) {
+    // opts: { to, toName, subject, html, fromEmail, fromName }
+    var key = process.env.RESEND_API_KEY;
+    if (!key) return { ok: false, reason: 'no_key' };
+    var fromEmail = opts.fromEmail || process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+    var fromName  = opts.fromName  || process.env.RESEND_FROM_NAME  || 'Volvix POS';
+    var fromCombined = fromName ? (fromName + ' <' + fromEmail + '>') : fromEmail;
+    var payload = JSON.stringify({
+      from: fromCombined,
+      to: [opts.to],
+      subject: opts.subject || '(sin asunto)',
+      html: opts.html || ' '
+    });
+    try {
+      var https = require('https');
+      return await new Promise(function (resolve) {
+        var rq = https.request({
+          method: 'POST',
+          hostname: 'api.resend.com',
+          path: '/emails',
+          headers: {
+            'Authorization': 'Bearer ' + key,
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(payload)
+          },
+          timeout: 15000
+        }, function (resp) {
+          var chunks = [];
+          resp.on('data', function (c) { chunks.push(c); });
+          resp.on('end', function () {
+            var body = Buffer.concat(chunks).toString('utf8');
+            if (resp.statusCode >= 200 && resp.statusCode < 300) {
+              var msgId = null;
+              try { msgId = JSON.parse(body).id || null; } catch (_) {}
+              resolve({ ok: true, provider: 'resend', provider_msg_id: msgId });
+            } else {
+              resolve({ ok: false, provider: 'resend', error: 'http_' + resp.statusCode + ' ' + r12o3aTruncate(body, 200) });
+            }
+          });
+        });
+        rq.on('error', function (e) { resolve({ ok: false, provider: 'resend', error: String(e && e.message || e) }); });
+        rq.on('timeout', function () { try { rq.destroy(); } catch (_) {} resolve({ ok: false, provider: 'resend', error: 'timeout' }); });
+        rq.write(payload);
+        rq.end();
+      });
+    } catch (e) {
+      return { ok: false, provider: 'resend', error: String(e && e.message || e) };
+    }
+  }
+
   // ---- Provider: SendGrid v3 ----
   async function r12o3aSendViaSendGrid(opts) {
     // opts: { to, toName, subject, html, fromEmail, fromName }
@@ -29090,6 +29598,85 @@ if (process.env.NODE_ENV === 'test') {
       return { ok: false, provider: 'sendgrid', error: String(e && e.message || e) };
     }
   }
+
+  // ---- Provider: Twilio SMS ----
+  async function r12o3aSendViaTwilioSms(opts) {
+    // opts: { to, body }
+    var sid = process.env.TWILIO_ACCOUNT_SID;
+    var token = process.env.TWILIO_AUTH_TOKEN;
+    var fromNum = process.env.TWILIO_SMS_FROM || process.env.TWILIO_PHONE_NUMBER || process.env.TWILIO_FROM;
+    if (!sid || !token || !fromNum) return { ok: false, reason: 'no_key' };
+    var phone = String(opts.to || '').replace(/[\s\-\(\)]/g, '');
+    var auth = 'Basic ' + Buffer.from(sid + ':' + token).toString('base64');
+    var qs = 'From=' + encodeURIComponent(fromNum) +
+             '&To=' + encodeURIComponent(phone) +
+             '&Body=' + encodeURIComponent(opts.body || '');
+    try {
+      var https = require('https');
+      return await new Promise(function (resolve) {
+        var rq = https.request({
+          method: 'POST',
+          hostname: 'api.twilio.com',
+          path: '/2010-04-01/Accounts/' + sid + '/Messages.json',
+          headers: {
+            'Authorization': auth,
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Length': Buffer.byteLength(qs)
+          },
+          timeout: 15000
+        }, function (resp) {
+          var chunks = [];
+          resp.on('data', function (c) { chunks.push(c); });
+          resp.on('end', function () {
+            var body = Buffer.concat(chunks).toString('utf8');
+            if (resp.statusCode >= 200 && resp.statusCode < 300) {
+              var id = null;
+              try { id = JSON.parse(body).sid || null; } catch (_) {}
+              resolve({ ok: true, provider: 'twilio', provider_msg_id: id });
+            } else {
+              resolve({ ok: false, provider: 'twilio', error: 'http_' + resp.statusCode + ' ' + r12o3aTruncate(body, 200) });
+            }
+          });
+        });
+        rq.on('error', function (e) { resolve({ ok: false, provider: 'twilio', error: String(e && e.message || e) }); });
+        rq.on('timeout', function () { try { rq.destroy(); } catch (_) {} resolve({ ok: false, provider: 'twilio', error: 'timeout' }); });
+        rq.write(qs);
+        rq.end();
+      });
+    } catch (e) {
+      return { ok: false, provider: 'twilio', error: String(e && e.message || e) };
+    }
+  }
+
+  // ---- Email dispatcher (fallback chain: Resend → SendGrid → log) ----
+  async function r12o3aSendEmail(opts) {
+    if (process.env.RESEND_API_KEY) {
+      var r = await r12o3aSendViaResend(opts);
+      if (r && r.ok) return r;
+      if (r && r.reason !== 'no_key' && process.env.SENDGRID_API_KEY) {
+        return await r12o3aSendViaSendGrid(opts);
+      }
+      if (r && r.reason === 'no_key' && process.env.SENDGRID_API_KEY) {
+        return await r12o3aSendViaSendGrid(opts);
+      }
+      return r;
+    }
+    if (process.env.SENDGRID_API_KEY) {
+      return await r12o3aSendViaSendGrid(opts);
+    }
+    return { ok: false, reason: 'no_key' };
+  }
+
+  // ---- SMS dispatcher (Twilio → log) ----
+  async function r12o3aSendSms(opts) {
+    if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
+      return await r12o3aSendViaTwilioSms(opts);
+    }
+    return { ok: false, reason: 'no_key' };
+  }
+  // Expose globally so register-tenant + health-test endpoints can reach it
+  try { global.__r12o3a_sendEmail = r12o3aSendEmail; } catch (_) {}
+  try { global.__r12o3a_sendSms = r12o3aSendSms; } catch (_) {}
 
   // ---- Provider: Wasender / Twilio WhatsApp ----
   async function r12o3aSendViaWhatsApp(opts) {
@@ -29253,11 +29840,11 @@ if (process.env.NODE_ENV === 'test') {
     // Send
     var result;
     if (channel === 'email') {
-      if (!process.env.SENDGRID_API_KEY) {
-        await r12o3aUpdateMessage(savedId, { status: 'pending_provider', error_msg: 'SENDGRID_API_KEY not set', next_retry_at: new Date(Date.now() + 60 * 60 * 1000).toISOString() });
+      if (!process.env.RESEND_API_KEY && !process.env.SENDGRID_API_KEY) {
+        await r12o3aUpdateMessage(savedId, { status: 'pending_provider', error_msg: 'No email provider configured (need RESEND_API_KEY or SENDGRID_API_KEY)', next_retry_at: new Date(Date.now() + 60 * 60 * 1000).toISOString() });
         return { ok: true, queued: true, id: savedId, status: 'pending_provider', channel: channel };
       }
-      result = await r12o3aSendViaSendGrid({
+      result = await r12o3aSendEmail({
         to: opts.recipient.email,
         toName: opts.recipient.name,
         subject: subject,
@@ -29272,9 +29859,18 @@ if (process.env.NODE_ENV === 'test') {
         to: opts.recipient.phone,
         body: rendered
       });
+    } else if (channel === 'sms') {
+      if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
+        await r12o3aUpdateMessage(savedId, { status: 'pending_provider', error_msg: 'Twilio SMS not configured (TWILIO_ACCOUNT_SID + TWILIO_AUTH_TOKEN required)', next_retry_at: new Date(Date.now() + 60 * 60 * 1000).toISOString() });
+        return { ok: true, queued: true, id: savedId, status: 'pending_provider', channel: channel };
+      }
+      result = await r12o3aSendSms({
+        to: opts.recipient.phone,
+        body: rendered.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+      });
     } else {
-      // sms placeholder — mismo retry queue
-      await r12o3aUpdateMessage(savedId, { status: 'pending_provider', error_msg: 'sms provider not implemented', next_retry_at: new Date(Date.now() + 60 * 60 * 1000).toISOString() });
+      // unsupported channel — mismo retry queue
+      await r12o3aUpdateMessage(savedId, { status: 'pending_provider', error_msg: 'channel not implemented', next_retry_at: new Date(Date.now() + 60 * 60 * 1000).toISOString() });
       return { ok: true, queued: true, id: savedId, status: 'pending_provider', channel: channel };
     }
 
@@ -29420,9 +30016,11 @@ if (process.env.NODE_ENV === 'test') {
         email: emailList,
         whatsapp: waList,
         providers: {
+          resend_configured:   !!process.env.RESEND_API_KEY,
           sendgrid_configured: !!process.env.SENDGRID_API_KEY,
           wasender_configured: !!process.env.WASENDER_API_KEY,
           twilio_configured:   !!(process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_ACCOUNT_SID),
+          twilio_sms_configured: !!(process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_ACCOUNT_SID && (process.env.TWILIO_SMS_FROM || process.env.TWILIO_PHONE_NUMBER || process.env.TWILIO_FROM)),
           whatsapp_meta_configured: !!process.env.WHATSAPP_TOKEN
         }
       });
@@ -29496,6 +30094,408 @@ if (process.env.NODE_ENV === 'test') {
       });
     } catch (err) { sendError(res, err); }
   };
+
+})();
+
+// ============================================================================
+// FIX-1 — Provider Health Endpoints (superadmin only)
+// ============================================================================
+// Endpoints:
+//   GET  /api/admin/providers/health            → reporta qué providers están configurados
+//   POST /api/admin/providers/test/email        → envía email de prueba al admin
+//   POST /api/admin/providers/test/sms          → envía SMS de prueba
+//   POST /api/admin/providers/test/whatsapp     → envía WhatsApp de prueba
+//
+// IMPORTANTE: Estos endpoints SOLO devuelven booleans + nombres de variables
+// faltantes. NUNCA exponen el valor de las API keys.
+// ============================================================================
+(function attachProviderHealth() {
+  if (typeof handlers === 'undefined') return;
+
+  // ---- Helpers ----
+  function isSuperadmin(req) {
+    var r = req.user && req.user.role;
+    return r === 'superadmin' || r === 'platform_admin';
+  }
+  function envSet(name) {
+    return !!(process.env[name] && String(process.env[name]).trim().length > 0);
+  }
+  function missingFrom(list) {
+    return list.filter(function (n) { return !envSet(n); });
+  }
+
+  // ---- In-memory test status cache (best-effort, not persisted) ----
+  // { email: { status: 'ok'|'failed', last_test_at: ISO, error: msg }, sms: {...}, whatsapp: {...} }
+  global.__providerTestStatus = global.__providerTestStatus || {
+    email: { status: 'untested', last_test_at: null, error: null },
+    sms: { status: 'untested', last_test_at: null, error: null },
+    whatsapp: { status: 'untested', last_test_at: null, error: null }
+  };
+
+  function recordTest(channel, ok, error) {
+    try {
+      global.__providerTestStatus[channel] = {
+        status: ok ? 'ok' : 'failed',
+        last_test_at: new Date().toISOString(),
+        error: ok ? null : (error ? String(error).slice(0, 300) : 'unknown')
+      };
+    } catch (_) {}
+  }
+
+  function getEmailStatus() {
+    var hasResend = envSet('RESEND_API_KEY');
+    var hasSendgrid = envSet('SENDGRID_API_KEY');
+    var hasSmtp = envSet('SMTP_HOST');
+    var configured = hasResend || hasSendgrid || hasSmtp;
+    var provider = hasResend ? 'resend' : (hasSendgrid ? 'sendgrid' : (hasSmtp ? 'smtp' : null));
+    var fromAddrSet = false;
+    if (provider === 'resend') fromAddrSet = envSet('RESEND_FROM_EMAIL') || true; // resend default permite onboarding@resend.dev
+    else if (provider === 'sendgrid') fromAddrSet = envSet('SENDGRID_FROM_EMAIL') || envSet('SENDGRID_FROM');
+    else if (provider === 'smtp') fromAddrSet = envSet('SMTP_FROM_EMAIL');
+    var missing = configured ? [] : ['RESEND_API_KEY', 'SENDGRID_API_KEY', 'SMTP_HOST'];
+    var test = (global.__providerTestStatus && global.__providerTestStatus.email) || { status: 'untested', last_test_at: null };
+    return {
+      configured: configured,
+      provider: provider,
+      from_address_set: !!fromAddrSet,
+      test_status: test.status || 'untested',
+      last_test_at: test.last_test_at || null,
+      missing_env_vars: missing
+    };
+  }
+
+  function getSmsStatus() {
+    var hasTwilio = envSet('TWILIO_ACCOUNT_SID') && envSet('TWILIO_AUTH_TOKEN');
+    var hasFrom = envSet('TWILIO_SMS_FROM') || envSet('TWILIO_PHONE_NUMBER') || envSet('TWILIO_FROM');
+    var configured = hasTwilio && hasFrom;
+    var missing = [];
+    if (!envSet('TWILIO_ACCOUNT_SID')) missing.push('TWILIO_ACCOUNT_SID');
+    if (!envSet('TWILIO_AUTH_TOKEN'))  missing.push('TWILIO_AUTH_TOKEN');
+    if (!hasFrom) missing.push('TWILIO_SMS_FROM (or TWILIO_PHONE_NUMBER)');
+    var test = (global.__providerTestStatus && global.__providerTestStatus.sms) || { status: 'untested', last_test_at: null };
+    return {
+      configured: configured,
+      provider: hasTwilio ? 'twilio' : null,
+      from_number_set: !!hasFrom,
+      test_status: test.status || 'untested',
+      last_test_at: test.last_test_at || null,
+      missing_env_vars: missing
+    };
+  }
+
+  function getWhatsappStatus() {
+    var hasTwilio = envSet('TWILIO_ACCOUNT_SID') && envSet('TWILIO_AUTH_TOKEN') && envSet('TWILIO_WHATSAPP_FROM');
+    var hasWasender = envSet('WASENDER_API_KEY');
+    var hasMeta = envSet('WHATSAPP_TOKEN') && envSet('WHATSAPP_PHONE_NUMBER_ID');
+    var configured = hasTwilio || hasWasender || hasMeta;
+    var provider = hasTwilio ? 'twilio' : (hasWasender ? 'wasender' : (hasMeta ? 'meta' : null));
+    var missing = [];
+    if (!hasTwilio && !hasWasender && !hasMeta) {
+      missing.push('TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN', 'TWILIO_WHATSAPP_FROM');
+      missing.push('WASENDER_API_KEY');
+      missing.push('WHATSAPP_TOKEN', 'WHATSAPP_PHONE_NUMBER_ID');
+    }
+    var test = (global.__providerTestStatus && global.__providerTestStatus.whatsapp) || { status: 'untested', last_test_at: null };
+    return {
+      configured: configured,
+      provider: provider,
+      test_status: test.status || 'untested',
+      last_test_at: test.last_test_at || null,
+      missing_env_vars: missing
+    };
+  }
+
+  function getStripeStatus() {
+    var hasSecret = envSet('STRIPE_SECRET_KEY');
+    var hasPub = envSet('STRIPE_PUBLISHABLE_KEY');
+    var hasWebhook = envSet('STRIPE_WEBHOOK_SECRET');
+    var configured = hasSecret;
+    var missing = missingFrom(['STRIPE_SECRET_KEY', 'STRIPE_PUBLISHABLE_KEY', 'STRIPE_WEBHOOK_SECRET']);
+    return {
+      configured: configured,
+      publishable_key_set: hasPub,
+      webhook_secret_set: hasWebhook,
+      missing_env_vars: missing
+    };
+  }
+
+  function getAiStatus() {
+    var hasAnthropic = envSet('ANTHROPIC_API_KEY');
+    var hasOpenAi = envSet('OPENAI_API_KEY');
+    var hasGoogle = envSet('GOOGLE_API_KEY');
+    var configured = hasAnthropic || hasOpenAi || hasGoogle;
+    var provider = hasAnthropic ? 'anthropic' : (hasOpenAi ? 'openai' : (hasGoogle ? 'google' : null));
+    var missing = [];
+    if (!configured) missing.push('ANTHROPIC_API_KEY', 'OPENAI_API_KEY', 'GOOGLE_API_KEY');
+    return {
+      configured: configured,
+      provider: provider,
+      missing_env_vars: missing
+    };
+  }
+
+  function getStorageStatus() {
+    var hasS3 = envSet('AWS_ACCESS_KEY') && envSet('AWS_SECRET') && envSet('S3_BUCKET');
+    var missing = [];
+    if (!envSet('AWS_ACCESS_KEY')) missing.push('AWS_ACCESS_KEY');
+    if (!envSet('AWS_SECRET'))     missing.push('AWS_SECRET');
+    if (!envSet('S3_BUCKET'))      missing.push('S3_BUCKET');
+    return { configured: hasS3, provider: hasS3 ? 's3' : null, missing_env_vars: missing };
+  }
+
+  function getCoreStatus() {
+    var missing = [];
+    if (!envSet('SUPABASE_URL'))         missing.push('SUPABASE_URL');
+    if (!envSet('SUPABASE_SERVICE_KEY')) missing.push('SUPABASE_SERVICE_KEY');
+    if (!envSet('JWT_SECRET'))           missing.push('JWT_SECRET');
+    return { configured: missing.length === 0, missing_env_vars: missing };
+  }
+
+  function calcOverallHealth(parts) {
+    var keys = ['email', 'sms', 'whatsapp', 'stripe', 'ai', 'core'];
+    var pct = 0, total = 0;
+    keys.forEach(function (k) {
+      total++;
+      if (parts[k] && parts[k].configured) pct++;
+    });
+    return Math.round((pct / total) * 100);
+  }
+
+  // =================================================================
+  // GET /api/admin/providers/health (superadmin only)
+  // =================================================================
+  handlers['GET /api/admin/providers/health'] = requireAuth(async function (req, res) {
+    try {
+      if (!isSuperadmin(req)) {
+        return send403(res, { need_role: ['superadmin', 'platform_admin'], have_role: req.user.role });
+      }
+      var email = getEmailStatus();
+      var sms = getSmsStatus();
+      var whatsapp = getWhatsappStatus();
+      var stripe = getStripeStatus();
+      var ai = getAiStatus();
+      var storage = getStorageStatus();
+      var core = getCoreStatus();
+      var overall = calcOverallHealth({ email: email, sms: sms, whatsapp: whatsapp, stripe: stripe, ai: ai, core: core });
+      sendJSON(res, {
+        ok: true,
+        email: email,
+        sms: sms,
+        whatsapp: whatsapp,
+        stripe: stripe,
+        ai: ai,
+        storage: storage,
+        core: core,
+        overall_health_pct: overall,
+        generated_at: new Date().toISOString(),
+        // No exponemos valores de keys, solo metadata
+        _security_note: 'API keys NEVER returned. Only boolean configured status + missing env var names.'
+      });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // =================================================================
+  // POST /api/admin/providers/test/email (superadmin only)
+  // Envía email de prueba al email del admin que ejecuta.
+  // =================================================================
+  handlers['POST /api/admin/providers/test/email'] = requireAuth(async function (req, res) {
+    try {
+      if (!isSuperadmin(req)) {
+        return send403(res, { need_role: ['superadmin', 'platform_admin'], have_role: req.user.role });
+      }
+      var sendEmail = (typeof global.__r12o3a_sendEmail === 'function') ? global.__r12o3a_sendEmail : null;
+      if (!sendEmail) {
+        recordTest('email', false, 'email dispatcher unavailable');
+        return sendJSON(res, { ok: false, error: 'EMAIL_DISPATCHER_UNAVAILABLE', error_message: 'Internal: email module not loaded' }, 500);
+      }
+      if (!process.env.RESEND_API_KEY && !process.env.SENDGRID_API_KEY) {
+        recordTest('email', false, 'no email provider configured');
+        return sendJSON(res, {
+          ok: false,
+          error: 'NO_EMAIL_PROVIDER',
+          error_message: 'Configura RESEND_API_KEY o SENDGRID_API_KEY antes de probar.',
+          missing_env_vars: ['RESEND_API_KEY', 'SENDGRID_API_KEY']
+        }, 503);
+      }
+      var to = (req.user && req.user.email) || null;
+      // Allow override via body for dispatch testing
+      try {
+        var body = await readBody(req, { maxBytes: 4096 });
+        if (body && body.to && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(body.to))) {
+          to = String(body.to).toLowerCase().trim();
+        }
+      } catch (_) {}
+      if (!to) {
+        return sendValidation(res, 'admin email no disponible — envía body { "to": "tu@email.com" }', 'to');
+      }
+      var html =
+        '<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;padding:20px;">' +
+        '<h2>Test de email — Volvix POS</h2>' +
+        '<p>Este es un email de prueba enviado por <strong>/api/admin/providers/test/email</strong>.</p>' +
+        '<p>Si recibiste este mensaje, tu provider de email está correctamente configurado.</p>' +
+        '<p><strong>Provider:</strong> ' + (process.env.RESEND_API_KEY ? 'Resend' : 'SendGrid') + '</p>' +
+        '<p><strong>Timestamp:</strong> ' + new Date().toISOString() + '</p>' +
+        '<hr><p style="color:#999;font-size:12px;">Volvix POS — Provider Health Check</p>' +
+        '</body></html>';
+      var result = await sendEmail({
+        to: to,
+        toName: 'Volvix Admin',
+        subject: 'Volvix POS — Test de email',
+        html: html
+      });
+      if (result && result.ok) {
+        recordTest('email', true, null);
+        return sendJSON(res, { ok: true, provider: result.provider, provider_msg_id: result.provider_msg_id, sent_to: to });
+      }
+      recordTest('email', false, (result && (result.error || result.reason)) || 'unknown');
+      return sendJSON(res, {
+        ok: false,
+        error: 'EMAIL_SEND_FAILED',
+        provider: result && result.provider,
+        reason: result && (result.reason || result.error),
+        sent_to: to
+      }, 502);
+    } catch (err) { sendError(res, err); }
+  });
+
+  // =================================================================
+  // POST /api/admin/providers/test/sms (superadmin only)
+  // Envía SMS de prueba. Body: { to: '+52...' } (default = req.user.phone si existe)
+  // =================================================================
+  handlers['POST /api/admin/providers/test/sms'] = requireAuth(async function (req, res) {
+    try {
+      if (!isSuperadmin(req)) {
+        return send403(res, { need_role: ['superadmin', 'platform_admin'], have_role: req.user.role });
+      }
+      var sendSms = (typeof global.__r12o3a_sendSms === 'function') ? global.__r12o3a_sendSms : null;
+      if (!sendSms) {
+        recordTest('sms', false, 'sms dispatcher unavailable');
+        return sendJSON(res, { ok: false, error: 'SMS_DISPATCHER_UNAVAILABLE' }, 500);
+      }
+      if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
+        recordTest('sms', false, 'twilio not configured');
+        return sendJSON(res, {
+          ok: false,
+          error: 'NO_SMS_PROVIDER',
+          error_message: 'Configura TWILIO_ACCOUNT_SID + TWILIO_AUTH_TOKEN + TWILIO_SMS_FROM',
+          missing_env_vars: missingFrom(['TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN', 'TWILIO_SMS_FROM'])
+        }, 503);
+      }
+      var to = null;
+      try {
+        var body = await readBody(req, { maxBytes: 4096 });
+        if (body && body.to) to = String(body.to).replace(/[\s\-\(\)]/g, '');
+      } catch (_) {}
+      if (!to || !/^\+?\d{8,15}$/.test(to)) {
+        return sendValidation(res, 'body { "to": "+52XXXXXXXXXX" } requerido (formato E.164)', 'to');
+      }
+      var msg = '[Volvix POS] Test SMS enviado ' + new Date().toISOString() + '. Si recibes este mensaje, tu provider esta OK.';
+      var result = await sendSms({ to: to, body: msg });
+      if (result && result.ok) {
+        recordTest('sms', true, null);
+        return sendJSON(res, { ok: true, provider: result.provider, provider_msg_id: result.provider_msg_id, sent_to: to });
+      }
+      recordTest('sms', false, (result && (result.error || result.reason)) || 'unknown');
+      return sendJSON(res, {
+        ok: false,
+        error: 'SMS_SEND_FAILED',
+        provider: result && result.provider,
+        reason: result && (result.reason || result.error),
+        sent_to: to
+      }, 502);
+    } catch (err) { sendError(res, err); }
+  });
+
+  // =================================================================
+  // POST /api/admin/providers/test/whatsapp (superadmin only)
+  // =================================================================
+  handlers['POST /api/admin/providers/test/whatsapp'] = requireAuth(async function (req, res) {
+    try {
+      if (!isSuperadmin(req)) {
+        return send403(res, { need_role: ['superadmin', 'platform_admin'], have_role: req.user.role });
+      }
+      var hasTwilio = process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_WHATSAPP_FROM;
+      var hasWasender = !!process.env.WASENDER_API_KEY;
+      var hasMeta = !!process.env.WHATSAPP_TOKEN;
+      if (!hasTwilio && !hasWasender && !hasMeta) {
+        recordTest('whatsapp', false, 'no whatsapp provider configured');
+        return sendJSON(res, {
+          ok: false,
+          error: 'NO_WA_PROVIDER',
+          error_message: 'Configura Twilio (SID+TOKEN+WHATSAPP_FROM) o WASENDER_API_KEY o WHATSAPP_TOKEN',
+          missing_env_vars: ['TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN', 'TWILIO_WHATSAPP_FROM', 'WASENDER_API_KEY', 'WHATSAPP_TOKEN']
+        }, 503);
+      }
+      var to = null;
+      try {
+        var body = await readBody(req, { maxBytes: 4096 });
+        if (body && body.to) to = String(body.to).replace(/[\s\-\(\)]/g, '');
+      } catch (_) {}
+      if (!to || !/^\+?\d{8,15}$/.test(to)) {
+        return sendValidation(res, 'body { "to": "+52XXXXXXXXXX" } requerido', 'to');
+      }
+      var msg = '[Volvix POS] Test WhatsApp enviado ' + new Date().toISOString() + '. Si recibiste este mensaje, tu provider esta OK.';
+      // Reuse Twilio WhatsApp directly
+      if (hasTwilio) {
+        try {
+          var sid = process.env.TWILIO_ACCOUNT_SID;
+          var token = process.env.TWILIO_AUTH_TOKEN;
+          var fromNum = process.env.TWILIO_WHATSAPP_FROM;
+          var auth = 'Basic ' + Buffer.from(sid + ':' + token).toString('base64');
+          var qs = 'From=' + encodeURIComponent('whatsapp:' + fromNum) +
+                   '&To=' + encodeURIComponent('whatsapp:' + to) +
+                   '&Body=' + encodeURIComponent(msg);
+          var https = require('https');
+          var result = await new Promise(function (resolve) {
+            var rq = https.request({
+              method: 'POST',
+              hostname: 'api.twilio.com',
+              path: '/2010-04-01/Accounts/' + sid + '/Messages.json',
+              headers: {
+                'Authorization': auth,
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Content-Length': Buffer.byteLength(qs)
+              },
+              timeout: 15000
+            }, function (resp) {
+              var chunks = [];
+              resp.on('data', function (c) { chunks.push(c); });
+              resp.on('end', function () {
+                var b = Buffer.concat(chunks).toString('utf8');
+                if (resp.statusCode >= 200 && resp.statusCode < 300) {
+                  var id = null;
+                  try { id = JSON.parse(b).sid || null; } catch (_) {}
+                  resolve({ ok: true, provider: 'twilio', provider_msg_id: id });
+                } else {
+                  resolve({ ok: false, provider: 'twilio', error: 'http_' + resp.statusCode + ' ' + (b || '').slice(0, 200) });
+                }
+              });
+            });
+            rq.on('error', function (e) { resolve({ ok: false, error: String(e && e.message || e) }); });
+            rq.on('timeout', function () { try { rq.destroy(); } catch (_) {} resolve({ ok: false, error: 'timeout' }); });
+            rq.write(qs);
+            rq.end();
+          });
+          if (result.ok) {
+            recordTest('whatsapp', true, null);
+            return sendJSON(res, { ok: true, provider: 'twilio', provider_msg_id: result.provider_msg_id, sent_to: to });
+          }
+          recordTest('whatsapp', false, result.error || 'unknown');
+          return sendJSON(res, { ok: false, error: 'WA_SEND_FAILED', provider: 'twilio', reason: result.error, sent_to: to }, 502);
+        } catch (e) {
+          recordTest('whatsapp', false, String(e && e.message || e));
+          return sendJSON(res, { ok: false, error: 'WA_SEND_FAILED', reason: String(e && e.message || e) }, 502);
+        }
+      }
+      // No Twilio fallback in this test endpoint — recommend using messaging/send for Wasender/Meta
+      recordTest('whatsapp', false, 'only Twilio test path implemented in health endpoint');
+      return sendJSON(res, {
+        ok: false,
+        error: 'WA_TEST_PATH_LIMITED',
+        hint: 'Para Wasender/Meta usa POST /api/messaging/send con channel=whatsapp'
+      }, 501);
+    } catch (err) { sendError(res, err); }
+  });
 
 })();
 

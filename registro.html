@@ -326,6 +326,14 @@
         Enviamos un código de 6 dígitos a tu email y WhatsApp. Revísalo e ingrésalo abajo.
       </div>
 
+      <!-- FIX-2: Banner modo demo (visible solo si providers offline) -->
+      <div class="dev-otp-banner" id="devOtpBanner" style="display:none;background:#fef3c7;border:1px solid #f59e0b;border-radius:10px;padding:14px 16px;margin:0 0 14px;color:#78350f;font-size:14px;line-height:1.5;">
+        <strong>⚠️ Modo demo</strong> — Email y WhatsApp no configurados todavía.
+        <br>Tu código de verificación es:
+        <code class="otp-code" id="devOtpCode" style="display:inline-block;margin-top:6px;font-size:22px;font-weight:700;letter-spacing:6px;background:#fff;padding:6px 14px;border-radius:8px;border:1px dashed #f59e0b;color:#78350f;font-family:'Courier New',monospace;">000000</code>
+        <br><small style="color:#92400e;">El admin del SaaS configurará envío automático pronto.</small>
+      </div>
+
       <div class="otp-input-row" id="otpRow">
         <input type="tel" maxlength="1" inputmode="numeric" pattern="[0-9]" data-otp="0" autocomplete="one-time-code">
         <input type="tel" maxlength="1" inputmode="numeric" pattern="[0-9]" data-otp="1">
@@ -574,13 +582,60 @@
         if (res.status === 200 && res.body.ok) {
           state.tenant_id = res.body.tenant_id;
           state.user_id = res.body.user_id || null;
-          alert('info', 'Código enviado. Revisa tu email y WhatsApp.');
-          setStep(3);
-          startResendCounter(60);
-          setTimeout(function () { var f = $$('#otpRow input')[0]; if (f) f.focus(); }, 200);
+
+          // FIX-2: Modo demo — providers offline → mostrar banner + auto-fill
+          var banner = document.getElementById('devOtpBanner');
+          var bannerCode = document.getElementById('devOtpCode');
+          var otpInfo = document.getElementById('otpInfo');
+          if (res.body.providers_offline && res.body.otp_dev_visible) {
+            if (banner) banner.style.display = 'block';
+            if (bannerCode) bannerCode.textContent = String(res.body.otp_dev_visible);
+            if (otpInfo) otpInfo.style.display = 'none';
+            alert('info', 'Modo demo: tu código aparece en pantalla.');
+            setStep(3);
+            startResendCounter(60);
+            // Auto-fill inputs (UX friendly)
+            setTimeout(function () {
+              var inputs = $$('#otpRow input');
+              var code = String(res.body.otp_dev_visible);
+              for (var i = 0; i < inputs.length && i < code.length; i++) {
+                inputs[i].value = code.charAt(i);
+              }
+              // Habilitar botón
+              var b3 = document.getElementById('btnStep3');
+              if (b3) b3.disabled = false;
+              if (inputs[5]) inputs[5].focus();
+            }, 200);
+          } else {
+            if (banner) banner.style.display = 'none';
+            if (otpInfo) otpInfo.style.display = '';
+            alert('info', 'Código enviado. Revisa tu email y WhatsApp.');
+            setStep(3);
+            startResendCounter(60);
+            setTimeout(function () { var f = $$('#otpRow input')[0]; if (f) f.focus(); }, 200);
+          }
         } else {
-          var msg = (res.body && (res.body.error_message || res.body.error)) || 'Error al registrar.';
-          if (res.body.field) showErr(res.body.field, msg);
+          // BUG-T1 FIX: traducir error_code a mensaje friendly antes de mostrar SQL crudo
+          var errCode = (res.body && (res.body.error_code || res.body.error)) || '';
+          var rawMsg  = (res.body && (res.body.error_message || res.body.message)) || '';
+          var msg;
+          if (errCode === 'PHONE_TAKEN') {
+            msg = 'Este teléfono ya está registrado. Intenta otro o haz login.';
+            if (res.body) res.body.field = 'phone';
+          } else if (errCode === 'EMAIL_TAKEN') {
+            msg = 'Este email ya está registrado. Haz login o usa otro email.';
+            if (res.body) res.body.field = 'email';
+          } else if (errCode === 'DUPLICATE') {
+            msg = 'Algo ya existe con esos datos. Intenta otros.';
+          } else if (/Supabase\s+\d+/i.test(rawMsg) || /23505|duplicate key/i.test(rawMsg)) {
+            // Defensivo: si llegó un mensaje SQL crudo, traducir genéricamente
+            if (/phone/i.test(rawMsg)) msg = 'Este teléfono ya está registrado. Intenta otro o haz login.';
+            else if (/email/i.test(rawMsg)) msg = 'Este email ya está registrado. Haz login o usa otro email.';
+            else msg = 'Algo ya existe con esos datos. Intenta otros.';
+          } else {
+            msg = rawMsg || 'Error al registrar. Intenta de nuevo.';
+          }
+          if (res.body && res.body.field) showErr(res.body.field, msg);
           alert('error', msg);
         }
       })
