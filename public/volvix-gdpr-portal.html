@@ -4,8 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Volvix — Portal GDPR / Privacidad</title>
+<<<<<<< HEAD
 <link rel="stylesheet" href="volvix-modals.css">
 <script defer src="volvix-modals.js"></script>
+=======
+>>>>>>> origin/master
 <style>
   :root { --bg:#0b0f1a; --card:#141a2b; --fg:#e8ecf4; --muted:#8a93a6; --accent:#5cc8ff; --danger:#ff6b6b; --ok:#4ade80; }
   * { box-sizing:border-box; }
@@ -148,10 +151,17 @@ async function api(path, body) {
 async function submitRequest() {
   const email = document.getElementById('email').value.trim();
   const reason = document.getElementById('reason').value.trim();
+<<<<<<< HEAD
   if (!email) return VolvixUI.toast({type:'error', message:'Email requerido'});
   const path = `/api/gdpr/${state.type}`;
   const { status, json } = await api(path, { email, reason });
   if (!json.ok) return VolvixUI.toast({type:'error', message:'Error: ' + (json.error || status)});
+=======
+  if (!email) return alert('Email requerido');
+  const path = `/api/gdpr/${state.type}`;
+  const { status, json } = await api(path, { email, reason });
+  if (!json.ok) return alert('Error: ' + (json.error || status));
+>>>>>>> origin/master
   document.getElementById('req-id').value = json.request_id;
   // En producción el token llega por email; en dev viene en la respuesta.
   if (json.verify_token_dev) {
@@ -165,7 +175,11 @@ async function submitRequest() {
 async function confirmRequest() {
   const request_id = document.getElementById('req-id').value.trim();
   const verify_token = document.getElementById('verify-token').value.trim();
+<<<<<<< HEAD
   if (!request_id || !verify_token) return VolvixUI.toast({type:'error', message:'Request ID y token requeridos'});
+=======
+  if (!request_id || !verify_token) return alert('Request ID y token requeridos');
+>>>>>>> origin/master
   const path = `/api/gdpr/${state.type}`;
   const { status, json } = await api(path, { request_id, verify_token });
   if (!json.ok) {

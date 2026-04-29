@@ -1,0 +1,1813 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Volvix POS</title>
+  <meta name="theme-color" content="#1a237e">
+  <link rel="manifest" href="/manifest.json">
+
+  <!-- 1. AUTH GATE (primero, síncrono, bloquea sin sesión) -->
+  <script src="/auth-gate.js" data-roles="superadmin,owner,cajero"></script>
+
+  <!-- 2. Config y dependencias Volvix -->
+  <script src="/config.js"></script>
+
+  <!-- 3. Fuentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- 4. Design tokens -->
+  <link rel="stylesheet" href="/volvix-tokens.css">
+
+  <!-- 5. API + Sync + Widget -->
+  <script src="/volvix-api.js"></script>
+  <script src="/volvix-sync.js"></script>
+  <script src="/volvix-sync-widget.js"></script>
+
+  <!-- 6. Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator && window.VOLVIX_FLAGS?.serviceWorker !== false) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
+  </script>
+
+<style>
+/* ── RESET + BASE ── */
+*, *::before, *::after { box-sizing: border-box; }
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-3);
+  font-family: var(--font-primary);
+  font-size: 14px;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── LAYOUT ── */
+.pos-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+.pos-main {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* ── TOP HEADER ── */
+.top-header {
+  background: var(--navy);
+  color: #fff;
+  padding: 0 12px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  user-select: none;
+}
+.th-logo {
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: .5px;
+  color: #fff;
+}
+.th-logo span { color: #90caf9; }
+.th-info { font-size: 11px; color: #90caf9; margin-left: 4px; }
+.th-date { font-size: 11px; color: #b3c5ff; margin-left: 6px; }
+.th-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .3px;
+  cursor: default;
+}
+.badge-w    { background: #1565c0; color: #fff; }
+.badge-a    { background: #2e7d32; color: #fff; }
+.badge-web  { background: #1565c0; color: #fff; border: 1px solid #42a5f5; }
+.badge-live {
+  background: transparent;
+  color: #69f0ae;
+  border: 1px solid #69f0ae;
+  animation: blink 1.5s infinite;
+}
+@keyframes blink { 0%,100%{opacity:1}50%{opacity:.5} }
+.th-user { font-size: 11px; color: #e3f2fd; }
+.th-exit {
+  background: var(--danger);
+  color: #fff;
+  border: none;
+  padding: 3px 10px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--t-base);
+}
+.th-exit:hover { background: var(--danger-2); }
+
+/* ── NAV TABS ── */
+.nav-tabs {
+  background: var(--surface);
+  border-bottom: 2px solid var(--border);
+  display: flex;
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+.nav-tabs::-webkit-scrollbar { height: 0; }
+.nav-tab {
+  padding: 6px 13px;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text-3);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all var(--t-base);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.nav-tab:hover { color: var(--navy); background: #f3f4ff; }
+.nav-tab.active {
+  color: var(--navy);
+  border-bottom-color: var(--navy);
+  background: var(--surface);
+}
+.tab-key {
+  font-size: 10px;
+  color: #90caf9;
+  background: var(--navy);
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-weight: 700;
+}
+
+/* ── TICKET BAR ── */
+.ticket-bar {
+  background: #e8eaf6;
+  padding: 4px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid #c5cae9;
+  flex-shrink: 0;
+}
+.ticket-title { font-size: 13px; font-weight: 700; color: var(--navy); }
+.ticket-tabs-row { display: flex; gap: 2px; margin-left: 10px; }
+.tkt-tab {
+  padding: 3px 12px;
+  border-radius: 4px 4px 0 0;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #c5cae9;
+  color: var(--navy);
+  border: 1px solid #9fa8da;
+  border-bottom: none;
+  transition: background var(--t-fast);
+}
+.tkt-tab.active { background: var(--surface); }
+.tkt-new {
+  padding: 3px 10px;
+  border-radius: 4px 4px 0 0;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  background: transparent;
+  border: 1px dashed #9fa8da;
+  border-bottom: none;
+  color: #5c6bc0;
+}
+.tkt-new:hover { background: #e8eaf6; }
+
+/* ── CODE INPUT ── */
+.code-row {
+  background: var(--surface);
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.code-label { font-size: 12px; font-weight: 700; color: var(--navy); white-space: nowrap; }
+.barcode-icon { color: var(--text-3); font-size: 18px; margin: 0 2px; letter-spacing: -1px; }
+.code-input {
+  flex: 1;
+  max-width: 340px;
+  border: 2px solid var(--navy);
+  border-radius: var(--radius-md);
+  padding: 5px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  outline: none;
+  color: var(--text);
+  transition: border-color var(--t-base), box-shadow var(--t-base);
+}
+.code-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(21,101,192,.15);
+}
+.code-enter-btn {
+  background: var(--green);
+  color: #fff;
+  border: none;
+  padding: 5px 16px;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: background var(--t-base);
+}
+.code-enter-btn::before { content: '✓'; font-weight: 900; }
+.code-enter-btn:hover { background: #1b5e20; }
+
+/* ── SHORTCUTS ── */
+.shortcuts {
+  background: var(--bg-3);
+  padding: 4px 12px;
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.sc-btn {
+  padding: 3px 9px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid;
+  white-space: nowrap;
+  transition: filter var(--t-fast);
+}
+.sc-btn:hover { filter: brightness(.9); }
+.sc-ins   { background:#e3f2fd; border-color:#1565c0; color:#1565c0; }
+.sc-comun { background:#e8f5e9; border-color:#2e7d32; color:#2e7d32; }
+.sc-busca { background:#e3f2fd; border-color:#1565c0; color:#1565c0; }
+.sc-mayo  { background:#fff8e1; border-color:#f57f17; color:#f57f17; }
+.sc-ent   { background:#e8f5e9; border-color:#2e7d32; color:#2e7d32; }
+.sc-sal   { background:#fce4ec; border-color:#c62828; color:#c62828; }
+.sc-del   { background:#fce4ec; border-color:#c62828; color:#c62828; }
+.sc-ver   { background:#e8f5e9; border-color:#2e7d32; color:#2e7d32; }
+.sc-panel { background:#fff3e0; border-color:#e65100; color:#e65100; }
+.sc-cat   { background:#ede7f6; border-color:#6a1b9a; color:#6a1b9a; }
+.sc-gran  { background:#f3e5f5; border-color:#6a1b9a; color:#6a1b9a; }
+.sc-desc  { background:#e0f2f1; border-color:#00695c; color:#00695c; }
+.sc-calc  { background: var(--bg-4); border-color: var(--border-2); color: var(--text-2); }
+
+/* ── TABLE ── */
+.table-wrap {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--surface);
+  min-height: 0;
+}
+.pos-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.pos-table thead th {
+  background: #e8eaf6;
+  color: var(--navy);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-bottom: 2px solid #c5cae9;
+  border-right: 1px solid #c5cae9;
+  text-align: left;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  user-select: none;
+}
+.pos-table thead th:last-child { border-right: none; }
+.pos-table thead th.right { text-align: right; }
+.pos-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background var(--t-fast);
+  cursor: default;
+}
+.pos-table tbody tr:hover  { background: var(--row-hover); }
+.pos-table tbody tr.selected { background: #e3f2fd; }
+.pos-table tbody td {
+  padding: 5px 10px;
+  font-size: 13px;
+  border-right: 1px solid #f0f0f0;
+  vertical-align: middle;
+}
+.pos-table tbody td:last-child { border-right: none; }
+.pos-table tbody td.right { text-align: right; }
+.pos-table tbody td.importe { color: var(--green); font-weight: 700; text-align: right; }
+.pos-table tbody td.existencia { color: var(--muted); text-align: right; }
+.pos-table .qty-cell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: center;
+}
+.qty-btn {
+  width: 20px; height: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg-3);
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--t-fast);
+  color: var(--text);
+  line-height: 1;
+}
+.qty-btn:hover { background: var(--navy); color: #fff; border-color: var(--navy); }
+.del-row {
+  width: 20px; height: 20px;
+  border: none;
+  background: transparent;
+  color: var(--red);
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.del-row:hover { color: #b71c1c; }
+.col-code  { width: 140px; }
+.col-desc  { width: auto; }
+.col-price { width: 110px; }
+.col-qty   { width: 88px; text-align: center; }
+.col-importe { width: 110px; }
+.col-exist { width: 90px; }
+.col-del   { width: 32px; }
+.desc-badge {
+  background: var(--orange);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 3px;
+  margin-left: 4px;
+}
+.table-empty {
+  text-align: center;
+  padding: 50px 20px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* ── BOTTOM BAR ── */
+.bottom-bar {
+  background: var(--surface);
+  border-top: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 5px 12px;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.bb-btn {
+  padding: 6px 14px;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid;
+  transition: all var(--t-base);
+  white-space: nowrap;
+}
+.bb-f5    { background:#e8eaf6; border-color:#9fa8da; color:var(--navy); }
+.bb-f5:hover { background:#c5cae9; }
+.bb-f6    { background:#fff8e1; border-color:#f9a825; color:var(--yellow); }
+.bb-f6:hover { background:#ffe082; }
+.bb-elim  { background:#fce4ec; border-color:#ef9a9a; color:var(--red); }
+.bb-elim:hover { background:#ffcdd2; }
+.bb-client { background:#e3f2fd; border-color:#90caf9; color:var(--accent); }
+.bb-client:hover { background:#bbdefb; }
+.bb-cobrar {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green);
+  font-size: 14px;
+  padding: 7px 24px;
+}
+.bb-cobrar:hover:not(:disabled) { background: #1b5e20; }
+.bb-cobrar:disabled { opacity: .45; cursor: not-allowed; }
+.bb-total {
+  margin-left: auto;
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -1px;
+}
+.bb-total span { color: var(--navy); }
+
+/* ── BOTTOM INFO ── */
+.bottom-info {
+  background: var(--bg-2);
+  border-top: 1px solid var(--border);
+  padding: 4px 12px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+.bi-item { display: flex; align-items: center; gap: 5px; font-size: 12px; }
+.bi-label { color: var(--muted); font-weight: 600; }
+.bi-value { font-weight: 700; color: var(--text); }
+.bi-value.red { color: var(--red); }
+.bi-pm {
+  background: var(--green);
+  color: #fff;
+  border: none;
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ── COMPANY FOOTER ── */
+.company-footer {
+  background: var(--bg-2);
+  border-top: 1px solid var(--border);
+  padding: 2px 12px;
+  font-size: 10px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+/* ── MODALES ── */
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+  z-index: var(--z-modal);
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.overlay.open { display: flex; }
+.modal-box {
+  background: var(--surface);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-2xl);
+  width: 420px;
+  max-width: 95vw;
+  overflow: hidden;
+  animation: vlx-scale-in var(--t-base) var(--ease-out) both;
+}
+.modal-hdr {
+  background: var(--navy);
+  color: #fff;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.modal-close {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+  opacity: .7;
+}
+.modal-close:hover { opacity: 1; }
+.modal-body { padding: 20px; }
+.modal-footer {
+  padding: 12px 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.modal-action {
+  padding: 8px 18px;
+  border-radius: var(--radius-lg);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all var(--t-base);
+}
+.ma-cancel { background: var(--bg-3); color: var(--text); }
+.ma-cancel:hover { background: var(--bg-4); }
+.ma-confirm { background: var(--green); color: #fff; }
+.ma-confirm:hover:not(:disabled) { background: #1b5e20; }
+.ma-confirm:disabled { opacity: .45; cursor: not-allowed; }
+.ma-new { background: var(--navy); color: #fff; }
+.ma-new:hover { background: var(--navy2); }
+
+/* ── COBRO MODAL ── */
+.cobro-label { font-size: 12px; color: var(--muted); text-align: center; }
+.cobro-total {
+  font-size: 34px;
+  font-weight: 900;
+  color: var(--navy);
+  text-align: center;
+  margin: 8px 0 12px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -1px;
+}
+.pm-row { display: flex; gap: 6px; margin-bottom: 12px; }
+.pm-pill {
+  flex: 1;
+  padding: 6px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 2px solid var(--border);
+  color: var(--muted);
+  text-align: center;
+  transition: all var(--t-base);
+}
+.pm-pill.active { background: var(--navy); border-color: var(--navy); color: #fff; }
+.amount-input {
+  width: 100%;
+  border: 2px solid var(--navy);
+  border-radius: var(--radius-lg);
+  padding: 10px 14px;
+  font-size: 24px;
+  font-weight: 900;
+  text-align: right;
+  outline: none;
+  color: var(--navy);
+  margin-bottom: 8px;
+  font-variant-numeric: tabular-nums;
+}
+.numpad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin: 8px 0;
+}
+.np {
+  padding: 12px;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  transition: all var(--t-fast);
+  color: var(--text);
+}
+.np:hover { background: var(--navy); color: #fff; border-color: var(--navy); }
+.np:active { transform: scale(.96); }
+.cambio-row {
+  background: #e8f5e9;
+  border-radius: var(--radius-lg);
+  padding: 8px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.cambio-label { font-size: 13px; font-weight: 700; color: var(--green); }
+.cambio-val   { font-size: 22px; font-weight: 900; color: var(--green); font-variant-numeric: tabular-nums; }
+
+/* ── RECEIPT ── */
+.receipt {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  white-space: pre;
+  line-height: 1.6;
+  max-height: 360px;
+  overflow-y: auto;
+  color: var(--text);
+}
+
+/* ── SEARCH MODAL ── */
+.search-modal { width: 700px; }
+.sm-input {
+  width: 100%;
+  border: 2px solid var(--navy);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  font-size: 14px;
+  outline: none;
+  margin-bottom: 10px;
+  transition: border-color var(--t-base);
+}
+.sm-input:focus { border-color: var(--accent); }
+.sm-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.sm-table th { background: var(--navy); color: #fff; padding: 6px 10px; text-align: left; }
+.sm-table td { padding: 5px 10px; border-bottom: 1px solid var(--border); cursor: pointer; }
+.sm-table tr:hover td { background: #e3f2fd; }
+
+/* ── DESCUENTO MODAL ── */
+.desc-input {
+  width: 100%;
+  border: 2px solid var(--navy);
+  border-radius: var(--radius-md);
+  padding: 10px;
+  font-size: 22px;
+  font-weight: 700;
+  margin-top: 6px;
+  outline: none;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── CALCULADORA MODAL ── */
+.calc-display {
+  width: 100%;
+  border: 2px solid var(--navy);
+  border-radius: var(--radius-lg);
+  padding: 12px 14px;
+  font-family: var(--font-mono);
+  font-size: 26px;
+  font-weight: 700;
+  text-align: right;
+  color: var(--navy);
+  background: #f3f4ff;
+  margin-bottom: 10px;
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.calc-numpad {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.cn {
+  padding: 12px;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  transition: all var(--t-fast);
+  color: var(--text);
+}
+.cn:hover  { background: var(--navy); color: #fff; border-color: var(--navy); }
+.cn:active { transform: scale(.96); }
+.cn.op    { background: #e3f2fd; color: var(--navy); }
+.cn.equal { background: var(--green); color: #fff; border-color: var(--green); grid-row: span 2; }
+.cn.clear { background: #fce4ec; color: var(--red); border-color: #ef9a9a; }
+
+/* ── CAMBIAR PRECIO MODAL ── */
+.precio-input {
+  width: 100%;
+  border: 2px solid var(--navy);
+  border-radius: var(--radius-md);
+  padding: 10px;
+  font-size: 22px;
+  font-weight: 700;
+  margin-top: 6px;
+  outline: none;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── LOADING OVERLAY ── */
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  font-size: 13px;
+  color: var(--text-2);
+  gap: 8px;
+}
+.spinner {
+  width: 20px; height: 20px;
+  border: 2px solid var(--border);
+  border-top-color: var(--navy);
+  border-radius: 50%;
+  animation: vlx-spin 0.8s linear infinite;
+}
+
+/* ── PRINT ── */
+@media print {
+  .pos-layout > *:not(#ticketOverlay) { display: none !important; }
+  .overlay { display: block !important; position: static !important; background: none; }
+  .modal-box { box-shadow: none !important; border: none !important; width: auto !important; }
+  .modal-hdr, .modal-footer, .modal-close { display: none !important; }
+  .receipt { border: none !important; max-height: none !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="pos-layout">
+
+  <!-- ── TOP HEADER ── -->
+  <div class="top-header">
+    <div class="th-logo" id="brandName">Vol<span>vix</span></div>
+    <div class="th-info" id="tenantName">Cargando...</div>
+    <div class="th-date" id="headerDate"></div>
+    <div class="th-right">
+      <span class="badge badge-w">Windows</span>
+      <span class="badge badge-a">Android</span>
+      <span class="badge badge-web">Web</span>
+      <span class="badge badge-live">● LIVE</span>
+      <span class="th-user" id="userLabel"></span>
+      <button class="th-exit" onclick="logout()">⏻ Salir</button>
+    </div>
+  </div>
+
+  <!-- ── NAV TABS ── -->
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="tabSwitch(this,'ventas')">
+      <span class="tab-key">F1</span>Ventas
+    </div>
+    <div class="nav-tab" onclick="location.href='/pos-clientes.html'">
+      <span class="tab-key">F3</span>Clientes
+    </div>
+    <div class="nav-tab" onclick="navToInventario()">
+      <span class="tab-key">F4</span>Inventario
+    </div>
+    <div class="nav-tab" onclick="location.href='/pos-corte.html'">
+      Corte de caja
+    </div>
+    <div class="nav-tab" onclick="location.href='/pos-reportes.html'">
+      Reportes
+    </div>
+    <div class="nav-tab" onclick="location.href='/pos-config.html'">
+      ⚙ Config
+    </div>
+  </div>
+
+  <!-- ── POS MAIN ── -->
+  <div class="pos-main" id="panelVentas">
+
+    <!-- Ticket header -->
+    <div class="ticket-bar">
+      <div class="ticket-title">
+        VENTA — Ticket <span id="ticketNum">1</span>
+      </div>
+      <div class="ticket-tabs-row" id="ticketTabsRow">
+        <div class="tkt-tab active" onclick="selectTicket(this,0)">Ticket 1</div>
+        <div class="tkt-new" onclick="newTicket()" title="Nuevo ticket">＋</div>
+      </div>
+    </div>
+
+    <!-- Code input -->
+    <div class="code-row">
+      <span class="code-label">Código:</span>
+      <span class="barcode-icon" aria-hidden="true">▌▍▌▌▍▌</span>
+      <input
+        class="code-input"
+        id="codeInput"
+        placeholder="Escanear o escribir código..."
+        autocomplete="off"
+        autofocus
+        spellcheck="false"
+      >
+      <button class="code-enter-btn" onclick="addByCode()">
+        ENTER — Agregar
+      </button>
+    </div>
+
+    <!-- Shortcuts -->
+    <div class="shortcuts">
+      <button class="sc-btn sc-ins"   onclick="insertVarios()">INS Varios</button>
+      <button class="sc-btn sc-comun" onclick="addComun()">CTRL+P Común</button>
+      <button class="sc-btn sc-busca" onclick="openSearch()">F10 Buscar</button>
+      <button class="sc-btn sc-mayo"  onclick="toggleMayoreo()">F11 Mayoreo</button>
+      <button class="sc-btn sc-ent"   onclick="addStock()">F7 Entradas</button>
+      <button class="sc-btn sc-sal"   onclick="removeStock()">F8 Salidas</button>
+      <button class="sc-btn sc-del"   onclick="delSelected()">DEL Borrar</button>
+      <button class="sc-btn sc-ver"   onclick="verificar()">F9 Verificar</button>
+      <button class="sc-btn sc-panel" onclick="irPanel()">▦ Panel</button>
+      <button class="sc-btn sc-cat"   onclick="openSearch()">Catálogo</button>
+      <button class="sc-btn sc-gran"  onclick="toast('Granel: próximamente','info')">⚖ Granel</button>
+      <button class="sc-btn sc-desc"  onclick="openDescuento()">% Descuento</button>
+      <button class="sc-btn sc-calc"  onclick="openCalc()">🧮 Calc</button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap" style="position:relative">
+      <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        Cargando productos...
+      </div>
+      <table class="pos-table">
+        <thead>
+          <tr>
+            <th class="col-code">Código de barras</th>
+            <th class="col-desc">Descripción</th>
+            <th class="col-price right">Precio</th>
+            <th class="col-qty">Cant.</th>
+            <th class="col-importe right">Importe</th>
+            <th class="col-exist right">Exist.</th>
+            <th class="col-del"></th>
+          </tr>
+        </thead>
+        <tbody id="saleTableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Bottom bar -->
+    <div class="bottom-bar">
+      <button class="bb-btn bb-f5" onclick="openCambiarPrecio()">
+        F5 Cambiar precio
+      </button>
+      <button class="bb-btn bb-f6" onclick="marcarPendiente()">
+        F6 Pendiente
+      </button>
+      <button class="bb-btn bb-elim" onclick="delSelected()">
+        Eliminar
+      </button>
+      <button class="bb-btn bb-client" onclick="asignarCliente()">
+        👤 Cliente
+      </button>
+      <button class="bb-btn bb-cobrar" id="btnCobrar" onclick="openCobro()" disabled>
+        ● F12 Cobrar
+      </button>
+      <div class="bb-total" id="bbTotal"><span>$</span>0.00</div>
+    </div>
+
+    <!-- Bottom info -->
+    <div class="bottom-info">
+      <div class="bi-item">
+        <span class="bi-label">Total:</span>
+        <span class="bi-value red" id="biTotal">$0.00</span>
+      </div>
+      <div class="bi-item">
+        <span class="bi-label">Pagó:</span>
+        <span class="bi-value" id="biPago">$0.00</span>
+      </div>
+      <div class="bi-item">
+        <span class="bi-label">Cambio:</span>
+        <span class="bi-value" id="biCambio">$0.00</span>
+      </div>
+      <div class="bi-item" style="margin-left:6px">
+        <button class="bi-pm" id="biPmBtn" onclick="cyclePM()">Efectivo</button>
+      </div>
+      <div style="margin-left:auto;font-size:11px;color:var(--muted)" id="biCount">
+        0 productos
+      </div>
+    </div>
+
+  </div><!-- /pos-main -->
+
+  <!-- Company footer -->
+  <div class="company-footer">
+    <span id="footerBrand">Volvix POS · v7.0.0</span>
+    <span id="footerTime"></span>
+  </div>
+
+</div><!-- /pos-layout -->
+
+<!-- ══════════════ COBRO ══════════════ -->
+<div class="overlay" id="cobroOverlay">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <span>● Cobrar venta</span>
+      <button class="modal-close" onclick="closeOverlay('cobroOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="cobro-label">Total a cobrar</div>
+      <div class="cobro-total" id="cobroTotalLbl">$0.00</div>
+      <div class="pm-row">
+        <div class="pm-pill active" data-pm="efectivo" onclick="setPM(this)">💵 Efectivo</div>
+        <div class="pm-pill" data-pm="tarjeta"       onclick="setPM(this)">💳 Tarjeta</div>
+        <div class="pm-pill" data-pm="transferencia" onclick="setPM(this)">📲 Transfer</div>
+      </div>
+      <input class="amount-input" id="amountInput" value="$0.00" readonly>
+      <div class="numpad" id="numpadGrid"></div>
+      <div class="cambio-row">
+        <span class="cambio-label">Cambio</span>
+        <span class="cambio-val" id="cambioVal">$0.00</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-action ma-cancel" onclick="closeOverlay('cobroOverlay')">Cancelar</button>
+      <button class="modal-action ma-confirm" id="btnConfirmar" onclick="confirmarCobro()" disabled>
+        Confirmar cobro
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ TICKET ══════════════ -->
+<div class="overlay" id="ticketOverlay">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <span>🖨 Ticket de venta</span>
+      <button class="modal-close" onclick="closeOverlay('ticketOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="receipt" id="receiptText"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-action ma-cancel" onclick="printTicket()">🖨 Imprimir</button>
+      <button class="modal-action ma-new"    onclick="newSale()">+ Nueva venta</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ BUSCAR ══════════════ -->
+<div class="overlay" id="searchOverlay">
+  <div class="modal-box search-modal">
+    <div class="modal-hdr">
+      <span>🔍 Buscar producto</span>
+      <button class="modal-close" onclick="closeOverlay('searchOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input
+        class="sm-input"
+        id="searchInput"
+        placeholder="Nombre, código o categoría..."
+        oninput="filterSearch()"
+        autocomplete="off"
+      >
+      <div style="overflow-y:auto;max-height:320px">
+        <table class="sm-table">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Descripción</th>
+              <th>Precio</th>
+              <th>Stock</th>
+            </tr>
+          </thead>
+          <tbody id="searchBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ DESCUENTO ══════════════ -->
+<div class="overlay" id="descOverlay">
+  <div class="modal-box" style="width:320px">
+    <div class="modal-hdr">
+      <span>% Descuento global</span>
+      <button class="modal-close" onclick="closeOverlay('descOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <label style="font-size:12px;font-weight:700;color:var(--muted)">
+        Porcentaje de descuento al ticket completo (0–100)
+      </label>
+      <input
+        class="desc-input"
+        id="descPct"
+        type="number"
+        min="0" max="100"
+        value="0"
+      >
+    </div>
+    <div class="modal-footer">
+      <button class="modal-action ma-cancel" onclick="closeOverlay('descOverlay')">Cancelar</button>
+      <button class="modal-action ma-confirm" onclick="applyDesc()">Aplicar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ CAMBIAR PRECIO ══════════════ -->
+<div class="overlay" id="precioOverlay">
+  <div class="modal-box" style="width:320px">
+    <div class="modal-hdr">
+      <span>✏ Cambiar precio</span>
+      <button class="modal-close" onclick="closeOverlay('precioOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <label style="font-size:12px;font-weight:700;color:var(--muted)" id="precioLabel">
+        Producto seleccionado
+      </label>
+      <input
+        class="precio-input"
+        id="precioInput"
+        type="number"
+        min="0"
+        step="0.01"
+        placeholder="0.00"
+      >
+    </div>
+    <div class="modal-footer">
+      <button class="modal-action ma-cancel" onclick="closeOverlay('precioOverlay')">Cancelar</button>
+      <button class="modal-action ma-confirm" onclick="applyPrecio()">Aplicar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ CALCULADORA ══════════════ -->
+<div class="overlay" id="calcOverlay">
+  <div class="modal-box" style="width:300px">
+    <div class="modal-hdr">
+      <span>🧮 Calculadora</span>
+      <button class="modal-close" onclick="closeOverlay('calcOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="calc-display" id="calcDisplay">0</div>
+      <div class="calc-numpad">
+        <div class="cn clear"   onclick="calcKey('C')">C</div>
+        <div class="cn op"      onclick="calcKey('±')">±</div>
+        <div class="cn op"      onclick="calcKey('%')">%</div>
+        <div class="cn op"      onclick="calcKey('/')">÷</div>
+        <div class="cn"         onclick="calcKey('7')">7</div>
+        <div class="cn"         onclick="calcKey('8')">8</div>
+        <div class="cn"         onclick="calcKey('9')">9</div>
+        <div class="cn op"      onclick="calcKey('*')">×</div>
+        <div class="cn"         onclick="calcKey('4')">4</div>
+        <div class="cn"         onclick="calcKey('5')">5</div>
+        <div class="cn"         onclick="calcKey('6')">6</div>
+        <div class="cn op"      onclick="calcKey('-')">−</div>
+        <div class="cn"         onclick="calcKey('1')">1</div>
+        <div class="cn"         onclick="calcKey('2')">2</div>
+        <div class="cn"         onclick="calcKey('3')">3</div>
+        <div class="cn op equal" onclick="calcKey('=')">=</div>
+        <div class="cn"          onclick="calcKey('0')" style="grid-column:span 2">0</div>
+        <div class="cn"          onclick="calcKey('.')">.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   VOLVIX POS · Lógica principal
+   Depende de: volvix-api.js, volvix-sync.js, volvix-tokens.css
+   Sesión disponible en: window.VOLVIX_USER (seteado por auth-gate)
+============================================================ */
+'use strict';
+
+// ── Helpers ──
+const esc = (s) => window.volvix?.utils?.esc(s) ?? String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money = (n) => window.volvix?.utils?.money(n) ?? ('$' + Number(n).toFixed(2));
+const fmtDatetime = (d) => window.volvix?.utils?.datetime(d) ?? new Date(d).toLocaleString('es-MX');
+const fmtTime = (d) => window.volvix?.utils?.time(d) ?? new Date(d).toLocaleTimeString('es-MX');
+const fmtDate = (d) => window.volvix?.utils?.date(d, {weekday:'short',day:'2-digit',month:'short',year:'numeric'}) ?? new Date(d).toLocaleDateString('es-MX');
+
+// ── Estado global ──
+const TICKETS = [[]];
+let currentTicketIdx = 0;
+let allProducts = [];
+let discount = 0;
+let currentPM = 'efectivo';
+let numpadBuffer = '';
+let selectedRow = -1;
+
+function cart() { return TICKETS[currentTicketIdx]; }
+
+// ── Reloj ──
+function updateClock() {
+  const now = new Date();
+  const el = document.getElementById('headerDate');
+  const ft = document.getElementById('footerTime');
+  if (el) el.textContent = fmtDate(now);
+  if (ft) ft.textContent = fmtTime(now);
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ── Inicializar UI desde sesión ──
+(function initFromSession() {
+  const u = window.VOLVIX_USER;
+  if (!u) return;
+  const tenant = document.getElementById('tenantName');
+  const user   = document.getElementById('userLabel');
+  const brand  = document.getElementById('brandName');
+  const footer = document.getElementById('footerBrand');
+  const b = window.VOLVIX_BRAND || {};
+
+  if (tenant) tenant.textContent = u.tenant_name || 'Sin tenant';
+  if (user)   user.textContent   = u.email || u.role;
+  if (brand)  brand.innerHTML    = `${esc(b.name || 'Volvix')}`;
+  if (footer) footer.textContent = `${b.productName || 'Volvix POS'} · v${b.version || '7.0.0'}`;
+})();
+
+// ── Cargar productos ──
+async function loadProducts() {
+  const overlay = document.getElementById('loadingOverlay');
+  if (overlay) overlay.style.display = 'flex';
+  try {
+    const data = await window.volvix.api.productos.list();
+    if (Array.isArray(data) && data.length) {
+      allProducts = data.map(p => ({
+        id:        p.id,
+        codigo:    p.codigo || String(p.id).substring(0, 13) || '0000000000000',
+        nombre:    p.nombre || p.name || 'Producto',
+        precio:    parseFloat(p.precio || p.price) || 0,
+        stock:     p.stock ?? 999,
+        categoria: p.categoria || p.category || 'General',
+      }));
+    } else {
+      // Fallback offline del store
+      const offline = window.volvix.offline.list('productos');
+      allProducts = offline.length ? offline : [];
+    }
+  } catch {
+    const offline = window.volvix?.offline?.list?.('productos') || [];
+    allProducts = offline;
+  } finally {
+    if (overlay) overlay.style.display = 'none';
+    loadSearchTable(allProducts);
+    renderTable();
+  }
+}
+
+// ── Render de tabla ──
+function renderTable() {
+  const tbody = document.getElementById('saleTableBody');
+  const items = cart();
+  if (!items.length) {
+    tbody.innerHTML = `<tr><td colspan="7" class="table-empty">
+      Escanea un código o presiona <strong>F10</strong> para buscar</td></tr>`;
+    updateBottomBar(0);
+    return;
+  }
+  const total = items.reduce((s, i) => s + i.precio * i.qty, 0) * (1 - discount / 100);
+  tbody.innerHTML = items.map((item, i) => {
+    const imp = item.precio * item.qty * (1 - discount / 100);
+    return `<tr class="${i === selectedRow ? 'selected' : ''}" onclick="selectRow(${i})">
+      <td class="col-code txt-mono" style="font-size:12px">${esc(item.codigo)}</td>
+      <td class="col-desc">${esc(item.nombre)}${discount ? `<span class="desc-badge">-${discount}%</span>` : ''}${item.originalPrecio ? `<span class="desc-badge">precio ajustado</span>` : ''}</td>
+      <td class="col-price right">${money(item.precio)}</td>
+      <td class="col-qty">
+        <div class="qty-cell">
+          <button class="qty-btn" onclick="event.stopPropagation();changeQty(${i},-1)">−</button>
+          <span style="min-width:28px;text-align:center;font-weight:700">${item.qty}</span>
+          <button class="qty-btn" onclick="event.stopPropagation();changeQty(${i},+1)">+</button>
+        </div>
+      </td>
+      <td class="importe">${money(imp)}</td>
+      <td class="existencia">${item.stock}</td>
+      <td><button class="del-row" onclick="event.stopPropagation();removeRow(${i})" title="Eliminar">×</button></td>
+    </tr>`;
+  }).join('');
+  updateBottomBar(total);
+}
+
+function selectRow(i) { selectedRow = i; renderTable(); }
+
+function updateBottomBar(total) {
+  const items = cart();
+  const count = items.reduce((s, i) => s + i.qty, 0);
+  const t = document.getElementById('bbTotal');
+  if (t) t.innerHTML = `<span>$</span>${money(total).replace('$','')}`;
+  const bt = document.getElementById('biTotal');
+  if (bt) bt.textContent = money(total);
+  const bc = document.getElementById('biCount');
+  if (bc) bc.textContent = `${count} producto${count !== 1 ? 's' : ''}`;
+  const btn = document.getElementById('btnCobrar');
+  if (btn) btn.disabled = !items.length;
+  // Resetear cambio/pago al cambiar el carrito
+  const bp = document.getElementById('biPago');
+  const bch = document.getElementById('biCambio');
+  if (bp) bp.textContent = money(0);
+  if (bch) bch.textContent = money(0);
+}
+
+// ── Agregar productos ──
+function addByCode() {
+  const inp = document.getElementById('codeInput');
+  const val = (inp.value || '').trim();
+  if (!val) return;
+  const prod = allProducts.find(p =>
+    p.codigo === val ||
+    p.nombre.toLowerCase() === val.toLowerCase()
+  );
+  if (prod) {
+    addItem(prod);
+    inp.value = '';
+  } else {
+    toast(`Producto "${esc(val)}" no encontrado`, 'err');
+  }
+  inp.focus();
+}
+
+function addItem(prod) {
+  const items = cart();
+  const existing = items.find(i => i.id === prod.id);
+  if (existing) {
+    existing.qty++;
+  } else {
+    items.push({ ...prod, qty: 1 });
+    selectedRow = items.length - 1;
+  }
+  renderTable();
+  toast(`+ ${prod.nombre}`, 'ok');
+}
+
+function changeQty(i, delta) {
+  const items = cart();
+  items[i].qty += delta;
+  if (items[i].qty <= 0) {
+    items.splice(i, 1);
+    selectedRow = -1;
+  }
+  renderTable();
+}
+
+function removeRow(i) {
+  cart().splice(i, 1);
+  selectedRow = -1;
+  renderTable();
+}
+
+// ── Multi-ticket ──
+function selectTicket(el, idx) {
+  currentTicketIdx = idx;
+  selectedRow = -1;
+  document.querySelectorAll('.tkt-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const tn = document.getElementById('ticketNum');
+  if (tn) tn.textContent = idx + 1;
+  renderTable();
+}
+
+function newTicket() {
+  // No crear ticket vacío si el actual ya está vacío
+  if (cart().length === 0) {
+    toast('El ticket actual ya está vacío', 'info');
+    return;
+  }
+  TICKETS.push([]);
+  const idx = TICKETS.length - 1;
+  const row = document.getElementById('ticketTabsRow');
+  const newBtn = row.querySelector('.tkt-new');
+  const tab = document.createElement('div');
+  tab.className = 'tkt-tab';
+  tab.textContent = 'Ticket ' + (idx + 1);
+  tab.onclick = () => selectTicket(tab, idx);
+  row.insertBefore(tab, newBtn);
+  selectTicket(tab, idx);
+}
+
+// ── Búsqueda ──
+function openSearch() {
+  loadSearchTable(allProducts);
+  const si = document.getElementById('searchInput');
+  if (si) si.value = '';
+  document.getElementById('searchOverlay').classList.add('open');
+  setTimeout(() => si?.focus(), 80);
+}
+
+function loadSearchTable(products) {
+  const body = document.getElementById('searchBody');
+  if (!body) return;
+  if (!products.length) {
+    body.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--muted)">Sin resultados</td></tr>`;
+    return;
+  }
+  body.innerHTML = products.map(p => `
+    <tr onclick="pickProduct('${esc(String(p.id))}')">
+      <td class="txt-mono" style="font-size:11px">${esc(p.codigo)}</td>
+      <td>${esc(p.nombre)}</td>
+      <td>${money(p.precio)}</td>
+      <td>${p.stock}</td>
+    </tr>`).join('');
+}
+
+function filterSearch() {
+  const q = (document.getElementById('searchInput')?.value || '').toLowerCase();
+  const filtered = allProducts.filter(p =>
+    p.nombre.toLowerCase().includes(q) ||
+    p.codigo.includes(q) ||
+    (p.categoria || '').toLowerCase().includes(q)
+  );
+  loadSearchTable(filtered);
+}
+
+function pickProduct(id) {
+  const prod = allProducts.find(p => String(p.id) === id);
+  if (prod) {
+    addItem(prod);
+    closeOverlay('searchOverlay');
+  }
+}
+
+// ── Descuento ──
+function openDescuento() {
+  const el = document.getElementById('descPct');
+  if (el) el.value = discount;
+  document.getElementById('descOverlay').classList.add('open');
+  setTimeout(() => el?.focus(), 80);
+}
+
+function applyDesc() {
+  const v = parseFloat(document.getElementById('descPct')?.value || '0');
+  discount = Math.min(100, Math.max(0, isNaN(v) ? 0 : v));
+  closeOverlay('descOverlay');
+  renderTable();
+  if (discount > 0) toast(`Descuento ${discount}% aplicado al ticket`, 'ok');
+  else toast('Descuento eliminado', 'info');
+}
+
+// ── Cambiar precio (modal, no prompt) ──
+function openCambiarPrecio() {
+  if (selectedRow < 0 || selectedRow >= cart().length) {
+    toast('Selecciona un producto primero', 'err');
+    return;
+  }
+  const item = cart()[selectedRow];
+  const lbl = document.getElementById('precioLabel');
+  const inp = document.getElementById('precioInput');
+  if (lbl) lbl.textContent = item.nombre;
+  if (inp) { inp.value = item.precio; }
+  document.getElementById('precioOverlay').classList.add('open');
+  setTimeout(() => { inp?.select(); }, 80);
+}
+
+function applyPrecio() {
+  const val = parseFloat(document.getElementById('precioInput')?.value || '0');
+  if (isNaN(val) || val < 0) { toast('Precio inválido', 'err'); return; }
+  const item = cart()[selectedRow];
+  if (!item) return;
+  item.originalPrecio = item.originalPrecio || item.precio;
+  item.precio = val;
+  closeOverlay('precioOverlay');
+  renderTable();
+  toast(`Precio cambiado a ${money(val)}`, 'ok');
+}
+
+// ── Método de pago ──
+function setPM(el) {
+  document.querySelectorAll('.pm-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  currentPM = el.dataset.pm;
+  const btn = document.getElementById('biPmBtn');
+  if (btn) btn.textContent = { efectivo: 'Efectivo', tarjeta: 'Tarjeta', transferencia: 'Transfer' }[currentPM];
+
+  // Tarjeta y transferencia: llenar monto exacto automáticamente
+  if (currentPM !== 'efectivo') {
+    const total = getTotal();
+    numpadBuffer = total.toFixed(2);
+    const ai = document.getElementById('amountInput');
+    if (ai) ai.value = money(total);
+    const cv = document.getElementById('cambioVal');
+    if (cv) cv.textContent = money(0);
+    const bc = document.getElementById('btnConfirmar');
+    if (bc) bc.disabled = false;
+  } else {
+    resetNumpad();
+  }
+}
+
+function cyclePM() {
+  const pms = ['efectivo', 'tarjeta', 'transferencia'];
+  const i = pms.indexOf(currentPM);
+  const next = pms[(i + 1) % 3];
+  const pill = document.querySelector(`[data-pm="${next}"]`);
+  if (pill) setPM(pill);
+}
+
+// ── Cobro ──
+function getTotal() {
+  return cart().reduce((s, i) => s + i.precio * i.qty, 0) * (1 - discount / 100);
+}
+
+function openCobro() {
+  if (!cart().length) return;
+  const total = getTotal();
+  const lbl = document.getElementById('cobroTotalLbl');
+  if (lbl) lbl.textContent = money(total);
+  resetNumpad();
+  document.getElementById('cobroOverlay').classList.add('open');
+}
+
+function resetNumpad() {
+  numpadBuffer = '';
+  const ai = document.getElementById('amountInput');
+  if (ai) ai.value = money(0);
+  const cv = document.getElementById('cambioVal');
+  if (cv) cv.textContent = money(0);
+  const bc = document.getElementById('btnConfirmar');
+  if (bc) bc.disabled = true;
+}
+
+function buildNumpad() {
+  const keys = ['7','8','9','4','5','6','1','2','3','⌫','0','.'];
+  const grid = document.getElementById('numpadGrid');
+  if (!grid) return;
+  grid.innerHTML = keys.map(k =>
+    `<div class="np" onclick="npKey('${esc(k)}')">${esc(k)}</div>`
+  ).join('');
+}
+
+function npKey(k) {
+  const total = getTotal();
+  if (k === '⌫') numpadBuffer = numpadBuffer.slice(0, -1);
+  else if (k === '.' && numpadBuffer.includes('.')) return;
+  else numpadBuffer += k;
+
+  const val = parseFloat(numpadBuffer || '0') || 0;
+  const ai = document.getElementById('amountInput');
+  if (ai) ai.value = money(val);
+  const cambio = Math.max(0, val - total);
+  const cv = document.getElementById('cambioVal');
+  if (cv) cv.textContent = money(cambio);
+
+  const bc = document.getElementById('btnConfirmar');
+  if (bc) {
+    // Efectivo: el monto debe >= total
+    // Tarjeta/transferencia: siempre listo (ya se setea el total exacto)
+    bc.disabled = currentPM === 'efectivo' ? val < total : false;
+  }
+}
+
+async function confirmarCobro() {
+  const total  = getTotal();
+  const pagado = currentPM !== 'efectivo' ? total : (parseFloat(numpadBuffer || '0') || 0);
+  const cambio = Math.max(0, pagado - total);
+
+  const bp  = document.getElementById('biPago');
+  const bch = document.getElementById('biCambio');
+  if (bp)  bp.textContent  = money(pagado);
+  if (bch) bch.textContent = money(cambio);
+
+  await processSale(total, pagado, cambio);
+  closeOverlay('cobroOverlay');
+}
+
+async function processSale(total, pagado, cambio) {
+  const items = cart();
+  const user  = window.VOLVIX_USER;
+
+  if (!user?.tenant_id) {
+    toast('Error de sesión: no hay tenant. Vuelve a iniciar sesión.', 'err');
+    return;
+  }
+
+  const venta = {
+    tenant_id:    user.tenant_id,
+    cajero_id:    user.user_id,
+    total,
+    metodo_pago:  currentPM,
+    descuento:    discount,
+    pagado,
+    cambio,
+    created_at:   new Date().toISOString(),
+    items: items.map(i => ({
+      id:     i.id,
+      codigo: i.codigo,
+      nombre: i.nombre,
+      qty:    i.qty,
+      precio: i.precio,
+    })),
+  };
+
+  // Intentar enviar al server (offline-first via sync engine)
+  try {
+    const result = await window.volvix.sync.execute({
+      type:     'create',
+      table:    'ventas',
+      data:     venta,
+      endpoint: '/api/ventas',
+      body:     venta,
+    });
+
+    if (result.synced) {
+      toast('Venta registrada ✓', 'ok');
+    } else {
+      toast('Venta guardada offline · se sincronizará al reconectar', 'ok');
+    }
+  } catch (err) {
+    // Fallback duro: guardar en localStorage offline store
+    window.volvix.offline.insert('ventas', venta);
+    toast('Venta guardada localmente', 'info');
+  }
+
+  showTicket(items, total, pagado, cambio);
+}
+
+function showTicket(items, total, pagado, cambio) {
+  const brand = window.VOLVIX_BRAND || {};
+  const now   = fmtDatetime(new Date());
+  const sep   = '================================';
+  const sep2  = '--------------------------------';
+  const lines = [
+    sep,
+    '       ' + (brand.name || 'VOLVIX') + ' POS',
+    `  ${now}`,
+    sep2,
+    ...items.map(i => {
+      const imp  = (i.precio * i.qty * (1 - discount / 100)).toFixed(2);
+      const name = i.nombre.length > 20 ? i.nombre.slice(0, 20) : i.nombre.padEnd(20);
+      return `${name}  x${i.qty}  $${imp}`;
+    }),
+    sep2,
+    discount ? `${'Descuento ' + discount + '%'.padEnd(18)} -$${(items.reduce((s,i)=>s+i.precio*i.qty,0)*discount/100).toFixed(2)}` : '',
+    `${'TOTAL'.padEnd(22)} $${total.toFixed(2)}`,
+    `${'Pago (' + (currentPM === 'efectivo' ? 'Efectivo' : currentPM === 'tarjeta' ? 'Tarjeta' : 'Transfer') + ')'.padEnd(22)} $${pagado.toFixed(2)}`,
+    cambio > 0 ? `${'Cambio'.padEnd(22)} $${cambio.toFixed(2)}` : '',
+    sep2,
+    '      ¡Gracias por su compra!',
+    sep,
+  ].filter(Boolean).join('\n');
+
+  const rt = document.getElementById('receiptText');
+  if (rt) rt.textContent = lines;
+  document.getElementById('ticketOverlay').classList.add('open');
+}
+
+function printTicket() { window.print(); }
+
+function newSale() {
+  TICKETS[currentTicketIdx] = [];
+  discount = 0;
+  selectedRow = -1;
+  closeOverlay('ticketOverlay');
+  renderTable();
+  const inp = document.getElementById('codeInput');
+  if (inp) inp.focus();
+}
+
+// ── Calculadora (modal real, no Google) ──
+let calcExpr = '';
+let calcResult = false;
+
+function openCalc() {
+  calcExpr = '';
+  calcResult = false;
+  const d = document.getElementById('calcDisplay');
+  if (d) d.textContent = '0';
+  document.getElementById('calcOverlay').classList.add('open');
+}
+
+function calcKey(k) {
+  const d = document.getElementById('calcDisplay');
+  if (!d) return;
+  if (k === 'C') {
+    calcExpr = ''; calcResult = false; d.textContent = '0'; return;
+  }
+  if (k === '=') {
+    try {
+      /* eslint-disable no-new-func */
+      const r = Function('"use strict";return (' + calcExpr + ')')();
+      /* eslint-enable */
+      calcExpr = String(parseFloat(r.toFixed(10)));
+      d.textContent = calcExpr;
+      calcResult = true;
+    } catch {
+      d.textContent = 'Error';
+      calcExpr = '';
+    }
+    return;
+  }
+  if (k === '±') {
+    if (calcExpr.startsWith('-')) calcExpr = calcExpr.slice(1);
+    else calcExpr = '-' + (calcExpr || '0');
+    d.textContent = calcExpr;
+    return;
+  }
+  if (k === '%') {
+    try {
+      /* eslint-disable no-new-func */
+      const r = Function('"use strict";return (' + calcExpr + ')')();
+      /* eslint-enable */
+      calcExpr = String(r / 100);
+      d.textContent = calcExpr;
+    } catch {}
+    return;
+  }
+  if (calcResult && !isNaN(k)) {
+    calcExpr = '';
+    calcResult = false;
+  }
+  calcExpr += k;
+  d.textContent = calcExpr;
+}
+
+// ── Funciones de acción (shortcuts) ──
+function delSelected() {
+  if (selectedRow >= 0 && selectedRow < cart().length) {
+    removeRow(selectedRow);
+  } else {
+    toast('Selecciona un producto para eliminar', 'info');
+  }
+}
+
+function marcarPendiente() { toast('Ticket marcado como pendiente', 'info'); }
+function asignarCliente()  { toast('Módulo de clientes: próximamente', 'info'); }
+
+function insertVarios() {
+  addItem({
+    id: 'varios-' + Date.now(),
+    codigo: '0000000000000',
+    nombre: 'Varios',
+    precio: 1,
+    stock: 999,
+    categoria: 'Varios',
+  });
+}
+
+function addComun() { openSearch(); }
+
+function toggleMayoreo() { toast('Modo mayoreo: próximamente', 'info'); }
+
+function addStock()    {
+  if (cart().length > 0 && !confirm('¿Ir a inventario? El ticket actual se conservará.')) return;
+  location.href = '/pos-inventario.html';
+}
+function removeStock() { addStock(); }
+
+function verificar() {
+  const val = (document.getElementById('codeInput')?.value || '').trim();
+  if (!val) { toast('Ingresa un código para verificar', 'info'); return; }
+  const p = allProducts.find(x =>
+    x.codigo === val || x.nombre.toLowerCase() === val.toLowerCase()
+  );
+  if (p) {
+    toast(`${p.nombre}  ${money(p.precio)}  Stock: ${p.stock}`, 'ok');
+  } else {
+    toast(`No encontrado: "${val}"`, 'err');
+  }
+}
+
+function irPanel() {
+  if (cart().length > 0 && !confirm('¿Ir al panel? El ticket actual se conservará.')) return;
+  location.href = '/volvix_owner_panel_v7.html';
+}
+
+function navToInventario() {
+  if (cart().length > 0 && !confirm('¿Ir a inventario? El ticket actual se conservará.')) return;
+  location.href = '/pos-inventario.html';
+}
+
+// ── Logout ──
+function logout() {
+  if (typeof window.volvixLogout === 'function') {
+    window.volvixLogout();
+  } else {
+    if (!confirm('¿Cerrar sesión?')) return;
+    localStorage.removeItem('volvix:session');
+    location.replace('/login.html');
+  }
+}
+
+// ── Navegación de tabs ──
+function tabSwitch(el, panel) {
+  if (panel === 'inventario') { navToInventario(); return; }
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ── Cierre de modales ──
+function closeOverlay(id) {
+  document.getElementById(id)?.classList.remove('open');
+  document.getElementById('codeInput')?.focus();
+}
+document.querySelectorAll('.overlay').forEach(o => {
+  o.addEventListener('click', e => {
+    if (e.target === o) o.classList.remove('open');
+  });
+});
+
+// ── Toast ──
+function toast(msg, type = 'info') {
+  if (window.volvix?.utils?.toast) {
+    window.volvix.utils.toast(msg, type);
+    return;
+  }
+  // Fallback
+  const el = document.getElementById('volvix-global-toast') || (() => {
+    const t = document.createElement('div');
+    t.id = 'volvix-global-toast';
+    t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:#1C1917;color:#fff;border-radius:8px;padding:10px 20px;font:600 13px/1.4 Inter,system-ui,sans-serif;z-index:9999;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap';
+    document.body.appendChild(t);
+    return t;
+  })();
+  const colors = { info:'#3B82F6', ok:'#16A34A', err:'#DC2626', warn:'#F97316' };
+  el.style.background = colors[type] || '#1C1917';
+  el.textContent = msg;
+  el.style.opacity = '1';
+  el.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(-50%) translateY(20px)';
+  }, 2800);
+}
+
+// ── Keyboard shortcuts ──
+document.addEventListener('keydown', e => {
+  // Si hay un modal abierto, solo manejar Escape y Enter en cobro
+  const modalOpen = document.querySelector('.overlay.open');
+  if (modalOpen) {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      document.querySelectorAll('.overlay.open').forEach(o => o.classList.remove('open'));
+      document.getElementById('codeInput')?.focus();
+      return;
+    }
+    if (e.key === 'Enter' && document.getElementById('cobroOverlay').classList.contains('open')) {
+      const btn = document.getElementById('btnConfirmar');
+      if (btn && !btn.disabled) { e.preventDefault(); confirmarCobro(); }
+    }
+    // Números del teclado en modal de cobro
+    if (document.getElementById('cobroOverlay').classList.contains('open')) {
+      if (/^[0-9.]$/.test(e.key)) { npKey(e.key); return; }
+      if (e.key === 'Backspace')  { npKey('⌫'); return; }
+    }
+    return;
+  }
+
+  // Shortcuts globales del POS
+  const map = {
+    'F1':  () => { /* ya estamos en ventas */ },
+    'F3':  () => location.href = '/pos-clientes.html',
+    'F4':  () => navToInventario(),
+    'F5':  () => openCambiarPrecio(),
+    'F6':  () => marcarPendiente(),
+    'F7':  () => addStock(),
+    'F8':  () => removeStock(),
+    'F9':  () => verificar(),
+    'F10': () => openSearch(),
+    'F11': () => toggleMayoreo(),
+    'F12': () => { if (cart().length) openCobro(); },
+    'Delete': delSelected,
+    'Escape': () => document.querySelectorAll('.overlay.open').forEach(o => o.classList.remove('open')),
+  };
+  if (map[e.key]) {
+    e.preventDefault();
+    map[e.key]();
+    return;
+  }
+
+  // Enter en el campo de código
+  if (e.key === 'Enter' && document.activeElement?.id === 'codeInput') {
+    addByCode();
+    return;
+  }
+
+  // Cualquier tecla alfanumérica que no sea en un input → enfocar barcode
+  if (!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)) {
+    document.getElementById('codeInput')?.focus();
+  }
+});
+
+// ── Realtime Supabase (sin credenciales en este archivo) ──
+(function startRealtime() {
+  if (!window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) return;
+  const script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+  script.onload = () => {
+    try {
+      const client = window.supabase.createClient(
+        window.SUPABASE_URL,
+        window.SUPABASE_ANON_KEY
+      );
+      window._supabaseClient = client;
+      client.channel('pos-productos')
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'volvix_productos',
+        }, () => loadProducts())
+        .subscribe();
+    } catch (e) {
+      console.warn('[pos] Realtime no disponible:', e.message);
+    }
+  };
+  script.onerror = () => {};
+  document.head.appendChild(script);
+})();
+
+// ── INIT ──
+buildNumpad();
+loadProducts();
+</script>
+</body>
+</html>

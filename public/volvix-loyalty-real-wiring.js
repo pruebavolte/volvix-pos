@@ -15,6 +15,7 @@
 (function () {
   'use strict';
 
+<<<<<<< HEAD
   // VxUI: VolvixUI con fallback nativo
   const _w = window;
   const VxUI = {
@@ -35,6 +36,8 @@
     }
   };
 
+=======
+>>>>>>> origin/master
   const API_BASE = (window.VOLVIX_API_BASE || '').replace(/\/$/, '');
 
   async function api(path, opts = {}) {
@@ -95,7 +98,11 @@
     injectStyles();
     let info;
     try { info = await fetchCustomer(customerId); }
+<<<<<<< HEAD
     catch (e) { VxUI.toast('error', 'No se pudo cargar lealtad: ' + e.message); return; }
+=======
+    catch (e) { alert('No se pudo cargar lealtad: ' + e.message); return; }
+>>>>>>> origin/master
 
     const c    = info.customer || {};
     const tier = c.tier || { name: 'Sin nivel', perks: [] };
@@ -139,6 +146,7 @@
     btn.className = 'vlx-btn vlx-btn-primary';
     btn.textContent = 'Canjear puntos';
     btn.addEventListener('click', async () => {
+<<<<<<< HEAD
       const r0 = await VxUI.form({
         title: 'Canjear puntos',
         size: 'sm',
@@ -156,6 +164,17 @@
         if (typeof onRedeemed === 'function') onRedeemed(r);
       } catch (e) {
         VxUI.toast('error', 'Canje fallido: ' + (e.data?.error || e.message));
+=======
+      const ptsStr = prompt('¿Cuántos puntos canjear?');
+      const points = parseInt(ptsStr, 10);
+      if (!Number.isInteger(points) || points <= 0) return;
+      try {
+        const r = await redeem({ customer_id: customerId, sale_id: saleId, points });
+        alert(`Canjeados ${r.redeemed} pts. Saldo: ${r.balance}`);
+        if (typeof onRedeemed === 'function') onRedeemed(r);
+      } catch (e) {
+        alert('Canje fallido: ' + (e.data?.error || e.message));
+>>>>>>> origin/master
       }
     });
     container.appendChild(btn);

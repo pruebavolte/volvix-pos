@@ -1,0 +1,1804 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Owner Panel · Volvix</title>
+  <meta name="theme-color" content="#0A0A0A">
+
+  <!-- 1. Auth gate -->
+  <script src="/auth-gate.js" data-roles="superadmin,owner"></script>
+
+  <!-- 2. Config -->
+  <script src="/config.js"></script>
+
+  <!-- 3. Fuentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+  <!-- 4. Design tokens -->
+  <link rel="stylesheet" href="/volvix-tokens.css">
+
+  <!-- 5. API + Sync + Widget -->
+  <script src="/volvix-api.js"></script>
+  <script src="/volvix-sync.js"></script>
+  <script src="/volvix-sync-widget.js"></script>
+
+<style>
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; }
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-primary);
+  font-size: 14px;
+  color: var(--text);
+  background: var(--bg-2);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* ── APP SHELL ── */
+.app {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  grid-template-rows: 52px 1fr;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  grid-column: 1 / -1;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 12px;
+  flex-shrink: 0;
+  z-index: var(--z-sticky);
+}
+.tb-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: -0.3px;
+  color: var(--text);
+  text-decoration: none;
+}
+.tb-logo {
+  width: 34px; height: 34px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #FBBF24, #F59E0B);
+  color: #000;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px;
+  box-shadow: 0 0 16px rgba(251,191,36,0.35);
+  flex-shrink: 0;
+}
+.tb-sep { flex: 1; }
+.tb-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+.tb-stat .dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 6px var(--success);
+  animation: vlx-pulse 1.8s ease-in-out infinite;
+}
+.tb-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: background var(--t-base);
+}
+.tb-user:hover { background: var(--bg-2); }
+.tb-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3B82F6, #1E40AF);
+  color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+.tb-user-name { font-size: 12.5px; font-weight: 600; color: var(--text-2); }
+.tb-btn {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all var(--t-base);
+  font-family: var(--font-primary);
+}
+.tb-btn:hover { border-color: var(--border-2); color: var(--text); }
+.tb-btn.primary { background: var(--layer-owner); color: #000; border-color: var(--layer-owner); font-weight: 600; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+.nav-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-4);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 10px 10px 4px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  border-radius: var(--radius-lg);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all var(--t-fast);
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  font-family: var(--font-primary);
+}
+.nav-item:hover { background: var(--bg-2); color: var(--text); }
+.nav-item.active { background: var(--layer-owner-soft); color: var(--layer-owner-2); font-weight: 600; }
+.nav-item .icon { font-size: 15px; flex-shrink: 0; }
+.nav-item .label { flex: 1; }
+.nav-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  background: var(--bg-3);
+  color: var(--text-3);
+}
+.nav-item.active .nav-badge { background: var(--layer-owner); color: #000; }
+
+/* ── MAIN ── */
+.main {
+  overflow-y: auto;
+  padding: 24px 28px;
+  background: var(--bg-2);
+}
+.main::-webkit-scrollbar { width: 6px; }
+.main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* ── SECTION HEAD ── */
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.section-title { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 3px; }
+.section-sub { font-size: 13px; color: var(--text-3); }
+.section-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* Secciones ocultas */
+.page { display: none; animation: vlx-fade-up 0.2s var(--ease-out) both; }
+.page.active { display: block; }
+
+/* ── CARD ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+.card-head {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.card-title { font-size: 13.5px; font-weight: 600; }
+.card-sub { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+.card-body { padding: 18px; }
+
+/* ── KPI GRID ── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.kpi {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 16px 18px;
+}
+.kpi-label { font-size: 11px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
+.kpi-value { font-size: 26px; font-weight: 800; letter-spacing: -1px; color: var(--text); }
+.kpi-value.gold { color: var(--layer-owner); }
+.kpi-value.green { color: var(--success); }
+.kpi-value.blue { color: var(--layer-support); }
+.kpi-value.purple { color: var(--layer-ai); }
+.kpi-sub { font-size: 11.5px; color: var(--text-3); margin-top: 4px; }
+.kpi-up { color: var(--success); font-weight: 600; }
+
+/* ── BANNER ── */
+.banner {
+  border-radius: var(--radius-xl);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  border: 1px solid transparent;
+}
+.banner-icon {
+  width: 44px; height: 44px;
+  border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.banner-info { flex: 1; min-width: 160px; }
+.banner-title { font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+.banner-sub { font-size: 12px; opacity: 0.8; }
+.banner-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.banner.orange { background: linear-gradient(135deg, #FFF7ED, #FFEDD5); border-color: #FED7AA; }
+.banner.orange .banner-icon { background: #EA580C; color: white; }
+.banner.blue   { background: linear-gradient(135deg, #EFF6FF, #DBEAFE); border-color: #BFDBFE; }
+.banner.blue   .banner-icon { background: #1E40AF; color: white; }
+.banner.green  { background: linear-gradient(135deg, #F0FDF4, #DCFCE7); border-color: #BBF7D0; }
+.banner.green  .banner-icon { background: #16A34A; color: white; }
+.banner.dark   { background: linear-gradient(135deg, #0F172A, #1E3A8A); border-color: #334155; }
+.banner.dark .banner-title { color: #FBBF24; }
+.banner.dark .banner-sub   { color: #94A3B8; }
+
+/* ── AI ENGINE MINI CARDS (en banner oscuro) ── */
+.ai-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+.ai-mini {
+  border-radius: 10px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all var(--t-base);
+  border: 1px solid transparent;
+}
+.ai-mini:hover { transform: translateY(-1px); }
+.ai-mini.gold   { background: rgba(251,191,36,0.08); border-color: rgba(251,191,36,0.25); }
+.ai-mini.blue   { background: rgba(59,130,246,0.08); border-color: rgba(59,130,246,0.25); }
+.ai-mini.purple { background: rgba(168,85,247,0.08); border-color: rgba(168,85,247,0.25); }
+.ai-mini-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.ai-mini-ico {
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px;
+  color: white;
+}
+.ai-mini-name { font-size: 13px; font-weight: 700; color: white; }
+.ai-mini-tag  { font-size: 9.5px; color: #94A3B8; letter-spacing: 0.5px; text-transform: uppercase; }
+.ai-mini-desc { font-size: 11.5px; color: #CBD5E1; line-height: 1.5; margin-bottom: 8px; }
+.ai-mini-stats { display: flex; justify-content: space-between; font-size: 10.5px; color: #94A3B8; }
+
+/* ── TABLA ── */
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th {
+  padding: 9px 14px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-2);
+  white-space: nowrap;
+}
+.data-table td {
+  padding: 11px 14px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: var(--bg-2); }
+
+/* ── PILLS ── */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 600;
+}
+.pill.green  { background: var(--success-soft); color: var(--success-2); }
+.pill.blue   { background: var(--info-soft); color: var(--info-2); }
+.pill.orange { background: var(--warn-soft); color: var(--warn-2); }
+.pill.red    { background: var(--danger-soft); color: var(--danger-2); }
+.pill.purple { background: rgba(168,85,247,0.1); color: #7C3AED; }
+.pill.gray   { background: var(--bg-3); color: var(--text-3); }
+
+/* ── TENANT CARD ── */
+.tenant-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+.tenant-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 16px 18px;
+  transition: all var(--t-base);
+  cursor: default;
+}
+.tenant-card:hover { border-color: var(--border-2); box-shadow: var(--shadow-md); }
+.tc-head { display: flex; align-items: center; gap: 11px; margin-bottom: 12px; }
+.tc-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.tc-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+.tc-id   { font-size: 10.5px; color: var(--text-3); font-family: var(--font-mono); }
+.tc-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.tc-stat-label { font-size: 10.5px; color: var(--text-3); margin-bottom: 2px; }
+.tc-stat-val   { font-size: 13px; font-weight: 700; }
+.tc-actions { display: flex; gap: 6px; }
+
+/* ── MODAL ── */
+.modal-bg {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: var(--z-modal);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+.modal-bg.open { display: flex; }
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-2xl);
+  max-width: 560px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: vlx-scale-in var(--t-base) var(--ease-out) both;
+  box-shadow: var(--shadow-2xl);
+}
+.modal-head {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.modal-head-title { font-size: 15px; font-weight: 700; }
+.modal-head-sub   { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+.modal-body { padding: 20px 22px; overflow-y: auto; flex: 1; }
+.modal-foot {
+  padding: 14px 22px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* ── FORM ── */
+.form-group { margin-bottom: 14px; }
+.form-label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-2);
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  font-size: 13px;
+  font-family: var(--font-primary);
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+  transition: border-color var(--t-base), box-shadow var(--t-base);
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--info);
+  box-shadow: 0 0 0 3px var(--info-soft);
+}
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* ── BTN ── */
+.btn {
+  padding: 8px 16px;
+  border-radius: var(--radius-lg);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-2);
+  font-family: var(--font-primary);
+  transition: all var(--t-base);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.btn:hover { border-color: var(--border-2); color: var(--text); }
+.btn.primary { background: var(--layer-owner); color: #000; border-color: var(--layer-owner); }
+.btn.primary:hover { background: var(--layer-owner-2); }
+.btn.danger  { background: var(--danger-soft); color: var(--danger-2); border-color: var(--danger-border); }
+.btn.sm { padding: 5px 10px; font-size: 12px; }
+.btn.lg { padding: 11px 22px; font-size: 14px; }
+
+/* ── HIERARCHY TREE ── */
+.tree-node { margin-left: 0; }
+.tree-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: var(--radius-lg);
+  margin-bottom: 4px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  transition: background var(--t-fast);
+}
+.tree-row:hover { background: var(--bg-2); }
+.tree-level-badge {
+  width: 24px; height: 24px;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+.tree-info { flex: 1; min-width: 0; }
+.tree-name { font-size: 13px; font-weight: 600; }
+.tree-meta { font-size: 11px; color: var(--text-3); margin-top: 1px; }
+.tree-children { margin-left: 24px; border-left: 2px solid var(--border); padding-left: 12px; margin-top: 4px; }
+
+/* ── FEATURE LIST ── */
+.feat-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 90px 80px auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  transition: background var(--t-fast);
+}
+.feat-row:hover { background: var(--bg-2); }
+.feat-row:last-child { border-bottom: none; }
+.feat-main { display: flex; align-items: center; gap: 10px; }
+.feat-icon {
+  width: 30px; height: 30px;
+  border-radius: 7px;
+  background: var(--bg-3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.feat-name { font-size: 13px; font-weight: 600; margin-bottom: 1px; }
+.feat-id   { font-size: 10.5px; color: var(--text-3); font-family: var(--font-mono); }
+
+/* ── TICKET ROW ── */
+.ticket-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  transition: background var(--t-fast);
+  cursor: pointer;
+}
+.ticket-row:hover { background: var(--bg-2); }
+.ticket-row:last-child { border-bottom: none; }
+.ticket-avatar {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.ticket-info { flex: 1; min-width: 0; }
+.ticket-title-row { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ticket-meta  { font-size: 11.5px; color: var(--text-3); margin-top: 2px; }
+.ticket-time  { font-size: 11px; color: var(--text-3); flex-shrink: 0; font-family: var(--font-mono); }
+
+/* ── WYSIWYG EDITOR ── */
+.we-grid { display: grid; grid-template-columns: 280px 1fr; gap: 16px; }
+.we-list { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-xl); overflow: hidden; max-height: 70vh; overflow-y: auto; }
+.we-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background var(--t-fast);
+}
+.we-item:hover { background: var(--bg-2); }
+.we-item.active { background: var(--layer-owner-soft); }
+.we-item:last-child { border-bottom: none; }
+.we-giro-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.we-giro-name { font-size: 13px; font-weight: 600; }
+.we-giro-sys  { font-size: 11px; color: var(--text-3); font-family: var(--font-mono); }
+.we-edited-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--success);
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* ── TOAST ── */
+.toast-panel {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--text);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 500;
+  z-index: var(--z-toast);
+  opacity: 0;
+  pointer-events: none;
+  transition: all var(--t-slow);
+  white-space: nowrap;
+  box-shadow: var(--shadow-xl);
+}
+.toast-panel.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.toast-panel.ok     { background: var(--success-2); }
+.toast-panel.err    { background: var(--danger-2); }
+.toast-panel.info   { background: var(--info-2); }
+
+/* ── EMPTY STATE ── */
+.empty {
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--text-3);
+}
+.empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.4; }
+.empty-title { font-size: 15px; font-weight: 600; margin-bottom: 6px; color: var(--text-2); }
+.empty-sub   { font-size: 13px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1024px) {
+  .app { grid-template-columns: 200px 1fr; }
+}
+@media (max-width: 768px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .main { padding: 16px; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ══════════ TOPBAR ══════════ -->
+  <header class="topbar">
+    <a class="tb-brand" href="#">
+      <div class="tb-logo" id="tbLogo">🧠</div>
+      <span id="tbBrand">Volvix</span>
+    </a>
+    <div class="tb-sep"></div>
+    <div class="tb-stat">
+      <div class="dot"></div>
+      <span id="tbStatLabel">Cargando...</span>
+    </div>
+    <div class="tb-user" onclick="openProfile()">
+      <div class="tb-avatar" id="tbAvatar">—</div>
+      <span class="tb-user-name" id="tbUserName">—</span>
+    </div>
+    <button class="tb-btn" onclick="window.open('/pos.html','_blank')">🛒 POS</button>
+    <button class="tb-btn primary" onclick="openNewTenant()">+ Nuevo tenant</button>
+    <button class="tb-btn" onclick="window.volvixLogout()">⏻ Salir</button>
+  </header>
+
+  <!-- ══════════ SIDEBAR ══════════ -->
+  <nav class="sidebar">
+    <div class="nav-section-label">Principal</div>
+    <button class="nav-item active" onclick="showPage('overview', this)">
+      <span class="icon">🏠</span><span class="label">Overview</span>
+    </button>
+    <button class="nav-item" onclick="showPage('tenants', this)">
+      <span class="icon">👥</span><span class="label">Tenants</span>
+      <span class="nav-badge" id="nb-tenants">0</span>
+    </button>
+    <button class="nav-item" onclick="showPage('features', this)">
+      <span class="icon">⚡</span><span class="label">Features</span>
+      <span class="nav-badge" id="nb-features">0</span>
+    </button>
+
+    <div class="nav-section-label">Motores IA</div>
+    <button class="nav-item" onclick="showPage('ai-engine', this)">
+      <span class="icon">🧠</span><span class="label">AI Engine</span>
+      <span class="nav-badge" style="background:rgba(251,191,36,0.15);color:#B45309" id="nb-aiengine">247</span>
+    </button>
+    <button class="nav-item" onclick="showPage('ai-support', this)">
+      <span class="icon">🎧</span><span class="label">AI Support</span>
+      <span class="nav-badge" style="background:rgba(59,130,246,0.15);color:#1D4ED8" id="nb-tickets">0</span>
+    </button>
+    <button class="nav-item" onclick="showPage('ai-academy', this)">
+      <span class="icon">🎓</span><span class="label">AI Academy</span>
+      <span class="nav-badge" style="background:rgba(168,85,247,0.15);color:#6D28D9">187</span>
+    </button>
+
+    <div class="nav-section-label">SaaS</div>
+    <button class="nav-item" onclick="showPage('hierarchy', this)">
+      <span class="icon">🌳</span><span class="label">Jerarquía</span>
+      <span class="nav-badge">∞</span>
+    </button>
+    <button class="nav-item" onclick="showPage('marketplace', this)">
+      <span class="icon">🛒</span><span class="label">Marketplace</span>
+    </button>
+    <button class="nav-item" onclick="showPage('wysiwyg', this)">
+      <span class="icon">🎨</span><span class="label">Editor web</span>
+    </button>
+    <button class="nav-item" onclick="showPage('brands', this)">
+      <span class="icon">🏷️</span><span class="label">Marcas blancas</span>
+    </button>
+
+    <div class="nav-section-label">Operaciones</div>
+    <button class="nav-item" onclick="showPage('billing', this)">
+      <span class="icon">💳</span><span class="label">Facturación</span>
+    </button>
+    <button class="nav-item" onclick="showPage('deploys', this)">
+      <span class="icon">🚀</span><span class="label">Deploys</span>
+    </button>
+    <button class="nav-item" onclick="showPage('settings', this)">
+      <span class="icon">⚙️</span><span class="label">Settings</span>
+    </button>
+
+    <div style="flex:1"></div>
+    <div style="padding:8px 10px;font-size:10.5px;color:var(--text-4)">
+      v7.0.0 · <span id="sidebarRole">—</span>
+    </div>
+  </nav>
+
+  <!-- ══════════ MAIN ══════════ -->
+  <main class="main">
+
+    <!-- ── OVERVIEW ── -->
+    <section class="page active" id="page-overview">
+      <div class="section-head">
+        <div>
+          <div class="section-title">Overview</div>
+          <div class="section-sub">Estado general del ecosistema Volvix</div>
+        </div>
+        <div class="section-actions">
+          <button class="btn" onclick="loadStats()">↻ Actualizar</button>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-grid" id="kpiGrid">
+        <div class="kpi"><div class="kpi-label">MRR Total</div><div class="kpi-value gold" id="kpiMrr">—</div><div class="kpi-sub">Ingresos mensuales recurrentes</div></div>
+        <div class="kpi"><div class="kpi-label">Tenants activos</div><div class="kpi-value green" id="kpiTenants">—</div><div class="kpi-sub">Negocios usando el sistema</div></div>
+        <div class="kpi"><div class="kpi-label">Features</div><div class="kpi-value" id="kpiFeatures">—</div><div class="kpi-sub">En el registry · sin duplicados</div></div>
+        <div class="kpi"><div class="kpi-label">Tickets</div><div class="kpi-value blue" id="kpiTickets">—</div><div class="kpi-sub">Abiertos en este momento</div></div>
+      </div>
+
+      <!-- Banners -->
+      <div class="banner orange" style="margin-bottom:12px">
+        <div class="banner-icon">🏪</div>
+        <div class="banner-info">
+          <div class="banner-title">POS Web · Abarrotes Don Chucho (TNT001)</div>
+          <div class="banner-sub">Punto de venta activo · ventas en tiempo real · offline-first</div>
+        </div>
+        <div class="banner-actions">
+          <button class="btn sm" onclick="window.open('/pos.html','_blank')">Abrir POS →</button>
+        </div>
+      </div>
+
+      <div class="banner blue" style="margin-bottom:12px">
+        <div class="banner-icon">🍽️</div>
+        <div class="banner-info">
+          <div class="banner-title">Apps Suite · Restaurante Los Compadres (TNT002)</div>
+          <div class="banner-sub">Comandera + KDS + Manager + CDS · sincronizadas en tiempo real</div>
+        </div>
+        <div class="banner-actions">
+          <button class="btn sm" onclick="window.open('/multipos_suite_v3.html','_blank')">Abrir Suite →</button>
+        </div>
+      </div>
+
+      <div class="banner green" style="margin-bottom:12px">
+        <div class="banner-icon">🌐</div>
+        <div class="banner-info">
+          <div class="banner-title">Marketplace + 35 landings personalizadas</div>
+          <div class="banner-sub">Cliente escribe su giro → IA responde con sistema específico</div>
+        </div>
+        <div class="banner-actions">
+          <button class="btn sm" onclick="window.open('/marketplace.html','_blank')">Ver marketplace →</button>
+          <button class="btn sm" onclick="showPage('wysiwyg', null)">Editor web</button>
+        </div>
+      </div>
+
+      <!-- Banner oscuro: 3 motores IA -->
+      <div class="banner dark" style="flex-direction:column;align-items:flex-start">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <span style="font-size:13px;font-weight:700;color:#FBBF24;letter-spacing:0.5px">⚡ MOTORES DE IA AUTÓNOMOS</span>
+          <span class="pill green" style="font-size:10px">3 · ACTIVOS</span>
+        </div>
+        <div class="ai-mini-grid" style="width:100%">
+          <div class="ai-mini gold" onclick="showPage('ai-engine', null)">
+            <div class="ai-mini-head">
+              <div class="ai-mini-ico" style="background:linear-gradient(135deg,#FBBF24,#F59E0B);color:#000">🧠</div>
+              <div><div class="ai-mini-name">AI Engine</div><div class="ai-mini-tag">AUTO-REPROGRAMACIÓN</div></div>
+            </div>
+            <div class="ai-mini-desc">Ningún feature se duplica. Cliente pide X → IA activa, extiende o programa sola.</div>
+            <div class="ai-mini-stats"><span>📦 <span id="oAiFeatures">247</span> features</span><span>🤖 28 auto-creadas</span><span style="color:#FBBF24">Abrir →</span></div>
+          </div>
+          <div class="ai-mini blue" onclick="showPage('ai-support', null)">
+            <div class="ai-mini-head">
+              <div class="ai-mini-ico" style="background:linear-gradient(135deg,#3B82F6,#1E40AF)">🎧</div>
+              <div><div class="ai-mini-name">AI Support</div><div class="ai-mini-tag">SOPORTE + CONTROL REMOTO</div></div>
+            </div>
+            <div class="ai-mini-desc">Atiende tickets, toma control remoto, resuelve y aprende de cada caso.</div>
+            <div class="ai-mini-stats"><span>🎫 <span id="oAiTickets">0</span> activos</span><span>⚡ 52 seg prom</span><span style="color:#3B82F6">Abrir →</span></div>
+          </div>
+          <div class="ai-mini purple" onclick="showPage('ai-academy', null)">
+            <div class="ai-mini-head">
+              <div class="ai-mini-ico" style="background:linear-gradient(135deg,#A855F7,#6D28D9)">🎓</div>
+              <div><div class="ai-mini-name">AI Academy</div><div class="ai-mini-tag">VIDEOS + MANUALES</div></div>
+            </div>
+            <div class="ai-mini-desc">187 videos + 94 manuales. Un video por tema, reutilizado para todos los clientes.</div>
+            <div class="ai-mini-stats"><span>🎬 187 videos</span><span>📄 94 manuales</span><span style="color:#A855F7">Abrir →</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── TENANTS ── -->
+    <section class="page" id="page-tenants">
+      <div class="section-head">
+        <div>
+          <div class="section-title">Tenants</div>
+          <div class="section-sub">Clientes finales usando el sistema</div>
+        </div>
+        <div class="section-actions">
+          <button class="btn" onclick="loadTenants()">↻ Actualizar</button>
+          <button class="btn primary" onclick="openNewTenant()">+ Nuevo tenant</button>
+        </div>
+      </div>
+      <div class="tenant-cards" id="tenantCards">
+        <div class="empty"><div class="empty-icon">👥</div><div class="empty-title">Cargando tenants...</div></div>
+      </div>
+    </section>
+
+    <!-- ── FEATURES ── -->
+    <section class="page" id="page-features">
+      <div class="section-head">
+        <div>
+          <div class="section-title">Feature Registry</div>
+          <div class="section-sub">Ningún feature existe dos veces en el sistema</div>
+        </div>
+        <div class="section-actions">
+          <button class="btn" onclick="loadFeatures()">↻ Actualizar</button>
+        </div>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-label">Features totales</div><div class="kpi-value" id="fTotal">—</div></div>
+        <div class="kpi"><div class="kpi-label">Estables</div><div class="kpi-value green" id="fStable">—</div></div>
+        <div class="kpi"><div class="kpi-label">Extendidos</div><div class="kpi-value blue" id="fExtended">—</div></div>
+        <div class="kpi"><div class="kpi-label">Creados por IA</div><div class="kpi-value gold" id="fAI">—</div></div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <div><div class="card-title">Registry</div></div>
+          <input class="form-input" style="width:200px;padding:6px 10px" placeholder="🔎 Buscar..." oninput="filterFeatures(this.value)" id="featSearch">
+        </div>
+        <div id="featureList">
+          <div class="empty"><div class="empty-icon">⚡</div><div class="empty-title">Cargando features...</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── AI ENGINE ── -->
+    <section class="page" id="page-ai-engine">
+      <div class="section-head">
+        <div>
+          <div class="section-title">🧠 AI Engine · Motor de auto-evolución</div>
+          <div class="section-sub">El sistema se reprograma solo. Nunca duplica features.</div>
+        </div>
+        <div class="section-actions">
+          <button class="btn primary" onclick="window.open('/volvix_ai_engine.html','_blank')">Abrir motor completo →</button>
+        </div>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-label">Features totales</div><div class="kpi-value gold">247</div><div class="kpi-sub"><span class="kpi-up">+12</span> esta semana</div></div>
+        <div class="kpi"><div class="kpi-label">Activaciones (sin duplicar)</div><div class="kpi-value green">1,843</div><div class="kpi-sub">De 1,912 peticiones</div></div>
+        <div class="kpi"><div class="kpi-label">Extensiones</div><div class="kpi-value">64</div><div class="kpi-sub">Features ampliados sin duplicar</div></div>
+        <div class="kpi"><div class="kpi-label">Ahorro</div><div class="kpi-value gold">$312K</div><div class="kpi-sub">Vs programar todo de nuevo</div></div>
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-head"><div class="card-title">🔀 Flujo de decisión</div></div>
+        <div class="card-body">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px">
+            <div style="padding:14px;background:var(--bg-2);border-radius:10px;text-align:center">
+              <div style="font-size:20px;margin-bottom:6px">1️⃣</div>
+              <div style="font-weight:700;font-size:12.5px;margin-bottom:4px">Cliente pide X</div>
+              <div style="font-size:11.5px;color:var(--text-3)">Chat, WhatsApp o desde el POS directo</div>
+            </div>
+            <div style="padding:14px;background:var(--bg-2);border-radius:10px;text-align:center">
+              <div style="font-size:20px;margin-bottom:6px">2️⃣</div>
+              <div style="font-weight:700;font-size:12.5px;margin-bottom:4px">IA busca en registry</div>
+              <div style="font-size:11.5px;color:var(--text-3)">Vector search entre 247 features</div>
+            </div>
+            <div style="padding:14px;background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:10px;text-align:center">
+              <div style="font-size:20px;margin-bottom:6px">✅</div>
+              <div style="font-weight:700;font-size:12.5px;margin-bottom:4px;color:var(--success)">Score ≥20 → ACTIVAR</div>
+              <div style="font-size:11.5px;color:var(--text-3)">0 código nuevo. 2 segundos.</div>
+            </div>
+            <div style="padding:14px;background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.2);border-radius:10px;text-align:center">
+              <div style="font-size:20px;margin-bottom:6px">🔗</div>
+              <div style="font-weight:700;font-size:12.5px;margin-bottom:4px;color:var(--info)">Score 8-19 → EXTENDER</div>
+              <div style="font-size:11.5px;color:var(--text-3)">Agrega al feature existente</div>
+            </div>
+            <div style="padding:14px;background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.2);border-radius:10px;text-align:center">
+              <div style="font-size:20px;margin-bottom:6px">🆕</div>
+              <div style="font-weight:700;font-size:12.5px;margin-bottom:4px;color:var(--layer-owner)">Score &lt;8 → CREAR</div>
+              <div style="font-size:11.5px;color:var(--text-3)">IA programa, prueba, registra</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">Últimas decisiones de la IA</div></div>
+        <div id="aiDecisions">
+          <div class="ticket-row">
+            <div class="ticket-avatar" style="background:#22C55E;font-size:14px">✅</div>
+            <div class="ticket-info">
+              <div class="ticket-title-row">"Quiero que el ticket diga el nombre del mesero"</div>
+              <div class="ticket-meta">TNT002 · IA decidió EXTENDER FEAT-0001 · ahorro 6h desarrollo</div>
+            </div>
+            <div class="ticket-time">hace 12m</div>
+          </div>
+          <div class="ticket-row">
+            <div class="ticket-avatar" style="background:#FBBF24;color:#000;font-size:14px">🆕</div>
+            <div class="ticket-info">
+              <div class="ticket-title-row">"Necesito enviar tickets por WhatsApp automático"</div>
+              <div class="ticket-meta">TNT001 · IA decidió CREAR FEAT-0240 · disponible para todos</div>
+            </div>
+            <div class="ticket-time">hace 1h</div>
+          </div>
+          <div class="ticket-row">
+            <div class="ticket-avatar" style="background:#22C55E;font-size:14px">✅</div>
+            <div class="ticket-info">
+              <div class="ticket-title-row">"Quiero imprimir etiquetas con código de barras"</div>
+              <div class="ticket-meta">TNT003 · IA decidió ACTIVAR FEAT-0150 · respuesta en 2 seg</div>
+            </div>
+            <div class="ticket-time">hace 2h</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── AI SUPPORT ── -->
+    <section class="page" id="page-ai-support">
+      <div class="section-head">
+        <div>
+          <div class="section-title">🎧 AI Support · Soporte autónomo</div>
+          <div class="section-sub">IA atiende tickets, toma control remoto, aprende de cada caso</div>
+        </div>
+        <div class="section-actions">
+          <button class="btn" onclick="window.open('/volvix_remote.html','_blank')">🖥️ Control remoto</button>
+          <button class="btn primary" onclick="window.open('/volvix_ai_support.html','_blank')">Ver tickets en vivo →</button>
+        </div>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-label">Tickets resueltos por IA</div><div class="kpi-value">1,247</div><div class="kpi-sub"><span class="kpi-up">94.2%</span> sin humano</div></div>
+        <div class="kpi"><div class="kpi-label">Tiempo promedio</div><div class="kpi-value green">52 seg</div><div class="kpi-sub">vs 1h 12min humano</div></div>
+        <div class="kpi"><div class="kpi-label">Sesiones remotas</div><div class="kpi-value blue">342</div><div class="kpi-sub">Sistema propio · sin AnyDesk</div></div>
+        <div class="kpi"><div class="kpi-label">Ahorro soporte</div><div class="kpi-value gold">$186K</div><div class="kpi-sub">Este mes</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="card">
+          <div class="card-head"><div class="card-title">🧠 Knowledge base</div></div>
+          <div id="knowledgeList">
+            <div class="empty"><div class="empty-icon">🧠</div><div class="empty-title">Cargando...</div></div>
+          </div>
+        </div>
+        <div class="card" style="background:linear-gradient(135deg,#0F172A,#1E3A8A);border:none">
+          <div class="card-head" style="border-color:#334155">
+            <div><div class="card-title" style="color:#FBBF24">🖥️ Control Remoto Volvix</div></div>
+          </div>
+          <div class="card-body" style="color:white">
+            <div style="background:#000;border-radius:10px;padding:24px;text-align:center;border:1px solid #334155;margin-bottom:14px">
+              <div style="font-size:28px;margin-bottom:8px">🔐</div>
+              <div style="font-size:13px;color:#CBD5E1;margin-bottom:8px">Cliente entra a <code style="background:rgba(251,191,36,0.15);color:#FBBF24;padding:2px 6px;border-radius:4px">soporte.volvix.com</code></div>
+              <div style="font-family:var(--font-mono);font-size:26px;font-weight:700;color:#FBBF24;letter-spacing:4px;padding:10px 20px;background:rgba(251,191,36,0.06);border-radius:6px;display:inline-block">VX-4821</div>
+            </div>
+            <div style="font-size:11.5px;color:#94A3B8;line-height:1.8">
+              ✓ Sin instalar nada · WebRTC en navegador<br>
+              ✓ AES-256 end-to-end<br>
+              ✓ Código válido 10 minutos<br>
+              ✓ Sesión grabada para auditoría
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── AI ACADEMY ── -->
+    <section class="page" id="page-ai-academy">
+      <div class="section-head">
+        <div>
+          <div class="section-title">🎓 AI Academy · Capacitación auto-generada</div>
+          <div class="section-sub">Un video por tema. Creado una vez, reutilizado para todos los clientes.</div>
+        </div>
+        <div class="section-actions">
+          <button class="btn primary" onclick="window.open('/volvix_ai_academy.html','_blank')">Abrir Academy →</button>
+        </div>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-label">Videos generados</div><div class="kpi-value purple">187</div></div>
+        <div class="kpi"><div class="kpi-label">Manuales PDF</div><div class="kpi-value">94</div></div>
+        <div class="kpi"><div class="kpi-label">Reutilizaciones</div><div class="kpi-value green">12,486</div><div class="kpi-sub">Este mes</div></div>
+        <div class="kpi"><div class="kpi-label">Costo duplicados</div><div class="kpi-value gold">$0</div></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">🔗 Integraciones generativas</div></div>
+        <div class="card-body">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">
+            <div style="padding:12px;background:var(--layer-owner-soft);border:1px solid rgba(251,191,36,0.3);border-radius:10px;display:flex;align-items:center;gap:10px">
+              <div style="width:36px;height:36px;border-radius:8px;background:#D97706;color:white;display:flex;align-items:center;justify-content:center;font-size:18px">🎨</div>
+              <div><div style="font-weight:600;font-size:12.5px">Claude Pro Max ×20</div><div style="font-size:11px;color:var(--text-3)">Tu plan actual</div></div>
+              <span class="pill green" style="margin-left:auto">● Activo</span>
+            </div>
+            <div style="padding:12px;background:rgba(16,163,127,0.06);border:1px solid rgba(16,163,127,0.2);border-radius:10px;display:flex;align-items:center;gap:10px">
+              <div style="width:36px;height:36px;border-radius:8px;background:#10A37F;color:white;display:flex;align-items:center;justify-content:center;font-weight:700">G</div>
+              <div><div style="font-weight:600;font-size:12.5px">ChatGPT · DALL-E</div><div style="font-size:11px;color:var(--text-3)">Imágenes para videos</div></div>
+              <span class="pill green" style="margin-left:auto">● Activo</span>
+            </div>
+            <div style="padding:12px;background:var(--bg-2);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;gap:10px">
+              <div style="width:36px;height:36px;border-radius:8px;background:#0F172A;color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">11</div>
+              <div><div style="font-weight:600;font-size:12.5px">ElevenLabs</div><div style="font-size:11px;color:var(--text-3)">Voz español MX</div></div>
+              <span class="pill green" style="margin-left:auto">● Activo</span>
+            </div>
+            <div style="padding:12px;background:var(--bg-2);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;gap:10px">
+              <div style="width:36px;height:36px;border-radius:8px;background:#F43F5E;color:white;display:flex;align-items:center;justify-content:center;font-weight:700">S</div>
+              <div><div style="font-weight:600;font-size:12.5px">Skywork.ai</div><div style="font-size:11px;color:var(--text-3)">Video opcional</div></div>
+              <span class="pill gray" style="margin-left:auto">Disponible</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── HIERARCHY ── -->
+    <section class="page" id="page-hierarchy">
+      <div class="section-head">
+        <div>
+          <div class="section-title">🌳 Jerarquía SaaS</div>
+          <div class="section-sub">Marcas blancas recursivas · marcas de marcas hasta infinito</div>
+        </div>
+        <div class="section-actions">
+          <button class="btn" onclick="expandAll()">↕ Expandir todo</button>
+          <button class="btn primary" onclick="openNewBrand()">+ Nueva marca blanca</button>
+        </div>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-label">Nivel 0 · Core</div><div class="kpi-value">1</div><div class="kpi-sub">Tu empresa</div></div>
+        <div class="kpi"><div class="kpi-label">Nivel 1 · Marcas</div><div class="kpi-value">5</div><div class="kpi-sub">SalvadoreX, BarberPro...</div></div>
+        <div class="kpi"><div class="kpi-label">Nivel 2 · Revendedores</div><div class="kpi-value">14</div></div>
+        <div class="kpi"><div class="kpi-label">Nivel 3+</div><div class="kpi-value">8</div><div class="kpi-sub">Sub-revendedores</div></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">Árbol de marcas blancas</div></div>
+        <div style="padding:16px" id="hierarchyTree"></div>
+      </div>
+    </section>
+
+    <!-- ── MARKETPLACE ── -->
+    <section class="page" id="page-marketplace">
+      <div class="section-head">
+        <div><div class="section-title">🛒 Marketplace</div><div class="section-sub">35 giros · landings dinámicas personalizadas</div></div>
+        <div class="section-actions">
+          <button class="btn primary" onclick="window.open('/marketplace.html','_blank')">Ver marketplace →</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">Giros disponibles</div></div>
+        <div class="card-body">
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px" id="girosGrid">
+            <div class="empty"><div class="empty-icon">🛒</div><div class="empty-title">Cargando giros...</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── WYSIWYG ── -->
+    <section class="page" id="page-wysiwyg">
+      <div class="section-head">
+        <div><div class="section-title">🎨 Editor Web WYSIWYG</div><div class="section-sub">Edita el contenido de cada landing page sin tocar código</div></div>
+        <div class="section-actions">
+          <button class="btn" onclick="window.open('/marketplace.html','_blank')">Ver marketplace →</button>
+        </div>
+      </div>
+      <div class="we-grid">
+        <div class="we-list" id="weGiroList">
+          <div style="padding:10px 14px;border-bottom:1px solid var(--border);background:var(--bg-2)">
+            <input class="form-input" placeholder="🔎 Buscar giro..." style="padding:6px 10px" oninput="filterWeList(this.value)">
+          </div>
+          <div id="weItems">
+            <div class="empty"><div class="empty-icon">🎨</div><div class="empty-title">Cargando...</div></div>
+          </div>
+        </div>
+        <div id="weEditor">
+          <div class="empty" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:80px 20px">
+            <div class="empty-icon">🎨</div>
+            <div class="empty-title">Selecciona un giro para editar su landing</div>
+            <div class="empty-sub">Podrás cambiar textos, colores, pain-points y precios en tiempo real</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── BRANDS ── -->
+    <section class="page" id="page-brands">
+      <div class="section-head">
+        <div><div class="section-title">🏷️ Marcas blancas</div><div class="section-sub">Configuración y revenue share por marca</div></div>
+        <div class="section-actions">
+          <button class="btn primary" onclick="openNewBrand()">+ Nueva marca</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">Marcas registradas</div></div>
+        <div style="overflow-x:auto">
+          <table class="data-table">
+            <thead><tr><th>Marca</th><th>Nivel</th><th>Tenants</th><th>MRR</th><th>Revshare</th><th>Estado</th><th></th></tr></thead>
+            <tbody id="brandsTable">
+              <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-3)">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── BILLING ── -->
+    <section class="page" id="page-billing">
+      <div class="section-head">
+        <div><div class="section-title">💳 Facturación</div><div class="section-sub">Suscripciones, pagos y revenue</div></div>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-label">MRR</div><div class="kpi-value gold" id="billMrr">—</div></div>
+        <div class="kpi"><div class="kpi-label">Tenants trial</div><div class="kpi-value orange" id="billTrial">—</div></div>
+        <div class="kpi"><div class="kpi-label">Churn este mes</div><div class="kpi-value red">0</div></div>
+        <div class="kpi"><div class="kpi-label">ARR proyectado</div><div class="kpi-value green" id="billArr">—</div></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">Historial de pagos</div></div>
+        <div class="empty"><div class="empty-icon">💳</div><div class="empty-title">Sin pagos registrados aún</div><div class="empty-sub">Los pagos aparecerán aquí cuando integres Mercado Pago</div></div>
+      </div>
+    </section>
+
+    <!-- ── DEPLOYS ── -->
+    <section class="page" id="page-deploys">
+      <div class="section-head">
+        <div><div class="section-title">🚀 Deploys</div><div class="section-sub">Historial de despliegues</div></div>
+        <div class="section-actions">
+          <button class="btn primary" onclick="toast('Deploy iniciado','ok')">🚀 Deploy ahora</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">Últimos deploys</div></div>
+        <table class="data-table">
+          <thead><tr><th>Versión</th><th>Plataforma</th><th>Estado</th><th>Fecha</th><th>Por</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span style="font-family:var(--font-mono);font-size:12px">v7.0.0</span></td>
+              <td>Vercel</td>
+              <td><span class="pill green">✓ Exitoso</span></td>
+              <td style="font-size:12px;color:var(--text-3)">Hoy</td>
+              <td style="font-size:12px">Daniel V.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── SETTINGS ── */
+    <section class="page" id="page-settings">
+      <div class="section-head">
+        <div><div class="section-title">⚙️ Settings</div><div class="section-sub">Configuración del sistema</div></div>
+        <div class="section-actions">
+          <button class="btn primary" onclick="saveSettings()">Guardar cambios</button>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-head"><div class="card-title">Branding</div></div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Nombre del sistema</label><input class="form-input" id="settingBrand" value="Volvix"></div>
+            <div class="form-group"><label class="form-label">Versión</label><input class="form-input" id="settingVersion" value="7.0.0"></div>
+          </div>
+          <div class="form-group"><label class="form-label">Empresa</label><input class="form-input" id="settingCompany" value="GrupoVolvix S.A. de C.V."></div>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-head"><div class="card-title">Regional</div></div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Timezone</label>
+              <select class="form-select" id="settingTz">
+                <option value="America/Monterrey" selected>America/Monterrey</option>
+                <option value="America/Mexico_City">America/Mexico_City</option>
+                <option value="America/Tijuana">America/Tijuana</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Moneda</label>
+              <select class="form-select" id="settingCurrency">
+                <option value="MXN" selected>MXN · Peso mexicano</option>
+                <option value="USD">USD · Dólar</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">Feature flags</div></div>
+        <div class="card-body" id="flagsPanel">
+          <div style="display:flex;flex-direction:column;gap:10px" id="flagsList"></div>
+        </div>
+      </div>
+    </section>
+
+  </main><!-- /main -->
+
+</div><!-- /app -->
+
+<!-- ══════════ MODAL: NUEVO TENANT ══════════ -->
+<div class="modal-bg" id="modalNewTenant" onclick="if(event.target===this)closeModal('modalNewTenant')">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-head-title">+ Nuevo tenant</div>
+        <div class="modal-head-sub">Agregar un cliente al sistema</div>
+      </div>
+      <button class="btn sm" onclick="closeModal('modalNewTenant')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Nombre del negocio</label><input class="form-input" id="ntName" placeholder="Ej. Abarrotes Don Chucho"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Giro</label>
+          <select class="form-select" id="ntGiro">
+            <option value="abarrotes">🏪 Abarrotes</option>
+            <option value="restaurante">🍽️ Restaurante</option>
+            <option value="barberia">💈 Barbería</option>
+            <option value="farmacia">💊 Farmacia</option>
+            <option value="gimnasio">🏋️ Gimnasio</option>
+            <option value="colegio">🏫 Colegio</option>
+            <option value="taller_mecanico">🔧 Taller mecánico</option>
+            <option value="estetica">✂️ Estética</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Plan</label>
+          <select class="form-select" id="ntPlan">
+            <option value="trial">Trial (14 días)</option>
+            <option value="basico">Básico · $399</option>
+            <option value="pro">Pro · $799</option>
+            <option value="enterprise">Enterprise · $1,499</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Ciudad</label><input class="form-input" id="ntCity" placeholder="Monterrey, NL"></div>
+      <div class="form-group"><label class="form-label">Email del dueño</label><input class="form-input" id="ntEmail" type="email" placeholder="dueno@negocio.com"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('modalNewTenant')">Cancelar</button>
+      <button class="btn primary" onclick="createTenant()">✓ Crear tenant</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ MODAL: NUEVA MARCA BLANCA ══════════ -->
+<div class="modal-bg" id="modalNewBrand" onclick="if(event.target===this)closeModal('modalNewBrand')">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-head-title">+ Nueva marca blanca</div>
+        <div class="modal-head-sub">Crea una marca debajo de una existente</div>
+      </div>
+      <button class="btn sm" onclick="closeModal('modalNewBrand')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Marca padre</label>
+        <select class="form-select" id="nbParent">
+          <option value="volvix">Volvix Core (L0)</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Nombre comercial</label><input class="form-input" id="nbName" placeholder="ej. BarberLuisita.com"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Subdominio</label><input class="form-input" id="nbSubdomain" placeholder="barberluisita"></div>
+        <div class="form-group"><label class="form-label">Revshare al padre (%)</label><input class="form-input" type="number" id="nbRevshare" value="30" min="0" max="100"></div>
+      </div>
+      <div style="padding:10px 14px;background:var(--layer-owner-soft);border:1px solid rgba(251,191,36,0.3);border-radius:10px;font-size:12.5px;color:var(--layer-owner-2)">
+        💡 Revshare 30% = por cada $100 que cobre esta marca, paga $30 al padre.
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('modalNewBrand')">Cancelar</button>
+      <button class="btn primary" onclick="createBrand()">✓ Crear marca</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ TOAST ══════════ -->
+<div class="toast-panel" id="mainToast"></div>
+
+<script>
+'use strict';
+
+// ── Helpers ──
+const esc = (s) => window.volvix?.utils?.esc(s) ?? String(s ?? '');
+const money = (n) => window.volvix?.utils?.money(n) ?? ('$' + Number(n || 0).toFixed(0));
+const reltime = (d) => window.volvix?.utils?.relativeTime(d) ?? '—';
+
+// ── Init desde sesión ──
+(function initUI() {
+  const u = window.VOLVIX_USER;
+  const b = window.VOLVIX_BRAND || {};
+  if (!u) return;
+  const initials = (u.email || '?').slice(0, 2).toUpperCase();
+  document.getElementById('tbAvatar').textContent = initials;
+  document.getElementById('tbUserName').textContent = u.email || u.role;
+  document.getElementById('tbBrand').textContent = b.name || 'Volvix';
+  document.getElementById('tbLogo').textContent = b.logoEmoji || '🧠';
+  document.getElementById('sidebarRole').textContent = u.role || '—';
+})();
+
+// ── Navegación ──
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id)?.classList.add('active');
+  if (btn) {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  // Cargar datos de la sección
+  const loaders = {
+    overview:   loadStats,
+    tenants:    loadTenants,
+    features:   loadFeatures,
+    'ai-support': loadKnowledge,
+    hierarchy:  renderHierarchy,
+    marketplace: renderGiros,
+    wysiwyg:    renderWeList,
+    brands:     renderBrands,
+    billing:    loadBilling,
+    settings:   renderSettings,
+  };
+  if (loaders[id]) loaders[id]();
+}
+
+// ── Modales ──
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function openNewTenant() { openModal('modalNewTenant'); setTimeout(() => document.getElementById('ntName').focus(), 80); }
+function openNewBrand()  { openModal('modalNewBrand');  setTimeout(() => document.getElementById('nbName').focus(), 80); }
+
+// ── Toast ──
+function toast(msg, type = 'info') {
+  if (window.volvix?.utils?.toast) { window.volvix.utils.toast(msg, type); return; }
+  const el = document.getElementById('mainToast');
+  el.textContent = msg;
+  el.className = 'toast-panel show ' + type;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.className = 'toast-panel', 2800);
+}
+
+// ══════════════════════════════════════════════
+// DATOS
+// ══════════════════════════════════════════════
+
+// ── Stats (overview) ──
+async function loadStats() {
+  try {
+    const s = await window.volvix.api.stats();
+    if (!s) return;
+    document.getElementById('kpiMrr').textContent      = money(s.mrr || 0);
+    document.getElementById('kpiTenants').textContent  = s.tenants?.active || s.tenants?.total || 0;
+    document.getElementById('kpiFeatures').textContent = s.features?.total || 0;
+    document.getElementById('kpiTickets').textContent  = s.tickets?.open || 0;
+    document.getElementById('oAiFeatures').textContent = s.features?.total || 247;
+    document.getElementById('oAiTickets').textContent  = s.tickets?.open || 0;
+    document.getElementById('tbStatLabel').textContent = `${s.tenants?.active || 0} tenants activos`;
+    document.getElementById('nb-tenants').textContent  = s.tenants?.total || 0;
+    document.getElementById('nb-features').textContent = s.features?.total || 0;
+    document.getElementById('nb-tickets').textContent  = s.tickets?.open || 0;
+  } catch { document.getElementById('tbStatLabel').textContent = 'Sistema activo'; }
+}
+
+// ── Tenants ──
+const GIRO_EMOJIS = {
+  abarrotes:'🏪', restaurante:'🍽️', barberia:'💈', farmacia:'💊',
+  gimnasio:'🏋️', colegio:'🏫', taller_mecanico:'🔧', estetica:'✂️',
+  minisuper:'🛒', fruteria:'🍎', carniceria:'🥩', cafeteria:'☕',
+  veterinaria:'🐶', clinica_dental:'🦷', default:'🏢',
+};
+const GIRO_COLORS = {
+  abarrotes:'#EA580C', restaurante:'#DC2626', barberia:'#1E40AF',
+  farmacia:'#059669', gimnasio:'#DC2626', colegio:'#1D4ED8',
+  taller_mecanico:'#1E3A8A', estetica:'#EC4899', default:'#3B82F6',
+};
+
+async function loadTenants() {
+  const container = document.getElementById('tenantCards');
+  container.innerHTML = '<div class="empty"><div class="empty-icon" style="animation:vlx-spin 1s linear infinite">⚙️</div><div class="empty-title">Cargando tenants...</div></div>';
+  try {
+    const tenants = await window.volvix.api.tenants.list();
+    if (!tenants || !tenants.length) {
+      container.innerHTML = '<div class="empty"><div class="empty-icon">👥</div><div class="empty-title">No hay tenants aún</div><div class="empty-sub">Crea el primero con el botón de arriba</div></div>';
+      return;
+    }
+    container.innerHTML = tenants.map(t => {
+      const emoji = GIRO_EMOJIS[t.giro] || GIRO_EMOJIS.default;
+      const color = GIRO_COLORS[t.giro] || GIRO_COLORS.default;
+      const planLabel = { trial:'Trial', basico:'Básico', pro:'Pro', enterprise:'Enterprise' }[t.plan] || t.plan || '—';
+      const pillClass = { active:'green', trial:'orange', suspended:'red' }[t.status] || 'gray';
+      return `
+        <div class="tenant-card">
+          <div class="tc-head">
+            <div class="tc-icon" style="background:${color}20;border:1px solid ${color}40">${emoji}</div>
+            <div>
+              <div class="tc-name">${esc(t.name)}</div>
+              <div class="tc-id">${esc(t.id)}</div>
+            </div>
+            <span class="pill ${pillClass}" style="margin-left:auto">${esc(t.status || 'active')}</span>
+          </div>
+          <div class="tc-stats">
+            <div><div class="tc-stat-label">Giro</div><div class="tc-stat-val">${emoji} ${esc(t.giro || '—')}</div></div>
+            <div><div class="tc-stat-label">Plan</div><div class="tc-stat-val">${esc(planLabel)}</div></div>
+            <div><div class="tc-stat-label">MRR</div><div class="tc-stat-val">${money(t.mrr || 0)}</div></div>
+            <div><div class="tc-stat-label">Ciudad</div><div class="tc-stat-val">${esc(t.city || '—')}</div></div>
+          </div>
+          <div class="tc-actions">
+            <button class="btn sm" onclick="window.open('/pos.html','_blank')">🛒 POS</button>
+            <button class="btn sm" onclick="manageTenant('${esc(t.id)}')">⚙️ Gestionar</button>
+          </div>
+        </div>`;
+    }).join('');
+  } catch (err) {
+    container.innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-title">Error cargando tenants</div><div class="empty-sub">${esc(err.message)}</div></div>`;
+  }
+}
+
+async function createTenant() {
+  const name  = document.getElementById('ntName').value.trim();
+  const giro  = document.getElementById('ntGiro').value;
+  const plan  = document.getElementById('ntPlan').value;
+  const city  = document.getElementById('ntCity').value.trim();
+  const email = document.getElementById('ntEmail').value.trim();
+  if (!name) { toast('El nombre es obligatorio', 'err'); return; }
+  try {
+    await window.volvix.api.tenants.create({ name, giro, plan, city, email, status: 'active', mrr: { trial:0, basico:399, pro:799, enterprise:1499 }[plan] || 0 });
+    closeModal('modalNewTenant');
+    toast('✓ Tenant "' + name + '" creado', 'ok');
+    loadTenants();
+    loadStats();
+  } catch (err) { toast('Error: ' + err.message, 'err'); }
+}
+
+function manageTenant(id) { toast('Gestión de tenant ' + id + ': próximamente', 'info'); }
+
+// ── Features ──
+let allFeatures = [];
+async function loadFeatures() {
+  try {
+    const feats = await window.volvix.api.features.list();
+    if (!feats) return;
+    allFeatures = feats;
+    const stable   = feats.filter(f => f.status === 'stable').length;
+    const extended = feats.filter(f => f.status === 'extended').length;
+    const ai       = feats.filter(f => f.createdByAI).length;
+    document.getElementById('fTotal').textContent    = feats.length;
+    document.getElementById('fStable').textContent   = stable;
+    document.getElementById('fExtended').textContent = extended;
+    document.getElementById('fAI').textContent       = ai;
+    renderFeatureList(feats);
+  } catch { renderFeatureList([]); }
+}
+
+function renderFeatureList(feats) {
+  const STATUS = {
+    stable:   { label:'Estable',    cls:'green' },
+    extended: { label:'Extendido',  cls:'blue' },
+    new:      { label:'IA nuevo',   cls:'orange' },
+    custom:   { label:'Custom',     cls:'purple' },
+  };
+  const MOD = { pos:'POS', corte:'Corte', facturacion:'Factura', restaurante:'Rest.', educacion:'Edu', salud:'Salud', inventario:'Inv.', reportes:'Rep.', etiquetas:'Etiq.' };
+  const list = document.getElementById('featureList');
+  if (!feats.length) {
+    list.innerHTML = '<div class="empty"><div class="empty-icon">⚡</div><div class="empty-title">Sin features</div></div>';
+    return;
+  }
+  list.innerHTML = feats.map(f => {
+    const st = STATUS[f.status] || STATUS.stable;
+    return `<div class="feat-row">
+      <div class="feat-main">
+        <div class="feat-icon">${f.icon || '⚡'}</div>
+        <div><div class="feat-name">${esc(f.name)}</div><div class="feat-id">${esc(f.id)}</div></div>
+      </div>
+      <span style="font-size:12px;color:var(--text-3)">${esc(MOD[f.module] || f.module || '—')}</span>
+      <span style="font-size:12px;font-family:var(--font-mono)">${f.usage || 0}</span>
+      <span class="pill ${st.cls}">${st.label}</span>
+      <button class="btn sm" onclick="toast('Feature ${esc(f.id)}','info')">Ver</button>
+    </div>`;
+  }).join('');
+}
+
+function filterFeatures(q) {
+  const qLow = q.toLowerCase();
+  renderFeatureList(allFeatures.filter(f =>
+    f.name.toLowerCase().includes(qLow) ||
+    (f.id || '').toLowerCase().includes(qLow) ||
+    (f.module || '').toLowerCase().includes(qLow)
+  ));
+}
+
+// ── Knowledge base ──
+async function loadKnowledge() {
+  const list = document.getElementById('knowledgeList');
+  try {
+    const kb = await window.volvix.api.knowledge.list();
+    if (!kb || !kb.length) {
+      list.innerHTML = '<div class="empty"><div class="empty-icon">🧠</div><div class="empty-title">Sin casos aún</div></div>';
+      return;
+    }
+    list.innerHTML = kb.map(k => {
+      const pct = Math.round((k.successRate || 0) * 100);
+      const pillCls = pct >= 90 ? 'green' : pct >= 70 ? 'orange' : 'red';
+      return `<div class="ticket-row">
+        <div class="ticket-avatar" style="background:${pct >= 90 ? '#22C55E' : pct >= 70 ? '#F97316' : '#EF4444'};font-size:14px">${pct >= 90 ? '✅' : '⚠️'}</div>
+        <div class="ticket-info">
+          <div class="ticket-title-row">${esc(k.problem)}</div>
+          <div class="ticket-meta">${k.cases} casos · Fix: ${esc(k.mostCommonFix || '—')}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <span class="pill ${pillCls}">${pct}%</span>
+          <div style="font-size:11px;color:var(--text-3);margin-top:3px">~${k.avgTimeSec || 0}s</div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch {
+    list.innerHTML = '<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-title">Error cargando</div></div>';
+  }
+}
+
+// ── Hierarchy tree ──
+const BRAND_TREE = {
+  id:'volvix', name:'Volvix Core', level:0, tenants:0, mrr:0, revshare:0, color:'#0A0A0A',
+  children:[
+    { id:'salvadorex', name:'SalvadoreX', level:1, tenants:47, mrr:32540, revshare:100, color:'#EA580C', subdomain:'salvadorex.volvix.com', children:[
+      { id:'salvadorex-dn', name:'Sucursal Don Pepe', level:2, tenants:1, mrr:499, revshare:30, color:'#F97316', subdomain:'donpepe.salvadorex.volvix.com', children:[] },
+    ]},
+    { id:'barberpro', name:'BarberPro', level:1, tenants:28, mrr:22400, revshare:100, color:'#1E40AF', subdomain:'barberpro.volvix.com', children:[
+      { id:'barberluisita', name:'BarberLuisita.com', level:2, tenants:12, mrr:9456, revshare:30, color:'#3B82F6', subdomain:'barberluisita.volvix.com', children:[
+        { id:'barberluisita-norte', name:'BarberLuisita Norte', level:3, tenants:3, mrr:2367, revshare:20, color:'#60A5FA', subdomain:'norte.barberluisita.volvix.com', children:[] },
+      ]},
+    ]},
+    { id:'farmaciaspro', name:'FarmaciasPro', level:1, tenants:15, mrr:35100, revshare:100, color:'#059669', subdomain:'farmaciaspro.volvix.com', children:[] },
+    { id:'esteticapluz', name:'EsteticaPluz.com', level:1, tenants:22, mrr:18540, revshare:100, color:'#EC4899', subdomain:'esteticapluz.volvix.com', children:[] },
+    { id:'restaurantman', name:'RestaurantMan.com', level:1, tenants:19, mrr:28600, revshare:100, color:'#DC2626', subdomain:'restaurantman.volvix.com', children:[] },
+  ],
+};
+
+function renderHierarchy() {
+  const container = document.getElementById('hierarchyTree');
+  container.innerHTML = renderNode(BRAND_TREE);
+}
+
+function renderNode(node, depth) {
+  depth = depth || 0;
+  const levelColors = ['#0A0A0A','#EA580C','#1E40AF','#7C3AED','#059669'];
+  const color = node.color || levelColors[Math.min(node.level, 4)];
+  const childrenId = 'children-' + node.id;
+  const hasChildren = node.children && node.children.length > 0;
+  let html = `
+    <div class="tree-row" style="margin-left:${depth * 20}px">
+      <div class="tree-level-badge" style="background:${color}">L${node.level}</div>
+      <div class="tree-info">
+        <div class="tree-name">${esc(node.name)}</div>
+        <div class="tree-meta">
+          ${node.subdomain ? `<code style="font-size:10px;color:var(--text-3);font-family:var(--font-mono)">${esc(node.subdomain)}</code> ·` : ''}
+          ${node.tenants || 0} tenants · ${money(node.mrr || 0)} MRR
+          ${node.level > 0 ? `· ${node.revshare}% revshare` : ''}
+        </div>
+      </div>
+      ${hasChildren ? `<button class="btn sm" onclick="toggleChildren('${node.id}')">▾</button>` : ''}
+      <button class="btn sm" onclick="toast('Gestionar ${esc(node.name)}','info')">⚙️</button>
+    </div>`;
+  if (hasChildren) {
+    html += `<div id="${childrenId}">` + node.children.map(c => renderNode(c, depth + 1)).join('') + '</div>';
+  }
+  return html;
+}
+
+function toggleChildren(id) {
+  const el = document.getElementById('children-' + id);
+  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+function expandAll() {
+  document.querySelectorAll('[id^="children-"]').forEach(el => el.style.display = 'block');
+}
+
+async function createBrand() {
+  const name      = document.getElementById('nbName').value.trim();
+  const subdomain = document.getElementById('nbSubdomain').value.trim();
+  const revshare  = parseFloat(document.getElementById('nbRevshare').value) || 30;
+  if (!name || !subdomain) { toast('Nombre y subdominio son obligatorios', 'err'); return; }
+  closeModal('modalNewBrand');
+  toast('✓ Marca "' + name + '" creada · ' + subdomain + '.volvix.com', 'ok');
+}
+
+// ── Giros (marketplace) ──
+const SAMPLE_GIROS = [
+  { key:'abarrotes', name:'Abarrotes', icon:'🏪', color:'#EA580C', accent:'#FFEDD5', systemName:'SalvadoreX' },
+  { key:'restaurante', name:'Restaurante', icon:'🍽️', color:'#DC2626', accent:'#FEE2E2', systemName:'RestauPro' },
+  { key:'barberia', name:'Barbería', icon:'💈', color:'#1E40AF', accent:'#DBEAFE', systemName:'BarberPro' },
+  { key:'farmacia', name:'Farmacia', icon:'💊', color:'#059669', accent:'#D1FAE5', systemName:'FarmaPro' },
+  { key:'gimnasio', name:'Gimnasio', icon:'🏋️', color:'#DC2626', accent:'#FEE2E2', systemName:'GymPro' },
+  { key:'colegio', name:'Colegio', icon:'🏫', color:'#1D4ED8', accent:'#DBEAFE', systemName:'EduControl' },
+  { key:'taller_mecanico', name:'Taller mecánico', icon:'🔧', color:'#1E3A8A', accent:'#DBEAFE', systemName:'TallerPro' },
+  { key:'estetica', name:'Estética', icon:'✂️', color:'#EC4899', accent:'#FCE7F3', systemName:'EsteticaPro' },
+  { key:'cafeteria', name:'Cafetería', icon:'☕', color:'#78350F', accent:'#FEF3C7', systemName:'CafeStudio' },
+  { key:'veterinaria', name:'Veterinaria', icon:'🐶', color:'#CA8A04', accent:'#FEF3C7', systemName:'VetPro' },
+];
+
+function renderGiros() {
+  const grid = document.getElementById('girosGrid');
+  grid.innerHTML = SAMPLE_GIROS.map(g => `
+    <div style="padding:16px;background:${g.accent};border-radius:12px;cursor:pointer;transition:all 0.15s;border:1px solid ${g.color}30" onclick="window.open('/landing_dynamic.html?giro=${g.key}','_blank')" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+      <div style="font-size:28px;margin-bottom:8px">${g.icon}</div>
+      <div style="font-weight:700;font-size:13px;color:${g.color};margin-bottom:2px">${esc(g.name)}</div>
+      <div style="font-size:11px;color:${g.color}99">${esc(g.systemName)}</div>
+    </div>`).join('');
+}
+
+// ── WYSIWYG ──
+let weSelected = null;
+function renderWeList() {
+  const items = document.getElementById('weItems');
+  items.innerHTML = SAMPLE_GIROS.map(g => {
+    const custom = loadLandingCustom(g.key);
+    const edited = Object.keys(custom).length > 0;
+    return `<div class="we-item ${weSelected === g.key ? 'active' : ''}" id="we-item-${g.key}" onclick="selectGiroWe('${g.key}')">
+      <div class="we-giro-icon" style="background:${g.accent}">${g.icon}</div>
+      <div><div class="we-giro-name">${esc(g.name)}</div><div class="we-giro-sys">${esc(custom.systemName || g.systemName)}</div></div>
+      ${edited ? '<div class="we-edited-dot" title="Personalizado"></div>' : ''}
+    </div>`;
+  }).join('');
+}
+
+function filterWeList(q) {
+  const ql = q.toLowerCase();
+  document.querySelectorAll('.we-item').forEach(el => {
+    el.style.display = el.textContent.toLowerCase().includes(ql) ? '' : 'none';
+  });
+}
+
+function selectGiroWe(key) {
+  weSelected = key;
+  renderWeList();
+  const g = SAMPLE_GIROS.find(x => x.key === key);
+  if (!g) return;
+  const custom = loadLandingCustom(key);
+  const editor = document.getElementById('weEditor');
+  editor.innerHTML = `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:22px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:46px;height:46px;border-radius:10px;background:${g.accent};display:flex;align-items:center;justify-content:center;font-size:24px">${g.icon}</div>
+          <div><div style="font-size:16px;font-weight:700">${esc(g.name)}</div><div style="font-size:12px;color:var(--text-3)">${esc(g.key)}</div></div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn sm" onclick="window.open('/landing_dynamic.html?giro=${g.key}','_blank')">👁 Ver landing</button>
+          <button class="btn sm primary" onclick="saveWeCustom('${g.key}')">💾 Guardar</button>
+        </div>
+      </div>
+      <div class="form-row" style="margin-bottom:12px">
+        <div class="form-group"><label class="form-label">Nombre del sistema</label><input class="form-input" id="we-sysname" value="${esc(custom.systemName || g.systemName)}"></div>
+        <div class="form-group"><label class="form-label">Dominio</label><input class="form-input" id="we-domain" value="${esc(custom.domain || g.key + 'pro.com')}"></div>
+      </div>
+      <div class="form-group" style="margin-bottom:12px"><label class="form-label">Subtítulo</label><input class="form-input" id="we-sub" value="${esc(custom.subheadline || 'Hecho específicamente para ' + g.name.toLowerCase() + 's.')}"></div>
+      <div class="form-row" style="margin-bottom:4px">
+        <div class="form-group"><label class="form-label">Color principal</label><div style="display:flex;gap:6px"><input type="color" id="we-color" value="${custom.color || g.color}" style="width:48px;height:38px;border:1px solid var(--border);border-radius:8px;cursor:pointer"><input class="form-input" id="we-colorhex" value="${custom.color || g.color}" style="font-family:var(--font-mono)"></div></div>
+        <div class="form-group"><label class="form-label">Color acento</label><div style="display:flex;gap:6px"><input type="color" id="we-accent" value="${custom.accent || g.accent}" style="width:48px;height:38px;border:1px solid var(--border);border-radius:8px;cursor:pointer"><input class="form-input" id="we-accenthex" value="${custom.accent || g.accent}" style="font-family:var(--font-mono)"></div></div>
+      </div>
+      <div style="margin-top:14px;padding:12px;background:var(--layer-owner-soft);border:1px solid rgba(251,191,36,0.3);border-radius:10px;font-size:12.5px;color:var(--layer-owner-2)">
+        💡 Al guardar, la landing se actualiza en vivo para los clientes que la tengan abierta (vía BroadcastChannel).
+      </div>
+    </div>`;
+  // Sync color pickers
+  document.getElementById('we-color').oninput   = e => { document.getElementById('we-colorhex').value = e.target.value; };
+  document.getElementById('we-colorhex').oninput = e => { document.getElementById('we-color').value = e.target.value; };
+  document.getElementById('we-accent').oninput   = e => { document.getElementById('we-accenthex').value = e.target.value; };
+  document.getElementById('we-accenthex').oninput = e => { document.getElementById('we-accent').value = e.target.value; };
+}
+
+function saveWeCustom(key) {
+  const data = {
+    systemName:  document.getElementById('we-sysname').value,
+    domain:      document.getElementById('we-domain').value,
+    subheadline: document.getElementById('we-sub').value,
+    color:       document.getElementById('we-color').value,
+    accent:      document.getElementById('we-accent').value,
+  };
+  saveLandingCustom(key, data);
+  toast('✓ Landing de ' + key + ' guardada', 'ok');
+  renderWeList();
+  try { new BroadcastChannel('volvix-landing').postMessage({ type:'landing-update', giroKey: key }); } catch {}
+}
+
+function loadLandingCustom(key) {
+  try { return JSON.parse(localStorage.getItem('volvix:landing:' + key) || '{}'); } catch { return {}; }
+}
+function saveLandingCustom(key, data) {
+  localStorage.setItem('volvix:landing:' + key, JSON.stringify(data));
+}
+
+// ── Brands table ──
+function renderBrands() {
+  const brands = [
+    { name:'SalvadoreX', level:1, tenants:47, mrr:32540, revshare:100, status:'active' },
+    { name:'BarberPro',  level:1, tenants:28, mrr:22400, revshare:100, status:'active' },
+    { name:'FarmaciasPro',level:1,tenants:15,mrr:35100, revshare:100, status:'active' },
+    { name:'EsteticaPluz',level:1,tenants:22,mrr:18540,revshare:100, status:'active' },
+    { name:'BarberLuisita.com',level:2,tenants:12,mrr:9456,revshare:30,status:'active' },
+  ];
+  document.getElementById('brandsTable').innerHTML = brands.map(b => `
+    <tr>
+      <td><strong>${esc(b.name)}</strong></td>
+      <td><span class="pill gray">L${b.level}</span></td>
+      <td>${b.tenants}</td>
+      <td>${money(b.mrr)}</td>
+      <td>${b.revshare}%</td>
+      <td><span class="pill green">Activa</span></td>
+      <td><button class="btn sm" onclick="toast('Gestionar ${esc(b.name)}','info')">⚙️</button></td>
+    </tr>`).join('');
+}
+
+// ── Billing ──
+async function loadBilling() {
+  try {
+    const s = await window.volvix.api.stats();
+    if (!s) return;
+    const mrr = s.mrr || 0;
+    document.getElementById('billMrr').textContent  = money(mrr);
+    document.getElementById('billArr').textContent  = money(mrr * 12);
+    document.getElementById('billTrial').textContent = s.tenants?.total - s.tenants?.active || 0;
+  } catch {}
+}
+
+// ── Settings ──
+function renderSettings() {
+  const flags = window.VOLVIX_FLAGS || {};
+  const labels = {
+    realtimeSync: 'Sync en tiempo real',
+    offlineQueue: 'Cola offline',
+    aiEngine: 'AI Engine',
+    aiSupport: 'AI Support',
+    remoteControl: 'Control remoto',
+    debugMode: 'Modo debug',
+    serviceWorker: 'Service Worker (PWA)',
+  };
+  const list = document.getElementById('flagsList');
+  list.innerHTML = Object.entries(labels).map(([k, label]) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg-2);border-radius:10px">
+      <div>
+        <div style="font-weight:600;font-size:13px">${esc(label)}</div>
+        <div style="font-size:11.5px;color:var(--text-3);font-family:var(--font-mono)">${esc(k)}</div>
+      </div>
+      <label style="cursor:pointer;display:flex;align-items:center;gap:6px">
+        <input type="checkbox" ${flags[k] ? 'checked' : ''} id="flag-${k}" style="width:16px;height:16px;cursor:pointer">
+        <span style="font-size:12px;color:var(--text-3)">${flags[k] ? 'On' : 'Off'}</span>
+      </label>
+    </div>`).join('');
+}
+
+function saveSettings() {
+  const brand = document.getElementById('settingBrand')?.value;
+  const version = document.getElementById('settingVersion')?.value;
+  const company = document.getElementById('settingCompany')?.value;
+  if (brand && window.VOLVIX_BRAND) {
+    window.VOLVIX_BRAND.name = brand;
+    window.VOLVIX_BRAND.version = version;
+    window.VOLVIX_BRAND.company = company;
+  }
+  toast('✓ Settings guardados', 'ok');
+}
+
+// ── Keyboard shortcuts ──
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-bg.open').forEach(m => m.classList.remove('open'));
+  }
+});
+
+// ── Init ──
+window.volvix.ready(() => {
+  loadStats();
+});
+</script>
+</body>
+</html>

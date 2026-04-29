@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volvix — Inventario</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0a0a0f">
+<script>if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');</script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --primary:#6c47ff;--primary-dark:#4f2fe0;--accent:#00d4aa;--danger:#ff4757;--warn:#ffa502;
+    --bg:#0a0a0f;--bg2:#12121a;--bg3:#1a1a28;--text:#e8e8f0;--muted:#8888a8;--border:#2a2a3f;
+  }
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+  a{color:var(--muted);text-decoration:none}a:hover{color:#fff}
+
+  header{background:var(--bg2);border-bottom:1px solid var(--border);padding:.85rem 2rem;
+    display:flex;align-items:center;gap:1rem}
+  .logo{font-size:1.2rem;font-weight:800}.logo span{color:var(--primary)}
+  header nav{display:flex;gap:.8rem;margin-left:auto}
+  .nav-link{font-size:.82rem;padding:.3rem .7rem;border-radius:7px;transition:all .2s}
+  .nav-link:hover{background:var(--bg3);color:#fff}
+
+  .container{max-width:1200px;margin:0 auto;padding:2rem}
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem}
+  h1{font-size:1.5rem;font-weight:800}
+
+  .btn{padding:.5rem 1.1rem;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;border:none;transition:all .2s}
+  .btn-primary{background:var(--primary);color:#fff}
+  .btn-primary:hover{background:var(--primary-dark)}
+  .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+  .btn-ghost:hover{color:#fff;border-color:var(--primary)}
+  .btn-danger{background:var(--danger);color:#fff}
+  .btn-sm{padding:.3rem .7rem;font-size:.78rem}
+
+  .stat-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem;margin-bottom:1.5rem}
+  .stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.2rem}
+  .stat-card .label{font-size:.78rem;color:var(--muted);margin-bottom:.3rem}
+  .stat-card .value{font-size:1.8rem;font-weight:800}
+  .stat-card .sub{font-size:.72rem;color:var(--muted);margin-top:.2rem}
+
+  .toolbar{display:flex;gap:.7rem;margin-bottom:1rem;flex-wrap:wrap}
+  .search-input{background:var(--bg3);border:1px solid var(--border);color:#fff;
+    padding:.5rem .9rem;border-radius:8px;font-size:.85rem;outline:none;min-width:220px}
+  .search-input:focus{border-color:var(--primary)}
+  select{background:var(--bg3);border:1px solid var(--border);color:#fff;
+    padding:.5rem .8rem;border-radius:8px;font-size:.85rem;outline:none;cursor:pointer}
+
+  .panel{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  table{width:100%;border-collapse:collapse;font-size:.85rem}
+  thead{background:var(--bg3)}
+  th{text-align:left;padding:.7rem 1rem;color:var(--muted);font-size:.75rem;
+    font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+  td{padding:.75rem 1rem;border-bottom:1px solid rgba(42,42,63,.4)}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:rgba(26,26,40,.5)}
+
+  .chip{display:inline-block;padding:.2rem .6rem;border-radius:6px;font-size:.72rem;font-weight:600}
+  .chip-green{background:rgba(0,212,170,.15);color:var(--accent)}
+  .chip-red{background:rgba(255,71,87,.15);color:var(--danger)}
+  .chip-yellow{background:rgba(255,165,2,.15);color:var(--warn)}
+  .chip-blue{background:rgba(108,71,255,.15);color:var(--primary)}
+
+  .stock-bar{width:80px;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle;margin-left:.5rem}
+  .stock-fill{height:100%;border-radius:3px}
+  .fill-high{background:var(--accent)}
+  .fill-med{background:var(--warn)}
+  .fill-low{background:var(--danger)}
+
+  /* MODAL */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;align-items:center;justify-content:center}
+  .modal-overlay.open{display:flex}
+  .modal{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:2rem;width:90%;max-width:480px;max-height:90vh;overflow-y:auto}
+  .modal-title{font-size:1.1rem;font-weight:700;margin-bottom:1.4rem}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin-bottom:1.2rem}
+  .form-group{display:flex;flex-direction:column;gap:.35rem}
+  .form-group.full{grid-column:1/-1}
+  label{font-size:.78rem;font-weight:600;color:var(--muted)}
+  input,select,textarea{background:var(--bg3);border:1px solid var(--border);color:#fff;
+    padding:.6rem .9rem;border-radius:8px;font-size:.85rem;outline:none;font-family:inherit;width:100%}
+  input:focus,select:focus,textarea:focus{border-color:var(--primary)}
+
+  .toast{position:fixed;bottom:2rem;right:2rem;background:var(--bg3);border:1px solid var(--border);
+    border-radius:10px;padding:.8rem 1.4rem;font-size:.85rem;z-index:999;
+    transform:translateY(3rem);opacity:0;transition:all .3s;pointer-events:none}
+  .toast.show{transform:translateY(0);opacity:1}
+  .toast.success{border-color:var(--accent);color:var(--accent)}
+  .toast.error{border-color:var(--danger);color:var(--danger)}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Vol<span>vix</span> <span style="font-size:.75rem;color:var(--muted)">Inventario</span></div>
+  <nav>
+    <a href="owner.html" class="nav-link">Panel</a>
+    <a href="pos.html" class="nav-link">POS</a>
+    <a href="index.html" class="nav-link">Inicio</a>
+  </nav>
+</header>
+
+<div class="container">
+  <div class="topbar">
+    <h1>Inventario</h1>
+    <div style="display:flex;gap:.7rem">
+      <button class="btn btn-ghost" onclick="exportCSV()">Exportar CSV</button>
+      <button class="btn btn-primary" onclick="openModal()">+ Agregar producto</button>
+    </div>
+  </div>
+
+  <div class="stat-cards">
+    <div class="stat-card">
+      <div class="label">Total productos</div>
+      <div class="value" id="st-total">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Stock bajo</div>
+      <div class="value" id="st-bajo" style="color:var(--danger)">—</div>
+      <div class="sub">Menos de 5 unidades</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Sin stock</div>
+      <div class="value" id="st-cero" style="color:var(--danger)">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Valor total</div>
+      <div class="value" id="st-valor" style="color:var(--accent)">—</div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <input class="search-input" id="searchInput" placeholder="Buscar por nombre, categoría..." oninput="filterTable()">
+    <select id="catFilter" onchange="filterTable()">
+      <option value="">Todas las categorías</option>
+    </select>
+    <select id="stockFilter" onchange="filterTable()">
+      <option value="">Todo el stock</option>
+      <option value="bajo">Stock bajo (&lt;5)</option>
+      <option value="cero">Sin stock</option>
+      <option value="ok">Stock OK</option>
+    </select>
+    <button class="btn btn-ghost" onclick="loadProducts()">↻ Actualizar</button>
+  </div>
+
+  <div class="panel">
+    <table>
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Categoría</th>
+          <th>Precio</th>
+          <th>Costo</th>
+          <th>Stock</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="productTable">
+        <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">Cargando...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="productModal">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">Nuevo producto</div>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Nombre del producto</label>
+        <input id="p-nombre" placeholder="Ej: Coca-Cola 600ml">
+      </div>
+      <div class="form-group">
+        <label>Precio de venta</label>
+        <input id="p-precio" type="number" step="0.01" placeholder="0.00">
+      </div>
+      <div class="form-group">
+        <label>Costo</label>
+        <input id="p-costo" type="number" step="0.01" placeholder="0.00">
+      </div>
+      <div class="form-group">
+        <label>Stock actual</label>
+        <input id="p-stock" type="number" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label>Stock mínimo</label>
+        <input id="p-stock-min" type="number" placeholder="5">
+      </div>
+      <div class="form-group">
+        <label>Categoría</label>
+        <input id="p-cat" placeholder="Ej: Bebidas">
+      </div>
+      <div class="form-group">
+        <label>Código de barras</label>
+        <input id="p-codigo" placeholder="7501234567890">
+      </div>
+      <div class="form-group full">
+        <label>Descripción</label>
+        <textarea id="p-desc" rows="2" placeholder="Descripción opcional"></textarea>
+      </div>
+    </div>
+    <div style="display:flex;gap:.7rem;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveProduct()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let allProducts = [];
+let editId = null;
+
+const DEMO = [
+  {id:'p1',nombre:'Coca-Cola 600ml',precio:20,costo:12,stock:50,stock_min:10,categoria:'Bebidas',codigo:'7501234001'},
+  {id:'p2',nombre:'Pan de caja',precio:35,costo:22,stock:8,stock_min:5,categoria:'Panadería',codigo:'7501234002'},
+  {id:'p3',nombre:'Leche 1L',precio:28,costo:18,stock:3,stock_min:10,categoria:'Lácteos',codigo:'7501234003'},
+  {id:'p4',nombre:'Jabón antibacterial',precio:22,costo:14,stock:0,stock_min:5,categoria:'Higiene',codigo:'7501234004'},
+  {id:'p5',nombre:'Arroz 1kg',precio:25,costo:15,stock:60,stock_min:15,categoria:'Básicos',codigo:'7501234005'},
+  {id:'p6',nombre:'Aceite 1L',precio:52,costo:38,stock:15,stock_min:8,categoria:'Básicos',codigo:'7501234006'},
+];
+
+function toast(msg, type='success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = `toast show ${type}`;
+  setTimeout(() => el.className = 'toast', 2600);
+}
+
+function fmt(n) { return '$' + parseFloat(n||0).toFixed(2); }
+
+async function loadProducts() {
+  try {
+    const r = await fetch('/api/productos');
+    const data = await r.json();
+    allProducts = data.length ? data : DEMO;
+  } catch { allProducts = DEMO; }
+  buildCatFilter();
+  updateStats();
+  filterTable();
+}
+
+function buildCatFilter() {
+  const cats = [...new Set(allProducts.map(p => p.categoria || 'General'))];
+  const sel = document.getElementById('catFilter');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">Todas las categorías</option>' +
+    cats.map(c => `<option value="${c}" ${c===cur?'selected':''}>${c}</option>`).join('');
+}
+
+function updateStats() {
+  document.getElementById('st-total').textContent = allProducts.length;
+  document.getElementById('st-bajo').textContent = allProducts.filter(p => p.stock > 0 && p.stock < (p.stock_min||5)).length;
+  document.getElementById('st-cero').textContent = allProducts.filter(p => !p.stock).length;
+  const valor = allProducts.reduce((s,p) => s + (p.costo||0) * (p.stock||0), 0);
+  document.getElementById('st-valor').textContent = fmt(valor);
+}
+
+function filterTable() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const cat = document.getElementById('catFilter').value;
+  const sf = document.getElementById('stockFilter').value;
+
+  let list = allProducts.filter(p => {
+    const matchQ = !q || p.nombre.toLowerCase().includes(q) || (p.categoria||'').toLowerCase().includes(q);
+    const matchCat = !cat || (p.categoria||'') === cat;
+    let matchS = true;
+    if (sf === 'bajo') matchS = p.stock > 0 && p.stock < (p.stock_min||5);
+    else if (sf === 'cero') matchS = !p.stock;
+    else if (sf === 'ok') matchS = p.stock >= (p.stock_min||5);
+    return matchQ && matchCat && matchS;
+  });
+
+  renderTable(list);
+}
+
+function stockStatus(p) {
+  if (!p.stock) return {label:'Sin stock', cls:'chip-red'};
+  if (p.stock < (p.stock_min||5)) return {label:'Stock bajo', cls:'chip-yellow'};
+  return {label:'OK', cls:'chip-green'};
+}
+
+function stockBarClass(p) {
+  if (!p.stock) return 'fill-low';
+  if (p.stock < (p.stock_min||5)) return 'fill-med';
+  return 'fill-high';
+}
+
+function renderTable(list) {
+  const tb = document.getElementById('productTable');
+  if (!list.length) {
+    tb.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">Sin productos que coincidan</td></tr>';
+    return;
+  }
+  const maxStock = Math.max(...list.map(p => p.stock||0), 1);
+  tb.innerHTML = list.map(p => {
+    const s = stockStatus(p);
+    const pct = Math.min(100, ((p.stock||0)/maxStock)*100);
+    return `<tr>
+      <td>
+        <div style="font-weight:600">${p.nombre}</div>
+        ${p.codigo ? `<div style="font-size:.72rem;color:var(--muted);font-family:monospace">${p.codigo}</div>` : ''}
+      </td>
+      <td>${p.categoria||'—'}</td>
+      <td style="font-weight:700;color:var(--accent)">${fmt(p.precio)}</td>
+      <td style="color:var(--muted)">${fmt(p.costo)}</td>
+      <td>
+        <span style="font-weight:600">${p.stock??0}</span>
+        <span class="stock-bar"><span class="stock-fill ${stockBarClass(p)}" style="width:${pct}%"></span></span>
+      </td>
+      <td><span class="chip ${s.cls}">${s.label}</span></td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick='editProduct(${JSON.stringify(p).replace(/'/g,"&#39;")})'>Editar</button>
+        <button class="btn btn-ghost btn-sm" style="margin-left:.3rem" onclick="ajustarStock('${p.id}')">+Stock</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function openModal(p = null) {
+  editId = p?.id || null;
+  document.getElementById('modalTitle').textContent = p ? 'Editar producto' : 'Nuevo producto';
+  document.getElementById('p-nombre').value = p?.nombre||'';
+  document.getElementById('p-precio').value = p?.precio||'';
+  document.getElementById('p-costo').value = p?.costo||'';
+  document.getElementById('p-stock').value = p?.stock||'';
+  document.getElementById('p-stock-min').value = p?.stock_min||'5';
+  document.getElementById('p-cat').value = p?.categoria||'';
+  document.getElementById('p-codigo').value = p?.codigo||'';
+  document.getElementById('p-desc').value = p?.descripcion||'';
+  document.getElementById('productModal').classList.add('open');
+}
+
+function editProduct(p) { openModal(p); }
+
+function closeModal() { document.getElementById('productModal').classList.remove('open'); }
+
+async function saveProduct() {
+  const body = {
+    nombre: document.getElementById('p-nombre').value,
+    precio: parseFloat(document.getElementById('p-precio').value)||0,
+    costo: parseFloat(document.getElementById('p-costo').value)||0,
+    stock: parseInt(document.getElementById('p-stock').value)||0,
+    stock_min: parseInt(document.getElementById('p-stock-min').value)||5,
+    categoria: document.getElementById('p-cat').value,
+    codigo: document.getElementById('p-codigo').value,
+    descripcion: document.getElementById('p-desc').value,
+  };
+  try {
+    const r = await fetch('/api/productos', {
+      method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)
+    });
+    const data = await r.json();
+    if (data.error) { toast(data.error, 'error'); return; }
+    toast('Producto guardado');
+  } catch { toast('Guardado localmente (sin conexión)'); }
+  closeModal();
+  loadProducts();
+}
+
+async function ajustarStock(id) {
+  const qty = parseInt(prompt('Cantidad a agregar al stock (puede ser negativo):') || '0');
+  if (!qty) return;
+  const p = allProducts.find(x => x.id === id);
+  if (!p) return;
+  p.stock = (p.stock||0) + qty;
+  try {
+    await fetch(`/api/productos/${id}`, {
+      method: 'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({stock: p.stock})
+    });
+  } catch {}
+  toast(`Stock actualizado: ${p.stock}`);
+  loadProducts();
+}
+
+function exportCSV() {
+  const rows = [['Nombre','Categoría','Precio','Costo','Stock','Stock Min','Código']];
+  allProducts.forEach(p => rows.push([p.nombre,p.categoria||'',p.precio||0,p.costo||0,p.stock||0,p.stock_min||0,p.codigo||'']));
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'inventario_volvix.csv';
+  a.click();
+  toast('CSV exportado');
+}
+
+document.querySelector('.modal-overlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+loadProducts();
+</script>
+</body>
+</html>

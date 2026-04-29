@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volvix — Panel del Propietario</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0a0a0f">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --primary:#6c47ff;--primary-dark:#4f2fe0;--accent:#00d4aa;--danger:#ff4757;--warn:#ffa502;
+    --bg:#0a0a0f;--bg2:#12121a;--bg3:#1a1a28;--text:#e8e8f0;--muted:#8888a8;--border:#2a2a3f;
+  }
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;display:flex;min-height:100vh}
+
+  /* SIDEBAR */
+  .sidebar{width:230px;background:var(--bg2);border-right:1px solid var(--border);
+    display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50}
+  .sidebar-logo{padding:1.4rem 1.2rem;font-size:1.3rem;font-weight:800;border-bottom:1px solid var(--border)}
+  .sidebar-logo span{color:var(--primary)}
+  .sidebar nav{flex:1;padding:.75rem 0;overflow-y:auto}
+  .nav-section{padding:.4rem 1.2rem;font-size:.7rem;font-weight:700;color:var(--muted);
+    letter-spacing:1px;text-transform:uppercase;margin-top:.5rem}
+  .nav-item{display:flex;align-items:center;gap:.7rem;padding:.65rem 1.2rem;
+    color:var(--muted);font-size:.88rem;cursor:pointer;transition:all .15s;border-left:3px solid transparent}
+  .nav-item:hover,.nav-item.active{background:var(--bg3);color:#fff;border-left-color:var(--primary)}
+  .nav-item .icon{font-size:1rem;width:1.2rem;text-align:center}
+  .sidebar-footer{padding:1rem 1.2rem;border-top:1px solid var(--border);font-size:.8rem;color:var(--muted)}
+
+  /* MAIN */
+  .main{margin-left:230px;flex:1;padding:2rem;overflow-y:auto}
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem}
+  .topbar h1{font-size:1.4rem;font-weight:700}
+  .topbar-right{display:flex;gap:.8rem;align-items:center}
+  .badge-ws{padding:.25rem .7rem;border-radius:20px;font-size:.75rem;font-weight:600}
+  .ws-on{background:rgba(0,212,170,.15);color:var(--accent)}
+  .ws-off{background:rgba(255,71,87,.15);color:var(--danger)}
+
+  /* CARDS */
+  .stat-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-bottom:2rem}
+  .stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.4rem}
+  .stat-card .label{font-size:.8rem;color:var(--muted);margin-bottom:.4rem}
+  .stat-card .value{font-size:2rem;font-weight:800}
+  .stat-card .sub{font-size:.75rem;color:var(--muted);margin-top:.2rem}
+
+  /* PANELS */
+  .panel{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem}
+  .panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem}
+  .panel-title{font-size:1rem;font-weight:700}
+
+  /* TABLE */
+  table{width:100%;border-collapse:collapse;font-size:.85rem}
+  th{text-align:left;padding:.6rem .8rem;color:var(--muted);font-weight:600;font-size:.75rem;
+    text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+  td{padding:.7rem .8rem;border-bottom:1px solid rgba(42,42,63,.5)}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:var(--bg3)}
+
+  /* BUTTONS */
+  .btn{padding:.5rem 1.1rem;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;border:none;transition:all .2s}
+  .btn-primary{background:var(--primary);color:#fff}
+  .btn-primary:hover{background:var(--primary-dark)}
+  .btn-sm{padding:.3rem .7rem;font-size:.78rem}
+  .btn-danger{background:var(--danger);color:#fff}
+  .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+  .btn-ghost:hover{color:#fff;border-color:var(--primary)}
+  .btn-accent{background:var(--accent);color:#000}
+
+  /* FORM */
+  .form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem}
+  .form-group{display:flex;flex-direction:column;gap:.4rem}
+  label{font-size:.8rem;font-weight:600;color:var(--muted)}
+  input,select,textarea{background:var(--bg3);border:1px solid var(--border);color:#fff;
+    padding:.6rem .9rem;border-radius:8px;font-size:.88rem;outline:none;width:100%;font-family:inherit}
+  input:focus,select:focus,textarea:focus{border-color:var(--primary)}
+  select option{background:var(--bg3)}
+
+  /* BADGE */
+  .chip{display:inline-block;padding:.2rem .6rem;border-radius:6px;font-size:.72rem;font-weight:600}
+  .chip-green{background:rgba(0,212,170,.15);color:var(--accent)}
+  .chip-red{background:rgba(255,71,87,.15);color:var(--danger)}
+  .chip-blue{background:rgba(108,71,255,.15);color:var(--primary)}
+  .chip-yellow{background:rgba(255,165,2,.15);color:var(--warn)}
+
+  /* MODAL */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;
+    align-items:center;justify-content:center}
+  .modal-overlay.open{display:flex}
+  .modal{background:var(--bg2);border:1px solid var(--border);border-radius:16px;
+    padding:2rem;width:90%;max-width:520px;max-height:90vh;overflow-y:auto}
+  .modal-title{font-size:1.1rem;font-weight:700;margin-bottom:1.4rem}
+
+  /* TOAST */
+  .toast{position:fixed;bottom:2rem;right:2rem;background:var(--bg3);border:1px solid var(--border);
+    border-radius:10px;padding:.9rem 1.4rem;font-size:.88rem;z-index:999;
+    transform:translateY(4rem);opacity:0;transition:all .3s;pointer-events:none}
+  .toast.show{transform:translateY(0);opacity:1}
+  .toast.success{border-color:var(--accent);color:var(--accent)}
+  .toast.error{border-color:var(--danger);color:var(--danger)}
+
+  /* SECTIONS */
+  .section{display:none}
+  .section.active{display:block}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-logo">Vol<span>vix</span> <span style="font-size:.7rem;color:var(--muted);font-weight:400">POS</span></div>
+  <nav>
+    <div class="nav-section">Principal</div>
+    <div class="nav-item active" data-section="dashboard"><span class="icon">📊</span>Dashboard</div>
+    <div class="nav-item" data-section="tenants"><span class="icon">🏪</span>Negocios</div>
+    <div class="nav-item" data-section="ventas"><span class="icon">💰</span>Ventas</div>
+    <div class="nav-section">Gestión</div>
+    <div class="nav-item" data-section="productos"><span class="icon">📦</span>Productos</div>
+    <div class="nav-item" data-section="features"><span class="icon">⚡</span>Features IA</div>
+    <div class="nav-item" data-section="licencias"><span class="icon">🔑</span>Licencias</div>
+    <div class="nav-section">Sistema</div>
+    <div class="nav-item" data-section="tickets"><span class="icon">🎫</span>Soporte</div>
+    <div class="nav-item" onclick="location.href='ai.html'"><span class="icon">🤖</span>Motor IA</div>
+    <div class="nav-item" onclick="location.href='pos.html'"><span class="icon">🛒</span>POS</div>
+    <div class="nav-item" onclick="location.href='index.html'"><span class="icon">🌐</span>Landing</div>
+  </nav>
+  <div class="sidebar-footer">
+    <div id="wsBadge" class="badge-ws ws-off">● Desconectado</div>
+    <div style="margin-top:.4rem">Volvix v1.0</div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <h1 id="sectionTitle">Dashboard</h1>
+    <div class="topbar-right">
+      <button class="btn btn-primary" id="mainAction" onclick="openCreateModal()">+ Nuevo Negocio</button>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="section active" id="sec-dashboard">
+    <div class="stat-cards">
+      <div class="stat-card">
+        <div class="label">Negocios activos</div>
+        <div class="value" id="st-tenants">—</div>
+        <div class="sub">Total registrados</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Ventas hoy</div>
+        <div class="value" id="st-ventas">—</div>
+        <div class="sub">Transacciones</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Productos</div>
+        <div class="value" id="st-productos">—</div>
+        <div class="sub">En catálogo</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Tickets abiertos</div>
+        <div class="value" id="st-tickets">—</div>
+        <div class="sub">Sin resolver</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Actividad reciente</span>
+        <button class="btn btn-ghost btn-sm" onclick="loadStats()">Actualizar</button>
+      </div>
+      <div id="activityFeed" style="color:var(--muted);font-size:.88rem">Conectando...</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Accesos rápidos</span></div>
+      <div style="display:flex;gap:1rem;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="showSection('tenants')">Ver negocios</button>
+        <button class="btn btn-accent" onclick="showSection('features')">Motor IA</button>
+        <button class="btn btn-ghost" onclick="location.href='pos.html'">Abrir POS</button>
+        <button class="btn btn-ghost" onclick="showSection('tickets')">Ver tickets</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TENANTS -->
+  <div class="section" id="sec-tenants">
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Negocios registrados</span>
+        <button class="btn btn-primary btn-sm" onclick="openCreateModal()">+ Nuevo</button>
+      </div>
+      <div id="tenantsTable"><div style="color:var(--muted)">Cargando...</div></div>
+    </div>
+  </div>
+
+  <!-- VENTAS -->
+  <div class="section" id="sec-ventas">
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Historial de ventas</span>
+        <button class="btn btn-ghost btn-sm" onclick="loadVentas()">Actualizar</button>
+      </div>
+      <div id="ventasTable"><div style="color:var(--muted)">Cargando...</div></div>
+    </div>
+  </div>
+
+  <!-- PRODUCTOS -->
+  <div class="section" id="sec-productos">
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Catálogo de productos</span>
+        <button class="btn btn-primary btn-sm" onclick="openProductoModal()">+ Producto</button>
+      </div>
+      <div id="productosTable"><div style="color:var(--muted)">Cargando...</div></div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="section" id="sec-features">
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Features activos por negocio</span>
+        <button class="btn btn-accent btn-sm" onclick="runAIActivation()">Activar con IA</button>
+      </div>
+      <div id="featuresContent"><div style="color:var(--muted)">Cargando...</div></div>
+    </div>
+  </div>
+
+  <!-- LICENCIAS -->
+  <div class="section" id="sec-licencias">
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Licencias</span>
+        <button class="btn btn-primary btn-sm" onclick="openLicenciaModal()">+ Licencia</button>
+      </div>
+      <div id="licenciasTable"><div style="color:var(--muted)">Cargando...</div></div>
+    </div>
+  </div>
+
+  <!-- TICKETS -->
+  <div class="section" id="sec-tickets">
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Tickets de soporte</span>
+        <button class="btn btn-primary btn-sm" onclick="openTicketModal()">+ Ticket</button>
+      </div>
+      <div id="ticketsTable"><div style="color:var(--muted)">Cargando...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CREAR TENANT -->
+<div class="modal-overlay" id="createModal">
+  <div class="modal">
+    <div class="modal-title">Nuevo Negocio</div>
+    <div class="form-grid" style="margin-bottom:1rem">
+      <div class="form-group">
+        <label>Nombre del negocio</label>
+        <input id="tn-nombre" placeholder="Ej: Tienda San José">
+      </div>
+      <div class="form-group">
+        <label>Tipo de negocio</label>
+        <select id="tn-tipo">
+          <option value="retail">Retail / Tienda</option>
+          <option value="alimentos">Alimentos / Restaurante</option>
+          <option value="salud">Salud / Farmacia</option>
+          <option value="belleza">Belleza / Spa</option>
+          <option value="rentas">Rentas / Inmuebles</option>
+          <option value="servicios">Servicios / Taller</option>
+          <option value="gym">Gimnasio</option>
+          <option value="educacion">Educación</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Email del propietario</label>
+        <input id="tn-email" type="email" placeholder="correo@ejemplo.com">
+      </div>
+      <div class="form-group">
+        <label>Teléfono</label>
+        <input id="tn-tel" placeholder="+52 555 000 0000">
+      </div>
+    </div>
+    <div style="display:flex;gap:.7rem;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeModal('createModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="createTenant()">Crear negocio</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TICKET -->
+<div class="modal-overlay" id="ticketModal">
+  <div class="modal">
+    <div class="modal-title">Nuevo Ticket</div>
+    <div class="form-grid" style="margin-bottom:1rem">
+      <div class="form-group">
+        <label>Asunto</label>
+        <input id="tk-asunto" placeholder="Describe el problema">
+      </div>
+      <div class="form-group">
+        <label>Prioridad</label>
+        <select id="tk-prioridad">
+          <option value="baja">Baja</option>
+          <option value="media" selected>Media</option>
+          <option value="alta">Alta</option>
+          <option value="critica">Crítica</option>
+        </select>
+      </div>
+      <div class="form-group" style="grid-column:1/-1">
+        <label>Descripción</label>
+        <textarea id="tk-desc" rows="3" placeholder="Detalles del problema..."></textarea>
+      </div>
+    </div>
+    <div style="display:flex;gap:.7rem;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeModal('ticketModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="createTicket()">Crear ticket</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '';
+let ws, currentTenantId = null;
+const feed = [];
+
+function toast(msg, type='success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = `toast show ${type}`;
+  setTimeout(() => el.className = 'toast', 2800);
+}
+
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  document.querySelector(`[data-section="${id}"]`)?.classList.add('active');
+  const titles = {dashboard:'Dashboard',tenants:'Negocios',ventas:'Ventas',productos:'Productos',features:'Features IA',licencias:'Licencias',tickets:'Soporte'};
+  document.getElementById('sectionTitle').textContent = titles[id] || id;
+
+  if (id === 'tenants') loadTenants();
+  else if (id === 'ventas') loadVentas();
+  else if (id === 'productos') loadProductos();
+  else if (id === 'features') loadFeatures();
+  else if (id === 'licencias') loadLicencias();
+  else if (id === 'tickets') loadTickets();
+}
+
+document.querySelectorAll('[data-section]').forEach(el => {
+  el.addEventListener('click', () => showSection(el.dataset.section));
+});
+
+// REALTIME via Supabase (reemplaza WebSocket — compatible con Vercel serverless)
+function connectWS() {
+  const SUPA_URL = 'https://zhvwmzkcqngcaqpdxtwr.supabase.co';
+  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpodndtemtjcW5nY2FxcGR4dHdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxNjcwMTgsImV4cCI6MjA3OTc0MzAxOH0.ygTc754INgqYJEMD0wc_CzRCzRxUfp4hq3rYvJRpjkk';
+
+  const script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+  script.onload = () => {
+    const { createClient } = supabase;
+    const client = createClient(SUPA_URL, SUPA_KEY);
+
+    document.getElementById('wsBadge').textContent = '● Conectando...';
+    document.getElementById('wsBadge').className = 'badge-ws';
+
+    ['volvix_ventas','volvix_tickets','volvix_productos','volvix_features'].forEach(table => {
+      client.channel(`rt-${table}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table }, (payload) => {
+          document.getElementById('wsBadge').textContent = '● Conectado';
+          document.getElementById('wsBadge').className = 'badge-ws ws-on';
+          const evt = payload.eventType || 'change';
+          feed.unshift(`[${new Date().toLocaleTimeString()}] ${table}:${evt}: ${JSON.stringify(payload.new || payload.old || '').slice(0,60)}`);
+          if (feed.length > 20) feed.pop();
+          document.getElementById('activityFeed').innerHTML = feed.slice(0,8).map(f =>
+            `<div style="padding:.3rem 0;border-bottom:1px solid var(--border);font-family:monospace">${f}</div>`
+          ).join('') || '<div style="color:var(--muted)">Sin actividad</div>';
+          // Auto-refresh relevant section
+          if (table === 'volvix_ventas') loadVentas();
+          if (table === 'volvix_tickets') loadTickets();
+          if (table === 'volvix_productos') loadProductos();
+        })
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            document.getElementById('wsBadge').textContent = '● Conectado';
+            document.getElementById('wsBadge').className = 'badge-ws ws-on';
+          }
+          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+            document.getElementById('wsBadge').textContent = '● Desconectado';
+            document.getElementById('wsBadge').className = 'badge-ws ws-off';
+          }
+        });
+    });
+  };
+  document.head.appendChild(script);
+}
+
+// STATS
+async function loadStats() {
+  const r = await fetch('/api/stats');
+  const d = await r.json();
+  document.getElementById('st-tenants').textContent = d.tenants ?? '—';
+  document.getElementById('st-ventas').textContent = d.ventas ?? '—';
+  document.getElementById('st-productos').textContent = d.productos ?? '—';
+  document.getElementById('st-tickets').textContent = d.tickets ?? '—';
+}
+
+// TENANTS
+async function loadTenants() {
+  const r = await fetch('/api/tenants');
+  const data = await r.json();
+  if (!data.length) { document.getElementById('tenantsTable').innerHTML = '<p style="color:var(--muted)">Sin negocios registrados. Crea el primero.</p>'; return; }
+  document.getElementById('tenantsTable').innerHTML = `<table>
+    <thead><tr><th>Nombre</th><th>Tipo</th><th>Email</th><th>Estado</th><th>Creado</th><th></th></tr></thead>
+    <tbody>${data.map(t => `<tr>
+      <td><strong>${t.nombre || t.name || '—'}</strong></td>
+      <td>${t.tipo_negocio || '—'}</td>
+      <td>${t.email || '—'}</td>
+      <td><span class="chip ${t.activo ? 'chip-green' : 'chip-red'}">${t.activo ? 'Activo' : 'Inactivo'}</span></td>
+      <td>${t.created_at ? new Date(t.created_at).toLocaleDateString() : '—'}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="activateAI('${t.id}','${t.tipo_negocio||'retail'}')">IA</button></td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+async function createTenant() {
+  const body = {
+    nombre: document.getElementById('tn-nombre').value,
+    tipo_negocio: document.getElementById('tn-tipo').value,
+    email: document.getElementById('tn-email').value,
+    telefono: document.getElementById('tn-tel').value,
+    activo: true,
+  };
+  const r = await fetch('/api/tenants', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  const data = await r.json();
+  if (data.error) { toast(data.error, 'error'); return; }
+  toast('Negocio creado con éxito');
+  closeModal('createModal');
+  await activateAI(data.id, body.tipo_negocio);
+  loadTenants();
+}
+
+// VENTAS
+async function loadVentas() {
+  const r = await fetch('/api/ventas');
+  const data = await r.json();
+  if (!Array.isArray(data) || !data.length) { document.getElementById('ventasTable').innerHTML = '<p style="color:var(--muted)">Sin ventas registradas.</p>'; return; }
+  document.getElementById('ventasTable').innerHTML = `<table>
+    <thead><tr><th>ID</th><th>Total</th><th>Método</th><th>Fecha</th></tr></thead>
+    <tbody>${data.map(v => `<tr>
+      <td style="font-family:monospace;font-size:.75rem">${v.id?.slice(0,8)}…</td>
+      <td>$${parseFloat(v.total||0).toFixed(2)}</td>
+      <td>${v.metodo_pago || '—'}</td>
+      <td>${v.created_at ? new Date(v.created_at).toLocaleString() : '—'}</td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+// PRODUCTOS
+async function loadProductos() {
+  const r = await fetch('/api/productos');
+  const data = await r.json();
+  if (!Array.isArray(data) || !data.length) { document.getElementById('productosTable').innerHTML = '<p style="color:var(--muted)">Sin productos. Agrega el primero.</p>'; return; }
+  document.getElementById('productosTable').innerHTML = `<table>
+    <thead><tr><th>Nombre</th><th>Precio</th><th>Stock</th><th>Categoría</th></tr></thead>
+    <tbody>${data.map(p => `<tr>
+      <td>${p.nombre}</td>
+      <td>$${parseFloat(p.precio||0).toFixed(2)}</td>
+      <td><span class="chip ${p.stock>5?'chip-green':'chip-red'}">${p.stock??0}</span></td>
+      <td>${p.categoria||'—'}</td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+// FEATURES
+async function loadFeatures() {
+  const r = await fetch('/api/features');
+  const data = await r.json();
+  if (!Array.isArray(data) || !data.length) {
+    document.getElementById('featuresContent').innerHTML = '<p style="color:var(--muted)">Sin features activados. Usa el Motor IA para activar.</p>';
+    return;
+  }
+  const byTenant = {};
+  data.forEach(f => { if (!byTenant[f.tenant_id]) byTenant[f.tenant_id] = []; byTenant[f.tenant_id].push(f); });
+  document.getElementById('featuresContent').innerHTML = Object.entries(byTenant).map(([tid, feats]) => `
+    <div style="margin-bottom:1rem">
+      <div style="font-size:.8rem;color:var(--muted);margin-bottom:.5rem;font-family:monospace">${tid}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:.4rem">
+        ${feats.map(f => `<span class="chip ${f.activo?'chip-green':'chip-red'}">${f.feature}</span>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+async function runAIActivation() {
+  const tenantR = await fetch('/api/tenants');
+  const tenants = await tenantR.json();
+  if (!tenants.length) { toast('No hay negocios', 'error'); return; }
+  for (const t of tenants) {
+    await activateAI(t.id, t.tipo_negocio || 'retail');
+  }
+  toast(`IA activó features para ${tenants.length} negocios`);
+  loadFeatures();
+}
+
+async function activateAI(tenant_id, tipo_negocio) {
+  await fetch('/api/ai/activate', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ tenant_id, tipo_negocio })
+  });
+}
+
+// LICENCIAS
+async function loadLicencias() {
+  const r = await fetch('/api/licencias');
+  const data = await r.json();
+  if (!Array.isArray(data) || !data.length) { document.getElementById('licenciasTable').innerHTML = '<p style="color:var(--muted)">Sin licencias.</p>'; return; }
+  document.getElementById('licenciasTable').innerHTML = `<table>
+    <thead><tr><th>Clave</th><th>Plan</th><th>Estado</th><th>Vence</th></tr></thead>
+    <tbody>${data.map(l => `<tr>
+      <td style="font-family:monospace">${l.clave||'—'}</td>
+      <td><span class="chip chip-blue">${l.plan||'—'}</span></td>
+      <td><span class="chip ${l.activo?'chip-green':'chip-red'}">${l.activo?'Activa':'Vencida'}</span></td>
+      <td>${l.fecha_vencimiento ? new Date(l.fecha_vencimiento).toLocaleDateString() : '—'}</td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+// TICKETS
+async function loadTickets() {
+  const r = await fetch('/api/tickets');
+  const data = await r.json();
+  if (!Array.isArray(data) || !data.length) { document.getElementById('ticketsTable').innerHTML = '<p style="color:var(--muted)">Sin tickets abiertos.</p>'; return; }
+  document.getElementById('ticketsTable').innerHTML = `<table>
+    <thead><tr><th>Asunto</th><th>Prioridad</th><th>Estado</th><th>Fecha</th></tr></thead>
+    <tbody>${data.map(t => `<tr>
+      <td>${t.asunto||'—'}</td>
+      <td><span class="chip ${t.prioridad==='critica'?'chip-red':t.prioridad==='alta'?'chip-yellow':'chip-blue'}">${t.prioridad||'media'}</span></td>
+      <td><span class="chip ${t.estado==='resuelto'?'chip-green':'chip-yellow'}">${t.estado||'abierto'}</span></td>
+      <td>${t.created_at ? new Date(t.created_at).toLocaleDateString() : '—'}</td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+async function createTicket() {
+  const body = {
+    asunto: document.getElementById('tk-asunto').value,
+    prioridad: document.getElementById('tk-prioridad').value,
+    descripcion: document.getElementById('tk-desc').value,
+    estado: 'abierto',
+  };
+  const r = await fetch('/api/tickets', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  const data = await r.json();
+  if (data.error) { toast(data.error, 'error'); return; }
+  toast('Ticket creado'); closeModal('ticketModal'); loadTickets();
+}
+
+// MODALS
+function openCreateModal() { document.getElementById('createModal').classList.add('open'); }
+function openTicketModal() { document.getElementById('ticketModal').classList.add('open'); }
+function openProductoModal() { toast('Módulo de productos — próximamente'); }
+function openLicenciaModal() { toast('Módulo de licencias — próximamente'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+// INIT
+connectWS();
+loadStats();
+</script>
+</body>
+</html>
