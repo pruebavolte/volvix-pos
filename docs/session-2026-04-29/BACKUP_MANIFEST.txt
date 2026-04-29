@@ -1,0 +1,60 @@
+================================================================================
+VOLVIX-POS COMPLETE BACKUP — 2026-04-28 23:11:26 UTC
+================================================================================
+
+PROJECT SIZE: 130MB (including node_modules)
+
+CONTENTS INCLUDED:
+✅ Complete source code (/src)
+✅ Node modules dependencies
+✅ Configuration files (.vercel, project.json, package.json, etc.)
+✅ All HTML pages (login.html, registro.html, etc.)
+✅ API endpoints (src/api/index.js)
+✅ Database migrations
+✅ Supabase configuration
+✅ Vercel configuration
+
+CRITICAL FILES LOCATION:
+- Main API:         src/api/index.js (28,500+ lines)
+- Login page:       src/login.html
+- Registration:     src/registro.html
+- Main page:        src/main.html / index.html
+- Capacitor config: capacitor.config.ts
+
+DEPLOYMENT STATUS:
+🟢 LIVE:           https://volvix-pos.vercel.app
+🟢 Vercel Project: prj_2f9m0VwArnqlGvlBZtxchvQl1a2t
+🟢 Supabase:       https://zhvwmzkcqngcaqpdxtwr.supabase.co
+
+CURRENT FIXES APPLIED:
+✅ BUG-T1: Phone duplicate (friendly error message)
+✅ BUG-T2: Bootstrap wrong products (async resolveOwnerPosUserIdAsync)
+✅ BUG-T3: Product duplicates (ON CONFLICT clause)
+✅ Login enhancements: email/phone toggle + forgot password modal
+✅ Twilio WhatsApp Sandbox: Configured & tested
+
+CONFIGURATION STATUS:
+🟢 TWILIO:          Sandbox activated
+🟢 JWT/Auth:        Custom implementation working
+🟢 Database RLS:    Configured
+🔴 RESEND EMAIL:    Key missing (add to Vercel env)
+🔴 GOOGLE OAUTH:    Not implemented
+🔴 SMS UPGRADE:     Awaiting Twilio Pay upgrade
+
+NEXT STEPS (Fibonacci-safe priority):
+1. Add RESEND_API_KEY to Vercel env vars
+2. Create tutorial: User registration flow + admin viewing
+3. Implement Google OAuth (if needed)
+4. Android APK build (Capacitor)
+5. Admin user management UI enhancements
+
+RESTORE INSTRUCTIONS:
+To restore from this backup:
+1. Copy all contents to /d/github/volvix-pos/ (or new directory)
+2. Run: npm install (in src/ directory)
+3. Verify .env files have correct credentials
+4. Deploy to Vercel: vercel --prod
+
+CREATED: 2026-04-28 23:11:26 UTC
+BACKED UP BY: Claude Agent (Opus 4.7M)
+================================================================================

@@ -1,0 +1,189 @@
+═══════════════════════════════════════════════════════════════════════════════
+NEXT SESSION — TODO LIST (IN PRIORITY ORDER)
+═══════════════════════════════════════════════════════════════════════════════
+
+🚨 CRITICAL — FIX IMMEDIATELY (5 min)
+───────────────────────────────────────────────────────────────────────────────
+
+TASK 1: FIX VERCEL 404 ERROR (ALL PAGES DOWN)
+
+Problem: All pages return 404 because HTML files are in /src/ but Vercel serves /public/
+
+Solution:
+  1. cd /d/github/volvix-pos
+  2. cp src/*.html public/
+  3. cp -r src/docs public/
+  4. cp -r src/tutorials public/
+  5. cp -r src/api public/
+  6. git add public/
+  7. git commit -m "fix: Deploy HTML files to public/ for Vercel"
+  8. git push
+  9. Wait 2 minutes for Vercel build
+  10. Test: curl https://volvix-pos.vercel.app/ (should work)
+
+Expected: Site back online, all pages accessible
+
+Time: 5 minutes
+Risk: Low
+Impact: CRITICAL — Site is currently down
+
+Read: CRITICAL-DEPLOYMENT-ISSUE.md for detailed instructions
+
+───────────────────────────────────────────────────────────────────────────────
+
+📋 SESSION ORDER
+───────────────────────────────────────────────────────────────────────────────
+
+FIRST (you are here):
+  ✓ Read CRITICAL-DEPLOYMENT-ISSUE.md (this explains 404 problem)
+  ✓ Fix Vercel deployment (copy files to public/)
+  ✓ Verify site loads
+
+SECOND:
+  ✓ Read MASTER-PROGRESS-2026-04-29.md (status: 85%)
+  ✓ Review DEPLOYMENT-CHECKLIST-ONDA3.txt (next features to deploy)
+
+THIRD:
+  ✓ Deploy Google OAuth (25 min)
+  ✓ Deploy Stripe (20 min)
+  ✓ Deploy Dashboard v8 (15 min)
+
+FOURTH:
+  ✓ Run E2E tests (30 min)
+  ✓ Verify all flows work
+
+FIFTH:
+  ✓ Document any new errors found
+  ✓ Update this file for next session
+
+───────────────────────────────────────────────────────────────────────────────
+
+🗂️ REFERENCE FILES IN BACKUP
+───────────────────────────────────────────────────────────────────────────────
+
+/d/volvix-pos-backup-2026-04-28_23-11-26/
+
+├── CRITICAL-DEPLOYMENT-ISSUE.md  ← START HERE (404 problem)
+├── MASTER-PROGRESS-2026-04-29.md ← Overall status (85%)
+├── DEPLOYMENT-CHECKLIST-ONDA3.txt ← Feature deployment guide
+├── ERROR-AUDIT-2026-04-29.md     ← All errors found (for reference)
+├── HANDOFF.md                    ← Credenciales + tech details
+└── (Complete backup of volvix-pos codebase)
+
+───────────────────────────────────────────────────────────────────────────────
+
+📊 STATUS SNAPSHOT
+───────────────────────────────────────────────────────────────────────────────
+
+CURRENT STATE:
+  • Code: 85% complete (Google OAuth, Stripe, Dashboard v8 all ready)
+  • Deployment: BROKEN (all 404s due to file location issue)
+  • APK: Built and ready (/d/volvix-pos-app-debug.apk)
+  • Documentation: 1,500+ lines saved for context
+
+AFTER FIX:
+  • Deployment: Functional
+  • Features: Ready to test end-to-end
+  • Next: Deploy 3 major features (Google OAuth, Stripe, Dashboard v8)
+
+FINAL TARGET:
+  • 85% → 95% after ONDA 3 deployment
+  • 95% → 100% after remaining work
+
+───────────────────────────────────────────────────────────────────────────────
+
+⏱️ ESTIMATED TIME (FROM THIS SESSION START)
+───────────────────────────────────────────────────────────────────────────────
+
+Fix Vercel 404:           5 min (CRITICAL)
+Deploy Google OAuth:     25 min
+Deploy Stripe:           20 min
+Deploy Dashboard v8:     15 min
+E2E Testing:             30 min
+                        ────────
+Total:                   95 minutes
+
+Expected to reach 95% functionality completion.
+
+───────────────────────────────────────────────────────────────────────────────
+
+🔑 KEY CREDENTIALS (FROM HANDOFF.md)
+───────────────────────────────────────────────────────────────────────────────
+
+Vercel:
+  Project ID:  prj_2f9m0VwArnqlGvlBZtxchvQl1a2t
+  URL:         https://volvix-pos.vercel.app
+
+Supabase:
+  URL:    https://zhvwmzkcqngcaqpdxtwr.supabase.co
+  Ref:    zhvwmzkcqngcaqpdxtwr
+  Key:    eyJhbGc... (see HANDOFF.md)
+
+Twilio (WhatsApp Sandbox):
+  Account SID: ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+  Auth Token:  6d32b0f3f58b75076b81361174ff8bd6
+  From:        +14155238886
+
+Environment Variables Needed (to add to Vercel):
+  ✓ SUPABASE_URL
+  ✓ SUPABASE_ANON_KEY
+  ✓ JWT_SECRET
+  ✓ TWILIO_ACCOUNT_SID
+  ✓ TWILIO_AUTH_TOKEN
+  ✓ TWILIO_WHATSAPP_FROM
+  ✗ RESEND_API_KEY (missing - get from resend.com)
+  ✗ GOOGLE_CLIENT_ID (for Google OAuth)
+  ✗ GOOGLE_CLIENT_SECRET (for Google OAuth)
+  ✗ STRIPE_PUBLIC_KEY (for Stripe payments)
+  ✗ STRIPE_SECRET_KEY (for Stripe payments)
+
+───────────────────────────────────────────────────────────────────────────────
+
+💡 TIPS FOR NEXT SESSION
+───────────────────────────────────────────────────────────────────────────────
+
+1. Don't skip the Vercel fix — site is down until fixed
+2. Test after fix immediately (curl to verify)
+3. While waiting for Vercel (2 min), start getting Google OAuth credentials
+4. Keep all 4 backup docs open for reference
+5. Focus on E2E testing — don't rush, test thoroughly
+6. Document any NEW errors found (continue ERROR-AUDIT.md)
+
+───────────────────────────────────────────────────────────────────────────────
+
+🎯 SUCCESS CRITERIA FOR THIS SESSION
+───────────────────────────────────────────────────────────────────────────────
+
+✓ Vercel 404 error fixed
+✓ Site loads (https://volvix-pos.vercel.app/)
+✓ All pages accessible (login, registro, pos, admin, docs, tutorials)
+✓ Google OAuth deployed
+✓ Stripe deployed
+✓ Dashboard v8 deployed
+✓ E2E tests pass (registration → login → POS → payment → admin)
+✓ Progress reaches 95% functionality
+
+Anything less = continue in next session
+
+───────────────────────────────────────────────────────────────────────────────
+
+📝 HOW TO CONTINUE WITHOUT LOSING CONTEXT
+───────────────────────────────────────────────────────────────────────────────
+
+Everything is saved. Just:
+
+1. Read CRITICAL-DEPLOYMENT-ISSUE.md (fix the 404)
+2. Read MASTER-PROGRESS-2026-04-29.md (understand where we are)
+3. Follow DEPLOYMENT-CHECKLIST-ONDA3.txt (do the work)
+4. Reference ERROR-AUDIT-2026-04-29.md (know what to avoid)
+5. Use HANDOFF.md (credentials + tech details)
+
+No context lost. Everything documented.
+
+───────────────────────────────────────────────────────────────────────────────
+
+Generated: 2026-04-29 06:35 UTC
+Status: Ready for next session
+Token usage: CRITICAL (this session ending)
+
+═══════════════════════════════════════════════════════════════════════════════
