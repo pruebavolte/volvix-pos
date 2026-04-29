@@ -4,6 +4,10 @@
   <meta name="robots" content="noindex, nofollow">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<!-- B37 Security hardening: auth-gate (any authenticated user) -->
+<script src="/auth-gate.js"></script>
+<!-- R10d-C FIX-N4-6: client-side system health monitor -->
+<script defer src="/volvix-system-monitor.js"></script>
 <meta name="theme-color" content="#0f172a">
 <meta name="description" content="Volvix PWA Final — Demo completo de Progressive Web App con instalación, modo offline, push notifications, share target y protocol handlers.">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -810,5 +814,6 @@ setInterval(async () => {
 <link rel="stylesheet" href="volvix-modals.css">
 <script defer src="volvix-modals.js"></script>
   <script defer src="volvix-i18n-wiring.js"></script>
+  <script defer src="volvix-recovery-wiring.js"></script>
 </body>
 </html>

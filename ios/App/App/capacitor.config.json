@@ -1,0 +1,51 @@
+{
+	"appId": "com.volvix.pos",
+	"appName": "Volvix POS",
+	"webDir": "public",
+	"bundledWebRuntime": false,
+	"server": {
+		"url": "https://volvix-pos.vercel.app",
+		"cleartext": false,
+		"androidScheme": "https",
+		"allowNavigation": [
+			"volvix-pos.vercel.app",
+			"zhvwmzkcqngcaqpdxtwr.supabase.co",
+			"api.stripe.com",
+			"checkout.stripe.com",
+			"billing.stripe.com"
+		]
+	},
+	"android": {
+		"allowMixedContent": false,
+		"captureInput": true,
+		"webContentsDebuggingEnabled": false
+	},
+	"ios": {
+		"scheme": "Volvix POS",
+		"contentInset": "always"
+	},
+	"plugins": {
+		"SplashScreen": {
+			"launchShowDuration": 2000,
+			"backgroundColor": "#0A0A0A",
+			"androidSplashResourceName": "splash",
+			"androidScaleType": "CENTER_CROP",
+			"showSpinner": false
+		},
+		"StatusBar": {
+			"style": "dark",
+			"backgroundColor": "#0A0A0A"
+		},
+		"Keyboard": {
+			"resize": "body",
+			"style": "DARK",
+			"resizeOnFullScreen": true
+		},
+		"Camera": {
+			"permissions": [
+				"camera"
+			]
+		}
+	},
+	"packageClassList": []
+}

@@ -34,15 +34,38 @@
   // =============================================================
   // API CLIENT
   // =============================================================
+  // B41 fix: include Bearer token so queued offline sales actually authenticate
+  // when synced. Previously the queue would silently 401 forever.
+  function _getAuthToken() {
+    try {
+      // Preferred: VolvixAuth helper from auth-helper.js
+      if (window.VolvixAuth && typeof window.VolvixAuth.getToken === 'function') {
+        const t = window.VolvixAuth.getToken();
+        if (t) return t;
+      }
+      // Volvix.auth path
+      if (window.Volvix && window.Volvix.auth && typeof window.Volvix.auth.getToken === 'function') {
+        const t = window.Volvix.auth.getToken();
+        if (t) return t;
+      }
+    } catch (_) {}
+    return localStorage.getItem('volvix_token')
+        || localStorage.getItem('volvixAuthToken')
+        || localStorage.getItem('token')
+        || '';
+  }
+
   async function api(path, opts = {}) {
     const url = API_BASE + path;
-    const res = await fetch(url, {
-      ...opts,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(opts.headers || {})
-      }
-    });
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(opts.headers || {})
+    };
+    const tok = _getAuthToken();
+    if (tok && !headers.Authorization && !headers.authorization) {
+      headers.Authorization = 'Bearer ' + tok;
+    }
+    const res = await fetch(url, { ...opts, headers });
     if (!res.ok) throw new Error(`API error: ${res.status}`);
     return res.json();
   }

@@ -1,21 +1,24 @@
 /* ============================================================
    Volvix POS — Service Worker
-   Agent-12 / Ronda 6 Fibonacci
+   Agent-12 / Ronda 6 Fibonacci → Round 6b PWA HARDENING
    Estrategias:
      - Static: cache-first con fallback a red
      - API:    network-first con fallback a cache (stale-while-revalidate)
      - Offline: página fallback
-     - Background Sync: cola de operaciones offline
+     - Background Sync: cola de operaciones offline con Idempotency-Key + X-Cart-Token
+     - Memory leak prevention: limpieza periodica de API_CACHE > 24h
+     - Auto-refresh nightly cuando SW lleva > 24h sin actualizar
    ============================================================ */
 
-// TODO(build-step): cuando se agregue build pipeline (esbuild/vite),
-// reemplazar VERSION manual por hash generado del contenido de STATIC_FILES.
-// Ej: const VERSION = '__BUILD_HASH__'; sustituido en build.
+// R6b: VERSION bumpeada para invalidar todos los caches viejos y forzar
+// que clientes carguen los fixes acumulados de R1-R6a.
+// Cuando exista build pipeline (esbuild/vite), reemplazar por hash generado.
 // Mientras tanto: bumpear VERSION manualmente en cada deploy con cambios.
-const VERSION   = 'v1.5.0-b34';
+const VERSION   = 'v1.12.3-r6b';
 const CACHE     = `volvix-${VERSION}`;
 const API_CACHE = `volvix-api-${VERSION}`;
 const RT_CACHE  = `volvix-rt-${VERSION}`;
+const BUILD_TS  = Date.now(); // para auto-refresh nightly check
 
 const STATIC_FILES = [
   // HTML principales
@@ -89,7 +92,27 @@ const STATIC_FILES = [
   '/volvix-drinks-wiring.js',
   '/volvix-extras-wiring.js',
   '/volvix-cron-wiring.js',
-  '/volvix-anomaly-wiring.js'
+  '/volvix-anomaly-wiring.js',
+  // B41 perf: critical assets for salvadorex POS that were missing from cache.
+  // These are referenced from salvadorex_web_v25.html and load on every page render.
+  '/volvix-feature-flags.js',
+  '/volvix-feature-flags.css',
+  '/volvix-modals.js',
+  '/volvix-modals.css',
+  '/volvix-product-search.js',
+  '/volvix-barcode-resolver.js',
+  '/auth-helper.js',
+  '/volvix-ai-assistant.js',
+  // R5b/R5c/R6a: nuevos wirings de seguridad / sesiones / permisos / KDS / promos / devoluciones
+  '/volvix-permissions-wiring.js',
+  '/volvix-mfa-wiring.js',
+  '/volvix-pin-wiring.js',
+  '/volvix-security-scan.js',
+  '/volvix-error-tracker.js',
+  '/volvix-promotions-wiring.js',
+  '/volvix-returns-wiring.js',
+  '/volvix-kds-wiring.js',
+  '/volvix-indexeddb-wiring.js'
 ];
 
 const ALL_CACHES = [CACHE, API_CACHE, RT_CACHE];
@@ -126,10 +149,53 @@ self.addEventListener('activate', (event) => {
             })
         )
       ),
+      // R6b GAP-S4: limpiar entradas API_CACHE > 24h (memory leak prevention)
+      pruneStaleApiCache(),
       self.clients.claim()
     ])
   );
 });
+
+/* ---------- R6b GAP-S4: Memory-leak prevention ---------- */
+const STALE_MAX_AGE = 24 * 60 * 60 * 1000; // 24 horas
+const SW_NIGHTLY_REFRESH_AGE = 24 * 60 * 60 * 1000; // 24 horas
+
+async function pruneStaleApiCache() {
+  try {
+    const cache = await caches.open(API_CACHE);
+    const requests = await cache.keys();
+    const now = Date.now();
+    let pruned = 0;
+    for (const req of requests) {
+      try {
+        const res = await cache.match(req);
+        if (!res) continue;
+        // Si la respuesta tiene header Date, validar contra 24h
+        const dateHdr = res.headers.get('date');
+        const ts = dateHdr ? Date.parse(dateHdr) : 0;
+        if (ts && (now - ts) > STALE_MAX_AGE) {
+          await cache.delete(req);
+          pruned++;
+        }
+      } catch (_) { /* ignorar */ }
+    }
+    if (pruned > 0) console.log(`[SW] prune API_CACHE: ${pruned} entradas > 24h eliminadas`);
+  } catch (e) {
+    console.warn('[SW] prune cache fail:', e.message);
+  }
+}
+
+// Periodic cleanup interno cada hora mientras SW vivo
+setInterval(() => { pruneStaleApiCache().catch(()=>{}); }, 60 * 60 * 1000);
+
+// Notify clients to refresh si SW lleva > 24h sin update
+setInterval(async () => {
+  const age = Date.now() - BUILD_TS;
+  if (age > SW_NIGHTLY_REFRESH_AGE) {
+    const clients = await self.clients.matchAll();
+    clients.forEach((c) => c.postMessage({ type: 'NEED_REFRESH', reason: 'sw_age_24h', ageMs: age }));
+  }
+}, 60 * 60 * 1000);
 
 /* ---------- FETCH ---------- */
 self.addEventListener('fetch', (event) => {
@@ -231,6 +297,18 @@ self.addEventListener('periodicsync', (event) => {
   }
 });
 
+/* R6b GAP-S2: Robust queue sync with conflict resolution + auth handling */
+const RETRY_BACKOFFS = [1000, 2000, 4000, 8000, 16000, 30000]; // exp backoff
+const QUEUE_STATUS = {
+  PENDING: 'pending',
+  SKIPPED: 'skipped',          // 409 cart_already_consumed
+  BLOCKED_AUTH: 'blocked_auth' // 401 SESSION_REVOKED / PERMISSIONS_CHANGED
+};
+
+function pickBackoffMs(retries) {
+  return RETRY_BACKOFFS[Math.min(retries, RETRY_BACKOFFS.length - 1)];
+}
+
 async function processSyncQueue() {
   console.log('[SW] procesando cola offline...');
   const db = await openDB();
@@ -240,32 +318,155 @@ async function processSyncQueue() {
   const store = tx.objectStore('queue');
   const all = await idbGetAll(store);
 
-  let ok = 0, fail = 0;
+  let ok = 0, fail = 0, skipped = 0, blocked = 0;
+  const now = Date.now();
+
   for (const item of all) {
+    // Skip si está marcado como bloqueado o saltado
+    if (item.status === QUEUE_STATUS.SKIPPED || item.status === QUEUE_STATUS.BLOCKED_AUTH) {
+      continue;
+    }
+    // Backoff: respetar nextAttemptAt si existe
+    if (item.nextAttemptAt && item.nextAttemptAt > now) continue;
+
     try {
+      // Construir headers con Idempotency-Key (R1) y X-Cart-Token (R1)
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(item.headers || {})
+      };
+
+      // Idempotency-Key: usar el guardado o el client_uuid del item
+      const idemKey = item.idempotency_key || item.headers?.['Idempotency-Key'] || item.client_uuid;
+      if (idemKey && !headers['Idempotency-Key']) {
+        headers['Idempotency-Key'] = idemKey;
+      }
+
+      // X-Cart-Token: solo para POST /api/sales si existe en item
+      const isSalePost = (item.method || 'POST').toUpperCase() === 'POST'
+        && /\/api\/sales(\?|$)/.test(item.endpoint || '');
+      if (isSalePost && item.cart_token && !headers['X-Cart-Token']) {
+        headers['X-Cart-Token'] = item.cart_token;
+      }
+
+      // Auth: usar token guardado en el item (capturado al encolar)
+      if (item.auth_token && !headers['Authorization']) {
+        headers['Authorization'] = 'Bearer ' + item.auth_token;
+      }
+
       const res = await fetch(item.endpoint, {
         method: item.method || 'POST',
-        headers: { 'Content-Type': 'application/json', ...(item.headers || {}) },
+        headers,
         body: item.data ? JSON.stringify(item.data) : undefined
       });
+
+      // 2xx: éxito → eliminar de queue
       if (res.ok) {
         const delTx = db.transaction(['queue'], 'readwrite');
         delTx.objectStore('queue').delete(item.id);
         ok++;
-      } else {
-        fail++;
+        continue;
       }
+
+      // 409: cart_already_consumed → marcar skipped (no duplicar)
+      if (res.status === 409) {
+        let body = {};
+        try { body = await res.clone().json(); } catch (_) {}
+        if (body.error === 'cart_already_consumed' || body.error_code === 'CART_ALREADY_CONSUMED') {
+          item.status = QUEUE_STATUS.SKIPPED;
+          item.skip_reason = 'cart_already_consumed';
+          item.last_response = body;
+          const upTx = db.transaction(['queue'], 'readwrite');
+          upTx.objectStore('queue').put(item);
+          skipped++;
+          continue;
+        }
+        // 409 idempotency replay: response cacheada del server R1 → tratar como ok
+        if (body.idempotent_replay === true || body.error_code === 'IDEMPOTENT_REPLAY') {
+          const delTx2 = db.transaction(['queue'], 'readwrite');
+          delTx2.objectStore('queue').delete(item.id);
+          ok++;
+          continue;
+        }
+        // Otros 409: contar fail con backoff
+      }
+
+      // 401: SESSION_REVOKED / PERMISSIONS_CHANGED → bloquear hasta re-login
+      if (res.status === 401) {
+        let body = {};
+        try { body = await res.clone().json(); } catch (_) {}
+        const code = body.error_code || body.error || '';
+        if (code === 'SESSION_REVOKED' || code === 'PERMISSIONS_CHANGED' || code === 'TOKEN_EXPIRED') {
+          item.status = QUEUE_STATUS.BLOCKED_AUTH;
+          item.block_reason = code;
+          item.last_response = body;
+          const upTx = db.transaction(['queue'], 'readwrite');
+          upTx.objectStore('queue').put(item);
+          blocked++;
+          // Notificar clientes para que pidan re-login
+          const cls = await self.clients.matchAll();
+          cls.forEach((c) => c.postMessage({ type: 'auth-required', code, queueItemId: item.id }));
+          continue;
+        }
+      }
+
+      // 4xx no recuperable (400, 403, 422...): drop después de 3 intentos
+      if (res.status >= 400 && res.status < 500 && res.status !== 408 && res.status !== 429) {
+        item.retries = (item.retries || 0) + 1;
+        if (item.retries >= 3) {
+          // Mover a dead-letter (mantener pero marcar)
+          item.status = 'dead';
+          item.last_response = { status: res.status };
+          const upTx = db.transaction(['queue'], 'readwrite');
+          upTx.objectStore('queue').put(item);
+        } else {
+          item.nextAttemptAt = now + pickBackoffMs(item.retries);
+          const upTx = db.transaction(['queue'], 'readwrite');
+          upTx.objectStore('queue').put(item);
+        }
+        fail++;
+        continue;
+      }
+
+      // 5xx / 408 / 429: retry con backoff exponencial
+      item.retries = (item.retries || 0) + 1;
+      item.nextAttemptAt = now + pickBackoffMs(item.retries);
+      const upTx = db.transaction(['queue'], 'readwrite');
+      upTx.objectStore('queue').put(item);
+      fail++;
     } catch (e) {
+      // Network error → backoff
+      item.retries = (item.retries || 0) + 1;
+      item.last_error = String(e && e.message || e);
+      item.nextAttemptAt = now + pickBackoffMs(item.retries);
+      try {
+        const upTx = db.transaction(['queue'], 'readwrite');
+        upTx.objectStore('queue').put(item);
+      } catch (_) {}
       fail++;
     }
   }
 
-  console.log(`[SW] sync: ${ok} ok, ${fail} fail`);
+  console.log(`[SW] sync: ${ok} ok, ${fail} fail, ${skipped} skipped, ${blocked} blocked`);
+
+  // Calcular si quedan pendientes "vivos" (no skipped ni blocked ni dead)
+  const remaining = await idbGetAll(db.transaction(['queue'], 'readonly').objectStore('queue'));
+  const livePending = remaining.filter(x =>
+    x.status !== QUEUE_STATUS.SKIPPED &&
+    x.status !== QUEUE_STATUS.BLOCKED_AUTH &&
+    x.status !== 'dead'
+  ).length;
 
   // Notificar a clientes
   const clients = await self.clients.matchAll();
   clients.forEach((c) =>
-    c.postMessage({ type: 'sync-complete', ok, fail })
+    c.postMessage({
+      type: 'sync-complete',
+      ok, fail, skipped, blocked,
+      livePending,
+      // GAP-S3: indicar cuándo la cola está limpia para destrabar cierre Z
+      online_clean: livePending === 0
+    })
   );
 }
 
@@ -306,6 +507,31 @@ self.addEventListener('message', (event) => {
   }
   if (type === 'TRIGGER_SYNC') {
     processSyncQueue();
+  }
+  // FIX-N5-C1 (R10e-C): force refresh requested by VolvixRecovery
+  if (type === 'FORCE_REFRESH') {
+    const scope = (event.data && event.data.payload && event.data.payload.scope) || 'all';
+    event.waitUntil((async () => {
+      try {
+        const keys = await caches.keys();
+        // 'all' borra todo; 'products'/'api' borra solo el caché de API
+        const targets = (scope === 'all')
+          ? keys
+          : keys.filter(k => k.startsWith('volvix-api-') || k.startsWith('volvix-rt-'));
+        await Promise.all(targets.map(k => caches.delete(k)));
+        // Notifica clientes para que recarguen estado
+        const cls = await self.clients.matchAll();
+        cls.forEach(c => c.postMessage({ type: 'CACHE_REFRESHED', scope, cleared: targets.length }));
+        if (event.ports && event.ports[0]) {
+          event.ports[0].postMessage({ ok: true, cleared: targets.length });
+        }
+      } catch (err) {
+        console.warn('[SW] FORCE_REFRESH fail:', err.message);
+        if (event.ports && event.ports[0]) {
+          event.ports[0].postMessage({ ok: false, error: err.message });
+        }
+      }
+    })());
   }
 });
 

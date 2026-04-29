@@ -4,6 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>MultiPOS Suite — v3</title>
+<!-- B37 Security hardening: auth-gate + role guard (owner or superadmin) -->
+<script src="/auth-gate.js"></script>
+<script>
+(function(){
+  try {
+    var t = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+    if (!t) return;
+    var p = JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+    var role = (p.role || '').toLowerCase();
+    if (role !== 'superadmin' && role !== 'owner') {
+      window.location.replace('/volvix-launcher.html?denied=' + encodeURIComponent(location.pathname));
+    }
+  } catch(e){}
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -486,7 +501,7 @@ body{font-family:var(--font);background:var(--page);color:var(--black);font-feat
               <button class="pin-key" onclick="pinPress('7')">7</button>
               <button class="pin-key" onclick="pinPress('8')">8</button>
               <button class="pin-key" onclick="pinPress('9')">9</button>
-              <button class="pin-key action" onclick="showToast('Demo: cualquier PIN')">?</button>
+              <button class="pin-key action" onclick="mpHelpPin()">?</button>
               <button class="pin-key" onclick="pinPress('0')">0</button>
               <button class="pin-key action" onclick="pinDel()">⌫</button>
             </div>
@@ -577,8 +592,8 @@ body{font-family:var(--font);background:var(--page);color:var(--black);font-feat
             </div>
             <div class="row-btns">
               <button class="btn btn-outline btn-sm" onclick="goScreen('c-pedido')">✏ Agregar</button>
-              <button class="btn btn-outline btn-sm" onclick="showToast('Dividir cuenta...')">➗ Dividir</button>
-              <button class="btn btn-outline btn-sm" onclick="showToast('Enviado ✓')">🍳 Cocina</button>
+              <button class="btn btn-outline btn-sm" onclick="mpSplitCheck()">➗ Dividir</button>
+              <button class="btn btn-outline btn-sm" onclick="mpSendToKitchen(this)">🍳 Cocina</button>
             </div>
             <button class="btn btn-primary" onclick="goScreen('c-cobrar')" id="go-pay" disabled style="opacity:.4">Cobrar</button>
           </div>
@@ -617,9 +632,9 @@ body{font-family:var(--font);background:var(--page);color:var(--black);font-feat
               <div class="samount" id="ex-amt">$0.00</div>
               <div class="ssub"><span id="ex-pay">Efectivo</span> · Mesa <span id="ex-mesa">05</span><br><span id="ex-chg"></span></div>
               <div class="row-btns" style="width:100%;margin-top:12px">
-                <button class="btn btn-outline btn-sm" onclick="showToast('Imprimiendo...')">🖨 Ticket</button>
-                <button class="btn btn-outline btn-sm" onclick="showToast('CFDI generado ✓')">🧾 Factura</button>
-                <button class="btn btn-outline btn-sm" onclick="showToast('Enviado ✓')">📩 Email</button>
+                <button class="btn btn-outline btn-sm" onclick="mpPrintTicket(this)">🖨 Ticket</button>
+                <button class="btn btn-outline btn-sm" onclick="mpGenerateCFDI(this)">🧾 Factura</button>
+                <button class="btn btn-outline btn-sm" onclick="mpEmailReceipt(this)">📩 Email</button>
               </div>
             </div>
             <button class="btn btn-primary" onclick="resetCart();goScreen('c-mesas')">← Volver</button>
@@ -631,33 +646,33 @@ body{font-family:var(--font);background:var(--page);color:var(--black);font-feat
           <div class="statusbar"><span>9:41</span></div>
           <div class="navbar">
             <div style="flex:1"><div class="navtitle">Reservaciones</div><div class="navsub">Hoy · 6 reservadas</div></div>
-            <button class="navbtn" onclick="showToast('Nueva reservación')" style="background:var(--black);color:white;border-color:var(--black)">+</button>
+            <button class="navbtn" onclick="mpNewReservation()" style="background:var(--black);color:white;border-color:var(--black)">+</button>
           </div>
           <div class="scroll">
             <div class="slbl">Próximas hoy<span class="slbl-line"></span></div>
-            <div class="reserv-item" onclick="showToast('Familia Martínez')">
+            <div class="reserv-item" onclick="mpViewReservation('Familia Martínez', {time:'20:00', people:4, table:'T2', phone:'+528112345678'})">
               <div class="reserv-head">
                 <div class="reserv-time"><div class="reserv-time-val">20:00</div><div class="reserv-time-lbl">Hoy</div></div>
                 <div class="reserv-info"><div class="reserv-name">Familia Martínez</div><div class="reserv-meta">4 personas · Mesa T2 · 🎂</div></div>
                 <span class="chip chip-amb">35 min</span>
               </div>
               <div class="reserv-footer">
-                <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();showToast('Confirmado')">✓ Confirmar</button>
-                <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();showToast('Llamando...')">📞 Llamar</button>
+                <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();mpConfirmReservation(this,'Familia Martínez')">✓ Confirmar</button>
+                <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();mpCallCustomer('+528112345678','Familia Martínez')">📞 Llamar</button>
               </div>
             </div>
-            <div class="reserv-item" onclick="showToast('Carlos Rodríguez')">
+            <div class="reserv-item" onclick="mpViewReservation('Carlos Rodríguez', {time:'20:30', people:2, table:'03', phone:'+528123456789'})">
               <div class="reserv-head">
                 <div class="reserv-time"><div class="reserv-time-val">20:30</div><div class="reserv-time-lbl">Hoy</div></div>
                 <div class="reserv-info"><div class="reserv-name">Carlos Rodríguez</div><div class="reserv-meta">2 personas · Mesa 03 · 💐</div></div>
                 <span class="chip chip-gr">1h 5m</span>
               </div>
               <div class="reserv-footer">
-                <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();showToast('Confirmado')">✓ Confirmar</button>
-                <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();showToast('Llamando...')">📞 Llamar</button>
+                <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();mpConfirmReservation(this,'Carlos Rodríguez')">✓ Confirmar</button>
+                <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();mpCallCustomer('+528123456789','Carlos Rodríguez')">📞 Llamar</button>
               </div>
             </div>
-            <div class="reserv-item" onclick="showToast('Sara López')">
+            <div class="reserv-item" onclick="mpViewReservation('Sara López', {time:'21:00', people:6, table:'04', phone:'+528134567890'})">
               <div class="reserv-head">
                 <div class="reserv-time"><div class="reserv-time-val">21:00</div><div class="reserv-time-lbl">Hoy</div></div>
                 <div class="reserv-info"><div class="reserv-name">Sara López</div><div class="reserv-meta">6 personas · Mesa 04 · 💼</div></div>
@@ -665,7 +680,7 @@ body{font-family:var(--font);background:var(--page);color:var(--black);font-feat
               </div>
             </div>
             <div class="slbl">Mañana<span class="slbl-line"></span></div>
-            <div class="reserv-item" onclick="showToast('Juan Pérez')">
+            <div class="reserv-item" onclick="mpViewReservation('Juan Pérez', {time:'13:30', people:3, table:'libre', phone:'+528145678901'})">
               <div class="reserv-head">
                 <div class="reserv-time"><div class="reserv-time-val">13:30</div><div class="reserv-time-lbl">Mié</div></div>
                 <div class="reserv-info"><div class="reserv-name">Juan Pérez</div><div class="reserv-meta">3 personas · Mesa libre</div></div>
@@ -746,11 +761,11 @@ body{font-family:var(--font);background:var(--page);color:var(--black);font-feat
             </div>
             <div class="slbl">Ajustes<span class="slbl-line"></span></div>
             <div class="setting-list">
-              <div class="setting-row" onclick="showToast('EPSON TM-T20')"><div class="setting-ico">🖨</div><div class="setting-name">Impresora BT</div><div class="setting-val">EPSON TM-T20</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpManagePrinter()"><div class="setting-ico">🖨</div><div class="setting-name">Impresora BT</div><div class="setting-val">EPSON TM-T20</div><div class="setting-arrow">›</div></div>
               <div class="setting-row"><div class="setting-ico">🔔</div><div class="setting-name">Notificaciones</div><div class="toggle on" onclick="toggleSet(event,this)"></div></div>
               <div class="setting-row"><div class="setting-ico">🔊</div><div class="setting-name">Sonido cocina</div><div class="toggle on" onclick="toggleSet(event,this)"></div></div>
-              <div class="setting-row" onclick="showToast('Cambiar PIN')"><div class="setting-ico">🔒</div><div class="setting-name">Cambiar PIN</div><div class="setting-arrow">›</div></div>
-              <div class="setting-row" onclick="showToast('Idioma: Español')"><div class="setting-ico">🌐</div><div class="setting-name">Idioma</div><div class="setting-val">Español</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpChangePin()"><div class="setting-ico">🔒</div><div class="setting-name">Cambiar PIN</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpChangeLanguage(this)"><div class="setting-ico">🌐</div><div class="setting-name">Idioma</div><div class="setting-val" id="mp-lang-val">Español</div><div class="setting-arrow">›</div></div>
             </div>
             <button class="btn btn-danger" onclick="handleLogout()">Cerrar turno</button>
             <div style="text-align:center;font-size:10px;color:var(--g400);margin-top:12px;font-family:var(--mono)">Comandera v0.1.0</div>
@@ -786,7 +801,7 @@ body{font-family:var(--font);background:var(--page);color:var(--black);font-feat
                 <div class="pair-step"><div class="pair-num">3</div><div class="pair-text">Ingresa el código de arriba</div></div>
               </div>
               <button class="btn btn-primary" onclick="goScreen('k-setup')" style="margin-top:8px">Ya vinculé, continuar →</button>
-              <div class="login-link">¿Problemas? <strong onclick="showToast('Soporte: +52 81 1234 5678')">Soporte</strong></div>
+              <div class="login-link">¿Problemas? <strong onclick="mpSupport()">Soporte</strong></div>
             </div>
           </div>
         </div>
@@ -847,7 +862,7 @@ body{font-family:var(--font);background:var(--page);color:var(--black);font-feat
               <div id="det-items"></div>
             </div>
             <div class="row-btns">
-              <button class="btn btn-outline btn-sm" onclick="showToast('Mesero avisado ✓')">📢 Avisar</button>
+              <button class="btn btn-outline btn-sm" onclick="mpNotifyWaiter(this)">📢 Avisar</button>
               <button class="btn btn-sm" style="background:var(--c-k);color:white" onclick="completeTicket();goScreen('kds-main')">✓ Listo</button>
             </div>
           </div>
@@ -863,7 +878,7 @@ body{font-family:var(--font);background:var(--page);color:var(--black);font-feat
           <div class="scroll">
             <div class="slbl">Estación<span class="slbl-line"></span></div>
             <div class="setting-list">
-              <div class="setting-row" onclick="showToast('Cambiar estación')"><div class="setting-ico">🔥</div><div class="setting-name">Tipo</div><div class="setting-val">Cocina principal</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpChangeStation()"><div class="setting-ico">🔥</div><div class="setting-name">Tipo</div><div class="setting-val" id="mp-kds-station-val">Cocina principal</div><div class="setting-arrow">›</div></div>
               <div class="setting-row"><div class="setting-ico">🔗</div><div class="setting-name">Vinculado a caja</div><div class="setting-val" style="color:var(--green)">● Conectado</div></div>
             </div>
             <div class="slbl">Alertas<span class="slbl-line"></span></div>
@@ -877,9 +892,9 @@ body{font-family:var(--font);background:var(--page);color:var(--black);font-feat
             <div class="setting-list">
               <div class="setting-row"><div class="setting-ico">🌙</div><div class="setting-name">Modo oscuro</div><div class="toggle" onclick="toggleSet(event,this)"></div></div>
               <div class="setting-row"><div class="setting-ico">🔆</div><div class="setting-name">Pantalla siempre encendida</div><div class="toggle on" onclick="toggleSet(event,this)"></div></div>
-              <div class="setting-row" onclick="showToast('Tamaño: Grande')"><div class="setting-ico">🔤</div><div class="setting-name">Tamaño de texto</div><div class="setting-val">Grande</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpChangeFontSize(this)"><div class="setting-ico">🔤</div><div class="setting-name">Tamaño de texto</div><div class="setting-val" id="mp-font-val">Grande</div><div class="setting-arrow">›</div></div>
             </div>
-            <button class="btn btn-danger" onclick="showToast('Desvinculando...')">Desvincular</button>
+            <button class="btn btn-danger" onclick="mpUnpairKDS()">Desvincular</button>
             <div style="text-align:center;font-size:10px;color:var(--g400);margin-top:10px;font-family:var(--mono)">KDS v0.1.0</div>
           </div>
         </div>
@@ -902,8 +917,8 @@ body{font-family:var(--font);background:var(--page);color:var(--black);font-feat
               <div class="login-field"><label class="login-label">Email</label><input type="email" class="login-input" value="ricardo@mirestaurante.mx"></div>
               <div class="login-field"><label class="login-label">Contraseña</label><input type="password" class="login-input" value="demopass"></div>
               <button class="btn btn-primary" onclick="loginManager()" style="margin-top:6px">Iniciar sesión →</button>
-              <div class="login-link">¿Olvidaste tu contraseña? <strong onclick="showToast('Email enviado ✓')">Recuperar</strong></div>
-              <div class="login-link" style="margin-top:4px">¿Sin cuenta? <strong onclick="showToast('multipos.mx/signup')">Crear cuenta</strong></div>
+              <div class="login-link">¿Olvidaste tu contraseña? <strong onclick="mpRecoverPassword()">Recuperar</strong></div>
+              <div class="login-link" style="margin-top:4px">¿Sin cuenta? <strong onclick="mpCreateAccount()">Crear cuenta</strong></div>
             </div>
           </div>
         </div>
@@ -932,7 +947,7 @@ body{font-family:var(--font);background:var(--page);color:var(--black);font-feat
             </div>
             <div class="alert alert-a">
               <span class="alert-icon">⚡</span>
-              <div class="alert-txt"><strong>Stock bajo:</strong> Arrachera — 3 porciones. <span style="color:var(--c-m);font-weight:700;cursor:pointer" onclick="showToast('Abriendo proveedores')">Ordenar →</span></div>
+              <div class="alert-txt"><strong>Stock bajo:</strong> Arrachera — 3 porciones. <span style="color:var(--c-m);font-weight:700;cursor:pointer" onclick="mpOrderRestock('Arrachera')">Ordenar →</span></div>
             </div>
             <div style="display:flex;align-items:center;justify-content:space-between;margin:14px 0 9px"><span style="font-size:13px;font-weight:700;letter-spacing:-0.02em">Top platillos hoy</span><span style="font-size:11px;color:var(--c-m);font-weight:600;cursor:pointer" onclick="goScreen('mgr-top')">Ver todo →</span></div>
             <div class="card">
@@ -1001,7 +1016,7 @@ body{font-family:var(--font);background:var(--page);color:var(--black);font-feat
               <div class="stat-cell"><div class="stat-val">32m</div><div class="stat-lbl">Prom.</div></div>
             </div>
             <div class="slbl">En curso<span class="slbl-line"></span></div>
-            <div class="del-order" onclick="showToast('Rappi #RAP-2847')">
+            <div class="del-order" onclick="mpViewDelivery({id:'RAP-2847', platform:'Rappi', customer:'Luis V.', address:'Av. Vasconcelos 1234', distance_km:3.2, status:'En camino', driver:'Juan P.', eta_min:8})">
               <div class="del-head">
                 <div class="del-platform del-platform-r">R</div>
                 <div class="del-info"><div class="del-id">#RAP-2847 · Luis V.</div><div class="del-addr">Av. Vasconcelos 1234 · 3.2 km</div></div>
@@ -1012,7 +1027,7 @@ body{font-family:var(--font);background:var(--page);color:var(--black);font-feat
               </div>
               <div class="del-footer"><span>📍 Juan P.</span><span>🕓 ETA: 8 min</span></div>
             </div>
-            <div class="del-order" onclick="showToast('Didi #DD-9821')">
+            <div class="del-order" onclick="mpViewDelivery({id:'DD-9821', platform:'Didi', customer:'María L.', address:'Calle Río Nilo 567', distance_km:1.8, status:'Preparando', kitchen_min:6, eta_min:18})">
               <div class="del-head">
                 <div class="del-platform del-platform-d">D</div>
                 <div class="del-info"><div class="del-id">#DD-9821 · María L.</div><div class="del-addr">Calle Río Nilo 567 · 1.8 km</div></div>
@@ -1023,7 +1038,7 @@ body{font-family:var(--font);background:var(--page);color:var(--black);font-feat
               </div>
               <div class="del-footer"><span>🍳 Cocina: 6 min</span><span>🕓 ETA: 18 min</span></div>
             </div>
-            <div class="del-order" onclick="showToast('Uber #UE-1102')">
+            <div class="del-order" onclick="mpViewDelivery({id:'UE-1102', platform:'Uber Eats', customer:'Jorge R.', address:'Paseo de los Leones', distance_km:5.1, status:'Nuevo', total:285})">
               <div class="del-head">
                 <div class="del-platform del-platform-u">U</div>
                 <div class="del-info"><div class="del-id">#UE-1102 · Jorge R.</div><div class="del-addr">Paseo de los Leones · 5.1 km</div></div>
@@ -1034,7 +1049,7 @@ body{font-family:var(--font);background:var(--page);color:var(--black);font-feat
               </div>
               <div class="del-footer"><span>📝 Confirmar 2 min</span><span>💰 $285</span></div>
             </div>
-            <div class="del-order" onclick="showToast('Propio · Entregado')">
+            <div class="del-order" onclick="mpViewDelivery({id:'PROP-0458', platform:'Propio', customer:'Ana R.', distance_km:4.5, status:'Entregado', minutes:28, rating:5})">
               <div class="del-head">
                 <div class="del-platform" style="background:var(--black)">P</div>
                 <div class="del-info"><div class="del-id">#PROP-0458 · Ana R.</div><div class="del-addr">Repartidor propio · 4.5 km</div></div>
@@ -1064,22 +1079,22 @@ body{font-family:var(--font);background:var(--page);color:var(--black);font-feat
               <div class="setting-row" onclick="goScreen('mgr-corte')"><div class="setting-ico">💰</div><div class="setting-name">Corte de caja</div><div class="setting-val">Turno activo</div><div class="setting-arrow">›</div></div>
               <div class="setting-row" onclick="goScreen('mgr-suc')"><div class="setting-ico">🏪</div><div class="setting-name">Sucursales</div><div class="setting-val">3 activas</div><div class="setting-arrow">›</div></div>
               <div class="setting-row" onclick="goScreen('mgr-emp')"><div class="setting-ico">👥</div><div class="setting-name">Empleados</div><div class="setting-val">12 en turno</div><div class="setting-arrow">›</div></div>
-              <div class="setting-row" onclick="showToast('Inventario')"><div class="setting-ico">📦</div><div class="setting-name">Inventario</div><div class="setting-val">124 items</div><div class="setting-arrow">›</div></div>
-              <div class="setting-row" onclick="showToast('Clientes: 342')"><div class="setting-ico">🧑‍💼</div><div class="setting-name">Clientes</div><div class="setting-val">342</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpOpenInventory()"><div class="setting-ico">📦</div><div class="setting-name">Inventario</div><div class="setting-val">124 items</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpOpenCustomers()"><div class="setting-ico">🧑‍💼</div><div class="setting-name">Clientes</div><div class="setting-val">342</div><div class="setting-arrow">›</div></div>
             </div>
             <div class="slbl">Reportes<span class="slbl-line"></span></div>
             <div class="setting-list">
-              <div class="setting-row" onclick="showToast('Ventas')"><div class="setting-ico">📈</div><div class="setting-name">Ventas</div><div class="setting-arrow">›</div></div>
-              <div class="setting-row" onclick="showToast('Utilidad')"><div class="setting-ico">💹</div><div class="setting-name">Utilidad</div><div class="setting-arrow">›</div></div>
-              <div class="setting-row" onclick="showToast('Mermas')"><div class="setting-ico">🗑</div><div class="setting-name">Mermas</div><div class="setting-arrow">›</div></div>
-              <div class="setting-row" onclick="showToast('Exportando...')"><div class="setting-ico">📊</div><div class="setting-name">Exportar Excel</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpReportSales()"><div class="setting-ico">📈</div><div class="setting-name">Ventas</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpReportProfit()"><div class="setting-ico">💹</div><div class="setting-name">Utilidad</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpReportWaste()"><div class="setting-ico">🗑</div><div class="setting-name">Mermas</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpExportExcel(this)"><div class="setting-ico">📊</div><div class="setting-name">Exportar Excel</div><div class="setting-arrow">›</div></div>
             </div>
             <div class="slbl">Config<span class="slbl-line"></span></div>
             <div class="setting-list">
               <div class="setting-row" onclick="goScreen('mgr-conf')"><div class="setting-ico">⚙</div><div class="setting-name">Ajustes generales</div><div class="setting-arrow">›</div></div>
-              <div class="setting-row" onclick="showToast('Vincular KDS')"><div class="setting-ico">📱</div><div class="setting-name">Vincular KDS</div><div class="setting-arrow">›</div></div>
-              <div class="setting-row" onclick="showToast('Vincular CDS')"><div class="setting-ico">📺</div><div class="setting-name">Vincular CDS</div><div class="setting-arrow">›</div></div>
-              <div class="setting-row" onclick="showToast('7 integraciones')"><div class="setting-ico">🔌</div><div class="setting-name">Integraciones</div><div class="setting-val">7 activas</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpPairKDS()"><div class="setting-ico">📱</div><div class="setting-name">Vincular KDS</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpPairCDS()"><div class="setting-ico">📺</div><div class="setting-name">Vincular CDS</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpOpenIntegrations()"><div class="setting-ico">🔌</div><div class="setting-name">Integraciones</div><div class="setting-val">7 activas</div><div class="setting-arrow">›</div></div>
             </div>
             <button class="btn btn-danger" onclick="handleLogout()">Cerrar sesión</button>
             <div style="text-align:center;font-size:10px;color:var(--g400);margin-top:10px;font-family:var(--mono)">Manager v0.1.0</div>
@@ -1098,7 +1113,7 @@ body{font-family:var(--font);background:var(--page);color:var(--black);font-feat
           <div class="navbar">
             <button class="navbtn" onclick="goScreen('mgr-more')">←</button>
             <div style="flex:1"><div class="navtitle">Corte de caja</div><div class="navsub">Turno noche · 21 Abr</div></div>
-            <button class="navbtn" onclick="showToast('Exportando...')">⬇</button>
+            <button class="navbtn" onclick="mpExportCashCut(this)">⬇</button>
           </div>
           <div class="scroll">
             <div style="background:var(--black);color:white;border-radius:16px;padding:18px;margin-bottom:12px">
@@ -1121,10 +1136,10 @@ body{font-family:var(--font);background:var(--page);color:var(--black);font-feat
               <div class="srow"><span class="slb">Propinas</span><span class="svl" style="color:var(--green)">$420</span></div>
             </div>
             <div class="row-btns">
-              <button class="btn btn-outline btn-sm" onclick="showToast('Imprimiendo')">🖨 Imprimir</button>
-              <button class="btn btn-outline btn-sm" onclick="showToast('Email enviado ✓')">📩 Email</button>
+              <button class="btn btn-outline btn-sm" onclick="mpPrintCashCut(this)">🖨 Imprimir</button>
+              <button class="btn btn-outline btn-sm" onclick="mpEmailCashCut(this)">📩 Email</button>
             </div>
-            <button class="btn btn-primary" onclick="showToast('⚠ Cierre confirmado')">Cerrar caja →</button>
+            <button class="btn btn-primary" onclick="mpCloseCashRegister(this)">Cerrar caja →</button>
           </div>
         </div>
 
@@ -1136,7 +1151,7 @@ body{font-family:var(--font);background:var(--page);color:var(--black);font-feat
             <div style="flex:1"><div class="navtitle">Sucursales</div><div class="navsub">3 activas · en vivo</div></div>
           </div>
           <div class="scroll">
-            <div class="card" onclick="showToast('Sucursal Centro')" style="cursor:pointer">
+            <div class="card" onclick="mpSwitchBranch('TNT001','Centro')" style="cursor:pointer">
               <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">
                 <div style="width:34px;height:34px;border-radius:10px;background:var(--c-m-bg);display:flex;align-items:center;justify-content:center;font-size:16px">🏢</div>
                 <div style="flex:1"><div style="font-size:14px;font-weight:700">Centro</div><div style="font-size:10.5px;color:var(--g500)">Av. Constitución 1500</div></div>
@@ -1148,7 +1163,7 @@ body{font-family:var(--font);background:var(--page);color:var(--black);font-feat
                 <div><div style="font-size:14px;font-weight:800;color:var(--green)">+12%</div><div style="font-size:9.5px;color:var(--g500);margin-top:2px">vs ayer</div></div>
               </div>
             </div>
-            <div class="card" onclick="showToast('Norte')" style="cursor:pointer">
+            <div class="card" onclick="mpSwitchBranch('TNT002','Norte · San Agustín')" style="cursor:pointer">
               <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">
                 <div style="width:34px;height:34px;border-radius:10px;background:var(--c-m-bg);display:flex;align-items:center;justify-content:center;font-size:16px">🏢</div>
                 <div style="flex:1"><div style="font-size:14px;font-weight:700">Norte · San Agustín</div><div style="font-size:10.5px;color:var(--g500)">Av. Lázaro Cárdenas</div></div>
@@ -1160,7 +1175,7 @@ body{font-family:var(--font);background:var(--page);color:var(--black);font-feat
                 <div><div style="font-size:14px;font-weight:800;color:var(--red)">-4%</div><div style="font-size:9.5px;color:var(--g500);margin-top:2px">vs ayer</div></div>
               </div>
             </div>
-            <div class="card" onclick="showToast('Sur')" style="cursor:pointer">
+            <div class="card" onclick="mpSwitchBranch('TNT003','Sur · Cumbres')" style="cursor:pointer">
               <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">
                 <div style="width:34px;height:34px;border-radius:10px;background:var(--c-m-bg);display:flex;align-items:center;justify-content:center;font-size:16px">🏢</div>
                 <div style="flex:1"><div style="font-size:14px;font-weight:700">Sur · Cumbres</div><div style="font-size:10.5px;color:var(--g500)">Paseo de los Leones</div></div>
@@ -1172,7 +1187,7 @@ body{font-family:var(--font);background:var(--page);color:var(--black);font-feat
                 <div><div style="font-size:14px;font-weight:800;color:var(--green)">+8%</div><div style="font-size:9.5px;color:var(--g500);margin-top:2px">vs ayer</div></div>
               </div>
             </div>
-            <div style="background:var(--g50);border:1px dashed var(--g200);border-radius:13px;padding:16px;text-align:center">
+            <div style="background:var(--g50);border:1px dashed var(--g200);border-radius:13px;padding:16px;text-align:center;cursor:pointer" onclick="mpAddBranch()">
               <div style="font-size:20px;opacity:.4;margin-bottom:3px">+</div>
               <div style="font-size:12.5px;font-weight:600;color:var(--g700)">Agregar sucursal</div>
               <div style="font-size:10.5px;color:var(--g500);margin-top:2px">Plan: hasta 5</div>
@@ -1186,7 +1201,7 @@ body{font-family:var(--font);background:var(--page);color:var(--black);font-feat
           <div class="navbar">
             <button class="navbtn" onclick="goScreen('mgr-more')">←</button>
             <div style="flex:1"><div class="navtitle">Empleados</div><div class="navsub">12 en turno · 18 total</div></div>
-            <button class="navbtn" onclick="showToast('Nuevo empleado')" style="background:var(--black);color:white;border-color:var(--black)">+</button>
+            <button class="navbtn" onclick="mpNewEmployee()" style="background:var(--black);color:white;border-color:var(--black)">+</button>
           </div>
           <div class="scroll">
             <div class="stat-grid">
@@ -1196,16 +1211,16 @@ body{font-family:var(--font);background:var(--page);color:var(--black);font-feat
             </div>
             <div class="slbl">En turno<span class="slbl-line"></span></div>
             <div class="card" style="padding:14px">
-              <div class="emp-item" onclick="showToast('Luis Mendoza')"><div class="emp-avatar" style="background:var(--c-a)">LM</div><div class="emp-info"><div class="emp-name">Luis Mendoza</div><div class="emp-role">Mesero · Entró 18:00</div></div><span class="chip chip-g">● Activo</span></div>
-              <div class="emp-item" onclick="showToast('Ana García')"><div class="emp-avatar" style="background:#D97706">AG</div><div class="emp-info"><div class="emp-name">Ana García</div><div class="emp-role">Mesero · Entró 17:30</div></div><span class="chip chip-g">● Activo</span></div>
-              <div class="emp-item" onclick="showToast('Carlos Reyes')"><div class="emp-avatar" style="background:var(--c-k)">CR</div><div class="emp-info"><div class="emp-name">Carlos Reyes</div><div class="emp-role">Jefe cocina · 16:00</div></div><span class="chip chip-g">● Activo</span></div>
-              <div class="emp-item" onclick="showToast('María Jiménez')"><div class="emp-avatar" style="background:var(--c-k)">MJ</div><div class="emp-info"><div class="emp-name">María Jiménez</div><div class="emp-role">Cocinero · Descanso</div></div><span class="chip chip-amb">☕ Break</span></div>
-              <div class="emp-item" onclick="showToast('Roberto Silva')"><div class="emp-avatar" style="background:var(--c-m)">RS</div><div class="emp-info"><div class="emp-name">Roberto Silva</div><div class="emp-role">Barista · 18:30</div></div><span class="chip chip-g">● Activo</span></div>
+              <div class="emp-item" onclick="mpViewEmployee({name:'Luis Mendoza',role:'Mesero',shift_start:'18:00',status:'active'})"><div class="emp-avatar" style="background:var(--c-a)">LM</div><div class="emp-info"><div class="emp-name">Luis Mendoza</div><div class="emp-role">Mesero · Entró 18:00</div></div><span class="chip chip-g">● Activo</span></div>
+              <div class="emp-item" onclick="mpViewEmployee({name:'Ana García',role:'Mesero',shift_start:'17:30',status:'active'})"><div class="emp-avatar" style="background:#D97706">AG</div><div class="emp-info"><div class="emp-name">Ana García</div><div class="emp-role">Mesero · Entró 17:30</div></div><span class="chip chip-g">● Activo</span></div>
+              <div class="emp-item" onclick="mpViewEmployee({name:'Carlos Reyes',role:'Jefe cocina',shift_start:'16:00',status:'active'})"><div class="emp-avatar" style="background:var(--c-k)">CR</div><div class="emp-info"><div class="emp-name">Carlos Reyes</div><div class="emp-role">Jefe cocina · 16:00</div></div><span class="chip chip-g">● Activo</span></div>
+              <div class="emp-item" onclick="mpViewEmployee({name:'María Jiménez',role:'Cocinero',status:'break'})"><div class="emp-avatar" style="background:var(--c-k)">MJ</div><div class="emp-info"><div class="emp-name">María Jiménez</div><div class="emp-role">Cocinero · Descanso</div></div><span class="chip chip-amb">☕ Break</span></div>
+              <div class="emp-item" onclick="mpViewEmployee({name:'Roberto Silva',role:'Barista',shift_start:'18:30',status:'active'})"><div class="emp-avatar" style="background:var(--c-m)">RS</div><div class="emp-info"><div class="emp-name">Roberto Silva</div><div class="emp-role">Barista · 18:30</div></div><span class="chip chip-g">● Activo</span></div>
             </div>
             <div class="slbl">Fuera de turno<span class="slbl-line"></span></div>
             <div class="card" style="padding:14px">
-              <div class="emp-item" style="opacity:.6" onclick="showToast('Pedro Morales')"><div class="emp-avatar" style="background:var(--g400)">PM</div><div class="emp-info"><div class="emp-name">Pedro Morales</div><div class="emp-role">Mesero · Mañana</div></div><span class="chip chip-gr">Off</span></div>
-              <div class="emp-item" style="opacity:.6" onclick="showToast('Laura Hernández')"><div class="emp-avatar" style="background:var(--g400)">LH</div><div class="emp-info"><div class="emp-name">Laura Hernández</div><div class="emp-role">Gerente asistente</div></div><span class="chip chip-gr">Off</span></div>
+              <div class="emp-item" style="opacity:.6" onclick="mpViewEmployee({name:'Pedro Morales',role:'Mesero',shift_window:'Mañana',status:'off'})"><div class="emp-avatar" style="background:var(--g400)">PM</div><div class="emp-info"><div class="emp-name">Pedro Morales</div><div class="emp-role">Mesero · Mañana</div></div><span class="chip chip-gr">Off</span></div>
+              <div class="emp-item" style="opacity:.6" onclick="mpViewEmployee({name:'Laura Hernández',role:'Gerente asistente',status:'off'})"><div class="emp-avatar" style="background:var(--g400)">LH</div><div class="emp-info"><div class="emp-name">Laura Hernández</div><div class="emp-role">Gerente asistente</div></div><span class="chip chip-gr">Off</span></div>
             </div>
           </div>
         </div>
@@ -1224,10 +1239,10 @@ body{font-family:var(--font);background:var(--page);color:var(--black);font-feat
             </div>
             <div class="slbl">Negocio<span class="slbl-line"></span></div>
             <div class="setting-list">
-              <div class="setting-row" onclick="showToast('Editar info')"><div class="setting-ico">🏢</div><div class="setting-name">Información</div><div class="setting-arrow">›</div></div>
-              <div class="setting-row" onclick="showToast('Horarios')"><div class="setting-ico">🕓</div><div class="setting-name">Horarios</div><div class="setting-arrow">›</div></div>
-              <div class="setting-row" onclick="showToast('RFC')"><div class="setting-ico">🧾</div><div class="setting-name">Datos fiscales</div><div class="setting-val">Config.</div><div class="setting-arrow">›</div></div>
-              <div class="setting-row" onclick="showToast('Menú')"><div class="setting-ico">📋</div><div class="setting-name">Menú</div><div class="setting-val">124 items</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpEditBusinessInfo()"><div class="setting-ico">🏢</div><div class="setting-name">Información</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpEditSchedule()"><div class="setting-ico">🕓</div><div class="setting-name">Horarios</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpEditFiscal()"><div class="setting-ico">🧾</div><div class="setting-name">Datos fiscales</div><div class="setting-val">Config.</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpOpenMenu()"><div class="setting-ico">📋</div><div class="setting-name">Menú</div><div class="setting-val">124 items</div><div class="setting-arrow">›</div></div>
             </div>
             <div class="slbl">Integraciones<span class="slbl-line"></span></div>
             <div class="setting-list">
@@ -1247,9 +1262,9 @@ body{font-family:var(--font);background:var(--page);color:var(--black);font-feat
             </div>
             <div class="slbl">Cuenta<span class="slbl-line"></span></div>
             <div class="setting-list">
-              <div class="setting-row" onclick="showToast('Pro · $599/mes')"><div class="setting-ico">💎</div><div class="setting-name">Plan</div><div class="setting-val">Pro</div><div class="setting-arrow">›</div></div>
-              <div class="setting-row" onclick="showToast('Facturación')"><div class="setting-ico">💳</div><div class="setting-name">Facturación</div><div class="setting-arrow">›</div></div>
-              <div class="setting-row" onclick="showToast('Ayuda')"><div class="setting-ico">❓</div><div class="setting-name">Ayuda</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpOpenPlan()"><div class="setting-ico">💎</div><div class="setting-name">Plan</div><div class="setting-val">Pro</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpOpenBilling()"><div class="setting-ico">💳</div><div class="setting-name">Facturación</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpOpenHelp()"><div class="setting-ico">❓</div><div class="setting-name">Ayuda</div><div class="setting-arrow">›</div></div>
             </div>
             <div style="text-align:center;font-size:10px;color:var(--g400);margin-top:10px;font-family:var(--mono)">Manager v0.1.0</div>
           </div>
@@ -1813,7 +1828,7 @@ function renderKDS(){
     const hc=t.minutes>20?'thead-r':(t.minutes>10?'thead-a':'thead-g');
     const tc=t.minutes>20?'ttimer-r':(t.minutes>10?'ttimer-a':'ttimer-g');
     const pre=t.minutes>20?'⚠ ':'';
-    return `<div class="tcard ${sc}" onclick="openTk(${t.id})"><div class="thead ${hc}"><div style="flex:1"><div class="tmesa">Mesa ${t.mesa} · #${t.id}</div><div class="tmesero">${t.mesero}</div></div><span class="ttimer ${tc}">${pre}${t.minutes} min</span></div><div class="tbody">${t.items.map(i=>`<div class="titem"><span class="tq ${i.done?'tdone':''}">${i.q}×</span><span class="tn ${i.done?'tdone':''}">${i.name}${i.note?` — <span class="tnote">${i.note}</span>`:''}${i.noteAlert?` — <span class="tnote tnote-alert">${i.noteAlert}</span>`:''}</span></div>`).join('')}</div>${state.kdsFilter==='pending'?`<div class="tfoot"><button class="kbtn kbtn-dl" onclick="event.stopPropagation();showToast('Mesero avisado')">Demorar</button><button class="kbtn kbtn-ok" onclick="event.stopPropagation();completeTk(${t.id})">✓ Listo</button></div>`:''}</div>`;
+    return `<div class="tcard ${sc}" onclick="openTk(${t.id})"><div class="thead ${hc}"><div style="flex:1"><div class="tmesa">Mesa ${t.mesa} · #${t.id}</div><div class="tmesero">${t.mesero}</div></div><span class="ttimer ${tc}">${pre}${t.minutes} min</span></div><div class="tbody">${t.items.map(i=>`<div class="titem"><span class="tq ${i.done?'tdone':''}">${i.q}×</span><span class="tn ${i.done?'tdone':''}">${i.name}${i.note?` — <span class="tnote">${i.note}</span>`:''}${i.noteAlert?` — <span class="tnote tnote-alert">${i.noteAlert}</span>`:''}</span></div>`).join('')}</div>${state.kdsFilter==='pending'?`<div class="tfoot"><button class="kbtn kbtn-dl" onclick="event.stopPropagation();mpDelayTicket(${t.id})">Demorar</button><button class="kbtn kbtn-ok" onclick="event.stopPropagation();completeTk(${t.id})">✓ Listo</button></div>`:''}</div>`;
   }).join('');
 }
 function kdsFilter(f,el){
@@ -1896,6 +1911,7 @@ renderMenu();
 <script defer src="volvix-modals.js"></script>
 <script src="volvix-multipos-wiring.js" defer></script>
 <script src="volvix-multipos-extra-wiring.js" defer></script>
+<script src="volvix-multipos-stubs-wiring.js" defer></script>
 <script src="volvix-ai-real-wiring.js" defer></script>
 <script src="volvix-charts-wiring.js" defer></script>
 <script src="volvix-notifications-wiring.js" defer></script>

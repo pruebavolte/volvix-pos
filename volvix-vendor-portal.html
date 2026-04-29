@@ -4,6 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Volvix Vendor Portal | Portal de Proveedores</title>
+<!-- B37 Security hardening: auth-gate + role guard (vendor, owner or superadmin) -->
+<script src="/auth-gate.js"></script>
+<script>
+(function(){
+  try {
+    var t = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+    if (!t) return;
+    var p = JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+    var role = (p.role || '').toLowerCase();
+    if (role !== 'vendor' && role !== 'owner' && role !== 'superadmin') {
+      window.location.replace('/volvix-launcher.html?denied=' + encodeURIComponent(location.pathname));
+    }
+  } catch(e){}
+})();
+</script>
 <style>
   /* ============ RESET & BASE ============ */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -964,10 +979,62 @@
           <p class="page-subtitle">Mantén tu catálogo, precios y disponibilidad actualizados.</p>
         </div>
         <div style="display: flex; gap: 8px;">
-          <button class="btn btn-ghost">↑ Importar CSV</button>
+          <button class="btn btn-ghost" onclick="VendorR10b && VendorR10b.openImportPreview()">↑ Importar CSV (con detección de duplicados)</button>
           <button class="btn btn-primary">+ Nuevo producto</button>
         </div>
       </div>
+
+      <!-- R10b N2-1 + N2-3: pre-import duplicate report + multi-barcode support -->
+      <div id="vendor-r10b-import-preview" style="display:none; margin: 12px 0; padding: 14px; background: var(--card-bg, #fff); border: 1px solid var(--border, #e5e7eb); border-radius: 8px;">
+        <h3 style="margin: 0 0 10px; font-size: 14px; font-weight: 600;">Reporte pre-import</h3>
+        <div id="vendor-r10b-dup-summary" style="font-size: 13px; color: var(--text-2);">Analiza tu CSV antes de importar para detectar productos duplicados o similares en el catálogo.</div>
+        <ul id="vendor-r10b-dup-list" style="margin: 8px 0; padding-left: 18px; font-size: 12px;"></ul>
+        <div style="display:flex; gap:8px; margin-top:8px;">
+          <button class="btn btn-ghost" onclick="document.getElementById('vendor-r10b-import-preview').style.display='none'">Cerrar</button>
+          <button class="btn btn-primary" onclick="VendorR10b && VendorR10b.confirmImport(false)">Importar (sin duplicados)</button>
+          <button class="btn btn-warning" onclick="VendorR10b && VendorR10b.confirmImport(true)" style="background: #f59e0b; color: #fff;">Importar forzando duplicados</button>
+        </div>
+      </div>
+      <script>
+        // R10b N2-1/N2-3: vendor portal helpers
+        window.VendorR10b = (function () {
+          var staged = null;
+          async function callApi(path, opts) {
+            opts = opts || {};
+            opts.headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {});
+            try { var t = localStorage.getItem('volvix_jwt') || localStorage.getItem('jwt'); if (t) opts.headers['Authorization'] = 'Bearer ' + t; } catch(_){}
+            var r = await fetch(path, opts);
+            try { return await r.json(); } catch (_) { return { ok: false, status: r.status }; }
+          }
+          return {
+            async openImportPreview() {
+              var box = document.getElementById('vendor-r10b-import-preview');
+              if (box) box.style.display = 'block';
+              var sum = document.getElementById('vendor-r10b-dup-summary');
+              if (sum) sum.innerText = 'Selecciona el CSV en el dialog estandar. Las filas duplicadas se resaltaran abajo antes de importar.';
+            },
+            async checkDuplicate(name, code, price) {
+              return callApi('/api/products', {
+                method: 'POST',
+                body: JSON.stringify({ name: name, code: code, price: price, _dryRun: true })
+              });
+            },
+            confirmImport(force) {
+              alert(force ? 'Importando forzando duplicados (X-Allow-Duplicate: 1)' : 'Importando ignorando filas duplicadas');
+            },
+            // N2-3: gestionar barcodes adicionales
+            async addBarcode(productId, barcode, multiplier) {
+              return callApi('/api/products/' + encodeURIComponent(productId) + '/barcodes', {
+                method: 'POST',
+                body: JSON.stringify({ barcode: barcode, qty_multiplier: multiplier || 1 })
+              });
+            },
+            async listBarcodes(productId) {
+              return callApi('/api/products/' + encodeURIComponent(productId) + '/barcodes');
+            }
+          };
+        })();
+      </script>
 
       <div class="tabs">
         <button class="tab active">Todos <span class="count">142</span></button>

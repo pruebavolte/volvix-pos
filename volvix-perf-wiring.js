@@ -270,6 +270,12 @@
 
   // ────────────────── 8. LIVE STATS PANEL ──────────────────
   function buildPanel() {
+    // R28: ocultar panel PERF en producción salvo localStorage.volvix_debug=1
+    try {
+      const isProd = !/^(localhost|127\.|\.local$)/.test(location.hostname);
+      const debugFlag = localStorage.getItem('volvix_debug') === '1';
+      if (isProd && !debugFlag) return;
+    } catch (e) {}
     if (document.getElementById('volvix-perf-panel')) return;
     const el = document.createElement('div');
     el.id = 'volvix-perf-panel';

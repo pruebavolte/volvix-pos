@@ -1489,6 +1489,112 @@
 <!-- B19: búsqueda inteligente offline-first + barcode cascade -->
 <script src="volvix-product-search.js" defer></script>
 <script src="volvix-barcode-resolver.js" defer></script>
+<!-- R12-O-3-B FIX-O3-B-2: auto-trigger welcome wizard en first_login + banner pendiente -->
+<script src="volvix-onboarding-tour-wiring.js" defer></script>
+<script defer>
+  // R12-O-3-B FIX-O3-B-2 / FIX-O3-B-4
+  // Detecta si el usuario es first_login (post OTP verified) y redirige al wizard.
+  // Si saltó el wizard antes, muestra banner "Completa configuración".
+  (function () {
+    'use strict';
+    if (window.__volvixWelcomeWizardChecked) return;
+    window.__volvixWelcomeWizardChecked = true;
+
+    function getToken() {
+      try {
+        return localStorage.getItem('volvix_token') ||
+               localStorage.getItem('volvixAuthToken') || '';
+      } catch (e) { return ''; }
+    }
+    function getCachedUser() {
+      try { return JSON.parse(localStorage.getItem('volvix_user') || 'null'); }
+      catch (e) { return null; }
+    }
+    function shouldRedirectToWizard(user) {
+      if (!user) return false;
+      // Marcadores de finalización locales (offline-friendly)
+      try {
+        if (localStorage.getItem('volvix_first_login_completed') === '1') return false;
+      } catch (e) {}
+      // Server marker
+      if (user.first_login_completed_at) return false;
+      // Bandera explícita primer login
+      if (user.is_first_login === true) return true;
+      if (user.first_login === true) return true;
+      // Fallback: si nunca ha completado wizard y rol owner
+      if ((user.role === 'owner' || user.role === 'admin') && !user.first_login_completed_at) {
+        return user.is_first_login !== false;
+      }
+      return false;
+    }
+    function showSetupBanner() {
+      if (document.getElementById('volvix-setup-banner')) return;
+      var b = document.createElement('div');
+      b.id = 'volvix-setup-banner';
+      b.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9000;' +
+        'background:linear-gradient(90deg,#fef3c7,#fde68a);color:#78350f;' +
+        'padding:10px 16px;font:600 13px/1.4 Segoe UI,Tahoma,sans-serif;' +
+        'display:flex;align-items:center;justify-content:center;gap:14px;' +
+        'box-shadow:0 2px 8px rgba(0,0,0,.08);border-bottom:1px solid #f59e0b';
+      b.innerHTML = '<span>⚠️ Completa la configuración inicial para una mejor experiencia.</span>' +
+        '<button id="volvix-setup-banner-go" style="padding:6px 14px;border:none;border-radius:6px;background:#1e3c72;color:#fff;font-weight:700;cursor:pointer;font-size:12px">Continuar</button>' +
+        '<button id="volvix-setup-banner-dismiss" style="padding:6px 10px;border:none;background:transparent;color:#78350f;cursor:pointer;font-size:12px;text-decoration:underline">Cerrar</button>';
+      document.body.appendChild(b);
+      var go = document.getElementById('volvix-setup-banner-go');
+      var dismiss = document.getElementById('volvix-setup-banner-dismiss');
+      if (go) go.onclick = function () {
+        window.location.href = '/volvix-onboarding-v2.html';
+      };
+      if (dismiss) dismiss.onclick = function () {
+        try { sessionStorage.setItem('volvix_setup_banner_hidden', '1'); } catch (e) {}
+        b.remove();
+      };
+    }
+    async function refreshUserFromServer() {
+      var token = getToken();
+      if (!token) return null;
+      try {
+        var r = await fetch('/api/users/me', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!r.ok) return null;
+        var u = await r.json();
+        try { localStorage.setItem('volvix_user', JSON.stringify(u)); } catch (e) {}
+        return u;
+      } catch (e) { return null; }
+    }
+    async function check() {
+      // Solo aplicamos en la pantalla principal del POS
+      var path = (location.pathname || '').toLowerCase();
+      if (path.indexOf('onboarding') >= 0 || path.indexOf('login') >= 0) return;
+      if (!getToken()) return; // Aún no autenticado, dejar al login flow
+      var user = getCachedUser();
+      // Si no hay user cacheado o no tiene flag, refrescar del server
+      if (!user || (user.is_first_login === undefined && user.first_login_completed_at === undefined)) {
+        user = await refreshUserFromServer() || user;
+      }
+      if (!user) return;
+      if (shouldRedirectToWizard(user)) {
+        // Auto-redirigir al wizard
+        window.location.replace('/volvix-onboarding-v2.html');
+        return;
+      }
+      // Banner pendiente de setup (saltó wizard)
+      var pending = false;
+      try { pending = localStorage.getItem('volvix_show_setup_banner') === '1'; } catch (e) {}
+      var hidden = false;
+      try { hidden = sessionStorage.getItem('volvix_setup_banner_hidden') === '1'; } catch (e) {}
+      if (pending && !hidden) {
+        showSetupBanner();
+      }
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', check, { once: true });
+    } else {
+      check();
+    }
+  })();
+</script>
 <script defer>
   // Wire autocomplete al input cuando todo cargue
   document.addEventListener('DOMContentLoaded', function() {
@@ -1513,6 +1619,7 @@
 </script>
   <script src="/volvix-uplift-wiring.js" defer></script>
   <script src="/volvix-error-reporter.js" defer></script>
+  <script defer src="volvix-intro-tour-wiring.js"></script>
 </head>
 <body>
 

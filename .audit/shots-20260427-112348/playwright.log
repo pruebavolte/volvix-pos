@@ -1,0 +1,73 @@
+
+Running 4 tests using 4 workers
+
+  x  4 [chromium] › tests\_postfix-20260427-112348.spec.js:34:5 › postfix › regress-1 (14.7s)
+  x  2 [chromium] › tests\_postfix-20260427-112348.spec.js:20:3 › postfix › fixed (15.5s)
+  ok 1 [chromium] › tests\_postfix-20260427-112348.spec.js:34:5 › postfix › regress-3 (18.3s)
+  ok 3 [chromium] › tests\_postfix-20260427-112348.spec.js:34:5 › postfix › regress-2 (19.6s)
+
+
+  1) [chromium] › tests\_postfix-20260427-112348.spec.js:20:3 › postfix › fixed ────────────────────
+
+    Error: page.goto: net::ERR_NAME_NOT_RESOLVED at https://volvix-pos.vercel.appc/Program%20Files/Git/volvix-mega-dashboard.html
+    Call log:
+    [2m  - navigating to "https://volvix-pos.vercel.appc/Program%20Files/Git/volvix-mega-dashboard.html", waiting until "domcontentloaded"[22m
+
+
+      22 |     const p = await ctx.newPage();
+      23 |     await login(p);
+    > 24 |     await p.goto(PROD + FIXED, { waitUntil: 'domcontentloaded', timeout: 30000 });
+         |             ^
+      25 |     await p.waitForTimeout(3500);
+      26 |     await p.screenshot({ path: `${SHOTS}/fixed.png`, fullPage: false });
+      27 |     fs.writeFileSync(`${SHOTS}/fixed.json`, JSON.stringify({
+        at C:\qa-playwright\tests\_postfix-20260427-112348.spec.js:24:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\_postfix-20260427-112348-postfix-fixed-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\_postfix-20260427-112348-postfix-fixed-chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\_postfix-20260427-112348-postfix-fixed-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\_postfix-20260427-112348-postfix-fixed-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium] › tests\_postfix-20260427-112348.spec.js:34:5 › postfix › regress-1 ────────────────
+
+    Error: page.goto: net::ERR_NAME_NOT_RESOLVED at https://volvix-pos.vercel.appc/Program%20Files/Git/volvix_owner_panel_v7.html
+    Call log:
+    [2m  - navigating to "https://volvix-pos.vercel.appc/Program%20Files/Git/volvix_owner_panel_v7.html", waiting until "domcontentloaded"[22m
+
+
+      36 |       const p = await ctx.newPage();
+      37 |       await login(p);
+    > 38 |       await p.goto(PROD + path, { waitUntil: 'domcontentloaded', timeout: 30000 });
+         |               ^
+      39 |       await p.waitForTimeout(3500);
+      40 |       await p.screenshot({ path: `${SHOTS}/regress-${i+1}.png`, fullPage: false });
+      41 |     });
+        at C:\qa-playwright\tests\_postfix-20260427-112348.spec.js:38:15
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\_postfix-20260427-112348-postfix-regress-1-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\_postfix-20260427-112348-postfix-regress-1-chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\_postfix-20260427-112348-postfix-regress-1-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\_postfix-20260427-112348-postfix-regress-1-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    [chromium] › tests\_postfix-20260427-112348.spec.js:20:3 › postfix › fixed ─────────────────────
+    [chromium] › tests\_postfix-20260427-112348.spec.js:34:5 › postfix › regress-1 ─────────────────
+  2 passed (22.5s)

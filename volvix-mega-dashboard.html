@@ -4,6 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Volvix MEGA Dashboard</title>
+<!-- B37 Security hardening: auth-gate + role guard (superadmin only) -->
+<script src="/auth-gate.js"></script>
+<script>
+(function(){
+  try {
+    var t = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+    if (!t) return;
+    var p = JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+    var role = (p.role || '').toLowerCase();
+    if (role !== 'superadmin') {
+      window.location.replace('/volvix-launcher.html?denied=' + encodeURIComponent(location.pathname));
+    }
+  } catch(e){}
+})();
+</script>
 <style>
 :root{
   /* R29: variables locales caen a Volvix theme vars cuando existen */

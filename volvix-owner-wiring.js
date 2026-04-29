@@ -26,11 +26,59 @@
     return fetch(API + path, init);
   }
 
+  // R5b GAP-O1: silently refresh JWT on 401 PERMISSIONS_CHANGED, then retry once.
+  async function r5bRefreshToken() {
+    try {
+      let token = null;
+      try { token = localStorage.getItem('volvix_token') || localStorage.getItem('volvix.jwt'); } catch (_) {}
+      if (!token) return false;
+      const r = await fetch(API + '/api/refresh', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/json' },
+        credentials: 'same-origin'
+      });
+      const d = await r.json().catch(() => null);
+      if (r.ok && d && d.token) {
+        try { localStorage.setItem('volvix_token', d.token); } catch (_) {}
+        try { localStorage.setItem('volvix.jwt', d.token); } catch (_) {}
+        return true;
+      }
+    } catch (_) {}
+    return false;
+  }
+
+  async function r5bHandleResponse(res, retryFn) {
+    let data = null;
+    try { data = await res.clone().json(); } catch (_) {}
+    if (res.status === 401 && data && data.error_code === 'PERMISSIONS_CHANGED') {
+      const refreshed = await r5bRefreshToken();
+      if (refreshed && typeof retryFn === 'function') {
+        try { toast('Permisos actualizados', 'ok'); } catch (_) {}
+        return { retry: true };
+      }
+      try { toast('Tus permisos cambiaron — vuelve a iniciar sesión', 'warn'); } catch (_) {}
+      setTimeout(() => { try { location.href = '/index.html'; } catch (_) {} }, 1500);
+    }
+    if (res.status === 402 && data && data.error_code === 'PLAN_INSUFFICIENT') {
+      try { toast('Esta función requiere plan ' + (data.required_plan || 'superior'), 'warn'); } catch (_) {}
+      if (data.upgrade_url) {
+        if (confirm('Esta función requiere plan ' + (data.required_plan || 'superior') + '. ¿Quieres actualizar?')) {
+          try { location.href = data.upgrade_url; } catch (_) {}
+        }
+      }
+    }
+    return { retry: false, data };
+  }
+
   async function apiGet(path) {
     const cacheKey = 'GET:' + path;
     try {
-      const res = await authFetch(path);
-      if (!res.ok) throw new Error('HTTP ' + res.status);
+      let res = await authFetch(path);
+      if (!res.ok) {
+        const handled = await r5bHandleResponse(res, () => authFetch(path));
+        if (handled.retry) res = await authFetch(path);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+      }
       const data = await res.json();
       cachedData[cacheKey] = data;
       return data;
@@ -41,33 +89,51 @@
   }
 
   async function apiPost(path, body) {
-    const res = await authFetch(path, {
+    const init = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body || {})
-    });
+    };
+    let res = await authFetch(path, init);
     if (!res.ok) {
-      const text = await res.text().catch(() => '');
-      throw new Error('HTTP ' + res.status + ' ' + text);
+      const handled = await r5bHandleResponse(res, () => authFetch(path, init));
+      if (handled.retry) res = await authFetch(path, init);
+      if (!res.ok) {
+        const text = await res.text().catch(() => '');
+        const err = new Error('HTTP ' + res.status + ' ' + text);
+        err.status = res.status; err.data = handled.data;
+        throw err;
+      }
     }
     return res.json();
   }
 
   async function apiPatch(path, body) {
-    const res = await authFetch(path, {
+    const init = {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body || {})
-    });
+    };
+    let res = await authFetch(path, init);
     if (!res.ok) {
-      const text = await res.text().catch(() => '');
-      throw new Error('HTTP ' + res.status + ' ' + text);
+      const handled = await r5bHandleResponse(res, () => authFetch(path, init));
+      if (handled.retry) res = await authFetch(path, init);
+      if (!res.ok) {
+        const text = await res.text().catch(() => '');
+        const err = new Error('HTTP ' + res.status + ' ' + text);
+        err.status = res.status; err.data = handled.data;
+        throw err;
+      }
     }
     return res.json();
   }
 
   async function apiDelete(path) {
-    const res = await authFetch(path, { method: 'DELETE' });
+    let res = await authFetch(path, { method: 'DELETE' });
+    if (!res.ok) {
+      const handled = await r5bHandleResponse(res, () => authFetch(path, { method: 'DELETE' }));
+      if (handled.retry) res = await authFetch(path, { method: 'DELETE' });
+    }
     return res.json();
   }
 

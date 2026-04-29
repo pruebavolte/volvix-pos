@@ -301,6 +301,16 @@
     const state = getState();
     const role = session.role || 'cajero';
     if (state[role] && state[role].completed) return;
+    // R28: respetar dismiss persistente (botón "Después" o tras 3 dismisses)
+    try {
+      const dismissKey = 'volvix_welcome_dismissed_' + (session.email || 'anon') + '_' + role;
+      const dismissedAt = localStorage.getItem(dismissKey);
+      if (dismissedAt) {
+        const ageMs = Date.now() - parseInt(dismissedAt, 10);
+        // dismiss vale 30 días; tras eso reaparece
+        if (ageMs >= 0 && ageMs < 30 * 24 * 3600 * 1000) return;
+      }
+    } catch (e) {}
 
     const existing = document.getElementById('welcome-modal');
     if (existing) existing.remove();
@@ -333,7 +343,14 @@
     document.body.appendChild(modal);
 
     document.getElementById('wm-start').onclick = function () { modal.remove(); startTour(role); };
-    document.getElementById('wm-later').onclick = function () { modal.remove(); };
+    document.getElementById('wm-later').onclick = function () {
+      // R28: persistir dismiss para no reaparecer en cada nav
+      try {
+        const dismissKey = 'volvix_welcome_dismissed_' + (session.email || 'anon') + '_' + role;
+        localStorage.setItem(dismissKey, String(Date.now()));
+      } catch (e) {}
+      modal.remove();
+    };
     if (hasResume) {
       document.getElementById('wm-resume').onclick = function () { modal.remove(); startTour(role, { resume: true }); };
     }

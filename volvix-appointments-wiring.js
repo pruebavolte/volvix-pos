@@ -5,7 +5,7 @@
  * - Calendario semanal (week view) custom-grid (sin dependencias externas).
  *   Si window.FullCalendar está cargado por CDN, lo prefiere.
  * - Drag & drop reschedule
- * - Color por status: booked/confirmed/canceled/completed/no_show
+ * - Color por status: booked/confirmed/cancelled/completed/no_show (R7c canon)
  * - REST: /api/services, /api/appointments, /api/availability
  * Expone: window.AppointmentsAPI
  * ==========================================================================*/
@@ -33,10 +33,14 @@
     return j;
   });
 
+  // R7c FIX-N1: canonical 'cancelled' (post-r7c-canonicalize-status migration).
+  // Mantener alias 'canceled' como fallback durante un transition window
+  // por si algún cliente viejo todavía manda americano.
   const STATUS_COLORS = {
     booked:    { bg: '#dbeafe', fg: '#1e3a8a', border: '#3b82f6' },
     confirmed: { bg: '#dcfce7', fg: '#14532d', border: '#16a34a' },
-    canceled:  { bg: '#fee2e2', fg: '#7f1d1d', border: '#dc2626' },
+    cancelled: { bg: '#fee2e2', fg: '#7f1d1d', border: '#dc2626' },
+    canceled:  { bg: '#fee2e2', fg: '#7f1d1d', border: '#dc2626' }, // alias legacy
     completed: { bg: '#e0e7ff', fg: '#312e81', border: '#6366f1' },
     no_show:   { bg: '#fef3c7', fg: '#78350f', border: '#d97706' }
   };

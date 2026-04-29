@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Volvix POS  Network security config
+  ====================================
+  - cleartextTrafficPermitted=false  bloquea HTTP plano (solo HTTPS)
+  - trust-anchors src=system          confia solo en CAs del sistema, no user CAs
+  - domain-config sobrescribe SOLO para subdominios explicitos si fuera necesario
+  - debug-overrides permite trafico cleartext SOLO en builds debug (desarrollo)
+
+  Coloca este archivo en: android/app/src/main/res/xml/network_security_config.xml
+  Y referencialo en AndroidManifest.xml: android:networkSecurityConfig="@xml/network_security_config"
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+    <!-- Dominios criticos del POS: forzar pin/CA system, sin excepciones -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">volvix-pos.vercel.app</domain>
+        <domain includeSubdomains="true">zhvwmzkcqngcaqpdxtwr.supabase.co</domain>
+        <domain includeSubdomains="true">api.stripe.com</domain>
+        <domain includeSubdomains="true">checkout.stripe.com</domain>
+        <domain includeSubdomains="true">billing.stripe.com</domain>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+
+    <!-- Solo en builds debug: permite localhost / IPs de dev -->
+    <debug-overrides>
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </debug-overrides>
+</network-security-config>

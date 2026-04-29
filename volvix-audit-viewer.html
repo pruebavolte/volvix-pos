@@ -4,6 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Volvix POS — Audit Logs Viewer</title>
+<!-- B37 Security hardening: auth-gate + role guard (superadmin or owner) -->
+<script src="/auth-gate.js"></script>
+<script>
+(function(){
+  try {
+    var t = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+    if (!t) return;
+    var p = JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+    var role = (p.role || '').toLowerCase();
+    if (role !== 'superadmin' && role !== 'owner') {
+      window.location.replace('/volvix-launcher.html?denied=' + encodeURIComponent(location.pathname));
+    }
+  } catch(e){}
+})();
+</script>
 <style>
   :root { --bg:#0f172a; --card:#1e293b; --fg:#f1f5f9; --muted:#94a3b8; --accent:#3b82f6; --warn:#f59e0b; --crit:#ef4444; --ok:#22c55e; --br:#334155; }
   * { box-sizing: border-box; }

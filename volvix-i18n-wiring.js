@@ -1378,8 +1378,105 @@
     } catch (e) { return String(d); }
   };
 
+  // ═══════════════════════════════════════════════════════════
+  // R10c-B FIX-N3-4: Snapshot/Restore para preservar contexto al cambiar idioma
+  // (carrito, modales abiertos, ruta, scroll position)
+  // ═══════════════════════════════════════════════════════════
+  const SNAPSHOT_KEY = 'volvix_i18n_state_snapshot';
+
+  function captureStateSnapshot() {
+    try {
+      const snapshot = {
+        ts: Date.now(),
+        scrollY: window.scrollY || 0,
+        scrollX: window.scrollX || 0,
+        route: location.pathname + location.search + location.hash,
+        cart: null,
+        modal: null,
+        formInputs: {}
+      };
+      // Cart: try multiple known storage keys
+      const cartKeys = ['volvix_cart', 'volvix_pos_cart', 'cart', 'salvadorex_cart', 'volvix_kiosk_cart', 'volvix_shop_cart'];
+      for (const k of cartKeys) {
+        const v = localStorage.getItem(k);
+        if (v) { snapshot.cart = { key: k, value: v }; break; }
+      }
+      // Detect open modal (data-modal-open, .modal.show, [aria-modal=true])
+      const openModal = document.querySelector('[data-modal-open="true"], .modal.show, .modal.open, [aria-modal="true"]:not([hidden])');
+      if (openModal) {
+        snapshot.modal = {
+          id: openModal.id || '',
+          dataModal: openModal.getAttribute('data-modal') || '',
+          className: openModal.className || ''
+        };
+      }
+      // Capture form input values (so checkout flow doesn't lose data)
+      const inputs = document.querySelectorAll('input[name]:not([type=password]), select[name], textarea[name]');
+      inputs.forEach(el => {
+        if (el.name && el.value) {
+          snapshot.formInputs[el.name] = (el.type === 'checkbox' || el.type === 'radio') ? el.checked : el.value;
+        }
+      });
+      sessionStorage.setItem(SNAPSHOT_KEY, JSON.stringify(snapshot));
+      return snapshot;
+    } catch (e) {
+      console.warn('[i18n] captureStateSnapshot failed:', e);
+      return null;
+    }
+  }
+
+  function restoreStateSnapshot(snapshot) {
+    if (!snapshot) return;
+    try {
+      // Restore scroll
+      if (typeof snapshot.scrollY === 'number') {
+        window.scrollTo(snapshot.scrollX || 0, snapshot.scrollY);
+      }
+      // Restore cart (re-write to localStorage if missing/different)
+      if (snapshot.cart && snapshot.cart.key) {
+        const current = localStorage.getItem(snapshot.cart.key);
+        if (!current || current !== snapshot.cart.value) {
+          localStorage.setItem(snapshot.cart.key, snapshot.cart.value);
+        }
+      }
+      // Restore form inputs
+      if (snapshot.formInputs) {
+        Object.keys(snapshot.formInputs).forEach(name => {
+          const el = document.querySelector(`[name="${CSS.escape(name)}"]`);
+          if (!el) return;
+          const v = snapshot.formInputs[name];
+          if (el.type === 'checkbox' || el.type === 'radio') {
+            el.checked = !!v;
+          } else if (el.value !== v) {
+            el.value = v;
+          }
+        });
+      }
+      // Re-open modal if it was open (delegate to app via event)
+      if (snapshot.modal) {
+        window.dispatchEvent(new CustomEvent('volvix:i18n:restoreModal', { detail: snapshot.modal }));
+        // Try to re-show by id if app uses common patterns
+        if (snapshot.modal.id) {
+          const m = document.getElementById(snapshot.modal.id);
+          if (m) {
+            m.classList.add('show', 'open');
+            m.removeAttribute('hidden');
+            m.setAttribute('aria-modal', 'true');
+            m.setAttribute('data-modal-open', 'true');
+          }
+        }
+      }
+      // Notify app for any custom restore logic
+      window.dispatchEvent(new CustomEvent('volvix:i18n:stateRestored', { detail: snapshot }));
+    } catch (e) {
+      console.warn('[i18n] restoreStateSnapshot failed:', e);
+    }
+  }
+
   window.setLanguage = async function(lang) {
     if (!AVAILABLE_LANGS.includes(lang)) return false;
+    // FIX-N3-4: capture state BEFORE language change
+    const snapshot = captureStateSnapshot();
     if (!TRANSLATIONS[lang]) {
       const dict = await loadLanguage(lang);
       if (!dict) return false;
@@ -1389,9 +1486,14 @@
     document.documentElement.lang = lang;
     translateAll();
     updateSelectorButton();
-    window.dispatchEvent(new CustomEvent('volvix:langchange', { detail: { lang: lang } }));
+    // FIX-N3-4: restore state AFTER re-render (next tick to let DOM settle)
+    setTimeout(() => restoreStateSnapshot(snapshot), 50);
+    window.dispatchEvent(new CustomEvent('volvix:langchange', { detail: { lang: lang, snapshot: snapshot } }));
     return true;
   };
+
+  // Expose snapshot helpers for app code
+  window.__volvixI18nSnapshot = { capture: captureStateSnapshot, restore: restoreStateSnapshot };
 
   // ═══════════════════════════════════════════════════════════
   // DOM helpers
@@ -1609,7 +1711,10 @@
     formatDate: window.formatDate,
     formatDateTime: window.formatDateTime,
     retranslate: translateAll,
-    loadLanguage: loadLanguage
+    loadLanguage: loadLanguage,
+    // R10c-B FIX-N3-4
+    captureState: captureStateSnapshot,
+    restoreState: restoreStateSnapshot
   };
 
   // Namespace Volvix.i18n (alias) — Volvix.i18n.setLanguage('en') sin reload

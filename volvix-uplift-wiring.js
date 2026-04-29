@@ -248,10 +248,31 @@
     '/volvix-perf-wiring.js',
     '/volvix-webrtc-wiring.js',
     '/volvix-ai-real-wiring.js',
-    '/volvix-tests-wiring.js'
+    '/volvix-tests-wiring.js',
+    '/volvix-export-import.js',
+    '/volvix-customer-credit.js'
+  ];
+
+  // Modules that should ALWAYS load (even on light pages) — they self-detect
+  // their target buttons via querySelector and do nothing if absent.
+  var ALWAYS_LOAD = [
+    '/volvix-export-import.js',
+    '/volvix-customer-credit.js',
+    // B40: observability + integrations
+    '/volvix-sentry-wiring.js',
+    '/volvix-whatsapp-wiring.js'
+  ];
+
+  // CSS files to ensure are present
+  var ALWAYS_LOAD_CSS = [
+    '/volvix-import-export.css'
   ];
 
   function autoLoadWirings() {
+    // Always inject styles + always-load modules first
+    ALWAYS_LOAD_CSS.forEach(function (href) { ensureLink('stylesheet', href); });
+    ALWAYS_LOAD.forEach(function (src) { loadScript(src); });
+
     // Solo cargar si la página no es muy ligera (evitar romper login/landing simples)
     // Heuristic: si ya hay > 5 wirings cargados, completar el resto
     var existing = document.querySelectorAll('script[src*="volvix-"][src*="-wiring"]').length;

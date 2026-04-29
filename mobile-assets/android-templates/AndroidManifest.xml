@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Volvix POS  AndroidManifest template
+  ======================================
+  Tras `npx cap add android`, mergea estos permisos y atributos
+  en android/app/src/main/AndroidManifest.xml.
+
+  Permisos requeridos para POS:
+   - INTERNET                    : llamadas a la API y al webview
+   - ACCESS_NETWORK_STATE        : detectar online/offline (@capacitor/network)
+   - CAMERA                      : escaneo de codigo de barras + fotos de recibo
+   - VIBRATE                     : feedback al escanear barcode
+   - WAKE_LOCK + KEEP_SCREEN_ON  : pantalla activa durante turno (@capacitor/keep-awake)
+   - BLUETOOTH (legacy)          : impresoras Bluetooth Android < 12
+   - BLUETOOTH_CONNECT/SCAN      : impresoras Bluetooth Android 12+
+   - WRITE_EXTERNAL_STORAGE      : exportar reportes (Android < 11; usar SAF en >=11)
+   - READ_EXTERNAL_STORAGE       : importar inventario CSV
+   - POST_NOTIFICATIONS          : notificaciones turno/corte (Android 13+)
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.volvix.pos">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- Bluetooth: clasico (legacy) + nuevo modelo Android 12+ -->
+    <uses-permission android:name="android.permission.BLUETOOTH"
+        android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"
+        android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"
+        android:usesPermissionFlags="neverForLocation" />
+
+    <!-- Storage legacy (ignorado en Android 11+ por scoped storage) -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="29" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+
+    <!-- Notificaciones: requerido en Android 13+ -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Hardware: la camara puede no estar; no bloquear instalacion -->
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera.autofocus"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.bluetooth_le"
+        android:required="false" />
+
+    <application
+        android:name="${applicationName}"
+        android:allowBackup="true"
+        android:fullBackupContent="@xml/backup_rules"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:hardwareAccelerated="true"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="false"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:requestLegacyExternalStorage="false">
+
+        <activity
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
+            android:name=".MainActivity"
+            android:label="@string/title_activity_main"
+            android:theme="@style/AppTheme.NoActionBarLaunch"
+            android:launchMode="singleTask"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+    </application>
+</manifest>

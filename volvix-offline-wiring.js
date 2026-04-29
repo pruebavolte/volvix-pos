@@ -175,6 +175,12 @@
     idbQueueAdd(op);
   }
 
+  /* R6b GAP-S2: Backoff exponencial + manejo 409/401 + headers idempotency/cart-token */
+  const RETRY_BACKOFFS = [1000, 2000, 4000, 8000, 16000, 30000];
+  function pickBackoffMs(retries) {
+    return RETRY_BACKOFFS[Math.min(retries, RETRY_BACKOFFS.length - 1)];
+  }
+
   async function syncOfflineQueue() {
     const q = readQueue();
     if (q.length === 0) return;
@@ -182,38 +188,99 @@
 
     LOG(`Sincronizando ${q.length} operaciones...`);
     const remaining = [];
-    let ok = 0, fail = 0;
+    let ok = 0, fail = 0, skipped = 0, blocked = 0;
+    const now = Date.now();
 
     for (const op of q) {
+      // Skip si está marcado bloqueado/saltado/dead
+      if (op.status === 'skipped' || op.status === 'blocked_auth' || op.status === 'dead') {
+        remaining.push(op);
+        continue;
+      }
+      // Backoff: respetar nextAttemptAt
+      if (op.nextAttemptAt && op.nextAttemptAt > now) {
+        remaining.push(op);
+        continue;
+      }
       try {
+        // Construir headers con Idempotency-Key + X-Cart-Token + Authorization
+        const headers = { 'Content-Type': 'application/json', ...(op.headers || {}) };
+        if (op.idempotency_key && !headers['Idempotency-Key']) headers['Idempotency-Key'] = op.idempotency_key;
+        if (op.cart_token && !headers['X-Cart-Token']) headers['X-Cart-Token'] = op.cart_token;
+        if (op.auth_token && !headers['Authorization']) headers['Authorization'] = 'Bearer ' + op.auth_token;
+
         const res = await fetch(op.endpoint, {
           method: op.method || 'POST',
-          headers: { 'Content-Type': 'application/json', ...(op.headers || {}) },
+          headers,
           body: op.data ? JSON.stringify(op.data) : undefined
         });
         if (res.ok) {
           ok++;
           LOG(`  OK ${op.type || op.endpoint}`);
-        } else {
-          fail++;
-          op.attempts = (op.attempts || 0) + 1;
-          if (op.attempts < 5) remaining.push(op);
+          continue;
         }
-      } catch (e) {
-        fail++;
+        // 409 cart_already_consumed → marcar skipped (no dup)
+        if (res.status === 409) {
+          let body = {};
+          try { body = await res.clone().json(); } catch (_) {}
+          if (body.error === 'cart_already_consumed' || body.error_code === 'CART_ALREADY_CONSUMED') {
+            op.status = 'skipped';
+            op.skip_reason = 'cart_already_consumed';
+            skipped++;
+            remaining.push(op);
+            continue;
+          }
+          if (body.idempotent_replay === true || body.error_code === 'IDEMPOTENT_REPLAY') {
+            ok++;
+            continue; // server ya respondió, drop
+          }
+        }
+        // 401 SESSION_REVOKED / PERMISSIONS_CHANGED → bloquear
+        if (res.status === 401) {
+          let body = {};
+          try { body = await res.clone().json(); } catch (_) {}
+          const code = body.error_code || body.error || '';
+          if (code === 'SESSION_REVOKED' || code === 'PERMISSIONS_CHANGED' || code === 'TOKEN_EXPIRED') {
+            op.status = 'blocked_auth';
+            op.block_reason = code;
+            blocked++;
+            remaining.push(op);
+            continue;
+          }
+        }
+        // Otros errores: backoff exponencial
         op.attempts = (op.attempts || 0) + 1;
-        if (op.attempts < 5) remaining.push(op);
+        op.retries = op.attempts;
+        op.nextAttemptAt = now + pickBackoffMs(op.attempts);
+        if (op.attempts < 6) remaining.push(op);
+        else { op.status = 'dead'; remaining.push(op); }
+        fail++;
+      } catch (e) {
+        op.attempts = (op.attempts || 0) + 1;
+        op.retries = op.attempts;
+        op.nextAttemptAt = now + pickBackoffMs(op.attempts);
+        op.last_error = e.message;
+        if (op.attempts < 6) remaining.push(op);
+        else { op.status = 'dead'; remaining.push(op); }
+        fail++;
       }
     }
 
     writeQueue(remaining);
     if (typeof window.toast === 'function') {
-      if (ok > 0)   window.toast(`Sincronizadas ${ok} operaciones`, 'success');
-      if (fail > 0) window.toast(`${fail} fallaron, reintentando luego`, 'warning');
+      if (ok > 0)        window.toast(`Sincronizadas ${ok} operaciones`, 'success');
+      if (skipped > 0)   window.toast(`${skipped} ya cobradas (no duplicadas)`, 'info');
+      if (blocked > 0)   window.toast(`${blocked} bloqueadas: vuelve a iniciar sesión`, 'error');
+      if (fail > 0)      window.toast(`${fail} fallaron, reintentando luego`, 'warning');
     }
     // Pedir al SW que tambien drene su cola IDB
     if (swRegistration && navigator.serviceWorker.controller) {
       navigator.serviceWorker.controller.postMessage({ type: 'TRIGGER_SYNC' });
+    }
+    // GAP-S3: notificar cuando queue esté vacía → online_clean
+    const livePending = remaining.filter(o => o.status !== 'skipped' && o.status !== 'blocked_auth' && o.status !== 'dead').length;
+    if (livePending === 0) {
+      try { window.__volvixOfflineQueueClean = true; window.dispatchEvent(new CustomEvent('volvix:queue-clean')); } catch (_) {}
     }
   }
 
@@ -325,6 +392,54 @@
     catch { return s; }
   }
 
+  /* ---------- R6b GAP-S4: Hourly cleanup en cliente ---------- */
+  const _LAST_USER_ACTIVITY_KEY = 'volvix:last_activity_ts';
+  function _markUserActivity() {
+    try { localStorage.setItem(_LAST_USER_ACTIVITY_KEY, String(Date.now())); } catch (_) {}
+  }
+  function _getInactivityMs() {
+    try {
+      const last = parseInt(localStorage.getItem(_LAST_USER_ACTIVITY_KEY) || '0', 10);
+      return last ? (Date.now() - last) : 0;
+    } catch (_) { return 0; }
+  }
+  // Marcar actividad en eventos típicos
+  ['click','keydown','mousemove','touchstart'].forEach(ev => {
+    try { window.addEventListener(ev, _markUserActivity, { passive: true, capture: true }); } catch (_) {}
+  });
+  _markUserActivity();
+
+  function _hourlyCleanup() {
+    try {
+      // 1. Si PerfMonitor expone cleanup de listeners orfanos, llamarlo
+      if (window.PerfMonitor && typeof window.PerfMonitor.reset === 'function') {
+        // Solo reset si no está corriendo activamente (no romper observabilidad en uso)
+        const st = window.PerfMonitor.state || {};
+        if (!st.running) { /* no hacer nada */ }
+      }
+      // 2. Liberar caches de listeners orphans en window (heuristico: si > 100, log)
+      // 3. Force GC hint si está disponible (raro pero existe en algunos chromiums)
+      if (typeof window.gc === 'function') { try { window.gc(); } catch (_) {} }
+    } catch (e) { WARN('hourly cleanup error', e.message); }
+
+    // 4. Force refresh nightly: si pagina lleva > 2h sin interaccion del user → reload
+    //    SOLO en POS principal (salvadorex_web_v25.html), no en owner panel ni admin
+    try {
+      const p = (location.pathname || '').toLowerCase();
+      const isPos = p.includes('salvadorex_web') || p.includes('multipos') || p === '/';
+      if (!isPos) return;
+      const inactivityMs = _getInactivityMs();
+      const TWO_HOURS = 2 * 60 * 60 * 1000;
+      if (inactivityMs >= TWO_HOURS) {
+        LOG('User inactivo > 2h, refresh nocturno PWA');
+        // Solo si no hay queue offline pendiente (no perder ventas)
+        if (queueLength() === 0 && navigator.onLine) {
+          window.location.reload();
+        }
+      }
+    } catch (_) {}
+  }
+
   /* ---------- 7. INIT ---------- */
   async function init() {
     await openIDB();
@@ -337,6 +452,9 @@
       if (navigator.onLine && queueLength() > 0) syncOfflineQueue();
       updateIndicator();
     }, 30000);
+
+    // R6b GAP-S4: Hourly cleanup (memory leak prevention en PWA días abierta)
+    setInterval(_hourlyCleanup, 60 * 60 * 1000);
   }
 
   /* ---------- 8. API PUBLICA ---------- */

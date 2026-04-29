@@ -284,6 +284,12 @@
   // -------------------------------------------------------------------------
   function ensurePanel() {
     if (typeof document === 'undefined') return null;
+    // R28: ocultar panel debug en producción salvo localStorage.volvix_debug=1
+    try {
+      const isProd = !/^(localhost|127\.|\.local$)/.test(location.hostname);
+      const debugFlag = localStorage.getItem('volvix_debug') === '1';
+      if (isProd && !debugFlag) return null;
+    } catch (e) {}
     let panel = document.getElementById(CONFIG.panelId);
     if (panel) return panel;
     panel = document.createElement('div');

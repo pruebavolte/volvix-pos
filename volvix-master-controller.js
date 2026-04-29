@@ -376,8 +376,16 @@
         'background:#8B5CF6;color:#fff;padding:4px 8px;border-radius:4px;font-weight:bold;',
         `${h.available}/${h.total} modulos cargados (score ${h.score}%) · v${VERSION}`
       );
+      // R28: solo mostrar toast modulos si hay flag debug o si carga es perfecta (>=95%)
       if (typeof window.toast === 'function') {
-        window.toast(`✓ Volvix listo: ${h.available}/${h.total} modulos`, 'success');
+        try {
+          const isProd = !/^(localhost|127\.|\.local$)/.test(location.hostname);
+          const debugFlag = localStorage.getItem('volvix_debug') === '1';
+          const fullyLoaded = h.total > 0 && (h.available / h.total) >= 0.95;
+          if (debugFlag || !isProd || fullyLoaded) {
+            window.toast(`✓ Volvix listo: ${h.available}/${h.total} modulos`, 'success');
+          }
+        } catch (e) {}
       }
       window.dispatchEvent(new CustomEvent('volvix:master:ready', { detail: h }));
     }, 2000);

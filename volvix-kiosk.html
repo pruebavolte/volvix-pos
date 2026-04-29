@@ -2,7 +2,11 @@
 <html lang="es" id="root">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<!-- R8d FIX-M2: viewport (kiosk: no zoom by design) + iOS PWA + safe-area -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Volvix Kiosko</title>
 <style>
   :root{
@@ -56,6 +60,31 @@
   .modal h3{margin:0 0 12px;font-size:24px}
   .modal p{color:var(--muted);font-size:16px;margin:0 0 20px}
   .modal .ok{padding:14px 28px;background:var(--accent2);border:0;border-radius:8px;font-size:18px;color:#fff;font-weight:700;cursor:pointer}
+
+  /* ============ R8d FIX-M1: Mobile breakpoints (kiosk responsive) ============ */
+  body { padding-top: env(safe-area-inset-top, 0); padding-bottom: env(safe-area-inset-bottom, 0); }
+  @media (max-width: 1024px) {
+    body { grid-template-columns: 1fr 320px; }
+    .grid { grid-template-columns: repeat(auto-fill, 170px); gap: 14px; }
+    .card { width: 170px; height: 220px; }
+  }
+  @media (max-width: 640px) {
+    body { grid-template-rows: 56px 1fr 60px 56px; grid-template-columns: 1fr; }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+    .card { width: 100%; height: 200px; }
+    .scan input { width: 110px; }
+    .lang button, .scan, button { min-height: 44px; }
+    .modal .box { width: 92vw; padding: 18px; }
+    input, select, textarea { font-size: 16px; }
+  }
+  @media (max-width: 380px) {
+    .grid { grid-template-columns: 1fr 1fr; }
+    .card { height: 170px; font-size: 12px; }
+  }
+  @media (hover: none) and (pointer: coarse) {
+    button, .lang button, .ok { min-height: 48px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(255,255,255,0.1); }
+  }
+  /* ============ END R8d FIX-M1 ============ */
 </style>
 </head>
 <body>
@@ -279,6 +308,11 @@ document.getElementById('m-ok').onclick    = () => document.getElementById('moda
 })();
 </script>
 <link rel="stylesheet" href="volvix-modals.css">
+<link rel="stylesheet" href="volvix-shared.css">
 <script defer src="volvix-modals.js"></script>
+<!-- R10c-B FIX-N3-4: i18n wiring -->
+<script src="volvix-i18n-wiring.js" defer></script>
+<!-- R10c-B FIX-N3-5: Accessibility wiring -->
+<script src="volvix-accessibility-wiring.js" defer></script>
 </body>
 </html>

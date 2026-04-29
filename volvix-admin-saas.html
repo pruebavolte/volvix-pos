@@ -4,6 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Volvix Admin SaaS — Super Admin Panel</title>
+<!-- B37 Security hardening: auth-gate + role guard (superadmin only) -->
+<script src="/auth-gate.js"></script>
+<script>
+(function(){
+  try {
+    var t = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+    if (!t) return; // auth-gate handles redirect
+    var p = JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+    var role = (p.role || '').toLowerCase();
+    if (role !== 'superadmin') {
+      window.location.replace('/volvix-launcher.html?denied=' + encodeURIComponent(location.pathname));
+    }
+  } catch(e){}
+})();
+</script>
 <style>
 :root{
   /* R29: caen a Volvix theme vars cuando theme wiring las setea */
@@ -190,6 +205,7 @@ tr:hover td{background:var(--card2)}
       <a href="#"><span class="ic">⚡</span>System Health</a>
       <a href="#"><span class="ic">🔔</span>Alertas<span class="badge">5</span></a>
       <a href="#"><span class="ic">🗄️</span>Base de Datos</a>
+      <a href="#sec-merge-branches" data-action="goto-merge-branches"><span class="ic">🔀</span>Fusionar sucursales</a>
     </nav>
     <div class="nav-section">Configuración</div>
     <nav class="nav">
@@ -208,9 +224,9 @@ tr:hover td{background:var(--card2)}
     <header class="topbar">
       <div class="search"><input placeholder="Buscar tenants, usuarios, transacciones..."></div>
       <div class="tb-actions">
-        <button class="icon-btn" title="Comando"><span>⌘</span></button>
-        <button class="icon-btn" title="Notificaciones">🔔<span class="dot"></span></button>
-        <button class="icon-btn" title="Tema">🌙</button>
+        <button class="icon-btn" title="Paleta de comandos (Ctrl+K)" data-action="command-palette"><span>⌘</span></button>
+        <button class="icon-btn" title="Notificaciones" data-action="open-notifications">🔔<span class="dot"></span></button>
+        <button class="icon-btn" title="Cambiar tema" data-action="toggle-theme">🌙</button>
         <div class="user">
           <div class="avatar" id="adm-avatar">—</div>
           <div class="user-info">
@@ -230,9 +246,9 @@ tr:hover td{background:var(--card2)}
           <p>Panorama multi-tenant en tiempo real · última actualización hace 2 min</p>
         </div>
         <div class="btn-row">
-          <button class="btn btn-ghost">📥 Exportar</button>
-          <button class="btn btn-ghost">📅 Últimos 30 días</button>
-          <button class="btn btn-primary">+ Nuevo Tenant</button>
+          <button class="btn btn-ghost" data-action="export-dashboard">📥 Exportar</button>
+          <button class="btn btn-ghost" data-action="period-picker" data-period="30d">📅 Últimos 30 días</button>
+          <button class="btn btn-primary" data-action="new-tenant">+ Nuevo Tenant</button>
         </div>
       </div>
 
@@ -284,10 +300,10 @@ tr:hover td{background:var(--card2)}
               <h3>Crecimiento de Ingresos · MRR</h3>
               <div class="t-mini">Últimos 12 meses · USD</div>
             </div>
-            <div class="btn-row">
-              <button class="btn btn-ghost" style="padding:6px 12px;font-size:11px">MRR</button>
-              <button class="btn btn-ghost" style="padding:6px 12px;font-size:11px">ARR</button>
-              <button class="btn btn-ghost" style="padding:6px 12px;font-size:11px">Net New</button>
+            <div class="btn-row" data-group="mrr-mode">
+              <button class="btn btn-ghost active" style="padding:6px 12px;font-size:11px" data-action="chart-mode" data-mode="mrr">MRR</button>
+              <button class="btn btn-ghost" style="padding:6px 12px;font-size:11px" data-action="chart-mode" data-mode="arr">ARR</button>
+              <button class="btn btn-ghost" style="padding:6px 12px;font-size:11px" data-action="chart-mode" data-mode="netnew">Net New</button>
             </div>
           </div>
           <div class="chart" id="adm-mrr-chart">
@@ -332,7 +348,7 @@ tr:hover td{background:var(--card2)}
         </div>
 
         <div class="card">
-          <div class="card-h"><h3>Deploys Recientes</h3><button class="btn btn-primary" style="padding:6px 12px;font-size:11px">+ Deploy</button></div>
+          <div class="card-h"><h3>Deploys Recientes</h3><button class="btn btn-primary" style="padding:6px 12px;font-size:11px" data-action="new-deploy">+ Deploy</button></div>
           <div class="deploy">
             <div class="stat ok"></div>
             <div><b>v4.12.3</b> → producción<br><span class="meta">main · #a8f2c1 · feat: nuevo billing dashboard</span></div>
@@ -369,8 +385,8 @@ tr:hover td{background:var(--card2)}
             <div class="t-mini">Mostrando 8 de 847 · ordenado por MRR</div>
           </div>
           <div class="btn-row">
-            <button class="btn btn-ghost" style="padding:6px 12px;font-size:11px">Filtros</button>
-            <button class="btn btn-ghost" style="padding:6px 12px;font-size:11px">Ver todos</button>
+            <button class="btn btn-ghost" style="padding:6px 12px;font-size:11px" data-action="filter-tenants">Filtros</button>
+            <button class="btn btn-ghost" style="padding:6px 12px;font-size:11px" data-action="view-all-tenants">Ver todos</button>
           </div>
         </div>
         <table>
@@ -423,7 +439,7 @@ tr:hover td{background:var(--card2)}
               <tr><td colspan="2" style="padding:14px;text-align:center;color:var(--muted);font-size:12px">Sin datos de gateways</td></tr>
             </tbody>
           </table>
-          <button class="btn btn-primary" style="width:100%;margin-top:12px">Ver Billing completo →</button>
+          <button class="btn btn-primary" style="width:100%;margin-top:12px" data-action="open-billing">Ver Billing completo →</button>
         </div>
       </div>
 
@@ -444,7 +460,7 @@ tr:hover td{background:var(--card2)}
         </div>
 
         <div class="card">
-          <div class="card-h"><h3>Planes &amp; Conversión</h3><button class="btn btn-ghost" style="padding:6px 12px;font-size:11px">Editar</button></div>
+          <div class="card-h"><h3>Planes &amp; Conversión</h3><button class="btn btn-ghost" style="padding:6px 12px;font-size:11px" data-action="edit-plans">Editar</button></div>
           <table>
             <thead><tr><th>Plan</th><th>Precio</th><th>Tenants</th><th>Conv. Trial→Paid</th></tr></thead>
             <tbody>
@@ -512,7 +528,7 @@ tr:hover td{background:var(--card2)}
         </div>
 
         <div class="card">
-          <div class="card-h"><h3>Feature Flags</h3><button class="btn btn-ghost" style="padding:6px 12px;font-size:11px">+ Nueva</button></div>
+          <div class="card-h"><h3>Feature Flags</h3><button class="btn btn-ghost" style="padding:6px 12px;font-size:11px" data-action="new-flag">+ Nueva</button></div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
             <div><b style="font-size:13px">new-billing-ui</b><div class="t-mini">100% rollout</div></div>
             <span class="tag ok">ON</span>
@@ -568,14 +584,85 @@ tr:hover td{background:var(--card2)}
       <div class="card" style="margin-bottom:24px">
         <div class="card-h"><h3>Acciones Rápidas</h3><span class="t-mini">Operaciones de Super Admin</span></div>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">
-          <button class="btn btn-ghost" style="padding:14px;text-align:left">🏢<br><b>Crear Tenant</b><br><span class="t-mini">Provisión manual</span></button>
-          <button class="btn btn-ghost" style="padding:14px;text-align:left">📨<br><b>Email Masivo</b><br><span class="t-mini">A todos los admins</span></button>
-          <button class="btn btn-ghost" style="padding:14px;text-align:left">💸<br><b>Aplicar Crédito</b><br><span class="t-mini">Compensación</span></button>
-          <button class="btn btn-ghost" style="padding:14px;text-align:left">🚀<br><b>Trigger Deploy</b><br><span class="t-mini">CI/CD pipeline</span></button>
-          <button class="btn btn-ghost" style="padding:14px;text-align:left">🔄<br><b>Restart Workers</b><br><span class="t-mini">Queue maintenance</span></button>
-          <button class="btn btn-ghost" style="padding:14px;text-align:left">📊<br><b>Generar Reporte</b><br><span class="t-mini">Mensual ejecutivo</span></button>
-          <button class="btn btn-ghost" style="padding:14px;text-align:left">🛟<br><b>Modo Mantenimiento</b><br><span class="t-mini">Banner global</span></button>
-          <button class="btn btn-danger" style="padding:14px;text-align:left">🚨<br><b>Kill Switch</b><br><span style="font-size:11px;opacity:.85">Emergencia P0</span></button>
+          <button class="btn btn-ghost" style="padding:14px;text-align:left" data-action="new-tenant">🏢<br><b>Crear Tenant</b><br><span class="t-mini">Provisión manual</span></button>
+          <button class="btn btn-ghost" style="padding:14px;text-align:left" data-action="bulk-email">📨<br><b>Email Masivo</b><br><span class="t-mini">A todos los admins</span></button>
+          <button class="btn btn-ghost" style="padding:14px;text-align:left" data-action="apply-credit">💸<br><b>Aplicar Crédito</b><br><span class="t-mini">Compensación</span></button>
+          <button class="btn btn-ghost" style="padding:14px;text-align:left" data-action="trigger-deploy">🚀<br><b>Trigger Deploy</b><br><span class="t-mini">CI/CD pipeline</span></button>
+          <button class="btn btn-ghost" style="padding:14px;text-align:left" data-action="restart-workers">🔄<br><b>Restart Workers</b><br><span class="t-mini">Queue maintenance</span></button>
+          <button class="btn btn-ghost" style="padding:14px;text-align:left" data-action="generate-report">📊<br><b>Generar Reporte</b><br><span class="t-mini">Mensual ejecutivo</span></button>
+          <button class="btn btn-ghost" style="padding:14px;text-align:left" data-action="maintenance-mode">🛟<br><b>Modo Mantenimiento</b><br><span class="t-mini">Banner global</span></button>
+          <button class="btn btn-danger" style="padding:14px;text-align:left" data-action="kill-switch">🚨<br><b>Kill Switch</b><br><span style="font-size:11px;opacity:.85">Emergencia P0</span></button>
+        </div>
+      </div>
+
+      <!-- ======================== FIX-N4-3: FUSIÓN DE SUCURSALES ======================== -->
+      <div class="card" id="sec-merge-branches" style="margin-bottom:24px;border:1px solid var(--danger)">
+        <div class="card-h">
+          <div>
+            <h3>🔀 Fusionar Sucursales (consolidación)</h3>
+            <div class="t-mini">Solo superadmin · operación irreversible que mueve productos, ventas y usuarios de una sucursal origen a una destino.</div>
+          </div>
+          <span class="tag err">SUPERADMIN ONLY</span>
+        </div>
+        <div style="padding:8px 0">
+          <div style="background:rgba(239,68,68,.08);border-left:3px solid var(--danger);padding:12px;border-radius:6px;margin-bottom:16px;font-size:12px;color:var(--text)">
+            <b>⚠️ Antes de fusionar:</b> verifica que no haya cortes de caja abiertos en la sucursal origen y que su inventario haya sido auditado. Esta operación NO se puede deshacer; usa cierre histórico si solo quieres deshabilitar ventas.
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 40px 1fr;gap:14px;align-items:end;margin-bottom:14px">
+            <div>
+              <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px">Sucursal origen (se va)</label>
+              <select id="merge-from" style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:13px">
+                <option value="">Cargando sucursales…</option>
+              </select>
+            </div>
+            <div style="text-align:center;font-size:24px;color:var(--muted);padding-bottom:6px">→</div>
+            <div>
+              <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px">Sucursal destino (conserva)</label>
+              <select id="merge-into" style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:13px">
+                <option value="">Cargando sucursales…</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Preview cargado dinámicamente -->
+          <div id="merge-preview" style="display:none;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:14px">
+            <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Impacto estimado</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+              <div>
+                <div style="font-size:22px;font-weight:700" data-merge-stat="products">—</div>
+                <div style="font-size:11px;color:var(--muted)">productos a mover</div>
+              </div>
+              <div>
+                <div style="font-size:22px;font-weight:700" data-merge-stat="sales">—</div>
+                <div style="font-size:11px;color:var(--muted)">ventas históricas a re-asignar</div>
+              </div>
+              <div>
+                <div style="font-size:22px;font-weight:700" data-merge-stat="users">—</div>
+                <div style="font-size:11px;color:var(--muted)">usuarios afectados</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-bottom:14px">
+            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px">Razón / justificación (mín. 30 caracteres) <span style="color:var(--danger)">*</span></label>
+            <textarea id="merge-reason" rows="3" placeholder="Ej.: La sucursal Centro cierra por término de contrato de arrendamiento. Su inventario ya se trasladó físicamente a Sucursal Sur y los empleados fueron re-asignados. Auditoría de caja completada el 2026-04-15."
+              style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:13px;resize:vertical"></textarea>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px"><span id="merge-reason-count">0</span> / 30 chars mínimos</div>
+          </div>
+
+          <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;cursor:pointer;margin-bottom:16px;padding:10px;background:var(--card2);border-radius:8px">
+            <input type="checkbox" id="merge-confirm" style="margin-top:3px;cursor:pointer">
+            <span>Sí, entiendo que esta operación <b style="color:var(--danger)">es IRREVERSIBLE</b>. Los datos de la sucursal origen se transferirán a la destino y la sucursal origen quedará marcada como "fusionada" sin posibilidad de restauración.</span>
+          </label>
+
+          <div id="merge-error" style="display:none;background:rgba(239,68,68,.12);color:var(--danger);padding:10px;border-radius:6px;font-size:12px;margin-bottom:12px"></div>
+          <div id="merge-success" style="display:none;background:rgba(16,185,129,.12);color:var(--success);padding:10px;border-radius:6px;font-size:12px;margin-bottom:12px"></div>
+
+          <div style="display:flex;justify-content:flex-end;gap:10px">
+            <button class="btn btn-ghost" id="merge-cancel" type="button">Cancelar</button>
+            <button class="btn btn-danger" id="merge-submit" type="button" disabled>🔀 Fusionar sucursales (irreversible)</button>
+          </div>
         </div>
       </div>
 
@@ -783,6 +870,137 @@ tr:hover td{background:var(--card2)}
       }
     }
   } catch(e){ console.warn('[admin-saas] plans fail', e); }
+
+  // ============== FIX-N4-3: FUSIÓN DE SUCURSALES ==============
+  try {
+    var selFrom = document.getElementById('merge-from');
+    var selInto = document.getElementById('merge-into');
+    var preview = document.getElementById('merge-preview');
+    var reasonEl = document.getElementById('merge-reason');
+    var reasonCount = document.getElementById('merge-reason-count');
+    var confirmCb = document.getElementById('merge-confirm');
+    var btnSubmit = document.getElementById('merge-submit');
+    var btnCancel = document.getElementById('merge-cancel');
+    var errBox = document.getElementById('merge-error');
+    var okBox = document.getElementById('merge-success');
+    var branchesCache = [];
+
+    if (!selFrom || !selInto) return;
+
+    // Cargar sucursales del tenant actual (selector necesita /api/branches)
+    var rb = await fetch('/api/branches', { headers, credentials: 'include' });
+    if (rb.ok) {
+      var jb = await rb.json();
+      branchesCache = (jb && (jb.items || jb.branches || jb)) || [];
+      if (!Array.isArray(branchesCache) || !branchesCache.length) {
+        selFrom.innerHTML = '<option value="">— Sin sucursales registradas —</option>';
+        selInto.innerHTML = '<option value="">— Sin sucursales registradas —</option>';
+      } else {
+        var opts = '<option value="">— Selecciona —</option>' + branchesCache.map(function(b){
+          var label = (b.name || b.id || '').toString().replace(/[<>]/g,'');
+          var st = b.status && b.status !== 'active' ? ' (' + b.status + ')' : '';
+          return '<option value="' + b.id + '">' + label + st + '</option>';
+        }).join('');
+        selFrom.innerHTML = opts;
+        selInto.innerHTML = opts;
+      }
+    } else {
+      selFrom.innerHTML = '<option value="">Endpoint /api/branches no disponible</option>';
+      selInto.innerHTML = '<option value="">Endpoint /api/branches no disponible</option>';
+    }
+
+    function showError(msg){ errBox.textContent = msg; errBox.style.display='block'; okBox.style.display='none'; }
+    function showOk(msg){ okBox.textContent = msg; okBox.style.display='block'; errBox.style.display='none'; }
+    function clearMsg(){ errBox.style.display='none'; okBox.style.display='none'; }
+
+    function updateSubmitState(){
+      var f = selFrom.value, i = selInto.value, r = (reasonEl.value||'').trim();
+      var ok = f && i && f !== i && r.length >= 30 && confirmCb.checked;
+      btnSubmit.disabled = !ok;
+    }
+
+    async function loadPreview(){
+      var f = selFrom.value, i = selInto.value;
+      if (!f || !i || f === i) {
+        preview.style.display = 'none';
+        return;
+      }
+      preview.style.display = 'block';
+      // intenta endpoint preview si existe
+      try {
+        var pr = await fetch('/api/branches/merge/preview?from=' + encodeURIComponent(f) + '&into=' + encodeURIComponent(i), { headers, credentials: 'include' });
+        if (pr.ok) {
+          var pj = await pr.json();
+          document.querySelector('[data-merge-stat="products"]').textContent = (pj.products_count != null ? pj.products_count : '—');
+          document.querySelector('[data-merge-stat="sales"]').textContent = (pj.sales_count != null ? pj.sales_count : '—');
+          document.querySelector('[data-merge-stat="users"]').textContent = (pj.users_count != null ? pj.users_count : '—');
+          return;
+        }
+      } catch(_) {}
+      // fallback: contadores locales si /api/branches expone counts
+      var src = branchesCache.find(function(b){ return b.id === f; }) || {};
+      document.querySelector('[data-merge-stat="products"]').textContent = src.products_count != null ? src.products_count : '? (preview no disponible)';
+      document.querySelector('[data-merge-stat="sales"]').textContent = src.sales_count != null ? src.sales_count : '? (preview no disponible)';
+      document.querySelector('[data-merge-stat="users"]').textContent = src.users_count != null ? src.users_count : '? (preview no disponible)';
+    }
+
+    selFrom.addEventListener('change', function(){ clearMsg(); loadPreview(); updateSubmitState(); });
+    selInto.addEventListener('change', function(){ clearMsg(); loadPreview(); updateSubmitState(); });
+    reasonEl.addEventListener('input', function(){
+      var n = (reasonEl.value||'').trim().length;
+      reasonCount.textContent = n;
+      reasonCount.style.color = n >= 30 ? 'var(--success)' : 'var(--muted)';
+      updateSubmitState();
+    });
+    confirmCb.addEventListener('change', updateSubmitState);
+    btnCancel.addEventListener('click', function(){
+      selFrom.value=''; selInto.value=''; reasonEl.value=''; reasonCount.textContent='0';
+      confirmCb.checked=false; preview.style.display='none'; clearMsg(); updateSubmitState();
+    });
+    btnSubmit.addEventListener('click', async function(){
+      clearMsg();
+      var f = selFrom.value, i = selInto.value, r = (reasonEl.value||'').trim();
+      if (!f || !i || f === i) { showError('Selecciona dos sucursales distintas.'); return; }
+      if (r.length < 30) { showError('La razón debe tener al menos 30 caracteres.'); return; }
+      if (!confirmCb.checked) { showError('Debes confirmar que entiendes que es irreversible.'); return; }
+
+      btnSubmit.disabled = true;
+      var prevTxt = btnSubmit.textContent;
+      btnSubmit.textContent = '⏳ Fusionando…';
+      try {
+        var resp = await fetch('/api/branches/merge', {
+          method: 'POST',
+          headers: Object.assign({'Content-Type':'application/json','Idempotency-Key':'merge-'+Date.now()}, headers),
+          credentials: 'include',
+          body: JSON.stringify({ from: f, into: i, reason: r })
+        });
+        if (resp.status === 404 || resp.status === 405) {
+          showError('Endpoint /api/branches/merge próximamente. Crea ticket de soporte adjuntando este texto: "Solicitud de fusión sucursal origen=' + f + ' destino=' + i + ' tenant_id=desde sesión actual. Razón: ' + r + '". Ver runbook docs/branch-merge-runbook.md para alternativa SQL manual.');
+          return;
+        }
+        if (!resp.ok) {
+          var t = await resp.text();
+          showError('Error del servidor (' + resp.status + '): ' + (t || 'desconocido'));
+          return;
+        }
+        showOk('✅ Sucursales fusionadas exitosamente. Recargando lista…');
+        setTimeout(function(){ location.reload(); }, 1800);
+      } catch(e) {
+        showError('Error de red: ' + (e && e.message || 'desconocido'));
+      } finally {
+        btnSubmit.textContent = prevTxt;
+        updateSubmitState();
+      }
+    });
+
+    // nav anchor
+    var navMerge = document.querySelector('[data-action="goto-merge-branches"]');
+    if (navMerge) navMerge.addEventListener('click', function(ev){
+      ev.preventDefault();
+      var sec = document.getElementById('sec-merge-branches');
+      if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  } catch(e){ console.warn('[admin-saas] merge UI fail', e); }
 })();
 </script>
   <script defer src="auth-helper.js"></script>
@@ -790,5 +1008,7 @@ tr:hover td{background:var(--card2)}
 <script defer src="volvix-modals.js"></script>
   <script defer src="volvix-theme-wiring.js"></script>
 <script defer src="volvix-i18n-wiring.js"></script>
+<script defer src="volvix-admin-helpers.js"></script>
+<script defer src="volvix-admin-saas-actions.js"></script>
 </body>
 </html>

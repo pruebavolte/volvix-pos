@@ -2,7 +2,11 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- R8d FIX-M2: viewport + iOS PWA + safe-area -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Volvix · Portal Cliente</title>
 <style>
   :root { --pri:#1d4ed8; --pri-d:#1e40af; --bg:#f8fafc; --card:#fff; --border:#e2e8f0; --text:#0f172a; --muted:#64748b; --ok:#16a34a; --err:#dc2626; }
@@ -59,6 +63,28 @@
     .tabs { gap: 6px; }
     table { display: block; overflow-x: auto; }
   }
+
+  /* ============ R8d FIX-M1: extra breakpoints + touch ============ */
+  body { padding-top: env(safe-area-inset-top, 0); padding-bottom: env(safe-area-inset-bottom, 0); }
+  @media (max-width: 1024px) {
+    main { max-width: 100%; }
+    header { padding: 12px 16px; }
+  }
+  @media (max-width: 640px) {
+    header h1 { font-size: 16px; }
+    header .user { font-size: 12px; }
+    .card { padding: 14px; }
+    button { min-height: 44px; touch-action: manipulation; }
+  }
+  @media (max-width: 380px) {
+    header { flex-direction: column; gap: 6px; align-items: flex-start; }
+    main { padding: 0 8px; }
+  }
+  @media (hover: none) and (pointer: coarse) {
+    button, .tabs button { min-height: 44px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.08); }
+    main, table { -webkit-overflow-scrolling: touch; }
+  }
+  /* ============ END R8d FIX-M1 ============ */
 </style>
 </head>
 <body>
@@ -371,6 +397,87 @@
 })();
 </script>
 <link rel="stylesheet" href="volvix-modals.css">
+<link rel="stylesheet" href="volvix-shared.css">
 <script defer src="volvix-modals.js"></script>
+<!-- R10c-B FIX-N3-4: i18n wiring para preserve contexto -->
+<script src="volvix-i18n-wiring.js" defer></script>
+<!-- R10c-B FIX-N3-5: Accessibility wiring -->
+<script src="volvix-accessibility-wiring.js" defer></script>
+
+<!-- ============================================================ -->
+<!-- FIX-N5-B2: Modal "Pago en proceso..." en customer portal -->
+<!-- Cliente paga desde app bancaria → portal espera reflejo -->
+<!-- ============================================================ -->
+<div id="vlx-cp-app-pay" style="display:none;align-items:center;justify-content:center;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;">
+  <div style="background:#fff;max-width:440px;width:92%;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,.3);overflow:hidden;font-family:system-ui,-apple-system,sans-serif;">
+    <div style="padding:14px 18px;background:#dbeafe;border-bottom:1px solid #bfdbfe;">
+      <strong style="font-size:15px;color:#1e3a8a;">💳 Pago en proceso...</strong>
+    </div>
+    <div style="padding:18px 20px;text-align:center;font-size:13px;">
+      <div style="margin:6px 0 14px 0;">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:#6b7280;">Total</div>
+        <div id="vlx-cp-ap-total" style="font-size:28px;font-weight:800;color:#1e3a8a;">$0.00</div>
+      </div>
+      <div style="margin:10px 0;padding:12px;background:#eff6ff;border-radius:8px;">
+        <div style="font-size:12px;color:#1e3a8a;margin-bottom:6px;">⏱ Tiempo restante</div>
+        <div id="vlx-cp-ap-timer" style="font-size:32px;font-weight:800;color:#1e3a8a;font-variant-numeric:tabular-nums;">60:00</div>
+      </div>
+      <div id="vlx-cp-ap-status" style="margin:8px 0;font-size:13px;color:#374151;font-weight:600;">Esperando confirmación bancaria...</div>
+      <div style="margin:10px auto;width:24px;height:24px;border:3px solid #dbeafe;border-top-color:#2563eb;border-radius:50%;animation:vlxCpApSpin 1s linear infinite;"></div>
+      <div style="font-size:10.5px;color:#9ca3af;">Consultando cada 30s al banco...</div>
+    </div>
+    <div style="display:flex;justify-content:center;gap:8px;padding:12px 18px;background:#f9fafb;border-top:1px solid #e5e7eb;">
+      <button type="button" onclick="window.__vlxCpAppPayCancel()" style="padding:9px 14px;border:1px solid #fecaca;background:#fff;color:#b91c1c;border-radius:6px;cursor:pointer;font-weight:600;">Cancelar</button>
+    </div>
+  </div>
+</div>
+<style>@keyframes vlxCpApSpin { to { transform: rotate(360deg); } }</style>
+<script>
+/* FIX-N5-B2 — customer portal: timer 60min + polling externo */
+(function () {
+  'use strict';
+  var st = { total: 0, sale_id: null, deadline: 0, intId: null, pollId: null };
+  function _open(){var e=document.getElementById('vlx-cp-app-pay');if(e)e.style.display='flex';}
+  function _close(){var e=document.getElementById('vlx-cp-app-pay');if(e)e.style.display='none';}
+  function _stop(){if(st.intId){clearInterval(st.intId);st.intId=null;}if(st.pollId){clearInterval(st.pollId);st.pollId=null;}}
+  function _tick(){
+    var rem=Math.max(0,st.deadline-Date.now());
+    var mm=Math.floor(rem/60000),ss=Math.floor((rem%60000)/1000);
+    var t=document.getElementById('vlx-cp-ap-timer');
+    if(t)t.textContent=String(mm).padStart(2,'0')+':'+String(ss).padStart(2,'0');
+    if(rem<=0){_stop();var s=document.getElementById('vlx-cp-ap-status');if(s){s.textContent='Pago expirado';s.style.color='#b91c1c';}alert('Pago expirado. Inicia uno nuevo.');}
+  }
+  async function _poll(){
+    try{
+      var r=await fetch('/api/payments/poll-external/'+encodeURIComponent(st.sale_id));
+      if(!r.ok)return;
+      var d=await r.json().catch(function(){return null;});
+      if(d && (d.status==='confirmed' || d.confirmed===true)){
+        _stop();_close();
+        if(typeof window.showToast==='function')window.showToast('✓ Pago confirmado','success');
+        else alert('✓ Pago confirmado');
+        if(typeof window.__vlxCpOnPayConfirmed==='function')window.__vlxCpOnPayConfirmed(d);
+      }
+    }catch(e){}
+  }
+  window.__vlxCpOpenAppPayModal=function(total,sale_id){
+    st.total=Number(total)||0;
+    st.sale_id=sale_id||('CP-'+Date.now());
+    st.deadline=Date.now()+60*60*1000;
+    var t=document.getElementById('vlx-cp-ap-total');
+    if(t)t.textContent='$'+st.total.toFixed(2);
+    _open();_tick();
+    if(st.intId)clearInterval(st.intId);
+    st.intId=setInterval(_tick,1000);
+    if(st.pollId)clearInterval(st.pollId);
+    st.pollId=setInterval(_poll,30000);
+    _poll();
+  };
+  window.__vlxCpAppPayCancel=function(){
+    if(!confirm('¿Cancelar el pago en proceso?'))return;
+    _stop();_close();
+  };
+})();
+</script>
 </body>
 </html>
