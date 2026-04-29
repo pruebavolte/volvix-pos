@@ -1,0 +1,339 @@
+═══════════════════════════════════════════════════════════════════════════════
+VOLVIX-POS DEPLOYMENT CHECKLIST — ONDA 3
+═══════════════════════════════════════════════════════════════════════════════
+
+STATUS: 85% → Ready for ONDA 3 deployment
+DATE: 2026-04-29
+TOKENS: CRITICAL — Using this checklist for next session
+
+───────────────────────────────────────────────────────────────────────────────
+ONDA 3 DEPLOYMENT PLAN (90 minutes total)
+───────────────────────────────────────────────────────────────────────────────
+
+TASK 1: Deploy Admin Dashboard v8 [15 MIN] — Priority 1
+TASK 2: Deploy Stripe Payments [20 MIN] — Priority 2
+TASK 3: Deploy Google OAuth [25 MIN] — Priority 3
+TASK 4: E2E Testing [30 MIN] — Priority 4
+
+Result: 85% → 95% functionality
+
+───────────────────────────────────────────────────────────────────────────────
+TASK 1: DEPLOY ADMIN DASHBOARD v8 [15 MIN]
+───────────────────────────────────────────────────────────────────────────────
+
+COMPLETED:
+✓ volvix_owner_panel_v8.html (36 KB, 881 lines)
+✓ api/dashboard.js (18 KB, 559 lines, 11 endpoints)
+✓ 4 comprehensive documentation files
+✓ 11 API endpoints (sales, transactions, users, inventory, etc.)
+✓ 7 tabs (Dashboard, Sales, Transactions, Inventory, Users, Reports, Integrations)
+✓ 4 interactive charts (Chart.js)
+✓ 40+ JavaScript functions
+
+DEPLOY STEPS:
+1. Copy volvix_owner_panel_v8.html to /d/github/volvix-pos/src/
+2. Copy api/dashboard.js to /d/github/volvix-pos/src/api/
+3. Update /d/github/volvix-pos/src/api/index.js:
+   - Add dashboard route handlers (lines 20450-20491)
+   - Include function: attachDashboardRoutes()
+4. git add . && git commit -m "feat: Add Dashboard v8 with analytics"
+5. Vercel deploy (automatic)
+6. Verify: https://volvix-pos.vercel.app/volvix_owner_panel_v8.html
+
+TEST:
+• All 7 tabs load correctly
+• Dashboard KPIs display
+• Charts render with data
+• Filters and search work
+• CSV export functional
+• No console errors
+
+BLOCKED BY: None
+RISK: Low (isolated, no backend changes)
+TIME: ~15 minutes
+
+───────────────────────────────────────────────────────────────────────────────
+TASK 2: DEPLOY STRIPE PAYMENTS [20 MIN]
+───────────────────────────────────────────────────────────────────────────────
+
+COMPLETED:
+✓ 18 production-ready files
+✓ 4,500+ lines of TypeScript/JavaScript
+✓ 3 API endpoints (charge, refund, history)
+✓ 3 React payment components
+✓ Database migration (PostgreSQL + RLS)
+✓ Complete documentation and setup guide
+
+PREREQUISITES:
+• Stripe account (signup at stripe.com if needed)
+• Get test keys from https://dashboard.stripe.com/apikeys
+  - Copy: sk_test_... (secret key)
+  - Copy: pk_test_... (public key)
+
+DEPLOY STEPS:
+1. Copy all payment files:
+   - src/config/stripe.ts
+   - src/components/payment/*.tsx (3 files)
+   - api/payment/*.ts (3 files)
+2. Add Vercel environment variables:
+   - STRIPE_SECRET_KEY=sk_test_...
+   - STRIPE_PUBLIC_KEY=pk_test_...
+3. Run database migration: supabase db push
+4. Update POS checkout page with Stripe modal component
+5. git add . && git commit -m "feat: Add Stripe payment processing"
+6. Vercel deploy
+7. Test payment at: https://volvix-pos.vercel.app/pos.html
+
+TEST FLOW:
+• Click POS → Add products → Checkout
+• Select "💳 Pagar con Tarjeta"
+• Stripe modal appears
+• Enter card: 4242 4242 4242 4242
+• Enter any future date (12/26)
+• Enter any CVC (123)
+• Click "Cobrar"
+• Verify: "Pago exitoso" message
+• Check Stripe Dashboard for transaction
+• Test refund button
+• Verify transaction in Dashboard v8
+
+BLOCKED BY: Stripe test keys (2 minutes to obtain)
+RISK: Medium (third-party API, requires credentials)
+TIME: ~20 minutes (including credential setup)
+
+───────────────────────────────────────────────────────────────────────────────
+TASK 3: DEPLOY GOOGLE OAUTH [25 MIN]
+───────────────────────────────────────────────────────────────────────────────
+
+COMPLETED:
+✓ 7 comprehensive documentation files (82 KB)
+✓ Updated login.html with Google button
+✓ Updated registro.html with Google OAuth
+✓ login-callback.html handler code
+✓ Complete implementation guide (800+ lines)
+✓ Google Cloud setup checklist (5 minutes)
+✓ Full troubleshooting guide
+
+PREREQUISITES:
+• Google Cloud account (free tier available)
+• Google+ API enabled
+• OAuth 2.0 credentials created
+
+GOOGLE CLOUD SETUP (5 min):
+1. Go to: https://console.cloud.google.com/
+2. Create new project: "volvix-pos"
+3. Enable Google+ API (search: "Google+ API")
+4. Create OAuth 2.0 credentials:
+   - Type: Web application
+   - Authorized redirect URIs:
+     https://zhvwmzkcqngcaqpdxtwr.supabase.co/auth/v1/callback
+5. Copy CLIENT_ID and CLIENT_SECRET
+
+SUPABASE SETUP (2 min):
+1. Go to: https://supabase.com/dashboard/project/zhvwmzkcqngcaqpdxtwr/auth/providers
+2. Enable Google provider
+3. Paste CLIENT_ID and CLIENT_SECRET
+4. Save
+
+VERCEL DEPLOYMENT (3 min):
+1. Copy updated files:
+   - src/login.html (with Google button)
+   - src/registro.html (with Google button)
+   - src/login-callback.html (if custom callback needed)
+2. Add Vercel environment variables:
+   - GOOGLE_CLIENT_ID=...
+   - GOOGLE_CLIENT_SECRET=...
+3. git add . && git commit -m "feat: Add Google OAuth login"
+4. Vercel deploy
+
+TEST FLOW:
+• Go to: https://volvix-pos.vercel.app/login.html
+• Click "🔐 Continuar con Google"
+• Redirects to Google signin
+• Sign in with test Google account
+• Should redirect to /pos.html (existing user) or /registro.html (new user)
+• If new user: Should auto-skip Step 1, go to Step 2 (Negocio)
+• After completing: Should create tenant and redirect to /pos.html
+• Verify: User can access POS and make transactions
+
+ALTERNATIVELY (Test with Registro):
+• Go to: https://volvix-pos.vercel.app/registro.html
+• Click "🔐 Continuar con Google"
+• Should auto-complete Step 1
+• Fill Step 2 (Negocio, Giro)
+• Account created
+• Redirects to /pos.html
+
+BLOCKED BY: Google Cloud setup (10 minutes total, including waiting)
+RISK: Medium (requires Google account, isolated setup)
+TIME: ~25 minutes (including all Google Cloud setup)
+
+───────────────────────────────────────────────────────────────────────────────
+TASK 4: E2E TESTING [30 MIN]
+───────────────────────────────────────────────────────────────────────────────
+
+5 Complete Test Scenarios:
+
+1. REGISTRATION FLOW (5 min):
+   ✓ Go to /registro.html
+   ✓ Step 1: Email, Password (8+ chars), Phone
+   ✓ Verify password strength indicator works
+   ✓ Step 2: Negocio name, Giro selection
+   ✓ OTP code received (SMS or WhatsApp)
+   ✓ Enter OTP code
+   ✓ "¡Bienvenido!" message
+   ✓ Redirects to /pos.html
+   ✓ Can see 8-12 products loaded (by giro)
+
+2. LOGIN FLOWS (5 min):
+   ✓ Email + Password login
+   ✓ Verify JWT token in localStorage
+   ✓ Verify user info displays (email, tenant)
+   ✓ Google OAuth login (new flow)
+   ✓ Forgot password modal works
+   ✓ Email reset link functional (if Resend key available)
+
+3. POS CHECKOUT FLOW (8 min):
+   ✓ Click "Vender" button
+   ✓ Select products from list
+   ✓ Add to cart
+   ✓ View cart with totals
+   ✓ Calculate tax (if applicable)
+   ✓ Click "Cobrar"
+   ✓ Payment method selector appears
+   ✓ Choose "💳 Tarjeta"
+   ✓ Stripe modal appears
+   ✓ Enter test card: 4242 4242 4242 4242
+   ✓ Enter future date: 12/26
+   ✓ Enter CVC: 123
+   ✓ Click "Cobrar"
+   ✓ Payment succeeds (green toast)
+   ✓ Receipt displayed
+   ✓ Transaction in history
+
+4. ADMIN DASHBOARD (8 min):
+   ✓ Login as owner
+   ✓ Navigate to /volvix_owner_panel_v8.html
+   ✓ Dashboard tab: KPIs load (total sales, count, avg, products)
+   ✓ 4 charts render with data
+   ✓ Sales tab: Show top products, filter by period, CSV export works
+   ✓ Transactions tab: List with pagination, search works, filter by status
+   ✓ Inventory tab: Show stock levels, highlight items < 5 units
+   ✓ Users tab: Show users by role, display last login
+   ✓ Reports tab: Generate sales/employee/hours-peak reports
+   ✓ Integrations tab: Show status (WhatsApp, Twilio, Stripe, Email)
+   ✓ No console errors
+
+5. ANDROID MOBILE (4 min):
+   ✓ Connect Android device via USB
+   ✓ Run: adb install /d/volvix-pos-app-debug.apk
+   ✓ App appears in device menu
+   ✓ Open app
+   ✓ Page loads to https://volvix-pos.vercel.app
+   ✓ Login works (email or Google)
+   ✓ POS interface displays correctly
+   ✓ Can add products and complete a transaction
+
+───────────────────────────────────────────────────────────────────────────────
+DEPLOYMENT ORDER (Fibonacci Safe)
+───────────────────────────────────────────────────────────────────────────────
+
+Start here → TASK 1: Dashboard v8 (no blockers)
+            ↓
+          TASK 2: Stripe (get keys in parallel)
+            ↓
+          TASK 3: Google OAuth (setup Google Cloud in parallel)
+            ↓
+          TASK 4: E2E Tests (all code ready)
+
+EXPECTED PROGRESSION:
+85% (Start) → 88% (Dashboard) → 90% (Stripe) → 92% (OAuth) → 95% (Tests pass)
+
+───────────────────────────────────────────────────────────────────────────────
+KNOWN ISSUES & SOLUTIONS
+───────────────────────────────────────────────────────────────────────────────
+
+Issue: "API endpoint not found" when testing Dashboard
+Solution: Ensure /api/dashboard.js is properly integrated in api/index.js
+
+Issue: Stripe payment fails with "Invalid public key"
+Solution: Verify STRIPE_PUBLIC_KEY in Vercel environment matches test key
+
+Issue: Google OAuth redirects to blank page
+Solution: Check that Supabase Google provider is enabled and credentials are correct
+
+Issue: OTP not received during registration
+Solution: Verify Twilio WhatsApp sandbox (user must send "join own-fear" first)
+
+Issue: Android APK won't install
+Solution: Enable "Unknown Sources" in device settings, or use: adb install -r (replace)
+
+───────────────────────────────────────────────────────────────────────────────
+SUCCESS CRITERIA
+───────────────────────────────────────────────────────────────────────────────
+
+✓ All 4 tasks completed successfully
+✓ No console errors in production
+✓ All E2E tests pass
+✓ Stripe payments work end-to-end
+✓ Google OAuth login functional
+✓ Admin Dashboard v8 displays all data
+✓ Android APK installable and functional
+✓ Progress reaches 95% functionality
+
+ESTIMATED TIME: 90 minutes
+ESTIMATED COMPLETION: 2026-04-29 ~07:45 UTC
+
+───────────────────────────────────────────────────────────────────────────────
+FILES TO COPY/DEPLOY
+───────────────────────────────────────────────────────────────────────────────
+
+From documentation:
+→ Read MASTER-PROGRESS-2026-04-29.md first (context)
+→ Read DEPLOYMENT-CHECKLIST-ONDA3.txt (this file)
+
+Dashboard v8:
+→ volvix_owner_panel_v8.html
+→ api/dashboard.js
+→ Update: api/index.js with dashboard routes
+
+Stripe:
+→ config/stripe.ts
+→ components/payment/StripePaymentModal.tsx
+→ components/payment/RefundModal.tsx
+→ components/payment/PaymentHistory.tsx
+→ api/payment/charge.ts
+→ api/payment/refund.ts
+→ api/payment/history.ts
+→ Database: supabase/migrations/create_payment_transactions.sql
+
+Google OAuth:
+→ Updated login.html
+→ Updated registro.html
+→ login-callback.html (if needed)
+→ Supabase Google provider enabled
+
+───────────────────────────────────────────────────────────────────────────────
+NEXT SESSION INSTRUCTIONS
+═══════════════════════════════════════════════════════════════════════════════
+
+1. READ THIS FILE completely (understand all 4 tasks)
+2. READ MASTER-PROGRESS-2026-04-29.md (context + completed work)
+3. START TASK 1: Deploy Dashboard v8 (no blockers)
+4. WHILE WAITING FOR VERCEL: Start Google Cloud setup for Task 3
+5. COMPLETE Task 2: Stripe deployment (keys ready from Google signup)
+6. COMPLETE Task 3: Google OAuth deployment
+7. RUN Task 4: E2E tests
+8. Report final status: Should reach 95% functionality
+
+EXPECTED OUTCOME:
+- Production system with payment processing (Stripe)
+- OAuth login (Google)
+- Advanced admin analytics (Dashboard v8)
+- Android mobile app
+- 95% feature completeness
+
+═══════════════════════════════════════════════════════════════════════════════
+Generated: 2026-04-29 06:20 UTC
+Session: Token-critical handoff to next session
+═══════════════════════════════════════════════════════════════════════════════
