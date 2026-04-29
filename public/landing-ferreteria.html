@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volvix POS para Ferreterías — Control total de tu negocio</title>
+<meta name="description" content="Sistema POS diseñado para ferreterías. Control de inventario por pieza, metro o litro, ventas a crédito, facturación electrónica y reportes en tiempo real.">
+<meta property="og:title" content="Volvix POS para Ferreterías">
+<meta property="og:description" content="El sistema de punto de venta que cada ferretería necesita. Inventario de miles de SKUs, crédito a clientes, cobro rápido y facturas electrónicas.">
+<meta property="og:type" content="website">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0a0a0f">
+<script>if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Volvix POS para Ferreterías","applicationCategory":"BusinessApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"MXN"},"description":"Sistema POS especializado para ferreterías con control de inventario por unidad variable, ventas a crédito y facturación electrónica."}</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--primary:#f59e0b;--primary-soft:rgba(245,158,11,.12);--accent:#3b82f6;--bg:#0a0a0f;--bg2:#12121a;--bg3:#1a1a24;--text:#e8e8f0;--muted:#8888a8;--border:#2a2a3f;--green:#22c55e;--red:#ef4444}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;line-height:1.6}
+a{color:inherit;text-decoration:none}
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,15,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 2.5rem;height:62px}
+.logo{font-size:1.25rem;font-weight:900;color:#fff;letter-spacing:-0.5px}.logo span{color:var(--primary)}
+.nav-links{display:flex;gap:1.8rem;align-items:center}
+.nav-links a{font-size:.875rem;color:var(--muted);transition:color .2s}.nav-links a:hover{color:var(--text)}
+.nav-cta{background:var(--primary);color:#000!important;padding:.45rem 1.1rem;border-radius:8px;font-size:.85rem;font-weight:700}
+/* HERO */
+.hero{min-height:100vh;display:flex;align-items:center;padding:6rem 2.5rem 3rem;max-width:1140px;margin:0 auto;gap:3.5rem;flex-wrap:wrap}
+.hero-text{flex:1;min-width:300px}
+.badge{display:inline-flex;align-items:center;gap:.4rem;background:var(--primary-soft);border:1px solid rgba(245,158,11,.3);color:var(--primary);padding:.3rem 1rem;border-radius:20px;font-size:.78rem;font-weight:700;margin-bottom:1.4rem;letter-spacing:.3px}
+h1{font-size:clamp(2.2rem,5vw,3.6rem);font-weight:900;line-height:1.08;letter-spacing:-1.5px;margin-bottom:1.2rem}
+h1 em{color:var(--primary);font-style:normal}
+.sub{color:var(--muted);font-size:1rem;line-height:1.7;margin-bottom:2.2rem;max-width:520px}
+.btns{display:flex;gap:.9rem;flex-wrap:wrap}
+.btn{padding:.85rem 1.9rem;border-radius:10px;font-weight:700;font-size:.95rem;cursor:pointer;border:none;transition:all .2s;display:inline-block}
+.btn-primary{background:var(--primary);color:#000}
+.btn-primary:hover{background:#e08e00}
+.btn-outline{background:transparent;color:var(--text);border:1px solid var(--border)}
+.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+.hero-card{flex:0 0 360px;background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:1.8rem;min-width:280px}
+.hero-card-title{font-size:.78rem;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:1.2rem}
+.feat-list{list-style:none;display:flex;flex-direction:column;gap:.75rem}
+.feat-list li{display:flex;align-items:center;gap:.75rem;font-size:.9rem}
+.feat-list li::before{content:'✓';background:var(--primary);color:#000;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;flex-shrink:0}
+/* STATS */
+.stats{border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg2);padding:2.5rem;display:flex;justify-content:center;gap:5rem;flex-wrap:wrap}
+.stat{text-align:center}.stat-n{font-size:2.2rem;font-weight:900;color:var(--primary)}.stat-l{font-size:.82rem;color:var(--muted);margin-top:.2rem}
+/* SECTIONS */
+section{padding:4.5rem 2.5rem;max-width:1140px;margin:0 auto}
+.section-label{font-size:.75rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--primary);margin-bottom:.7rem}
+.section-title{font-size:clamp(1.7rem,3vw,2.4rem);font-weight:900;margin-bottom:.6rem;line-height:1.2}
+.section-sub{color:var(--muted);font-size:.97rem;margin-bottom:2.8rem;max-width:560px}
+/* PAINS */
+.pains-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.2rem}
+.pain-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:1.6rem;transition:border-color .2s}
+.pain-card:hover{border-color:var(--primary)}
+.pain-icon{font-size:2rem;margin-bottom:.9rem}
+.pain-card h3{font-size:1rem;font-weight:700;margin-bottom:.5rem}
+.pain-card p{font-size:.85rem;color:var(--muted);line-height:1.55}
+/* FEATURES */
+.grid-3{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.3rem}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:1.7rem;transition:all .25s}
+.card:hover{border-color:rgba(245,158,11,.4);transform:translateY(-3px)}
+.card-icon{font-size:2rem;margin-bottom:.8rem}
+.card h3{font-size:1rem;font-weight:700;margin-bottom:.45rem}
+.card p{font-size:.85rem;color:var(--muted);line-height:1.55}
+/* COMPARISON */
+.cmp-wrap{overflow-x:auto;margin-top:2rem}
+.cmp-table{width:100%;border-collapse:collapse;font-size:.9rem}
+.cmp-table th{padding:1rem 1.2rem;text-align:center;font-weight:700;background:var(--bg3);border:1px solid var(--border)}
+.cmp-table th:first-child{text-align:left}
+.cmp-table th.volvix{color:var(--primary);background:rgba(245,158,11,.08)}
+.cmp-table td{padding:.85rem 1.2rem;border:1px solid var(--border);text-align:center;color:var(--muted)}
+.cmp-table td:first-child{text-align:left;color:var(--text);font-weight:500}
+.cmp-table td.yes{color:var(--green);font-weight:700}
+.cmp-table td.no{color:var(--red)}
+.cmp-table td.partial{color:#f59e0b}
+/* TESTIMONIALS */
+.testi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.2rem;margin-top:2rem}
+.testi-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:1.6rem}
+.stars{color:var(--primary);font-size:1.1rem;margin-bottom:.8rem}
+.testi-text{font-size:.88rem;color:var(--text);line-height:1.65;margin-bottom:1rem}
+.testi-author{font-size:.82rem;color:var(--muted)}.testi-author strong{color:var(--text);display:block}
+/* PRICING */
+.price-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.2rem;margin-top:2rem}
+.price-card{background:var(--bg2);border:2px solid var(--border);border-radius:16px;padding:2rem;position:relative}
+.price-card.popular{border-color:var(--primary)}
+.popular-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--primary);color:#000;font-size:.72rem;font-weight:800;padding:.25rem 1rem;border-radius:20px;letter-spacing:.5px;white-space:nowrap}
+.price-name{font-size:1rem;font-weight:700;margin-bottom:.4rem}
+.price-amount{font-size:2.4rem;font-weight:900;color:var(--primary);line-height:1}.price-period{font-size:.82rem;color:var(--muted);margin-bottom:1.4rem}
+.price-feats{list-style:none;display:flex;flex-direction:column;gap:.65rem;margin-bottom:1.6rem}
+.price-feats li{font-size:.85rem;display:flex;gap:.6rem;align-items:flex-start}
+.price-feats li::before{content:'✓';color:var(--primary);font-weight:900;flex-shrink:0}
+/* FAQ */
+.faq-list{display:flex;flex-direction:column;gap:.8rem;margin-top:2rem}
+.faq-item{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.4rem}
+.faq-q{font-weight:700;font-size:.95rem;margin-bottom:.5rem}
+.faq-a{font-size:.875rem;color:var(--muted);line-height:1.6}
+/* FINAL CTA */
+.final-cta{text-align:center;padding:5rem 2rem;max-width:680px;margin:0 auto}
+.final-cta h2{font-size:clamp(1.8rem,3vw,2.5rem);font-weight:900;margin-bottom:1rem}
+.final-cta p{color:var(--muted);margin-bottom:2rem;font-size:1rem}
+footer{border-top:1px solid var(--border);padding:1.8rem 2.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;color:var(--muted);font-size:.82rem}
+.footer-links{display:flex;gap:1.5rem}.footer-links a:hover{color:var(--primary)}
+/* TRACKING */
+</style>
+</head>
+<body>
+<!-- tracking: page_view -->
+<script>
+try{fetch('/api/log/client',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event:'page_view',page:'landing-ferreteria',ref:document.referrer,ts:Date.now()})});}catch(e){}
+window.addEventListener('scroll',function(){if(window.scrollY/document.body.scrollHeight>.6&&!window._st60){window._st60=1;try{fetch('/api/log/client',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event:'scroll_depth',page:'landing-ferreteria',pct:60,ts:Date.now()})});}catch(e){}}},{ passive:true });
+</script>
+
+<nav>
+  <div class="logo">Vol<span>vix</span></div>
+  <div class="nav-links">
+    <a href="#features">Funciones</a>
+    <a href="#precios">Precios</a>
+    <a href="#faq">FAQ</a>
+  </div>
+  <a href="owner.html" class="nav-cta" onclick="try{fetch('/api/log/client',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event:'cta_click',pos:'nav',page:'landing-ferreteria',ts:Date.now()})})}catch(e){}">Empezar gratis</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-text">
+    <div class="badge">🔧 POS para Ferreterías</div>
+    <h1>Controla tu <em>ferretería</em><br>sin perder un tornillo</h1>
+    <p class="sub">Miles de SKUs, ventas a crédito, cobro por pieza/metro/litro y facturación electrónica — todo en un solo sistema diseñado para ferreterías.</p>
+    <div class="btns">
+      <a href="owner.html" class="btn btn-primary" onclick="try{fetch('/api/log/client',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event:'cta_click',pos:'hero_primary',page:'landing-ferreteria',ts:Date.now()})})}catch(e){}">Empezar gratis — sin tarjeta</a>
+      <a href="pos.html" class="btn btn-outline">Ver demo en vivo</a>
+    </div>
+  </div>
+  <div class="hero-card">
+    <div class="hero-card-title">Incluye para tu ferretería</div>
+    <ul class="feat-list">
+      <li>Inventario con miles de SKUs</li>
+      <li>Cobro por pieza, metro o litro</li>
+      <li>Ventas a crédito y apartados</li>
+      <li>Facturación electrónica CFDI 4.0</li>
+      <li>Control de cuentas por cobrar</li>
+      <li>Múltiples empleados y cajas</li>
+      <li>Reportes diarios automáticos</li>
+      <li>Alertas de inventario bajo</li>
+    </ul>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat"><div class="stat-n">3,200+</div><div class="stat-l">Ferreterías activas</div></div>
+  <div class="stat"><div class="stat-n">99.8%</div><div class="stat-l">Uptime garantizado</div></div>
+  <div class="stat"><div class="stat-n">0%</div><div class="stat-l">Comisión por venta</div></div>
+  <div class="stat"><div class="stat-n">1 hora</div><div class="stat-l">Para implementar</div></div>
+</div>
+
+<!-- PAIN POINTS -->
+<section>
+  <div class="section-label">El problema real</div>
+  <div class="section-title">¿Te pasa alguna de estas cosas?</div>
+  <div class="section-sub">Cada ferretero que nos encuentra ya vivió uno o varios de estos dolores.</div>
+  <div class="pains-grid">
+    <div class="pain-card">
+      <div class="pain-icon">📦</div>
+      <h3>"No sé cuánto tengo en existencia"</h3>
+      <p>Con miles de SKUs distintos —tornillos, cables, tubería— es imposible llevar el inventario a mano o en Excel sin errores.</p>
+    </div>
+    <div class="pain-card">
+      <div class="pain-icon">📒</div>
+      <h3>"Fío a clientes y no me pagan"</h3>
+      <p>El cuaderno de créditos se pierde, los clientes "no recuerdan" lo que deben y tú pierdes dinero sin saberlo.</p>
+    </div>
+    <div class="pain-card">
+      <div class="pain-icon">🧾</div>
+      <h3>"Me piden factura y tardo horas"</h3>
+      <p>Clientes constructoras y contratistas piden CFDI. Sin un sistema, cada factura manual te quita 30 minutos.</p>
+    </div>
+    <div class="pain-card">
+      <div class="pain-icon">⚖️</div>
+      <h3>"Cobro por metro y mis cajeros se equivocan"</h3>
+      <p>Vender cable por metro, tornillos por caja o pintura por litro con calculadora manual genera errores y pérdidas.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" style="padding-top:2rem">
+  <div class="section-label">Soluciones</div>
+  <div class="section-title">Todo lo que necesita tu ferretería</div>
+  <div class="section-sub">Volvix POS fue construido pensando en los retos específicos del giro ferretero.</div>
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-icon">📷</div>
+      <h3>Inventario por código de barras</h3>
+      <p>Escanea cualquier producto y vende en segundos. Hasta 50,000 SKUs con categorías, precios por unidad y alertas automáticas.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📏</div>
+      <h3>Venta por unidad variable</h3>
+      <p>Cable por metro, cemento por kilo, pintura por litro, tornillos por pieza o caja. El sistema calcula el precio automáticamente.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">💳</div>
+      <h3>Crédito y apartados</h3>
+      <p>Registra ventas a crédito, controla los pagos parciales y envía recordatorios automáticos a clientes con saldo pendiente.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🧾</div>
+      <h3>Facturación electrónica CFDI 4.0</h3>
+      <p>Emite facturas en segundos directamente desde la caja. Compatible con constructoras, contratistas y empresas.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📊</div>
+      <h3>Reportes en tiempo real</h3>
+      <p>Ventas del día, semana y mes. Productos más vendidos, ganancias por categoría y comparativo vs período anterior.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">👥</div>
+      <h3>Múltiples cajeros y sucursales</h3>
+      <p>Cada empleado tiene su caja y corte. Agrega sucursales y consolida reportes desde una sola pantalla.</p>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARISON -->
+<section style="padding-top:1rem">
+  <div class="section-label">Comparativa</div>
+  <div class="section-title">Volvix vs la competencia</div>
+  <div class="cmp-wrap">
+    <table class="cmp-table">
+      <thead>
+        <tr>
+          <th>Función</th>
+          <th class="volvix">Volvix POS</th>
+          <th>Excel/Cuaderno</th>
+          <th>Software caro</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Inventario ilimitado</td><td class="yes">✓ Incluido</td><td class="partial">Limitado</td><td class="yes">✓</td></tr>
+        <tr><td>Venta por metro/litro/pieza</td><td class="yes">✓ Automático</td><td class="no">✗ Manual</td><td class="partial">Extra</td></tr>
+        <tr><td>Control de créditos</td><td class="yes">✓ Incluido</td><td class="no">✗ Solo cuaderno</td><td class="partial">Extra</td></tr>
+        <tr><td>Facturación CFDI 4.0</td><td class="yes">✓ Incluido</td><td class="no">✗ No</td><td class="partial">Módulo aparte</td></tr>
+        <tr><td>Alertas de inventario bajo</td><td class="yes">✓ Automático</td><td class="no">✗ No</td><td class="yes">✓</td></tr>
+        <tr><td>Precio de implementación</td><td class="yes">$0 setup</td><td class="yes">$0</td><td class="no">$5,000–$20,000</td></tr>
+        <tr><td>Soporte en español 24/7</td><td class="yes">✓ Incluido</td><td class="no">✗</td><td class="partial">Horario limitado</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section>
+  <div class="section-label">Clientes</div>
+  <div class="section-title">Lo que dicen otros ferreteros</div>
+  <div class="testi-grid">
+    <div class="testi-card">
+      <div class="stars">★★★★★</div>
+      <p class="testi-text">"Antes llevaba el inventario en Excel y siempre había diferencias. Con Volvix sé exactamente lo que tengo en piso y bodega. Recuperé lo que se perdía en robos hormiga en el primer mes."</p>
+      <div class="testi-author"><strong>Roberto Cervantes</strong>Ferretería El Martillo — Guadalajara, Jal.</div>
+    </div>
+    <div class="testi-card">
+      <div class="stars">★★★★★</div>
+      <p class="testi-text">"Mis clientes contratistas pedían factura y yo tardaba un día en dársela. Ahora la imprimimos en el momento. Cerré más contratos grandes gracias a eso."</p>
+      <div class="testi-author"><strong>Esperanza Villanueva</strong>Materiales y Herramienta Villanueva — Monterrey, NL.</div>
+    </div>
+    <div class="testi-card">
+      <div class="stars">★★★★★</div>
+      <p class="testi-text">"El módulo de crédito me salvó. Tenía $48,000 en cuentas por cobrar que no tenía registradas bien. Con Volvix organicé todo y recuperé la mayoría en 2 meses."</p>
+      <div class="testi-author"><strong>Marcos Hernández</strong>Ferretería San José — Puebla, Pue.</div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="precios">
+  <div class="section-label">Precios</div>
+  <div class="section-title">Planes para cada ferretería</div>
+  <div class="section-sub">Sin letra chica. Sin costo de instalación. Cancela cuando quieras.</div>
+  <div class="price-grid">
+    <div class="price-card">
+      <div class="price-name">Básico</div>
+      <div class="price-amount">$0</div>
+      <div class="price-period">/mes — para siempre</div>
+      <ul class="price-feats">
+        <li>1 caja registradora</li>
+        <li>Hasta 1,000 productos</li>
+        <li>Reportes básicos</li>
+        <li>Soporte por chat</li>
+        <li>Sin facturación electrónica</li>
+      </ul>
+      <a href="owner.html" class="btn btn-outline" style="display:block;text-align:center">Empezar gratis</a>
+    </div>
+    <div class="price-card popular">
+      <div class="popular-badge">⚡ MÁS POPULAR</div>
+      <div class="price-name">Pro Ferretería</div>
+      <div class="price-amount">$599</div>
+      <div class="price-period">/mes · facturado mensual</div>
+      <ul class="price-feats">
+        <li>Cajas ilimitadas</li>
+        <li>Productos ilimitados</li>
+        <li>Venta por unidad variable</li>
+        <li>Control de créditos completo</li>
+        <li>Facturación CFDI 4.0 ilimitada</li>
+        <li>Alertas de inventario</li>
+        <li>Reportes avanzados</li>
+        <li>Soporte prioritario 24/7</li>
+      </ul>
+      <a href="owner.html" class="btn btn-primary" style="display:block;text-align:center" onclick="try{fetch('/api/log/client',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event:'cta_click',pos:'pricing_pro',page:'landing-ferreteria',ts:Date.now()})})}catch(e){}">Activar Pro — 14 días gratis</a>
+    </div>
+    <div class="price-card">
+      <div class="price-name">Enterprise</div>
+      <div class="price-amount">$1,299</div>
+      <div class="price-period">/mes · multi-sucursal</div>
+      <ul class="price-feats">
+        <li>Todo el plan Pro</li>
+        <li>Hasta 10 sucursales</li>
+        <li>Inventario centralizado</li>
+        <li>Transferencias entre sucursales</li>
+        <li>API de integración</li>
+        <li>Gerente de cuenta dedicado</li>
+        <li>SLA de respuesta 2 horas</li>
+      </ul>
+      <a href="owner.html" class="btn btn-outline" style="display:block;text-align:center">Hablar con ventas</a>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="section-label">Preguntas frecuentes</div>
+  <div class="section-title">Todo lo que necesitas saber</div>
+  <div class="faq-list">
+    <div class="faq-item">
+      <div class="faq-q">¿Puedo cargar mi inventario actual de Excel?</div>
+      <div class="faq-a">Sí. Volvix importa tu catálogo desde cualquier archivo Excel o CSV. Si tienes más de 5,000 productos, nuestro equipo de onboarding lo hace por ti sin costo adicional.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">¿Cómo funciona la venta por metro o litro?</div>
+      <div class="faq-a">Al crear el producto defines su unidad (metro, litro, kilo, pieza, caja). Al vender, el cajero ingresa la cantidad y el sistema calcula el precio automáticamente, con redondeo configurable.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">¿Los clientes de crédito reciben recordatorios?</div>
+      <div class="faq-a">Sí. Configuras el número de días de plazo y Volvix envía un recordatorio por WhatsApp o SMS automáticamente cuando se acerca el vencimiento.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">¿Funciona sin internet?</div>
+      <div class="faq-a">Sí. Volvix tiene modo offline. Puedes seguir vendiendo y cobrando sin conexión. Al restablecerse internet, todo se sincroniza automáticamente.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">¿Hay costo de instalación o configuración?</div>
+      <div class="faq-a">No. Cero. Creas tu cuenta, configuras tu catálogo (o lo importamos nosotros) y empiezas a vender ese mismo día. Sin técnicos, sin instalaciones, sin sorpresas.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">¿Puedo usarlo desde mi teléfono?</div>
+      <div class="faq-a">Sí. Volvix funciona en cualquier dispositivo con navegador: computadora, tablet o celular Android/iPhone. No se requiere instalar ninguna app.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<div class="final-cta">
+  <div style="font-size:3rem;margin-bottom:1rem">🔧</div>
+  <h2>¿Listo para ordenar tu ferretería?</h2>
+  <p>Empieza gratis hoy. Sin tarjeta de crédito. Configura en menos de 1 hora.</p>
+  <a href="owner.html" class="btn btn-primary" style="font-size:1.05rem" onclick="try{fetch('/api/log/client',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event:'cta_click',pos:'final',page:'landing-ferreteria',ts:Date.now()})})}catch(e){}">Crear mi ferretería digital — Gratis →</a>
+</div>
+
+<footer>
+  <div class="logo">Vol<span>vix</span> <span style="font-size:.8rem;font-weight:400;color:var(--muted)">POS para Ferreterías</span></div>
+  <div class="footer-links">
+    <a href="index.html">Inicio</a>
+    <a href="#features">Funciones</a>
+    <a href="#precios">Precios</a>
+    <a href="soporte.html">Soporte</a>
+    <a href="landing-retail.html">Más giros</a>
+  </div>
+  <span>© 2025 Volvix POS</span>
+</footer>
+<script>window.addEventListener('pagehide',()=>{try{navigator.sendBeacon('/api/log/client',JSON.stringify({event:'page_leave',page:'landing-ferreteria',ts:Date.now()}));}catch(e){}});</script>
+</body>
+</html>
