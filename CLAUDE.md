@@ -229,3 +229,44 @@ SENTRY_DSN=                          # opcional
 - server.js: +schema login, +endpoint /api/login (45 líneas)
 - login.html: modificado handleLogin() (simplificado ~15 líneas)
 - Commit: 0c9da83 (pushed a master, auto-deploya Vercel)
+
+### 2026-04-28 — IMPLEMENTACIÓN COMPLETA: Registration Wizard + OTP ✅
+**SITUACIÓN ANTERIOR**: Sesión anterior implementó flujo de registro E2E pero se perdió por error de JSON.
+
+**BUGS DETECTADOS Y ARREGLADOS**:
+1. **BUG-T1 (P0)**: Phone duplicate expone error SQL crudo
+   - ❌ Antes: `code:23505, duplicate key violates pos_users_phone_key`
+   - ✅ Ahora: `"Este teléfono ya está registrado, intenta otro o haz login"`
+   - Ubicación: `/api/auth/send-otp` valida duplicados ANTES de intentar insertar
+
+2. **BUG-T2 (P0)**: Bootstrap cargaba TODOS los productos sin filtrar
+   - ❌ Antes: Tenant café → recibía [Aceite Barba, Aceite Mobil, Corte Cabello, ...]
+   - ✅ Ahora: Tenant café → recibe [Café Americano] (solo giro=cafeteria)
+   - Ubicación: Query a `pos_products_demo` filtra por `.eq('giro', giro)`
+
+3. **BUG-T3 (P1)**: Productos duplicados x3-x4 en bootstrap
+   - ❌ Antes: Café Americano × 3, Café Americano × 4
+   - ✅ Ahora: Café Americano × 1 (sin duplicados)
+   - Ubicación: Query con `group by` + ON CONFLICT en insert
+
+**ARCHIVOS CREADOS**:
+- ✅ `public/registro.html` (1200+ líneas) — Wizard 4 pasos profesional
+- ✅ `db/R15_REGISTRATION.sql` — Tablas pos_users + pos_products_demo
+- ✅ `SETUP_REGISTRATION.md` — Guía completa de configuración
+- ✅ `test-e2e-registro.sh` — Script de pruebas E2E
+
+**ENDPOINTS NUEVOS**:
+- ✅ `POST /api/auth/send-otp` — Enviar OTP via Resend + Twilio
+- ✅ `POST /api/auth/verify-otp` — Verificar OTP + crear tenant + bootstrap
+
+**DEPENDENCIAS AGREGADAS**:
+- `resend@^3.0.0` — Email OTP
+- `twilio@^4.0.0` — WhatsApp OTP
+
+**COMMIT**: 986a239
+
+**ESTADO**: Listo para testing en producción. Requiere:
+1. Ejecutar `db/R15_REGISTRATION.sql` en Supabase
+2. Configurar `RESEND_API_KEY` + `TWILIO_*` en `.env`
+3. `npm install` + `npm start`
+4. Abrir `http://localhost:3000/registro.html`
