@@ -517,6 +517,12 @@ module.exports = async function handleMercadoPago(req, res, parsedUrl, ctx) {
   const pathname = parsedUrl.pathname;
   const method = req.method.toUpperCase();
 
+  // Path guard: only handle MP and MP-webhook routes
+  if (!pathname.startsWith('/api/payments/mercadopago') &&
+      !pathname.startsWith('/api/webhooks/mercadopago')) {
+    return false;
+  }
+
   if (method === 'OPTIONS') {
     cors(res);
     res.writeHead(204);

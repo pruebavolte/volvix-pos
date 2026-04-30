@@ -12,6 +12,11 @@ const emailTemplates = require('./email-templates'); // R14
 const handleMercadoPago = require('./payments-mercadopago');
 const handleSTP = require('./payments-stp');
 const handleDelivery = require('./integrations-delivery');
+const handleAI = require('./ai-engine');
+const handleEmail = require('./email-resend');
+const handleRecargasServicios = require('./recargas-servicios');
+const handlePDF = require('./pdf-export');
+const handleCFDI = require('./cfdi-pac');
 
 // =============================================================
 // CONFIG SUPABASE
@@ -692,6 +697,8 @@ function sendJSON(res, data, status = 200) {
   res.setHeader('Cache-Control', 'no-store');
   res.end(JSON.stringify(data));
 }
+// Alias used by the modular handlers (payments, ai, email, cfdi, etc.)
+const sendJson = sendJSON;
 
 // B29.4: Cache-Control para endpoints publicos read-only (catalogos, planes, health)
 // B31.1: ETag support con If-None-Match -> 304 Not Modified
@@ -1430,6 +1437,21 @@ const handlers = {
     } catch (err) {
       sendJSON(res, { ok: true, time: Date.now(), supabase_connected: false });
     }
+  },
+
+  // /api/payments/health — feature-flag style report of which integrations have credentials
+  'GET /api/payments/health': async (req, res) => {
+    sendJSON(res, {
+      mp: !!process.env.MERCADO_PAGO_ACCESS_TOKEN,
+      stp: !!process.env.STP_OWNER_CLABE,
+      stripe: !!process.env.STRIPE_SECRET_KEY,
+      codi: !!process.env.STP_ENTERPRISE_KEY,
+      recargas: !!process.env.PROVIDER_RECARGAS_API_KEY,
+      services: !!process.env.PROVIDER_SERVICES_API_KEY,
+      cfdi: !!(process.env.PAC_API_URL && process.env.PAC_API_USER && process.env.PAC_API_PASSWORD),
+      email: !!process.env.RESEND_API_KEY,
+      ai: !!(process.env.OPENAI_API_KEY || process.env.ANTHROPIC_API_KEY),
+    });
   },
 
   // B32.4: /api/log/client — recibir errores JS del frontend (rate-limited, sin auth)
@@ -12618,6 +12640,11 @@ module.exports = async (req, res) => {
   if (await handleMercadoPago(req, res, parsedUrl, _ctx)) return;
   if (await handleSTP(req, res, parsedUrl, _ctx)) return;
   if (await handleDelivery(req, res, parsedUrl, { supabaseRequest, sendJson })) return;
+  if (await handleAI(req, res, parsedUrl, _ctx)) return;
+  if (await handleEmail(req, res, parsedUrl, _ctx)) return;
+  if (await handleRecargasServicios(req, res, parsedUrl, _ctx)) return;
+  if (await handlePDF(req, res, parsedUrl, _ctx)) return;
+  if (await handleCFDI(req, res, parsedUrl, _ctx)) return;
 
   serveStaticFile(res, pathname);
 };

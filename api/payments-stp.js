@@ -654,6 +654,11 @@ module.exports = async function handleSTP(req, res, parsedUrl, ctx) {
   const { pathname } = parsedUrl;
   const method       = req.method || 'GET';
 
+  // Path guard: only handle STP and STP-webhook routes
+  if (!pathname.startsWith('/api/payments/stp') && !pathname.startsWith('/api/webhooks/stp')) {
+    return false;
+  }
+
   // ── generate-reference ──────────────────────────────────
   if (method === 'POST' && pathname === '/api/payments/stp/generate-reference') {
     await generateReference(req, res, ctx);
