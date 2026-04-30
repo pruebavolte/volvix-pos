@@ -1324,13 +1324,14 @@
       if (ro.ok) {
         var jo = await ro.json();
         var orders = (jo && (jo.items || jo.orders || jo.data)) || [];
+        window.__vendorOrders = orders;
         if (!Array.isArray(orders) || !orders.length) {
           tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-3);padding:30px">Sin órdenes registradas</td></tr>';
         } else {
           tbody.innerHTML = orders.map(function(o){
             var status = (o.status||'').toLowerCase();
             var badge = status === 'delivered' || status === 'entregado' ? 'success' :
-                        status === 'transit' || status === 'en_transito' ? 'info' :
+                        status === 'transit' || status === 'en_transito' || status === 'shipped' ? 'info' :
                         status === 'invoiced' || status === 'facturado' ? 'success' :
                         status === 'rejected' || status === 'rechazado' ? 'danger' : 'warning';
             var fechaTxt = '—';
@@ -1351,6 +1352,205 @@
       var tb2 = document.getElementById('vp-orders-tbody');
       if (tb2) tb2.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-3);padding:30px">Error cargando órdenes</td></tr>';
     }
+
+    // ============ ORDERS PANEL: live table with action buttons ============
+    async function loadOrdersPanel(filter){
+      var tabla = document.querySelector('#panel-orders table tbody');
+      if (!tabla) return;
+      try {
+        var qs = filter && filter !== 'all' ? '?status=' + encodeURIComponent(filter) : '';
+        var r = await fetch('/api/vendor/orders' + qs, { headers });
+        if (!r.ok) { tabla.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-3);padding:30px">No autorizado</td></tr>'; return; }
+        var j = await r.json();
+        var orders = (j && (j.items || j.orders)) || [];
+        if (filter && filter !== 'all') {
+          orders = orders.filter(function(o){ return (o.status||'').toLowerCase() === filter; });
+        }
+        if (!orders.length) {
+          tabla.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-3);padding:30px">Sin órdenes en este filtro</td></tr>';
+          return;
+        }
+        tabla.innerHTML = orders.map(function(o){
+          var st = (o.status||'').toLowerCase();
+          var badge = st==='delivered' ? 'success' : st==='shipped'||st==='transit' ? 'info' :
+                      st==='invoiced' ? 'success' : st==='rejected' ? 'danger' : 'warning';
+          var actionBtn = '';
+          if (st === 'pending') {
+            actionBtn = '<button class="btn btn-success btn-sm" data-vp-action="confirm" data-id="'+o.id+'">Confirmar</button>';
+          } else if (st === 'confirmed') {
+            actionBtn = '<button class="btn btn-primary btn-sm" data-vp-action="ship" data-id="'+o.id+'">Marcar enviada</button>';
+          } else if (st === 'shipped' || st === 'transit') {
+            actionBtn = '<button class="btn btn-success btn-sm" data-vp-action="deliver" data-id="'+o.id+'">Confirmar entrega</button>';
+          } else if (st === 'delivered') {
+            actionBtn = '<button class="btn btn-ghost btn-sm" data-vp-action="invoice" data-id="'+o.id+'" data-amount="'+(o.amount||0)+'">Facturar</button>';
+          } else {
+            actionBtn = '<button class="btn btn-ghost btn-sm">Ver</button>';
+          }
+          var d1='—',d2='—';
+          try { var dd=new Date(o.created_at); if(!isNaN(dd)) d1=dd.toISOString().slice(0,10); } catch(_){}
+          try { var dd2=new Date(o.delivery_date||o.due_date); if(!isNaN(dd2)) d2=dd2.toISOString().slice(0,10); } catch(_){}
+          var itemsCount = Array.isArray(o.items) ? o.items.length : (o.items_count || '—');
+          return '<tr>' +
+            '<td><input type="checkbox"/></td>' +
+            '<td class="td-mono">'+(o.po_number||o.id||'—')+'</td>' +
+            '<td>'+d1+'</td>' +
+            '<td>'+(o.buyer_name||o.branch||o.customer||'—')+'</td>' +
+            '<td>'+itemsCount+'</td>' +
+            '<td class="td-amount">'+fmt$(Number(o.amount||o.total||0))+'</td>' +
+            '<td>'+d2+'</td>' +
+            '<td><span class="badge badge-'+badge+'">'+(o.status_label||o.status||'—')+'</span></td>' +
+            '<td>'+actionBtn+'</td>' +
+          '</tr>';
+        }).join('');
+      } catch(e){ console.warn('[vendor-portal] orders fail', e); }
+    }
+    loadOrdersPanel('all');
+
+    // Wire inner-tabs of #panel-orders to filter
+    (function(){
+      var tabsEl = document.querySelector('#panel-orders .tabs');
+      if (!tabsEl) return;
+      var labels = ['all','pending','confirmed','shipped','delivered','rejected'];
+      tabsEl.querySelectorAll('.tab').forEach(function(btn, idx){
+        btn.addEventListener('click', function(){ loadOrdersPanel(labels[idx] || 'all'); });
+      });
+    })();
+
+    // Action buttons inside orders panel (delegated)
+    document.addEventListener('click', async function(ev){
+      var btn = ev.target.closest('[data-vp-action]');
+      if (!btn) return;
+      var act = btn.dataset.vpAction;
+      var id = btn.dataset.id;
+      if (!id) return;
+      try {
+        if (act === 'confirm') {
+          await fetch('/api/vendor/pos/'+id, { method:'PATCH', headers:Object.assign({'Content-Type':'application/json'},headers), body: JSON.stringify({status:'confirmed'}) });
+        } else if (act === 'ship') {
+          var trk = prompt('Tracking number (opcional):') || '';
+          await fetch('/api/vendor/pos/'+id, { method:'PATCH', headers:Object.assign({'Content-Type':'application/json'},headers), body: JSON.stringify({status:'shipped', tracking_number: trk}) });
+        } else if (act === 'deliver') {
+          await fetch('/api/vendor/pos/'+id+'/confirm-delivery', { method:'POST', headers:Object.assign({'Content-Type':'application/json'},headers), body: JSON.stringify({}) });
+        } else if (act === 'invoice') {
+          var num = prompt('Folio CFDI / invoice number:'); if (!num) return;
+          var amt = btn.dataset.amount || '';
+          await fetch('/api/vendor/pos/'+id+'/invoice', { method:'POST', headers:Object.assign({'Content-Type':'application/json'},headers), body: JSON.stringify({invoice_number:num, amount:Number(amt)||null}) });
+        }
+        loadOrdersPanel('all');
+      } catch(e){ alert('Error: ' + (e.message||e)); }
+    });
+
+    // ============ INVOICES PANEL: PO selector + upload ============
+    (function wireInvoices(){
+      var sel = document.querySelector('#panel-invoices select.form-control');
+      var btn = document.querySelector('#panel-invoices button.btn-primary');
+      var notes = document.querySelector('#panel-invoices textarea.form-control');
+      if (sel) {
+        sel.innerHTML = '<option value="">Cargando POs entregadas…</option>';
+        var pending = (window.__vendorOrders || []).filter(function(o){
+          var s = (o.status||'').toLowerCase();
+          return s === 'delivered' || s === 'shipped';
+        });
+        if (pending.length) {
+          sel.innerHTML = pending.map(function(o){
+            return '<option value="'+o.id+'">'+(o.po_number||o.id)+' — '+(o.buyer_name||'—')+' — '+fmt$(Number(o.amount||0))+'</option>';
+          }).join('');
+        } else {
+          sel.innerHTML = '<option value="">Sin POs disponibles para facturar</option>';
+        }
+      }
+      if (btn) {
+        btn.addEventListener('click', async function(){
+          if (!sel || !sel.value) { alert('Selecciona una PO'); return; }
+          var num = prompt('Número de factura / Folio CFDI:'); if (!num) return;
+          var uuid = prompt('UUID CFDI (opcional):') || '';
+          try {
+            var r = await fetch('/api/vendor/pos/'+sel.value+'/invoice', {
+              method: 'POST',
+              headers: Object.assign({'Content-Type':'application/json'}, headers),
+              body: JSON.stringify({
+                invoice_number: num,
+                invoice_url: uuid ? ('cfdi:'+uuid) : null,
+                notes: notes ? notes.value : ''
+              })
+            });
+            var jr = await r.json();
+            alert(r.ok ? 'Factura enviada a validación' : ('Error: ' + (jr.error || r.status)));
+          } catch(e){ alert('Error: ' + (e.message||e)); }
+        });
+      }
+      // Recientes — usa /api/vendor/invoices
+      (async function(){
+        try {
+          var r = await fetch('/api/vendor/invoices', { headers });
+          if (!r.ok) return;
+          var j = await r.json();
+          var items = (j && j.items) || [];
+          var tb = document.querySelector('#panel-invoices table tbody');
+          if (!tb) return;
+          if (!items.length) { tb.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-3);padding:20px">Sin facturas</td></tr>'; return; }
+          tb.innerHTML = items.map(function(o){
+            return '<tr><td class="td-mono">'+(o.invoice_number||'—')+'</td>'+
+                   '<td class="td-amount">'+fmt$(Number(o.invoice_amount||o.amount||0))+'</td>'+
+                   '<td><span class="badge badge-success">'+(o.status||'invoiced')+'</span></td></tr>';
+          }).join('');
+        } catch(e){}
+      })();
+    })();
+
+    // ============ PAYMENTS PANEL ============
+    (async function wirePayments(){
+      try {
+        var r = await fetch('/api/vendor/payouts', { headers });
+        if (!r.ok) return;
+        var j = await r.json();
+        var items = (j && j.items) || [];
+        var tb = document.querySelector('#panel-payments table tbody');
+        if (!tb) return;
+        if (!items.length) { tb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-3);padding:20px">Sin pagos registrados</td></tr>'; return; }
+        tb.innerHTML = items.map(function(p){
+          var st = (p.status||'').toLowerCase();
+          var badge = st==='paid'||st==='liquidado' ? 'success' : st==='delivered' ? 'success' : 'info';
+          var lbl = st==='invoiced' ? 'Programado' : st==='delivered' ? 'Por programar' : (st==='paid' ? 'Liquidado' : st);
+          var d='—'; try { var dd=new Date(p.delivery_date||p.paid_at||p.created_at); if(!isNaN(dd)) d=dd.toISOString().slice(0,10); }catch(_){}
+          return '<tr><td class="td-mono">'+(p.po_number||p.id||'—')+'</td>'+
+                 '<td>'+d+'</td>'+
+                 '<td>'+(p.invoice_number||'—')+'</td>'+
+                 '<td class="td-amount td-strong">'+fmt$(Number(p.amount||0))+'</td>'+
+                 '<td>—</td>'+
+                 '<td><span class="badge badge-'+badge+'">'+lbl+'</span></td></tr>';
+        }).join('');
+        // KPIs
+        var paidYTD = items.filter(function(x){return (x.status||'').toLowerCase()==='paid';}).reduce(function(s,x){return s+Number(x.amount||0);},0);
+        var pending = items.filter(function(x){var s=(x.status||'').toLowerCase();return s!=='paid';}).reduce(function(s,x){return s+Number(x.amount||0);},0);
+        var kpis = document.querySelectorAll('#panel-payments .kpi .kpi-value');
+        if (kpis[0]) kpis[0].textContent = fmt$(paidYTD);
+        if (kpis[1]) kpis[1].textContent = fmt$(pending);
+      } catch(e){}
+    })();
+
+    // ============ PROFILE PANEL ============
+    (async function wireProfile(){
+      try {
+        var r = await fetch('/api/vendor/me', { headers });
+        if (!r.ok) return;
+        var j = await r.json();
+        var v = j.vendor || {};
+        var map = {
+          razon_social: v.razon_social || v.name || '—',
+          rfc: v.rfc || '—',
+          id: v.id || '—',
+          tier: v.tier || 'standard',
+          contacto: v.contact_name || v.contact_email || '—',
+          terminos: v.payment_terms || '—',
+          cuenta: v.bank_clabe ? (v.bank_name || '') + ' · ' + String(v.bank_clabe).slice(-6).padStart(10,'•') : (v.bank_account || '—')
+        };
+        Object.keys(map).forEach(function(k){
+          var el = document.querySelector('[data-vp="'+k+'"]');
+          if (el) el.textContent = map[k];
+        });
+      } catch(e){}
+    })();
   })();
 </script>
   <script defer src="auth-helper.js"></script>

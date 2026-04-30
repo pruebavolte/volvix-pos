@@ -20241,6 +20241,82 @@ if (process.env.NODE_ENV === 'test') {
   }));
 
   // ===========================================================================
+  // VENDOR PORTAL — additional endpoints (PATCH profile + top products + monthly)
+  // ===========================================================================
+  // PATCH /api/vendor/me — vendor updates own fiscal/contact data
+  handlers['PATCH /api/vendor/me'] = requireAuth(async function (req, res) {
+    try {
+      if (!b43mIsVendorRole(req)) return sendJSON(res, { error: 'forbidden', need_role: 'vendor+' }, 403);
+      var vendor = await _b43mResolveVendorByUser(req.user.id);
+      if (!vendor) return sendJSON(res, { error: 'no_vendor_record_for_user' }, 404);
+      var body = await readBody(req, { maxBytes: 16 * 1024, strictJson: true });
+      var allowed = ['name','rfc','razon_social','contact_name','contact_email','contact_phone',
+                     'payment_terms','bank_name','bank_account','bank_clabe','address','notes'];
+      var patch = {};
+      allowed.forEach(function (k) {
+        if (body[k] !== undefined) patch[k] = body[k] === null ? null : String(body[k]).slice(0, 300);
+      });
+      if (Object.keys(patch).length === 0) return sendJSON(res, { error: 'no_changes' }, 400);
+      patch.updated_at = new Date().toISOString();
+      var upd = null;
+      try {
+        upd = await supabaseRequest('PATCH',
+          '/volvix_vendors?id=eq.' + encodeURIComponent(vendor.id), patch);
+      } catch (e) { return sendError(res, e); }
+      try { logAudit(req, 'vendor.profile.updated', 'volvix_vendors', { id: vendor.id, after: patch }); } catch (_) {}
+      sendJSON(res, { ok: true, vendor: (upd && upd[0]) || upd });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // GET /api/vendor/stats/top-products — top 5 productos vendidos
+  handlers['GET /api/vendor/stats/top-products'] = requireAuth(async function (req, res) {
+    try {
+      var vendor = await _b43mResolveVendorByUser(req.user.id);
+      if (!vendor) return sendJSON(res, { ok: true, items: [] });
+      // Source: volvix_vendor_pos rows have a JSONB items[] column with {sku,name,qty,price}
+      var pos = await supabaseRequest('GET',
+        '/volvix_vendor_pos?vendor_id=eq.' + encodeURIComponent(vendor.id) +
+        '&select=items,amount,status,created_at&limit=500').catch(function () { return []; });
+      var arr = Array.isArray(pos) ? pos : [];
+      var agg = {};
+      arr.forEach(function (po) {
+        var items = po && po.items;
+        if (!Array.isArray(items)) return;
+        items.forEach(function (it) {
+          var key = (it && (it.sku || it.product_id || it.name)) || 'unknown';
+          if (!agg[key]) agg[key] = { sku: it.sku || null, name: it.name || key, qty: 0, revenue: 0 };
+          agg[key].qty += Number(it.qty || it.quantity || 1);
+          agg[key].revenue += Number(it.price || it.unit_price || 0) * Number(it.qty || it.quantity || 1);
+        });
+      });
+      var top = Object.values(agg).sort(function (a, b) { return b.revenue - a.revenue; }).slice(0, 5);
+      sendJSON(res, { ok: true, items: top });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // GET /api/vendor/stats/monthly — ventas mes a mes (últimos 12 meses)
+  handlers['GET /api/vendor/stats/monthly'] = requireAuth(async function (req, res) {
+    try {
+      var vendor = await _b43mResolveVendorByUser(req.user.id);
+      if (!vendor) return sendJSON(res, { ok: true, items: [] });
+      var pos = await supabaseRequest('GET',
+        '/volvix_vendor_pos?vendor_id=eq.' + encodeURIComponent(vendor.id) +
+        '&select=amount,status,created_at&limit=1000').catch(function () { return []; });
+      var arr = Array.isArray(pos) ? pos : [];
+      var bucket = {};
+      arr.forEach(function (p) {
+        var d = new Date(p.created_at);
+        if (isNaN(d)) return;
+        var k = d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0');
+        bucket[k] = (bucket[k] || 0) + Number(p.amount || 0);
+      });
+      var keys = Object.keys(bucket).sort().slice(-12);
+      var items = keys.map(function (k) { return { period: k, revenue: Number(bucket[k].toFixed(2)) }; });
+      sendJSON(res, { ok: true, items: items });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // ===========================================================================
   // FIX 3 — PROMOTIONS: wire applyPromoToSale into POST /api/sales
   // ===========================================================================
   // global.applyPromoToSale exists at api/index.js:9581 but was NEVER called.
