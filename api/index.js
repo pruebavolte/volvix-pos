@@ -31355,5 +31355,23 @@ if (process.env.NODE_ENV === 'test') {
     }, ['superadmin']);
   }
 
+  // GET /api/dashboard — unified dashboard alias (used by volvix_owner_panel_v8.html)
+  if (!handlers['GET /api/dashboard']) {
+    handlers['GET /api/dashboard'] = requireAuth(async function (req, res) {
+      // Delegate to /api/owner/dashboard if admin/owner, else /api/dashboard/today for cajero
+      const role = req.user.role;
+      if (role === 'cajero' || role === 'cashier') {
+        // Cajero gets today's KPIs
+        return handlers['GET /api/dashboard/today'] ?
+          handlers['GET /api/dashboard/today'](req, res, {}) :
+          sendJSON(res, { ok: true, role, message: 'cajero dashboard' });
+      }
+      // Owner/admin/superadmin get the full owner dashboard
+      return handlers['GET /api/owner/dashboard'] ?
+        handlers['GET /api/owner/dashboard'](req, res, {}) :
+        sendJSON(res, { ok: true, role, message: 'dashboard stub' });
+    }, ['owner', 'admin', 'superadmin', 'cajero', 'manager']);
+  }
+
 })();
 
