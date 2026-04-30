@@ -13,11 +13,7 @@
    Versioning: cambia CACHE_VERSION para forzar refresh global.
 ============================================================ */
 
-<<<<<<< HEAD
 const CACHE_VERSION  = 'volvix-v8.1.0';
-=======
-const CACHE_VERSION  = 'volvix-v8.0.0';
->>>>>>> origin/master
 const CACHE_STATIC   = CACHE_VERSION + '-static';
 const CACHE_PAGES    = CACHE_VERSION + '-pages';
 const CACHE_API      = CACHE_VERSION + '-api';

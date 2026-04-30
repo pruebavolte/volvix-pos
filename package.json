@@ -1,18 +1,11 @@
 {
-<<<<<<< HEAD
   "name": "volvix-saas",
   "version": "7.0.0",
   "description": "Volvix · SaaS POS multi-giro · Offline-first · IA autónoma · Web + Android + Windows + Mac",
-=======
-  "name": "volvix-pos",
-  "version": "1.0.0",
-  "description": "Volvix - Sistema POS multi-tenant autónomo con IA",
->>>>>>> origin/master
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-<<<<<<< HEAD
     "prod": "NODE_ENV=production node server.js",
     "build": "echo 'Volvix ready'",
     "build:android": "node build-apps.js android",
@@ -64,16 +57,7 @@
     "@capacitor/preferences": "^8.0.1",
     "@capacitor/share": "^8.0.1",
     "@capacitor/splash-screen": "^8.0.1",
-    "@capacitor/status-bar": "^8.0.2"
-  },
-  "devDependencies": {
-    "@playwright/test": "^1.59.1",
-    "electron": "^33.0.0",
-    "electron-builder": "^25.1.8"
-=======
-    "build": "echo 'No build step needed'"
-  },
-  "dependencies": {
+    "@capacitor/status-bar": "^8.0.2",
     "@supabase/supabase-js": "^2.39.0",
     "dotenv": "^16.4.0",
     "open": "^10.1.0",
@@ -81,8 +65,9 @@
     "resend": "^3.0.0",
     "twilio": "^4.0.0"
   },
-  "engines": {
-    "node": ">=18.0.0"
->>>>>>> origin/master
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
   }
 }
