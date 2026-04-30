@@ -1059,11 +1059,17 @@ function resolveOwnerPosUserId(tenantId) {
 // ARCHIVOS ESTÁTICOS
 // =============================================================
 function findFile(filename) {
-  const possibleRoots = [
+  const baseRoots = [
     path.join(__dirname, '..'), path.join(process.cwd()), '/var/task',
     __dirname, path.join(__dirname, '..', '..'),
     '/var/task/api', path.join(process.cwd(), '..')
   ];
+  // Search each root AND its public/ subdirectory (files may be in public/)
+  const possibleRoots = [];
+  baseRoots.forEach(function(r) {
+    possibleRoots.push(r);
+    possibleRoots.push(path.join(r, 'public'));
+  });
   for (const root of possibleRoots) {
     try {
       const fullPath = path.join(root, filename);
