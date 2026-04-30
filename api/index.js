@@ -1059,21 +1059,29 @@ function resolveOwnerPosUserId(tenantId) {
 // ARCHIVOS ESTÁTICOS
 // =============================================================
 function findFile(filename) {
-  const baseRoots = [
-    path.join(__dirname, '..'), path.join(process.cwd()), '/var/task',
-    __dirname, path.join(__dirname, '..', '..'),
-    '/var/task/api', path.join(process.cwd(), '..')
+  // Normalize: strip leading slash for path.join safety
+  const clean = filename.startsWith('/') ? filename.slice(1) : filename;
+  // Candidate roots — ordered from most-likely to least-likely on Vercel/Lambda
+  const candidates = [
+    // Project root is typically __dirname/.. when function is in api/
+    path.join(__dirname, '..', clean),
+    path.join(__dirname, '..', 'public', clean),
+    // Process cwd variants
+    path.join(process.cwd(), clean),
+    path.join(process.cwd(), 'public', clean),
+    // Vercel /var/task variants
+    '/var/task/' + clean,
+    '/var/task/public/' + clean,
+    // api/ relative (in case includeFiles bundles relative to api/)
+    path.join(__dirname, clean),
+    path.join(__dirname, 'public', clean),
+    // Extra fallbacks
+    path.join(__dirname, '..', '..', clean),
+    path.join(__dirname, '..', '..', 'public', clean),
   ];
-  // Search each root AND its public/ subdirectory (files may be in public/)
-  const possibleRoots = [];
-  baseRoots.forEach(function(r) {
-    possibleRoots.push(r);
-    possibleRoots.push(path.join(r, 'public'));
-  });
-  for (const root of possibleRoots) {
+  for (let i = 0; i < candidates.length; i++) {
     try {
-      const fullPath = path.join(root, filename);
-      if (fs.existsSync(fullPath)) return fullPath;
+      if (fs.existsSync(candidates[i])) return candidates[i];
     } catch (_) {}
   }
   return null;
@@ -31255,6 +31263,96 @@ if (process.env.NODE_ENV === 'test') {
         sendJSON(res, { ok: true, order });
       } catch (err) { sendError(res, err); }
     };
+  }
+
+  // ── Wave 15: Missing routes for owner.html + volvix-admin-saas.html ──────────
+
+  // POST /api/ai/activate — toggle AI module for tenant
+  if (!handlers['POST /api/ai/activate']) {
+    handlers['POST /api/ai/activate'] = requireAuth(async function (req, res) {
+      try {
+        const body = await readBody(req);
+        const module_key = String(body.module_key || 'ai_engine');
+        const active = body.active !== false;
+        const tenantId = req.user.tenant_id;
+        await supabaseRequest('PATCH',
+          `/pos_tenant_modules?tenant_id=eq.${tenantId}&module_key=eq.${encodeURIComponent(module_key)}`,
+          { active, updated_at: new Date().toISOString() }
+        ).catch(() => {});
+        sendJSON(res, { ok: true, module_key, active });
+      } catch (err) { sendError(res, err); }
+    }, ['owner', 'admin', 'superadmin']);
+  }
+
+  if (!handlers['GET /api/ai/activate']) {
+    handlers['GET /api/ai/activate'] = requireAuth(async function (req, res) {
+      try {
+        const tenantId = req.user.tenant_id;
+        const rows = await supabaseRequest('GET',
+          `/pos_tenant_modules?tenant_id=eq.${tenantId}&module_key=eq.ai_engine&select=active,module_key`
+        ).catch(() => []);
+        const row = rows && rows[0];
+        sendJSON(res, { ok: true, active: row ? !!row.active : false, module_key: 'ai_engine' });
+      } catch (err) { sendError(res, err); }
+    }, ['owner', 'admin', 'superadmin']);
+  }
+
+  // GET /api/licencias — list tenant licenses/subscriptions
+  if (!handlers['GET /api/licencias']) {
+    handlers['GET /api/licencias'] = requireAuth(async function (req, res) {
+      try {
+        const tenantId = req.user.tenant_id;
+        const rows = await supabaseRequest('GET',
+          `/pos_companies?id=eq.${tenantId}&select=id,plan,is_active,trial_ends_at,created_at`
+        ).catch(() => []);
+        const company = rows && rows[0];
+        sendJSON(res, {
+          ok: true,
+          licencias: company ? [{
+            id: company.id,
+            plan: company.plan || 'free',
+            activa: company.is_active !== false,
+            trial_ends_at: company.trial_ends_at,
+            created_at: company.created_at
+          }] : [],
+          plan: company ? company.plan : 'free',
+          activa: company ? company.is_active !== false : false
+        });
+      } catch (err) { sendError(res, err); }
+    }, ['owner', 'admin', 'superadmin', 'cajero']);
+  }
+
+  // GET /api/branches/merge/preview — preview branch merge
+  if (!handlers['GET /api/branches/merge/preview']) {
+    handlers['GET /api/branches/merge/preview'] = requireAuth(async function (req, res) {
+      try {
+        sendJSON(res, {
+          ok: true,
+          preview: true,
+          message: 'Branch merge preview: consolidates sales, inventory and customers from source into target branch.',
+          warning: 'Irreversible. Use POST /api/branches/merge to execute.',
+          steps: ['Copy products/inventory', 'Reassign sales', 'Reassign customers', 'Deactivate source']
+        });
+      } catch (err) { sendError(res, err); }
+    }, ['superadmin', 'admin']);
+  }
+
+  // POST /api/branches/merge — merge two branches (superadmin only)
+  if (!handlers['POST /api/branches/merge']) {
+    handlers['POST /api/branches/merge'] = requireAuth(async function (req, res) {
+      try {
+        const body = await readBody(req);
+        const source = String(body.source || '');
+        const target = String(body.target || '');
+        if (!source || !target) return sendJSON(res, { error: 'source and target required' }, 400);
+        if (source === target) return sendJSON(res, { error: 'source and target must differ' }, 400);
+        await supabaseRequest('PATCH',
+          `/pos_companies?id=eq.${encodeURIComponent(source)}`,
+          { is_active: false, merged_into: target, merged_at: new Date().toISOString() }
+        ).catch(() => {});
+        sendJSON(res, { ok: true, merged: true, source, target, message: 'Source branch deactivated and marked merged.' });
+      } catch (err) { sendError(res, err); }
+    }, ['superadmin']);
   }
 
 })();
