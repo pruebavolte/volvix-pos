@@ -714,6 +714,45 @@
       arr.unshift(id);
       STATE.recents = arr.slice(0, 5);
       saveJSON('vlx-launcher-recents', STATE.recents);
+      // B44: persist to backend (best-effort, non-blocking)
+      try {
+        let token = null;
+        try { token = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken'); } catch (_) {}
+        if (token) {
+          fetch('/api/user/recent-apps', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            credentials: 'include',
+            body: JSON.stringify({ app_id: id })
+          }).catch(() => {});
+        }
+      } catch (_) {}
+    }
+
+    // B44: hydrate recents from backend on first load (overrides localStorage
+    // if backend has more recent data). Falls back silently.
+    async function hydrateRecentsFromBackend() {
+      try {
+        let token = null;
+        try { token = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken'); } catch (_) {}
+        if (!token) return;
+        const r = await fetch('/api/user/recent-apps', {
+          headers: { 'Authorization': 'Bearer ' + token },
+          credentials: 'include'
+        });
+        if (!r.ok) return;
+        const j = await r.json();
+        const recents = (j && j.recents) || [];
+        if (recents.length) {
+          // Merge: backend wins for ordering; cap at 5
+          const ids = recents.map(x => x.app_id).filter(Boolean).slice(0, 5);
+          if (ids.length) {
+            STATE.recents = ids;
+            saveJSON('vlx-launcher-recents', ids);
+            renderSections();
+          }
+        }
+      } catch (_) {}
     }
 
     // ------- THEME -------
@@ -802,6 +841,8 @@
       initTheme();
       renderHeader();
       renderSections();
+      // B44: backend-persisted recents (overrides localStorage if available)
+      hydrateRecentsFromBackend();
 
       document.getElementById('searchInput').addEventListener('input', (e) => {
         STATE.query = e.target.value;

@@ -31751,6 +31751,23 @@ if (process.env.NODE_ENV === 'test') {
     }, ['superadmin']);
   }
 
+  // B44: Remote terminals + sync replay + user recent apps wiring
+  try {
+    const remoteTerminals = require('./remote-terminals');
+    if (remoteTerminals && typeof remoteTerminals.install === 'function') {
+      remoteTerminals.install(handlers, {
+        requireAuth,
+        supabaseRequest,
+        sendJSON,
+        sendError,
+        readBody,
+        crypto,
+      });
+    }
+  } catch (e) {
+    try { console.warn('[remote-terminals] install failed:', e && e.message); } catch (_) {}
+  }
+
   // GET /api/dashboard — unified dashboard alias (used by volvix_owner_panel_v8.html)
   if (!handlers['GET /api/dashboard']) {
     handlers['GET /api/dashboard'] = requireAuth(async function (req, res) {

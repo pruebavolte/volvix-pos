@@ -4,8 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Volvix POS · Welcome Wizard</title>
-<!-- B37 Security hardening: auth-gate (any authenticated user) -->
-<script src="/auth-gate.js"></script>
+<meta name="description" content="Wizard de bienvenida de Volvix POS. Te lleva al setup inicial de tu cuenta en cinco pasos.">
+<meta name="robots" content="noindex,nofollow">
+<!-- B44: 301-style redirect via meta refresh + JS fallback. SEO preserved
+     because <title> + <meta description> remain on the wrapper. -->
+<meta http-equiv="refresh" content="0; url=/volvix-onboarding-v2.html">
+<link rel="canonical" href="/volvix-onboarding-v2.html">
 <style>
   *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,sans-serif}
   body{min-height:100vh;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;padding:20px;color:#fff;text-align:center}
@@ -21,17 +25,15 @@
   <div class="card">
     <div class="spinner"></div>
     <h1>Bienvenido a Volvix POS</h1>
-    <p>Cargando tu wizard de configuración...</p>
+    <p>Redirigiendo al wizard de configuración...</p>
     <a href="/volvix-onboarding-v2.html">Ir manualmente al wizard</a>
   </div>
 <script>
-  // Redirige a la versión v2 (R12-O-3-B). El wizard antiguo se reemplazó
-  // por el nuevo welcome wizard de 5 pasos.
+  // JS fallback: si el meta refresh falla (raro), forzar redirect inmediato.
+  // Mantiene la query string para preservar parámetros de tracking/onboarding.
   (function () {
     var qs = window.location.search || '';
-    setTimeout(function () {
-      window.location.replace('/volvix-onboarding-v2.html' + qs);
-    }, 350);
+    window.location.replace('/volvix-onboarding-v2.html' + qs);
   })();
 </script>
 </body>

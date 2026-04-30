@@ -168,6 +168,7 @@
       </button>
 
       <div class="exit-row">
+        <button class="exit-btn" id="probeBtn">Probar conexión</button>
         <button class="exit-btn" id="syncNowBtn" disabled>Sincronizar ahora</button>
         <button class="exit-btn primary" id="exitEmergencyBtn" disabled>Salir de emergencia</button>
       </div>
@@ -644,7 +645,86 @@
     window.location.href = '/login.html';
   });
 
-  window.addEventListener('online',  function(){ isOnline = true;  probeServer().then(trySync); });
+  // B44: Botón "Probar conexión" → /api/health + intento de sync inmediato
+  $('probeBtn').addEventListener('click', function(){
+    var btn = $('probeBtn');
+    var orig = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Probando…';
+    probeServer().then(function(ok){
+      if (ok) {
+        btn.textContent = '✓ Servidor OK';
+        // Drenar cola general localStorage si existe (B44 sync replay)
+        drainLocalStorageQueue();
+        return trySync();
+      } else {
+        btn.textContent = '✗ Sin servidor';
+      }
+    }).catch(function(){
+      btn.textContent = '✗ Error';
+    }).finally(function(){
+      setTimeout(function(){ btn.textContent = orig; btn.disabled = false; }, 1800);
+    });
+  });
+
+  // B44: drainLocalStorageQueue — drena `volvix_offline_queue` (cola
+  // genérica usada por otros módulos) llamando a /api/sync/replay.
+  // Backoff exponencial por item: si falla, retry_count++ y si supera 5
+  // se descarta para no bloquear el queue eternamente.
+  function drainLocalStorageQueue(){
+    var KEY = 'volvix_offline_queue';
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return Promise.resolve({ ok:true, drained:0 });
+      var queue = JSON.parse(raw);
+      if (!Array.isArray(queue) || !queue.length) return Promise.resolve({ ok:true, drained:0 });
+      var batch = queue.slice(0, 50).map(function(op){
+        return {
+          method: op.method || 'POST',
+          path: op.path,
+          body: op.body || {},
+          idempotency_key: op.idempotency_key || null
+        };
+      });
+      return fetch('/api/sync/replay', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + AUTH.token
+        },
+        body: JSON.stringify({ operations: batch })
+      }).then(function(r){
+        if (!r.ok) throw new Error('replay_failed: ' + r.status);
+        return r.json();
+      }).then(function(resp){
+        // Items con ok:true → eliminar del queue. Falls → retry_count++.
+        var keep = [];
+        var results = resp.results || [];
+        for (var i = 0; i < queue.length; i++) {
+          var res = results[i];
+          if (i < batch.length && res && res.ok) continue;
+          var item = queue[i];
+          item.retry_count = (item.retry_count || 0) + 1;
+          if (item.retry_count < 5) keep.push(item);
+        }
+        // Items más allá del batch quedan intactos para próxima ronda
+        var remaining = keep.concat(queue.slice(50));
+        if (remaining.length) localStorage.setItem(KEY, JSON.stringify(remaining));
+        else localStorage.removeItem(KEY);
+        return { ok: true, drained: (resp.replayed || 0) };
+      }).catch(function(e){
+        // Network/server error: backoff. No tocamos queue, próximo probe reintenta.
+        return { ok: false, error: String(e && e.message || e) };
+      });
+    } catch (_) { return Promise.resolve({ ok:false, error:'parse_failed' }); }
+  }
+
+  window.addEventListener('online',  function(){
+    isOnline = true;
+    probeServer().then(function(ok){
+      if (ok) { drainLocalStorageQueue(); trySync(); }
+    });
+  });
   window.addEventListener('offline', function(){ isOnline = false; updateConnUI(); });
 
   // -------- User info en topbar (FIX-9a-2) --------
