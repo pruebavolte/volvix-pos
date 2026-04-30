@@ -360,16 +360,55 @@
         <div class="form-group">
           <label>Tipo de negocio *</label>
           <div class="giro-select-grid">
-            <div class="giro-option" data-giro="cafeteria">☕ Cafetería</div>
-            <div class="giro-option" data-giro="barberia">💇 Barbería</div>
             <div class="giro-option" data-giro="restaurante">🍽️ Restaurante</div>
-            <div class="giro-option" data-giro="farmacia">💊 Farmacia</div>
+            <div class="giro-option" data-giro="cafeteria">☕ Cafetería</div>
+            <div class="giro-option" data-giro="taqueria">🌮 Taquería</div>
+            <div class="giro-option" data-giro="pizzeria">🍕 Pizzería</div>
             <div class="giro-option" data-giro="heladeria">🍦 Heladería</div>
+            <div class="giro-option" data-giro="pasteleria">🎂 Pastelería</div>
+            <div class="giro-option" data-giro="panaderia">🥖 Panadería</div>
+            <div class="giro-option" data-giro="abarrotes">🛒 Abarrotes</div>
+            <div class="giro-option" data-giro="minisuper">🏪 Minisuper</div>
+            <div class="giro-option" data-giro="tienda-conveniencia">🏪 Conveniencia</div>
+            <div class="giro-option" data-giro="farmacia">💊 Farmacia</div>
             <div class="giro-option" data-giro="ferreteria">🔨 Ferretería</div>
-            <div class="giro-option" data-giro="tienda-ropa">👕 Tienda Ropa</div>
+            <div class="giro-option" data-giro="barberia">💇 Barbería</div>
             <div class="giro-option" data-giro="salon-belleza">💄 Salón Belleza</div>
+            <div class="giro-option" data-giro="belleza">💅 Belleza</div>
+            <div class="giro-option" data-giro="nails">💅 Nails</div>
+            <div class="giro-option" data-giro="spa">🧖 Spa</div>
+            <div class="giro-option" data-giro="tienda-ropa">👕 Ropa</div>
+            <div class="giro-option" data-giro="zapateria">👟 Zapatería</div>
             <div class="giro-option" data-giro="hotel">🏨 Hotel</div>
             <div class="giro-option" data-giro="taller">🔧 Taller</div>
+            <div class="giro-option" data-giro="taller-mecanico">🚗 Taller Mecánico</div>
+            <div class="giro-option" data-giro="carwash">🚿 Car Wash</div>
+            <div class="giro-option" data-giro="gym">💪 Gym</div>
+            <div class="giro-option" data-giro="gimnasio">💪 Gimnasio</div>
+            <div class="giro-option" data-giro="veterinaria">🐾 Veterinaria</div>
+            <div class="giro-option" data-giro="dental">🦷 Dental</div>
+            <div class="giro-option" data-giro="salud">🏥 Salud</div>
+            <div class="giro-option" data-giro="optica">👓 Óptica</div>
+            <div class="giro-option" data-giro="fruteria">🍎 Frutería</div>
+            <div class="giro-option" data-giro="carniceria">🥩 Carnicería</div>
+            <div class="giro-option" data-giro="polleria">🍗 Pollería</div>
+            <div class="giro-option" data-giro="tortilleria">🫓 Tortillería</div>
+            <div class="giro-option" data-giro="dulceria">🍬 Dulcería</div>
+            <div class="giro-option" data-giro="purificadora">💧 Purificadora</div>
+            <div class="giro-option" data-giro="lavanderia">👕 Lavandería</div>
+            <div class="giro-option" data-giro="papeleria">📝 Papelería</div>
+            <div class="giro-option" data-giro="educacion">🎓 Educación</div>
+            <div class="giro-option" data-giro="electronica">📱 Electrónica</div>
+            <div class="giro-option" data-giro="tienda-celulares">📱 Celulares</div>
+            <div class="giro-option" data-giro="muebleria">🛋️ Mueblería</div>
+            <div class="giro-option" data-giro="refaccionaria">⚙️ Refaccionaria</div>
+            <div class="giro-option" data-giro="gasolinera">⛽ Gasolinera</div>
+            <div class="giro-option" data-giro="agencia-viajes">✈️ Agencia Viajes</div>
+            <div class="giro-option" data-giro="rentas">🏠 Rentas</div>
+            <div class="giro-option" data-giro="tatuajes">🎨 Tatuajes</div>
+            <div class="giro-option" data-giro="alimentos">🍱 Alimentos</div>
+            <div class="giro-option" data-giro="servicios">🛠️ Servicios</div>
+            <div class="giro-option" data-giro="retail">🛍️ Retail</div>
           </div>
           <input type="hidden" id="giro" required>
         </div>
@@ -481,6 +520,20 @@
         document.getElementById('giro').value = this.dataset.giro;
       });
     });
+
+    // Pre-seleccionar giro desde URL param (?giro=restaurante)
+    (function() {
+      try {
+        const giroParam = new URLSearchParams(window.location.search).get('giro');
+        if (giroParam) {
+          const match = document.querySelector(`.giro-option[data-giro="${giroParam}"]`);
+          if (match) {
+            match.click();
+            match.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }
+      } catch(_) {}
+    })();
 
     // Navegación de pasos
     function goToStep(step) {
