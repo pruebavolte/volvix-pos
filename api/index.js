@@ -31143,6 +31143,40 @@ if (process.env.NODE_ENV === 'test') {
   })();
 
   // ================================================================
+  // EMERGENCY SYNC — volvix-emergency-mode.html
+  // Bulk upload of offline-queued sales when back online
+  // ================================================================
+  if (!handlers['POST /api/sales/emergency-sync']) {
+    handlers['POST /api/sales/emergency-sync'] = requireAuth(async function (req, res) {
+      try {
+        const body = await readBody(req, { maxBytes: 512 * 1024 }).catch(() => ({}));
+        const sales = Array.isArray(body && body.sales) ? body.sales : [];
+        if (!sales.length) return sendJSON(res, { ok: true, synced: 0, failed: 0 });
+        const tenantId = resolveTenant(req);
+        const userId = req.user && req.user.id;
+        let synced = 0, failed = 0;
+        for (const s of sales) {
+          try {
+            await supabaseRequest('POST', '/pos_sales', {
+              id: s.id || undefined,
+              tenant_id: tenantId,
+              pos_user_id: userId,
+              total: s.total || 0,
+              payment_method: s.payment_method || 'efectivo',
+              items: s.items || [],
+              created_at: s.created_at || new Date().toISOString(),
+              source: 'emergency_sync',
+              status: 'completed',
+            });
+            synced++;
+          } catch (_) { failed++; }
+        }
+        sendJSON(res, { ok: true, synced, failed, device_id: body.device_id || null });
+      } catch (err) { sendError(res, err); }
+    });
+  }
+
+  // ================================================================
   // SHOP ROUTES — volvix-shop.html
   // Customer-facing public storefront
   // ================================================================
