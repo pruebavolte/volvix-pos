@@ -3,41 +3,763 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Volvix POS — API Docs</title>
-  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
+  <title>Volvix POS · API Docs</title>
   <style>
-    body { margin: 0; background: #fafafa; }
-    .topbar { display: none; }
-    #swagger-ui { max-width: 1400px; margin: 0 auto; }
-    .header { background: #0f172a; color: #fff; padding: 14px 24px; font-family: system-ui, sans-serif; }
-    .header strong { font-size: 18px; }
-    .header a { color: #93c5fd; margin-left: 14px; text-decoration: none; }
+    :root{
+      --bg:#0a0a0a; --surface:#11131a; --surface2:#15171f; --border:#23262f;
+      --text:#e7e9ee; --text-2:#9aa0aa; --amber:#FBBF24; --navy:#1E3A8A;
+      --green:#10b981; --red:#ef4444; --blue:#3b82f6;
+      --code:#13151c;
+      --mono:ui-monospace,SFMono-Regular,Consolas,Menlo,monospace;
+      --sans:Inter,system-ui,-apple-system,Segoe UI,sans-serif;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.55}
+    a{color:var(--amber);text-decoration:none}
+    a:hover{text-decoration:underline}
+    code,pre{font-family:var(--mono);font-size:12.5px}
+    pre{background:var(--code);border:1px solid var(--border);border-radius:8px;padding:12px;overflow:auto;margin:6px 0}
+    .layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+    aside{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;background:var(--surface);border-right:1px solid var(--border);padding:18px 14px}
+    .brand{display:flex;align-items:center;gap:10px;padding:6px 8px 14px;border-bottom:1px solid var(--border);margin-bottom:12px}
+    .brand .logo{width:28px;height:28px;border-radius:8px;background:var(--amber);color:#000;display:flex;align-items:center;justify-content:center;font-weight:800}
+    .brand .name{font-weight:700;font-size:14px}
+    .brand .ver{font-size:11px;color:var(--text-2)}
+    .search{width:100%;padding:9px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px;outline:none;margin-bottom:14px}
+    .search:focus{border-color:var(--amber)}
+    nav h4{margin:14px 8px 6px;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--text-2);font-weight:700}
+    nav a.section{display:block;padding:6px 10px;border-radius:6px;color:var(--text);font-size:13px}
+    nav a.section:hover{background:var(--surface2);text-decoration:none}
+    nav a.section.active{background:rgba(251,191,36,.10);color:var(--amber)}
+    main{padding:28px 36px 80px;max-width:1080px}
+    h1{font-size:26px;margin:0 0 4px}
+    h2{font-size:20px;margin:34px 0 8px;padding-top:10px;border-top:1px solid var(--border)}
+    h2:first-of-type{border-top:0;padding-top:0}
+    h3{font-size:14.5px;margin:18px 0 6px;color:var(--amber)}
+    .lead{color:var(--text-2);margin:0 0 14px}
+    .badges{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+    .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:600;border:1px solid var(--border);background:var(--surface2);color:var(--text-2)}
+    .badge.ok{color:#a7f3d0;border-color:#065f46}
+    .badge.auth{color:#fde68a;border-color:#92400e}
+    .endpoint{border:1px solid var(--border);background:var(--surface);border-radius:10px;padding:14px 16px;margin:10px 0}
+    .endpoint .row1{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .method{display:inline-block;padding:3px 8px;border-radius:6px;font-weight:700;font-size:11px;font-family:var(--mono);min-width:54px;text-align:center}
+    .method.GET{background:rgba(59,130,246,.18);color:#93c5fd}
+    .method.POST{background:rgba(16,185,129,.18);color:#6ee7b7}
+    .method.PATCH{background:rgba(251,191,36,.18);color:var(--amber)}
+    .method.DELETE{background:rgba(239,68,68,.18);color:#fca5a5}
+    .path{font-family:var(--mono);font-size:13px;color:var(--text);background:var(--code);padding:3px 8px;border-radius:6px;border:1px solid var(--border)}
+    .auth-tag{font-size:11px;color:var(--amber);margin-left:auto}
+    .auth-tag.public{color:#86efac}
+    .desc{color:var(--text-2);margin:8px 0 6px;font-size:13px}
+    details{margin:6px 0 0}
+    details summary{cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;padding:4px 0}
+    details[open] summary{color:var(--amber)}
+    .hide{display:none !important}
+    .topbar{display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--border);padding:0 0 16px;margin-bottom:18px}
+    .topbar .ver{font-size:11px;color:var(--text-2)}
+    .pill{display:inline-block;padding:2px 8px;border-radius:999px;background:rgba(251,191,36,.10);color:var(--amber);font-size:11px;font-weight:600;border:1px solid rgba(251,191,36,.25)}
+    .footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--border);color:var(--text-2);font-size:12px}
+    @media (max-width:880px){.layout{grid-template-columns:1fr}aside{position:relative;height:auto;border-right:0;border-bottom:1px solid var(--border)}main{padding:18px}}
   </style>
 </head>
 <body>
-  <div class="header">
-    <strong>Volvix POS · API Docs</strong>
-    <a href="/api/openapi.yaml">Spec YAML</a>
-    <a href="/api/health">Health</a>
+  <div class="layout">
+    <aside>
+      <div class="brand">
+        <div class="logo">V</div>
+        <div>
+          <div class="name">Volvix POS</div>
+          <div class="ver">API Reference</div>
+        </div>
+      </div>
+      <input id="search" class="search" type="search" placeholder="Buscar endpoint…  (e.g. /sales)" autocomplete="off">
+      <nav id="nav">
+        <h4>Dominios</h4>
+        <a class="section" href="#auth">Autenticación</a>
+        <a class="section" href="#products">Productos</a>
+        <a class="section" href="#sales">Ventas</a>
+        <a class="section" href="#customers">Clientes</a>
+        <a class="section" href="#cuts">Cortes (Z)</a>
+        <a class="section" href="#reports">Reportes (PDF)</a>
+        <a class="section" href="#payments-mp">Pagos · Mercado Pago</a>
+        <a class="section" href="#payments-stp">Pagos · STP / SPEI</a>
+        <a class="section" href="#payments-stripe">Pagos · Stripe</a>
+        <a class="section" href="#ai">AI Engine</a>
+        <a class="section" href="#email">Email (Resend)</a>
+        <a class="section" href="#cfdi">CFDI / SAT</a>
+        <a class="section" href="#labels">Etiquetas</a>
+        <a class="section" href="#giros">Giros</a>
+        <a class="section" href="#recargas">Recargas / Servicios</a>
+        <a class="section" href="#integrations">Delivery (Webhooks)</a>
+        <a class="section" href="#customer-portal">Customer Portal</a>
+        <a class="section" href="#status">Status / Uptime</a>
+      </nav>
+      <div class="footer">
+        Auth: <code>Authorization: Bearer &lt;token&gt;</code><br>
+        Tenant: <code>X-Tenant-Id</code><br>
+        <a href="/api/openapi.yaml">openapi.yaml</a> ·
+        <a href="/api/health">health</a>
+      </div>
+    </aside>
+
+    <main>
+      <div class="topbar">
+        <h1>Volvix POS · API</h1>
+        <span class="pill">v1</span>
+        <span class="ver">Base URL: <code>https://&lt;tu-dominio&gt;</code></span>
+      </div>
+      <p class="lead">
+        Referencia de los endpoints HTTP/JSON expuestos por el backend serverless de Volvix POS.
+        Todos los endpoints autenticados requieren <code>Authorization: Bearer &lt;jwt&gt;</code>.
+        El header <code>X-Tenant-Id</code> es opcional (se infiere del token si está ausente).
+        Las respuestas son JSON salvo donde se indica explícitamente PDF/XML.
+      </p>
+
+      <!-- AUTH -->
+      <h2 id="auth">Autenticación</h2>
+      <div class="endpoint" data-text="POST /api/auth/login login session token">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/auth/login</span><span class="auth-tag public">público</span></div>
+        <div class="desc">Intercambia email/password por un JWT y datos de sesión.</div>
+        <details><summary>Request &amp; Response</summary>
+<pre>{
+  "email": "owner@tienda.com",
+  "password": "••••••••"
+}</pre>
+<pre>{
+  "ok": true,
+  "access_token": "eyJ...",
+  "user": { "id": "u_1", "email": "...", "role": "owner", "tenant_id": "t_1" },
+  "expires_at": 1714521600000
+}</pre>
+        </details>
+      </div>
+      <div class="endpoint" data-text="POST /api/auth/register signup">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/auth/register</span><span class="auth-tag public">público</span></div>
+        <div class="desc">Crea un tenant + usuario owner. Usa <code>/api/email/otp</code> para verificar correo.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/auth/refresh">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/auth/refresh</span><span class="auth-tag public">público</span></div>
+        <div class="desc">Renueva el JWT a partir de un refresh_token vigente.</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/auth/me current user">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/auth/me</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Devuelve el usuario y tenant asociado al token activo.</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/health">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/health</span><span class="auth-tag public">público</span></div>
+        <div class="desc">Latido del servicio. <code>{ ok: true, version: "..." }</code>.</div>
+      </div>
+
+      <!-- PRODUCTS -->
+      <h2 id="products">Productos</h2>
+      <div class="endpoint" data-text="GET /api/products list inventory">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/products</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Lista productos del tenant. Soporta <code>?q=</code>, <code>?low_stock=1</code>, <code>?limit=</code>, <code>?branch_id=</code>. Alias en español: <code>/api/productos</code>.</div>
+        <details><summary>Response</summary>
+<pre>[
+  { "id":"p_1","name":"Coca 600ml","code":"7501055303045","price":25,"stock":124 }
+]</pre>
+        </details>
+      </div>
+      <div class="endpoint" data-text="POST /api/products create item">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/products</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Crea un producto. Detecta duplicados por <code>code</code> (sugiere <code>force_create=true</code> o <code>merge</code>).</div>
+        <details><summary>Body</summary>
+<pre>{ "name":"Pan dulce","code":"PD-001","price":8.5,"cost":4,"stock":50,"category":"Panadería" }</pre>
+        </details>
+      </div>
+      <div class="endpoint" data-text="PATCH /api/products/:id update product">
+        <div class="row1"><span class="method PATCH">PATCH</span><span class="path">/api/products/:id</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Actualiza campos parciales. Mantiene <code>cost-history</code> al cambiar <code>cost</code>.</div>
+      </div>
+      <div class="endpoint" data-text="DELETE /api/products/:id">
+        <div class="row1"><span class="method DELETE">DELETE</span><span class="path">/api/products/:id</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Soft-delete del producto.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/products/import bulk csv">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/products/import</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Importación transaccional CSV/JSON. Inserta todo o nada.</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/products/by-barcode lookup">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/products/by-barcode</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Búsqueda por código de barras: <code>?barcode=7501...</code>.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/products/:id/merge">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/products/:id/merge</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Fusiona dos SKUs en uno. <code>?into=&lt;other_id&gt;</code>.</div>
+      </div>
+
+      <!-- SALES -->
+      <h2 id="sales">Ventas</h2>
+      <div class="endpoint" data-text="GET /api/sales ventas list">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/sales</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Lista ventas. Filtros: <code>?from=</code>, <code>?to=</code>, <code>?branch_id=</code>, <code>?customer_id=</code>.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/sales create venta">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/sales</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Crea una venta. Soporta idempotency-key. Alias: <code>/api/ventas</code>.</div>
+        <details><summary>Body</summary>
+<pre>{
+  "items":[{"product_id":"p_1","qty":2,"price":25}],
+  "payment_method":"efectivo",
+  "total":50,
+  "customer_id":"c_1"
+}</pre>
+        </details>
+      </div>
+      <div class="endpoint" data-text="GET /api/sales/:id detail">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/sales/:id</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Detalle de una venta con items y pagos asociados.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/sales/:id/refund">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/sales/:id/refund</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Devolución total/parcial. Reabastece inventario.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/sales/emergency-sync offline">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/sales/emergency-sync</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Sube ventas en cola desde el modo offline.</div>
+      </div>
+
+      <!-- CUSTOMERS -->
+      <h2 id="customers">Clientes</h2>
+      <div class="endpoint" data-text="GET /api/customers clientes">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/customers</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Lista clientes con paginación (<code>?limit=</code>, <code>?offset=</code>). Alias: <code>/api/clientes</code>.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/customers create">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/customers</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Crea cliente. Detecta duplicados por <code>email</code>/<code>phone</code>.</div>
+      </div>
+      <div class="endpoint" data-text="PATCH /api/customers/:id update">
+        <div class="row1"><span class="method PATCH">PATCH</span><span class="path">/api/customers/:id</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Actualización parcial.</div>
+      </div>
+      <div class="endpoint" data-text="DELETE /api/customers/:id">
+        <div class="row1"><span class="method DELETE">DELETE</span><span class="path">/api/customers/:id</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Soft-delete del cliente.</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/customers/:id/payments credit history">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/customers/:id/payments</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Historial de movimientos de crédito (cargos/abonos).</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/customers/:id/payments abono">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/customers/:id/payments</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Registra cargo o abono al saldo de crédito.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/customers/:id/merge">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/customers/:id/merge</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Fusiona dos clientes. <code>?into=&lt;other_id&gt;</code>.</div>
+      </div>
+
+      <!-- CUTS -->
+      <h2 id="cuts">Cortes Z (Cierre de Caja)</h2>
+      <div class="endpoint" data-text="POST /api/cuts/open turno apertura">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/cuts/open</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Abre turno con fondo inicial. Idempotente.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/cuts/close cierre z">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/cuts/close</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Cierra turno y emite Corte Z. Bloquea si hay ventas pendientes.</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/cuts list">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/cuts</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Lista cortes históricos del tenant.</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/cuts/:id summary">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/cuts/:id/summary</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Resumen detallado de un corte.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/cuts/:id/adjustment ajuste">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/cuts/:id/adjustment</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Registra ajuste auditable; queda PENDIENTE hasta aprobación de owner.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/cuts/:id/reopen">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/cuts/:id/reopen</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Reabre un corte cerrado para corregir. Bloquea impresión Z hasta re-cierre.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/cortes spanish alias wave9">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/cortes</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Alias legacy en español usado por <code>pos-corte.html</code>. Persiste a <code>pos_cortes</code>.</div>
+      </div>
+
+      <!-- REPORTS -->
+      <h2 id="reports">Reportes (PDF)</h2>
+      <div class="endpoint" data-text="GET /api/reports/sales/pdf">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/reports/sales/pdf</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Reporte de ventas en PDF. Query: <code>?from=</code>, <code>?to=</code>, <code>?download=1</code>.</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/reports/inventory/pdf">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/reports/inventory/pdf</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Inventario actual con stock y costos.</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/reports/customers/pdf">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/reports/customers/pdf</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Listado de clientes y saldos.</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/reports/cash-cut/pdf corte z">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/reports/cash-cut/pdf</span><span class="auth-tag">auth</span></div>
+        <div class="desc">PDF del Corte Z. <code>?cut_id=</code>.</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/reports/profit/pdf utilidad">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/reports/profit/pdf</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Reporte de utilidades (precio − costo).</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/reports/kardex/pdf">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/reports/kardex/pdf</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Kardex por SKU. <code>?product_id=</code>, <code>?from=</code>, <code>?to=</code>.</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/reports/cfdi/pdf">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/reports/cfdi/pdf</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Listado de CFDI emitidos en el rango.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/reports/custom/pdf">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/reports/custom/pdf</span><span class="auth-tag">auth</span></div>
+        <div class="desc">PDF personalizado a partir de un body con columnas/filtros.</div>
+      </div>
+
+      <!-- PAYMENTS MP -->
+      <h2 id="payments-mp">Pagos · Mercado Pago</h2>
+      <div class="endpoint" data-text="POST /api/payments/mercadopago/preference checkout">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/payments/mercadopago/preference</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Crea una preferencia de Checkout Pro. Devuelve <code>init_point</code>.</div>
+        <details><summary>Body</summary>
+<pre>{ "items":[{"title":"Plan Pro","quantity":1,"unit_price":799}],
+  "metadata":{"sale_id":"s_1"} }</pre>
+        </details>
+      </div>
+      <div class="endpoint" data-text="POST /api/payments/mercadopago/subscription">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/payments/mercadopago/subscription</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Crea suscripción recurrente (preapproval).</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/payments/mercadopago/status/:payment_id">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/payments/mercadopago/status/:payment_id</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Estado de un pago (approved / rejected / pending).</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/payments/mercadopago/configure">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/payments/mercadopago/configure</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Activa/desactiva el gateway. <code>{ enabled: true }</code>.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/webhooks/mercadopago">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/webhooks/mercadopago</span><span class="auth-tag public">público</span></div>
+        <div class="desc">Webhook IPN de Mercado Pago. No requiere auth (verifica firma).</div>
+      </div>
+
+      <!-- PAYMENTS STP -->
+      <h2 id="payments-stp">Pagos · STP / SPEI</h2>
+      <div class="endpoint" data-text="POST /api/payments/stp/generate-reference clabe spei">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/payments/stp/generate-reference</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Genera CLABE/referencia única para cobro SPEI.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/payments/stp/qr-codi">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/payments/stp/qr-codi</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Genera QR CoDi para cobro inmediato.</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/payments/stp/verify/:reference">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/payments/stp/verify/:reference</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Consulta estado de cobro por referencia.</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/payments/stp/pending/:tenant_id">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/payments/stp/pending/:tenant_id</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Lista cobros pendientes del tenant.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/payments/stp/configure">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/payments/stp/configure</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Configura credenciales/firma del tenant.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/webhooks/stp">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/webhooks/stp</span><span class="auth-tag public">público</span></div>
+        <div class="desc">Webhook STP. Marca cobro como pagado y dispara realtime.</div>
+      </div>
+
+      <!-- PAYMENTS STRIPE -->
+      <h2 id="payments-stripe">Pagos · Stripe</h2>
+      <div class="endpoint" data-text="POST /api/payments/stripe/checkout">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/payments/stripe/checkout</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Crea Checkout Session. Devuelve URL para redirección.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/payments/stripe/configure">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/payments/stripe/configure</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Activa/desactiva Stripe. Requiere <code>STRIPE_SECRET_KEY</code>.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/webhooks/stripe">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/webhooks/stripe</span><span class="auth-tag public">público</span></div>
+        <div class="desc">Webhook Stripe (verifica firma con <code>STRIPE_WEBHOOK_SECRET</code>).</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/payments/health">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/payments/health</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Estado consolidado de todos los gateways (MP/STP/Stripe/QR).</div>
+      </div>
+
+      <!-- AI -->
+      <h2 id="ai">AI Engine</h2>
+      <div class="endpoint" data-text="POST /api/ai/chat openai claude">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/ai/chat</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Chat genérico. Soporta <code>messages: [...]</code> (preferido) o <code>message</code>. Si no hay API keys, devuelve <code>provider: "mock"</code>.</div>
+        <details><summary>Body</summary>
+<pre>{ "messages":[{"role":"user","content":"Hola"}],
+  "system":"Eres asistente de Volvix" }</pre>
+        </details>
+      </div>
+      <div class="endpoint" data-text="POST /api/ai/forecast prediccion ventas">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/ai/forecast</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Pronóstico de ventas a 7/14/30 días. Body: <code>{ days, product_ids? }</code>.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/ai/reorder-suggestions">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/ai/reorder-suggestions</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Sugerencias de reabasto basadas en histórico.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/ai/sales-insights">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/ai/sales-insights</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Insights por periodo: <code>7d</code>, <code>30d</code>, <code>90d</code>.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/ai/support-chat">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/ai/support-chat</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Chat de soporte con prompt especializado y flag <code>escalate_to_human</code>.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/ai/categorize-product">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/ai/categorize-product</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Sugiere categoría desde el nombre del producto.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/ai/generate-description">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/ai/generate-description</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Genera descripción de producto para tienda online.</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/ai/health">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/ai/health</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Estado de proveedores configurados (OpenAI/Anthropic/mock).</div>
+      </div>
+
+      <!-- EMAIL -->
+      <h2 id="email">Email (Resend)</h2>
+      <div class="endpoint" data-text="POST /api/email/otp registration">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/email/otp</span><span class="auth-tag public">público (rate-limited)</span></div>
+        <div class="desc">Envía OTP de registro. Body: <code>{ email, code }</code>.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/email/welcome">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/email/welcome</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Email de bienvenida post-registro.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/email/receipt sale">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/email/receipt</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Envía recibo de venta al cliente. Body: <code>{ sale_id, to }</code>.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/email/cfdi xml pdf">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/email/cfdi</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Envía CFDI (XML + PDF) por email.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/email/password-reset">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/email/password-reset</span><span class="auth-tag public">público</span></div>
+        <div class="desc">Envía link de reset de contraseña.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/email/send generic">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/email/send</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Envío genérico. Body: <code>{ to, subject, html, text? }</code>.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/email/test">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/email/test</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Email de prueba al usuario autenticado.</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/email/health">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/email/health</span><span class="auth-tag public">público</span></div>
+        <div class="desc">Estado de Resend (configured / missing API key).</div>
+      </div>
+
+      <!-- CFDI -->
+      <h2 id="cfdi">CFDI / SAT</h2>
+      <div class="endpoint" data-text="POST /api/cfdi/preview">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/cfdi/preview</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Vista previa del XML antes de timbrar.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/cfdi/stamp timbrado">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/cfdi/stamp</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Timbra CFDI vía PAC. Body: <code>{ sale_id, rfc, regimen?, uso_cfdi? }</code>. Devuelve <code>uuid</code>.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/cfdi/cancel cancelacion">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/cfdi/cancel</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Cancela CFDI. Requiere motivo SAT (01–04).</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/cfdi/list">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/cfdi/list</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Lista CFDIs emitidos. Filtros por estado/fecha.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/cfdi/csd/upload sello">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/cfdi/csd/upload</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Sube Certificado de Sello Digital (.cer + .key + password).</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/cfdi/email send xml pdf">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/cfdi/email</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Envía CFDI al cliente (XML + PDF) por correo.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/cfdi/public-link">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/cfdi/public-link</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Genera link público temporal para descarga del CFDI.</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/cfdi/sat-catalogs/:nombre">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/cfdi/sat-catalogs/:nombre</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Catálogos SAT (ClaveProdServ, Unidades, RegimenFiscal, etc.).</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/cfdi/health">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/cfdi/health</span><span class="auth-tag public">público</span></div>
+        <div class="desc">Estado de la conexión con el PAC.</div>
+      </div>
+
+      <!-- LABELS -->
+      <h2 id="labels">Etiquetas</h2>
+      <div class="endpoint" data-text="POST /api/labels/print zpl printer">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/labels/print</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Imprime etiqueta. Soporta ZPL/EPL/PDF y formatos 40×25 / 50×30 / 100×50 mm. Body: <code>{ format, sku, name, price, qty, template? }</code>.</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/labels/preview">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/labels/preview</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Vista previa: <code>?format=zpl&amp;sku=...&amp;name=...&amp;price=...&amp;qty=1</code>.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/printer/raw bridge">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/printer/raw</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Envía bytes raw a impresora vía Volvix Print Bridge (<code>127.0.0.1:9101</code>). Auditable.</div>
+      </div>
+
+      <!-- GIROS -->
+      <h2 id="giros">Giros</h2>
+      <div class="endpoint" data-text="GET /api/giros list industries">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/giros</span><span class="auth-tag public">público</span></div>
+        <div class="desc">Lista todos los giros con landing dedicada (<code>landing-*.html</code>).</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/giros/search fuzzy match">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/giros/search</span><span class="auth-tag public">público</span></div>
+        <div class="desc">Match difuso: <code>?q=panaderia</code> → <code>{ exists, slug, landing }</code>.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/giros/generate ai landing">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/giros/generate</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Genera landing personalizada con IA o stub si no hay <code>OPENAI_API_KEY</code>.</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/giros/:slug/exists">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/giros/:slug/exists</span><span class="auth-tag public">público</span></div>
+        <div class="desc"><code>{ exists: true|false, slug }</code>.</div>
+      </div>
+
+      <!-- RECARGAS -->
+      <h2 id="recargas">Recargas / Servicios</h2>
+      <div class="endpoint" data-text="GET /api/recargas/carriers telcel movistar att">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/recargas/carriers</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Lista compañías y montos disponibles.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/recargas/buy compra">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/recargas/buy</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Compra de tiempo aire. Body: <code>{ carrier, phone, amount }</code>.</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/recargas/history">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/recargas/history</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Historial de recargas del tenant.</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/recargas/:id/status">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/recargas/:id/status</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Estado de una recarga puntual.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/recargas/:id/cancel">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/recargas/:id/cancel</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Cancela recarga si aún no fue procesada.</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/services/providers cfe agua">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/services/providers</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Lista de servicios disponibles (CFE, Telmex, agua, etc.).</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/services/lookup">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/services/lookup</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Consulta saldo del servicio. Body: <code>{ provider, account }</code>.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/services/pay">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/services/pay</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Paga el servicio. Body: <code>{ provider, account, amount }</code>.</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/services/:id/receipt">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/services/:id/receipt</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Comprobante del pago de servicio.</div>
+      </div>
+
+      <!-- INTEGRATIONS DELIVERY -->
+      <h2 id="integrations">Delivery (Webhooks &amp; Aggregator)</h2>
+      <div class="endpoint" data-text="POST /api/webhooks/ubereats">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/webhooks/ubereats</span><span class="auth-tag public">público</span></div>
+        <div class="desc">Webhook Uber Eats: nuevos pedidos, cambios de estado.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/webhooks/didi">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/webhooks/didi</span><span class="auth-tag public">público</span></div>
+        <div class="desc">Webhook DiDi Food.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/webhooks/rappi">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/webhooks/rappi</span><span class="auth-tag public">público</span></div>
+        <div class="desc">Webhook Rappi.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/webhooks/sinDelantal">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/webhooks/sinDelantal</span><span class="auth-tag public">público</span></div>
+        <div class="desc">Webhook SinDelantal (Just Eat MX).</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/webhooks/ifood">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/webhooks/ifood</span><span class="auth-tag public">público</span></div>
+        <div class="desc">Webhook iFood.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/webhooks/pedidosya">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/webhooks/pedidosya</span><span class="auth-tag public">público</span></div>
+        <div class="desc">Webhook PedidosYa.</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/integrations/delivery/orders">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/integrations/delivery/orders</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Lista unificada de pedidos de las 6 plataformas.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/integrations/delivery/orders/:id/accept">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/integrations/delivery/orders/:id/accept</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Acepta el pedido y lo manda a cocina/POS.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/integrations/delivery/orders/:id/ready">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/integrations/delivery/orders/:id/ready</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Marca pedido como listo para repartidor.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/integrations/delivery/configure">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/integrations/delivery/configure</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Configura tokens/store IDs por plataforma.</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/integrations/delivery/config">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/integrations/delivery/config</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Lee configuración actual de las plataformas.</div>
+      </div>
+
+      <!-- CUSTOMER PORTAL -->
+      <h2 id="customer-portal">Customer Portal (B2C)</h2>
+      <div class="endpoint" data-text="POST /api/customer/otp/request">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/customer/otp/request</span><span class="auth-tag public">público</span></div>
+        <div class="desc">Pide OTP por email/SMS para login del cliente final.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/customer/otp/verify">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/customer/otp/verify</span><span class="auth-tag public">público</span></div>
+        <div class="desc">Verifica OTP y devuelve sesión de cliente.</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/customer/me">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/customer/me</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Perfil del cliente autenticado.</div>
+      </div>
+      <div class="endpoint" data-text="PATCH /api/customer/me">
+        <div class="row1"><span class="method PATCH">PATCH</span><span class="path">/api/customer/me</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Actualiza datos personales.</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/customer/orders">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/customer/orders</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Historial de compras.</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/customer/loyalty puntos">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/customer/loyalty</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Puntos acumulados y nivel.</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/customer/payment-methods">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/customer/payment-methods</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Métodos de pago guardados.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/customer/appointments">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/customer/appointments</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Reserva una cita (estética, dental, etc.).</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/customer/invoice/request cfdi">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/customer/invoice/request</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Solicita CFDI de un ticket.</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/customer/ticket/:id">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/customer/ticket/:id</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Detalle de un ticket por ID.</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/customer/invoice/:id">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/customer/invoice/:id</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Descarga el CFDI emitido.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/customer/password">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/customer/password</span><span class="auth-tag">auth</span></div>
+        <div class="desc">Cambia password del cliente.</div>
+      </div>
+
+      <!-- STATUS -->
+      <h2 id="status">Status / Uptime</h2>
+      <div class="endpoint" data-text="GET /api/status/incidents">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/status/incidents</span><span class="auth-tag public">público</span></div>
+        <div class="desc">Incidentes activos/recientes (estilo statuspage).</div>
+      </div>
+      <div class="endpoint" data-text="GET /api/status/uptime">
+        <div class="row1"><span class="method GET">GET</span><span class="path">/api/status/uptime</span><span class="auth-tag public">público</span></div>
+        <div class="desc">Métricas de uptime por servicio (últimos 90 días).</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/status/incidents">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/status/incidents</span><span class="auth-tag">auth (admin)</span></div>
+        <div class="desc">Crea incidente. Body: <code>{ service, severity, message }</code>.</div>
+      </div>
+      <div class="endpoint" data-text="PATCH /api/status/incidents/:id">
+        <div class="row1"><span class="method PATCH">PATCH</span><span class="path">/api/status/incidents/:id</span><span class="auth-tag">auth (admin)</span></div>
+        <div class="desc">Actualiza un incidente.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/status/incidents/:id/resolve">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/status/incidents/:id/resolve</span><span class="auth-tag">auth (admin)</span></div>
+        <div class="desc">Marca incidente como resuelto.</div>
+      </div>
+      <div class="endpoint" data-text="POST /api/status/ping/:service">
+        <div class="row1"><span class="method POST">POST</span><span class="path">/api/status/ping/:service</span><span class="auth-tag public">público</span></div>
+        <div class="desc">Ping desde el monitor externo. Marca el servicio vivo.</div>
+      </div>
+
+      <div class="footer">
+        <strong>Convenciones generales:</strong>
+        Errores siguen el formato <code>{ ok:false, error:"...", code:"..." }</code>.
+        HTTP <code>401</code> = sesión expirada (cliente debe re-loguear).
+        HTTP <code>503</code> = servicio sin configurar (incluye <code>env_var</code> faltante).
+        Todos los <code>POST</code> mutables aceptan <code>Idempotency-Key</code> en header.
+      </div>
+    </main>
   </div>
-  <div id="swagger-ui"></div>
-  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js" crossorigin></script>
-  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-standalone-preset.js" crossorigin></script>
+
   <script>
-    window.addEventListener('load', () => {
-      window.ui = SwaggerUIBundle({
-        url: '/api/openapi.yaml',
-        dom_id: '#swagger-ui',
-        deepLinking: true,
-        presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset.slice(1)],
-        plugins: [SwaggerUIBundle.plugins.DownloadUrl],
-        layout: 'BaseLayout',
-        persistAuthorization: true,
-        tryItOutEnabled: true,
-        docExpansion: 'list',
-        defaultModelsExpandDepth: 1
+    // Search filter (client-side).
+    (function () {
+      var search = document.getElementById('search');
+      var endpoints = document.querySelectorAll('.endpoint');
+      var sections = document.querySelectorAll('main h2');
+      function applyFilter() {
+        var q = (search.value || '').trim().toLowerCase();
+        if (!q) {
+          endpoints.forEach(function (e) { e.classList.remove('hide'); });
+          sections.forEach(function (h) { h.classList.remove('hide'); });
+          return;
+        }
+        endpoints.forEach(function (e) {
+          var text = (e.getAttribute('data-text') || '').toLowerCase() + ' ' + (e.textContent || '').toLowerCase();
+          e.classList.toggle('hide', text.indexOf(q) === -1);
+        });
+        sections.forEach(function (h) {
+          var sect = h;
+          var any = false;
+          var n = sect.nextElementSibling;
+          while (n && n.tagName !== 'H2') {
+            if (n.classList && n.classList.contains('endpoint') && !n.classList.contains('hide')) { any = true; break; }
+            n = n.nextElementSibling;
+          }
+          h.classList.toggle('hide', !any);
+        });
+      }
+      search.addEventListener('input', applyFilter);
+      search.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { search.value = ''; applyFilter(); }
       });
-    });
+
+      // Highlight active section in sidebar on scroll.
+      var navLinks = document.querySelectorAll('nav a.section');
+      function onScroll() {
+        var pos = window.scrollY + 120;
+        var current = null;
+        sections.forEach(function (h) {
+          if (h.offsetTop <= pos) current = h.id;
+        });
+        navLinks.forEach(function (a) {
+          a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+        });
+      }
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    })();
   </script>
 </body>
 </html>

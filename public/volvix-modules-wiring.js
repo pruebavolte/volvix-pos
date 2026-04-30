@@ -728,9 +728,95 @@
   }
 
   // ---------------------------------------------------------------------------
+  // Analytics: GA4 (gtag) + Meta Pixel (fbq) on PUBLIC pages only
+  // ---------------------------------------------------------------------------
+  // Public pages: index, marketplace, landing_dynamic, landing-*, registro, login.
+  // Authenticated/private pages (POS, owner panels, AI panels, etc.) skip injection.
+  // IDs come from window.VOLVIX_GA_ID / window.VOLVIX_FB_PIXEL_ID (per-tenant).
+  // If neither is defined, nothing is injected (graceful no-op).
+  function isPublicPage() {
+    var f = fileName;
+    if (!f || f === '' || f === '/') return /\/$/.test(path); // root
+    return /^index\.html?$/i.test(f) ||
+           /^marketplace\.html?$/i.test(f) ||
+           /^landing_dynamic\.html?$/i.test(f) ||
+           /^landing-[a-z0-9_-]+\.html?$/i.test(f) ||
+           /^registro\.html?$/i.test(f) ||
+           /^login\.html?$/i.test(f);
+  }
+
+  function injectGtag(gaId) {
+    if (!gaId || window.__vlxGtagInjected) return;
+    window.__vlxGtagInjected = true;
+    try {
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(gaId);
+      document.head.appendChild(s);
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
+      window.gtag('js', new Date());
+      window.gtag('config', gaId, { send_page_view: true });
+    } catch (_) {}
+  }
+
+  function injectFbq(pixelId) {
+    if (!pixelId || window.__vlxFbqInjected) return;
+    window.__vlxFbqInjected = true;
+    try {
+      // Standard Meta Pixel base snippet (manually expanded, no eval-style minified blob).
+      if (!window.fbq) {
+        var n = window.fbq = function () {
+          n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+        };
+        if (!window._fbq) window._fbq = n;
+        n.push = n; n.loaded = true; n.version = '2.0'; n.queue = [];
+        var t = document.createElement('script');
+        t.async = true;
+        t.src = 'https://connect.facebook.net/en_US/fbevents.js';
+        var s = document.getElementsByTagName('script')[0];
+        if (s && s.parentNode) s.parentNode.insertBefore(t, s);
+        else document.head.appendChild(t);
+      }
+      window.fbq('init', String(pixelId));
+      window.fbq('track', 'PageView');
+    } catch (_) {}
+  }
+
+  function setupAnalytics() {
+    if (!isPublicPage()) return;
+    var gaId = window.VOLVIX_GA_ID;
+    var pxId = window.VOLVIX_FB_PIXEL_ID;
+    if (!gaId && !pxId) return; // graceful no-op
+    if (gaId) injectGtag(gaId);
+    if (pxId) injectFbq(pxId);
+
+    // Wire CTA clicks → custom events on both providers.
+    function wireCtas() {
+      var ctas = document.querySelectorAll('.cta, [data-cta]');
+      ctas.forEach(function (el) {
+        if (!markWired(el, 'analyticsCta')) return;
+        el.addEventListener('click', function () {
+          var label = el.getAttribute('data-cta') ||
+                      (el.innerText || el.textContent || '').trim().slice(0, 60).toLowerCase().replace(/\s+/g, '_') ||
+                      'cta';
+          try {
+            if (window.gtag) window.gtag('event', 'cta_click', { label: label, page: fileName });
+          } catch (_) {}
+          try {
+            if (window.fbq) window.fbq('track', 'Lead', { content_name: label, page: fileName });
+          } catch (_) {}
+        }, { capture: false });
+      });
+    }
+    observeBody(wireCtas);
+  }
+
+  // ---------------------------------------------------------------------------
   // Bootstrap
   // ---------------------------------------------------------------------------
   whenReady(function () {
+    try { setupAnalytics(); }        catch (e) { console.warn('[vlx] analytics', e); }
     try { setupRegistroOtp(); }      catch (e) { console.warn('[vlx] otp', e); }
     try { setupAiChat(); }           catch (e) { console.warn('[vlx] ai', e); }
     try { setupOwnerPanelPdf(); }    catch (e) { console.warn('[vlx] owner', e); }
