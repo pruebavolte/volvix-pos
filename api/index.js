@@ -10974,24 +10974,6 @@ handlers['GET /api/config/public'] = async (req, res) => {
   // ---- admin / debug / private / auth root ----
   handlers['GET /api/admin'] = requireAuth(async (req, res) => sendJSON(res, { ok: true, endpoints: ['/api/admin/backup/trigger','/api/admin/jobs/low-stock-alert'] }));
   handlers['GET /api/debug'] = requireAuth(async (req, res) => sendJSON(res, { ok: true, env: process.env.NODE_ENV || 'production', uptime: process.uptime() }));
-  // TEMP DEBUG: file system probe (public, remove after diagnosis)
-  handlers['GET /api/debug/fs'] = async (req, res) => {
-    const info = { __dirname, cwd: process.cwd() };
-    const probes = [
-      '/var/task/public/pos.html', '/var/task/pos.html',
-      path.join(__dirname, '..', 'public', 'pos.html'),
-      path.join(__dirname, 'public', 'pos.html'),
-      path.join(process.cwd(), 'public', 'pos.html'),
-    ];
-    info.probes = {};
-    probes.forEach(p => { try { info.probes[p] = fs.existsSync(p); } catch(e) { info.probes[p] = e.message; } });
-    ['/', '/var/task', '/var/task/api', '/var/task/public', path.join(__dirname, '..'), path.join(__dirname)].forEach(d => {
-      try { info['ls_' + d] = fs.readdirSync(d).slice(0, 15); } catch(e) { info['ls_' + d] = e.message; }
-    });
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(info, null, 2));
-  };
   handlers['GET /api/private'] = requireAuth(async (req, res) => sendJSON(res, { ok: true, message: 'private area' }));
   handlers['GET /api/auth'] = (req, res) => sendJSON(res, { ok: true, endpoints: ['/api/auth/login','/api/auth/register','/api/auth/session'] });
 
