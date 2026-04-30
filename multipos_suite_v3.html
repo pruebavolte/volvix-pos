@@ -2099,5 +2099,204 @@ renderMenu();
 <script src="volvix-webextensions-wiring.js" defer></script>
 <script src="volvix-routes-wiring.js" defer></script>
 <script src="volvix-pwa-install-prompt.js" defer></script>
+<!-- ===================================================================
+     VOLVIX BACKEND WIRING (v3 → REAL API)
+     Intercepta puntos de carga/guardado. Fallback a localStorage demo.
+     =================================================================== -->
+<script>
+(function(){
+  'use strict';
+  const TOKEN_KEYS=['volvix_token','volvixAuthToken'];
+  const getTok=()=>TOKEN_KEYS.map(k=>localStorage.getItem(k)).find(Boolean);
+  const tokenPayload=()=>{try{return JSON.parse(atob(getTok().split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));}catch{return{}}};
+  const API_BASE=(window.VOLVIX_API_BASE||'')+'/api';
+  const VBW={online:!!getTok(),products:[],customers:[],lastSale:null,realtime:null};
+  window.VBW=VBW;
+
+  // --- Auth gate ---
+  if(!getTok()){
+    const here=encodeURIComponent(location.pathname+location.search);
+    if(!/login\.html/.test(location.pathname)){
+      console.warn('[VBW] Sin token. Redirigiendo a login...');
+      // Permitir modo demo si el usuario añade ?demo=1
+      if(!/[?&]demo=1/.test(location.search)){
+        location.replace('/login.html?redirect='+here); return;
+      }
+      VBW.online=false;
+    }
+  }
+
+  async function api(path,opts={}){
+    const tok=getTok();
+    const h=Object.assign({'Content-Type':'application/json'},opts.headers||{});
+    if(tok)h.Authorization='Bearer '+tok;
+    const r=await fetch(API_BASE+path,Object.assign({},opts,{headers:h}));
+    if(!r.ok){
+      let msg=r.statusText;try{msg=(await r.json()).error||msg;}catch{}
+      throw new Error('API '+r.status+': '+msg);
+    }
+    const ct=r.headers.get('content-type')||'';
+    return ct.includes('json')?r.json():r.text();
+  }
+  VBW.api=api;
+
+  // --- Productos: GET /api/products → reemplaza array `menu` global ---
+  async function loadProducts(){
+    if(!VBW.online)return;
+    try{
+      const data=await api('/products');
+      const list=Array.isArray(data)?data:(data.products||data.data||[]);
+      if(!list.length){console.warn('[VBW] /api/products vacío, mantengo demo menu');return;}
+      // Mapear schema backend → schema UI (menu)
+      const mapped=list.map((p,i)=>({
+        id:p.id||p.product_id||i+1,
+        emoji:p.emoji||p.icon||'🍽',
+        name:p.name||p.nombre||'Producto',
+        desc:p.description||p.desc||p.descripcion||'',
+        price:Number(p.price||p.precio||0),
+        cat:p.categories||p.cat||(p.category?[p.category]:['pop']),
+        sku:p.sku,stock:p.stock,_raw:p
+      }));
+      // Mutar in-place el array `menu` (es const pero el array es mutable)
+      if(typeof menu!=='undefined'&&Array.isArray(menu)){
+        menu.length=0;mapped.forEach(m=>menu.push(m));
+        if(typeof renderMenu==='function')renderMenu();
+        if(typeof showToast==='function')showToast('Catálogo: '+mapped.length+' productos');
+      }
+      VBW.products=mapped;
+    }catch(e){console.error('[VBW] loadProducts',e);if(typeof showToast==='function')showToast('Error catálogo: '+e.message);}
+  }
+  VBW.loadProducts=loadProducts;
+
+  // --- Ventas: POST /api/sales (interceptamos goScreen('c-exito')) ---
+  const _goScreen=window.goScreen;
+  window.goScreen=function(name){
+    if(name==='c-exito'&&VBW.online){
+      // Disparar venta antes de navegar
+      submitSale().catch(e=>{
+        console.error('[VBW] submitSale',e);
+        if(typeof showToast==='function')showToast('Venta NO sincronizada: '+e.message);
+      });
+    }
+    return _goScreen?_goScreen.apply(this,arguments):undefined;
+  };
+
+  async function submitSale(){
+    if(!state||!state.cart||!state.cart.length)return;
+    const subtotal=state.cart.reduce((s,i)=>s+i.price*i.qty,0);
+    const tax=subtotal*0.16;
+    const total=subtotal+tax;
+    const payload={
+      mesa:state.currentMesa,
+      payment_method:state.paymentMethod,
+      subtotal,tax,total,
+      items:state.cart.map(i=>({
+        product_id:i.id,sku:i.sku,name:i.name,
+        qty:i.qty,price:i.price,line_total:i.price*i.qty
+      }))
+    };
+    try{
+      const sale=await api('/sales',{method:'POST',body:JSON.stringify(payload)});
+      VBW.lastSale=sale;
+      // Pago (idempotente; backend puede crearlo internamente)
+      if(sale&&sale.id){
+        try{await api('/payments',{method:'POST',body:JSON.stringify({sale_id:sale.id,method:state.paymentMethod,amount:total})});}catch{}
+      }
+      // Imprimir
+      printTicket(sale,payload).catch(()=>{});
+      if(typeof showToast==='function')showToast('Venta #'+(sale.folio||sale.id||'?')+' ✓');
+    }catch(e){throw e;}
+  }
+  VBW.submitSale=submitSale;
+
+  // --- Impresión ESC/POS ---
+  function escposBytes(sale,payload){
+    const ESC=0x1B,GS=0x1D;const buf=[];
+    const push=s=>{for(const c of s)buf.push(c.charCodeAt(0)&0xFF);};
+    buf.push(ESC,0x40);             // init
+    buf.push(ESC,0x61,0x01);        // center
+    push('VOLVIX POS\n');
+    buf.push(ESC,0x61,0x00);        // left
+    push('Folio: '+(sale&&sale.folio||sale&&sale.id||'-')+'\n');
+    push('Mesa:  '+(payload.mesa||'-')+'\n');
+    push('--------------------------------\n');
+    payload.items.forEach(it=>{push(it.qty+'x '+it.name.slice(0,22)+'\n   $'+it.line_total.toFixed(2)+'\n');});
+    push('--------------------------------\n');
+    push('Subtotal: $'+payload.subtotal.toFixed(2)+'\n');
+    push('IVA:      $'+payload.tax.toFixed(2)+'\n');
+    push('TOTAL:    $'+payload.total.toFixed(2)+'\n');
+    push('Pago: '+payload.payment_method+'\n\n');
+    push('Gracias por su visita\n\n\n');
+    buf.push(GS,0x56,0x00);         // cut
+    return buf;
+  }
+  async function printTicket(sale,payload){
+    if(!VBW.online){window.print();return;}
+    try{
+      await api('/printer/raw',{method:'POST',body:JSON.stringify({bytes:escposBytes(sale,payload)})});
+    }catch(e){console.warn('[VBW] printer fallback',e);try{window.print();}catch{}}
+  }
+  VBW.printTicket=printTicket;
+
+  // --- Clientes: búsqueda ---
+  VBW.searchCustomer=async function(q){
+    if(!VBW.online)return [];
+    try{return await api('/customers?q='+encodeURIComponent(q||''));}catch(e){return [];}
+  };
+
+  // --- Corte de caja ---
+  VBW.openCut=async function(opening_amount){return api('/cuts/open',{method:'POST',body:JSON.stringify({opening_amount})});};
+  VBW.closeCut=async function(cut_id,closing_amount){return api('/cuts/close',{method:'POST',body:JSON.stringify({cut_id,closing_amount})});};
+  VBW.getCutSummary=async function(id){return api('/cuts/'+id+'/summary');};
+
+  // --- Reportes ---
+  VBW.reportDaily=async function(from,to){
+    const qs='?from='+encodeURIComponent(from)+'&to='+encodeURIComponent(to);
+    return api('/reports/sales/daily'+qs);
+  };
+  VBW.dashboardToday=async function(){return api('/dashboard/today');};
+
+  // Cablear botones de manager si existen
+  document.addEventListener('click',function(e){
+    const t=e.target.closest('[data-vbw-action]');
+    if(!t)return;
+    const a=t.dataset.vbwAction;
+    if(a==='close-cut'){VBW.closeCut(t.dataset.cutId,Number(t.dataset.amount||0)).then(r=>showToast('Corte cerrado')).catch(err=>showToast(err.message));}
+    if(a==='daily-report'){VBW.reportDaily(t.dataset.from,t.dataset.to).then(r=>console.log('[VBW] report',r));}
+  });
+
+  // --- Realtime: Supabase channel pos_updates ---
+  function initRealtime(){
+    if(!window.supabase||!window.supabase.createClient)return;
+    try{
+      const url=window.VOLVIX_SUPABASE_URL,key=window.VOLVIX_SUPABASE_ANON;
+      if(!url||!key)return;
+      const sb=window.supabase.createClient(url,key,{global:{headers:{Authorization:'Bearer '+getTok()}}});
+      const ch=sb.channel('pos_updates');
+      ch.on('broadcast',{event:'product_update'},({payload})=>{
+        const p=payload&&payload.product;if(!p||typeof menu==='undefined')return;
+        const ix=menu.findIndex(m=>m.id===p.id);
+        if(ix>=0){Object.assign(menu[ix],{price:p.price,stock:p.stock});if(typeof renderMenu==='function')renderMenu();}
+      });
+      ch.on('broadcast',{event:'sale_created'},({payload})=>{
+        if(payload&&payload.tenant_id===tokenPayload().tenant_id){
+          if(typeof showToast==='function')showToast('Venta otra terminal: $'+(payload.total||0));
+          loadProducts(); // refrescar stocks
+        }
+      });
+      ch.subscribe();
+      VBW.realtime=ch;
+    }catch(e){console.warn('[VBW] realtime',e);}
+  }
+
+  // --- Boot ---
+  function boot(){
+    if(VBW.online){loadProducts();initRealtime();}
+    console.log('[VBW] wiring ready · online='+VBW.online);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);
+  else boot();
+})();
+</script>
 </body>
 </html>
