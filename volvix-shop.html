@@ -242,6 +242,7 @@
     <h3>Método de pago</h3>
     <div class="field"><select id="payMethod">
       <option value="card">Tarjeta (Stripe)</option>
+      <option value="mercadopago">MercadoPago</option>
       <option value="codi">CoDi (QR MX)</option>
       <option value="spei">SPEI</option>
       <option value="transfer">Transferencia manual</option>
@@ -278,9 +279,14 @@ const params = new URLSearchParams(location.search);
 const TENANT = params.get('tenant') || params.get('tenant_id') || '';
 const SLUG   = params.get('shop_slug') || params.get('slug') || '';
 const API    = (window.VOLVIX_API_BASE || '').replace(/\/$/, '');
-const CART_KEY = 'volvix_shop_cart_' + (SLUG || TENANT || 'default');
+// Cart storage: unified key 'vlx_shop_cart' per tenant/slug for cross-tab consistency
+const CART_KEY = 'vlx_shop_cart';
+const CART_NS  = SLUG || TENANT || 'default';
 let SHOP = { id: TENANT, slug: SLUG, name: 'Volvix Shop', currency: 'MXN' };
-let cart = JSON.parse(localStorage.getItem(CART_KEY) || '[]');
+// Load cart: namespaced under tenant/slug inside a single vlx_shop_cart object
+let _cartStore = {};
+try { _cartStore = JSON.parse(localStorage.getItem(CART_KEY) || '{}') || {}; } catch(_){ _cartStore = {}; }
+let cart = Array.isArray(_cartStore[CART_NS]) ? _cartStore[CART_NS] : [];
 
 function fmt(n){return new Intl.NumberFormat('es-MX',{style:'currency',currency:SHOP.currency||'MXN'}).format(+n||0)}
 function api(path){return fetch(API + path).then(r => r.json())}
@@ -341,7 +347,11 @@ function addToCart(p){
   document.getElementById('cart').classList.add('open');
 }
 function changeQty(idx, d){cart[idx].quantity = Math.max(0, cart[idx].quantity + d);if(!cart[idx].quantity)cart.splice(idx,1);saveCart();renderCart()}
-function saveCart(){localStorage.setItem(CART_KEY, JSON.stringify(cart));document.getElementById('cartCount').textContent = cart.reduce((s,i)=>s+i.quantity,0)}
+function saveCart(){
+  _cartStore[CART_NS] = cart;
+  localStorage.setItem(CART_KEY, JSON.stringify(_cartStore));
+  document.getElementById('cartCount').textContent = cart.reduce((s,i)=>s+i.quantity,0);
+}
 function toggleCart(){document.getElementById('cart').classList.toggle('open')}
 
 function renderCart(){
@@ -373,27 +383,57 @@ async function submitCheckout(){
   const name = document.getElementById('cName').value.trim();
   const email= document.getElementById('cEmail').value.trim();
   if (!name||!email){alertBox.innerHTML='<div class="alert">Nombre y email son requeridos</div>';return}
+  const payMethod = document.getElementById('payMethod').value;
+  const itemsFull = cart.map(i=>({product_id:i.product_id, quantity:i.quantity, name:i.name, price:i.price, sku:i.sku}));
   const body = {
     tenant_id: SHOP.id || TENANT,
     shop_slug: SLUG || SHOP.slug,
-    items: cart.map(i=>({product_id:i.product_id, quantity:i.quantity})),
+    items: itemsFull,
     customer_info: { name, email, phone: document.getElementById('cPhone').value.trim() },
     shipping: {
       address: document.getElementById('sAddr').value.trim(),
       city:    document.getElementById('sCity').value.trim(),
       zip:     document.getElementById('sZip').value.trim(),
     },
-    payment_method: document.getElementById('payMethod').value,
+    payment_method: payMethod,
+    payment_provider: payMethod,
     promo_code: document.getElementById('promoCode').value.trim() || undefined,
     gift_card:  document.getElementById('giftCard').value.trim() || undefined,
   };
   try{
-    const r = await fetch(API + '/api/shop/checkout', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    // 1) Create order via /api/shop/orders (persists shop_orders + tracking + email)
+    const r = await fetch(API + '/api/shop/orders', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     const d = await r.json();
     if (!r.ok || !d.ok){alertBox.innerHTML='<div class="alert">'+escape(d.message||d.error||'Error')+'</div>';return}
-    alertBox.innerHTML = `<div class="ok">Pedido creado: <strong>${d.order.id}</strong> — Total ${fmt(d.order.total)}<br/>Guarda este ID con tu email para consultarlo.</div>`;
+    const tracking = d.tracking_number || (d.order && d.order.tracking_number) || (d.order && d.order.id);
+    const orderId  = (d.order && d.order.id) || tracking;
+    alertBox.innerHTML = `<div class="ok">Pedido creado<br/>
+      <strong>Tracking:</strong> ${escape(tracking)}<br/>
+      <strong>Total:</strong> ${fmt(d.total || (d.order && d.order.total) || 0)}<br/>
+      Te enviamos confirmación a <strong>${escape(email)}</strong>.</div>`;
     cart = [];saveCart();renderCart();
-    if (d.intent && d.intent.next && d.intent.next.type === 'qr') alertBox.innerHTML += '<div class="ok">Genera QR en: '+d.intent.next.endpoint+'</div>';
+
+    // 2) MercadoPago: redirigir al checkout de MP
+    if (payMethod === 'mercadopago'){
+      try{
+        const mp = await fetch(API + '/api/payments/mercadopago/preference', {
+          method:'POST',headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+            tenant_id: SHOP.id || TENANT,
+            order_id:  orderId,
+            items: cart.length ? cart : itemsFull.map(i=>({title:i.name, quantity:i.quantity, unit_price:Number(i.price)||0, currency_id:SHOP.currency||'MXN'})),
+            payer: { name, email, phone: document.getElementById('cPhone').value.trim() },
+            back_urls: { success:location.href, failure:location.href, pending:location.href }
+          })
+        });
+        const mpd = await mp.json();
+        if (mp.ok && (mpd.init_point || mpd.sandbox_init_point)){
+          alertBox.innerHTML += `<div class="ok"><a href="${mpd.init_point||mpd.sandbox_init_point}" class="btn purple" style="display:inline-block;text-decoration:none;margin-top:6px">Pagar con MercadoPago</a></div>`;
+        } else {
+          alertBox.innerHTML += '<div class="alert">MercadoPago no disponible: '+escape(mpd.message||mpd.error||'config')+'</div>';
+        }
+      }catch(e){ alertBox.innerHTML += '<div class="alert">MP: '+escape(e.message)+'</div>'; }
+    }
   }catch(e){alertBox.innerHTML='<div class="alert">Red: '+escape(e.message)+'</div>'}
 }
 

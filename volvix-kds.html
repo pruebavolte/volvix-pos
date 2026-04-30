@@ -117,7 +117,52 @@
 
 <script>
 const API = (window.VOLVIX_API || '') + '/api/kds/tickets';
+const ORDER_API = (window.VOLVIX_API || '') + '/api/kds/orders';
 let tickets = [], soundOn = true, knownIds = new Set(), firstLoad = true;
+
+// Web Audio API beep (800Hz, 200ms) — replaces empty data-URI WAV
+let audioCtx = null;
+function beep(freq, ms){
+  if(!soundOn) return;
+  try{
+    if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==='suspended') audioCtx.resume().catch(()=>{});
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type='sine'; o.frequency.value=freq||800;
+    g.gain.value=0.15;
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime+(ms||200)/1000);
+  }catch(_){}
+}
+
+// Supabase Realtime subscription for kds_orders channel
+let realtimeChannel = null;
+async function initRealtime(){
+  try{
+    const cfg = await fetch((window.VOLVIX_API||'')+'/api/config/public').then(r=>r.json()).catch(()=>null);
+    if(!cfg || !cfg.supabase_url || !cfg.supabase_anon_key || cfg.mode!=='full') return;
+    if(!window.supabase || !window.supabase.createClient){
+      // Lazy-load supabase-js if not present
+      await new Promise((res,rej)=>{
+        const s=document.createElement('script');
+        s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+        s.onload=res; s.onerror=rej; document.head.appendChild(s);
+      });
+    }
+    const sb = window.supabase.createClient(cfg.supabase_url, cfg.supabase_anon_key);
+    realtimeChannel = sb.channel('kds_orders')
+      .on('broadcast', {event:'new_order'}, payload => {
+        beep(800, 200);
+        // Pull a refresh to ingest the new ticket
+        refresh();
+      })
+      .on('postgres_changes', {event:'INSERT', schema:'public', table:'kds_tickets'}, payload => {
+        beep(800, 200);
+        refresh();
+      })
+      .subscribe();
+  }catch(_){}
+}
 // R5a GAP-K5: delta sync state
 let lastSyncAt = localStorage.getItem('kds_last_sync_at') || null;
 // R5a GAP-K1: track which tickets we've already alerted on for needs_attention
@@ -148,6 +193,22 @@ async function acceptTicket(id){
 }
 window.acceptTicket = acceptTicket;
 
+// Status change via POST /api/kds/orders/:id/status (used by botones En preparación / Listo / Cancelar)
+async function setStatus(id, status){
+  try{
+    const r = await fetch(ORDER_API+'/'+id+'/status', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok()},
+      body: JSON.stringify({status})
+    });
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    refresh();
+  }catch(e){
+    if(window.VolvixUI) VolvixUI.toast({type:'error', message:'No se pudo actualizar: '+e.message});
+  }
+}
+window.setStatus = setStatus;
+
 async function refresh(){
   try{
     const st = $('#station').value;
@@ -174,11 +235,12 @@ async function refresh(){
 
     if(!firstLoad && soundOn){
       if(newAttn.length){
-        // Play alert tone twice for maximum cocina-attention
-        $('#alert').play().catch(()=>{});
-        setTimeout(()=>$('#alert').play().catch(()=>{}), 600);
+        // Web Audio API: louder alert (1000Hz, 400ms x2)
+        beep(1000, 400);
+        setTimeout(()=>beep(1000, 400), 600);
       } else if (fresh.length){
-        $('#ding').play().catch(()=>{});
+        // New order: 800Hz 200ms
+        beep(800, 200);
       }
     }
 
@@ -225,6 +287,11 @@ function render(){
         <ul>${items}</ul>
         ${t.notes?`<div class="notes">! ${escapeHtml(t.notes)}</div>`:''}
         <button class="accept-btn" ${accepted?'disabled':''} onclick="acceptTicket('${t.id}')">${accepted?'Recibido OK':'Marcar recibido'}</button>
+        <div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap">
+          <button class="accept-btn" style="background:#ffa657;color:#1a1a1a" onclick="setStatus('${t.id}','preparing')">En preparación</button>
+          <button class="accept-btn" style="background:#3fb950;color:#0d1117" onclick="setStatus('${t.id}','ready')">Listo</button>
+          <button class="accept-btn" style="background:#f85149" onclick="setStatus('${t.id}','cancelled')">Cancelar</button>
+        </div>
       </div>`;
     }).join('');
   });
@@ -278,6 +345,7 @@ setInterval(()=>{
 
 setInterval(refresh, 5000);
 refresh();
+initRealtime();
 </script>
 </body>
 </html>

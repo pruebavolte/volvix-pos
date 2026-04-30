@@ -13491,6 +13491,27 @@ if (process.env.NODE_ENV === 'test') {
     } catch (err) { sendError(res, err); }
   });
 
+  // ALIAS: POST /api/kds/orders/:id/status — frontend convenience (volvix-kds.html buttons)
+  // Maps {status: 'preparing'|'ready'|'cancelled'} → existing PATCH /api/kds/tickets/:id/status
+  handlers['POST /api/kds/orders/:id/status'] = requireAuth(async (req, res, params) => {
+    try {
+      const id = params && params.id;
+      const b = await readBody(req, { maxBytes: 4 * 1024, strictJson: true });
+      if (checkBodyError(req, res)) return;
+      const allowed = ['received','preparing','ready','served','cancelled','needs_attention'];
+      if (!id || !allowed.includes(b.status))
+        return sendJSON(res, { ok: false, error: 'bad_request' }, 400);
+      const tnt = (req.user && req.user.tenant_id) || 'TNT001';
+      const r = await dbQuery(
+        `UPDATE kds_tickets SET status=$1 WHERE id=$2 AND tenant_id=$3 RETURNING *`,
+        [b.status, id, tnt]
+      );
+      if (!r.rows.length) return sendJSON(res, { ok: false, error: 'not_found' }, 404);
+      try { logAudit(req, 'kds_ticket.updated', 'kds_tickets', { id, after: r.rows[0] }); } catch (_) {}
+      sendJSON(res, { ok: true, ticket: r.rows[0] });
+    } catch (err) { sendError(res, err); }
+  });
+
   // R5a GAP-K3: Acceptance flow — cocina marks ticket as accepted (recibido en pantalla)
   handlers['POST /api/kds/tickets/:id/accept'] = requireAuth(async (req, res, params) => {
     try {
@@ -31553,10 +31574,78 @@ if (process.env.NODE_ENV === 'test') {
   if (!handlers['GET /api/shop/orders/:id']) {
     handlers['GET /api/shop/orders/:id'] = async function (req, res, params) {
       try {
-        const rows = await supabaseRequest('GET', `/pos_sales?id=eq.${encodeURIComponent(params.id)}&select=*&limit=1`).catch(() => []);
-        const order = rows && rows[0];
+        // Try shop_orders first, fallback to pos_sales
+        let rows = await supabaseRequest('GET', `/shop_orders?id=eq.${encodeURIComponent(params.id)}&select=*&limit=1`).catch(() => []);
+        let order = rows && rows[0];
+        if (!order) {
+          rows = await supabaseRequest('GET', `/pos_sales?id=eq.${encodeURIComponent(params.id)}&select=*&limit=1`).catch(() => []);
+          order = rows && rows[0];
+        }
         if (!order) return sendJSON(res, { ok: false, error: 'Orden no encontrada' }, 404);
         sendJSON(res, { ok: true, order });
+      } catch (err) { sendError(res, err); }
+    };
+  }
+
+  // POST /api/shop/orders — full e-commerce order pipeline
+  // Persists in shop_orders, generates tracking number, fires confirmation email (if Resend configured)
+  if (!handlers['POST /api/shop/orders']) {
+    handlers['POST /api/shop/orders'] = async function (req, res) {
+      try {
+        const body = await readBody(req, { maxBytes: 64 * 1024 }).catch(() => ({}));
+        const items = Array.isArray(body.items) ? body.items : [];
+        if (!items.length) return sendJSON(res, { ok: false, error: 'items requeridos' }, 400);
+        const ci = body.customer_info || {};
+        if (!ci.email) return sendJSON(res, { ok: false, error: 'customer_email requerido' }, 400);
+
+        const subtotal = items.reduce((s, i) => s + Number(i.price || 0) * Number(i.quantity || i.qty || 1), 0);
+        const shipping = Number((body.shipping && body.shipping.cost) || 0);
+        const total = +(subtotal + shipping).toFixed(2);
+        const tracking = 'VLX-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+
+        const orderRow = {
+          tenant_id: body.tenant_id || body.shop_slug || 'default',
+          customer_email: ci.email,
+          customer_phone: ci.phone || null,
+          customer_name: ci.name || null,
+          shipping_address: body.shipping || null,
+          items,
+          subtotal,
+          shipping,
+          total,
+          payment_provider: body.payment_provider || body.payment_method || 'pending',
+          status: 'pending',
+          tracking_number: tracking,
+        };
+        let saved = null;
+        try {
+          const created = await supabaseRequest('POST', '/shop_orders', orderRow);
+          saved = Array.isArray(created) ? created[0] : created;
+        } catch (e) {
+          // shop_orders table may not exist yet — return tracking number anyway
+          saved = { ...orderRow, id: tracking };
+        }
+
+        // Fire confirmation email (best-effort, non-blocking)
+        try {
+          const emailMod = require('./email-resend');
+          if (emailMod && emailMod.sendEmail && process.env.RESEND_API_KEY) {
+            const itemsHtml = items.map(i => `<li>${Number(i.quantity || i.qty || 1)}x ${String(i.name || '').replace(/[<>]/g,'')} — $${Number(i.price || 0).toFixed(2)}</li>`).join('');
+            const html = `<h2>Confirmación de pedido</h2>
+              <p>Hola ${ci.name || ''}, gracias por tu compra.</p>
+              <p><strong>Tracking:</strong> ${tracking}</p>
+              <ul>${itemsHtml}</ul>
+              <p><strong>Total:</strong> $${total.toFixed(2)}</p>`;
+            emailMod.sendEmail({}, {
+              to: ci.email,
+              subject: 'Pedido confirmado · Volvix Shop',
+              html,
+              type: 'shop_order',
+            }).catch(() => {});
+          }
+        } catch (_) { /* email module optional */ }
+
+        sendJSON(res, { ok: true, order: saved, tracking_number: tracking, total });
       } catch (err) { sendError(res, err); }
     };
   }
