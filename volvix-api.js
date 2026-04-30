@@ -1,313 +1,535 @@
 /* ============================================================
    VOLVIX · Cliente API universal
    ============================================================
-   Se carga con: <script src="volvix-api.js"></script>
+   Se carga con: <script src="/volvix-api.js"></script>
 
-   NO hardcodea rutas. Autodetecta:
-   - Si está en file:// → modo offline (localStorage)
-   - Si está en http(s):// → usa el mismo origen para API
-   - Variable window.VOLVIX_API_URL sobreescribe
+   Responsabilidades:
+   - Autodetectar URL del backend (mismo origen, file://, override)
+   - Exponer window.volvix.api con metodos por recurso
+   - Fallback a localStorage cuando no hay servidor (modo offline)
+   - Integrar con auth (manda Authorization header si hay sesion)
+   - Manejar errores de red sin romper la UI
 
-   Expone: window.volvix
-     volvix.api.tenants.list() → GET /api/tenants
-     volvix.api.features.request(text, tenantId) → POST /api/features/request
-     volvix.ws.on('ai:decision', handler) → suscripción WebSocket
+   Expone:
+     window.volvix.config             → { apiUrl, offline, version }
+     window.volvix.api.health()
+     window.volvix.api.tenants.*
+     window.volvix.api.features.*
+     window.volvix.api.tickets.*
+     window.volvix.api.knowledge.*
+     window.volvix.api.remote.*
+     window.volvix.api.ai.*
+     window.volvix.api.ventas.*
+     window.volvix.api.productos.*
+     window.volvix.api.clientes.*
+
+   NO incluye sync engine (eso es volvix-sync.js)
 ============================================================ */
 (function () {
   'use strict';
 
-  // =============== AUTO-DETECT URL ===============
-  function getApiUrl() {
-    // 1. Override manual
-    if (typeof window.VOLVIX_API_URL === 'string') return window.VOLVIX_API_URL;
-
-    // 2. Mismo origen si es http(s)
+  // =========================================================
+  // AUTODETECCIÓN DE URL
+  // =========================================================
+  function detectApiUrl() {
+    // 1. Override manual (config.js o window asignado)
+    if (typeof window.VOLVIX_API_URL === 'string' && window.VOLVIX_API_URL.length > 0) {
+      return window.VOLVIX_API_URL.replace(/\/$/, '');
+    }
+    // 2. Mismo origen si es http/https
     if (location.protocol === 'http:' || location.protocol === 'https:') {
       return location.origin;
     }
-
-    // 3. file:// → intenta localhost en puertos comunes
+    // 3. file:// → no hay servidor, modo offline puro
     return null;
   }
 
-  function getWsUrl(apiUrl) {
-    if (!apiUrl) return null;
-    return apiUrl.replace(/^http/, 'ws');
+  const API_URL = detectApiUrl();
+  const OFFLINE_MODE = !API_URL;
+  const FLAGS = window.VOLVIX_FLAGS || {};
+  const DEBUG = FLAGS.debugMode === true;
+
+  // =========================================================
+  // SESIÓN / AUTH
+  // =========================================================
+  function getSession() {
+    try {
+      const raw = localStorage.getItem('volvix:session');
+      if (!raw) return null;
+      const s = JSON.parse(raw);
+      if (s.expires_at && s.expires_at < Date.now()) {
+        localStorage.removeItem('volvix:session');
+        return null;
+      }
+      return s;
+    } catch {
+      return null;
+    }
   }
 
-  let API_URL = getApiUrl();
-  const OFFLINE = !API_URL;
+  function getAuthHeaders() {
+    const s = getSession();
+    if (!s || !s.access_token) return {};
+    return { 'Authorization': 'Bearer ' + s.access_token };
+  }
 
-  // =============== MODO OFFLINE (localStorage) ===============
-  // Cuando abres los HTMLs con doble clic (file://), funciona igual
-  // guardando datos en localStorage
+  function getTenantId() {
+    const s = getSession();
+    return s?.tenant_id || window.VOLVIX_DEFAULT_TENANT || null;
+  }
+
+  // =========================================================
+  // STORAGE OFFLINE (fallback cuando no hay servidor)
+  // =========================================================
   const OfflineStore = {
-    key: 'volvix:offline-db',
-    data: null,
+    KEY: 'volvix:offline-data',
+    cache: null,
+
     load() {
-      try { this.data = JSON.parse(localStorage.getItem(this.key) || 'null'); } catch { this.data = null; }
-      if (!this.data) this.data = this._seed();
+      if (this.cache) return this.cache;
+      try {
+        this.cache = JSON.parse(localStorage.getItem(this.KEY) || 'null');
+      } catch {
+        this.cache = null;
+      }
+      if (!this.cache) {
+        this.cache = this._seed();
+        this.save();
+      }
+      return this.cache;
     },
-    save() { localStorage.setItem(this.key, JSON.stringify(this.data)); },
+
+    save() {
+      try {
+        localStorage.setItem(this.KEY, JSON.stringify(this.cache));
+      } catch (e) {
+        console.warn('[volvix] localStorage lleno:', e.message);
+      }
+    },
+
     _seed() {
       return {
         tenants: [
           { id: 'TNT001', name: 'Abarrotes Don Chucho', giro: 'abarrotes', plan: 'pro', status: 'active', mrr: 799 },
-          { id: 'TNT002', name: 'Restaurante Los Compadres', giro: 'restaurante', plan: 'enterprise', status: 'active', mrr: 1499 },
         ],
-        features: [
-          { id: 'FEAT-0001', name: 'Cobrar ticket', module: 'pos', status: 'stable', usage: 1843 },
-          { id: 'FEAT-0030', name: 'Corte de caja estándar', module: 'corte', status: 'stable', usage: 1843 },
-          { id: 'FEAT-0050', name: 'Factura CFDI 4.0', module: 'facturacion', status: 'stable', usage: 892 },
+        productos: [
+          { id: 'd1', codigo: '7501055303045', nombre: 'Coca-Cola 600ml', precio: 25, stock: 124, categoria: 'Bebidas' },
+          { id: 'd2', codigo: '7501030411025', nombre: 'Pan dulce', precio: 8.5, stock: 48, categoria: 'Panadería' },
+          { id: 'd3', codigo: '7501058634511', nombre: 'Queso fresco 250g', precio: 120, stock: 12, categoria: 'Lácteos' },
+          { id: 'd4', codigo: '7501055305018', nombre: 'Agua 1.5L', precio: 12, stock: 200, categoria: 'Bebidas' },
+          { id: 'd5', codigo: '7501031301013', nombre: 'Leche Lala 1L', precio: 32, stock: 55, categoria: 'Lácteos' },
+          { id: 'd6', codigo: '7501003130052', nombre: 'Arroz 1kg', precio: 28, stock: 80, categoria: 'Básicos' },
+          { id: 'd7', codigo: '7501003130069', nombre: 'Frijol negro 1kg', precio: 35, stock: 60, categoria: 'Básicos' },
+          { id: 'd8', codigo: '7501007861054', nombre: 'Sabritas Original', precio: 18, stock: 90, categoria: 'Snacks' },
         ],
+        ventas: [],
+        clientes: [],
+        features: [],
         tickets: [],
-        knowledge: [
-          { id: 'KB-001', problem: 'Impresora térmica Epson no imprime', cases: 47, mostCommonFix: 'Cambio puerto USB', successRate: 0.89, avgTimeSec: 52 },
-        ],
+        knowledge: [],
       };
     },
-    get(table) { return this.data[table] || []; },
-    find(table, id) { return this.get(table).find(x => x.id === id); },
-    add(table, obj) { this.data[table].push(obj); this.save(); return obj; },
+
+    list(table) {
+      this.load();
+      return this.cache[table] || [];
+    },
+
+    find(table, id) {
+      return this.list(table).find(x => x.id === id);
+    },
+
+    insert(table, obj) {
+      this.load();
+      if (!this.cache[table]) this.cache[table] = [];
+      const item = { ...obj, id: obj.id || this._genId(table), _localOnly: true, _ts: Date.now() };
+      this.cache[table].push(item);
+      this.save();
+      return item;
+    },
+
     update(table, id, patch) {
-      const o = this.find(table, id);
-      if (o) { Object.assign(o, patch); this.save(); }
-      return o;
+      this.load();
+      const item = this.find(table, id);
+      if (item) {
+        Object.assign(item, patch, { _ts: Date.now() });
+        this.save();
+      }
+      return item;
+    },
+
+    remove(table, id) {
+      this.load();
+      this.cache[table] = (this.cache[table] || []).filter(x => x.id !== id);
+      this.save();
+    },
+
+    _genId(table) {
+      const prefix = {
+        ventas: 'V', tenants: 'TNT', productos: 'P', clientes: 'C',
+        features: 'FEAT', tickets: 'TKT',
+      }[table] || 'X';
+      return prefix + '-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+    },
+
+    clear() {
+      localStorage.removeItem(this.KEY);
+      this.cache = null;
     },
   };
-  if (OFFLINE) OfflineStore.load();
 
-  // =============== AI DECIDE (offline) ===============
-  function aiDecideOffline(clientRequest, tenantId) {
-    const features = OfflineStore.get('features');
-    const req = (clientRequest || '').toLowerCase();
-    let best = null, score = 0;
-    for (const f of features) {
-      const words = f.name.toLowerCase().split(' ');
-      let s = 0;
-      for (const w of words) if (w.length > 3 && req.includes(w)) s += w.length;
-      if (s > score) { score = s; best = f; }
-    }
-    let decision, created;
-    if (score >= 20) {
-      decision = 'activate'; created = best;
-    } else if (score >= 8) {
-      decision = 'extend';
-      created = {
-        id: 'FEAT-' + String(features.length + 240).padStart(4, '0'),
-        name: best.name + ' · extensión',
-        module: best.module,
-        status: 'extended',
-        parent: best.id,
-        usage: 1,
-        createdByAI: true,
-        origRequest: clientRequest,
-        created: Date.now(),
-      };
-      OfflineStore.add('features', created);
-    } else {
-      decision = 'create';
-      created = {
-        id: 'FEAT-' + String(features.length + 240).padStart(4, '0'),
-        name: clientRequest.slice(0, 60),
-        module: 'custom',
-        status: 'new',
-        usage: 1,
-        createdByAI: true,
-        origRequest: clientRequest,
-        created: Date.now(),
-      };
-      OfflineStore.add('features', created);
-    }
-    return { decision, feature: created, score };
-  }
-
-  // =============== FETCH HELPER ===============
-  async function http(method, endpoint, body) {
-    if (OFFLINE) {
-      console.log('[volvix offline]', method, endpoint, body);
+  // =========================================================
+  // FETCH HELPER (con auth, timeout, error handling)
+  // =========================================================
+  async function http(method, endpoint, body, opts = {}) {
+    if (OFFLINE_MODE) {
+      if (DEBUG) console.log('[volvix offline]', method, endpoint, body);
       return null;
     }
+
+    const ctrl = new AbortController();
+    const timeoutMs = opts.timeout || 10000;
+    const timeoutId = setTimeout(() => ctrl.abort(), timeoutMs);
+
     try {
+      const headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        ...getAuthHeaders(),
+        ...(opts.headers || {}),
+      };
+      const tenantId = getTenantId();
+      if (tenantId) headers['X-Tenant-Id'] = tenantId;
+
       const res = await fetch(API_URL + endpoint, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: body ? JSON.stringify(body) : undefined,
+        signal: ctrl.signal,
+        cache: 'no-store',
       });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
+
+      clearTimeout(timeoutId);
+
+      // 401 = sesión expirada → forzar re-login
+      if (res.status === 401) {
+        localStorage.removeItem('volvix:session');
+        if (typeof window.VOLVIX_ON_AUTH_FAIL === 'function') {
+          window.VOLVIX_ON_AUTH_FAIL();
+        } else if (location.pathname !== '/login.html') {
+          location.replace('/login.html?expired=1');
+        }
+        throw new Error('Sesión expirada');
+      }
+
+      // 4xx / 5xx
+      if (!res.ok) {
+        let errMsg = 'HTTP ' + res.status;
+        try {
+          const errBody = await res.json();
+          errMsg = errBody.error || errBody.message || errMsg;
+        } catch {}
+        throw new Error(errMsg);
+      }
+
+      // 204 No Content
+      if (res.status === 204) return null;
+
       return await res.json();
     } catch (err) {
-      console.warn('[volvix] API fallo, usando datos locales:', err.message);
+      clearTimeout(timeoutId);
+      if (err.name === 'AbortError') {
+        throw new Error('Timeout: el servidor no respondió en ' + timeoutMs + 'ms');
+      }
+      // Error de red → caller decide si usar fallback offline
+      if (DEBUG) console.warn('[volvix] http error:', method, endpoint, err.message);
+      throw err;
+    }
+  }
+
+  // Wrapper que usa offline fallback en caso de error de red
+  async function httpOrOffline(method, endpoint, body, table, fallbackFn) {
+    try {
+      return await http(method, endpoint, body);
+    } catch (err) {
+      if (DEBUG) console.warn('[volvix] usando offline fallback:', err.message);
+      if (typeof fallbackFn === 'function') return fallbackFn();
       return null;
     }
   }
 
-  // =============== WEBSOCKET ===============
-  const wsListeners = new Map();
-  let ws = null, wsReconnectTimer = null;
+  // =========================================================
+  // API PÚBLICA POR RECURSO
+  // =========================================================
+  const api = {
+    // ---------- Core ----------
+    health:  () => http('GET', '/api/health').catch(() => null),
+    config:  () => http('GET', '/api/config').catch(() => null),
+    stats:   () => http('GET', '/api/stats').catch(() => null),
 
-  function wsConnect() {
-    if (OFFLINE) return;
-    // B17: Vercel serverless NO soporta WebSocket — abortar silenciosamente
-    try {
-      if (typeof location !== 'undefined' && /\.vercel\.app$/i.test(location.hostname)) {
-        console.log('[volvix] WS skip on Vercel (serverless)');
-        return;
+    // ---------- Tenants ----------
+    tenants: {
+      list:   () => httpOrOffline('GET', '/api/tenants', null, 'tenants',
+                                  () => OfflineStore.list('tenants')),
+      get:    (id) => httpOrOffline('GET', '/api/tenants/' + encodeURIComponent(id), null, null,
+                                    () => OfflineStore.find('tenants', id)),
+      create: (data) => http('POST', '/api/tenants', data),
+      update: (id, data) => http('PATCH', '/api/tenants/' + encodeURIComponent(id), data),
+      delete: (id) => http('DELETE', '/api/tenants/' + encodeURIComponent(id)),
+    },
+
+    // ---------- Features (motor auto-evolución) ----------
+    features: {
+      list:    (filters) => {
+        const q = filters ? '?' + new URLSearchParams(filters).toString() : '';
+        return httpOrOffline('GET', '/api/features' + q, null, 'features',
+                             () => OfflineStore.list('features'));
+      },
+      get:     (id) => http('GET', '/api/features/' + encodeURIComponent(id)),
+      // EL CORAZON: cliente pide algo, IA decide
+      request: (clientRequest, tenantId) => http('POST', '/api/features/request', {
+        clientRequest,
+        tenantId: tenantId || getTenantId(),
+      }),
+    },
+
+    // ---------- Tickets (soporte) ----------
+    tickets: {
+      list:    () => httpOrOffline('GET', '/api/tickets', null, 'tickets',
+                                   () => OfflineStore.list('tickets')),
+      get:     (id) => http('GET', '/api/tickets/' + encodeURIComponent(id)),
+      create:  (data) => http('POST', '/api/tickets', { ...data, tenantId: data.tenantId || getTenantId() }),
+      resolve: (id, data) => http('POST', '/api/tickets/' + encodeURIComponent(id) + '/resolve', data),
+    },
+
+    // ---------- Knowledge base ----------
+    knowledge: {
+      list:    () => httpOrOffline('GET', '/api/knowledge', null, 'knowledge',
+                                   () => OfflineStore.list('knowledge')),
+      search:  (q) => http('GET', '/api/knowledge/search?q=' + encodeURIComponent(q)),
+    },
+
+    // ---------- Control remoto ----------
+    remote: {
+      start:   (tenantId) => http('POST', '/api/remote/start', { tenantId: tenantId || getTenantId() }),
+      connect: (code) => http('POST', '/api/remote/connect', { code }),
+    },
+
+    // ---------- IA chat ----------
+    ai: {
+      chat: (message, system) => http('POST', '/api/ai/chat', { message, system }),
+      chatMessages: (messages, system) => http('POST', '/api/ai/chat', { messages, system }),
+    },
+
+    // ---------- Ventas (POS) ----------
+    ventas: {
+      list:   (filters) => {
+        const q = filters ? '?' + new URLSearchParams(filters).toString() : '';
+        return httpOrOffline('GET', '/api/ventas' + q, null, 'ventas',
+                             () => OfflineStore.list('ventas'));
+      },
+      get:    (id) => http('GET', '/api/ventas/' + encodeURIComponent(id)),
+      create: (venta) => http('POST', '/api/ventas', {
+        ...venta,
+        tenant_id: venta.tenant_id || getTenantId(),
+      }),
+    },
+
+    // ---------- Productos ----------
+    productos: {
+      list:   () => httpOrOffline('GET', '/api/productos', null, 'productos',
+                                  () => OfflineStore.list('productos')),
+      get:    (id) => http('GET', '/api/productos/' + encodeURIComponent(id)),
+      create: (data) => http('POST', '/api/productos', data),
+      update: (id, data) => http('PATCH', '/api/productos/' + encodeURIComponent(id), data),
+      delete: (id) => http('DELETE', '/api/productos/' + encodeURIComponent(id)),
+      search: (q) => http('GET', '/api/productos/search?q=' + encodeURIComponent(q)),
+    },
+
+    // ---------- Clientes ----------
+    clientes: {
+      list:   () => httpOrOffline('GET', '/api/clientes', null, 'clientes',
+                                  () => OfflineStore.list('clientes')),
+      get:    (id) => http('GET', '/api/clientes/' + encodeURIComponent(id)),
+      create: (data) => http('POST', '/api/clientes', data),
+      update: (id, data) => http('PATCH', '/api/clientes/' + encodeURIComponent(id), data),
+    },
+
+    // ---------- Helpers de bajo nivel (escape hatch) ----------
+    raw: http,
+    rawOffline: httpOrOffline,
+  };
+
+  // =========================================================
+  // UTILIDADES GLOBALES
+  // =========================================================
+  const utils = {
+    // Toast notification (UI feedback)
+    toast(msg, type = 'info', durationMs = 2800) {
+      let el = document.getElementById('volvix-global-toast');
+      if (!el) {
+        el = document.createElement('div');
+        el.id = 'volvix-global-toast';
+        el.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);' +
+          'background:#1C1917;color:#fff;border-radius:8px;padding:10px 20px;' +
+          'font:600 13px/1.4 Inter,system-ui,sans-serif;z-index:9999;' +
+          'opacity:0;transition:all 0.25s;pointer-events:none;white-space:nowrap;' +
+          'box-shadow:0 10px 30px rgba(0,0,0,0.3);max-width:90vw;text-overflow:ellipsis;overflow:hidden';
+        document.body.appendChild(el);
       }
-    } catch (_) {}
-    const wsUrl = getWsUrl(API_URL);
-    if (!wsUrl) return;
-
-    try {
-      ws = new WebSocket(wsUrl);
-      ws.onopen = () => {
-        console.log('[volvix] WebSocket conectado');
-        if (wsReconnectTimer) { clearTimeout(wsReconnectTimer); wsReconnectTimer = null; }
+      const colors = {
+        info:    '#3B82F6',
+        ok:      '#16A34A',
+        success: '#16A34A',
+        warn:    '#F97316',
+        err:     '#DC2626',
+        error:   '#DC2626',
       };
-      ws.onmessage = (e) => {
-        try {
-          const msg = JSON.parse(e.data);
-          const handlers = wsListeners.get(msg.type) || [];
-          handlers.forEach(h => { try { h(msg); } catch (err) { console.error(err); } });
-          const wildcardHandlers = wsListeners.get('*') || [];
-          wildcardHandlers.forEach(h => { try { h(msg); } catch (err) { console.error(err); } });
-        } catch {}
+      el.style.background = colors[type] || '#1C1917';
+      el.textContent = msg;
+      requestAnimationFrame(() => {
+        el.style.opacity = '1';
+        el.style.transform = 'translateX(-50%) translateY(0)';
+      });
+      clearTimeout(el._t);
+      el._t = setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateX(-50%) translateY(20px)';
+      }, durationMs);
+    },
+
+    // Escape HTML (anti-XSS) – uso obligatorio en template strings con datos del backend
+    esc(s) {
+      if (s == null) return '';
+      return String(s).replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      })[c]);
+    },
+
+    // Formato moneda MXN (o lo que diga config)
+    money(n, currency) {
+      const code = currency || (window.VOLVIX_REGION?.currency) || 'MXN';
+      const num = Number(n);
+      if (isNaN(num)) return '$0.00';
+      try {
+        return new Intl.NumberFormat(window.VOLVIX_REGION?.locale || 'es-MX', {
+          style: 'currency',
+          currency: code,
+          minimumFractionDigits: 2,
+        }).format(num);
+      } catch {
+        return '$' + num.toFixed(2);
+      }
+    },
+
+    // Formato número simple
+    num(n, decimals = 0) {
+      const num = Number(n);
+      if (isNaN(num)) return '0';
+      return num.toLocaleString(window.VOLVIX_REGION?.locale || 'es-MX', {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+      });
+    },
+
+    // Formato fecha respetando timezone del config
+    date(d, opts) {
+      const date = d instanceof Date ? d : new Date(d);
+      if (isNaN(date.getTime())) return '—';
+      const tz = window.VOLVIX_REGION?.timezone || 'America/Monterrey';
+      const locale = window.VOLVIX_REGION?.locale || 'es-MX';
+      return date.toLocaleDateString(locale, { timeZone: tz, ...(opts || {}) });
+    },
+
+    datetime(d, opts) {
+      const date = d instanceof Date ? d : new Date(d);
+      if (isNaN(date.getTime())) return '—';
+      const tz = window.VOLVIX_REGION?.timezone || 'America/Monterrey';
+      const locale = window.VOLVIX_REGION?.locale || 'es-MX';
+      return date.toLocaleString(locale, { timeZone: tz, ...(opts || {}) });
+    },
+
+    time(d, opts) {
+      const date = d instanceof Date ? d : new Date(d);
+      if (isNaN(date.getTime())) return '—';
+      const tz = window.VOLVIX_REGION?.timezone || 'America/Monterrey';
+      const locale = window.VOLVIX_REGION?.locale || 'es-MX';
+      return date.toLocaleTimeString(locale, { timeZone: tz, ...(opts || {}) });
+    },
+
+    // Tiempo relativo: "hace 5 min", "hace 2h"
+    relativeTime(d) {
+      const date = d instanceof Date ? d : new Date(d);
+      const diffMs = Date.now() - date.getTime();
+      const min = Math.floor(diffMs / 60000);
+      if (min < 1) return 'ahora';
+      if (min < 60) return 'hace ' + min + ' min';
+      const h = Math.floor(min / 60);
+      if (h < 24) return 'hace ' + h + 'h';
+      const d2 = Math.floor(h / 24);
+      if (d2 < 30) return 'hace ' + d2 + 'd';
+      return this.date(date);
+    },
+
+    // Debounce simple
+    debounce(fn, ms) {
+      let t;
+      return function (...args) {
+        clearTimeout(t);
+        t = setTimeout(() => fn.apply(this, args), ms);
       };
-      ws.onclose = () => {
-        console.log('[volvix] WebSocket desconectado, reintentando en 3s...');
-        wsReconnectTimer = setTimeout(wsConnect, 3000);
-      };
-      ws.onerror = () => {};
-    } catch (err) {
-      console.warn('[volvix] WebSocket no disponible');
-    }
-  }
-
-  function wsOn(event, handler) {
-    if (!wsListeners.has(event)) wsListeners.set(event, []);
-    wsListeners.get(event).push(handler);
-  }
-
-  function wsSend(msg) {
-    if (!ws || ws.readyState !== 1) return false;
-    ws.send(JSON.stringify(msg));
-    return true;
-  }
-
-  // =============== API PÚBLICA ===============
-  window.volvix = {
-    config: {
-      apiUrl: API_URL,
-      offline: OFFLINE,
-      version: '7.0.0',
     },
 
-    // API REST
-    api: {
-      health: () => http('GET', '/api/health'),
-      stats: () => http('GET', '/api/stats'),
-      config: () => http('GET', '/api/config'),
-
-      tenants: {
-        list: async () => {
-          // Pull del server si online, fallback local
-          const server = await http('GET', '/api/tenants');
-          if (server && window.volvix?.sync) {
-            window.volvix.sync.setLocal('tenants', server);
-            return server;
-          }
-          return window.volvix?.sync?.getLocal('tenants') || OfflineStore.get('tenants');
-        },
-        get: (id) => http('GET', '/api/tenants/' + id) || OfflineStore.find('tenants', id),
-        create: async (data) => {
-          // Offline-first: usa sync engine si disponible
-          if (window.volvix?.sync) {
-            const full = { ...data, id: 'TNT-' + Date.now(), created: Date.now() };
-            await window.volvix.sync.execute({
-              type: 'create', table: 'tenants', data: full,
-              endpoint: '/api/tenants', body: full,
-            });
-            return full;
-          }
-          return http('POST', '/api/tenants', data) || OfflineStore.add('tenants', { ...data, id: 'TNT' + Date.now() });
-        },
-        update: async (id, data) => {
-          if (window.volvix?.sync) {
-            await window.volvix.sync.execute({
-              type: 'update', table: 'tenants', id,
-              endpoint: '/api/tenants/' + id, body: data, data,
-            });
-            return { id, ...data };
-          }
-          return http('PATCH', '/api/tenants/' + id, data) || OfflineStore.update('tenants', id, data);
-        },
-      },
-
-      features: {
-        list: (filters) => {
-          const q = filters ? '?' + new URLSearchParams(filters) : '';
-          return http('GET', '/api/features' + q) || OfflineStore.get('features');
-        },
-        request: async (clientRequest, tenantId) => {
-          if (OFFLINE) return aiDecideOffline(clientRequest, tenantId);
-          return http('POST', '/api/features/request', { clientRequest, tenantId })
-            || aiDecideOffline(clientRequest, tenantId);
-        },
-      },
-
-      tickets: {
-        list: () => http('GET', '/api/tickets') || OfflineStore.get('tickets'),
-        create: async (data) => http('POST', '/api/tickets', data) || OfflineStore.add('tickets', { ...data, id: 'TKT-' + Date.now() }),
-        resolve: (id, data) => http('POST', '/api/tickets/' + id + '/resolve', data),
-      },
-
-      knowledge: {
-        list: () => http('GET', '/api/knowledge') || OfflineStore.get('knowledge'),
-        search: (q) => http('GET', '/api/knowledge/search?q=' + encodeURIComponent(q)),
-      },
-
-      remote: {
-        start: (tenantId) => http('POST', '/api/remote/start', { tenantId }),
-        connect: (code) => http('POST', '/api/remote/connect', { code }),
-      },
-
-      ai: {
-        chat: (message, system) => http('POST', '/api/ai/chat', { message, system }),
-        chatMessages: (messages, system) => http('POST', '/api/ai/chat', { messages, system }),
-      },
-    },
-
-    // WebSocket
-    ws: {
-      on: wsOn,
-      send: wsSend,
-      isConnected: () => ws && ws.readyState === 1,
-    },
-
-    // Helpers
-    ready: (cb) => {
-      if (document.readyState === 'complete') cb();
-      else window.addEventListener('load', cb);
-    },
-
-    // Utilities
-    toast: (msg, type = 'info') => {
-      const existing = document.querySelector('.volvix-toast');
-      if (existing) existing.remove();
-      const t = document.createElement('div');
-      t.className = 'volvix-toast';
-      t.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#1C1917;color:#fff;padding:10px 18px;border-radius:100px;font:500 13px system-ui;z-index:10000;box-shadow:0 10px 30px rgba(0,0,0,0.3);opacity:0;transition:opacity 0.2s;';
-      t.textContent = msg;
-      document.body.appendChild(t);
-      requestAnimationFrame(() => t.style.opacity = '1');
-      setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2500);
+    // UUID v4 simple (no crypto-grade pero alcanza para IDs locales)
+    uuid() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+        const r = Math.random() * 16 | 0;
+        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+      });
     },
   };
 
-  // Arrancar WebSocket
-  wsConnect();
+  // =========================================================
+  // PUBLICAR EN window.volvix
+  // =========================================================
+  window.volvix = window.volvix || {};
+  window.volvix.config = {
+    apiUrl: API_URL,
+    offline: OFFLINE_MODE,
+    version: window.VOLVIX_BRAND?.version || '7.0.0',
+    flags: FLAGS,
+  };
+  window.volvix.api = api;
+  window.volvix.utils = utils;
+  window.volvix.session = {
+    get: getSession,
+    getTenantId: getTenantId,
+    getAuthHeaders: getAuthHeaders,
+    clear: () => {
+      localStorage.removeItem('volvix:session');
+    },
+    set: (session) => {
+      localStorage.setItem('volvix:session', JSON.stringify(session));
+    },
+  };
+  window.volvix.offline = OfflineStore;
 
-  // Log de inicio
-  console.log('%c VOLVIX ', 'background:#FBBF24;color:#000;font-weight:700;padding:3px 8px;border-radius:4px;',
-    OFFLINE ? 'modo offline (localStorage)' : 'conectado a ' + API_URL);
+  // Helper "ready"
+  window.volvix.ready = (cb) => {
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      Promise.resolve().then(cb);
+    } else {
+      document.addEventListener('DOMContentLoaded', cb);
+    }
+  };
+
+  // =========================================================
+  // LOG DE INICIO
+  // =========================================================
+  const tag = OFFLINE_MODE ? 'background:#F97316' : 'background:#FBBF24';
+  console.log(
+    '%c VOLVIX %c ' + (OFFLINE_MODE ? 'modo offline (localStorage)' : 'conectado a ' + API_URL),
+    tag + ';color:#000;font-weight:700;padding:3px 8px;border-radius:4px',
+    'color:#666'
+  );
 })();
