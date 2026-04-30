@@ -30757,5 +30757,102 @@ if (process.env.NODE_ENV === 'test') {
     } catch (err) { sendError(res, err); }
   }, ['admin', 'owner', 'superadmin']);
 
+  // ================================================================
+  // MISSING ROUTES — Wave 3C
+  // ================================================================
+
+  // Alias: /api/tenant/modules/active -> /api/tenant/modules
+  handlers['GET /api/tenant/modules/active'] = requireAuth(async function (req, res) {
+    try {
+      const tenantId = resolveTenant(req);
+      const modules = await supabaseRequest('GET', `/tenant_modules?tenant_id=eq.${encodeURIComponent(tenantId)}&select=*`).catch(() => []);
+      sendJSON(res, { ok: true, modules: Array.isArray(modules) ? modules : [], overrides: {} });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // /api/tenant/users/with-modules — users + their module permissions
+  handlers['GET /api/tenant/users/with-modules'] = requireAuth(async function (req, res) {
+    try {
+      const tenantId = resolveTenant(req);
+      const [users, perms] = await Promise.all([
+        supabaseRequest('GET', `/pos_users?company_id=eq.${encodeURIComponent(tenantId)}&select=id,email,full_name,role,is_active&limit=100`).catch(() => []),
+        supabaseRequest('GET', `/user_permissions?tenant_id=eq.${encodeURIComponent(tenantId)}&select=user_id,module_key,status&limit=500`).catch(() => []),
+      ]);
+      const usersArr = Array.isArray(users) ? users : [];
+      const permsArr = Array.isArray(perms) ? perms : [];
+      const permMap = {};
+      permsArr.forEach(p => {
+        if (!permMap[p.user_id]) permMap[p.user_id] = [];
+        permMap[p.user_id].push({ module_key: p.module_key, status: p.status });
+      });
+      const result = usersArr.map(u => ({ ...u, modules: permMap[u.id] || [] }));
+      sendJSON(res, { ok: true, users: result });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // /api/module-pricing — pricing for modules
+  handlers['GET /api/module-pricing'] = requireAuth(async function (req, res) {
+    try {
+      const pricing = await supabaseRequest('GET', '/module_pricing?select=*&order=module_key.asc&limit=100').catch(() => []);
+      sendJSON(res, Array.isArray(pricing) ? pricing : []);
+    } catch (err) { sendError(res, err); }
+  });
+
+  handlers['PATCH /api/module-pricing'] = requireAuth(async function (req, res) {
+    try {
+      const body = await readBody(req);
+      if (!body.module_key) return sendJSON(res, { error: 'module_key required' }, 400);
+      const safe = pickFields(body, ['module_key', 'price', 'currency', 'billing_cycle', 'description']);
+      const result = await supabaseRequest('PATCH', `/module_pricing?module_key=eq.${encodeURIComponent(body.module_key)}`, safe).catch(() => null);
+      sendJSON(res, result || { ok: true });
+    } catch (err) { sendError(res, err); }
+  }, ['admin', 'owner', 'superadmin']);
+
+  // /api/tenant/list — for super-admin multi-tenant view
+  handlers['GET /api/tenant/list'] = requireAuth(async function (req, res) {
+    try {
+      if (!['superadmin', 'admin'].includes(req.user && req.user.role)) {
+        return sendJSON(res, [], 200);
+      }
+      const tenants = await supabaseRequest('GET', '/pos_companies?select=id,name,plan,is_active,created_at&order=created_at.desc&limit=100').catch(() => []);
+      sendJSON(res, Array.isArray(tenants) ? tenants : []);
+    } catch (err) { sendError(res, err); }
+  });
+
+  // /api/user-permissions/:userId — for user management RBAC
+  handlers['GET /api/users/:id/permissions'] = requireAuth(async function (req, res, params) {
+    try {
+      const perms = await supabaseRequest('GET', `/user_permissions?user_id=eq.${encodeURIComponent(params.id)}&select=module_key,status&limit=200`).catch(() => []);
+      sendJSON(res, Array.isArray(perms) ? perms : []);
+    } catch (err) { sendError(res, err); }
+  });
+
+  handlers['PATCH /api/users/:id/permissions'] = requireAuth(async function (req, res, params) {
+    try {
+      const body = await readBody(req);
+      const tenantId = resolveTenant(req);
+      // Upsert permission for this user
+      if (body.module_key) {
+        await supabaseRequest('POST', '/user_permissions', {
+          user_id: params.id, tenant_id: tenantId,
+          module_key: body.module_key, status: body.status || 'active'
+        }).catch(async () => {
+          await supabaseRequest('PATCH', `/user_permissions?user_id=eq.${encodeURIComponent(params.id)}&module_key=eq.${encodeURIComponent(body.module_key)}`, { status: body.status || 'active' }).catch(() => {});
+        });
+      }
+      sendJSON(res, { ok: true });
+    } catch (err) { sendError(res, err); }
+  }, ['admin', 'owner', 'superadmin']);
+
+  handlers['PATCH /api/users/:id/branch-scope'] = requireAuth(async function (req, res, params) {
+    try {
+      const body = await readBody(req);
+      await supabaseRequest('PATCH', `/pos_users?id=eq.${encodeURIComponent(params.id)}`, {
+        branch_scope: body.branch_ids || body.branch_scope || null
+      }).catch(() => {});
+      sendJSON(res, { ok: true });
+    } catch (err) { sendError(res, err); }
+  }, ['admin', 'owner', 'superadmin']);
+
 })();
 
