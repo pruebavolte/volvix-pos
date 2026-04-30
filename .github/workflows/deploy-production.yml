@@ -1,0 +1,39 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    name: Trigger Vercel Production Deployment
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Syntax check api/index.js
+        run: node --check api/index.js
+
+      - name: Trigger Vercel production deploy
+        run: |
+          RESPONSE=$(curl -s -X POST "https://api.vercel.com/v1/integrations/deploy/prj_2f9m0VwArnqlGvlBZtxchvQl1a2t/AZu9c0G1Ie" \
+            -H "Content-Type: application/json" \
+            -d '{"ref":"main"}')
+          echo "Deploy triggered: $RESPONSE"
+          # Extract deployment URL if available
+          echo "$RESPONSE" | python3 -c "import sys,json; d=json.load(sys.stdin); print('Deployment:', d.get('url', d.get('id', 'triggered')))" 2>/dev/null || true
+
+      - name: Wait for deployment and verify
+        run: |
+          echo "Waiting 30s for deployment to propagate..."
+          sleep 30
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://volvix-pos.vercel.app/api/health")
+          echo "Health check status: $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "WARNING: Health check returned $STATUS"
+          else
+            echo "Production deployment verified!"
+          fi
