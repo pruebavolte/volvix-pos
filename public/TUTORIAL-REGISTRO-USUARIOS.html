@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guía Completa: Registro de Usuarios & Admin Panel | Volvix POS</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #1a2332 100%);
+      color: #e2e8f0;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 50px;
+      border-bottom: 2px solid #334155;
+      padding-bottom: 30px;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 12px;
+      background: linear-gradient(90deg, #38bdf8, #a78bfa);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .subtitle {
+      font-size: 1.1rem;
+      color: #94a3b8;
+      margin-bottom: 8px;
+    }
+    .breadcrumb {
+      color: #64748b;
+      font-size: 0.9rem;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      border-bottom: 2px solid #334155;
+      overflow-x: auto;
+    }
+    .tab-btn {
+      padding: 14px 20px;
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s;
+      white-space: nowrap;
+    }
+    .tab-btn.active {
+      color: #38bdf8;
+      border-bottom-color: #38bdf8;
+    }
+    .tab-btn:hover {
+      color: #cbd5e1;
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Sections */
+    .section {
+      margin-bottom: 40px;
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 28px;
+    }
+    .section h2 {
+      font-size: 1.6rem;
+      margin-bottom: 16px;
+      color: #fde047;
+    }
+    .section h3 {
+      font-size: 1.2rem;
+      margin-top: 20px;
+      margin-bottom: 12px;
+      color: #cbd5e1;
+    }
+
+    /* Steps */
+    .step-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+    .step-card {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 20px;
+      transition: all 0.3s;
+    }
+    .step-card:hover {
+      border-color: #38bdf8;
+      transform: translateY(-3px);
+      box-shadow: 0 12px 24px rgba(56, 189, 248, 0.15);
+    }
+    .step-card .step-num {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      background: #3b82f6;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .step-card h4 {
+      font-size: 1.05rem;
+      margin-bottom: 10px;
+      color: #fde047;
+    }
+    .step-card p {
+      font-size: 0.9rem;
+      color: #cbd5e1;
+      line-height: 1.5;
+    }
+
+    /* Mockup */
+    .mockup {
+      background: white;
+      color: #1e293b;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 15px 0;
+      min-height: 300px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      font-weight: 600;
+      position: relative;
+    }
+    .mockup-label {
+      position: absolute;
+      top: 8px;
+      left: 12px;
+      font-size: 0.75rem;
+      background: #3b82f6;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    /* Lists */
+    .checklist {
+      list-style: none;
+      margin: 15px 0;
+    }
+    .checklist li {
+      padding: 10px 0;
+      padding-left: 30px;
+      position: relative;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.3);
+    }
+    .checklist li:before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #10b981;
+      font-weight: 700;
+      font-size: 1.2rem;
+    }
+
+    /* Quick Links */
+    .quick-links {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin: 20px 0;
+    }
+    .quick-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid #3b82f6;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      color: #38bdf8;
+      transition: all 0.3s;
+      font-weight: 600;
+    }
+    .quick-link:hover {
+      background: rgba(59, 130, 246, 0.2);
+      transform: translateX(4px);
+    }
+    .quick-link .icon {
+      font-size: 1.5rem;
+    }
+
+    /* Warning/Info boxes */
+    .info-box {
+      background: rgba(59, 130, 246, 0.1);
+      border-left: 4px solid #3b82f6;
+      padding: 16px;
+      border-radius: 6px;
+      margin: 15px 0;
+    }
+    .warning-box {
+      background: rgba(239, 68, 68, 0.1);
+      border-left: 4px solid #ef4444;
+      padding: 16px;
+      border-radius: 6px;
+      margin: 15px 0;
+    }
+    .success-box {
+      background: rgba(16, 185, 129, 0.1);
+      border-left: 4px solid #10b981;
+      padding: 16px;
+      border-radius: 6px;
+      margin: 15px 0;
+    }
+
+    .code-box {
+      background: #0b1220;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      padding: 12px 16px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      color: #10b981;
+      overflow-x: auto;
+      margin: 12px 0;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      margin-top: 50px;
+      padding-top: 30px;
+      border-top: 2px solid #334155;
+      color: #64748b;
+      font-size: 0.9rem;
+    }
+
+    .toc {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+    .toc h3 {
+      margin-top: 0;
+      margin-bottom: 12px;
+    }
+    .toc ul {
+      list-style: none;
+      margin: 0;
+    }
+    .toc li {
+      padding: 6px 0;
+    }
+    .toc a {
+      color: #38bdf8;
+      text-decoration: none;
+    }
+    .toc a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+      h1 { font-size: 1.8rem; }
+      .step-grid {
+        grid-template-columns: 1fr;
+      }
+      .tabs {
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <h1>🚀 Registro de Usuarios & Admin Panel</h1>
+      <p class="subtitle">Guía completa: Desde el registro inicial hasta la gestión en el panel de control</p>
+      <p class="breadcrumb">Última actualización: 2026-04-28 | Versión: 1.0</p>
+    </header>
+
+    <!-- Table of Contents -->
+    <div class="toc">
+      <h3>📖 Contenido</h3>
+      <ul>
+        <li><a href="#tab-client">👤 Perspectiva del Cliente: Registro</a></li>
+        <li><a href="#tab-admin">👨‍💼 Perspectiva del Admin: Ver Usuarios</a></li>
+        <li><a href="#tab-urls">🔗 URLs Importantes</a></li>
+        <li><a href="#tab-faq">❓ Preguntas Frecuentes</a></li>
+      </ul>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('client')">👤 Cliente</button>
+      <button class="tab-btn" onclick="switchTab('admin')">👨‍💼 Admin</button>
+      <button class="tab-btn" onclick="switchTab('urls')">🔗 URLs</button>
+      <button class="tab-btn" onclick="switchTab('faq')">❓ FAQ</button>
+    </div>
+
+    <!-- TAB 1: CLIENT REGISTRATION -->
+    <div class="tab-content active" id="tab-client">
+      <div class="section">
+        <h2>👤 Perspectiva del Cliente: Proceso de Registro</h2>
+        <p>Así ve el cliente nuevo el proceso desde el inicio hasta crear su cuenta y estar listo para vender.</p>
+
+        <h3>📊 Flujo General</h3>
+        <div class="info-box">
+          <strong>⏱️ Tiempo total:</strong> 3-5 minutos<br>
+          <strong>📋 Pasos:</strong> 4 pasos principales<br>
+          <strong>📱 Métodos:</strong> Email, teléfono, OTP (WhatsApp/SMS)
+        </div>
+
+        <h3>Paso 1️⃣: Accesar a Registro</h3>
+        <div class="step-grid">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <h4>Ir a página de registro</h4>
+            <p>El cliente va a <code style="background: #334155; padding: 2px 6px; border-radius: 4px;">https://volvix-pos.vercel.app/registro.html</code></p>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <h4>Ver página inicial</h4>
+            <p>Aparece formulario con titulo "Crea tu cuenta en 3 pasos" con indicador de progreso (1, 2, 3, 4)</p>
+          </div>
+        </div>
+
+        <div class="mockup">
+          <div class="mockup-label">Paso 1: Inicio</div>
+          <div style="font-size: 1.5rem; margin-bottom: 12px;">📋</div>
+          <strong style="font-size: 1.1rem;">Registro en Volvix POS</strong>
+          <p style="margin-top: 8px; color: #64748b;">Indicador: Paso 1/4 - Negocio</p>
+        </div>
+
+        <h3>Paso 2️⃣: Datos del Negocio</h3>
+        <ul class="checklist">
+          <li><strong>Nombre del negocio:</strong> "Café El Sol" (obligatorio)</li>
+          <li><strong>Giro/Industria:</strong> Selecciona de lista (Cafetería, Restaurante, Tienda, etc.)</li>
+          <li><strong>Email:</strong> "dueno@cafeelsol.com" (obligatorio, valida formato)</li>
+          <li><strong>Teléfono:</strong> "+52 555 1234567" (obligatorio, 10-15 dígitos)</li>
+        </ul>
+
+        <div class="mockup">
+          <div class="mockup-label">Paso 2: Datos Básicos</div>
+          <div style="text-align: left; margin: 0 auto; max-width: 300px;">
+            <div style="margin-bottom: 12px;">
+              <label style="color: #475569; font-size: 0.85rem;">Nombre del negocio</label>
+              <input type="text" value="Café El Sol" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; margin-top: 4px;">
+            </div>
+            <div style="margin-bottom: 12px;">
+              <label style="color: #475569; font-size: 0.85rem;">Email</label>
+              <input type="email" value="dueno@cafeelsol.com" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; margin-top: 4px;">
+            </div>
+            <div style="margin-bottom: 12px;">
+              <label style="color: #475569; font-size: 0.85rem;">Teléfono</label>
+              <input type="tel" value="+52 555 1234567" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; margin-top: 4px;">
+            </div>
+            <button style="width: 100%; padding: 10px; background: #2D5F8F; color: white; border: none; border-radius: 6px; font-weight: 600;">Siguiente →</button>
+          </div>
+        </div>
+
+        <h3>Paso 3️⃣: Crear Contraseña</h3>
+        <ul class="checklist">
+          <li><strong>Contraseña:</strong> Min 8 caracteres, mayúscula, número, símbolo</li>
+          <li><strong>Indicador de fuerza:</strong> Rojo (débil) → Amarillo (media) → Verde (fuerte)</li>
+          <li><strong>Confirmar:</strong> Repite la contraseña para verificar</li>
+        </ul>
+
+        <h3>Paso 4️⃣: Verificación por OTP</h3>
+        <ul class="checklist">
+          <li><strong>Recibe código:</strong> Sistema envía código de 4 dígitos por WhatsApp o SMS</li>
+          <li><strong>Ingresa código:</strong> Cliente digita los 4 números en campos separados</li>
+          <li><strong>Verifica:</strong> Sistema confirma código (valida en 10 minutos)</li>
+        </ul>
+
+        <div class="success-box">
+          <strong>✅ Registro Exitoso:</strong> Después de verificar, cliente ve "¡Bienvenido!" y puede acceder al POS con:
+          <div class="code-box">Email: dueno@cafeelsol.com
+Password: [su contraseña]</div>
+        </div>
+
+        <h3>Después del Registro: ¿Qué Ve el Cliente?</h3>
+        <ul class="checklist">
+          <li>Dashboard POS con productos pre-cargados del giro</li>
+          <li>Para Cafetería: 12 productos (Café, Espresso, Capuccino, etc.)</li>
+          <li>Para Restaurante: 8 productos (Agua, Ensalada, Filete, Pasta, Pollo, Postre, Refresco, Sopa)</li>
+          <li>Puede empezar a vender inmediatamente</li>
+          <li>Panel de configuración para personalizar productos</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- TAB 2: ADMIN PANEL -->
+    <div class="tab-content" id="tab-admin">
+      <div class="section">
+        <h2>👨‍💼 Perspectiva del Admin: Ver Usuarios Registrados</h2>
+        <p>Así el propietario/admin ve los nuevos usuarios registrados y los gestiona.</p>
+
+        <h3>¿Dónde Ver Usuarios Registrados?</h3>
+        <div class="info-box">
+          <strong>Opción A (Recomendado):</strong> <a href="/volvix-user-management.html" style="color: #38bdf8;">Panel de Gestión de Usuarios</a><br>
+          <strong>Opción B:</strong> <a href="/volvix_owner_panel_v7.html" style="color: #38bdf8;">Panel del Propietario</a> → Sección "Gestión de Usuarios"
+        </div>
+
+        <h3>Paso 1: Accesar al Panel de Admin</h3>
+        <div class="step-grid">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <h4>Login como Owner</h4>
+            <p>Ir a <code style="background: #334155; padding: 2px 6px; border-radius: 4px;">login.html</code> e ingresar con credenciales de propietario</p>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <h4>Seleccionar Panel</h4>
+            <p>En sidebar, ir a "👥 Gestión de Usuarios" o "Panel del Propietario"</p>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <h4>Ver Tabla de Usuarios</h4>
+            <p>Se muestra tabla con todos los usuarios del tenant, incluyendo recién registrados</p>
+          </div>
+        </div>
+
+        <div class="mockup">
+          <div class="mockup-label">Admin Panel: Usuarios</div>
+          <div style="text-align: left; margin: 0 auto; max-width: 500px; font-size: 0.85rem;">
+            <div style="border: 1px solid #cbd5e1; border-radius: 6px; overflow: hidden;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                  <tr style="background: #f1f5f9;">
+                    <th style="padding: 12px; text-align: left; color: #1e293b; font-weight: 600; border-bottom: 2px solid #cbd5e1;">Email</th>
+                    <th style="padding: 12px; text-align: left; color: #1e293b; font-weight: 600; border-bottom: 2px solid #cbd5e1;">Rol</th>
+                    <th style="padding: 12px; text-align: left; color: #1e293b; font-weight: 600; border-bottom: 2px solid #cbd5e1;">Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 12px; color: #1e293b;">dueno@cafeelsol.com</td>
+                    <td style="padding: 12px; color: #1e293b;">owner</td>
+                    <td style="padding: 12px; color: #10b981; font-weight: 600;">✓ Activo</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid #e2e8f0; background: #f0fdf4;">
+                    <td style="padding: 12px; color: #1e293b;"><strong>comandera@cafeelsol.com</strong></td>
+                    <td style="padding: 12px; color: #1e293b;">comandera</td>
+                    <td style="padding: 12px; color: #10b981; font-weight: 600;">✓ Nuevo</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 12px; color: #1e293b;">gerente@cafeelsol.com</td>
+                    <td style="padding: 12px; color: #1e293b;">manager</td>
+                    <td style="padding: 12px; color: #10b981; font-weight: 600;">✓ Activo</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p style="margin-top: 12px; color: #64748b; font-size: 0.8rem;">Los usuarios recién registrados aparecen en verde "Nuevo"</p>
+          </div>
+        </div>
+
+        <h3>Información que ve el Admin</h3>
+        <ul class="checklist">
+          <li><strong>Email:</strong> Dirección de correo del usuario</li>
+          <li><strong>Nombre:</strong> Nombre completo del usuario</li>
+          <li><strong>Rol:</strong> owner, comandera, manager, kds, cds</li>
+          <li><strong>Estado:</strong> Activo, Inactivo, Nuevo, Verificado</li>
+          <li><strong>Fecha de Registro:</strong> Cuándo se creó la cuenta</li>
+          <li><strong>Último Acceso:</strong> Última vez que ingresó</li>
+        </ul>
+
+        <h3>Acciones Disponibles para cada Usuario</h3>
+        <div class="step-grid">
+          <div class="step-card">
+            <div class="step-num">🔑</div>
+            <h4>Cambiar Contraseña</h4>
+            <p>Admin puede resetear/cambiar contraseña del usuario</p>
+          </div>
+          <div class="step-card">
+            <div class="step-num">🔒</div>
+            <h4>Bloquear/Desbloquear</h4>
+            <p>Desactivar acceso temporalmente sin eliminar cuenta</p>
+          </div>
+          <div class="step-card">
+            <div class="step-num">👤</div>
+            <h4>Cambiar Rol</h4>
+            <p>Promocionar a manager, asignar como comandera, etc.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-num">❌</div>
+            <h4>Eliminar Usuario</h4>
+            <p>Remover permanentemente (cuidado: irreversible)</p>
+          </div>
+        </div>
+
+        <h3>Filtros y Búsqueda</h3>
+        <ul class="checklist">
+          <li><strong>Buscar por email:</strong> Tipea para filtrar usuarios</li>
+          <li><strong>Filtrar por rol:</strong> Ver solo owner, comandera, manager, etc.</li>
+          <li><strong>Filtrar por estado:</strong> Activos, Nuevos, Inactivos, Verificados</li>
+          <li><strong>Ordenar:</strong> Por fecha, nombre, último acceso</li>
+        </ul>
+
+        <div class="success-box">
+          <strong>💡 Consejo:</strong> Cuando veas un usuario nuevo registrado, aparecerá con badge "Nuevo" en verde. Puedes darle un rol específico (comandera para caja, manager para gerencia) antes de que acceda.
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: URLS -->
+    <div class="tab-content" id="tab-urls">
+      <div class="section">
+        <h2>🔗 URLs Importantes</h2>
+        <p>Aquí están todos los links necesarios para acceder a registro, admin, tutoriales y documentación.</p>
+
+        <h3>🎯 Registro y Login</h3>
+        <div class="quick-links">
+          <a href="https://volvix-pos.vercel.app/registro.html" class="quick-link" target="_blank">
+            <span class="icon">📋</span>
+            <span>Registro de Cliente</span>
+          </a>
+          <a href="https://volvix-pos.vercel.app/login.html" class="quick-link" target="_blank">
+            <span class="icon">🔐</span>
+            <span>Login</span>
+          </a>
+        </div>
+
+        <h3>👨‍💼 Admin Panels</h3>
+        <div class="quick-links">
+          <a href="https://volvix-pos.vercel.app/volvix-user-management.html" class="quick-link" target="_blank">
+            <span class="icon">👥</span>
+            <span>Gestión de Usuarios</span>
+          </a>
+          <a href="https://volvix-pos.vercel.app/volvix_owner_panel_v7.html" class="quick-link" target="_blank">
+            <span class="icon">👨‍💼</span>
+            <span>Panel del Propietario</span>
+          </a>
+        </div>
+
+        <h3>📚 Tutoriales</h3>
+        <div class="quick-links">
+          <a href="https://volvix-pos.vercel.app/tutorials/index.html" class="quick-link" target="_blank">
+            <span class="icon">📖</span>
+            <span>Galería de Tutoriales</span>
+          </a>
+          <a href="https://volvix-pos.vercel.app/tutorials/10-registro-3min.html" class="quick-link" target="_blank">
+            <span class="icon">⚡</span>
+            <span>Tutorial: Registro en 3min</span>
+          </a>
+        </div>
+
+        <h3>📖 Documentación</h3>
+        <div class="quick-links">
+          <a href="https://volvix-pos.vercel.app/volvix-api-docs.html" class="quick-link" target="_blank">
+            <span class="icon">⚙️</span>
+            <span>API Docs</span>
+          </a>
+          <a href="https://volvix-pos.vercel.app/docs.html" class="quick-link" target="_blank">
+            <span class="icon">📚</span>
+            <span>Documentación General</span>
+          </a>
+        </div>
+
+        <h3>🛒 Público</h3>
+        <div class="quick-links">
+          <a href="https://volvix-pos.vercel.app/" class="quick-link" target="_blank">
+            <span class="icon">🏠</span>
+            <span>Página Principal</span>
+          </a>
+          <a href="https://volvix-pos.vercel.app/marketplace.html" class="quick-link" target="_blank">
+            <span class="icon">🏪</span>
+            <span>Marketplace</span>
+          </a>
+        </div>
+
+        <h3>Endpoints API Clave</h3>
+        <p>Para desarrollo/integración:</p>
+        <div class="code-box">
+POST /api/auth/register-tenant
+  → Registra nuevo tenant y owner
+
+POST /api/auth/login
+  → Login con email/phone + password
+
+GET /api/pos-users?tenant_id=eq.TNT-XXXXX
+  → Obtiene usuarios del tenant
+
+POST /api/auth/forgot
+  → Envía reset de contraseña
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: FAQ -->
+    <div class="tab-content" id="tab-faq">
+      <div class="section">
+        <h2>❓ Preguntas Frecuentes</h2>
+
+        <h3>❓ ¿Cuánto tarda el registro?</h3>
+        <p>El registro toma 3-5 minutos de inicio a fin, incluyendo la espera del OTP.</p>
+
+        <h3>❓ ¿Qué pasa si el usuario no recibe el OTP?</h3>
+        <div class="warning-box">
+          <strong>Causas comunes:</strong>
+          <ul style="margin-left: 20px; margin-top: 8px;">
+            <li>Teléfono no está en sandbox de Twilio (debe enviar "join own-fear")</li>
+            <li>Número inválido o con espacios mal formateados</li>
+            <li>Timeout (10 minutos máximo)</li>
+          </ul>
+          <strong style="display: block; margin-top: 12px;">Solución:</strong> El usuario puede solicitar nuevo OTP o usar email alternativo
+        </div>
+
+        <h3>❓ ¿Cómo agregar más usuarios al tenant?</h3>
+        <ul class="checklist">
+          <li><strong>Como Owner:</strong> Ir a Gestión de Usuarios → Agregar Usuario</li>
+          <li><strong>Método:</strong> Email + Rol (comandera, manager, kds, cds)</li>
+          <li><strong>Notificación:</strong> Sistema envía invite por email</li>
+          <li><strong>Usuario nuevo:</strong> Hace click en link y crea su contraseña</li>
+        </ul>
+
+        <h3>❓ ¿Qué roles existen?</h3>
+        <ul class="checklist">
+          <li><strong>Owner:</strong> Propietario del negocio, acceso total</li>
+          <li><strong>Comandera:</strong> Toma órdenes, piso de venta</li>
+          <li><strong>Manager:</strong> Gerente, reportes y control de personal</li>
+          <li><strong>KDS:</strong> Cocina (Kitchen Display System)</li>
+          <li><strong>CDS:</strong> Bar (Drink Display System)</li>
+        </ul>
+
+        <h3>❓ ¿Puedo cambiar el rol de un usuario después?</h3>
+        <p><strong>Sí.</strong> En la tabla de Gestión de Usuarios, selecciona el usuario y cambia su rol. Los cambios son inmediatos.</p>
+
+        <h3>❓ ¿Qué datos se guardan en el registro?</h3>
+        <ul class="checklist">
+          <li>Email del usuario (único por tenant)</li>
+          <li>Teléfono del usuario</li>
+          <li>Nombre del negocio</li>
+          <li>Giro (Cafetería, Restaurante, etc.)</li>
+          <li>Contraseña (hasheada, nunca en texto plano)</li>
+          <li>Timestamp de registro</li>
+        </ul>
+
+        <h3>❓ ¿Es seguro el sistema?</h3>
+        <div class="success-box">
+          <strong>✅ Sí, con estas medidas:</strong>
+          <ul style="margin-left: 20px; margin-top: 8px;">
+            <li>JWT + rate limiting (60 intents/15min por IP)</li>
+            <li>RLS (Row Level Security) en Supabase</li>
+            <li>Contraseña mínimo 8 chars + mayúscula + número + símbolo</li>
+            <li>OTP (One-Time Password) para verificación</li>
+            <li>HTTPS encriptado (Vercel)</li>
+          </ul>
+        </div>
+
+        <h3>❓ ¿Puedo ver historial de logins?</h3>
+        <p>Sí, en el panel de auditoría. Volvix guarda último acceso y logs de actividad por usuario.</p>
+
+        <h3>❓ ¿Qué hacer si olvidó la contraseña?</h3>
+        <ul class="checklist">
+          <li>Ir a <code style="background: #334155; padding: 2px 6px; border-radius: 4px;">login.html</code></li>
+          <li>Hacer click en "¿Olvidaste tu contraseña?"</li>
+          <li>Ingresar email</li>
+          <li>Recibir link de reset por email (Resend) o WhatsApp (Twilio)</li>
+          <li>Hacer click en link, crear nueva contraseña</li>
+        </ul>
+
+        <h3>❓ ¿Usuarios de prueba disponibles?</h3>
+        <p>Sí, existen tenants de prueba:</p>
+        <div class="code-box">
+TNT-WTFDY (Cafetería) — 12 productos
+TNT-27PYW (Restaurante) — 8 productos
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <p>Guía completa de Volvix POS • Registro & Admin Panel</p>
+      <p>Para soporte: <a href="mailto:support@volvix.com" style="color: #38bdf8;">support@volvix.com</a></p>
+    </footer>
+  </div>
+
+  <script>
+    function switchTab(tabName) {
+      // Hide all tabs
+      const tabs = document.querySelectorAll('.tab-content');
+      tabs.forEach(tab => tab.classList.remove('active'));
+
+      // Remove active from all buttons
+      const buttons = document.querySelectorAll('.tab-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+
+      // Show selected tab
+      document.getElementById('tab-' + tabName).classList.add('active');
+
+      // Mark button as active
+      event.target.classList.add('active');
+    }
+  </script>
+</body>
+</html>

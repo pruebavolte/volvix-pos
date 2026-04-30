@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volvix POS — Grand Tour</title>
+<meta name="description" content="Recorrido completo del Sistema POS SaaS multi-vertical Volvix. Conoce las 130+ funciones de la plataforma.">
+<meta name="theme-color" content="#6366f1">
+<link rel="canonical" href="https://volvix-pos.vercel.app/volvix-grand-tour.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Volvix POS — Grand Tour">
+<meta property="og:description" content="Recorrido completo del Sistema POS SaaS multi-vertical Volvix.">
+<meta property="og:image" content="https://volvix-pos.vercel.app/og-default.png">
+<meta property="og:url" content="https://volvix-pos.vercel.app/volvix-grand-tour.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Volvix POS — Grand Tour">
+<meta name="twitter:description" content="Recorrido completo del Sistema POS SaaS multi-vertical Volvix.">
+<meta name="twitter:image" content="https://volvix-pos.vercel.app/og-default.png">
+<style>
+:root{
+  --bg:#05060a; --bg2:#0b0d14; --bg3:#11141d;
+  --primary:#6366f1; --primary2:#8b5cf6; --accent:#06b6d4;
+  --pink:#ec4899; --green:#10b981; --orange:#f59e0b; --red:#ef4444;
+  --text:#e5e7eb; --muted:#9ca3af; --border:rgba(255,255,255,0.08);
+  --glass:rgba(255,255,255,0.04); --glass2:rgba(255,255,255,0.07);
+  --grad:linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#ec4899 100%);
+  --grad2:linear-gradient(135deg,#06b6d4 0%,#6366f1 100%);
+  --grad3:linear-gradient(135deg,#10b981 0%,#06b6d4 100%);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Roboto,sans-serif;
+  background:var(--bg); color:var(--text); line-height:1.6; overflow-x:hidden;
+}
+::selection{background:var(--primary);color:#fff}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--primary);border-radius:5px}
+
+/* ============ NAV ============ */
+nav.top{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  background:rgba(5,6,10,0.85);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:14px 40px;display:flex;align-items:center;justify-content:space-between;
+}
+nav.top .logo{font-size:1.4rem;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-0.5px}
+nav.top .menu{display:flex;gap:28px;list-style:none}
+nav.top .menu a{color:var(--muted);text-decoration:none;font-size:0.92rem;font-weight:500;transition:color 0.2s}
+nav.top .menu a:hover{color:var(--text)}
+nav.top .cta{background:var(--grad);color:#fff;padding:9px 22px;border-radius:8px;font-weight:600;text-decoration:none;font-size:0.9rem;box-shadow:0 4px 20px rgba(99,102,241,0.4)}
+
+/* ============ HERO ============ */
+.hero{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;padding:120px 40px 80px;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(circle at 20% 30%,rgba(99,102,241,0.25),transparent 50%),
+    radial-gradient(circle at 80% 70%,rgba(236,72,153,0.2),transparent 50%),
+    radial-gradient(circle at 50% 100%,rgba(6,182,212,0.18),transparent 50%);
+  z-index:0;
+}
+.hero::after{
+  content:'';position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(99,102,241,0.05) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(99,102,241,0.05) 1px,transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse at center,#000 30%,transparent 70%);
+  z-index:0;
+}
+.hero-content{position:relative;z-index:2;text-align:center;max-width:1200px}
+.hero .badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--glass2);border:1px solid var(--border);
+  padding:8px 18px;border-radius:100px;font-size:0.85rem;color:var(--muted);
+  margin-bottom:30px;backdrop-filter:blur(10px);
+}
+.hero .badge .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+.hero h1{
+  font-size:clamp(3rem,8vw,7rem);font-weight:900;line-height:1.05;letter-spacing:-3px;margin-bottom:24px;
+  background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:fadeUp 1s ease;
+}
+.hero h1 .word{display:inline-block;animation:floatWord 4s ease-in-out infinite}
+.hero h1 .word:nth-child(2){animation-delay:0.5s}
+.hero h1 .word:nth-child(3){animation-delay:1s}
+@keyframes floatWord{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero p.tagline{font-size:1.4rem;color:var(--muted);max-width:780px;margin:0 auto 50px;font-weight:400}
+.hero .cta-row{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:80px}
+.btn{
+  padding:16px 36px;border-radius:12px;font-weight:600;text-decoration:none;font-size:1rem;
+  border:none;cursor:pointer;transition:all 0.3s;display:inline-flex;align-items:center;gap:10px;
+}
+.btn-primary{background:var(--grad);color:#fff;box-shadow:0 8px 30px rgba(99,102,241,0.5)}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(99,102,241,0.6)}
+.btn-ghost{background:var(--glass);color:var(--text);border:1px solid var(--border);backdrop-filter:blur(10px)}
+.btn-ghost:hover{background:var(--glass2);transform:translateY(-3px)}
+
+/* Hero showcase mock */
+.hero-mock{
+  margin-top:30px;background:var(--bg2);border:1px solid var(--border);border-radius:16px;
+  padding:14px;box-shadow:0 50px 100px rgba(0,0,0,0.6),0 0 60px rgba(99,102,241,0.15);
+  max-width:1100px;margin-left:auto;margin-right:auto;position:relative;
+}
+.hero-mock::before{
+  content:'';position:absolute;inset:-2px;background:var(--grad);border-radius:16px;z-index:-1;opacity:0.5;filter:blur(20px);
+}
+.mock-bar{display:flex;gap:6px;padding:8px}
+.mock-bar span{width:12px;height:12px;border-radius:50%;background:var(--red)}
+.mock-bar span:nth-child(2){background:var(--orange)}
+.mock-bar span:nth-child(3){background:var(--green)}
+.mock-screen{
+  background:linear-gradient(135deg,#0f1119 0%,#1a1d2e 100%);border-radius:10px;
+  height:480px;position:relative;overflow:hidden;
+  display:grid;grid-template-columns:220px 1fr 280px;gap:1px;
+}
+.mock-sidebar{background:rgba(0,0,0,0.3);padding:20px}
+.mock-sidebar .item{padding:10px;border-radius:6px;margin-bottom:6px;color:var(--muted);font-size:0.8rem;display:flex;align-items:center;gap:10px}
+.mock-sidebar .item.active{background:var(--primary);color:#fff}
+.mock-sidebar .item::before{content:'';width:18px;height:18px;background:rgba(255,255,255,0.1);border-radius:4px;display:block}
+.mock-main{padding:24px;overflow:hidden}
+.mock-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+.mock-card{background:var(--glass2);border:1px solid var(--border);border-radius:8px;padding:14px;font-size:0.75rem}
+.mock-card .num{font-size:1.4rem;font-weight:800;color:var(--text);margin-top:4px}
+.mock-card .lab{color:var(--muted);font-size:0.7rem}
+.mock-chart{background:var(--glass);border:1px solid var(--border);border-radius:8px;height:240px;padding:14px;position:relative;overflow:hidden}
+.mock-chart svg{width:100%;height:100%}
+.mock-cart{background:rgba(0,0,0,0.3);padding:20px}
+.mock-cart h4{font-size:0.85rem;margin-bottom:14px;color:var(--text)}
+.mock-cart .li{display:flex;justify-content:space-between;font-size:0.75rem;padding:8px 0;border-bottom:1px solid var(--border);color:var(--muted)}
+.mock-cart .total{margin-top:12px;font-size:1.2rem;font-weight:800;color:var(--green)}
+
+/* ============ SECTION ============ */
+section{padding:120px 40px;position:relative;max-width:1400px;margin:0 auto}
+.sec-head{text-align:center;margin-bottom:80px}
+.sec-head .pre{color:var(--primary);font-size:0.9rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;margin-bottom:16px}
+.sec-head h2{font-size:clamp(2.2rem,5vw,4rem);font-weight:900;letter-spacing:-2px;line-height:1.1;margin-bottom:18px}
+.sec-head h2 span{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sec-head p{color:var(--muted);font-size:1.15rem;max-width:680px;margin:0 auto}
+
+/* ============ STATS ============ */
+.stats-section{background:linear-gradient(180deg,transparent,rgba(99,102,241,0.05),transparent)}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px}
+.stat{
+  background:var(--glass);border:1px solid var(--border);border-radius:20px;padding:36px 28px;
+  text-align:center;backdrop-filter:blur(20px);transition:all 0.3s;position:relative;overflow:hidden;
+}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad)}
+.stat:hover{transform:translateY(-8px);border-color:var(--primary)}
+.stat .num{font-size:3.5rem;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;margin-bottom:10px;letter-spacing:-2px}
+.stat .lab{color:var(--muted);font-size:0.95rem;font-weight:500}
+.stat .sub{color:var(--text);font-size:0.8rem;opacity:0.6;margin-top:6px}
+
+/* ============ VIDEOS ============ */
+.video-grid{display:grid;grid-template-columns:2fr 1fr;gap:24px}
+.video{
+  background:var(--bg2);border:1px solid var(--border);border-radius:18px;overflow:hidden;
+  position:relative;cursor:pointer;transition:all 0.3s;
+}
+.video:hover{transform:scale(1.02);border-color:var(--primary)}
+.video .thumb{
+  aspect-ratio:16/9;background:linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#831843 100%);
+  position:relative;display:flex;align-items:center;justify-content:center;
+}
+.video.small .thumb{aspect-ratio:16/10}
+.video .thumb::after{
+  content:'';position:absolute;inset:0;
+  background-image:radial-gradient(circle at 30% 30%,rgba(255,255,255,0.1),transparent 50%);
+}
+.play-btn{
+  width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.95);
+  display:flex;align-items:center;justify-content:center;z-index:2;
+  box-shadow:0 10px 40px rgba(0,0,0,0.5);transition:transform 0.3s;
+}
+.video:hover .play-btn{transform:scale(1.1)}
+.play-btn::after{content:'';border-left:22px solid #000;border-top:14px solid transparent;border-bottom:14px solid transparent;margin-left:6px}
+.video.small .play-btn{width:56px;height:56px}
+.video.small .play-btn::after{border-left-width:16px;border-top-width:10px;border-bottom-width:10px}
+.video .info{padding:20px}
+.video .info h4{font-size:1.15rem;margin-bottom:6px}
+.video .info p{color:var(--muted);font-size:0.88rem}
+.video .duration{position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,0.8);color:#fff;padding:4px 10px;border-radius:6px;font-size:0.75rem;font-weight:600;z-index:3}
+.video-side{display:grid;grid-template-rows:1fr 1fr;gap:24px}
+
+/* ============ SCREENSHOTS ============ */
+.screen-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:24px}
+.screen{
+  background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;
+  transition:all 0.3s;
+}
+.screen:hover{transform:translateY(-6px);border-color:var(--primary);box-shadow:0 20px 50px rgba(99,102,241,0.2)}
+.screen .head{padding:8px 12px;background:var(--bg3);display:flex;gap:5px}
+.screen .head span{width:9px;height:9px;border-radius:50%;background:#444}
+.screen .body{aspect-ratio:16/10;background:linear-gradient(135deg,var(--bg3),var(--bg2));position:relative;overflow:hidden;padding:18px}
+.screen .body.s1{background:linear-gradient(135deg,#0c1226,#1e1b4b)}
+.screen .body.s2{background:linear-gradient(135deg,#022c22,#064e3b)}
+.screen .body.s3{background:linear-gradient(135deg,#451a03,#78350f)}
+.screen .body.s4{background:linear-gradient(135deg,#500724,#831843)}
+.screen .body.s5{background:linear-gradient(135deg,#082f49,#0c4a6e)}
+.screen .body.s6{background:linear-gradient(135deg,#1e1b4b,#312e81)}
+.screen .body .fake-content{display:grid;gap:8px}
+.screen .body .fake-row{height:8px;background:rgba(255,255,255,0.08);border-radius:4px}
+.screen .body .fake-row.w70{width:70%}
+.screen .body .fake-row.w50{width:50%}
+.screen .body .fake-row.w90{width:90%}
+.screen .body .fake-card{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:12px;margin-top:10px}
+.screen .body .fake-num{font-size:1.8rem;font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.screen .label{padding:16px;border-top:1px solid var(--border)}
+.screen .label h4{font-size:1rem;margin-bottom:4px}
+.screen .label p{color:var(--muted);font-size:0.82rem}
+
+/* ============ VERTICALS ============ */
+.vert-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.vert{
+  background:var(--glass);border:1px solid var(--border);border-radius:18px;padding:32px 28px;
+  position:relative;overflow:hidden;transition:all 0.4s;cursor:pointer;
+}
+.vert::before{
+  content:'';position:absolute;top:0;left:0;width:100%;height:100%;
+  background:var(--grad);opacity:0;transition:opacity 0.4s;z-index:-1;
+}
+.vert:hover{transform:translateY(-10px);border-color:transparent;color:#fff}
+.vert:hover::before{opacity:0.15}
+.vert:hover .icon{transform:rotate(-8deg) scale(1.15)}
+.vert .icon{
+  width:64px;height:64px;border-radius:14px;background:var(--grad);
+  display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin-bottom:20px;
+  transition:all 0.4s;box-shadow:0 8px 24px rgba(99,102,241,0.3);
+}
+.vert h3{font-size:1.3rem;margin-bottom:8px;font-weight:700}
+.vert .pre{color:var(--primary);font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px}
+.vert p{color:var(--muted);font-size:0.92rem;margin-bottom:18px}
+.vert ul{list-style:none;font-size:0.85rem}
+.vert ul li{padding:5px 0;color:var(--muted);display:flex;align-items:center;gap:8px}
+.vert ul li::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--primary);flex-shrink:0}
+
+/* ============ COMPONENTS ============ */
+.comp-section{background:radial-gradient(ellipse at center,rgba(99,102,241,0.05),transparent 70%)}
+.comp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px}
+.comp{
+  background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:30px;
+  transition:all 0.3s;
+}
+.comp:hover{border-color:var(--primary);transform:translateY(-4px)}
+.comp .tag{display:inline-block;background:var(--glass2);color:var(--accent);padding:4px 12px;border-radius:100px;font-size:0.7rem;font-weight:700;letter-spacing:1px;margin-bottom:14px}
+.comp h4{font-size:1.05rem;margin-bottom:18px}
+.comp .demo{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:24px;min-height:140px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:10px}
+
+/* component demos */
+.b{padding:10px 22px;border-radius:8px;font-size:0.85rem;font-weight:600;border:none;cursor:pointer}
+.b1{background:var(--grad);color:#fff}
+.b2{background:transparent;color:var(--text);border:1px solid var(--border)}
+.b3{background:var(--glass2);color:var(--text)}
+.b4{background:var(--red);color:#fff}
+.b5{background:var(--green);color:#fff}
+
+.in{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;font-size:0.88rem;width:100%}
+.in:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(99,102,241,0.2)}
+
+.tog{position:relative;width:50px;height:28px;background:var(--bg3);border-radius:100px;cursor:pointer;border:1px solid var(--border)}
+.tog.on{background:var(--primary)}
+.tog::after{content:'';position:absolute;top:2px;left:2px;width:22px;height:22px;background:#fff;border-radius:50%;transition:transform 0.3s}
+.tog.on::after{transform:translateX(22px)}
+
+.bdg{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:100px;font-size:0.75rem;font-weight:600}
+.bdg.ok{background:rgba(16,185,129,0.15);color:var(--green)}
+.bdg.warn{background:rgba(245,158,11,0.15);color:var(--orange)}
+.bdg.err{background:rgba(239,68,68,0.15);color:var(--red)}
+.bdg.info{background:rgba(6,182,212,0.15);color:var(--accent)}
+
+.av{width:38px;height:38px;border-radius:50%;background:var(--grad);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:0.85rem;margin-right:-8px;border:2px solid var(--bg2)}
+
+.prog{width:100%;height:8px;background:var(--bg3);border-radius:100px;overflow:hidden;margin:6px 0}
+.prog>div{height:100%;background:var(--grad);border-radius:100px}
+
+.alert{padding:12px 16px;border-radius:10px;font-size:0.85rem;width:100%;border:1px solid;display:flex;gap:10px;align-items:flex-start}
+.alert.s{background:rgba(16,185,129,0.08);border-color:rgba(16,185,129,0.3);color:var(--green)}
+.alert.w{background:rgba(245,158,11,0.08);border-color:rgba(245,158,11,0.3);color:var(--orange)}
+.alert.e{background:rgba(239,68,68,0.08);border-color:rgba(239,68,68,0.3);color:var(--red)}
+
+.tab-bar{display:flex;gap:4px;background:var(--bg3);padding:4px;border-radius:10px;width:100%}
+.tab-bar .t{flex:1;padding:8px;border-radius:7px;text-align:center;font-size:0.82rem;color:var(--muted);cursor:pointer}
+.tab-bar .t.active{background:var(--primary);color:#fff}
+
+.card-mini{background:var(--glass2);border:1px solid var(--border);border-radius:10px;padding:14px;width:100%}
+.card-mini h5{font-size:0.9rem;margin-bottom:6px}
+.card-mini p{color:var(--muted);font-size:0.78rem}
+
+.loader{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.skel{width:100%}
+.skel>div{background:linear-gradient(90deg,var(--bg3),var(--glass2),var(--bg3));background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:6px;margin-bottom:8px}
+.skel>div:nth-child(1){height:14px;width:80%}
+.skel>div:nth-child(2){height:14px;width:60%}
+.skel>div:nth-child(3){height:14px;width:90%}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ============ FEATURES ============ */
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px}
+.feat{
+  background:var(--glass);border:1px solid var(--border);border-radius:16px;padding:30px;
+  transition:all 0.3s;position:relative;
+}
+.feat:hover{transform:translateY(-6px);border-color:var(--primary);background:var(--glass2)}
+.feat .ic{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:18px}
+.feat .ic.c1{background:linear-gradient(135deg,#6366f1,#8b5cf6)}
+.feat .ic.c2{background:linear-gradient(135deg,#06b6d4,#0ea5e9)}
+.feat .ic.c3{background:linear-gradient(135deg,#10b981,#059669)}
+.feat .ic.c4{background:linear-gradient(135deg,#f59e0b,#ea580c)}
+.feat .ic.c5{background:linear-gradient(135deg,#ec4899,#be185d)}
+.feat .ic.c6{background:linear-gradient(135deg,#8b5cf6,#6d28d9)}
+.feat h4{font-size:1.15rem;margin-bottom:8px}
+.feat p{color:var(--muted);font-size:0.92rem}
+
+/* ============ DEMO INTERACTIVO ============ */
+.demo-section{background:linear-gradient(180deg,transparent,rgba(139,92,246,0.05),transparent)}
+.demo-wrap{
+  background:var(--bg2);border:1px solid var(--border);border-radius:24px;padding:40px;
+  display:grid;grid-template-columns:300px 1fr;gap:40px;
+}
+.steps{display:flex;flex-direction:column;gap:8px}
+.step{
+  padding:18px 20px;border-radius:12px;border:1px solid var(--border);background:var(--glass);
+  cursor:pointer;transition:all 0.3s;display:flex;gap:14px;align-items:center;
+}
+.step:hover{border-color:var(--primary)}
+.step.active{background:var(--grad);border-color:transparent;box-shadow:0 8px 24px rgba(99,102,241,0.4)}
+.step .n{width:32px;height:32px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9rem;flex-shrink:0}
+.step.active .n{background:rgba(255,255,255,0.25);color:#fff}
+.step .txt h5{font-size:0.95rem;margin-bottom:2px}
+.step .txt p{color:var(--muted);font-size:0.78rem}
+.step.active .txt p{color:rgba(255,255,255,0.85)}
+.step.done .n{background:var(--green);color:#fff}
+.step.done .n::after{content:'✓'}
+.step.done .n>span{display:none}
+
+.demo-stage{
+  background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:30px;min-height:520px;
+  display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;
+}
+.stage-pane{display:none;width:100%}
+.stage-pane.active{display:block;animation:fadeIn 0.5s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.stage-pane h3{font-size:1.6rem;margin-bottom:14px}
+.stage-pane p.lead{color:var(--muted);margin-bottom:24px}
+.product-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.prod{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px;text-align:center;cursor:pointer;transition:all 0.2s}
+.prod:hover{border-color:var(--primary);transform:translateY(-3px)}
+.prod .em{font-size:2rem;margin-bottom:8px}
+.prod .nm{font-size:0.88rem;font-weight:600;margin-bottom:4px}
+.prod .pr{color:var(--green);font-weight:700;font-size:0.95rem}
+
+.cart-list{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px}
+.cart-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)}
+.cart-row:last-child{border-bottom:none}
+.cart-row .qt{display:flex;align-items:center;gap:10px;background:var(--bg3);padding:4px 10px;border-radius:6px;font-size:0.85rem}
+.cart-totals{margin-top:18px;padding-top:18px;border-top:2px dashed var(--border)}
+.cart-totals .row{display:flex;justify-content:space-between;padding:6px 0;color:var(--muted);font-size:0.92rem}
+.cart-totals .row.tot{color:var(--green);font-size:1.5rem;font-weight:800;padding-top:14px;border-top:1px solid var(--border);margin-top:8px}
+
+.pay-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px}
+.pay{background:var(--bg2);border:2px solid var(--border);border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:all 0.2s}
+.pay:hover,.pay.sel{border-color:var(--primary);background:var(--glass2)}
+.pay .em{font-size:2rem;margin-bottom:6px}
+.pay .nm{font-weight:600;font-size:0.9rem}
+
+.recv{background:#fff;color:#000;border-radius:12px;padding:30px;font-family:'Courier New',monospace;max-width:420px;margin:0 auto}
+.recv h4{text-align:center;margin-bottom:6px;font-size:1.1rem}
+.recv .ad{text-align:center;font-size:0.78rem;color:#666;margin-bottom:16px}
+.recv hr{border:none;border-top:1px dashed #999;margin:12px 0}
+.recv .li{display:flex;justify-content:space-between;font-size:0.85rem;padding:3px 0}
+.recv .tt{font-weight:800;font-size:1.1rem;display:flex;justify-content:space-between;margin-top:8px}
+.recv .ft{text-align:center;font-size:0.75rem;margin-top:14px;color:#666}
+
+/* ============ TIMELINE ============ */
+.tl-section{position:relative}
+.tl{position:relative;max-width:900px;margin:0 auto;padding:20px 0}
+.tl::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--grad);transform:translateX(-1px)}
+.tl-item{display:grid;grid-template-columns:1fr 80px 1fr;gap:20px;margin-bottom:60px;align-items:center}
+.tl-item .dot{
+  width:60px;height:60px;border-radius:50%;background:var(--grad);
+  display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;
+  margin:0 auto;box-shadow:0 0 0 6px var(--bg),0 0 30px rgba(99,102,241,0.5);position:relative;z-index:2;
+}
+.tl-card{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:22px}
+.tl-card h4{font-size:1.05rem;margin-bottom:6px}
+.tl-card p{color:var(--muted);font-size:0.88rem}
+.tl-item .empty{visibility:hidden}
+
+/* ============ TESTIMONIALS ============ */
+.test-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px}
+.test{background:var(--glass);border:1px solid var(--border);border-radius:16px;padding:30px;position:relative}
+.test::before{content:'"';position:absolute;top:-15px;left:24px;font-size:5rem;color:var(--primary);font-family:Georgia;line-height:1}
+.test p{color:var(--text);font-size:0.95rem;margin-bottom:20px;font-style:italic;padding-top:14px}
+.test .who{display:flex;align-items:center;gap:14px}
+.test .pic{width:48px;height:48px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
+.test .who h5{font-size:0.95rem}
+.test .who span{color:var(--muted);font-size:0.8rem}
+.stars{color:var(--orange);margin-bottom:10px;font-size:0.9rem}
+
+/* ============ PRICING ============ */
+.price-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;max-width:1100px;margin:0 auto}
+.price{background:var(--glass);border:1px solid var(--border);border-radius:20px;padding:36px 30px;position:relative;transition:all 0.3s}
+.price.popular{border-color:var(--primary);transform:scale(1.04);background:var(--glass2)}
+.price.popular::before{content:'MÁS POPULAR';position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--grad);padding:5px 16px;border-radius:100px;font-size:0.7rem;font-weight:700;letter-spacing:1px}
+.price h3{font-size:1.3rem;margin-bottom:8px}
+.price .desc{color:var(--muted);font-size:0.85rem;margin-bottom:24px}
+.price .amt{font-size:3rem;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
+.price .per{color:var(--muted);font-size:0.85rem;margin-bottom:24px}
+.price ul{list-style:none;margin-bottom:28px}
+.price ul li{padding:8px 0;color:var(--muted);font-size:0.88rem;display:flex;gap:10px;align-items:flex-start}
+.price ul li::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0}
+
+/* ============ CTA FINAL ============ */
+.final{
+  background:var(--grad);border-radius:32px;margin:80px 40px;padding:80px 40px;text-align:center;
+  position:relative;overflow:hidden;
+}
+.final::before{
+  content:'';position:absolute;inset:0;
+  background-image:radial-gradient(circle at 20% 50%,rgba(255,255,255,0.2),transparent 50%);
+}
+.final h2{font-size:clamp(2rem,5vw,3.5rem);font-weight:900;color:#fff;margin-bottom:14px;position:relative;letter-spacing:-1.5px}
+.final p{color:rgba(255,255,255,0.9);font-size:1.2rem;margin-bottom:36px;position:relative}
+.final .btn{position:relative;background:#fff;color:var(--primary);padding:18px 44px;font-size:1.05rem}
+
+/* ============ FOOTER ============ */
+footer{padding:60px 40px 30px;border-top:1px solid var(--border);background:var(--bg2)}
+.foot-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px}
+.foot-grid h5{font-size:0.85rem;text-transform:uppercase;letter-spacing:2px;margin-bottom:18px;color:var(--text)}
+.foot-grid ul{list-style:none}
+.foot-grid ul li{padding:6px 0}
+.foot-grid ul a{color:var(--muted);text-decoration:none;font-size:0.9rem}
+.foot-grid ul a:hover{color:var(--primary)}
+.foot-grid .br h3{font-size:1.6rem;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:14px}
+.foot-grid .br p{color:var(--muted);font-size:0.9rem;max-width:280px}
+.foot-bot{max-width:1200px;margin:0 auto;padding-top:24px;border-top:1px solid var(--border);display:flex;justify-content:space-between;color:var(--muted);font-size:0.85rem;flex-wrap:wrap;gap:16px}
+
+@media (max-width:768px){
+  nav.top{padding:12px 20px}
+  nav.top .menu{display:none}
+  section{padding:80px 20px}
+  .demo-wrap{grid-template-columns:1fr}
+  .video-grid{grid-template-columns:1fr}
+  .tl::before{left:30px}
+  .tl-item{grid-template-columns:60px 1fr;gap:16px}
+  .tl-item .empty{display:none}
+  .tl-item .dot{margin:0}
+  .foot-grid{grid-template-columns:1fr 1fr}
+  .hero-mock .mock-screen{grid-template-columns:1fr;height:auto}
+  .mock-sidebar,.mock-cart{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ================= NAV ================= -->
+<nav class="top">
+  <div class="logo">VOLVIX POS</div>
+  <ul class="menu">
+    <li><a href="#stats">Métricas</a></li>
+    <li><a href="#videos">Demos</a></li>
+    <li><a href="#screens">Producto</a></li>
+    <li><a href="#verticals">Verticales</a></li>
+    <li><a href="#components">UI Kit</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#tour">Tour</a></li>
+    <li><a href="#pricing">Precios</a></li>
+  </ul>
+  <a href="#final" class="cta">Probar gratis →</a>
+</nav>
+
+<!-- ================= HERO ================= -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="badge"><span class="dot"></span> Versión 3.4.0 · Disponible ahora</div>
+    <h1><span class="word">El POS</span> <span class="word">que</span> <span class="word">conquista</span></h1>
+    <p class="tagline">Volvix POS es la plataforma todo-en-uno para retail, restaurantes, servicios y eventos. Inventario, ventas, fidelización, analytics e IA — todo conectado en tiempo real.</p>
+    <div class="cta-row">
+      <a href="#final" class="btn btn-primary">Empezar prueba de 30 días</a>
+      <a href="#videos" class="btn btn-ghost">▶ Ver demo (2 min)</a>
+    </div>
+
+    <div class="hero-mock">
+      <div class="mock-bar"><span></span><span></span><span></span></div>
+      <div class="mock-screen">
+        <div class="mock-sidebar">
+          <div class="item active">Dashboard</div>
+          <div class="item">Ventas</div>
+          <div class="item">Inventario</div>
+          <div class="item">Clientes</div>
+          <div class="item">Reportes</div>
+          <div class="item">Empleados</div>
+          <div class="item">Configuración</div>
+        </div>
+        <div class="mock-main">
+          <div class="mock-grid">
+            <div class="mock-card"><div class="lab">Hoy</div><div class="num">$24,839</div></div>
+            <div class="mock-card"><div class="lab">Tickets</div><div class="num">147</div></div>
+            <div class="mock-card"><div class="lab">Avg</div><div class="num">$169</div></div>
+          </div>
+          <div class="mock-chart">
+            <svg viewBox="0 0 400 200" preserveAspectRatio="none">
+              <defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#6366f1" stop-opacity="0.5"/><stop offset="100%" stop-color="#6366f1" stop-opacity="0"/></linearGradient></defs>
+              <path d="M0,150 L40,130 L80,140 L120,90 L160,100 L200,60 L240,80 L280,40 L320,55 L360,30 L400,45 L400,200 L0,200 Z" fill="url(#g)"/>
+              <path d="M0,150 L40,130 L80,140 L120,90 L160,100 L200,60 L240,80 L280,40 L320,55 L360,30 L400,45" stroke="#8b5cf6" stroke-width="2.5" fill="none"/>
+            </svg>
+          </div>
+        </div>
+        <div class="mock-cart">
+          <h4>Ticket #00147</h4>
+          <div class="li"><span>Café Latte ×2</span><span>$120</span></div>
+          <div class="li"><span>Croissant</span><span>$45</span></div>
+          <div class="li"><span>Sandwich</span><span>$95</span></div>
+          <div class="li"><span>Jugo Natural</span><span>$60</span></div>
+          <div class="li"><span>Postre del día</span><span>$80</span></div>
+          <div class="total">$400.00</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= STATS ================= -->
+<section id="stats" class="stats-section">
+  <div class="sec-head">
+    <div class="pre">Por los números</div>
+    <h2>Resultados <span>medibles</span></h2>
+    <p>Más de 12,000 negocios confían en Volvix para operar mejor cada día.</p>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="num">12K+</div><div class="lab">Negocios activos</div><div class="sub">en 18 países</div></div>
+    <div class="stat"><div class="num">$890M</div><div class="lab">Procesados/año</div><div class="sub">y subiendo</div></div>
+    <div class="stat"><div class="num">99.9%</div><div class="lab">Uptime SLA</div><div class="sub">últimos 24 meses</div></div>
+    <div class="stat"><div class="num">2.1s</div><div class="lab">Tiempo de checkout</div><div class="sub">promedio</div></div>
+    <div class="stat"><div class="num">47</div><div class="lab">Integraciones</div><div class="sub">listas para usar</div></div>
+    <div class="stat"><div class="num">4.9★</div><div class="lab">Calificación promedio</div><div class="sub">G2 + Capterra</div></div>
+    <div class="stat"><div class="num">73%</div><div class="lab">Reducción de errores</div><div class="sub">vs. POS tradicional</div></div>
+    <div class="stat"><div class="num">24/7</div><div class="lab">Soporte humano</div><div class="sub">en español</div></div>
+  </div>
+</section>
+
+<!-- ================= VIDEOS ================= -->
+<section id="videos">
+  <div class="sec-head">
+    <div class="pre">Velo en acción</div>
+    <h2>Demos <span>en video</span></h2>
+    <p>Recorre Volvix en menos de 5 minutos. Casos reales, métricas reales, resultados reales.</p>
+  </div>
+  <div class="video-grid">
+    <div class="video">
+      <div class="thumb">
+        <div class="play-btn"></div>
+        <div class="duration">2:14</div>
+      </div>
+      <div class="info">
+        <h4>Tour completo de Volvix POS</h4>
+        <p>Desde el setup inicial hasta el primer ticket vendido en menos de 3 minutos.</p>
+      </div>
+    </div>
+    <div class="video-side">
+      <div class="video small">
+        <div class="thumb"><div class="play-btn"></div><div class="duration">0:48</div></div>
+        <div class="info"><h4>Vertical Restaurante</h4></div>
+      </div>
+      <div class="video small">
+        <div class="thumb"><div class="play-btn"></div><div class="duration">1:12</div></div>
+        <div class="info"><h4>Inventario inteligente</h4></div>
+      </div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:24px">
+    <div class="video small"><div class="thumb"><div class="play-btn"></div><div class="duration">1:35</div></div><div class="info"><h4>Programa de fidelidad</h4><p>Cómo retener al 65% más de clientes.</p></div></div>
+    <div class="video small"><div class="thumb"><div class="play-btn"></div><div class="duration">2:02</div></div><div class="info"><h4>Reportes con IA</h4><p>Pregunta en español, obtén insights al instante.</p></div></div>
+    <div class="video small"><div class="thumb"><div class="play-btn"></div><div class="duration">0:55</div></div><div class="info"><h4>Multi-sucursal</h4><p>Administra 100 puntos como si fuera 1.</p></div></div>
+  </div>
+</section>
+
+<!-- ================= SCREENSHOTS ================= -->
+<section id="screens">
+  <div class="sec-head">
+    <div class="pre">El producto</div>
+    <h2>Cada pantalla, <span>pulida al detalle</span></h2>
+    <p>Diseñado para que el cajero vaya rápido y el dueño tome mejores decisiones.</p>
+  </div>
+  <div class="screen-grid">
+    <div class="screen"><div class="head"><span></span><span></span><span></span></div><div class="body s1"><div class="fake-content"><div class="fake-row w50"></div><div class="fake-row w90"></div><div class="fake-card"><div class="fake-num">$24,839</div><div class="fake-row w70" style="margin-top:8px"></div></div></div></div><div class="label"><h4>Dashboard ejecutivo</h4><p>KPIs en tiempo real, comparativos y alertas inteligentes.</p></div></div>
+    <div class="screen"><div class="head"><span></span><span></span><span></span></div><div class="body s2"><div class="fake-content"><div class="fake-row w70"></div><div class="fake-row w50"></div><div class="fake-card"><div class="fake-row w90"></div><div class="fake-row w70" style="margin-top:6px"></div><div class="fake-row w50" style="margin-top:6px"></div></div></div></div><div class="label"><h4>Punto de venta</h4><p>Cobra en segundos. Touch, teclado o lector de barras.</p></div></div>
+    <div class="screen"><div class="head"><span></span><span></span><span></span></div><div class="body s3"><div class="fake-content"><div class="fake-row w50"></div><div class="fake-row w70"></div><div class="fake-card"><div class="fake-num">847 SKUs</div><div class="fake-row w50" style="margin-top:8px"></div></div></div></div><div class="label"><h4>Inventario</h4><p>Stock multi-almacén, alertas de mínimo, recetas y mermas.</p></div></div>
+    <div class="screen"><div class="head"><span></span><span></span><span></span></div><div class="body s4"><div class="fake-content"><div class="fake-row w70"></div><div class="fake-row w90"></div><div class="fake-card"><div class="fake-row w70"></div><div class="fake-row w50" style="margin-top:6px"></div></div></div></div><div class="label"><h4>CRM y fidelidad</h4><p>Segmenta, envía promos y construye lealtad real.</p></div></div>
+    <div class="screen"><div class="head"><span></span><span></span><span></span></div><div class="body s5"><div class="fake-content"><div class="fake-row w50"></div><div class="fake-row w70"></div><div class="fake-card"><div class="fake-num">+18.4%</div><div class="fake-row w90" style="margin-top:8px"></div></div></div></div><div class="label"><h4>Analytics avanzado</h4><p>Cohorts, funnels, heatmaps y reportes con IA.</p></div></div>
+    <div class="screen"><div class="head"><span></span><span></span><span></span></div><div class="body s6"><div class="fake-content"><div class="fake-row w70"></div><div class="fake-row w50"></div><div class="fake-card"><div class="fake-row w90"></div><div class="fake-row w70" style="margin-top:6px"></div></div></div></div><div class="label"><h4>App móvil</h4><p>Para dueños viajeros. iOS, Android, Apple Watch.</p></div></div>
+  </div>
+</section>
+
+<!-- ================= VERTICALS ================= -->
+<section id="verticals">
+  <div class="sec-head">
+    <div class="pre">Para todos los giros</div>
+    <h2>10 verticales, <span>0 compromisos</span></h2>
+    <p>No es un POS genérico con add-ons. Cada vertical fue diseñado desde cero para tu industria.</p>
+  </div>
+  <div class="vert-grid">
+    <div class="vert"><div class="icon">🍽️</div><div class="pre">Vertical 01</div><h3>Restaurante</h3><p>Mesas, comandas, recetas y propinas inteligentes.</p><ul><li>Plano de mesas drag&drop</li><li>KDS de cocina</li><li>Split de cuenta</li><li>QR menú</li></ul></div>
+    <div class="vert"><div class="icon">☕</div><div class="pre">Vertical 02</div><h3>Cafetería</h3><p>Velocidad de cobro y modificadores de bebidas.</p><ul><li>Cobro en 8 segundos</li><li>Modificadores ilimitados</li><li>Loyalty automático</li><li>Pre-orden por app</li></ul></div>
+    <div class="vert"><div class="icon">🛍️</div><div class="pre">Vertical 03</div><h3>Retail</h3><p>Tallas, colores, variantes y devoluciones limpias.</p><ul><li>Matriz de variantes</li><li>Códigos de barras</li><li>Tienda online conectada</li><li>Devoluciones 1-click</li></ul></div>
+    <div class="vert"><div class="icon">💇</div><div class="pre">Vertical 04</div><h3>Salón / Spa</h3><p>Citas, comisiones y productos en un mismo flujo.</p><ul><li>Agenda multi-staff</li><li>Recordatorios SMS</li><li>Comisiones por servicio</li><li>Paquetes y prepagados</li></ul></div>
+    <div class="vert"><div class="icon">🏪</div><div class="pre">Vertical 05</div><h3>Tienda de barrio</h3><p>Granel, fiados y modo offline para zonas con mala señal.</p><ul><li>Fiados con WhatsApp</li><li>Báscula integrada</li><li>Offline-first</li><li>Cuentas claras</li></ul></div>
+    <div class="vert"><div class="icon">🚚</div><div class="pre">Vertical 06</div><h3>Food truck</h3><p>Móvil, pesado en datos, ligero en hardware.</p><ul><li>Funciona en tablet</li><li>4G + offline</li><li>Imprime por Bluetooth</li><li>Reportes por ubicación</li></ul></div>
+    <div class="vert"><div class="icon">🎉</div><div class="pre">Vertical 07</div><h3>Eventos</h3><p>Pulseras NFC, recargas y reportes por staff.</p><ul><li>Cashless con NFC</li><li>Múltiples barras</li><li>Reportes en vivo</li><li>Cierre rápido</li></ul></div>
+    <div class="vert"><div class="icon">🏨</div><div class="pre">Vertical 08</div><h3>Hospedaje</h3><p>POS conectado a habitaciones y check-out unificado.</p><ul><li>Cargo a habitación</li><li>Folio único</li><li>Restaurante + Bar + Spa</li><li>PMS integrado</li></ul></div>
+    <div class="vert"><div class="icon">🏋️</div><div class="pre">Vertical 09</div><h3>Gimnasio</h3><p>Membresías, accesos y tienda en uno solo.</p><ul><li>Cobro recurrente</li><li>Control de accesos</li><li>Clases y reservas</li><li>Tienda de suplementos</li></ul></div>
+    <div class="vert"><div class="icon">🚗</div><div class="pre">Vertical 10</div><h3>Servicios automotrices</h3><p>Órdenes, refacciones, mano de obra y garantías.</p><ul><li>Órdenes de servicio</li><li>Refacciones por VIN</li><li>Cotizaciones digitales</li><li>Historial por vehículo</li></ul></div>
+  </div>
+</section>
+
+<!-- ================= COMPONENTS ================= -->
+<section id="components" class="comp-section">
+  <div class="sec-head">
+    <div class="pre">UI Kit en vivo</div>
+    <h2>Componentes que <span>tus cajeros aman</span></h2>
+    <p>Cada control está optimizado para velocidad, accesibilidad y dedos cansados.</p>
+  </div>
+  <div class="comp-grid">
+    <div class="comp"><div class="tag">BUTTONS</div><h4>Botones — 5 variantes</h4><div class="demo"><button class="b b1">Cobrar</button><button class="b b2">Cancelar</button><button class="b b3">Hold</button><button class="b b5">✓ Pagado</button><button class="b b4">Eliminar</button></div></div>
+    <div class="comp"><div class="tag">INPUTS</div><h4>Campos de entrada</h4><div class="demo"><input class="in" type="text" placeholder="Buscar producto..."><input class="in" type="text" placeholder="Email del cliente" style="margin-top:10px"></div></div>
+    <div class="comp"><div class="tag">TOGGLE</div><h4>Switches</h4><div class="demo" style="gap:30px"><div class="tog on"></div><div class="tog"></div><div class="tog on"></div></div></div>
+    <div class="comp"><div class="tag">BADGES</div><h4>Estado y etiquetas</h4><div class="demo"><span class="bdg ok">● Pagado</span><span class="bdg warn">● Pendiente</span><span class="bdg err">● Cancelado</span><span class="bdg info">● En cocina</span></div></div>
+    <div class="comp"><div class="tag">AVATARS</div><h4>Equipo</h4><div class="demo"><div><span class="av">JM</span><span class="av">LO</span><span class="av">CR</span><span class="av">PT</span><span class="av">+8</span></div></div></div>
+    <div class="comp"><div class="tag">PROGRESS</div><h4>Barras de progreso</h4><div class="demo" style="flex-direction:column;align-items:stretch"><div>Meta del día<div class="prog"><div style="width:78%"></div></div></div><div>Inventario crítico<div class="prog"><div style="width:32%"></div></div></div><div>Sincronización<div class="prog"><div style="width:96%"></div></div></div></div></div>
+    <div class="comp"><div class="tag">ALERTS</div><h4>Notificaciones</h4><div class="demo" style="flex-direction:column"><div class="alert s">✓ Venta cerrada exitosamente</div><div class="alert w">⚠ Stock bajo en 3 productos</div><div class="alert e">✕ Error de conexión con SAT</div></div></div>
+    <div class="comp"><div class="tag">TABS</div><h4>Pestañas</h4><div class="demo"><div class="tab-bar"><div class="t active">Hoy</div><div class="t">Semana</div><div class="t">Mes</div><div class="t">Año</div></div></div></div>
+    <div class="comp"><div class="tag">CARDS</div><h4>Tarjetas</h4><div class="demo"><div class="card-mini"><h5>Mejor vendedor</h5><p>Café Americano · 248 unidades</p></div></div></div>
+    <div class="comp"><div class="tag">LOADERS</div><h4>Cargando</h4><div class="demo"><div class="loader"></div></div></div>
+    <div class="comp"><div class="tag">SKELETON</div><h4>Estado de carga</h4><div class="demo"><div class="skel"><div></div><div></div><div></div></div></div></div>
+    <div class="comp"><div class="tag">CHARTS</div><h4>Gráfica mini</h4><div class="demo"><svg viewBox="0 0 200 80" style="width:100%;max-width:240px"><polyline points="0,60 25,45 50,55 75,30 100,40 125,15 150,25 175,10 200,20" stroke="#8b5cf6" stroke-width="2.5" fill="none"/><polyline points="0,60 25,45 50,55 75,30 100,40 125,15 150,25 175,10 200,20 200,80 0,80" fill="rgba(139,92,246,0.2)"/></svg></div></div>
+  </div>
+</section>
+
+<!-- ================= FEATURES ================= -->
+<section id="features">
+  <div class="sec-head">
+    <div class="pre">Todas las features</div>
+    <h2>Hay un Volvix <span>para cada problema</span></h2>
+    <p>De la operación diaria al insight estratégico — sin pagar por módulos que no usas.</p>
+  </div>
+  <div class="feat-grid">
+    <div class="feat"><div class="ic c1">⚡</div><h4>POS instantáneo</h4><p>Cobra en menos de 2 segundos. Funciona online y offline sin perder un ticket.</p></div>
+    <div class="feat"><div class="ic c2">📦</div><h4>Inventario en tiempo real</h4><p>Stock multi-sucursal, recetas, mermas, conteos cíclicos y órdenes de compra automáticas.</p></div>
+    <div class="feat"><div class="ic c3">👥</div><h4>CRM integrado</h4><p>Cada ticket alimenta el perfil del cliente. Segmenta y manda promos sin software extra.</p></div>
+    <div class="feat"><div class="ic c4">📊</div><h4>Analytics con IA</h4><p>Pregunta "¿cuál fue mi mejor jueves?" en español y obtén la respuesta al instante.</p></div>
+    <div class="feat"><div class="ic c5">💳</div><h4>Pagos unificados</h4><p>Tarjeta, transferencia, QR, vales, propinas y links de pago — todo en un mismo flujo.</p></div>
+    <div class="feat"><div class="ic c6">🤖</div><h4>Automatizaciones</h4><p>Reglas tipo "si X entonces Y" para alertas, descuentos, fidelidad y operación.</p></div>
+    <div class="feat"><div class="ic c1">🏢</div><h4>Multi-sucursal</h4><p>Administra 1 o 100 puntos de venta con permisos granulares y sincronización instantánea.</p></div>
+    <div class="feat"><div class="ic c2">🔐</div><h4>Roles y permisos</h4><p>Cada empleado ve solo lo que debe ver. Auditoría completa de cambios.</p></div>
+    <div class="feat"><div class="ic c3">📱</div><h4>App móvil nativa</h4><p>iOS, Android y Apple Watch. Vende, supervisa y aprueba descuentos desde donde sea.</p></div>
+    <div class="feat"><div class="ic c4">🧾</div><h4>Facturación electrónica</h4><p>CFDI 4.0, complementos de pago y timbrado ilimitado. Listo para SAT.</p></div>
+    <div class="feat"><div class="ic c5">🎁</div><h4>Programa de lealtad</h4><p>Puntos, niveles, cumpleaños y recompensas — configurable sin programar.</p></div>
+    <div class="feat"><div class="ic c6">🔌</div><h4>API + Webhooks</h4><p>47 integraciones nativas. API REST documentada. Webhooks para todo evento.</p></div>
+  </div>
+</section>
+
+<!-- ================= DEMO INTERACTIVO ================= -->
+<section id="tour" class="demo-section">
+  <div class="sec-head">
+    <div class="pre">Tour interactivo</div>
+    <h2>Vive una venta <span>de principio a fin</span></h2>
+    <p>5 pasos. Sin instalar nada. Haz clic en cualquier paso para ver la pantalla.</p>
+  </div>
+  <div class="demo-wrap">
+    <div class="steps">
+      <div class="step active" data-step="1"><div class="n"><span>1</span></div><div class="txt"><h5>Abrir caja</h5><p>Login y monto inicial</p></div></div>
+      <div class="step" data-step="2"><div class="n"><span>2</span></div><div class="txt"><h5>Agregar productos</h5><p>Touch, código o búsqueda</p></div></div>
+      <div class="step" data-step="3"><div class="n"><span>3</span></div><div class="txt"><h5>Revisar carrito</h5><p>Descuentos, propinas, notas</p></div></div>
+      <div class="step" data-step="4"><div class="n"><span>4</span></div><div class="txt"><h5>Cobrar</h5><p>Tarjeta, efectivo, mixto</p></div></div>
+      <div class="step" data-step="5"><div class="n"><span>5</span></div><div class="txt"><h5>Ticket y cierre</h5><p>Imprime, manda por email o WhatsApp</p></div></div>
+    </div>
+    <div class="demo-stage">
+      <div class="stage-pane active" data-pane="1">
+        <h3>Paso 1 · Abrir caja</h3>
+        <p class="lead">El cajero ingresa con su PIN y declara el efectivo inicial. Volvix registra apertura, IP y dispositivo.</p>
+        <div class="card-mini" style="max-width:380px;margin:0 auto"><h5>Caja #1 — Sucursal Centro</h5><p style="margin-bottom:14px">Cajero: Lucía Ortiz</p><label style="font-size:0.8rem;color:var(--muted)">Monto inicial</label><input class="in" value="$1,500.00" style="margin-top:6px;font-size:1.4rem;font-weight:700;text-align:center"><button class="b b1" style="width:100%;margin-top:14px;padding:14px">Abrir caja →</button></div>
+      </div>
+      <div class="stage-pane" data-pane="2">
+        <h3>Paso 2 · Agregar productos</h3>
+        <p class="lead">Toca el producto, escanea su código o usa la búsqueda. Modificadores y combos se aplican automáticamente.</p>
+        <div class="product-grid">
+          <div class="prod"><div class="em">☕</div><div class="nm">Café Latte</div><div class="pr">$60</div></div>
+          <div class="prod"><div class="em">🥐</div><div class="nm">Croissant</div><div class="pr">$45</div></div>
+          <div class="prod"><div class="em">🥪</div><div class="nm">Sandwich</div><div class="pr">$95</div></div>
+          <div class="prod"><div class="em">🧃</div><div class="nm">Jugo Natural</div><div class="pr">$60</div></div>
+          <div class="prod"><div class="em">🍰</div><div class="nm">Pastel</div><div class="pr">$80</div></div>
+          <div class="prod"><div class="em">🍪</div><div class="nm">Galleta</div><div class="pr">$35</div></div>
+        </div>
+      </div>
+      <div class="stage-pane" data-pane="3">
+        <h3>Paso 3 · Revisar carrito</h3>
+        <p class="lead">Edita cantidades, aplica descuentos, agrega notas o asigna a una mesa. Todo con un toque.</p>
+        <div class="cart-list">
+          <div class="cart-row"><div><strong>Café Latte</strong><div style="font-size:0.78rem;color:var(--muted)">$60.00 c/u</div></div><div class="qt">− <strong>2</strong> +</div><div style="font-weight:700">$120.00</div></div>
+          <div class="cart-row"><div><strong>Croissant</strong><div style="font-size:0.78rem;color:var(--muted)">$45.00 c/u</div></div><div class="qt">− <strong>1</strong> +</div><div style="font-weight:700">$45.00</div></div>
+          <div class="cart-row"><div><strong>Sandwich</strong><div style="font-size:0.78rem;color:var(--muted)">$95.00 c/u</div></div><div class="qt">− <strong>1</strong> +</div><div style="font-weight:700">$95.00</div></div>
+          <div class="cart-totals">
+            <div class="row"><span>Subtotal</span><span>$260.00</span></div>
+            <div class="row"><span>Descuento (10%)</span><span>−$26.00</span></div>
+            <div class="row"><span>IVA (16%)</span><span>$37.44</span></div>
+            <div class="row tot"><span>TOTAL</span><span>$271.44</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="stage-pane" data-pane="4">
+        <h3>Paso 4 · Cobrar</h3>
+        <p class="lead">Acepta cualquier método. Combina pagos. Procesa propina. Todo en una sola pantalla.</p>
+        <div class="pay-grid">
+          <div class="pay sel"><div class="em">💳</div><div class="nm">Tarjeta</div></div>
+          <div class="pay"><div class="em">💵</div><div class="nm">Efectivo</div></div>
+          <div class="pay"><div class="em">📱</div><div class="nm">QR / Wallet</div></div>
+          <div class="pay"><div class="em">🔀</div><div class="nm">Mixto</div></div>
+        </div>
+        <div class="card-mini" style="text-align:center"><div style="font-size:0.85rem;color:var(--muted);margin-bottom:6px">A cobrar</div><div style="font-size:2.2rem;font-weight:900;color:var(--green)">$271.44</div><button class="b b1" style="width:100%;margin-top:14px;padding:14px">Procesar pago →</button></div>
+      </div>
+      <div class="stage-pane" data-pane="5">
+        <h3>Paso 5 · Ticket y cierre</h3>
+        <p class="lead">Manda el ticket por email, WhatsApp o imprímelo. CFDI listo si el cliente lo pide.</p>
+        <div class="recv">
+          <h4>VOLVIX CAFÉ</h4>
+          <div class="ad">Av. Reforma 123 · CDMX<br>RFC: VOL250101AB1</div>
+          <hr>
+          <div class="li"><span>Café Latte ×2</span><span>$120.00</span></div>
+          <div class="li"><span>Croissant</span><span>$45.00</span></div>
+          <div class="li"><span>Sandwich</span><span>$95.00</span></div>
+          <hr>
+          <div class="li"><span>Subtotal</span><span>$260.00</span></div>
+          <div class="li"><span>Descuento</span><span>−$26.00</span></div>
+          <div class="li"><span>IVA 16%</span><span>$37.44</span></div>
+          <div class="tt"><span>TOTAL</span><span>$271.44</span></div>
+          <hr>
+          <div class="ft">¡Gracias por tu compra!<br>Ticket #00147 · Cajero: Lucía<br>26/abr/2026 14:32</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TIMELINE / ROADMAP ================= -->
+<section id="roadmap" class="tl-section">
+  <div class="sec-head">
+    <div class="pre">Roadmap público</div>
+    <h2>Hacia dónde <span>vamos</span></h2>
+    <p>Construimos a la luz pública. Vota por features en nuestro foro.</p>
+  </div>
+  <div class="tl">
+    <div class="tl-item"><div class="tl-card"><h4>v3.4 · Hoy</h4><p>IA conversacional para reportes, modo oscuro, 12 nuevos webhooks.</p></div><div class="dot">3.4</div><div class="empty"></div></div>
+    <div class="tl-item"><div class="empty"></div><div class="dot">3.5</div><div class="tl-card"><h4>v3.5 · Junio 2026</h4><p>Marketplace de plugins, builder visual de reportes, KDS rediseñado.</p></div></div>
+    <div class="tl-item"><div class="tl-card"><h4>v4.0 · Q4 2026</h4><p>Volvix Pay (procesador propio), terminal hardware Volvix One, app para clientes finales.</p></div><div class="dot">4.0</div><div class="empty"></div></div>
+    <div class="tl-item"><div class="empty"></div><div class="dot">4.1</div><div class="tl-card"><h4>v4.1 · 2027</h4><p>Expansión LATAM (CO, AR, CL), facturación local en 5 países, multi-moneda nativa.</p></div></div>
+  </div>
+</section>
+
+<!-- ================= TESTIMONIALS ================= -->
+<section id="testimonials">
+  <div class="sec-head">
+    <div class="pre">Lo que dicen nuestros clientes</div>
+    <h2>12,000 negocios <span>no se equivocan</span></h2>
+  </div>
+  <div class="test-grid">
+    <div class="test"><div class="stars">★★★★★</div><p>Cambiamos 4 sistemas distintos por Volvix. Tardé 1 día en migrar 8 sucursales. Increíble.</p><div class="who"><div class="pic">MR</div><div><h5>Mariana Reyes</h5><span>CEO · Cafetería Origen (8 sucursales)</span></div></div></div>
+    <div class="test"><div class="stars">★★★★★</div><p>El reporte con IA me ahorra 6 horas a la semana. Pregunto en español y obtengo el dato.</p><div class="who"><div class="pic">JV</div><div><h5>Javier Velázquez</h5><span>Dueño · 3 restaurantes</span></div></div></div>
+    <div class="test"><div class="stars">★★★★★</div><p>El programa de fidelidad por sí solo nos pagó la suscripción del primer año en 3 meses.</p><div class="who"><div class="pic">CL</div><div><h5>Carla Limón</h5><span>Marketing · Salón Belle</span></div></div></div>
+    <div class="test"><div class="stars">★★★★★</div><p>Modo offline real. Internet se nos cae cada semana y nunca perdemos un ticket. Antes sí.</p><div class="who"><div class="pic">EM</div><div><h5>Eduardo Morales</h5><span>Tienda de barrio · Puebla</span></div></div></div>
+    <div class="test"><div class="stars">★★★★★</div><p>Implementamos Volvix en un evento de 12,000 personas. Zero crashes. El soporte respondió en 2 minutos.</p><div class="who"><div class="pic">PT</div><div><h5>Paola Trujillo</h5><span>Productora · Festival Verbena</span></div></div></div>
+    <div class="test"><div class="stars">★★★★★</div><p>Soy contadora de 14 negocios y todos están en Volvix ahora. Conciliar es trivial.</p><div class="who"><div class="pic">RG</div><div><h5>Rocío Garza</h5><span>Contadora independiente</span></div></div></div>
+  </div>
+</section>
+
+<!-- ================= PRICING ================= -->
+<section id="pricing">
+  <div class="sec-head">
+    <div class="pre">Planes</div>
+    <h2>Precios <span>justos</span>, sin sorpresas</h2>
+    <p>Sin contratos. Sin costos de instalación. Cancela cuando quieras.</p>
+  </div>
+  <div class="price-grid">
+    <div class="price"><h3>Starter</h3><p class="desc">Para quien empieza</p><div class="amt">$499</div><div class="per">/mes · 1 sucursal</div><ul><li>POS ilimitado</li><li>Inventario básico</li><li>1 usuario</li><li>Reportes esenciales</li><li>Soporte por chat</li></ul><a href="#final" class="btn btn-ghost" style="width:100%;justify-content:center">Comenzar</a></div>
+    <div class="price popular"><h3>Pro</h3><p class="desc">El favorito</p><div class="amt">$999</div><div class="per">/mes · hasta 3 sucursales</div><ul><li>Todo de Starter</li><li>CRM + Lealtad</li><li>10 usuarios</li><li>Analytics con IA</li><li>App móvil</li><li>API + 47 integraciones</li><li>Soporte prioritario</li></ul><a href="#final" class="btn btn-primary" style="width:100%;justify-content:center">Comenzar 30 días gratis</a></div>
+    <div class="price"><h3>Enterprise</h3><p class="desc">Para multi-sucursal</p><div class="amt">A medida</div><div class="per">descuentos por volumen</div><ul><li>Todo de Pro</li><li>Sucursales y usuarios ilimitados</li><li>SLA 99.99%</li><li>Onboarding dedicado</li><li>Customer Success Manager</li><li>SSO + auditoría avanzada</li><li>Integraciones a medida</li></ul><a href="#final" class="btn btn-ghost" style="width:100%;justify-content:center">Hablar con ventas</a></div>
+  </div>
+</section>
+
+<!-- ================= INTEGRATIONS ================= -->
+<section id="integrations">
+  <div class="sec-head">
+    <div class="pre">Ecosistema</div>
+    <h2>47 integraciones, <span>cero fricción</span></h2>
+    <p>Volvix se conecta con las herramientas que ya usas. Activa cualquier integración con un clic.</p>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:18px;max-width:1200px;margin:0 auto">
+    <div class="card-mini" style="text-align:center;padding:22px"><div style="font-size:2rem">💳</div><div style="font-weight:600;margin-top:6px">Stripe</div><div style="font-size:0.75rem;color:var(--muted)">Pagos online</div></div>
+    <div class="card-mini" style="text-align:center;padding:22px"><div style="font-size:2rem">🏦</div><div style="font-weight:600;margin-top:6px">Conekta</div><div style="font-size:0.75rem;color:var(--muted)">Pagos LATAM</div></div>
+    <div class="card-mini" style="text-align:center;padding:22px"><div style="font-size:2rem">📊</div><div style="font-weight:600;margin-top:6px">Contpaqi</div><div style="font-size:0.75rem;color:var(--muted)">Contabilidad</div></div>
+    <div class="card-mini" style="text-align:center;padding:22px"><div style="font-size:2rem">🚚</div><div style="font-weight:600;margin-top:6px">Rappi</div><div style="font-size:0.75rem;color:var(--muted)">Delivery</div></div>
+    <div class="card-mini" style="text-align:center;padding:22px"><div style="font-size:2rem">🍔</div><div style="font-weight:600;margin-top:6px">UberEats</div><div style="font-size:0.75rem;color:var(--muted)">Delivery</div></div>
+    <div class="card-mini" style="text-align:center;padding:22px"><div style="font-size:2rem">🏪</div><div style="font-weight:600;margin-top:6px">DiDi Food</div><div style="font-size:0.75rem;color:var(--muted)">Delivery</div></div>
+    <div class="card-mini" style="text-align:center;padding:22px"><div style="font-size:2rem">📧</div><div style="font-weight:600;margin-top:6px">Mailchimp</div><div style="font-size:0.75rem;color:var(--muted)">Email mkt</div></div>
+    <div class="card-mini" style="text-align:center;padding:22px"><div style="font-size:2rem">💬</div><div style="font-weight:600;margin-top:6px">WhatsApp</div><div style="font-size:0.75rem;color:var(--muted)">Mensajería</div></div>
+    <div class="card-mini" style="text-align:center;padding:22px"><div style="font-size:2rem">🛒</div><div style="font-weight:600;margin-top:6px">Shopify</div><div style="font-size:0.75rem;color:var(--muted)">eCommerce</div></div>
+    <div class="card-mini" style="text-align:center;padding:22px"><div style="font-size:2rem">🌐</div><div style="font-weight:600;margin-top:6px">WooCommerce</div><div style="font-size:0.75rem;color:var(--muted)">eCommerce</div></div>
+    <div class="card-mini" style="text-align:center;padding:22px"><div style="font-size:2rem">📦</div><div style="font-weight:600;margin-top:6px">SAT</div><div style="font-size:0.75rem;color:var(--muted)">Facturación</div></div>
+    <div class="card-mini" style="text-align:center;padding:22px"><div style="font-size:2rem">⚡</div><div style="font-weight:600;margin-top:6px">Zapier</div><div style="font-size:0.75rem;color:var(--muted)">Automatización</div></div>
+  </div>
+</section>
+
+<!-- ================= COMPARISON ================= -->
+<section id="compare">
+  <div class="sec-head">
+    <div class="pre">Comparativa</div>
+    <h2>Volvix vs <span>el resto del mercado</span></h2>
+    <p>Aquí está la verdad, sin asteriscos.</p>
+  </div>
+  <div style="overflow-x:auto;max-width:1100px;margin:0 auto">
+    <table style="width:100%;border-collapse:separate;border-spacing:0;background:var(--bg2);border:1px solid var(--border);border-radius:16px;overflow:hidden">
+      <thead>
+        <tr style="background:var(--glass2)">
+          <th style="padding:18px 20px;text-align:left;font-size:0.85rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Característica</th>
+          <th style="padding:18px 20px;text-align:center;font-size:0.95rem;background:var(--grad);color:#fff">Volvix POS</th>
+          <th style="padding:18px 20px;text-align:center;font-size:0.85rem;color:var(--muted)">POS Genérico A</th>
+          <th style="padding:18px 20px;text-align:center;font-size:0.85rem;color:var(--muted)">POS Genérico B</th>
+        </tr>
+      </thead>
+      <tbody style="font-size:0.9rem">
+        <tr><td style="padding:14px 20px;border-top:1px solid var(--border)">Modo offline real</td><td style="padding:14px 20px;text-align:center;border-top:1px solid var(--border);color:var(--green)">✓ Ilimitado</td><td style="padding:14px 20px;text-align:center;border-top:1px solid var(--border);color:var(--orange)">⚠ Limitado</td><td style="padding:14px 20px;text-align:center;border-top:1px solid var(--border);color:var(--red)">✕</td></tr>
+        <tr><td style="padding:14px 20px;border-top:1px solid var(--border)">Reportes con IA en español</td><td style="padding:14px 20px;text-align:center;border-top:1px solid var(--border);color:var(--green)">✓</td><td style="padding:14px 20px;text-align:center;border-top:1px solid var(--border);color:var(--red)">✕</td><td style="padding:14px 20px;text-align:center;border-top:1px solid var(--border);color:var(--red)">✕</td></tr>
+        <tr><td style="padding:14px 20px;border-top:1px solid var(--border)">CRM + lealtad incluido</td><td style="padding:14px 20px;text-align:center;border-top:1px solid var(--border);color:var(--green)">✓</td><td style="padding:14px 20px;text-align:center;border-top:1px solid var(--border);color:var(--orange)">$ Extra</td><td style="padding:14px 20px;text-align:center;border-top:1px solid var(--border);color:var(--orange)">$ Extra</td></tr>
+        <tr><td style="padding:14px 20px;border-top:1px solid var(--border)">Multi-sucursal nativo</td><td style="padding:14px 20px;text-align:center;border-top:1px solid var(--border);color:var(--green)">✓ Ilimitado</td><td style="padding:14px 20px;text-align:center;border-top:1px solid var(--border);color:var(--orange)">$ Extra</td><td style="padding:14px 20px;text-align:center;border-top:1px solid var(--border);color:var(--green)">✓</td></tr>
+        <tr><td style="padding:14px 20px;border-top:1px solid var(--border)">CFDI 4.0 ilimitado</td><td style="padding:14px 20px;text-align:center;border-top:1px solid var(--border);color:var(--green)">✓</td><td style="padding:14px 20px;text-align:center;border-top:1px solid var(--border);color:var(--orange)">$ Por timbre</td><td style="padding:14px 20px;text-align:center;border-top:1px solid var(--border);color:var(--orange)">$ Por timbre</td></tr>
+        <tr><td style="padding:14px 20px;border-top:1px solid var(--border)">API + webhooks</td><td style="padding:14px 20px;text-align:center;border-top:1px solid var(--border);color:var(--green)">✓ Públicos</td><td style="padding:14px 20px;text-align:center;border-top:1px solid var(--border);color:var(--orange)">⚠ Limitado</td><td style="padding:14px 20px;text-align:center;border-top:1px solid var(--border);color:var(--red)">✕</td></tr>
+        <tr><td style="padding:14px 20px;border-top:1px solid var(--border)">Soporte humano 24/7</td><td style="padding:14px 20px;text-align:center;border-top:1px solid var(--border);color:var(--green)">✓ En español</td><td style="padding:14px 20px;text-align:center;border-top:1px solid var(--border);color:var(--orange)">⚠ Solo email</td><td style="padding:14px 20px;text-align:center;border-top:1px solid var(--border);color:var(--orange)">⚠ Bot</td></tr>
+        <tr><td style="padding:14px 20px;border-top:1px solid var(--border)">Hardware obligatorio</td><td style="padding:14px 20px;text-align:center;border-top:1px solid var(--border);color:var(--green)">✓ Ninguno</td><td style="padding:14px 20px;text-align:center;border-top:1px solid var(--border);color:var(--red)">✕ Propietario</td><td style="padding:14px 20px;text-align:center;border-top:1px solid var(--border);color:var(--red)">✕ Propietario</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ================= FAQ ================= -->
+<section id="faq">
+  <div class="sec-head">
+    <div class="pre">Preguntas frecuentes</div>
+    <h2>Todo lo que <span>quieres saber</span></h2>
+  </div>
+  <div style="max-width:820px;margin:0 auto;display:flex;flex-direction:column;gap:14px">
+    <details style="background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:20px 24px;cursor:pointer"><summary style="font-weight:600;font-size:1.05rem;list-style:none;display:flex;justify-content:space-between;align-items:center">¿Necesito hardware especial? <span style="color:var(--primary)">+</span></summary><p style="margin-top:14px;color:var(--muted);font-size:0.92rem">No. Volvix funciona en cualquier tablet, laptop o PC con navegador moderno. Si quieres impresora, lector o cajón, te recomendamos modelos económicos pero no obligamos a nada.</p></details>
+    <details style="background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:20px 24px;cursor:pointer"><summary style="font-weight:600;font-size:1.05rem;list-style:none;display:flex;justify-content:space-between;align-items:center">¿Qué pasa si se va el internet? <span style="color:var(--primary)">+</span></summary><p style="margin-top:14px;color:var(--muted);font-size:0.92rem">Volvix sigue vendiendo en modo offline ilimitado. Cuando vuelve la conexión, sincroniza todo automáticamente sin perder un solo ticket.</p></details>
+    <details style="background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:20px 24px;cursor:pointer"><summary style="font-weight:600;font-size:1.05rem;list-style:none;display:flex;justify-content:space-between;align-items:center">¿Cuánto tarda la migración desde mi sistema actual? <span style="color:var(--primary)">+</span></summary><p style="margin-top:14px;color:var(--muted);font-size:0.92rem">Para 1 sucursal, menos de 24 horas. Para multi-sucursal, asignamos un Customer Success Manager y migramos en menos de una semana, sin parar tu operación.</p></details>
+    <details style="background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:20px 24px;cursor:pointer"><summary style="font-weight:600;font-size:1.05rem;list-style:none;display:flex;justify-content:space-between;align-items:center">¿Tengo que firmar contrato? <span style="color:var(--primary)">+</span></summary><p style="margin-top:14px;color:var(--muted);font-size:0.92rem">No. Mes a mes. Cancelas cuando quieras. Si pagas anual, son 2 meses gratis pero sigues pudiendo cancelar.</p></details>
+    <details style="background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:20px 24px;cursor:pointer"><summary style="font-weight:600;font-size:1.05rem;list-style:none;display:flex;justify-content:space-between;align-items:center">¿Mis datos están seguros? <span style="color:var(--primary)">+</span></summary><p style="margin-top:14px;color:var(--muted);font-size:0.92rem">Cifrado AES-256 en reposo y TLS 1.3 en tránsito. Hosting en AWS regiones MX y US. Backups cada 4 horas. Cumplimos con LFPDPPP y GDPR.</p></details>
+    <details style="background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:20px 24px;cursor:pointer"><summary style="font-weight:600;font-size:1.05rem;list-style:none;display:flex;justify-content:space-between;align-items:center">¿Funciona para varios giros a la vez? <span style="color:var(--primary)">+</span></summary><p style="margin-top:14px;color:var(--muted);font-size:0.92rem">Sí. Si tienes restaurante + tienda + spa en un mismo lugar, Volvix los maneja en una sola cuenta con perfiles separados pero contabilidad unificada.</p></details>
+    <details style="background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:20px 24px;cursor:pointer"><summary style="font-weight:600;font-size:1.05rem;list-style:none;display:flex;justify-content:space-between;align-items:center">¿Hay límite de tickets, productos o usuarios? <span style="color:var(--primary)">+</span></summary><p style="margin-top:14px;color:var(--muted);font-size:0.92rem">Tickets y productos siempre ilimitados. Usuarios depende del plan, pero los planes Pro y Enterprise no tienen tope realista para la mayoría de negocios.</p></details>
+  </div>
+</section>
+
+<!-- ================= COVERAGE ================= -->
+<section id="coverage">
+  <div class="sec-head">
+    <div class="pre">Presencia global</div>
+    <h2>En 18 países, <span>creciendo</span></h2>
+    <p>Equipos locales, monedas locales, facturación local, soporte en tu zona horaria.</p>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;max-width:1100px;margin:0 auto">
+    <div class="card-mini" style="text-align:center"><div style="font-size:1.8rem">🇲🇽</div><div style="font-weight:700;margin-top:4px">México</div><div style="font-size:0.78rem;color:var(--muted)">5,840 negocios</div></div>
+    <div class="card-mini" style="text-align:center"><div style="font-size:1.8rem">🇨🇴</div><div style="font-weight:700;margin-top:4px">Colombia</div><div style="font-size:0.78rem;color:var(--muted)">1,920 negocios</div></div>
+    <div class="card-mini" style="text-align:center"><div style="font-size:1.8rem">🇦🇷</div><div style="font-weight:700;margin-top:4px">Argentina</div><div style="font-size:0.78rem;color:var(--muted)">1,205 negocios</div></div>
+    <div class="card-mini" style="text-align:center"><div style="font-size:1.8rem">🇨🇱</div><div style="font-weight:700;margin-top:4px">Chile</div><div style="font-size:0.78rem;color:var(--muted)">810 negocios</div></div>
+    <div class="card-mini" style="text-align:center"><div style="font-size:1.8rem">🇵🇪</div><div style="font-weight:700;margin-top:4px">Perú</div><div style="font-size:0.78rem;color:var(--muted)">645 negocios</div></div>
+    <div class="card-mini" style="text-align:center"><div style="font-size:1.8rem">🇪🇸</div><div style="font-weight:700;margin-top:4px">España</div><div style="font-size:0.78rem;color:var(--muted)">580 negocios</div></div>
+    <div class="card-mini" style="text-align:center"><div style="font-size:1.8rem">🇺🇸</div><div style="font-weight:700;margin-top:4px">USA (LATAM)</div><div style="font-size:0.78rem;color:var(--muted)">510 negocios</div></div>
+    <div class="card-mini" style="text-align:center"><div style="font-size:1.8rem">🌎</div><div style="font-weight:700;margin-top:4px">Otros 11 países</div><div style="font-size:0.78rem;color:var(--muted)">490 negocios</div></div>
+  </div>
+</section>
+
+<!-- ================= AWARDS ================= -->
+<section id="awards">
+  <div class="sec-head">
+    <div class="pre">Reconocimientos</div>
+    <h2>Premios <span>que cuentan</span></h2>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;max-width:1100px;margin:0 auto">
+    <div class="card-mini" style="text-align:center;padding:28px"><div style="font-size:2.5rem;margin-bottom:8px">🏆</div><div style="font-weight:700">G2 Leader 2025</div><div style="font-size:0.82rem;color:var(--muted);margin-top:4px">Top 3 POS de Latinoamérica</div></div>
+    <div class="card-mini" style="text-align:center;padding:28px"><div style="font-size:2.5rem;margin-bottom:8px">⭐</div><div style="font-weight:700">Capterra 4.9★</div><div style="font-size:0.82rem;color:var(--muted);margin-top:4px">+1,800 reseñas verificadas</div></div>
+    <div class="card-mini" style="text-align:center;padding:28px"><div style="font-size:2.5rem;margin-bottom:8px">🚀</div><div style="font-weight:700">Endeavor 2024</div><div style="font-size:0.82rem;color:var(--muted);margin-top:4px">Empresa de alto impacto</div></div>
+    <div class="card-mini" style="text-align:center;padding:28px"><div style="font-size:2.5rem;margin-bottom:8px">🌟</div><div style="font-weight:700">Forbes 30u30</div><div style="font-size:0.82rem;color:var(--muted);margin-top:4px">Tecnología 2024</div></div>
+  </div>
+</section>
+
+<!-- ================= SECURITY ================= -->
+<section id="security">
+  <div class="sec-head">
+    <div class="pre">Seguridad y cumplimiento</div>
+    <h2>Tus datos, <span>blindados</span></h2>
+    <p>Infraestructura de nivel bancario, certificaciones internacionales y privacidad por diseño.</p>
+  </div>
+  <div class="feat-grid" style="max-width:1200px;margin:0 auto">
+    <div class="feat"><div class="ic c1">🔒</div><h4>Cifrado AES-256</h4><p>Datos cifrados en reposo. TLS 1.3 en tránsito. Tus tickets nunca viajan en claro.</p></div>
+    <div class="feat"><div class="ic c2">🛡️</div><h4>SOC 2 Type II</h4><p>Auditoría anual independiente. Reporte disponible bajo NDA para clientes Enterprise.</p></div>
+    <div class="feat"><div class="ic c3">📜</div><h4>LFPDPPP + GDPR</h4><p>Cumplimiento legal en México y Europa. DPO designado. Derechos ARCO automatizados.</p></div>
+    <div class="feat"><div class="ic c4">☁️</div><h4>AWS Multi-región</h4><p>Hosting en AWS México y US-East. Failover automático. RTO de 15 minutos.</p></div>
+    <div class="feat"><div class="ic c5">💾</div><h4>Backups continuos</h4><p>Snapshots cada 4 horas. Retención de 90 días. Restauración point-in-time.</p></div>
+    <div class="feat"><div class="ic c6">🔍</div><h4>Auditoría completa</h4><p>Cada acción queda registrada con usuario, IP, dispositivo y timestamp. Inmutable.</p></div>
+    <div class="feat"><div class="ic c1">🧬</div><h4>PCI-DSS nivel 1</h4><p>Certificación máxima para procesar pagos con tarjeta. Auditada por QSA externo cada año.</p></div>
+    <div class="feat"><div class="ic c2">🔑</div><h4>SSO + 2FA</h4><p>Single sign-on con Google, Microsoft y SAML. Doble factor obligatorio para administradores.</p></div>
+    <div class="feat"><div class="ic c3">🚨</div><h4>Detección de fraude</h4><p>Modelos de machine learning detectan transacciones anómalas y alertan en tiempo real.</p></div>
+    <div class="feat"><div class="ic c4">⚖️</div><h4>Acuerdos legales</h4><p>DPA, BAA y contratos a medida disponibles. Equipo legal interno para apoyo en compliance.</p></div>
+  </div>
+</section>
+
+<!-- ================= FINAL CTA ================= -->
+<section id="final" class="final">
+  <h2>Empieza hoy. Vende mejor mañana.</h2>
+  <p>30 días gratis. Sin tarjeta. Sin compromiso. Migración asistida en menos de 24 horas.</p>
+  <a href="#" class="btn">Crear mi cuenta gratis →</a>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer>
+  <div class="foot-grid">
+    <div class="br">
+      <h3>VOLVIX POS</h3>
+      <p>El sistema de punto de venta que convierte cada ticket en una mejor decisión.</p>
+    </div>
+    <div><h5>Producto</h5><ul><li><a href="#">POS</a></li><li><a href="#">Inventario</a></li><li><a href="#">CRM</a></li><li><a href="#">Analytics</a></li><li><a href="#">App móvil</a></li></ul></div>
+    <div><h5>Verticales</h5><ul><li><a href="#">Restaurante</a></li><li><a href="#">Cafetería</a></li><li><a href="#">Retail</a></li><li><a href="#">Salón</a></li><li><a href="#">Eventos</a></li></ul></div>
+    <div><h5>Recursos</h5><ul><li><a href="#">Documentación</a></li><li><a href="#">API</a></li><li><a href="#">Blog</a></li><li><a href="#">Roadmap</a></li><li><a href="#">Status</a></li></ul></div>
+    <div><h5>Empresa</h5><ul><li><a href="#">Sobre nosotros</a></li><li><a href="#">Clientes</a></li><li><a href="#">Carreras</a></li><li><a href="#">Contacto</a></li><li><a href="#">Prensa</a></li></ul></div>
+  </div>
+  <div class="foot-bot">
+    <div>© 2026 Volvix POS. Todos los derechos reservados.</div>
+    <div>Hecho con cariño en CDMX 🇲🇽</div>
+  </div>
+</footer>
+
+<script>
+// Demo interactivo - steps
+document.querySelectorAll('.step').forEach(step=>{
+  step.addEventListener('click',()=>{
+    const n = step.dataset.step;
+    document.querySelectorAll('.step').forEach(s=>{
+      s.classList.remove('active');
+      if(parseInt(s.dataset.step) < parseInt(n)) s.classList.add('done'); else s.classList.remove('done');
+    });
+    step.classList.add('active');
+    document.querySelectorAll('.stage-pane').forEach(p=>p.classList.remove('active'));
+    document.querySelector(`.stage-pane[data-pane="${n}"]`).classList.add('active');
+  });
+});
+
+// Auto-advance demo every 5s
+let auto = 1;
+setInterval(()=>{
+  auto = auto >= 5 ? 1 : auto+1;
+  const target = document.querySelector(`.step[data-step="${auto}"]`);
+  if(target && !document.querySelector('.demo-wrap:hover')) target.click();
+},5500);
+
+// Toggle demo
+document.querySelectorAll('.tog').forEach(t=>t.addEventListener('click',()=>t.classList.toggle('on')));
+
+// Tab demo
+document.querySelectorAll('.tab-bar').forEach(bar=>{
+  bar.querySelectorAll('.t').forEach(tab=>{
+    tab.addEventListener('click',()=>{
+      bar.querySelectorAll('.t').forEach(x=>x.classList.remove('active'));
+      tab.classList.add('active');
+    });
+  });
+});
+
+// Pay select
+document.querySelectorAll('.pay').forEach(p=>p.addEventListener('click',()=>{
+  document.querySelectorAll('.pay').forEach(x=>x.classList.remove('sel'));
+  p.classList.add('sel');
+}));
+
+// Stat counter animation on view
+const counters = document.querySelectorAll('.stat .num');
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.style.transform='scale(1.05)';
+      setTimeout(()=>e.target.style.transform='',300);
+      io.unobserve(e.target);
+    }
+  });
+},{threshold:0.5});
+counters.forEach(c=>{c.style.transition='transform 0.4s';io.observe(c);});
+
+// Smooth scroll active nav
+const links = document.querySelectorAll('nav.top .menu a');
+window.addEventListener('scroll',()=>{
+  const y = window.scrollY + 100;
+  document.querySelectorAll('section[id]').forEach(s=>{
+    if(s.offsetTop <= y && s.offsetTop+s.offsetHeight > y){
+      links.forEach(l=>l.style.color = l.getAttribute('href')==='#'+s.id ? 'var(--text)' : '');
+    }
+  });
+});
+</script>
+
+  <script defer src="auth-helper.js"></script>
+<link rel="stylesheet" href="volvix-modals.css">
+<script defer src="volvix-modals.js"></script>
+  <script defer src="volvix-i18n-wiring.js"></script>
+</body>
+</html>

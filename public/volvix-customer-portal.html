@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volvix — Portal del Cliente</title>
+<meta name="description" content="Portal del Cliente Volvix: gestiona tus pedidos, fidelidad, facturas y datos en una sola plataforma POS SaaS segura.">
+<meta name="keywords" content="portal cliente Volvix, mis pedidos POS, facturas CFDI, puntos lealtad, crédito cliente, autoservicio POS México">
+<meta name="author" content="Volvix POS">
+<meta name="theme-color" content="#1e3a8a">
+<meta name="robots" content="noindex, follow">
+<link rel="canonical" href="https://volvix-pos.vercel.app/volvix-customer-portal.html">
+
+<!-- ============ OPEN GRAPH ============ -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Volvix POS">
+<meta property="og:locale" content="es_MX">
+<meta property="og:title" content="Volvix — Portal del Cliente">
+<meta property="og:description" content="Gestiona tus pedidos, fidelidad y datos en el Portal del Cliente Volvix.">
+<meta property="og:image" content="https://volvix-pos.vercel.app/marketplace-assets/og-default.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://volvix-pos.vercel.app/volvix-customer-portal.html">
+
+<!-- ============ TWITTER CARD ============ -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@VolvixPOS">
+<meta name="twitter:title" content="Volvix — Portal del Cliente">
+<meta name="twitter:description" content="Gestiona tus pedidos, fidelidad y datos en el Portal del Cliente Volvix.">
+<meta name="twitter:image" content="https://volvix-pos.vercel.app/marketplace-assets/og-default.png">
+
+<!-- ============ FAVICON ============ -->
+<link rel="icon" type="image/png" sizes="32x32" href="/marketplace-assets/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/marketplace-assets/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/marketplace-assets/apple-touch-icon.png">
+
+<!-- ============ SCHEMA.ORG JSON-LD ============ -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Volvix Portal del Cliente",
+  "description": "Aplicación web para que los clientes de Volvix POS gestionen sus pedidos, facturas, lealtad y crédito.",
+  "url": "https://volvix-pos.vercel.app/volvix-customer-portal.html",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web",
+  "inLanguage": "es-MX",
+  "isAccessibleForFree": true,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "MXN"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Volvix POS",
+    "url": "https://volvix-pos.vercel.app/",
+    "logo": "https://volvix-pos.vercel.app/marketplace-assets/volvix-logo-512x512.png"
+  }
+}
+</script>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --primary:#1e3a8a; --primary-dark:#1e40af; --primary-light:#3b82f6;
+    --accent:#f59e0b; --accent-dark:#d97706;
+    --success:#10b981; --danger:#ef4444; --warning:#f59e0b;
+    --bg:#f1f5f9; --card:#ffffff; --border:#e2e8f0;
+    --text:#0f172a; --text-muted:#64748b; --text-light:#94a3b8;
+    --shadow-sm:0 1px 2px rgba(0,0,0,.05);
+    --shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -2px rgba(0,0,0,.05);
+    --shadow-lg:0 10px 25px -5px rgba(0,0,0,.1),0 8px 10px -6px rgba(0,0,0,.05);
+    --radius:12px; --radius-sm:8px;
+  }
+  body{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.5}
+  a{color:var(--primary);text-decoration:none}
+  button{cursor:pointer;font-family:inherit;border:none;background:none}
+
+  /* SSO LOADER — show while checking JWT (B43 fix: avoid blank screen) */
+  .sso-loader{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 50%,#0f172a 100%);padding:20px;flex-direction:column;gap:18px;color:#fff}
+  .sso-loader.hidden{display:none}
+  .sso-spinner{width:54px;height:54px;border:4px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:ssoSpin .9s linear infinite}
+  @keyframes ssoSpin{to{transform:rotate(360deg)}}
+  .sso-loader p{font-size:14px;opacity:.85;letter-spacing:.3px}
+  .sso-loader strong{font-size:17px;font-weight:700;letter-spacing:.5px}
+
+  /* LOGIN */
+  .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 50%,#0f172a 100%);padding:20px}
+  .login-card{background:#fff;border-radius:20px;padding:48px 40px;width:100%;max-width:440px;box-shadow:var(--shadow-lg)}
+  .login-logo{text-align:center;margin-bottom:32px}
+  .login-logo .badge{display:inline-flex;align-items:center;justify-content:center;width:72px;height:72px;background:linear-gradient(135deg,var(--primary),var(--primary-light));border-radius:20px;color:#fff;font-size:32px;font-weight:800;margin-bottom:16px;box-shadow:var(--shadow)}
+  .login-logo h1{font-size:28px;color:var(--primary);font-weight:800}
+  .login-logo p{color:var(--text-muted);font-size:14px;margin-top:6px}
+  .form-group{margin-bottom:20px}
+  .form-group label{display:block;margin-bottom:8px;font-size:13px;font-weight:600;color:var(--text)}
+  .form-group input{width:100%;padding:14px 16px;border:2px solid var(--border);border-radius:var(--radius-sm);font-size:15px;transition:.2s;font-family:inherit}
+  .form-group input:focus{outline:none;border-color:var(--primary-light);box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 22px;border-radius:var(--radius-sm);font-size:15px;font-weight:600;transition:.2s;border:none}
+  .btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;box-shadow:var(--shadow-sm)}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+  .btn-block{width:100%}
+  .btn-ghost{background:transparent;color:var(--primary);border:2px solid var(--border)}
+  .btn-ghost:hover{border-color:var(--primary-light);color:var(--primary)}
+  .btn-danger{background:var(--danger);color:#fff}
+  .btn-success{background:var(--success);color:#fff}
+  .login-foot{text-align:center;margin-top:20px;font-size:13px;color:var(--text-muted)}
+  .divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--text-light);font-size:12px}
+  .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+  /* APP */
+  .app{display:none}
+  .app.active{display:block}
+  .topbar{background:#fff;border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--shadow-sm)}
+  .topbar-brand{display:flex;align-items:center;gap:12px;font-weight:800;color:var(--primary);font-size:18px}
+  .topbar-brand .logo-mini{width:36px;height:36px;background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800}
+  .user-chip{display:flex;align-items:center;gap:10px;padding:6px 14px 6px 6px;background:var(--bg);border-radius:30px;font-size:14px}
+  .avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+
+  .layout{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 65px)}
+  .sidebar{background:#fff;border-right:1px solid var(--border);padding:24px 16px}
+  .nav-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--radius-sm);color:var(--text-muted);font-weight:500;font-size:14px;cursor:pointer;transition:.15s;margin-bottom:4px;width:100%;text-align:left}
+  .nav-item:hover{background:var(--bg);color:var(--text)}
+  .nav-item.active{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;box-shadow:var(--shadow-sm)}
+  .nav-icon{font-size:18px;width:22px;text-align:center}
+
+  .main{padding:32px 36px;max-width:1280px;width:100%}
+  .page{display:none}
+  .page.active{display:block;animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .page-head{margin-bottom:28px}
+  .page-head h2{font-size:26px;color:var(--text);font-weight:700}
+  .page-head p{color:var(--text-muted);margin-top:4px;font-size:14px}
+
+  /* CARDS */
+  .grid-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin-bottom:28px}
+  .stat{background:#fff;border-radius:var(--radius);padding:22px;border:1px solid var(--border);position:relative;overflow:hidden}
+  .stat::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--primary)}
+  .stat.purple::before{background:#8b5cf6}
+  .stat.green::before{background:var(--success)}
+  .stat.orange::before{background:var(--accent)}
+  .stat-label{font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:8px}
+  .stat-value{font-size:28px;font-weight:800;color:var(--text)}
+  .stat-sub{font-size:12px;color:var(--text-muted);margin-top:6px}
+
+  .card{background:#fff;border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;margin-bottom:24px}
+  .card-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .card-head h3{font-size:16px;font-weight:700;color:var(--text)}
+  .card-body{padding:22px}
+
+  /* TABLA */
+  table{width:100%;border-collapse:collapse}
+  th,td{text-align:left;padding:13px 22px;font-size:14px;border-bottom:1px solid var(--border)}
+  th{background:var(--bg);font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);font-weight:600}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:#fafbfc}
+  .badge{display:inline-block;padding:4px 10px;border-radius:30px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+  .badge-success{background:#d1fae5;color:#065f46}
+  .badge-warning{background:#fef3c7;color:#92400e}
+  .badge-danger{background:#fee2e2;color:#991b1b}
+  .badge-info{background:#dbeafe;color:#1e40af}
+
+  /* LOYALTY */
+  .loyalty-hero{background:linear-gradient(135deg,#8b5cf6 0%,#6366f1 50%,var(--primary) 100%);color:#fff;border-radius:16px;padding:32px;margin-bottom:24px;position:relative;overflow:hidden}
+  .loyalty-hero::after{content:'';position:absolute;right:-40px;top:-40px;width:200px;height:200px;background:rgba(255,255,255,.1);border-radius:50%}
+  .loyalty-hero::before{content:'';position:absolute;right:60px;bottom:-60px;width:140px;height:140px;background:rgba(255,255,255,.08);border-radius:50%}
+  .loyalty-tier{font-size:13px;text-transform:uppercase;letter-spacing:1px;opacity:.85;margin-bottom:6px}
+  .loyalty-points{font-size:48px;font-weight:800;letter-spacing:-1px}
+  .loyalty-meta{margin-top:14px;font-size:14px;opacity:.92}
+  .progress{height:10px;background:rgba(255,255,255,.25);border-radius:5px;margin-top:16px;overflow:hidden;position:relative;z-index:1}
+  .progress-bar{height:100%;background:#fff;border-radius:5px;transition:width .6s}
+
+  .reward-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+  .reward{background:#fff;border:2px solid var(--border);border-radius:var(--radius);padding:20px;transition:.2s;cursor:pointer}
+  .reward:hover{border-color:var(--primary-light);transform:translateY(-2px);box-shadow:var(--shadow)}
+  .reward-icon{font-size:28px;margin-bottom:10px}
+  .reward h4{font-size:15px;margin-bottom:6px}
+  .reward .cost{color:var(--accent-dark);font-weight:700;margin-top:10px}
+
+  /* CRÉDITO */
+  .credit-summary{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px}
+  .credit-box{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:24px}
+  .credit-box.debt{background:linear-gradient(135deg,#fef2f2,#fff);border-color:#fecaca}
+  .credit-box.limit{background:linear-gradient(135deg,#eff6ff,#fff);border-color:#bfdbfe}
+  .credit-amount{font-size:34px;font-weight:800;color:var(--text);margin:8px 0}
+  .credit-amount.neg{color:var(--danger)}
+
+  /* FORM perfil */
+  .profile-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+
+  /* MODAL */
+  .modal{display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:200;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+  .modal.active{display:flex}
+  .modal-card{background:#fff;border-radius:var(--radius);max-width:480px;width:100%;box-shadow:var(--shadow-lg);animation:pop .2s ease}
+  @keyframes pop{from{transform:scale(.95);opacity:0}to{transform:none;opacity:1}}
+  .modal-head{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+  .modal-head h3{font-size:17px}
+  .modal-body{padding:24px}
+  .modal-foot{padding:18px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+  .close-x{font-size:22px;color:var(--text-muted);background:none;border:none;cursor:pointer;line-height:1}
+
+  .empty{text-align:center;padding:50px 20px;color:var(--text-muted)}
+  .empty-icon{font-size:42px;margin-bottom:10px;opacity:.5}
+
+  .toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:#fff;padding:14px 20px;border-radius:var(--radius-sm);box-shadow:var(--shadow-lg);z-index:300;animation:slide .3s ease;font-size:14px;display:none}
+  .toast.show{display:block}
+  .toast.success{background:var(--success)}
+  .toast.error{background:var(--danger)}
+  @keyframes slide{from{transform:translateX(100%);opacity:0}to{transform:none;opacity:1}}
+
+  @media(max-width:768px){
+    .layout{grid-template-columns:1fr}
+    .sidebar{display:none}
+    .main{padding:20px}
+    .credit-summary{grid-template-columns:1fr}
+    th,td{padding:10px 14px;font-size:13px}
+    .topbar{padding:12px 18px}
+    .grid-stats{grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+    .stat{padding:18px}
+    .stat-value{font-size:24px}
+    .reward-list{grid-template-columns:1fr 1fr;gap:10px}
+    .login-card{padding:36px 24px;border-radius:16px}
+  }
+  @media(max-width:640px){
+    .topbar{padding:10px 14px;flex-wrap:wrap;gap:10px}
+    .topbar-brand{font-size:16px}
+    .topbar-brand .logo-mini{width:30px;height:30px;font-size:14px}
+    .user-chip{font-size:12px;padding:4px 10px 4px 4px}
+    .avatar{width:28px;height:28px;font-size:11px}
+    .main{padding:16px 12px}
+    .page-head h2{font-size:22px}
+    .page-head p{font-size:13px}
+    .grid-stats{grid-template-columns:1fr 1fr;gap:10px}
+    .stat{padding:14px}
+    .stat-value{font-size:20px}
+    .stat-label{font-size:11px}
+    .card-head{padding:14px 16px}
+    .card-body{padding:16px}
+    table th,table td{padding:8px 10px;font-size:12px}
+    .loyalty-hero{padding:22px 18px}
+    .loyalty-points{font-size:36px}
+    .reward-list{grid-template-columns:1fr;gap:10px}
+    .modal-card{margin:0 8px}
+    .login-card{padding:28px 18px;max-width:100%}
+    .login-logo .badge{width:60px;height:60px;font-size:26px}
+    .login-logo h1{font-size:24px}
+    .form-group input{padding:12px 14px;font-size:14px}
+    .btn{padding:12px 18px;font-size:14px}
+    .actions{flex-direction:column}
+    .actions .btn{width:100%}
+  }
+  @media(max-width:380px){
+    .grid-stats{grid-template-columns:1fr}
+    table th:nth-child(n+4),table td:nth-child(n+4){display:none}
+  }
+</style>
+  <script src="/volvix-uplift-wiring.js" defer></script>
+  <script src="/volvix-error-reporter.js" defer></script>
+</head>
+<body>
+
+<!-- B43: SSO loader (visible by default, hidden by JS once state is determined) -->
+<div id="ssoLoader" class="sso-loader" role="status" aria-live="polite">
+  <div class="sso-spinner" aria-hidden="true"></div>
+  <strong>Volvix Portal</strong>
+  <p data-i18n="customer.checking_session">Verificando tu sesión…</p>
+</div>
+
+<!-- B4: login local eliminado — SSO redirige a /login.html central. Este screen solo se muestra si SSO check determina que no hay sesión y el redirect aún no ocurre. -->
+<div id="loginScreen" class="login-wrap" style="display:none;">
+  <div class="login-card" style="text-align:center">
+    <div class="login-logo">
+      <div class="badge">V</div>
+      <h1>Volvix</h1>
+      <p data-i18n="customer.portal_title">Portal del Cliente</p>
+    </div>
+    <p style="color:var(--text-muted);margin:24px 0;font-size:14px" data-i18n="customer.session_required">Necesitas iniciar sesión para acceder al portal.</p>
+    <a href="/login.html" class="btn btn-primary btn-block" data-i18n="customer.go_login">Iniciar sesión</a>
+    <p class="login-foot" style="margin-top:18px"><a href="/" style="color:var(--text-muted)">← Volver al inicio</a></p>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="app" class="app">
+  <header class="topbar">
+    <div class="topbar-brand">
+      <div class="logo-mini">V</div>
+      <span>Volvix Portal</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px">
+      <button class="btn btn-ghost" onclick="logout()" style="padding:8px 14px;font-size:13px">Salir</button>
+      <div class="user-chip">
+        <div class="avatar" id="userAvatar">JD</div>
+        <span id="userName">Cliente</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <button class="nav-item active" data-page="dashboard"><span class="nav-icon">◉</span> Inicio</button>
+      <button class="nav-item" data-page="purchases"><span class="nav-icon">◫</span> Mis compras</button>
+      <button class="nav-item" data-page="invoices"><span class="nav-icon">◧</span> Facturas</button>
+      <button class="nav-item" data-page="loyalty"><span class="nav-icon">★</span> Puntos Loyalty</button>
+      <button class="nav-item" data-page="credit"><span class="nav-icon">$</span> Mi crédito</button>
+      <button class="nav-item" data-page="addresses"><span class="nav-icon">◇</span> Direcciones</button>
+      <button class="nav-item" data-page="payments"><span class="nav-icon">▭</span> Métodos de pago</button>
+      <button class="nav-item" data-page="favorites"><span class="nav-icon">♡</span> Favoritos</button>
+      <button class="nav-item" data-page="notifications"><span class="nav-icon">◈</span> Notificaciones</button>
+      <button class="nav-item" data-page="support"><span class="nav-icon">◔</span> Soporte</button>
+      <button class="nav-item" data-page="profile"><span class="nav-icon">◐</span> Mi perfil</button>
+    </aside>
+
+    <main class="main">
+      <!-- DASHBOARD -->
+      <section class="page active" id="page-dashboard">
+        <div class="page-head">
+          <h2>Hola, <span id="greetName">Cliente</span> 👋</h2>
+          <p>Resumen de tu actividad en Volvix</p>
+        </div>
+        <div class="grid-stats">
+          <div class="stat"><div class="stat-label">Compras totales</div><div class="stat-value" id="dashTotal">$0.00</div><div class="stat-sub" id="dashOrders">0 órdenes</div></div>
+          <div class="stat purple"><div class="stat-label">Puntos disponibles</div><div class="stat-value" id="dashPoints">0</div><div class="stat-sub">Nivel <span id="dashTier">Bronze</span></div></div>
+          <div class="stat orange"><div class="stat-label">Crédito disponible</div><div class="stat-value" id="dashCredit">$0.00</div><div class="stat-sub" id="dashDebt">Saldo: $0</div></div>
+          <div class="stat green"><div class="stat-label">Última compra</div><div class="stat-value" id="dashLastAmt" style="font-size:22px">--</div><div class="stat-sub" id="dashLastDate">Sin compras</div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Compras recientes</h3><button class="btn btn-ghost" style="padding:6px 14px;font-size:13px" onclick="goPage('purchases')">Ver todas</button></div>
+          <table id="recentTable"><thead><tr><th>Folio</th><th>Fecha</th><th>Total</th><th>Estado</th></tr></thead><tbody></tbody></table>
+        </div>
+      </section>
+
+      <!-- COMPRAS -->
+      <section class="page" id="page-purchases">
+        <div class="page-head"><h2>Mis compras</h2><p>Historial completo de tus órdenes</p></div>
+        <div class="card">
+          <div class="card-head">
+            <h3>Todas las órdenes</h3>
+            <input type="text" id="searchPurchases" placeholder="Buscar folio..." style="padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+          </div>
+          <table id="purchasesTable"><thead><tr><th>Folio</th><th>Fecha</th><th>Items</th><th>Total</th><th>Pago</th><th>Estado</th><th>Acción</th></tr></thead><tbody></tbody></table>
+        </div>
+      </section>
+
+      <!-- FACTURAS -->
+      <section class="page" id="page-invoices">
+        <div class="page-head"><h2>Facturas</h2><p>Descarga tus comprobantes fiscales (PDF / XML)</p></div>
+        <div class="card">
+          <div class="card-head"><h3>Facturas emitidas</h3></div>
+          <table id="invoiceTable"><thead><tr><th>Folio</th><th>Fecha</th><th>RFC</th><th>Total</th><th>Estado</th><th>Descargas</th></tr></thead><tbody></tbody></table>
+        </div>
+      </section>
+
+      <!-- LOYALTY -->
+      <section class="page" id="page-loyalty">
+        <div class="page-head"><h2>Puntos Loyalty</h2><p>Acumula y canjea recompensas</p></div>
+        <div class="loyalty-hero">
+          <div class="loyalty-tier">Nivel <span id="loyTier">Bronze</span></div>
+          <div class="loyalty-points"><span id="loyPoints">0</span> pts</div>
+          <div class="loyalty-meta">Próximo nivel: <strong id="loyNext">Silver</strong> · Faltan <span id="loyMissing">0</span> pts</div>
+          <div class="progress"><div class="progress-bar" id="loyBar" style="width:0%"></div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Canjea tus puntos</h3></div>
+          <div class="card-body">
+            <div class="reward-list" id="rewardList"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Movimientos de puntos</h3></div>
+          <table id="loyaltyTable"><thead><tr><th>Fecha</th><th>Concepto</th><th>Movimiento</th><th>Saldo</th></tr></thead><tbody></tbody></table>
+        </div>
+      </section>
+
+      <!-- CRÉDITO -->
+      <section class="page" id="page-credit">
+        <div class="page-head"><h2>Mi crédito</h2><p>Gestiona tu línea de crédito y abonos</p></div>
+        <div class="credit-summary">
+          <div class="credit-box debt">
+            <div style="font-size:13px;color:var(--text-muted);font-weight:600">Saldo pendiente</div>
+            <div class="credit-amount neg" id="creditDebt">$0.00</div>
+            <div style="font-size:12px;color:var(--text-muted)">Próximo vencimiento: <strong id="creditDue">--</strong></div>
+            <button class="btn btn-success" style="margin-top:14px" onclick="openPay()">Abonar ahora</button>
+          </div>
+          <div class="credit-box limit">
+            <div style="font-size:13px;color:var(--text-muted);font-weight:600">Línea disponible</div>
+            <div class="credit-amount" id="creditAvail">$0.00</div>
+            <div style="font-size:12px;color:var(--text-muted)">Límite total: <strong id="creditLimit">$0</strong></div>
+            <div class="progress" style="background:#dbeafe;margin-top:14px"><div class="progress-bar" id="creditBar" style="background:var(--primary);width:0%"></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Movimientos de crédito</h3></div>
+          <table id="creditTable"><thead><tr><th>Fecha</th><th>Concepto</th><th>Cargo</th><th>Abono</th><th>Saldo</th></tr></thead><tbody></tbody></table>
+        </div>
+      </section>
+
+      <!-- PERFIL -->
+      <section class="page" id="page-profile">
+        <div class="page-head"><h2>Mi perfil</h2><p>Datos personales y de facturación</p></div>
+        <div class="card">
+          <div class="card-head"><h3>Información personal</h3></div>
+          <div class="card-body">
+            <div class="profile-grid">
+              <div class="form-group"><label>Nombre completo</label><input type="text" id="pfName"></div>
+              <div class="form-group"><label>Email</label><input type="email" id="pfEmail"></div>
+              <div class="form-group"><label>Teléfono</label><input type="tel" id="pfPhone"></div>
+              <div class="form-group"><label>Fecha nacimiento</label><input type="date" id="pfBirth"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Datos fiscales</h3></div>
+          <div class="card-body">
+            <div class="profile-grid">
+              <div class="form-group"><label>RFC</label><input type="text" id="pfRfc"></div>
+              <div class="form-group"><label>Razón social</label><input type="text" id="pfRazon"></div>
+              <div class="form-group"><label>Régimen fiscal</label><input type="text" id="pfReg"></div>
+              <div class="form-group"><label>Código postal</label><input type="text" id="pfCp"></div>
+              <div class="form-group" style="grid-column:1/-1"><label>Dirección</label><input type="text" id="pfAddr"></div>
+            </div>
+            <div class="actions">
+              <button class="btn btn-primary" onclick="saveProfile()">Guardar cambios</button>
+              <button class="btn btn-ghost" onclick="loadProfile()">Cancelar</button>
+              <button class="btn btn-danger" onclick="closeAllSessions()">Cerrar todas las sesiones</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DIRECCIONES -->
+      <section class="page" id="page-addresses">
+        <div class="page-head"><h2>Direcciones de envío</h2><p>Administra los lugares donde recibes tus pedidos</p></div>
+        <div class="card">
+          <div class="card-head"><h3>Mis direcciones</h3><button class="btn btn-primary" style="padding:8px 16px;font-size:13px" onclick="addAddr()">+ Nueva dirección</button></div>
+          <div class="card-body" id="addrList"></div>
+        </div>
+      </section>
+
+      <!-- MÉTODOS DE PAGO -->
+      <section class="page" id="page-payments">
+        <div class="page-head"><h2>Métodos de pago</h2><p>Tarjetas y formas de pago guardadas</p></div>
+        <div class="card">
+          <div class="card-head"><h3>Tarjetas guardadas</h3><button class="btn btn-primary" style="padding:8px 16px;font-size:13px" onclick="toast('Añade tarjeta nueva')">+ Agregar tarjeta</button></div>
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px">
+              <div style="background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:14px;padding:22px;position:relative;min-height:160px;display:flex;flex-direction:column;justify-content:space-between"><div style="display:flex;justify-content:space-between"><span style="opacity:.85;font-size:12px;letter-spacing:1px">VISA</span><span class="badge" style="background:rgba(255,255,255,.25);color:#fff">Predeterminada</span></div><div style="font-size:18px;letter-spacing:2px;font-family:monospace">•••• •••• •••• 4521</div><div style="display:flex;justify-content:space-between;font-size:12px;opacity:.9"><span>JUAN DOMÍNGUEZ</span><span>05/28</span></div></div>
+              <div style="background:linear-gradient(135deg,#7c2d12,#ea580c);color:#fff;border-radius:14px;padding:22px;min-height:160px;display:flex;flex-direction:column;justify-content:space-between"><div><span style="opacity:.85;font-size:12px;letter-spacing:1px">MASTERCARD</span></div><div style="font-size:18px;letter-spacing:2px;font-family:monospace">•••• •••• •••• 8809</div><div style="display:flex;justify-content:space-between;font-size:12px;opacity:.9"><span>JUAN DOMÍNGUEZ</span><span>11/27</span></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAVORITOS -->
+      <section class="page" id="page-favorites">
+        <div class="page-head"><h2>Mis favoritos</h2><p>Productos que has marcado para volver a comprar</p></div>
+        <div class="card"><div class="card-body">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px">
+            <div style="border:1px solid var(--border);border-radius:10px;padding:16px"><div style="background:var(--bg);height:120px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:42px">📦</div><h4 style="margin-top:12px">Producto Premium</h4><p style="color:var(--text-muted);font-size:13px">Categoría general</p><div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center"><strong style="color:var(--primary)">$349.00</strong><button class="btn btn-primary" style="padding:6px 12px;font-size:12px">Comprar</button></div></div>
+            <div style="border:1px solid var(--border);border-radius:10px;padding:16px"><div style="background:var(--bg);height:120px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:42px">🎧</div><h4 style="margin-top:12px">Accesorio Pro</h4><p style="color:var(--text-muted);font-size:13px">Audio y video</p><div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center"><strong style="color:var(--primary)">$1,299.00</strong><button class="btn btn-primary" style="padding:6px 12px;font-size:12px">Comprar</button></div></div>
+            <div style="border:1px solid var(--border);border-radius:10px;padding:16px"><div style="background:var(--bg);height:120px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:42px">⌚</div><h4 style="margin-top:12px">Smartwatch X1</h4><p style="color:var(--text-muted);font-size:13px">Wearables</p><div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center"><strong style="color:var(--primary)">$2,890.00</strong><button class="btn btn-primary" style="padding:6px 12px;font-size:12px">Comprar</button></div></div>
+          </div>
+        </div></div>
+      </section>
+
+      <!-- NOTIFICACIONES -->
+      <section class="page" id="page-notifications">
+        <div class="page-head"><h2>Notificaciones</h2><p>Mantente informado de tu actividad</p></div>
+        <div class="card">
+          <div class="card-head"><h3>Centro de avisos</h3><button class="btn btn-ghost" style="padding:6px 14px;font-size:13px" onclick="markAllRead()">Marcar todo leído</button></div>
+          <div class="card-body" id="notifList"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Preferencias de comunicación</h3></div>
+          <div class="card-body">
+            <label style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)"><input type="checkbox" checked> <span>Email — Promociones y descuentos</span></label>
+            <label style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)"><input type="checkbox" checked> <span>Email — Estados de pedido</span></label>
+            <label style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)"><input type="checkbox"> <span>SMS — Avisos urgentes</span></label>
+            <label style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)"><input type="checkbox" checked> <span>Push — Recordatorios de crédito</span></label>
+            <label style="display:flex;align-items:center;gap:12px;padding:12px 0"><input type="checkbox" checked> <span>WhatsApp — Confirmación de compras</span></label>
+            <div class="actions"><button class="btn btn-primary" onclick="toast('Preferencias guardadas','success')">Guardar preferencias</button></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SOPORTE -->
+      <section class="page" id="page-support">
+        <div class="page-head"><h2>Soporte y ayuda</h2><p>Estamos para ayudarte</p></div>
+        <div class="grid-stats">
+          <div class="stat"><div class="stat-label">Teléfono</div><div class="stat-value" style="font-size:20px">800-VOLVIX</div><div class="stat-sub">Lun-Vie 9-18h</div></div>
+          <div class="stat purple"><div class="stat-label">WhatsApp</div><div class="stat-value" style="font-size:20px">55 9876 5432</div><div class="stat-sub">24/7</div></div>
+          <div class="stat green"><div class="stat-label">Email</div><div class="stat-value" style="font-size:18px">ayuda@volvix.com</div><div class="stat-sub">Resp. en 24h</div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Crear ticket de soporte</h3></div>
+          <div class="card-body">
+            <div class="form-group"><label>Asunto</label><input type="text" id="tkSubject" placeholder="Describe el motivo brevemente"></div>
+            <div class="form-group"><label>Categoría</label><select id="tkCat" style="width:100%;padding:14px 16px;border:2px solid var(--border);border-radius:8px;font-size:15px"><option>Problema con compra</option><option>Devolución</option><option>Facturación</option><option>Crédito y pagos</option><option>Puntos Loyalty</option><option>Otro</option></select></div>
+            <div class="form-group"><label>Descripción</label><textarea id="tkDesc" rows="5" style="width:100%;padding:14px 16px;border:2px solid var(--border);border-radius:8px;font-size:15px;font-family:inherit;resize:vertical" placeholder="Cuéntanos en detalle..."></textarea></div>
+            <div class="actions"><button class="btn btn-primary" onclick="sendTicket()">Enviar ticket</button></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Tickets recientes</h3></div>
+          <table id="ticketsTable"><thead><tr><th>ID</th><th>Asunto</th><th>Fecha</th><th>Estado</th></tr></thead><tbody>
+            <tr><td><strong>#T-204</strong></td><td>Consulta sobre factura F-A2031</td><td>2026-04-16</td><td><span class="badge badge-success">Resuelto</span></td></tr>
+            <tr><td><strong>#T-198</strong></td><td>Cambio de dirección</td><td>2026-04-02</td><td><span class="badge badge-success">Resuelto</span></td></tr>
+            <tr><td><strong>#T-187</strong></td><td>Aclaración de puntos</td><td>2026-03-20</td><td><span class="badge badge-warning">En proceso</span></td></tr>
+          </tbody></table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- MODAL ABONO -->
+<div class="modal" id="payModal">
+  <div class="modal-card">
+    <div class="modal-head"><h3>Abonar a crédito</h3><button class="close-x" onclick="closePay()">×</button></div>
+    <div class="modal-body">
+      <p style="color:var(--text-muted);margin-bottom:16px;font-size:14px">Saldo actual: <strong id="payDebt">$0</strong></p>
+      <div class="form-group"><label>Monto a abonar</label><input type="number" id="payAmt" placeholder="0.00" min="1" step="0.01"></div>
+      <div class="form-group"><label>Método de pago</label>
+        <select id="payMethod" style="width:100%;padding:14px 16px;border:2px solid var(--border);border-radius:8px;font-size:15px">
+          <option>Tarjeta de crédito/débito</option><option>Transferencia SPEI</option><option>OXXO Pay</option><option>PayPal</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closePay()">Cancelar</button>
+      <button class="btn btn-success" onclick="processPay()">Confirmar abono</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CANJE -->
+<div class="modal" id="redeemModal">
+  <div class="modal-card">
+    <div class="modal-head"><h3>Canjear recompensa</h3><button class="close-x" onclick="closeRedeem()">×</button></div>
+    <div class="modal-body" id="redeemBody"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeRedeem()">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmRedeem()">Confirmar canje</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// =========== DATA (cargado desde Supabase vía /api/customer/*) ===========
+let DB = {
+  user:{name:"",email:"",phone:"",birth:"",rfc:"",razon:"",reg:"",cp:"",addr:""},
+  purchases:[],
+  invoices:[],
+  loyalty:{points:0,tier:"Bronze",next:"Silver",nextAt:1000,history:[],rewards:[]},
+  addresses:[],
+  notifs:[],
+  credit:{limit:0,debt:0,due:"",history:[]},
+};
+
+// ========= CARGA DESDE API =========
+async function loadCustomerData(){
+  const token = localStorage.getItem('volvix_customer_token') || localStorage.getItem('customer_token');
+  const headers = { 'Accept':'application/json' };
+  if(token) headers['Authorization'] = 'Bearer ' + token;
+  async function gj(url){ try{ const r = await fetch(url,{headers, credentials:'include'}); if(!r.ok) return null; return await r.json(); }catch(e){ return null; } }
+  const [me, orders, loyalty, pmethods] = await Promise.all([
+    gj('/api/customer/me'),
+    gj('/api/customer/orders'),
+    gj('/api/customer/loyalty'),
+    gj('/api/customer/payment-methods')
+  ]);
+  if(me && me.user){ Object.assign(DB.user, me.user); }
+  else if(me && me.email){ Object.assign(DB.user, me); }
+  if(orders){
+    const arr = Array.isArray(orders)?orders:(orders.items||orders.orders||[]);
+    DB.purchases = arr.map(o=>({folio:o.folio||o.id, date:(o.date||o.created_at||'').slice(0,10), items:o.items_count||(o.items?o.items.length:0), total:Number(o.total||0), pay:o.payment_method||o.pay||'-', status:o.status||'Entregada'}));
+    DB.invoices = arr.filter(o=>o.invoice_folio||o.cfdi_uuid).map(o=>({folio:o.invoice_folio||o.cfdi_uuid, date:(o.date||o.created_at||'').slice(0,10), rfc:o.rfc||DB.user.rfc||'', total:Number(o.total||0), status:o.invoice_status||'Vigente'}));
+  }
+  if(loyalty){
+    DB.loyalty.points = Number(loyalty.points||0);
+    DB.loyalty.tier = loyalty.tier||'Bronze';
+    DB.loyalty.next = loyalty.next_tier||loyalty.next||'Silver';
+    DB.loyalty.nextAt = Number(loyalty.next_at||loyalty.nextAt||1000);
+    DB.loyalty.history = Array.isArray(loyalty.history)?loyalty.history:[];
+    DB.loyalty.rewards = Array.isArray(loyalty.rewards)?loyalty.rewards:[];
+  }
+  // payment-methods could feed credit card list; credit account is inferred from orders
+  if(typeof renderAll==='function' && document.getElementById('app') && document.getElementById('app').classList.contains('active')){
+    try{ renderAll(); }catch(e){}
+  }
+}
+window.addEventListener('DOMContentLoaded',()=>{ loadCustomerData(); });
+
+// ========= UTILS =========
+const $ = s => document.querySelector(s);
+const fmt = n => "$" + n.toLocaleString("es-MX",{minimumFractionDigits:2,maximumFractionDigits:2});
+const initials = n => n.split(" ").slice(0,2).map(x=>x[0]).join("").toUpperCase();
+function toast(msg,type=""){const t=$("#toast");t.textContent=msg;t.className="toast show "+type;setTimeout(()=>t.className="toast",2800);}
+
+// ========= LOGIN =========
+// B43 SSO state machine — three states: LOADER (default) → APP (if valid JWT) | LOGIN (if no JWT, with redirect fallback)
+function _ssoSetState(state){
+  // state: 'loader' | 'app' | 'login'
+  const loader=document.getElementById('ssoLoader');
+  const login=document.getElementById('loginScreen');
+  const app=document.getElementById('app');
+  if(loader) loader.classList.toggle('hidden', state!=='loader');
+  if(login) login.style.display = (state==='login') ? 'flex' : 'none';
+  if(app) app.classList.toggle('active', state==='app');
+}
+
+// R29 + B43: SSO check — si hay JWT válido, entrar; si no, redirigir y mostrar fallback de login si redirect no ocurre
+(function customerSSOCheck(){
+  // 1) Default state: SHOW LOADER (avoid blank screen)
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>_ssoSetState('loader'),{once:true});
+  } else {
+    _ssoSetState('loader');
+  }
+
+  let decided=false;
+  try{
+    const tk=localStorage.getItem('volvix_token')||localStorage.getItem('volvixAuthToken');
+    if(!tk){
+      // Sin sesión → redirect to central login. If redirect is blocked/slow, show login screen as fallback after 1.2s
+      const back=encodeURIComponent(location.pathname+location.search);
+      const redirectUrl='/login.html?redirect='+back;
+      decided=true;
+      setTimeout(()=>{
+        // If still on this page after 1.2s, show login form (fallback)
+        if(!document.getElementById('app')||!document.getElementById('app').classList.contains('active')){
+          _ssoSetState('login');
+        }
+      },1200);
+      try{ location.replace(redirectUrl); }catch(e){ _ssoSetState('login'); }
+      return;
+    }
+    const p=tk.split('.');
+    if(p.length<2){
+      // Malformed token → treat as no session
+      try{ localStorage.removeItem('volvix_token'); localStorage.removeItem('volvixAuthToken'); }catch(e){}
+      decided=true;
+      _ssoSetState('login');
+      return;
+    }
+    const payload=JSON.parse(atob(p[1].replace(/-/g,'+').replace(/_/g,'/')));
+    if(!payload.exp||payload.exp*1000<=Date.now()){
+      // Expired
+      try{ localStorage.removeItem('volvix_token'); localStorage.removeItem('volvixAuthToken'); }catch(e){}
+      const back=encodeURIComponent(location.pathname+location.search);
+      decided=true;
+      setTimeout(()=>{
+        if(!document.getElementById('app')||!document.getElementById('app').classList.contains('active')){
+          _ssoSetState('login');
+        }
+      },1200);
+      try{ location.replace('/login.html?expired=1&redirect='+back); }catch(e){ _ssoSetState('login'); }
+      return;
+    }
+    // Valid token → enter app
+    const email=payload.email||payload.sub||'usuario';
+    decided=true;
+    const go=()=>{ try{ enterApp(email); }catch(e){ console.error('[Customer-SSO] enterApp fail',e); _ssoSetState('login'); } };
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',go,{once:true});
+    else go();
+    console.log('[Customer-SSO] token Volvix detectado, login omitido para',email);
+  }catch(e){
+    console.warn('[Customer-SSO] fail',e);
+    if(!decided) _ssoSetState('login');
+  }
+
+  // Safety net: if 5s pass and we're still on loader, force login screen so the user is never stuck
+  setTimeout(()=>{
+    const loader=document.getElementById('ssoLoader');
+    const app=document.getElementById('app');
+    if(loader && !loader.classList.contains('hidden') && (!app || !app.classList.contains('active'))){
+      console.warn('[Customer-SSO] safety timeout, forcing login state');
+      _ssoSetState('login');
+    }
+  },5000);
+})();
+// B4: form login eliminado — SSO ya gestiona auth. Solo helpers para enterApp/logout.
+function enterApp(email){
+  DB.user.email=email;
+  _ssoSetState('app');
+  loadCustomerData().then(()=>renderAll()).catch(()=>renderAll());
+  toast("Bienvenido a Volvix","success");
+}
+function logout(){
+  try { localStorage.removeItem('volvix_token'); localStorage.removeItem('volvixAuthToken'); } catch(e){}
+  location.replace('/login.html');
+}
+
+// ========= NAV =========
+document.querySelectorAll(".nav-item").forEach(b=>b.addEventListener("click",()=>goPage(b.dataset.page)));
+function goPage(p){document.querySelectorAll(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.page===p));document.querySelectorAll(".page").forEach(s=>s.classList.toggle("active",s.id==="page-"+p));}
+
+// ========= RENDER =========
+function renderAll(){
+  $("#userName").textContent=DB.user.name;
+  $("#userAvatar").textContent=initials(DB.user.name);
+  $("#greetName").textContent=DB.user.name.split(" ")[0];
+  renderDashboard();renderPurchases();renderInvoices();renderLoyalty();renderCredit();loadProfile();renderAddresses();renderNotifs();
+}
+function renderAddresses(){
+  const c=$("#addrList");c.innerHTML="";
+  if(!DB.addresses.length){c.innerHTML='<div class="empty"><div class="empty-icon">◇</div><p>No tienes direcciones guardadas</p></div>';return;}
+  DB.addresses.forEach(a=>{
+    c.insertAdjacentHTML("beforeend",`<div style="border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:12px;display:flex;justify-content:space-between;gap:14px;align-items:flex-start"><div><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><strong>${a.alias}</strong>${a.default?'<span class="badge badge-info">Predeterminada</span>':''}</div><div style="color:var(--text-muted);font-size:14px;line-height:1.7">${a.name}<br>${a.addr}<br>${a.city} · CP ${a.cp}<br>Tel: ${a.phone}</div></div><div style="display:flex;flex-direction:column;gap:6px"><button class="btn btn-ghost" style="padding:5px 12px;font-size:12px" onclick="toast('Editando ${a.alias}')">Editar</button>${a.default?'':'<button class="btn btn-ghost" style="padding:5px 12px;font-size:12px" onclick="setDefaultAddr('+a.id+')">Predeterminar</button><button class="btn btn-danger" style="padding:5px 12px;font-size:12px" onclick="delAddr('+a.id+')">Eliminar</button>'}</div></div>`);
+  });
+}
+function setDefaultAddr(id){DB.addresses.forEach(a=>a.default=(a.id===id));renderAddresses();toast("Predeterminada actualizada","success");}
+async function delAddr(id){
+  let ok=false;
+  if(window.VolvixUI && typeof window.VolvixUI.confirm==='function'){
+    ok=await window.VolvixUI.confirm({title:'Eliminar dirección',message:'¿Eliminar dirección?',danger:true,confirmText:'Eliminar'});
+  } else { ok=confirm("¿Eliminar dirección?"); }
+  if(!ok)return;
+  DB.addresses=DB.addresses.filter(a=>a.id!==id);renderAddresses();toast("Dirección eliminada","success");
+}
+async function closeAllSessions(){
+  let ok=false;
+  if(window.VolvixUI && typeof window.VolvixUI.confirm==='function'){
+    ok=await window.VolvixUI.confirm({title:'Cerrar sesiones',message:'¿Cerrar sesión en todos los dispositivos?',danger:true,confirmText:'Cerrar todas'});
+  } else { ok=confirm('¿Cerrar sesión en todos los dispositivos?'); }
+  if(ok) toast('Sesiones cerradas','success');
+}
+async function addAddr(){
+  let al="", ad="";
+  if (window.VolvixUI && typeof window.VolvixUI.form === 'function') {
+    const r = await window.VolvixUI.form({
+      title: 'Agregar dirección',
+      size: 'sm',
+      fields: [
+        { name: 'alias', type: 'text',     label: 'Alias',              required: true, placeholder: 'Casa, Oficina, etc.' },
+        { name: 'addr',  type: 'textarea', label: 'Dirección completa', required: true, rows: 2, placeholder: 'Calle, número, colonia, ciudad, CP' }
+      ],
+      submitText: 'Agregar'
+    });
+    if (!r) return;
+    al = String(r.alias).trim(); ad = String(r.addr).trim();
+  } else {
+    al = prompt("Alias (Casa, Oficina, etc):"); if(!al) return;
+    ad = prompt("Dirección completa:"); if(!ad) return;
+  }
+  if (!al || !ad) return;
+  DB.addresses.push({id:Date.now(),alias:al,name:DB.user.name,addr:ad,city:"CDMX",cp:"00000",phone:DB.user.phone,default:false});
+  renderAddresses();
+  toast("Dirección agregada","success");
+}
+function renderNotifs(){
+  const c=$("#notifList");c.innerHTML="";
+  if(!DB.notifs.length){c.innerHTML='<div class="empty">Sin notificaciones</div>';return;}
+  DB.notifs.forEach(n=>{c.insertAdjacentHTML("beforeend",`<div style="display:flex;gap:14px;padding:14px;border-bottom:1px solid var(--border);${n.read?'opacity:.6':'background:#f8fafc'};border-radius:6px;align-items:flex-start"><div style="font-size:24px">${n.icon}</div><div style="flex:1"><div style="font-weight:${n.read?'500':'600'};color:var(--text)">${n.title}</div><div style="font-size:12px;color:var(--text-muted);margin-top:3px">${n.time}</div></div>${n.read?'':'<span style="width:8px;height:8px;border-radius:50%;background:var(--primary-light);margin-top:8px"></span>'}</div>`);});
+}
+function markAllRead(){DB.notifs.forEach(n=>n.read=true);renderNotifs();toast("Notificaciones leídas","success");}
+function sendTicket(){const s=$("#tkSubject").value,d=$("#tkDesc").value;if(!s||!d){toast("Completa todos los campos","error");return;}$("#tkSubject").value="";$("#tkDesc").value="";toast("Ticket enviado. Te contactaremos pronto","success");}
+function renderDashboard(){
+  const tot=DB.purchases.reduce((s,p)=>s+p.total,0);
+  $("#dashTotal").textContent=fmt(tot);
+  $("#dashOrders").textContent=DB.purchases.length+" órdenes";
+  $("#dashPoints").textContent=DB.loyalty.points.toLocaleString();
+  $("#dashTier").textContent=DB.loyalty.tier;
+  $("#dashCredit").textContent=fmt(DB.credit.limit-DB.credit.debt);
+  $("#dashDebt").textContent="Saldo: "+fmt(DB.credit.debt);
+  const last=DB.purchases[0];if(last){$("#dashLastAmt").textContent=fmt(last.total);$("#dashLastDate").textContent=last.date+" · "+last.folio;}
+  const tb=$("#recentTable tbody");tb.innerHTML="";DB.purchases.slice(0,5).forEach(p=>tb.insertAdjacentHTML("beforeend",`<tr><td><strong>${p.folio}</strong></td><td>${p.date}</td><td>${fmt(p.total)}</td><td><span class="badge badge-success">${p.status}</span></td></tr>`));
+}
+function renderPurchases(filter=""){
+  const tb=$("#purchasesTable tbody");tb.innerHTML="";
+  DB.purchases.filter(p=>p.folio.toLowerCase().includes(filter.toLowerCase())).forEach(p=>{
+    const payBadge=p.pay==="Crédito"?"badge-warning":"badge-info";
+    tb.insertAdjacentHTML("beforeend",`<tr><td><strong>${p.folio}</strong></td><td>${p.date}</td><td>${p.items}</td><td>${fmt(p.total)}</td><td><span class="badge ${payBadge}">${p.pay}</span></td><td><span class="badge badge-success">${p.status}</span></td><td><button class="btn btn-ghost" style="padding:5px 12px;font-size:12px" onclick="toast('Detalle de ${p.folio}')">Ver</button></td></tr>`);
+  });
+}
+$("#searchPurchases").addEventListener("input",e=>renderPurchases(e.target.value));
+function renderInvoices(){
+  const tb=$("#invoiceTable tbody");tb.innerHTML="";
+  DB.invoices.forEach(i=>tb.insertAdjacentHTML("beforeend",`<tr><td><strong>${i.folio}</strong></td><td>${i.date}</td><td>${i.rfc}</td><td>${fmt(i.total)}</td><td><span class="badge badge-success">${i.status}</span></td><td><button class="btn btn-primary" style="padding:5px 11px;font-size:12px" onclick="dl('${i.folio}','PDF')">PDF</button> <button class="btn btn-ghost" style="padding:5px 11px;font-size:12px" onclick="dl('${i.folio}','XML')">XML</button></td></tr>`));
+}
+function dl(f,t){toast(`Descargando ${f}.${t.toLowerCase()}`,"success");}
+function renderLoyalty(){
+  const L=DB.loyalty;$("#loyPoints").textContent=L.points.toLocaleString();$("#loyTier").textContent=L.tier;$("#loyNext").textContent=L.next;
+  const miss=Math.max(0,L.nextAt-L.points);$("#loyMissing").textContent=miss.toLocaleString();
+  $("#loyBar").style.width=Math.min(100,(L.points/L.nextAt*100))+"%";
+  const rl=$("#rewardList");rl.innerHTML="";
+  L.rewards.forEach(r=>{const can=L.points>=r.cost;rl.insertAdjacentHTML("beforeend",`<div class="reward" onclick="openRedeem(${r.id})" style="${can?'':'opacity:.55'}"><div class="reward-icon">${r.icon}</div><h4>${r.name}</h4><div style="color:var(--text-muted);font-size:13px">${r.desc}</div><div class="cost">${r.cost.toLocaleString()} pts ${can?'':'🔒'}</div></div>`);});
+  const lt=$("#loyaltyTable tbody");lt.innerHTML="";L.history.forEach(h=>{const cls=h.delta>0?"badge-success":"badge-danger";const sign=h.delta>0?"+":"";lt.insertAdjacentHTML("beforeend",`<tr><td>${h.date}</td><td>${h.concept}</td><td><span class="badge ${cls}">${sign}${h.delta}</span></td><td>${h.balance.toLocaleString()}</td></tr>`);});
+}
+function renderCredit(){
+  const c=DB.credit;$("#creditDebt").textContent=fmt(c.debt);$("#creditDue").textContent=c.due;$("#creditLimit").textContent=fmt(c.limit);$("#creditAvail").textContent=fmt(c.limit-c.debt);
+  $("#creditBar").style.width=((c.limit-c.debt)/c.limit*100)+"%";
+  const tb=$("#creditTable tbody");tb.innerHTML="";c.history.forEach(h=>tb.insertAdjacentHTML("beforeend",`<tr><td>${h.date}</td><td>${h.concept}</td><td>${h.charge?fmt(h.charge):"--"}</td><td>${h.credit?'<span style="color:var(--success);font-weight:600">'+fmt(h.credit)+'</span>':"--"}</td><td><strong>${fmt(h.balance)}</strong></td></tr>`));
+}
+function loadProfile(){const u=DB.user;$("#pfName").value=u.name;$("#pfEmail").value=u.email;$("#pfPhone").value=u.phone;$("#pfBirth").value=u.birth;$("#pfRfc").value=u.rfc;$("#pfRazon").value=u.razon;$("#pfReg").value=u.reg;$("#pfCp").value=u.cp;$("#pfAddr").value=u.addr;}
+function saveProfile(){DB.user.name=$("#pfName").value;DB.user.email=$("#pfEmail").value;DB.user.phone=$("#pfPhone").value;DB.user.birth=$("#pfBirth").value;DB.user.rfc=$("#pfRfc").value;DB.user.razon=$("#pfRazon").value;DB.user.reg=$("#pfReg").value;DB.user.cp=$("#pfCp").value;DB.user.addr=$("#pfAddr").value;$("#userName").textContent=DB.user.name;$("#userAvatar").textContent=initials(DB.user.name);$("#greetName").textContent=DB.user.name.split(" ")[0];toast("Perfil actualizado","success");}
+
+// ========= MODALES =========
+function openPay(){$("#payDebt").textContent=fmt(DB.credit.debt);$("#payAmt").value="";$("#payModal").classList.add("active");}
+function closePay(){$("#payModal").classList.remove("active");}
+function processPay(){const a=parseFloat($("#payAmt").value);if(!a||a<=0){toast("Monto inválido","error");return;}if(a>DB.credit.debt){toast("Excede el saldo","error");return;}DB.credit.debt-=a;DB.credit.history.unshift({date:new Date().toISOString().slice(0,10),concept:"Abono - "+$("#payMethod").value,charge:0,credit:a,balance:DB.credit.debt});closePay();renderCredit();renderDashboard();toast("Abono aplicado: "+fmt(a),"success");}
+
+let redeemId=null;
+function openRedeem(id){const r=DB.loyalty.rewards.find(x=>x.id===id);if(!r)return;if(DB.loyalty.points<r.cost){toast("Puntos insuficientes","error");return;}redeemId=id;$("#redeemBody").innerHTML=`<div style="text-align:center"><div style="font-size:54px">${r.icon}</div><h3 style="margin:10px 0">${r.name}</h3><p style="color:var(--text-muted)">${r.desc}</p><p style="margin-top:14px"><strong>Costo:</strong> ${r.cost.toLocaleString()} pts</p><p><strong>Saldo después:</strong> ${(DB.loyalty.points-r.cost).toLocaleString()} pts</p></div>`;$("#redeemModal").classList.add("active");}
+function closeRedeem(){$("#redeemModal").classList.remove("active");redeemId=null;}
+function confirmRedeem(){if(!redeemId)return;const r=DB.loyalty.rewards.find(x=>x.id===redeemId);DB.loyalty.points-=r.cost;DB.loyalty.history.unshift({date:new Date().toISOString().slice(0,10),concept:"Canje "+r.name,delta:-r.cost,balance:DB.loyalty.points});closeRedeem();renderLoyalty();renderDashboard();toast("Canjeado: "+r.name,"success");}
+
+// B4: form de login local eliminado — el SSO check redirige a /login.html central.
+</script>
+  <script defer src="auth-helper.js"></script>
+<link rel="stylesheet" href="volvix-modals.css">
+<script defer src="volvix-modals.js"></script>
+  <script defer src="volvix-theme-wiring.js"></script>
+<script defer src="volvix-i18n-wiring.js"></script>
+</body>
+</html>

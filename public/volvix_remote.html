@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volvix Remote · Control remoto</title>
+<script src="/auth-gate.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  :root {
+    --bg: #0A0A0A;
+    --surface: #121212;
+    --border: #2E2E2C;
+    --text: #FAFAF9;
+    --text-2: #A8A29E;
+    --accent: #3B82F6;
+    --success: #22C55E;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  body {
+    background: radial-gradient(circle at 30% 30%, #1E3A8A 0%, #0A0A0A 60%);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+
+  .container {
+    max-width: 480px;
+    width: 100%;
+  }
+
+  .logo-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 40px;
+    justify-content: center;
+  }
+  .brand-ico {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #3B82F6, #1E40AF);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 0 30px rgba(59,130,246,0.5);
+  }
+  .brand {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+  }
+  .brand small {
+    display: block;
+    font-size: 11px;
+    color: var(--text-2);
+    font-weight: 500;
+    letter-spacing: 1px;
+    margin-top: 2px;
+  }
+
+  .card {
+    background: rgba(18,18,18,0.8);
+    backdrop-filter: blur(14px);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px 30px;
+    text-align: center;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+  }
+
+  h1 {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.8px;
+    margin-bottom: 10px;
+  }
+  h1 span { color: var(--accent); }
+  .sub {
+    font-size: 14px;
+    color: var(--text-2);
+    line-height: 1.6;
+    margin-bottom: 28px;
+  }
+
+  .code-input {
+    display: flex;
+    gap: 8px;
+    margin: 0 auto 20px;
+    justify-content: center;
+  }
+  .code-input input {
+    width: 54px;
+    height: 64px;
+    background: rgba(255,255,255,0.04);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 28px;
+    font-weight: 700;
+    color: #FBBF24;
+    text-transform: uppercase;
+    transition: all 0.15s;
+  }
+  .code-input input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(59,130,246,0.15);
+  }
+  .code-input .dash {
+    display: flex;
+    align-items: center;
+    color: var(--text-2);
+    font-size: 22px;
+    font-weight: 600;
+  }
+
+  .connect-btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-bottom: 18px;
+  }
+  .connect-btn:hover { background: #2563EB; transform: translateY(-1px); }
+  .connect-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .hint {
+    font-size: 12px;
+    color: var(--text-2);
+    margin-bottom: 20px;
+  }
+  .hint strong { color: #FBBF24; }
+
+  .trust-row {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text-2);
+    flex-wrap: wrap;
+  }
+  .trust-item { display: flex; align-items: center; gap: 5px; }
+  .trust-item::before { content: '✓'; color: var(--success); font-weight: 700; }
+
+  /* Connection screen */
+  .connecting {
+    display: none;
+  }
+  .connecting.active { display: block; }
+  .card.connected { display: none; }
+  .card.connected.active { display: block; }
+
+  .connecting .loader {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    border: 4px solid rgba(59,130,246,0.2);
+    border-top-color: var(--accent);
+    margin: 10px auto 20px;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .logs {
+    text-align: left;
+    background: #000;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-family: var(--mono);
+    font-size: 11px;
+    max-height: 180px;
+    overflow-y: auto;
+    margin-top: 20px;
+    color: var(--text-2);
+  }
+  .logs .line { display: block; padding: 1px 0; }
+  .logs .ok { color: var(--success); }
+  .logs .info { color: var(--accent); }
+
+  /* Connected state */
+  .connected-wrap {
+    display: none;
+    background: rgba(18,18,18,0.9);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(34,197,94,0.3);
+    border-radius: 20px;
+    padding: 32px 28px;
+    text-align: center;
+    box-shadow: 0 30px 80px rgba(34,197,94,0.15);
+  }
+  .connected-wrap.active { display: block; }
+  .ok-icon {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: rgba(34,197,94,0.15);
+    border: 2px solid var(--success);
+    color: var(--success);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    margin: 0 auto 18px;
+    animation: scaleIn 0.4s ease;
+  }
+  @keyframes scaleIn { from { transform: scale(0); } to { transform: scale(1); } }
+
+  .agent-info {
+    margin: 18px 0;
+    padding: 14px;
+    background: rgba(251,191,36,0.08);
+    border: 1px solid rgba(251,191,36,0.25);
+    border-radius: 10px;
+    font-size: 12.5px;
+    color: #FBBF24;
+  }
+  .agent-info strong { color: var(--text); }
+
+  .actions-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .actions-row button {
+    flex: 1;
+    padding: 12px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .actions-row .disconnect {
+    background: rgba(239,68,68,0.1);
+    border-color: rgba(239,68,68,0.3);
+    color: #F87171;
+  }
+
+  .safety-note {
+    margin-top: 22px;
+    padding: 12px;
+    background: rgba(59,130,246,0.06);
+    border: 1px solid rgba(59,130,246,0.15);
+    border-radius: 10px;
+    font-size: 11px;
+    color: var(--text-2);
+    line-height: 1.55;
+  }
+  .safety-note strong { color: var(--text); }
+</style>
+<script src="volvix-api.js"></script>
+<script src="volvix-sync.js"></script>
+<script src="volvix-sync-widget.js"></script>
+</head>
+<body>
+
+<div class="container">
+  <div class="logo-row">
+    <div class="brand-ico">🖥️</div>
+    <div class="brand">
+      Volvix Remote
+      <small>CONTROL REMOTO SEGURO · SIN INSTALAR NADA</small>
+    </div>
+  </div>
+
+  <!-- Initial state -->
+  <div class="card" id="initial">
+    <h1>Ingresa tu código de <span>soporte</span></h1>
+    <p class="sub">Nuestra IA te lo dio en el chat. Es un código único, válido por 10 minutos.</p>
+
+    <div class="code-input">
+      <input type="text" maxlength="1" value="V" onkeyup="moveNext(event, 0)">
+      <input type="text" maxlength="1" value="X" onkeyup="moveNext(event, 1)">
+      <div class="dash">-</div>
+      <input type="text" maxlength="1" value="4" onkeyup="moveNext(event, 3)">
+      <input type="text" maxlength="1" value="8" onkeyup="moveNext(event, 4)">
+      <input type="text" maxlength="1" value="2" onkeyup="moveNext(event, 5)">
+      <input type="text" maxlength="1" value="1" onkeyup="moveNext(event, 6)">
+    </div>
+
+    <button class="connect-btn" onclick="connect()">🔒 Conectar con IA de soporte</button>
+
+    <div class="hint">💡 Tu código está en el chat de <strong>soporte.volvix.com</strong></div>
+
+    <div class="trust-row">
+      <div class="trust-item">Sin descargar nada</div>
+      <div class="trust-item">Encriptado end-to-end</div>
+      <div class="trust-item">Solo por 10 min</div>
+      <div class="trust-item">Puedes cortar en cualquier momento</div>
+    </div>
+  </div>
+
+  <!-- Connecting state -->
+  <div class="card connecting" id="connecting">
+    <div class="loader"></div>
+    <h1>Conectando con <span>IA...</span></h1>
+    <p class="sub">Por favor no cierres esta ventana. La conexión se establece en segundos.</p>
+
+    <div class="logs" id="logs"></div>
+  </div>
+
+  <!-- Connected state -->
+  <div class="connected-wrap" id="connected">
+    <div class="ok-icon">✓</div>
+    <h1 style="color:var(--success);">Conectado</h1>
+    <p class="sub">La IA de soporte ya tiene control de tu pantalla y está diagnosticando el problema automáticamente.</p>
+
+    <div class="agent-info">
+      <strong>🤖 Volvix AI Support</strong> · Agente #47B2<br>
+      <span style="font-size:11px;opacity:0.8;">Especialista: Impresoras térmicas · 47 casos resueltos</span>
+    </div>
+
+    <div class="safety-note">
+      <strong>🛡️ Tu privacidad está protegida.</strong><br>
+      La IA solo ve la ventana del sistema POS. Tu escritorio personal, archivos y otros programas permanecen privados. Todo queda grabado y tú puedes revisarlo después.
+    </div>
+
+    <div class="actions-row">
+      <button>📹 Ver grabación</button>
+      <button>💬 Chatear con IA</button>
+      <button class="disconnect" onclick="location.reload()">Desconectar</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function moveNext(e, idx) {
+  const inputs = document.querySelectorAll('.code-input input');
+  if (e.target.value.length === 1 && idx < inputs.length - 1) {
+    inputs[idx + 1].focus();
+  }
+  inputs.forEach(i => i.value = i.value.toUpperCase());
+}
+
+async function connect() {
+  document.getElementById('initial').style.display = 'none';
+  document.getElementById('connecting').classList.add('active');
+  const log = document.getElementById('logs');
+
+  const steps = [
+    { type:'info', text:'[00:00] Validando código VX-4821...' },
+    { type:'ok',   text:'[00:01] ✓ Código válido · expira en 9:58' },
+    { type:'info', text:'[00:01] Estableciendo conexión encriptada (WebRTC)...' },
+    { type:'ok',   text:'[00:02] ✓ Canal seguro AES-256 establecido' },
+    { type:'info', text:'[00:02] Identificando computadora: DESKTOP-D3R4 (Windows 11 · 16GB RAM)' },
+    { type:'info', text:'[00:03] Detectando apps Volvix instaladas...' },
+    { type:'ok',   text:'[00:03] ✓ SalvadoreX POS v3.2.1 detectado' },
+    { type:'info', text:'[00:04] Solicitando autorización de control al usuario...' },
+    { type:'ok',   text:'[00:05] ✓ Usuario autorizó control remoto' },
+    { type:'info', text:'[00:06] Iniciando grabación de sesión (obligatoria)...' },
+    { type:'ok',   text:'[00:06] ✓ Sesión grabándose' },
+    { type:'ok',   text:'[00:07] 🤖 IA Support (Agente #47B2) tomando control...' },
+  ];
+
+  for (const s of steps) {
+    const line = document.createElement('span');
+    line.className = 'line';
+    line.innerHTML = `<span class="${s.type}">${s.text}</span>`;
+    log.appendChild(line);
+    log.scrollTop = log.scrollHeight;
+    await wait(350 + Math.random() * 300);
+  }
+
+  await wait(800);
+  document.getElementById('connecting').classList.remove('active');
+  document.getElementById('connected').classList.add('active');
+}
+
+function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+</script>
+
+<script defer src="auth-helper.js"></script>
+<script src="volvix-tools-wiring.js" defer></script>
+<script src="volvix-extras-wiring.js" defer></script>
+<script src="volvix-charts-wiring.js" defer></script>
+<script src="volvix-notifications-wiring.js" defer></script>
+<script src="volvix-backup-wiring.js" defer></script>
+<script src="volvix-logger-wiring.js" defer></script>
+<script src="volvix-reports-wiring.js" defer></script>
+<script src="volvix-offline-wiring.js" defer></script>
+<script src="volvix-onboarding-wiring.js" defer></script>
+<script src="volvix-pwa-wiring.js" defer></script>
+<script src="volvix-i18n-wiring.js" defer></script>
+<script src="volvix-theme-wiring.js" defer></script>
+<script src="volvix-shortcuts-wiring.js" defer></script>
+<script src="volvix-search-wiring.js" defer></script>
+<script src="volvix-voice-wiring.js" defer></script>
+<script src="volvix-gamification-wiring.js" defer></script>
+<script src="volvix-perf-wiring.js" defer></script>
+<script src="volvix-email-wiring.js" defer></script>
+<script src="volvix-webrtc-wiring.js" defer></script>
+<script src="volvix-master-controller.js" defer></script>
+<script src="volvix-calendar-wiring.js" defer></script>
+<script src="volvix-payments-wiring.js" defer></script>
+<script src="volvix-realtime-wiring.js" defer></script>
+<script src="volvix-currency-wiring.js" defer></script>
+<script src="volvix-loyalty-wiring.js" defer></script>
+<script src="volvix-tax-wiring.js" defer></script>
+<script src="volvix-webhooks-wiring.js" defer></script>
+<script src="volvix-audit-wiring.js" defer></script>
+<script src="volvix-cache-wiring.js" defer></script>
+<script src="volvix-queue-wiring.js" defer></script>
+<script src="volvix-fulltext-wiring.js" defer></script>
+<script src="volvix-recommendations-wiring.js" defer></script>
+<script src="volvix-subscriptions-wiring.js" defer></script>
+<script src="volvix-plugins-wiring.js" defer></script>
+<script src="volvix-compliance-wiring.js" defer></script>
+<script src="volvix-cs-wiring.js" defer></script>
+<script src="volvix-ratelimit-wiring.js" defer></script>
+<script src="volvix-workflow-wiring.js" defer></script>
+<script src="volvix-ab-testing-wiring.js" defer></script>
+<script src="volvix-feedback-wiring.js" defer></script>
+<script src="volvix-inventory-ai-wiring.js" defer></script>
+</body>
+</html>
