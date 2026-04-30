@@ -499,9 +499,23 @@
     else if (tab === 'integrations') loadIntegrationStatus();
   }
 
+  function getAuthToken() {
+    try {
+      return localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
+    } catch (_) { return ''; }
+  }
+
   async function fetchAPI(endpoint) {
     try {
-      const res = await fetch(API_BASE + endpoint);
+      const token = getAuthToken();
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+      const res = await fetch(API_BASE + endpoint, { headers });
+      if (res.status === 401) {
+        // Session expired — redirect to login
+        window.location.replace('/login.html');
+        return null;
+      }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return await res.json();
     } catch (err) {
@@ -534,12 +548,14 @@
 
     // Load KPIs
     const kpis = await fetchAPI('/kpis?period=month');
-    if (kpis) {
-      document.getElementById('kpi-total-sales').textContent = kpis.totalSales || '$0.00';
-      document.getElementById('kpi-avg-ticket').textContent = kpis.avgTicketSize || '$0.00';
-      document.getElementById('kpi-trans-count').textContent = kpis.transactionsPerDay || '0';
+    if (kpis && kpis.ok !== false) {
+      document.getElementById('kpi-total-sales').textContent = formatCurrency(kpis.total_revenue || kpis.totalSales || 0);
+      document.getElementById('kpi-avg-ticket').textContent = formatCurrency(kpis.avg_ticket || kpis.avgTicketSize || 0);
+      document.getElementById('kpi-trans-count').textContent = (kpis.ticket_count || kpis.transactionsPerDay || 0).toString();
       const trend = parseFloat(kpis.salesGrowthPercent || 0);
-      document.getElementById('kpi-sales-trend').innerHTML = `<span class="${trend >= 0 ? 'trend-up' : 'trend-dn'}">${trend >= 0 ? '↑' : '↓'} ${Math.abs(trend).toFixed(1)}%</span>`;
+      document.getElementById('kpi-sales-trend').innerHTML = trend !== 0
+        ? `<span class="${trend >= 0 ? 'trend-up' : 'trend-dn'}">${trend >= 0 ? '↑' : '↓'} ${Math.abs(trend).toFixed(1)}%</span>`
+        : `<span style="color:var(--text-3)">— sin cambio</span>`;
     }
 
     // Load inventory count
@@ -557,44 +573,44 @@
   async function loadCharts() {
     // Sales by day
     const salesByDay = await fetchAPI('/sales-by-day?period=month');
-    if (salesByDay && salesByDay.data) {
+    if (salesByDay && salesByDay.data && salesByDay.data.length > 0) {
       createChart('chart-sales-by-day', {
         type: 'line',
         labels: salesByDay.data.map(d => d.date),
-        data: salesByDay.data.map(d => parseFloat(d.amount || 0)),
+        data: salesByDay.data.map(d => parseFloat(d.total || d.amount || 0)),
         label: 'Ventas ($)'
       });
     }
 
     // Payment methods
     const paymentMethods = await fetchAPI('/payment-methods?period=month');
-    if (paymentMethods && paymentMethods.data) {
+    if (paymentMethods && paymentMethods.data && paymentMethods.data.length > 0) {
       createChart('chart-payment-methods', {
         type: 'doughnut',
         labels: paymentMethods.data.map(d => d.method),
-        data: paymentMethods.data.map(d => parseFloat(d.amount || 0)),
+        data: paymentMethods.data.map(d => parseFloat(d.total || d.amount || 0)),
         label: 'Métodos de Pago'
       });
     }
 
     // Top products
     const topProducts = await fetchAPI('/top-products?limit=10&period=month');
-    if (topProducts && topProducts.data) {
+    if (topProducts && topProducts.data && topProducts.data.length > 0) {
       createChart('chart-top-products', {
         type: 'bar',
         labels: topProducts.data.map(d => d.name || d.id).slice(0, 10),
-        data: topProducts.data.map(d => parseFloat(d.amount || 0)).slice(0, 10),
+        data: topProducts.data.map(d => parseFloat(d.revenue || d.amount || 0)).slice(0, 10),
         label: 'Ventas por Producto ($)'
       });
     }
 
     // Categories
     const categories = await fetchAPI('/sales-by-category?period=month');
-    if (categories && categories.data) {
+    if (categories && categories.data && categories.data.length > 0) {
       createChart('chart-categories', {
         type: 'bar',
         labels: categories.data.map(d => d.category),
-        data: categories.data.map(d => parseFloat(d.amount || 0)),
+        data: categories.data.map(d => parseFloat(d.total || d.amount || 0)),
         label: 'Ventas por Categoría ($)'
       });
     }
@@ -647,22 +663,23 @@
     const data = await fetchAPI(`/sales-by-product?period=${period}`);
 
     if (data && data.data) {
-      const total = data.data.reduce((sum, item) => sum + (item.amount || 0), 0);
+      const total = data.data.reduce((sum, item) => sum + (item.revenue || item.amount || 0), 0);
       let html = '';
 
       data.data.forEach(item => {
-        const percent = total > 0 ? ((item.amount / total) * 100).toFixed(1) : 0;
+        const revenue = item.revenue || item.amount || 0;
+        const percent = total > 0 ? ((revenue / total) * 100).toFixed(1) : 0;
         html += `
           <tr>
             <td>${item.name || item.id}</td>
-            <td>${item.quantity}</td>
-            <td>${item.amountFormatted || '$0.00'}</td>
+            <td>${item.qty || item.quantity || 0}</td>
+            <td>${formatCurrency(revenue)}</td>
             <td>${percent}%</td>
           </tr>
         `;
       });
 
-      document.getElementById('sales-by-product-body').innerHTML = html || '<tr><td colspan="4">Sin datos</td></tr>';
+      document.getElementById('sales-by-product-body').innerHTML = html || '<tr><td colspan="4">Sin datos para el período seleccionado</td></tr>';
     }
   }
 
@@ -674,26 +691,27 @@
     const search = document.getElementById('search-trans').value;
     const data = await fetchAPI(`/transactions?limit=${ITEMS_PER_PAGE}&offset=${currentPage * ITEMS_PER_PAGE}&filter=${filter}`);
 
-    if (data && data.items) {
+    const txList = data && (data.data || data.items);
+    if (txList) {
       let html = '';
 
-      data.items.forEach(item => {
+      txList.forEach(item => {
         const status = item.status || 'completed';
         const statusClass = status === 'refunded' ? 'warn' : status === 'pending' ? 'info' : 'ok';
         html += `
           <tr>
             <td>${formatDate(item.created_at || '')}</td>
-            <td>${item.customer_name || 'Cliente'}</td>
-            <td>${formatCurrency(item.amount || 0)}</td>
-            <td>${item.payment_method || 'Desconocido'}</td>
+            <td>${item.customer_name || item.id ? ('#' + String(item.id).slice(-6)) : 'Cliente'}</td>
+            <td>${formatCurrency(item.total || item.amount || 0)}</td>
+            <td>${item.payment_method || 'efectivo'}</td>
             <td><span class="chip ${statusClass}">${status}</span></td>
             <td><button class="btn sm" onclick="viewTransaction('${item.id}')">Ver</button></td>
           </tr>
         `;
       });
 
-      document.getElementById('transactions-body').innerHTML = html || '<tr><td colspan="6">Sin transacciones</td></tr>';
-      renderPagination('trans-pagination', Math.ceil((data.total || 0) / ITEMS_PER_PAGE), 'loadTransactions');
+      document.getElementById('transactions-body').innerHTML = html || '<tr><td colspan="6">Sin transacciones para el filtro seleccionado</td></tr>';
+      renderPagination('trans-pagination', Math.ceil((data.total || txList.length || 0) / ITEMS_PER_PAGE), 'loadTransactions');
     }
   }
 
@@ -708,26 +726,27 @@
     const lowStockOnly = document.getElementById('low-stock-only').checked;
     const data = await fetchAPI(`/inventory?low-stock-only=${lowStockOnly}`);
 
-    if (data && data.items) {
+    const invList = data && (data.data || data.items);
+    if (invList) {
       let html = '';
 
-      data.items.forEach(item => {
+      invList.forEach(item => {
         const stock = parseInt(item.stock || 0);
-        const minStock = parseInt(item.min_stock || 5);
-        const statusClass = stock < minStock ? 'warn' : 'ok';
+        const minStock = parseInt(item.reorder_point || item.min_stock || 5);
+        const statusClass = stock <= minStock ? 'warn' : 'ok';
         html += `
           <tr>
             <td>${item.name || 'Producto'}</td>
-            <td><code>${item.sku || 'N/A'}</code></td>
+            <td><code>${item.code || item.sku || 'N/A'}</code></td>
             <td>${stock}</td>
             <td>${minStock}</td>
-            <td><span class="chip ${statusClass}">${stock < minStock ? 'Bajo' : 'Disponible'}</span></td>
-            <td>${item.category || '-'}</td>
+            <td><span class="chip ${statusClass}">${stock <= minStock ? 'Bajo' : 'Disponible'}</span></td>
+            <td>${formatCurrency(item.price || 0)}</td>
           </tr>
         `;
       });
 
-      document.getElementById('inventory-body').innerHTML = html || '<tr><td colspan="6">Sin productos</td></tr>';
+      document.getElementById('inventory-body').innerHTML = html || '<tr><td colspan="6">Sin productos en inventario</td></tr>';
     }
   }
 
@@ -738,26 +757,27 @@
     const role = document.getElementById('user-role').value;
     const data = await fetchAPI(`/users?limit=${ITEMS_PER_PAGE}&offset=${currentPage * ITEMS_PER_PAGE}&role=${role}`);
 
-    if (data && data.items) {
+    const userList = data && (data.data || data.items);
+    if (userList) {
       let html = '';
 
-      data.items.forEach(user => {
-        const status = user.status || 'active';
-        const statusClass = status === 'active' ? 'ok' : 'err';
+      userList.forEach(user => {
+        const isActive = user.is_active !== false && (user.status !== 'inactive');
+        const statusClass = isActive ? 'ok' : 'err';
         html += `
           <tr>
-            <td>${user.name || user.email}</td>
+            <td>${user.full_name || user.name || user.email}</td>
             <td>${user.email}</td>
             <td><span class="chip">${user.role || 'usuario'}</span></td>
-            <td><span class="chip ${statusClass}">${status}</span></td>
-            <td>${user.last_login ? formatDate(user.last_login) : 'Nunca'}</td>
+            <td><span class="chip ${statusClass}">${isActive ? 'Activo' : 'Inactivo'}</span></td>
+            <td>${user.last_login_at || user.last_login ? formatDate(user.last_login_at || user.last_login) : 'Nunca'}</td>
             <td><button class="btn sm" onclick="editUser('${user.id}')">Editar</button></td>
           </tr>
         `;
       });
 
-      document.getElementById('users-body').innerHTML = html || '<tr><td colspan="6">Sin usuarios</td></tr>';
-      renderPagination('users-pagination', Math.ceil((data.total || 0) / ITEMS_PER_PAGE), 'loadUsers');
+      document.getElementById('users-body').innerHTML = html || '<tr><td colspan="6">Sin usuarios registrados</td></tr>';
+      renderPagination('users-pagination', Math.ceil((data.total || userList.length || 0) / ITEMS_PER_PAGE), 'loadUsers');
     }
   }
 
@@ -777,26 +797,28 @@
   async function loadIntegrationStatus() {
     const data = await fetchAPI('/integration-status');
 
-    if (data) {
-      updateIntegrationUI('whatsapp', data.whatsapp);
-      updateIntegrationUI('twilio', data.twilio);
-      updateIntegrationUI('paypal', data.paypal);
-      updateIntegrationUI('email', data.email);
+    if (data && data.integrations) {
+      Object.entries(data.integrations).forEach(([key, info]) => {
+        updateIntegrationUI(key, info);
+      });
+      // Legacy mapping
+      if (data.integrations.whatsapp) updateIntegrationUI('twilio', data.integrations.whatsapp);
     }
   }
 
-  function updateIntegrationUI(service, status) {
+  function updateIntegrationUI(service, info) {
     const statusEl = document.getElementById(`${service}-status`);
     const detailsEl = document.getElementById(`${service}-details`);
 
     if (statusEl) {
-      const configured = status && status.configured;
-      statusEl.textContent = configured ? 'Activo' : 'Inactivo';
-      statusEl.className = configured ? 'chip ok' : 'chip err';
+      const active = info && (info.active || info.configured || info.status === 'active');
+      statusEl.textContent = active ? 'Activo' : 'Inactivo';
+      statusEl.className = active ? 'chip ok' : 'chip err';
     }
 
     if (detailsEl) {
-      detailsEl.textContent = status && status.status === 'active' ? 'Conectado' : 'No configurado';
+      const active = info && (info.active || info.status === 'active');
+      detailsEl.textContent = active ? 'Conectado' : 'No configurado';
     }
   }
 
