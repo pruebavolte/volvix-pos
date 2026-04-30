@@ -30819,31 +30819,7 @@ if (process.env.NODE_ENV === 'test') {
     } catch (err) { sendError(res, err); }
   });
 
-  // /api/user-permissions/:userId — for user management RBAC
-  handlers['GET /api/users/:id/permissions'] = requireAuth(async function (req, res, params) {
-    try {
-      const perms = await supabaseRequest('GET', `/user_permissions?user_id=eq.${encodeURIComponent(params.id)}&select=module_key,status&limit=200`).catch(() => []);
-      sendJSON(res, Array.isArray(perms) ? perms : []);
-    } catch (err) { sendError(res, err); }
-  });
-
-  handlers['PATCH /api/users/:id/permissions'] = requireAuth(async function (req, res, params) {
-    try {
-      const body = await readBody(req);
-      const tenantId = resolveTenant(req);
-      // Upsert permission for this user
-      if (body.module_key) {
-        await supabaseRequest('POST', '/user_permissions', {
-          user_id: params.id, tenant_id: tenantId,
-          module_key: body.module_key, status: body.status || 'active'
-        }).catch(async () => {
-          await supabaseRequest('PATCH', `/user_permissions?user_id=eq.${encodeURIComponent(params.id)}&module_key=eq.${encodeURIComponent(body.module_key)}`, { status: body.status || 'active' }).catch(() => {});
-        });
-      }
-      sendJSON(res, { ok: true });
-    } catch (err) { sendError(res, err); }
-  }, ['admin', 'owner', 'superadmin']);
-
+  // PATCH /api/users/:id/branch-scope (alias using branch_scope field)
   handlers['PATCH /api/users/:id/branch-scope'] = requireAuth(async function (req, res, params) {
     try {
       const body = await readBody(req);
