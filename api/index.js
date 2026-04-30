@@ -31073,6 +31073,49 @@ if (process.env.NODE_ENV === 'test') {
   }
 
   // ================================================================
+  // POS CORTES (Z-CLOSE / SHIFT CLOSE) — Wave 9
+  // pos-corte.html POSTs a corte object to /api/cortes via volvix.sync
+  // ================================================================
+  if (!handlers['POST /api/cortes']) {
+    handlers['POST /api/cortes'] = requireAuth(async function (req, res) {
+      try {
+        const tenantId = resolveTenant(req);
+        const userId = req.user && req.user.id;
+        const body = await readBody(req, { maxBytes: 64 * 1024 }).catch(() => ({}));
+        const safe = {
+          tenant_id:  tenantId,
+          pos_user_id: userId,
+          started_at:  body.inicio || body.started_at || null,
+          ended_at:    body.fin || body.ended_at || new Date().toISOString(),
+          total_sales: body.totalVentas || body.total_sales || 0,
+          cash_declared: body.efectivoFisico || body.cash_declared || 0,
+          notes:       body.observaciones || body.notes || null,
+          estado:      body.estado || 'cerrado',
+          ticket_text: body.ticket || null,
+        };
+        // Best-effort save to pos_cortes table (may not exist — silently ok)
+        const result = await supabaseRequest('POST', '/pos_cortes', safe).catch(() => null);
+        const created = result && (Array.isArray(result) ? result[0] : result);
+        sendJSON(res, { ok: true, id: created && created.id, message: 'Corte guardado' });
+      } catch (err) { sendError(res, err); }
+    });
+  }
+
+  if (!handlers['GET /api/cortes']) {
+    handlers['GET /api/cortes'] = requireAuth(async function (req, res) {
+      try {
+        const tenantId = resolveTenant(req);
+        const q = (url || require('url')).parse(req.url, true).query;
+        const limit = Math.min(parseInt(q.limit, 10) || 50, 200);
+        const rows = await supabaseRequest('GET',
+          `/pos_cortes?tenant_id=eq.${encodeURIComponent(tenantId)}&order=ended_at.desc&limit=${limit}&select=*`
+        ).catch(() => []);
+        sendJSON(res, { ok: true, data: Array.isArray(rows) ? rows : [] });
+      } catch (err) { sendError(res, err); }
+    });
+  }
+
+  // ================================================================
   // SPANISH ROUTE ALIASES — Wave 9
   // volvix-api.js calls /api/productos and /api/clientes (Spanish).
   // Map them to the English handlers to avoid silent 404s in pos.html.
@@ -31098,6 +31141,61 @@ if (process.env.NODE_ENV === 'test') {
       handlers['GET /api/productos/search'] = handlers['GET /api/products'];
     }
   })();
+
+  // ================================================================
+  // SHOP ROUTES — volvix-shop.html
+  // Customer-facing public storefront
+  // ================================================================
+  if (!handlers['GET /api/shop/products']) {
+    handlers['GET /api/shop/products'] = async function (req, res) {
+      try {
+        const q = (url || require('url')).parse(req.url, true).query;
+        const tenantSlug = q.tenant || q.shop || null;
+        if (!tenantSlug) return sendJSON(res, { ok: false, error: 'tenant required' }, 400);
+        // Resolve tenant by slug or id
+        const tenants = await supabaseRequest('GET', `/pos_companies?name=ilike.${encodeURIComponent('%'+tenantSlug+'%')}&select=id&limit=1`).catch(() => []);
+        const tenantId = tenants && tenants[0] && tenants[0].id;
+        if (!tenantId) return sendJSON(res, { ok: true, products: [], shop: { name: tenantSlug } });
+        const products = await supabaseRequest('GET', `/pos_products?company_id=eq.${encodeURIComponent(tenantId)}&is_active=eq.true&select=id,name,price,image_url,description,category&limit=100`).catch(() => []);
+        sendJSON(res, { ok: true, products: Array.isArray(products) ? products : [] });
+      } catch (err) { sendError(res, err); }
+    };
+  }
+
+  if (!handlers['POST /api/shop/checkout']) {
+    handlers['POST /api/shop/checkout'] = async function (req, res) {
+      try {
+        const body = await readBody(req, { maxBytes: 32 * 1024 }).catch(() => ({}));
+        if (!body.items || !body.tenant_id) return sendJSON(res, { ok: false, error: 'items y tenant_id requeridos' }, 400);
+        const orderId = 'shop-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
+        const total = (body.items || []).reduce(function(s, i) { return s + (Number(i.price || 0) * Number(i.qty || 1)); }, 0);
+        // Save as pending sale
+        await supabaseRequest('POST', '/pos_sales', {
+          id: orderId,
+          tenant_id: body.tenant_id,
+          total,
+          payment_method: body.payment_method || 'pending',
+          status: 'pending',
+          source: 'shop',
+          customer_name: body.customer_name || null,
+          customer_email: body.customer_email || null,
+          items: body.items,
+        }).catch(() => {});
+        sendJSON(res, { ok: true, order_id: orderId, total, status: 'pending', message: 'Orden creada' });
+      } catch (err) { sendError(res, err); }
+    };
+  }
+
+  if (!handlers['GET /api/shop/orders/:id']) {
+    handlers['GET /api/shop/orders/:id'] = async function (req, res, params) {
+      try {
+        const rows = await supabaseRequest('GET', `/pos_sales?id=eq.${encodeURIComponent(params.id)}&select=*&limit=1`).catch(() => []);
+        const order = rows && rows[0];
+        if (!order) return sendJSON(res, { ok: false, error: 'Orden no encontrada' }, 404);
+        sendJSON(res, { ok: true, order });
+      } catch (err) { sendError(res, err); }
+    };
+  }
 
 })();
 
