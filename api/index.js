@@ -30830,5 +30830,228 @@ if (process.env.NODE_ENV === 'test') {
     } catch (err) { sendError(res, err); }
   }, ['admin', 'owner', 'superadmin']);
 
+  // GET /api/feature-flags/audit — audit trail for module/permission changes
+  handlers['GET /api/feature-flags/audit'] = requireAuth(async function (req, res) {
+    try {
+      const q = (url || require('url')).parse(req.url, true).query;
+      const tenantId = resolveTenant(req);
+      const limit = Math.min(parseInt(q.limit, 10) || 50, 200);
+      let qs = `?tenant_id=eq.${encodeURIComponent(tenantId)}&resource=in.(feature_flag,module,user_permission)&select=*&order=ts.desc&limit=${limit}`;
+      if (q.user_id) qs += `&user_id=eq.${encodeURIComponent(q.user_id)}`;
+      const rows = await supabaseRequest('GET', '/volvix_audit_log' + qs).catch(() => []);
+      const entries = (Array.isArray(rows) ? rows : []).map(function(r) {
+        let before = {}; let after = {};
+        try { before = typeof r.before === 'string' ? JSON.parse(r.before) : (r.before || {}); } catch(_) {}
+        try { after = typeof r.after === 'string' ? JSON.parse(r.after) : (r.after || {}); } catch(_) {}
+        return {
+          module_key: r.resource_id || after.module_key || before.module_key || r.entity_id || '—',
+          old_status:  before.status || before.is_active || r.old_value || null,
+          new_status:  after.status  || after.is_active  || r.new_value || r.action || 'changed',
+          changed_at:  r.ts || r.created_at || new Date().toISOString(),
+          scope:       r.scope || after.scope || 'tenant',
+          actor:       r.actor_email || r.user_id || 'system',
+        };
+      });
+      sendJSON(res, { ok: true, entries });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // GET /api/refresh — token refresh endpoint
+  // (already registered elsewhere; this guard prevents silent 404)
+  if (!handlers['POST /api/refresh']) {
+    handlers['POST /api/refresh'] = requireAuth(async function (req, res) {
+      try {
+        const token = signJWT({ id: req.user.id, email: req.user.email, role: req.user.role, tenant_id: req.user.tenant_id });
+        sendJSON(res, { token });
+      } catch (err) { sendError(res, err); }
+    });
+  }
+
+  // ================================================================
+  // REGISTRO OTP FLOW — Wave 4
+  // POST /api/auth/send-otp  — generate & send OTP for new registration
+  // POST /api/auth/verify-otp — verify OTP, create tenant + owner user
+  // ================================================================
+  if (!handlers['POST /api/auth/send-otp']) {
+    // In-memory OTP store — keyed by email (lowercased), value: { otp, expires, meta }
+    // Lost on cold start; acceptable for stateless serverless (retry triggers new OTP)
+    const _otpStore = {};
+
+    function _genOtp() {
+      return String(Math.floor(100000 + Math.random() * 900000));
+    }
+
+    handlers['POST /api/auth/send-otp'] = async function (req, res) {
+      try {
+        const ip = clientIp(req);
+        if (!rateLimit('send-otp:' + ip, 5, 10 * 60 * 1000)) {
+          return send429(res, 60000, 'Demasiados intentos, intenta en un momento');
+        }
+        const body = await readBody(req, { maxBytes: 4 * 1024 }).catch(() => ({}));
+        const email = String((body && body.email) || '').toLowerCase().trim();
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          return sendJSON(res, { ok: false, error: 'Email inválido' }, 400);
+        }
+        const nombre_negocio = String((body && body.nombre_negocio) || '').trim();
+        const giro = String((body && body.giro) || '').trim();
+        const telefono = String((body && body.telefono) || '').trim();
+
+        // Check if email already registered
+        const existing = await supabaseRequest('GET', `/pos_users?email=eq.${encodeURIComponent(email)}&select=id&limit=1`).catch(() => []);
+        if (Array.isArray(existing) && existing.length > 0) {
+          return sendJSON(res, { ok: false, error: 'Este email ya está registrado. Inicia sesión.' }, 409);
+        }
+
+        const otp = _genOtp();
+        const expires = Date.now() + 10 * 60 * 1000; // 10 min
+        _otpStore[email] = { otp, expires, nombre_negocio, giro, telefono };
+
+        // Try to send via Resend if configured
+        let emailSent = false;
+        const resendKey = process.env.RESEND_API_KEY;
+        if (resendKey) {
+          try {
+            const emailBody = JSON.stringify({
+              from: 'Volvix POS <noreply@volvix.com>',
+              to: [email],
+              subject: `Tu código de verificación Volvix: ${otp}`,
+              html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px">
+                <h2 style="color:#6C5CE7">Código de verificación Volvix POS</h2>
+                <p>Hola! Usa este código para completar tu registro:</p>
+                <div style="font-size:48px;font-weight:bold;letter-spacing:8px;color:#6C5CE7;text-align:center;padding:24px;background:#f8f7ff;border-radius:8px;margin:24px 0">${otp}</div>
+                <p style="color:#666">Válido por 10 minutos. Si no solicitaste esto, ignora este mensaje.</p>
+                <p style="color:#999;font-size:12px">© 2026 Volvix POS</p>
+              </div>`
+            });
+            const emailRes = await fetch('https://api.resend.com/emails', {
+              method: 'POST',
+              headers: { 'Authorization': 'Bearer ' + resendKey, 'Content-Type': 'application/json' },
+              body: emailBody
+            });
+            emailSent = emailRes.ok;
+          } catch (_) {}
+        }
+
+        // Try SMS via Twilio if configured
+        let smsSent = false;
+        if (!emailSent && telefono && process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_PHONE_FROM) {
+          try {
+            const creds = Buffer.from(process.env.TWILIO_ACCOUNT_SID + ':' + process.env.TWILIO_AUTH_TOKEN).toString('base64');
+            const smsRes = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${process.env.TWILIO_ACCOUNT_SID}/Messages.json`, {
+              method: 'POST',
+              headers: { 'Authorization': 'Basic ' + creds, 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: new URLSearchParams({ From: process.env.TWILIO_PHONE_FROM, To: telefono, Body: `Tu código Volvix POS: ${otp}` }).toString()
+            });
+            smsSent = smsRes.ok;
+          } catch (_) {}
+        }
+
+        // Also persist to Supabase otp_verifications table (best effort)
+        await supabaseRequest('POST', '/otp_verifications', {
+          email,
+          otp_hash: otp, // plaintext OK — 10 min lifetime, no password
+          expires_at: new Date(expires).toISOString(),
+          meta: { nombre_negocio, giro, telefono }
+        }).catch(() => {});
+
+        const isDev = process.env.NODE_ENV !== 'production';
+        sendJSON(res, {
+          ok: true,
+          message: emailSent ? `Código enviado a ${email}` : smsSent ? `Código enviado vía SMS` : `Código generado`,
+          channel: emailSent ? 'email' : smsSent ? 'sms' : 'none',
+          // Only expose OTP in non-production or when no channel is available
+          ...(isDev || (!emailSent && !smsSent) ? { dev_otp: otp, note: 'Configura RESEND_API_KEY para enviar por email' } : {})
+        });
+      } catch (err) { sendError(res, err); }
+    };
+
+    handlers['POST /api/auth/verify-otp'] = async function (req, res) {
+      try {
+        const body = await readBody(req, { maxBytes: 4 * 1024 }).catch(() => ({}));
+        const email = String((body && body.email) || '').toLowerCase().trim();
+        const otp_code = String((body && body.otp_code) || '').replace(/\s/g, '');
+        if (!email || !otp_code) {
+          return sendJSON(res, { ok: false, error: 'Email y código son requeridos' }, 400);
+        }
+
+        // Verify OTP — check in-memory first, then Supabase
+        let valid = false;
+        let otpMeta = {};
+
+        const memEntry = _otpStore[email];
+        if (memEntry && memEntry.otp === otp_code && memEntry.expires > Date.now()) {
+          valid = true;
+          otpMeta = { nombre_negocio: memEntry.nombre_negocio, giro: memEntry.giro, telefono: memEntry.telefono };
+          delete _otpStore[email]; // consume
+        }
+
+        if (!valid) {
+          // Try Supabase
+          const rows = await supabaseRequest('GET',
+            `/otp_verifications?email=eq.${encodeURIComponent(email)}&otp_hash=eq.${encodeURIComponent(otp_code)}&expires_at=gt.${encodeURIComponent(new Date().toISOString())}&select=*&order=created_at.desc&limit=1`
+          ).catch(() => []);
+          if (Array.isArray(rows) && rows.length > 0) {
+            valid = true;
+            const row = rows[0];
+            try { otpMeta = typeof row.meta === 'string' ? JSON.parse(row.meta) : (row.meta || {}); } catch(_) {}
+            await supabaseRequest('DELETE', `/otp_verifications?email=eq.${encodeURIComponent(email)}`).catch(() => {});
+          }
+        }
+
+        if (!valid) {
+          return sendJSON(res, { ok: false, error: 'Código inválido o expirado. Solicita uno nuevo.' }, 400);
+        }
+
+        const nombre_negocio = String((body && body.nombre_negocio) || otpMeta.nombre_negocio || '').trim() || 'Mi Negocio';
+        const giro = String((body && body.giro) || otpMeta.giro || '').trim() || 'general';
+        const telefono = String((body && body.telefono) || otpMeta.telefono || '').trim();
+
+        // Check again that email not already registered (race condition guard)
+        const already = await supabaseRequest('GET', `/pos_users?email=eq.${encodeURIComponent(email)}&select=id&limit=1`).catch(() => []);
+        if (Array.isArray(already) && already.length > 0) {
+          return sendJSON(res, { ok: false, error: 'Email ya registrado. Inicia sesión.' }, 409);
+        }
+
+        // Create tenant (pos_company)
+        const company = await supabaseRequest('POST', '/pos_companies', {
+          name: nombre_negocio,
+          giro: giro,
+          plan: 'trial',
+          is_active: true
+        });
+        const tenantId = (Array.isArray(company) ? company[0] : company) && (Array.isArray(company) ? company[0].id : company.id);
+        if (!tenantId) {
+          return sendJSON(res, { ok: false, error: 'Error creando cuenta. Intenta de nuevo.' }, 500);
+        }
+
+        // Create owner user (pos_users)
+        const tempPassword = Buffer.from(email + ':' + Date.now()).toString('base64').slice(0, 16);
+        const user = await supabaseRequest('POST', '/pos_users', {
+          email,
+          full_name: nombre_negocio,
+          role: 'owner',
+          company_id: tenantId,
+          is_active: true,
+          phone: telefono || null,
+          password_hash: tempPassword, // Will be set on first login via forgot-password flow
+          plan: 'trial'
+        });
+        const userId = (Array.isArray(user) ? user[0] : user) && (Array.isArray(user) ? user[0].id : user.id);
+
+        // Sign JWT
+        const token = signJWT({ id: userId, email, role: 'owner', tenant_id: tenantId });
+
+        sendJSON(res, {
+          ok: true,
+          token,
+          tenant_id: tenantId,
+          user_id: userId,
+          message: '¡Cuenta creada exitosamente!',
+          next: '/volvix-launcher.html'
+        });
+      } catch (err) { sendError(res, err); }
+    };
+  }
+
 })();
 
