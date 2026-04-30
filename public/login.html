@@ -356,17 +356,25 @@ async function handleLogin(event) {
       throw new Error(result.error || 'Sesión no válida');
     }
 
-    // Guardar sesión
+    // Guardar sesión — JWT (para páginas que usan Bearer) + legacy (auth-gate fallback)
+    if (result.token) {
+      localStorage.setItem('volvix_token', result.token);
+      localStorage.setItem('volvixAuthToken', result.token);
+    }
     localStorage.setItem('volvixSession', JSON.stringify(result.session));
     showAlert('¡Bienvenido!', 'success');
 
-    // Redirigir según rol
+    // Redirigir según parámetro redirect o según rol
     const role = result.session.role;
+    const params = new URLSearchParams(window.location.search);
+    const redirectTo = params.get('redirect');
     setTimeout(() => {
-      if (role === 'superadmin' || role === 'owner') {
-        window.location.href = '/volvix_owner_panel_v7.html';
+      if (redirectTo && redirectTo.startsWith('/') && !redirectTo.includes('//')) {
+        window.location.href = redirectTo;
+      } else if (role === 'cajero' || role === 'cashier') {
+        window.location.href = '/pos.html';
       } else {
-        window.location.href = '/volvix_owner_panel_v7.html';
+        window.location.href = '/volvix_owner_panel_v8.html';
       }
     }, 600);
   } catch (err) {
