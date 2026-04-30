@@ -12571,6 +12571,25 @@ module.exports = async (req, res) => {
     }
   }
 
+  // Serve /config.js dynamically (gitignored, generated from env)
+  if (pathname === '/config.js') {
+    const configJs = [
+      '/* Volvix POS — Runtime config (server-generated) */',
+      '(function(){\'use strict\';',
+      'window.VOLVIX_FLAGS = window.VOLVIX_FLAGS || {',
+      '  debugMode: false,',
+      '  offlineFirst: true,',
+      '  version: \'7.2.0\'',
+      '};',
+      '})();',
+    ].join('\n');
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+    res.end(configJs);
+    return;
+  }
+
   serveStaticFile(res, pathname);
 };
 
@@ -31052,6 +31071,33 @@ if (process.env.NODE_ENV === 'test') {
       } catch (err) { sendError(res, err); }
     };
   }
+
+  // ================================================================
+  // SPANISH ROUTE ALIASES — Wave 9
+  // volvix-api.js calls /api/productos and /api/clientes (Spanish).
+  // Map them to the English handlers to avoid silent 404s in pos.html.
+  // ================================================================
+  (function addSpanishAliases() {
+    var aliases = [
+      ['GET /api/productos',       'GET /api/products'],
+      ['POST /api/productos',      'POST /api/products'],
+      ['PATCH /api/productos/:id', 'PATCH /api/products/:id'],
+      ['DELETE /api/productos/:id','DELETE /api/products/:id'],
+      ['GET /api/clientes',        'GET /api/customers'],
+      ['POST /api/clientes',       'POST /api/customers'],
+      ['PATCH /api/clientes/:id',  'PATCH /api/customers/:id'],
+      ['DELETE /api/clientes/:id', 'DELETE /api/customers/:id'],
+    ];
+    aliases.forEach(function(pair) {
+      if (!handlers[pair[0]] && handlers[pair[1]]) {
+        handlers[pair[0]] = handlers[pair[1]];
+      }
+    });
+    // /api/productos/search delegates to /api/products (supports ?q= param)
+    if (!handlers['GET /api/productos/search'] && handlers['GET /api/products']) {
+      handlers['GET /api/productos/search'] = handlers['GET /api/products'];
+    }
+  })();
 
 })();
 

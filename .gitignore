@@ -1,6 +1,12 @@
-<<<<<<< HEAD
-.vercel
+node_modules/
+.env
+.env.local
 .env*.local
+*.log
+.DS_Store
+Thumbs.db
+supabase/.temp/
+.vercel
 
 # Backup dumps (no subir al repo)
 backups/dumps/
@@ -11,19 +17,8 @@ dumps/
 *.sql.gz
 volvix-pos-app-debug.apk
 *.apk
-=======
-node_modules/
-.env
-*.log
-.DS_Store
-Thumbs.db
-supabase/.temp/
-
-.vercel
+*.local
+db/
 
 # Credenciales locales — NUNCA al repo
 public/config.js
-.env.local
-*.local
-db/
->>>>>>> origin/master
