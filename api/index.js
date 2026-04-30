@@ -700,6 +700,9 @@ function sendJSON(res, data, status = 200) {
 // Alias used by the modular handlers (payments, ai, email, cfdi, etc.)
 const sendJson = sendJSON;
 
+// Deploy marker — signature endpoint to verify which commit is live
+const DEPLOY_MARKER = { commit: '9b82f90', built_at: '2026-04-30T19:00:00Z', features: 9 };
+
 // B29.4: Cache-Control para endpoints publicos read-only (catalogos, planes, health)
 // B31.1: ETag support con If-None-Match -> 304 Not Modified
 function sendJSONPublic(res, data, ttlSec, status = 200, req = null) {
@@ -1432,10 +1435,11 @@ const handlers = {
       sendJSON(res, {
         ok: true, time: Date.now(), version: '7.2.0',
         database: 'Supabase', supabase_connected: true,
-        users_table_accessible: Array.isArray(test)
+        users_table_accessible: Array.isArray(test),
+        deploy_marker: DEPLOY_MARKER
       });
     } catch (err) {
-      sendJSON(res, { ok: true, time: Date.now(), supabase_connected: false });
+      sendJSON(res, { ok: true, time: Date.now(), supabase_connected: false, deploy_marker: DEPLOY_MARKER });
     }
   },
 
