@@ -274,73 +274,297 @@
   }
 
   // ---------------------------------------------------------------------------
-  // Pages: ai.html / volvix_ai_engine.html / volvix_ai_support.html
+  // Pages: ai.html / volvix_ai_engine.html / volvix_ai_support.html / volvix_ai_academy.html
+  // Wiring against api/ai-engine.js: /api/ai/{chat, forecast, reorder-suggestions,
+  //   sales-insights, support-chat}. Real contract uses { messages: [...] }, not
+  //   { message }. Mock provider returns 200 with provider:'mock' (no 503).
   // ---------------------------------------------------------------------------
-  function setupAiChat() {
-    var isAi = /ai\.html?$/i.test(fileName);
-    var isEngine = /volvix_ai_engine\.html?$/i.test(fileName);
-    var isSupport = /volvix_ai_support\.html?$/i.test(fileName);
-    if (!isAi && !isEngine && !isSupport) return;
+  function getPageKind() {
+    if (/volvix_ai_engine\.html?$/i.test(fileName))  return 'engine';
+    if (/volvix_ai_support\.html?$/i.test(fileName)) return 'support';
+    if (/volvix_ai_academy\.html?$/i.test(fileName)) return 'academy';
+    if (/(^|\/)ai\.html?$/i.test(fileName))          return 'ai';
+    return null;
+  }
 
-    var endpoint = isEngine ? '/api/ai/forecast' : isSupport ? '/api/ai/support-chat' : '/api/ai/chat';
+  function endpointFor(kind) {
+    if (kind === 'support') return '/api/ai/support-chat';
+    return '/api/ai/chat';
+  }
 
-    function findChatContainer() {
-      return document.querySelector('#chat-messages, .chat-history, [data-vlx-chat]');
-    }
-    function findInput() {
-      return document.querySelector('#chat-input, [data-vlx-chat-input], textarea[name=message], input[name=message], textarea[placeholder*="mensaje" i], textarea[placeholder*="pregunta" i], input[placeholder*="mensaje" i]');
-    }
-    function findSendBtn() {
-      return document.querySelector('#chat-send, [data-vlx-chat-send]') ||
-        findButtonByText(function (t, el) {
-          return /^(enviar|send|preguntar|ask)$/i.test(t) || el.querySelector && el.querySelector('svg[data-icon=send]');
-        });
-    }
+  function systemPromptFor(kind) {
+    if (kind === 'engine')  return 'Eres el motor de IA de Volvix POS. Decides si el feature pedido por un cliente debe ACTIVARSE (ya existe), EXTENDERSE (existe parcial) o CREARSE (nuevo). Responde en español, conciso, indicando la decisión.';
+    if (kind === 'support') return null; // backend ya inyecta SUPPORT_SYSTEM
+    if (kind === 'academy') return 'Eres tutor de la Volvix Academy. Explicas paso a paso cómo usar el POS, en español, con bullets y pasos numerados.';
+    return 'Eres la IA de Volvix POS. Ayudas a comerciantes con su negocio. Responde en español, conciso.';
+  }
 
-    function appendMsg(container, role, text) {
-      var div = document.createElement('div');
-      div.className = 'vlx-chat-msg vlx-chat-' + role;
-      div.style.cssText = 'padding:8px 12px;border-radius:10px;margin:6px 0;max-width:85%;' +
-        (role === 'user'
-          ? 'background:' + COLOR_NAVY + ';color:#fff;margin-left:auto;'
-          : 'background:rgba(251,191,36,.08);border-left:3px solid ' + COLOR_AMBER + ';color:#eee;');
-      div.textContent = text;
-      container.appendChild(div);
+  function notifyMockIfNeeded(data) {
+    if (data && data.provider === 'mock') {
+      vlxToast('IA no configurada · agrega OPENAI_API_KEY o ANTHROPIC_API_KEY en Vercel', 'warn');
+    }
+  }
+
+  // Per-page conversation history (resets on reload)
+  var _aiHistory = [];
+
+  async function aiSend(kind, userText, opts) {
+    opts = opts || {};
+    _aiHistory.push({ role: 'user', content: String(userText || '') });
+    // Cap history to last 20 turns to stay token-light
+    if (_aiHistory.length > 20) _aiHistory = _aiHistory.slice(-20);
+    var body = { messages: _aiHistory.slice() };
+    var sys = opts.system || systemPromptFor(kind);
+    if (sys) body.system = sys;
+    if (opts.lessonId) body.lesson_id = opts.lessonId;
+    if (opts.context)  body.context   = opts.context;
+
+    var data = await vlxCallApi('POST', endpointFor(kind), body);
+    var reply = (data && (data.reply || data.message || data.text)) || '';
+    if (reply) _aiHistory.push({ role: 'assistant', content: String(reply) });
+    notifyMockIfNeeded(data);
+    return { reply: String(reply || ''), raw: data };
+  }
+
+  // ----- ai.html (admin features) — no chat surface, just expose helpers -----
+  // ----- volvix_ai_support.html: #chat-msgs / #chat-input / .send-btn ------
+  function setupSupportChat() {
+    var input = document.querySelector('#chat-input');
+    var container = document.querySelector('#chat-msgs');
+    var btn = document.querySelector('.send-btn');
+    if (!input || !container) return;
+
+    function appendBubble(role, text) {
+      var wrap = document.createElement('div');
+      wrap.className = 'msg ' + (role === 'user' ? 'client' : 'ai');
+      wrap.innerHTML =
+        '<div class="av">' + (role === 'user' ? '👤' : '🤖') + '</div>' +
+        '<div>' +
+          (role === 'user' ? '' : '<span class="tag">IA · Volvix Support</span>') +
+          '<div class="bubble"></div>' +
+          '<div class="time">' + new Date().toLocaleTimeString().slice(0,5) + '</div>' +
+        '</div>';
+      wrap.querySelector('.bubble').textContent = text;
+      container.appendChild(wrap);
       container.scrollTop = container.scrollHeight;
-      return div;
+      return wrap.querySelector('.bubble');
     }
 
     async function submit() {
-      var inp = findInput();
-      var container = findChatContainer();
-      if (!inp || !container) return;
-      var msg = (inp.value || '').trim();
+      var msg = (input.value || '').trim();
       if (!msg) return;
-      appendMsg(container, 'user', msg);
-      inp.value = '';
-      var thinking = appendMsg(container, 'assistant', '…');
+      appendBubble('user', msg);
+      input.value = '';
+      var thinking = appendBubble('ai', '…');
       try {
-        var data = await vlxCallApi('POST', endpoint, { message: msg, prompt: msg });
-        var reply = (data && (data.reply || data.message || data.text || data.forecast || data.answer)) ||
-          (typeof data === 'string' ? data : JSON.stringify(data));
-        thinking.textContent = String(reply);
+        var r = await aiSend('support', msg);
+        thinking.textContent = r.reply || '(sin respuesta)';
+        if (r.raw && r.raw.escalate_to_human) {
+          vlxToast('Sugerencia: escalar a soporte humano', 'warn');
+        }
       } catch (e) {
         thinking.textContent = '⛔ Error consultando IA';
       }
     }
 
-    observeBody(function () {
-      var btn = findSendBtn();
-      if (btn && markWired(btn, 'aichat')) {
-        btn.addEventListener('click', function (ev) { ev.preventDefault(); submit(); });
+    if (btn && markWired(btn, 'supportSend')) {
+      btn.addEventListener('click', function (ev) { ev.preventDefault(); submit(); });
+    }
+    if (input && markWired(input, 'supportKey')) {
+      input.addEventListener('keydown', function (ev) {
+        if (ev.key === 'Enter' && !ev.shiftKey) { ev.preventDefault(); submit(); }
+      });
+    }
+  }
+
+  // ----- volvix_ai_engine.html: #ai-input / .ai-send / .ai-messages --------
+  // The page already ships a hardcoded simulator (sendAI()). We keep it as
+  // fallback when no auth token is present; with a token, route to /api/ai/chat.
+  function setupEngineChat() {
+    var input = document.querySelector('#ai-input');
+    var container = document.querySelector('.ai-messages');
+    var btn = document.querySelector('.ai-send');
+    if (!input || !container || !btn) return;
+    if (!getToken()) return; // leave the local simulator alone
+
+    function appendBubble(role, text) {
+      var wrap = document.createElement('div');
+      wrap.className = 'ai-msg ' + (role === 'user' ? 'user' : 'ai');
+      wrap.innerHTML = (role === 'user' ? '' : '<span class="tag">IA · Volvix</span>') +
+        '<div></div>';
+      wrap.lastChild.textContent = text;
+      container.appendChild(wrap);
+      container.scrollTop = container.scrollHeight;
+      return wrap.lastChild;
+    }
+
+    async function submit() {
+      var msg = (input.value || '').trim();
+      if (!msg) return;
+      input.value = '';
+      appendBubble('user', msg);
+      var thinking = appendBubble('ai', '…');
+      try {
+        var r = await aiSend('engine', msg);
+        thinking.textContent = r.reply || '(sin respuesta)';
+      } catch (e) {
+        thinking.textContent = '⛔ Error consultando IA';
       }
-      var inp = findInput();
-      if (inp && markWired(inp, 'aichatkey')) {
-        inp.addEventListener('keydown', function (ev) {
-          if (ev.key === 'Enter' && !ev.shiftKey) { ev.preventDefault(); submit(); }
-        });
+    }
+
+    // Override the page's onclick by capturing first
+    if (markWired(btn, 'engineSend')) {
+      btn.addEventListener('click', function (ev) {
+        ev.preventDefault(); ev.stopImmediatePropagation(); submit();
+      }, true);
+    }
+    if (markWired(input, 'engineKey')) {
+      input.addEventListener('keydown', function (ev) {
+        if (ev.key === 'Enter' && !ev.shiftKey) {
+          ev.preventDefault(); ev.stopImmediatePropagation(); submit();
+        }
+      }, true);
+    }
+  }
+
+  // ----- volvix_ai_academy.html: no chat surface — inject floating widget --
+  function setupAcademyAi() {
+    if (document.getElementById('vlx-academy-ai')) return;
+
+    var btn = document.createElement('button');
+    btn.id = 'vlx-academy-ai-toggle';
+    btn.type = 'button';
+    btn.textContent = '🤖 Pregúntale a la IA';
+    btn.style.cssText = 'position:fixed;right:18px;bottom:18px;z-index:2147483640;padding:12px 16px;border-radius:999px;border:0;background:' + COLOR_AMBER + ';color:' + COLOR_DARK + ';font-weight:700;font-family:inherit;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.35);font-size:14px';
+
+    var panel = document.createElement('div');
+    panel.id = 'vlx-academy-ai';
+    panel.style.cssText = 'position:fixed;right:18px;bottom:72px;width:360px;max-width:calc(100vw - 36px);height:480px;max-height:calc(100vh - 110px);background:#0F1014;border:1px solid #2A2D33;border-radius:14px;display:none;flex-direction:column;z-index:2147483641;box-shadow:0 12px 40px rgba(0,0,0,.55);font-family:system-ui,-apple-system,Segoe UI,sans-serif;overflow:hidden';
+    panel.innerHTML =
+      '<div style="padding:10px 12px;background:' + COLOR_NAVY + ';color:#fff;font-weight:600;font-size:13px;display:flex;align-items:center;justify-content:space-between">' +
+        '<span>🎓 IA · Volvix Academy</span>' +
+        '<span id="vlx-acad-close" style="cursor:pointer;opacity:.8">×</span>' +
+      '</div>' +
+      '<div id="vlx-acad-msgs" style="flex:1;overflow-y:auto;padding:10px;font-size:13px;color:#ddd;line-height:1.45"></div>' +
+      '<div style="display:flex;gap:6px;padding:8px;border-top:1px solid #2A2D33;background:#0A0B0F">' +
+        '<input id="vlx-acad-input" placeholder="¿Qué quieres aprender?" style="flex:1;padding:8px 10px;border-radius:8px;border:1px solid #333;background:#15161B;color:#eee;font-size:13px;outline:none">' +
+        '<button id="vlx-acad-send" type="button" style="padding:8px 12px;border:0;border-radius:8px;background:' + COLOR_AMBER + ';color:#000;font-weight:700;cursor:pointer">Enviar</button>' +
+      '</div>';
+
+    document.body.appendChild(btn);
+    document.body.appendChild(panel);
+
+    var msgsEl = panel.querySelector('#vlx-acad-msgs');
+    var inputEl = panel.querySelector('#vlx-acad-input');
+    var sendEl = panel.querySelector('#vlx-acad-send');
+
+    function append(role, text) {
+      var div = document.createElement('div');
+      div.style.cssText = 'margin:6px 0;padding:8px 10px;border-radius:10px;max-width:90%;white-space:pre-wrap;' +
+        (role === 'user'
+          ? 'background:' + COLOR_NAVY + ';color:#fff;margin-left:auto'
+          : 'background:rgba(251,191,36,.10);border-left:3px solid ' + COLOR_AMBER + ';color:#eee');
+      div.textContent = text;
+      msgsEl.appendChild(div);
+      msgsEl.scrollTop = msgsEl.scrollHeight;
+      return div;
+    }
+    append('assistant', 'Hola! Pregúntame cualquier duda sobre cómo usar Volvix POS.');
+
+    async function submit() {
+      var msg = (inputEl.value || '').trim();
+      if (!msg) return;
+      inputEl.value = '';
+      append('user', msg);
+      var thinking = append('assistant', '…');
+      try {
+        var lessonId = (window.__vlxAcademyLessonId || null);
+        var r = await aiSend('academy', msg, { context: 'academy', lessonId: lessonId });
+        thinking.textContent = r.reply || '(sin respuesta)';
+      } catch (e) {
+        thinking.textContent = '⛔ Error consultando IA';
       }
+    }
+
+    btn.addEventListener('click', function () {
+      panel.style.display = panel.style.display === 'flex' ? 'none' : 'flex';
+      if (panel.style.display === 'flex') setTimeout(function () { inputEl.focus(); }, 30);
     });
+    panel.querySelector('#vlx-acad-close').addEventListener('click', function () {
+      panel.style.display = 'none';
+    });
+    sendEl.addEventListener('click', function (ev) { ev.preventDefault(); submit(); });
+    inputEl.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Enter' && !ev.shiftKey) { ev.preventDefault(); submit(); }
+    });
+  }
+
+  // ----- Public AI helpers (forecast / reorder / insights) ------------------
+  // Engine page UI doesn't ship buttons for these; expose programmatic API
+  // so any future button can call window.vlxAi.{forecast,reorder,insights}().
+  var vlxAi = {
+    chat: function (kind, text, opts) { return aiSend(kind || 'ai', text, opts); },
+    forecast: async function (params) {
+      var p = params || {};
+      var body = { days: [7, 14, 30].indexOf(Number(p.days)) >= 0 ? Number(p.days) : 14 };
+      if (Array.isArray(p.product_ids)) body.product_ids = p.product_ids.map(String);
+      if (p.tenant_id) body.tenant_id = p.tenant_id;
+      var data = await vlxCallApi('POST', '/api/ai/forecast', body);
+      notifyMockIfNeeded({ provider: data && data.provider });
+      return data;
+    },
+    reorder: async function (params) {
+      var body = (params && params.tenant_id) ? { tenant_id: params.tenant_id } : {};
+      return vlxCallApi('POST', '/api/ai/reorder-suggestions', body);
+    },
+    insights: async function (params) {
+      var p = params || {};
+      var body = {};
+      if (['7d','30d','90d'].indexOf(p.period) >= 0) body.period = p.period;
+      if (p.tenant_id) body.tenant_id = p.tenant_id;
+      return vlxCallApi('POST', '/api/ai/sales-insights', body);
+    },
+    health: function () { return vlxCallApi('GET', '/api/ai/health'); }
+  };
+  window.vlxAi = vlxAi;
+
+  // Auto-wire any button that opts in via data attributes
+  function setupAiButtonHooks() {
+    observeBody(function () {
+      document.querySelectorAll('[data-vlx-ai-action]').forEach(function (el) {
+        if (!markWired(el, 'aiAction')) return;
+        el.addEventListener('click', async function (ev) {
+          ev.preventDefault();
+          var action = el.getAttribute('data-vlx-ai-action');
+          var target = el.getAttribute('data-vlx-target');
+          var paramsAttr = el.getAttribute('data-vlx-params');
+          var params = {};
+          try { if (paramsAttr) params = JSON.parse(paramsAttr); } catch (_) {}
+          var fn = vlxAi[action];
+          if (typeof fn !== 'function') return;
+          el.disabled = true;
+          try {
+            var data = await fn(params);
+            if (target) {
+              var t = document.querySelector(target);
+              if (t) t.textContent = JSON.stringify(data, null, 2);
+            }
+            vlxToast(action + ' OK', 'success');
+          } catch (_) { /* toast already shown by vlxCallApi */ }
+          finally { el.disabled = false; }
+        });
+      });
+    });
+  }
+
+  function setupAiChat() {
+    var kind = getPageKind();
+    if (!kind) return;
+    if (kind === 'support') setupSupportChat();
+    else if (kind === 'engine')  setupEngineChat();
+    else if (kind === 'academy') setupAcademyAi();
+    // 'ai' (admin features page) has no chat — only helpers
+    setupAiButtonHooks();
   }
 
   // ---------------------------------------------------------------------------

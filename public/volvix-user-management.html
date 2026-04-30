@@ -327,11 +327,13 @@
               <label>Rol *</label>
               <select id="u-role" required>
                 <option value="">— selecciona —</option>
-                <option value="admin">Admin</option>
-                <option value="manager">Manager</option>
                 <option value="cajero">Cajero</option>
+                <option value="manager" data-label="Gerente">Gerente</option>
                 <option value="inventario">Inventario</option>
                 <option value="contador">Contador</option>
+                <option value="admin">Admin</option>
+                <option value="owner" data-owner-only="true" style="display:none">Owner</option>
+                <option value="superadmin" data-super-only="true" style="display:none">Superadmin</option>
               </select>
               <span class="error" id="err-role"></span>
             </div>
@@ -375,6 +377,7 @@
     </div>
     <div class="drawer-foot">
       <button class="btn" onclick="closeUserDrawer()">Cancelar</button>
+      <button class="btn" id="btn-reset-pwd" style="display:none" onclick="resetUserPassword()" title="Generar contraseña temporal">🔑 Reset password</button>
       <button class="btn danger" id="btn-disable-user" style="display:none" onclick="disableUser()">Deshabilitar</button>
       <button class="btn primary" id="btn-save-user" onclick="saveUser()">Guardar</button>
     </div>
@@ -768,7 +771,21 @@ function openUserDrawer(id) {
   const isNew = !STATE.currentUser;
   document.getElementById('drawer-title').textContent = isNew ? 'Crear usuario' : 'Editar: ' + STATE.currentUser.name;
   document.getElementById('btn-disable-user').style.display = isNew ? 'none' : 'inline-flex';
+  document.getElementById('btn-reset-pwd').style.display = isNew ? 'none' : 'inline-flex';
   document.getElementById('pwd-hint').textContent = isNew ? '(mín. 8 caracteres)' : '(opcional, dejar vacío para no cambiar)';
+
+  // Gate sensitive role options to owner/superadmin
+  try {
+    const me = getUser();
+    const myRole = String((me && me.role) || '').toLowerCase();
+    const canCreateOwner = (myRole === 'owner' || myRole === 'superadmin');
+    const canCreateSuper = (myRole === 'superadmin');
+    const sel = document.getElementById('u-role');
+    Array.from(sel.options).forEach(opt => {
+      if (opt.dataset.ownerOnly === 'true') opt.style.display = canCreateOwner ? '' : 'none';
+      if (opt.dataset.superOnly === 'true') opt.style.display = canCreateSuper ? '' : 'none';
+    });
+  } catch (_) {}
 
   document.getElementById('u-name').value     = isNew ? '' : (STATE.currentUser.name || '');
   document.getElementById('u-email').value    = isNew ? '' : (STATE.currentUser.email || '');
@@ -896,6 +913,29 @@ async function saveUser() {
   } finally {
     btn.disabled = false;
     btn.innerHTML = 'Guardar';
+  }
+}
+
+async function resetUserPassword() {
+  if (!STATE.currentUser) return;
+  const u = STATE.currentUser;
+  if (!confirm('¿Generar una contraseña temporal para ' + (u.name || u.email) + '?\n\nEl usuario será forzado a cambiarla en su próximo inicio de sesión y se cerrarán todas sus sesiones activas.')) return;
+  const btn = document.getElementById('btn-reset-pwd');
+  btn.disabled = true;
+  const original = btn.innerHTML;
+  btn.innerHTML = '<span class="spinner"></span> Generando…';
+  try {
+    const res = await api('POST', '/api/users/' + encodeURIComponent(u.id) + '/reset-password');
+    const tmp = res && res.temporary_password;
+    if (!tmp) { toast('Sin contraseña en respuesta', 'error'); return; }
+    // Show one-time password to owner. Use prompt so it's selectable/copyable.
+    window.prompt('Contraseña temporal generada para ' + (u.email || u.name) + ' — cópiala AHORA, no se mostrará de nuevo:', tmp);
+    toast('Contraseña reseteada. Comparte la temporal con el usuario.', 'success');
+  } catch (e) {
+    toast('Error al resetear: ' + (e && e.message ? e.message : 'desconocido'), 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = original;
   }
 }
 

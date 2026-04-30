@@ -17,6 +17,8 @@ const handleEmail = require('./email-resend');
 const handleRecargasServicios = require('./recargas-servicios');
 const handlePDF = require('./pdf-export');
 const handleCFDI = require('./cfdi-pac');
+const handleGiros = require('./giros');
+const handleLabels = require('./labels');
 
 // =============================================================
 // CONFIG SUPABASE
@@ -1101,7 +1103,12 @@ function findFile(filename) {
 }
 
 function serveStaticFile(res, pathname) {
-  if (pathname === '/' || pathname === '') pathname = '/login.html';
+  // Customer journey entry: '/' lands on marketplace (giro discovery), then login.html, then 404.
+  if (pathname === '/' || pathname === '') {
+    if (findFile('/marketplace.html')) pathname = '/marketplace.html';
+    else if (findFile('/index.html')) pathname = '/index.html';
+    else pathname = '/login.html';
+  }
   const filePath = findFile(pathname);
 
   if (!filePath) {
@@ -1375,6 +1382,8 @@ const handlers = {
         logAudit(fakeReq, 'auth.login_success', 'pos_users', { id: user.id });
       } catch(_){}
 
+      // First-login / forced-change detection
+      const mustChangePassword = !!(notes && notes.must_change_password) || !user.last_login_at;
       const resp = {
         ok: true,
         token, // nuevo
@@ -1383,8 +1392,10 @@ const handlers = {
           tenant_id: tenantId, tenant_name: tenantName,
           full_name: user.full_name, company_id: user.company_id,
           expires_at: Date.now() + (JWT_EXPIRES_SECONDS * 1000), plan: user.plan,
-          jti
-        }
+          jti,
+          must_change_password: mustChangePassword
+        },
+        must_change_password: mustChangePassword
       };
       // Surface warnings to the client
       if (newIpWarning) resp.security_alert = newIpWarning;
@@ -12590,9 +12601,30 @@ module.exports = async (req, res) => {
         });
         sendError(res, err);
       }
-    } else {
-      sendJSON(res, { error: 'endpoint not found' }, 404);
+      return;
     }
+
+    // FIX: No match in handlers[] — try modular handlers BEFORE 404
+    const _ctx = { supabaseRequest, getAuthUser: () => req.user, sendJson, IS_PROD };
+    try {
+      if (await handleMercadoPago(req, res, parsed, _ctx)) return;
+      if (await handleSTP(req, res, parsed, _ctx)) return;
+      if (await handleDelivery(req, res, parsed, { supabaseRequest, sendJson })) return;
+      if (await handleAI(req, res, parsed, _ctx)) return;
+      if (await handleEmail(req, res, parsed, _ctx)) return;
+      if (await handleRecargasServicios(req, res, parsed, _ctx)) return;
+      if (await handlePDF(req, res, parsed, _ctx)) return;
+      if (await handleCFDI(req, res, parsed, _ctx)) return;
+      if (await handleGiros(req, res, parsed, _ctx)) return;
+      if (await handleLabels(req, res, parsed, _ctx)) return;
+    } catch (modErr) {
+      METRICS.errorCount++;
+      logRequest({ ts: new Date().toISOString(), level: 'error', path: pathname, method, msg: 'module handler threw', err: IS_PROD ? 'internal' : String(modErr && modErr.message || modErr) });
+      sendError(res, modErr);
+      return;
+    }
+
+    sendJSON(res, { error: 'endpoint not found' }, 404);
     return;
   }
 
@@ -12639,16 +12671,7 @@ module.exports = async (req, res) => {
     return;
   }
 
-  // ── Payment & Delivery Integrations ──
-  const _ctx = { supabaseRequest, getAuthUser: () => req.user, sendJson, IS_PROD };
-  if (await handleMercadoPago(req, res, parsedUrl, _ctx)) return;
-  if (await handleSTP(req, res, parsedUrl, _ctx)) return;
-  if (await handleDelivery(req, res, parsedUrl, { supabaseRequest, sendJson })) return;
-  if (await handleAI(req, res, parsedUrl, _ctx)) return;
-  if (await handleEmail(req, res, parsedUrl, _ctx)) return;
-  if (await handleRecargasServicios(req, res, parsedUrl, _ctx)) return;
-  if (await handlePDF(req, res, parsedUrl, _ctx)) return;
-  if (await handleCFDI(req, res, parsedUrl, _ctx)) return;
+  // (Module handlers moved to inside /api/ block to fix early-404 bug)
 
   serveStaticFile(res, pathname);
 };
@@ -15160,6 +15183,110 @@ if (process.env.NODE_ENV === 'test') {
     } catch (err) { sendError(res, err); }
   });
 
+  // POST /api/users/:id/reset-password — owner forces a password reset for an employee.
+  // Generates a random 12-char password, hashes with scrypt, returns the plain password ONCE.
+  // Sets force_change=true (in notes) so first-login flow forces user to change it.
+  // If RESEND_API_KEY set, also fires the standard reset-link email (defense in depth).
+  handlers['POST /api/users/:id/reset-password'] = requireAuth(async function (req, res, params) {
+    try {
+      if (!b36IsOwner(req)) return send403(res, { need_role: ['owner', 'admin', 'superadmin'], have_role: req.user.role });
+      if (!isUuid(params.id)) return sendValidation(res, 'invalid id', 'id');
+      var tnt = b36Tenant(req);
+      if (!rateLimit('users:reset:' + tnt, 30, 60000)) {
+        return send429(res, rateLimitRetryMs('users:reset:' + tnt, 60000));
+      }
+      var existing = await supabaseRequest('GET',
+        '/pos_users?id=eq.' + encodeURIComponent(params.id) + '&select=id,tenant_id,email,notes');
+      if (!existing || !existing.length) return send404(res, 'pos_users', params.id);
+      if (!b36IsSuperadmin(req) && existing[0].tenant_id !== tnt) {
+        return send404(res, 'pos_users', params.id);
+      }
+      // Generate a 12-char alphanumeric password (no ambiguous chars)
+      var alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+      var raw = crypto.randomBytes(16);
+      var newPwd = '';
+      for (var i = 0; i < 12; i++) newPwd += alphabet[raw[i] % alphabet.length];
+      var passwordHash = b36Hash(newPwd);
+      // Mark must_change_password=true in notes so first-login flow can pick it up
+      var notesObj = {};
+      try { notesObj = existing[0].notes ? (typeof existing[0].notes === 'string' ? JSON.parse(existing[0].notes) : existing[0].notes) : {}; } catch (_) { notesObj = {}; }
+      notesObj.must_change_password = true;
+      notesObj.password_reset_at = new Date().toISOString();
+      notesObj.password_reset_by = req.user.id || null;
+      await supabaseRequest('PATCH', '/pos_users?id=eq.' + encodeURIComponent(params.id), {
+        password_hash: passwordHash,
+        notes: typeof existing[0].notes === 'string' ? JSON.stringify(notesObj) : notesObj,
+        last_login_at: null,
+        updated_at: new Date().toISOString()
+      });
+      // Revoke active sessions to force re-login
+      try {
+        await supabaseRequest('PATCH',
+          '/pos_active_sessions?user_id=eq.' + encodeURIComponent(params.id) + '&revoked_at=is.null',
+          { revoked_at: new Date().toISOString(), revoked_reason: 'admin_password_reset' });
+      } catch (_) {}
+      try {
+        await supabaseRequest('POST', '/pos_user_session_invalidations', {
+          user_id: params.id,
+          tenant_id: existing[0].tenant_id || tnt,
+          invalidated_at: new Date().toISOString(),
+          reason: 'admin_password_reset',
+          triggered_by: req.user.id || null
+        });
+      } catch (_) {}
+      // Best-effort email (only if email infra wired)
+      try {
+        if (process.env.RESEND_API_KEY && typeof emailTemplates !== 'undefined' && typeof sendEmail === 'function') {
+          var tpl = emailTemplates.passwordResetTemplate
+            ? emailTemplates.passwordResetTemplate('(usar contraseña temporal proporcionada por tu administrador)')
+            : { subject: 'Tu contraseña fue restablecida', html: '<p>Tu contraseña fue restablecida por un administrador.</p>', text: 'Tu contraseña fue restablecida por un administrador.' };
+          sendEmail({ to: existing[0].email, subject: tpl.subject, html: tpl.html, text: tpl.text, template: 'admin_password_reset' }).catch(function () {});
+        }
+      } catch (_) {}
+      try { logAudit(req, 'user.password_reset_admin', 'pos_users', { id: params.id }); } catch (_) {}
+      sendJSON(res, { ok: true, temporary_password: newPwd, must_change_on_login: true, email: existing[0].email });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // POST /api/users/me/change-password — current user changes their own password.
+  // Required for first-login flow when notes.must_change_password=true.
+  handlers['POST /api/users/me/change-password'] = requireAuth(async function (req, res) {
+    try {
+      var uid = req.user && req.user.id;
+      if (!uid) return send401(res, 'auth requerido');
+      var ip = clientIp(req);
+      if (!rateLimit('change-pwd:' + uid, 10, 15 * 60 * 1000)) {
+        return send429(res, 60000, 'Demasiados intentos, intenta más tarde');
+      }
+      var body = await readBody(req, { maxBytes: 4 * 1024, strictJson: true });
+      if (checkBodyError(req, res)) return;
+      var current = String((body && (body.current_password || body.old_password)) || '');
+      var next = String((body && (body.new_password || body.password)) || '');
+      if (!next || next.length < 8) return sendValidation(res, 'new_password mínimo 8 caracteres', 'new_password');
+      if (current === next) return sendValidation(res, 'la nueva contraseña no puede ser igual a la actual', 'new_password');
+      var rows = await supabaseRequest('GET',
+        '/pos_users?id=eq.' + encodeURIComponent(uid) + '&select=id,password_hash,notes,tenant_id');
+      if (!rows || !rows.length) return send404(res, 'pos_users', uid);
+      var u = rows[0];
+      if (!verifyPassword(current, u.password_hash)) {
+        return sendJSON(res, { ok: false, error: 'contraseña actual inválida', error_code: 'INVALID_CURRENT_PASSWORD' }, 401);
+      }
+      var passwordHash = b36Hash(next);
+      var notesObj = {};
+      try { notesObj = u.notes ? (typeof u.notes === 'string' ? JSON.parse(u.notes) : u.notes) : {}; } catch (_) { notesObj = {}; }
+      notesObj.must_change_password = false;
+      notesObj.password_changed_at = new Date().toISOString();
+      await supabaseRequest('PATCH', '/pos_users?id=eq.' + encodeURIComponent(uid), {
+        password_hash: passwordHash,
+        notes: typeof u.notes === 'string' ? JSON.stringify(notesObj) : notesObj,
+        last_login_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      });
+      try { logAudit(req, 'user.password_changed', 'pos_users', { id: uid, ip: ip }); } catch (_) {}
+      sendJSON(res, { ok: true, message: 'Contraseña actualizada' });
+    } catch (err) { sendError(res, err); }
+  });
+
   handlers['GET /api/users/:id/permissions'] = requireAuth(async function (req, res, params) {
     try {
       if (!b36IsOwner(req)) return send403(res, { need_role: ['owner', 'admin', 'superadmin'], have_role: req.user.role });
@@ -16482,6 +16609,26 @@ if (process.env.NODE_ENV === 'test') {
         { deleted_at: new Date().toISOString() });
       try { logAudit(req, 'label_template.deleted', 'label_templates', { id: params.id }); } catch (_) {}
       sendJSON(res, { ok: true, deleted: true, id: params.id });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // =========================================================================
+  // LABELS — Batch barcode label printing (ZPL / ESC-POS / PDF-HTML)
+  // Delegates encoding to api/labels.js (handleLabels). Registered via
+  // handlers[] so it's reachable through the normal /api/* dispatcher.
+  // =========================================================================
+  handlers['POST /api/labels/print'] = requireAuth(async function (req, res) {
+    try {
+      var parsed = url.parse(req.url, true);
+      var ctx = { supabaseRequest: supabaseRequest, getAuthUser: function () { return req.user; }, sendJson: sendJSON, IS_PROD: IS_PROD };
+      await handleLabels(req, res, parsed, ctx);
+    } catch (err) { sendError(res, err); }
+  });
+  handlers['GET /api/labels/preview'] = requireAuth(async function (req, res) {
+    try {
+      var parsed = url.parse(req.url, true);
+      var ctx = { supabaseRequest: supabaseRequest, getAuthUser: function () { return req.user; }, sendJson: sendJSON, IS_PROD: IS_PROD };
+      await handleLabels(req, res, parsed, ctx);
     } catch (err) { sendError(res, err); }
   });
 

@@ -821,14 +821,31 @@
     wrap.classList.add('visible');
     wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-    setTimeout(() => {
-      const giro = findGiro(q);
-      if (giro) {
-        showFoundGiro(giro);
-      } else {
-        showNewGiroGeneration(q);
-      }
-    }, 1200);
+    // VOLVIX entry-point wiring: hit backend /api/giros/search first.
+    // If it has a real landing-{slug}.html, redirect there.
+    // If not, fall back to local catalog (showFoundGiro) or AI generator (showNewGiroGeneration).
+    fetch('/api/giros/search?q=' + encodeURIComponent(q), { headers: { 'Accept': 'application/json' } })
+      .then((r) => r.ok ? r.json() : Promise.reject(new Error('search failed')))
+      .then((data) => {
+        if (data && data.exists && data.landing) {
+          // Real landing on disk -> hard redirect
+          window.location.assign(data.landing);
+          return;
+        }
+        // Backend says no landing-*.html — try local catalog (richer UI), else AI generator
+        const localHit = findGiro(q);
+        if (localHit) {
+          showFoundGiro(localHit);
+        } else {
+          showNewGiroGeneration(q);
+        }
+      })
+      .catch(() => {
+        // Network/API failure: degrade to local-only behavior
+        const localHit = findGiro(q);
+        if (localHit) showFoundGiro(localHit);
+        else showNewGiroGeneration(q);
+      });
   }
 
   function findGiro(query) {
@@ -880,6 +897,18 @@
   }
 
   function showNewGiroGeneration(query) {
+    // Fire-and-forget: ask backend to generate a personalized landing.
+    // If OPENAI_API_KEY is set, server returns generated HTML; otherwise returns todo:true.
+    try {
+      fetch('/api/giros/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ name: query, description: '' }),
+      }).then((r) => r.ok ? r.json() : null).then((data) => {
+        if (data && data.landing) window.__volvixGeneratedLanding = data.landing;
+      }).catch(() => {});
+    } catch (_) {}
+
     const wrap = document.getElementById('ai-response');
 
     wrap.innerHTML = `

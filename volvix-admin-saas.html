@@ -786,12 +786,111 @@ tr:hover td{background:var(--card2)}
             '<td>' + st + '</td>' +
             '<td>' + (t.region || '—') + '</td>' +
             '<td class="t-mini">' + (t.last_activity || '—') + '</td>' +
-            '<td><span class="more" style="cursor:pointer">⋯</span></td>' +
+            '<td><button class="btn btn-ghost" style="padding:4px 10px;font-size:11px" data-modules-tenant="' + (t.id || t.subdomain || '') + '" data-tenant-name="' + (t.name || '') + '">Módulos</button></td>' +
           '</tr>';
         }).join('');
+        // Wire per-tenant module-toggle modal (super-admin)
+        if (tbody) {
+          tbody.querySelectorAll('button[data-modules-tenant]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              openTenantModulesModal(btn.getAttribute('data-modules-tenant'), btn.getAttribute('data-tenant-name') || '');
+            });
+          });
+        }
       }
     }
   } catch(e){ console.warn('[admin-saas] tenants fail', e); }
+
+  // ---- Per-tenant module toggle modal (super-admin) ----------------------
+  var TENANT_MODULES_LIST = [
+    { key:'pos',          label:'POS',          emoji:'🛒' },
+    { key:'inventory',    label:'Inventario',   emoji:'📦' },
+    { key:'customers',    label:'Clientes',     emoji:'👥' },
+    { key:'cortes',       label:'Cortes',       emoji:'💰' },
+    { key:'reportes',     label:'Reportes',     emoji:'📊' },
+    { key:'devoluciones', label:'Devoluciones', emoji:'↩️' },
+    { key:'promociones',  label:'Promociones',  emoji:'🎁' },
+    { key:'cotizaciones', label:'Cotizaciones', emoji:'📝' },
+    { key:'etiquetas',    label:'Etiquetas',    emoji:'🏷️' },
+    { key:'kds',          label:'KDS',          emoji:'🍳' },
+    { key:'multipos',     label:'Multi-POS',    emoji:'🖥️' },
+    { key:'recargas',     label:'Recargas',     emoji:'📱' },
+    { key:'servicios',    label:'Servicios',    emoji:'💡' },
+    { key:'cfdi',         label:'CFDI',         emoji:'🧾' },
+    { key:'ai_modules',   label:'IA',           emoji:'🤖' },
+    { key:'delivery',     label:'Delivery',     emoji:'🛵' }
+  ];
+  function openTenantModulesModal(tenantId, tenantName) {
+    if (!tenantId) return;
+    var bg = document.getElementById('tenant-modules-modal');
+    if (!bg) {
+      bg = document.createElement('div');
+      bg.id = 'tenant-modules-modal';
+      bg.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:9999;';
+      bg.innerHTML = ''
+        + '<div style="background:var(--bg);color:var(--text-1);border-radius:10px;padding:20px;max-width:640px;width:92%;max-height:80vh;overflow:auto;border:1px solid var(--border);">'
+        +   '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">'
+        +     '<h3 id="tm-title" style="margin:0;">Módulos del tenant</h3>'
+        +     '<button class="btn btn-ghost" id="tm-close" style="padding:4px 10px;">✕</button>'
+        +   '</div>'
+        +   '<p style="font-size:12px;color:var(--muted);margin:-4px 0 12px;">Activa o desactiva módulos para este tenant. Cambios aplican de inmediato.</p>'
+        +   '<div id="tm-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;"></div>'
+        +   '<div style="text-align:right;margin-top:16px;"><button class="btn btn-primary" id="tm-done">Listo</button></div>'
+        + '</div>';
+      document.body.appendChild(bg);
+      bg.addEventListener('click', function (e) { if (e.target === bg) bg.remove(); });
+      bg.querySelector('#tm-close').addEventListener('click', function () { bg.remove(); });
+      bg.querySelector('#tm-done').addEventListener('click', function () { bg.remove(); });
+    }
+    bg.querySelector('#tm-title').textContent = 'Módulos · ' + (tenantName || tenantId);
+    var grid = bg.querySelector('#tm-grid');
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:20px;">Cargando…</div>';
+
+    var tk = (function () {
+      try { return localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || ''; } catch (_) { return ''; }
+    })();
+    var hdrs = { 'Content-Type': 'application/json' };
+    if (tk) hdrs['Authorization'] = 'Bearer ' + tk;
+    hdrs['x-tenant-id'] = tenantId;
+
+    fetch('/api/tenant/modules/active', { headers: hdrs })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        var statusByKey = (j && j.status_by_key) || {};
+        var enabledList = (j && j.enabled) || [];
+        enabledList.forEach(function (k) { if (!statusByKey[k]) statusByKey[k] = 'enabled'; });
+        grid.innerHTML = TENANT_MODULES_LIST.map(function (m) {
+          var on = statusByKey[m.key] === 'enabled' || (m.key === 'pos' && !statusByKey[m.key]);
+          return ''
+            + '<label style="display:flex;align-items:center;gap:6px;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer;">'
+            +   '<input type="checkbox" data-tm-key="' + m.key + '" ' + (on ? 'checked' : '') + '>'
+            +   '<span>' + m.emoji + ' ' + m.label + '</span>'
+            + '</label>';
+        }).join('');
+        grid.querySelectorAll('input[data-tm-key]').forEach(function (cb) {
+          cb.addEventListener('change', function () {
+            var key = cb.getAttribute('data-tm-key');
+            var status = cb.checked ? 'enabled' : 'disabled';
+            cb.disabled = true;
+            fetch('/api/tenant/modules/' + encodeURIComponent(key), {
+              method: 'PATCH', headers: hdrs,
+              body: JSON.stringify({ status: status })
+            }).then(function (r) { return r.json(); })
+              .then(function (jj) {
+                if (!jj || !jj.ok) throw new Error(jj && jj.error || 'fallo');
+              })
+              .catch(function (e) {
+                cb.checked = !cb.checked;
+                alert('Error: ' + (e.message || e));
+              })
+              .finally(function () { cb.disabled = false; });
+          });
+        });
+      })
+      .catch(function (e) {
+        grid.innerHTML = '<div style="grid-column:1/-1;color:var(--err);padding:20px;text-align:center;">Error: ' + (e.message || e) + '</div>';
+      });
+  }
 
   // B2/B27: cablear feed actividad a /api/audit-log con _semantic enriquecido
   try {

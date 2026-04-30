@@ -660,10 +660,14 @@
       .then(function (res) {
         btn.disabled = false; btn.textContent = 'Verificar código';
         if (res.status === 200 && res.body.ok) {
-          // Guardar token para login
+          // Guardar token para login (ambas claves: snake_case legacy + camelCase spec)
           if (res.body.token) {
             try { localStorage.setItem('volvix_token', res.body.token); } catch(_) {}
-            try { localStorage.setItem('volvix_session', JSON.stringify(res.body.session || {})); } catch(_) {}
+            try {
+              var sessJson = JSON.stringify(res.body.session || {});
+              localStorage.setItem('volvix_session', sessJson);
+              localStorage.setItem('volvixSession', sessJson);
+            } catch(_) {}
           }
           $('#tenantIdBox').textContent = state.tenant_id || 'TNT-XXXXX';
           setStep(4);

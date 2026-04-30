@@ -405,6 +405,15 @@
 
       <!-- TAB: INTEGRATIONS -->
       <div id="integrations" class="tab-content">
+        <h2>Módulos del Negocio</h2>
+        <p style="font-size:13px;color:var(--text-3);margin:-4px 0 14px;">Activa o desactiva módulos para tu tenant. Los módulos desactivados se ocultan en el POS.</p>
+
+        <div class="card" style="margin-bottom:24px;">
+          <div id="modules-toggle-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">
+            <div style="padding:30px;text-align:center;color:var(--text-3);font-size:13px;grid-column:1/-1;">Cargando módulos…</div>
+          </div>
+        </div>
+
         <h2>Estado de Integraciones</h2>
 
         <div class="card">
@@ -795,6 +804,7 @@
   // INTEGRACIONES
   // ============================================================================
   async function loadIntegrationStatus() {
+    loadModuleToggles();
     const data = await fetchAPI('/integration-status');
 
     if (data && data.integrations) {
@@ -804,6 +814,114 @@
       // Legacy mapping
       if (data.integrations.whatsapp) updateIntegrationUI('twilio', data.integrations.whatsapp);
     }
+  }
+
+  // ============================================================================
+  // MÓDULOS — feature toggles per tenant
+  // ============================================================================
+  const VOLVIX_MODULES = [
+    { key:'pos',           label:'Punto de Venta',  emoji:'🛒', healthKey:null },
+    { key:'inventory',     label:'Inventario',      emoji:'📦', healthKey:null },
+    { key:'customers',     label:'Clientes / CRM',  emoji:'👥', healthKey:null },
+    { key:'cortes',        label:'Cortes de Caja',  emoji:'💰', healthKey:null },
+    { key:'reportes',      label:'Reportes',        emoji:'📊', healthKey:null },
+    { key:'devoluciones',  label:'Devoluciones',    emoji:'↩️', healthKey:null },
+    { key:'promociones',   label:'Promociones',     emoji:'🎁', healthKey:null },
+    { key:'cotizaciones',  label:'Cotizaciones',    emoji:'📝', healthKey:null },
+    { key:'etiquetas',     label:'Etiquetas',       emoji:'🏷️', healthKey:null },
+    { key:'kds',           label:'KDS Cocina',      emoji:'🍳', healthKey:null },
+    { key:'multipos',      label:'Multi-POS',       emoji:'🖥️', healthKey:null },
+    { key:'recargas',      label:'Recargas / TAE',  emoji:'📱', healthKey:'recargas' },
+    { key:'servicios',     label:'Pago Servicios',  emoji:'💡', healthKey:'servicios' },
+    { key:'cfdi',          label:'CFDI / SAT',      emoji:'🧾', healthKey:'cfdi' },
+    { key:'ai_modules',    label:'IA / Asistente',  emoji:'🤖', healthKey:'ai' },
+    { key:'delivery',      label:'Delivery',        emoji:'🛵', healthKey:'delivery' }
+  ];
+
+  async function loadModuleToggles() {
+    const grid = document.getElementById('modules-toggle-grid');
+    if (!grid) return;
+    let activeMap = {};
+    try {
+      const token = getAuthToken();
+      const res = await fetch('/api/tenant/modules/active', {
+        headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+      });
+      const json = await res.json();
+      if (json && json.ok) {
+        (json.enabled || []).forEach(k => { activeMap[k] = true; });
+        if (json.status_by_key) {
+          Object.entries(json.status_by_key).forEach(([k, v]) => {
+            activeMap[k] = (v === 'enabled');
+          });
+        }
+      }
+    } catch (e) { console.warn('[modules] load failed', e); }
+
+    grid.innerHTML = VOLVIX_MODULES.map(m => {
+      const on = !!activeMap[m.key] || m.key === 'pos';
+      const healthChip = m.healthKey
+        ? '<span class="chip" data-health="' + m.healthKey + '" style="font-size:10px;background:var(--card2);color:var(--text-3);">···</span>'
+        : '';
+      return ''
+        + '<div class="card" style="border:1px solid var(--border);padding:12px;">'
+        +   '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;">'
+        +     '<div style="display:flex;align-items:center;gap:8px;">'
+        +       '<span style="font-size:18px;">' + m.emoji + '</span>'
+        +       '<strong style="font-size:13px;">' + m.label + '</strong>'
+        +     '</div>'
+        +     healthChip
+        +   '</div>'
+        +   '<label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-3);cursor:pointer;">'
+        +     '<input type="checkbox" data-mod-key="' + m.key + '" ' + (on ? 'checked' : '') + ' '
+        +       (m.key === 'pos' ? 'disabled title="POS siempre activo"' : '') + '>'
+        +     '<span data-mod-state>' + (on ? 'Activado' : 'Desactivado') + '</span>'
+        +   '</label>'
+        + '</div>';
+    }).join('');
+
+    grid.querySelectorAll('input[type=checkbox][data-mod-key]').forEach(cb => {
+      cb.addEventListener('change', async function () {
+        const key = cb.getAttribute('data-mod-key');
+        const status = cb.checked ? 'enabled' : 'disabled';
+        const label = cb.parentElement.querySelector('[data-mod-state]');
+        cb.disabled = true;
+        try {
+          const token = getAuthToken();
+          const res = await fetch('/api/tenant/modules/' + encodeURIComponent(key), {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': token ? 'Bearer ' + token : ''
+            },
+            body: JSON.stringify({ status: status })
+          });
+          const json = await res.json();
+          if (!res.ok || !json.ok) throw new Error(json.error || 'no se pudo guardar');
+          if (label) label.textContent = cb.checked ? 'Activado' : 'Desactivado';
+        } catch (e) {
+          alert('Error guardando módulo: ' + (e.message || e));
+          cb.checked = !cb.checked;
+        } finally {
+          cb.disabled = (key === 'pos');
+        }
+      });
+    });
+
+    // Health pills based on integration-status
+    try {
+      const data = await fetchAPI('/integration-status');
+      if (data && data.integrations) {
+        grid.querySelectorAll('[data-health]').forEach(el => {
+          const k = el.getAttribute('data-health');
+          const info = data.integrations[k];
+          const ok = info && (info.active || info.configured || info.status === 'active');
+          el.textContent = ok ? 'configurado' : 'pendiente API';
+          el.style.background = ok ? 'rgba(34,197,94,.15)' : 'rgba(245,158,11,.15)';
+          el.style.color = ok ? '#16a34a' : '#d97706';
+        });
+      }
+    } catch (_) {}
   }
 
   function updateIntegrationUI(service, info) {
