@@ -9,6 +9,9 @@ const url = require('url');
 const https = require('https');
 const crypto = require('crypto'); // FIX R13: para JWT, scrypt, timingSafeEqual
 const emailTemplates = require('./email-templates'); // R14
+const handleMercadoPago = require('./payments-mercadopago');
+const handleSTP = require('./payments-stp');
+const handleDelivery = require('./integrations-delivery');
 
 // =============================================================
 // CONFIG SUPABASE
@@ -9359,6 +9362,10 @@ handlers['GET /api/config/public'] = async (req, res) => {
   handlers['GET /api/me'] = requireAuth(async (req, res) => {
     sendJSON(res, { ok: true, user: req.user });
   });
+  // Alias: /api/users/me → same as /api/me
+  handlers['GET /api/users/me'] = requireAuth(async (req, res) => {
+    sendJSON(res, { ok: true, user: req.user });
+  });
   handlers['POST /api/refresh'] = async (req, res) => {
     try {
       const auth = req.headers['authorization'] || '';
@@ -12605,6 +12612,12 @@ module.exports = async (req, res) => {
     res.end(configJs);
     return;
   }
+
+  // ── Payment & Delivery Integrations ──
+  const _ctx = { supabaseRequest, getAuthUser: () => req.user, sendJson, IS_PROD };
+  if (await handleMercadoPago(req, res, parsedUrl, _ctx)) return;
+  if (await handleSTP(req, res, parsedUrl, _ctx)) return;
+  if (await handleDelivery(req, res, parsedUrl, { supabaseRequest, sendJson })) return;
 
   serveStaticFile(res, pathname);
 };
@@ -27445,6 +27458,53 @@ if (process.env.NODE_ENV === 'test') {
         expires_at: expiresAt,
         timeout_minutes: 60
       }, 201);
+    } catch (err) { sendError(res, err); }
+  });
+
+  // GET /api/payments/poll-external/:id — status check by sale_id
+  handlers['GET /api/payments/poll-external/:id'] = requireAuth(async function (req, res, params) {
+    try {
+      var saleId = (params && params.id) || '';
+      if (!saleId) return sendJSON(res, { error: 'sale_id required' }, 400);
+      saleId = String(saleId).slice(0, 128);
+
+      // Check payments table
+      var payments = [];
+      try {
+        payments = await supabaseRequest('GET',
+          '/payments?sale_id=eq.' + encodeURIComponent(saleId) + '&limit=1') || [];
+      } catch (_) {}
+
+      // Check pos_payment_verifications
+      var verifications = [];
+      try {
+        verifications = await supabaseRequest('GET',
+          '/pos_payment_verifications?sale_id=eq.' + encodeURIComponent(saleId) + '&limit=1') || [];
+      } catch (_) {}
+
+      var pay = payments[0] || null;
+      var ver = verifications[0] || null;
+
+      if (!pay && !ver) {
+        return sendJSON(res, { sale_id: saleId, status: 'not_found', payment_method: null, amount: null, confirmed_at: null, provider: null });
+      }
+
+      var source = pay || ver;
+      var status = 'pending';
+      if (pay && (pay.status === 'confirmed' || pay.status === 'paid' || pay.status === 'approved')) {
+        status = 'confirmed';
+      } else if (ver && (ver.status === 'confirmed' || ver.verified === true)) {
+        status = 'confirmed';
+      }
+
+      sendJSON(res, {
+        sale_id: saleId,
+        status: status,
+        payment_method: source.payment_method || source.method || null,
+        amount: source.amount || null,
+        confirmed_at: source.confirmed_at || source.verified_at || source.created_at || null,
+        provider: source.provider || source.external_app_name || null
+      });
     } catch (err) { sendError(res, err); }
   });
 
