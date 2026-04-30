@@ -6211,6 +6211,17 @@ try {
   console.error('[R18 SHOP] register failed:', e && e.message);
 }
 
+// STATUS MONITOR — public status page + uptime + incidents
+try {
+  require('./status-monitor').register({
+    handlers,
+    supabaseRequest, readBody, requireAuth,
+    sendJSON, sendError,
+  });
+} catch (e) {
+  console.error('[STATUS-MONITOR] register failed:', e && e.message);
+}
+
 // =============================================================
 // R18 — NFT LOYALTY + BLOCKCHAIN RECEIPTS (MOCK)
 // Implementación mock: NO usa cadenas reales. token_id, tx_hash y IPFS

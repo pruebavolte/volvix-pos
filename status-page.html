@@ -123,6 +123,24 @@
 
   <div class="grid" id="servicesGrid" aria-label="Servicios"></div>
 
+  <!-- Status real backend: incidentes activos + uptime por servicio -->
+  <section class="device-section" aria-label="Estado de servicios (real-time)">
+    <h2 class="device-title">Servicios monitoreados (uptime 30 días)</h2>
+    <p class="device-subtitle">Datos en vivo desde <code>/api/status/uptime</code> y <code>/api/status/incidents</code>. Auto-refresh 60s.</p>
+    <div class="grid" id="uptimeGrid" aria-live="polite"></div>
+  </section>
+
+  <section class="device-section" aria-label="Incidentes">
+    <h2 class="device-title">Incidentes activos</h2>
+    <div id="activeIncidents" aria-live="polite">
+      <p class="device-subtitle">Cargando…</p>
+    </div>
+    <h2 class="device-title" style="margin-top:24px">Últimos 30 días</h2>
+    <div id="historyIncidents" aria-live="polite">
+      <p class="device-subtitle">Cargando…</p>
+    </div>
+  </section>
+
   <!-- R10d-C FIX-N4-7: Tu dispositivo (cliente-side health) -->
   <section class="device-section" aria-label="Tu dispositivo">
     <h2 class="device-title">Tu dispositivo</h2>
@@ -436,6 +454,114 @@
   setInterval(fetchStatus, REFRESH_MS);
   // Re-leer owner message cada minuto por si lo actualizan otra pestaña
   setInterval(renderOwnerMessage, 60000);
+
+  // ─────────────────────────────────────────────────────────────
+  // REAL STATUS: /api/status/uptime + /api/status/incidents
+  // Auto-refresh cada 60s
+  // ─────────────────────────────────────────────────────────────
+  var REAL_REFRESH_MS = 60000;
+  var REAL_SERVICES = [
+    { key: 'api',      label: 'API',         desc: 'Servidor principal' },
+    { key: 'db',       label: 'Base de datos',desc: 'Supabase / Postgres' },
+    { key: 'payments', label: 'Pagos',        desc: 'Stripe / MercadoPago' },
+    { key: 'ai',       label: 'IA',           desc: 'OpenAI / Claude' },
+    { key: 'email',    label: 'Email',        desc: 'Resend / SendGrid' }
+  ];
+  function statusEmoji(s){
+    if (s === 'operational') return '✅';
+    if (s === 'degraded')    return '⚠️';
+    if (s === 'outage')      return '❌';
+    return '—';
+  }
+  function statusLabel(s){
+    if (s === 'operational') return 'Operativo';
+    if (s === 'degraded')    return 'Degradado';
+    if (s === 'outage')      return 'Caído';
+    return 'Sin datos';
+  }
+  function statusBadgeClass(s){
+    if (s === 'operational') return 'ok';
+    if (s === 'degraded')    return 'warn';
+    if (s === 'outage')      return 'err';
+    return 'warn';
+  }
+  function fmtPct(p){
+    if (p === null || p === undefined) return '—';
+    return Number(p).toFixed(2) + '%';
+  }
+  function fmtDate(s){
+    try { return new Date(s).toLocaleString(); } catch(_) { return s || ''; }
+  }
+  function renderUptime(svcMap){
+    var grid = $('uptimeGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    REAL_SERVICES.forEach(function(svc){
+      var data = (svcMap && svcMap[svc.key]) || {};
+      var st = data.status || 'unknown';
+      var card = document.createElement('div');
+      card.className = 'card ' + (st === 'operational' ? 'ok' : st === 'degraded' ? 'warn' : st === 'outage' ? 'err' : '');
+      var lat = (typeof data.avg_latency_ms === 'number') ? (' · ' + data.avg_latency_ms + ' ms') : '';
+      card.innerHTML =
+        '<h3>' + statusEmoji(st) + ' ' + svc.label +
+        ' <span class="badge ' + statusBadgeClass(st) + '">' + statusLabel(st) + '</span></h3>' +
+        '<div class="latency">Uptime 30d: <strong>' + fmtPct(data.uptime_pct) + '</strong>' + lat + '</div>' +
+        '<div class="detail">' + escapeHtml(svc.desc) + '</div>';
+      grid.appendChild(card);
+    });
+  }
+  function renderIncidentList(elId, list, emptyMsg){
+    var el = $(elId);
+    if (!el) return;
+    if (!list || !list.length){
+      el.innerHTML = '<p class="device-subtitle">' + escapeHtml(emptyMsg) + '</p>';
+      return;
+    }
+    var html = '';
+    list.forEach(function(inc){
+      var sev = (inc.severity || 'minor').toLowerCase();
+      var badgeClass = sev === 'critical' ? 'err' : sev === 'major' ? 'warn' : 'ok';
+      var resolved = inc.resolved_at ? (' · resuelto: ' + fmtDate(inc.resolved_at)) : ' · en curso';
+      html += '<div class="card ' + (inc.resolved_at ? '' : 'err') + '" style="margin-bottom:8px">' +
+              '<h3>' + escapeHtml(inc.title || ('Incidente ' + (inc.service||''))) +
+              ' <span class="badge ' + badgeClass + '">' + escapeHtml(sev.toUpperCase()) + '</span>' +
+              ' <span class="badge warn">' + escapeHtml(inc.service || '?') + '</span></h3>' +
+              '<div class="latency">' + escapeHtml(fmtDate(inc.started_at)) + escapeHtml(resolved) + '</div>' +
+              (inc.message ? '<div class="detail">' + escapeHtml(inc.message) + '</div>' : '') +
+              '</div>';
+    });
+    el.innerHTML = html;
+  }
+  function fetchUptime(){
+    fetch('/api/status/uptime?days=30', { cache:'no-store' })
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if (data && data.ok && data.services) renderUptime(data.services);
+        else renderUptime({});
+      })
+      .catch(function(){ renderUptime({}); });
+  }
+  function fetchIncidents(){
+    fetch('/api/status/incidents?days=30', { cache:'no-store' })
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if (data && data.ok){
+          renderIncidentList('activeIncidents', data.active || [], 'Sin incidentes activos.');
+          renderIncidentList('historyIncidents', data.history || [], 'Sin incidentes en los últimos 30 días.');
+        } else {
+          renderIncidentList('activeIncidents', [], 'Sin datos.');
+          renderIncidentList('historyIncidents', [], 'Sin datos.');
+        }
+      })
+      .catch(function(){
+        renderIncidentList('activeIncidents', [], 'No se pudo cargar.');
+        renderIncidentList('historyIncidents', [], 'No se pudo cargar.');
+      });
+  }
+  fetchUptime();
+  fetchIncidents();
+  setInterval(fetchUptime, REAL_REFRESH_MS);
+  setInterval(fetchIncidents, REAL_REFRESH_MS);
 })();
 </script>
 </body>
