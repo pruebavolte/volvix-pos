@@ -1259,8 +1259,9 @@ const handlers = {
       }
 
       const notes = parseNotes(user.notes);
-      const volvixRole = notes.volvix_role || (user.role === 'ADMIN' ? 'superadmin' : 'cajero');
-      const tenantId = notes.tenant_id || 'TNT001';
+      const _roleMap = { owner:'owner',admin:'admin',superadmin:'superadmin',manager:'manager',gerente:'manager',cashier:'cajero',cajero:'cajero',ADMIN:'superadmin',OWNER:'owner' };
+      const volvixRole = notes.volvix_role || _roleMap[user.role] || user.role || 'cajero';
+      const tenantId = notes.tenant_id || user.company_id || 'TNT001';
       const tenantName = notes.tenant_name || 'Mi Negocio';
 
       supabaseRequest('PATCH', `/pos_users?id=eq.${user.id}`, {
@@ -3558,8 +3559,9 @@ const handlers = {
       if (!ok) return sendJSON(res, { error: 'código inválido' }, 401);
 
       const notes = parseNotes(user.notes);
-      const volvixRole = notes.volvix_role || (user.role === 'ADMIN' ? 'superadmin' : 'cajero');
-      const tenantId = notes.tenant_id || 'TNT001';
+      const _roleMap = { owner:'owner',admin:'admin',superadmin:'superadmin',manager:'manager',gerente:'manager',cashier:'cajero',cajero:'cajero',ADMIN:'superadmin',OWNER:'owner' };
+      const volvixRole = notes.volvix_role || _roleMap[user.role] || user.role || 'cajero';
+      const tenantId = notes.tenant_id || user.company_id || 'TNT001';
       const tenantName = notes.tenant_name || 'Mi Negocio';
 
       supabaseRequest('PATCH', `/pos_users?id=eq.${user.id}`,
