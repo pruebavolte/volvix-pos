@@ -259,6 +259,146 @@ function register(deps) {
     } catch (err) { sendError(res, err); }
   }, ['customer']);
 
+  // ---------- PATCH /api/customer/me ----------
+  // Updates portal_customers row for the authenticated customer.
+  handlers['PATCH /api/customer/me'] = requireAuth(async (req, res) => {
+    try {
+      const id = req.user.id;
+      if (!id) return sendJSON(res, { error: 'sin id de cliente' }, 400);
+      const body = await readBody(req);
+      const ALLOWED = [
+        'full_name', 'phone', 'birth_date',
+        'rfc', 'business_name', 'tax_regime', 'zip_code', 'address',
+      ];
+      const patch = {};
+      for (const k of ALLOWED) {
+        if (body[k] !== undefined && body[k] !== null) {
+          patch[k] = String(body[k]).slice(0, 250);
+        }
+      }
+      if (!Object.keys(patch).length) return sendJSON(res, { error: 'nada que actualizar' }, 400);
+      patch.updated_at = new Date().toISOString();
+      let updated = null;
+      try {
+        const r = await supabaseRequest('PATCH',
+          '/portal_customers?id=eq.' + encodeURIComponent(id), patch);
+        updated = (r && r[0]) || r;
+      } catch (e) {
+        logRequest({ ts: new Date().toISOString(), level: 'warn',
+          msg: 'portal_customers patch failed', err: String(e.message || e) });
+      }
+      sendJSON(res, { ok: true, customer: updated || patch });
+    } catch (err) { sendError(res, err); }
+  }, ['customer']);
+
+  // ---------- POST /api/customer/invoice/request ----------
+  // Customer-facing wrapper around CFDI stamping. Body: { sale_id, rfc, business_name, tax_regime, zip_code, email, use? }
+  handlers['POST /api/customer/invoice/request'] = requireAuth(async (req, res) => {
+    try {
+      const body = await readBody(req);
+      const saleId = String(body.sale_id || '').trim();
+      const rfc    = String(body.rfc || '').toUpperCase().trim();
+      if (!saleId || !rfc) return sendJSON(res, { error: 'sale_id y rfc requeridos' }, 400);
+
+      let sale = null;
+      try {
+        const rows = await supabaseRequest('GET',
+          '/pos_sales?id=eq.' + encodeURIComponent(saleId) +
+          '&customer_email=eq.' + encodeURIComponent(req.user.email) +
+          '&select=id,folio,total,cfdi_uuid&limit=1');
+        sale = rows && rows[0];
+      } catch (_) {}
+      if (!sale) return sendJSON(res, { error: 'venta no encontrada' }, 404);
+      if (sale.cfdi_uuid) return sendJSON(res, { ok: true, uuid: sale.cfdi_uuid, message: 'ya facturada' });
+
+      // Persist invoice request (best-effort) and confirm via email
+      const reqRow = {
+        sale_id: saleId,
+        customer_email: req.user.email,
+        rfc,
+        business_name: String(body.business_name || '').slice(0, 250),
+        tax_regime:    String(body.tax_regime    || '').slice(0, 10),
+        zip_code:      String(body.zip_code      || '').slice(0, 10),
+        cfdi_use:      String(body.use           || 'G03').slice(0, 6),
+        delivery_email: String(body.email || req.user.email).toLowerCase().slice(0, 200),
+        status: 'pending',
+        created_at: new Date().toISOString(),
+      };
+      try { await supabaseRequest('POST', '/cfdi_requests', reqRow); } catch (e) {
+        logRequest({ ts: new Date().toISOString(), level: 'warn',
+          msg: 'cfdi_requests insert failed', err: String(e.message || e) });
+      }
+
+      // Notify customer
+      sendEmail({
+        to: reqRow.delivery_email,
+        subject: 'Solicitud de factura recibida — Volvix',
+        html: '<p>Hemos recibido tu solicitud de factura para la venta <strong>' +
+              (sale.folio || sale.id) + '</strong>.</p>' +
+              '<p>Te enviaremos el CFDI (PDF + XML) a este correo en cuanto sea timbrado.</p>',
+        text: 'Solicitud de factura recibida para venta ' + (sale.folio || sale.id),
+        template: 'cfdi_request',
+      }).catch(() => {});
+
+      sendJSON(res, { ok: true, status: 'pending', sale_id: saleId });
+    } catch (err) { sendError(res, err); }
+  }, ['customer']);
+
+  // ---------- GET /api/customer/ticket/:id ----------
+  // Returns a printable HTML ticket the browser can save as PDF (window.print).
+  handlers['GET /api/customer/ticket/:id'] = requireAuth(async (req, res, params) => {
+    try {
+      let sale = null;
+      try {
+        const saleRows = await supabaseRequest('GET',
+          '/pos_sales?id=eq.' + encodeURIComponent(params.id) +
+          '&customer_email=eq.' + encodeURIComponent(req.user.email) +
+          '&select=id,folio,total,subtotal,tax,items,payment_method,created_at,customer_email&limit=1');
+        sale = saleRows && saleRows[0];
+      } catch (_) {}
+      if (!sale) return sendJSON(res, { error: 'no encontrada' }, 404);
+
+      const esc = (s) => String(s == null ? '' : s)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      const items = Array.isArray(sale.items) ? sale.items : [];
+      const rowsHtml = items.map(it =>
+        '<tr><td>' + esc(it.name || it.sku || '-') + '</td>' +
+        '<td style="text-align:center">' + (Number(it.qty || it.quantity) || 1) + '</td>' +
+        '<td style="text-align:right">$' + (Number(it.price || it.unit_price) || 0).toFixed(2) + '</td>' +
+        '<td style="text-align:right">$' + ((Number(it.qty||it.quantity)||1) * (Number(it.price||it.unit_price)||0)).toFixed(2) + '</td></tr>'
+      ).join('');
+      const html = '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">' +
+        '<title>Ticket ' + esc(sale.folio || sale.id) + '</title>' +
+        '<style>body{font-family:monospace;max-width:380px;margin:20px auto;padding:0 14px;color:#000}' +
+        'h1{font-size:18px;text-align:center;margin:0 0 4px}' +
+        '.muted{color:#666;font-size:12px;text-align:center}' +
+        'table{width:100%;border-collapse:collapse;margin-top:14px;font-size:12px}' +
+        'th,td{padding:4px;border-bottom:1px dashed #ccc}' +
+        '.tot{font-size:16px;font-weight:700;text-align:right;margin-top:12px}' +
+        '@media print{.noprint{display:none}}</style></head><body>' +
+        '<h1>VOLVIX</h1>' +
+        '<div class="muted">Ticket de compra</div>' +
+        '<div class="muted">Folio: ' + esc(sale.folio || sale.id) + '</div>' +
+        '<div class="muted">Fecha: ' + esc((sale.created_at || '').slice(0,19).replace('T',' ')) + '</div>' +
+        '<div class="muted">Cliente: ' + esc(sale.customer_email || '') + '</div>' +
+        '<table><thead><tr><th>Concepto</th><th>Cant</th><th>P.U.</th><th>Importe</th></tr></thead>' +
+        '<tbody>' + (rowsHtml || '<tr><td colspan="4" style="text-align:center;color:#999">Sin partidas</td></tr>') + '</tbody></table>' +
+        '<div class="tot">Subtotal: $' + (Number(sale.subtotal) || 0).toFixed(2) + '</div>' +
+        '<div class="tot">IVA: $' + (Number(sale.tax) || 0).toFixed(2) + '</div>' +
+        '<div class="tot">TOTAL: $' + (Number(sale.total) || 0).toFixed(2) + '</div>' +
+        '<div class="muted" style="margin-top:18px">Pago: ' + esc(sale.payment_method || '-') + '</div>' +
+        '<div class="muted" style="margin-top:24px">Gracias por su compra</div>' +
+        '<div class="noprint" style="text-align:center;margin-top:20px">' +
+        '<button onclick="window.print()" style="padding:10px 20px">Imprimir / Guardar PDF</button></div>' +
+        '<script>setTimeout(function(){try{window.print()}catch(e){}},400);</script>' +
+        '</body></html>';
+      res.statusCode = 200;
+      setSecurityHeaders(res);
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.end(html);
+    } catch (err) { sendError(res, err); }
+  }, ['customer']);
+
   // ---------- GET /api/customer/invoice/:id ----------
   handlers['GET /api/customer/invoice/:id'] = requireAuth(async (req, res, params) => {
     try {

@@ -546,6 +546,34 @@
   </div>
 </div>
 
+<!-- MODAL SOLICITAR FACTURA -->
+<div class="modal" id="invModal">
+  <div class="modal-card">
+    <div class="modal-head"><h3>Solicitar factura — venta <span id="invFolio"></span></h3><button class="close-x" onclick="closeInvoiceReq()">×</button></div>
+    <div class="modal-body">
+      <div class="profile-grid">
+        <div class="form-group"><label>RFC*</label><input type="text" id="invRfc" placeholder="XAXX010101000" maxlength="13"></div>
+        <div class="form-group"><label>Razón social</label><input type="text" id="invRazon"></div>
+        <div class="form-group"><label>Régimen fiscal</label><input type="text" id="invReg" placeholder="612"></div>
+        <div class="form-group"><label>Código postal</label><input type="text" id="invCp" maxlength="5"></div>
+        <div class="form-group"><label>Uso CFDI</label>
+          <select id="invUse" style="width:100%;padding:14px 16px;border:2px solid var(--border);border-radius:8px;font-size:15px">
+            <option value="G03">G03 — Gastos en general</option>
+            <option value="G01">G01 — Adquisición de mercancías</option>
+            <option value="G02">G02 — Devoluciones, descuentos</option>
+            <option value="P01">P01 — Por definir</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Email para recibir</label><input type="email" id="invEmail"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeInvoiceReq()">Cancelar</button>
+      <button class="btn btn-primary" onclick="submitInvoiceReq()">Solicitar</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -561,33 +589,65 @@ let DB = {
 };
 
 // ========= CARGA DESDE API =========
+// B47 wire: read JWT from same key as SSO check; expose helpers globally for fetch reuse
+function _custToken(){ return localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || localStorage.getItem('volvix_customer_token') || ''; }
+function _authHeaders(extra){
+  const h = Object.assign({ 'Accept':'application/json' }, extra||{});
+  const t = _custToken();
+  if(t) h['Authorization'] = 'Bearer ' + t;
+  return h;
+}
+async function _apiGet(u){ try{ const r = await fetch(u,{headers:_authHeaders(), credentials:'include'}); if(!r.ok) return null; return await r.json(); }catch(e){ return null; } }
+async function _apiSend(method,u,body){ try{ const r = await fetch(u,{method, headers:_authHeaders({'Content-Type':'application/json'}), credentials:'include', body: body?JSON.stringify(body):undefined}); const j = await r.json().catch(()=>null); return { ok:r.ok, status:r.status, data:j }; }catch(e){ return { ok:false, status:0, data:null }; } }
+
 async function loadCustomerData(){
-  const token = localStorage.getItem('volvix_customer_token') || localStorage.getItem('customer_token');
-  const headers = { 'Accept':'application/json' };
-  if(token) headers['Authorization'] = 'Bearer ' + token;
-  async function gj(url){ try{ const r = await fetch(url,{headers, credentials:'include'}); if(!r.ok) return null; return await r.json(); }catch(e){ return null; } }
   const [me, orders, loyalty, pmethods] = await Promise.all([
-    gj('/api/customer/me'),
-    gj('/api/customer/orders'),
-    gj('/api/customer/loyalty'),
-    gj('/api/customer/payment-methods')
+    _apiGet('/api/customer/me'),
+    _apiGet('/api/customer/orders'),
+    _apiGet('/api/customer/loyalty'),
+    _apiGet('/api/customer/payment-methods')
   ]);
-  if(me && me.user){ Object.assign(DB.user, me.user); }
-  else if(me && me.email){ Object.assign(DB.user, me); }
+  // me => { ok, customer:{ id, email, full_name, phone, loyalty_points, ... } } or fallback shape
+  const c = (me && (me.customer||me.user)) || me || {};
+  DB.user.email = c.email || DB.user.email || '';
+  DB.user.name  = c.full_name || c.name || (DB.user.email||'').split('@')[0] || 'Cliente';
+  DB.user.phone = c.phone || '';
+  DB.user.birth = c.birth_date || '';
+  DB.user.rfc   = c.rfc || '';
+  DB.user.razon = c.business_name || '';
+  DB.user.reg   = c.tax_regime || '';
+  DB.user.cp    = c.zip_code || '';
+  DB.user.addr  = c.address || '';
+  DB.user.id    = c.id || null;
+
   if(orders){
-    const arr = Array.isArray(orders)?orders:(orders.items||orders.orders||[]);
-    DB.purchases = arr.map(o=>({folio:o.folio||o.id, date:(o.date||o.created_at||'').slice(0,10), items:o.items_count||(o.items?o.items.length:0), total:Number(o.total||0), pay:o.payment_method||o.pay||'-', status:o.status||'Entregada'}));
-    DB.invoices = arr.filter(o=>o.invoice_folio||o.cfdi_uuid).map(o=>({folio:o.invoice_folio||o.cfdi_uuid, date:(o.date||o.created_at||'').slice(0,10), rfc:o.rfc||DB.user.rfc||'', total:Number(o.total||0), status:o.invoice_status||'Vigente'}));
+    const arr = Array.isArray(orders)?orders:(orders.orders||orders.items||[]);
+    DB.purchases = arr.map(o=>({
+      id: o.id, folio:o.folio||o.id, date:(o.date||o.created_at||'').slice(0,10),
+      items:o.items_count||(Array.isArray(o.items)?o.items.length:0),
+      total:Number(o.total||0), pay:o.payment_method||o.pay||'-',
+      status:o.status||'Entregada', cfdi_uuid: o.cfdi_uuid||null
+    }));
+    DB.invoices = arr.filter(o=>o.cfdi_uuid).map(o=>({
+      id:o.id, folio:o.cfdi_uuid, date:(o.date||o.created_at||'').slice(0,10),
+      rfc: DB.user.rfc||'-', total:Number(o.total||0), status:'Vigente'
+    }));
   }
   if(loyalty){
     DB.loyalty.points = Number(loyalty.points||0);
-    DB.loyalty.tier = loyalty.tier||'Bronze';
-    DB.loyalty.next = loyalty.next_tier||loyalty.next||'Silver';
-    DB.loyalty.nextAt = Number(loyalty.next_at||loyalty.nextAt||1000);
-    DB.loyalty.history = Array.isArray(loyalty.history)?loyalty.history:[];
-    DB.loyalty.rewards = Array.isArray(loyalty.rewards)?loyalty.rewards:[];
+    const movements = Array.isArray(loyalty.movements)?loyalty.movements:(loyalty.history||[]);
+    let bal = DB.loyalty.points;
+    DB.loyalty.history = movements.map(m=>{
+      const d = Number(m.points||m.delta||0);
+      const row = { date:(m.created_at||m.date||'').slice(0,10), concept:m.note||m.concept||m.kind||'-', delta:d, balance:bal };
+      bal -= d; return row;
+    });
+    // tier inferida por puntos
+    const p = DB.loyalty.points;
+    DB.loyalty.tier = p>=5000?'Gold':(p>=1000?'Silver':'Bronze');
+    DB.loyalty.next = p>=5000?'Platinum':(p>=1000?'Gold':'Silver');
+    DB.loyalty.nextAt = p>=5000?10000:(p>=1000?5000:1000);
   }
-  // payment-methods could feed credit card list; credit account is inferred from orders
   if(typeof renderAll==='function' && document.getElementById('app') && document.getElementById('app').classList.contains('active')){
     try{ renderAll(); }catch(e){}
   }
@@ -597,7 +657,7 @@ window.addEventListener('DOMContentLoaded',()=>{ loadCustomerData(); });
 // ========= UTILS =========
 const $ = s => document.querySelector(s);
 const fmt = n => "$" + n.toLocaleString("es-MX",{minimumFractionDigits:2,maximumFractionDigits:2});
-const initials = n => n.split(" ").slice(0,2).map(x=>x[0]).join("").toUpperCase();
+const initials = n => (String(n||'C').trim()||'C').split(" ").slice(0,2).map(x=>x[0]||'').join("").toUpperCase();
 function toast(msg,type=""){const t=$("#toast");t.textContent=msg;t.className="toast show "+type;setTimeout(()=>t.className="toast",2800);}
 
 // ========= LOGIN =========
@@ -700,9 +760,10 @@ function goPage(p){document.querySelectorAll(".nav-item").forEach(b=>b.classList
 
 // ========= RENDER =========
 function renderAll(){
-  $("#userName").textContent=DB.user.name;
-  $("#userAvatar").textContent=initials(DB.user.name);
-  $("#greetName").textContent=DB.user.name.split(" ")[0];
+  const nm = DB.user.name || 'Cliente';
+  $("#userName").textContent=nm;
+  $("#userAvatar").textContent=initials(nm);
+  $("#greetName").textContent=nm.split(" ")[0];
   renderDashboard();renderPurchases();renderInvoices();renderLoyalty();renderCredit();loadProfile();renderAddresses();renderNotifs();
 }
 function renderAddresses(){
@@ -771,17 +832,88 @@ function renderDashboard(){
 }
 function renderPurchases(filter=""){
   const tb=$("#purchasesTable tbody");tb.innerHTML="";
-  DB.purchases.filter(p=>p.folio.toLowerCase().includes(filter.toLowerCase())).forEach(p=>{
+  if(!DB.purchases.length){ tb.innerHTML='<tr><td colspan="7" class="empty">Aún no tienes compras</td></tr>'; return; }
+  DB.purchases.filter(p=>String(p.folio).toLowerCase().includes(filter.toLowerCase())).forEach(p=>{
     const payBadge=p.pay==="Crédito"?"badge-warning":"badge-info";
-    tb.insertAdjacentHTML("beforeend",`<tr><td><strong>${p.folio}</strong></td><td>${p.date}</td><td>${p.items}</td><td>${fmt(p.total)}</td><td><span class="badge ${payBadge}">${p.pay}</span></td><td><span class="badge badge-success">${p.status}</span></td><td><button class="btn btn-ghost" style="padding:5px 12px;font-size:12px" onclick="toast('Detalle de ${p.folio}')">Ver</button></td></tr>`);
+    const factBtn = p.cfdi_uuid
+      ? `<button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="dlInvoice('${p.id}','pdf')">Factura</button>`
+      : `<button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="openInvoiceReq('${p.id}','${p.folio}')">Solicitar factura</button>`;
+    tb.insertAdjacentHTML("beforeend",`<tr><td><strong>${p.folio}</strong></td><td>${p.date}</td><td>${p.items}</td><td>${fmt(p.total)}</td><td><span class="badge ${payBadge}">${p.pay}</span></td><td><span class="badge badge-success">${p.status}</span></td><td style="white-space:nowrap"><button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="dlTicket('${p.id}')">Ticket</button> ${factBtn}</td></tr>`);
   });
 }
 $("#searchPurchases").addEventListener("input",e=>renderPurchases(e.target.value));
 function renderInvoices(){
   const tb=$("#invoiceTable tbody");tb.innerHTML="";
-  DB.invoices.forEach(i=>tb.insertAdjacentHTML("beforeend",`<tr><td><strong>${i.folio}</strong></td><td>${i.date}</td><td>${i.rfc}</td><td>${fmt(i.total)}</td><td><span class="badge badge-success">${i.status}</span></td><td><button class="btn btn-primary" style="padding:5px 11px;font-size:12px" onclick="dl('${i.folio}','PDF')">PDF</button> <button class="btn btn-ghost" style="padding:5px 11px;font-size:12px" onclick="dl('${i.folio}','XML')">XML</button></td></tr>`));
+  if(!DB.invoices.length){ tb.innerHTML='<tr><td colspan="6" class="empty">Aún no tienes facturas emitidas</td></tr>'; return; }
+  DB.invoices.forEach(i=>tb.insertAdjacentHTML("beforeend",`<tr><td><strong>${i.folio}</strong></td><td>${i.date}</td><td>${i.rfc}</td><td>${fmt(i.total)}</td><td><span class="badge badge-success">${i.status}</span></td><td><button class="btn btn-primary" style="padding:5px 11px;font-size:12px" onclick="dlInvoice('${i.id}','pdf')">PDF</button> <button class="btn btn-ghost" style="padding:5px 11px;font-size:12px" onclick="dlInvoice('${i.id}','xml')">XML</button></td></tr>`));
 }
-function dl(f,t){toast(`Descargando ${f}.${t.toLowerCase()}`,"success");}
+// B47: descargar ticket / factura usando JWT en query (window.open no envía Authorization)
+function _tokenQS(){ const t=_custToken(); return t?('&_t='+encodeURIComponent(t)):''; }
+function dlTicket(saleId){
+  // Abre HTML imprimible (auto window.print). El backend valida customer_email del JWT.
+  const url = '/api/customer/ticket/' + encodeURIComponent(saleId) + '?_=' + Date.now();
+  fetch(url,{ headers:_authHeaders(), credentials:'include' })
+    .then(r=>{ if(!r.ok) throw new Error(r.status); return r.text(); })
+    .then(html=>{
+      const w = window.open('','_blank','width=420,height=640');
+      if(w){ w.document.open(); w.document.write(html); w.document.close(); toast('Ticket listo para imprimir/PDF','success'); }
+      else { toast('Habilita ventanas emergentes','error'); }
+    })
+    .catch(()=>toast('No se pudo cargar el ticket','error'));
+}
+function dlInvoice(saleId, fmt){
+  const url = '/api/customer/invoice/' + encodeURIComponent(saleId) + '?fmt=' + (fmt==='xml'?'xml':'pdf');
+  fetch(url,{ headers:_authHeaders(), credentials:'include' })
+    .then(r=>{
+      if(r.status===404){ toast('Factura no disponible','error'); return null; }
+      if(r.redirected || (r.status>=300 && r.status<400)){ window.open(r.url,'_blank'); return null; }
+      if(!r.ok){ toast('Error al descargar','error'); return null; }
+      return r.blob().then(b=>({b, ct:r.headers.get('Content-Type')||''}));
+    })
+    .then(x=>{
+      if(!x) return;
+      const ext = (fmt==='xml')?'xml':'pdf';
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(x.b); a.download = 'factura-'+saleId+'.'+ext;
+      document.body.appendChild(a); a.click(); a.remove();
+      toast('Descarga iniciada','success');
+    })
+    .catch(()=>toast('Error de red','error'));
+}
+// Modal solicitar factura
+let _invSaleId = null;
+function openInvoiceReq(saleId, folio){
+  _invSaleId = saleId;
+  $("#invFolio").textContent = folio || saleId;
+  $("#invRfc").value   = DB.user.rfc || '';
+  $("#invRazon").value = DB.user.razon || '';
+  $("#invReg").value   = DB.user.reg || '';
+  $("#invCp").value    = DB.user.cp || '';
+  $("#invEmail").value = DB.user.email || '';
+  $("#invModal").classList.add('active');
+}
+function closeInvoiceReq(){ $("#invModal").classList.remove('active'); _invSaleId=null; }
+async function submitInvoiceReq(){
+  if(!_invSaleId) return;
+  const rfc = $("#invRfc").value.trim().toUpperCase();
+  if(!/^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/.test(rfc)){ toast('RFC inválido','error'); return; }
+  const payload = {
+    sale_id: _invSaleId, rfc,
+    business_name: $("#invRazon").value.trim(),
+    tax_regime:    $("#invReg").value.trim(),
+    zip_code:      $("#invCp").value.trim(),
+    email:         $("#invEmail").value.trim(),
+    use:           ($("#invUse")||{}).value || 'G03'
+  };
+  const r = await _apiSend('POST','/api/customer/invoice/request', payload);
+  if(r.ok){
+    toast('Solicitud enviada — revisa tu correo','success');
+    closeInvoiceReq();
+    loadCustomerData().then(()=>renderAll());
+  } else {
+    toast((r.data&&r.data.error)||'No se pudo solicitar','error');
+  }
+}
 function renderLoyalty(){
   const L=DB.loyalty;$("#loyPoints").textContent=L.points.toLocaleString();$("#loyTier").textContent=L.tier;$("#loyNext").textContent=L.next;
   const miss=Math.max(0,L.nextAt-L.points);$("#loyMissing").textContent=miss.toLocaleString();
@@ -791,12 +923,28 @@ function renderLoyalty(){
   const lt=$("#loyaltyTable tbody");lt.innerHTML="";L.history.forEach(h=>{const cls=h.delta>0?"badge-success":"badge-danger";const sign=h.delta>0?"+":"";lt.insertAdjacentHTML("beforeend",`<tr><td>${h.date}</td><td>${h.concept}</td><td><span class="badge ${cls}">${sign}${h.delta}</span></td><td>${h.balance.toLocaleString()}</td></tr>`);});
 }
 function renderCredit(){
-  const c=DB.credit;$("#creditDebt").textContent=fmt(c.debt);$("#creditDue").textContent=c.due;$("#creditLimit").textContent=fmt(c.limit);$("#creditAvail").textContent=fmt(c.limit-c.debt);
-  $("#creditBar").style.width=((c.limit-c.debt)/c.limit*100)+"%";
+  const c=DB.credit;$("#creditDebt").textContent=fmt(c.debt);$("#creditDue").textContent=c.due||'--';$("#creditLimit").textContent=fmt(c.limit);$("#creditAvail").textContent=fmt(c.limit-c.debt);
+  const pct = c.limit>0 ? Math.max(0,Math.min(100,((c.limit-c.debt)/c.limit*100))) : 0;
+  $("#creditBar").style.width=pct+"%";
   const tb=$("#creditTable tbody");tb.innerHTML="";c.history.forEach(h=>tb.insertAdjacentHTML("beforeend",`<tr><td>${h.date}</td><td>${h.concept}</td><td>${h.charge?fmt(h.charge):"--"}</td><td>${h.credit?'<span style="color:var(--success);font-weight:600">'+fmt(h.credit)+'</span>':"--"}</td><td><strong>${fmt(h.balance)}</strong></td></tr>`));
 }
 function loadProfile(){const u=DB.user;$("#pfName").value=u.name;$("#pfEmail").value=u.email;$("#pfPhone").value=u.phone;$("#pfBirth").value=u.birth;$("#pfRfc").value=u.rfc;$("#pfRazon").value=u.razon;$("#pfReg").value=u.reg;$("#pfCp").value=u.cp;$("#pfAddr").value=u.addr;}
-function saveProfile(){DB.user.name=$("#pfName").value;DB.user.email=$("#pfEmail").value;DB.user.phone=$("#pfPhone").value;DB.user.birth=$("#pfBirth").value;DB.user.rfc=$("#pfRfc").value;DB.user.razon=$("#pfRazon").value;DB.user.reg=$("#pfReg").value;DB.user.cp=$("#pfCp").value;DB.user.addr=$("#pfAddr").value;$("#userName").textContent=DB.user.name;$("#userAvatar").textContent=initials(DB.user.name);$("#greetName").textContent=DB.user.name.split(" ")[0];toast("Perfil actualizado","success");}
+async function saveProfile(){
+  DB.user.name=$("#pfName").value;DB.user.email=$("#pfEmail").value;DB.user.phone=$("#pfPhone").value;
+  DB.user.birth=$("#pfBirth").value;DB.user.rfc=$("#pfRfc").value;DB.user.razon=$("#pfRazon").value;
+  DB.user.reg=$("#pfReg").value;DB.user.cp=$("#pfCp").value;DB.user.addr=$("#pfAddr").value;
+  $("#userName").textContent=DB.user.name;
+  $("#userAvatar").textContent=initials(DB.user.name||'C');
+  $("#greetName").textContent=(DB.user.name||'Cliente').split(" ")[0];
+  const payload = {
+    full_name: DB.user.name, phone: DB.user.phone, birth_date: DB.user.birth,
+    rfc: DB.user.rfc, business_name: DB.user.razon, tax_regime: DB.user.reg,
+    zip_code: DB.user.cp, address: DB.user.addr
+  };
+  const r = await _apiSend('PATCH','/api/customer/me', payload);
+  if(r.ok) toast("Perfil actualizado","success");
+  else toast((r.data&&r.data.error)||"No se pudo guardar","error");
+}
 
 // ========= MODALES =========
 function openPay(){$("#payDebt").textContent=fmt(DB.credit.debt);$("#payAmt").value="";$("#payModal").classList.add("active");}
