@@ -7,6 +7,37 @@
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0a0a0f">
 <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');</script>
+<script>
+// Auth-aware splash redirect (only on first visit / with ?go=1).
+// Logged-in users -> launcher. Logged-out users -> landing (this page).
+// Disable redirect with ?stay=1 for testing.
+(function(){
+  try{
+    var qs = new URLSearchParams(location.search);
+    if (qs.get('stay') === '1') return;
+
+    var token = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
+    if (!token) return; // no logged-in -> show landing
+
+    // Validate token is not obviously expired (best-effort, decode JWT exp).
+    try{
+      var payload = token.split('.')[1];
+      if (payload){
+        var data = JSON.parse(atob(payload.replace(/-/g,'+').replace(/_/g,'/')));
+        if (data && data.exp && data.exp * 1000 < Date.now()){
+          localStorage.removeItem('volvix_token');
+          localStorage.removeItem('volvixAuthToken');
+          return;
+        }
+      }
+    } catch(_) { /* opaque token, allow */ }
+
+    // Redirect logged-in user to launcher (or marketplace as fallback).
+    var target = '/volvix-launcher.html';
+    location.replace(target);
+  } catch(_) { /* noop -> show landing */ }
+})();
+</script>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   :root{

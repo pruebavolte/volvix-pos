@@ -69,6 +69,12 @@
     footer a{color:#999;text-decoration:none;margin:0 12px}
     footer a:hover{color:#3B82F6}
     .legal{margin-top:16px;font-size:11px;color:#444;line-height:1.5}
+    .req-list{
+      list-style:none;padding:12px 0 0;margin:0;
+      border-top:1px dashed #2A2A2A;font-size:12px;color:#888;
+    }
+    .req-list li{padding:3px 0;display:flex;gap:8px;align-items:flex-start}
+    .req-list li::before{content:'✓';color:#3B82F6;font-weight:700;flex-shrink:0}
   </style>
 </head>
 <body>
@@ -82,47 +88,83 @@
   <section class="grid" aria-label="Plataformas disponibles">
 
     <!-- Versión Web -->
-    <article class="card">
+    <article class="card" data-platform="web">
       <div class="card-icon" aria-hidden="true">🌐</div>
       <div class="platform">Web · Funciona en cualquier navegador</div>
       <h2>Versión Web</h2>
       <p>Acceso instantáneo desde Chrome, Safari, Firefox o Edge. No requiere instalación. Recomendada para empezar rápido.</p>
-      <a href="/login.html" class="btn btn-primary" aria-label="Abrir Volvix POS Web">
+      <a href="/login.html" class="btn btn-primary" data-track-platform="web" aria-label="Abrir Volvix POS Web">
         Abrir
       </a>
+      <ul class="req-list">
+        <li>Chrome 100+, Edge 100+, Firefox 100+, Safari 15+</li>
+        <li>Conexión inicial; luego funciona offline (PWA)</li>
+        <li>Recomendado: 4 GB RAM</li>
+      </ul>
     </article>
 
     <!-- Windows .exe -->
-    <article class="card">
+    <article class="card" data-platform="windows">
       <div class="card-icon" aria-hidden="true">🖥️</div>
       <div class="platform">Windows 10 / 11 · Aplicación nativa</div>
       <h2>Windows <span class="badge badge-soon">Próximamente</span></h2>
       <p>Aplicación de escritorio para Windows con soporte offline, integración con impresoras y lectores USB.</p>
-      <a href="#" class="btn btn-disabled" aria-disabled="true" onclick="event.preventDefault();return false;">
+      <a href="/downloads/volvix-pos-setup.exe" class="btn btn-disabled" data-track-platform="windows" data-probe-url="/downloads/volvix-pos-setup.exe" aria-disabled="true" onclick="return handleDownloadClick(event, this);">
         Disponible pronto
       </a>
+      <ul class="req-list">
+        <li>Windows 10 (64-bit) o superior</li>
+        <li>Procesador 1 GHz, 2 GB RAM, 200 MB disco</li>
+        <li>Soporte para impresoras térmicas USB / Bluetooth</li>
+      </ul>
     </article>
 
     <!-- Android APK -->
-    <article class="card">
+    <article class="card" data-platform="android">
       <div class="card-icon" aria-hidden="true">📱</div>
-      <div class="platform">Android 7.0+ · APK directo</div>
+      <div class="platform">Android 8.0+ · APK directo</div>
       <h2>Android APK <span class="badge badge-soon">Próximamente</span></h2>
       <p>Instalación directa para Android. Soporte completo para cámara, escáner de barras y notificaciones push.</p>
-      <a href="#" class="btn btn-disabled" aria-disabled="true" onclick="event.preventDefault();return false;">
+      <a href="/downloads/volvix-pos.apk" class="btn btn-disabled" data-track-platform="android" data-probe-url="/downloads/volvix-pos.apk" aria-disabled="true" onclick="return handleDownloadClick(event, this);">
         Disponible pronto
       </a>
+      <ul class="req-list">
+        <li>Android 8.0 (Oreo) o superior</li>
+        <li>2 GB RAM, 100 MB disco</li>
+        <li>Permisos: cámara, almacenamiento, Bluetooth</li>
+      </ul>
     </article>
 
-    <!-- iOS App Store -->
-    <article class="card">
+    <!-- macOS DMG -->
+    <article class="card" data-platform="macos">
       <div class="card-icon" aria-hidden="true">🍎</div>
-      <div class="platform">iOS 14+ · App Store</div>
-      <h2>iOS <span class="badge badge-soon">Próximamente</span></h2>
-      <p>App nativa de iOS publicada en App Store. Funciona en iPhone y iPad. Optimizada para Apple Silicon.</p>
-      <a href="#" class="btn btn-disabled" aria-disabled="true" onclick="event.preventDefault();return false;">
+      <div class="platform">macOS 11+ · DMG nativa</div>
+      <h2>macOS <span class="badge badge-soon">Próximamente</span></h2>
+      <p>App nativa para Mac (Apple Silicon e Intel). Optimizada para tiendas físicas con teclado y lector USB.</p>
+      <a href="/downloads/volvix-pos.dmg" class="btn btn-disabled" data-track-platform="macos" data-probe-url="/downloads/volvix-pos.dmg" aria-disabled="true" onclick="return handleDownloadClick(event, this);">
         Disponible pronto
       </a>
+      <ul class="req-list">
+        <li>macOS 11 Big Sur o superior</li>
+        <li>Apple Silicon (M1/M2/M3) o Intel x64</li>
+        <li>250 MB disco</li>
+      </ul>
+    </article>
+
+    <!-- Linux DEB -->
+    <article class="card" data-platform="linux">
+      <div class="card-icon" aria-hidden="true">🐧</div>
+      <div class="platform">Linux · paquete .deb</div>
+      <h2>Linux <span class="badge badge-soon">Próximamente</span></h2>
+      <p>Paquete .deb para Ubuntu, Debian y derivados. Ideal para hardware POS de bajo consumo.</p>
+      <a href="/downloads/volvix-pos.deb" class="btn btn-disabled" data-track-platform="linux" data-probe-url="/downloads/volvix-pos.deb" aria-disabled="true" onclick="return handleDownloadClick(event, this);">
+        Disponible pronto
+      </a>
+      <ul class="req-list">
+        <li>Ubuntu 20.04+ / Debian 11+ / derivados</li>
+        <li>Arquitectura x86_64 o arm64</li>
+        <li>CUPS para impresoras térmicas</li>
+      </ul>
     </article>
 
     <!-- PWA Install -->
@@ -168,38 +210,75 @@
     var open=box.classList.toggle('show');
     btn.setAttribute('aria-expanded', open ? 'true' : 'false');
     btn.textContent = open ? 'Ocultar instrucciones' : 'Ver instrucciones';
+    trackDownload('pwa_instructions', null);
   }
+
+  // ===== Tracking =====
+  function trackDownload(platform, version){
+    try { if (typeof gtag === 'function') gtag('event', 'download', { platform: platform, version: version || 'unknown' }); } catch(_) {}
+    try {
+      // anonymous track. IP is intentionally NOT sent from client; backend should
+      // anonymize from request socket. Body remains compatible with the spec.
+      fetch('/api/downloads/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ platform: platform, version: version || null, ts: new Date().toISOString(), ua: navigator.userAgent || '' }),
+        keepalive: true
+      }).catch(function(){});
+    } catch(_) {}
+  }
+
+  function handleDownloadClick(ev, anchor){
+    var disabled = anchor.classList.contains('btn-disabled');
+    if (disabled) {
+      ev.preventDefault();
+      var p = anchor.getAttribute('data-track-platform') || 'unknown';
+      trackDownload(p + '_unavailable', null);
+      return false;
+    }
+    var p = anchor.getAttribute('data-track-platform') || 'unknown';
+    trackDownload(p, null);
+    return true;
+  }
+  window.handleDownloadClick = handleDownloadClick;
 
   // Dynamic version detection — replace placeholders if real downloads exist
   document.addEventListener('DOMContentLoaded', function(){
-    // If a real APK/EXE exists at /downloads/, swap the disabled buttons.
-    // (Backend can add ?v=XXX query param to invalidate cache.)
-    var probes = [
-      { url: '/downloads/volvix-pos-windows-latest.exe', selector: 'article:nth-of-type(2)', label: 'Descargar .exe' },
-      { url: '/downloads/volvix-pos-android-latest.apk', selector: 'article:nth-of-type(3)', label: 'Descargar APK' }
-    ];
-    probes.forEach(function(p){
-      fetch(p.url, { method: 'HEAD' }).then(function(r){
-        if(r.ok){
-          var card = document.querySelector(p.selector);
-          if(!card) return;
-          var btn = card.querySelector('.btn-disabled');
-          var badge = card.querySelector('.badge-soon');
-          if(btn){
-            btn.classList.remove('btn-disabled');
-            btn.classList.add('btn-primary');
-            btn.removeAttribute('aria-disabled');
-            btn.removeAttribute('onclick');
-            btn.href = p.url;
-            btn.textContent = p.label;
-          }
-          if(badge){
-            badge.classList.remove('badge-soon');
-            badge.classList.add('badge-new');
-            badge.textContent = 'Disponible';
-          }
+    // Track page view
+    try { if (typeof gtag === 'function') gtag('event', 'page_view', { page: 'descargas' }); } catch(_){}
+
+    // Web button always tracked on click
+    document.querySelectorAll('[data-track-platform="web"]').forEach(function(a){
+      a.addEventListener('click', function(){ trackDownload('web', null); });
+    });
+
+    var labels = {
+      windows: 'Descargar .exe',
+      android: 'Descargar APK',
+      macos:   'Descargar .dmg',
+      linux:   'Descargar .deb'
+    };
+
+    document.querySelectorAll('[data-probe-url]').forEach(function(btn){
+      var url = btn.getAttribute('data-probe-url');
+      var platform = btn.getAttribute('data-track-platform');
+      fetch(url, { method: 'HEAD', cache: 'no-store' }).then(function(r){
+        if (!r.ok) return;
+        btn.classList.remove('btn-disabled');
+        btn.classList.add('btn-primary');
+        btn.removeAttribute('aria-disabled');
+        btn.textContent = labels[platform] || 'Descargar';
+        // Try to read version from response header (X-Version) or from filename
+        var ver = r.headers.get('X-Version') || r.headers.get('Last-Modified') || null;
+        btn.dataset.version = ver || '';
+        var card = btn.closest('article');
+        var badge = card && card.querySelector('.badge-soon');
+        if (badge){
+          badge.classList.remove('badge-soon');
+          badge.classList.add('badge-new');
+          badge.textContent = 'Disponible';
         }
-      }).catch(function(){ /* silently keep "próximamente" */ });
+      }).catch(function(){ /* keep próximamente */ });
     });
   });
 </script>

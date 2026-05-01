@@ -352,6 +352,7 @@
     <button class="tb-btn" data-wired="true" onclick="clearCanvas()">🗑️ Limpiar</button>
     <button class="tb-btn" data-wired="true" onclick="openTemplatesModal()">📂 Cargar plantilla</button>
     <button class="tb-btn" data-wired="true" onclick="saveTemplate()">💾 Guardar plantilla</button>
+    <button class="tb-btn" data-wired="true" onclick="openBatchPrintModal()">📦 Imprimir lote</button>
     <button class="tb-btn primary" data-wired="true" onclick="printEtiqueta()">🖨️ Imprimir</button>
   </div>
 
@@ -456,6 +457,36 @@
         <div class="icon">👆</div>
         <div>Selecciona un elemento del diseño para editar sus propiedades</div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- BATCH PRINT MODAL -->
+<div id="batch-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:12px;width:min(720px,94vw);max-height:84vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 50px rgba(0,0,0,0.3);">
+    <div style="padding:16px 20px;border-bottom:1px solid #E7E5E4;display:flex;align-items:center;gap:10px;">
+      <div style="font-weight:700;font-size:16px;flex:1;">📦 Imprimir lote de etiquetas</div>
+      <button class="tb-btn" onclick="closeBatchPrintModal()" style="padding:6px 10px;">✕</button>
+    </div>
+    <div style="padding:14px 20px;border-bottom:1px solid #F1F1F0;display:flex;gap:8px;align-items:center;">
+      <input id="batch-search" type="text" placeholder="Buscar producto por nombre / SKU..." style="flex:1;padding:8px 12px;border:1px solid #E7E5E4;border-radius:8px;font-size:13px;font-family:inherit;" oninput="renderBatchProducts()">
+      <button class="tb-btn" onclick="batchSelectAllVisible()" style="padding:7px 12px;">Seleccionar visibles</button>
+      <button class="tb-btn" onclick="batchClearSelection()" style="padding:7px 12px;">Limpiar</button>
+    </div>
+    <div id="batch-list" style="flex:1;overflow-y:auto;padding:8px 14px;">
+      <div style="text-align:center;color:#A8A29E;padding:30px;">Cargando productos…</div>
+    </div>
+    <div style="padding:14px 20px;border-top:1px solid #E7E5E4;display:flex;gap:10px;align-items:center;background:#FAFAF9;">
+      <div style="flex:1;font-size:13px;color:#57534E;">
+        <strong id="batch-selected-count">0</strong> productos seleccionados
+        · Total etiquetas: <strong id="batch-total-labels">0</strong>
+      </div>
+      <label style="font-size:12px;color:#57534E;display:flex;align-items:center;gap:6px;">
+        Por defecto:
+        <input id="batch-default-qty" type="number" min="1" value="1" style="width:60px;padding:4px 6px;border:1px solid #E7E5E4;border-radius:6px;" onchange="batchUpdateDefaultQty()">
+      </label>
+      <button class="tb-btn" onclick="closeBatchPrintModal()" style="padding:8px 14px;">Cancelar</button>
+      <button class="tb-btn primary" onclick="confirmBatchPrint()" style="padding:8px 14px;">Imprimir lote</button>
     </div>
   </div>
 </div>
@@ -1281,6 +1312,166 @@
     clearTimeout(window._tt);
     window._tt = setTimeout(() => t.classList.remove('show'), 2500);
   }
+
+  // ===== BATCH PRINT =====
+  let _batchProducts = [];
+  let _batchSelected = {}; // id -> qty
+
+  async function openBatchPrintModal() {
+    const modal = document.getElementById('batch-modal');
+    modal.style.display = 'flex';
+    document.getElementById('batch-list').innerHTML = '<div style="text-align:center;color:#A8A29E;padding:30px;">Cargando productos…</div>';
+    try {
+      const r = await _authFetch('/api/productos', { method: 'GET' });
+      if (r.ok) {
+        const j = await r.json();
+        _batchProducts = Array.isArray(j) ? j : (j.products || j.productos || []);
+      } else {
+        _batchProducts = [];
+      }
+    } catch (e) {
+      _batchProducts = [];
+    }
+    if (!_batchProducts.length) {
+      _batchProducts = [
+        { id:'demo1', nombre:'Coca-Cola 600ml', precio:25, codigo:'7501055303045', sku:'SKU-001' },
+        { id:'demo2', nombre:'Pan de caja', precio:45, codigo:'7501030450012', sku:'SKU-002' },
+        { id:'demo3', nombre:'Leche entera 1L', precio:32, codigo:'7501020012345', sku:'SKU-003' },
+      ];
+    }
+    renderBatchProducts();
+  }
+  window.openBatchPrintModal = openBatchPrintModal;
+
+  function closeBatchPrintModal() {
+    document.getElementById('batch-modal').style.display = 'none';
+  }
+  window.closeBatchPrintModal = closeBatchPrintModal;
+
+  function renderBatchProducts() {
+    const q = String(document.getElementById('batch-search').value || '').toLowerCase().trim();
+    const list = _batchProducts.filter(p => {
+      if (!q) return true;
+      const hay = ((p.nombre||'') + ' ' + (p.sku||'') + ' ' + (p.codigo||'')).toLowerCase();
+      return hay.includes(q);
+    });
+    const wrap = document.getElementById('batch-list');
+    if (!list.length) {
+      wrap.innerHTML = '<div style="text-align:center;color:#A8A29E;padding:30px;">Sin coincidencias.</div>';
+      return;
+    }
+    wrap.innerHTML = list.map(p => {
+      const sel = _batchSelected[p.id] || 0;
+      const checked = sel > 0;
+      return `<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid #F1F1F0;border-radius:8px;margin-bottom:6px;background:${checked ? '#FFF7ED' : '#FFF'};">
+        <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleBatchProduct('${p.id}', this.checked)">
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:600;font-size:13px;color:#1C1917;">${(p.nombre||'').replace(/[<>"']/g,'')}</div>
+          <div style="font-size:11px;color:#A8A29E;">${p.codigo||p.sku||'—'} · ${p.precio ? '$'+p.precio : ''}</div>
+        </div>
+        <input type="number" min="0" value="${sel||1}" style="width:72px;padding:5px 8px;border:1px solid #E7E5E4;border-radius:6px;font-size:13px;text-align:center;" onchange="setBatchQty('${p.id}', +this.value)">
+        <span style="font-size:11px;color:#A8A29E;">copias</span>
+      </div>`;
+    }).join('');
+    refreshBatchTotals();
+  }
+  window.renderBatchProducts = renderBatchProducts;
+
+  function toggleBatchProduct(id, checked) {
+    const def = parseInt(document.getElementById('batch-default-qty').value) || 1;
+    if (checked) _batchSelected[id] = def;
+    else delete _batchSelected[id];
+    renderBatchProducts();
+  }
+  window.toggleBatchProduct = toggleBatchProduct;
+
+  function setBatchQty(id, qty) {
+    if (!qty || qty < 1) delete _batchSelected[id];
+    else _batchSelected[id] = qty;
+    refreshBatchTotals();
+  }
+  window.setBatchQty = setBatchQty;
+
+  function batchSelectAllVisible() {
+    const q = String(document.getElementById('batch-search').value || '').toLowerCase().trim();
+    const def = parseInt(document.getElementById('batch-default-qty').value) || 1;
+    _batchProducts.forEach(p => {
+      const hay = ((p.nombre||'') + ' ' + (p.sku||'') + ' ' + (p.codigo||'')).toLowerCase();
+      if (!q || hay.includes(q)) _batchSelected[p.id] = def;
+    });
+    renderBatchProducts();
+  }
+  window.batchSelectAllVisible = batchSelectAllVisible;
+
+  function batchClearSelection() {
+    _batchSelected = {};
+    renderBatchProducts();
+  }
+  window.batchClearSelection = batchClearSelection;
+
+  function batchUpdateDefaultQty() {
+    const def = parseInt(document.getElementById('batch-default-qty').value) || 1;
+    Object.keys(_batchSelected).forEach(id => { _batchSelected[id] = def; });
+    renderBatchProducts();
+  }
+  window.batchUpdateDefaultQty = batchUpdateDefaultQty;
+
+  function refreshBatchTotals() {
+    const ids = Object.keys(_batchSelected);
+    const total = ids.reduce((s,id) => s + (_batchSelected[id] || 0), 0);
+    document.getElementById('batch-selected-count').textContent = ids.length;
+    document.getElementById('batch-total-labels').textContent = total;
+  }
+
+  async function confirmBatchPrint() {
+    const ids = Object.keys(_batchSelected);
+    if (!ids.length) { showToast('Selecciona al menos un producto'); return; }
+    const items = ids.map(id => {
+      const p = _batchProducts.find(x => String(x.id) === String(id));
+      return p ? { product_id: p.id, qty: _batchSelected[id], name: p.nombre, price: p.precio, barcode: p.codigo, sku: p.sku } : null;
+    }).filter(Boolean);
+
+    const total = items.reduce((s,i) => s + (i.qty||0), 0);
+    if (!confirm(`Imprimir ${total} etiquetas (${items.length} productos distintos)?`)) return;
+
+    const body = {
+      template_id: window._etiquetaCurrentId || null,
+      template_elements: elements,
+      canvas_w: document.getElementById('canvas').offsetWidth,
+      canvas_h: document.getElementById('canvas').offsetHeight,
+      items,
+      printer_id: 'default',
+      source: 'etiqueta_designer_batch'
+    };
+
+    try {
+      const res = await _authFetch('/api/labels/print', {
+        method: 'POST',
+        body: JSON.stringify(body)
+      });
+      if (res.status === 401) { showToast('⚠️ Inicia sesión'); return; }
+      if (res.status === 404 || res.status === 503) {
+        showToast('🖨️ Endpoint de lote no disponible. Imprimiendo de a uno...');
+        // best-effort fallback: just call printEtiqueta() once per item
+        for (const it of items) {
+          for (let n = 0; n < it.qty; n++) {
+            try { await printEtiqueta(); } catch(_) {}
+          }
+        }
+        return;
+      }
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        showToast('Error: ' + (err.error || err.message || ('HTTP ' + res.status)));
+        return;
+      }
+      showToast(`✓ ${total} etiquetas enviadas a impresora`);
+      closeBatchPrintModal();
+    } catch (e) {
+      showToast('Error de red: ' + (e.message || e));
+    }
+  }
+  window.confirmBatchPrint = confirmBatchPrint;
 
   // ===== INIT =====
   loadTemplate('producto');

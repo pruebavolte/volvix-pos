@@ -204,9 +204,14 @@
     <div class="layout-2">
       <!-- MÓDULOS -->
       <div class="card">
-        <h2>Módulos disponibles (18)</h2>
-        <p class="help">Cambia los toggles para activar o desactivar. POS siempre activo.</p>
-        <div class="mod-grid" id="modGrid"></div>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px;">
+          <div>
+            <h2 style="margin-bottom:4px;">Módulos disponibles (18)</h2>
+            <p class="help" style="margin:0;">Cambia los toggles para activar o desactivar. POS siempre activo.</p>
+          </div>
+          <button class="btn sm" type="button" id="btnRequestModule">+ Solicitar nuevo módulo</button>
+        </div>
+        <div class="mod-grid" id="modGrid" style="margin-top:14px;"></div>
       </div>
 
       <!-- PREVIEW -->
@@ -244,6 +249,36 @@
     </div>
   </div>
 
+</div>
+
+<!-- REQUEST MODULE MODAL -->
+<div class="modal-bg hidden" id="reqModuleBg">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Solicitar un módulo nuevo</h3>
+      <div class="small">Tu solicitud será revisada por el equipo de Volvix.</div>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <label style="font-size:12px;color:var(--text-2);font-weight:600;">
+          Nombre del módulo
+          <input id="reqModName" type="text" placeholder="Ej. Gestión de membresías" style="width:100%;margin-top:4px;padding:9px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;">
+        </label>
+        <label style="font-size:12px;color:var(--text-2);font-weight:600;">
+          ¿Qué necesitas que haga?
+          <textarea id="reqModDesc" rows="4" placeholder="Describe el caso de uso, qué pantallas / acciones esperas..." style="width:100%;margin-top:4px;padding:9px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;resize:vertical;"></textarea>
+        </label>
+        <label style="font-size:12px;color:var(--text-2);font-weight:600;">
+          Tipo de negocio (opcional)
+          <input id="reqModBiz" type="text" placeholder="Ej. Spa, Veterinaria, B2B mayorista..." style="width:100%;margin-top:4px;padding:9px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;">
+        </label>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn sm" id="reqModCancel" type="button">Cancelar</button>
+      <button class="btn primary sm" id="reqModSend" type="button">Enviar solicitud</button>
+    </div>
+  </div>
 </div>
 
 <!-- USER OVERRIDES MODAL -->
@@ -617,6 +652,43 @@
     renderUsers();
   }
 
+  // ================== REQUEST NEW MODULE =================
+  function openRequestModal() {
+    $('#reqModName').value = '';
+    $('#reqModDesc').value = '';
+    $('#reqModBiz').value = '';
+    $('#reqModuleBg').classList.remove('hidden');
+    setTimeout(function () { $('#reqModName').focus(); }, 30);
+  }
+  function closeRequestModal() { $('#reqModuleBg').classList.add('hidden'); }
+
+  async function sendModuleRequest() {
+    var name = String($('#reqModName').value || '').trim();
+    var desc = String($('#reqModDesc').value || '').trim();
+    var biz  = String($('#reqModBiz').value  || '').trim();
+    if (!name) { toast('Ingresa un nombre', 'warn'); $('#reqModName').focus(); return; }
+    if (!desc) { toast('Describe brevemente el módulo', 'warn'); $('#reqModDesc').focus(); return; }
+    var btn = $('#reqModSend');
+    btn.disabled = true; btn.textContent = 'Enviando...';
+    try {
+      var resp = await fetch('/api/feature-flags/requests', {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ module_name: name, description: desc, business_type: biz || null })
+      });
+      var json = await resp.json().catch(function () { return {}; });
+      if (!resp.ok || (json && json.ok === false)) {
+        throw new Error(json.error_message || json.error || ('HTTP ' + resp.status));
+      }
+      btn.disabled = false; btn.textContent = 'Enviar solicitud';
+      closeRequestModal();
+      toast('Solicitud enviada · gracias por tu feedback', 'ok');
+    } catch (e) {
+      btn.disabled = false; btn.textContent = 'Enviar solicitud';
+      toast('Error: ' + (e.message || 'no se pudo enviar'), 'err');
+    }
+  }
+
   // ================== TABS =================
   function setupTabs() {
     $all('#tabs .tab').forEach(function (t) {
@@ -650,6 +722,12 @@
     $('#userModalSave').addEventListener('click', saveUserOverrides);
     $('#userModalBg').addEventListener('click', function (e) {
       if (e.target === e.currentTarget) closeUserModal();
+    });
+    $('#btnRequestModule').addEventListener('click', openRequestModal);
+    $('#reqModCancel').addEventListener('click', closeRequestModal);
+    $('#reqModSend').addEventListener('click', sendModuleRequest);
+    $('#reqModuleBg').addEventListener('click', function (e) {
+      if (e.target === e.currentTarget) closeRequestModal();
     });
 
     $('#loading').style.display = 'none';

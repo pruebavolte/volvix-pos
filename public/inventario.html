@@ -103,8 +103,11 @@
 <div class="container">
   <div class="topbar">
     <h1>Inventario</h1>
-    <div style="display:flex;gap:.7rem">
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+      <button class="btn btn-ghost" onclick="document.getElementById('csvFile').click()">Importar CSV</button>
+      <input id="csvFile" type="file" accept=".csv,text/csv" style="display:none" onchange="onCsvSelected(event)">
       <button class="btn btn-ghost" onclick="exportCSV()">Exportar CSV</button>
+      <button class="btn btn-ghost" onclick="openBulkModal()">Bulk precios</button>
       <button class="btn btn-primary" onclick="openModal()">+ Agregar producto</button>
     </div>
   </div>
@@ -130,7 +133,7 @@
   </div>
 
   <div class="toolbar">
-    <input class="search-input" id="searchInput" placeholder="Buscar por nombre, categoría..." oninput="filterTable()">
+    <input class="search-input" id="searchInput" placeholder="Buscar por nombre, categoría, código..." oninput="debouncedFilter()">
     <select id="catFilter" onchange="filterTable()">
       <option value="">Todas las categorías</option>
     </select>
@@ -139,6 +142,7 @@
       <option value="bajo">Stock bajo (&lt;5)</option>
       <option value="cero">Sin stock</option>
       <option value="ok">Stock OK</option>
+      <option value="costo_cero">Costo cero</option>
     </select>
     <button class="btn btn-ghost" onclick="loadProducts()">↻ Actualizar</button>
   </div>
@@ -208,6 +212,71 @@
   </div>
 </div>
 
+<!-- BULK PRICE MODAL -->
+<div class="modal-overlay" id="bulkModal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-title">Actualizar precios en lote</div>
+    <p style="color:var(--muted);font-size:.82rem;margin-bottom:1rem">
+      Aplica un cambio de precio o costo a todos los productos filtrados actualmente.
+    </p>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Campo</label>
+        <select id="bulk-field">
+          <option value="precio">Precio</option>
+          <option value="costo">Costo</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Operación</label>
+        <select id="bulk-op">
+          <option value="increase_pct">Subir %</option>
+          <option value="decrease_pct">Bajar %</option>
+          <option value="set">Asignar valor fijo</option>
+          <option value="add">Sumar monto</option>
+          <option value="round_up">Redondear a múltiplo</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label>Valor</label>
+        <input id="bulk-value" type="number" step="0.01" placeholder="Ej. 10 (= 10% si subir/bajar, $10 si asignar/sumar)">
+      </div>
+    </div>
+    <div id="bulkPreview" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.8rem;font-size:.78rem;max-height:160px;overflow-y:auto;margin-bottom:1rem;color:var(--muted)">
+      Sin previsualización aún.
+    </div>
+    <div style="display:flex;gap:.7rem;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeBulkModal()">Cancelar</button>
+      <button class="btn btn-ghost" onclick="bulkPreview()">Previsualizar</button>
+      <button class="btn btn-primary" onclick="bulkApply()">Aplicar a <span id="bulkCount">0</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- CSV IMPORT MODAL -->
+<div class="modal-overlay" id="csvModal">
+  <div class="modal" style="max-width:680px">
+    <div class="modal-title">Importar productos desde CSV</div>
+    <p style="color:var(--muted);font-size:.8rem;margin-bottom:1rem">
+      Columnas esperadas: <code>nombre,categoria,precio,costo,stock,stock_min,codigo</code>.
+      La primera fila debe ser el encabezado. Se actualizan productos existentes (match por nombre o código) y se crean los nuevos.
+    </p>
+    <div id="csvSummary" style="font-size:.85rem;margin-bottom:.8rem"></div>
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.5rem;max-height:280px;overflow:auto;margin-bottom:1rem">
+      <table style="font-size:.78rem">
+        <thead>
+          <tr><th>Nombre</th><th>Cat</th><th>Precio</th><th>Costo</th><th>Stock</th><th>Código</th><th>Acción</th></tr>
+        </thead>
+        <tbody id="csvPreviewBody"></tbody>
+      </table>
+    </div>
+    <div style="display:flex;gap:.7rem;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeCsvModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmCsvImport()">Confirmar importación</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -258,22 +327,34 @@ function updateStats() {
   document.getElementById('st-valor').textContent = fmt(valor);
 }
 
-function filterTable() {
-  const q = document.getElementById('searchInput').value.toLowerCase();
+let _debounceTimer = null;
+function debouncedFilter() {
+  clearTimeout(_debounceTimer);
+  _debounceTimer = setTimeout(filterTable, 220);
+}
+
+function getFilteredProducts() {
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
   const cat = document.getElementById('catFilter').value;
   const sf = document.getElementById('stockFilter').value;
 
-  let list = allProducts.filter(p => {
-    const matchQ = !q || p.nombre.toLowerCase().includes(q) || (p.categoria||'').toLowerCase().includes(q);
+  return allProducts.filter(p => {
+    const matchQ = !q ||
+      (p.nombre||'').toLowerCase().includes(q) ||
+      (p.categoria||'').toLowerCase().includes(q) ||
+      (p.codigo||'').toLowerCase().includes(q);
     const matchCat = !cat || (p.categoria||'') === cat;
     let matchS = true;
     if (sf === 'bajo') matchS = p.stock > 0 && p.stock < (p.stock_min||5);
     else if (sf === 'cero') matchS = !p.stock;
     else if (sf === 'ok') matchS = p.stock >= (p.stock_min||5);
+    else if (sf === 'costo_cero') matchS = !p.costo;
     return matchQ && matchCat && matchS;
   });
+}
 
-  renderTable(list);
+function filterTable() {
+  renderTable(getFilteredProducts());
 }
 
 function stockStatus(p) {
@@ -386,8 +467,207 @@ function exportCSV() {
   toast('CSV exportado');
 }
 
-document.querySelector('.modal-overlay').addEventListener('click', e => {
-  if (e.target === e.currentTarget) closeModal();
+// ===== BULK PRICE UPDATE =====
+function openBulkModal() {
+  const list = getFilteredProducts();
+  document.getElementById('bulkCount').textContent = list.length + ' producto' + (list.length===1?'':'s');
+  document.getElementById('bulkPreview').textContent = 'Filtrados actualmente: ' + list.length + ' productos. Configura la operación y previsualiza.';
+  document.getElementById('bulkModal').classList.add('open');
+}
+function closeBulkModal() { document.getElementById('bulkModal').classList.remove('open'); }
+
+function _computeBulk(p, field, op, value) {
+  const current = parseFloat(p[field] || 0);
+  const v = parseFloat(value || 0);
+  let next = current;
+  switch(op){
+    case 'increase_pct': next = current * (1 + v/100); break;
+    case 'decrease_pct': next = current * (1 - v/100); break;
+    case 'set':          next = v; break;
+    case 'add':          next = current + v; break;
+    case 'round_up':
+      if (v > 0) next = Math.ceil(current / v) * v;
+      break;
+  }
+  return Math.max(0, +next.toFixed(2));
+}
+
+function bulkPreview() {
+  const list = getFilteredProducts();
+  const field = document.getElementById('bulk-field').value;
+  const op = document.getElementById('bulk-op').value;
+  const value = document.getElementById('bulk-value').value;
+  if (value === '' && op !== 'round_up') { toast('Ingresa un valor', 'error'); return; }
+  const sample = list.slice(0, 8).map(p => {
+    const next = _computeBulk(p, field, op, value);
+    return `${(p.nombre||'').slice(0,28).padEnd(28,' ')}  ${field}: ${fmt(p[field])} → ${fmt(next)}`;
+  }).join('\n');
+  const more = list.length > 8 ? `\n…y ${list.length - 8} más` : '';
+  document.getElementById('bulkPreview').innerHTML =
+    '<pre style="margin:0;font-family:monospace;font-size:.75rem;color:var(--text);white-space:pre-wrap">' + sample + more + '</pre>';
+}
+
+async function bulkApply() {
+  const list = getFilteredProducts();
+  const field = document.getElementById('bulk-field').value;
+  const op = document.getElementById('bulk-op').value;
+  const value = document.getElementById('bulk-value').value;
+  if (!list.length) { toast('Sin productos para actualizar', 'error'); return; }
+  if (!confirm(`Aplicar ${op} con valor ${value} sobre ${field} a ${list.length} productos?`)) return;
+
+  const updates = list.map(p => ({ id: p.id, [field]: _computeBulk(p, field, op, value) }));
+
+  // Optimistic local update
+  updates.forEach(u => {
+    const p = allProducts.find(x => x.id === u.id);
+    if (p) p[field] = u[field];
+  });
+
+  // Try bulk endpoint, fallback to per-item PUT
+  let okServer = false;
+  try {
+    const r = await fetch('/api/productos/bulk', {
+      method: 'PATCH',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ updates })
+    });
+    if (r.ok) okServer = true;
+  } catch {}
+  if (!okServer) {
+    // best-effort per-item
+    for (const u of updates.slice(0, 50)) {
+      try { await fetch(`/api/productos/${u.id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ [field]: u[field] }) }); } catch {}
+    }
+  }
+
+  closeBulkModal();
+  toast(`${updates.length} productos actualizados`);
+  updateStats();
+  filterTable();
+}
+
+// ===== CSV IMPORT =====
+let _csvParsed = null;
+
+function _parseCsv(text) {
+  // Simple CSV parser supporting quoted fields and commas inside quotes
+  const rows = [];
+  let row = []; let cur = ''; let inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i], n = text[i+1];
+    if (inQ) {
+      if (c === '"' && n === '"') { cur += '"'; i++; }
+      else if (c === '"') inQ = false;
+      else cur += c;
+    } else {
+      if (c === '"') inQ = true;
+      else if (c === ',') { row.push(cur); cur = ''; }
+      else if (c === '\n') { row.push(cur); rows.push(row); row = []; cur = ''; }
+      else if (c === '\r') { /* skip */ }
+      else cur += c;
+    }
+  }
+  if (cur.length || row.length) { row.push(cur); rows.push(row); }
+  return rows.filter(r => r.some(x => String(x).trim() !== ''));
+}
+
+function onCsvSelected(ev) {
+  const file = ev.target.files && ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const rows = _parseCsv(String(reader.result));
+      if (rows.length < 2) { toast('CSV vacío o sin datos', 'error'); return; }
+      const header = rows[0].map(h => String(h).trim().toLowerCase());
+      const idx = (k) => header.indexOf(k);
+      const iName = idx('nombre');
+      if (iName === -1) { toast('Falta columna "nombre"', 'error'); return; }
+      const iCat   = idx('categoria');
+      const iPrec  = idx('precio');
+      const iCost  = idx('costo');
+      const iStock = idx('stock');
+      const iMin   = idx('stock_min');
+      const iCode  = idx('codigo');
+
+      const items = [];
+      for (let r = 1; r < rows.length; r++) {
+        const row = rows[r];
+        const nombre = String(row[iName]||'').trim();
+        if (!nombre) continue;
+        const codigo = iCode>=0 ? String(row[iCode]||'').trim() : '';
+        const existing = allProducts.find(p =>
+          (codigo && p.codigo === codigo) ||
+          (p.nombre||'').toLowerCase() === nombre.toLowerCase()
+        );
+        items.push({
+          nombre,
+          categoria: iCat>=0 ? String(row[iCat]||'').trim() : '',
+          precio: iPrec>=0 ? parseFloat(row[iPrec])||0 : 0,
+          costo: iCost>=0 ? parseFloat(row[iCost])||0 : 0,
+          stock: iStock>=0 ? parseInt(row[iStock])||0 : 0,
+          stock_min: iMin>=0 ? parseInt(row[iMin])||5 : 5,
+          codigo,
+          action: existing ? 'update' : 'create',
+          existing_id: existing ? existing.id : null
+        });
+      }
+      _csvParsed = items;
+      const created = items.filter(i => i.action === 'create').length;
+      const updated = items.filter(i => i.action === 'update').length;
+      document.getElementById('csvSummary').innerHTML =
+        `<strong>${items.length}</strong> filas detectadas · <span style="color:var(--accent)">${created} nuevos</span> · <span style="color:var(--warn)">${updated} actualizan</span>`;
+      const body = document.getElementById('csvPreviewBody');
+      body.innerHTML = items.slice(0, 30).map(it => `<tr>
+        <td>${it.nombre}</td>
+        <td>${it.categoria}</td>
+        <td>${fmt(it.precio)}</td>
+        <td>${fmt(it.costo)}</td>
+        <td>${it.stock}</td>
+        <td style="font-family:monospace;font-size:.7rem">${it.codigo||'—'}</td>
+        <td><span class="chip ${it.action==='create'?'chip-green':'chip-yellow'}">${it.action==='create'?'Nuevo':'Actualizar'}</span></td>
+      </tr>`).join('') + (items.length > 30 ? `<tr><td colspan="7" style="text-align:center;color:var(--muted)">…y ${items.length-30} más</td></tr>` : '');
+      document.getElementById('csvModal').classList.add('open');
+    } catch (e) {
+      toast('Error parseando CSV: ' + e.message, 'error');
+    } finally {
+      ev.target.value = '';
+    }
+  };
+  reader.readAsText(file);
+}
+
+function closeCsvModal() { document.getElementById('csvModal').classList.remove('open'); }
+
+async function confirmCsvImport() {
+  if (!_csvParsed || !_csvParsed.length) { toast('Sin datos', 'error'); return; }
+  const items = _csvParsed.map(({action,existing_id,...rest}) => rest);
+  let okServer = false;
+  try {
+    const r = await fetch('/api/productos/import', {
+      method: 'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ products: items })
+    });
+    if (r.ok) okServer = true;
+  } catch {}
+  if (!okServer) {
+    // fallback per-item
+    for (const it of items) {
+      try {
+        await fetch('/api/productos', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(it) });
+      } catch {}
+    }
+  }
+  toast(`${items.length} productos importados`);
+  closeCsvModal();
+  _csvParsed = null;
+  loadProducts();
+}
+
+document.querySelectorAll('.modal-overlay').forEach(ov => {
+  ov.addEventListener('click', e => {
+    if (e.target === e.currentTarget) ov.classList.remove('open');
+  });
 });
 
 loadProducts();
