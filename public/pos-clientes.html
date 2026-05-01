@@ -1295,7 +1295,7 @@ function openMovimiento(tipo) {
   setTimeout(() => document.getElementById('movMonto').focus(), 80);
 }
 
-function guardarMovimiento() {
+async function guardarMovimiento() {
   const monto    = parseFloat(document.getElementById('movMonto').value || 0);
   const concepto = document.getElementById('movConcepto').value.trim();
   if (monto <= 0) { toast('El monto debe ser mayor a 0', 'err'); return; }
@@ -1310,6 +1310,23 @@ function guardarMovimiento() {
   // Guardar en historial local
   if (!DEMO_MOVIMIENTOS[c.id]) DEMO_MOVIMIENTOS[c.id] = [];
   DEMO_MOVIMIENTOS[c.id].unshift({ tipo: movType, monto, concepto, fecha: Date.now() });
+
+  // POST al backend (auth via volvix-api)
+  try {
+    await window.volvix.api.raw('POST', '/api/customers/' + encodeURIComponent(c.id) + '/payments', {
+      type:    movType, // 'cargo' | 'abono'
+      amount:  monto,
+      concept: concepto,
+    });
+  } catch {}
+  // Persistir nuevo saldo
+  try {
+    await window.volvix.sync.execute({
+      type: 'update', table: 'clientes', id: c.id,
+      data: { saldo_credito: c.saldoCredito },
+      endpoint: '/api/clientes/' + c.id, body: { saldo_credito: c.saldoCredito },
+    });
+  } catch {}
 
   closeModal('modalMovimiento');
   selectClient(c.id);

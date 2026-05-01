@@ -515,6 +515,7 @@ html, body {
       <!-- Botones de acción -->
       <div style="display:flex;gap:10px;flex-wrap:wrap" class="no-print">
         <button class="btn" onclick="imprimirCorte()">🖨️ Imprimir resumen</button>
+        <button class="btn primary" onclick="imprimirCorteZPdf()">🧾 Imprimir Corte Z (PDF)</button>
         <button class="btn" onclick="switchTab('arqueo', document.querySelectorAll('.tab')[1])">🪙 Ir a arqueo</button>
         <div style="flex:1"></div>
         <button class="btn danger no-print" id="btnCerrarTurno" onclick="confirmarCerrarTurno()">
@@ -865,7 +866,7 @@ function confirmarAbrirTurno() {
   setTimeout(() => document.getElementById('aperFondo').focus(), 80);
 }
 
-function abrirTurno() {
+async function abrirTurno() {
   const fondo = parseFloat(document.getElementById('aperFondo').value || '0');
   if (fondo < 0) { toast('El fondo no puede ser negativo', 'err'); return; }
   const u = window.VOLVIX_USER;
@@ -879,6 +880,19 @@ function abrirTurno() {
     estado:       'abierto',
     notas:        document.getElementById('aperNotas').value,
   };
+
+  // POST /api/cuts/open (auth via volvix-api → Authorization Bearer)
+  try {
+    const resp = await window.volvix.api.raw('POST', '/api/cuts/open', {
+      opening_amount: fondo,
+      cashier:        turno.cajero,
+      notes:          turno.notas,
+    });
+    if (resp?.id || resp?.cut_id) turno.id = resp.id || resp.cut_id;
+  } catch (err) {
+    toast('⚠ Apertura registrada localmente (offline): ' + err.message, 'warn');
+  }
+
   saveTurno();
   entradas = []; salidas = []; ventas = [];
   closeModal('modalApertura');
@@ -935,7 +949,26 @@ async function ejecutarCorteZ() {
   hist.unshift({ ...turno });
   localStorage.setItem(histKey, JSON.stringify(hist.slice(0, 100)));
 
-  // Sync al server
+  // POST /api/cuts/close (auth via volvix-api → Authorization Bearer)
+  try {
+    const efectivoVentas = ventas.filter(v => v.metodo_pago === 'efectivo').reduce((s, v) => s + Number(v.total || 0), 0);
+    const totalEnt   = entradas.reduce((s, e) => s + Number(e.monto || 0), 0);
+    const totalSal   = salidas.reduce((s, e)  => s + Number(e.monto || 0), 0);
+    const expected   = (turno.fondoInicial || 0) + efectivoVentas + totalEnt - totalSal;
+    await window.volvix.api.raw('POST', '/api/cuts/close', {
+      cut_id:           turno.id,
+      closing_amount:   turno.efectivoFisico,
+      expected_amount:  expected,
+      total_sales:      turno.totalVentas,
+      cash_in:          totalEnt,
+      cash_out:         totalSal,
+      observations:     turno.observaciones,
+    });
+  } catch (err) {
+    toast('⚠ Cierre registrado localmente (offline): ' + err.message, 'warn');
+  }
+
+  // Sync alias /api/cortes (legado)
   try {
     await window.volvix.sync.execute({
       type:     'create',
@@ -1009,6 +1042,36 @@ function imprimirCorte() {
   win.print();
 }
 
+// ── Imprimir Corte Z (PDF backend, fallback a impresora térmica raw) ──
+async function imprimirCorteZPdf() {
+  const cutId = turno?.id || '';
+  // Intento 1: PDF desde backend (auth header automático vía fetch+session)
+  try {
+    const headers = window.volvix?.session?.getAuthHeaders?.() || {};
+    const url = `/api/reports/cash-cut/pdf?cut_id=${encodeURIComponent(cutId)}`;
+    const resp = await fetch(url, { headers });
+    if (resp.ok) {
+      const blob = await resp.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = objectUrl;
+      a.download = `corte_z_${cutId || 'turno'}_${new Date().toISOString().slice(0,10)}.pdf`;
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 5000);
+      toast('✓ Corte Z (PDF) descargado', 'ok');
+      return;
+    }
+  } catch {}
+  // Fallback: enviar texto raw a impresora térmica
+  try {
+    await window.volvix.api.raw('POST', '/api/printer/raw', { text: generarTicketTexto() });
+    toast('✓ Corte Z enviado a impresora', 'ok');
+  } catch (err) {
+    imprimirCorte();
+  }
+}
+
 // ── Movimientos (entrada/salida) ──
 let movTipo = 'entrada';
 function openMovimiento(tipo) {
@@ -1021,7 +1084,7 @@ function openMovimiento(tipo) {
   setTimeout(() => document.getElementById('movConcepto').focus(), 80);
 }
 
-function guardarMovimiento() {
+async function guardarMovimiento() {
   const concepto  = document.getElementById('movConcepto').value.trim();
   const monto     = parseFloat(document.getElementById('movMonto').value || '0');
   const autorizo  = document.getElementById('movAutorizo').value.trim();
@@ -1043,11 +1106,23 @@ function guardarMovimiento() {
   if (movTipo === 'entrada') entradas.push(mov);
   else salidas.push(mov);
 
-  // Persistir
+  // Persistir local
   const key  = 'volvix:movimientos:' + (window.VOLVIX_USER?.tenant_id || 'local');
   const all  = JSON.parse(localStorage.getItem(key) || '[]');
   all.push(mov);
   localStorage.setItem(key, JSON.stringify(all));
+
+  // POST al backend (auth automático)
+  try {
+    await window.volvix.api.raw('POST', '/api/cuts/' + encodeURIComponent(turno?.id || '') + '/adjustment', {
+      type:     movTipo === 'entrada' ? 'cash_in' : 'cash_out',
+      amount:   monto,
+      concept:  concepto,
+      authorized_by: autorizo,
+    });
+  } catch {
+    // offline-first → ya guardado en localStorage
+  }
 
   closeModal('modalMovimiento');
   renderKPIs();

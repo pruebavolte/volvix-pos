@@ -1303,15 +1303,37 @@ async function guardarAjuste() {
     movs.push(mov);
     window.volvix?.offline?.setLocal?.('movimientos', movs) || localStorage.setItem('volvix:movimientos', JSON.stringify(movs));
 
-    // Sync al server
-    await window.volvix.sync.execute({
+    // Llamada real al backend según tipo
+    const cantidad = parseInt(document.getElementById('ajusteCantidad').value || 0);
+    if (tipo === 'ajuste') {
+      // Ajuste directo → /api/inventory/bulk-adjust
+      await window.volvix.api.raw('POST', '/api/inventory/bulk-adjust', {
+        items: [{ product_id: ajustingProduct.id, qty_diff: resultante - (ajustingProduct.stock || 0), reason: motivo }],
+      }).catch(async () => {
+        // Fallback al endpoint legacy /api/inventory/adjust
+        await window.volvix.api.raw('POST', '/api/inventory/adjust', {
+          product_id: ajustingProduct.id, qty: resultante, reason: motivo,
+        });
+      });
+    } else {
+      // Entrada / salida → /api/inventory/movements
+      await window.volvix.api.raw('POST', '/api/inventory/movements', {
+        type:       tipo === 'entrada' ? 'in' : 'out',
+        product_id: ajustingProduct.id,
+        qty:        cantidad,
+        notes:      motivo,
+      });
+    }
+
+    // Mantener stock en /api/productos sincronizado (best-effort)
+    window.volvix.sync.execute({
       type:     'update',
       table:    'productos',
       id:       ajustingProduct.id,
       data:     { stock: resultante },
       endpoint: '/api/productos/' + ajustingProduct.id,
       body:     { stock: resultante },
-    });
+    }).catch(() => {});
 
     closeModal('modalAjuste');
     applyFilters();
@@ -1363,18 +1385,30 @@ async function importarCSV() {
   const btn = document.getElementById('btnImport');
   btn.disabled = true;
   btn.textContent = 'Importando...';
+
+  // Intento 1: bulk via /api/products/import (transactional)
   let ok = 0, fail = 0;
-  for (const p of csvParsed) {
-    try {
-      await window.volvix.sync.execute({ type:'create', table:'productos', data:p, endpoint:'/api/productos', body:p });
-      allProducts.push(normalizeProducto({ ...p, id:'csv-' + Date.now() + Math.random() }));
-      ok++;
-    } catch { fail++; }
+  try {
+    const resp = await window.volvix.api.raw('POST', '/api/products/import', { items: csvParsed });
+    ok   = Number(resp?.imported ?? resp?.ok ?? csvParsed.length) || 0;
+    fail = Number(resp?.failed ?? resp?.errors?.length ?? 0) || 0;
+    // Refrescar desde server
+    await loadProductos();
+  } catch (errBulk) {
+    // Intento 2: fallback uno-a-uno (compat)
+    for (const p of csvParsed) {
+      try {
+        await window.volvix.sync.execute({ type:'create', table:'productos', data:p, endpoint:'/api/productos', body:p });
+        allProducts.push(normalizeProducto({ ...p, id:'csv-' + Date.now() + Math.random() }));
+        ok++;
+      } catch { fail++; }
+    }
+    applyFilters();
+    updateKPIs();
+    updateCategoryFilter();
   }
+
   closeModal('modalImport');
-  applyFilters();
-  updateKPIs();
-  updateCategoryFilter();
   toast(`✓ Importados ${ok} productos${fail ? ' · ' + fail + ' con error' : ''}`, ok > 0 ? 'ok' : 'err');
   btn.disabled = false;
   btn.textContent = '⬆ Importar';

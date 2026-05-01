@@ -1168,7 +1168,25 @@ function toast(msg, type = 'info') {
 // GUARDADO DE SECCIONES
 // ══════════════════════════════════════════════
 
-function guardarEmpresa() {
+async function persistTenantSettings(section, data) {
+  const tenantId = window.volvix?.session?.getTenantId?.() || window.VOLVIX_USER?.tenant_id;
+  if (!tenantId) return false;
+  // Intento 1: PATCH /api/tenants/:id (settings.<section>)
+  try {
+    await window.volvix.api.raw('PATCH', '/api/tenants/' + encodeURIComponent(tenantId), {
+      settings: { [section]: data },
+    });
+    return true;
+  } catch {}
+  // Intento 2: PATCH /api/tenant/settings (alias si existiera)
+  try {
+    await window.volvix.api.raw('PATCH', '/api/tenant/settings', { section, data });
+    return true;
+  } catch {}
+  return false;
+}
+
+async function guardarEmpresa() {
   const data = {
     negocio:   document.getElementById('eNegocio').value,
     giro:      document.getElementById('eGiro').value,
@@ -1184,15 +1202,16 @@ function guardarEmpresa() {
     window.VOLVIX_BRAND.name = data.negocio;
     window.VOLVIX_BRAND.company = data.negocio;
   }
-  toast('✓ Datos de empresa guardados', 'ok');
+  const ok = await persistTenantSettings('empresa', data);
+  toast(ok ? '✓ Datos de empresa guardados (servidor)' : '✓ Guardado local · pendiente sync', ok ? 'ok' : 'warn');
 }
 
-function guardarRegional() {
+async function guardarRegional() {
   const data = {
     timezone:   document.getElementById('rTimezone').value,
     currency:   document.getElementById('rCurrency').value,
     locale:     document.getElementById('rLocale').value,
-    dateFormat: document.getElementById('rDateFormat').value,
+    dateFormat: document.getElementById('rDateFormat')?.value,
     iva:        document.getElementById('rIva').value,
   };
   localStorage.setItem('volvix:config:regional', JSON.stringify(data));
@@ -1201,10 +1220,11 @@ function guardarRegional() {
     window.VOLVIX_REGION.currency = data.currency;
     window.VOLVIX_REGION.locale   = data.locale;
   }
-  toast('✓ Configuración regional guardada', 'ok');
+  const ok = await persistTenantSettings('regional', data);
+  toast(ok ? '✓ Configuración regional guardada (servidor)' : '✓ Guardado local · pendiente sync', ok ? 'ok' : 'warn');
 }
 
-function guardarFiscal() {
+async function guardarFiscal() {
   const rfc = document.getElementById('fRfc').value.trim().toUpperCase();
   if (rfc && rfc.length < 12) { toast('RFC inválido · mínimo 12 caracteres', 'err'); return; }
   const data = {
@@ -1215,10 +1235,11 @@ function guardarFiscal() {
     pac:      document.getElementById('fPac').value,
   };
   localStorage.setItem('volvix:config:fiscal', JSON.stringify(data));
-  toast('✓ Datos fiscales guardados', 'ok');
+  const ok = await persistTenantSettings('fiscal', data);
+  toast(ok ? '✓ Datos fiscales guardados (servidor)' : '✓ Guardado local · pendiente sync', ok ? 'ok' : 'warn');
 }
 
-function guardarTicket() {
+async function guardarTicket() {
   const data = {
     logo:    document.getElementById('tLogo')?.classList.contains('on'),
     fecha:   document.getElementById('tFecha')?.classList.contains('on'),
@@ -1231,10 +1252,11 @@ function guardarTicket() {
     paper:   document.getElementById('tPaper')?.value,
   };
   localStorage.setItem('volvix:config:ticket', JSON.stringify(data));
-  toast('✓ Diseño del ticket guardado', 'ok');
+  const ok = await persistTenantSettings('ticket', data);
+  toast(ok ? '✓ Diseño del ticket guardado (servidor)' : '✓ Guardado local · pendiente sync', ok ? 'ok' : 'warn');
 }
 
-function guardarPagos() {
+async function guardarPagos() {
   const data = {
     tarjeta:    document.getElementById('pTarjeta')?.classList.contains('on'),
     transfer:   document.getElementById('pTransfer')?.classList.contains('on'),
@@ -1244,7 +1266,8 @@ function guardarPagos() {
     mpConcepto: document.getElementById('mpConcepto')?.value,
   };
   localStorage.setItem('volvix:config:pagos', JSON.stringify(data));
-  toast('✓ Métodos de pago guardados', 'ok');
+  const ok = await persistTenantSettings('pagos', data);
+  toast(ok ? '✓ Métodos de pago guardados (servidor)' : '✓ Guardado local · pendiente sync', ok ? 'ok' : 'warn');
 }
 
 function guardarFlags() {
@@ -1257,20 +1280,49 @@ function guardarFlags() {
   toast('✓ Feature flags guardados · recarga para aplicar', 'ok');
 }
 
-// ── Cargar config guardada ──
+// ── Cargar config guardada (local primero, luego refresh desde backend) ──
+function applySavedConfig(empresa, regional, fiscal) {
+  if (empresa) {
+    if (empresa.negocio)   document.getElementById('eNegocio').value   = empresa.negocio;
+    if (empresa.giro)      document.getElementById('eGiro').value      = empresa.giro;
+    if (empresa.telefono)  document.getElementById('eTelefono').value  = empresa.telefono;
+    if (empresa.direccion) document.getElementById('eDireccion').value = empresa.direccion;
+    if (empresa.footer)    document.getElementById('eFooter')          && (document.getElementById('eFooter').value = empresa.footer);
+  }
+  if (regional) {
+    if (regional.timezone) document.getElementById('rTimezone') && (document.getElementById('rTimezone').value = regional.timezone);
+    if (regional.currency) document.getElementById('rCurrency') && (document.getElementById('rCurrency').value = regional.currency);
+    if (regional.locale)   document.getElementById('rLocale')   && (document.getElementById('rLocale').value   = regional.locale);
+    if (regional.iva)      document.getElementById('rIva')      && (document.getElementById('rIva').value      = regional.iva);
+  }
+  if (fiscal) {
+    if (fiscal.rfc)     document.getElementById('fRfc')     && (document.getElementById('fRfc').value     = fiscal.rfc);
+    if (fiscal.regimen) document.getElementById('fRegimen') && (document.getElementById('fRegimen').value = fiscal.regimen);
+    if (fiscal.razon)   document.getElementById('fRazon')   && (document.getElementById('fRazon').value   = fiscal.razon);
+    if (fiscal.cp)      document.getElementById('fCp')      && (document.getElementById('fCp').value      = fiscal.cp);
+    if (fiscal.pac)     document.getElementById('fPac')     && (document.getElementById('fPac').value     = fiscal.pac);
+  }
+}
 (function loadSavedConfig() {
-  const empresa = JSON.parse(localStorage.getItem('volvix:config:empresa') || '{}');
-  if (empresa.negocio)   document.getElementById('eNegocio').value   = empresa.negocio;
-  if (empresa.giro)      document.getElementById('eGiro').value      = empresa.giro;
-  if (empresa.telefono)  document.getElementById('eTelefono').value  = empresa.telefono;
-  if (empresa.direccion) document.getElementById('eDireccion').value = empresa.direccion;
-  if (empresa.footer)    document.getElementById('eFooter').value    = empresa.footer;
-
+  const empresa  = JSON.parse(localStorage.getItem('volvix:config:empresa')  || '{}');
   const regional = JSON.parse(localStorage.getItem('volvix:config:regional') || '{}');
-  if (regional.timezone) document.getElementById('rTimezone').value = regional.timezone;
-  if (regional.currency) document.getElementById('rCurrency').value = regional.currency;
-  if (regional.locale)   document.getElementById('rLocale').value   = regional.locale;
-  if (regional.iva)      document.getElementById('rIva').value      = regional.iva;
+  const fiscal   = JSON.parse(localStorage.getItem('volvix:config:fiscal')   || '{}');
+  applySavedConfig(empresa, regional, fiscal);
+})();
+// Refrescar desde backend (auth automatico via volvix-api)
+(async function refreshFromBackend() {
+  const tenantId = window.volvix?.session?.getTenantId?.() || window.VOLVIX_USER?.tenant_id;
+  if (!tenantId) return;
+  try {
+    const t = await window.volvix.api.tenants.get(tenantId);
+    const s = t?.settings || {};
+    if (s.empresa)  localStorage.setItem('volvix:config:empresa',  JSON.stringify(s.empresa));
+    if (s.regional) localStorage.setItem('volvix:config:regional', JSON.stringify(s.regional));
+    if (s.fiscal)   localStorage.setItem('volvix:config:fiscal',   JSON.stringify(s.fiscal));
+    if (s.ticket)   localStorage.setItem('volvix:config:ticket',   JSON.stringify(s.ticket));
+    if (s.pagos)    localStorage.setItem('volvix:config:pagos',    JSON.stringify(s.pagos));
+    applySavedConfig(s.empresa, s.regional, s.fiscal);
+  } catch {}
 })();
 
 // ══════════════════════════════════════════════
@@ -1328,9 +1380,25 @@ function detectarImpresoras() {
   setTimeout(() => toast('Epson TM-T20III detectada en COM3', 'ok'), 1800);
 }
 
-function probarImpresora(nombre) {
+async function probarImpresora(nombre) {
   toast(`Imprimiendo ticket de prueba en ${nombre}...`, 'info');
-  setTimeout(() => toast(`✓ Ticket de prueba enviado a ${nombre}`, 'ok'), 1000);
+  const sample = [
+    '================================',
+    '       VOLVIX POS · TEST',
+    '================================',
+    'Impresora: ' + nombre,
+    'Fecha: ' + new Date().toLocaleString('es-MX'),
+    '--------------------------------',
+    'Si lees esto, la impresora',
+    'esta conectada correctamente.',
+    '================================',
+  ].join('\n');
+  try {
+    await window.volvix.api.raw('POST', '/api/printer/raw', { text: sample, printer: nombre });
+    toast(`✓ Ticket de prueba enviado a ${nombre}`, 'ok');
+  } catch (err) {
+    toast('Error: ' + err.message + ' · usa app nativa para impresoras locales', 'warn');
+  }
 }
 
 function pairBluetooth() {
