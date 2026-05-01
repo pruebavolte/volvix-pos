@@ -16,6 +16,10 @@
 <meta property="og:description" content="Sistema POS para panaderías con control de producción por lotes, costo de receta, manejo de mermas y pre-órdenes para eventos. Prueba 14 días gratis.">
 <meta property="og:locale" content="es_MX">
 <meta property="og:site_name" content="Volvix POS">
+<meta property="og:image" content="https://volvix-pos.vercel.app/og-panaderia.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:image" content="https://volvix-pos.vercel.app/og-panaderia.png">
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
@@ -433,7 +437,7 @@
       <h1>El POS hecho para tu <span class="accent">panadería</span></h1>
       <p class="sub">Controla recetas, lotes diarios, mermas y pre-órdenes. Volvix entiende que tu producto se hace cada día y se vende fresco.</p>
       <div class="hero-cta-row">
-        <a href="/volvix-onboarding-wizard.html?vertical=panaderia" class="btn-primary cta-track" data-cta="hero-primary">
+        <a href="/registro.html?giro=panaderia" class="btn-primary cta-track" data-cta="hero-primary">
           Empezar gratis 14 días →
         </a>
         <a href="/volvix-grand-tour.html" class="btn-secondary cta-track" data-cta="hero-secondary">
@@ -655,7 +659,7 @@
           <li>Tickets electrónicos</li>
           <li>Soporte por chat</li>
         </ul>
-        <a href="/volvix-onboarding-wizard.html?vertical=panaderia&plan=basico" class="price-cta cta-track" data-cta="price-basic" style="display:block;text-align:center">Empezar gratis</a>
+        <a href="/registro.html?giro=panaderia&plan=basico" class="price-cta cta-track" data-cta="price-basic" style="display:block;text-align:center">Empezar gratis</a>
       </article>
       <article class="price-card featured">
         <h3>Pro</h3>
@@ -670,7 +674,7 @@
           <li>CFDI 4.0 ilimitados</li>
           <li>Soporte prioritario WhatsApp 24/7</li>
         </ul>
-        <a href="/volvix-onboarding-wizard.html?vertical=panaderia&plan=pro" class="price-cta cta-track" data-cta="price-pro" style="display:block;text-align:center">Empezar 14 días gratis</a>
+        <a href="/registro.html?giro=panaderia&plan=pro" class="price-cta cta-track" data-cta="price-pro" style="display:block;text-align:center">Empezar 14 días gratis</a>
       </article>
       <article class="price-card">
         <h3>Enterprise</h3>
@@ -734,7 +738,7 @@
     <h2>Tu panadería merece un POS a la altura</h2>
     <p>Empieza hoy gratis. En 5 minutos estás cobrando. Sin tarjeta, sin contratos, sin pretextos.</p>
     <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
-      <a href="/volvix-onboarding-wizard.html?vertical=panaderia" class="btn-primary cta-track" data-cta="final-primary">
+      <a href="/registro.html?giro=panaderia" class="btn-primary cta-track" data-cta="final-primary">
         Empezar gratis 14 días →
       </a>
       <a href="/volvix-grand-tour.html" class="btn-secondary cta-track" data-cta="final-secondary">
@@ -797,6 +801,7 @@
 
 <script src="/auth-gate.js"></script>
 <script src="/volvix-uplift-wiring.js" defer></script>
+<script defer src="/volvix-modules-wiring.js"></script>
 <script>
   // ===== CONVERSION TRACKING =====
   (function() {
@@ -858,7 +863,7 @@
     function rewireCtaIfLoggedIn() {
       var user = (window.VLX_USER || window.__VLX_USER__ || null);
       if (!user) return;
-      document.querySelectorAll('a[href*="/volvix-onboarding-wizard.html"]').forEach(function(a) {
+      document.querySelectorAll('a[href*="/registro.html"]').forEach(function(a) {
         a.setAttribute('href', '/volvix_owner_panel_v7.html');
         a.textContent = 'Ir a mi panel →';
       });
