@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mercado Pago vs Stripe vs Conekta — Volvix Blog</title>
+<meta name="description" content="Comisiones reales, tiempos de depósito, integración con POS y cuándo conviene cada pasarela en México.">
+<style>
+  :root { --txt:#0f172a; --muted:#64748b; --accent:#3b82f6; --border:#e2e8f0 }
+  * { box-sizing:border-box }
+  body { margin:0; font-family:Georgia,Cambria,serif; color:var(--txt); line-height:1.7; background:#fff }
+  header { padding:20px 16px; border-bottom:1px solid var(--border); background:#fff }
+  header .inner { max-width:720px; margin:0 auto; display:flex; justify-content:space-between; align-items:center }
+  header a { font-family:system-ui; text-decoration:none; color:var(--txt); font-weight:700 }
+  header nav a { font-weight:400; color:var(--muted); font-size:14px }
+  .hero {
+    background:linear-gradient(135deg,#064e3b 0%,#10b981 100%); color:#fff;
+    padding:64px 16px; text-align:center;
+  }
+  .hero .cat {
+    display:inline-block; background:rgba(255,255,255,.2); padding:4px 14px;
+    border-radius:99px; font-size:12px; font-family:system-ui; font-weight:600;
+    text-transform:uppercase; letter-spacing:1px; margin-bottom:16px;
+  }
+  .hero h1 { margin:0 0 12px; font-size:36px; line-height:1.2; max-width:720px; margin-left:auto; margin-right:auto }
+  .hero .meta { font-family:system-ui; font-size:14px; opacity:.85 }
+  article { max-width:720px; margin:0 auto; padding:48px 16px; font-size:18px }
+  article h2 { font-family:system-ui; margin-top:40px; font-size:26px }
+  article h3 { font-family:system-ui; margin-top:24px; font-size:20px }
+  article p { margin:16px 0 }
+  article ul { padding-left:20px }
+  article li { margin:8px 0 }
+  table { width:100%; border-collapse:collapse; margin:16px 0; font-family:system-ui; font-size:15px }
+  th, td { border:1px solid var(--border); padding:10px; text-align:left }
+  th { background:#f8fafc }
+  .cta {
+    background:#f8fafc; border:1px solid var(--border); border-radius:12px;
+    padding:32px; text-align:center; margin:48px 0; font-family:system-ui;
+  }
+  .cta h3 { margin:0 0 12px; font-size:22px }
+  .cta p { font-size:15px; color:var(--muted); margin:0 0 20px }
+  .cta a {
+    display:inline-block; background:var(--accent); color:#fff;
+    padding:12px 28px; border-radius:8px; text-decoration:none; font-weight:600;
+  }
+  footer { border-top:1px solid var(--border); padding:24px 16px; text-align:center; color:var(--muted); font-size:13px; font-family:system-ui }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="inner">
+    <a href="/">Volvix</a>
+    <nav><a href="/blog.html">← Volver al blog</a></nav>
+  </div>
+</header>
+
+<section class="hero">
+  <span class="cat">Pagos</span>
+  <h1>Mercado Pago vs Stripe vs Conekta: cuál te conviene</h1>
+  <div class="meta">15 de marzo, 2026 · 10 min de lectura</div>
+</section>
+
+<article>
+  <p>Las tres procesan tarjeta. Las tres funcionan. Pero detrás de la misma promesa esconden diferencias enormes: comisión real con IVA, depósito rápido o lento, fricción de integración y sobre todo —experiencia con contracargos. Esta comparativa parte de números actuales en México y casos reales de negocios pequeños y medianos.</p>
+
+  <h2>Comisiones reales (sin la letra chiquita)</h2>
+  <p>Lo que ves en la página de cada uno es el costo base. Lo que pagas incluye IVA y a veces costos adicionales por tipo de operación.</p>
+  <table>
+    <thead><tr><th>Concepto</th><th>Mercado Pago</th><th>Stripe</th><th>Conekta</th></tr></thead>
+    <tbody>
+      <tr><td>Tarjeta de crédito (nacional)</td><td>3.49% + IVA</td><td>3.6% + $3 + IVA</td><td>2.9% + $2.50 + IVA</td></tr>
+      <tr><td>Tarjeta de débito (nacional)</td><td>1.99% + IVA</td><td>3.6% + $3 + IVA</td><td>2.9% + $2.50 + IVA</td></tr>
+      <tr><td>Tarjeta internacional</td><td>+1.5%</td><td>+1.5%</td><td>+1.5%</td></tr>
+      <tr><td>OXXO Pay</td><td>3.99% + IVA</td><td>$10 + IVA fijo</td><td>$8 + IVA fijo</td></tr>
+      <tr><td>SPEI / transferencias</td><td>0.99% + IVA</td><td>$10 + IVA fijo</td><td>$3.99 + IVA fijo</td></tr>
+    </tbody>
+  </table>
+  <p>Sumando IVA, una venta de $1,000 con tarjeta de crédito te cuesta:</p>
+  <ul>
+    <li>Mercado Pago: $40.48 (4.05%)</li>
+    <li>Stripe: $44.94 (4.49%)</li>
+    <li>Conekta: $36.54 (3.65%)</li>
+  </ul>
+
+  <h2>Tiempos de depósito</h2>
+  <h3>Mercado Pago</h3>
+  <p>Default: 14 días. Puedes activar "Liberación inmediata" pero pagas 1.5% extra. Para tickets pequeños el costo no compensa.</p>
+  <h3>Stripe</h3>
+  <p>2 días hábiles después de la transacción. Sin opción de adelantarlo en México.</p>
+  <h3>Conekta</h3>
+  <p>3 días hábiles. Tiene plan "Conekta Premium" con liberación al día siguiente, pero requiere volumen alto.</p>
+
+  <h2>Integración: cuánto pelea tu programador</h2>
+  <h3>Mercado Pago</h3>
+  <p>Documentación abundante en español, SDKs para todos los lenguajes. Pero la API tiene inconsistencias entre productos (Checkout Pro vs. API directa). Webhooks fiables.</p>
+  <h3>Stripe</h3>
+  <p>El estándar de oro técnico. Documentación impecable, sandbox idéntico a producción, webhooks con firma criptográfica robusta. Si tu desarrollador es bueno, lo prefiere.</p>
+  <h3>Conekta</h3>
+  <p>API simple, similar a Stripe pero con menos features. Soporte en español es excelente. Buena opción para equipos que no quieren pelear con docs en inglés.</p>
+
+  <h2>Contracargos: la prueba de fuego</h2>
+  <p>Aquí es donde ves el verdadero costo. Cuando un cliente reclama un cobro:</p>
+  <ul>
+    <li><strong>Mercado Pago:</strong> congela el monto, pide evidencia. La resolución tarda hasta 90 días. Tasa de "ganados por el comercio": cercana al 30% según experiencia de retailers medianos.</li>
+    <li><strong>Stripe:</strong> sistema "Radar" anti-fraude robusto. Permite subir evidencia estructurada (tracking, firmas, comunicaciones). Tasa de ganados: 50-60% si presentas evidencia bien.</li>
+    <li><strong>Conekta:</strong> proceso similar a Stripe pero con menos automatización. Soporte humano ayuda a redactar la respuesta.</li>
+  </ul>
+
+  <h2>Funciones extra que importan</h2>
+  <ul>
+    <li><strong>Mercado Pago:</strong> integración nativa con Mercado Libre. Si vendes ahí, evita usar otra cosa. También ofrece QR de cobro físico (Point) sin terminal.</li>
+    <li><strong>Stripe:</strong> suscripciones recurrentes y facturación SaaS imbatibles. Si tu negocio es por mensualidad, gana.</li>
+    <li><strong>Conekta:</strong> soporte para pagos en OXXO bien optimizado. Si vendes a mercado popular, esto convierte mucho.</li>
+  </ul>
+
+  <h2>Recomendación por tipo de negocio</h2>
+  <h3>Tienda física con TPV / mostrador</h3>
+  <p>Conekta o Mercado Pago Point. Comisión más baja en débito (que es la mayoría del consumo cotidiano).</p>
+  <h3>E-commerce con público amplio</h3>
+  <p>Mercado Pago si tu cliente compra en MercadoLibre. Conekta si valoras OXXO Pay. Stripe si vendes también fuera de México.</p>
+  <h3>SaaS / suscripciones</h3>
+  <p>Stripe sin discusión. La gestión de cobros recurrentes, fallos de tarjeta y dunning está años por delante.</p>
+  <h3>Marketplace / pagos a terceros</h3>
+  <p>Mercado Pago tiene split payments más maduros en México. Stripe Connect funciona pero requiere más configuración.</p>
+
+  <h2>Tip final</h2>
+  <p>Empieza con uno solo. Mezclar dos pasarelas suena flexible pero multiplica trabajo de conciliación, contracargos y reportes. Solo agrega la segunda cuando tu volumen mensual con tarjeta supere $200,000 MXN: ahí ya negocias comisiones personalizadas con cualquiera de los tres.</p>
+
+  <div class="cta">
+    <h3>Volvix se conecta a las 3 pasarelas</h3>
+    <p>Configura la que prefieras desde el panel, sin tocar código. Cambia cuando lo necesites.</p>
+    <a href="/registro.html">Empezar gratis</a>
+  </div>
+</article>
+
+<footer>© Volvix POS. Comisiones referenciales actualizadas a marzo 2026; verifica con cada proveedor antes de contratar.</footer>
+<script src="/volvix-newsletter-wiring.js" defer></script>
+</body>
+</html>

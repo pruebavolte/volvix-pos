@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Blog Volvix — Tips de POS, SaaS y pagos en México</title>
+<meta name="description" content="Guías prácticas sobre POS, CFDI 4.0, pagos en México, recargas y marketing para tienditas.">
+<style>
+  :root { --bg:#fff; --txt:#0f172a; --muted:#64748b; --accent:#3b82f6; --card:#f8fafc; --border:#e2e8f0 }
+  * { box-sizing:border-box }
+  body { margin:0; font-family:system-ui,-apple-system,Segoe UI,sans-serif; background:var(--bg); color:var(--txt) }
+  header { padding:24px 16px; border-bottom:1px solid var(--border); background:#fff; position:sticky; top:0; z-index:10 }
+  header .inner { max-width:960px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; gap:16px }
+  header a.logo { font-weight:700; font-size:20px; text-decoration:none; color:var(--txt) }
+  .hero { max-width:960px; margin:0 auto; padding:48px 16px 24px; text-align:center }
+  .hero h1 { margin:0 0 8px; font-size:36px }
+  .hero p { color:var(--muted); margin:0 0 24px; font-size:18px }
+  .filters {
+    max-width:960px; margin:0 auto; padding:0 16px 24px;
+    display:flex; gap:12px; flex-wrap:wrap; align-items:center;
+  }
+  .filters input {
+    flex:1; min-width:220px; padding:10px 14px; border:1px solid var(--border);
+    border-radius:8px; font-size:14px;
+  }
+  .filters .chips { display:flex; gap:6px; flex-wrap:wrap }
+  .chip {
+    padding:6px 12px; border:1px solid var(--border); border-radius:99px;
+    cursor:pointer; font-size:13px; background:#fff; color:var(--txt);
+    transition:all .15s;
+  }
+  .chip.active { background:var(--accent); color:#fff; border-color:var(--accent) }
+  .grid {
+    max-width:960px; margin:0 auto; padding:0 16px 64px;
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:24px;
+  }
+  .post {
+    background:var(--card); border:1px solid var(--border); border-radius:12px;
+    padding:24px; cursor:pointer; transition:transform .15s, box-shadow .15s;
+    text-decoration:none; color:inherit; display:block;
+  }
+  .post:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,.08) }
+  .post .cat {
+    display:inline-block; background:var(--accent); color:#fff;
+    padding:2px 10px; border-radius:99px; font-size:11px; font-weight:600;
+    text-transform:uppercase; letter-spacing:.5px; margin-bottom:12px;
+  }
+  .post h2 { margin:0 0 8px; font-size:18px }
+  .post p { color:var(--muted); margin:0 0 12px; font-size:14px; line-height:1.5 }
+  .post .meta { font-size:12px; color:var(--muted) }
+  .post .tags { margin-top:8px }
+  .post .tag {
+    display:inline-block; padding:2px 8px; background:#fff;
+    border:1px solid var(--border); border-radius:99px;
+    font-size:11px; color:var(--muted); margin:2px 4px 0 0;
+  }
+  .empty { text-align:center; color:var(--muted); grid-column:1/-1; padding:48px }
+  footer { border-top:1px solid var(--border); padding:24px 16px; text-align:center; color:var(--muted); font-size:13px }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="inner">
+    <a href="/" class="logo">Volvix</a>
+    <nav><a href="/" style="text-decoration:none;color:var(--muted);font-size:14px">← Volver al inicio</a></nav>
+  </div>
+</header>
+
+<section class="hero">
+  <h1>Blog Volvix</h1>
+  <p>Tips, guías y casos prácticos para tu negocio en México.</p>
+</section>
+
+<div class="filters">
+  <input type="text" id="q" placeholder="Buscar artículos..." aria-label="Buscar">
+  <div class="chips" id="cats"></div>
+</div>
+
+<main class="grid" id="grid"></main>
+
+<footer>© Volvix POS. Todos los artículos son guías informativas, no asesoría legal.</footer>
+
+<script>
+(function () {
+  var POSTS = [
+    {
+      slug: 'como-elegir-pos-mexico',
+      title: 'Cómo elegir el POS correcto para tu negocio en México',
+      excerpt: 'Comparativa práctica de criterios — costos, hardware, CFDI, conectividad — para no equivocarte al elegir un punto de venta.',
+      cat: 'POS',
+      tags: ['guía', 'comparativa', 'mxn'],
+      date: '2026-04-12',
+    },
+    {
+      slug: 'cfdi-4-0-guia',
+      title: 'CFDI 4.0: lo que cambió y cómo no romper tu facturación',
+      excerpt: 'Diferencias clave entre 3.3 y 4.0, errores comunes en RFC del receptor, uso del CFDI y régimen fiscal.',
+      cat: 'Fiscal',
+      tags: ['cfdi', 'sat', 'facturación'],
+      date: '2026-03-28',
+    },
+    {
+      slug: 'mercado-pago-vs-stripe',
+      title: 'Mercado Pago vs Stripe vs Conekta: cuál te conviene',
+      excerpt: 'Comisiones reales, tiempos de depósito, integración con POS y cuándo conviene cada pasarela en México.',
+      cat: 'Pagos',
+      tags: ['pagos', 'comparativa', 'mercadopago', 'stripe'],
+      date: '2026-03-15',
+    },
+    {
+      slug: 'recargas-tiempo-aire-negocio',
+      title: 'Recargas de tiempo aire: cómo convertirlas en un negocio rentable',
+      excerpt: 'Comisiones por compañía, capital de trabajo necesario, márgenes reales y errores que hunden el negocio.',
+      cat: 'Servicios',
+      tags: ['recargas', 'márgenes', 'negocio'],
+      date: '2026-02-20',
+    },
+    {
+      slug: '10-ideas-marketing-tiendita',
+      title: '10 ideas de marketing baratas para tu tiendita',
+      excerpt: 'WhatsApp Business, programas de lealtad, promociones por día, vitrina y trato al cliente. Sin inversión grande.',
+      cat: 'Marketing',
+      tags: ['marketing', 'tiendita', 'lealtad'],
+      date: '2026-02-05',
+    },
+  ];
+
+  var cats = ['Todas'].concat(Array.from(new Set(POSTS.map(function (p) { return p.cat; }))));
+  var activeCat = 'Todas';
+  var query = '';
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+    });
+  }
+  function fmtDate(s) {
+    try { return new Date(s).toLocaleDateString('es-MX', { day:'numeric', month:'short', year:'numeric' }); }
+    catch (_) { return s; }
+  }
+  function renderCats() {
+    document.getElementById('cats').innerHTML = cats.map(function (c) {
+      return '<button class="chip' + (c === activeCat ? ' active' : '') + '" data-cat="' +
+        escapeHtml(c) + '">' + escapeHtml(c) + '</button>';
+    }).join('');
+    document.querySelectorAll('.chip').forEach(function (el) {
+      el.addEventListener('click', function () {
+        activeCat = this.getAttribute('data-cat');
+        renderCats(); render();
+      });
+    });
+  }
+  function render() {
+    var q = query.toLowerCase();
+    var filtered = POSTS.filter(function (p) {
+      if (activeCat !== 'Todas' && p.cat !== activeCat) return false;
+      if (!q) return true;
+      var hay = (p.title + ' ' + p.excerpt + ' ' + p.tags.join(' ')).toLowerCase();
+      return hay.indexOf(q) !== -1;
+    });
+    var grid = document.getElementById('grid');
+    if (!filtered.length) {
+      grid.innerHTML = '<div class="empty">Sin artículos para tu búsqueda.</div>';
+      return;
+    }
+    grid.innerHTML = filtered.map(function (p) {
+      return '<a class="post" href="/blog/' + escapeHtml(p.slug) + '.html">' +
+        '<span class="cat">' + escapeHtml(p.cat) + '</span>' +
+        '<h2>' + escapeHtml(p.title) + '</h2>' +
+        '<p>' + escapeHtml(p.excerpt) + '</p>' +
+        '<div class="meta">' + fmtDate(p.date) + '</div>' +
+        '<div class="tags">' + p.tags.map(function (t) {
+          return '<span class="tag">#' + escapeHtml(t) + '</span>';
+        }).join('') + '</div>' +
+        '</a>';
+    }).join('');
+  }
+
+  document.getElementById('q').addEventListener('input', function () {
+    query = this.value || ''; render();
+  });
+
+  renderCats(); render();
+})();
+</script>
+</body>
+</html>

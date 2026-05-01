@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CFDI 4.0: lo que cambió y cómo no romper tu facturación — Volvix Blog</title>
+<meta name="description" content="Diferencias clave entre 3.3 y 4.0, errores comunes en RFC del receptor, uso del CFDI y régimen fiscal.">
+<style>
+  :root { --txt:#0f172a; --muted:#64748b; --accent:#3b82f6; --border:#e2e8f0 }
+  * { box-sizing:border-box }
+  body { margin:0; font-family:Georgia,Cambria,serif; color:var(--txt); line-height:1.7; background:#fff }
+  header { padding:20px 16px; border-bottom:1px solid var(--border); background:#fff }
+  header .inner { max-width:720px; margin:0 auto; display:flex; justify-content:space-between; align-items:center }
+  header a { font-family:system-ui; text-decoration:none; color:var(--txt); font-weight:700 }
+  header nav a { font-weight:400; color:var(--muted); font-size:14px }
+  .hero {
+    background:linear-gradient(135deg,#7c2d12 0%,#dc2626 100%); color:#fff;
+    padding:64px 16px; text-align:center;
+  }
+  .hero .cat {
+    display:inline-block; background:rgba(255,255,255,.2); padding:4px 14px;
+    border-radius:99px; font-size:12px; font-family:system-ui; font-weight:600;
+    text-transform:uppercase; letter-spacing:1px; margin-bottom:16px;
+  }
+  .hero h1 { margin:0 0 12px; font-size:36px; line-height:1.2; max-width:720px; margin-left:auto; margin-right:auto }
+  .hero .meta { font-family:system-ui; font-size:14px; opacity:.85 }
+  article { max-width:720px; margin:0 auto; padding:48px 16px; font-size:18px }
+  article h2 { font-family:system-ui; margin-top:40px; font-size:26px }
+  article h3 { font-family:system-ui; margin-top:24px; font-size:20px }
+  article p { margin:16px 0 }
+  article ul, article ol { padding-left:20px }
+  article li { margin:8px 0 }
+  article code { background:#f1f5f9; padding:2px 6px; border-radius:4px; font-size:.9em }
+  table { width:100%; border-collapse:collapse; margin:16px 0; font-family:system-ui; font-size:15px }
+  th, td { border:1px solid var(--border); padding:10px; text-align:left }
+  th { background:#f8fafc }
+  .cta {
+    background:#f8fafc; border:1px solid var(--border); border-radius:12px;
+    padding:32px; text-align:center; margin:48px 0; font-family:system-ui;
+  }
+  .cta h3 { margin:0 0 12px; font-size:22px }
+  .cta p { font-size:15px; color:var(--muted); margin:0 0 20px }
+  .cta a {
+    display:inline-block; background:var(--accent); color:#fff;
+    padding:12px 28px; border-radius:8px; text-decoration:none; font-weight:600;
+  }
+  footer { border-top:1px solid var(--border); padding:24px 16px; text-align:center; color:var(--muted); font-size:13px; font-family:system-ui }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="inner">
+    <a href="/">Volvix</a>
+    <nav><a href="/blog.html">← Volver al blog</a></nav>
+  </div>
+</header>
+
+<section class="hero">
+  <span class="cat">Fiscal</span>
+  <h1>CFDI 4.0: lo que cambió y cómo no romper tu facturación</h1>
+  <div class="meta">28 de marzo, 2026 · 9 min de lectura</div>
+</section>
+
+<article>
+  <p>Si has emitido al menos 10 facturas con CFDI 4.0 ya sabes que el cambio del 3.3 al 4.0 no fue solo de número. Cambió quién es responsable de qué dato, cómo se valida el RFC del receptor y qué pasa si el régimen fiscal del cliente no coincide. Esta guía resume los puntos donde más se atoran los negocios pequeños, basada en errores reales del SAT.</p>
+
+  <h2>Diferencias clave entre 3.3 y 4.0</h2>
+  <table>
+    <thead><tr><th>Concepto</th><th>CFDI 3.3</th><th>CFDI 4.0</th></tr></thead>
+    <tbody>
+      <tr><td>Nombre del receptor</td><td>Opcional</td><td>Obligatorio y exacto</td></tr>
+      <tr><td>Código postal del receptor</td><td>No requerido</td><td>Obligatorio</td></tr>
+      <tr><td>Régimen fiscal del receptor</td><td>No requerido</td><td>Obligatorio</td></tr>
+      <tr><td>Uso del CFDI</td><td>Tolera errores</td><td>Validación estricta vs. régimen</td></tr>
+      <tr><td>Objeto de impuesto</td><td>Implícito</td><td>Por concepto</td></tr>
+    </tbody>
+  </table>
+
+  <h2>El error #1: nombre del receptor mal escrito</h2>
+  <p>En 3.3 podías facturar a "PEPE PEREZ S.A." y nadie reclamaba. En 4.0, si el nombre legal en el SAT es <code>JOSE PEREZ GARCIA</code>, cualquier otra cosa rebota. Recomendaciones:</p>
+  <ul>
+    <li>Pide a tu cliente la <strong>Constancia de Situación Fiscal</strong> y captura el nombre tal cual aparece (sin acentos, sin "S.A. de C.V." extra ni faltante).</li>
+    <li>Si tu POS lo permite, guarda el contacto con RFC y nombre legal validados desde la primera factura.</li>
+    <li>No mezcles mayúsculas y minúsculas: el SAT no las acepta intercambiables.</li>
+  </ul>
+
+  <h2>Régimen fiscal: el campo que más tira facturas</h2>
+  <p>El receptor debe declarar su régimen fiscal. Los más comunes:</p>
+  <ul>
+    <li><code>601</code> — General de Ley Personas Morales</li>
+    <li><code>612</code> — Personas Físicas con Actividades Empresariales y Profesionales</li>
+    <li><code>626</code> — Régimen Simplificado de Confianza (RESICO)</li>
+    <li><code>616</code> — Sin obligaciones fiscales</li>
+  </ul>
+  <p>Si capturas el régimen equivocado, el timbrado falla. Y aquí viene lo importante: <strong>el régimen del receptor también limita qué uso del CFDI es válido</strong>. Por ejemplo, un cliente en RESICO no puede usar "G03 - Gastos en general" para deducir; debe usar el específico de su régimen.</p>
+
+  <h2>Uso del CFDI: lista mínima que debes conocer</h2>
+  <p>Los más usados en negocios chicos:</p>
+  <ul>
+    <li><code>G01</code> — Adquisición de mercancías</li>
+    <li><code>G03</code> — Gastos en general</li>
+    <li><code>S01</code> — Sin efectos fiscales (cuando el cliente solo quiere comprobante)</li>
+    <li><code>D01</code> — Honorarios médicos, dentales, hospitalarios</li>
+    <li><code>I04</code> — Equipo de cómputo y accesorios</li>
+  </ul>
+  <p>Si dudas, <code>S01</code> es la opción segura: nunca falla, pero el cliente no la podrá deducir.</p>
+
+  <h2>Objeto de impuesto por concepto</h2>
+  <p>En 4.0 cada concepto debe declarar si es objeto de impuesto:</p>
+  <ul>
+    <li><code>01</code> — No objeto de impuesto</li>
+    <li><code>02</code> — Sí objeto de impuesto</li>
+    <li><code>03</code> — Sí objeto y no obligado al desglose</li>
+  </ul>
+  <p>Para mercancías y servicios gravados con IVA, casi siempre va <code>02</code>. Tu POS debería poner el valor por defecto correcto según el catálogo del SAT. Si no, vas a estar peleando timbres.</p>
+
+  <h2>Errores comunes que generan rechazo</h2>
+  <ol>
+    <li><strong>RFC genérico para extranjero:</strong> usa <code>XEXX010101000</code> y nombre tal cual el pasaporte.</li>
+    <li><strong>RFC público:</strong> <code>XAXX010101000</code> solo cuando vendes a público en general (notas en lote, ventas mostrador acumuladas).</li>
+    <li><strong>Código postal:</strong> debe ser el del domicilio fiscal del emisor, NO el de la sucursal donde vendiste.</li>
+    <li><strong>Mezcla de monedas:</strong> si vendes en USD, el tipo de cambio debe coincidir con el publicado por el SAT del día.</li>
+    <li><strong>Forma de pago:</strong> "PUE" (Pago en una sola exhibición) si te pagaron al momento. "PPD" (Pago en parcialidades o diferido) si es a crédito; en este caso debes emitir CFDI de pago al cobrar.</li>
+  </ol>
+
+  <h2>Cancelación: ahora con motivo</h2>
+  <p>Otra novedad: cancelar un CFDI requiere especificar motivo. Las claves:</p>
+  <ul>
+    <li><code>01</code> — Comprobante con errores con relación</li>
+    <li><code>02</code> — Comprobante con errores sin relación</li>
+    <li><code>03</code> — No se llevó a cabo la operación</li>
+    <li><code>04</code> — Operación nominativa relacionada en factura global</li>
+  </ul>
+  <p>Si emites un sustituto, debes usar <code>01</code> y referenciar el folio del nuevo CFDI.</p>
+
+  <h2>Recomendación práctica</h2>
+  <p>Configura tu POS para que valide automáticamente, antes de timbrar:</p>
+  <ul>
+    <li>RFC con regex correcto (12 chars personas morales, 13 chars personas físicas).</li>
+    <li>Código postal numérico de 5 dígitos.</li>
+    <li>Régimen fiscal seleccionado.</li>
+    <li>Uso del CFDI compatible con el régimen del receptor.</li>
+  </ul>
+  <p>Esto te ahorra entre 5 y 20 timbres rebotados al mes, que en algunos PACs cuestan 1 peso cada uno aunque rebote.</p>
+
+  <div class="cta">
+    <h3>Volvix factura con CFDI 4.0 sin dolor</h3>
+    <p>PAC certificado incluido. Validación automática antes de timbrar. Cancelaciones con motivo en un clic.</p>
+    <a href="/registro.html">Probar gratis</a>
+  </div>
+</article>
+
+<footer>© Volvix POS. Esta guía es informativa y no constituye asesoría fiscal. Consulta a tu contador.</footer>
+<script src="/volvix-newsletter-wiring.js" defer></script>
+</body>
+</html>
