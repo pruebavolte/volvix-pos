@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cómo fidelizar clientes con un programa de puntos simple — Volvix Blog</title>
+<meta name="description" content="Diseño práctico de un programa de puntos para tienda en México: reglas, montos, tecnología y errores que matan la lealtad.">
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"Article",
+  "headline":"Cómo fidelizar clientes con un programa de puntos simple",
+  "description":"Diseño práctico de programa de puntos para tienda en México.",
+  "datePublished":"2026-04-08",
+  "author":{"@type":"Organization","name":"Volvix POS"},
+  "publisher":{"@type":"Organization","name":"Volvix POS"},
+  "keywords":"fidelización, puntos, lealtad, clientes, México, POS"
+}
+</script>
+<style>
+  :root { --txt:#0f172a; --muted:#64748b; --accent:#3b82f6; --border:#e2e8f0 }
+  * { box-sizing:border-box }
+  body { margin:0; font-family:Georgia,Cambria,serif; color:var(--txt); line-height:1.7; background:#fff }
+  header { padding:20px 16px; border-bottom:1px solid var(--border); background:#fff }
+  header .inner { max-width:720px; margin:0 auto; display:flex; justify-content:space-between; align-items:center }
+  header a { font-family:system-ui; text-decoration:none; color:var(--txt); font-weight:700 }
+  header nav a { font-weight:400; color:var(--muted); font-size:14px }
+  .hero {
+    background:linear-gradient(135deg,#831843 0%,#ec4899 100%); color:#fff;
+    padding:64px 16px; text-align:center;
+  }
+  .hero .cat {
+    display:inline-block; background:rgba(255,255,255,.2); padding:4px 14px;
+    border-radius:99px; font-size:12px; font-family:system-ui; font-weight:600;
+    text-transform:uppercase; letter-spacing:1px; margin-bottom:16px;
+  }
+  .hero h1 { margin:0 0 12px; font-size:36px; line-height:1.2; max-width:720px; margin-left:auto; margin-right:auto }
+  .hero .meta { font-family:system-ui; font-size:14px; opacity:.85 }
+  article { max-width:720px; margin:0 auto; padding:48px 16px; font-size:18px }
+  article h2 { font-family:system-ui; margin-top:40px; font-size:26px }
+  article h3 { font-family:system-ui; margin-top:24px; font-size:20px }
+  article p { margin:16px 0 }
+  article ul, article ol { padding-left:20px }
+  article li { margin:8px 0 }
+  article code { background:#f1f5f9; padding:2px 6px; border-radius:4px; font-size:.9em }
+  table { width:100%; border-collapse:collapse; margin:16px 0; font-family:system-ui; font-size:15px }
+  th, td { border:1px solid var(--border); padding:10px; text-align:left }
+  th { background:#f8fafc }
+  .ejemplo { background:#fdf2f8; border-left:4px solid #ec4899; padding:16px 20px; margin:20px 0; border-radius:0 8px 8px 0; font-family:system-ui; font-size:16px }
+  .cta {
+    background:#f8fafc; border:1px solid var(--border); border-radius:12px;
+    padding:32px; text-align:center; margin:48px 0; font-family:system-ui;
+  }
+  .cta h3 { margin:0 0 12px; font-size:22px }
+  .cta p { font-size:15px; color:var(--muted); margin:0 0 20px }
+  .cta a {
+    display:inline-block; background:var(--accent); color:#fff;
+    padding:12px 28px; border-radius:8px; text-decoration:none; font-weight:600;
+  }
+  footer { border-top:1px solid var(--border); padding:24px 16px; text-align:center; color:var(--muted); font-size:13px; font-family:system-ui }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="inner">
+    <a href="/">Volvix</a>
+    <nav><a href="/blog.html">← Volver al blog</a></nav>
+  </div>
+</header>
+
+<section class="hero">
+  <span class="cat">Marketing</span>
+  <h1>Cómo fidelizar clientes con un programa de puntos simple</h1>
+  <div class="meta">8 de abril, 2026 · 7 min de lectura</div>
+</section>
+
+<article>
+  <p>Costar atraer un cliente nuevo es 5 a 7 veces más caro que mantener uno. La gente lo sabe pero no lo aplica. Un programa de puntos bien diseñado te aumenta la frecuencia de compra y el ticket promedio sin pelear precio. Aquí está cómo armar uno que funcione, no uno que se vuelva un dolor de cabeza administrativo.</p>
+
+  <h2>Las 3 reglas de oro</h2>
+  <p>Antes de inventar mecánica, ten claras estas tres:</p>
+  <ol>
+    <li><strong>Que sea fácil de entender.</strong> Si el cliente necesita más de 10 segundos para entenderlo, no participa.</li>
+    <li><strong>Que sea fácil de canjear.</strong> Si el premio es muy lejano (5,000 puntos = $100), nadie lo persigue.</li>
+    <li><strong>Que sea rentable para ti.</strong> Si das 10% en puntos sobre todo, te comes el margen entero.</li>
+  </ol>
+
+  <h2>Mecánica básica que sí funciona</h2>
+  <p>El estándar mexicano que mejor responde:</p>
+  <ul>
+    <li>1 peso de compra = 1 punto.</li>
+    <li>100 puntos = $5 de descuento (5% efectivo).</li>
+    <li>Acumulación visible en cada ticket.</li>
+    <li>Notificación por WhatsApp cuando alcance el umbral.</li>
+  </ul>
+  <p>Si tu margen es bajo (abarrotes, gasolinera), baja a 1 punto cada $5 pesos para mantener el premio en 1-2%.</p>
+
+  <h2>Tablas de equivalencia por giro</h2>
+  <table>
+    <thead><tr><th>Giro</th><th>Acumulación</th><th>Premio</th></tr></thead>
+    <tbody>
+      <tr><td>Cafetería</td><td>1 café = 1 sello</td><td>10 sellos = café gratis</td></tr>
+      <tr><td>Restaurante</td><td>$1 = 1 punto</td><td>500 puntos = $50 descuento</td></tr>
+      <tr><td>Abarrotes</td><td>$5 = 1 punto</td><td>100 puntos = $20 descuento</td></tr>
+      <tr><td>Estética</td><td>$1 = 1 punto</td><td>1,500 puntos = corte gratis</td></tr>
+      <tr><td>Ropa</td><td>$1 = 1 punto</td><td>2,000 puntos = $200 descuento</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Cómo registrarlo sin complicaciones</h2>
+  <p>Olvídate de tarjetas físicas con sellos. La gente las pierde. Mejor:</p>
+  <ul>
+    <li>Captura el WhatsApp del cliente al cobrar.</li>
+    <li>El POS asocia los puntos a ese número.</li>
+    <li>El cliente recibe su saldo en cada compra.</li>
+    <li>Al alcanzar el umbral, le llega notificación.</li>
+  </ul>
+  <p>Ventaja extra: armas una base de datos de clientes con su historial de compras. Esto vale oro para campañas posteriores.</p>
+
+  <div class="ejemplo">
+    <strong>Caso real:</strong> Una panadería en Querétaro lanzó "10 panes = pan gratis" con tarjeta de cartón. La operación era un caos: tarjetas perdidas, clientes peleando porque no se las sellaron. Migraron a puntos por WhatsApp en su POS. En 4 meses, 1,200 clientes registrados y 28% de aumento en visitas recurrentes.
+  </div>
+
+  <h2>Errores que matan el programa</h2>
+  <ul>
+    <li><strong>Premios inalcanzables.</strong> Si necesita 6 meses de compras para un descuento de $50, no funciona.</li>
+    <li><strong>Caducidad muy corta.</strong> Que los puntos venzan en 30 días genera desconfianza. 12 meses es razonable.</li>
+    <li><strong>Reglas diferentes para cada cajero.</strong> Si un día acumula doble y otro día no, pierdes credibilidad.</li>
+    <li><strong>No avisar el saldo.</strong> Si el cliente no sabe cuántos puntos tiene, no piensa en regresar a canjearlos.</li>
+    <li><strong>Excluir productos sin avisar.</strong> "Esto no acumula" en letras chicas en un cartelito = mala experiencia.</li>
+  </ul>
+
+  <h2>Cómo medir si funciona</h2>
+  <p>Mide estos KPIs cada mes:</p>
+  <ul>
+    <li><strong>Tasa de inscripción:</strong> qué % de tickets se registran. Apunta a 40% mínimo.</li>
+    <li><strong>Frecuencia de compra:</strong> visitas por cliente al mes. Debería subir al menos 15%.</li>
+    <li><strong>Ticket promedio de inscritos vs no inscritos:</strong> los inscritos suelen gastar 20-30% más.</li>
+    <li><strong>Tasa de redención:</strong> qué % canjea sus puntos. Si es bajo (<10%), el premio es muy lejano.</li>
+  </ul>
+
+  <h2>Promociones puntuales para activar</h2>
+  <p>Cada 6-8 semanas, pícale con eventos:</p>
+  <ul>
+    <li>"Doble puntos los martes" (días flojos).</li>
+    <li>"Triple puntos en cumpleaños del cliente".</li>
+    <li>"Bonus de 50 puntos por traer un amigo nuevo".</li>
+    <li>"Semana de puntos x2 en categoría X" (mover SKU lento).</li>
+  </ul>
+
+  <h2>Aspecto legal</h2>
+  <p>En México, los puntos no son dinero pero sí son una promoción. Buenas prácticas:</p>
+  <ul>
+    <li>Publica las reglas en cartelito visible y en tu WhatsApp.</li>
+    <li>Vencimiento claro y por escrito.</li>
+    <li>Si manejas datos personales (WhatsApp), un aviso de privacidad básico te protege.</li>
+  </ul>
+
+  <div class="cta">
+    <h3>Volvix tiene programa de puntos integrado</h3>
+    <p>Captura WhatsApp, acumula puntos, notifica al cliente automáticamente. Sin apps extra ni costo adicional.</p>
+    <a href="/registro.html?giro=cafeteria">Probar gratis</a>
+  </div>
+</article>
+
+<footer>© Volvix POS. Las cifras de retención son promedios de la industria; tus resultados pueden variar.</footer>
+<script src="/volvix-newsletter-wiring.js" defer></script>
+</body>
+</html>

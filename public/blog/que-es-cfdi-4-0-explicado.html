@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Qué es CFDI 4.0 explicado simple para dueños de negocio — Volvix Blog</title>
+<meta name="description" content="CFDI 4.0 explicado sin tecnicismos: qué es, para qué sirve, qué cambió desde 3.3 y cómo afecta tu tienda en México.">
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"Article",
+  "headline":"Qué es CFDI 4.0 explicado simple para dueños de negocio",
+  "description":"CFDI 4.0 explicado sin tecnicismos: qué es, para qué sirve, qué cambió desde 3.3 y cómo afecta tu tienda en México.",
+  "datePublished":"2026-04-28",
+  "author":{"@type":"Organization","name":"Volvix POS"},
+  "publisher":{"@type":"Organization","name":"Volvix POS"},
+  "keywords":"CFDI 4.0, factura electrónica, SAT, México, POS, facturación"
+}
+</script>
+<style>
+  :root { --txt:#0f172a; --muted:#64748b; --accent:#3b82f6; --border:#e2e8f0 }
+  * { box-sizing:border-box }
+  body { margin:0; font-family:Georgia,Cambria,serif; color:var(--txt); line-height:1.7; background:#fff }
+  header { padding:20px 16px; border-bottom:1px solid var(--border); background:#fff }
+  header .inner { max-width:720px; margin:0 auto; display:flex; justify-content:space-between; align-items:center }
+  header a { font-family:system-ui; text-decoration:none; color:var(--txt); font-weight:700 }
+  header nav a { font-weight:400; color:var(--muted); font-size:14px }
+  .hero {
+    background:linear-gradient(135deg,#0c4a6e 0%,#0284c7 100%); color:#fff;
+    padding:64px 16px; text-align:center;
+  }
+  .hero .cat {
+    display:inline-block; background:rgba(255,255,255,.2); padding:4px 14px;
+    border-radius:99px; font-size:12px; font-family:system-ui; font-weight:600;
+    text-transform:uppercase; letter-spacing:1px; margin-bottom:16px;
+  }
+  .hero h1 { margin:0 0 12px; font-size:36px; line-height:1.2; max-width:720px; margin-left:auto; margin-right:auto }
+  .hero .meta { font-family:system-ui; font-size:14px; opacity:.85 }
+  article { max-width:720px; margin:0 auto; padding:48px 16px; font-size:18px }
+  article h2 { font-family:system-ui; margin-top:40px; font-size:26px }
+  article h3 { font-family:system-ui; margin-top:24px; font-size:20px }
+  article p { margin:16px 0 }
+  article ul, article ol { padding-left:20px }
+  article li { margin:8px 0 }
+  article code { background:#f1f5f9; padding:2px 6px; border-radius:4px; font-size:.9em }
+  .ejemplo { background:#f0f9ff; border-left:4px solid var(--accent); padding:16px 20px; margin:20px 0; border-radius:0 8px 8px 0; font-family:system-ui; font-size:16px }
+  .cta {
+    background:#f8fafc; border:1px solid var(--border); border-radius:12px;
+    padding:32px; text-align:center; margin:48px 0; font-family:system-ui;
+  }
+  .cta h3 { margin:0 0 12px; font-size:22px }
+  .cta p { font-size:15px; color:var(--muted); margin:0 0 20px }
+  .cta a {
+    display:inline-block; background:var(--accent); color:#fff;
+    padding:12px 28px; border-radius:8px; text-decoration:none; font-weight:600;
+  }
+  footer { border-top:1px solid var(--border); padding:24px 16px; text-align:center; color:var(--muted); font-size:13px; font-family:system-ui }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="inner">
+    <a href="/">Volvix</a>
+    <nav><a href="/blog.html">← Volver al blog</a></nav>
+  </div>
+</header>
+
+<section class="hero">
+  <span class="cat">Fiscal</span>
+  <h1>Qué es CFDI 4.0 explicado simple para dueños de negocio</h1>
+  <div class="meta">28 de abril, 2026 · 7 min de lectura</div>
+</section>
+
+<article>
+  <p>Si vendes en México y emites facturas, el CFDI 4.0 es obligatorio desde 2023. Pero la mayoría de los manuales lo explican como si todos fuéramos contadores. Esta guía es para el dueño de la tienda, la cocina, la papelería: qué es, qué cambia y qué tienes que pedirle a tu cliente para no romper la facturación.</p>
+
+  <h2>Qué es un CFDI en una sola frase</h2>
+  <p>CFDI son las siglas de <strong>Comprobante Fiscal Digital por Internet</strong>. Es la factura electrónica que el SAT acepta como prueba de una venta. Sin CFDI válido, ni tú deduces ni tu cliente deduce.</p>
+  <p>El "4.0" es la versión más reciente del formato. Reemplazó al 3.3 en 2022 y desde entonces es el único válido para timbrar nuevas facturas.</p>
+
+  <h2>Qué cambió respecto al CFDI 3.3</h2>
+  <p>La diferencia gruesa: el 4.0 es más estricto con los datos del cliente. En el 3.3 podías mandar facturas con el nombre mal escrito o sin código postal y nadie te decía nada. Ahora todo se valida contra los registros del SAT.</p>
+  <ul>
+    <li><strong>Nombre del receptor obligatorio</strong> y debe coincidir letra por letra con la Constancia de Situación Fiscal.</li>
+    <li><strong>Código postal del receptor</strong> requerido (el de su domicilio fiscal, no el de la sucursal).</li>
+    <li><strong>Régimen fiscal del receptor</strong> obligatorio. Si lo capturas mal, el timbre rebota.</li>
+    <li><strong>Objeto de impuesto por concepto</strong>: cada partida indica si causa IVA o no.</li>
+    <li><strong>Cancelación con motivo</strong>: ya no puedes cancelar un CFDI sin justificar por qué.</li>
+  </ul>
+
+  <h2>Qué necesitas pedirle a tu cliente</h2>
+  <p>Antes de emitir tu primer CFDI 4.0 a un cliente, pídele su Constancia de Situación Fiscal (la genera en el portal del SAT en 2 minutos). De ahí vas a sacar:</p>
+  <ol>
+    <li>RFC exacto.</li>
+    <li>Nombre o razón social tal cual aparece, sin "S.A. de C.V." extra ni faltante.</li>
+    <li>Código postal fiscal.</li>
+    <li>Régimen fiscal (601, 612, 626, etc.).</li>
+  </ol>
+  <p>Guárdalo todo en tu POS o sistema de facturación la primera vez. La segunda factura ya sale en automático.</p>
+
+  <div class="ejemplo">
+    <strong>Caso real:</strong> Una papelería en CDMX timbraba 200 facturas al mes. Al migrar a 4.0, el 18% rebotaba por nombre mal escrito o régimen incorrecto. Después de pedir la Constancia a sus 50 clientes recurrentes y guardar los datos validados, el rechazo bajó al 2%.
+  </div>
+
+  <h2>Cómo afecta a tu tienda en el día a día</h2>
+  <p>Si vendes solo a público en general, el cambio es menor: usas RFC genérico <code>XAXX010101000</code> y emites factura global periódica. Pero si tienes clientes que piden factura a su nombre, el flujo cambia:</p>
+  <ul>
+    <li>Tienes que validar los 4 datos antes de timbrar.</li>
+    <li>El uso del CFDI debe coincidir con el régimen del receptor (un cliente RESICO no puede usar G03 igual que una persona moral).</li>
+    <li>Si te pagan a crédito, debes emitir un CFDI de "Pago" cada vez que cobres.</li>
+  </ul>
+
+  <h2>Errores que más timbres queman</h2>
+  <ul>
+    <li><strong>Nombre con acentos</strong> cuando el SAT lo tiene sin acentos.</li>
+    <li><strong>Régimen 626 (RESICO)</strong> con uso del CFDI G03: rebota.</li>
+    <li><strong>Forma de pago "PUE"</strong> cuando en realidad fue a crédito.</li>
+    <li><strong>Código postal de la sucursal</strong> en vez del fiscal.</li>
+    <li><strong>RFC de 12 caracteres</strong> capturado como persona física (que son 13).</li>
+  </ul>
+  <p>Cada timbre rebotado puede costarte entre $1 y $3 MXN según el PAC, y peor: el cliente espera su factura y queda mal contigo.</p>
+
+  <h2>Lo que un buen POS hace por ti</h2>
+  <p>Un POS moderno en México debe:</p>
+  <ul>
+    <li>Validar RFC con regex (12 vs 13 caracteres) antes de mandar al PAC.</li>
+    <li>Sugerir el uso del CFDI según el régimen del receptor.</li>
+    <li>Guardar el catálogo de clientes con sus datos validados.</li>
+    <li>Generar la factura global automática a fin de mes para ventas mostrador.</li>
+    <li>Permitir cancelar con motivo en un clic.</li>
+  </ul>
+  <p>Si tu sistema actual te obliga a capturar todo a mano cada venta, estás perdiendo tiempo y dinero.</p>
+
+  <div class="cta">
+    <h3>Volvix factura con CFDI 4.0 sin dolor</h3>
+    <p>Validación automática, PAC incluido y catálogo de clientes con datos del SAT precargados.</p>
+    <a href="/registro.html?giro=papeleria">Probar gratis</a>
+  </div>
+</article>
+
+<footer>© Volvix POS. Esta guía es informativa y no constituye asesoría fiscal. Consulta a tu contador.</footer>
+<script src="/volvix-newsletter-wiring.js" defer></script>
+</body>
+</html>

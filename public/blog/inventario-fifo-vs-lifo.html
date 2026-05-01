@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Inventario FIFO vs LIFO: cuál usar en tu tienda en México — Volvix Blog</title>
+<meta name="description" content="Diferencias entre FIFO y LIFO, ejemplos reales de costo de mercancía vendida, y cuál te conviene para tu tienda según el giro.">
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"Article",
+  "headline":"Inventario FIFO vs LIFO: cuál usar en tu tienda en México",
+  "description":"Diferencias entre FIFO y LIFO, ejemplos reales y cuál conviene según el giro.",
+  "datePublished":"2026-04-22",
+  "author":{"@type":"Organization","name":"Volvix POS"},
+  "publisher":{"@type":"Organization","name":"Volvix POS"},
+  "keywords":"FIFO, LIFO, inventario, costo de venta, México, POS"
+}
+</script>
+<style>
+  :root { --txt:#0f172a; --muted:#64748b; --accent:#3b82f6; --border:#e2e8f0 }
+  * { box-sizing:border-box }
+  body { margin:0; font-family:Georgia,Cambria,serif; color:var(--txt); line-height:1.7; background:#fff }
+  header { padding:20px 16px; border-bottom:1px solid var(--border); background:#fff }
+  header .inner { max-width:720px; margin:0 auto; display:flex; justify-content:space-between; align-items:center }
+  header a { font-family:system-ui; text-decoration:none; color:var(--txt); font-weight:700 }
+  header nav a { font-weight:400; color:var(--muted); font-size:14px }
+  .hero {
+    background:linear-gradient(135deg,#581c87 0%,#a855f7 100%); color:#fff;
+    padding:64px 16px; text-align:center;
+  }
+  .hero .cat {
+    display:inline-block; background:rgba(255,255,255,.2); padding:4px 14px;
+    border-radius:99px; font-size:12px; font-family:system-ui; font-weight:600;
+    text-transform:uppercase; letter-spacing:1px; margin-bottom:16px;
+  }
+  .hero h1 { margin:0 0 12px; font-size:36px; line-height:1.2; max-width:720px; margin-left:auto; margin-right:auto }
+  .hero .meta { font-family:system-ui; font-size:14px; opacity:.85 }
+  article { max-width:720px; margin:0 auto; padding:48px 16px; font-size:18px }
+  article h2 { font-family:system-ui; margin-top:40px; font-size:26px }
+  article h3 { font-family:system-ui; margin-top:24px; font-size:20px }
+  article p { margin:16px 0 }
+  article ul, article ol { padding-left:20px }
+  article li { margin:8px 0 }
+  article code { background:#f1f5f9; padding:2px 6px; border-radius:4px; font-size:.9em }
+  table { width:100%; border-collapse:collapse; margin:16px 0; font-family:system-ui; font-size:15px }
+  th, td { border:1px solid var(--border); padding:10px; text-align:left }
+  th { background:#f8fafc }
+  .ejemplo { background:#faf5ff; border-left:4px solid #a855f7; padding:16px 20px; margin:20px 0; border-radius:0 8px 8px 0; font-family:system-ui; font-size:16px }
+  .cta {
+    background:#f8fafc; border:1px solid var(--border); border-radius:12px;
+    padding:32px; text-align:center; margin:48px 0; font-family:system-ui;
+  }
+  .cta h3 { margin:0 0 12px; font-size:22px }
+  .cta p { font-size:15px; color:var(--muted); margin:0 0 20px }
+  .cta a {
+    display:inline-block; background:var(--accent); color:#fff;
+    padding:12px 28px; border-radius:8px; text-decoration:none; font-weight:600;
+  }
+  footer { border-top:1px solid var(--border); padding:24px 16px; text-align:center; color:var(--muted); font-size:13px; font-family:system-ui }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="inner">
+    <a href="/">Volvix</a>
+    <nav><a href="/blog.html">← Volver al blog</a></nav>
+  </div>
+</header>
+
+<section class="hero">
+  <span class="cat">Inventario</span>
+  <h1>Inventario FIFO vs LIFO: cuál usar en tu tienda en México</h1>
+  <div class="meta">22 de abril, 2026 · 7 min de lectura</div>
+</section>
+
+<article>
+  <p>Cuando un proveedor te sube el precio en julio y vendes el producto en agosto, ¿cuál fue tu costo real? La respuesta depende del método de valuación que uses. FIFO y LIFO son los dos más comunes y la diferencia entre uno y otro puede cambiar tu utilidad reportada en miles de pesos al cierre del año.</p>
+
+  <h2>Qué significa cada método</h2>
+  <p><strong>FIFO</strong> (First In, First Out): el primer producto que entró al inventario es el primero que sale. Cuando vendes, el costo que se registra es el de la mercancía más antigua.</p>
+  <p><strong>LIFO</strong> (Last In, First Out): el último producto que entró es el primero que sale. El costo registrado es el de la compra más reciente.</p>
+  <p>Existe también el <strong>Costo Promedio Ponderado</strong>, donde sumas todo el inventario, lo divides entre las unidades y obtienes un costo único.</p>
+
+  <h2>Ejemplo concreto con números</h2>
+  <p>Tienes una tienda de cerveza artesanal. Compraste:</p>
+  <ul>
+    <li>1 enero: 100 latas a $25 c/u (costo $2,500)</li>
+    <li>15 marzo: 100 latas a $30 c/u (costo $3,000)</li>
+    <li>10 mayo: 100 latas a $35 c/u (costo $3,500)</li>
+  </ul>
+  <p>En junio vendes 150 latas a $50 c/u. Ingresos: $7,500. ¿Cuál fue tu costo de venta?</p>
+
+  <table>
+    <thead><tr><th>Método</th><th>Costo de venta</th><th>Utilidad bruta</th></tr></thead>
+    <tbody>
+      <tr><td>FIFO</td><td>100×25 + 50×30 = $4,000</td><td>$3,500</td></tr>
+      <tr><td>LIFO</td><td>100×35 + 50×30 = $5,000</td><td>$2,500</td></tr>
+      <tr><td>Promedio</td><td>150×30 = $4,500</td><td>$3,000</td></tr>
+    </tbody>
+  </table>
+  <p>Los tres son válidos contablemente. Lo que cambia es lo que reportas como utilidad y, por tanto, lo que pagas de impuestos.</p>
+
+  <h2>Qué dice la legislación mexicana</h2>
+  <p>El SAT, vía la Ley del ISR, acepta:</p>
+  <ul>
+    <li>Primeras Entradas Primeras Salidas (FIFO).</li>
+    <li>Costo Identificado.</li>
+    <li>Costo Promedio.</li>
+    <li>Detallista (para tiendas con muchos SKUs y baja rotación).</li>
+  </ul>
+  <p><strong>LIFO no es aceptado fiscalmente en México.</strong> Puedes usarlo internamente para análisis, pero para tu declaración debes usar uno de los métodos permitidos.</p>
+
+  <div class="ejemplo">
+    <strong>Caso real:</strong> Una abarrotera en Puebla usaba LIFO porque su contador anterior se lo recomendó. En la auditoría, el SAT recalculó con FIFO y le ajustó la utilidad un 18% hacia arriba, generando un crédito fiscal de $42,000 más recargos. Cambiar el método después de un ejercicio cuesta caro.
+  </div>
+
+  <h2>Cuándo usar FIFO</h2>
+  <p>Casi siempre. FIFO es el estándar y funciona bien para:</p>
+  <ul>
+    <li>Productos perecederos (lácteos, panadería, frutas y verduras).</li>
+    <li>Productos con caducidad o lote (medicamentos, cosméticos).</li>
+    <li>Cualquier giro donde quieras vender lo más viejo primero por lógica operativa.</li>
+  </ul>
+  <p>En épocas de inflación, FIFO reporta utilidad más alta porque el costo registrado es el más antiguo (y barato). Esto significa más impuesto a pagar, pero también más utilidad real visible para análisis.</p>
+
+  <h2>Cuándo usar Costo Promedio</h2>
+  <p>Tiene sentido cuando:</p>
+  <ul>
+    <li>Manejas commodities donde no distingues lotes (tornillos, papel, granel).</li>
+    <li>Tienes alta rotación con muchas compras a precios variables.</li>
+    <li>Quieres simplificar el cálculo y que tu sistema lo haga automático.</li>
+  </ul>
+
+  <h2>Cuándo usar Costo Identificado</h2>
+  <p>Para productos únicos o de alto valor donde puedes rastrear cada pieza: autos, joyería, equipo médico, electrodomésticos serializados. Cada SKU lleva su costo asociado y se descuenta al venderse esa pieza específica.</p>
+
+  <h2>Lo que tu POS debe hacer</h2>
+  <p>Un punto de venta moderno debe permitir elegir el método y aplicarlo automático en cada venta:</p>
+  <ul>
+    <li>Capturar costo unitario en cada compra de proveedor.</li>
+    <li>Calcular costo de venta por método al cierre del día.</li>
+    <li>Generar reporte de utilidad bruta real (no solo ingresos).</li>
+    <li>Alertar cuando un costo subió más del 10% para que reajustes precio.</li>
+  </ul>
+  <p>Si tu POS solo registra ventas pero no costos, estás operando a ciegas.</p>
+
+  <div class="cta">
+    <h3>Volvix maneja FIFO y costo promedio automático</h3>
+    <p>Captura cada compra, valúa el inventario y calcula utilidad bruta sin que muevas un dedo.</p>
+    <a href="/registro.html?giro=abarrotes">Probar gratis</a>
+  </div>
+</article>
+
+<footer>© Volvix POS. Esta guía es informativa y no sustituye asesoría contable o fiscal.</footer>
+<script src="/volvix-newsletter-wiring.js" defer></script>
+</body>
+</html>
