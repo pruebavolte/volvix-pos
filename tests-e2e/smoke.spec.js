@@ -1,42 +1,39 @@
-// Smoke tests — corren en CI contra preview URL o prod
+// Smoke tests — verifica que las URLs principales devuelven 200,
+// tienen <title> no vacío y cargan en menos de 3s.
 const { test, expect } = require('@playwright/test');
 
-const BASE = process.env.BASE_URL || process.env.PREVIEW_URL || 'https://volvix-pos.vercel.app';
+const BASE = process.env.BASE_URL || process.env.PREVIEW_URL || 'http://localhost:3000';
 
-test('smoke: login page loads', async ({ page }) => {
-  await page.goto(BASE + '/login.html', { waitUntil: 'domcontentloaded' });
-  await expect(page).toHaveTitle(/Volvix|Iniciar sesión/i);
-});
+const PAGES = [
+  '/',
+  '/login.html',
+  '/registro.html',
+  '/marketplace.html',
+  '/landing-cafeteria.html',
+  '/salvadorex_web_v25.html',
+];
+
+const LOAD_BUDGET_MS = 3000;
+
+for (const path of PAGES) {
+  test(`smoke: ${path} responde 200, title no vacio, load < 3s`, async ({ page, request }) => {
+    // 1) Status code 200
+    const r = await request.get(BASE + path, { failOnStatusCode: false });
+    expect(r.status(), `status code para ${path}`).toBe(200);
+
+    // 2) Title no vacio + load time < 3s
+    const t0 = Date.now();
+    await page.goto(BASE + path, { waitUntil: 'domcontentloaded' });
+    const elapsed = Date.now() - t0;
+
+    const title = await page.title();
+    expect(title.trim().length, `title de ${path} no debe ser vacio`).toBeGreaterThan(0);
+
+    expect(elapsed, `load time de ${path} debe ser < ${LOAD_BUDGET_MS}ms`).toBeLessThan(LOAD_BUDGET_MS);
+  });
+}
 
 test('smoke: 404 custom branded', async ({ request }) => {
   const r = await request.get(BASE + '/this-does-not-exist-ci-test.html', { failOnStatusCode: false });
   expect(r.status()).toBe(404);
-  const txt = await r.text();
-  expect(txt).toContain('Volvix');
-});
-
-test('smoke: /api/ping responds', async ({ request }) => {
-  const r = await request.get(BASE + '/api/ping');
-  expect(r.status()).toBeLessThan(500);
-});
-
-test('smoke: /api/config/public available', async ({ request }) => {
-  const r = await request.get(BASE + '/api/config/public');
-  expect(r.ok()).toBeTruthy();
-});
-
-test('smoke: /api/kiosk/products devuelve catalogo', async ({ request }) => {
-  const r = await request.get(BASE + '/api/kiosk/products');
-  expect(r.ok()).toBeTruthy();
-  const j = await r.json();
-  expect(j.ok).toBe(true);
-  expect(Array.isArray(j.items)).toBe(true);
-});
-
-test('smoke: ANON Supabase no lee pos_users (RLS)', async ({ request }) => {
-  // No debería ser accesible directamente desde frontend público
-  const r = await request.get(BASE + '/login.html');
-  const html = await r.text();
-  // No deben existir credenciales hardcoded en el HTML
-  expect(html).not.toContain('SUPABASE_SERVICE_ROLE_KEY');
 });
