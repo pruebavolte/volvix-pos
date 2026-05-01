@@ -1627,12 +1627,12 @@
     selectorBtn.id = 'volvix-i18n-btn';
     selectorBtn.innerHTML = LOCALES[currentLang].flag;
     selectorBtn.title = 'Idioma / Language / Idioma';
+    // Inline (non-floating): position:relative so it sits in the normal flow
     selectorBtn.style.cssText = [
-      'position:fixed', 'top:140px', 'right:20px',
+      'position:relative',
       'width:44px', 'height:44px', 'border-radius:50%',
       'background:#fff', 'border:2px solid #2563eb',
-      'cursor:pointer', 'font-size:22px', 'z-index:9989',
-      'box-shadow:0 2px 8px rgba(0,0,0,0.15)',
+      'cursor:pointer', 'font-size:22px', 'z-index:1',
       'display:flex', 'align-items:center', 'justify-content:center',
       'transition:transform .2s'
     ].join(';');
@@ -1642,12 +1642,28 @@
       e.stopPropagation();
       toggleDropdown();
     };
-    document.body.appendChild(selectorBtn);
+
+    // Mount inline: prefer existing #volvix-i18n-slot in header, else append to header, else body
+    const slot = document.getElementById('volvix-i18n-slot');
+    if (slot) {
+      slot.appendChild(selectorBtn);
+    } else {
+      const header = document.querySelector('header');
+      if (header) {
+        const slotDiv = document.createElement('div');
+        slotDiv.id = 'volvix-i18n-slot';
+        slotDiv.style.cssText = 'display:inline-flex;align-items:center;margin-left:auto;';
+        slotDiv.appendChild(selectorBtn);
+        header.appendChild(slotDiv);
+      } else {
+        document.body.appendChild(selectorBtn);
+      }
+    }
 
     dropdownEl = document.createElement('div');
     dropdownEl.id = 'volvix-i18n-dropdown';
     dropdownEl.style.cssText = [
-      'position:fixed', 'top:190px', 'right:20px',
+      'position:absolute', 'top:50px', 'right:0',
       'background:#fff', 'border:1px solid #ccc', 'border-radius:8px',
       'box-shadow:0 4px 12px rgba(0,0,0,0.15)',
       'z-index:9990', 'display:none', 'min-width:160px',
@@ -1667,7 +1683,11 @@
       dropdownEl.appendChild(item);
     });
 
-    document.body.appendChild(dropdownEl);
+    // Dropdown attached to button's parent for relative positioning
+    selectorBtn.style.position = 'relative';
+    const wrapper = selectorBtn.parentElement || document.body;
+    wrapper.style.position = wrapper.style.position || 'relative';
+    wrapper.appendChild(dropdownEl);
     document.addEventListener('click', hideDropdown);
   }
 

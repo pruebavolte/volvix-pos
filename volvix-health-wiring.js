@@ -234,25 +234,11 @@
     try { console[(level === STATUS.CRIT || level === STATUS.DOWN) ? 'error' : 'warn']
             ('[Health]', msg, ctx || ''); } catch (_) {}
     state.listeners.forEach(fn => { try { fn(payload); } catch (_) {} });
-    showToast(level, msg);
+    // showToast removed — #volvix-health-toasts floating UI eliminated (UI cleanup)
   }
 
   function showToast(level, msg) {
-    if (typeof document === 'undefined') return;
-    let host = document.getElementById('volvix-health-toasts');
-    if (!host) {
-      host = document.createElement('div');
-      host.id = 'volvix-health-toasts';
-      host.style.cssText = 'position:fixed;top:12px;right:12px;z-index:99999;display:flex;flex-direction:column;gap:6px;font-family:system-ui,sans-serif;';
-      document.body.appendChild(host);
-    }
-    const colors = { ok:'#16a34a', warn:'#d97706', crit:'#dc2626', down:'#7f1d1d', unknown:'#6b7280' };
-    const el = document.createElement('div');
-    el.style.cssText = 'background:'+(colors[level]||'#374151')+
-      ';color:#fff;padding:8px 12px;border-radius:6px;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.2);max-width:320px;';
-    el.textContent = '[' + level.toUpperCase() + '] ' + msg;
-    host.appendChild(el);
-    setTimeout(() => { try { el.remove(); } catch(_){} }, 6000);
+    // no-op: health toasts removed (UI cleanup). Alerts still fire via console + onAlert callbacks.
   }
 
   function evaluateAlerts(prev, next) {
@@ -280,70 +266,16 @@
   }
 
   // -------------------------------------------------------------------------
-  // 10. PANEL DE STATUS
+  // 10. PANEL DE STATUS — REMOVED (UI cleanup)
+  // #volvix-health-panel floating widget eliminated.
+  // HealthAPI.snapshot() still available for programmatic access.
   // -------------------------------------------------------------------------
   function ensurePanel() {
-    if (typeof document === 'undefined') return null;
-    // R28: ocultar panel debug en producción salvo localStorage.volvix_debug=1
-    try {
-      const isProd = !/^(localhost|127\.|\.local$)/.test(location.hostname);
-      const debugFlag = localStorage.getItem('volvix_debug') === '1';
-      if (isProd && !debugFlag) return null;
-    } catch (e) {}
-    let panel = document.getElementById(CONFIG.panelId);
-    if (panel) return panel;
-    panel = document.createElement('div');
-    panel.id = CONFIG.panelId;
-    panel.style.cssText = [
-      'position:fixed','bottom:12px','right:12px','z-index:99998',
-      'background:#0f172a','color:#e2e8f0','font-family:ui-monospace,Menlo,monospace',
-      'font-size:11px','padding:10px 12px','border-radius:8px','min-width:240px',
-      'box-shadow:0 6px 18px rgba(0,0,0,.35)','border:1px solid #1e293b'
-    ].join(';');
-    panel.innerHTML = '<div id="vh-head" style="font-weight:700;margin-bottom:6px;cursor:pointer;">'
-      + 'Volvix Health <span id="vh-dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#6b7280;margin-left:6px;"></span>'
-      + '<span id="vh-toggle" style="float:right;opacity:.7;">[-]</span></div>'
-      + '<div id="vh-body"></div>';
-    document.body.appendChild(panel);
-    panel.querySelector('#vh-head').addEventListener('click', () => {
-      const b = panel.querySelector('#vh-body');
-      const t = panel.querySelector('#vh-toggle');
-      const hidden = b.style.display === 'none';
-      b.style.display = hidden ? 'block' : 'none';
-      t.textContent = hidden ? '[-]' : '[+]';
-    });
-    return panel;
+    return null; // no-op: panel removed
   }
 
   function renderPanel(snap) {
-    const panel = ensurePanel();
-    if (!panel) return;
-    const dotColor = { ok:'#16a34a', warn:'#d97706', crit:'#dc2626', down:'#7f1d1d', unknown:'#6b7280' };
-    panel.querySelector('#vh-dot').style.background = dotColor[snap.overall] || '#6b7280';
-    const body = panel.querySelector('#vh-body');
-    const row = (label, st, extra) => {
-      const c = dotColor[st] || '#6b7280';
-      return '<div style="display:flex;justify-content:space-between;gap:8px;padding:2px 0;">'
-        + '<span><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:'
-        + c + ';margin-right:6px;"></span>' + label + '</span>'
-        + '<span style="opacity:.75;">' + (extra || st) + '</span></div>';
-    };
-    let html = '';
-    html += '<div style="opacity:.6;margin-bottom:4px;">Endpoints</div>';
-    Object.values(snap.endpoints).forEach(r => {
-      html += row(r.id, r.status, r.latency != null ? r.latency + 'ms' : (r.error || '—'));
-    });
-    html += '<div style="opacity:.6;margin:6px 0 4px;">Integrations</div>';
-    Object.values(snap.integrations).forEach(r => {
-      html += row(r.id, r.status, r.latency != null ? r.latency + 'ms' : '');
-    });
-    html += '<div style="opacity:.6;margin:6px 0 4px;">Network</div>';
-    html += row('latency', classifyLatency(snap.network.latency),
-                snap.network.latency != null ? snap.network.latency + 'ms' : '—');
-    html += row('downlink', STATUS.OK,
-                snap.network.downKbps != null ? snap.network.downKbps + ' kbps' : '—');
-    html += '<div style="opacity:.45;margin-top:6px;font-size:10px;">' + (snap.updatedAt || '') + '</div>';
-    body.innerHTML = html;
+    // no-op: panel UI removed
   }
 
   // -------------------------------------------------------------------------

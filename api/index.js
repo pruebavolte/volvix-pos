@@ -13364,7 +13364,9 @@ module.exports = async (req, res) => {
   }
 
   const parsed = url.parse(req.url, true);
-  const pathname = parsed.pathname;
+  let pathname = parsed.pathname;
+  // B7: alias plural → singular for admin tenants list
+  if (pathname === '/api/admin/tenants') pathname = '/api/admin/tenant';
   const method = req.method;
 
   if (pathname.startsWith('/api/') || pathname === '/api') {
@@ -30410,20 +30412,20 @@ if (process.env.NODE_ENV === 'test') {
       const phone = phoneRaw;
 
       // ---- Validaciones ----
+      if (!isValidPhoneServer(phone)) {
+        return sendJSON(res, { ok: false, field: 'phone', error_code: 'INVALID_PHONE', error_message: 'Teléfono inválido. Usa 10 dígitos MX.' }, 400);
+      }
+      if (!password || password.length < 8) {
+        return sendJSON(res, { ok: false, field: 'password', error_code: 'WEAK_PASSWORD', error_message: 'Contraseña debe tener mínimo 8 caracteres.' }, 400);
+      }
       if (business_name.length < 3 || business_name.length > 100) {
         return sendJSON(res, { ok: false, field: 'business_name', error_code: 'INVALID_NAME', error_message: 'Nombre del negocio inválido (3-100 caracteres).' }, 400);
       }
       if (!VALID_GIROS.has(giro)) {
         return sendJSON(res, { ok: false, field: 'giro', error_code: 'INVALID_GIRO', error_message: 'Selecciona un giro válido.' }, 400);
       }
-      if (!isValidPhoneServer(phone)) {
-        return sendJSON(res, { ok: false, field: 'phone', error_code: 'INVALID_PHONE', error_message: 'Teléfono inválido. Usa 10 dígitos MX.' }, 400);
-      }
       if (email && !isValidEmailServer(email)) {
         return sendJSON(res, { ok: false, field: 'email', error_code: 'INVALID_EMAIL', error_message: 'Email inválido.' }, 400);
-      }
-      if (!password || password.length < 8) {
-        return sendJSON(res, { ok: false, field: 'password', error_code: 'WEAK_PASSWORD', error_message: 'Contraseña debe tener mínimo 8 caracteres.' }, 400);
       }
 
       // ---- Phone duplicado ----

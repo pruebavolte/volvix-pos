@@ -1,28 +1,41 @@
 # 🤝 HANDOFF.md — Estado completo Volvix POS
 
 **Fecha:** 2026-05-01
-**Sesión completada:** ~70 commits, ~40,000 líneas, 32 módulos backend
+**Sesión completada:** ~70 commits, ~40,000 líneas, 32 módulos backend + 7 nuevas migraciones aplicadas
 **Repo:** `D:\volvix-pos-GITHUB-BACKUP-2026-04-29` → `github.com/pruebavolte/volvix-pos`
-**Producción:** `https://salvadorexoficial.com` y `https://salvadorexoficial.com`
-**Próximo dominio principal:** `systeminternational.app`
+**Dominio canónico:** `https://systeminternational.app`
+**Dominio legacy activo:** `https://salvadorexoficial.com`
 
 ---
 
 ## 🎯 Para qué sirve este sistema
 
 Volvix POS / SalvadoreX es un SaaS multi-tenant de Punto de Venta para negocios mexicanos:
-- Cliente potencial llega a `/` → busca su giro → si existe lo lleva a landing personalizada, si no la genera con IA
-- Se registra con **solo teléfono + contraseña** (3 pasos, OTP via SMS con auto-fill nativo)
+- Cliente llega a `/` → busca su giro → landing personalizada o generada con IA
+- Se registra con **teléfono + contraseña** (3 pasos, OTP via SMS con auto-fill nativo)
 - Recibe acceso al POS con datos demo
-- Activa los módulos que quiere usar (POS, Inventario, Recargas, etc)
-- Empieza a vender → cobra cuando alcanza usage threshold (no trial 14 días)
-- Tú (super-admin) controlas: activar/desactivar módulos+botones por cliente, regalar días, bloquear morosos, impersonar para probar
+- Activa módulos (POS, Inventario, Recargas, etc.)
+- Empieza a vender → cobra cuando alcanza usage threshold (no trial fijo)
+- Tú (super-admin) controlas: módulos+botones por cliente, regalar días, bloquear morosos, impersonar
 
 ---
 
-## ✅ LO QUE YA FUNCIONA AL 100% (verificado live)
+## ✅ QUÉ YA FUNCIONA (estado al 2026-05-01)
+
+### Supabase — 7 nuevas migraciones aplicadas hoy
+
+| Migración | Tablas creadas | Función |
+|---|---|---|
+| `giros-synonyms.sql` | `giros_synonyms` | 63 giros + sinónimos para autocomplete inteligente |
+| `system-error-logs.sql` | `system_error_logs` | Tracking de errores de sistema (no se muestran al usuario) |
+| `usage-billing.sql` | `tenant_usage_events`, `tenant_usage_summary`, `tenant_billing_overrides` | Usage-based billing + middleware 402 |
+| `shop-orders.sql` | `shop_orders` | E-commerce del tenant |
+| `status-monitor.sql` | `system_incidents`, `system_health_pings` | Monitor de uptime + incidentes |
+| `2026_pos_leads_and_tour_progress.sql` | `pos_leads`, `volvix_user_tour_progress` | Lead capture + estado del tour de onboarding |
+| `r45-tenant-button-control.sql` | `tenant_button_overrides`, `tenant_admin_notes`, `tenant_impersonation_log` | Control granular de botones por tenant + notas admin + log de impersonación |
 
 ### Backend (32 módulos en `api/`)
+
 | Módulo | Endpoint | Status |
 |---|---|---|
 | `auth` | `/api/login`, `/api/auth/register-simple`, `/auth/verify-simple` | ✅ Live |
@@ -31,7 +44,7 @@ Volvix POS / SalvadoreX es un SaaS multi-tenant de Punto de Venta para negocios 
 | `payments-stp` | `/api/payments/stp/*` + CoDi QR | ⚠️ Espera convenio |
 | `integrations-delivery` | 6 webhooks (Uber/DiDi/Rappi/SinDelantal/iFood/PedidosYa) | ⚠️ Partner approval |
 | `ai-engine` | `/api/ai/chat`, `/forecast`, `/insights` | ⚠️ Espera OPENAI_API_KEY |
-| `email-resend` | OTP + welcome + receipt + CFDI | ✅ RESEND_API_KEY ya set |
+| `email-resend` | OTP + welcome + receipt + CFDI | ✅ RESEND_API_KEY set |
 | `email-campaigns` | Drip campaigns + tracking | ✅ Listo |
 | `email-drips` | Welcome 14d / cart 25h / re-engagement | ✅ Cron config |
 | `recargas-servicios` | Telcel/Movistar/CFE/etc | ⚠️ Espera reseller key |
@@ -61,158 +74,206 @@ Volvix POS / SalvadoreX es un SaaS multi-tenant de Punto de Venta para negocios 
 | `usage-billing` | Tracking + middleware 402 + lock/unlock | ✅ Live |
 | `leads` | Capture + admin list | ✅ Live |
 
-### Frontend (142 URLs)
-- 9 TIER 0 (login/registro/marketplace/hub/grand-tour/blog/booking/referrals/landing_dynamic)
-- 9 TIER 1 POS (salvadorex_web_v25 ⭐ + multipos + pos-clientes/inv/corte/config/reportes + launcher + pos.html legacy)
-- 8 TIER 2 Admin
-- 5 TIER 3 Portales
-- 6 TIER 4 Operación
-- 5 TIER 5 Super-admin
-- 4 TIER 6 IA
-- 8 TIER 7 Legal
-- 6 TIER 8 Docs
-- 14 TIER 10 Utilities
-- 50 Landings de giros (TIER 1+2+3+4)
-- 5 internos (BITACORA, MATRIZ, qa-scenarios, sandbox, modals-demo) — protegidos a `/internal/`
-- 4 video tutorials HTML interactivos
-- 15 blog posts SEO
+### Frontend
+- 142 URLs activas (9 TIER 0, 9 TIER 1 POS, 8 TIER 2 Admin, 5 TIER 3 Portales, 50 landings de giros, etc.)
+- POS principal: `salvadorex_web_v25.html`
 
-### UI clean
+### UI limpia (aplicado hoy)
 - ✅ Sin floating buttons (notifications, health pill, sync widget, theme toggle, academy AI avatar)
-- ✅ Language switch INLINE (no flotante) en header/nav/footer
-- ✅ Banner tricolor "🇲🇽 Hecho en México · Soy Mexicano · Hecho en Nuevo León 🦅" auto-inject
-- ✅ Errores de sistema NO se muestran al usuario, se logean a `system_error_logs`
+- ✅ Language switch INLINE en header/nav/footer — no flotante
+- ✅ Banner "🇲🇽 Hecho en México" auto-inject
+- ✅ Errores de sistema NO se muestran al usuario → se logean a `system_error_logs`
 - ✅ Errores de validación SÍ se muestran con mensaje claro
+
+### Bugs corregidos hoy
+- ✅ B4: `<title>` truncado en landing-taqueria.html
+- ✅ B5: validation order en register-simple (business_name antes que phone)
+- ✅ B6: Canonicals faltantes en registro.html y salvadorex_web_v25.html
+- ✅ B7: `/api/admin/tenants` 404 — handler agregado
+- ✅ B8: Sitemap regenerado (npm run sitemap → ahora refleja 142 URLs reales)
+
+### Variables de entorno confirmadas en Vercel
+- ✅ `RESEND_API_KEY`
+- ✅ `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `SUPABASE_ANON_KEY`, `JWT_SECRET`
+- ✅ `ADMIN_API_KEY`
 
 ---
 
 ## 🚨 LO QUE FALTA (para 100% live)
 
-### Tú haces (15 min total):
+### 1. Vercel deploy bloqueado — CRÍTICO
+El commit `689b457` (el más reciente con todo el trabajo de hoy) **NO está en Production**.
+El `deploy_marker` aún apunta a `9b82f90`.
 
-#### 1. DNS de `systeminternational.app` (5 min)
-- **Si está agregado en otro proyecto Vercel**: ir a ese proyecto → Settings → Domains → Remove
-- En `volvix-pos`: Settings → Domains → Add → `systeminternational.app`
-- Configurar DNS: A record `@` → `216.150.1.1` (o usar nameservers Vercel)
+**Acción:** Vercel Dashboard → proyecto `volvix-pos` → Deployments → buscar commit `689b457` → `⋯` → "Promote to Production"
 
-#### 2. Aplicar 19 migraciones SQL en Supabase (5 min)
-Todas en `migrations/*.sql`:
+Si no aparece o hay build error, verificar:
+- Deployments tab → ver si hay error de build
+- Settings → Git → confirmar que el branch es `main`
+- Si hay "Ignored Build Step" activo: desactivarlo
+
+### 2. API Keys pendientes (en orden de prioridad)
+
+| Variable | Servicio | Sin ella... |
+|---|---|---|
+| `TWILIO_ACCOUNT_SID` + `AUTH_TOKEN` + `TWILIO_SMS_FROM` | SMS OTP | Registro falla (usa dev_code fallback) |
+| `OPENAI_API_KEY` | IA chat/forecast | Páginas IA muestran "no configurado" |
+| `MERCADO_PAGO_ACCESS_TOKEN` + `PUBLIC_KEY` | Pagos MX | Pagos en mock |
+| `STRIPE_SECRET_KEY` + `PUBLISHABLE_KEY` | Pagos USD | Pagos en mock |
+| `VOLVIX_GA_ID` | Google Analytics 4 | Sin tracking |
+| `VOLVIX_FB_PIXEL_ID` | Meta Pixel | Sin tracking |
+
+Agregar en: Vercel → Settings → Environment Variables → Import .env → pegar `.env.production.template`
+
+### 3. Migraciones SQL restantes (~55 archivos de la serie r1-r12)
+
+Las **7 críticas de hoy ya están aplicadas** (ver sección anterior).
+Quedan pendientes las de la serie `r1` a `r12` (hardening, realtime, seguridad, etc.):
+
 ```
-giros-synonyms.sql                  → giros_synonyms (autocomplete)
-usage-billing.sql                   → tenant_usage_events + summary + overrides
-r45-tenant-button-control.sql       → tenant_button_overrides + admin_notes + impersonation_log
-system-error-logs.sql               → system_error_logs (NEW — error tracking)
-shop-orders.sql                     → shop_orders
-status-monitor.sql                  → system_incidents + system_health_pings
-2026_pos_leads_and_tour_progress.sql→ pos_leads + user_tour_progress
-... (14 más, ver migrations/ folder)
+r1-pos-core-hardening.sql
+r2-mv-sales-daily.sql
+r3a-devoluciones-hardening.sql
+r3b-promociones-priority.sql
+r4a-inventario-hardening.sql
+r4b-customers-hardening.sql
+r4c-cortes-hardening.sql
+r5a-kds-hardening.sql
+r5b-perms-rt.sql
+r5c-audit-rewrite.sql
+r6a-auth-hardening.sql
+r6c-quotations-pdf.sql
+r7a-security-fixes.sql
+r7c-canonicalize-status.sql
+r8a-hardware-resilience.sql
+r8b-recovery-server.sql
+r8c-sales-search.sql
+r8e-dr-feature-flags.sql
+r8f-multi-sucursal.sql
+r8g-approvals-fraud.sql
+r9a-rls-cart-hardening.sql
+r9b-security-hardening.sql
+r10a-nivel1-realtime.sql
+r10b-nivel2-daily.sql
+r10c-a-schedule-anomaly.sql
+r10d-a-multimoneda-impuestos.sql
+r10e-a-payments-remote.sql
+r11-final-hardening.sql
+r12-dedupe-products.sql
+r12-o-1-registro-otp.sql
+r12-o-3a-messaging.sql
+r12a-demo-data-pro.sql
+r12b-arco-requests.sql
+r12bug-fix-bootstrap.sql
 ```
 
-Aplicar via Supabase Dashboard → SQL Editor → paste + run.
-
-#### 3. API keys en Vercel (5 min)
-Settings → Environment Variables → Import .env → pega `.env.production.template`
-
-**Mínimo para launch:**
-```
-TWILIO_ACCOUNT_SID + AUTH_TOKEN + SMS_FROM (SMS OTP)
-OPENAI_API_KEY (IA + giro generator)
-MERCADO_PAGO_ACCESS_TOKEN (pagos MX)
-VOLVIX_GA_ID + VOLVIX_FB_PIXEL_ID (tracking)
-```
+Aplicar via Supabase Dashboard → SQL Editor → paste + run (todos son idempotentes con `IF NOT EXISTS`).
 
 ---
 
-## 👤 USUARIOS DE PRUEBA (admin-test)
+## 👤 USUARIOS DE PRUEBA
 
-### Super Admin (TÚ — para administrar todo)
+### Super Admin (TÚ)
 ```
 Email:    admin@volvix.test
 Password: Volvix2026!
-Role:     superadmin (DB) / superadmin (notes.volvix_role)
+Role:     superadmin
 Tenant:   TNT001 (Abarrotes Don Chucho)
-Acceso:
-  - /volvix-admin-saas.html (gestiona todos los tenants)
-  - /volvix-mega-dashboard.html (KPIs platform: ARR/MAU/Churn)
-  - /internal/index.html (portal dev/QA)
-  - /volvix-launcher.html (hub apps)
-  - Todo lo demás
+Acceso:   /volvix-admin-saas.html · /volvix-mega-dashboard.html · /internal/index.html · todo lo demás
 ```
 
 ### Owner (cliente dueño de negocio)
-Después de registro fresh con `/registro.html`:
+Registrarse fresh en `/registro.html`:
 ```
-Phone:    8112345099 (ejemplo del último registro)
-Tenant:   TNT-MK38N (auto-generado)
-Role:     USER (DB) / owner (notes.volvix_role)
-Acceso:
-  - /volvix_owner_panel_v8.html (su dashboard)
-  - /volvix-launcher.html
-  - /salvadorex_web_v25.html (POS)
-  - /mis-modulos.html (activar/desactivar features)
-  - /volvix-user-management.html (crear cajeros)
-  - /pos-* (todos los módulos POS)
+Phone:    8112345099 (ejemplo)
+Tenant:   TNT-XXXXX (auto-generado)
+Role:     owner
+Acceso:   /volvix_owner_panel_v8.html · /salvadorex_web_v25.html · /mis-modulos.html
 ```
 
 ### Cajero (empleado del owner)
 Owner crea via `/volvix-user-management.html`:
 ```
-Email:    cajero@negocio.com
-Password: cualquiera
-Role:     USER (DB) / cajero (notes.volvix_role)
-Acceso:
-  - /volvix-launcher.html (limited)
-  - /salvadorex_web_v25.html (POS)
-  - /pos-clientes.html, /pos-inventario.html (limited)
-  - SIN acceso a admin SaaS, mega-dashboard, etc
+Role:     cajero
+Acceso:   /salvadorex_web_v25.html · /pos-clientes.html · /pos-inventario.html (limitado)
 ```
 
-### Cliente Final (compra al negocio)
-Auto-creado o registrado en `/volvix-customer-portal.html`:
+### Cliente Final
 ```
-Phone+OTP login
-Acceso:
-  - /volvix-customer-portal.html (sus compras, puntos, CFDI)
-  - /volvix-shop.html (e-commerce del tenant)
-  - /volvix-booking.html (citas si tenant es barbería/spa/dental)
+Login:    Phone + OTP en /volvix-customer-portal.html
+Acceso:   /volvix-shop.html?tenant=TNT-XXX · /volvix-booking.html
 ```
 
 ---
 
-## 🧪 CÓMO PROBAR CADA PERFIL
+## 🔄 DEPLOY FLOW
 
-### Como super-admin (TÚ):
-1. `https://salvadorexoficial.com/login.html` → email `admin@volvix.test` / password `Volvix2026!`
-2. Vas al launcher → click "Admin SaaS"
-3. Tabla de tenants → "Control Cliente" tab → seleccionar tenant
-4. Botón "Probar como cliente" → impersonate JWT 30 min en nuevo tab → ves todo como ese cliente
-5. Volver a tu sesión: cerrar el tab, tu JWT real sigue en el tab original
+- **Dominio canónico:** `systeminternational.app`
+- **Branch:** `main` (NO master)
+- **Auto-deploy:** push a `main` → Vercel deploya automáticamente como Production
+- **Project ID:** `prj_2f9m0VwArnqlGvlBZtxchvQl1a2t`
+- **Vercel team:** `grupo-volvixs-projects`
+- **Supabase project:** `zhvwmzkcqngcaqpdxtwr`
+- **Crons en vercel.json:**
+  - `0 8 * * *` → `/api/cron/daily-summary`
+  - `0 9 * * 1` → `/api/cron/weekly-report`
+  - `0 10 1 * *` → `/api/cron/monthly-billing`
+- **CSP configurada** para `systeminternational.app` en `vercel.json` headers
 
-### Como cliente nuevo:
-1. `/registro.html` → teléfono + nombre negocio + giro (escribe "tacos" → sugiere taqueria) + password
-2. SMS llega → auto-fill OTP via Web OTP API (Android/Chrome) o pegar manualmente
-3. Redirect a `/volvix-launcher.html` → ves apps disponibles
-4. Click "POS" → `/salvadorex_web_v25.html` → registras tu primer producto
-5. Haces venta de prueba
-6. Owner panel: `/volvix_owner_panel_v8.html` → ves KPIs reales (con datos demo + tus propias ventas)
+### Para promover deploy manualmente:
+1. Vercel Dashboard → Deployments
+2. Buscar commit `689b457`
+3. `⋯` → "Promote to Production"
 
-### Como cajero del owner:
-1. Owner crea cajero en `/volvix-user-management.html` → recibe email con password temporal
-2. Cajero entra `/login.html` → cambio forzado de password (first-login-complete flag)
-3. Solo ve POS + sus clientes + algunos reportes
-4. Botones bloqueados (si owner los desactivó) → ven 🔒
+---
 
-### Como cliente final del negocio:
-1. URL del shop del tenant: `/volvix-shop.html?tenant=TNT-XXX`
-2. Browse productos → checkout
-3. Auto-creación de customer en pos_customers
-4. Recibe email con tracking
+## 📊 ESTADO ACTUAL
+
+| # | Item | Estado |
+|---|---|---|
+| 1 | 142 URLs renderizan | ✅ |
+| 2 | 32 módulos backend listos | ✅ |
+| 3 | 7 migraciones críticas aplicadas hoy | ✅ |
+| 4 | UI limpia (sin botones flotantes, i18n inline) | ✅ |
+| 5 | Bugs B4-B8 corregidos | ✅ |
+| 6 | Email transaccional (Resend) funcional | ✅ |
+| 7 | Vercel deploy commit 689b457 sin promover a Production | ❌ |
+| 8 | TWILIO_* no configurado → registro sin SMS real | ❌ |
+| 9 | OPENAI_API_KEY no configurada → IA desactivada | ❌ |
+| 10 | MERCADO_PAGO / STRIPE no configurados → pagos en mock | ❌ |
+| 11 | ~34 migraciones r1-r12 pendientes (hardening/security) | ⚠️ |
+| 12 | DNS systeminternational.app sin configurar en Vercel domains | ⚠️ |
+| 13 | Sitemap regenerado (npm run sitemap) | ✅ |
+| 14 | Playwright E2E specs listos (5 specs) | ✅ |
+| 15 | CSP headers configurados para systeminternational.app | ✅ |
+
+---
+
+## 🎯 PRÓXIMOS 3 PASOS (en orden)
+
+### 1. Resolver Vercel deploy stuck
+```
+Vercel Dashboard → Deployments → commit 689b457 → Promote to Production
+```
+Sin esto, TODO el trabajo de hoy no está live.
+
+### 2. Agregar Twilio keys
+```
+TWILIO_ACCOUNT_SID=ACxxxxxxxx
+TWILIO_AUTH_TOKEN=xxxxxxxx
+TWILIO_SMS_FROM=+1xxxxxxxxxx
+```
+Sin Twilio, el registro usa `dev_code` (cualquier OTP funciona — inseguro en producción).
+
+### 3. Aplicar migraciones r1-r12 restantes
+Supabase Dashboard → SQL Editor → ejecutar en orden los 34 archivos `r1-r12`.
+Son todos idempotentes. Cubren hardening de auth, RLS avanzado, multi-sucursal, auditoría.
 
 ---
 
 ## 🐛 ERROR LOGGING
 
-Toda la app ahora envía errores a `POST /api/errors/log` que escribe a `system_error_logs`:
+Errores de sistema van a `system_error_logs` (tabla aplicada hoy). Consulta rápida:
 
 ```sql
 SELECT type, error_code, error_message, tenant_id, count(*)
@@ -222,132 +283,53 @@ GROUP BY 1,2,3,4
 ORDER BY count DESC;
 ```
 
-Cuando me digas "revisa los errores", consulto esta tabla, identifico patrones, y los arreglo.
-
 ---
 
 ## 📦 Estructura del repo
 
 ```
 volvix-pos-GITHUB-BACKUP-2026-04-29/
-├── api/                           ← 32 módulos backend
-│   ├── index.js                   ← Monolítico ~32k líneas, dispatcher principal
-│   ├── auth-register.js, ai-engine.js, ... (31 módulos)
-│   └── ...
-├── public/                        ← 63 HTML servidos por Vercel (fallback)
-│   ├── salvadorex_web_v25.html    ⭐ POS principal
-│   ├── volvix_owner_panel_v8.html
-│   ├── pos-*.html, volvix-*.html, landing-*.html (TIER 2-4)
-│   ├── blog/                      ← 15 posts SEO
-│   ├── i18n/                      ← es-MX.json + en.json
-│   ├── tutorials/                 ← 4 video HTML interactivos
-│   └── volvix-*-wiring.js         ← Auto-injected scripts (i18n, mexico-pride, modules-wiring, etc)
-├── (root .html)                   ← 63 HTML al root (Vercel sirve PRIMERO)
-│   ├── landing-{abarrotes,barberia,...}.html  (10 TIER 1 + 11 TIER 4)
-│   ├── volvix-*.html (admin-saas, mega-dashboard, customer-portal, vendor-portal, ...)
-│   ├── login.html, registro.html, marketplace.html
-├── migrations/                    ← 19 archivos .sql pendientes
-├── docs/                          ← 19 articles + VERCEL_ENV_SETUP.md
-├── scripts/                       ← generate-sitemap, update-domain, generate-tier3/4-landings, etc
-├── tests-e2e/                     ← Playwright specs (5 specs)
-├── REPETIDOS/                     ← 99 duplicados archivados (NO ELIMINAR)
-├── internal/                      ← 6 dev/QA tools (gate role superadmin)
-├── .env.production.template       ← Lista 36 env vars para importar a Vercel
-├── PENDIENTES.md                  ← Lista detallada de bloqueadores + roadmap
-├── HANDOFF.md                     ← ESTE archivo
-├── vercel.json                    ← Routes + crons + headers + CSP
-└── package.json                   ← npm start, test:e2e, sitemap, etc
+├── api/                  ← 32 módulos backend (index.js monolítico ~32k líneas)
+├── migrations/           ← ~65 archivos SQL (7 críticos aplicados hoy, ~34 r1-r12 pendientes)
+├── public/               ← HTML + assets (fallback Vercel)
+├── (root .html)          ← 142 HTML servidos directamente
+├── docs/                 ← 19 articles + VERCEL_ENV_SETUP.md
+├── scripts/              ← generate-sitemap, update-domain, etc.
+├── tests-e2e/            ← 5 specs Playwright
+├── REPETIDOS/            ← 99 duplicados archivados (NO ELIMINAR)
+├── internal/             ← 6 dev/QA tools (gate: rol superadmin)
+├── .env.production.template ← 36 env vars para importar a Vercel
+├── vercel.json           ← Routes + crons + CSP headers
+└── package.json          ← scripts: start, sitemap, test:e2e, build:android, etc.
 ```
 
 ---
 
-## 🎯 LO QUE FALTA POR HACER (siguiente sesión)
+## 🔑 VARIABLES DE ENTORNO ACTUALES
 
-### Prioridad CRITICAL (cuando aplique migraciones SQL)
-1. ✅ Verificar que `/api/auth/register-simple` con DB real (no in-memory fallback)
-2. ✅ Verificar `/api/billing/check-limits` middleware funciona
-3. ✅ Aplicar las 19 migraciones SQL
+| Variable | Estado |
+|---|---|
+| `RESEND_API_KEY` | ✅ Set |
+| `SUPABASE_URL` / `SERVICE_KEY` / `ANON_KEY` | ✅ Set |
+| `JWT_SECRET` / `ADMIN_API_KEY` | ✅ Set |
+| `TWILIO_*` | ❌ Falta |
+| `OPENAI_API_KEY` | ❌ Falta |
+| `MERCADO_PAGO_ACCESS_TOKEN` / `PUBLIC_KEY` | ❌ Falta |
+| `STRIPE_SECRET_KEY` / `PUBLISHABLE_KEY` | ❌ Falta |
+| `VOLVIX_GA_ID` / `VOLVIX_FB_PIXEL_ID` | ❌ Falta |
+| `CANONICAL_REDIRECT_ENABLED` | ⚠️ Desactivado intencional hasta DNS final |
 
-### Prioridad HIGH
-4. Configurar Twilio para SMS real (sin él, registro funciona pero sin SMS)
-5. Configurar OPENAI_API_KEY (sin él, IA pages muestran "no configurado")
-6. Configurar MERCADO_PAGO_ACCESS_TOKEN (sin él, pagos en mock)
-7. Probar cada perfil de usuario manualmente con Chrome
-8. Tomar screenshots de cada flow para landing/marketing
-
-### Prioridad MEDIUM (polish post-launch)
-9. Generar APK Android con Capacitor (existe estructura en `ios/` pero no Android)
-10. Generar EXE Windows con Electron
-11. Performance audit Lighthouse 90+
-12. ML real para fraud-dashboard (hoy heurístico)
-13. WebSocket real para chat live (hoy mock)
-
-### Prioridad LOW (nice-to-have)
-14. Más blog posts (15 → 30)
-15. i18n adicional (pt-BR, en-US)
-16. White-label para resellers
-17. GraphQL wrapper sobre REST
-18. Compliance dashboard (SOC2 readiness score)
-
-### Bugs reportados Quinn QA aún sin arreglar:
-- B4 LOW: `<title>` truncado en landing-taqueria.html ("...controla tu trompo y due")
-- B5 MEDIUM: validation order en register-simple (business_name antes que phone) — funciona pero UX confusa
-- B6 MEDIUM: Faltan canonical en registro.html y salvadorex_web_v25.html
-- B7 LOW: `/api/admin/tenants` 404 (deberíamos agregar handler o renombrar plural→singular)
-- B8 LOW: Sitemap declara 121 URLs vs 142 reales (regenerar con `npm run sitemap`)
+Referencia completa: `docs/VERCEL_ENV_SETUP.md`
 
 ---
 
-## 🔑 VARIABLES DE ENTORNO ACTUALES (Vercel)
-
-Confirmadas vía `/api/payments/health`:
-- ✅ `RESEND_API_KEY` (email funciona)
-- ✅ `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `SUPABASE_ANON_KEY`, `JWT_SECRET`
-- ✅ `ADMIN_API_KEY`
-- ❌ `MERCADO_PAGO_ACCESS_TOKEN` (mp:false)
-- ❌ `STP_OWNER_CLABE` (stp:false)
-- ❌ `STRIPE_SECRET_KEY` (stripe:false)
-- ❌ `OPENAI_API_KEY` (ai:false)
-- ❌ `PAC_API_*` (cfdi:false)
-- ❌ `PROVIDER_RECARGAS_API_KEY` (recargas:false)
-- ❌ `TWILIO_*` (SMS no funciona, registro fallback dev_code)
-- ❌ `CANONICAL_REDIRECT_ENABLED` (no redirige, intencional hasta DNS final)
-
-Lista completa con dónde obtener cada una: `docs/VERCEL_ENV_SETUP.md`
-
----
-
-## 🔄 DEPLOY FLOW
-
-1. Push a `main` en GitHub → Vercel auto-deploya como **Production** (configurado correcto)
-2. Si falla build, ver `https://vercel.com/grupo-volvixs-projects/volvix-pos/deployments`
-3. Para promover deploy específico: click deploy → ⋯ → "Promote to Production"
-4. **Project ID:** `prj_2f9m0VwArnqlGvlBZtxchvQl1a2t`
-5. **Branch tracking:** `main` (NO master)
-6. Custom domains:
-   - `salvadorexoficial.com` (Valid Configuration ✅)
-   - `salvadorexoficial.com` (default)
-   - `systeminternational.app` (a agregar)
-7. Cron jobs configurados en `vercel.json` (requieren plan Pro ✅ ya tienes)
-
----
-
-## 📞 CONTACTO Y CREDENCIALES
-
-- GitHub: `pruebavolte/volvix-pos` (privado)
-- Vercel team: `grupo-volvixs-projects`
-- Supabase project ID: `zhvwmzkcqngcaqpdxtwr` (salvadorexoficial)
-- Domains:
-  - `salvadorexoficial.com` (validado, esperando DNS A record)
-  - `systeminternational.app` (a configurar)
-  - `salvadorexoficial.com` (alias permanente)
-
----
-
-## 💬 Mensaje del usuario para próxima sesión
+## 💬 Mensaje clave
 
 > "Comparte el sitio. Pruébalo. Regístrate con tu teléfono."
 >
-> Eso es lo único que tenemos que poder decir cuando el cliente nos pregunte. Si el flow no funciona en 60 segundos, no estamos listos.
+> Eso es lo único que tenemos que poder decir cuando el cliente pregunte. Si el flow no funciona en 60 segundos, no estamos listos.
 
-**Próxima sesión:** comenzar con `cat HANDOFF.md && cat PENDIENTES.md && curl -s https://salvadorexoficial.com/api/payments/health | jq` para tener contexto rápido del estado.
+**Próxima sesión — contexto rápido:**
+```bash
+cat HANDOFF.md && cat PENDIENTES.md && curl -s https://systeminternational.app/api/payments/health | jq
+```

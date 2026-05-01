@@ -192,110 +192,21 @@
   }
 
   // ──────────────────────────────────────────────────────────────
-  // Centro de notificaciones (campana + panel)
+  // Centro de notificaciones (campana + panel) — REMOVED (UI cleanup)
+  // #vlx-bell y #vlx-notif-drawer eliminados. Polling conservado.
   // ──────────────────────────────────────────────────────────────
-  function createBellButton() {
-    if (document.getElementById('volvix-notif-bell')) return;
-    const btn = document.createElement('button');
-    btn.id = 'volvix-notif-bell';
-    btn.title = 'Notificaciones';
-    btn.innerHTML = `
-      <span style="position:relative;display:inline-block;">🔔
-        <span id="notif-badge" style="display:none;position:absolute;top:-8px;right:-10px;
-          background:#ef4444;color:#fff;font-size:10px;font-weight:bold;
-          padding:2px 6px;border-radius:10px;min-width:18px;text-align:center;">0</span>
-      </span>`;
-    btn.style.cssText = `
-      position:fixed;top:20px;right:80px;width:42px;height:42px;
-      border-radius:50%;background:#1e293b;color:#fff;border:none;
-      cursor:pointer;font-size:18px;z-index:9997;
-      box-shadow:0 4px 12px rgba(0,0,0,0.25);
-      display:flex;align-items:center;justify-content:center;
-    `;
-    btn.onclick = togglePanel;
-    document.body.appendChild(btn);
-  }
+  // createBellButton() removed — no floating bell injected in DOM
 
   function updateBadge(pulse = false) {
-    const badge = document.getElementById('notif-badge');
-    if (!badge) return;
-    const unread = notifications.filter(n => !n.read).length;
-    badge.textContent = unread > 99 ? '99+' : String(unread);
-    badge.style.display = unread > 0 ? 'inline-block' : 'none';
-    if (pulse) {
-      const bell = document.getElementById('volvix-notif-bell');
-      if (bell) {
-        bell.classList.remove('vn-bell-pulse');
-        void bell.offsetWidth;
-        bell.classList.add('vn-bell-pulse');
-      }
-    }
+    // no-op: bell UI removed
   }
 
   function togglePanel() {
-    const existing = document.getElementById('notif-panel');
-    if (panelOpen && existing) {
-      existing.remove();
-      panelOpen = false;
-      return;
-    }
-    const panel = document.createElement('div');
-    panel.id = 'notif-panel';
-    panel.style.cssText = `
-      position:fixed;top:75px;right:80px;width:380px;max-height:520px;
-      background:#1e293b;color:#fff;border-radius:12px;
-      box-shadow:0 20px 60px rgba(0,0,0,0.5);overflow:hidden;z-index:9996;
-      font-family:system-ui,sans-serif;display:flex;flex-direction:column;
-    `;
-    document.body.appendChild(panel);
-    panelOpen = true;
-    renderPanelBody();
+    // no-op: panel UI removed
   }
 
   function renderPanelBody() {
-    const panel = document.getElementById('notif-panel');
-    if (!panel) return;
-    const unread = notifications.filter(n => !n.read).length;
-    panel.innerHTML = `
-      <div style="padding:14px 16px;border-bottom:1px solid #334155;display:flex;justify-content:space-between;align-items:center;">
-        <strong style="font-size:15px;">Notificaciones ${unread ? `<span style="color:#94a3b8;font-weight:normal;">(${unread})</span>`:''}</strong>
-        <div style="display:flex;gap:8px;">
-          <button data-action="mark-all"
-            style="background:none;border:1px solid #334155;color:#94a3b8;cursor:pointer;font-size:11px;padding:4px 8px;border-radius:6px;">
-            Marcar todo leído
-          </button>
-          <button data-action="clear"
-            style="background:none;border:1px solid #334155;color:#ef4444;cursor:pointer;font-size:11px;padding:4px 8px;border-radius:6px;">
-            Limpiar
-          </button>
-        </div>
-      </div>
-      <div style="overflow:auto;flex:1;">
-        ${notifications.length === 0
-          ? '<div style="padding:40px;text-align:center;color:#94a3b8;font-size:13px;">Sin notificaciones</div>'
-          : notifications.slice().reverse().map(renderItem).join('')}
-      </div>
-      <div style="padding:8px 14px;border-top:1px solid #334155;display:flex;justify-content:space-between;font-size:11px;color:#94a3b8;">
-        <label style="cursor:pointer;"><input type="checkbox" data-setting="soundEnabled" ${settings.soundEnabled?'checked':''}> Sonido</label>
-        <label style="cursor:pointer;"><input type="checkbox" data-setting="pushEnabled"  ${settings.pushEnabled ?'checked':''}> Push</label>
-        <label style="cursor:pointer;"><input type="checkbox" data-setting="autoMonitor"  ${settings.autoMonitor ?'checked':''}> Monitor</label>
-      </div>
-    `;
-
-    // Wire-up
-    panel.querySelector('[data-action="mark-all"]').onclick = () => { window.markAllRead(); };
-    panel.querySelector('[data-action="clear"]').onclick    = async () => {
-      if (await VxUI.destructiveConfirm({ title: 'Eliminar notificaciones', message: '¿Eliminar todas las notificaciones?', confirmText: 'Eliminar', requireText: 'ELIMINAR' })) window.clearNotifications();
-    };
-    panel.querySelectorAll('[data-setting]').forEach(cb => {
-      cb.onchange = () => {
-        settings[cb.dataset.setting] = cb.checked;
-        saveSettings();
-      };
-    });
-    panel.querySelectorAll('[data-id]').forEach(el => {
-      el.onclick = () => window.markRead(el.dataset.id);
-    });
+    // no-op: panel UI removed
   }
 
   function renderItem(n) {
@@ -557,8 +468,6 @@
     }
     load();
     injectStyles();
-    createBellButton();
-    updateBadge();
     requestPushPermission();
 
     // Monitores periódicos
@@ -572,17 +481,6 @@
     setTimeout(monitorNewSales, 4_000);
     setTimeout(monitorSync,     6_000);
     setTimeout(monitorSession,  8_000);
-
-    // Cerrar panel al click fuera
-    document.addEventListener('click', (e) => {
-      if (!panelOpen) return;
-      const panel = document.getElementById('notif-panel');
-      const bell  = document.getElementById('volvix-notif-bell');
-      if (panel && !panel.contains(e.target) && bell && !bell.contains(e.target)) {
-        panel.remove();
-        panelOpen = false;
-      }
-    });
 
     console.log('[volvix-notifications] inicializado — historial:', notifications.length);
   }

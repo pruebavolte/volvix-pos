@@ -186,48 +186,13 @@
   }
 
   // ───────────────────────────────────────────────────────────────────
-  //  CHAT OVERLAY
+  //  CHAT OVERLAY — REMOVED (UI cleanup)
+  // #ai-chat-toggle (floating FAB) and #ai-chat-overlay eliminated.
+  // Backend functions (callAI, callSupportAI, aiSendMessage, etc.) preserved.
   // ───────────────────────────────────────────────────────────────────
   function createChatOverlay() {
-    if (document.getElementById('ai-chat-overlay')) return;
-
-    const html = `
-      <div id="ai-chat-overlay" style="position:fixed;bottom:20px;right:20px;width:380px;max-height:540px;background:#1e293b;color:#fff;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,0.55);display:none;flex-direction:column;z-index:9999;font-family:system-ui,-apple-system,sans-serif;overflow:hidden;">
-        <div style="padding:14px 16px;background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 100%);display:flex;justify-content:space-between;align-items:center;">
-          <div>
-            <strong style="font-size:14px;">🤖 Volvix AI</strong>
-            <div style="font-size:11px;color:#93c5fd;margin-top:2px;">Powered by Claude · v${VERSION}</div>
-          </div>
-          <div style="display:flex;gap:6px;">
-            <button onclick="window.aiClearChat()" title="Limpiar" style="background:transparent;border:1px solid #334155;color:#94a3b8;font-size:12px;cursor:pointer;border-radius:5px;padding:4px 8px;">↺</button>
-            <button onclick="window.aiToggleChat()" title="Cerrar" style="background:transparent;border:1px solid #334155;color:#94a3b8;font-size:14px;cursor:pointer;border-radius:5px;padding:4px 9px;line-height:1;">×</button>
-          </div>
-        </div>
-
-        <div id="ai-chat-quick" style="padding:8px 12px;background:#0f172a;border-bottom:1px solid #334155;display:flex;gap:6px;flex-wrap:wrap;">
-          <button onclick="window.aiSummarizeSales()" style="background:#334155;color:#cbd5e1;border:none;padding:5px 9px;border-radius:5px;font-size:11px;cursor:pointer;">📊 Ventas</button>
-          <button onclick="window.aiRecommendProducts()" style="background:#334155;color:#cbd5e1;border:none;padding:5px 9px;border-radius:5px;font-size:11px;cursor:pointer;">📦 Stock</button>
-          <button onclick="window.aiForecastSales()" style="background:#334155;color:#cbd5e1;border:none;padding:5px 9px;border-radius:5px;font-size:11px;cursor:pointer;">📈 Forecast</button>
-          <button onclick="window.aiDetectPatterns()" style="background:#334155;color:#cbd5e1;border:none;padding:5px 9px;border-radius:5px;font-size:11px;cursor:pointer;">🔍 Patrones</button>
-          <button onclick="window.aiTrainingAssistant()" style="background:#334155;color:#cbd5e1;border:none;padding:5px 9px;border-radius:5px;font-size:11px;cursor:pointer;">🎓 Tutor</button>
-        </div>
-
-        <div id="ai-chat-messages" style="flex:1;padding:14px;overflow-y:auto;max-height:300px;min-height:200px;background:#1e293b;">
-          <div style="background:#334155;padding:10px 12px;border-radius:10px 10px 10px 2px;font-size:13px;line-height:1.5;">
-            ¡Hola! Soy la IA de Volvix POS. Pregúntame lo que quieras o usa los botones rápidos.
-          </div>
-        </div>
-
-        <div style="padding:12px 14px;border-top:1px solid #334155;background:#0f172a;display:flex;gap:8px;align-items:center;">
-          <input id="ai-chat-input" placeholder="Pregunta a la IA..." onkeydown="if(event.key==='Enter') window.aiSendMessage()" style="flex:1;padding:8px 12px;background:#1e293b;border:1px solid #334155;color:#fff;border-radius:6px;font-size:13px;outline:none;" />
-          <button onclick="window.aiSendMessage()" style="padding:8px 14px;background:#3b82f6;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;">→</button>
-        </div>
-      </div>
-
-      <button id="ai-chat-toggle" onclick="window.aiToggleChat()" title="Abrir IA" style="position:fixed;bottom:20px;right:20px;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#1e40af);color:#fff;border:none;font-size:26px;cursor:pointer;box-shadow:0 8px 28px rgba(59,130,246,0.55);z-index:9998;transition:transform .15s ease;">🤖</button>
-    `;
-    document.body.insertAdjacentHTML('beforeend', html);
-    log('Chat overlay creado');
+    // no-op: floating chat UI removed (UI cleanup)
+    log('Chat overlay desactivado (UI cleanup)');
   }
 
   function appendUserMessage(text) {

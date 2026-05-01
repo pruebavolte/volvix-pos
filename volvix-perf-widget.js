@@ -20,7 +20,8 @@
   if (typeof window === 'undefined' || typeof document === 'undefined') return;
   if (window.__VOLVIX_PERF_WIDGET__) return;
   window.__VOLVIX_PERF_WIDGET__ = true;
-  if (window.VOLVIX_PERF_HIDE) return;
+  // UI cleanup: #volvix-perf-widget permanently disabled (dev-only tool, not for production)
+  return;
 
   // ---------- state ----------
   var state = {

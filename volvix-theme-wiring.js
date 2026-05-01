@@ -202,54 +202,12 @@
   }
 
   // ---------------------------------------------------------------------------
-  // TOGGLE BUTTON
+  // TOGGLE BUTTON — REMOVED (floating button eliminated, UI cleanup)
   // ---------------------------------------------------------------------------
-  function createButton() {
-    if (document.getElementById(BUTTON_ID)) return;
-
-    const btn = document.createElement('button');
-    btn.id = BUTTON_ID;
-    btn.setAttribute('aria-label', 'Cambiar tema');
-    btn.setAttribute('title', 'Cambiar tema (dark / light / auto)');
-    btn.style.cssText = [
-      'position:fixed',
-      'top:200px',
-      'right:20px',
-      'width:44px',
-      'height:44px',
-      'border-radius:50%',
-      'background:var(--vlx-surface,#1F2937)',
-      'color:var(--vlx-text,#FFF)',
-      'border:1px solid var(--vlx-border,#2E2E2C)',
-      'cursor:pointer',
-      'font-size:20px',
-      'line-height:1',
-      'display:flex',
-      'align-items:center',
-      'justify-content:center',
-      'box-shadow:var(--vlx-shadow,0 4px 12px rgba(0,0,0,0.4))',
-      'z-index:9988',
-      'transition:transform .15s ease, background-color .25s ease, color .25s ease'
-    ].join(';');
-
-    btn.addEventListener('mouseenter', function () {
-      btn.style.transform = 'scale(1.08)';
-    });
-    btn.addEventListener('mouseleave', function () {
-      btn.style.transform = 'scale(1)';
-    });
-
-    btn.addEventListener('click', cycleMode);
-
-    document.body.appendChild(btn);
-    updateButton();
-  }
+  // createButton() removed — no floating #theme-toggle injected in DOM
 
   function updateButton() {
-    const btn = document.getElementById(BUTTON_ID);
-    if (!btn) return;
-    btn.textContent = ICONS[currentMode] || ICONS.auto;
-    btn.setAttribute('data-mode', currentMode);
+    // no-op: button removed
   }
 
   function cycleMode() {
@@ -301,7 +259,6 @@
   function init() {
     ensureTransitionStyle();
     applyTheme(currentMode);
-    createButton();
     watchSystem();
     dispatch('volvix:theme:ready', {
       mode: currentMode,
