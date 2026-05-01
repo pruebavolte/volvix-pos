@@ -7,9 +7,9 @@
 
 const BRAND = {
   name: 'Volvix POS',
-  logo: 'https://volvix-pos.vercel.app/logo.png', // placeholder
+  logo: 'https://salvadorexoficial.com/logo.png', // placeholder
   color: '#1f6feb',
-  url: 'https://volvix-pos.vercel.app',
+  url: 'https://salvadorexoficial.com',
 };
 
 function escapeHtml(s) {

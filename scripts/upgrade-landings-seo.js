@@ -18,7 +18,7 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
-const BASE_URL = 'https://volvix-pos.vercel.app';
+const BASE_URL = 'https://salvadorexoficial.com';
 
 // TIER 1 — root files
 const TIER1 = [

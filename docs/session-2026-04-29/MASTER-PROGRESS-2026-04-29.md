@@ -69,15 +69,15 @@ GLOBAL: 67% → 85% (+18%)
 ## 🔗 URLS PRODUCCIÓN
 
 ```
-Landing:           https://volvix-pos.vercel.app
-Registro:          https://volvix-pos.vercel.app/registro.html
-Login:             https://volvix-pos.vercel.app/login.html
-POS:               https://volvix-pos.vercel.app/pos.html
-Admin Panel v7:    https://volvix-pos.vercel.app/volvix_owner_panel_v7.html
-Admin Panel v8:    https://volvix-pos.vercel.app/volvix_owner_panel_v8.html
-Tutoriales:        https://volvix-pos.vercel.app/tutorials/index.html
-Tutorial Nuevo:    https://volvix-pos.vercel.app/TUTORIAL-REGISTRO-USUARIOS.html
-User Management:   https://volvix-pos.vercel.app/volvix-user-management.html
+Landing:           https://salvadorexoficial.com
+Registro:          https://salvadorexoficial.com/registro.html
+Login:             https://salvadorexoficial.com/login.html
+POS:               https://salvadorexoficial.com/pos.html
+Admin Panel v7:    https://salvadorexoficial.com/volvix_owner_panel_v7.html
+Admin Panel v8:    https://salvadorexoficial.com/volvix_owner_panel_v8.html
+Tutoriales:        https://salvadorexoficial.com/tutorials/index.html
+Tutorial Nuevo:    https://salvadorexoficial.com/TUTORIAL-REGISTRO-USUARIOS.html
+User Management:   https://salvadorexoficial.com/volvix-user-management.html
 ```
 
 ---
@@ -144,7 +144,7 @@ Owner login → /volvix_owner_panel_v8.html
 **Instalación**:
 ```bash
 adb install /d/volvix-pos-app-debug.apk
-# Abre a: https://volvix-pos.vercel.app (via Capacitor)
+# Abre a: https://salvadorexoficial.com (via Capacitor)
 ```
 
 **Build Specs**:
@@ -361,7 +361,7 @@ git commit -m "docs: Add comprehensive OAuth, Stripe, Dashboard guides"
 
 **REPOSITORIO**: /d/github/volvix-pos (git + Vercel)
 **BACKUP**: /d/volvix-pos-backup-2026-04-28_23-11-26
-**PRODUCCIÓN**: https://volvix-pos.vercel.app
+**PRODUCCIÓN**: https://salvadorexoficial.com
 **DOCUMENTACIÓN**: Este archivo + HANDOFF.md + 7 guides por módulo
 
 ---

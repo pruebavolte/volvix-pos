@@ -59,7 +59,7 @@ Desglose por tag:
 
 ### Servers
 
-- `https://volvix-pos.vercel.app` (producción)
+- `https://salvadorexoficial.com` (producción)
 - `http://localhost:3000` (dev)
 
 ## Notas
@@ -77,5 +77,5 @@ Desglose por tag:
 
 ## Acceso
 
-- **Spec raw:** https://volvix-pos.vercel.app/api/openapi.yaml
-- **UI interactiva:** https://volvix-pos.vercel.app/api/docs
+- **Spec raw:** https://salvadorexoficial.com/api/openapi.yaml
+- **UI interactiva:** https://salvadorexoficial.com/api/docs

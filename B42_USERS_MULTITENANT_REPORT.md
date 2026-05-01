@@ -1,6 +1,6 @@
 # B42 — Users Multi-Tenant E2E Audit Report
 
-**Run:** 2026-04-28 (UTC) · **Target:** https://volvix-pos.vercel.app · **Tag:** `46282719`
+**Run:** 2026-04-28 (UTC) · **Target:** https://salvadorexoficial.com · **Tag:** `46282719`
 **Test file:** `tests/users-multitenant-e2e.spec.js`
 **Config:** `tests/playwright.b42.config.js`
 **Run command:** `npx playwright test --config=tests/playwright.b42.config.js`

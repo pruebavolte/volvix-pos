@@ -71,7 +71,7 @@ All require `Authorization: Bearer <jwt>` from `window.Volvix.auth.getToken()` (
 ## Test plan (manual, end-to-end)
 
 ### Setup
-1. Open https://volvix-pos.vercel.app and log in with valid Volvix credentials.
+1. Open https://salvadorexoficial.com and log in with valid Volvix credentials.
 2. Open DevTools → Console; verify `window.VolvixExportImport` and `window.VolvixCustomerCredit` are defined.
 3. Verify `<link rel="stylesheet" href="/volvix-import-export.css">` is in `<head>`.
 

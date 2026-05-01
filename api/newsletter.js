@@ -145,7 +145,7 @@ function register(deps) {
 
       // Best-effort confirmation email
       const token = unsubToken(email, SECRET);
-      const baseUrl = process.env.PUBLIC_BASE_URL || 'https://volvix-pos.vercel.app';
+      const baseUrl = process.env.PUBLIC_BASE_URL || 'https://salvadorexoficial.com';
       const unsubUrl = baseUrl + '/api/newsletter/unsubscribe?email=' +
         encodeURIComponent(email) + '&token=' + token;
       if (typeof sendEmail === 'function') {
@@ -283,7 +283,7 @@ function register(deps) {
       }
       let sent = 0;
       let failed = 0;
-      const baseUrl = process.env.PUBLIC_BASE_URL || 'https://volvix-pos.vercel.app';
+      const baseUrl = process.env.PUBLIC_BASE_URL || 'https://salvadorexoficial.com';
 
       for (const r of (Array.isArray(recipients) ? recipients : [])) {
         const email = r && r.email;

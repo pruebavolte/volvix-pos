@@ -119,7 +119,7 @@
 **VOICEOVER**: "Volvix POS Multi-Sucursal. Desde 2 hasta 100 tiendas. Pruebalo gratis."
 **VISUAL**: URL + CTA
 **ACTION**: Click animado
-**TEXTO ON-SCREEN**: "volvix-pos.vercel.app/registro"
+**TEXTO ON-SCREEN**: "salvadorexoficial.com/registro"
 
 ## Caption (subtitulos)
 - Auto-generar
@@ -131,7 +131,7 @@
 ## Hashtags / Description
 #MultiSucursal #FranquiciaMx #PuntoDeVenta #DashboardEjecutivo #Volvix #CadenaTiendas #BusinessIntelligence
 
-"Controla 2, 5 o 50 sucursales desde un dashboard. Reportes consolidados, alertas en tiempo real, mobile-first. Volvix POS para cadenas. volvix-pos.vercel.app/registro"
+"Controla 2, 5 o 50 sucursales desde un dashboard. Reportes consolidados, alertas en tiempo real, mobile-first. Volvix POS para cadenas. salvadorexoficial.com/registro"
 
 ## Metricas esperadas
 - Watch time: >65% (audiencia mas senior, mas paciente)

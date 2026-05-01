@@ -26,7 +26,7 @@ Nota: El conteo de `confirm()` subió respecto al baseline. Causa probable: dura
 
 ## Deploy
 
-- URL prod: https://volvix-pos.vercel.app
+- URL prod: https://salvadorexoficial.com
 - Deploy IDs: `dpl_GaC7ninFYaQ41dQFExfu2Dw7urCT` (inicial) + redeploy con fix CSS
 - Verificación curl:
   - `/volvix-modals.js`  → **200**

@@ -1,10 +1,10 @@
 # B42 — KIOSKO Self-Service E2E Report
 
-**Target**: `https://volvix-pos.vercel.app/volvix-kiosk.html` (PUBLIC, no login)
+**Target**: `https://salvadorexoficial.com/volvix-kiosk.html` (PUBLIC, no login)
 **Scope**: customer browses + cobra solo (self-service kiosk)
 **Test file**: `tests/r6b-kiosko-e2e.spec.js`
 **Config**: `tests/playwright.r6b.config.js`
-**Run**: `VOLVIX_BASE_URL=https://volvix-pos.vercel.app npx playwright test tests/r6b-kiosko-e2e.spec.js --config=tests/playwright.r6b.config.js`
+**Run**: `VOLVIX_BASE_URL=https://salvadorexoficial.com npx playwright test tests/r6b-kiosko-e2e.spec.js --config=tests/playwright.r6b.config.js`
 **Result**: **14 / 14 passed (19.1s)** — `tests/r6b-results.json`
 
 ## Score: **88 / 100**

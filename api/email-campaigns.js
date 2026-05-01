@@ -222,7 +222,7 @@ function register(deps) {
   const helpers = { sendJSON, sendError, readBody };
   const auth = requireAuth || ((fn) => fn);
   const SECRET = JWT_SECRET || process.env.JWT_SECRET || 'volvix-campaigns';
-  const baseUrl = (process.env.PUBLIC_BASE_URL || 'https://volvix-pos.vercel.app').replace(/\/$/, '');
+  const baseUrl = (process.env.PUBLIC_BASE_URL || 'https://salvadorexoficial.com').replace(/\/$/, '');
 
   // POST /api/campaigns/create
   handlers['POST /api/campaigns/create'] = auth(async (req, res) => {

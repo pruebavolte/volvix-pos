@@ -14,7 +14,7 @@
 - **Status:** READY
 - **Deployment ID:** `dpl_cLYW2U5wwFtr24gEpEehdMuJhfGf`
 - **URL deploy:** https://volvix-5naxv9ybt-grupo-volvixs-projects.vercel.app
-- **Alias producción:** https://volvix-pos.vercel.app
+- **Alias producción:** https://salvadorexoficial.com
 - **Build time:** 869ms
 - **Inspect:** https://vercel.com/grupo-volvixs-projects/volvix-pos/cLYW2U5wwFtr24gEpEehdMuJhfGf
 
@@ -59,6 +59,6 @@ Las rutas estáticas bloqueadas vía `vercel.json` (HTML confidenciales, status.
 
 ## Observaciones
 
-- El deploy **se subió bien**, el binding de dominio funcionó (`volvix-pos.vercel.app` aliased OK).
+- El deploy **se subió bien**, el binding de dominio funcionó (`salvadorexoficial.com` aliased OK).
 - Los bloqueos 404 de archivos confidenciales (auditoría de seguridad R13) están **operativos**.
 - El único problema bloqueante es la configuración de env vars en el dashboard de Vercel.

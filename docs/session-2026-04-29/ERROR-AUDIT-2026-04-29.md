@@ -12,7 +12,7 @@
 
 **Issue**: `/volvix-api-docs.html` returns 404 on production
 ```
-https://volvix-pos.vercel.app/volvix-api-docs.html
+https://salvadorexoficial.com/volvix-api-docs.html
 → ERROR: 404: NOT_FOUND
    Code: NOT_FOUND
    ID: cle1::qxmb6-1777465319350-0f460eb153c7
@@ -39,7 +39,7 @@ https://volvix-pos.vercel.app/volvix-api-docs.html
 ### FLOW 1: Owner Creates Brand/Company (Startup)
 
 **Expected Path**:
-1. User visits https://volvix-pos.vercel.app
+1. User visits https://salvadorexoficial.com
 2. Clicks "Crear cuenta gratis" button
 3. Redirects to /registro.html
 4. Step 1: Enter email, password, phone
@@ -172,7 +172,7 @@ https://volvix-pos.vercel.app/volvix-api-docs.html
 ### 1. API Docs 404 (IMMEDIATE)
 ```
 FILE: /src/volvix-api-docs.html (exists)
-DEPLOYED: https://volvix-pos.vercel.app/volvix-api-docs.html (returns 404)
+DEPLOYED: https://salvadorexoficial.com/volvix-api-docs.html (returns 404)
 CAUSE: Unknown (Vercel deployment issue?)
 FIX: Check Vercel build logs, verify file in public/ folder, check vercel.json routes
 ```
@@ -389,7 +389,7 @@ STATUS: APK ready (/d/volvix-pos-app-debug.apk), untested
 - Source: `/d/github/volvix-pos/`
 - Backup: `/d/volvix-pos-backup-2026-04-28_23-11-26/`
 - APK: `/d/volvix-pos-app-debug.apk`
-- Production: `https://volvix-pos.vercel.app`
+- Production: `https://salvadorexoficial.com`
 
 ---
 

@@ -1,7 +1,7 @@
 # R22 — SECURITY HARDENING (anti-fraude / race conditions)
 
 **Fecha:** 2026-04-26
-**Deploy prod:** https://volvix-pos.vercel.app (alias) — `dpl_5KiQPo3re84t1sbRKpD1BK1QEZNp`
+**Deploy prod:** https://salvadorexoficial.com (alias) — `dpl_5KiQPo3re84t1sbRKpD1BK1QEZNp`
 **SQL:** `db/R22_SECURITY_HARDENING.sql` ejecutado vía Management API (Cloudflare bypass: `User-Agent: curl/8.5.0`).
 
 ## Cambios aplicados

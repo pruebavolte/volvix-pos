@@ -30,7 +30,7 @@ jobs:
         run: |
           echo "Waiting 30s for deployment to propagate..."
           sleep 30
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://volvix-pos.vercel.app/api/health")
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://salvadorexoficial.com/api/health")
           echo "Health check status: $STATUS"
           if [ "$STATUS" != "200" ]; then
             echo "WARNING: Health check returned $STATUS"

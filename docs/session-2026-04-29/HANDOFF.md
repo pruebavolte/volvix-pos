@@ -13,7 +13,7 @@
 | **BUG-T3** Productos duplicados | ✅ FIXED | Cero duplicados, ON CONFLICT activo |
 | **resolveOwnerPosUserId** | ✅ FIXED | Nueva versión async + DB lookup + cache |
 | **Twilio WhatsApp Sandbox** | ✅ ACTIVO | Sandbox aceptado, mensajes enviándose |
-| **Deploy producción** | ✅ LIVE | https://volvix-pos.vercel.app |
+| **Deploy producción** | ✅ LIVE | https://salvadorexoficial.com |
 | **E2E verificado** | ✅ PASS | Cafetería (12 prod) + Restaurante (8 prod) |
 | Email Resend | 🔴 SIN KEY | Falta API key del usuario |
 | SMS Twilio | 🔴 SIN NÚMERO | Trial sin números comprados |
@@ -134,7 +134,7 @@ Para que un cliente reciba el WhatsApp del sistema:
 Project ID:  prj_2f9m0VwArnqlGvlBZtxchvQl1a2t
 Org ID:      team_AtHSWVUCrU0jPVxtbFe1MwB5
 Cuenta:      grupovolvix-8691
-URL:         https://volvix-pos.vercel.app
+URL:         https://salvadorexoficial.com
 ```
 
 ### **Supabase**
@@ -180,7 +180,7 @@ Para probar el sistema con un cliente real (con WhatsApp sandbox):
 4. Espera confirmación de Twilio
 
 ### **PASO 2: Cliente se registra**
-1. Va a https://volvix-pos.vercel.app/registro.html
+1. Va a https://salvadorexoficial.com/registro.html
 2. Llena los 4 pasos del wizard
 3. Recibe OTP por WhatsApp ✅
 4. Completa verificación
@@ -196,11 +196,11 @@ Para probar el sistema con un cliente real (con WhatsApp sandbox):
 ## 🔗 URLS IMPORTANTES
 
 ```
-Producción:        https://volvix-pos.vercel.app
-Registro:          https://volvix-pos.vercel.app/registro.html
-Login:             https://volvix-pos.vercel.app/login.html
-Sitemap:           https://volvix-pos.vercel.app/sitemap.xml
-API:               https://volvix-pos.vercel.app/api/*
+Producción:        https://salvadorexoficial.com
+Registro:          https://salvadorexoficial.com/registro.html
+Login:             https://salvadorexoficial.com/login.html
+Sitemap:           https://salvadorexoficial.com/sitemap.xml
+API:               https://salvadorexoficial.com/api/*
 
 Twilio Console:    https://console.twilio.com/us1/develop/sms/try-it-out/whatsapp-learn
 Vercel Dashboard:  https://vercel.com/grupo-volvixs-projects/volvix-pos
@@ -215,7 +215,7 @@ Supabase:          https://supabase.com/dashboard/project/zhvwmzkcqngcaqpdxtwr
 1. dpl_GY5tPYM2W2MUAa521w15bqM4AUBd  (fix resolveOwnerPosUserId)
 2. dpl_xxx (clean Twilio env vars)
 3. Production current: https://volvix-bo5o2k9wc-grupo-volvixs-projects.vercel.app
-4. Aliased: https://volvix-pos.vercel.app
+4. Aliased: https://salvadorexoficial.com
 ```
 
 ---

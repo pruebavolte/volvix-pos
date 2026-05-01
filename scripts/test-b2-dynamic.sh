@@ -5,7 +5,7 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$PROJECT_ROOT"
 set -a; . .env.production 2>/dev/null; set +a
 
-PROD="${PROD_URL:-https://volvix-pos.vercel.app}"
+PROD="${PROD_URL:-https://salvadorexoficial.com}"
 USER_A="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1"
 
 green() { printf "\033[32m%s\033[0m\n" "$*"; }

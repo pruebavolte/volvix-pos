@@ -172,7 +172,7 @@ Los endpoints consultan estas tablas:
 
 ### 1. Acceder al Dashboard
 ```
-URL: https://volvix-pos.vercel.app/volvix_owner_panel_v8.html
+URL: https://salvadorexoficial.com/volvix_owner_panel_v8.html
 ```
 
 ### 2. Autenticación

@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 // scripts/setup-telegram.js — registra el webhook de Telegram contra Vercel.
 // Uso: TELEGRAM_BOT_TOKEN=xxx node scripts/setup-telegram.js
-//      TELEGRAM_BOT_TOKEN=xxx WEBHOOK_URL=https://volvix-pos.vercel.app/api/telegram/webhook node scripts/setup-telegram.js
+//      TELEGRAM_BOT_TOKEN=xxx WEBHOOK_URL=https://salvadorexoficial.com/api/telegram/webhook node scripts/setup-telegram.js
 
 const https = require('https');
 
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const WEBHOOK_URL = process.env.WEBHOOK_URL || 'https://volvix-pos.vercel.app/api/telegram/webhook';
+const WEBHOOK_URL = process.env.WEBHOOK_URL || 'https://salvadorexoficial.com/api/telegram/webhook';
 
 if (!TOKEN) {
   console.error('ERROR: define TELEGRAM_BOT_TOKEN en el entorno antes de correr este script.');

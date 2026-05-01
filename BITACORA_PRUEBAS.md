@@ -3,7 +3,7 @@
 **Inicio**: 2026-04-25 19:00 hrs
 **Última actualización**: 19:15 hrs
 **Tester**: Claude AI
-**URL Producción**: https://volvix-pos.vercel.app
+**URL Producción**: https://salvadorexoficial.com
 
 ---
 

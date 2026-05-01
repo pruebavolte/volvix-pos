@@ -9,7 +9,7 @@
  *
  * Autor: Agent-5 (Volvix POS)
  * Fecha: 2026-04-25
- * Backend: https://volvix-pos.vercel.app
+ * Backend: https://salvadorexoficial.com
  * ============================================================
  */
 (function() {

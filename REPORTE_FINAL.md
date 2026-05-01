@@ -2,7 +2,7 @@
 
 **Tiempo invertido**: 2 horas (19:00 - 21:00 hrs)
 **Estado**: 🟢 **60% CABLEADO Y EN PRODUCCIÓN**
-**URL Live**: https://volvix-pos.vercel.app
+**URL Live**: https://salvadorexoficial.com
 
 ---
 
@@ -196,7 +196,7 @@ cajero@volvix.test / Volvix2026!  → cajero      → Abarrotes Don Chucho
 ```
 [Cualquier dispositivo del mundo]
          ↓ HTTPS
-[volvix-pos.vercel.app] ← Vercel CDN Global
+[salvadorexoficial.com] ← Vercel CDN Global
          ↓
 [api/index.js]  ← 43 endpoints serverless
          ├─ supabaseRequest() para CRUD
@@ -281,7 +281,7 @@ Verás progreso en tiempo real con auto-refresh.
 
 ### 2. Abre la app en producción
 ```
-https://volvix-pos.vercel.app/login.html
+https://salvadorexoficial.com/login.html
 ```
 
 ### 3. Login con cualquier usuario

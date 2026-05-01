@@ -179,7 +179,7 @@ function register(deps) {
 
   const helpers = { sendJSON, sendError, readBody };
   const auth = requireAuth || ((fn) => fn);
-  const baseUrl = (process.env.PUBLIC_BASE_URL || 'https://volvix-pos.vercel.app').replace(/\/$/, '');
+  const baseUrl = (process.env.PUBLIC_BASE_URL || 'https://salvadorexoficial.com').replace(/\/$/, '');
 
   // POST /api/drips/enroll
   handlers['POST /api/drips/enroll'] = async (req, res) => {

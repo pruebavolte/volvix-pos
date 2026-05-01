@@ -54,7 +54,7 @@ volvix-real-data-loader.js: OK (8018 chars)
 Commit: `34279c6` — "R26: replace hardcoded mocks with real Supabase data wiring"
 
 Producción Vercel:
-- **URL**: https://volvix-pos.vercel.app
+- **URL**: https://salvadorexoficial.com
 - **Deploy ID**: `dpl_9NfSc3gB4RPmzCZiPYQR8Nmt4Qn8`
 - **Estado**: READY (13s)
 - Inspect: https://vercel.com/grupo-volvixs-projects/volvix-pos/9NfSc3gB4RPmzCZiPYQR8Nmt4Qn8

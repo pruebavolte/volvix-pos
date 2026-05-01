@@ -1,7 +1,7 @@
 # R26 — Bugs Críticos Detectados por Playwright (FIXED)
 
 **Fecha**: 2026-04-27
-**Deploy**: https://volvix-pos.vercel.app (alias) · https://volvix-8t396tlla-grupo-volvixs-projects.vercel.app
+**Deploy**: https://salvadorexoficial.com (alias) · https://volvix-8t396tlla-grupo-volvixs-projects.vercel.app
 **Deploy ID**: `dpl_G27DGJetvqDQ899CP3kLCaxEi9Mg`
 
 ## Smoke test post-deploy
@@ -77,4 +77,4 @@ node --check volvix-realtime-wiring.js   # OK
 node --check volvix-changelog-auto.js    # OK
 ```
 
-Deploy URL producción: **https://volvix-pos.vercel.app**
+Deploy URL producción: **https://salvadorexoficial.com**

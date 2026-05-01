@@ -15,7 +15,7 @@ Cablear los 354 botones pendientes del proyecto Volvix POS para que TODOS guarde
 ```
 Carpeta del proyecto: C:\Users\DELL\Downloads\verion 340
 
-URL Producción: https://volvix-pos.vercel.app
+URL Producción: https://salvadorexoficial.com
 Vercel CLI:    Ya configurado, usa `vercel --prod --yes` para deploy
 
 Supabase:
@@ -155,7 +155,7 @@ async function miFuncionCableada() {
 
 ```bash
 # Probar endpoint
-curl -X POST https://volvix-pos.vercel.app/api/<recurso> \
+curl -X POST https://salvadorexoficial.com/api/<recurso> \
   -H "Content-Type: application/json" \
   -d '{...}'
 ```
@@ -389,7 +389,7 @@ Alternativa: usar servicio externo como Daily.co, Twilio.
 
 ### Test endpoint:
 ```bash
-curl https://volvix-pos.vercel.app/api/health
+curl https://salvadorexoficial.com/api/health
 ```
 
 ### Ver datos en Supabase:

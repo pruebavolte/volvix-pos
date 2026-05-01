@@ -8,12 +8,12 @@
 #
 # Uso:
 #   ./scripts/smoke-exhaustive.sh
-#   ./scripts/smoke-exhaustive.sh --base https://volvix-pos.vercel.app
+#   ./scripts/smoke-exhaustive.sh --base https://salvadorexoficial.com
 #   ./scripts/smoke-exhaustive.sh --json
 #   VOLVIX_BASE_URL=https://staging.volvix-pos.app ./scripts/smoke-exhaustive.sh
 #
 # Variables de entorno opcionales:
-#   VOLVIX_BASE_URL   — URL base (default: https://volvix-pos.vercel.app)
+#   VOLVIX_BASE_URL   — URL base (default: https://salvadorexoficial.com)
 #   VOLVIX_EMAIL      — email admin (default: admin@volvix.test)
 #   VOLVIX_PASSWORD   — password (default: Volvix2026!)
 #   VOLVIX_TIMEOUT    — timeout por curl en seg (default: 10)
@@ -22,7 +22,7 @@
 
 set -uo pipefail
 
-BASE_URL="${VOLVIX_BASE_URL:-https://volvix-pos.vercel.app}"
+BASE_URL="${VOLVIX_BASE_URL:-https://salvadorexoficial.com}"
 EMAIL="${VOLVIX_EMAIL:-admin@volvix.test}"
 PASSWORD="${VOLVIX_PASSWORD:-Volvix2026!}"
 TIMEOUT="${VOLVIX_TIMEOUT:-10}"

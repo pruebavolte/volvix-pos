@@ -10,7 +10,7 @@ Scope: Multi-tenant verification + Financial reports + Inventory completion + Ba
 
 ### Verification methodology
 
-End-to-end tests against production (`https://volvix-pos.vercel.app`):
+End-to-end tests against production (`https://salvadorexoficial.com`):
 
 1. Logged in as `admin@volvix.test` (TNT001, role=`superadmin`).
 2. Logged in as `owner@volvix.test` (TNT002, role=`owner`).
@@ -65,7 +65,7 @@ Returns: opening_balance, sales_breakdown_by_method, gross_total, sales_count, t
 Sample call:
 ```bash
 curl -H "Authorization: Bearer $TOK" \
-  "https://volvix-pos.vercel.app/api/reports/cierre-z?date=2026-04-27"
+  "https://salvadorexoficial.com/api/reports/cierre-z?date=2026-04-27"
 ```
 
 ### `GET /api/reports/libro-ventas`
@@ -78,7 +78,7 @@ CSV: SAT-compatible with proper escaping + `Content-Disposition: attachment`.
 Sample:
 ```bash
 curl -H "Authorization: Bearer $TOK" \
-  "https://volvix-pos.vercel.app/api/reports/libro-ventas?from=2026-04-01&to=2026-04-30&format=csv" \
+  "https://salvadorexoficial.com/api/reports/libro-ventas?from=2026-04-01&to=2026-04-30&format=csv" \
   -o libro-ventas.csv
 ```
 
@@ -91,7 +91,7 @@ Returns chronological movements: fecha, tipo, qty, before_stock, after_stock, un
 Sample:
 ```bash
 curl -H "Authorization: Bearer $TOK" \
-  "https://volvix-pos.vercel.app/api/reports/kardex?product_id=2ceba2fb-b669-4154-a405-d1ec8e9fedaf&from=2026-01-01"
+  "https://salvadorexoficial.com/api/reports/kardex?product_id=2ceba2fb-b669-4154-a405-d1ec8e9fedaf&from=2026-01-01"
 ```
 
 ### `GET /api/reports/estado-resultados`
@@ -103,7 +103,7 @@ Returns: ingresos_por_ventas, costo_mercancia_vendida (from sale items' cost), u
 Sample:
 ```bash
 curl -H "Authorization: Bearer $TOK" \
-  "https://volvix-pos.vercel.app/api/reports/estado-resultados?from=2026-04-01&to=2026-04-30"
+  "https://salvadorexoficial.com/api/reports/estado-resultados?from=2026-04-01&to=2026-04-30"
 ```
 
 ### `GET /api/reports/sales-by-hour`
@@ -115,7 +115,7 @@ Returns 7×24 grid (weekday × hour, UTC) with `{count, total}` per cell + best_
 Sample:
 ```bash
 curl -H "Authorization: Bearer $TOK" \
-  "https://volvix-pos.vercel.app/api/reports/sales-by-hour?from=2026-03-27"
+  "https://salvadorexoficial.com/api/reports/sales-by-hour?from=2026-03-27"
 ```
 
 ---
@@ -145,10 +145,10 @@ All endpoints enforce tenant ownership via `pos_user_id == resolvePosUserId(req,
 Sample:
 ```bash
 curl -H "Authorization: Bearer $TOK" \
-  "https://volvix-pos.vercel.app/api/inventory/alerts"
+  "https://salvadorexoficial.com/api/inventory/alerts"
 
 curl -H "Authorization: Bearer $TOK" -H "Idempotency-Key: bulk-$(date +%s)" \
-  -X POST https://volvix-pos.vercel.app/api/inventory/bulk-adjust \
+  -X POST https://salvadorexoficial.com/api/inventory/bulk-adjust \
   -d '{"adjustments":[{"product_id":"<UUID>","delta":-3,"reason":"merma"}]}' \
   -H "Content-Type: application/json"
 ```
@@ -169,11 +169,11 @@ curl -H "Authorization: Bearer $TOK" -H "Idempotency-Key: bulk-$(date +%s)" \
 Sample:
 ```bash
 curl -H "Authorization: Bearer $TOK" -H "Idempotency-Key: bk-$(date +%s)" \
-  -X POST https://volvix-pos.vercel.app/api/admin/backup/trigger
+  -X POST https://salvadorexoficial.com/api/admin/backup/trigger
 # → {"ok":true,"backup_id":"<uuid>","status":"ready","rows_total":284, ...}
 
 curl -H "Authorization: Bearer $TOK" \
-  https://volvix-pos.vercel.app/api/admin/backup/list
+  https://salvadorexoficial.com/api/admin/backup/list
 ```
 
 ### Offline sync queue
@@ -188,7 +188,7 @@ curl -H "Authorization: Bearer $TOK" \
 Sample:
 ```bash
 curl -X POST -H "Authorization: Bearer $TOK" -H "Content-Type: application/json" \
-  https://volvix-pos.vercel.app/api/sync/queue \
+  https://salvadorexoficial.com/api/sync/queue \
   -d '{"operations":[{"endpoint":"/api/sales","method":"POST","body":{"items":[{"id":"<UUID>","qty":1,"price":50}]},"idempotency_key":"sale-1234","queued_at":"2026-04-27T12:00:00Z"}]}'
 ```
 

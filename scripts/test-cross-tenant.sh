@@ -5,7 +5,7 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$PROJECT_ROOT"
 set -a; . .env.production 2>/dev/null; set +a
 
-PROD="${PROD_URL:-https://volvix-pos.vercel.app}"
+PROD="${PROD_URL:-https://salvadorexoficial.com}"
 TENANT_A="11111111-1111-1111-1111-111111111111"
 TENANT_B="22222222-2222-2222-2222-222222222222"
 USER_A="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1"

@@ -2,8 +2,8 @@
 
 # Volvix POS v7.0.0 — GODMODE EDITION
 
-[![Version](https://img.shields.io/badge/version-7.0.0-blueviolet)](https://volvix-pos.vercel.app)
-[![Build](https://img.shields.io/badge/build-passing-brightgreen)](https://volvix-pos.vercel.app)
+[![Version](https://img.shields.io/badge/version-7.0.0-blueviolet)](https://salvadorexoficial.com)
+[![Build](https://img.shields.io/badge/build-passing-brightgreen)](https://salvadorexoficial.com)
 [![Coverage](https://img.shields.io/badge/coverage-94%25-brightgreen)]()
 [![License](https://img.shields.io/badge/license-MIT-blue)](#license)
 [![Agents](https://img.shields.io/badge/agents-137%20Fibonacci-orange)]()
@@ -17,7 +17,7 @@
 **The most complete open-core Point of Sale platform ever shipped.**
 Multi-tenant. Multi-currency. Multi-warehouse. Multi-everything.
 
-[Live Demo](https://volvix-pos.vercel.app) · [Documentation](#user-guide-por-rol) · [API Reference](#api-reference) · [Roadmap](#roadmap-próximos-12-meses) · [Changelog](#changelog-highlights)
+[Live Demo](https://salvadorexoficial.com) · [Documentation](#user-guide-por-rol) · [API Reference](#api-reference) · [Roadmap](#roadmap-próximos-12-meses) · [Changelog](#changelog-highlights)
 
 </div>
 
@@ -97,7 +97,7 @@ Total: 1+1+2+3+5+8+13+21+34+55 = **143** posiciones, de las cuales **137** está
 
 ### 1. Acceso a la demo en vivo
 
-URL: **https://volvix-pos.vercel.app**
+URL: **https://salvadorexoficial.com**
 
 Credenciales de demo:
 
@@ -406,7 +406,7 @@ El **Wiring Layer** es la innovación clave de GODMODE: un orquestador declarati
 
 ## API Reference
 
-Base URL: `https://volvix-pos.vercel.app/api/v1`
+Base URL: `https://salvadorexoficial.com/api/v1`
 Auth: `Authorization: Bearer <token>`
 
 ### Autenticación (3)

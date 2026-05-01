@@ -1,4 +1,4 @@
-# R23 — Deep Audit (Volvix POS — https://volvix-pos.vercel.app)
+# R23 — Deep Audit (Volvix POS — https://salvadorexoficial.com)
 
 **Fecha:** 2026-04-26 · **Build:** 7.2.0 · **Auth:** admin@volvix.test (superadmin TNT001)
 **Método:** 53 endpoints HTTP probados con JWT, auth negativa, perf p50, headers, concurrencia 10x, edge cases.
@@ -53,7 +53,7 @@
 | 37 | Performance | p50 `/api/health`=327ms, p95 estimado >400ms — alto para healthcheck | MEDIA | /api/health | 5 curls secuenciales | Cachear last-good por 30s, eliminar consulta tabla `users` |
 | 38 | Performance | 10 req paralelas /api/products tomaron 1815 ms total (≈ 280 ms p99 sostenido — OK) pero sin throttling | BAJA | /api/products | concurrencia | Añadir rate-limit por tenant + `429 Retry-After` |
 | 39 | Documentación | R17/R18 reportan endpoints como entregados; auditoría confirma 22 ausentes — falsos positivos | **ALTA** | docs vs código | comparar tablas | Re-correr `R17_FRONTEND_WIRED.md` con scraper real, marcar PENDING |
-| 40 | OPTIONS/CORS | CORS permite `Access-Control-Allow-Origin: https://volvix-pos.vercel.app` (correcto), pero falta `Vary: Origin` → cache poisoning posible vía CDN | MEDIA | global | `curl -I -X OPTIONS .../api/me` | Añadir `Vary: Origin` en respuestas CORS |
+| 40 | OPTIONS/CORS | CORS permite `Access-Control-Allow-Origin: https://salvadorexoficial.com` (correcto), pero falta `Vary: Origin` → cache poisoning posible vía CDN | MEDIA | global | `curl -I -X OPTIONS .../api/me` | Añadir `Vary: Origin` en respuestas CORS |
 
 ## Métricas
 

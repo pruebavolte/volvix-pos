@@ -554,7 +554,7 @@ def render_landing(ind):
         "description": ind["meta_desc"]
     }, ensure_ascii=False)
 
-    canonical = f"https://volvix-pos.vercel.app/landing-{slug}.html"
+    canonical = f"https://salvadorexoficial.com/landing-{slug}.html"
 
     html = f"""<!DOCTYPE html>
 <html lang="es">

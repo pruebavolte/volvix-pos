@@ -23,7 +23,7 @@ Funcionan offline, son livianos (~6-10 KB c/u) y accesibles en cualquier navegad
 | 10 | `10-registro-3min` | Registro en 3 min | 25s |
 
 URL base de producción (ejemplo):
-`https://volvix-pos.vercel.app/tutorials/{id}.html`
+`https://salvadorexoficial.com/tutorials/{id}.html`
 
 URL local (development):
 `http://localhost:3000/tutorials/{id}.html`
@@ -35,7 +35,7 @@ Galería index: `/tutorials/index.html`
 ## 1. iframe básico (cualquier sitio)
 
 ```html
-<iframe src="https://volvix-pos.vercel.app/tutorials/01-primera-venta.html"
+<iframe src="https://salvadorexoficial.com/tutorials/01-primera-venta.html"
         width="800" height="600"
         frameborder="0"
         loading="lazy"
@@ -54,7 +54,7 @@ Recomendado:
 
 ```html
 <div style="position:relative; width:100%; max-width:760px; aspect-ratio:4/3;">
-  <iframe src="https://volvix-pos.vercel.app/tutorials/02-crear-producto.html"
+  <iframe src="https://salvadorexoficial.com/tutorials/02-crear-producto.html"
           style="position:absolute; inset:0; width:100%; height:100%; border:0; border-radius:12px;"
           loading="lazy"
           title="Tutorial — Crear producto">
@@ -69,11 +69,11 @@ Recomendado:
 Notion no permite iframes arbitrarios pero sí soporta `/embed`:
 
 1. En la página de Notion, escribe `/embed` y selecciona "Embed"
-2. Pega la URL: `https://volvix-pos.vercel.app/tutorials/01-primera-venta.html`
+2. Pega la URL: `https://salvadorexoficial.com/tutorials/01-primera-venta.html`
 3. Ajusta el tamaño arrastrando la esquina inferior derecha
 
 Si Notion bloquea el embed (por CSP), usa la galería pública:
-`https://volvix-pos.vercel.app/tutorials/`
+`https://salvadorexoficial.com/tutorials/`
 
 ---
 
@@ -83,7 +83,7 @@ Si Notion bloquea el embed (por CSP), usa la galería pública:
 2. Pega:
 
 ```html
-<iframe src="https://volvix-pos.vercel.app/tutorials/03-cierre-z.html"
+<iframe src="https://salvadorexoficial.com/tutorials/03-cierre-z.html"
         width="100%" height="600"
         frameborder="0" loading="lazy"
         style="border-radius:12px;">
@@ -105,7 +105,7 @@ Si Notion bloquea el embed (por CSP), usa la galería pública:
 2. Pega:
 
 ```html
-<iframe src="https://volvix-pos.vercel.app/tutorials/04-modo-offline.html"
+<iframe src="https://salvadorexoficial.com/tutorials/04-modo-offline.html"
         width="800" height="600" loading="lazy"></iframe>
 ```
 
@@ -113,7 +113,7 @@ Si Notion bloquea el embed (por CSP), usa la galería pública:
 - "Iframe Embed for Gutenberg" — permite iframes seguros vía shortcode
 
 ```
-[iframe src="https://volvix-pos.vercel.app/tutorials/05-cliente-credito.html" width="800" height="600"]
+[iframe src="https://salvadorexoficial.com/tutorials/05-cliente-credito.html" width="800" height="600"]
 ```
 
 ---
@@ -150,9 +150,9 @@ Ventajas:
 Los clientes de email **no soportan iframes** ni JS. En su lugar:
 
 ```html
-<a href="https://volvix-pos.vercel.app/tutorials/01-primera-venta.html"
+<a href="https://salvadorexoficial.com/tutorials/01-primera-venta.html"
    target="_blank">
-  <img src="https://volvix-pos.vercel.app/tutorials/preview/01-primera-venta.png"
+  <img src="https://salvadorexoficial.com/tutorials/preview/01-primera-venta.png"
        alt="Ver tutorial: Tu primera venta"
        width="600" style="border-radius:12px;">
 </a>
@@ -237,6 +237,6 @@ X-Frame-Options: SAMEORIGIN
 open http://localhost:3000/tutorials/index.html
 
 # Producción
-curl -I https://volvix-pos.vercel.app/tutorials/01-primera-venta.html
+curl -I https://salvadorexoficial.com/tutorials/01-primera-venta.html
 # Debe responder 200 y Content-Type: text/html
 ```

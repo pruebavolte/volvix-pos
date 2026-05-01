@@ -102,14 +102,14 @@ API manual: `window.VolvixErrorTracker.capture(err, meta)`.
 
 ```bash
 # Health deep
-curl -s https://volvix-pos.vercel.app/api/health/deep | jq
+curl -s https://salvadorexoficial.com/api/health/deep | jq
 
 # Metrics (requiere JWT admin)
 curl -s -H "Authorization: Bearer $TOKEN" \
-  https://volvix-pos.vercel.app/api/metrics | jq
+  https://salvadorexoficial.com/api/metrics | jq
 
 # Error log (anon)
-curl -s -X POST https://volvix-pos.vercel.app/api/errors/log \
+curl -s -X POST https://salvadorexoficial.com/api/errors/log \
   -H "Content-Type: application/json" \
   -d '{"type":"test","message":"manual test","url":"https://x"}'
 ```

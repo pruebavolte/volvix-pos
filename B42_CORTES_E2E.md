@@ -1,14 +1,14 @@
 # B42 — CORTES DE CAJA E2E (R4C)
 
 **Date:** 2026-04-27
-**Target:** https://volvix-pos.vercel.app (production)
+**Target:** https://salvadorexoficial.com (production)
 **Spec file:** `tests/r4c-cortes-e2e.spec.js`
 **Config:** `tests/playwright.r4c.config.js`
 **JSON results:** `tests/r4c-results.json`
 **Run command:**
 ```bash
 cd "C:/Users/DELL/Downloads/verion 340"
-BASE_URL=https://volvix-pos.vercel.app \
+BASE_URL=https://salvadorexoficial.com \
   npx playwright test --config=tests/playwright.r4c.config.js --reporter=list
 ```
 

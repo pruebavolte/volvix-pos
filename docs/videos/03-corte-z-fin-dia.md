@@ -103,7 +103,7 @@
 **VOICEOVER**: "Cierra tu dia en 30 segundos. Volvix POS gratis hoy."
 **VISUAL**: URL grande + boton CTA
 **ACTION**: Click animado
-**TEXTO ON-SCREEN**: "volvix-pos.vercel.app/registro"
+**TEXTO ON-SCREEN**: "salvadorexoficial.com/registro"
 
 ## Caption (subtitulos)
 - Auto-generar
@@ -115,7 +115,7 @@
 ## Hashtags / Description
 #CorteZ #PuntoDeVenta #ContabilidadMexico #CajaRegistradora #SAT #NegocioMx #Volvix #FinDeDia
 
-"Cerrar caja en 30 segundos. Volvix POS calcula todo, concilia, imprime y manda al contador. Listo para SAT. volvix-pos.vercel.app/registro"
+"Cerrar caja en 30 segundos. Volvix POS calcula todo, concilia, imprime y manda al contador. Listo para SAT. salvadorexoficial.com/registro"
 
 ## Metricas esperadas
 - Watch time: >70%

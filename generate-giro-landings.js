@@ -1658,8 +1658,8 @@ function renderHTML(g) {
 <meta property="og:title" content="Volvix POS para ${g.plural.charAt(0).toUpperCase()+g.plural.slice(1)}">
 <meta property="og:description" content="${g.sub.slice(0,200)}">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://volvix-pos.vercel.app/landing-${g.slug}.html">
-<link rel="canonical" href="https://volvix-pos.vercel.app/landing-${g.slug}.html">
+<meta property="og:url" content="https://salvadorexoficial.com/landing-${g.slug}.html">
+<link rel="canonical" href="https://salvadorexoficial.com/landing-${g.slug}.html">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0a0a0f">
 <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');</script>
@@ -1935,6 +1935,6 @@ GIROS.forEach((g, i) => {
 console.log(`\n✨ Listo: ${GIROS.length} landings generadas en ${OUT_DIR}\n`);
 console.log('📋 URLs públicas:');
 generated.forEach(g => {
-  console.log(`   https://volvix-pos.vercel.app/landing-${g.slug}.html`);
+  console.log(`   https://salvadorexoficial.com/landing-${g.slug}.html`);
 });
 console.log();

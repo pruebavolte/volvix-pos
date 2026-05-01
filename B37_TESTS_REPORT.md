@@ -88,12 +88,12 @@ npx playwright test --config=tests/playwright.b36.config.js
 npx playwright test --config=tests/playwright.b36.config.js -g "A. Auth"
 ```
 
-### Production (https://volvix-pos.vercel.app)
+### Production (https://salvadorexoficial.com)
 
 ```bash
 TEST_TARGET=prod npx playwright test --config=tests/playwright.b36.config.js
 # or override fully:
-BASE_URL=https://staging.volvix-pos.vercel.app npx playwright test --config=tests/playwright.b36.config.js
+BASE_URL=https://staging.salvadorexoficial.com npx playwright test --config=tests/playwright.b36.config.js
 ```
 
 ### Headed (debug visually)

@@ -1,14 +1,14 @@
 # B42 — SERVICIOS (Pago de servicios) E2E (R6G)
 
 **Date:** 2026-04-27
-**Target:** https://volvix-pos.vercel.app (production)
+**Target:** https://salvadorexoficial.com (production)
 **Spec file:** `tests/r6g-servicios-e2e.spec.js`
 **Config:** `tests/playwright.r6g.config.js`
 **JSON results:** `tests/r6g-results.json`
 **Run command:**
 ```bash
 cd "C:/Users/DELL/Downloads/verion 340"
-BASE_URL=https://volvix-pos.vercel.app \
+BASE_URL=https://salvadorexoficial.com \
   npx playwright test --config=tests/playwright.r6g.config.js --reporter=list
 ```
 
@@ -232,7 +232,7 @@ generated a fake id and confirmed every reverse candidate is unreachable.
 1. inject cajero token in localStorage (volvix_token + volvixAuthToken)
 2. navigate to /salvadorex_web_v25.html
 3. assert page reaches HTTP 200 ✓ (final url:
-   https://volvix-pos.vercel.app/salvadorex_web_v25.html)
+   https://salvadorexoficial.com/salvadorex_web_v25.html)
 4. locate <button data-menu="servicios">  → present in DOM, in the
    collapsed side-drawer; not visible in the responsive test viewport
    (this is faithful behaviour for a hidden-menu drawer)

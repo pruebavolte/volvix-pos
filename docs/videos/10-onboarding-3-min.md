@@ -46,7 +46,7 @@
 **SFX**: Tic-toc countdown
 
 ### 0:05-0:15 - Registro (Min 0:00 -> 0:30 in-app)
-**VOICEOVER**: "Vas a volvix-pos.vercel.app/registro. Pones tu email, contrasena, telefono."
+**VOICEOVER**: "Vas a salvadorexoficial.com/registro. Pones tu email, contrasena, telefono."
 **VISUAL**: URL en barra direccion, formulario de registro:
   - Email: lucho@donlucho.test
   - Password: ********
@@ -158,10 +158,10 @@
 **ACTION**: Cada check con animacion stagger
 **TEXTO ON-SCREEN**: "Empieza ya"
 
-**VOICEOVER**: "Empieza tu prueba ahora en volvix-pos.vercel.app/registro."
+**VOICEOVER**: "Empieza tu prueba ahora en salvadorexoficial.com/registro."
 **VISUAL**: URL grande, boton CTA "Empezar gratis 14 dias"
 **ACTION**: Cursor click, fade-out
-**TEXTO ON-SCREEN**: "volvix-pos.vercel.app/registro"
+**TEXTO ON-SCREEN**: "salvadorexoficial.com/registro"
 **SFX**: Outro music swell
 
 ## Caption (subtitulos)
@@ -174,7 +174,7 @@
 ## Hashtags / Description
 #Onboarding #PuntoDeVenta #POSGratis #14diasgratis #Volvix #DigitalizaTuNegocio #PizzeriaMx #RestauranteMx
 
-"De CERO a vender en 3 minutos. Volvix POS sin instalacion, sin contrato, 14 dias gratis. Mira el reto en vivo. volvix-pos.vercel.app/registro"
+"De CERO a vender en 3 minutos. Volvix POS sin instalacion, sin contrato, 14 dias gratis. Mira el reto en vivo. salvadorexoficial.com/registro"
 
 ## Metricas esperadas
 - Watch time: >60% (video largo, mas exigente)

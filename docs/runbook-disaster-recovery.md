@@ -25,7 +25,7 @@ Activa el plan de DR si se cumple **cualquiera** de estos disparadores:
 
 1. **Supabase down**: el endpoint `/api/health/full` reporta `checks.supabase.ok=false` durante > 5 min
 2. **API down**: > 50% de requests devuelven 5xx durante > 3 min
-3. **Vercel down**: `https://volvix-pos.vercel.app` no responde
+3. **Vercel down**: `https://salvadorexoficial.com` no responde
 4. **Datos corruptos**: detectado por audit trail o reportado por owner
 5. **Compromiso de seguridad**: leak de credenciales, RLS bypass detectado, etc.
 6. **Decisión humana**: el owner activa DR vía status page (mensaje del owner)
@@ -45,8 +45,8 @@ Activa el plan de DR si se cumple **cualquiera** de estos disparadores:
 
 1. Confirmar que NO es un falso positivo:
    ```bash
-   ./scripts/health-check-exhaustive.sh --base https://volvix-pos.vercel.app
-   curl -s https://volvix-pos.vercel.app/api/health/full | jq .
+   ./scripts/health-check-exhaustive.sh --base https://salvadorexoficial.com
+   curl -s https://salvadorexoficial.com/api/health/full | jq .
    ```
 2. Notificar al canal `#volvix-incidents` con: hora, tipo de incidente, alcance.
 3. Designar **Incident Commander** (IC). El IC tiene autoridad para activar feature flags y rollback.
@@ -218,7 +218,7 @@ export GDRIVE_FOLDER_ID=...
 # Primer lunes de cada mes — restore drill en ambiente staging
 ./scripts/backup-restore-drill.sh                                  # crea backup
 ./scripts/backup-restore-drill.sh --restore <último_backup>        # en staging
-./scripts/health-check-exhaustive.sh --base https://staging.volvix-pos.vercel.app
+./scripts/health-check-exhaustive.sh --base https://staging.salvadorexoficial.com
 ```
 
 Documenta el resultado en `docs/dr-drill-history.md`.
@@ -228,7 +228,7 @@ Documenta el resultado en `docs/dr-drill-history.md`.
 ## 6. Comunicación durante incidente
 
 ### Status page
-URL pública: `https://volvix-pos.vercel.app/status-page.html`
+URL pública: `https://salvadorexoficial.com/status-page.html`
 
 Para mostrar mensaje de owner durante incidente, abre la consola del browser y ejecuta:
 ```js

@@ -3,7 +3,7 @@
 
 **Fecha cierre:** 2026-04-26
 **Estado:** 🟢 SISTEMA FINAL — Producción
-**URL producción:** https://volvix-pos.vercel.app
+**URL producción:** https://salvadorexoficial.com
 
 ---
 
@@ -167,7 +167,7 @@ Estos archivos solo son accesibles localmente (`file://`) o vía portal admin co
 
 ## 11. Próximos pasos sugeridos
 
-1. **Decidir host de portal admin protegido por login** para los 8 archivos confidenciales (subdominio `admin.volvix-pos.vercel.app` o proyecto Vercel separado privado).
+1. **Decidir host de portal admin protegido por login** para los 8 archivos confidenciales (subdominio `admin.salvadorexoficial.com` o proyecto Vercel separado privado).
 2. **Pruebas físicas Chrome** de todos los módulos contra producción real (vía Claude-in-Chrome MCP).
 3. **Ronda 13 (144 agentes)** opcional — solo si se requiere cobertura adicional (i18n total, accesibilidad WCAG 2.2 AAA, hardening avanzado).
 4. **Auditoría de seguridad externa** — pen-test de los 43 endpoints.

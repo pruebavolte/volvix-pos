@@ -171,24 +171,24 @@ TOKEN="..."  # JWT for a tenant user
 
 # List (empty initially)
 curl -sH "Authorization: Bearer $TOKEN" \
-  https://volvix-pos.vercel.app/api/label-templates
+  https://salvadorexoficial.com/api/label-templates
 
 # Create
 curl -sX POST -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -H "Idempotency-Key: test-$(date +%s)" \
   -d '{"name":"Demo 50x30","elements":[{"type":"name","text":"Coca","x":10,"y":10}],"canvas_w":300,"canvas_h":180}' \
-  https://volvix-pos.vercel.app/api/label-templates
+  https://salvadorexoficial.com/api/label-templates
 
 # Patch
 curl -sX PATCH -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"name":"Demo renombrada"}' \
-  https://volvix-pos.vercel.app/api/label-templates/<UUID>
+  https://salvadorexoficial.com/api/label-templates/<UUID>
 
 # Delete
 curl -sX DELETE -H "Authorization: Bearer $TOKEN" \
-  https://volvix-pos.vercel.app/api/label-templates/<UUID>
+  https://salvadorexoficial.com/api/label-templates/<UUID>
 ```
 
 ### Frontend manual walkthrough

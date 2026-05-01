@@ -80,7 +80,7 @@ Flow: `Volvix.stripe.cobrar(saleId, amountCents)` → llama `/api/payments/strip
 
 ```bash
 stripe login
-stripe listen --forward-to https://volvix-pos.vercel.app/api/payments/stripe/webhook
+stripe listen --forward-to https://salvadorexoficial.com/api/payments/stripe/webhook
 # copia el `whsec_...` que imprime y mételo como STRIPE_WEBHOOK_SECRET en Vercel
 stripe trigger payment_intent.succeeded
 stripe trigger charge.refunded

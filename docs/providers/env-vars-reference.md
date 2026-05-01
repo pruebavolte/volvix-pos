@@ -19,7 +19,7 @@ Tabla maestra de **TODAS** las variables de entorno usadas por el backend (`api/
 | `SUPABASE_ANON_KEY` | Opcional | JWT | `eyJhbGciOi...` | Dashboard Supabase → API → `anon` (solo cliente público) |
 | `JWT_SECRET` | Sí | string >= 32 chars | random 64 hex | Genera con `openssl rand -hex 32` |
 | `NODE_ENV` | Opcional | `production` \| `development` | `production` | Vercel lo setea automático en deploy |
-| `ALLOWED_ORIGINS` | Opcional | CSV de orígenes | `https://volvix-pos.vercel.app,https://app.volvix.com` | Dominios que pueden hacer CORS |
+| `ALLOWED_ORIGINS` | Opcional | CSV de orígenes | `https://salvadorexoficial.com,https://app.volvix.com` | Dominios que pueden hacer CORS |
 | `CRON_SECRET` | Opcional | string secreto | random 32 hex | Necesario si activas crons (retry, anchor, reconcile) |
 | `VERCEL_CRON_SECRET` | Opcional | (alias) | — | Vercel lo provee automáticamente para cron jobs |
 | `ADMIN_API_KEY` | Opcional | random 32+ chars | `vlx_admin_xxx` | Para llamadas server-to-server con permisos elevados |

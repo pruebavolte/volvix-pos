@@ -1,7 +1,7 @@
 # B41 — Offline-First + Backup/Restore E2E Report
 
 **Date:** 2026-04-28
-**Target:** https://volvix-pos.vercel.app (production)
+**Target:** https://salvadorexoficial.com (production)
 **Tests:** `tests/offline-e2e.spec.js`, `tests/backup-e2e.spec.js`
 **Config:** `tests/playwright.b41.config.js`
 **Run:** `npx playwright test --config=tests/playwright.b41.config.js`
@@ -163,7 +163,7 @@
 ### Bug #2 — MEDIUM — `volvix-tests-wiring.js` returns HTML 404 (MIME error spam)
 
 **Where:** Console errors observed:
-> Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable.
+> Refused to execute script from 'https://salvadorexoficial.com/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable.
 
 The file is referenced in `sw.js` STATIC_FILES + likely included in `salvadorex_web_v25.html` script tags but doesn't exist on the server. Causes 882 console errors per page load → noisy in monitoring.
 
@@ -234,7 +234,7 @@ Mission part B4 explicitly says "DON'T actually run a real restore (would overwr
 
 ```bash
 # 0. Set env: STAGING_URL, ADMIN_TOKEN
-STAGING_URL=https://staging.volvix-pos.vercel.app
+STAGING_URL=https://staging.salvadorexoficial.com
 ADMIN_TOKEN=$(curl -s -X POST $STAGING_URL/api/login \
   -H 'Content-Type: application/json' \
   -d '{"email":"admin@volvix.test","password":"Volvix2026!"}' \
@@ -322,7 +322,7 @@ NOT modified (per mission constraints):
 
 ```bash
 cd "C:/Users/DELL/Downloads/verion 340"
-# Tests run against production (https://volvix-pos.vercel.app) by default.
+# Tests run against production (https://salvadorexoficial.com) by default.
 # Override with VOLVIX_BASE_URL=... to point at staging.
 npx playwright test --config=tests/playwright.b41.config.js
 # Reports:

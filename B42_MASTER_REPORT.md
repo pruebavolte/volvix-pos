@@ -2,7 +2,7 @@
 
 **Fecha**: 2026-04-28
 **SW Version**: v1.11.4-b42
-**Production**: https://volvix-pos.vercel.app
+**Production**: https://salvadorexoficial.com
 **Estrategia**: Fibonacci 1-1-2-3-5-8 (20 agentes en 6 rondas)
 
 ---

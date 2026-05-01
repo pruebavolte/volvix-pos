@@ -100,7 +100,7 @@
 **VOICEOVER**: "Personaliza tu Volvix POS gratis hoy."
 **VISUAL**: URL + CTA
 **ACTION**: Click animado
-**TEXTO ON-SCREEN**: "volvix-pos.vercel.app/registro"
+**TEXTO ON-SCREEN**: "salvadorexoficial.com/registro"
 
 ## Caption (subtitulos)
 - Auto-generar
@@ -112,7 +112,7 @@
 ## Hashtags / Description
 #PuntoDeVenta #POS #PersonalizaTuNegocio #ModulosPOS #Volvix #NegocioMexico #SistemaModular
 
-"Activa solo los modulos que tu negocio necesita. Cafeteria? Restaurante? Ferreteria? Volvix POS se adapta. Sin pagar por funciones que no usas. volvix-pos.vercel.app/registro"
+"Activa solo los modulos que tu negocio necesita. Cafeteria? Restaurante? Ferreteria? Volvix POS se adapta. Sin pagar por funciones que no usas. salvadorexoficial.com/registro"
 
 ## Metricas esperadas
 - Watch time: >68%

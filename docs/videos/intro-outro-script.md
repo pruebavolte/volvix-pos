@@ -92,7 +92,7 @@ Cada uno con audio embedded + version "music only" para mezclar.
 - Sonido: outro music sting 4 notas (resolucion del intro tono)
 
 **Frame 0:01-0:03 (2s)**: CTA principal
-- URL grande: "volvix-pos.vercel.app/registro"
+- URL grande: "salvadorexoficial.com/registro"
 - Font: Inter Bold, 72pt, color blanco
 - Boton CTA naranja: "Empieza gratis"
 - Subtitulo abajo: "Sin tarjeta de credito - 14 dias gratis"
@@ -113,7 +113,7 @@ Cada uno con audio embedded + version "music only" para mezclar.
 ### Voiceover Outro (estandar)
 
 ```
-"Empieza gratis hoy en volvix-pos.vercel.app/registro. Sin tarjeta de credito. Suscribete para mas tutoriales semanales."
+"Empieza gratis hoy en salvadorexoficial.com/registro. Sin tarjeta de credito. Suscribete para mas tutoriales semanales."
 ```
 
 Duracion locucion: 5-6 segundos (encaja en outro)
@@ -128,7 +128,7 @@ Duracion locucion: 5-6 segundos (encaja en outro)
 #### Variante B: Short (para TikTok / Reels < 30s)
 - 3 segundos
 - Solo URL + CTA boton
-- Sin voiceover (subtitulo grande "VOLVIX-POS.VERCEL.APP/REGISTRO")
+- Sin voiceover (subtitulo grande "salvadorexoficial.com/REGISTRO")
 - Sin social links (no caben en vertical)
 
 #### Variante C: Live event / urgencia

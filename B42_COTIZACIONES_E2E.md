@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-27
 **Spec file:** `tests/r6e-cotizaciones-e2e.spec.js`
-**Run target:** `https://volvix-pos.vercel.app` (production)
+**Run target:** `https://salvadorexoficial.com` (production)
 **Auth:** `admin@volvix.test` (TNT001) + `owner@volvix.test` (TNT002), password `Volvix2026!`
 **Final score: 41 / 100**
 

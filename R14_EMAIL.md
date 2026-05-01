@@ -50,7 +50,7 @@ Anadir a Vercel / `.env`:
 SENDGRID_API_KEY=SG.xxxxxxxxxxxxxxxxxxxxxxxxxx
 SENDGRID_FROM=no-reply@tu-dominio.com
 SENDGRID_FROM_NAME=Volvix POS
-PASSWORD_RESET_BASE_URL=https://volvix-pos.vercel.app
+PASSWORD_RESET_BASE_URL=https://salvadorexoficial.com
 ```
 
 Si `SENDGRID_API_KEY` falta: el helper escribe `warn` en stdout, registra

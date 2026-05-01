@@ -1,4 +1,4 @@
-# Audit UX — 2026-04-27 — https://volvix-pos.vercel.app (commit 34279c6, deploy dpl_EzMceyeUp8mx2zSfjtPiwahJoGiH)
+# Audit UX — 2026-04-27 — https://salvadorexoficial.com (commit 34279c6, deploy dpl_EzMceyeUp8mx2zSfjtPiwahJoGiH)
 
 ## Score final: 6/100  (arrancó en 100, restados 94 puntos por 22 defectos)
 

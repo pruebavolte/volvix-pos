@@ -37,7 +37,7 @@ Para cada variable abajo:
 | `SUPABASE_ANON_KEY` | Supabase → Project → Settings → API → anon |
 | `JWT_SECRET` | Genera con `openssl rand -hex 32` |
 | `ADMIN_API_KEY` | Genera con `openssl rand -hex 24` |
-| `ALLOWED_ORIGINS` | `https://volvix-pos.vercel.app` |
+| `ALLOWED_ORIGINS` | `https://salvadorexoficial.com` |
 | `NODE_ENV` | `production` |
 
 ### 🟢 Prioridad 1 (80% del valor)
@@ -59,7 +59,7 @@ Para cada variable abajo:
 | Variable | Dónde se obtiene |
 |---|---|
 | `MERCADO_PAGO_WEBHOOK_SECRET` | MP → Webhooks → Setup |
-| `STRIPE_WEBHOOK_SECRET` | Stripe → Webhooks → Add endpoint → URL: `https://volvix-pos.vercel.app/api/webhooks/stripe` |
+| `STRIPE_WEBHOOK_SECRET` | Stripe → Webhooks → Add endpoint → URL: `https://salvadorexoficial.com/api/webhooks/stripe` |
 | `STP_OWNER_CLABE` | STP → cuenta empresarial (requiere convenio) |
 | `STP_ENTERPRISE_KEY` | STP → API credentials |
 | `STP_WEBHOOK_SECRET` | STP → Webhooks |
@@ -113,13 +113,13 @@ Después de redeployar, prueba estos endpoints:
 
 ```bash
 # Health (debería responder sin error)
-curl https://volvix-pos.vercel.app/api/health
+curl https://salvadorexoficial.com/api/health
 
 # Status de pagos (te dice qué keys están configuradas)
-curl https://volvix-pos.vercel.app/api/payments/health
+curl https://salvadorexoficial.com/api/payments/health
 
 # Status global del sistema
-curl https://volvix-pos.vercel.app/api/status/uptime
+curl https://salvadorexoficial.com/api/status/uptime
 ```
 
 Si `/api/payments/health` devuelve `{mp:true, stripe:true, ai:true, ...}` → ¡todo activo!

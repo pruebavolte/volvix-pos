@@ -37,7 +37,7 @@
 
 - URL: `https://volvix-40zbbj8xp-grupo-volvixs-projects.vercel.app`
 - Estado: **● Ready** (build 10 s)
-- Alias prod: `https://volvix-pos.vercel.app`
+- Alias prod: `https://salvadorexoficial.com`
 
 ### Smoke test (5 endpoints)
 

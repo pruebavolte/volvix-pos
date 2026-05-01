@@ -1,6 +1,6 @@
 # R16 · SendGrid Setup + DKIM/SPF/DMARC
 
-Domain: `volvix-pos.vercel.app` · Sender: `no-reply@volvix-pos.app`
+Domain: `salvadorexoficial.com` · Sender: `no-reply@volvix-pos.app`
 Endpoint: `POST /api/email/send` (auth required) · Helper: `sendEmail()` en `api/index.js:3127`
 
 ---
@@ -11,7 +11,7 @@ Endpoint: `POST /api/email/send` (auth required) · Helper: `sendEmail()` en `ap
 SENDGRID_API_KEY=SG.xxxxxxxxxxxxxxxxxxxxxx
 SENDGRID_FROM=no-reply@volvix-pos.app
 SENDGRID_FROM_NAME=Volvix POS
-PASSWORD_RESET_BASE_URL=https://volvix-pos.vercel.app
+PASSWORD_RESET_BASE_URL=https://salvadorexoficial.com
 ```
 
 Vercel Dashboard → Project → Settings → Environment Variables → add for `Production`, `Preview`, `Development`. Después: **Redeploy** (las env se leen al boot).
@@ -101,13 +101,13 @@ Verificar entrega real con [mail-tester.com](https://www.mail-tester.com): apunt
 
 ```bash
 # (a) sin SENDGRID_API_KEY → 503
-curl -sS -X POST https://volvix-pos.vercel.app/api/email/send \
+curl -sS -X POST https://salvadorexoficial.com/api/email/send \
   -H "Authorization: Bearer $JWT" \
   -H "Content-Type: application/json" \
   -d '{"to":"x@y.com","subject":"t"}' -i
 
 # (b) sin auth → 401 (NOTA: 401 precede a 503; ver findings R16)
-curl -sS -X POST https://volvix-pos.vercel.app/api/email/send \
+curl -sS -X POST https://salvadorexoficial.com/api/email/send \
   -H "Content-Type: application/json" \
   -d '{"to":"x@y.com","subject":"t"}' -i
 ```

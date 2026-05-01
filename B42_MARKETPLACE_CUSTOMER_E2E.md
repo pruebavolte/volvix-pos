@@ -1,7 +1,7 @@
 # B42 — Marketplace + Customer Portal + Shop E2E Report
 
 - **Run tag**: `49279774`
-- **Base**: https://volvix-pos.vercel.app
+- **Base**: https://salvadorexoficial.com
 - **Surfaces tested**:
   - Marketplace: `/marketplace.html`
   - Customer Portal: `/volvix-customer-portal.html`
@@ -41,7 +41,7 @@
 ```
 [MP1] Failed to load resource: the server responded with a status of 401 ()
 [MP1] Failed to load resource: the server responded with a status of 404 ()
-[MP1] Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.
+[MP1] Refused to execute script from 'https://salvadorexoficial.com/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.
 [MP1] Failed to load resource: the server responded with a status of 404 ()
 [MP1] Failed to load resource: the server responded with a status of 401 ()
 [MP1] Failed to load resource: the server responded with a status of 401 ()
@@ -50,7 +50,7 @@
 [MP1] Failed to load resource: the server responded with a status of 503 (Offline)
 [MP2] Failed to load resource: the server responded with a status of 401 ()
 [MP2] Failed to load resource: the server responded with a status of 404 ()
-[MP2] Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.
+[MP2] Refused to execute script from 'https://salvadorexoficial.com/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.
 [MP2] Failed to load resource: the server responded with a status of 404 ()
 [MP2] Failed to load resource: the server responded with a status of 401 ()
 [MP2] Failed to load resource: the server responded with a status of 401 ()
@@ -59,7 +59,7 @@
 [MP2] Failed to load resource: the server responded with a status of 503 (Offline)
 [MP2] Failed to load resource: the server responded with a status of 401 ()
 [MP2] Failed to load resource: the server responded with a status of 404 ()
-[MP2] Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.
+[MP2] Refused to execute script from 'https://salvadorexoficial.com/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.
 [MP2] Failed to load resource: the server responded with a status of 401 ()
 [MP2] Failed to load resource: the server responded with a status of 401 ()
 [MP2] Failed to load resource: the server responded with a status of 404 ()
@@ -67,7 +67,7 @@
 [MP2] Failed to load resource: the server responded with a status of 401 ()
 [MP3] Failed to load resource: the server responded with a status of 401 ()
 [MP3] Failed to load resource: the server responded with a status of 404 ()
-[MP3] Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.
+[MP3] Refused to execute script from 'https://salvadorexoficial.com/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.
 [MP3] Failed to load resource: the server responded with a status of 404 ()
 ```
 
@@ -78,15 +78,15 @@
 | MP1 | GET | 503 | https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap |
 | MP2 | GET | 503 | https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap |
 | MP3 | GET | 503 | https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap |
-| MP4 | GET | 500 | https://volvix-pos.vercel.app/api/shop/don-chucho/info |
-| MP4 | GET | 500 | https://volvix-pos.vercel.app/api/shop/don-chucho/products?q=&category= |
-| SH1 | GET | 500 | https://volvix-pos.vercel.app/api/shop/don-chucho/info |
-| SH1 | GET | 500 | https://volvix-pos.vercel.app/api/shop/don-chucho/products?q=&category= |
-| SH3 | GET | 500 | https://volvix-pos.vercel.app/api/shop/don-chucho/info |
-| SH3 | GET | 500 | https://volvix-pos.vercel.app/api/shop/don-chucho/products?q=&category= |
+| MP4 | GET | 500 | https://salvadorexoficial.com/api/shop/don-chucho/info |
+| MP4 | GET | 500 | https://salvadorexoficial.com/api/shop/don-chucho/products?q=&category= |
+| SH1 | GET | 500 | https://salvadorexoficial.com/api/shop/don-chucho/info |
+| SH1 | GET | 500 | https://salvadorexoficial.com/api/shop/don-chucho/products?q=&category= |
+| SH3 | GET | 500 | https://salvadorexoficial.com/api/shop/don-chucho/info |
+| SH3 | GET | 500 | https://salvadorexoficial.com/api/shop/don-chucho/products?q=&category= |
 | X2 | GET | 503 | https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap |
-| X2 | GET | 500 | https://volvix-pos.vercel.app/api/shop/don-chucho/info |
-| X2 | GET | 500 | https://volvix-pos.vercel.app/api/shop/don-chucho/products?q=&category= |
+| X2 | GET | 500 | https://salvadorexoficial.com/api/shop/don-chucho/info |
+| X2 | GET | 500 | https://salvadorexoficial.com/api/shop/don-chucho/products?q=&category= |
 
 ## Notes
 

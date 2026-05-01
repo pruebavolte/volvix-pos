@@ -1,6 +1,6 @@
 #!/bin/bash
 TOKEN="$1"
-BASE="https://volvix-pos.vercel.app"
+BASE="https://salvadorexoficial.com"
 ENDPOINTS=(
 "/api/health"
 "/api/login"

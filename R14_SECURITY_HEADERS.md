@@ -40,51 +40,51 @@ No se rompe funcionalidad: los headers son aditivos, CORS y `Cache-Control` exis
 Producción (Vercel):
 
 ```bash
-curl -sI https://volvix-pos.vercel.app/login.html | grep -iE "strict-transport|x-content-type|x-frame|referrer-policy|permissions-policy|content-security-policy"
+curl -sI https://salvadorexoficial.com/login.html | grep -iE "strict-transport|x-content-type|x-frame|referrer-policy|permissions-policy|content-security-policy"
 ```
 
 Headers individuales:
 
 ```bash
 # HSTS
-curl -sI https://volvix-pos.vercel.app/ | grep -i "strict-transport-security"
+curl -sI https://salvadorexoficial.com/ | grep -i "strict-transport-security"
 # Esperado: strict-transport-security: max-age=63072000; includeSubDomains; preload
 
 # nosniff
-curl -sI https://volvix-pos.vercel.app/api/health | grep -i "x-content-type-options"
+curl -sI https://salvadorexoficial.com/api/health | grep -i "x-content-type-options"
 # Esperado: x-content-type-options: nosniff
 
 # Anti-clickjacking
-curl -sI https://volvix-pos.vercel.app/ | grep -i "x-frame-options"
+curl -sI https://salvadorexoficial.com/ | grep -i "x-frame-options"
 # Esperado: x-frame-options: DENY
 
 # Referrer
-curl -sI https://volvix-pos.vercel.app/ | grep -i "referrer-policy"
+curl -sI https://salvadorexoficial.com/ | grep -i "referrer-policy"
 # Esperado: referrer-policy: strict-origin-when-cross-origin
 
 # Permissions
-curl -sI https://volvix-pos.vercel.app/ | grep -i "permissions-policy"
+curl -sI https://salvadorexoficial.com/ | grep -i "permissions-policy"
 # Esperado: permissions-policy: geolocation=(), camera=(), microphone=(), payment=()
 
 # CSP
-curl -sI https://volvix-pos.vercel.app/ | grep -i "content-security-policy"
+curl -sI https://salvadorexoficial.com/ | grep -i "content-security-policy"
 # Esperado: content-security-policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; ...
 ```
 
 Verificar API JSON:
 
 ```bash
-curl -sI https://volvix-pos.vercel.app/api/health
+curl -sI https://salvadorexoficial.com/api/health
 ```
 
 Test negativo de `unsafe-eval` (NO debe aparecer):
 
 ```bash
-curl -sI https://volvix-pos.vercel.app/ | grep -i "unsafe-eval" && echo "FALLO: unsafe-eval detectado" || echo "OK: sin unsafe-eval"
+curl -sI https://salvadorexoficial.com/ | grep -i "unsafe-eval" && echo "FALLO: unsafe-eval detectado" || echo "OK: sin unsafe-eval"
 ```
 
 Validador online recomendado:
-- https://securityheaders.com/?q=https://volvix-pos.vercel.app
+- https://securityheaders.com/?q=https://salvadorexoficial.com
 - https://csp-evaluator.withgoogle.com/
 
 ---

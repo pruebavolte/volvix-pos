@@ -1,6 +1,6 @@
 # R24 POST Fixes — Resultado
 
-**Fecha:** 2026-04-27 · **Base:** https://volvix-pos.vercel.app · **Deploy:** dpl_5XA5FetqEGCGP6AW913iYUCkwnB8 (re-deploy con regex ampliada)
+**Fecha:** 2026-04-27 · **Base:** https://salvadorexoficial.com · **Deploy:** dpl_5XA5FetqEGCGP6AW913iYUCkwnB8 (re-deploy con regex ampliada)
 
 ## Cambios aplicados en `api/index.js`
 
@@ -21,7 +21,7 @@
 ## Validación
 
 - `node --check api/index.js` → OK
-- Deploy Vercel → READY (alias `volvix-pos.vercel.app`)
+- Deploy Vercel → READY (alias `salvadorexoficial.com`)
 
 ## Smoke test (token admin)
 

@@ -1,6 +1,6 @@
 # R24 POST Audit — Verificación con body válido
 
-**Fecha:** 2026-04-27 · **Base:** https://volvix-pos.vercel.app · **Auth:** Bearer token (login admin@volvix.test)
+**Fecha:** 2026-04-27 · **Base:** https://salvadorexoficial.com · **Auth:** Bearer token (login admin@volvix.test)
 
 ## Tabla de resultados (30 endpoints)
 

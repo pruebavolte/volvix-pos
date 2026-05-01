@@ -1,6 +1,6 @@
 # R29 — Fixes finales y verificación visual
 
-Fecha: 2026-04-27 · Deploy: `dpl_9taBXqDpCZX5yy2289VrcS62SfM5` · URL: https://volvix-pos.vercel.app
+Fecha: 2026-04-27 · Deploy: `dpl_9taBXqDpCZX5yy2289VrcS62SfM5` · URL: https://salvadorexoficial.com
 
 ## Estado de los 17 fixes del R28
 

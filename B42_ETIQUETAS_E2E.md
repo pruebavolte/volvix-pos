@@ -1,7 +1,7 @@
 # B42 — ETIQUETA DESIGNER E2E (R5A)
 
 **Date:** 2026-04-27
-**Target:** https://volvix-pos.vercel.app (production)
+**Target:** https://salvadorexoficial.com (production)
 **Spec file:** `tests/r5a-etiquetas-e2e.spec.js`
 **Config:** `tests/playwright.r5a.config.js`
 **JSON results:** `tests/r5a-results.json`
@@ -9,7 +9,7 @@
 **Run command:**
 ```bash
 cd "C:/Users/DELL/Downloads/verion 340"
-BASE_URL=https://volvix-pos.vercel.app \
+BASE_URL=https://salvadorexoficial.com \
   npx playwright test --config=tests/playwright.r5a.config.js
 ```
 
@@ -25,7 +25,7 @@ to `/login.html`. Multi-tenant isolation holds — owner (TNT002) cannot see adm
 
 | # | Test | Status | Real evidence |
 |---|------|:------:|---------------|
-| E1  | Auth-gate + page load | PASS | unauth → `https://volvix-pos.vercel.app/login.html?expired=0&redirect=%2Fetiqueta_designer.html`; auth → `/etiqueta_designer.html`, canvas visible |
+| E1  | Auth-gate + page load | PASS | unauth → `https://salvadorexoficial.com/login.html?expired=0&redirect=%2Fetiqueta_designer.html`; auth → `/etiqueta_designer.html`, canvas visible |
 | E2  | GET list shape | PASS | 200, body keys `["ok","templates","count"]`, 1 prior template visible |
 | E3  | POST create → 201 + id | PASS | id `bb66778f-da7c-4a7a-be08-d13fe31ad45c`, idem `E3-create-1777348257242-57cb4205` |
 | E4  | GET single, elements intact | PASS | 200, 3 elements (name/price/sku), canvas_w=300, canvas_h=180 |
@@ -49,12 +49,12 @@ to `/login.html`. Multi-tenant isolation holds — owner (TNT002) cannot see adm
 ```
 Step 1 (no token):
   navigate → /etiqueta_designer.html
-  result   → https://volvix-pos.vercel.app/login.html?expired=0&redirect=%2Fetiqueta_designer.html
+  result   → https://salvadorexoficial.com/login.html?expired=0&redirect=%2Fetiqueta_designer.html
   assertion: URL contains login.html ✓
 
 Step 2 (admin@volvix.test logged in via UI):
   navigate → /etiqueta_designer.html
-  result   → https://volvix-pos.vercel.app/etiqueta_designer.html ✓
+  result   → https://salvadorexoficial.com/etiqueta_designer.html ✓
   #canvas visible ✓
 ```
 

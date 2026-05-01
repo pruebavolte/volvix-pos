@@ -33,7 +33,7 @@ Si el `chat_id` no esta vinculado en `telegram_admins`, el bot responde pidiendo
 
 ```
 TELEGRAM_BOT_TOKEN=123456:ABC...   # token de BotFather
-WEBHOOK_URL=https://volvix-pos.vercel.app/api/telegram/webhook  # opcional override
+WEBHOOK_URL=https://salvadorexoficial.com/api/telegram/webhook  # opcional override
 ```
 
 ## Instrucciones BotFather
@@ -74,7 +74,7 @@ WEBHOOK_URL=https://volvix-pos.vercel.app/api/telegram/webhook  # opcional overr
 ## Smoke test
 
 ```
-curl -X POST https://volvix-pos.vercel.app/api/telegram/webhook \
+curl -X POST https://salvadorexoficial.com/api/telegram/webhook \
   -H "Content-Type: application/json" \
   -d '{"message":{"chat":{"id":1},"text":"/start","from":{"username":"test"}}}'
 ```

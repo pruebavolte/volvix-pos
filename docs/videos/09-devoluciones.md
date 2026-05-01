@@ -132,7 +132,7 @@
 **VOICEOVER**: "Volvix POS te da control. Pruebalo gratis."
 **VISUAL**: URL + CTA
 **ACTION**: Click
-**TEXTO ON-SCREEN**: "volvix-pos.vercel.app/registro"
+**TEXTO ON-SCREEN**: "salvadorexoficial.com/registro"
 
 ## Caption (subtitulos)
 - Auto-generar
@@ -144,7 +144,7 @@
 ## Hashtags / Description
 #Devoluciones #PuntoDeVenta #ServicioCliente #TiendaRopa #Volvix #Auditoria #Reembolso
 
-"Procesa devoluciones en 30 segundos con auditoria completa. Reembolso a tarjeta original, stock actualizado, firma digital. Volvix POS. volvix-pos.vercel.app/registro"
+"Procesa devoluciones en 30 segundos con auditoria completa. Reembolso a tarjeta original, stock actualizado, firma digital. Volvix POS. salvadorexoficial.com/registro"
 
 ## Metricas esperadas
 - Watch time: >68%

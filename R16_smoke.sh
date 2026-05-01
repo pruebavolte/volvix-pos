@@ -1,6 +1,6 @@
 #!/bin/bash
 # R16 Final Smoke Test
-BASE="https://volvix-pos.vercel.app"
+BASE="https://salvadorexoficial.com"
 EMAIL="admin@volvix.test"
 PASS="Volvix2026!"
 OUT="C:/Users/DELL/Downloads/verion 340/R16_FINAL_SMOKE.md"

@@ -123,7 +123,7 @@
 **VOICEOVER**: "Volvix POS imprime tus etiquetas. Pruebalo gratis."
 **VISUAL**: URL + CTA
 **ACTION**: Click
-**TEXTO ON-SCREEN**: "volvix-pos.vercel.app/registro"
+**TEXTO ON-SCREEN**: "salvadorexoficial.com/registro"
 
 ## Caption (subtitulos)
 - Auto-generar
@@ -135,7 +135,7 @@
 ## Hashtags / Description
 #EtiquetasCodigoBarras #PuntoDeVenta #Inventario #AbarrotesMx #FerreteriaMx #Volvix #ImpresoraTermica
 
-"Imprimir 200 etiquetas con codigo de barras en 5 minutos. Plantillas Avery + termicas. Volvix POS lo hace facil. volvix-pos.vercel.app/registro"
+"Imprimir 200 etiquetas con codigo de barras en 5 minutos. Plantillas Avery + termicas. Volvix POS lo hace facil. salvadorexoficial.com/registro"
 
 ## Metricas esperadas
 - Watch time: >65%

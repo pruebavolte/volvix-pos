@@ -74,7 +74,7 @@ node --check api/index.js
 # Expected: no output = success
 
 # Optional: smoke test with valid JWT
-curl -H "Authorization: Bearer $JWT" https://volvix-pos.vercel.app/api/cuts
+curl -H "Authorization: Bearer $JWT" https://salvadorexoficial.com/api/cuts
 # Expected: {ok: true, data: [...]} or empty array
 ```
 
@@ -85,7 +85,7 @@ vercel --prod
 ```
 
 ### Step 5: Smoke Test in Production
-Login at https://volvix-pos.vercel.app/login.html with `admin@volvix.test` / `Volvix2026!`
+Login at https://salvadorexoficial.com/login.html with `admin@volvix.test` / `Volvix2026!`
 
 Test these critical flows:
 1. **POS sale**: salvadorex_web_v25.html → search product → add to cart → cobrar → print receipt
@@ -98,8 +98,8 @@ Test these critical flows:
 8. **User mgmt**: Owner panel → Gestión de Usuarios → create user → set permissions
 9. **Customer credit**: Clientes → Registrar abono → search customer → submit
 10. **Export CSV**: Productos → Exportar → CSV downloads with UTF-8 BOM
-11. **Landing page**: Navigate to https://volvix-pos.vercel.app/landing-restaurant.html
-12. **404 redirect**: Navigate to https://volvix-pos.vercel.app/restaurante (should redirect)
+11. **Landing page**: Navigate to https://salvadorexoficial.com/landing-restaurant.html
+12. **404 redirect**: Navigate to https://salvadorexoficial.com/restaurante (should redirect)
 
 ### Step 6: Run Playwright Regression
 ```bash

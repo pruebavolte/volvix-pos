@@ -1,6 +1,6 @@
 # R18 — Volvix POS Mobile App (Capacitor wrapper)
 
-Wrapper Android/iOS de la app web Volvix POS (https://volvix-pos.vercel.app)
+Wrapper Android/iOS de la app web Volvix POS (https://salvadorexoficial.com)
 empaquetada con **Capacitor 6**. Reutiliza el mismo frontend PWA.
 
 ## 0. Pre-requisitos
@@ -75,7 +75,7 @@ npx cap open ios          # abre Xcode
 1. Crear app en [Play Console](https://play.google.com/console) → mx.volvix.app
 2. Subir `app-release.aab` a track **internal testing** primero.
 3. Llenar:
-   - Privacy policy URL → https://volvix-pos.vercel.app/privacy
+   - Privacy policy URL → https://salvadorexoficial.com/privacy
    - Data safety form (sin tracking de terceros)
    - Screenshots 1080x1920 (5 mínimo)
    - Descripción ES/EN

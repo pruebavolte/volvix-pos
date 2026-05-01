@@ -88,7 +88,7 @@
 **SFX**: Progress + completion chime
 
 ### 0:35-0:42 - CTA
-**VOICEOVER**: "Sin Excel manual. Sin errores. volvix-pos.vercel.app/registro."
+**VOICEOVER**: "Sin Excel manual. Sin errores. salvadorexoficial.com/registro."
 **VISUAL**: Split screen: izquierda catalogo Volvix, derecha Excel desordenado tachado en rojo
 **ACTION**: Cursor click en CTA
 **TEXTO ON-SCREEN**: "Adios al Excel manual"
@@ -103,7 +103,7 @@
 ## Hashtags / Description
 #Inventario #PuntoDeVenta #Productos #ImportarCSV #Negocio #POS #Volvix #DigitalizaInventario
 
-"Subir 100 productos en 5 segundos? Volvix POS lo hace por ti. Importa CSV, auto-genera SKUs, calcula margenes. Sin Excel manual. volvix-pos.vercel.app/registro"
+"Subir 100 productos en 5 segundos? Volvix POS lo hace por ti. Importa CSV, auto-genera SKUs, calcula margenes. Sin Excel manual. salvadorexoficial.com/registro"
 
 ## Metricas esperadas
 - Watch time: >65%

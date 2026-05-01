@@ -11,10 +11,10 @@
 
 **Vercel is returning 404 for ALL pages:**
 ```
-https://volvix-pos.vercel.app/           → 404 NOT_FOUND
-https://volvix-pos.vercel.app/index.html → 404 NOT_FOUND
-https://volvix-pos.vercel.app/pos.html   → 404 NOT_FOUND
-https://volvix-pos.vercel.app/login.html → 404 NOT_FOUND
+https://salvadorexoficial.com/           → 404 NOT_FOUND
+https://salvadorexoficial.com/index.html → 404 NOT_FOUND
+https://salvadorexoficial.com/pos.html   → 404 NOT_FOUND
+https://salvadorexoficial.com/login.html → 404 NOT_FOUND
 (and every other page)
 ```
 
@@ -114,7 +114,7 @@ git commit -m "fix: Copy all HTML files to public/ for Vercel deployment"
 git push
 
 # Vercel will auto-deploy
-# Check: https://volvix-pos.vercel.app/ (should now show landing page)
+# Check: https://salvadorexoficial.com/ (should now show landing page)
 ```
 
 **Time**: 2 minutes  
@@ -190,17 +190,17 @@ git push
 ```bash
 # Wait 1-2 minutes for Vercel build
 # Then test:
-curl https://volvix-pos.vercel.app/ | head -20
+curl https://salvadorexoficial.com/ | head -20
 # Should show HTML, not 404
 ```
 
 ### Step 4: Test critical pages
 ```
-https://volvix-pos.vercel.app/
-https://volvix-pos.vercel.app/login.html
-https://volvix-pos.vercel.app/registro.html
-https://volvix-pos.vercel.app/pos.html
-https://volvix-pos.vercel.app/volvix-api-docs.html
+https://salvadorexoficial.com/
+https://salvadorexoficial.com/login.html
+https://salvadorexoficial.com/registro.html
+https://salvadorexoficial.com/pos.html
+https://salvadorexoficial.com/volvix-api-docs.html
 ```
 
 All should return 200 OK, not 404.
@@ -226,38 +226,38 @@ All should return 200 OK, not 404.
 
 ### 1. Landing page loads
 ```
-https://volvix-pos.vercel.app/
+https://salvadorexoficial.com/
 → Should show "Volvix POS" branding, "Crear cuenta gratis" button
 ```
 
 ### 2. Registration works
 ```
-https://volvix-pos.vercel.app/registro.html
+https://salvadorexoficial.com/registro.html
 → Should show 4-step registration form
 ```
 
 ### 3. Login works
 ```
-https://volvix-pos.vercel.app/login.html
+https://salvadorexoficial.com/login.html
 → Should show email + password fields
 ```
 
 ### 4. Admin panels exist
 ```
-https://volvix-pos.vercel.app/volvix_owner_panel_v7.html
+https://salvadorexoficial.com/volvix_owner_panel_v7.html
 → Should show admin dashboard
 ```
 
 ### 5. API docs accessible
 ```
-https://volvix-pos.vercel.app/volvix-api-docs.html
+https://salvadorexoficial.com/volvix-api-docs.html
 → Should show API documentation (no more 404)
 ```
 
 ### 6. Tutorials accessible
 ```
-https://volvix-pos.vercel.app/tutorials/index.html
-https://volvix-pos.vercel.app/tutorials/10-registro-3min.html
+https://salvadorexoficial.com/tutorials/index.html
+https://salvadorexoficial.com/tutorials/10-registro-3min.html
 → Both should load with content
 ```
 
@@ -281,7 +281,7 @@ CRITICAL_FILES=(
 
 for file in "${CRITICAL_FILES[@]}"; do
   echo "Checking $file..."
-  curl -s -o /dev/null -w "%{http_code}" https://volvix-pos.vercel.app/$file
+  curl -s -o /dev/null -w "%{http_code}" https://salvadorexoficial.com/$file
 done
 ```
 

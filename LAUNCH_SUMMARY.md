@@ -3,7 +3,7 @@
 **ESTADO**: 🟢 **EN VIVO PRODUCCIÓN**  
 **FECHA**: 2026-04-25  
 **PLATAFORMA**: Vercel (Serverless)  
-**URL**: https://volvix-pos.vercel.app  
+**URL**: https://salvadorexoficial.com  
 
 ---
 
@@ -36,7 +36,7 @@
 
 ### URL Principal
 ```
-https://volvix-pos.vercel.app/login.html
+https://salvadorexoficial.com/login.html
 ```
 
 ### Credenciales Demo
@@ -135,10 +135,10 @@ Usuario 3 (Cashier):
 
 ### Test 4: Endpoints
 ```
-✅ GET  https://volvix-pos.vercel.app/login.html
-✅ GET  https://volvix-pos.vercel.app/salvadorex_web_v25.html
-✅ POST https://volvix-pos.vercel.app/api/login
-✅ GET  https://volvix-pos.vercel.app/api/health
+✅ GET  https://salvadorexoficial.com/login.html
+✅ GET  https://salvadorexoficial.com/salvadorex_web_v25.html
+✅ POST https://salvadorexoficial.com/api/login
+✅ GET  https://salvadorexoficial.com/api/health
 ```
 
 ---
@@ -147,7 +147,7 @@ Usuario 3 (Cashier):
 
 ### Paso 1: Ir a Login
 ```
-https://volvix-pos.vercel.app/login.html
+https://salvadorexoficial.com/login.html
 ```
 
 ### Paso 2: Ingresar Credenciales
@@ -298,7 +298,7 @@ Proyecto Volvix POS v7.0.0
 
 ## 📞 CONTACTO & SOPORTE
 
-**URL**: https://volvix-pos.vercel.app  
+**URL**: https://salvadorexoficial.com  
 **Repositorio**: Git local en C:\Users\DELL\Downloads\verion 340  
 **Documentación**: Ver archivos .md en la carpeta  
 

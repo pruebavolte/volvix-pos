@@ -110,16 +110,16 @@ psql $DATABASE_URL -f migrations/cuts-and-movements.sql  # NEEDS TO BE CREATED
 vercel --prod
 
 # 5. Smoke test
-curl https://volvix-pos.vercel.app/api/health/full
+curl https://salvadorexoficial.com/api/health/full
 # Expect: 200 with all subsystems green
 
 # 6. Manual UI test
-# - Login at https://volvix-pos.vercel.app/login.html (admin@volvix.test / Volvix2026!)
+# - Login at https://salvadorexoficial.com/login.html (admin@volvix.test / Volvix2026!)
 # - Navigate to POS, verify Inventario tab loads
 # - Open a cut, make a sale, close cut, print receipt
 # - Navigate to Owner Panel, click "Gestión de Usuarios", verify it loads
-# - Test 1 landing page: https://volvix-pos.vercel.app/landing-restaurant.html
-# - Test 404 redirect: https://volvix-pos.vercel.app/restaurante (should redirect to landing-restaurant.html)
+# - Test 1 landing page: https://salvadorexoficial.com/landing-restaurant.html
+# - Test 404 redirect: https://salvadorexoficial.com/restaurante (should redirect to landing-restaurant.html)
 ```
 
 ## Risk Assessment Post-Deploy

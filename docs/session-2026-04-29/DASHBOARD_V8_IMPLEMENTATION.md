@@ -258,19 +258,19 @@ Los endpoints están registrados en `/src/api/index.js`:
 ```bash
 # Resumen de ventas
 curl -H "Authorization: Bearer TOKEN" \
-  "https://volvix-pos.vercel.app/api/dashboard/sales-summary?period=month"
+  "https://salvadorexoficial.com/api/dashboard/sales-summary?period=month"
 
 # KPIs
 curl -H "Authorization: Bearer TOKEN" \
-  "https://volvix-pos.vercel.app/api/dashboard/kpis?period=month"
+  "https://salvadorexoficial.com/api/dashboard/kpis?period=month"
 
 # Transacciones
 curl -H "Authorization: Bearer TOKEN" \
-  "https://volvix-pos.vercel.app/api/dashboard/transactions?limit=20&offset=0"
+  "https://salvadorexoficial.com/api/dashboard/transactions?limit=20&offset=0"
 
 # Integraciones
 curl -H "Authorization: Bearer TOKEN" \
-  "https://volvix-pos.vercel.app/api/dashboard/integration-status"
+  "https://salvadorexoficial.com/api/dashboard/integration-status"
 ```
 
 ### Flujo de Prueba Manual

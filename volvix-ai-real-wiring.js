@@ -2,7 +2,7 @@
  * VOLVIX AI REAL WIRING
  * ─────────────────────────────────────────────────────────────────────
  * Sistema de IA REAL conectado a Anthropic Claude API
- * Backend: https://volvix-pos.vercel.app  (api/index.js -> callClaude)
+ * Backend: https://salvadorexoficial.com  (api/index.js -> callClaude)
  *
  * Funcionalidades incluidas:
  *  1. Chat overlay flotante con Claude
@@ -26,7 +26,7 @@
   //  CONFIG
   // ───────────────────────────────────────────────────────────────────
   const API = location.origin.includes('localhost') || location.origin.includes('file://')
-    ? 'https://volvix-pos.vercel.app'
+    ? 'https://salvadorexoficial.com'
     : location.origin;
 
   const ENDPOINTS = {

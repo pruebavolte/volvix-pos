@@ -77,7 +77,7 @@ function register(deps) {
   const auth = requireAuth || ((fn) => fn);
 
   function buildLink(userId) {
-    const base = process.env.PUBLIC_BASE_URL || 'https://volvix-pos.vercel.app';
+    const base = process.env.PUBLIC_BASE_URL || 'https://salvadorexoficial.com';
     return base + '/registro.html?ref=' + encodeURIComponent(userId);
   }
 

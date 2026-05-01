@@ -1,7 +1,7 @@
 # B42 — POS UI Click-by-Click Audit (R3A)
 
 **Generated:** 2026-04-28T04:01:02.457Z
-**Base URL:** https://volvix-pos.vercel.app
+**Base URL:** https://salvadorexoficial.com
 **User:** cajero@volvix.test
 **Methodology:** Real Playwright browser, click EVERY button, measure response (modal/screen/toast/URL/DOM-delta)
 
@@ -59,7 +59,7 @@ These are likely correct: the handler short-circuits when `CART.length === 0`. W
 ## Screen: salvadorex
 
 **Notes:**
-- Post-login URL: https://volvix-pos.vercel.app/login.html
+- Post-login URL: https://salvadorexoficial.com/login.html
 - DEBUG: login-screen visible: false
 - DEBUG: visible text: Saltar al contenido principal | Saltar a la navegación | Saltar al pie de página | Saltar al contenido | S | SalvadoreX | Don Chucho · Caja 1 | 27 Abr 2026 | ONLINE | salvadorex.com | Le atiende: Administrator | ! | 3 | Windows | Android | Web | RÁPIDO | 👑 | SAAS | 📱 | MÓVIL | LIVE SYNC | AD | Sign out | F1 Sales | F2 Créditos | Customers | F3 Products | F4 Inventory | Purchases | Settings | Invoices | Cut | Reports | Dashboard | Opening | Quotes | Returns | Historial | Users | 📱 Recargas | 💡 Servicios | 🎬 Tarjetas | 🏷️ Promos | 🏢 Depto. | 🛒 Sugeridas | 💱 Actualizar | ⋯ Más | VENT
 - DEBUG: top buttons: [{"text":"!\n      3","id":"","cls":"tb-btn notif","onclick":"openNotificationsPanel()"},{"text":"0","id":"tb-lowstock-bell","cls":"tb-btn lowstock","onclick":"openLowStockAlerts()"},{"text":"Windows","id":"","cls":"platform-toggle-btn","onclick":"selectPlatform(this, 'windows')"},{"text":"Android","id":"","cls":"platform-toggle-btn","onclick":"selectPlatform(this, 'android')"},{"text":"Web","id":"","cls":"platform-toggle-btn active","onclick":"selectPlatform(this, 'web')"},{"text":"RÁPIDO","id":"","cls":"tb-btn rapido","onclick":"showScreen('quickpos')"},{"text":"👑 SAAS","id":"","cls":"tb-btn saas","onclick":"openOwnerPanel()"},{"text":"📱 MÓVIL","id":"","cls":"tb-btn movil","onclick":"showScreen('mobile-apps')"},{"text":"LIVE SYNC","id":"","cls":"tb-btn livesync","onclick":"showScreen('salud')"},{"text":"AD","id":"","cls":"tb-btn perfil","onclick":"showScreen('perfil')"},{"text":"","id":"","cls":"tb-btn ayuda","onclick":"showScreen('ayuda')"},{"text":"Sign out","id":"","cls":"tb-btn salir","onclick":"doLogout()"},{"text":"F1 Sales","id":"","cls":"menu-btn active","onclick":"showScreen('pos')"},{"text":"F2 Créditos","id":"","cls":"menu-btn","onclick":"showScreen('credito')"},{"text":"Customers","id":"","cls":"menu-btn","onclick":"showScreen('clientes')"},{"text":"F3 Products","id":"","cls":"menu-btn","onclick":"showScreen('inventario')"},{"text":"F4 Inventory","id":"","cls":"menu-btn","onclick":"showScreen('kardex')"},{"text":"Purchases","id":"","cls":"menu-btn","onclick":"
@@ -155,37 +155,37 @@ These are likely correct: the handler short-circuits when `CART.length === 0`. W
 ### Console errors — salvadorex (68)
 
 - `Failed to load resource: the server responded with a status of 404 ()`
-- `Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.`
+- `Refused to execute script from 'https://salvadorexoficial.com/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.`
 - `Failed to load resource: the server responded with a status of 401 ()`
 - `Failed to load resource: the server responded with a status of 401 ()`
 - `Failed to load resource: the server responded with a status of 401 ()`
 - `Failed to load resource: the server responded with a status of 503 (Offline)`
-- `[ERROR] [ErrorHandler] {"type":"fetch","message":"Rate limit exceeded for default. Retry in 1402ms","stack":"Error: Rate limit exceeded for default. Retry in 1402ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at window.fetch (https://volvix-pos.vercel.`
+- `[ERROR] [ErrorHandler] {"type":"fetch","message":"Rate limit exceeded for default. Retry in 1402ms","stack":"Error: Rate limit exceeded for default. Retry in 1402ms\n    at global.fetch (https://salvadorexoficial.com/volvix-ratelimit-wiring.js:360:23)\n    at window.fetch (https://volvix-pos.vercel.`
 - `[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 1402ms, stack: Error: Rate limit exceeded for default. Retry in 1…x-pos.vercel.app/volvix-real-data-loader.js:225:3, userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safar`
-- `[ERROR] [ErrorHandler] {"type":"fetch","message":"Rate limit exceeded for default. Retry in 1399ms","stack":"Error: Rate limit exceeded for default. Retry in 1399ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at window.fetch (https://volvix-pos.vercel.`
+- `[ERROR] [ErrorHandler] {"type":"fetch","message":"Rate limit exceeded for default. Retry in 1399ms","stack":"Error: Rate limit exceeded for default. Retry in 1399ms\n    at global.fetch (https://salvadorexoficial.com/volvix-ratelimit-wiring.js:360:23)\n    at window.fetch (https://volvix-pos.vercel.`
 - `[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 1399ms, stack: Error: Rate limit exceeded for default. Retry in 1…x-pos.vercel.app/volvix-real-data-loader.js:225:3, userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safar`
-- `[ERROR] [ErrorHandler] {"type":"fetch","message":"Rate limit exceeded for default. Retry in 1396ms","stack":"Error: Rate limit exceeded for default. Retry in 1396ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at window.fetch (https://volvix-pos.vercel.`
+- `[ERROR] [ErrorHandler] {"type":"fetch","message":"Rate limit exceeded for default. Retry in 1396ms","stack":"Error: Rate limit exceeded for default. Retry in 1396ms\n    at global.fetch (https://salvadorexoficial.com/volvix-ratelimit-wiring.js:360:23)\n    at window.fetch (https://volvix-pos.vercel.`
 - `[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 1396ms, stack: Error: Rate limit exceeded for default. Retry in 1…x-pos.vercel.app/volvix-real-data-loader.js:225:3, userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safar`
-- `[ERROR] [ErrorHandler] {"type":"fetch","message":"Rate limit exceeded for default. Retry in 1393ms","stack":"Error: Rate limit exceeded for default. Retry in 1393ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at window.fetch (https://volvix-pos.vercel.`
+- `[ERROR] [ErrorHandler] {"type":"fetch","message":"Rate limit exceeded for default. Retry in 1393ms","stack":"Error: Rate limit exceeded for default. Retry in 1393ms\n    at global.fetch (https://salvadorexoficial.com/volvix-ratelimit-wiring.js:360:23)\n    at window.fetch (https://volvix-pos.vercel.`
 - `[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 1393ms, stack: Error: Rate limit exceeded for default. Retry in 1…x-pos.vercel.app/volvix-real-data-loader.js:225:3, userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safar`
-- `[ERROR] [ErrorHandler] {"type":"fetch","message":"Rate limit exceeded for default. Retry in 1390ms","stack":"Error: Rate limit exceeded for default. Retry in 1390ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at window.fetch (https://volvix-pos.vercel.`
+- `[ERROR] [ErrorHandler] {"type":"fetch","message":"Rate limit exceeded for default. Retry in 1390ms","stack":"Error: Rate limit exceeded for default. Retry in 1390ms\n    at global.fetch (https://salvadorexoficial.com/volvix-ratelimit-wiring.js:360:23)\n    at window.fetch (https://volvix-pos.vercel.`
 - `[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 1390ms, stack: Error: Rate limit exceeded for default. Retry in 1…x-pos.vercel.app/volvix-real-data-loader.js:225:3, userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safar`
-- `[ERROR] [ErrorHandler] {"type":"fetch","message":"Rate limit exceeded for default. Retry in 1317ms","stack":"Error: Rate limit exceeded for default. Retry in 1317ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at window.fetch (https://volvix-pos.vercel.`
+- `[ERROR] [ErrorHandler] {"type":"fetch","message":"Rate limit exceeded for default. Retry in 1317ms","stack":"Error: Rate limit exceeded for default. Retry in 1317ms\n    at global.fetch (https://salvadorexoficial.com/volvix-ratelimit-wiring.js:360:23)\n    at window.fetch (https://volvix-pos.vercel.`
 - `[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 1317ms, stack: Error: Rate limit exceeded for default. Retry in 1…x-pos.vercel.app/salvadorex_web_v25.html:2947:20), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safar`
-- `[ERROR] [ErrorHandler] {"type":"fetch","message":"Rate limit exceeded for /api/inventory. Retry in 1248ms","stack":"Error: Rate limit exceeded for /api/inventory. Retry in 1248ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at window.fetch (https://volv`
+- `[ERROR] [ErrorHandler] {"type":"fetch","message":"Rate limit exceeded for /api/inventory. Retry in 1248ms","stack":"Error: Rate limit exceeded for /api/inventory. Retry in 1248ms\n    at global.fetch (https://salvadorexoficial.com/volvix-ratelimit-wiring.js:360:23)\n    at window.fetch (https://volv`
 - `[ErrorHandler] {type: fetch, message: Rate limit exceeded for /api/inventory. Retry in 1248ms, stack: Error: Rate limit exceeded for /api/inventory. Ret…x-pos.vercel.app/salvadorex_web_v25.html:3961:52), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.1`
 - _… y 48 más_
 
 ### Network failures (4xx/5xx) — salvadorex (24)
 
-- `GET 404 https://volvix-pos.vercel.app/volvix-tests-wiring.js` × 2
-- `GET 401 https://volvix-pos.vercel.app/api/products` × 1
-- `GET 401 https://volvix-pos.vercel.app/api/sales` × 1
-- `POST 401 https://volvix-pos.vercel.app/api/ai/decide` × 1
+- `GET 404 https://salvadorexoficial.com/volvix-tests-wiring.js` × 2
+- `GET 401 https://salvadorexoficial.com/api/products` × 1
+- `GET 401 https://salvadorexoficial.com/api/sales` × 1
+- `POST 401 https://salvadorexoficial.com/api/ai/decide` × 1
 - `GET 503 https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2` × 1
 - `GET 503 https://fonts.gstatic.com/s/jetbrainsmono/v24/tDbv2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwBNntkaToggR7BYRbKPxDcwg.woff2` × 1
 - `GET 404 https://api.stripe.com/v1` × 9
-- `GET 403 https://volvix-pos.vercel.app/api/owner/low-stock` × 8
+- `GET 403 https://salvadorexoficial.com/api/owner/low-stock` × 8
 
 ---
 
@@ -214,7 +214,7 @@ These are likely correct: the handler short-circuits when `CART.length === 0`. W
 ### Console errors — kds (8)
 
 - `Failed to load resource: the server responded with a status of 404 ()`
-- `Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.`
+- `Refused to execute script from 'https://salvadorexoficial.com/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.`
 - `Failed to load resource: the server responded with a status of 401 ()`
 - `Failed to load resource: the server responded with a status of 401 ()`
 - `Failed to load resource: the server responded with a status of 401 ()`
@@ -224,10 +224,10 @@ These are likely correct: the handler short-circuits when `CART.length === 0`. W
 
 ### Network failures (4xx/5xx) — kds (6)
 
-- `GET 404 https://volvix-pos.vercel.app/volvix-tests-wiring.js` × 1
-- `GET 401 https://volvix-pos.vercel.app/api/sales` × 1
-- `GET 401 https://volvix-pos.vercel.app/api/products` × 1
-- `POST 401 https://volvix-pos.vercel.app/api/ai/decide` × 1
+- `GET 404 https://salvadorexoficial.com/volvix-tests-wiring.js` × 1
+- `GET 401 https://salvadorexoficial.com/api/sales` × 1
+- `GET 401 https://salvadorexoficial.com/api/products` × 1
+- `POST 401 https://salvadorexoficial.com/api/ai/decide` × 1
 - `GET 503 https://fonts.googleapis.com/css2` × 2
 
 ---

@@ -89,7 +89,7 @@
 **VOICEOVER**: "Volvix POS. Pruebalo gratis."
 **VISUAL**: URL + CTA grande
 **ACTION**: Click animado
-**TEXTO ON-SCREEN**: "volvix-pos.vercel.app/registro"
+**TEXTO ON-SCREEN**: "salvadorexoficial.com/registro"
 
 ## Caption (subtitulos)
 - Auto-generar
@@ -101,7 +101,7 @@
 ## Hashtags / Description
 #ModoOffline #PuntoDeVenta #InternetCaido #NegocioRural #POS #Volvix #VentasSinInternet #PWA
 
-"Tu negocio NO se detiene. Volvix POS funciona offline y sincroniza solo cuando regresa el WiFi. Sin perder ventas. volvix-pos.vercel.app/registro"
+"Tu negocio NO se detiene. Volvix POS funciona offline y sincroniza solo cuando regresa el WiFi. Sin perder ventas. salvadorexoficial.com/registro"
 
 ## Metricas esperadas
 - Watch time: >75% (alta utilidad)

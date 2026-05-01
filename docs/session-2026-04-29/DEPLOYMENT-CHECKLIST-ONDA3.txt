@@ -38,7 +38,7 @@ DEPLOY STEPS:
    - Include function: attachDashboardRoutes()
 4. git add . && git commit -m "feat: Add Dashboard v8 with analytics"
 5. Vercel deploy (automatic)
-6. Verify: https://volvix-pos.vercel.app/volvix_owner_panel_v8.html
+6. Verify: https://salvadorexoficial.com/volvix_owner_panel_v8.html
 
 TEST:
 • All 7 tabs load correctly
@@ -82,7 +82,7 @@ DEPLOY STEPS:
 4. Update POS checkout page with Stripe modal component
 5. git add . && git commit -m "feat: Add Stripe payment processing"
 6. Vercel deploy
-7. Test payment at: https://volvix-pos.vercel.app/pos.html
+7. Test payment at: https://salvadorexoficial.com/pos.html
 
 TEST FLOW:
 • Click POS → Add products → Checkout
@@ -147,7 +147,7 @@ VERCEL DEPLOYMENT (3 min):
 4. Vercel deploy
 
 TEST FLOW:
-• Go to: https://volvix-pos.vercel.app/login.html
+• Go to: https://salvadorexoficial.com/login.html
 • Click "🔐 Continuar con Google"
 • Redirects to Google signin
 • Sign in with test Google account
@@ -157,7 +157,7 @@ TEST FLOW:
 • Verify: User can access POS and make transactions
 
 ALTERNATIVELY (Test with Registro):
-• Go to: https://volvix-pos.vercel.app/registro.html
+• Go to: https://salvadorexoficial.com/registro.html
 • Click "🔐 Continuar con Google"
 • Should auto-complete Step 1
 • Fill Step 2 (Negocio, Giro)
@@ -229,7 +229,7 @@ TASK 4: E2E TESTING [30 MIN]
    ✓ Run: adb install /d/volvix-pos-app-debug.apk
    ✓ App appears in device menu
    ✓ Open app
-   ✓ Page loads to https://volvix-pos.vercel.app
+   ✓ Page loads to https://salvadorexoficial.com
    ✓ Login works (email or Google)
    ✓ POS interface displays correctly
    ✓ Can add products and complete a transaction

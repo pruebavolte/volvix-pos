@@ -1,7 +1,7 @@
 # R16 — Browser Automation (Playwright headless)
 
 **Fecha:** 2026-04-26
-**Target:** https://volvix-pos.vercel.app
+**Target:** https://salvadorexoficial.com
 
 ## Archivos creados
 - `tests/browser/run-auto.js` — script principal (chromium headless, 7 pasos)

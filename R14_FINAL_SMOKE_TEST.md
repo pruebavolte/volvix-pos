@@ -1,6 +1,6 @@
 # R14 — Final Smoke Test Report
 
-**Deploy URL**: https://volvix-pos.vercel.app
+**Deploy URL**: https://salvadorexoficial.com
 **Deployment ID**: dpl_ApE4HdjQKE2HRwhTZYYuSa7VS8DA
 **Date**: 2026-04-26
 **Credentials**: admin@volvix.test / Volvix2026! (role=superadmin, tenant=TNT001)

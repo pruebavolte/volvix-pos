@@ -4,7 +4,7 @@
 
 ### URL de Acceso
 ```
-https://volvix-pos.vercel.app/volvix_owner_panel_v8.html
+https://salvadorexoficial.com/volvix_owner_panel_v8.html
 ```
 
 ### Requisitos

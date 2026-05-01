@@ -3,7 +3,7 @@
 **Date:** 2026-04-27
 **Author:** Claude Opus 4.7 (1M)
 **Scope:** Full KDS lifecycle verified against production
-**Production:** https://volvix-pos.vercel.app/volvix-kds.html
+**Production:** https://salvadorexoficial.com/volvix-kds.html
 **Test users:** `cajero@volvix.test` (TNT001 / cajero) + `owner@volvix.test` (TNT002 / owner) — `Volvix2026!`
 
 ---
@@ -38,7 +38,7 @@ The **two issues below MUST be fixed before this is "ready for restaurants"**.
 - UI screenshot: `tests/screenshots/r5c-k12-kds-loaded.png`
 
 ```
-$ VOLVIX_BASE_URL=https://volvix-pos.vercel.app \
+$ VOLVIX_BASE_URL=https://salvadorexoficial.com \
   npx playwright test tests/r5c-kds-e2e.spec.js \
   --config=tests/playwright.r5c.config.js --reporter=list
 

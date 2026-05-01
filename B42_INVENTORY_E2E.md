@@ -1,7 +1,7 @@
 # B42 — Inventory E2E Audit Report (R3B)
 
 **Generated:** 2026-04-28 03:39 UTC
-**Target:** https://volvix-pos.vercel.app (production)
+**Target:** https://salvadorexoficial.com (production)
 **Scope:** Complete Inventario flow — UI + API verification
 **Test file:** `tests/r3b-inventory-e2e.spec.js`
 **Config:** `tests/playwright.r3b.config.js`

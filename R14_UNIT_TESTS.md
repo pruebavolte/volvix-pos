@@ -48,7 +48,7 @@ En producción (`NODE_ENV !== 'test'`) ese bloque queda inerte: `module.exports`
 - `JWT_SECRET=test-secret-key-for-unit-tests-only-32bytes`
 - `SUPABASE_SERVICE_KEY=test-service-key`
 - `SUPABASE_URL=https://test.supabase.co`
-- `ALLOWED_ORIGINS=https://volvix-pos.vercel.app,https://app.volvix.com`
+- `ALLOWED_ORIGINS=https://salvadorexoficial.com,https://app.volvix.com`
 
 Si faltan, `api/index.js` aborta el boot (validación R13 #1 / #3), por eso el runner los inyecta.
 

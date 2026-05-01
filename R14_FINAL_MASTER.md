@@ -266,15 +266,15 @@ Building: Running "vercel build"
 Building: Installing dependencies... up to date in 497ms
 Building: Build Completed in /vercel/output [1s]
 Production: https://volvix-de5etqpmu-grupo-volvixs-projects.vercel.app [14s]
-Aliased: https://volvix-pos.vercel.app [14s]
+Aliased: https://salvadorexoficial.com [14s]
 Deployment ready (status: READY, target: production, id: dpl_FFitC5BJEJ9oeJ176K8KzejGqLqy)
 ```
 
-**Resultado:** build OK, deploy READY, alias `https://volvix-pos.vercel.app` actualizado.
+**Resultado:** build OK, deploy READY, alias `https://salvadorexoficial.com` actualizado.
 
 ## 10. Verificaciones post-deploy
 
-Base URL: `https://volvix-pos.vercel.app`
+Base URL: `https://salvadorexoficial.com`
 
 | Endpoint | Esperado | Obtenido | OK |
 |---|---|---|---|

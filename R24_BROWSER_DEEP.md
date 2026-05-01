@@ -1,6 +1,6 @@
 # R24_BROWSER_DEEP — Volvix POS Live QA
 
-**Target:** https://volvix-pos.vercel.app | **Date:** 2026-04-27
+**Target:** https://salvadorexoficial.com | **Date:** 2026-04-27
 **Tools:** Playwright 1.59 (chromium) — `C:\qa-playwright\tests\volvix-deep.spec.js`
 
 ## BLOQUEO CRITICO

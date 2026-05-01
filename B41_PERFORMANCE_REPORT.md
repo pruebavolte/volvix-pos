@@ -1,7 +1,7 @@
 # B41 — Volvix POS Performance Audit
 
 **Generated:** 2026-04-28
-**Target:** https://volvix-pos.vercel.app (production)
+**Target:** https://salvadorexoficial.com (production)
 **Method:** Playwright headless Chromium + PerformanceObserver / Navigation Timing API
 **Account used:** admin@volvix.test (Volvix2026!)
 
@@ -248,7 +248,7 @@ If/when product images, logos, or receipts are added, follow:
   SVG for icons/logos
 - Add `width` + `height` attributes to prevent CLS
 - Use Vercel Image Optimization (`next/image` equivalent) for tenant-uploaded
-  product photos: `https://volvix-pos.vercel.app/_vercel/image?url=...&w=200&q=80`
+  product photos: `https://salvadorexoficial.com/_vercel/image?url=...&w=200&q=80`
 
 ---
 
@@ -291,7 +291,7 @@ network throttling via Playwright doesn't fully simulate SW offline
 behavior). Manual verification recommended:
 
 ```
-1. Open https://volvix-pos.vercel.app/salvadorex_web_v25.html
+1. Open https://salvadorexoficial.com/salvadorex_web_v25.html
 2. Wait 30 s for full SW install
 3. DevTools > Application > Service Workers > "Offline" checkbox
 4. Refresh

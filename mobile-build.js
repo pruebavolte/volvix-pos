@@ -2,7 +2,7 @@
 /* ============================================================
    VOLVIX POS  Mobile build pipeline (Capacitor)
    ============================================================
-   Empaqueta la PWA https://volvix-pos.vercel.app como app nativa
+   Empaqueta la PWA https://salvadorexoficial.com como app nativa
    Android (APK/AAB) y iOS (IPA, requiere macOS + Xcode).
 
    Comandos rapidos:

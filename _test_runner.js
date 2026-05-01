@@ -1,6 +1,6 @@
 const https=require('https');
 const TOKEN=process.env.TOK;
-const HOST='volvix-pos.vercel.app';
+const HOST='salvadorexoficial.com';
 const fs=require('fs');
 const eps=fs.readFileSync('_endpoints.txt','utf8').split('\n').map(s=>s.trim()).filter(Boolean);
 // Filter out trailing "/" - they're the same as without; also skip dummy paths

@@ -81,7 +81,7 @@ SYNTAX_OK
 
 ```
 $ vercel --prod --yes
-Production: https://volvix-pos.vercel.app
+Production: https://salvadorexoficial.com
 Status: READY
 Deployment: dpl_7ANdh9GBmoFRmKH9Wzz6Qc1dZzed
 ```

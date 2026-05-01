@@ -23,7 +23,7 @@ set -u
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$PROJECT_ROOT" || exit 1
 
-PROD_URL="${PROD_URL:-https://volvix-pos.vercel.app}"
+PROD_URL="${PROD_URL:-https://salvadorexoficial.com}"
 QA_PROJECT="${QA_PROJECT:-C:/qa-playwright}"
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 REPORT="$PROJECT_ROOT/.audit/post-fix-$TIMESTAMP.md"
@@ -59,7 +59,7 @@ mkdir -p "$SHOTS"
 cat > "$SPEC" <<'JSEOF'
 const { test } = require('@playwright/test');
 const fs = require('fs');
-const PROD = process.env.PROD_URL || 'https://volvix-pos.vercel.app';
+const PROD = process.env.PROD_URL || 'https://salvadorexoficial.com';
 const SHOTS = process.env.SHOTS_DIR;
 const FIXED = process.env.FIXED_URL;
 const REGR  = (process.env.REGR_LIST || '').split(',').filter(Boolean);

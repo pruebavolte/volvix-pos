@@ -88,7 +88,7 @@ Add the routes from `migrations/feature-flags-api.md` to `api/index.js`. Each ha
 - Return JSON with the documented shape
 
 ### 3. Smoke test the UI
-- Visit `https://volvix-pos.vercel.app/volvix-user-management.html` (must be authenticated)
+- Visit `https://salvadorexoficial.com/volvix-user-management.html` (must be authenticated)
 - **Usuarios tab**: click "+ Crear usuario" → fill form → submit (form validates: name ≥ 2, email format, role required, password ≥ 8 chars on create)
 - Click an existing user → drawer opens → switch to "Permisos" tab → toggle a module to `coming-soon` → click Guardar → toast confirms
 - **Roles tab**: "+ Crear rol" → name validates `[a-z_][a-z0-9_]*` → save → modal closes

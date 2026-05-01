@@ -5,7 +5,7 @@
  * Usage: node scripts/e2e.mjs [BASE_URL]
  */
 
-const BASE = process.argv[2] || 'https://volvix-pos.vercel.app';
+const BASE = process.argv[2] || 'https://salvadorexoficial.com';
 
 const CHECKS = [
   // Pages

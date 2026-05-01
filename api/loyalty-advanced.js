@@ -613,7 +613,7 @@ function register(deps) {
     try {
       const u = req.user || {};
       const userId = u.id || u.user_id || u.email || 'anon';
-      const base = process.env.PUBLIC_BASE_URL || 'https://volvix-pos.vercel.app';
+      const base = process.env.PUBLIC_BASE_URL || 'https://salvadorexoficial.com';
       const link = base + '/volvix-loyalty-customer.html?ref=' + encodeURIComponent(userId);
       return send(res, {
         ok: true,

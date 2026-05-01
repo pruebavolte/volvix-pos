@@ -2,7 +2,7 @@
 
 **Fecha**: 2026-04-27
 **Path**: `C:\Users\DELL\Downloads\verion 340\`
-**Producción**: https://volvix-pos.vercel.app
+**Producción**: https://salvadorexoficial.com
 
 ---
 

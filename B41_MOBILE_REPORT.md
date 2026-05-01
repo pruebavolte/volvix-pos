@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-04-27
 **Working dir:** `C:\Users\DELL\Downloads\verion 340\`
-**Production URL (wrapper):** https://volvix-pos.vercel.app
+**Production URL (wrapper):** https://salvadorexoficial.com
 **App ID:** `com.volvix.pos`
 **Estado pipeline:** LISTO para `android-debug` cuando JDK17 + Android SDK estén instalados.
 
@@ -18,7 +18,7 @@ Archivo: `capacitor.config.json`
 | `appName`                                | `Volvix POS`                                                | OK     |
 | `webDir`                                 | `public` (existe, contiene manifest.json + sw.js)           | OK     |
 | `bundledWebRuntime`                      | `false`                                                     | OK     |
-| `server.url`                             | `https://volvix-pos.vercel.app`                             | OK     |
+| `server.url`                             | `https://salvadorexoficial.com`                             | OK     |
 | `server.cleartext`                       | `false`                                                     | OK (segura) |
 | `server.androidScheme`                   | `https`                                                     | OK     |
 | `server.allowNavigation`                 | 5 dominios concretos (volvix-pos, supabase, stripe x3)      | OK (sin wildcards) |

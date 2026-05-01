@@ -1,7 +1,7 @@
 # B42 — Vendor Portal E2E Report
 
 - **Run tag**: `49126854`
-- **Base**: https://volvix-pos.vercel.app
+- **Base**: https://salvadorexoficial.com
 - **Portal**: `/volvix-vendor-portal.html`
 - **Vendor A**: `admin@volvix.test` (expected: Distribuidora Don Chucho)
 - **Vendor B**: `owner@volvix.test` (expected: Proveedora Los Compadres)
@@ -13,7 +13,7 @@
 
 | ID | Label | Result | Detail |
 |----|-------|--------|--------|
-| V1 | Page loads with auth (console errors < 10) | PASS | http=200 sidebar_visible=true on_portal=true console_errors=4 sample=["Failed to load resource: the server responded with a status of 404 ()","Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executab |
+| V1 | Page loads with auth (console errors < 10) | PASS | http=200 sidebar_visible=true on_portal=true console_errors=4 sample=["Failed to load resource: the server responded with a status of 404 ()","Refused to execute script from 'https://salvadorexoficial.com/volvix-tests-wiring.js' because its MIME type ('text/html') is not executab |
 | V2 | GET /api/vendor/me — returns vendor info | PASS | status=200 vendor_id=11110000-1111-1111-1111-aaaaaaaaaaa1 name="Distribuidora Don Chucho" tier=gold verified=true email=admin@volvix.test |
 | V3 | GET /api/vendor/orders — lists POs | PASS | status=200 count=5 total=5 sample={"id":"268164d9-4f36-49b6-a54b-18d9721034d1","po_number":"PO-2026-V1-001","amount":24580,"status":"pending"} |
 | V4 | GET /api/vendor/invoices — lists invoices | PASS | status=200 count=1 total=1 statuses=["invoiced"] |
@@ -42,11 +42,11 @@
 
 ```
 [V1] Failed to load resource: the server responded with a status of 404 ()
-[V1] Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.
+[V1] Refused to execute script from 'https://salvadorexoficial.com/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.
 [V1] Failed to load resource: the server responded with a status of 401 ()
 [V1] Failed to load resource: the server responded with a status of 401 ()
 [V14] Failed to load resource: the server responded with a status of 404 ()
-[V14] Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.
+[V14] Refused to execute script from 'https://salvadorexoficial.com/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.
 [V14] Failed to load resource: the server responded with a status of 401 ()
 [V14] Failed to load resource: the server responded with a status of 401 ()
 ```

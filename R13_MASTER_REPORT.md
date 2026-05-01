@@ -3,7 +3,7 @@
 **Proyecto:** Volvix POS / SaaS multi-tenant (`verion 340`)
 **Fecha:** 2026-04-26
 **Versión auditada:** v7.1.0 (`api/index.js`)
-**Target productivo:** https://volvix-pos.vercel.app
+**Target productivo:** https://salvadorexoficial.com
 **Stack:** Vercel serverless + Supabase (`zhvwmzkcqngcaqpdxtwr`) + Anthropic Claude
 **Agentes lanzados:** 12 — Reportes consolidados: 9
 
@@ -201,7 +201,7 @@ Todos en `C:\Users\DELL\Downloads\verion 340\`:
 
 1. [`R13_HARDCODED_AUDIT.md`](./R13_HARDCODED_AUDIT.md) — 327 archivos, ~45 con datos de negocio embebidos; mapeo a tablas Supabase.
 2. [`R13_API_AUDIT.md`](./R13_API_AUDIT.md) — 43 endpoints de `api/index.js` v7.1.0; 15 bugs críticos.
-3. [`R13_LOGIN_PHYSICAL_TEST.md`](./R13_LOGIN_PHYSICAL_TEST.md) — Pruebas físicas en `volvix-pos.vercel.app` con curl real.
+3. [`R13_LOGIN_PHYSICAL_TEST.md`](./R13_LOGIN_PHYSICAL_TEST.md) — Pruebas físicas en `salvadorexoficial.com` con curl real.
 4. [`R13_HTTP_AUDIT.md`](./R13_HTTP_AUDIT.md) — Status HTTP de páginas públicas y archivos confidenciales.
 5. [`R13_WIRING_AUDIT.md`](./R13_WIRING_AUDIT.md) — Tabla de 271 archivos JS: Supabase / Demo / TODOs / Console / Fetch.
 6. [`R13_SECURITY_AUDIT.md`](./R13_SECURITY_AUDIT.md) — 13 issues seguridad clasificados CRITICAL→LOW con fixes.

@@ -3,7 +3,7 @@ const { defineConfig, devices } = require('@playwright/test');
 
 const isCI = !!process.env.CI;
 const defaultBase = process.env.NODE_ENV === 'production'
-  ? 'https://volvix-pos.vercel.app'
+  ? 'https://salvadorexoficial.com'
   : 'http://localhost:3000';
 
 module.exports = defineConfig({

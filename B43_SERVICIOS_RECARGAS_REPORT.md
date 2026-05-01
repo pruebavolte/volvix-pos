@@ -112,7 +112,7 @@ Tables created (idempotent):
 Replace `$TOKEN` with a valid Bearer JWT (e.g. from `POST /api/login`).
 
 ```bash
-BASE=https://volvix-pos.vercel.app
+BASE=https://salvadorexoficial.com
 TOKEN=eyJhbGciOiJIUzI1NiIs...
 
 # --- SERVICIOS -----------------------------------------------------------

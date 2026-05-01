@@ -1,7 +1,7 @@
 # R13 — Prueba física de login y endpoints (Volvix POS)
 
 **Fecha:** 2026-04-26
-**Target:** https://volvix-pos.vercel.app
+**Target:** https://salvadorexoficial.com
 **Endpoint login:** `POST /api/login` (verificado en `api/index.js` líneas 183-224)
 **Método de auth:** El backend NO emite JWT/token. Devuelve un objeto `session` con `user_id`, `role`, `tenant_id`, `expires_at`. No hay cookie. No hay middleware de validación en endpoints protegidos.
 
@@ -11,7 +11,7 @@
 
 Comando base:
 ```
-curl -i -X POST https://volvix-pos.vercel.app/api/login \
+curl -i -X POST https://salvadorexoficial.com/api/login \
   -H "Content-Type: application/json" \
   -d '{"email":"<USER>","password":"Volvix2026!"}'
 ```

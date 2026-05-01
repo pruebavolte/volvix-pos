@@ -1,5 +1,5 @@
 # R28 — Full System Audit (Architecture + Cross-wiring + UX)
-Fecha: 2026-04-27 · URL: https://volvix-pos.vercel.app · Deploy: dpl_EzMceyeUp8mx2zSfjtPiwahJoGiH
+Fecha: 2026-04-27 · URL: https://salvadorexoficial.com · Deploy: dpl_EzMceyeUp8mx2zSfjtPiwahJoGiH
 
 ## Score final: 0/100 (clamped) — score real bruto: -188
 

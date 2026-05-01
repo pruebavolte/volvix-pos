@@ -13,19 +13,19 @@
 #
 # Uso:
 #   ./scripts/health-check-exhaustive.sh
-#   ./scripts/health-check-exhaustive.sh --base https://volvix-pos.vercel.app
+#   ./scripts/health-check-exhaustive.sh --base https://salvadorexoficial.com
 #   ./scripts/health-check-exhaustive.sh --json   # output JSON para parsers
 #   ./scripts/health-check-exhaustive.sh --fail-on-degraded   # exit 1 si degraded
 #
 # Variables de entorno opcionales:
-#   VOLVIX_BASE_URL    — URL base (default: https://volvix-pos.vercel.app)
+#   VOLVIX_BASE_URL    — URL base (default: https://salvadorexoficial.com)
 #   VOLVIX_TIMEOUT     — timeout por curl en segundos (default: 10)
 #   VOLVIX_SLOW_MS     — latencia que dispara warn (default: 1500ms)
 # ============================================================================
 
 set -uo pipefail
 
-BASE_URL="${VOLVIX_BASE_URL:-https://volvix-pos.vercel.app}"
+BASE_URL="${VOLVIX_BASE_URL:-https://salvadorexoficial.com}"
 TIMEOUT="${VOLVIX_TIMEOUT:-10}"
 SLOW_MS="${VOLVIX_SLOW_MS:-1500}"
 OUTPUT_JSON=0

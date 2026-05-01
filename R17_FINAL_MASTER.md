@@ -1,6 +1,6 @@
 # R17 Final Smoke Test + Master Report (R1-R17)
 
-**Base URL:** https://volvix-pos.vercel.app
+**Base URL:** https://salvadorexoficial.com
 **Auth:** admin@volvix.test (superadmin, JWT bearer, token len 279)
 **Date:** 2026-04-26
 **Tester:** automated curl, NO sleeps, mix R14+R15+R16+R17 endpoints

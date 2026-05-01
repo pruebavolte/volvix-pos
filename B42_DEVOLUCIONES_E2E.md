@@ -1,7 +1,7 @@
 # B42 — DEVOLUCIONES (Returns/Refunds) E2E (R5B)
 
 **Date:** 2026-04-27
-**Target:** https://volvix-pos.vercel.app (production)
+**Target:** https://salvadorexoficial.com (production)
 **Spec file:** `tests/r5b-devoluciones-e2e.spec.js`
 **Config:** `tests/playwright.r5b.config.js`
 **JSON results:** `tests/r5b-results.json`
@@ -9,7 +9,7 @@
 **Run command:**
 ```bash
 cd "C:/Users/DELL/Downloads/verion 340"
-BASE_URL=https://volvix-pos.vercel.app \
+BASE_URL=https://salvadorexoficial.com \
   npx playwright test --config=tests/playwright.r5b.config.js --reporter=list
 ```
 

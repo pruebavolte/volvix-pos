@@ -2,7 +2,7 @@
 
 **Fecha**: 2026-04-28
 **SW Version**: v1.12.0-b43
-**Production**: https://volvix-pos.vercel.app
+**Production**: https://salvadorexoficial.com
 **api/index.js**: 16,931 lines / 628 endpoints
 
 ---

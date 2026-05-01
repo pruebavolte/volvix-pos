@@ -38,7 +38,7 @@ Sistema POS multi-tenant SaaS con arquitectura serverless (Vercel + Supabase), 1
 
 ## 4. Smoke Test Producción (25 endpoints, bearer JWT)
 
-URL: `https://volvix-pos.vercel.app` — version desplegada **7.2.0** (anterior a R17/R18).
+URL: `https://salvadorexoficial.com` — version desplegada **7.2.0** (anterior a R17/R18).
 
 - **PASS 9/25** (36%): health, products, sales, customers, inventory, loyalty, loyalty/tiers, printers, returns
 - **FAIL 16/25** (64%): bundles, warehouses, giftcards, appointments, promotions, segments, recurring, tips, wallets, reviews, hr/*, audit, zapier, subscriptions/plans, openapi.json — todos 404 porque el deploy en producción es anterior a R14–R18.
@@ -67,7 +67,7 @@ ls db/*.sql | xargs -I{} psql $SUPABASE_DB_URL -f {}
 vercel --prod
 
 # 3. Verificar
-curl https://volvix-pos.vercel.app/api/health   # esperar version >= 8.0.0
+curl https://salvadorexoficial.com/api/health   # esperar version >= 8.0.0
 
 # 4. Smoke test post-deploy
 bash smoke_r18.sh
@@ -100,8 +100,8 @@ Sin estas keys, el módulo correspondiente devuelve 503 graceful:
 
 ## 9. URLs y Credenciales
 
-- **Prod**: https://volvix-pos.vercel.app
-- **Health**: https://volvix-pos.vercel.app/api/health
+- **Prod**: https://salvadorexoficial.com
+- **Health**: https://salvadorexoficial.com/api/health
 - **Swagger UI**: `/docs` (servida desde `/api/openapi.json` cuando deploy v8 esté activo)
 - **Login admin**: `admin@volvix.test` / `Volvix2026!`
 - **Tenant default**: `TNT001` (Abarrotes Don Chucho)

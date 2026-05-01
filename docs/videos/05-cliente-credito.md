@@ -118,7 +118,7 @@
 **VOICEOVER**: "Adios cuaderno, hola Volvix POS. Pruebalo gratis."
 **VISUAL**: Cuaderno viejo en basura, pantalla Volvix limpia
 **ACTION**: Click CTA
-**TEXTO ON-SCREEN**: "volvix-pos.vercel.app/registro"
+**TEXTO ON-SCREEN**: "salvadorexoficial.com/registro"
 
 ## Caption (subtitulos)
 - Auto-generar
@@ -130,7 +130,7 @@
 ## Hashtags / Description
 #ClientesCredito #FiarCredito #ControlCartera #PuntoDeVenta #FerreteriaMx #Volvix #NegocioBarrio
 
-"Le fias a tus clientes? Volvix POS lleva el control: limite por cliente, saldos, vencimientos y recordatorios automaticos por WhatsApp. Adios al cuaderno. volvix-pos.vercel.app/registro"
+"Le fias a tus clientes? Volvix POS lleva el control: limite por cliente, saldos, vencimientos y recordatorios automaticos por WhatsApp. Adios al cuaderno. salvadorexoficial.com/registro"
 
 ## Metricas esperadas
 - Watch time: >70% (caso de uso especifico)

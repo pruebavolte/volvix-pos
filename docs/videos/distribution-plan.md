@@ -108,7 +108,7 @@
 ### Estructura UTM
 
 ```
-https://volvix-pos.vercel.app/registro?utm_source={plataforma}&utm_medium=video&utm_campaign={video-name}&utm_content={variant}
+https://salvadorexoficial.com/registro?utm_source={plataforma}&utm_medium=video&utm_campaign={video-name}&utm_content={variant}
 ```
 
 ### Por Plataforma
@@ -205,7 +205,7 @@ CHAPTERS:
 LINKS:
 - Probar gratis: [UTM link]
 - Otros videos: [playlist link]
-- Web: volvix-pos.vercel.app
+- Web: salvadorexoficial.com
 
 #hashtags
 

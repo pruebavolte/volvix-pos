@@ -3,7 +3,7 @@
 **Versión:** 3.4.0 FINAL
 **Fecha de publicación:** 2026-04-25
 **Estado:** Producción
-**URL Producción:** https://volvix-pos.vercel.app
+**URL Producción:** https://salvadorexoficial.com
 **Base de datos:** Supabase (proyecto `zhvwmzkcqngcaqpdxtwr`)
 **Documento generado por:** Agent-80 R9 Volvix (último agente Fibonacci de Ronda 9)
 
@@ -321,7 +321,7 @@ Volvix expone **43 endpoints REST** bajo `/api/*`. Todos requieren JWT excepto `
 
 ## 5.1 Convenciones
 
-- Base URL: `https://volvix-pos.vercel.app/api`
+- Base URL: `https://salvadorexoficial.com/api`
 - Auth: header `Authorization: Bearer <jwt>`
 - Content-Type: `application/json`
 - Errores: `{ "error": { "code": "STRING", "message": "...", "details": {} } }`
@@ -566,7 +566,7 @@ volvix-pos/
 
 # 10. CREDENCIALES DE PRUEBA
 
-> ⚠️ **Solo para entorno de pruebas** — `https://volvix-pos.vercel.app`. No usar en producción real.
+> ⚠️ **Solo para entorno de pruebas** — `https://salvadorexoficial.com`. No usar en producción real.
 
 | Rol | Email | Password |
 |-----|-------|----------|
@@ -607,7 +607,7 @@ Reset semanal automático cada domingo 03:00 UTC.
 
 ## 11.3 DNS
 
-- `volvix-pos.vercel.app` → CNAME a Vercel.
+- `salvadorexoficial.com` → CNAME a Vercel.
 - Custom domain: agregar en Vercel + verificar TXT.
 
 ## 11.4 Pipeline CI/CD
@@ -870,7 +870,7 @@ Vercel Edge en 30+ regiones; Supabase `us-east-1` (EE.UU.), réplicas leer próx
 
 - Repositorio: `D:\github\volvix-pos`
 - Proyecto Supabase: `zhvwmzkcqngcaqpdxtwr`
-- Producción: https://volvix-pos.vercel.app
+- Producción: https://salvadorexoficial.com
 - Auditor IA: https://claude.ai/chat/455d7e93-082b-48d3-8f46-3e57301cd9fb
 - Registry de agentes: `docs/agents/REGISTRY.md`
 - OpenAPI: `docs/api/openapi.yaml`

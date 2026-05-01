@@ -84,10 +84,10 @@
 **SFX**: Transition swoosh entre devices
 
 ### 0:35-0:42 - CTA final
-**VOICEOVER**: "Empieza gratis hoy en volvix-pos.vercel.app/registro. Sin tarjeta de credito."
+**VOICEOVER**: "Empieza gratis hoy en salvadorexoficial.com/registro. Sin tarjeta de credito."
 **VISUAL**: Pantalla split: izquierda muestra POS, derecha muestra URL grande con flecha animada
 **ACTION**: Cursor click en CTA "Empezar gratis", fade-out
-**TEXTO ON-SCREEN**: "volvix-pos.vercel.app/registro" + boton "Empezar gratis"
+**TEXTO ON-SCREEN**: "salvadorexoficial.com/registro" + boton "Empezar gratis"
 **SFX**: Notification ding final + outro music
 
 ## Caption (subtitulos)
@@ -102,7 +102,7 @@
 #PuntoDeVenta #POS #Mexico #NegocioPequeno #DigitalizaTuNegocio #Volvix #SistemaCaja #VentasRapidas #EmprendedorMx
 
 **Description copy**:
-"De 0 a vender en 5 SEGUNDOS con Volvix POS. Modo offline + audit trail + multi-sucursal. Sin contratos, sin instalacion. volvix-pos.vercel.app/registro - Tu primera venta en menos de 1 minuto."
+"De 0 a vender en 5 SEGUNDOS con Volvix POS. Modo offline + audit trail + multi-sucursal. Sin contratos, sin instalacion. salvadorexoficial.com/registro - Tu primera venta en menos de 1 minuto."
 
 ## Metricas esperadas (KPIs post-publicacion)
 - Watch time: >70% (objetivo: 75%+)

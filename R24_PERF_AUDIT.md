@@ -1,6 +1,6 @@
 # R24 — Performance Audit Producción
 
-**Fecha:** 2026-04-27 | **Target:** https://volvix-pos.vercel.app
+**Fecha:** 2026-04-27 | **Target:** https://salvadorexoficial.com
 **Nota path:** `Sin auditor/` no existe; auditado `verion 340/` raíz.
 
 ## 1. Top 5 wirings JS (mayor a menor)

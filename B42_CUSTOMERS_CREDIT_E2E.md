@@ -2,7 +2,7 @@
 
 **Suite:** `tests/r4a-customers-credit-e2e.spec.js`
 **Config:** `tests/playwright.r4a.config.js`
-**Target:** https://volvix-pos.vercel.app (production)
+**Target:** https://salvadorexoficial.com (production)
 **Tenant:** TNT001 ("Abarrotes Don Chucho", 16 seeded customers)
 **Run date:** 2026-04-27
 **Outcome:** **12 / 12 tests passed (100%)** — runtime 4.2 min
@@ -12,7 +12,7 @@
 ## Run command
 
 ```bash
-BASE_URL=https://volvix-pos.vercel.app \
+BASE_URL=https://salvadorexoficial.com \
   node_modules/.bin/playwright test \
   --config=tests/playwright.r4a.config.js \
   --reporter=list

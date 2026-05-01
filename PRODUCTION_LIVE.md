@@ -2,7 +2,7 @@
 
 **Status**: 🟢 **LIVE EN PRODUCCIÓN**  
 **Fecha Deploy**: 2026-04-25  
-**URL**: https://volvix-pos.vercel.app  
+**URL**: https://salvadorexoficial.com  
 **Plataforma**: Vercel (Serverless)  
 
 ---
@@ -11,13 +11,13 @@
 
 ### URL Principal
 ```
-https://volvix-pos.vercel.app/login.html
+https://salvadorexoficial.com/login.html
 ```
 
 ### Endpoints API
 ```
-POST https://volvix-pos.vercel.app/api/login
-GET  https://volvix-pos.vercel.app/api/health
+POST https://salvadorexoficial.com/api/login
+GET  https://salvadorexoficial.com/api/health
 ```
 
 ---
@@ -84,7 +84,7 @@ Status: ✅ FUNCIONANDO
 
 ### Paso 1: Abrir Login
 ```
-https://volvix-pos.vercel.app/login.html
+https://salvadorexoficial.com/login.html
 ```
 
 ### Paso 2: Ingresar Credenciales
@@ -135,7 +135,7 @@ https://volvix-pos.vercel.app/login.html
 ```
 Cliente Browser
     ↓
-[HTTPS] volvix-pos.vercel.app
+[HTTPS] salvadorexoficial.com
     ↓
 [Serverless Function] api/index.js
     ├─ POST /api/login → Valida credenciales
@@ -274,7 +274,7 @@ El sistema Volvix POS v7.0.0 está **completamente operacional** en producción.
 ## 🚀 ¡A USAR!
 
 ```
-https://volvix-pos.vercel.app/login.html
+https://salvadorexoficial.com/login.html
 
 Email: admin@volvix.test
 Password: Volvix2026!

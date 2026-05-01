@@ -22,7 +22,7 @@ const ROOT = path.resolve(__dirname, '..');
 const BASE_URL = (() => {
   const arg = process.argv.find((a) => a.startsWith('--base-url='));
   if (arg) return arg.split('=')[1].replace(/\/$/, '');
-  return 'https://volvix-pos.vercel.app';
+  return 'https://salvadorexoficial.com';
 })();
 
 const SCAN_DIRS = [

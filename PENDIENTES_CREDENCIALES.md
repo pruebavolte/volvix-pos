@@ -43,7 +43,7 @@ CFDI_KEY_PASSWORD=<password_llave>
 
 ### Test cuando esté configurado
 ```bash
-curl -X POST https://volvix-pos.vercel.app/api/cfdi/generate \
+curl -X POST https://salvadorexoficial.com/api/cfdi/generate \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -H "Idempotency-Key: cfdi-$(date +%s)" \
@@ -89,7 +89,7 @@ WHATSAPP_VERIFY_TOKEN=<custom_verify_token>
 
 ### Webhook URL para configurar en Meta/Wasender
 ```
-https://volvix-pos.vercel.app/api/whatsapp/webhook
+https://salvadorexoficial.com/api/whatsapp/webhook
 Verify Token: <el mismo WHATSAPP_VERIFY_TOKEN del env>
 ```
 
@@ -128,7 +128,7 @@ STRIPE_PRICE_ENTERPRISE_ANNUAL=price_...
 
 ### Webhook URL para configurar en Stripe
 ```
-https://volvix-pos.vercel.app/api/stripe/webhook
+https://salvadorexoficial.com/api/stripe/webhook
 Eventos a suscribir:
 - checkout.session.completed
 - invoice.paid
@@ -252,7 +252,7 @@ node mobile-build.js ios   # Abre Xcode con proyecto listo
 ## 7. CUSTOM DOMAIN — Comprar dominio + DNS
 
 ### Estado
-- ✅ Sistema funciona en `volvix-pos.vercel.app`
+- ✅ Sistema funciona en `salvadorexoficial.com`
 - ⏳ Sin dominio custom → URL larga genérica
 
 ### Cuando compres `volvix.com` (o el que elijas)

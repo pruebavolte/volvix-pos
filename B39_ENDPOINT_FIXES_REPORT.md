@@ -241,20 +241,20 @@ SYNTAX_OK
 
 ```bash
 # 1. Get superadmin token
-TOKEN=$(curl -s -X POST https://volvix-pos.vercel.app/api/login \
+TOKEN=$(curl -s -X POST https://salvadorexoficial.com/api/login \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@volvix.test","password":"Volvix2026!"}' \
   | python -c "import sys,json; print(json.load(sys.stdin).get('token',''))")
 
 # 2. Test Bug 1 fix — create sub-tenant (should now hit sub_tenants, not pos_companies)
-curl -i -X POST "https://volvix-pos.vercel.app/api/owner/tenants" \
+curl -i -X POST "https://salvadorexoficial.com/api/owner/tenants" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"name":"Test Sub","vertical":"abarrotes","plan":"basic"}'
 # Expected: 201 { ok:true, tenant: { id: "<uuid>", name:"Test Sub", parent_tenant_id:"TNT001", ... } }
 
 # 3. Test Bug 2 fix — emit seats with slug tenant_id
-curl -i -X POST "https://volvix-pos.vercel.app/api/owner/seats" \
+curl -i -X POST "https://salvadorexoficial.com/api/owner/seats" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -H "Idempotency-Key: seat-test-$(date +%s)" \
@@ -262,14 +262,14 @@ curl -i -X POST "https://volvix-pos.vercel.app/api/owner/seats" \
 # Expected: 201 { ok:true, seats: { id, tenant_id:"TNT001", seat_count:5, plan:"pro", ... } }
 
 # 4. Sanity check — slug tenant_id rejected if malformed
-curl -i -X POST "https://volvix-pos.vercel.app/api/owner/seats" \
+curl -i -X POST "https://salvadorexoficial.com/api/owner/seats" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"tenant_id":"lowercase","seat_count":1}'
 # Expected: 400 { error: "tenant_id requerido (uuid o slug TNTxxx)" }
 
 # 5. Audit endpoint — feature flag scoped by slug
-curl -i -X POST "https://volvix-pos.vercel.app/api/admin/feature-flags" \
+curl -i -X POST "https://salvadorexoficial.com/api/admin/feature-flags" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"key":"experimental_ui","status":"enabled","tenant_id":"TNT001"}'

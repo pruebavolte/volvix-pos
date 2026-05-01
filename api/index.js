@@ -56,7 +56,7 @@ const ANTHROPIC_API_KEY = (process.env.ANTHROPIC_API_KEY || '').trim().replace(/
 const IS_PROD = process.env.NODE_ENV === 'production';
 
 // FIX R13 (#8): CORS whitelist
-const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'https://volvix-pos.vercel.app')
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'https://salvadorexoficial.com,https://www.salvadorexoficial.com,https://volvix-pos.vercel.app')
   .split(',').map(s => s.trim()).filter(Boolean);
 
 // =============================================================
@@ -690,7 +690,7 @@ function setSecurityHeaders(res) {
   res.setHeader('Cross-Origin-Resource-Policy', 'same-site');
   res.setHeader(
     'Content-Security-Policy',
-    "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://js.stripe.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.ipify.org https://api.exchangerate.host https://api.anthropic.com https://api.stripe.com https://api.openai.com https://api.sendgrid.com https://api.twilio.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+    "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://js.stripe.com; connect-src 'self' https://salvadorexoficial.com https://www.salvadorexoficial.com https://volvix-pos.vercel.app https://*.supabase.co wss://*.supabase.co https://api.ipify.org https://api.exchangerate.host https://api.anthropic.com https://api.stripe.com https://api.openai.com https://api.sendgrid.com https://api.twilio.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
   );
 }
 
@@ -1550,9 +1550,9 @@ const handlers = {
         title: 'Volvix POS API',
         version: '7.2.0',
         description: 'Multi-tenant POS API. Auth via Bearer JWT or httpOnly cookie. See /api/api-docs.',
-        contact: { name: 'Volvix Support', url: 'https://volvix-pos.vercel.app' }
+        contact: { name: 'Volvix Support', url: 'https://salvadorexoficial.com' }
       },
-      servers: [{ url: 'https://volvix-pos.vercel.app', description: 'Production' }],
+      servers: [{ url: 'https://salvadorexoficial.com', description: 'Production' }],
       components: {
         securitySchemes: {
           bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
@@ -6554,7 +6554,7 @@ try {
   // GET /api/mobile/config → endpoints + feature flags
   handlers['GET /api/mobile/config'] = async (req, res) => {
     try {
-      const baseUrl = (ALLOWED_ORIGINS && ALLOWED_ORIGINS[0]) || 'https://volvix-pos.vercel.app';
+      const baseUrl = (ALLOWED_ORIGINS && ALLOWED_ORIGINS[0]) || 'https://salvadorexoficial.com';
       sendJSON(res, {
         ok: true,
         api_base: `${baseUrl}/api`,
@@ -6619,7 +6619,7 @@ const SENDGRID_API_KEY = (process.env.SENDGRID_API_KEY || '').trim();
 const SENDGRID_FROM = (process.env.SENDGRID_FROM || 'no-reply@volvix-pos.app').trim();
 const SENDGRID_FROM_NAME = (process.env.SENDGRID_FROM_NAME || 'Volvix POS').trim();
 const PASSWORD_RESET_BASE_URL = (process.env.PASSWORD_RESET_BASE_URL ||
-  (ALLOWED_ORIGINS[0] || 'https://volvix-pos.vercel.app')).trim();
+  (ALLOWED_ORIGINS[0] || 'https://salvadorexoficial.com')).trim();
 
 async function logEmail(row) {
   try {
@@ -7734,7 +7734,7 @@ handlers['POST /api/payments/wallets/validate-merchant'] = requireAuth(async (re
         merchantIdentifier: merchantId,
         displayName: 'Volvix POS',
         initiative: 'web',
-        initiativeContext: req.headers['host'] || 'volvix-pos.vercel.app',
+        initiativeContext: req.headers['host'] || 'salvadorexoficial.com',
       });
 
       const session = await new Promise((resolve, reject) => {
@@ -9454,7 +9454,7 @@ handlers['GET /api/config/public'] = async (req, res) => {
 
         // Try to send email via existing infrastructure
         try {
-          const link = `${(typeof PASSWORD_RESET_BASE_URL !== 'undefined' && PASSWORD_RESET_BASE_URL) || 'https://volvix-pos.vercel.app'}/reset-password.html?token=${encodeURIComponent(rawToken)}`;
+          const link = `${(typeof PASSWORD_RESET_BASE_URL !== 'undefined' && PASSWORD_RESET_BASE_URL) || 'https://salvadorexoficial.com'}/reset-password.html?token=${encodeURIComponent(rawToken)}`;
           if (typeof emailTemplates !== 'undefined' && typeof sendEmail === 'function') {
             const tpl = emailTemplates.passwordResetTemplate(link);
             sendEmail({ to: u.email, subject: tpl.subject, html: tpl.html, text: tpl.text, template: 'password_reset' })
@@ -13231,6 +13231,17 @@ module.exports = async (req, res) => {
   applyCorsHeaders(req, res);
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization,apikey');
+
+  // Domain canonicalization: redirect www and legacy vercel domain to canonical salvadorexoficial.com
+  try {
+    const __host = (req.headers && req.headers.host) || '';
+    if (__host === 'volvix-pos.vercel.app' || __host === 'www.salvadorexoficial.com') {
+      res.statusCode = 301;
+      res.setHeader('Location', 'https://salvadorexoficial.com' + (req.url || '/'));
+      res.end();
+      return;
+    }
+  } catch (_) { /* noop */ }
 
   if (req.method === 'OPTIONS') {
     res.statusCode = 204;
@@ -18410,11 +18421,11 @@ if (process.env.NODE_ENV === 'test') {
       var priceId = (process.env[priceEnvKey] || '').trim();
       if (!priceId) return sendJSON(res, { ok: false, error: 'price_not_configured', need_env: priceEnvKey }, 503);
       // B40 SECURITY FIX A8: Origin allowlist (no attacker-controlled redirect)
-      var ORIGIN_ALLOWLIST = ['https://volvix-pos.vercel.app'];
+      var ORIGIN_ALLOWLIST = ['https://salvadorexoficial.com', 'https://www.salvadorexoficial.com', 'https://volvix-pos.vercel.app'];
       var rawOrigin = req.headers && (req.headers.origin || req.headers.referer);
       var origin = (rawOrigin && ORIGIN_ALLOWLIST.indexOf(String(rawOrigin).split('/').slice(0, 3).join('/')) >= 0)
         ? String(rawOrigin).split('/').slice(0, 3).join('/')
-        : 'https://volvix-pos.vercel.app';
+        : 'https://salvadorexoficial.com';
       var formData = new URLSearchParams();
       formData.append('mode', 'subscription');
       formData.append('line_items[0][price]', priceId);
@@ -28758,6 +28769,8 @@ if (process.env.NODE_ENV === 'test') {
     } catch (_) {}
     var ALLOWED = [
       supabaseHost,
+      'salvadorexoficial.com',
+      'www.salvadorexoficial.com',
       'volvix-pos.vercel.app',
       'salvadorex.com'
     ].filter(function (d) { return !!d; });

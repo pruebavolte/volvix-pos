@@ -1,7 +1,7 @@
 # B42 — PROMOCIONES, CUPONES & DESCUENTOS E2E (R5E)
 
 **Date:** 2026-04-27
-**Target:** https://volvix-pos.vercel.app (production)
+**Target:** https://salvadorexoficial.com (production)
 **Spec file:** `tests/r5e-promociones-e2e.spec.js`
 **Config:** `tests/playwright.r5e.config.js`
 **JSON results:** `tests/r5e-results.json`
@@ -9,7 +9,7 @@
 **Run command:**
 ```bash
 cd "C:/Users/DELL/Downloads/verion 340"
-BASE_URL=https://volvix-pos.vercel.app \
+BASE_URL=https://salvadorexoficial.com \
   npx playwright test --config=tests/playwright.r5e.config.js --reporter=list
 ```
 
@@ -173,7 +173,7 @@ handlers['GET /api/reports/promotions'] = requireAuth(async (req, res) => {
 
 ## P9 — UI flow — partial PASS
 
-Login form on `/login.html` accepts `owner@volvix.test / Volvix2026!`. After submit, the page does NOT navigate away from `/login.html` (the URL stayed at `https://volvix-pos.vercel.app/login.html`). When we manually navigated to `/multipos_suite_v3.html`, the DOM did not contain the substring "Promoci" anywhere visible — no "Promociones" menu/section is rendered for the owner. (The HTML source has a feature flag `'manager.promociones': false` at line 1455 of `multipos_suite_v3.html` — the section is intentionally hidden by default.)
+Login form on `/login.html` accepts `owner@volvix.test / Volvix2026!`. After submit, the page does NOT navigate away from `/login.html` (the URL stayed at `https://salvadorexoficial.com/login.html`). When we manually navigated to `/multipos_suite_v3.html`, the DOM did not contain the substring "Promoci" anywhere visible — no "Promociones" menu/section is rendered for the owner. (The HTML source has a feature flag `'manager.promociones': false` at line 1455 of `multipos_suite_v3.html` — the section is intentionally hidden by default.)
 
 **UI evidence:** `tests/screenshots-r5e/P9-ui-after-login.png`
 

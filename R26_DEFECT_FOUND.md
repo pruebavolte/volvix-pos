@@ -23,11 +23,11 @@ a double-failure: invalid RFCs accepted with HTTP 200, valid RFCs lost.
 ### Repro pre-fix (production)
 
 ```bash
-TOK=$(curl -s -X POST https://volvix-pos.vercel.app/api/login \
+TOK=$(curl -s -X POST https://salvadorexoficial.com/api/login \
   -H 'Content-Type: application/json' \
   -d '{"email":"admin@volvix.test","password":"Volvix2026!"}' | jq -r .token)
 
-curl -s -X POST https://volvix-pos.vercel.app/api/customers \
+curl -s -X POST https://salvadorexoficial.com/api/customers \
   -H "Authorization: Bearer $TOK" -H 'Content-Type: application/json' \
   -d '{"name":"X","rfc":"INVALID-RFC"}'
 # → HTTP 200 {"ok":true,"id":"...","rfc":"INVALID-RFC"}   ← BUG
@@ -56,4 +56,4 @@ Both expected. Defect closed.
 ## Deploy
 
 - Commit: `7f147e4` (local, no remote configured)
-- Vercel: production alias `volvix-pos.vercel.app` → `dpl_7wkPXy2mZLzpN3DVbMQUAZpYJwv3` (READY)
+- Vercel: production alias `salvadorexoficial.com` → `dpl_7wkPXy2mZLzpN3DVbMQUAZpYJwv3` (READY)

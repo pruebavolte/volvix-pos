@@ -46,7 +46,7 @@ Tercera pasada (cleanup): 1 fila (`OBRIEN1`).
 ## Validaciones
 
 - `node --check api/index.js` → OK.
-- `vercel --prod --yes` → `https://volvix-pos.vercel.app` (alias estable).
+- `vercel --prod --yes` → `https://salvadorexoficial.com` (alias estable).
 
 ## Tests post-fix (curl)
 

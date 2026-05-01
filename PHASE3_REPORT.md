@@ -8,7 +8,7 @@
 
 ## 1. Files Created
 
-All landing pages live in `C:\Users\DELL\Downloads\verion 340\` and resolve at the production URL `https://volvix-pos.vercel.app/landing-<slug>.html`.
+All landing pages live in `C:\Users\DELL\Downloads\verion 340\` and resolve at the production URL `https://salvadorexoficial.com/landing-<slug>.html`.
 
 | # | File | Industry | Lines | Size (bytes) | Accent |
 |---|------|----------|-------|--------------|--------|

@@ -94,19 +94,19 @@ ON CONFLICT (key) DO NOTHING;
 ```bash
 # GET — leer estado actual
 curl -H "Authorization: Bearer $JWT" \
-     https://volvix-pos.vercel.app/api/feature-flags
+     https://salvadorexoficial.com/api/feature-flags
 
 # PATCH — actualizar (requiere rol admin/owner/superadmin)
 curl -X PATCH \
      -H "Authorization: Bearer $JWT" \
      -H "Content-Type: application/json" \
      -d '{"enabled":true}' \
-     https://volvix-pos.vercel.app/api/feature-flags/emergency_mode
+     https://salvadorexoficial.com/api/feature-flags/emergency_mode
 ```
 
 ### Vía Owner Panel UI
 
-`https://volvix-pos.vercel.app/volvix_owner_panel_v7.html` → Settings → Feature Flags
+`https://salvadorexoficial.com/volvix_owner_panel_v7.html` → Settings → Feature Flags
 
 (Disponible cuando la API está sana)
 

@@ -2,7 +2,7 @@
 
 **Date**: 2026-04-26
 **Status**: GREEN — DEPLOYED
-**Deployment**: https://volvix-pos.vercel.app (`dpl_7gGtFyxwm41g2ak9cdZ3Q76Gbr1d`)
+**Deployment**: https://salvadorexoficial.com (`dpl_7gGtFyxwm41g2ak9cdZ3Q76Gbr1d`)
 
 ## Alcance
 
@@ -42,7 +42,7 @@ read=authenticated, write=service_role. Trigger `updated_at`. FK opcional a
 
 ## Validación
 - `node --check api/index.js` → **PASS**.
-- Vercel deploy ready, alias `volvix-pos.vercel.app` actualizado.
+- Vercel deploy ready, alias `salvadorexoficial.com` actualizado.
 - Endpoints registrados en `handlers` map.
 
 ## Variables de entorno requeridas (opcionales)

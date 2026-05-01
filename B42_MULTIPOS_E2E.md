@@ -1,7 +1,7 @@
 # B42 — MULTIPOS Suite E2E Report
 
 - **Run tag**: `49515097`
-- **Base**: https://volvix-pos.vercel.app
+- **Base**: https://salvadorexoficial.com
 - **Page**: `/multipos_suite_v3.html`
 - **Owner**: `owner@volvix.test` (TNT002 / owner)
 - **Admin**: `admin@volvix.test` (TNT001 / superadmin)
@@ -51,66 +51,66 @@
 
 ```
 [M14] Failed to load resource: the server responded with a status of 404 ()
-[M14] Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.
+[M14] Refused to execute script from 'https://salvadorexoficial.com/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.
 [M14] Failed to load resource: the server responded with a status of 401 ()
 [M14] Failed to load resource: the server responded with a status of 401 ()
 [M14] [ERROR] [VolvixPerf] fetch error: /api/fx/rates?base=MXN Failed to fetch
 TypeError: Failed to fetch
-    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)
-    at window.fetch (https://volvix-pos.vercel.app/volvix-sentry-wiring.js:280:14)
+    at wrapped (https://salvadorexoficial.com/volvix-perf-wiring.js:167:27)
+    at window.fetch (https://salvadorexoficial.com/volvix-sentry-wiring.js:280:14)
     at window.fetch (https://volvix-pos.v
 [M14] [VolvixPerf] fetch error: /api/fx/rates?base=MXN TypeError: Failed to fetch
-    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)
-    at window.fetch (https://volvix-pos.vercel.app/volvix-sentry-wiring.js:280:14)
-    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-
+    at wrapped (https://salvadorexoficial.com/volvix-perf-wiring.js:167:27)
+    at window.fetch (https://salvadorexoficial.com/volvix-sentry-wiring.js:280:14)
+    at window.fetch (https://salvadorexoficial.com/volvix-logger-
 [M14] [ERROR] API GET /api/fx/rates?base=MXN failed: Failed to fetch {url: /api/fx/rates?base=MXN, method: GET, error: Failed to fetch, stack: TypeError: Failed to fetch
     at wrapped (https:/…-pos.vercel.app/volvix-currency-wiring.js:134:18)}
 [M14] [ERROR] [VolvixPerf] fetch error: /api/fx/rates?base=MXN Failed to fetch
 TypeError: Failed to fetch
-    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)
-    at window.fetch (https://volvix-pos.vercel.app/volvix-sentry-wiring.js:280:14)
+    at wrapped (https://salvadorexoficial.com/volvix-perf-wiring.js:167:27)
+    at window.fetch (https://salvadorexoficial.com/volvix-sentry-wiring.js:280:14)
     at window.fetch (https://volvix-pos.v
 [M14] [VolvixPerf] fetch error: /api/fx/rates?base=MXN TypeError: Failed to fetch
-    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)
-    at window.fetch (https://volvix-pos.vercel.app/volvix-sentry-wiring.js:280:14)
-    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-
+    at wrapped (https://salvadorexoficial.com/volvix-perf-wiring.js:167:27)
+    at window.fetch (https://salvadorexoficial.com/volvix-sentry-wiring.js:280:14)
+    at window.fetch (https://salvadorexoficial.com/volvix-logger-
 [M14] Failed to load resource: the server responded with a status of 401 ()
 [M14] Failed to load resource: the server responded with a status of 401 ()
 [M14] Failed to load resource: the server responded with a status of 401 ()
 [M14] Failed to load resource: the server responded with a status of 404 ()
-[M14] Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.
+[M14] Refused to execute script from 'https://salvadorexoficial.com/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.
 [M14] Failed to load resource: the server responded with a status of 401 ()
 [M14] Failed to load resource: the server responded with a status of 404 ()
 [M14] Failed to load resource: the server responded with a status of 401 ()
 [M14] Failed to load resource: the server responded with a status of 401 ()
-[M14] [ERROR] API POST https://volvix-pos.vercel.app/api/ai/decide failed: Failed to fetch {url: https://volvix-pos.vercel.app/api/ai/decide, method: POST, error: Failed to fetch, stack: TypeError: Failed to fetch
+[M14] [ERROR] API POST https://salvadorexoficial.com/api/ai/decide failed: Failed to fetch {url: https://salvadorexoficial.com/api/ai/decide, method: POST, error: Failed to fetch, stack: TypeError: Failed to fetch
     at window.fetch (ht…x-pos.vercel.app/volvix-ai-real-wiring.js:603:25)}
-[M14] [ERROR] [VolvixPerf] fetch error: https://volvix-pos.vercel.app/api/ai/decide Failed to fetch
+[M14] [ERROR] [VolvixPerf] fetch error: https://salvadorexoficial.com/api/ai/decide Failed to fetch
 TypeError: Failed to fetch
-    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)
-    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)
+    at window.fetch (https://salvadorexoficial.com/volvix-logger-wiring.js:266:27)
+    at wrapped (https://salvadorexoficial.com/volvix-perf-wiring.js:167:27)
     at global.fetch 
-[M14] [VolvixPerf] fetch error: https://volvix-pos.vercel.app/api/ai/decide TypeError: Failed to fetch
-    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)
-    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)
+[M14] [VolvixPerf] fetch error: https://salvadorexoficial.com/api/ai/decide TypeError: Failed to fetch
+    at window.fetch (https://salvadorexoficial.com/volvix-logger-wiring.js:266:27)
+    at wrapped (https://salvadorexoficial.com/volvix-perf-wiring.js:167:27)
     at global.fetch (https://volvix-pos.verc
-[M14] [ERROR] [VolvixPerf] fetch error: https://volvix-pos.vercel.app/api/ai/decide Failed to fetch
+[M14] [ERROR] [VolvixPerf] fetch error: https://salvadorexoficial.com/api/ai/decide Failed to fetch
 TypeError: Failed to fetch
-    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)
-    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)
+    at window.fetch (https://salvadorexoficial.com/volvix-logger-wiring.js:266:27)
+    at wrapped (https://salvadorexoficial.com/volvix-perf-wiring.js:167:27)
     at global.fetch 
-[M14] [VolvixPerf] fetch error: https://volvix-pos.vercel.app/api/ai/decide TypeError: Failed to fetch
-    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)
-    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)
+[M14] [VolvixPerf] fetch error: https://salvadorexoficial.com/api/ai/decide TypeError: Failed to fetch
+    at window.fetch (https://salvadorexoficial.com/volvix-logger-wiring.js:266:27)
+    at wrapped (https://salvadorexoficial.com/volvix-perf-wiring.js:167:27)
     at global.fetch (https://volvix-pos.verc
-[M14] [ERROR] [ErrorHandler] {"type":"fetch","message":"Failed to fetch","stack":"TypeError: Failed to fetch\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at global.fetch (https://volvix
+[M14] [ERROR] [ErrorHandler] {"type":"fetch","message":"Failed to fetch","stack":"TypeError: Failed to fetch\n    at window.fetch (https://salvadorexoficial.com/volvix-logger-wiring.js:266:27)\n    at wrapped (https://salvadorexoficial.com/volvix-perf-wiring.js:167:27)\n    at global.fetch (https://volvix
 [M14] [ErrorHandler] {type: fetch, message: Failed to fetch, stack: TypeError: Failed to fetch
     at window.fetch (ht…x-pos.vercel.app/volvix-ai-real-wiring.js:603:25), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safari/537.36, url: https://volvix-pos
 [M14] [ERROR] [AI-REAL-WIRING] Health-check falló: Failed to fetch {}
 [M14] [AI-REAL-WIRING] Health-check falló: Failed to fetch
 [M14] Failed to load resource: the server responded with a status of 503 (Offline)
 [M14] Failed to load resource: the server responded with a status of 404 ()
-[M14] Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.
+[M14] Refused to execute script from 'https://salvadorexoficial.com/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.
 ```
 
 ## 5xx network failures captured (during M14)

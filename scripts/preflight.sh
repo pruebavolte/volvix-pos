@@ -15,7 +15,7 @@ set -u
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$PROJECT_ROOT" || exit 1
 
-PROD_URL="${PROD_URL:-https://volvix-pos.vercel.app}"
+PROD_URL="${PROD_URL:-https://salvadorexoficial.com}"
 INVENTORY="$PROJECT_ROOT/SYSTEM-INVENTORY.json"
 FIX_PLAN="$PROJECT_ROOT/VOLVIX-FIX-PLAN.md"
 
