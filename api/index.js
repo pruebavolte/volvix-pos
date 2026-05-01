@@ -19,6 +19,15 @@ const handlePDF = require('./pdf-export');
 const handleCFDI = require('./cfdi-pac');
 const handleGiros = require('./giros');
 const handleLabels = require('./labels');
+const handleAbtest = require('./abtest');
+const { rateLimitMiddleware } = require('./rate-limit');
+const __apiRateLimiter = rateLimitMiddleware({
+  windowMs: 60 * 1000,
+  max: parseInt(process.env.API_RATE_LIMIT_PER_MIN || '60', 10),
+  keyPrefix: 'volvix-api',
+  scope: 'api',
+  skipPaths: ['/api/health', '/api/static-assets'],
+});
 
 // =============================================================
 // CONFIG SUPABASE
@@ -12879,6 +12888,11 @@ module.exports = async (req, res) => {
   const method = req.method;
 
   if (pathname.startsWith('/api/') || pathname === '/api') {
+    // Global rate limiter (60 req/min per IP/user, configurable via API_RATE_LIMIT_PER_MIN)
+    try {
+      if (await __apiRateLimiter(req, res)) return;
+    } catch (_) { /* limiter must never crash request handling */ }
+
     const match = matchRoute(method, pathname);
 
     if (match) {
@@ -12909,6 +12923,7 @@ module.exports = async (req, res) => {
       if (await handleCFDI(req, res, parsed, _ctx)) return;
       if (await handleGiros(req, res, parsed, _ctx)) return;
       if (await handleLabels(req, res, parsed, _ctx)) return;
+      if (await handleAbtest(req, res, parsed, _ctx)) return;
     } catch (modErr) {
       METRICS.errorCount++;
       logRequest({ ts: new Date().toISOString(), level: 'error', path: pathname, method, msg: 'module handler threw', err: IS_PROD ? 'internal' : String(modErr && modErr.message || modErr) });
@@ -15880,6 +15895,59 @@ if (process.env.NODE_ENV === 'test') {
   // =========================================================================
   // FEATURE FLAGS  (read-only resolution + tenant/module overrides)
   // =========================================================================
+
+  // GET /api/feature-flags/admin (admin) — full list of flags + rollout config
+  handlers['GET /api/feature-flags/admin'] = requireAuth(async function (req, res) {
+    try {
+      if (!b36IsSuperadmin(req) && !b36IsOwner(req)) {
+        return send403(res, { need_role: ['superadmin', 'owner'], have_role: req.user.role });
+      }
+      var rows = [];
+      try {
+        rows = await supabaseRequest('GET',
+          '/feature_modules?select=key,name,default_status,rollout_pct,target_tenants,target_plans,description&order=key.asc&limit=500');
+      } catch (_) { rows = []; }
+      sendJSON(res, { ok: true, flags: rows || [] });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // POST /api/feature-flags/:key (admin) — update flag config (status, rollout, targeting)
+  handlers['POST /api/feature-flags/:key'] = requireAuth(async function (req, res, params) {
+    try {
+      if (!b36IsSuperadmin(req) && !b36IsOwner(req)) {
+        return send403(res, { need_role: ['superadmin', 'owner'], have_role: req.user.role });
+      }
+      var key = String(params.key || '').slice(0, 80);
+      if (!key) return sendValidation(res, 'key requerido', 'key');
+      var body = await readBody(req, { maxBytes: 8 * 1024, strictJson: true });
+      if (checkBodyError(req, res)) return;
+      var allowed = ['enabled', 'disabled', 'coming-soon'];
+      var status = body.status && allowed.indexOf(String(body.status)) !== -1 ? String(body.status) : null;
+      var rollout = (body.rollout_pct == null) ? null : Math.max(0, Math.min(100, parseInt(body.rollout_pct, 10) || 0));
+      var targetTenants = Array.isArray(body.target_tenants) ? body.target_tenants.map(String).slice(0, 200) : null;
+      var targetPlans = Array.isArray(body.target_plans) ? body.target_plans.map(String).slice(0, 50) : null;
+      var patch = { updated_at: new Date().toISOString() };
+      if (status !== null) patch.default_status = status;
+      if (rollout !== null) patch.rollout_pct = rollout;
+      if (targetTenants !== null) patch.target_tenants = targetTenants;
+      if (targetPlans !== null) patch.target_plans = targetPlans;
+      try {
+        await supabaseRequest('PATCH',
+          '/feature_modules?key=eq.' + encodeURIComponent(key), patch);
+      } catch (e) {
+        return sendError(res, e);
+      }
+      try {
+        await supabaseRequest('POST', '/feature_flag_audit', {
+          tenant_id: b36Tenant(req), scope: 'global', scope_ref: key,
+          module_key: key, new_status: status || null, changed_by: req.user.id || null,
+        });
+      } catch (_) {}
+      try { logAudit(req, 'admin.flag.update', 'feature_modules', { id: key, after: patch }); } catch (_) {}
+      sendJSON(res, { ok: true, key: key, applied: patch });
+    } catch (err) { sendError(res, err); }
+  });
+
   handlers['GET /api/feature-flags'] = requireAuth(async function (req, res) {
     try {
       var q = url.parse(req.url, true).query;
