@@ -30242,6 +30242,375 @@ if (process.env.NODE_ENV === 'test') {
   });
 
   // =================================================================
+  // POST /api/auth/register-simple
+  // Mínima fricción: solo phone (10 dígitos MX) + business_name + giro + password
+  // Email es opcional. Genera OTP de 6 dígitos para SMS.
+  // Body: { phone, business_name, giro, password, email? }
+  // =================================================================
+  handlers['POST /api/auth/register-simple'] = async (req, res) => {
+    try {
+      const ip = clientIp(req);
+      if (!rateLimit('register-simple:ip:' + ip, 10, 15 * 60 * 1000)) {
+        return send429(res, 60000, 'Demasiados registros desde tu IP, intenta más tarde');
+      }
+
+      const body = await readBody(req, { maxBytes: 8 * 1024 });
+      if (checkBodyError(req, res)) return;
+
+      const business_name = String(body.business_name || '').trim();
+      const giro = String(body.giro || body.business_type || '').trim();
+      const password = String(body.password || '');
+      const email = body.email ? String(body.email).toLowerCase().trim() : null;
+      const userAgent = String(req.headers['user-agent'] || '').slice(0, 200);
+
+      // Normalizar phone: aceptar 10 dígitos crudos o +52 + 10
+      let phoneRaw = String(body.phone || '').replace(/[\s\-\(\)]/g, '');
+      if (/^\d{10}$/.test(phoneRaw)) phoneRaw = '+52' + phoneRaw;
+      else if (/^52\d{10}$/.test(phoneRaw)) phoneRaw = '+' + phoneRaw;
+      const phone = phoneRaw;
+
+      // ---- Validaciones ----
+      if (business_name.length < 3 || business_name.length > 100) {
+        return sendJSON(res, { ok: false, field: 'business_name', error_code: 'INVALID_NAME', error_message: 'Nombre del negocio inválido (3-100 caracteres).' }, 400);
+      }
+      if (!VALID_GIROS.has(giro)) {
+        return sendJSON(res, { ok: false, field: 'giro', error_code: 'INVALID_GIRO', error_message: 'Selecciona un giro válido.' }, 400);
+      }
+      if (!isValidPhoneServer(phone)) {
+        return sendJSON(res, { ok: false, field: 'phone', error_code: 'INVALID_PHONE', error_message: 'Teléfono inválido. Usa 10 dígitos MX.' }, 400);
+      }
+      if (email && !isValidEmailServer(email)) {
+        return sendJSON(res, { ok: false, field: 'email', error_code: 'INVALID_EMAIL', error_message: 'Email inválido.' }, 400);
+      }
+      if (!password || password.length < 8) {
+        return sendJSON(res, { ok: false, field: 'password', error_code: 'WEAK_PASSWORD', error_message: 'Contraseña debe tener mínimo 8 caracteres.' }, 400);
+      }
+
+      // ---- Phone duplicado ----
+      try {
+        const existingP = await supabaseRequest('GET',
+          '/pos_users?phone=eq.' + encodeURIComponent(phone) + '&select=id&limit=1');
+        if (Array.isArray(existingP) && existingP.length > 0) {
+          return sendJSON(res, {
+            ok: false, field: 'phone',
+            error_code: 'PHONE_TAKEN',
+            error_message: 'Este teléfono ya está registrado. Intenta otro o haz login.'
+          }, 409);
+        }
+      } catch (_) {}
+
+      // ---- Email duplicado (solo si suministrado) ----
+      if (email) {
+        try {
+          const existing = await supabaseRequest('GET',
+            '/pos_users?email=eq.' + encodeURIComponent(email) + '&select=id&limit=1');
+          if (Array.isArray(existing) && existing.length > 0) {
+            return sendJSON(res, {
+              ok: false, field: 'email',
+              error_code: 'EMAIL_TAKEN',
+              error_message: 'Este email ya está registrado.'
+            }, 409);
+          }
+        } catch (_) {}
+      }
+
+      // ---- tenant_id único ----
+      let tenantId = null;
+      for (let i = 0; i < 5; i++) {
+        const candidate = genTenantId();
+        try {
+          const dup = await supabaseRequest('GET',
+            '/pos_companies?tenant_id=eq.' + encodeURIComponent(candidate) + '&select=id&limit=1');
+          if (!Array.isArray(dup) || dup.length === 0) { tenantId = candidate; break; }
+        } catch (_) { tenantId = candidate; break; }
+      }
+      if (!tenantId) tenantId = genTenantId();
+
+      // ---- Crear pos_users ----
+      const passwordHash = hashPasswordScrypt(password);
+      // Email pseudo si no fue dado: phone-based, jamás se envía pero cumple NOT NULL.
+      const emailValue = email || (phone.replace(/[^\d]/g, '') + '@phone.volvix.local');
+      const notes = JSON.stringify({
+        volvix_role: 'owner',
+        tenant_id: tenantId,
+        tenant_name: business_name,
+        business_type: giro,
+        registration_flow: 'simple_phone'
+      });
+      let userId = null;
+      try {
+        const insU = await supabaseRequest('POST', '/pos_users', {
+          email: emailValue,
+          password_hash: passwordHash,
+          role: 'USER',
+          is_active: false,
+          plan: 'trial',
+          full_name: 'Owner ' + business_name,
+          notes: notes,
+          phone: phone,
+          email_verified: false,
+          phone_verified: false,
+          mfa_enabled: false,
+          created_at: new Date().toISOString()
+        });
+        if (Array.isArray(insU) && insU.length > 0) userId = insU[0].id;
+      } catch (e) {
+        const errStr = String(e && e.message || e);
+        if (/23505|duplicate key/i.test(errStr)) {
+          if (/phone/i.test(errStr)) {
+            return sendJSON(res, { ok: false, field: 'phone', error_code: 'PHONE_TAKEN', error_message: 'Este teléfono ya está registrado.' }, 409);
+          }
+          if (/email/i.test(errStr)) {
+            return sendJSON(res, { ok: false, field: 'email', error_code: 'EMAIL_TAKEN', error_message: 'Este email ya está registrado.' }, 409);
+          }
+          return sendJSON(res, { ok: false, error_code: 'DUPLICATE', error_message: 'Ya existe un registro similar.' }, 409);
+        }
+        return sendJSON(res, {
+          ok: false, error_code: 'USER_CREATE_FAILED',
+          error_message: 'No se pudo crear usuario.' + (process.env.NODE_ENV !== 'production' ? ' ' + errStr.slice(0, 200) : '')
+        }, 500);
+      }
+      if (!userId) {
+        return sendJSON(res, { ok: false, error_code: 'USER_CREATE_FAILED', error_message: 'No se pudo crear usuario.' }, 500);
+      }
+
+      // ---- Crear pos_companies ----
+      let companyId = null;
+      try {
+        const ins = await supabaseRequest('POST', '/pos_companies', {
+          name: business_name,
+          owner_user_id: userId,
+          tenant_id: tenantId,
+          business_type: giro,
+          phone: phone,
+          plan: 'trial',
+          status: 'pending',
+          is_active: false,
+          created_at: new Date().toISOString()
+        });
+        if (Array.isArray(ins) && ins.length > 0) companyId = ins[0].id;
+      } catch (e) {
+        if (userId) supabaseRequest('DELETE', '/pos_users?id=eq.' + userId).catch(function () {});
+        return sendJSON(res, {
+          ok: false, error_code: 'COMPANY_CREATE_FAILED',
+          error_message: 'No se pudo crear la empresa.' + (process.env.NODE_ENV !== 'production' ? ' ' + String(e && e.message || e).slice(0, 200) : '')
+        }, 500);
+      }
+
+      if (companyId && userId) {
+        supabaseRequest('PATCH', '/pos_users?id=eq.' + userId, { company_id: companyId }).catch(function () {});
+      }
+
+      // ---- OTP ----
+      const otpCode = genOtp();
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+      try {
+        await supabaseRequest('POST', '/pos_otp_verifications', {
+          tenant_id: tenantId,
+          user_id: userId,
+          email: emailValue,
+          phone: phone,
+          otp_code: otpCode,
+          sent_to_email: false,
+          sent_to_phone: true,
+          attempts: 0,
+          expires_at: expiresAt,
+          ip_address: ip,
+          user_agent: userAgent,
+          purpose: 'register_simple'
+        });
+      } catch (e) {
+        return sendJSON(res, { ok: false, error_code: 'OTP_CREATE_FAILED', error_message: 'No se pudo enviar el código.' }, 500);
+      }
+
+      // ---- Enviar SMS (formato Web OTP API compatible) ----
+      // El cuerpo del SMS DEBE incluir línea final "@dominio #código" para que
+      // Chrome/Android autollenen el campo via Web OTP API.
+      const otpDomain = (process.env.OTP_BOUND_DOMAIN || 'salvadorexoficial.com').replace(/^https?:\/\//, '');
+      const smsBody =
+        'Tu código Volvix es: ' + otpCode + '\n' +
+        'Vence en 10 minutos.\n\n' +
+        '@' + otpDomain + ' #' + otpCode;
+
+      let smsSent = false;
+      const sendSms = (typeof global.__r12o3a_sendSms === 'function') ? global.__r12o3a_sendSms : null;
+      const hasSmsFrom = !!(process.env.TWILIO_SMS_FROM || process.env.TWILIO_PHONE_NUMBER || process.env.TWILIO_FROM);
+      if (sendSms && process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && hasSmsFrom) {
+        try {
+          const sr = await sendSms({ to: phone, body: smsBody });
+          smsSent = !!(sr && sr.ok);
+        } catch (_) {}
+      }
+
+      try {
+        console.log('[register-simple] tenant=' + tenantId + ' phone=' + phone +
+          ' code=' + otpCode + ' sms_sent=' + smsSent);
+      } catch (_) {}
+
+      logAuditSafe({ user: { id: userId, email: emailValue, role: 'owner', tenant_id: tenantId } },
+        'auth.register_simple', 'pos_companies', { id: companyId, tenant_id: tenantId });
+
+      // ---- Respuesta ----
+      const allowDevVisible = process.env.NODE_ENV !== 'production';
+      const respPayload = {
+        ok: true,
+        tenant_id: tenantId,
+        user_id: userId,
+        otp_required: true,
+        otp_sent_to: smsSent ? ['sms'] : [],
+        otp_expires_at: expiresAt,
+        sms_sent: smsSent
+      };
+      if (!smsSent && allowDevVisible) {
+        respPayload.dev_code = otpCode;
+        respPayload.notice = 'SMS no configurado. Usa dev_code en NODE_ENV != production.';
+      }
+      return sendJSON(res, respPayload);
+    } catch (err) {
+      sendError(res, err);
+    }
+  };
+
+  // =================================================================
+  // POST /api/auth/verify-simple
+  // Body: { phone, code }  ó { tenant_id, code }
+  // En éxito: marca phone_verified=true, activa cuenta, emite JWT.
+  // =================================================================
+  handlers['POST /api/auth/verify-simple'] = async (req, res) => {
+    try {
+      const ip = clientIp(req);
+      const userAgent = String(req.headers['user-agent'] || '').slice(0, 200);
+      if (!rateLimit('verify-simple:ip:' + ip, 30, 15 * 60 * 1000)) {
+        return send429(res, 60000, 'Demasiados intentos. Espera un momento.');
+      }
+      const body = await readBody(req, { maxBytes: 4 * 1024 });
+      if (checkBodyError(req, res)) return;
+
+      let phone = String(body.phone || '').replace(/[\s\-\(\)]/g, '');
+      if (/^\d{10}$/.test(phone)) phone = '+52' + phone;
+      else if (/^52\d{10}$/.test(phone)) phone = '+' + phone;
+      const tenantId = String(body.tenant_id || '').trim();
+      const otpCode = String(body.code || body.otp_code || '').trim();
+
+      if (!/^\d{6}$/.test(otpCode)) {
+        return sendJSON(res, { ok: false, error_code: 'OTP_INVALID', error_message: 'El código debe tener 6 dígitos.' }, 400);
+      }
+      if (!phone && !tenantId) {
+        return sendJSON(res, { ok: false, error_code: 'MISSING_IDENTIFIER', error_message: 'phone o tenant_id requerido.' }, 400);
+      }
+
+      // Lookup OTP por phone o tenant_id (purpose=register_simple, no verificado, no expirado)
+      const nowIso = new Date().toISOString();
+      let qPath = '/pos_otp_verifications?purpose=eq.register_simple&verified_at=is.null' +
+                  '&expires_at=gt.' + encodeURIComponent(nowIso) +
+                  '&order=created_at.desc&limit=1';
+      if (tenantId) qPath += '&tenant_id=eq.' + encodeURIComponent(tenantId);
+      else qPath += '&phone=eq.' + encodeURIComponent(phone);
+
+      let rows = [];
+      try { rows = await supabaseRequest('GET', qPath); }
+      catch (e) {
+        return sendJSON(res, { ok: false, error_code: 'OTP_LOOKUP_FAILED', error_message: 'Error verificando.' }, 500);
+      }
+      if (!Array.isArray(rows) || rows.length === 0) {
+        return sendJSON(res, { ok: false, error_code: 'OTP_INVALID', error_message: 'Código inválido o expirado.' }, 400);
+      }
+      const otpRow = rows[0];
+
+      if ((otpRow.attempts || 0) >= 3) {
+        return sendJSON(res, { ok: false, error_code: 'OTP_LOCKOUT', error_message: 'Demasiados intentos. Reenvía uno nuevo.' }, 429);
+      }
+      if (String(otpRow.otp_code) !== otpCode) {
+        supabaseRequest('PATCH',
+          '/pos_otp_verifications?id=eq.' + encodeURIComponent(otpRow.id),
+          { attempts: (otpRow.attempts || 0) + 1 }).catch(function () {});
+        return sendJSON(res, {
+          ok: false, error_code: 'OTP_INVALID',
+          error_message: 'Código incorrecto. ' + Math.max(0, 3 - ((otpRow.attempts || 0) + 1)) + ' intentos restantes.'
+        }, 400);
+      }
+
+      // OTP correcto
+      try {
+        await supabaseRequest('PATCH',
+          '/pos_otp_verifications?id=eq.' + encodeURIComponent(otpRow.id),
+          { verified_at: nowIso, attempts: (otpRow.attempts || 0) + 1 });
+      } catch (_) {}
+
+      const userId = otpRow.user_id;
+      const finalTenantId = otpRow.tenant_id;
+      let user = null;
+      try {
+        const upd = await supabaseRequest('PATCH',
+          '/pos_users?id=eq.' + encodeURIComponent(userId),
+          { phone_verified: true, is_active: true, updated_at: nowIso });
+        if (Array.isArray(upd) && upd.length > 0) user = upd[0];
+      } catch (_) {}
+      if (!user) {
+        try {
+          const rr = await supabaseRequest('GET',
+            '/pos_users?id=eq.' + encodeURIComponent(userId) +
+            '&select=id,email,role,plan,full_name,company_id,notes,phone');
+          if (Array.isArray(rr) && rr.length > 0) user = rr[0];
+        } catch (_) {}
+      }
+      if (!user) {
+        return sendJSON(res, { ok: false, error_code: 'USER_NOT_FOUND', error_message: 'Usuario no encontrado.' }, 404);
+      }
+
+      try {
+        await supabaseRequest('PATCH',
+          '/pos_companies?id=eq.' + encodeURIComponent(user.company_id),
+          { status: 'active', is_active: true, updated_at: nowIso });
+      } catch (_) {}
+
+      // Bootstrap demo data
+      let notesObj = {};
+      try { notesObj = typeof user.notes === 'string' ? JSON.parse(user.notes) : (user.notes || {}); } catch (_) {}
+      const businessType = notesObj.business_type || 'otro';
+      const tenantName = notesObj.tenant_name || ('Tenant ' + finalTenantId);
+      try {
+        await bootstrapTenant({
+          tenant_id: finalTenantId,
+          company_id: user.company_id,
+          user_id: user.id,
+          business_type: businessType,
+          business_name: tenantName
+        });
+      } catch (_) {}
+
+      // JWT
+      const jti = crypto.randomBytes(16).toString('hex');
+      const token = signJWT({
+        id: user.id, email: user.email,
+        role: 'owner', tenant_id: finalTenantId,
+        jti: jti
+      });
+
+      logAuditSafe({ user: { id: user.id, email: user.email, role: 'owner', tenant_id: finalTenantId } },
+        'auth.verify_simple', 'pos_companies', { id: user.company_id, tenant_id: finalTenantId });
+
+      return sendJSON(res, {
+        ok: true,
+        token: token,
+        tenant_id: finalTenantId,
+        user_id: user.id,
+        session: {
+          token: token,
+          tenant_id: finalTenantId,
+          user_id: user.id,
+          role: 'owner',
+          email: user.email,
+          full_name: user.full_name
+        },
+        redirect: '/mis-modulos.html'
+      });
+    } catch (err) {
+      sendError(res, err);
+    }
+  };
+
+  // =================================================================
   // POST /api/admin/cleanup-test-tenants — superadmin only
   // Soft-delete tenants creados durante tests (business_name LIKE Test/Demo)
   // NO toca productos demo originales (esos están en otros tenants demo).

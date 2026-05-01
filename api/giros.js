@@ -7,10 +7,11 @@
  * Exported: async function handleGiros(req, res, parsedUrl, ctx)
  *
  * Routes:
- *   GET  /api/giros                  -> list all giros (scanned from landing-*.html on disk)
- *   GET  /api/giros/search?q=X       -> fuzzy match against existing giros { exists, slug, name, landing }
- *   POST /api/giros/generate         -> AI-generate a personalized landing (or stub if no OPENAI_API_KEY)
- *   GET  /api/giros/:slug/exists     -> { exists: true|false, slug }
+ *   GET  /api/giros                     -> list all giros (scanned from landing-*.html on disk)
+ *   GET  /api/giros/search?q=X          -> fuzzy match against existing giros { exists, slug, name, landing }
+ *   GET  /api/giros/autocomplete?q=X    -> top-N giros con sinónimos (DB → fallback hardcoded)
+ *   POST /api/giros/generate            -> AI-generate a personalized landing (or stub if no OPENAI_API_KEY)
+ *   GET  /api/giros/:slug/exists        -> { exists: true|false, slug }
  *
  * ctx: { supabaseRequest, sendJson, getAuthUser, IS_PROD }
  */
@@ -140,6 +141,144 @@ async function searchGiros(ctx, req, res, parsedUrl) {
   return send(ctx, res, 200, { exists: false, query: q });
 }
 
+// ---------- autocomplete (synonyms-aware) ----------
+// Map de sinónimos hardcoded para fallback cuando giros_synonyms está vacía o no existe.
+const GIRO_SYNONYMS = {
+  'restaurante': { name:'Restaurante', synonyms:['comida','food','restaurant','restaurantes','venta de comida','comer','cena','almuerzo','desayuno','cocina','menu','platillos'], sells:['comida','platillos','bebidas'] },
+  'taqueria': { name:'Taquería', synonyms:['taco','tacos','taquero','taqueros','taquería','pastor','suadero'], sells:['tacos','quesadillas'] },
+  'pizzeria': { name:'Pizzería', synonyms:['pizza','pizzas','pizzeria','italiana','italiano'], sells:['pizza','calzone','pasta'] },
+  'cafeteria': { name:'Cafetería', synonyms:['cafe','cafetería','expresso','espresso','cappuccino','mocha','latte','café'], sells:['café','postres','sandwiches'] },
+  'panaderia': { name:'Panadería', synonyms:['pan','panes','panadero','bolillos','conchas','pastel','bakery'], sells:['pan','bolillos','conchas'] },
+  'pasteleria': { name:'Pastelería', synonyms:['pasteles','cakes','reposteria','postres','repostería'], sells:['pasteles','tartas'] },
+  'heladeria': { name:'Heladería', synonyms:['helados','paletas','nieves','ice cream','helado'], sells:['helados','paletas'] },
+  'tortilleria': { name:'Tortillería', synonyms:['tortillas','tortilleria','tortilladora'], sells:['tortillas'] },
+  'barberia': { name:'Barbería', synonyms:['barbería','barber','corte cabello hombre','barba','rasurar'], sells:['cortes','rasurado'] },
+  'estetica': { name:'Estética', synonyms:['salón','estilista','peluquería','corte de cabello','salon','peluqueria','beauty'], sells:['cortes','tintes'] },
+  'spa': { name:'Spa', synonyms:['masajes','relajación','sauna','jacuzzi'], sells:['masajes','tratamientos'] },
+  'nails': { name:'Salón de Uñas', synonyms:['uñas','manicure','pedicure','nail','acrilico'], sells:['manicure','pedicure'] },
+  'tatuajes': { name:'Estudio de Tatuajes', synonyms:['tattoo','tatuajes','piercing','tatuador'], sells:['tatuajes'] },
+  'farmacia': { name:'Farmacia', synonyms:['medicinas','medicamentos','pharmacy','drug store','farmacéutica'], sells:['medicamentos','vitaminas'] },
+  'clinica_dental': { name:'Clínica Dental', synonyms:['dentista','dental','muelas','dentadura','ortodoncia'], sells:['consultas','limpiezas'] },
+  'veterinaria': { name:'Veterinaria', synonyms:['veterinario','vet','mascotas','perros','gatos','animales'], sells:['consultas','vacunas'] },
+  'optica': { name:'Óptica', synonyms:['lentes','anteojos','optometría','optometra','vista'], sells:['lentes','armazones'] },
+  'abarrotes': { name:'Abarrotes', synonyms:['tienda','tendajón','tendajon','misceláneo','abarrote','tiendita','minisuper','miscelanea'], sells:['refrescos','botanas','despensa'] },
+  'minisuper': { name:'Minisúper', synonyms:['minisuper','minisúper','mini super','convenience','oxxo'], sells:['despensa','refrescos'] },
+  'papeleria': { name:'Papelería', synonyms:['papel','cuadernos','utiles','escolares','copy','impresiones','papelería'], sells:['cuadernos','plumas','copias'] },
+  'fruteria': { name:'Frutería', synonyms:['fruta','verduras','frutas','verdura','frutería'], sells:['frutas','verduras'] },
+  'carniceria': { name:'Carnicería', synonyms:['carne','res','cerdo','pollo','carnicería','carnicero'], sells:['carne','res','pollo'] },
+  'polleria': { name:'Pollería', synonyms:['pollo','pollos','pollería','rosticeria','rostizado'], sells:['pollo'] },
+  'taller_mecanico': { name:'Taller Mecánico', synonyms:['mecanico','mecánico','taller','autos','carros','reparación','vehiculos'], sells:['servicios','refacciones'] },
+  'lavado_autos': { name:'Lavado de Autos', synonyms:['lavado','autolavado','car wash','encerado','detallado'], sells:['lavados','encerados'] },
+  'servicio_celulares': { name:'Servicio de Celulares', synonyms:['celulares','reparacion celulares','accesorios','telefonos','reparacion movil','iphone','android'], sells:['fundas','reparaciones'] },
+  'colegio': { name:'Colegio', synonyms:['escuela','primaria','secundaria','prepa','preparatoria','kinder','colegio'], sells:['inscripciones','colegiaturas'] },
+  'gimnasio': { name:'Gimnasio', synonyms:['gym','gimnasio','fitness','crossfit','pesas','ejercicio','workout'], sells:['membresías','clases'] },
+  'escuela_idiomas': { name:'Escuela de Idiomas', synonyms:['ingles','inglés','frances','francés','idiomas','language'], sells:['cursos'] },
+  'renta_autos': { name:'Renta de Autos', synonyms:['rent a car','renta autos','renta vehiculos','car rental'], sells:['rentas'] },
+  'renta_salones': { name:'Renta de Salones', synonyms:['salon eventos','salón eventos','fiestas','bodas','renta salon'], sells:['salones'] },
+  'foto_estudio': { name:'Estudio Fotográfico', synonyms:['fotografia','fotografía','foto','photo','sesiones'], sells:['sesiones','impresiones'] },
+  'ferreteria': { name:'Ferretería', synonyms:['ferretería','herramientas','tornillos','clavos','pinturas','plomeria','plomería'], sells:['herramientas','tornillería'] },
+  'gasolinera': { name:'Gasolinera', synonyms:['gasolina','combustible','gas','diesel','pemex'], sells:['gasolina','diésel'] },
+  'funeraria': { name:'Funeraria', synonyms:['funerales','servicios funerarios','velación','panteón'], sells:['ataúdes','servicios'] },
+  'purificadora': { name:'Purificadora de Agua', synonyms:['agua','purificada','garrafones','agua potable'], sells:['agua','garrafones'] },
+  'lavanderia': { name:'Lavandería', synonyms:['lavanderia','tintoreria','tintorería','lavado de ropa','planchado'], sells:['lavado','planchado'] },
+  'floreria': { name:'Florería', synonyms:['flores','florería','arreglos florales','ramos','bouquet'], sells:['arreglos','ramos'] },
+  'joyeria': { name:'Joyería', synonyms:['joyas','oro','plata','anillos','joyería','collares'], sells:['joyas'] },
+  'zapateria': { name:'Zapatería', synonyms:['zapatos','calzado','zapatería','tenis','sandalias'], sells:['zapatos','tenis'] },
+  'ropa': { name:'Tienda de Ropa', synonyms:['ropa','clothing','boutique','vestidos','pantalones','camisas'], sells:['ropa','accesorios'] },
+  'libreria': { name:'Librería', synonyms:['libros','librería','book','revistas','editorial'], sells:['libros','revistas'] },
+  'muebleria': { name:'Mueblería', synonyms:['muebles','mueblería','sillones','camas','mesas','recámaras'], sells:['muebles','colchones'] },
+  'hotel': { name:'Hotel', synonyms:['hospedaje','hotel','motel','posada','hostal'], sells:['habitaciones'] },
+  'cantina': { name:'Cantina/Bar', synonyms:['bar','cantina','cervezas','cerveza','tragos','antros','cocteles'], sells:['cervezas','licores'] },
+  'disco': { name:'Antro/Discoteca', synonyms:['antro','disco','club','nightclub','baile','dj'], sells:['cover','bebidas'] },
+  'foodtruck': { name:'Food Truck', synonyms:['food truck','foodtruck','hamburguesas','hot dogs','hotdogs','dogos','comida rapida'], sells:['hamburguesas','hot dogs'] },
+  'sushi': { name:'Sushi', synonyms:['sushi','rolls','japonés','japonesa','nigiri','sashimi'], sells:['rolls','sashimi'] },
+  'parking': { name:'Estacionamiento', synonyms:['parking','estacionamiento','pension','pensión'], sells:['horas'] },
+  'hotel_mascotas': { name:'Hotel de Mascotas', synonyms:['guarderia mascotas','pet hotel','daycare perros','hotel perros'], sells:['estancias','baños'] },
+  'cremeria': { name:'Cremería', synonyms:['quesos','cremas','lácteos','lacteos','cremería'], sells:['quesos','crema'] },
+  'vinateria': { name:'Vinatería', synonyms:['vinos','licores','tequila','mezcal','whisky','vinatería'], sells:['vinos','licores'] },
+  'cine': { name:'Cine', synonyms:['cine','pelicula','películas','cinema','funciones'], sells:['boletos'] },
+  'bowling': { name:'Boliche', synonyms:['boliche','bowling','bolos'], sells:['rentas'] },
+  'karaoke': { name:'Karaoke', synonyms:['karaoke','canto','bar karaoke'], sells:['rentas','bebidas'] },
+  'cafe_internet': { name:'Café Internet', synonyms:['cyber','internet','impresiones','cibercafe'], sells:['horas','impresiones'] },
+  'renta_equipo': { name:'Renta de Equipo', synonyms:['renta','equipo','rental','herramientas renta'], sells:['rentas'] },
+  'paqueteria': { name:'Paquetería', synonyms:['envios','envíos','paqueteria','paquetería','dhl','fedex','estafeta'], sells:['envíos'] },
+  'fotografia': { name:'Fotografía', synonyms:['fotos','fotógrafo','sesion','sesión','eventos foto'], sells:['sesiones'] },
+  'mecanica_motos': { name:'Mecánica de Motos', synonyms:['motos','motocicletas','taller motos','mecanica motos'], sells:['servicios'] },
+  'inmobiliaria': { name:'Inmobiliaria', synonyms:['inmobiliaria','bienes raices','casas','departamentos','rentas inmuebles'], sells:['rentas','ventas'] },
+  'notaria': { name:'Notaría', synonyms:['notaria','notarial','escrituras','poderes','notario'], sells:['servicios notariales'] },
+  'dulceria': { name:'Dulcería', synonyms:['dulces','candy','golosinas','chocolates','dulcería'], sells:['dulces','chocolates'] },
+  'tabaqueria': { name:'Tabaquería', synonyms:['cigarros','tabaco','cigarrillos','vapeador','tabaquería'], sells:['cigarros','tabaco'] },
+  'otro': { name:'Otro', synonyms:['otro','other','varios'], sells:['varios'] }
+};
+
+function scoreLocal(query, slug, entry) {
+  const q = normalize(query);
+  if (!q) return 0;
+  let score = 0;
+  if (slug === q) score += 100;
+  if (slug.indexOf(q) === 0) score += 50;
+  if (normalize(entry.name) === q) score += 90;
+  if (normalize(entry.name).indexOf(q) !== -1) score += 30;
+  for (const syn of (entry.synonyms || [])) {
+    const ns = normalize(syn);
+    if (ns === q) score += 80;
+    else if (ns.indexOf(q) === 0) score += 40;
+    else if (ns.indexOf(q) !== -1) score += 20;
+    else if (q.indexOf(ns) !== -1 && ns.length >= 3) score += 25;
+  }
+  for (const w of (entry.sells || [])) {
+    const nw = normalize(w);
+    if (nw === q) score += 60;
+    else if (nw.indexOf(q) !== -1) score += 15;
+  }
+  return score;
+}
+
+function localAutocomplete(query, limit) {
+  const out = [];
+  for (const slug of Object.keys(GIRO_SYNONYMS)) {
+    const entry = GIRO_SYNONYMS[slug];
+    const s = scoreLocal(query, slug, entry);
+    if (s > 0) out.push({ slug, name: entry.name, score: s, source: 'local' });
+  }
+  out.sort((a, b) => b.score - a.score);
+  return out.slice(0, limit);
+}
+
+async function autocompleteGiros(ctx, req, res, parsedUrl) {
+  const q = normalize((parsedUrl && parsedUrl.query && parsedUrl.query.q) || '');
+  const limit = Math.min(parseInt((parsedUrl && parsedUrl.query && parsedUrl.query.limit) || '5', 10) || 5, 20);
+  if (!q) return send(ctx, res, 200, { query: '', results: [] });
+
+  // 1) Try DB-backed lookup
+  if (ctx && typeof ctx.supabaseRequest === 'function') {
+    try {
+      const enc = encodeURIComponent(q);
+      const orQ = [
+        'giro_slug.eq.' + enc,
+        'name.ilike.*' + enc + '*',
+        'synonyms.cs.{' + q.replace(/"/g, '') + '}',
+        'what_they_sell.cs.{' + q.replace(/"/g, '') + '}'
+      ].join(',');
+      const path = '/giros_synonyms?or=(' + orQ + ')&select=giro_slug,name,synonyms,what_they_sell&limit=' + limit;
+      const rows = await ctx.supabaseRequest('GET', path);
+      if (Array.isArray(rows) && rows.length > 0) {
+        const results = rows.map((r) => ({
+          slug: r.giro_slug,
+          name: r.name,
+          score: r.giro_slug === q ? 100 : 50,
+          source: 'db'
+        }));
+        return send(ctx, res, 200, { query: q, results });
+      }
+    } catch (_) { /* fall through to local */ }
+  }
+
+  // 2) Fallback hardcoded
+  const results = localAutocomplete(q, limit);
+  return send(ctx, res, 200, { query: q, results });
+}
+
 async function existsGiro(ctx, req, res, slug) {
   const giros = scanLandings();
   const norm = slugify(slug);
@@ -266,9 +405,10 @@ module.exports = async function handleGiros(req, res, parsedUrl, ctx) {
   if (!pathname.startsWith('/api/giros')) return false;
 
   try {
-    if (method === 'GET'  && pathname === '/api/giros')           { await listGiros(ctx, req, res); return true; }
-    if (method === 'GET'  && pathname === '/api/giros/search')    { await searchGiros(ctx, req, res, parsedUrl); return true; }
-    if (method === 'POST' && pathname === '/api/giros/generate')  { await generateGiro(ctx, req, res); return true; }
+    if (method === 'GET'  && pathname === '/api/giros')               { await listGiros(ctx, req, res); return true; }
+    if (method === 'GET'  && pathname === '/api/giros/search')        { await searchGiros(ctx, req, res, parsedUrl); return true; }
+    if (method === 'GET'  && pathname === '/api/giros/autocomplete')  { await autocompleteGiros(ctx, req, res, parsedUrl); return true; }
+    if (method === 'POST' && pathname === '/api/giros/generate')      { await generateGiro(ctx, req, res); return true; }
 
     const slug = matchExistsPath(pathname);
     if (slug && method === 'GET') { await existsGiro(ctx, req, res, slug); return true; }
@@ -284,3 +424,5 @@ module.exports = async function handleGiros(req, res, parsedUrl, ctx) {
 
 module.exports.scanLandings = scanLandings;
 module.exports.slugify = slugify;
+module.exports.GIRO_SYNONYMS = GIRO_SYNONYMS;
+module.exports.localAutocomplete = localAutocomplete;
