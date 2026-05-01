@@ -57,7 +57,7 @@ const ANTHROPIC_API_KEY = (process.env.ANTHROPIC_API_KEY || '').trim().replace(/
 const IS_PROD = process.env.NODE_ENV === 'production';
 
 // FIX R13 (#8): CORS whitelist
-const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'https://salvadorexoficial.com,https://www.salvadorexoficial.com,https://volvix-pos.vercel.app')
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'https://salvadorexoficial.com,https://www.salvadorexoficial.com,https://salvadorexoficial.com')
   .split(',').map(s => s.trim()).filter(Boolean);
 
 // =============================================================
@@ -691,7 +691,7 @@ function setSecurityHeaders(res) {
   res.setHeader('Cross-Origin-Resource-Policy', 'same-site');
   res.setHeader(
     'Content-Security-Policy',
-    "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://js.stripe.com; connect-src 'self' https://salvadorexoficial.com https://www.salvadorexoficial.com https://volvix-pos.vercel.app https://*.supabase.co wss://*.supabase.co https://api.ipify.org https://api.exchangerate.host https://api.anthropic.com https://api.stripe.com https://api.openai.com https://api.sendgrid.com https://api.twilio.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+    "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://js.stripe.com; connect-src 'self' https://salvadorexoficial.com https://www.salvadorexoficial.com https://salvadorexoficial.com https://*.supabase.co wss://*.supabase.co https://api.ipify.org https://api.exchangerate.host https://api.anthropic.com https://api.stripe.com https://api.openai.com https://api.sendgrid.com https://api.twilio.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
   );
 }
 
@@ -13348,7 +13348,7 @@ module.exports = async (req, res) => {
   try {
     if (process.env.CANONICAL_REDIRECT_ENABLED === '1' || process.env.CANONICAL_REDIRECT_ENABLED === 'true') {
       const __host = (req.headers && req.headers.host) || '';
-      if (__host === 'volvix-pos.vercel.app' || __host === 'www.salvadorexoficial.com') {
+      if (__host === 'salvadorexoficial.com' || __host === 'www.salvadorexoficial.com') {
         res.statusCode = 301;
         res.setHeader('Location', 'https://salvadorexoficial.com' + (req.url || '/'));
         res.end();
@@ -18564,7 +18564,7 @@ if (process.env.NODE_ENV === 'test') {
       var priceId = (process.env[priceEnvKey] || '').trim();
       if (!priceId) return sendJSON(res, { ok: false, error: 'price_not_configured', need_env: priceEnvKey }, 503);
       // B40 SECURITY FIX A8: Origin allowlist (no attacker-controlled redirect)
-      var ORIGIN_ALLOWLIST = ['https://salvadorexoficial.com', 'https://www.salvadorexoficial.com', 'https://volvix-pos.vercel.app'];
+      var ORIGIN_ALLOWLIST = ['https://salvadorexoficial.com', 'https://www.salvadorexoficial.com', 'https://salvadorexoficial.com'];
       var rawOrigin = req.headers && (req.headers.origin || req.headers.referer);
       var origin = (rawOrigin && ORIGIN_ALLOWLIST.indexOf(String(rawOrigin).split('/').slice(0, 3).join('/')) >= 0)
         ? String(rawOrigin).split('/').slice(0, 3).join('/')
@@ -28914,7 +28914,7 @@ if (process.env.NODE_ENV === 'test') {
       supabaseHost,
       'salvadorexoficial.com',
       'www.salvadorexoficial.com',
-      'volvix-pos.vercel.app',
+      'salvadorexoficial.com',
       'salvadorex.com'
     ].filter(function (d) { return !!d; });
     try {
