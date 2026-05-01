@@ -361,14 +361,54 @@ let _allProducts = [];
 function fmt(n){return new Intl.NumberFormat('es-MX',{style:'currency',currency:SHOP.currency||'MXN'}).format(+n||0)}
 function api(path){return fetch(API + path).then(r => r.json())}
 
+function _renderTenantNotFound(slug, suggestions){
+  var grid = document.getElementById('grid');
+  var sugHtml = '';
+  if (Array.isArray(suggestions) && suggestions.length){
+    sugHtml = '<p style="margin-top:14px">¿Quizá quisiste decir?</p><ul style="list-style:none;padding:0;margin:8px 0">' +
+      suggestions.slice(0,5).map(function(s){
+        var ss = (typeof s === 'string') ? s : (s.shop_slug || s.slug || '');
+        var nm = (typeof s === 'string') ? s : (s.shop_name || s.name || ss);
+        var url = location.pathname + '?shop_slug=' + encodeURIComponent(ss);
+        return '<li><a href="' + url + '" style="color:var(--ac);text-decoration:underline">' + (nm) + '</a></li>';
+      }).join('') + '</ul>';
+  }
+  var msg = '<div class="empty" role="alert" aria-live="assertive" style="padding:48px;text-align:center">' +
+            '<h2 style="margin:0 0 8px">404 · Tienda no encontrada</h2>' +
+            '<p>No existe una tienda con el identificador <code>' + (slug || '—') + '</code>.</p>' +
+            sugHtml +
+            '<p style="margin-top:18px"><a href="/" class="btn">Ir a Volvix</a></p>' +
+            '</div>';
+  if (grid) grid.innerHTML = msg;
+  try { document.title = '404 · Tienda no encontrada'; } catch(_){}
+}
+
 async function loadShopInfo(){
   if (!SLUG) return;
   try{
-    const r = await api(`/api/shop/${encodeURIComponent(SLUG)}/info`);
+    var resp = await fetch(API + '/api/shop/' + encodeURIComponent(SLUG) + '/info');
+    if (resp.status === 404){
+      var suggestions = [];
+      try {
+        var sr = await fetch(API + '/api/shop/search?q=' + encodeURIComponent(SLUG) + '&limit=5');
+        if (sr.ok){ var sj = await sr.json(); suggestions = (sj && (sj.shops || sj.results || sj.items)) || []; }
+      } catch(_){}
+      _renderTenantNotFound(SLUG, suggestions);
+      // Mark as not-found so subsequent loaders short-circuit
+      SHOP._notFound = true;
+      return;
+    }
+    if (resp.status === 503){
+      var grid = document.getElementById('grid');
+      if (grid) grid.innerHTML = '<div class="alert">Servicio no disponible (503). Intenta más tarde.</div>';
+      return;
+    }
+    if (!resp.ok) return;
+    var r = await resp.json();
     if (r.ok && r.shop){
-      SHOP = { ...SHOP, ...r.shop, id: r.shop.id, slug: r.shop.shop_slug };
-      const h = document.getElementById('shopName');
-      h.innerHTML = (r.shop.shop_logo ? `<img src="${r.shop.shop_logo}" alt=""/>` : '') + (r.shop.shop_name || 'Volvix Shop');
+      SHOP = Object.assign({}, SHOP, r.shop, { id: r.shop.id, slug: r.shop.shop_slug });
+      var h = document.getElementById('shopName');
+      if (h) h.innerHTML = (r.shop.shop_logo ? '<img src="' + r.shop.shop_logo + '" alt=""/>' : '') + (r.shop.shop_name || 'Volvix Shop');
       if (r.shop.shop_theme && r.shop.shop_theme.accent) document.documentElement.style.setProperty('--ac', r.shop.shop_theme.accent);
     }
   }catch(_){}
@@ -377,6 +417,7 @@ async function loadShopInfo(){
 let _t;
 function loadProductsDebounced(){clearTimeout(_t);_t=setTimeout(loadProducts,250)}
 async function loadProducts(){
+  if (SHOP && SHOP._notFound) return;
   const q = document.getElementById('qInput').value.trim();
   const grid = document.getElementById('grid');
   grid.innerHTML = '<div class="empty">Cargando…</div>';

@@ -222,6 +222,10 @@
     rtClient: null,
     pollTimer: null,
     lastTs: null,
+    pageSize: 50,
+    offset: 0,
+    loadingMore: false,
+    hasMore: true,
   };
 
   function getToken() {
@@ -266,7 +270,8 @@
     if (since) params.set('since', since);
     if (state.filterType) params.set('type', state.filterType);
     if (state.filterUser) params.set('user_id', state.filterUser);
-    params.set('limit', '200');
+    params.set('limit', String(state.pageSize || 50));
+    if (state.offset) params.set('offset', String(state.offset));
     const headers = {};
     const tok = getToken();
     if (tok) headers['Authorization'] = 'Bearer ' + tok;
@@ -385,10 +390,51 @@
 
   async function refresh() {
     setLive(false, 'Cargando…');
+    state.offset = 0;
+    state.hasMore = true;
     const items = await fetchEvents();
+    state.hasMore = items.length >= (state.pageSize || 50);
     render(items);
     setLive(state.rt ? true : false, state.rt ? 'En vivo' : 'Polling');
   }
+
+  async function loadMore() {
+    if (state.loadingMore || !state.hasMore) return;
+    state.loadingMore = true;
+    state.offset = (state.items || []).length;
+    const more = await fetchEvents();
+    if (!more.length || more.length < (state.pageSize || 50)) state.hasMore = false;
+    if (more.length) {
+      // Append, dedupe by id
+      const seen = state.seen;
+      const fresh = more.filter((it) => !it.id || !seen.has(it.id));
+      fresh.forEach((it) => { if (it.id) seen.add(it.id); });
+      state.items = (state.items || []).concat(fresh);
+      // Re-render appending only (cheap: use full render to reuse logic)
+      render(state.items);
+    }
+    state.loadingMore = false;
+  }
+
+  // Sentinel for infinite scroll
+  function setupInfiniteScroll() {
+    try {
+      const list = $('feedList');
+      if (!list || !('IntersectionObserver' in window)) return;
+      let sentinel = document.getElementById('feedSentinel');
+      if (!sentinel) {
+        sentinel = document.createElement('div');
+        sentinel.id = 'feedSentinel';
+        sentinel.style.cssText = 'height:1px;';
+        list.parentNode.insertBefore(sentinel, list.nextSibling);
+      }
+      const io = new IntersectionObserver((entries) => {
+        if (entries.some((e) => e.isIntersecting)) loadMore();
+      }, { rootMargin: '200px' });
+      io.observe(sentinel);
+    } catch (_) {}
+  }
+  setupInfiniteScroll();
 
   // --- Live: try Supabase Realtime, fall back to polling ---
   function setLive(on, label) {

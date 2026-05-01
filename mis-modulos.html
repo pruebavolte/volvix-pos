@@ -211,7 +211,11 @@
           </div>
           <button class="btn sm" type="button" id="btnRequestModule">+ Solicitar nuevo módulo</button>
         </div>
+        <div style="margin-top:10px;">
+          <input id="modSearch" type="search" placeholder="Buscar módulo por nombre, descripción o etiqueta…" aria-label="Buscar módulo" style="width:100%;padding:8px 12px;border:1px solid var(--border,#ddd);border-radius:8px;font-size:13px;font-family:inherit;" />
+        </div>
         <div class="mod-grid" id="modGrid" style="margin-top:14px;"></div>
+        <div id="modEmpty" class="help" style="display:none;text-align:center;padding:18px;">Sin coincidencias.</div>
       </div>
 
       <!-- PREVIEW -->
@@ -399,20 +403,28 @@
   }
 
   function renderModules() {
-    var html = MODULES.map(function (m) {
+    var qEl = $('#modSearch');
+    var q = (qEl && qEl.value || '').trim().toLowerCase();
+    var filtered = !q ? MODULES : MODULES.filter(function (m) {
+      return ((m.name || '') + ' ' + (m.desc || '') + ' ' + (m.tag || '') + ' ' + (m.key || '')).toLowerCase().indexOf(q) !== -1;
+    });
+    var emptyEl = $('#modEmpty');
+    if (emptyEl) emptyEl.style.display = filtered.length ? 'none' : '';
+    var html = filtered.map(function (m) {
       var on = !!state.current[m.key];
       var locked = !!m.always_on;
       var cardCls = 'mod-card' + (on ? ' on' : '') + (locked ? ' locked' : '');
       var togCls = 'tg' + (on ? ' on' : '') + (locked ? ' locked' : '');
+      var tip = 'Para qué sirve: ' + (m.desc || m.name || '');
       return (
-        '<div class="' + cardCls + '" data-key="' + m.key + '">' +
+        '<div class="' + cardCls + '" data-key="' + m.key + '" title="' + tip.replace(/"/g, '&quot;') + '">' +
           '<div class="mod-icon">' + m.emoji + '</div>' +
           '<div class="mod-body">' +
             '<div class="mod-name">' + m.name + (locked ? '<span class="lock">· siempre activo</span>' : '') + '</div>' +
             '<div class="mod-desc">' + m.desc + '</div>' +
             '<div class="mod-tag">Recomendado: ' + m.tag + '</div>' +
           '</div>' +
-          '<div class="' + togCls + '" data-key="' + m.key + '" role="switch" aria-checked="' + (on ? 'true' : 'false') + '"></div>' +
+          '<div class="' + togCls + '" data-key="' + m.key + '" role="switch" aria-checked="' + (on ? 'true' : 'false') + '" aria-label="Activar ' + m.name + '"></div>' +
         '</div>'
       );
     }).join('');
@@ -724,6 +736,14 @@
       if (e.target === e.currentTarget) closeUserModal();
     });
     $('#btnRequestModule').addEventListener('click', openRequestModal);
+    var modSearchEl = $('#modSearch');
+    if (modSearchEl) {
+      var searchT = null;
+      modSearchEl.addEventListener('input', function () {
+        clearTimeout(searchT);
+        searchT = setTimeout(renderModules, 120);
+      });
+    }
     $('#reqModCancel').addEventListener('click', closeRequestModal);
     $('#reqModSend').addEventListener('click', sendModuleRequest);
     $('#reqModuleBg').addEventListener('click', function (e) {

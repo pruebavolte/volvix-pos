@@ -121,16 +121,27 @@ function renderProducts(products) {
     const sale = Number(p.sale_price)||0;
     const orig = Number(p.original_price)||0;
     const off = orig ? Math.round((1 - sale/orig) * 100) : null;
-    return `<div class="card">
-      ${off ? `<span class="badge">AHORRO ${off}%</span>` : ''}
-      <div class="img">${p.image_url ? '<img src="'+escAttr(p.image_url)+'" alt="">' : '🛒'}</div>
+    const stock = (p.stock != null) ? Number(p.stock) : (p.qty != null ? Number(p.qty) : null);
+    const soldOut = stock != null && stock <= 0;
+    const lowStock = stock != null && stock > 0 && stock <= 5;
+    const cardCls = 'card' + (soldOut ? ' sold-out' : '');
+    const btn = soldOut
+      ? `<button disabled aria-disabled="true" style="opacity:.5;cursor:not-allowed">Agotado</button>`
+      : `<button onclick='addCart(${JSON.stringify({i, name:p.name, price:sale, product_id:p.product_id})})'>Agregar</button>`;
+    const badges =
+      (soldOut ? `<span class="badge" style="background:#dc2626">AGOTADO</span>` : '') +
+      (!soldOut && lowStock ? `<span class="badge" style="background:#f59e0b">¡Solo ${stock} disp.!</span>` : '') +
+      (!soldOut && off ? `<span class="badge">AHORRO ${off}%</span>` : '');
+    return `<div class="${cardCls}" aria-label="${esc(p.name || 'Producto')}${soldOut ? ' (agotado)' : ''}">
+      ${badges}
+      <div class="img" style="${soldOut ? 'filter:grayscale(1) opacity(.55)' : ''}">${p.image_url ? '<img src="'+escAttr(p.image_url)+'" alt="">' : '🛒'}</div>
       <div class="body">
         <h3>${esc(p.name || 'Producto')}</h3>
         <div class="price">
           <span class="now">${money(sale)}</span>
           ${orig ? `<span class="was">${money(orig)}</span>` : ''}
         </div>
-        <button onclick='addCart(${JSON.stringify({i, name:p.name, price:sale, product_id:p.product_id})})'>Agregar</button>
+        ${btn}
       </div>
     </div>`;
   }).join('');

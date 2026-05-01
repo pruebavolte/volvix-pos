@@ -500,6 +500,50 @@
   let dragOffset = { x: 0, y: 0 };
   let elementId = 0;
 
+  // ===== HISTORY (UNDO/REDO) =====
+  const HISTORY_LIMIT = 50;
+  let history = [];
+  let historyIdx = -1;
+  function snapshot() {
+    try {
+      // Drop forward states when branching
+      if (historyIdx < history.length - 1) history = history.slice(0, historyIdx + 1);
+      history.push(JSON.stringify({ elements, elementId }));
+      if (history.length > HISTORY_LIMIT) history.shift();
+      historyIdx = history.length - 1;
+    } catch (_) {}
+  }
+  function restoreSnapshot(idx) {
+    if (idx < 0 || idx >= history.length) return false;
+    try {
+      const s = JSON.parse(history[idx]);
+      elements = s.elements || [];
+      elementId = s.elementId || 0;
+      selected = null;
+      historyIdx = idx;
+      if (typeof renderCanvas === 'function') renderCanvas();
+      if (typeof renderProps === 'function') renderProps();
+      return true;
+    } catch (_) { return false; }
+  }
+  function undo() {
+    if (historyIdx > 0) { restoreSnapshot(historyIdx - 1); showToast && showToast('Deshacer'); }
+  }
+  function redo() {
+    if (historyIdx < history.length - 1) { restoreSnapshot(historyIdx + 1); showToast && showToast('Rehacer'); }
+  }
+  document.addEventListener('keydown', function (e) {
+    const tgt = e.target;
+    const tag = tgt && tgt.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || (tgt && tgt.isContentEditable)) return;
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && (e.key === 'z' || e.key === 'Z')) {
+      e.preventDefault(); undo();
+    } else if (((e.ctrlKey || e.metaKey) && (e.key === 'y' || e.key === 'Y')) ||
+               ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'z' || e.key === 'Z'))) {
+      e.preventDefault(); redo();
+    }
+  });
+
   // ===== DRAG & DROP DESDE SIDEBAR =====
   document.querySelectorAll('.comp-item').forEach(item => {
     item.addEventListener('dragstart', e => {
@@ -546,6 +590,7 @@
       ...def
     };
     elements.push(el);
+    snapshot();
     renderCanvas();
     selectElement(id);
   }
@@ -688,6 +733,7 @@
     event.stopPropagation();
     elements = elements.filter(e => e.id !== id);
     selected = null;
+    snapshot();
     renderCanvas();
     renderProps();
     showToast('Elemento eliminado');
@@ -719,6 +765,7 @@
     };
     const onUp = () => {
       draggedElement = null;
+      snapshot();
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onUp);
     };
@@ -805,6 +852,7 @@
     const el = elements.find(e => e.id === selected);
     if (!el) return;
     el[key] = value;
+    snapshot();
     renderCanvas();
   }
 
