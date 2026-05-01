@@ -13233,13 +13233,16 @@ module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization,apikey');
 
   // Domain canonicalization: redirect www and legacy vercel domain to canonical salvadorexoficial.com
+  // Only active when CANONICAL_REDIRECT_ENABLED=1 (after DNS is configured for salvadorexoficial.com)
   try {
-    const __host = (req.headers && req.headers.host) || '';
-    if (__host === 'volvix-pos.vercel.app' || __host === 'www.salvadorexoficial.com') {
-      res.statusCode = 301;
-      res.setHeader('Location', 'https://salvadorexoficial.com' + (req.url || '/'));
-      res.end();
-      return;
+    if (process.env.CANONICAL_REDIRECT_ENABLED === '1' || process.env.CANONICAL_REDIRECT_ENABLED === 'true') {
+      const __host = (req.headers && req.headers.host) || '';
+      if (__host === 'volvix-pos.vercel.app' || __host === 'www.salvadorexoficial.com') {
+        res.statusCode = 301;
+        res.setHeader('Location', 'https://salvadorexoficial.com' + (req.url || '/'));
+        res.end();
+        return;
+      }
     }
   } catch (_) { /* noop */ }
 
