@@ -706,6 +706,37 @@
   </div>
 </section>
 
+<!-- ═══════════ INDUSTRIES (filtros por giro) ═══════════ -->
+<section class="section" id="industries">
+  <div class="container">
+    <div class="section-head">
+      <span class="section-tag">Para tu industria</span>
+      <h2 class="section-title">Sistemas listos para tu giro</h2>
+      <p class="section-desc">Filtra por industria. Cada giro tiene su propia configuración, módulos y terminología.</p>
+    </div>
+    <div id="hub-industry-filters" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 auto 28px;max-width:1100px;padding:0 12px"></div>
+    <div id="hub-industry-grid" style="max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;padding:0 12px"></div>
+  </div>
+</section>
+
+<style>
+  .hub-chip{
+    padding:8px 16px;border-radius:9999px;background:#1f2937;color:#e5e7eb;
+    border:1px solid #374151;font-size:13px;font-weight:600;cursor:pointer;
+    transition:all .15s;font-family:inherit;
+  }
+  .hub-chip:hover{border-color:#818cf8;color:#fff}
+  .hub-chip.active{background:linear-gradient(135deg,#6366f1,#8b5cf6);border-color:transparent;color:#fff}
+  .hub-giro-card{
+    padding:22px 14px;background:#111827;border:1px solid #243049;border-radius:14px;
+    text-align:center;text-decoration:none;color:#e5e7eb;display:flex;flex-direction:column;
+    align-items:center;gap:8px;transition:all .15s;
+  }
+  .hub-giro-card:hover{border-color:#6366f1;transform:translateY(-2px);box-shadow:0 12px 28px -10px rgba(99,102,241,.45)}
+  .hub-giro-icon{width:48px;height:48px;border-radius:12px;display:grid;place-items:center;font-size:24px}
+  .hub-giro-name{font-weight:700;font-size:14px}
+</style>
+
 <!-- ═══════════ PRICING ═══════════ -->
 <section class="section pricing" id="pricing">
   <div class="container">
@@ -1101,5 +1132,86 @@
 <link rel="stylesheet" href="volvix-modals.css">
 <script defer src="volvix-modals.js"></script>
   <script defer src="volvix-i18n-wiring.js"></script>
+
+<!-- ═══════════ INDUSTRY FILTERS ═══════════ -->
+<script src="giros_catalog_v2.js" defer></script>
+<script>
+(function(){
+  var INDUSTRY = {
+    todos:         { label: 'Ver todos',     icon: '🌐' },
+    alimentos:     { label: 'Comida',        icon: '🍽️' },
+    belleza:       { label: 'Belleza',       icon: '💇' },
+    salud:         { label: 'Salud',         icon: '🩺' },
+    retail:        { label: 'Retail',        icon: '🛍️' },
+    servicios:     { label: 'Servicios',     icon: '🔧' },
+    educacion:     { label: 'Educación',     icon: '🏫' },
+    rentas:        { label: 'Rentas',        icon: '🏠' },
+    profesionales: { label: 'Profesionales', icon: '💼' },
+    construccion:  { label: 'Construcción',  icon: '🏗️' },
+    automotriz:    { label: 'Automotriz',    icon: '🚗' },
+    otros:         { label: 'Otros',         icon: '📦' }
+  };
+  var KEY = 'volvix_hub_industry';
+  var active = (function(){ try { return localStorage.getItem(KEY) || 'todos'; } catch(_) { return 'todos'; } })();
+
+  function getCatalog(){ return (typeof GIROS_V2 !== 'undefined' && Array.isArray(GIROS_V2)) ? GIROS_V2 : []; }
+  function presentCategories(){
+    var present = {};
+    getCatalog().forEach(function(g){ if (g && g.category) present[g.category] = true; });
+    var out = ['todos'];
+    Object.keys(INDUSTRY).forEach(function(k){ if (k !== 'todos' && present[k]) out.push(k); });
+    return out;
+  }
+
+  function renderFilters(){
+    var wrap = document.getElementById('hub-industry-filters');
+    if (!wrap) return;
+    var cats = presentCategories();
+    if (cats.length <= 1){ wrap.innerHTML = ''; return; }
+    wrap.innerHTML = cats.map(function(k){
+      var cfg = INDUSTRY[k] || { label: k, icon: '' };
+      var cls = 'hub-chip' + (k === active ? ' active' : '');
+      return '<button type="button" class="' + cls + '" data-industry="' + k + '">' + cfg.icon + ' ' + cfg.label + '</button>';
+    }).join('');
+    Array.prototype.forEach.call(wrap.querySelectorAll('.hub-chip'), function(btn){
+      btn.addEventListener('click', function(){
+        active = btn.getAttribute('data-industry') || 'todos';
+        try { localStorage.setItem(KEY, active); } catch(_) {}
+        renderFilters();
+        renderGrid();
+      });
+    });
+  }
+
+  function renderGrid(){
+    var grid = document.getElementById('hub-industry-grid');
+    if (!grid) return;
+    var TOP = ['barberia','restaurante','farmacia','abarrotes','taqueria','colegio','clinica_dental','taller_mecanico','gimnasio','fruteria','cafeteria','minisuper'];
+    var giros;
+    var cat = getCatalog();
+    if (active === 'todos'){
+      giros = TOP.map(function(k){ return cat.find(function(g){ return g.key === k; }); }).filter(Boolean);
+    } else {
+      giros = cat.filter(function(g){ return g && g.category === active; });
+    }
+    if (!giros.length){
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#94a3b8;padding:30px">Sin giros en esta industria.</div>';
+      return;
+    }
+    grid.innerHTML = giros.map(function(g){
+      return '<a href="landing_dynamic.html?giro=' + encodeURIComponent(g.key) + '" class="hub-giro-card">'
+        + '<div class="hub-giro-icon" style="background:' + (g.accent || '#1f2937') + ';color:#0f172a">' + g.icon + '</div>'
+        + '<div class="hub-giro-name">' + g.name + '</div>'
+        + '</a>';
+    }).join('');
+  }
+
+  function init(){ renderFilters(); renderGrid(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+  // Re-init in case GIROS_V2 loads after init.
+  setTimeout(init, 600);
+})();
+</script>
 </body>
 </html>

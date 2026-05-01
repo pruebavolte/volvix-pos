@@ -579,6 +579,34 @@
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 14px;
   }
+  /* Industry filters */
+  .industry-filters {
+    max-width: 1200px;
+    margin: 0 auto 28px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    padding: 0 12px;
+  }
+  .industry-chip {
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: white;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .industry-chip:hover { border-color: var(--accent); }
+  .industry-chip.active {
+    background: var(--accent, #EA580C);
+    color: white;
+    border-color: transparent;
+  }
   .popular-card {
     padding: 24px 16px;
     background: white;
@@ -770,8 +798,9 @@
 <section class="popular" id="popular">
   <div class="section-head">
     <h2>Giros más populares</h2>
-    <p>Haz clic en uno para ver su sistema personalizado</p>
+    <p>Filtra por industria o haz clic en uno para ver su sistema personalizado</p>
   </div>
+  <div class="industry-filters" id="industry-filters" role="tablist" aria-label="Filtrar giros por industria"></div>
   <div class="popular-grid" id="popular-grid"></div>
 </section>
 
@@ -793,9 +822,65 @@
 <script>
   const TOP_GIROS = ['barberia', 'restaurante', 'farmacia', 'abarrotes', 'taqueria', 'colegio', 'clinica_dental', 'taller_mecanico', 'gimnasio', 'fruteria', 'cafeteria', 'minisuper'];
 
+  // Industry filter (categories from giros_catalog_v2.js)
+  const INDUSTRY_LABELS = {
+    todos:         { label: 'Ver todos',     icon: '🌐' },
+    alimentos:     { label: 'Comida',        icon: '🍽️' },
+    belleza:       { label: 'Belleza',       icon: '💇' },
+    salud:         { label: 'Salud',         icon: '🩺' },
+    retail:        { label: 'Retail',        icon: '🛍️' },
+    servicios:     { label: 'Servicios',     icon: '🔧' },
+    educacion:     { label: 'Educación',     icon: '🏫' },
+    rentas:        { label: 'Rentas',        icon: '🏠' },
+    profesionales: { label: 'Profesionales', icon: '💼' },
+    construccion:  { label: 'Construcción',  icon: '🏗️' },
+    automotriz:    { label: 'Automotriz',    icon: '🚗' },
+    otros:         { label: 'Otros',         icon: '📦' },
+  };
+  const FILTER_KEY = 'volvix_marketplace_industry';
+  let activeIndustry = (() => {
+    try { return localStorage.getItem(FILTER_KEY) || 'todos'; }
+    catch (_) { return 'todos'; }
+  })();
+
+  function presentIndustries() {
+    const present = new Set();
+    if (Array.isArray(GIROS_V2)) {
+      GIROS_V2.forEach(g => { if (g && g.category) present.add(g.category); });
+    }
+    return ['todos', ...Object.keys(INDUSTRY_LABELS).filter(k => k !== 'todos' && present.has(k))];
+  }
+
+  function renderIndustryFilters() {
+    const wrap = document.getElementById('industry-filters');
+    if (!wrap) return;
+    wrap.innerHTML = presentIndustries().map(k => {
+      const cfg = INDUSTRY_LABELS[k] || { label: k, icon: '' };
+      const cls = 'industry-chip' + (k === activeIndustry ? ' active' : '');
+      return `<button type="button" class="${cls}" data-industry="${k}" role="tab" aria-selected="${k === activeIndustry}">${cfg.icon} ${cfg.label}</button>`;
+    }).join('');
+    wrap.querySelectorAll('.industry-chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        activeIndustry = btn.dataset.industry || 'todos';
+        try { localStorage.setItem(FILTER_KEY, activeIndustry); } catch (_) {}
+        renderIndustryFilters();
+        renderPopular();
+      });
+    });
+  }
+
   function renderPopular() {
     const grid = document.getElementById('popular-grid');
-    const giros = TOP_GIROS.map(k => GIROS_V2.find(g => g.key === k)).filter(Boolean);
+    let giros;
+    if (activeIndustry === 'todos') {
+      giros = TOP_GIROS.map(k => GIROS_V2.find(g => g.key === k)).filter(Boolean);
+    } else {
+      giros = (GIROS_V2 || []).filter(g => g && g.category === activeIndustry);
+    }
+    if (!giros.length) {
+      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#64748b;padding:30px">Sin giros en esta industria. <button type="button" class="industry-chip" onclick="(function(){activeIndustry='todos';try{localStorage.setItem('${FILTER_KEY}','todos');}catch(_){}renderIndustryFilters();renderPopular();})()">Ver todos</button></div>`;
+      return;
+    }
     grid.innerHTML = giros.map(g => `
       <a href="landing_dynamic.html?giro=${g.key}" class="popular-card">
         <div class="popular-icon" style="background:${g.accent};">${g.icon}</div>
@@ -1090,6 +1175,7 @@
   }
 
   // Init
+  renderIndustryFilters();
   renderPopular();
 </script>
 
