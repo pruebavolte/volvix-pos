@@ -21,7 +21,8 @@ const https = require('https');
 
 // ---------- helpers ----------
 function send(ctx, res, status, body) {
-  if (ctx && typeof ctx.sendJson === 'function') return ctx.sendJson(res, status, body);
+  // ctx.sendJson is an alias for sendJSON(res, data, status=200) — argument order: (res, data, status)
+  if (ctx && typeof ctx.sendJson === 'function') return ctx.sendJson(res, body, status);
   res.statusCode = status;
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.end(JSON.stringify(body));
