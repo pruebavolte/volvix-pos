@@ -389,16 +389,39 @@ tr:hover td{background:var(--card2)}
             <button class="btn btn-ghost" style="padding:6px 12px;font-size:11px" data-action="view-all-tenants">Ver todos</button>
           </div>
         </div>
+        <!-- Bulk-actions toolbar (visible only when at least one row selected) -->
+        <div id="adm-bulk-toolbar" style="display:none;align-items:center;gap:10px;padding:10px 14px;background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.25);border-radius:10px;margin-bottom:10px;flex-wrap:wrap">
+          <strong id="adm-bulk-count" style="font-size:13px">0 seleccionados</strong>
+          <span style="flex:1"></span>
+          <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px" data-bulk-action="approve">Aprobar</button>
+          <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px" data-bulk-action="reset_passwords">Reset password owners</button>
+          <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px" data-bulk-action="export">Exportar CSV</button>
+          <button class="btn btn-danger" style="padding:6px 12px;font-size:12px" data-bulk-action="suspend">Suspender</button>
+        </div>
         <table>
           <thead>
             <tr>
+              <th style="width:32px"><input type="checkbox" id="adm-tenants-selectall" aria-label="Seleccionar todo"></th>
               <th>Tenant</th><th>Plan</th><th>Usuarios</th><th>MRR</th><th>Estado</th><th>Región</th><th>Última actividad</th><th></th>
             </tr>
           </thead>
           <tbody id="adm-tenants-tbody">
-            <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:30px">Cargando tenants…</td></tr>
+            <tr><td colspan="9" style="text-align:center;color:var(--muted);padding:30px">Cargando tenants…</td></tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- Bulk confirm modal -->
+      <div id="adm-bulk-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;align-items:center;justify-content:center">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px;width:min(440px,92vw);box-shadow:0 20px 60px rgba(0,0,0,.5)">
+          <h3 id="adm-bulk-modal-title" style="font-size:18px;margin-bottom:8px">Confirmar acción</h3>
+          <div id="adm-bulk-modal-body" style="font-size:13px;color:var(--muted);margin-bottom:8px"></div>
+          <div id="adm-bulk-modal-warn" style="display:none;background:rgba(239,68,68,.12);color:#fca5a5;border:1px solid rgba(239,68,68,.3);padding:10px 12px;border-radius:8px;font-size:12px;margin-bottom:14px"></div>
+          <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+            <button id="adm-bulk-cancel" class="btn btn-ghost" style="padding:8px 14px">Cancelar</button>
+            <button id="adm-bulk-confirm" class="btn btn-primary" style="padding:8px 14px">Ejecutar</button>
+          </div>
+        </div>
       </div>
 
       <!-- Row: Activity feed + Support tickets + Billing summary -->
@@ -763,7 +786,7 @@ tr:hover td{background:var(--card2)}
     if (rt.ok && tbody) {
       var tenants = await rt.json();
       if (!Array.isArray(tenants) || !tenants.length) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:30px">Sin tenants registrados</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:30px">Sin tenants registrados</td></tr>';
       } else {
         var planBadge = function(plan){
           var p = (plan||'').toLowerCase();
@@ -776,9 +799,13 @@ tr:hover td{background:var(--card2)}
         var initials = function(name){
           return (name||'').split(' ').slice(0,2).map(function(w){return (w[0]||'').toUpperCase();}).join('') || '—';
         };
+        // Cache for bulk actions
+        window.__admTenantsCache = tenants;
         tbody.innerHTML = tenants.map(function(t){
           var st = t.is_active === false ? '<span class="tag err">Inactivo</span>' : '<span class="tag ok">Activo</span>';
+          var tid = (t.id || t.subdomain || '');
           return '<tr>' +
+            '<td><input type="checkbox" class="adm-row-chk" data-tenant-id="' + tid + '" data-tenant-name="' + (t.name||'').replace(/"/g,'&quot;') + '" aria-label="Seleccionar fila"></td>' +
             '<td><div class="tcell"><div class="t-avatar">' + initials(t.name) + '</div><div><b>' + (t.name || '—') + '</b><div class="t-mini">' + (t.subdomain || t.id || '—') + '</div></div></div></td>' +
             '<td>' + planBadge(t.plan) + '</td>' +
             '<td>' + (t.users_count != null ? t.users_count : '—') + '</td>' +
@@ -786,7 +813,7 @@ tr:hover td{background:var(--card2)}
             '<td>' + st + '</td>' +
             '<td>' + (t.region || '—') + '</td>' +
             '<td class="t-mini">' + (t.last_activity || '—') + '</td>' +
-            '<td><button class="btn btn-ghost" style="padding:4px 10px;font-size:11px" data-modules-tenant="' + (t.id || t.subdomain || '') + '" data-tenant-name="' + (t.name || '') + '">Módulos</button></td>' +
+            '<td><button class="btn btn-ghost" style="padding:4px 10px;font-size:11px" data-modules-tenant="' + tid + '" data-tenant-name="' + (t.name || '') + '">Módulos</button></td>' +
           '</tr>';
         }).join('');
         // Wire per-tenant module-toggle modal (super-admin)
@@ -796,10 +823,141 @@ tr:hover td{background:var(--card2)}
               openTenantModulesModal(btn.getAttribute('data-modules-tenant'), btn.getAttribute('data-tenant-name') || '');
             });
           });
+          // Wire row checkboxes for bulk-actions toolbar
+          tbody.querySelectorAll('input.adm-row-chk').forEach(function (chk) {
+            chk.addEventListener('change', updateBulkToolbar);
+          });
         }
       }
     }
   } catch(e){ console.warn('[admin-saas] tenants fail', e); }
+
+  // ---- Bulk actions on tenants (super-admin) -----------------------------
+  function getSelectedTenantIds(){
+    return Array.prototype.slice.call(document.querySelectorAll('input.adm-row-chk:checked'))
+      .map(function(c){ return c.getAttribute('data-tenant-id'); }).filter(Boolean);
+  }
+  function getSelectedTenantRows(){
+    return Array.prototype.slice.call(document.querySelectorAll('input.adm-row-chk:checked'))
+      .map(function(c){ return { id: c.getAttribute('data-tenant-id'), name: c.getAttribute('data-tenant-name') || '' }; });
+  }
+  function updateBulkToolbar(){
+    var ids = getSelectedTenantIds();
+    var bar = document.getElementById('adm-bulk-toolbar');
+    var lbl = document.getElementById('adm-bulk-count');
+    if (!bar || !lbl) return;
+    if (ids.length){
+      bar.style.display = 'flex';
+      lbl.textContent = ids.length + (ids.length === 1 ? ' seleccionado' : ' seleccionados');
+    } else {
+      bar.style.display = 'none';
+    }
+    // Sync select-all state
+    var allChks = document.querySelectorAll('input.adm-row-chk');
+    var sa = document.getElementById('adm-tenants-selectall');
+    if (sa){
+      sa.checked = allChks.length > 0 && ids.length === allChks.length;
+      sa.indeterminate = ids.length > 0 && ids.length < allChks.length;
+    }
+  }
+  // Select-all wiring
+  (function wireSelectAll(){
+    var sa = document.getElementById('adm-tenants-selectall');
+    if (sa) {
+      sa.addEventListener('change', function(){
+        document.querySelectorAll('input.adm-row-chk').forEach(function(c){ c.checked = sa.checked; });
+        updateBulkToolbar();
+      });
+    }
+  })();
+  function openBulkConfirm(action){
+    var rows = getSelectedTenantRows();
+    if (!rows.length) return;
+    var titles = { suspend:'Suspender tenants', approve:'Aprobar tenants', reset_passwords:'Resetear passwords de owners', export:'Exportar CSV' };
+    var bodies = {
+      suspend: 'Vas a suspender ' + rows.length + ' tenant(s). Sus usuarios no podrán iniciar sesión hasta que se reactive.',
+      approve: 'Vas a aprobar/activar ' + rows.length + ' tenant(s). Volverán a estar accesibles.',
+      reset_passwords: 'Se forzará cambio de password en el próximo login para los owners de ' + rows.length + ' tenant(s).',
+      export: 'Se descargará un CSV con los ' + rows.length + ' tenant(s) seleccionados.'
+    };
+    var irreversible = (action === 'suspend' || action === 'reset_passwords');
+    var modal = document.getElementById('adm-bulk-modal');
+    document.getElementById('adm-bulk-modal-title').textContent = titles[action] || 'Confirmar';
+    document.getElementById('adm-bulk-modal-body').textContent = bodies[action] || ('Acción sobre ' + rows.length + ' tenant(s).');
+    var warn = document.getElementById('adm-bulk-modal-warn');
+    if (irreversible){
+      warn.style.display = 'block';
+      warn.textContent = '⚠ Esta acción afecta sesiones activas y no es trivialmente reversible. Verifica la lista antes de continuar.';
+    } else {
+      warn.style.display = 'none';
+    }
+    modal.style.display = 'flex';
+    var confirmBtn = document.getElementById('adm-bulk-confirm');
+    var cancelBtn = document.getElementById('adm-bulk-cancel');
+    function close(){ modal.style.display = 'none'; confirmBtn.removeEventListener('click', onOk); cancelBtn.removeEventListener('click', close); }
+    function onOk(){
+      close();
+      if (action === 'export') return exportTenantsCsv(rows);
+      executeBulkAction(action, rows);
+    }
+    confirmBtn.addEventListener('click', onOk);
+    cancelBtn.addEventListener('click', close);
+  }
+  function exportTenantsCsv(rows){
+    var cache = window.__admTenantsCache || [];
+    var byId = {};
+    cache.forEach(function(t){ byId[t.id || t.subdomain || ''] = t; });
+    var head = ['id','name','subdomain','plan','status','region','users_count','mrr'];
+    var lines = [head.join(',')];
+    rows.forEach(function(r){
+      var t = byId[r.id] || { id: r.id, name: r.name };
+      var row = [t.id||'', t.name||'', t.subdomain||'', t.plan||'',
+        (t.is_active===false?'inactive':'active'), t.region||'', t.users_count||'', t.mrr||''];
+      lines.push(row.map(function(v){ var s=String(v).replace(/"/g,'""'); return /[",\n]/.test(s) ? '"'+s+'"' : s; }).join(','));
+    });
+    var blob = new Blob([lines.join('\n')], { type:'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'tenants_' + new Date().toISOString().slice(0,10) + '.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+  }
+  async function executeBulkAction(action, rows){
+    var tk = (function(){ try{ return localStorage.getItem('volvix_token')||localStorage.getItem('volvixAuthToken')||''; }catch(e){return '';} })();
+    var hdrs = { 'Content-Type':'application/json' };
+    if (tk) hdrs['Authorization'] = 'Bearer ' + tk;
+    try {
+      var r = await fetch('/api/admin/tenants/bulk', {
+        method: 'POST',
+        headers: hdrs,
+        body: JSON.stringify({ action: action, tenant_ids: rows.map(function(x){ return x.id; }) })
+      });
+      if (!r.ok) {
+        var msg = 'HTTP ' + r.status;
+        try { var j = await r.json(); msg = (j && (j.error || j.message)) || msg; } catch(_){}
+        alert('Bulk falló: ' + msg);
+        return;
+      }
+      var data = await r.json();
+      alert('Bulk ' + action + ': ' + (data.succeeded||0) + ' OK, ' + (data.failed||0) + ' fallidos');
+      // Refresh tenants table
+      if (typeof location !== 'undefined') location.reload();
+    } catch (e) {
+      alert('Error de red: ' + (e && e.message || e));
+    }
+  }
+  // Wire toolbar buttons (delegation)
+  (function wireBulkToolbar(){
+    var bar = document.getElementById('adm-bulk-toolbar');
+    if (!bar) return;
+    bar.addEventListener('click', function(ev){
+      var btn = ev.target.closest('button[data-bulk-action]');
+      if (!btn) return;
+      var act = btn.getAttribute('data-bulk-action');
+      if (!getSelectedTenantIds().length) return;
+      openBulkConfirm(act);
+    });
+  })();
 
   // ---- Per-tenant module toggle modal (super-admin) ----------------------
   var TENANT_MODULES_LIST = [

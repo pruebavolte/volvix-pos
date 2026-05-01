@@ -229,11 +229,21 @@ body{min-height:100vh;background:radial-gradient(circle at 20% 0%,#1a2540 0%,var
   <input type="date" id="md-date-from" style="display:none;background:#0b1220;color:#fff;border:1px solid var(--border,#334155);padding:6px 8px;border-radius:6px">
   <input type="date" id="md-date-to"   style="display:none;background:#0b1220;color:#fff;border:1px solid var(--border,#334155);padding:6px 8px;border-radius:6px">
   <span style="flex:1"></span>
+  <label style="display:flex;align-items:center;gap:6px;color:var(--muted);cursor:pointer" title="Mostrar valores del periodo anterior y diferencia %">
+    <input type="checkbox" id="md-compare-toggle"> Comparar con periodo anterior
+  </label>
   <label style="display:flex;align-items:center;gap:6px;color:var(--muted);cursor:pointer">
     <input type="checkbox" id="md-auto-refresh" checked> Auto-refresh 60s
   </label>
   <button id="md-btn-export" style="background:#3b82f6;color:#fff;border:0;padding:8px 14px;border-radius:6px;cursor:pointer;font-weight:600">Exportar CSV</button>
 </div>
+<style>
+  .metric-compare{display:none;font-size:11px;color:var(--muted);margin-top:6px;line-height:1.4}
+  .metric-compare.show{display:block}
+  .metric-compare .prev{color:var(--muted)}
+  .metric-compare .delta-up{color:var(--green);font-weight:700}
+  .metric-compare .delta-down{color:var(--red);font-weight:700}
+</style>
 <style>
   .md-period-btn{background:#1e293b;color:#e2e8f0;border:1px solid #334155;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:13px}
   .md-period-btn.active{background:#3b82f6;color:#fff;border-color:#3b82f6}
@@ -267,54 +277,63 @@ body{min-height:100vh;background:radial-gradient(circle at 20% 0%,#1a2540 0%,var
       <div class="metric-label">Ventas Hoy</div>
       <div class="metric-val" id="m-sales">—</div>
       <div class="metric-trend" id="m-sales-trend"></div>
+      <div class="metric-compare" data-cmp="sales"></div>
     </div>
     <div class="metric green">
       <div class="metric-icon">#</div>
       <div class="metric-label">Tickets</div>
       <div class="metric-val" id="m-tickets">—</div>
       <div class="metric-trend" id="m-tickets-trend"></div>
+      <div class="metric-compare" data-cmp="tickets"></div>
     </div>
     <div class="metric pink">
       <div class="metric-icon">P</div>
       <div class="metric-label">Productos</div>
       <div class="metric-val" id="m-prods">—</div>
       <div class="metric-trend" id="m-prods-trend"></div>
+      <div class="metric-compare" data-cmp="prods"></div>
     </div>
     <div class="metric">
       <div class="metric-icon">C</div>
       <div class="metric-label">Customers</div>
       <div class="metric-val" id="m-cust">—</div>
       <div class="metric-trend" id="m-cust-trend"></div>
+      <div class="metric-compare" data-cmp="cust"></div>
     </div>
     <div class="metric green">
       <div class="metric-icon">T</div>
       <div class="metric-label">Tenants Activos</div>
       <div class="metric-val" id="m-ten">—</div>
       <div class="metric-trend" id="m-ten-trend"></div>
+      <div class="metric-compare" data-cmp="ten"></div>
     </div>
     <div class="metric pink">
       <div class="metric-icon">%</div>
       <div class="metric-label">Conversion</div>
       <div class="metric-val" id="m-conv">—</div>
       <div class="metric-trend" id="m-conv-trend">—</div>
+      <div class="metric-compare" data-cmp="conv"></div>
     </div>
     <div class="metric kpi-platform" data-kpi="arr">
       <div class="metric-icon">A</div>
       <div class="metric-label">ARR (Anual)</div>
       <div class="metric-val" id="m-arr">—</div>
       <div class="metric-trend" id="m-arr-trend">platform</div>
+      <div class="metric-compare" data-cmp="arr"></div>
     </div>
     <div class="metric green kpi-platform" data-kpi="mau">
       <div class="metric-icon">U</div>
       <div class="metric-label">MAU (30d)</div>
       <div class="metric-val" id="m-mau">—</div>
       <div class="metric-trend" id="m-mau-trend">usuarios activos</div>
+      <div class="metric-compare" data-cmp="mau"></div>
     </div>
     <div class="metric pink kpi-platform" data-kpi="churn">
       <div class="metric-icon">X</div>
       <div class="metric-label">Churn</div>
       <div class="metric-val" id="m-churn">—</div>
       <div class="metric-trend" id="m-churn-trend">30d</div>
+      <div class="metric-compare" data-cmp="churn"></div>
     </div>
   </div>
 
@@ -615,7 +634,7 @@ function animateNum(id,val){ const el = document.getElementById(id); if (el) el.
 // ============ BAR CHART (datos reales /api/reports/sales/daily) ============
 async function renderBars(){
   const tid = (window.Volvix && Volvix.session && Volvix.session.tenant_id) || 'TNT001';
-  let data = [];
+  let data = [], dataPrev = [];
   try{
     const r = await fetch('/api/reports/sales/daily?tenant_id='+encodeURIComponent(tid)+'&days=7',{headers:{'Accept':'application/json'},credentials:'include'});
     if(r.ok){
@@ -627,22 +646,39 @@ async function renderBars(){
         return { d: labels[d.getDay()]||'-', v: Math.round((Number(x.total||x.sales||0))/1000) };
       });
     }
+    // Previous-period overlay if compare mode is on
+    if (typeof MD_STATE !== 'undefined' && MD_STATE.compare) {
+      try {
+        const r2 = await fetch('/api/reports/sales/daily?tenant_id='+encodeURIComponent(tid)+'&days=7&compare_with=previous_period',{headers:{'Accept':'application/json'},credentials:'include'});
+        if (r2.ok) {
+          const j2 = await r2.json();
+          const arr2 = (j2 && (j2.previous || j2.compare)) || [];
+          dataPrev = arr2.slice(-7).map(x=>Math.round((Number(x.total||x.sales||0))/1000));
+        }
+      } catch(_){}
+    }
   }catch(e){}
   const c = document.getElementById('bar-chart');
   if(!data.length){ c.innerHTML = '<div style="color:#888;padding:20px;font-size:13px">Sin datos de ventas semanales</div>'; return; }
-  const max = Math.max(...data.map(x=>x.v),1);
-  c.innerHTML = data.map(x=>`
-    <div class="bar" style="height:${(x.v/max*100)}%">
-      <span class="bar-val">$${x.v}k</span>
-      <span class="bar-label">${x.d}</span>
-    </div>`).join('');
+  const max = Math.max(...data.map(x=>x.v).concat(dataPrev),1);
+  c.innerHTML = data.map((x,i)=>{
+    var prevH = dataPrev[i] != null ? (dataPrev[i]/max*100) : null;
+    var prevOverlay = prevH != null
+      ? '<span data-prev-overlay style="position:absolute;left:0;right:0;bottom:'+prevH+'%;border-top:2px dashed #a78bfa;display:'+(MD_STATE.compare?'block':'none')+'" title="Periodo anterior: $'+dataPrev[i]+'k"></span>'
+      : '';
+    return '<div class="bar" style="height:'+(x.v/max*100)+'%;position:relative">'+
+      '<span class="bar-val">$'+x.v+'k</span>'+
+      '<span class="bar-label">'+x.d+'</span>'+
+      prevOverlay+
+    '</div>';
+  }).join('');
 }
 renderBars();
 
 // ============ LINE CHART (datos reales /api/reports/sales/hourly) ============
 async function renderLine(){
   const tid = (window.Volvix && Volvix.session && Volvix.session.tenant_id) || 'TNT001';
-  let series = [];
+  let series = [], seriesPrev = [];
   try{
     const r = await fetch('/api/reports/sales/hourly?tenant_id='+encodeURIComponent(tid),{headers:{'Accept':'application/json'},credentials:'include'});
     if(r.ok){
@@ -650,13 +686,28 @@ async function renderLine(){
       const arr = Array.isArray(j)?j:(j.items||j.data||[]);
       series = arr.slice(0,24).map(x=>Number(x.total||x.sales||0));
     }
+    if (typeof MD_STATE !== 'undefined' && MD_STATE.compare) {
+      try {
+        const r2 = await fetch('/api/reports/sales/hourly?tenant_id='+encodeURIComponent(tid)+'&compare_with=previous_period',{headers:{'Accept':'application/json'},credentials:'include'});
+        if (r2.ok) {
+          const j2 = await r2.json();
+          const arr2 = (j2 && (j2.previous || j2.compare)) || [];
+          seriesPrev = arr2.slice(0,24).map(x=>Number(x.total||x.sales||0));
+        }
+      } catch(_){}
+    }
   }catch(e){}
   const el = document.getElementById('line-chart');
   if(!series.length){ if(el) el.innerHTML=''; return; }
-  const max = Math.max(...series,1);
+  const max = Math.max.apply(null, series.concat(seriesPrev).concat([1]));
   const pts = series.map((v,i)=>[i*(600/Math.max(series.length-1,1)), 200-(v/max)*180]);
   const path = 'M '+pts.map(p=>p.join(',')).join(' L ');
   const area = path+` L 600,200 L 0,200 Z`;
+  let prevPath = '';
+  if (seriesPrev.length) {
+    const ptsP = seriesPrev.map((v,i)=>[i*(600/Math.max(seriesPrev.length-1,1)), 200-(v/max)*180]);
+    prevPath = '<path data-prev-overlay d="M '+ptsP.map(p=>p.join(',')).join(' L ')+'" fill="none" stroke="#a78bfa" stroke-width="2" stroke-dasharray="6 4" stroke-linejoin="round" style="display:'+(MD_STATE.compare?'block':'none')+'"/>';
+  }
   el.innerHTML = `
     <defs><linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
       <stop offset="0%" stop-color="#5b9dff" stop-opacity=".4"/>
@@ -664,6 +715,7 @@ async function renderLine(){
     </linearGradient></defs>
     <path d="${area}" fill="url(#g1)"/>
     <path d="${path}" fill="none" stroke="#5b9dff" stroke-width="2.5" stroke-linejoin="round"/>
+    ${prevPath}
     ${pts.filter((_,i)=>i%4===0).map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="#a78bfa"/>`).join('')}
   `;
 }
@@ -949,7 +1001,96 @@ document.getElementById('goals').innerHTML = GOALS.map(G=>`
   </div>`).join('');
 
 // ============ TOOLBAR (period filter, auto-refresh, export) ============
-var MD_STATE = { period: '30d', from: null, to: null, autoMs: 60000, autoTimer: null, snapshot: {} };
+var MD_STATE = { period: '30d', from: null, to: null, autoMs: 60000, autoTimer: null, snapshot: {}, compare: false, prev: {} };
+
+// Format helper for compare slot
+function mdFmtPrev(metricKey, raw){
+  if (raw == null || raw === '' || isNaN(Number(raw))) return '—';
+  var n = Number(raw);
+  if (metricKey === 'sales' || metricKey === 'arr') {
+    return '$' + (n>=1e6 ? (n/1e6).toFixed(2)+'M' : Math.round(n).toLocaleString('es-MX'));
+  }
+  if (metricKey === 'conv' || metricKey === 'churn') return n.toFixed(1) + '%';
+  return Math.round(n).toLocaleString('es-MX');
+}
+function mdRenderCompare(){
+  var on = !!MD_STATE.compare;
+  document.querySelectorAll('.metric-compare').forEach(function(el){
+    var key = el.getAttribute('data-cmp');
+    if (!on) { el.classList.remove('show'); el.innerHTML = ''; return; }
+    var prev = MD_STATE.prev[key];
+    var cur = MD_STATE.cur ? MD_STATE.cur[key] : null;
+    if (prev == null && cur == null) { el.classList.add('show'); el.innerHTML = '<span class="prev">Periodo anterior: —</span>'; return; }
+    var delta = '';
+    if (prev != null && cur != null && Number(prev) !== 0) {
+      var pct = ((Number(cur) - Number(prev)) / Math.abs(Number(prev))) * 100;
+      var cls = pct >= 0 ? 'delta-up' : 'delta-down';
+      var arrow = pct >= 0 ? '▲' : '▼';
+      // For churn, lower is better, invert color
+      if (key === 'churn') cls = pct >= 0 ? 'delta-down' : 'delta-up';
+      delta = ' <span class="' + cls + '">' + arrow + ' ' + Math.abs(pct).toFixed(1) + '%</span>';
+    }
+    el.classList.add('show');
+    el.innerHTML = '<span class="prev">Anterior: ' + mdFmtPrev(key, prev) + '</span>' + delta;
+  });
+}
+
+// Hook for capturing current values (string) into MD_STATE.cur for comparisons
+function mdCaptureCurrent(){
+  MD_STATE.cur = {
+    sales: parseFloat((document.getElementById('m-sales').textContent||'').replace(/[^0-9.\-]/g,'')) || 0,
+    tickets: parseFloat((document.getElementById('m-tickets').textContent||'').replace(/[^0-9.\-]/g,'')) || 0,
+    prods: parseFloat((document.getElementById('m-prods').textContent||'').replace(/[^0-9.\-]/g,'')) || 0,
+    cust: parseFloat((document.getElementById('m-cust').textContent||'').replace(/[^0-9.\-]/g,'')) || 0,
+    ten: parseFloat((document.getElementById('m-ten').textContent||'').replace(/[^0-9.\-]/g,'')) || 0,
+    conv: parseFloat((document.getElementById('m-conv').textContent||'').replace(/[^0-9.\-]/g,'')) || 0,
+    arr: (function(){ var t=document.getElementById('m-arr').textContent||''; var n=parseFloat(t.replace(/[^0-9.\-]/g,'')); if (/M\b/.test(t)) n*=1e6; return n||0; })(),
+    mau: parseFloat((document.getElementById('m-mau').textContent||'').replace(/[^0-9.\-]/g,'')) || 0,
+    churn: parseFloat((document.getElementById('m-churn').textContent||'').replace(/[^0-9.\-]/g,'')) || 0
+  };
+}
+
+// Fetch previous-period KPIs (compare_with=previous_period) — non-fatal if endpoint not present
+async function mdLoadComparePrev(){
+  if (!MD_STATE.compare) return;
+  var period = MD_STATE.period === 'today' ? '1d' : MD_STATE.period;
+  var qs = '?compare_with=previous_period&period=' + encodeURIComponent(period);
+  if (MD_STATE.period === 'custom' && MD_STATE.from && MD_STATE.to){
+    qs = '?compare_with=previous_period&from=' + encodeURIComponent(MD_STATE.from) + '&to=' + encodeURIComponent(MD_STATE.to);
+  }
+  // Generic fetch used to read previous values from /api/owner/dashboard
+  try {
+    var d = await fetch('/api/owner/dashboard' + qs, { credentials:'include',
+      headers: (function(){ try{ var t=localStorage.getItem('volvix_token')||localStorage.getItem('volvixAuthToken')||''; return t?{Authorization:'Bearer '+t}:{}; }catch(_){return {};} })()
+    }).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; });
+    var prevMetrics = (d && (d.previous || d.compare || (d.metrics && d.metrics.previous))) || {};
+    MD_STATE.prev.sales = prevMetrics.sales_today || prevMetrics.sales || null;
+    MD_STATE.prev.tickets = prevMetrics.tickets_today || prevMetrics.tickets || null;
+    MD_STATE.prev.prods = prevMetrics.total_products || prevMetrics.products || null;
+    MD_STATE.prev.cust = prevMetrics.total_customers || prevMetrics.customers || null;
+    MD_STATE.prev.ten = prevMetrics.active_tenants || prevMetrics.total_tenants || null;
+    MD_STATE.prev.conv = prevMetrics.conversion || null;
+  } catch(_){}
+  // Platform KPIs previous (best-effort, separate endpoints if available)
+  try {
+    var p1 = await fetch('/api/reports/platform/arr?compare_with=previous_period', { credentials:'include' }).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;});
+    if (p1) MD_STATE.prev.arr = p1.previous_arr || (p1.previous && p1.previous.arr) || null;
+    var p2 = await fetch('/api/reports/platform/mau?compare_with=previous_period', { credentials:'include' }).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;});
+    if (p2) MD_STATE.prev.mau = p2.previous_mau || (p2.previous && p2.previous.mau) || null;
+    var p3 = await fetch('/api/reports/platform/churn?compare_with=previous_period&period=' + encodeURIComponent(period), { credentials:'include' }).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;});
+    if (p3) MD_STATE.prev.churn = p3.previous_churn_pct || (p3.previous && p3.previous.churn_pct) || null;
+  } catch(_){}
+  mdCaptureCurrent();
+  mdRenderCompare();
+}
+
+function mdToggleCompare(on){
+  MD_STATE.compare = !!on;
+  // Toggle the bar/line chart "previous" overlays
+  document.querySelectorAll('[data-prev-overlay]').forEach(function(el){ el.style.display = on ? '' : 'none'; });
+  if (on) mdLoadComparePrev();
+  else { document.querySelectorAll('.metric-compare').forEach(function(el){ el.classList.remove('show'); el.innerHTML=''; }); }
+}
 
 function mdAuthFetch(path){
   var tk = '';
@@ -1002,11 +1143,17 @@ function mdSetPeriod(p){
   var show = (p === 'custom') ? '' : 'none';
   fromEl.style.display = show; toEl.style.display = show;
   loadAll(); mdLoadPlatformKpis();
+  if (MD_STATE.compare) mdLoadComparePrev();
 }
 
 document.querySelectorAll('.md-period-btn').forEach(function(b){
   b.addEventListener('click', function(){ mdSetPeriod(b.dataset.period); });
 });
+// Compare toggle wiring
+(function(){
+  var c = document.getElementById('md-compare-toggle');
+  if (c) c.addEventListener('change', function(){ mdToggleCompare(c.checked); });
+})();
 ['md-date-from','md-date-to'].forEach(function(id){
   document.getElementById(id).addEventListener('change', function(){
     MD_STATE.from = document.getElementById('md-date-from').value;

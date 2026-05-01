@@ -16451,6 +16451,66 @@ if (process.env.NODE_ENV === 'test') {
     return rank[String(p || '').toLowerCase()] || 0;
   }
 
+  // =========================================================================
+  // POST /api/admin/tenants/bulk
+  //   body: { action: 'suspend'|'approve'|'reset_passwords', tenant_ids: [uuid] }
+  // Bulk operations on multiple tenants (admin/superadmin only).
+  // =========================================================================
+  handlers['POST /api/admin/tenants/bulk'] = requireAuth(async function (req, res) {
+    try {
+      if (!b36IsOwner(req)) return send403(res, { need_role: ['owner', 'admin', 'superadmin'], have_role: req.user.role });
+      var body = await readBody(req, { maxBytes: 32 * 1024, strictJson: true });
+      if (checkBodyError(req, res)) return;
+      var action = String(body.action || '').toLowerCase().trim();
+      var ids = Array.isArray(body.tenant_ids) ? body.tenant_ids : [];
+      var allowedActions = ['suspend', 'approve', 'reset_passwords'];
+      if (allowedActions.indexOf(action) === -1) {
+        return sendValidation(res, 'action invalida (suspend|approve|reset_passwords)', 'action');
+      }
+      if (!ids.length || ids.length > 200) {
+        return sendValidation(res, 'tenant_ids debe contener entre 1 y 200 ids', 'tenant_ids');
+      }
+      var results = { ok: 0, failed: 0, items: [] };
+      for (var i = 0; i < ids.length; i++) {
+        var id = String(ids[i] || '').trim();
+        if (!id) { results.failed++; results.items.push({ id: id, status: 'invalid' }); continue; }
+        try {
+          var ownership = await b40AssertSubTenantOwnership(req, id);
+          if (ownership.error) {
+            results.failed++;
+            results.items.push({ id: id, status: 'forbidden', error: ownership.error });
+            continue;
+          }
+          var table = ownership.table || 'sub_tenants';
+          var nowIso = new Date().toISOString();
+          if (action === 'suspend') {
+            await supabaseRequest('PATCH', '/' + table + '?id=eq.' + encodeURIComponent(id),
+              { is_active: false, suspended_at: nowIso });
+            try { logAudit(req, 'tenant.bulk_suspended', table, { id: id }); } catch (_) {}
+          } else if (action === 'approve') {
+            await supabaseRequest('PATCH', '/' + table + '?id=eq.' + encodeURIComponent(id),
+              { is_active: true, approved_at: nowIso, suspended_at: null });
+            try { logAudit(req, 'tenant.bulk_approved', table, { id: id }); } catch (_) {}
+          } else if (action === 'reset_passwords') {
+            // Mark owner users for password reset on next login
+            try {
+              await supabaseRequest('PATCH',
+                '/users?tenant_id=eq.' + encodeURIComponent(id) + '&role=eq.owner',
+                { must_change_password: true, password_reset_requested_at: nowIso });
+            } catch (_) {}
+            try { logAudit(req, 'tenant.bulk_reset_passwords', table, { id: id }); } catch (_) {}
+          }
+          results.ok++;
+          results.items.push({ id: id, status: 'ok' });
+        } catch (e) {
+          results.failed++;
+          results.items.push({ id: id, status: 'error', error: String(e && e.message || e) });
+        }
+      }
+      sendJSON(res, { ok: true, action: action, processed: ids.length, succeeded: results.ok, failed: results.failed, items: results.items });
+    } catch (err) { sendError(res, err); }
+  });
+
   handlers['POST /api/owner/seats'] = requireAuth(async function (req, res) {
     try {
       if (!b36IsOwner(req)) return send403(res, { need_role: ['owner', 'admin', 'superadmin'], have_role: req.user.role });

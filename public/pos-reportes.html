@@ -530,6 +530,184 @@ async function exportarPDF() {
 }
 
 // ══════════════════════════════════════════════
+// SVG Chart helpers (vanilla, sin CDN) — autocontenido
+// ══════════════════════════════════════════════
+function vlxEsc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+function vlxTooltipHost(elementId){
+  var el = document.getElementById(elementId);
+  if (!el) return null;
+  var tip = el.querySelector('.vlx-tip');
+  if (!tip) {
+    tip = document.createElement('div');
+    tip.className = 'vlx-tip';
+    tip.style.cssText = 'position:absolute;pointer-events:none;background:#1a237e;color:#fff;padding:6px 10px;border-radius:6px;font-size:12px;line-height:1.3;box-shadow:0 4px 12px rgba(0,0,0,.25);opacity:0;transform:translate(-50%,-110%);transition:opacity .12s;white-space:nowrap;z-index:5';
+    el.appendChild(tip);
+    el.style.position = el.style.position || 'relative';
+  }
+  return tip;
+}
+function vlxRenderBarChart(elementId, data, options){
+  var el = document.getElementById(elementId);
+  if (!el || !Array.isArray(data) || !data.length) { if (el) el.innerHTML = '<div style="color:#888;padding:20px;font-size:12px">Sin datos</div>'; return; }
+  options = options || {};
+  var W = options.width || 720, H = options.height || 220, P = 28;
+  var max = Math.max.apply(null, data.map(function(d){ return Number(d.value)||0; }).concat([1]));
+  var bw = (W - P*2) / data.length * 0.78;
+  var gap = (W - P*2) / data.length * 0.22;
+  var color = options.color || '#1a237e';
+  var bars = data.map(function(d, i){
+    var v = Number(d.value)||0;
+    var h = (v/max) * (H - P*2);
+    var x = P + i*(bw+gap) + gap/2;
+    var y = H - P - h;
+    return '<rect class="vlx-bar" data-idx="'+i+'" x="'+x+'" y="'+y+'" width="'+bw+'" height="'+h+'" rx="3" fill="'+color+'" style="cursor:pointer;transition:opacity .12s"></rect>'+
+      '<text x="'+(x+bw/2)+'" y="'+(H-8)+'" text-anchor="middle" font-size="10" fill="#666">'+vlxEsc(d.label||'')+'</text>';
+  }).join('');
+  // Y axis ticks
+  var ticks = '';
+  for (var i=0;i<=4;i++){
+    var ty = P + i*((H-P*2)/4);
+    var val = Math.round(max - (max*i/4));
+    ticks += '<line x1="'+P+'" y1="'+ty+'" x2="'+(W-P)+'" y2="'+ty+'" stroke="#eee" stroke-width="1"/>'+
+             '<text x="4" y="'+(ty+3)+'" font-size="9" fill="#999">'+val+'</text>';
+  }
+  el.style.position = 'relative';
+  el.innerHTML = '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:100%;display:block">'+ticks+bars+'</svg>';
+  var tip = vlxTooltipHost(elementId);
+  el.querySelectorAll('.vlx-bar').forEach(function(rect){
+    rect.addEventListener('mouseenter', function(ev){
+      var d = data[+rect.getAttribute('data-idx')];
+      rect.style.opacity = .8;
+      if (tip) {
+        tip.innerHTML = '<b>'+vlxEsc(d.label||'')+'</b><br>'+(options.fmt ? options.fmt(d.value) : d.value);
+        var box = el.getBoundingClientRect();
+        tip.style.left = (ev.clientX - box.left) + 'px';
+        tip.style.top  = (ev.clientY - box.top) + 'px';
+        tip.style.opacity = 1;
+      }
+    });
+    rect.addEventListener('mousemove', function(ev){
+      if (!tip) return;
+      var box = el.getBoundingClientRect();
+      tip.style.left = (ev.clientX - box.left) + 'px';
+      tip.style.top  = (ev.clientY - box.top) + 'px';
+    });
+    rect.addEventListener('mouseleave', function(){ rect.style.opacity = 1; if (tip) tip.style.opacity = 0; });
+    if (typeof options.onClick === 'function') {
+      rect.addEventListener('click', function(){ options.onClick(data[+rect.getAttribute('data-idx')]); });
+    }
+  });
+}
+function vlxRenderPieChart(elementId, data, options){
+  var el = document.getElementById(elementId);
+  if (!el || !Array.isArray(data) || !data.length) { if (el) el.innerHTML = '<div style="color:#888;padding:20px;font-size:12px">Sin datos</div>'; return; }
+  options = options || {};
+  var W = options.width || 280, H = options.height || 220, cx = W/2, cy = H/2, r = Math.min(W,H)/2 - 16;
+  var total = data.reduce(function(s,d){ return s + (Number(d.value)||0); }, 0) || 1;
+  var ang = -Math.PI/2;
+  var paths = data.map(function(d, i){
+    var v = Number(d.value)||0;
+    var slice = (v/total) * Math.PI*2;
+    var x1 = cx + r*Math.cos(ang), y1 = cy + r*Math.sin(ang);
+    ang += slice;
+    var x2 = cx + r*Math.cos(ang), y2 = cy + r*Math.sin(ang);
+    var large = slice > Math.PI ? 1 : 0;
+    var color = d.color || ['#1a237e','#2e7d32','#c62828','#ef6c00','#6a1b9a','#00838f'][i % 6];
+    return '<path class="vlx-slice" data-idx="'+i+'" d="M '+cx+' '+cy+' L '+x1+' '+y1+' A '+r+' '+r+' 0 '+large+' 1 '+x2+' '+y2+' Z" fill="'+color+'" stroke="#fff" stroke-width="2" style="cursor:pointer;transition:opacity .12s"></path>';
+  }).join('');
+  // Legend
+  var legend = data.map(function(d,i){
+    var color = d.color || ['#1a237e','#2e7d32','#c62828','#ef6c00','#6a1b9a','#00838f'][i % 6];
+    var pct = Math.round((Number(d.value)||0)/total*100);
+    return '<div style="display:flex;align-items:center;gap:6px;font-size:11.5px;margin:3px 0"><span style="display:inline-block;width:10px;height:10px;background:'+color+';border-radius:2px"></span>'+vlxEsc(d.label||'')+' <span style="color:#888;margin-left:auto">'+pct+'%</span></div>';
+  }).join('');
+  el.style.position = 'relative';
+  el.innerHTML = '<div style="display:flex;align-items:center;gap:14px;height:100%"><svg viewBox="0 0 '+W+' '+H+'" style="flex:0 0 auto;height:100%;max-height:'+H+'px">'+paths+'</svg><div style="flex:1;min-width:0">'+legend+'</div></div>';
+  var tip = vlxTooltipHost(elementId);
+  el.querySelectorAll('.vlx-slice').forEach(function(p){
+    p.addEventListener('mouseenter', function(ev){
+      var d = data[+p.getAttribute('data-idx')];
+      var pct = Math.round((Number(d.value)||0)/total*100);
+      p.style.opacity = .8;
+      if (tip) {
+        tip.innerHTML = '<b>'+vlxEsc(d.label||'')+'</b><br>'+(options.fmt ? options.fmt(d.value) : d.value)+' ('+pct+'%)';
+        var box = el.getBoundingClientRect();
+        tip.style.left = (ev.clientX - box.left) + 'px';
+        tip.style.top  = (ev.clientY - box.top) + 'px';
+        tip.style.opacity = 1;
+      }
+    });
+    p.addEventListener('mousemove', function(ev){
+      if (!tip) return;
+      var box = el.getBoundingClientRect();
+      tip.style.left = (ev.clientX - box.left) + 'px';
+      tip.style.top  = (ev.clientY - box.top) + 'px';
+    });
+    p.addEventListener('mouseleave', function(){ p.style.opacity = 1; if (tip) tip.style.opacity = 0; });
+  });
+}
+function vlxRenderLineChart(elementId, data, options){
+  var el = document.getElementById(elementId);
+  if (!el || !Array.isArray(data) || !data.length) { if (el) el.innerHTML = '<div style="color:#888;padding:20px;font-size:12px">Sin datos</div>'; return; }
+  options = options || {};
+  var W = options.width || 720, H = options.height || 200, P = 28;
+  var max = Math.max.apply(null, data.map(function(d){ return Number(d.value)||0; }).concat([1]));
+  var stepX = (W - P*2) / Math.max(data.length-1,1);
+  var pts = data.map(function(d, i){
+    var v = Number(d.value)||0;
+    return [P + i*stepX, H - P - (v/max)*(H-P*2)];
+  });
+  var color = options.color || '#1a237e';
+  var path = 'M ' + pts.map(function(p){ return p.join(','); }).join(' L ');
+  var area = path + ' L ' + (W-P) + ',' + (H-P) + ' L ' + P + ',' + (H-P) + ' Z';
+  var ticks = '';
+  for (var i=0;i<=4;i++){
+    var ty = P + i*((H-P*2)/4);
+    var val = Math.round(max - (max*i/4));
+    ticks += '<line x1="'+P+'" y1="'+ty+'" x2="'+(W-P)+'" y2="'+ty+'" stroke="#eee" stroke-width="1"/>'+
+             '<text x="4" y="'+(ty+3)+'" font-size="9" fill="#999">'+val+'</text>';
+  }
+  var dots = pts.map(function(p, i){
+    return '<circle class="vlx-dot" data-idx="'+i+'" cx="'+p[0]+'" cy="'+p[1]+'" r="3.5" fill="'+color+'" stroke="#fff" stroke-width="1.5" style="cursor:pointer"></circle>';
+  }).join('');
+  // X labels (every Nth to avoid overlap)
+  var step = Math.ceil(data.length/8);
+  var xLabels = data.map(function(d, i){
+    if (i % step !== 0) return '';
+    return '<text x="'+pts[i][0]+'" y="'+(H-8)+'" text-anchor="middle" font-size="9" fill="#666">'+vlxEsc(d.label||'')+'</text>';
+  }).join('');
+  el.style.position = 'relative';
+  el.innerHTML = '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:100%;display:block">'+
+    '<defs><linearGradient id="vlxLG_'+elementId+'" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="'+color+'" stop-opacity=".25"/><stop offset="100%" stop-color="'+color+'" stop-opacity="0"/></linearGradient></defs>'+
+    ticks+
+    '<path d="'+area+'" fill="url(#vlxLG_'+elementId+')"/>'+
+    '<path d="'+path+'" fill="none" stroke="'+color+'" stroke-width="2.5" stroke-linejoin="round"/>'+
+    dots+xLabels+
+    '</svg>';
+  var tip = vlxTooltipHost(elementId);
+  el.querySelectorAll('.vlx-dot').forEach(function(c){
+    c.addEventListener('mouseenter', function(ev){
+      var d = data[+c.getAttribute('data-idx')];
+      c.setAttribute('r','5');
+      if (tip) {
+        tip.innerHTML = '<b>'+vlxEsc(d.label||'')+'</b><br>'+(options.fmt ? options.fmt(d.value) : d.value);
+        var box = el.getBoundingClientRect();
+        tip.style.left = (ev.clientX - box.left) + 'px';
+        tip.style.top  = (ev.clientY - box.top) + 'px';
+        tip.style.opacity = 1;
+      }
+    });
+    c.addEventListener('mousemove', function(ev){
+      if (!tip) return;
+      var box = el.getBoundingClientRect();
+      tip.style.left = (ev.clientX - box.left) + 'px';
+      tip.style.top  = (ev.clientY - box.top) + 'px';
+    });
+    c.addEventListener('mouseleave', function(){ c.setAttribute('r','3.5'); if (tip) tip.style.opacity = 0; });
+  });
+}
+
+// ══════════════════════════════════════════════
 // TAB: VENTAS
 // ══════════════════════════════════════════════
 async function renderVentas() {
@@ -579,11 +757,45 @@ async function renderVentas() {
       <div class="card-head">
         <div>
           <div class="card-title">Ventas por día</div>
-          <div class="card-sub">${fmtDate(from)} — hoy</div>
+          <div class="card-sub">${fmtDate(from)} — hoy · click en barra para filtrar tabla</div>
         </div>
       </div>
       <div class="card-body">
         <div class="chart-wrap"><canvas id="chartVentas"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Gráficas SVG inline (vanilla, sin CDN) -->
+    <div class="grid-2" style="margin-bottom:14px">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">📊 Ventas por día (SVG)</div>
+          <div class="card-sub">Click en una barra para filtrar la tabla</div>
+        </div>
+        <div class="card-body">
+          <div id="vlx-bar-ventas" style="height:240px"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">🥧 Métodos de pago (SVG)</div>
+          <div class="card-sub">Distribución del periodo</div>
+        </div>
+        <div class="card-body">
+          <div id="vlx-pie-metodos" style="height:240px"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-head">
+        <div>
+          <div class="card-title">📈 Tendencia 30 días (SVG)</div>
+          <div class="card-sub">Hover sobre los puntos para ver el detalle</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div id="vlx-line-trend" style="height:220px"></div>
       </div>
     </div>
 
@@ -593,12 +805,16 @@ async function renderVentas() {
         <div class="card-title">Últimas ventas</div>
         <div style="font-size:12px;color:var(--text-3)">${ventas.length} tickets en el período</div>
       </div>
+      <div id="vlx-filter-pill" style="display:none;padding:8px 12px;background:rgba(26,35,126,.08);border-radius:6px;font-size:12px;margin:0 0 10px 0">
+        Filtrando por fecha: <b id="vlx-filter-day"></b>
+        <button onclick="vlxClearDayFilter()" style="margin-left:8px;border:0;background:#1a237e;color:#fff;padding:3px 10px;border-radius:4px;cursor:pointer;font-size:11px">Limpiar</button>
+      </div>
       <div style="overflow-x:auto">
-        <table class="data-table">
+        <table class="data-table" id="vlx-ventas-table">
           <thead><tr><th>Ticket</th><th>Fecha</th><th>Artículos</th><th>Método</th><th>Cajero</th><th class="right">Total</th></tr></thead>
-          <tbody>
+          <tbody id="vlx-ventas-tbody">
             ${ventas.slice(-20).reverse().map(v => `
-              <tr>
+              <tr data-fecha="${fmtDate(v.fecha)}">
                 <td class="mono">#${esc(v.id)}</td>
                 <td style="font-size:11.5px;color:var(--text-3)">${fmtDateFull(v.fecha)}</td>
                 <td>${v.items.length} art.</td>
@@ -662,7 +878,57 @@ async function renderVentas() {
         },
       },
     });
+
+    // ===== SVG charts (vanilla, sin CDN) =====
+    // Bar chart "Ventas por día" — click → drill-down a tabla
+    vlxRenderBarChart('vlx-bar-ventas', dias.map(function(d){
+      return { label: d.label, value: Math.round(d.total) };
+    }), {
+      color: '#1a237e',
+      fmt: function(v){ return money(v); },
+      onClick: function(d){ vlxFilterByDay(d.label); }
+    });
+
+    // Pie chart "Métodos de pago"
+    var metMap = { efectivo:{label:'Efectivo',color:'#2e7d32'}, tarjeta:{label:'Tarjeta',color:'#1565c0'}, transferencia:{label:'Transferencia',color:'#6a1b9a'} };
+    var metSum = {};
+    ventas.forEach(function(v){ metSum[v.metodo] = (metSum[v.metodo]||0) + v.total; });
+    var pieData = Object.keys(metSum).map(function(k){
+      var m = metMap[k] || { label:k, color:'#757575' };
+      return { label: m.label, color: m.color, value: Math.round(metSum[k]) };
+    });
+    vlxRenderPieChart('vlx-pie-metodos', pieData, { fmt: function(v){ return money(v); } });
+
+    // Line chart "Tendencia 30 días" — fill from byDia (or pad to 30 with zeros)
+    var lineData = dias.map(function(d){ return { label: d.label, value: Math.round(d.total) }; });
+    if (lineData.length < 30) {
+      // pad backwards with zeros
+      var pad = 30 - lineData.length;
+      for (var i = 0; i < pad; i++) lineData.unshift({ label: '', value: 0 });
+    }
+    vlxRenderLineChart('vlx-line-trend', lineData.slice(-30), {
+      color: '#FBBF24',
+      fmt: function(v){ return money(v); }
+    });
   }, 50);
+}
+
+// Drill-down helpers exposed globally
+function vlxFilterByDay(dayLabel){
+  var pill = document.getElementById('vlx-filter-pill');
+  var dayEl = document.getElementById('vlx-filter-day');
+  var tbody = document.getElementById('vlx-ventas-tbody');
+  if (!tbody) return;
+  if (pill && dayEl) { pill.style.display = 'block'; dayEl.textContent = dayLabel; }
+  Array.prototype.forEach.call(tbody.querySelectorAll('tr'), function(tr){
+    tr.style.display = (tr.getAttribute('data-fecha') === dayLabel) ? '' : 'none';
+  });
+}
+function vlxClearDayFilter(){
+  var pill = document.getElementById('vlx-filter-pill');
+  var tbody = document.getElementById('vlx-ventas-tbody');
+  if (pill) pill.style.display = 'none';
+  if (tbody) Array.prototype.forEach.call(tbody.querySelectorAll('tr'), function(tr){ tr.style.display = ''; });
 }
 
 // ══════════════════════════════════════════════
