@@ -1082,7 +1082,9 @@ function vlxCheckProvider() {
   // Si el backend devuelve provider=mock, avisamos una sola vez
   try {
     if (sessionStorage.getItem('vlx_mock_warned') === '1') return;
-    fetch('/api/ai/provider', { method: 'GET' }).then(r => r.ok ? r.json() : null).then(j => {
+    const _t = (function(){try{return localStorage.getItem('volvix_token')||localStorage.getItem('volvixAuthToken');}catch(_){return null;}})();
+    const _h = _t ? { 'Authorization': 'Bearer ' + _t } : {};
+    fetch('/api/ai/provider', { method: 'GET', headers: _h }).then(r => r.ok ? r.json() : null).then(j => {
       if (j && j.provider === 'mock') {
         vlxToast('⚠️ Configura OPENAI_API_KEY para respuestas reales', 5000);
         sessionStorage.setItem('vlx_mock_warned', '1');

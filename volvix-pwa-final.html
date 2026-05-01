@@ -699,11 +699,15 @@ async function registerPushSubscription() {
       }
     }
     const payload = sub.toJSON ? sub.toJSON() : { endpoint: sub.endpoint, keys: sub.keys };
+    const _tok = (function(){ try { return localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken'); } catch(_){ return null; } })();
+    const _hdrs = { 'Content-Type': 'application/json' };
+    if (_tok) _hdrs['Authorization'] = 'Bearer ' + _tok;
     const r = await fetch('/api/push/subscribe', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: _hdrs,
       body: JSON.stringify(payload)
     }).catch(() => null);
+    if (r && r.status === 503) { log('warn', 'Push no configurado en backend (503)'); return sub; }
     if (r && r.ok) log('ok', 'Subscription registrada en el backend');
     else log('warn', 'Backend de push no respondió (¿endpoint montado?)');
     return sub;

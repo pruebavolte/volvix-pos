@@ -273,6 +273,13 @@ async function api(path, opts) {
     ...(tk ? { 'Authorization': 'Bearer ' + tk } : {})
   }, opts.headers || {});
   const r = await fetch(path, opts);
+  if (r.status === 401 && tk) {
+    // Token expired/invalid — clear and redirect to login (preserve location)
+    try { localStorage.removeItem('volvix_token'); localStorage.removeItem('volvixAuthToken'); localStorage.removeItem('volvix_jwt'); } catch(_){}
+    const redir = encodeURIComponent(location.pathname + location.search);
+    location.replace('/login.html?expired=1&redirect=' + redir);
+    return { status: 401, json: {} };
+  }
   return { status: r.status, json: await r.json().catch(()=>({})) };
 }
 function track(event, params) {

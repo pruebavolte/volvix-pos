@@ -231,6 +231,31 @@ const KEYWORDS = {
 let selectedTipo = 'retail';
 let activationsCount = 0;
 
+// AUTH helpers — Bearer + 401 redirect + 503 friendly
+function _vlxToken(){ try { return localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken'); } catch(_){ return null; } }
+function _vlxAuthHeaders(extra){
+  const h = Object.assign({'Content-Type':'application/json'}, extra||{});
+  const t = _vlxToken(); if (t) h['Authorization'] = 'Bearer ' + t;
+  return h;
+}
+function _vlxHandle401(r){
+  if (r && r.status === 401) {
+    try { localStorage.removeItem('volvix_token'); localStorage.removeItem('volvixAuthToken'); } catch(_){}
+    const redir = encodeURIComponent(location.pathname + location.search);
+    location.replace('/login.html?expired=1&redirect=' + redir);
+    return true;
+  }
+  return false;
+}
+async function _vlxApi(method, url, body){
+  const opts = { method, headers: _vlxAuthHeaders() };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(url, opts);
+  if (_vlxHandle401(r)) return { ok:false, status:401, json:null };
+  let json = null; try { json = await r.json(); } catch(_){}
+  return { ok: r.ok, status: r.status, json };
+}
+
 function log(msg, type='ok') {
   const box = document.getElementById('logBox');
   const d = document.createElement('div');
@@ -294,15 +319,18 @@ async function runActivation() {
     if (tenant_id) body.tenant_id = tenant_id;
     else {
       // get first tenant
-      const tr = await fetch('/api/tenants');
+      const tr = await fetch('/api/tenants', { headers: _vlxAuthHeaders() });
+      if (_vlxHandle401(tr)) { btn.disabled = false; return; }
       const tenants = await tr.json();
       if (!tenants.length) { log('No hay negocios registrados', 'err'); btn.disabled = false; return; }
       body.tenant_id = tenants[0].id;
     }
 
     const r = await fetch('/api/ai/activate', {
-      method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body)
+      method: 'POST', headers: _vlxAuthHeaders(), body: JSON.stringify(body)
     });
+    if (_vlxHandle401(r)) { btn.disabled = false; return; }
+    if (r.status === 503) { log('Motor IA no configurado (503)', 'warn'); btn.disabled = false; return; }
     const data = await r.json();
     if (data.error) { log(`Error: ${data.error}`, 'err'); }
     else {
@@ -317,14 +345,17 @@ async function runActivation() {
 async function runAllTenants() {
   log('Activando features para todos los negocios...', 'info');
   try {
-    const tr = await fetch('/api/tenants');
+    const tr = await fetch('/api/tenants', { headers: _vlxAuthHeaders() });
+    if (_vlxHandle401(tr)) return;
     const tenants = await tr.json();
     if (!tenants.length) { log('No hay negocios registrados', 'warn'); return; }
     for (const t of tenants) {
       const r = await fetch('/api/ai/activate', {
-        method: 'POST', headers: {'Content-Type':'application/json'},
+        method: 'POST', headers: _vlxAuthHeaders(),
         body: JSON.stringify({ tenant_id: t.id, tipo_negocio: t.tipo_negocio || 'retail' })
       });
+      if (_vlxHandle401(r)) return;
+      if (r.status === 503) { log(`${t.nombre || t.id}: IA no configurada (503)`, 'warn'); continue; }
       const data = await r.json();
       if (data.error) log(`${t.nombre}: Error - ${data.error}`, 'err');
       else log(`${t.nombre || t.id}: ${data.total} features activados`, 'ok');
@@ -365,7 +396,8 @@ function analyzeDescription() {
 
 async function loadStats() {
   try {
-    const r = await fetch('/api/stats');
+    const r = await fetch('/api/stats', { headers: _vlxAuthHeaders() });
+    if (_vlxHandle401(r)) return;
     const d = await r.json();
     document.getElementById('st-tenants').textContent = d.tenants ?? '—';
   } catch {}
@@ -374,7 +406,8 @@ async function loadStats() {
 // =========== AI USAGE STATS ===========
 async function loadAIStats() {
   try {
-    const r = await fetch('/api/ai/usage?period=month');
+    const r = await fetch('/api/ai/usage?period=month', { headers: _vlxAuthHeaders() });
+    if (_vlxHandle401(r)) return;
     if (!r.ok) throw new Error('no usage');
     const d = await r.json();
     document.getElementById('st-tokens').textContent = (d.tokens||0).toLocaleString();
@@ -401,7 +434,7 @@ async function toggleGlobalAI() {
   log(`IA tenant-global ${on?'ACTIVADA':'DESACTIVADA'}`, on?'ok':'warn');
   try {
     await fetch('/api/ai/global-toggle', {
-      method:'POST', headers:{'Content-Type':'application/json'},
+      method:'POST', headers: _vlxAuthHeaders(),
       body: JSON.stringify({ enabled: on })
     });
   } catch {}
@@ -413,11 +446,13 @@ async function testAIConnection() {
   const t0 = performance.now();
   try {
     const r = await fetch('/api/ai/chat', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ message: 'ping', context: 'health-check' })
+      method:'POST', headers: _vlxAuthHeaders(),
+      body: JSON.stringify({ messages: [{role:'user', content:'ping'}] })
     });
-    const d = await r.json();
+    if (_vlxHandle401(r)) return;
+    const d = await r.json().catch(()=>({}));
     const dt = Math.round(performance.now() - t0);
+    if (r.status === 503) { log(`✗ IA no configurada (${dt}ms)`, 'warn'); return; }
     if (r.ok) {
       log(`✓ OK · ${dt}ms · provider: ${d.provider||d.model||'claude'}`, 'ok');
     } else {
@@ -447,12 +482,19 @@ async function sendChat() {
   box.scrollTop = box.scrollHeight;
   try {
     const r = await fetch('/api/ai/chat', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ message: text, context: 'admin-test' })
+      method:'POST', headers: _vlxAuthHeaders(),
+      body: JSON.stringify({ messages: [{role:'user', content: text}], context: 'admin-test' })
     });
+    if (_vlxHandle401(r)) return;
+    if (r.status === 503) {
+      ph.remove();
+      box.insertAdjacentHTML('beforeend', `<div style="color:#f59e0b">⚠ IA no configurada en este entorno (503).</div>`);
+      box.scrollTop = box.scrollHeight;
+      return;
+    }
     const d = await r.json();
     ph.remove();
-    const reply = d.response || d.reply || d.text || JSON.stringify(d);
+    const reply = d.reply || d.response || d.text || JSON.stringify(d);
     box.insertAdjacentHTML('beforeend', `<div style="background:var(--bg3);padding:.5rem .75rem;border-radius:8px;max-width:80%">${escHtml(reply)}</div>`);
     loadAIStats(); // refresh tokens after each request
   } catch (e) {

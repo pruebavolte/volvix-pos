@@ -741,6 +741,23 @@ const LESSONS = [
 
 const STORAGE_KEY = 'volvix:academy:progress';
 
+// AUTH helpers — Bearer + 401 redirect
+function _vlxToken(){ try { return localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken'); } catch(_){ return null; } }
+function _vlxAuthHeaders(extra){
+  const h = Object.assign({'Content-Type':'application/json'}, extra||{});
+  const t = _vlxToken(); if (t) h['Authorization'] = 'Bearer ' + t;
+  return h;
+}
+function _vlxHandle401(r){
+  if (r && r.status === 401) {
+    try { localStorage.removeItem('volvix_token'); localStorage.removeItem('volvixAuthToken'); } catch(_){}
+    const redir = encodeURIComponent(location.pathname + location.search);
+    location.replace('/login.html?expired=1&redirect=' + redir);
+    return true;
+  }
+  return false;
+}
+
 function loadProgress() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch { return {}; }
 }
@@ -755,11 +772,12 @@ async function markComplete(lessonId) {
   renderLessons();
   // Persist to backend (best-effort)
   try {
-    await fetch('/api/user/academy-progress', {
+    const _r = await fetch('/api/user/academy-progress', {
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers: _vlxAuthHeaders(),
       body: JSON.stringify({ lesson_id: lessonId, completed: true })
     });
+    if (_vlxHandle401(_r)) return;
   } catch(e) { /* offline ok, localStorage es source of truth */ }
 }
 
@@ -845,7 +863,9 @@ async function downloadCert() {
   try {
     let userId = null;
     try {
-      const me = await fetch('/api/me').then(r => r.json());
+      const _meR = await fetch('/api/me', { headers: _vlxAuthHeaders() });
+      if (_vlxHandle401(_meR)) return;
+      const me = await _meR.json();
       userId = me?.id || me?.user_id;
     } catch {}
     const url = '/api/reports/academy-cert/pdf' + (userId ? ('?user_id=' + encodeURIComponent(userId)) : '');
@@ -859,7 +879,8 @@ async function downloadCert() {
 // Hidratar progreso desde backend si está disponible (no destructivo)
 (async function syncBackendProgress() {
   try {
-    const r = await fetch('/api/user/academy-progress');
+    const r = await fetch('/api/user/academy-progress', { headers: _vlxAuthHeaders() });
+    if (_vlxHandle401(r)) return;
     if (!r.ok) return;
     const remote = await r.json();
     if (Array.isArray(remote)) {
@@ -917,12 +938,18 @@ async function sendAI() {
   try {
     const r = await fetch('/api/ai/chat', {
       method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ message: text, context: 'academy' })
+      headers: _vlxAuthHeaders(),
+      body: JSON.stringify({ messages: [{ role:'user', content: text }], context: 'academy' })
     });
+    if (_vlxHandle401(r)) return;
+    if (r.status === 503) {
+      loading.remove();
+      msgs.insertAdjacentHTML('beforeend', `<div style="background:rgba(245,158,11,.08);color:#92400E;padding:10px 12px;border-radius:10px;">Tutor IA no configurado en este entorno (503).</div>`);
+      return;
+    }
     const d = await r.json();
     loading.remove();
-    msgs.insertAdjacentHTML('beforeend', `<div style="background:var(--bg);padding:10px 12px;border-radius:10px;">${(d.response||d.reply||d.text||'Respuesta no disponible')}</div>`);
+    msgs.insertAdjacentHTML('beforeend', `<div style="background:var(--bg);padding:10px 12px;border-radius:10px;">${(d.reply||d.response||d.text||'Respuesta no disponible')}</div>`);
   } catch (e) {
     loading.remove();
     msgs.insertAdjacentHTML('beforeend', `<div style="background:rgba(220,38,38,.08);color:#B91C1C;padding:10px 12px;border-radius:10px;">No pude conectar con el tutor IA. Intenta en un momento.</div>`);

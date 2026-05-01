@@ -177,6 +177,16 @@ async function api(method, path, body){
     method, headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok()},
     body: body ? JSON.stringify(body) : undefined
   });
+  if (r.status === 401) {
+    try { localStorage.removeItem('volvix_token'); localStorage.removeItem('volvixAuthToken'); } catch(_){}
+    const redir = encodeURIComponent(location.pathname + location.search);
+    location.replace('/login.html?expired=1&redirect=' + redir);
+    throw new Error('HTTP 401');
+  }
+  if (r.status === 503) {
+    if (window.VolvixUI) VolvixUI.toast({type:'error', message:'KDS no configurado (503)'});
+    throw new Error('HTTP 503');
+  }
   if(!r.ok) throw new Error('HTTP '+r.status);
   return r.json();
 }
@@ -201,6 +211,12 @@ async function setStatus(id, status){
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok()},
       body: JSON.stringify({status})
     });
+    if (r.status === 401) {
+      try { localStorage.removeItem('volvix_token'); localStorage.removeItem('volvixAuthToken'); } catch(_){}
+      const redir = encodeURIComponent(location.pathname + location.search);
+      location.replace('/login.html?expired=1&redirect=' + redir);
+      return;
+    }
     if(!r.ok) throw new Error('HTTP '+r.status);
     refresh();
   }catch(e){

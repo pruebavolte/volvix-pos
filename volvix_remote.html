@@ -371,6 +371,15 @@ const VLX_REMOTE = (function () {
     const opts = { method, headers, credentials: 'include' };
     if (body) opts.body = JSON.stringify(body);
     const r = await fetch(path, opts);
+    if (r.status === 401) {
+      try { localStorage.removeItem('volvix_token'); localStorage.removeItem('volvixAuthToken'); } catch(_){}
+      const redir = encodeURIComponent(location.pathname + location.search);
+      location.replace('/login.html?expired=1&redirect=' + redir);
+      return { ok:false, status:401, json:null };
+    }
+    if (r.status === 503) {
+      logLine('info', ts() + ' ⚠ Servicio remoto no configurado (503)');
+    }
     let json = null;
     try { json = await r.json(); } catch (_) {}
     return { ok: r.ok, status: r.status, json };
