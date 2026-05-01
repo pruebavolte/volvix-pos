@@ -1,6 +1,16 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<script id="vlx-internal-gate">
+(function(){
+  var token = localStorage.getItem('volvix_token') || '';
+  if (!token) { location.replace('/login.html?redirect=' + encodeURIComponent(location.pathname)); return; }
+  try {
+    var p = JSON.parse(atob((token.split('.')[1] || '').replace(/-/g,'+').replace(/_/g,'/')));
+    if (p.role !== 'superadmin') { location.replace('/internal/index.html'); }
+  } catch(e) { location.replace('/login.html'); }
+})();
+</script>
   <meta name="robots" content="noindex, nofollow">
 <meta charset="UTF-8">
 <title>🧪 Volvix QA - Escenarios de Prueba</title>

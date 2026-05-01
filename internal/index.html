@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex,nofollow,noarchive" />
+<title>Volvix DEV / INTERNAL ZONE</title>
+<style>
+  :root { --amber:#FBBF24; --navy:#1E3A8A; --dark:#0A0A0A; --red:#DC2626; --gray:#1f2937; }
+  * { box-sizing: border-box; }
+  body {
+    margin:0; min-height:100vh; background:var(--dark); color:#e5e7eb;
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    background-image:
+      linear-gradient(rgba(251,191,36,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(251,191,36,0.04) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  header.banner {
+    background: repeating-linear-gradient(45deg, var(--red) 0 12px, #7f1d1d 12px 24px);
+    color:#fff; padding:8px 20px; font-weight:800; letter-spacing:2px;
+    text-align:center; font-size:12px; border-bottom:2px solid var(--amber);
+    text-shadow:0 1px 2px rgba(0,0,0,.6);
+  }
+  .wrap { max-width:1100px; margin:0 auto; padding:36px 22px; }
+  h1 {
+    margin:0 0 8px; font-size:32px; color:var(--amber);
+    text-shadow:0 0 20px rgba(251,191,36,.35);
+  }
+  h1 span.tag { color:#fff; background:var(--navy); padding:4px 10px; border-radius:6px; font-size:14px; vertical-align:middle; margin-left:8px; }
+  p.lede { color:#9ca3af; margin:0 0 28px; font-size:14px; }
+  .userbar {
+    display:flex; justify-content:space-between; align-items:center;
+    background:rgba(255,255,255,.03); border:1px solid #333; border-radius:10px;
+    padding:10px 14px; margin-bottom:24px; font-size:13px;
+  }
+  .userbar b { color:var(--amber); }
+  .grid { display:grid; gap:14px; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); }
+  a.card {
+    display:block; text-decoration:none; color:inherit;
+    background:linear-gradient(180deg, rgba(30,58,138,.18) 0%, rgba(0,0,0,.4) 100%);
+    border:1px solid #2c3a52; border-radius:12px; padding:16px;
+    transition:transform .15s, border-color .15s, box-shadow .15s;
+  }
+  a.card:hover { transform:translateY(-2px); border-color:var(--amber); box-shadow:0 8px 24px rgba(251,191,36,.12); }
+  a.card .icon { font-size:22px; margin-bottom:8px; }
+  a.card h3 { margin:0 0 6px; font-size:15px; color:var(--amber); }
+  a.card p { margin:0; font-size:12px; color:#9ca3af; line-height:1.5; }
+  a.card code { font-size:11px; color:#cbd5e1; background:rgba(0,0,0,.4); padding:2px 6px; border-radius:4px; display:inline-block; margin-top:8px; }
+  .denied {
+    max-width:520px; margin:80px auto; padding:32px;
+    background:rgba(220,38,38,.08); border:1px solid var(--red); border-radius:14px;
+    text-align:center;
+  }
+  .denied h2 { color:var(--red); margin:0 0 8px; }
+  .denied a { color:var(--amber); }
+  footer.foot { margin-top:32px; padding-top:16px; border-top:1px solid #222; font-size:11px; color:#6b7280; text-align:center; }
+  button.logout {
+    background:transparent; border:1px solid #444; color:#cbd5e1; padding:6px 12px;
+    border-radius:6px; cursor:pointer; font-family:inherit; font-size:12px;
+  }
+  button.logout:hover { border-color:var(--red); color:var(--red); }
+</style>
+</head>
+<body>
+<header class="banner">DEV / INTERNAL ZONE — RESTRICTED ACCESS — SUPERADMIN ONLY</header>
+
+<div id="vlx-root"></div>
+
+<script>
+(function(){
+  var TOKEN_KEY = 'volvix_token';
+  var root = document.getElementById('vlx-root');
+
+  function decode(token){
+    try {
+      var p = token.split('.');
+      if (p.length < 2) return null;
+      // base64url -> base64
+      var b64 = p[1].replace(/-/g,'+').replace(/_/g,'/');
+      while (b64.length % 4) b64 += '=';
+      return JSON.parse(atob(b64));
+    } catch (e) { return null; }
+  }
+
+  function denied(reason){
+    root.innerHTML =
+      '<div class="denied">' +
+        '<h2>403 — Access Denied</h2>' +
+        '<p>' + reason + '</p>' +
+        '<p><a href="/login.html?redirect=' + encodeURIComponent('/internal/index.html') + '">Iniciar sesión</a></p>' +
+      '</div>';
+  }
+
+  var token = '';
+  try { token = localStorage.getItem(TOKEN_KEY) || ''; } catch (_){}
+
+  if (!token) {
+    setTimeout(function(){
+      location.replace('/login.html?redirect=' + encodeURIComponent('/internal/index.html'));
+    }, 50);
+    denied('No hay sesión activa. Redirigiendo a login…');
+    return;
+  }
+
+  var payload = decode(token);
+  if (!payload) { denied('Token inválido.'); return; }
+
+  var role = payload.role || payload.user_role || '';
+  if (role !== 'superadmin') {
+    denied('Tu rol "' + (role || 'desconocido') + '" no tiene acceso a esta zona. Solo superadmins.');
+    return;
+  }
+
+  var email = payload.email || payload.sub || 'unknown';
+  var tenant = payload.tenant_id || payload.tenantId || 'n/a';
+
+  var pages = [
+    {
+      file: 'BITACORA_LIVE.html',
+      icon: '[L]',
+      title: 'Bitácora Live',
+      desc: 'Log en vivo de pruebas, deployments y eventos del sistema. Útil para auditoría y debugging en producción.'
+    },
+    {
+      file: 'MATRIZ_PRUEBAS_LOCAL.html',
+      icon: '[M]',
+      title: 'Matriz de Pruebas Local',
+      desc: 'Matriz completa de pruebas funcionales por módulo. Marca pass/fail por feature en sesiones de QA.'
+    },
+    {
+      file: 'volvix-qa-scenarios.html',
+      icon: '[Q]',
+      title: 'QA Scenarios',
+      desc: 'Catálogo de escenarios E2E predefinidos: ventas, devoluciones, cortes, multipos, CFDI, etc.'
+    },
+    {
+      file: 'volvix-sandbox.html',
+      icon: '[S]',
+      title: 'Sandbox',
+      desc: 'Entorno de pruebas aislado para experimentar con APIs internas, mocks y nuevas integraciones.'
+    },
+    {
+      file: 'volvix-modals-demo.html',
+      icon: '[D]',
+      title: 'Modals Demo',
+      desc: 'Galería de todos los modales del sistema (toasts, confirmaciones, drawers, sheets) con triggers de prueba.'
+    },
+    {
+      file: 'MATRIZ_PRUEBAS_LOCAL_v1_backup.html',
+      icon: '[B]',
+      title: 'Matriz Pruebas v1 (backup)',
+      desc: 'Versión histórica de la matriz de pruebas. Solo lectura — referencia comparativa.'
+    }
+  ];
+
+  var cards = pages.map(function(p){
+    return '<a class="card" href="/internal/' + p.file + '">' +
+      '<div class="icon">' + p.icon + '</div>' +
+      '<h3>' + p.title + '</h3>' +
+      '<p>' + p.desc + '</p>' +
+      '<code>/internal/' + p.file + '</code>' +
+    '</a>';
+  }).join('');
+
+  root.innerHTML =
+    '<div class="wrap">' +
+      '<h1>Internal Portal <span class="tag">SUPERADMIN</span></h1>' +
+      '<p class="lede">Acceso restringido a herramientas internas de QA, sandbox y bitácora. Estas páginas no están indexadas y no son accesibles sin token de superadmin.</p>' +
+      '<div class="userbar">' +
+        '<div>Sesión: <b>' + email + '</b> · tenant <b>' + tenant + '</b> · role <b>' + role + '</b></div>' +
+        '<button class="logout" id="vlx-logout">Cerrar sesión</button>' +
+      '</div>' +
+      '<div class="grid">' + cards + '</div>' +
+      '<footer class="foot">Volvix POS · Internal Tools · ' + new Date().getFullYear() + ' · DO NOT SHARE THIS URL</footer>' +
+    '</div>';
+
+  document.getElementById('vlx-logout').addEventListener('click', function(){
+    try { localStorage.removeItem(TOKEN_KEY); } catch(_){}
+    location.replace('/login.html');
+  });
+})();
+</script>
+</body>
+</html>

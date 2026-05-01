@@ -815,6 +815,19 @@
   // ---------------------------------------------------------------------------
   // Bootstrap
   // ---------------------------------------------------------------------------
+  function loadNotificationsCenter() {
+    if (window.__vlxNotifWiringLoaded) return;
+    if (document.querySelector('script[data-vlx-notif]')) return;
+    try {
+      var s = document.createElement('script');
+      s.src = '/volvix-notifications-wiring.js';
+      s.async = true;
+      s.defer = true;
+      s.setAttribute('data-vlx-notif', '1');
+      document.head.appendChild(s);
+    } catch (_) {}
+  }
+
   whenReady(function () {
     try { setupAnalytics(); }        catch (e) { console.warn('[vlx] analytics', e); }
     try { setupRegistroOtp(); }      catch (e) { console.warn('[vlx] otp', e); }
@@ -823,5 +836,6 @@
     try { setupCorteZ(); }           catch (e) { console.warn('[vlx] corteZ', e); }
     try { setupCfdi(); }             catch (e) { console.warn('[vlx] cfdi', e); }
     try { setupHealthPill(); }       catch (e) { console.warn('[vlx] pill', e); }
+    try { loadNotificationsCenter(); } catch (e) { console.warn('[vlx] notif', e); }
   });
 })();

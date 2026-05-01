@@ -829,6 +829,130 @@ async function handleEmail(req, res, ctx) {
   }
 }
 
+// ---------- CFDI templates (saved receptor presets) ----------
+
+async function ensureTemplatesTable() {
+  // Best-effort: attempt to create on first use. Silently no-op if RPC not available.
+  try {
+    await sb().rpc('exec_sql', {
+      sql: "CREATE TABLE IF NOT EXISTS cfdi_templates (" +
+        "id uuid DEFAULT gen_random_uuid() PRIMARY KEY," +
+        "tenant_id text NOT NULL," +
+        "nombre text NOT NULL," +
+        "rfc_receptor text NOT NULL," +
+        "razon_social text," +
+        "domicilio_fiscal_cp text," +
+        "regimen_fiscal text," +
+        "uso_cfdi text DEFAULT 'G03'," +
+        "metodo_pago text DEFAULT 'PUE'," +
+        "forma_pago text DEFAULT '03'," +
+        "is_default boolean DEFAULT false," +
+        "created_at timestamptz DEFAULT now())"
+    });
+  } catch (_) { /* ignore */ }
+}
+
+function tenantFromCtx(req, ctx, body, parsedUrl) {
+  return (ctx && (ctx.tenant_id || ctx.tenantId)) ||
+    (body && (body.tenant_id || body.tenantId)) ||
+    (parsedUrl && parsedUrl.query && (parsedUrl.query.tenant_id || parsedUrl.query.tenantId)) ||
+    (req && req.headers && req.headers['x-tenant-id']) || null;
+}
+
+async function handleTemplatesList(req, res, parsedUrl, ctx) {
+  await ensureTemplatesTable();
+  const tenantId = tenantFromCtx(req, ctx, null, parsedUrl);
+  if (!tenantId) return json(res, 400, { error: 'tenant_id required' });
+  try {
+    const { data, error } = await sb()
+      .from('cfdi_templates')
+      .select('*')
+      .eq('tenant_id', tenantId)
+      .order('is_default', { ascending: false })
+      .order('created_at', { ascending: false });
+    if (error) return json(res, 500, { error: error.message, items: [] });
+    return json(res, 200, { items: data || [] });
+  } catch (e) {
+    return json(res, 500, { error: e.message, items: [] });
+  }
+}
+
+async function handleTemplatesCreate(req, res, ctx) {
+  await ensureTemplatesTable();
+  const body = await readBody(req);
+  const tenantId = tenantFromCtx(req, ctx, body);
+  if (!tenantId) return json(res, 400, { error: 'tenant_id required' });
+  if (!body.nombre) return json(res, 400, { error: 'nombre required' });
+  if (!body.rfc_receptor) return json(res, 400, { error: 'rfc_receptor required' });
+  const row = {
+    tenant_id: tenantId,
+    nombre: body.nombre,
+    rfc_receptor: String(body.rfc_receptor).toUpperCase().trim(),
+    razon_social: body.razon_social || null,
+    domicilio_fiscal_cp: body.domicilio_fiscal_cp || null,
+    regimen_fiscal: body.regimen_fiscal || null,
+    uso_cfdi: body.uso_cfdi || 'G03',
+    metodo_pago: body.metodo_pago || 'PUE',
+    forma_pago: body.forma_pago || '03',
+    is_default: !!body.is_default
+  };
+  try {
+    if (row.is_default) {
+      await sb().from('cfdi_templates').update({ is_default: false }).eq('tenant_id', tenantId);
+    }
+    const { data, error } = await sb().from('cfdi_templates').insert(row).select().single();
+    if (error) return json(res, 500, { error: error.message });
+    return json(res, 201, { template: data });
+  } catch (e) {
+    return json(res, 500, { error: e.message });
+  }
+}
+
+async function handleTemplatesUpdate(req, res, id, ctx) {
+  await ensureTemplatesTable();
+  const body = await readBody(req);
+  const tenantId = tenantFromCtx(req, ctx, body);
+  if (!tenantId) return json(res, 400, { error: 'tenant_id required' });
+  const patch = {};
+  ['nombre','rfc_receptor','razon_social','domicilio_fiscal_cp','regimen_fiscal','uso_cfdi','metodo_pago','forma_pago','is_default'].forEach(function (k) {
+    if (body[k] !== undefined) patch[k] = body[k];
+  });
+  if (patch.rfc_receptor) patch.rfc_receptor = String(patch.rfc_receptor).toUpperCase().trim();
+  try {
+    if (patch.is_default) {
+      await sb().from('cfdi_templates').update({ is_default: false }).eq('tenant_id', tenantId);
+    }
+    const { data, error } = await sb()
+      .from('cfdi_templates')
+      .update(patch)
+      .eq('id', id)
+      .eq('tenant_id', tenantId)
+      .select()
+      .single();
+    if (error) return json(res, 500, { error: error.message });
+    return json(res, 200, { template: data });
+  } catch (e) {
+    return json(res, 500, { error: e.message });
+  }
+}
+
+async function handleTemplatesDelete(req, res, id, parsedUrl, ctx) {
+  await ensureTemplatesTable();
+  const tenantId = tenantFromCtx(req, ctx, null, parsedUrl);
+  if (!tenantId) return json(res, 400, { error: 'tenant_id required' });
+  try {
+    const { error } = await sb()
+      .from('cfdi_templates')
+      .delete()
+      .eq('id', id)
+      .eq('tenant_id', tenantId);
+    if (error) return json(res, 500, { error: error.message });
+    return json(res, 200, { ok: true });
+  } catch (e) {
+    return json(res, 500, { error: e.message });
+  }
+}
+
 // ---------- router ----------
 
 module.exports = async function handleCFDI(req, res, parsedUrl, ctx) {
@@ -852,6 +976,16 @@ module.exports = async function handleCFDI(req, res, parsedUrl, ctx) {
     if (method === 'POST' && path === '/api/cfdi/csd/upload') return handleCsdUpload(req, res);
     if (method === 'POST' && path === '/api/cfdi/public-link') return handlePublicLink(req, res);
     if (method === 'POST' && path === '/api/cfdi/email') return handleEmail(req, res, ctx);
+
+    // Templates
+    if (method === 'GET'  && path === '/api/cfdi/templates') return handleTemplatesList(req, res, parsedUrl, ctx);
+    if (method === 'POST' && path === '/api/cfdi/templates') return handleTemplatesCreate(req, res, ctx);
+    const tplRoute = path.match(/^\/api\/cfdi\/templates\/([^/]+)$/);
+    if (tplRoute) {
+      const tplId = decodeURIComponent(tplRoute[1]);
+      if (method === 'PUT' || method === 'PATCH') return handleTemplatesUpdate(req, res, tplId, ctx);
+      if (method === 'DELETE') return handleTemplatesDelete(req, res, tplId, parsedUrl, ctx);
+    }
 
     const uuidRoute = path.match(/^\/api\/cfdi\/([^/]+)\/(xml|pdf|status)$/);
     if (uuidRoute && method === 'GET') {

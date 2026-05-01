@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Volvix · CFDI Templates</title>
+<script src="/auth-gate.js"></script>
+<script defer src="/volvix-modules-wiring.js"></script>
+<style>
+  :root { --amber:#FBBF24; --navy:#1E3A8A; --dark:#0A0A0A; --gray:#1f2937; --soft:#111827; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--dark); color:#e5e7eb; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; min-height:100vh; }
+  header.top {
+    background:linear-gradient(90deg,var(--navy),#2563eb); color:#fff;
+    padding:14px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;
+    border-bottom:2px solid var(--amber);
+  }
+  header.top h1 { margin:0; font-size:20px; color:var(--amber); }
+  header.top a { color:#dbeafe; text-decoration:none; font-size:13px; }
+  header.top a:hover { color:var(--amber); }
+  .wrap { display:grid; grid-template-columns:1fr 1fr; gap:18px; padding:18px; max-width:1300px; margin:0 auto; }
+  @media (max-width: 900px) { .wrap { grid-template-columns:1fr; } }
+  .panel {
+    background:var(--soft); border:1px solid #1f2937; border-radius:12px;
+    padding:16px; min-height:300px;
+  }
+  .panel h2 { margin:0 0 12px; color:var(--amber); font-size:16px; display:flex; justify-content:space-between; align-items:center; }
+  .panel h2 button.refresh {
+    background:transparent; border:1px solid var(--amber); color:var(--amber);
+    padding:4px 10px; border-radius:6px; cursor:pointer; font-size:12px;
+  }
+  label { display:block; font-size:12px; color:#9ca3af; margin:10px 0 4px; font-weight:600; }
+  input, select, textarea {
+    width:100%; padding:8px 10px; border-radius:8px; border:1px solid #374151;
+    background:#0f172a; color:#e5e7eb; font-size:13px; font-family:inherit;
+  }
+  input:focus, select:focus, textarea:focus { outline:none; border-color:var(--amber); }
+  .row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .row3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+  .actions { margin-top:14px; display:flex; gap:8px; flex-wrap:wrap; }
+  button.btn {
+    padding:8px 14px; border-radius:8px; border:none; cursor:pointer;
+    font-weight:600; font-size:13px; font-family:inherit;
+  }
+  button.btn-primary { background:var(--amber); color:var(--dark); }
+  button.btn-primary:hover { filter:brightness(1.08); }
+  button.btn-ghost { background:transparent; border:1px solid #374151; color:#cbd5e1; }
+  button.btn-ghost:hover { border-color:var(--amber); color:var(--amber); }
+  button.btn-danger { background:#dc2626; color:#fff; }
+  .tpl-list { display:flex; flex-direction:column; gap:8px; max-height:520px; overflow-y:auto; }
+  .tpl-card {
+    background:rgba(255,255,255,.03); border:1px solid #1f2937; border-radius:10px;
+    padding:12px; cursor:pointer; transition:border-color .12s, background .12s;
+  }
+  .tpl-card:hover { border-color:var(--amber); }
+  .tpl-card.active { border-color:var(--amber); background:rgba(251,191,36,.06); }
+  .tpl-card .tn { font-weight:700; color:#fff; font-size:14px; }
+  .tpl-card .tr { font-size:12px; color:#9ca3af; margin-top:2px; }
+  .tpl-card .tagrow { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+  .tag { font-size:10px; background:#374151; color:#d1d5db; padding:2px 6px; border-radius:4px; font-weight:600; }
+  .tag.default { background:var(--amber); color:var(--dark); }
+  .tag.uso { background:#065f46; color:#a7f3d0; }
+  .tpl-card .actions { margin-top:8px; display:flex; gap:6px; }
+  .tpl-card button { padding:4px 8px; font-size:11px; }
+  pre.preview {
+    background:#020617; color:#cbd5e1; border:1px solid #1f2937; border-radius:8px;
+    padding:12px; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:11px;
+    white-space:pre-wrap; word-break:break-word; max-height:300px; overflow-y:auto;
+    margin-top:10px;
+  }
+  .empty { text-align:center; color:#6b7280; padding:30px 20px; font-size:13px; }
+  .checkbox-row { display:flex; align-items:center; gap:8px; margin-top:10px; font-size:13px; }
+  .checkbox-row input { width:auto; }
+  .toolbar { display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; }
+  .toolbar input { flex:1; min-width:200px; }
+  .footer-note { margin-top:14px; font-size:11px; color:#6b7280; line-height:1.5; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>CFDI · Templates de receptor</h1>
+  <nav>
+    <a href="/owner-dashboard.html">&larr; Dashboard</a>
+  </nav>
+</header>
+
+<div class="wrap">
+
+  <!-- LEFT: list -->
+  <section class="panel">
+    <h2>
+      Plantillas guardadas
+      <button class="refresh" id="vlx-refresh" type="button">Refrescar</button>
+    </h2>
+    <div class="toolbar">
+      <input type="search" id="vlx-search" placeholder="Buscar por nombre o RFC…" />
+    </div>
+    <div class="tpl-list" id="vlx-list">
+      <div class="empty">Cargando plantillas…</div>
+    </div>
+  </section>
+
+  <!-- RIGHT: editor + preview -->
+  <section class="panel">
+    <h2>
+      <span id="vlx-form-title">Nueva plantilla</span>
+      <button class="refresh" id="vlx-new" type="button">+ Nueva</button>
+    </h2>
+    <form id="vlx-form" onsubmit="return false;">
+      <input type="hidden" id="f-id" />
+      <label for="f-nombre">Nombre interno</label>
+      <input id="f-nombre" required placeholder="Ej. Cliente Recurrente Acme" />
+
+      <div class="row2">
+        <div>
+          <label for="f-rfc">RFC receptor</label>
+          <input id="f-rfc" required placeholder="XAXX010101000" maxlength="13" style="text-transform:uppercase" />
+        </div>
+        <div>
+          <label for="f-razon">Razón social</label>
+          <input id="f-razon" placeholder="ACME SA DE CV" />
+        </div>
+      </div>
+
+      <div class="row2">
+        <div>
+          <label for="f-cp">CP domicilio fiscal</label>
+          <input id="f-cp" placeholder="64000" maxlength="5" />
+        </div>
+        <div>
+          <label for="f-regimen">Régimen fiscal</label>
+          <select id="f-regimen">
+            <option value="">(seleccionar)</option>
+            <option value="601">601 — General Personas Morales</option>
+            <option value="603">603 — Personas Morales sin fines de lucro</option>
+            <option value="605">605 — Sueldos y Salarios</option>
+            <option value="606">606 — Arrendamiento</option>
+            <option value="612">612 — Personas Físicas Actividad Empresarial</option>
+            <option value="616">616 — Sin obligaciones fiscales</option>
+            <option value="621">621 — Incorporación Fiscal</option>
+            <option value="626">626 — RESICO</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row3">
+        <div>
+          <label for="f-uso">Uso CFDI</label>
+          <select id="f-uso">
+            <option value="G01">G01 — Adquisición de mercancías</option>
+            <option value="G03" selected>G03 — Gastos en general</option>
+            <option value="P01">P01 — Por definir</option>
+            <option value="D01">D01 — Honorarios médicos</option>
+            <option value="I01">I01 — Construcciones</option>
+            <option value="S01">S01 — Sin efectos fiscales</option>
+            <option value="CP01">CP01 — Pagos</option>
+          </select>
+        </div>
+        <div>
+          <label for="f-metodo">Método de pago</label>
+          <select id="f-metodo">
+            <option value="PUE" selected>PUE — Pago en una exhibición</option>
+            <option value="PPD">PPD — Pago en parcialidades</option>
+          </select>
+        </div>
+        <div>
+          <label for="f-forma">Forma de pago</label>
+          <select id="f-forma">
+            <option value="01">01 — Efectivo</option>
+            <option value="02">02 — Cheque nominativo</option>
+            <option value="03" selected>03 — Transferencia electrónica</option>
+            <option value="04">04 — Tarjeta de crédito</option>
+            <option value="28">28 — Tarjeta de débito</option>
+            <option value="99">99 — Por definir</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="checkbox-row">
+        <input type="checkbox" id="f-default" />
+        <label for="f-default" style="margin:0;color:#cbd5e1;cursor:pointer">Marcar como plantilla por defecto del tenant</label>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="vlx-save" type="button">Guardar plantilla</button>
+        <button class="btn btn-ghost" id="vlx-clear" type="button">Limpiar</button>
+        <button class="btn btn-ghost" id="vlx-apply" type="button" disabled>Aplicar a venta</button>
+      </div>
+    </form>
+
+    <h2 style="margin-top:18px">Preview XML</h2>
+    <pre class="preview" id="vlx-preview">// Completa el formulario para generar el preview</pre>
+
+    <p class="footer-note">
+      El preview muestra los datos del receptor que se enviarán al PAC. El XML real se genera al timbrar la venta usando esta plantilla
+      vía <code>/api/cfdi/stamp</code>. La plantilla por defecto se aplica automáticamente en facturación rápida.
+    </p>
+  </section>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var TOKEN_KEY = 'volvix_token';
+  function tok() { try { return localStorage.getItem(TOKEN_KEY) || ''; } catch (_) { return ''; } }
+  function tenantFromJwt() {
+    try {
+      var b = (tok().split('.')[1] || '').replace(/-/g,'+').replace(/_/g,'/');
+      while (b.length % 4) b += '=';
+      var p = JSON.parse(atob(b));
+      return p.tenant_id || p.tenantId || '';
+    } catch (_) { return ''; }
+  }
+  var TENANT = tenantFromJwt();
+
+  function api(method, url, body) {
+    var headers = { 'Content-Type': 'application/json' };
+    var t = tok();
+    if (t) headers['Authorization'] = 'Bearer ' + t;
+    var init = { method: method, headers: headers };
+    if (body !== undefined && body !== null && method !== 'GET') init.body = JSON.stringify(body);
+    return fetch(url, init).then(function (r) {
+      var ct = r.headers.get('content-type') || '';
+      var p = ct.indexOf('json') !== -1 ? r.json() : r.text();
+      return p.then(function (d) { return { ok: r.ok, status: r.status, data: d }; });
+    });
+  }
+
+  function toast(msg, type) {
+    if (typeof window.vlxToast === 'function') return window.vlxToast(msg, type);
+    alert(msg);
+  }
+
+  var state = { items: [], filter: '', selectedId: null };
+
+  // ---------------- DOM refs ----------------
+  var $ = function (id) { return document.getElementById(id); };
+
+  // ---------------- list ----------------
+  function load() {
+    api('GET', '/api/cfdi/templates?tenant_id=' + encodeURIComponent(TENANT)).then(function (r) {
+      if (!r.ok) {
+        $('vlx-list').innerHTML = '<div class="empty">Error al cargar: ' + (r.data && r.data.error || r.status) + '</div>';
+        return;
+      }
+      state.items = (r.data && r.data.items) || [];
+      render();
+    }).catch(function (e) {
+      $('vlx-list').innerHTML = '<div class="empty">Error de red</div>';
+    });
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+    });
+  }
+
+  function render() {
+    var q = state.filter.toLowerCase();
+    var rows = state.items.filter(function (it) {
+      if (!q) return true;
+      return ((it.nombre || '') + ' ' + (it.rfc_receptor || '')).toLowerCase().indexOf(q) !== -1;
+    });
+    if (!rows.length) {
+      $('vlx-list').innerHTML = '<div class="empty">No hay plantillas guardadas todavía.</div>';
+      return;
+    }
+    $('vlx-list').innerHTML = rows.map(function (it) {
+      return '<div class="tpl-card' + (state.selectedId === it.id ? ' active' : '') + '" data-id="' + escapeHtml(it.id) + '">' +
+        '<div class="tn">' + escapeHtml(it.nombre) + '</div>' +
+        '<div class="tr">' + escapeHtml(it.rfc_receptor) + (it.razon_social ? ' · ' + escapeHtml(it.razon_social) : '') + '</div>' +
+        '<div class="tagrow">' +
+          (it.is_default ? '<span class="tag default">DEFAULT</span>' : '') +
+          '<span class="tag uso">Uso ' + escapeHtml(it.uso_cfdi || 'G03') + '</span>' +
+          '<span class="tag">' + escapeHtml(it.metodo_pago || 'PUE') + '</span>' +
+          '<span class="tag">Forma ' + escapeHtml(it.forma_pago || '03') + '</span>' +
+        '</div>' +
+        '<div class="actions">' +
+          '<button class="btn btn-ghost" data-act="edit">Editar</button>' +
+          '<button class="btn btn-ghost" data-act="apply">Aplicar a venta</button>' +
+          '<button class="btn btn-danger" data-act="delete">Eliminar</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    Array.prototype.forEach.call($('vlx-list').querySelectorAll('.tpl-card'), function (card) {
+      var id = card.getAttribute('data-id');
+      card.querySelector('[data-act=edit]').addEventListener('click', function (e) { e.stopPropagation(); editItem(id); });
+      card.querySelector('[data-act=delete]').addEventListener('click', function (e) { e.stopPropagation(); delItem(id); });
+      card.querySelector('[data-act=apply]').addEventListener('click', function (e) { e.stopPropagation(); applyToSale(id); });
+      card.addEventListener('click', function () { editItem(id); });
+    });
+  }
+
+  function findItem(id) { return state.items.filter(function (x) { return String(x.id) === String(id); })[0]; }
+
+  // ---------------- editor ----------------
+  function clearForm() {
+    state.selectedId = null;
+    $('f-id').value = '';
+    $('f-nombre').value = '';
+    $('f-rfc').value = '';
+    $('f-razon').value = '';
+    $('f-cp').value = '';
+    $('f-regimen').value = '';
+    $('f-uso').value = 'G03';
+    $('f-metodo').value = 'PUE';
+    $('f-forma').value = '03';
+    $('f-default').checked = false;
+    $('vlx-form-title').textContent = 'Nueva plantilla';
+    $('vlx-apply').disabled = true;
+    updatePreview();
+    render();
+  }
+
+  function editItem(id) {
+    var it = findItem(id);
+    if (!it) return;
+    state.selectedId = id;
+    $('f-id').value = it.id;
+    $('f-nombre').value = it.nombre || '';
+    $('f-rfc').value = it.rfc_receptor || '';
+    $('f-razon').value = it.razon_social || '';
+    $('f-cp').value = it.domicilio_fiscal_cp || '';
+    $('f-regimen').value = it.regimen_fiscal || '';
+    $('f-uso').value = it.uso_cfdi || 'G03';
+    $('f-metodo').value = it.metodo_pago || 'PUE';
+    $('f-forma').value = it.forma_pago || '03';
+    $('f-default').checked = !!it.is_default;
+    $('vlx-form-title').textContent = 'Editar: ' + (it.nombre || '');
+    $('vlx-apply').disabled = false;
+    updatePreview();
+    render();
+  }
+
+  function readForm() {
+    return {
+      tenant_id: TENANT,
+      nombre: $('f-nombre').value.trim(),
+      rfc_receptor: $('f-rfc').value.trim().toUpperCase(),
+      razon_social: $('f-razon').value.trim() || null,
+      domicilio_fiscal_cp: $('f-cp').value.trim() || null,
+      regimen_fiscal: $('f-regimen').value || null,
+      uso_cfdi: $('f-uso').value,
+      metodo_pago: $('f-metodo').value,
+      forma_pago: $('f-forma').value,
+      is_default: $('f-default').checked
+    };
+  }
+
+  function save() {
+    var data = readForm();
+    if (!data.nombre) { toast('Falta nombre', 'warn'); return; }
+    if (!data.rfc_receptor) { toast('Falta RFC receptor', 'warn'); return; }
+    var id = $('f-id').value;
+    var p = id
+      ? api('PUT', '/api/cfdi/templates/' + encodeURIComponent(id), data)
+      : api('POST', '/api/cfdi/templates', data);
+    p.then(function (r) {
+      if (!r.ok) { toast((r.data && r.data.error) || 'Error al guardar', 'error'); return; }
+      toast(id ? 'Plantilla actualizada' : 'Plantilla creada', 'success');
+      clearForm();
+      load();
+    }).catch(function () { toast('Error de red', 'error'); });
+  }
+
+  function delItem(id) {
+    if (!confirm('¿Eliminar esta plantilla? Esta acción no se puede deshacer.')) return;
+    api('DELETE', '/api/cfdi/templates/' + encodeURIComponent(id) + '?tenant_id=' + encodeURIComponent(TENANT))
+      .then(function (r) {
+        if (!r.ok) { toast((r.data && r.data.error) || 'Error al eliminar', 'error'); return; }
+        toast('Plantilla eliminada', 'success');
+        if (state.selectedId === id) clearForm();
+        load();
+      });
+  }
+
+  function applyToSale(id) {
+    var it = findItem(id);
+    if (!it) return;
+    try { sessionStorage.setItem('vlx_cfdi_template', JSON.stringify(it)); } catch (_) {}
+    toast('Plantilla "' + it.nombre + '" aplicada a la próxima venta', 'success');
+    setTimeout(function () { location.href = '/pos.html?cfdi_template=' + encodeURIComponent(id); }, 800);
+  }
+
+  // ---------------- preview ----------------
+  function updatePreview() {
+    var d = readForm();
+    var xml =
+      '<?xml version="1.0" encoding="UTF-8"?>\n' +
+      '<cfdi:Comprobante Version="4.0" MetodoPago="' + (d.metodo_pago || '') + '" FormaPago="' + (d.forma_pago || '') + '">\n' +
+      '  <cfdi:Receptor\n' +
+      '      Rfc="' + (d.rfc_receptor || '') + '"\n' +
+      '      Nombre="' + (d.razon_social || '') + '"\n' +
+      '      DomicilioFiscalReceptor="' + (d.domicilio_fiscal_cp || '') + '"\n' +
+      '      RegimenFiscalReceptor="' + (d.regimen_fiscal || '') + '"\n' +
+      '      UsoCFDI="' + (d.uso_cfdi || '') + '" />\n' +
+      '  <!-- Conceptos se completan al timbrar -->\n' +
+      '</cfdi:Comprobante>';
+    $('vlx-preview').textContent = xml;
+  }
+
+  // ---------------- wiring ----------------
+  $('vlx-refresh').addEventListener('click', load);
+  $('vlx-new').addEventListener('click', clearForm);
+  $('vlx-save').addEventListener('click', save);
+  $('vlx-clear').addEventListener('click', clearForm);
+  $('vlx-apply').addEventListener('click', function () { if (state.selectedId) applyToSale(state.selectedId); });
+  $('vlx-search').addEventListener('input', function (e) { state.filter = e.target.value || ''; render(); });
+
+  ['f-nombre','f-rfc','f-razon','f-cp','f-regimen','f-uso','f-metodo','f-forma'].forEach(function (id) {
+    $(id).addEventListener('input', updatePreview);
+    $(id).addEventListener('change', updatePreview);
+  });
+
+  if (!TENANT) {
+    $('vlx-list').innerHTML = '<div class="empty">No hay tenant_id en el token. Inicia sesión.</div>';
+  } else {
+    load();
+  }
+  updatePreview();
+})();
+</script>
+
+</body>
+</html>
