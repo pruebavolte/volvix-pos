@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volvix — Almacenes</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0a0a0f">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --primary:#6c47ff;--primary-dark:#4f2fe0;--accent:#00d4aa;--danger:#ff4757;--warn:#ffa502;
+    --bg:#0a0a0f;--bg2:#12121a;--bg3:#1a1a28;--text:#e8e8f0;--muted:#8888a8;--border:#2a2a3f;
+  }
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+  a{color:var(--muted);text-decoration:none}a:hover{color:#fff}
+
+  header{background:var(--bg2);border-bottom:1px solid var(--border);padding:.85rem 2rem;
+    display:flex;align-items:center;gap:1rem}
+  .logo{font-size:1.2rem;font-weight:800}.logo span{color:var(--primary)}
+  header nav{display:flex;gap:.8rem;margin-left:auto}
+  .nav-link{font-size:.82rem;padding:.3rem .7rem;border-radius:7px}
+  .nav-link:hover{background:var(--bg3);color:#fff}
+
+  .container{max-width:1300px;margin:0 auto;padding:2rem}
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem}
+  h1{font-size:1.5rem;font-weight:800}
+  h2{font-size:1.1rem;font-weight:700;margin-bottom:.8rem}
+
+  .btn{padding:.5rem 1.1rem;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;border:none;transition:all .15s}
+  .btn-primary{background:var(--primary);color:#fff}
+  .btn-primary:hover{background:var(--primary-dark)}
+  .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+  .btn-ghost:hover{color:#fff;border-color:var(--primary)}
+  .btn-danger{background:var(--danger);color:#fff}
+  .btn-accent{background:var(--accent);color:#06121a}
+  .btn-sm{padding:.3rem .7rem;font-size:.78rem}
+
+  .grid{display:grid;grid-template-columns:1fr 2fr;gap:1.4rem}
+  .card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.2rem}
+
+  .wh-list{display:flex;flex-direction:column;gap:.5rem}
+  .wh-item{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.7rem .9rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+  .wh-item.active{border-color:var(--primary);background:#1f1830}
+  .wh-item .name{font-weight:600;font-size:.9rem}
+  .wh-item .code{font-size:.72rem;color:var(--muted)}
+  .wh-item .actions{display:flex;gap:.3rem}
+
+  table{width:100%;border-collapse:collapse;font-size:.85rem}
+  th,td{text-align:left;padding:.55rem .6rem;border-bottom:1px solid var(--border)}
+  th{color:var(--muted);font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:.5px}
+  tr.draggable{cursor:grab}
+  tr.dragging{opacity:.4}
+
+  .form-row{display:flex;flex-direction:column;gap:.3rem;margin-bottom:.7rem}
+  .form-row label{font-size:.78rem;color:var(--muted)}
+  input,select,textarea{background:var(--bg3);border:1px solid var(--border);color:#fff;padding:.5rem .7rem;border-radius:7px;font-size:.85rem;outline:none;width:100%;font-family:inherit}
+  input:focus,select:focus,textarea:focus{border-color:var(--primary)}
+  .checkbox{display:flex;align-items:center;gap:.5rem}
+  .checkbox input{width:auto}
+
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:50;padding:1rem}
+  .modal-bg.open{display:flex}
+  .modal{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.5rem;max-width:760px;width:100%;max-height:90vh;overflow-y:auto}
+  .modal h3{font-size:1.1rem;margin-bottom:1rem}
+  .modal-actions{display:flex;justify-content:flex-end;gap:.5rem;margin-top:1.2rem}
+
+  .transfer-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+  .drop-zone{background:var(--bg3);border:2px dashed var(--border);border-radius:8px;padding:1rem;min-height:240px}
+  .drop-zone.over{border-color:var(--primary);background:#1c1530}
+  .drop-zone h4{font-size:.85rem;color:var(--muted);margin-bottom:.5rem}
+  .drop-item{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:.5rem .7rem;margin-bottom:.4rem;font-size:.82rem;display:flex;justify-content:space-between;align-items:center}
+  .drop-item input{width:80px}
+
+  .toast{position:fixed;bottom:20px;right:20px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.7rem 1rem;font-size:.85rem;z-index:99;display:none}
+  .toast.show{display:block}
+  .toast.error{border-color:var(--danger)}
+  .toast.ok{border-color:var(--accent)}
+
+  .scanner-input{font-size:1rem;padding:.7rem;border:2px solid var(--accent)}
+  .badge{display:inline-block;background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:.1rem .4rem;font-size:.7rem}
+  .badge.default{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+  @media(max-width:900px){.grid{grid-template-columns:1fr}.transfer-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">VOL<span>VIX</span></div>
+  <nav>
+    <a class="nav-link" href="/inventario.html">Inventario</a>
+    <a class="nav-link" href="/volvix-reorder-dashboard.html">Reorden</a>
+    <a class="nav-link" href="/mis-modulos.html">Modulos</a>
+  </nav>
+</header>
+
+<div class="container">
+  <div class="topbar">
+    <h1>Almacenes (Multi-bodega)</h1>
+    <div style="display:flex;gap:.5rem">
+      <button class="btn btn-accent" onclick="openTransferModal()">Transferir entre almacenes</button>
+      <button class="btn btn-ghost" onclick="openCycleCountModal()">Cycle count</button>
+      <button class="btn btn-primary" onclick="openWhModal()">+ Nuevo almacen</button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- Lista almacenes -->
+    <div class="card">
+      <h2>Mis almacenes</h2>
+      <div id="whList" class="wh-list"><div style="color:var(--muted);font-size:.85rem">Cargando...</div></div>
+    </div>
+
+    <!-- Stock por almacen -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem">
+        <h2 id="stockTitle">Stock</h2>
+        <input id="stockSearch" placeholder="Buscar producto..." style="max-width:240px" oninput="renderStock()">
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>Producto</th><th>Cantidad</th><th>Reorden</th><th>Lead time</th><th>Actualizado</th></tr></thead>
+          <tbody id="stockBody"><tr><td colspan="5" style="color:var(--muted);text-align:center;padding:1rem">Selecciona un almacen</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal create/edit warehouse -->
+<div id="whModal" class="modal-bg">
+  <div class="modal">
+    <h3 id="whModalTitle">Nuevo almacen</h3>
+    <div class="form-row"><label>Nombre *</label><input id="whName" placeholder="Bodega central"></div>
+    <div class="form-row"><label>Codigo</label><input id="whCode" placeholder="BC-01"></div>
+    <div class="form-row"><label>Direccion</label><input id="whAddress" placeholder="Calle 123, Col..."></div>
+    <div class="form-row checkbox"><input type="checkbox" id="whDefault"><label for="whDefault">Es almacen por defecto</label></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeWhModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveWh()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal transfer drag-drop -->
+<div id="transferModal" class="modal-bg">
+  <div class="modal" style="max-width:1000px">
+    <h3>Transferir entre almacenes</h3>
+    <div style="display:flex;gap:1rem;margin-bottom:1rem">
+      <div class="form-row" style="flex:1"><label>Origen</label><select id="transferFrom" onchange="loadTransferStock()"></select></div>
+      <div class="form-row" style="flex:1"><label>Destino</label><select id="transferTo"></select></div>
+    </div>
+    <div class="transfer-grid">
+      <div class="drop-zone" id="srcZone">
+        <h4>Productos disponibles (arrastra al destino)</h4>
+        <div id="srcItems" style="max-height:340px;overflow-y:auto"></div>
+      </div>
+      <div class="drop-zone" id="dstZone" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="onDrop(event)">
+        <h4>A transferir</h4>
+        <div id="dstItems" style="max-height:340px;overflow-y:auto"></div>
+      </div>
+    </div>
+    <div class="form-row" style="margin-top:.8rem"><label>Nota</label><input id="transferNote" placeholder="Motivo de la transferencia"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeTransferModal()">Cancelar</button>
+      <button class="btn btn-accent" onclick="submitTransfer()">Confirmar transferencia</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal cycle count -->
+<div id="cycleModal" class="modal-bg">
+  <div class="modal">
+    <h3>Cycle count (conteo parcial)</h3>
+    <div class="form-row"><label>Almacen</label><select id="cycleWh"></select></div>
+    <div class="form-row">
+      <label>Modo scanner — escanea o escribe SKU/codigo y enter</label>
+      <input id="cycleScan" class="scanner-input" placeholder="Escanea aqui..." onkeydown="if(event.key==='Enter')addScan()">
+    </div>
+    <table>
+      <thead><tr><th>Producto</th><th>Conteo</th><th></th></tr></thead>
+      <tbody id="cycleBody"></tbody>
+    </table>
+    <div class="form-row" style="margin-top:.8rem"><label>Nota</label><input id="cycleNote"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeCycleModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="submitCycle()">Guardar conteo</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+// ==== state ====
+const state = {
+  tenantId: localStorage.getItem('tenant_id') || (window.VOLVIX_TENANT_ID || ''),
+  warehouses: [],
+  selected: null,
+  stock: [],
+  transferDest: [],
+  cycleItems: [],
+};
+
+// ==== helpers ====
+function toast(msg, type){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + (type || '');
+  setTimeout(()=>t.classList.remove('show'), 2800);
+}
+
+async function api(path, opts){
+  opts = opts || {};
+  opts.headers = Object.assign({'Content-Type':'application/json'}, opts.headers || {});
+  const tok = localStorage.getItem('volvix_token') || localStorage.getItem('auth_token');
+  if (tok) opts.headers['Authorization'] = 'Bearer ' + tok;
+  const r = await fetch(path, opts);
+  const txt = await r.text();
+  let json; try { json = JSON.parse(txt); } catch { json = { raw: txt }; }
+  if (!r.ok) throw new Error((json && json.error) || ('HTTP '+r.status));
+  return json;
+}
+
+// ==== warehouses ====
+async function loadWarehouses(){
+  if (!state.tenantId){
+    document.getElementById('whList').innerHTML = '<div style="color:var(--danger);font-size:.85rem">tenant_id no encontrado en localStorage</div>';
+    return;
+  }
+  try {
+    const j = await api('/api/warehouses?tenant_id='+encodeURIComponent(state.tenantId));
+    state.warehouses = j.warehouses || [];
+    renderWh();
+  } catch(e){
+    document.getElementById('whList').innerHTML = '<div style="color:var(--danger);font-size:.85rem">'+e.message+'</div>';
+  }
+}
+
+function renderWh(){
+  const c = document.getElementById('whList');
+  if (!state.warehouses.length){
+    c.innerHTML = '<div style="color:var(--muted);font-size:.85rem">Sin almacenes. Crea uno con + Nuevo almacen.</div>';
+    return;
+  }
+  c.innerHTML = state.warehouses.map(w => `
+    <div class="wh-item ${state.selected===w.id?'active':''}" onclick="selectWh('${w.id}')">
+      <div>
+        <div class="name">${escape(w.name)} ${w.is_default?'<span class="badge default">default</span>':''}</div>
+        <div class="code">${escape(w.code||'-')} · ${escape(w.address||'')}</div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();editWh('${w.id}')">Editar</button>
+        <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteWh('${w.id}')">X</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectWh(id){
+  state.selected = id;
+  const w = state.warehouses.find(x=>x.id===id);
+  document.getElementById('stockTitle').textContent = 'Stock — '+(w?w.name:'');
+  renderWh();
+  loadStock();
+}
+
+async function loadStock(){
+  if (!state.selected) return;
+  try {
+    const j = await api('/api/inventory/by-warehouse?warehouse_id='+encodeURIComponent(state.selected));
+    state.stock = j.items || [];
+    renderStock();
+  } catch(e){
+    document.getElementById('stockBody').innerHTML = '<tr><td colspan="5" style="color:var(--danger)">'+e.message+'</td></tr>';
+  }
+}
+
+function renderStock(){
+  const q = (document.getElementById('stockSearch').value||'').toLowerCase();
+  let rows = state.stock;
+  if (q) rows = rows.filter(r => String(r.product_id).toLowerCase().includes(q));
+  const b = document.getElementById('stockBody');
+  if (!rows.length){ b.innerHTML = '<tr><td colspan="5" style="color:var(--muted);text-align:center;padding:1rem">Sin productos</td></tr>'; return; }
+  b.innerHTML = rows.map(r => `
+    <tr>
+      <td>${escape(r.product_id)}</td>
+      <td>${r.qty}</td>
+      <td>${r.reorder_point ?? '-'}</td>
+      <td>${r.lead_time_days ?? '-'}</td>
+      <td>${r.updated_at ? new Date(r.updated_at).toLocaleString() : '-'}</td>
+    </tr>
+  `).join('');
+}
+
+function escape(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// ==== modal create/edit ====
+let editingWhId = null;
+function openWhModal(){
+  editingWhId = null;
+  document.getElementById('whModalTitle').textContent = 'Nuevo almacen';
+  ['whName','whCode','whAddress'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('whDefault').checked = false;
+  document.getElementById('whModal').classList.add('open');
+}
+function closeWhModal(){ document.getElementById('whModal').classList.remove('open'); }
+function editWh(id){
+  const w = state.warehouses.find(x=>x.id===id); if (!w) return;
+  editingWhId = id;
+  document.getElementById('whModalTitle').textContent = 'Editar almacen';
+  document.getElementById('whName').value = w.name||'';
+  document.getElementById('whCode').value = w.code||'';
+  document.getElementById('whAddress').value = w.address||'';
+  document.getElementById('whDefault').checked = !!w.is_default;
+  document.getElementById('whModal').classList.add('open');
+}
+async function saveWh(){
+  const body = {
+    tenant_id: state.tenantId,
+    name: document.getElementById('whName').value.trim(),
+    code: document.getElementById('whCode').value.trim(),
+    address: document.getElementById('whAddress').value.trim(),
+    is_default: document.getElementById('whDefault').checked,
+  };
+  if (!body.name){ toast('Nombre requerido','error'); return; }
+  try {
+    if (editingWhId){
+      await api('/api/warehouses/'+editingWhId, { method:'PUT', body: JSON.stringify(body) });
+      toast('Actualizado','ok');
+    } else {
+      await api('/api/warehouses', { method:'POST', body: JSON.stringify(body) });
+      toast('Creado','ok');
+    }
+    closeWhModal();
+    loadWarehouses();
+  } catch(e){ toast(e.message,'error'); }
+}
+async function deleteWh(id){
+  if (!confirm('Eliminar este almacen?')) return;
+  try {
+    await api('/api/warehouses/'+id, { method:'DELETE' });
+    toast('Eliminado','ok');
+    if (state.selected===id) state.selected = null;
+    loadWarehouses();
+  } catch(e){ toast(e.message,'error'); }
+}
+
+// ==== transfer ====
+function openTransferModal(){
+  if (state.warehouses.length < 2){ toast('Necesitas al menos 2 almacenes','error'); return; }
+  const fr = document.getElementById('transferFrom');
+  const to = document.getElementById('transferTo');
+  const opts = state.warehouses.map(w=>`<option value="${w.id}">${escape(w.name)}</option>`).join('');
+  fr.innerHTML = opts;
+  to.innerHTML = opts;
+  if (state.warehouses[1]) to.value = state.warehouses[1].id;
+  state.transferDest = [];
+  renderTransferDst();
+  document.getElementById('transferModal').classList.add('open');
+  loadTransferStock();
+}
+function closeTransferModal(){ document.getElementById('transferModal').classList.remove('open'); }
+
+async function loadTransferStock(){
+  const wid = document.getElementById('transferFrom').value;
+  if (!wid) return;
+  try {
+    const j = await api('/api/inventory/by-warehouse?warehouse_id='+encodeURIComponent(wid));
+    const items = j.items || [];
+    document.getElementById('srcItems').innerHTML = items.map(r => `
+      <div class="drop-item" draggable="true" ondragstart="onDrag(event,'${r.product_id}',${r.qty})">
+        <span>${escape(r.product_id)}</span>
+        <span style="color:var(--muted);font-size:.78rem">stock: ${r.qty}</span>
+      </div>
+    `).join('') || '<div style="color:var(--muted);font-size:.82rem">Sin stock</div>';
+  } catch(e){ document.getElementById('srcItems').innerHTML = '<div style="color:var(--danger);font-size:.82rem">'+e.message+'</div>'; }
+}
+
+function onDrag(e, pid, max){
+  e.dataTransfer.setData('text/plain', JSON.stringify({pid, max}));
+}
+function onDrop(e){
+  e.preventDefault();
+  document.getElementById('dstZone').classList.remove('over');
+  try {
+    const d = JSON.parse(e.dataTransfer.getData('text/plain'));
+    if (state.transferDest.find(x=>x.product_id===d.pid)) return;
+    state.transferDest.push({ product_id: d.pid, qty: 1, max: d.max });
+    renderTransferDst();
+  } catch(_){}
+}
+function renderTransferDst(){
+  document.getElementById('dstItems').innerHTML = state.transferDest.map((r,i)=>`
+    <div class="drop-item">
+      <span>${escape(r.product_id)} <span style="color:var(--muted);font-size:.72rem">(max ${r.max})</span></span>
+      <span style="display:flex;gap:.3rem;align-items:center">
+        <input type="number" min="1" max="${r.max}" value="${r.qty}" onchange="state.transferDest[${i}].qty=Math.max(1,Math.min(${r.max},+this.value))">
+        <button class="btn btn-danger btn-sm" onclick="state.transferDest.splice(${i},1);renderTransferDst()">X</button>
+      </span>
+    </div>
+  `).join('') || '<div style="color:var(--muted);font-size:.82rem">Arrastra productos aqui</div>';
+}
+
+async function submitTransfer(){
+  const from = document.getElementById('transferFrom').value;
+  const to = document.getElementById('transferTo').value;
+  if (from===to){ toast('Origen y destino iguales','error'); return; }
+  if (!state.transferDest.length){ toast('Agrega items','error'); return; }
+  try {
+    await api('/api/inventory/transfer', { method:'POST', body: JSON.stringify({
+      tenant_id: state.tenantId, from_warehouse: from, to_warehouse: to,
+      items: state.transferDest.map(x=>({product_id:x.product_id, qty:x.qty})),
+      note: document.getElementById('transferNote').value,
+    })});
+    toast('Transferencia OK','ok');
+    closeTransferModal();
+    loadStock();
+  } catch(e){ toast(e.message,'error'); }
+}
+
+// ==== cycle count ====
+function openCycleCountModal(){
+  if (!state.warehouses.length){ toast('No hay almacenes','error'); return; }
+  const sel = document.getElementById('cycleWh');
+  sel.innerHTML = state.warehouses.map(w=>`<option value="${w.id}">${escape(w.name)}</option>`).join('');
+  state.cycleItems = [];
+  renderCycle();
+  document.getElementById('cycleNote').value = '';
+  document.getElementById('cycleModal').classList.add('open');
+  setTimeout(()=>document.getElementById('cycleScan').focus(), 100);
+}
+function closeCycleModal(){ document.getElementById('cycleModal').classList.remove('open'); }
+function addScan(){
+  const inp = document.getElementById('cycleScan');
+  const v = inp.value.trim();
+  if (!v) return;
+  const ex = state.cycleItems.find(x=>x.product_id===v);
+  if (ex) ex.counted_qty += 1;
+  else state.cycleItems.push({ product_id: v, counted_qty: 1 });
+  inp.value = '';
+  renderCycle();
+}
+function renderCycle(){
+  document.getElementById('cycleBody').innerHTML = state.cycleItems.map((r,i)=>`
+    <tr>
+      <td>${escape(r.product_id)}</td>
+      <td><input type="number" min="0" step="0.01" value="${r.counted_qty}" onchange="state.cycleItems[${i}].counted_qty=+this.value" style="width:100px"></td>
+      <td><button class="btn btn-danger btn-sm" onclick="state.cycleItems.splice(${i},1);renderCycle()">X</button></td>
+    </tr>
+  `).join('') || '<tr><td colspan="3" style="color:var(--muted);text-align:center;padding:.7rem">Escanea productos</td></tr>';
+}
+async function submitCycle(){
+  if (!state.cycleItems.length){ toast('Sin items','error'); return; }
+  try {
+    await api('/api/inventory/cycle-count', { method:'POST', body: JSON.stringify({
+      tenant_id: state.tenantId,
+      warehouse_id: document.getElementById('cycleWh').value,
+      counts: state.cycleItems,
+      note: document.getElementById('cycleNote').value,
+    })});
+    toast('Conteo guardado','ok');
+    closeCycleModal();
+    loadStock();
+  } catch(e){ toast(e.message,'error'); }
+}
+
+// ==== boot ====
+loadWarehouses();
+</script>
+</body>
+</html>

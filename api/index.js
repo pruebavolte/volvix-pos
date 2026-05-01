@@ -22,6 +22,7 @@ const handleLabels = require('./labels');
 const handleAbtest = require('./abtest');
 const handleBackup = require('./backup');
 const handleActivityFeed = require('./activity-feed');
+const handleInventoryAdvanced = require('./inventory-advanced');
 const __geoIp = (() => { try { return require('./geo-ip'); } catch (_) { return null; } })();
 const { rateLimitMiddleware } = require('./rate-limit');
 const __apiRateLimiter = rateLimitMiddleware({
@@ -12963,6 +12964,7 @@ module.exports = async (req, res) => {
       if (await handleAbtest(req, res, parsed, _ctx)) return;
       if (await handleBackup(req, res, parsed, _ctx)) return;
       if (await handleActivityFeed(req, res, parsed, _ctx)) return;
+      if (await handleInventoryAdvanced(req, res, parsed, _ctx)) return;
     } catch (modErr) {
       METRICS.errorCount++;
       logRequest({ ts: new Date().toISOString(), level: 'error', path: pathname, method, msg: 'module handler threw', err: IS_PROD ? 'internal' : String(modErr && modErr.message || modErr) });
