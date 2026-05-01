@@ -604,15 +604,43 @@ const installBanner = document.getElementById('installBanner');
 const installPill = document.getElementById('installPill');
 const installStatus = document.getElementById('installStatus');
 
+// Smart A2HS timing — only show the install banner after the user has visited
+// 2+ times AND it hasn't been dismissed in the last 7 days. The install BUTTON
+// is enabled immediately on capture; the BANNER waits.
+const A2HS_VISITS_KEY    = 'volvix_pwa_visits';
+const A2HS_DISMISSED_KEY = 'volvix_pwa_banner_dismissed_at';
+const A2HS_INSTALLED_KEY = 'volvix_pwa_installed_at';
+(function bumpVisitCount(){
+  try {
+    const n = parseInt(localStorage.getItem(A2HS_VISITS_KEY) || '0', 10) || 0;
+    localStorage.setItem(A2HS_VISITS_KEY, String(n + 1));
+  } catch(_){}
+})();
+function shouldAutoShowA2HS(){
+  try {
+    if (localStorage.getItem(A2HS_INSTALLED_KEY)) return false;
+    const visits = parseInt(localStorage.getItem(A2HS_VISITS_KEY) || '0', 10) || 0;
+    if (visits < 2) return false;
+    const dismissedAt = parseInt(localStorage.getItem(A2HS_DISMISSED_KEY) || '0', 10) || 0;
+    const SEVEN_DAYS = 7 * 24 * 3600 * 1000;
+    if (dismissedAt && (Date.now() - dismissedAt) < SEVEN_DAYS) return false;
+    return true;
+  } catch(_) { return true; }
+}
+
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   state.deferredPrompt = e;
   btnInstall.disabled = false;
   btnInstall2.disabled = false;
-  installBanner.classList.add('show');
+  if (shouldAutoShowA2HS()) {
+    installBanner.classList.add('show');
+    log('info', 'beforeinstallprompt capturado — banner mostrado (visitas >=2)');
+  } else {
+    log('info', 'beforeinstallprompt capturado — banner DIFERIDO (visita 1 o reciente dismiss)');
+  }
   installStatus.textContent = 'Listo para instalar';
   installStatus.className = 'card-status ok';
-  log('info', 'beforeinstallprompt capturado — la app es instalable');
 });
 
 async function doInstall(){
@@ -629,7 +657,10 @@ async function doInstall(){
 btnInstall.addEventListener('click', doInstall);
 btnInstall2.addEventListener('click', doInstall);
 btnInstallBanner.addEventListener('click', doInstall);
-document.getElementById('btnCloseBanner').addEventListener('click', () => installBanner.classList.remove('show'));
+document.getElementById('btnCloseBanner').addEventListener('click', () => {
+  installBanner.classList.remove('show');
+  try { localStorage.setItem(A2HS_DISMISSED_KEY, String(Date.now())); } catch(_){}
+});
 
 window.addEventListener('appinstalled', () => {
   state.installed = true;
@@ -637,6 +668,7 @@ window.addEventListener('appinstalled', () => {
   installPill.classList.add('online');
   installStatus.textContent = 'Instalada';
   installStatus.className = 'card-status ok';
+  try { localStorage.setItem(A2HS_INSTALLED_KEY, String(Date.now())); } catch(_){}
   log('ok', 'App instalada correctamente');
 });
 

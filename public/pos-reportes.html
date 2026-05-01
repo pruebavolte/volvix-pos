@@ -658,6 +658,9 @@ function vlxRenderPieChart(elementId, data, options){
       tip.style.top  = (ev.clientY - box.top) + 'px';
     });
     p.addEventListener('mouseleave', function(){ p.style.opacity = 1; if (tip) tip.style.opacity = 0; });
+    if (typeof options.onClick === 'function') {
+      p.addEventListener('click', function(){ options.onClick(data[+p.getAttribute('data-idx')]); });
+    }
   });
 }
 function vlxRenderLineChart(elementId, data, options){
@@ -718,6 +721,9 @@ function vlxRenderLineChart(elementId, data, options){
       tip.style.top  = (ev.clientY - box.top) + 'px';
     });
     c.addEventListener('mouseleave', function(){ c.setAttribute('r','3.5'); if (tip) tip.style.opacity = 0; });
+    if (typeof options.onClick === 'function') {
+      c.addEventListener('click', function(){ options.onClick(data[+c.getAttribute('data-idx')]); });
+    }
   });
 }
 
@@ -911,7 +917,10 @@ async function renderVentas() {
       var m = metMap[k] || { label:k, color:'#757575' };
       return { label: m.label, color: m.color, value: Math.round(metSum[k]) };
     });
-    vlxRenderPieChart('vlx-pie-metodos', pieData, { fmt: function(v){ return money(v); } });
+    vlxRenderPieChart('vlx-pie-metodos', pieData, {
+      fmt: function(v){ return money(v); },
+      onClick: function(d){ if (typeof vlxFilterByMethod === 'function') vlxFilterByMethod(d.label); }
+    });
 
     // Line chart "Tendencia 30 días" — fill from byDia (or pad to 30 with zeros)
     var lineData = dias.map(function(d){ return { label: d.label, value: Math.round(d.total) }; });
@@ -922,7 +931,8 @@ async function renderVentas() {
     }
     vlxRenderLineChart('vlx-line-trend', lineData.slice(-30), {
       color: '#FBBF24',
-      fmt: function(v){ return money(v); }
+      fmt: function(v){ return money(v); },
+      onClick: function(d){ if (d && d.label) vlxFilterByDay(d.label); }
     });
   }, 50);
 }
@@ -944,6 +954,22 @@ function vlxClearDayFilter(){
   if (pill) pill.style.display = 'none';
   if (tbody) Array.prototype.forEach.call(tbody.querySelectorAll('tr'), function(tr){ tr.style.display = ''; });
 }
+// Drill-down by payment method (clicked from pie chart). Filters the ventas table.
+function vlxFilterByMethod(methodLabel){
+  var tbody = document.getElementById('vlx-ventas-tbody');
+  if (!tbody || !methodLabel) return;
+  var pill = document.getElementById('vlx-filter-pill');
+  var dayEl = document.getElementById('vlx-filter-day');
+  if (pill && dayEl) { pill.style.display = 'block'; dayEl.textContent = 'método: ' + methodLabel; }
+  var key = String(methodLabel).toLowerCase();
+  Array.prototype.forEach.call(tbody.querySelectorAll('tr'), function(tr){
+    var m = (tr.getAttribute('data-metodo') || tr.textContent || '').toLowerCase();
+    tr.style.display = m.indexOf(key) >= 0 ? '' : 'none';
+  });
+}
+window.vlxFilterByDay = vlxFilterByDay;
+window.vlxFilterByMethod = vlxFilterByMethod;
+window.vlxClearDayFilter = vlxClearDayFilter;
 
 // ══════════════════════════════════════════════
 // TAB: PRODUCTOS

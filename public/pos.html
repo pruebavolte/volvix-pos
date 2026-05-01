@@ -10,6 +10,35 @@
   <!-- 1. AUTH GATE (primero, síncrono, bloquea sin sesión) -->
   <script src="/auth-gate.js" data-roles="superadmin,owner,cajero"></script>
 
+  <!-- 1b. 401/503 global interceptor — polish auth: redirect a login con ?redirect=, toast user-friendly en 503 -->
+  <script>
+  (function(){
+    if (window.__volvix401Patched) return;
+    window.__volvix401Patched = true;
+    var orig = window.fetch.bind(window);
+    var redirected = false;
+    window.fetch = function(input, init){
+      return orig(input, init).then(function(r){
+        try {
+          if (r && r.status === 401 && !redirected) {
+            redirected = true;
+            try { localStorage.removeItem('volvix_token'); localStorage.removeItem('volvixAuthToken'); } catch(_){}
+            var here = location.pathname + location.search;
+            location.replace('/login.html?expired=1&redirect=' + encodeURIComponent(here));
+          } else if (r && r.status === 503) {
+            // Friendly toast (best-effort: VolvixUI or fallback console)
+            try {
+              if (window.VolvixUI && VolvixUI.toast) VolvixUI.toast({ type:'warn', message:'Servicio temporalmente no disponible (503). Reintenta en unos segundos.' });
+              else if (window.toast) window.toast('Servicio temporalmente no disponible (503)', 'warn');
+            } catch(_){}
+          }
+        } catch(_){}
+        return r;
+      });
+    };
+  })();
+  </script>
+
   <!-- 2. Config y dependencias Volvix -->
   <script src="/config.js"></script>
 

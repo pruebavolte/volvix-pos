@@ -663,12 +663,13 @@ input[type="checkbox"] { cursor: pointer; accent-color: var(--navy); }
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Stock actual *</label>
-          <input class="form-input" id="pStock" type="number" min="0" step="1" placeholder="0">
+          <input class="form-input" id="pStock" type="number" min="0" step="1" placeholder="0" oninput="recalcStockBadge()" aria-describedby="stockBadgePreview">
         </div>
         <div class="form-group">
           <label class="form-label">Stock mínimo (alerta)</label>
-          <input class="form-input" id="pMin" type="number" min="0" step="1" placeholder="5">
+          <input class="form-input" id="pMin" type="number" min="0" step="1" placeholder="5" oninput="recalcStockBadge()">
           <div class="form-hint">Recibirás alerta cuando baje de este número</div>
+          <div id="stockBadgePreview" class="form-hint" aria-live="polite" style="margin-top:6px;font-weight:600"></div>
         </div>
       </div>
       <div class="form-group">
@@ -1164,6 +1165,7 @@ function openEditar(id) {
   document.getElementById('pProveedor').value = p.proveedor || '';
   document.getElementById('pNotas').value     = p.notas || '';
   updateMargen();
+  recalcStockBadge();
   openModal('modalProducto');
   setTimeout(() => document.getElementById('pNombre').focus(), 80);
 }
@@ -1246,6 +1248,22 @@ async function guardarProducto() {
     btn.textContent = editingId ? '✓ Actualizar' : '✓ Guardar';
   }
 }
+
+// ── Live recalc of stock-status badge while editing in the product modal ──
+function recalcStockBadge() {
+  const stockEl = document.getElementById('pStock');
+  const minEl   = document.getElementById('pMin');
+  const out     = document.getElementById('stockBadgePreview');
+  if (!stockEl || !minEl || !out) return;
+  const stock = parseInt(stockEl.value || 0, 10) || 0;
+  const minimo = parseInt(minEl.value || 5, 10) || 0;
+  let cls, label;
+  if (stock === 0)              { cls = 'stock-out'; label = '✗ Sin stock'; }
+  else if (stock <= minimo)     { cls = 'stock-low'; label = '⚠ Stock crítico (≤ mínimo)'; }
+  else                          { cls = 'stock-ok';  label = '✓ Stock normal'; }
+  out.innerHTML = '<span class="stock-pill ' + cls + '">' + label + '</span>';
+}
+window.recalcStockBadge = recalcStockBadge;
 
 // ── Ajuste de stock ──
 function openAjuste(id) {

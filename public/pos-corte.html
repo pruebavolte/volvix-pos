@@ -905,13 +905,19 @@ function confirmarCerrarTurno() {
   if (!turno || turno.estado !== 'abierto') { toast('No hay turno abierto', 'err'); return; }
   document.getElementById('corteTicketText').textContent = generarTicketTexto();
   document.getElementById('corteEfectivoFisico').value   = '';
-  document.getElementById('corteDiffBox').style.display  = 'none';
   document.getElementById('corteObs').value              = '';
+  // Precalcular diferencia ANTES de pedir conteo: mostramos esperado y delta=esperado.
+  // Así el cajero ve el monto esperado al abrir el modal y la diff se actualiza
+  // al teclear el conteo físico.
+  calcDiferenciaCorte();
   openModal('modalCorteZ');
 }
 
 function calcDiferenciaCorte() {
-  const fisico     = parseFloat(document.getElementById('corteEfectivoFisico').value || '0');
+  const fisicoEl   = document.getElementById('corteEfectivoFisico');
+  const fisicoRaw  = fisicoEl ? fisicoEl.value : '';
+  const hasFisico  = fisicoRaw !== '' && fisicoRaw !== null;
+  const fisico     = parseFloat(fisicoRaw || '0') || 0;
   const efectivoVentas = ventas.filter(v => v.metodo_pago === 'efectivo').reduce((s, v) => s + Number(v.total || 0), 0);
   const totalEnt   = entradas.reduce((s, e) => s + Number(e.monto || 0), 0);
   const totalSal   = salidas.reduce((s, e)  => s + Number(e.monto || 0), 0);
@@ -920,17 +926,25 @@ function calcDiferenciaCorte() {
   const box        = document.getElementById('corteDiffBox');
   const val        = document.getElementById('corteDiffVal');
   const lbl        = document.getElementById('corteDiffLabel');
+  if (!box || !val || !lbl) return;
   box.style.display = 'flex';
+  if (!hasFisico) {
+    // Modo precálculo (antes de contar) — mostramos esperado, no la diff
+    val.textContent = money(esperado);
+    box.className = 'diff-box ok';
+    lbl.textContent = 'Esperado en caja · ingresa el conteo físico para ver la diferencia';
+    return;
+  }
   val.textContent  = money(Math.abs(diff));
   if (Math.abs(diff) < 1) {
     box.className = 'diff-box ok';
     lbl.textContent = '✓ Cuadrado · sin diferencia';
   } else if (diff > 0) {
     box.className = 'diff-box warn';
-    lbl.textContent = '⚠ Sobrante en caja';
+    lbl.textContent = '⚠ Sobrante en caja · ' + money(diff);
   } else {
     box.className = 'diff-box err';
-    lbl.textContent = '✗ Faltante en caja';
+    lbl.textContent = '✗ Faltante en caja · ' + money(Math.abs(diff));
   }
 }
 

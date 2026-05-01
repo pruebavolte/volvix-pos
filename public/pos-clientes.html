@@ -926,6 +926,48 @@ function applyFilter() {
 }
 
 // ── Render lista ──
+// ── Virtualized rendering helpers (activates when >500 clients) ──
+const __VIRT_ROW_H = 60;     // px per row (matches .client-item)
+const __VIRT_BUFFER = 6;     // overscan rows
+let __virtScrollHandler = null;
+
+function __renderClientItemHTML(c) {
+  const color  = avatarColor(c.id);
+  const ini    = initials(c.nombre);
+  const deuda  = c.saldoCredito < 0;
+  const favor  = c.saldoCredito > 0;
+  const saldoCls = deuda ? 'saldo-deuda' : favor ? 'saldo-favor' : 'saldo-zero';
+  const saldoTxt = deuda ? money(-c.saldoCredito) + ' debe' : favor ? money(c.saldoCredito) + ' a favor' : '';
+  const isActive = c.id === selectedClientId;
+  return `<div class="client-item ${isActive ? 'active' : ''}" style="height:${__VIRT_ROW_H}px;box-sizing:border-box" onclick="selectClient('${esc(c.id)}')">
+    <div class="client-avatar" style="background:${color}">${ini}</div>
+    <div class="client-info">
+      <div class="client-name">${esc(c.nombre)}</div>
+      <div class="client-meta">
+        ${c.telefono ? `<span>📞 ${esc(c.telefono)}</span>` : ''}
+        ${c.compras  ? `<span>🛒 ${c.compras} compras</span>` : ''}
+      </div>
+    </div>
+    <div class="client-right">
+      ${saldoTxt ? `<span class="saldo-pill ${saldoCls}">${esc(saldoTxt)}</span>` : ''}
+      ${c.puntos > 0 ? `<span class="puntos-badge">⭐ ${c.puntos} pts</span>` : ''}
+    </div>
+  </div>`;
+}
+
+function __virtualRender(listEl) {
+  const total = filteredClients.length;
+  const totalH = total * __VIRT_ROW_H;
+  const viewportH = listEl.clientHeight || 600;
+  const scrollTop = listEl.scrollTop || 0;
+  const startIdx = Math.max(0, Math.floor(scrollTop / __VIRT_ROW_H) - __VIRT_BUFFER);
+  const endIdx   = Math.min(total, Math.ceil((scrollTop + viewportH) / __VIRT_ROW_H) + __VIRT_BUFFER);
+  const offsetY = startIdx * __VIRT_ROW_H;
+  const slice = filteredClients.slice(startIdx, endIdx);
+  const inner = slice.map(__renderClientItemHTML).join('');
+  listEl.innerHTML = `<div style="position:relative;height:${totalH}px"><div style="position:absolute;top:${offsetY}px;left:0;right:0">${inner}</div></div>`;
+}
+
 function renderClientList() {
   const list   = document.getElementById('clientList');
   const footer = document.getElementById('listFooter');
@@ -933,12 +975,31 @@ function renderClientList() {
   if (total)  total.textContent  = '(' + allClients.length + ')';
   if (footer) footer.textContent = filteredClients.length + ' cliente' + (filteredClients.length !== 1 ? 's' : '');
 
+  // Detach previous virtual scroll handler if present
+  if (__virtScrollHandler && list) {
+    list.removeEventListener('scroll', __virtScrollHandler);
+    __virtScrollHandler = null;
+  }
+
   if (!filteredClients.length) {
     list.innerHTML = `<div class="empty">
       <div class="empty-icon">🔍</div>
       <div class="empty-title">${allClients.length === 0 ? 'Sin clientes aún' : 'Sin resultados'}</div>
       <div class="empty-sub">${allClients.length === 0 ? 'Agrega tu primer cliente' : 'Intenta con otros términos'}</div>
     </div>`;
+    return;
+  }
+
+  // Switch to virtualized rendering for large lists (>500 rows) to keep
+  // scrolling at 60fps even with 10k+ clientes.
+  if (filteredClients.length > 500) {
+    __virtualRender(list);
+    let raf = 0;
+    __virtScrollHandler = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => { raf = 0; __virtualRender(list); });
+    };
+    list.addEventListener('scroll', __virtScrollHandler, { passive: true });
     return;
   }
 

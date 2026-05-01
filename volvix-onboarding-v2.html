@@ -329,6 +329,8 @@ function showStep(n){
   if (state.step === 5) renderDemoSummary();
   if (state.step === TOTAL_STEPS) renderCompleteSummary();
   clearInvalid();
+  // Persist step progress to backend (per-step), debounced
+  if (typeof saveStepProgress === 'function') saveStepProgress(state.step);
 }
 
 // ===== Step 1: Empresa =====
@@ -635,11 +637,30 @@ function renderCompleteSummary(){
 async function markFirstLoginDone(){
   try {
     await fetch(`${API_BASE}/users/me/first-login-complete`, {
-      method:'POST', headers: authHeaders(), body:'{}'
+      method:'POST', headers: authHeaders(), body: JSON.stringify({ step: TOTAL_STEPS, completed: true })
     });
   } catch(e){ console.warn('[wizard] mark first-login error', e); }
   localStorage.setItem('volvix_first_login_completed', '1');
   localStorage.removeItem('volvix_show_setup_banner');
+}
+
+// Persist step progress to backend (best-effort, debounced).
+let __saveStepTimer = null;
+async function saveStepProgress(stepNum){
+  try { localStorage.setItem('volvix_onboarding_last_step', String(stepNum)); } catch(_){}
+  if (__saveStepTimer) clearTimeout(__saveStepTimer);
+  __saveStepTimer = setTimeout(async () => {
+    try {
+      await fetch(`${API_BASE}/users/me/first-login-complete`, {
+        method:'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ step: stepNum, completed: false })
+      });
+    } catch (e) {
+      // Silent failure — progress is also saved locally and will retry on next step
+      console.warn('[wizard] saveStepProgress error', e);
+    }
+  }, 500);
 }
 
 async function finishWizard(){

@@ -96,6 +96,15 @@
     border-radius:8px; padding:10px 14px; margin-bottom:16px;
     font-size:.85rem; color:var(--warn);
   }
+  .pending-syncs .progress-track{
+    margin-top:8px; height:6px; background:rgba(255,255,255,.08);
+    border-radius:3px; overflow:hidden;
+  }
+  .pending-syncs .progress-fill{
+    height:100%; background:var(--warn); width:0%; transition:width .3s ease;
+  }
+  .pending-syncs.syncing .progress-fill{background:#3b82f6}
+  .pending-syncs .label-row{display:flex;justify-content:space-between;align-items:center}
   .exit-row{display:flex;gap:8px;margin-top:16px}
   .exit-btn{
     flex:1; background:var(--border); color:var(--text); border:0;
@@ -146,7 +155,13 @@
       <button type="submit">+</button>
     </form>
 
-    <div id="pendingBanner" class="pending-syncs" style="display:none" role="status"></div>
+    <div id="pendingBanner" class="pending-syncs" style="display:none" role="status" aria-live="polite">
+      <div class="label-row">
+        <span id="pendingLabel">0 ventas pendientes</span>
+        <span id="pendingCounts" style="font-variant-numeric:tabular-nums">0/0</span>
+      </div>
+      <div class="progress-track" aria-hidden="true"><div class="progress-fill" id="pendingProgress"></div></div>
+    </div>
   </div>
 
   <div class="totals-area">
@@ -460,15 +475,29 @@
   }
 
   // -------- Sync logic --------
+  // Track total batch size to render X/Y progress (total = ventas creadas en esta sesión)
+  var syncTotalSeen = 0;
   function updatePendingCount(){
     return dbAll(STORE_SALES).then(function(sales){
       pendingCount = sales.filter(function(s){ return !s.synced; }).length;
+      var totalAll = sales.length;
+      // total seen = max(totalAll, totalAll-pending+pendingCount-historical) — usamos el total absoluto
+      if (totalAll > syncTotalSeen) syncTotalSeen = totalAll;
       var banner = $('pendingBanner');
+      var label  = $('pendingLabel');
+      var counts = $('pendingCounts');
+      var fill   = $('pendingProgress');
       if (pendingCount > 0){
         banner.style.display = 'block';
-        banner.textContent = pendingCount + ' venta(s) pendiente(s) de sincronizar';
+        if (label)  label.textContent  = pendingCount + ' venta' + (pendingCount===1?'':'s') + ' pendiente' + (pendingCount===1?'':'s') + ' de sincronizar';
+        var done = Math.max(0, syncTotalSeen - pendingCount);
+        if (counts) counts.textContent = done + '/' + syncTotalSeen;
+        if (fill)   fill.style.width   = (syncTotalSeen ? Math.round((done/syncTotalSeen)*100) : 0) + '%';
       } else {
         banner.style.display = 'none';
+        if (fill) fill.style.width = '100%';
+        // reset when all done
+        syncTotalSeen = 0;
       }
       $('syncNowBtn').disabled = !(pendingCount > 0 && isOnline);
       // Solo permitir salir de emergencia si: online + cero pendientes
@@ -478,6 +507,7 @@
   }
   function trySync(){
     if (!isOnline) return Promise.resolve({skipped:'offline'});
+    var __banner = $('pendingBanner'); if (__banner) __banner.classList.add('syncing');
     // FIX-9a-2: si el token expiró mientras estábamos offline, no podemos sync.
     // En ese caso, mostrar warning pero NO redirigir (el cajero puede seguir
     // cobrando offline; al volver a login se re-sincroniza).
@@ -580,6 +610,7 @@
         return { ok: totalFailed === 0, synced: totalOk, failed: totalFailed };
       });
     }).then(function(res){
+      var b = $('pendingBanner'); if (b) b.classList.remove('syncing');
       updatePendingCount();
       return res;
     });

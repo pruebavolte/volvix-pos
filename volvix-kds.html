@@ -97,8 +97,9 @@
       <option value="bar">Bar</option>
       <option value="dessert">Postres</option>
     </select>
-    <button id="soundBtn">Sonido: ON</button>
-    <span id="clock"></span>
+    <button id="soundBtn" aria-label="Alternar sonido de notificaciones">Sonido: ON</button>
+    <input id="soundVol" type="range" min="0" max="100" step="5" value="50" aria-label="Volumen de notificaciones" title="Volumen" style="width:80px;vertical-align:middle">
+    <span id="clock" aria-live="polite"></span>
   </div>
 </header>
 
@@ -118,18 +119,21 @@
 <script>
 const API = (window.VOLVIX_API || '') + '/api/kds/tickets';
 const ORDER_API = (window.VOLVIX_API || '') + '/api/kds/orders';
-let tickets = [], soundOn = true, knownIds = new Set(), firstLoad = true;
+let tickets = [], knownIds = new Set(), firstLoad = true;
+// Persisted sound config: on/off + volume 0..1
+let soundOn = (localStorage.getItem('kds_sound_on') !== '0');
+let soundVol = (function(){ const v = parseFloat(localStorage.getItem('kds_sound_vol')); return isFinite(v) ? Math.max(0,Math.min(1,v)) : 0.5; })();
 
 // Web Audio API beep (800Hz, 200ms) — replaces empty data-URI WAV
 let audioCtx = null;
 function beep(freq, ms){
-  if(!soundOn) return;
+  if(!soundOn || soundVol <= 0) return;
   try{
     if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
     if(audioCtx.state==='suspended') audioCtx.resume().catch(()=>{});
     const o = audioCtx.createOscillator(), g = audioCtx.createGain();
     o.type='sine'; o.frequency.value=freq||800;
-    g.gain.value=0.15;
+    g.gain.value = 0.3 * soundVol; // user-controlled volume
     o.connect(g); g.connect(audioCtx.destination);
     o.start(); o.stop(audioCtx.currentTime+(ms||200)/1000);
   }catch(_){}
@@ -302,11 +306,11 @@ function render(){
         </div>
         <ul>${items}</ul>
         ${t.notes?`<div class="notes">! ${escapeHtml(t.notes)}</div>`:''}
-        <button class="accept-btn" ${accepted?'disabled':''} onclick="acceptTicket('${t.id}')">${accepted?'Recibido OK':'Marcar recibido'}</button>
+        <button class="accept-btn" ${accepted?'disabled':''} aria-label="${accepted?'Ticket recibido':'Marcar ticket como recibido'}" onclick="acceptTicket('${t.id}')">${accepted?'Recibido OK':'Marcar recibido'}</button>
         <div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap">
-          <button class="accept-btn" style="background:#ffa657;color:#1a1a1a" onclick="setStatus('${t.id}','preparing')">En preparación</button>
-          <button class="accept-btn" style="background:#3fb950;color:#0d1117" onclick="setStatus('${t.id}','ready')">Listo</button>
-          <button class="accept-btn" style="background:#f85149" onclick="setStatus('${t.id}','cancelled')">Cancelar</button>
+          <button class="accept-btn" style="background:#ffa657;color:#1a1a1a" aria-label="Mover ticket a En preparación" onclick="setStatus('${t.id}','preparing')">En preparación</button>
+          <button class="accept-btn" style="background:#3fb950;color:#0d1117" aria-label="Marcar ticket como Listo" onclick="setStatus('${t.id}','ready')">Listo</button>
+          <button class="accept-btn" style="background:#f85149" aria-label="Cancelar ticket" onclick="setStatus('${t.id}','cancelled')">Cancelar</button>
         </div>
       </div>`;
     }).join('');
@@ -344,7 +348,29 @@ function bindDrag(){
   });
 }
 
-$('#soundBtn').onclick=()=>{soundOn=!soundOn;$('#soundBtn').textContent='Sonido: '+(soundOn?'ON':'OFF');};
+// Sound config — toggle + volume, both persisted
+(function initSoundUI(){
+  const btn = $('#soundBtn'), vol = $('#soundVol');
+  if(btn){
+    btn.textContent = 'Sonido: ' + (soundOn?'ON':'OFF');
+    btn.setAttribute('aria-pressed', String(soundOn));
+    btn.onclick = () => {
+      soundOn = !soundOn;
+      try { localStorage.setItem('kds_sound_on', soundOn?'1':'0'); } catch(_){}
+      btn.textContent = 'Sonido: ' + (soundOn?'ON':'OFF');
+      btn.setAttribute('aria-pressed', String(soundOn));
+      if(soundOn) beep(800, 120); // audible confirmation when enabling
+    };
+  }
+  if(vol){
+    vol.value = String(Math.round(soundVol * 100));
+    vol.addEventListener('input', () => {
+      soundVol = Math.max(0, Math.min(1, (parseInt(vol.value,10)||0) / 100));
+      try { localStorage.setItem('kds_sound_vol', String(soundVol)); } catch(_){}
+    });
+    vol.addEventListener('change', () => { if(soundOn) beep(800, 120); });
+  }
+})();
 $('#station').onchange=refresh;
 
 // Tick clock + timers every second

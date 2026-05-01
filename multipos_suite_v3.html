@@ -990,10 +990,10 @@ body{font-family:var(--font);background:var(--page);color:var(--black);font-feat
               <div class="greeting-date">MAR 21 ABR · Sucursal Centro</div>
             </div>
             <div class="kpi-grid">
-              <div class="kpi"><div class="kpi-lbl">Ventas hoy</div><div class="kpi-val">$8,240</div><div class="kpi-dl kpi-up">↗ +12% vs ayer</div></div>
-              <div class="kpi"><div class="kpi-lbl">Clientes</div><div class="kpi-val">47</div><div class="kpi-dl kpi-up">↗ 3 más</div></div>
-              <div class="kpi"><div class="kpi-lbl">Ticket prom.</div><div class="kpi-val">$175</div><div class="kpi-dl kpi-up">↗ $12</div></div>
-              <div class="kpi"><div class="kpi-lbl">Ocupación</div><div class="kpi-val">58%</div><div class="kpi-sub">7 de 12</div></div>
+              <div class="kpi"><div class="kpi-lbl">Ventas hoy</div><div class="kpi-val" id="kpiVentas" aria-live="polite">—</div><div class="kpi-dl kpi-up" id="kpiVentasDelta"></div></div>
+              <div class="kpi"><div class="kpi-lbl">Clientes</div><div class="kpi-val" id="kpiClientes" aria-live="polite">—</div><div class="kpi-dl kpi-up" id="kpiClientesDelta"></div></div>
+              <div class="kpi"><div class="kpi-lbl">Ticket prom.</div><div class="kpi-val" id="kpiTicket" aria-live="polite">—</div><div class="kpi-dl kpi-up" id="kpiTicketDelta"></div></div>
+              <div class="kpi"><div class="kpi-lbl">Ocupación</div><div class="kpi-val" id="kpiOcupacion" aria-live="polite">—</div><div class="kpi-sub" id="kpiOcupacionSub"></div></div>
             </div>
             <div class="card">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px"><span style="font-size:12.5px;font-weight:700">Ventas por hora</span><span class="chip chip-gr">12 hrs</span></div>
@@ -2392,12 +2392,32 @@ renderMenu();
       if (r.status === 503) { return; }
       if (!r.ok) throw new Error('HTTP '+r.status);
       var d = await r.json();
-      var ventas = d.total_sales ?? d.ventas ?? d.total ?? 0;
-      var items  = d.items_sold  ?? d.items  ?? 0;
-      var ticket = d.avg_ticket  ?? d.ticket_promedio ?? (d.tickets_count ? ventas / d.tickets_count : 0);
+      var ventas    = d.total_sales ?? d.ventas ?? d.total ?? 0;
+      var items     = d.items_sold  ?? d.items  ?? 0;
+      var tickets   = d.tickets_count ?? d.tickets ?? 0;
+      var ticket    = d.avg_ticket  ?? d.ticket_promedio ?? (tickets ? ventas / tickets : 0);
+      var customers = d.customers_count ?? d.customers ?? d.clientes ?? tickets;
+      var occPct    = d.occupancy_pct ?? d.ocupacion ?? null;
+      var occUsed   = d.tables_occupied ?? null;
+      var occTotal  = d.tables_total ?? null;
+      var dventas   = d.delta_sales_pct;
+      // Stats bar (top header)
       var v = document.getElementById('vbwStatVentas'); if (v) v.textContent = fmtMx(ventas);
       var a = document.getElementById('vbwStatAvg');    if (a) a.textContent = fmtMx(ticket);
       var i = document.getElementById('vbwStatItems');  if (i) i.textContent = String(items|0);
+      // Dashboard KPI grid (real data, replaces previous hardcoded $8,240 etc.)
+      var kV = document.getElementById('kpiVentas');     if (kV) kV.textContent = fmtMx(ventas);
+      var kC = document.getElementById('kpiClientes');   if (kC) kC.textContent = String(customers|0);
+      var kT = document.getElementById('kpiTicket');     if (kT) kT.textContent = fmtMx(ticket);
+      var kO = document.getElementById('kpiOcupacion');  if (kO) kO.textContent = (occPct != null ? Math.round(occPct) + '%' : (occTotal ? Math.round((occUsed||0)/occTotal*100) + '%' : '—'));
+      var kOSub = document.getElementById('kpiOcupacionSub');
+      if (kOSub && occUsed != null && occTotal != null) kOSub.textContent = (occUsed|0) + ' de ' + (occTotal|0);
+      var kVD = document.getElementById('kpiVentasDelta');
+      if (kVD && dventas != null) {
+        kVD.textContent = (dventas >= 0 ? '↗ +' : '↘ ') + Math.round(Math.abs(dventas)) + '% vs ayer';
+        kVD.classList.toggle('kpi-up', dventas >= 0);
+        kVD.classList.toggle('kpi-dn', dventas < 0);
+      }
     } catch(e){ /* silent */ }
   }
 

@@ -369,7 +369,7 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
       </span>
       <input type="search" id="searchInput" class="search-input" placeholder="Buscar aplicación…" aria-label="Buscar aplicación" autocomplete="off">
-      <span class="kbd" aria-hidden="true">Ctrl K</span>
+      <button type="button" id="kbdHint" class="kbd" aria-label="Abrir paleta de comandos (Ctrl+K)" title="Abrir paleta de comandos" style="cursor:pointer;background:none;border:0;padding:0;color:inherit;font:inherit"><span id="kbdHintModifier">Ctrl</span> K</button>
     </div>
 
     <div class="topbar-spacer"></div>
@@ -977,6 +977,15 @@
       });
 
       document.getElementById('btnLogout').addEventListener('click', logout);
+
+      // Show platform-correct modifier in the kbd hint and make it clickable to open palette
+      try {
+        var isMac = /Mac|iPod|iPhone|iPad/.test(navigator.platform || '');
+        var modSpan = document.getElementById('kbdHintModifier');
+        if (modSpan && isMac) modSpan.textContent = '⌘';
+        var hintBtn = document.getElementById('kbdHint');
+        if (hintBtn) hintBtn.addEventListener('click', openPalette);
+      } catch(_){}
 
       // Command palette shortcut: Ctrl/Cmd + K
       document.addEventListener('keydown', (e) => {

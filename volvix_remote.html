@@ -326,6 +326,23 @@
       <span style="font-size:11px;opacity:0.8;">Especialista: Impresoras térmicas · 47 casos resueltos</span>
     </div>
 
+    <!-- Terminal status filter -->
+    <div id="terminalFilterPanel" style="margin-top:14px;padding:14px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;text-align:left">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <strong style="font-size:12px;color:var(--text)">Terminales</strong>
+        <span id="termCount" style="font-size:11px;color:var(--text-2)" aria-live="polite">0</span>
+      </div>
+      <div role="tablist" aria-label="Filtrar terminales por estado" style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+        <button type="button" data-filter="all"     class="term-filter active" aria-pressed="true"  style="padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:rgba(59,130,246,0.18);color:var(--text);font-size:11px;cursor:pointer">Todas</button>
+        <button type="button" data-filter="online"  class="term-filter"        aria-pressed="false" style="padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-2);font-size:11px;cursor:pointer">🟢 Online</button>
+        <button type="button" data-filter="idle"    class="term-filter"        aria-pressed="false" style="padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-2);font-size:11px;cursor:pointer">🟡 Idle</button>
+        <button type="button" data-filter="offline" class="term-filter"        aria-pressed="false" style="padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-2);font-size:11px;cursor:pointer">⚫ Offline</button>
+      </div>
+      <div id="termList" style="max-height:160px;overflow-y:auto;font-size:11.5px;color:var(--text-2)">
+        <div class="empty" style="padding:14px;text-align:center;font-size:11px">Cargando terminales…</div>
+      </div>
+    </div>
+
     <div class="safety-note">
       <strong>🛡️ Tu privacidad está protegida.</strong><br>
       La IA solo ve la ventana del sistema POS. Tu escritorio personal, archivos y otros programas permanecen privados. Todo queda grabado y tú puedes revisarlo después.
@@ -535,6 +552,107 @@ async function connect() {
 }
 
 function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ---------------------------------------------------------------------------
+// Terminal list + filter (status: all/online/idle/offline)
+// ---------------------------------------------------------------------------
+let __terminalsCache = [];
+let __terminalFilter = 'all';
+
+function _termStatus(t) {
+  // Derive idle state if backend doesn't provide it: online & last_heartbeat > 60s old
+  if (t.status) return String(t.status).toLowerCase();
+  if (t.last_seen_at) {
+    var ageSec = (Date.now() - new Date(t.last_seen_at).getTime()) / 1000;
+    if (ageSec < 30) return 'online';
+    if (ageSec < 300) return 'idle';
+    return 'offline';
+  }
+  return 'offline';
+}
+
+function renderTerminalList() {
+  var box = document.getElementById('termList');
+  var counter = document.getElementById('termCount');
+  if (!box) return;
+  var filtered = __terminalsCache.filter(function (t) {
+    if (__terminalFilter === 'all') return true;
+    return _termStatus(t) === __terminalFilter;
+  });
+  if (counter) counter.textContent = String(filtered.length) + (__terminalFilter==='all' ? '' : ' / ' + __terminalsCache.length);
+  if (!filtered.length) {
+    box.innerHTML = '<div class="empty" style="padding:14px;text-align:center;font-size:11px">No hay terminales' + (__terminalFilter!=='all' ? ' en estado "' + __terminalFilter + '"' : '') + '.</div>';
+    return;
+  }
+  var dot = function (s) {
+    if (s === 'online') return '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#22C55E;margin-right:6px"></span>';
+    if (s === 'idle')   return '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#FBBF24;margin-right:6px"></span>';
+    return '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#71717A;margin-right:6px"></span>';
+  };
+  box.innerHTML = filtered.map(function (t) {
+    var st = _termStatus(t);
+    var name = t.device_name || t.device_id || t.id || 'Terminal';
+    var v = t.app_version || 'n/a';
+    return '<div class="term-row" data-id="' + (t.id || '') + '" tabindex="0" role="button" aria-label="Seleccionar terminal ' + escAttr(name) + '" style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:6px;cursor:pointer;border:1px solid transparent">' +
+           '<span>' + dot(st) + '<strong style="color:var(--text)">' + escHtml(name) + '</strong> <span style="opacity:0.6">v' + escHtml(v) + '</span></span>' +
+           '<span style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-2)">' + st + '</span>' +
+           '</div>';
+  }).join('');
+  // Click → set active terminal
+  box.querySelectorAll('.term-row').forEach(function (row) {
+    row.addEventListener('click', function () {
+      var id = row.dataset.id;
+      var t = __terminalsCache.find(function (x) { return String(x.id) === String(id); });
+      if (!t) return;
+      VLX_REMOTE.setActive(t);
+      VLX_REMOTE.logLine('ok', '[' + new Date().toLocaleTimeString() + '] ✓ Terminal activo: ' + (t.device_name || t.device_id));
+      VLX_REMOTE.startLogsPoll(t.id);
+    });
+    row.addEventListener('keypress', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); row.click(); }
+    });
+  });
+}
+
+function escHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+function escAttr(s) { return escHtml(s); }
+
+// Refresh the cached list and re-render
+async function refreshTerminals() {
+  try {
+    var list = await VLX_REMOTE.listTerminals();
+    __terminalsCache = Array.isArray(list) ? list : [];
+    renderTerminalList();
+  } catch (_) {}
+}
+
+// Wire filter buttons after DOM ready
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.term-filter').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      __terminalFilter = btn.dataset.filter || 'all';
+      document.querySelectorAll('.term-filter').forEach(function (b) {
+        var active = b === btn;
+        b.classList.toggle('active', active);
+        b.setAttribute('aria-pressed', String(active));
+        b.style.background = active ? 'rgba(59,130,246,0.18)' : 'transparent';
+        b.style.color = active ? 'var(--text)' : 'var(--text-2)';
+      });
+      renderTerminalList();
+    });
+  });
+});
+
+// Hook into connect() flow: after the connect routine populates terminals, also
+// expose them to the filter UI. We monkey-patch by listening for the connected
+// state appearing.
+const __origConnect = window.connect;
+window.connect = async function () {
+  await __origConnect();
+  await refreshTerminals();
+  // Periodic refresh while connected
+  setInterval(refreshTerminals, 15000);
+};
 </script>
 
 <script defer src="auth-helper.js"></script>

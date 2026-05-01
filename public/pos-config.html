@@ -718,9 +718,11 @@ html, body {
         <div class="card">
           <div class="card-head">
             <div class="card-title">Impresoras detectadas</div>
-            <div style="display:flex;gap:8px">
-              <button class="btn sm" onclick="detectarImpresoras()">🔍 Detectar</button>
-              <button class="btn sm primary" onclick="openModal('modalImpresora')">+ Agregar manual</button>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn sm" onclick="detectarImpresoras()" aria-label="Buscar impresoras conectadas">🔍 Detectar</button>
+              <button class="btn sm" onclick="probarImpresora('USB local',{transport:'usb'})" aria-label="Probar impresora USB con permiso del navegador">🔌 Test USB</button>
+              <button class="btn sm" onclick="probarImpresora('BT local',{transport:'bluetooth'})" aria-label="Probar impresora Bluetooth con permiso del navegador">📱 Test BT</button>
+              <button class="btn sm primary" onclick="openModal('modalImpresora')" aria-label="Agregar impresora manualmente">+ Agregar manual</button>
             </div>
           </div>
           <div style="padding:14px" id="printerList">
@@ -1380,7 +1382,8 @@ function detectarImpresoras() {
   setTimeout(() => toast('Epson TM-T20III detectada en COM3', 'ok'), 1800);
 }
 
-async function probarImpresora(nombre) {
+async function probarImpresora(nombre, opts) {
+  opts = opts || {};
   toast(`Imprimiendo ticket de prueba en ${nombre}...`, 'info');
   const sample = [
     '================================',
@@ -1392,7 +1395,29 @@ async function probarImpresora(nombre) {
     'Si lees esto, la impresora',
     'esta conectada correctamente.',
     '================================',
+    '\n\n\n', // feed paper
   ].join('\n');
+
+  // 1) WebUSB direct path (if user opts in or transport explicitly = 'usb')
+  if (opts.transport === 'usb') {
+    try {
+      const ok = await testPrinterUSB(sample);
+      if (ok) { toast(`✓ Ticket de prueba enviado por USB a ${nombre}`, 'ok'); return; }
+    } catch (err) {
+      toast('USB: ' + (err && err.message || err), 'warn');
+      // fall through to backend
+    }
+  }
+  // 2) WebBluetooth direct path
+  if (opts.transport === 'bluetooth') {
+    try {
+      const ok = await testPrinterBluetooth(sample);
+      if (ok) { toast(`✓ Ticket de prueba enviado por BT a ${nombre}`, 'ok'); return; }
+    } catch (err) {
+      toast('Bluetooth: ' + (err && err.message || err), 'warn');
+    }
+  }
+  // 3) Server-side print queue (default)
   try {
     await window.volvix.api.raw('POST', '/api/printer/raw', { text: sample, printer: nombre });
     toast(`✓ Ticket de prueba enviado a ${nombre}`, 'ok');
@@ -1400,6 +1425,90 @@ async function probarImpresora(nombre) {
     toast('Error: ' + err.message + ' · usa app nativa para impresoras locales', 'warn');
   }
 }
+
+// Real USB test using WebUSB API (triggers permission prompt). Returns true if
+// the OS reported the bulk-out write succeeded. ESC/POS thermal printers are
+// vendor=class 7 (Printer) or 0xFF (Vendor-specific). We let the user pick.
+async function testPrinterUSB(payload) {
+  if (!navigator.usb || !navigator.usb.requestDevice) {
+    throw new Error('WebUSB no soportado. Usa Chrome/Edge sobre HTTPS.');
+  }
+  toast('Abriendo selector USB...', 'info');
+  // Common thermal printer vendor IDs (Epson, Star, Bixolon, Citizen, Xprinter clones)
+  const filters = [
+    { vendorId: 0x04b8 }, // Epson
+    { vendorId: 0x0519 }, // Star
+    { vendorId: 0x1504 }, // Bixolon
+    { vendorId: 0x1cbe }, // Citizen
+    { vendorId: 0x0fe6 }, // Xprinter / clones
+    { classCode: 7 }      // USB Printer class fallback
+  ];
+  const device = await navigator.usb.requestDevice({ filters });
+  if (!device) throw new Error('Sin dispositivo seleccionado');
+  await device.open();
+  if (device.configuration === null) await device.selectConfiguration(1);
+  // Find first interface with bulk-OUT endpoint
+  let ifaceNum = 0, epOut = 1;
+  outer:
+  for (const iface of (device.configuration && device.configuration.interfaces || [])) {
+    for (const alt of iface.alternates) {
+      for (const ep of alt.endpoints) {
+        if (ep.direction === 'out' && ep.type === 'bulk') {
+          ifaceNum = iface.interfaceNumber;
+          epOut = ep.endpointNumber;
+          break outer;
+        }
+      }
+    }
+  }
+  await device.claimInterface(ifaceNum);
+  const enc = new TextEncoder();
+  const result = await device.transferOut(epOut, enc.encode(payload));
+  try { await device.releaseInterface(ifaceNum); } catch(_){}
+  try { await device.close(); } catch(_){}
+  // Persist for reuse
+  try {
+    const stored = JSON.parse(localStorage.getItem('vlx_printers') || '[]');
+    const info = { id: 'usb-' + (device.vendorId||'?') + '-' + (device.productId||'?'), name: device.productName || ('USB ' + (device.vendorId||'')), type: 'usb', pairedAt: Date.now() };
+    const dedup = stored.filter(p => p.id !== info.id); dedup.push(info);
+    localStorage.setItem('vlx_printers', JSON.stringify(dedup));
+  } catch(_){}
+  return !!(result && result.status === 'ok');
+}
+
+// Real BT test: connects to a paired (or new) device and writes the payload.
+async function testPrinterBluetooth(payload) {
+  if (!navigator.bluetooth || !navigator.bluetooth.requestDevice) {
+    throw new Error('Web Bluetooth no soportado.');
+  }
+  toast('Abriendo selector Bluetooth...', 'info');
+  const device = await navigator.bluetooth.requestDevice({
+    filters: [
+      { namePrefix: 'Printer' }, { namePrefix: 'BT' }, { namePrefix: 'POS' },
+      { services: ['000018f0-0000-1000-8000-00805f9b34fb'] }
+    ],
+    optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb', 'e7810a71-73ae-499d-8c15-faa9aef0c3f2']
+  });
+  if (!device || !device.gatt) throw new Error('Sin dispositivo seleccionado');
+  const server = await device.gatt.connect();
+  // Try the SPP-like service used by most ESC/POS BT printers
+  const SVC = '000018f0-0000-1000-8000-00805f9b34fb';
+  const CHAR = '00002af1-0000-1000-8000-00805f9b34fb';
+  const svc = await server.getPrimaryService(SVC);
+  const ch  = await svc.getCharacteristic(CHAR);
+  const enc = new TextEncoder();
+  const data = enc.encode(payload);
+  // Most BT printers limit MTU around 100-180 bytes; chunk to be safe
+  const CHUNK = 120;
+  for (let i = 0; i < data.length; i += CHUNK) {
+    await ch.writeValueWithoutResponse(data.slice(i, i + CHUNK));
+  }
+  try { server.disconnect(); } catch(_){}
+  return true;
+}
+window.probarImpresora = probarImpresora;
+window.testPrinterUSB = testPrinterUSB;
+window.testPrinterBluetooth = testPrinterBluetooth;
 
 async function pairBluetooth() {
   if (!('bluetooth' in navigator) || !navigator.bluetooth || !navigator.bluetooth.requestDevice) {
