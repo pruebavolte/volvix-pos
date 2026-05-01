@@ -142,6 +142,22 @@
   .alert{background:rgba(239,68,68,.12);border:1px solid var(--err);color:#ffb4b4;padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px}
   .ok{background:rgba(110,231,183,.12);border:1px solid var(--ac);color:var(--ac);padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px}
   .empty{text-align:center;color:var(--mut);padding:60px 20px}
+  /* Reviews & wishlist */
+  .stars{color:#fbbf24;font-size:13px;letter-spacing:1px;line-height:1}
+  .stars .empty-star{color:#3a3f55}
+  .review-meta{font-size:11px;color:var(--mut);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .wish-btn{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.45);border:0;border-radius:50%;width:32px;height:32px;color:#fff;cursor:pointer;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;transition:transform .15s}
+  .wish-btn.active{color:#ef4444}
+  .wish-btn:hover{transform:scale(1.1)}
+  .card{position:relative}
+  .review-list{max-height:200px;overflow:auto;margin-top:8px;padding-right:4px}
+  .review-item{padding:8px 0;border-bottom:1px dashed var(--bd);font-size:12.5px}
+  .review-item:last-child{border:0}
+  .review-item .who{font-weight:600;color:var(--fg);font-size:12px}
+  .review-item .body{color:var(--mut);margin-top:2px}
+  .price-slider-wrap input[type=range]{width:100%}
+  .price-slider-wrap .vals{display:flex;justify-content:space-between;font-size:11px;color:var(--mut)}
+  .stock-toggle{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:12.5px;color:var(--fg)}
   /* ============ RESPONSIVE ============ */
   @media(max-width:780px){
     main{grid-template-columns:1fr;padding:18px 14px;gap:18px}
@@ -208,10 +224,26 @@
     <input id="qInput" placeholder="Nombre, SKU…" oninput="loadProductsDebounced()" aria-label="Buscar producto" />
     <h3>Categoría</h3>
     <label for="catInput" style="display:none">Filtrar por categoría</label>
-    <select id="catInput" onchange="loadProducts()" aria-label="Categoría">
+    <select id="catInput" onchange="applyClientFilters()" aria-label="Categoría">
       <option value="">Todas</option>
     </select>
-    <button class="btn ghost" onclick="document.getElementById('qInput').value='';document.getElementById('catInput').value='';loadProducts()">Limpiar filtros</button>
+    <h3>Precio máximo</h3>
+    <div class="price-slider-wrap">
+      <input id="priceMax" type="range" min="0" max="20000" step="50" value="20000" oninput="onPriceSlider()" aria-label="Precio máximo" />
+      <div class="vals"><span>$0</span><span id="priceMaxLbl">$20,000+</span></div>
+    </div>
+    <h3>Disponibilidad</h3>
+    <label class="stock-toggle"><input id="onlyInStock" type="checkbox" onchange="applyClientFilters()" /> Solo en stock</label>
+    <h3>Ordenar por</h3>
+    <select id="sortBy" onchange="applyClientFilters()" aria-label="Ordenar resultados">
+      <option value="relevance">Relevancia</option>
+      <option value="price_asc">Precio: menor a mayor</option>
+      <option value="price_desc">Precio: mayor a menor</option>
+      <option value="rating">Mejor valorados</option>
+      <option value="recent">Más recientes</option>
+    </select>
+    <button class="btn ghost" style="margin-top:8px;width:100%" onclick="resetFilters()">Limpiar filtros</button>
+    <button class="btn ghost" style="margin-top:6px;width:100%" onclick="openWishlist()" aria-label="Ver lista de deseos">❤ Mi wishlist (<span id="wishCount">0</span>)</button>
   </aside>
   <section aria-label="Lista de productos">
     <div id="grid" class="grid" role="list"></div>
@@ -261,6 +293,35 @@
   </div>
 </div>
 
+<div id="reviewModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="rvTitle">
+  <div class="box">
+    <h2 id="rvTitle">Escribir reseña</h2>
+    <div id="rvAlert"></div>
+    <div class="field"><label>Producto</label><input id="rvProduct" disabled/></div>
+    <div class="row2">
+      <div class="field"><label>Tu nombre</label><input id="rvName" placeholder="Ej. Ana M."/></div>
+      <div class="field"><label>Calificación</label>
+        <select id="rvRating"><option value="5">★★★★★ (5)</option><option value="4">★★★★ (4)</option><option value="3">★★★ (3)</option><option value="2">★★ (2)</option><option value="1">★ (1)</option></select>
+      </div>
+    </div>
+    <div class="field"><label>Comentario</label><textarea id="rvBody" rows="4" placeholder="Cuéntanos tu experiencia..."></textarea></div>
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <button class="btn ghost" style="flex:1" onclick="document.getElementById('reviewModal').classList.remove('open')">Cancelar</button>
+      <button class="btn purple" style="flex:1" onclick="submitReview()">Publicar</button>
+    </div>
+  </div>
+</div>
+
+<div id="wishlistModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="wlTitle">
+  <div class="box">
+    <h2 id="wlTitle">❤ Mi lista de deseos</h2>
+    <div id="wishlistBody"></div>
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <button class="btn ghost" style="flex:1" onclick="document.getElementById('wishlistModal').classList.remove('open')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
 <div id="orderLookup" class="modal">
   <div class="box">
     <h2>Consultar pedido</h2>
@@ -288,6 +349,15 @@ let _cartStore = {};
 try { _cartStore = JSON.parse(localStorage.getItem(CART_KEY) || '{}') || {}; } catch(_){ _cartStore = {}; }
 let cart = Array.isArray(_cartStore[CART_NS]) ? _cartStore[CART_NS] : [];
 
+// Wishlist (per tenant/slug)
+const WISH_KEY = 'vlx_wishlist';
+let _wishStore = {};
+try { _wishStore = JSON.parse(localStorage.getItem(WISH_KEY) || '{}') || {}; } catch(_){ _wishStore = {}; }
+let wishlist = Array.isArray(_wishStore[CART_NS]) ? _wishStore[CART_NS] : [];
+
+// Cache last fetched product list for client-side sort/filter
+let _allProducts = [];
+
 function fmt(n){return new Intl.NumberFormat('es-MX',{style:'currency',currency:SHOP.currency||'MXN'}).format(+n||0)}
 function api(path){return fetch(API + path).then(r => r.json())}
 
@@ -308,34 +378,182 @@ let _t;
 function loadProductsDebounced(){clearTimeout(_t);_t=setTimeout(loadProducts,250)}
 async function loadProducts(){
   const q = document.getElementById('qInput').value.trim();
-  const c = document.getElementById('catInput').value.trim();
   const grid = document.getElementById('grid');
   grid.innerHTML = '<div class="empty">Cargando…</div>';
   try{
     const slug = SLUG || SHOP.slug;
-    const r = await api(`/api/shop/${encodeURIComponent(slug)}/products?q=${encodeURIComponent(q)}&category=${encodeURIComponent(c)}`);
+    const r = await api(`/api/shop/${encodeURIComponent(slug)}/products?q=${encodeURIComponent(q)}`);
     const items = (r && r.products) || [];
     if (r && r.shop && r.shop.currency) SHOP.currency = r.shop.currency;
-    if (!items.length){grid.innerHTML='';document.getElementById('empty').style.display='block';return}
-    document.getElementById('empty').style.display='none';
-    // populate cats
+    _allProducts = items;
+    // populate cats once
     const cats = [...new Set(items.map(p=>p.category).filter(Boolean))].sort();
     const sel = document.getElementById('catInput');
     if (sel.children.length <= 1) cats.forEach(cat=>{const o=document.createElement('option');o.value=cat;o.textContent=cat;sel.appendChild(o)});
-    grid.innerHTML = items.map(p => `
-      <article class="card" role="listitem" itemscope itemtype="https://schema.org/Product">
-        ${p.image_url ? `<img src="${p.image_url}" alt="${escape(p.name)}" itemprop="image" loading="lazy"/>` : `<div class="ph" aria-hidden="true">Sin imagen</div>`}
-        <h4 itemprop="name">${escape(p.name)}</h4>
-        <div class="sku">${p.sku?`<span itemprop="sku">${escape(p.sku)}</span>`:''} ${p.category?'· <span itemprop="category">'+escape(p.category)+'</span>':''}</div>
-        <div class="price" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
-          <meta itemprop="priceCurrency" content="${SHOP.currency||'MXN'}">
-          <meta itemprop="price" content="${Number(p.price)||0}">
-          <meta itemprop="availability" content="https://schema.org/InStock">
-          ${fmt(p.price)}
-        </div>
-        <button class="btn" onclick='addToCart(${JSON.stringify(p).replace(/'/g,"&#39;")})' aria-label="Agregar ${escape(p.name)} al carrito">Agregar</button>
-      </article>`).join('');
+    applyClientFilters();
   }catch(e){grid.innerHTML='<div class="alert">Error al cargar productos: '+escape(e.message)+'</div>'}
+}
+
+function onPriceSlider(){
+  const v = +document.getElementById('priceMax').value;
+  document.getElementById('priceMaxLbl').textContent = v >= 20000 ? '$20,000+' : fmt(v);
+  applyClientFilters();
+}
+
+function applyClientFilters(){
+  const grid = document.getElementById('grid');
+  const empty = document.getElementById('empty');
+  const cat = document.getElementById('catInput').value.trim();
+  const onlyStock = document.getElementById('onlyInStock').checked;
+  const maxPrice = +document.getElementById('priceMax').value;
+  const sortBy = document.getElementById('sortBy').value;
+
+  let list = _allProducts.slice();
+  if (cat) list = list.filter(p => p.category === cat);
+  if (onlyStock) list = list.filter(p => (p.stock == null) || +p.stock > 0);
+  if (maxPrice < 20000) list = list.filter(p => +p.price <= maxPrice);
+
+  if (sortBy === 'price_asc') list.sort((a,b)=>(+a.price||0)-(+b.price||0));
+  else if (sortBy === 'price_desc') list.sort((a,b)=>(+b.price||0)-(+a.price||0));
+  else if (sortBy === 'rating') list.sort((a,b)=>(+b.rating||0)-(+a.rating||0));
+  else if (sortBy === 'recent') list.sort((a,b)=>{
+    const ta = new Date(a.created_at||a.updated_at||0).getTime();
+    const tb = new Date(b.created_at||b.updated_at||0).getTime();
+    return tb - ta;
+  });
+
+  if (!list.length){grid.innerHTML='';empty.style.display='block';return}
+  empty.style.display='none';
+  grid.innerHTML = list.map(p => renderProductCard(p)).join('');
+  updateWishCount();
+}
+
+function renderStars(rating){
+  const r = Math.round(+rating || 0);
+  let html = '<span class="stars" aria-label="'+r+' de 5 estrellas">';
+  for (let i=1;i<=5;i++) html += i <= r ? '★' : '<span class="empty-star">★</span>';
+  html += '</span>';
+  return html;
+}
+
+function renderProductCard(p){
+  const inWish = wishlist.indexOf(p.id) >= 0;
+  const rating = +p.rating || 0;
+  const reviewCount = +p.review_count || 0;
+  const safeJson = JSON.stringify(p).replace(/'/g,"&#39;");
+  return `
+    <article class="card" role="listitem" itemscope itemtype="https://schema.org/Product">
+      <button class="wish-btn ${inWish?'active':''}" onclick="toggleWishlist('${escape(p.id)}', event)" aria-label="${inWish?'Quitar de':'Agregar a'} wishlist" title="Wishlist">${inWish?'❤':'♡'}</button>
+      ${p.image_url ? `<img src="${p.image_url}" alt="${escape(p.name)}" itemprop="image" loading="lazy"/>` : `<div class="ph" aria-hidden="true">Sin imagen</div>`}
+      <h4 itemprop="name">${escape(p.name)}</h4>
+      <div class="sku">${p.sku?`<span itemprop="sku">${escape(p.sku)}</span>`:''} ${p.category?'· <span itemprop="category">'+escape(p.category)+'</span>':''}</div>
+      <div class="review-meta" itemprop="aggregateRating" itemscope itemtype="https://schema.org/AggregateRating">
+        ${renderStars(rating)}
+        <span itemprop="ratingValue" style="display:none">${rating||0}</span>
+        <span itemprop="reviewCount" style="display:none">${reviewCount}</span>
+        <span>${rating?rating.toFixed(1):'—'} · ${reviewCount} reseña${reviewCount===1?'':'s'}</span>
+      </div>
+      <div class="price" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+        <meta itemprop="priceCurrency" content="${SHOP.currency||'MXN'}">
+        <meta itemprop="price" content="${Number(p.price)||0}">
+        <meta itemprop="availability" content="https://schema.org/InStock">
+        ${fmt(p.price)}
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn" style="flex:1" onclick='addToCart(${safeJson})' aria-label="Agregar ${escape(p.name)} al carrito">Agregar</button>
+        <button class="btn ghost" style="padding:8px 10px" onclick='openReviewModal(${safeJson})' aria-label="Escribir reseña">★</button>
+      </div>
+    </article>`;
+}
+
+function resetFilters(){
+  document.getElementById('qInput').value='';
+  document.getElementById('catInput').value='';
+  document.getElementById('onlyInStock').checked=false;
+  document.getElementById('priceMax').value=20000;
+  document.getElementById('priceMaxLbl').textContent='$20,000+';
+  document.getElementById('sortBy').value='relevance';
+  loadProducts();
+}
+
+// Wishlist
+function saveWishlist(){
+  _wishStore[CART_NS] = wishlist;
+  try { localStorage.setItem(WISH_KEY, JSON.stringify(_wishStore)); } catch(_){}
+  updateWishCount();
+  // Best-effort sync to server (will silently fail if no auth/endpoint)
+  fetch(API + '/api/customer/wishlist', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ tenant_id: SHOP.id || TENANT, shop_slug: SLUG || SHOP.slug, product_ids: wishlist })
+  }).catch(()=>{});
+}
+function updateWishCount(){
+  const el = document.getElementById('wishCount');
+  if (el) el.textContent = wishlist.length;
+}
+function toggleWishlist(pid, ev){
+  if (ev) ev.stopPropagation();
+  const i = wishlist.indexOf(pid);
+  if (i >= 0) wishlist.splice(i,1); else wishlist.push(pid);
+  saveWishlist();
+  applyClientFilters();
+}
+function openWishlist(){
+  const body = document.getElementById('wishlistBody');
+  if (!wishlist.length){body.innerHTML='<div class="empty">Tu wishlist está vacía. Toca ♡ en cualquier producto.</div>';}
+  else {
+    const items = _allProducts.filter(p => wishlist.indexOf(p.id) >= 0);
+    body.innerHTML = items.map(p => `
+      <div class="row" style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px dashed var(--bd)">
+        <div><div>${escape(p.name)}</div><div style="color:var(--mut);font-size:11px">${fmt(p.price)}</div></div>
+        <div style="display:flex;gap:6px">
+          <button class="btn" onclick='addToCart(${JSON.stringify(p).replace(/'/g,"&#39;")})'>+ Carrito</button>
+          <button class="btn ghost" onclick="toggleWishlist('${escape(p.id)}');openWishlist()">Quitar</button>
+        </div>
+      </div>`).join('');
+  }
+  document.getElementById('wishlistModal').classList.add('open');
+}
+
+// Reviews
+let _reviewProduct = null;
+function openReviewModal(p){
+  _reviewProduct = p;
+  document.getElementById('rvProduct').value = p.name || '';
+  document.getElementById('rvName').value = '';
+  document.getElementById('rvBody').value = '';
+  document.getElementById('rvAlert').innerHTML = '';
+  document.getElementById('reviewModal').classList.add('open');
+}
+async function submitReview(){
+  const al = document.getElementById('rvAlert');
+  al.innerHTML = '';
+  const name = document.getElementById('rvName').value.trim();
+  const rating = +document.getElementById('rvRating').value;
+  const body = document.getElementById('rvBody').value.trim();
+  if (!name || !body){ al.innerHTML='<div class="alert">Nombre y comentario son requeridos</div>'; return; }
+  if (!_reviewProduct){ al.innerHTML='<div class="alert">Producto no válido</div>'; return; }
+  try{
+    const r = await fetch(API + '/api/shop/reviews', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        tenant_id: SHOP.id || TENANT,
+        shop_slug: SLUG || SHOP.slug,
+        product_id: _reviewProduct.id,
+        author_name: name,
+        rating: rating,
+        body: body
+      })
+    });
+    const d = await r.json().catch(()=>({}));
+    if (!r.ok || d.ok === false){ al.innerHTML='<div class="alert">'+escape(d.message||'No se pudo publicar')+'</div>'; return; }
+    al.innerHTML='<div class="ok">¡Gracias por tu reseña!</div>';
+    setTimeout(()=>document.getElementById('reviewModal').classList.remove('open'), 1200);
+  }catch(e){
+    al.innerHTML='<div class="alert">Error de red: '+escape(e.message)+'</div>';
+  }
 }
 function escape(s){return String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 
@@ -451,7 +669,7 @@ async function lookupOrder(){
   }catch(e){box.innerHTML='<div class="alert">'+escape(e.message)+'</div>'}
 }
 
-(async()=>{await loadShopInfo();await loadProducts();renderCart()})();
+(async()=>{await loadShopInfo();await loadProducts();renderCart();updateWishCount()})();
 </script>
 <link rel="stylesheet" href="volvix-modals.css">
 <link rel="stylesheet" href="volvix-shared.css">

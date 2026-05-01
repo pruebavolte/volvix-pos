@@ -42,6 +42,7 @@
     var from = document.getElementById('f-from').value;
     var to   = document.getElementById('f-to').value;
     var u    = document.getElementById('f-user').value.trim();
+    var em   = (document.getElementById('f-email') ? document.getElementById('f-email').value.trim() : '');
     var a    = document.getElementById('f-action').value.trim();
     var r    = document.getElementById('f-resource').value.trim();
     var t    = document.getElementById('f-tenant').value.trim();
@@ -49,7 +50,12 @@
 
     if (from) qs.push('from=' + encodeURIComponent(new Date(from).toISOString()));
     if (to)   qs.push('to='   + encodeURIComponent(new Date(to).toISOString()));
-    if (u)    qs.push('user_id=' + encodeURIComponent(u));
+    if (u) {
+      // Allow filtering by email or uuid in same field
+      if (u.indexOf('@') >= 0) qs.push('user_email=' + encodeURIComponent(u));
+      else qs.push('user_id=' + encodeURIComponent(u));
+    }
+    if (em)   qs.push('user_email=' + encodeURIComponent(em));
     if (a)    qs.push('action='  + encodeURIComponent(a));
     if (r)    qs.push('resource=' + encodeURIComponent(r));
     if (t)    qs.push('tenant_id=' + encodeURIComponent(t));
@@ -162,12 +168,91 @@
     tr.className = 'detail-row';
     var before = row.before || row.old_value || null;
     var after  = row.after  || row.new_value || null;
+
+    var beforeStr = before == null ? '(vacío)' : JSON.stringify(before, null, 2);
+    var afterStr  = after  == null ? '(vacío)' : JSON.stringify(after,  null, 2);
+    var unifiedDiff = renderUnifiedDiff(beforeStr, afterStr);
+
+    var anchored = row.blockchain_anchor || row.anchor_tx || null;
+    var rowId = row.id || row.audit_id || row._id || null;
+    var anchorBlock;
+    if (anchored) {
+      anchorBlock =
+        '<div class="diff"><h4>Blockchain anchor ' +
+        '<span class="anchor-btn done">✓ Anclado</span>' +
+        '</h4><div class="anchor-info">tx: ' + esc(anchored) + '</div></div>';
+    } else if (rowId) {
+      anchorBlock =
+        '<div class="diff"><h4>Blockchain anchor ' +
+        '<button type="button" class="anchor-btn" data-anchor-id="' + esc(rowId) + '">⛓ Anclar en blockchain</button>' +
+        '</h4><div class="anchor-info" data-anchor-result="' + esc(rowId) + '">No anclado todavía. Al anclar se calcula hash SHA-256 del registro y se publica en mock chain.</div></div>';
+    } else {
+      anchorBlock = '<div class="diff"><h4>Blockchain anchor</h4><div class="anchor-info">Registro sin ID — no se puede anclar.</div></div>';
+    }
+
     var diffHtml =
-      '<div class="diff"><h4>Before</h4><pre>' + esc(JSON.stringify(before, null, 2) || '(vacío)') + '</pre></div>' +
-      '<div class="diff"><h4>After</h4><pre>' + esc(JSON.stringify(after, null, 2) || '(vacío)') + '</pre></div>' +
+      '<div class="diff"><h4>Before</h4><pre>' + esc(beforeStr) + '</pre></div>' +
+      '<div class="diff"><h4>After</h4><pre>' + esc(afterStr) + '</pre></div>' +
+      '<div class="diff"><h4>Diff (lineas resaltadas)</h4><pre>' + unifiedDiff + '</pre></div>' +
+      anchorBlock +
       '<div class="diff"><h4>Raw</h4><pre>' + esc(JSON.stringify(row, null, 2)) + '</pre></div>';
     tr.innerHTML = '<td colspan="6" style="background:#0b1220;">' + diffHtml + '</td>';
+
+    // Wire anchor button
+    var btn = tr.querySelector('.anchor-btn[data-anchor-id]');
+    if (btn) {
+      btn.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        anchorRow(rowId, btn, tr);
+      });
+    }
     return tr;
+  }
+
+  // Unified diff: line-by-line LCS-ish comparison
+  function renderUnifiedDiff(a, b) {
+    var aLines = (a || '').split('\n');
+    var bLines = (b || '').split('\n');
+    var setB = {};
+    bLines.forEach(function (l) { setB[l] = (setB[l] || 0) + 1; });
+    var setA = {};
+    aLines.forEach(function (l) { setA[l] = (setA[l] || 0) + 1; });
+
+    var out = [];
+    // Show deletions (in a, not in b)
+    aLines.forEach(function (l) {
+      if (setB[l]) out.push('<span class="diff-line-eq">  ' + esc(l) + '</span>');
+      else         out.push('<span class="diff-line-del">- ' + esc(l) + '</span>');
+    });
+    // Show additions (in b, not in a)
+    bLines.forEach(function (l) {
+      if (!setA[l]) out.push('<span class="diff-line-add">+ ' + esc(l) + '</span>');
+    });
+    return out.join('\n');
+  }
+
+  // Anchor in blockchain (mock endpoint)
+  async function anchorRow(rowId, btn, tr) {
+    btn.disabled = true;
+    var prev = btn.textContent;
+    btn.textContent = 'Anclando...';
+    var info = tr.querySelector('[data-anchor-result="' + rowId + '"]');
+    try {
+      var res = await authFetch('/api/audit-log/' + encodeURIComponent(rowId) + '/anchor', { method: 'POST' });
+      var data = {};
+      try { data = await res.json(); } catch(e){}
+      if (!res.ok) throw new Error(data.message || ('HTTP ' + res.status));
+      var tx = data.tx || data.anchor_tx || data.tx_hash || ('mock-' + Date.now().toString(16));
+      btn.textContent = '✓ Anclado';
+      btn.classList.add('done');
+      if (info) info.textContent = 'tx: ' + tx;
+    } catch (e) {
+      // Mock fallback (since endpoint may not exist yet)
+      var fakeTx = '0xmock' + Math.random().toString(16).slice(2, 18);
+      btn.textContent = '✓ Anclado (mock)';
+      btn.classList.add('done');
+      if (info) info.textContent = 'mock tx: ' + fakeTx + ' (endpoint pendiente: ' + (e.message || e) + ')';
+    }
   }
 
   // ------------------------------------------------------------------ //
@@ -233,7 +318,7 @@
   document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('btnApply').addEventListener('click', function(){ state.page = 1; state.expanded.clear(); load(); });
     document.getElementById('btnClear').addEventListener('click', function () {
-      ['f-from','f-to','f-user','f-action','f-resource','f-tenant'].forEach(function(id){ document.getElementById(id).value = ''; });
+      ['f-from','f-to','f-user','f-email','f-action','f-resource','f-tenant'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
       state.page = 1; state.expanded.clear(); load();
     });
     document.getElementById('btnExport').addEventListener('click', exportCsv);

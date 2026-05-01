@@ -1401,10 +1401,83 @@ async function probarImpresora(nombre) {
   }
 }
 
-function pairBluetooth() {
+async function pairBluetooth() {
+  if (!('bluetooth' in navigator) || !navigator.bluetooth || !navigator.bluetooth.requestDevice) {
+    toast('Web Bluetooth no soportado en este navegador. Usa Chrome/Edge en HTTPS o app nativa.', 'warn');
+    return;
+  }
   toast('Abriendo selector de dispositivos Bluetooth...', 'info');
-  setTimeout(() => toast('Función disponible en app nativa (Tauri / Capacitor)', 'warn'), 1500);
+  try {
+    // Common ESC/POS thermal printer service UUIDs
+    var device = await navigator.bluetooth.requestDevice({
+      filters: [
+        { namePrefix: 'Printer' },
+        { namePrefix: 'BT' },
+        { namePrefix: 'POS' },
+        { services: ['000018f0-0000-1000-8000-00805f9b34fb'] },
+        { services: ['e7810a71-73ae-499d-8c15-faa9aef0c3f2'] }
+      ],
+      optionalServices: [
+        '000018f0-0000-1000-8000-00805f9b34fb',
+        'e7810a71-73ae-499d-8c15-faa9aef0c3f2',
+        '49535343-fe7d-4ae5-8fa9-9fafd205e455',
+        'battery_service'
+      ]
+    });
+    if (!device) { toast('Sin dispositivo seleccionado', 'warn'); return; }
+    // Persist the device id/name for reuse
+    var info = { id: device.id, name: device.name || 'Impresora BT', type: 'bluetooth', pairedAt: Date.now() };
+    try {
+      var stored = JSON.parse(localStorage.getItem('vlx_printers') || '[]');
+      // de-dupe by id
+      stored = stored.filter(function(p){ return p.id !== info.id; });
+      stored.push(info);
+      localStorage.setItem('vlx_printers', JSON.stringify(stored));
+    } catch(e){}
+    // Try connect for confirmation
+    try {
+      if (device.gatt && device.gatt.connect) {
+        var server = await device.gatt.connect();
+        if (server && server.disconnect) server.disconnect();
+      }
+    } catch(e){}
+    toast('✓ Pareada: ' + (device.name || device.id), 'ok');
+    appendBluetoothPrinter(info);
+  } catch (err) {
+    if (err && err.name === 'NotFoundError') {
+      toast('Sin dispositivo seleccionado', 'warn');
+    } else {
+      toast('Bluetooth: ' + (err && err.message ? err.message : 'error desconocido'), 'err');
+    }
+  }
 }
+
+function appendBluetoothPrinter(info){
+  var list = document.getElementById('printerList');
+  if (!list) return;
+  var row = document.createElement('div');
+  row.className = 'printer-card';
+  row.innerHTML =
+    '<div class="printer-icon">📱</div>' +
+    '<div class="printer-info">' +
+      '<div class="printer-name">' + esc(info.name) + '</div>' +
+      '<div class="printer-model">Bluetooth · id ' + esc((info.id||'').slice(0,12)) + '… · ESC/POS</div>' +
+    '</div>' +
+    '<span class="printer-status status-ok">✓ Pareada</span>' +
+    '<button class="btn sm" onclick="probarImpresora(\'' + esc(info.name).replace(/\\/g,'\\\\').replace(/\'/g,"\\'") + '\')">Probar</button>';
+  list.appendChild(row);
+}
+
+// Auto-render any previously paired Bluetooth devices on page load
+(function restorePairedBluetooth(){
+  try {
+    var stored = JSON.parse(localStorage.getItem('vlx_printers') || '[]');
+    if (!Array.isArray(stored) || !stored.length) return;
+    document.addEventListener('DOMContentLoaded', function(){
+      stored.forEach(function(p){ if (p && p.type === 'bluetooth') appendBluetoothPrinter(p); });
+    });
+  } catch(e){}
+})();
 
 function updatePrinterFields() {
   const type = document.getElementById('iPrinterType').value;

@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="refresh" content="0;url=/volvix-customer-portal.html">
 <link rel="canonical" href="/volvix-customer-portal.html">
 <title>Volvix · Portal Cliente (redirigiendo)</title>
 <style>
@@ -14,20 +13,75 @@
   a{color:#1d4ed8;text-decoration:none;font-weight:600}
   a:hover{text-decoration:underline}
   .spinner{width:28px;height:28px;border:3px solid #dbeafe;border-top-color:#1d4ed8;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px}
+  .countdown{display:inline-block;min-width:24px;font-weight:700;color:#1d4ed8}
+  .skip-btn{display:inline-block;margin-top:6px;font-size:13px;background:transparent;border:1px solid #e2e8f0;color:#475569;padding:6px 14px;border-radius:8px;cursor:pointer}
+  .skip-btn:hover{background:#f1f5f9}
   @keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
   <div class="box">
-    <div class="spinner"></div>
+    <div class="spinner" id="spinner"></div>
     <h1>Hemos actualizado el portal</h1>
-    <p>Redirigiendo al portal de cliente actualizado...</p>
-    <p>Si no eres redirigido automáticamente, <a href="/volvix-customer-portal.html">haz clic aquí</a>.</p>
+    <p>Redirigiendo al portal de cliente actualizado en <span class="countdown" id="cd">3</span>s...</p>
+    <p>Si no eres redirigido automáticamente, <a id="manualLink" href="/volvix-customer-portal.html">haz clic aquí</a>.</p>
+    <button class="skip-btn" id="skipBtn" type="button">Ir ahora</button>
   </div>
 <script>
 'use strict';
-// JS fallback for browsers ignoring meta refresh
-window.location.replace('/volvix-customer-portal.html');
+(function(){
+  // Preserve query params + hash on redirect
+  var dest = '/volvix-customer-portal.html';
+  var qs = window.location.search || '';
+  var hash = window.location.hash || '';
+  var fullDest = dest + qs + hash;
+
+  // Update manual link to include params
+  var link = document.getElementById('manualLink');
+  if (link) link.href = fullDest;
+
+  // Detect logged-in user via known token keys
+  function isLoggedIn(){
+    try {
+      var keys = ['volvix_token','volvixAuthToken','volvix.token','token'];
+      for (var i=0;i<keys.length;i++){
+        if (localStorage.getItem(keys[i])) return true;
+      }
+    } catch(e){}
+    return false;
+  }
+
+  function go(){
+    try { window.location.replace(fullDest); }
+    catch(e){ window.location.href = fullDest; }
+  }
+
+  // Skip button → immediate redirect
+  var skip = document.getElementById('skipBtn');
+  if (skip) skip.addEventListener('click', go);
+
+  // If logged in, redirect immediately (no countdown wait)
+  if (isLoggedIn()){
+    // Tiny delay so user sees the message but no full reload-style countdown
+    setTimeout(go, 250);
+    return;
+  }
+
+  // Countdown for anonymous users
+  var seconds = 3;
+  var cdEl = document.getElementById('cd');
+  var timer = setInterval(function(){
+    seconds--;
+    if (cdEl) cdEl.textContent = String(Math.max(0, seconds));
+    if (seconds <= 0){
+      clearInterval(timer);
+      go();
+    }
+  }, 1000);
+
+  // Fallback: hard 5s safety net
+  setTimeout(go, 5000);
+})();
 </script>
 </body>
 </html>

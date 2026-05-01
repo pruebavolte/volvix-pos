@@ -456,6 +456,34 @@ body{font-family:var(--font);background:var(--page);color:var(--black);font-feat
 <body>
 
 <!-- TOPBAR -->
+<style>
+  .vbw-stats-bar{display:flex;gap:14px;align-items:center;font-size:11.5px;color:#475569;flex-wrap:wrap}
+  .vbw-stats-bar .stat{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.5);padding:4px 9px;border-radius:6px;border:1px solid rgba(0,0,0,.05)}
+  .vbw-stats-bar .stat b{color:#0f172a;font-weight:700;font-size:12px}
+  .vbw-rt{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:4px 8px;border-radius:99px}
+  .vbw-rt.online{background:rgba(34,197,94,.12);color:#16a34a}
+  .vbw-rt.offline{background:rgba(239,68,68,.12);color:#dc2626}
+  .vbw-rt .dot{width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 6px currentColor;animation:vbw-pulse 2s infinite}
+  @keyframes vbw-pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .vbw-shortcut-hints{display:none;gap:6px;font-size:10.5px;color:#6b7280}
+  .vbw-shortcut-hints kbd{background:#fff;border:1px solid #d1d5db;border-bottom-width:2px;border-radius:4px;padding:1px 6px;font-family:ui-monospace,monospace;font-size:10px;color:#374151}
+  @media(min-width:980px){ .vbw-shortcut-hints{display:inline-flex} }
+  .vbw-search-btn{background:#fff;border:1px solid #d1d5db;color:#475569;padding:5px 10px;border-radius:8px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+  .vbw-search-btn:hover{border-color:#94a3b8}
+  .vbw-search-btn kbd{background:#f3f4f6;border:1px solid #d1d5db;border-radius:3px;padding:0 4px;font-size:10px;font-family:ui-monospace,monospace}
+  /* Quick search modal */
+  .vbw-qs-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:flex-start;justify-content:center;z-index:9999;padding-top:10vh}
+  .vbw-qs-overlay.open{display:flex}
+  .vbw-qs-box{background:#fff;width:min(560px,95vw);max-height:70vh;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.35);display:flex;flex-direction:column;overflow:hidden}
+  .vbw-qs-input{border:0;border-bottom:1px solid #e5e7eb;padding:16px 20px;font-size:16px;outline:none}
+  .vbw-qs-results{flex:1;overflow:auto;padding:8px 0}
+  .vbw-qs-group{padding:6px 16px;font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:#9ca3af;font-weight:700}
+  .vbw-qs-item{padding:9px 18px;display:flex;justify-content:space-between;gap:12px;cursor:pointer;font-size:13px;color:#1f2937}
+  .vbw-qs-item:hover, .vbw-qs-item.sel{background:#eef2ff}
+  .vbw-qs-item .meta{color:#6b7280;font-size:11.5px}
+  .vbw-qs-empty{padding:30px;text-align:center;color:#9ca3af;font-size:13px}
+  .vbw-qs-foot{border-top:1px solid #e5e7eb;padding:8px 16px;font-size:11px;color:#6b7280;display:flex;gap:14px;justify-content:space-between}
+</style>
 <div class="topbar">
   <div class="brand-mini">M</div>
   <nav class="app-selector">
@@ -464,8 +492,37 @@ body{font-family:var(--font);background:var(--page);color:var(--black);font-feat
     <button class="app-tab" data-app="manager" onclick="switchApp('manager')"><span class="tab-dot" style="background:var(--c-m)"></span><span>Manager</span></button>
     <button class="app-tab" data-app="cds" onclick="switchApp('cds')"><span class="tab-dot" style="background:var(--c-c)"></span><span>CDS Cliente</span></button>
   </nav>
-  <a href="docs.html" target="_blank" rel="noopener" title="Centro de ayuda" style="margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;background:rgba(99,102,241,.12);color:#4f46e5;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(99,102,241,.25)">? Ayuda</a>
+
+  <div class="vbw-shortcut-hints" aria-hidden="true">
+    <span><kbd>F1</kbd> Ventas</span>
+    <span><kbd>F2</kbd> Créditos</span>
+    <span><kbd>F3</kbd> Cortes</span>
+    <span><kbd>F4</kbd> KDS</span>
+  </div>
+
+  <div class="vbw-stats-bar" aria-live="polite">
+    <span class="stat" title="Ventas hoy">💰 <b id="vbwStatVentas">$0</b></span>
+    <span class="stat" title="Ticket promedio">🎫 <b id="vbwStatAvg">$0</b></span>
+    <span class="stat" title="Productos vendidos hoy">📦 <b id="vbwStatItems">0</b></span>
+    <span class="vbw-rt offline" id="vbwRtIndicator" title="Conexión en tiempo real"><span class="dot"></span><span id="vbwRtLbl">Offline</span></span>
+  </div>
+
+  <button type="button" class="vbw-search-btn" id="vbwSearchOpen" aria-label="Búsqueda rápida" style="margin-left:auto"><span>🔍 Buscar</span><kbd>Ctrl+K</kbd></button>
+
+  <a href="docs.html" target="_blank" rel="noopener" title="Centro de ayuda" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;background:rgba(99,102,241,.12);color:#4f46e5;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(99,102,241,.25)">? Ayuda</a>
   <button class="logout-btn" onclick="handleLogout()" id="logout-btn" style="display:none">⎋</button>
+</div>
+
+<!-- Quick search modal (Ctrl+K) -->
+<div class="vbw-qs-overlay" id="vbwQsOverlay" role="dialog" aria-modal="true" aria-label="Búsqueda rápida">
+  <div class="vbw-qs-box">
+    <input type="text" class="vbw-qs-input" id="vbwQsInput" placeholder="Buscar productos, clientes, ventas..." autocomplete="off" />
+    <div class="vbw-qs-results" id="vbwQsResults"><div class="vbw-qs-empty">Empieza a escribir para buscar...</div></div>
+    <div class="vbw-qs-foot">
+      <span><kbd>↑</kbd> <kbd>↓</kbd> navegar · <kbd>Enter</kbd> seleccionar · <kbd>Esc</kbd> cerrar</span>
+      <span id="vbwQsCount"></span>
+    </div>
+  </div>
 </div>
 
 <!-- STAGE -->
@@ -2296,6 +2353,186 @@ renderMenu();
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);
   else boot();
+})();
+
+// =====================================================
+// VBW v3 polish: live stats, realtime indicator, quick search (Ctrl+K)
+// =====================================================
+(function(){
+  'use strict';
+  function fmtMx(n){
+    try { return new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(+n||0); }
+    catch(e){ return '$'+Math.round(+n||0); }
+  }
+  function getTok(){
+    try { return localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || ''; } catch(e){ return ''; }
+  }
+  function authHeaders(){ var t=getTok(); return t?{Authorization:'Bearer '+t,'Content-Type':'application/json'}:{'Content-Type':'application/json'}; }
+
+  // ---- Realtime indicator ----
+  function setRtState(online){
+    var el = document.getElementById('vbwRtIndicator');
+    var lbl = document.getElementById('vbwRtLbl');
+    if (!el) return;
+    el.classList.toggle('online', !!online);
+    el.classList.toggle('offline', !online);
+    if (lbl) lbl.textContent = online ? 'Online' : 'Offline';
+  }
+  function updateRtFromNet(){ setRtState(navigator.onLine && !!getTok()); }
+  window.addEventListener('online',  updateRtFromNet);
+  window.addEventListener('offline', updateRtFromNet);
+
+  // ---- Stats refresher ----
+  async function refreshStats(){
+    if (!navigator.onLine || !getTok()) return;
+    try {
+      var r = await fetch('/api/reports/today-stats', { headers: authHeaders() });
+      if (!r.ok) throw new Error('HTTP '+r.status);
+      var d = await r.json();
+      var ventas = d.total_sales ?? d.ventas ?? d.total ?? 0;
+      var items  = d.items_sold  ?? d.items  ?? 0;
+      var ticket = d.avg_ticket  ?? d.ticket_promedio ?? (d.tickets_count ? ventas / d.tickets_count : 0);
+      var v = document.getElementById('vbwStatVentas'); if (v) v.textContent = fmtMx(ventas);
+      var a = document.getElementById('vbwStatAvg');    if (a) a.textContent = fmtMx(ticket);
+      var i = document.getElementById('vbwStatItems');  if (i) i.textContent = String(items|0);
+    } catch(e){ /* silent */ }
+  }
+
+  // ---- Quick search (Ctrl+K) ----
+  var qsState = { items: [], sel: 0, debTimer: null };
+  function openQs(){
+    var ov = document.getElementById('vbwQsOverlay');
+    if (!ov) return;
+    ov.classList.add('open');
+    var inp = document.getElementById('vbwQsInput');
+    if (inp){ inp.value=''; inp.focus(); }
+    renderQs([]);
+  }
+  function closeQs(){
+    var ov = document.getElementById('vbwQsOverlay');
+    if (ov) ov.classList.remove('open');
+  }
+  function renderQs(items){
+    qsState.items = items || [];
+    qsState.sel = 0;
+    var box = document.getElementById('vbwQsResults');
+    var count = document.getElementById('vbwQsCount');
+    if (!box) return;
+    if (!items || !items.length){
+      box.innerHTML = '<div class="vbw-qs-empty">Sin resultados</div>';
+      if (count) count.textContent = '';
+      return;
+    }
+    var byKind = {};
+    items.forEach(function(it){ (byKind[it.kind] = byKind[it.kind] || []).push(it); });
+    var labels = { product:'Productos', customer:'Clientes', sale:'Ventas' };
+    var html = '';
+    Object.keys(byKind).forEach(function(k){
+      html += '<div class="vbw-qs-group">'+(labels[k]||k)+'</div>';
+      byKind[k].forEach(function(it,i){
+        html += '<div class="vbw-qs-item" data-idx="'+items.indexOf(it)+'"><span>'+escHtml(it.label)+'</span><span class="meta">'+escHtml(it.meta||'')+'</span></div>';
+      });
+    });
+    box.innerHTML = html;
+    if (count) count.textContent = items.length+' resultado'+(items.length===1?'':'s');
+    box.querySelectorAll('.vbw-qs-item').forEach(function(el){
+      el.addEventListener('mouseenter', function(){ setSelQs(parseInt(el.dataset.idx,10)); });
+      el.addEventListener('click', function(){ selectQs(parseInt(el.dataset.idx,10)); });
+    });
+    setSelQs(0);
+  }
+  function setSelQs(i){
+    qsState.sel = Math.max(0, Math.min((qsState.items.length||1)-1, i));
+    var box = document.getElementById('vbwQsResults');
+    if (!box) return;
+    box.querySelectorAll('.vbw-qs-item').forEach(function(el){
+      el.classList.toggle('sel', parseInt(el.dataset.idx,10) === qsState.sel);
+    });
+    var sel = box.querySelector('.vbw-qs-item.sel');
+    if (sel && sel.scrollIntoView) sel.scrollIntoView({ block:'nearest' });
+  }
+  function selectQs(i){
+    var it = qsState.items[i];
+    if (!it) return;
+    closeQs();
+    if (it.url) { window.location.href = it.url; return; }
+    if (it.action && typeof window[it.action] === 'function') { try { window[it.action](it.payload); } catch(e){} }
+  }
+  function escHtml(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];}); }
+
+  async function searchQs(q){
+    q = (q||'').trim();
+    if (!q) { renderQs([]); return; }
+    var results = [];
+    // Local fallback: VBW.products in scope above (window.VBW may exist)
+    try {
+      if (window.VBW && Array.isArray(window.VBW.products)){
+        var ql = q.toLowerCase();
+        window.VBW.products.slice(0,200).forEach(function(p){
+          var name = (p.name||'').toString();
+          var sku  = (p.sku||'').toString();
+          if (name.toLowerCase().indexOf(ql)>=0 || sku.toLowerCase().indexOf(ql)>=0){
+            results.push({ kind:'product', label:name, meta: sku, url:'#', payload:p });
+          }
+        });
+      }
+    } catch(e){}
+    // Backend search (best effort)
+    if (navigator.onLine && getTok()){
+      try {
+        var r = await fetch('/api/search?q='+encodeURIComponent(q), { headers: authHeaders() });
+        if (r.ok){
+          var d = await r.json();
+          (d.products||[]).forEach(function(p){ results.push({kind:'product',label:p.name,meta:p.sku||'',url:p.url||'#'}); });
+          (d.customers||[]).forEach(function(c){ results.push({kind:'customer',label:c.name||c.full_name||c.email,meta:c.phone||c.email||'',url:c.url||'#'}); });
+          (d.sales||[]).forEach(function(s){ results.push({kind:'sale',label:'Venta #'+(s.id||s.folio),meta:fmtMx(s.total||0),url:s.url||'#'}); });
+        }
+      } catch(e){}
+    }
+    // Dedupe by label
+    var seen={}; results = results.filter(function(it){ var k=it.kind+'|'+it.label; if (seen[k]) return false; seen[k]=1; return true; });
+    renderQs(results.slice(0,30));
+  }
+
+  function wireQs(){
+    var btn = document.getElementById('vbwSearchOpen');
+    if (btn) btn.addEventListener('click', openQs);
+    var ov = document.getElementById('vbwQsOverlay');
+    if (ov) ov.addEventListener('click', function(e){ if (e.target === ov) closeQs(); });
+    var inp = document.getElementById('vbwQsInput');
+    if (inp) inp.addEventListener('input', function(){
+      clearTimeout(qsState.debTimer);
+      qsState.debTimer = setTimeout(function(){ searchQs(inp.value); }, 220);
+    });
+    document.addEventListener('keydown', function(e){
+      var open = ov && ov.classList.contains('open');
+      // Ctrl/Cmd + K
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')){
+        e.preventDefault(); open ? closeQs() : openQs();
+        return;
+      }
+      if (!open) return;
+      if (e.key === 'Escape'){ e.preventDefault(); closeQs(); }
+      else if (e.key === 'ArrowDown'){ e.preventDefault(); setSelQs(qsState.sel+1); }
+      else if (e.key === 'ArrowUp'){ e.preventDefault(); setSelQs(qsState.sel-1); }
+      else if (e.key === 'Enter'){ e.preventDefault(); selectQs(qsState.sel); }
+    });
+  }
+
+  function bootPolish(){
+    wireQs();
+    updateRtFromNet();
+    refreshStats();
+    setInterval(refreshStats, 30000);
+    // Re-evaluate realtime state when VBW reports it
+    setInterval(function(){
+      try {
+        if (window.VBW && typeof window.VBW.online !== 'undefined') setRtState(!!window.VBW.online && navigator.onLine);
+      } catch(e){}
+    }, 5000);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootPolish);
+  else bootPolish();
 })();
 </script>
 </body>

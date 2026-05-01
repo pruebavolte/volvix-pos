@@ -675,6 +675,25 @@ footer{padding:60px 40px 30px;border-top:1px solid var(--border);background:var(
     <h2>Vive una venta <span>de principio a fin</span></h2>
     <p>5 pasos. Sin instalar nada. Haz clic en cualquier paso para ver la pantalla.</p>
   </div>
+  <div class="tour-controls" style="display:flex;align-items:center;gap:14px;justify-content:center;margin-bottom:24px;flex-wrap:wrap">
+    <div id="tourStepIndicator" style="font-size:1.1rem;font-weight:700;color:var(--text);background:var(--glass2);border:1px solid var(--border);padding:8px 18px;border-radius:100px;min-width:130px;text-align:center" aria-live="polite">Paso 1 de 5</div>
+    <div style="flex:1;max-width:340px;height:6px;background:var(--bg3);border-radius:100px;overflow:hidden">
+      <div id="tourProgress" style="height:100%;background:var(--grad);width:20%;transition:width .35s ease"></div>
+    </div>
+    <button id="tourBackBtn" type="button" class="btn btn-ghost" style="padding:9px 16px;font-size:0.88rem">← Volver</button>
+    <button id="tourNextBtn" type="button" class="btn btn-ghost" style="padding:9px 16px;font-size:0.88rem">Siguiente →</button>
+    <button id="tourShareBtn" type="button" class="btn btn-ghost" style="padding:9px 16px;font-size:0.88rem" title="Copiar link del tour">🔗 Compartir</button>
+    <button id="tourSkipBtn" type="button" class="btn btn-ghost" style="padding:9px 16px;font-size:0.88rem" title="Marcar como completado y volver">⏭ Saltar tour</button>
+  </div>
+  <style>
+    .stage-pane{transition:opacity .4s ease, transform .4s ease}
+    .stage-pane:not(.active){opacity:0;transform:translateY(12px);position:absolute;pointer-events:none}
+    .stage-pane.active{opacity:1;transform:translateY(0);position:relative}
+    .demo-stage{position:relative;min-height:380px}
+    @media (prefers-reduced-motion: reduce){
+      .stage-pane{transition:none}
+    }
+  </style>
   <div class="demo-wrap">
     <div class="steps">
       <div class="step active" data-step="1"><div class="n"><span>1</span></div><div class="txt"><h5>Abrir caja</h5><p>Login y monto inicial</p></div></div>
@@ -968,21 +987,110 @@ footer{padding:60px 40px 30px;border-top:1px solid var(--border);background:var(
 
 <script>
 // Demo interactivo - steps
+const TOUR_TOTAL_STEPS = 5;
+let tourCurrentStep = 1;
+
+function updateTourUI(n){
+  tourCurrentStep = n;
+  const ind = document.getElementById('tourStepIndicator');
+  if (ind) ind.textContent = 'Paso ' + n + ' de ' + TOUR_TOTAL_STEPS;
+  const bar = document.getElementById('tourProgress');
+  if (bar) bar.style.width = ((n / TOUR_TOTAL_STEPS) * 100) + '%';
+  const back = document.getElementById('tourBackBtn');
+  if (back) back.disabled = n <= 1;
+  const next = document.getElementById('tourNextBtn');
+  if (next) next.textContent = (n >= TOUR_TOTAL_STEPS) ? '✓ Completar' : 'Siguiente →';
+}
+
+function gotoStep(n){
+  n = Math.max(1, Math.min(TOUR_TOTAL_STEPS, parseInt(n,10) || 1));
+  document.querySelectorAll('.step').forEach(s=>{
+    s.classList.remove('active');
+    if(parseInt(s.dataset.step) < n) s.classList.add('done'); else s.classList.remove('done');
+  });
+  const stepEl = document.querySelector(`.step[data-step="${n}"]`);
+  if (stepEl) stepEl.classList.add('active');
+  document.querySelectorAll('.stage-pane').forEach(p=>p.classList.remove('active'));
+  const pane = document.querySelector(`.stage-pane[data-pane="${n}"]`);
+  if (pane) pane.classList.add('active');
+  updateTourUI(n);
+}
+
 document.querySelectorAll('.step').forEach(step=>{
   step.addEventListener('click',()=>{
-    const n = step.dataset.step;
-    document.querySelectorAll('.step').forEach(s=>{
-      s.classList.remove('active');
-      if(parseInt(s.dataset.step) < parseInt(n)) s.classList.add('done'); else s.classList.remove('done');
-    });
-    step.classList.add('active');
-    document.querySelectorAll('.stage-pane').forEach(p=>p.classList.remove('active'));
-    document.querySelector(`.stage-pane[data-pane="${n}"]`).classList.add('active');
+    const n = parseInt(step.dataset.step,10) || 1;
+    gotoStep(n);
   });
 });
 
-// Auto-advance demo every 5s
-let auto = 1;
+// Back / Next buttons
+const _backBtn = document.getElementById('tourBackBtn');
+if (_backBtn) _backBtn.addEventListener('click', () => gotoStep(tourCurrentStep - 1));
+const _nextBtn = document.getElementById('tourNextBtn');
+if (_nextBtn) _nextBtn.addEventListener('click', () => {
+  if (tourCurrentStep >= TOUR_TOTAL_STEPS){
+    // Mark completed and offer redirect
+    try {
+      var p = JSON.parse(localStorage.getItem('volvix_tour_progress')||'{}');
+      p.completed = true; p.step = TOUR_TOTAL_STEPS;
+      localStorage.setItem('volvix_tour_progress', JSON.stringify(p));
+    } catch(e){}
+    if (typeof window.gtag === 'function') { try { window.gtag('event','tour_completed'); } catch(e){} }
+  } else {
+    gotoStep(tourCurrentStep + 1);
+  }
+});
+
+// Skip tour
+const _skipBtn = document.getElementById('tourSkipBtn');
+if (_skipBtn) _skipBtn.addEventListener('click', () => {
+  if (!confirm('¿Saltar el tour? Se marcará como completado.')) return;
+  try {
+    var p = JSON.parse(localStorage.getItem('volvix_tour_progress')||'{}');
+    p.completed = true; p.skipped = true; p.step = TOUR_TOTAL_STEPS;
+    localStorage.setItem('volvix_tour_progress', JSON.stringify(p));
+  } catch(e){}
+  if (typeof window.gtag === 'function') { try { window.gtag('event','tour_skipped'); } catch(e){} }
+  window.location.href = '/volvix-launcher.html';
+});
+
+// Share tour link
+const _shareBtn = document.getElementById('tourShareBtn');
+if (_shareBtn) _shareBtn.addEventListener('click', async () => {
+  const url = window.location.origin + '/volvix-grand-tour.html?step=' + tourCurrentStep;
+  const original = _shareBtn.textContent;
+  if (navigator.share) {
+    try { await navigator.share({ title: 'Volvix POS — Grand Tour', url: url }); return; } catch(e){}
+  }
+  try {
+    await navigator.clipboard.writeText(url);
+    _shareBtn.textContent = '✓ Link copiado';
+  } catch(e) {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = url; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); _shareBtn.textContent = '✓ Link copiado'; } catch(_){}
+    document.body.removeChild(ta);
+  }
+  setTimeout(()=>{ _shareBtn.textContent = original; }, 1800);
+});
+
+// Init: support deep-link ?step=N and persisted progress
+(function bootTour(){
+  let initial = 1;
+  try {
+    const sp = new URLSearchParams(window.location.search).get('step');
+    if (sp) initial = parseInt(sp,10) || 1;
+    else {
+      const saved = JSON.parse(localStorage.getItem('volvix_tour_progress')||'{}');
+      if (saved && saved.step && !saved.completed) initial = saved.step;
+    }
+  } catch(e){}
+  gotoStep(initial);
+})();
+
+// Auto-advance demo every 5s (paused on hover or while user actively navigated)
+let auto = tourCurrentStep || 1;
 setInterval(()=>{
   auto = auto >= 5 ? 1 : auto+1;
   const target = document.querySelector(`.step[data-step="${auto}"]`);
