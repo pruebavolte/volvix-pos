@@ -6315,6 +6315,31 @@ try {
   console.error('[CRON] register failed:', e && e.message);
 }
 
+// EMAIL CAMPAIGNS — campañas con segmentación, schedule, stats
+try {
+  require('./email-campaigns').register({
+    handlers,
+    supabaseRequest, readBody, requireAuth,
+    sendJSON, sendError,
+    sendEmail: (typeof sendEmail === 'function' ? sendEmail : null),
+    JWT_SECRET: (typeof JWT_SECRET !== 'undefined' ? JWT_SECRET : null),
+  });
+} catch (e) {
+  console.error('[EMAIL_CAMPAIGNS] register failed:', e && e.message);
+}
+
+// EMAIL DRIPS — welcome / abandoned-cart / re-engagement series
+try {
+  require('./email-drips').register({
+    handlers,
+    supabaseRequest, readBody, requireAuth,
+    sendJSON, sendError,
+    sendEmail: (typeof sendEmail === 'function' ? sendEmail : null),
+  });
+} catch (e) {
+  console.error('[EMAIL_DRIPS] register failed:', e && e.message);
+}
+
 // =============================================================
 // R18 — NFT LOYALTY + BLOCKCHAIN RECEIPTS (MOCK)
 // Implementación mock: NO usa cadenas reales. token_id, tx_hash y IPFS

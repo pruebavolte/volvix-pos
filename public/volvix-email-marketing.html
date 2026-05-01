@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Volvix · Email Marketing</title>
+<link rel="stylesheet" href="/volvix-shared.css">
+<style>
+  :root { --bg:#0f1115; --card:#171a21; --line:#262a35; --txt:#e6e8ee; --mut:#94a0b4; --acc:#5b8cff; --ok:#3fb37f; --warn:#f0a142; --err:#e45a5a; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,Segoe UI,sans-serif; background:var(--bg); color:var(--txt); }
+  header { background:#0b0d12; border-bottom:1px solid var(--line); padding:14px 22px; display:flex; align-items:center; justify-content:space-between; }
+  header h1 { margin:0; font-size:18px; }
+  .tabs { display:flex; gap:4px; border-bottom:1px solid var(--line); padding:0 22px; background:#11141a; }
+  .tabs button { background:none; border:none; color:var(--mut); padding:12px 16px; cursor:pointer; border-bottom:2px solid transparent; font-size:14px; }
+  .tabs button.active { color:var(--txt); border-bottom-color:var(--acc); }
+  main { padding:22px; max-width:1280px; margin:0 auto; }
+  .grid { display:grid; gap:14px; }
+  .grid-3 { grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); }
+  .grid-2 { grid-template-columns:repeat(auto-fit,minmax(380px,1fr)); }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; }
+  .card h3 { margin:0 0 10px; font-size:15px; }
+  .stat { font-size:24px; font-weight:600; }
+  .stat .lbl { display:block; font-size:11px; color:var(--mut); text-transform:uppercase; letter-spacing:.5px; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th,td { padding:9px 10px; text-align:left; border-bottom:1px solid var(--line); }
+  th { color:var(--mut); font-weight:500; font-size:11px; text-transform:uppercase; }
+  .badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; }
+  .badge.draft { background:#2a2f3c; color:var(--mut); }
+  .badge.scheduled { background:#3a3013; color:var(--warn); }
+  .badge.sending { background:#1a3a4a; color:var(--acc); }
+  .badge.sent { background:#143a25; color:var(--ok); }
+  .badge.failed { background:#3a1414; color:var(--err); }
+  input,select,textarea,button { font:inherit; color:var(--txt); }
+  input,select,textarea { width:100%; background:#0b0d12; border:1px solid var(--line); border-radius:6px; padding:8px 10px; }
+  textarea { min-height:140px; font-family:ui-monospace,monospace; font-size:12px; }
+  label { display:block; font-size:12px; color:var(--mut); margin:10px 0 4px; }
+  button.btn { background:var(--acc); border:none; border-radius:6px; padding:9px 14px; color:#fff; cursor:pointer; font-weight:500; }
+  button.btn.ghost { background:transparent; border:1px solid var(--line); color:var(--txt); }
+  button.btn.danger { background:var(--err); }
+  button.btn.success { background:var(--ok); }
+  button.btn:disabled { opacity:.5; cursor:not-allowed; }
+  .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .right { margin-left:auto; }
+  .template-thumb { border:1px solid var(--line); border-radius:8px; padding:14px; cursor:pointer; transition:.15s; background:#0b0d12; }
+  .template-thumb:hover { border-color:var(--acc); }
+  .template-thumb h4 { margin:0 0 6px; font-size:14px; }
+  .template-thumb p { margin:0; font-size:12px; color:var(--mut); }
+  .preview { background:#fff; color:#000; border-radius:6px; padding:18px; margin-top:10px; min-height:200px; }
+  .seg-pill { display:inline-flex; align-items:center; gap:6px; background:#0b0d12; border:1px solid var(--line); border-radius:14px; padding:4px 10px; font-size:12px; }
+  .toast { position:fixed; bottom:20px; right:20px; padding:10px 16px; background:var(--card); border:1px solid var(--line); border-radius:8px; z-index:1000; }
+  .toast.ok { border-color:var(--ok); }
+  .toast.err { border-color:var(--err); }
+  .modal { position:fixed; inset:0; background:rgba(0,0,0,.7); display:none; align-items:center; justify-content:center; z-index:500; padding:20px; }
+  .modal.show { display:flex; }
+  .modal-body { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:20px; max-width:760px; width:100%; max-height:90vh; overflow:auto; }
+  pre.json { background:#0b0d12; padding:10px; border-radius:6px; font-size:12px; overflow:auto; }
+  .small { font-size:12px; color:var(--mut); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Volvix · Email Marketing</h1>
+  <div class="row">
+    <span class="small" id="userInfo">Cargando…</span>
+    <button class="btn ghost" onclick="loadAll()">Refrescar</button>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="active" data-tab="dashboard">Dashboard</button>
+  <button data-tab="create">Crear Campaña</button>
+  <button data-tab="drips">Drip Series</button>
+  <button data-tab="templates">Templates</button>
+</nav>
+
+<main>
+  <!-- DASHBOARD -->
+  <section id="tab-dashboard">
+    <div class="grid grid-3" style="margin-bottom:18px">
+      <div class="card"><span class="stat" id="kpiTotal">0</span><span class="lbl">Total campañas</span></div>
+      <div class="card"><span class="stat" id="kpiSent">0</span><span class="lbl">Enviadas</span></div>
+      <div class="card"><span class="stat" id="kpiScheduled">0</span><span class="lbl">Programadas</span></div>
+    </div>
+    <div class="card">
+      <h3>Campañas</h3>
+      <table>
+        <thead><tr><th>Nombre</th><th>Asunto</th><th>Status</th><th>Targets</th><th>Enviados</th><th>Creada</th><th></th></tr></thead>
+        <tbody id="campaignsTbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- CREATE -->
+  <section id="tab-create" hidden>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>Detalles de la campaña</h3>
+        <label>Nombre interno</label>
+        <input id="cName" placeholder="Promo Black Friday 2026">
+        <label>Asunto del email</label>
+        <input id="cSubject" placeholder="50% de descuento sólo hoy">
+
+        <h3 style="margin-top:18px">Segmentación</h3>
+        <div class="grid grid-2">
+          <div>
+            <label>Por giro</label>
+            <select id="segGiro">
+              <option value="">Cualquiera</option>
+              <option>restaurant</option><option>cafe</option><option>abarrotes</option>
+              <option>farmacia</option><option>ropa</option><option>estetica</option>
+              <option>barberia</option><option>fitness</option><option>panaderia</option>
+            </select>
+          </div>
+          <div>
+            <label>Por plan</label>
+            <select id="segPlan">
+              <option value="">Cualquiera</option>
+              <option>free</option><option>basic</option><option>pro</option><option>enterprise</option>
+            </select>
+          </div>
+          <div>
+            <label>Last login (días)</label>
+            <input id="segLastLogin" type="number" min="0" placeholder="30">
+          </div>
+          <div>
+            <label>Min compras ($)</label>
+            <input id="segMinPurchase" type="number" min="0" placeholder="500">
+          </div>
+        </div>
+        <div id="segPreview" class="row" style="margin-top:10px"></div>
+
+        <div class="row" style="margin-top:18px">
+          <button class="btn" onclick="createCampaign(false)">Guardar borrador</button>
+          <button class="btn success" onclick="createCampaign(true)">Crear y enviar ahora</button>
+          <button class="btn ghost" onclick="openSchedule()">Programar…</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Editor visual</h3>
+        <div class="row" style="margin-bottom:8px">
+          <button class="btn ghost" onclick="loadTemplate('promo')">Template Promo</button>
+          <button class="btn ghost" onclick="loadTemplate('newsletter')">Template Newsletter</button>
+          <button class="btn ghost" onclick="loadTemplate('product')">Template Product</button>
+          <button class="btn ghost" onclick="loadTemplate('plain')">Texto plano</button>
+        </div>
+        <label>HTML</label>
+        <textarea id="cHtml" oninput="renderPreview()"></textarea>
+        <label>Texto alternativo (opcional)</label>
+        <textarea id="cText" style="min-height:60px"></textarea>
+        <label>Vista previa</label>
+        <div class="preview" id="cPreview">Escribe HTML para ver la vista previa.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DRIPS -->
+  <section id="tab-drips" hidden>
+    <div class="card" style="margin-bottom:14px">
+      <h3>Inscribir usuario en drip</h3>
+      <div class="grid grid-2">
+        <div>
+          <label>Email</label>
+          <input id="dEmail" placeholder="cliente@ejemplo.com">
+        </div>
+        <div>
+          <label>Drip</label>
+          <select id="dName">
+            <option value="welcome">welcome (5 emails / 14 días)</option>
+            <option value="abandoned-cart">abandoned-cart (2 emails)</option>
+            <option value="re-engagement">re-engagement (3 emails)</option>
+          </select>
+        </div>
+        <div>
+          <label>Nombre</label><input id="dCtxName" placeholder="Juan">
+        </div>
+        <div>
+          <label>Cart value (sólo abandoned-cart)</label><input id="dCtxCart" placeholder="$1,250">
+        </div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" onclick="enrollDrip()">Inscribir</button>
+        <span class="small">Cron-driven: cada hora se procesa el siguiente paso si toca.</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Series definidas</h3>
+      <div id="seriesBox"></div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <h3>Suscripciones activas</h3>
+      <table>
+        <thead><tr><th>Email</th><th>Drip</th><th>Step</th><th>Status</th><th>Próximo envío</th><th></th></tr></thead>
+        <tbody id="subsTbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- TEMPLATES -->
+  <section id="tab-templates" hidden>
+    <div class="grid grid-3">
+      <div class="template-thumb" onclick="loadTemplate('promo'); switchTab('create')"><h4>Promo</h4><p>Hero + CTA + descuento destacado</p></div>
+      <div class="template-thumb" onclick="loadTemplate('newsletter'); switchTab('create')"><h4>Newsletter</h4><p>3 columnas tipo blog roundup</p></div>
+      <div class="template-thumb" onclick="loadTemplate('product'); switchTab('create')"><h4>Product</h4><p>Lanzamiento de producto</p></div>
+      <div class="template-thumb" onclick="loadTemplate('event'); switchTab('create')"><h4>Event</h4><p>Invitación a evento o webinar</p></div>
+      <div class="template-thumb" onclick="loadTemplate('survey'); switchTab('create')"><h4>Survey</h4><p>Encuesta NPS / feedback</p></div>
+      <div class="template-thumb" onclick="loadTemplate('plain'); switchTab('create')"><h4>Plain</h4><p>Personal, texto plano</p></div>
+    </div>
+  </section>
+</main>
+
+<!-- Modal Schedule -->
+<div class="modal" id="scheduleModal">
+  <div class="modal-body">
+    <h3>Programar envío</h3>
+    <p class="small">Selecciona fecha y hora para enviar la campaña automáticamente.</p>
+    <input id="schedDate" type="datetime-local">
+    <div class="row" style="margin-top:14px; justify-content:flex-end">
+      <button class="btn ghost" onclick="closeModal('scheduleModal')">Cancelar</button>
+      <button class="btn" onclick="confirmSchedule()">Programar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Stats -->
+<div class="modal" id="statsModal">
+  <div class="modal-body" id="statsBody"></div>
+</div>
+
+<script src="/auth-helper.js" onerror=""></script>
+<script>
+const API = location.origin;
+let currentCampaignId = null;
+let TEMPLATES = {};
+
+const TPL_HTML = {
+  promo: '<div style="max-width:600px;margin:auto;font-family:Arial,sans-serif">'+
+    '<h1 style="background:#5b8cff;color:#fff;padding:30px;text-align:center;margin:0">50% OFF · SOLO HOY</h1>'+
+    '<div style="padding:24px"><p>Hola {{name}},</p><p>Aprovecha esta oferta exclusiva en todos nuestros productos.</p>'+
+    '<p style="text-align:center"><a href="https://volvix-pos.vercel.app" style="background:#5b8cff;color:#fff;padding:14px 28px;text-decoration:none;border-radius:6px;display:inline-block">Ver ofertas</a></p>'+
+    '<p style="font-size:12px;color:#888">Aplica TyC. Vigencia 24h.</p></div></div>',
+  newsletter: '<div style="max-width:600px;margin:auto;font-family:Arial,sans-serif">'+
+    '<h1>📰 Newsletter Volvix</h1>'+
+    '<h2>Top 3 noticias de la semana</h2>'+
+    '<h3>1. Nuevo módulo KDS</h3><p>Lanzamos pantalla de cocina con tickets en tiempo real.</p>'+
+    '<h3>2. AI Assistant</h3><p>Pregunta a Volvix sobre tus ventas, inventario y reportes.</p>'+
+    '<h3>3. Marketplace</h3><p>Vende online sin salir del POS.</p></div>',
+  product: '<div style="max-width:600px;margin:auto;font-family:Arial,sans-serif">'+
+    '<img src="https://via.placeholder.com/600x300?text=Producto" style="width:100%">'+
+    '<div style="padding:24px"><h1>Lanzamiento: Volvix Mobile</h1>'+
+    '<p>Tu POS ahora cabe en tu bolsillo. Disponible para iOS y Android.</p>'+
+    '<a href="https://volvix-pos.vercel.app" style="background:#3fb37f;color:#fff;padding:12px 24px;text-decoration:none;border-radius:6px">Descargar</a></div></div>',
+  event: '<div style="max-width:600px;margin:auto;font-family:Arial,sans-serif;padding:24px">'+
+    '<h1>🎉 Te invitamos al webinar</h1>'+
+    '<p><strong>Fecha:</strong> Viernes 16 de mayo · 18:00 CST</p>'+
+    '<p><strong>Tema:</strong> Cómo automatizar tu negocio con Volvix</p>'+
+    '<a href="https://volvix-pos.vercel.app" style="background:#f0a142;color:#fff;padding:12px 24px;text-decoration:none;border-radius:6px">Reservar lugar</a></div>',
+  survey: '<div style="max-width:600px;margin:auto;font-family:Arial,sans-serif;padding:24px">'+
+    '<h1>Tu opinión cuenta</h1><p>Hola {{name}}, ¿qué tan probable es que recomiendes Volvix? (1-10)</p>'+
+    '<p><a href="https://volvix-pos.vercel.app/feedback?score=10">10 · Lo amo</a></p>'+
+    '<p><a href="https://volvix-pos.vercel.app/feedback?score=5">5 · Es OK</a></p>'+
+    '<p><a href="https://volvix-pos.vercel.app/feedback?score=1">1 · No me gusta</a></p></div>',
+  plain: 'Hola {{name}},\n\nQuería contactarte directamente para...\n\nSaludos,\nEquipo Volvix',
+};
+
+function authHeaders() {
+  const tok = localStorage.getItem('volvix_token') || localStorage.getItem('token') || '';
+  return tok ? { 'Authorization': 'Bearer ' + tok } : {};
+}
+
+async function api(method, path, body) {
+  const r = await fetch(API + path, {
+    method,
+    headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()),
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  let data = null;
+  try { data = await r.json(); } catch (_) {}
+  if (!r.ok) throw new Error((data && data.error) || ('HTTP ' + r.status));
+  return data;
+}
+
+function toast(msg, kind) {
+  const t = document.createElement('div');
+  t.className = 'toast ' + (kind || 'ok');
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  document.querySelectorAll('main > section').forEach(s => s.hidden = s.id !== ('tab-' + name));
+}
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => switchTab(b.dataset.tab));
+
+function escapeHtml(s) { return String(s || '').replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
+
+function loadTemplate(key) {
+  const html = TPL_HTML[key] || '';
+  document.getElementById('cHtml').value = html;
+  renderPreview();
+}
+
+function renderPreview() {
+  document.getElementById('cPreview').innerHTML = document.getElementById('cHtml').value || '<em>Sin contenido</em>';
+}
+
+function getSegment() {
+  const s = {};
+  const giro = document.getElementById('segGiro').value;
+  const plan = document.getElementById('segPlan').value;
+  const ll = document.getElementById('segLastLogin').value;
+  const mp = document.getElementById('segMinPurchase').value;
+  if (giro) s.giro = giro;
+  if (plan) s.plan = plan;
+  if (ll) s.last_login_days = parseInt(ll, 10);
+  if (mp) s.min_purchase_value = parseFloat(mp);
+  return s;
+}
+
+function renderSegPreview() {
+  const seg = getSegment();
+  const box = document.getElementById('segPreview');
+  box.innerHTML = '';
+  if (!Object.keys(seg).length) {
+    box.innerHTML = '<span class="small">Sin filtros: enviará a TODOS los suscriptores opt-in.</span>';
+    return;
+  }
+  Object.entries(seg).forEach(([k, v]) => {
+    const span = document.createElement('span');
+    span.className = 'seg-pill';
+    span.textContent = k + ': ' + v;
+    box.appendChild(span);
+  });
+}
+['segGiro','segPlan','segLastLogin','segMinPurchase'].forEach(id => {
+  document.getElementById(id).addEventListener('input', renderSegPreview);
+  document.getElementById(id).addEventListener('change', renderSegPreview);
+});
+
+async function createCampaign(sendNow) {
+  try {
+    const payload = {
+      name: document.getElementById('cName').value.trim(),
+      subject: document.getElementById('cSubject').value.trim(),
+      html: document.getElementById('cHtml').value,
+      text: document.getElementById('cText').value || null,
+      segment: getSegment(),
+    };
+    if (!payload.name || !payload.subject || !payload.html) {
+      return toast('Nombre, asunto y HTML son requeridos', 'err');
+    }
+    const r = await api('POST', '/api/campaigns/create', payload);
+    if (!r || !r.ok) return toast('Error al crear', 'err');
+    currentCampaignId = r.campaign && r.campaign.id;
+    toast('Campaña creada #' + currentCampaignId);
+    if (sendNow && currentCampaignId) {
+      const s = await api('POST', '/api/campaigns/' + currentCampaignId + '/send-now');
+      toast('Enviados: ' + (s.sent || 0) + ' / ' + (s.total || 0));
+    }
+    loadCampaigns();
+  } catch (e) { toast(e.message, 'err'); }
+}
+
+function openSchedule() {
+  if (!currentCampaignId) return toast('Crea la campaña primero', 'err');
+  const dt = new Date(Date.now() + 3600 * 1000);
+  document.getElementById('schedDate').value = dt.toISOString().slice(0,16);
+  document.getElementById('scheduleModal').classList.add('show');
+}
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+async function confirmSchedule() {
+  try {
+    const dt = document.getElementById('schedDate').value;
+    if (!dt) return toast('Fecha requerida', 'err');
+    const r = await api('POST', '/api/campaigns/' + currentCampaignId + '/schedule', {
+      scheduled_at: new Date(dt).toISOString(),
+    });
+    if (!r.ok) throw new Error(r.error);
+    toast('Programada para ' + r.scheduled_at);
+    closeModal('scheduleModal');
+    loadCampaigns();
+  } catch (e) { toast(e.message, 'err'); }
+}
+
+async function loadCampaigns() {
+  try {
+    const r = await api('GET', '/api/campaigns');
+    const rows = (r && r.rows) || [];
+    document.getElementById('kpiTotal').textContent = rows.length;
+    document.getElementById('kpiSent').textContent = rows.filter(x => x.status === 'sent').length;
+    document.getElementById('kpiScheduled').textContent = rows.filter(x => x.status === 'scheduled').length;
+    const tb = document.getElementById('campaignsTbody');
+    tb.innerHTML = '';
+    rows.forEach(c => {
+      const tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td>' + escapeHtml(c.name) + '</td>' +
+        '<td>' + escapeHtml(c.subject) + '</td>' +
+        '<td><span class="badge ' + c.status + '">' + c.status + '</span></td>' +
+        '<td>' + (c.total_targets || 0) + '</td>' +
+        '<td>' + (c.total_sent || 0) + '</td>' +
+        '<td>' + (c.created_at ? new Date(c.created_at).toLocaleDateString() : '') + '</td>' +
+        '<td><button class="btn ghost" data-id="' + c.id + '" data-act="stats">Stats</button> ' +
+        '<button class="btn" data-id="' + c.id + '" data-act="send" ' + (c.status==='sent'||c.status==='sending'?'disabled':'') + '>Send</button></td>';
+      tb.appendChild(tr);
+    });
+    tb.querySelectorAll('button[data-act]').forEach(btn => {
+      btn.onclick = () => {
+        const id = btn.dataset.id;
+        if (btn.dataset.act === 'stats') showStats(id);
+        else if (btn.dataset.act === 'send') sendNow(id);
+      };
+    });
+  } catch (e) { toast(e.message, 'err'); }
+}
+
+async function sendNow(id) {
+  if (!confirm('¿Enviar campaña ' + id + ' ahora?')) return;
+  try {
+    const r = await api('POST', '/api/campaigns/' + id + '/send-now');
+    toast('Enviados: ' + (r.sent || 0) + ' · Fallidos: ' + (r.failed || 0));
+    loadCampaigns();
+  } catch (e) { toast(e.message, 'err'); }
+}
+
+async function showStats(id) {
+  try {
+    const r = await api('GET', '/api/campaigns/' + id + '/stats');
+    const s = r.stats || {};
+    document.getElementById('statsBody').innerHTML =
+      '<h3>Stats · campaña ' + id + '</h3>' +
+      '<div class="grid grid-3">' +
+        '<div class="card"><span class="stat">' + (s.sent||0) + '</span><span class="lbl">Enviados</span></div>' +
+        '<div class="card"><span class="stat">' + (s.unique_opens||0) + '</span><span class="lbl">Aperturas únicas</span></div>' +
+        '<div class="card"><span class="stat">' + (s.unique_clicks||0) + '</span><span class="lbl">Clicks únicos</span></div>' +
+        '<div class="card"><span class="stat">' + (s.open_rate||0) + '%</span><span class="lbl">Open rate</span></div>' +
+        '<div class="card"><span class="stat">' + (s.click_rate||0) + '%</span><span class="lbl">Click rate</span></div>' +
+        '<div class="card"><span class="stat">' + (s.bounces||0) + '</span><span class="lbl">Bounces</span></div>' +
+      '</div>' +
+      '<pre class="json">' + escapeHtml(JSON.stringify(r.campaign||{},null,2)) + '</pre>' +
+      '<div class="row" style="justify-content:flex-end"><button class="btn ghost" onclick="closeModal(\'statsModal\')">Cerrar</button></div>';
+    document.getElementById('statsModal').classList.add('show');
+  } catch (e) { toast(e.message, 'err'); }
+}
+
+async function enrollDrip() {
+  try {
+    const payload = {
+      email: document.getElementById('dEmail').value.trim(),
+      drip_name: document.getElementById('dName').value,
+      context: {
+        name: document.getElementById('dCtxName').value || undefined,
+        cart_value: document.getElementById('dCtxCart').value || undefined,
+      },
+    };
+    if (!payload.email) return toast('Email requerido', 'err');
+    const r = await api('POST', '/api/drips/enroll', payload);
+    if (!r.ok) throw new Error(r.error || 'fail');
+    toast('Inscrito en ' + payload.drip_name);
+    loadSubs();
+  } catch (e) { toast(e.message, 'err'); }
+}
+
+async function loadSeries() {
+  try {
+    const r = await api('GET', '/api/drips/series');
+    const box = document.getElementById('seriesBox');
+    box.innerHTML = '';
+    Object.entries(r.series || {}).forEach(([name, s]) => {
+      const div = document.createElement('div');
+      div.className = 'card';
+      div.style.background = '#0b0d12';
+      div.style.marginBottom = '8px';
+      div.innerHTML = '<h4>' + name + '</h4><p class="small">' + escapeHtml(s.description) +
+        ' · ' + s.step_count + ' steps</p><ul style="font-size:12px;color:var(--mut)">' +
+        s.steps.map(st => '<li>+' + st.delay_hours + 'h — ' + escapeHtml(st.subject) + '</li>').join('') +
+        '</ul>';
+      box.appendChild(div);
+    });
+  } catch (e) { /* silent */ }
+}
+
+async function loadSubs() {
+  try {
+    const r = await api('GET', '/api/drips/subscriptions');
+    const tb = document.getElementById('subsTbody');
+    tb.innerHTML = '';
+    (r.rows || []).forEach(s => {
+      const tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td>' + escapeHtml(s.email) + '</td>' +
+        '<td>' + escapeHtml(s.drip_name) + '</td>' +
+        '<td>' + (s.current_step||0) + '</td>' +
+        '<td><span class="badge ' + s.status + '">' + s.status + '</span></td>' +
+        '<td>' + (s.next_send_at ? new Date(s.next_send_at).toLocaleString() : '-') + '</td>' +
+        '<td><button class="btn ghost" data-email="' + escapeHtml(s.email) + '" data-name="' + escapeHtml(s.drip_name) + '">Cancelar</button></td>';
+      tb.appendChild(tr);
+    });
+    tb.querySelectorAll('button').forEach(btn => {
+      btn.onclick = async () => {
+        try {
+          await api('POST', '/api/drips/unenroll', { email: btn.dataset.email, drip_name: btn.dataset.name });
+          toast('Cancelado');
+          loadSubs();
+        } catch (e) { toast(e.message, 'err'); }
+      };
+    });
+  } catch (e) { /* silent */ }
+}
+
+async function loadAll() {
+  loadCampaigns();
+  loadSeries();
+  loadSubs();
+  renderSegPreview();
+  document.getElementById('userInfo').textContent = 'Sesión: ' + (localStorage.getItem('volvix_email') || 'admin');
+}
+
+loadAll();
+</script>
+</body>
+</html>
