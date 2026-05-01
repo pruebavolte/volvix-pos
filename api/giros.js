@@ -129,6 +129,27 @@ async function searchGiros(ctx, req, res, parsedUrl) {
   // 3) name token match
   if (!hit) hit = giros.find((g) => normalize(g.name).includes(q) || q.includes(normalize(g.name)));
 
+  // 4) FUZZY via synonyms map — 'tacos' → taqueria, 'comida' → restaurante, etc.
+  if (!hit) {
+    for (const [slug, info] of Object.entries(GIRO_SYNONYMS || {})) {
+      const synonyms = (info.synonyms || []).map(normalize);
+      const sells = (info.sells || []).map(normalize);
+      const allMatches = synonyms.concat(sells);
+      if (allMatches.some(s => s === q || s.includes(q) || q.includes(s))) {
+        hit = giros.find(g => g.slug === slug.replace(/_/g, '-'));
+        if (!hit) {
+          // Synthesize from synonyms map even if no landing file exists
+          hit = {
+            slug: slug.replace(/_/g, '-'),
+            name: info.name,
+            landing: '/landing-' + slug.replace(/_/g, '-') + '.html',
+          };
+        }
+        break;
+      }
+    }
+  }
+
   if (hit) {
     return send(ctx, res, 200, {
       exists: true,
