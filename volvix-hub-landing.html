@@ -985,6 +985,31 @@
 <!-- R12b FIX-LEGAL-4: cookie banner consent -->
 <script defer src="/volvix-cookie-banner-wiring.js"></script>
 
+<!-- ================ Lead capture modal ================ -->
+<div id="hub-lead-modal" role="dialog" aria-modal="true" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:#0f172a;color:#e2e8f0;width:min(440px,92vw);max-height:90vh;overflow:auto;padding:28px;border-radius:14px;border:1px solid #334155;font-family:system-ui,sans-serif">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h3 style="margin:0;font-size:20px">Solicitar información</h3>
+      <button id="hub-lead-close" style="background:#334155;color:#fff;border:0;padding:6px 12px;border-radius:6px;cursor:pointer">×</button>
+    </div>
+    <p style="margin:0 0 14px;color:#94a3b8;font-size:13px">Te contactamos en menos de 24 horas.</p>
+    <form id="hub-lead-form" style="display:flex;flex-direction:column;gap:10px">
+      <input name="name"  placeholder="Nombre completo *" required style="background:#1e293b;color:#fff;border:1px solid #334155;padding:10px;border-radius:6px">
+      <input name="email" type="email" placeholder="Email *" required style="background:#1e293b;color:#fff;border:1px solid #334155;padding:10px;border-radius:6px">
+      <input name="phone" placeholder="Teléfono" style="background:#1e293b;color:#fff;border:1px solid #334155;padding:10px;border-radius:6px">
+      <select name="giro" style="background:#1e293b;color:#fff;border:1px solid #334155;padding:10px;border-radius:6px">
+        <option value="">Tipo de negocio (giro)</option>
+        <option>Restaurante</option><option>Cafetería</option><option>Retail</option>
+        <option>Abarrotes</option><option>Farmacia</option><option>Salón / Estética</option>
+        <option>Servicios</option><option>Otro</option>
+      </select>
+      <textarea name="message" rows="3" placeholder="Cuéntanos brevemente..." style="background:#1e293b;color:#fff;border:1px solid #334155;padding:10px;border-radius:6px;font-family:inherit;resize:vertical"></textarea>
+      <button type="submit" style="background:#3b82f6;color:#fff;border:0;padding:12px;border-radius:6px;cursor:pointer;font-weight:700;font-size:15px">Enviar</button>
+      <div id="hub-lead-msg" style="text-align:center;font-size:13px;min-height:18px"></div>
+    </form>
+  </div>
+</div>
+
 <script>
   // Nav scroll effect
   const nav = document.querySelector('.nav');
@@ -995,6 +1020,81 @@
       nav.style.boxShadow = 'none';
     }
   });
+
+  // ===== Lead capture modal =====
+  (function(){
+    var modal = document.getElementById('hub-lead-modal');
+    var form  = document.getElementById('hub-lead-form');
+    var msg   = document.getElementById('hub-lead-msg');
+
+    function openModal(){
+      modal.style.display = 'flex';
+      msg.textContent = '';
+      var first = form.querySelector('input[name="name"]'); if (first) first.focus();
+    }
+    function closeModal(){ modal.style.display = 'none'; }
+
+    // Wire all #signup, #demo, #contact, "Hablar con ventas", "Empezar gratis", "Empezar 14 días gratis", etc.
+    var TRIGGER_SELECTORS = [
+      'a[href="#signup"]','a[href="#demo"]','a[href="#contact"]','a[href="#login"]'
+    ];
+    document.querySelectorAll(TRIGGER_SELECTORS.join(',')).forEach(function(el){
+      el.addEventListener('click', function(e){ e.preventDefault(); openModal(); });
+    });
+    // "Hablar con ventas" / "Contactar ventas" — match by text
+    document.querySelectorAll('a.btn,button.btn').forEach(function(el){
+      var t = (el.textContent||'').toLowerCase();
+      if (/hablar con ventas|contactar ventas|agendar demo|solicitar/.test(t)){
+        el.addEventListener('click', function(e){ e.preventDefault(); openModal(); });
+      }
+    });
+
+    document.getElementById('hub-lead-close').addEventListener('click', closeModal);
+    modal.addEventListener('click', function(e){ if (e.target === modal) closeModal(); });
+
+    function utm(n){ try { return new URLSearchParams(location.search).get(n) || ''; } catch(e){ return ''; } }
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var fd = new FormData(form);
+      var payload = {
+        name:    (fd.get('name')||'').toString().trim(),
+        email:   (fd.get('email')||'').toString().trim(),
+        phone:   (fd.get('phone')||'').toString().trim(),
+        giro:    (fd.get('giro')||'').toString().trim(),
+        message: (fd.get('message')||'').toString().trim(),
+        source:  'hub-landing',
+        utm_source:   utm('utm_source'),
+        utm_medium:   utm('utm_medium'),
+        utm_campaign: utm('utm_campaign'),
+      };
+      msg.style.color = '#94a3b8';
+      msg.textContent = 'Enviando...';
+      fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json' },
+        body: JSON.stringify(payload),
+      }).then(function(r){
+        return r.json().catch(function(){return{};}).then(function(d){return{ok:r.ok,d:d};});
+      }).then(function(res){
+        if (res.ok && res.d && res.d.ok !== false){
+          msg.style.color = '#22c55e';
+          msg.textContent = '¡Gracias! Te contactaremos pronto.';
+          form.reset();
+          if (typeof window.gtag === 'function') {
+            try { window.gtag('event','lead_submit',{source:'hub-landing'}); } catch(_){}
+          }
+          setTimeout(closeModal, 1800);
+        } else {
+          msg.style.color = '#ef4444';
+          msg.textContent = (res.d && res.d.reason) || 'Error al enviar. Intenta de nuevo.';
+        }
+      }).catch(function(){
+        msg.style.color = '#ef4444';
+        msg.textContent = 'Error de red. Intenta de nuevo.';
+      });
+    });
+  })();
 </script>
 
   <script defer src="auth-helper.js"></script>

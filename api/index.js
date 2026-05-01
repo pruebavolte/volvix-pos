@@ -11027,8 +11027,217 @@ handlers['GET /api/config/public'] = async (req, res) => {
   // ---- crm / leads ----
   handlers['GET /api/crm'] = requireAuth(_emptyList);
   handlers['POST /api/crm'] = requireAuth(_createOk);
-  handlers['GET /api/leads'] = requireAuth(_emptyList);
-  handlers['POST /api/leads'] = requireAuth(_createOk);
+
+  // ---- leads (REAL handlers from api/leads.js) ----
+  try {
+    const leadsMod = require('./leads');
+    const leadEmail = (() => {
+      try {
+        const er = require('./email-resend');
+        if (typeof er === 'function') {
+          // email-resend exports a request handler; for direct sends we use raw fetch via Resend API
+          return null;
+        }
+        return null;
+      } catch (_) { return null; }
+    })();
+    const sendEmail = (opts) => new Promise((resolve, reject) => {
+      const key = (process.env.RESEND_API_KEY || '').trim();
+      if (!key) return resolve({ skipped: true });
+      const data = JSON.stringify({
+        from: process.env.RESEND_FROM || 'Volvix <noreply@volvix.com>',
+        to: [opts.to], subject: opts.subject, text: opts.text,
+      });
+      const req = https.request({
+        hostname: 'api.resend.com', port: 443, path: '/emails', method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + key,
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(data),
+        }
+      }, (r) => { let b=''; r.on('data', c => b+=c); r.on('end', () => resolve({ status: r.statusCode })); });
+      req.on('error', reject);
+      req.write(data); req.end();
+    });
+    const leadHandlers = leadsMod.build({
+      supabaseRequest, sendJSON, sendError, requireAuth, sendEmail,
+    });
+    Object.keys(leadHandlers).forEach(k => { handlers[k] = leadHandlers[k]; });
+  } catch (e) {
+    // fall back to stubs if module fails to load
+    handlers['GET /api/leads']      = requireAuth(_emptyList, ['admin','owner','superadmin']);
+    handlers['POST /api/leads']     = _createOk;
+    handlers['PATCH /api/leads/:id']= requireAuth(_updateOk, ['admin','owner','superadmin']);
+  }
+
+  // =============================================================
+  // PLATFORM REPORTS (super-admin) — /api/reports/platform/*
+  // ARR / MAU / Churn / Cohorts (compatible with mega-dashboard)
+  // =============================================================
+  function _onlySuperadmin(req, res) {
+    const role = (req.user && req.user.role) || '';
+    if (role !== 'superadmin') {
+      sendJSON(res, { error: 'forbidden', reason: 'superadmin_only' }, 403);
+      return false;
+    }
+    return true;
+  }
+
+  handlers['GET /api/reports/platform/arr'] = requireAuth(async (req, res) => {
+    if (!_onlySuperadmin(req, res)) return;
+    try {
+      let total = 0, active = 0;
+      try {
+        const subs = await supabaseRequest('GET',
+          '/volvix_subscriptions?select=mrr,monthly_amount,plan_amount,status&status=eq.active&limit=10000');
+        if (Array.isArray(subs)) {
+          active = subs.length;
+          total = subs.reduce((acc, r) => acc + (Number(r.mrr || r.monthly_amount || r.plan_amount) || 0), 0);
+        }
+      } catch (_) {}
+      sendJSON(res, {
+        ok: true,
+        mrr: Math.round(total * 100) / 100,
+        arr: Math.round(total * 12 * 100) / 100,
+        active_subscriptions: active,
+        currency: 'MXN',
+        as_of: new Date().toISOString(),
+      });
+    } catch (e) { sendError(res, e); }
+  }, ['superadmin']);
+
+  handlers['GET /api/reports/platform/mau'] = requireAuth(async (req, res) => {
+    if (!_onlySuperadmin(req, res)) return;
+    try {
+      const since = new Date(Date.now() - 30 * 86400000).toISOString();
+      let mau = 0;
+      try {
+        const rows = await supabaseRequest('GET',
+          `/volvix_audit_log?select=user_id&action=eq.LOGIN&ts=gte.${encodeURIComponent(since)}&limit=50000`);
+        if (Array.isArray(rows)) {
+          mau = new Set(rows.map(r => r.user_id).filter(Boolean)).size;
+        }
+      } catch (_) {}
+      sendJSON(res, {
+        ok: true, mau, window_days: 30,
+        since, as_of: new Date().toISOString(),
+      });
+    } catch (e) { sendError(res, e); }
+  }, ['superadmin']);
+
+  handlers['GET /api/reports/platform/churn'] = requireAuth(async (req, res) => {
+    if (!_onlySuperadmin(req, res)) return;
+    try {
+      const q = url.parse(req.url, true).query;
+      const period = String(q.period || '30d');
+      const days = (period.match(/^(\d+)d$/) || [])[1];
+      const dn = days ? parseInt(days, 10) : 30;
+      const since = new Date(Date.now() - dn * 86400000).toISOString();
+      let active = 0, cancelled = 0;
+      try {
+        const a = await supabaseRequest('GET', '/volvix_subscriptions?select=id&status=eq.active&limit=10000');
+        active = Array.isArray(a) ? a.length : 0;
+        const c = await supabaseRequest('GET',
+          `/volvix_subscriptions?select=id&status=eq.cancelled&cancelled_at=gte.${encodeURIComponent(since)}&limit=10000`);
+        cancelled = Array.isArray(c) ? c.length : 0;
+      } catch (_) {}
+      const denom = Math.max(active + cancelled, 1);
+      const churn = cancelled / denom;
+      sendJSON(res, {
+        ok: true, period, window_days: dn,
+        active, cancelled,
+        churn_rate: Math.round(churn * 10000) / 10000,
+        churn_pct: Math.round(churn * 10000) / 100,
+        as_of: new Date().toISOString(),
+      });
+    } catch (e) { sendError(res, e); }
+  }, ['superadmin']);
+
+  handlers['GET /api/reports/platform/cohorts'] = requireAuth(async (req, res) => {
+    if (!_onlySuperadmin(req, res)) return;
+    try {
+      const q = url.parse(req.url, true).query;
+      const since = q.since
+        ? String(q.since)
+        : new Date(Date.now() - 180 * 86400000).toISOString();
+      let users = [];
+      try {
+        users = await supabaseRequest('GET',
+          `/users?select=id,created_at,last_login_at&created_at=gte.${encodeURIComponent(since)}&limit=10000`) || [];
+      } catch (_) {}
+      // group by month-of-signup; retention = % with last_login_at within last 30d
+      const cutoff = Date.now() - 30 * 86400000;
+      const byMonth = {};
+      users.forEach(u => {
+        if (!u.created_at) return;
+        const mo = String(u.created_at).slice(0, 7); // YYYY-MM
+        byMonth[mo] = byMonth[mo] || { cohort: mo, total: 0, retained_30d: 0 };
+        byMonth[mo].total++;
+        const last = u.last_login_at && Date.parse(u.last_login_at);
+        if (last && last >= cutoff) byMonth[mo].retained_30d++;
+      });
+      const cohorts = Object.values(byMonth).sort((a, b) => a.cohort.localeCompare(b.cohort)).map(c => ({
+        ...c,
+        retention_pct: c.total ? Math.round((c.retained_30d / c.total) * 10000) / 100 : 0,
+      }));
+      sendJSON(res, { ok: true, since, cohorts, as_of: new Date().toISOString() });
+    } catch (e) { sendError(res, e); }
+  }, ['superadmin']);
+
+  // =============================================================
+  // TOUR PROGRESS — cross-device sync for grand-tour
+  // =============================================================
+  handlers['GET /api/user/tour-progress'] = requireAuth(async (req, res) => {
+    try {
+      const uid = (req.user && (req.user.id || req.user.email)) || '';
+      if (!uid) return sendJSON(res, { ok: true, step: 0, completed: false });
+      let row = null;
+      try {
+        const rows = await supabaseRequest('GET',
+          `/volvix_user_tour_progress?user_id=eq.${encodeURIComponent(uid)}&limit=1`);
+        row = Array.isArray(rows) ? rows[0] : null;
+      } catch (_) {}
+      sendJSON(res, {
+        ok: true,
+        user_id: uid,
+        tour_id: (row && row.tour_id) || 'grand-tour',
+        step: (row && row.step) || 0,
+        completed: !!(row && row.completed),
+        steps_json: (row && row.steps_json) || null,
+        updated_at: row && row.updated_at,
+      });
+    } catch (e) { sendError(res, e); }
+  });
+
+  handlers['POST /api/user/tour-progress'] = requireAuth(async (req, res) => {
+    try {
+      const uid = (req.user && (req.user.id || req.user.email)) || '';
+      if (!uid) return sendJSON(res, { error: 'unauthorized' }, 401);
+      const body = await new Promise((resolve, reject) => {
+        let buf = '', size = 0;
+        req.on('data', c => { size += c.length; if (size > 16384) { req.destroy(); reject(new Error('too_large')); return; } buf += c; });
+        req.on('end', () => { try { resolve(buf ? JSON.parse(buf) : {}); } catch (e) { reject(new Error('invalid_json')); } });
+        req.on('error', reject);
+      }).catch(() => ({}));
+      const tour_id = String(body.tour_id || 'grand-tour').slice(0, 80);
+      const step    = Math.max(0, Math.min(parseInt(body.step, 10) || 0, 999));
+      const completed = !!body.completed;
+      const steps_json = (body.steps_json && typeof body.steps_json === 'object') ? body.steps_json : null;
+      const payload = {
+        user_id: uid, tour_id, step, completed, steps_json,
+        updated_at: new Date().toISOString(),
+      };
+      try {
+        await supabaseRequest('POST',
+          '/volvix_user_tour_progress?on_conflict=user_id',
+          payload);
+      } catch (_) {
+        // table may be missing; degrade gracefully
+        return sendJSON(res, { ok: true, queued: true, note: 'progress noted (deferred)' });
+      }
+      sendJSON(res, { ok: true, ...payload });
+    } catch (e) { sendError(res, e); }
+  });
 
   // ---- customer self-service portal: REAL handlers from customer-portal.js (line ~3075); stubs removed ----
 

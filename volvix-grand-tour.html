@@ -924,8 +924,29 @@ footer{padding:60px 40px 30px;border-top:1px solid var(--border);background:var(
 <section id="final" class="final">
   <h2>Empieza hoy. Vende mejor mañana.</h2>
   <p>30 días gratis. Sin tarjeta. Sin compromiso. Migración asistida en menos de 24 horas.</p>
-  <a href="#" class="btn">Crear mi cuenta gratis →</a>
+  <a href="#" class="btn" id="vt-cta-demo">Crear mi cuenta gratis →</a>
+  <button class="btn" id="vt-cta-demo2" style="margin-left:8px;background:#f59e0b;color:#0b1220">Solicitar demo</button>
 </section>
+
+<!-- ================= LEAD MODAL ================= -->
+<div id="vt-lead-modal" role="dialog" aria-modal="true" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:#0f172a;color:#e2e8f0;width:min(440px,92vw);max-height:90vh;overflow:auto;padding:28px;border-radius:14px;border:1px solid #334155;font-family:system-ui,sans-serif">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h3 style="margin:0;font-size:20px">Solicitar demo</h3>
+      <button id="vt-lead-close" style="background:#334155;color:#fff;border:0;padding:6px 12px;border-radius:6px;cursor:pointer">×</button>
+    </div>
+    <p style="margin:0 0 14px;color:#94a3b8;font-size:13px">Te contactamos en menos de 24h.</p>
+    <form id="vt-lead-form" style="display:flex;flex-direction:column;gap:10px">
+      <input name="name"  placeholder="Nombre completo *" required style="background:#1e293b;color:#fff;border:1px solid #334155;padding:10px;border-radius:6px">
+      <input name="email" type="email" placeholder="Email *" required style="background:#1e293b;color:#fff;border:1px solid #334155;padding:10px;border-radius:6px">
+      <input name="phone" placeholder="Teléfono" style="background:#1e293b;color:#fff;border:1px solid #334155;padding:10px;border-radius:6px">
+      <input name="giro"  placeholder="Tipo de negocio (giro)" style="background:#1e293b;color:#fff;border:1px solid #334155;padding:10px;border-radius:6px">
+      <textarea name="message" rows="3" placeholder="Cuéntanos brevemente..." style="background:#1e293b;color:#fff;border:1px solid #334155;padding:10px;border-radius:6px;font-family:inherit;resize:vertical"></textarea>
+      <button type="submit" style="background:#3b82f6;color:#fff;border:0;padding:12px;border-radius:6px;cursor:pointer;font-weight:700;font-size:15px">Enviar</button>
+      <div id="vt-lead-msg" style="text-align:center;font-size:13px;min-height:18px"></div>
+    </form>
+  </div>
+</div>
 
 <!-- ================= FOOTER ================= -->
 <footer>
@@ -1010,6 +1031,152 @@ window.addEventListener('scroll',()=>{
     }
   });
 });
+
+// =============== Tour tracking + lead capture ===============
+(function(){
+  'use strict';
+  var STORAGE_KEY = 'volvix_tour_progress';
+  var TOUR_ID = 'grand-tour';
+  var stepNames = {
+    1: 'Abrir caja', 2: 'Agregar productos', 3: 'Revisar carrito',
+    4: 'Cobrar', 5: 'Ticket y cierre'
+  };
+
+  function getProgress(){
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'); }
+    catch(e){ return {}; }
+  }
+  function saveProgress(p){
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); } catch(e){}
+  }
+  function authToken(){
+    try { return localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || ''; }
+    catch(e){ return ''; }
+  }
+  function syncToServer(progress){
+    var tk = authToken();
+    if (!tk) return;
+    fetch('/api/user/tour-progress', {
+      method:'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+tk },
+      credentials:'include',
+      body: JSON.stringify({
+        tour_id: TOUR_ID,
+        step: progress.step || 0,
+        completed: !!progress.completed,
+        steps_json: progress.steps || null,
+      })
+    }).catch(function(){});
+  }
+
+  function trackStep(stepNum, name){
+    // gtag analytics if present
+    if (typeof window.gtag === 'function') {
+      try { window.gtag('event', 'tour_step', { step: stepNum, name: name }); } catch(e){}
+    }
+    // local persistence
+    var p = getProgress();
+    p.tour_id = TOUR_ID;
+    p.step = Math.max(p.step || 0, stepNum);
+    p.steps = p.steps || {};
+    p.steps[stepNum] = { name: name, ts: Date.now() };
+    if (stepNum >= 5) p.completed = true;
+    saveProgress(p);
+    syncToServer(p);
+  }
+
+  // Hook into existing .step click handlers — fire trackStep
+  document.querySelectorAll('.step').forEach(function(stepEl){
+    stepEl.addEventListener('click', function(){
+      var n = parseInt(stepEl.dataset.step, 10) || 0;
+      trackStep(n, stepNames[n] || ('step-'+n));
+    });
+  });
+
+  // On load: sync from server (if logged in) and resume
+  (function pullFromServer(){
+    var tk = authToken();
+    if (!tk) return;
+    fetch('/api/user/tour-progress', {
+      headers: { 'Authorization':'Bearer '+tk, 'Accept':'application/json' },
+      credentials:'include'
+    }).then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(d){
+        if (!d || !d.step) return;
+        var p = getProgress();
+        if ((d.step||0) > (p.step||0)){
+          p.step = d.step;
+          p.completed = !!d.completed;
+          p.steps = d.steps_json || p.steps;
+          saveProgress(p);
+        }
+      }).catch(function(){});
+  })();
+
+  // ====== Lead modal ======
+  var modal = document.getElementById('vt-lead-modal');
+  var form  = document.getElementById('vt-lead-form');
+  var msg   = document.getElementById('vt-lead-msg');
+
+  function openModal(){
+    modal.style.display = 'flex';
+    msg.textContent = '';
+    var first = form.querySelector('input[name="name"]'); if (first) first.focus();
+  }
+  function closeModal(){ modal.style.display = 'none'; }
+
+  document.getElementById('vt-cta-demo').addEventListener('click', function(e){ e.preventDefault(); openModal(); });
+  document.getElementById('vt-cta-demo2').addEventListener('click', function(e){ e.preventDefault(); openModal(); });
+  document.getElementById('vt-lead-close').addEventListener('click', closeModal);
+  modal.addEventListener('click', function(e){ if (e.target === modal) closeModal(); });
+
+  function utm(name){
+    try { return new URLSearchParams(location.search).get(name) || ''; } catch(e){ return ''; }
+  }
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var fd = new FormData(form);
+    var progress = getProgress();
+    var payload = {
+      name:    (fd.get('name')||'').toString().trim(),
+      email:   (fd.get('email')||'').toString().trim(),
+      phone:   (fd.get('phone')||'').toString().trim(),
+      giro:    (fd.get('giro')||'').toString().trim(),
+      message: (fd.get('message')||'').toString().trim(),
+      source:  'grand-tour',
+      utm_source:   utm('utm_source'),
+      utm_medium:   utm('utm_medium'),
+      utm_campaign: utm('utm_campaign'),
+      tour_step:    progress.step || 0,
+    };
+    msg.style.color = '#94a3b8';
+    msg.textContent = 'Enviando...';
+    fetch('/api/leads', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json' },
+      body: JSON.stringify(payload),
+    }).then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){ return { ok:r.ok, d:d }; }); })
+      .then(function(res){
+        if (res.ok && res.d && res.d.ok !== false){
+          msg.style.color = '#22c55e';
+          msg.textContent = '¡Gracias! Te contactaremos pronto.';
+          form.reset();
+          if (typeof window.gtag === 'function') {
+            try { window.gtag('event', 'lead_submit', { source: 'grand-tour', step: payload.tour_step }); } catch(e){}
+          }
+          setTimeout(closeModal, 1800);
+        } else {
+          msg.style.color = '#ef4444';
+          msg.textContent = (res.d && res.d.reason) || 'Error al enviar. Intenta de nuevo.';
+        }
+      })
+      .catch(function(){
+        msg.style.color = '#ef4444';
+        msg.textContent = 'Error de red. Intenta de nuevo.';
+      });
+  });
+})();
 </script>
 
   <script defer src="auth-helper.js"></script>

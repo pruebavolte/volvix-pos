@@ -218,6 +218,45 @@ body{min-height:100vh;background:radial-gradient(circle at 20% 0%,#1a2540 0%,var
   </div>
 </div>
 
+<!-- ===== Toolbar: period filter + auto-refresh + export CSV ===== -->
+<div id="md-toolbar" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 24px;background:var(--bg2,#0f172a);border-bottom:1px solid var(--border,#334155);font-size:13px">
+  <span style="color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.05em">Periodo:</span>
+  <button class="md-period-btn" data-period="today">Hoy</button>
+  <button class="md-period-btn" data-period="7d">7d</button>
+  <button class="md-period-btn active" data-period="30d">30d</button>
+  <button class="md-period-btn" data-period="90d">90d</button>
+  <button class="md-period-btn" data-period="custom">Custom</button>
+  <input type="date" id="md-date-from" style="display:none;background:#0b1220;color:#fff;border:1px solid var(--border,#334155);padding:6px 8px;border-radius:6px">
+  <input type="date" id="md-date-to"   style="display:none;background:#0b1220;color:#fff;border:1px solid var(--border,#334155);padding:6px 8px;border-radius:6px">
+  <span style="flex:1"></span>
+  <label style="display:flex;align-items:center;gap:6px;color:var(--muted);cursor:pointer">
+    <input type="checkbox" id="md-auto-refresh" checked> Auto-refresh 60s
+  </label>
+  <button id="md-btn-export" style="background:#3b82f6;color:#fff;border:0;padding:8px 14px;border-radius:6px;cursor:pointer;font-weight:600">Exportar CSV</button>
+</div>
+<style>
+  .md-period-btn{background:#1e293b;color:#e2e8f0;border:1px solid #334155;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:13px}
+  .md-period-btn.active{background:#3b82f6;color:#fff;border-color:#3b82f6}
+  .md-period-btn:hover{background:#273449}
+  .metric.kpi-platform{cursor:pointer}
+  .metric.kpi-platform:hover{outline:2px solid #3b82f6;outline-offset:2px}
+  /* Drill-down modal */
+  #md-modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:1000}
+  #md-modal.show{display:flex}
+  #md-modal .box{background:#1e293b;color:#f1f5f9;width:min(520px,92vw);max-height:80vh;overflow:auto;border-radius:10px;padding:22px;border:1px solid #334155}
+  #md-modal h3{margin:0 0 14px;font-size:18px}
+  #md-modal pre{background:#0b1220;padding:12px;border-radius:6px;font-size:12px;overflow:auto;color:#cbd5e1;max-height:50vh}
+  #md-modal .close{float:right;background:#475569;color:#fff;border:0;padding:6px 12px;border-radius:6px;cursor:pointer}
+</style>
+
+<div id="md-modal" role="dialog" aria-modal="true" onclick="if(event.target===this) this.classList.remove('show')">
+  <div class="box">
+    <button class="close" onclick="document.getElementById('md-modal').classList.remove('show')">Cerrar</button>
+    <h3 id="md-modal-title">Detalle</h3>
+    <div id="md-modal-body"><pre id="md-modal-pre"></pre></div>
+  </div>
+</div>
+
 <div class="container">
 
   <!-- METRICS -->
@@ -258,6 +297,24 @@ body{min-height:100vh;background:radial-gradient(circle at 20% 0%,#1a2540 0%,var
       <div class="metric-label">Conversion</div>
       <div class="metric-val" id="m-conv">—</div>
       <div class="metric-trend" id="m-conv-trend">—</div>
+    </div>
+    <div class="metric kpi-platform" data-kpi="arr">
+      <div class="metric-icon">A</div>
+      <div class="metric-label">ARR (Anual)</div>
+      <div class="metric-val" id="m-arr">—</div>
+      <div class="metric-trend" id="m-arr-trend">platform</div>
+    </div>
+    <div class="metric green kpi-platform" data-kpi="mau">
+      <div class="metric-icon">U</div>
+      <div class="metric-label">MAU (30d)</div>
+      <div class="metric-val" id="m-mau">—</div>
+      <div class="metric-trend" id="m-mau-trend">usuarios activos</div>
+    </div>
+    <div class="metric pink kpi-platform" data-kpi="churn">
+      <div class="metric-icon">X</div>
+      <div class="metric-label">Churn</div>
+      <div class="metric-val" id="m-churn">—</div>
+      <div class="metric-trend" id="m-churn-trend">30d</div>
     </div>
   </div>
 
@@ -891,9 +948,128 @@ document.getElementById('goals').innerHTML = GOALS.map(G=>`
     <div class="perf-bar"><div class="perf-fill ${G.c}" style="width:${G.v}%"></div></div>
   </div>`).join('');
 
+// ============ TOOLBAR (period filter, auto-refresh, export) ============
+var MD_STATE = { period: '30d', from: null, to: null, autoMs: 60000, autoTimer: null, snapshot: {} };
+
+function mdAuthFetch(path){
+  var tk = '';
+  try{ tk = localStorage.getItem('volvix_token')||localStorage.getItem('volvixAuthToken')||''; }catch(e){}
+  var h = tk ? { 'Authorization':'Bearer '+tk, 'Accept':'application/json' } : { 'Accept':'application/json' };
+  return fetch(path, { headers: h, credentials:'include' }).then(function(r){
+    if(!r.ok){ throw new Error('HTTP '+r.status); }
+    return r.json();
+  });
+}
+
+function mdQueryRange(){
+  if (MD_STATE.period === 'custom' && MD_STATE.from && MD_STATE.to){
+    return '?from=' + encodeURIComponent(MD_STATE.from) + '&to=' + encodeURIComponent(MD_STATE.to);
+  }
+  if (MD_STATE.period === 'today') return '?period=today';
+  return '?period=' + encodeURIComponent(MD_STATE.period);
+}
+
+function mdLoadPlatformKpis(){
+  var period = MD_STATE.period === 'today' ? '1d' : MD_STATE.period;
+  // ARR
+  mdAuthFetch('/api/reports/platform/arr').then(function(d){
+    if (!d) return;
+    var arr = Number(d.arr||0);
+    document.getElementById('m-arr').textContent = '$' + (arr>=1e6 ? (arr/1e6).toFixed(2)+'M' : Math.round(arr).toLocaleString('es-MX'));
+    MD_STATE.snapshot.arr = d;
+  }).catch(function(){ document.getElementById('m-arr').textContent='—'; });
+  // MAU
+  mdAuthFetch('/api/reports/platform/mau').then(function(d){
+    if (!d) return;
+    document.getElementById('m-mau').textContent = Number(d.mau||0).toLocaleString('es-MX');
+    MD_STATE.snapshot.mau = d;
+  }).catch(function(){ document.getElementById('m-mau').textContent='—'; });
+  // Churn
+  mdAuthFetch('/api/reports/platform/churn?period=' + encodeURIComponent(period)).then(function(d){
+    if (!d) return;
+    document.getElementById('m-churn').textContent = (d.churn_pct!=null ? d.churn_pct.toFixed(2) : '—') + '%';
+    MD_STATE.snapshot.churn = d;
+  }).catch(function(){ document.getElementById('m-churn').textContent='—'; });
+}
+
+function mdSetPeriod(p){
+  MD_STATE.period = p;
+  document.querySelectorAll('.md-period-btn').forEach(function(b){
+    b.classList.toggle('active', b.dataset.period === p);
+  });
+  var fromEl = document.getElementById('md-date-from');
+  var toEl   = document.getElementById('md-date-to');
+  var show = (p === 'custom') ? '' : 'none';
+  fromEl.style.display = show; toEl.style.display = show;
+  loadAll(); mdLoadPlatformKpis();
+}
+
+document.querySelectorAll('.md-period-btn').forEach(function(b){
+  b.addEventListener('click', function(){ mdSetPeriod(b.dataset.period); });
+});
+['md-date-from','md-date-to'].forEach(function(id){
+  document.getElementById(id).addEventListener('change', function(){
+    MD_STATE.from = document.getElementById('md-date-from').value;
+    MD_STATE.to   = document.getElementById('md-date-to').value;
+    if (MD_STATE.from && MD_STATE.to) { loadAll(); mdLoadPlatformKpis(); }
+  });
+});
+
+// Auto-refresh toggle
+function mdStartAuto(){
+  mdStopAuto();
+  MD_STATE.autoTimer = setInterval(function(){ loadAll(); mdLoadPlatformKpis(); }, MD_STATE.autoMs);
+}
+function mdStopAuto(){ if (MD_STATE.autoTimer){ clearInterval(MD_STATE.autoTimer); MD_STATE.autoTimer=null; } }
+document.getElementById('md-auto-refresh').addEventListener('change', function(e){
+  if (e.target.checked) mdStartAuto(); else mdStopAuto();
+});
+
+// Drill-down modal: click on a platform KPI -> show detail JSON
+document.querySelectorAll('.kpi-platform').forEach(function(card){
+  card.addEventListener('click', function(){
+    var kpi = card.dataset.kpi;
+    var titles = { arr:'ARR / MRR Detalle', mau:'MAU (Usuarios Activos 30d)', churn:'Churn Rate' };
+    document.getElementById('md-modal-title').textContent = titles[kpi] || kpi;
+    var data = MD_STATE.snapshot[kpi] || { note: 'cargando...' };
+    document.getElementById('md-modal-pre').textContent = JSON.stringify(data, null, 2);
+    document.getElementById('md-modal').classList.add('show');
+  });
+});
+
+// CSV export — snapshot of current dashboard KPIs
+document.getElementById('md-btn-export').addEventListener('click', function(){
+  var ids = ['m-sales','m-tickets','m-prods','m-cust','m-ten','m-conv','m-uptime','m-latency','m-rpm','m-arr','m-mau','m-churn'];
+  var rows = [['kpi','value','as_of']];
+  ids.forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) rows.push([id, (el.textContent||'').trim(), new Date().toISOString()]);
+  });
+  // include platform snapshot raw json as final rows
+  ['arr','mau','churn'].forEach(function(k){
+    var d = MD_STATE.snapshot[k];
+    if (d) rows.push(['platform_'+k, JSON.stringify(d), new Date().toISOString()]);
+  });
+  var csv = rows.map(function(r){
+    return r.map(function(v){
+      v = String(v==null?'':v).replace(/"/g,'""');
+      return '"' + v + '"';
+    }).join(',');
+  }).join('\n');
+  var blob = new Blob([csv], { type:'text/csv;charset=utf-8' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'volvix-mega-dashboard-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+});
+
 // ============ INIT ============
 loadAll();
-setInterval(loadAll, 30000);
+mdLoadPlatformKpis();
+mdStartAuto();
+// Compatibility: keep existing 30s legacy interval but the auto-refresh checkbox controls main cycle
+// (legacy interval below replaced by toolbar control)
 
 // Subtle perf updates
 setInterval(()=>{
