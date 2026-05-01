@@ -33,7 +33,11 @@
     }
   ],
   "routes": [
+    { "src": "/internal/(.*)", "status": 404, "dest": "/404" },
     { "src": "/volvix-qa-scenarios\\.html", "status": 404, "dest": "/404" },
+    { "src": "/volvix-sandbox\\.html", "status": 404, "dest": "/404" },
+    { "src": "/volvix-modals-demo\\.html", "status": 404, "dest": "/404" },
+    { "src": "/MATRIZ_PRUEBAS_LOCAL(.*)\\.html", "status": 404, "dest": "/404" },
     { "src": "/BITACORA_LIVE\\.html", "status": 404, "dest": "/404" },
     { "src": "/BITACORA_PRUEBAS\\.md", "status": 404, "dest": "/404" },
     { "src": "/status\\.json", "status": 404, "dest": "/404" },
