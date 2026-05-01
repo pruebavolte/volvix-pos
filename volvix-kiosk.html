@@ -85,6 +85,38 @@
     button, .lang button, .ok { min-height: 48px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(255,255,255,0.1); }
   }
   /* ============ END R8d FIX-M1 ============ */
+
+  /* ============ A11Y: Accesibilidad kiosko ============ */
+  body.a11y-large, body.a11y-large input, body.a11y-large button,
+  body.a11y-large .card .name, body.a11y-large .card .price,
+  body.a11y-large .totals .row, body.a11y-large .totals .grand,
+  body.a11y-large h2, body.a11y-large h3 { font-size: 1.5em !important; line-height: 1.4 !important; }
+  body.a11y-large .card { width: 240px; height: 290px; }
+  body.high-contrast { background:#000 !important; color:#fff !important; }
+  body.high-contrast header, body.high-contrast aside, body.high-contrast footer,
+  body.high-contrast .modal .box { background:#000 !important; color:#fff !important; border-color:#fff !important; }
+  body.high-contrast .card, body.high-contrast .totals, body.high-contrast .citem { background:#000 !important; color:#fff !important; border-color:#fff !important; }
+  body.high-contrast button, body.high-contrast .lang button.active { background:#fff !important; color:#000 !important; border:2px solid #fff !important; }
+  body.high-contrast .card .price { color:#fff !important; }
+  body.high-contrast input { background:#000 !important; color:#fff !important; border:2px solid #fff !important; }
+  body.high-contrast .qty button { background:#fff !important; color:#000 !important; }
+  body.high-contrast .modal { background: rgba(0,0,0,.9) !important; }
+  #a11y-btn { background:#0ea5a4; color:#fff; border:0; padding:10px 14px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; }
+  #a11y-btn:hover { filter: brightness(1.15); }
+  #a11y-panel { position: fixed; top: 70px; right: 16px; background: var(--panel2); border:1px solid var(--border); border-radius:12px; padding:16px; min-width:260px; z-index: 60; display:none; box-shadow:0 10px 30px rgba(0,0,0,.5); }
+  #a11y-panel.show { display:block; }
+  #a11y-panel h4 { margin:0 0 10px; font-size:15px; color:var(--txt); }
+  #a11y-panel .a11y-row { display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px dashed var(--border); font-size:14px; }
+  #a11y-panel .a11y-row:last-child { border-bottom:0; }
+  #a11y-panel .a11y-toggle { width:46px; height:26px; border-radius:14px; background:#444; position:relative; cursor:pointer; transition:.2s; border:0; }
+  #a11y-panel .a11y-toggle.on { background: var(--accent2); }
+  #a11y-panel .a11y-toggle::after { content:''; position:absolute; top:3px; left:3px; width:20px; height:20px; background:#fff; border-radius:50%; transition:.2s; }
+  #a11y-panel .a11y-toggle.on::after { left:23px; }
+  #help-fab { position: fixed; right: 20px; bottom: 76px; z-index: 55; background:#ef4444; color:#fff; border:0; border-radius:50px; padding:18px 26px; font-size:18px; font-weight:700; cursor:pointer; box-shadow:0 8px 24px rgba(239,68,68,.5); display:flex; align-items:center; gap:10px; }
+  #help-fab:hover { transform: translateY(-2px); box-shadow:0 12px 28px rgba(239,68,68,.6); }
+  #help-fab:active { transform: scale(.97); }
+  body.a11y-large #help-fab { font-size: 22px; padding: 22px 32px; }
+  /* ============ END A11Y ============ */
 </style>
 </head>
 <body>
@@ -98,9 +130,28 @@
       <button class="active" data-lang="es">ES</button>
       <button data-lang="en">EN</button>
     </div>
-    <button id="fs-btn" style="background:var(--panel2);color:var(--txt);border:0;padding:8px 12px;border-radius:8px;cursor:pointer">⛶</button>
+    <button id="a11y-btn" aria-label="Opciones de accesibilidad" aria-haspopup="dialog">♿ Accesibilidad</button>
+    <button id="fs-btn" style="background:var(--panel2);color:var(--txt);border:0;padding:8px 12px;border-radius:8px;cursor:pointer" aria-label="Pantalla completa">⛶</button>
   </div>
 </header>
+
+<div id="a11y-panel" role="dialog" aria-label="Opciones de accesibilidad" aria-modal="false">
+  <h4>♿ Accesibilidad</h4>
+  <div class="a11y-row">
+    <span>📖 Texto grande</span>
+    <button class="a11y-toggle" id="a11y-large" aria-pressed="false" aria-label="Activar texto grande" role="switch"></button>
+  </div>
+  <div class="a11y-row">
+    <span>🌗 Alto contraste</span>
+    <button class="a11y-toggle" id="a11y-contrast" aria-pressed="false" aria-label="Activar alto contraste" role="switch"></button>
+  </div>
+  <div class="a11y-row">
+    <span>🔊 Lector de pantalla</span>
+    <button class="a11y-toggle" id="a11y-reader" aria-pressed="false" aria-label="Activar etiquetas para lector de pantalla" role="switch"></button>
+  </div>
+</div>
+
+<button id="help-fab" aria-label="Pedir ayuda al cajero">🆘 Pedir ayuda</button>
 
 <main id="catalog"><div class="grid" id="grid"></div></main>
 
@@ -300,11 +351,103 @@ document.getElementById('pay-cash').onclick = () => submitOrder('cash');
 document.getElementById('m-ok').onclick    = () => document.getElementById('modal').classList.remove('show');
 ['click','keydown','touchstart'].forEach(ev => document.addEventListener(ev, resetIdle, {passive:true}));
 
+/* ============== A11Y: Accesibilidad ============== */
+const A11Y_KEY = 'vlx_kiosk_a11y';
+const a11yState = (function(){
+  try { return JSON.parse(localStorage.getItem(A11Y_KEY) || '{}'); } catch(_) { return {}; }
+})();
+
+function saveA11y(){ try { localStorage.setItem(A11Y_KEY, JSON.stringify(a11yState)); } catch(_){} }
+
+function applyA11y(){
+  document.body.classList.toggle('a11y-large', !!a11yState.large);
+  document.body.classList.toggle('high-contrast', !!a11yState.contrast);
+  // Toggle visual state of switches
+  const tLarge = document.getElementById('a11y-large');
+  const tContrast = document.getElementById('a11y-contrast');
+  const tReader = document.getElementById('a11y-reader');
+  if (tLarge){ tLarge.classList.toggle('on', !!a11yState.large); tLarge.setAttribute('aria-pressed', !!a11yState.large); }
+  if (tContrast){ tContrast.classList.toggle('on', !!a11yState.contrast); tContrast.setAttribute('aria-pressed', !!a11yState.contrast); }
+  if (tReader){ tReader.classList.toggle('on', !!a11yState.reader); tReader.setAttribute('aria-pressed', !!a11yState.reader); }
+  // Screen reader: añade ARIA labels y role=button a clickables
+  if (a11yState.reader){
+    document.querySelectorAll('.card').forEach(el => {
+      if (!el.hasAttribute('role')) el.setAttribute('role','button');
+      if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex','0');
+      const name = el.querySelector('.name')?.textContent?.trim() || 'producto';
+      const price = el.querySelector('.price')?.textContent?.trim() || '';
+      el.setAttribute('aria-label', `Agregar al carrito: ${name}, precio ${price}`);
+    });
+    document.querySelectorAll('.qty button, .pay button, .modal .ok, .lang button').forEach(b => {
+      if (!b.hasAttribute('role')) b.setAttribute('role','button');
+      if (!b.getAttribute('aria-label')){
+        b.setAttribute('aria-label', b.textContent.trim() || 'botón');
+      }
+    });
+    document.getElementById('cart')?.setAttribute('aria-live','polite');
+    document.getElementById('total')?.setAttribute('aria-live','polite');
+  }
+}
+
+document.getElementById('a11y-btn').onclick = () => {
+  document.getElementById('a11y-panel').classList.toggle('show');
+};
+document.getElementById('a11y-large').onclick = () => {
+  a11yState.large = !a11yState.large; saveA11y(); applyA11y();
+};
+document.getElementById('a11y-contrast').onclick = () => {
+  a11yState.contrast = !a11yState.contrast; saveA11y(); applyA11y();
+};
+document.getElementById('a11y-reader').onclick = () => {
+  a11yState.reader = !a11yState.reader; saveA11y(); applyA11y();
+};
+// Cierra panel al click fuera
+document.addEventListener('click', (e) => {
+  const panel = document.getElementById('a11y-panel');
+  const btn = document.getElementById('a11y-btn');
+  if (panel.classList.contains('show') && !panel.contains(e.target) && e.target !== btn && !btn.contains(e.target)){
+    panel.classList.remove('show');
+  }
+});
+
+// Help request → cajero
+document.getElementById('help-fab').onclick = async () => {
+  const btn = document.getElementById('help-fab');
+  btn.disabled = true;
+  const orig = btn.textContent;
+  btn.textContent = '⏳ Llamando al cajero...';
+  try {
+    const r = await fetch(`${API}/api/kds/orders`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json', ...(token?{'Authorization':'Bearer '+token}:{})},
+      body: JSON.stringify({
+        type: 'help_request',
+        kiosk_id: KIOSK_ID,
+        tenant_id: TENANT_ID,
+        message: 'Cliente solicita asistencia en kiosko',
+        priority: 'high',
+        created_at: new Date().toISOString()
+      })
+    });
+    if (r.ok){
+      showModal('🆘 Ayuda solicitada', 'Un cajero vendrá a asistirte en breve. Gracias por tu paciencia.');
+    } else {
+      showModal('Aviso', 'No pudimos llamar al cajero. Por favor dirígete a la caja.');
+    }
+  } catch(_){
+    showModal('Aviso', 'Sin conexión. Por favor dirígete a la caja.');
+  } finally {
+    setTimeout(() => { btn.disabled = false; btn.textContent = orig; }, 2000);
+  }
+};
+
 /* ============== Boot ============== */
 (async () => {
   applyI18n(); renderCart(); resetIdle();
+  applyA11y();
   await openSession();
   await loadCatalog();
+  applyA11y(); // re-apply para cards recién renderizadas
 })();
 </script>
 <link rel="stylesheet" href="volvix-modals.css">
