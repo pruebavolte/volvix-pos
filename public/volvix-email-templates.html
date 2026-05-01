@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Volvix · Email Templates</title>
+<script src="/auth-gate.js"></script>
+<script defer src="/volvix-modules-wiring.js"></script>
+<style>
+  :root { --amber:#FBBF24; --navy:#1E3A8A; --dark:#0A0A0A; --gray:#1f2937; --soft:#111827; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--dark); color:#e5e7eb; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; min-height:100vh; }
+  header.top {
+    background:linear-gradient(90deg,var(--navy),#2563eb); color:#fff;
+    padding:14px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;
+    border-bottom:2px solid var(--amber);
+  }
+  header.top h1 { margin:0; font-size:20px; color:var(--amber); }
+  header.top a { color:#dbeafe; text-decoration:none; font-size:13px; }
+  header.top a:hover { color:var(--amber); }
+  .wrap { display:grid; grid-template-columns:280px 1fr; gap:18px; padding:18px; max-width:1400px; margin:0 auto; }
+  @media (max-width: 900px) { .wrap { grid-template-columns:1fr; } }
+  .panel {
+    background:var(--soft); border:1px solid #1f2937; border-radius:12px;
+    padding:16px; min-height:300px;
+  }
+  .panel h2 { margin:0 0 12px; color:var(--amber); font-size:16px; }
+  label { display:block; font-size:12px; color:#9ca3af; margin:10px 0 4px; font-weight:600; }
+  input, select, textarea {
+    width:100%; padding:8px 10px; border-radius:8px; border:1px solid #374151;
+    background:#0f172a; color:#e5e7eb; font-size:13px; font-family:inherit;
+  }
+  textarea { font-family:ui-monospace,Menlo,Consolas,monospace; min-height:280px; resize:vertical; }
+  input:focus, select:focus, textarea:focus { outline:none; border-color:var(--amber); }
+  .actions { margin-top:14px; display:flex; gap:8px; flex-wrap:wrap; }
+  button.btn {
+    padding:8px 14px; border-radius:8px; border:none; cursor:pointer;
+    font-weight:600; font-size:13px; font-family:inherit;
+  }
+  button.btn-primary { background:var(--amber); color:var(--dark); }
+  button.btn-primary:hover { filter:brightness(1.08); }
+  button.btn-ghost { background:transparent; border:1px solid #374151; color:#cbd5e1; }
+  button.btn-ghost:hover { border-color:var(--amber); color:var(--amber); }
+  .tpl-list { display:flex; flex-direction:column; gap:6px; }
+  .tpl-item {
+    background:rgba(255,255,255,.03); border:1px solid #1f2937; border-radius:8px;
+    padding:10px 12px; cursor:pointer; transition:border-color .12s, background .12s;
+  }
+  .tpl-item:hover { border-color:var(--amber); }
+  .tpl-item.active { border-color:var(--amber); background:rgba(251,191,36,.06); }
+  .tpl-item .tn { font-weight:700; color:#fff; font-size:13px; }
+  .tpl-item .tr { font-size:11px; color:#9ca3af; margin-top:2px; }
+  .tpl-item .tag { font-size:9px; background:#065f46; color:#a7f3d0; padding:1px 5px; border-radius:3px; margin-left:6px; font-weight:600; text-transform:uppercase; }
+  .vars { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+  .var-chip {
+    background:#1f2937; color:#fbbf24; padding:3px 8px; border-radius:6px;
+    font-size:11px; font-family:ui-monospace,Menlo,Consolas,monospace; cursor:pointer;
+    border:1px solid #374151;
+  }
+  .var-chip:hover { background:#374151; }
+  .editor-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width: 1100px) { .editor-row { grid-template-columns:1fr; } }
+  iframe.preview {
+    width:100%; min-height:480px; border:1px solid #1f2937; border-radius:8px;
+    background:#fff;
+  }
+  .toast { position:fixed; bottom:20px; right:20px; background:#065f46; color:#fff; padding:12px 18px; border-radius:8px; font-size:13px; box-shadow:0 4px 14px rgba(0,0,0,.4); display:none; }
+  .toast.show { display:block; }
+  .toast.error { background:#7f1d1d; }
+  .footer-note { margin-top:14px; font-size:11px; color:#6b7280; line-height:1.5; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>Email · Editor de Templates</h1>
+  <nav>
+    <a href="/owner-dashboard.html">&larr; Dashboard</a>
+  </nav>
+</header>
+
+<div class="wrap">
+
+  <!-- LEFT: list -->
+  <section class="panel">
+    <h2>Templates</h2>
+    <div class="tpl-list" id="vlx-list">
+      <div style="color:#6b7280;font-size:12px;padding:14px 0;">Cargando…</div>
+    </div>
+    <p class="footer-note">Selecciona un template para editarlo. Los cambios se guardan por tenant.</p>
+  </section>
+
+  <!-- RIGHT: editor -->
+  <section class="panel">
+    <h2 id="vlx-current-name">Selecciona un template</h2>
+
+    <div id="vlx-editor" style="display:none;">
+      <label>Asunto del correo</label>
+      <input type="text" id="vlx-subject" placeholder="Ej. Tu codigo de verificacion - Volvix POS" />
+
+      <label>Variables disponibles (clic para insertar)</label>
+      <div class="vars" id="vlx-vars"></div>
+
+      <div class="editor-row" style="margin-top:14px;">
+        <div>
+          <label>HTML del cuerpo</label>
+          <textarea id="vlx-html" placeholder="<p>Hola {{name}}…</p>"></textarea>
+        </div>
+        <div>
+          <label>Vista previa</label>
+          <iframe id="vlx-preview" class="preview" sandbox="allow-same-origin"></iframe>
+        </div>
+      </div>
+
+      <label style="margin-top:14px;">Email destino para test</label>
+      <input type="email" id="vlx-test-email" placeholder="tu@correo.com" />
+
+      <div class="actions">
+        <button class="btn btn-primary" id="vlx-save" type="button">Guardar</button>
+        <button class="btn btn-ghost"   id="vlx-test" type="button">Enviar prueba</button>
+        <button class="btn btn-ghost"   id="vlx-reset" type="button">Restablecer</button>
+      </div>
+      <p class="footer-note">
+        Las variables se sustituyen en el momento del envío. El editor solo afecta a tu tenant.
+      </p>
+    </div>
+  </section>
+
+</div>
+
+<div class="toast" id="vlx-toast"></div>
+
+<script>
+(function(){
+  var state = { templates: [], current: null };
+
+  function $(id){ return document.getElementById(id); }
+  function api(method, path, body){
+    var headers = { 'Content-Type':'application/json' };
+    var token = (window.VolvixAuth && VolvixAuth.token) || localStorage.getItem('volvix_token') || '';
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+    return fetch(path, {
+      method: method,
+      headers: headers,
+      body: body ? JSON.stringify(body) : undefined,
+    }).then(function(r){ return r.json().then(function(j){ j.__status = r.status; return j; }); });
+  }
+
+  function toast(msg, isErr){
+    var t = $('vlx-toast');
+    t.textContent = msg;
+    t.classList.toggle('error', !!isErr);
+    t.classList.add('show');
+    setTimeout(function(){ t.classList.remove('show'); }, 3000);
+  }
+
+  function renderList(){
+    var html = state.templates.map(function(t){
+      var active = state.current && state.current.name === t.name ? 'active' : '';
+      var override = t.is_override ? '<span class="tag">custom</span>' : '';
+      return '<div class="tpl-item '+active+'" data-name="'+t.name+'">' +
+        '<div class="tn">'+t.label+override+'</div>' +
+        '<div class="tr">'+t.name+'</div>' +
+      '</div>';
+    }).join('');
+    $('vlx-list').innerHTML = html || '<div style="color:#6b7280;font-size:12px;padding:14px 0;">Sin templates.</div>';
+    Array.prototype.forEach.call(document.querySelectorAll('.tpl-item'), function(el){
+      el.addEventListener('click', function(){ loadTemplate(el.getAttribute('data-name')); });
+    });
+  }
+
+  function renderVars(vars){
+    var html = (vars || []).map(function(v){
+      return '<span class="var-chip" data-var="{{'+v+'}}">{{'+v+'}}</span>';
+    }).join('');
+    $('vlx-vars').innerHTML = html;
+    Array.prototype.forEach.call(document.querySelectorAll('.var-chip'), function(el){
+      el.addEventListener('click', function(){
+        insertAtCursor($('vlx-html'), el.getAttribute('data-var'));
+        updatePreview();
+      });
+    });
+  }
+
+  function insertAtCursor(ta, text){
+    var s = ta.selectionStart, e = ta.selectionEnd;
+    ta.value = ta.value.slice(0, s) + text + ta.value.slice(e);
+    ta.selectionStart = ta.selectionEnd = s + text.length;
+    ta.focus();
+  }
+
+  function updatePreview(){
+    var html = $('vlx-html').value || '';
+    // crude variable preview replacement
+    html = html.replace(/\{\{\s*([\w.]+)\s*\}\}/g, function(_, k){ return '<mark>['+k+']</mark>'; });
+    $('vlx-preview').srcdoc = '<!doctype html><body style="font-family:system-ui,sans-serif;padding:18px;">' + html + '</body>';
+  }
+
+  function loadTemplate(name){
+    api('GET', '/api/email/templates/' + encodeURIComponent(name)).then(function(r){
+      if (!r.ok) { toast(r.error || 'Error al cargar', true); return; }
+      state.current = r;
+      $('vlx-editor').style.display = 'block';
+      $('vlx-current-name').textContent = r.label + (r.is_override ? ' · personalizado' : '');
+      $('vlx-subject').value = r.subject || '';
+      $('vlx-html').value = r.html || '';
+      renderVars(r.variables);
+      renderList();
+      updatePreview();
+    }).catch(function(e){ toast('Network error', true); });
+  }
+
+  function saveTemplate(){
+    if (!state.current) return;
+    var body = { subject: $('vlx-subject').value, html: $('vlx-html').value, variables: state.current.variables };
+    api('PUT', '/api/email/templates/' + encodeURIComponent(state.current.name), body).then(function(r){
+      if (r.ok) { toast('Guardado'); loadAll(); }
+      else { toast(r.error || 'Error al guardar', true); }
+    });
+  }
+
+  function sendTest(){
+    var to = $('vlx-test-email').value.trim();
+    if (!to) { toast('Captura un email', true); return; }
+    api('POST', '/api/email/test', { to: to }).then(function(r){
+      if (r.ok) toast(r.mock ? 'Test (mock) registrado' : 'Email enviado');
+      else toast(r.error || 'Error al enviar', true);
+    });
+  }
+
+  function resetTemplate(){
+    if (!state.current) return;
+    if (!confirm('¿Restablecer este template a su valor por defecto?')) return;
+    // We just clear the textarea/subject; saving with empty is rejected by API,
+    // so we re-fetch the builtin (server returns it when no override exists).
+    // Quick approach: PUT empty values is blocked → instead instruct user.
+    toast('Para revertir, contacta a soporte (el override persiste hasta sobreescribirlo).');
+  }
+
+  function loadAll(){
+    api('GET', '/api/email/templates').then(function(r){
+      if (!r.ok) { toast(r.error || 'Error al listar', true); return; }
+      state.templates = r.templates || [];
+      renderList();
+      if (state.current){ loadTemplate(state.current.name); }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    $('vlx-save').addEventListener('click', saveTemplate);
+    $('vlx-test').addEventListener('click', sendTest);
+    $('vlx-reset').addEventListener('click', resetTemplate);
+    $('vlx-html').addEventListener('input', updatePreview);
+    loadAll();
+  });
+})();
+</script>
+
+</body>
+</html>

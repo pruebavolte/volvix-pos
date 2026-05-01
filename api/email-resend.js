@@ -211,6 +211,40 @@ function tplTest() {
   return { subject: 'Test - Volvix POS Resend', html };
 }
 
+// ---- Template registry (built-ins) ---------------------------------------
+const BUILTIN_TEMPLATES = [
+  { name: 'otp',            label: 'Código OTP',          variables: ['code', 'name'] },
+  { name: 'welcome',        label: 'Bienvenida',           variables: ['tenant_name', 'login_url'] },
+  { name: 'receipt',        label: 'Recibo de venta',      variables: ['sale.folio', 'sale.total', 'tenant_name', 'items'] },
+  { name: 'cfdi',           label: 'CFDI',                 variables: ['sale_id'] },
+  { name: 'password_reset', label: 'Reset de contraseña',  variables: ['reset_token'] },
+];
+
+function renderBuiltin(name) {
+  switch (name) {
+    case 'otp':            return tplOtp('123456', 'Cliente');
+    case 'welcome':        return tplWelcome('Tu Negocio', 'https://volvix.com/login');
+    case 'receipt':        return tplReceipt({ folio: 'V-0001', total: 0, created_at: new Date().toISOString() }, [], 'Tu Negocio');
+    case 'cfdi':           return tplCfdi('SALE-PREVIEW');
+    case 'password_reset': return tplPasswordReset('preview-token');
+    default:               return null;
+  }
+}
+
+// Substitute {{var}} placeholders with values
+function applyVariables(str, vars) {
+  if (!str || !vars) return str || '';
+  return String(str).replace(/\{\{\s*([\w.]+)\s*\}\}/g, (m, key) => {
+    const path = key.split('.');
+    let v = vars;
+    for (const p of path) {
+      if (v && typeof v === 'object' && p in v) v = v[p];
+      else { v = undefined; break; }
+    }
+    return v == null ? m : esc(String(v));
+  });
+}
+
 // ---- log to supabase ------------------------------------------------------
 async function logEmail(supabaseRequest, row) {
   if (typeof supabaseRequest !== 'function') return;
@@ -324,6 +358,110 @@ module.exports = async function handleEmail(req, res, parsedUrl, ctx) {
       from_name: FROM_NAME,
     });
     return true;
+  }
+
+  // ---- GET /api/email/templates  (auth) — list templates ------------------
+  if (req.method === 'GET' && path === '/api/email/templates') {
+    const user = await requireAuth();
+    if (!user) { send(401, { ok: false, error: 'No autorizado' }); return true; }
+    const tenantId = user.tenant_id || user.company_id || null;
+
+    let overrides = [];
+    if (tenantId && typeof supabaseRequest === 'function') {
+      try {
+        overrides = await supabaseRequest('GET',
+          `/email_templates?tenant_id=eq.${encodeURIComponent(tenantId)}&select=template_name,subject,html,variables,updated_at`
+        ) || [];
+      } catch (_) { overrides = []; }
+    }
+    const overrideByName = Object.fromEntries((overrides || []).map(o => [o.template_name, o]));
+
+    const list = BUILTIN_TEMPLATES.map(b => {
+      const ov = overrideByName[b.name];
+      const builtin = renderBuiltin(b.name) || { subject: '', html: '' };
+      return {
+        name: b.name,
+        label: b.label,
+        variables: b.variables,
+        subject: ov ? ov.subject : builtin.subject,
+        html: ov ? ov.html : builtin.html,
+        is_override: !!ov,
+        updated_at: ov ? ov.updated_at : null,
+      };
+    });
+    send(200, { ok: true, templates: list, tenant_id: tenantId });
+    return true;
+  }
+
+  // ---- GET/PUT /api/email/templates/:name  (auth) -------------------------
+  const tplMatch = path.match(/^\/api\/email\/templates\/([\w-]+)$/);
+  if (tplMatch) {
+    const user = await requireAuth();
+    if (!user) { send(401, { ok: false, error: 'No autorizado' }); return true; }
+    const tenantId = user.tenant_id || user.company_id || null;
+    const name = tplMatch[1];
+    const builtin = BUILTIN_TEMPLATES.find(b => b.name === name);
+    if (!builtin) { send(404, { ok: false, error: 'Template no existe' }); return true; }
+
+    if (req.method === 'GET') {
+      let ov = null;
+      if (tenantId && typeof supabaseRequest === 'function') {
+        try {
+          const rows = await supabaseRequest('GET',
+            `/email_templates?tenant_id=eq.${encodeURIComponent(tenantId)}&template_name=eq.${encodeURIComponent(name)}&limit=1`
+          );
+          ov = Array.isArray(rows) && rows[0] ? rows[0] : null;
+        } catch (_) {}
+      }
+      const base = renderBuiltin(name) || { subject: '', html: '' };
+      send(200, {
+        ok: true,
+        name,
+        label: builtin.label,
+        variables: builtin.variables,
+        subject: ov ? ov.subject : base.subject,
+        html: ov ? ov.html : base.html,
+        is_override: !!ov,
+      });
+      return true;
+    }
+
+    if (req.method === 'PUT') {
+      if (!tenantId) { send(400, { ok: false, error: 'tenant_id requerido' }); return true; }
+      const body = await readJson(req);
+      if (!body.subject || !body.html) {
+        send(400, { ok: false, error: 'subject y html son requeridos' }); return true;
+      }
+      if (typeof supabaseRequest !== 'function') {
+        send(503, { ok: false, error: 'DB no disponible' }); return true;
+      }
+      try {
+        // upsert
+        const existing = await supabaseRequest('GET',
+          `/email_templates?tenant_id=eq.${encodeURIComponent(tenantId)}&template_name=eq.${encodeURIComponent(name)}&limit=1`
+        );
+        const row = {
+          tenant_id: tenantId,
+          template_name: name,
+          subject: String(body.subject),
+          html: String(body.html),
+          variables: body.variables || builtin.variables || [],
+          updated_at: new Date().toISOString(),
+        };
+        if (Array.isArray(existing) && existing[0]) {
+          await supabaseRequest('PATCH',
+            `/email_templates?tenant_id=eq.${encodeURIComponent(tenantId)}&template_name=eq.${encodeURIComponent(name)}`,
+            row
+          );
+        } else {
+          await supabaseRequest('POST', '/email_templates', row);
+        }
+        send(200, { ok: true, name, saved: true });
+      } catch (e) {
+        send(502, { ok: false, error: 'No se pudo guardar', detail: String(e.message || e) });
+      }
+      return true;
+    }
   }
 
   // ---- POST /api/email/otp (public, rate-limited) -------------------------
@@ -460,6 +598,8 @@ module.exports = async function handleEmail(req, res, parsedUrl, ctx) {
 
 // expose for tests / re-use
 module.exports.templates = { tplOtp, tplWelcome, tplReceipt, tplCfdi, tplPasswordReset, tplTest };
+module.exports.BUILTIN_TEMPLATES = BUILTIN_TEMPLATES;
+module.exports.applyVariables = applyVariables;
 module.exports.sendEmail = sendEmail;
 
 /* ---------------------------------------------------------------------------
@@ -480,4 +620,16 @@ module.exports.sendEmail = sendEmail;
  * CREATE INDEX IF NOT EXISTS email_log_sent_at_idx  ON email_log(sent_at DESC);
  * CREATE INDEX IF NOT EXISTS email_log_recipient_idx ON email_log(recipient);
  * CREATE INDEX IF NOT EXISTS email_log_tenant_idx   ON email_log(tenant_id);
+ *
+ * CREATE TABLE IF NOT EXISTS email_templates (
+ *   id            uuid        DEFAULT gen_random_uuid() PRIMARY KEY,
+ *   tenant_id     text        NOT NULL,
+ *   template_name text        NOT NULL,
+ *   subject       text        NOT NULL,
+ *   html          text        NOT NULL,
+ *   variables     jsonb,
+ *   updated_at    timestamptz DEFAULT now(),
+ *   UNIQUE(tenant_id, template_name)
+ * );
+ * CREATE INDEX IF NOT EXISTS email_templates_tenant_idx ON email_templates(tenant_id);
  * ------------------------------------------------------------------------- */

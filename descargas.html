@@ -56,6 +56,9 @@
     }
     .badge-soon{background:#451A03;color:#FCD34D}
     .badge-new{background:#064E3B;color:#6EE7B7}
+    .badge-beta{background:#78350F;color:#FDE68A;border:1px solid #B45309}
+    .btn-beta{background:#B45309;color:#FFF7ED}
+    .btn-beta:hover{background:#92400E}
     .pwa-instructions{
       background:#0F1729;border:1px solid #1E3A8A;border-radius:8px;
       padding:12px;font-size:12px;color:#93C5FD;margin-top:8px;
@@ -258,26 +261,53 @@
       macos:   'Descargar .dmg',
       linux:   'Descargar .deb'
     };
+    var betaLabels = {
+      windows: 'Descargar .exe (beta)',
+      android: 'Descargar APK (beta)',
+      macos:   'Descargar .dmg (beta)',
+      linux:   'Descargar .deb (beta)'
+    };
+
+    // Heuristic: if file is < 50KB OR Content-Length header ≤ 50KB → treat as placeholder/beta
+    var BETA_MAX_BYTES = 50 * 1024;
 
     document.querySelectorAll('[data-probe-url]').forEach(function(btn){
       var url = btn.getAttribute('data-probe-url');
       var platform = btn.getAttribute('data-track-platform');
       fetch(url, { method: 'HEAD', cache: 'no-store' }).then(function(r){
         if (!r.ok) return;
+        var len = parseInt(r.headers.get('Content-Length') || '0', 10);
+        var isBeta = (len > 0 && len <= BETA_MAX_BYTES);
+
         btn.classList.remove('btn-disabled');
-        btn.classList.add('btn-primary');
         btn.removeAttribute('aria-disabled');
-        btn.textContent = labels[platform] || 'Descargar';
+
+        var card = btn.closest('article');
+        var badge = card && card.querySelector('.badge-soon');
+
+        if (isBeta){
+          btn.classList.add('btn-beta');
+          btn.textContent = betaLabels[platform] || 'Descargar (beta)';
+          btn.title = 'Build de prueba — placeholder. Versión final próximamente.';
+          if (badge){
+            badge.classList.remove('badge-soon');
+            badge.classList.add('badge-beta');
+            badge.textContent = 'Build de prueba';
+          }
+        } else {
+          btn.classList.add('btn-primary');
+          btn.textContent = labels[platform] || 'Descargar';
+          if (badge){
+            badge.classList.remove('badge-soon');
+            badge.classList.add('badge-new');
+            badge.textContent = 'Disponible';
+          }
+        }
+
         // Try to read version from response header (X-Version) or from filename
         var ver = r.headers.get('X-Version') || r.headers.get('Last-Modified') || null;
         btn.dataset.version = ver || '';
-        var card = btn.closest('article');
-        var badge = card && card.querySelector('.badge-soon');
-        if (badge){
-          badge.classList.remove('badge-soon');
-          badge.classList.add('badge-new');
-          badge.textContent = 'Disponible';
-        }
+        btn.dataset.beta = isBeta ? '1' : '0';
       }).catch(function(){ /* keep próximamente */ });
     });
   });
