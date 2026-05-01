@@ -196,6 +196,7 @@ tr:hover td{background:var(--card2)}
       <a href="#"><span class="ic">🏢</span>Tenants<span class="badge" data-kpi="tenants-badge">—</span></a>
       <a href="#"><span class="ic">👥</span>Usuarios</a>
       <a href="#"><span class="ic">💳</span>Billing Global</a>
+      <a href="#sec-usage-billing" data-action="goto-usage-billing"><span class="ic">📊</span>Billing por Uso<span class="badge" id="ub-pending-badge" style="display:none">0</span></a>
       <a href="#"><span class="ic">📈</span>Analytics</a>
     </nav>
     <div class="nav-section">Operaciones</div>
@@ -617,6 +618,122 @@ tr:hover td{background:var(--card2)}
           <button class="btn btn-danger" style="padding:14px;text-align:left" data-action="kill-switch">🚨<br><b>Kill Switch</b><br><span style="font-size:11px;opacity:.85">Emergencia P0</span></button>
         </div>
       </div>
+
+      <!-- ======================== USAGE-BILLING ======================== -->
+      <div class="card" id="sec-usage-billing" style="margin-bottom:24px">
+        <div class="card-h">
+          <div>
+            <h3>📊 Billing por Uso (cobro por consumo)</h3>
+            <div class="t-mini">Tenants que rebasaron threshold del mes. Sin trial: solo se cobra cuando hay uso real.</div>
+          </div>
+          <div class="btn-row">
+            <label style="font-size:12px;display:flex;align-items:center;gap:6px"><input type="checkbox" id="ub-only-unpaid" checked> Solo pendientes de pago</label>
+            <button class="btn btn-ghost" id="ub-refresh">Refrescar</button>
+            <button class="btn btn-danger" id="ub-bulk-lock">Bloquear morosos &gt;30d</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table id="ub-table">
+            <thead>
+              <tr>
+                <th>Tenant</th>
+                <th>Periodo</th>
+                <th>Ventas</th>
+                <th>Productos</th>
+                <th>Clientes</th>
+                <th>Días activos</th>
+                <th>Estado</th>
+                <th>Adeudo</th>
+                <th>Vence</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="ub-tbody">
+              <tr><td colspan="10" style="text-align:center;color:var(--muted);padding:24px">Cargando…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <script>
+      (function(){
+        var tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
+        function H(){ return tok ? { 'Authorization': 'Bearer ' + tok, 'Content-Type':'application/json' } : { 'Content-Type':'application/json' }; }
+        function fmt(n){ if(n==null) return '—'; return Number(n).toLocaleString('es-MX'); }
+        function tag(state){
+          if (state==='paid')    return '<span class="tag ok">PAGADO</span>';
+          if (state==='pending') return '<span class="tag warn">PENDIENTE</span>';
+          if (state==='free')    return '<span class="tag info">GRATIS</span>';
+          if (state==='overdue') return '<span class="tag err">VENCIDO</span>';
+          return '<span class="tag">—</span>';
+        }
+        function render(items){
+          var tbody = document.getElementById('ub-tbody');
+          if (!items || !items.length) {
+            tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:24px">Sin datos.</td></tr>';
+            document.getElementById('ub-pending-badge').style.display = 'none';
+            return;
+          }
+          var pending = items.filter(function(r){ return r.requires_payment && !r.paid_at; }).length;
+          var b = document.getElementById('ub-pending-badge');
+          if (pending > 0) { b.style.display = ''; b.textContent = pending; } else { b.style.display = 'none'; }
+          tbody.innerHTML = items.map(function(r){
+            var state = r.paid_at ? 'paid' : (r.requires_payment ? (r.payment_due_date && new Date(r.payment_due_date) < new Date() ? 'overdue' : 'pending') : 'free');
+            return '<tr>' +
+              '<td><b>' + (r.tenant_id||'') + '</b></td>' +
+              '<td class="t-mini">' + (r.period_start||'') + '</td>' +
+              '<td>' + fmt(r.sales_count) + '</td>' +
+              '<td>' + fmt(r.products_count) + '</td>' +
+              '<td>' + fmt(r.customers_count) + '</td>' +
+              '<td>' + fmt(r.active_days) + '</td>' +
+              '<td>' + tag(state) + '</td>' +
+              '<td>$' + fmt(r.amount_due||0) + '</td>' +
+              '<td class="t-mini">' + (r.payment_due_date||'—') + '</td>' +
+              '<td>' +
+                '<button class="btn btn-ghost" data-act="extend7" data-tid="' + r.tenant_id + '" style="padding:4px 8px;font-size:11px">+7d</button> ' +
+                '<button class="btn btn-ghost" data-act="extend30" data-tid="' + r.tenant_id + '" style="padding:4px 8px;font-size:11px">+30d</button> ' +
+                '<button class="btn btn-success" data-act="paid" data-tid="' + r.tenant_id + '" style="padding:4px 8px;font-size:11px">Pagado</button> ' +
+                '<button class="btn btn-danger" data-act="lock" data-tid="' + r.tenant_id + '" style="padding:4px 8px;font-size:11px">Lock</button> ' +
+                '<button class="btn btn-ghost" data-act="unlock" data-tid="' + r.tenant_id + '" style="padding:4px 8px;font-size:11px">Unlock</button>' +
+              '</td>' +
+              '</tr>';
+          }).join('');
+        }
+        function load(){
+          var only = document.getElementById('ub-only-unpaid').checked ? '?only_unpaid=1' : '';
+          fetch('/api/billing/admin/list' + only, { headers: H() })
+            .then(function(r){ return r.json(); })
+            .then(function(j){ render((j && j.items) || []); })
+            .catch(function(){
+              document.getElementById('ub-tbody').innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--danger);padding:24px">Error de carga.</td></tr>';
+            });
+        }
+        document.getElementById('ub-refresh').addEventListener('click', load);
+        document.getElementById('ub-only-unpaid').addEventListener('change', load);
+        document.getElementById('ub-bulk-lock').addEventListener('click', function(){
+          if (!confirm('¿Bloquear todos los tenants con adeudo >30 días?')) return;
+          fetch('/api/billing/admin/bulk-lock', { method:'POST', headers: H(), body: JSON.stringify({ older_than_days: 30 })})
+            .then(function(r){ return r.json(); })
+            .then(function(j){ alert('Bloqueados: ' + (j && j.locked || 0)); load(); });
+        });
+        document.getElementById('ub-tbody').addEventListener('click', function(e){
+          var btn = e.target.closest('button[data-act]'); if (!btn) return;
+          var act = btn.getAttribute('data-act');
+          var tid = btn.getAttribute('data-tid');
+          var url, body;
+          if (act === 'extend7')  { url = '/api/billing/extend-days'; body = { tenant_id: tid, days: 7 }; }
+          else if (act === 'extend30'){ url = '/api/billing/extend-days'; body = { tenant_id: tid, days: 30 }; }
+          else if (act === 'paid')    { url = '/api/billing/mark-paid'; body = { tenant_id: tid }; }
+          else if (act === 'lock')    { if (!confirm('¿Bloquear ' + tid + '?')) return; url = '/api/billing/lock-tenant'; body = { tenant_id: tid }; }
+          else if (act === 'unlock')  { url = '/api/billing/unlock-tenant'; body = { tenant_id: tid }; }
+          else return;
+          fetch(url, { method:'POST', headers: H(), body: JSON.stringify(body) })
+            .then(function(r){ return r.json(); })
+            .then(function(){ load(); });
+        });
+        document.addEventListener('DOMContentLoaded', load);
+        if (document.readyState !== 'loading') load();
+      })();
+      </script>
 
       <!-- ======================== FIX-N4-3: FUSIÓN DE SUCURSALES ======================== -->
       <div class="card" id="sec-merge-branches" style="margin-bottom:24px;border:1px solid var(--danger)">

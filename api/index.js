@@ -24,6 +24,7 @@ const handleBackup = require('./backup');
 const handleActivityFeed = require('./activity-feed');
 const handleInventoryAdvanced = require('./inventory-advanced');
 const handlePromotionsEngine = require('./promotions-engine');
+const handleUsageBilling = require('./usage-billing');
 const __geoIp = (() => { try { return require('./geo-ip'); } catch (_) { return null; } })();
 const { rateLimitMiddleware } = require('./rate-limit');
 const __apiRateLimiter = rateLimitMiddleware({
@@ -7236,6 +7237,82 @@ if (handlers['POST /api/inventory/locations'])   handlers['POST /api/inventory/l
 if (handlers['POST /api/sales'])                 handlers['POST /api/sales']                 = enforcePlanLimits('sales')(handlers['POST /api/sales']);
 
 // =============================================================
+// USAGE-BILLING: best-effort tracking en hot paths
+// (jamas falla la request; usa setImmediate para no bloquear).
+// =============================================================
+function __wrapUsageTracker(handlerKey, eventType) {
+  const orig = handlers[handlerKey];
+  if (typeof orig !== 'function') return;
+  handlers[handlerKey] = async function (req, res, params) {
+    let captured = null;
+    const chunks = [];
+    const origWrite = res.write && res.write.bind(res);
+    const origEnd   = res.end   && res.end.bind(res);
+    res.write = function (chunk) {
+      if (chunk) chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+      return origWrite ? origWrite(chunk) : true;
+    };
+    res.end = function (chunk) {
+      if (chunk) chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+      try {
+        const txt = Buffer.concat(chunks).toString('utf8');
+        if (txt) captured = JSON.parse(txt);
+      } catch (_) {}
+      const r = origEnd ? origEnd(chunk) : undefined;
+      try {
+        const ok = res.statusCode >= 200 && res.statusCode < 300 && captured && !captured.error;
+        const tenantId = req.user && (req.user.tenant_id || req.user.id);
+        if (ok && tenantId) {
+          handleUsageBilling.safeTrack(supabaseRequest, {
+            tenant_id: tenantId, event_type: eventType, quantity: 1,
+            metadata: { ref_id: captured && captured.id ? captured.id : null },
+          });
+        }
+      } catch (_) {}
+      return r;
+    };
+    return orig(req, res, params);
+  };
+}
+__wrapUsageTracker('POST /api/sales',     'sale_created');
+__wrapUsageTracker('POST /api/products',  'product_added');
+__wrapUsageTracker('POST /api/customers', 'customer_added');
+
+// Login: trackea daily_login (deduplicado por dia adentro de safeTrack).
+if (typeof handlers['POST /api/login'] === 'function') {
+  const __origLoginUB = handlers['POST /api/login'];
+  handlers['POST /api/login'] = async function (req, res, params) {
+    let captured = null;
+    const chunks = [];
+    const origWrite = res.write && res.write.bind(res);
+    const origEnd   = res.end   && res.end.bind(res);
+    res.write = function (c) { if (c) chunks.push(Buffer.isBuffer(c) ? c : Buffer.from(c)); return origWrite ? origWrite(c) : true; };
+    res.end = function (c) {
+      if (c) chunks.push(Buffer.isBuffer(c) ? c : Buffer.from(c));
+      try {
+        const txt = Buffer.concat(chunks).toString('utf8');
+        if (txt) captured = JSON.parse(txt);
+      } catch (_) {}
+      const r = origEnd ? origEnd(c) : undefined;
+      try {
+        if (res.statusCode === 200 && captured && captured.user) {
+          const tid = captured.user.tenant_id || captured.user.id;
+          if (tid) {
+            handleUsageBilling.safeTrack(supabaseRequest, {
+              tenant_id: tid, event_type: 'daily_login', quantity: 1,
+              metadata: { user_id: captured.user.id || null },
+            });
+          }
+        }
+      } catch (_) {}
+      return r;
+    };
+    return __origLoginUB(req, res, params);
+  };
+  handlers['POST /api/auth/login'] = handlers['POST /api/login'];
+}
+
+// =============================================================
 // R14: WEB PUSH (VAPID)
 // =============================================================
 const VAPID_PUBLIC_KEY  = (process.env.VAPID_PUBLIC_KEY || '').trim();
@@ -13262,6 +13339,31 @@ module.exports = async (req, res) => {
       if (await __apiRateLimiter(req, res)) return;
     } catch (_) { /* limiter must never crash request handling */ }
 
+    // Usage-billing middleware: bloquea 402 si el tenant supero grace y no pago.
+    // Best-effort: nunca rompe el handler.
+    try {
+      if (!req.user) {
+        try {
+          const apiKey = req.headers['x-api-key'];
+          if (apiKey) {
+            const row = await lookupApiKey(String(apiKey).trim()).catch(() => null);
+            if (row) req.user = { id: null, role: row.scopes?.includes('admin') ? 'admin' : 'user', tenant_id: row.tenant_id, via: 'api_key' };
+          } else {
+            const auth = req.headers['authorization'] || '';
+            const m = auth.match(/^Bearer\s+(.+)$/i);
+            const tok = m ? m[1] : (parseCookies(req).volvix_token || null);
+            if (tok) {
+              const p = verifyJWT(tok);
+              if (p) req.user = { id: p.id, email: p.email, role: p.role, tenant_id: p.tenant_id, via: 'jwt' };
+            }
+          }
+        } catch (_) {}
+      }
+      if (await handleUsageBilling.middleware(req, res, {
+        supabaseRequest, getAuthUser: () => req.user,
+      })) return;
+    } catch (_) { /* middleware never crashes */ }
+
     const match = matchRoute(method, pathname);
 
     if (match) {
@@ -13297,6 +13399,10 @@ module.exports = async (req, res) => {
       if (await handleActivityFeed(req, res, parsed, _ctx)) return;
       if (await handleInventoryAdvanced(req, res, parsed, _ctx)) return;
       if (await handlePromotionsEngine(req, res, parsed, _ctx)) return;
+      if (await handleUsageBilling(req, res, parsed, {
+        supabaseRequest, sendJson, sendJSON, sendError, requireAuth,
+        getAuthUser: () => req.user, IS_PROD,
+      })) return;
     } catch (modErr) {
       METRICS.errorCount++;
       logRequest({ ts: new Date().toISOString(), level: 'error', path: pathname, method, msg: 'module handler threw', err: IS_PROD ? 'internal' : String(modErr && modErr.message || modErr) });

@@ -738,6 +738,44 @@
 
   <!-- MAIN -->
   <main class="main">
+    <!-- Usage-billing banner (auto-mostrado si requires_payment) -->
+    <div id="vlx-billing-banner" style="display:none;padding:14px 22px;border-bottom:1px solid var(--border);background:linear-gradient(90deg,rgba(245,158,11,.18),rgba(239,68,68,.18))">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div style="font-size:13px"><b id="vlx-bb-title">Has alcanzado tu uso del mes.</b> <span id="vlx-bb-msg" style="opacity:.85"></span></div>
+        <div style="display:flex;gap:8px">
+          <button id="vlx-bb-pay" class="btn primary" style="padding:8px 14px;font-size:12px;border-radius:6px;cursor:pointer;border:0;background:#6366f1;color:#fff">Pagar ahora</button>
+          <button id="vlx-bb-close" class="btn" style="padding:8px 12px;font-size:12px;border-radius:6px;cursor:pointer;border:1px solid #d1d5db;background:transparent;color:inherit">Más tarde</button>
+        </div>
+      </div>
+    </div>
+    <script>
+    (function(){
+      try {
+        var tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
+        if (!tok) return;
+        if (sessionStorage.getItem('vlx_bb_dismissed') === '1') return;
+        fetch('/api/billing/check-limits', { headers: { Authorization: 'Bearer ' + tok }})
+          .then(function(r){ return r.json(); })
+          .then(function(j){
+            if (!j) return;
+            if (!j.requires_payment && !j.blocked) return;
+            var b = document.getElementById('vlx-billing-banner');
+            var msg = j.soft_warning || j.message || '';
+            if (j.amount_due) msg += ' Adeudo: $' + j.amount_due;
+            document.getElementById('vlx-bb-msg').textContent = msg;
+            b.style.display = '';
+            document.getElementById('vlx-bb-pay').onclick = function(){
+              window.location.href = j.cta_url || '/billing/payment-required.html';
+            };
+            document.getElementById('vlx-bb-close').onclick = function(){
+              sessionStorage.setItem('vlx_bb_dismissed','1');
+              b.style.display = 'none';
+            };
+          })
+          .catch(function(){});
+      } catch(_){}
+    })();
+    </script>
     <div class="topbar">
       <div>
         <div class="page-title" id="page-title">Overview</div>
