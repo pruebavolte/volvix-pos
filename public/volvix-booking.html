@@ -264,8 +264,14 @@ async function confirmar() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    const data = await r.json();
-    if (!r.ok) throw new Error(data.error || 'Error');
+    if (r.status === 401 || r.status === 403) {
+      throw new Error('El widget de reservación pública aún no está habilitado para este negocio. Contacta al establecimiento.');
+    }
+    if (r.status === 503) {
+      throw new Error('Servicio de reservaciones no configurado.');
+    }
+    const data = await r.json().catch(()=>({}));
+    if (!r.ok) throw new Error(data.error || data.message || 'Error');
 
     $('conf-details').innerHTML = `
       <div><strong>Servicio:</strong> ${state.service.name}</div>

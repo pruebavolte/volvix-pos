@@ -1140,6 +1140,32 @@
     }, 1800);
   }
 
+  async function _postLead(payload) {
+    try {
+      const res = await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (res.status === 503) {
+        if (window.VolvixUI) VolvixUI.toast({type:'warning', message:'Servicio de leads no configurado. Intenta más tarde.'});
+        return false;
+      }
+      if (res.status === 429) {
+        if (window.VolvixUI) VolvixUI.toast({type:'warning', message:'Demasiadas solicitudes. Espera un momento.'});
+        return false;
+      }
+      if (!res.ok) {
+        if (window.VolvixUI) VolvixUI.toast({type:'error', message:'No se pudo enviar la solicitud.'});
+        return false;
+      }
+      return true;
+    } catch (e) {
+      if (window.VolvixUI) VolvixUI.toast({type:'error', message:'Error de red. Reintenta.'});
+      return false;
+    }
+  }
+
   async function requestDemo(giroKey) {
     if(window.VolvixUI && typeof window.VolvixUI.form==='function'){
       const r = await window.VolvixUI.form({
@@ -1164,10 +1190,22 @@
         submitText: 'Enviar solicitud'
       });
       if(!r) return;
-      VolvixUI.toast({type:'success', message:'✓ Solicitud enviada. Un asesor te contactará en breve.'});
+      const ok = await _postLead({
+        name: r.nombre || '',
+        email: r.email || '',
+        phone: r.tel || '',
+        giro: giroKey || '',
+        message: 'Demo request · ' + (r.empresa||'') + ' · RFC:' + (r.rfc||'-') + ' · CP:' + (r.cp||'-') + ' · Sucursales:' + (r.sucursales||'-') + ' · ' + (r.notas||''),
+        source: 'marketplace-demo',
+      });
+      if (ok) VolvixUI.toast({type:'success', message:'✓ Solicitud enviada. Un asesor te contactará en breve.'});
       return;
     }
-    VolvixUI.toast({type:'info', message:'Un asesor te contactará en breve.'});
+    // Fallback sin VolvixUI: prompt mínimo
+    const email = (window.prompt('Tu correo para que te contacte un asesor:') || '').trim();
+    if (!email) return;
+    const ok = await _postLead({ email, giro: giroKey, source: 'marketplace-demo-fallback', message: 'Demo request' });
+    if (ok && window.VolvixUI) VolvixUI.toast({type:'info', message:'Un asesor te contactará en breve.'});
   }
 
   function capitalize(s) {

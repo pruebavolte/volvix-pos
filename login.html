@@ -413,9 +413,13 @@ async function handleLogin(event) {
       body: JSON.stringify({ email, password }),
     });
 
+    if (response.status === 503) {
+      throw new Error('Servicio de autenticación no configurado. Contacta soporte.');
+    }
     if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.error || 'Error al iniciar sesión');
+      let err = {};
+      try { err = await response.json(); } catch (e) {}
+      throw new Error(err.error || err.message || 'Error al iniciar sesión');
     }
 
     const result = await response.json();
@@ -426,12 +430,16 @@ async function handleLogin(event) {
     // Guardar sesión (legacy)
     localStorage.setItem('volvixSession', JSON.stringify(result.session));
 
-    // Guardar JWT Bearer token (R13 hardening)
+    // Guardar JWT Bearer token (R13 hardening) — keys consistentes con checkExistingSession
     const jwt = result.token || (result.session && result.session.token) || null;
-    if (jwt && window.Volvix && window.Volvix.auth) {
-      window.Volvix.auth.saveToken(jwt);
-    } else if (jwt) {
-      try { localStorage.setItem('volvixAuthToken', jwt); } catch (e) {}
+    if (jwt) {
+      try {
+        localStorage.setItem('volvix_token', jwt);
+        localStorage.setItem('volvixAuthToken', jwt); // legacy back-compat
+      } catch (e) {}
+      if (window.Volvix && window.Volvix.auth && typeof window.Volvix.auth.saveToken === 'function') {
+        try { window.Volvix.auth.saveToken(jwt); } catch (e) {}
+      }
     }
 
     showAlert('¡Bienvenido!', 'success');

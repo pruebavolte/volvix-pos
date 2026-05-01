@@ -2386,7 +2386,10 @@ renderMenu();
   async function refreshStats(){
     if (!navigator.onLine || !getTok()) return;
     try {
-      var r = await fetch('/api/reports/today-stats', { headers: authHeaders() });
+      // Endpoint real: /api/dashboard/today (devuelve {total_sales, items_sold, tickets_count, ...})
+      var r = await fetch('/api/dashboard/today', { headers: authHeaders() });
+      if (r.status === 401) { /* token inválido — el flujo principal redirigirá */ return; }
+      if (r.status === 503) { return; }
       if (!r.ok) throw new Error('HTTP '+r.status);
       var d = await r.json();
       var ventas = d.total_sales ?? d.ventas ?? d.total ?? 0;

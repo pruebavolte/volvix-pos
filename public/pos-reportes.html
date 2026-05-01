@@ -513,7 +513,21 @@ async function exportarPDF() {
   });
   try {
     const headers = window.volvix?.session?.getAuthHeaders?.() || {};
+    // Asegurar Authorization Bearer si tenemos token
+    try {
+      const tk = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+      if (tk && !headers.Authorization && !headers.authorization) headers.Authorization = 'Bearer ' + tk;
+    } catch (_) {}
     const resp = await fetch('/api/reports/sales/pdf?' + params.toString(), { headers });
+    if (resp.status === 401) {
+      toast('Sesión expirada. Redirigiendo a login…', 'warn');
+      setTimeout(() => location.replace('/login.html?redirect=' + encodeURIComponent(location.pathname)), 800);
+      return;
+    }
+    if (resp.status === 503) {
+      toast('Reportes no configurados (PDF). Contacta soporte.', 'warn');
+      return;
+    }
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const blob = await resp.blob();
     const url  = URL.createObjectURL(blob);

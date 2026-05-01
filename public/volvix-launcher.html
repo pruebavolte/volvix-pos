@@ -467,10 +467,30 @@
     window.VolvixAuth.getUser = readUser;
 
     function logout() {
+      // Best-effort: invalidar token en backend
       try {
-        localStorage.removeItem('volvix_token');
-        localStorage.removeItem('volvixAuthToken');
-        localStorage.removeItem('volvixSession');
+        var tk = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+        if (tk) {
+          fetch('/api/logout', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + tk, 'Content-Type': 'application/json' },
+            credentials: 'include'
+          }).catch(function(){});
+        }
+      } catch (_) {}
+      // Limpiar TODO el localStorage volvix_* / Volvix* / vlx-* (sesión + UI state)
+      try {
+        var toRemove = [];
+        for (var i = 0; i < localStorage.length; i++) {
+          var k = localStorage.key(i);
+          if (!k) continue;
+          if (k.indexOf('volvix_') === 0 || k.indexOf('volvix:') === 0 ||
+              k.indexOf('volvixSession') === 0 || k.indexOf('volvixAuth') === 0 ||
+              k.indexOf('vlx-') === 0 || k.indexOf('vlx_') === 0) {
+            toRemove.push(k);
+          }
+        }
+        toRemove.forEach(function (k) { try { localStorage.removeItem(k); } catch(_){} });
       } catch (_) {}
       window.location.replace('/login.html');
     }

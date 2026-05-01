@@ -112,6 +112,7 @@
   function getToken() {
     try {
       return localStorage.getItem('volvix_token') ||
+             localStorage.getItem('volvixAuthToken') ||
              localStorage.getItem('auth_token') ||
              localStorage.getItem('token') || null;
     } catch (_) { return null; }
@@ -142,7 +143,23 @@
 
   fetch('/api/referrals/me', {
     headers: { 'Authorization': 'Bearer ' + token }
-  }).then(function (r) { return r.json(); })
+  }).then(function (r) {
+    if (r.status === 401) {
+      // Token expirado o inválido — limpiar y redirigir
+      try {
+        localStorage.removeItem('volvix_token');
+        localStorage.removeItem('volvixAuthToken');
+      } catch(_) {}
+      location.replace('/login.html?redirect=' + encodeURIComponent(location.pathname));
+      return Promise.reject(new Error('unauthenticated'));
+    }
+    if (r.status === 503) {
+      document.getElementById('login-warn').style.display = 'block';
+      document.getElementById('login-warn').textContent = 'Programa de referidos no configurado en este momento.';
+      return Promise.reject(new Error('unavailable'));
+    }
+    return r.json();
+  })
     .then(function (j) {
       if (!j || !j.ok) {
         document.getElementById('login-warn').style.display = 'block';

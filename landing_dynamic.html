@@ -780,7 +780,7 @@
         <ul class="price-feats">
           ${p.features.map(f => `<li>${f}</li>`).join('')}
         </ul>
-        <button class="price-cta">${i === 1 ? 'Elegir ' + p.plan : 'Empezar con ' + p.plan}</button>
+        <a class="price-cta" href="/registro.html?giro=${encodeURIComponent(giro.key)}&plan=${encodeURIComponent((p.plan||'').toLowerCase())}" style="display:inline-block;text-decoration:none;text-align:center">${i === 1 ? 'Elegir ' + p.plan : 'Empezar con ' + p.plan}</a>
       </div>
     `).join('');
 
@@ -918,7 +918,7 @@
       <section class="final-cta" id="cta" style="background: linear-gradient(135deg, ${data.accent}, white);">
         <h2>Empieza hoy tu ${giro.name.toLowerCase()}</h2>
         <p>14 días gratis. Sin tarjeta. Sin contratos. Cancelas cuando quieras.</p>
-        <a href="#" class="btn-primary" style="font-size:17px;padding:18px 36px;">Crear mi cuenta gratis →</a>
+        <a href="/registro.html?giro=${encodeURIComponent(giro.key)}" class="btn-primary" style="font-size:17px;padding:18px 36px;">Crear mi cuenta gratis →</a>
       </section>
 
       <footer>
@@ -932,8 +932,8 @@
           </div>
           <div>
             <a href="marketplace.html">Otro giro</a>
-            <a href="#">Términos</a>
-            <a href="#">Privacidad</a>
+            <a href="/terminos-condiciones.html">Términos</a>
+            <a href="/aviso-privacidad.html">Privacidad</a>
           </div>
         </div>
       </footer>
@@ -941,7 +941,9 @@
   }
 
   function openDemo(giroKey) {
-    window.open('salvadorex_web_v24.html?giro=' + giroKey, '_blank');
+    // Probar ruta /public/ primero (Vercel rewrites), luego raíz como fallback
+    var dest = '/salvadorex_web_v25.html?giro=' + encodeURIComponent(giroKey || '');
+    window.open(dest, '_blank');
   }
 
   function renderNotFound(key) {

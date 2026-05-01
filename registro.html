@@ -801,12 +801,33 @@
     });
   }
 
+  // ---------- Preseleccion de giro desde landings (?giro=X o legacy ?vertical=X) ----------
+  function preselectGiroFromUrl() {
+    try {
+      var params = new URLSearchParams(location.search);
+      var g = params.get('giro') || params.get('vertical') || '';
+      if (!g) return;
+      var sel = $('#business_type');
+      if (!sel) return;
+      var key = String(g).trim().toLowerCase();
+      // Match exacto o por prefijo
+      for (var i = 0; i < sel.options.length; i++) {
+        var v = String(sel.options[i].value || '').toLowerCase();
+        if (v && (v === key || v.indexOf(key) === 0 || key.indexOf(v) === 0)) {
+          sel.value = sel.options[i].value;
+          return;
+        }
+      }
+    } catch (e) {}
+  }
+
   // ---------- Init ----------
   document.addEventListener('DOMContentLoaded', function () {
     fillGiros();
     fillStates();
     setupOtpInputs();
     bind();
+    preselectGiroFromUrl();
     setStep(1);
   });
 })();
