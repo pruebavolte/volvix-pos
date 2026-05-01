@@ -207,6 +207,7 @@ tr:hover td{background:var(--card2)}
       <a href="#"><span class="ic">🔔</span>Alertas<span class="badge">5</span></a>
       <a href="#"><span class="ic">🗄️</span>Base de Datos</a>
       <a href="#sec-merge-branches" data-action="goto-merge-branches"><span class="ic">🔀</span>Fusionar sucursales</a>
+      <a href="#sec-tenant-control" data-action="goto-tenant-control"><span class="ic">🎛️</span>Control Cliente</a>
     </nav>
     <div class="nav-section">Configuración</div>
     <nav class="nav">
@@ -806,6 +807,78 @@ tr:hover td{background:var(--card2)}
         </div>
       </div>
 
+      <!-- ═══════════════════════════════════════════════════════════════════
+           R45 — Control granular por cliente (Super-Admin)
+           ═══════════════════════════════════════════════════════════════════ -->
+      <div class="card" id="sec-tenant-control" style="margin-bottom:24px;border:1px solid var(--primary)">
+        <h3 style="font-size:16px;margin-bottom:6px;display:flex;align-items:center;gap:8px">
+          🎛️ Control granular por cliente
+          <span style="font-size:11px;background:var(--primary);color:#fff;padding:2px 8px;border-radius:10px">SUPERADMIN</span>
+        </h3>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:14px">
+          Activa/desactiva módulos y botones específicos por tenant. Bonifica días extras, ve métricas e imita al cliente.
+        </p>
+
+        <!-- Selector de tenant -->
+        <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+          <input id="tc-tenant-search" type="text" placeholder="Buscar tenant por nombre o ID…"
+                 style="flex:1;min-width:240px;background:var(--card2);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:8px;font-size:13px">
+          <select id="tc-tenant-select" style="flex:0 1 320px;min-width:240px;background:var(--card2);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:8px;font-size:13px">
+            <option value="">— Selecciona tenant —</option>
+          </select>
+          <button class="btn btn-ghost" id="tc-reload-tenants" type="button">🔄 Recargar</button>
+        </div>
+
+        <div id="tc-empty" style="text-align:center;padding:30px;color:var(--muted);font-size:13px">
+          Selecciona un tenant para ver su control granular.
+        </div>
+
+        <div id="tc-panel" style="display:none">
+          <!-- Acciones rápidas -->
+          <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap">
+            <button class="btn btn-primary" id="tc-impersonate" type="button">👤 Probar como cliente</button>
+            <button class="btn btn-ghost" id="tc-extra-days" type="button">🎁 Bonificar días</button>
+            <button class="btn btn-ghost" id="tc-refresh-metrics" type="button">📊 Refrescar métricas</button>
+          </div>
+
+          <!-- Métricas -->
+          <div id="tc-metrics" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:18px">
+            <div class="kpi" style="padding:14px"><div class="kpi-label">Ventas (30d)</div><div class="kpi-value" id="tc-m-sales">—</div></div>
+            <div class="kpi" style="padding:14px"><div class="kpi-label">Ingresos (30d)</div><div class="kpi-value" id="tc-m-revenue">—</div></div>
+            <div class="kpi" style="padding:14px"><div class="kpi-label">Productos</div><div class="kpi-value" id="tc-m-products">—</div></div>
+            <div class="kpi" style="padding:14px"><div class="kpi-label">Clientes</div><div class="kpi-value" id="tc-m-customers">—</div></div>
+            <div class="kpi" style="padding:14px"><div class="kpi-label">Último login</div><div class="kpi-value" style="font-size:13px" id="tc-m-lastlogin">—</div></div>
+          </div>
+
+          <!-- Tabs por categoría -->
+          <div style="border-bottom:1px solid var(--border);display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap" id="tc-cat-tabs">
+            <button class="btn btn-ghost tc-cat-tab active" data-cat="pos" type="button" style="border-radius:8px 8px 0 0">🛒 POS</button>
+            <button class="btn btn-ghost tc-cat-tab" data-cat="inventory" type="button" style="border-radius:8px 8px 0 0">📦 Inventario</button>
+            <button class="btn btn-ghost tc-cat-tab" data-cat="reports" type="button" style="border-radius:8px 8px 0 0">📈 Reportes</button>
+            <button class="btn btn-ghost tc-cat-tab" data-cat="customers" type="button" style="border-radius:8px 8px 0 0">👥 Clientes</button>
+            <button class="btn btn-ghost tc-cat-tab" data-cat="settings" type="button" style="border-radius:8px 8px 0 0">⚙️ Settings</button>
+          </div>
+
+          <!-- Contenido por categoría -->
+          <div id="tc-cat-content" style="margin-bottom:20px">
+            <div style="color:var(--muted);font-size:12px">Cargando botones…</div>
+          </div>
+
+          <!-- Notas internas -->
+          <div style="margin-top:24px;padding:16px;background:var(--card2);border-radius:8px;border:1px solid var(--border)">
+            <h4 style="font-size:14px;margin-bottom:10px">📝 Notas internas</h4>
+            <textarea id="tc-note-text" placeholder="Anotación interna sobre este cliente (no visible para el tenant)…"
+                      style="width:100%;min-height:70px;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:6px;font-size:13px;font-family:inherit;resize:vertical"></textarea>
+            <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px">
+              <button class="btn btn-primary" id="tc-save-note" type="button">💾 Guardar nota</button>
+            </div>
+            <div id="tc-notes-list" style="margin-top:12px;max-height:240px;overflow-y:auto"></div>
+          </div>
+
+          <div id="tc-msg" style="margin-top:14px;display:none;padding:10px;border-radius:6px;font-size:12px"></div>
+        </div>
+      </div>
+
     </div>
 
     <footer class="footer">
@@ -1375,6 +1448,293 @@ tr:hover td{background:var(--card2)}
       if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   } catch(e){ console.warn('[admin-saas] merge UI fail', e); }
+})();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     R45 — Tenant Control wiring (Super-Admin granular)
+     ═══════════════════════════════════════════════════════════════════ -->
+<script>
+(function tenantControlWiring(){
+  function tk(){ return localStorage.getItem('volvix_token')||localStorage.getItem('volvixAuthToken')||''; }
+  var t = tk();
+  if (!t) return;
+  var headers = { 'Authorization':'Bearer '+t, 'Content-Type':'application/json' };
+
+  var elSel = document.getElementById('tc-tenant-select');
+  var elSearch = document.getElementById('tc-tenant-search');
+  var elReload = document.getElementById('tc-reload-tenants');
+  var elEmpty = document.getElementById('tc-empty');
+  var elPanel = document.getElementById('tc-panel');
+  var elContent = document.getElementById('tc-cat-content');
+  var elTabs = document.querySelectorAll('.tc-cat-tab');
+  var elMsg = document.getElementById('tc-msg');
+  if (!elSel) return;
+
+  var state = { tenantId:'', catalog:null, overrides:{}, modules:{}, currentCat:'pos', tenants:[] };
+
+  function showMsg(text, kind){
+    if (!elMsg) return;
+    elMsg.style.display = 'block';
+    elMsg.style.background = kind==='ok' ? 'rgba(16,185,129,.12)' : (kind==='error' ? 'rgba(239,68,68,.12)' : 'rgba(99,102,241,.12)');
+    elMsg.style.color = kind==='ok' ? 'var(--success)' : (kind==='error' ? 'var(--danger)' : 'var(--text)');
+    elMsg.textContent = text;
+    setTimeout(function(){ elMsg.style.display='none'; }, 4500);
+  }
+
+  function fmt$(n){ return '$'+Number(n||0).toLocaleString('es-MX', {maximumFractionDigits:2}); }
+  function fmtDate(s){ try { return new Date(s).toLocaleString('es-MX'); } catch(_){ return '—'; } }
+
+  // ── Cargar tenants ───────────────────────────────────────────────────────
+  async function loadTenants(){
+    elSel.innerHTML = '<option value="">— Cargando… —</option>';
+    try {
+      var r = await fetch('/api/tenant/list', { headers, credentials:'include' });
+      if (!r.ok) throw new Error('list '+r.status);
+      var rows = await r.json();
+      state.tenants = Array.isArray(rows) ? rows : (rows.tenants||rows.items||[]);
+      renderTenantOptions(state.tenants);
+    } catch(e){
+      elSel.innerHTML = '<option value="">— Error cargando tenants —</option>';
+      showMsg('Error cargando tenants: '+(e.message||'desconocido'), 'error');
+    }
+  }
+
+  function renderTenantOptions(arr){
+    elSel.innerHTML = '<option value="">— Selecciona tenant ('+arr.length+') —</option>';
+    arr.forEach(function(tn){
+      var opt = document.createElement('option');
+      opt.value = tn.id;
+      opt.textContent = (tn.name || tn.id) + (tn.plan ? ' · '+tn.plan : '');
+      elSel.appendChild(opt);
+    });
+  }
+
+  if (elSearch) {
+    elSearch.addEventListener('input', function(){
+      var q = (elSearch.value||'').toLowerCase().trim();
+      if (!q) { renderTenantOptions(state.tenants); return; }
+      var filtered = state.tenants.filter(function(tn){
+        return (tn.name||'').toLowerCase().indexOf(q)>=0 || String(tn.id||'').toLowerCase().indexOf(q)>=0;
+      });
+      renderTenantOptions(filtered);
+    });
+  }
+  if (elReload) elReload.addEventListener('click', loadTenants);
+
+  // ── Cuando cambia tenant ─────────────────────────────────────────────────
+  elSel.addEventListener('change', async function(){
+    var tid = elSel.value;
+    state.tenantId = tid;
+    if (!tid) { elPanel.style.display='none'; elEmpty.style.display='block'; return; }
+    elEmpty.style.display='none';
+    elPanel.style.display='block';
+    await Promise.all([loadButtons(), loadModules(), loadMetrics(), loadNotes()]);
+    renderCategory(state.currentCat);
+  });
+
+  // ── Botones ──────────────────────────────────────────────────────────────
+  async function loadButtons(){
+    try {
+      var r = await fetch('/api/admin/tenant/'+encodeURIComponent(state.tenantId)+'/buttons', { headers, credentials:'include' });
+      if (!r.ok) throw new Error('buttons '+r.status);
+      var j = await r.json();
+      state.catalog = j.catalog || {};
+      state.overrides = j.overrides || {};
+    } catch(e){ showMsg('Error cargando botones: '+e.message, 'error'); }
+  }
+
+  async function loadModules(){
+    try {
+      var r = await fetch('/api/admin/tenant/'+encodeURIComponent(state.tenantId)+'/modules', { headers, credentials:'include' });
+      if (!r.ok) throw new Error('modules '+r.status);
+      var j = await r.json();
+      state.modules = {};
+      (j.modules||[]).forEach(function(m){ state.modules[m.module_key] = m.active !== false; });
+    } catch(e){ /* opcional, módulos pueden no existir */ }
+  }
+
+  // ── Render por categoría ─────────────────────────────────────────────────
+  function renderCategory(cat){
+    state.currentCat = cat;
+    elTabs.forEach(function(t){ t.classList.toggle('active', t.getAttribute('data-cat')===cat); });
+    if (!state.catalog) { elContent.innerHTML = '<div style="color:var(--muted)">Sin datos</div>'; return; }
+    var btns = state.catalog[cat] || [];
+    if (!btns.length) { elContent.innerHTML = '<div style="color:var(--muted);font-size:12px">Sin botones para esta categoría.</div>'; return; }
+
+    var html = '<div style="display:grid;gap:8px">';
+    // Sección módulo (toggle del módulo entero)
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--card2);border-radius:6px;border-left:3px solid var(--primary)">'+
+            '<div><b style="font-size:13px">Módulo: '+cat+'</b><div style="font-size:11px;color:var(--muted)">Activa/desactiva el módulo completo</div></div>'+
+            '<label style="display:flex;align-items:center;gap:8px;cursor:pointer">'+
+            '<input type="checkbox" data-module-toggle="'+cat+'" '+(state.modules[cat]!==false?'checked':'')+'>'+
+            '<span style="font-size:12px">Activo</span></label></div>';
+    // Botones
+    btns.forEach(function(b){
+      var ov = state.overrides[b] || {};
+      var enabled = ov.is_enabled !== false; // default true
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--card2);border-radius:6px">'+
+              '<div style="flex:1;min-width:0">'+
+                '<b style="font-size:13px;font-family:monospace">'+b+'</b>'+
+                (ov.reason ? '<div style="font-size:11px;color:var(--muted);margin-top:2px">📝 '+escapeHtml(ov.reason)+'</div>' : '')+
+              '</div>'+
+              '<label style="display:flex;align-items:center;gap:8px;cursor:pointer">'+
+                '<input type="checkbox" data-button-toggle="'+b+'" '+(enabled?'checked':'')+'>'+
+                '<span style="font-size:12px;color:'+(enabled?'var(--success)':'var(--danger)')+'">'+(enabled?'Activo':'Bloqueado')+'</span>'+
+              '</label></div>';
+    });
+    html += '</div>';
+    elContent.innerHTML = html;
+
+    // Wire toggles
+    elContent.querySelectorAll('[data-button-toggle]').forEach(function(cb){
+      cb.addEventListener('change', async function(){
+        var btn = cb.getAttribute('data-button-toggle');
+        var isEnabled = cb.checked;
+        var reason = isEnabled ? '' : (prompt('Razón del bloqueo (opcional, máx 500 chars):', '') || '');
+        try {
+          var r = await fetch('/api/admin/tenant/'+encodeURIComponent(state.tenantId)+'/buttons/'+encodeURIComponent(btn)+'/toggle', {
+            method:'POST', headers, credentials:'include',
+            body: JSON.stringify({ is_enabled: isEnabled, reason: reason })
+          });
+          if (!r.ok) throw new Error('toggle '+r.status);
+          state.overrides[btn] = { is_enabled: isEnabled, reason: reason };
+          showMsg('Botón '+btn+' '+(isEnabled?'activado':'bloqueado'), 'ok');
+          renderCategory(state.currentCat);
+        } catch(e){ showMsg('Error: '+e.message, 'error'); cb.checked = !isEnabled; }
+      });
+    });
+    elContent.querySelectorAll('[data-module-toggle]').forEach(function(cb){
+      cb.addEventListener('change', async function(){
+        var mod = cb.getAttribute('data-module-toggle');
+        var active = cb.checked;
+        try {
+          var r = await fetch('/api/admin/tenant/'+encodeURIComponent(state.tenantId)+'/modules/'+encodeURIComponent(mod)+'/toggle', {
+            method:'POST', headers, credentials:'include', body: JSON.stringify({ active: active })
+          });
+          if (!r.ok) throw new Error('mod '+r.status);
+          state.modules[mod] = active;
+          showMsg('Módulo '+mod+' '+(active?'activado':'desactivado'), 'ok');
+        } catch(e){ showMsg('Error: '+e.message, 'error'); cb.checked = !active; }
+      });
+    });
+  }
+
+  function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  }); }
+
+  elTabs.forEach(function(tab){
+    tab.addEventListener('click', function(){
+      var cat = tab.getAttribute('data-cat');
+      renderCategory(cat);
+    });
+  });
+
+  // ── Métricas ─────────────────────────────────────────────────────────────
+  async function loadMetrics(){
+    try {
+      var r = await fetch('/api/admin/tenant/'+encodeURIComponent(state.tenantId)+'/metrics', { headers, credentials:'include' });
+      if (!r.ok) throw new Error('metrics '+r.status);
+      var j = await r.json();
+      var m = j.metrics || {};
+      var s = function(id, v){ var e=document.getElementById(id); if (e) e.textContent = (v==null||v==='')?'—':v; };
+      s('tc-m-sales', m.sales_count);
+      s('tc-m-revenue', fmt$(m.revenue_30d));
+      s('tc-m-products', m.products_count);
+      s('tc-m-customers', m.customers_count);
+      s('tc-m-lastlogin', m.last_login ? fmtDate(m.last_login) : 'Nunca');
+    } catch(e){ /* metrics opcionales */ }
+  }
+  document.getElementById('tc-refresh-metrics').addEventListener('click', loadMetrics);
+
+  // ── Impersonate ──────────────────────────────────────────────────────────
+  document.getElementById('tc-impersonate').addEventListener('click', async function(){
+    if (!state.tenantId) return;
+    var tn = state.tenants.find(function(x){ return x.id === state.tenantId; }) || {};
+    var reason = prompt('Razón para imitar al cliente "'+(tn.name||state.tenantId)+'" (queda auditado):', 'Soporte / Debug');
+    if (reason == null) return;
+    try {
+      var r = await fetch('/api/admin/tenant/'+encodeURIComponent(state.tenantId)+'/impersonate', {
+        method:'POST', headers, credentials:'include', body: JSON.stringify({ reason: reason })
+      });
+      if (!r.ok) throw new Error('impersonate '+r.status);
+      var j = await r.json();
+      if (!j.token) throw new Error('no token');
+      // Guardar token en sessionStorage del nuevo tab usando un hash temporal
+      var stash = 'vlx_imp_'+Date.now();
+      try { sessionStorage.setItem(stash, j.token); } catch(_){}
+      var url = (j.launcher_url || '/volvix-launcher.html?impersonate=1') + '&stash='+encodeURIComponent(stash);
+      // Pasar token en hash (no query) para que el launcher lo capture y lo meta a localStorage
+      url += '#token='+encodeURIComponent(j.token);
+      var w = window.open(url, '_blank');
+      if (!w) { prompt('Popup bloqueado. Copia este token y pégalo manualmente:', j.token); }
+      else showMsg('Impersonando "'+(tn.name||state.tenantId)+'" durante '+Math.round(j.expires_in/60)+' min', 'ok');
+    } catch(e){ showMsg('Error impersonate: '+e.message, 'error'); }
+  });
+
+  // ── Bonificar días extras (delegamos a /api/billing/extend-days existente) ──
+  document.getElementById('tc-extra-days').addEventListener('click', async function(){
+    if (!state.tenantId) return;
+    var days = prompt('¿Cuántos días extras bonificar?', '7');
+    if (!days) return;
+    var n = parseInt(days, 10);
+    if (!Number.isFinite(n) || n <= 0 || n > 365) { showMsg('Días inválidos (1-365)', 'error'); return; }
+    var reason = prompt('Razón de la bonificación:', 'Bonificación admin');
+    try {
+      var r = await fetch('/api/billing/extend-days', {
+        method:'POST', headers, credentials:'include',
+        body: JSON.stringify({ tenant_id: state.tenantId, days: n, reason: reason || null })
+      });
+      if (!r.ok) throw new Error('extend '+r.status);
+      showMsg('+'+n+' días bonificados al tenant', 'ok');
+    } catch(e){ showMsg('Error bonificación: '+e.message, 'error'); }
+  });
+
+  // ── Notas ────────────────────────────────────────────────────────────────
+  async function loadNotes(){
+    try {
+      var r = await fetch('/api/admin/tenant/'+encodeURIComponent(state.tenantId)+'/notes', { headers, credentials:'include' });
+      if (!r.ok) throw new Error('notes '+r.status);
+      var j = await r.json();
+      var list = document.getElementById('tc-notes-list');
+      if (!list) return;
+      var arr = j.notes || [];
+      if (!arr.length) { list.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:8px">Sin notas aún.</div>'; return; }
+      list.innerHTML = arr.map(function(n){
+        return '<div style="padding:8px 10px;background:var(--bg2);border-radius:6px;margin-bottom:6px;border-left:2px solid var(--info)">'+
+                 '<div style="font-size:12px;white-space:pre-wrap">'+escapeHtml(n.note)+'</div>'+
+                 '<div style="font-size:10px;color:var(--muted);margin-top:4px">'+escapeHtml(n.author_name||'admin')+' · '+fmtDate(n.created_at)+'</div>'+
+               '</div>';
+      }).join('');
+    } catch(e){ /* opcional */ }
+  }
+  document.getElementById('tc-save-note').addEventListener('click', async function(){
+    var ta = document.getElementById('tc-note-text');
+    if (!ta || !state.tenantId) return;
+    var note = (ta.value||'').trim();
+    if (!note) { showMsg('Escribe una nota primero', 'error'); return; }
+    try {
+      var r = await fetch('/api/admin/tenant/'+encodeURIComponent(state.tenantId)+'/note', {
+        method:'POST', headers, credentials:'include', body: JSON.stringify({ note: note })
+      });
+      if (!r.ok) throw new Error('note '+r.status);
+      ta.value = '';
+      showMsg('Nota guardada', 'ok');
+      loadNotes();
+    } catch(e){ showMsg('Error: '+e.message, 'error'); }
+  });
+
+  // Nav anchor
+  var navTC = document.querySelector('[data-action="goto-tenant-control"]');
+  if (navTC) navTC.addEventListener('click', function(ev){
+    ev.preventDefault();
+    var sec = document.getElementById('sec-tenant-control');
+    if (sec) sec.scrollIntoView({ behavior:'smooth', block:'start' });
+  });
+
+  // Init
+  loadTenants();
 })();
 </script>
   <script defer src="auth-helper.js"></script>

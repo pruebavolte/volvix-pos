@@ -33057,3 +33057,312 @@ if (process.env.NODE_ENV === 'test') {
 
 })();
 
+// =============================================================
+// R45 — Tenant Button & Module Control (Super-Admin granular)
+// =============================================================
+// Tabla: tenant_button_overrides   (migrations/r45-tenant-button-control.sql)
+// Tabla: tenant_admin_notes
+// Tabla: tenant_impersonation_log
+//
+// Endpoints:
+//   GET  /api/admin/tenant/:id/modules
+//   POST /api/admin/tenant/:id/modules/:module_id/toggle
+//   GET  /api/admin/tenant/:id/buttons
+//   POST /api/admin/tenant/:id/buttons/:button_id/toggle
+//   POST /api/admin/tenant/:id/impersonate
+//   GET  /api/admin/tenant/:id/metrics
+//   GET  /api/admin/tenant/:id/notes
+//   POST /api/admin/tenant/:id/note
+//   GET  /api/admin/buttons/catalog          (lista CONTROLLABLE_BUTTONS)
+//   GET  /api/tenant/buttons/active          (público para usuarios authenticated del tenant)
+// =============================================================
+(function attachR45TenantControl() {
+  // Lista canónica de botones controlables (single source of truth FE↔BE)
+  const CONTROLLABLE_BUTTONS = {
+    pos: [
+      'F12_cobrar', 'F10_buscar', 'F7_entradas', 'F8_salidas',
+      'F5_cambiar_precio', 'F6_pendiente', 'F9_verificador',
+      'F11_mayoreo', 'descuento', 'devolucion', 'cancelar_venta',
+      'art_comun', 'ins_varios', 'panel_catalogo', 'catalogo_visual',
+      'granel', 'recargas_btn', 'servicios_btn', 'calculadora',
+    ],
+    inventory: [
+      'agregar_producto', 'editar_producto', 'borrar_producto',
+      'importar_csv', 'exportar', 'bulk_update',
+    ],
+    reports: [
+      'exportar_pdf', 'exportar_csv', 'reporte_ventas', 'reporte_inventario',
+    ],
+    customers: [
+      'agregar_cliente', 'editar_cliente', 'historial_compras',
+    ],
+    settings: [
+      'cambiar_logo', 'configurar_impuestos', 'invitar_usuarios',
+    ],
+  };
+
+  // Helper: solo super-admin
+  function requireSuper(req, res) {
+    if (!req.user || req.user.role !== 'superadmin') {
+      sendJSON(res, { error: 'forbidden', reason: 'superadmin_required' }, 403);
+      return false;
+    }
+    return true;
+  }
+
+  // ── GET /api/admin/buttons/catalog ─────────────────────────────────────────
+  handlers['GET /api/admin/buttons/catalog'] = requireAuth(async function (req, res) {
+    if (!requireSuper(req, res)) return;
+    sendJSON(res, { ok: true, catalog: CONTROLLABLE_BUTTONS });
+  });
+
+  // ── GET /api/admin/tenant/:id/modules ──────────────────────────────────────
+  handlers['GET /api/admin/tenant/:id/modules'] = requireAuth(async function (req, res, params) {
+    if (!requireSuper(req, res)) return;
+    try {
+      const tid = String(params.id || '').trim();
+      if (!tid) return sendJSON(res, { error: 'tenant_id required' }, 400);
+      const rows = await supabaseRequest('GET',
+        `/pos_tenant_modules?tenant_id=eq.${encodeURIComponent(tid)}&select=module_key,active,updated_at`
+      ).catch(() => []);
+      sendJSON(res, { ok: true, tenant_id: tid, modules: Array.isArray(rows) ? rows : [] });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // ── POST /api/admin/tenant/:id/modules/:module_id/toggle ───────────────────
+  handlers['POST /api/admin/tenant/:id/modules/:module_id/toggle'] = requireAuth(async function (req, res, params) {
+    if (!requireSuper(req, res)) return;
+    try {
+      const tid = String(params.id || '').trim();
+      const mod = String(params.module_id || '').trim();
+      if (!tid || !mod) return sendJSON(res, { error: 'tenant_id and module_id required' }, 400);
+      const body = await readBody(req).catch(() => ({}));
+      const active = body && body.active !== undefined ? !!body.active : true;
+      const nowIso = new Date().toISOString();
+
+      // Upsert: try PATCH; if 0 rows touched, INSERT
+      const existing = await supabaseRequest('GET',
+        `/pos_tenant_modules?tenant_id=eq.${encodeURIComponent(tid)}&module_key=eq.${encodeURIComponent(mod)}&select=module_key`
+      ).catch(() => []);
+      if (Array.isArray(existing) && existing.length) {
+        await supabaseRequest('PATCH',
+          `/pos_tenant_modules?tenant_id=eq.${encodeURIComponent(tid)}&module_key=eq.${encodeURIComponent(mod)}`,
+          { active, updated_at: nowIso }
+        ).catch(() => {});
+      } else {
+        await supabaseRequest('POST', '/pos_tenant_modules',
+          { tenant_id: tid, module_key: mod, active, updated_at: nowIso }
+        ).catch(() => {});
+      }
+      sendJSON(res, { ok: true, tenant_id: tid, module_id: mod, active });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // ── GET /api/admin/tenant/:id/buttons ──────────────────────────────────────
+  handlers['GET /api/admin/tenant/:id/buttons'] = requireAuth(async function (req, res, params) {
+    if (!requireSuper(req, res)) return;
+    try {
+      const tid = String(params.id || '').trim();
+      if (!tid) return sendJSON(res, { error: 'tenant_id required' }, 400);
+      const rows = await supabaseRequest('GET',
+        `/tenant_button_overrides?tenant_id=eq.${encodeURIComponent(tid)}&select=button_id,is_enabled,reason,updated_at`
+      ).catch(() => []);
+      const overrides = {};
+      (Array.isArray(rows) ? rows : []).forEach(r => {
+        overrides[r.button_id] = {
+          is_enabled: r.is_enabled !== false,
+          reason: r.reason || null,
+          updated_at: r.updated_at || null,
+        };
+      });
+      sendJSON(res, { ok: true, tenant_id: tid, catalog: CONTROLLABLE_BUTTONS, overrides });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // ── POST /api/admin/tenant/:id/buttons/:button_id/toggle ───────────────────
+  handlers['POST /api/admin/tenant/:id/buttons/:button_id/toggle'] = requireAuth(async function (req, res, params) {
+    if (!requireSuper(req, res)) return;
+    try {
+      const tid = String(params.id || '').trim();
+      const btn = String(params.button_id || '').trim();
+      if (!tid || !btn) return sendJSON(res, { error: 'tenant_id and button_id required' }, 400);
+
+      // Validar contra catálogo (no permitir IDs arbitrarios)
+      const allKnown = Object.values(CONTROLLABLE_BUTTONS).reduce((a, x) => a.concat(x), []);
+      if (!allKnown.includes(btn)) {
+        return sendJSON(res, { error: 'unknown_button', button_id: btn, hint: 'GET /api/admin/buttons/catalog' }, 400);
+      }
+
+      const body = await readBody(req).catch(() => ({}));
+      const isEnabled = body && body.is_enabled !== undefined ? !!body.is_enabled : false;
+      const reason = body && body.reason ? String(body.reason).slice(0, 500) : null;
+      const nowIso = new Date().toISOString();
+      const setBy = req.user && req.user.id ? req.user.id : null;
+
+      const existing = await supabaseRequest('GET',
+        `/tenant_button_overrides?tenant_id=eq.${encodeURIComponent(tid)}&button_id=eq.${encodeURIComponent(btn)}&select=id`
+      ).catch(() => []);
+      if (Array.isArray(existing) && existing.length) {
+        await supabaseRequest('PATCH',
+          `/tenant_button_overrides?tenant_id=eq.${encodeURIComponent(tid)}&button_id=eq.${encodeURIComponent(btn)}`,
+          { is_enabled: isEnabled, reason, set_by: setBy, updated_at: nowIso }
+        ).catch(() => {});
+      } else {
+        await supabaseRequest('POST', '/tenant_button_overrides',
+          { tenant_id: tid, button_id: btn, is_enabled: isEnabled, reason, set_by: setBy, updated_at: nowIso }
+        ).catch(() => {});
+      }
+      sendJSON(res, { ok: true, tenant_id: tid, button_id: btn, is_enabled: isEnabled, reason });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // ── GET /api/tenant/buttons/active (PÚBLICO para users authenticated del tenant) ──
+  // Usuario normal pide "qué botones tengo deshabilitados". Solo lee SU tenant.
+  handlers['GET /api/tenant/buttons/active'] = requireAuth(async function (req, res) {
+    try {
+      const tid = req.user && req.user.tenant_id ? String(req.user.tenant_id) : '';
+      if (!tid) return sendJSON(res, { ok: true, disabled: [] });
+      const rows = await supabaseRequest('GET',
+        `/tenant_button_overrides?tenant_id=eq.${encodeURIComponent(tid)}&is_enabled=eq.false&select=button_id,reason`
+      ).catch(() => []);
+      const disabled = (Array.isArray(rows) ? rows : []).map(r => r.button_id);
+      const reasons = {};
+      (Array.isArray(rows) ? rows : []).forEach(r => {
+        if (r.reason) reasons[r.button_id] = r.reason;
+      });
+      // Cache corto en cliente; super-admin toggles tardan ≤30s en propagarse.
+      res.setHeader('Cache-Control', 'private, max-age=30');
+      sendJSON(res, { ok: true, disabled, reasons });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // ── POST /api/admin/tenant/:id/impersonate ─────────────────────────────────
+  handlers['POST /api/admin/tenant/:id/impersonate'] = requireAuth(async function (req, res, params) {
+    if (!requireSuper(req, res)) return;
+    try {
+      const tid = String(params.id || '').trim();
+      if (!tid) return sendJSON(res, { error: 'tenant_id required' }, 400);
+      const body = await readBody(req).catch(() => ({}));
+      const reason = body && body.reason ? String(body.reason).slice(0, 500) : 'admin_impersonate';
+
+      // TTL corto: 30 minutos (override JWT_EXPIRES_SECONDS sólo para este token)
+      const IMPERSONATE_TTL_SEC = 30 * 60;
+      const now = Math.floor(Date.now() / 1000);
+      const jti = crypto.randomBytes(16).toString('hex');
+      const payload = {
+        id: req.user.id || null,            // mantenemos identidad del super-admin
+        email: req.user.email || null,
+        role: 'owner',                      // role efectivo: owner del tenant target
+        tenant_id: tid,
+        impersonated_by: req.user.id || null,
+        impersonated_email: req.user.email || null,
+        is_impersonation: true,
+        jti,
+        iat: now,
+        exp: now + IMPERSONATE_TTL_SEC,
+      };
+      const header = { alg: 'HS256', typ: 'JWT' };
+      const h = b64url(JSON.stringify(header));
+      const p = b64url(JSON.stringify(payload));
+      const sig = b64url(crypto.createHmac('sha256', JWT_SECRET).update(`${h}.${p}`).digest());
+      const token = `${h}.${p}.${sig}`;
+
+      // Audit
+      await supabaseRequest('POST', '/tenant_impersonation_log', {
+        super_admin_id: req.user.id || null,
+        super_admin_email: req.user.email || null,
+        tenant_id: tid,
+        reason,
+        jti,
+        expires_at: new Date((now + IMPERSONATE_TTL_SEC) * 1000).toISOString(),
+      }).catch(() => {});
+
+      sendJSON(res, {
+        ok: true,
+        token,
+        tenant_id: tid,
+        expires_in: IMPERSONATE_TTL_SEC,
+        launcher_url: `/volvix-launcher.html?impersonate=1&tenant=${encodeURIComponent(tid)}`,
+        warning: 'Token de impersonación válido 30 min. Acciones quedan auditadas.',
+      });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // ── GET /api/admin/tenant/:id/metrics ──────────────────────────────────────
+  handlers['GET /api/admin/tenant/:id/metrics'] = requireAuth(async function (req, res, params) {
+    if (!requireSuper(req, res)) return;
+    try {
+      const tid = String(params.id || '').trim();
+      if (!tid) return sendJSON(res, { error: 'tenant_id required' }, 400);
+      const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+
+      const [salesRows, productsRows, customersRows, companyRows] = await Promise.all([
+        supabaseRequest('GET',
+          `/pos_sales?company_id=eq.${encodeURIComponent(tid)}&created_at=gte.${encodeURIComponent(since)}&select=id,total,created_at&limit=5000`
+        ).catch(() => []),
+        supabaseRequest('GET',
+          `/pos_products?company_id=eq.${encodeURIComponent(tid)}&select=id&limit=5000`
+        ).catch(() => []),
+        supabaseRequest('GET',
+          `/pos_customers?company_id=eq.${encodeURIComponent(tid)}&select=id&limit=5000`
+        ).catch(() => []),
+        supabaseRequest('GET',
+          `/pos_companies?id=eq.${encodeURIComponent(tid)}&select=id,name,plan,is_active,created_at,last_login_at`
+        ).catch(() => []),
+      ]);
+
+      const sales = Array.isArray(salesRows) ? salesRows : [];
+      const totalRevenue = sales.reduce((a, s) => a + Number(s.total || 0), 0);
+      const company = Array.isArray(companyRows) && companyRows[0] ? companyRows[0] : null;
+
+      sendJSON(res, {
+        ok: true,
+        tenant_id: tid,
+        period: 'last_30_days',
+        company,
+        metrics: {
+          sales_count: sales.length,
+          revenue_30d: totalRevenue,
+          products_count: Array.isArray(productsRows) ? productsRows.length : 0,
+          customers_count: Array.isArray(customersRows) ? customersRows.length : 0,
+          last_login: company && company.last_login_at ? company.last_login_at : null,
+        },
+      });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // ── GET /api/admin/tenant/:id/notes ────────────────────────────────────────
+  handlers['GET /api/admin/tenant/:id/notes'] = requireAuth(async function (req, res, params) {
+    if (!requireSuper(req, res)) return;
+    try {
+      const tid = String(params.id || '').trim();
+      if (!tid) return sendJSON(res, { error: 'tenant_id required' }, 400);
+      const rows = await supabaseRequest('GET',
+        `/tenant_admin_notes?tenant_id=eq.${encodeURIComponent(tid)}&select=id,note,author_name,created_at&order=created_at.desc&limit=100`
+      ).catch(() => []);
+      sendJSON(res, { ok: true, tenant_id: tid, notes: Array.isArray(rows) ? rows : [] });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // ── POST /api/admin/tenant/:id/note ────────────────────────────────────────
+  handlers['POST /api/admin/tenant/:id/note'] = requireAuth(async function (req, res, params) {
+    if (!requireSuper(req, res)) return;
+    try {
+      const tid = String(params.id || '').trim();
+      if (!tid) return sendJSON(res, { error: 'tenant_id required' }, 400);
+      const body = await readBody(req).catch(() => ({}));
+      const note = body && body.note ? String(body.note).slice(0, 4000) : '';
+      if (!note.trim()) return sendJSON(res, { error: 'note required' }, 400);
+      const row = {
+        tenant_id: tid,
+        note,
+        author_id: req.user.id || null,
+        author_name: req.user.email || null,
+      };
+      const saved = await supabaseRequest('POST', '/tenant_admin_notes', row).catch(() => null);
+      sendJSON(res, { ok: true, note: saved && saved[0] ? saved[0] : row });
+    } catch (err) { sendError(res, err); }
+  });
+
+})();
+
