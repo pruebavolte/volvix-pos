@@ -408,21 +408,21 @@
     <button onclick="searchVideo()">Buscar 🔎</button>
   </div>
 
-  <div class="stats">
+  <div class="stats" aria-label="Estadísticas de la academia">
     <div class="stat">
-      <div class="stat-num">187</div>
+      <div class="stat-num" id="stat-videos">187</div>
       <div class="stat-label">Videos generados</div>
     </div>
     <div class="stat">
-      <div class="stat-num">94</div>
+      <div class="stat-num" id="stat-manuals">94</div>
       <div class="stat-label">Manuales PDF</div>
     </div>
     <div class="stat">
-      <div class="stat-num">12,486</div>
+      <div class="stat-num" id="stat-views">12,486</div>
       <div class="stat-label">Vistas este mes</div>
     </div>
     <div class="stat">
-      <div class="stat-num">$0</div>
+      <div class="stat-num" id="stat-savings">$0</div>
       <div class="stat-label">Costo de duplicados</div>
     </div>
   </div>
@@ -888,6 +888,22 @@ async function downloadCert() {
       remote.forEach(row => { if (row.lesson_id && row.completed) p[row.lesson_id] = { done: true, ts: row.ts || Date.now() }; });
       saveProgress(p);
       renderLessons();
+    }
+  } catch {}
+})();
+
+// Hidratar stats reales si el endpoint existe (best-effort, fallback a hardcoded)
+(async function syncAcademyStats() {
+  try {
+    const r = await fetch('/api/academy/stats', { headers: _vlxAuthHeaders() });
+    if (_vlxHandle401(r)) return;
+    if (!r.ok) return;
+    const d = await r.json();
+    if (d && typeof d === 'object') {
+      if (typeof d.videos === 'number') document.getElementById('stat-videos').textContent = d.videos.toLocaleString('es-MX');
+      if (typeof d.manuals === 'number') document.getElementById('stat-manuals').textContent = d.manuals.toLocaleString('es-MX');
+      if (typeof d.views_month === 'number') document.getElementById('stat-views').textContent = d.views_month.toLocaleString('es-MX');
+      if (typeof d.savings_usd === 'number') document.getElementById('stat-savings').textContent = '$' + d.savings_usd.toLocaleString('es-MX');
     }
   } catch {}
 })();

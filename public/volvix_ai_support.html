@@ -748,9 +748,9 @@
         </div>
       </div>
       <div class="th-actions">
-        <button class="tb-btn">📞 Llamar</button>
-        <button class="tb-btn">📜 Ver historial</button>
-        <button class="tb-btn">👤 Escalar a humano</button>
+        <button class="tb-btn" onclick="vlxCallContact()" aria-label="Llamar al cliente">📞 Llamar</button>
+        <button class="tb-btn" onclick="vlxViewHistory()" aria-label="Ver historial del cliente">📜 Ver historial</button>
+        <button class="tb-btn" id="vlx-escalate-btn" onclick="vlxEscalateToHuman()" aria-label="Escalar este ticket a un agente humano">👤 Escalar a humano</button>
       </div>
     </div>
 
@@ -1148,6 +1148,69 @@ function vlxCheckProvider() {
 vlxLoadTheme();
 vlxLoadHistory();
 vlxCheckProvider();
+
+// =====================================================
+// ESCALATE TO HUMAN — POST /api/tickets with full context
+// =====================================================
+function _vlxSupTok(){ try { return localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || ''; } catch(_){ return ''; } }
+function _vlxSupHeaders(){ const h = { 'Content-Type':'application/json' }; const t = _vlxSupTok(); if (t) h['Authorization'] = 'Bearer ' + t; return h; }
+
+async function vlxEscalateToHuman(){
+  const btn = document.getElementById('vlx-escalate-btn');
+  if (!btn) return;
+  if (btn.dataset.escalated === '1'){ vlxToast('Ya escalado a un humano'); return; }
+  // Compose context from chat
+  const chatEl = document.getElementById('chat-msgs');
+  const lines = [];
+  if (chatEl) {
+    chatEl.querySelectorAll('.msg').forEach(m => {
+      const who = m.classList.contains('client') ? 'Cliente' : 'IA';
+      const txt = (m.querySelector('.bubble') && m.querySelector('.bubble').textContent || '').trim();
+      if (txt) lines.push(who + ': ' + txt);
+    });
+  }
+  const desc = lines.slice(-12).join('\n') || 'Escalación desde chat IA — sin transcripción disponible.';
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Escalando...';
+  try {
+    const r = await fetch('/api/tickets', {
+      method:'POST',
+      headers: _vlxSupHeaders(),
+      body: JSON.stringify({
+        title: 'Escalación IA → Humano',
+        subject: 'Escalación IA → Humano',
+        priority: 'alta',
+        category: 'tecnico',
+        description: desc,
+        descripcion: desc,
+        source: 'ai-support',
+        escalated: true
+      })
+    });
+    if (r.status === 401) {
+      try { localStorage.removeItem('volvix_token'); localStorage.removeItem('volvixAuthToken'); } catch(_){}
+      const redir = encodeURIComponent(location.pathname + location.search);
+      location.replace('/login.html?expired=1&redirect=' + redir);
+      return;
+    }
+    if (r.status === 503) { vlxToast('Sistema de tickets no configurado (503)', 4000); btn.disabled = false; btn.textContent = original; return; }
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json().catch(() => ({}));
+    btn.textContent = '✓ Escalado';
+    btn.dataset.escalated = '1';
+    vlxToast('Ticket #' + (data.id || data.ticket_id || 'creado') + ' enviado a un agente humano.', 4500);
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = original;
+    vlxToast('No se pudo escalar: ' + (e && e.message || e), 4000);
+  }
+}
+function vlxCallContact(){ vlxToast('Función de llamada no disponible en este entorno.'); }
+function vlxViewHistory(){
+  // Best-effort: redirect to soporte page filtered by client
+  try { window.open('/soporte.html', '_blank'); } catch(_){ vlxToast('No se pudo abrir el historial.'); }
+}
 </script>
 
 <script defer src="auth-helper.js"></script>

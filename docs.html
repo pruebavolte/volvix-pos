@@ -246,6 +246,14 @@ const CAT_LABELS = {
   integraciones:'Integraciones',faq:'FAQ'
 };
 
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function escapeRegex(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+function highlight(text, q){
+  if(!q) return escapeHtml(text);
+  const safe = escapeHtml(text);
+  const re = new RegExp('('+escapeRegex(q.replace(/&/g,'').replace(/</g,''))+')','ig');
+  return safe.replace(re, '<mark style="background:rgba(245,158,11,.35);color:#fde68a;border-radius:3px;padding:0 2px">$1</mark>');
+}
 function render(){
   const q = search.value.trim().toLowerCase();
   let items = ARTICLES.slice();
@@ -260,9 +268,9 @@ function render(){
   }
   grid.innerHTML = items.map(a => `
     <a class="card" href="${a.url || ('docs/' + a.id + '.html')}">
-      <span class="card-cat">${a.catLabel}</span>
-      <h3>${a.title}</h3>
-      <p>${a.summary}</p>
+      <span class="card-cat">${escapeHtml(a.catLabel)}</span>
+      <h3>${highlight(a.title, q)}</h3>
+      <p>${highlight(a.summary, q)}</p>
       <span class="card-arrow">${a.cat === 'video' ? '▶ Reproducir video' : 'Leer artículo →'}</span>
     </a>
   `).join('');

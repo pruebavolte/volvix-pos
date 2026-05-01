@@ -1156,11 +1156,29 @@ function filterByTag(btn, tag) {
   filterCards(q, tag);
 }
 
+// Auth helpers
+function _vlxToken(){ try { return localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken'); } catch(_){ return null; } }
+function _vlxAuthHeaders(){
+  const h = { 'Content-Type': 'application/json' };
+  const t = _vlxToken(); if (t) h['Authorization'] = 'Bearer ' + t;
+  return h;
+}
+function _vlxHandle401(r){
+  if (r && r.status === 401) {
+    try { localStorage.removeItem('volvix_token'); localStorage.removeItem('volvixAuthToken'); } catch(_){}
+    const redir = encodeURIComponent(location.pathname + location.search);
+    location.replace('/login.html?expired=1&redirect=' + redir);
+    return true;
+  }
+  return false;
+}
+
 // ============== PROGRESS ==============
 async function loadProgress() {
   let completed = [];
   try {
-    const r = await fetch('/api/user/tutorials');
+    const r = await fetch('/api/user/tutorials', { headers: _vlxAuthHeaders() });
+    if (_vlxHandle401(r)) return;
     if (r.ok) {
       const list = await r.json();
       if (Array.isArray(list)) completed = list.filter(t => t.completed).map(t => t.tutorial_id);

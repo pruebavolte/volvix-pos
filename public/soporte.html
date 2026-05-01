@@ -138,7 +138,7 @@
               <option value="resuelto">Resueltos</option>
               <option value="critica">Críticos</option>
             </select>
-            <button class="btn btn-ghost btn-sm" onclick="loadTickets()">↻</button>
+            <button class="btn btn-ghost btn-sm" onclick="loadTickets()" aria-label="Recargar lista de tickets" title="Recargar">↻</button>
           </div>
         </div>
         <div class="ticket-list" id="ticketList">
@@ -153,7 +153,7 @@
         <div style="padding:1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.6rem">
           <span style="font-size:1.2rem">🤖</span>
           <span class="panel-title">Asistente IA</span>
-          <span class="chip chip-green" style="margin-left:auto">En línea</span>
+          <span id="liveStatus" class="chip chip-gray" style="margin-left:auto">verificando…</span>
         </div>
         <div class="chat-panel">
           <div class="chat-messages" id="chatMessages">
@@ -171,8 +171,12 @@
 
       <!-- FAQ -->
       <div class="panel">
-        <div class="panel-header"><span class="panel-title">Preguntas frecuentes</span></div>
+        <div class="panel-header">
+          <span class="panel-title">Preguntas frecuentes</span>
+          <input id="faqSearch" placeholder="Buscar en FAQ…" style="width:200px;padding:.4rem .7rem;font-size:.78rem;background:var(--bg3);border:1px solid var(--border);color:#fff;border-radius:7px;outline:none">
+        </div>
         <div id="faqList"></div>
+        <div id="faqEmpty" style="display:none;color:var(--muted);font-size:.85rem;padding:.8rem 0;text-align:center">Sin coincidencias.</div>
       </div>
     </div>
   </div>
@@ -527,15 +531,40 @@ function getAIReply(msg) {
 }
 
 // FAQ
-function buildFAQ() {
-  document.getElementById('faqList').innerHTML = FAQ.map(f => `
-    <details style="border-bottom:1px solid var(--border);padding:.7rem 0">
+function buildFAQ(query) {
+  const q = (query || '').toLowerCase().trim();
+  const items = q
+    ? FAQ.filter(f => f.q.toLowerCase().includes(q) || f.a.toLowerCase().includes(q))
+    : FAQ;
+  document.getElementById('faqList').innerHTML = items.map(f => `
+    <details style="border-bottom:1px solid var(--border);padding:.7rem 0"${q ? ' open' : ''}>
       <summary style="cursor:pointer;font-size:.85rem;font-weight:600;list-style:none;display:flex;justify-content:space-between">
         ${f.q} <span style="color:var(--primary)">+</span>
       </summary>
       <div style="margin-top:.5rem;font-size:.82rem;color:var(--muted);line-height:1.5">${f.a}</div>
     </details>`).join('');
+  const empty = document.getElementById('faqEmpty');
+  if (empty) empty.style.display = items.length ? 'none' : 'block';
 }
+
+// Live online status — polls /api/support/online
+async function pollOnline() {
+  const el = document.getElementById('liveStatus');
+  if (!el) return;
+  try {
+    const r = await fetch('/api/support/online', { headers: _vlxToken() ? { 'Authorization': 'Bearer ' + _vlxToken() } : {}, cache: 'no-store' });
+    if (!r.ok) throw new Error('not ok');
+    const d = await r.json().catch(() => ({}));
+    const on = d.online === true || d.status === 'online';
+    el.textContent = on ? 'En línea' : 'Fuera de línea';
+    el.className = 'chip ' + (on ? 'chip-green' : 'chip-gray');
+  } catch {
+    // Endpoint absent — don't show error to user, fall back to neutral state
+    el.textContent = 'IA disponible';
+    el.className = 'chip chip-blue';
+  }
+}
+function _vlxToken(){ try { return localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || ''; } catch(_){ return ''; } }
 
 function openModal() {
   // Auto-fill email del usuario
@@ -558,6 +587,10 @@ window.closeModal = closeModal;
 
 buildFAQ();
 loadTickets();
+pollOnline();
+setInterval(pollOnline, 60000);
+const _faqInput = document.getElementById('faqSearch');
+if (_faqInput) _faqInput.addEventListener('input', e => buildFAQ(e.target.value));
 track('support_page_view', { path: location.pathname });
 </script>
 </body>

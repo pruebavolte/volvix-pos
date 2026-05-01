@@ -48,6 +48,16 @@
   footer { text-align:center; color:var(--muted); font-size:12px; padding:24px; }
   .legal { font-size:12px; color:var(--muted); border-left:3px solid var(--accent); padding:8px 12px; margin:12px 0; }
   .hidden { display:none; }
+  .stepper { display:flex; gap:8px; margin:18px 0 24px; padding:0 4px; }
+  .stepper .step { flex:1; display:flex; flex-direction:column; align-items:center; position:relative; }
+  .stepper .step:not(:last-child)::after { content:''; position:absolute; top:14px; left:calc(50% + 18px); right:calc(-50% + 18px); height:2px; background:#243056; z-index:0; }
+  .stepper .step.done:not(:last-child)::after, .stepper .step.active:not(:last-child)::after { background:var(--accent); }
+  .stepper .num { width:30px; height:30px; border-radius:50%; background:#0d1322; border:2px solid #243056; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:var(--muted); position:relative; z-index:1; transition:all .25s; }
+  .stepper .step.active .num { background:var(--accent); color:#08111f; border-color:var(--accent); box-shadow:0 0 0 4px rgba(92,200,255,0.18); }
+  .stepper .step.done .num { background:var(--ok); color:#08111f; border-color:var(--ok); }
+  .stepper .lbl { font-size:11px; color:var(--muted); margin-top:6px; text-align:center; }
+  .stepper .step.active .lbl { color:var(--accent); font-weight:600; }
+  .stepper .step.done .lbl { color:var(--ok); }
 </style>
 </head>
 <body>
@@ -58,6 +68,14 @@
 </header>
 
 <main>
+
+  <!-- Progress stepper (ARCO flow) -->
+  <div class="stepper" id="gdpr-stepper" role="progressbar" aria-label="Progreso de solicitud ARCO">
+    <div class="step" data-step="select"><div class="num">1</div><div class="lbl">Derecho</div></div>
+    <div class="step" data-step="form"><div class="num">2</div><div class="lbl">Datos</div></div>
+    <div class="step" data-step="verify"><div class="num">3</div><div class="lbl">Verificar</div></div>
+    <div class="step" data-step="result"><div class="num">4</div><div class="lbl">Resultado</div></div>
+  </div>
 
   <!-- Selector de derecho -->
   <div class="card" id="step-select">
@@ -146,6 +164,15 @@ function show(id) {
   for (const s of ['step-select','step-form','step-verify','step-result']) {
     document.getElementById(s).classList.toggle('hidden', s !== id);
   }
+  // Update stepper visual progress
+  const order = ['select','form','verify','result'];
+  const current = id.replace('step-','');
+  const idx = order.indexOf(current);
+  document.querySelectorAll('#gdpr-stepper .step').forEach((el, i) => {
+    el.classList.remove('active','done');
+    if (i < idx) el.classList.add('done');
+    else if (i === idx) el.classList.add('active');
+  });
 }
 
 async function api(path, body) {
@@ -288,6 +315,8 @@ function resetFlow() {
     document.getElementById('req-id').value = id;
     document.getElementById('verify-token').value = verify;
     show('step-verify');
+  } else {
+    show('step-select');
   }
 })();
 </script>

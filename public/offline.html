@@ -163,10 +163,24 @@
         } catch (_) { return false; }
       }
 
+      let countdownTimer = null;
+      function startCountdown(totalMs){
+        if (countdownTimer) clearInterval(countdownTimer);
+        let remain = Math.ceil(totalMs / 1000);
+        retryInfo.textContent = 'Próximo reintento en ' + remain + 's…';
+        countdownTimer = setInterval(() => {
+          remain--;
+          if (remain <= 0) { clearInterval(countdownTimer); countdownTimer = null; return; }
+          if (state !== 'offline') { clearInterval(countdownTimer); countdownTimer = null; return; }
+          retryInfo.textContent = 'Próximo reintento en ' + remain + 's…';
+        }, 1000);
+      }
+
       async function tryReconnect() {
         if (state === 'online') return;
         attempt++;
-        setUi('reconnecting', 'Intento ' + attempt + '… (' + (nextDelay()/1000) + 's si falla)');
+        if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+        setUi('reconnecting', 'Intento ' + attempt + '…');
         const ok = await probe();
         if (ok) {
           setUi('online', 'Conexión restaurada — redirigiendo…');
@@ -178,12 +192,14 @@
           return;
         }
         const d = nextDelay();
-        setUi('offline', 'Reintento en ' + (d/1000) + 's…');
+        setUi('offline');
+        startCountdown(d);
         timer = setTimeout(tryReconnect, d);
       }
 
       function manualRetry() {
         if (timer) { clearTimeout(timer); timer = null; }
+        if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
         attempt = 0;
         tryReconnect();
       }

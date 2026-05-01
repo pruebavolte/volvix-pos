@@ -800,6 +800,23 @@ TNT-27PYW (Restaurante) — 8 productos
   <script>
     const TUTORIAL_ID = 'registro-usuarios';
 
+    // Auth helpers — Bearer + 401 redirect
+    function _vlxToken(){ try { return localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken'); } catch(_){ return null; } }
+    function _vlxAuthHeaders(){
+      const h = { 'Content-Type': 'application/json' };
+      const t = _vlxToken(); if (t) h['Authorization'] = 'Bearer ' + t;
+      return h;
+    }
+    function _vlxHandle401(r){
+      if (r && r.status === 401) {
+        try { localStorage.removeItem('volvix_token'); localStorage.removeItem('volvixAuthToken'); } catch(_){}
+        const redir = encodeURIComponent(location.pathname + location.search);
+        location.replace('/login.html?expired=1&redirect=' + redir);
+        return true;
+      }
+      return false;
+    }
+
     function loadVideo() {
       const f = document.getElementById('tutorial-video');
       f.src = f.dataset.src;
@@ -811,11 +828,12 @@ TNT-27PYW (Restaurante) — 8 productos
       btn.disabled = true;
       btn.textContent = 'Guardando...';
       try {
-        await fetch('/api/user/tutorials/' + TUTORIAL_ID + '/complete', {
+        const r = await fetch('/api/user/tutorials/' + TUTORIAL_ID + '/complete', {
           method:'POST',
-          headers:{'Content-Type':'application/json'},
+          headers: _vlxAuthHeaders(),
           body: JSON.stringify({ tutorial_id: TUTORIAL_ID, completed_at: new Date().toISOString() })
         });
+        if (_vlxHandle401(r)) return;
       } catch (e) { /* fallback localStorage */ }
       const done = JSON.parse(localStorage.getItem('volvix:tutorials:done') || '[]');
       if (!done.includes(TUTORIAL_ID)) done.push(TUTORIAL_ID);
@@ -864,7 +882,8 @@ TNT-27PYW (Restaurante) — 8 productos
     // Hidratar estado completado
     (async function hydrate() {
       try {
-        const r = await fetch('/api/user/tutorials');
+        const r = await fetch('/api/user/tutorials', { headers: _vlxAuthHeaders() });
+        if (_vlxHandle401(r)) return;
         if (r.ok) {
           const list = await r.json();
           if (Array.isArray(list) && list.find(t => t.tutorial_id === TUTORIAL_ID && t.completed)) {

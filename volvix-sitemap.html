@@ -50,6 +50,14 @@
   .badge.green{background:rgba(0,212,170,.12);border-color:rgba(0,212,170,.35);color:var(--accent)}
   .badge.amber{background:rgba(255,181,71,.12);border-color:rgba(255,181,71,.35);color:var(--accent-2)}
 
+  /* SEARCH */
+  .sitemap-search{max-width:760px;margin:32px auto 0;padding:0 32px;position:relative}
+  .sitemap-search input{width:100%;padding:14px 18px 14px 46px;background:var(--card);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:15px;outline:none;font-family:inherit;transition:all .2s}
+  .sitemap-search input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(91,141,239,.18)}
+  .sitemap-search .icon{position:absolute;left:46px;top:50%;transform:translateY(-50%);color:var(--text-mute);pointer-events:none;font-size:18px}
+  .sitemap-search .meta{margin:8px 0 0;font-size:12px;color:var(--text-mute);text-align:center}
+  .card.hide,section.cat.hide{display:none !important}
+
   /* TOC */
   nav.toc{max-width:1200px;margin:32px auto;padding:24px 32px;background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow)}
   nav.toc h2{font-size:13px;text-transform:uppercase;letter-spacing:.2em;color:var(--text-mute);margin-bottom:14px;font-weight:700}
@@ -125,6 +133,12 @@
   <div class="stat"><div class="num">90+</div><div class="lbl">Páginas mapeadas</div></div>
   <div class="stat"><div class="num">7</div><div class="lbl">Portales</div></div>
   <div class="stat"><div class="num">100%</div><div class="lbl">Cobertura</div></div>
+</div>
+
+<div class="sitemap-search">
+  <span class="icon" aria-hidden="true">🔎</span>
+  <input id="sitemap-q" type="search" placeholder="Buscar página, módulo o URL... (ej: pos, kds, marketplace)" autocomplete="off" aria-label="Buscar en sitemap">
+  <p class="meta" id="sitemap-meta">Escribe para filtrar las categorías y páginas.</p>
 </div>
 
 <nav class="toc">
@@ -513,5 +527,38 @@
 
   <script defer src="auth-helper.js"></script>
   <script defer src="volvix-i18n-wiring.js"></script>
+  <script>
+  (function(){
+    var input = document.getElementById('sitemap-q');
+    var meta = document.getElementById('sitemap-meta');
+    if (!input) return;
+    var cards = Array.from(document.querySelectorAll('main .card'));
+    var sections = Array.from(document.querySelectorAll('section.cat'));
+    var total = cards.length;
+    function apply(){
+      var q = (input.value||'').toLowerCase().trim();
+      if (!q){
+        cards.forEach(function(c){ c.classList.remove('hide'); });
+        sections.forEach(function(s){ s.classList.remove('hide'); });
+        meta.textContent = total + ' páginas mapeadas en ' + sections.length + ' categorías.';
+        return;
+      }
+      var matched = 0;
+      cards.forEach(function(c){
+        var t = c.textContent.toLowerCase();
+        var hit = t.indexOf(q) !== -1;
+        c.classList.toggle('hide', !hit);
+        if (hit) matched++;
+      });
+      sections.forEach(function(s){
+        var hasVisible = s.querySelectorAll('.card:not(.hide)').length > 0;
+        s.classList.toggle('hide', !hasVisible);
+      });
+      meta.textContent = matched + ' resultado' + (matched===1?'':'s') + ' para "' + q + '"';
+    }
+    input.addEventListener('input', apply);
+    input.addEventListener('keydown', function(e){ if (e.key==='Escape'){ input.value=''; apply(); } });
+  })();
+  </script>
 </body>
 </html>

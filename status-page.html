@@ -517,12 +517,15 @@
       el.innerHTML = '<p class="device-subtitle">' + escapeHtml(emptyMsg) + '</p>';
       return;
     }
-    var html = '';
+    // Render as a visual timeline with semaforo dots
+    var html = '<div class="timeline" style="position:relative;padding-left:18px;border-left:2px solid var(--border);">';
     list.forEach(function(inc){
       var sev = (inc.severity || 'minor').toLowerCase();
+      var dotColor = sev === 'critical' ? 'var(--err)' : sev === 'major' ? 'var(--warn)' : 'var(--ok)';
       var badgeClass = sev === 'critical' ? 'err' : sev === 'major' ? 'warn' : 'ok';
       var resolved = inc.resolved_at ? (' · resuelto: ' + fmtDate(inc.resolved_at)) : ' · en curso';
-      html += '<div class="card ' + (inc.resolved_at ? '' : 'err') + '" style="margin-bottom:8px">' +
+      html += '<div class="card ' + (inc.resolved_at ? '' : 'err') + '" style="margin-bottom:10px;position:relative;">' +
+              '<span aria-hidden="true" style="position:absolute;left:-26px;top:18px;width:14px;height:14px;border-radius:50%;background:' + dotColor + ';box-shadow:0 0 0 3px var(--bg),0 0 0 5px ' + dotColor + ';"></span>' +
               '<h3>' + escapeHtml(inc.title || ('Incidente ' + (inc.service||''))) +
               ' <span class="badge ' + badgeClass + '">' + escapeHtml(sev.toUpperCase()) + '</span>' +
               ' <span class="badge warn">' + escapeHtml(inc.service || '?') + '</span></h3>' +
@@ -530,6 +533,7 @@
               (inc.message ? '<div class="detail">' + escapeHtml(inc.message) + '</div>' : '') +
               '</div>';
     });
+    html += '</div>';
     el.innerHTML = html;
   }
   function fetchUptime(){

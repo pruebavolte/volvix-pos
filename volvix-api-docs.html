@@ -288,11 +288,44 @@ footer {
       <div style="font-weight:500;font-size:12.5px;opacity:.85;">Será deprecada próximamente. Usa la nueva en <a href="/api-docs.html" style="color:#0d1117;text-decoration:underline;font-weight:700;">/api-docs.html</a>.</div>
     </div>
   </div>
-  <div style="display:flex;gap:8px;">
-    <a href="/api-docs.html" style="background:#0d1117;color:#f0f6fc;padding:8px 14px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600;">Ir a docs nuevas →</a>
-    <button onclick="document.getElementById('deprecated-banner').style.display='none'" style="background:transparent;color:#0d1117;border:1px solid #0d1117;padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;">Recordar luego</button>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <span id="legacy-countdown" style="font-size:12px;font-weight:700;background:rgba(13,17,23,0.18);padding:6px 10px;border-radius:6px;">Redirección automática en <strong id="legacy-secs">5</strong>s</span>
+    <a href="/api-docs.html" style="background:#0d1117;color:#f0f6fc;padding:8px 14px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600;">Ir ahora →</a>
+    <button id="legacy-cancel" type="button" style="background:transparent;color:#0d1117;border:1px solid #0d1117;padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;">Quedarme aquí</button>
   </div>
 </div>
+<script>
+(function(){
+  // 5s redirect timer to /api-docs.html (cancellable)
+  var secs = 5;
+  var lbl = document.getElementById('legacy-secs');
+  var box = document.getElementById('legacy-countdown');
+  var cancel = document.getElementById('legacy-cancel');
+  var cancelled = false;
+  var timer;
+  function tick(){
+    if (cancelled) return;
+    secs--;
+    if (lbl) lbl.textContent = secs;
+    if (secs <= 0) { try { location.replace('/api-docs.html'); } catch(_){} return; }
+    timer = setTimeout(tick, 1000);
+  }
+  if (cancel) cancel.addEventListener('click', function(){
+    cancelled = true;
+    if (timer) clearTimeout(timer);
+    if (box) box.style.display = 'none';
+    var b = document.getElementById('deprecated-banner');
+    if (b) b.style.opacity = '0.85';
+  });
+  // Honor explicit ?stay=1 query for direct linking
+  if (location.search.indexOf('stay=1') !== -1) {
+    cancelled = true;
+    if (box) box.style.display = 'none';
+  } else {
+    timer = setTimeout(tick, 1000);
+  }
+})();
+</script>
 
 <header>
   <h1>Volvix POS API</h1>

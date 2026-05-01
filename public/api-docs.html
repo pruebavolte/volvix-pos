@@ -60,6 +60,11 @@
     .topbar .ver{font-size:11px;color:var(--text-2)}
     .pill{display:inline-block;padding:2px 8px;border-radius:999px;background:rgba(251,191,36,.10);color:var(--amber);font-size:11px;font-weight:600;border:1px solid rgba(251,191,36,.25)}
     .footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--border);color:var(--text-2);font-size:12px}
+    .try-it{margin-top:8px;padding:10px;background:rgba(16,185,129,0.04);border:1px dashed rgba(16,185,129,0.3);border-radius:8px}
+    .try-it button{background:var(--green);color:#000;border:0;padding:6px 12px;border-radius:6px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:var(--mono)}
+    .try-it button:hover{filter:brightness(1.1)}
+    .try-it .out{margin-top:8px;padding:10px;background:var(--code);border:1px solid var(--border);border-radius:6px;font-family:var(--mono);font-size:11.5px;color:var(--text);max-height:240px;overflow:auto;white-space:pre-wrap;word-break:break-word}
+    .try-it .meta{font-size:11px;color:var(--text-2);margin-top:6px}
     @media (max-width:880px){.layout{grid-template-columns:1fr}aside{position:relative;height:auto;border-right:0;border-bottom:1px solid var(--border)}main{padding:18px}}
   </style>
 </head>
@@ -759,6 +764,39 @@
       }
       window.addEventListener('scroll', onScroll, { passive: true });
       onScroll();
+
+      // Try-it-out: only for endpoints marked público with GET method
+      document.querySelectorAll('.endpoint').forEach(function(ep){
+        var methodEl = ep.querySelector('.method');
+        var pathEl = ep.querySelector('.path');
+        var pub = ep.querySelector('.auth-tag.public');
+        if (!methodEl || !pathEl || !pub) return;
+        var method = (methodEl.textContent || '').trim().toUpperCase();
+        var path = (pathEl.textContent || '').trim();
+        if (method !== 'GET') return;
+        if (path.indexOf(':') !== -1) return; // skip parameterized paths
+        var box = document.createElement('div');
+        box.className = 'try-it';
+        box.innerHTML = '<button type="button">▶ Probar</button> <span class="meta">' + method + ' ' + path + ' (sin auth)</span><div class="out" style="display:none"></div>';
+        var btn = box.querySelector('button');
+        var out = box.querySelector('.out');
+        btn.addEventListener('click', function(){
+          out.style.display = 'block';
+          out.textContent = 'Cargando...';
+          var t0 = Date.now();
+          fetch(path, { cache: 'no-store' }).then(function(r){
+            var dt = Date.now() - t0;
+            return r.text().then(function(txt){
+              var pretty = txt;
+              try { pretty = JSON.stringify(JSON.parse(txt), null, 2); } catch(_){}
+              out.textContent = 'HTTP ' + r.status + ' · ' + dt + ' ms\n\n' + pretty.slice(0, 4000);
+            });
+          }).catch(function(err){
+            out.textContent = 'Error: ' + (err && err.message || err);
+          });
+        });
+        ep.appendChild(box);
+      });
     })();
   </script>
 </body>

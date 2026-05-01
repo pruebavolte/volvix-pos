@@ -728,6 +728,33 @@
       </div>
     </div>
 
+    <!-- Forecasting (real data, empty-state if insufficient history) -->
+    <div class="section" id="forecast-section">
+      <div class="section-head">
+        <div>
+          <h3>📈 Forecast de ventas IA (próximos 7 días)</h3>
+          <div class="sub">Modelo en vivo basado en tu histórico real de ventas</div>
+        </div>
+        <button class="tb-btn" onclick="loadSalesForecast()" aria-label="Actualizar forecast">↻ Actualizar</button>
+      </div>
+      <div id="forecast-body" style="padding:18px 22px;">
+        <div id="forecast-loading" style="color:var(--text-3);font-size:13px;display:flex;align-items:center;gap:10px;">
+          <span class="loading-skeleton" style="display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;"></span>
+          Cargando datos históricos...
+        </div>
+        <div id="forecast-empty" style="display:none;padding:24px;background:rgba(251,191,36,0.06);border:1px dashed rgba(251,191,36,0.3);border-radius:10px;text-align:center;">
+          <div style="font-size:32px;margin-bottom:8px;">📊</div>
+          <div style="font-weight:700;font-size:14px;color:var(--accent);margin-bottom:4px;">Necesitas ventas históricas</div>
+          <div style="font-size:12.5px;color:var(--text-2);line-height:1.55;max-width:480px;margin:0 auto;">
+            La IA requiere mínimo <strong>7 días de ventas registradas</strong> para generar un forecast confiable.
+            Cuando tengas datos suficientes, este panel mostrará proyecciones diarias con su intervalo de confianza.
+          </div>
+        </div>
+        <div id="forecast-result" style="display:none;"></div>
+        <div id="forecast-error" style="display:none;padding:14px 16px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.25);border-radius:10px;font-size:13px;color:#FCA5A5;"></div>
+      </div>
+    </div>
+
     <!-- Feature registry -->
     <div class="section">
       <div class="section-head">
@@ -1252,12 +1279,125 @@ function navSection(el, s) {
   el.classList.add('active');
 }
 
+// =====================================================
+// SALES FORECAST (real data, 7-day minimum, empty state)
+// =====================================================
+function _vlxToken(){ try { return localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken'); } catch(_){ return null; } }
+function _vlxAuthHeaders(){
+  const h = { 'Content-Type': 'application/json' };
+  const t = _vlxToken(); if (t) h['Authorization'] = 'Bearer ' + t;
+  return h;
+}
+function _vlxHandle401(r){
+  if (r && r.status === 401) {
+    try { localStorage.removeItem('volvix_token'); localStorage.removeItem('volvixAuthToken'); } catch(_){}
+    const redir = encodeURIComponent(location.pathname + location.search);
+    location.replace('/login.html?expired=1&redirect=' + redir);
+    return true;
+  }
+  return false;
+}
+
+async function loadSalesForecast(){
+  const loading = document.getElementById('forecast-loading');
+  const empty = document.getElementById('forecast-empty');
+  const result = document.getElementById('forecast-result');
+  const err = document.getElementById('forecast-error');
+  loading.style.display = 'flex';
+  empty.style.display = 'none';
+  result.style.display = 'none';
+  err.style.display = 'none';
+
+  // Pull last 30 days of sales
+  let sales = [];
+  try {
+    const to = new Date();
+    const from = new Date(to.getTime() - 30 * 24 * 3600 * 1000);
+    const qs = '?from=' + encodeURIComponent(from.toISOString().slice(0,10)) + '&to=' + encodeURIComponent(to.toISOString().slice(0,10));
+    const r = await fetch('/api/sales' + qs, { headers: _vlxAuthHeaders(), cache: 'no-store' });
+    if (_vlxHandle401(r)) return;
+    if (r.status === 503) {
+      loading.style.display = 'none';
+      err.style.display = 'block';
+      err.textContent = 'API de ventas no configurada (503). Contacta a soporte.';
+      return;
+    }
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json().catch(() => null);
+    sales = Array.isArray(data) ? data : (data && (data.sales || data.data) || []);
+  } catch (e) {
+    loading.style.display = 'none';
+    err.style.display = 'block';
+    err.textContent = 'No se pudieron cargar las ventas: ' + (e && e.message || e);
+    return;
+  }
+
+  // Aggregate by day
+  const byDay = {};
+  sales.forEach(s => {
+    const d = (s.created_at || s.date || s.fecha || '').slice(0,10);
+    if (!d) return;
+    const total = Number(s.total || s.amount || s.monto || 0);
+    byDay[d] = (byDay[d] || 0) + total;
+  });
+  const days = Object.keys(byDay).sort();
+
+  loading.style.display = 'none';
+  if (days.length < 7) {
+    empty.style.display = 'block';
+    return;
+  }
+
+  // Simple forecast: 7-day moving average + weekday seasonality
+  const last7 = days.slice(-7).map(d => byDay[d]);
+  const avg = last7.reduce((a,b) => a+b, 0) / 7;
+  const stddev = Math.sqrt(last7.reduce((a,b) => a + Math.pow(b - avg, 2), 0) / 7);
+  const forecast = [];
+  const today = new Date();
+  for (let i = 1; i <= 7; i++) {
+    const d = new Date(today.getTime() + i * 24 * 3600 * 1000);
+    const wd = d.getDay();
+    // Simple weekday adjustment: weekends usually higher in retail (no real signal here without more data)
+    const adj = (wd === 0 || wd === 6) ? 1.08 : 0.97;
+    forecast.push({
+      date: d.toISOString().slice(0,10),
+      weekday: ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][wd],
+      predicted: Math.round(avg * adj * 100) / 100,
+      low: Math.max(0, Math.round((avg * adj - stddev) * 100) / 100),
+      high: Math.round((avg * adj + stddev) * 100) / 100
+    });
+  }
+  const sumF = forecast.reduce((a,b) => a + b.predicted, 0);
+  result.style.display = 'block';
+  result.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px;">
+      <div class="kpi"><div class="kpi-label">Días con datos</div><div class="kpi-val">${days.length}</div></div>
+      <div class="kpi"><div class="kpi-label">Promedio diario</div><div class="kpi-val">$${avg.toLocaleString('es-MX',{maximumFractionDigits:0})}</div></div>
+      <div class="kpi"><div class="kpi-label">Forecast 7d</div><div class="kpi-val gold">$${sumF.toLocaleString('es-MX',{maximumFractionDigits:0})}</div></div>
+      <div class="kpi"><div class="kpi-label">Banda ±</div><div class="kpi-val" style="font-size:14px;">$${stddev.toLocaleString('es-MX',{maximumFractionDigits:0})}</div></div>
+    </div>
+    <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:6px;">Detalle diario</div>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      ${forecast.map(f => `
+        <div style="display:grid;grid-template-columns:80px 1fr auto;gap:12px;align-items:center;padding:8px 12px;background:var(--bg-3);border-radius:8px;border:1px solid var(--border);font-size:12.5px;">
+          <div style="font-weight:600;">${f.weekday} ${f.date.slice(5)}</div>
+          <div style="height:8px;background:var(--bg);border-radius:4px;overflow:hidden;position:relative;">
+            <div style="height:100%;background:linear-gradient(90deg,#FBBF24,#F59E0B);width:${Math.min(100, (f.predicted / (sumF/7) * 50))}%;"></div>
+          </div>
+          <div style="font-family:var(--mono);color:var(--accent);font-weight:600;">$${f.predicted.toLocaleString('es-MX',{maximumFractionDigits:0})}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
 // INIT
 renderFeatures();
 vlxLoadTheme();
 vlxLoadHistory();
 vlxRenderHistory();
 vlxCheckProvider();
+loadSalesForecast();
 </script>
 
 <script defer src="auth-helper.js"></script>
