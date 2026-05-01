@@ -3343,7 +3343,7 @@ const handlers = {
       if (!rateLimit('errlog:' + clientIp(req), 30, 60 * 1000)) {
         return send429(res, 60000, 'Demasiadas solicitudes, intenta más tarde');
       }
-      const body = await readBody(req);
+      const body = await readBody(req).catch(() => ({}));
       let userId = null, tenantId = null;
       const auth = req.headers['authorization'] || '';
       const m = auth.match(/^Bearer\s+(.+)$/i);
@@ -3351,6 +3351,7 @@ const handlers = {
         const p = verifyJWT(m[1]);
         if (p) { userId = p.id; tenantId = p.tenant_id; }
       }
+      // Compatibilidad legacy: tabla error_log con esquema previo.
       const row = {
         type: String(body.type || 'unknown').slice(0, 50),
         message: String(body.message || '').slice(0, 2000),
@@ -3368,14 +3369,30 @@ const handlers = {
       try {
         await supabaseRequest('POST', '/error_log', row);
       } catch (e) {
-        // Fallback when error_log table missing or supabase unavailable:
-        // log to console.warn so the row still surfaces in Vercel function logs.
         try { console.warn('[error_log fallback]', JSON.stringify(row)); } catch (_) {}
         logRequest({ ts: new Date().toISOString(), level: 'error',
           msg: 'error_log insert failed', err: String(e.message || e) });
       }
+      // Pre-launch: nueva tabla system_error_logs (schema operacional).
+      try {
+        await supabaseRequest('POST', '/system_error_logs', {
+          type: String(body.type || 'system').slice(0, 50),
+          error_code: body.code ? String(body.code).slice(0, 100) : null,
+          error_message: String(body.message || '').slice(0, 1000),
+          url: String(body.url || '').slice(0, 500),
+          user_agent: String(req.headers['user-agent'] || '').slice(0, 200),
+          tenant_id: tenantId || (body.tenant_id ? String(body.tenant_id) : null),
+          user_id: userId,
+          stack: String(body.stack || '').slice(0, 4000),
+          ip_address: String(req.headers['x-forwarded-for'] || (req.socket && req.socket.remoteAddress) || '').slice(0, 100),
+          created_at: new Date().toISOString()
+        });
+      } catch (_) { /* siempre 200 para no causar loop de errores */ }
       sendJSON(res, { ok: true });
-    } catch (err) { sendError(res, err); }
+    } catch (err) {
+      // Pre-launch: nunca devolver 500 desde errors/log para evitar loop infinito.
+      try { sendJSON(res, { ok: false }, 200); } catch (_) { sendError(res, err); }
+    }
   },
 
   // GET /api/errors — admin only — returns recent error_log rows

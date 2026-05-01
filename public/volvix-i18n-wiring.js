@@ -1622,33 +1622,56 @@
     if (selectorBtn) selectorBtn.innerHTML = LOCALES[currentLang].flag;
   }
 
+  // Encuentra un host discreto para anclar el switcher: header, nav o footer.
+  function _findSwitcherHost() {
+    return (
+      document.querySelector('header [data-vlx-i18n-host]') ||
+      document.querySelector('nav [data-vlx-i18n-host]') ||
+      document.querySelector('footer [data-vlx-i18n-host]') ||
+      document.querySelector('[data-vlx-i18n-host]') ||
+      document.querySelector('header .user-menu') ||
+      document.querySelector('header nav') ||
+      document.querySelector('header') ||
+      document.querySelector('nav.topbar') ||
+      document.querySelector('nav') ||
+      document.querySelector('footer') ||
+      null
+    );
+  }
+
   function createLangSelector() {
+    var host = _findSwitcherHost();
+
+    // Wrapper inline (no fixed) — se acomoda dentro del header/nav/footer.
+    var wrap = document.createElement('span');
+    wrap.id = 'volvix-i18n-wrap';
+    wrap.style.cssText = [
+      'position:relative', 'display:inline-flex', 'align-items:center',
+      'gap:6px', 'margin:0 8px', 'font-family:system-ui,sans-serif', 'font-size:13px'
+    ].join(';');
+
     selectorBtn = document.createElement('button');
     selectorBtn.id = 'volvix-i18n-btn';
+    selectorBtn.type = 'button';
     selectorBtn.innerHTML = LOCALES[currentLang].flag;
-    selectorBtn.title = 'Idioma / Language / Idioma';
+    selectorBtn.title = 'Idioma / Language';
+    selectorBtn.setAttribute('aria-label', 'Cambiar idioma');
     selectorBtn.style.cssText = [
-      'position:fixed', 'top:140px', 'right:20px',
-      'width:44px', 'height:44px', 'border-radius:50%',
-      'background:#fff', 'border:2px solid #2563eb',
-      'cursor:pointer', 'font-size:22px', 'z-index:9989',
-      'box-shadow:0 2px 8px rgba(0,0,0,0.15)',
-      'display:flex', 'align-items:center', 'justify-content:center',
-      'transition:transform .2s'
+      'background:transparent', 'border:1px solid rgba(0,0,0,0.15)',
+      'border-radius:6px', 'padding:4px 8px', 'cursor:pointer',
+      'font-size:16px', 'line-height:1', 'color:inherit'
     ].join(';');
-    selectorBtn.onmouseenter = () => selectorBtn.style.transform = 'scale(1.1)';
-    selectorBtn.onmouseleave = () => selectorBtn.style.transform = 'scale(1)';
     selectorBtn.onclick = (e) => {
       e.stopPropagation();
       toggleDropdown();
     };
-    document.body.appendChild(selectorBtn);
+    wrap.appendChild(selectorBtn);
 
     dropdownEl = document.createElement('div');
     dropdownEl.id = 'volvix-i18n-dropdown';
     dropdownEl.style.cssText = [
-      'position:fixed', 'top:190px', 'right:20px',
-      'background:#fff', 'border:1px solid #ccc', 'border-radius:8px',
+      'position:absolute', 'top:calc(100% + 4px)', 'right:0',
+      'background:#fff', 'color:#111', 'border:1px solid #ccc', 'border-radius:8px',
       'box-shadow:0 4px 12px rgba(0,0,0,0.15)',
       'z-index:9990', 'display:none', 'min-width:160px',
       'font-family:system-ui,sans-serif', 'font-size:14px'
@@ -1666,8 +1689,20 @@
       };
       dropdownEl.appendChild(item);
     });
+    wrap.appendChild(dropdownEl);
 
-    document.body.appendChild(dropdownEl);
+    if (host) {
+      try { host.appendChild(wrap); }
+      catch (_) { document.body.appendChild(wrap); }
+    } else {
+      // Fallback discreto al footer del body (no flotante, al final del flujo).
+      wrap.style.display = 'block';
+      wrap.style.textAlign = 'center';
+      wrap.style.padding = '8px';
+      wrap.style.opacity = '0.7';
+      wrap.style.fontSize = '12px';
+      document.body.appendChild(wrap);
+    }
     document.addEventListener('click', hideDropdown);
   }
 

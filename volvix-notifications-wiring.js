@@ -399,28 +399,63 @@
     } catch {}
   }
 
+  // Helper: log de error de sistema al backend (silencioso, sin toast).
+  function _logSystemError(payload) {
+    try {
+      var body = JSON.stringify(Object.assign({
+        type: 'system',
+        url: location.href,
+        user_agent: navigator.userAgent
+      }, payload || {}));
+      var headers = { 'Content-Type': 'application/json' };
+      try {
+        var tok = localStorage.getItem('volvix_token');
+        if (tok) headers['Authorization'] = 'Bearer ' + tok;
+      } catch (_) {}
+      fetch('/api/errors/log', { method: 'POST', headers: headers, body: body, credentials: 'include' })
+        .catch(function () {});
+    } catch (_) {}
+  }
+
   async function monitorSync() {
     if (!settings.autoMonitor) return;
     try {
       const res = await fetch(location.origin + '/api/sync/status', { credentials: 'include' });
       if (!res.ok) {
-        if (!recentDuplicate('sync-error')) {
-          window.notify('Error de sincronización',
-            `Servidor respondió ${res.status}`, 'error',
-            { type: 'sync-error', status: res.status });
+        // Errores de sistema: NO mostrar toast al usuario. Loguear al backend.
+        _logSystemError({
+          code: String(res.status),
+          message: 'sync status http ' + res.status,
+          source: 'monitorSync'
+        });
+        // Si el error es crítico (5xx) y aún no hemos avisado, mensaje genérico discreto.
+        if (res.status >= 500 && !recentDuplicate('sync-system-critical')) {
+          try {
+            window.notify(
+              'Conexión inestable',
+              'Estamos arreglando un problema. Reintenta en unos minutos.',
+              'warning',
+              { type: 'sync-system-critical' }
+            );
+          } catch (_) {}
         }
         return;
       }
       const data = await res.json();
-      if (data && data.error && !recentDuplicate('sync-error')) {
-        window.notify('Error de sincronización', String(data.error),
-          'error', { type: 'sync-error' });
+      if (data && data.error) {
+        _logSystemError({
+          code: 'sync-status-error',
+          message: String(data.error).slice(0, 500),
+          source: 'monitorSync'
+        });
       }
     } catch (e) {
-      if (!recentDuplicate('sync-error')) {
-        window.notify('Error de sincronización', 'Sin conexión con el servidor',
-          'error', { type: 'sync-error' });
-      }
+      // Error de red: registrar silenciosamente, no spamear al usuario.
+      _logSystemError({
+        code: 'network',
+        message: String((e && e.message) || e).slice(0, 500),
+        source: 'monitorSync'
+      });
     }
   }
 
@@ -572,7 +607,7 @@
     // Disparadores manuales (útiles para testing y para wiring externo)
     triggerLowStock:    (count)   => window.notify('Stock bajo', `${count} producto(s) bajos`, 'warning', { type:'low-stock', count }),
     triggerNewSale:     (id, tot) => window.notify('Nueva venta', `Venta #${id} por $${tot}`,    'success', { type:'new-sale', saleId:id }),
-    triggerSyncError:   (msg)     => window.notify('Error de sincronización', msg || 'Sin conexión', 'error', { type:'sync-error' }),
+    triggerSyncError:   (msg)     => { _logSystemError({ code:'manual', message: String(msg || 'Sin conexión').slice(0,500), source:'triggerSyncError' }); },
     triggerSessionExp:  (mins)    => window.notify('Sesión por expirar', `Expira en ${mins} min`, 'warning', { type:'session-expiring' })
   };
 

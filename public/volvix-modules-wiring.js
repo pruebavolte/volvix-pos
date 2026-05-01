@@ -179,6 +179,12 @@
   function shouldShowHealthPill() {
     if (/login\.html?$/i.test(fileName) || /registro\.html?$/i.test(fileName)) return false;
     try { if (localStorage.getItem(HIDE_PILL_KEY) === '1') return false; } catch (_) {}
+    // Pre-launch: la health pill flotante queda oculta en producción.
+    // Solo se muestra con ?debug=1 en la URL.
+    try {
+      var qs = new URLSearchParams(window.location.search || '');
+      if (qs.get('debug') !== '1') return false;
+    } catch (_) { return false; }
     return true;
   }
   async function setupHealthPill() {
@@ -430,6 +436,14 @@
   // ----- volvix_ai_academy.html: no chat surface — inject floating widget --
   function setupAcademyAi() {
     if (document.getElementById('vlx-academy-ai')) return;
+    // Pre-launch: avatar/IA flotante (círculo con bot) deshabilitado.
+    // Solo se activa con ?debug=1 o si la página opta-in con <body data-vlx-academy-ai="1">.
+    try {
+      var qs = new URLSearchParams(window.location.search || '');
+      var optIn = qs.get('debug') === '1' ||
+                  (document.body && document.body.getAttribute('data-vlx-academy-ai') === '1');
+      if (!optIn) return;
+    } catch (_) { return; }
 
     var btn = document.createElement('button');
     btn.id = 'vlx-academy-ai-toggle';
@@ -828,6 +842,25 @@
     } catch (_) {}
   }
 
+  function loadMexicoPride() {
+    if (window.__vlxMexicoPrideLoaded) return;
+    if (document.querySelector('script[data-vlx-mxpride]')) return;
+    // Skip explícito en login/registro/embed (el script se auto-omite también).
+    if (/login\.html?$/i.test(fileName) || /registro\.html?$/i.test(fileName)) return;
+    try {
+      var qs = new URLSearchParams(window.location.search || '');
+      if (qs.get('embed') === '1') return;
+    } catch (_) {}
+    try {
+      var s = document.createElement('script');
+      s.src = '/volvix-mexico-pride-wiring.js';
+      s.async = true;
+      s.defer = true;
+      s.setAttribute('data-vlx-mxpride', '1');
+      document.head.appendChild(s);
+    } catch (_) {}
+  }
+
   whenReady(function () {
     try { setupAnalytics(); }        catch (e) { console.warn('[vlx] analytics', e); }
     try { setupRegistroOtp(); }      catch (e) { console.warn('[vlx] otp', e); }
@@ -837,5 +870,6 @@
     try { setupCfdi(); }             catch (e) { console.warn('[vlx] cfdi', e); }
     try { setupHealthPill(); }       catch (e) { console.warn('[vlx] pill', e); }
     try { loadNotificationsCenter(); } catch (e) { console.warn('[vlx] notif', e); }
+    try { loadMexicoPride(); }       catch (e) { console.warn('[vlx] mxpride', e); }
   });
 })();

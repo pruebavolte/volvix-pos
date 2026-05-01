@@ -33,6 +33,23 @@
   }
   if (!getToken()) return;
 
+  // Pre-launch: solo activar el bell flotante si la página lo pide explícitamente
+  // con <div data-vlx-notifications></div>. De lo contrario, exponer API y salir.
+  function _hasOptIn() {
+    try { return !!document.querySelector('[data-vlx-notifications]'); }
+    catch (_) { return false; }
+  }
+  function _debugMode() {
+    try {
+      var qs = new URLSearchParams(location.search);
+      return qs.get('debug') === '1';
+    } catch (_) { return false; }
+  }
+  if (!_hasOptIn() && !_debugMode()) {
+    // No-op: el bell global queda desactivado en producción.
+    return;
+  }
+
   var jwt = decodeJwt(getToken()) || {};
   var TENANT = jwt.tenant_id || jwt.tenantId || '';
 

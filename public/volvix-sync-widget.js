@@ -225,7 +225,20 @@
   // =========================================================
   // INICIALIZACIÓN
   // =========================================================
+  // Pre-launch: el indicador flotante de online/sync queda oculto en producción.
+  // Solo se muestra con ?debug=1 o si la página lo opta-in con <body data-vlx-sync-widget="1">.
+  function _shouldShowSyncWidget() {
+    try {
+      var qs = new URLSearchParams(location.search || '');
+      if (qs.get('debug') === '1') return true;
+    } catch (_) {}
+    try {
+      if (document.body && document.body.getAttribute('data-vlx-sync-widget') === '1') return true;
+    } catch (_) {}
+    return false;
+  }
   function init() {
+    if (!_shouldShowSyncWidget()) return;
     const sync = window.volvix?.sync;
     if (!sync) {
       setTimeout(init, 80);

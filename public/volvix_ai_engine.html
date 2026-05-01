@@ -602,7 +602,6 @@
     <span>IA Auto-reprogramación activa</span>
   </div>
   <button class="tb-btn" onclick="window.open('volvix_owner_panel_v7.html','_blank')">← Owner Panel</button>
-  <button class="tb-btn" id="vlx-theme-toggle" onclick="vlxToggleTheme()" title="Cambiar tema">🌙</button>
   <button class="tb-btn gold" onclick="simulateRequest()">+ Simular petición</button>
 </div>
 <div id="vlx-toast"></div>
@@ -1056,23 +1055,9 @@ function vlxToast(msg, ms) {
   clearTimeout(t._timer);
   t._timer = setTimeout(() => t.classList.remove('show'), ms || 2500);
 }
-function vlxToggleTheme() {
-  document.body.classList.toggle('vlx-light');
-  const isLight = document.body.classList.contains('vlx-light');
-  try { localStorage.setItem('vlx_theme', isLight ? 'light' : 'dark'); } catch (_) {}
-  const btn = document.getElementById('vlx-theme-toggle');
-  if (btn) btn.textContent = isLight ? '☀️' : '🌙';
-}
-function vlxLoadTheme() {
-  try {
-    const t = localStorage.getItem('vlx_theme');
-    if (t === 'light') {
-      document.body.classList.add('vlx-light');
-      const btn = document.getElementById('vlx-theme-toggle');
-      if (btn) btn.textContent = '☀️';
-    }
-  } catch (_) {}
-}
+// Pre-launch: tema dark fijo. Toggle visual eliminado; setting interno preservado.
+function vlxToggleTheme() { /* no-op: tema dark fijo */ }
+function vlxLoadTheme() { /* no-op: tema dark fijo */ }
 function vlxAppendCopyBtn(div, text) {
   const btn = document.createElement('button');
   btn.className = 'copy-btn';
