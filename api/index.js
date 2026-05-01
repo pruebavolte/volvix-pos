@@ -20,6 +20,9 @@ const handleCFDI = require('./cfdi-pac');
 const handleGiros = require('./giros');
 const handleLabels = require('./labels');
 const handleAbtest = require('./abtest');
+const handleBackup = require('./backup');
+const handleActivityFeed = require('./activity-feed');
+const __geoIp = (() => { try { return require('./geo-ip'); } catch (_) { return null; } })();
 const { rateLimitMiddleware } = require('./rate-limit');
 const __apiRateLimiter = rateLimitMiddleware({
   windowMs: 60 * 1000,
@@ -1051,7 +1054,16 @@ function logAudit(req, action, resource, details) {
       after: Object.assign({}, (details && details.after) || {}, { _semantic: semanticAction }),
     };
     if (typeof supabaseRequest === 'function') {
-      supabaseRequest('POST', '/volvix_audit_log', row).catch(() => {});
+      // Geo enrichment best-effort: never block audit insert if geo lookup fails or is slow
+      if (__geoIp && typeof __geoIp.enrichAuditRow === 'function') {
+        const _post = () => supabaseRequest('POST', '/volvix_audit_log', row).catch(() => {});
+        Promise.race([
+          __geoIp.enrichAuditRow(req, row),
+          new Promise((resolve) => setTimeout(resolve, 1500)),
+        ]).then(_post, _post);
+      } else {
+        supabaseRequest('POST', '/volvix_audit_log', row).catch(() => {});
+      }
     }
   } catch (_) {}
 }
@@ -12924,6 +12936,8 @@ module.exports = async (req, res) => {
       if (await handleGiros(req, res, parsed, _ctx)) return;
       if (await handleLabels(req, res, parsed, _ctx)) return;
       if (await handleAbtest(req, res, parsed, _ctx)) return;
+      if (await handleBackup(req, res, parsed, _ctx)) return;
+      if (await handleActivityFeed(req, res, parsed, _ctx)) return;
     } catch (modErr) {
       METRICS.errorCount++;
       logRequest({ ts: new Date().toISOString(), level: 'error', path: pathname, method, msg: 'module handler threw', err: IS_PROD ? 'internal' : String(modErr && modErr.message || modErr) });

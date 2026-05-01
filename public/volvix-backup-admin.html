@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volvix · Backup Admin</title>
+<style>
+  :root {
+    --bg: #0b1220;
+    --panel: #131c33;
+    --panel-2: #1b2547;
+    --line: #2a3658;
+    --text: #e6ecff;
+    --muted: #8a96b8;
+    --accent: #6d8bff;
+    --accent-2: #9b6dff;
+    --ok: #3ddc84;
+    --warn: #ffb86b;
+    --err: #ff6b8a;
+    --shadow: 0 8px 24px rgba(0,0,0,.35);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: linear-gradient(135deg, var(--bg), #050a18);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 28px; border-bottom: 1px solid var(--line);
+    background: rgba(11,18,32,.85); backdrop-filter: blur(8px);
+    position: sticky; top: 0; z-index: 10;
+  }
+  header h1 { margin: 0; font-size: 20px; letter-spacing: .3px; }
+  .badge {
+    background: var(--accent); color: #0b1220;
+    padding: 4px 10px; border-radius: 999px;
+    font-size: 12px; font-weight: 700;
+  }
+  main { padding: 28px; max-width: 1100px; margin: 0 auto; }
+  .grid { display: grid; gap: 20px; grid-template-columns: 1fr; }
+  @media (min-width: 900px) { .grid { grid-template-columns: 1fr 1fr; } }
+  .card {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 16px; padding: 22px; box-shadow: var(--shadow);
+  }
+  .card h2 { margin: 0 0 12px; font-size: 16px; }
+  .card p.muted { color: var(--muted); font-size: 13px; margin: 0 0 14px; }
+  label { display: block; font-size: 13px; color: var(--muted); margin: 10px 0 4px; }
+  select, input[type="text"], input[type="email"], input[type="number"] {
+    width: 100%; background: var(--panel-2); color: var(--text);
+    border: 1px solid var(--line); border-radius: 10px;
+    padding: 10px 12px; font-size: 14px;
+  }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .row > * { flex: 1 1 auto; }
+  .btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: white; border: 0; border-radius: 12px;
+    padding: 11px 18px; font-weight: 600; font-size: 14px;
+    cursor: pointer; transition: transform .1s ease, opacity .15s;
+  }
+  .btn.secondary { background: var(--panel-2); border: 1px solid var(--line); }
+  .btn.warn { background: linear-gradient(135deg, #ff6b8a, #ff9b6b); }
+  .btn:hover { transform: translateY(-1px); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table th, table td {
+    padding: 9px 8px; text-align: left;
+    border-bottom: 1px solid var(--line);
+  }
+  table th { color: var(--muted); font-weight: 500; font-size: 12px; }
+  .tag {
+    display: inline-block; padding: 2px 8px; border-radius: 999px;
+    font-size: 11px; font-weight: 600;
+  }
+  .tag.ok { background: rgba(61,220,132,.18); color: var(--ok); }
+  .tag.err { background: rgba(255,107,138,.18); color: var(--err); }
+  .tag.warn { background: rgba(255,184,107,.18); color: var(--warn); }
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--panel-2); border: 1px solid var(--line);
+    padding: 12px 16px; border-radius: 10px; box-shadow: var(--shadow);
+    transform: translateY(120%); transition: transform .2s ease;
+    max-width: 360px; font-size: 13px;
+  }
+  .toast.show { transform: translateY(0); }
+  .toast.ok { border-left: 3px solid var(--ok); }
+  .toast.err { border-left: 3px solid var(--err); }
+  .switch { display: flex; align-items: center; gap: 10px; user-select: none; cursor: pointer; }
+  .switch input { display: none; }
+  .switch .track {
+    width: 40px; height: 22px; background: var(--panel-2);
+    border: 1px solid var(--line); border-radius: 999px; position: relative;
+    transition: background .15s;
+  }
+  .switch .track::after {
+    content: ""; position: absolute; top: 2px; left: 2px;
+    width: 16px; height: 16px; background: var(--text);
+    border-radius: 50%; transition: transform .15s;
+  }
+  .switch input:checked + .track { background: var(--accent); }
+  .switch input:checked + .track::after { transform: translateX(18px); }
+  pre.log {
+    background: var(--panel-2); border: 1px solid var(--line);
+    border-radius: 10px; padding: 12px; max-height: 200px; overflow: auto;
+    font-size: 12px; color: var(--muted); margin-top: 12px;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Backup &amp; Restore</h1>
+  <span class="badge" id="tenantBadge">Cargando…</span>
+</header>
+
+<main>
+  <div class="grid">
+    <!-- Export -->
+    <section class="card">
+      <h2>📤 Exportar backup</h2>
+      <p class="muted">Descarga un snapshot completo del tenant: productos, ventas, clientes, usuarios y configuración.</p>
+      <label>Formato</label>
+      <select id="exportFormat">
+        <option value="json">JSON</option>
+        <option value="sql">SQL</option>
+      </select>
+      <label class="switch" style="margin-top: 14px;">
+        <input type="checkbox" id="exportGzip" checked>
+        <span class="track"></span>
+        <span>Compresión gzip</span>
+      </label>
+      <label class="switch" style="margin-top: 8px;">
+        <input type="checkbox" id="exportEncrypt">
+        <span class="track"></span>
+        <span>Encriptar (AES-256-GCM, requiere BACKUP_ENCRYPTION_KEY)</span>
+      </label>
+      <div class="row" style="margin-top: 18px;">
+        <button class="btn" id="btnExport">Descargar backup</button>
+      </div>
+    </section>
+
+    <!-- Schedule -->
+    <section class="card">
+      <h2>⏰ Auto-backup</h2>
+      <p class="muted">Programa respaldos automáticos para este tenant.</p>
+      <label class="switch">
+        <input type="checkbox" id="schEnabled">
+        <span class="track"></span>
+        <span>Habilitar auto-backup</span>
+      </label>
+      <label>Frecuencia</label>
+      <select id="schFrequency">
+        <option value="daily">Diario</option>
+        <option value="weekly" selected>Semanal</option>
+        <option value="monthly">Mensual</option>
+        <option value="hourly">Cada hora</option>
+      </select>
+      <label>Hora UTC (0-23)</label>
+      <input type="number" id="schHour" value="3" min="0" max="23">
+      <label>Conservar últimos N respaldos</label>
+      <input type="number" id="schKeep" value="30" min="1" max="365">
+      <label>Email de notificación (opcional)</label>
+      <input type="email" id="schEmail" placeholder="admin@empresa.com">
+      <div class="row" style="margin-top: 18px;">
+        <button class="btn secondary" id="btnSaveSchedule">Guardar configuración</button>
+      </div>
+    </section>
+
+    <!-- Restore -->
+    <section class="card" style="grid-column: 1 / -1;">
+      <h2>📥 Restaurar desde JSON</h2>
+      <p class="muted">Selecciona un archivo JSON exportado previamente. Los registros se insertarán bajo el <em>tenant actual</em>.</p>
+      <input type="file" id="restoreFile" accept=".json,.gz,.enc,application/json,application/gzip,application/octet-stream">
+      <div class="row" style="margin-top: 14px;">
+        <button class="btn warn" id="btnRestore" disabled>Iniciar restore</button>
+      </div>
+      <pre class="log" id="restoreLog">Esperando archivo…</pre>
+    </section>
+
+    <!-- History -->
+    <section class="card" style="grid-column: 1 / -1;">
+      <h2>🗂️ Historial de backups</h2>
+      <p class="muted">Últimos 100 eventos registrados.</p>
+      <table id="historyTable">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Acción</th>
+            <th>Usuario</th>
+            <th>Detalle</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const toastEl = $('toast');
+
+  function toast(msg, kind) {
+    toastEl.textContent = msg;
+    toastEl.className = 'toast show ' + (kind || 'ok');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => { toastEl.classList.remove('show'); }, 3500);
+  }
+
+  function getToken() {
+    try {
+      return (
+        localStorage.getItem('volvix_token') ||
+        sessionStorage.getItem('volvix_token') ||
+        document.cookie.split('; ').find((c) => c.startsWith('volvix_token='))?.split('=')[1] ||
+        ''
+      );
+    } catch (_) { return ''; }
+  }
+
+  async function api(path, opts) {
+    opts = opts || {};
+    const headers = Object.assign({}, opts.headers || {});
+    const tok = getToken();
+    if (tok) headers['Authorization'] = 'Bearer ' + tok;
+    if (opts.body && typeof opts.body === 'object' && !(opts.body instanceof FormData)) {
+      headers['Content-Type'] = 'application/json';
+      opts.body = JSON.stringify(opts.body);
+    }
+    const r = await fetch(path, Object.assign({}, opts, { headers, credentials: 'include' }));
+    return r;
+  }
+
+  function fmtDate(ts) {
+    if (!ts) return '—';
+    try { return new Date(ts).toLocaleString('es-MX'); }
+    catch (_) { return String(ts); }
+  }
+
+  // --- Tenant badge ---
+  (async function () {
+    try {
+      const r = await api('/api/auth/me');
+      if (r.ok) {
+        const me = await r.json();
+        $('tenantBadge').textContent = (me.tenant_id || 'Sin tenant') + ' · ' + (me.email || me.role || '');
+      } else {
+        $('tenantBadge').textContent = 'No autenticado';
+      }
+    } catch (_) { $('tenantBadge').textContent = 'Offline'; }
+  })();
+
+  // --- Export ---
+  $('btnExport').addEventListener('click', async () => {
+    const format = $('exportFormat').value;
+    const gzip = $('exportGzip').checked ? 1 : 0;
+    const enc = $('exportEncrypt').checked ? 1 : 0;
+    const url = `/api/backup/export?format=${format}&gzip=${gzip}&encrypt=${enc}`;
+    toast('Generando backup…');
+    try {
+      const r = await api(url);
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({}));
+        return toast('Error: ' + (err.error || r.status), 'err');
+      }
+      const blob = await r.blob();
+      const cd = r.headers.get('Content-Disposition') || '';
+      const m = cd.match(/filename="([^"]+)"/);
+      const filename = m ? m[1] : `backup.${format}`;
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+      toast('Backup descargado: ' + filename);
+      loadHistory();
+    } catch (e) { toast('Error: ' + e.message, 'err'); }
+  });
+
+  // --- Schedule ---
+  async function loadSchedule() {
+    try {
+      const r = await api('/api/backup/schedule');
+      if (!r.ok) return;
+      const j = await r.json();
+      const s = (j && j.schedule) || {};
+      $('schEnabled').checked = !!s.enabled;
+      $('schFrequency').value = s.frequency || 'weekly';
+      $('schHour').value = (s.hour_utc != null) ? s.hour_utc : 3;
+      $('schKeep').value = s.keep_last || 30;
+      $('schEmail').value = s.notify_email || '';
+    } catch (_) {}
+  }
+  $('btnSaveSchedule').addEventListener('click', async () => {
+    const body = {
+      enabled: $('schEnabled').checked,
+      frequency: $('schFrequency').value,
+      hour_utc: parseInt($('schHour').value, 10),
+      keep_last: parseInt($('schKeep').value, 10),
+      notify_email: $('schEmail').value.trim() || null,
+    };
+    const r = await api('/api/backup/schedule', { method: 'POST', body });
+    if (r.ok) { toast('Configuración guardada'); loadHistory(); }
+    else toast('No se pudo guardar', 'err');
+  });
+
+  // --- Restore ---
+  let pendingPayload = null;
+  $('restoreFile').addEventListener('change', async (e) => {
+    const file = e.target.files && e.target.files[0];
+    pendingPayload = null;
+    $('btnRestore').disabled = true;
+    if (!file) return;
+    $('restoreLog').textContent = 'Leyendo ' + file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)…';
+    try {
+      const text = await file.text();
+      pendingPayload = JSON.parse(text);
+      const counts = (pendingPayload && pendingPayload.counts) || {};
+      $('restoreLog').textContent =
+        'Archivo válido.\n' +
+        'Tenant origen: ' + (pendingPayload.tenant_id || '?') + '\n' +
+        'Generado: ' + (pendingPayload.generated_at || '?') + '\n' +
+        'Conteos: ' + JSON.stringify(counts, null, 2);
+      $('btnRestore').disabled = false;
+    } catch (err) {
+      $('restoreLog').textContent = 'Archivo inválido: ' + err.message;
+    }
+  });
+  $('btnRestore').addEventListener('click', async () => {
+    if (!pendingPayload) return;
+    if (!confirm('Esto insertará los registros del backup en el tenant actual. ¿Continuar?')) return;
+    $('btnRestore').disabled = true;
+    toast('Restaurando…');
+    const r = await api('/api/backup/import', { method: 'POST', body: pendingPayload });
+    const j = await r.json().catch(() => ({}));
+    if (r.ok) {
+      $('restoreLog').textContent = 'Restore completado:\n' + JSON.stringify(j.summary, null, 2);
+      toast('Restore completado');
+      loadHistory();
+    } else {
+      $('restoreLog').textContent = 'Error: ' + (j.error || r.status);
+      toast('Restore falló: ' + (j.error || r.status), 'err');
+    }
+  });
+
+  // --- History ---
+  async function loadHistory() {
+    const tbody = $('historyTable').querySelector('tbody');
+    tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted)">Cargando…</td></tr>';
+    try {
+      const r = await api('/api/backup/history');
+      const j = await r.json().catch(() => ({}));
+      const rows = (j && j.history) || [];
+      if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted)">Sin registros</td></tr>';
+        return;
+      }
+      tbody.innerHTML = rows.map((row) => {
+        const meta = row.meta || {};
+        const action = row.action || 'unknown';
+        const tagClass = action === 'export' ? 'ok' : action === 'import' ? 'warn' : '';
+        return (
+          '<tr>' +
+            '<td>' + fmtDate(row.ts) + '</td>' +
+            '<td><span class="tag ' + tagClass + '">' + action + '</span></td>' +
+            '<td>' + (row.user_id || '—') + '</td>' +
+            '<td><code style="font-size:11px;color:var(--muted)">' + escapeHtml(JSON.stringify(meta).slice(0, 200)) + '</code></td>' +
+          '</tr>'
+        );
+      }).join('');
+    } catch (_) {
+      tbody.innerHTML = '<tr><td colspan="4" style="color:var(--err)">No disponible</td></tr>';
+    }
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  loadSchedule();
+  loadHistory();
+})();
+</script>
+</body>
+</html>
