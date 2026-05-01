@@ -669,8 +669,62 @@ btnNotify.addEventListener('click', async () => {
   const p = await Notification.requestPermission();
   log(p==='granted'?'ok':'warn', `Permiso de notificaciones: ${p}`);
   refreshPushStatus();
-  if (p === 'granted') sendTestNotif();
+  if (p === 'granted') {
+    sendTestNotif();
+    // Registrar push subscription en el backend
+    await registerPushSubscription();
+  }
 });
+
+// ============ PUSH SUBSCRIPTION (B47) ============
+async function registerPushSubscription() {
+  try {
+    if (!state.swReg || !state.swReg.pushManager) {
+      log('warn', 'PushManager no disponible (sin VAPID configurado)');
+      return null;
+    }
+    let sub = await state.swReg.pushManager.getSubscription();
+    if (!sub) {
+      try {
+        // Mock VAPID — endpoint público de placeholder. Reemplazar con clave real en prod.
+        const VAPID_PUB = (window.VOLVIX_VAPID_PUB || 'BO_mock_replace_with_real_VAPID_public_key_in_production');
+        sub = await state.swReg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(VAPID_PUB)
+        });
+      } catch (subErr) {
+        log('warn', 'No se pudo crear subscription (modo mock): ' + subErr.message);
+        // Fallback: registrar mock subscription para que el flujo pueda completarse
+        sub = { endpoint: 'mock://volvix/' + Date.now(), keys: { p256dh: 'mock', auth: 'mock' }, toJSON: function(){ return { endpoint: this.endpoint, keys: this.keys }; } };
+      }
+    }
+    const payload = sub.toJSON ? sub.toJSON() : { endpoint: sub.endpoint, keys: sub.keys };
+    const r = await fetch('/api/push/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).catch(() => null);
+    if (r && r.ok) log('ok', 'Subscription registrada en el backend');
+    else log('warn', 'Backend de push no respondió (¿endpoint montado?)');
+    return sub;
+  } catch (e) {
+    log('err', 'Push subscribe falló: ' + e.message);
+    return null;
+  }
+}
+function urlBase64ToUint8Array(base64String) {
+  try {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const raw = atob(base64);
+    const out = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; ++i) out[i] = raw.charCodeAt(i);
+    return out;
+  } catch (_) {
+    // Si la clave es inválida (mock), devolvemos un buffer vacío — la subscribe fallará controladamente
+    return new Uint8Array(0);
+  }
+}
 
 async function sendTestNotif(){
   if (Notification.permission !== 'granted') {

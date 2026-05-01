@@ -86,6 +86,14 @@ function scoreSale(sale, ctx) {
 
 // ============ STORE ADAPTER ============
 
+// Default rules (fallback cuando un tenant no tiene config guardada)
+const DEFAULT_RULES = {
+  ticket_multiplier: 3,    // total > X * avg
+  velocity_n: 5,           // N ventas
+  velocity_secs: 60,       // en Y segundos
+  discount_pct: 20,        // descuento > X%
+};
+
 function makeStore(supabaseRequest) {
   if (typeof supabaseRequest === 'function') {
     return {
@@ -94,6 +102,34 @@ function makeStore(supabaseRequest) {
         const qs = `?status=eq.${encodeURIComponent(status || 'pending')}&select=*&order=created_at.desc&limit=${lim}`;
         try { return await supabaseRequest('GET', `/fraud_alerts${qs}`) || []; }
         catch (e) { return { _error: String(e && e.message || e) }; }
+      },
+      async getRules(tenantId) {
+        if (!tenantId) return Object.assign({}, DEFAULT_RULES);
+        try {
+          const rows = await supabaseRequest('GET', `/fraud_rules?tenant_id=eq.${encodeURIComponent(tenantId)}&select=rules&limit=1`);
+          if (Array.isArray(rows) && rows.length && rows[0].rules) {
+            return Object.assign({}, DEFAULT_RULES, rows[0].rules);
+          }
+        } catch (_) {}
+        return Object.assign({}, DEFAULT_RULES);
+      },
+      async setRules(tenantId, rules) {
+        if (!tenantId) return { ok: false, error: 'tenant_required' };
+        try {
+          const existing = await supabaseRequest('GET', `/fraud_rules?tenant_id=eq.${encodeURIComponent(tenantId)}&select=tenant_id&limit=1`);
+          if (Array.isArray(existing) && existing.length) {
+            await supabaseRequest('PATCH', `/fraud_rules?tenant_id=eq.${encodeURIComponent(tenantId)}`, {
+              rules, updated_at: new Date().toISOString()
+            });
+          } else {
+            await supabaseRequest('POST', '/fraud_rules', {
+              tenant_id: tenantId, rules, updated_at: new Date().toISOString()
+            });
+          }
+          return { ok: true };
+        } catch (e) {
+          return { ok: false, error: String(e && e.message || e) };
+        }
       },
       async reviewSale(saleId, action, notes, reviewer) {
         const patch = {
@@ -120,6 +156,7 @@ function makeStore(supabaseRequest) {
   }
   // Fallback en-memoria
   const alerts = [];
+  const rulesByTenant = new Map();
   return {
     async listAlerts(status) { return alerts.filter(a => a.status === (status || 'pending')); },
     async reviewSale(saleId, action) {
@@ -131,6 +168,14 @@ function makeStore(supabaseRequest) {
         }
       }
       return { ok: n > 0, updated: n };
+    },
+    async getRules(tenantId) {
+      const r = rulesByTenant.get(tenantId || '_default');
+      return Object.assign({}, DEFAULT_RULES, r || {});
+    },
+    async setRules(tenantId, rules) {
+      rulesByTenant.set(tenantId || '_default', Object.assign({}, DEFAULT_RULES, rules || {}));
+      return { ok: true };
     },
     _push(a) { alerts.push(a); },
   };
@@ -190,10 +235,47 @@ function buildHandlers(deps) {
     }
   });
 
+  // GET /api/fraud/rules — devuelve config del tenant actual
+  const getRules = requireAuth(async (req, res) => {
+    try {
+      const tenantId = (req.user && req.user.tenant_id) || null;
+      const rules = await store.getRules(tenantId);
+      return send(res, { ok: true, rules, defaults: DEFAULT_RULES }, 200, helpers);
+    } catch (err) {
+      if (helpers.sendError) return helpers.sendError(res, err);
+      return send(res, { ok: false, error: String(err && err.message || err) }, 500, helpers);
+    }
+  });
+
+  // POST /api/fraud/rules — guarda config del tenant
+  const postRules = requireAuth(async (req, res) => {
+    try {
+      const body = await readBodySafe(req, helpers);
+      const incoming = (body && body.rules) || {};
+      // Validación básica + clamps
+      const rules = {
+        ticket_multiplier: Math.min(Math.max(num(incoming.ticket_multiplier, DEFAULT_RULES.ticket_multiplier), 1), 10),
+        velocity_n: Math.min(Math.max(num(incoming.velocity_n, DEFAULT_RULES.velocity_n), 1), 50),
+        velocity_secs: Math.min(Math.max(num(incoming.velocity_secs, DEFAULT_RULES.velocity_secs), 1), 3600),
+        discount_pct: Math.min(Math.max(num(incoming.discount_pct, DEFAULT_RULES.discount_pct), 1), 100),
+      };
+      const tenantId = (body && body.tenant_id) || (req.user && req.user.tenant_id) || null;
+      if (!tenantId) return send(res, { ok: false, error: 'tenant_required' }, 400, helpers);
+      const r = await store.setRules(tenantId, rules);
+      if (!r.ok) return send(res, { ok: false, error: r.error || 'save_failed' }, 500, helpers);
+      return send(res, { ok: true, rules }, 200, helpers);
+    } catch (err) {
+      if (helpers.sendError) return helpers.sendError(res, err);
+      return send(res, { ok: false, error: String(err && err.message || err) }, 500, helpers);
+    }
+  });
+
   return {
     'GET /api/fraud/alerts':            getAlerts,
     'POST /api/fraud/review/:sale_id':  postReview,
     'POST /api/fraud/score':            postScore,
+    'GET /api/fraud/rules':             getRules,
+    'POST /api/fraud/rules':            postRules,
   };
 }
 
@@ -205,4 +287,4 @@ function register(handlers, deps) {
   return Object.keys(own);
 }
 
-module.exports = { register, buildHandlers, scoreSale, RULES };
+module.exports = { register, buildHandlers, scoreSale, RULES, DEFAULT_RULES };

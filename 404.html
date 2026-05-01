@@ -21,15 +21,49 @@
     a.ghost{background:transparent;border:1px solid rgba(255,255,255,.12);color:var(--text)}
     a.btn:hover{transform:translateY(-1px)}
     .path{margin-top:18px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;color:var(--muted);word-break:break-all;opacity:.7}
+    .svg-404{width:160px;height:96px;display:block;margin:0 auto 14px}
+    .svg-404 .digit{fill:none;stroke:url(#g404);stroke-width:8;stroke-linecap:round;stroke-linejoin:round;
+      stroke-dasharray:600;stroke-dashoffset:600;animation:drawDigit 1.4s ease forwards}
+    .svg-404 .digit.d2{animation-delay:.25s}
+    .svg-404 .digit.d3{animation-delay:.5s}
+    .svg-404 .orbit{transform-origin:center;animation:spin 6s linear infinite}
+    @keyframes drawDigit{to{stroke-dashoffset:0}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .popular{margin:0 0 18px;padding:14px;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);border-radius:10px;text-align:left;display:none}
+    .popular .ph{font-size:11px;color:var(--muted);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+    .popular ul{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+    .popular li a{display:block;padding:6px 8px;color:var(--accent);text-decoration:none;font-size:12.5px;border-radius:6px;background:rgba(251,191,36,0.06)}
+    .popular li a:hover{background:rgba(251,191,36,0.14)}
+    #countdown-bar{margin-top:14px;font-size:11px;color:var(--muted)}
+    #countdown-bar strong{color:var(--accent2)}
+    .countdown-cancel{background:transparent;border:1px solid rgba(255,255,255,0.12);color:var(--text);padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;margin-left:6px}
   </style>
 </head>
 <body>
   <main class="wrap">
     <div class="card" role="alert">
       <div class="logo">V</div>
+      <svg class="svg-404" viewBox="0 0 200 120" aria-hidden="true">
+        <defs>
+          <linearGradient id="g404" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#fbbf24"/>
+            <stop offset="100%" stop-color="#3b82f6"/>
+          </linearGradient>
+        </defs>
+        <g class="orbit">
+          <circle cx="100" cy="60" r="46" fill="none" stroke="rgba(251,191,36,0.18)" stroke-width="1" stroke-dasharray="3 4"/>
+        </g>
+        <path class="digit"    d="M30 80 L30 50 L60 80 L60 35"/>
+        <path class="digit d2" d="M85 50 a18 18 0 1 1 0 30 a18 18 0 1 1 0 -30"/>
+        <path class="digit d3" d="M140 80 L140 50 L170 80 L170 35"/>
+      </svg>
       <h1>404</h1>
       <h2>Página no encontrada</h2>
       <p id="msg">La ruta que solicitaste no existe o fue movida. Puedes regresar al inicio o iniciar sesión.</p>
+      <div class="popular" id="popular">
+        <div class="ph">Páginas más populares</div>
+        <ul id="popular-list"></ul>
+      </div>
       <div id="suggestion-box" style="display:none;margin:0 0 18px;padding:14px;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);border-radius:10px;text-align:left;">
         <div style="font-size:12px;color:#94a3b8;margin-bottom:6px;">¿Quizás quisiste decir?</div>
         <div id="suggestion-list" style="display:flex;flex-direction:column;gap:6px;"></div>
@@ -47,6 +81,10 @@
         <a class="btn primary" href="/">Volver al inicio</a>
         <a class="btn ghost" href="/salvadorex_web_v25.html">Ir al POS</a>
         <a class="btn ghost" href="/soporte.html">Contactar soporte</a>
+      </div>
+      <div id="countdown-bar">
+        Te llevaré al inicio en <strong id="countdown-num">30</strong>s
+        <button type="button" class="countdown-cancel" id="cancel-countdown">Cancelar</button>
       </div>
       <div class="path" id="path"></div>
     </div>
@@ -293,6 +331,72 @@
         }).join('');
         ac.style.display = 'block';
       }
+
+      // ============ Popular pages ============
+      (function loadPopular() {
+        var FALLBACK = [
+          ['/volvix-launcher.html', 'Launcher'],
+          ['/salvadorex_web_v25.html', 'POS'],
+          ['/volvix_owner_panel_v7.html', 'Owner Panel'],
+          ['/volvix-mega-dashboard.html', 'Dashboard'],
+          ['/volvix-customer-portal.html', 'Portal de Clientes']
+        ];
+        function render(items) {
+          if (!items || !items.length) return;
+          var ul = document.getElementById('popular-list');
+          if (!ul) return;
+          ul.innerHTML = items.slice(0, 5).map(function (p) {
+            var href = p.url || p[0];
+            var label = p.label || p[1] || href;
+            return '<li><a href="' + href + '">' + label + '</a></li>';
+          }).join('');
+          document.getElementById('popular').style.display = 'block';
+        }
+        try {
+          fetch('/api/analytics/popular', { cache: 'no-store' })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (data) {
+              if (data && Array.isArray(data.pages) && data.pages.length) render(data.pages);
+              else if (Array.isArray(data) && data.length) render(data);
+              else render(FALLBACK);
+            })
+            .catch(function () { render(FALLBACK); });
+        } catch (_) { render(FALLBACK); }
+      })();
+
+      // ============ Auto-redirect con countdown (30s) ============
+      (function countdown() {
+        var sec = 30;
+        var num = document.getElementById('countdown-num');
+        var bar = document.getElementById('countdown-bar');
+        var btn = document.getElementById('cancel-countdown');
+        var cancelled = false;
+        var timer;
+        function tick() {
+          if (cancelled) return;
+          sec--;
+          if (num) num.textContent = sec;
+          if (sec <= 0) {
+            location.replace('/');
+            return;
+          }
+          timer = setTimeout(tick, 1000);
+        }
+        if (btn) {
+          btn.addEventListener('click', function () {
+            cancelled = true;
+            if (timer) clearTimeout(timer);
+            if (bar) bar.style.display = 'none';
+          });
+        }
+        // Si el usuario interactúa con el input/búsqueda, cancelamos
+        document.addEventListener('keydown', function () {
+          cancelled = true;
+          if (timer) clearTimeout(timer);
+          if (bar) bar.style.display = 'none';
+        }, { once: true });
+        timer = setTimeout(tick, 1000);
+      })();
 
       if (input) {
         input.addEventListener('input', function () {

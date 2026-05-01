@@ -6245,6 +6245,17 @@ try {
   console.error('[FRAUD] register failed:', e && e.message);
 }
 
+// PUSH NOTIFICATIONS — Web Push subscribe/unsubscribe/send
+try {
+  require('./push-notifications').register({
+    handlers,
+    supabaseRequest, readBody, requireAuth,
+    sendJSON, sendError,
+  });
+} catch (e) {
+  console.error('[PUSH] register failed:', e && e.message);
+}
+
 // =============================================================
 // R18 — NFT LOYALTY + BLOCKCHAIN RECEIPTS (MOCK)
 // Implementación mock: NO usa cadenas reales. token_id, tx_hash y IPFS
