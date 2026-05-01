@@ -568,6 +568,16 @@ function tick(){
 }
 tick(); setInterval(tick,1000);
 
+// ============ AUTH HELPERS (TIER 2 wiring) ============
+function _mdAuthToken(){
+  try{ return localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || ''; }catch(_){ return ''; }
+}
+function _mdAuthHeaders(extra){
+  var h = Object.assign({}, extra || {});
+  var t = _mdAuthToken(); if (t) h['Authorization'] = 'Bearer ' + t;
+  return h;
+}
+
 // ============ DATA FETCHERS (con fallback mock) ============
 async function safeFetch(url, mock){
   try{
@@ -636,7 +646,8 @@ async function renderBars(){
   const tid = (window.Volvix && Volvix.session && Volvix.session.tenant_id) || 'TNT001';
   let data = [], dataPrev = [];
   try{
-    const r = await fetch('/api/reports/sales/daily?tenant_id='+encodeURIComponent(tid)+'&days=7',{headers:{'Accept':'application/json'},credentials:'include'});
+    const r = await fetch('/api/reports/sales/daily?tenant_id='+encodeURIComponent(tid)+'&days=7',{headers:_mdAuthHeaders({'Accept':'application/json'}),credentials:'include'});
+    if (r.status === 401) { window.location.replace('/login.html'); return; }
     if(r.ok){
       const j = await r.json();
       const arr = Array.isArray(j)?j:(j.items||j.data||[]);
@@ -649,7 +660,7 @@ async function renderBars(){
     // Previous-period overlay if compare mode is on
     if (typeof MD_STATE !== 'undefined' && MD_STATE.compare) {
       try {
-        const r2 = await fetch('/api/reports/sales/daily?tenant_id='+encodeURIComponent(tid)+'&days=7&compare_with=previous_period',{headers:{'Accept':'application/json'},credentials:'include'});
+        const r2 = await fetch('/api/reports/sales/daily?tenant_id='+encodeURIComponent(tid)+'&days=7&compare_with=previous_period',{headers:_mdAuthHeaders({'Accept':'application/json'}),credentials:'include'});
         if (r2.ok) {
           const j2 = await r2.json();
           const arr2 = (j2 && (j2.previous || j2.compare)) || [];
@@ -680,7 +691,8 @@ async function renderLine(){
   const tid = (window.Volvix && Volvix.session && Volvix.session.tenant_id) || 'TNT001';
   let series = [], seriesPrev = [];
   try{
-    const r = await fetch('/api/reports/sales/hourly?tenant_id='+encodeURIComponent(tid),{headers:{'Accept':'application/json'},credentials:'include'});
+    const r = await fetch('/api/reports/sales/hourly?tenant_id='+encodeURIComponent(tid),{headers:_mdAuthHeaders({'Accept':'application/json'}),credentials:'include'});
+    if (r.status === 401) { window.location.replace('/login.html'); return; }
     if(r.ok){
       const j = await r.json();
       const arr = Array.isArray(j)?j:(j.items||j.data||[]);
@@ -688,7 +700,7 @@ async function renderLine(){
     }
     if (typeof MD_STATE !== 'undefined' && MD_STATE.compare) {
       try {
-        const r2 = await fetch('/api/reports/sales/hourly?tenant_id='+encodeURIComponent(tid)+'&compare_with=previous_period',{headers:{'Accept':'application/json'},credentials:'include'});
+        const r2 = await fetch('/api/reports/sales/hourly?tenant_id='+encodeURIComponent(tid)+'&compare_with=previous_period',{headers:_mdAuthHeaders({'Accept':'application/json'}),credentials:'include'});
         if (r2.ok) {
           const j2 = await r2.json();
           const arr2 = (j2 && (j2.previous || j2.compare)) || [];

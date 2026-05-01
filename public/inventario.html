@@ -300,12 +300,45 @@ function toast(msg, type='success') {
 
 function fmt(n) { return '$' + parseFloat(n||0).toFixed(2); }
 
+// === Auth + fetch helpers (TIER 2 wiring) ===
+function _authToken() {
+  try {
+    return localStorage.getItem('volvix_token')
+        || localStorage.getItem('volvixAuthToken')
+        || localStorage.getItem('volvix.token') || '';
+  } catch (_) { return ''; }
+}
+function _authHeaders(extra) {
+  const h = Object.assign({}, extra || {});
+  const t = _authToken();
+  if (t) h['Authorization'] = 'Bearer ' + t;
+  return h;
+}
+async function _fetchAuth(url, opts) {
+  opts = opts || {};
+  opts.headers = _authHeaders(opts.headers || {});
+  const r = await fetch(url, opts);
+  if (r.status === 401) {
+    try { window.location.replace('/login.html'); } catch (_) {}
+    const e = new Error('AUTH_REQUIRED'); e.status = 401; throw e;
+  }
+  if (r.status === 503) {
+    toast('Función no configurada en el servidor', 'error');
+    const e = new Error('FEATURE_UNAVAILABLE'); e.status = 503; throw e;
+  }
+  return r;
+}
+
 async function loadProducts() {
   try {
-    const r = await fetch('/api/productos');
+    const r = await _fetchAuth('/api/productos');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
     const data = await r.json();
-    allProducts = data.length ? data : DEMO;
-  } catch { allProducts = DEMO; }
+    allProducts = (Array.isArray(data) && data.length) ? data : DEMO;
+  } catch (e) {
+    if (e && e.status === 401) return;
+    allProducts = DEMO;
+  }
   buildCatFilter();
   updateStats();
   filterTable();
@@ -430,13 +463,16 @@ async function saveProduct() {
     descripcion: document.getElementById('p-desc').value,
   };
   try {
-    const r = await fetch('/api/productos', {
+    const r = await _fetchAuth('/api/productos', {
       method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)
     });
-    const data = await r.json();
-    if (data.error) { toast(data.error, 'error'); return; }
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok || data.error) { toast(data.error || ('HTTP ' + r.status), 'error'); return; }
     toast('Producto guardado');
-  } catch { toast('Guardado localmente (sin conexión)'); }
+  } catch (e) {
+    if (e && (e.status === 401 || e.status === 503)) return;
+    toast('Guardado localmente (sin conexión)');
+  }
   closeModal();
   loadProducts();
 }
@@ -448,10 +484,12 @@ async function ajustarStock(id) {
   if (!p) return;
   p.stock = (p.stock||0) + qty;
   try {
-    await fetch(`/api/productos/${id}`, {
-      method: 'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({stock: p.stock})
+    await _fetchAuth(`/api/productos/${id}`, {
+      method: 'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({stock: p.stock})
     });
-  } catch {}
+  } catch (e) {
+    if (e && (e.status === 401 || e.status === 503)) return;
+  }
   toast(`Stock actualizado: ${p.stock}`);
   loadProducts();
 }
@@ -526,17 +564,19 @@ async function bulkApply() {
   // Try bulk endpoint, fallback to per-item PUT
   let okServer = false;
   try {
-    const r = await fetch('/api/productos/bulk', {
+    const r = await _fetchAuth('/api/productos/bulk', {
       method: 'PATCH',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ updates })
     });
     if (r.ok) okServer = true;
-  } catch {}
+  } catch (e) {
+    if (e && (e.status === 401 || e.status === 503)) return;
+  }
   if (!okServer) {
     // best-effort per-item
     for (const u of updates.slice(0, 50)) {
-      try { await fetch(`/api/productos/${u.id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ [field]: u[field] }) }); } catch {}
+      try { await _fetchAuth(`/api/productos/${u.id}`, { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ [field]: u[field] }) }); } catch {}
     }
   }
 
@@ -644,17 +684,19 @@ async function confirmCsvImport() {
   const items = _csvParsed.map(({action,existing_id,...rest}) => rest);
   let okServer = false;
   try {
-    const r = await fetch('/api/productos/import', {
+    const r = await _fetchAuth('/api/productos/import', {
       method: 'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ products: items })
     });
     if (r.ok) okServer = true;
-  } catch {}
+  } catch (e) {
+    if (e && (e.status === 401 || e.status === 503)) return;
+  }
   if (!okServer) {
     // fallback per-item
     for (const it of items) {
       try {
-        await fetch('/api/productos', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(it) });
+        await _fetchAuth('/api/productos', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(it) });
       } catch {}
     }
   }

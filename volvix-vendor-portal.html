@@ -1261,8 +1261,15 @@
     var t = tk();
     if (!t) return; // sin sesión, dejar UI con dashes
     var headers = { 'Authorization': 'Bearer ' + t };
+    // shared 401/503 handler
+    function _vpCheck(r){
+      if (r && r.status === 401){ try{ window.location.replace('/login.html'); }catch(_){} return false; }
+      if (r && r.status === 503){ try{ console.warn('[vendor-portal] feature unavailable', r.url); }catch(_){} return false; }
+      return r && r.ok;
+    }
     try {
       var r = await fetch('/api/vendor/me', { headers });
+      if (!_vpCheck(r)) { if (r.status===401) return; }
       if (r.ok){
         var j = await r.json(); var v = j.vendor || {};
         setText('vp-name', v.name || v.email || '—');

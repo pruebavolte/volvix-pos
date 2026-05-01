@@ -724,8 +724,27 @@
     }
   }
 
-  function viewTransaction(id) {
-    alert('Transacción: ' + id);
+  async function viewTransaction(id) {
+    try {
+      // /api/sales/:id (full transaction detail) — fetchAPI prepends /api/dashboard so override
+      const token = getAuthToken();
+      const r = await fetch('/api/sales/' + encodeURIComponent(id), {
+        headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+      });
+      if (r.status === 401) { window.location.replace('/login.html'); return; }
+      if (r.status === 503) { alert('Detalle no disponible'); return; }
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const data = await r.json();
+      if (!data) return;
+      const lines = [
+        'ID: ' + (data.id || id),
+        'Fecha: ' + (data.created_at || '—'),
+        'Total: ' + formatCurrency(data.total || 0),
+        'Método: ' + (data.payment_method || '—'),
+        'Estatus: ' + (data.status || '—')
+      ];
+      alert(lines.join('\n'));
+    } catch (e) { alert('Error: ' + (e.message || e)); }
   }
 
   // ============================================================================
@@ -790,14 +809,34 @@
     }
   }
 
-  function inviteUser() {
+  async function inviteUser() {
     const email = prompt('Email del nuevo usuario:');
     if (!email) return;
-    alert('Invitación enviada a: ' + email);
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { alert('Email inválido'); return; }
+    const full_name = prompt('Nombre completo:') || email.split('@')[0];
+    const role = prompt('Rol (cashier, manager, owner):', 'cashier') || 'cashier';
+    try {
+      const token = getAuthToken();
+      const res = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': token ? ('Bearer ' + token) : '' },
+        body: JSON.stringify({ email, full_name, role })
+      });
+      if (res.status === 401) { window.location.replace('/login.html'); return; }
+      if (res.status === 503) { alert('Función no configurada en el servidor'); return; }
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || json.ok === false) throw new Error(json.error || ('HTTP ' + res.status));
+      alert('Usuario creado: ' + email);
+      if (currentTab === 'users') loadUsers();
+    } catch (e) {
+      alert('Error creando usuario: ' + (e.message || e));
+    }
   }
 
   function editUser(id) {
-    alert('Editando usuario: ' + id);
+    // Redirect to dedicated user-management UI for full edit
+    try { window.location.href = '/volvix-user-management.html?user_id=' + encodeURIComponent(id); }
+    catch (_) { alert('No fue posible abrir la página de usuarios'); }
   }
 
   // ============================================================================
@@ -940,21 +979,52 @@
     }
   }
 
-  function testWA() { alert('Probando WhatsApp...'); }
-  function testTwilio() { alert('Probando Twilio...'); }
-  function testPayPal() { alert('Probando PayPal...'); }
-  function testEmail() { alert('Probando Email...'); }
+  async function _testIntegration(service) {
+    try {
+      const data = await fetchAPI('/integration-status');
+      if (!data || !data.integrations) { alert(service + ': servidor no disponible'); return; }
+      const info = data.integrations[service] || {};
+      const ok = info.active || info.configured || info.status === 'active';
+      alert(service.toUpperCase() + ': ' + (ok ? 'CONFIGURADO ✓' : 'PENDIENTE — falta API key/credentials'));
+    } catch (e) { alert('Error consultando estado: ' + (e.message || e)); }
+  }
+  function testWA()     { _testIntegration('whatsapp'); }
+  function testTwilio() { _testIntegration('twilio'); }
+  function testPayPal() { _testIntegration('paypal'); }
+  function testEmail()  { _testIntegration('email'); }
 
   // ============================================================================
   // REPORTES
   // ============================================================================
-  function generateReport() {
-    const type = document.getElementById('report-type').value;
-    alert('Generando reporte: ' + type);
+  async function generateReport() {
+    const type = (document.getElementById('report-type') || { value: 'sales' }).value;
+    const map = {
+      sales: '/api/reports/sales',
+      inventory: '/api/reports/inventory',
+      'top-products': '/api/reports/top-products',
+      cashier: '/api/reports/sales/by-cashier',
+      branch: '/api/reports/sales/by-branch'
+    };
+    const path = map[type] || map.sales;
+    try {
+      const token = getAuthToken();
+      const r = await fetch(path, { headers: token ? { 'Authorization': 'Bearer ' + token } : {} });
+      if (r.status === 401) { window.location.replace('/login.html'); return; }
+      if (r.status === 503) { alert('Reporte no configurado en el servidor'); return; }
+      const json = await r.json().catch(() => null);
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      alert('Reporte generado · ' + ((json && (json.total_rows || (json.data && json.data.length))) || 0) + ' filas');
+      window._lastReport = json;
+    } catch (e) { alert('Error: ' + (e.message || e)); }
   }
 
   function exportReportPDF() {
-    alert('Exportando a PDF...');
+    if (!window._lastReport) { alert('Genera un reporte primero'); return; }
+    const blob = new Blob([JSON.stringify(window._lastReport, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'reporte_' + Date.now() + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
   }
 
   // ============================================================================
@@ -966,20 +1036,40 @@
     else if (currentTab === 'inventory') exportInventoryCSV();
   }
 
-  function exportSalesCSV() {
-    const period = document.getElementById('sales-period').value;
-    alert(`Exportando ventas (${period})...`);
-    // TODO: Implementar exportación real
+  function _downloadCSV(filename, rows) {
+    if (!rows || !rows.length) { alert('No hay datos para exportar'); return; }
+    const csv = rows.map(r => r.map(v => {
+      const s = (v == null) ? '' : String(v);
+      return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    }).join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = 'data:text/csv;charset=utf-8,﻿' + encodeURIComponent(csv);
+    a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
   }
 
-  function exportTransactionsCSV() {
-    alert('Exportando transacciones...');
-    // TODO: Implementar exportación real
+  async function exportSalesCSV() {
+    const period = (document.getElementById('sales-period') || { value: 'month' }).value;
+    const data = await fetchAPI('/sales-by-day?period=' + encodeURIComponent(period));
+    if (!data || !data.data) return;
+    _downloadCSV('ventas_' + period + '.csv',
+      [['Fecha','Total','Tickets']].concat(data.data.map(d => [d.date, d.total || d.amount || 0, d.count || ''])));
   }
 
-  function exportInventoryCSV() {
-    alert('Exportando inventario...');
-    // TODO: Implementar exportación real
+  async function exportTransactionsCSV() {
+    const data = await fetchAPI('/transactions?limit=500&offset=0&filter=all');
+    if (!data || !Array.isArray(data.transactions)) return;
+    _downloadCSV('transacciones.csv',
+      [['ID','Fecha','Total','Método','Estatus']].concat(data.transactions.map(t =>
+        [t.id, t.created_at, t.total, t.payment_method, t.status])));
+  }
+
+  async function exportInventoryCSV() {
+    const data = await fetchAPI('/inventory?low-stock-only=false');
+    if (!data || !Array.isArray(data.products)) return;
+    _downloadCSV('inventario.csv',
+      [['ID','Nombre','Stock','Mínimo','Precio','Categoría']].concat(data.products.map(p =>
+        [p.id, p.nombre || p.name, p.stock, p.stock_min, p.precio || p.price, p.categoria || p.category])));
   }
 
   // ============================================================================

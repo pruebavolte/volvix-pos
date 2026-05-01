@@ -417,18 +417,21 @@ document.getElementById('help-fab').onclick = async () => {
   const orig = btn.textContent;
   btn.textContent = '⏳ Llamando al cajero...';
   try {
-    const r = await fetch(`${API}/api/kds/orders`, {
+    // /api/kds/tickets is the canonical KDS endpoint; kiosk help_request requires station+items
+    const r = await fetch(`${API}/api/kds/tickets`, {
       method:'POST',
       headers:{'Content-Type':'application/json', ...(token?{'Authorization':'Bearer '+token}:{})},
       body: JSON.stringify({
+        station: 'cashier',
+        items: [{ name: '🆘 Ayuda kiosko', qty: 1 }],
         type: 'help_request',
         kiosk_id: KIOSK_ID,
         tenant_id: TENANT_ID,
-        message: 'Cliente solicita asistencia en kiosko',
-        priority: 'high',
-        created_at: new Date().toISOString()
+        notes: 'Cliente solicita asistencia en kiosko',
+        priority: 'high'
       })
     });
+    if (r.status === 503) { showModal('Aviso','Llamada a cajero no disponible. Acércate a la caja.'); return; }
     if (r.ok){
       showModal('🆘 Ayuda solicitada', 'Un cajero vendrá a asistirte en breve. Gracias por tu paciencia.');
     } else {

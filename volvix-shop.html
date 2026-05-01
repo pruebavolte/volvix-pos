@@ -547,6 +547,10 @@ async function submitReview(){
         body: body
       })
     });
+    if (r.status === 503 || r.status === 404){
+      al.innerHTML='<div class="alert">Reseñas aún no disponibles en este servidor.</div>';
+      return;
+    }
     const d = await r.json().catch(()=>({}));
     if (!r.ok || d.ok === false){ al.innerHTML='<div class="alert">'+escape(d.message||'No se pudo publicar')+'</div>'; return; }
     al.innerHTML='<div class="ok">¡Gracias por tu reseña!</div>';

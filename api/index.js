@@ -31987,6 +31987,16 @@ if (process.env.NODE_ENV === 'test') {
     if (!handlers['GET /api/productos/search'] && handlers['GET /api/products']) {
       handlers['GET /api/productos/search'] = handlers['GET /api/products'];
     }
+    // public/inventario.html — bulk + import (TIER 2 wiring)
+    if (!handlers['PATCH /api/productos/bulk'] && handlers['POST /api/products/bulk']) {
+      handlers['PATCH /api/productos/bulk'] = handlers['POST /api/products/bulk'];
+    }
+    if (!handlers['POST /api/productos/bulk'] && handlers['POST /api/products/bulk']) {
+      handlers['POST /api/productos/bulk'] = handlers['POST /api/products/bulk'];
+    }
+    if (!handlers['POST /api/productos/import'] && handlers['POST /api/products/import']) {
+      handlers['POST /api/productos/import'] = handlers['POST /api/products/import'];
+    }
   })();
 
   // ================================================================
