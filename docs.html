@@ -178,6 +178,7 @@ footer a{color:var(--primary-light)}
 
   <div class="cats" id="cats">
     <button class="cat-pill active" data-cat="todos">Todos</button>
+    <button class="cat-pill" data-cat="video" style="border-color:#dc2626;color:#fca5a5">📹 Videos</button>
     <button class="cat-pill" data-cat="inicio">Inicio rápido</button>
     <button class="cat-pill" data-cat="pos">POS básico</button>
     <button class="cat-pill" data-cat="productos">Productos</button>
@@ -205,6 +206,10 @@ footer a{color:var(--primary-light)}
 
 <script>
 const ARTICLES = [
+  {id:"video-como-hacer-venta",url:"tutorials/video-como-hacer-venta.html",cat:"video",catLabel:"📹 Video",title:"Video: Tu primera venta (60s)",summary:"Video tutorial interactivo. Mira un cajero hacer una venta con animación paso a paso.",keywords:"video tutorial venta cobro nuevo"},
+  {id:"video-agregar-producto",url:"tutorials/video-agregar-producto.html",cat:"video",catLabel:"📹 Video",title:"Video: Agregar producto (45s)",summary:"Video tutorial interactivo para crear un nuevo producto en el inventario.",keywords:"video tutorial producto inventario nuevo"},
+  {id:"video-corte-caja",url:"tutorials/video-corte-caja.html",cat:"video",catLabel:"📹 Video",title:"Video: Corte de caja (50s)",summary:"Video tutorial interactivo de apertura, ventas y cierre con corte Z.",keywords:"video tutorial corte caja z apertura cierre"},
+  {id:"video-crear-cajero",url:"tutorials/video-crear-cajero.html",cat:"video",catLabel:"📹 Video",title:"Video: Crear un cajero (40s)",summary:"Video tutorial interactivo para invitar un nuevo cajero desde el panel del owner.",keywords:"video tutorial usuario cajero invitar owner"},
   {id:"primera-venta",cat:"inicio",catLabel:"Inicio rápido",title:"Cómo hacer mi primera venta",summary:"Guía paso a paso para registrar tu primera venta en menos de 2 minutos.",keywords:"venta cobro carrito ticket inicio empezar"},
   {id:"crear-producto",cat:"productos",catLabel:"Productos",title:"Crear un producto",summary:"Aprende a registrar productos con SKU, precio, impuestos e imagen.",keywords:"producto sku catalogo nuevo agregar"},
   {id:"importar-csv",cat:"productos",catLabel:"Productos",title:"Importar productos desde CSV",summary:"Carga masiva de catálogo usando archivos CSV o Excel.",keywords:"csv excel importar masivo catalogo carga"},
@@ -235,7 +240,7 @@ const cats = document.getElementById('cats');
 let activeCat = 'todos';
 
 const CAT_LABELS = {
-  todos:'Todos los artículos',inicio:'Inicio rápido',pos:'POS básico',
+  todos:'Todos los artículos',video:'📹 Video tutoriales',inicio:'Inicio rápido',pos:'POS básico',
   productos:'Productos',clientes:'Clientes',ventas:'Ventas',reportes:'Reportes',
   facturacion:'Facturación',caja:'Caja',config:'Configuración',
   integraciones:'Integraciones',faq:'FAQ'
@@ -254,11 +259,11 @@ function render(){
     );
   }
   grid.innerHTML = items.map(a => `
-    <a class="card" href="docs/${a.id}.html">
+    <a class="card" href="${a.url || ('docs/' + a.id + '.html')}">
       <span class="card-cat">${a.catLabel}</span>
       <h3>${a.title}</h3>
       <p>${a.summary}</p>
-      <span class="card-arrow">Leer artículo →</span>
+      <span class="card-arrow">${a.cat === 'video' ? '▶ Reproducir video' : 'Leer artículo →'}</span>
     </a>
   `).join('');
   empty.style.display = items.length ? 'none' : 'block';

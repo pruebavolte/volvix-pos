@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Video Tutorial: Agregar un producto al inventario - Volvix POS</title>
+<meta name="description" content="Aprende a agregar un nuevo producto al inventario en Volvix POS en 45 segundos.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+body{background:linear-gradient(135deg,#0b1220 0%,#1e293b 100%);color:#e2e8f0;min-height:100vh;padding:24px 16px}
+.wrap{max-width:1280px;margin:0 auto}
+.hero{text-align:center;margin-bottom:24px}
+.hero .badge{display:inline-block;padding:4px 12px;border-radius:999px;background:#dc2626;color:#fff;font-size:.75rem;font-weight:700;letter-spacing:.05em;margin-bottom:8px}
+.hero h1{font-size:2rem;background:linear-gradient(90deg,#38bdf8,#a78bfa);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:8px}
+.hero p{color:#94a3b8;font-size:1rem}
+.layout{display:grid;grid-template-columns:1fr 360px;gap:24px;margin-top:24px}
+@media (max-width:980px){.layout{grid-template-columns:1fr}}
+
+.player{background:#000;border-radius:14px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.6);position:relative;border:1px solid #1f2937}
+.screen{position:relative;aspect-ratio:16/9;background:#0b1220;overflow:hidden}
+
+.app{position:absolute;inset:0;background:#f8fafc;color:#0f172a;font-size:13px;display:flex;flex-direction:column}
+.topbar{background:#0f172a;color:#fff;padding:8px 12px;display:flex;justify-content:space-between;font-size:12px}
+.topbar .brand{font-weight:700;color:#38bdf8}
+.tabs-bar{background:#fff;border-bottom:1px solid #e2e8f0;padding:0 12px;display:flex;gap:4px}
+.tab{padding:10px 14px;font-size:12px;font-weight:600;color:#64748b;cursor:pointer;border-bottom:2px solid transparent}
+.tab.active{color:#3b82f6;border-color:#3b82f6}
+.content{flex:1;padding:14px;overflow:auto;background:#f8fafc}
+.toolbar{display:flex;gap:8px;margin-bottom:12px;align-items:center}
+.btn-primary{background:#16a34a;color:#fff;border:0;padding:8px 14px;border-radius:6px;font-weight:600;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:.15s}
+.btn-primary.flash{background:#22c55e;box-shadow:0 0 0 6px rgba(34,197,94,.3);transform:scale(1.04)}
+.search-box{flex:1;background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:7px 10px;font-size:12px;color:#94a3b8}
+.table{background:#fff;border-radius:8px;border:1px solid #e2e8f0;overflow:hidden}
+.tr{display:grid;grid-template-columns:1fr 100px 80px 90px;padding:10px 12px;border-bottom:1px solid #f1f5f9;font-size:12px}
+.tr.head{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transform:uppercase}
+.tr .price,.tr .stock{text-align:right;font-variant-numeric:tabular-nums}
+.tr.new-row{background:#dcfce7;animation:slideIn .5s ease}
+@keyframes slideIn{from{transform:translateY(-10px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* Modal */
+.modal{position:absolute;inset:0;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.3s}
+.modal.show{opacity:1;pointer-events:auto}
+.modal-box{background:#fff;color:#0f172a;border-radius:10px;width:75%;max-width:480px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.modal-box h3{font-size:1rem;margin-bottom:12px;color:#1e40af}
+.form-row{margin-bottom:10px}
+.form-row label{display:block;font-size:11px;color:#475569;font-weight:600;margin-bottom:4px;text-transform:uppercase}
+.form-row .val{border:2px solid #cbd5e1;border-radius:6px;padding:8px 10px;font-size:13px;min-height:34px;background:#fff;display:flex;align-items:center}
+.form-row .val.focused{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+.btn-cancel{background:#f1f5f9;color:#334155;border:0;padding:8px 14px;border-radius:6px;font-weight:600;font-size:12px;cursor:pointer}
+.type-cursor{display:inline-block;width:2px;height:14px;background:#3b82f6;animation:blink 1s infinite;vertical-align:middle;margin-left:1px}
+@keyframes blink{0%,50%{opacity:1}51%,100%{opacity:0}}
+
+/* Success */
+.success{position:absolute;inset:0;background:rgba(255,255,255,.97);color:#0f172a;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.4s}
+.success.show{opacity:1;pointer-events:auto}
+.success .check{width:80px;height:80px;border-radius:50%;background:#22c55e;display:flex;align-items:center;justify-content:center;font-size:2.6rem;color:#fff;animation:pop .6s ease}
+.success h2{margin-top:14px;color:#16a34a;font-size:1.3rem}
+.success p{color:#64748b;margin-top:4px;font-size:.9rem}
+@keyframes pop{0%{transform:scale(0)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+
+/* Cursor */
+.cursor{position:absolute;width:22px;height:22px;pointer-events:none;z-index:50;transition:left .9s cubic-bezier(.4,0,.2,1),top .9s cubic-bezier(.4,0,.2,1);filter:drop-shadow(0 3px 6px rgba(0,0,0,.5))}
+.cursor svg{width:100%;height:100%}
+.cursor.click::after{content:"";position:absolute;left:-6px;top:-6px;width:34px;height:34px;border-radius:50%;border:3px solid #fbbf24;animation:ring .5s ease}
+@keyframes ring{0%{transform:scale(.4);opacity:1}100%{transform:scale(1.6);opacity:0}}
+
+/* Player chrome */
+.player-overlay{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(transparent,rgba(0,0,0,.85));padding:14px 14px 10px}
+.controls{display:flex;align-items:center;gap:10px;color:#fff;font-size:12px}
+.btn-icon{background:none;border:0;color:#fff;cursor:pointer;font-size:1.1rem;padding:4px;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.btn-icon:hover{background:rgba(255,255,255,.15)}
+.progress-wrap{flex:1;height:5px;background:rgba(255,255,255,.25);border-radius:3px;cursor:pointer}
+.progress-bar{height:100%;background:linear-gradient(90deg,#38bdf8,#a78bfa);border-radius:3px;width:0%}
+.time{font-variant-numeric:tabular-nums;color:#cbd5e1;font-size:11px;min-width:78px;text-align:center}
+.vol{display:flex;align-items:center;gap:4px}
+.vol-bar{width:50px;height:4px;background:rgba(255,255,255,.3);border-radius:2px;overflow:hidden}
+.vol-bar-fill{height:100%;width:70%;background:#fff}
+.big-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.4);cursor:pointer;z-index:30;transition:.25s}
+.big-play.hidden{opacity:0;pointer-events:none}
+.big-play .circle{width:84px;height:84px;border-radius:50%;background:rgba(220,38,38,.92);display:flex;align-items:center;justify-content:center;color:#fff;font-size:2.5rem;padding-left:8px;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+.big-play:hover .circle{transform:scale(1.1)}
+.step-caption{position:absolute;left:14px;top:14px;background:rgba(15,23,42,.88);color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:600;z-index:25;display:flex;gap:6px;align-items:center}
+.step-caption .step-num{background:#38bdf8;color:#0b1220;border-radius:4px;padding:2px 6px;font-size:10px}
+
+/* Sidebar */
+.sidebar{background:#1e293b;border-radius:14px;padding:18px;border:1px solid #334155}
+.sidebar h2{font-size:1rem;color:#38bdf8;margin-bottom:12px}
+.steps-list{list-style:none;display:flex;flex-direction:column;gap:8px}
+.step-item{display:flex;gap:10px;padding:10px;background:#0f172a;border-radius:8px;border:1px solid #334155;cursor:pointer;transition:.2s}
+.step-item:hover{border-color:#475569}
+.step-item.active{border-color:#38bdf8;box-shadow:0 0 0 1px #38bdf8}
+.step-item.done .num{background:#16a34a;color:#fff}
+.step-item .num{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:#334155;color:#cbd5e1;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700}
+.step-item.active .num{background:#38bdf8;color:#0b1220}
+.step-item .body strong{color:#e2e8f0;font-size:.85rem;display:block}
+.step-item .body span{color:#94a3b8;font-size:.75rem}
+.actions{margin-top:18px;display:flex;flex-direction:column;gap:8px}
+.action-btn{padding:10px 14px;border:0;border-radius:8px;font-weight:600;font-size:.85rem;cursor:pointer;text-align:center;text-decoration:none;display:flex;align-items:center;gap:8px;justify-content:center}
+.action-btn.primary{background:#16a34a;color:#fff}
+.action-btn.secondary{background:#334155;color:#e2e8f0}
+.action-btn.outline{background:transparent;color:#38bdf8;border:1px solid #38bdf8}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#0f172a;color:#fff;padding:12px 20px;border-radius:8px;border:1px solid #38bdf8;font-size:.85rem;opacity:0;transition:.3s;z-index:100}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+footer{margin-top:32px;text-align:center;color:#64748b;font-size:.8rem}
+footer a{color:#38bdf8;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <span class="badge">VIDEO TUTORIAL</span>
+    <h1>Como agregar un producto al inventario</h1>
+    <p>45 segundos. Aprende a registrar productos nuevos en Volvix POS.</p>
+  </div>
+
+  <div class="layout">
+    <div class="player" id="player">
+      <div class="screen" id="screen">
+
+        <div class="step-caption" id="stepCaption" style="display:none">
+          <span class="step-num" id="stepNum">1</span>
+          <span id="stepText">Inicio</span>
+        </div>
+
+        <div class="big-play" id="bigPlay">
+          <div class="circle">&#9654;</div>
+        </div>
+
+        <div class="app">
+          <div class="topbar">
+            <div class="brand">Volvix POS - Inventario (F4)</div>
+            <div>Admin: Maria</div>
+          </div>
+          <div class="tabs-bar">
+            <div class="tab active">Productos</div>
+            <div class="tab">Categorias</div>
+            <div class="tab">Proveedores</div>
+            <div class="tab">Stock</div>
+          </div>
+          <div class="content">
+            <div class="toolbar">
+              <div class="search-box">Buscar productos...</div>
+              <button class="btn-primary" id="addBtn">+ Agregar producto</button>
+            </div>
+            <div class="table" id="table">
+              <div class="tr head"><span>Producto</span><span class="price">Precio</span><span class="stock">Stock</span><span>Accion</span></div>
+              <div class="tr"><span>Coca Cola 600ml</span><span class="price">$22.00</span><span class="stock">45</span><span style="color:#3b82f6">Editar</span></div>
+              <div class="tr"><span>Sabritas Original</span><span class="price">$18.00</span><span class="stock">30</span><span style="color:#3b82f6">Editar</span></div>
+              <div class="tr"><span>Pan Bimbo Blanco</span><span class="price">$42.00</span><span class="stock">12</span><span style="color:#3b82f6">Editar</span></div>
+              <div class="tr new-row" id="newRow" style="display:none"><span id="nrName">-</span><span class="price" id="nrPrice">-</span><span class="stock" id="nrStock">-</span><span style="color:#16a34a">Nuevo</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form modal -->
+        <div class="modal" id="formModal">
+          <div class="modal-box">
+            <h3>Nuevo producto</h3>
+            <div class="form-row">
+              <label>Nombre del producto</label>
+              <div class="val" id="fName"><span id="tName"></span><span class="type-cursor" id="curName" style="display:none"></span></div>
+            </div>
+            <div class="form-grid">
+              <div class="form-row">
+                <label>Precio venta</label>
+                <div class="val" id="fPrice"><span id="tPrice"></span><span class="type-cursor" id="curPrice" style="display:none"></span></div>
+              </div>
+              <div class="form-row">
+                <label>Stock inicial</label>
+                <div class="val" id="fStock"><span id="tStock"></span><span class="type-cursor" id="curStock" style="display:none"></span></div>
+              </div>
+            </div>
+            <div class="form-row">
+              <label>Categoria</label>
+              <div class="val">Bebidas</div>
+            </div>
+            <div class="modal-actions">
+              <button class="btn-cancel">Cancelar</button>
+              <button class="btn-primary" id="saveBtn">Guardar producto</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Success -->
+        <div class="success" id="success">
+          <div class="check">&#10003;</div>
+          <h2>Producto creado</h2>
+          <p>Galleta Oreo agregada al inventario</p>
+        </div>
+
+        <!-- Cursor -->
+        <div class="cursor" id="cursor" style="left:50%;top:50%">
+          <svg viewBox="0 0 24 24" fill="#fff" stroke="#000" stroke-width="1"><path d="M3 2 L3 18 L7 14 L10 21 L13 20 L10 13 L16 13 Z"/></svg>
+        </div>
+      </div>
+
+      <div class="player-overlay">
+        <div class="controls">
+          <button class="btn-icon" id="playPauseBtn">&#9654;</button>
+          <button class="btn-icon" id="restartBtn">&#8634;</button>
+          <div class="progress-wrap" id="progressWrap"><div class="progress-bar" id="progressBar"></div></div>
+          <span class="time" id="timeDisplay">0:00 / 0:45</span>
+          <div class="vol"><button class="btn-icon">&#128266;</button><div class="vol-bar"><div class="vol-bar-fill"></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="sidebar">
+      <h2>&#128214; Pasos del tutorial</h2>
+      <ul class="steps-list" id="stepsList">
+        <li class="step-item" data-step="0"><div class="num">1</div><div class="body"><strong>Abrir Inventario</strong><span>Presiona F4 o click en el menu</span></div></li>
+        <li class="step-item" data-step="1"><div class="num">2</div><div class="body"><strong>Click "+ Agregar producto"</strong><span>Boton verde arriba a la derecha</span></div></li>
+        <li class="step-item" data-step="2"><div class="num">3</div><div class="body"><strong>Llenar formulario</strong><span>Nombre, precio, stock inicial</span></div></li>
+        <li class="step-item" data-step="3"><div class="num">4</div><div class="body"><strong>Guardar producto</strong><span>Click en "Guardar"</span></div></li>
+        <li class="step-item" data-step="4"><div class="num">5</div><div class="body"><strong>Confirmacion</strong><span>Producto agregado a la lista</span></div></li>
+      </ul>
+      <div class="actions">
+        <button class="action-btn primary" id="restartActionBtn">&#8634; Volver a reproducir</button>
+        <a class="action-btn secondary" href="../salvadorex_web_v25.html">&#128187; Ir al POS real</a>
+        <button class="action-btn outline" id="shareBtn">&#128279; Compartir tutorial</button>
+      </div>
+    </aside>
+  </div>
+
+  <footer><p>Tutorial interactivo - Volvix POS - <a href="../INDICE-TUTORIALES.html">Ver todos los tutoriales</a></p></footer>
+</div>
+
+<div class="toast" id="toast">Link copiado al portapapeles</div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const screen = $('screen');
+  const cursor = $('cursor');
+  const bigPlay = $('bigPlay');
+  const playPauseBtn = $('playPauseBtn');
+  const restartBtn = $('restartBtn');
+  const restartActionBtn = $('restartActionBtn');
+  const progressBar = $('progressBar');
+  const progressWrap = $('progressWrap');
+  const timeDisplay = $('timeDisplay');
+  const stepCaption = $('stepCaption');
+  const stepNum = $('stepNum');
+  const stepText = $('stepText');
+  const stepsList = $('stepsList');
+  const shareBtn = $('shareBtn');
+  const toast = $('toast');
+
+  const DURATION = 45;
+  let elapsed = 0, playing = false, lastTick = null, rafId = null;
+
+  const steps = [
+    {t:0,  label:'Abrir Inventario (F4)'},
+    {t:8,  label:'Click en + Agregar producto'},
+    {t:16, label:'Llenar nombre, precio y stock'},
+    {t:32, label:'Click en Guardar producto'},
+    {t:40, label:'Producto agregado al inventario'}
+  ];
+
+  function fmt(s){ s = Math.max(0,Math.min(DURATION,Math.floor(s))); return Math.floor(s/60)+':' + String(s%60).padStart(2,'0'); }
+  function rect(el){ return el.getBoundingClientRect(); }
+  function moveCursorTo(targetEl){
+    if(!targetEl) return;
+    const sr = rect(screen), tr = rect(targetEl);
+    cursor.style.left = ((tr.left - sr.left) + tr.width/2 - 11) + 'px';
+    cursor.style.top  = ((tr.top  - sr.top ) + tr.height/2 - 11) + 'px';
+  }
+  function show(el){ el && el.classList.add('show'); }
+  function hide(el){ el && el.classList.remove('show'); }
+  function flash(el){ if(!el) return; el.classList.add('flash'); setTimeout(()=>el.classList.remove('flash'), 500); }
+
+  function applyState(t){
+    let curStep = 0;
+    for (let i=0;i<steps.length;i++) if (t >= steps[i].t) curStep = i;
+    stepCaption.style.display = (playing || t > 0) ? 'flex' : 'none';
+    stepNum.textContent = curStep + 1;
+    stepText.textContent = steps[curStep].label;
+    [...stepsList.children].forEach((li,i)=>{
+      li.classList.toggle('active', i === curStep);
+      li.classList.toggle('done', i < curStep);
+    });
+
+    const formModal = $('formModal');
+    const success = $('success');
+    const newRow = $('newRow');
+    const addBtn = $('addBtn');
+    const saveBtn = $('saveBtn');
+    const tName = $('tName'), tPrice = $('tPrice'), tStock = $('tStock');
+    const curName = $('curName'), curPrice = $('curPrice'), curStock = $('curStock');
+    const fName = $('fName'), fPrice = $('fPrice'), fStock = $('fStock');
+
+    // Reset
+    hide(formModal); hide(success);
+    newRow.style.display = 'none';
+    tName.textContent = ''; tPrice.textContent = ''; tStock.textContent = '';
+    curName.style.display = 'none'; curPrice.style.display = 'none'; curStock.style.display = 'none';
+    [fName,fPrice,fStock].forEach(el => el && el.classList.remove('focused'));
+
+    if (curStep === 0) {
+      const local = t - steps[0].t;
+      if (local < 4) moveCursorTo($('table'));
+      else { moveCursorTo(addBtn); }
+    }
+    else if (curStep === 1) {
+      moveCursorTo(addBtn);
+      const local = t - steps[1].t;
+      if (local >= 5) { flash(addBtn); show(formModal); }
+      if (local >= 7) show(formModal);
+    }
+    else if (curStep === 2) {
+      show(formModal);
+      const local = t - steps[2].t;
+      const phrase = 'Galleta Oreo';
+      const priceStr = '24.50';
+      const stockStr = '50';
+
+      if (local < 6) {
+        // Type name
+        moveCursorTo(fName);
+        fName.classList.add('focused');
+        curName.style.display = 'inline-block';
+        const chars = Math.min(phrase.length, Math.floor(local * 2.2));
+        tName.textContent = phrase.slice(0, chars);
+      } else if (local < 11) {
+        tName.textContent = phrase;
+        moveCursorTo(fPrice);
+        fPrice.classList.add('focused');
+        curPrice.style.display = 'inline-block';
+        const lp = local - 6;
+        const chars = Math.min(priceStr.length, Math.floor(lp * 1.4));
+        tPrice.textContent = '$' + priceStr.slice(0, chars);
+      } else {
+        tName.textContent = phrase;
+        tPrice.textContent = '$' + priceStr;
+        moveCursorTo(fStock);
+        fStock.classList.add('focused');
+        curStock.style.display = 'inline-block';
+        const lp = local - 11;
+        const chars = Math.min(stockStr.length, Math.floor(lp * 1.5));
+        tStock.textContent = stockStr.slice(0, chars);
+      }
+    }
+    else if (curStep === 3) {
+      show(formModal);
+      tName.textContent = 'Galleta Oreo';
+      tPrice.textContent = '$24.50';
+      tStock.textContent = '50';
+      const local = t - steps[3].t;
+      if (local < 5) {
+        moveCursorTo(saveBtn);
+        if (local >= 4) flash(saveBtn);
+      } else {
+        moveCursorTo(saveBtn);
+      }
+    }
+    else if (curStep === 4) {
+      newRow.style.display = 'grid';
+      $('nrName').textContent = 'Galleta Oreo';
+      $('nrPrice').textContent = '$24.50';
+      $('nrStock').textContent = '50';
+      moveCursorTo(newRow);
+      const local = t - steps[4].t;
+      if (local >= 1) show(success);
+    }
+
+    progressBar.style.width = Math.min(100, (t/DURATION)*100) + '%';
+    timeDisplay.textContent = fmt(t) + ' / 0:45';
+  }
+
+  function tick(now){
+    if(!playing) return;
+    if (lastTick == null) lastTick = now;
+    elapsed += (now - lastTick)/1000; lastTick = now;
+    if (elapsed >= DURATION){ elapsed = DURATION; applyState(elapsed); pause(); return; }
+    applyState(elapsed); rafId = requestAnimationFrame(tick);
+  }
+  function play(){ if (elapsed >= DURATION) elapsed = 0; playing = true; bigPlay.classList.add('hidden'); playPauseBtn.innerHTML='&#10074;&#10074;'; lastTick = null; rafId = requestAnimationFrame(tick); }
+  function pause(){ playing = false; playPauseBtn.innerHTML = '&#9654;'; if(rafId) cancelAnimationFrame(rafId); rafId = null; }
+  function toggle(){ playing ? pause() : play(); }
+  function restart(){ pause(); elapsed = 0; applyState(0); bigPlay.classList.remove('hidden'); stepCaption.style.display='none'; play(); }
+
+  bigPlay.addEventListener('click', toggle);
+  playPauseBtn.addEventListener('click', toggle);
+  restartBtn.addEventListener('click', restart);
+  restartActionBtn.addEventListener('click', restart);
+  progressWrap.addEventListener('click', e => {
+    const r = progressWrap.getBoundingClientRect();
+    elapsed = Math.max(0, Math.min(DURATION, ((e.clientX - r.left)/r.width) * DURATION));
+    applyState(elapsed); bigPlay.classList.add('hidden');
+  });
+  stepsList.addEventListener('click', e => {
+    const li = e.target.closest('.step-item'); if(!li) return;
+    elapsed = steps[parseInt(li.dataset.step,10)].t;
+    bigPlay.classList.add('hidden'); applyState(elapsed); if(!playing) play();
+  });
+  shareBtn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2200);
+    } catch(e){ toast.textContent='No se pudo copiar'; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2200); }
+  });
+  document.addEventListener('keydown', e => { if(e.code==='Space'){e.preventDefault();toggle();} if(e.key==='r'||e.key==='R')restart(); });
+
+  applyState(0);
+  stepCaption.style.display='none';
+})();
+</script>
+</body>
+</html>
