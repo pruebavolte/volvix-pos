@@ -234,6 +234,13 @@
       opts.body = JSON.stringify(opts.body);
     }
     const r = await fetch(path, Object.assign({}, opts, { headers, credentials: 'include' }));
+    if (r.status === 401 && path !== '/api/auth/me') {
+      const back = encodeURIComponent(location.pathname + location.search);
+      location.replace('/login.html?expired=1&redirect=' + back);
+    }
+    if (r.status === 503) {
+      try { (window.vlxToast || function(m){console.warn(m);})('Servicio no disponible (503)', 'warn'); } catch(_){}
+    }
     return r;
   }
 

@@ -94,6 +94,10 @@ async function load() {
   }
   try {
     const r = await fetch('/api/flash-sales/active?tenant_id=' + encodeURIComponent(tenantId));
+    if (r.status === 503) {
+      $('products').innerHTML = '<div class="empty">Servicio no disponible. Intenta más tarde.</div>';
+      return;
+    }
     const data = await r.json();
     const sales = data.flash_sales || [];
     if (!sales.length) { showEnded(); return; }

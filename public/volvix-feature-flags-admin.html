@@ -162,7 +162,16 @@ function api(method, path, body) {
     body: body ? JSON.stringify(body) : undefined,
     credentials: 'same-origin',
   }).then(function (r) {
-    if (!r.ok) return r.json().then(function (e) { throw new Error(e.error || ('HTTP ' + r.status)); });
+    if (r.status === 401) {
+      var back = encodeURIComponent(location.pathname + location.search);
+      location.replace('/login.html?expired=1&redirect=' + back);
+      throw new Error('unauthorized');
+    }
+    if (r.status === 503) {
+      try { (window.vlxToast || function(m){alert(m);})('Servicio no disponible (503)', 'warn'); } catch(_){}
+      throw new Error('service_unavailable');
+    }
+    if (!r.ok) return r.json().catch(function(){return {};}).then(function (e) { throw new Error(e.error || ('HTTP ' + r.status)); });
     return r.json();
   });
 }

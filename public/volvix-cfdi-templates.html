@@ -223,6 +223,14 @@
     var init = { method: method, headers: headers };
     if (body !== undefined && body !== null && method !== 'GET') init.body = JSON.stringify(body);
     return fetch(url, init).then(function (r) {
+      if (r.status === 401) {
+        var back = encodeURIComponent(location.pathname + location.search);
+        location.replace('/login.html?expired=1&redirect=' + back);
+        return { ok: false, status: 401, data: { error: 'unauthorized' } };
+      }
+      if (r.status === 503) {
+        try { (window.vlxToast || alert)('Servicio no disponible (503)', 'warn'); } catch (_) {}
+      }
       var ct = r.headers.get('content-type') || '';
       var p = ct.indexOf('json') !== -1 ? r.json() : r.text();
       return p.then(function (d) { return { ok: r.ok, status: r.status, data: d }; });

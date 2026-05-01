@@ -271,6 +271,15 @@
     const tok = getToken();
     if (tok) headers['Authorization'] = 'Bearer ' + tok;
     const r = await fetch('/api/activity?' + params.toString(), { headers, credentials: 'include' });
+    if (r.status === 401) {
+      const back = encodeURIComponent(location.pathname + location.search);
+      location.replace('/login.html?expired=1&redirect=' + back);
+      return [];
+    }
+    if (r.status === 503) {
+      try { (window.vlxToast || function(m){console.warn(m);})('Servicio no disponible (503)', 'warn'); } catch(_){}
+      return [];
+    }
     if (!r.ok) return [];
     const j = await r.json().catch(() => ({}));
     return (j && j.items) || [];

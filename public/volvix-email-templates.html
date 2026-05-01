@@ -143,7 +143,15 @@
       method: method,
       headers: headers,
       body: body ? JSON.stringify(body) : undefined,
-    }).then(function(r){ return r.json().then(function(j){ j.__status = r.status; return j; }); });
+    }).then(function(r){
+      if (r.status === 401) {
+        var back = encodeURIComponent(location.pathname + location.search);
+        location.replace('/login.html?expired=1&redirect=' + back);
+        return { ok: false, error: 'unauthorized', __status: 401 };
+      }
+      if (r.status === 503) { try { toast('Servicio no disponible (503)', true); } catch(_){} }
+      return r.json().catch(function(){ return {}; }).then(function(j){ j.__status = r.status; return j; });
+    });
   }
 
   function toast(msg, isErr){

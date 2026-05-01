@@ -115,10 +115,23 @@ function setTab(t) {
 
 function token(){ return localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || ''; }
 function authHeaders(){ const t = token(); return t ? { 'Authorization': 'Bearer ' + t } : {}; }
+async function apiFetch(path, opts){
+  const r = await fetch(path, Object.assign({}, opts || {}, { headers: Object.assign({}, (opts && opts.headers) || {}, authHeaders()) }));
+  if (r.status === 401) {
+    const back = encodeURIComponent(location.pathname + location.search);
+    location.replace('/login.html?expired=1&redirect=' + back);
+    throw new Error('unauthorized');
+  }
+  if (r.status === 503) {
+    try { (window.vlxToast || function(m){alert(m);})('Servicio no disponible (503)', 'warn'); } catch(_){}
+    throw new Error('service_unavailable');
+  }
+  return r;
+}
 
 async function loadKPIs() {
   try {
-    const r = await fetch('/api/appointments?status=all', { headers: authHeaders() });
+    const r = await apiFetch('/api/appointments?status=all');
     const data = await r.json();
     const list = data.items || data.appointments || [];
     const todayStr = today.toISOString().slice(0,10);
@@ -151,7 +164,7 @@ async function loadDay() {
   }
   $('day-grid').innerHTML = html;
   try {
-    const r = await fetch('/api/appointments?date=' + dateInput, { headers: authHeaders() });
+    const r = await apiFetch('/api/appointments?date=' + dateInput);
     const data = await r.json();
     const list = data.items || data.appointments || [];
     list.forEach(a => {
@@ -172,7 +185,7 @@ async function loadDay() {
 async function loadList(filter) {
   let qs = filter === 'past' ? 'status=past' : 'status=upcoming';
   try {
-    const r = await fetch('/api/appointments?' + qs, { headers: authHeaders() });
+    const r = await apiFetch('/api/appointments?' + qs);
     const data = await r.json();
     const list = data.items || data.appointments || [];
     $('appts-body').innerHTML = list.map(a => {
@@ -199,9 +212,9 @@ async function loadList(filter) {
 async function action(id, kind) {
   if (!confirm(`¿Confirmar acción "${kind}"?`)) return;
   try {
-    const r = await fetch(`/api/appointments/${id}/${kind}`, {
+    const r = await apiFetch(`/api/appointments/${id}/${kind}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...authHeaders() },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({})
     });
     if (!r.ok) throw new Error(await r.text());

@@ -88,6 +88,15 @@ async function api(path, method, body) {
   if (tk) opts.headers['Authorization'] = 'Bearer ' + tk;
   if (body) opts.body = JSON.stringify(body);
   const r = await fetch(path, opts);
+  if (r.status === 401) {
+    const back = encodeURIComponent(location.pathname + location.search);
+    location.replace('/login.html?expired=1&redirect=' + back);
+    return { ok: false, error: 'unauthorized' };
+  }
+  if (r.status === 503) {
+    try { (window.vlxToast || function(m){console.warn(m);})('Servicio no disponible (503)', 'warn'); } catch(_){}
+    return { ok: false, error: 'service_unavailable' };
+  }
   return r.json().catch(() => ({ ok: false, error: 'parse_error' }));
 }
 
