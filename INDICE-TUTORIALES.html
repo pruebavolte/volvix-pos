@@ -359,6 +359,44 @@ footer a:hover {
   <p class="description">Aprende todas las features de Volvix POS con tutoriales interactivos, artículos de ayuda y guías paso a paso. Desde tu primera venta hasta configuraciones avanzadas.</p>
 </header>
 
+<!-- Búsqueda con autocomplete -->
+<div style="max-width:720px;margin:0 auto 24px;position:relative;">
+  <input id="tutorial-search" type="text" placeholder="🔎 Busca tutorial: 'venta', 'producto', 'corte'..." autocomplete="off"
+         style="width:100%;padding:14px 18px;background:#1e293b;border:1px solid #334155;border-radius:10px;color:#e2e8f0;font-size:1rem;outline:none;transition:border-color .2s;"
+         oninput="onSearchInput(this.value)" onfocus="onSearchInput(this.value)" onblur="setTimeout(()=>document.getElementById('search-suggest').style.display='none',180)">
+  <div id="search-suggest" style="display:none;position:absolute;top:100%;left:0;right:0;background:#1e293b;border:1px solid #334155;border-top:0;border-radius:0 0 10px 10px;max-height:280px;overflow-y:auto;z-index:50;"></div>
+</div>
+
+<!-- Filtro por categoría/tags -->
+<div id="tag-filter" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:24px;">
+  <button class="tag-pill active" data-tag="all" onclick="filterByTag(this,'all')">Todos</button>
+  <button class="tag-pill" data-tag="inicio" onclick="filterByTag(this,'inicio')">🚀 Inicio rápido</button>
+  <button class="tag-pill" data-tag="pos" onclick="filterByTag(this,'pos')">💳 POS</button>
+  <button class="tag-pill" data-tag="inventario" onclick="filterByTag(this,'inventario')">📦 Inventario</button>
+  <button class="tag-pill" data-tag="reportes" onclick="filterByTag(this,'reportes')">📊 Reportes</button>
+  <button class="tag-pill" data-tag="avanzado" onclick="filterByTag(this,'avanzado')">⚙️ Avanzado</button>
+</div>
+
+<style>
+  .tag-pill { padding:8px 14px;background:#1e293b;border:1px solid #334155;border-radius:100px;color:#cbd5e1;font-size:0.85rem;font-weight:500;cursor:pointer;transition:all .2s; }
+  .tag-pill:hover { border-color:#38bdf8;color:#fff; }
+  .tag-pill.active { background:linear-gradient(90deg,#38bdf8,#a78bfa);color:#fff;border-color:#38bdf8; }
+  .suggest-item { display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-bottom:1px solid #334155;color:#e2e8f0;font-size:0.9rem; }
+  .suggest-item:hover { background:#334155;color:#fff; }
+  .suggest-item:last-child { border-bottom:0; }
+</style>
+
+<!-- Progreso global -->
+<div style="max-width:720px;margin:0 auto 32px;background:#1e293b;border:1px solid #334155;border-radius:12px;padding:18px 20px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+    <strong style="color:#fde047;">📈 Tu progreso global</strong>
+    <span id="progress-counter" style="color:#94a3b8;font-size:0.9rem;">0 / 28 completados</span>
+  </div>
+  <div style="height:10px;background:#0b1220;border-radius:6px;overflow:hidden;">
+    <div id="progress-fill-global" style="height:100%;background:linear-gradient(90deg,#38bdf8,#a78bfa);border-radius:6px;width:0%;transition:width .5s;"></div>
+  </div>
+</div>
+
 <div class="stats">
   <div class="stat">
     <div class="stat-number">10</div>
@@ -949,6 +987,122 @@ function showTab(tabName) {
 
   // Add active class to clicked button
   event.target.classList.add('active');
+}
+
+// ============== INDEX BUILDING ==============
+// Auto-tag cards by inferring from title
+const TAG_RULES = [
+  { tag:'inicio',     match:/registro|primera venta|primera|inicio|bienvenid|3 min|módulos/i },
+  { tag:'pos',        match:/cobr|tarjeta|caja|venta|descuento|devolución|abrir/i },
+  { tag:'inventario', match:/producto|inventario|csv|importar|etiqueta|stock|crear product/i },
+  { tag:'reportes',   match:/reporte|cierre|corte|análisis|ventas/i },
+  { tag:'avanzado',   match:/cfdi|factur|whatsapp|shopify|stripe|backup|impresora|api|integraci|promoci|crédito|usuari/i },
+];
+
+function tagsForTitle(title) {
+  const t = (title || '').toLowerCase();
+  const tags = TAG_RULES.filter(r => r.match.test(t)).map(r => r.tag);
+  return tags.length ? tags : ['avanzado'];
+}
+
+const allCards = [];
+function indexAllCards() {
+  document.querySelectorAll('.card').forEach(card => {
+    const titleEl = card.querySelector('h3');
+    const linkEl = card.querySelector('.card-link');
+    if (!titleEl || !linkEl) return;
+    const title = titleEl.textContent.trim();
+    const href = linkEl.getAttribute('href');
+    const tags = tagsForTitle(title);
+    card.dataset.tags = tags.join(',');
+    card.dataset.title = title.toLowerCase();
+    allCards.push({ card, title, href, tags });
+  });
+}
+
+// ============== SEARCH AUTOCOMPLETE ==============
+function onSearchInput(q) {
+  const sug = document.getElementById('search-suggest');
+  q = (q || '').trim().toLowerCase();
+  if (!q) { sug.style.display = 'none'; filterCards('', getActiveTag()); return; }
+  filterCards(q, getActiveTag());
+  const matches = allCards.filter(c => c.title.toLowerCase().includes(q)).slice(0, 8);
+  if (!matches.length) { sug.style.display = 'none'; return; }
+  sug.innerHTML = matches.map(m => `
+    <a class="suggest-item" href="${m.href}">
+      <span style="color:#38bdf8;">→</span>
+      <span>${m.title}</span>
+      <span style="margin-left:auto;font-size:0.72rem;color:#64748b;">${m.tags.join(' · ')}</span>
+    </a>
+  `).join('');
+  sug.style.display = 'block';
+}
+
+function filterCards(query, tag) {
+  allCards.forEach(({ card, title, tags }) => {
+    const matchesQuery = !query || title.toLowerCase().includes(query);
+    const matchesTag = tag === 'all' || tags.includes(tag);
+    card.style.display = (matchesQuery && matchesTag) ? '' : 'none';
+  });
+}
+
+function getActiveTag() {
+  return document.querySelector('.tag-pill.active')?.dataset.tag || 'all';
+}
+
+function filterByTag(btn, tag) {
+  document.querySelectorAll('.tag-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const q = (document.getElementById('tutorial-search').value || '').trim().toLowerCase();
+  filterCards(q, tag);
+}
+
+// ============== PROGRESS ==============
+async function loadProgress() {
+  let completed = [];
+  try {
+    const r = await fetch('/api/user/tutorials');
+    if (r.ok) {
+      const list = await r.json();
+      if (Array.isArray(list)) completed = list.filter(t => t.completed).map(t => t.tutorial_id);
+    }
+  } catch {}
+  if (!completed.length) {
+    completed = JSON.parse(localStorage.getItem('volvix:tutorials:done') || '[]');
+  }
+
+  const total = allCards.length;
+  let done = 0;
+  allCards.forEach(({ card, href }) => {
+    const id = href.split('/').pop().replace('.html','');
+    const isDone = completed.some(c => href.includes(c) || c === id);
+    if (isDone) {
+      done++;
+      card.style.position = 'relative';
+      if (!card.querySelector('.done-badge')) {
+        const badge = document.createElement('div');
+        badge.className = 'done-badge';
+        badge.style.cssText = 'position:absolute;top:8px;right:8px;background:#10b981;color:#fff;font-size:0.7rem;font-weight:700;padding:3px 8px;border-radius:100px;z-index:5;';
+        badge.textContent = '✓ COMPLETO';
+        card.appendChild(badge);
+      }
+    }
+  });
+
+  const pct = total ? Math.round((done/total)*100) : 0;
+  document.getElementById('progress-counter').textContent = `${done} / ${total} completados (${pct}%)`;
+  document.getElementById('progress-fill-global').style.width = pct + '%';
+}
+
+// ============== INIT ==============
+document.addEventListener('DOMContentLoaded', () => {
+  indexAllCards();
+  loadProgress();
+});
+// Fallback if already loaded
+if (document.readyState !== 'loading') {
+  indexAllCards();
+  loadProgress();
 }
 </script>
 </body>

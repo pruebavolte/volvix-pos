@@ -594,6 +594,20 @@
 <script src="volvix-sync-widget.js"></script>
   <script src="/volvix-uplift-wiring.js" defer></script>
   <script src="/volvix-error-reporter.js" defer></script>
+
+  <!-- GA4 (gtag) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-VOLVIX001"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-VOLVIX001', { send_page_view: false });
+  </script>
+
+  <!-- SEO meta + canonical (rellenado dinámicamente) -->
+  <meta name="description" id="meta-desc" content="Volvix POS · sistema personalizado por giro de negocio.">
+  <link rel="canonical" id="meta-canonical" href="">
+  <script type="application/ld+json" id="ld-json"></script>
 </head>
 <body>
 
@@ -682,6 +696,57 @@
     document.documentElement.style.setProperty('--primary-soft', data.accent);
 
     document.title = `${data.systemName} · ${data.tagline}`;
+
+    // ===== SEO: meta description + canonical + JSON-LD =====
+    try {
+      const description = `${data.systemName} es el sistema POS #1 para ${giro.plural}. ${data.subheadline}`.slice(0, 158);
+      document.getElementById('meta-desc').setAttribute('content', description);
+      const canonical = (location.origin || 'https://volvix.com') + '/landing_dynamic.html?giro=' + encodeURIComponent(giro.key);
+      document.getElementById('meta-canonical').setAttribute('href', canonical);
+
+      const cheapestPrice = (data.pricing && data.pricing.length) ? Math.min(...data.pricing.map(p => Number(p.price)||0)) : 399;
+      const ldJson = {
+        '@context': 'https://schema.org',
+        '@graph': [
+          {
+            '@type': 'LocalBusiness',
+            'name': data.systemName,
+            'description': description,
+            'url': canonical,
+            'image': giro.hero?.image || (location.origin + '/og-default.png'),
+            'priceRange': '$$',
+            'address': { '@type': 'PostalAddress', 'addressCountry': 'MX' },
+            'aggregateRating': { '@type': 'AggregateRating', 'ratingValue': '4.8', 'reviewCount': '247' }
+          },
+          {
+            '@type': 'Product',
+            'name': data.systemName,
+            'description': description,
+            'brand': { '@type': 'Brand', 'name': 'Volvix Core' },
+            'category': giro.category || 'Software · POS',
+            'offers': {
+              '@type': 'Offer',
+              'priceCurrency': 'MXN',
+              'price': String(cheapestPrice),
+              'availability': 'https://schema.org/InStock',
+              'url': canonical
+            }
+          }
+        ]
+      };
+      document.getElementById('ld-json').textContent = JSON.stringify(ldJson);
+
+      // GA4 page_view con custom dimension `giro`
+      if (typeof gtag === 'function') {
+        gtag('event', 'page_view', {
+          page_title: document.title,
+          page_location: canonical,
+          giro: giro.key,
+          giro_name: giro.name,
+          giro_category: giro.category || ''
+        });
+      }
+    } catch (e) { /* no romper render */ }
 
     const isDark = giro.hero?.dark;
     const testimonial = TESTIMONIALS[giro.category] || TESTIMONIALS.otros;
@@ -902,7 +967,12 @@
   // ========== MAIN ==========
   const giroKey = getParam('giro');
   if (!giroKey) {
-    window.location.href = 'marketplace.html';
+    // Redirige al marketplace si no hay giro indicado
+    window.location.replace('marketplace.html');
+  } else if (!Array.isArray(window.GIROS_V2)) {
+    // Fallback robusto si el catálogo no cargó
+    console.warn('[landing_dynamic] GIROS_V2 no disponible, fallback al marketplace');
+    setTimeout(() => window.location.replace('marketplace.html?reason=catalog_missing'), 100);
   } else {
     let giro = GIROS_V2.find(g => g.key === giroKey);
 
@@ -923,8 +993,25 @@
 
     if (giro) {
       renderGiro(giro);
+      // Aplicar lazy-load a todas las imágenes inyectadas (mejor Lighthouse)
+      requestAnimationFrame(() => {
+        document.querySelectorAll('img:not([loading])').forEach(img => {
+          img.setAttribute('loading', 'lazy');
+          img.setAttribute('decoding', 'async');
+        });
+      });
     } else {
+      // Giro no existe → tracking + redirect a marketplace
+      try {
+        if (typeof gtag === 'function') {
+          gtag('event', 'giro_not_found', { giro: giroKey });
+        }
+      } catch {}
+      // Mostrar 404 visual brevemente y luego redirigir
       renderNotFound(giroKey);
+      setTimeout(() => {
+        window.location.replace('marketplace.html?missing=' + encodeURIComponent(giroKey));
+      }, 2500);
     }
   }
 

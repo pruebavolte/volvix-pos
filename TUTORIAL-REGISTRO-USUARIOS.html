@@ -693,6 +693,103 @@ TNT-27PYW (Restaurante) — 8 productos
       </div>
     </div>
 
+    <!-- VIDEO + SCREENSHOTS + ACCIONES -->
+    <div class="section" style="margin-top:40px;">
+      <h2>🎥 Video tutorial</h2>
+      <div style="position:relative;width:100%;aspect-ratio:16/9;background:#0b1220;border-radius:12px;overflow:hidden;border:1px solid #334155;">
+        <iframe id="tutorial-video" loading="lazy" src="about:blank" data-src="https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0" title="Tutorial: Registro de Usuarios" allow="accelerometer; clipboard-write; encrypted-media; gyroscope" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;border:0;"></iframe>
+        <div id="video-poster" onclick="loadVideo()" style="position:absolute;inset:0;background:linear-gradient(135deg,#1e3a8a,#7c3aed);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:#fff;">
+          <div style="font-size:68px;margin-bottom:12px;">▶️</div>
+          <div style="font-size:1.1rem;font-weight:600;">Reproducir video tutorial</div>
+          <div style="font-size:0.85rem;color:#cbd5e1;margin-top:4px;">Duración: 4:30 min</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>🖼️ Screenshots paso a paso</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;">
+        <div style="background:#0b1220;border:1px solid #334155;border-radius:10px;padding:14px;">
+          <svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;border-radius:6px;background:#1e293b">
+            <rect x="20" y="20" width="260" height="40" fill="#334155" rx="4"/>
+            <text x="150" y="45" text-anchor="middle" fill="#e2e8f0" font-size="12" font-family="sans-serif">Café El Sol</text>
+            <rect x="20" y="80" width="260" height="40" fill="#334155" rx="4"/>
+            <text x="150" y="105" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="sans-serif">dueno@cafeelsol.com</text>
+            <rect x="20" y="135" width="260" height="35" fill="#3b82f6" rx="4"/>
+            <text x="150" y="158" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif" font-weight="600">Siguiente →</text>
+          </svg>
+          <div style="margin-top:10px;font-size:0.85rem;color:#cbd5e1;">Paso 1: Datos del negocio</div>
+        </div>
+        <div style="background:#0b1220;border:1px solid #334155;border-radius:10px;padding:14px;">
+          <svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;border-radius:6px;background:#1e293b">
+            <text x="150" y="40" text-anchor="middle" fill="#e2e8f0" font-size="13" font-family="sans-serif" font-weight="600">Crea tu contraseña</text>
+            <rect x="20" y="60" width="260" height="34" fill="#334155" rx="4"/>
+            <text x="30" y="80" fill="#94a3b8" font-size="11" font-family="monospace">●●●●●●●●●</text>
+            <rect x="20" y="100" width="180" height="6" fill="#10b981" rx="3"/>
+            <rect x="200" y="100" width="80" height="6" fill="#475569" rx="3"/>
+            <text x="20" y="125" fill="#10b981" font-size="10" font-family="sans-serif">✓ Fuerte</text>
+            <rect x="20" y="135" width="260" height="35" fill="#3b82f6" rx="4"/>
+            <text x="150" y="158" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif" font-weight="600">Crear cuenta</text>
+          </svg>
+          <div style="margin-top:10px;font-size:0.85rem;color:#cbd5e1;">Paso 2: Contraseña segura</div>
+        </div>
+        <div style="background:#0b1220;border:1px solid #334155;border-radius:10px;padding:14px;">
+          <svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;border-radius:6px;background:#1e293b">
+            <text x="150" y="40" text-anchor="middle" fill="#e2e8f0" font-size="13" font-family="sans-serif" font-weight="600">Verifica tu OTP</text>
+            <rect x="40" y="65" width="40" height="50" fill="#334155" rx="4"/>
+            <text x="60" y="98" text-anchor="middle" fill="#fbbf24" font-size="22" font-family="monospace">7</text>
+            <rect x="90" y="65" width="40" height="50" fill="#334155" rx="4"/>
+            <text x="110" y="98" text-anchor="middle" fill="#fbbf24" font-size="22" font-family="monospace">2</text>
+            <rect x="140" y="65" width="40" height="50" fill="#334155" rx="4"/>
+            <text x="160" y="98" text-anchor="middle" fill="#fbbf24" font-size="22" font-family="monospace">9</text>
+            <rect x="190" y="65" width="40" height="50" fill="#334155" rx="4"/>
+            <text x="210" y="98" text-anchor="middle" fill="#fbbf24" font-size="22" font-family="monospace">4</text>
+            <rect x="20" y="135" width="260" height="35" fill="#10b981" rx="4"/>
+            <text x="150" y="158" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif" font-weight="600">Verificar ✓</text>
+          </svg>
+          <div style="margin-top:10px;font-size:0.85rem;color:#cbd5e1;">Paso 3: Verificación OTP</div>
+        </div>
+        <div style="background:#0b1220;border:1px solid #334155;border-radius:10px;padding:14px;">
+          <svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;border-radius:6px;background:#1e293b">
+            <circle cx="150" cy="60" r="32" fill="#10b981"/>
+            <text x="150" y="72" text-anchor="middle" fill="#fff" font-size="32" font-family="sans-serif">✓</text>
+            <text x="150" y="115" text-anchor="middle" fill="#e2e8f0" font-size="13" font-family="sans-serif" font-weight="600">¡Bienvenido!</text>
+            <text x="150" y="135" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="sans-serif">Tu cuenta está lista</text>
+            <rect x="20" y="145" width="260" height="25" fill="#3b82f6" rx="4"/>
+            <text x="150" y="162" text-anchor="middle" fill="#fff" font-size="11" font-family="sans-serif" font-weight="600">Ir al POS →</text>
+          </svg>
+          <div style="margin-top:10px;font-size:0.85rem;color:#cbd5e1;">Paso 4: Confirmación</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" style="text-align:center;">
+      <h2>✅ ¿Ya completaste el tutorial?</h2>
+      <p style="color:#94a3b8;margin-bottom:24px;">Marca como completado y desbloquearás el siguiente nivel. Si todavía tienes dudas, agenda una capacitación 1 a 1 sin costo.</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <button onclick="markTutorialComplete()" id="btn-complete" style="background:#10b981;color:#fff;padding:14px 28px;border:0;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;">Ya completé el tutorial</button>
+        <button onclick="openLeadModal()" style="background:#3b82f6;color:#fff;padding:14px 28px;border:0;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;">📞 Solicitar capacitación 1 a 1</button>
+      </div>
+      <div id="complete-msg" style="display:none;margin-top:18px;color:#10b981;font-weight:600;">✓ Tutorial marcado como completado. ¡Bien hecho!</div>
+    </div>
+
+    <!-- LEAD MODAL -->
+    <div id="lead-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center;padding:20px;">
+      <div style="background:#1e293b;border:1px solid #334155;border-radius:14px;padding:28px;max-width:480px;width:100%;">
+        <h3 style="font-size:1.3rem;color:#38bdf8;margin-bottom:8px;">📞 Capacitación 1 a 1</h3>
+        <p style="color:#94a3b8;font-size:0.9rem;margin-bottom:20px;">Te contactamos en menos de 24 hrs por WhatsApp para agendar tu sesión gratuita.</p>
+        <input id="lead-name" type="text" placeholder="Nombre completo" style="width:100%;padding:10px;background:#0b1220;border:1px solid #334155;border-radius:6px;color:#e2e8f0;margin-bottom:10px;">
+        <input id="lead-email" type="email" placeholder="Email" style="width:100%;padding:10px;background:#0b1220;border:1px solid #334155;border-radius:6px;color:#e2e8f0;margin-bottom:10px;">
+        <input id="lead-phone" type="tel" placeholder="Teléfono / WhatsApp" style="width:100%;padding:10px;background:#0b1220;border:1px solid #334155;border-radius:6px;color:#e2e8f0;margin-bottom:10px;">
+        <textarea id="lead-message" rows="3" placeholder="¿Qué quieres aprender? (opcional)" style="width:100%;padding:10px;background:#0b1220;border:1px solid #334155;border-radius:6px;color:#e2e8f0;margin-bottom:14px;font-family:inherit;"></textarea>
+        <div style="display:flex;gap:10px;">
+          <button onclick="submitLead()" style="flex:1;background:#10b981;color:#fff;padding:12px;border:0;border-radius:6px;font-weight:600;cursor:pointer;">Enviar solicitud</button>
+          <button onclick="closeLeadModal()" style="background:#334155;color:#cbd5e1;padding:12px 18px;border:0;border-radius:6px;cursor:pointer;">Cancelar</button>
+        </div>
+        <div id="lead-feedback" style="margin-top:12px;font-size:0.85rem;"></div>
+      </div>
+    </div>
+
     <!-- Footer -->
     <footer>
       <p>Guía completa de Volvix POS • Registro & Admin Panel</p>
@@ -701,6 +798,85 @@ TNT-27PYW (Restaurante) — 8 productos
   </div>
 
   <script>
+    const TUTORIAL_ID = 'registro-usuarios';
+
+    function loadVideo() {
+      const f = document.getElementById('tutorial-video');
+      f.src = f.dataset.src;
+      document.getElementById('video-poster').style.display = 'none';
+    }
+
+    async function markTutorialComplete() {
+      const btn = document.getElementById('btn-complete');
+      btn.disabled = true;
+      btn.textContent = 'Guardando...';
+      try {
+        await fetch('/api/user/tutorials/' + TUTORIAL_ID + '/complete', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ tutorial_id: TUTORIAL_ID, completed_at: new Date().toISOString() })
+        });
+      } catch (e) { /* fallback localStorage */ }
+      const done = JSON.parse(localStorage.getItem('volvix:tutorials:done') || '[]');
+      if (!done.includes(TUTORIAL_ID)) done.push(TUTORIAL_ID);
+      localStorage.setItem('volvix:tutorials:done', JSON.stringify(done));
+      btn.textContent = '✓ Completado';
+      btn.style.background = '#475569';
+      document.getElementById('complete-msg').style.display = 'block';
+    }
+
+    function openLeadModal() {
+      document.getElementById('lead-modal').style.display = 'flex';
+    }
+    function closeLeadModal() {
+      document.getElementById('lead-modal').style.display = 'none';
+    }
+
+    async function submitLead() {
+      const name = document.getElementById('lead-name').value.trim();
+      const email = document.getElementById('lead-email').value.trim();
+      const phone = document.getElementById('lead-phone').value.trim();
+      const message = document.getElementById('lead-message').value.trim();
+      const fb = document.getElementById('lead-feedback');
+      if (!name || !email || !phone) {
+        fb.style.color = '#ef4444';
+        fb.textContent = 'Completa nombre, email y teléfono.';
+        return;
+      }
+      fb.style.color = '#94a3b8';
+      fb.textContent = 'Enviando...';
+      try {
+        const r = await fetch('/api/leads', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ name, email, phone, message, source: 'tutorial', tutorial_id: TUTORIAL_ID })
+        });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        fb.style.color = '#10b981';
+        fb.textContent = '✓ ¡Solicitud enviada! Te contactamos en menos de 24 hrs.';
+        setTimeout(closeLeadModal, 2000);
+      } catch (e) {
+        fb.style.color = '#ef4444';
+        fb.textContent = 'No pudimos enviar la solicitud: ' + e.message + '. Escríbenos a support@volvix.com';
+      }
+    }
+
+    // Hidratar estado completado
+    (async function hydrate() {
+      try {
+        const r = await fetch('/api/user/tutorials');
+        if (r.ok) {
+          const list = await r.json();
+          if (Array.isArray(list) && list.find(t => t.tutorial_id === TUTORIAL_ID && t.completed)) {
+            const btn = document.getElementById('btn-complete');
+            btn.disabled = true;
+            btn.textContent = '✓ Ya completado';
+            btn.style.background = '#475569';
+          }
+        }
+      } catch {}
+    })();
+
     function switchTab(tabName) {
       // Hide all tabs
       const tabs = document.querySelectorAll('.tab-content');

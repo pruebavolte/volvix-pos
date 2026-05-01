@@ -430,6 +430,27 @@
 
 <div class="main">
 
+  <!-- PROGRESO DEL ESTUDIANTE -->
+  <div class="section-head">
+    <div>
+      <h2>🎓 Tu plan de capacitación</h2>
+      <p id="progress-text">5 lecciones · 0 completas</p>
+    </div>
+    <button class="tb-btn primary" id="cert-btn" onclick="downloadCert()" style="display:none;">📜 Generar certificado</button>
+  </div>
+  <div style="background:white;border:1px solid var(--border);border-radius:12px;padding:6px;margin-bottom:30px;">
+    <div id="progress-bar" style="height:10px;background:linear-gradient(90deg,#7C3AED,#A855F7);border-radius:8px;width:0%;transition:width .4s ease;"></div>
+  </div>
+
+  <!-- LECCIONES -->
+  <div class="section-head">
+    <div>
+      <h2>📚 Lecciones predefinidas</h2>
+      <p>Contenido oficial · Marca cada lección como completada para liberar tu certificado</p>
+    </div>
+  </div>
+  <div id="lessons-list" style="display:flex;flex-direction:column;gap:14px;margin-bottom:40px;"></div>
+
   <!-- VIDEOS NUEVOS IA -->
   <div class="section-head">
     <div>
@@ -638,6 +659,276 @@ function closeGen() { document.getElementById('gen-modal').classList.remove('ope
 
 renderVideos();
 renderManuals();
+
+// ============== LESSONS SYSTEM ==============
+const LESSONS = [
+  {
+    id: 'first-sale',
+    icon: '💳',
+    title: 'Primera venta',
+    desc: 'Aprende a buscar producto, agregarlo al carrito, cobrar e imprimir ticket.',
+    sections: [
+      { type:'text', body:'Para hacer tu primera venta abre el POS, busca el producto por nombre o código de barras y agrégalo al carrito. Selecciona método de pago y cierra la venta. El ticket se imprime automáticamente.' },
+      { type:'screenshot', alt:'Pantalla del POS con carrito de compra' },
+      { type:'quiz', questions:[
+        { q:'¿Cómo se busca un producto?', opts:['Por nombre o código','Solo por código','No se puede buscar'], correct:0 },
+        { q:'¿Qué pasa al cerrar venta?', opts:['Se imprime ticket','Nada','Se borra carrito'], correct:0 },
+        { q:'¿Dónde se selecciona método de pago?', opts:['Antes de cerrar venta','En reportes','En inventario'], correct:0 },
+      ]},
+    ]
+  },
+  {
+    id: 'create-product',
+    icon: '📦',
+    title: 'Crear producto',
+    desc: 'Cómo agregar productos al inventario con nombre, precio y stock.',
+    sections: [
+      { type:'text', body:'Ve a Inventario → Nuevo producto. Ingresa nombre, precio de venta, costo y stock inicial. Asigna categoría y código de barras. Guarda y aparecerá inmediatamente en el POS.' },
+      { type:'screenshot', alt:'Formulario de creación de producto' },
+      { type:'quiz', questions:[
+        { q:'¿Dónde se crean productos?', opts:['Inventario → Nuevo producto','POS','Reportes'], correct:0 },
+        { q:'¿Es obligatorio el código de barras?', opts:['No es obligatorio','Sí, siempre','Solo para alimentos'], correct:0 },
+        { q:'¿Cuándo aparece en POS?', opts:['Inmediatamente al guardar','Al día siguiente','Tras reiniciar'], correct:0 },
+      ]},
+    ]
+  },
+  {
+    id: 'card-payment',
+    icon: '💳',
+    title: 'Cobrar tarjeta',
+    desc: 'Procesa pagos con tarjeta usando terminal o Stripe integrado.',
+    sections: [
+      { type:'text', body:'Selecciona método "Tarjeta" al cobrar. Si tienes terminal MIT, conecta por Bluetooth y desliza/inserta. Para pagos remotos genera link de Stripe que el cliente abre por WhatsApp.' },
+      { type:'screenshot', alt:'Pantalla de cobro con tarjeta' },
+      { type:'quiz', questions:[
+        { q:'¿Qué procesador admite Volvix?', opts:['MIT y Stripe','Solo PayPal','Solo efectivo'], correct:0 },
+        { q:'¿Cómo se conecta la terminal?', opts:['Bluetooth','Cable serial','WiFi solamente'], correct:0 },
+        { q:'¿Cómo se cobra remoto?', opts:['Link de Stripe por WhatsApp','Por email','No se puede'], correct:0 },
+      ]},
+    ]
+  },
+  {
+    id: 'corte-z',
+    icon: '🔒',
+    title: 'Corte Z',
+    desc: 'Conciliación de caja al final del día y reporte fiscal.',
+    sections: [
+      { type:'text', body:'Al final del turno, ve a Caja → Corte Z. Cuenta efectivo físico e ingrésalo. El sistema compara con lo registrado y muestra diferencias. Imprime el comprobante para tu archivo fiscal.' },
+      { type:'screenshot', alt:'Pantalla de corte Z' },
+      { type:'quiz', questions:[
+        { q:'¿Cuándo se hace corte Z?', opts:['Al final del turno','Cada hora','Solo los lunes'], correct:0 },
+        { q:'¿Qué se ingresa manualmente?', opts:['Efectivo físico contado','Las ventas con tarjeta','Productos vendidos'], correct:0 },
+        { q:'¿Para qué sirve el comprobante?', opts:['Archivo fiscal','Es opcional','Para el cliente'], correct:0 },
+      ]},
+    ]
+  },
+  {
+    id: 'csv-import',
+    icon: '📥',
+    title: 'Importar CSV',
+    desc: 'Carga masiva de productos desde Excel/CSV.',
+    sections: [
+      { type:'text', body:'Ve a Inventario → Importar. Descarga plantilla CSV, llena con tus productos (nombre, precio, stock, categoría) y súbela. El sistema valida campos y reporta errores fila por fila antes de guardar.' },
+      { type:'screenshot', alt:'Pantalla de importación CSV' },
+      { type:'quiz', questions:[
+        { q:'¿Qué formato acepta?', opts:['CSV/Excel','Solo PDF','Solo JSON'], correct:0 },
+        { q:'¿Qué hace antes de guardar?', opts:['Valida campos','Borra todo','Manda email'], correct:0 },
+        { q:'¿Dónde se descarga la plantilla?', opts:['Inventario → Importar','En el POS','En reportes'], correct:0 },
+      ]},
+    ]
+  },
+];
+
+const STORAGE_KEY = 'volvix:academy:progress';
+
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch { return {}; }
+}
+function saveProgress(p) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+}
+
+async function markComplete(lessonId) {
+  const p = loadProgress();
+  p[lessonId] = { done: true, ts: Date.now() };
+  saveProgress(p);
+  renderLessons();
+  // Persist to backend (best-effort)
+  try {
+    await fetch('/api/user/academy-progress', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ lesson_id: lessonId, completed: true })
+    });
+  } catch(e) { /* offline ok, localStorage es source of truth */ }
+}
+
+function renderLessons() {
+  const p = loadProgress();
+  const done = LESSONS.filter(l => p[l.id]?.done).length;
+  const total = LESSONS.length;
+  const pct = Math.round((done/total)*100);
+
+  document.getElementById('progress-text').textContent = `${total} lecciones · ${done} completas (${pct}%)`;
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('cert-btn').style.display = done === total ? 'inline-block' : 'none';
+
+  document.getElementById('lessons-list').innerHTML = LESSONS.map((l, i) => {
+    const isDone = !!p[l.id]?.done;
+    return `
+      <div style="background:white;border:1px solid ${isDone?'rgba(22,163,74,.4)':'var(--border)'};border-radius:14px;overflow:hidden;">
+        <div style="padding:18px 20px;display:flex;align-items:center;gap:14px;cursor:pointer;" onclick="toggleLesson('${l.id}')">
+          <div style="font-size:32px;">${l.icon}</div>
+          <div style="flex:1;">
+            <div style="font-weight:700;font-size:15px;">${i+1}. ${l.title} ${isDone?'<span style="color:var(--success);font-size:13px;">✓ completada</span>':''}</div>
+            <div style="font-size:12.5px;color:var(--text-3);margin-top:2px;">${l.desc}</div>
+          </div>
+          <div id="chev-${l.id}" style="font-size:20px;color:var(--text-3);">▾</div>
+        </div>
+        <div id="body-${l.id}" style="display:none;padding:0 20px 20px;border-top:1px solid var(--border);">
+          ${l.sections.map((s, si) => renderSection(l.id, s, si)).join('')}
+          <div style="margin-top:18px;display:flex;gap:10px;">
+            <button class="tb-btn primary" onclick="markComplete('${l.id}')">${isDone?'Marcado ✓':'Marcar completado'}</button>
+            <button class="tb-btn" onclick="toggleLesson('${l.id}')">Cerrar</button>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderSection(lessonId, s, idx) {
+  if (s.type === 'text') {
+    return `<div style="margin-top:18px;font-size:13.5px;line-height:1.65;color:var(--text-2);">${s.body}</div>`;
+  }
+  if (s.type === 'screenshot') {
+    return `<div style="margin-top:18px;background:linear-gradient(135deg,#FAF5FF,#FDF2F8);border:1px dashed rgba(124,58,237,.35);border-radius:10px;height:160px;display:flex;align-items:center;justify-content:center;color:var(--text-3);font-size:12px;">📷 ${s.alt}</div>`;
+  }
+  if (s.type === 'quiz') {
+    return `<div style="margin-top:18px;padding:16px;background:var(--bg);border-radius:10px;">
+      <div style="font-weight:700;font-size:13px;margin-bottom:10px;">📝 Quiz rápido</div>
+      ${s.questions.map((q, qi) => `
+        <div style="margin-bottom:14px;">
+          <div style="font-size:13px;margin-bottom:6px;">${qi+1}. ${q.q}</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            ${q.opts.map((o, oi) => `
+              <label style="font-size:12.5px;display:flex;gap:8px;align-items:center;cursor:pointer;">
+                <input type="radio" name="${lessonId}-${idx}-${qi}" value="${oi}" data-correct="${q.correct}" onchange="checkQuiz(this)">
+                <span>${o}</span>
+                <span class="qfb" style="display:none;font-weight:600;"></span>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+      `).join('')}
+    </div>`;
+  }
+  return '';
+}
+
+function checkQuiz(input) {
+  const fb = input.parentElement.querySelector('.qfb');
+  const correct = input.dataset.correct === input.value;
+  fb.style.display = 'inline';
+  fb.textContent = correct ? '✓ correcto' : '✗ revisa';
+  fb.style.color = correct ? 'var(--success)' : 'var(--text-3)';
+}
+
+function toggleLesson(id) {
+  const body = document.getElementById('body-'+id);
+  const chev = document.getElementById('chev-'+id);
+  const open = body.style.display === 'block';
+  body.style.display = open ? 'none' : 'block';
+  chev.textContent = open ? '▾' : '▴';
+}
+
+async function downloadCert() {
+  try {
+    let userId = null;
+    try {
+      const me = await fetch('/api/me').then(r => r.json());
+      userId = me?.id || me?.user_id;
+    } catch {}
+    const url = '/api/reports/academy-cert/pdf' + (userId ? ('?user_id=' + encodeURIComponent(userId)) : '');
+    window.open(url, '_blank');
+  } catch (e) {
+    if (window.VolvixUI?.toast) VolvixUI.toast({type:'error', message:'No se pudo generar el certificado: ' + e.message});
+    else alert('Error: ' + e.message);
+  }
+}
+
+// Hidratar progreso desde backend si está disponible (no destructivo)
+(async function syncBackendProgress() {
+  try {
+    const r = await fetch('/api/user/academy-progress');
+    if (!r.ok) return;
+    const remote = await r.json();
+    if (Array.isArray(remote)) {
+      const p = loadProgress();
+      remote.forEach(row => { if (row.lesson_id && row.completed) p[row.lesson_id] = { done: true, ts: row.ts || Date.now() }; });
+      saveProgress(p);
+      renderLessons();
+    }
+  } catch {}
+})();
+
+renderLessons();
+
+// ============== AI CHAT FLOAT ==============
+(function mountAIChat() {
+  const float = document.createElement('div');
+  float.innerHTML = `
+    <div id="ai-fab" style="position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#7C3AED,#A855F7);color:white;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 10px 30px rgba(124,58,237,.4);cursor:pointer;z-index:300;">💬</div>
+    <div id="ai-panel" style="display:none;position:fixed;bottom:90px;right:24px;width:340px;max-width:calc(100vw - 32px);height:440px;background:white;border:1px solid var(--border);border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.18);z-index:300;flex-direction:column;overflow:hidden;">
+      <div style="padding:14px 16px;background:linear-gradient(135deg,#7C3AED,#A855F7);color:white;font-weight:700;font-size:14px;display:flex;justify-content:space-between;align-items:center;">
+        <span>🤖 Tutor IA</span>
+        <span style="cursor:pointer;font-size:18px;" onclick="document.getElementById('ai-panel').style.display='none'">×</span>
+      </div>
+      <div id="ai-msgs" style="flex:1;overflow-y:auto;padding:14px;font-size:13px;display:flex;flex-direction:column;gap:10px;">
+        <div style="background:var(--bg);padding:10px 12px;border-radius:10px;">¡Hola! Pregúntame sobre cualquier tema del POS.</div>
+      </div>
+      <div style="padding:10px;border-top:1px solid var(--border);display:flex;gap:6px;">
+        <input id="ai-input" placeholder="Escribe tu duda..." style="flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none;">
+        <button class="tb-btn primary" onclick="sendAI()" style="padding:7px 12px;">→</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(float);
+  document.getElementById('ai-fab').onclick = () => {
+    const p = document.getElementById('ai-panel');
+    p.style.display = p.style.display === 'flex' ? 'none' : 'flex';
+  };
+  document.getElementById('ai-input').addEventListener('keypress', e => {
+    if (e.key === 'Enter') sendAI();
+  });
+})();
+
+async function sendAI() {
+  const input = document.getElementById('ai-input');
+  const msgs = document.getElementById('ai-msgs');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  msgs.insertAdjacentHTML('beforeend', `<div style="align-self:flex-end;background:var(--accent);color:white;padding:10px 12px;border-radius:10px;max-width:80%;">${text}</div>`);
+  const loading = document.createElement('div');
+  loading.style.cssText = 'background:var(--bg);padding:10px 12px;border-radius:10px;color:var(--text-3);font-style:italic;';
+  loading.textContent = 'Pensando...';
+  msgs.appendChild(loading);
+  msgs.scrollTop = msgs.scrollHeight;
+  try {
+    const r = await fetch('/api/ai/chat', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ message: text, context: 'academy' })
+    });
+    const d = await r.json();
+    loading.remove();
+    msgs.insertAdjacentHTML('beforeend', `<div style="background:var(--bg);padding:10px 12px;border-radius:10px;">${(d.response||d.reply||d.text||'Respuesta no disponible')}</div>`);
+  } catch (e) {
+    loading.remove();
+    msgs.insertAdjacentHTML('beforeend', `<div style="background:rgba(220,38,38,.08);color:#B91C1C;padding:10px 12px;border-radius:10px;">No pude conectar con el tutor IA. Intenta en un momento.</div>`);
+  }
+  msgs.scrollTop = msgs.scrollHeight;
+}
 </script>
 
 <script defer src="auth-helper.js"></script>
