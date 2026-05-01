@@ -851,13 +851,21 @@
     return ['todos', ...Object.keys(INDUSTRY_LABELS).filter(k => k !== 'todos' && present.has(k))];
   }
 
+  let liveQuery = '';
+
+  function countForIndustry(k) {
+    if (k === 'todos') return TOP_GIROS.map(x => GIROS_V2.find(g => g.key === x)).filter(Boolean).length;
+    return (GIROS_V2 || []).filter(g => g && g.category === k).length;
+  }
+
   function renderIndustryFilters() {
     const wrap = document.getElementById('industry-filters');
     if (!wrap) return;
     wrap.innerHTML = presentIndustries().map(k => {
       const cfg = INDUSTRY_LABELS[k] || { label: k, icon: '' };
       const cls = 'industry-chip' + (k === activeIndustry ? ' active' : '');
-      return `<button type="button" class="${cls}" data-industry="${k}" role="tab" aria-selected="${k === activeIndustry}">${cfg.icon} ${cfg.label}</button>`;
+      const c = countForIndustry(k);
+      return `<button type="button" class="${cls}" data-industry="${k}" role="tab" aria-selected="${k === activeIndustry}">${cfg.icon} ${cfg.label} <span style="opacity:0.65;font-weight:400">(${c})</span></button>`;
     }).join('');
     wrap.querySelectorAll('.industry-chip').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -877,8 +885,20 @@
     } else {
       giros = (GIROS_V2 || []).filter(g => g && g.category === activeIndustry);
     }
+    // Instant search filtrando por nombre/key/aliases si hay query
+    if (liveQuery) {
+      const q = liveQuery.toLowerCase();
+      giros = giros.filter(g => {
+        if (!g) return false;
+        const hay = [g.name, g.key, g.plural, ...(g.aliases || [])].filter(Boolean).join(' ').toLowerCase();
+        return hay.includes(q);
+      });
+    }
     if (!giros.length) {
-      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#64748b;padding:30px">Sin giros en esta industria. <button type="button" class="industry-chip" onclick="(function(){activeIndustry='todos';try{localStorage.setItem('${FILTER_KEY}','todos');}catch(_){}renderIndustryFilters();renderPopular();})()">Ver todos</button></div>`;
+      const msg = liveQuery
+        ? `No encontramos giros que coincidan con "<strong>${escapeHtmlMP(liveQuery)}</strong>" en esta industria.`
+        : 'Sin giros en esta industria.';
+      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#64748b;padding:30px">${msg} <button type="button" class="industry-chip" onclick="(function(){activeIndustry='todos';liveQuery='';var inp=document.getElementById('giro-input');if(inp)inp.value='';try{localStorage.setItem('${FILTER_KEY}','todos');}catch(_){}renderIndustryFilters();renderPopular();})()">Ver todos</button></div>`;
       return;
     }
     grid.innerHTML = giros.map(g => `
@@ -887,6 +907,12 @@
         <div class="popular-name">${g.name}</div>
       </a>
     `).join('');
+  }
+
+  function escapeHtmlMP(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+    });
   }
 
   function quickSearch(text) {
@@ -1215,6 +1241,30 @@
   // Init
   renderIndustryFilters();
   renderPopular();
+
+  // Instant search (debounced) que filtra la grilla de giros sin recargar
+  (function setupInstantSearch(){
+    const input = document.getElementById('giro-input');
+    if (!input) return;
+    let t = null;
+    input.addEventListener('input', function(){
+      clearTimeout(t);
+      t = setTimeout(function(){
+        liveQuery = (input.value || '').trim();
+        renderPopular();
+      }, 120);
+    });
+    // Escape limpia búsqueda y cierra ai-response
+    input.addEventListener('keydown', function(e){
+      if (e.key === 'Escape') {
+        input.value = '';
+        liveQuery = '';
+        renderPopular();
+        const r = document.getElementById('ai-response');
+        if (r) { r.classList.remove('visible'); r.innerHTML = ''; }
+      }
+    });
+  })();
 </script>
 
 <script defer src="auth-helper.js"></script>

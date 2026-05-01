@@ -435,11 +435,11 @@
       <a href="#signup" class="btn btn-primary btn-lg">Empezar 14 días gratis →</a>
       <a href="#demo" class="btn btn-secondary btn-lg">▶ Ver demo (2 min)</a>
     </div>
-    <div class="hero-stats">
-      <div><div class="stat-num">130+</div><div class="stat-label">Funciones integradas</div></div>
-      <div><div class="stat-num">12K+</div><div class="stat-label">Empresas activas</div></div>
-      <div><div class="stat-num">99.99%</div><div class="stat-label">Uptime garantizado</div></div>
-      <div><div class="stat-num">4.9★</div><div class="stat-label">Calificación promedio</div></div>
+    <div class="hero-stats" id="heroStats">
+      <div><div class="stat-num" data-stat="features">130+</div><div class="stat-label">Funciones integradas</div></div>
+      <div><div class="stat-num" data-stat="businesses">12K+</div><div class="stat-label">Empresas activas</div></div>
+      <div><div class="stat-num" data-stat="uptime">99.99%</div><div class="stat-label">Uptime garantizado</div></div>
+      <div><div class="stat-num" data-stat="rating">4.9★</div><div class="stat-label">Calificación promedio</div></div>
     </div>
   </div>
 </header>
@@ -1211,6 +1211,52 @@
   else init();
   // Re-init in case GIROS_V2 loads after init.
   setTimeout(init, 600);
+})();
+</script>
+
+<script>
+// Lazy-load images de cada giro + Stats reales desde /api/stats
+(function lazyAndStats(){
+  function applyLazy(){
+    document.querySelectorAll('img:not([loading])').forEach(function(img){
+      img.setAttribute('loading','lazy');
+      img.setAttribute('decoding','async');
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', applyLazy);
+  } else {
+    applyLazy();
+  }
+  // Re-apply tras renders dinámicos
+  setTimeout(applyLazy, 800);
+  setTimeout(applyLazy, 2000);
+
+  // Cargar stats reales (silencioso si falla — los defaults del HTML quedan)
+  fetch('/api/stats', { headers: { 'Accept': 'application/json' } })
+    .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+    .then(function(data){
+      if (!data) return;
+      function fmt(n, suffix){
+        if (n == null) return null;
+        var num = Number(n);
+        if (isNaN(num)) return String(n);
+        if (num >= 1000) return (num/1000).toFixed(num >= 10000 ? 0 : 1).replace(/\.0$/,'') + 'K' + (suffix||'');
+        return num + (suffix || '');
+      }
+      var map = {
+        features:   data.features != null ? fmt(data.features, '+') : null,
+        businesses: data.tenants != null ? fmt(data.tenants, '+') : (data.businesses != null ? fmt(data.businesses, '+') : null),
+        uptime:     data.uptime != null ? data.uptime + '%' : null,
+        rating:     data.rating != null ? Number(data.rating).toFixed(1) + '★' : null
+      };
+      Object.keys(map).forEach(function(k){
+        if (map[k] == null) return;
+        var el = document.querySelector('[data-stat="'+k+'"]');
+        if (el) el.textContent = map[k];
+      });
+    })
+    .catch(function(){ /* defaults remain */ });
 })();
 </script>
 </body>

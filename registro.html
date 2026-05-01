@@ -228,7 +228,7 @@
   </div>
 
   <div class="card">
-    <div id="globalAlert"></div>
+    <div id="globalAlert" aria-live="polite" role="status"></div>
 
     <!-- ===================================================== -->
     <!-- PASO 1: Datos del negocio                                 -->
@@ -458,8 +458,16 @@
   function validRfc(v) {
     if (!v) return true; // opcional
     var rfc = String(v).toUpperCase().trim();
-    // RFC persona moral: 12 chars, persona física: 13 chars
-    return /^[A-ZÑ&]{3,4}[0-9]{6}[A-Z0-9]{3}$/.test(rfc);
+    // RFC persona moral: 12 chars (3 letras + 6 fecha + 3 homoclave)
+    // RFC persona física: 13 chars (4 letras + 6 fecha + 3 homoclave)
+    if (rfc.length === 12) return /^[A-ZÑ&]{3}[0-9]{6}[A-Z0-9]{3}$/.test(rfc);
+    if (rfc.length === 13) return /^[A-ZÑ&]{4}[0-9]{6}[A-Z0-9]{3}$/.test(rfc);
+    return false;
+  }
+  function validPhoneDigits(v) {
+    var clean = String(v || '').replace(/[\s\-\(\)\+]/g, '');
+    if (clean.startsWith('52')) clean = clean.slice(2);
+    return /^\d{10}$/.test(clean);
   }
   function validCity(v) { return typeof v === 'string' && v.trim().length >= 2 && v.trim().length <= 80; }
   function validState(v) { return STATES_MX.indexOf(v) !== -1; }

@@ -83,6 +83,11 @@
       <a id="share-mail" href="#">Email</a>
       <a id="share-x" href="#" target="_blank" rel="noopener">X (Twitter)</a>
       <a id="share-fb" href="#" target="_blank" rel="noopener">Facebook</a>
+      <button type="button" id="btn-qr" class="ghost" style="background:transparent;border:1px solid #475569;color:var(--txt);padding:10px 14px;font-size:14px;font-weight:600;cursor:pointer;border-radius:8px">Ver QR</button>
+    </div>
+    <div id="qr-wrap" hidden style="margin-top:16px;text-align:center;padding:16px;background:#0b1220;border-radius:8px">
+      <img id="qr-img" alt="Código QR de tu link de referido" style="max-width:220px;width:100%;height:auto;border-radius:8px;background:#fff;padding:8px" loading="lazy">
+      <div style="font-size:12px;color:var(--muted);margin-top:8px">Escanea para abrir tu link</div>
     </div>
   </div>
 
@@ -141,7 +146,8 @@
     return;
   }
 
-  fetch('/api/referrals/me', {
+  function loadReferrals() {
+    return fetch('/api/referrals/me', {
     headers: { 'Authorization': 'Bearer ' + token }
   }).then(function (r) {
     if (r.status === 401) {
@@ -179,6 +185,14 @@
       document.getElementById('share-x').href    = 'https://twitter.com/intent/tweet?text=' + msg;
       document.getElementById('share-fb').href   = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(j.link || '');
 
+      // QR code generator (sin librería externa: usa servicio público QR como fallback,
+      // funciona offline-aware si se cambia por canvas-qr-encoder más adelante)
+      if (j.link) {
+        var qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&format=png&data=' + encodeURIComponent(j.link);
+        var qrImg = document.getElementById('qr-img');
+        if (qrImg) qrImg.src = qrUrl;
+      }
+
       var st = j.stats || {};
       document.getElementById('s-total').textContent  = st.total || 0;
       document.getElementById('s-signed').textContent = st.signed_up || 0;
@@ -203,15 +217,59 @@
       document.getElementById('login-warn').style.display = 'block';
       document.getElementById('login-warn').textContent = 'Error de red.';
     });
+  }
 
+  // Carga inicial
+  loadReferrals();
+
+  // Auto-refresh stats cada 60s (silencioso, solo si la pestaña está visible)
+  setInterval(function () {
+    if (document.visibilityState === 'visible') {
+      loadReferrals();
+    }
+  }, 60000);
+
+  // Refrescar al volver a foco si lleva > 30s sin refrescar
+  var lastRefresh = Date.now();
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible' && (Date.now() - lastRefresh) > 30000) {
+      lastRefresh = Date.now();
+      loadReferrals();
+    }
+  });
+
+  // Copy-to-clipboard con feedback visual de confirmación
   document.getElementById('btn-copy').addEventListener('click', function () {
     var inp = document.getElementById('ref-link');
-    inp.select();
-    try { document.execCommand('copy'); } catch (_) {}
-    if (navigator.clipboard) { try { navigator.clipboard.writeText(inp.value); } catch (_) {} }
-    this.textContent = 'Copiado!';
     var self = this;
-    setTimeout(function () { self.textContent = 'Copiar link'; }, 1800);
+    var done = function () {
+      self.textContent = '✓ Copiado al portapapeles';
+      self.style.background = '#22c55e';
+      setTimeout(function () {
+        self.textContent = 'Copiar link';
+        self.style.background = '';
+      }, 2000);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(inp.value).then(done).catch(function () {
+        try { inp.select(); document.execCommand('copy'); done(); } catch (_) {
+          self.textContent = 'No se pudo copiar';
+          setTimeout(function () { self.textContent = 'Copiar link'; }, 1800);
+        }
+      });
+    } else {
+      try { inp.select(); document.execCommand('copy'); done(); } catch (_) {}
+    }
+  });
+
+  // Toggle QR
+  var qrBtn = document.getElementById('btn-qr');
+  if (qrBtn) qrBtn.addEventListener('click', function () {
+    var wrap = document.getElementById('qr-wrap');
+    if (!wrap) return;
+    wrap.hidden = !wrap.hidden;
+    qrBtn.textContent = wrap.hidden ? 'Ver QR' : 'Ocultar QR';
+    qrBtn.setAttribute('aria-expanded', String(!wrap.hidden));
   });
 })();
 </script>

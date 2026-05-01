@@ -317,6 +317,19 @@ html, body {
         <button type="submit" class="btn-primary" id="btnLogin">Entrar</button>
       </form>
 
+      <div class="login-link-row">
+        <a href="#" id="forgotPasswordLink" aria-label="Recuperar contraseña olvidada">¿Olvidaste tu contraseña?</a>
+      </div>
+
+      <!-- Social login fallback (oculto si OAuth no disponible) -->
+      <div id="socialLoginBox" hidden style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.08)">
+        <div style="text-align:center;font-size:11px;color:#52524E;margin-bottom:12px;letter-spacing:0.5px;text-transform:uppercase">o continúa con</div>
+        <div style="display:flex;gap:8px">
+          <button type="button" class="social-btn" data-provider="google" style="flex:1;height:42px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#FAFAF9;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">G Google</button>
+          <button type="button" class="social-btn" data-provider="microsoft" style="flex:1;height:42px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#FAFAF9;font-size:13px;font-weight:600;cursor:pointer">Microsoft</button>
+        </div>
+      </div>
+
       <!-- Test credentials info (oculto en producción) -->
       <div class="test-creds" id="testCreds" hidden>
         <strong>Test:</strong> admin@volvix.test / Volvix2026!
@@ -470,6 +483,59 @@ document.getElementById('emailInput').addEventListener('keydown', e => {
 document.getElementById('passwordInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') document.getElementById('btnLogin')?.click();
 });
+
+// ¿Olvidaste contraseña? → POST /api/email/password-reset
+(function setupForgotPassword(){
+  const link = document.getElementById('forgotPasswordLink');
+  if (!link) return;
+  link.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const email = (document.getElementById('emailInput').value || '').trim();
+    if (!email || !email.includes('@')) {
+      document.getElementById('emailInput').classList.add('error');
+      document.getElementById('emailInput').focus();
+      showAlert('Escribe tu correo arriba y vuelve a hacer clic', 'info');
+      return;
+    }
+    showAlert('Enviando instrucciones...', 'info');
+    try {
+      const r = await fetch('/api/email/password-reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      if (r.status === 503) { showAlert('Servicio de email no configurado. Contacta soporte.', 'error'); return; }
+      if (r.status === 404) { showAlert('No encontramos una cuenta con ese correo', 'error'); return; }
+      if (r.status === 429) { showAlert('Demasiadas solicitudes. Espera unos minutos.', 'error'); return; }
+      if (!r.ok) { showAlert('No se pudo procesar la solicitud. Intenta más tarde.', 'error'); return; }
+      showAlert('Te enviamos un correo con los pasos para recuperar tu contraseña', 'success');
+    } catch (err) {
+      showAlert('Sin conexión. Verifica tu red.', 'error');
+    }
+  });
+})();
+
+// Social login: detectar disponibilidad y solo mostrar si OAuth está configurado
+(function setupSocialLogin(){
+  const box = document.getElementById('socialLoginBox');
+  if (!box) return;
+  fetch('/api/auth/oauth/providers', { headers: { 'Accept': 'application/json' } })
+    .then(r => r.ok ? r.json() : Promise.reject(new Error('not available')))
+    .then(data => {
+      const providers = (data && (data.providers || data.enabled)) || [];
+      if (Array.isArray(providers) && providers.length) {
+        box.hidden = false;
+        box.querySelectorAll('.social-btn').forEach(btn => {
+          const p = btn.dataset.provider;
+          if (!providers.includes(p)) btn.style.display = 'none';
+          btn.addEventListener('click', () => {
+            window.location.href = '/api/auth/oauth/' + encodeURIComponent(p) + '/start';
+          });
+        });
+      }
+    })
+    .catch(() => { /* OAuth no configurado: dejar oculto el box */ });
+})();
   </script>
 <script src="auth-helper.js"></script>
 <link rel="stylesheet" href="volvix-modals.css">
