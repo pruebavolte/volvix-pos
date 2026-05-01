@@ -6342,6 +6342,27 @@ try {
   console.error('[EMAIL_DRIPS] register failed:', e && e.message);
 }
 
+// APPOINTMENTS — booking, availability, waitlist
+try {
+  const apptRoutes = require('./appointments').build({
+    supabaseRequest, sendJSON, sendError, requireAuth,
+    sendEmail: (typeof sendEmail === 'function' ? sendEmail : null),
+  });
+  for (const k of Object.keys(apptRoutes)) handlers[k] = apptRoutes[k];
+} catch (e) {
+  console.error('[APPOINTMENTS] register failed:', e && e.message);
+}
+
+// SERVICES CATALOG — services + staff
+try {
+  const svcRoutes = require('./services-catalog').build({
+    supabaseRequest, sendJSON, sendError, requireAuth,
+  });
+  for (const k of Object.keys(svcRoutes)) handlers[k] = svcRoutes[k];
+} catch (e) {
+  console.error('[SERVICES_CATALOG] register failed:', e && e.message);
+}
+
 // LOYALTY ADVANCED — tiers, auto-promote, rewards catalog, birthday cron
 try {
   require('./loyalty-advanced').register({
