@@ -6341,6 +6341,18 @@ try {
   console.error('[EMAIL_DRIPS] register failed:', e && e.message);
 }
 
+// LOYALTY ADVANCED — tiers, auto-promote, rewards catalog, birthday cron
+try {
+  require('./loyalty-advanced').register({
+    handlers,
+    supabaseRequest, readBody, requireAuth,
+    sendJSON, sendError,
+    sendEmail: (typeof sendEmail === 'function' ? sendEmail : null),
+  });
+} catch (e) {
+  console.error('[LOYALTY_ADVANCED] register failed:', e && e.message);
+}
+
 // =============================================================
 // R18 — NFT LOYALTY + BLOCKCHAIN RECEIPTS (MOCK)
 // Implementación mock: NO usa cadenas reales. token_id, tx_hash y IPFS
