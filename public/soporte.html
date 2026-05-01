@@ -183,6 +183,10 @@
   <div class="modal">
     <div class="modal-title">Nuevo Ticket de Soporte</div>
     <div class="form-group">
+      <label>Email (auto-fill)</label>
+      <input id="tk-email" placeholder="tu@email.com">
+    </div>
+    <div class="form-group">
       <label>Asunto</label>
       <input id="tk-asunto" placeholder="Describe brevemente el problema">
     </div>
@@ -209,9 +213,30 @@
       <label>Descripción detallada</label>
       <textarea id="tk-desc" rows="4" placeholder="Describe el problema con detalle..."></textarea>
     </div>
+    <div class="form-group">
+      <label>Adjuntos (opcional)</label>
+      <input id="tk-attach" type="file" multiple accept="image/*,application/pdf">
+    </div>
     <div style="display:flex;gap:.7rem;justify-content:flex-end">
       <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
-      <button class="btn btn-primary" onclick="createTicket()">Crear ticket</button>
+      <button class="btn btn-primary" onclick="createTicket()">Enviar ticket</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DETALLE / THREAD -->
+<div class="modal-overlay" id="threadModal">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-title" id="thread-title">Ticket</div>
+    <div id="thread-meta" style="font-size:.75rem;color:var(--muted);margin-bottom:.8rem"></div>
+    <div id="thread-body" style="max-height:340px;overflow-y:auto;padding:.5rem .2rem;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:1rem"></div>
+    <div class="form-group">
+      <label>Tu respuesta</label>
+      <textarea id="reply-text" rows="3" placeholder="Escribe una respuesta…"></textarea>
+    </div>
+    <div style="display:flex;gap:.7rem;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeThread()">Cerrar</button>
+      <button class="btn btn-primary" onclick="sendReply()">Enviar respuesta</button>
     </div>
   </div>
 </div>
@@ -220,11 +245,44 @@
 
 <script>
 let allTickets = [];
+let currentTicket = null;
+
+// === Auth helpers ===
+function getToken() {
+  return localStorage.getItem('volvix_token')
+      || localStorage.getItem('volvixAuthToken')
+      || localStorage.getItem('volvix_jwt')
+      || '';
+}
+function userEmail() {
+  // Heurística: decodificar JWT si es posible
+  try {
+    const tk = getToken();
+    if (!tk) return '';
+    const payload = tk.split('.')[1];
+    if (!payload) return '';
+    const json = JSON.parse(atob(payload.replace(/-/g,'+').replace(/_/g,'/')));
+    return json.email || json.sub || json.user_email || '';
+  } catch (_) { return ''; }
+}
+async function api(path, opts) {
+  opts = opts || {};
+  const tk = getToken();
+  opts.headers = Object.assign({
+    'Content-Type': 'application/json',
+    ...(tk ? { 'Authorization': 'Bearer ' + tk } : {})
+  }, opts.headers || {});
+  const r = await fetch(path, opts);
+  return { status: r.status, json: await r.json().catch(()=>({})) };
+}
+function track(event, params) {
+  try { if (typeof gtag === 'function') gtag('event', event, params || {}); } catch (_) {}
+}
 
 const DEMO_TICKETS = [
-  {id:'tk1',asunto:'No puedo imprimir tickets',prioridad:'alta',estado:'abierto',categoria:'tecnico',descripcion:'Al intentar imprimir el ticket de venta el sistema no responde.',created_at:new Date(Date.now()-3600000).toISOString()},
-  {id:'tk2',asunto:'Error en facturación CFDI',prioridad:'critica',estado:'abierto',categoria:'facturacion',descripcion:'Los folios no se generan correctamente.',created_at:new Date(Date.now()-7200000).toISOString()},
-  {id:'tk3',asunto:'Cómo agregar empleados',prioridad:'baja',estado:'resuelto',categoria:'capacitacion',descripcion:'Necesito capacitación para agregar usuarios.',created_at:new Date(Date.now()-86400000).toISOString()},
+  {id:'tk1',title:'No puedo imprimir tickets',asunto:'No puedo imprimir tickets',prioridad:'alta',priority:'high',estado:'abierto',status:'open',categoria:'tecnico',category:'tecnico',descripcion:'Al intentar imprimir el ticket de venta el sistema no responde.',description:'Al intentar imprimir el ticket de venta el sistema no responde.',created_at:new Date(Date.now()-3600000).toISOString(),thread:[]},
+  {id:'tk2',title:'Error en facturación CFDI',asunto:'Error en facturación CFDI',prioridad:'critica',priority:'critical',estado:'abierto',status:'open',categoria:'facturacion',category:'facturacion',descripcion:'Los folios no se generan correctamente.',description:'Los folios no se generan correctamente.',created_at:new Date(Date.now()-7200000).toISOString(),thread:[]},
+  {id:'tk3',title:'Cómo agregar empleados',asunto:'Cómo agregar empleados',prioridad:'baja',priority:'low',estado:'resuelto',status:'solved',categoria:'capacitacion',category:'capacitacion',descripcion:'Necesito capacitación para agregar usuarios.',description:'Necesito capacitación para agregar usuarios.',created_at:new Date(Date.now()-86400000).toISOString(),thread:[]},
 ];
 
 const FAQ = [
@@ -260,14 +318,35 @@ function estadoChip(e) {
   return `<span class="chip ${e==='resuelto'?'chip-green':'chip-yellow'}">${e}</span>`;
 }
 
+function normalizeTicket(t) {
+  // Mapea respuesta API → estructura UI (acepta ambos esquemas)
+  return {
+    id: t.id || t.ticket_id || ('tk-' + Math.random().toString(36).slice(2,9)),
+    asunto: t.asunto || t.title || t.subject || 'Sin asunto',
+    descripcion: t.descripcion || t.description || t.solution || '',
+    prioridad: t.prioridad || t.priority || 'media',
+    estado: t.estado || (t.status === 'solved' ? 'resuelto' : (t.status === 'open' ? 'abierto' : t.status)) || 'abierto',
+    categoria: t.categoria || t.category || 'otro',
+    created_at: t.created_at || (t.opened ? new Date(t.opened).toISOString() : new Date().toISOString()),
+    thread: t.thread || t.messages || [],
+    raw: t
+  };
+}
+
 async function loadTickets() {
   try {
-    const r = await fetch('/api/tickets');
-    const data = await r.json();
-    allTickets = data.length ? data : DEMO_TICKETS;
-  } catch { allTickets = DEMO_TICKETS; }
+    const { status, json } = await api('/api/tickets?mine=1');
+    const data = Array.isArray(json) ? json : (json.tickets || json.data || []);
+    if (status === 401 || status === 403) {
+      toast('Sesión expirada — usando demo', 'error');
+      allTickets = DEMO_TICKETS.map(normalizeTicket);
+    } else {
+      allTickets = (data.length ? data : DEMO_TICKETS).map(normalizeTicket);
+    }
+  } catch { allTickets = DEMO_TICKETS.map(normalizeTicket); }
   updateStats();
   filterTickets();
+  track('soporte_tickets_loaded', { count: allTickets.length });
 }
 
 function updateStats() {
@@ -290,33 +369,51 @@ function renderTickets(list) {
     return;
   }
   container.innerHTML = list.map(t => `
-    <div class="ticket-card ${t.estado} ${t.prioridad === 'critica' ? 'critica' : ''}">
+    <div class="ticket-card ${t.estado} ${t.prioridad === 'critica' ? 'critica' : ''}" data-id="${t.id}" onclick="openThread('${t.id}')">
       <div class="tk-header">
-        <span class="tk-id">#${(t.id||'').slice(0,8)}</span>
+        <span class="tk-id">#${(t.id||'').slice(0,12)}</span>
         <span style="font-size:.75rem;color:var(--muted)">${t.created_at ? new Date(t.created_at).toLocaleDateString() : '—'}</span>
       </div>
       <div class="tk-asunto">${t.asunto||'Sin asunto'}</div>
-      <div class="tk-desc">${(t.descripcion||'').slice(0,80)}${t.descripcion?.length>80?'…':''}</div>
+      <div class="tk-desc">${(t.descripcion||'').slice(0,80)}${(t.descripcion||'').length>80?'…':''}</div>
       <div class="tk-footer">
         ${prioChip(t.prioridad||'media')}
         ${estadoChip(t.estado||'abierto')}
-        ${t.estado !== 'resuelto' ? `<button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="resolverTicket('${t.id}')">Resolver</button>` : ''}
+        ${t.estado !== 'resuelto' ? `<button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="event.stopPropagation();resolverTicket('${t.id}')">Resolver</button>` : ''}
       </div>
     </div>`).join('');
 }
 
 async function createTicket() {
+  const subject = document.getElementById('tk-asunto').value.trim();
+  if (!subject) { toast('El asunto es requerido', 'error'); return; }
+  // Mapea a los campos esperados por /api/tickets (subject/title + description)
   const body = {
-    asunto: document.getElementById('tk-asunto').value,
+    title: subject,
+    subject: subject,
+    asunto: subject,
+    priority: document.getElementById('tk-prioridad').value,
     prioridad: document.getElementById('tk-prioridad').value,
+    category: document.getElementById('tk-cat').value,
     categoria: document.getElementById('tk-cat').value,
+    description: document.getElementById('tk-desc').value,
     descripcion: document.getElementById('tk-desc').value,
+    email: document.getElementById('tk-email').value || userEmail() || '',
     estado: 'abierto',
   };
-  if (!body.asunto) { toast('El asunto es requerido', 'error'); return; }
+  // Adjuntos: solo nombres por ahora (multipart real requiere otro endpoint)
+  const files = document.getElementById('tk-attach') && document.getElementById('tk-attach').files;
+  if (files && files.length) {
+    body.attachments = Array.from(files).map(f => ({ name: f.name, size: f.size, type: f.type }));
+  }
   try {
-    await fetch('/api/tickets', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
-    toast('Ticket creado con éxito');
+    const { status, json } = await api('/api/tickets', { method:'POST', body: JSON.stringify(body) });
+    if (status >= 200 && status < 300) {
+      toast('Ticket enviado con éxito');
+      track('support_ticket_created', { priority: body.priority, category: body.category });
+    } else {
+      toast('Ticket guardado localmente (HTTP ' + status + ')', 'error');
+    }
   } catch { toast('Ticket guardado localmente'); }
   closeModal();
   loadTickets();
@@ -324,11 +421,72 @@ async function createTicket() {
 
 async function resolverTicket(id) {
   allTickets = allTickets.map(t => t.id === id ? {...t, estado: 'resuelto'} : t);
-  try { await fetch(`/api/tickets/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({estado:'resuelto'}) }); } catch {}
+  try {
+    await api(`/api/tickets/${encodeURIComponent(id)}`, { method:'PUT', body: JSON.stringify({estado:'resuelto', status:'solved'}) });
+    track('support_ticket_resolved', { id });
+  } catch {}
   toast('Ticket marcado como resuelto');
   updateStats();
   filterTickets();
 }
+
+// === Thread / detalle ===
+function openThread(id) {
+  const t = allTickets.find(x => x.id === id);
+  if (!t) return;
+  currentTicket = t;
+  document.getElementById('thread-title').textContent = '#' + (t.id||'').slice(0,12) + ' · ' + (t.asunto||'');
+  document.getElementById('thread-meta').textContent =
+    [t.categoria, t.prioridad, t.estado, t.created_at ? new Date(t.created_at).toLocaleString() : ''].filter(Boolean).join(' · ');
+  renderThread(t);
+  document.getElementById('threadModal').classList.add('open');
+  track('support_ticket_opened', { id });
+}
+function renderThread(t) {
+  const body = document.getElementById('thread-body');
+  const items = [];
+  // Mensaje inicial
+  items.push({ author: 'Tú', text: t.descripcion || '(sin descripción)', ts: t.created_at });
+  (t.thread || []).forEach(m => items.push({
+    author: m.author || m.from || 'Soporte',
+    text: m.text || m.message || m.body || '',
+    ts: m.created_at || m.ts
+  }));
+  body.innerHTML = items.map(m => `
+    <div style="margin:.6rem 0;padding:.6rem .8rem;background:var(--bg3);border:1px solid var(--border);border-radius:8px;">
+      <div style="font-size:.72rem;color:var(--muted);margin-bottom:.3rem;">
+        <strong style="color:#fff">${m.author}</strong>${m.ts ? ' · ' + new Date(m.ts).toLocaleString() : ''}
+      </div>
+      <div style="font-size:.85rem;line-height:1.4;white-space:pre-wrap;">${(m.text||'').replace(/[<>]/g, c => c === '<' ? '&lt;' : '&gt;')}</div>
+    </div>`).join('');
+  body.scrollTop = body.scrollHeight;
+}
+function closeThread() {
+  document.getElementById('threadModal').classList.remove('open');
+  document.getElementById('reply-text').value = '';
+  currentTicket = null;
+}
+async function sendReply() {
+  if (!currentTicket) return;
+  const text = document.getElementById('reply-text').value.trim();
+  if (!text) { toast('Escribe una respuesta', 'error'); return; }
+  // Optimistic update local
+  currentTicket.thread = currentTicket.thread || [];
+  currentTicket.thread.push({ author: 'Tú', text, ts: new Date().toISOString() });
+  renderThread(currentTicket);
+  document.getElementById('reply-text').value = '';
+  try {
+    await api(`/api/tickets/${encodeURIComponent(currentTicket.id)}/reply`, {
+      method: 'POST', body: JSON.stringify({ message: text })
+    });
+    track('support_ticket_replied', { id: currentTicket.id });
+  } catch (_) {}
+  toast('Respuesta enviada');
+}
+window.openThread = openThread;
+window.closeThread = closeThread;
+window.sendReply = sendReply;
+window.resolverTicket = resolverTicket;
 
 // CHAT IA
 function sendChat() {
@@ -372,12 +530,28 @@ function buildFAQ() {
     </details>`).join('');
 }
 
-function openModal() { document.getElementById('ticketModal').classList.add('open'); }
+function openModal() {
+  // Auto-fill email del usuario
+  const emailInput = document.getElementById('tk-email');
+  if (emailInput && !emailInput.value) emailInput.value = userEmail() || '';
+  document.getElementById('ticketModal').classList.add('open');
+  track('support_modal_opened', {});
+}
 function closeModal() { document.getElementById('ticketModal').classList.remove('open'); }
-document.querySelector('.modal-overlay').addEventListener('click', e => { if(e.target===e.currentTarget) closeModal(); });
+document.querySelectorAll('.modal-overlay').forEach(ov => {
+  ov.addEventListener('click', e => {
+    if (e.target === e.currentTarget) {
+      ov.classList.remove('open');
+      if (ov.id === 'threadModal') currentTicket = null;
+    }
+  });
+});
+window.openModal = openModal;
+window.closeModal = closeModal;
 
 buildFAQ();
 loadTickets();
+track('support_page_view', { path: location.pathname });
 </script>
 </body>
 </html>

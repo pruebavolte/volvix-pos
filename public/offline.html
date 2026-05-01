@@ -102,15 +102,17 @@
       Puedes seguir trabajando offline — todo se sincronizará cuando vuelva la conexión.
     </p>
     <div class="actions">
-      <button onclick="location.reload()">Reintentar</button>
-      <a class="btn secondary" href="/pos.html">Ir al POS</a>
+      <button onclick="manualRetry()">Reintentar ahora</button>
+      <a class="btn secondary" id="offlinePosBtn" href="/salvadorex_web_v25.html?offline=1">Modo offline POS</a>
     </div>
     <div class="tip">
-      💡 <strong>Modo offline activo:</strong> las ventas se guardan localmente
-      en <code>Volvix.offlineQueue</code> y se envían al servidor en cuanto se restablezca la red.
+      💡 <strong>Tus ventas se guardan localmente</strong> y se sincronizan al volver online.
+      Mientras no haya conexión, puedes seguir cobrando desde el POS — todo va a
+      <code>Volvix.offlineQueue</code> y se envía automáticamente al servidor.
     </div>
     <div class="queue" id="queueInfo">Verificando ventas pendientes…</div>
-    <div class="status" id="status"><span class="dot" id="dot"></span><span id="statusTxt">Offline</span></div>
+    <div class="status" id="status"><span class="dot" id="dot"></span><span id="statusTxt">Sin conexión</span></div>
+    <div class="queue" id="retryInfo" style="margin-top:8px;font-size:11px;color:#78716C"></div>
   </main>
 
   <script>
@@ -118,33 +120,101 @@
       const dot = document.getElementById('dot');
       const txt = document.getElementById('statusTxt');
       const qInfo = document.getElementById('queueInfo');
+      const retryInfo = document.getElementById('retryInfo');
 
-      function refreshOnline() {
-        if (navigator.onLine) {
+      // Detectamos URL original (la que provocó la página offline)
+      const params = new URLSearchParams(location.search);
+      const originalUrl = params.get('from') || sessionStorage.getItem('volvix.offline.from') || '/';
+      try { sessionStorage.setItem('volvix.offline.from', originalUrl); } catch (_) {}
+
+      // Estado: 'offline' | 'reconnecting' | 'online'
+      let state = navigator.onLine ? 'reconnecting' : 'offline';
+      let attempt = 0;
+      let timer = null;
+
+      function setUi(s, msg) {
+        state = s;
+        if (s === 'online') {
           dot.classList.add('online');
-          txt.textContent = 'Conexión restaurada · recargando…';
-          setTimeout(() => location.reload(), 800);
+          txt.textContent = 'Conectado';
+        } else if (s === 'reconnecting') {
+          dot.classList.remove('online');
+          txt.textContent = 'Reconectando…';
         } else {
           dot.classList.remove('online');
-          txt.textContent = 'Offline';
+          txt.textContent = 'Sin conexión';
         }
+        if (msg) retryInfo.textContent = msg;
       }
-      window.addEventListener('online',  refreshOnline);
-      window.addEventListener('offline', refreshOnline);
-      refreshOnline();
+
+      // Backoff: 5s, 10s, 20s, 40s, máx 60s
+      function nextDelay() {
+        return Math.min(5000 * Math.pow(2, attempt), 60000);
+      }
+
+      async function probe() {
+        // Pequeño HEAD a la raíz para confirmar conectividad real
+        try {
+          const ctrl = new AbortController();
+          const t = setTimeout(() => ctrl.abort(), 4000);
+          const r = await fetch('/?_p=' + Date.now(), { method: 'HEAD', cache: 'no-store', signal: ctrl.signal });
+          clearTimeout(t);
+          return r.ok || r.status > 0;
+        } catch (_) { return false; }
+      }
+
+      async function tryReconnect() {
+        if (state === 'online') return;
+        attempt++;
+        setUi('reconnecting', 'Intento ' + attempt + '… (' + (nextDelay()/1000) + 's si falla)');
+        const ok = await probe();
+        if (ok) {
+          setUi('online', 'Conexión restaurada — redirigiendo…');
+          try { gtag && gtag('event', 'offline_recovered', { attempts: attempt }); } catch(_){}
+          setTimeout(() => {
+            // Auto-redirect a la página original
+            try { location.replace(originalUrl); } catch (_) { location.reload(); }
+          }, 700);
+          return;
+        }
+        const d = nextDelay();
+        setUi('offline', 'Reintento en ' + (d/1000) + 's…');
+        timer = setTimeout(tryReconnect, d);
+      }
+
+      function manualRetry() {
+        if (timer) { clearTimeout(timer); timer = null; }
+        attempt = 0;
+        tryReconnect();
+      }
+      window.manualRetry = manualRetry;
+
+      // Mantener parametro ?from al pasar al POS
+      try {
+        const btn = document.getElementById('offlinePosBtn');
+        if (originalUrl && originalUrl !== '/' && btn) {
+          btn.href = '/salvadorex_web_v25.html?offline=1&return=' + encodeURIComponent(originalUrl);
+        }
+      } catch (_) {}
+
+      window.addEventListener('online',  () => { attempt = 0; tryReconnect(); });
+      window.addEventListener('offline', () => setUi('offline', 'Conexión perdida.'));
+
+      // Inicia el primer probe inmediatamente y arranca el ciclo
+      tryReconnect();
 
       // Consultar la queue al SW
       if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
         const ch = new MessageChannel();
         ch.port1.onmessage = (e) => {
-          const n = (e.data?.items || []).length;
+          const n = ((e.data && e.data.items) || []).length;
           qInfo.innerHTML = n
-            ? `Tienes <b>${n}</b> operación(es) pendientes de sincronizar.`
+            ? 'Tienes <b>' + n + '</b> operación(es) pendientes de sincronizar.'
             : 'No hay operaciones pendientes.';
         };
         navigator.serviceWorker.controller.postMessage({ type: 'GET_QUEUE' }, [ch.port2]);
       } else {
-        qInfo.textContent = '';
+        qInfo.textContent = 'Service Worker no disponible — sincroniza manual al volver online.';
       }
     })();
   </script>

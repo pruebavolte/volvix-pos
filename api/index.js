@@ -6222,6 +6222,29 @@ try {
   console.error('[STATUS-MONITOR] register failed:', e && e.message);
 }
 
+// GDPR — derechos ARCO (acceso/portabilidad/borrado) con OTP
+try {
+  require('./gdpr').register({
+    handlers,
+    supabaseRequest, readBody, requireAuth,
+    sendJSON, sendError,
+    sendEmail: (typeof sendEmail === 'function' ? sendEmail : null),
+  });
+} catch (e) {
+  console.error('[GDPR] register failed:', e && e.message);
+}
+
+// FRAUD DETECTION — alerts + review + scoring heurístico
+try {
+  require('./fraud-detection').register({
+    handlers,
+    supabaseRequest, readBody, requireAuth,
+    sendJSON, sendError,
+  });
+} catch (e) {
+  console.error('[FRAUD] register failed:', e && e.message);
+}
+
 // =============================================================
 // R18 — NFT LOYALTY + BLOCKCHAIN RECEIPTS (MOCK)
 // Implementación mock: NO usa cadenas reales. token_id, tx_hash y IPFS

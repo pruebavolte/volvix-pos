@@ -90,13 +90,14 @@
   <!-- Verificación -->
   <div class="card hidden" id="step-verify">
     <h2>3. Verificación</h2>
-    <p id="verify-msg">Hemos registrado tu solicitud. Revisa tu email y haz clic en el enlace de verificación. También puedes pegar el token aquí:</p>
-    <label>Request ID</label>
-    <input id="req-id">
-    <label>Verify token</label>
-    <input id="verify-token">
+    <p id="verify-msg">Hemos registrado tu solicitud. Revisa tu email para obtener el código OTP de verificación. También puedes pegar el código aquí:</p>
+    <label>Ticket ID</label>
+    <input id="req-id" placeholder="GDPR-XXXX-XXXX">
+    <label>Código OTP (6 dígitos) o Verify token</label>
+    <input id="verify-token" placeholder="123456">
     <div class="row" style="margin-top:12px;">
-      <button onclick="confirmRequest()">Confirmar y ejecutar</button>
+      <button onclick="confirmOtp()">Confirmar OTP</button>
+      <button class="secondary" onclick="confirmRequest()">Modo legacy</button>
     </div>
   </div>
 
@@ -159,18 +160,80 @@ async function api(path, body) {
 async function submitRequest() {
   const email = document.getElementById('email').value.trim();
   const reason = document.getElementById('reason').value.trim();
-  if (!email) return VolvixUI.toast({type:'error', message:'Email requerido'});
+  if (!email) return (window.VolvixUI ? VolvixUI.toast({type:'error', message:'Email requerido'}) : alert('Email requerido'));
+  // 1) Probamos el nuevo endpoint /api/gdpr/request
+  const newApi = await api('/api/gdpr/request', { type: state.type, email, identification: { reason } });
+  if (newApi.json && newApi.json.ok && newApi.json.ticket_id) {
+    state.useNewApi = true;
+    state.ticketId = newApi.json.ticket_id;
+    document.getElementById('req-id').value = newApi.json.ticket_id;
+    if (newApi.json.otp_dev) {
+      document.getElementById('verify-token').value = newApi.json.otp_dev;
+      document.getElementById('verify-msg').textContent =
+        'DEV: el OTP se ha pre-rellenado. En producción lo recibirás por email.';
+    }
+    return show('step-verify');
+  }
+  // 2) Fallback al endpoint legacy /api/gdpr/{type}
   const path = `/api/gdpr/${state.type}`;
   const { status, json } = await api(path, { email, reason });
-  if (!json.ok) return VolvixUI.toast({type:'error', message:'Error: ' + (json.error || status)});
+  if (!json.ok) {
+    const msg = 'Error: ' + (json.error || status);
+    return (window.VolvixUI ? VolvixUI.toast({type:'error', message:msg}) : alert(msg));
+  }
+  state.useNewApi = false;
   document.getElementById('req-id').value = json.request_id;
-  // En producción el token llega por email; en dev viene en la respuesta.
   if (json.verify_token_dev) {
     document.getElementById('verify-token').value = json.verify_token_dev;
     document.getElementById('verify-msg').textContent =
       'DEV: el token se ha pre-rellenado. En producción lo recibirás por email.';
   }
   show('step-verify');
+}
+
+// Nuevo flujo OTP — usa /api/gdpr/verify + /api/gdpr/request/:id/data|erase
+async function confirmOtp() {
+  const ticket = document.getElementById('req-id').value.trim();
+  const otp = document.getElementById('verify-token').value.trim();
+  if (!ticket || !otp) {
+    const m = 'Ticket ID y OTP requeridos';
+    return (window.VolvixUI ? VolvixUI.toast({type:'error', message:m}) : alert(m));
+  }
+  // Step 1: verificar OTP
+  const v = await api('/api/gdpr/verify', { ticket_id: ticket, otp });
+  if (!v.json || !v.json.ok) {
+    document.getElementById('result-badge').className = 'badge err';
+    document.getElementById('result-badge').textContent = 'ERROR';
+    document.getElementById('result-msg').textContent = (v.json && v.json.error) || ('HTTP ' + v.status);
+    document.getElementById('result-data').textContent = JSON.stringify(v.json || {}, null, 2);
+    return show('step-result');
+  }
+  // Step 2: ejecutar accion
+  let result;
+  if (state.type === 'erasure') {
+    result = await api(`/api/gdpr/request/${encodeURIComponent(ticket)}/erase`, {});
+  } else {
+    // GET no tiene body; reusamos fetch directamente
+    const r = await fetch(`/api/gdpr/request/${encodeURIComponent(ticket)}/data`, { method: 'GET' });
+    result = { status: r.status, json: await r.json().catch(()=>({})) };
+  }
+  if (!result.json || !result.json.ok) {
+    document.getElementById('result-badge').className = 'badge err';
+    document.getElementById('result-badge').textContent = 'ERROR';
+    document.getElementById('result-msg').textContent = (result.json && result.json.error) || 'Error desconocido';
+    document.getElementById('result-data').textContent = JSON.stringify(result.json || {}, null, 2);
+  } else {
+    state.lastResult = result.json;
+    document.getElementById('result-badge').className = 'badge ok';
+    document.getElementById('result-badge').textContent = result.json.legal_basis || 'OK';
+    document.getElementById('result-msg').textContent =
+      state.type === 'erasure'
+        ? 'Tus datos han sido anonimizados. Conserva esta confirmación como evidencia.'
+        : 'Aquí está el export completo de tus datos personales.';
+    const payload = state.type === 'erasure' ? result.json.result : result.json.data;
+    document.getElementById('result-data').textContent = JSON.stringify(payload, null, 2);
+  }
+  show('step-result');
 }
 
 async function confirmRequest() {
