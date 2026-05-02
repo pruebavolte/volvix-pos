@@ -1,0 +1,469 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "description": "Schemas de campos por giro de negocio. Cada giro define qué campos del producto son: requeridos, opcionales, o no aplican. Las terminologías cambian (ej. en panadería 'Nombre' es 'Nombre del pan', en restaurant 'Nombre platillo'). El admin puede activar/desactivar/locker cada campo individual via tenant_field_flags (control granular).",
+    "field_categories": {
+      "core": "Campos universales que siempre aplican",
+      "industry": "Campos específicos del giro",
+      "advanced": "Campos avanzados (IA, omnicanal, multimedia)",
+      "premium": "Campos que requieren plan superior"
+    },
+    "field_types": {
+      "text": "input texto libre",
+      "number": "input numérico",
+      "money": "input precio (formateado)",
+      "select": "dropdown con opciones",
+      "boolean": "toggle sí/no",
+      "date": "fecha",
+      "datetime": "fecha + hora",
+      "image": "subir imagen",
+      "image-multi": "subir múltiples imágenes",
+      "barcode": "código de barras",
+      "textarea": "texto largo",
+      "tags": "lista de etiquetas",
+      "file": "archivo (PDF, etc.)"
+    }
+  },
+
+  "_universal": {
+    "label": "Campos universales (todos los giros)",
+    "fields": [
+      { "key": "name", "label": "Nombre", "type": "text", "required": true, "placeholder": "Ej. Coca Cola 600ml" },
+      { "key": "barcode", "label": "Código de barras", "type": "barcode", "required": false, "auto_generate": true, "placeholder": "Se auto-genera (1, 2, 3…)" },
+      { "key": "price", "label": "Precio venta", "type": "money", "required": true },
+      { "key": "cost", "label": "Costo", "type": "money", "required": false, "help": "Si no lo conoces, déjalo en 0" },
+      { "key": "stock", "label": "Stock", "type": "number", "required": false, "default": 0 },
+      { "key": "stock_min", "label": "Stock mínimo", "type": "number", "required": false, "help": "Avisar cuando baje de este número" },
+      { "key": "category", "label": "Categoría", "type": "text", "required": false, "placeholder": "Bebidas, Abarrotes…" },
+      { "key": "unit", "label": "Unidad", "type": "select", "options": ["pieza", "kilo", "gramo", "litro", "ml", "metro", "paquete"], "default": "pieza" },
+      { "key": "iva", "label": "IVA", "type": "select", "options": ["16%", "8% frontera", "0% exento"], "default": "16%" },
+      { "key": "image", "label": "Imagen", "type": "image", "required": false },
+      { "key": "description", "label": "Descripción", "type": "textarea", "required": false }
+    ]
+  },
+
+  "_advanced": {
+    "label": "Campos avanzados (premium / superior)",
+    "premium": true,
+    "fields": [
+      { "key": "ai_related", "label": "Productos relacionados (IA)", "type": "tags", "category": "advanced" },
+      { "key": "ai_suggested_sale", "label": "Venta sugerida", "type": "tags", "category": "advanced" },
+      { "key": "ai_seasonality", "label": "Estacionalidad", "type": "select", "options": ["año", "navidad", "verano", "invierno", "back-to-school"], "category": "advanced" },
+      { "key": "shopify_id", "label": "Shopify ID", "type": "text", "category": "omnicanal" },
+      { "key": "ml_id", "label": "MercadoLibre ID", "type": "text", "category": "omnicanal" },
+      { "key": "tiktok_shop_id", "label": "TikTok Shop ID", "type": "text", "category": "omnicanal" },
+      { "key": "video_url", "label": "Video del producto", "type": "text", "category": "multimedia" },
+      { "key": "manual_pdf", "label": "Manual PDF", "type": "file", "category": "multimedia" },
+      { "key": "images_extra", "label": "Imágenes adicionales", "type": "image-multi", "category": "multimedia" },
+      { "key": "lots_multi", "label": "Lotes múltiples", "type": "boolean", "category": "inventory" },
+      { "key": "warehouses_multi", "label": "Multi-almacén", "type": "boolean", "category": "inventory" },
+      { "key": "costing_method", "label": "Método de costeo", "type": "select", "options": ["promedio", "FIFO", "LIFO"], "category": "finanzas" }
+    ]
+  },
+
+  "abarrotes": {
+    "label": "Abarrotes / Tienda",
+    "title_singular": "Producto",
+    "fields_extra": [
+      { "key": "sku", "label": "SKU", "type": "text" },
+      { "key": "brand", "label": "Marca", "type": "text", "placeholder": "Bimbo, Nestlé…" },
+      { "key": "price_wholesale", "label": "Precio mayoreo", "type": "money" },
+      { "key": "supplier", "label": "Proveedor", "type": "text" },
+      { "key": "expiry", "label": "Caducidad", "type": "date" },
+      { "key": "lot", "label": "Lote", "type": "text" },
+      { "key": "shelf_location", "label": "Ubicación anaquel", "type": "text", "placeholder": "Pasillo 3, anaquel 2" },
+      { "key": "weight", "label": "Peso", "type": "number" },
+      { "key": "flavor", "label": "Sabor", "type": "text" },
+      { "key": "net_content", "label": "Contenido neto", "type": "text", "placeholder": "600ml, 250g" },
+      { "key": "promo", "label": "Promoción", "type": "text" },
+      { "key": "combo", "label": "Es combo", "type": "boolean" }
+    ]
+  },
+
+  "panaderia": {
+    "label": "Panadería",
+    "title_singular": "Pan",
+    "field_overrides": { "name": "Nombre del pan", "category": "Tipo de pan" },
+    "fields_extra": [
+      { "key": "price_per_kilo", "label": "Precio por kilo", "type": "money" },
+      { "key": "weight", "label": "Peso", "type": "number" },
+      { "key": "ingredients", "label": "Ingredientes", "type": "textarea" },
+      { "key": "allergens", "label": "Alérgenos", "type": "tags", "options": ["gluten", "huevo", "lácteos", "frutos secos", "soya"] },
+      { "key": "production_date", "label": "Fecha elaboración", "type": "date" },
+      { "key": "expiry", "label": "Fecha caducidad", "type": "date" },
+      { "key": "size", "label": "Tamaño", "type": "select", "options": ["chico", "mediano", "grande", "extra grande"] },
+      { "key": "filling", "label": "Relleno", "type": "text" },
+      { "key": "has_sugar", "label": "Con azúcar", "type": "boolean", "default": true },
+      { "key": "has_gluten", "label": "Con gluten", "type": "boolean", "default": true },
+      { "key": "daily_production", "label": "Producción diaria", "type": "number" },
+      { "key": "production_cost", "label": "Costo producción", "type": "money" },
+      { "key": "internal_recipe", "label": "Receta interna", "type": "textarea", "category": "premium" }
+    ]
+  },
+
+  "farmacia": {
+    "label": "Farmacia",
+    "title_singular": "Medicamento",
+    "field_overrides": { "name": "Nombre comercial", "brand": "Laboratorio" },
+    "fields_extra": [
+      { "key": "active_ingredient", "label": "Ingrediente activo", "type": "text" },
+      { "key": "concentration", "label": "Concentración", "type": "text", "placeholder": "500mg, 250ml" },
+      { "key": "presentation", "label": "Presentación", "type": "select", "options": ["caja", "frasco", "blister", "ampolleta", "jarabe", "crema"] },
+      { "key": "patent_or_generic", "label": "Patente / genérico", "type": "select", "options": ["patente", "genérico", "GI (Genérico Intercambiable)"] },
+      { "key": "requires_prescription", "label": "Requiere receta", "type": "boolean" },
+      { "key": "prescription_type", "label": "Tipo de receta", "type": "select", "options": ["simple", "controlada (psicotrópicos)", "controlada (estupefacientes)"] },
+      { "key": "prescription_scan", "label": "Escaneo de receta", "type": "image" },
+      { "key": "lot", "label": "Lote", "type": "text", "required": true },
+      { "key": "expiry", "label": "Caducidad", "type": "date", "required": true },
+      { "key": "sanitary_register", "label": "Registro sanitario (COFEPRIS)", "type": "text" },
+      { "key": "storage_temp", "label": "Temperatura almacenamiento", "type": "select", "options": ["ambiente", "refrigerado 2-8°C", "congelado <0°C"] },
+      { "key": "administration", "label": "Vía de administración", "type": "select", "options": ["oral", "tópica", "inyectable", "inhalada", "rectal", "ocular"] },
+      { "key": "dose", "label": "Dosis", "type": "text" },
+      { "key": "contraindications", "label": "Contraindicaciones", "type": "textarea" },
+      { "key": "controlled_substance", "label": "Sustancia controlada", "type": "boolean" }
+    ]
+  },
+
+  "refaccionaria": {
+    "label": "Refaccionaria",
+    "title_singular": "Refacción",
+    "field_overrides": { "name": "Nombre pieza" },
+    "fields_extra": [
+      { "key": "part_number", "label": "Número de parte", "type": "text", "required": true },
+      { "key": "oem", "label": "OEM", "type": "text" },
+      { "key": "brand", "label": "Marca", "type": "text" },
+      { "key": "compatible_with", "label": "Compatible con", "type": "tags", "placeholder": "Ford F150, Nissan Tsuru" },
+      { "key": "vehicle_brand", "label": "Marca auto", "type": "select", "options": ["Ford", "Nissan", "Toyota", "Chevrolet", "Volkswagen", "Honda", "Mazda", "Hyundai", "Kia", "otra"] },
+      { "key": "vehicle_model", "label": "Modelo", "type": "text" },
+      { "key": "year", "label": "Año", "type": "number" },
+      { "key": "engine", "label": "Motor", "type": "text", "placeholder": "1.8L 4 cilindros" },
+      { "key": "cylinders", "label": "Cilindros", "type": "select", "options": ["3", "4", "6", "8", "10", "12"] },
+      { "key": "transmission", "label": "Transmisión", "type": "select", "options": ["manual", "automática", "CVT", "DCT"] },
+      { "key": "fuel", "label": "Combustible", "type": "select", "options": ["gasolina", "diésel", "híbrido", "eléctrico"] },
+      { "key": "warehouse_location", "label": "Ubicación almacén", "type": "text" },
+      { "key": "warranty", "label": "Garantía", "type": "text" },
+      { "key": "country_origin", "label": "País origen", "type": "text" },
+      { "key": "equivalents", "label": "Equivalencias", "type": "tags" }
+    ]
+  },
+
+  "taller-mecanico": {
+    "label": "Taller mecánico",
+    "title_singular": "Servicio",
+    "is_service": true,
+    "field_overrides": { "name": "Tipo de servicio", "stock": false },
+    "fields_extra": [
+      { "key": "labor_cost", "label": "Mano de obra", "type": "money" },
+      { "key": "estimated_time", "label": "Tiempo estimado", "type": "text", "placeholder": "2 horas" },
+      { "key": "parts_used", "label": "Refacciones usadas", "type": "tags" },
+      { "key": "vehicle_brand", "label": "Marca auto", "type": "text" },
+      { "key": "vehicle_model", "label": "Modelo", "type": "text" },
+      { "key": "year", "label": "Año", "type": "number" },
+      { "key": "vin", "label": "VIN", "type": "text" },
+      { "key": "engine", "label": "Motor", "type": "text" },
+      { "key": "kilometers", "label": "Kilometraje", "type": "number" },
+      { "key": "customer", "label": "Cliente", "type": "text" },
+      { "key": "diagnosis", "label": "Diagnóstico", "type": "textarea" },
+      { "key": "technician", "label": "Técnico asignado", "type": "text" },
+      { "key": "repair_status", "label": "Estado reparación", "type": "select", "options": ["recibido", "diagnóstico", "esperando refacción", "en reparación", "listo", "entregado"] },
+      { "key": "evidence_photos", "label": "Evidencias / fotos", "type": "image-multi" },
+      { "key": "warranty", "label": "Garantía", "type": "text" },
+      { "key": "intake_date", "label": "Fecha ingreso", "type": "datetime" },
+      { "key": "delivery_date", "label": "Fecha entrega", "type": "datetime" },
+      { "key": "estimate", "label": "Presupuesto", "type": "money" },
+      { "key": "customer_signature", "label": "Firma cliente", "type": "image" }
+    ]
+  },
+
+  "restaurante": {
+    "label": "Restaurante",
+    "title_singular": "Platillo",
+    "field_overrides": { "name": "Nombre platillo", "category": "Categoría", "stock": false },
+    "is_recipe_based": true,
+    "fields_extra": [
+      { "key": "ingredients", "label": "Ingredientes", "type": "textarea" },
+      { "key": "recipe", "label": "Receta", "type": "textarea", "category": "premium" },
+      { "key": "prep_time", "label": "Tiempo de preparación", "type": "text", "placeholder": "15 minutos" },
+      { "key": "size", "label": "Tamaño", "type": "select", "options": ["chico", "mediano", "grande", "para compartir"] },
+      { "key": "spicy", "label": "Picante", "type": "boolean" },
+      { "key": "allergens", "label": "Alérgenos", "type": "tags" },
+      { "key": "modifiers", "label": "Modificadores", "type": "tags", "placeholder": "extra queso, sin cebolla" },
+      { "key": "extras", "label": "Extras", "type": "tags" },
+      { "key": "combo", "label": "Es combo", "type": "boolean" },
+      { "key": "production_cost", "label": "Costo producción", "type": "money" },
+      { "key": "available", "label": "Disponible", "type": "boolean", "default": true },
+      { "key": "calories", "label": "Calorías", "type": "number" },
+      { "key": "drink_included", "label": "Bebida incluida", "type": "boolean" }
+    ]
+  },
+
+  "carniceria": {
+    "label": "Carnicería",
+    "title_singular": "Corte",
+    "field_overrides": { "name": "Tipo de carne" },
+    "fields_extra": [
+      { "key": "cut", "label": "Corte", "type": "text", "placeholder": "Aguayón, Diezmillo, Lomo" },
+      { "key": "price_per_kilo", "label": "Precio por kilo", "type": "money", "required": true },
+      { "key": "weight", "label": "Peso", "type": "number" },
+      { "key": "expiry", "label": "Caducidad", "type": "date" },
+      { "key": "lot", "label": "Lote", "type": "text" },
+      { "key": "animal_origin", "label": "Origen animal", "type": "select", "options": ["res", "cerdo", "pollo", "borrego", "pavo", "pescado", "mariscos"] },
+      { "key": "refrigerated", "label": "Refrigerado", "type": "boolean", "default": true },
+      { "key": "frozen", "label": "Congelado", "type": "boolean" },
+      { "key": "packaging", "label": "Empaque", "type": "select", "options": ["bandeja", "vacío", "papel", "bolsa"] },
+      { "key": "slaughter_date", "label": "Fecha sacrificio", "type": "date" },
+      { "key": "supplier", "label": "Proveedor", "type": "text" },
+      { "key": "quality", "label": "Calidad", "type": "select", "options": ["premium", "selecta", "estándar"] }
+    ]
+  },
+
+  "fruteria": {
+    "label": "Frutería / Verdulería",
+    "title_singular": "Producto",
+    "fields_extra": [
+      { "key": "price_per_kilo", "label": "Precio por kilo", "type": "money", "required": true },
+      { "key": "weight", "label": "Peso", "type": "number" },
+      { "key": "origin", "label": "Origen", "type": "text", "placeholder": "Michoacán, Veracruz" },
+      { "key": "season", "label": "Temporada", "type": "select", "options": ["año", "primavera", "verano", "otoño", "invierno"] },
+      { "key": "organic", "label": "Orgánico", "type": "boolean" },
+      { "key": "expiry", "label": "Caducidad", "type": "date" },
+      { "key": "supplier", "label": "Proveedor", "type": "text" },
+      { "key": "quality", "label": "Calidad", "type": "select", "options": ["primera", "segunda", "tercera"] },
+      { "key": "lot", "label": "Lote", "type": "text" }
+    ]
+  },
+
+  "papeleria": {
+    "label": "Papelería",
+    "fields_extra": [
+      { "key": "brand", "label": "Marca", "type": "text" },
+      { "key": "model", "label": "Modelo", "type": "text" },
+      { "key": "color", "label": "Color", "type": "text" },
+      { "key": "size", "label": "Tamaño", "type": "text" },
+      { "key": "material", "label": "Material", "type": "text" },
+      { "key": "sku", "label": "SKU", "type": "text" },
+      { "key": "supplier", "label": "Proveedor", "type": "text" },
+      { "key": "is_pack", "label": "Es paquete", "type": "boolean" }
+    ]
+  },
+
+  "ferreteria": {
+    "label": "Ferretería",
+    "fields_extra": [
+      { "key": "brand", "label": "Marca", "type": "text" },
+      { "key": "model", "label": "Modelo", "type": "text" },
+      { "key": "dimensions", "label": "Medidas", "type": "text", "placeholder": "10cm x 5cm" },
+      { "key": "material", "label": "Material", "type": "text" },
+      { "key": "compatibility", "label": "Compatibilidad", "type": "tags" },
+      { "key": "use", "label": "Uso", "type": "text" },
+      { "key": "weight", "label": "Peso", "type": "number" },
+      { "key": "warranty", "label": "Garantía", "type": "text" },
+      { "key": "voltage", "label": "Voltaje", "type": "text", "placeholder": "127V, 220V" },
+      { "key": "power", "label": "Potencia", "type": "text", "placeholder": "1500W" },
+      { "key": "manual_pdf", "label": "Manual PDF", "type": "file" }
+    ]
+  },
+
+  "tienda-ropa": {
+    "label": "Tienda de ropa",
+    "field_overrides": { "name": "Nombre" },
+    "has_variants": true,
+    "fields_extra": [
+      { "key": "brand", "label": "Marca", "type": "text" },
+      { "key": "size", "label": "Talla", "type": "select", "options": ["XS", "S", "M", "L", "XL", "XXL", "28", "30", "32", "34", "36", "38", "40"] },
+      { "key": "color", "label": "Color", "type": "text" },
+      { "key": "gender", "label": "Género", "type": "select", "options": ["hombre", "mujer", "unisex", "niño", "niña"] },
+      { "key": "material", "label": "Material", "type": "text" },
+      { "key": "season", "label": "Temporada", "type": "select", "options": ["primavera-verano", "otoño-invierno", "todo el año"] },
+      { "key": "garment_type", "label": "Tipo de prenda", "type": "select", "options": ["camiseta", "pantalón", "vestido", "falda", "blusa", "saco", "abrigo", "sudadera"] },
+      { "key": "collection", "label": "Colección", "type": "text" },
+      { "key": "supplier", "label": "Proveedor", "type": "text" }
+    ]
+  },
+
+  "zapateria": {
+    "label": "Zapatería",
+    "has_variants": true,
+    "fields_extra": [
+      { "key": "brand", "label": "Marca", "type": "text" },
+      { "key": "model", "label": "Modelo", "type": "text" },
+      { "key": "size", "label": "Talla", "type": "select", "options": ["22", "23", "24", "25", "26", "27", "28", "29", "30", "31"] },
+      { "key": "color", "label": "Color", "type": "text" },
+      { "key": "material", "label": "Material", "type": "select", "options": ["piel", "cuero", "sintético", "tela", "plástico"] },
+      { "key": "gender", "label": "Género", "type": "select", "options": ["hombre", "mujer", "niño", "niña", "unisex"] },
+      { "key": "sole_type", "label": "Tipo de suela", "type": "select", "options": ["goma", "cuero", "sintética", "antiderrapante"] },
+      { "key": "warranty", "label": "Garantía", "type": "text" }
+    ]
+  },
+
+  "celulares": {
+    "label": "Celulares / Electrónica",
+    "fields_extra": [
+      { "key": "brand", "label": "Marca", "type": "text" },
+      { "key": "model", "label": "Modelo", "type": "text" },
+      { "key": "imei", "label": "IMEI", "type": "text", "required": true },
+      { "key": "storage", "label": "Capacidad", "type": "select", "options": ["32GB", "64GB", "128GB", "256GB", "512GB", "1TB"] },
+      { "key": "ram", "label": "RAM", "type": "select", "options": ["2GB", "3GB", "4GB", "6GB", "8GB", "12GB", "16GB"] },
+      { "key": "processor", "label": "Procesador", "type": "text" },
+      { "key": "color", "label": "Color", "type": "text" },
+      { "key": "carrier", "label": "Operadora", "type": "select", "options": ["liberado", "Telcel", "AT&T", "Movistar", "Bait", "Unefon"] },
+      { "key": "unlocked", "label": "Liberado", "type": "boolean" },
+      { "key": "warranty", "label": "Garantía", "type": "text" },
+      { "key": "serial", "label": "Serie", "type": "text" },
+      { "key": "accessories", "label": "Accesorios incluidos", "type": "tags" },
+      { "key": "battery_health", "label": "Estado batería", "type": "select", "options": ["nueva", ">90%", "80-90%", "70-80%", "<70%"] },
+      { "key": "refurbished", "label": "Reacondicionado", "type": "boolean" }
+    ]
+  },
+
+  "muebleria": {
+    "label": "Mueblería",
+    "fields_extra": [
+      { "key": "material", "label": "Material", "type": "text" },
+      { "key": "color", "label": "Color", "type": "text" },
+      { "key": "dimensions", "label": "Medidas", "type": "text", "placeholder": "200cm x 80cm x 75cm" },
+      { "key": "weight", "label": "Peso", "type": "number" },
+      { "key": "assembled", "label": "Armado", "type": "boolean" },
+      { "key": "warranty", "label": "Garantía", "type": "text" },
+      { "key": "supplier", "label": "Proveedor", "type": "text" },
+      { "key": "manual_pdf", "label": "Manual de armado", "type": "file" }
+    ]
+  },
+
+  "estetica": {
+    "label": "Estética / Spa / Salón",
+    "title_singular": "Servicio",
+    "is_service": true,
+    "field_overrides": { "name": "Nombre del servicio", "stock": false },
+    "fields_extra": [
+      { "key": "duration", "label": "Duración", "type": "text", "placeholder": "60 minutos" },
+      { "key": "specialist", "label": "Especialista", "type": "text" },
+      { "key": "products_used", "label": "Productos usados", "type": "tags" },
+      { "key": "customer_history", "label": "Historial cliente", "type": "textarea", "category": "premium" },
+      { "key": "allergy_notes", "label": "Notas de alergias", "type": "textarea" },
+      { "key": "employee_commission", "label": "Comisión empleado", "type": "money" },
+      { "key": "appointment", "label": "Cita", "type": "datetime" },
+      { "key": "before_photos", "label": "Fotos antes", "type": "image-multi" },
+      { "key": "after_photos", "label": "Fotos después", "type": "image-multi" }
+    ]
+  },
+
+  "hotel": {
+    "label": "Hotel",
+    "title_singular": "Habitación",
+    "field_overrides": { "name": "Número de habitación" },
+    "fields_extra": [
+      { "key": "room_type", "label": "Tipo habitación", "type": "select", "options": ["sencilla", "doble", "triple", "suite", "junior suite", "presidencial"] },
+      { "key": "price_night", "label": "Precio por noche", "type": "money", "required": true },
+      { "key": "capacity", "label": "Capacidad", "type": "number" },
+      { "key": "check_in", "label": "Check-in", "type": "datetime" },
+      { "key": "check_out", "label": "Check-out", "type": "datetime" },
+      { "key": "cleaning_status", "label": "Estado limpieza", "type": "select", "options": ["limpia", "sucia", "en limpieza", "fuera de servicio"] },
+      { "key": "amenities", "label": "Amenidades", "type": "tags" },
+      { "key": "photos", "label": "Fotos", "type": "image-multi" },
+      { "key": "floor", "label": "Piso", "type": "number" },
+      { "key": "available", "label": "Disponibilidad", "type": "boolean" },
+      { "key": "guest_name", "label": "Huésped actual", "type": "text" },
+      { "key": "deposit", "label": "Depósito", "type": "money" }
+    ]
+  },
+
+  "agencia-viajes": {
+    "label": "Agencia de viajes",
+    "title_singular": "Paquete",
+    "is_service": true,
+    "field_overrides": { "name": "Destino", "stock": false },
+    "fields_extra": [
+      { "key": "hotel", "label": "Hotel", "type": "text" },
+      { "key": "flight", "label": "Vuelo", "type": "text" },
+      { "key": "dates", "label": "Fechas", "type": "text" },
+      { "key": "people", "label": "Personas", "type": "number" },
+      { "key": "transport_included", "label": "Incluye transporte", "type": "boolean" },
+      { "key": "insurance_included", "label": "Incluye seguro", "type": "boolean" },
+      { "key": "visa_required", "label": "Visa requerida", "type": "boolean" },
+      { "key": "passport_required", "label": "Pasaporte requerido", "type": "boolean", "default": true },
+      { "key": "itinerary", "label": "Itinerario", "type": "textarea" }
+    ]
+  },
+
+  "lavanderia": {
+    "label": "Lavandería",
+    "title_singular": "Servicio",
+    "is_service": true,
+    "field_overrides": { "name": "Tipo de prenda", "stock": false },
+    "fields_extra": [
+      { "key": "weight", "label": "Peso", "type": "number" },
+      { "key": "price_per_kilo", "label": "Precio por kilo", "type": "money" },
+      { "key": "express_service", "label": "Servicio express", "type": "boolean" },
+      { "key": "delivery_date", "label": "Fecha entrega", "type": "datetime" },
+      { "key": "status", "label": "Estado", "type": "select", "options": ["recibido", "lavando", "secando", "planchando", "listo", "entregado"] },
+      { "key": "stains", "label": "Manchas especiales", "type": "textarea" },
+      { "key": "customer", "label": "Cliente", "type": "text" },
+      { "key": "evidence_photos", "label": "Fotos evidencia", "type": "image-multi" }
+    ]
+  },
+
+  "dulceria": {
+    "label": "Dulcería",
+    "fields_extra": [
+      { "key": "brand", "label": "Marca", "type": "text" },
+      { "key": "flavor", "label": "Sabor", "type": "text" },
+      { "key": "net_content", "label": "Contenido", "type": "text" },
+      { "key": "expiry", "label": "Caducidad", "type": "date" },
+      { "key": "lot", "label": "Lote", "type": "text" },
+      { "key": "has_sugar", "label": "Con azúcar", "type": "boolean", "default": true },
+      { "key": "imported", "label": "Importado", "type": "boolean" }
+    ]
+  },
+
+  "tienda-mascotas": {
+    "label": "Tienda de mascotas",
+    "fields_extra": [
+      { "key": "pet_type", "label": "Tipo mascota", "type": "select", "options": ["perro", "gato", "ave", "pez", "roedor", "reptil", "exótico"] },
+      { "key": "recommended_age", "label": "Edad recomendada", "type": "select", "options": ["cachorro", "junior", "adulto", "senior"] },
+      { "key": "recommended_weight", "label": "Peso recomendado", "type": "text", "placeholder": "5-10kg" },
+      { "key": "ingredients", "label": "Ingredientes", "type": "textarea" },
+      { "key": "brand", "label": "Marca", "type": "text" },
+      { "key": "expiry", "label": "Caducidad", "type": "date" },
+      { "key": "flavor", "label": "Sabor", "type": "text" },
+      { "key": "medicated", "label": "Medicado", "type": "boolean" }
+    ]
+  },
+
+  "barberia": {
+    "label": "Barbería",
+    "title_singular": "Servicio",
+    "is_service": true,
+    "field_overrides": { "name": "Servicio", "stock": false },
+    "fields_extra": [
+      { "key": "duration", "label": "Duración", "type": "text", "placeholder": "30 minutos" },
+      { "key": "barber", "label": "Barbero asignado", "type": "text" },
+      { "key": "products_used", "label": "Productos usados", "type": "tags" },
+      { "key": "appointment", "label": "Cita", "type": "datetime" },
+      { "key": "employee_commission", "label": "Comisión barbero", "type": "money" }
+    ]
+  },
+
+  "gimnasio": {
+    "label": "Gimnasio / Fitness",
+    "title_singular": "Membresía / Servicio",
+    "is_service": true,
+    "field_overrides": { "name": "Tipo de membresía", "stock": false },
+    "fields_extra": [
+      { "key": "duration_days", "label": "Duración (días)", "type": "number", "placeholder": "30, 90, 365" },
+      { "key": "trainer_included", "label": "Entrenador incluido", "type": "boolean" },
+      { "key": "areas_access", "label": "Áreas con acceso", "type": "tags", "placeholder": "pesas, cardio, alberca, sauna" },
+      { "key": "appointment", "label": "Hora de clase", "type": "datetime" }
+    ]
+  },
+
+  "tortilleria": {
+    "label": "Tortillería",
+    "fields_extra": [
+      { "key": "price_per_kilo", "label": "Precio por kilo", "type": "money", "required": true },
+      { "key": "weight", "label": "Peso", "type": "number" },
+      { "key": "tortilla_type", "label": "Tipo", "type": "select", "options": ["maíz blanco", "maíz amarillo", "harina trigo", "nopal", "integral"] },
+      { "key": "production_date", "label": "Fecha producción", "type": "date" }
+    ]
+  }
+}

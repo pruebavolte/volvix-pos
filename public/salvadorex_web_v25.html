@@ -2975,10 +2975,43 @@
         <button class="btn" data-method="oxxo" onclick="setPayMethod(this)" style="flex-direction: column; height: 56px;">🏪<span style="font-size: 10px; margin-top: 2px;">OXXO</span></button>
         <button class="btn" data-method="app-pago" onclick="setPayMethod(this)" style="flex-direction: column; height: 56px;">💸<span style="font-size: 10px; margin-top: 2px;">App pago</span></button>
       </div>
-      <div class="input-group"><label class="input-label">Recibido del cliente</label><input class="input-field" id="pay-recibido" type="text" value="$0.00" style="font-size: 16px; font-weight: 600;" oninput="calcChange()"></div>
-      <div class="summary-item" style="justify-content: space-between; width: 100%; padding: 10px 12px; background: var(--success-soft); border-radius: var(--r); margin-top: 8px;">
-        <span style="color: #166534; font-weight: 600;">Cambio a entregar</span>
-        <span style="color: #166534; font-weight: 700; font-size: 16px;" id="pay-cambio">$0.00</span>
+      <div class="input-group"><label class="input-label">Recibido del cliente</label><input class="input-field" id="pay-recibido" type="text" value="$0.00" style="font-size: 18px; font-weight: 600;" oninput="calcChange()" onkeydown="if(event.key==='Enter'){event.preventDefault();completePay();}"></div>
+
+      <!-- BILLETES MX rápidos: el cajero da clic al billete que recibió -->
+      <div data-button="pay.bills-quick" data-module="pos.cobrar" style="margin-top:10px;margin-bottom:8px">
+        <div style="font-size:11px;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.04em;font-weight:500;margin-bottom:6px">Billetes recibidos</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
+          <button type="button" class="bill-btn" data-bill="20" onclick="payAddBill(20)" style="padding:10px 6px;border:1px solid #E5E5EA;background:#FFF;border-radius:8px;cursor:pointer;font-size:13.5px;font-weight:600;color:#0B0B0F;min-height:44px">$20</button>
+          <button type="button" class="bill-btn" data-bill="50" onclick="payAddBill(50)" style="padding:10px 6px;border:1px solid #E5E5EA;background:#FFF;border-radius:8px;cursor:pointer;font-size:13.5px;font-weight:600;color:#0B0B0F;min-height:44px">$50</button>
+          <button type="button" class="bill-btn" data-bill="100" onclick="payAddBill(100)" style="padding:10px 6px;border:1px solid #E5E5EA;background:#FFF;border-radius:8px;cursor:pointer;font-size:13.5px;font-weight:600;color:#0B0B0F;min-height:44px">$100</button>
+          <button type="button" class="bill-btn" data-bill="200" onclick="payAddBill(200)" style="padding:10px 6px;border:1px solid #E5E5EA;background:#FFF;border-radius:8px;cursor:pointer;font-size:13.5px;font-weight:600;color:#0B0B0F;min-height:44px">$200</button>
+          <button type="button" class="bill-btn" data-bill="500" onclick="payAddBill(500)" style="padding:10px 6px;border:1px solid #E5E5EA;background:#FFF;border-radius:8px;cursor:pointer;font-size:13.5px;font-weight:600;color:#0B0B0F;min-height:44px">$500</button>
+          <button type="button" class="bill-btn" data-bill="1000" onclick="payAddBill(1000)" style="padding:10px 6px;border:1px solid #E5E5EA;background:#FFF;border-radius:8px;cursor:pointer;font-size:13.5px;font-weight:600;color:#0B0B0F;min-height:44px">$1000</button>
+          <button type="button" data-button="pay.exact" onclick="payExactAmount()" style="padding:10px 6px;border:1px solid #BBF7D0;background:#F0FDF4;color:#15803D;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;min-height:44px;grid-column:span 2">EXACTO</button>
+        </div>
+      </div>
+
+      <!-- Teclado numérico para cantidad libre -->
+      <div data-button="pay.numpad" data-module="pos.cobrar" style="margin-bottom:10px">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px">
+          <button type="button" onclick="payNumKey('7')" class="numpad-btn" style="padding:12px;border:1px solid #E5E5EA;background:#FFF;border-radius:6px;font-size:16px;font-weight:600;cursor:pointer;min-height:44px">7</button>
+          <button type="button" onclick="payNumKey('8')" class="numpad-btn" style="padding:12px;border:1px solid #E5E5EA;background:#FFF;border-radius:6px;font-size:16px;font-weight:600;cursor:pointer;min-height:44px">8</button>
+          <button type="button" onclick="payNumKey('9')" class="numpad-btn" style="padding:12px;border:1px solid #E5E5EA;background:#FFF;border-radius:6px;font-size:16px;font-weight:600;cursor:pointer;min-height:44px">9</button>
+          <button type="button" onclick="payNumKey('4')" class="numpad-btn" style="padding:12px;border:1px solid #E5E5EA;background:#FFF;border-radius:6px;font-size:16px;font-weight:600;cursor:pointer;min-height:44px">4</button>
+          <button type="button" onclick="payNumKey('5')" class="numpad-btn" style="padding:12px;border:1px solid #E5E5EA;background:#FFF;border-radius:6px;font-size:16px;font-weight:600;cursor:pointer;min-height:44px">5</button>
+          <button type="button" onclick="payNumKey('6')" class="numpad-btn" style="padding:12px;border:1px solid #E5E5EA;background:#FFF;border-radius:6px;font-size:16px;font-weight:600;cursor:pointer;min-height:44px">6</button>
+          <button type="button" onclick="payNumKey('1')" class="numpad-btn" style="padding:12px;border:1px solid #E5E5EA;background:#FFF;border-radius:6px;font-size:16px;font-weight:600;cursor:pointer;min-height:44px">1</button>
+          <button type="button" onclick="payNumKey('2')" class="numpad-btn" style="padding:12px;border:1px solid #E5E5EA;background:#FFF;border-radius:6px;font-size:16px;font-weight:600;cursor:pointer;min-height:44px">2</button>
+          <button type="button" onclick="payNumKey('3')" class="numpad-btn" style="padding:12px;border:1px solid #E5E5EA;background:#FFF;border-radius:6px;font-size:16px;font-weight:600;cursor:pointer;min-height:44px">3</button>
+          <button type="button" onclick="payNumKey('.')" class="numpad-btn" style="padding:12px;border:1px solid #E5E5EA;background:#FFF;border-radius:6px;font-size:16px;font-weight:600;cursor:pointer;min-height:44px">.</button>
+          <button type="button" onclick="payNumKey('0')" class="numpad-btn" style="padding:12px;border:1px solid #E5E5EA;background:#FFF;border-radius:6px;font-size:16px;font-weight:600;cursor:pointer;min-height:44px">0</button>
+          <button type="button" onclick="payNumKey('back')" class="numpad-btn" style="padding:12px;border:1px solid #E5E5EA;background:#FEF3C7;color:#92400E;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;min-height:44px">⌫</button>
+        </div>
+      </div>
+
+      <div class="summary-item" style="justify-content: space-between; width: 100%; padding: 14px 16px; background: var(--success-soft); border-radius: var(--r); margin-top: 8px; border: 2px solid #BBF7D0;">
+        <span style="color: #166534; font-weight: 600; font-size: 14px;">Cambio a entregar</span>
+        <span style="color: #166534; font-weight: 800; font-size: 22px; letter-spacing: -0.01em;" id="pay-cambio">$0.00</span>
       </div>
     </div>
     <div class="modal-foot">
@@ -5376,8 +5409,50 @@
     const recibido = parse$($('#pay-recibido').value);
     const cambio = Math.max(0, recibido - total);
     $('#pay-cambio').textContent = fmt(cambio);
-    $('#footer-pago').textContent = fmt(recibido);
-    $('#footer-cambio').textContent = fmt(cambio);
+    var fp = document.getElementById('footer-pago'); if (fp) fp.textContent = fmt(recibido);
+    var fc = document.getElementById('footer-cambio'); if (fc) fc.textContent = fmt(cambio);
+    // Cambio negativo (recibido < total) → marcar input en rojo discreto
+    const inp = $('#pay-recibido');
+    if (inp) inp.style.borderColor = (recibido > 0 && recibido < total) ? '#FBBF24' : '';
+  }
+  // Sumar billete recibido al campo "recibido"
+  function payAddBill(amount) {
+    const inp = $('#pay-recibido');
+    if (!inp) return;
+    const cur = parse$(inp.value);
+    const nv = cur + Number(amount);
+    inp.value = fmt(nv);
+    calcChange();
+    // Visual feedback en el botón
+    const btn = document.querySelector('.bill-btn[data-bill="' + amount + '"]');
+    if (btn) {
+      btn.style.background = '#0B0B0F'; btn.style.color = '#FFF'; btn.style.borderColor = '#0B0B0F';
+      setTimeout(() => { btn.style.background = '#FFF'; btn.style.color = '#0B0B0F'; btn.style.borderColor = '#E5E5EA'; }, 200);
+    }
+  }
+  // Marcar como exacto (recibido = total, cambio 0)
+  function payExactAmount() {
+    const inp = $('#pay-recibido');
+    if (!inp) return;
+    const total = parse$($('#pay-total').textContent);
+    inp.value = fmt(total);
+    calcChange();
+  }
+  // Numpad: agregar dígito al campo recibido o limpiar con backspace
+  function payNumKey(key) {
+    const inp = $('#pay-recibido');
+    if (!inp) return;
+    let raw = String(inp.value || '').replace(/[^0-9.]/g, '');
+    if (key === 'back') {
+      raw = raw.slice(0, -1);
+    } else if (key === '.') {
+      if (!raw.includes('.')) raw = raw + '.';
+    } else {
+      raw = raw + key;
+    }
+    const num = parseFloat(raw) || 0;
+    inp.value = fmt(num);
+    calcChange();
   }
   async function completePay() {
     // R7b FIX-S2: GUARD GLOBAL anti double-submit.

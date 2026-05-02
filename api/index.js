@@ -10554,6 +10554,71 @@ handlers['GET /api/config/public'] = async (req, res) => {
       sendJSON(res, { ok: false, error: 'db_error', detail: IS_PROD ? null : String(e && e.message || e) }, 500);
     }
   });
+  // ---- INDUSTRY SCHEMAS ----
+  // GET /api/industry-schema?giro=abarrotes — devuelve el schema de campos
+  // del producto para ese giro (combina universal + específicos del giro +
+  // avanzados). El cliente lo usa para renderizar el modal "Nuevo producto"
+  // dinámicamente con los campos correctos. Las terminologías cambian via
+  // field_overrides (ej. 'name' → 'Nombre del pan' en panadería).
+  let _industrySchemasCache = null;
+  function getIndustrySchemas() {
+    if (_industrySchemasCache) return _industrySchemasCache;
+    try {
+      const schemaPath = path.join(__dirname, '..', 'data', 'industry-schemas.json');
+      const fs = require('fs');
+      _industrySchemasCache = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
+    } catch (_) { _industrySchemasCache = {}; }
+    return _industrySchemasCache;
+  }
+
+  handlers['GET /api/industry-schema'] = (req, res) => {
+    const parsedUrl = url.parse(req.url, true);
+    const giro = String((parsedUrl.query && parsedUrl.query.giro) || '').toLowerCase().trim();
+    const schemas = getIndustrySchemas();
+    if (!giro) {
+      // Sin giro → devolver lista de giros disponibles
+      const list = Object.keys(schemas)
+        .filter(k => !k.startsWith('_'))
+        .map(k => ({ giro: k, label: schemas[k].label || k }));
+      return sendJSON(res, { ok: true, available: list });
+    }
+    const universalFields = (schemas._universal && schemas._universal.fields) || [];
+    const advancedFields = (schemas._advanced && schemas._advanced.fields) || [];
+    const giroSchema = schemas[giro];
+    if (!giroSchema) {
+      // Giro no soportado: devolver solo universal + advanced
+      return sendJSON(res, {
+        ok: true, giro: giro, fallback: true,
+        title_singular: 'Producto',
+        fields: universalFields,
+        fields_advanced: advancedFields
+      });
+    }
+    // Combinar universal + extras del giro + advanced. Aplicar overrides al label.
+    const overrides = giroSchema.field_overrides || {};
+    const mergedUniversal = universalFields.map(f => {
+      const out = Object.assign({}, f);
+      if (overrides[f.key]) {
+        if (overrides[f.key] === false) out._hidden = true;
+        else out.label = overrides[f.key];
+      }
+      return out;
+    });
+    sendJSON(res, {
+      ok: true,
+      giro: giro,
+      label: giroSchema.label,
+      title_singular: giroSchema.title_singular || 'Producto',
+      is_service: !!giroSchema.is_service,
+      has_variants: !!giroSchema.has_variants,
+      is_recipe_based: !!giroSchema.is_recipe_based,
+      fields: mergedUniversal.filter(f => !f._hidden),
+      fields_extra: giroSchema.fields_extra || [],
+      fields_advanced: advancedFields,
+      meta: schemas._meta || null
+    });
+  };
+
   // ---- TENANT MODULES & BUTTONS — control granular per-tenant ----
   // El dueño del SaaS (superadmin) habilita/deshabilita módulos enteros y
   // botones individuales por tenant. El frontend del tenant recibe la lista
