@@ -10963,7 +10963,7 @@ handlers['GET /api/config/public'] = async (req, res) => {
     const sku = String(url.parse(req.url, true).query.sku || '').trim();
     if (!sku) return sendJSON(res, { ok: false, error: 'sku_required' }, 400);
     try {
-      const rows = await supabaseRequest('GET', `/rest/v1/product_recipes?tenant_id=eq.${tid}&parent_sku=eq.${encodeURIComponent(sku)}&order=child_sku.asc`);
+      const rows = await supabaseRequest('GET', `/product_recipes?tenant_id=eq.${tid}&parent_sku=eq.${encodeURIComponent(sku)}&order=child_sku.asc`);
       sendJSON(res, { ok: true, sku, recipe: rows || [] });
     } catch (e) { sendJSON(res, { ok: false, error: String(e.message || e) }, 500); }
   };
@@ -10979,7 +10979,7 @@ handlers['GET /api/config/public'] = async (req, res) => {
     if (!sku || !items.length) return sendJSON(res, { ok: false, error: 'sku_and_items_required' }, 400);
     try {
       // Replace strategy: borra los existentes y reinserta
-      await supabaseRequest('DELETE', `/rest/v1/product_recipes?tenant_id=eq.${tid}&parent_sku=eq.${encodeURIComponent(sku)}`);
+      await supabaseRequest('DELETE', `/product_recipes?tenant_id=eq.${tid}&parent_sku=eq.${encodeURIComponent(sku)}`);
       const rows = items.map(it => ({
         tenant_id: tid,
         parent_sku: sku,
@@ -10988,7 +10988,7 @@ handlers['GET /api/config/public'] = async (req, res) => {
         unit: it.unit || 'pieza',
         notes: it.notes || null
       })).filter(r => r.child_sku);
-      if (rows.length) await supabaseRequest('POST', '/rest/v1/product_recipes', rows);
+      if (rows.length) await supabaseRequest('POST', '/product_recipes', rows);
       sendJSON(res, { ok: true, sku, count: rows.length });
     } catch (e) { sendJSON(res, { ok: false, error: String(e.message || e) }, 500); }
   };
@@ -11001,7 +11001,7 @@ handlers['GET /api/config/public'] = async (req, res) => {
     const sku = String(url.parse(req.url, true).query.sku || '').trim();
     if (!sku) return sendJSON(res, { ok: false, error: 'sku_required' }, 400);
     try {
-      const rows = await supabaseRequest('GET', `/rest/v1/product_variants?tenant_id=eq.${tid}&parent_sku=eq.${encodeURIComponent(sku)}&order=sort_order.asc`);
+      const rows = await supabaseRequest('GET', `/product_variants_v2?tenant_id=eq.${tid}&parent_sku=eq.${encodeURIComponent(sku)}&order=sort_order.asc`);
       sendJSON(res, { ok: true, sku, variants: rows || [] });
     } catch (e) { sendJSON(res, { ok: false, error: String(e.message || e) }, 500); }
   };
@@ -11016,7 +11016,7 @@ handlers['GET /api/config/public'] = async (req, res) => {
     const variants = Array.isArray(body.variants) ? body.variants : [];
     if (!sku || !variants.length) return sendJSON(res, { ok: false, error: 'sku_and_variants_required' }, 400);
     try {
-      await supabaseRequest('DELETE', `/rest/v1/product_variants?tenant_id=eq.${tid}&parent_sku=eq.${encodeURIComponent(sku)}`);
+      await supabaseRequest('DELETE', `/product_variants_v2?tenant_id=eq.${tid}&parent_sku=eq.${encodeURIComponent(sku)}`);
       const rows = variants.map((v, i) => ({
         tenant_id: tid,
         parent_sku: sku,
@@ -11030,7 +11030,7 @@ handlers['GET /api/config/public'] = async (req, res) => {
         active: v.active !== false,
         sort_order: i
       }));
-      if (rows.length) await supabaseRequest('POST', '/rest/v1/product_variants', rows);
+      if (rows.length) await supabaseRequest('POST', '/product_variants_v2', rows);
       sendJSON(res, { ok: true, sku, count: rows.length });
     } catch (e) { sendJSON(res, { ok: false, error: String(e.message || e) }, 500); }
   };
@@ -11043,7 +11043,7 @@ handlers['GET /api/config/public'] = async (req, res) => {
     const sku = String(url.parse(req.url, true).query.sku || '').trim();
     if (!sku) return sendJSON(res, { ok: false, error: 'sku_required' }, 400);
     try {
-      const rows = await supabaseRequest('GET', `/rest/v1/product_modifiers?tenant_id=eq.${tid}&parent_sku=eq.${encodeURIComponent(sku)}&order=sort_order.asc`);
+      const rows = await supabaseRequest('GET', `/product_modifiers?tenant_id=eq.${tid}&parent_sku=eq.${encodeURIComponent(sku)}&order=sort_order.asc`);
       sendJSON(res, { ok: true, sku, modifiers: rows || [] });
     } catch (e) { sendJSON(res, { ok: false, error: String(e.message || e) }, 500); }
   };
@@ -11058,7 +11058,7 @@ handlers['GET /api/config/public'] = async (req, res) => {
     const modifiers = Array.isArray(body.modifiers) ? body.modifiers : [];
     if (!sku || !modifiers.length) return sendJSON(res, { ok: false, error: 'sku_and_modifiers_required' }, 400);
     try {
-      await supabaseRequest('DELETE', `/rest/v1/product_modifiers?tenant_id=eq.${tid}&parent_sku=eq.${encodeURIComponent(sku)}`);
+      await supabaseRequest('DELETE', `/product_modifiers?tenant_id=eq.${tid}&parent_sku=eq.${encodeURIComponent(sku)}`);
       const rows = modifiers.map((m, i) => ({
         tenant_id: tid,
         parent_sku: sku,
@@ -11072,7 +11072,7 @@ handlers['GET /api/config/public'] = async (req, res) => {
         active: m.active !== false,
         sort_order: i
       })).filter(r => r.modifier_label);
-      if (rows.length) await supabaseRequest('POST', '/rest/v1/product_modifiers', rows);
+      if (rows.length) await supabaseRequest('POST', '/product_modifiers', rows);
       sendJSON(res, { ok: true, sku, count: rows.length });
     } catch (e) { sendJSON(res, { ok: false, error: String(e.message || e) }, 500); }
   };
@@ -11111,7 +11111,7 @@ handlers['GET /api/config/public'] = async (req, res) => {
         active: r.active !== false,
         notes: r.notes || null
       })).filter(r => r.rule_type);
-      if (rows.length) await supabaseRequest('POST', '/rest/v1/product_rules', rows);
+      if (rows.length) await supabaseRequest('POST', '/product_rules', rows);
       sendJSON(res, { ok: true, count: rows.length });
     } catch (e) { sendJSON(res, { ok: false, error: String(e.message || e) }, 500); }
   };
@@ -11124,7 +11124,7 @@ handlers['GET /api/config/public'] = async (req, res) => {
     const id = String(url.parse(req.url, true).query.id || '').trim();
     if (!id) return sendJSON(res, { ok: false, error: 'id_required' }, 400);
     try {
-      await supabaseRequest('DELETE', `/rest/v1/product_rules?id=eq.${encodeURIComponent(id)}&tenant_id=eq.${tid}`);
+      await supabaseRequest('DELETE', `/product_rules?id=eq.${encodeURIComponent(id)}&tenant_id=eq.${tid}`);
       sendJSON(res, { ok: true });
     } catch (e) { sendJSON(res, { ok: false, error: String(e.message || e) }, 500); }
   };
@@ -11136,7 +11136,7 @@ handlers['GET /api/config/public'] = async (req, res) => {
     const tid = _umsTenant(req);
     if (!tid) return sendJSON(res, { ok: false, error: 'tenant_required' }, 400);
     try {
-      const rows = await supabaseRequest('GET', `/rest/v1/tenant_terminology?tenant_id=eq.${tid}`);
+      const rows = await supabaseRequest('GET', `/tenant_terminology?tenant_id=eq.${tid}`);
       const dict = {};
       (rows || []).forEach(r => { dict[r.term_key] = r.term_value; });
       sendJSON(res, { ok: true, terminology: dict });
@@ -11161,8 +11161,8 @@ handlers['GET /api/config/public'] = async (req, res) => {
         locale: body.locale || 'es-MX'
       }));
       // Borra y reinserta — más simple que upsert
-      await supabaseRequest('DELETE', `/rest/v1/tenant_terminology?tenant_id=eq.${tid}&term_key=in.(${rows.map(r => '"' + r.term_key + '"').join(',')})`);
-      if (rows.length) await supabaseRequest('POST', '/rest/v1/tenant_terminology', rows);
+      await supabaseRequest('DELETE', `/tenant_terminology?tenant_id=eq.${tid}&term_key=in.(${rows.map(r => '"' + r.term_key + '"').join(',')})`);
+      if (rows.length) await supabaseRequest('POST', '/tenant_terminology', rows);
       sendJSON(res, { ok: true, count: rows.length });
     } catch (e) { sendJSON(res, { ok: false, error: String(e.message || e) }, 500); }
   };
@@ -11176,7 +11176,7 @@ handlers['GET /api/config/public'] = async (req, res) => {
     const sku = String(url.parse(req.url, true).query.sku || '').trim();
     if (!sku) return sendJSON(res, { ok: false, error: 'sku_required' }, 400);
     try {
-      const rows = await supabaseRequest('GET', `/rest/v1/product_feature_flags?tenant_id=eq.${tid}&sku=eq.${encodeURIComponent(sku)}`);
+      const rows = await supabaseRequest('GET', `/product_feature_flags?tenant_id=eq.${tid}&sku=eq.${encodeURIComponent(sku)}`);
       const flags = {};
       (rows || []).forEach(r => { flags[r.flag_key] = !!r.flag_value; });
       sendJSON(res, { ok: true, sku, flags });
@@ -11193,14 +11193,14 @@ handlers['GET /api/config/public'] = async (req, res) => {
     const flags = body.flags || {};
     if (!sku) return sendJSON(res, { ok: false, error: 'sku_required' }, 400);
     try {
-      await supabaseRequest('DELETE', `/rest/v1/product_feature_flags?tenant_id=eq.${tid}&sku=eq.${encodeURIComponent(sku)}`);
+      await supabaseRequest('DELETE', `/product_feature_flags?tenant_id=eq.${tid}&sku=eq.${encodeURIComponent(sku)}`);
       const rows = Object.keys(flags).map(k => ({
         tenant_id: tid,
         sku,
         flag_key: String(k).trim(),
         flag_value: !!flags[k]
       })).filter(r => r.flag_key && r.flag_value); // sólo persistir los activos
-      if (rows.length) await supabaseRequest('POST', '/rest/v1/product_feature_flags', rows);
+      if (rows.length) await supabaseRequest('POST', '/product_feature_flags', rows);
       sendJSON(res, { ok: true, sku, count: rows.length });
     } catch (e) { sendJSON(res, { ok: false, error: String(e.message || e) }, 500); }
   };
