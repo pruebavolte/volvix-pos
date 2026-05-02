@@ -10551,6 +10551,71 @@ handlers['GET /api/config/public'] = async (req, res) => {
       sendJSON(res, { ok: true, items: Array.isArray(rows) ? rows : [], total: Array.isArray(rows) ? rows.length : 0 });
     } catch (_) { sendJSON(res, { ok: true, items: [], total: 0 }); }
   });
+  // ---- AUDIT 2026-05-02: cable last broken refs detectado por static analyzer
+  // /api/clientes (español alias de /api/customers para pos-clientes.html legacy)
+  handlers['GET /api/clientes'] = requireAuth(async (req, res) => {
+    const tenantId = req.user && (req.user.tenant_id || req.user.company_id);
+    try {
+      const rows = await supabaseRequest('GET',
+        '/pos_customers?tenant_id=eq.' + encodeURIComponent(tenantId || '') +
+        '&select=id,name,phone,email,balance,credit_limit,created_at&order=created_at.desc&limit=500');
+      sendJSON(res, { ok: true, items: Array.isArray(rows) ? rows : [], total: Array.isArray(rows) ? rows.length : 0 });
+    } catch (_) { sendJSON(res, { ok: true, items: [], total: 0 }); }
+  });
+  handlers['POST /api/clientes'] = requireAuth(async (req, res) => {
+    try {
+      const body = await readBody(req);
+      const tenantId = req.user && (req.user.tenant_id || req.user.company_id);
+      const ins = await supabaseRequest('POST', '/pos_customers', {
+        tenant_id: tenantId,
+        name: String(body.name || body.nombre || '').slice(0, 200),
+        phone: String(body.phone || body.telefono || '').slice(0, 30),
+        email: body.email ? String(body.email).slice(0, 200) : null,
+        balance: Number(body.balance) || 0,
+        credit_limit: Number(body.credit_limit || body.credito) || 0,
+        created_at: new Date().toISOString()
+      });
+      sendJSON(res, { ok: true, item: Array.isArray(ins) && ins[0] || ins });
+    } catch (e) { sendJSON(res, { ok: false, error: 'create_failed' }, 500); }
+  });
+  // /api/productos (español alias de /api/products)
+  handlers['GET /api/productos'] = requireAuth(async (req, res) => {
+    const tenantId = req.user && (req.user.tenant_id || req.user.company_id);
+    try {
+      const rows = await supabaseRequest('GET',
+        '/pos_products?tenant_id=eq.' + encodeURIComponent(tenantId || '') +
+        '&select=*&order=created_at.desc&limit=500');
+      sendJSON(res, { ok: true, items: Array.isArray(rows) ? rows : [], total: Array.isArray(rows) ? rows.length : 0 });
+    } catch (_) { sendJSON(res, { ok: true, items: [], total: 0 }); }
+  });
+  // /api/support/online — heartbeat de soporte (público)
+  handlers['GET /api/support/online'] = (req, res) => {
+    // Heuristic: business hours MX (CDT 9am-9pm, lun-sab)
+    const now = new Date();
+    const utcH = now.getUTCHours();
+    const localH = (utcH - 6 + 24) % 24; // CDMX UTC-6
+    const day = now.getUTCDay();
+    const online = day !== 0 && localH >= 9 && localH < 21;
+    sendJSON(res, { ok: true, online: online, mode: online ? 'live' : 'message_only', ts: now.toISOString() });
+  };
+  // /api/academy/stats — global stats del academy (público)
+  handlers['GET /api/academy/stats'] = async (req, res) => {
+    try {
+      const totalRows = await supabaseRequest('GET', '/academy_progress?select=user_id&limit=10000');
+      const users = new Set((totalRows || []).map(r => r.user_id));
+      sendJSON(res, { ok: true, total_learners: users.size, total_steps_completed: (totalRows || []).length });
+    } catch (_) { sendJSON(res, { ok: true, total_learners: 0, total_steps_completed: 0 }); }
+  };
+  // /api/downloads/stats — agregado de POST /api/downloads/track
+  handlers['GET /api/downloads/stats'] = async (req, res) => {
+    try {
+      const rows = await supabaseRequest('GET', '/download_events?select=platform&limit=10000');
+      const counts = {};
+      (rows || []).forEach(r => { counts[r.platform || 'unknown'] = (counts[r.platform || 'unknown'] || 0) + 1; });
+      sendJSON(res, { ok: true, by_platform: counts, total: (rows || []).length });
+    } catch (_) { sendJSON(res, { ok: true, by_platform: {}, total: 0 }); }
+  };
+
   // /api/tenant/settings — GET para complementar el PATCH existente
   handlers['GET /api/tenant/settings'] = requireAuth(async (req, res) => {
     const tenantId = req.user && (req.user.tenant_id || req.user.company_id);
