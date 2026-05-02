@@ -32375,7 +32375,9 @@ if (process.env.NODE_ENV === 'test') {
           email: user.email,
           full_name: user.full_name
         },
-        redirect: '/mis-modulos.html'
+        // 2026-05: el dueño del negocio (owner-de-tenant) entra DIRECTO al POS.
+        // /volvix-launcher.html y /mis-modulos.html son del equipo de plataforma.
+        redirect: '/salvadorex_web_v25.html'
       });
     } catch (err) {
       sendError(res, err);

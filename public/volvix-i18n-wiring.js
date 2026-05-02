@@ -1640,6 +1640,10 @@
   }
 
   function createLangSelector() {
+    // 2026-05: idempotencia — si ya existe el switcher (en el DOM), no crear otro.
+    // Antes podía crearse 2x si init() corría múltiples veces (DOMContentLoaded
+    // + load + carga lazy) → dos banderas en pantalla.
+    if (document.getElementById('volvix-i18n-wrap') || document.getElementById('volvix-i18n-btn')) return;
     var host = _findSwitcherHost();
 
     // Wrapper inline (no fixed) — se acomoda dentro del header/nav/footer.

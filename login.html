@@ -588,8 +588,13 @@ body {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       if (payload.exp && payload.exp * 1000 > Date.now()) {
-        // R29: si vino con ?redirect=/xxx.html lo respetamos, sino default a SalvadoreX
-        let dest = '/volvix-launcher.html';
+        // 2026-05: redirect dependiente del rol — el dueño del negocio entra
+        // al POS, el dueño de la plataforma entra al launcher.
+        const role = String(payload.role || payload.rol || '').toLowerCase();
+        const email = String(payload.email || '').toLowerCase();
+        const isPlatform = role === 'superadmin' || role === 'platform_owner'
+                          || email.endsWith('@systeminternational.app');
+        let dest = isPlatform ? '/volvix-launcher.html' : '/salvadorex_web_v25.html';
         try {
           const params = new URLSearchParams(location.search);
           const r = params.get('redirect');
@@ -694,9 +699,18 @@ async function handleLogin(event) {
 
     showAlert('¡Bienvenido!', 'success');
 
-    // R29: respetar redirect= en URL si viene de otra página protegida
-    let dest = '/volvix-launcher.html';
+    // 2026-05: redirect según rol — owner-de-tenant → POS; plataforma → launcher.
+    let dest = '/salvadorex_web_v25.html';
     try {
+      const tok = (data && data.session && data.session.token) || (data && data.token) || '';
+      if (tok) {
+        const p = JSON.parse(atob(tok.split('.')[1]));
+        const role = String(p.role || p.rol || '').toLowerCase();
+        const email = String(p.email || '').toLowerCase();
+        const isPlatform = role === 'superadmin' || role === 'platform_owner'
+                          || email.endsWith('@systeminternational.app');
+        if (isPlatform) dest = '/volvix-launcher.html';
+      }
       const params = new URLSearchParams(location.search);
       const r = params.get('redirect');
       if (r && r.startsWith('/') && !r.startsWith('//') && !r.includes(':')) {

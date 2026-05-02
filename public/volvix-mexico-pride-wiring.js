@@ -12,6 +12,11 @@
     try {
       var path = (location.pathname || '').toLowerCase();
       if (/login\.html?$|registro\.html?$|signup|register/.test(path)) return true;
+      // 2026-05: el banner es decoración de marketing/landings. En el POS y
+      // panels operativos es ruido (el dueño ya está dentro de su negocio).
+      // Skip en TODOS los paneles internos del owner para que el header del
+      // POS no compita con el banner.
+      if (/salvadorex_web|multipos|pos-(inventario|clientes|corte|reportes|config)|inventario\.html|volvix-launcher|volvix_owner_panel|volvix-admin|volvix-feature-flags|volvix-fraud|volvix-backup|volvix-mega|volvix-kds|volvix-kiosk|mis-modulos|volvix-loyalty|volvix-promotions|volvix-email|volvix-cfdi-templates|volvix-inventory-warehouses|volvix-reorder|volvix-flash-sale|volvix-customer-portal|volvix-user-management|etiqueta_designer|volvix-booking|volvix-appointments|volvix-referrals|autofactura/i.test(path)) return true;
       var qs = new URLSearchParams(location.search || '');
       if (qs.get('embed') === '1') return true;
     } catch (_) {}

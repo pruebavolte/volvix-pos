@@ -44,7 +44,9 @@
         '/volvix-emergency-mode.html',
         '/volvix-backup-admin.html',
         '/volvix-mega-dashboard.html',
-        '/volvix-api-docs.html'
+        '/volvix-api-docs.html',
+        '/volvix-launcher.html',
+        '/mis-modulos.html'
       ];
       var matches = PLATFORM.some(function (p) { return path === p || path.endsWith(p); });
       if (!matches) return;
@@ -64,7 +66,7 @@
       var isPlatform = role === 'superadmin' || role === 'platform_owner'
                        || email.endsWith('@systeminternational.app');
       if (!isPlatform) {
-        window.location.replace('/volvix-launcher.html?denied=platform_only');
+        window.location.replace('/salvadorex_web_v25.html?denied=platform_only');
       }
     } catch (_) {}
   })();

@@ -58,7 +58,9 @@
 
   // 2026-05 audit Bloque 9: páginas exclusivas del DUEÑO DE LA PLATAFORMA
   // (superadmin / @systeminternational.app). Un owner-de-tenant intentando
-  // entrar es redirigido a su launcher.
+  // entrar es redirigido al POS (/salvadorex_web_v25.html).
+  // El launcher y mis-modulos también son del equipo plataforma — el owner
+  // del negocio NO los necesita; va directo al POS donde está todo.
   const PLATFORM_ONLY_PAGES = [
     '/volvix_owner_panel_v8.html',
     '/volvix-admin-saas.html',
@@ -68,7 +70,9 @@
     '/volvix-emergency-mode.html',
     '/volvix-backup-admin.html',
     '/volvix-mega-dashboard.html',
-    '/volvix-api-docs.html'
+    '/volvix-api-docs.html',
+    '/volvix-launcher.html',
+    '/mis-modulos.html'
   ];
   function _decodeJwt(tok) {
     try {
@@ -90,8 +94,8 @@
   }
   if (PLATFORM_ONLY_PAGES.some(p => pathname === p || pathname.endsWith(p))) {
     if (!_isPlatformOwner()) {
-      // No es dueño de plataforma → redirigir a su launcher con mensaje
-      window.location.replace('/volvix-launcher.html?denied=platform_only');
+      // No es dueño de plataforma → redirigir directo al POS (donde trabaja).
+      window.location.replace('/salvadorex_web_v25.html?denied=platform_only');
       return;
     }
   }
