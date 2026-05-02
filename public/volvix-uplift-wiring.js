@@ -612,57 +612,124 @@
     } catch (_) { return false; }
   }
   function injectNoFloatersGuard() {
-    if (_isAdminViewer()) return; // admins ven todo (incluye diagnóstico interno)
+    if (_isAdminViewer()) return; // admins ven TODO (incluye flotantes y diagnóstico)
     if (document.getElementById('vlx-no-floaters-css')) return;
     var st = document.createElement('style');
     st.id = 'vlx-no-floaters-css';
-    // ESTRATEGIA REVISADA — antes ocultábamos demasiado y matábamos funciones.
-    // Ahora SOLO ocultamos los widgets que son diagnóstico interno (útiles a
-    // admins, ruido para clientes). Las funciones reales del usuario (sync
-    // status, notifications, idioma) se mantienen visibles, solo las
-    // RE-ESTILIZAMOS para que se vean elegantes y monocromas.
+    // POLÍTICA 2026-05: usuario regular SOLO ve el botón de ayuda (?).
+    // Todos los demás flotantes (bandera, sync, refresh, list, search,
+    // settings/wrench, AI, theme, robot, etc.) se ocultan. Admin (token con
+    // role superadmin/platform_owner o email @systeminternational.app, o
+    // ?debug=1) vuelve a verlos automáticamente.
     st.textContent = [
-      // OCULTAR — diagnóstico interno solamente:
-      '#vlx-health-pill, #vlx-health-modal { display: none !important; }',           // status del sistema (admin only)
-      '.vx-banner-container { display: none !important; }',                          // banners rojos [DOWN] degradado
-      '#vlx-mx-flag, .vlx-mx-flag-floating { display: none !important; }',           // bandera MX flotante (ya está en topbar)
-      '#vlx-robot-avatar, .vlx-robot-fab { display: none !important; }',             // avatar robot IA decorativo
-      '#vlx-theme-toggle, #vlx-theme-fab { display: none !important; }',             // theme toggle (sin valor)
-      '#vlx-online-pill, .vlx-online-pill { display: none !important; }',            // "Online" pill
-      '[data-vlx-floater="diagnostic"] { display: none !important; }',                // genérico opt-in admin-only
+      // ---- OCULTAR todos los flotantes conocidos del sistema ----
+      '#vlx-health-pill, #vlx-health-modal { display: none !important; }',
+      '.vx-banner-container { display: none !important; }',
+      '#vlx-mx-flag, .vlx-mx-flag-floating { display: none !important; }',
+      '#vlx-robot-avatar, .vlx-robot-fab { display: none !important; }',
+      '#vlx-theme-toggle, #vlx-theme-fab { display: none !important; }',
+      '#vlx-online-pill, .vlx-online-pill { display: none !important; }',
+      '#vlx-bell, #vlx-notif-drawer { display: none !important; }',
+      '.vlx-widget, .vlx-sync-widget, .vlx-sync-fab { display: none !important; }',
+      '#vlx-ai-fab, #vlx-ai-avatar, #vlx-ai-bubble, .vlx-ai-fab { display: none !important; }',
+      '#vlx-search-fab, .vlx-search-fab { display: none !important; }',
+      '#vlx-settings-fab, .vlx-settings-fab, #vlx-wrench-fab, .vlx-wrench-fab { display: none !important; }',
+      '#vlx-save-fab, .vlx-save-fab, #vlx-refresh-fab, .vlx-refresh-fab { display: none !important; }',
+      '#vlx-list-fab, .vlx-list-fab, #vlx-menu-fab, .vlx-menu-fab { display: none !important; }',
+      '#vlx-print-fab, .vlx-print-fab { display: none !important; }',
+      '#vlx-i18n-fab, .vlx-i18n-fab, #vlx-lang-fab, .vlx-lang-fab { display: none !important; }',
+      '#vlx-pwa-prompt, .vlx-pwa-prompt-fab { display: none !important; }',
+      '#vlx-fab-cluster, .vlx-fab-cluster, .vlx-fab-group { display: none !important; }',
+      '[data-vlx-floater]:not([data-vlx-floater="help"]) { display: none !important; }',
+      // Genéricos: cualquier "fab" que no sea help
+      '.fab:not(.vlx-help-fab):not([data-vlx-floater="help"]):not([aria-label*="ayuda" i]):not([aria-label*="help" i]) { display: none !important; }',
 
-      // RE-ESTILIZAR — útiles, las dejamos pero monocromas y discretas:
-      // Notification bell → círculo gris, sin colores chillones
-      '#vlx-bell { background:#F4F4F5 !important; color:#0B0B0F !important; ' +
-        'border:1px solid #E5E5EA !important; box-shadow:0 1px 3px rgba(0,0,0,0.06) !important; ' +
-        'width:38px !important; height:38px !important; font-size:16px !important; ' +
-        'top:auto !important; bottom:14px !important; right:14px !important; }',
-      '#vlx-bell .vlx-badge { background:#0B0B0F !important; border-color:#FFFFFF !important; }',
-      '#vlx-notif-drawer { background:#FFFFFF !important; color:#0B0B0F !important; ' +
-        'border-left:1px solid #ECECEE !important; }',
-      // Sync widget → cuadrado gris discreto, no 4 círculos de colores
-      '.vlx-widget { background:#F4F4F5 !important; border:1px solid #E5E5EA !important; ' +
-        'border-radius:10px !important; box-shadow:0 1px 3px rgba(0,0,0,0.06) !important; ' +
-        'color:#0B0B0F !important; }',
-      '.vlx-widget .vlx-widget-btn { background:transparent !important; color:#3F3F46 !important; }',
-      // AI floater → solo botón pequeño (no avatar grande)
-      '#vlx-ai-fab, #vlx-ai-avatar { background:#0B0B0F !important; color:#FFFFFF !important; ' +
-        'box-shadow:0 4px 14px rgba(0,0,0,0.15) !important; ' +
-        'width:42px !important; height:42px !important; font-size:18px !important; }'
+      // ---- WHITELIST: el ÚNICO botón flotante visible es el de ayuda ----
+      '#vlx-help-fab, .vlx-help-fab, [data-vlx-floater="help"], [aria-label="Ayuda"], [aria-label="Help"] {',
+      '  display: inline-flex !important;',
+      '  position: fixed !important;',
+      '  bottom: 18px !important;',
+      '  right: 18px !important;',
+      '  width: 44px !important;',
+      '  height: 44px !important;',
+      '  border-radius: 50% !important;',
+      '  background: #FFFFFF !important;',
+      '  color: #2563EB !important;',
+      '  border: 1px solid #E6E7EB !important;',
+      '  box-shadow: 0 6px 18px rgba(15,23,42,0.10), 0 2px 4px rgba(15,23,42,0.06) !important;',
+      '  align-items: center !important;',
+      '  justify-content: center !important;',
+      '  font-size: 18px !important;',
+      '  font-weight: 700 !important;',
+      '  cursor: pointer !important;',
+      '  z-index: 9998 !important;',
+      '  transition: transform 140ms ease, box-shadow 140ms ease !important;',
+      '}',
+      '#vlx-help-fab:hover, .vlx-help-fab:hover, [data-vlx-floater="help"]:hover {',
+      '  transform: translateY(-2px) !important;',
+      '  box-shadow: 0 12px 28px rgba(37,99,235,0.18), 0 4px 8px rgba(15,23,42,0.08) !important;',
+      '}'
     ].join('\n');
     document.head.appendChild(st);
 
-    // MutationObserver: si una librería tarda en montar elementos diagnostico,
-    // los ocultamos por estilo inline. Solo lo PURO admin-only.
+    // MutationObserver: barrido continuo. Cualquier elemento posicionado fixed
+    // anclado a esquinas inferiores que NO sea el de ayuda → display:none.
+    function _isHelp(n) {
+      if (!n || n.nodeType !== 1) return false;
+      try {
+        if (n.id === 'vlx-help-fab') return true;
+        if (n.classList && n.classList.contains('vlx-help-fab')) return true;
+        var df = n.getAttribute && n.getAttribute('data-vlx-floater');
+        if (df === 'help') return true;
+        var al = (n.getAttribute && (n.getAttribute('aria-label') || '')).toLowerCase();
+        if (al.indexOf('ayuda') >= 0 || al.indexOf('help') >= 0) return true;
+      } catch (_) {}
+      return false;
+    }
+    function _isCornerFloater(n) {
+      try {
+        var cs = window.getComputedStyle(n);
+        if (cs.position !== 'fixed') return false;
+        var r = n.getBoundingClientRect();
+        var vh = window.innerHeight, vw = window.innerWidth;
+        // Esquinas inferiores: dentro de 120px del bottom y 200px de cualquier lado
+        var nearBottom = (vh - r.bottom) < 140;
+        var nearSides = r.left < 220 || (vw - r.right) < 220;
+        return nearBottom && nearSides && r.width < 220 && r.height < 220;
+      } catch (_) { return false; }
+    }
+    function _sweep(root) {
+      try {
+        var nodes = (root || document).querySelectorAll('body *');
+        for (var i = 0; i < nodes.length; i++) {
+          var n = nodes[i];
+          if (_isHelp(n)) continue;
+          if (_isCornerFloater(n)) {
+            n.style.setProperty('display', 'none', 'important');
+          }
+        }
+      } catch (_) {}
+    }
+    // Sweep inicial al cargar y barrido secundario tras 1.5s para librerías lazy
+    try { _sweep(); } catch (_) {}
+    setTimeout(function () { try { _sweep(); } catch (_) {} }, 1500);
+    setTimeout(function () { try { _sweep(); } catch (_) {} }, 4000);
+
     try {
-      var hideIds = ['vlx-health-pill','vlx-mx-flag','vlx-robot-avatar','vlx-theme-toggle','vlx-online-pill'];
       var mo = new MutationObserver(function (muts) {
         muts.forEach(function (m) {
           (m.addedNodes || []).forEach(function (n) {
             if (!n || n.nodeType !== 1) return;
-            if (hideIds.indexOf(n.id) >= 0) {
+            if (_isHelp(n)) return;
+            // Hide explicit known IDs
+            if (typeof n.id === 'string' && n.id.indexOf('vlx-') === 0 && !_isHelp(n)) {
               n.style.setProperty('display', 'none', 'important');
+              return;
             }
+            // Hide if it's a corner floater
+            try {
+              setTimeout(function () { if (_isCornerFloater(n) && !_isHelp(n)) n.style.setProperty('display', 'none', 'important'); }, 50);
+            } catch (_) {}
           });
         });
       });
