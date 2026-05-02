@@ -1171,9 +1171,12 @@ function serveStaticFile(res, pathname) {
     res.statusCode = 200;
     setSecurityHeaders(res); // R14
     res.setHeader('Content-Type', mime);
-    // R23: HTML siempre fresco; assets pueden cachear
-    if (ext === '.html') {
-      res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+    // R23: HTML y wiring scripts SIEMPRE frescos; otros assets cachean 1h.
+    // Los volvix-*.js cambian con cada deploy y deben revalidarse para que
+    // los usuarios vean los fixes inmediato (no esperar 1h cache HTTP).
+    const isWiring = /\/volvix-[\w-]+\.js$/.test(pathname);
+    if (ext === '.html' || isWiring) {
+      res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
     } else {
       res.setHeader('Cache-Control', 'public, max-age=3600');
     }
