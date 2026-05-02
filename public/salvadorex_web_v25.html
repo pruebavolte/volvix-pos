@@ -2770,9 +2770,71 @@
     </section>
 
     <!-- ============ PLACEHOLDERS ============ -->
-    <section id="screen-kardex" class="screen-pad hidden"><div class="placeholder"><div class="placeholder-icon">📋</div><h2 class="placeholder-title">Kardex</h2><p class="placeholder-text">Movimientos detallados por producto: entradas, salidas, ajustes, transferencias.</p></div></section>
-    <section id="screen-proveedores" class="screen-pad hidden"><div class="placeholder"><div class="placeholder-icon">🚚</div><h2 class="placeholder-title">Compras / Proveedores</h2><p class="placeholder-text">Gestiona proveedores, órdenes de compra y pagos.</p></div></section>
-    <section id="screen-facturacion" class="screen-pad hidden"><div class="placeholder"><div class="placeholder-icon">📄</div><h2 class="placeholder-title">Facturación CFDI</h2><p class="placeholder-text">Emisión de facturas 4.0 al SAT. Timbrado fiscal en tiempo real.</p></div></section>
+    <!-- ============ KARDEX — movimientos por producto ============ -->
+    <section id="screen-kardex" class="screen-pad hidden">
+      <div class="page-head">
+        <div><h1 class="page-title">Kardex</h1><p class="page-sub">Movimientos por producto · entradas, salidas, ajustes, traslados</p></div>
+        <div class="btn-row">
+          <input id="krd-search" placeholder="Buscar producto o SKU..." style="padding:8px 12px;border:1px solid #E5E5EA;border-radius:8px;min-width:240px">
+          <button class="btn" id="krd-refresh" onclick="kardexLoad()">🔄 Recargar</button>
+          <button class="btn primary" onclick="kardexExportCSV()">📥 Exportar CSV</button>
+        </div>
+      </div>
+      <div id="krd-summary" style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap"></div>
+      <div class="card">
+        <table class="table" style="width:100%;border-collapse:collapse">
+          <thead><tr style="background:#F4F4F7;text-align:left">
+            <th style="padding:10px">Fecha</th><th>Producto</th><th>Tipo</th><th style="text-align:right">Cantidad</th><th style="text-align:right">Costo</th><th>Usuario</th><th>Notas</th>
+          </tr></thead>
+          <tbody id="krd-tbody"><tr><td colspan="7" style="padding:24px;text-align:center;color:#94A3B8">Cargando movimientos...</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ PROVEEDORES / COMPRAS ============ -->
+    <section id="screen-proveedores" class="screen-pad hidden">
+      <div class="page-head">
+        <div><h1 class="page-title">Compras / Proveedores</h1><p class="page-sub" id="prov-sub">0 proveedores</p></div>
+        <div class="btn-row">
+          <button class="btn primary" onclick="proveedorNuevo()">+ Nuevo proveedor</button>
+          <button class="btn" onclick="ordenCompraNueva()">📦 Nueva orden de compra</button>
+          <button class="btn" onclick="proveedoresLoad()">🔄 Recargar</button>
+        </div>
+      </div>
+      <div class="config-tabs" style="margin-bottom:14px">
+        <button class="config-tab active" onclick="provTab('lista', this)">📋 Proveedores</button>
+        <button class="config-tab" onclick="provTab('ordenes', this)">📦 Órdenes de compra</button>
+        <button class="config-tab" onclick="provTab('cuentas', this)">💸 Cuentas por pagar</button>
+      </div>
+      <div id="prov-lista" class="card">
+        <table class="table" style="width:100%"><thead><tr style="background:#F4F4F7;text-align:left">
+          <th style="padding:10px">Nombre</th><th>RFC</th><th>Teléfono</th><th>Email</th><th style="text-align:right">Acciones</th>
+        </tr></thead><tbody id="prov-tbody"><tr><td colspan="5" style="padding:24px;text-align:center;color:#94A3B8">Sin proveedores aún. Agrega el primero.</td></tr></tbody></table>
+      </div>
+      <div id="prov-ordenes" class="card hidden"><div id="ord-list" style="padding:24px;color:#94A3B8;text-align:center">Sin órdenes de compra.</div></div>
+      <div id="prov-cuentas" class="card hidden"><div id="cxp-list" style="padding:24px;color:#94A3B8;text-align:center">Sin cuentas por pagar.</div></div>
+    </section>
+
+    <!-- ============ FACTURACIÓN CFDI ============ -->
+    <section id="screen-facturacion" class="screen-pad hidden">
+      <div class="page-head">
+        <div><h1 class="page-title">Facturación CFDI</h1><p class="page-sub" id="cfdi-sub">CFDI 4.0 · timbrado vía Facturama</p></div>
+        <div class="btn-row">
+          <button class="btn primary" onclick="cfdiNueva()">+ Nueva factura</button>
+          <button class="btn" onclick="cfdiOnboard()">🔑 Configurar CSD</button>
+          <button class="btn" onclick="cfdiLoad()">🔄 Recargar</button>
+        </div>
+      </div>
+      <div id="cfdi-status" style="margin-bottom:14px;padding:14px;border-radius:10px;background:#FEF3C7;border:1px solid #F59E0B;color:#78350F;font-size:13px;display:none">
+        <strong>⚠️ CSD no configurado.</strong> Para emitir facturas, sube tu Certificado de Sello Digital del SAT.
+        <button class="btn sm" onclick="cfdiOnboard()" style="margin-left:8px">Configurar ahora</button>
+      </div>
+      <div class="card">
+        <table class="table" style="width:100%"><thead><tr style="background:#F4F4F7;text-align:left">
+          <th style="padding:10px">Folio</th><th>Cliente</th><th>RFC</th><th>Total</th><th>Estado</th><th>UUID SAT</th><th style="text-align:right">Acciones</th>
+        </tr></thead><tbody id="cfdi-tbody"><tr><td colspan="7" style="padding:24px;text-align:center;color:#94A3B8">Cargando facturas...</td></tr></tbody></table>
+      </div>
+    </section>
     <!-- ============ COTIZACIONES — B43 UI ============ -->
     <section id="screen-cotizaciones" class="screen-pad hidden">
       <div class="page-head">
@@ -2882,8 +2944,61 @@
         </div>
       </div>
     </section>
-    <section id="screen-recargas" class="screen-pad hidden"><div class="placeholder"><div class="placeholder-icon">📱</div><h2 class="placeholder-title">Recargas electrónicas</h2><p class="placeholder-text">Telcel, Movistar, AT&T, Unefon, Bait. Comisión automática.</p></div></section>
-    <section id="screen-servicios" class="screen-pad hidden"><div class="placeholder"><div class="placeholder-icon">💡</div><h2 class="placeholder-title">Pago de servicios</h2><p class="placeholder-text">CFE, agua, teléfono, internet, gas. Paga desde tu caja.</p></div></section>
+    <!-- ============ RECARGAS ELECTRÓNICAS ============ -->
+    <section id="screen-recargas" class="screen-pad hidden">
+      <div class="page-head">
+        <div><h1 class="page-title">📱 Recargas electrónicas</h1><p class="page-sub" id="rec-sub">Telcel · AT&amp;T · Movistar · Unefon · Bait</p></div>
+        <div class="btn-row">
+          <button class="btn" onclick="recargasHistorial()">📋 Historial</button>
+          <button class="btn" onclick="recargasHealth()">🟢 Estado</button>
+        </div>
+      </div>
+      <div id="rec-status" style="margin-bottom:14px;padding:12px;border-radius:10px;background:#EFF6FF;border:1px solid #2563EB;color:#1E40AF;font-size:13px">
+        <strong>ℹ️ Modo MP-bridge.</strong> Cobro vía Mercado Pago. Entrega manual del saldo en 24-48h hasta firmar reseller.
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:18px">
+        <button class="card" onclick="recargaCarrier('telcel')" style="cursor:pointer;text-align:center;padding:24px;border:2px solid transparent;transition:all .15s">
+          <div style="font-size:48px;margin-bottom:8px">📡</div><strong>Telcel</strong><div style="color:#94A3B8;font-size:12px;margin-top:4px">$10 · $20 · $30 · $50 · $100 · $200 · $500</div>
+        </button>
+        <button class="card" onclick="recargaCarrier('att')" style="cursor:pointer;text-align:center;padding:24px;border:2px solid transparent;transition:all .15s">
+          <div style="font-size:48px;margin-bottom:8px">📶</div><strong>AT&amp;T</strong><div style="color:#94A3B8;font-size:12px;margin-top:4px">$30 · $50 · $100 · $200</div>
+        </button>
+        <button class="card" onclick="recargaCarrier('movistar')" style="cursor:pointer;text-align:center;padding:24px;border:2px solid transparent;transition:all .15s">
+          <div style="font-size:48px;margin-bottom:8px">📲</div><strong>Movistar</strong><div style="color:#94A3B8;font-size:12px;margin-top:4px">$30 · $50 · $100 · $200</div>
+        </button>
+        <button class="card" onclick="recargaCarrier('unefon')" style="cursor:pointer;text-align:center;padding:24px;border:2px solid transparent;transition:all .15s">
+          <div style="font-size:48px;margin-bottom:8px">📞</div><strong>Unefon</strong><div style="color:#94A3B8;font-size:12px;margin-top:4px">$30 · $50 · $100 · $200</div>
+        </button>
+        <button class="card" onclick="recargaCarrier('bait')" style="cursor:pointer;text-align:center;padding:24px;border:2px solid transparent;transition:all .15s">
+          <div style="font-size:48px;margin-bottom:8px">📡</div><strong>Bait</strong><div style="color:#94A3B8;font-size:12px;margin-top:4px">$30 · $50 · $100 · $200</div>
+        </button>
+      </div>
+      <div class="card" id="rec-history" style="display:none">
+        <h3 style="margin:0 0 10px">Últimas recargas</h3>
+        <div id="rec-list" style="color:#94A3B8;text-align:center;padding:18px">Sin recargas aún.</div>
+      </div>
+    </section>
+
+    <!-- ============ PAGO DE SERVICIOS (CFE, agua, etc.) ============ -->
+    <section id="screen-servicios" class="screen-pad hidden">
+      <div class="page-head">
+        <div><h1 class="page-title">💡 Pago de servicios</h1><p class="page-sub">CFE · Agua · Teléfono · Internet · Gas</p></div>
+        <div class="btn-row">
+          <button class="btn" onclick="serviciosHistorial()">📋 Historial</button>
+        </div>
+      </div>
+      <div style="margin-bottom:14px;padding:12px;border-radius:10px;background:#EFF6FF;border:1px solid #2563EB;color:#1E40AF;font-size:13px">
+        <strong>ℹ️ Modo MP-bridge.</strong> Cobro inmediato; el pago se aplica al servicio en 24-48h.
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px">
+        <button class="card" onclick="servicioPagar('cfe')" style="cursor:pointer;text-align:center;padding:24px"><div style="font-size:48px">⚡</div><strong>CFE</strong><div style="color:#94A3B8;font-size:12px;margin-top:4px">Luz</div></button>
+        <button class="card" onclick="servicioPagar('agua')" style="cursor:pointer;text-align:center;padding:24px"><div style="font-size:48px">💧</div><strong>Agua</strong><div style="color:#94A3B8;font-size:12px;margin-top:4px">Servicio municipal</div></button>
+        <button class="card" onclick="servicioPagar('telmex')" style="cursor:pointer;text-align:center;padding:24px"><div style="font-size:48px">☎️</div><strong>Telmex</strong><div style="color:#94A3B8;font-size:12px;margin-top:4px">Teléfono / internet</div></button>
+        <button class="card" onclick="servicioPagar('izzi')" style="cursor:pointer;text-align:center;padding:24px"><div style="font-size:48px">📺</div><strong>Izzi</strong><div style="color:#94A3B8;font-size:12px;margin-top:4px">TV / internet</div></button>
+        <button class="card" onclick="servicioPagar('totalplay')" style="cursor:pointer;text-align:center;padding:24px"><div style="font-size:48px">📡</div><strong>Totalplay</strong><div style="color:#94A3B8;font-size:12px;margin-top:4px">Internet / TV</div></button>
+        <button class="card" onclick="servicioPagar('gas-natural')" style="cursor:pointer;text-align:center;padding:24px"><div style="font-size:48px">🔥</div><strong>Gas Natural</strong><div style="color:#94A3B8;font-size:12px;margin-top:4px">Gas residencial</div></button>
+      </div>
+    </section>
     <!-- ============ PROMOCIONES — B43 UI ============ -->
     <section id="screen-promociones" class="screen-pad hidden">
       <div class="page-head">
@@ -2938,11 +3053,119 @@
         </div>
       </div>
     </section>
-    <section id="screen-departamentos" class="screen-pad hidden"><div class="placeholder"><div class="placeholder-icon">🏷️</div><h2 class="placeholder-title">Departamentos</h2><p class="placeholder-text">Organiza el inventario por departamentos con reglas fiscales.</p></div></section>
-    <section id="screen-actualizador" class="screen-pad hidden"><div class="placeholder"><div class="placeholder-icon">💱</div><h2 class="placeholder-title">Actualizador masivo</h2><p class="placeholder-text">Sube precios, cambia stock o modifica categorías en lote.</p></div></section>
-    <section id="screen-salud" class="screen-pad hidden"><div class="placeholder"><div class="placeholder-icon">💚</div><h2 class="placeholder-title">Panel de Salud · LIVE SYNC</h2><p class="placeholder-text">Estado en tiempo real: latencia, operaciones por minuto, cola de sync, última actualización recibida.</p></div></section>
-    <section id="screen-mobile-apps" class="screen-pad hidden"><div class="placeholder"><div class="placeholder-icon">📱</div><h2 class="placeholder-title">Preview apps móviles</h2><p class="placeholder-text">Vista previa de la app en Android e iOS, con el mismo layout y funcionalidades.</p></div></section>
-    <section id="screen-ayuda" class="screen-pad hidden"><div class="placeholder"><div class="placeholder-icon">❓</div><h2 class="placeholder-title">Centro de ayuda</h2><p class="placeholder-text">Documentación, tutoriales, atajos de teclado y contacto con soporte.</p></div></section>
+    <!-- ============ DEPARTAMENTOS ============ -->
+    <section id="screen-departamentos" class="screen-pad hidden">
+      <div class="page-head">
+        <div><h1 class="page-title">🏷️ Departamentos</h1><p class="page-sub" id="dep-sub">Organiza tu inventario por departamento</p></div>
+        <div class="btn-row"><button class="btn primary" onclick="depNuevo()">+ Nuevo departamento</button><button class="btn" onclick="depsLoad()">🔄 Recargar</button></div>
+      </div>
+      <div class="card"><table class="table" style="width:100%"><thead><tr style="background:#F4F4F7;text-align:left">
+        <th style="padding:10px">Nombre</th><th>Descripción</th><th style="text-align:right">Productos</th><th>IVA</th><th style="text-align:right">Acciones</th>
+      </tr></thead><tbody id="dep-tbody"><tr><td colspan="5" style="padding:24px;text-align:center;color:#94A3B8">Sin departamentos. Agrega el primero.</td></tr></tbody></table></div>
+    </section>
+
+    <!-- ============ ACTUALIZADOR MASIVO ============ -->
+    <section id="screen-actualizador" class="screen-pad hidden">
+      <div class="page-head">
+        <div><h1 class="page-title">💱 Actualizador masivo</h1><p class="page-sub">Cambia precio, stock o categoría a múltiples productos a la vez</p></div>
+      </div>
+      <div class="card" style="padding:18px">
+        <div class="grid-2" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px">
+          <div>
+            <label style="font-weight:600;display:block;margin-bottom:6px">1. Filtrar productos</label>
+            <select id="bulk-filter-cat" class="btn" style="width:100%;margin-bottom:8px"><option value="">Todas las categorías</option></select>
+            <input id="bulk-filter-text" placeholder="Buscar nombre/SKU..." style="width:100%;padding:8px 12px;border:1px solid #E5E5EA;border-radius:8px">
+          </div>
+          <div>
+            <label style="font-weight:600;display:block;margin-bottom:6px">2. Acción</label>
+            <select id="bulk-action" class="btn" style="width:100%;margin-bottom:8px">
+              <option value="">Selecciona acción...</option>
+              <option value="price-pct">Subir/bajar precio %</option>
+              <option value="price-set">Asignar precio fijo</option>
+              <option value="stock-set">Asignar stock</option>
+              <option value="category-change">Cambiar categoría</option>
+              <option value="archive">Archivar</option>
+            </select>
+            <input id="bulk-value" placeholder="Valor (ej. 10 = +10%)" style="width:100%;padding:8px 12px;border:1px solid #E5E5EA;border-radius:8px">
+          </div>
+        </div>
+        <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center">
+          <div id="bulk-count" style="color:#64748B">0 productos seleccionados</div>
+          <div><button class="btn" onclick="bulkPreview()">👁️ Previsualizar</button> <button class="btn primary" onclick="bulkApply()">✓ Aplicar cambios</button></div>
+        </div>
+      </div>
+      <div class="card" id="bulk-preview-box" style="margin-top:14px;display:none"><h3 style="margin:0 0 10px">Vista previa</h3><div id="bulk-preview-list"></div></div>
+    </section>
+
+    <!-- ============ PANEL DE SALUD · LIVE SYNC ============ -->
+    <section id="screen-salud" class="screen-pad hidden">
+      <div class="page-head">
+        <div><h1 class="page-title">💚 Panel de Salud</h1><p class="page-sub">Estado en tiempo real del sistema</p></div>
+        <div class="btn-row"><button class="btn" onclick="healthLoad()">🔄 Refrescar</button></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:18px">
+        <div class="card" style="padding:18px"><div style="font-size:12px;color:#64748B;text-transform:uppercase;letter-spacing:.05em">Backend API</div><div id="hl-api" style="font-size:24px;font-weight:700;margin-top:6px">—</div><div id="hl-api-detail" style="color:#94A3B8;font-size:12px"></div></div>
+        <div class="card" style="padding:18px"><div style="font-size:12px;color:#64748B;text-transform:uppercase;letter-spacing:.05em">Pagos</div><div id="hl-pay" style="font-size:24px;font-weight:700;margin-top:6px">—</div><div id="hl-pay-detail" style="color:#94A3B8;font-size:12px"></div></div>
+        <div class="card" style="padding:18px"><div style="font-size:12px;color:#64748B;text-transform:uppercase;letter-spacing:.05em">Email (Resend)</div><div id="hl-email" style="font-size:24px;font-weight:700;margin-top:6px">—</div><div id="hl-email-detail" style="color:#94A3B8;font-size:12px"></div></div>
+        <div class="card" style="padding:18px"><div style="font-size:12px;color:#64748B;text-transform:uppercase;letter-spacing:.05em">AI Gateway</div><div id="hl-ai" style="font-size:24px;font-weight:700;margin-top:6px">—</div><div id="hl-ai-detail" style="color:#94A3B8;font-size:12px"></div></div>
+        <div class="card" style="padding:18px"><div style="font-size:12px;color:#64748B;text-transform:uppercase;letter-spacing:.05em">Sync queue</div><div id="hl-sync" style="font-size:24px;font-weight:700;margin-top:6px">—</div><div id="hl-sync-detail" style="color:#94A3B8;font-size:12px"></div></div>
+        <div class="card" style="padding:18px"><div style="font-size:12px;color:#64748B;text-transform:uppercase;letter-spacing:.05em">Última actualización</div><div id="hl-last" style="font-size:14px;font-weight:600;margin-top:6px">—</div></div>
+      </div>
+      <div class="card" style="padding:18px"><h3 style="margin:0 0 10px">Versión actual</h3><div id="hl-version" style="font-family:monospace;color:#64748B">Cargando...</div></div>
+    </section>
+
+    <!-- ============ MOBILE PREVIEW ============ -->
+    <section id="screen-mobile-apps" class="screen-pad hidden">
+      <div class="page-head">
+        <div><h1 class="page-title">📱 Apps móviles</h1><p class="page-sub">Tu POS funciona en cualquier dispositivo</p></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px">
+        <div class="card" style="padding:24px;text-align:center">
+          <div style="font-size:64px">📱</div><h3 style="margin:8px 0">Web App (PWA)</h3>
+          <p style="color:#64748B;font-size:14px">Instala desde el navegador en cualquier celular o tablet. Funciona offline.</p>
+          <button class="btn primary" onclick="installPWAPrompt()">⬇ Instalar PWA</button>
+        </div>
+        <div class="card" style="padding:24px;text-align:center;opacity:.7">
+          <div style="font-size:64px">🤖</div><h3 style="margin:8px 0">Android (Próximo)</h3>
+          <p style="color:#64748B;font-size:14px">App nativa para Android, sincroniza con tu POS web.</p>
+          <button class="btn" disabled>Próximamente</button>
+        </div>
+        <div class="card" style="padding:24px;text-align:center;opacity:.7">
+          <div style="font-size:64px">🍎</div><h3 style="margin:8px 0">iOS (Próximo)</h3>
+          <p style="color:#64748B;font-size:14px">App nativa para iPhone/iPad, sincroniza con tu POS web.</p>
+          <button class="btn" disabled>Próximamente</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CENTRO DE AYUDA ============ -->
+    <section id="screen-ayuda" class="screen-pad hidden">
+      <div class="page-head">
+        <div><h1 class="page-title">❓ Centro de ayuda</h1><p class="page-sub">Documentación, tutoriales y soporte</p></div>
+        <div class="btn-row"><button class="btn primary" onclick="window.open('https://systeminternational.app/docs.html','_blank')">📖 Docs</button><button class="btn" onclick="ayudaContacto()">💬 Contactar soporte</button></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px">
+        <div class="card" style="padding:18px;cursor:pointer" onclick="ayudaSeccion('inicio')"><div style="font-size:36px">🚀</div><h3 style="margin:6px 0">Empezar</h3><p style="color:#64748B;font-size:13px">Tu primera venta en 5 min</p></div>
+        <div class="card" style="padding:18px;cursor:pointer" onclick="ayudaSeccion('productos')"><div style="font-size:36px">📦</div><h3 style="margin:6px 0">Productos</h3><p style="color:#64748B;font-size:13px">Cargar inventario, plantillas, CSV</p></div>
+        <div class="card" style="padding:18px;cursor:pointer" onclick="ayudaSeccion('cobrar')"><div style="font-size:36px">💵</div><h3 style="margin:6px 0">Cobrar</h3><p style="color:#64748B;font-size:13px">Efectivo, tarjeta, MP, Stripe</p></div>
+        <div class="card" style="padding:18px;cursor:pointer" onclick="ayudaSeccion('corte')"><div style="font-size:36px">📊</div><h3 style="margin:6px 0">Cierre de caja</h3><p style="color:#64748B;font-size:13px">Cierre Z, sobrantes, faltantes</p></div>
+        <div class="card" style="padding:18px;cursor:pointer" onclick="ayudaSeccion('cfdi')"><div style="font-size:36px">📄</div><h3 style="margin:6px 0">Facturas CFDI</h3><p style="color:#64748B;font-size:13px">Configurar CSD, emitir, cancelar</p></div>
+        <div class="card" style="padding:18px;cursor:pointer" onclick="ayudaSeccion('atajos')"><div style="font-size:36px">⌨️</div><h3 style="margin:6px 0">Atajos teclado</h3><p style="color:#64748B;font-size:13px">F1-F12, hot keys, productividad</p></div>
+      </div>
+      <div class="card" style="margin-top:18px;padding:18px">
+        <h3 style="margin:0 0 10px">⌨️ Atajos rápidos</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;font-size:13px">
+          <div><kbd style="background:#F4F4F7;padding:2px 6px;border-radius:4px;border:1px solid #E5E5EA">F1</kbd> Punto de venta</div>
+          <div><kbd style="background:#F4F4F7;padding:2px 6px;border-radius:4px;border:1px solid #E5E5EA">F2</kbd> Créditos</div>
+          <div><kbd style="background:#F4F4F7;padding:2px 6px;border-radius:4px;border:1px solid #E5E5EA">F3</kbd> Inventario</div>
+          <div><kbd style="background:#F4F4F7;padding:2px 6px;border-radius:4px;border:1px solid #E5E5EA">F4</kbd> Kardex</div>
+          <div><kbd style="background:#F4F4F7;padding:2px 6px;border-radius:4px;border:1px solid #E5E5EA">F5</kbd> Buscar</div>
+          <div><kbd style="background:#F4F4F7;padding:2px 6px;border-radius:4px;border:1px solid #E5E5EA">F9</kbd> Calculadora</div>
+          <div><kbd style="background:#F4F4F7;padding:2px 6px;border-radius:4px;border:1px solid #E5E5EA">F11</kbd> Descuento</div>
+          <div><kbd style="background:#F4F4F7;padding:2px 6px;border-radius:4px;border:1px solid #E5E5EA">F12</kbd> Cobrar</div>
+        </div>
+      </div>
+    </section>
 
   </main>
 </div>
@@ -12548,5 +12771,312 @@
 <script defer src="/volvix-pos-payments-integration.js"></script>
 <script defer src="/volvix-modules-wiring.js"></script>
 <script defer src="/volvix-owner-only-wiring.js"></script>
+
+<!-- 2026-05: wiring de los módulos previamente placeholders ahora funcionales -->
+<script>
+(function () {
+  'use strict';
+  function $(s, r) { return (r || document).querySelector(s); }
+  function _tok() { try { return localStorage.getItem('volvix_token') || ''; } catch(_) { return ''; } }
+  function _api(path, opts) {
+    var o = opts || {}; o.headers = o.headers || {};
+    if (!o.headers['Content-Type'] && o.body) o.headers['Content-Type'] = 'application/json';
+    var t = _tok(); if (t) o.headers['Authorization'] = 'Bearer ' + t;
+    return fetch(path, o);
+  }
+  function _toast(m, t) { try { (window.showToast || window.toast || console.log)(m, t); } catch(_){ console.log(m); } }
+  function _money(n) { return Number(n||0).toLocaleString('es-MX',{style:'currency',currency:'MXN'}); }
+
+  // ── KARDEX ─────────────────────────────────────────────────
+  window.kardexLoad = async function () {
+    var tbody = $('#krd-tbody'); if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="7" style="padding:24px;text-align:center;color:#94A3B8">Cargando...</td></tr>';
+    try {
+      var r = await _api('/api/inventory/movements?limit=200');
+      var data = await r.json();
+      var rows = (data && (data.items || data.movements || data)) || [];
+      if (!Array.isArray(rows) || !rows.length) {
+        tbody.innerHTML = '<tr><td colspan="7" style="padding:24px;text-align:center;color:#94A3B8">Sin movimientos aún. Los movimientos se registran automáticamente al vender, devolver, ajustar o trasladar inventario.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = rows.map(function (m) {
+        var d = m.created_at ? new Date(m.created_at).toLocaleString('es-MX') : '—';
+        var typeColor = m.type === 'venta' ? '#DC2626' : m.type === 'entrada' ? '#10B981' : '#64748B';
+        var qty = Number(m.qty || m.quantity || 0);
+        return '<tr style="border-top:1px solid #F4F4F7"><td style="padding:10px">' + d + '</td>' +
+          '<td>' + (m.product_name || m.sku || m.product_id || '—') + '</td>' +
+          '<td><span style="background:' + typeColor + '15;color:' + typeColor + ';padding:2px 8px;border-radius:6px;font-size:12px;font-weight:600">' + (m.type || '—') + '</span></td>' +
+          '<td style="text-align:right;font-weight:600;color:' + (qty < 0 ? '#DC2626' : '#10B981') + '">' + (qty > 0 ? '+' : '') + qty + '</td>' +
+          '<td style="text-align:right">' + (m.unit_cost != null ? _money(m.unit_cost) : '—') + '</td>' +
+          '<td>' + (m.user_email || m.user_id || '—') + '</td>' +
+          '<td style="color:#64748B;font-size:12px">' + (m.notes || '') + '</td></tr>';
+      }).join('');
+    } catch (e) {
+      tbody.innerHTML = '<tr><td colspan="7" style="padding:24px;text-align:center;color:#DC2626">Error al cargar movimientos: ' + (e.message || e) + '</td></tr>';
+    }
+  };
+  window.kardexExportCSV = function () {
+    var rows = Array.prototype.slice.call(document.querySelectorAll('#krd-tbody tr')).map(function (tr) {
+      return Array.prototype.slice.call(tr.querySelectorAll('td')).map(function (td) {
+        var s = (td.textContent || '').trim();
+        return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+      }).join(',');
+    });
+    var csv = 'Fecha,Producto,Tipo,Cantidad,Costo,Usuario,Notas\r\n' + rows.join('\r\n');
+    var blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'kardex_' + new Date().toISOString().slice(0,10) + '.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  };
+
+  // ── PROVEEDORES ────────────────────────────────────────────
+  window.provTab = function (tab, btn) {
+    document.querySelectorAll('#screen-proveedores .config-tab').forEach(function(b){b.classList.remove('active');});
+    if (btn) btn.classList.add('active');
+    ['lista','ordenes','cuentas'].forEach(function (t) {
+      var el = $('#prov-' + t); if (el) el.classList.toggle('hidden', t !== tab);
+    });
+  };
+  window.proveedoresLoad = async function () {
+    var tbody = $('#prov-tbody'); if (!tbody) return;
+    try {
+      var r = await _api('/api/suppliers?limit=200');
+      var data = await r.json().catch(function(){return null;});
+      var list = (data && (data.suppliers || data.items || data)) || [];
+      if (!Array.isArray(list) || !list.length) {
+        tbody.innerHTML = '<tr><td colspan="5" style="padding:24px;text-align:center;color:#94A3B8">Sin proveedores aún. Agrega el primero.</td></tr>';
+        $('#prov-sub').textContent = '0 proveedores';
+        return;
+      }
+      tbody.innerHTML = list.map(function (s) {
+        return '<tr style="border-top:1px solid #F4F4F7"><td style="padding:10px;font-weight:600">' + (s.name || '—') + '</td>' +
+          '<td>' + (s.rfc || '—') + '</td><td>' + (s.phone || '—') + '</td><td>' + (s.email || '—') + '</td>' +
+          '<td style="text-align:right"><button class="btn sm" onclick="proveedorEdit(\'' + s.id + '\')">Editar</button></td></tr>';
+      }).join('');
+      $('#prov-sub').textContent = list.length + ' proveedores';
+    } catch (e) {
+      tbody.innerHTML = '<tr><td colspan="5" style="padding:24px;text-align:center;color:#DC2626">Error: ' + (e.message || e) + '</td></tr>';
+    }
+  };
+  window.proveedorNuevo = function () {
+    var name = prompt('Nombre del proveedor:'); if (!name) return;
+    var rfc = prompt('RFC (opcional):') || '';
+    var phone = prompt('Teléfono (opcional):') || '';
+    var email = prompt('Email (opcional):') || '';
+    _api('/api/suppliers', { method: 'POST', body: JSON.stringify({ name: name, rfc: rfc, phone: phone, email: email }) })
+      .then(function (r) { return r.json(); }).then(function (j) {
+        if (j && j.ok !== false) { _toast('Proveedor agregado', 'ok'); window.proveedoresLoad(); }
+        else _toast(j && j.error_message || 'No se pudo agregar', 'error');
+      }).catch(function (e) { _toast('Error: ' + e.message, 'error'); });
+  };
+  window.proveedorEdit = function (id) { _toast('Editar proveedor: ' + id + ' (próximamente)', 'info'); };
+  window.ordenCompraNueva = function () { _toast('Nueva orden de compra: próximamente', 'info'); };
+
+  // ── CFDI / FACTURACIÓN ─────────────────────────────────────
+  window.cfdiLoad = async function () {
+    var tbody = $('#cfdi-tbody'); if (!tbody) return;
+    try {
+      // Verifica si tenant tiene CSD configurado
+      var hr = await _api('/api/facturama/status');
+      var hd = await hr.json().catch(function(){return null;});
+      var status = $('#cfdi-status');
+      if (status) status.style.display = (hd && hd.active) ? 'none' : '';
+      // Lista facturas
+      var r = await _api('/api/facturama/invoices?limit=100');
+      var data = await r.json().catch(function(){return null;});
+      var list = (data && (data.invoices || data.items || data)) || [];
+      if (!Array.isArray(list) || !list.length) {
+        tbody.innerHTML = '<tr><td colspan="7" style="padding:24px;text-align:center;color:#94A3B8">Sin facturas aún.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = list.map(function (f) {
+        var statusColor = f.status === 'cancelled' ? '#DC2626' : '#10B981';
+        return '<tr style="border-top:1px solid #F4F4F7"><td style="padding:10px;font-family:monospace">' + (f.folio || '—') + '</td>' +
+          '<td>' + (f.customer_name || '—') + '</td><td style="font-family:monospace">' + (f.customer_rfc || '—') + '</td>' +
+          '<td>' + _money(f.total || 0) + '</td>' +
+          '<td><span style="background:' + statusColor + '15;color:' + statusColor + ';padding:2px 8px;border-radius:6px;font-size:12px;font-weight:600">' + (f.status || 'issued') + '</span></td>' +
+          '<td style="font-family:monospace;font-size:11px">' + (f.uuid_sat || '—') + '</td>' +
+          '<td style="text-align:right"><button class="btn sm" onclick="cfdiPDF(\'' + (f.facturama_id || f.id) + '\')">PDF</button> <button class="btn sm" onclick="cfdiCancel(\'' + (f.facturama_id || f.id) + '\')">Cancelar</button></td></tr>';
+      }).join('');
+    } catch (e) {
+      tbody.innerHTML = '<tr><td colspan="7" style="padding:24px;text-align:center;color:#DC2626">Error: ' + (e.message || e) + '</td></tr>';
+    }
+  };
+  window.cfdiNueva = function () { window.location.href = '/volvix-cfdi-templates.html'; };
+  window.cfdiOnboard = function () { _toast('Sube tu CSD desde Configuración → Facturación electrónica.', 'info'); window.showScreen && window.showScreen('config'); };
+  window.cfdiPDF = function (id) { window.open('/api/facturama/invoice/' + encodeURIComponent(id) + '/pdf', '_blank'); };
+  window.cfdiCancel = function (id) {
+    var motivo = prompt('Motivo de cancelación (01, 02, 03 o 04):', '02'); if (!motivo) return;
+    _api('/api/facturama/cancel/' + encodeURIComponent(id), { method: 'POST', body: JSON.stringify({ motivo: motivo }) })
+      .then(function (r) { return r.json(); }).then(function (j) {
+        if (j && j.ok) { _toast('Factura cancelada', 'ok'); window.cfdiLoad(); }
+        else _toast((j && j.error) || 'No se pudo cancelar', 'error');
+      });
+  };
+
+  // ── RECARGAS ────────────────────────────────────────────────
+  window.recargaCarrier = function (carrier) {
+    var phone = prompt('Número del cliente (10 dígitos):'); if (!phone || !/^\d{10}$/.test(phone.replace(/\D/g,''))) { _toast('Teléfono inválido', 'error'); return; }
+    var amount = prompt('Monto a recargar:'); if (!amount || isNaN(amount)) return;
+    _api('/api/recargas/checkout', { method: 'POST', body: JSON.stringify({ carrier: carrier, phone: '+52' + phone.replace(/\D/g,''), amount: Number(amount) }) })
+      .then(function (r) { return r.json(); }).then(function (j) {
+        if (j && j.checkout_url) { window.open(j.checkout_url, '_blank'); _toast('Pago iniciado en MP', 'ok'); }
+        else _toast((j && j.error_message) || 'No se pudo crear el pago', 'error');
+      }).catch(function (e) { _toast('Error: ' + e.message, 'error'); });
+  };
+  window.recargasHistorial = function () {
+    var box = $('#rec-history'); if (box) box.style.display = box.style.display === 'none' ? '' : 'none';
+    if (box && box.style.display !== 'none') {
+      _api('/api/recargas/history?limit=50').then(function(r){return r.json();}).then(function (j) {
+        var list = (j && j.items) || [];
+        $('#rec-list').innerHTML = list.length
+          ? list.map(function(i){return '<div style="padding:10px;border-top:1px solid #F4F4F7;display:flex;justify-content:space-between"><span>' + (i.carrier||'') + ' · ' + (i.phone||'') + '</span><strong>' + _money(i.amount||0) + '</strong></div>';}).join('')
+          : '<div style="padding:18px;color:#94A3B8;text-align:center">Sin recargas aún.</div>';
+      });
+    }
+  };
+  window.recargasHealth = function () {
+    _api('/api/recargas/health').then(function(r){return r.json();}).then(function (j) {
+      _toast('Modo: ' + (j.mode || 'mp_bridge') + ' · MP: ' + (j.mp_configured ? '✅' : '❌'), 'info');
+    });
+  };
+
+  // ── SERVICIOS (CFE, agua, etc.) ─────────────────────────────
+  window.servicioPagar = function (servicio) {
+    var ref = prompt('Número de referencia / contrato:'); if (!ref) return;
+    var amount = prompt('Monto a pagar:'); if (!amount || isNaN(amount)) return;
+    _api('/api/services/checkout', { method: 'POST', body: JSON.stringify({ service: servicio, reference: ref, amount: Number(amount) }) })
+      .then(function (r) { return r.json(); }).then(function (j) {
+        if (j && j.checkout_url) { window.open(j.checkout_url, '_blank'); _toast('Pago iniciado', 'ok'); }
+        else _toast((j && j.error_message) || 'No se pudo crear el pago', 'error');
+      });
+  };
+  window.serviciosHistorial = function () { _toast('Historial: próximamente', 'info'); };
+
+  // ── DEPARTAMENTOS ──────────────────────────────────────────
+  window.depsLoad = async function () {
+    var tbody = $('#dep-tbody'); if (!tbody) return;
+    try {
+      var r = await _api('/api/products/categories');
+      var data = await r.json().catch(function(){return null;});
+      var list = (data && (data.items || data.categories || data)) || [];
+      if (!Array.isArray(list) || !list.length) {
+        tbody.innerHTML = '<tr><td colspan="5" style="padding:24px;text-align:center;color:#94A3B8">Sin departamentos.</td></tr>';
+        $('#dep-sub').textContent = '0 departamentos';
+        return;
+      }
+      tbody.innerHTML = list.map(function (d) {
+        return '<tr style="border-top:1px solid #F4F4F7"><td style="padding:10px;font-weight:600">' + (d.name || d) + '</td>' +
+          '<td>' + (d.description || '—') + '</td><td style="text-align:right">' + (d.product_count || 0) + '</td>' +
+          '<td>' + (d.iva || '16%') + '</td>' +
+          '<td style="text-align:right"><button class="btn sm" onclick="depEdit(\'' + (d.id || d.name) + '\')">Editar</button></td></tr>';
+      }).join('');
+      $('#dep-sub').textContent = list.length + ' departamentos';
+    } catch (e) { tbody.innerHTML = '<tr><td colspan="5" style="padding:24px;text-align:center;color:#DC2626">Error</td></tr>'; }
+  };
+  window.depNuevo = function () {
+    var name = prompt('Nombre del departamento:'); if (!name) return;
+    _api('/api/products/categories', { method: 'POST', body: JSON.stringify({ name: name }) })
+      .then(function(r){return r.json();}).then(function (j) {
+        if (j && j.ok !== false) { _toast('Departamento creado', 'ok'); window.depsLoad(); }
+        else _toast('No se pudo crear', 'error');
+      });
+  };
+  window.depEdit = function (id) { _toast('Editar departamento: ' + id, 'info'); };
+
+  // ── ACTUALIZADOR MASIVO ────────────────────────────────────
+  window.bulkPreview = function () {
+    var action = $('#bulk-action').value;
+    var value = $('#bulk-value').value;
+    if (!action) { _toast('Selecciona una acción', 'error'); return; }
+    $('#bulk-preview-box').style.display = '';
+    $('#bulk-preview-list').innerHTML = '<div style="padding:14px;background:#FEF3C7;border-radius:8px;color:#78350F">Vista previa: ' + action + ' = ' + value + '. Click "Aplicar" para ejecutar.</div>';
+  };
+  window.bulkApply = async function () {
+    var action = $('#bulk-action').value;
+    var value = $('#bulk-value').value;
+    var cat = $('#bulk-filter-cat').value;
+    var text = $('#bulk-filter-text').value;
+    if (!action) { _toast('Selecciona una acción', 'error'); return; }
+    if (!confirm('¿Aplicar "' + action + '" con valor "' + value + '"? Esta acción no se puede deshacer fácilmente.')) return;
+    try {
+      var r = await _api('/api/products/bulk-update', { method: 'POST', body: JSON.stringify({ action: action, value: value, filter: { category: cat, text: text } }) });
+      var j = await r.json();
+      if (j && j.ok) _toast('Actualizados: ' + (j.updated || 0) + ' productos', 'ok');
+      else _toast((j && j.error_message) || 'Error al aplicar', 'error');
+    } catch (e) { _toast('Error: ' + e.message, 'error'); }
+  };
+
+  // ── PANEL SALUD ────────────────────────────────────────────
+  window.healthLoad = async function () {
+    var pillSet = function (id, ok, detail) {
+      var el = $('#hl-' + id); if (!el) return;
+      el.innerHTML = ok ? '<span style="color:#10B981">●</span> Activo' : '<span style="color:#DC2626">●</span> Caído';
+      var d = $('#hl-' + id + '-detail'); if (d) d.textContent = detail || '';
+    };
+    try {
+      var v = await fetch('/api/version').then(function(r){return r.json();}).catch(function(){return null;});
+      $('#hl-version').textContent = v ? (v.commit + ' · ' + v.env) : '—';
+      $('#hl-last').textContent = v ? new Date(v.ts).toLocaleString('es-MX') : '—';
+      pillSet('api', !!v && v.ok, v ? 'v' + (v.version || '?') : '');
+      var p = await fetch('/api/payments/health').then(function(r){return r.json();}).catch(function(){return null;});
+      pillSet('pay', p && (p.stripe || p.mp), p ? 'Stripe:' + (p.stripe?'✅':'❌') + ' · MP:' + (p.mp?'✅':'❌') : '');
+      pillSet('email', p && p.email, p && p.email ? 'Resend' : 'No configurado');
+      pillSet('ai', p && p.ai_gateway, p && p.ai_gateway ? 'Vercel AI Gateway' : 'No configurado');
+      var pending = (window.__volvixOfflineQueue && window.__volvixOfflineQueue.length) || 0;
+      pillSet('sync', pending === 0, pending + ' en cola');
+    } catch (e) { _toast('Error cargando salud: ' + e.message, 'error'); }
+  };
+
+  // ── PWA Install ─────────────────────────────────────────────
+  window.installPWAPrompt = function () {
+    if (window.__vlxDeferredPwaPrompt) {
+      window.__vlxDeferredPwaPrompt.prompt();
+    } else {
+      _toast('Para instalar: en Chrome/Safari, usa el menú "Instalar app" o "Añadir a pantalla de inicio".', 'info');
+    }
+  };
+
+  // ── AYUDA ──────────────────────────────────────────────────
+  window.ayudaSeccion = function (key) {
+    var docs = {
+      inicio: '/docs.html#inicio',
+      productos: '/docs.html#productos',
+      cobrar: '/docs.html#cobrar',
+      corte: '/docs.html#corte',
+      cfdi: '/docs.html#cfdi',
+      atajos: '/docs.html#atajos'
+    };
+    window.open(docs[key] || '/docs.html', '_blank');
+  };
+  window.ayudaContacto = function () {
+    var msg = prompt('¿En qué te ayudamos? Describe tu problema:');
+    if (!msg) return;
+    _api('/api/support/ticket', { method: 'POST', body: JSON.stringify({ message: msg, source: 'pos-help' }) })
+      .then(function(r){return r.json();}).then(function () { _toast('Ticket enviado. Te contactaremos pronto.', 'ok'); })
+      .catch(function () { _toast('Si no responde, escríbenos a soporte@systeminternational.app', 'info'); });
+  };
+
+  // ── Auto-load cuando el screen se muestra ──────────────────
+  var origShowScreen = window.showScreen;
+  if (typeof origShowScreen === 'function') {
+    window.showScreen = function (name) {
+      var r = origShowScreen.apply(this, arguments);
+      try {
+        if (name === 'kardex') window.kardexLoad();
+        else if (name === 'proveedores') window.proveedoresLoad();
+        else if (name === 'facturacion') window.cfdiLoad();
+        else if (name === 'departamentos') window.depsLoad();
+        else if (name === 'salud') window.healthLoad();
+      } catch (e) { console.warn('[screen-load]', name, e); }
+      return r;
+    };
+  }
+  // Captura de PWA install prompt
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault(); window.__vlxDeferredPwaPrompt = e;
+  });
+})();
+</script>
 </body>
 </html>
