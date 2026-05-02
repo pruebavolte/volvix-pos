@@ -38,7 +38,7 @@ const PAGE_ROUTES = [
   '/pos.html', '/login.html', '/pos-inventario.html', '/pos-corte.html',
   '/pos-clientes.html', '/pos-reportes.html', '/pos-config.html',
   '/volvix_owner_panel_v7.html', '/owner.html', '/ai.html',
-  '/inventario.html', '/soporte.html',
+  '/soporte.html',
 ];
 
 const STATIC_EXTENSIONS = [

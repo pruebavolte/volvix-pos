@@ -12908,8 +12908,41 @@
         else _toast(j && j.error_message || 'No se pudo agregar', 'error');
       }).catch(function (e) { _toast('Error: ' + e.message, 'error'); });
   };
-  window.proveedorEdit = function (id) { _toast('Editar proveedor: ' + id + ' (próximamente)', 'info'); };
-  window.ordenCompraNueva = function () { _toast('Nueva orden de compra: próximamente', 'info'); };
+  window.proveedorEdit = function (id) {
+    if (!id) { _toast('ID de proveedor inválido', 'error'); return; }
+    var name = prompt('Nuevo nombre (deja vacío para no cambiar):'); if (name === null) return;
+    var rfc = prompt('Nuevo RFC (deja vacío para no cambiar):'); if (rfc === null) return;
+    var phone = prompt('Nuevo teléfono (deja vacío para no cambiar):'); if (phone === null) return;
+    var email = prompt('Nuevo email (deja vacío para no cambiar):'); if (email === null) return;
+    var patch = {};
+    if (name)  patch.name = name;
+    if (rfc)   patch.rfc = rfc;
+    if (phone) patch.phone = phone;
+    if (email) patch.email = email;
+    if (!Object.keys(patch).length) { _toast('Sin cambios', 'info'); return; }
+    _api('/api/suppliers/' + encodeURIComponent(id), { method: 'PATCH', body: JSON.stringify(patch) })
+      .then(function (r) { return r.json().catch(function(){return null;}); })
+      .then(function (j) {
+        if (j && j.ok !== false) { _toast('Proveedor actualizado', 'ok'); window.proveedoresLoad && window.proveedoresLoad(); }
+        else _toast((j && (j.error_message || j.error)) || 'No se pudo actualizar', 'error');
+      })
+      .catch(function (e) { _toast('Error: ' + e.message, 'error'); });
+  };
+  window.ordenCompraNueva = function () {
+    var product_name = prompt('Producto a comprar:'); if (!product_name) return;
+    var qtyStr = prompt('Cantidad:'); var qty = Number(qtyStr);
+    if (!qty || qty <= 0 || isNaN(qty)) { _toast('Cantidad inválida', 'error'); return; }
+    var supplier = prompt('Proveedor (opcional):') || '';
+    var urgent = confirm('¿Marcar como URGENTE? (Aceptar = sí)');
+    var body = { product_name: product_name, qty: qty, supplier: supplier, urgent: !!urgent };
+    _api('/api/purchases', { method: 'POST', body: JSON.stringify(body) })
+      .then(function (r) { return r.json().catch(function(){return null;}); })
+      .then(function (j) {
+        if (j && j.ok) { _toast('Orden de compra creada', 'ok'); window.proveedoresLoad && window.proveedoresLoad(); }
+        else _toast((j && (j.error_message || j.error)) || 'No se pudo crear la orden', 'error');
+      })
+      .catch(function (e) { _toast('Error: ' + e.message, 'error'); });
+  };
 
   // ── CFDI / FACTURACIÓN ─────────────────────────────────────
   window.cfdiLoad = async function () {
@@ -12990,7 +13023,45 @@
         else _toast((j && j.error_message) || 'No se pudo crear el pago', 'error');
       });
   };
-  window.serviciosHistorial = function () { _toast('Historial: próximamente', 'info'); };
+  window.serviciosHistorial = function () {
+    var screen = document.getElementById('screen-servicios'); if (!screen) { _toast('Pantalla servicios no disponible', 'error'); return; }
+    var box = document.getElementById('srv-history');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'srv-history';
+      box.className = 'card';
+      box.style.cssText = 'margin-top:14px;padding:12px';
+      box.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><strong>Historial de pagos de servicios</strong><button class="btn sm" onclick="document.getElementById(\'srv-history\').style.display=\'none\'">Cerrar</button></div><div id="srv-list" style="max-height:360px;overflow:auto"></div>';
+      screen.appendChild(box);
+    }
+    box.style.display = '';
+    var list = document.getElementById('srv-list');
+    if (list) list.innerHTML = '<div style="padding:12px;color:#94A3B8;text-align:center">Cargando...</div>';
+    _api('/api/services/history?limit=50')
+      .then(function (r) { return r.json().catch(function(){return null;}); })
+      .then(function (j) {
+        var items = (j && (j.items || j.history || j.payments || j)) || [];
+        if (!Array.isArray(items)) items = [];
+        if (!items.length) {
+          list.innerHTML = '<div style="padding:18px;color:#94A3B8;text-align:center">Sin pagos de servicios aún.</div>';
+          return;
+        }
+        list.innerHTML = items.map(function (i) {
+          var d = i.paid_at ? new Date(i.paid_at).toLocaleString('es-MX') : '';
+          var prov = i.provider_code || i.provider || i.service || '';
+          var ref = i.reference || '';
+          var amt = Number(i.amount || 0);
+          var st = i.status || '';
+          return '<div style="padding:10px;border-top:1px solid #F4F4F7;display:flex;justify-content:space-between;align-items:center;gap:10px">' +
+            '<div><strong>' + prov + '</strong><div style="font-size:12px;color:#64748B">Ref: ' + ref + ' · ' + d + '</div></div>' +
+            '<div style="text-align:right"><strong>' + _money(amt) + '</strong><div style="font-size:11px;color:#64748B">' + st + '</div></div>' +
+            '</div>';
+        }).join('');
+      })
+      .catch(function (e) {
+        if (list) list.innerHTML = '<div style="padding:18px;color:#DC2626;text-align:center">Error: ' + (e.message || e) + '</div>';
+      });
+  };
 
   // ── DEPARTAMENTOS ──────────────────────────────────────────
   window.depsLoad = async function () {

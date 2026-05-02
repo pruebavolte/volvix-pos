@@ -83,7 +83,7 @@
       '/404.html', '/INDICE-TUTORIALES.html', '/TUTORIAL-REGISTRO-USUARIOS.html',
       '/docs.html', '/api-docs.html', '/status-page.html',
       '/volvix-grand-tour.html', '/volvix-hub-landing.html',
-      '/volvix-customer-portal.html', '/volvix-customer-portal-v2.html',
+      '/volvix-customer-portal.html',
       '/salvadorex_web_v25.html'
     ];
     var __VLX_PUB_PATTERNS = [

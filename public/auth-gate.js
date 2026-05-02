@@ -31,7 +31,6 @@
     '/volvix-grand-tour.html',
     '/volvix-hub-landing.html',
     '/volvix-customer-portal.html',
-    '/volvix-customer-portal-v2.html',
     '/salvadorex_web_v25.html'
   ];
   // Patrones públicos (cualquier landing-* y landing_*)

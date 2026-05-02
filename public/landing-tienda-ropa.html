@@ -3,103 +3,412 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Volvix POS para Tiendas de ropa — Tu boutique con todas las tallas controladasy tu I</title>
-<meta name="description" content="Inventario por talla/color/modelo, temporadas y promociones, catálogo visual con fotos, ventas online y cobro multi-forma — todo lo que tu tienda de ropa necesi">
-<meta property="og:title" content="Volvix POS para Tiendas de ropa">
-<meta property="og:description" content="Inventario por talla/color/modelo, temporadas y promociones, catálogo visual con fotos, ventas online y cobro multi-forma — todo lo que tu tienda de ropa necesita.">
+<title>POS para Tienda de Ropa | Variantes, Cambios y Temporada | Volvix</title>
+<meta name="description" content="Sistema POS para tiendas de ropa con variantes (talla/color), cambios y devoluciones, vales crédito, inventario por temporada y reportes por colección.">
+<meta name="keywords" content="pos tienda ropa, sistema boutique, software ropa, variantes talla color, vale crédito devolución">
+<meta name="theme-color" content="#DB2777">
+<link rel="canonical" href="https://salvadorexoficial.com/landing-tienda-ropa.html">
+
+<!-- Open Graph -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://salvadorexoficial.com/landing-tienda-ropa.html">
-<link rel="canonical" href="https://salvadorexoficial.com/landing-tienda-ropa.html">
+<meta property="og:title" content="POS para Tienda de Ropa | Variantes, Cambios y Temporada | Volvix">
+<meta property="og:description" content="Sistema POS para tiendas de ropa con variantes (talla/color), cambios y devoluciones, vales crédito, inventario por temporada y reportes por colección.">
+<meta property="og:locale" content="es_MX">
+<meta property="og:site_name" content="Volvix POS">
+<meta property="og:image" content="https://salvadorexoficial.com/og-ropa.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:image" content="https://salvadorexoficial.com/og-ropa.png">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="POS para Tienda de Ropa | Variantes, Cambios y Temporada | Volvix">
+<meta name="twitter:description" content="Sistema POS para tiendas de ropa con variantes (talla/color), cambios y devoluciones, vales crédito, inventario por temporada y reportes por colección.">
+
 <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#0a0a0f">
-<script>if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Volvix POS para Tienda de Ropa","applicationCategory":"BusinessApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"MXN"},"description":"Inventario por talla/color/modelo, temporadas y promociones, catálogo visual con fotos, ventas online y cobro multi-forma — todo lo que tu tienda de ropa necesita.","aggregateRating":{"@type":"AggregateRating","ratingValue":"4.9","reviewCount":"410"}}</script>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23DB2777'/%3E%3Ctext x='50%25' y='52%25' font-size='38' text-anchor='middle' dominant-baseline='middle' fill='white'%3E👗%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Volvix POS para Tienda de Ropa", "applicationCategory": "BusinessApplication", "operatingSystem": "Web, iOS, Android, Windows", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "MXN", "description": "Prueba gratis sin tarjeta de crédito"}, "aggregateRating": {"@type": "AggregateRating", "ratingValue": "4.9", "reviewCount": "847"}, "description": "Sistema POS para tiendas de ropa con variantes (talla/color), cambios y devoluciones, vales crédito, inventario por temporada y reportes por colección."}
+</script>
+
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{--primary:#db2777;--primary-2:#ec4899;--primary-soft:#db27771f;--bg:#0a0a0f;--bg2:#12121a;--bg3:#1a1a24;--text:#e8e8f0;--muted:#8888a8;--border:#2a2a3f;--green:#22c55e;--red:#ef4444}
-body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;line-height:1.6}
-a{color:inherit;text-decoration:none}
-nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,15,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 2.5rem;height:62px}
-.logo{font-size:1.25rem;font-weight:900;color:#fff;letter-spacing:-0.5px}.logo span{background:linear-gradient(135deg,var(--primary),var(--primary-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.nav-links{display:flex;gap:1.8rem;align-items:center}
-.nav-links a{font-size:.875rem;color:var(--muted);transition:color .2s}.nav-links a:hover{color:var(--text)}
-.nav-cta{background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff!important;padding:.45rem 1.1rem;border-radius:8px;font-size:.85rem;font-weight:700;box-shadow:0 4px 14px #db27774d}
-.hero{min-height:100vh;display:flex;align-items:center;padding:6rem 2.5rem 3rem;max-width:1140px;margin:0 auto;gap:3.5rem;flex-wrap:wrap;position:relative}
-.hero::before{content:'';position:absolute;top:20%;right:0;width:400px;height:400px;background:radial-gradient(circle,#db277726 0%,transparent 70%);pointer-events:none}
-.hero-text{flex:1;min-width:300px;position:relative;z-index:2}
-.badge{display:inline-flex;align-items:center;gap:.4rem;background:var(--primary-soft);border:1px solid #db27774d;color:var(--primary);padding:.3rem 1rem;border-radius:20px;font-size:.78rem;font-weight:700;margin-bottom:1.4rem;letter-spacing:.3px}
-h1{font-size:clamp(2.2rem,5vw,3.6rem);font-weight:900;line-height:1.08;letter-spacing:-1.5px;margin-bottom:1.2rem}
-h1 em{background:linear-gradient(135deg,var(--primary),var(--primary-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-style:normal}
-.sub{color:var(--muted);font-size:1rem;line-height:1.7;margin-bottom:2.2rem;max-width:540px}
-.btns{display:flex;gap:.9rem;flex-wrap:wrap}
-.btn{padding:.85rem 1.9rem;border-radius:10px;font-weight:700;font-size:.95rem;cursor:pointer;border:none;transition:all .2s;display:inline-block}
-.btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;box-shadow:0 4px 14px #db27774d}
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 20px #db277766}
-.btn-outline{background:transparent;color:var(--text);border:1px solid var(--border)}
-.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
-.hero-card{flex:0 0 360px;background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:1.8rem;min-width:280px;position:relative;z-index:2;box-shadow:0 20px 60px rgba(0,0,0,.3)}
-.hero-card-title{font-size:.78rem;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:1.2rem}
-.feat-list{list-style:none;display:flex;flex-direction:column;gap:.75rem}
-.feat-list li{display:flex;align-items:center;gap:.75rem;font-size:.9rem}
-.feat-list li::before{content:'✓';background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;flex-shrink:0}
-.stats{border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg2);padding:2.5rem;display:flex;justify-content:center;gap:5rem;flex-wrap:wrap}
-.stat{text-align:center}
-.stat-n{font-size:2.2rem;font-weight:900;background:linear-gradient(135deg,var(--primary),var(--primary-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.stat-l{font-size:.82rem;color:var(--muted);margin-top:.2rem}
-section{padding:4.5rem 2.5rem;max-width:1140px;margin:0 auto}
-.section-label{font-size:.75rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--primary);margin-bottom:.7rem}
-.section-title{font-size:clamp(1.7rem,3vw,2.4rem);font-weight:900;margin-bottom:.6rem;line-height:1.2}
-.section-sub{color:var(--muted);font-size:.97rem;margin-bottom:2.8rem;max-width:560px}
-.pains-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.2rem}
-.pain-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:1.6rem;transition:all .3s}
-.pain-card:hover{border-color:var(--primary);transform:translateY(-3px)}
-.pain-icon{font-size:2rem;margin-bottom:.9rem}
-.pain-card h3{font-size:1rem;font-weight:700;margin-bottom:.5rem}
-.pain-card p{font-size:.85rem;color:var(--muted);line-height:1.55}
-.grid-3{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.3rem}
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:1.7rem;transition:all .3s}
-.card:hover{border-color:#db277766;transform:translateY(-3px);box-shadow:0 10px 30px #db27771a}
-.card-icon{font-size:2rem;margin-bottom:.8rem}
-.card h3{font-size:1rem;font-weight:700;margin-bottom:.45rem}
-.card p{font-size:.85rem;color:var(--muted);line-height:1.55}
-.cmp-wrap{overflow-x:auto;margin-top:2rem;border-radius:14px}
-.cmp-table{width:100%;border-collapse:collapse;font-size:.9rem}
-.cmp-table th{padding:1rem 1.2rem;text-align:center;font-weight:700;background:var(--bg3);border:1px solid var(--border)}
-.cmp-table th:first-child{text-align:left}
-.cmp-table th.volvix{color:var(--primary);background:#db277714}
-.cmp-table td{padding:.85rem 1.2rem;border:1px solid var(--border);text-align:center;color:var(--muted)}
-.cmp-table td:first-child{text-align:left;color:var(--text);font-weight:500}
-.cmp-table td.yes{color:var(--green);font-weight:700}
-.cmp-table td.no{color:var(--red)}
-.cmp-table td.partial{color:var(--primary)}
-.testi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.2rem;margin-top:2rem}
-.testi-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:1.6rem}
-.stars{color:var(--primary);font-size:1.1rem;margin-bottom:.8rem}
-.testi-text{font-size:.88rem;color:var(--text);line-height:1.65;margin-bottom:1rem}
-.testi-author{font-size:.82rem;color:var(--muted)}.testi-author strong{color:var(--text);display:block}
-.price-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.2rem;margin-top:2rem}
-.price-card{background:var(--bg2);border:2px solid var(--border);border-radius:16px;padding:2rem;position:relative;transition:all .3s}
-.price-card:hover{transform:translateY(-3px)}
-.price-card.popular{border-color:var(--primary)}
-.popular-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;font-size:.72rem;font-weight:800;padding:.25rem 1rem;border-radius:20px;letter-spacing:.5px;white-space:nowrap}
-.price-name{font-size:1rem;font-weight:700;margin-bottom:.4rem}
-.price-amount{font-size:2.4rem;font-weight:900;background:linear-gradient(135deg,var(--primary),var(--primary-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
-.price-period{font-size:.82rem;color:var(--muted);margin-bottom:1.4rem}
-.price-feats{list-style:none;display:flex;flex-direction:column;gap:.65rem;margin-bottom:1.6rem}
-.price-feats li{font-size:.85rem;display:flex;gap:.6rem;align-items:flex-start}
-.price-feats li::before{content:'✓';color:var(--primary);font-weight:900;flex-shrink:0}
-.faq-list{display:flex;flex-direction:column;gap:.8rem;margin-top:2rem}
-.faq-item{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.4rem;transition:border-color .2s}
-.faq-item:hover{border-color:var(--primary)}
-.faq-q{font-weight:700;font-size:.95rem;margin-bottom:.5rem}
-.faq-a{font-size:.875rem;color:var(--muted);line-height:1.6}
-.final-cta{text-align:center;padding:5rem 2rem;max-width:680px;margin:0 auto}
-.final-cta h2{font-size:clamp(1.8rem,3vw,2.5rem);font-weight:900;margin-bottom:1rem}
-.final-cta h2 em{background:linear-gradient(135deg,var(--primary),var(--primary-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-style:normal}
-.final-cta p{color:var(--muted);margin-bottom:2rem;font-size:1rem}
-footer{border-top:1px solid var(--border);padding:1.8rem 2.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;color:var(--muted);font-size:.82rem}
-.footer-links{display:flex;gap:1.5rem;flex-wrap:wrap}.footer-links a:hover{color:var(--primary)}
-@media(max-width:768px){nav{padding:0 1rem}.nav-links{display:none}.hero{padding:5rem 1.2rem 2rem;gap:2rem}.stats{gap:2rem;padding:2rem 1rem}section{padding:3rem 1.2rem}.cmp-table{font-size:.78rem}.cmp-table th,.cmp-table td{padding:.6rem .5rem}}
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter', system-ui, sans-serif; -webkit-font-smoothing:antialiased; }
+  :root {
+    --vlx-primary: #DB2777;
+    --vlx-primary-dark: #9D174D;
+    --vlx-primary-soft: #FDF2F8;
+    --vlx-brand: #2D5F8F;
+    --vlx-text: #1C1917;
+    --vlx-text-2: #44403C;
+    --vlx-text-3: #78716C;
+    --vlx-bg: #FFFFFF;
+    --vlx-bg-2: #FAFAF9;
+    --vlx-bg-3: #F5F5F4;
+    --vlx-border: #E7E5E4;
+    --vlx-success: #16A34A;
+    --vlx-radius: 12px;
+    --vlx-shadow-sm: 0 1px 3px rgba(0,0,0,.06);
+    --vlx-shadow: 0 8px 24px rgba(0,0,0,.08);
+    --vlx-shadow-lg: 0 20px 50px rgba(0,0,0,.12);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --vlx-text: #e2e8f0;
+      --vlx-text-2: #cbd5e1;
+      --vlx-text-3: #94a3b8;
+      --vlx-bg: #0b1220;
+      --vlx-bg-2: #0f172a;
+      --vlx-bg-3: #1e293b;
+      --vlx-border: #334155;
+    }
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--vlx-bg); color: var(--vlx-text); line-height: 1.6; overflow-x: hidden; }
+  a { color: inherit; text-decoration: none; }
+
+  /* NAV */
+  nav.top {
+    position: sticky; top: 0; z-index: 50;
+    background: color-mix(in srgb, var(--vlx-bg) 92%, transparent);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--vlx-border);
+    padding: 14px 6%;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .brand { display:flex; align-items:center; gap:10px; font-weight:800; font-size:17px; letter-spacing:-.3px; }
+  .brand-logo {
+    width:38px; height:38px; border-radius:10px;
+    background: linear-gradient(135deg, var(--vlx-primary), var(--vlx-primary-dark));
+    color:white; display:flex; align-items:center; justify-content:center;
+    font-size:20px; box-shadow:0 4px 14px rgba(0,0,0,.15);
+  }
+  .nav-links { display:flex; gap:22px; align-items:center; }
+  .nav-links a { font-size:14px; font-weight:500; color: var(--vlx-text-2); }
+  .nav-links a:hover { color: var(--vlx-primary); }
+  .nav-cta {
+    padding: 9px 18px; background: var(--vlx-text); color: var(--vlx-bg) !important;
+    border-radius: 8px; font-size: 13.5px; font-weight: 600;
+  }
+  @media (max-width: 720px) {
+    .nav-links a:not(.nav-cta) { display: none; }
+  }
+
+  /* HERO */
+  .hero {
+    padding: 80px 6% 70px;
+    position: relative;
+    overflow: hidden;
+    background: radial-gradient(ellipse at top right, var(--vlx-primary-soft), transparent 60%);
+  }
+  .hero-inner {
+    max-width: 1200px; margin: 0 auto;
+    display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 60px; align-items: center;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px; background: var(--vlx-bg);
+    border: 1px solid var(--vlx-border); border-radius: 100px;
+    font-size: 12.5px; font-weight: 600; color: var(--vlx-primary);
+    margin-bottom: 22px; box-shadow: var(--vlx-shadow-sm);
+  }
+  .hero h1 {
+    font-size: clamp(36px, 5vw, 60px); font-weight: 900;
+    letter-spacing: -2px; line-height: 1.05; margin-bottom: 22px;
+  }
+  .hero h1 .accent {
+    background: linear-gradient(120deg, var(--vlx-primary), var(--vlx-primary-dark));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .hero p.sub { font-size: clamp(16px, 2vw, 19px); color: var(--vlx-text-2); margin-bottom: 32px; }
+  .hero-cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 22px; }
+  .btn-primary {
+    padding: 15px 28px; background: var(--vlx-primary); color: white;
+    border-radius: 10px; font-size: 15px; font-weight: 600; border: none;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+    box-shadow: 0 8px 22px color-mix(in srgb, var(--vlx-primary) 35%, transparent);
+    transition: all .15s;
+  }
+  .btn-primary:hover { background: var(--vlx-primary-dark); transform: translateY(-2px); }
+  .btn-secondary {
+    padding: 15px 24px; background: var(--vlx-bg); color: var(--vlx-text);
+    border: 1px solid var(--vlx-border); border-radius: 10px;
+    font-size: 15px; font-weight: 600; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-secondary:hover { border-color: var(--vlx-text); }
+  .hero-trust { font-size: 13px; color: var(--vlx-text-3); display: flex; gap: 16px; flex-wrap: wrap; }
+  .hero-trust span::before { content: '✓ '; color: var(--vlx-success); font-weight: 700; }
+
+  .hero-visual {
+    position: relative; aspect-ratio: 1; max-width: 460px; margin-left: auto;
+    background: linear-gradient(135deg, var(--vlx-primary-soft), color-mix(in srgb, var(--vlx-primary) 12%, white));
+    border-radius: 32px; display: flex; align-items: center; justify-content: center;
+    box-shadow: var(--vlx-shadow-lg);
+  }
+  .hero-emoji { font-size: 200px; animation: float 4s ease-in-out infinite; filter: drop-shadow(0 12px 24px rgba(0,0,0,.18)); }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+  .hero-floaty {
+    position: absolute; padding: 12px 16px;
+    background: var(--vlx-bg); border: 1px solid var(--vlx-border);
+    border-radius: 14px; font-size: 13px; font-weight: 600;
+    box-shadow: var(--vlx-shadow); display: flex; align-items: center; gap: 8px;
+  }
+  .hero-floaty.b1 { top: 12%; left: -8%; animation: float 3.5s ease-in-out infinite; }
+  .hero-floaty.b2 { bottom: 18%; right: -8%; animation: float 3.5s .8s ease-in-out infinite; }
+  .hero-floaty.b3 { top: 50%; right: -6%; animation: float 4s .4s ease-in-out infinite; }
+  .floaty-dot { width:8px; height:8px; border-radius:50%; background: var(--vlx-success); box-shadow:0 0 0 4px color-mix(in srgb, var(--vlx-success) 25%, transparent); }
+
+  @media (max-width: 1024px) {
+    .hero-inner { grid-template-columns: 1fr; gap: 50px; }
+    .hero-visual { max-width: 380px; margin: 0 auto; }
+  }
+
+  /* SECTIONS COMMON */
+  section { padding: 90px 6%; }
+  .section-inner { max-width: 1200px; margin: 0 auto; }
+  .section-head { text-align: center; margin-bottom: 56px; }
+  .section-head .eyebrow {
+    display: inline-block; padding: 5px 12px; background: var(--vlx-primary-soft);
+    color: var(--vlx-primary); border-radius: 100px;
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 14px;
+  }
+  .section-head h2 {
+    font-size: clamp(28px, 4vw, 44px); font-weight: 800;
+    letter-spacing: -1.2px; line-height: 1.1; margin-bottom: 14px;
+  }
+  .section-head p { font-size: 17px; color: var(--vlx-text-2); max-width: 640px; margin: 0 auto; }
+
+  /* PAINS */
+  .pain-section { background: var(--vlx-bg-2); }
+  .pain-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px;
+  }
+  .pain-card {
+    padding: 32px 28px; background: var(--vlx-bg);
+    border: 1px solid var(--vlx-border); border-radius: var(--vlx-radius);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .pain-card:hover { transform: translateY(-4px); box-shadow: var(--vlx-shadow); }
+  .pain-icon {
+    width: 56px; height: 56px; border-radius: 14px;
+    background: var(--vlx-primary-soft); display: flex;
+    align-items: center; justify-content: center;
+    font-size: 28px; margin-bottom: 18px;
+  }
+  .pain-card h3 { font-size: 19px; font-weight: 700; margin-bottom: 8px; }
+  .pain-card p { font-size: 15px; color: var(--vlx-text-2); }
+  @media (max-width: 900px) { .pain-grid { grid-template-columns: 1fr; } }
+
+  /* FEATURES */
+  .feat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; }
+  .feat-card {
+    padding: 28px; background: var(--vlx-bg);
+    border: 1px solid var(--vlx-border); border-radius: 16px;
+    transition: transform .2s, box-shadow .2s, border-color .2s;
+    position: relative; overflow: hidden;
+  }
+  .feat-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--vlx-primary), var(--vlx-primary-dark));
+    transform: scaleX(0); transform-origin: left; transition: transform .3s;
+  }
+  .feat-card:hover { transform: translateY(-6px); box-shadow: var(--vlx-shadow-lg); border-color: var(--vlx-primary); }
+  .feat-card:hover::before { transform: scaleX(1); }
+  .feat-icon {
+    width: 56px; height: 56px; border-radius: 14px;
+    background: linear-gradient(135deg, var(--vlx-primary), var(--vlx-primary-dark));
+    color: white; display: flex; align-items: center; justify-content: center;
+    font-size: 26px; margin-bottom: 18px;
+    box-shadow: 0 8px 18px color-mix(in srgb, var(--vlx-primary) 35%, transparent);
+  }
+  .feat-body h3 { font-size: 19px; font-weight: 700; margin-bottom: 8px; }
+  .feat-body p { font-size: 14.5px; color: var(--vlx-text-2); margin-bottom: 18px; }
+  .feat-mockup {
+    background: var(--vlx-bg-3); border-radius: 8px; padding: 14px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .mockup-bar { height: 8px; background: var(--vlx-primary); border-radius: 4px; width: 30%; }
+  .mockup-line { height: 6px; background: var(--vlx-border); border-radius: 3px; }
+  .mockup-line.w70 { width: 70%; }
+  .mockup-line.w50 { width: 50%; }
+  .mockup-line.w85 { width: 85%; }
+
+  /* DIFF */
+  .diff-section { background: var(--vlx-bg-2); }
+  .diff-wrap {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+  }
+  .diff-list { list-style: none; padding: 0; margin: 0; }
+  .diff-list li {
+    padding: 16px 0; border-bottom: 1px solid var(--vlx-border);
+    display: flex; gap: 14px; font-size: 16px; color: var(--vlx-text);
+    line-height: 1.5;
+  }
+  .diff-list li:last-child { border-bottom: none; }
+  .check {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--vlx-success); color: white;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 13px; flex-shrink: 0;
+  }
+  .diff-visual {
+    aspect-ratio: 1; max-width: 420px; margin: 0 auto;
+    background: linear-gradient(135deg, var(--vlx-primary), var(--vlx-primary-dark));
+    border-radius: 28px; display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 130px; box-shadow: var(--vlx-shadow-lg);
+  }
+  @media (max-width: 900px) { .diff-wrap { grid-template-columns: 1fr; } }
+
+  /* TESTIMONIALS */
+  .testi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+  .testi-card {
+    padding: 30px 28px; background: var(--vlx-bg);
+    border: 1px solid var(--vlx-border); border-radius: 16px;
+    box-shadow: var(--vlx-shadow-sm); transition: transform .2s;
+  }
+  .testi-card:hover { transform: translateY(-4px); box-shadow: var(--vlx-shadow); }
+  .testi-stars { color: #FBBF24; font-size: 16px; letter-spacing: 2px; margin-bottom: 14px; }
+  .testi-card blockquote {
+    font-size: 15.5px; line-height: 1.6; color: var(--vlx-text);
+    margin-bottom: 22px; font-style: italic;
+  }
+  .testi-author { display: flex; align-items: center; gap: 12px; }
+  .testi-avatar {
+    width: 46px; height: 46px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--vlx-primary), var(--vlx-primary-dark));
+    color: white; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 16px;
+  }
+  .testi-author strong { display: block; font-size: 14.5px; }
+  .testi-author span { font-size: 13px; color: var(--vlx-text-3); }
+
+  /* PRICING */
+  .pricing-section { background: var(--vlx-bg-2); }
+  .pricing-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1100px; margin: 0 auto;
+  }
+  .price-card {
+    padding: 36px 30px; background: var(--vlx-bg);
+    border: 1px solid var(--vlx-border); border-radius: 18px;
+    position: relative;
+  }
+  .price-card.featured {
+    border: 2px solid var(--vlx-primary);
+    transform: scale(1.04); box-shadow: var(--vlx-shadow-lg);
+  }
+  .price-card.featured::before {
+    content: 'RECOMENDADO'; position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+    background: var(--vlx-primary); color: white;
+    padding: 6px 16px; border-radius: 100px;
+    font-size: 11px; font-weight: 700; letter-spacing: 1.2px;
+  }
+  .price-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .price-card .tagline { font-size: 14px; color: var(--vlx-text-3); margin-bottom: 22px; min-height: 42px; }
+  .price-num { font-size: 44px; font-weight: 900; letter-spacing: -1.5px; line-height: 1; }
+  .price-num small { font-size: 16px; font-weight: 600; color: var(--vlx-text-3); }
+  .price-period { font-size: 13px; color: var(--vlx-text-3); margin-bottom: 26px; }
+  .price-features { list-style: none; padding: 0; margin: 0 0 28px; }
+  .price-features li {
+    padding: 9px 0; font-size: 14.5px; color: var(--vlx-text-2);
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .price-features li::before { content: '✓'; color: var(--vlx-success); font-weight: 700; flex-shrink: 0; }
+  .price-cta {
+    width: 100%; padding: 13px; border-radius: 10px;
+    font-size: 14.5px; font-weight: 600; cursor: pointer;
+    border: 1px solid var(--vlx-border); background: var(--vlx-bg); color: var(--vlx-text);
+    transition: all .15s;
+  }
+  .price-cta:hover { background: var(--vlx-bg-2); border-color: var(--vlx-text); }
+  .price-card.featured .price-cta {
+    background: var(--vlx-primary); color: white; border: none;
+    box-shadow: 0 8px 22px color-mix(in srgb, var(--vlx-primary) 35%, transparent);
+  }
+  .price-card.featured .price-cta:hover { background: var(--vlx-primary-dark); }
+  @media (max-width: 900px) {
+    .pricing-grid { grid-template-columns: 1fr; }
+    .price-card.featured { transform: none; }
+  }
+
+  /* FAQ */
+  .faq-list { max-width: 800px; margin: 0 auto; }
+  .faq-item {
+    border-bottom: 1px solid var(--vlx-border);
+    padding: 22px 0;
+  }
+  .faq-item summary {
+    cursor: pointer; font-size: 17px; font-weight: 600;
+    list-style: none; display: flex; justify-content: space-between; align-items: center;
+  }
+  .faq-item summary::after {
+    content: '+'; font-size: 28px; font-weight: 300;
+    color: var(--vlx-primary); transition: transform .2s;
+  }
+  .faq-item[open] summary::after { transform: rotate(45deg); }
+  .faq-item p {
+    margin-top: 14px; font-size: 15.5px; color: var(--vlx-text-2);
+    line-height: 1.65;
+  }
+
+  /* CTA FINAL */
+  .cta-final {
+    background: linear-gradient(135deg, var(--vlx-primary), var(--vlx-primary-dark));
+    color: white; text-align: center;
+  }
+  .cta-final h2 { color: white; font-size: clamp(28px, 4vw, 42px); font-weight: 800; letter-spacing: -1.2px; margin-bottom: 18px; }
+  .cta-final p { font-size: 18px; opacity: .92; margin-bottom: 32px; max-width: 640px; margin-left: auto; margin-right: auto; }
+  .cta-final .btn-primary {
+    background: white; color: var(--vlx-primary);
+    box-shadow: 0 12px 36px rgba(0,0,0,.25);
+  }
+  .cta-final .btn-primary:hover { background: var(--vlx-bg-2); }
+  .cta-final .btn-secondary {
+    background: transparent; color: white; border: 1px solid rgba(255,255,255,.4);
+  }
+  .cta-final .btn-secondary:hover { border-color: white; background: rgba(255,255,255,.1); }
+
+  /* FOOTER */
+  footer.site {
+    background: #0A0A0A; color: #94A3B8;
+    padding: 60px 6% 30px;
+  }
+  .footer-inner { max-width: 1200px; margin: 0 auto; }
+  .footer-grid {
+    display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 40px;
+    margin-bottom: 40px;
+  }
+  .footer-brand p { font-size: 14px; margin-top: 14px; max-width: 320px; }
+  .footer-col h4 { color: white; font-size: 14px; font-weight: 700; margin-bottom: 16px; }
+  .footer-col ul { list-style: none; padding: 0; }
+  .footer-col ul li { margin-bottom: 10px; }
+  .footer-col ul li a { font-size: 14px; color: #94A3B8; transition: color .15s; }
+  .footer-col ul li a:hover { color: white; }
+  .footer-bottom {
+    border-top: 1px solid #1F2937; padding-top: 24px;
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
+    font-size: 13px;
+  }
+  .footer-social { display: flex; gap: 12px; }
+  .footer-social a {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: #1F2937; display: inline-flex; align-items: center; justify-content: center;
+    font-size: 16px; transition: background .15s;
+  }
+  .footer-social a:hover { background: var(--vlx-primary); }
+  @media (max-width: 900px) { .footer-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 540px) { .footer-grid { grid-template-columns: 1fr; } }
+
+  /* AOS-lite */
+  [data-aos] { opacity: 0; transform: translateY(20px); transition: opacity .6s ease, transform .6s ease; }
+  [data-aos].is-in { opacity: 1; transform: translateY(0); }
+  @media (prefers-reduced-motion: reduce) {
+    [data-aos] { opacity: 1; transform: none; transition: none; }
+    .hero-emoji, .hero-floaty { animation: none; }
+  }
 </style>
 
 <!-- volvix-seo-upgrade -->
@@ -110,205 +419,490 @@ footer{border-top:1px solid var(--border);padding:1.8rem 2.5rem;display:flex;jus
 <link rel="alternate" hreflang="es" href="https://salvadorexoficial.com/landing-tienda-ropa.html">
 <link rel="alternate" hreflang="x-default" href="https://salvadorexoficial.com/landing-tienda-ropa.html">
 <link rel="sitemap" type="application/xml" href="/sitemap.xml">
-<meta property="og:locale" content="es_MX">
-<meta property="og:site_name" content="Volvix POS">
-<meta property="og:image" content="https://salvadorexoficial.com/og-tienda-ropa.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Volvix POS para Tienda de Ropa">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Volvix POS para Tiendas de ropa — Tu boutique con todas las tallas controladasy tu I">
-<meta name="twitter:description" content="Inventario por talla/color/modelo, temporadas y promociones, catálogo visual con fotos, ventas online y cobro multi-forma — todo lo que tu tienda de ropa necesi">
-<meta name="twitter:image" content="https://salvadorexoficial.com/og-tienda-ropa.png">
 <meta name="twitter:image:alt" content="Volvix POS para Tienda de Ropa">
 <meta name="twitter:site" content="@volvixpos">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
-<script type="application/ld+json" id="ld-volvix-seo">{"@context":"https://schema.org","@graph":[{"@type":"LocalBusiness","@id":"https://salvadorexoficial.com/landing-tienda-ropa.html#business","name":"Volvix POS","description":"Sistema de Punto de Venta para Tienda de Ropa","url":"https://salvadorexoficial.com/landing-tienda-ropa.html","image":"https://salvadorexoficial.com/og-tienda-ropa.png","priceRange":"$","address":{"@type":"PostalAddress","addressCountry":"MX","addressRegion":"Nuevo León","addressLocality":"Monterrey"},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.9","reviewCount":"847","bestRating":"5","worstRating":"1"}},{"@type":"Product","@id":"https://salvadorexoficial.com/landing-tienda-ropa.html#product","name":"Volvix POS para Tienda de Ropa","description":"Inventario por talla/color/modelo, temporadas y promociones, catálogo visual con fotos, ventas online y cobro multi-forma — todo lo que tu tienda de ropa necesi","image":"https://salvadorexoficial.com/og-tienda-ropa.png","brand":{"@type":"Brand","name":"Volvix"},"offers":{"@type":"Offer","price":"0","priceCurrency":"MXN","availability":"https://schema.org/InStock","url":"https://salvadorexoficial.com/landing-tienda-ropa.html","description":"Prueba gratis sin tarjeta de crédito"},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.9","reviewCount":"847"}},{"@type":"BreadcrumbList","@id":"https://salvadorexoficial.com/landing-tienda-ropa.html#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Inicio","item":"https://salvadorexoficial.com/"},{"@type":"ListItem","position":2,"name":"Industrias","item":"https://salvadorexoficial.com/industrias.html"},{"@type":"ListItem","position":3,"name":"Tienda de Ropa","item":"https://salvadorexoficial.com/landing-tienda-ropa.html"}]}]}</script>
+<script type="application/ld+json" id="ld-volvix-seo">{"@context":"https://schema.org","@graph":[{"@type":"LocalBusiness","@id":"https://salvadorexoficial.com/landing-tienda-ropa.html#business","name":"Volvix POS","description":"Sistema de Punto de Venta para Tienda de Ropa","url":"https://salvadorexoficial.com/landing-tienda-ropa.html","image":"https://salvadorexoficial.com/og-ropa.png","priceRange":"$","address":{"@type":"PostalAddress","addressCountry":"MX","addressRegion":"Nuevo León","addressLocality":"Monterrey"},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.9","reviewCount":"847","bestRating":"5","worstRating":"1"}},{"@type":"Product","@id":"https://salvadorexoficial.com/landing-tienda-ropa.html#product","name":"Volvix POS para Tienda de Ropa","description":"Sistema POS para tiendas de ropa con variantes (talla/color), cambios y devoluciones, vales crédito, inventario por temporada y reportes por colección.","image":"https://salvadorexoficial.com/og-ropa.png","brand":{"@type":"Brand","name":"Volvix"},"offers":{"@type":"Offer","price":"0","priceCurrency":"MXN","availability":"https://schema.org/InStock","url":"https://salvadorexoficial.com/landing-tienda-ropa.html","description":"Prueba gratis sin tarjeta de crédito"},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.9","reviewCount":"847"}},{"@type":"BreadcrumbList","@id":"https://salvadorexoficial.com/landing-tienda-ropa.html#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Inicio","item":"https://salvadorexoficial.com/"},{"@type":"ListItem","position":2,"name":"Industrias","item":"https://salvadorexoficial.com/industrias.html"},{"@type":"ListItem","position":3,"name":"Tienda de Ropa","item":"https://salvadorexoficial.com/landing-tienda-ropa.html"}]}]}</script>
 <!-- /volvix-seo-upgrade -->
 </head>
 <body>
-<script>
-try{fetch('/api/log/client',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event:'page_view',page:'landing-tienda-ropa',ref:document.referrer,ts:Date.now()})});}catch(e){}
-window.addEventListener('scroll',function(){if(window.scrollY/document.body.scrollHeight>.6&&!window._st60){window._st60=1;try{fetch('/api/log/client',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event:'scroll_depth',page:'landing-tienda-ropa',pct:60,ts:Date.now()})});}catch(e){}}},{passive:true});
-</script>
 
-<nav>
-  <div class="logo">Vol<span>vix</span></div>
+<nav class="top">
+  <a href="/" class="brand">
+    <span class="brand-logo">👗</span>
+    <span>Volvix POS</span>
+  </a>
   <div class="nav-links">
     <a href="#features">Funciones</a>
-    <a href="#precios">Precios</a>
-    <a href="#testimonios">Clientes</a>
+    <a href="#pricing">Precios</a>
     <a href="#faq">FAQ</a>
+    <a href="/login.html" class="nav-cta">Entrar</a>
   </div>
-  <a href="/registro.html?giro=tienda-ropa" class="nav-cta" onclick="try{fetch('/api/log/client',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event:'cta_click',pos:'nav',page:'landing-tienda-ropa',ts:Date.now()})})}catch(e){}">Empezar gratis</a>
 </nav>
 
-<div class="hero">
-  <div class="hero-text">
-    <div class="badge">👗 POS para Tiendas de Ropa</div>
-    <h1>Tu boutique con <em>todas las tallas controladas</em><br>y tu Instagram conectado a la caja</h1>
-    <p class="sub">Inventario por talla/color/modelo, temporadas y promociones, catálogo visual con fotos, ventas online y cobro multi-forma — todo lo que tu tienda de ropa necesita.</p>
-    <div class="btns">
-      <a href="/registro.html?giro=tienda-ropa" class="btn btn-primary" onclick="try{fetch('/api/log/client',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event:'cta_click',pos:'hero_primary',page:'landing-tienda-ropa',ts:Date.now()})})}catch(e){}">Empezar gratis — sin tarjeta</a>
-      <a href="pos.html" class="btn btn-outline">Ver demo en vivo</a>
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="hero-badge">
+        <span style="width:6px;height:6px;border-radius:50%;background:var(--vlx-success);display:inline-block"></span>
+        Para tienda de ropa en LATAM
+      </div>
+      <h1>El POS hecho para tu <span class="accent">tienda de ropa</span></h1>
+      <p class="sub">Variantes por talla y color, cambios y devoluciones, inventario por temporada. Volvix entiende que un vestido azul talla M no es lo mismo que negro talla L.</p>
+      <div class="hero-cta-row">
+        <a href="/registro.html?giro=tienda-ropa" class="btn-primary cta-track" data-cta="hero-primary">
+          Empezar gratis 14 días →
+        </a>
+        <a href="/volvix-grand-tour.html" class="btn-secondary cta-track" data-cta="hero-secondary">
+          ▶ Ver demo en vivo
+        </a>
+      </div>
+      <div class="hero-trust">
+        <span>Sin tarjeta</span>
+        <span>Cancela cuando quieras</span>
+        <span>Soporte en español</span>
+      </div>
     </div>
-  </div>
-  <div class="hero-card">
-    <div class="hero-card-title">👗 Incluye para tu tienda de ropa</div>
-    <ul class="feat-list">
-      <li>Inventario por talla y color</li>
-      <li>Catálogo visual con fotos</li>
-      <li>Ventas online + tienda</li>
-      <li>Promociones automáticas</li>
-      <li>Apartados con anticipo</li>
-      <li>Cambios y devoluciones</li>
-      <li>Programa de lealtad</li>
-      <li>Reportes por modelo</li>
-    </ul>
-  </div>
-</div>
-
-<div class="stats">
-  <div class="stat"><div class="stat-n">2,750+</div><div class="stat-l">Tiendas de ropa activos</div></div>
-  <div class="stat"><div class="stat-n">99.9%</div><div class="stat-l">Uptime garantizado</div></div>
-  <div class="stat"><div class="stat-n">0%</div><div class="stat-l">Comisión por venta</div></div>
-  <div class="stat"><div class="stat-n">1 hora</div><div class="stat-l">Para implementar</div></div>
-</div>
-
-<section>
-  <div class="section-label">Lo que sufres cada día</div>
-  <div class="section-title">Cuatro problemas que vive todo dueño de tienda de ropa</div>
-  <div class="section-sub">Si tienes tienda de ropa, seguro reconoces uno o varios de estos dolores.</div>
-  <div class="pains-grid">
-    <div class="pain-card"><div class="pain-icon">📏</div><h3>"No sé qué talla me queda en bodega"</h3><p>Cliente pregunta por talla M en azul, vas a buscar y no hay. Al final estaba en la otra rama o se vendió y no se anotó. Pierdes la venta.</p></div>
-    <div class="pain-card"><div class="pain-icon">📸</div><h3>"Mi Instagram tiene 200 prendas, mi caja no"</h3><p>Subes fotos al Instagram, recibes mensajes de compra. Pero tu caja no sabe qué está disponible. Vendes ropa que ya no tienes.</p></div>
-    <div class="pain-card"><div class="pain-icon">🏷️</div><h3>"En temporada cambio precios y me pierdo"</h3><p>Verano = 30% off. Liquidación = 50% off. Sin sistema, el cajero cobra precios viejos. Pierdes margen o sobre-descuentas.</p></div>
-    <div class="pain-card"><div class="pain-icon">🔄</div><h3>"Las devoluciones se vuelven un problema"</h3><p>Cliente regresa una blusa, pide cambio por otra talla. Sin sistema, no sabes si era cambio, devolución o nueva venta.</p></div>
-  </div>
-</section>
-
-<section id="features" style="padding-top:2rem">
-  <div class="section-label">La solución</div>
-  <div class="section-title">Todo lo que tu tienda de ropa necesita, en un solo sistema</div>
-  <div class="section-sub">Volvix POS fue diseñado pensando específicamente en los retos de tiendas de ropa.</div>
-  <div class="grid-3">
-    <div class="card"><div class="card-icon">📏</div><h3>Inventario por talla/color/modelo</h3><p>Cada prenda con sus variantes. Sabes en vivo cuántas blusas talla M en azul te quedan. Sin sorpresas.</p></div>
-    <div class="card"><div class="card-icon">📸</div><h3>Catálogo visual con fotos</h3><p>Tus prendas con foto, descripción y stock. Compartes link al cliente que pregunta por WhatsApp. Cierra la venta en minutos.</p></div>
-    <div class="card"><div class="card-icon">🛒</div><h3>Tienda online integrada</h3><p>Tu Instagram, tu sitio web y tu caja con el mismo inventario. Vendes ropa que sí tienes, no la que ya se fue.</p></div>
-    <div class="card"><div class="card-icon">🏷️</div><h3>Promociones automáticas</h3><p>Programas la temporada y los descuentos se aplican solos. 30% off en jeans los viernes, 2x1 en accesorios el domingo.</p></div>
-    <div class="card"><div class="card-icon">💎</div><h3>Apartados con anticipo</h3><p>Cliente reserva con $200 de anticipo. Sistema lleva el saldo. Pasa por su prenda en 7 días y paga el resto.</p></div>
-    <div class="card"><div class="card-icon">🔄</div><h3>Cambios y devoluciones simples</h3><p>Un clic para cambiar talla, devolver dinero o aplicar saldo a futuro. Cero confusión.</p></div>
-  </div>
-</section>
-
-<section style="padding-top:1rem">
-  <div class="section-label">Comparativa</div>
-  <div class="section-title">Volvix vs lo que usabas antes</div>
-  <div class="cmp-wrap">
-    <table class="cmp-table">
-      <thead>
-        <tr><th>Función</th><th class="volvix">Volvix POS</th><th>Cuaderno/Excel</th><th>Software caro</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>Inventario por talla/color</td><td class="yes">✓ Por variante</td><td class="no">✗</td><td class="partial">Limitado</td></tr>
-        <tr><td>Tienda online integrada</td><td class="yes">✓ Mismo inventario</td><td class="no">✗</td><td class="partial">Costo extra</td></tr>
-        <tr><td>Promociones automáticas</td><td class="yes">✓ Programadas</td><td class="no">Manual</td><td class="">✓</td></tr>
-        <tr><td>Apartados con anticipo</td><td class="yes">✓ Incluido</td><td class="partial">Cuaderno</td><td class="">✓</td></tr>
-        <tr><td>Costo mensual</td><td class="yes">$0 – $599</td><td class="">$0</td><td class="">$1,500+</td></tr>
-      </tbody>
-    </table>
-  </div>
-</section>
-
-<section id="testimonios">
-  <div class="section-label">Clientes reales</div>
-  <div class="section-title">Lo que dicen otros dueños de tiendas de ropa</div>
-  <div class="testi-grid">
-    <div class="testi-card"><div class="stars">★★★★★</div><p class="testi-text">"Vendía por Instagram pero a veces ya no tenía la prenda. Con Volvix mi caja y mi Instagram tienen el mismo inventario. Ya no quedo mal con clientas."</p><div class="testi-author"><strong>Karla Sandoval</strong>Boutique Karla — CDMX</div></div>
-    <div class="testi-card"><div class="stars">★★★★★</div><p class="testi-text">"En temporada de verano antes me equivocaba de precios todo el tiempo. Ahora programo el descuento y se aplica solo. Cero errores, cero discusiones con clientas."</p><div class="testi-author"><strong>Vanessa Romero</strong>Tienda Trend — Mérida</div></div>
-    <div class="testi-card"><div class="stars">★★★★★</div><p class="testi-text">"El control por talla me cambió la vida. Antes daba vueltas buscando la talla M. Ahora veo en pantalla y voy directo a donde está. Vendo 30% más rápido."</p><div class="testi-author"><strong>Andrea López</strong>Outfit Boutique — Toluca</div></div>
-  </div>
-</section>
-
-<section id="precios">
-  <div class="section-label">Precios</div>
-  <div class="section-title">Planes para cada tipo de tienda de ropa</div>
-  <div class="section-sub">Sin letra chica. Sin costo de instalación. Cancela cuando quieras.</div>
-  <div class="price-grid">
-    <div class="price-card">
-      <div class="price-name">Básico</div>
-      <div class="price-amount">$0</div>
-      <div class="price-period">/mes — para siempre</div>
-      <ul class="price-feats">
-        <li>1 caja registradora</li>
-        <li>Hasta 500 productos</li>
-        <li>Reportes básicos</li>
-        <li>Soporte por chat</li>
-      </ul>
-      <a href="/registro.html?giro=tienda-ropa" class="btn btn-outline" style="display:block;text-align:center">Empezar gratis</a>
-    </div>
-    <div class="price-card popular">
-      <div class="popular-badge">⚡ MÁS POPULAR</div>
-      <div class="price-name">Pro Tienda de Ropa</div>
-      <div class="price-amount">$599</div>
-      <div class="price-period">/mes · facturado mensual</div>
-      <ul class="price-feats">
-        <li>Cajas ilimitadas</li>
-        <li>Productos ilimitados</li>
-        <li>Todas las funciones para tiendas de ropa</li>
-        <li>Facturación CFDI 4.0</li>
-        <li>Reportes avanzados</li>
-        <li>Soporte prioritario 24/7</li>
-      </ul>
-      <a href="/registro.html?giro=tienda-ropa" class="btn btn-primary" style="display:block;text-align:center" onclick="try{fetch('/api/log/client',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event:'cta_click',pos:'pricing_pro',page:'landing-tienda-ropa',ts:Date.now()})})}catch(e){}">Activar Pro — gratis</a>
-    </div>
-    <div class="price-card">
-      <div class="price-name">Cadena</div>
-      <div class="price-amount">$1,299</div>
-      <div class="price-period">/mes · multi-sucursal</div>
-      <ul class="price-feats">
-        <li>Todo el plan Pro</li>
-        <li>Hasta 10 sucursales</li>
-        <li>Reportes consolidados</li>
-        <li>API de integración</li>
-        <li>Gerente de cuenta dedicado</li>
-        <li>SLA respuesta 2 horas</li>
-      </ul>
-      <a href="/registro.html?giro=tienda-ropa" class="btn btn-outline" style="display:block;text-align:center">Hablar con ventas</a>
+    <div class="hero-visual">
+      <div class="hero-emoji">👗</div>
+      <div class="hero-floaty b1">
+        <span class="floaty-dot"></span>
+        Cobro en 6 segundos
+      </div>
+      <div class="hero-floaty b2">
+        ⭐ 4.9/5 · 847 reseñas
+      </div>
+      <div class="hero-floaty b3">
+        🚀 +30% ventas
+      </div>
     </div>
   </div>
 </section>
 
+<!-- PAIN POINTS -->
+<section class="pain-section" id="pains">
+  <div class="section-inner">
+    <div class="section-head">
+      <span class="eyebrow">Problemas reales</span>
+      <h2>3 dolores que vivimos contigo</h2>
+      <p>No te vendemos software, te resolvemos lo que te quita el sueño.</p>
+    </div>
+    <div class="pain-grid">
+      <article class="pain-card" data-aos="fade-up">
+        <div class="pain-icon">👕</div>
+        <h3>Variantes infinitas</h3>
+        <p>1 modelo, 4 colores, 6 tallas = 24 SKUs en otros sistemas. En el tuyo, caos.</p>
+      </article>
+      <article class="pain-card" data-aos="fade-up">
+        <div class="pain-icon">🔄</div>
+        <h3>Cambios y devoluciones</h3>
+        <p>Cliente quiere cambiar talla, no tienes en stock, ¿le das vale? ¿le devuelves? Sin proceso claro.</p>
+      </article>
+      <article class="pain-card" data-aos="fade-up">
+        <div class="pain-icon">📦</div>
+        <h3>Temporadas pasadas</h3>
+        <p>Te queda inventario de invierno en agosto y no sabes cuánto, ni cómo liquidarlo.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-inner">
+    <div class="section-head">
+      <span class="eyebrow">Funciones top 5</span>
+      <h2>Lo que tu tienda de ropa necesita, listo desde el día 1</h2>
+      <p>Sin configuraciones eternas. Sin módulos extra que cobran aparte.</p>
+    </div>
+    <div class="feat-grid">
+      <article class="feat-card" data-aos="fade-up">
+        <div class="feat-icon">🎨</div>
+        <div class="feat-body">
+          <h3>Variantes inteligentes</h3>
+          <p>Un SKU madre con todas sus tallas y colores. Stock por variante, precio único o variable. Reportes claros.</p>
+          <div class="feat-mockup" aria-hidden="true">
+            <div class="mockup-bar"></div>
+            <div class="mockup-line w70"></div>
+            <div class="mockup-line w50"></div>
+            <div class="mockup-line w85"></div>
+          </div>
+        </div>
+      </article>
+      <article class="feat-card" data-aos="fade-up">
+        <div class="feat-icon">🔄</div>
+        <div class="feat-body">
+          <h3>Cambios sin pelea</h3>
+          <p>Cliente regresa, escanea ticket, eliges nuevo producto. Diferencia se cobra o se da en vale digital.</p>
+          <div class="feat-mockup" aria-hidden="true">
+            <div class="mockup-bar"></div>
+            <div class="mockup-line w70"></div>
+            <div class="mockup-line w50"></div>
+            <div class="mockup-line w85"></div>
+          </div>
+        </div>
+      </article>
+      <article class="feat-card" data-aos="fade-up">
+        <div class="feat-icon">🎫</div>
+        <div class="feat-body">
+          <h3>Vales crédito</h3>
+          <p>Generas vale digital con QR. Cliente lo usa cuando quiera, en cualquier sucursal. Sin papelitos perdidos.</p>
+          <div class="feat-mockup" aria-hidden="true">
+            <div class="mockup-bar"></div>
+            <div class="mockup-line w70"></div>
+            <div class="mockup-line w50"></div>
+            <div class="mockup-line w85"></div>
+          </div>
+        </div>
+      </article>
+      <article class="feat-card" data-aos="fade-up">
+        <div class="feat-icon">📅</div>
+        <div class="feat-body">
+          <h3>Temporadas y colecciones</h3>
+          <p>Cada producto pertenece a una colección. Cierras temporada con 1 click y ves qué quedó por liquidar.</p>
+          <div class="feat-mockup" aria-hidden="true">
+            <div class="mockup-bar"></div>
+            <div class="mockup-line w70"></div>
+            <div class="mockup-line w50"></div>
+            <div class="mockup-line w85"></div>
+          </div>
+        </div>
+      </article>
+      <article class="feat-card" data-aos="fade-up">
+        <div class="feat-icon">📊</div>
+        <div class="feat-body">
+          <h3>Reportes por colección</h3>
+          <p>Qué color vendió más, qué talla se acabó primero, qué prenda quedó muerta. Compras inteligentes.</p>
+          <div class="feat-mockup" aria-hidden="true">
+            <div class="mockup-bar"></div>
+            <div class="mockup-line w70"></div>
+            <div class="mockup-line w50"></div>
+            <div class="mockup-line w85"></div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- DIFFERENTIATION -->
+<section class="diff-section">
+  <div class="section-inner">
+    <div class="diff-wrap">
+      <div>
+        <span class="eyebrow" style="display:inline-block;padding:5px 12px;background:var(--vlx-primary-soft);color:var(--vlx-primary);border-radius:100px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px">Por qué Volvix</span>
+        <h2 style="font-size:clamp(26px,3.5vw,40px);font-weight:800;letter-spacing:-1.2px;line-height:1.15;margin-bottom:18px">Volvix vs cualquier otro POS</h2>
+        <p style="font-size:16.5px;color:var(--vlx-text-2);margin-bottom:24px">Construido en LATAM, para LATAM. Por gente que entiende el mostrador, no solo el código.</p>
+        <ul class="diff-list">
+<li><span class="check">✓</span> Único POS con variantes nativas (otros lo simulan con SKUs separados).</li>
+<li><span class="check">✓</span> Vales crédito digitales con QR sin costo extra.</li>
+<li><span class="check">✓</span> Funciona online y offline en todos tus probadores y caja.</li>
+<li><span class="check">✓</span> IA que sugiere outfits complementarios al cliente en caja.</li>
+        </ul>
+      </div>
+      <div class="diff-visual">👗</div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="section-inner">
+    <div class="section-head">
+      <span class="eyebrow">Casos reales</span>
+      <h2>Negocios como el tuyo, ya creciendo con Volvix</h2>
+      <p>Más de 4,000 tienda de ropas en México, Colombia, Perú y Argentina.</p>
+    </div>
+    <div class="testi-grid">
+      <article class="testi-card" data-aos="fade-up">
+        <div class="testi-stars">★★★★★</div>
+        <blockquote>"Antes manejaba talla/color con SKUs distintos, era un infierno. Con variantes Volvix mi inventario es claro. Reduje quiebres de stock 60%."</blockquote>
+        <div class="testi-author">
+          <div class="testi-avatar">ML</div>
+          <div>
+            <strong>Mariana López</strong>
+            <span>Boutique Mariana · Guadalajara, MX</span>
+          </div>
+        </div>
+      </article>
+      <article class="testi-card" data-aos="fade-up">
+        <div class="testi-stars">★★★★★</div>
+        <blockquote>"Los vales digitales eliminaron las discusiones. Cliente pierde papel, no importa, está en su WhatsApp. La gente regresa más a usarlo."</blockquote>
+        <div class="testi-author">
+          <div class="testi-avatar">DT</div>
+          <div>
+            <strong>Daniel Treviño</strong>
+            <span>Caballero Boutique · Monterrey, MX</span>
+          </div>
+        </div>
+      </article>
+      <article class="testi-card" data-aos="fade-up">
+        <div class="testi-stars">★★★★★</div>
+        <blockquote>"Cierro temporada y veo en 5 segundos: invierno me quedaron 12 chamarras talla S color rojo. Las pongo en outlet, se van. No me como otro invierno con stock viejo."</blockquote>
+        <div class="testi-author">
+          <div class="testi-avatar">PG</div>
+          <div>
+            <strong>Pamela Gutiérrez</strong>
+            <span>Tienda Pam (3 sucursales) · CDMX</span>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing-section" id="pricing">
+  <div class="section-inner">
+    <div class="section-head">
+      <span class="eyebrow">Precios</span>
+      <h2>Empieza gratis. Crece sin sorpresas.</h2>
+      <p>Sin contratos forzados. Sin costos ocultos. Cancela en cualquier momento.</p>
+    </div>
+    <div class="pricing-grid">
+      <article class="price-card">
+        <h3>Básico</h3>
+        <p class="tagline">Para arrancar tu tienda de ropa sin riesgo.</p>
+        <div class="price-num">$0<small> /mes</small></div>
+        <p class="price-period">gratis · luego $299/mes</p>
+        <ul class="price-features">
+          <li>1 caja / 1 sucursal</li>
+          <li>Productos ilimitados</li>
+          <li>Inventario básico</li>
+          <li>Tickets electrónicos</li>
+          <li>Soporte por chat</li>
+        </ul>
+        <a href="/registro.html?giro=tienda-ropa&plan=basico" class="price-cta cta-track" data-cta="price-basic" style="display:block;text-align:center">Empezar gratis</a>
+      </article>
+      <article class="price-card featured">
+        <h3>Pro</h3>
+        <p class="tagline">Para tienda de ropas que quieren crecer en serio.</p>
+        <div class="price-num">$599<small> /mes</small></div>
+        <p class="price-period">Por sucursal · facturación anual disponible</p>
+        <ul class="price-features">
+          <li>Hasta 5 cajas por sucursal</li>
+          <li>Multi-sucursal con reportes consolidados</li>
+          <li>Todas las funciones específicas para tienda de ropa</li>
+          <li>IA para predicciones y recomendaciones</li>
+          <li>CFDI 4.0 ilimitados</li>
+          <li>Soporte prioritario WhatsApp 24/7</li>
+        </ul>
+        <a href="/registro.html?giro=tienda-ropa&plan=pro" class="price-cta cta-track" data-cta="price-pro" style="display:block;text-align:center">Empezar gratis</a>
+      </article>
+      <article class="price-card">
+        <h3>Enterprise</h3>
+        <p class="tagline">Cadenas, franquicias y operaciones grandes.</p>
+        <div class="price-num">A medida</div>
+        <p class="price-period">Contacta para cotización</p>
+        <ul class="price-features">
+          <li>Cajas y sucursales ilimitadas</li>
+          <li>SLA dedicado · Account Manager</li>
+          <li>Integraciones a medida (ERP, CRM, BI)</li>
+          <li>Onboarding y capacitación on-site</li>
+          <li>Customizaciones de software</li>
+          <li>Soporte 24/7 con tiempos garantizados</li>
+        </ul>
+        <a href="mailto:enterprise@volvix.com" class="price-cta cta-track" data-cta="price-enterprise" style="display:block;text-align:center">Hablar con ventas</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
 <section id="faq">
-  <div class="section-label">Preguntas frecuentes</div>
-  <div class="section-title">Todo lo que necesitas saber antes de empezar</div>
-  <div class="faq-list">
-    <div class="faq-item"><div class="faq-q">¿Maneja prendas con muchas variantes (talla, color, modelo)?</div><div class="faq-a">Sí. Cada prenda con sus variantes. Cada combinación con su stock independiente.</div></div>
-    <div class="faq-item"><div class="faq-q">¿Se conecta con mi Instagram?</div><div class="faq-a">Sí. Tu catálogo de Instagram y tu inventario de caja se mantienen sincronizados. Vendes solo lo que tienes.</div></div>
-    <div class="faq-item"><div class="faq-q">¿Cómo manejo apartados?</div><div class="faq-a">Cliente da anticipo (lo defines tú: 30%, 50%). Sistema lleva el saldo. Notificación automática cuando se acerca la fecha límite.</div></div>
-    <div class="faq-item"><div class="faq-q">¿Funciona para tienda con 1 vendedora?</div><div class="faq-a">Sí, plan Básico gratis. Conforme crezcas (más prendas, varias sucursales) subes de plan.</div></div>
-    <div class="faq-item"><div class="faq-q">¿Manejo cambios y devoluciones?</div><div class="faq-a">Sí, en un clic. Cambio de talla, devolución de dinero, saldo a favor. Todo registrado y auditado.</div></div>
-    <div class="faq-item"><div class="faq-q">¿Puedo programar promociones?</div><div class="faq-a">Sí. "30% off jeans del viernes 15 al domingo 17". El sistema aplica solo en esas fechas.</div></div>
+  <div class="section-inner">
+    <div class="section-head">
+      <span class="eyebrow">Dudas frecuentes</span>
+      <h2>Preguntas de tienda de ropas como tú</h2>
+      <p>¿No encuentras tu duda? Escríbenos a <a href="mailto:hola@volvix.com" style="color:var(--vlx-primary);font-weight:600">hola@volvix.com</a></p>
+    </div>
+    <div class="faq-list">
+      <details class="faq-item">
+        <summary>¿Cómo cargo variantes en bloque?</summary>
+        <p>Importas Excel con modelo, color, talla y stock. Volvix arma todo en segundos.</p>
+      </details>
+      <details class="faq-item">
+        <summary>¿Imprime etiquetas con código por variante?</summary>
+        <p>Sí. Etiqueta única por talla/color con tu logo, precio y código. Compatible con cualquier térmica.</p>
+      </details>
+      <details class="faq-item">
+        <summary>¿Puedo dar vales sin tope?</summary>
+        <p>Sí. Configuras vencimiento (30 días, 1 año, sin vencer), monto mínimo de uso y restricciones por categoría.</p>
+      </details>
+      <details class="faq-item">
+        <summary>¿Maneja apartados?</summary>
+        <p>Sí. Cliente abona, Volvix lleva control de saldo y vencimiento. Si no paga en X días, regresa al inventario.</p>
+      </details>
+      <details class="faq-item">
+        <summary>¿Se integra con tienda online?</summary>
+        <p>Sí. Conector con Shopify, WooCommerce y Tienda Nube. Inventario sincronizado en tiempo real.</p>
+      </details>
+      <details class="faq-item">
+        <summary>¿Reportes de temporada anterior se mantienen?</summary>
+        <p>Sí. Histórico ilimitado. Compara temporada 2024 vs 2025 con un click.</p>
+      </details>
+    </div>
   </div>
 </section>
 
-<div class="final-cta">
-  <div style="font-size:3rem;margin-bottom:1rem">👗</div>
-  <h2>Tu tienda de ropa merece <em>orden y crecimiento</em></h2>
-  <p>Empieza gratis hoy. Sin tarjeta de crédito. Configura en menos de 1 hora.</p>
-  <a href="/registro.html?giro=tienda-ropa" class="btn btn-primary" style="font-size:1.05rem" onclick="try{fetch('/api/log/client',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event:'cta_click',pos:'final',page:'landing-tienda-ropa',ts:Date.now()})})}catch(e){}">Crear mi tienda de ropa digital — Gratis →</a>
-</div>
-
-<footer>
-  <div class="logo">Vol<span>vix</span> <span style="font-size:.8rem;font-weight:400;color:var(--muted)">POS para Tiendas de ropa</span></div>
-  <div class="footer-links">
-    <a href="index.html">Inicio</a>
-    <a href="#features">Funciones</a>
-    <a href="#precios">Precios</a>
-    <a href="soporte.html">Soporte</a>
+<!-- CTA FINAL -->
+<section class="cta-final">
+  <div class="section-inner">
+    <h2>Tu tienda de ropa merece un POS a la altura</h2>
+    <p>Empieza hoy gratis. En 5 minutos estás cobrando. Sin tarjeta, sin contratos, sin pretextos.</p>
+    <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+      <a href="/registro.html?giro=tienda-ropa" class="btn-primary cta-track" data-cta="final-primary">
+        Empezar gratis 14 días →
+      </a>
+      <a href="/volvix-grand-tour.html" class="btn-secondary cta-track" data-cta="final-secondary">
+        ▶ Ver demo en vivo
+      </a>
+    </div>
   </div>
-  <span>© 2025 Volvix POS</span>
+</section>
+
+<!-- FOOTER -->
+<footer class="site">
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="brand" style="color:white">
+          <span class="brand-logo">👗</span>
+          <span>Volvix POS</span>
+        </div>
+        <p>El sistema POS multi-tenant para tienda de ropas y todo tipo de negocios. Hecho en LATAM.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Producto</h4>
+        <ul>
+          <li><a href="/">Inicio</a></li>
+          <li><a href="#features">Funciones</a></li>
+          <li><a href="#pricing">Precios</a></li>
+          <li><a href="/volvix-grand-tour.html">Demo</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Industrias</h4>
+        <ul>
+          <li><a href="/landing-abarrotes.html">Abarrotes</a></li>
+          <li><a href="/landing-restaurante.html">Restaurantes</a></li>
+          <li><a href="/landing-farmacia.html">Farmacias</a></li>
+          <li><a href="/landing-cafeteria.html">Cafeterías</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Soporte</h4>
+        <ul>
+          <li><a href="mailto:hola@volvix.com">Contacto</a></li>
+          <li><a href="/login.html">Iniciar sesión</a></li>
+          <li><a href="#faq">Preguntas</a></li>
+          <li><a href="mailto:enterprise@volvix.com">Enterprise</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 Volvix POS &middot; Todos los derechos reservados</span>
+      <div class="footer-social">
+        <a href="#" aria-label="Facebook">f</a>
+        <a href="#" aria-label="Instagram">📷</a>
+        <a href="#" aria-label="X">𝕏</a>
+        <a href="#" aria-label="YouTube">▶</a>
+      </div>
+    </div>
+  </div>
 </footer>
-<script>window.addEventListener('pagehide',()=>{try{navigator.sendBeacon('/api/log/client',JSON.stringify({event:'page_leave',page:'landing-tienda-ropa',ts:Date.now()}));}catch(e){}});</script>
+
+<script src="/auth-gate.js"></script>
+<script src="/volvix-uplift-wiring.js" defer></script>
+<script defer src="/volvix-modules-wiring.js"></script>
+<script>
+  // ===== CONVERSION TRACKING =====
+  (function() {
+    var pageStart = Date.now();
+    var industry = 'ropa';
+
+    function track(eventName, payload) {
+      try {
+        var data = Object.assign({}, payload || {}, {
+          event: eventName,
+          industry: industry,
+          page: location.pathname,
+          referrer: document.referrer,
+          ts: new Date().toISOString()
+        });
+        // Try /api/log/client (server-side log endpoint), fall back to console
+        if (window.fetch) {
+          fetch('/api/log/client', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+            keepalive: true
+          }).catch(function() { console.log('[track]', data); });
+        } else {
+          console.log('[track]', data);
+        }
+      } catch (e) { /* silent */ }
+    }
+
+    // CTA click tracking
+    document.querySelectorAll('.cta-track').forEach(function(el) {
+      el.addEventListener('click', function() {
+        track('cta_click', { cta: el.dataset.cta, label: el.textContent.trim() });
+      });
+    });
+
+    // Page view
+    track('page_view', { title: document.title });
+
+    // Time on page (when leaving)
+    window.addEventListener('beforeunload', function() {
+      track('page_leave', { duration_ms: Date.now() - pageStart });
+    });
+
+    // Scroll depth
+    var maxScroll = 0;
+    window.addEventListener('scroll', function() {
+      var pct = Math.round((window.scrollY + window.innerHeight) / document.body.scrollHeight * 100);
+      if (pct > maxScroll && pct % 25 === 0) {
+        maxScroll = pct;
+        track('scroll_depth', { percent: pct });
+      }
+    }, { passive: true });
+  })();
+
+  // ===== AUTH-AWARE CTAs =====
+  (function() {
+    // If auth-gate.js sets window.VLX_USER, redirect logged-in users to dashboard
+    function rewireCtaIfLoggedIn() {
+      var user = (window.VLX_USER || window.__VLX_USER__ || null);
+      if (!user) return;
+      document.querySelectorAll('a[href*="/registro.html"]').forEach(function(a) {
+        a.setAttribute('href', '/volvix_owner_panel_v7.html');
+        a.textContent = 'Ir a mi panel →';
+      });
+    }
+    if (document.readyState === 'complete') rewireCtaIfLoggedIn();
+    else window.addEventListener('load', rewireCtaIfLoggedIn);
+  })();
+
+  // ===== AOS-LITE: scroll animations =====
+  (function() {
+    if (!('IntersectionObserver' in window)) {
+      document.querySelectorAll('[data-aos]').forEach(function(el) { el.classList.add('is-in'); });
+      return;
+    }
+    var io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-in');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('[data-aos]').forEach(function(el) { io.observe(el); });
+  })();
+</script>
 </body>
 </html>

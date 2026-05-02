@@ -12,7 +12,7 @@ const CHECKS = [
   { label: 'Home (index.html)',         url: '/' },
   { label: 'POS (pos.html)',            url: '/pos.html' },
   { label: 'Owner dashboard',           url: '/owner.html' },
-  { label: 'Inventario',                url: '/inventario.html' },
+  { label: 'Inventario',                url: '/pos-inventario.html' },
   { label: 'Motor IA',                  url: '/ai.html' },
   { label: 'Soporte',                   url: '/soporte.html' },
   { label: 'PWA Manifest',              url: '/manifest.json' },
