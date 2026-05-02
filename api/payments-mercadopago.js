@@ -269,10 +269,35 @@ async function handleWebhook(req, res, ctx) {
 
     const ts = tsMatch[1];
     const v1 = v1Match[1];
-    const manifest = `id:${requestId};request-id:${requestId};ts:${ts};`;
+    // 2026-05 audit B-28: manifest spec MP es id:<dataId>;request-id:<requestId>;ts:<ts>;
+    // ANTES usábamos requestId en lugar de dataId en el primer slot → la firma
+    // nunca validaba con secret real.
+    let dataIdForManifest = '';
+    try {
+      // Intentar obtener data.id del query string o body raw. Si no, usamos requestId como fallback.
+      const u = require('url');
+      const parsed = u.parse(req.url, true);
+      dataIdForManifest = String((parsed.query && (parsed.query['data.id'] || parsed.query.id)) || '');
+      if (!dataIdForManifest && rawBody) {
+        try {
+          const b = JSON.parse(rawBody);
+          dataIdForManifest = String((b && b.data && b.data.id) || (b && b.id) || '');
+        } catch (_) {}
+      }
+    } catch (_) {}
+    const manifest = `id:${dataIdForManifest};request-id:${requestId};ts:${ts};`;
     const expected = crypto.createHmac('sha256', webhookSecret).update(manifest).digest('hex');
 
-    if (!crypto.timingSafeEqual(Buffer.from(v1, 'hex'), Buffer.from(expected, 'hex'))) {
+    // Validación segura: ambos buffers deben ser de igual largo y hex válidos.
+    let valid = false;
+    try {
+      const a = Buffer.from(v1, 'hex');
+      const b = Buffer.from(expected, 'hex');
+      if (a.length === b.length && a.length > 0) {
+        valid = crypto.timingSafeEqual(a, b);
+      }
+    } catch (_) { valid = false; }
+    if (!valid) {
       cors(res); return sendJson(res, 401, { error: 'Firma incorrecta' });
     }
   }
@@ -309,20 +334,30 @@ async function handleWebhook(req, res, ctx) {
   const mpStatus = mpPayment.status;
   const amountCents = Math.round((mpPayment.transaction_amount || 0) * 100);
 
-  // Upsert into payments table
+  // 2026-05 audit B-27: idempotency. Antes el upsert no detectaba si el evento
+  // ya había sido procesado completamente; cualquier reenvío de MP (frecuente)
+  // disparaba broadcast + PATCH a pos_payment_verifications de nuevo.
+  // Ahora si el row existe con MISMO status, salimos temprano con 200 ack.
+  let alreadyProcessed = false;
   try {
     const existing = await supabaseRequest(
       'GET',
-      `/payments?provider_payment_id=eq.${encodeURIComponent(String(dataId))}&limit=1`,
+      `/payments?provider_payment_id=eq.${encodeURIComponent(String(dataId))}&select=id,status,amount_cents&limit=1`,
       null
     );
 
     if (existing && existing.length) {
-      await supabaseRequest(
-        'PATCH',
-        `/payments?provider_payment_id=eq.${encodeURIComponent(String(dataId))}`,
-        { status: mpStatus, raw: mpPayment, amount_cents: amountCents }
-      );
+      const prev = existing[0];
+      if (prev.status === mpStatus && prev.amount_cents === amountCents) {
+        // Evento idéntico ya procesado → ack sin re-disparar side-effects.
+        alreadyProcessed = true;
+      } else {
+        await supabaseRequest(
+          'PATCH',
+          `/payments?provider_payment_id=eq.${encodeURIComponent(String(dataId))}`,
+          { status: mpStatus, raw: mpPayment, amount_cents: amountCents }
+        );
+      }
     } else {
       await supabaseRequest('POST', '/payments', {
         sale_id: saleId,
@@ -337,6 +372,9 @@ async function handleWebhook(req, res, ctx) {
     }
   } catch (e) {
     console.error('[MP Webhook] Error updating payments table:', e.message);
+  }
+  if (alreadyProcessed) {
+    cors(res); return sendJson(res, 200, { ok: true, idempotent: true, status: mpStatus });
   }
 
   if (mpStatus === 'approved' && saleId) {

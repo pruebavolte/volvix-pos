@@ -7781,7 +7781,12 @@ function stripeApiCall(method, p, formBody) {
   });
 }
 
-handlers['POST /api/payments/stripe/intent'] = requireAuth(withIdempotency('POST /api/payments/stripe/intent', async (req, res) => {
+// 2026-05 audit B-25/B-26: Stripe intent + alias /checkout para que el
+// frontend (volvix-pos-payments-integration.js:818) que llama
+// /api/payments/stripe/checkout no falle con 404.
+// B-26: validar que el amount enviado coincida con el TOTAL de la venta real
+// (anti-tampering: cliente malicioso pagando $1 por venta de $1000).
+const __stripeIntentHandler = requireAuth(withIdempotency('POST /api/payments/stripe/intent', async (req, res) => {
   try {
     if (!STRIPE_SECRET_KEY) return sendJSON(res, { error: 'STRIPE_SECRET_KEY no configurada' }, 503);
     const body = await readBody(req, { maxBytes: 16 * 1024, strictJson: true });
@@ -7791,6 +7796,35 @@ handlers['POST /api/payments/stripe/intent'] = requireAuth(withIdempotency('POST
     const currency = (body.currency || 'mxn').toString().toLowerCase();
     if (!saleId) return sendJSON(res, { error: 'sale_id requerido' }, 400);
     if (!Number.isInteger(amount) || amount <= 0) return sendJSON(res, { error: 'amount inválido (centavos)' }, 400);
+
+    // B-26: validar amount vs venta real, en mismo tenant del JWT
+    try {
+      const tid = req.user && req.user.tenant_id;
+      let salePath = '/pos_sales?id=eq.' + encodeURIComponent(saleId) + '&select=id,total,tenant_id&limit=1';
+      const sales = await supabaseRequest('GET', salePath);
+      if (!Array.isArray(sales) || !sales[0]) {
+        return sendJSON(res, { error: 'sale_not_found' }, 404);
+      }
+      const sale = sales[0];
+      if (tid && sale.tenant_id && String(sale.tenant_id) !== String(tid)) {
+        return sendJSON(res, { error: 'sale_not_found' }, 404); // 404 genérico, no leak
+      }
+      const expectedCents = Math.round(Number(sale.total || 0) * 100);
+      // Tolerancia 1 centavo por redondeo
+      if (Math.abs(expectedCents - amount) > 1) {
+        return sendJSON(res, {
+          error: 'amount_mismatch',
+          message: 'El monto del cobro no coincide con el total de la venta.',
+          expected_cents: expectedCents,
+          received_cents: amount
+        }, 400);
+      }
+    } catch (e) {
+      // Si la verificación falla por DB error en prod, RECHAZAR (fail-closed).
+      if (IS_PROD) {
+        return sendJSON(res, { error: 'amount_validation_failed' }, 503);
+      }
+    }
 
     const form = new URLSearchParams();
     form.append('amount', String(amount));
@@ -7820,6 +7854,55 @@ handlers['POST /api/payments/stripe/intent'] = requireAuth(withIdempotency('POST
     });
   } catch (err) { sendError(res, err); }
 }));
+handlers['POST /api/payments/stripe/intent']   = __stripeIntentHandler;
+// B-25: alias para el frontend legacy que llama /checkout
+handlers['POST /api/payments/stripe/checkout'] = __stripeIntentHandler;
+
+// 2026-05 audit B-29: refund Stripe real. Llama POST /v1/refunds y actualiza
+// el row en `payments`. Antes solo cambiaba status interno → el dinero NO
+// se devolvía al cliente.
+handlers['POST /api/payments/stripe/refund'] = requireAuth(async (req, res) => {
+  try {
+    if (!STRIPE_SECRET_KEY) return sendJSON(res, { error: 'STRIPE_SECRET_KEY no configurada' }, 503);
+    const body = await readBody(req, { maxBytes: 4 * 1024, strictJson: true });
+    if (checkBodyError(req, res)) return;
+    const paymentIntentId = String(body.payment_intent_id || body.charge_id || '').trim();
+    const reason = String(body.reason || 'requested_by_customer').trim();
+    const amountCents = body.amount != null ? parseInt(body.amount, 10) : null; // null = full refund
+    if (!paymentIntentId) return sendJSON(res, { error: 'payment_intent_id requerido' }, 400);
+    // Verificar que el payment pertenece al tenant del JWT
+    try {
+      const rows = await supabaseRequest('GET',
+        '/payments?provider_payment_id=eq.' + encodeURIComponent(paymentIntentId) +
+        '&tenant_id=eq.' + encodeURIComponent(req.user.tenant_id || '') +
+        '&select=sale_id,amount,status&limit=1');
+      if (!Array.isArray(rows) || !rows[0]) return sendJSON(res, { error: 'payment_not_found' }, 404);
+    } catch (_) { /* tabla puede tener shape distinta; seguimos */ }
+
+    const form = new URLSearchParams();
+    form.append('payment_intent', paymentIntentId);
+    if (amountCents && amountCents > 0) form.append('amount', String(amountCents));
+    if (reason && /^(duplicate|fraudulent|requested_by_customer)$/.test(reason)) {
+      form.append('reason', reason);
+    }
+    let refund;
+    try {
+      refund = await stripeApiCall('POST', '/v1/refunds', form.toString());
+    } catch (e) {
+      return sendJSON(res, { error: 'stripe_refund_failed', detail: String(e && e.message || e).slice(0, 200) }, 502);
+    }
+
+    try {
+      await supabaseRequest('PATCH',
+        '/payments?provider_payment_id=eq.' + encodeURIComponent(paymentIntentId) +
+        '&tenant_id=eq.' + encodeURIComponent(req.user.tenant_id || ''),
+        { status: 'refunded', refunded_at: new Date().toISOString(), refund_id: refund && refund.id || null });
+    } catch (_) {}
+
+    try { logAudit(req, 'payment.refunded', 'payments', { provider_payment_id: paymentIntentId, refund_id: refund && refund.id, amount_cents: amountCents }); } catch (_) {}
+    sendJSON(res, { ok: true, refund: { id: refund.id, status: refund.status, amount: refund.amount } });
+  } catch (err) { sendError(res, err); }
+});
 
 handlers['POST /api/payments/stripe/webhook'] = async (req, res) => {
   try {
