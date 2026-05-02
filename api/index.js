@@ -20,6 +20,7 @@ const handleCFDI = require('./cfdi-pac');
 const handleGiros = require('./giros');
 const handleLabels = require('./labels');
 const handleAbtest = require('./abtest');
+const handleFacturama = require('./facturama');
 const handleBackup = require('./backup');
 const handleActivityFeed = require('./activity-feed');
 const handleInventoryAdvanced = require('./inventory-advanced');
@@ -1504,7 +1505,10 @@ const handlers = {
       codi: !!process.env.STP_ENTERPRISE_KEY,
       recargas: !!process.env.PROVIDER_RECARGAS_API_KEY,
       services: !!process.env.PROVIDER_SERVICES_API_KEY,
-      cfdi: !!(process.env.PAC_API_URL && process.env.PAC_API_USER && process.env.PAC_API_PASSWORD),
+      cfdi: !!(
+        (process.env.FACTURAMA_USER && process.env.FACTURAMA_PASSWORD) ||
+        (process.env.PAC_API_USER && process.env.PAC_API_PASSWORD)
+      ),
       email: !!process.env.RESEND_API_KEY,
       ai: !!(process.env.AI_GATEWAY_API_KEY || process.env.OPENAI_API_KEY || process.env.ANTHROPIC_API_KEY),
       ai_gateway: !!process.env.AI_GATEWAY_API_KEY,
@@ -13730,6 +13734,7 @@ module.exports = async (req, res) => {
       if (await handleGiros(req, res, parsed, _ctx)) return;
       if (await handleLabels(req, res, parsed, _ctx)) return;
       if (await handleAbtest(req, res, parsed, _ctx)) return;
+      if (await handleFacturama(req, res, parsed, _ctx)) return;
       if (await handleBackup(req, res, parsed, _ctx)) return;
       if (await handleActivityFeed(req, res, parsed, _ctx)) return;
       if (await handleInventoryAdvanced(req, res, parsed, _ctx)) return;
@@ -30964,19 +30969,32 @@ if (process.env.NODE_ENV === 'test') {
       let smsError = null;
       let smsProvider = null;
       const sendSms = (typeof global.__r12o3a_sendSms === 'function') ? global.__r12o3a_sendSms : null;
-      const hasSmsFrom = !!(process.env.TWILIO_SMS_FROM || process.env.TWILIO_PHONE_NUMBER || process.env.TWILIO_FROM || process.env.TWILIO_WHATSAPP_FROM);
+      const sendWhatsApp = (typeof global.__r12o3a_sendWhatsApp === 'function') ? global.__r12o3a_sendWhatsApp : null;
+      const hasDedicatedSmsFrom = !!(process.env.TWILIO_SMS_FROM || process.env.TWILIO_PHONE_NUMBER || process.env.TWILIO_FROM);
+      const hasWhatsAppFrom = !!process.env.TWILIO_WHATSAPP_FROM;
       const hasTwilioKeys = !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN);
-      if (sendSms && hasTwilioKeys && hasSmsFrom) {
+
+      // Estrategia: si hay número SMS dedicado → SMS. Si no, intentar WhatsApp
+      // (el usuario debe haber unido el sandbox enviando "join <code>" antes).
+      if (sendSms && hasTwilioKeys && hasDedicatedSmsFrom) {
         try {
           const sr = await sendSms({ to: phone, body: smsBody });
           smsSent = !!(sr && sr.ok);
-          smsProvider = sr && sr.provider;
+          smsProvider = sr && sr.provider || 'twilio_sms';
           if (!smsSent) smsError = (sr && sr.error) || (sr && sr.reason) || 'unknown';
+        } catch (e) { smsError = String(e && e.message || e).slice(0, 200); }
+      } else if (sendWhatsApp && hasTwilioKeys && hasWhatsAppFrom) {
+        // Fallback a WhatsApp Twilio Sandbox
+        try {
+          const wr = await sendWhatsApp({ to: phone, body: smsBody });
+          smsSent = !!(wr && wr.ok);
+          smsProvider = wr && wr.provider || 'twilio_whatsapp';
+          if (!smsSent) smsError = (wr && wr.error) || (wr && wr.reason) || 'whatsapp_failed';
         } catch (e) { smsError = String(e && e.message || e).slice(0, 200); }
       } else {
         smsError = !hasTwilioKeys
           ? 'TWILIO_ACCOUNT_SID/TWILIO_AUTH_TOKEN missing'
-          : (!hasSmsFrom ? 'TWILIO_SMS_FROM missing' : 'sendSms not loaded');
+          : 'no_send_function_loaded';
       }
 
       try {
@@ -31808,6 +31826,9 @@ if (process.env.NODE_ENV === 'test') {
   // Expose globally so register-tenant + health-test endpoints can reach it
   try { global.__r12o3a_sendEmail = r12o3aSendEmail; } catch (_) {}
   try { global.__r12o3a_sendSms = r12o3aSendSms; } catch (_) {}
+  // Expose WhatsApp sender too — register-simple usa esto cuando solo hay
+  // TWILIO_WHATSAPP_FROM (sandbox) y no hay SMS dedicado.
+  try { global.__r12o3a_sendWhatsApp = r12o3aSendViaWhatsApp; } catch (_) {}
 
   // ---- Provider: Wasender / Twilio WhatsApp ----
   async function r12o3aSendViaWhatsApp(opts) {
