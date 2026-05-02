@@ -372,6 +372,10 @@
     // puede agregar después sin volver a depender de prefers-color-scheme.
     try { forceLightModeAlways(); } catch (_) {}
 
+    // === VISUAL REFRESH 2026-05 — solo CSS variables, tipografía, sombras,
+    // radios y micro-interacciones. NO toca layout ni estructura.
+    try { injectVisualRefresh(); } catch (_) {}
+
     // === KILL FLOATERS — ocultar globalmente todo widget flotante de usuario.
     // Se mantienen visibles solo si:
     //   - URL contiene ?debug=1
@@ -440,6 +444,151 @@
       '}'
     ].join('\n');
     document.head.appendChild(st);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Visual Refresh 2026-05 — diseño moderno, limpio, profesional.
+  // SOLO modifica: variables de color, tipografía, sombras, radios, transiciones,
+  // y micro-interacciones (hover/focus). NO toca layout ni estructura.
+  // ---------------------------------------------------------------------------
+  function injectVisualRefresh() {
+    if (document.getElementById('vlx-visual-refresh-css')) return;
+    var st = document.createElement('style');
+    st.id = 'vlx-visual-refresh-css';
+    st.textContent = [
+      // ---- Design Tokens (CSS variables globales con fallback gentle) ----
+      ':root {',
+      '  --vlx-c-bg:        #FAFAFB;',
+      '  --vlx-c-surface:   #FFFFFF;',
+      '  --vlx-c-surface-2: #F4F4F7;',
+      '  --vlx-c-border:    #E6E7EB;',
+      '  --vlx-c-border-2:  #EFEFF3;',
+      '  --vlx-c-text:      #0B0B0F;',
+      '  --vlx-c-text-2:    #475569;',
+      '  --vlx-c-text-mute: #94A3B8;',
+      '  --vlx-c-primary:   #2563EB;',
+      '  --vlx-c-primary-h: #1D4ED8;',
+      '  --vlx-c-primary-50:#EFF6FF;',
+      '  --vlx-c-success:   #10B981;',
+      '  --vlx-c-warn:      #F59E0B;',
+      '  --vlx-c-danger:    #EF4444;',
+      '  --vlx-r-sm: 8px;',
+      '  --vlx-r-md: 12px;',
+      '  --vlx-r-lg: 16px;',
+      '  --vlx-r-xl: 22px;',
+      '  --vlx-r-pill: 999px;',
+      '  --vlx-s-1: 0 1px 2px rgba(15,23,42,.04), 0 1px 1px rgba(15,23,42,.03);',
+      '  --vlx-s-2: 0 4px 12px rgba(15,23,42,.06), 0 2px 4px rgba(15,23,42,.04);',
+      '  --vlx-s-3: 0 14px 32px rgba(15,23,42,.08), 0 6px 12px rgba(15,23,42,.05);',
+      '  --vlx-s-glow: 0 0 0 4px rgba(37,99,235,.14);',
+      '  --vlx-t-fast:  140ms cubic-bezier(.2,.7,.3,1);',
+      '  --vlx-t-mid:   220ms cubic-bezier(.2,.7,.3,1);',
+      '}',
+
+      // ---- Tipografía global modernizada (system stack premium + Inter optional) ----
+      'html, body {',
+      '  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif !important;',
+      '  -webkit-font-smoothing: antialiased;',
+      '  -moz-osx-font-smoothing: grayscale;',
+      '  text-rendering: optimizeLegibility;',
+      '  font-feature-settings: "ss01","cv11","cv05";',
+      '  letter-spacing: -0.005em;',
+      '}',
+      'h1, h2, h3, h4, h5, h6 { letter-spacing: -0.02em; font-weight: 700; }',
+      'h1 { font-weight: 800; }',
+      'p, li, label { line-height: 1.55; }',
+
+      // ---- Botones — bordes y sombras suaves, hover sutil, transición ----
+      'button, .btn, [role="button"], input[type="submit"], input[type="button"] {',
+      '  transition: transform var(--vlx-t-fast), box-shadow var(--vlx-t-fast), background-color var(--vlx-t-fast), border-color var(--vlx-t-fast), color var(--vlx-t-fast) !important;',
+      '  border-radius: var(--vlx-r-md);',
+      '}',
+      'button:hover:not(:disabled), .btn:hover:not(:disabled), [role="button"]:hover:not([aria-disabled="true"]) {',
+      '  transform: translateY(-1px);',
+      '  box-shadow: var(--vlx-s-2);',
+      '}',
+      'button:active:not(:disabled), .btn:active:not(:disabled) {',
+      '  transform: translateY(0);',
+      '  box-shadow: var(--vlx-s-1);',
+      '}',
+      'button:focus-visible, .btn:focus-visible, [role="button"]:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {',
+      '  outline: none !important;',
+      '  box-shadow: var(--vlx-s-glow) !important;',
+      '}',
+
+      // ---- Botón primario — gradiente sutil + sombra azul al hover ----
+      '.btn-primary, .primary, button.primary, [data-variant="primary"], .button-primary {',
+      '  background-image: linear-gradient(180deg, #2C6BF0 0%, #1F58D6 100%) !important;',
+      '  border: 1px solid rgba(15,23,42,.08) !important;',
+      '  color: #FFFFFF !important;',
+      '  font-weight: 600 !important;',
+      '  letter-spacing: -0.01em;',
+      '  box-shadow: 0 1px 0 rgba(255,255,255,.18) inset, 0 1px 2px rgba(15,23,42,.10);',
+      '}',
+      '.btn-primary:hover:not(:disabled), .primary:hover:not(:disabled), button.primary:hover:not(:disabled), [data-variant="primary"]:hover:not(:disabled), .button-primary:hover:not(:disabled) {',
+      '  background-image: linear-gradient(180deg, #2160E5 0%, #174FCC 100%) !important;',
+      '  box-shadow: 0 8px 24px rgba(37,99,235,.28), 0 1px 0 rgba(255,255,255,.18) inset !important;',
+      '}',
+
+      // ---- Inputs — borde más limpio, focus ring premium, transición suave ----
+      'input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea {',
+      '  border-radius: var(--vlx-r-md);',
+      '  transition: border-color var(--vlx-t-fast), box-shadow var(--vlx-t-fast), background-color var(--vlx-t-fast);',
+      '}',
+      'input:hover:not(:disabled):not(:focus), select:hover:not(:disabled):not(:focus), textarea:hover:not(:disabled):not(:focus) {',
+      '  border-color: #C8CBD3;',
+      '}',
+
+      // ---- Cards / contenedores — sombras suaves, radio mayor ----
+      '.card, .panel, .box, .modal-content, .dialog, [role="dialog"] > div, .surface {',
+      '  border-radius: var(--vlx-r-lg);',
+      '  box-shadow: var(--vlx-s-2);',
+      '  transition: box-shadow var(--vlx-t-mid), transform var(--vlx-t-mid);',
+      '}',
+
+      // ---- Links — underline gradient, transición de color ----
+      'a { transition: color var(--vlx-t-fast), text-decoration-color var(--vlx-t-fast); }',
+      'a:hover { text-decoration-thickness: 2px; }',
+
+      // ---- Tablas — separadores más sutiles, hover de fila ----
+      'table { border-collapse: separate; border-spacing: 0; }',
+      'table th { font-weight: 600; letter-spacing: -0.005em; }',
+      'table tbody tr { transition: background-color var(--vlx-t-fast); }',
+      'table tbody tr:hover { background-color: rgba(37,99,235,.035); }',
+
+      // ---- Badges / chips / pills — tipografía y radio ----
+      '.badge, .chip, .tag, .pill { border-radius: var(--vlx-r-pill); font-weight: 600; letter-spacing: 0.01em; }',
+
+      // ---- Scrollbars limpios ----
+      '* { scrollbar-width: thin; scrollbar-color: #CBD0D9 transparent; }',
+      '*::-webkit-scrollbar { width: 10px; height: 10px; }',
+      '*::-webkit-scrollbar-track { background: transparent; }',
+      '*::-webkit-scrollbar-thumb { background: #D5D8DF; border-radius: 8px; border: 2px solid transparent; background-clip: padding-box; }',
+      '*::-webkit-scrollbar-thumb:hover { background: #B8BCC5; border: 2px solid transparent; background-clip: padding-box; }',
+
+      // ---- Selección de texto ----
+      '::selection { background: rgba(37,99,235,.18); color: inherit; }',
+
+      // ---- Imágenes/logos: render más limpio ----
+      'img { image-rendering: -webkit-optimize-contrast; }',
+
+      // ---- Reduced motion respetado ----
+      '@media (prefers-reduced-motion: reduce) {',
+      '  *, *::before, *::after { transition: none !important; animation: none !important; }',
+      '  button:hover, .btn:hover { transform: none !important; }',
+      '}'
+    ].join('\n');
+    document.head.appendChild(st);
+
+    // Pre-conectar a Google Fonts una sola vez para que Inter cargue rápido si
+    // alguna landing lo trae (es opcional; el system stack ya cubre).
+    try {
+      var pre = document.createElement('link');
+      pre.rel = 'preconnect';
+      pre.href = 'https://fonts.googleapis.com';
+      pre.crossOrigin = 'anonymous';
+      document.head.appendChild(pre);
+    } catch (_) {}
   }
 
   // ---------------------------------------------------------------------------
