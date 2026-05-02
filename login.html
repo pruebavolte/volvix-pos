@@ -736,7 +736,9 @@ document.getElementById('passwordInput').addEventListener('keydown', e => {
     }
     showAlert('Enviando instrucciones...', 'info');
     try {
-      const r = await fetch('/api/email/password-reset', {
+      // 2026-05 audit B-12: el endpoint correcto es /api/auth/password-reset/request
+      // (antes apuntaba a /api/email/password-reset que no existe → siempre fallaba).
+      const r = await fetch('/api/auth/password-reset/request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })

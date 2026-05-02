@@ -735,10 +735,20 @@
 
   // ---------- Bind ----------
   function bind() {
+    // 2026-05 audit B-13: deshabilitar ANTES del fetch para impedir doble-click
+    // que duplica registros (409 EMAIL_TAKEN o múltiples OTPs).
     $('#btnRegister').addEventListener('click', function () {
-      if (validateStep1()) submitRegister();
+      var b = $('#btnRegister');
+      if (b.disabled) return;
+      if (!validateStep1()) return;
+      b.disabled = true; b.textContent = 'Enviando código a tu correo...';
+      submitRegister();
     });
-    $('#btnVerify').addEventListener('click', submitOtp);
+    $('#btnVerify').addEventListener('click', function () {
+      var b = $('#btnVerify');
+      if (b.disabled) return;
+      submitOtp();
+    });
     $('#btnBack').addEventListener('click', function () {
       if (state.otpAbort) try { state.otpAbort.abort(); } catch (_) {}
       setStep(1);

@@ -31911,6 +31911,29 @@ if (process.env.NODE_ENV === 'test') {
         return sendJSON(res, { ok: false, error_code: 'OTP_INVALID', error_message: 'Código inválido o expirado.' }, 400);
       }
 
+      // 2026-05 audit B-14: lockout AGREGADO por user_id/email/phone en los
+      // últimos 30 min. Antes resend creaba fila nueva y attempts volvía a 0,
+      // permitiendo brute-force ilimitado. Ahora sumamos attempts en la
+      // ventana y limitamos a 8 intentos totales antes de bloquear 30 min.
+      try {
+        const since30min = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+        let aggPath = '/pos_otp_verifications?created_at=gte.' + encodeURIComponent(since30min);
+        if (otpRow.user_id) aggPath += '&user_id=eq.' + encodeURIComponent(otpRow.user_id);
+        else if (emailId) aggPath += '&email=eq.' + encodeURIComponent(emailId);
+        else if (phone) aggPath += '&phone=eq.' + encodeURIComponent(phone);
+        aggPath += '&select=attempts';
+        const aggRows = await supabaseRequest('GET', aggPath);
+        if (Array.isArray(aggRows)) {
+          const totalAttempts = aggRows.reduce((s, r) => s + (Number(r.attempts) || 0), 0);
+          if (totalAttempts >= 8) {
+            return sendJSON(res, {
+              ok: false, error_code: 'OTP_LOCKOUT_AGGREGATE',
+              error_message: 'Demasiados intentos en los últimos 30 minutos. Espera un momento.'
+            }, 429);
+          }
+        }
+      } catch (_) { /* si la query falla, caemos al check legacy de la fila individual */ }
+
       if ((otpRow.attempts || 0) >= 3) {
         return sendJSON(res, { ok: false, error_code: 'OTP_LOCKOUT', error_message: 'Demasiados intentos. Reenvía uno nuevo.' }, 429);
       }
