@@ -330,9 +330,24 @@
 
   async function monitorSync() {
     if (!settings.autoMonitor) return;
+    // 2026-05: skip en páginas públicas (home/landings/registro/login) y
+    // cuando NO hay token. Antes esto saturaba system_error_logs con 510
+    // entradas/semana de '401 sync status' en visitantes anónimos del home.
+    try {
+      if (typeof window.__vlxIsPublicPage === 'function' && window.__vlxIsPublicPage()) return;
+      var __tok = '';
+      try { __tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || ''; } catch (_) {}
+      if (!__tok) return;
+    } catch (_) {}
     try {
       const res = await fetch(location.origin + '/api/sync/status', { credentials: 'include' });
       if (!res.ok) {
+        // 2026-05: 401 en monitorSync es esperado cuando el token expira;
+        // no es ruido — loguear con level=info, no como error.
+        if (res.status === 401) {
+          // Token expiró, dejar que auth-helper haga el redirect.
+          return;
+        }
         // Errores de sistema: NO mostrar toast al usuario. Loguear al backend.
         _logSystemError({
           code: String(res.status),

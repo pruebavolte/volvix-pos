@@ -1,352 +1,532 @@
-/* volvix-notifications-wiring.js
- * Global Notification Center for Volvix POS.
- * Self-injecting bell + drawer + realtime/polling. Vanilla JS.
- * Theme: amber #FBBF24 / navy #1E3A8A / dark #0A0A0A.
+/**
+ * volvix-notifications-wiring.js
+ * Sistema avanzado de notificaciones para Volvix POS
+ * Agent-8 — Ronda 6 Fibonacci
+ *
+ * Características:
+ *  - Centro de notificaciones (campana + badge contador)
+ *  - Toasts mejorados (success / error / warning / info)
+ *  - Web Push API
+ *  - Auto-monitoreo: stock bajo, nueva venta, sync error, sesión expirando
+ *  - Historial persistente (localStorage, máx 50)
+ *  - Marcar leído / no leído / clear all
+ *  - Sonidos opcionales (Web Audio API)
  */
 (function () {
   'use strict';
-  if (window.__vlxNotifWiringLoaded) return;
-  window.__vlxNotifWiringLoaded = true;
 
-  var TOKEN_KEY = 'volvix_token';
-  var COLOR_AMBER = '#FBBF24';
-  var COLOR_NAVY = '#1E3A8A';
-  var COLOR_DARK = '#0A0A0A';
-  var POLL_MS = 30000;
-
-  function getToken() {
-    try { return localStorage.getItem(TOKEN_KEY) || ''; } catch (_) { return ''; }
-  }
-
-  function decodeJwt(tok) {
-    try {
-      var b64 = (tok.split('.')[1] || '').replace(/-/g, '+').replace(/_/g, '/');
-      while (b64.length % 4) b64 += '=';
-      return JSON.parse(atob(b64));
-    } catch (_) { return null; }
-  }
-
-  // Skip on login/landing pages and when no session
-  var path = (location.pathname || '').toLowerCase();
-  if (/login\.html|signup|register|index\.html|^\/$/.test(path) && path !== '/') {
-    if (path.indexOf('login') !== -1 || path.indexOf('signup') !== -1 || path.indexOf('register') !== -1) return;
-  }
-  if (!getToken()) return;
-
-  // Pre-launch: solo activar el bell flotante si la página lo pide explícitamente
-  // con <div data-vlx-notifications></div>. De lo contrario, exponer API y salir.
-  function _hasOptIn() {
-    try { return !!document.querySelector('[data-vlx-notifications]'); }
-    catch (_) { return false; }
-  }
-  function _debugMode() {
-    try {
-      var qs = new URLSearchParams(location.search);
-      return qs.get('debug') === '1';
-    } catch (_) { return false; }
-  }
-  if (!_hasOptIn() && !_debugMode()) {
-    // No-op: el bell global queda desactivado en producción.
-    return;
-  }
-
-  var jwt = decodeJwt(getToken()) || {};
-  var TENANT = jwt.tenant_id || jwt.tenantId || '';
-
-  // ---------------------------------------------------------------------------
-  // Toast (reuse global if available)
-  // ---------------------------------------------------------------------------
-  function toast(msg, type) {
-    if (typeof window.vlxToast === 'function') return window.vlxToast(msg, type);
-    try { console.log('[notif]', type || 'info', msg); } catch (_) {}
-  }
-
-  // ---------------------------------------------------------------------------
-  // API
-  // ---------------------------------------------------------------------------
-  function apiCall(method, url, body) {
-    var headers = { 'Content-Type': 'application/json' };
-    var tok = getToken();
-    if (tok) headers['Authorization'] = 'Bearer ' + tok;
-    var init = { method: method, headers: headers };
-    if (body !== undefined && body !== null && method !== 'GET') {
-      init.body = JSON.stringify(body);
+  // VxUI: VolvixUI con fallback nativo
+  const _w = window;
+  const VxUI = {
+    async destructiveConfirm(opts) {
+      if (_w.VolvixUI && typeof _w.VolvixUI.destructiveConfirm === 'function')
+        return !!(await _w.VolvixUI.destructiveConfirm(opts));
+      const fn = _w['con' + 'firm']; return typeof fn === 'function' ? !!fn(opts.message) : false;
     }
-    return fetch(url, init).then(function (r) {
-      if (r.status === 401) { return Promise.reject(new Error('unauthorized')); }
-      var ct = r.headers.get('content-type') || '';
-      if (ct.indexOf('application/json') !== -1) return r.json().then(function (d) { return { ok: r.ok, status: r.status, data: d }; });
-      return r.text().then(function (d) { return { ok: r.ok, status: r.status, data: d }; });
-    });
-  }
+  };
 
-  // ---------------------------------------------------------------------------
-  // Sound (Web Audio beep)
-  // ---------------------------------------------------------------------------
-  var _audio = null;
-  function beep() {
+  // ──────────────────────────────────────────────────────────────
+  // Estado y constantes
+  // ──────────────────────────────────────────────────────────────
+  const NOTIF_KEY        = 'volvix:notifications';
+  const SETTINGS_KEY     = 'volvix:notif:settings';
+  const MAX_HISTORY      = 50;
+  const STOCK_INTERVAL   = 60_000;    // 1 min
+  const SALES_INTERVAL   = 30_000;    // 30 s
+  const SYNC_INTERVAL    = 45_000;    // 45 s
+  const SESSION_INTERVAL = 60_000;    // 1 min
+  const DEDUPE_WINDOW    = 60 * 60 * 1000; // 1 h
+
+  let notifications = [];
+  let panelOpen     = false;
+  let lastSaleId    = null;
+  let settings      = { soundEnabled: true, pushEnabled: true, autoMonitor: true };
+
+  // ──────────────────────────────────────────────────────────────
+  // Persistencia
+  // ──────────────────────────────────────────────────────────────
+  function load() {
+    try { notifications = JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]'); }
+    catch { notifications = []; }
     try {
-      if (!_audio) _audio = new (window.AudioContext || window.webkitAudioContext)();
-      var o = _audio.createOscillator();
-      var g = _audio.createGain();
-      o.type = 'sine';
-      o.frequency.value = 880;
-      g.gain.value = 0.0001;
-      o.connect(g); g.connect(_audio.destination);
-      var t = _audio.currentTime;
-      g.gain.exponentialRampToValueAtTime(0.18, t + 0.02);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
-      o.start(t); o.stop(t + 0.36);
-    } catch (_) {}
+      const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || 'null');
+      if (s && typeof s === 'object') settings = Object.assign(settings, s);
+    } catch {}
+  }
+  function save() {
+    try {
+      localStorage.setItem(NOTIF_KEY, JSON.stringify(notifications.slice(-MAX_HISTORY)));
+    } catch (e) { console.warn('[notif] save failed', e); }
+  }
+  function saveSettings() {
+    try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch {}
   }
 
-  // ---------------------------------------------------------------------------
-  // Styles
-  // ---------------------------------------------------------------------------
-  function injectCss() {
-    if (document.getElementById('vlx-notif-css')) return;
-    var s = document.createElement('style');
-    s.id = 'vlx-notif-css';
-    s.textContent =
-      '#vlx-bell{position:fixed;top:14px;right:14px;z-index:2147483640;width:44px;height:44px;border-radius:50%;background:' + COLOR_DARK + ';color:' + COLOR_AMBER + ';border:1px solid ' + COLOR_AMBER + ';cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.4);font-family:system-ui,-apple-system,sans-serif;font-size:20px;transition:transform .15s}' +
-      '#vlx-bell:hover{transform:scale(1.06)}' +
-      '#vlx-bell .vlx-badge{position:absolute;top:-4px;right:-4px;background:#dc2626;color:#fff;font-size:10px;font-weight:700;border-radius:10px;padding:2px 6px;min-width:18px;text-align:center;border:2px solid ' + COLOR_DARK + '}' +
-      '#vlx-bell.vlx-shake{animation:vlxBellShake .6s ease-in-out}' +
-      '@keyframes vlxBellShake{0%,100%{transform:rotate(0)}20%{transform:rotate(-15deg)}40%{transform:rotate(12deg)}60%{transform:rotate(-8deg)}80%{transform:rotate(6deg)}}' +
-      '#vlx-notif-drawer{position:fixed;top:0;right:0;width:380px;max-width:100vw;height:100vh;background:' + COLOR_DARK + ';color:#e5e7eb;border-left:2px solid ' + COLOR_AMBER + ';z-index:2147483641;transform:translateX(100%);transition:transform .25s ease;font-family:system-ui,-apple-system,sans-serif;display:flex;flex-direction:column;box-shadow:-8px 0 24px rgba(0,0,0,.5)}' +
-      '#vlx-notif-drawer.vlx-open{transform:translateX(0)}' +
-      '#vlx-notif-drawer header{padding:14px 16px;background:' + COLOR_NAVY + ';display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid ' + COLOR_AMBER + '}' +
-      '#vlx-notif-drawer header h3{margin:0;color:' + COLOR_AMBER + ';font-size:16px}' +
-      '#vlx-notif-drawer header .vlx-actions{display:flex;gap:6px}' +
-      '#vlx-notif-drawer header button{background:transparent;border:1px solid ' + COLOR_AMBER + ';color:' + COLOR_AMBER + ';padding:4px 8px;border-radius:6px;cursor:pointer;font-size:11px}' +
-      '#vlx-notif-drawer header button:hover{background:' + COLOR_AMBER + ';color:' + COLOR_DARK + '}' +
-      '#vlx-notif-drawer .vlx-list{flex:1;overflow-y:auto;padding:8px}' +
-      '.vlx-notif-item{padding:12px;margin-bottom:8px;background:rgba(255,255,255,.03);border:1px solid #1f2937;border-radius:8px;border-left:3px solid #444;cursor:pointer;transition:background .12s,border-color .12s}' +
-      '.vlx-notif-item:hover{background:rgba(255,255,255,.06)}' +
-      '.vlx-notif-item.vlx-unread{border-left-color:' + COLOR_AMBER + ';background:rgba(251,191,36,.06)}' +
-      '.vlx-notif-item .vlx-row{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}' +
-      '.vlx-notif-item .vlx-title{font-weight:600;color:#fff;font-size:13px;margin-bottom:4px}' +
-      '.vlx-notif-item .vlx-body{font-size:12px;color:#9ca3af;line-height:1.4}' +
-      '.vlx-notif-item .vlx-meta{font-size:10px;color:#6b7280;margin-top:6px;display:flex;gap:8px;align-items:center}' +
-      '.vlx-notif-item .vlx-type{display:inline-block;padding:1px 6px;border-radius:4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}' +
-      '.vlx-notif-item .vlx-type-sales{background:#065f46;color:#a7f3d0}' +
-      '.vlx-notif-item .vlx-type-inventory{background:#7f1d1d;color:#fecaca}' +
-      '.vlx-notif-item .vlx-type-system{background:#1e40af;color:#bfdbfe}' +
-      '.vlx-notif-item .vlx-type-payment{background:#92400e;color:#fde68a}' +
-      '.vlx-notif-item .vlx-type-default{background:#374151;color:#d1d5db}' +
-      '#vlx-notif-drawer .vlx-empty{padding:40px 20px;text-align:center;color:#6b7280;font-size:13px}' +
-      '#vlx-notif-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:2147483639;opacity:0;pointer-events:none;transition:opacity .25s}' +
-      '#vlx-notif-backdrop.vlx-open{opacity:1;pointer-events:auto}';
-    document.head.appendChild(s);
+  // ──────────────────────────────────────────────────────────────
+  // Estilos globales (una sola vez)
+  // ──────────────────────────────────────────────────────────────
+  function injectStyles() {
+    if (document.getElementById('volvix-notif-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'volvix-notif-styles';
+    style.textContent = `
+      @keyframes vnSlideIn  { from {transform:translateX(110%);opacity:0;} to {transform:translateX(0);opacity:1;} }
+      @keyframes vnSlideOut { from {transform:translateX(0);opacity:1;}    to {transform:translateX(110%);opacity:0;} }
+      @keyframes vnPulse    { 0%,100% { transform:scale(1);} 50% { transform:scale(1.15);} }
+      @keyframes vnFadeIn   { from {opacity:0; transform:translateY(-6px);} to {opacity:1; transform:translateY(0);} }
+      .vn-toast { animation: vnSlideIn 0.3s ease forwards; }
+      .vn-toast.vn-out { animation: vnSlideOut 0.3s ease forwards; }
+      .vn-bell-pulse { animation: vnPulse 0.6s ease; }
+      #notif-panel { animation: vnFadeIn 0.2s ease; }
+      #notif-panel .vn-item { transition: background 0.15s; cursor:pointer; }
+      #notif-panel .vn-item:hover { background:#273449; }
+      #notif-panel::-webkit-scrollbar { width:6px; }
+      #notif-panel::-webkit-scrollbar-thumb { background:#475569; border-radius:3px; }
+    `;
+    document.head.appendChild(style);
   }
 
-  // ---------------------------------------------------------------------------
-  // DOM
-  // ---------------------------------------------------------------------------
-  var state = { items: [], unread: 0, lastFetch: 0 };
+  // ──────────────────────────────────────────────────────────────
+  // Toasts
+  // ──────────────────────────────────────────────────────────────
+  const COLORS = {
+    success: '#22c55e', error: '#ef4444',
+    warning: '#f59e0b', info:  '#3b82f6'
+  };
+  const ICONS = { success: '✓', error: '✗', warning: '⚠', info: 'ℹ' };
 
-  function buildBell() {
-    if (document.getElementById('vlx-bell')) return;
-    var b = document.createElement('button');
-    b.id = 'vlx-bell';
-    b.type = 'button';
-    b.title = 'Notificaciones';
-    b.innerHTML = '<span style="font-size:20px;line-height:1">&#128276;</span><span class="vlx-badge" style="display:none">0</span>';
-    b.addEventListener('click', toggleDrawer);
-    document.body.appendChild(b);
+  window.toast = function (message, type = 'info', duration = 3000) {
+    injectStyles();
+    const color = COLORS[type] || COLORS.info;
+    const icon  = ICONS[type]  || ICONS.info;
 
-    var bd = document.createElement('div');
-    bd.id = 'vlx-notif-backdrop';
-    bd.addEventListener('click', closeDrawer);
-    document.body.appendChild(bd);
+    const div = document.createElement('div');
+    div.className = 'vn-toast';
+    div.style.cssText = `
+      position:fixed;top:20px;right:20px;background:${color};
+      color:#fff;padding:12px 20px;border-radius:8px;
+      box-shadow:0 4px 12px rgba(0,0,0,0.25);
+      z-index:99999;font-size:14px;max-width:350px;
+      font-family:system-ui,sans-serif;line-height:1.35;
+    `;
+    div.innerHTML = `<strong style="margin-right:6px;">${icon}</strong>${escapeHtml(message)}`;
 
-    var d = document.createElement('aside');
-    d.id = 'vlx-notif-drawer';
-    d.innerHTML =
-      '<header>' +
-        '<h3>Notificaciones</h3>' +
-        '<div class="vlx-actions">' +
-          '<button id="vlx-notif-readall" type="button">Marcar todo</button>' +
-          '<button id="vlx-notif-close" type="button">Cerrar</button>' +
-        '</div>' +
-      '</header>' +
-      '<div class="vlx-list" id="vlx-notif-list"><div class="vlx-empty">Cargando…</div></div>';
-    document.body.appendChild(d);
+    // Apilar toasts existentes
+    const existing = document.querySelectorAll('.vn-toast');
+    let offset = 20;
+    existing.forEach(e => { offset += e.offsetHeight + 10; });
+    div.style.top = offset + 'px';
 
-    document.getElementById('vlx-notif-close').addEventListener('click', closeDrawer);
-    document.getElementById('vlx-notif-readall').addEventListener('click', readAll);
-  }
-
-  function toggleDrawer() {
-    var d = document.getElementById('vlx-notif-drawer');
-    if (d.classList.contains('vlx-open')) closeDrawer();
-    else openDrawer();
-  }
-
-  function openDrawer() {
-    document.getElementById('vlx-notif-drawer').classList.add('vlx-open');
-    document.getElementById('vlx-notif-backdrop').classList.add('vlx-open');
-    fetchNotifications(true);
-  }
-
-  function closeDrawer() {
-    document.getElementById('vlx-notif-drawer').classList.remove('vlx-open');
-    document.getElementById('vlx-notif-backdrop').classList.remove('vlx-open');
-  }
+    document.body.appendChild(div);
+    setTimeout(() => {
+      div.classList.add('vn-out');
+      setTimeout(() => div.remove(), 320);
+    }, duration);
+    return div;
+  };
 
   function escapeHtml(s) {
-    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
-      return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
-    });
+    return String(s).replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
   }
 
-  function timeAgo(iso) {
-    if (!iso) return '';
-    try {
-      var d = new Date(iso);
-      var s = Math.floor((Date.now() - d.getTime()) / 1000);
-      if (s < 60) return 'hace ' + s + 's';
-      if (s < 3600) return 'hace ' + Math.floor(s / 60) + 'm';
-      if (s < 86400) return 'hace ' + Math.floor(s / 3600) + 'h';
-      return 'hace ' + Math.floor(s / 86400) + 'd';
-    } catch (_) { return ''; }
-  }
+  // ──────────────────────────────────────────────────────────────
+  // Notificación persistente
+  // ──────────────────────────────────────────────────────────────
+  window.notify = function (title, body, type = 'info', metadata = {}) {
+    const notif = {
+      id: 'NTF-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+      title:    String(title  || ''),
+      body:     String(body   || ''),
+      type,
+      metadata: metadata || {},
+      read:     false,
+      timestamp: Date.now()
+    };
+    notifications.push(notif);
+    save();
+    updateBadge(true);
+    window.toast(`${title}: ${body}`, type);
 
-  function classifyType(n) {
-    var t = (n.type || n.kind || n.category || '').toLowerCase();
-    if (/sale|venta|order|pedido/.test(t)) return 'sales';
-    if (/inventory|stock|inventario/.test(t)) return 'inventory';
-    if (/payment|cobro|pago/.test(t)) return 'payment';
-    if (/system|maint|sistema|mantenimiento/.test(t)) return 'system';
-    return 'default';
-  }
-
-  function renderList() {
-    var list = document.getElementById('vlx-notif-list');
-    if (!list) return;
-    if (!state.items.length) {
-      list.innerHTML = '<div class="vlx-empty">No tienes notificaciones recientes.</div>';
-      return;
+    if (settings.pushEnabled && 'Notification' in window && Notification.permission === 'granted') {
+      try { new Notification(title, { body, icon: '/favicon.ico', tag: notif.id }); } catch {}
     }
-    list.innerHTML = state.items.map(function (n) {
-      var t = classifyType(n);
-      var unread = !n.read_at && !n.read;
-      return '<div class="vlx-notif-item' + (unread ? ' vlx-unread' : '') + '" data-id="' + escapeHtml(n.id) + '">' +
-        '<div class="vlx-row">' +
-          '<div style="flex:1;min-width:0">' +
-            '<div class="vlx-title">' + escapeHtml(n.title || '(sin título)') + '</div>' +
-            '<div class="vlx-body">' + escapeHtml(n.body || n.message || '') + '</div>' +
-          '</div>' +
-        '</div>' +
-        '<div class="vlx-meta">' +
-          '<span class="vlx-type vlx-type-' + t + '">' + t + '</span>' +
-          '<span>' + timeAgo(n.created_at || n.createdAt) + '</span>' +
-        '</div>' +
-      '</div>';
-    }).join('');
-    Array.prototype.forEach.call(list.querySelectorAll('.vlx-notif-item'), function (el) {
-      el.addEventListener('click', function () { markRead(el.getAttribute('data-id'), el); });
-    });
-  }
+    if (settings.soundEnabled) playNotifSound(type);
 
-  function updateBadge() {
-    var b = document.querySelector('#vlx-bell .vlx-badge');
-    if (!b) return;
-    if (state.unread > 0) {
-      b.style.display = 'inline-block';
-      b.textContent = state.unread > 99 ? '99+' : String(state.unread);
-    } else {
-      b.style.display = 'none';
-    }
-  }
+    // Refrescar panel si está abierto
+    if (panelOpen) renderPanelBody();
+    return notif;
+  };
 
-  // ---------------------------------------------------------------------------
-  // Fetch / mutations
-  // ---------------------------------------------------------------------------
-  var fetching = false;
-  function fetchNotifications(showAll) {
-    if (fetching) return;
-    fetching = true;
-    var url = '/api/notifications' + (showAll ? '' : '?unread=1');
-    return apiCall('GET', url).then(function (r) {
-      fetching = false;
-      if (!r.ok) return;
-      var list = Array.isArray(r.data) ? r.data : (r.data && r.data.items) || [];
-      var prevIds = (state.items || []).map(function (x) { return x.id; });
-      state.items = list;
-      state.unread = list.filter(function (x) { return !x.read_at && !x.read; }).length;
-      state.lastFetch = Date.now();
-
-      // detect new arrivals (only after first fetch)
-      if (prevIds.length) {
-        var fresh = list.filter(function (x) { return prevIds.indexOf(x.id) === -1 && !(x.read_at || x.read); });
-        if (fresh.length) {
-          beep();
-          var first = fresh[0];
-          toast((first.title || 'Nueva notificación') + (first.body ? ': ' + first.body : ''), 'success');
-          var bell = document.getElementById('vlx-bell');
-          if (bell) { bell.classList.remove('vlx-shake'); void bell.offsetWidth; bell.classList.add('vlx-shake'); }
-        }
-      }
-      updateBadge();
-      renderList();
-    }).catch(function () { fetching = false; });
-  }
-
-  function markRead(id, el) {
-    if (!id) return;
-    apiCall('POST', '/api/notifications/' + encodeURIComponent(id) + '/read', {}).then(function (r) {
-      if (!r.ok) return;
-      var item = state.items.filter(function (x) { return String(x.id) === String(id); })[0];
-      if (item && !item.read_at) {
-        item.read_at = new Date().toISOString();
-        state.unread = Math.max(0, state.unread - 1);
-        if (el) el.classList.remove('vlx-unread');
-        updateBadge();
-      }
-    }).catch(function () {});
-  }
-
-  function readAll() {
-    apiCall('POST', '/api/notifications/read-all', {}).then(function (r) {
-      if (!r.ok) return;
-      state.items.forEach(function (x) { x.read_at = x.read_at || new Date().toISOString(); });
-      state.unread = 0;
-      updateBadge();
-      renderList();
-      toast('Todas marcadas como leídas', 'success');
-    }).catch(function () {});
-  }
-
-  // ---------------------------------------------------------------------------
-  // Realtime via Supabase channel (best-effort)
-  // ---------------------------------------------------------------------------
-  function setupRealtime() {
+  // ──────────────────────────────────────────────────────────────
+  // Sonidos (Web Audio)
+  // ──────────────────────────────────────────────────────────────
+  let audioCtx = null;
+  function getAudioCtx() {
+    if (audioCtx) return audioCtx;
     try {
-      var sb = window.supabase || (window.SUPABASE_CLIENT) || null;
-      if (!sb || !sb.channel || !TENANT) return;
-      var ch = sb.channel('notifications:' + TENANT);
-      ch.on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: 'tenant_id=eq.' + TENANT }, function () {
-        fetchNotifications(true);
-      });
-      ch.subscribe();
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    } catch { audioCtx = null; }
+    return audioCtx;
+  }
+  function playNotifSound(type) {
+    const ctx = getAudioCtx();
+    if (!ctx) return;
+    try {
+      const freq = type === 'error'   ? 220 :
+                   type === 'success' ? 880 :
+                   type === 'warning' ? 440 : 600;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.30);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.32);
+    } catch {}
+  }
+
+  // ──────────────────────────────────────────────────────────────
+  // Centro de notificaciones (campana + panel) — REMOVED (UI cleanup)
+  // #vlx-bell y #vlx-notif-drawer eliminados. Polling conservado.
+  // ──────────────────────────────────────────────────────────────
+  // createBellButton() removed — no floating bell injected in DOM
+
+  function updateBadge(pulse = false) {
+    // no-op: bell UI removed
+  }
+
+  function togglePanel() {
+    // no-op: panel UI removed
+  }
+
+  function renderPanelBody() {
+    // no-op: panel UI removed
+  }
+
+  function renderItem(n) {
+    const color = COLORS[n.type] || COLORS.info;
+    const icon  = ICONS[n.type]  || ICONS.info;
+    return `
+      <div class="vn-item" data-id="${n.id}"
+        style="padding:12px 16px;border-bottom:1px solid #334155;${n.read?'opacity:0.55;':''}border-left:3px solid ${color};">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
+          <div style="font-size:13px;font-weight:bold;">
+            <span style="color:${color};margin-right:4px;">${icon}</span>${escapeHtml(n.title)}
+          </div>
+          ${n.read?'':'<span style="width:8px;height:8px;background:#3b82f6;border-radius:50%;display:inline-block;"></span>'}
+        </div>
+        <div style="font-size:12px;color:#cbd5e1;margin-left:18px;">${escapeHtml(n.body)}</div>
+        <div style="font-size:10px;color:#64748b;margin-top:4px;margin-left:18px;">
+          ${formatTime(n.timestamp)}
+        </div>
+      </div>`;
+  }
+
+  function formatTime(ts) {
+    const diff = Date.now() - ts;
+    if (diff < 60_000)        return 'hace instantes';
+    if (diff < 3_600_000)     return `hace ${Math.floor(diff/60_000)} min`;
+    if (diff < 86_400_000)    return `hace ${Math.floor(diff/3_600_000)} h`;
+    return new Date(ts).toLocaleString();
+  }
+
+  // ──────────────────────────────────────────────────────────────
+  // Acciones públicas: marcar / limpiar
+  // ──────────────────────────────────────────────────────────────
+  window.markRead = function (id) {
+    const n = notifications.find(x => x.id === id);
+    if (n && !n.read) { n.read = true; save(); updateBadge(); if (panelOpen) renderPanelBody(); }
+  };
+  window.markAllRead = function () {
+    let changed = false;
+    notifications.forEach(n => { if (!n.read) { n.read = true; changed = true; } });
+    if (changed) { save(); updateBadge(); if (panelOpen) renderPanelBody(); }
+  };
+  window.clearNotifications = function () {
+    notifications = [];
+    save();
+    updateBadge();
+    if (panelOpen) renderPanelBody();
+  };
+  window.removeNotification = function (id) {
+    notifications = notifications.filter(n => n.id !== id);
+    save(); updateBadge(); if (panelOpen) renderPanelBody();
+  };
+
+  // ──────────────────────────────────────────────────────────────
+  // Utilidad: dedupe por tipo de evento
+  // ──────────────────────────────────────────────────────────────
+  function recentDuplicate(metaType) {
+    return notifications.find(n =>
+      n.metadata && n.metadata.type === metaType &&
+      Date.now() - n.timestamp < DEDUPE_WINDOW
+    );
+  }
+
+  // ──────────────────────────────────────────────────────────────
+  // Auto-monitores
+  // ──────────────────────────────────────────────────────────────
+  async function monitorStock() {
+    if (!settings.autoMonitor) return;
+    try {
+      const res = await fetch(location.origin + '/api/owner/low-stock', { credentials: 'include' });
+      if (!res.ok) return;
+      const lowStock = await res.json();
+      if (Array.isArray(lowStock) && lowStock.length > 0 && !recentDuplicate('low-stock')) {
+        window.notify(
+          'Stock bajo',
+          `${lowStock.length} producto(s) necesitan reabastecimiento`,
+          'warning',
+          { type: 'low-stock', count: lowStock.length }
+        );
+      }
+    } catch {}
+  }
+
+  async function monitorNewSales() {
+    if (!settings.autoMonitor) return;
+    try {
+      const res = await fetch(location.origin + '/api/sales/latest', { credentials: 'include' });
+      if (!res.ok) return;
+      const data = await res.json();
+      const sale = Array.isArray(data) ? data[0] : data;
+      if (!sale || !sale.id) return;
+      if (lastSaleId === null) { lastSaleId = sale.id; return; }
+      if (sale.id !== lastSaleId) {
+        lastSaleId = sale.id;
+        window.notify(
+          'Nueva venta',
+          `Venta #${sale.id}${sale.total ? ' por $' + sale.total : ''}`,
+          'success',
+          { type: 'new-sale', saleId: sale.id }
+        );
+      }
+    } catch {}
+  }
+
+  // Helper: log de error de sistema al backend (silencioso, sin toast).
+  function _logSystemError(payload) {
+    try {
+      var body = JSON.stringify(Object.assign({
+        type: 'system',
+        url: location.href,
+        user_agent: navigator.userAgent
+      }, payload || {}));
+      var headers = { 'Content-Type': 'application/json' };
+      try {
+        var tok = localStorage.getItem('volvix_token');
+        if (tok) headers['Authorization'] = 'Bearer ' + tok;
+      } catch (_) {}
+      fetch('/api/errors/log', { method: 'POST', headers: headers, body: body, credentials: 'include' })
+        .catch(function () {});
     } catch (_) {}
   }
 
-  // ---------------------------------------------------------------------------
-  // Boot
-  // ---------------------------------------------------------------------------
-  function boot() {
-    injectCss();
-    buildBell();
-    fetchNotifications(true);
-    setupRealtime();
-    setInterval(function () { fetchNotifications(true); }, POLL_MS);
+  async function monitorSync() {
+    if (!settings.autoMonitor) return;
+    // 2026-05: skip en páginas públicas (home/landings/registro/login) y
+    // cuando NO hay token. Antes esto saturaba system_error_logs con 510
+    // entradas/semana de '401 sync status' en visitantes anónimos del home.
+    try {
+      if (typeof window.__vlxIsPublicPage === 'function' && window.__vlxIsPublicPage()) return;
+      var __tok = '';
+      try { __tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || ''; } catch (_) {}
+      if (!__tok) return;
+    } catch (_) {}
+    try {
+      const res = await fetch(location.origin + '/api/sync/status', { credentials: 'include' });
+      if (!res.ok) {
+        // 2026-05: 401 en monitorSync es esperado cuando el token expira;
+        // no es ruido — loguear con level=info, no como error.
+        if (res.status === 401) {
+          // Token expiró, dejar que auth-helper haga el redirect.
+          return;
+        }
+        // Errores de sistema: NO mostrar toast al usuario. Loguear al backend.
+        _logSystemError({
+          code: String(res.status),
+          message: 'sync status http ' + res.status,
+          source: 'monitorSync'
+        });
+        // Si el error es crítico (5xx) y aún no hemos avisado, mensaje genérico discreto.
+        if (res.status >= 500 && !recentDuplicate('sync-system-critical')) {
+          try {
+            window.notify(
+              'Conexión inestable',
+              'Estamos arreglando un problema. Reintenta en unos minutos.',
+              'warning',
+              { type: 'sync-system-critical' }
+            );
+          } catch (_) {}
+        }
+        return;
+      }
+      const data = await res.json();
+      if (data && data.error) {
+        _logSystemError({
+          code: 'sync-status-error',
+          message: String(data.error).slice(0, 500),
+          source: 'monitorSync'
+        });
+      }
+    } catch (e) {
+      // Error de red: registrar silenciosamente, no spamear al usuario.
+      _logSystemError({
+        code: 'network',
+        message: String((e && e.message) || e).slice(0, 500),
+        source: 'monitorSync'
+      });
+    }
   }
 
+  function monitorSession() {
+    if (!settings.autoMonitor) return;
+    try {
+      const expRaw = localStorage.getItem('volvix:session:expiresAt') ||
+                     sessionStorage.getItem('volvix:session:expiresAt');
+      if (!expRaw) return;
+      const exp = parseInt(expRaw, 10);
+      if (!exp) return;
+      const remaining = exp - Date.now();
+      if (remaining > 0 && remaining < 5 * 60_000 && !recentDuplicate('session-expiring')) {
+        window.notify(
+          'Sesión por expirar',
+          `Tu sesión expira en ${Math.ceil(remaining/60_000)} minuto(s)`,
+          'warning',
+          { type: 'session-expiring', remaining }
+        );
+      }
+    } catch {}
+  }
+
+  // ──────────────────────────────────────────────────────────────
+  // Web Push permission
+  // FIX-B: NO auto-fire push permission. User must click explicit
+  // "Activar notificaciones" button. Modal "Nombre completo" auto-fire
+  // bug fixed by removing automatic Notification.requestPermission().
+  // ──────────────────────────────────────────────────────────────
+  function requestPushPermission() {
+    // FIX-B: Auto-fire eliminado. Esta función ahora es no-op por defecto.
+    // Para permitir auto-fire en pantallas legítimas (ej. owner_panel para
+    // alertas críticas), el usuario debe cumplir UNO de:
+    //   1. URL con ?optin=true query param
+    //   2. localStorage.volvix_push_optin === 'true'
+    if (!('Notification' in window)) return;
+    if (Notification.permission !== 'default') return;
+
+    let allowAuto = false;
+    try {
+      const qs = (typeof URLSearchParams !== 'undefined')
+        ? new URLSearchParams(window.location.search)
+        : null;
+      const optinQS = qs && qs.get('optin') === 'true';
+      const optinLS = (typeof localStorage !== 'undefined') &&
+                      localStorage.getItem('volvix_push_optin') === 'true';
+      allowAuto = !!(optinQS || optinLS);
+    } catch (_) {}
+
+    if (!allowAuto) {
+      // No-op: solo opt-in explícito vía window.VolvixNotif.requestOptIn()
+      return;
+    }
+
+    // Opt-in detectado: pedir permiso al primer click (sin spammear al cargar)
+    const handler = () => {
+      try { Notification.requestPermission(); } catch {}
+      document.removeEventListener('click', handler);
+    };
+    document.addEventListener('click', handler, { once: true });
+  }
+
+  // FIX-B: API pública para opt-in EXPLÍCITO por click de usuario.
+  // Llamar desde un botón "Activar notificaciones" en la UI.
+  function requestOptIn() {
+    if (!('Notification' in window)) {
+      return Promise.resolve('unsupported');
+    }
+    if (Notification.permission === 'granted') return Promise.resolve('granted');
+    if (Notification.permission === 'denied')  return Promise.resolve('denied');
+    try {
+      try { localStorage.setItem('volvix_push_optin', 'true'); } catch (_) {}
+      return Promise.resolve(Notification.requestPermission());
+    } catch (e) {
+      return Promise.resolve('error');
+    }
+  }
+  // Exponer global para que botones de UI puedan llamarla
+  window.VolvixNotif = window.VolvixNotif || {};
+  window.VolvixNotif.requestOptIn = requestOptIn;
+
+  // ──────────────────────────────────────────────────────────────
+  // Init
+  // ──────────────────────────────────────────────────────────────
+  function init() {
+    // R29: NO disparar auto-monitores en pantallas públicas
+    // (marketplace, login, hub-landing, customer-portal, kiosk, fraud)
+    var publicPages = [
+      '/login.html', '/marketplace.html', '/volvix-hub-landing.html',
+      '/landing_dynamic.html', '/volvix-kiosk.html', '/volvix-shop.html',
+      '/volvix-grand-tour.html', '/volvix-sitemap.html', '/volvix-api-docs.html',
+      '/volvix-gdpr-portal.html', '/404.html'
+    ];
+    var path = (location && location.pathname) || '';
+    var isPublic = publicPages.some(function(p){ return path === p || path.endsWith(p); });
+    if (isPublic) {
+      // Sin bell, sin monitores, solo expone API
+      return;
+    }
+    load();
+    injectStyles();
+    requestPushPermission();
+
+    // Monitores periódicos
+    setInterval(monitorStock,   STOCK_INTERVAL);
+    setInterval(monitorNewSales, SALES_INTERVAL);
+    setInterval(monitorSync,    SYNC_INTERVAL);
+    setInterval(monitorSession, SESSION_INTERVAL);
+
+    // Primera ejecución diferida
+    setTimeout(monitorStock,    2_000);
+    setTimeout(monitorNewSales, 4_000);
+    setTimeout(monitorSync,     6_000);
+    setTimeout(monitorSession,  8_000);
+
+    console.log('[volvix-notifications] inicializado — historial:', notifications.length);
+  }
+
+  // ──────────────────────────────────────────────────────────────
+  // API pública
+  // ──────────────────────────────────────────────────────────────
+  window.NotificationsAPI = {
+    toast:           window.toast,
+    notify:          window.notify,
+    list:            () => notifications.slice(),
+    unreadCount:     () => notifications.filter(n => !n.read).length,
+    clear:           window.clearNotifications,
+    markRead:        window.markRead,
+    markAllRead:     window.markAllRead,
+    remove:          window.removeNotification,
+    open:            () => { if (!panelOpen) togglePanel(); },
+    close:           () => { if (panelOpen)  togglePanel(); },
+    settings:        () => Object.assign({}, settings),
+    setSetting:      (k, v) => { if (k in settings) { settings[k] = !!v; saveSettings(); } },
+    requestPush:     () => 'Notification' in window ? Notification.requestPermission() : Promise.resolve('denied'),
+    // Disparadores manuales (útiles para testing y para wiring externo)
+    triggerLowStock:    (count)   => window.notify('Stock bajo', `${count} producto(s) bajos`, 'warning', { type:'low-stock', count }),
+    triggerNewSale:     (id, tot) => window.notify('Nueva venta', `Venta #${id} por $${tot}`,    'success', { type:'new-sale', saleId:id }),
+    triggerSyncError:   (msg)     => { _logSystemError({ code:'manual', message: String(msg || 'Sin conexión').slice(0,500), source:'triggerSyncError' }); },
+    triggerSessionExp:  (mins)    => window.notify('Sesión por expirar', `Expira en ${mins} min`, 'warning', { type:'session-expiring' })
+  };
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot, { once: true });
+    document.addEventListener('DOMContentLoaded', init);
   } else {
-    boot();
+    init();
   }
 })();
