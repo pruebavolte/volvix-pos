@@ -10438,6 +10438,133 @@ handlers['GET /api/config/public'] = async (req, res) => {
     try { await readBody(req); } catch (_) {}
     sendJSON(res, { ok: true, received: true });
   };
+
+  // ---- AUDIT 2026-05-01: cabling missing endpoints (status report) ----
+  // /api/version — public meta + build info
+  handlers['GET /api/version'] = (req, res) => {
+    sendJSON(res, {
+      ok: true,
+      service: 'volvix-pos',
+      version: '1.0.0',
+      commit: process.env.VERCEL_GIT_COMMIT_SHA || null,
+      branch: process.env.VERCEL_GIT_COMMIT_REF || null,
+      env: process.env.NODE_ENV || 'development',
+      ts: new Date().toISOString()
+    });
+  };
+  // /api/giros/list — list catalog (alias to giros search w/o q)
+  handlers['GET /api/giros/list'] = async (req, res) => {
+    try {
+      const rows = await supabaseRequest('GET', '/business_giros?select=*&limit=200');
+      sendJSON(res, { ok: true, items: Array.isArray(rows) ? rows : [], total: Array.isArray(rows) ? rows.length : 0 });
+    } catch (e) {
+      sendJSON(res, { ok: true, items: [], total: 0, note: 'using_in_memory_fallback' });
+    }
+  };
+  // /api/marketplace/stores — público
+  handlers['GET /api/marketplace/stores'] = async (req, res) => {
+    try {
+      const rows = await supabaseRequest('GET',
+        '/pos_companies?is_active=eq.true&select=tenant_id,name,business_type,phone&limit=200');
+      sendJSON(res, { ok: true, items: Array.isArray(rows) ? rows : [], total: Array.isArray(rows) ? rows.length : 0 });
+    } catch (_) { sendJSON(res, { ok: true, items: [], total: 0 }); }
+  };
+  // /api/marketplace/products — público (sin tenant filter)
+  handlers['GET /api/marketplace/products'] = async (req, res) => {
+    try {
+      const rows = await supabaseRequest('GET',
+        '/pos_products?is_active=eq.true&select=id,tenant_id,name,price,image_url,category&limit=100');
+      sendJSON(res, { ok: true, items: Array.isArray(rows) ? rows : [], total: Array.isArray(rows) ? rows.length : 0 });
+    } catch (_) { sendJSON(res, { ok: true, items: [], total: 0 }); }
+  };
+  // /api/admin/tenants — list tenants (superadmin only). Bulk POST ya existe.
+  handlers['GET /api/admin/tenants'] = requireAuth(async (req, res) => {
+    const role = String((req.user && (req.user.role || req.user.rol)) || '').toLowerCase();
+    if (role !== 'superadmin' && role !== 'platform_owner') {
+      return sendJSON(res, { ok: false, error: 'forbidden' }, 403);
+    }
+    try {
+      const rows = await supabaseRequest('GET',
+        '/pos_companies?select=id,tenant_id,name,business_type,plan,is_active,status,created_at&order=created_at.desc&limit=500');
+      sendJSON(res, { ok: true, items: Array.isArray(rows) ? rows : [], total: Array.isArray(rows) ? rows.length : 0 });
+    } catch (e) {
+      sendJSON(res, { ok: false, error: 'db_error', detail: IS_PROD ? null : String(e && e.message || e) }, 500);
+    }
+  });
+  // /api/recargas/health — fast probe sin auth
+  handlers['GET /api/recargas/health'] = (req, res) => {
+    sendJSON(res, {
+      ok: true,
+      provider_configured: !!(process.env.PROVIDER_RECARGAS_API_KEY),
+      ts: new Date().toISOString()
+    });
+  };
+  // /api/services/health
+  handlers['GET /api/services/health'] = (req, res) => {
+    sendJSON(res, {
+      ok: true,
+      provider_configured: !!(process.env.PROVIDER_SERVICES_API_KEY),
+      ts: new Date().toISOString()
+    });
+  };
+  // /api/errors/log — alias del POST /api/errors/report (clientes lo llaman así)
+  handlers['POST /api/errors/log'] = async (req, res) => {
+    try {
+      const body = await readBody(req);
+      // Best-effort persist if system_error_logs table existe
+      try {
+        await supabaseRequest('POST', '/system_error_logs', {
+          level: String(body.level || 'error').slice(0, 20),
+          source: String(body.source || body.context || 'client').slice(0, 80),
+          error_code: String(body.code || body.error_code || '').slice(0, 64),
+          message: String(body.message || body.error || '').slice(0, 1000),
+          context: typeof body.context === 'object' ? JSON.stringify(body.context).slice(0, 4000) : null,
+          created_at: new Date().toISOString()
+        });
+      } catch (_) {}
+      sendJSON(res, { ok: true });
+    } catch (e) { sendJSON(res, { ok: true, note: 'no-op' }); }
+  };
+  // /api/academy-progress — track tutorial/academy completion
+  handlers['POST /api/academy-progress'] = requireAuth(async (req, res) => {
+    try {
+      const body = await readBody(req);
+      const userId = req.user && req.user.id;
+      const tenantId = req.user && (req.user.tenant_id || req.user.company_id);
+      try {
+        await supabaseRequest('POST', '/academy_progress', {
+          user_id: userId, tenant_id: tenantId,
+          tutorial_id: String(body.tutorial_id || '').slice(0, 80),
+          step: Number(body.step) || 0,
+          completed: !!body.completed,
+          updated_at: new Date().toISOString()
+        });
+      } catch (_) {}
+      sendJSON(res, { ok: true });
+    } catch (_) { sendJSON(res, { ok: true, note: 'no-op' }); }
+  });
+  handlers['GET /api/academy-progress'] = requireAuth(async (req, res) => {
+    const userId = req.user && req.user.id;
+    try {
+      const rows = await supabaseRequest('GET',
+        '/academy_progress?user_id=eq.' + encodeURIComponent(userId) + '&select=*&limit=200');
+      sendJSON(res, { ok: true, items: Array.isArray(rows) ? rows : [], total: Array.isArray(rows) ? rows.length : 0 });
+    } catch (_) { sendJSON(res, { ok: true, items: [], total: 0 }); }
+  });
+  // /api/tenant/settings — GET para complementar el PATCH existente
+  handlers['GET /api/tenant/settings'] = requireAuth(async (req, res) => {
+    const tenantId = req.user && (req.user.tenant_id || req.user.company_id);
+    if (!tenantId) return sendJSON(res, { ok: false, error: 'no_tenant' }, 400);
+    try {
+      const rows = await supabaseRequest('GET',
+        '/pos_companies?tenant_id=eq.' + encodeURIComponent(tenantId) + '&select=tenant_id,name,business_type,phone,plan,settings&limit=1');
+      const row = Array.isArray(rows) && rows[0] || {};
+      sendJSON(res, { ok: true, tenant: row, settings: row.settings || {} });
+    } catch (e) {
+      sendJSON(res, { ok: false, error: 'db_error' }, 500);
+    }
+  });
+
   handlers['POST /api/logs'] = async (req, res) => {
     try { await readBody(req); } catch (_) {}
     sendJSON(res, { ok: true });
