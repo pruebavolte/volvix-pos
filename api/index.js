@@ -2238,6 +2238,33 @@ const handlers = {
         if (dPct) saleRow.discount_pct = dPct;
         if (dAmt) saleRow.discount_amount = dAmt;
       }
+
+      // 2026-05 audit B-37: emitir inventory_movements (type='venta') por cada
+      // ítem para que el trigger DB decremente stock. Antes la venta no
+      // generaba movimientos → el stock real nunca bajaba (solo bajaba via
+      // path alterno del POS si existía). Best-effort: si la tabla no existe
+      // (legacy), no falla la venta — solo logueamos.
+      try {
+        if (saleRow && saleRow.id && Array.isArray(itemsIn) && itemsIn.length) {
+          const movRows = itemsIn.map(it => ({
+            tenant_id: req.user && req.user.tenant_id || null,
+            sale_id: saleRow.id,
+            product_id: it.product_id || it.id || null,
+            sku: it.sku || it.code || it.barcode || null,
+            type: 'venta',
+            qty: -Math.abs(Number(it.qty || it.quantity || 1)),
+            unit_cost: Number(it.cost || 0),
+            user_id: req.user && req.user.id || null,
+            created_at: new Date().toISOString()
+          })).filter(r => r.product_id || r.sku);
+          if (movRows.length) {
+            await supabaseRequest('POST', '/inventory_movements', movRows).catch(function (e) {
+              try { console.warn('[sale.inventory_movement] best-effort failed:', String(e && e.message || e).slice(0, 200)); } catch (_) {}
+            });
+          }
+        }
+      } catch (_) { /* never block a confirmed sale */ }
+
       // R14: receipt email si customer.email existe
       try {
         const customerEmail = body.customer?.email || body.customer_email;
@@ -16598,23 +16625,72 @@ if (process.env.NODE_ENV === 'test') {
         return send404(res, 'cuts', body.cut_id);
       }
       if (cut.closed_at) return sendJSON(res, { error: 'cut_already_closed' }, 409);
-      // Compute total sales between opened_at and now for this cashier
+      // 2026-05 audit B-34/B-36: ahora SOLO sumamos ventas con status válido
+      // (excluimos void/cancelled), separamos por método de pago, y
+      // restamos las devoluciones (pos_returns) del periodo.
       var totalSales = 0;
+      var totalCash = 0, totalCard = 0, totalTransfer = 0, totalOther = 0;
       try {
         var sales = await supabaseRequest('GET',
           '/pos_sales?pos_user_id=eq.' + encodeURIComponent(cut.cashier_id || '') +
           '&created_at=gte.' + encodeURIComponent(cut.opened_at) +
-          '&select=total&limit=10000');
+          // Excluir voided/cancelled
+          '&status=not.in.(void,cancelled,refunded)' +
+          '&select=total,payment_method&limit=10000');
         for (var i = 0; i < (sales || []).length; i++) {
-          totalSales += parseFloat(sales[i].total || 0) || 0;
+          var amt = parseFloat(sales[i].total || 0) || 0;
+          totalSales += amt;
+          var pm = String(sales[i].payment_method || '').toLowerCase();
+          if (pm === 'efectivo' || pm === 'cash') totalCash += amt;
+          else if (pm === 'tarjeta' || pm === 'card' || pm === 'stripe') totalCard += amt;
+          else if (pm === 'transferencia' || pm === 'transfer' || pm === 'spei') totalTransfer += amt;
+          else totalOther += amt;
         }
       } catch (_) {}
-      var expected = (parseFloat(cut.opening_balance) || 0) + totalSales;
+      // Restar devoluciones del periodo (pos_returns)
+      var totalRefunds = 0;
+      try {
+        var refunds = await supabaseRequest('GET',
+          '/pos_returns?pos_user_id=eq.' + encodeURIComponent(cut.cashier_id || '') +
+          '&created_at=gte.' + encodeURIComponent(cut.opened_at) +
+          '&select=total_refunded,refund_method&limit=10000').catch(function () { return []; });
+        for (var r = 0; r < (refunds || []).length; r++) {
+          var rAmt = parseFloat(refunds[r].total_refunded || refunds[r].total || 0) || 0;
+          totalRefunds += rAmt;
+          var rPm = String(refunds[r].refund_method || refunds[r].payment_method || '').toLowerCase();
+          if (rPm === 'efectivo' || rPm === 'cash') totalCash -= rAmt;
+          else if (rPm === 'tarjeta' || rPm === 'card' || rPm === 'stripe') totalCard -= rAmt;
+          else if (rPm === 'transferencia' || rPm === 'transfer') totalTransfer -= rAmt;
+          else totalOther -= rAmt;
+        }
+      } catch (_) {}
+      // Cash-in / cash-out del turno (movimientos manuales de caja)
+      var cashIn = 0, cashOut = 0;
+      try {
+        var movs = await supabaseRequest('GET',
+          '/cash_movements?cut_id=eq.' + encodeURIComponent(body.cut_id) +
+          '&select=type,amount&limit=1000').catch(function () { return []; });
+        for (var m = 0; m < (movs || []).length; m++) {
+          var t = String(movs[m].type || '').toLowerCase();
+          var a = parseFloat(movs[m].amount || 0) || 0;
+          if (t === 'in' || t === 'cash_in') cashIn += a;
+          else if (t === 'out' || t === 'cash_out') cashOut += a;
+        }
+      } catch (_) {}
+      var totalNet = totalSales - totalRefunds;
+      var expected = (parseFloat(cut.opening_balance) || 0) + totalCash + cashIn - cashOut;
       var discrepancy = +(counted - expected).toFixed(2);
       var patch = {
         closing_balance: counted,
         closing_breakdown: body.closing_breakdown || null,
         total_sales: totalSales,
+        total_refunds: totalRefunds,
+        total_cash_sales: +totalCash.toFixed(2),
+        total_card_sales: +totalCard.toFixed(2),
+        total_transfer_sales: +totalTransfer.toFixed(2),
+        total_other_sales: +totalOther.toFixed(2),
+        total_cash_in: +cashIn.toFixed(2),
+        total_cash_out: +cashOut.toFixed(2),
         expected_balance: expected,
         discrepancy: discrepancy,
         notes_close: body.notes ? sanitizeText(String(body.notes)).slice(0, 1000) : null,
@@ -16628,6 +16704,16 @@ if (process.env.NODE_ENV === 'test') {
         cut_id: body.cut_id,
         opening: parseFloat(cut.opening_balance) || 0,
         total_sales: totalSales,
+        total_refunds: totalRefunds,
+        net_sales: +totalNet.toFixed(2),
+        by_method: {
+          cash: +totalCash.toFixed(2),
+          card: +totalCard.toFixed(2),
+          transfer: +totalTransfer.toFixed(2),
+          other: +totalOther.toFixed(2)
+        },
+        cash_in: +cashIn.toFixed(2),
+        cash_out: +cashOut.toFixed(2),
         expected: expected,
         counted: counted,
         discrepancy: discrepancy,
