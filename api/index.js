@@ -1176,8 +1176,11 @@ function serveStaticFile(res, pathname) {
     //   /volvix-*.js?v=HASH → max-age=1y immutable (URL única por deploy)
     //   /volvix-*.js sin ?v → max-age=0, must-revalidate (back-compat)
     //   resto       → max-age=3600 (imagenes, fonts, etc.)
+    // serveStaticFile no recibe `req` directo — el cache-bust flag se infiere
+    // mirando si pathname trae query string (Vercel ya lo separa por defecto,
+    // pero por robustez lo detectamos también del path crudo si es posible).
     const isWiring = /\/volvix-[\w-]+\.js$/.test(pathname);
-    const hasCacheBust = !!(req.url && /[?&]v=/.test(req.url));
+    const hasCacheBust = /[?&]v=[a-f0-9]/.test(pathname);
     if (ext === '.html') {
       res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
     } else if (isWiring && hasCacheBust) {
