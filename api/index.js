@@ -10518,6 +10518,165 @@ handlers['GET /api/config/public'] = async (req, res) => {
       sendJSON(res, { ok: false, error: 'db_error', detail: IS_PROD ? null : String(e && e.message || e) }, 500);
     }
   });
+  // ---- TENANT MODULES & BUTTONS — control granular per-tenant ----
+  // El dueño del SaaS (superadmin) habilita/deshabilita módulos enteros y
+  // botones individuales por tenant. El frontend del tenant recibe la lista
+  // y REMUEVE del DOM los elementos no autorizados (no greying — desaparecen).
+  //
+  // GET /api/tenant/active-modules    (auth) — lo que el tenant SÍ puede ver
+  // POST /api/admin/tenants/:id/modules    (superadmin) — toggle módulo
+  // POST /api/admin/tenants/:id/buttons    (superadmin) — toggle botón
+
+  // Default modules: si no hay flags en DB, asumimos TODOS habilitados
+  // (modo "modo demo" para clientes nuevos hasta que el admin lo restrinja).
+  const DEFAULT_MODULES_ALL_ON = true;
+
+  handlers['GET /api/tenant/active-modules'] = requireAuth(async (req, res) => {
+    const tenantId = req.user && (req.user.tenant_id || req.user.company_id);
+    if (!tenantId) return sendJSON(res, { ok: false, error: 'no_tenant' }, 400);
+    try {
+      const moduleRows = await supabaseRequest('GET',
+        '/tenant_module_flags?tenant_id=eq.' + encodeURIComponent(tenantId) +
+        '&select=module_key,state,enabled,paid,lock_message&limit=200').catch(() => []);
+      const buttonRows = await supabaseRequest('GET',
+        '/tenant_button_flags?tenant_id=eq.' + encodeURIComponent(tenantId) +
+        '&select=button_key,state,enabled,lock_message&limit=2000').catch(() => []);
+      const modules = {};
+      (Array.isArray(moduleRows) ? moduleRows : []).forEach(r => {
+        modules[r.module_key] = {
+          state: r.state || (r.enabled ? 'enabled' : 'hidden'),
+          enabled: !!r.enabled,
+          paid: !!r.paid,
+          lock_message: r.lock_message || null
+        };
+      });
+      const buttons = {};
+      (Array.isArray(buttonRows) ? buttonRows : []).forEach(r => {
+        buttons[r.button_key] = {
+          state: r.state || (r.enabled ? 'enabled' : 'hidden'),
+          enabled: !!r.enabled,
+          lock_message: r.lock_message || null
+        };
+      });
+      sendJSON(res, {
+        ok: true,
+        tenant_id: tenantId,
+        defaults_open: DEFAULT_MODULES_ALL_ON,
+        modules: modules,
+        buttons: buttons,
+        ts: new Date().toISOString()
+      });
+    } catch (_) {
+      sendJSON(res, { ok: true, defaults_open: true, modules: {}, buttons: {} });
+    }
+  });
+
+  handlers['POST /api/admin/tenants/:id/modules'] = requireAuth(async (req, res, params) => {
+    const role = String((req.user && (req.user.role || req.user.rol)) || '').toLowerCase();
+    if (role !== 'superadmin' && role !== 'platform_owner') {
+      return sendJSON(res, { ok: false, error: 'forbidden' }, 403);
+    }
+    const tenantId = decodeURIComponent(params.id);
+    const body = await readBody(req);
+    // body: { modules: { ventas: {enabled, paid}, inventario: {...}, ... } }
+    if (!body.modules || typeof body.modules !== 'object') {
+      return sendJSON(res, { ok: false, error: 'modules_required' }, 400);
+    }
+    const updates = [];
+    // 3 estados soportados:
+    //   'hidden'   → el wiring remueve el elemento del DOM. Cambia el layout.
+    //   'locked'   → visible pero deshabilitado, con overlay candado + mensaje custom (ej "Suscríbete")
+    //   'enabled'  → funciona normal
+    // Compatibilidad: si el body trae solo {enabled: true/false}, lo mapeamos.
+    const VALID_STATES = ['hidden', 'locked', 'enabled'];
+    for (const [k, v] of Object.entries(body.modules)) {
+      let state, lockMsg;
+      if (v && typeof v === 'object') {
+        state = VALID_STATES.includes(v.state) ? v.state
+              : (v.enabled === false ? 'hidden' : 'enabled');
+        lockMsg = v.lock_message ? String(v.lock_message).slice(0, 200) : null;
+      } else {
+        state = v ? 'enabled' : 'hidden';
+        lockMsg = null;
+      }
+      const row = {
+        tenant_id: tenantId,
+        module_key: String(k).slice(0, 80),
+        state: state,
+        // back-compat: enabled mirror
+        enabled: state === 'enabled',
+        paid: !!(v && v.paid),
+        lock_message: lockMsg,
+        updated_at: new Date().toISOString()
+      };
+      try {
+        const exist = await supabaseRequest('GET',
+          '/tenant_module_flags?tenant_id=eq.' + encodeURIComponent(tenantId) +
+          '&module_key=eq.' + encodeURIComponent(row.module_key) + '&select=tenant_id&limit=1').catch(() => []);
+        if (Array.isArray(exist) && exist.length > 0) {
+          await supabaseRequest('PATCH',
+            '/tenant_module_flags?tenant_id=eq.' + encodeURIComponent(tenantId) +
+            '&module_key=eq.' + encodeURIComponent(row.module_key), row);
+        } else {
+          await supabaseRequest('POST', '/tenant_module_flags', row);
+        }
+        updates.push({ module: row.module_key, state: state, paid: row.paid, lock_message: lockMsg });
+      } catch (e) {
+        updates.push({ module: row.module_key, error: String(e && e.message || e).slice(0, 100) });
+      }
+    }
+    sendJSON(res, { ok: true, tenant_id: tenantId, updates: updates });
+  });
+
+  handlers['POST /api/admin/tenants/:id/buttons'] = requireAuth(async (req, res, params) => {
+    const role = String((req.user && (req.user.role || req.user.rol)) || '').toLowerCase();
+    if (role !== 'superadmin' && role !== 'platform_owner') {
+      return sendJSON(res, { ok: false, error: 'forbidden' }, 403);
+    }
+    const tenantId = decodeURIComponent(params.id);
+    const body = await readBody(req);
+    if (!body.buttons || typeof body.buttons !== 'object') {
+      return sendJSON(res, { ok: false, error: 'buttons_required' }, 400);
+    }
+    const updates = [];
+    const VALID_STATES_BTN = ['hidden', 'locked', 'enabled'];
+    for (const [k, v] of Object.entries(body.buttons)) {
+      let state, lockMsg;
+      if (v && typeof v === 'object') {
+        state = VALID_STATES_BTN.includes(v.state) ? v.state
+              : (v.enabled === false ? 'hidden' : 'enabled');
+        lockMsg = v.lock_message ? String(v.lock_message).slice(0, 200) : null;
+      } else {
+        state = v ? 'enabled' : 'hidden';
+        lockMsg = null;
+      }
+      const row = {
+        tenant_id: tenantId,
+        button_key: String(k).slice(0, 120),
+        state: state,
+        enabled: state === 'enabled',
+        lock_message: lockMsg,
+        updated_at: new Date().toISOString()
+      };
+      try {
+        const exist = await supabaseRequest('GET',
+          '/tenant_button_flags?tenant_id=eq.' + encodeURIComponent(tenantId) +
+          '&button_key=eq.' + encodeURIComponent(row.button_key) + '&select=tenant_id&limit=1').catch(() => []);
+        if (Array.isArray(exist) && exist.length > 0) {
+          await supabaseRequest('PATCH',
+            '/tenant_button_flags?tenant_id=eq.' + encodeURIComponent(tenantId) +
+            '&button_key=eq.' + encodeURIComponent(row.button_key), row);
+        } else {
+          await supabaseRequest('POST', '/tenant_button_flags', row);
+        }
+        updates.push({ button: row.button_key, state: state, lock_message: lockMsg });
+      } catch (e) {
+        updates.push({ button: row.button_key, error: String(e && e.message || e).slice(0, 100) });
+      }
+    }
+    sendJSON(res, { ok: true, tenant_id: tenantId, updates: updates });
+  });
+
   // /api/ai/giro-classify — endpoint PÚBLICO (rate-limited) que clasifica
   // texto libre del usuario en un giro de negocio MX. Ej. "vendo abarrotitos"
   // → "abarrotes". Usa AI Gateway si está, sino fallback a synonym match local

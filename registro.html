@@ -434,10 +434,68 @@
       .then(function (r) { return r.json(); })
       .then(function (data) {
         giroResults = (data && Array.isArray(data.results)) ? data.results : [];
+        // Si autocomplete local no devolvió matches Y el texto es largo (>=10
+        // caracteres, ej. "vendo gorditas y campechanas"), llamar AI Gateway
+        // para clasificar lenguaje natural. La AI mapea a un giro de los 60+.
+        if (giroResults.length === 0 && q.length >= 10) {
+          aiClassifyGiro(q);
+          return;
+        }
         renderGiroSuggestions(q, giroResults);
       })
       .catch(function () { /* silencioso */ });
   }, 200);
+
+  // AI giro classifier — fallback para lenguaje natural ambiguo. Pinta
+  // sugerencia "✨ ¿Te referías a [giro]?" con confianza visual.
+  var aiInflight = null;
+  function aiClassifyGiro(text) {
+    // Cancelar request previo si el usuario sigue tipeando
+    if (aiInflight && aiInflight.abort) try { aiInflight.abort(); } catch (_) {}
+    var ac = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    aiInflight = ac;
+    // Pintar estado "pensando"
+    giroSugBox.innerHTML = '<div class="giro-suggestion" style="color:#9CA3AF;font-style:italic;cursor:wait">✨ Identificando tu giro…</div>';
+    giroSugBox.classList.add('show');
+    fetch('/api/ai/giro-classify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: text }),
+      signal: ac && ac.signal
+    })
+      .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+      .then(function (j) {
+        if (!j || !j.giro || j.giro === 'otro' || j.confidence < 0.5) {
+          giroSugBox.innerHTML = '<div class="giro-suggestion" style="color:#9CA3AF;font-style:italic;cursor:default">No reconocí ese giro. Intenta con palabras más simples (ej. "abarrotes", "tacos").</div>';
+          return;
+        }
+        // Validar que el giro sugerido tenga datos en el catálogo
+        return fetch('/api/giros/autocomplete?q=' + encodeURIComponent(j.giro) + '&limit=1')
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            var match = data && data.results && data.results[0];
+            if (!match) {
+              giroSugBox.innerHTML = '<div class="giro-suggestion" style="color:#9CA3AF;font-style:italic">No tenemos catálogo para "' + j.giro + '" todavía.</div>';
+              return;
+            }
+            // Render UNA sugerencia con la pista visual de IA
+            giroSugBox.innerHTML =
+              '<div class="giro-suggestion" data-slug="' + match.slug + '" data-name="' + (match.name || '').replace(/"/g, '&quot;') + '" style="display:flex;align-items:center;gap:8px;cursor:pointer">' +
+                '<span style="font-size:16px">✨</span>' +
+                '<div style="flex:1">' +
+                  '<div style="font-weight:500;color:#0B0B0F">' + (match.name || j.giro) + '</div>' +
+                  '<div style="font-size:11px;color:#6B7280;margin-top:1px">Identificado por IA · ' + Math.round((j.confidence || 0.85) * 100) + '% seguro · click para usar</div>' +
+                '</div>' +
+              '</div>';
+            giroResults = [match];
+          });
+      })
+      .catch(function (e) {
+        if (e && e.name === 'AbortError') return;
+        giroSugBox.innerHTML = '';
+        giroSugBox.classList.remove('show');
+      });
+  }
 
   giroBox.addEventListener('input', function (e) {
     state.selected_giro = null;

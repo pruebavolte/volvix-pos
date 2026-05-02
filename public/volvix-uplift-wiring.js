@@ -360,6 +360,11 @@
     }
     try { window.dispatchEvent(new CustomEvent('volvix:uplift:ready')); } catch (_) {}
 
+    // === LOAD MODULE FLAGS WIRING — solo si no está ya cargado y la página
+    // tiene elementos data-module o data-button (heurística: páginas
+    // funcionales del POS, no las landings públicas).
+    try { ensureModuleFlagsWiring(); } catch (_) {}
+
     // === FORCE LIGHT MODE — el usuario reportó texto invisible (negro sobre
     // negro) cuando su OS está en dark mode. Las landings de giro tenían
     // @media (prefers-color-scheme: dark) que invertía colores según el OS.
@@ -376,6 +381,23 @@
     try {
       injectNoFloatersGuard();
     } catch (_) {}
+  }
+
+  // ---------------------------------------------------------------------------
+  // Module Flags Wiring loader
+  // ---------------------------------------------------------------------------
+  function ensureModuleFlagsWiring() {
+    if (window.__vlxModuleFlagsLoaded) return;
+    // Solo en páginas con auth (POS, launcher, owner panel, etc.)
+    var path = (location.pathname || '').toLowerCase();
+    var isPublic = /^\/(login|registro|index|404|cookies|aviso|terminos|gdpr|landing-|marketplace|blog|autofactura)/.test(path)
+                || path === '/' || path === '';
+    if (isPublic) return;
+    // Cargar el script
+    var s = document.createElement('script');
+    s.src = '/volvix-module-flags-wiring.js';
+    s.defer = true;
+    document.head.appendChild(s);
   }
 
   // ---------------------------------------------------------------------------
