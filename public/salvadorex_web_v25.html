@@ -4269,50 +4269,126 @@
     }
   };
 
-  /* ============ POS — B19: cascade local→central→external ============ */
+  /* Helper: importa un producto del catálogo global del dueño al tenant.
+     Se usa cuando el match viene del Level 3 de la cascada de scan. */
+  async function _importProductToTenant(g) {
+    try {
+      const tnt = (typeof _vTenant === 'function') ? _vTenant() : 'TNT001';
+      const payload = {
+        tenant_id: tnt,
+        name: g.name || g.nombre,
+        code: g.code || g.barcode,
+        barcode: g.barcode || g.code,
+        price: Number(g.suggested_price || g.price || 0),
+        cost: Number(g.cost || 0),
+        stock: 1,
+        category: g.category || 'General',
+        image_url: g.image_url || null,
+        source: 'owner_global'
+      };
+      const r = await fetch('/api/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(payload)
+      });
+      if (r.ok) {
+        const saved = await r.json().catch(() => null);
+        if (saved && saved.id) g.id = saved.id;
+        try { if (typeof loadCatalogReal === 'function') await loadCatalogReal(); } catch (_) {}
+      }
+    } catch (e) { console.warn('[_importProductToTenant] fail', e); }
+  }
+
+  /* ============ POS — CASCADE LOOKUP (4 levels) ============================
+   * 1. CATALOG en memoria (tenant local cache)
+   * 2. Tenant DB         GET /api/products?q=X
+   * 3. Owner global lib  GET /api/owner/products/lookup?q=X
+   * 4. Internet          VolvixBarcodeResolver (Open Food Facts + UPCitemDB)
+   * Si todo falla → modal "Nuevo producto" con prefill inteligente.
+   * ========================================================================== */
   async function searchProduct(code) {
     if (!code) { showToast('Escribe un código antes de presionar ENTER'); return; }
     const trimmed = String(code).trim();
     if (!trimmed) { showToast('Escribe un código antes de presionar ENTER'); return; }
-
-    // 1. Si el query parece un código numérico → cascade barcode resolver
     const isBarcode = /^\d{6,}$/.test(trimmed);
+    const lower = trimmed.toLowerCase();
+
+    // ── Level 1: CATALOG en memoria (instantáneo) ─────────────────────────
+    if (typeof CATALOG !== 'undefined' && Array.isArray(CATALOG)) {
+      const hit = CATALOG.find(x =>
+        x.code === trimmed || x.barcode === trimmed ||
+        (x.name || '').toLowerCase() === lower ||
+        (x.name || '').toLowerCase().includes(lower)
+      );
+      if (hit) {
+        addToCart(hit);
+        $('#barcode-input').value = ''; $('#barcode-input').focus();
+        return;
+      }
+    }
+
+    // ── Level 2: Tenant DB ────────────────────────────────────────────────
+    try {
+      const params = isBarcode
+        ? 'or=(barcode.eq.' + encodeURIComponent(trimmed) + ',code.eq.' + encodeURIComponent(trimmed) + ')'
+        : 'name=ilike.' + encodeURIComponent('%' + trimmed + '%');
+      const r = await fetch('/api/productos?' + params + '&select=*&limit=5', { credentials: 'include' });
+      if (r.ok) {
+        const j = await r.json();
+        const items = j.items || j.data || [];
+        if (items.length) {
+          const final = items[0];
+          addToCart(normalizeProductForCart(final));
+          showToast('✓ ' + (final.name || final.nombre) + ' (catálogo del negocio)');
+          $('#barcode-input').value = ''; $('#barcode-input').focus();
+          return;
+        }
+      }
+    } catch (_) {}
+
+    // ── Level 3: Owner global library (productos curados por systeminternational) ─
+    let ownerSuggestion = null;
+    try {
+      const r = await fetch('/api/owner/products/lookup?q=' + encodeURIComponent(trimmed), { credentials: 'include' });
+      if (r.ok) {
+        const j = await r.json();
+        if (j.items && j.items.length) {
+          ownerSuggestion = j.items[0];
+          // Si match exacto por barcode → agregar directo
+          if (isBarcode && (ownerSuggestion.barcode === trimmed || ownerSuggestion.code === trimmed)) {
+            // Importar a tenant DB y agregar al cart
+            await _importProductToTenant(ownerSuggestion);
+            addToCart(normalizeProductForCart(ownerSuggestion));
+            showToast('✓ ' + (ownerSuggestion.name || 'producto') + ' (catálogo global · importado)');
+            $('#barcode-input').value = ''; $('#barcode-input').focus();
+            return;
+          }
+        }
+      }
+    } catch (_) {}
+
+    // ── Level 4: Internet (solo barcodes — Open Food Facts + UPCitemDB) ───
     if (isBarcode && window.VolvixBarcodeResolver) {
       try {
         const result = await window.VolvixBarcodeResolver.scan(trimmed);
         if (result.found && result.product) {
           const p = result.product;
-          // B19: validar precio re-fetch desde local antes de agregar
           let final = p;
           if (window.VolvixProductSearch && p.id) {
             const fresh = await window.VolvixProductSearch.getById(p.id);
             if (fresh) final = fresh;
           }
           addToCart(normalizeProductForCart(final));
-          if (result.source === 'external_captured') {
-            showToast('✓ Producto nuevo guardado: ' + (final.name || final.nombre));
-          } else {
-            showToast('✓ ' + (final.name || final.nombre) + ' (' + result.source + ')');
-          }
-          $('#barcode-input').value = '';
-          $('#barcode-input').focus();
+          showToast('✓ ' + (final.name || final.nombre) + ' (' + (result.source || 'internet') + ')');
+          $('#barcode-input').value = ''; $('#barcode-input').focus();
           return;
         }
         if (result.error === 'user_cancelled') {
-          $('#barcode-input').value = '';
-          $('#barcode-input').focus();
+          $('#barcode-input').value = ''; $('#barcode-input').focus();
           return;
         }
-      } catch (e) { console.warn('[searchProduct] resolver fail', e); }
-    }
-
-    // 2. Fallback: catálogo legacy en memoria
-    const p = (typeof CATALOG !== 'undefined') ? CATALOG.find(x => x.code === trimmed || (x.name||'').toLowerCase().includes(trimmed.toLowerCase())) : null;
-    if (p) {
-      addToCart(p);
-      $('#barcode-input').value = '';
-      $('#barcode-input').focus();
-      return;
+      } catch (e) { console.warn('[searchProduct] internet resolver fail', e); }
     }
     // 3. No existe → abrir modal "Nuevo producto" con prefill inteligente.
     //    - Si lo escrito parece código de barras → prefill barcode + code, focus en NAME
@@ -5709,13 +5785,12 @@
               Nombre del producto *
               <input id="pf-name" type="text" required maxlength="160" value="${escapeAttr(p.name||'')}" style="padding:9px;border:1px solid #E7E5E4;border-radius:7px;font-size:13.5px;" placeholder="Ej. Coca Cola 600ml">
             </label>
-            <label style="display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;">
-              Código / SKU *
-              <input id="pf-code" type="text" required maxlength="64" value="${escapeAttr(p.code||'')}" style="padding:9px;border:1px solid #E7E5E4;border-radius:7px;font-size:13.5px;" placeholder="SKU-001">
-            </label>
-            <label style="display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;">
+            <!-- SKU hidden — auto-derivado del barcode si queda vacío -->
+            <input id="pf-code" type="hidden" value="${escapeAttr(p.code||'')}">
+            <label style="grid-column:span 2;display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;">
               Código de barras
-              <input id="pf-barcode" type="text" maxlength="32" value="${escapeAttr(p.barcode||p.code||'')}" style="padding:9px;border:1px solid #E7E5E4;border-radius:7px;font-size:13.5px;" placeholder="7501...">
+              <input id="pf-barcode" type="text" maxlength="32" value="${escapeAttr(p.barcode||p.code||'')}" style="padding:9px;border:1px solid #E7E5E4;border-radius:7px;font-size:13.5px;" placeholder="Se auto-genera (1, 2, 3…) o escribe el tuyo">
+              <span id="pf-barcode-status" style="font-size:11.5px;font-weight:500;min-height:14px;padding-left:2px"></span>
             </label>
             <label style="display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;">
               Precio (venta) *
@@ -5768,7 +5843,12 @@
         const min_stock = parseInt(modal.querySelector('#pf-min').value, 10) || 0;
         // Validation
         if (!name) { msg.textContent = 'El nombre es obligatorio'; modal.querySelector('#pf-name').focus(); return; }
-        if (!code) { msg.textContent = 'El código es obligatorio'; modal.querySelector('#pf-code').focus(); return; }
+        // SKU oculto — auto-derivado del barcode si quedó vacío
+        if (!code) {
+          const bc = modal.querySelector('#pf-barcode').value.trim();
+          code = bc || ('SKU-' + Date.now().toString(36).toUpperCase().slice(-6));
+          modal.querySelector('#pf-code').value = code;
+        }
         if (isNaN(price) || price <= 0) { msg.textContent = 'El precio debe ser mayor a 0'; modal.querySelector('#pf-price').focus(); return; }
         if (isNaN(cost) || cost < 0) { msg.textContent = 'El costo no puede ser negativo'; modal.querySelector('#pf-cost').focus(); return; }
         if (isNaN(stock) || stock < 0) { msg.textContent = 'El stock no puede ser negativo'; modal.querySelector('#pf-stock').focus(); return; }
@@ -5794,6 +5874,59 @@
         || (p.barcode && !p.name ? '#pf-name'
         : (p.name && !p.barcode ? '#pf-price' : '#pf-name'));
       setTimeout(() => modal.querySelector(autoFocusSel)?.focus(), 50);
+
+      // ── Auto-generar barcode (1, 2, 3, …) cuando el cajero solo escribe nombre.
+      //    Se dispara solo si el campo barcode está vacío al abrir el modal y el
+      //    prefill viene de "escribí un nombre" (no de scan de código).
+      const bcInput = modal.querySelector('#pf-barcode');
+      const bcStatus = modal.querySelector('#pf-barcode-status');
+      if (bcInput && !bcInput.value && !p.barcode && p.name) {
+        // Sugerir el próximo libre desde el server (silencioso si falla)
+        fetch('/api/products/next-barcode', { credentials: 'include' })
+          .then(r => r.ok ? r.json() : null)
+          .then(j => {
+            if (j && j.next_barcode && !bcInput.value) {
+              bcInput.value = j.next_barcode;
+              if (bcStatus) {
+                bcStatus.textContent = 'Sugerido — puedes cambiarlo';
+                bcStatus.style.color = '#6B7280';
+              }
+            }
+          })
+          .catch(() => {});
+      }
+      // ── Inline duplicate check del barcode (debounced). Texto rojo si está
+      //    ocupado, verde si está libre. Sin modal, sin bloquear el flujo.
+      let bcCheckTimer = null;
+      if (bcInput && bcStatus) {
+        bcInput.addEventListener('input', () => {
+          const v = bcInput.value.trim();
+          clearTimeout(bcCheckTimer);
+          if (!v) { bcStatus.textContent = ''; return; }
+          bcStatus.textContent = 'Verificando…';
+          bcStatus.style.color = '#9CA3AF';
+          bcCheckTimer = setTimeout(async () => {
+            try {
+              const r = await fetch('/api/products/check-barcode?code=' + encodeURIComponent(v), { credentials: 'include' });
+              if (!r.ok) { bcStatus.textContent = ''; return; }
+              const j = await r.json();
+              // Editing: si el barcode actual coincide con el original del prefill, no marcar como ocupado
+              if (j.taken && j.existing && p.id && j.existing.id === p.id) {
+                bcStatus.textContent = 'Tu producto actual';
+                bcStatus.style.color = '#10B981';
+                return;
+              }
+              if (j.taken) {
+                bcStatus.textContent = '✗ Ya está ocupado por: ' + (j.existing?.name || 'otro producto');
+                bcStatus.style.color = '#DC2626';
+              } else {
+                bcStatus.textContent = '✓ Disponible';
+                bcStatus.style.color = '#10B981';
+              }
+            } catch (_) { bcStatus.textContent = ''; }
+          }, 350);
+        });
+      }
 
       // Enter → siguiente campo (Enter en el último submitea). Si Enter en precio Y
       // los obligatorios mínimos están cubiertos → submit directo (flujo POS rápido).

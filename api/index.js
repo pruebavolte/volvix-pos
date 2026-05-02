@@ -10616,6 +10616,82 @@ handlers['GET /api/config/public'] = async (req, res) => {
     } catch (_) { sendJSON(res, { ok: true, by_platform: {}, total: 0 }); }
   };
 
+  // ---- POS SCAN CASCADE — tenant → owner global library → internet ----
+  // /api/owner/products/lookup?q=X — global product library curada por el dueño
+  // del sistema (catálogo de referencia que TODOS los tenants pueden importar).
+  // Devuelve match exacto por código_barras o coincidencia por nombre/sinónimos.
+  handlers['GET /api/owner/products/lookup'] = async (req, res) => {
+    const q = String(req.query && req.query.q || '').trim().slice(0, 120);
+    if (!q) return sendJSON(res, { ok: true, items: [] });
+    const isBarcode = /^\d{6,}$/.test(q);
+    try {
+      // Tabla owner_global_products: { id, code, barcode, name, brand, category,
+      //                                 image_url, suggested_price, synonyms, created_at }
+      let rows;
+      if (isBarcode) {
+        rows = await supabaseRequest('GET',
+          '/owner_global_products?or=(barcode.eq.' + encodeURIComponent(q) +
+          ',code.eq.' + encodeURIComponent(q) + ')&select=*&limit=5');
+      } else {
+        // Búsqueda fuzzy por name + synonyms (ilike)
+        const enc = encodeURIComponent('%' + q + '%');
+        rows = await supabaseRequest('GET',
+          '/owner_global_products?or=(name.ilike.' + enc +
+          ',synonyms.ilike.' + enc + ')&select=*&limit=10');
+      }
+      sendJSON(res, { ok: true, items: Array.isArray(rows) ? rows : [], source: 'owner_global', is_barcode: isBarcode });
+    } catch (e) {
+      // Tabla no existe todavía → devolver [] silenciosamente para que la cascada siga al siguiente paso
+      sendJSON(res, { ok: true, items: [], source: 'owner_global', note: 'table_unavailable' });
+    }
+  };
+  // /api/products/check-barcode?code=X — verifica si el barcode ya está en uso
+  // en el tenant del usuario. Para validación inline en el modal "Nuevo producto".
+  handlers['GET /api/products/check-barcode'] = requireAuth(async (req, res) => {
+    const code = String(req.query && req.query.code || '').trim();
+    const tenantId = req.user && (req.user.tenant_id || req.user.company_id);
+    if (!code || !tenantId) return sendJSON(res, { ok: false, available: false, error: 'missing_params' }, 400);
+    try {
+      const rows = await supabaseRequest('GET',
+        '/pos_products?tenant_id=eq.' + encodeURIComponent(tenantId) +
+        '&or=(barcode.eq.' + encodeURIComponent(code) +
+        ',code.eq.' + encodeURIComponent(code) + ')&select=id,name,code,barcode&limit=1');
+      const taken = Array.isArray(rows) && rows.length > 0;
+      sendJSON(res, {
+        ok: true,
+        available: !taken,
+        taken: taken,
+        existing: taken ? rows[0] : null
+      });
+    } catch (_) {
+      sendJSON(res, { ok: true, available: true, taken: false }); // ante error, asume disponible
+    }
+  });
+  // /api/products/next-barcode — sugiere el próximo entero libre (1,2,3,…)
+  // para el tenant. Útil cuando el usuario solo escribe el nombre del producto.
+  handlers['GET /api/products/next-barcode'] = requireAuth(async (req, res) => {
+    const tenantId = req.user && (req.user.tenant_id || req.user.company_id);
+    if (!tenantId) return sendJSON(res, { ok: false, error: 'no_tenant' }, 400);
+    try {
+      // Todos los barcodes/codes numéricos del tenant
+      const rows = await supabaseRequest('GET',
+        '/pos_products?tenant_id=eq.' + encodeURIComponent(tenantId) +
+        '&select=barcode,code&limit=10000');
+      const used = new Set();
+      (rows || []).forEach(r => {
+        [r.barcode, r.code].forEach(v => {
+          if (v && /^\d+$/.test(String(v))) used.add(parseInt(v, 10));
+        });
+      });
+      // Próximo entero libre desde 1
+      let next = 1;
+      while (used.has(next)) next++;
+      sendJSON(res, { ok: true, next_barcode: String(next), used_count: used.size });
+    } catch (_) {
+      sendJSON(res, { ok: true, next_barcode: '1', used_count: 0 });
+    }
+  });
+
   // /api/tenant/settings — GET para complementar el PATCH existente
   handlers['GET /api/tenant/settings'] = requireAuth(async (req, res) => {
     const tenantId = req.user && (req.user.tenant_id || req.user.company_id);
