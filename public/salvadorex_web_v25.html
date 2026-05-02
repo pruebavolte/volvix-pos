@@ -1736,7 +1736,7 @@
       <span>RÁPIDO</span>
     </button>
 
-    <button class="tb-btn saas" data-feature="ui.saas_btn" onclick="openOwnerPanel()" aria-label="Panel SaaS Admin (dueño del sistema)" title="Panel SaaS Admin (dueño del sistema)">
+    <button class="tb-btn saas" data-feature="ui.saas_btn" data-vlx-owner-only="systeminternational" onclick="openOwnerPanel()" aria-label="Panel SaaS Admin (dueño del sistema)" title="Panel SaaS Admin (dueño del sistema)" style="display:none">
       👑 <span>SAAS</span>
     </button>
 
@@ -11954,5 +11954,6 @@
 <script src="volvix-accessibility-wiring.js" defer></script>
 <script defer src="/volvix-pos-payments-integration.js"></script>
 <script defer src="/volvix-modules-wiring.js"></script>
+<script defer src="/volvix-owner-only-wiring.js"></script>
 </body>
 </html>
