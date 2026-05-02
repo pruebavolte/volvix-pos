@@ -6519,14 +6519,17 @@
     // Si el usuario esta tipeando en input/textarea/select, no interceptar
     // (respeta el guard del listener antiguo de linea 5048 que tambien excluia inputs)
     const _typing = e.target && e.target.matches && e.target.matches('input, textarea, select');
+    // 2026-05 audit B-22: F2 y F12 ya no comparten openPayment(). F2 ahora va
+    // a Créditos (pantalla que la UI prometía) y F12 mantiene Cobrar.
     if (e.key === 'F1') { e.preventDefault(); showScreen('pos'); }
-    if (e.key === 'F2' && !$('#screen-pos').classList.contains('hidden')) { e.preventDefault(); openPayment(); }
+    if (e.key === 'F2') { e.preventDefault(); if (typeof showScreen === 'function') showScreen('creditos'); }
     if (e.key === 'F3') { e.preventDefault(); showScreen('inventario'); }
     if (e.key === 'F4') { e.preventDefault(); showScreen('kardex'); }
     if (!_typing && e.key === 'F5') { e.preventDefault(); if (typeof openSearch === 'function') openSearch(); }
     if (!_typing && e.key === 'F9') { e.preventDefault(); if (typeof openCalc === 'function') openCalc(); }
     if (!_typing && e.key === 'F11') { e.preventDefault(); if (typeof applyDiscount === 'function') applyDiscount(); }
-    if (e.key === 'F12') { e.preventDefault(); openPayment(); }
+    // F12 = Cobrar (calculadora con billetes / EXACTO / cambio).
+    if (e.key === 'F12' && !$('#screen-pos').classList.contains('hidden')) { e.preventDefault(); openPayment(); }
     // R8a FIX-H3: Ctrl+M → búsqueda manual fallback (cuando scanner falla)
     if ((e.ctrlKey || e.metaKey) && (e.key === 'm' || e.key === 'M')) {
       e.preventDefault();
@@ -7367,13 +7370,79 @@
 
   // CALCULADORA
   let calcExpr = '';
+  // 2026-05 audit B-21: SECURITY — antes usábamos Function() con input crudo,
+  // permitiendo eval-injection. El cajero malicioso podía teclear
+  // 'fetch(...)' y ejecutar cualquier JS. Ahora un parser numérico safe que
+  // SOLO acepta dígitos, operadores básicos, paréntesis y punto decimal.
+  function calcSafeEval(expr) {
+    var s = String(expr || '').replace(/\s+/g, '');
+    if (!s) return 0;
+    // Whitelist estricta: dígitos, + - * / . ( )
+    if (!/^[0-9+\-*/.()]+$/.test(s)) throw new Error('expr_invalid');
+    // Tokenize
+    var tokens = [];
+    var num = '';
+    for (var i = 0; i < s.length; i++) {
+      var ch = s[i];
+      if ((ch >= '0' && ch <= '9') || ch === '.') { num += ch; }
+      else {
+        if (num) { tokens.push(num); num = ''; }
+        tokens.push(ch);
+      }
+    }
+    if (num) tokens.push(num);
+    // Shunting-yard → RPN → evaluate
+    var prec = { '+': 1, '-': 1, '*': 2, '/': 2 };
+    var out = []; var ops = [];
+    for (var k = 0; k < tokens.length; k++) {
+      var t = tokens[k];
+      if (/^[0-9.]+$/.test(t)) { out.push(parseFloat(t)); }
+      else if (t === '(') { ops.push(t); }
+      else if (t === ')') {
+        while (ops.length && ops[ops.length - 1] !== '(') out.push(ops.pop());
+        if (!ops.length) throw new Error('paren_mismatch');
+        ops.pop();
+      }
+      else if (prec[t]) {
+        while (ops.length && prec[ops[ops.length - 1]] >= prec[t]) out.push(ops.pop());
+        ops.push(t);
+      } else { throw new Error('token_invalid'); }
+    }
+    while (ops.length) {
+      var op = ops.pop();
+      if (op === '(' || op === ')') throw new Error('paren_mismatch');
+      out.push(op);
+    }
+    var stack = [];
+    for (var j = 0; j < out.length; j++) {
+      var x = out[j];
+      if (typeof x === 'number') stack.push(x);
+      else {
+        var b = stack.pop(), a = stack.pop();
+        if (a == null || b == null) throw new Error('expr_invalid');
+        if (x === '+') stack.push(a + b);
+        else if (x === '-') stack.push(a - b);
+        else if (x === '*') stack.push(a * b);
+        else if (x === '/') {
+          if (b === 0) throw new Error('div_by_zero');
+          stack.push(a / b);
+        }
+        else throw new Error('op_invalid');
+      }
+    }
+    if (stack.length !== 1) throw new Error('expr_invalid');
+    var r = stack[0];
+    if (!isFinite(r)) throw new Error('expr_invalid');
+    return Math.round(r * 1e6) / 1e6;
+  }
+
   function calcInput(key) {
     const disp = $('#calc-display');
     if (key === 'C') { calcExpr = ''; disp.textContent = '0'; return; }
     if (key === '←') { calcExpr = calcExpr.slice(0, -1); disp.textContent = calcExpr || '0'; return; }
     if (key === '=') {
       try {
-        const r = Function('"use strict";return (' + calcExpr + ')')();
+        const r = calcSafeEval(calcExpr);
         disp.textContent = r;
         calcExpr = String(r);
       } catch { disp.textContent = 'Error'; calcExpr = ''; }

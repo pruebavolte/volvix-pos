@@ -2098,9 +2098,17 @@ const handlers = {
             if (/23505|duplicate key|conflict/i.test(msg)) {
               return sendJSON(res, { error: 'cart_already_consumed', message: 'Este carrito ya fue cobrado en otra sesión/pestaña' }, 409);
             }
-            // Tabla no existe (42P01) → fail-open en dev, fail en prod
-            if (IS_PROD && !/42P01|does not exist/i.test(msg)) {
-              return sendJSON(res, { error: 'cart_token_check_failed', message: msg.slice(0, 120) }, 500);
+            // 2026-05 audit B-24: en PROD, si la tabla cart_tokens no existe
+            // (42P01) ANTES dejábamos pasar (fail-open) silenciosamente —
+            // efectivamente desactivando el guard de doble-cobro multi-pestaña.
+            // Ahora también fallamos en prod cuando la tabla falta: el sysadmin
+            // verá el error y aplicará la migración correspondiente.
+            if (IS_PROD) {
+              return sendJSON(res, {
+                error: 'cart_token_check_failed',
+                message: msg.slice(0, 120),
+                hint: /42P01|does not exist/i.test(msg) ? 'Aplicar migración de cart_tokens' : undefined
+              }, 500);
             }
           }
         }
@@ -2196,6 +2204,7 @@ const handlers = {
       try {
         const r5bSaleRow = {
           pos_user_id: req.user.id, // FIX R13 (#6): usuario del JWT
+          tenant_id: req.user.tenant_id || null,
           total, payment_method: pm,
           items: itemsIn,
           // R17 TIPS
@@ -2205,9 +2214,23 @@ const handlers = {
         if (r5bTaxRateSnapshot != null) r5bSaleRow.tax_rate_snapshot = r5bTaxRateSnapshot;
         const result = await supabaseRequest('POST', '/pos_sales', r5bSaleRow);
         saleRow = result && (result[0] || result);
+        if (!saleRow || !saleRow.id) {
+          // Si la inserción no devolvió fila, considerarlo error.
+          throw new Error('sale_insert_no_row');
+        }
       } catch (dbErr) {
-        saleRow = { id: (require('crypto').randomUUID && require('crypto').randomUUID()) || ('sale_' + Date.now()), total, payment_method: pm, items: itemsIn, status: 'paid', created_at: new Date().toISOString() };
-        if (r5bTaxRateSnapshot != null) saleRow.tax_rate_snapshot = r5bTaxRateSnapshot;
+        // 2026-05 audit B-23: ELIMINADO el fallback in-memory que confirmaba
+        // venta con id=sale_<ts> sin persistir DB. Inventario ya se descontó
+        // (línea ~23461) → quedaba descuadre permanente. Ahora devolvemos 503
+        // y el frontend debe encolar offline (offlineQueue) o reintentar.
+        try { logAudit({ user: req.user }, 'sale.persist_failed', 'pos_sales',
+          { tenant_id: req.user && req.user.tenant_id, error: String(dbErr && dbErr.message || dbErr).slice(0, 200) }); } catch (_) {}
+        return sendJSON(res, {
+          ok: false,
+          error_code: 'SALE_PERSIST_FAILED',
+          error_message: 'No pudimos guardar la venta. Reintenta o el sistema la encolará offline.',
+          retry_after_seconds: 5
+        }, 503);
       }
       if (saleRow && typeof saleRow === 'object') {
         saleRow.change = change;
