@@ -525,8 +525,11 @@ body {
       <!-- Formulario -->
       <form onsubmit="handleLogin(event)">
         <div class="form-group">
-          <label class="form-label" for="emailInput">Correo</label>
-          <input type="email" id="emailInput" class="form-input" placeholder="admin@volvix.test" autocomplete="username" aria-label="Correo electrónico" required>
+          <label class="form-label" for="emailInput">Correo o teléfono</label>
+          <!-- Antes era type=email — pero registro permite alta solo con phone, así que el
+               usuario que se registró con teléfono no podía volver. Cambio a type=text con
+               autocomplete=username; el handler en el backend ya acepta ambos formatos. -->
+          <input type="text" id="emailInput" class="form-input" placeholder="tu@correo.com  ó  5512345678" autocomplete="username" aria-label="Correo electrónico o teléfono de 10 dígitos" required>
         </div>
 
         <div class="form-group">
@@ -625,13 +628,18 @@ function setLoading(btn, loading, text) {
 async function handleLogin(event) {
   event.preventDefault();
 
-  const email = (document.getElementById('emailInput').value || '').trim();
+  const idValue = (document.getElementById('emailInput').value || '').trim();
   const password = (document.getElementById('passwordInput').value || '').trim();
 
-  // Validar
-  if (!email || !email.includes('@')) {
+  // Detectar si es email o teléfono (10 dígitos MX). El backend de /api/login
+  // ya soporta ambos via body.phone o body.email.
+  const isEmail = idValue.includes('@');
+  const phoneDigits = idValue.replace(/[\s\-\(\)\+]/g, '');
+  const isPhone = /^\d{10}$/.test(phoneDigits) || /^52\d{10}$/.test(phoneDigits);
+
+  if (!isEmail && !isPhone) {
     document.getElementById('emailInput').classList.add('error');
-    showAlert('Ingresa un correo válido', 'error');
+    showAlert('Ingresa un correo válido o tu teléfono de 10 dígitos', 'error');
     return;
   }
   document.getElementById('emailInput').classList.remove('error');
@@ -646,10 +654,13 @@ async function handleLogin(event) {
   setLoading('btnLogin', true, 'Entrando...');
 
   try {
+    const payload = isEmail
+      ? { email: idValue, password }
+      : { phone: phoneDigits.length === 10 ? '+52' + phoneDigits : '+' + phoneDigits, password };
     const response = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify(payload),
     });
 
     if (response.status === 503) {

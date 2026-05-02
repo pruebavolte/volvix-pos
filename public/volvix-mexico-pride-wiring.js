@@ -85,6 +85,20 @@
       'min-height:48px'
     ].join(';');
 
+    // En pantallas <=480px ambas franjas roban viewport precioso. El logo NL
+    // mantiene la identidad sin necesitar la barra negra encima en mobile chico.
+    if (!document.getElementById('vlx-pride-mobile-style')) {
+      var ms = document.createElement('style');
+      ms.id = 'vlx-pride-mobile-style';
+      ms.textContent =
+        '@media (max-width: 480px) {' +
+          '#vlx-mexico-pride { display: none !important; }' +
+          '#vlx-nl-logo-strip { top: 0 !important; min-height: 40px !important; padding: 6px 12px !important; }' +
+          '#vlx-nl-logo-strip img { max-height: 28px !important; }' +
+        '}';
+      document.head.appendChild(ms);
+    }
+
     // Cascada SVG → PNG → JPG. Si todos 404, ocultamos la franja entera.
     var candidates = [
       '/logos/hecho-en-nuevo-leon.svg',

@@ -244,19 +244,30 @@
         <div class="err" data-err="password2">Las contraseñas no coinciden.</div>
       </div>
 
-      <button class="primary" id="btnRegister">Crear cuenta y enviar SMS</button>
+      <!-- Copy adaptativo: si el sistema termina mostrando dev_code en pantalla
+           porque Twilio aún no está activo, "y enviar SMS" sería mentira.
+           Texto neutral funciona en ambos casos. -->
+      <button class="primary" id="btnRegister">Crear cuenta</button>
     </div>
 
     <!-- ============================ -->
     <!-- PASO 2: OTP (Web OTP API) -->
     <!-- ============================ -->
     <div class="step" data-step="2">
+      <!-- Eco del teléfono al que se envió el código + opción "Cambiar" inline.
+           Sin esto, si el cajero tipea mal su número descubre el error 60s
+           después al no recibir nada. -->
+      <div style="text-align:center;font-size:13px;color:#475569;margin-bottom:14px">
+        Código para <strong id="otpPhoneEcho">+52 ••••••••••</strong>
+        · <button class="resend-link" type="button" id="btnBackInline">Cambiar</button>
+      </div>
+
       <div class="alert info" id="otpInfo">
-        Te enviamos un SMS con un código de 6 dígitos. En Android/Chrome se autocompletará.
+        Te enviamos un código de 6 dígitos. En Android/Chrome se autocompleta solo.
       </div>
 
       <div id="devOtpBanner" style="display:none;background:#fef3c7;border:1px solid #f59e0b;border-radius:10px;padding:14px 16px;margin:0 0 14px;color:#78350f;font-size:14px;line-height:1.5;">
-        <strong>Modo demo</strong> — SMS no configurado. Tu código de prueba es:
+        <strong>Tu código está listo:</strong>
         <code id="devOtpCode" style="display:inline-block;margin-left:6px;font-size:20px;font-weight:700;letter-spacing:6px;background:#fff;padding:4px 10px;border-radius:6px;border:1px dashed #f59e0b;color:#78350f;font-family:'Courier New',monospace;">000000</code>
       </div>
 
@@ -529,6 +540,15 @@
             if (info) info.style.display = '';
             alertBox('info', 'Código enviado por SMS al +52' + state.formData.phone);
           }
+          // Eco del teléfono al que se envió el código (heurística #1 visibilidad)
+          try {
+            var rawPhone = String(state.formData.phone || '').replace(/[^\d]/g, '');
+            var fmt = rawPhone.length === 10
+              ? '+52 ' + rawPhone.slice(0, 2) + ' ' + rawPhone.slice(2, 6) + ' ' + rawPhone.slice(6)
+              : '+52 ' + rawPhone;
+            var echoEl = document.getElementById('otpPhoneEcho');
+            if (echoEl) echoEl.textContent = fmt;
+          } catch (_) {}
           setStep(2);
           startResendCounter(60);
           startWebOtpListener();
@@ -654,6 +674,12 @@
     });
     $('#btnVerify').addEventListener('click', submitOtp);
     $('#btnBack').addEventListener('click', function () {
+      if (state.otpAbort) try { state.otpAbort.abort(); } catch (_) {}
+      setStep(1);
+    });
+    // Handler del nuevo "Cambiar" inline en el eco del teléfono
+    var btnBackInline = document.getElementById('btnBackInline');
+    if (btnBackInline) btnBackInline.addEventListener('click', function () {
       if (state.otpAbort) try { state.otpAbort.abort(); } catch (_) {}
       setStep(1);
     });

@@ -1899,10 +1899,9 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
           ENTER — Agregar Producto
         </button>
-        <!-- R8a FIX-H3: fallback de búsqueda manual cuando el lector falla -->
-        <button id="r8a-manual-search-btn" type="button" onclick="r8aOpenManualSearch()" aria-label="Búsqueda manual (Ctrl+M)" title="Búsqueda manual cuando el lector no responde (Ctrl+M)" style="margin-left:8px;padding:8px 14px;background:#FEF3C7;color:#92400E;border:2px solid #FBBF24;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#92400E" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
-          Búsqueda manual (Ctrl+M)
+        <!-- R8a FIX-H3: búsqueda manual reducida a icono lupa (Ctrl+M / F2) — antes era CTA amarillo que competía con ENTER verde y paralizaba la decisión del cajero. -->
+        <button id="r8a-manual-search-btn" type="button" onclick="r8aOpenManualSearch()" aria-label="Búsqueda manual (Ctrl+M o F2)" title="Búsqueda manual (Ctrl+M o F2)" style="margin-left:8px;padding:8px 10px;background:transparent;color:#6B7280;border:1px solid #E5E5EA;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;min-width:36px;min-height:36px;transition:border-color .15s ease,color .15s ease;" onmouseover="this.style.borderColor='#0B0B0F';this.style.color='#0B0B0F'" onmouseout="this.style.borderColor='#E5E5EA';this.style.color='#6B7280'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
         </button>
       </div>
 
@@ -4310,6 +4309,34 @@
   // In-flight guard: evita doble-scan al teclear ENTER dos veces sobre el mismo
   // input (race condition que duplicaba imports a tenant DB).
   let __searchProductBusy = false;
+  // Loading-UX helpers: el cascade puede tardar hasta 1.5s buscando en internet
+  // (Open Food Facts + UPCitemDB). Sin feedback visual, el cajero teclea de
+  // nuevo pensando que no se procesó. Esto bloquea el input + cambia el botón.
+  function _setScanBusy(busy) {
+    const inp = document.getElementById('barcode-input');
+    const btn = document.querySelector('.btn-enter');
+    if (inp) inp.disabled = !!busy;
+    if (btn) {
+      btn.disabled = !!busy;
+      btn.style.opacity = busy ? '0.6' : '';
+      btn.style.cursor = busy ? 'wait' : '';
+      if (busy) {
+        btn.dataset._origHtml = btn.dataset._origHtml || btn.innerHTML;
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:vlx-spin 0.8s linear infinite"><path d="M21 12a9 9 0 1 1-6.2-8.55"/></svg> Buscando…';
+      } else if (btn.dataset._origHtml) {
+        btn.innerHTML = btn.dataset._origHtml;
+      }
+    }
+    if (busy) {
+      // Inyectar keyframes una sola vez
+      if (!document.getElementById('vlx-spin-style')) {
+        const s = document.createElement('style');
+        s.id = 'vlx-spin-style';
+        s.textContent = '@keyframes vlx-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }';
+        document.head.appendChild(s);
+      }
+    }
+  }
   async function searchProduct(code) {
     if (__searchProductBusy) return;
     if (!code) { showToast('Escribe un código antes de presionar ENTER'); return; }
@@ -4318,8 +4345,15 @@
     const isBarcode = /^\d{6,}$/.test(trimmed);
     const lower = trimmed.toLowerCase();
     __searchProductBusy = true;
+    _setScanBusy(true);
     try { return await _searchProductInner(trimmed, isBarcode, lower); }
-    finally { __searchProductBusy = false; }
+    finally {
+      __searchProductBusy = false;
+      _setScanBusy(false);
+      // Re-focus input para siguiente scan (importante para scanners hardware
+      // que envían Enter automático y necesitan foco listo).
+      try { document.getElementById('barcode-input').focus(); } catch (_) {}
+    }
   }
   async function _searchProductInner(trimmed, isBarcode, lower) {
 
@@ -5786,12 +5820,38 @@
       if (modal) modal.remove();
       modal = document.createElement('div');
       modal.id = 'modal-product-form';
+      // ARIA: el modal generado dinámicamente carecía de role="dialog" y aria-modal,
+      // así que lectores de pantalla lo anunciaban como "form". También faltaba
+      // aria-labelledby al título y focus trap. Con esto cumplimos WCAG 2.1.
+      modal.setAttribute('role', 'dialog');
+      modal.setAttribute('aria-modal', 'true');
+      modal.setAttribute('aria-labelledby', 'pf-title');
       modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:99990;';
+      // Inyectar override mobile-first: en pantallas <=768px los inputs van a
+      // 16px (evita zoom iOS) y el grid 2-cols colapsa a 1 col para no romper.
+      if (!document.getElementById('vlx-modal-mobile-style')) {
+        const ms = document.createElement('style');
+        ms.id = 'vlx-modal-mobile-style';
+        ms.textContent = `
+          @media (max-width: 768px) {
+            #modal-product-form input,
+            #modal-product-form textarea,
+            #modal-product-form select { font-size: 16px !important; }
+            #modal-product-form #pf-form { grid-template-columns: 1fr !important; }
+            #modal-product-form > div { padding: 18px 16px !important; max-height: 95vh !important; }
+            #modal-product-form button { min-height: 44px !important; }
+          }
+        `;
+        document.head.appendChild(ms);
+      }
+      // Recordar el elemento que tenía foco antes de abrir el modal,
+      // para devolvérselo al cerrar (heurística #1 + a11y).
+      const _previouslyFocused = document.activeElement;
       modal.innerHTML = `
         <div style="background:#fff;color:#1C1917;border-radius:12px;padding:22px;width:520px;max-width:92vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-            <h2 style="margin:0;font-size:18px;font-weight:700;">${prefill ? '✏️ Editar producto' : '+ Nuevo producto'}</h2>
-            <button id="pf-close" style="background:none;border:none;font-size:22px;cursor:pointer;color:#666;" aria-label="Cerrar">&times;</button>
+            <h2 id="pf-title" style="margin:0;font-size:18px;font-weight:600;letter-spacing:-0.02em;color:#0B0B0F;">${prefill ? 'Editar producto' : 'Nuevo producto'}</h2>
+            <button id="pf-close" style="background:none;border:none;font-size:22px;cursor:pointer;color:#666;" aria-label="Cerrar (Esc)" title="Esc">&times;</button>
           </div>
           <form id="pf-form" style="display:grid;gap:10px;grid-template-columns:1fr 1fr;">
             <label style="grid-column:span 2;display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;">
@@ -5810,8 +5870,9 @@
               <input id="pf-price" type="number" required min="0.01" step="0.01" value="${Number(p.price)||0}" style="padding:9px;border:1px solid #E7E5E4;border-radius:7px;font-size:13.5px;">
             </label>
             <label style="display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;">
-              Costo *
-              <input id="pf-cost" type="number" required min="0" step="0.01" value="${Number(p.cost)||0}" style="padding:9px;border:1px solid #E7E5E4;border-radius:7px;font-size:13.5px;">
+              Costo <span style="color:#9CA3AF;font-weight:400">(opcional)</span>
+              <input id="pf-cost" type="number" min="0" step="0.01" value="${Number(p.cost)||0}" style="padding:9px;border:1px solid #E7E5E4;border-radius:7px;font-size:13.5px;">
+              <span style="font-size:11px;color:#9CA3AF;margin-top:2px">Si no lo conoces, déjalo en 0 y lo agregas después</span>
             </label>
             <label style="display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;">
               Stock actual *
@@ -5831,8 +5892,8 @@
             </label>
             <div id="pf-msg" style="grid-column:span 2;font-size:12px;color:#DC2626;min-height:14px;"></div>
             <div style="grid-column:span 2;display:flex;gap:8px;justify-content:flex-end;margin-top:6px;">
-              <button type="button" id="pf-cancel" style="padding:9px 16px;border:1px solid #E7E5E4;background:#fff;border-radius:7px;cursor:pointer;font-weight:500;">Cancelar</button>
-              <button type="submit" id="pf-submit" style="padding:9px 16px;border:none;background:#EA580C;color:#fff;border-radius:7px;cursor:pointer;font-weight:600;">
+              <button type="button" id="pf-cancel" style="padding:10px 18px;border:1px solid #E5E5EA;background:#fff;color:#3F3F46;border-radius:8px;cursor:pointer;font-weight:500;font-size:14px;min-height:44px;">Cancelar</button>
+              <button type="submit" id="pf-submit" style="padding:10px 18px;border:none;background:#0B0B0F;color:#fff;border-radius:8px;cursor:pointer;font-weight:500;font-size:14px;letter-spacing:0.005em;min-height:44px;">
                 <span id="pf-submit-label">${prefill ? 'Guardar cambios' : 'Crear producto'}</span>
                 <span id="pf-spinner" style="display:none;margin-left:6px;">⏳</span>
               </button>
@@ -5841,10 +5902,29 @@
         </div>
       `;
       document.body.appendChild(modal);
-      const close = (val) => { modal.remove(); resolve(val); };
+      const close = (val) => {
+        modal.remove();
+        // Devolver foco al elemento que abrió el modal (a11y + heurística #3)
+        try { _previouslyFocused && _previouslyFocused.focus(); } catch (_) {}
+        resolve(val);
+      };
       modal.querySelector('#pf-close').onclick = () => close(null);
       modal.querySelector('#pf-cancel').onclick = () => close(null);
       modal.addEventListener('click', (e) => { if (e.target === modal) close(null); });
+      // Esc cierra el modal (heurística #3: control y libertad)
+      modal.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Escape') { ev.preventDefault(); close(null); }
+      });
+      // Focus trap: Tab y Shift+Tab solo navegan dentro del modal
+      modal.addEventListener('keydown', (ev) => {
+        if (ev.key !== 'Tab') return;
+        const focusables = modal.querySelectorAll('input, select, textarea, button, [tabindex]:not([tabindex="-1"])');
+        const visible = Array.from(focusables).filter(el => !el.disabled && el.offsetParent !== null);
+        if (!visible.length) return;
+        const first = visible[0], last = visible[visible.length - 1];
+        if (ev.shiftKey && document.activeElement === first) { ev.preventDefault(); last.focus(); }
+        else if (!ev.shiftKey && document.activeElement === last) { ev.preventDefault(); first.focus(); }
+      });
       modal.querySelector('#pf-form').addEventListener('submit', (e) => {
         e.preventDefault();
         const msg = modal.querySelector('#pf-msg'); msg.textContent = '';
@@ -5865,7 +5945,8 @@
           modal.querySelector('#pf-code').value = code;
         }
         if (isNaN(price) || price <= 0) { msg.textContent = 'El precio debe ser mayor a 0'; modal.querySelector('#pf-price').focus(); return; }
-        if (isNaN(cost) || cost < 0) { msg.textContent = 'El costo no puede ser negativo'; modal.querySelector('#pf-cost').focus(); return; }
+        // Costo es opcional — sanitizar negativos a 0 sin bloquear el flujo
+        const costClean = (isNaN(cost) || cost < 0) ? 0 : cost;
         if (isNaN(stock) || stock < 0) { msg.textContent = 'El stock no puede ser negativo'; modal.querySelector('#pf-stock').focus(); return; }
         // Show spinner
         modal.querySelector('#pf-spinner').style.display = 'inline';
@@ -5873,7 +5954,7 @@
         close({
           name, code,
           barcode: modal.querySelector('#pf-barcode').value.trim() || code,
-          price, cost, stock, min_stock,
+          price, cost: costClean, stock, min_stock,
           stock_actual: stock,
           category: modal.querySelector('#pf-cat').value.trim() || 'General',
           categoria: modal.querySelector('#pf-cat').value.trim() || 'General',
