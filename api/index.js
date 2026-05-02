@@ -31003,13 +31003,16 @@ if (process.env.NODE_ENV === 'test') {
         'auth.register_simple', 'pos_companies', { id: companyId, tenant_id: tenantId });
 
       // ---- Respuesta ----
-      // Bridge: si NO hay proveedor de SMS configurado (producción inicial sin
-      // Twilio todavía), devolvemos dev_code para no bloquear el flujo de
-      // registro. Una vez que se configura Twilio, este path deja de
-      // dispararse porque smsSent=true.
+      // Bridge: devolvemos dev_code cuando el flujo de SMS NO completa, ya sea
+      // porque (a) no hay proveedor configurado, o (b) el proveedor falló
+      // (caso típico: el TWILIO_WHATSAPP_FROM es el sandbox compartido
+      // +14155238886 que no es válido para SMS y devuelve mismatch 21660).
+      // Sin este fallback el usuario queda bloqueado viendo "te enviaremos
+      // SMS" pero sin código que ingresar.
       const isProd = process.env.NODE_ENV === 'production';
       const noSmsProviderConfigured = !hasTwilioKeys || !hasSmsFrom;
-      const allowDevVisibleBridge = !isProd || noSmsProviderConfigured;
+      const smsAttemptedButFailed = !smsSent && !!smsError;
+      const allowDevVisibleBridge = !isProd || noSmsProviderConfigured || smsAttemptedButFailed;
       const respPayload = {
         ok: true,
         tenant_id: tenantId,
@@ -31022,9 +31025,13 @@ if (process.env.NODE_ENV === 'test') {
       };
       if (!smsSent && allowDevVisibleBridge) {
         respPayload.dev_code = otpCode;
-        respPayload.notice = noSmsProviderConfigured
-          ? 'SMS provider no configurado todavía. Código mostrado en pantalla para no bloquear el lanzamiento.'
-          : 'SMS no enviado (modo dev).';
+        if (noSmsProviderConfigured) {
+          respPayload.notice = 'SMS provider no configurado todavía. Código mostrado en pantalla para no bloquear el lanzamiento.';
+        } else if (smsAttemptedButFailed) {
+          respPayload.notice = 'SMS rechazado por el proveedor (' + (smsError || 'unknown').slice(0, 80) + '). Código mostrado en pantalla.';
+        } else {
+          respPayload.notice = 'SMS no enviado (modo dev).';
+        }
       }
       // En prod CON proveedor pero falla puntual: incluir error para debug pero no dev_code
       if (!smsSent && isProd && !noSmsProviderConfigured && smsError) {
