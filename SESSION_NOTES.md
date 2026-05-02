@@ -1,7 +1,24 @@
 # Volvix POS · Session Notes (handoff comprimido)
 
-**Última sesión:** 2026-05-02. Commits hoy: 21+. HEAD `main`+`master` = `7e7202a`.
-**Lambda live producción:** `5b77ac0` (atorado, 5 deploy hooks PENDING en cola).
+**Última sesión:** 2026-05-02 22:28 UTC. Commits hoy: 23. HEAD `main`+`master` = `0bf0add`.
+**Lambda live producción:** `5b77ac0` (atorado, 6 deploy hooks PENDING en cola Vercel).
+
+## ⚡ ARRANQUE RÁPIDO próxima sesión
+
+```bash
+# 1. Verificar deploy
+curl https://systeminternational.app/api/version
+# Si commit != 0bf0add (o más reciente):
+curl -X POST "https://api.vercel.com/v1/integrations/deploy/prj_2f9m0VwArnqlGvlBZtxchvQl1a2t/AZu9c0G1Ie" -H "Content-Type: application/json" -d '{"ref":"main"}'
+
+# 2. Cuando deploy llegue, smoke-test:
+curl -X POST https://systeminternational.app/api/auth/register-simple -H "Content-Type: application/json" -d '{"email":"smoke-'$RANDOM'@test.local","business_name":"Smoke Test","giro":"abarrotes","password":"SmokeTest2026!"}'
+# Esperado: {"ok":true,"tenant_id":"TNT-XXXXX",...} con dev_code o email_sent
+
+# 3. Limpiar test:
+# DELETE FROM pos_users WHERE email LIKE 'smoke-%@test.local';
+# DELETE FROM pos_companies WHERE name LIKE 'Smoke Test%';
+```
 
 ## Infraestructura clave (NO CAMBIAR)
 - Dominio canónico: `systeminternational.app` (Vercel)
