@@ -1,7 +1,24 @@
 # Volvix POS · Session Notes (handoff comprimido)
 
-**Última sesión:** 2026-05-02 22:28 UTC. Commits hoy: 23. HEAD `main`+`master` = `0bf0add`.
-**Lambda live producción:** `5b77ac0` (atorado, 6 deploy hooks PENDING en cola Vercel).
+**Última sesión:** 2026-05-02 23:39 UTC. ✅ DEPLOY VIVO.
+**Lambda live producción:** `612fd67` ✅ (smoke-tested, /api/version + /api/auth/register-simple OK).
+
+## 🔥 Causa raíz Vercel atorado (descubierta y resuelta esta sesión)
+
+**Error:** "A Serverless Function has exceeded the unzipped maximum size of 250 MB"
+**Culpable:** `@capacitor-community/barcode-scanner` traía como transitive dep a `@zxing` = **257 MB solos**.
+**Diagnóstico:** entré a Vercel UI → Build Logs → vi "Build Failed: 250 MB" en TODOS los deploys post-`5b77ac0`.
+
+### Fixes aplicados (commits `326c315` → `612fd67`):
+- `326c315`: @capacitor/* + twilio movidos a devDeps (NO sirvió: cache de Vercel reusaba node_modules viejo)
+- `8097fe7`: `.npmrc` con `omit=dev` + `omit=optional` + .vercelignore expandido (NO: cache seguía)
+- `ef02c0e`: split lambda/estáticos en `vercel.json` con `{handle:filesystem}` + 100 archivos copiados a /public/
+- `612fd67`: **package.json LIMPIO** — eliminados @capacitor/*, electron, playwright, twilio, open. Solo quedan: @supabase/supabase-js, dotenv, zod, resend.
+
+### Settings UI Vercel cambiados esta sesión (importante saber):
+1. Project Settings > Build and Deployment > Install Command override: `npm install --omit=dev --omit=optional --no-fund --no-audit`
+2. Environment Variables: agregada `VERCEL_ANALYZE_BUILD_OUTPUT=1`
+3. Redeploy hecho desde UI con "Use existing Build Cache" UNCHECKED — **único modo de invalidar el cache cuando package.json cambia y no hay package-lock.json**.
 
 ## ⚡ ARRANQUE RÁPIDO próxima sesión
 
