@@ -30429,15 +30429,30 @@ if (process.env.NODE_ENV === 'test') {
       }
 
       // ---- Phone duplicado ----
+      // UX mejorado: si el teléfono existe pero el OTP nunca fue verificado
+      // (registro abandonado), permitimos REUSAR ese user_id y reemitir OTP.
+      // Solo bloqueamos si phone_verified=true (cuenta ya activa).
+      let reuseUserId = null;
+      let reuseTenantId = null;
       try {
         const existingP = await supabaseRequest('GET',
-          '/pos_users?phone=eq.' + encodeURIComponent(phone) + '&select=id&limit=1');
+          '/pos_users?phone=eq.' + encodeURIComponent(phone) + '&select=id,phone_verified,is_active,notes&limit=1');
         if (Array.isArray(existingP) && existingP.length > 0) {
-          return sendJSON(res, {
-            ok: false, field: 'phone',
-            error_code: 'PHONE_TAKEN',
-            error_message: 'Este teléfono ya está registrado. Intenta otro o haz login.'
-          }, 409);
+          const u = existingP[0];
+          const verified = !!u.phone_verified || !!u.is_active;
+          if (verified) {
+            return sendJSON(res, {
+              ok: false, field: 'phone',
+              error_code: 'PHONE_TAKEN',
+              error_message: 'Este teléfono ya está registrado. Inicia sesión o usa otro número.'
+            }, 409);
+          }
+          // Cuenta abandonada → reusar
+          reuseUserId = u.id;
+          try {
+            const meta = JSON.parse(u.notes || '{}');
+            reuseTenantId = meta.tenant_id || null;
+          } catch (_) {}
         }
       } catch (_) {}
 
@@ -30456,19 +30471,21 @@ if (process.env.NODE_ENV === 'test') {
         } catch (_) {}
       }
 
-      // ---- tenant_id único ----
-      let tenantId = null;
-      for (let i = 0; i < 5; i++) {
-        const candidate = genTenantId();
-        try {
-          const dup = await supabaseRequest('GET',
-            '/pos_companies?tenant_id=eq.' + encodeURIComponent(candidate) + '&select=id&limit=1');
-          if (!Array.isArray(dup) || dup.length === 0) { tenantId = candidate; break; }
-        } catch (_) { tenantId = candidate; break; }
+      // ---- tenant_id único (o reutilizado) ----
+      let tenantId = reuseTenantId || null;
+      if (!tenantId) {
+        for (let i = 0; i < 5; i++) {
+          const candidate = genTenantId();
+          try {
+            const dup = await supabaseRequest('GET',
+              '/pos_companies?tenant_id=eq.' + encodeURIComponent(candidate) + '&select=id&limit=1');
+            if (!Array.isArray(dup) || dup.length === 0) { tenantId = candidate; break; }
+          } catch (_) { tenantId = candidate; break; }
+        }
+        if (!tenantId) tenantId = genTenantId();
       }
-      if (!tenantId) tenantId = genTenantId();
 
-      // ---- Crear pos_users ----
+      // ---- Crear pos_users (o reusar el abandonado y refrescar pass/notes) ----
       const passwordHash = hashPasswordScrypt(password);
       // Email pseudo si no fue dado: phone-based, jamás se envía pero cumple NOT NULL.
       const emailValue = email || (phone.replace(/[^\d]/g, '') + '@phone.volvix.local');
@@ -30479,23 +30496,33 @@ if (process.env.NODE_ENV === 'test') {
         business_type: giro,
         registration_flow: 'simple_phone'
       });
-      let userId = null;
+      let userId = reuseUserId || null;
       try {
-        const insU = await supabaseRequest('POST', '/pos_users', {
-          email: emailValue,
-          password_hash: passwordHash,
-          role: 'USER',
-          is_active: false,
-          plan: 'trial',
-          full_name: 'Owner ' + business_name,
-          notes: notes,
-          phone: phone,
-          email_verified: false,
-          phone_verified: false,
-          mfa_enabled: false,
-          created_at: new Date().toISOString()
-        });
-        if (Array.isArray(insU) && insU.length > 0) userId = insU[0].id;
+        if (reuseUserId) {
+          // Refrescar password + notes del registro abandonado
+          await supabaseRequest('PATCH', '/pos_users?id=eq.' + reuseUserId, {
+            password_hash: passwordHash,
+            notes: notes,
+            full_name: 'Owner ' + business_name,
+            updated_at: new Date().toISOString()
+          });
+        } else {
+          const insU = await supabaseRequest('POST', '/pos_users', {
+            email: emailValue,
+            password_hash: passwordHash,
+            role: 'USER',
+            is_active: false,
+            plan: 'trial',
+            full_name: 'Owner ' + business_name,
+            notes: notes,
+            phone: phone,
+            email_verified: false,
+            phone_verified: false,
+            mfa_enabled: false,
+            created_at: new Date().toISOString()
+          });
+          if (Array.isArray(insU) && insU.length > 0) userId = insU[0].id;
+        }
       } catch (e) {
         const errStr = String(e && e.message || e);
         if (/23505|duplicate key/i.test(errStr)) {
@@ -30516,23 +30543,40 @@ if (process.env.NODE_ENV === 'test') {
         return sendJSON(res, { ok: false, error_code: 'USER_CREATE_FAILED', error_message: 'No se pudo crear usuario.' }, 500);
       }
 
-      // ---- Crear pos_companies ----
+      // ---- Crear pos_companies (o saltar si ya existe por reuso) ----
       let companyId = null;
       try {
-        const ins = await supabaseRequest('POST', '/pos_companies', {
-          name: business_name,
-          owner_user_id: userId,
-          tenant_id: tenantId,
-          business_type: giro,
-          phone: phone,
-          plan: 'trial',
-          status: 'pending',
-          is_active: false,
-          created_at: new Date().toISOString()
-        });
-        if (Array.isArray(ins) && ins.length > 0) companyId = ins[0].id;
+        if (reuseUserId && reuseTenantId) {
+          // Buscar la company existente del registro abandonado
+          const existCo = await supabaseRequest('GET',
+            '/pos_companies?tenant_id=eq.' + encodeURIComponent(reuseTenantId) + '&select=id&limit=1');
+          if (Array.isArray(existCo) && existCo.length > 0) {
+            companyId = existCo[0].id;
+            // Refrescar nombre/giro por si cambiaron
+            await supabaseRequest('PATCH', '/pos_companies?id=eq.' + companyId, {
+              name: business_name, business_type: giro
+            }).catch(function () {});
+          }
+        }
+        if (!companyId) {
+          const ins = await supabaseRequest('POST', '/pos_companies', {
+            name: business_name,
+            owner_user_id: userId,
+            tenant_id: tenantId,
+            business_type: giro,
+            phone: phone,
+            plan: 'trial',
+            status: 'pending',
+            is_active: false,
+            created_at: new Date().toISOString()
+          });
+          if (Array.isArray(ins) && ins.length > 0) companyId = ins[0].id;
+        }
       } catch (e) {
-        if (userId) supabaseRequest('DELETE', '/pos_users?id=eq.' + userId).catch(function () {});
+        // Solo borrar el user si LO acabamos de crear (no si lo estábamos reusando)
+        if (userId && !reuseUserId) {
+          supabaseRequest('DELETE', '/pos_users?id=eq.' + userId).catch(function () {});
+        }
         return sendJSON(res, {
           ok: false, error_code: 'COMPANY_CREATE_FAILED',
           error_message: 'No se pudo crear la empresa.' + (process.env.NODE_ENV !== 'production' ? ' ' + String(e && e.message || e).slice(0, 200) : '')
@@ -30618,25 +30662,55 @@ if (process.env.NODE_ENV === 'test') {
         '@' + otpDomain + ' #' + otpCode;
 
       let smsSent = false;
+      let smsError = null;
+      let smsProvider = null;
       const sendSms = (typeof global.__r12o3a_sendSms === 'function') ? global.__r12o3a_sendSms : null;
       const hasSmsFrom = !!(process.env.TWILIO_SMS_FROM || process.env.TWILIO_PHONE_NUMBER || process.env.TWILIO_FROM);
-      if (sendSms && process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && hasSmsFrom) {
+      const hasTwilioKeys = !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN);
+      if (sendSms && hasTwilioKeys && hasSmsFrom) {
         try {
           const sr = await sendSms({ to: phone, body: smsBody });
           smsSent = !!(sr && sr.ok);
-        } catch (_) {}
+          smsProvider = sr && sr.provider;
+          if (!smsSent) smsError = (sr && sr.error) || (sr && sr.reason) || 'unknown';
+        } catch (e) { smsError = String(e && e.message || e).slice(0, 200); }
+      } else {
+        smsError = !hasTwilioKeys
+          ? 'TWILIO_ACCOUNT_SID/TWILIO_AUTH_TOKEN missing'
+          : (!hasSmsFrom ? 'TWILIO_SMS_FROM missing' : 'sendSms not loaded');
       }
 
       try {
         console.log('[register-simple] tenant=' + tenantId + ' phone=' + phone +
-          ' code=' + otpCode + ' sms_sent=' + smsSent);
+          ' code=' + otpCode + ' sms_sent=' + smsSent +
+          (smsError ? ' sms_error=' + smsError : ''));
       } catch (_) {}
+
+      // Persistir error en system_error_logs para review interno (sin exponer al user)
+      if (!smsSent && smsError) {
+        try {
+          supabaseRequest('POST', '/system_error_logs', {
+            level: 'warn',
+            source: 'register-simple/sms',
+            error_code: 'SMS_NOT_SENT',
+            message: smsError,
+            context: JSON.stringify({ tenant_id: tenantId, phone: phone, provider: smsProvider }),
+            created_at: new Date().toISOString()
+          }).catch(function () {});
+        } catch (_) {}
+      }
 
       logAuditSafe({ user: { id: userId, email: emailValue, role: 'owner', tenant_id: tenantId } },
         'auth.register_simple', 'pos_companies', { id: companyId, tenant_id: tenantId });
 
       // ---- Respuesta ----
-      const allowDevVisible = process.env.NODE_ENV !== 'production';
+      // Bridge: si NO hay proveedor de SMS configurado (producción inicial sin
+      // Twilio todavía), devolvemos dev_code para no bloquear el flujo de
+      // registro. Una vez que se configura Twilio, este path deja de
+      // dispararse porque smsSent=true.
+      const isProd = process.env.NODE_ENV === 'production';
+      const noSmsProviderConfigured = !hasTwilioKeys || !hasSmsFrom;
+      const allowDevVisibleBridge = !isProd || noSmsProviderConfigured;
       const respPayload = {
         ok: true,
         tenant_id: tenantId,
@@ -30644,11 +30718,18 @@ if (process.env.NODE_ENV === 'test') {
         otp_required: true,
         otp_sent_to: smsSent ? ['sms'] : [],
         otp_expires_at: expiresAt,
-        sms_sent: smsSent
+        sms_sent: smsSent,
+        sms_provider: smsProvider || null
       };
-      if (!smsSent && allowDevVisible) {
+      if (!smsSent && allowDevVisibleBridge) {
         respPayload.dev_code = otpCode;
-        respPayload.notice = 'SMS no configurado. Usa dev_code en NODE_ENV != production.';
+        respPayload.notice = noSmsProviderConfigured
+          ? 'SMS provider no configurado todavía. Código mostrado en pantalla para no bloquear el lanzamiento.'
+          : 'SMS no enviado (modo dev).';
+      }
+      // En prod CON proveedor pero falla puntual: incluir error para debug pero no dev_code
+      if (!smsSent && isProd && !noSmsProviderConfigured && smsError) {
+        respPayload.sms_error = String(smsError).slice(0, 120);
       }
       return sendJSON(res, respPayload);
     } catch (err) {
