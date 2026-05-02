@@ -963,10 +963,15 @@
     <a href="#popular">Giros populares</a>
     <a href="#stats">Nosotros</a>
     <a href="/login.html" class="vlx-nav-link" style="color:var(--vlx-ink-2);font-weight:500">Iniciar sesión</a>
+    <a href="/registro.html" class="nav-cta" style="background:var(--vlx-ink,#0B0B0F);color:#fff;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;text-decoration:none">Crear cuenta</a>
     <select id="vlx-nav-lang" aria-label="Idioma" onchange="window.__vlxSetLang && window.__vlxSetLang(this.value)" style="appearance:none;-webkit-appearance:none;background:transparent;border:1px solid var(--vlx-line-2,#E5E5EA);color:var(--vlx-ink-2,#3F3F46);font-size:13px;font-weight:500;padding:6px 26px 6px 10px;border-radius:8px;cursor:pointer;background-image:url(&quot;data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%236B7280' stroke-width='1.5' fill='none' stroke-linecap='round'/></svg>&quot;);background-repeat:no-repeat;background-position:right 8px center">
       <option value="es">Español</option>
       <option value="en">English</option>
       <option value="pt">Português</option>
+      <option value="fr">Français</option>
+      <option value="de">Deutsch</option>
+      <option value="it">Italiano</option>
+      <option value="ja">日本語</option>
     </select>
     <a href="volvix_owner_panel_v5.html" class="nav-cta" id="navPanelSaas" data-vlx-owner-only="systeminternational" style="display:none">Panel SaaS</a>
   </div>
@@ -977,15 +982,25 @@
     var sel = document.getElementById('vlx-nav-lang');
     if (!sel) return;
     var cur = (localStorage.getItem('volvix_lang') || (navigator.language||'es').slice(0,2)).toLowerCase();
-    if (['es','en','pt'].indexOf(cur) >= 0) sel.value = cur;
-    if (!window.__vlxSetLang) {
-      window.__vlxSetLang = function(lang){
-        try { localStorage.setItem('volvix_lang', lang); } catch(_) {}
-        try { document.documentElement.setAttribute('lang', lang); } catch(_) {}
-        try { window.dispatchEvent(new CustomEvent('volvix:lang:change',{detail:{lang:lang}})); } catch(_) {}
-        setTimeout(function(){ location.reload(); }, 80);
-      };
+    if (['es','en','pt','fr','de','it','ja'].indexOf(cur) >= 0) sel.value = cur;
+    // Si la opción no está en el <select>, agrégala (defensivo)
+    if (sel.value !== cur) {
+      var op = document.createElement('option'); op.value = cur; op.textContent = cur.toUpperCase(); sel.appendChild(op); sel.value = cur;
     }
+    window.__vlxSetLang = function(lang){
+      try { localStorage.setItem('volvix_lang', lang); } catch(_) {}
+      try { document.documentElement.setAttribute('lang', lang); } catch(_) {}
+      // Caso 1: i18n wiring real cargado → cambia in-place sin reload
+      if (window.setLanguage && typeof window.setLanguage === 'function') {
+        try { window.setLanguage(lang); return; } catch(_) {}
+      }
+      if (window.Volvix && window.Volvix.i18n && typeof window.Volvix.i18n.setLanguage === 'function') {
+        try { window.Volvix.i18n.setLanguage(lang); return; } catch(_) {}
+      }
+      // Caso 2: i18n no disponible → fallback reload (recarga aplica desde localStorage al boot)
+      try { window.dispatchEvent(new CustomEvent('volvix:lang:change',{detail:{lang:lang}})); } catch(_) {}
+      setTimeout(function(){ location.reload(); }, 80);
+    };
   } catch(_) {}
 })();
 </script>

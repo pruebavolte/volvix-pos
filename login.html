@@ -501,6 +501,10 @@ body {
       <option value="es">Español</option>
       <option value="en">English</option>
       <option value="pt">Português</option>
+      <option value="fr">Français</option>
+      <option value="de">Deutsch</option>
+      <option value="it">Italiano</option>
+      <option value="ja">日本語</option>
     </select>
   </div>
 
@@ -535,6 +539,12 @@ body {
 
       <div class="login-link-row">
         <a href="#" id="forgotPasswordLink" aria-label="Recuperar contraseña olvidada">¿Olvidaste tu contraseña?</a>
+      </div>
+
+      <!-- Crear cuenta — entry point de registro (faltaba) -->
+      <div style="text-align:center;margin-top:18px;padding-top:18px;border-top:1px solid var(--vlx-line,#ECECEE);font-size:13px;color:var(--vlx-ink-3,#6B7280)">
+        ¿No tienes cuenta?
+        <a href="/registro.html" style="color:var(--vlx-ink,#0B0B0F);font-weight:500;text-decoration:none;margin-left:4px">Crear cuenta</a>
       </div>
 
       <!-- Social login fallback (oculto si OAuth no disponible) -->
@@ -799,18 +809,24 @@ document.getElementById('passwordInput').addEventListener('keydown', e => {
 </footer>
 <script defer src="/volvix-cookie-banner-wiring.js"></script>
 <script>
-// Idioma inline (login). Persiste en localStorage; reload aplica.
+// Idioma inline (login). Usa window.setLanguage() del i18n wiring si está
+// disponible (cambio in-place sin reload), si no fallback a reload.
 (function(){
   try {
     var sel = document.getElementById('vlx-lang-select');
     if (!sel) return;
     var cur = (localStorage.getItem('volvix_lang') || (navigator.language||'es').slice(0,2)).toLowerCase();
-    if (['es','en','pt'].indexOf(cur) >= 0) sel.value = cur;
+    if (['es','en','pt','fr','de','it','ja'].indexOf(cur) >= 0) sel.value = cur;
     window.__vlxSetLang = function(lang){
       try { localStorage.setItem('volvix_lang', lang); } catch(_) {}
       try { document.documentElement.setAttribute('lang', lang); } catch(_) {}
+      if (window.setLanguage && typeof window.setLanguage === 'function') {
+        try { window.setLanguage(lang); return; } catch(_) {}
+      }
+      if (window.Volvix && window.Volvix.i18n && typeof window.Volvix.i18n.setLanguage === 'function') {
+        try { window.Volvix.i18n.setLanguage(lang); return; } catch(_) {}
+      }
       try { window.dispatchEvent(new CustomEvent('volvix:lang:change', { detail: { lang: lang } })); } catch(_) {}
-      // Reload suave para que i18n wiring repinte
       setTimeout(function(){ location.reload(); }, 80);
     };
   } catch(_) {}
