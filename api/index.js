@@ -1171,16 +1171,47 @@ function serveStaticFile(res, pathname) {
     res.statusCode = 200;
     setSecurityHeaders(res); // R14
     res.setHeader('Content-Type', mime);
-    // R23: HTML y wiring scripts SIEMPRE frescos; otros assets cachean 1h.
-    // Los volvix-*.js cambian con cada deploy y deben revalidarse para que
-    // los usuarios vean los fixes inmediato (no esperar 1h cache HTTP).
+    // CACHE STRATEGY (cero stale + cero requests innecesarios):
+    //   HTML        → max-age=0, must-revalidate (siempre revalida vía ETag)
+    //   /volvix-*.js?v=HASH → max-age=1y immutable (URL única por deploy)
+    //   /volvix-*.js sin ?v → max-age=0, must-revalidate (back-compat)
+    //   resto       → max-age=3600 (imagenes, fonts, etc.)
     const isWiring = /\/volvix-[\w-]+\.js$/.test(pathname);
-    if (ext === '.html' || isWiring) {
+    const hasCacheBust = !!(req.url && /[?&]v=/.test(req.url));
+    if (ext === '.html') {
+      res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+    } else if (isWiring && hasCacheBust) {
+      // URL ya tiene ?v=XYZ → cambia con cada deploy → cachea 1 año
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    } else if (isWiring) {
       res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
     } else {
       res.setHeader('Cache-Control', 'public, max-age=3600');
     }
-    res.end(fs.readFileSync(filePath));
+    let body = fs.readFileSync(filePath);
+    // CACHE BUSTING: en HTML reescribir refs a /volvix-*.js para incluir ?v=COMMIT_SHA.
+    // El hash es el commit SHA (cambia con cada deploy). Resultado:
+    //   - Deploy nuevo → HTML cambia → user fetch HTML (max-age=0) → ve refs nuevas
+    //   - URL nueva → navegador NO usa cache local → descarga JS nuevo
+    //   - URL igual → navegador usa cache local instantáneo (max-age=1y)
+    // Cero Ctrl+Shift+R, cero requests redundantes.
+    if (ext === '.html') {
+      const sha = (process.env.VERCEL_GIT_COMMIT_SHA || '').slice(0, 8) || 'dev';
+      try {
+        let html = body.toString('utf8');
+        html = html.replace(
+          /(<script[^>]+src=["'])(\/?volvix-[\w-]+\.js)(["'])/g,
+          (m, pre, src, post) => {
+            // Si ya tiene ?v= no tocar
+            if (/[?&]v=/.test(src)) return m;
+            const sep = src.includes('?') ? '&' : '?';
+            return pre + src + sep + 'v=' + sha + post;
+          }
+        );
+        body = Buffer.from(html, 'utf8');
+      } catch (_) { /* fallback a body original */ }
+    }
+    res.end(body);
   } catch (err) {
     res.statusCode = 500;
     res.end(`<h1>500</h1><p>${IS_PROD ? 'internal' : err.message}</p>`);
@@ -31394,7 +31425,10 @@ if (process.env.NODE_ENV === 'test') {
       // Sin este fallback el usuario queda bloqueado viendo "te enviaremos
       // SMS" pero sin código que ingresar.
       const isProd = process.env.NODE_ENV === 'production';
-      const noSmsProviderConfigured = !hasTwilioKeys || !hasSmsFrom;
+      // Refactor: ahora hay 3 vías independientes (Verify, SMS dedicado, WhatsApp).
+      // El proveedor está "configurado" si CUALQUIERA de las tres existe.
+      const anyProviderAvailable = hasTwilioKeys && (hasVerifyService || hasDedicatedSmsFrom || hasWhatsAppFrom);
+      const noSmsProviderConfigured = !anyProviderAvailable;
       const smsAttemptedButFailed = !smsSent && !!smsError;
       const allowDevVisibleBridge = !isProd || noSmsProviderConfigured || smsAttemptedButFailed;
       const respPayload = {
