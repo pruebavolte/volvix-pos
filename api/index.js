@@ -13492,8 +13492,8 @@ module.exports = async (req, res) => {
 
   const parsed = url.parse(req.url, true);
   let pathname = parsed.pathname;
-  // B7: alias plural → singular for admin tenants list
-  if (pathname === '/api/admin/tenants') pathname = '/api/admin/tenant';
+  // B7 (revertido): el alias plural→singular dejaba /api/admin/tenants apuntando
+  // a un handler que ya no existe. Ahora hay handler nativo plural en línea 10481.
   const method = req.method;
 
   if (pathname.startsWith('/api/') || pathname === '/api') {
