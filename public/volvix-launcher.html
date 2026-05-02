@@ -357,6 +357,25 @@
 </head>
 <body>
 
+  <script>
+    // 2026-05 audit Bloque 9: si veniste redirigido por intentar acceder a una
+    // página solo-de-plataforma, mostramos un toast/banner explicativo.
+    (function () {
+      try {
+        var qs = new URLSearchParams(location.search || '');
+        if (qs.get('denied') === 'platform_only') {
+          var b = document.createElement('div');
+          b.style.cssText = 'position:fixed;top:14px;left:50%;transform:translateX(-50%);background:#fef3c7;border:1px solid #f59e0b;color:#78350f;padding:12px 18px;border-radius:10px;font-size:14px;font-weight:500;box-shadow:0 8px 24px rgba(15,23,42,.1);z-index:99999;max-width:90vw';
+          b.textContent = 'Esa sección es solo para el equipo de Volvix (plataforma). Tu cuenta es dueña de tu negocio, no de la plataforma.';
+          document.body.appendChild(b);
+          setTimeout(function () { try { b.style.opacity = '0'; b.style.transition = 'opacity .4s'; setTimeout(function(){b.remove()}, 500); } catch(_){} }, 6000);
+          // Limpia el query string
+          try { history.replaceState({}, document.title, location.pathname); } catch(_){}
+        }
+      } catch (_) {}
+    })();
+  </script>
+
   <!-- ============== TOP BAR ============== -->
   <header class="topbar" role="banner">
     <a href="/volvix-launcher.html" class="brand" aria-label="Volvix Launcher inicio">

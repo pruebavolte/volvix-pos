@@ -56,6 +56,46 @@
   const pathname = window.location.pathname;
   if (isPublicPage(pathname)) return;
 
+  // 2026-05 audit Bloque 9: páginas exclusivas del DUEÑO DE LA PLATAFORMA
+  // (superadmin / @systeminternational.app). Un owner-de-tenant intentando
+  // entrar es redirigido a su launcher.
+  const PLATFORM_ONLY_PAGES = [
+    '/volvix_owner_panel_v8.html',
+    '/volvix-admin-saas.html',
+    '/volvix-feature-flags-admin.html',
+    '/volvix-fraud-dashboard.html',
+    '/volvix-audit-viewer.html',
+    '/volvix-emergency-mode.html',
+    '/volvix-backup-admin.html',
+    '/volvix-mega-dashboard.html',
+    '/volvix-api-docs.html'
+  ];
+  function _decodeJwt(tok) {
+    try {
+      const p = String(tok || '').split('.');
+      if (p.length < 2) return null;
+      const b64 = p[1].replace(/-/g, '+').replace(/_/g, '/');
+      const pad = b64.length % 4 ? '='.repeat(4 - (b64.length % 4)) : '';
+      return JSON.parse(decodeURIComponent(escape(atob(b64 + pad))));
+    } catch (_) { return null; }
+  }
+  function _isPlatformOwner() {
+    const tok = (function () {
+      try { return localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || ''; } catch (_) { return ''; }
+    })();
+    const payload = _decodeJwt(tok) || {};
+    const role = String(payload.role || payload.rol || '').toLowerCase();
+    const email = String(payload.email || '').toLowerCase();
+    return role === 'superadmin' || role === 'platform_owner' || email.endsWith('@systeminternational.app');
+  }
+  if (PLATFORM_ONLY_PAGES.some(p => pathname === p || pathname.endsWith(p))) {
+    if (!_isPlatformOwner()) {
+      // No es dueño de plataforma → redirigir a su launcher con mensaje
+      window.location.replace('/volvix-launcher.html?denied=platform_only');
+      return;
+    }
+  }
+
   // Validar sesión vía JWT helper (preferido) con fallback a chequeo legacy
   let isValid = false;
   let hadAnySession = false;

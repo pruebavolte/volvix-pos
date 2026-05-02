@@ -29,6 +29,46 @@
   if (window.__volvixUpliftLoaded) return;
   window.__volvixUpliftLoaded = true;
 
+  // 2026-05 audit Bloque 9: enforce platform-only pages aun cuando el HTML
+  // no haya incluido <script src="/auth-gate.js">. Esto evita que un
+  // owner-de-tenant abra /volvix-feature-flags-admin.html, etc.
+  (function _enforcePlatformOnlyImmediate() {
+    try {
+      var path = (window.location && window.location.pathname) || '/';
+      var PLATFORM = [
+        '/volvix_owner_panel_v8.html',
+        '/volvix-admin-saas.html',
+        '/volvix-feature-flags-admin.html',
+        '/volvix-fraud-dashboard.html',
+        '/volvix-audit-viewer.html',
+        '/volvix-emergency-mode.html',
+        '/volvix-backup-admin.html',
+        '/volvix-mega-dashboard.html',
+        '/volvix-api-docs.html'
+      ];
+      var matches = PLATFORM.some(function (p) { return path === p || path.endsWith(p); });
+      if (!matches) return;
+      var tok = '';
+      try { tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || ''; } catch (_) {}
+      var role = '', email = '';
+      try {
+        var parts = String(tok).split('.');
+        if (parts.length >= 2) {
+          var b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+          var pad = b64.length % 4 ? '='.repeat(4 - (b64.length % 4)) : '';
+          var p = JSON.parse(decodeURIComponent(escape(atob(b64 + pad))));
+          role = String(p.role || p.rol || '').toLowerCase();
+          email = String(p.email || '').toLowerCase();
+        }
+      } catch (_) {}
+      var isPlatform = role === 'superadmin' || role === 'platform_owner'
+                       || email.endsWith('@systeminternational.app');
+      if (!isPlatform) {
+        window.location.replace('/volvix-launcher.html?denied=platform_only');
+      }
+    } catch (_) {}
+  })();
+
   // ---- Helper compartido: ¿estamos en una página pública? -----------------
   // Definido aquí (uplift se inyecta en TODAS las HTML) además de en
   // auth-gate.js para garantizar disponibilidad antes que cualquier wrapper

@@ -37,16 +37,15 @@
     } catch (_) { return ''; }
   }
 
+  // 2026-05 audit B-9-1: SOLO confiamos en el JWT firmado del server.
+  // Eliminado el branch localStorage.volvix_role que cualquiera podía setear
+  // desde devtools (era cosmético pero confuso para auditoría / QA).
   function isPlatformOwner() {
     const payload = decodeJwt(getToken()) || {};
     const email = String(payload.email || '').toLowerCase();
     const role = String(payload.role || payload.rol || '').toLowerCase();
     if (role === 'superadmin' || role === 'platform_owner') return true;
     if (email.endsWith('@systeminternational.app')) return true;
-    try {
-      const lsRole = String(localStorage.getItem('volvix_role') || '').toLowerCase();
-      if (lsRole === 'superadmin') return true;
-    } catch (_) {}
     return false;
   }
 

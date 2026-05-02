@@ -36,7 +36,17 @@
 
   function clearToken() {
     try {
+      // 2026-05 audit Bloque 9: limpiar TODAS las keys de sesión y rol para
+      // evitar señales fantasma (volvix_role en localStorage que daba pistas
+      // visuales de admin aunque el JWT real ya estuviera caducado).
       localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem('volvixAuthToken');
+      localStorage.removeItem('jwt');
+      localStorage.removeItem('token');
+      localStorage.removeItem('volvixSession');
+      localStorage.removeItem('volvix_session');
+      localStorage.removeItem('volvix_role');
+      localStorage.removeItem('volvix:session');
     } catch (e) { /* noop */ }
   }
 
