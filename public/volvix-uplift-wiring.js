@@ -483,6 +483,19 @@
   // ---------------------------------------------------------------------------
   function forceLightModeAlways() {
     if (document.getElementById('vlx-force-light-css')) return;
+    // 2026-05 CONTRASTE FIX: si la página tiene su propio tema dark declarado
+    // (via color-scheme:dark en :root, o data-theme="dark", o
+    // <meta name="vlx-theme" content="dark">), NO pisamos sus colores —
+    // el resultado de pisar es texto negro sobre fondo oscuro = invisible.
+    try {
+      var rootCS = getComputedStyle(document.documentElement).colorScheme || '';
+      var hasDarkThemeAttr = document.documentElement.getAttribute('data-theme') === 'dark';
+      var optOutMeta = document.querySelector('meta[name="vlx-theme"][content="dark"]');
+      if (rootCS.indexOf('dark') >= 0 || hasDarkThemeAttr || optOutMeta) {
+        // Solo aplicar attr data-theme=light SI el dueño NO declaró dark.
+        return;
+      }
+    } catch (_) {}
     // 1. Decirle al navegador que solo soportamos light scheme. Esto neutraliza
     //    @media (prefers-color-scheme: dark) en TODAS las páginas + form
     //    controls, scrollbars y user-agent stylesheet.
@@ -527,6 +540,15 @@
   // ---------------------------------------------------------------------------
   function injectVisualRefresh() {
     if (document.getElementById('vlx-visual-refresh-css')) return;
+    // 2026-05 CONTRASTE FIX: detectar si la página tiene tema dark declarado.
+    // Si sí, NO inyectamos colores light que pisarían el texto.
+    var __isDarkTheme = false;
+    try {
+      var rootCS = getComputedStyle(document.documentElement).colorScheme || '';
+      __isDarkTheme = rootCS.indexOf('dark') >= 0
+        || document.documentElement.getAttribute('data-theme') === 'dark'
+        || !!document.querySelector('meta[name="vlx-theme"][content="dark"]');
+    } catch (_) {}
     var st = document.createElement('style');
     st.id = 'vlx-visual-refresh-css';
     st.textContent = [
@@ -560,6 +582,8 @@
       '}',
 
       // ---- Tipografía global modernizada (system stack premium + Inter optional) ----
+      // 2026-05 CONTRASTE FIX: NO declaramos color en body — dejamos que la
+      // página declare el suyo. Solo tipografía y rendering.
       'html, body {',
       '  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif !important;',
       '  -webkit-font-smoothing: antialiased;',

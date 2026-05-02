@@ -46,11 +46,26 @@
   *{box-sizing:border-box;margin:0;padding:0}
   /* 2026-05: paleta azul Volvix coherente con resto del sistema (#2563EB) */
   :root{
+    color-scheme: dark;  /* opt-out del force-light global de uplift-wiring */
     --primary:#2563EB;--primary-dark:#1D4ED8;--primary-light:#60A5FA;--accent:#06B6D4;
     --bg:#0A0F1F;--bg2:#0F172A;--bg3:#1E293B;
     --text:#F1F5F9;--muted:#94A3B8;--border:#1E293B;
     --blue-soft:#3B82F6;--blue-glow:rgba(37,99,235,.35);
   }
+  /* CONTRASTE — todos los <a> y <button> dentro del body por defecto deben
+     ser visibles sobre el fondo oscuro. Override del visual-refresh global. */
+  html, body, body * { color-scheme: dark !important; }
+  body { color: var(--text) !important; background: var(--bg) !important; }
+  a:not(.nav-cta):not(.btn):not(.btn-primary):not(.btn-outline):not(.panel-link):not(.tipo-card) {
+    color: #93C5FD !important;
+  }
+  a:not(.nav-cta):not(.btn):not(.btn-primary):not(.btn-outline):not(.panel-link):not(.tipo-card):hover {
+    color: #BFDBFE !important;
+  }
+  footer p, footer a { color: #CBD5E1 !important; }
+  footer a:hover { color: #FFFFFF !important; }
+  footer p:last-child a { color: #94A3B8 !important; }
+  footer p:last-child a:hover { color: #CBD5E1 !important; }
   body{background:var(--bg);color:var(--text);font-family:'Inter','SF Pro Display','Segoe UI',system-ui,sans-serif;min-height:100vh;
     background-image:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(37,99,235,.10),transparent 60%)}
   a{color:inherit;text-decoration:none}
