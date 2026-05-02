@@ -10615,8 +10615,305 @@ handlers['GET /api/config/public'] = async (req, res) => {
       fields: mergedUniversal.filter(f => !f._hidden),
       fields_extra: giroSchema.fields_extra || [],
       fields_advanced: advancedFields,
+      feature_flags: (schemas._feature_flags && schemas._feature_flags.flags) || [],
+      terminology: (schemas._terminology && schemas._terminology.examples && schemas._terminology.examples[giro]) || null,
       meta: schemas._meta || null
     });
+  };
+
+  // ---- INDUSTRY SEED PRODUCTS — pre-cargar productos al elegir giro ----
+  // GET /api/industry-seed/:giro → 10 productos comunes con receta/variantes/modificadores/flags
+  let _industrySeedCache = null;
+  function getIndustrySeed() {
+    if (_industrySeedCache) return _industrySeedCache;
+    try {
+      const p = path.join(__dirname, '..', 'data', 'industry-seed-products.json');
+      _industrySeedCache = JSON.parse(fs.readFileSync(p, 'utf8'));
+    } catch (_) { _industrySeedCache = {}; }
+    return _industrySeedCache;
+  }
+
+  handlers['GET /api/industry-seed'] = (req, res) => {
+    const parsedUrl = url.parse(req.url, true);
+    const giro = String((parsedUrl.query && parsedUrl.query.giro) || '').toLowerCase().trim();
+    const seed = getIndustrySeed();
+    if (!giro) {
+      const list = Object.keys(seed)
+        .filter(k => !k.startsWith('_'))
+        .map(k => ({ giro: k, count: (seed[k].productos || seed[k].products || []).length }));
+      return sendJSON(res, { ok: true, available: list, meta: seed._meta || null });
+    }
+    const giroBlock = seed[giro];
+    if (!giroBlock) return sendJSON(res, { ok: true, giro, fallback: true, products: [], default_flags: {}, rules: [] });
+    sendJSON(res, {
+      ok: true,
+      giro,
+      label: giroBlock.label || giro,
+      products: giroBlock.productos || giroBlock.products || [],
+      default_flags: giroBlock.default_flags || {},
+      rules: giroBlock.rules || [],
+      terminology: giroBlock.terminology || null
+    });
+  };
+
+  // ---- UNIVERSAL MODULAR SYSTEM — recetas, variantes, modificadores, reglas, terminología ----
+  // Todas las rutas requieren auth y aíslan por tenant_id del JWT.
+  // Las tablas se crean con migrations/universal-modular-system.sql
+
+  function _umsTenant(req) {
+    const u = req.user || {};
+    return u.tenant_id || u.tenantId || null;
+  }
+
+  // --------- RECIPES ---------
+  // GET /api/products/:sku/recipe
+  handlers['GET /api/products/recipe'] = async (req, res) => {
+    if (!req.user) return sendJSON(res, { ok: false, error: 'unauthorized' }, 401);
+    const tid = _umsTenant(req);
+    if (!tid) return sendJSON(res, { ok: false, error: 'tenant_required' }, 400);
+    const sku = String(url.parse(req.url, true).query.sku || '').trim();
+    if (!sku) return sendJSON(res, { ok: false, error: 'sku_required' }, 400);
+    try {
+      const rows = await supabaseRequest('GET', `/rest/v1/product_recipes?tenant_id=eq.${tid}&parent_sku=eq.${encodeURIComponent(sku)}&order=child_sku.asc`);
+      sendJSON(res, { ok: true, sku, recipe: rows || [] });
+    } catch (e) { sendJSON(res, { ok: false, error: String(e.message || e) }, 500); }
+  };
+
+  // POST /api/products/recipe   { sku, items:[{child_sku, quantity, unit?, notes?}] }
+  handlers['POST /api/products/recipe'] = async (req, res) => {
+    if (!req.user) return sendJSON(res, { ok: false, error: 'unauthorized' }, 401);
+    const tid = _umsTenant(req);
+    if (!tid) return sendJSON(res, { ok: false, error: 'tenant_required' }, 400);
+    const body = req.body || {};
+    const sku = String(body.sku || '').trim();
+    const items = Array.isArray(body.items) ? body.items : [];
+    if (!sku || !items.length) return sendJSON(res, { ok: false, error: 'sku_and_items_required' }, 400);
+    try {
+      // Replace strategy: borra los existentes y reinserta
+      await supabaseRequest('DELETE', `/rest/v1/product_recipes?tenant_id=eq.${tid}&parent_sku=eq.${encodeURIComponent(sku)}`);
+      const rows = items.map(it => ({
+        tenant_id: tid,
+        parent_sku: sku,
+        child_sku: String(it.child_sku || it.sku || '').trim(),
+        quantity: Number(it.quantity || it.qty || 1),
+        unit: it.unit || 'pieza',
+        notes: it.notes || null
+      })).filter(r => r.child_sku);
+      if (rows.length) await supabaseRequest('POST', '/rest/v1/product_recipes', rows);
+      sendJSON(res, { ok: true, sku, count: rows.length });
+    } catch (e) { sendJSON(res, { ok: false, error: String(e.message || e) }, 500); }
+  };
+
+  // --------- VARIANTS ---------
+  handlers['GET /api/products/variants'] = async (req, res) => {
+    if (!req.user) return sendJSON(res, { ok: false, error: 'unauthorized' }, 401);
+    const tid = _umsTenant(req);
+    if (!tid) return sendJSON(res, { ok: false, error: 'tenant_required' }, 400);
+    const sku = String(url.parse(req.url, true).query.sku || '').trim();
+    if (!sku) return sendJSON(res, { ok: false, error: 'sku_required' }, 400);
+    try {
+      const rows = await supabaseRequest('GET', `/rest/v1/product_variants?tenant_id=eq.${tid}&parent_sku=eq.${encodeURIComponent(sku)}&order=sort_order.asc`);
+      sendJSON(res, { ok: true, sku, variants: rows || [] });
+    } catch (e) { sendJSON(res, { ok: false, error: String(e.message || e) }, 500); }
+  };
+
+  // POST /api/products/variants   { sku, variants:[{variant_key, variant_label, price?, stock?, attributes?}] }
+  handlers['POST /api/products/variants'] = async (req, res) => {
+    if (!req.user) return sendJSON(res, { ok: false, error: 'unauthorized' }, 401);
+    const tid = _umsTenant(req);
+    if (!tid) return sendJSON(res, { ok: false, error: 'tenant_required' }, 400);
+    const body = req.body || {};
+    const sku = String(body.sku || '').trim();
+    const variants = Array.isArray(body.variants) ? body.variants : [];
+    if (!sku || !variants.length) return sendJSON(res, { ok: false, error: 'sku_and_variants_required' }, 400);
+    try {
+      await supabaseRequest('DELETE', `/rest/v1/product_variants?tenant_id=eq.${tid}&parent_sku=eq.${encodeURIComponent(sku)}`);
+      const rows = variants.map((v, i) => ({
+        tenant_id: tid,
+        parent_sku: sku,
+        variant_key: String(v.variant_key || v.key || ('v' + (i + 1))).trim(),
+        variant_label: String(v.variant_label || v.label || v.name || ('Variante ' + (i + 1))).trim(),
+        attributes: v.attributes || {},
+        price: (v.price != null) ? Number(v.price) : null,
+        cost: (v.cost != null) ? Number(v.cost) : null,
+        stock: (v.stock != null) ? Number(v.stock) : 0,
+        barcode: v.barcode || null,
+        active: v.active !== false,
+        sort_order: i
+      }));
+      if (rows.length) await supabaseRequest('POST', '/rest/v1/product_variants', rows);
+      sendJSON(res, { ok: true, sku, count: rows.length });
+    } catch (e) { sendJSON(res, { ok: false, error: String(e.message || e) }, 500); }
+  };
+
+  // --------- MODIFIERS ---------
+  handlers['GET /api/products/modifiers'] = async (req, res) => {
+    if (!req.user) return sendJSON(res, { ok: false, error: 'unauthorized' }, 401);
+    const tid = _umsTenant(req);
+    if (!tid) return sendJSON(res, { ok: false, error: 'tenant_required' }, 400);
+    const sku = String(url.parse(req.url, true).query.sku || '').trim();
+    if (!sku) return sendJSON(res, { ok: false, error: 'sku_required' }, 400);
+    try {
+      const rows = await supabaseRequest('GET', `/rest/v1/product_modifiers?tenant_id=eq.${tid}&parent_sku=eq.${encodeURIComponent(sku)}&order=sort_order.asc`);
+      sendJSON(res, { ok: true, sku, modifiers: rows || [] });
+    } catch (e) { sendJSON(res, { ok: false, error: String(e.message || e) }, 500); }
+  };
+
+  // POST /api/products/modifiers   { sku, modifiers:[{modifier_key, modifier_label, price_delta, group_label?, required?}] }
+  handlers['POST /api/products/modifiers'] = async (req, res) => {
+    if (!req.user) return sendJSON(res, { ok: false, error: 'unauthorized' }, 401);
+    const tid = _umsTenant(req);
+    if (!tid) return sendJSON(res, { ok: false, error: 'tenant_required' }, 400);
+    const body = req.body || {};
+    const sku = String(body.sku || '').trim();
+    const modifiers = Array.isArray(body.modifiers) ? body.modifiers : [];
+    if (!sku || !modifiers.length) return sendJSON(res, { ok: false, error: 'sku_and_modifiers_required' }, 400);
+    try {
+      await supabaseRequest('DELETE', `/rest/v1/product_modifiers?tenant_id=eq.${tid}&parent_sku=eq.${encodeURIComponent(sku)}`);
+      const rows = modifiers.map((m, i) => ({
+        tenant_id: tid,
+        parent_sku: sku,
+        modifier_key: String(m.modifier_key || m.key || ('m' + (i + 1))).trim(),
+        modifier_label: String(m.modifier_label || m.label || m.name || '').trim(),
+        group_label: m.group_label || m.group || null,
+        price_delta: Number(m.price_delta || m.delta || 0),
+        required: !!m.required,
+        multiselect: m.multiselect !== false,
+        max_qty: Number(m.max_qty || 1),
+        active: m.active !== false,
+        sort_order: i
+      })).filter(r => r.modifier_label);
+      if (rows.length) await supabaseRequest('POST', '/rest/v1/product_modifiers', rows);
+      sendJSON(res, { ok: true, sku, count: rows.length });
+    } catch (e) { sendJSON(res, { ok: false, error: String(e.message || e) }, 500); }
+  };
+
+  // --------- RULES (horarios, ley seca, pricing dinámico) ---------
+  handlers['GET /api/products/rules'] = async (req, res) => {
+    if (!req.user) return sendJSON(res, { ok: false, error: 'unauthorized' }, 401);
+    const tid = _umsTenant(req);
+    if (!tid) return sendJSON(res, { ok: false, error: 'tenant_required' }, 400);
+    const q = url.parse(req.url, true).query;
+    const sku = String(q.sku || '').trim();
+    let path1 = `/rest/v1/product_rules?tenant_id=eq.${tid}&order=priority.asc`;
+    if (sku) path1 += `&scope=eq.sku&scope_value=eq.${encodeURIComponent(sku)}`;
+    try {
+      const rows = await supabaseRequest('GET', path1);
+      sendJSON(res, { ok: true, rules: rows || [] });
+    } catch (e) { sendJSON(res, { ok: false, error: String(e.message || e) }, 500); }
+  };
+
+  // POST /api/products/rules   { rules:[{scope, scope_value, rule_type, rule_data, priority?}] }
+  handlers['POST /api/products/rules'] = async (req, res) => {
+    if (!req.user) return sendJSON(res, { ok: false, error: 'unauthorized' }, 401);
+    const tid = _umsTenant(req);
+    if (!tid) return sendJSON(res, { ok: false, error: 'tenant_required' }, 400);
+    const body = req.body || {};
+    const rules = Array.isArray(body.rules) ? body.rules : (body.rule ? [body.rule] : []);
+    if (!rules.length) return sendJSON(res, { ok: false, error: 'rules_required' }, 400);
+    try {
+      const rows = rules.map(r => ({
+        tenant_id: tid,
+        scope: r.scope || 'sku',
+        scope_value: r.scope_value || r.sku || null,
+        rule_type: String(r.rule_type || '').trim(),
+        rule_data: r.rule_data || {},
+        priority: Number(r.priority || 100),
+        active: r.active !== false,
+        notes: r.notes || null
+      })).filter(r => r.rule_type);
+      if (rows.length) await supabaseRequest('POST', '/rest/v1/product_rules', rows);
+      sendJSON(res, { ok: true, count: rows.length });
+    } catch (e) { sendJSON(res, { ok: false, error: String(e.message || e) }, 500); }
+  };
+
+  // DELETE /api/products/rules?id=UUID
+  handlers['DELETE /api/products/rules'] = async (req, res) => {
+    if (!req.user) return sendJSON(res, { ok: false, error: 'unauthorized' }, 401);
+    const tid = _umsTenant(req);
+    if (!tid) return sendJSON(res, { ok: false, error: 'tenant_required' }, 400);
+    const id = String(url.parse(req.url, true).query.id || '').trim();
+    if (!id) return sendJSON(res, { ok: false, error: 'id_required' }, 400);
+    try {
+      await supabaseRequest('DELETE', `/rest/v1/product_rules?id=eq.${encodeURIComponent(id)}&tenant_id=eq.${tid}`);
+      sendJSON(res, { ok: true });
+    } catch (e) { sendJSON(res, { ok: false, error: String(e.message || e) }, 500); }
+  };
+
+  // --------- TERMINOLOGÍA per-tenant ---------
+  // GET /api/tenant/terminology  → diccionario completo del tenant (cliente→Paciente, etc.)
+  handlers['GET /api/tenant/terminology'] = async (req, res) => {
+    if (!req.user) return sendJSON(res, { ok: false, error: 'unauthorized' }, 401);
+    const tid = _umsTenant(req);
+    if (!tid) return sendJSON(res, { ok: false, error: 'tenant_required' }, 400);
+    try {
+      const rows = await supabaseRequest('GET', `/rest/v1/tenant_terminology?tenant_id=eq.${tid}`);
+      const dict = {};
+      (rows || []).forEach(r => { dict[r.term_key] = r.term_value; });
+      sendJSON(res, { ok: true, terminology: dict });
+    } catch (e) { sendJSON(res, { ok: false, error: String(e.message || e) }, 500); }
+  };
+
+  // POST /api/tenant/terminology  { terms:{cliente:"Paciente", venta:"Consulta"} }
+  handlers['POST /api/tenant/terminology'] = async (req, res) => {
+    if (!req.user) return sendJSON(res, { ok: false, error: 'unauthorized' }, 401);
+    const tid = _umsTenant(req);
+    if (!tid) return sendJSON(res, { ok: false, error: 'tenant_required' }, 400);
+    const body = req.body || {};
+    const terms = body.terms || {};
+    const keys = Object.keys(terms);
+    if (!keys.length) return sendJSON(res, { ok: false, error: 'terms_required' }, 400);
+    try {
+      // Upsert via PostgREST: header Prefer resolution=merge-duplicates
+      const rows = keys.map(k => ({
+        tenant_id: tid,
+        term_key: String(k).trim(),
+        term_value: String(terms[k] || '').trim(),
+        locale: body.locale || 'es-MX'
+      }));
+      // Borra y reinserta — más simple que upsert
+      await supabaseRequest('DELETE', `/rest/v1/tenant_terminology?tenant_id=eq.${tid}&term_key=in.(${rows.map(r => '"' + r.term_key + '"').join(',')})`);
+      if (rows.length) await supabaseRequest('POST', '/rest/v1/tenant_terminology', rows);
+      sendJSON(res, { ok: true, count: rows.length });
+    } catch (e) { sendJSON(res, { ok: false, error: String(e.message || e) }, 500); }
+  };
+
+  // --------- PRODUCT FEATURE FLAGS ---------
+  // GET /api/products/feature-flags?sku=X
+  handlers['GET /api/products/feature-flags'] = async (req, res) => {
+    if (!req.user) return sendJSON(res, { ok: false, error: 'unauthorized' }, 401);
+    const tid = _umsTenant(req);
+    if (!tid) return sendJSON(res, { ok: false, error: 'tenant_required' }, 400);
+    const sku = String(url.parse(req.url, true).query.sku || '').trim();
+    if (!sku) return sendJSON(res, { ok: false, error: 'sku_required' }, 400);
+    try {
+      const rows = await supabaseRequest('GET', `/rest/v1/product_feature_flags?tenant_id=eq.${tid}&sku=eq.${encodeURIComponent(sku)}`);
+      const flags = {};
+      (rows || []).forEach(r => { flags[r.flag_key] = !!r.flag_value; });
+      sendJSON(res, { ok: true, sku, flags });
+    } catch (e) { sendJSON(res, { ok: false, error: String(e.message || e) }, 500); }
+  };
+
+  // POST /api/products/feature-flags  { sku, flags:{usa_receta:true, usa_variantes:true, ...} }
+  handlers['POST /api/products/feature-flags'] = async (req, res) => {
+    if (!req.user) return sendJSON(res, { ok: false, error: 'unauthorized' }, 401);
+    const tid = _umsTenant(req);
+    if (!tid) return sendJSON(res, { ok: false, error: 'tenant_required' }, 400);
+    const body = req.body || {};
+    const sku = String(body.sku || '').trim();
+    const flags = body.flags || {};
+    if (!sku) return sendJSON(res, { ok: false, error: 'sku_required' }, 400);
+    try {
+      await supabaseRequest('DELETE', `/rest/v1/product_feature_flags?tenant_id=eq.${tid}&sku=eq.${encodeURIComponent(sku)}`);
+      const rows = Object.keys(flags).map(k => ({
+        tenant_id: tid,
+        sku,
+        flag_key: String(k).trim(),
+        flag_value: !!flags[k]
+      })).filter(r => r.flag_key && r.flag_value); // sólo persistir los activos
+      if (rows.length) await supabaseRequest('POST', '/rest/v1/product_feature_flags', rows);
+      sendJSON(res, { ok: true, sku, count: rows.length });
+    } catch (e) { sendJSON(res, { ok: false, error: String(e.message || e) }, 500); }
   };
 
   // ---- TENANT MODULES & BUTTONS — control granular per-tenant ----

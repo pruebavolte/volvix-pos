@@ -61,6 +61,58 @@
     ]
   },
 
+  "_feature_flags": {
+    "label": "Feature flags universales (activan secciones del modal dinámicamente)",
+    "description": "Cada producto/tenant puede activar estos flags. Cuando un flag está ON, el modal renderiza la sección correspondiente. NO hay 100 modales distintos; hay UN modal universal con secciones que se activan/desactivan.",
+    "flags": [
+      { "key": "usa_receta",       "label": "Producto compuesto / Receta",  "section": "recipe",     "help": "Producto que se arma desde otros (six = 6 latas; hamburguesa = pan+carne+queso)" },
+      { "key": "usa_compuestos",   "label": "Es paquete / kit",              "section": "kit",        "help": "Combo o kit pre-armado" },
+      { "key": "usa_insumos",      "label": "Descuenta insumos al vender",   "section": "consumables","help": "Al vender, descuenta de inventario los ingredientes" },
+      { "key": "usa_variantes",    "label": "Tiene variantes",               "section": "variants",   "help": "Mismo producto con tallas/colores/sabores distintos" },
+      { "key": "usa_modificadores","label": "Tiene modificadores",           "section": "modifiers",  "help": "Extra queso, sin tomate, agrandar (suman/restan precio)" },
+      { "key": "usa_lote",         "label": "Maneja lote",                   "section": "lot" },
+      { "key": "usa_caducidad",    "label": "Maneja caducidad",              "section": "expiry" },
+      { "key": "usa_serie",        "label": "Número de serie",               "section": "serial",     "help": "Electrónica, herramientas" },
+      { "key": "usa_imei",         "label": "IMEI",                          "section": "imei",       "help": "Celulares" },
+      { "key": "usa_vin",          "label": "VIN / NIV",                     "section": "vin",        "help": "Autos, refacciones específicas" },
+      { "key": "usa_motor",        "label": "Número de motor",               "section": "motor" },
+      { "key": "usa_horarios",     "label": "Restricción horaria",           "section": "schedule",   "help": "Sólo se vende en X horario (ley seca, happy hour)" },
+      { "key": "usa_dias",         "label": "Días disponibles",              "section": "weekdays",   "help": "Sólo lun-vie, sólo fines de semana" },
+      { "key": "usa_ley_seca",     "label": "Sujeto a ley seca",             "section": "leyseca" },
+      { "key": "usa_pricing_rules","label": "Reglas de precio dinámico",     "section": "pricing",    "help": "Precio premium fuera de horario; descuento por volumen" },
+      { "key": "usa_comision",     "label": "Comisión vendedor",             "section": "commission" },
+      { "key": "usa_garantia",     "label": "Garantía",                      "section": "warranty" },
+      { "key": "usa_peso",         "label": "Se vende por peso",             "section": "weight" },
+      { "key": "usa_color",        "label": "Color",                         "section": "color" },
+      { "key": "usa_talla",        "label": "Talla",                         "section": "size" },
+      { "key": "usa_preparacion",  "label": "Tiempo de preparación",         "section": "prep_time",  "help": "Cocina, panadería" },
+      { "key": "usa_alergenos",    "label": "Alérgenos",                     "section": "allergens",  "help": "Restaurante, panadería" },
+      { "key": "usa_patente",      "label": "Patente / clave",               "section": "patent" },
+      { "key": "usa_ingrediente_activo","label": "Ingrediente activo",       "section": "active_ingredient", "help": "Farmacia, naturista" },
+      { "key": "usa_receta_medica","label": "Requiere receta médica",        "section": "rx" },
+      { "key": "usa_temporada",    "label": "Temporal / estacional",         "section": "seasonal" },
+      { "key": "usa_servicio",     "label": "Es servicio (no físico)",       "section": "service",    "help": "Citas, suscripciones, mano de obra" }
+    ]
+  },
+
+  "_terminology": {
+    "label": "Terminología dinámica per-tenant (cliente↔paciente↔huésped)",
+    "description": "Diccionario que reemplaza términos del UI según el giro. El wiring lee data-term='X' y reemplaza el textContent.",
+    "examples": {
+      "doctor":         { "cliente": "Paciente", "venta": "Consulta", "ticket": "Receta" },
+      "dentista":       { "cliente": "Paciente", "venta": "Tratamiento" },
+      "veterinaria":    { "cliente": "Tutor", "producto": "Servicio/Medicamento" },
+      "hotel":          { "cliente": "Huésped", "venta": "Reservación", "producto": "Habitación/Servicio" },
+      "gimnasio":       { "cliente": "Miembro", "venta": "Inscripción", "producto": "Plan" },
+      "estetica":       { "cliente": "Cliente", "venta": "Cita", "producto": "Servicio" },
+      "barberia":       { "cliente": "Cliente", "venta": "Cita", "producto": "Servicio/Producto" },
+      "academia":       { "cliente": "Alumno", "venta": "Inscripción", "producto": "Curso" },
+      "iglesia":        { "cliente": "Miembro", "venta": "Donación" },
+      "restaurante":    { "cliente": "Comensal", "venta": "Orden", "ticket": "Cuenta" },
+      "taller":         { "cliente": "Cliente", "venta": "Servicio", "producto": "Refacción/Mano de obra" }
+    }
+  },
+
   "abarrotes": {
     "label": "Abarrotes / Tienda",
     "title_singular": "Producto",
