@@ -30964,7 +30964,7 @@ if (process.env.NODE_ENV === 'test') {
       let smsError = null;
       let smsProvider = null;
       const sendSms = (typeof global.__r12o3a_sendSms === 'function') ? global.__r12o3a_sendSms : null;
-      const hasSmsFrom = !!(process.env.TWILIO_SMS_FROM || process.env.TWILIO_PHONE_NUMBER || process.env.TWILIO_FROM);
+      const hasSmsFrom = !!(process.env.TWILIO_SMS_FROM || process.env.TWILIO_PHONE_NUMBER || process.env.TWILIO_FROM || process.env.TWILIO_WHATSAPP_FROM);
       const hasTwilioKeys = !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN);
       if (sendSms && hasTwilioKeys && hasSmsFrom) {
         try {
@@ -31719,7 +31719,16 @@ if (process.env.NODE_ENV === 'test') {
     // opts: { to, body }
     var sid = process.env.TWILIO_ACCOUNT_SID;
     var token = process.env.TWILIO_AUTH_TOKEN;
-    var fromNum = process.env.TWILIO_SMS_FROM || process.env.TWILIO_PHONE_NUMBER || process.env.TWILIO_FROM;
+    // Fallback chain ampliado: si no existe SMS_FROM dedicado, usar el número
+    // que el usuario tenga configurado para WhatsApp — la mayoría de Twilio
+    // numbers son SMS-capable también. Quitar el prefijo "whatsapp:" si lo trae.
+    var fromNum =
+        process.env.TWILIO_SMS_FROM
+     || process.env.TWILIO_PHONE_NUMBER
+     || process.env.TWILIO_FROM
+     || (process.env.TWILIO_WHATSAPP_FROM
+          ? String(process.env.TWILIO_WHATSAPP_FROM).replace(/^whatsapp:/i, '')
+          : null);
     if (!sid || !token || !fromNum) return { ok: false, reason: 'no_key' };
     var phone = String(opts.to || '').replace(/[\s\-\(\)]/g, '');
     var auth = 'Basic ' + Buffer.from(sid + ':' + token).toString('base64');
