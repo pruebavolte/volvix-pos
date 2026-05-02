@@ -31939,20 +31939,41 @@ if (process.env.NODE_ENV === 'test') {
         const errStr = String(e && e.message || e);
         if (/23505|duplicate key/i.test(errStr)) {
           if (/phone/i.test(errStr)) {
-            return sendJSON(res, { ok: false, field: 'phone', error_code: 'PHONE_TAKEN', error_message: 'Este teléfono ya está registrado.' }, 409);
+            return sendJSON(res, { ok: false, field: 'phone', error_code: 'PHONE_TAKEN', error_message: 'Este teléfono ya está registrado. Inicia sesión o usa otro número.' }, 409);
           }
           if (/email/i.test(errStr)) {
-            return sendJSON(res, { ok: false, field: 'email', error_code: 'EMAIL_TAKEN', error_message: 'Este email ya está registrado.' }, 409);
+            return sendJSON(res, { ok: false, field: 'email', error_code: 'EMAIL_TAKEN', error_message: 'Este correo ya está registrado. Inicia sesión o usa otro.' }, 409);
           }
-          return sendJSON(res, { ok: false, error_code: 'DUPLICATE', error_message: 'Ya existe un registro similar.' }, 409);
+          return sendJSON(res, { ok: false, error_code: 'DUPLICATE', error_message: 'Ya existe un registro con esos datos.' }, 409);
         }
+        // 2026-05: folio + log técnico para errores no-conocidos
+        const folio = 'VLX-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+        try {
+          await supabaseRequest('POST', '/system_error_logs', {
+            level: 'error', type: 'register-simple/user', source: 'register-simple/user',
+            error_code: 'USER_CREATE_FAILED', error_message: errStr.slice(0, 500),
+            folio: folio, ip_address: ip, user_agent: userAgent,
+            url: '/api/auth/register-simple',
+            context: { email: emailValue, business_name: business_name, giro: giro },
+            created_at: new Date().toISOString()
+          });
+        } catch (_) {}
         return sendJSON(res, {
           ok: false, error_code: 'USER_CREATE_FAILED',
-          error_message: 'No se pudo crear usuario.' + (process.env.NODE_ENV !== 'production' ? ' ' + errStr.slice(0, 200) : '')
+          folio: folio,
+          error_message: 'Estamos validando tu solicitud. Tu folio es: ' + folio +
+            ' · Toma una captura de esta pantalla y envíala a soporte@systeminternational.app — el equipo te autorizará la cuenta en menos de 1 hora.',
+          tech: process.env.NODE_ENV !== 'production' ? errStr.slice(0, 200) : undefined
         }, 500);
       }
       if (!userId) {
-        return sendJSON(res, { ok: false, error_code: 'USER_CREATE_FAILED', error_message: 'No se pudo crear usuario.' }, 500);
+        const folio = 'VLX-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+        return sendJSON(res, {
+          ok: false, error_code: 'USER_CREATE_FAILED',
+          folio: folio,
+          error_message: 'Estamos validando tu solicitud. Tu folio es: ' + folio +
+            ' · Toma una captura de esta pantalla y envíala a soporte@systeminternational.app — el equipo te autorizará la cuenta en menos de 1 hora.'
+        }, 500);
       }
 
       // ---- Crear pos_companies (o saltar si ya existe por reuso) ----
@@ -31971,12 +31992,16 @@ if (process.env.NODE_ENV === 'test') {
           }
         }
         if (!companyId) {
+          // 2026-05 fix: SOLO los campos que realmente existen en pos_companies.
+          // Schema verificado en Supabase: id, name, owner_user_id, plan,
+          // is_active, expires_at, created_at, updated_at, plan_changed_at,
+          // previous_plan, status, business_type, rfc, city, state, phone, tenant_id.
+          // NO incluye 'email' — eso queda en pos_users.
           const companyPayload = {
             name: business_name,
             owner_user_id: userId,
             tenant_id: tenantId,
             business_type: giro,
-            email: emailValue,
             plan: 'trial',
             status: 'pending',
             is_active: false,
@@ -31991,9 +32016,40 @@ if (process.env.NODE_ENV === 'test') {
         if (userId && !reuseUserId) {
           supabaseRequest('DELETE', '/pos_users?id=eq.' + userId).catch(function () {});
         }
+        // 2026-05: sistema de folios — el usuario ve folio + instrucciones
+        // amigables, nosotros logueamos el error técnico real en BD para debug.
+        const folio = 'VLX-' + Date.now().toString(36).toUpperCase() + '-' +
+                      Math.random().toString(36).slice(2, 6).toUpperCase();
+        const techDetail = String(e && e.message || e).slice(0, 500);
+        try {
+          await supabaseRequest('POST', '/system_error_logs', {
+            level: 'error',
+            type: 'register-simple/company',
+            source: 'register-simple/company',
+            error_code: 'COMPANY_CREATE_FAILED',
+            error_message: techDetail,
+            folio: folio,
+            tenant_id: tenantId,
+            user_id: userId,
+            ip_address: ip,
+            user_agent: userAgent,
+            url: '/api/auth/register-simple',
+            context: {
+              email: emailValue,
+              business_name: business_name,
+              giro: giro,
+              phone: phone || null
+            },
+            created_at: new Date().toISOString()
+          });
+        } catch (_) { /* nunca bloquear la respuesta por log fail */ }
         return sendJSON(res, {
-          ok: false, error_code: 'COMPANY_CREATE_FAILED',
-          error_message: 'No se pudo crear la empresa.' + (process.env.NODE_ENV !== 'production' ? ' ' + String(e && e.message || e).slice(0, 200) : '')
+          ok: false,
+          error_code: 'COMPANY_CREATE_FAILED',
+          folio: folio,
+          error_message: 'Estamos validando tu solicitud. Tu folio es: ' + folio +
+            ' · Toma una captura de esta pantalla y envíala a soporte@systeminternational.app — el equipo te autorizará la cuenta en menos de 1 hora.',
+          tech: process.env.NODE_ENV !== 'production' ? techDetail : undefined
         }, 500);
       }
 

@@ -618,7 +618,24 @@
         } else {
           var msg = (res.body && (res.body.error_message || res.body.message)) || 'Error al registrar.';
           if (res.body && res.body.field) showErr(res.body.field, msg);
-          alertBox('error', msg);
+          // 2026-05: si el backend devolvió folio, mostramos UI especial con
+          // botón para copiar folio + abrir email a soporte.
+          if (res.body && res.body.folio) {
+            var folio = res.body.folio;
+            var html = '<div style="text-align:left;line-height:1.5">' +
+              '<strong style="color:#92400e;display:block;margin-bottom:8px">⏳ Estamos validando tu solicitud</strong>' +
+              '<div style="font-size:13px;color:#78350f;margin-bottom:10px">Tu folio es:</div>' +
+              '<div style="background:#fff;border:2px dashed #f59e0b;padding:10px;border-radius:8px;font-family:monospace;font-size:16px;font-weight:700;text-align:center;color:#0f172a;letter-spacing:1px">' + folio + '</div>' +
+              '<div style="font-size:13px;color:#78350f;margin:10px 0 8px">Toma una captura de esta pantalla y envíala a:</div>' +
+              '<a href="mailto:soporte@systeminternational.app?subject=Folio%20' + encodeURIComponent(folio) + '%20-%20Activar%20cuenta&body=' + encodeURIComponent('Folio: ' + folio + '\nCorreo: ' + (state.formData ? state.formData.email : '') + '\nNegocio: ' + (state.formData ? state.formData.business_name : '')) + '" style="display:inline-block;background:#2563EB;color:#fff;padding:8px 14px;border-radius:8px;text-decoration:none;font-weight:600;font-size:13px">📧 Enviar a soporte</a>' +
+              ' <button type="button" onclick="navigator.clipboard.writeText(\'' + folio + '\').then(function(){this.textContent=\'✓ Copiado\'}.bind(this))" style="background:#fff;color:#2563EB;border:1px solid #2563EB;padding:8px 14px;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer">📋 Copiar folio</button>' +
+              '<div style="font-size:12px;color:#92400e;margin-top:10px">El equipo te autoriza la cuenta en menos de 1 hora.</div>' +
+              '</div>';
+            var ga = document.getElementById('globalAlert');
+            if (ga) { ga.innerHTML = '<div class="alert" style="background:#fef3c7;border:1px solid #f59e0b;border-radius:10px;padding:14px;margin:0 0 14px">' + html + '</div>'; }
+          } else {
+            alertBox('error', msg);
+          }
         }
       })
       .catch(function () {
