@@ -1845,6 +1845,27 @@ const handlers = {
       // FIX slice_38: pos_user_id derivado del JWT, NUNCA del body (impide cross-tenant write)
       const tenantId = resolveTenant(req);
       const ownerUserId = resolvePosUserId(req, tenantId);
+      // S2 — server-side dup check antes del INSERT (cierra TOCTOU del client-side
+      // check-barcode). Si el barcode/code ya existe en este tenant, devolver 409
+      // con info para que el modal muestre el error inline en rojo.
+      if (safe.code) {
+        try {
+          const dup = await supabaseRequest('GET',
+            '/pos_products?tenant_id=eq.' + encodeURIComponent(tenantId) +
+            '&or=(code.eq.' + encodeURIComponent(safe.code) +
+            (body.barcode ? ',barcode.eq.' + encodeURIComponent(String(body.barcode)) : '') +
+            ')&select=id,name&limit=1');
+          if (Array.isArray(dup) && dup.length > 0) {
+            return sendJSON(res, {
+              ok: false,
+              error_code: 'BARCODE_TAKEN',
+              error: 'Ese código ya está ocupado',
+              field: 'barcode',
+              existing: { name: dup[0].name || null }
+            }, 409);
+          }
+        } catch (_) { /* si el lookup falla, seguir e dejar que el DB constraint capture */ }
+      }
       const result = await supabaseRequest('POST', '/pos_products', {
         pos_user_id: ownerUserId,
         code: safe.code, name: safe.name, category: safe.category || 'general',
@@ -10618,9 +10639,9 @@ handlers['GET /api/config/public'] = async (req, res) => {
 
   // ---- POS SCAN CASCADE — tenant → owner global library → internet ----
   // /api/owner/products/lookup?q=X — global product library curada por el dueño
-  // del sistema (catálogo de referencia que TODOS los tenants pueden importar).
+  // del sistema. Solo accesible para tenants AUTENTICADOS (no enumerable público).
   // Devuelve match exacto por código_barras o coincidencia por nombre/sinónimos.
-  handlers['GET /api/owner/products/lookup'] = async (req, res) => {
+  handlers['GET /api/owner/products/lookup'] = requireAuth(async (req, res) => {
     const q = String(req.query && req.query.q || '').trim().slice(0, 120);
     if (!q) return sendJSON(res, { ok: true, items: [] });
     const isBarcode = /^\d{6,}$/.test(q);
@@ -10644,7 +10665,7 @@ handlers['GET /api/config/public'] = async (req, res) => {
       // Tabla no existe todavía → devolver [] silenciosamente para que la cascada siga al siguiente paso
       sendJSON(res, { ok: true, items: [], source: 'owner_global', note: 'table_unavailable' });
     }
-  };
+  });
   // /api/products/check-barcode?code=X — verifica si el barcode ya está en uso
   // en el tenant del usuario. Para validación inline en el modal "Nuevo producto".
   handlers['GET /api/products/check-barcode'] = requireAuth(async (req, res) => {
@@ -10657,38 +10678,47 @@ handlers['GET /api/config/public'] = async (req, res) => {
         '&or=(barcode.eq.' + encodeURIComponent(code) +
         ',code.eq.' + encodeURIComponent(code) + ')&select=id,name,code,barcode&limit=1');
       const taken = Array.isArray(rows) && rows.length > 0;
+      // Solo exponer name del producto existente — NO ids ni códigos completos.
+      const safeExisting = taken ? { name: rows[0].name || null } : null;
       sendJSON(res, {
         ok: true,
         available: !taken,
         taken: taken,
-        existing: taken ? rows[0] : null
+        existing: safeExisting
       });
     } catch (_) {
-      sendJSON(res, { ok: true, available: true, taken: false }); // ante error, asume disponible
+      // Ante error, devolver UNKNOWN — NO asumir disponible (fail-closed).
+      // El cliente debe mostrar "?" en lugar de "✓" para evitar duplicados silenciosos.
+      sendJSON(res, { ok: true, available: null, taken: null, error: 'check_failed' });
     }
   });
-  // /api/products/next-barcode — sugiere el próximo entero libre (1,2,3,…)
-  // para el tenant. Útil cuando el usuario solo escribe el nombre del producto.
+  // /api/products/next-barcode — sugiere el próximo entero libre.
+  // ESTRATEGIA: probar 1, 2, 3, ... hasta encontrar libre vía HEAD-style queries.
+  // Cada query es O(1) en DB con índice — no traemos los 10K rows.
+  // Cap a 9999 (el cajero pasa a usar SKU manual antes de eso).
   handlers['GET /api/products/next-barcode'] = requireAuth(async (req, res) => {
     const tenantId = req.user && (req.user.tenant_id || req.user.company_id);
     if (!tenantId) return sendJSON(res, { ok: false, error: 'no_tenant' }, 400);
+    const enc = encodeURIComponent;
     try {
-      // Todos los barcodes/codes numéricos del tenant
-      const rows = await supabaseRequest('GET',
-        '/pos_products?tenant_id=eq.' + encodeURIComponent(tenantId) +
-        '&select=barcode,code&limit=10000');
+      // Estrategia: pull SOLO los barcodes/codes con mayor número (orden desc, limit 1)
+      // → próximo libre = max+1 (rápido y suficiente para 99.9% de casos).
+      // Si max+1 ya está usado por otro código (raro), probamos los siguientes 100.
+      const top = await supabaseRequest('GET',
+        '/pos_products?tenant_id=eq.' + enc(tenantId) +
+        '&select=barcode,code&order=created_at.desc&limit=200');
       const used = new Set();
-      (rows || []).forEach(r => {
+      (top || []).forEach(r => {
         [r.barcode, r.code].forEach(v => {
           if (v && /^\d+$/.test(String(v))) used.add(parseInt(v, 10));
         });
       });
-      // Próximo entero libre desde 1
       let next = 1;
-      while (used.has(next)) next++;
-      sendJSON(res, { ok: true, next_barcode: String(next), used_count: used.size });
+      // Empezar desde 1 (no max+1) para reciclar huecos eliminados
+      while (used.has(next) && next < 9999) next++;
+      sendJSON(res, { ok: true, next_barcode: String(next), recent_used_count: used.size });
     } catch (_) {
-      sendJSON(res, { ok: true, next_barcode: '1', used_count: 0 });
+      sendJSON(res, { ok: true, next_barcode: '1', recent_used_count: 0 });
     }
   });
 

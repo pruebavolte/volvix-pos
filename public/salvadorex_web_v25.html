@@ -4307,12 +4307,21 @@
    * 4. Internet          VolvixBarcodeResolver (Open Food Facts + UPCitemDB)
    * Si todo falla → modal "Nuevo producto" con prefill inteligente.
    * ========================================================================== */
+  // In-flight guard: evita doble-scan al teclear ENTER dos veces sobre el mismo
+  // input (race condition que duplicaba imports a tenant DB).
+  let __searchProductBusy = false;
   async function searchProduct(code) {
+    if (__searchProductBusy) return;
     if (!code) { showToast('Escribe un código antes de presionar ENTER'); return; }
     const trimmed = String(code).trim();
     if (!trimmed) { showToast('Escribe un código antes de presionar ENTER'); return; }
     const isBarcode = /^\d{6,}$/.test(trimmed);
     const lower = trimmed.toLowerCase();
+    __searchProductBusy = true;
+    try { return await _searchProductInner(trimmed, isBarcode, lower); }
+    finally { __searchProductBusy = false; }
+  }
+  async function _searchProductInner(trimmed, isBarcode, lower) {
 
     // ── Level 1: CATALOG en memoria (instantáneo) ─────────────────────────
     if (typeof CATALOG !== 'undefined' && Array.isArray(CATALOG)) {
@@ -4430,13 +4439,17 @@
       } catch (e) {
         console.warn('[searchProduct] saveProduct failed', e);
       }
-      // Caer a /api/products directamente si saveProduct no existe / falló
+      // Caer a /api/products directamente si saveProduct no existe / falló.
+      // SEC2: incluir credentials para que requireAuth pueda leer el JWT cookie.
+      // SEC3: tenant_id viene del payload pero el backend re-deriva desde req.user
+      // (no confiar en lo que mande el cliente).
       if (!saved || !saved.id) {
         try {
           const tnt = (typeof _vTenant === 'function') ? _vTenant() : 'TNT001';
           const r = await fetch('/api/products', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
             body: JSON.stringify(Object.assign({ tenant_id: tnt }, data))
           });
           if (r.ok) saved = await r.json().catch(() => null);
@@ -5836,7 +5849,9 @@
         e.preventDefault();
         const msg = modal.querySelector('#pf-msg'); msg.textContent = '';
         const name = modal.querySelector('#pf-name').value.trim();
-        const code = modal.querySelector('#pf-code').value.trim();
+        // Usar `let` (no `const`) porque más abajo derivamos code del barcode
+        // si está vacío; el código original con `const` lanzaba TypeError.
+        let code = modal.querySelector('#pf-code').value.trim();
         const price = parseFloat(modal.querySelector('#pf-price').value);
         const cost = parseFloat(modal.querySelector('#pf-cost').value);
         const stock = parseInt(modal.querySelector('#pf-stock').value, 10);
@@ -5910,10 +5925,11 @@
               const r = await fetch('/api/products/check-barcode?code=' + encodeURIComponent(v), { credentials: 'include' });
               if (!r.ok) { bcStatus.textContent = ''; return; }
               const j = await r.json();
-              // Editing: si el barcode actual coincide con el original del prefill, no marcar como ocupado
-              if (j.taken && j.existing && p.id && j.existing.id === p.id) {
-                bcStatus.textContent = 'Tu producto actual';
-                bcStatus.style.color = '#10B981';
+              // Fail-closed: si el server no pudo verificar, mostrar warning ámbar
+              // (NO verde — un duplicado no detectado es peor que una falsa duda).
+              if (j.available === null || j.taken === null) {
+                bcStatus.textContent = '⚠ No se pudo verificar — el server confirmará al guardar';
+                bcStatus.style.color = '#D97706';
                 return;
               }
               if (j.taken) {
