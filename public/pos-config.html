@@ -845,7 +845,7 @@ html, body {
               <label class="form-label">Concepto de pago</label>
               <input class="form-input" id="mpConcepto" value="Compra en Abarrotes Don Chucho" placeholder="Texto que ve el cliente al pagar">
             </div>
-            <button class="btn green" onclick="toast('Mercado Pago configurado · próxima venta lo incluirá','ok')">✓ Guardar y probar</button>
+            <button class="btn green" onclick="guardarPagos()">✓ Guardar y probar</button>
           </div>
         </div>
       </div>
@@ -1411,9 +1411,20 @@ function eliminarUsuario(nombre) {
 // ══════════════════════════════════════════════
 // IMPRESORAS
 // ══════════════════════════════════════════════
-function detectarImpresoras() {
-  toast('Buscando impresoras...', 'info');
-  setTimeout(() => toast('Epson TM-T20III detectada en COM3', 'ok'), 1800);
+async function detectarImpresoras() {
+  toast('Buscando impresoras registradas...', 'info');
+  try {
+    const r = await window.volvix.api.raw('GET', '/api/printers');
+    const list = (r && Array.isArray(r.printers)) ? r.printers : [];
+    if (!list.length) {
+      toast('No hay impresoras registradas. Agrega una con "+ Nueva impresora" o usa Bluetooth.', 'warn');
+      return;
+    }
+    const names = list.map(p => p.name || p.model || p.port || 'impresora').slice(0,3).join(', ');
+    toast(`✓ ${list.length} impresora(s) registrada(s): ${names}`, 'ok');
+  } catch (e) {
+    toast('No se pudo consultar impresoras del servidor', 'err');
+  }
 }
 
 async function probarImpresora(nombre, opts) {
@@ -1743,12 +1754,50 @@ function crearBackup() {
   toast('✓ Backup descargado', 'ok');
 }
 
-function descargarBackup(fecha) { toast(`Descargando backup del ${fecha}...`, 'info'); }
+async function descargarBackup(fecha) {
+  toast(`Descargando backup del ${fecha}...`, 'info');
+  try {
+    const headers = window.volvix?.session?.getAuthHeaders?.() || {};
+    const r = await fetch('/api/backup/export?format=json', { headers });
+    if (!r.ok) throw new Error('http ' + r.status);
+    const blob = await r.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `backup_${fecha || new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    toast('✓ Backup descargado', 'ok');
+  } catch (e) {
+    toast('No se pudo descargar el backup. Reintenta.', 'err');
+  }
+}
 
-function exportData(type) {
+async function exportData(type) {
   const label = { productos:'Productos', clientes:'Clientes', ventas:'Ventas', movimientos:'Movimientos', todo:'Todo' }[type] || type;
   toast(`Preparando exportación: ${label}...`, 'info');
-  setTimeout(() => toast(`✓ ${label} exportado`, 'ok'), 1200);
+  try {
+    const headers = window.volvix?.session?.getAuthHeaders?.() || {};
+    const r = await fetch('/api/backup/export?format=json', { headers });
+    if (!r.ok) throw new Error('http ' + r.status);
+    const full = await r.json();
+    let payload = full;
+    if (type !== 'todo' && full && typeof full === 'object') {
+      const map = { productos:'products', clientes:'customers', ventas:'sales', movimientos:'movements' };
+      const key = map[type];
+      if (key && full[key] !== undefined) payload = { [key]: full[key] };
+    }
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${type}_${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    toast(`✓ ${label} exportado`, 'ok');
+  } catch (e) {
+    toast(`No se pudo exportar ${label}. Reintenta.`, 'err');
+  }
 }
 
 function limpiarDatos() {

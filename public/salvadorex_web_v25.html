@@ -4116,9 +4116,7 @@
     }
   }
 
-  function doLogin() {
-    handleLogin();
-  }
+  // doLogin() era wrapper huérfano de handleLogin — eliminado en consolida.
   async function doLogout() {
     let ok = false;
     if (window.VolvixUI && typeof window.VolvixUI.confirm === 'function') {
