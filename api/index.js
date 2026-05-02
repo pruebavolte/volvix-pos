@@ -1127,7 +1127,7 @@ function findFile(filename) {
   return null;
 }
 
-function serveStaticFile(res, pathname) {
+function serveStaticFile(res, pathname, fullUrl) {
   // Customer journey entry: '/' lands on marketplace (giro discovery), then login.html, then 404.
   if (pathname === '/' || pathname === '') {
     if (findFile('/marketplace.html')) pathname = '/marketplace.html';
@@ -1176,11 +1176,10 @@ function serveStaticFile(res, pathname) {
     //   /volvix-*.js?v=HASH → max-age=1y immutable (URL única por deploy)
     //   /volvix-*.js sin ?v → max-age=0, must-revalidate (back-compat)
     //   resto       → max-age=3600 (imagenes, fonts, etc.)
-    // serveStaticFile no recibe `req` directo — el cache-bust flag se infiere
-    // mirando si pathname trae query string (Vercel ya lo separa por defecto,
-    // pero por robustez lo detectamos también del path crudo si es posible).
+    // hasCacheBust se determina del fullUrl (req.url) porque pathname ya no
+    // tiene el query string. fullUrl viene del caller; si no se pasa, fallback.
     const isWiring = /\/volvix-[\w-]+\.js$/.test(pathname);
-    const hasCacheBust = /[?&]v=[a-f0-9]/.test(pathname);
+    const hasCacheBust = !!(fullUrl && /[?&]v=[a-f0-9]/i.test(fullUrl));
     if (ext === '.html') {
       res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
     } else if (isWiring && hasCacheBust) {
@@ -14173,7 +14172,7 @@ module.exports = async (req, res) => {
 
   // (Module handlers moved to inside /api/ block to fix early-404 bug)
 
-  serveStaticFile(res, pathname);
+  serveStaticFile(res, pathname, req.url);
 };
 
 // Test exports (only when NODE_ENV=test) - used by tests/unit/*.test.js
