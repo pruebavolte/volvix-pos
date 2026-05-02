@@ -302,7 +302,7 @@
       <p style="text-align:center;font-size:13px;color:#64748b;margin:0 0 12px;">
         Guarda este identificador. Lo necesitarás para soporte.
       </p>
-      <button class="primary" id="btnGoLauncher">Entrar al panel</button>
+      <button class="primary" id="btnGoLauncher">Entrar a mi POS</button>
     </div>
   </div>
 
@@ -677,7 +677,7 @@
             } catch (_) {}
           }
           $('#tenantIdBox').textContent = state.tenant_id || 'TNT-XXXXX';
-          state._redirect = res.body.redirect || '/mis-modulos.html';
+          state._redirect = res.body.redirect || '/salvadorex_web_v25.html';
           setStep(3);
         } else {
           var code2 = res.body && res.body.error_code;
@@ -761,7 +761,7 @@
     });
     $('#btnResend').addEventListener('click', resendOtp);
     $('#btnGoLauncher').addEventListener('click', function () {
-      window.location.href = state._redirect || '/mis-modulos.html';
+      window.location.href = state._redirect || '/salvadorex_web_v25.html';
     });
 
     // OTP input — habilitar botón y auto-submit a los 6

@@ -143,7 +143,8 @@
     <li><a href="#tipos">Sectores</a></li>
     <li><a href="#features">Features</a></li>
     <li><a href="#precios">Precios</a></li>
-    <li><a href="owner.html" class="nav-cta">Panel Propietario</a></li>
+    <li><a href="login.html" class="nav-cta">Iniciar sesión</a></li>
+    <li><a href="registro.html" class="nav-cta" style="background:#2563EB;color:#fff;padding:6px 14px;border-radius:8px">Empezar gratis</a></li>
   </ul>
 </nav>
 
@@ -153,7 +154,7 @@
     <h1>El POS que se adapta<br><span>solo a tu negocio</span></h1>
     <p class="hero-sub">Volvix detecta tu tipo de negocio y activa automáticamente las funciones que necesitas. Sin configuraciones complejas. Sin curvas de aprendizaje.</p>
     <div class="hero-btns">
-      <a href="owner.html" class="btn btn-primary">Iniciar ahora — Gratis</a>
+      <a href="marketplace.html" class="btn btn-primary">Encuentra tu sistema — Gratis</a>
       <a href="#features" class="btn btn-outline">Ver funciones</a>
     </div>
     <div class="stats">
@@ -163,10 +164,9 @@
       <div class="stat"><strong>Sin</strong><span>Config manual</span></div>
     </div>
     <div class="panel-links">
-      <a href="owner.html" class="panel-link">Panel Propietario</a>
-      <a href="ai.html" class="panel-link">Motor IA</a>
-      <a href="pos.html" class="panel-link">POS Ventas</a>
-      <a href="inventario.html" class="panel-link">Inventario</a>
+      <a href="marketplace.html" class="panel-link">Buscar mi giro</a>
+      <a href="login.html" class="panel-link">Iniciar sesión</a>
+      <a href="docs.html" class="panel-link">Documentación</a>
       <a href="soporte.html" class="panel-link">Soporte</a>
     </div>
   </div>
@@ -208,7 +208,7 @@
         <li>POS básico</li>
         <li>Soporte comunidad</li>
       </ul>
-      <a href="owner.html" class="btn btn-outline" style="width:100%;text-align:center">Empezar gratis</a>
+      <a href="registro.html?plan=starter" class="btn btn-outline" style="width:100%;text-align:center">Empezar gratis</a>
     </div>
     <div class="plan featured">
       <div class="plan-badge">Popular</div>
@@ -222,7 +222,7 @@
         <li>WhatsApp + Facturación</li>
         <li>Soporte prioritario</li>
       </ul>
-      <a href="owner.html" class="btn btn-primary" style="width:100%;text-align:center">Comenzar Pro</a>
+      <a href="registro.html?plan=pro" class="btn btn-primary" style="width:100%;text-align:center">Comenzar Pro</a>
     </div>
     <div class="plan">
       <div class="plan-name">Enterprise</div>
@@ -244,29 +244,53 @@
   <div class="cta-section">
     <h2 style="font-size:2rem;font-weight:800;margin-bottom:1rem">Empieza hoy mismo</h2>
     <p style="color:var(--muted);margin-bottom:2rem">Sin tarjeta de crédito. Sin configuración. La IA hace el trabajo por ti.</p>
-    <a href="owner.html" class="btn btn-primary">Crear mi negocio — Gratis</a>
+    <a href="registro.html" class="btn btn-primary">Crear mi negocio — Gratis</a>
   </div>
 </div>
 
 <footer>
-  <p>Volvix POS &copy; 2024 — Sistema multi-tenant autónomo con IA</p>
-  <p style="margin-top:.5rem"><a href="owner.html">Panel</a> &nbsp;·&nbsp; <a href="soporte.html">Soporte</a> &nbsp;·&nbsp; <a href="ai.html">Motor IA</a></p>
+  <p>Volvix POS &copy; 2026 — Sistema POS multi-tenant para México</p>
+  <p style="margin-top:.5rem">
+    <a href="marketplace.html">Buscar giro</a> &nbsp;·&nbsp;
+    <a href="registro.html">Crear cuenta</a> &nbsp;·&nbsp;
+    <a href="login.html">Iniciar sesión</a> &nbsp;·&nbsp;
+    <a href="soporte.html">Soporte</a>
+  </p>
+  <p style="margin-top:.5rem;font-size:11px;color:#94A3B8">
+    <a href="aviso-privacidad.html">Aviso de privacidad</a> &nbsp;·&nbsp;
+    <a href="terminos-condiciones.html">Términos</a> &nbsp;·&nbsp;
+    <a href="cookies-policy.html">Cookies</a>
+  </p>
 </footer>
 
 <script>
+// 2026-05: cada giro va a SU landing específico (no colapsamos a 6 keys
+// genéricas). Los slugs deben coincidir con archivos landing-*.html reales.
 const TIPOS = [
-  {icon:'🛒',name:'Tienda Retail',key:'retail'},
-  {icon:'🍔',name:'Restaurante',key:'alimentos'},
-  {icon:'💊',name:'Farmacia/Salud',key:'salud'},
-  {icon:'💈',name:'Belleza/Spa',key:'belleza'},
-  {icon:'🏠',name:'Rentas',key:'rentas'},
-  {icon:'🔧',name:'Servicios/Taller',key:'servicios'},
+  {icon:'🛒',name:'Abarrotes',key:'abarrotes'},
+  {icon:'🍔',name:'Restaurante',key:'restaurante'},
+  {icon:'☕',name:'Cafetería',key:'cafeteria'},
+  {icon:'🌮',name:'Taquería',key:'taqueria'},
+  {icon:'🍕',name:'Pizzería',key:'pizzeria'},
+  {icon:'🥖',name:'Panadería',key:'panaderia'},
+  {icon:'💊',name:'Farmacia',key:'farmacia'},
+  {icon:'🦷',name:'Dental',key:'dental'},
+  {icon:'🐾',name:'Veterinaria',key:'veterinaria'},
+  {icon:'💈',name:'Barbería',key:'barberia'},
+  {icon:'💅',name:'Estética',key:'estetica'},
   {icon:'💪',name:'Gimnasio',key:'gym'},
-  {icon:'📚',name:'Educación',key:'educacion'},
-  {icon:'🚗',name:'Automotriz',key:'servicios'},
-  {icon:'🐾',name:'Veterinaria',key:'salud'},
-  {icon:'👗',name:'Boutique/Moda',key:'retail'},
-  {icon:'☕',name:'Café/Panadería',key:'alimentos'},
+  {icon:'🏨',name:'Hotel',key:'hotel'},
+  {icon:'🔧',name:'Taller mecánico',key:'taller-mecanico'},
+  {icon:'🧴',name:'Lavandería',key:'lavanderia'},
+  {icon:'👗',name:'Tienda de ropa',key:'tienda-ropa'},
+  {icon:'👟',name:'Zapatería',key:'zapateria'},
+  {icon:'📱',name:'Celulares',key:'tienda-celulares'},
+  {icon:'🔩',name:'Ferretería',key:'ferreteria'},
+  {icon:'📚',name:'Papelería',key:'papeleria'},
+  {icon:'🍦',name:'Heladería',key:'heladeria'},
+  {icon:'🍭',name:'Dulcería',key:'dulceria'},
+  {icon:'🥩',name:'Carnicería',key:'carniceria'},
+  {icon:'🍎',name:'Frutería',key:'fruteria'},
 ];
 
 const grid = document.getElementById('tiposGrid');
@@ -277,6 +301,12 @@ TIPOS.forEach(t => {
   card.onclick = () => window.location.href = `landing-${t.key}.html`;
   grid.appendChild(card);
 });
+
+// "Ver todos los giros" link al marketplace que tiene buscador con AI
+var seeAll = document.createElement('div');
+seeAll.style.cssText = 'grid-column:1/-1;text-align:center;margin-top:14px';
+seeAll.innerHTML = '<a href="marketplace.html" style="color:#2563EB;font-weight:600;text-decoration:none;font-size:14px">Ver todos los giros (60+) →</a>';
+grid.appendChild(seeAll);
 </script>
 </body>
 </html>

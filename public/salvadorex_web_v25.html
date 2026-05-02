@@ -1530,6 +1530,41 @@
       }
       return false;
     }
+    // 2026-05: banner de bienvenida para usuarios recién registrados.
+    // No los obliga a ir a un wizard; los invita a explorar el POS y a
+    // completar config cuando puedan.
+    function showWelcomeBanner(user) {
+      if (document.getElementById('volvix-welcome-banner')) return;
+      var b = document.createElement('div');
+      b.id = 'volvix-welcome-banner';
+      b.style.cssText = 'position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:9000;' +
+        'background:linear-gradient(135deg,#EFF6FF,#DBEAFE);color:#1E3A8A;' +
+        'padding:14px 20px;font:500 13px/1.45 -apple-system,Segoe UI,sans-serif;' +
+        'border:1px solid #93C5FD;border-radius:14px;box-shadow:0 12px 32px rgba(30,58,138,.12);' +
+        'display:flex;align-items:center;gap:14px;max-width:720px;width:calc(100% - 28px)';
+      var name = (user && (user.tenant_name || user.business_name || user.full_name)) || 'tu negocio';
+      b.innerHTML =
+        '<div style="font-size:28px">🎉</div>' +
+        '<div style="flex:1">' +
+          '<div style="font-weight:700;font-size:14px;margin-bottom:2px">¡Bienvenido a Volvix POS!</div>' +
+          '<div style="color:#475569">Tu cuenta de <strong>' + name + '</strong> está lista. Empieza cargando tu primer producto o haz tu primera venta.</div>' +
+        '</div>' +
+        '<button id="vlx-welcome-load" style="padding:8px 14px;border:none;border-radius:8px;background:#2563EB;color:#fff;font-weight:600;cursor:pointer;font-size:13px">Cargar productos</button>' +
+        '<button id="vlx-welcome-dismiss" style="padding:8px 10px;border:none;background:transparent;color:#64748B;cursor:pointer;font-size:18px;line-height:1">×</button>';
+      document.body.appendChild(b);
+      var loadBtn = document.getElementById('vlx-welcome-load');
+      var dismissBtn = document.getElementById('vlx-welcome-dismiss');
+      if (loadBtn) loadBtn.onclick = function () {
+        try { localStorage.setItem('volvix_first_login_completed', '1'); } catch(e){}
+        b.remove();
+        if (typeof showScreen === 'function') showScreen('inventario');
+      };
+      if (dismissBtn) dismissBtn.onclick = function () {
+        try { localStorage.setItem('volvix_first_login_completed', '1'); } catch(e){}
+        b.remove();
+      };
+    }
+
     function showSetupBanner() {
       if (document.getElementById('volvix-setup-banner')) return;
       var b = document.createElement('div');
@@ -1577,9 +1612,13 @@
         user = await refreshUserFromServer() || user;
       }
       if (!user) return;
+      // 2026-05: NO redirigimos a /volvix-onboarding-v2.html. El usuario debe
+      // entrar directo al POS (que es donde trabaja). El primer-login se
+      // marca con un banner "Bienvenido — completa tu configuración" que es
+      // descartable y enlaza a config en la misma página.
       if (shouldRedirectToWizard(user)) {
-        // Auto-redirigir al wizard
-        window.location.replace('/volvix-onboarding-v2.html');
+        try { localStorage.setItem('volvix_show_welcome_banner', '1'); } catch (e) {}
+        showWelcomeBanner(user);
         return;
       }
       // Banner pendiente de setup (saltó wizard)
@@ -1643,7 +1682,7 @@
 
     <div class="input-group">
       <label class="input-label">Usuario</label>
-      <input id="login-email" class="input-field" type="email" value="admin@volvix.test" autocomplete="username" placeholder="tu@email.com" required aria-required="true">
+      <input id="login-email" class="input-field" type="email" value="" autocomplete="username" placeholder="tu@email.com" required aria-required="true">
     </div>
     <div class="input-group">
       <label class="input-label">Contraseña</label>
