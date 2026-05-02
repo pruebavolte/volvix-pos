@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "installCommand": "npm install --omit=dev --omit=optional",
   "builds": [
     {
       "src": "api/index.js",
@@ -25,11 +26,8 @@
           "logos-demo/**",
           "public/logos-demo/**",
           "public/tutorials/**",
-          "tutorials/**",
           "templates/**",
-          "docs/**",
-          "data/**",
-          "migrations/**"
+          "data/**"
         ]
       }
     }
