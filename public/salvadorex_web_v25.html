@@ -5812,6 +5812,117 @@
       showToast('Importados ' + items.length + ' productos');
     } catch(e){ showToast('Error import: ' + e.message,'error'); }
   }
+  // Panel inline post-save del modal Nuevo producto. Ofrece al cajero imprimir
+  // etiqueta de código de barras del producto recién creado, especificar cantidad
+  // y opcionalmente abrir el módulo de Diseño de etiqueta para personalizar.
+  // Está marcado con data-module="etiquetas" — el admin puede ocultar/locker
+  // este flow completo per-tenant (control granular).
+  function showLabelPrintPanel(modal, productData, closeFn) {
+    const card = modal.querySelector('div[role="document"]') || modal.firstElementChild;
+    if (!card) { closeFn(productData); return; }
+    // Reemplazar el contenido del card por el panel de etiquetas
+    card.innerHTML =
+      '<div data-module="etiquetas" data-button="product.label-print-prompt">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
+          '<h2 id="pf-title" style="margin:0;font-size:18px;font-weight:600;letter-spacing:-0.02em;color:#0B0B0F">✓ Producto creado</h2>' +
+          '<button id="pl-close" style="background:none;border:none;font-size:22px;cursor:pointer;color:#666" aria-label="Cerrar (Esc)">&times;</button>' +
+        '</div>' +
+        '<div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:14px 16px;margin-bottom:18px;font-size:13.5px">' +
+          '<div style="font-weight:500;color:#15803D;margin-bottom:4px">' +
+            (escapeHtml(productData.name)) + '</div>' +
+          '<div style="color:#3F3F46;font-size:12.5px">' +
+            'Código de barras: <code style="background:#FFF;padding:2px 6px;border-radius:4px;border:1px solid #E5E5EA;font-family:\'SF Mono\',Menlo,monospace">' + escapeHtml(productData.barcode) + '</code> · ' +
+            'Precio: <strong>$' + Number(productData.price).toFixed(2) + '</strong>' +
+          '</div>' +
+        '</div>' +
+        '<div style="font-size:14px;color:#0B0B0F;margin-bottom:16px;font-weight:500">¿Imprimir etiqueta del código de barras?</div>' +
+        '<div data-button="product.label-quantity" style="display:flex;gap:10px;align-items:center;margin-bottom:14px">' +
+          '<label style="font-size:13px;color:#3F3F46;font-weight:500">Cantidad:</label>' +
+          '<input id="pl-qty" type="number" min="1" max="500" value="1" style="width:80px;padding:9px 12px;border:1px solid #E5E5EA;border-radius:8px;font-size:14px;text-align:center">' +
+          '<span style="font-size:12px;color:#9CA3AF">etiquetas</span>' +
+        '</div>' +
+        '<div data-button="product.label-format" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">' +
+          '<button type="button" data-pl-fmt="thermal-58" class="pl-fmt-btn" style="padding:8px 14px;border:1px solid #0B0B0F;background:#0B0B0F;color:#FFF;border-radius:8px;font-size:12.5px;font-weight:500;cursor:pointer">Térmica 58mm</button>' +
+          '<button type="button" data-pl-fmt="thermal-80" class="pl-fmt-btn" style="padding:8px 14px;border:1px solid #E5E5EA;background:#FFF;color:#3F3F46;border-radius:8px;font-size:12.5px;cursor:pointer">Térmica 80mm</button>' +
+          '<button type="button" data-pl-fmt="a4" class="pl-fmt-btn" style="padding:8px 14px;border:1px solid #E5E5EA;background:#FFF;color:#3F3F46;border-radius:8px;font-size:12.5px;cursor:pointer">A4 (24/hoja)</button>' +
+        '</div>' +
+        '<div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">' +
+          '<button type="button" id="pl-skip" data-button="product.label-skip" style="padding:10px 16px;border:1px solid #E5E5EA;background:#FFF;color:#3F3F46;border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;min-height:44px">No, gracias</button>' +
+          '<button type="button" id="pl-design" data-button="product.label-design" style="padding:10px 16px;border:1px solid #E5E5EA;background:#FFF;color:#0B0B0F;border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;min-height:44px">Diseñar etiqueta</button>' +
+          '<button type="button" id="pl-print" data-button="product.label-print" style="padding:10px 18px;border:none;background:#0B0B0F;color:#FFF;border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;min-height:44px">Imprimir ahora</button>' +
+        '</div>' +
+      '</div>';
+    // Format selector (visual)
+    let selectedFmt = 'thermal-58';
+    card.querySelectorAll('.pl-fmt-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        card.querySelectorAll('.pl-fmt-btn').forEach(b => {
+          b.style.background = '#FFF'; b.style.color = '#3F3F46'; b.style.borderColor = '#E5E5EA';
+        });
+        btn.style.background = '#0B0B0F'; btn.style.color = '#FFF'; btn.style.borderColor = '#0B0B0F';
+        selectedFmt = btn.getAttribute('data-pl-fmt');
+      });
+    });
+    // Skip
+    card.querySelector('#pl-skip').addEventListener('click', () => closeFn(productData));
+    card.querySelector('#pl-close').addEventListener('click', () => closeFn(productData));
+    // Diseñar → módulo de diseño existente con el producto pre-seleccionado
+    card.querySelector('#pl-design').addEventListener('click', () => {
+      const url = '/etiqueta_designer.html?barcode=' + encodeURIComponent(productData.barcode) +
+                  '&name=' + encodeURIComponent(productData.name) +
+                  '&price=' + encodeURIComponent(productData.price);
+      window.open(url, '_blank');
+      closeFn(productData);
+    });
+    // Imprimir: el endpoint /api/labels/print acepta {products:[{sku,name,price,qty,barcode}],format}.
+    // En format='html' retorna HTML printable directo (no JSON). Lo abrimos en window y disparamos print.
+    card.querySelector('#pl-print').addEventListener('click', async () => {
+      const qty = Math.max(1, Math.min(500, parseInt(card.querySelector('#pl-qty').value, 10) || 1));
+      try {
+        const r = await fetch('/api/labels/print', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            products: [{
+              sku: productData.code || productData.barcode,
+              name: productData.name,
+              price: productData.price,
+              qty: qty,
+              barcode: productData.barcode
+            }],
+            // Mapear nuestro UI fmt al esperado por el backend
+            format: 'html',
+            template_format: selectedFmt
+          })
+        });
+        if (r.ok) {
+          const ct = r.headers.get('content-type') || '';
+          if (ct.includes('text/html')) {
+            const html = await r.text();
+            const w = window.open('', '_blank');
+            if (w) { w.document.write(html); w.document.close(); setTimeout(() => w.print(), 300); }
+          } else {
+            const j = await r.json().catch(() => null);
+            if (j && j.print_url) window.open(j.print_url, '_blank');
+            else if (j && j.html) {
+              const w = window.open('', '_blank');
+              if (w) { w.document.write(j.html); w.document.close(); setTimeout(() => w.print(), 300); }
+            }
+          }
+        } else {
+          showToast('No se pudo generar la etiqueta. Intenta desde el módulo de diseño.', 'error');
+        }
+      } catch (e) {
+        showToast('Sin conexión — intenta de nuevo', 'error');
+      }
+      closeFn(productData);
+    });
+  }
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c]);
+  }
+
   async function promptProductForm(prefill, opts){
     const p = prefill || {};
     const options = opts || {};
@@ -5951,7 +6062,7 @@
         // Show spinner
         modal.querySelector('#pf-spinner').style.display = 'inline';
         modal.querySelector('#pf-submit').disabled = true;
-        close({
+        const productData = {
           name, code,
           barcode: modal.querySelector('#pf-barcode').value.trim() || code,
           price, cost: costClean, stock, min_stock,
@@ -5959,7 +6070,14 @@
           category: modal.querySelector('#pf-cat').value.trim() || 'General',
           categoria: modal.querySelector('#pf-cat').value.trim() || 'General',
           description: modal.querySelector('#pf-desc').value.trim()
-        });
+        };
+        // Si llamador opt-in con offerLabelPrint, mostrar mini-panel inline
+        // antes de cerrar el modal: "¿Imprimir etiqueta de código de barras?"
+        if (options && options.offerLabelPrint !== false) {
+          showLabelPrintPanel(modal, productData, close);
+        } else {
+          close(productData);
+        }
       });
       // Focus inteligente:
       //  - Si llamador pidió focusField, úsalo
@@ -5971,12 +6089,12 @@
         : (p.name && !p.barcode ? '#pf-price' : '#pf-name'));
       setTimeout(() => modal.querySelector(autoFocusSel)?.focus(), 50);
 
-      // ── Auto-generar barcode (1, 2, 3, …) cuando el cajero solo escribe nombre.
-      //    Se dispara solo si el campo barcode está vacío al abrir el modal y el
-      //    prefill viene de "escribí un nombre" (no de scan de código).
+      // ── Auto-generar barcode SIEMPRE que el campo esté vacío al abrir.
+      //    El cajero NO debe inventar números. El sistema asigna automático
+      //    el próximo libre (1, 2, 3, …) y el usuario puede cambiarlo si quiere.
       const bcInput = modal.querySelector('#pf-barcode');
       const bcStatus = modal.querySelector('#pf-barcode-status');
-      if (bcInput && !bcInput.value && !p.barcode && p.name) {
+      if (bcInput && !bcInput.value && !p.barcode) {
         // Sugerir el próximo libre desde el server (silencioso si falla)
         fetch('/api/products/next-barcode', { credentials: 'include' })
           .then(r => r.ok ? r.json() : null)
