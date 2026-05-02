@@ -447,3 +447,7 @@ module.exports.scanLandings = scanLandings;
 module.exports.slugify = slugify;
 module.exports.GIRO_SYNONYMS = GIRO_SYNONYMS;
 module.exports.localAutocomplete = localAutocomplete;
+// 2026-05 audit B-16: searchGiros NO estaba exportado pero api/index.js:11114
+// lo invocaba como giros.searchGiros() → siempre undefined → fallback de
+// sinónimos roto, todo iba directo a la IA (más caro y lento).
+module.exports.searchGiros = searchGiros;

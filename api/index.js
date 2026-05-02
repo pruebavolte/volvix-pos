@@ -10678,6 +10678,88 @@ handlers['GET /api/config/public'] = async (req, res) => {
     });
   };
 
+  // 2026-05 audit B-17: bulk-import los 10 productos típicos del giro al
+  // catálogo del tenant. Auth requerido. Resuelve giro del JWT/notes o ?giro=.
+  handlers['POST /api/products/seed-from-giro'] = requireAuth(async (req, res) => {
+    try {
+      const tid = req.user && req.user.tenant_id;
+      if (!tid) return sendJSON(res, { ok: false, error_code: 'TENANT_REQUIRED' }, 400);
+      const parsed = url.parse(req.url, true);
+      let giro = String((parsed.query && parsed.query.giro) || '').toLowerCase().trim();
+      // Si no vino en query, leer del tenant en pos_companies
+      if (!giro) {
+        try {
+          const co = await supabaseRequest('GET',
+            '/pos_companies?tenant_id=eq.' + encodeURIComponent(tid) + '&select=business_type&limit=1');
+          giro = (Array.isArray(co) && co[0] && (co[0].business_type || '')).toLowerCase().trim();
+        } catch (_) {}
+      }
+      if (!giro) return sendJSON(res, { ok: false, error_code: 'GIRO_REQUIRED', error_message: 'No pudimos determinar tu giro. Pásalo via ?giro=.' }, 400);
+
+      const seed = getIndustrySeed();
+      const giroBlock = seed[giro];
+      const products = (giroBlock && (giroBlock.productos || giroBlock.products)) || [];
+      if (!products.length) {
+        return sendJSON(res, { ok: false, error_code: 'NO_SEED_FOR_GIRO',
+          error_message: 'Aún no tenemos plantilla para tu giro. Importa CSV o crea uno por uno.' }, 404);
+      }
+
+      // Resolver pos_user_id del owner del tenant
+      let ownerUserId = null;
+      try {
+        const cu = await supabaseRequest('GET',
+          '/pos_companies?tenant_id=eq.' + encodeURIComponent(tid) + '&select=owner_user_id&limit=1');
+        ownerUserId = (Array.isArray(cu) && cu[0] && cu[0].owner_user_id) || null;
+      } catch (_) {}
+      if (!ownerUserId) ownerUserId = req.user.id || null;
+
+      // Construir filas pos_products. Auto-barcode incremental seguro: 1001..N
+      let nextCode = 1001;
+      try {
+        const last = await supabaseRequest('GET',
+          '/pos_products?tenant_id=eq.' + encodeURIComponent(tid) +
+          '&barcode=neq.null&order=created_at.desc&limit=200&select=barcode');
+        if (Array.isArray(last)) {
+          let maxN = 1000;
+          for (const row of last) {
+            const n = parseInt(String(row.barcode || '').trim(), 10);
+            if (!Number.isNaN(n) && n > maxN) maxN = n;
+          }
+          nextCode = maxN + 1;
+        }
+      } catch (_) {}
+
+      const rows = products.slice(0, 10).map((p, i) => ({
+        tenant_id: tid,
+        pos_user_id: ownerUserId,
+        name: String(p.name || p.nombre || ('Producto ' + (i + 1))).slice(0, 200),
+        barcode: String(p.barcode || (nextCode + i)),
+        price: Number(p.price || p.precio || 0),
+        cost: Number(p.cost || p.costo || 0),
+        stock: Number(p.stock != null ? p.stock : 10),
+        stock_min: Number(p.stock_min || p.minimo || 0),
+        category: String(p.category || p.categoria || 'General').slice(0, 80),
+        description: String(p.description || '').slice(0, 500),
+        unit: String(p.unit || p.unidad || 'pieza'),
+        is_active: true,
+        created_at: new Date().toISOString()
+      }));
+
+      let inserted = 0;
+      try {
+        const ins = await supabaseRequest('POST', '/pos_products', rows);
+        inserted = Array.isArray(ins) ? ins.length : rows.length;
+      } catch (e) {
+        // Si falla bulk, intentar uno-a-uno y reportar parciales
+        for (const r of rows) {
+          try { await supabaseRequest('POST', '/pos_products', r); inserted++; } catch (_) {}
+        }
+      }
+      try { logAudit(req, 'products.seeded_from_giro', 'pos_products', { tenant_id: tid, giro, inserted }); } catch (_) {}
+      return sendJSON(res, { ok: true, giro, inserted, total_in_template: products.length });
+    } catch (err) { sendError(res, err); }
+  });
+
   // ---- UNIVERSAL MODULAR SYSTEM — recetas, variantes, modificadores, reglas, terminología ----
   // Todas las rutas requieren auth y aíslan por tenant_id del JWT.
   // Las tablas se crean con migrations/universal-modular-system.sql
@@ -13084,9 +13166,14 @@ handlers['GET /api/config/public'] = async (req, res) => {
   handlers['POST /api/products/import'] = requireAuth(async (req, res) => {
     try {
       const body = await readBody(req);
-      const list = Array.isArray(body) ? body : (Array.isArray(body.products) ? body.products : []);
+      const list = Array.isArray(body) ? body : (Array.isArray(body.products) ? body.products : (Array.isArray(body.items) ? body.items : []));
       if (list.length === 0) return sendJSON(res, { ok: true, imported: 0, errors: [], message: 'empty list' });
-      const posUserId = (req.user && req.user.id) || 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1';
+      // 2026-05 audit B-20: usar tenant_id del JWT como ámbito de aislamiento.
+      // Antes usaba pos_user_id del importador → si un cajero importaba, los
+      // productos quedaban con pos_user_id del cajero, invisibles a otros.
+      const tid = req.user && req.user.tenant_id;
+      if (!tid) return sendJSON(res, { ok: false, error_code: 'TENANT_REQUIRED' }, 400);
+      const posUserId = (req.user && req.user.id) || null;
       let imported = 0, skipped = 0;
       const errors = [];
       for (let i = 0; i < list.length; i++) {
@@ -13099,20 +13186,26 @@ handlers['GET /api/config/public'] = async (req, res) => {
         if (!cleanName) { errors.push({ idx: i, reason: 'invalid name' }); continue; }
         if (Number(p.price) < 0) { errors.push({ idx: i, reason: 'negative price' }); continue; }
         try {
-          const code = p.code || `IMP_${Date.now()}_${i}`;
-          // skip if duplicate code
+          const code = p.code || p.barcode || `IMP_${Date.now()}_${i}`;
+          // skip if duplicate code en el mismo tenant
           const existing = await supabaseRequest('GET',
-            `/pos_products?code=eq.${encodeURIComponent(code)}&pos_user_id=eq.${posUserId}&select=id`);
+            `/pos_products?or=(code.eq.${encodeURIComponent(code)},barcode.eq.${encodeURIComponent(code)})&tenant_id=eq.${encodeURIComponent(tid)}&select=id&limit=1`);
           if (existing && existing.length > 0) { skipped++; continue; }
           await supabaseRequest('POST', '/pos_products', {
+            tenant_id: tid,
             pos_user_id: posUserId,
             code,
+            barcode: p.barcode || code,
             name: cleanName,
             category: p.category || 'general',
             cost: Number(p.cost || 0),
             price: Number(p.price),
             stock: Number(p.stock || 0),
-            icon: p.icon || '📦'
+            stock_min: Number(p.stock_min || p.minimo || 0),
+            unit: p.unit || 'pieza',
+            icon: p.icon || '📦',
+            is_active: true,
+            created_at: new Date().toISOString()
           });
           imported++;
         } catch (e) {

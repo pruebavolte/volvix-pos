@@ -932,11 +932,29 @@ function renderTable() {
   const page  = filteredProducts.slice(start, start + PAGE_SIZE);
 
   if (!page.length) {
+    // 2026-05 audit B-17: empty state ahora ofrece 3 caminos: pre-cargar
+    // plantilla del giro, importar CSV, o crear uno por uno.
+    const isTrueEmpty = allProducts.length === 0;
     tbody.innerHTML = `<tr><td colspan="10"><div class="empty">
-      <div class="empty-icon">📦</div>
-      <div class="empty-title">${allProducts.length === 0 ? 'No hay productos aún' : 'Sin resultados para tu búsqueda'}</div>
-      <div class="empty-sub">${allProducts.length === 0 ? 'Agrega tu primer producto con el botón "+ Nuevo producto"' : 'Intenta con otros términos'}</div>
-      ${allProducts.length === 0 ? '<button class="btn primary" onclick="openNuevo()" style="margin:0 auto;display:flex">+ Nuevo producto</button>' : ''}
+      <div class="empty-icon">${isTrueEmpty ? '🚀' : '🔍'}</div>
+      <div class="empty-title">${isTrueEmpty ? '¡Empecemos a cargar tu inventario!' : 'Sin resultados para tu búsqueda'}</div>
+      <div class="empty-sub">${isTrueEmpty ? 'Elige cómo prefieres comenzar:' : 'Intenta con otros términos'}</div>
+      ${isTrueEmpty ? `
+        <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:16px;max-width:680px;margin-left:auto;margin-right:auto">
+          <button class="btn primary" onclick="seedFromGiro()" style="flex:1;min-width:200px">
+            ✨ Pre-cargar plantilla de mi giro
+          </button>
+          <button class="btn" onclick="openImport()" style="flex:1;min-width:200px">
+            📋 Importar desde CSV/Excel
+          </button>
+          <button class="btn" onclick="openNuevo()" style="flex:1;min-width:200px">
+            + Crear uno por uno
+          </button>
+        </div>
+        <div style="margin-top:12px;font-size:12px;color:#94a3b8;max-width:560px;margin-left:auto;margin-right:auto">
+          La plantilla agrega 10 productos típicos de tu giro de negocio en un solo clic. Puedes editarlos o eliminarlos después.
+        </div>
+      ` : ''}
     </div></td></tr>`;
     renderPagination();
     return;
@@ -1365,6 +1383,42 @@ async function guardarAjuste() {
 // ── Importar CSV ──
 let csvParsed = [];
 function openImport() { openModal('modalImport'); }
+
+// 2026-05 audit B-17: pre-cargar 10 productos típicos del giro del tenant
+// invocando POST /api/products/seed-from-giro. Reusa data/industry-seed-products.json.
+async function seedFromGiro() {
+  const btn = event && event.target;
+  const origLabel = btn ? btn.textContent : '';
+  if (btn) { btn.disabled = true; btn.textContent = 'Cargando plantilla...'; }
+  try {
+    // El backend resuelve el giro del tenant del JWT; fallback ?giro= via query.
+    let giroParam = '';
+    try {
+      const sess = JSON.parse(localStorage.getItem('volvix_session') || localStorage.getItem('volvixSession') || '{}');
+      if (sess && sess.business_type) giroParam = '?giro=' + encodeURIComponent(sess.business_type);
+    } catch (_) {}
+    const r = await fetch('/api/products/seed-from-giro' + giroParam, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(localStorage.getItem('volvix_token') ? { 'Authorization': 'Bearer ' + localStorage.getItem('volvix_token') } : {})
+      }
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || !j.ok) {
+      alert((j && j.error_message) || 'No pudimos cargar la plantilla. Intenta importar CSV o crear uno por uno.');
+      if (btn) { btn.disabled = false; btn.textContent = origLabel; }
+      return;
+    }
+    alert('¡Listo! Pre-cargamos ' + (j.inserted || 0) + ' productos típicos de tu giro. Puedes editarlos o agregar más.');
+    // Refrescar la lista
+    if (typeof loadProducts === 'function') loadProducts();
+    else location.reload();
+  } catch (e) {
+    alert('Error de red. Verifica tu conexión.');
+    if (btn) { btn.disabled = false; btn.textContent = origLabel; }
+  }
+}
 
 function previewCSV(input) {
   const file = input.files[0];
