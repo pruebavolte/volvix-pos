@@ -10569,7 +10569,7 @@ handlers['GET /api/config/public'] = async (req, res) => {
       }
       try {
         // Llamar AI Gateway (OpenAI-compatible endpoint)
-        const base = (process.env.AI_GATEWAY_BASE || 'https://gateway.ai.vercel.com/v1').trim();
+        const base = (process.env.AI_GATEWAY_BASE || 'https://ai-gateway.vercel.sh/v1').trim();
         const model = (process.env.AI_GATEWAY_MODEL || 'openai/gpt-4o-mini').trim();
         const aiResp = await fetch(base + '/chat/completions', {
           method: 'POST',

@@ -14,7 +14,8 @@ const ANTHROPIC_API_KEY = (process.env.ANTHROPIC_API_KEY || '').trim().replace(/
 const AI_GATEWAY_API_KEY = (process.env.AI_GATEWAY_API_KEY || '').trim().replace(/[\r\n]+/g, '');
 // Endpoint OpenAI-compatible del Gateway. Soporta modelos prefijados con
 // 'openai/', 'anthropic/', 'xai/', etc. Nosotros default a un modelo barato.
-const AI_GATEWAY_BASE = (process.env.AI_GATEWAY_BASE || 'https://gateway.ai.vercel.com/v1').trim();
+// URL oficial Vercel AI Gateway: ai-gateway.vercel.sh (NO gateway.ai.vercel.com).
+const AI_GATEWAY_BASE = (process.env.AI_GATEWAY_BASE || 'https://ai-gateway.vercel.sh/v1').trim();
 
 const OPENAI_MODEL = 'gpt-4o-mini';
 const ANTHROPIC_MODEL = 'claude-3-5-haiku-20241022';
