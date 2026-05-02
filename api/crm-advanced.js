@@ -1,15 +1,24 @@
-// api/crm-advanced.js — Rutas CRM Avanzado (B2B Pipeline)
-// Montaje sugerido en api/index.js:
-//   const crmAdvanced = require('./crm-advanced');
-//   crmAdvanced.register(app, { db, auth });
+// api/crm-advanced.js — CRM Avanzado (B2B Pipeline) con tenant isolation estricto.
+// 2026-05: tras audit B-1..B-3 se cierran cross-tenant leaks: GET/POST/PATCH/DELETE
+// SIEMPRE filtran por tenant_id del JWT. Sin fallback a query/body/'1'.
 
 function register(app, { db, auth }) {
   const requireAuth = auth || ((req, res, next) => next());
 
+  // Helper: tenant_id obligatorio del JWT. Si no hay → 401.
+  function _tenant(req, res) {
+    const tid = req && req.user && req.user.tenant_id;
+    if (!tid) {
+      try { res.status(401).json({ ok: false, error: 'tenant_required' }); } catch (_) {}
+      return null;
+    }
+    return tid;
+  }
+
   // ── LEADS ─────────────────────────────────────────────
   app.get('/api/crm/leads', requireAuth, async (req, res) => {
     try {
-      const tenantId = req.user?.tenant_id || req.query.tenant_id || 1;
+      const tenantId = _tenant(req, res); if (!tenantId) return;
       const { stage_id, status, owner_user_id } = req.query;
       const where = ['tenant_id=$1'];
       const args = [tenantId];
@@ -25,8 +34,8 @@ function register(app, { db, auth }) {
 
   app.post('/api/crm/leads', requireAuth, async (req, res) => {
     try {
-      const tenantId = req.user?.tenant_id || req.body.tenant_id || 1;
-      const { name, email, phone, company, source, value_estimated, stage_id, owner_user_id, notes } = req.body;
+      const tenantId = _tenant(req, res); if (!tenantId) return;
+      const { name, email, phone, company, source, value_estimated, stage_id, owner_user_id, notes } = req.body || {};
       if (!name) return res.status(400).json({ ok: false, error: 'name required' });
       const r = await db.query(
         `INSERT INTO leads(tenant_id,name,email,phone,company,source,value_estimated,stage_id,owner_user_id,notes)
@@ -39,19 +48,28 @@ function register(app, { db, auth }) {
 
   app.patch('/api/crm/leads/:id', requireAuth, async (req, res) => {
     try {
+      const tenantId = _tenant(req, res); if (!tenantId) return;
       const fields = ['name','email','phone','company','source','value_estimated','stage_id','owner_user_id','status','notes'];
       const sets = []; const args = [];
-      for (const f of fields) if (req.body[f] !== undefined) { args.push(req.body[f]); sets.push(`${f}=$${args.length}`); }
+      for (const f of fields) if (req.body && req.body[f] !== undefined) { args.push(req.body[f]); sets.push(`${f}=$${args.length}`); }
       if (!sets.length) return res.status(400).json({ ok: false, error: 'no fields' });
       args.push(req.params.id);
-      const r = await db.query(`UPDATE leads SET ${sets.join(',')} WHERE id=$${args.length} RETURNING *`, args);
+      args.push(tenantId);
+      // Filtrar por tenant_id en el WHERE para impedir cross-tenant write
+      const r = await db.query(
+        `UPDATE leads SET ${sets.join(',')} WHERE id=$${args.length-1} AND tenant_id=$${args.length} RETURNING *`,
+        args
+      );
+      if (!r.rows.length) return res.status(404).json({ ok: false, error: 'not_found' });
       res.json({ ok: true, lead: r.rows[0] });
     } catch (e) { res.status(500).json({ ok: false, error: e.message }); }
   });
 
   app.delete('/api/crm/leads/:id', requireAuth, async (req, res) => {
     try {
-      await db.query('DELETE FROM leads WHERE id=$1', [req.params.id]);
+      const tenantId = _tenant(req, res); if (!tenantId) return;
+      const r = await db.query('DELETE FROM leads WHERE id=$1 AND tenant_id=$2 RETURNING id', [req.params.id, tenantId]);
+      if (!r.rows.length) return res.status(404).json({ ok: false, error: 'not_found' });
       res.json({ ok: true });
     } catch (e) { res.status(500).json({ ok: false, error: e.message }); }
   });
@@ -59,17 +77,21 @@ function register(app, { db, auth }) {
   // ── MOVE STAGE + LOG ──────────────────────────────────
   app.post('/api/crm/leads/:id/move-stage', requireAuth, async (req, res) => {
     try {
-      const { to_stage_id } = req.body;
+      const tenantId = _tenant(req, res); if (!tenantId) return;
+      const { to_stage_id } = req.body || {};
       const userId = req.user?.id || null;
-      const cur = await db.query('SELECT stage_id, status FROM leads WHERE id=$1', [req.params.id]);
+      const cur = await db.query('SELECT stage_id, status FROM leads WHERE id=$1 AND tenant_id=$2', [req.params.id, tenantId]);
       if (!cur.rows.length) return res.status(404).json({ ok: false, error: 'not found' });
       const fromStage = cur.rows[0].stage_id;
-      const stageInfo = await db.query('SELECT name FROM pipeline_stages WHERE id=$1', [to_stage_id]);
+      // Asegurar que el stage destino sea del mismo tenant
+      const stageInfo = await db.query('SELECT name FROM pipeline_stages WHERE id=$1 AND tenant_id=$2', [to_stage_id, tenantId]);
+      if (!stageInfo.rows.length) return res.status(400).json({ ok: false, error: 'invalid_stage' });
       const sname = stageInfo.rows[0]?.name || '';
       let newStatus = 'open';
       if (sname === 'Closed Won') newStatus = 'won';
       else if (sname === 'Closed Lost') newStatus = 'lost';
-      await db.query('UPDATE leads SET stage_id=$1, status=$2 WHERE id=$3', [to_stage_id, newStatus, req.params.id]);
+      await db.query('UPDATE leads SET stage_id=$1, status=$2 WHERE id=$3 AND tenant_id=$4',
+        [to_stage_id, newStatus, req.params.id, tenantId]);
       await db.query(
         'INSERT INTO crm_stage_log(lead_id,from_stage_id,to_stage_id,user_id) VALUES($1,$2,$3,$4)',
         [req.params.id, fromStage, to_stage_id, userId]
@@ -78,22 +100,42 @@ function register(app, { db, auth }) {
     } catch (e) { res.status(500).json({ ok: false, error: e.message }); }
   });
 
-  // ── ACTIVITIES ────────────────────────────────────────
+  // ── ACTIVITIES (GET con tenant via JOIN a leads) ──────
   app.get('/api/crm/activities', requireAuth, async (req, res) => {
     try {
+      const tenantId = _tenant(req, res); if (!tenantId) return;
       const { lead_id } = req.query;
-      const r = lead_id
-        ? await db.query('SELECT * FROM crm_activities WHERE lead_id=$1 ORDER BY ts DESC LIMIT 200', [lead_id])
-        : await db.query('SELECT * FROM crm_activities ORDER BY ts DESC LIMIT 200');
+      let r;
+      if (lead_id) {
+        r = await db.query(
+          `SELECT a.* FROM crm_activities a
+           JOIN leads l ON l.id = a.lead_id
+           WHERE a.lead_id=$1 AND l.tenant_id=$2
+           ORDER BY a.ts DESC LIMIT 200`,
+          [lead_id, tenantId]
+        );
+      } else {
+        r = await db.query(
+          `SELECT a.* FROM crm_activities a
+           JOIN leads l ON l.id = a.lead_id
+           WHERE l.tenant_id=$1
+           ORDER BY a.ts DESC LIMIT 200`,
+          [tenantId]
+        );
+      }
       res.json({ ok: true, activities: r.rows });
     } catch (e) { res.status(500).json({ ok: false, error: e.message }); }
   });
 
   app.post('/api/crm/activities', requireAuth, async (req, res) => {
     try {
-      const { lead_id, type, summary, scheduled_at, completed_at } = req.body;
+      const tenantId = _tenant(req, res); if (!tenantId) return;
+      const { lead_id, type, summary, scheduled_at, completed_at } = req.body || {};
       const userId = req.user?.id || null;
       if (!lead_id || !type || !summary) return res.status(400).json({ ok: false, error: 'lead_id, type, summary required' });
+      // Verificar que el lead pertenezca al tenant del usuario
+      const lead = await db.query('SELECT id FROM leads WHERE id=$1 AND tenant_id=$2', [lead_id, tenantId]);
+      if (!lead.rows.length) return res.status(404).json({ ok: false, error: 'lead_not_found' });
       const r = await db.query(
         `INSERT INTO crm_activities(lead_id,type,summary,scheduled_at,completed_at,user_id)
          VALUES($1,$2,$3,$4,$5,$6) RETURNING *`,
@@ -106,7 +148,7 @@ function register(app, { db, auth }) {
   // ── PIPELINE VIEW (kanban) ────────────────────────────
   app.get('/api/crm/pipeline-view', requireAuth, async (req, res) => {
     try {
-      const tenantId = req.user?.tenant_id || req.query.tenant_id || 1;
+      const tenantId = _tenant(req, res); if (!tenantId) return;
       const stages = await db.query(
         'SELECT * FROM pipeline_stages WHERE tenant_id=$1 ORDER BY "order" ASC', [tenantId]
       );
@@ -124,7 +166,7 @@ function register(app, { db, auth }) {
   // ── FORECAST (ponderado por probability) ──────────────
   app.get('/api/crm/forecast', requireAuth, async (req, res) => {
     try {
-      const tenantId = req.user?.tenant_id || req.query.tenant_id || 1;
+      const tenantId = _tenant(req, res); if (!tenantId) return;
       const r = await db.query(
         `SELECT s.id stage_id, s.name stage, s.probability,
                 COUNT(l.id)::int AS leads_count,

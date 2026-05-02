@@ -166,16 +166,21 @@ function register(deps) {
     } catch (err) { sendError(res, err); }
   }, ['customer']);
 
+  // 2026-05 audit B-9: customer-portal AHORA filtra por tenant_id del JWT.
+  // Antes solo filtraba por email → un cliente con el mismo email en dos
+  // tenants veía las ventas/loyalty/pagos de ambos.
+
   // ---------- GET /api/customer/orders ----------
   handlers['GET /api/customer/orders'] = requireAuth(async (req, res) => {
     try {
       const email = req.user.email;
+      const tid = req.user.tenant_id || null;
       let rows = [];
       try {
-        rows = await supabaseRequest('GET',
-          '/pos_sales?customer_email=eq.' + encodeURIComponent(email) +
-          '&select=id,folio,total,status,created_at,cfdi_uuid' +
-          '&order=created_at.desc&limit=100') || [];
+        let path = '/pos_sales?customer_email=eq.' + encodeURIComponent(email);
+        if (tid) path += '&tenant_id=eq.' + encodeURIComponent(tid);
+        path += '&select=id,folio,total,status,created_at,cfdi_uuid&order=created_at.desc&limit=100';
+        rows = await supabaseRequest('GET', path) || [];
       } catch (_) { rows = []; }
       sendJSON(res, { ok: true, orders: rows });
     } catch (err) { sendError(res, err); }
@@ -186,10 +191,13 @@ function register(deps) {
     try {
       const id = req.user.id;
       const email = req.user.email;
+      const tid = req.user.tenant_id || null;
       let points = 0;
       try {
-        const cs = await supabaseRequest('GET',
-          '/portal_customers?email=eq.' + encodeURIComponent(email) + '&select=loyalty_points&limit=1');
+        let pcPath = '/portal_customers?email=eq.' + encodeURIComponent(email);
+        if (tid) pcPath += '&tenant_id=eq.' + encodeURIComponent(tid);
+        pcPath += '&select=loyalty_points&limit=1';
+        const cs = await supabaseRequest('GET', pcPath);
         points = (cs && cs[0] && cs[0].loyalty_points) || 0;
       } catch (_) {}
       let movements = [];
@@ -197,8 +205,10 @@ function register(deps) {
         const filter = id
           ? 'customer_id=eq.' + encodeURIComponent(id)
           : 'customer_email=eq.' + encodeURIComponent(email);
-        movements = await supabaseRequest('GET',
-          '/loyalty_movements?' + filter + '&select=created_at,kind,points,note&order=created_at.desc&limit=50') || [];
+        let mvPath = '/loyalty_movements?' + filter;
+        if (tid) mvPath += '&tenant_id=eq.' + encodeURIComponent(tid);
+        mvPath += '&select=created_at,kind,points,note&order=created_at.desc&limit=50';
+        movements = await supabaseRequest('GET', mvPath) || [];
       } catch (_) { movements = []; }
       sendJSON(res, { ok: true, points, movements });
     } catch (err) { sendError(res, err); }
@@ -208,11 +218,13 @@ function register(deps) {
   handlers['GET /api/customer/payment-methods'] = requireAuth(async (req, res) => {
     try {
       const email = req.user.email;
+      const tid = req.user.tenant_id || null;
       let methods = [];
       try {
-        methods = await supabaseRequest('GET',
-          '/customer_payment_methods?email=eq.' + encodeURIComponent(email) +
-          '&select=type,brand,last4,exp&order=created_at.desc&limit=20') || [];
+        let path = '/customer_payment_methods?email=eq.' + encodeURIComponent(email);
+        if (tid) path += '&tenant_id=eq.' + encodeURIComponent(tid);
+        path += '&select=type,brand,last4,exp&order=created_at.desc&limit=20';
+        methods = await supabaseRequest('GET', path) || [];
       } catch (_) { methods = []; }
       sendJSON(res, { ok: true, methods });
     } catch (err) { sendError(res, err); }

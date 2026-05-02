@@ -1015,8 +1015,9 @@ function requireAuth(handler, requiredRoles) {
 // Lanza Error('TENANT_REQUIRED') que requireAuth convierte en 401 con error_code=TENANT_REQUIRED.
 function resolveTenant(req, queryTenant) {
   const role = req.user?.role;
-  // Superadmin/admin puede override con queryTenant si lo provee
-  if ((role === 'superadmin' || role === 'admin') && queryTenant) {
+  // 2026-05 audit B-10: SOLO superadmin/platform_owner puede override tenant via
+  // query. Antes 'admin' (rol-de-tenant) podía hacerlo → cross-tenant escalation.
+  if ((role === 'superadmin' || role === 'platform_owner') && queryTenant) {
     const q = String(queryTenant).trim();
     if (q && q.length >= 3 && q !== 'DEFAULT' && q !== 'undefined' && q !== 'null') return q;
   }
@@ -1681,11 +1682,22 @@ const handlers = {
   },
 
   // ============ TENANTS / COMPANIES ============
+  // 2026-05 audit B-5: /api/tenants/* es operación de SUPERADMIN (dueño de la
+  // plataforma), no de owner-de-tenant. Antes el role 'owner' podía mutar
+  // cualquier tenant — riesgo crítico cross-tenant.
   'GET /api/tenants': requireAuth(async (req, res) => {
     try {
-      const companies = await supabaseRequest('GET',
-        '/pos_companies?id=in.(11111111-1111-1111-1111-111111111111,22222222-2222-2222-2222-222222222222,33333333-3333-3333-3333-333333333333)&select=*');
-      sendJSON(res, companies || []);
+      // Superadmin ve todos; owner solo ve SU tenant.
+      const role = req.user && req.user.role;
+      if (role === 'superadmin' || role === 'platform_owner') {
+        const all = await supabaseRequest('GET', '/pos_companies?select=*&order=created_at.desc&limit=200');
+        return sendJSON(res, all || []);
+      }
+      const tid = req.user && req.user.tenant_id;
+      if (!tid) return sendJSON(res, [], 200);
+      const mine = await supabaseRequest('GET',
+        `/pos_companies?tenant_id=eq.${encodeURIComponent(tid)}&select=*`);
+      sendJSON(res, mine || []);
     } catch (err) { sendError(res, err); }
   }),
 
@@ -1701,17 +1713,17 @@ const handlers = {
       try { logAudit(req, 'tenant.created', 'pos_companies', { id: created && created.id, after: { name: safe.name, plan: safe.plan } }); } catch(_){}
       sendJSON(res, created);
     } catch (err) { sendError(res, err); }
-  }, ['admin', 'owner', 'superadmin']),
+  }, ['superadmin', 'platform_owner']),
 
   'PATCH /api/tenants/:id': requireAuth(async (req, res, params) => {
     try {
-      if (!isUuid(params.id)) return sendJSON(res, { error: 'invalid id' }, 400); // FIX R13 (#10)
+      if (!isUuid(params.id)) return sendJSON(res, { error: 'invalid id' }, 400);
       const body = await readBody(req);
-      const safe = pickFields(body, ALLOWED_FIELDS_TENANTS); // FIX R13 (#9)
+      const safe = pickFields(body, ALLOWED_FIELDS_TENANTS);
       const result = await supabaseRequest('PATCH', `/pos_companies?id=eq.${params.id}`, safe);
       sendJSON(res, result);
     } catch (err) { sendError(res, err); }
-  }, ['admin', 'owner', 'superadmin']),
+  }, ['superadmin', 'platform_owner']),
 
   'DELETE /api/tenants/:id': requireAuth(async (req, res, params) => {
     try {
@@ -1719,7 +1731,7 @@ const handlers = {
       await supabaseRequest('PATCH', `/pos_companies?id=eq.${params.id}`, { is_active: false });
       sendJSON(res, { ok: true, message: 'Tenant suspendido' });
     } catch (err) { sendError(res, err); }
-  }, ['admin', 'owner', 'superadmin']),
+  }, ['superadmin', 'platform_owner']),
 
   // ============ PRODUCTOS ============
   // GAP-1 R1 (typo tolerance): si el cliente escribe "cocacola" buscamos también "coca cola".
@@ -2426,11 +2438,17 @@ const handlers = {
       if (safe.rfc !== undefined && safe.rfc !== null && safe.rfc !== '') {
         safe.rfc = String(safe.rfc).trim().toUpperCase();
       }
-      // FIX slice_38: tenant ownership check + R4b GAP-C4: snapshot rfc viejo.
+      // 2026-05 audit B-4: tenant ownership AHORA por tenant_id (no por user_id).
+      // El check anterior fallaba si user_id era NULL (legacy) → cualquier tenant
+      // podía PATCH otro customer. Ahora SIEMPRE filtramos por tenant_id del JWT.
       const existing = await supabaseRequest('GET', `/customers?id=eq.${params.id}&select=id,user_id,version,rfc,tenant_id,deleted_at`);
       if (!existing || existing.length === 0) return sendJSON(res, { error: 'not found' }, 404);
-      if (req.user.role !== 'superadmin' && existing[0].user_id && existing[0].user_id !== req.user.id) {
-        return sendJSON(res, { error: 'not found' }, 404);
+      if (req.user.role !== 'superadmin') {
+        const callerTid = req.user.tenant_id || null;
+        const ownerTid = existing[0].tenant_id || null;
+        if (!callerTid || !ownerTid || String(callerTid) !== String(ownerTid)) {
+          return sendJSON(res, { error: 'not found' }, 404);
+        }
       }
       // R4b GAP-C1: no permitir PATCH sobre customer soft-deleted (excepto via /restore).
       if (existing[0].deleted_at) {
@@ -2482,11 +2500,15 @@ const handlers = {
   'DELETE /api/customers/:id': requireAuth(async (req, res, params) => {
     try {
       if (!isUuid(params.id)) return sendJSON(res, { error: 'invalid id' }, 400);
-      // FIX slice_38: tenant ownership check
+      // 2026-05 audit B-4: tenant ownership AHORA por tenant_id (no por user_id).
       const existing = await supabaseRequest('GET', `/customers?id=eq.${params.id}&select=id,user_id,tenant_id`);
       if (!existing || existing.length === 0) return sendJSON(res, { error: 'not found' }, 404);
-      if (req.user.role !== 'superadmin' && existing[0].user_id && existing[0].user_id !== req.user.id) {
-        return sendJSON(res, { error: 'not found' }, 404);
+      if (req.user.role !== 'superadmin') {
+        const callerTid = req.user.tenant_id || null;
+        const ownerTid = existing[0].tenant_id || null;
+        if (!callerTid || !ownerTid || String(callerTid) !== String(ownerTid)) {
+          return sendJSON(res, { error: 'not found' }, 404);
+        }
       }
       // R4b GAP-C1: soft-delete (default) or hard-delete (?hard=1, superadmin only).
       const parsed = url.parse(req.url, true);

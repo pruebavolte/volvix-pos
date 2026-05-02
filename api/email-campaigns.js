@@ -89,10 +89,17 @@ function trackToken(campaignId, email, secret) {
 }
 
 // Construye query Supabase a partir de segment {giro, plan, last_login_days, min_purchase_value}
-async function resolveSegmentTargets(segment, supabaseRequest) {
+// 2026-05 audit B-8: tenantId OBLIGATORIO. Antes la query no filtraba por
+// tenant → la campaña del tenant A se enviaba a usuarios de TODOS los tenants
+// que cumplieran giro/plan. Cross-tenant leak GDPR-grave.
+async function resolveSegmentTargets(segment, supabaseRequest, tenantId) {
   if (typeof supabaseRequest !== 'function') return [];
+  if (!tenantId) {
+    // Sin tenant: devolvemos vacío en lugar de globalizar.
+    return [];
+  }
   const seg = segment || {};
-  const filters = [];
+  const filters = ['tenant_id=eq.' + encodeURIComponent(String(tenantId))];
   if (seg.giro) filters.push('giro=eq.' + encodeURIComponent(String(seg.giro)));
   if (seg.plan) filters.push('plan=eq.' + encodeURIComponent(String(seg.plan)));
   if (seg.last_login_days != null) {
@@ -105,18 +112,20 @@ async function resolveSegmentTargets(segment, supabaseRequest) {
   }
   filters.push('email=not.is.null');
   filters.push('marketing_opt_in=eq.true');
-  const qs = '/pos_users?select=email,name,giro,plan' +
-    (filters.length ? '&' + filters.join('&') : '') +
+  const qs = '/pos_users?select=email,name,giro,plan,tenant_id' +
+    '&' + filters.join('&') +
     '&limit=10000';
   try {
     const rows = await supabaseRequest('GET', qs);
     return Array.isArray(rows) ? rows.filter((r) => isValidEmail(r && r.email)) : [];
   } catch (_) {
-    // fallback: si la tabla difiere, intentar newsletter_subscribers
+    // fallback: si la tabla difiere, intentar newsletter_subscribers (también con tenant)
     try {
       const rows2 = await supabaseRequest(
         'GET',
-        '/newsletter_subscribers?status=eq.active&select=email,name&limit=10000'
+        '/newsletter_subscribers?status=eq.active&tenant_id=eq.' +
+        encodeURIComponent(String(tenantId)) +
+        '&select=email,name&limit=10000'
       );
       return Array.isArray(rows2) ? rows2.filter((r) => isValidEmail(r && r.email)) : [];
     } catch (_) { return []; }
@@ -158,7 +167,8 @@ async function logEvent(supabaseRequest, campaignId, email, type, data) {
 
 async function executeCampaignSend(campaign, deps) {
   const { supabaseRequest, sendEmail, baseUrl, SECRET } = deps;
-  const targets = await resolveSegmentTargets(campaign.segment, supabaseRequest);
+  // 2026-05 audit B-8: pasar tenant_id al resolver para impedir leak cross-tenant
+  const targets = await resolveSegmentTargets(campaign.segment, supabaseRequest, campaign && campaign.tenant_id);
   let sent = 0, failed = 0;
   if (typeof supabaseRequest === 'function') {
     try {

@@ -398,22 +398,77 @@ async function handleCancel(req, res, ctx, fid) {
   sendJson(res, 200, { ok: true, cancelled: true });
 }
 
-/* ---------- Auto-factura pública (sin auth) ---------- */
+/* ---------- Auto-factura pública (sin auth) ----------
+ * 2026-05 audit B-11:
+ *  (a) Rate-limit por IP (10/15min) para impedir enumeration de tickets.
+ *  (b) El cliente debe demostrar conocimiento del ticket: requiere también
+ *      ?email=<email del ticket> O ?total=<monto exacto> en el lookup. Si
+ *      falla la verificación, devolvemos 404 genérico (no leak de existencia).
+ */
+const __autofacturaRateBuckets = new Map();
+function __autofacturaRateLimit(ip, max, windowMs) {
+  const now = Date.now();
+  const key = String(ip || 'unknown');
+  let entry = __autofacturaRateBuckets.get(key);
+  if (!entry || (now - entry.start) > windowMs) {
+    entry = { start: now, count: 0 };
+    __autofacturaRateBuckets.set(key, entry);
+  }
+  entry.count++;
+  if (__autofacturaRateBuckets.size > 5000) {
+    // GC simple
+    for (const [k, v] of __autofacturaRateBuckets.entries()) {
+      if ((now - v.start) > windowMs) __autofacturaRateBuckets.delete(k);
+    }
+  }
+  return entry.count <= max;
+}
+function __ipOf(req) {
+  return (req.headers && (req.headers['x-forwarded-for'] || '').split(',')[0].trim())
+    || (req.connection && req.connection.remoteAddress) || 'unknown';
+}
 
 async function handleAutofacturaLookup(req, res, ctx, parsedUrl) {
   const { sendJson, supabaseRequest } = ctx;
+  // Rate-limit estricto: 10 lookups por IP cada 15 min
+  if (!__autofacturaRateLimit(__ipOf(req), 10, 15 * 60 * 1000)) {
+    return sendJson(res, 429, { ok: false, error: 'rate_limited', retry_after_seconds: 900 });
+  }
   const q = parsedUrl.query || {};
   const tenantId = String(q.tenant || '').slice(0, 80);
   const ticketId = String(q.ticket || '').slice(0, 80);
+  // El usuario DEBE proveer al menos uno de: email O total (monto exacto)
+  // como prueba de propiedad del ticket. Sin esto el endpoint es enumerable.
+  const verifyEmail = String(q.email || '').toLowerCase().trim();
+  const verifyTotal = q.total != null ? String(q.total).trim() : '';
   if (!tenantId || !ticketId) return sendJson(res, 400, { ok: false, error: 'missing_params', need: ['tenant', 'ticket'] });
+  if (!verifyEmail && !verifyTotal) {
+    return sendJson(res, 400, { ok: false, error: 'verification_required',
+      message: 'Provee email o total del ticket para verificar propiedad.', need_one_of: ['email', 'total'] });
+  }
   try {
     // 1. ¿El ticket pertenece a ese tenant?
     const sales = await supabaseRequest('GET',
       '/pos_sales?tenant_id=eq.' + encodeURIComponent(tenantId) +
       '&id=eq.' + encodeURIComponent(ticketId) +
-      '&select=id,total,subtotal,tax,date,items&limit=1');
+      '&select=id,total,subtotal,tax,date,items,customer_email&limit=1');
     if (!Array.isArray(sales) || !sales[0]) return sendJson(res, 404, { ok: false, error: 'ticket_not_found' });
     const sale = sales[0];
+
+    // 1b. Verificación de propiedad: email O total exacto deben coincidir.
+    let owns = false;
+    if (verifyEmail && sale.customer_email && String(sale.customer_email).toLowerCase().trim() === verifyEmail) {
+      owns = true;
+    }
+    if (!owns && verifyTotal) {
+      const expected = Math.round(Number(sale.total || 0) * 100);
+      const got = Math.round(Number(verifyTotal) * 100);
+      if (expected > 0 && expected === got) owns = true;
+    }
+    if (!owns) {
+      // 404 genérico — no revelamos que el ticket existe pero la verificación falla
+      return sendJson(res, 404, { ok: false, error: 'ticket_not_found' });
+    }
 
     // 2. ¿Ya tiene CFDI emitido?
     const existing = await supabaseRequest('GET',
@@ -440,6 +495,10 @@ async function handleAutofacturaLookup(req, res, ctx, parsedUrl) {
 
 async function handleAutofacturaIssue(req, res, ctx) {
   const { sendJson, supabaseRequest } = ctx;
+  // 2026-05 audit B-11: rate-limit por IP (5 emisiones por hora)
+  if (!__autofacturaRateLimit('issue:' + __ipOf(req), 5, 60 * 60 * 1000)) {
+    return sendJson(res, 429, { ok: false, error: 'rate_limited', retry_after_seconds: 3600 });
+  }
   const body = await readBody(req);
   // body: { tenant_id, ticket_id, customer_rfc, customer_name, customer_zip,
   //         customer_cfdi_use, customer_fiscal_regime, customer_email }
@@ -447,6 +506,8 @@ async function handleAutofacturaIssue(req, res, ctx) {
   for (const k of required) {
     if (!body[k]) return sendJson(res, 400, { ok: false, error: 'missing_field', field: k });
   }
+  // El customer_email debe coincidir con el del ticket (o el lookup previo pasó la verificación
+  // por total y el flow lo trae embebido). Validamos de nuevo aquí.
   // Lookup ticket → reusar items reales
   let sale;
   try {
@@ -457,6 +518,19 @@ async function handleAutofacturaIssue(req, res, ctx) {
     sale = Array.isArray(sales) && sales[0];
   } catch (_) {}
   if (!sale) return sendJson(res, 404, { ok: false, error: 'ticket_not_found' });
+
+  // 2026-05 audit B-11: validar propiedad antes de emitir CFDI ajeno.
+  const claimEmail = String(body.customer_email || '').toLowerCase().trim();
+  const ticketEmail = sale.customer_email ? String(sale.customer_email).toLowerCase().trim() : '';
+  const claimTotal = body.expected_total != null ? Math.round(Number(body.expected_total) * 100) : null;
+  const realTotal = Math.round(Number(sale.total || 0) * 100);
+  let proven = false;
+  if (ticketEmail && claimEmail === ticketEmail) proven = true;
+  if (!proven && claimTotal != null && realTotal > 0 && claimTotal === realTotal) proven = true;
+  if (!proven) {
+    return sendJson(res, 403, { ok: false, error: 'ownership_verification_failed',
+      message: 'El correo o el total no coinciden con el ticket. Verifica los datos.' });
+  }
 
   // Construir items desde el ticket (sin marcar productos individuales para no exponer mucho)
   const items = (sale.items || [{ description: 'Venta general', quantity: 1, unit_price: sale.subtotal || sale.total }]).map(it => ({

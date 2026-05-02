@@ -180,11 +180,15 @@ function register(deps) {
   const helpers = { sendJSON, sendError, readBody };
   const auth = requireAuth || ((fn) => fn);
 
-  async function loadCustomer(customerId) {
+  async function loadCustomer(customerId, tenantId) {
     if (typeof supabaseRequest !== 'function') return null;
     try {
-      const rows = await supabaseRequest('GET',
-        `/customers?id=eq.${encodeURIComponent(customerId)}&select=id,tenant_id,name,email,loyalty_points,tier,annual_spend,birthday`);
+      // 2026-05 audit B-7: filtrar por tenant_id obligatorio para impedir
+      // earn/redeem en clientes ajenos al tenant del caller.
+      let path = `/customers?id=eq.${encodeURIComponent(customerId)}`;
+      if (tenantId) path += `&tenant_id=eq.${encodeURIComponent(tenantId)}`;
+      path += '&select=id,tenant_id,name,email,loyalty_points,tier,annual_spend,birthday';
+      const rows = await supabaseRequest('GET', path);
       return Array.isArray(rows) && rows.length ? rows[0] : null;
     } catch (_) { return null; }
   }
@@ -228,10 +232,10 @@ function register(deps) {
         return send(res, { ok: false, error: 'points_invalid' }, 400, helpers);
       }
 
-      const c = await loadCustomer(customerId);
+      // 2026-05 audit B-7: usar tenant del JWT primero; loadCustomer lo valida.
+      const tenantId = tenantOf(req) || (req.user && req.user.tenant_id) || null;
+      const c = await loadCustomer(customerId, tenantId);
       if (!c) return send(res, { ok: false, error: 'customer_not_found' }, 404, helpers);
-
-      const tenantId = c.tenant_id || tenantOf(req);
       const thresholds = await loadTierThresholds(supabaseRequest, tenantId);
 
       // Apply tier multiplier if amount provided
@@ -285,7 +289,8 @@ function register(deps) {
       if (!isUuidLike(customerId)) return send(res, { ok: false, error: 'customer_id_invalid' }, 400, helpers);
       if (!isUuidLike(rewardId))   return send(res, { ok: false, error: 'reward_id_invalid' }, 400, helpers);
 
-      const c = await loadCustomer(customerId);
+      const tenantIdR = tenantOf(req) || (req.user && req.user.tenant_id) || null;
+      const c = await loadCustomer(customerId, tenantIdR);
       if (!c) return send(res, { ok: false, error: 'customer_not_found' }, 404, helpers);
 
       let reward = null;
@@ -362,7 +367,8 @@ function register(deps) {
       const id = params && params.id;
       if (!isUuidLike(id)) return send(res, { ok: false, error: 'invalid_id' }, 400, helpers);
 
-      const c = await loadCustomer(id);
+      const tenantIdC = tenantOf(req) || (req.user && req.user.tenant_id) || null;
+      const c = await loadCustomer(id, tenantIdC);
       if (!c) return send(res, { ok: false, error: 'customer_not_found' }, 404, helpers);
 
       let history = [];

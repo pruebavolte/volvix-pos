@@ -644,15 +644,17 @@
     } catch (_) { return false; }
   }
   function injectNoFloatersGuard() {
-    if (_isAdminViewer()) return; // admins ven TODO (incluye flotantes y diagnóstico)
+    // 2026-05 v2: política universal — NADIE ve flotantes salvo el botón de
+    // ayuda (?). El único override es ?debug=1 en la URL para inspección manual.
+    // Antes: el admin podía verlos, pero el dueño dijo "solo el (?) y ya".
+    var qs = '';
+    try { qs = window.location.search || ''; } catch (_) {}
+    var __debugOverride = /[?&]debug=1\b/.test(qs);
+    if (__debugOverride) return;
+
     if (document.getElementById('vlx-no-floaters-css')) return;
     var st = document.createElement('style');
     st.id = 'vlx-no-floaters-css';
-    // POLÍTICA 2026-05: usuario regular SOLO ve el botón de ayuda (?).
-    // Todos los demás flotantes (bandera, sync, refresh, list, search,
-    // settings/wrench, AI, theme, robot, etc.) se ocultan. Admin (token con
-    // role superadmin/platform_owner o email @systeminternational.app, o
-    // ?debug=1) vuelve a verlos automáticamente.
     st.textContent = [
       // ---- OCULTAR todos los flotantes conocidos del sistema ----
       '#vlx-health-pill, #vlx-health-modal { display: none !important; }',
@@ -662,7 +664,13 @@
       '#vlx-theme-toggle, #vlx-theme-fab { display: none !important; }',
       '#vlx-online-pill, .vlx-online-pill { display: none !important; }',
       '#vlx-bell, #vlx-notif-drawer { display: none !important; }',
-      '.vlx-widget, .vlx-sync-widget, .vlx-sync-fab { display: none !important; }',
+      // Sync widget — IDs reales
+      '#vlx-widget, #vlx-panel, .vlx-widget, .vlx-sync-widget, .vlx-sync-fab { display: none !important; }',
+      // Voice — IDs reales (volvix-voice-wiring.js)
+      '#volvix-voice-btn, #volvix-voice-wave { display: none !important; }',
+      // Academy AI — IDs reales (volvix-modules-wiring.js)
+      '#vlx-academy-ai-toggle, #vlx-academy-ai, #vlx-acad-msgs, #vlx-acad-input { display: none !important; }',
+      // Toast stack solo cuando no hay nada (lo mantenemos pero invisible si no hay toasts)
       '#vlx-ai-fab, #vlx-ai-avatar, #vlx-ai-bubble, .vlx-ai-fab { display: none !important; }',
       '#vlx-search-fab, .vlx-search-fab { display: none !important; }',
       '#vlx-settings-fab, .vlx-settings-fab, #vlx-wrench-fab, .vlx-wrench-fab { display: none !important; }',
