@@ -27,38 +27,38 @@
     bar.id = 'vlx-mexico-pride';
     bar.setAttribute('role', 'note');
     bar.setAttribute('aria-label', 'Hecho en Mexico - Nuevo Leon');
+    // Top bar premium minimalista (estilo Apple/Stripe): negro suave, fina,
+    // tipografía con tracking apretado, separadores tipo bullet sutil.
     bar.style.cssText = [
       'position:sticky',
       'top:0',
       'z-index:99999',
       'width:100%',
       'box-sizing:border-box',
-      'background:#006847',
-      'color:#FFFFFF',
-      'padding:0 16px',
-      'height:36px',
-      'line-height:36px',
+      'background:#0B0B0F',
+      'color:#E5E5EA',
+      'padding:0 24px',
+      'height:32px',
+      'line-height:32px',
       'text-align:center',
-      'font-size:13px',
-      'font-weight:600',
-      'letter-spacing:0.03em',
-      'font-family:Inter,-apple-system,BlinkMacSystemFont,sans-serif',
+      'font-size:12px',
+      'font-weight:500',
+      'letter-spacing:0.01em',
+      'font-family:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif',
       'display:flex',
       'align-items:center',
       'justify-content:center',
-      'gap:10px',
-      'border-bottom:2px solid #CE1126',
-      'box-shadow:0 2px 8px rgba(0,104,71,0.35)'
+      'gap:14px',
+      'border-bottom:1px solid #1F1F23',
+      '-webkit-font-smoothing:antialiased'
     ].join(';');
-    // Banda verde superior — solo texto. El logo oficial "Hecho en Nuevo León"
-    // va en una franja separada DEBAJO de la línea verde (no inventamos SVG).
+    // Sin emojis: solo texto editorial, separadores · de bullet sutil.
+    var dot = '<span aria-hidden="true" style="color:rgba(229,229,234,0.30);font-size:10px;margin:0 2px;letter-spacing:0">·</span>';
     bar.innerHTML =
-      '<span style="font-size:18px;line-height:1;margin-right:4px">🇲🇽</span>' +
-      '<span><strong>Hecho en México</strong></span>' +
-      '<span style="color:rgba(255,255,255,0.4);font-size:10px;margin:0 6px">●</span>' +
-      '<span>Soy Mexicano</span>' +
-      '<span style="color:rgba(255,255,255,0.4);font-size:10px;margin:0 6px">●</span>' +
-      '<span>Hecho en Nuevo León 🦅</span>';
+      '<span style="color:#FFFFFF;font-weight:500">Hecho en México</span>' + dot +
+      '<span>Desarrollado en Nuevo León</span>' + dot +
+      '<span>Licencia vitalicia</span>' + dot +
+      '<span>Sin mensualidades</span>';
 
     // Franja blanca con el logo OFICIAL subido por el dueño.
     // Drop the file at ONE of these paths and it aparece automáticamente:
@@ -72,17 +72,17 @@
     nlStrip.setAttribute('aria-label', 'Logo oficial Hecho en Nuevo León México');
     nlStrip.style.cssText = [
       'position:sticky',
-      'top:36px',
+      'top:32px',
       'z-index:99998',
       'width:100%',
       'box-sizing:border-box',
       'background:#FFFFFF',
-      'border-bottom:1px solid #E5E7EB',
-      'padding:10px 16px',
+      'border-bottom:1px solid #ECECEE',
+      'padding:8px 16px',
       'display:flex',
       'align-items:center',
       'justify-content:center',
-      'min-height:56px'
+      'min-height:48px'
     ].join(';');
 
     // Cascada SVG → PNG → JPG. Si todos 404, ocultamos la franja entera.

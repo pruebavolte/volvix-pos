@@ -392,39 +392,55 @@
     } catch (_) { return false; }
   }
   function injectNoFloatersGuard() {
-    if (_isAdminViewer()) return; // admins ven todo
+    if (_isAdminViewer()) return; // admins ven todo (incluye diagnóstico interno)
     if (document.getElementById('vlx-no-floaters-css')) return;
     var st = document.createElement('style');
     st.id = 'vlx-no-floaters-css';
-    // Lista negra de IDs/clases de widgets flotantes que existen en el sistema.
-    // Mantener: cookie banner, cookies legales, language switcher (si está
-    // ya marcado como inline), banner-arriba (Hecho en México) y logo NL.
+    // ESTRATEGIA REVISADA — antes ocultábamos demasiado y matábamos funciones.
+    // Ahora SOLO ocultamos los widgets que son diagnóstico interno (útiles a
+    // admins, ruido para clientes). Las funciones reales del usuario (sync
+    // status, notifications, idioma) se mantienen visibles, solo las
+    // RE-ESTILIZAMOS para que se vean elegantes y monocromas.
     st.textContent = [
-      '#vlx-bell, #vlx-notif-drawer { display: none !important; }',                  // notificaciones
-      '.vlx-widget { display: none !important; }',                                    // sync widget
-      '#vlx-health-pill, #vlx-health-modal { display: none !important; }',           // health pill
-      '#vlx-ai-avatar, #vlx-ai-panel, #vlx-ai-fab { display: none !important; }',    // AI floater
-      '#vlx-theme-toggle, #vlx-theme-fab { display: none !important; }',             // theme toggle
+      // OCULTAR — diagnóstico interno solamente:
+      '#vlx-health-pill, #vlx-health-modal { display: none !important; }',           // status del sistema (admin only)
+      '.vx-banner-container { display: none !important; }',                          // banners rojos [DOWN] degradado
+      '#vlx-mx-flag, .vlx-mx-flag-floating { display: none !important; }',           // bandera MX flotante (ya está en topbar)
+      '#vlx-robot-avatar, .vlx-robot-fab { display: none !important; }',             // avatar robot IA decorativo
+      '#vlx-theme-toggle, #vlx-theme-fab { display: none !important; }',             // theme toggle (sin valor)
       '#vlx-online-pill, .vlx-online-pill { display: none !important; }',            // "Online" pill
-      '#vlx-mx-flag, .vlx-mx-flag-floating { display: none !important; }',           // bandera MX flotante
-      '#vlx-robot-avatar, .vlx-robot-fab { display: none !important; }',             // avatar robot IA
-      '.vx-banner-container { display: none !important; }',                          // banners de degradado
-      '[data-vlx-floater] { display: none !important; }',                            // genérico opt-in
-      // Heurística defensiva: cualquier elemento con z-index > 9000 fijo en
-      // esquinas que NO esté en allowlist se oculta. Esto cubre widgets nuevos.
-      '[id^="vlx-floater-"], [class*="floating-widget"]:not(.vlx-allow) { display: none !important; }'
+      '[data-vlx-floater="diagnostic"] { display: none !important; }',                // genérico opt-in admin-only
+
+      // RE-ESTILIZAR — útiles, las dejamos pero monocromas y discretas:
+      // Notification bell → círculo gris, sin colores chillones
+      '#vlx-bell { background:#F4F4F5 !important; color:#0B0B0F !important; ' +
+        'border:1px solid #E5E5EA !important; box-shadow:0 1px 3px rgba(0,0,0,0.06) !important; ' +
+        'width:38px !important; height:38px !important; font-size:16px !important; ' +
+        'top:auto !important; bottom:14px !important; right:14px !important; }',
+      '#vlx-bell .vlx-badge { background:#0B0B0F !important; border-color:#FFFFFF !important; }',
+      '#vlx-notif-drawer { background:#FFFFFF !important; color:#0B0B0F !important; ' +
+        'border-left:1px solid #ECECEE !important; }',
+      // Sync widget → cuadrado gris discreto, no 4 círculos de colores
+      '.vlx-widget { background:#F4F4F5 !important; border:1px solid #E5E5EA !important; ' +
+        'border-radius:10px !important; box-shadow:0 1px 3px rgba(0,0,0,0.06) !important; ' +
+        'color:#0B0B0F !important; }',
+      '.vlx-widget .vlx-widget-btn { background:transparent !important; color:#3F3F46 !important; }',
+      // AI floater → solo botón pequeño (no avatar grande)
+      '#vlx-ai-fab, #vlx-ai-avatar { background:#0B0B0F !important; color:#FFFFFF !important; ' +
+        'box-shadow:0 4px 14px rgba(0,0,0,0.15) !important; ' +
+        'width:42px !important; height:42px !important; font-size:18px !important; }'
     ].join('\n');
     document.head.appendChild(st);
 
-    // MutationObserver: si una librería tarda en montar, lo cazamos al volar
-    // y ocultamos por estilo inline para vencer cualquier !important interno.
+    // MutationObserver: si una librería tarda en montar elementos diagnostico,
+    // los ocultamos por estilo inline. Solo lo PURO admin-only.
     try {
+      var hideIds = ['vlx-health-pill','vlx-mx-flag','vlx-robot-avatar','vlx-theme-toggle','vlx-online-pill'];
       var mo = new MutationObserver(function (muts) {
         muts.forEach(function (m) {
           (m.addedNodes || []).forEach(function (n) {
             if (!n || n.nodeType !== 1) return;
-            var ids = ['vlx-bell','vlx-notif-drawer','vlx-health-pill','vlx-ai-avatar','vlx-ai-panel','vlx-ai-fab','vlx-theme-toggle','vlx-online-pill','vlx-mx-flag','vlx-robot-avatar'];
-            if (ids.indexOf(n.id) >= 0 || (n.classList && n.classList.contains('vlx-widget'))) {
+            if (hideIds.indexOf(n.id) >= 0) {
               n.style.setProperty('display', 'none', 'important');
             }
           });
