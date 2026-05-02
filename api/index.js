@@ -1503,8 +1503,9 @@ const handlers = {
       stp: !!process.env.STP_OWNER_CLABE,
       stripe: !!process.env.STRIPE_SECRET_KEY,
       codi: !!process.env.STP_ENTERPRISE_KEY,
-      recargas: !!process.env.PROVIDER_RECARGAS_API_KEY,
-      services: !!process.env.PROVIDER_SERVICES_API_KEY,
+      // recargas/services: true si hay reseller directo O si MP está activo como bridge (cobro funciona, fulfillment manual)
+      recargas: !!(process.env.PROVIDER_RECARGAS_API_KEY || process.env.MERCADO_PAGO_ACCESS_TOKEN),
+      services: !!(process.env.PROVIDER_SERVICES_API_KEY || process.env.MERCADO_PAGO_ACCESS_TOKEN),
       cfdi: !!(
         (process.env.FACTURAMA_USER && process.env.FACTURAMA_PASSWORD) ||
         (process.env.PAC_API_USER && process.env.PAC_API_PASSWORD)
@@ -10517,19 +10518,98 @@ handlers['GET /api/config/public'] = async (req, res) => {
       sendJSON(res, { ok: false, error: 'db_error', detail: IS_PROD ? null : String(e && e.message || e) }, 500);
     }
   });
-  // /api/recargas/health — fast probe sin auth
+  // /api/recargas/webhook/mp — Mercado Pago notifica cambio de pago.
+  // Marcamos la recarga como 'paid_pending_fulfillment' cuando MP confirma.
+  // El dueño del POS o un cron job luego procesa el fulfillment manual.
+  handlers['POST /api/recargas/webhook/mp'] = async (req, res) => {
+    try {
+      const body = await readBody(req).catch(() => ({}));
+      const topic = (req.url && req.url.includes('topic=payment')) || body.type === 'payment';
+      const paymentId = body.data && body.data.id || body.id || (req.url && (req.url.match(/[?&]id=([^&]+)/) || [])[1]);
+      if (!topic || !paymentId) return sendJSON(res, { ok: true, ignored: 'no_payment_id' }, 200);
+      // Consultar el pago a MP para verificar estado
+      const token = process.env.MERCADO_PAGO_ACCESS_TOKEN;
+      if (!token) return sendJSON(res, { ok: false, error: 'mp_not_configured' }, 503);
+      const r = await fetch('https://api.mercadopago.com/v1/payments/' + encodeURIComponent(paymentId), {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      const j = await r.json().catch(() => null);
+      if (!r.ok || !j) return sendJSON(res, { ok: false, error: 'mp_lookup_failed' }, 502);
+      const externalRef = j.external_reference;
+      const status = j.status; // approved | pending | rejected | refunded
+      const newStatus = status === 'approved' ? 'paid_pending_fulfillment'
+                      : status === 'rejected' ? 'failed'
+                      : status === 'refunded' ? 'refunded' : 'pending_payment';
+      try {
+        await supabaseRequest('PATCH',
+          '/recargas?external_ref=eq.' + encodeURIComponent(externalRef),
+          { status: newStatus, mp_payment_id: paymentId, updated_at: new Date().toISOString() });
+      } catch (_) {}
+      sendJSON(res, { ok: true, processed: { externalRef, mp_status: status, new_status: newStatus } });
+    } catch (e) {
+      sendJSON(res, { ok: false, error: 'webhook_failed' }, 500);
+    }
+  };
+  // /api/services/webhook/mp — equivalente para pagos de servicios
+  handlers['POST /api/services/webhook/mp'] = async (req, res) => {
+    try {
+      const body = await readBody(req).catch(() => ({}));
+      const paymentId = body.data && body.data.id || body.id || (req.url && (req.url.match(/[?&]id=([^&]+)/) || [])[1]);
+      if (!paymentId) return sendJSON(res, { ok: true, ignored: 'no_payment_id' });
+      const token = process.env.MERCADO_PAGO_ACCESS_TOKEN;
+      if (!token) return sendJSON(res, { ok: false, error: 'mp_not_configured' }, 503);
+      const r = await fetch('https://api.mercadopago.com/v1/payments/' + encodeURIComponent(paymentId), {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      const j = await r.json().catch(() => null);
+      if (!r.ok || !j) return sendJSON(res, { ok: false, error: 'mp_lookup_failed' }, 502);
+      const externalRef = j.external_reference;
+      const status = j.status;
+      const newStatus = status === 'approved' ? 'paid_pending_fulfillment'
+                      : status === 'rejected' ? 'failed'
+                      : status === 'refunded' ? 'refunded' : 'pending_payment';
+      try {
+        await supabaseRequest('PATCH',
+          '/service_payments?external_ref=eq.' + encodeURIComponent(externalRef),
+          { status: newStatus, mp_payment_id: paymentId, updated_at: new Date().toISOString() });
+      } catch (_) {}
+      sendJSON(res, { ok: true, processed: { externalRef, mp_status: status, new_status: newStatus } });
+    } catch (e) { sendJSON(res, { ok: false, error: 'webhook_failed' }, 500); }
+  };
+
+  // /api/recargas/health — refleja la cadena de fallback
   handlers['GET /api/recargas/health'] = (req, res) => {
+    const reseller = !!process.env.PROVIDER_RECARGAS_API_KEY;
+    const mp = !!process.env.MERCADO_PAGO_ACCESS_TOKEN;
     sendJSON(res, {
       ok: true,
-      provider_configured: !!(process.env.PROVIDER_RECARGAS_API_KEY),
+      mode: reseller ? 'reseller_direct' : (mp ? 'mp_bridge' : 'mock'),
+      provider_configured: reseller || mp,
+      reseller_configured: reseller,
+      mercadopago_bridge: mp,
+      capabilities: {
+        cobro: reseller || mp,
+        entrega_inmediata: reseller,
+        pending_fulfillment_only: !reseller && mp
+      },
       ts: new Date().toISOString()
     });
   };
   // /api/services/health
   handlers['GET /api/services/health'] = (req, res) => {
+    const reseller = !!process.env.PROVIDER_SERVICES_API_KEY;
+    const mp = !!process.env.MERCADO_PAGO_ACCESS_TOKEN;
     sendJSON(res, {
       ok: true,
-      provider_configured: !!(process.env.PROVIDER_SERVICES_API_KEY),
+      mode: reseller ? 'reseller_direct' : (mp ? 'mp_bridge' : 'mock'),
+      provider_configured: reseller || mp,
+      reseller_configured: reseller,
+      mercadopago_bridge: mp,
+      capabilities: {
+        cobro: reseller || mp,
+        pago_proveedor_inmediato: reseller,
+        pending_fulfillment_only: !reseller && mp
+      },
       ts: new Date().toISOString()
     });
   };

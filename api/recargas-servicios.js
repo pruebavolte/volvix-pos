@@ -5,15 +5,62 @@
  * Volvix POS — Phone recargas (top-ups) and payment of services.
  * Native fetch, no external deps.
  *
- * Exported: async function handleRecargasServicios(req, res, parsedUrl, ctx)
+ * Provider chain:
+ *   1. Reseller real (PROVIDER_RECARGAS_URL + KEY): integración directa con
+ *      Recargaki / Dimo / eGlobal — entrega instantánea de saldo.
+ *   2. Mercado Pago como PASARELA (MERCADO_PAGO_ACCESS_TOKEN): cobramos al
+ *      cliente pero la entrega del saldo queda diferida — para fulfillment
+ *      manual del dueño hasta que se firme convenio con un reseller.
+ *   3. Mock: solo registra la venta sin cobrar ni entregar (modo dev).
  *
- * ctx is expected to contain (provided by api/index.js):
- *   - db / pool: pg Pool with .query(text, params)
- *   - getAuthUser(req): returns { user_id, tenant_id, role, ... } or null
- *   - readJson(req): parses JSON body
- *   - sendJson(res, status, body)
- *   - logger (optional)
+ * Exported: async function handleRecargasServicios(req, res, parsedUrl, ctx)
  */
+
+// ---------- Mercado Pago bridge ----------
+// Crea una preferencia de pago en MP. Devuelve init_point (URL de checkout)
+// y el qr_code para mostrarle al cliente. Cuando MP confirma el pago via
+// webhook, el sistema marca la recarga/servicio como 'paid_pending_fulfillment'.
+async function createMercadoPagoPreference(opts) {
+  const token = (process.env.MERCADO_PAGO_ACCESS_TOKEN || '').trim();
+  if (!token) throw new Error('MERCADO_PAGO_ACCESS_TOKEN missing');
+  const isSandbox = /APP_USR-|TEST-/.test(token) && /TEST-/.test(token);
+  const body = {
+    items: [{
+      title: String(opts.title || 'Servicio Volvix').slice(0, 250),
+      quantity: Number(opts.quantity || 1),
+      unit_price: Number(opts.unit_price || 0),
+      currency_id: 'MXN'
+    }],
+    external_reference: String(opts.external_reference || ''),
+    notification_url: opts.notification_url || undefined,
+    auto_return: 'approved',
+    binary_mode: true,
+    metadata: opts.metadata || undefined
+  };
+  const r = await fetch('https://api.mercadopago.com/checkout/preferences', {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + token,
+      'Content-Type': 'application/json',
+      'X-Idempotency-Key': 'mp-pref-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8)
+    },
+    body: JSON.stringify(body)
+  });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) {
+    const e = new Error('mp_pref_failed: http_' + r.status + ' ' + (j.message || JSON.stringify(j).slice(0, 200)));
+    e.detail = j;
+    throw e;
+  }
+  return {
+    id: j.id,
+    init_point: j.init_point,
+    sandbox_init_point: j.sandbox_init_point,
+    qr_code: j.qr_code || null,
+    qr_code_base64: j.qr_code_base64 || null,
+    is_sandbox: isSandbox
+  };
+}
 
 const CARRIERS = [
   { code: 'TELCEL',       name: 'Telcel',        logo: '/logos/telcel.png',       amounts: [10, 20, 30, 50, 100, 150, 200, 300, 500] },
@@ -344,16 +391,34 @@ async function handleRecargaBuy(ctx, req, res) {
 
   log(ctx, 'info', 'recarga.buy.start', { tenant_id, carrier: carrier.code, phone, amount, performed_by });
 
-  // Mock path when provider not configured.
+  // Mock/MP-bridged path when provider reseller not configured.
+  // Si MP está activo (MERCADO_PAGO_ACCESS_TOKEN), creamos una preferencia de
+  // pago: el cliente final paga la recarga via MP, queda pending de fulfillment
+  // manual hasta que se contrate un proveedor reseller real (Recargaki, Dimo, etc).
   if (!process.env.PROVIDER_RECARGAS_API_KEY || !process.env.PROVIDER_RECARGAS_URL) {
-    const externalRef = `MOCK-${Date.now()}`;
+    const hasMP = !!process.env.MERCADO_PAGO_ACCESS_TOKEN;
+    const externalRef = `${hasMP ? 'MP' : 'MOCK'}-${Date.now()}`;
+    let mpCheckout = null;
+    if (hasMP) {
+      try {
+        mpCheckout = await createMercadoPagoPreference({
+          title: `Recarga ${carrier.code} a ${phone}`,
+          unit_price: total_charged,
+          quantity: 1,
+          external_reference: externalRef,
+          notification_url: (process.env.PUBLIC_BASE_URL || 'https://systeminternational.app') + '/api/recargas/webhook/mp'
+        });
+      } catch (mpe) {
+        log(ctx, 'warn', 'recarga.mp_pref_failed', { error: String(mpe && mpe.message || mpe) });
+      }
+    }
     try {
       const ins = await db.query(
         `INSERT INTO recargas
            (tenant_id, carrier_code, phone, amount, comision, status, external_ref, performed_by, created_at)
-         VALUES ($1, $2, $3, $4, $5, 'pending', $6, $7, NOW())
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
          RETURNING id, status, external_ref, amount, comision, created_at`,
-        [tenant_id, carrier.code, phone, amount, comision, externalRef, performed_by]
+        [tenant_id, carrier.code, phone, amount, comision, hasMP ? 'pending_payment' : 'pending', externalRef, performed_by]
       );
       const row = ins.rows[0];
       return send(ctx, res, 200, {
@@ -363,9 +428,13 @@ async function handleRecargaBuy(ctx, req, res) {
         amount: Number(row.amount),
         comision: Number(row.comision),
         total_charged,
-        receipt: { mock: true, idempotency_key, carrier: carrier.code, phone, amount },
-        mock: true,
-        note: 'Provider credentials not configured; transaction recorded as pending.',
+        provider: hasMP ? 'mercadopago' : 'mock',
+        checkout_url: mpCheckout && (mpCheckout.init_point || mpCheckout.sandbox_init_point) || null,
+        qr_code: mpCheckout && mpCheckout.qr_code || null,
+        receipt: { idempotency_key, carrier: carrier.code, phone, amount },
+        note: hasMP
+          ? 'Cobro via Mercado Pago. La entrega de saldo requiere proveedor reseller (Recargaki/Dimo/etc) — recarga registrada como pending_payment.'
+          : 'Provider credentials not configured; transaction recorded as pending.',
       });
     } catch (e) {
       log(ctx, 'error', 'recarga.buy.db_insert_mock_failed', { error: String(e && e.message || e) });
@@ -625,20 +694,39 @@ async function handleServicesPay(ctx, req, res) {
 
   log(ctx, 'info', 'service.pay.start', { tenant_id, provider: provider.code, reference, amount, paid_by });
 
-  // Mock path when provider not configured.
+  // Mock/MP-bridged path when service reseller not configured. Si MP está
+  // activo, generamos preferencia de pago y dejamos el servicio pending
+  // payment confirmation. El fulfillment (pago real al proveedor) requiere
+  // contrato con un reseller (BBVA Apps, Speei, etc.) — eso queda manual.
   if (!process.env.PROVIDER_SERVICES_API_KEY || !process.env.PROVIDER_SERVICES_URL) {
-    const externalRef = `MOCK-${Date.now()}`;
+    const hasMP = !!process.env.MERCADO_PAGO_ACCESS_TOKEN;
+    const externalRef = `${hasMP ? 'MP' : 'MOCK'}-${Date.now()}`;
+    let mpCheckout = null;
+    if (hasMP) {
+      try {
+        mpCheckout = await createMercadoPagoPreference({
+          title: `Pago ${provider.name} ref ${reference}`,
+          unit_price: amount + comision,
+          quantity: 1,
+          external_reference: externalRef,
+          notification_url: (process.env.PUBLIC_BASE_URL || 'https://systeminternational.app') + '/api/services/webhook/mp'
+        });
+      } catch (mpe) {
+        log(ctx, 'warn', 'service.pay.mp_pref_failed', { error: String(mpe && mpe.message || mpe) });
+      }
+    }
     try {
       const ins = await db.query(
         `INSERT INTO service_payments
            (tenant_id, provider_code, reference, amount, currency, status, customer_phone, customer_email,
             external_ref, receipt_data, comision, paid_by, paid_at)
-         VALUES ($1, $2, $3, $4, 'MXN', 'pending', $5, $6, $7, $8::jsonb, $9, $10, NOW())
+         VALUES ($1, $2, $3, $4, 'MXN', $5, $6, $7, $8, $9::jsonb, $10, $11, NOW())
          RETURNING id, status, external_ref, amount, comision, paid_at`,
         [
           tenant_id, provider.code, reference, amount,
+          hasMP ? 'pending_payment' : 'pending',
           customer_phone, customer_email, externalRef,
-          JSON.stringify({ mock: true, idempotency_key }),
+          JSON.stringify({ provider_used: hasMP ? 'mercadopago_bridge' : 'mock', idempotency_key, mp: mpCheckout && { id: mpCheckout.id, init_point: mpCheckout.init_point } }),
           comision, paid_by,
         ]
       );
@@ -649,9 +737,13 @@ async function handleServicesPay(ctx, req, res) {
         external_ref: row.external_ref,
         amount: Number(row.amount),
         comision: Number(row.comision),
-        receipt: { mock: true, idempotency_key, provider: provider.code, reference, amount },
-        mock: true,
-        note: 'Provider credentials not configured; payment recorded as pending.',
+        provider: hasMP ? 'mercadopago' : 'mock',
+        checkout_url: mpCheckout && (mpCheckout.init_point || mpCheckout.sandbox_init_point) || null,
+        qr_code: mpCheckout && mpCheckout.qr_code || null,
+        receipt: { idempotency_key, provider: provider.code, reference, amount },
+        note: hasMP
+          ? 'Cobro via Mercado Pago. Fulfillment al proveedor del servicio requiere convenio reseller — pago registrado como pending_payment.'
+          : 'Provider credentials not configured; payment recorded as pending.',
       });
     } catch (e) {
       log(ctx, 'error', 'service.pay.db_mock_failed', { error: String(e && e.message || e) });
