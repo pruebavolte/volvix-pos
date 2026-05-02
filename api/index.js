@@ -30968,15 +30968,31 @@ if (process.env.NODE_ENV === 'test') {
       let smsSent = false;
       let smsError = null;
       let smsProvider = null;
+      let usingTwilioVerify = false; // si true, NO necesitamos guardar otpCode local
+      const verifyStart = (typeof global.__r12o3a_twilioVerifyStart === 'function') ? global.__r12o3a_twilioVerifyStart : null;
       const sendSms = (typeof global.__r12o3a_sendSms === 'function') ? global.__r12o3a_sendSms : null;
       const sendWhatsApp = (typeof global.__r12o3a_sendWhatsApp === 'function') ? global.__r12o3a_sendWhatsApp : null;
       const hasDedicatedSmsFrom = !!(process.env.TWILIO_SMS_FROM || process.env.TWILIO_PHONE_NUMBER || process.env.TWILIO_FROM);
       const hasWhatsAppFrom = !!process.env.TWILIO_WHATSAPP_FROM;
       const hasTwilioKeys = !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN);
+      const hasVerifyService = !!process.env.TWILIO_VERIFY_SERVICE_SID;
 
-      // Estrategia: si hay número SMS dedicado → SMS. Si no, intentar WhatsApp
-      // (el usuario debe haber unido el sandbox enviando "join <code>" antes).
-      if (sendSms && hasTwilioKeys && hasDedicatedSmsFrom) {
+      // ESTRATEGIA (en orden de preferencia):
+      //  1. Twilio Verify API (managed) — si TWILIO_VERIFY_SERVICE_SID está. NO requiere
+      //     número propio. Twilio genera el OTP y lo envía. Es el flujo correcto, el
+      //     que el sistema usaba antes (legacy Railway deploy).
+      //  2. SMS directo si hay TWILIO_SMS_FROM dedicado.
+      //  3. WhatsApp sandbox si solo hay TWILIO_WHATSAPP_FROM.
+      //  4. Fallback dev_code en pantalla.
+      if (verifyStart && hasTwilioKeys && hasVerifyService) {
+        try {
+          const vr = await verifyStart({ to: phone, channel: 'sms', locale: 'es' });
+          smsSent = !!(vr && vr.ok);
+          smsProvider = 'twilio_verify';
+          usingTwilioVerify = !!smsSent;
+          if (!smsSent) smsError = (vr && vr.error) || (vr && vr.reason) || 'verify_start_failed';
+        } catch (e) { smsError = String(e && e.message || e).slice(0, 200); }
+      } else if (sendSms && hasTwilioKeys && hasDedicatedSmsFrom) {
         try {
           const sr = await sendSms({ to: phone, body: smsBody });
           smsSent = !!(sr && sr.ok);
@@ -30984,7 +31000,6 @@ if (process.env.NODE_ENV === 'test') {
           if (!smsSent) smsError = (sr && sr.error) || (sr && sr.reason) || 'unknown';
         } catch (e) { smsError = String(e && e.message || e).slice(0, 200); }
       } else if (sendWhatsApp && hasTwilioKeys && hasWhatsAppFrom) {
-        // Fallback a WhatsApp Twilio Sandbox
         try {
           const wr = await sendWhatsApp({ to: phone, body: smsBody });
           smsSent = !!(wr && wr.ok);
@@ -30995,6 +31010,17 @@ if (process.env.NODE_ENV === 'test') {
         smsError = !hasTwilioKeys
           ? 'TWILIO_ACCOUNT_SID/TWILIO_AUTH_TOKEN missing'
           : 'no_send_function_loaded';
+      }
+      // Cuando usamos Twilio Verify, marcar el OTP local como "delegated" para
+      // que verify-simple sepa que debe checkear con Twilio en lugar de
+      // comparar contra pos_otp_verifications.otp_code.
+      if (usingTwilioVerify) {
+        try {
+          await supabaseRequest('PATCH',
+            '/pos_otp_verifications?phone=eq.' + encodeURIComponent(phone) +
+            '&otp_code=eq.' + encodeURIComponent(otpCode),
+            { otp_code: 'TWILIO_VERIFY_DELEGATED' });
+        } catch (_) { /* table-shape variations: just log */ }
       }
 
       try {
@@ -31126,7 +31152,30 @@ if (process.env.NODE_ENV === 'test') {
       if ((otpRow.attempts || 0) >= 3) {
         return sendJSON(res, { ok: false, error_code: 'OTP_LOCKOUT', error_message: 'Demasiados intentos. Reenvía uno nuevo.' }, 429);
       }
-      if (String(otpRow.otp_code) !== otpCode) {
+
+      // Twilio Verify path: si la fila local está marcada como delegada,
+      // validamos el código contra Twilio Verify (no contra la DB).
+      const verifyCheck = (typeof global.__r12o3a_twilioVerifyCheck === 'function') ? global.__r12o3a_twilioVerifyCheck : null;
+      const isDelegated = String(otpRow.otp_code) === 'TWILIO_VERIFY_DELEGATED';
+      if (isDelegated) {
+        if (!verifyCheck) {
+          return sendJSON(res, { ok: false, error_code: 'OTP_VERIFY_UNAVAILABLE',
+            error_message: 'Servicio de verificación no disponible.' }, 503);
+        }
+        let vcheck;
+        try { vcheck = await verifyCheck({ to: phone, code: otpCode }); }
+        catch (e) { vcheck = { ok: false, error: String(e && e.message || e) }; }
+        if (!vcheck || !vcheck.ok) {
+          supabaseRequest('PATCH',
+            '/pos_otp_verifications?id=eq.' + encodeURIComponent(otpRow.id),
+            { attempts: (otpRow.attempts || 0) + 1 }).catch(function () {});
+          return sendJSON(res, {
+            ok: false, error_code: 'OTP_INVALID',
+            error_message: 'Código incorrecto. ' + Math.max(0, 3 - ((otpRow.attempts || 0) + 1)) + ' intentos restantes.'
+          }, 400);
+        }
+        // Twilio aprobó el código → continuar con el flujo de marcado
+      } else if (String(otpRow.otp_code) !== otpCode) {
         supabaseRequest('PATCH',
           '/pos_otp_verifications?id=eq.' + encodeURIComponent(otpRow.id),
           { attempts: (otpRow.attempts || 0) + 1 }).catch(function () {});
@@ -31829,6 +31878,98 @@ if (process.env.NODE_ENV === 'test') {
   // Expose WhatsApp sender too — register-simple usa esto cuando solo hay
   // TWILIO_WHATSAPP_FROM (sandbox) y no hay SMS dedicado.
   try { global.__r12o3a_sendWhatsApp = r12o3aSendViaWhatsApp; } catch (_) {}
+
+  // Twilio Verify API — managed OTP service: NO requiere comprar número.
+  // Twilio se encarga de generar el código, enviar el SMS y validarlo.
+  // Solo necesita: TWILIO_ACCOUNT_SID + TWILIO_AUTH_TOKEN + TWILIO_VERIFY_SERVICE_SID
+  // Endpoint base: https://verify.twilio.com/v2/Services/{SID}/Verifications
+  async function r12o3aTwilioVerifyStart(opts) {
+    var sid = process.env.TWILIO_ACCOUNT_SID;
+    var token = process.env.TWILIO_AUTH_TOKEN;
+    var serviceSid = process.env.TWILIO_VERIFY_SERVICE_SID;
+    if (!sid || !token || !serviceSid) return { ok: false, reason: 'no_key' };
+    var phone = String(opts.to || '').replace(/[\s\-\(\)]/g, '');
+    var channel = String(opts.channel || 'sms').toLowerCase(); // sms | call | whatsapp | email
+    var auth = 'Basic ' + Buffer.from(sid + ':' + token).toString('base64');
+    var qs = 'To=' + encodeURIComponent(phone) + '&Channel=' + encodeURIComponent(channel);
+    if (opts.locale) qs += '&Locale=' + encodeURIComponent(opts.locale);
+    try {
+      var https = require('https');
+      return await new Promise(function (resolve) {
+        var rq = https.request({
+          method: 'POST',
+          hostname: 'verify.twilio.com',
+          path: '/v2/Services/' + encodeURIComponent(serviceSid) + '/Verifications',
+          headers: {
+            'Authorization': auth,
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Length': Buffer.byteLength(qs)
+          },
+          timeout: 15000
+        }, function (resp) {
+          var chunks = [];
+          resp.on('data', function (c) { chunks.push(c); });
+          resp.on('end', function () {
+            var body = Buffer.concat(chunks).toString('utf8');
+            if (resp.statusCode >= 200 && resp.statusCode < 300) {
+              var parsed = null; try { parsed = JSON.parse(body); } catch (_) {}
+              resolve({ ok: true, provider: 'twilio_verify', status: parsed && parsed.status, sid: parsed && parsed.sid });
+            } else {
+              resolve({ ok: false, provider: 'twilio_verify', error: 'http_' + resp.statusCode + ' ' + r12o3aTruncate(body, 200) });
+            }
+          });
+        });
+        rq.on('error', function (e) { resolve({ ok: false, provider: 'twilio_verify', error: String(e && e.message || e) }); });
+        rq.on('timeout', function () { try { rq.destroy(); } catch (_) {} resolve({ ok: false, provider: 'twilio_verify', error: 'timeout' }); });
+        rq.write(qs); rq.end();
+      });
+    } catch (e) { return { ok: false, provider: 'twilio_verify', error: String(e && e.message || e) }; }
+  }
+  async function r12o3aTwilioVerifyCheck(opts) {
+    var sid = process.env.TWILIO_ACCOUNT_SID;
+    var token = process.env.TWILIO_AUTH_TOKEN;
+    var serviceSid = process.env.TWILIO_VERIFY_SERVICE_SID;
+    if (!sid || !token || !serviceSid) return { ok: false, reason: 'no_key' };
+    var phone = String(opts.to || '').replace(/[\s\-\(\)]/g, '');
+    var code = String(opts.code || '').trim();
+    if (!code) return { ok: false, error: 'no_code' };
+    var auth = 'Basic ' + Buffer.from(sid + ':' + token).toString('base64');
+    var qs = 'To=' + encodeURIComponent(phone) + '&Code=' + encodeURIComponent(code);
+    try {
+      var https = require('https');
+      return await new Promise(function (resolve) {
+        var rq = https.request({
+          method: 'POST',
+          hostname: 'verify.twilio.com',
+          path: '/v2/Services/' + encodeURIComponent(serviceSid) + '/VerificationCheck',
+          headers: {
+            'Authorization': auth,
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Length': Buffer.byteLength(qs)
+          },
+          timeout: 15000
+        }, function (resp) {
+          var chunks = [];
+          resp.on('data', function (c) { chunks.push(c); });
+          resp.on('end', function () {
+            var body = Buffer.concat(chunks).toString('utf8');
+            var parsed = null; try { parsed = JSON.parse(body); } catch (_) {}
+            if (resp.statusCode >= 200 && resp.statusCode < 300) {
+              var approved = parsed && parsed.status === 'approved';
+              resolve({ ok: approved, status: parsed && parsed.status, valid: approved });
+            } else {
+              resolve({ ok: false, error: 'http_' + resp.statusCode + ' ' + r12o3aTruncate(body, 200) });
+            }
+          });
+        });
+        rq.on('error', function (e) { resolve({ ok: false, error: String(e && e.message || e) }); });
+        rq.on('timeout', function () { try { rq.destroy(); } catch (_) {} resolve({ ok: false, error: 'timeout' }); });
+        rq.write(qs); rq.end();
+      });
+    } catch (e) { return { ok: false, error: String(e && e.message || e) }; }
+  }
+  try { global.__r12o3a_twilioVerifyStart = r12o3aTwilioVerifyStart; } catch (_) {}
+  try { global.__r12o3a_twilioVerifyCheck = r12o3aTwilioVerifyCheck; } catch (_) {}
 
   // ---- Provider: Wasender / Twilio WhatsApp ----
   async function r12o3aSendViaWhatsApp(opts) {
