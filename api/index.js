@@ -31252,12 +31252,12 @@ if (process.env.NODE_ENV === 'test') {
         return send429(res, 60000, 'Demasiados reenvíos desde tu IP.');
       }
 
-      // Buscar último OTP de este tenant para reusar email/phone/user_id
+      // Buscar último OTP de este tenant (cualquier purpose) para reusar email/phone/user_id
       let last = null;
       try {
         const rows = await supabaseRequest('GET',
           '/pos_otp_verifications?tenant_id=eq.' + encodeURIComponent(tenantId) +
-          '&purpose=eq.register_tenant&order=created_at.desc&limit=1');
+          '&order=created_at.desc&limit=1');
         if (Array.isArray(rows) && rows.length > 0) last = rows[0];
       } catch (_) {}
       if (!last) {
@@ -31268,35 +31268,54 @@ if (process.env.NODE_ENV === 'test') {
       const newCode = genOtp();
       const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
       try {
-        await supabaseRequest('POST', '/pos_otp_verifications', {
+        const reissue = {
           tenant_id: tenantId,
           user_id: last.user_id,
           email: last.email,
-          phone: last.phone,
           otp_code: newCode,
           sent_to_email: true,
-          sent_to_phone: true,
+          sent_to_phone: false,
           attempts: 0,
           expires_at: expiresAt,
           ip_address: ip,
           user_agent: userAgent,
-          purpose: 'register_tenant'
-        });
+          purpose: last.purpose || 'register_simple'
+        };
+        if (last.phone) reissue.phone = last.phone;
+        await supabaseRequest('POST', '/pos_otp_verifications', reissue);
       } catch (e) {
         return sendJSON(res, { ok: false, error: 'OTP_CREATE_FAILED', error_message: 'No se pudo enviar.' }, 500);
       }
 
-      const sentRes = sendOtpNotifications({
-        tenant_id: tenantId, email: last.email, phone: last.phone,
-        code: newCode, business_name: ''
-      });
+      // Reenviar por email (Resend) — flujo email-first 2026-05
+      let emailSent = false;
+      const sendEmailFn = (typeof global.__r12o3a_sendEmail === 'function') ? global.__r12o3a_sendEmail : null;
+      if (sendEmailFn && last.email && (process.env.RESEND_API_KEY || process.env.SENDGRID_API_KEY)) {
+        try {
+          const otpDomain = (process.env.OTP_BOUND_DOMAIN || 'systeminternational.app').replace(/^https?:\/\//, '');
+          const html =
+            '<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1e293b">' +
+              '<h1 style="font-size:22px;margin:0 0 6px">Volvix POS</h1>' +
+              '<p style="color:#475569;margin:0 0 18px">Tu nuevo código de verificación:</p>' +
+              '<div style="font-size:34px;font-weight:800;letter-spacing:8px;text-align:center;background:#f1f5f9;border-radius:12px;padding:18px 0;color:#0f172a;font-family:Courier New,monospace">' + newCode + '</div>' +
+              '<p style="color:#64748b;font-size:13px;margin:18px 0 0">Vence en 10 minutos.</p>' +
+              '<hr style="border:none;border-top:1px solid #e2e8f0;margin:22px 0">' +
+              '<p style="color:#94a3b8;font-size:11px;margin:0">Volvix POS · ' + otpDomain + '</p>' +
+            '</div>';
+          const er = await sendEmailFn({ to: last.email, subject: 'Tu código Volvix: ' + newCode, html: html, text: 'Tu código Volvix es: ' + newCode });
+          emailSent = !!(er && er.ok);
+        } catch (_) {}
+      }
 
+      const isProd = process.env.NODE_ENV === 'production';
+      const noProvider = !(process.env.RESEND_API_KEY || process.env.SENDGRID_API_KEY);
       return sendJSON(res, {
         ok: true,
-        otp_sent_to: ['email', 'whatsapp'],
+        otp_channel: 'email',
+        otp_sent_to: emailSent ? ['email'] : [],
         otp_expires_at: expiresAt,
-        otp_dev_hint: (process.env.NODE_ENV !== 'production') ? newCode : undefined,
-        notification: { email_sent: sentRes.email_sent, phone_sent: sentRes.phone_sent }
+        email_sent: emailSent,
+        otp_dev_hint: (!isProd || noProvider || !emailSent) ? newCode : undefined
       });
     } catch (err) {
       sendError(res, err);
@@ -31424,9 +31443,10 @@ if (process.env.NODE_ENV === 'test') {
 
   // =================================================================
   // POST /api/auth/register-simple
-  // Mínima fricción: solo phone (10 dígitos MX) + business_name + giro + password
-  // Email es opcional. Genera OTP de 6 dígitos para SMS.
-  // Body: { phone, business_name, giro, password, email? }
+  // Mínima fricción: email + business_name + giro + password (phone opcional)
+  // 2026-05: SOLO EMAIL para lanzamiento (Twilio se activa cuando lleguen ingresos).
+  // Genera OTP de 6 dígitos enviado por correo (Resend).
+  // Body: { email, business_name, giro, password, phone? }
   // =================================================================
   handlers['POST /api/auth/register-simple'] = async (req, res) => {
     try {
@@ -31444,14 +31464,17 @@ if (process.env.NODE_ENV === 'test') {
       const email = body.email ? String(body.email).toLowerCase().trim() : null;
       const userAgent = String(req.headers['user-agent'] || '').slice(0, 200);
 
-      // Normalizar phone: aceptar 10 dígitos crudos o +52 + 10
+      // Phone OPCIONAL — sólo para login futuro o contacto. Se normaliza si viene.
       let phoneRaw = String(body.phone || '').replace(/[\s\-\(\)]/g, '');
       if (/^\d{10}$/.test(phoneRaw)) phoneRaw = '+52' + phoneRaw;
       else if (/^52\d{10}$/.test(phoneRaw)) phoneRaw = '+' + phoneRaw;
-      const phone = phoneRaw;
+      const phone = phoneRaw || null;
 
-      // ---- Validaciones ----
-      if (!isValidPhoneServer(phone)) {
+      // ---- Validaciones ---- (email requerido; phone opcional pero validado si viene)
+      if (!email || !isValidEmailServer(email)) {
+        return sendJSON(res, { ok: false, field: 'email', error_code: 'INVALID_EMAIL', error_message: 'Correo electrónico inválido. Es requerido para recibir tu código.' }, 400);
+      }
+      if (phone && !isValidPhoneServer(phone)) {
         return sendJSON(res, { ok: false, field: 'phone', error_code: 'INVALID_PHONE', error_message: 'Teléfono inválido. Usa 10 dígitos MX.' }, 400);
       }
       if (!password || password.length < 8) {
@@ -31463,27 +31486,21 @@ if (process.env.NODE_ENV === 'test') {
       if (!VALID_GIROS.has(giro)) {
         return sendJSON(res, { ok: false, field: 'giro', error_code: 'INVALID_GIRO', error_message: 'Selecciona un giro válido.' }, 400);
       }
-      if (email && !isValidEmailServer(email)) {
-        return sendJSON(res, { ok: false, field: 'email', error_code: 'INVALID_EMAIL', error_message: 'Email inválido.' }, 400);
-      }
 
-      // ---- Phone duplicado ----
-      // UX mejorado: si el teléfono existe pero el OTP nunca fue verificado
-      // (registro abandonado), permitimos REUSAR ese user_id y reemitir OTP.
-      // Solo bloqueamos si phone_verified=true (cuenta ya activa).
+      // ---- Email duplicado ---- (canal primario: si abandonó, lo reusamos)
       let reuseUserId = null;
       let reuseTenantId = null;
       try {
-        const existingP = await supabaseRequest('GET',
-          '/pos_users?phone=eq.' + encodeURIComponent(phone) + '&select=id,phone_verified,is_active,notes&limit=1');
-        if (Array.isArray(existingP) && existingP.length > 0) {
-          const u = existingP[0];
-          const verified = !!u.phone_verified || !!u.is_active;
+        const existingE = await supabaseRequest('GET',
+          '/pos_users?email=eq.' + encodeURIComponent(email) + '&select=id,email_verified,phone_verified,is_active,notes&limit=1');
+        if (Array.isArray(existingE) && existingE.length > 0) {
+          const u = existingE[0];
+          const verified = !!u.email_verified || !!u.phone_verified || !!u.is_active;
           if (verified) {
             return sendJSON(res, {
-              ok: false, field: 'phone',
-              error_code: 'PHONE_TAKEN',
-              error_message: 'Este teléfono ya está registrado. Inicia sesión o usa otro número.'
+              ok: false, field: 'email',
+              error_code: 'EMAIL_TAKEN',
+              error_message: 'Este correo ya está registrado. Inicia sesión o usa otro.'
             }, 409);
           }
           // Cuenta abandonada → reusar
@@ -31495,17 +31512,23 @@ if (process.env.NODE_ENV === 'test') {
         }
       } catch (_) {}
 
-      // ---- Email duplicado (solo si suministrado) ----
-      if (email) {
+      // ---- Phone duplicado (solo si suministrado) ----
+      if (phone) {
         try {
-          const existing = await supabaseRequest('GET',
-            '/pos_users?email=eq.' + encodeURIComponent(email) + '&select=id&limit=1');
-          if (Array.isArray(existing) && existing.length > 0) {
-            return sendJSON(res, {
-              ok: false, field: 'email',
-              error_code: 'EMAIL_TAKEN',
-              error_message: 'Este email ya está registrado.'
-            }, 409);
+          const existingP = await supabaseRequest('GET',
+            '/pos_users?phone=eq.' + encodeURIComponent(phone) + '&select=id,phone_verified,is_active&limit=1');
+          if (Array.isArray(existingP) && existingP.length > 0) {
+            const u = existingP[0];
+            const verified = !!u.phone_verified || !!u.is_active;
+            // Si el phone está tomado por OTRO usuario verificado, bloqueamos.
+            // Si es el mismo registro abandonado que ya estamos reusando, lo dejamos pasar.
+            if (verified && u.id !== reuseUserId) {
+              return sendJSON(res, {
+                ok: false, field: 'phone',
+                error_code: 'PHONE_TAKEN',
+                error_message: 'Este teléfono ya está registrado con otra cuenta.'
+              }, 409);
+            }
           }
         } catch (_) {}
       }
@@ -31526,25 +31549,26 @@ if (process.env.NODE_ENV === 'test') {
 
       // ---- Crear pos_users (o reusar el abandonado y refrescar pass/notes) ----
       const passwordHash = hashPasswordScrypt(password);
-      // Email pseudo si no fue dado: phone-based, jamás se envía pero cumple NOT NULL.
-      const emailValue = email || (phone.replace(/[^\d]/g, '') + '@phone.volvix.local');
+      const emailValue = email; // email es requerido ahora
       const notes = JSON.stringify({
         volvix_role: 'owner',
         tenant_id: tenantId,
         tenant_name: business_name,
         business_type: giro,
-        registration_flow: 'simple_phone'
+        registration_flow: 'simple_email'
       });
       let userId = reuseUserId || null;
       try {
         if (reuseUserId) {
-          // Refrescar password + notes del registro abandonado
-          await supabaseRequest('PATCH', '/pos_users?id=eq.' + reuseUserId, {
+          // Refrescar password + notes + phone (si cambió) del registro abandonado
+          const patchU = {
             password_hash: passwordHash,
             notes: notes,
             full_name: 'Owner ' + business_name,
             updated_at: new Date().toISOString()
-          });
+          };
+          if (phone) patchU.phone = phone;
+          await supabaseRequest('PATCH', '/pos_users?id=eq.' + reuseUserId, patchU);
         } else {
           const insU = await supabaseRequest('POST', '/pos_users', {
             email: emailValue,
@@ -31598,17 +31622,19 @@ if (process.env.NODE_ENV === 'test') {
           }
         }
         if (!companyId) {
-          const ins = await supabaseRequest('POST', '/pos_companies', {
+          const companyPayload = {
             name: business_name,
             owner_user_id: userId,
             tenant_id: tenantId,
             business_type: giro,
-            phone: phone,
+            email: emailValue,
             plan: 'trial',
             status: 'pending',
             is_active: false,
             created_at: new Date().toISOString()
-          });
+          };
+          if (phone) companyPayload.phone = phone;
+          const ins = await supabaseRequest('POST', '/pos_companies', companyPayload);
           if (Array.isArray(ins) && ins.length > 0) companyId = ins[0].id;
         }
       } catch (e) {
@@ -31626,49 +31652,50 @@ if (process.env.NODE_ENV === 'test') {
         supabaseRequest('PATCH', '/pos_users?id=eq.' + userId, { company_id: companyId }).catch(function () {});
       }
 
-      // ---- OTP ---- (resilient to schema variations: retry without optional cols)
+      // ---- OTP (DB) ---- (resilient to schema variations)
       const otpCode = genOtp();
       const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
       let otpInserted = false;
       let otpInsertError = null;
       // Try full payload
       try {
-        await supabaseRequest('POST', '/pos_otp_verifications', {
+        const otpPayload = {
           tenant_id: tenantId,
           user_id: userId,
           email: emailValue,
-          phone: phone,
           otp_code: otpCode,
-          sent_to_email: false,
-          sent_to_phone: true,
+          sent_to_email: true,
+          sent_to_phone: false,
           attempts: 0,
           expires_at: expiresAt,
           ip_address: ip,
           user_agent: userAgent,
           purpose: 'register_simple'
-        });
+        };
+        if (phone) otpPayload.phone = phone;
+        await supabaseRequest('POST', '/pos_otp_verifications', otpPayload);
         otpInserted = true;
       } catch (e1) {
         otpInsertError = e1;
-        // Retry minimal payload (drops purpose, ip_address, user_agent which may not exist)
+        // Retry minimal payload (drops purpose, ip_address, user_agent)
         try {
-          await supabaseRequest('POST', '/pos_otp_verifications', {
+          const minPayload = {
             tenant_id: tenantId,
             user_id: userId,
             email: emailValue,
-            phone: phone,
             otp_code: otpCode,
             attempts: 0,
             expires_at: expiresAt
-          });
+          };
+          if (phone) minPayload.phone = phone;
+          await supabaseRequest('POST', '/pos_otp_verifications', minPayload);
           otpInserted = true;
         } catch (e2) {
           otpInsertError = e2;
-          // Try alternative table name otp_codes
           try {
             await supabaseRequest('POST', '/otp_codes', {
               tenant_id: tenantId,
-              email: emailValue || phone + '@phone.local',
+              email: emailValue,
               code: otpCode,
               expires_at: expiresAt
             });
@@ -31676,103 +31703,77 @@ if (process.env.NODE_ENV === 'test') {
           } catch (e3) { otpInsertError = e3; }
         }
       }
-      // In dev or when no provider is configured, ALWAYS allow dev_code response
-      // even if DB insert failed — so the user can complete the flow.
       const isDev = process.env.NODE_ENV !== 'production';
-      const noSmsProvider = !(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_SMS_FROM);
-      if (!otpInserted && !(isDev || noSmsProvider)) {
+      const hasEmailProvider = !!(process.env.RESEND_API_KEY || process.env.SENDGRID_API_KEY);
+      if (!otpInserted && !(isDev || !hasEmailProvider)) {
         return sendJSON(res, { ok: false, error_code: 'OTP_CREATE_FAILED', error_message: 'No se pudo guardar el código. Intenta de nuevo.', detail: isDev ? String(otpInsertError && otpInsertError.message || otpInsertError).slice(0, 200) : undefined }, 500);
       }
-      // Stash in-memory as last-resort fallback (single-process)
+      // Stash in-memory as last-resort fallback (keyed por email)
       if (!otpInserted) {
         global.__VOLVIX_OTP_FALLBACK = global.__VOLVIX_OTP_FALLBACK || new Map();
-        global.__VOLVIX_OTP_FALLBACK.set(phone, { code: otpCode, expires_at: expiresAt, tenant_id: tenantId, user_id: userId });
-        // Auto-expire after 15 min
-        setTimeout(() => { try { global.__VOLVIX_OTP_FALLBACK.delete(phone); } catch (_) {} }, 15 * 60 * 1000);
+        global.__VOLVIX_OTP_FALLBACK.set('email:' + emailValue, { code: otpCode, expires_at: expiresAt, tenant_id: tenantId, user_id: userId });
+        setTimeout(() => { try { global.__VOLVIX_OTP_FALLBACK.delete('email:' + emailValue); } catch (_) {} }, 15 * 60 * 1000);
       }
 
-      // ---- Enviar SMS (formato Web OTP API compatible) ----
-      // El cuerpo del SMS DEBE incluir línea final "@dominio #código" para que
-      // Chrome/Android autollenen el campo via Web OTP API.
-      const otpDomain = (process.env.OTP_BOUND_DOMAIN || 'salvadorexoficial.com').replace(/^https?:\/\//, '');
-      const smsBody =
-        'Tu código Volvix es: ' + otpCode + '\n' +
-        'Vence en 10 minutos.\n\n' +
-        '@' + otpDomain + ' #' + otpCode;
+      // ---- Enviar OTP por EMAIL (Resend / SendGrid) ----
+      // 2026-05: SOLO email mientras Twilio no esté pagado. SMS reactivable cuando
+      // haya ingresos: solo descomentar el bloque legacy abajo.
+      const otpDomain = (process.env.OTP_BOUND_DOMAIN || 'systeminternational.app').replace(/^https?:\/\//, '');
+      const otpEmailSubject = 'Tu código Volvix: ' + otpCode;
+      const otpEmailHtml =
+        '<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1e293b">' +
+          '<h1 style="font-size:22px;margin:0 0 6px">Volvix POS</h1>' +
+          '<p style="color:#475569;margin:0 0 18px">Hola, este es tu código para activar tu cuenta de <strong>' + String(business_name).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }) + '</strong>:</p>' +
+          '<div style="font-size:34px;font-weight:800;letter-spacing:8px;text-align:center;background:#f1f5f9;border-radius:12px;padding:18px 0;color:#0f172a;font-family:Courier New,monospace">' + otpCode + '</div>' +
+          '<p style="color:#64748b;font-size:13px;margin:18px 0 0">El código vence en 10 minutos. Si no fuiste tú, ignora este mensaje.</p>' +
+          '<hr style="border:none;border-top:1px solid #e2e8f0;margin:22px 0">' +
+          '<p style="color:#94a3b8;font-size:11px;margin:0">Volvix POS · ' + otpDomain + '</p>' +
+        '</div>';
+      const otpEmailText = 'Tu código Volvix es: ' + otpCode + '\nVence en 10 minutos.';
 
-      let smsSent = false;
-      let smsError = null;
-      let smsProvider = null;
-      let usingTwilioVerify = false; // si true, NO necesitamos guardar otpCode local
-      const verifyStart = (typeof global.__r12o3a_twilioVerifyStart === 'function') ? global.__r12o3a_twilioVerifyStart : null;
-      const sendSms = (typeof global.__r12o3a_sendSms === 'function') ? global.__r12o3a_sendSms : null;
-      const sendWhatsApp = (typeof global.__r12o3a_sendWhatsApp === 'function') ? global.__r12o3a_sendWhatsApp : null;
-      const hasDedicatedSmsFrom = !!(process.env.TWILIO_SMS_FROM || process.env.TWILIO_PHONE_NUMBER || process.env.TWILIO_FROM);
-      const hasWhatsAppFrom = !!process.env.TWILIO_WHATSAPP_FROM;
-      const hasTwilioKeys = !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN);
-      const hasVerifyService = !!process.env.TWILIO_VERIFY_SERVICE_SID;
-
-      // ESTRATEGIA (en orden de preferencia):
-      //  1. Twilio Verify API (managed) — si TWILIO_VERIFY_SERVICE_SID está. NO requiere
-      //     número propio. Twilio genera el OTP y lo envía. Es el flujo correcto, el
-      //     que el sistema usaba antes (legacy Railway deploy).
-      //  2. SMS directo si hay TWILIO_SMS_FROM dedicado.
-      //  3. WhatsApp sandbox si solo hay TWILIO_WHATSAPP_FROM.
-      //  4. Fallback dev_code en pantalla.
-      if (verifyStart && hasTwilioKeys && hasVerifyService) {
+      let emailSent = false;
+      let emailError = null;
+      let emailProvider = null;
+      const sendEmailFn = (typeof global.__r12o3a_sendEmail === 'function') ? global.__r12o3a_sendEmail : null;
+      if (sendEmailFn && hasEmailProvider) {
         try {
-          const vr = await verifyStart({ to: phone, channel: 'sms', locale: 'es' });
-          smsSent = !!(vr && vr.ok);
-          smsProvider = 'twilio_verify';
-          usingTwilioVerify = !!smsSent;
-          if (!smsSent) smsError = (vr && vr.error) || (vr && vr.reason) || 'verify_start_failed';
-        } catch (e) { smsError = String(e && e.message || e).slice(0, 200); }
-      } else if (sendSms && hasTwilioKeys && hasDedicatedSmsFrom) {
+          const er = await sendEmailFn({
+            to: emailValue,
+            toName: 'Owner ' + business_name,
+            subject: otpEmailSubject,
+            html: otpEmailHtml,
+            text: otpEmailText
+          });
+          emailSent = !!(er && er.ok);
+          emailProvider = (er && er.provider) || (process.env.RESEND_API_KEY ? 'resend' : 'sendgrid');
+          if (!emailSent) emailError = (er && er.error) || (er && er.reason) || 'unknown';
+        } catch (e) { emailError = String(e && e.message || e).slice(0, 200); }
+      } else if (typeof sendEmail === 'function' && hasEmailProvider) {
+        // Fallback al sendEmail estilo SendGrid del módulo principal
         try {
-          const sr = await sendSms({ to: phone, body: smsBody });
-          smsSent = !!(sr && sr.ok);
-          smsProvider = sr && sr.provider || 'twilio_sms';
-          if (!smsSent) smsError = (sr && sr.error) || (sr && sr.reason) || 'unknown';
-        } catch (e) { smsError = String(e && e.message || e).slice(0, 200); }
-      } else if (sendWhatsApp && hasTwilioKeys && hasWhatsAppFrom) {
-        try {
-          const wr = await sendWhatsApp({ to: phone, body: smsBody });
-          smsSent = !!(wr && wr.ok);
-          smsProvider = wr && wr.provider || 'twilio_whatsapp';
-          if (!smsSent) smsError = (wr && wr.error) || (wr && wr.reason) || 'whatsapp_failed';
-        } catch (e) { smsError = String(e && e.message || e).slice(0, 200); }
+          const er = await sendEmail({ to: emailValue, subject: otpEmailSubject, html: otpEmailHtml, text: otpEmailText, template: 'register_otp' });
+          emailSent = !!(er && er.ok);
+          emailProvider = 'sendgrid';
+          if (!emailSent) emailError = (er && er.error) || 'unknown';
+        } catch (e) { emailError = String(e && e.message || e).slice(0, 200); }
       } else {
-        smsError = !hasTwilioKeys
-          ? 'TWILIO_ACCOUNT_SID/TWILIO_AUTH_TOKEN missing'
-          : 'no_send_function_loaded';
-      }
-      // Cuando usamos Twilio Verify, marcar el OTP local como "delegated" para
-      // que verify-simple sepa que debe checkear con Twilio en lugar de
-      // comparar contra pos_otp_verifications.otp_code.
-      if (usingTwilioVerify) {
-        try {
-          await supabaseRequest('PATCH',
-            '/pos_otp_verifications?phone=eq.' + encodeURIComponent(phone) +
-            '&otp_code=eq.' + encodeURIComponent(otpCode),
-            { otp_code: 'TWILIO_VERIFY_DELEGATED' });
-        } catch (_) { /* table-shape variations: just log */ }
+        emailError = 'no_email_provider_configured';
       }
 
       try {
-        console.log('[register-simple] tenant=' + tenantId + ' phone=' + phone +
-          ' code=' + otpCode + ' sms_sent=' + smsSent +
-          (smsError ? ' sms_error=' + smsError : ''));
+        console.log('[register-simple] tenant=' + tenantId + ' email=' + emailValue +
+          ' code=' + otpCode + ' email_sent=' + emailSent +
+          (emailError ? ' email_error=' + emailError : ''));
       } catch (_) {}
 
-      // Persistir error en system_error_logs para review interno (sin exponer al user)
-      if (!smsSent && smsError) {
+      if (!emailSent && emailError) {
         try {
           supabaseRequest('POST', '/system_error_logs', {
             level: 'warn',
-            source: 'register-simple/sms',
-            error_code: 'SMS_NOT_SENT',
-            message: smsError,
-            context: JSON.stringify({ tenant_id: tenantId, phone: phone, provider: smsProvider }),
+            source: 'register-simple/email',
+            error_code: 'OTP_EMAIL_NOT_SENT',
+            message: String(emailError).slice(0, 200),
+            context: JSON.stringify({ tenant_id: tenantId, email: emailValue, provider: emailProvider }),
             created_at: new Date().toISOString()
           }).catch(function () {});
         } catch (_) {}
@@ -31782,42 +31783,37 @@ if (process.env.NODE_ENV === 'test') {
         'auth.register_simple', 'pos_companies', { id: companyId, tenant_id: tenantId });
 
       // ---- Respuesta ----
-      // Bridge: devolvemos dev_code cuando el flujo de SMS NO completa, ya sea
-      // porque (a) no hay proveedor configurado, o (b) el proveedor falló
-      // (caso típico: el TWILIO_WHATSAPP_FROM es el sandbox compartido
-      // +14155238886 que no es válido para SMS y devuelve mismatch 21660).
-      // Sin este fallback el usuario queda bloqueado viendo "te enviaremos
-      // SMS" pero sin código que ingresar.
+      // Bridge: si el email NO se envió (provider caído o no configurado), devolvemos
+      // dev_code para no bloquear el lanzamiento. En cuanto Resend funcione, este
+      // fallback no se activa.
       const isProd = process.env.NODE_ENV === 'production';
-      // Refactor: ahora hay 3 vías independientes (Verify, SMS dedicado, WhatsApp).
-      // El proveedor está "configurado" si CUALQUIERA de las tres existe.
-      const anyProviderAvailable = hasTwilioKeys && (hasVerifyService || hasDedicatedSmsFrom || hasWhatsAppFrom);
-      const noSmsProviderConfigured = !anyProviderAvailable;
-      const smsAttemptedButFailed = !smsSent && !!smsError;
-      const allowDevVisibleBridge = !isProd || noSmsProviderConfigured || smsAttemptedButFailed;
+      const noEmailProvider = !hasEmailProvider;
+      const emailAttemptedButFailed = !emailSent && !!emailError && hasEmailProvider;
+      const allowDevVisibleBridge = !isProd || noEmailProvider || emailAttemptedButFailed;
       const respPayload = {
         ok: true,
         tenant_id: tenantId,
         user_id: userId,
+        email: emailValue,
         otp_required: true,
-        otp_sent_to: smsSent ? ['sms'] : [],
+        otp_channel: 'email',
+        otp_sent_to: emailSent ? ['email'] : [],
         otp_expires_at: expiresAt,
-        sms_sent: smsSent,
-        sms_provider: smsProvider || null
+        email_sent: emailSent,
+        email_provider: emailProvider || null
       };
-      if (!smsSent && allowDevVisibleBridge) {
+      if (!emailSent && allowDevVisibleBridge) {
         respPayload.dev_code = otpCode;
-        if (noSmsProviderConfigured) {
-          respPayload.notice = 'SMS provider no configurado todavía. Código mostrado en pantalla para no bloquear el lanzamiento.';
-        } else if (smsAttemptedButFailed) {
-          respPayload.notice = 'SMS rechazado por el proveedor (' + (smsError || 'unknown').slice(0, 80) + '). Código mostrado en pantalla.';
+        if (noEmailProvider) {
+          respPayload.notice = 'Email provider no configurado. Código mostrado en pantalla.';
+        } else if (emailAttemptedButFailed) {
+          respPayload.notice = 'Correo no entregado (' + (emailError || 'unknown').slice(0, 80) + '). Código mostrado en pantalla.';
         } else {
-          respPayload.notice = 'SMS no enviado (modo dev).';
+          respPayload.notice = 'Correo no enviado (modo dev).';
         }
       }
-      // En prod CON proveedor pero falla puntual: incluir error para debug pero no dev_code
-      if (!smsSent && isProd && !noSmsProviderConfigured && smsError) {
-        respPayload.sms_error = String(smsError).slice(0, 120);
+      if (!emailSent && isProd && !noEmailProvider && emailError) {
+        respPayload.email_error = String(emailError).slice(0, 120);
       }
       return sendJSON(res, respPayload);
     } catch (err) {
@@ -31844,21 +31840,23 @@ if (process.env.NODE_ENV === 'test') {
       if (/^\d{10}$/.test(phone)) phone = '+52' + phone;
       else if (/^52\d{10}$/.test(phone)) phone = '+' + phone;
       const tenantId = String(body.tenant_id || '').trim();
+      const emailId = String(body.email || '').toLowerCase().trim();
       const otpCode = String(body.code || body.otp_code || '').trim();
 
       if (!/^\d{6}$/.test(otpCode)) {
         return sendJSON(res, { ok: false, error_code: 'OTP_INVALID', error_message: 'El código debe tener 6 dígitos.' }, 400);
       }
-      if (!phone && !tenantId) {
-        return sendJSON(res, { ok: false, error_code: 'MISSING_IDENTIFIER', error_message: 'phone o tenant_id requerido.' }, 400);
+      if (!phone && !tenantId && !emailId) {
+        return sendJSON(res, { ok: false, error_code: 'MISSING_IDENTIFIER', error_message: 'email, phone o tenant_id requerido.' }, 400);
       }
 
-      // Lookup OTP por phone o tenant_id (purpose=register_simple, no verificado, no expirado)
+      // Lookup OTP por tenant_id > email > phone (purpose=register_simple, no verificado, no expirado)
       const nowIso = new Date().toISOString();
       let qPath = '/pos_otp_verifications?purpose=eq.register_simple&verified_at=is.null' +
                   '&expires_at=gt.' + encodeURIComponent(nowIso) +
                   '&order=created_at.desc&limit=1';
       if (tenantId) qPath += '&tenant_id=eq.' + encodeURIComponent(tenantId);
+      else if (emailId) qPath += '&email=eq.' + encodeURIComponent(emailId);
       else qPath += '&phone=eq.' + encodeURIComponent(phone);
 
       let rows = [];
@@ -31869,17 +31867,21 @@ if (process.env.NODE_ENV === 'test') {
         try {
           let altPath = '/pos_otp_verifications?verified_at=is.null&expires_at=gt.' + encodeURIComponent(nowIso) + '&order=created_at.desc&limit=1';
           if (tenantId) altPath += '&tenant_id=eq.' + encodeURIComponent(tenantId);
+          else if (emailId) altPath += '&email=eq.' + encodeURIComponent(emailId);
           else altPath += '&phone=eq.' + encodeURIComponent(phone);
           rows = await supabaseRequest('GET', altPath);
         } catch (_) { rows = []; }
       }
 
-      // FALLBACK in-memory (if DB has no OTP table at all)
+      // FALLBACK in-memory (if DB has no OTP table at all) — keyed por email o phone
       let otpRow = (Array.isArray(rows) && rows.length > 0) ? rows[0] : null;
-      if (!otpRow && global.__VOLVIX_OTP_FALLBACK && global.__VOLVIX_OTP_FALLBACK.has(phone)) {
-        const mem = global.__VOLVIX_OTP_FALLBACK.get(phone);
-        if (new Date(mem.expires_at) > new Date()) {
-          otpRow = { id: 'mem-' + phone, otp_code: mem.code, tenant_id: mem.tenant_id, user_id: mem.user_id, attempts: 0, _from_memory: true };
+      if (!otpRow && global.__VOLVIX_OTP_FALLBACK) {
+        const memKey = emailId ? ('email:' + emailId) : phone;
+        if (global.__VOLVIX_OTP_FALLBACK.has(memKey)) {
+          const mem = global.__VOLVIX_OTP_FALLBACK.get(memKey);
+          if (new Date(mem.expires_at) > new Date()) {
+            otpRow = { id: 'mem-' + memKey, otp_code: mem.code, tenant_id: mem.tenant_id, user_id: mem.user_id, attempts: 0, _from_memory: true };
+          }
         }
       }
 
@@ -31934,9 +31936,14 @@ if (process.env.NODE_ENV === 'test') {
       const finalTenantId = otpRow.tenant_id;
       let user = null;
       try {
+        // Si el OTP vino por email, marcamos email_verified; si por phone, phone_verified.
+        // En el flow nuevo (email-first) emailId siempre vendrá, así que email_verified=true.
+        const verifyPatch = { is_active: true, updated_at: nowIso };
+        if (emailId || (otpRow && otpRow.email)) verifyPatch.email_verified = true;
+        if (phone || (otpRow && otpRow.phone)) verifyPatch.phone_verified = true;
         const upd = await supabaseRequest('PATCH',
           '/pos_users?id=eq.' + encodeURIComponent(userId),
-          { phone_verified: true, is_active: true, updated_at: nowIso });
+          verifyPatch);
         if (Array.isArray(upd) && upd.length > 0) user = upd[0];
       } catch (_) {}
       if (!user) {

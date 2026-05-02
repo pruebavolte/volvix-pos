@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Registro · Volvix POS — Crea tu cuenta en 60 segundos</title>
-<meta name="description" content="Regístrate en Volvix POS con tu teléfono. Sin email, sin tarjeta, listo en menos de 1 minuto.">
+<meta name="description" content="Regístrate en Volvix POS con tu correo. Sin tarjeta, sin compromiso, listo en menos de 1 minuto.">
 <meta name="theme-color" content="#2D5F8F">
 <meta name="robots" content="noindex,follow">
 <link rel="canonical" href="https://systeminternational.app/registro.html">
@@ -183,7 +183,7 @@
 
 <div class="container">
   <h1>Crea tu cuenta en 60 segundos</h1>
-  <p class="subtitle">Solo necesitas tu teléfono. Sin tarjeta, sin email obligatorio.</p>
+  <p class="subtitle">Solo necesitas tu correo. Sin tarjeta, sin compromiso.</p>
 
   <div class="progress-wrap" aria-hidden="true">
     <div class="progress-step active" data-step="1"><span class="dot">1</span><span class="label">Tu negocio</span></div>
@@ -197,19 +197,28 @@
     <div id="globalAlert" aria-live="polite" role="status"></div>
 
     <!-- ============================ -->
-    <!-- PASO 1: phone + negocio + giro + password -->
+    <!-- PASO 1: email + negocio + giro + password (phone opcional) -->
     <!-- ============================ -->
     <div class="step active" data-step="1">
       <div class="field">
-        <label for="phone">Teléfono <span class="req">*</span></label>
+        <label for="email">Correo electrónico <span class="req">*</span></label>
+        <input id="email" name="email" type="email" inputmode="email"
+               placeholder="tu@correo.com" maxlength="120"
+               autocomplete="email">
+        <div class="hint">Te enviaremos un código de 6 dígitos para activar tu cuenta.</div>
+        <div class="err" data-err="email">Ingresa un correo válido.</div>
+      </div>
+
+      <div class="field">
+        <label for="phone">Teléfono <span style="color:#94a3b8;font-weight:500;font-size:12px">(opcional)</span></label>
         <div class="phone-row">
           <span class="prefix">+52</span>
           <input id="phone" name="phone" type="tel" inputmode="numeric"
-                 placeholder="10 dígitos" maxlength="10"
+                 placeholder="10 dígitos (opcional)" maxlength="10"
                  autocomplete="tel-national" pattern="\d{10}">
         </div>
-        <div class="hint">Te enviaremos un código por SMS para validarlo.</div>
-        <div class="err" data-err="phone">Ingresa 10 dígitos.</div>
+        <div class="hint">Lo usaremos para contactarte si lo necesitas.</div>
+        <div class="err" data-err="phone">Si lo agregas, deben ser 10 dígitos.</div>
       </div>
 
       <div class="field">
@@ -244,9 +253,6 @@
         <div class="err" data-err="password2">Las contraseñas no coinciden.</div>
       </div>
 
-      <!-- Copy adaptativo: si el sistema termina mostrando dev_code en pantalla
-           porque Twilio aún no está activo, "y enviar SMS" sería mentira.
-           Texto neutral funciona en ambos casos. -->
       <button class="primary" id="btnRegister">Crear cuenta</button>
     </div>
 
@@ -254,16 +260,14 @@
     <!-- PASO 2: OTP (Web OTP API) -->
     <!-- ============================ -->
     <div class="step" data-step="2">
-      <!-- Eco del teléfono al que se envió el código + opción "Cambiar" inline.
-           Sin esto, si el cajero tipea mal su número descubre el error 60s
-           después al no recibir nada. -->
+      <!-- Eco del correo al que se envió el código + opción "Cambiar" inline. -->
       <div style="text-align:center;font-size:13px;color:#475569;margin-bottom:14px">
-        Código para <strong id="otpPhoneEcho">+52 ••••••••••</strong>
+        Código enviado a <strong id="otpEmailEcho">tu@correo.com</strong>
         · <button class="resend-link" type="button" id="btnBackInline">Cambiar</button>
       </div>
 
       <div class="alert info" id="otpInfo">
-        Te enviamos un código de 6 dígitos. En Android/Chrome se autocompleta solo.
+        Te enviamos un código de 6 dígitos a tu correo. Revisa tu bandeja (y spam por si acaso).
       </div>
 
       <div id="devOtpBanner" style="display:none;background:#fef3c7;border:1px solid #f59e0b;border-radius:10px;padding:14px 16px;margin:0 0 14px;color:#78350f;font-size:14px;line-height:1.5;">
@@ -274,7 +278,7 @@
       <input id="otp" class="otp-input" type="text"
              autocomplete="one-time-code" inputmode="numeric"
              pattern="\d{6}" maxlength="6"
-             placeholder="••••••" aria-label="Código SMS">
+             placeholder="••••••" aria-label="Código de verificación">
 
       <div style="text-align:center;margin-top:12px;font-size:13px;color:#64748b;">
         ¿No te llegó? <button class="resend-link" id="btnResend">Reenviar código</button>
@@ -282,7 +286,7 @@
       </div>
 
       <button class="primary" id="btnVerify" disabled>Verificar y entrar</button>
-      <button class="secondary" id="btnBack">← Cambiar teléfono</button>
+      <button class="secondary" id="btnBack">← Cambiar correo</button>
     </div>
 
     <!-- ============================ -->
@@ -534,17 +538,21 @@
   });
 
   // ---------- Validar paso 1 ----------
+  function validEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(v || '').trim()); }
+
   function validateStep1() {
     clearAllErrs();
     var ok = true;
-    var phone = $('#phone').value.replace(/\D/g, '');
+    var email = ($('#email').value || '').trim().toLowerCase();
+    var phone = ($('#phone').value || '').replace(/\D/g, '');
     var name = $('#business_name').value;
     var giroVal = $('#giro').value.trim();
     var giroSlug = state.selected_giro || giroBox.dataset.slug;
     var p1 = $('#password').value;
     var p2 = $('#password2').value;
 
-    if (!validPhone10(phone)) { showErr('phone'); ok = false; }
+    if (!validEmail(email)) { showErr('email'); ok = false; }
+    if (phone && !validPhone10(phone)) { showErr('phone'); ok = false; } // phone opcional
     if (!validBusiness(name)) { showErr('business_name'); ok = false; }
     if (!giroSlug || !giroVal) { showErr('giro'); ok = false; }
     if (!p1 || p1.length < 8) { showErr('password'); ok = false; }
@@ -552,11 +560,12 @@
 
     if (ok) {
       state.formData = {
-        phone: phone,                 // 10 dígitos crudos; backend agrega +52
+        email: email,
         business_name: name.trim(),
         giro: giroSlug,
         password: p1
       };
+      if (phone) state.formData.phone = phone; // 10 dígitos crudos; backend agrega +52
     }
     return ok;
   }
@@ -564,7 +573,7 @@
   // ---------- POST /api/auth/register-simple ----------
   function submitRegister() {
     var btn = $('#btnRegister');
-    btn.disabled = true; btn.textContent = 'Enviando SMS...';
+    btn.disabled = true; btn.textContent = 'Enviando código a tu correo...';
     fetch('/api/auth/register-simple', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -572,10 +581,11 @@
     })
       .then(function (r) { return r.json().then(function (j) { return { status: r.status, body: j }; }); })
       .then(function (res) {
-        btn.disabled = false; btn.textContent = 'Crear cuenta y enviar SMS';
+        btn.disabled = false; btn.textContent = 'Crear cuenta';
         if (res.status === 200 && res.body.ok) {
           state.tenant_id = res.body.tenant_id;
           state.user_id = res.body.user_id || null;
+          state.email = res.body.email || state.formData.email;
 
           var banner = document.getElementById('devOtpBanner');
           var bannerCode = document.getElementById('devOtpCode');
@@ -585,7 +595,6 @@
             if (banner) banner.style.display = 'block';
             if (bannerCode) bannerCode.textContent = String(res.body.dev_code);
             if (info) info.style.display = 'none';
-            // Auto-fill UX en demo
             setTimeout(function () {
               var inp = $('#otp');
               if (inp) {
@@ -596,20 +605,15 @@
           } else {
             if (banner) banner.style.display = 'none';
             if (info) info.style.display = '';
-            alertBox('info', 'Código enviado por SMS al +52' + state.formData.phone);
+            alertBox('info', 'Código enviado a ' + state.email);
           }
-          // Eco del teléfono al que se envió el código (heurística #1 visibilidad)
+          // Eco del correo
           try {
-            var rawPhone = String(state.formData.phone || '').replace(/[^\d]/g, '');
-            var fmt = rawPhone.length === 10
-              ? '+52 ' + rawPhone.slice(0, 2) + ' ' + rawPhone.slice(2, 6) + ' ' + rawPhone.slice(6)
-              : '+52 ' + rawPhone;
-            var echoEl = document.getElementById('otpPhoneEcho');
-            if (echoEl) echoEl.textContent = fmt;
+            var echoEl = document.getElementById('otpEmailEcho');
+            if (echoEl) echoEl.textContent = state.email || state.formData.email || '';
           } catch (_) {}
           setStep(2);
           startResendCounter(60);
-          startWebOtpListener();
           setTimeout(function () { var f = $('#otp'); if (f) f.focus(); }, 200);
         } else {
           var msg = (res.body && (res.body.error_message || res.body.message)) || 'Error al registrar.';
@@ -618,7 +622,7 @@
         }
       })
       .catch(function () {
-        btn.disabled = false; btn.textContent = 'Crear cuenta y enviar SMS';
+        btn.disabled = false; btn.textContent = 'Crear cuenta';
         alertBox('error', 'No se pudo conectar al servidor. Reintenta.');
       });
   }
@@ -654,7 +658,11 @@
     fetch('/api/auth/verify-simple', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tenant_id: state.tenant_id, code: code })
+      body: JSON.stringify({
+        tenant_id: state.tenant_id,
+        email: state.email || (state.formData && state.formData.email) || null,
+        code: code
+      })
     })
       .then(function (r) { return r.json().then(function (j) { return { status: r.status, body: j }; }); })
       .then(function (res) {
