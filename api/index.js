@@ -10518,6 +10518,104 @@ handlers['GET /api/config/public'] = async (req, res) => {
       sendJSON(res, { ok: false, error: 'db_error', detail: IS_PROD ? null : String(e && e.message || e) }, 500);
     }
   });
+  // /api/ai/giro-classify — endpoint PÚBLICO (rate-limited) que clasifica
+  // texto libre del usuario en un giro de negocio MX. Ej. "vendo abarrotitos"
+  // → "abarrotes". Usa AI Gateway si está, sino fallback a synonym match local
+  // (giros.js tiene un GIRO_SYNONYMS con 64 giros). 30 req/min/IP.
+  handlers['POST /api/ai/giro-classify'] = async (req, res) => {
+    try {
+      const ip = clientIp(req);
+      if (!rateLimit('giro-classify:' + ip, 30, 60_000)) {
+        return send429(res, 60_000, 'Demasiados intentos, espera un minuto.');
+      }
+      const body = await readBody(req, { maxBytes: 4 * 1024 });
+      const text = String(body.text || body.q || '').slice(0, 300).trim();
+      if (!text) return sendJSON(res, { ok: false, error: 'no_text' }, 400);
+      // Lista oficial de giros (en sync con GIRO_SYNONYMS de api/giros.js)
+      const validGiros = [
+        'restaurante','taqueria','cafeteria','panaderia','pasteleria','heladeria',
+        'pizzeria','dulceria','fruteria','polleria','carniceria','tortilleria',
+        'abarrotes','minisuper','tienda-conveniencia','purificadora',
+        'barberia','salon-belleza','nails','tatuajes','spa','estetica','foto-estudio',
+        'farmacia','clinica-dental','dental','optica','veterinaria','salud','funeraria',
+        'electronica','tienda-celulares','servicio-celulares','refaccionaria',
+        'taller-mecanico','carwash','lavado-autos','renta-autos','gasolinera','automotriz',
+        'gimnasio','gym','fitness','hotel','agencia-viajes','renta-salones','rentas',
+        'casa-empeno','escuela-idiomas','colegio','educacion','tienda-ropa','ropa',
+        'zapateria','muebleria','papeleria','ferreteria','retail','lavanderia',
+        'belleza','alimentos','servicios','salud','otro'
+      ];
+      // 1) Match literal en lo escrito (rápido y barato)
+      const lower = text.toLowerCase();
+      for (const g of validGiros) {
+        if (lower.includes(g.replace(/-/g, ' ')) || lower.includes(g)) {
+          return sendJSON(res, { ok: true, giro: g, source: 'literal_match', confidence: 0.95 });
+        }
+      }
+      // 2) Synonym fallback usa el módulo giros.js si está
+      try {
+        const giros = require('./giros');
+        if (typeof giros.searchGiros === 'function') {
+          const matches = giros.searchGiros(text);
+          if (matches && matches.length > 0) {
+            return sendJSON(res, { ok: true, giro: matches[0].slug || matches[0].key || matches[0], source: 'synonym_match', confidence: 0.80 });
+          }
+        }
+      } catch (_) {}
+      // 3) AI Gateway: clasificar con LLM (si está configurado)
+      const aiKey = process.env.AI_GATEWAY_API_KEY || process.env.OPENAI_API_KEY || process.env.ANTHROPIC_API_KEY;
+      if (!aiKey) {
+        return sendJSON(res, { ok: true, giro: 'otro', source: 'fallback_no_ai', confidence: 0.30 });
+      }
+      try {
+        // Llamar AI Gateway (OpenAI-compatible endpoint)
+        const base = (process.env.AI_GATEWAY_BASE || 'https://gateway.ai.vercel.com/v1').trim();
+        const model = (process.env.AI_GATEWAY_MODEL || 'openai/gpt-4o-mini').trim();
+        const aiResp = await fetch(base + '/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + aiKey,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: model,
+            messages: [
+              { role: 'system', content:
+                'Eres un clasificador de giros de negocio MX. El usuario describirá su negocio en lenguaje natural. ' +
+                'Tu tarea: identificar el giro más cercano de esta lista exacta:\n' +
+                validGiros.join(', ') + '\n\n' +
+                'Reglas:\n' +
+                '- Responde SOLO el slug exacto de la lista (ej. "abarrotes", "taqueria").\n' +
+                '- Sin acentos, sin espacios, sin explicación.\n' +
+                '- Si no estás seguro o no aplica, responde "otro".\n' +
+                '- Ejemplos: "vendo abarrotitos" → abarrotes; "tengo taquería" → taqueria; "vendo zapatos" → zapateria.'
+              },
+              { role: 'user', content: text }
+            ],
+            max_tokens: 20,
+            temperature: 0.1
+          })
+        });
+        if (!aiResp.ok) {
+          return sendJSON(res, { ok: true, giro: 'otro', source: 'ai_failed', confidence: 0.20, http: aiResp.status });
+        }
+        const aiJson = await aiResp.json();
+        let suggestion = (aiJson?.choices?.[0]?.message?.content || '').trim().toLowerCase()
+          .replace(/[^a-z0-9-]/g, '');
+        if (!validGiros.includes(suggestion)) suggestion = 'otro';
+        return sendJSON(res, {
+          ok: true,
+          giro: suggestion,
+          source: 'ai_gateway',
+          confidence: suggestion === 'otro' ? 0.40 : 0.85,
+          model: model
+        });
+      } catch (e) {
+        return sendJSON(res, { ok: true, giro: 'otro', source: 'ai_error', confidence: 0.20, detail: String(e && e.message || e).slice(0, 80) });
+      }
+    } catch (err) { sendError(res, err); }
+  };
+
   // /api/recargas/webhook/mp — Mercado Pago notifica cambio de pago.
   // Marcamos la recarga como 'paid_pending_fulfillment' cuando MP confirma.
   // El dueño del POS o un cron job luego procesa el fulfillment manual.

@@ -1216,20 +1216,53 @@
           window.location.assign(data.landing);
           return;
         }
-        // Backend says no landing-*.html — try local catalog (richer UI), else AI generator
+        // Backend says no landing-*.html — try local catalog (richer UI)
         const localHit = findGiro(q);
-        if (localHit) {
-          showFoundGiro(localHit);
-        } else {
-          showNewGiroGeneration(q);
-        }
+        if (localHit) { showFoundGiro(localHit); return; }
+        // No local hit: invocar AI Gateway para clasificar lenguaje natural.
+        // Ej. usuario escribe "vendo abarrotitos" → AI dice "abarrotes" → redirect.
+        return classifyWithAI(q);
       })
       .catch(() => {
-        // Network/API failure: degrade to local-only behavior
+        // Network/API failure: degrade to local-only behavior, sin AI
         const localHit = findGiro(q);
         if (localHit) showFoundGiro(localHit);
         else showNewGiroGeneration(q);
       });
+  }
+
+  // AI giro classifier: cuando el usuario escribe lenguaje natural ambiguo
+  // ("ah mire es que vendo abarrotitos") y no hay match literal/sinónimo,
+  // pedimos a la IA que mapee a un giro de los 60+ soportados.
+  function classifyWithAI(text) {
+    const wrap = document.getElementById('ai-response');
+    wrap.innerHTML = '<div class="ai-thinking"><span class="dots"><span></span><span></span><span></span></span> Entendiendo lo que vendes…</div>';
+    return fetch('/api/ai/giro-classify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: text })
+    })
+      .then(r => r.ok ? r.json() : Promise.reject(new Error('ai classify failed')))
+      .then(j => {
+        if (!j || !j.giro || j.giro === 'otro' || j.confidence < 0.5) {
+          // AI no estuvo segura — caer a generación de giro nuevo
+          return showNewGiroGeneration(text);
+        }
+        // Verificar que el giro sugerido tenga landing disponible
+        return fetch('/api/giros/search?q=' + encodeURIComponent(j.giro), { headers: { 'Accept': 'application/json' } })
+          .then(r => r.ok ? r.json() : Promise.reject())
+          .then(data => {
+            if (data && data.exists && data.landing) {
+              window.location.assign(data.landing);
+              return;
+            }
+            const localHit = findGiro(j.giro);
+            if (localHit) showFoundGiro(localHit);
+            else showNewGiroGeneration(text);
+          })
+          .catch(() => showNewGiroGeneration(text));
+      })
+      .catch(() => showNewGiroGeneration(text));
   }
 
   function findGiro(query) {

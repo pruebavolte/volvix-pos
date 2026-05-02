@@ -360,6 +360,13 @@
     }
     try { window.dispatchEvent(new CustomEvent('volvix:uplift:ready')); } catch (_) {}
 
+    // === FORCE LIGHT MODE — el usuario reportó texto invisible (negro sobre
+    // negro) cuando su OS está en dark mode. Las landings de giro tenían
+    // @media (prefers-color-scheme: dark) que invertía colores según el OS.
+    // Forzamos light siempre para evitar el problema. Una toggle dark se
+    // puede agregar después sin volver a depender de prefers-color-scheme.
+    try { forceLightModeAlways(); } catch (_) {}
+
     // === KILL FLOATERS — ocultar globalmente todo widget flotante de usuario.
     // Se mantienen visibles solo si:
     //   - URL contiene ?debug=1
@@ -369,6 +376,48 @@
     try {
       injectNoFloatersGuard();
     } catch (_) {}
+  }
+
+  // ---------------------------------------------------------------------------
+  // Force Light Mode
+  // ---------------------------------------------------------------------------
+  function forceLightModeAlways() {
+    if (document.getElementById('vlx-force-light-css')) return;
+    // 1. Decirle al navegador que solo soportamos light scheme. Esto neutraliza
+    //    @media (prefers-color-scheme: dark) en TODAS las páginas + form
+    //    controls, scrollbars y user-agent stylesheet.
+    var meta = document.querySelector('meta[name="color-scheme"]');
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.setAttribute('name', 'color-scheme');
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute('content', 'light only');
+    // 2. Atributo data-theme=light para apps que lo respetan (como
+    //    volvix-launcher.html que usa `[data-theme="light"]`)
+    document.documentElement.setAttribute('data-theme', 'light');
+    document.documentElement.style.colorScheme = 'light';
+    // 3. CSS override que GANA contra cualquier @media dark — usamos
+    //    @media all para forzar los mismos colores que el media query base
+    //    independiente del prefers-color-scheme del OS.
+    var st = document.createElement('style');
+    st.id = 'vlx-force-light-css';
+    st.textContent = [
+      ':root { color-scheme: light !important; }',
+      '/* Anular @media (prefers-color-scheme: dark) que invertía colores */',
+      '@media (prefers-color-scheme: dark) {',
+      '  :root, html, body {',
+      '    background-color: #FFFFFF !important;',
+      '    color: #0B0B0F !important;',
+      '  }',
+      '  body * { background-color: revert; color: revert; }',
+      // Restaurar elementos comunes que las landings invertían
+      '  body { color: #0B0B0F !important; }',
+      '  h1, h2, h3, h4, h5, h6, p, span, li, a, label { color: inherit; }',
+      '  input, textarea, select { background: #FFFFFF !important; color: #0B0B0F !important; border-color: #E5E5EA !important; }',
+      '}'
+    ].join('\n');
+    document.head.appendChild(st);
   }
 
   // ---------------------------------------------------------------------------
