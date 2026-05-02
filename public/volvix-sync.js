@@ -295,9 +295,10 @@
       clearTimeout(to);
 
       if (res.status === 401) {
-        // Sesión expiró: limpiar y redirigir
+        // Sesión expiró: limpiar y redirigir solo si NO estamos en página pública
         if (window.volvix?.session?.clear) window.volvix.session.clear();
-        if (location.pathname !== '/login.html') {
+        var __isPubS = (typeof window.__vlxIsPublicPage === 'function') && window.__vlxIsPublicPage();
+        if (!__isPubS && location.pathname !== '/login.html') {
           location.replace('/login.html?expired=1');
         }
         throw new Error('Sesión expirada');

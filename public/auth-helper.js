@@ -108,11 +108,14 @@
       throw err;
     }
 
-    // 401 → clear token and redirect to login (skip if we are already there)
+    // 401 → clear token. Solo redirigimos al login si NO estamos en una
+    // página pública (landings, marketplace, blog, legales) — el usuario debe
+    // poder navegar el sitio antes de registrarse.
     if (response.status === 401) {
       clearToken();
       const here = window.location.pathname;
-      if (here.indexOf('login.html') === -1) {
+      const isPublic = (typeof window.__vlxIsPublicPage === 'function') && window.__vlxIsPublicPage(here);
+      if (!isPublic && here.indexOf('login.html') === -1) {
         const redirect = encodeURIComponent(window.location.pathname + window.location.search);
         window.location.replace(LOGIN_URL + '?expired=1&redirect=' + redirect);
       }

@@ -66,8 +66,11 @@
 
     if (resp.status === 401) {
       try { localStorage.removeItem('volvix_token'); } catch (_) {}
-      vlxToast('Sesión expirada. Redirigiendo...', 'error');
-      setTimeout(function () { location.href = '/login.html'; }, 1200);
+      var __isPubP = (typeof window.__vlxIsPublicPage === 'function') && window.__vlxIsPublicPage();
+      if (!__isPubP) {
+        vlxToast('Sesión expirada. Redirigiendo...', 'error');
+        setTimeout(function () { location.href = '/login.html'; }, 1200);
+      }
       const err = new Error('Unauthorized');
       err.code = 401;
       throw err;

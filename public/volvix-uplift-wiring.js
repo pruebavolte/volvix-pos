@@ -29,6 +29,38 @@
   if (window.__volvixUpliftLoaded) return;
   window.__volvixUpliftLoaded = true;
 
+  // ---- Helper compartido: ¿estamos en una página pública? -----------------
+  // Definido aquí (uplift se inyecta en TODAS las HTML) además de en
+  // auth-gate.js para garantizar disponibilidad antes que cualquier wrapper
+  // de fetch consulte 401. Idempotente: solo asigna si no existe.
+  if (typeof window.__vlxIsPublicPage !== 'function') {
+    var __VLX_PUB_EXACT = [
+      '/', '/index.html', '/login.html', '/registro.html', '/marketplace.html',
+      '/blog.html', '/landing_dynamic.html', '/cookies-policy.html',
+      '/aviso-privacidad.html', '/terminos-condiciones.html', '/autofactura.html',
+      '/404.html', '/INDICE-TUTORIALES.html', '/TUTORIAL-REGISTRO-USUARIOS.html',
+      '/docs.html', '/api-docs.html', '/status-page.html',
+      '/volvix-grand-tour.html', '/volvix-hub-landing.html',
+      '/volvix-customer-portal.html', '/volvix-customer-portal-v2.html',
+      '/salvadorex_web_v25.html'
+    ];
+    var __VLX_PUB_PATTERNS = [
+      /^\/landing-[a-z0-9_-]+\.html$/i,
+      /^\/landing_[a-z0-9_-]+\.html$/i,
+      /^\/ai\.html$/i
+    ];
+    window.__vlxIsPublicPage = function (pathname) {
+      pathname = pathname || (window.location && window.location.pathname) || '/';
+      for (var i = 0; i < __VLX_PUB_EXACT.length; i++) {
+        if (pathname === __VLX_PUB_EXACT[i] || pathname.endsWith(__VLX_PUB_EXACT[i])) return true;
+      }
+      for (var j = 0; j < __VLX_PUB_PATTERNS.length; j++) {
+        if (__VLX_PUB_PATTERNS[j].test(pathname)) return true;
+      }
+      return false;
+    };
+  }
+
   var CFG = {
     manifest: '/manifest.json',
     swPath: '/sw.js',

@@ -43,8 +43,12 @@
       throw e;
     }
     if (res.status === 401) {
-      vlxToast('Sesión expirada. Redirigiendo…', 'warn');
-      setTimeout(function () { window.location.href = '/login.html'; }, 800);
+      // No forzamos login si estamos en una página pública (landings, marketplace…)
+      var __isPub = (typeof window.__vlxIsPublicPage === 'function') && window.__vlxIsPublicPage();
+      if (!__isPub) {
+        vlxToast('Sesión expirada. Redirigiendo…', 'warn');
+        setTimeout(function () { window.location.href = '/login.html'; }, 800);
+      }
       throw new Error('unauthorized');
     }
     if (res.status === 503) {

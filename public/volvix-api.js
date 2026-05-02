@@ -214,9 +214,10 @@
       // 401 = sesión expirada → forzar re-login
       if (res.status === 401) {
         localStorage.removeItem('volvix:session');
+        var __isPubA = (typeof window.__vlxIsPublicPage === 'function') && window.__vlxIsPublicPage();
         if (typeof window.VOLVIX_ON_AUTH_FAIL === 'function') {
           window.VOLVIX_ON_AUTH_FAIL();
-        } else if (location.pathname !== '/login.html') {
+        } else if (!__isPubA && location.pathname !== '/login.html') {
           location.replace('/login.html?expired=1');
         }
         throw new Error('Sesión expirada');

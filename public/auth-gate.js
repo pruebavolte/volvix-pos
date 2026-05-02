@@ -7,20 +7,54 @@
 (function() {
   'use strict';
 
-  // Páginas que NO requieren autenticación
-  const PUBLIC_PAGES = [
+  // Páginas que NO requieren autenticación (públicas, navegables sin login).
+  // El usuario debe poder ver landings, marketplace, legales, blog, autofactura
+  // y la home antes de decidir registrarse.
+  const PUBLIC_PAGES_EXACT = [
+    '/',
     '/index.html',
     '/login.html',
-    '/landing_dynamic.html',
+    '/registro.html',
     '/marketplace.html',
-    '/salvadorex_web_v25.html',
+    '/blog.html',
+    '/landing_dynamic.html',
+    '/cookies-policy.html',
+    '/aviso-privacidad.html',
+    '/terminos-condiciones.html',
+    '/autofactura.html',
+    '/404.html',
+    '/INDICE-TUTORIALES.html',
+    '/TUTORIAL-REGISTRO-USUARIOS.html',
+    '/docs.html',
+    '/api-docs.html',
+    '/status-page.html',
+    '/volvix-grand-tour.html',
+    '/volvix-hub-landing.html',
+    '/volvix-customer-portal.html',
+    '/volvix-customer-portal-v2.html',
+    '/salvadorex_web_v25.html'
+  ];
+  // Patrones públicos (cualquier landing-* y landing_*)
+  const PUBLIC_PATTERNS = [
+    /^\/landing-[a-z0-9_-]+\.html$/i,
+    /^\/landing_[a-z0-9_-]+\.html$/i,
+    /^\/ai\.html$/i
   ];
 
-  const pathname = window.location.pathname;
+  function isPublicPage(pathname) {
+    pathname = pathname || window.location.pathname || '/';
+    if (PUBLIC_PAGES_EXACT.some(p => pathname === p || pathname.endsWith(p))) return true;
+    if (PUBLIC_PATTERNS.some(re => re.test(pathname))) return true;
+    return false;
+  }
+  // Exponer helper global para que otros wirings (auth-helper, volvix-api,
+  // volvix-modules-wiring, volvix-sync, volvix-pos-payments-integration) puedan
+  // consultar si NO deben forzar redirect al login al recibir un 401 desde
+  // una página pública.
+  try { window.__vlxIsPublicPage = isPublicPage; } catch (_) {}
 
-  // Verificar si la página actual es pública
-  const isPublic = PUBLIC_PAGES.some(p => pathname === p || pathname.endsWith(p));
-  if (isPublic) return;
+  const pathname = window.location.pathname;
+  if (isPublicPage(pathname)) return;
 
   // Validar sesión vía JWT helper (preferido) con fallback a chequeo legacy
   let isValid = false;
