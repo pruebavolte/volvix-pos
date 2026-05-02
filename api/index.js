@@ -2246,18 +2246,28 @@ const handlers = {
       // (legacy), no falla la venta — solo logueamos.
       try {
         if (saleRow && saleRow.id && Array.isArray(itemsIn) && itemsIn.length) {
-          const movRows = itemsIn.map(it => ({
-            tenant_id: req.user && req.user.tenant_id || null,
-            sale_id: saleRow.id,
-            product_id: it.product_id || it.id || null,
-            sku: it.sku || it.code || it.barcode || null,
-            type: 'venta',
-            qty: -Math.abs(Number(it.qty || it.quantity || 1)),
-            unit_cost: Number(it.cost || 0),
-            user_id: req.user && req.user.id || null,
-            created_at: new Date().toISOString()
-          })).filter(r => r.product_id || r.sku);
-          if (movRows.length) {
+          // 2026-05 fix schema: inventory_movements NO tiene 'sku' (causaba
+          // ignore silencioso). Schema: tenant_id NOT NULL, product_id NOT NULL,
+          // qty, type NOT NULL, user_id, sale_id, unit_cost, metadata (jsonb).
+          const tid = (req.user && req.user.tenant_id) || null;
+          const movRows = itemsIn
+            .filter(it => it && (it.product_id || it.id))  // skip si NO hay product_id (NOT NULL)
+            .map(it => ({
+              tenant_id: tid,
+              sale_id: saleRow.id,
+              product_id: it.product_id || it.id,
+              type: 'venta',
+              qty: -Math.abs(Number(it.qty || it.quantity || 1)),
+              quantity: Math.abs(Number(it.qty || it.quantity || 1)),
+              unit_cost: Number(it.cost || 0),
+              unit_price: Number(it.price || 0),
+              user_id: (req.user && req.user.id) || null,
+              metadata: { sku: it.sku || it.code || it.barcode || null, name: it.name || null },
+              ts: new Date().toISOString(),
+              created_at: new Date().toISOString()
+            }));
+          // Solo insertar si tenant_id no es null (NOT NULL en schema)
+          if (movRows.length && tid) {
             await supabaseRequest('POST', '/inventory_movements', movRows).catch(function (e) {
               try { console.warn('[sale.inventory_movement] best-effort failed:', String(e && e.message || e).slice(0, 200)); } catch (_) {}
             });
