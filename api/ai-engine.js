@@ -9,13 +9,25 @@
 
 const OPENAI_API_KEY = (process.env.OPENAI_API_KEY || '').trim().replace(/[\r\n]+/g, '');
 const ANTHROPIC_API_KEY = (process.env.ANTHROPIC_API_KEY || '').trim().replace(/[\r\n]+/g, '');
+// Vercel AI Gateway — un solo key da acceso a OpenAI, Anthropic, xAI, etc.
+// Se cobra al plan Vercel ($5 free credit). Preferido para primer lanzamiento.
+const AI_GATEWAY_API_KEY = (process.env.AI_GATEWAY_API_KEY || '').trim().replace(/[\r\n]+/g, '');
+// Endpoint OpenAI-compatible del Gateway. Soporta modelos prefijados con
+// 'openai/', 'anthropic/', 'xai/', etc. Nosotros default a un modelo barato.
+const AI_GATEWAY_BASE = (process.env.AI_GATEWAY_BASE || 'https://gateway.ai.vercel.com/v1').trim();
 
 const OPENAI_MODEL = 'gpt-4o-mini';
 const ANTHROPIC_MODEL = 'claude-3-5-haiku-20241022';
+// Modelo via Gateway: barato pero capaz. Usuario puede sobrescribir con AI_GATEWAY_MODEL.
+const GATEWAY_MODEL = (process.env.AI_GATEWAY_MODEL || 'openai/gpt-4o-mini').trim();
 const AI_TIMEOUT_MS = 30000;
-const DEFAULT_PROVIDER = OPENAI_API_KEY ? 'openai' : (ANTHROPIC_API_KEY ? 'anthropic' : 'mock');
+const DEFAULT_PROVIDER =
+    AI_GATEWAY_API_KEY ? 'gateway'
+  : OPENAI_API_KEY     ? 'openai'
+  : ANTHROPIC_API_KEY  ? 'anthropic'
+  :                      'mock';
 
-const MOCK_REPLY = 'IA en modo demo. Configura OPENAI_API_KEY o ANTHROPIC_API_KEY en Vercel para activar.';
+const MOCK_REPLY = 'IA en modo demo. Configura AI_GATEWAY_API_KEY (Vercel AI Gateway) o OPENAI_API_KEY/ANTHROPIC_API_KEY para activar.';
 
 // ---------------------------------------------------------------------------
 // HTTP helpers
@@ -109,8 +121,53 @@ async function callAnthropic(messages, system, opts) {
   return { reply, provider: 'anthropic', tokens_used: tokens };
 }
 
+// Vercel AI Gateway — endpoint OpenAI-compatible. Mismo payload que OpenAI
+// pero el modelo lleva prefijo de provider (ej. 'openai/gpt-4o-mini',
+// 'anthropic/claude-3-5-haiku-20241022', 'xai/grok-2-mini').
+async function callAIGateway(messages, system, opts) {
+  if (!AI_GATEWAY_API_KEY) throw new Error('AI_GATEWAY_API_KEY not configured');
+  opts = opts || {};
+  const msgs = system ? [{ role: 'system', content: system }, ...(messages || [])] : (messages || []);
+  const resp = await withTimeout(fetch(AI_GATEWAY_BASE + '/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${AI_GATEWAY_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: opts.model || GATEWAY_MODEL,
+      messages: msgs,
+      max_tokens: opts.max_tokens || 1024,
+      temperature: opts.temperature != null ? opts.temperature : 0.4,
+      response_format: opts.json ? { type: 'json_object' } : undefined,
+    }),
+  }), AI_TIMEOUT_MS, 'ai-gateway');
+  if (!resp.ok) {
+    const txt = await resp.text().catch(() => '');
+    throw new Error(`AI Gateway ${resp.status}: ${txt.slice(0, 200)}`);
+  }
+  const data = await resp.json();
+  const reply = data?.choices?.[0]?.message?.content || '';
+  const tokens = data?.usage?.total_tokens || 0;
+  return { reply, provider: 'gateway', model: opts.model || GATEWAY_MODEL, tokens_used: tokens };
+}
+
 async function callAI(messages, system, opts) {
   opts = opts || {};
+  // Prioridad: Gateway → OpenAI directo → Anthropic directo → mock
+  if (AI_GATEWAY_API_KEY) {
+    try { return await callAIGateway(messages, system, opts); }
+    catch (e) {
+      // Fallback a key directa si está
+      if (OPENAI_API_KEY) {
+        try { return await callOpenAI(messages, system, opts); } catch (_) {}
+      }
+      if (ANTHROPIC_API_KEY) {
+        try { return await callAnthropic(messages, system, opts); } catch (_) {}
+      }
+      return { reply: MOCK_REPLY, provider: 'mock', tokens_used: 0, error: String(e.message || e) };
+    }
+  }
   if (OPENAI_API_KEY) {
     try { return await callOpenAI(messages, system, opts); }
     catch (e) {
@@ -444,6 +501,8 @@ async function handleSupportChat(req, res, ctx) {
 async function handleHealth(req, res, ctx) {
   cors(res);
   return ctx.sendJson(res, 200, {
+    gateway_configured: !!AI_GATEWAY_API_KEY,
+    gateway_model: AI_GATEWAY_API_KEY ? GATEWAY_MODEL : null,
     openai_configured: !!OPENAI_API_KEY,
     anthropic_configured: !!ANTHROPIC_API_KEY,
     default_provider: DEFAULT_PROVIDER,

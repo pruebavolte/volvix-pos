@@ -1506,7 +1506,8 @@ const handlers = {
       services: !!process.env.PROVIDER_SERVICES_API_KEY,
       cfdi: !!(process.env.PAC_API_URL && process.env.PAC_API_USER && process.env.PAC_API_PASSWORD),
       email: !!process.env.RESEND_API_KEY,
-      ai: !!(process.env.OPENAI_API_KEY || process.env.ANTHROPIC_API_KEY),
+      ai: !!(process.env.AI_GATEWAY_API_KEY || process.env.OPENAI_API_KEY || process.env.ANTHROPIC_API_KEY),
+      ai_gateway: !!process.env.AI_GATEWAY_API_KEY,
     });
   },
 
