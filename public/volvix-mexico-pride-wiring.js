@@ -61,12 +61,15 @@
       '<span>Hecho en Nuevo León 🦅</span>';
 
     // Franja blanca con el logo OFICIAL subido por el dueño.
-    // Drop the official PNG/SVG at /logos/hecho-en-nuevo-leon.png and it appears
-    // automatically. If the file 404s the strip auto-collapses (no broken icon).
+    // Drop the file at ONE of these paths and it aparece automáticamente:
+    //   /logos/hecho-en-nuevo-leon.svg   ← preferido (vector, escala perfecto)
+    //   /logos/hecho-en-nuevo-leon.png
+    //   /logos/hecho-en-nuevo-leon.jpg
+    // Si ninguno existe, la franja se auto-colapsa (sin ícono roto).
     var nlStrip = document.createElement('div');
     nlStrip.id = 'vlx-nl-logo-strip';
     nlStrip.setAttribute('role', 'note');
-    nlStrip.setAttribute('aria-label', 'Logo oficial Hecho en Nuevo León');
+    nlStrip.setAttribute('aria-label', 'Logo oficial Hecho en Nuevo León México');
     nlStrip.style.cssText = [
       'position:sticky',
       'top:36px',
@@ -75,20 +78,36 @@
       'box-sizing:border-box',
       'background:#FFFFFF',
       'border-bottom:1px solid #E5E7EB',
-      'padding:6px 16px',
+      'padding:10px 16px',
       'display:flex',
       'align-items:center',
       'justify-content:center',
-      'min-height:40px'
+      'min-height:56px'
     ].join(';');
+
+    // Cascada SVG → PNG → JPG. Si todos 404, ocultamos la franja entera.
+    var candidates = [
+      '/logos/hecho-en-nuevo-leon.svg',
+      '/logos/hecho-en-nuevo-leon.png',
+      '/logos/hecho-en-nuevo-leon.jpg'
+    ];
     var nlImg = document.createElement('img');
-    nlImg.alt = 'Hecho en Nuevo León';
-    nlImg.src = '/logos/hecho-en-nuevo-leon.png';
-    nlImg.style.cssText = 'max-height:32px;width:auto;display:block';
-    nlImg.onerror = function () {
-      // Sin archivo subido todavía → ocultar la franja completa (sin placeholder feo)
-      nlStrip.style.display = 'none';
-    };
+    nlImg.alt = 'Hecho en Nuevo León México';
+    // El logo oficial es horizontal (escudo del león + texto). 48px de alto da
+    // buen tamaño en desktop sin ser invasivo, y deja respirar el espacio.
+    nlImg.style.cssText = 'max-height:48px;width:auto;display:block;image-rendering:auto';
+    nlImg.loading = 'eager';
+    nlImg.decoding = 'async';
+    var idx = 0;
+    function tryNext() {
+      if (idx >= candidates.length) {
+        nlStrip.style.display = 'none';
+        return;
+      }
+      nlImg.src = candidates[idx++];
+    }
+    nlImg.onerror = tryNext;
+    tryNext();
     nlStrip.appendChild(nlImg);
 
     // Insertar al inicio del <body>: primero la franja verde, luego el logo NL.
