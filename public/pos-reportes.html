@@ -428,12 +428,41 @@ async function fetchVentasReales() {
   return null; // caller usará generateDemoVentas como fallback
 }
 
+// 2026-05 audit B-31: bandera que indica si los datos en pantalla son demo
+// (el dueño DEBE saber que está viendo simulación, no su negocio real).
+let _isDemoData = false;
+function showDemoBanner(reason) {
+  let el = document.getElementById('vlx-demo-banner');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'vlx-demo-banner';
+    el.style.cssText = 'background:#fef3c7;border:1px solid #f59e0b;color:#78350f;padding:10px 14px;border-radius:10px;margin:0 0 14px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px';
+    const main = document.querySelector('main') || document.body;
+    main.insertBefore(el, main.firstChild);
+  }
+  el.innerHTML = '⚠️ <strong>Estás viendo datos de ejemplo.</strong> ' + (reason || 'No pudimos cargar tus ventas reales.') +
+    ' <a href="#" onclick="window.location.reload();return false" style="color:#92400e;text-decoration:underline">Reintentar</a>';
+  el.style.display = '';
+}
+function hideDemoBanner() {
+  const el = document.getElementById('vlx-demo-banner');
+  if (el) el.style.display = 'none';
+}
+
 // Ventas cacheadas para esta vista
 let _ventasCache = null;
 async function getVentas() {
   if (_ventasCache) return _ventasCache;
   const real = await fetchVentasReales();
-  _ventasCache = real && real.length ? real : generateDemoVentas();
+  if (real && real.length) {
+    _ventasCache = real;
+    _isDemoData = false;
+    hideDemoBanner();
+  } else {
+    _ventasCache = generateDemoVentas();
+    _isDemoData = true;
+    showDemoBanner('Tu cuenta aún no tiene ventas registradas o el servicio no está disponible.');
+  }
   return _ventasCache;
 }
 function invalidateVentas() { _ventasCache = null; }
@@ -730,11 +759,48 @@ function vlxRenderLineChart(elementId, data, options){
 // ══════════════════════════════════════════════
 // TAB: VENTAS
 // ══════════════════════════════════════════════
+// 2026-05 audit B-32: helper para calcular delta REAL vs período anterior.
+// Antes: '↑ 12.4%' estaba hardcodeado en HTML — mentía al dueño sobre su negocio.
+async function _calcDeltaPeriodoAnterior() {
+  // Si los datos son demo, devolver null (no inventar deltas)
+  if (_isDemoData) return { ventas: null, tickets: null, ticketProm: null, demo: true };
+  try {
+    const r = getRange();
+    const start = new Date(r.from);
+    const end = new Date(r.to || Date.now());
+    const ms = end - start;
+    const prevEnd = new Date(start.getTime() - 1);
+    const prevStart = new Date(start.getTime() - ms);
+    const headers = { 'Accept':'application/json' };
+    const tok = localStorage.getItem('volvix_token');
+    if (tok) headers['Authorization'] = 'Bearer ' + tok;
+    const url = '/api/reports/sales?from=' + prevStart.toISOString().slice(0,10) + '&to=' + prevEnd.toISOString().slice(0,10);
+    const resp = await fetch(url, { headers });
+    if (!resp.ok) return { ventas: null, tickets: null, ticketProm: null };
+    const j = await resp.json();
+    const list = (j && (j.daily || j.items || [])) || [];
+    const tot = list.reduce((s, x) => s + Number(x.total || x.amount || 0), 0);
+    const cnt = list.reduce((s, x) => s + Number(x.count || x.orders || 0), 0);
+    const tp = cnt > 0 ? (tot / cnt) : 0;
+    return { ventas: tot, tickets: cnt, ticketProm: tp };
+  } catch (e) { return { ventas: null, tickets: null, ticketProm: null }; }
+}
+function _renderDelta(curr, prev, isCurrency) {
+  if (prev == null || prev <= 0) return '<span class="kpi-sub" style="color:#94a3b8">— sin comparativo</span>';
+  const diff = curr - prev;
+  const pct = (diff / prev) * 100;
+  const cls = pct >= 0 ? 'kpi-up' : 'kpi-down';
+  const arrow = pct >= 0 ? '↑' : '↓';
+  return '<span class="' + cls + '">' + arrow + ' ' + Math.abs(pct).toFixed(1) + '%</span> vs período anterior';
+}
+
 async function renderVentas() {
   const ventas = await getVentas();
   const total  = ventas.reduce((s, v) => s + v.total, 0);
   const ticket = total / (ventas.length || 1);
   const { from } = getRange();
+  // Calcular deltas REALES (no hardcoded)
+  const prev = await _calcDeltaPeriodoAnterior();
 
   // Agrupar por día
   const byDia = {};
@@ -753,17 +819,17 @@ async function renderVentas() {
       <div class="kpi">
         <div class="kpi-label">Ventas totales</div>
         <div class="kpi-value gold">${money(total)}</div>
-        <div class="kpi-sub"><span class="kpi-up">↑ 12.4%</span> vs período anterior</div>
+        <div class="kpi-sub">${_renderDelta(total, prev.ventas)}</div>
       </div>
       <div class="kpi">
         <div class="kpi-label">Tickets</div>
         <div class="kpi-value green">${fmtNum(ventas.length)}</div>
-        <div class="kpi-sub"><span class="kpi-up">↑ 8.1%</span> más transacciones</div>
+        <div class="kpi-sub">${_renderDelta(ventas.length, prev.tickets)}</div>
       </div>
       <div class="kpi">
         <div class="kpi-label">Ticket promedio</div>
         <div class="kpi-value blue">${money(ticket)}</div>
-        <div class="kpi-sub"><span class="kpi-up">↑ 3.9%</span> vs período anterior</div>
+        <div class="kpi-sub">${_renderDelta(ticket, prev.ticketProm, true)}</div>
       </div>
       <div class="kpi">
         <div class="kpi-label">Mayor venta del día</div>
@@ -1340,17 +1406,78 @@ function renderCajeros() {
   }, 50);
 }
 
-// ── Exportar CSV ──
+// 2026-05 audit B-30: CSV ahora exporta DATOS REALES, no solo header vacío.
+function _csvEscape(v) {
+  if (v == null) return '';
+  const s = String(v);
+  if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+  return s;
+}
+function _toCSV(rows, headers) {
+  const lines = [headers.map(_csvEscape).join(',')];
+  for (const r of rows) {
+    lines.push(headers.map(h => _csvEscape(r[h])).join(','));
+  }
+  return lines.join('\r\n');
+}
 function exportarReporte() {
-  const lines = [`Reporte: ${currentTab} · Período: ${currentPeriod} · ${new Date().toLocaleString('es-MX')}`];
-  const blob  = new Blob([lines.join('\n')], { type:'text/csv;charset=utf-8;' });
-  const url   = URL.createObjectURL(blob);
-  const a     = document.createElement('a');
+  let rows = [];
+  let headers = [];
+  let nombre = currentTab || 'reporte';
+  try {
+    if (currentTab === 'ventas' || currentTab === 'ventas-diarias') {
+      rows = (Array.isArray(_ventasCache) ? _ventasCache : []).map(d => ({
+        fecha: d.date || d.day || d.fecha || '',
+        ventas: Number(d.total || d.amount || 0),
+        ordenes: Number(d.count || d.orders || 0),
+        ticket_promedio: Number(d.avg_ticket || (d.count > 0 ? (d.total / d.count) : 0))
+      }));
+      headers = ['fecha', 'ventas', 'ordenes', 'ticket_promedio'];
+    } else if (currentTab === 'productos' || currentTab === 'top-productos') {
+      rows = (Array.isArray(_productosCache) ? _productosCache : []).map(p => ({
+        nombre: p.name || p.nombre || '',
+        cantidad: Number(p.qty || p.cantidad || 0),
+        ingresos: Number(p.revenue || p.total || 0)
+      }));
+      headers = ['nombre', 'cantidad', 'ingresos'];
+    } else if (currentTab === 'metodos' || currentTab === 'pagos') {
+      rows = (Array.isArray(_metodosCache) ? _metodosCache : []).map(m => ({
+        metodo: m.method || m.metodo || '',
+        ventas: Number(m.total || m.amount || 0),
+        porcentaje: Number(m.pct || m.percent || 0)
+      }));
+      headers = ['metodo', 'ventas', 'porcentaje'];
+    } else if (currentTab === 'cajeros') {
+      rows = (Array.isArray(_cajerosCache) ? _cajerosCache : []).map(c => ({
+        cajero: c.name || c.user || '',
+        ventas: Number(c.total || 0),
+        ordenes: Number(c.count || 0)
+      }));
+      headers = ['cajero', 'ventas', 'ordenes'];
+    } else {
+      // Fallback genérico: si no reconocemos el tab, intentar exportar lo que sea esté en cache
+      const candidates = [_ventasCache, _productosCache, _metodosCache, _cajerosCache].filter(x => Array.isArray(x) && x.length);
+      if (candidates.length) {
+        rows = candidates[0];
+        headers = Object.keys(rows[0] || {});
+      }
+    }
+  } catch (e) {}
+
+  if (!rows.length) {
+    toast('No hay datos para exportar en este reporte', 'warn');
+    return;
+  }
+  const meta = `# Volvix POS · ${currentTab} · Período: ${currentPeriod} · Generado: ${new Date().toLocaleString('es-MX')}\r\n`;
+  const csv = meta + _toCSV(rows, headers);
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
   a.href = url;
-  a.download = `reporte_volvix_${currentTab}_${currentPeriod}_${new Date().toISOString().slice(0,10)}.csv`;
+  a.download = `reporte_volvix_${nombre}_${currentPeriod}_${new Date().toISOString().slice(0,10)}.csv`;
   document.body.appendChild(a); a.click();
   document.body.removeChild(a); URL.revokeObjectURL(url);
-  toast('✓ Reporte exportado', 'ok');
+  toast('✓ Reporte exportado (' + rows.length + ' filas)', 'ok');
 }
 
 // ── Toast ──

@@ -8355,9 +8355,33 @@ handlers['POST /api/loyalty/adjust'] = async (req, res) => {
 // =============================================================
 // R14: REPORTS / BI
 // =============================================================
+// 2026-05 audit B-33: timezone-aware range. Antes usábamos UTC puro → en
+// México (UTC-6) las ventas de las 18:00-23:59 caían al día siguiente en el
+// reporte "hoy", perdiendo ~25% de las horas pico.
+// Ahora si el query trae solo YYYY-MM-DD, lo interpretamos en America/Mexico_City
+// (UTC-6 sin DST) y convertimos a UTC para la query a Supabase.
+const REPORT_TZ_OFFSET_MS = 6 * 60 * 60 * 1000; // CST -6h (sin DST)
+function _parseLocalDate(s, isEndOfDay) {
+  const m = String(s).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return null;
+  // Construimos timestamp UTC equivalente al inicio/fin del día local CDMX.
+  // 00:00 CST = 06:00 UTC. 23:59:59.999 CST = 05:59:59.999 UTC del día siguiente.
+  const localStartUtcMs = Date.UTC(+m[1], +m[2] - 1, +m[3], 0, 0, 0, 0) + REPORT_TZ_OFFSET_MS;
+  if (isEndOfDay) return new Date(localStartUtcMs + 24 * 3600 * 1000 - 1);
+  return new Date(localStartUtcMs);
+}
 function reportRange(query) {
-  const to = query.to ? new Date(query.to) : new Date();
-  const from = query.from ? new Date(query.from) : new Date(Date.now() - 30 * 24 * 3600 * 1000);
+  let to, from;
+  if (query.to && /^\d{4}-\d{2}-\d{2}$/.test(query.to)) {
+    to = _parseLocalDate(query.to, true);
+  } else {
+    to = query.to ? new Date(query.to) : new Date();
+  }
+  if (query.from && /^\d{4}-\d{2}-\d{2}$/.test(query.from)) {
+    from = _parseLocalDate(query.from, false);
+  } else {
+    from = query.from ? new Date(query.from) : new Date(Date.now() - 30 * 24 * 3600 * 1000);
+  }
   return { from: from.toISOString(), to: to.toISOString() };
 }
 async function rpcCall(fn, args) { return supabaseRequest('POST', `/rpc/${fn}`, args || {}); }
