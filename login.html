@@ -283,21 +283,237 @@ html, body {
   .login-title { font-size: 18px; }
   .login-sub { font-size: 12.5px; }
 }
+
+/* =====================================================================
+   === VLX MINIMAL LOGIN — visual override (premium, blanco editorial) ===
+   === Sin tocar HTML/JS/handlers. Solo CSS via !important.            ===
+   ===================================================================== */
+:root {
+  --vlx-ink: #0B0B0F;
+  --vlx-ink-2: #3F3F46;
+  --vlx-ink-3: #6B7280;
+  --vlx-ink-4: #9CA3AF;
+  --vlx-paper: #FFFFFF;
+  --vlx-paper-2: #FAFAFA;
+  --vlx-line: #ECECEE;
+  --vlx-line-2: #E5E5EA;
+}
+html, body { overflow: auto !important; height: auto !important; min-height: 100% !important; }
+body {
+  background: var(--vlx-paper) !important;
+  color: var(--vlx-ink) !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+}
+.login-bg {
+  background: var(--vlx-paper) !important;
+  min-height: 100vh !important;
+  min-height: 100dvh !important;
+  padding: 64px 20px !important;
+  align-items: center !important;
+}
+.login-bg::before { display: none !important; }
+
+/* Top bar minimalista (Hecho en MX) — sutil, encima del card */
+#vlx-login-topnav {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px max(20px, 5%);
+  font-size: 13px;
+  color: var(--vlx-ink-2);
+  z-index: 5;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--vlx-line);
+}
+#vlx-login-topnav .vlx-brand-text {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--vlx-ink);
+  font-size: 15px;
+}
+#vlx-lang-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 1px solid var(--vlx-line-2);
+  color: var(--vlx-ink-2);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 28px 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%236B7280' stroke-width='1.5' fill='none' stroke-linecap='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+#vlx-lang-select:focus { outline: none; border-color: var(--vlx-ink); }
+
+/* Card en blanco premium */
+.login-card {
+  background: var(--vlx-paper) !important;
+  border: 1px solid var(--vlx-line) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 1px 3px rgba(17,17,17,0.04), 0 24px 48px -12px rgba(17,17,17,0.08) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  padding: 48px 40px !important;
+  max-width: 420px !important;
+  animation: none !important;
+}
+
+/* Logo: discreto, monocromo */
+.login-logo-icon {
+  width: 44px !important; height: 44px !important;
+  background: var(--vlx-ink) !important;
+  border-radius: 10px !important;
+  font-size: 22px !important;
+  color: #FFFFFF !important;
+  box-shadow: none !important;
+  animation: none !important;
+}
+.login-logo { margin-bottom: 32px !important; }
+
+/* Tipografía editorial */
+.login-title {
+  color: var(--vlx-ink) !important;
+  font-size: 26px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.025em !important;
+  margin-bottom: 8px !important;
+}
+.login-sub {
+  color: var(--vlx-ink-3) !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  margin-bottom: 32px !important;
+}
+
+/* Inputs limpios */
+.form-label {
+  color: var(--vlx-ink-2) !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.02em !important;
+  text-transform: none !important;
+}
+.form-input {
+  background: var(--vlx-paper) !important;
+  border: 1px solid var(--vlx-line-2) !important;
+  border-radius: 8px !important;
+  color: var(--vlx-ink) !important;
+  height: 44px !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  transition: border-color .15s ease, box-shadow .15s ease !important;
+}
+.form-input::placeholder { color: var(--vlx-ink-4) !important; }
+.form-input:focus {
+  border-color: var(--vlx-ink) !important;
+  background: var(--vlx-paper) !important;
+  box-shadow: 0 0 0 4px rgba(17,17,17,0.04) !important;
+}
+
+/* Botón principal: negro sólido */
+.btn-primary {
+  background: var(--vlx-ink) !important;
+  color: #FFFFFF !important;
+  border-radius: 8px !important;
+  height: 44px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.005em !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+}
+.btn-primary:hover:not(:disabled) {
+  transform: none !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.10) !important;
+  opacity: 0.92 !important;
+}
+.btn-primary.loading::after {
+  border-color: rgba(255,255,255,0.3) !important;
+  border-top-color: #FFFFFF !important;
+}
+
+/* Alerts: outline finito */
+.alert {
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  padding: 10px 12px !important;
+}
+.alert.error {
+  background: #FEF2F2 !important;
+  color: #B91C1C !important;
+  border: 1px solid #FECACA !important;
+}
+.alert.success {
+  background: #F0FDF4 !important;
+  color: #15803D !important;
+  border: 1px solid #BBF7D0 !important;
+}
+.alert.info {
+  background: var(--vlx-paper-2) !important;
+  color: var(--vlx-ink-2) !important;
+  border: 1px solid var(--vlx-line) !important;
+}
+
+/* Link sutil */
+.login-link-row a {
+  color: var(--vlx-ink-2) !important;
+  font-weight: 500 !important;
+  font-size: 13px !important;
+}
+.login-link-row a:hover { color: var(--vlx-ink) !important; }
+
+/* Social buttons en monocromo */
+.social-btn {
+  background: var(--vlx-paper) !important;
+  border: 1px solid var(--vlx-line-2) !important;
+  color: var(--vlx-ink) !important;
+}
+.social-btn:hover { background: var(--vlx-paper-2) !important; }
+
+/* Test creds */
+.test-creds {
+  background: var(--vlx-paper-2) !important;
+  border: 1px solid var(--vlx-line) !important;
+  color: var(--vlx-ink-3) !important;
+}
+.test-creds strong { color: var(--vlx-ink) !important; }
+
+@media (max-width: 480px) {
+  .login-card { padding: 32px 22px !important; }
+  .login-title { font-size: 22px !important; }
+  #vlx-login-topnav { padding: 12px 16px !important; }
+  #vlx-login-topnav .vlx-brand-text { font-size: 13px !important; }
+}
 </style>
   <script src="/volvix-uplift-wiring.js" defer></script>
   <script src="/volvix-error-reporter.js" defer></script>
 </head>
 <body>
+  <!-- Top bar minimalista (brand + idioma) -->
+  <div id="vlx-login-topnav" role="banner">
+    <div class="vlx-brand-text">SYSTEM INTERNATIONAL</div>
+    <select id="vlx-lang-select" aria-label="Idioma" onchange="window.__vlxSetLang && window.__vlxSetLang(this.value)">
+      <option value="es">Español</option>
+      <option value="en">English</option>
+      <option value="pt">Português</option>
+    </select>
+  </div>
+
   <div class="login-bg">
     <div class="login-card">
       <!-- Logo -->
       <div class="login-logo">
-        <div class="login-logo-icon">⚡</div>
+        <div class="login-logo-icon" aria-hidden="true">SI</div>
       </div>
 
       <!-- Títulos -->
-      <div class="login-title">Bienvenido a Volvix</div>
-      <div class="login-sub">Punto de venta inteligente · Offline-first</div>
+      <div class="login-title">Inicia sesión</div>
+      <div class="login-sub">System International · Plataforma POS</div>
 
       <!-- Alert -->
       <div id="alert" class="alert"></div>
@@ -582,5 +798,23 @@ document.getElementById('passwordInput').addEventListener('keydown', e => {
   </div>
 </footer>
 <script defer src="/volvix-cookie-banner-wiring.js"></script>
+<script>
+// Idioma inline (login). Persiste en localStorage; reload aplica.
+(function(){
+  try {
+    var sel = document.getElementById('vlx-lang-select');
+    if (!sel) return;
+    var cur = (localStorage.getItem('volvix_lang') || (navigator.language||'es').slice(0,2)).toLowerCase();
+    if (['es','en','pt'].indexOf(cur) >= 0) sel.value = cur;
+    window.__vlxSetLang = function(lang){
+      try { localStorage.setItem('volvix_lang', lang); } catch(_) {}
+      try { document.documentElement.setAttribute('lang', lang); } catch(_) {}
+      try { window.dispatchEvent(new CustomEvent('volvix:lang:change', { detail: { lang: lang } })); } catch(_) {}
+      // Reload suave para que i18n wiring repinte
+      setTimeout(function(){ location.reload(); }, 80);
+    };
+  } catch(_) {}
+})();
+</script>
 </body>
 </html>
