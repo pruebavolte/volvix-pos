@@ -148,6 +148,57 @@ async function handleOnboard(req, res, ctx) {
     return sendJson(res, 400, { ok: false, error: 'invalid_rfc', field: 'rfc' });
   }
 
+  // 2026-05 audit B-41: validación profunda del CSD ANTES de aceptarlo.
+  // (a) tamaño razonable, (b) parseo X.509 básico, (c) RFC del cert coincide
+  // con el RFC declarado por el tenant, (d) vigencia del cert.
+  try {
+    const cerB64 = String(body.csd_b64 || '').replace(/^data:[^;]+;base64,/, '');
+    if (!cerB64 || cerB64.length < 100) {
+      return sendJson(res, 400, { ok: false, error: 'csd_too_small', field: 'csd_b64' });
+    }
+    if (cerB64.length > 32 * 1024) {
+      return sendJson(res, 400, { ok: false, error: 'csd_too_large', field: 'csd_b64' });
+    }
+    const cerBuf = Buffer.from(cerB64, 'base64');
+    if (cerBuf.length < 80) {
+      return sendJson(res, 400, { ok: false, error: 'csd_invalid', field: 'csd_b64' });
+    }
+    // Parseo X.509 vía crypto.X509Certificate (Node 15.6+). Si falla, intentamos
+    // PEM. El SAT entrega el .cer en DER; lo convertimos.
+    let cert;
+    try {
+      const crypto = require('crypto');
+      const pem = '-----BEGIN CERTIFICATE-----\n' +
+        cerBuf.toString('base64').match(/.{1,64}/g).join('\n') +
+        '\n-----END CERTIFICATE-----\n';
+      cert = new crypto.X509Certificate(pem);
+    } catch (_) { cert = null; }
+    if (cert) {
+      // Verificar vigencia
+      const now = new Date();
+      const notAfter = new Date(cert.validTo);
+      const notBefore = new Date(cert.validFrom);
+      if (notAfter < now) {
+        return sendJson(res, 400, { ok: false, error: 'csd_expired',
+          message: 'El CSD venció el ' + notAfter.toISOString().slice(0,10) + '. Renueva tu CSD en SAT.' });
+      }
+      if (notBefore > now) {
+        return sendJson(res, 400, { ok: false, error: 'csd_not_yet_valid',
+          message: 'El CSD aún no es válido (inicia ' + notBefore.toISOString().slice(0,10) + ').' });
+      }
+      // Verificar que el RFC del subject coincida con el RFC declarado
+      const subject = String(cert.subject || '');
+      // El RFC viene en x500UniqueIdentifier, serialNumber o CN dependiendo del proveedor.
+      const rfcMatch = subject.match(/(?:serialNumber|x500UniqueIdentifier|CN)\s*=\s*([A-ZÑ&]{3,4}\d{6}[A-Z\d]{3})/i);
+      const certRfc = rfcMatch && rfcMatch[1] ? rfcMatch[1].toUpperCase() : null;
+      if (certRfc && certRfc !== rfc) {
+        return sendJson(res, 400, { ok: false, error: 'rfc_mismatch',
+          message: 'El RFC del certificado (' + certRfc + ') no coincide con el RFC declarado (' + rfc + ').' });
+      }
+    }
+    // (Si no pudimos parsear, dejamos que Facturama haga la validación final.)
+  } catch (_) { /* never block — Facturama valida también */ }
+
   if (!isConfigured()) {
     // Persistir creds del tenant igual (el timbrado fallará hasta que el dueño
     // del SaaS configure FACTURAMA_USER + PASSWORD en Vercel)

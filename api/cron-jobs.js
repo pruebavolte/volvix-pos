@@ -23,8 +23,19 @@ function send(res, payload, status, helpers) {
 }
 
 function isCronAuthorized(req) {
+  // 2026-05 audit B-43: en PROD el CRON_SECRET es obligatorio. Antes si la
+  // env no estaba seteada, devolvíamos true → cualquier visitor podía
+  // disparar daily-summary y enviar emails masivos a todos los tenants.
   const expected = process.env.CRON_SECRET || '';
-  if (!expected) return true; // dev mode
+  const isProd = process.env.NODE_ENV === 'production';
+  if (!expected) {
+    if (isProd) return false; // fail-closed en prod
+    return true; // dev mode — sigue libre
+  }
+  // Vercel Cron envía un header 'x-vercel-cron' además del Authorization.
+  // Aceptamos cualquiera de los dos.
+  const hdrV = req.headers && (req.headers['x-vercel-cron'] || req.headers['X-Vercel-Cron']);
+  if (hdrV) return true;
   const hdr = req.headers && (req.headers['authorization'] || req.headers['Authorization']);
   if (!hdr || typeof hdr !== 'string') return false;
   const parts = hdr.split(/\s+/);
@@ -142,7 +153,10 @@ function register(deps) {
   // ============================================================
   // POST /api/cron/daily-summary
   // ============================================================
-  handlers['POST /api/cron/daily-summary'] = async (req, res) => {
+  // 2026-05 audit B-42: Vercel cron envía GET (no POST). Antes los handlers
+  // solo respondían a POST → 404, los 3 jobs nunca corrían en producción.
+  // Ahora ambos métodos quedan registrados.
+  const _dailySummary = async (req, res) => {
     try {
       if (!isCronAuthorized(req)) {
         return send(res, { ok: false, error: 'unauthorized' }, 401, helpers);
@@ -190,7 +204,10 @@ function register(deps) {
   // ============================================================
   // POST /api/cron/weekly-report
   // ============================================================
-  handlers['POST /api/cron/weekly-report'] = async (req, res) => {
+  handlers['GET /api/cron/daily-summary']  = _dailySummary;
+  handlers['POST /api/cron/daily-summary'] = _dailySummary;
+
+  const _weeklyReport = async (req, res) => {
     try {
       if (!isCronAuthorized(req)) {
         return send(res, { ok: false, error: 'unauthorized' }, 401, helpers);
@@ -232,7 +249,10 @@ function register(deps) {
   // ============================================================
   // POST /api/cron/monthly-billing
   // ============================================================
-  handlers['POST /api/cron/monthly-billing'] = async (req, res) => {
+  handlers['GET /api/cron/weekly-report']  = _weeklyReport;
+  handlers['POST /api/cron/weekly-report'] = _weeklyReport;
+
+  const _monthlyBilling = async (req, res) => {
     try {
       if (!isCronAuthorized(req)) {
         return send(res, { ok: false, error: 'unauthorized' }, 401, helpers);
@@ -289,10 +309,13 @@ function register(deps) {
     }
   };
 
+  handlers['GET /api/cron/monthly-billing']  = _monthlyBilling;
+  handlers['POST /api/cron/monthly-billing'] = _monthlyBilling;
+
   return [
-    'POST /api/cron/daily-summary',
-    'POST /api/cron/weekly-report',
-    'POST /api/cron/monthly-billing',
+    'GET /api/cron/daily-summary',  'POST /api/cron/daily-summary',
+    'GET /api/cron/weekly-report',  'POST /api/cron/weekly-report',
+    'GET /api/cron/monthly-billing','POST /api/cron/monthly-billing',
   ];
 }
 

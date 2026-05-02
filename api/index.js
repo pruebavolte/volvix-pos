@@ -10128,15 +10128,33 @@ handlers['GET /api/config/public'] = async (req, res) => {
       sendJSON(res, { ok: true, queued: true });
     } catch (err) { sendError(res, err); }
   });
+  // 2026-05 audit B-39: allowlist estricta de campos. Antes el body se
+  // splatteaba con `...body` → mass-assignment (cliente podía setear plan,
+  // tax_rate, is_active, etc.).
+  const ALLOWED_TENANT_SETTINGS = new Set([
+    'business_name','legal_name','rfc','address','phone','email',
+    'logo_url','primary_color','secondary_color','timezone','currency',
+    'receipt_header','receipt_footer','tax_rate','default_payment_method',
+    'auto_print_ticket','show_tax_breakdown','round_total','language',
+    'cfdi_uso_default','cfdi_regimen_default','low_stock_threshold',
+    'enable_loyalty','enable_invoicing','enable_appointments'
+  ]);
   handlers['PATCH /api/tenant/settings'] = requireAuth(async (req, res) => {
     try {
       const body = await readBody(req).catch(() => ({}));
       const tid = (req.user && req.user.tenant_id);
       if (!tid) return sendJSON(res, { ok: false, error: 'no_tenant' }, 400);
+      // Filtrar a solo campos permitidos
+      const safe = { tenant_id: tid, updated_at: new Date().toISOString() };
+      let ignored = [];
+      Object.keys(body || {}).forEach(k => {
+        if (ALLOWED_TENANT_SETTINGS.has(k)) safe[k] = body[k];
+        else if (k !== 'tenant_id' && k !== 'updated_at') ignored.push(k);
+      });
       try {
-        await supabaseRequest('POST', '/tenant_settings', { tenant_id: tid, ...body, updated_at: new Date().toISOString() }, { 'Prefer': 'resolution=merge-duplicates' });
+        await supabaseRequest('POST', '/tenant_settings', safe, { 'Prefer': 'resolution=merge-duplicates' });
       } catch (_) {}
-      sendJSON(res, { ok: true });
+      sendJSON(res, { ok: true, applied: Object.keys(safe).length - 2, ignored: ignored.length ? ignored : undefined });
     } catch (err) { sendError(res, err); }
   });
 

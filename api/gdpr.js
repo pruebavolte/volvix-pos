@@ -207,8 +207,14 @@ function buildHandlers(deps) {
         legal_basis: LEGAL_BASIS[type],
         otp_delivered: !!delivery.delivered,
       };
-      // En dev (sin SMTP) devolvemos otp para no bloquear el flujo
-      if (!delivery.delivered) payload.otp_dev = otp;
+      // 2026-05 audit B-44: SOLO en dev/staging exponemos otp_dev en respuesta.
+      // En prod, si SMTP falla, NO devolvemos el OTP (era bypass total).
+      const _isProd = process.env.NODE_ENV === 'production';
+      if (!delivery.delivered && !_isProd) payload.otp_dev = otp;
+      if (!delivery.delivered && _isProd) {
+        payload.email_failed = true;
+        payload.message = 'No pudimos enviar el código por correo. Intenta de nuevo o contacta soporte.';
+      }
       payload.created_id = created && created.id || null;
       return send(res, payload, 202, helpers);
     } catch (err) {

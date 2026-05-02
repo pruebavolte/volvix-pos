@@ -445,7 +445,41 @@ html, body {
               <div>
                 <div style="font-weight:600;margin-bottom:4px">Logo actual</div>
                 <div style="font-size:12px;color:var(--text-3);margin-bottom:10px">Emoji por defecto (sin logo cargado)</div>
-                <button class="btn sm" onclick="toast('Carga de logo próximamente · por ahora usa emoji','info')">⬆ Cargar logo</button>
+                <input type="file" id="vlx-logo-upload" accept="image/png,image/jpeg,image/svg+xml" style="display:none" onchange="vlxUploadLogo(this)">
+                <button class="btn sm" onclick="document.getElementById('vlx-logo-upload').click()">⬆ Cargar logo</button>
+                <script>
+                  // 2026-05 audit B-40: upload real (antes era stub que mostraba toast).
+                  // Sube como base64 → /api/tenant/settings { logo_url } usando data URL.
+                  // Para producción a escala, migrar a presigned-url + S3.
+                  window.vlxUploadLogo = async function (input) {
+                    const file = input && input.files && input.files[0];
+                    if (!file) return;
+                    if (file.size > 256 * 1024) {
+                      window.toast && window.toast('El logo no debe pesar más de 256 KB. Usa PNG/SVG optimizado.', 'error');
+                      return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = async function (e) {
+                      try {
+                        const dataUrl = String(e.target.result || '');
+                        const tok = localStorage.getItem('volvix_token') || '';
+                        const r = await fetch('/api/tenant/settings', {
+                          method: 'PATCH',
+                          headers: { 'Content-Type':'application/json', 'Authorization': 'Bearer ' + tok },
+                          body: JSON.stringify({ logo_url: dataUrl })
+                        });
+                        if (r.ok) {
+                          window.toast && window.toast('Logo guardado.', 'ok');
+                        } else {
+                          window.toast && window.toast('No pudimos guardar el logo. Verifica tu sesión.', 'error');
+                        }
+                      } catch (err) {
+                        window.toast && window.toast('Error de red al subir logo.', 'error');
+                      }
+                    };
+                    reader.readAsDataURL(file);
+                  };
+                </script>
               </div>
             </div>
           </div>
