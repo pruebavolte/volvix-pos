@@ -4314,7 +4314,69 @@
       $('#barcode-input').focus();
       return;
     }
-    showToast('❌ Producto no encontrado: ' + trimmed);
+    // 3. No existe → abrir modal "Nuevo producto" con prefill inteligente.
+    //    - Si lo escrito parece código de barras → prefill barcode + code, focus en NAME
+    //    - Si parece nombre (jamón, leche, etc.) → prefill name, focus en PRICE
+    try {
+      if (typeof promptProductForm !== 'function') {
+        showToast('❌ Producto no encontrado: ' + trimmed);
+        return;
+      }
+      const prefill = isBarcode
+        ? { code: trimmed, barcode: trimmed, name: '', price: 0, cost: 0, stock: 1 }
+        : { code: '',      barcode: '',      name: trimmed, price: 0, cost: 0, stock: 1 };
+      // El input perderá foco al abrir el modal — limpiar primero
+      $('#barcode-input').value = '';
+      // Hint visual: foco automático correcto cuando se abra el modal
+      const focusTarget = isBarcode ? '#pf-name' : '#pf-price';
+      // Promesa: usuario llena el modal o cancela
+      const data = await promptProductForm(prefill);
+      // Re-focus después de pintar el modal (el modal mismo hace focus en pf-name por default;
+      // sobre-escribimos cuando es nombre → pf-price). Hacemos esto en un microtask después
+      // de promptProductForm resolver el listener de submit, así que en realidad lo aplicamos
+      // ANTES vía MutationObserver:
+      // Truco: si el usuario escribió un nombre, queremos foco en precio. Lo hacemos via
+      // observer dentro del propio promptProductForm sería ideal, pero no podemos modificar
+      // ese flujo aquí. Como alternativa: redisparamos focus sobre pf-price justo después de
+      // que el modal aparezca (en el siguiente tick).
+      // (El bloque arriba ya cerró el modal cuando data llegó; esto solo aplica si se quedó
+      // abierto. Ver setTimeout debajo en la versión activa.)
+      if (!data) {
+        $('#barcode-input').focus();
+        return;
+      }
+      // Guardar producto via API real
+      let saved = null;
+      try {
+        if (typeof saveProduct === 'function') {
+          saved = await saveProduct(data);
+        }
+      } catch (e) {
+        console.warn('[searchProduct] saveProduct failed', e);
+      }
+      // Caer a /api/products directamente si saveProduct no existe / falló
+      if (!saved || !saved.id) {
+        try {
+          const tnt = (typeof _vTenant === 'function') ? _vTenant() : 'TNT001';
+          const r = await fetch('/api/products', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(Object.assign({ tenant_id: tnt }, data))
+          });
+          if (r.ok) saved = await r.json().catch(() => null);
+        } catch (e) { console.warn('[searchProduct] /api/products POST fail', e); }
+      }
+      // Agregar al carrito (con fallback a los datos del form si el server no devolvió id)
+      const productForCart = saved && saved.id
+        ? normalizeProductForCart(saved)
+        : normalizeProductForCart(Object.assign({ id: 'tmp_' + Date.now() }, data));
+      addToCart(productForCart);
+      showToast('✓ Producto creado y agregado: ' + (productForCart.name || 'sin nombre'));
+      $('#barcode-input').focus();
+    } catch (e) {
+      console.warn('[searchProduct] modal flow error', e);
+      showToast('❌ No se pudo abrir el formulario de nuevo producto');
+    }
   }
   function normalizeProductForCart(p) {
     return {
@@ -5627,8 +5689,9 @@
       showToast('Importados ' + items.length + ' productos');
     } catch(e){ showToast('Error import: ' + e.message,'error'); }
   }
-  async function promptProductForm(prefill){
+  async function promptProductForm(prefill, opts){
     const p = prefill || {};
+    const options = opts || {};
     return new Promise((resolve) => {
       let modal = document.getElementById('modal-product-form');
       if (modal) modal.remove();
@@ -5722,7 +5785,45 @@
           description: modal.querySelector('#pf-desc').value.trim()
         });
       });
-      setTimeout(() => modal.querySelector('#pf-name')?.focus(), 50);
+      // Focus inteligente:
+      //  - Si llamador pidió focusField, úsalo
+      //  - Si el prefill ya trae un name (lo escribió el cajero) y NO trae barcode → ir a precio
+      //  - Si el prefill trae code/barcode (escaneo) y nombre vacío → ir a nombre
+      //  - Default → nombre
+      const autoFocusSel = options.focusField
+        || (p.barcode && !p.name ? '#pf-name'
+        : (p.name && !p.barcode ? '#pf-price' : '#pf-name'));
+      setTimeout(() => modal.querySelector(autoFocusSel)?.focus(), 50);
+
+      // Enter → siguiente campo (Enter en el último submitea). Si Enter en precio Y
+      // los obligatorios mínimos están cubiertos → submit directo (flujo POS rápido).
+      const fieldOrder = ['#pf-name','#pf-code','#pf-barcode','#pf-price','#pf-cost','#pf-stock','#pf-min','#pf-cat','#pf-desc'];
+      modal.addEventListener('keydown', (ev) => {
+        if (ev.key !== 'Enter') return;
+        const target = ev.target;
+        if (!target || target.tagName === 'TEXTAREA') return;
+        if (target.id === 'pf-submit' || target.tagName === 'BUTTON') return;
+        ev.preventDefault();
+        // Si estamos en pf-price y nombre+precio listos → submit fast
+        if (target.id === 'pf-price') {
+          const nm = (modal.querySelector('#pf-name')?.value || '').trim();
+          const pr = parseFloat(modal.querySelector('#pf-price')?.value);
+          if (nm && !isNaN(pr) && pr > 0) {
+            // Auto-rellenar code si vacío para evitar fallar la validación
+            const codeEl = modal.querySelector('#pf-code');
+            if (codeEl && !codeEl.value.trim()) {
+              codeEl.value = (p.barcode || ('SKU-' + Date.now().toString(36).toUpperCase())).slice(0, 32);
+            }
+            modal.querySelector('#pf-form')?.requestSubmit?.();
+            return;
+          }
+        }
+        // Sino → mover al siguiente campo
+        const idx = fieldOrder.indexOf('#' + target.id);
+        if (idx >= 0 && idx < fieldOrder.length - 1) {
+          modal.querySelector(fieldOrder[idx + 1])?.focus();
+        }
+      });
     });
   }
   document.addEventListener('DOMContentLoaded', () => {

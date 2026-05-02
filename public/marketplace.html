@@ -702,6 +702,210 @@
     .stats-grid { grid-template-columns: 1fr; }
     .popular-grid { grid-template-columns: 1fr 1fr; }
   }
+
+  /* =====================================================================
+     === VLX MINIMAL REDESIGN — visual-only override (Stripe/Linear style)
+     === Reglas: solo CSS. Sin tocar HTML/JS/contenido/funcionalidad.
+     === Paleta: blanco + #111 + grises + 1 acento muy contenido.
+     === Tipografía: -apple-system / Inter, escala generosa, tracking apretado.
+     === ================================================================== */
+  :root {
+    --vlx-ink:        #0B0B0F;
+    --vlx-ink-2:      #3F3F46;
+    --vlx-ink-3:      #6B7280;
+    --vlx-ink-4:      #9CA3AF;
+    --vlx-paper:      #FFFFFF;
+    --vlx-paper-2:    #FAFAFA;
+    --vlx-line:       #ECECEE;
+    --vlx-line-2:     #E5E5EA;
+    --vlx-accent:     #111111;          /* monocromo premium */
+    --vlx-accent-soft:#F4F4F5;
+    --vlx-radius-sm:  6px;
+    --vlx-radius:     10px;
+    --vlx-radius-lg:  14px;
+    --vlx-shadow-sm:  0 1px 2px rgba(17,17,17,0.04), 0 0 0 1px rgba(17,17,17,0.04);
+    --vlx-shadow:     0 1px 3px rgba(17,17,17,0.06), 0 8px 24px rgba(17,17,17,0.04);
+    --vlx-shadow-lg:  0 2px 6px rgba(17,17,17,0.06), 0 24px 48px -12px rgba(17,17,17,0.10);
+    --vlx-fs-h1:      clamp(40px, 5.6vw, 72px);
+    --vlx-fs-h2:      clamp(26px, 3vw, 40px);
+    --vlx-fs-body:    16px;
+    --vlx-fs-sm:      13.5px;
+  }
+
+  /* Reset tipográfico premium */
+  * {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text',
+                 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    background: var(--vlx-paper) !important;
+    color: var(--vlx-ink) !important;
+    font-size: var(--vlx-fs-body);
+    line-height: 1.6;
+    letter-spacing: -0.01em;
+  }
+
+  /* Nav: línea fina, sin sombra, espaciado generoso */
+  nav.top {
+    background: rgba(255,255,255,0.78) !important;
+    backdrop-filter: saturate(180%) blur(20px) !important;
+    -webkit-backdrop-filter: saturate(180%) blur(20px) !important;
+    border-bottom: 1px solid var(--vlx-line) !important;
+    padding: 18px max(6%, 24px) !important;
+  }
+  .brand {
+    font-weight: 600 !important;
+    font-size: 17px !important;
+    letter-spacing: -0.02em !important;
+    color: var(--vlx-ink) !important;
+  }
+  .brand-icon {
+    width: 30px !important; height: 30px !important;
+    border-radius: 8px !important;
+    background: var(--vlx-ink) !important;
+    box-shadow: none !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+  }
+  .nav-links { gap: 28px !important; }
+  .nav-links a {
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    color: var(--vlx-ink-2) !important;
+    transition: color .15s ease !important;
+  }
+  .nav-links a:hover { color: var(--vlx-ink) !important; }
+  .nav-cta {
+    padding: 8px 14px !important;
+    background: var(--vlx-ink) !important;
+    color: #fff !important;
+    border-radius: var(--vlx-radius-sm) !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    box-shadow: var(--vlx-shadow-sm) !important;
+    transition: transform .12s ease, box-shadow .12s ease !important;
+  }
+  .nav-cta:hover { transform: translateY(-1px) !important; }
+
+  /* Hero: tipografía editorial, sin gradiente, mucho aire */
+  .hero {
+    padding: 120px max(6%, 24px) 96px !important;
+    background: var(--vlx-paper) !important;
+    text-align: center !important;
+    overflow: visible !important;
+  }
+  .hero-badge {
+    background: var(--vlx-accent-soft) !important;
+    border: 1px solid var(--vlx-line-2) !important;
+    color: var(--vlx-ink-2) !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.01em !important;
+    box-shadow: none !important;
+    padding: 6px 12px !important;
+    font-size: 12.5px !important;
+    margin-bottom: 28px !important;
+  }
+  .hero h1 {
+    font-size: var(--vlx-fs-h1) !important;
+    font-weight: 600 !important;
+    letter-spacing: -0.035em !important;
+    line-height: 1.02 !important;
+    color: var(--vlx-ink) !important;
+    max-width: 880px !important;
+    margin: 0 auto 24px !important;
+  }
+  .hero h1 .accent { color: var(--vlx-ink-3) !important; }
+  .hero p.sub {
+    font-size: clamp(16px, 1.6vw, 19px) !important;
+    color: var(--vlx-ink-3) !important;
+    max-width: 580px !important;
+    line-height: 1.55 !important;
+    margin: 0 auto 48px !important;
+    font-weight: 400 !important;
+  }
+
+  /* Search: silencioso, sin elevación, foco discreto */
+  .search-box {
+    border: 1px solid var(--vlx-line-2) !important;
+    border-radius: var(--vlx-radius) !important;
+    box-shadow: var(--vlx-shadow-sm) !important;
+    overflow: hidden !important;
+    transition: box-shadow .15s ease, border-color .15s ease, transform 0s !important;
+  }
+  .search-box:focus-within {
+    border-color: var(--vlx-ink) !important;
+    box-shadow: var(--vlx-shadow), 0 0 0 4px rgba(17,17,17,0.04) !important;
+    transform: none !important;
+  }
+  .search-input {
+    padding: 18px 22px !important;
+    font-size: 16px !important;
+    font-weight: 400 !important;
+    color: var(--vlx-ink) !important;
+  }
+  .search-input::placeholder { color: var(--vlx-ink-4) !important; }
+  .search-btn {
+    padding: 0 24px !important;
+    background: var(--vlx-ink) !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.01em !important;
+    transition: opacity .12s ease !important;
+  }
+  .search-btn:hover { background: var(--vlx-ink) !important; opacity: 0.9 !important; }
+
+  /* Chips: outline finito */
+  .suggestion-chip {
+    background: var(--vlx-paper) !important;
+    border: 1px solid var(--vlx-line-2) !important;
+    color: var(--vlx-ink-2) !important;
+    font-weight: 500 !important;
+    border-radius: 999px !important;
+    padding: 7px 14px !important;
+    transition: border-color .12s ease, color .12s ease, background .12s ease !important;
+  }
+  .suggestion-chip:hover {
+    background: var(--vlx-accent-soft) !important;
+    border-color: var(--vlx-line) !important;
+    color: var(--vlx-ink) !important;
+  }
+
+  /* Tarjetas / superficies: aire, sin glow */
+  .ai-card,
+  .card,
+  .feature-card,
+  .pricing-card,
+  .vertical-card,
+  .stat-card {
+    background: var(--vlx-paper) !important;
+    border: 1px solid var(--vlx-line) !important;
+    border-radius: var(--vlx-radius-lg) !important;
+    box-shadow: var(--vlx-shadow-sm) !important;
+  }
+
+  /* Tipografía de secciones */
+  h2, h3, h4 {
+    color: var(--vlx-ink) !important;
+    letter-spacing: -0.025em !important;
+    font-weight: 600 !important;
+  }
+  h2 { font-size: var(--vlx-fs-h2) !important; line-height: 1.15 !important; }
+  h3 { font-size: 20px !important; line-height: 1.3 !important; }
+
+  /* Footer: limpio */
+  footer {
+    background: var(--vlx-paper-2) !important;
+    border-top: 1px solid var(--vlx-line) !important;
+    color: var(--vlx-ink-3) !important;
+    font-size: var(--vlx-fs-sm) !important;
+  }
+  footer a { color: var(--vlx-ink-2) !important; }
+
+  /* Apaga gradientes/decoraciones globales que ensucian */
+  .hero::before, .hero::after { display: none !important; }
 </style>
 <script src="volvix-api.js"></script>
 <script src="volvix-sync.js"></script>
