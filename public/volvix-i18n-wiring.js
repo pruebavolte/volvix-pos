@@ -317,7 +317,7 @@
       "auto.email_masivo": "Email Masivo",
       "auto.embarque_y_tracking": "Embarque y tracking",
       "auto.emergencia_p0": "Emergencia P0",
-      "auto.empezar_14_d_as_gratis": "Empezar 14 días gratis",
+      "auto.empezar_14_d_as_gratis": "Empezar gratis",
       "auto.empezar_gratis": "Empezar gratis",
       "auto.empieza_a_operar_mejor_hoy_mismo": "Empieza a operar mejor hoy mismo",
       "auto.empresa": "Empresa",

@@ -1865,7 +1865,7 @@ ${testiHTML}
         <li>Reportes avanzados</li>
         <li>Soporte prioritario 24/7</li>
       </ul>
-      <a href="owner.html" class="btn btn-primary" style="display:block;text-align:center" onclick="try{fetch('/api/log/client',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event:'cta_click',pos:'pricing_pro',page:'landing-${g.slug}',ts:Date.now()})})}catch(e){}">Activar Pro — 14 días gratis</a>
+      <a href="owner.html" class="btn btn-primary" style="display:block;text-align:center" onclick="try{fetch('/api/log/client',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event:'cta_click',pos:'pricing_pro',page:'landing-${g.slug}',ts:Date.now()})})}catch(e){}">Activar Pro — gratis</a>
     </div>
     <div class="price-card">
       <div class="price-name">Cadena</div>

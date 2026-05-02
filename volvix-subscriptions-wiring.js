@@ -33,7 +33,7 @@
             id: 'trial',
             name: 'Trial',
             price: { monthly: 0, annual: 0 },
-            features: ['Acceso completo Pro', '14 días', 'Sin tarjeta'],
+            features: ['Acceso completo Pro', 'Prueba gratis', 'Sin tarjeta'],
             limits: { terminals: 3, products: 1000, users: 5, storage_mb: 1024 },
             trial_days: 14,
             tier: 1

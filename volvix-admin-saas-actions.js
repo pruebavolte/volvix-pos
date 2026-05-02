@@ -110,7 +110,7 @@
           validate: function (v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v||'') ? null : 'Email inválido'; } },
         { name: 'plan', label: 'Plan', type: 'select', required: true,
           options: [
-            { value: 'trial',      label: 'Trial (14 días)' },
+            { value: 'trial',      label: 'Prueba gratis' },
             { value: 'starter',    label: 'Starter ($29/mo)' },
             { value: 'pro',        label: 'Pro ($99/mo)' },
             { value: 'business',   label: 'Business ($299/mo)' },

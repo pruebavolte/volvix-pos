@@ -281,7 +281,7 @@ function buildJsonLd(slug, title, desc, canonical, ogImage) {
           priceCurrency: 'MXN',
           availability: 'https://schema.org/InStock',
           url: canonical,
-          description: 'Prueba 14 días gratis sin tarjeta de crédito'
+          description: 'Prueba gratis sin tarjeta de crédito'
         },
         aggregateRating: {
           '@type': 'AggregateRating',
