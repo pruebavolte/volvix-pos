@@ -340,8 +340,10 @@ module.exports = async function handleEmail(req, res, parsedUrl, ctx) {
   const path = parsedUrl?.pathname || '';
   if (!path.startsWith('/api/email')) return false;
 
+  // sendJson firma: (res, body, status). Aquí mantenemos el wrapper local
+  // (code, body) por simplicidad pero traducimos al orden correcto.
   const send = (code, body) => (typeof sendJson === 'function')
-    ? sendJson(res, code, body)
+    ? sendJson(res, body, code)
     : (res.statusCode = code, res.setHeader('Content-Type','application/json'), res.end(JSON.stringify(body)));
 
   const requireAuth = async () => {

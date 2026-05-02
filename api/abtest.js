@@ -370,6 +370,22 @@ module.exports = async function handleAbtest(req, res, parsedUrl, ctx) {
     return false;
   }
 
+  // FIX: este módulo fue escrito asumiendo sendJson(res, status, body) pero
+  // index.js inyecta sendJson = sendJSON con firma (res, body, status). Aquí
+  // wrappeamos para que las llamadas internas (status, body) funcionen sin
+  // tener que tocar 14 sitios.
+  const _origSendJson = ctx.sendJson;
+  ctx = Object.assign({}, ctx, {
+    sendJson: function (resArg, statusOrBody, bodyOrStatus) {
+      // Caso (res, status, body) — status numérico → traducir a (res, body, status)
+      if (typeof statusOrBody === 'number') {
+        return _origSendJson(resArg, bodyOrStatus, statusOrBody);
+      }
+      // Caso (res, body, status?) — pasar tal cual
+      return _origSendJson(resArg, statusOrBody, bodyOrStatus);
+    }
+  });
+
   if (method === 'POST' && pathname === '/api/abtest/assign') {
     await handleAssign(req, res, ctx);
     return true;
