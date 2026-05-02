@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#dc2626">
+<title>MODO EMERGENCIA — Volvix POS</title>
+<style>
+  :root{
+    --bg:#0a0a0a; --panel:#1a1a1a; --border:#2a2a2a; --text:#fff;
+    --muted:#888; --ok:#10b981; --err:#ef4444; --warn:#f59e0b;
+    --emergency:#dc2626;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,Segoe UI,Roboto,sans-serif;
+    background:var(--bg); color:var(--text); min-height:100vh;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+  .banner{
+    background:var(--emergency); padding:10px 16px; text-align:center;
+    font-weight:700; letter-spacing:.5px; font-size:.85rem;
+    border-bottom:2px solid #991b1b;
+  }
+  .banner.hidden{display:none}
+  .layout{display:grid;grid-template-columns:1fr 380px;min-height:calc(100vh - 48px)}
+  .sale-area{padding:20px;overflow-y:auto}
+  .totals-area{
+    background:var(--panel); border-left:1px solid var(--border);
+    padding:24px 20px; display:flex; flex-direction:column;
+  }
+  h1{font-size:1.2rem;font-weight:600;margin-bottom:16px;color:var(--muted);
+     text-transform:uppercase; letter-spacing:1px}
+  .quick-products{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:24px}
+  .qp-btn{
+    background:var(--panel); border:1px solid var(--border);
+    border-radius:10px; padding:16px 12px; cursor:pointer; color:var(--text);
+    font-size:.95rem; transition:all .15s; min-height:80px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+  }
+  .qp-btn:active{transform:scale(.96);background:#2a2a2a}
+  .qp-btn .price{color:var(--ok);font-weight:700;margin-top:4px}
+  .add-custom{margin-bottom:20px;display:flex;gap:8px}
+  .add-custom input, .add-custom button{
+    background:var(--panel); border:1px solid var(--border);
+    border-radius:8px; padding:12px 14px; color:var(--text); font-size:1rem;
+  }
+  .add-custom input{flex:1;min-width:0}
+  .add-custom button{background:var(--ok);color:#000;font-weight:700;cursor:pointer;border-color:var(--ok)}
+  .add-custom button:active{opacity:.7}
+  .cart-list{margin-bottom:16px;max-height:320px;overflow-y:auto}
+  .cart-item{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:10px 0; border-bottom:1px solid var(--border);
+  }
+  .cart-item .name{flex:1;font-size:.95rem}
+  .cart-item .price{color:var(--ok);font-weight:600;margin-left:8px}
+  .cart-item .rm{
+    background:none;border:none;color:var(--err);font-size:1.4rem;
+    cursor:pointer;padding:4px 8px;
+  }
+  .cart-empty{color:var(--muted);text-align:center;padding:20px;font-size:.9rem}
+  .totals{margin-top:auto;padding-top:16px;border-top:1px solid var(--border)}
+  .total-row{display:flex;justify-content:space-between;font-size:1.1rem;margin-bottom:8px}
+  .total-row.grand{font-size:1.6rem;font-weight:700;color:var(--ok);
+                   border-top:1px solid var(--border);padding-top:12px;margin-top:8px}
+  .checkout-btn{
+    background:var(--ok); color:#000; border:none; border-radius:10px;
+    padding:18px; font-size:1.15rem; font-weight:700; cursor:pointer;
+    margin-top:16px; width:100%;
+  }
+  .checkout-btn:disabled{opacity:.4;cursor:not-allowed}
+  .checkout-btn:active:not(:disabled){opacity:.8}
+  .ticket-modal{
+    position:fixed; inset:0; background:rgba(0,0,0,.85);
+    display:none; align-items:center; justify-content:center; padding:20px; z-index:100;
+  }
+  .ticket-modal.show{display:flex}
+  .ticket-paper{
+    background:#fff; color:#000; padding:24px; border-radius:8px;
+    max-width:380px; width:100%; font-family:'Courier New',monospace;
+    font-size:.85rem; max-height:90vh; overflow-y:auto;
+  }
+  .ticket-paper hr{border:0;border-top:1px dashed #999;margin:8px 0}
+  .ticket-paper h2{font-size:1.1rem;text-align:center;margin-bottom:6px}
+  .ticket-actions{display:flex;gap:8px;margin-top:16px}
+  .ticket-actions button{
+    flex:1;padding:12px;border:0;border-radius:6px;font-weight:700;cursor:pointer;
+  }
+  .btn-print{background:#3b82f6;color:#fff}
+  .btn-close{background:#374151;color:#fff}
+  .pending-syncs{
+    background:rgba(245,158,11,.15); border:1px solid var(--warn);
+    border-radius:8px; padding:10px 14px; margin-bottom:16px;
+    font-size:.85rem; color:var(--warn);
+  }
+  .pending-syncs .progress-track{
+    margin-top:8px; height:6px; background:rgba(255,255,255,.08);
+    border-radius:3px; overflow:hidden;
+  }
+  .pending-syncs .progress-fill{
+    height:100%; background:var(--warn); width:0%; transition:width .3s ease;
+  }
+  .pending-syncs.syncing .progress-fill{background:#3b82f6}
+  .pending-syncs .label-row{display:flex;justify-content:space-between;align-items:center}
+  .exit-row{display:flex;gap:8px;margin-top:16px}
+  .exit-btn{
+    flex:1; background:var(--border); color:var(--text); border:0;
+    border-radius:8px; padding:12px; font-size:.9rem; cursor:pointer;
+  }
+  .exit-btn.primary{background:var(--ok);color:#000;font-weight:700}
+  .exit-btn:disabled{opacity:.4;cursor:not-allowed}
+  .conn-state{
+    display:inline-flex; align-items:center; gap:6px; font-size:.78rem;
+    color:var(--muted); margin-left:8px;
+  }
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--err)}
+  .dot.online{background:var(--ok)}
+  @media (max-width:768px){
+    .layout{grid-template-columns:1fr}
+    .totals-area{border-left:0;border-top:1px solid var(--border)}
+    .quick-products{grid-template-columns:repeat(auto-fill,minmax(110px,1fr))}
+  }
+  @media print{
+    body > *:not(.ticket-modal){display:none!important}
+    .ticket-modal{position:static;background:#fff;display:block!important;padding:0}
+    .ticket-paper{box-shadow:none;max-width:none;width:auto}
+    .ticket-actions{display:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="banner" id="banner" role="alert">
+  MODO EMERGENCIA ACTIVO — Solo cash, sin DB
+  <span class="conn-state">
+    <span class="dot" id="connDot"></span>
+    <span id="connText">offline</span>
+  </span>
+  <span class="conn-state" id="userInfo" style="margin-left:12px"></span>
+</div>
+
+<div class="layout">
+
+  <div class="sale-area">
+    <h1>Productos rápidos</h1>
+    <div class="quick-products" id="quickProducts" aria-label="Productos rápidos"></div>
+
+    <h1>Producto manual</h1>
+    <form class="add-custom" id="customForm" autocomplete="off">
+      <input type="text" id="customName" placeholder="Descripción" required minlength="1" maxlength="60" aria-label="Descripción">
+      <input type="number" id="customPrice" placeholder="$" required min="0.01" step="0.01" inputmode="decimal" aria-label="Precio">
+      <button type="submit">+</button>
+    </form>
+
+    <div id="pendingBanner" class="pending-syncs" style="display:none" role="status" aria-live="polite">
+      <div class="label-row">
+        <span id="pendingLabel">0 ventas pendientes</span>
+        <span id="pendingCounts" style="font-variant-numeric:tabular-nums">0/0</span>
+      </div>
+      <div class="progress-track" aria-hidden="true"><div class="progress-fill" id="pendingProgress"></div></div>
+    </div>
+  </div>
+
+  <div class="totals-area">
+    <h1>Carrito</h1>
+    <div class="cart-list" id="cartList"></div>
+
+    <div class="totals">
+      <div class="total-row">
+        <span>Items</span>
+        <span id="itemCount">0</span>
+      </div>
+      <div class="total-row grand">
+        <span>Total</span>
+        <span id="grandTotal">$0.00</span>
+      </div>
+
+      <button class="checkout-btn" id="checkoutBtn" disabled>
+        Cobrar EFECTIVO
+      </button>
+
+      <div class="exit-row">
+        <button class="exit-btn" id="probeBtn">Probar conexión</button>
+        <button class="exit-btn" id="syncNowBtn" disabled>Sincronizar ahora</button>
+        <button class="exit-btn primary" id="exitEmergencyBtn" disabled>Salir de emergencia</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="ticket-modal" id="ticketModal" role="dialog" aria-modal="true" aria-labelledby="ticketTitle">
+  <div class="ticket-paper" id="ticketPaper" tabindex="-1">
+    <h2 id="ticketTitle">VOLVIX POS — TICKET</h2>
+    <div id="ticketBody"></div>
+    <div class="ticket-actions">
+      <button class="btn-print" id="printBtn">Imprimir</button>
+      <button class="btn-close" id="closeTicketBtn">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  // -------------------------------------------------------------------------
+  // FIX-DR3 — EMERGENCY MODE (offline-first)
+  // - Funciona 100% offline: IndexedDB para ventas locales
+  // - Cuando vuelve la red, intenta sincronizar al backend con header
+  //   X-Emergency-Mode: true. Si falla, mantiene en queue local.
+  // - Coherence Charter: R1 label↔handler, R2 validation, R3 loading/err/ok
+  //
+  // FIX-9a-2: AUTH OBLIGATORIO. La página exige JWT válido. Sin token o token
+  // expirado → redirect a /login.html?redirect=/volvix-emergency-mode.html.
+  // El JWT provee: tenant_id, cashier_id, cashier_email — todos los SALES en
+  // IndexedDB y en el sync los incluyen para que el backend NO los acepte
+  // del payload (anti-spoof).
+  // -------------------------------------------------------------------------
+
+  // ============================================================
+  // FIX-9a-2: AUTH GATE — debe correr ANTES de cualquier UI
+  // ============================================================
+  function decodeJwt(tok){
+    try{
+      var parts = String(tok).split('.');
+      if (parts.length < 2) return null;
+      // Base64URL → Base64
+      var b64 = parts[1].replace(/-/g,'+').replace(/_/g,'/');
+      // Padding
+      while (b64.length % 4) b64 += '=';
+      var json = atob(b64);
+      return JSON.parse(json);
+    } catch(e){ return null; }
+  }
+  function getStoredToken(){
+    try {
+      return localStorage.getItem('volvix_token')
+          || localStorage.getItem('volvixAuthToken')
+          || null;
+    } catch(_){ return null; }
+  }
+  function redirectToLogin(reason){
+    try{
+      var here = '/volvix-emergency-mode.html';
+      var url = '/login.html?redirect=' + encodeURIComponent(here);
+      if (reason) url += '&reason=' + encodeURIComponent(reason);
+      window.location.replace(url);
+    } catch(_){
+      window.location.href = '/login.html';
+    }
+  }
+
+  var __token = getStoredToken();
+  var __jwt = __token ? decodeJwt(__token) : null;
+  var __nowSec = Math.floor(Date.now()/1000);
+  if (!__token || !__jwt || (__jwt.exp && __jwt.exp <= __nowSec)){
+    // No hay token o expirado → redirect (no renderizar nada)
+    redirectToLogin(!__token ? 'no_token' : 'expired');
+    return;
+  }
+
+  // Datos del cajero firmados por el backend — single source of truth.
+  var AUTH = {
+    token:    __token,
+    tenantId: __jwt.tenant_id || null,
+    userId:   __jwt.id || __jwt.sub || null,
+    email:    __jwt.email || null,
+    role:     __jwt.role || null,
+    name:     __jwt.name || __jwt.email || 'Cajero'
+  };
+  if (!AUTH.tenantId || !AUTH.userId){
+    redirectToLogin('incomplete_jwt');
+    return;
+  }
+  // Device id estable para auditoría (no cambia entre reloads del mismo navegador)
+  var DEVICE_ID = (function(){
+    try {
+      var k = 'volvix_emergency_device_id';
+      var v = localStorage.getItem(k);
+      if (!v) {
+        v = 'dev-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,10);
+        localStorage.setItem(k, v);
+      }
+      return v;
+    } catch(_) { return 'dev-' + Date.now().toString(36); }
+  })();
+
+  var DB_NAME = 'volvix_emergency';
+  var DB_VERSION = 1;
+  var STORE_SALES = 'sales_offline';
+  var STORE_QUICK = 'quick_products';
+  var SYNC_ENDPOINT = '/api/sales/emergency-sync'; // backend wiring en R9a
+
+  // Quick products predefinidos (editables después en el futuro)
+  var DEFAULT_QUICK = [
+    { name: 'Producto A', price: 25.00 },
+    { name: 'Producto B', price: 50.00 },
+    { name: 'Producto C', price: 100.00 },
+    { name: 'Refresco',   price: 18.00 },
+    { name: 'Café',       price: 35.00 },
+    { name: 'Snack',      price: 22.00 }
+  ];
+
+  var cart = [];
+  var dbHandle = null;
+  var pendingCount = 0;
+  var isOnline = (typeof navigator !== 'undefined' && 'onLine' in navigator) ? navigator.onLine : true;
+  var serverReachable = false;
+
+  function $(id){ return document.getElementById(id); }
+  function escapeHtml(s){
+    return String(s||'').replace(/[&<>"']/g, function(c){
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
+    });
+  }
+  function fmt(n){ return '$' + (Number(n)||0).toFixed(2); }
+  function uuid(){
+    return 'em-' + Date.now() + '-' + Math.random().toString(36).slice(2,10);
+  }
+
+  // -------- IndexedDB helpers --------
+  function openDb(){
+    return new Promise(function(resolve, reject){
+      var req = indexedDB.open(DB_NAME, DB_VERSION);
+      req.onupgradeneeded = function(e){
+        var db = e.target.result;
+        if (!db.objectStoreNames.contains(STORE_SALES)){
+          var s = db.createObjectStore(STORE_SALES, { keyPath: 'id' });
+          s.createIndex('synced', 'synced', { unique:false });
+          s.createIndex('created_at', 'created_at', { unique:false });
+        }
+        if (!db.objectStoreNames.contains(STORE_QUICK)){
+          var q = db.createObjectStore(STORE_QUICK, { keyPath: 'id', autoIncrement:true });
+        }
+      };
+      req.onsuccess = function(e){ resolve(e.target.result); };
+      req.onerror = function(e){ reject(e.target.error); };
+    });
+  }
+  function tx(store, mode){
+    var t = dbHandle.transaction(store, mode);
+    return t.objectStore(store);
+  }
+  function dbGet(store, k){
+    return new Promise(function(res, rej){
+      var r = tx(store,'readonly').get(k);
+      r.onsuccess = function(){ res(r.result); };
+      r.onerror = function(){ rej(r.error); };
+    });
+  }
+  function dbPut(store, value){
+    return new Promise(function(res, rej){
+      var r = tx(store,'readwrite').put(value);
+      r.onsuccess = function(){ res(r.result); };
+      r.onerror = function(){ rej(r.error); };
+    });
+  }
+  function dbAll(store){
+    return new Promise(function(res, rej){
+      var out = [];
+      var r = tx(store,'readonly').openCursor();
+      r.onsuccess = function(e){
+        var cur = e.target.result;
+        if (cur){ out.push(cur.value); cur.continue(); } else res(out);
+      };
+      r.onerror = function(){ rej(r.error); };
+    });
+  }
+  function dbDel(store, k){
+    return new Promise(function(res, rej){
+      var r = tx(store,'readwrite').delete(k);
+      r.onsuccess = function(){ res(); };
+      r.onerror = function(){ rej(r.error); };
+    });
+  }
+
+  // -------- UI rendering --------
+  function renderQuickProducts(){
+    var grid = $('quickProducts');
+    grid.innerHTML = '';
+    DEFAULT_QUICK.forEach(function(p){
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'qp-btn';
+      btn.innerHTML = '<div>' + escapeHtml(p.name) + '</div>' +
+                      '<div class="price">' + fmt(p.price) + '</div>';
+      btn.addEventListener('click', function(){ addToCart(p.name, p.price); });
+      grid.appendChild(btn);
+    });
+  }
+  function addToCart(name, price){
+    cart.push({ id: uuid(), name:name, price:Number(price)||0, qty:1 });
+    renderCart();
+  }
+  function removeFromCart(id){
+    cart = cart.filter(function(it){ return it.id !== id; });
+    renderCart();
+  }
+  function renderCart(){
+    var list = $('cartList');
+    if (!cart.length){
+      list.innerHTML = '<div class="cart-empty">Carrito vacío. Agrega productos para cobrar.</div>';
+    } else {
+      list.innerHTML = cart.map(function(it){
+        return '<div class="cart-item">' +
+                 '<span class="name">' + escapeHtml(it.name) + '</span>' +
+                 '<span class="price">' + fmt(it.price) + '</span>' +
+                 '<button class="rm" data-id="' + it.id + '" aria-label="Quitar">×</button>' +
+               '</div>';
+      }).join('');
+      list.querySelectorAll('.rm').forEach(function(b){
+        b.addEventListener('click', function(){ removeFromCart(b.dataset.id); });
+      });
+    }
+    var total = cart.reduce(function(s,it){ return s + (Number(it.price)||0); }, 0);
+    $('itemCount').textContent = String(cart.length);
+    $('grandTotal').textContent = fmt(total);
+    $('checkoutBtn').disabled = cart.length === 0;
+  }
+
+  // -------- Checkout offline --------
+  function checkout(){
+    if (!cart.length) return;
+    var total = cart.reduce(function(s,it){ return s + (Number(it.price)||0); }, 0);
+    var sale = {
+      id: uuid(),
+      created_at: new Date().toISOString(),
+      payment_method: 'cash',
+      emergency_mode: true,
+      items: cart.slice(),
+      total: Math.round(total * 100) / 100,
+      synced: 0,
+      sync_attempts: 0,
+      // FIX-9a-2: incluir identidad firmada del JWT (auditoría + recordatorio
+      // de quién registró la venta cuando se sync). El backend IGNORA estos
+      // campos y los re-extrae del JWT, son solo para trazabilidad local.
+      tenant_id:      AUTH.tenantId,
+      cashier_id:     AUTH.userId,
+      cashier_email:  AUTH.email,
+      device_id:      DEVICE_ID
+    };
+    dbPut(STORE_SALES, sale).then(function(){
+      printTicket(sale);
+      cart = [];
+      renderCart();
+      updatePendingCount();
+      // Intentar sync inmediato si online
+      trySync();
+    }).catch(function(err){
+      alert('Error guardando venta offline: ' + (err && err.message || err));
+    });
+  }
+  function printTicket(sale){
+    var lines = [];
+    lines.push('Ticket: ' + sale.id);
+    lines.push('Fecha: ' + new Date(sale.created_at).toLocaleString());
+    lines.push('Modo: EMERGENCIA (offline)');
+    lines.push('<hr>');
+    sale.items.forEach(function(it){
+      lines.push('<div style="display:flex;justify-content:space-between">' +
+                 '<span>' + escapeHtml(it.name) + '</span>' +
+                 '<span>' + fmt(it.price) + '</span></div>');
+    });
+    lines.push('<hr>');
+    lines.push('<div style="display:flex;justify-content:space-between;font-weight:700;font-size:1.1rem">' +
+               '<span>TOTAL EFECTIVO</span><span>' + fmt(sale.total) + '</span></div>');
+    lines.push('<hr>');
+    lines.push('<div style="text-align:center;font-size:.75rem">Pendiente de sincronizar al recuperar conexión</div>');
+    $('ticketBody').innerHTML = lines.join('\n');
+    $('ticketModal').classList.add('show');
+    setTimeout(function(){ $('ticketPaper').focus(); }, 100);
+  }
+
+  // -------- Sync logic --------
+  // Track total batch size to render X/Y progress (total = ventas creadas en esta sesión)
+  var syncTotalSeen = 0;
+  function updatePendingCount(){
+    return dbAll(STORE_SALES).then(function(sales){
+      pendingCount = sales.filter(function(s){ return !s.synced; }).length;
+      var totalAll = sales.length;
+      // total seen = max(totalAll, totalAll-pending+pendingCount-historical) — usamos el total absoluto
+      if (totalAll > syncTotalSeen) syncTotalSeen = totalAll;
+      var banner = $('pendingBanner');
+      var label  = $('pendingLabel');
+      var counts = $('pendingCounts');
+      var fill   = $('pendingProgress');
+      if (pendingCount > 0){
+        banner.style.display = 'block';
+        if (label)  label.textContent  = pendingCount + ' venta' + (pendingCount===1?'':'s') + ' pendiente' + (pendingCount===1?'':'s') + ' de sincronizar';
+        var done = Math.max(0, syncTotalSeen - pendingCount);
+        if (counts) counts.textContent = done + '/' + syncTotalSeen;
+        if (fill)   fill.style.width   = (syncTotalSeen ? Math.round((done/syncTotalSeen)*100) : 0) + '%';
+      } else {
+        banner.style.display = 'none';
+        if (fill) fill.style.width = '100%';
+        // reset when all done
+        syncTotalSeen = 0;
+      }
+      $('syncNowBtn').disabled = !(pendingCount > 0 && isOnline);
+      // Solo permitir salir de emergencia si: online + cero pendientes
+      $('exitEmergencyBtn').disabled = !(isOnline && serverReachable && pendingCount === 0);
+      return pendingCount;
+    });
+  }
+  function trySync(){
+    if (!isOnline) return Promise.resolve({skipped:'offline'});
+    var __banner = $('pendingBanner'); if (__banner) __banner.classList.add('syncing');
+    // FIX-9a-2: si el token expiró mientras estábamos offline, no podemos sync.
+    // En ese caso, mostrar warning pero NO redirigir (el cajero puede seguir
+    // cobrando offline; al volver a login se re-sincroniza).
+    var jwt = decodeJwt(AUTH.token);
+    if (!jwt || (jwt.exp && jwt.exp <= Math.floor(Date.now()/1000))) {
+      return Promise.resolve({ ok:false, skipped:'token_expired', synced:0, failed:0 });
+    }
+    return dbAll(STORE_SALES).then(function(sales){
+      var unsynced = sales.filter(function(s){ return !s.synced; });
+      if (!unsynced.length) return { ok:true, synced:0, failed:0 };
+      // FIX-9a-1: el backend acepta batch — enviamos hasta 200 por request.
+      // Si hay más, dividimos en chunks.
+      var CHUNK = 100;
+      var chunks = [];
+      for (var i = 0; i < unsynced.length; i += CHUNK) {
+        chunks.push(unsynced.slice(i, i + CHUNK));
+      }
+      var totalOk = 0, totalFailed = 0;
+      var chain = Promise.resolve();
+      chunks.forEach(function(group){
+        chain = chain.then(function(){
+          return fetch(SYNC_ENDPOINT, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Emergency-Mode': 'true',
+              'Authorization': 'Bearer ' + AUTH.token
+            },
+            body: JSON.stringify({
+              device_id: DEVICE_ID,
+              sales: group.map(function(s){
+                return {
+                  id: s.id,
+                  created_at: s.created_at,
+                  payment_method: s.payment_method,
+                  items: s.items,
+                  total: s.total,
+                  sync_attempts: s.sync_attempts || 0
+                };
+              })
+            })
+          }).then(function(r){
+            // 401 → token inválido / expirado: marcar todas como failed con motivo
+            if (r.status === 401 || r.status === 403) {
+              return r.json().catch(function(){return{};}).then(function(j){
+                group.forEach(function(s){
+                  s.sync_attempts = (s.sync_attempts||0) + 1;
+                  s.last_error = 'auth_failed: ' + (j && j.error || r.status);
+                  totalFailed++;
+                  return dbPut(STORE_SALES, s);
+                });
+                return Promise.all(group.map(function(s){ return dbPut(STORE_SALES, s); }));
+              });
+            }
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json().then(function(resp){
+              // resp.inserted: [{id, sale_id, deduped?, fallback_schema?}, ...]
+              // resp.errors:   [{id, reason, ...}, ...]
+              var insertedMap = {};
+              (resp.inserted||[]).forEach(function(x){ if (x && x.id) insertedMap[x.id] = x; });
+              var errMap = {};
+              (resp.errors||[]).forEach(function(x){ if (x && x.id) errMap[x.id] = x; });
+              var puts = [];
+              group.forEach(function(s){
+                if (insertedMap[s.id]) {
+                  s.synced = 1;
+                  s.synced_at = new Date().toISOString();
+                  s.server_sale_id = insertedMap[s.id].sale_id || null;
+                  totalOk++;
+                  puts.push(dbPut(STORE_SALES, s));
+                } else if (errMap[s.id]) {
+                  s.sync_attempts = (s.sync_attempts||0) + 1;
+                  s.last_error = String(errMap[s.id].reason || 'unknown').slice(0,200);
+                  totalFailed++;
+                  puts.push(dbPut(STORE_SALES, s));
+                } else {
+                  // No mencionada → asumir failed para reintentar
+                  s.sync_attempts = (s.sync_attempts||0) + 1;
+                  s.last_error = 'no_response_for_id';
+                  totalFailed++;
+                  puts.push(dbPut(STORE_SALES, s));
+                }
+              });
+              return Promise.all(puts);
+            });
+          }).catch(function(e){
+            // Falló el chunk completo (red, 5xx) — marcar todos en este chunk
+            var puts = [];
+            group.forEach(function(s){
+              s.sync_attempts = (s.sync_attempts||0) + 1;
+              s.last_error = String(e && e.message || e).slice(0,200);
+              totalFailed++;
+              puts.push(dbPut(STORE_SALES, s));
+            });
+            return Promise.all(puts);
+          });
+        });
+      });
+      return chain.then(function(){
+        return { ok: totalFailed === 0, synced: totalOk, failed: totalFailed };
+      });
+    }).then(function(res){
+      var b = $('pendingBanner'); if (b) b.classList.remove('syncing');
+      updatePendingCount();
+      return res;
+    });
+  }
+
+  // -------- Connectivity probing --------
+  function probeServer(){
+    if (!isOnline) {
+      serverReachable = false;
+      updateConnUI();
+      return Promise.resolve(false);
+    }
+    return fetch('/api/health', { method:'GET', cache:'no-store' })
+      .then(function(r){ serverReachable = r.ok; })
+      .catch(function(){ serverReachable = false; })
+      .then(function(){ updateConnUI(); return serverReachable; });
+  }
+  function updateConnUI(){
+    var dot = $('connDot');
+    var txt = $('connText');
+    if (isOnline && serverReachable){
+      dot.classList.add('online');
+      txt.textContent = 'online';
+    } else if (isOnline){
+      dot.classList.remove('online');
+      txt.textContent = 'sin servidor';
+    } else {
+      dot.classList.remove('online');
+      txt.textContent = 'offline';
+    }
+    updatePendingCount();
+  }
+
+  // -------- Wiring --------
+  $('checkoutBtn').addEventListener('click', checkout);
+  $('customForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var name = $('customName').value.trim();
+    var price = parseFloat($('customPrice').value);
+    if (!name || isNaN(price) || price <= 0) return;
+    addToCart(name, price);
+    $('customName').value = '';
+    $('customPrice').value = '';
+    $('customName').focus();
+  });
+  $('printBtn').addEventListener('click', function(){ window.print(); });
+  $('closeTicketBtn').addEventListener('click', function(){
+    $('ticketModal').classList.remove('show');
+  });
+  $('syncNowBtn').addEventListener('click', function(){
+    var btn = $('syncNowBtn');
+    btn.disabled = true;
+    btn.textContent = 'Sincronizando…';
+    trySync().then(function(res){
+      btn.textContent = res.ok ? ('Sincronizado: ' + (res.synced||0)) :
+                                  ('Falló ' + (res.failed||0) + ' venta(s)');
+      setTimeout(function(){ btn.textContent = 'Sincronizar ahora'; updatePendingCount(); }, 2200);
+    });
+  });
+  $('exitEmergencyBtn').addEventListener('click', function(){
+    if (!confirm('¿Salir de modo emergencia y volver al POS normal?\n' +
+                 'Verifica que todas las ventas se hayan sincronizado.')) return;
+    window.location.href = '/login.html';
+  });
+
+  // B44: Botón "Probar conexión" → /api/health + intento de sync inmediato
+  $('probeBtn').addEventListener('click', function(){
+    var btn = $('probeBtn');
+    var orig = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Probando…';
+    probeServer().then(function(ok){
+      if (ok) {
+        btn.textContent = '✓ Servidor OK';
+        // Drenar cola general localStorage si existe (B44 sync replay)
+        drainLocalStorageQueue();
+        return trySync();
+      } else {
+        btn.textContent = '✗ Sin servidor';
+      }
+    }).catch(function(){
+      btn.textContent = '✗ Error';
+    }).finally(function(){
+      setTimeout(function(){ btn.textContent = orig; btn.disabled = false; }, 1800);
+    });
+  });
+
+  // B44: drainLocalStorageQueue — drena `volvix_offline_queue` (cola
+  // genérica usada por otros módulos) llamando a /api/sync/replay.
+  // Backoff exponencial por item: si falla, retry_count++ y si supera 5
+  // se descarta para no bloquear el queue eternamente.
+  function drainLocalStorageQueue(){
+    var KEY = 'volvix_offline_queue';
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return Promise.resolve({ ok:true, drained:0 });
+      var queue = JSON.parse(raw);
+      if (!Array.isArray(queue) || !queue.length) return Promise.resolve({ ok:true, drained:0 });
+      var batch = queue.slice(0, 50).map(function(op){
+        return {
+          method: op.method || 'POST',
+          path: op.path,
+          body: op.body || {},
+          idempotency_key: op.idempotency_key || null
+        };
+      });
+      return fetch('/api/sync/replay', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + AUTH.token
+        },
+        body: JSON.stringify({ operations: batch })
+      }).then(function(r){
+        if (!r.ok) throw new Error('replay_failed: ' + r.status);
+        return r.json();
+      }).then(function(resp){
+        // Items con ok:true → eliminar del queue. Falls → retry_count++.
+        var keep = [];
+        var results = resp.results || [];
+        for (var i = 0; i < queue.length; i++) {
+          var res = results[i];
+          if (i < batch.length && res && res.ok) continue;
+          var item = queue[i];
+          item.retry_count = (item.retry_count || 0) + 1;
+          if (item.retry_count < 5) keep.push(item);
+        }
+        // Items más allá del batch quedan intactos para próxima ronda
+        var remaining = keep.concat(queue.slice(50));
+        if (remaining.length) localStorage.setItem(KEY, JSON.stringify(remaining));
+        else localStorage.removeItem(KEY);
+        return { ok: true, drained: (resp.replayed || 0) };
+      }).catch(function(e){
+        // Network/server error: backoff. No tocamos queue, próximo probe reintenta.
+        return { ok: false, error: String(e && e.message || e) };
+      });
+    } catch (_) { return Promise.resolve({ ok:false, error:'parse_failed' }); }
+  }
+
+  window.addEventListener('online',  function(){
+    isOnline = true;
+    probeServer().then(function(ok){
+      if (ok) { drainLocalStorageQueue(); trySync(); }
+    });
+  });
+  window.addEventListener('offline', function(){ isOnline = false; updateConnUI(); });
+
+  // -------- User info en topbar (FIX-9a-2) --------
+  function renderUserInfo(){
+    var el = $('userInfo');
+    if (!el) return;
+    var who = AUTH.email || AUTH.name || AUTH.userId || 'cajero';
+    var tnt = AUTH.tenantId ? String(AUTH.tenantId).slice(0,12) : '?';
+    el.textContent = '👤 ' + who + ' · 🏢 ' + tnt;
+  }
+
+  // -------- Init --------
+  renderUserInfo();
+  openDb().then(function(db){
+    dbHandle = db;
+    renderQuickProducts();
+    renderCart();
+    return probeServer();
+  }).then(function(){
+    updatePendingCount();
+    return trySync();
+  }).catch(function(err){
+    alert('Error inicializando emergency mode: ' + (err && err.message || err));
+  });
+
+  // Probe periódico cada 20s
+  setInterval(function(){ probeServer().then(function(ok){ if (ok) trySync(); }); }, 20000);
+})();
+</script>
+</body>
+</html>

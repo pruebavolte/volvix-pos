@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Indice completo de tutoriales, guías y documentación educativa de Volvix POS. Aprende todas las features en minutos.">
+<title>Indice Completo de Tutoriales — Volvix POS</title>
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+body {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #e2e8f0;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+h1 {
+  font-size: 2.5rem;
+  background: linear-gradient(90deg, #38bdf8, #a78bfa);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+.subtitle {
+  color: #94a3b8;
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+}
+
+.description {
+  color: #cbd5e1;
+  font-size: 0.95rem;
+  max-width: 700px;
+  margin: 0 auto 32px;
+}
+
+/* Navigation Tabs */
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  justify-content: center;
+  border-bottom: 1px solid #334155;
+  padding-bottom: 16px;
+}
+
+.tab-btn {
+  background: #1e293b;
+  color: #94a3b8;
+  border: 1px solid #334155;
+  padding: 10px 20px;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: 0.2s;
+}
+
+.tab-btn:hover {
+  background: #334155;
+  color: #e2e8f0;
+}
+
+.tab-btn.active {
+  background: linear-gradient(90deg, #38bdf8, #a78bfa);
+  color: #fff;
+  border-color: #38bdf8;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* Section Styles */
+.section {
+  background: #1e293b;
+  border-radius: 12px;
+  padding: 32px;
+  margin-bottom: 24px;
+  border: 1px solid #334155;
+}
+
+.section h2 {
+  font-size: 1.4rem;
+  color: #fde047;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section h2::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 24px;
+  background: linear-gradient(180deg, #38bdf8, #a78bfa);
+  border-radius: 2px;
+}
+
+/* Grid Styles */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.card {
+  background: #0b1220;
+  border-radius: 10px;
+  border: 1px solid #334155;
+  overflow: hidden;
+  transition: 0.2s;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  border-color: #38bdf8;
+  box-shadow: 0 12px 32px rgba(56, 189, 248, 0.15);
+}
+
+.card-icon {
+  background: linear-gradient(135deg, #334155, #475569);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  height: 120px;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-icon::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.2) 0%, transparent 70%);
+}
+
+.card-body {
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.card h3 {
+  font-size: 1.1rem;
+  color: #fde047;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.card p {
+  color: #94a3b8;
+  font-size: 0.9rem;
+  flex: 1;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.badge {
+  display: inline-block;
+  background: #334155;
+  color: #cbd5e1;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.badge.lvl-beginner {
+  background: #10b981;
+  color: #fff;
+}
+
+.badge.lvl-intermediate {
+  background: #f59e0b;
+  color: #fff;
+}
+
+.badge.lvl-advanced {
+  background: #ef4444;
+  color: #fff;
+}
+
+.card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #3b82f6;
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: 0.2s;
+  align-self: flex-start;
+  margin-top: auto;
+}
+
+.card-link:hover {
+  background: #2563eb;
+  gap: 12px;
+}
+
+/* Quick Links */
+.quick-links {
+  background: linear-gradient(135deg, #334155 0%, #475569 100%);
+  padding: 24px;
+  border-radius: 10px;
+  margin-bottom: 24px;
+}
+
+.quick-links h3 {
+  color: #fde047;
+  margin-bottom: 16px;
+  font-size: 1rem;
+}
+
+.quick-links-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.quick-link-item {
+  background: #1e293b;
+  padding: 12px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #38bdf8;
+  font-size: 0.9rem;
+  transition: 0.2s;
+  border-left: 3px solid #38bdf8;
+}
+
+.quick-link-item:hover {
+  background: #334155;
+  color: #a78bfa;
+  border-left-color: #a78bfa;
+}
+
+/* Stats */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  background: linear-gradient(135deg, #334155 0%, #475569 100%);
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #38bdf8;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  color: #64748b;
+  font-size: 0.85rem;
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid #334155;
+}
+
+footer a {
+  color: #38bdf8;
+  text-decoration: none;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 1.8rem;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section {
+    padding: 20px;
+  }
+
+  .tabs {
+    flex-direction: column;
+  }
+
+  .tab-btn {
+    border-radius: 8px;
+  }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>📚 Centro de Educación Volvix POS</h1>
+  <p class="subtitle">Indice Completo de Tutoriales y Guías</p>
+  <p class="description">Aprende todas las features de Volvix POS con tutoriales interactivos, artículos de ayuda y guías paso a paso. Desde tu primera venta hasta configuraciones avanzadas.</p>
+</header>
+
+<!-- Búsqueda con autocomplete -->
+<div style="max-width:720px;margin:0 auto 24px;position:relative;">
+  <input id="tutorial-search" type="text" placeholder="🔎 Busca tutorial: 'venta', 'producto', 'corte'..." autocomplete="off"
+         style="width:100%;padding:14px 18px;background:#1e293b;border:1px solid #334155;border-radius:10px;color:#e2e8f0;font-size:1rem;outline:none;transition:border-color .2s;"
+         oninput="onSearchInput(this.value)" onfocus="onSearchInput(this.value)" onblur="setTimeout(()=>document.getElementById('search-suggest').style.display='none',180)">
+  <div id="search-suggest" style="display:none;position:absolute;top:100%;left:0;right:0;background:#1e293b;border:1px solid #334155;border-top:0;border-radius:0 0 10px 10px;max-height:280px;overflow-y:auto;z-index:50;"></div>
+</div>
+
+<!-- Filtro por categoría/tags -->
+<div id="tag-filter" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:24px;">
+  <button class="tag-pill active" data-tag="all" onclick="filterByTag(this,'all')">Todos</button>
+  <button class="tag-pill" data-tag="inicio" onclick="filterByTag(this,'inicio')">🚀 Inicio rápido</button>
+  <button class="tag-pill" data-tag="pos" onclick="filterByTag(this,'pos')">💳 POS</button>
+  <button class="tag-pill" data-tag="inventario" onclick="filterByTag(this,'inventario')">📦 Inventario</button>
+  <button class="tag-pill" data-tag="reportes" onclick="filterByTag(this,'reportes')">📊 Reportes</button>
+  <button class="tag-pill" data-tag="avanzado" onclick="filterByTag(this,'avanzado')">⚙️ Avanzado</button>
+</div>
+
+<style>
+  .tag-pill { padding:8px 14px;background:#1e293b;border:1px solid #334155;border-radius:100px;color:#cbd5e1;font-size:0.85rem;font-weight:500;cursor:pointer;transition:all .2s; }
+  .tag-pill:hover { border-color:#38bdf8;color:#fff; }
+  .tag-pill.active { background:linear-gradient(90deg,#38bdf8,#a78bfa);color:#fff;border-color:#38bdf8; }
+  .suggest-item { display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-bottom:1px solid #334155;color:#e2e8f0;font-size:0.9rem; }
+  .suggest-item:hover { background:#334155;color:#fff; }
+  .suggest-item:last-child { border-bottom:0; }
+</style>
+
+<!-- Progreso global -->
+<div style="max-width:720px;margin:0 auto 32px;background:#1e293b;border:1px solid #334155;border-radius:12px;padding:18px 20px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+    <strong style="color:#fde047;">📈 Tu progreso global</strong>
+    <span id="progress-counter" style="color:#94a3b8;font-size:0.9rem;">0 / 28 completados</span>
+  </div>
+  <div style="height:10px;background:#0b1220;border-radius:6px;overflow:hidden;">
+    <div id="progress-fill-global" style="height:100%;background:linear-gradient(90deg,#38bdf8,#a78bfa);border-radius:6px;width:0%;transition:width .5s;"></div>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-number">10</div>
+    <div class="stat-label">Video-Tutoriales</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">20</div>
+    <div class="stat-label">Artículos de Ayuda</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">2</div>
+    <div class="stat-label">Guías Completas</div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab('tutorials')">🎬 Tutoriales Rápidos</button>
+  <button class="tab-btn" onclick="showTab('guides')">📖 Guías Completas</button>
+  <button class="tab-btn" onclick="showTab('help')">❓ Centro de Ayuda</button>
+  <button class="tab-btn" onclick="showTab('all')">📑 Todas las Páginas</button>
+</div>
+
+<!-- TAB 1: TUTORIALES RÁPIDOS -->
+<div id="tutorials" class="tab-content active">
+
+  <!-- VIDEO TUTORIALS - NUEVOS -->
+  <div class="section" style="border:2px solid #38bdf8;background:linear-gradient(135deg,#1e293b 0%,#1e3a8a22 100%)">
+    <h2 style="display:flex;align-items:center;gap:10px">📹 Video Tutoriales <span style="background:#dc2626;color:#fff;padding:3px 10px;border-radius:999px;font-size:.7rem;font-weight:700;letter-spacing:.05em">NUEVO</span></h2>
+    <p style="color:#94a3b8;margin-bottom:24px">Tutoriales tipo video con player interactivo, mouse animado y simulación paso a paso. ¡La forma más rápida de aprender!</p>
+
+    <div class="grid">
+
+      <!-- VIDEO 1 -->
+      <div class="card">
+        <div class="card-icon" style="background:linear-gradient(135deg,#dc2626,#ef4444)">
+          <svg viewBox="0 0 64 64" width="48" height="48" xmlns="http://www.w3.org/2000/svg" style="position:relative;z-index:1">
+            <rect x="2" y="10" width="60" height="44" rx="6" fill="#0f172a" stroke="#fff" stroke-width="2"/>
+            <circle cx="32" cy="32" r="14" fill="rgba(220,38,38,.95)"/>
+            <polygon points="28,24 28,40 42,32" fill="#fff"/>
+          </svg>
+        </div>
+        <div class="card-body">
+          <h3>📹 Tu Primera Venta</h3>
+          <p>Video tutorial 60s. Mira un cajero hacer una venta real con animación de mouse y POS simulado.</p>
+          <div class="card-meta">
+            <span class="badge" style="background:#dc2626;color:#fff">📹 VIDEO</span>
+            <span class="badge" style="background:#10b981;color:#fff">NUEVO</span>
+            <span class="badge lvl-beginner">Principiante</span>
+            <span class="badge">60s</span>
+          </div>
+          <a href="tutorials/video-como-hacer-venta.html" class="card-link">▶ Reproducir video</a>
+        </div>
+      </div>
+
+      <!-- VIDEO 2 -->
+      <div class="card">
+        <div class="card-icon" style="background:linear-gradient(135deg,#16a34a,#22c55e)">
+          <svg viewBox="0 0 64 64" width="48" height="48" xmlns="http://www.w3.org/2000/svg" style="position:relative;z-index:1">
+            <rect x="2" y="10" width="60" height="44" rx="6" fill="#0f172a" stroke="#fff" stroke-width="2"/>
+            <circle cx="32" cy="32" r="14" fill="rgba(22,163,74,.95)"/>
+            <polygon points="28,24 28,40 42,32" fill="#fff"/>
+          </svg>
+        </div>
+        <div class="card-body">
+          <h3>📹 Agregar un Producto</h3>
+          <p>Video tutorial 45s. Crea un nuevo producto en el inventario paso a paso con animación.</p>
+          <div class="card-meta">
+            <span class="badge" style="background:#dc2626;color:#fff">📹 VIDEO</span>
+            <span class="badge" style="background:#10b981;color:#fff">NUEVO</span>
+            <span class="badge lvl-beginner">Principiante</span>
+            <span class="badge">45s</span>
+          </div>
+          <a href="tutorials/video-agregar-producto.html" class="card-link">▶ Reproducir video</a>
+        </div>
+      </div>
+
+      <!-- VIDEO 3 -->
+      <div class="card">
+        <div class="card-icon" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)">
+          <svg viewBox="0 0 64 64" width="48" height="48" xmlns="http://www.w3.org/2000/svg" style="position:relative;z-index:1">
+            <rect x="2" y="10" width="60" height="44" rx="6" fill="#0f172a" stroke="#fff" stroke-width="2"/>
+            <circle cx="32" cy="32" r="14" fill="rgba(245,158,11,.95)"/>
+            <polygon points="28,24 28,40 42,32" fill="#fff"/>
+          </svg>
+        </div>
+        <div class="card-body">
+          <h3>📹 Corte de Caja</h3>
+          <p>Video tutorial 50s. Apertura, ventas y cierre con corte Z. Compara fondo final con esperado.</p>
+          <div class="card-meta">
+            <span class="badge" style="background:#dc2626;color:#fff">📹 VIDEO</span>
+            <span class="badge" style="background:#10b981;color:#fff">NUEVO</span>
+            <span class="badge lvl-intermediate">Intermedio</span>
+            <span class="badge">50s</span>
+          </div>
+          <a href="tutorials/video-corte-caja.html" class="card-link">▶ Reproducir video</a>
+        </div>
+      </div>
+
+      <!-- VIDEO 4 -->
+      <div class="card">
+        <div class="card-icon" style="background:linear-gradient(135deg,#a855f7,#c084fc)">
+          <svg viewBox="0 0 64 64" width="48" height="48" xmlns="http://www.w3.org/2000/svg" style="position:relative;z-index:1">
+            <rect x="2" y="10" width="60" height="44" rx="6" fill="#0f172a" stroke="#fff" stroke-width="2"/>
+            <circle cx="32" cy="32" r="14" fill="rgba(168,85,247,.95)"/>
+            <polygon points="28,24 28,40 42,32" fill="#fff"/>
+          </svg>
+        </div>
+        <div class="card-body">
+          <h3>📹 Crear un Cajero</h3>
+          <p>Video tutorial 40s. Invita un nuevo cajero al sistema desde el panel del owner.</p>
+          <div class="card-meta">
+            <span class="badge" style="background:#dc2626;color:#fff">📹 VIDEO</span>
+            <span class="badge" style="background:#10b981;color:#fff">NUEVO</span>
+            <span class="badge lvl-intermediate">Intermedio</span>
+            <span class="badge">40s</span>
+          </div>
+          <a href="tutorials/video-crear-cajero.html" class="card-link">▶ Reproducir video</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Tutoriales Interactivos (< 1 minuto)</h2>
+    <p style="color:#94a3b8;margin-bottom:24px">10 mini-tutoriales animados que te muestran visualmente cómo hacer cada tarea. Perfectos para aprender rápido.</p>
+
+    <div class="grid">
+      <!-- Tutorial 01 -->
+      <div class="card">
+        <div class="card-icon">💳</div>
+        <div class="card-body">
+          <h3>Tu Primera Venta</h3>
+          <p>Aprende a buscar un producto, agregarlo al carrito, cobrar e imprimir el ticket.</p>
+          <div class="card-meta">
+            <span class="badge lvl-beginner">Principiante</span>
+            <span class="badge">30s</span>
+          </div>
+          <a href="/tutorials/01-primera-venta.html" class="card-link">Ver Tutorial →</a>
+        </div>
+      </div>
+
+      <!-- Tutorial 02 -->
+      <div class="card">
+        <div class="card-icon">📦</div>
+        <div class="card-body">
+          <h3>Crear un Producto</h3>
+          <p>Paso a paso para crear nuevos productos con nombre, precio y stock inicial.</p>
+          <div class="card-meta">
+            <span class="badge lvl-beginner">Principiante</span>
+            <span class="badge">25s</span>
+          </div>
+          <a href="/tutorials/02-crear-producto.html" class="card-link">Ver Tutorial →</a>
+        </div>
+      </div>
+
+      <!-- Tutorial 03 -->
+      <div class="card">
+        <div class="card-icon">🔒</div>
+        <div class="card-body">
+          <h3>Cierre Z (Fin del Día)</h3>
+          <p>Cómo conciliar ventas, contar caja y cerrar correctamente el día.</p>
+          <div class="card-meta">
+            <span class="badge lvl-intermediate">Intermedio</span>
+            <span class="badge">25s</span>
+          </div>
+          <a href="/tutorials/03-cierre-z.html" class="card-link">Ver Tutorial →</a>
+        </div>
+      </div>
+
+      <!-- Tutorial 04 -->
+      <div class="card">
+        <div class="card-icon">📴</div>
+        <div class="card-body">
+          <h3>Modo Offline</h3>
+          <p>Cómo seguir vendiendo sin internet y sincronizar automáticamente al reconectar.</p>
+          <div class="card-meta">
+            <span class="badge lvl-intermediate">Intermedio</span>
+            <span class="badge">25s</span>
+          </div>
+          <a href="/tutorials/04-modo-offline.html" class="card-link">Ver Tutorial →</a>
+        </div>
+      </div>
+
+      <!-- Tutorial 05 -->
+      <div class="card">
+        <div class="card-icon">📋</div>
+        <div class="card-body">
+          <h3>Venta a Crédito</h3>
+          <p>Registra ventas a crédito, controla el saldo del cliente y registra abonos.</p>
+          <div class="card-meta">
+            <span class="badge lvl-intermediate">Intermedio</span>
+            <span class="badge">25s</span>
+          </div>
+          <a href="/tutorials/05-cliente-credito.html" class="card-link">Ver Tutorial →</a>
+        </div>
+      </div>
+
+      <!-- Tutorial 06 -->
+      <div class="card">
+        <div class="card-icon">⚙️</div>
+        <div class="card-body">
+          <h3>Activar Módulos</h3>
+          <p>Personaliza tu POS activando o desactivando módulos según tu negocio.</p>
+          <div class="card-meta">
+            <span class="badge lvl-beginner">Principiante</span>
+            <span class="badge">25s</span>
+          </div>
+          <a href="/tutorials/06-mis-modulos.html" class="card-link">Ver Tutorial →</a>
+        </div>
+      </div>
+
+      <!-- Tutorial 07 -->
+      <div class="card">
+        <div class="card-icon">🏷️</div>
+        <div class="card-body">
+          <h3>Diseñar Etiqueta</h3>
+          <p>Crea etiquetas personalizadas con código de barras usando el drag-and-drop designer.</p>
+          <div class="card-meta">
+            <span class="badge lvl-advanced">Avanzado</span>
+            <span class="badge">25s</span>
+          </div>
+          <a href="/tutorials/07-etiqueta-disenar.html" class="card-link">Ver Tutorial →</a>
+        </div>
+      </div>
+
+      <!-- Tutorial 08 -->
+      <div class="card">
+        <div class="card-icon">↩️</div>
+        <div class="card-body">
+          <h3>Procesar Devolución</h3>
+          <p>Cómo buscar una venta, marcar items y procesar reembolsos con nota de crédito.</p>
+          <div class="card-meta">
+            <span class="badge lvl-intermediate">Intermedio</span>
+            <span class="badge">25s</span>
+          </div>
+          <a href="/tutorials/08-devolucion.html" class="card-link">Ver Tutorial →</a>
+        </div>
+      </div>
+
+      <!-- Tutorial 09 -->
+      <div class="card">
+        <div class="card-icon">🎁</div>
+        <div class="card-body">
+          <h3>Crear Promociones</h3>
+          <p>Configura promociones 2x1, descuentos con horario y aplícalos automáticamente.</p>
+          <div class="card-meta">
+            <span class="badge lvl-advanced">Avanzado</span>
+            <span class="badge">25s</span>
+          </div>
+          <a href="/tutorials/09-promocion.html" class="card-link">Ver Tutorial →</a>
+        </div>
+      </div>
+
+      <!-- Tutorial 10 -->
+      <div class="card">
+        <div class="card-icon">🚀</div>
+        <div class="card-body">
+          <h3>Registro en 3 Minutos</h3>
+          <p>Crea tu cuenta, verifica OTP, elige tu giro y comienza a vender al instante.</p>
+          <div class="card-meta">
+            <span class="badge lvl-beginner">Principiante</span>
+            <span class="badge">25s</span>
+          </div>
+          <a href="/tutorials/10-registro-3min.html" class="card-link">Ver Tutorial →</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="quick-links">
+      <h3>⚡ Acceso Directo a Galería Completa</h3>
+      <div class="quick-links-grid">
+        <a href="/INDICE-TUTORIALES.html" class="quick-link-item">Ver Galería Interactiva →</a>
+        <a href="/INDICE-TUTORIALES.html?filterLvl=principiante" class="quick-link-item">Solo Principiantes</a>
+        <a href="/INDICE-TUTORIALES.html?filterLvl=intermedio" class="quick-link-item">Nivel Intermedio</a>
+        <a href="/INDICE-TUTORIALES.html?filterLvl=avanzado" class="quick-link-item">Nivel Avanzado</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 2: GUÍAS COMPLETAS -->
+<div id="guides" class="tab-content">
+  <div class="section">
+    <h2>Guías Paso a Paso (10-30 min)</h2>
+    <p style="color:#94a3b8;margin-bottom:24px">Guías completas y detalladas para configuración, integración y casos de uso complejos.</p>
+
+    <div class="grid">
+      <!-- Guía: POS Básico -->
+      <div class="card">
+        <div class="card-icon">🎯</div>
+        <div class="card-body">
+          <h3>POS Básico</h3>
+          <p>Guía completa sobre las funciones esenciales del punto de venta: búsqueda, carrito, cobro e impresión.</p>
+          <div class="card-meta">
+            <span class="badge lvl-beginner">Principiante</span>
+            <span class="badge">15 min</span>
+          </div>
+          <a href="docs/pos-basico.html" class="card-link">Leer Guía →</a>
+        </div>
+      </div>
+
+      <!-- Guía: Primeria Venta Detallada -->
+      <div class="card">
+        <div class="card-icon">🏪</div>
+        <div class="card-body">
+          <h3>Tu Primera Venta (Detallado)</h3>
+          <p>Artículo completo con screenshots: desde abrir el POS hasta entregar el ticket al cliente.</p>
+          <div class="card-meta">
+            <span class="badge lvl-beginner">Principiante</span>
+            <span class="badge">10 min</span>
+          </div>
+          <a href="docs/primera-venta.html" class="card-link">Leer Artículo →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 3: CENTRO DE AYUDA -->
+<div id="help" class="tab-content">
+  <div class="section">
+    <h2>Centro de Ayuda (FAQ y Artículos)</h2>
+    <p style="color:#94a3b8;margin-bottom:24px">Respuestas rápidas a dudas frecuentes y artículos temáticos.</p>
+
+    <div class="grid">
+      <!-- FAQ General -->
+      <div class="card">
+        <div class="card-icon">❓</div>
+        <div class="card-body">
+          <h3>Preguntas Frecuentes</h3>
+          <p>Respuestas a las dudas más comunes: offline, multi-caja, cajas registradoras, etc.</p>
+          <div class="card-meta">
+            <span class="badge">FAQ</span>
+          </div>
+          <a href="docs/faq-general.html" class="card-link">Ver FAQ →</a>
+        </div>
+      </div>
+
+      <!-- Crear Producto -->
+      <div class="card">
+        <div class="card-icon">📦</div>
+        <div class="card-body">
+          <h3>Crear Productos</h3>
+          <p>Cómo agregar productos al inventario: nombre, precio, categoría y más opciones.</p>
+          <div class="card-meta">
+            <span class="badge">Inventario</span>
+          </div>
+          <a href="docs/crear-producto.html" class="card-link">Leer Artículo →</a>
+        </div>
+      </div>
+
+      <!-- Importar CSV -->
+      <div class="card">
+        <div class="card-icon">📥</div>
+        <div class="card-body">
+          <h3>Importar CSV</h3>
+          <p>Importa múltiples productos en bulk desde un archivo CSV o Excel.</p>
+          <div class="card-meta">
+            <span class="badge">Inventario</span>
+          </div>
+          <a href="docs/importar-csv.html" class="card-link">Leer Artículo →</a>
+        </div>
+      </div>
+
+      <!-- Crear Cliente RFC -->
+      <div class="card">
+        <div class="card-icon">🏢</div>
+        <div class="card-body">
+          <h3>Cliente Empresarial (RFC)</h3>
+          <p>Cómo registrar clientes con RFC para facturación de empresas.</p>
+          <div class="card-meta">
+            <span class="badge">Clientes</span>
+          </div>
+          <a href="docs/crear-cliente-rfc.html" class="card-link">Leer Artículo →</a>
+        </div>
+      </div>
+
+      <!-- Crear Usuarios -->
+      <div class="card">
+        <div class="card-icon">👥</div>
+        <div class="card-body">
+          <h3>Crear Usuarios</h3>
+          <p>Añade operadores y administradores, asigna permisos y roles.</p>
+          <div class="card-meta">
+            <span class="badge">Administración</span>
+          </div>
+          <a href="docs/crear-usuarios.html" class="card-link">Leer Artículo →</a>
+        </div>
+      </div>
+
+      <!-- Abrir Caja -->
+      <div class="card">
+        <div class="card-icon">💰</div>
+        <div class="card-body">
+          <h3>Abrir Caja Registradora</h3>
+          <p>Inicio de turno, ingreso inicial y preparación para el día.</p>
+          <div class="card-meta">
+            <span class="badge">Ventas</span>
+          </div>
+          <a href="docs/abrir-caja.html" class="card-link">Leer Artículo →</a>
+        </div>
+      </div>
+
+      <!-- Aplicar Descuentos -->
+      <div class="card">
+        <div class="card-icon">🎟️</div>
+        <div class="card-body">
+          <h3>Aplicar Descuentos</h3>
+          <p>Descuentos por item, por total o por volumen dentro de una venta.</p>
+          <div class="card-meta">
+            <span class="badge">Ventas</span>
+          </div>
+          <a href="docs/aplicar-descuentos.html" class="card-link">Leer Artículo →</a>
+        </div>
+      </div>
+
+      <!-- Cobrar Tarjeta -->
+      <div class="card">
+        <div class="card-icon">💳</div>
+        <div class="card-body">
+          <h3>Cobro con Tarjeta</h3>
+          <p>Integración con procesadores de pago, tokenización y seguridad.</p>
+          <div class="card-meta">
+            <span class="badge">Pagos</span>
+          </div>
+          <a href="docs/cobrar-tarjeta.html" class="card-link">Leer Artículo →</a>
+        </div>
+      </div>
+
+      <!-- Devoluciones -->
+      <div class="card">
+        <div class="card-icon">↩️</div>
+        <div class="card-body">
+          <h3>Procesar Devoluciones</h3>
+          <p>Notas de crédito, reembolsos, y actualización de stock.</p>
+          <div class="card-meta">
+            <span class="badge">Ventas</span>
+          </div>
+          <a href="docs/devoluciones.html" class="card-link">Leer Artículo →</a>
+        </div>
+      </div>
+
+      <!-- Facturación CFDI -->
+      <div class="card">
+        <div class="card-icon">📜</div>
+        <div class="card-body">
+          <h3>Facturación CFDI</h3>
+          <p>Timbrado electrónico, facturas y cumplimiento fiscal en México.</p>
+          <div class="card-meta">
+            <span class="badge">Finanzas</span>
+          </div>
+          <a href="docs/facturar-cfdi.html" class="card-link">Leer Artículo →</a>
+        </div>
+      </div>
+
+      <!-- Corte Z -->
+      <div class="card">
+        <div class="card-icon">🔒</div>
+        <div class="card-body">
+          <h3>Cierre Z Completo</h3>
+          <p>Cierre de caja, conciliación, reportes de fin de día y archivado.</p>
+          <div class="card-meta">
+            <span class="badge">Finanzas</span>
+          </div>
+          <a href="docs/corte-z.html" class="card-link">Leer Artículo →</a>
+        </div>
+      </div>
+
+      <!-- Reportes Ventas -->
+      <div class="card">
+        <div class="card-icon">📊</div>
+        <div class="card-body">
+          <h3>Reportes de Ventas</h3>
+          <p>Análisis de ventas, top productos, horarios pico y tendencias.</p>
+          <div class="card-meta">
+            <span class="badge">Reportes</span>
+          </div>
+          <a href="docs/reportes-ventas.html" class="card-link">Leer Artículo →</a>
+        </div>
+      </div>
+
+      <!-- Impresora Térmica -->
+      <div class="card">
+        <div class="card-icon">🖨️</div>
+        <div class="card-body">
+          <h3>Configurar Impresora Térmica</h3>
+          <p>Setup de impresora, drivers, y solución de problemas de impresión.</p>
+          <div class="card-meta">
+            <span class="badge">Hardware</span>
+          </div>
+          <a href="docs/impresora-termica.html" class="card-link">Leer Artículo →</a>
+        </div>
+      </div>
+
+      <!-- WhatsApp -->
+      <div class="card">
+        <div class="card-icon">💬</div>
+        <div class="card-body">
+          <h3>Integración WhatsApp</h3>
+          <p>Notificaciones de venta, confirmaciones y soporte vía WhatsApp.</p>
+          <div class="card-meta">
+            <span class="badge">Integraciones</span>
+          </div>
+          <a href="docs/whatsapp.html" class="card-link">Leer Artículo →</a>
+        </div>
+      </div>
+
+      <!-- Shopify -->
+      <div class="card">
+        <div class="card-icon">🛒</div>
+        <div class="card-body">
+          <h3>Sync Shopify</h3>
+          <p>Integración con tienda en línea, órdenes y sincronización de inventario.</p>
+          <div class="card-meta">
+            <span class="badge">Integraciones</span>
+          </div>
+          <a href="docs/shopify.html" class="card-link">Leer Artículo →</a>
+        </div>
+      </div>
+
+      <!-- Stripe -->
+      <div class="card">
+        <div class="card-icon">💸</div>
+        <div class="card-body">
+          <h3>Pagos con Stripe</h3>
+          <p>Procesamiento de tarjetas internacionales con Stripe y seguridad PCI.</p>
+          <div class="card-meta">
+            <span class="badge">Integraciones</span>
+          </div>
+          <a href="docs/stripe.html" class="card-link">Leer Artículo →</a>
+        </div>
+      </div>
+
+      <!-- Backup -->
+      <div class="card">
+        <div class="card-icon">💾</div>
+        <div class="card-body">
+          <h3>Backup y Recuperación</h3>
+          <p>Respaldo de datos, recuperación de desastres y migración.</p>
+          <div class="card-meta">
+            <span class="badge">Administración</span>
+          </div>
+          <a href="docs/backup.html" class="card-link">Leer Artículo →</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="quick-links">
+      <h3>⚡ Navegar por Categoría</h3>
+      <div class="quick-links-grid">
+        <a href="/docs.html?cat=ventas" class="quick-link-item">📊 Ventas</a>
+        <a href="/docs.html?cat=inventario" class="quick-link-item">📦 Inventario</a>
+        <a href="/docs.html?cat=clientes" class="quick-link-item">👥 Clientes</a>
+        <a href="/docs.html?cat=finanzas" class="quick-link-item">💰 Finanzas</a>
+        <a href="/docs.html?cat=integraciones" class="quick-link-item">🔗 Integraciones</a>
+        <a href="/docs.html?cat=hardware" class="quick-link-item">🖨️ Hardware</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 4: TODAS LAS PÁGINAS -->
+<div id="all" class="tab-content">
+  <div class="section">
+    <h2>Mapa Completo de Contenido</h2>
+    <p style="color:#94a3b8;margin-bottom:24px">Listado de todas las páginas educativas disponibles en Volvix POS.</p>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+      <div style="background:#0b1220;border:1px solid #334155;border-radius:10px;padding:20px;">
+        <h3 style="color:#fde047;margin-bottom:16px;font-size:1.05rem">Tutoriales Interactivos</h3>
+        <ul style="list-style:none">
+          <li><a href="/INDICE-TUTORIALES.html" style="color:#38bdf8;text-decoration:none;margin:8px 0;display:block">📚 Galería de Tutoriales</a></li>
+          <li><a href="/tutorials/01-primera-venta.html" style="color:#38bdf8;text-decoration:none;margin:8px 0;display:block">💳 Tu Primera Venta</a></li>
+          <li><a href="/tutorials/02-crear-producto.html" style="color:#38bdf8;text-decoration:none;margin:8px 0;display:block">📦 Crear Producto</a></li>
+          <li><a href="/tutorials/03-cierre-z.html" style="color:#38bdf8;text-decoration:none;margin:8px 0;display:block">🔒 Cierre Z</a></li>
+          <li><a href="/tutorials/04-modo-offline.html" style="color:#38bdf8;text-decoration:none;margin:8px 0;display:block">📴 Modo Offline</a></li>
+          <li><a href="/tutorials/05-cliente-credito.html" style="color:#38bdf8;text-decoration:none;margin:8px 0;display:block">📋 Crédito</a></li>
+          <li><a href="/tutorials/06-mis-modulos.html" style="color:#38bdf8;text-decoration:none;margin:8px 0;display:block">⚙️ Módulos</a></li>
+          <li><a href="/tutorials/07-etiqueta-disenar.html" style="color:#38bdf8;text-decoration:none;margin:8px 0;display:block">🏷️ Etiquetas</a></li>
+          <li><a href="/tutorials/08-devolucion.html" style="color:#38bdf8;text-decoration:none;margin:8px 0;display:block">↩️ Devoluciones</a></li>
+          <li><a href="/tutorials/09-promocion.html" style="color:#38bdf8;text-decoration:none;margin:8px 0;display:block">🎁 Promociones</a></li>
+          <li><a href="/tutorials/10-registro-3min.html" style="color:#38bdf8;text-decoration:none;margin:8px 0;display:block">🚀 Registro</a></li>
+        </ul>
+      </div>
+
+      <div style="background:#0b1220;border:1px solid #334155;border-radius:10px;padding:20px;">
+        <h3 style="color:#fde047;margin-bottom:16px;font-size:1.05rem">Guías Detalladas</h3>
+        <ul style="list-style:none">
+          <li><a href="docs/pos-basico.html" style="color:#38bdf8;text-decoration:none;margin:8px 0;display:block">🎯 POS Básico</a></li>
+          <li><a href="docs/primera-venta.html" style="color:#38bdf8;text-decoration:none;margin:8px 0;display:block">🏪 Primera Venta Detallada</a></li>
+        </ul>
+      </div>
+
+      <div style="background:#0b1220;border:1px solid #334155;border-radius:10px;padding:20px;">
+        <h3 style="color:#fde047;margin-bottom:16px;font-size:1.05rem">Inventario</h3>
+        <ul style="list-style:none">
+          <li><a href="docs/crear-producto.html" style="color:#38bdf8;text-decoration:none;margin:8px 0;display:block">📦 Crear Productos</a></li>
+          <li><a href="docs/importar-csv.html" style="color:#38bdf8;text-decoration:none;margin:8px 0;display:block">📥 Importar CSV</a></li>
+        </ul>
+      </div>
+
+      <div style="background:#0b1220;border:1px solid #334155;border-radius:10px;padding:20px;">
+        <h3 style="color:#fde047;margin-bottom:16px;font-size:1.05rem">Clientes</h3>
+        <ul style="list-style:none">
+          <li><a href="docs/crear-cliente-rfc.html" style="color:#38bdf8;text-decoration:none;margin:8px 0;display:block">🏢 Cliente RFC</a></li>
+        </ul>
+      </div>
+
+      <div style="background:#0b1220;border:1px solid #334155;border-radius:10px;padding:20px;">
+        <h3 style="color:#fde047;margin-bottom:16px;font-size:1.05rem">Operación</h3>
+        <ul style="list-style:none">
+          <li><a href="docs/abrir-caja.html" style="color:#38bdf8;text-decoration:none;margin:8px 0;display:block">💰 Abrir Caja</a></li>
+          <li><a href="docs/aplicar-descuentos.html" style="color:#38bdf8;text-decoration:none;margin:8px 0;display:block">🎟️ Descuentos</a></li>
+          <li><a href="docs/cobrar-tarjeta.html" style="color:#38bdf8;text-decoration:none;margin:8px 0;display:block">💳 Cobrar Tarjeta</a></li>
+          <li><a href="docs/devoluciones.html" style="color:#38bdf8;text-decoration:none;margin:8px 0;display:block">↩️ Devoluciones</a></li>
+          <li><a href="docs/corte-z.html" style="color:#38bdf8;text-decoration:none;margin:8px 0;display:block">🔒 Cierre Z</a></li>
+        </ul>
+      </div>
+
+      <div style="background:#0b1220;border:1px solid #334155;border-radius:10px;padding:20px;">
+        <h3 style="color:#fde047;margin-bottom:16px;font-size:1.05rem">Finanzas</h3>
+        <ul style="list-style:none">
+          <li><a href="docs/facturar-cfdi.html" style="color:#38bdf8;text-decoration:none;margin:8px 0;display:block">📜 Facturación CFDI</a></li>
+          <li><a href="docs/reportes-ventas.html" style="color:#38bdf8;text-decoration:none;margin:8px 0;display:block">📊 Reportes</a></li>
+        </ul>
+      </div>
+
+      <div style="background:#0b1220;border:1px solid #334155;border-radius:10px;padding:20px;">
+        <h3 style="color:#fde047;margin-bottom:16px;font-size:1.05rem">Hardware</h3>
+        <ul style="list-style:none">
+          <li><a href="docs/impresora-termica.html" style="color:#38bdf8;text-decoration:none;margin:8px 0;display:block">🖨️ Impresora Térmica</a></li>
+        </ul>
+      </div>
+
+      <div style="background:#0b1220;border:1px solid #334155;border-radius:10px;padding:20px;">
+        <h3 style="color:#fde047;margin-bottom:16px;font-size:1.05rem">Integraciones</h3>
+        <ul style="list-style:none">
+          <li><a href="docs/whatsapp.html" style="color:#38bdf8;text-decoration:none;margin:8px 0;display:block">💬 WhatsApp</a></li>
+          <li><a href="docs/shopify.html" style="color:#38bdf8;text-decoration:none;margin:8px 0;display:block">🛒 Shopify</a></li>
+          <li><a href="docs/stripe.html" style="color:#38bdf8;text-decoration:none;margin:8px 0;display:block">💸 Stripe</a></li>
+        </ul>
+      </div>
+
+      <div style="background:#0b1220;border:1px solid #334155;border-radius:10px;padding:20px;">
+        <h3 style="color:#fde047;margin-bottom:16px;font-size:1.05rem">Administración</h3>
+        <ul style="list-style:none">
+          <li><a href="docs/crear-usuarios.html" style="color:#38bdf8;text-decoration:none;margin:8px 0;display:block">👥 Crear Usuarios</a></li>
+          <li><a href="docs/backup.html" style="color:#38bdf8;text-decoration:none;margin:8px 0;display:block">💾 Backup</a></li>
+        </ul>
+      </div>
+
+      <div style="background:#0b1220;border:1px solid #334155;border-radius:10px;padding:20px;">
+        <h3 style="color:#fde047;margin-bottom:16px;font-size:1.05rem">Ayuda General</h3>
+        <ul style="list-style:none">
+          <li><a href="docs/faq-general.html" style="color:#38bdf8;text-decoration:none;margin:8px 0;display:block">❓ FAQ General</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>📚 Volvix POS — Centro de Educación 2024</p>
+  <p style="margin-top:8px;font-size:0.8rem">
+    <a href="/INDICE-TUTORIALES.html">Tutoriales</a> •
+    <a href="/docs.html">Centro de Ayuda</a> •
+    <a href="index.html">Inicio</a>
+  </p>
+</footer>
+
+</div>
+
+<script>
+function showTab(tabName) {
+  // Hide all tabs
+  const tabs = document.querySelectorAll('.tab-content');
+  tabs.forEach(tab => tab.classList.remove('active'));
+
+  // Remove active class from all buttons
+  const buttons = document.querySelectorAll('.tab-btn');
+  buttons.forEach(btn => btn.classList.remove('active'));
+
+  // Show selected tab
+  document.getElementById(tabName).classList.add('active');
+
+  // Add active class to clicked button
+  event.target.classList.add('active');
+}
+
+// ============== INDEX BUILDING ==============
+// Auto-tag cards by inferring from title
+const TAG_RULES = [
+  { tag:'inicio',     match:/registro|primera venta|primera|inicio|bienvenid|3 min|módulos/i },
+  { tag:'pos',        match:/cobr|tarjeta|caja|venta|descuento|devolución|abrir/i },
+  { tag:'inventario', match:/producto|inventario|csv|importar|etiqueta|stock|crear product/i },
+  { tag:'reportes',   match:/reporte|cierre|corte|análisis|ventas/i },
+  { tag:'avanzado',   match:/cfdi|factur|whatsapp|shopify|stripe|backup|impresora|api|integraci|promoci|crédito|usuari/i },
+];
+
+function tagsForTitle(title) {
+  const t = (title || '').toLowerCase();
+  const tags = TAG_RULES.filter(r => r.match.test(t)).map(r => r.tag);
+  return tags.length ? tags : ['avanzado'];
+}
+
+const allCards = [];
+function indexAllCards() {
+  document.querySelectorAll('.card').forEach(card => {
+    const titleEl = card.querySelector('h3');
+    const linkEl = card.querySelector('.card-link');
+    if (!titleEl || !linkEl) return;
+    const title = titleEl.textContent.trim();
+    const href = linkEl.getAttribute('href');
+    const tags = tagsForTitle(title);
+    card.dataset.tags = tags.join(',');
+    card.dataset.title = title.toLowerCase();
+    allCards.push({ card, title, href, tags });
+  });
+}
+
+// ============== SEARCH AUTOCOMPLETE ==============
+function onSearchInput(q) {
+  const sug = document.getElementById('search-suggest');
+  q = (q || '').trim().toLowerCase();
+  if (!q) { sug.style.display = 'none'; filterCards('', getActiveTag()); return; }
+  filterCards(q, getActiveTag());
+  const matches = allCards.filter(c => c.title.toLowerCase().includes(q)).slice(0, 8);
+  if (!matches.length) { sug.style.display = 'none'; return; }
+  sug.innerHTML = matches.map(m => `
+    <a class="suggest-item" href="${m.href}">
+      <span style="color:#38bdf8;">→</span>
+      <span>${m.title}</span>
+      <span style="margin-left:auto;font-size:0.72rem;color:#64748b;">${m.tags.join(' · ')}</span>
+    </a>
+  `).join('');
+  sug.style.display = 'block';
+}
+
+function filterCards(query, tag) {
+  allCards.forEach(({ card, title, tags }) => {
+    const matchesQuery = !query || title.toLowerCase().includes(query);
+    const matchesTag = tag === 'all' || tags.includes(tag);
+    card.style.display = (matchesQuery && matchesTag) ? '' : 'none';
+  });
+}
+
+function getActiveTag() {
+  return document.querySelector('.tag-pill.active')?.dataset.tag || 'all';
+}
+
+function filterByTag(btn, tag) {
+  document.querySelectorAll('.tag-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const q = (document.getElementById('tutorial-search').value || '').trim().toLowerCase();
+  filterCards(q, tag);
+}
+
+// Auth helpers
+function _vlxToken(){ try { return localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken'); } catch(_){ return null; } }
+function _vlxAuthHeaders(){
+  const h = { 'Content-Type': 'application/json' };
+  const t = _vlxToken(); if (t) h['Authorization'] = 'Bearer ' + t;
+  return h;
+}
+function _vlxHandle401(r){
+  if (r && r.status === 401) {
+    try { localStorage.removeItem('volvix_token'); localStorage.removeItem('volvixAuthToken'); } catch(_){}
+    const redir = encodeURIComponent(location.pathname + location.search);
+    location.replace('/login.html?expired=1&redirect=' + redir);
+    return true;
+  }
+  return false;
+}
+
+// ============== PROGRESS ==============
+async function loadProgress() {
+  let completed = [];
+  try {
+    const r = await fetch('/api/user/tutorials', { headers: _vlxAuthHeaders() });
+    if (_vlxHandle401(r)) return;
+    if (r.ok) {
+      const list = await r.json();
+      if (Array.isArray(list)) completed = list.filter(t => t.completed).map(t => t.tutorial_id);
+    }
+  } catch {}
+  if (!completed.length) {
+    completed = JSON.parse(localStorage.getItem('volvix:tutorials:done') || '[]');
+  }
+
+  const total = allCards.length;
+  let done = 0;
+  allCards.forEach(({ card, href }) => {
+    const id = href.split('/').pop().replace('.html','');
+    const isDone = completed.some(c => href.includes(c) || c === id);
+    if (isDone) {
+      done++;
+      card.style.position = 'relative';
+      if (!card.querySelector('.done-badge')) {
+        const badge = document.createElement('div');
+        badge.className = 'done-badge';
+        badge.style.cssText = 'position:absolute;top:8px;right:8px;background:#10b981;color:#fff;font-size:0.7rem;font-weight:700;padding:3px 8px;border-radius:100px;z-index:5;';
+        badge.textContent = '✓ COMPLETO';
+        card.appendChild(badge);
+      }
+    }
+  });
+
+  const pct = total ? Math.round((done/total)*100) : 0;
+  document.getElementById('progress-counter').textContent = `${done} / ${total} completados (${pct}%)`;
+  document.getElementById('progress-fill-global').style.width = pct + '%';
+}
+
+// ============== INIT ==============
+document.addEventListener('DOMContentLoaded', () => {
+  indexAllCards();
+  loadProgress();
+});
+// Fallback if already loaded
+if (document.readyState !== 'loading') {
+  indexAllCards();
+  loadProgress();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,2562 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>MultiPOS Suite — v3</title>
+<!-- B37 Security hardening: auth-gate + role guard (owner or superadmin) -->
+<script src="/auth-gate.js"></script>
+<script>
+(function(){
+  try {
+    var t = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+    if (!t) return;
+    var p = JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+    var role = (p.role || '').toLowerCase();
+    if (role !== 'superadmin' && role !== 'owner') {
+      window.location.replace('/volvix-launcher.html?denied=' + encodeURIComponent(location.pathname));
+    }
+  } catch(e){}
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+:root{
+  --page:#F4F4F2;--white:#FFF;--off:#FAFAFA;
+  --g50:#F7F7F7;--g100:#F0F0EF;--g150:#E8E8E7;--g200:#DEDEDC;--g300:#C8C8C6;
+  --g400:#A0A09E;--g500:#737371;--g600:#525251;--g700:#3F3F3E;--g800:#242423;--g900:#131312;--black:#0A0A0A;
+  --c-a:#B8763F;--c-k:#2B6F5B;--c-m:#2A5CB8;--c-c:#7A3FA8;
+  --c-a-bg:#FBF3E9;--c-k-bg:#E8F4EF;--c-m-bg:#E8EFFB;--c-c-bg:#F1E8F8;
+  --green:#16A34A;--amber:#D97706;--red:#DC2626;
+  --font:'Geist',-apple-system,sans-serif;--mono:'Geist Mono',monospace;
+  --sh-xs:0 1px 2px rgba(10,10,10,.04);--sh-sm:0 2px 6px rgba(10,10,10,.05);--sh-md:0 6px 20px rgba(10,10,10,.07);
+  --sh-phone:0 40px 80px -20px rgba(10,10,10,.3),0 20px 40px -20px rgba(10,10,10,.2);
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font);background:var(--page);color:var(--black);font-feature-settings:"ss01","ss02","cv11";letter-spacing:-0.005em;position:fixed;inset:0;display:flex;flex-direction:column}
+
+/* TOPBAR */
+.topbar{padding:12px 16px;display:flex;align-items:center;gap:12px;background:rgba(244,244,242,.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--g150);flex-shrink:0;z-index:100}
+.brand-mini{width:30px;height:30px;background:var(--black);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:14px;flex-shrink:0;letter-spacing:-0.02em}
+.app-selector{display:flex;gap:2px;padding:3px;background:var(--white);border:1px solid var(--g150);border-radius:12px;box-shadow:var(--sh-xs);flex:1;min-width:0;overflow-x:auto;scrollbar-width:none}
+.app-selector::-webkit-scrollbar{display:none}
+.app-tab{display:flex;align-items:center;gap:7px;padding:8px 12px;border:none;background:transparent;border-radius:9px;font-family:var(--font);font-size:12px;font-weight:600;color:var(--g600);cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0;letter-spacing:-0.01em}
+.app-tab:hover{color:var(--black);background:var(--g50)}
+.app-tab.active{background:var(--black);color:white}
+.tab-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.logout-btn{padding:8px 10px;background:var(--white);border:1px solid var(--g150);border-radius:10px;font-family:var(--font);font-size:12px;font-weight:600;color:var(--g700);cursor:pointer;flex-shrink:0}
+
+/* STAGE */
+.stage{flex:1;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(circle at 50% 30%,#FAFAF8 0%,#F0F0EE 100%);overflow:auto;min-height:0}
+.device{flex-shrink:0;background:#0A0A0A;border-radius:44px;padding:8px;box-shadow:var(--sh-phone);position:relative;transition:all .4s cubic-bezier(.6,.05,.3,1)}
+.device.phone{width:360px;height:720px}
+.device.tablet{width:780px;height:440px;border-radius:28px;padding:10px}
+.device-screen{width:100%;height:100%;background:var(--white);border-radius:38px;overflow:hidden;position:relative}
+.device.tablet .device-screen{border-radius:20px}
+.device-island{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:96px;height:26px;background:#000;border-radius:14px;z-index:50;pointer-events:none}
+.device.tablet .device-island{display:none}
+
+/* Mobile fullscreen */
+@media(max-width:500px){
+  .topbar{padding:10px 12px}
+  .brand-mini{display:none}
+  .app-tab{font-size:11px;padding:7px 9px}
+  .logout-btn{padding:7px 8px;font-size:11px}
+  .stage{padding:6px;background:#0A0A0A}
+  .device.phone{width:100%;height:100%;max-width:none;max-height:none;border-radius:14px;padding:4px;background:#000}
+  .device.phone .device-screen{border-radius:10px}
+  .device.phone .device-island{display:none}
+  .device.tablet{width:100%;height:auto;aspect-ratio:16/9;max-height:78vh;padding:6px;border-radius:12px}
+}
+@media(max-width:380px){
+  .device.phone{border-radius:0;padding:0}
+  .device.phone .device-screen{border-radius:0}
+  .stage{padding:0}
+}
+
+/* App */
+.app{position:absolute;inset:0;display:none;flex-direction:column;background:var(--white)}
+.app.active{display:flex}
+.screen{position:absolute;inset:0;background:var(--white);display:none;flex-direction:column;overflow:hidden}
+.screen.visible{display:flex;animation:slideIn .3s ease}
+@keyframes slideIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes spinSlow{to{transform:rotate(360deg)}}
+
+/* STATUS / NAV */
+.statusbar{display:flex;align-items:center;justify-content:space-between;padding:14px 22px 2px;font-size:13px;font-weight:700;color:var(--black);flex-shrink:0}
+.sb-icons{display:flex;gap:4px;align-items:center;color:var(--g700)}
+.navbar{display:flex;align-items:center;padding:10px 18px 12px;gap:10px;flex-shrink:0}
+.navbtn{width:34px;height:34px;border-radius:10px;background:var(--g50);border:1px solid var(--g150);display:flex;align-items:center;justify-content:center;color:var(--black);font-size:17px;cursor:pointer;flex-shrink:0;transition:background .15s}
+.navbtn:hover{background:var(--g100)}
+.navbtn:active{transform:scale(.95)}
+.navtitle{font-size:17px;font-weight:700;letter-spacing:-0.02em;flex:1;line-height:1.1}
+.navsub{font-size:11px;color:var(--g500);margin-top:2px;font-weight:500}
+
+.scroll{flex:1;overflow-y:auto;padding:4px 18px 96px;-webkit-overflow-scrolling:touch}
+.scroll::-webkit-scrollbar{display:none}
+.tabbar{position:absolute;bottom:0;left:0;right:0;height:72px;background:rgba(255,255,255,.92);backdrop-filter:blur(20px);border-top:1px solid var(--g150);padding-bottom:14px;display:flex}
+.tabbar-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;transition:opacity .15s;color:var(--g400)}
+.tabbar-item:active{opacity:.6}
+.tabbar-item.active{color:var(--black)}
+.tb-icon{font-size:19px}
+.tb-lbl{font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase}
+
+.card{background:var(--white);border:1px solid var(--g150);border-radius:14px;padding:16px;margin-bottom:10px}
+.slbl{font-size:10px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--g500);margin:16px 0 10px;display:flex;align-items:center;gap:8px}
+.slbl-line{flex:1;height:1px;background:var(--g150)}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:18px;font-size:10.5px;font-weight:600;letter-spacing:-0.01em}
+.chip-a{background:var(--c-a-bg);color:var(--c-a)}
+.chip-k{background:var(--c-k-bg);color:var(--c-k)}
+.chip-m{background:var(--c-m-bg);color:var(--c-m)}
+.chip-g{background:#E6F5EC;color:var(--green)}
+.chip-r{background:#FDECEC;color:var(--red)}
+.chip-amb{background:#FDF3E6;color:var(--amber)}
+.chip-gr{background:var(--g100);color:var(--g600)}
+
+.btn{width:100%;padding:13px 14px;border-radius:12px;font-family:var(--font);font-size:14px;font-weight:700;border:1px solid transparent;cursor:pointer;transition:all .15s;letter-spacing:-0.01em}
+.btn:active{transform:scale(.985)}
+.btn-primary{background:var(--black);color:white}
+.btn-primary:hover{background:var(--g800)}
+.btn-primary:disabled{background:var(--g200);color:var(--g400);cursor:not-allowed}
+.btn-outline{background:var(--white);color:var(--black);border-color:var(--g200)}
+.btn-outline:hover{background:var(--g50)}
+.btn-danger{background:#FDECEC;color:var(--red);border-color:#F0C5C5}
+.btn-sm{padding:9px 11px;font-size:12.5px;border-radius:10px}
+.row-btns{display:flex;gap:7px;margin-bottom:10px}
+.row-btns .btn{flex:1}
+.bottom-cta{position:absolute;bottom:0;left:0;right:0;padding:14px 18px 20px;background:linear-gradient(to top,var(--white) 70%,transparent);z-index:10}
+
+#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--black);color:white;padding:10px 20px;border-radius:10px;font-size:12.5px;font-weight:600;letter-spacing:-0.01em;pointer-events:none;opacity:0;transition:all .25s;white-space:nowrap;z-index:9999;box-shadow:var(--sh-md);max-width:90vw;overflow:hidden;text-overflow:ellipsis}
+
+/* LOGIN */
+.login-screen{flex:1;display:flex;flex-direction:column;padding:0 28px;animation:fadeIn .5s ease;overflow-y:auto}
+.login-logo-section{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding-top:40px;padding-bottom:20px;gap:12px}
+.login-logo{width:64px;height:64px;border-radius:18px;background:var(--black);display:flex;align-items:center;justify-content:center;color:white;font-size:28px;font-weight:800;letter-spacing:-0.02em;box-shadow:var(--sh-md)}
+.login-logo-a{background:var(--c-a)}
+.login-logo-k{background:var(--c-k)}
+.login-logo-m{background:var(--c-m)}
+.login-logo-c{background:var(--c-c)}
+.login-title{font-size:24px;font-weight:800;letter-spacing:-0.03em;text-align:center}
+.login-sub{font-size:13px;color:var(--g500);text-align:center;max-width:260px;line-height:1.5}
+.login-form{padding-bottom:24px;display:flex;flex-direction:column;gap:10px}
+.login-field{display:flex;flex-direction:column;gap:6px}
+.login-label{font-size:10px;font-weight:700;color:var(--g500);letter-spacing:1.4px;text-transform:uppercase}
+.login-input{padding:14px 16px;background:var(--g50);border:1.5px solid var(--g150);border-radius:12px;font-family:var(--font);font-size:15px;font-weight:500;color:var(--black);letter-spacing:-0.01em;outline:none;transition:all .15s}
+.login-input:focus{border-color:var(--black);background:var(--white)}
+.login-link{font-size:12px;color:var(--g500);text-align:center;margin-top:8px}
+.login-link strong{color:var(--black);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+
+/* PIN */
+.pin-display{display:flex;gap:12px;justify-content:center;margin:8px 0}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--g200);background:transparent;transition:all .2s}
+.pin-dot.filled{background:var(--black);border-color:var(--black)}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding-bottom:24px}
+.pin-key{padding:14px;background:var(--white);border:1px solid var(--g150);border-radius:14px;font-family:var(--font);font-size:22px;font-weight:700;color:var(--black);cursor:pointer;transition:all .1s;letter-spacing:-0.02em}
+.pin-key:hover{background:var(--g50)}
+.pin-key:active{transform:scale(.95);background:var(--g100)}
+.pin-key.action{background:transparent;border:none;font-size:18px;color:var(--g500);font-weight:500}
+.pin-error{color:var(--red);font-size:12px;font-weight:600;text-align:center;min-height:16px;margin-top:-4px}
+
+/* PAIR CODE */
+.pair-code{font-family:var(--mono);font-size:36px;font-weight:700;letter-spacing:.18em;color:var(--black);padding:20px;background:var(--g50);border:1.5px dashed var(--g300);border-radius:14px;text-align:center;margin:8px 0 12px}
+.pair-step{display:flex;gap:12px;align-items:flex-start;padding:8px 0}
+.pair-num{width:22px;height:22px;border-radius:50%;background:var(--black);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.pair-text{font-size:12.5px;color:var(--g700);line-height:1.5;flex:1}
+
+/* MESAS */
+.mesa-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px}
+.mesa{border:1.5px solid var(--g150);background:var(--white);border-radius:13px;padding:13px 8px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;position:relative;transition:all .15s;min-height:82px}
+.mesa:hover{border-color:var(--g300);background:var(--g50)}
+.mesa:active{transform:scale(.96)}
+.mesa-ocup{background:#FDF8F1;border-color:#E9D4B2}
+.mesa-list{background:#F0F8F3;border-color:#BEDEC9}
+.mesa-wait{background:#FDF1F1;border-color:#F0C5C5}
+.mdot{width:6px;height:6px;border-radius:50%;position:absolute;top:7px;right:7px}
+.mnum{font-size:20px;font-weight:800;letter-spacing:-0.02em}
+.mnum-l{color:var(--g400)}
+.mnum-o{color:var(--c-a)}
+.mnum-v{color:var(--green)}
+.mnum-r{color:var(--red)}
+.mtime{font-size:10px;font-weight:600;color:var(--g500);font-family:var(--mono)}
+.mlbl{font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--g500)}
+.legend{display:flex;flex-wrap:wrap;gap:10px;padding:10px 12px;background:var(--g50);border:1px solid var(--g100);border-radius:11px;margin-top:12px}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--g600);font-weight:500}
+.leg-dot{width:7px;height:7px;border-radius:50%}
+
+/* MENU */
+.cats{display:flex;gap:6px;overflow-x:auto;padding:6px 0 10px}
+.cats::-webkit-scrollbar{display:none}
+.cpill{flex-shrink:0;padding:6px 12px;border-radius:20px;font-size:11.5px;font-weight:600;cursor:pointer;border:1px solid var(--g200);color:var(--g600);background:var(--white);transition:all .15s}
+.cpill:hover{border-color:var(--g300)}
+.cpill.on{background:var(--black);color:white;border-color:var(--black)}
+.mitem{display:flex;align-items:center;gap:11px;padding:12px 0;border-bottom:1px solid var(--g100)}
+.mitem:last-child{border-bottom:none}
+.memoji{width:40px;height:40px;border-radius:11px;background:var(--g50);border:1px solid var(--g100);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.minfo{flex:1;min-width:0}
+.mname{font-size:13.5px;font-weight:700;color:var(--black);margin-bottom:1px;letter-spacing:-0.01em}
+.mdesc{font-size:11px;color:var(--g500);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mprice{font-size:13px;font-weight:700;color:var(--black);font-variant-numeric:tabular-nums;flex-shrink:0}
+.qty-ctrl{display:flex;align-items:center;gap:0;background:var(--g50);border:1px solid var(--g200);border-radius:9px;overflow:hidden;flex-shrink:0}
+.qty-btn{width:28px;height:28px;border:none;background:transparent;cursor:pointer;font-size:14px;font-weight:700;color:var(--g700);display:flex;align-items:center;justify-content:center}
+.qty-btn:hover{background:var(--g100)}
+.qty-val{font-size:12.5px;font-weight:700;min-width:20px;text-align:center;font-variant-numeric:tabular-nums}
+.madd-btn{width:30px;height:30px;border-radius:9px;background:var(--black);color:white;border:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* ORDER */
+.orow{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--g100)}
+.orow:last-child{border-bottom:none}
+.oqty{width:26px;height:26px;border-radius:7px;background:var(--g100);color:var(--g700);display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;flex-shrink:0;font-variant-numeric:tabular-nums}
+.oname{flex:1;font-size:13.5px;font-weight:500;color:var(--black);letter-spacing:-0.01em}
+.oprice{font-size:13.5px;font-weight:600;color:var(--black);flex-shrink:0;font-variant-numeric:tabular-nums}
+.totals-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0}
+.tlbl{font-size:12.5px;color:var(--g600);letter-spacing:-0.01em}
+.tval{font-size:13.5px;font-weight:600;color:var(--black);font-variant-numeric:tabular-nums}
+.grand .tlbl{font-size:14px;font-weight:700;color:var(--black)}
+.grand .tval{font-size:20px;font-weight:800;color:var(--black);letter-spacing:-0.03em}
+.div{border:none;border-top:1px solid var(--g150);margin:5px 0}
+
+/* PAY */
+.pmethod{display:flex;align-items:center;gap:12px;padding:14px;border-radius:12px;background:var(--white);border:1.5px solid var(--g150);cursor:pointer;margin-bottom:9px;transition:all .15s}
+.pmethod:hover{border-color:var(--g300)}
+.pmethod.sel{border-color:var(--black);background:var(--g50)}
+.picon{width:38px;height:38px;border-radius:10px;background:var(--g100);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.pmethod.sel .picon{background:var(--black);color:white}
+.pname{font-size:13.5px;font-weight:700;color:var(--black);letter-spacing:-0.01em}
+.pdesc{font-size:10.5px;color:var(--g500);margin-top:1px}
+.pcheck{margin-left:auto;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--g300);display:flex;align-items:center;justify-content:center}
+.pmethod.sel .pcheck{background:var(--black);border-color:var(--black);color:white;font-size:11px;font-weight:800}
+.total-display{text-align:center;padding:16px 0 22px}
+.total-lbl{font-size:10px;color:var(--g500);font-weight:600;letter-spacing:1.4px;text-transform:uppercase;margin-bottom:6px}
+.total-amt{font-size:40px;font-weight:800;color:var(--black);letter-spacing:-0.04em;line-height:1;font-variant-numeric:tabular-nums}
+.total-dec{font-size:20px;color:var(--g400);font-weight:600}
+.total-ctx{font-size:11.5px;color:var(--g500);margin-top:5px}
+
+/* SUCCESS */
+.success{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 18px 0;gap:14px;flex:1;text-align:center}
+.sicon{width:68px;height:68px;border-radius:50%;background:#E6F5EC;border:1.5px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:30px;color:var(--green);animation:pop .4s cubic-bezier(.34,1.56,.64,1)}
+.stitle{font-size:22px;font-weight:800;letter-spacing:-0.03em}
+.samount{font-size:34px;font-weight:800;color:var(--green);letter-spacing:-0.03em;font-variant-numeric:tabular-nums}
+.ssub{font-size:12.5px;color:var(--g600);line-height:1.55}
+
+/* RESERV */
+.reserv-item{background:var(--white);border:1px solid var(--g150);border-radius:12px;padding:14px;margin-bottom:9px;cursor:pointer;transition:all .15s}
+.reserv-item:hover{border-color:var(--g300)}
+.reserv-head{display:flex;align-items:center;gap:11px;margin-bottom:10px}
+.reserv-time{width:56px;flex-shrink:0;text-align:center;padding:8px 0;background:var(--g50);border-radius:9px}
+.reserv-time-val{font-size:15px;font-weight:800;letter-spacing:-0.02em;font-variant-numeric:tabular-nums}
+.reserv-time-lbl{font-size:9px;color:var(--g500);font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-top:1px}
+.reserv-info{flex:1}
+.reserv-name{font-size:13.5px;font-weight:700;letter-spacing:-0.01em}
+.reserv-meta{font-size:11px;color:var(--g500);margin-top:2px}
+.reserv-footer{display:flex;gap:8px;padding-top:10px;border-top:1px solid var(--g100)}
+
+/* PROFILE */
+.profile-header{display:flex;flex-direction:column;align-items:center;padding:16px 0 20px;gap:10px;text-align:center}
+.profile-avatar{width:68px;height:68px;border-radius:50%;background:var(--c-a);color:white;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;letter-spacing:-0.02em}
+.profile-name{font-size:20px;font-weight:800;letter-spacing:-0.03em}
+.profile-role{font-size:11.5px;color:var(--g500);font-weight:500}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
+.stat-cell{background:var(--white);border:1px solid var(--g150);border-radius:11px;padding:12px;text-align:center}
+.stat-val{font-size:17px;font-weight:800;letter-spacing:-0.02em;line-height:1;font-variant-numeric:tabular-nums}
+.stat-lbl{font-size:9.5px;color:var(--g500);font-weight:600;letter-spacing:.6px;text-transform:uppercase;margin-top:4px}
+
+/* SETTINGS */
+.setting-list{background:var(--white);border:1px solid var(--g150);border-radius:12px;margin-bottom:10px;overflow:hidden}
+.setting-row{display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid var(--g100);cursor:pointer;transition:background .15s}
+.setting-row:hover{background:var(--g50)}
+.setting-row:last-child{border-bottom:none}
+.setting-ico{width:32px;height:32px;border-radius:9px;background:var(--g50);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.setting-name{flex:1;font-size:13.5px;font-weight:600;color:var(--black);letter-spacing:-0.01em}
+.setting-val{font-size:12px;color:var(--g500)}
+.setting-arrow{color:var(--g400);font-size:16px}
+.toggle{width:38px;height:22px;border-radius:11px;background:var(--g200);position:relative;transition:all .2s;cursor:pointer;flex-shrink:0}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:white;transition:all .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle.on{background:var(--black)}
+.toggle.on::after{left:18px}
+
+/* EMP */
+.emp-item{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--g100)}
+.emp-item:last-child{border-bottom:none}
+.emp-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:14px;font-weight:700;flex-shrink:0;letter-spacing:-0.02em}
+.emp-info{flex:1;min-width:0}
+.emp-name{font-size:13.5px;font-weight:700;letter-spacing:-0.01em}
+.emp-role{font-size:11px;color:var(--g500);margin-top:1px}
+
+/* KDS */
+.kds-stat-bar{display:flex;gap:7px;padding:0 18px 10px}
+.kds-stat{flex:1;padding:9px 10px;border-radius:11px;background:var(--g50);border:1px solid var(--g100)}
+.kds-stat-v{font-size:16px;font-weight:800;letter-spacing:-0.02em;line-height:1;font-variant-numeric:tabular-nums}
+.kds-stat-l{font-size:9px;color:var(--g500);margin-top:3px;font-weight:600;letter-spacing:.3px;text-transform:uppercase}
+.tcard{border:1.5px solid var(--g150);border-radius:14px;overflow:hidden;margin-bottom:10px;cursor:pointer;transition:all .15s;background:var(--white)}
+.tcard:hover{border-color:var(--g300);box-shadow:var(--sh-sm)}
+.tcard.urgent{border-color:var(--red);box-shadow:0 0 0 2px #FDECEC}
+.thead{display:flex;align-items:center;gap:9px;padding:11px 13px;border-bottom:1px solid var(--g100)}
+.thead-g{background:#F0F8F3}
+.thead-a{background:#FDF3E6}
+.thead-r{background:#FDECEC}
+.tmesa{font-size:14px;font-weight:800;color:var(--black);letter-spacing:-0.01em}
+.tmesero{font-size:10.5px;color:var(--g600);margin-top:1px}
+.ttimer{margin-left:auto;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:7px;font-variant-numeric:tabular-nums;font-family:var(--mono)}
+.ttimer-g{background:#D1F0DF;color:var(--green)}
+.ttimer-a{background:#FCE7C9;color:var(--amber)}
+.ttimer-r{background:#F9C7C7;color:var(--red)}
+.tbody{padding:9px 13px}
+.titem{display:flex;align-items:flex-start;gap:9px;padding:5px 0}
+.titem:not(:last-child){border-bottom:1px solid var(--g100)}
+.tq{font-size:12.5px;font-weight:800;color:var(--black);width:20px;font-variant-numeric:tabular-nums}
+.tn{font-size:12.5px;font-weight:500;color:var(--black);flex:1;line-height:1.3}
+.tnote{color:var(--c-k);font-size:10.5px;font-weight:600}
+.tnote-alert{color:var(--red);font-weight:700}
+.tdone{text-decoration:line-through;color:var(--g400)!important}
+.tfoot{padding:9px 13px;display:flex;gap:7px;border-top:1px solid var(--g100);background:var(--g50)}
+.kbtn{flex:1;padding:8px;border-radius:9px;font-family:var(--font);font-size:12.5px;font-weight:700;border:none;cursor:pointer;letter-spacing:-0.01em}
+.kbtn-ok{background:var(--c-k);color:white}
+.kbtn-dl{background:var(--white);color:var(--g600);border:1px solid var(--g200)}
+.empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 20px;color:var(--g500);gap:10px}
+.empty-icon{font-size:42px;opacity:.4}
+.empty-title{font-size:15px;font-weight:700;color:var(--g700)}
+.empty-desc{font-size:12px;color:var(--g500);line-height:1.5;max-width:220px}
+
+/* MANAGER */
+.greeting-wrap{padding:4px 0 16px}
+.greeting-hi{font-size:12px;color:var(--g500);font-weight:500}
+.greeting-name{font-size:24px;font-weight:800;color:var(--black);letter-spacing:-0.03em;line-height:1.1;margin-top:2px}
+.greeting-date{font-size:11px;color:var(--g500);margin-top:3px;font-family:var(--mono)}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px}
+.kpi{border:1px solid var(--g150);border-radius:13px;padding:13px;background:var(--white)}
+.kpi-lbl{font-size:9.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--g500);margin-bottom:6px}
+.kpi-val{font-size:22px;font-weight:800;color:var(--black);letter-spacing:-0.03em;line-height:1;font-variant-numeric:tabular-nums}
+.kpi-sub{font-size:10.5px;color:var(--g500);margin-top:4px}
+.kpi-dl{font-size:10.5px;font-weight:600;margin-top:5px}
+.kpi-up{color:var(--green)}
+.kpi-dn{color:var(--red)}
+.barchart{display:flex;align-items:flex-end;gap:2.5px;height:56px;padding:8px 0}
+.bar{flex:1;border-radius:3px 3px 0 0;background:var(--g200)}
+.bar.hi{background:var(--black)}
+.bar.mid{background:var(--g500)}
+.bar.low{background:var(--g300)}
+.barlabels{display:flex;justify-content:space-between;font-size:8.5px;color:var(--g400);font-family:var(--mono)}
+.rank-item{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid var(--g100)}
+.rank-item:last-child{border-bottom:none}
+.rnum{width:24px;height:24px;border-radius:7px;background:var(--g100);color:var(--g600);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;font-variant-numeric:tabular-nums}
+.rnum-gold{background:var(--black);color:white}
+.rname{flex:1;font-size:13px;font-weight:600;color:var(--black);letter-spacing:-0.01em}
+.rbar{width:54px;height:3.5px;border-radius:3px;background:var(--g100);overflow:hidden}
+.rbar-fill{height:100%;background:var(--black);border-radius:3px}
+.rcnt{font-size:12px;color:var(--g700);font-weight:700;font-variant-numeric:tabular-nums}
+.alert{border-radius:11px;padding:11px 13px;display:flex;align-items:flex-start;gap:9px;margin-bottom:10px}
+.alert-a{background:#FDF3E6;border:1px solid #F5DEB3}
+.alert-r{background:#FDECEC;border:1px solid #F0C5C5}
+.alert-icon{font-size:16px;flex-shrink:0;margin-top:-1px}
+.alert-txt{font-size:11.5px;color:var(--g700);flex:1;line-height:1.4;letter-spacing:-0.01em}
+.alert-txt strong{color:var(--black);font-weight:700}
+.srow{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--g100)}
+.srow:last-child{border-bottom:none}
+.slb{font-size:12.5px;color:var(--g700);font-weight:500}
+.svl{font-size:13px;font-weight:700;color:var(--black);font-variant-numeric:tabular-nums}
+.live{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:18px;background:#E6F5EC;border:1px solid #BEDEC9}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 1.6s infinite}
+.live-txt{font-size:9px;font-weight:700;color:var(--green);letter-spacing:1.1px;text-transform:uppercase}
+
+/* DELIVERY */
+.del-order{background:var(--white);border:1px solid var(--g150);border-radius:13px;padding:13px;margin-bottom:9px;cursor:pointer;transition:all .15s}
+.del-order:hover{border-color:var(--g300)}
+.del-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.del-platform{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:white;flex-shrink:0;letter-spacing:-0.02em}
+.del-platform-r{background:#FF441F}
+.del-platform-d{background:#FF7B00}
+.del-platform-u{background:#000}
+.del-info{flex:1;min-width:0}
+.del-id{font-size:13px;font-weight:700;letter-spacing:-0.01em}
+.del-addr{font-size:10.5px;color:var(--g500);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.del-progress{display:flex;gap:3px;padding:8px 0 10px}
+.del-step{flex:1;height:3px;border-radius:2px;background:var(--g200)}
+.del-step.done{background:var(--green)}
+.del-step.active{background:var(--amber)}
+.del-footer{display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid var(--g100);font-size:11px;color:var(--g500)}
+
+/* ============ CDS (LANDSCAPE) ============ */
+.cds-layout{display:grid;grid-template-columns:1fr 1fr;height:100%;background:var(--white)}
+.cds-left{background:var(--black);color:white;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:28px;text-align:center;position:relative;overflow:hidden}
+.cds-left::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 40%,rgba(255,255,255,.04) 0%,transparent 50%);pointer-events:none}
+.cds-logo{width:62px;height:62px;border-radius:16px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:12px;position:relative;z-index:1}
+.cds-brand-name{font-size:20px;font-weight:800;letter-spacing:-0.03em;position:relative;z-index:1}
+.cds-welcome-text{font-size:12.5px;color:rgba(255,255,255,.6);margin-top:6px;max-width:220px;line-height:1.5;position:relative;z-index:1}
+.cds-promo-badge{position:absolute;bottom:22px;left:22px;right:22px;padding:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:12px;z-index:1}
+.cds-promo-badge-lbl{font-size:9px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:4px}
+.cds-promo-badge-val{font-size:13.5px;font-weight:700;color:white;letter-spacing:-0.02em}
+.cds-right{display:flex;flex-direction:column;padding:22px 22px 0;position:relative;overflow:hidden}
+.cds-right-header{display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid var(--g150);margin-bottom:4px}
+.cds-right-title{font-size:10.5px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--g500)}
+.cds-order-num{font-size:11.5px;color:var(--g500);font-weight:600;font-family:var(--mono)}
+.cds-items-list{flex:1;overflow-y:auto;padding:4px 0}
+.cds-items-list::-webkit-scrollbar{display:none}
+.cds-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--g100);animation:fadeIn .3s ease}
+.cds-item:last-child{border-bottom:none}
+.cds-item-qty{width:24px;height:24px;border-radius:6px;background:var(--c-c-bg);color:var(--c-c);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;font-variant-numeric:tabular-nums}
+.cds-item-name{flex:1;font-size:13px;font-weight:600;letter-spacing:-0.01em}
+.cds-item-price{font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums}
+.cds-totals{background:var(--g50);border-top:1px solid var(--g150);padding:10px 22px;margin:0 -22px}
+.cds-sub-row{display:flex;justify-content:space-between;font-size:11.5px;color:var(--g600);padding:2px 0}
+.cds-grand{display:flex;justify-content:space-between;align-items:center;padding:10px 22px 14px;margin:0 -22px;background:var(--black);color:white}
+.cds-grand-lbl{font-size:10.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;opacity:.6}
+.cds-grand-val{font-size:26px;font-weight:800;letter-spacing:-0.03em;font-variant-numeric:tabular-nums}
+.cds-empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--g400);text-align:center;padding:30px 18px}
+.cds-empty-ico{font-size:44px;opacity:.3}
+.cds-empty-txt{font-size:12.5px;font-weight:500;max-width:220px;line-height:1.5;color:var(--g500)}
+.cds-paying{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:14px;background:var(--black);color:white;grid-column:1/-1}
+.cds-paying-ico{width:78px;height:78px;border-radius:50%;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:32px;animation:spinSlow 2s linear infinite}
+.cds-paying-title{font-size:20px;font-weight:800;letter-spacing:-0.03em}
+.cds-paying-sub{font-size:12px;color:rgba(255,255,255,.6);max-width:280px;line-height:1.55}
+.cds-thanks{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:12px;grid-column:1/-1;background:linear-gradient(135deg,#F8F8F6 0%,#EEEEEC 100%)}
+.cds-thanks-ico{width:78px;height:78px;border-radius:50%;background:#E6F5EC;border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:36px;color:var(--green)}
+.cds-thanks-title{font-size:26px;font-weight:800;letter-spacing:-0.03em}
+.cds-thanks-sub{font-size:12px;color:var(--g600);max-width:320px;line-height:1.5}
+.cds-stars{display:flex;gap:8px;margin-top:6px}
+.cds-star{font-size:28px;color:var(--g300);cursor:pointer;transition:all .15s}
+.cds-star:hover,.cds-star.on{color:#F5A623;transform:scale(1.1)}
+.cds-sim-controls{position:absolute;top:10px;right:10px;display:flex;gap:5px;z-index:10;flex-wrap:wrap;justify-content:flex-end;max-width:60%}
+.cds-sim-btn{padding:5px 9px;font-size:9.5px;font-weight:700;background:rgba(255,255,255,.9);border:1px solid var(--g200);border-radius:7px;cursor:pointer;color:var(--g700);letter-spacing:-0.01em;font-family:var(--font)}
+.cds-sim-btn:hover{background:var(--white)}
+.cds-sim-btn.active{background:var(--black);color:white;border-color:var(--black)}
+
+@media(max-width:500px){
+  .cds-logo{width:48px;height:48px;font-size:22px;margin-bottom:8px}
+  .cds-brand-name{font-size:16px}
+  .cds-welcome-text{font-size:10.5px}
+  .cds-left{padding:18px}
+  .cds-right{padding:18px 18px 0}
+  .cds-promo-badge{left:12px;right:12px;bottom:14px;padding:9px}
+  .cds-promo-badge-val{font-size:11px}
+  .cds-grand-val{font-size:20px}
+  .cds-paying-ico,.cds-thanks-ico{width:60px;height:60px;font-size:28px}
+  .cds-paying-title,.cds-thanks-title{font-size:18px}
+  .cds-sim-controls{top:6px;right:6px;gap:3px}
+  .cds-sim-btn{padding:4px 6px;font-size:8.5px;border-radius:5px}
+}
+
+/* HELP */
+.help-floating{position:fixed;bottom:20px;right:20px;width:42px;height:42px;border-radius:50%;background:var(--black);color:white;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;z-index:50;box-shadow:var(--sh-md);border:none}
+@media(max-width:500px){.help-floating{bottom:14px;right:14px;width:36px;height:36px;font-size:15px}}
+
+.hidden{display:none!important}
+</style>
+<script src="volvix-api.js"></script>
+<script src="volvix-sync.js"></script>
+<script src="volvix-sync-widget.js"></script>
+  <script src="/volvix-uplift-wiring.js" defer></script>
+  <script src="/volvix-error-reporter.js" defer></script>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<style>
+  .vbw-stats-bar{display:flex;gap:14px;align-items:center;font-size:11.5px;color:#475569;flex-wrap:wrap}
+  .vbw-stats-bar .stat{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.5);padding:4px 9px;border-radius:6px;border:1px solid rgba(0,0,0,.05)}
+  .vbw-stats-bar .stat b{color:#0f172a;font-weight:700;font-size:12px}
+  .vbw-rt{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:4px 8px;border-radius:99px}
+  .vbw-rt.online{background:rgba(34,197,94,.12);color:#16a34a}
+  .vbw-rt.offline{background:rgba(239,68,68,.12);color:#dc2626}
+  .vbw-rt .dot{width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 6px currentColor;animation:vbw-pulse 2s infinite}
+  @keyframes vbw-pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .vbw-shortcut-hints{display:none;gap:6px;font-size:10.5px;color:#6b7280}
+  .vbw-shortcut-hints kbd{background:#fff;border:1px solid #d1d5db;border-bottom-width:2px;border-radius:4px;padding:1px 6px;font-family:ui-monospace,monospace;font-size:10px;color:#374151}
+  @media(min-width:980px){ .vbw-shortcut-hints{display:inline-flex} }
+  .vbw-search-btn{background:#fff;border:1px solid #d1d5db;color:#475569;padding:5px 10px;border-radius:8px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+  .vbw-search-btn:hover{border-color:#94a3b8}
+  .vbw-search-btn kbd{background:#f3f4f6;border:1px solid #d1d5db;border-radius:3px;padding:0 4px;font-size:10px;font-family:ui-monospace,monospace}
+  /* Quick search modal */
+  .vbw-qs-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:flex-start;justify-content:center;z-index:9999;padding-top:10vh}
+  .vbw-qs-overlay.open{display:flex}
+  .vbw-qs-box{background:#fff;width:min(560px,95vw);max-height:70vh;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.35);display:flex;flex-direction:column;overflow:hidden}
+  .vbw-qs-input{border:0;border-bottom:1px solid #e5e7eb;padding:16px 20px;font-size:16px;outline:none}
+  .vbw-qs-results{flex:1;overflow:auto;padding:8px 0}
+  .vbw-qs-group{padding:6px 16px;font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:#9ca3af;font-weight:700}
+  .vbw-qs-item{padding:9px 18px;display:flex;justify-content:space-between;gap:12px;cursor:pointer;font-size:13px;color:#1f2937}
+  .vbw-qs-item:hover, .vbw-qs-item.sel{background:#eef2ff}
+  .vbw-qs-item .meta{color:#6b7280;font-size:11.5px}
+  .vbw-qs-empty{padding:30px;text-align:center;color:#9ca3af;font-size:13px}
+  .vbw-qs-foot{border-top:1px solid #e5e7eb;padding:8px 16px;font-size:11px;color:#6b7280;display:flex;gap:14px;justify-content:space-between}
+</style>
+<div class="topbar">
+  <div class="brand-mini">M</div>
+  <nav class="app-selector">
+    <button class="app-tab active" data-app="comandera" onclick="switchApp('comandera')"><span class="tab-dot" style="background:var(--c-a)"></span><span>Comandera</span></button>
+    <button class="app-tab" data-app="kds" onclick="switchApp('kds')"><span class="tab-dot" style="background:var(--c-k)"></span><span>KDS</span></button>
+    <button class="app-tab" data-app="manager" onclick="switchApp('manager')"><span class="tab-dot" style="background:var(--c-m)"></span><span>Manager</span></button>
+    <button class="app-tab" data-app="cds" onclick="switchApp('cds')"><span class="tab-dot" style="background:var(--c-c)"></span><span>CDS Cliente</span></button>
+  </nav>
+
+  <div class="vbw-shortcut-hints" aria-hidden="true">
+    <span><kbd>F1</kbd> Ventas</span>
+    <span><kbd>F2</kbd> Créditos</span>
+    <span><kbd>F3</kbd> Cortes</span>
+    <span><kbd>F4</kbd> KDS</span>
+  </div>
+
+  <div class="vbw-stats-bar" aria-live="polite">
+    <span class="stat" title="Ventas hoy">💰 <b id="vbwStatVentas">$0</b></span>
+    <span class="stat" title="Ticket promedio">🎫 <b id="vbwStatAvg">$0</b></span>
+    <span class="stat" title="Productos vendidos hoy">📦 <b id="vbwStatItems">0</b></span>
+    <span class="vbw-rt offline" id="vbwRtIndicator" title="Conexión en tiempo real"><span class="dot"></span><span id="vbwRtLbl">Offline</span></span>
+  </div>
+
+  <button type="button" class="vbw-search-btn" id="vbwSearchOpen" aria-label="Búsqueda rápida" style="margin-left:auto"><span>🔍 Buscar</span><kbd>Ctrl+K</kbd></button>
+
+  <a href="docs.html" target="_blank" rel="noopener" title="Centro de ayuda" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;background:rgba(99,102,241,.12);color:#4f46e5;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(99,102,241,.25)">? Ayuda</a>
+  <button class="logout-btn" onclick="handleLogout()" id="logout-btn" style="display:none">⎋</button>
+</div>
+
+<!-- Quick search modal (Ctrl+K) -->
+<div class="vbw-qs-overlay" id="vbwQsOverlay" role="dialog" aria-modal="true" aria-label="Búsqueda rápida">
+  <div class="vbw-qs-box">
+    <input type="text" class="vbw-qs-input" id="vbwQsInput" placeholder="Buscar productos, clientes, ventas..." autocomplete="off" />
+    <div class="vbw-qs-results" id="vbwQsResults"><div class="vbw-qs-empty">Empieza a escribir para buscar...</div></div>
+    <div class="vbw-qs-foot">
+      <span><kbd>↑</kbd> <kbd>↓</kbd> navegar · <kbd>Enter</kbd> seleccionar · <kbd>Esc</kbd> cerrar</span>
+      <span id="vbwQsCount"></span>
+    </div>
+  </div>
+</div>
+
+<!-- STAGE -->
+<div class="stage">
+  <div class="device phone" id="device-frame">
+    <div class="device-screen">
+      <div class="device-island"></div>
+
+      <!-- ============ COMANDERA ============ -->
+      <div class="app active" id="app-comandera">
+
+        <!-- LOGIN PIN -->
+        <div class="screen visible" data-screen="c-login">
+          <div class="statusbar"><span>9:41</span><span style="font-size:11px;color:var(--g500);font-weight:600">COMANDERA</span></div>
+          <div class="login-screen">
+            <div class="login-logo-section">
+              <div class="login-logo login-logo-a">🍽</div>
+              <div class="login-title">Comandera</div>
+              <div class="login-sub">Ingresa tu PIN de 4 dígitos</div>
+              <div class="pin-display">
+                <div class="pin-dot" id="pd-0"></div><div class="pin-dot" id="pd-1"></div>
+                <div class="pin-dot" id="pd-2"></div><div class="pin-dot" id="pd-3"></div>
+              </div>
+              <div class="pin-error" id="pin-error"></div>
+            </div>
+            <div class="pin-pad">
+              <button class="pin-key" onclick="pinPress('1')">1</button>
+              <button class="pin-key" onclick="pinPress('2')">2</button>
+              <button class="pin-key" onclick="pinPress('3')">3</button>
+              <button class="pin-key" onclick="pinPress('4')">4</button>
+              <button class="pin-key" onclick="pinPress('5')">5</button>
+              <button class="pin-key" onclick="pinPress('6')">6</button>
+              <button class="pin-key" onclick="pinPress('7')">7</button>
+              <button class="pin-key" onclick="pinPress('8')">8</button>
+              <button class="pin-key" onclick="pinPress('9')">9</button>
+              <button class="pin-key action" onclick="mpHelpPin()">?</button>
+              <button class="pin-key" onclick="pinPress('0')">0</button>
+              <button class="pin-key action" onclick="pinDel()">⌫</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- MESAS -->
+        <div class="screen" data-screen="c-mesas">
+          <div class="statusbar"><span>9:41</span><div class="sb-icons">📶 🔋</div></div>
+          <div class="navbar">
+            <div style="flex:1"><div class="navtitle">Mis mesas</div><div class="navsub">Turno noche · Luis Mendoza</div></div>
+            <div class="live"><div class="live-dot"></div><span class="live-txt">Live</span></div>
+          </div>
+          <div class="scroll">
+            <div class="slbl">Zona A — Interior<span class="slbl-line"></span><span style="color:var(--g600);letter-spacing:0;text-transform:none;font-weight:500;font-size:11px">5/6</span></div>
+            <div class="mesa-grid">
+              <div class="mesa" onclick="openMesa(1,'libre')"><span class="mnum mnum-l">01</span><span class="mlbl">Libre</span></div>
+              <div class="mesa mesa-ocup" onclick="openMesa(2,'ocup')"><div class="mdot" style="background:var(--c-a)"></div><span class="mnum mnum-o">02</span><span class="mtime">24 min</span><span class="mlbl">Ocupada</span></div>
+              <div class="mesa mesa-list" onclick="openMesa(3,'lista')"><div class="mdot" style="background:var(--green)"></div><span class="mnum mnum-v">03</span><span class="mtime" style="color:var(--green)">Lista</span><span class="mlbl" style="color:var(--green)">Servir</span></div>
+              <div class="mesa mesa-wait" onclick="openMesa(4,'espera')"><div class="mdot" style="background:var(--red)"></div><span class="mnum mnum-r">04</span><span class="mtime" style="color:var(--red)">47 min</span><span class="mlbl" style="color:var(--red)">Espera</span></div>
+              <div class="mesa mesa-ocup" onclick="openMesa(5,'ocup')"><div class="mdot" style="background:var(--c-a)"></div><span class="mnum mnum-o">05</span><span class="mtime">12 min</span><span class="mlbl">Ocupada</span></div>
+              <div class="mesa mesa-ocup" onclick="openMesa(6,'ocup')"><div class="mdot" style="background:var(--c-a)"></div><span class="mnum mnum-o">06</span><span class="mtime">8 min</span><span class="mlbl">Ocupada</span></div>
+            </div>
+            <div class="slbl">Zona B — Terraza<span class="slbl-line"></span><span style="color:var(--g600);letter-spacing:0;text-transform:none;font-weight:500;font-size:11px">2/3</span></div>
+            <div class="mesa-grid">
+              <div class="mesa" onclick="openMesa('T1','libre')"><span class="mnum mnum-l">T1</span><span class="mlbl">Libre</span></div>
+              <div class="mesa mesa-ocup" onclick="openMesa('T2','ocup')"><div class="mdot" style="background:var(--c-a)"></div><span class="mnum mnum-o">T2</span><span class="mtime">18 min</span><span class="mlbl">Ocupada</span></div>
+              <div class="mesa" onclick="openMesa('T3','libre')"><span class="mnum mnum-l">T3</span><span class="mlbl">Libre</span></div>
+            </div>
+            <div class="legend">
+              <div class="leg-item"><div class="leg-dot" style="background:var(--g400)"></div>Libre</div>
+              <div class="leg-item"><div class="leg-dot" style="background:var(--c-a)"></div>Ocupada</div>
+              <div class="leg-item"><div class="leg-dot" style="background:var(--green)"></div>Lista</div>
+              <div class="leg-item"><div class="leg-dot" style="background:var(--red)"></div>Cobro</div>
+            </div>
+          </div>
+          <div class="tabbar">
+            <div class="tabbar-item active"><span class="tb-icon">🗺</span><span class="tb-lbl">Mesas</span></div>
+            <div class="tabbar-item" onclick="goScreen('c-reservas')"><span class="tb-icon">📅</span><span class="tb-lbl">Reservas</span></div>
+            <div class="tabbar-item" onclick="goScreen('c-historial')"><span class="tb-icon">🕓</span><span class="tb-lbl">Turno</span></div>
+            <div class="tabbar-item" onclick="goScreen('c-perfil')"><span class="tb-icon">👤</span><span class="tb-lbl">Perfil</span></div>
+          </div>
+        </div>
+
+        <!-- PEDIDO -->
+        <div class="screen" data-screen="c-pedido">
+          <div class="statusbar"><span>9:41</span></div>
+          <div class="navbar">
+            <button class="navbtn" onclick="goScreen('c-mesas')">←</button>
+            <div style="flex:1"><div class="navtitle">Mesa <span id="ped-mesa">05</span></div><div class="navsub">4 personas · Luis M.</div></div>
+            <button class="navbtn" onclick="goScreen('c-resumen')" style="background:var(--black);color:white;border-color:var(--black);width:auto;padding:0 10px;gap:6px;display:flex;align-items:center;min-width:34px"><span>🛒</span><span id="cart-badge" style="font-size:12px;font-weight:700">0</span></button>
+          </div>
+          <div style="padding:0 18px 2px">
+            <div class="cats">
+              <div class="cpill on" onclick="filterCat(this,'todo')">Todo</div>
+              <div class="cpill" onclick="filterCat(this,'pop')">🔥 Popular</div>
+              <div class="cpill" onclick="filterCat(this,'carne')">🥩 Carnes</div>
+              <div class="cpill" onclick="filterCat(this,'mar')">🦐 Mariscos</div>
+              <div class="cpill" onclick="filterCat(this,'beb')">🥤 Bebidas</div>
+              <div class="cpill" onclick="filterCat(this,'post')">🍰 Postres</div>
+            </div>
+          </div>
+          <div class="scroll" style="padding-top:0"><div class="card" id="menu-list"></div></div>
+          <div class="bottom-cta"><button class="btn btn-primary" onclick="goScreen('c-resumen')">Ver orden · <span id="cart-summary">0 items · $0</span></button></div>
+        </div>
+
+        <!-- RESUMEN -->
+        <div class="screen" data-screen="c-resumen">
+          <div class="statusbar"><span>9:41</span></div>
+          <div class="navbar">
+            <button class="navbtn" onclick="goScreen('c-pedido')">←</button>
+            <div style="flex:1"><div class="navtitle">Resumen</div><div class="navsub">Mesa <span id="res-mesa">05</span> · Orden #247</div></div>
+          </div>
+          <div class="scroll">
+            <div class="card">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                <span style="font-size:13px;font-weight:700;letter-spacing:-0.01em">Items del pedido</span>
+                <span class="chip chip-a">Abierta</span>
+              </div>
+              <div id="cart-list"></div>
+            </div>
+            <div class="card">
+              <div class="totals-row"><span class="tlbl">Subtotal</span><span class="tval" id="sub-tot">$0.00</span></div>
+              <div class="totals-row"><span class="tlbl">IVA 16%</span><span class="tval" id="iva-tot">$0.00</span></div>
+              <div class="totals-row"><span class="tlbl">Descuento</span><span class="tval" style="color:var(--green)">— $0.00</span></div>
+              <hr class="div">
+              <div class="totals-row grand"><span class="tlbl">Total</span><span class="tval" id="grand-tot">$0.00</span></div>
+            </div>
+            <div class="row-btns">
+              <button class="btn btn-outline btn-sm" onclick="goScreen('c-pedido')">✏ Agregar</button>
+              <button class="btn btn-outline btn-sm" onclick="mpSplitCheck()">➗ Dividir</button>
+              <button class="btn btn-outline btn-sm" onclick="mpSendToKitchen(this)">🍳 Cocina</button>
+            </div>
+            <button class="btn btn-primary" onclick="goScreen('c-cobrar')" id="go-pay" disabled style="opacity:.4">Cobrar</button>
+          </div>
+        </div>
+
+        <!-- COBRAR -->
+        <div class="screen" data-screen="c-cobrar">
+          <div class="statusbar"><span>9:41</span></div>
+          <div class="navbar">
+            <button class="navbtn" onclick="goScreen('c-resumen')">←</button>
+            <div style="flex:1"><div class="navtitle">Cobrar</div></div>
+          </div>
+          <div class="scroll">
+            <div class="total-display">
+              <div class="total-lbl">Total a cobrar</div>
+              <div class="total-amt" id="pay-amt">$0<span class="total-dec">.00</span></div>
+              <div class="total-ctx">Mesa <span id="pay-mesa">05</span> · Orden #247</div>
+            </div>
+            <div class="slbl">Método de pago</div>
+            <div class="pmethod sel" data-pay="efectivo" onclick="selectPay(this)"><div class="picon">💵</div><div><div class="pname">Efectivo</div><div class="pdesc">Calcula cambio automático</div></div><div class="pcheck">✓</div></div>
+            <div class="pmethod" data-pay="clip" onclick="selectPay(this)"><div class="picon">📱</div><div><div class="pname">Clip · Terminal</div><div class="pdesc">Tarjeta · NFC · débito</div></div><div class="pcheck"></div></div>
+            <div class="pmethod" data-pay="mp" onclick="selectPay(this)"><div class="picon">🔵</div><div><div class="pname">Mercado Pago</div><div class="pdesc">QR · transferencia · wallet</div></div><div class="pcheck"></div></div>
+            <div class="pmethod" data-pay="mixto" onclick="selectPay(this)"><div class="picon">💳</div><div><div class="pname">Pago mixto</div><div class="pdesc">Combina varios métodos</div></div><div class="pcheck"></div></div>
+            <div style="height:12px"></div>
+            <button class="btn btn-primary" onclick="goScreen('c-exito')">Confirmar cobro →</button>
+          </div>
+        </div>
+
+        <!-- EXITO -->
+        <div class="screen" data-screen="c-exito">
+          <div class="statusbar"><span>9:41</span></div>
+          <div style="flex:1;display:flex;flex-direction:column;padding:16px">
+            <div class="success">
+              <div class="sicon">✓</div>
+              <div class="stitle">Cobro exitoso</div>
+              <div class="samount" id="ex-amt">$0.00</div>
+              <div class="ssub"><span id="ex-pay">Efectivo</span> · Mesa <span id="ex-mesa">05</span><br><span id="ex-chg"></span></div>
+              <div class="row-btns" style="width:100%;margin-top:12px">
+                <button class="btn btn-outline btn-sm" onclick="mpPrintTicket(this)">🖨 Ticket</button>
+                <button class="btn btn-outline btn-sm" onclick="mpGenerateCFDI(this)">🧾 Factura</button>
+                <button class="btn btn-outline btn-sm" onclick="mpEmailReceipt(this)">📩 Email</button>
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="resetCart();goScreen('c-mesas')">← Volver</button>
+          </div>
+        </div>
+
+        <!-- RESERVAS -->
+        <div class="screen" data-screen="c-reservas">
+          <div class="statusbar"><span>9:41</span></div>
+          <div class="navbar">
+            <div style="flex:1"><div class="navtitle">Reservaciones</div><div class="navsub">Hoy · 6 reservadas</div></div>
+            <button class="navbtn" onclick="mpNewReservation()" style="background:var(--black);color:white;border-color:var(--black)">+</button>
+          </div>
+          <div class="scroll">
+            <div class="slbl">Próximas hoy<span class="slbl-line"></span></div>
+            <div class="reserv-item" onclick="mpViewReservation('Familia Martínez', {time:'20:00', people:4, table:'T2', phone:'+528112345678'})">
+              <div class="reserv-head">
+                <div class="reserv-time"><div class="reserv-time-val">20:00</div><div class="reserv-time-lbl">Hoy</div></div>
+                <div class="reserv-info"><div class="reserv-name">Familia Martínez</div><div class="reserv-meta">4 personas · Mesa T2 · 🎂</div></div>
+                <span class="chip chip-amb">35 min</span>
+              </div>
+              <div class="reserv-footer">
+                <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();mpConfirmReservation(this,'Familia Martínez')">✓ Confirmar</button>
+                <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();mpCallCustomer('+528112345678','Familia Martínez')">📞 Llamar</button>
+              </div>
+            </div>
+            <div class="reserv-item" onclick="mpViewReservation('Carlos Rodríguez', {time:'20:30', people:2, table:'03', phone:'+528123456789'})">
+              <div class="reserv-head">
+                <div class="reserv-time"><div class="reserv-time-val">20:30</div><div class="reserv-time-lbl">Hoy</div></div>
+                <div class="reserv-info"><div class="reserv-name">Carlos Rodríguez</div><div class="reserv-meta">2 personas · Mesa 03 · 💐</div></div>
+                <span class="chip chip-gr">1h 5m</span>
+              </div>
+              <div class="reserv-footer">
+                <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();mpConfirmReservation(this,'Carlos Rodríguez')">✓ Confirmar</button>
+                <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();mpCallCustomer('+528123456789','Carlos Rodríguez')">📞 Llamar</button>
+              </div>
+            </div>
+            <div class="reserv-item" onclick="mpViewReservation('Sara López', {time:'21:00', people:6, table:'04', phone:'+528134567890'})">
+              <div class="reserv-head">
+                <div class="reserv-time"><div class="reserv-time-val">21:00</div><div class="reserv-time-lbl">Hoy</div></div>
+                <div class="reserv-info"><div class="reserv-name">Sara López</div><div class="reserv-meta">6 personas · Mesa 04 · 💼</div></div>
+                <span class="chip chip-gr">1h 35m</span>
+              </div>
+            </div>
+            <div class="slbl">Mañana<span class="slbl-line"></span></div>
+            <div class="reserv-item" onclick="mpViewReservation('Juan Pérez', {time:'13:30', people:3, table:'libre', phone:'+528145678901'})">
+              <div class="reserv-head">
+                <div class="reserv-time"><div class="reserv-time-val">13:30</div><div class="reserv-time-lbl">Mié</div></div>
+                <div class="reserv-info"><div class="reserv-name">Juan Pérez</div><div class="reserv-meta">3 personas · Mesa libre</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="tabbar">
+            <div class="tabbar-item" onclick="goScreen('c-mesas')"><span class="tb-icon">🗺</span><span class="tb-lbl">Mesas</span></div>
+            <div class="tabbar-item active"><span class="tb-icon">📅</span><span class="tb-lbl">Reservas</span></div>
+            <div class="tabbar-item" onclick="goScreen('c-historial')"><span class="tb-icon">🕓</span><span class="tb-lbl">Turno</span></div>
+            <div class="tabbar-item" onclick="goScreen('c-perfil')"><span class="tb-icon">👤</span><span class="tb-lbl">Perfil</span></div>
+          </div>
+        </div>
+
+        <!-- HISTORIAL -->
+        <div class="screen" data-screen="c-historial">
+          <div class="statusbar"><span>9:41</span></div>
+          <div class="navbar">
+            <div style="flex:1"><div class="navtitle">Mi turno</div><div class="navsub">12 órdenes · $3,458</div></div>
+          </div>
+          <div class="scroll">
+            <div class="stat-grid">
+              <div class="stat-cell"><div class="stat-val">12</div><div class="stat-lbl">Órdenes</div></div>
+              <div class="stat-cell"><div class="stat-val">$3,458</div><div class="stat-lbl">Ventas</div></div>
+              <div class="stat-cell"><div class="stat-val">$288</div><div class="stat-lbl">Prom.</div></div>
+            </div>
+            <div class="slbl">Últimas órdenes<span class="slbl-line"></span></div>
+            <div class="card" style="padding:0">
+              <div style="padding:12px 14px;border-bottom:1px solid var(--g100);display:flex;align-items:center;gap:10px">
+                <div style="width:34px;height:34px;border-radius:9px;background:var(--g50);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--g700)">05</div>
+                <div style="flex:1"><div style="font-size:13px;font-weight:700">Mesa 05 · #247</div><div style="font-size:10.5px;color:var(--g500);margin-top:2px">Hace 3 min · 4 pers.</div></div>
+                <div style="text-align:right"><div style="font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">$576.52</div><div style="font-size:10px;color:var(--green);font-weight:600">✓ Cobrada</div></div>
+              </div>
+              <div style="padding:12px 14px;border-bottom:1px solid var(--g100);display:flex;align-items:center;gap:10px">
+                <div style="width:34px;height:34px;border-radius:9px;background:var(--g50);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--g700)">T2</div>
+                <div style="flex:1"><div style="font-size:13px;font-weight:700">Mesa T2 · #246</div><div style="font-size:10.5px;color:var(--g500);margin-top:2px">Hace 18 min · 2 pers.</div></div>
+                <div style="text-align:right"><div style="font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">$324.00</div><div style="font-size:10px;color:var(--green);font-weight:600">✓ Cobrada</div></div>
+              </div>
+              <div style="padding:12px 14px;border-bottom:1px solid var(--g100);display:flex;align-items:center;gap:10px">
+                <div style="width:34px;height:34px;border-radius:9px;background:var(--g50);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--g700)">02</div>
+                <div style="flex:1"><div style="font-size:13px;font-weight:700">Mesa 02 · #245</div><div style="font-size:10.5px;color:var(--g500);margin-top:2px">Hace 45 min · 3 pers.</div></div>
+                <div style="text-align:right"><div style="font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">$418.20</div><div style="font-size:10px;color:var(--green);font-weight:600">✓ Cobrada</div></div>
+              </div>
+              <div style="padding:12px 14px;display:flex;align-items:center;gap:10px">
+                <div style="width:34px;height:34px;border-radius:9px;background:var(--g50);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--g700)">04</div>
+                <div style="flex:1"><div style="font-size:13px;font-weight:700">Mesa 04 · #243</div><div style="font-size:10.5px;color:var(--g500);margin-top:2px">Hace 1h · Cancelada</div></div>
+                <div style="text-align:right"><div style="font-size:13px;font-weight:700;color:var(--red);font-variant-numeric:tabular-nums">$0.00</div><div style="font-size:10px;color:var(--red);font-weight:600">Cancelada</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="tabbar">
+            <div class="tabbar-item" onclick="goScreen('c-mesas')"><span class="tb-icon">🗺</span><span class="tb-lbl">Mesas</span></div>
+            <div class="tabbar-item" onclick="goScreen('c-reservas')"><span class="tb-icon">📅</span><span class="tb-lbl">Reservas</span></div>
+            <div class="tabbar-item active"><span class="tb-icon">🕓</span><span class="tb-lbl">Turno</span></div>
+            <div class="tabbar-item" onclick="goScreen('c-perfil')"><span class="tb-icon">👤</span><span class="tb-lbl">Perfil</span></div>
+          </div>
+        </div>
+
+        <!-- PERFIL -->
+        <div class="screen" data-screen="c-perfil">
+          <div class="statusbar"><span>9:41</span></div>
+          <div class="navbar"><div style="flex:1"><div class="navtitle">Mi perfil</div></div></div>
+          <div class="scroll">
+            <div class="profile-header">
+              <div class="profile-avatar" style="background:var(--c-a)">LM</div>
+              <div><div class="profile-name">Luis Mendoza</div><div class="profile-role">Mesero · Turno noche</div></div>
+            </div>
+            <div class="stat-grid">
+              <div class="stat-cell"><div class="stat-val">12</div><div class="stat-lbl">Órdenes</div></div>
+              <div class="stat-cell"><div class="stat-val">$420</div><div class="stat-lbl">Propinas</div></div>
+              <div class="stat-cell"><div class="stat-val">4.8</div><div class="stat-lbl">Rating</div></div>
+            </div>
+            <div class="slbl">Mi turno<span class="slbl-line"></span></div>
+            <div class="setting-list">
+              <div class="setting-row"><div class="setting-ico">🕓</div><div class="setting-name">Entrada</div><div class="setting-val">18:00 hoy</div></div>
+              <div class="setting-row"><div class="setting-ico">⏱</div><div class="setting-name">Tiempo</div><div class="setting-val">3h 41m</div></div>
+              <div class="setting-row"><div class="setting-ico">☕</div><div class="setting-name">Descansos</div><div class="setting-val">1 de 2</div></div>
+            </div>
+            <div class="slbl">Ajustes<span class="slbl-line"></span></div>
+            <div class="setting-list">
+              <div class="setting-row" onclick="mpManagePrinter()"><div class="setting-ico">🖨</div><div class="setting-name">Impresora BT</div><div class="setting-val">EPSON TM-T20</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row"><div class="setting-ico">🔔</div><div class="setting-name">Notificaciones</div><div class="toggle on" onclick="toggleSet(event,this)"></div></div>
+              <div class="setting-row"><div class="setting-ico">🔊</div><div class="setting-name">Sonido cocina</div><div class="toggle on" onclick="toggleSet(event,this)"></div></div>
+              <div class="setting-row" onclick="mpChangePin()"><div class="setting-ico">🔒</div><div class="setting-name">Cambiar PIN</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpChangeLanguage(this)"><div class="setting-ico">🌐</div><div class="setting-name">Idioma</div><div class="setting-val" id="mp-lang-val">Español</div><div class="setting-arrow">›</div></div>
+            </div>
+            <button class="btn btn-danger" onclick="handleLogout()">Cerrar turno</button>
+            <div style="text-align:center;font-size:10px;color:var(--g400);margin-top:12px;font-family:var(--mono)">Comandera v0.1.0</div>
+          </div>
+          <div class="tabbar">
+            <div class="tabbar-item" onclick="goScreen('c-mesas')"><span class="tb-icon">🗺</span><span class="tb-lbl">Mesas</span></div>
+            <div class="tabbar-item" onclick="goScreen('c-reservas')"><span class="tb-icon">📅</span><span class="tb-lbl">Reservas</span></div>
+            <div class="tabbar-item" onclick="goScreen('c-historial')"><span class="tb-icon">🕓</span><span class="tb-lbl">Turno</span></div>
+            <div class="tabbar-item active"><span class="tb-icon">👤</span><span class="tb-lbl">Perfil</span></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ============ KDS ============ -->
+      <div class="app" id="app-kds">
+
+        <!-- LOGIN: Pairing -->
+        <div class="screen visible" data-screen="k-login">
+          <div class="statusbar"><span>9:41</span><span style="font-size:11px;color:var(--g500);font-weight:600">KDS</span></div>
+          <div class="login-screen">
+            <div class="login-logo-section" style="padding-top:20px;padding-bottom:10px">
+              <div class="login-logo login-logo-k">👨‍🍳</div>
+              <div class="login-title">Cocina KDS</div>
+              <div class="login-sub">Vincula esta tablet con tu caja registradora</div>
+            </div>
+            <div class="login-form">
+              <div style="font-size:10px;font-weight:700;color:var(--g500);letter-spacing:1.4px;text-transform:uppercase;text-align:center">Código de emparejamiento</div>
+              <div class="pair-code">K7-3829</div>
+              <div>
+                <div class="pair-step"><div class="pair-num">1</div><div class="pair-text">Abre <strong>Manager</strong> o <strong>Comandera</strong> en tu caja</div></div>
+                <div class="pair-step"><div class="pair-num">2</div><div class="pair-text"><strong>Configuración → Vincular KDS</strong></div></div>
+                <div class="pair-step"><div class="pair-num">3</div><div class="pair-text">Ingresa el código de arriba</div></div>
+              </div>
+              <button class="btn btn-primary" onclick="goScreen('k-setup')" style="margin-top:8px">Ya vinculé, continuar →</button>
+              <div class="login-link">¿Problemas? <strong onclick="mpSupport()">Soporte</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SETUP: Station -->
+        <div class="screen" data-screen="k-setup">
+          <div class="statusbar"><span>9:41</span></div>
+          <div class="login-screen">
+            <div style="padding:28px 0 16px;text-align:center">
+              <div class="login-logo login-logo-k" style="margin:0 auto 12px">🍳</div>
+              <div class="login-title">Selecciona estación</div>
+              <div class="login-sub">¿Qué parte de la cocina es esta tablet?</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:9px;padding-bottom:20px">
+              <div class="setting-row" style="background:white;border:1.5px solid var(--g150);border-radius:12px" onclick="selStation('Cocina principal')"><div class="setting-ico">🔥</div><div style="flex:1"><div class="setting-name">Cocina principal</div><div class="setting-val">Platillos calientes</div></div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" style="background:white;border:1.5px solid var(--g150);border-radius:12px" onclick="selStation('Barra')"><div class="setting-ico">🍹</div><div style="flex:1"><div class="setting-name">Barra · Bebidas</div><div class="setting-val">Cocteles y refrescos</div></div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" style="background:white;border:1.5px solid var(--g150);border-radius:12px" onclick="selStation('Postres')"><div class="setting-ico">🍰</div><div style="flex:1"><div class="setting-name">Postres</div><div class="setting-val">Repostería y dulces</div></div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" style="background:white;border:1.5px solid var(--g150);border-radius:12px" onclick="selStation('Todas')"><div class="setting-ico">🍽</div><div style="flex:1"><div class="setting-name">Ver todas</div><div class="setting-val">Cocina pequeña o food truck</div></div><div class="setting-arrow">›</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MAIN -->
+        <div class="screen" data-screen="kds-main">
+          <div class="statusbar"><span>9:41</span><span style="font-size:11px;color:var(--c-k);font-weight:700" id="kds-station">Cocina Principal</span></div>
+          <div class="navbar">
+            <div style="flex:1"><div class="navtitle">Cocina KDS</div><div class="navsub"><span id="kds-count">4</span> tickets activos</div></div>
+            <div class="live"><div class="live-dot"></div><span class="live-txt">Live</span></div>
+          </div>
+          <div class="kds-stat-bar">
+            <div class="kds-stat"><div class="kds-stat-v" id="kds-pend">4</div><div class="kds-stat-l">Pendientes</div></div>
+            <div class="kds-stat"><div class="kds-stat-v" id="kds-done">34</div><div class="kds-stat-l">Completados</div></div>
+            <div class="kds-stat"><div class="kds-stat-v">12:35</div><div class="kds-stat-l">Prom. min</div></div>
+          </div>
+          <div class="scroll" id="kds-wrap" style="padding-top:6px;padding-bottom:90px"></div>
+          <div class="tabbar">
+            <div class="tabbar-item active" onclick="kdsFilter('pending',this)"><span class="tb-icon">📋</span><span class="tb-lbl">Pendientes</span></div>
+            <div class="tabbar-item" onclick="kdsFilter('done',this)"><span class="tb-icon">✓</span><span class="tb-lbl">Listos</span></div>
+            <div class="tabbar-item" onclick="goScreen('k-config')"><span class="tb-icon">⚙</span><span class="tb-lbl">Config</span></div>
+          </div>
+        </div>
+
+        <!-- DETALLE -->
+        <div class="screen" data-screen="kds-det">
+          <div class="statusbar"><span>9:41</span></div>
+          <div class="navbar">
+            <button class="navbtn" onclick="goScreen('kds-main')">←</button>
+            <div style="flex:1"><div class="navtitle" id="det-mesa">Mesa 05</div><div class="navsub" id="det-mesero">Luis M.</div></div>
+            <span class="ttimer ttimer-a" id="det-timer" style="font-size:13px">14 min</span>
+          </div>
+          <div class="scroll">
+            <div class="alert alert-r">
+              <span class="alert-icon">⚠</span>
+              <div class="alert-txt"><strong>Alergia:</strong> Un comensal es alérgico a lácteos. Sin crema en enchiladas #2.</div>
+            </div>
+            <div class="card">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><span style="font-size:13px;font-weight:700;letter-spacing:-0.01em">Items</span><span class="chip chip-amb">En preparación</span></div>
+              <div id="det-items"></div>
+            </div>
+            <div class="row-btns">
+              <button class="btn btn-outline btn-sm" onclick="mpNotifyWaiter(this)">📢 Avisar</button>
+              <button class="btn btn-sm" style="background:var(--c-k);color:white" onclick="completeTicket();goScreen('kds-main')">✓ Listo</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- KDS CONFIG -->
+        <div class="screen" data-screen="k-config">
+          <div class="statusbar"><span>9:41</span></div>
+          <div class="navbar">
+            <button class="navbtn" onclick="goScreen('kds-main')">←</button>
+            <div style="flex:1"><div class="navtitle">Configuración</div></div>
+          </div>
+          <div class="scroll">
+            <div class="slbl">Estación<span class="slbl-line"></span></div>
+            <div class="setting-list">
+              <div class="setting-row" onclick="mpChangeStation()"><div class="setting-ico">🔥</div><div class="setting-name">Tipo</div><div class="setting-val" id="mp-kds-station-val">Cocina principal</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row"><div class="setting-ico">🔗</div><div class="setting-name">Vinculado a caja</div><div class="setting-val" style="color:var(--green)">● Conectado</div></div>
+            </div>
+            <div class="slbl">Alertas<span class="slbl-line"></span></div>
+            <div class="setting-list">
+              <div class="setting-row"><div class="setting-ico">🔊</div><div class="setting-name">Sonido nuevo ticket</div><div class="toggle on" onclick="toggleSet(event,this)"></div></div>
+              <div class="setting-row"><div class="setting-ico">⏰</div><div class="setting-name">Alerta 10+ min</div><div class="toggle on" onclick="toggleSet(event,this)"></div></div>
+              <div class="setting-row"><div class="setting-ico">🚨</div><div class="setting-name">Alerta 20+ min</div><div class="toggle on" onclick="toggleSet(event,this)"></div></div>
+              <div class="setting-row"><div class="setting-ico">📳</div><div class="setting-name">Vibración</div><div class="toggle" onclick="toggleSet(event,this)"></div></div>
+            </div>
+            <div class="slbl">Pantalla<span class="slbl-line"></span></div>
+            <div class="setting-list">
+              <div class="setting-row"><div class="setting-ico">🌙</div><div class="setting-name">Modo oscuro</div><div class="toggle" onclick="toggleSet(event,this)"></div></div>
+              <div class="setting-row"><div class="setting-ico">🔆</div><div class="setting-name">Pantalla siempre encendida</div><div class="toggle on" onclick="toggleSet(event,this)"></div></div>
+              <div class="setting-row" onclick="mpChangeFontSize(this)"><div class="setting-ico">🔤</div><div class="setting-name">Tamaño de texto</div><div class="setting-val" id="mp-font-val">Grande</div><div class="setting-arrow">›</div></div>
+            </div>
+            <button class="btn btn-danger" onclick="mpUnpairKDS()">Desvincular</button>
+            <div style="text-align:center;font-size:10px;color:var(--g400);margin-top:10px;font-family:var(--mono)">KDS v0.1.0</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ============ MANAGER ============ -->
+      <div class="app" id="app-manager">
+
+        <!-- LOGIN -->
+        <div class="screen visible" data-screen="m-login">
+          <div class="statusbar"><span>9:41</span><span style="font-size:11px;color:var(--g500);font-weight:600">MANAGER</span></div>
+          <div class="login-screen">
+            <div class="login-logo-section">
+              <div class="login-logo login-logo-m">📊</div>
+              <div class="login-title">Manager</div>
+              <div class="login-sub">Accede a tu negocio desde cualquier lugar</div>
+            </div>
+            <div class="login-form">
+              <div class="login-field"><label class="login-label">Email</label><input type="email" class="login-input" value="ricardo@mirestaurante.mx"></div>
+              <div class="login-field"><label class="login-label">Contraseña</label><input type="password" class="login-input" value="demopass"></div>
+              <button class="btn btn-primary" onclick="loginManager()" style="margin-top:6px">Iniciar sesión →</button>
+              <div class="login-link">¿Olvidaste tu contraseña? <strong onclick="mpRecoverPassword()">Recuperar</strong></div>
+              <div class="login-link" style="margin-top:4px">¿Sin cuenta? <strong onclick="mpCreateAccount()">Crear cuenta</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DASHBOARD -->
+        <div class="screen" data-screen="mgr-dash">
+          <div class="statusbar"><span>9:41</span><span style="font-size:11px;color:var(--c-m);font-weight:700">⬆ En vivo</span></div>
+          <div class="scroll" style="padding-top:12px">
+            <div class="greeting-wrap">
+              <div class="greeting-hi">Buenas noches,</div>
+              <div class="greeting-name">Ricardo 👋</div>
+              <div class="greeting-date">MAR 21 ABR · Sucursal Centro</div>
+            </div>
+            <div class="kpi-grid">
+              <div class="kpi"><div class="kpi-lbl">Ventas hoy</div><div class="kpi-val" id="kpiVentas" aria-live="polite">—</div><div class="kpi-dl kpi-up" id="kpiVentasDelta"></div></div>
+              <div class="kpi"><div class="kpi-lbl">Clientes</div><div class="kpi-val" id="kpiClientes" aria-live="polite">—</div><div class="kpi-dl kpi-up" id="kpiClientesDelta"></div></div>
+              <div class="kpi"><div class="kpi-lbl">Ticket prom.</div><div class="kpi-val" id="kpiTicket" aria-live="polite">—</div><div class="kpi-dl kpi-up" id="kpiTicketDelta"></div></div>
+              <div class="kpi"><div class="kpi-lbl">Ocupación</div><div class="kpi-val" id="kpiOcupacion" aria-live="polite">—</div><div class="kpi-sub" id="kpiOcupacionSub"></div></div>
+            </div>
+            <div class="card">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px"><span style="font-size:12.5px;font-weight:700">Ventas por hora</span><span class="chip chip-gr">12 hrs</span></div>
+              <div class="barchart">
+                <div class="bar low" style="height:18%"></div><div class="bar low" style="height:28%"></div><div class="bar mid" style="height:48%"></div><div class="bar hi" style="height:85%"></div><div class="bar mid" style="height:70%"></div><div class="bar hi" style="height:94%"></div><div class="bar hi" style="height:100%"></div><div class="bar mid" style="height:76%"></div><div class="bar mid" style="height:60%"></div><div class="bar low" style="height:42%"></div><div class="bar low" style="height:24%"></div><div class="bar low" style="height:15%"></div>
+              </div>
+              <div class="barlabels"><span>10a</span><span>12p</span><span>2p</span><span>4p</span><span>6p</span><span>8p</span><span>10p</span></div>
+            </div>
+            <div class="alert alert-a">
+              <span class="alert-icon">⚡</span>
+              <div class="alert-txt"><strong>Stock bajo:</strong> Arrachera — 3 porciones. <span style="color:var(--c-m);font-weight:700;cursor:pointer" onclick="mpOrderRestock('Arrachera')">Ordenar →</span></div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin:14px 0 9px"><span style="font-size:13px;font-weight:700;letter-spacing:-0.02em">Top platillos hoy</span><span style="font-size:11px;color:var(--c-m);font-weight:600;cursor:pointer" onclick="goScreen('mgr-top')">Ver todo →</span></div>
+            <div class="card">
+              <div class="rank-item"><div class="rnum rnum-gold">1</div><span class="rname">Tacos de Pastor</span><div class="rbar"><div class="rbar-fill" style="width:100%"></div></div><span class="rcnt">38</span></div>
+              <div class="rank-item"><div class="rnum">2</div><span class="rname">Arrachera</span><div class="rbar"><div class="rbar-fill" style="width:74%"></div></div><span class="rcnt">28</span></div>
+              <div class="rank-item"><div class="rnum">3</div><span class="rname">Camarones Mojo</span><div class="rbar"><div class="rbar-fill" style="width:55%"></div></div><span class="rcnt">21</span></div>
+            </div>
+          </div>
+          <div class="tabbar">
+            <div class="tabbar-item active"><span class="tb-icon">📊</span><span class="tb-lbl">Dashboard</span></div>
+            <div class="tabbar-item" onclick="goScreen('mgr-top')"><span class="tb-icon">🏆</span><span class="tb-lbl">Top</span></div>
+            <div class="tabbar-item" onclick="goScreen('mgr-del')"><span class="tb-icon">🛵</span><span class="tb-lbl">Delivery</span></div>
+            <div class="tabbar-item" onclick="goScreen('mgr-more')"><span class="tb-icon">⋯</span><span class="tb-lbl">Más</span></div>
+          </div>
+        </div>
+
+        <!-- TOP -->
+        <div class="screen" data-screen="mgr-top">
+          <div class="statusbar"><span>9:41</span></div>
+          <div class="navbar">
+            <button class="navbtn" onclick="goScreen('mgr-dash')">←</button>
+            <div style="flex:1"><div class="navtitle">Top productos</div><div class="navsub">Hoy · 47 órdenes</div></div>
+          </div>
+          <div class="scroll">
+            <div class="cats" style="padding-bottom:10px">
+              <div class="cpill on">Hoy</div>
+              <div class="cpill">Semana</div>
+              <div class="cpill">Mes</div>
+            </div>
+            <div class="card">
+              <div style="font-size:12.5px;font-weight:700;margin-bottom:10px">🍽 Por unidades</div>
+              <div class="rank-item"><div class="rnum rnum-gold">1</div><span class="rname">Tacos de Pastor</span><div class="rbar"><div class="rbar-fill" style="width:100%"></div></div><span class="rcnt">38</span></div>
+              <div class="rank-item"><div class="rnum">2</div><span class="rname">Arrachera</span><div class="rbar"><div class="rbar-fill" style="width:74%"></div></div><span class="rcnt">28</span></div>
+              <div class="rank-item"><div class="rnum">3</div><span class="rname">Camarones Mojo</span><div class="rbar"><div class="rbar-fill" style="width:55%"></div></div><span class="rcnt">21</span></div>
+              <div class="rank-item"><div class="rnum">4</div><span class="rname">Enchiladas Verdes</span><div class="rbar"><div class="rbar-fill" style="width:42%"></div></div><span class="rcnt">16</span></div>
+              <div class="rank-item"><div class="rnum">5</div><span class="rname">Burrito de Res</span><div class="rbar"><div class="rbar-fill" style="width:29%"></div></div><span class="rcnt">11</span></div>
+            </div>
+            <div class="card">
+              <div style="font-size:12.5px;font-weight:700;margin-bottom:10px">💰 Por ingreso</div>
+              <div class="srow"><span class="slb">🥩 Arrachera</span><span class="svl" style="color:var(--green)">$7,252</span></div>
+              <div class="srow"><span class="slb">🦐 Camarones</span><span class="svl">$3,969</span></div>
+              <div class="srow"><span class="slb">🌮 Tacos</span><span class="svl">$3,382</span></div>
+              <div class="srow"><span class="slb">🫔 Enchiladas</span><span class="svl">$2,000</span></div>
+              <div class="srow"><span class="slb">🌯 Burrito</span><span class="svl">$1,595</span></div>
+            </div>
+          </div>
+          <div class="tabbar">
+            <div class="tabbar-item" onclick="goScreen('mgr-dash')"><span class="tb-icon">📊</span><span class="tb-lbl">Dashboard</span></div>
+            <div class="tabbar-item active"><span class="tb-icon">🏆</span><span class="tb-lbl">Top</span></div>
+            <div class="tabbar-item" onclick="goScreen('mgr-del')"><span class="tb-icon">🛵</span><span class="tb-lbl">Delivery</span></div>
+            <div class="tabbar-item" onclick="goScreen('mgr-more')"><span class="tb-icon">⋯</span><span class="tb-lbl">Más</span></div>
+          </div>
+        </div>
+
+        <!-- DELIVERY -->
+        <div class="screen" data-screen="mgr-del">
+          <div class="statusbar"><span>9:41</span></div>
+          <div class="navbar">
+            <div style="flex:1"><div class="navtitle">Delivery</div><div class="navsub">4 activos · 28 hoy</div></div>
+            <div class="live"><div class="live-dot"></div><span class="live-txt">Live</span></div>
+          </div>
+          <div class="scroll">
+            <div class="stat-grid">
+              <div class="stat-cell"><div class="stat-val">28</div><div class="stat-lbl">Pedidos</div></div>
+              <div class="stat-cell"><div class="stat-val">$4,120</div><div class="stat-lbl">Ventas</div></div>
+              <div class="stat-cell"><div class="stat-val">32m</div><div class="stat-lbl">Prom.</div></div>
+            </div>
+            <div class="slbl">En curso<span class="slbl-line"></span></div>
+            <div class="del-order" onclick="mpViewDelivery({id:'RAP-2847', platform:'Rappi', customer:'Luis V.', address:'Av. Vasconcelos 1234', distance_km:3.2, status:'En camino', driver:'Juan P.', eta_min:8})">
+              <div class="del-head">
+                <div class="del-platform del-platform-r">R</div>
+                <div class="del-info"><div class="del-id">#RAP-2847 · Luis V.</div><div class="del-addr">Av. Vasconcelos 1234 · 3.2 km</div></div>
+                <span class="chip chip-amb">En camino</span>
+              </div>
+              <div class="del-progress">
+                <div class="del-step done"></div><div class="del-step done"></div><div class="del-step done"></div><div class="del-step active"></div><div class="del-step"></div>
+              </div>
+              <div class="del-footer"><span>📍 Juan P.</span><span>🕓 ETA: 8 min</span></div>
+            </div>
+            <div class="del-order" onclick="mpViewDelivery({id:'DD-9821', platform:'Didi', customer:'María L.', address:'Calle Río Nilo 567', distance_km:1.8, status:'Preparando', kitchen_min:6, eta_min:18})">
+              <div class="del-head">
+                <div class="del-platform del-platform-d">D</div>
+                <div class="del-info"><div class="del-id">#DD-9821 · María L.</div><div class="del-addr">Calle Río Nilo 567 · 1.8 km</div></div>
+                <span class="chip chip-amb">Preparando</span>
+              </div>
+              <div class="del-progress">
+                <div class="del-step done"></div><div class="del-step done"></div><div class="del-step active"></div><div class="del-step"></div><div class="del-step"></div>
+              </div>
+              <div class="del-footer"><span>🍳 Cocina: 6 min</span><span>🕓 ETA: 18 min</span></div>
+            </div>
+            <div class="del-order" onclick="mpViewDelivery({id:'UE-1102', platform:'Uber Eats', customer:'Jorge R.', address:'Paseo de los Leones', distance_km:5.1, status:'Nuevo', total:285})">
+              <div class="del-head">
+                <div class="del-platform del-platform-u">U</div>
+                <div class="del-info"><div class="del-id">#UE-1102 · Jorge R.</div><div class="del-addr">Paseo de los Leones · 5.1 km</div></div>
+                <span class="chip chip-g">Nuevo</span>
+              </div>
+              <div class="del-progress">
+                <div class="del-step done"></div><div class="del-step active"></div><div class="del-step"></div><div class="del-step"></div><div class="del-step"></div>
+              </div>
+              <div class="del-footer"><span>📝 Confirmar 2 min</span><span>💰 $285</span></div>
+            </div>
+            <div class="del-order" onclick="mpViewDelivery({id:'PROP-0458', platform:'Propio', customer:'Ana R.', distance_km:4.5, status:'Entregado', minutes:28, rating:5})">
+              <div class="del-head">
+                <div class="del-platform" style="background:var(--black)">P</div>
+                <div class="del-info"><div class="del-id">#PROP-0458 · Ana R.</div><div class="del-addr">Repartidor propio · 4.5 km</div></div>
+                <span class="chip chip-g">✓ Entregado</span>
+              </div>
+              <div class="del-progress">
+                <div class="del-step done"></div><div class="del-step done"></div><div class="del-step done"></div><div class="del-step done"></div><div class="del-step done"></div>
+              </div>
+              <div class="del-footer"><span>⏱ 28 min</span><span>⭐ 5 estrellas</span></div>
+            </div>
+          </div>
+          <div class="tabbar">
+            <div class="tabbar-item" onclick="goScreen('mgr-dash')"><span class="tb-icon">📊</span><span class="tb-lbl">Dashboard</span></div>
+            <div class="tabbar-item" onclick="goScreen('mgr-top')"><span class="tb-icon">🏆</span><span class="tb-lbl">Top</span></div>
+            <div class="tabbar-item active"><span class="tb-icon">🛵</span><span class="tb-lbl">Delivery</span></div>
+            <div class="tabbar-item" onclick="goScreen('mgr-more')"><span class="tb-icon">⋯</span><span class="tb-lbl">Más</span></div>
+          </div>
+        </div>
+
+        <!-- MÁS -->
+        <div class="screen" data-screen="mgr-more">
+          <div class="statusbar"><span>9:41</span></div>
+          <div class="navbar"><div style="flex:1"><div class="navtitle">Más opciones</div></div></div>
+          <div class="scroll">
+            <div class="slbl">Gestión<span class="slbl-line"></span></div>
+            <div class="setting-list">
+              <div class="setting-row" onclick="goScreen('mgr-corte')"><div class="setting-ico">💰</div><div class="setting-name">Corte de caja</div><div class="setting-val">Turno activo</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="goScreen('mgr-suc')"><div class="setting-ico">🏪</div><div class="setting-name">Sucursales</div><div class="setting-val">3 activas</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="goScreen('mgr-emp')"><div class="setting-ico">👥</div><div class="setting-name">Empleados</div><div class="setting-val">12 en turno</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpOpenInventory()"><div class="setting-ico">📦</div><div class="setting-name">Inventario</div><div class="setting-val">124 items</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpOpenCustomers()"><div class="setting-ico">🧑‍💼</div><div class="setting-name">Clientes</div><div class="setting-val">342</div><div class="setting-arrow">›</div></div>
+            </div>
+            <div class="slbl">Reportes<span class="slbl-line"></span></div>
+            <div class="setting-list">
+              <div class="setting-row" onclick="mpReportSales()"><div class="setting-ico">📈</div><div class="setting-name">Ventas</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpReportProfit()"><div class="setting-ico">💹</div><div class="setting-name">Utilidad</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpReportWaste()"><div class="setting-ico">🗑</div><div class="setting-name">Mermas</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpExportExcel(this)"><div class="setting-ico">📊</div><div class="setting-name">Exportar Excel</div><div class="setting-arrow">›</div></div>
+            </div>
+            <div class="slbl">Config<span class="slbl-line"></span></div>
+            <div class="setting-list">
+              <div class="setting-row" onclick="goScreen('mgr-conf')"><div class="setting-ico">⚙</div><div class="setting-name">Ajustes generales</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpPairKDS()"><div class="setting-ico">📱</div><div class="setting-name">Vincular KDS</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpPairCDS()"><div class="setting-ico">📺</div><div class="setting-name">Vincular CDS</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpOpenIntegrations()"><div class="setting-ico">🔌</div><div class="setting-name">Integraciones</div><div class="setting-val">7 activas</div><div class="setting-arrow">›</div></div>
+            </div>
+            <button class="btn btn-danger" onclick="handleLogout()">Cerrar sesión</button>
+            <div style="text-align:center;font-size:10px;color:var(--g400);margin-top:10px;font-family:var(--mono)">Manager v0.1.0</div>
+          </div>
+          <div class="tabbar">
+            <div class="tabbar-item" onclick="goScreen('mgr-dash')"><span class="tb-icon">📊</span><span class="tb-lbl">Dashboard</span></div>
+            <div class="tabbar-item" onclick="goScreen('mgr-top')"><span class="tb-icon">🏆</span><span class="tb-lbl">Top</span></div>
+            <div class="tabbar-item" onclick="goScreen('mgr-del')"><span class="tb-icon">🛵</span><span class="tb-lbl">Delivery</span></div>
+            <div class="tabbar-item active"><span class="tb-icon">⋯</span><span class="tb-lbl">Más</span></div>
+          </div>
+        </div>
+
+        <!-- CORTE -->
+        <div class="screen" data-screen="mgr-corte">
+          <div class="statusbar"><span>9:41</span></div>
+          <div class="navbar">
+            <button class="navbtn" onclick="goScreen('mgr-more')">←</button>
+            <div style="flex:1"><div class="navtitle">Corte de caja</div><div class="navsub">Turno noche · 21 Abr</div></div>
+            <button class="navbtn" onclick="mpExportCashCut(this)">⬇</button>
+          </div>
+          <div class="scroll">
+            <div style="background:var(--black);color:white;border-radius:16px;padding:18px;margin-bottom:12px">
+              <div style="font-size:9.5px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:5px">Total ventas netas</div>
+              <div style="font-size:34px;font-weight:800;letter-spacing:-0.04em;line-height:1;font-variant-numeric:tabular-nums">$8,240<span style="font-size:18px;color:rgba(255,255,255,.5)">.00</span></div>
+              <div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:5px">47 órdenes · 2 canceladas</div>
+            </div>
+            <div class="card">
+              <div style="font-size:12.5px;font-weight:700;margin-bottom:8px">Por método</div>
+              <div class="srow"><span class="slb">💵 Efectivo</span><span class="svl">$3,840</span></div>
+              <div class="srow"><span class="slb">📱 Clip</span><span class="svl">$2,960</span></div>
+              <div class="srow"><span class="slb">🔵 Mercado Pago</span><span class="svl">$1,200</span></div>
+              <div class="srow"><span class="slb">💳 Transferencia</span><span class="svl">$240</span></div>
+            </div>
+            <div class="card">
+              <div style="font-size:12.5px;font-weight:700;margin-bottom:8px">Resumen turno</div>
+              <div class="srow"><span class="slb">Cancelaciones</span><span class="svl" style="color:var(--red)">2</span></div>
+              <div class="srow"><span class="slb">Descuentos</span><span class="svl" style="color:var(--amber)">$180</span></div>
+              <div class="srow"><span class="slb">IVA generado</span><span class="svl">$1,136.55</span></div>
+              <div class="srow"><span class="slb">Propinas</span><span class="svl" style="color:var(--green)">$420</span></div>
+            </div>
+            <div class="row-btns">
+              <button class="btn btn-outline btn-sm" onclick="mpPrintCashCut(this)">🖨 Imprimir</button>
+              <button class="btn btn-outline btn-sm" onclick="mpEmailCashCut(this)">📩 Email</button>
+            </div>
+            <button class="btn btn-primary" onclick="mpCloseCashRegister(this)">Cerrar caja →</button>
+          </div>
+        </div>
+
+        <!-- SUCURSALES -->
+        <div class="screen" data-screen="mgr-suc">
+          <div class="statusbar"><span>9:41</span></div>
+          <div class="navbar">
+            <button class="navbtn" onclick="goScreen('mgr-more')">←</button>
+            <div style="flex:1"><div class="navtitle">Sucursales</div><div class="navsub">3 activas · en vivo</div></div>
+          </div>
+          <div class="scroll">
+            <div class="card" onclick="mpSwitchBranch('TNT001','Centro')" style="cursor:pointer">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">
+                <div style="width:34px;height:34px;border-radius:10px;background:var(--c-m-bg);display:flex;align-items:center;justify-content:center;font-size:16px">🏢</div>
+                <div style="flex:1"><div style="font-size:14px;font-weight:700">Centro</div><div style="font-size:10.5px;color:var(--g500)">Av. Constitución 1500</div></div>
+                <span class="chip chip-g">● Abierto</span>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding-top:9px;border-top:1px solid var(--g100)">
+                <div><div style="font-size:14px;font-weight:800">$8,240</div><div style="font-size:9.5px;color:var(--g500);margin-top:2px">Ventas</div></div>
+                <div><div style="font-size:14px;font-weight:800">47</div><div style="font-size:9.5px;color:var(--g500);margin-top:2px">Clientes</div></div>
+                <div><div style="font-size:14px;font-weight:800;color:var(--green)">+12%</div><div style="font-size:9.5px;color:var(--g500);margin-top:2px">vs ayer</div></div>
+              </div>
+            </div>
+            <div class="card" onclick="mpSwitchBranch('TNT002','Norte · San Agustín')" style="cursor:pointer">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">
+                <div style="width:34px;height:34px;border-radius:10px;background:var(--c-m-bg);display:flex;align-items:center;justify-content:center;font-size:16px">🏢</div>
+                <div style="flex:1"><div style="font-size:14px;font-weight:700">Norte · San Agustín</div><div style="font-size:10.5px;color:var(--g500)">Av. Lázaro Cárdenas</div></div>
+                <span class="chip chip-g">● Abierto</span>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding-top:9px;border-top:1px solid var(--g100)">
+                <div><div style="font-size:14px;font-weight:800">$6,120</div><div style="font-size:9.5px;color:var(--g500);margin-top:2px">Ventas</div></div>
+                <div><div style="font-size:14px;font-weight:800">32</div><div style="font-size:9.5px;color:var(--g500);margin-top:2px">Clientes</div></div>
+                <div><div style="font-size:14px;font-weight:800;color:var(--red)">-4%</div><div style="font-size:9.5px;color:var(--g500);margin-top:2px">vs ayer</div></div>
+              </div>
+            </div>
+            <div class="card" onclick="mpSwitchBranch('TNT003','Sur · Cumbres')" style="cursor:pointer">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">
+                <div style="width:34px;height:34px;border-radius:10px;background:var(--c-m-bg);display:flex;align-items:center;justify-content:center;font-size:16px">🏢</div>
+                <div style="flex:1"><div style="font-size:14px;font-weight:700">Sur · Cumbres</div><div style="font-size:10.5px;color:var(--g500)">Paseo de los Leones</div></div>
+                <span class="chip chip-amb">● En cierre</span>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding-top:9px;border-top:1px solid var(--g100)">
+                <div><div style="font-size:14px;font-weight:800">$4,890</div><div style="font-size:9.5px;color:var(--g500);margin-top:2px">Ventas</div></div>
+                <div><div style="font-size:14px;font-weight:800">28</div><div style="font-size:9.5px;color:var(--g500);margin-top:2px">Clientes</div></div>
+                <div><div style="font-size:14px;font-weight:800;color:var(--green)">+8%</div><div style="font-size:9.5px;color:var(--g500);margin-top:2px">vs ayer</div></div>
+              </div>
+            </div>
+            <div style="background:var(--g50);border:1px dashed var(--g200);border-radius:13px;padding:16px;text-align:center;cursor:pointer" onclick="mpAddBranch()">
+              <div style="font-size:20px;opacity:.4;margin-bottom:3px">+</div>
+              <div style="font-size:12.5px;font-weight:600;color:var(--g700)">Agregar sucursal</div>
+              <div style="font-size:10.5px;color:var(--g500);margin-top:2px">Plan: hasta 5</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- EMPLEADOS -->
+        <div class="screen" data-screen="mgr-emp">
+          <div class="statusbar"><span>9:41</span></div>
+          <div class="navbar">
+            <button class="navbtn" onclick="goScreen('mgr-more')">←</button>
+            <div style="flex:1"><div class="navtitle">Empleados</div><div class="navsub">12 en turno · 18 total</div></div>
+            <button class="navbtn" onclick="mpNewEmployee()" style="background:var(--black);color:white;border-color:var(--black)">+</button>
+          </div>
+          <div class="scroll">
+            <div class="stat-grid">
+              <div class="stat-cell"><div class="stat-val">12</div><div class="stat-lbl">En turno</div></div>
+              <div class="stat-cell"><div class="stat-val">$18K</div><div class="stat-lbl">Nómina</div></div>
+              <div class="stat-cell"><div class="stat-val">4.7</div><div class="stat-lbl">Rating</div></div>
+            </div>
+            <div class="slbl">En turno<span class="slbl-line"></span></div>
+            <div class="card" style="padding:14px">
+              <div class="emp-item" onclick="mpViewEmployee({name:'Luis Mendoza',role:'Mesero',shift_start:'18:00',status:'active'})"><div class="emp-avatar" style="background:var(--c-a)">LM</div><div class="emp-info"><div class="emp-name">Luis Mendoza</div><div class="emp-role">Mesero · Entró 18:00</div></div><span class="chip chip-g">● Activo</span></div>
+              <div class="emp-item" onclick="mpViewEmployee({name:'Ana García',role:'Mesero',shift_start:'17:30',status:'active'})"><div class="emp-avatar" style="background:#D97706">AG</div><div class="emp-info"><div class="emp-name">Ana García</div><div class="emp-role">Mesero · Entró 17:30</div></div><span class="chip chip-g">● Activo</span></div>
+              <div class="emp-item" onclick="mpViewEmployee({name:'Carlos Reyes',role:'Jefe cocina',shift_start:'16:00',status:'active'})"><div class="emp-avatar" style="background:var(--c-k)">CR</div><div class="emp-info"><div class="emp-name">Carlos Reyes</div><div class="emp-role">Jefe cocina · 16:00</div></div><span class="chip chip-g">● Activo</span></div>
+              <div class="emp-item" onclick="mpViewEmployee({name:'María Jiménez',role:'Cocinero',status:'break'})"><div class="emp-avatar" style="background:var(--c-k)">MJ</div><div class="emp-info"><div class="emp-name">María Jiménez</div><div class="emp-role">Cocinero · Descanso</div></div><span class="chip chip-amb">☕ Break</span></div>
+              <div class="emp-item" onclick="mpViewEmployee({name:'Roberto Silva',role:'Barista',shift_start:'18:30',status:'active'})"><div class="emp-avatar" style="background:var(--c-m)">RS</div><div class="emp-info"><div class="emp-name">Roberto Silva</div><div class="emp-role">Barista · 18:30</div></div><span class="chip chip-g">● Activo</span></div>
+            </div>
+            <div class="slbl">Fuera de turno<span class="slbl-line"></span></div>
+            <div class="card" style="padding:14px">
+              <div class="emp-item" style="opacity:.6" onclick="mpViewEmployee({name:'Pedro Morales',role:'Mesero',shift_window:'Mañana',status:'off'})"><div class="emp-avatar" style="background:var(--g400)">PM</div><div class="emp-info"><div class="emp-name">Pedro Morales</div><div class="emp-role">Mesero · Mañana</div></div><span class="chip chip-gr">Off</span></div>
+              <div class="emp-item" style="opacity:.6" onclick="mpViewEmployee({name:'Laura Hernández',role:'Gerente asistente',status:'off'})"><div class="emp-avatar" style="background:var(--g400)">LH</div><div class="emp-info"><div class="emp-name">Laura Hernández</div><div class="emp-role">Gerente asistente</div></div><span class="chip chip-gr">Off</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONFIG -->
+        <div class="screen" data-screen="mgr-conf">
+          <div class="statusbar"><span>9:41</span></div>
+          <div class="navbar">
+            <button class="navbtn" onclick="goScreen('mgr-more')">←</button>
+            <div style="flex:1"><div class="navtitle">Configuración</div></div>
+          </div>
+          <div class="scroll">
+            <div class="profile-header" style="padding:8px 0 16px">
+              <div class="profile-avatar" style="background:var(--c-m);font-size:22px">🏢</div>
+              <div><div class="profile-name" style="font-size:17px">Mi Restaurante</div><div class="profile-role">Plan Pro · 3 sucursales</div></div>
+            </div>
+            <div class="slbl">Negocio<span class="slbl-line"></span></div>
+            <div class="setting-list">
+              <div class="setting-row" onclick="mpEditBusinessInfo()"><div class="setting-ico">🏢</div><div class="setting-name">Información</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpEditSchedule()"><div class="setting-ico">🕓</div><div class="setting-name">Horarios</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpEditFiscal()"><div class="setting-ico">🧾</div><div class="setting-name">Datos fiscales</div><div class="setting-val">Config.</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpOpenMenu()"><div class="setting-ico">📋</div><div class="setting-name">Menú</div><div class="setting-val">124 items</div><div class="setting-arrow">›</div></div>
+            </div>
+            <div class="slbl">Integraciones<span class="slbl-line"></span></div>
+            <div class="setting-list">
+              <div class="setting-row"><div class="setting-ico">💵</div><div class="setting-name">Mercado Pago</div><div class="setting-val" style="color:var(--green)">● Conectado</div></div>
+              <div class="setting-row"><div class="setting-ico">📱</div><div class="setting-name">Clip</div><div class="setting-val" style="color:var(--green)">● Conectado</div></div>
+              <div class="setting-row"><div class="setting-ico">🚴</div><div class="setting-name">Rappi</div><div class="setting-val" style="color:var(--green)">● Conectado</div></div>
+              <div class="setting-row"><div class="setting-ico">🛵</div><div class="setting-name">Didi Food</div><div class="setting-val" style="color:var(--green)">● Conectado</div></div>
+              <div class="setting-row"><div class="setting-ico">🥡</div><div class="setting-name">Uber Eats</div><div class="setting-val">Configurar</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row"><div class="setting-ico">📲</div><div class="setting-name">WhatsApp Business</div><div class="setting-val" style="color:var(--green)">● Conectado</div></div>
+            </div>
+            <div class="slbl">Notificaciones<span class="slbl-line"></span></div>
+            <div class="setting-list">
+              <div class="setting-row"><div class="setting-ico">🔔</div><div class="setting-name">Push</div><div class="toggle on" onclick="toggleSet(event,this)"></div></div>
+              <div class="setting-row"><div class="setting-ico">📧</div><div class="setting-name">Email diario</div><div class="toggle on" onclick="toggleSet(event,this)"></div></div>
+              <div class="setting-row"><div class="setting-ico">⚡</div><div class="setting-name">Stock bajo</div><div class="toggle on" onclick="toggleSet(event,this)"></div></div>
+              <div class="setting-row"><div class="setting-ico">💰</div><div class="setting-name">Meta ventas</div><div class="toggle" onclick="toggleSet(event,this)"></div></div>
+            </div>
+            <div class="slbl">Cuenta<span class="slbl-line"></span></div>
+            <div class="setting-list">
+              <div class="setting-row" onclick="mpOpenPlan()"><div class="setting-ico">💎</div><div class="setting-name">Plan</div><div class="setting-val">Pro</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpOpenBilling()"><div class="setting-ico">💳</div><div class="setting-name">Facturación</div><div class="setting-arrow">›</div></div>
+              <div class="setting-row" onclick="mpOpenHelp()"><div class="setting-ico">❓</div><div class="setting-name">Ayuda</div><div class="setting-arrow">›</div></div>
+            </div>
+            <div style="text-align:center;font-size:10px;color:var(--g400);margin-top:10px;font-family:var(--mono)">Manager v0.1.0</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ============ CDS (LANDSCAPE) ============ -->
+      <div class="app" id="app-cds">
+
+        <!-- PAIRING -->
+        <div class="screen visible" data-screen="cds-pair">
+          <div class="cds-layout">
+            <div class="cds-left">
+              <div class="cds-logo">📺</div>
+              <div class="cds-brand-name">Pantalla Cliente</div>
+              <div class="cds-welcome-text">Vincula esta pantalla con tu caja</div>
+            </div>
+            <div style="padding:22px;display:flex;flex-direction:column;gap:10px;overflow-y:auto">
+              <div style="font-size:9.5px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--g500)">Código de emparejamiento</div>
+              <div style="font-family:var(--mono);font-size:26px;font-weight:700;letter-spacing:.18em;padding:14px;background:var(--g50);border:1.5px dashed var(--g300);border-radius:12px;text-align:center">CDS-4821</div>
+              <div>
+                <div class="pair-step"><div class="pair-num">1</div><div class="pair-text">Abre <strong>Manager</strong> en la caja</div></div>
+                <div class="pair-step"><div class="pair-num">2</div><div class="pair-text"><strong>Config → Vincular CDS</strong></div></div>
+                <div class="pair-step"><div class="pair-num">3</div><div class="pair-text">Ingresa el código</div></div>
+              </div>
+              <button class="btn btn-primary" onclick="goScreen('cds-idle')" style="margin-top:6px">Ya vinculé →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- IDLE -->
+        <div class="screen" data-screen="cds-idle">
+          <div class="cds-sim-controls">
+            <button class="cds-sim-btn active" onclick="cdsSim('idle')">Idle</button>
+            <button class="cds-sim-btn" onclick="cdsSim('order')">Ordenando</button>
+            <button class="cds-sim-btn" onclick="cdsSim('paying')">Pagando</button>
+            <button class="cds-sim-btn" onclick="cdsSim('thanks')">Gracias</button>
+          </div>
+          <div class="cds-layout">
+            <div class="cds-left">
+              <div class="cds-logo">🏢</div>
+              <div class="cds-brand-name">Bienvenido</div>
+              <div class="cds-welcome-text">A Mi Restaurante. Gracias por elegirnos</div>
+              <div class="cds-promo-badge">
+                <div class="cds-promo-badge-lbl">Promoción del día</div>
+                <div class="cds-promo-badge-val">🌮 2x1 en Tacos al Pastor</div>
+              </div>
+            </div>
+            <div class="cds-right">
+              <div class="cds-empty-state">
+                <div class="cds-empty-ico">🛒</div>
+                <div class="cds-empty-txt">Tu pedido aparecerá aquí conforme el mesero lo registre</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ORDER -->
+        <div class="screen" data-screen="cds-order">
+          <div class="cds-sim-controls">
+            <button class="cds-sim-btn" onclick="cdsSim('idle')">Idle</button>
+            <button class="cds-sim-btn active" onclick="cdsSim('order')">Ordenando</button>
+            <button class="cds-sim-btn" onclick="cdsSim('paying')">Pagando</button>
+            <button class="cds-sim-btn" onclick="cdsSim('thanks')">Gracias</button>
+          </div>
+          <div class="cds-layout">
+            <div class="cds-left">
+              <div class="cds-logo">🏢</div>
+              <div class="cds-brand-name">Mi Restaurante</div>
+              <div class="cds-welcome-text">Revisa tu orden a la derecha</div>
+              <div class="cds-promo-badge">
+                <div class="cds-promo-badge-lbl">Próximamente</div>
+                <div class="cds-promo-badge-val">🎉 Margaritas $50 jueves</div>
+              </div>
+            </div>
+            <div class="cds-right">
+              <div class="cds-right-header">
+                <div class="cds-right-title">Tu orden</div>
+                <div class="cds-order-num">#247 · Mesa 05</div>
+              </div>
+              <div class="cds-items-list">
+                <div class="cds-item"><div class="cds-item-qty">2</div><div class="cds-item-name">Tacos de Pastor</div><div class="cds-item-price">$178.00</div></div>
+                <div class="cds-item"><div class="cds-item-qty">1</div><div class="cds-item-name">Arrachera Parrilla</div><div class="cds-item-price">$259.00</div></div>
+                <div class="cds-item"><div class="cds-item-qty">2</div><div class="cds-item-name">Agua Mineral 600ml</div><div class="cds-item-price">$60.00</div></div>
+              </div>
+              <div class="cds-totals">
+                <div class="cds-sub-row"><span>Subtotal</span><span>$497.00</span></div>
+                <div class="cds-sub-row"><span>IVA 16%</span><span>$79.52</span></div>
+              </div>
+              <div class="cds-grand">
+                <div class="cds-grand-lbl">Total</div>
+                <div class="cds-grand-val">$576.52</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PAYING -->
+        <div class="screen" data-screen="cds-paying">
+          <div class="cds-sim-controls">
+            <button class="cds-sim-btn" onclick="cdsSim('idle')">Idle</button>
+            <button class="cds-sim-btn" onclick="cdsSim('order')">Ordenando</button>
+            <button class="cds-sim-btn active" onclick="cdsSim('paying')">Pagando</button>
+            <button class="cds-sim-btn" onclick="cdsSim('thanks')">Gracias</button>
+          </div>
+          <div class="cds-layout" style="display:flex">
+            <div class="cds-paying">
+              <div class="cds-paying-ico">💳</div>
+              <div class="cds-paying-title">Procesando pago</div>
+              <div class="cds-paying-sub">Por favor espere. No retire la terminal.</div>
+              <div style="font-size:32px;font-weight:800;letter-spacing:-0.03em;color:white;margin-top:6px;font-variant-numeric:tabular-nums">$576.52</div>
+              <div style="font-size:10.5px;color:rgba(255,255,255,.4)">Orden #247 · Mesa 05</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- THANKS -->
+        <div class="screen" data-screen="cds-thanks">
+          <div class="cds-sim-controls">
+            <button class="cds-sim-btn" onclick="cdsSim('idle')">Idle</button>
+            <button class="cds-sim-btn" onclick="cdsSim('order')">Ordenando</button>
+            <button class="cds-sim-btn" onclick="cdsSim('paying')">Pagando</button>
+            <button class="cds-sim-btn active" onclick="cdsSim('thanks')">Gracias</button>
+          </div>
+          <div class="cds-layout" style="display:flex">
+            <div class="cds-thanks">
+              <div class="cds-thanks-ico">✓</div>
+              <div class="cds-thanks-title">¡Gracias!</div>
+              <div class="cds-thanks-sub">Esperamos que hayas disfrutado. ¿Cómo fue tu experiencia?</div>
+              <div class="cds-stars">
+                <span class="cds-star" onclick="rateStar(1)">★</span>
+                <span class="cds-star" onclick="rateStar(2)">★</span>
+                <span class="cds-star" onclick="rateStar(3)">★</span>
+                <span class="cds-star" onclick="rateStar(4)">★</span>
+                <span class="cds-star" onclick="rateStar(5)">★</span>
+              </div>
+              <div style="font-size:10.5px;color:var(--g500);margin-top:8px;font-family:var(--mono)">Orden #247 · $576.52</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<button class="help-floating" onclick="showHelp()">?</button>
+<div id="toast"></div>
+
+<script>
+/* ============================================================
+   VOLVIX BRIDGE · MultiPOS Suite (4 apps)
+   Comunicación con el owner panel vía BroadcastChannel
+   ============================================================ */
+const VX_TENANT_ID = 'TNT002';  // Tenant de restaurante (diferente al POS de abarrotes)
+const VX_STORAGE_KEY = 'volvix:suite:' + VX_TENANT_ID;
+const VX_CHANNEL_NAME = 'volvix-saas';
+
+const VX_DEFAULT_STATE = {
+  id: VX_TENANT_ID,
+  name: 'Restaurante Los Compadres',
+  brand: 'MultiPOS',
+  plan: 'Pro',
+  status: 'active',
+  licenseKey: 'VLVX-MPOS-2025-X9F2',
+  // Control granular de cada app de la suite
+  apps: {
+    comandera: true,  // App del mesero
+    kds:       true,  // Kitchen Display System
+    manager:   true,  // Dashboard del gerente
+    cds:       true,  // Customer Display System (pantalla cliente)
+  },
+  // Funciones específicas de cada app
+  features: {
+    'comandera.tomar_orden':     true,
+    'comandera.enviar_cocina':   true,
+    'comandera.partir_cuenta':   true,
+    'comandera.propinas':        true,
+    'comandera.cobro_directo':   true,
+    'kds.alertas_tiempo':        true,
+    'kds.categorias':            true,
+    'kds.completar_item':        true,
+    'manager.dashboard':         true,
+    'manager.reportes':          true,
+    'manager.empleados':         true,
+    'manager.promociones':       false, // desactivado por defecto
+    'cds.mostrar_items':         true,
+    'cds.propinas_sugeridas':    true,
+    'cds.pago_qr':               true,
+    'cds.pedir_factura':         true,
+  },
+  broadcast: null
+};
+
+const VX_SUITE = {
+  channel: null,
+  init() {
+    if (!localStorage.getItem(VX_STORAGE_KEY)) {
+      localStorage.setItem(VX_STORAGE_KEY, JSON.stringify(VX_DEFAULT_STATE));
+    }
+    try {
+      this.channel = new BroadcastChannel(VX_CHANNEL_NAME);
+      this.channel.onmessage = (e) => this.handleMessage(e.data);
+    } catch {}
+    window.addEventListener('storage', (e) => {
+      if (e.key === VX_STORAGE_KEY && e.newValue) {
+        this.handleMessage({ type: 'state-update', state: JSON.parse(e.newValue) });
+      }
+    });
+  },
+  getState() {
+    try { return JSON.parse(localStorage.getItem(VX_STORAGE_KEY)) || VX_DEFAULT_STATE; }
+    catch { return VX_DEFAULT_STATE; }
+  },
+  setState(s) {
+    localStorage.setItem(VX_STORAGE_KEY, JSON.stringify(s));
+    if (this.channel) this.channel.postMessage({ type: 'state-update', tenantId: VX_TENANT_ID, state: s });
+  },
+  handleMessage(msg) {
+    if (msg.type === 'state-update' && msg.tenantId === VX_TENANT_ID) {
+      this.applyState(msg.state, true);
+    }
+    if (msg.type === 'owner-message' && msg.tenantId === VX_TENANT_ID) {
+      this.showOwnerMsg(msg.text);
+    }
+  },
+  applyState(state, fromLive = false) {
+    // 1. Licencia bloqueada
+    if (state.status === 'revoked' || state.status === 'suspended' || state.status === 'expired') {
+      this.showLicenseBlock(state);
+      return;
+    } else {
+      const b = document.getElementById('vx-license-block');
+      if (b) b.classList.remove('vx-active');
+    }
+
+    // 2. Control de apps (esconder tabs de apps desactivadas)
+    ['comandera','kds','manager','cds'].forEach(appId => {
+      const isOn = state.apps?.[appId] !== false;
+      const tab = document.querySelector(`.app-tab[data-app="${appId}"]`);
+      if (tab) tab.style.display = isOn ? '' : 'none';
+      // Si el usuario está en una app desactivada, saltar a otra
+      if (!isOn && state.currentApp === appId && typeof switchApp === 'function') {
+        const fallback = ['comandera','kds','manager','cds'].find(a => state.apps[a]);
+        if (fallback) switchApp(fallback);
+      }
+    });
+
+    // 3. Control de features (elementos con data-feature)
+    document.querySelectorAll('[data-feature]').forEach(el => {
+      const key = el.dataset.feature;
+      const enabled = state.features?.[key] !== false;
+      el.style.display = enabled ? '' : 'none';
+    });
+
+    // 4. Nombre del negocio (si algún elemento tiene data-tenant-name)
+    document.querySelectorAll('[data-tenant-name]').forEach(el => {
+      el.textContent = state.name || 'Restaurante';
+    });
+
+    if (fromLive) {
+      this.flash();
+      this.showOwnerMsg('Tu proveedor actualizó la configuración');
+    }
+  },
+  showLicenseBlock(state) {
+    let b = document.getElementById('vx-license-block');
+    if (!b) {
+      b = document.createElement('div');
+      b.id = 'vx-license-block';
+      b.style.cssText = 'position:fixed;inset:0;background:rgba(10,10,10,0.96);z-index:9999;display:none;align-items:center;justify-content:center;padding:20px;';
+      b.classList.add('vx-license');
+      document.body.appendChild(b);
+    }
+    const titles = { suspended:'Servicio suspendido', revoked:'Licencia revocada', expired:'Licencia vencida' };
+    const msgs = {
+      suspended:'Tu proveedor suspendió temporalmente el acceso. Probablemente por falta de pago.',
+      revoked:'Tu licencia fue revocada. Contacta a tu proveedor.',
+      expired:'Tu licencia venció. Renuévala para continuar.'
+    };
+    b.innerHTML = `
+      <div style="background:white;border-radius:20px;max-width:400px;width:100%;padding:36px 28px;text-align:center;">
+        <div style="width:72px;height:72px;background:#FEF2F2;border:2px solid #DC2626;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:32px;">${state.status==='revoked'?'🔒':state.status==='expired'?'⏰':'⚠️'}</div>
+        <h2 style="font-size:22px;font-weight:700;color:#DC2626;margin:0 0 8px;">${titles[state.status]}</h2>
+        <p style="font-size:14px;color:#525251;margin:0 0 16px;line-height:1.6;">${msgs[state.status]}</p>
+        <div style="background:#F4F4F2;border-radius:10px;padding:12px 16px;text-align:left;font-size:12px;margin:16px 0;">
+          <div style="display:flex;justify-content:space-between;padding:4px 0;"><span>Negocio</span><strong>${state.name}</strong></div>
+          <div style="display:flex;justify-content:space-between;padding:4px 0;"><span>Licencia</span><code style="font-family:monospace;">${state.licenseKey}</code></div>
+        </div>
+        <button style="width:100%;padding:12px;background:#0A0A0A;color:white;border:none;border-radius:10px;font-weight:600;cursor:pointer;" onclick="location.reload()">Reintentar</button>
+      </div>
+    `;
+    b.style.display = 'flex';
+    b.classList.add('vx-active');
+  },
+  showOwnerMsg(text) {
+    let el = document.getElementById('vx-owner-msg');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'vx-owner-msg';
+      el.style.cssText = 'position:fixed;top:12px;left:50%;transform:translateX(-50%) translateY(-100%);background:#0A0A0A;color:#FBBF24;padding:10px 20px;border-radius:10px;border:1px solid rgba(251,191,36,0.4);font-size:13px;font-weight:500;z-index:10000;transition:transform 0.3s ease;box-shadow:0 10px 30px rgba(0,0,0,0.2);max-width:calc(100% - 24px);';
+      el.innerHTML = '<span style="margin-right:6px;">👑</span><span class="vx-msg-text"></span>';
+      document.body.appendChild(el);
+    }
+    el.querySelector('.vx-msg-text').textContent = text;
+    el.style.transform = 'translateX(-50%) translateY(0)';
+    clearTimeout(window._vxob);
+    window._vxob = setTimeout(() => { el.style.transform = 'translateX(-50%) translateY(-100%)'; }, 4500);
+  },
+  flash() {
+    document.querySelectorAll('.app-tab').forEach(el => {
+      el.style.animation = 'none';
+      setTimeout(() => { el.style.animation = 'pulse 0.8s ease 2'; }, 10);
+    });
+  }
+};
+
+VX_SUITE.init();
+
+/* Aplicar estado del tenant al cargar el DOM */
+window.addEventListener('DOMContentLoaded', () => {
+  VX_SUITE.applyState(VX_SUITE.getState());
+});
+
+const state={
+  currentApp:'comandera',currentMesa:5,cart:[],paymentMethod:'efectivo',
+  kdsFilter:'pending',pin:'',
+  kdsTickets:[
+    {id:245,mesa:'03',mesero:'Ana García',minutes:7,status:'new',items:[{q:2,name:'Tacos de Pastor',done:true},{q:1,name:'Arrachera',note:'sin sal, término medio',done:false},{q:1,name:'Ensalada César',done:false}]},
+    {id:247,mesa:'05',mesero:'Luis Mendoza',minutes:14,status:'prep',items:[{q:2,name:'Enchiladas Verdes',note:'sin crema #2 (alergia)',done:false},{q:1,name:'Camarones al Mojo',noteAlert:'EXTRA PICOSO',done:false},{q:3,name:'Agua Mineral',done:false}]},
+    {id:241,mesa:'T2',mesero:'Carlos Reyes',minutes:31,status:'urgent',items:[{q:4,name:'Arrachera',note:'2 medio, 2 bien',done:false},{q:1,name:'Costillas BBQ',done:false}]},
+    {id:248,mesa:'02',mesero:'Ana García',minutes:1,status:'new',items:[{q:2,name:'Burrito de Res',done:false},{q:2,name:'Coca-Cola',done:false}]}
+  ],
+  completed:[],currentTicket:null,
+  loggedIn:{comandera:false,kds:false,manager:false,cds:true}
+};
+const menu=[
+  {id:1,emoji:'🌮',name:'Tacos de Pastor',desc:'3 tacos, cebolla, cilantro',price:89,cat:['pop','carne']},
+  {id:2,emoji:'🥩',name:'Arrachera Parrilla',desc:'250g, papas, chimichurri',price:259,cat:['pop','carne']},
+  {id:3,emoji:'🦐',name:'Camarones al Mojo',desc:'10 camarones, mantequilla, ajo',price:189,cat:['pop','mar']},
+  {id:4,emoji:'🫔',name:'Enchiladas Verdes',desc:'3 piezas, pollo, crema',price:125,cat:['pop']},
+  {id:5,emoji:'🌯',name:'Burrito de Res',desc:'Frijoles, arroz, pico',price:145,cat:['carne']},
+  {id:6,emoji:'🫓',name:'Quesadilla Chicharrón',desc:'Harina, crema, salsa',price:79,cat:['pop']},
+  {id:7,emoji:'🥗',name:'Ensalada César',desc:'Lechuga, crutones, parmesano',price:119,cat:['pop']},
+  {id:8,emoji:'🐟',name:'Filete Huachinango',desc:'200g, ajo, epazote',price:239,cat:['mar']},
+  {id:9,emoji:'🥤',name:'Agua Mineral 600ml',desc:'Topo Chico',price:30,cat:['beb']},
+  {id:10,emoji:'🍺',name:'Cerveza Artesanal',desc:'IPA 355ml',price:75,cat:['beb']},
+  {id:11,emoji:'🍰',name:'Pastel de Queso',desc:'Con frutos rojos',price:95,cat:['post']},
+  {id:12,emoji:'☕',name:'Café Americano',desc:'Grano local',price:45,cat:['beb','post']}
+];
+
+function switchApp(id){
+  state.currentApp=id;
+  document.querySelectorAll('.app').forEach(a=>a.classList.remove('active'));
+  document.getElementById('app-'+id).classList.add('active');
+  document.querySelectorAll('.app-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelector(`.app-tab[data-app="${id}"]`).classList.add('active');
+  const f=document.getElementById('device-frame');
+  if(id==='cds'){f.classList.remove('phone');f.classList.add('tablet');}
+  else{f.classList.remove('tablet');f.classList.add('phone');}
+  updateLogoutBtn();
+}
+
+function updateLogoutBtn(){
+  const b=document.getElementById('logout-btn');
+  b.style.display=state.loggedIn[state.currentApp]?'block':'none';
+}
+
+function handleLogout(){
+  const app=state.currentApp;
+  state.loggedIn[app]=false;
+  updateLogoutBtn();
+  const el=document.getElementById('app-'+app);
+  el.querySelectorAll('.screen').forEach(s=>s.classList.remove('visible'));
+  el.querySelector('.screen').classList.add('visible');
+  state.pin='';
+  updatePinDisplay();
+  showToast('Sesión cerrada');
+}
+
+function goScreen(name){
+  const app=document.querySelector('.app.active');
+  app.querySelectorAll('.screen').forEach(s=>s.classList.remove('visible'));
+  const t=app.querySelector(`.screen[data-screen="${name}"]`);
+  if(t)t.classList.add('visible');
+  // Trigger exit hook
+  if(name==='c-exito'){
+    const total=state.cart.reduce((s,i)=>s+i.price*i.qty,0)*1.16;
+    document.getElementById('ex-amt').textContent=`$${total.toFixed(2)}`;
+    const names={efectivo:'Efectivo',clip:'Clip',mp:'Mercado Pago',mixto:'Mixto'};
+    document.getElementById('ex-pay').textContent=names[state.paymentMethod];
+    const ch=document.getElementById('ex-chg');
+    if(state.paymentMethod==='efectivo'){
+      const paid=Math.ceil(total/100)*100;
+      ch.innerHTML=`Pagó: $${paid} · Cambio: <strong>$${(paid-total).toFixed(2)}</strong>`;
+    }else ch.innerHTML=`Confirmado ✓`;
+  }
+}
+
+// PIN
+function pinPress(d){
+  if(state.pin.length>=4)return;
+  state.pin+=d;updatePinDisplay();
+  if(state.pin.length===4){
+    setTimeout(()=>{
+      state.loggedIn.comandera=true;
+      updateLogoutBtn();
+      goScreen('c-mesas');
+      showToast('Bienvenido, Luis ✓');
+      state.pin='';updatePinDisplay();
+    },180);
+  }
+}
+function pinDel(){state.pin=state.pin.slice(0,-1);updatePinDisplay();}
+function updatePinDisplay(){
+  for(let i=0;i<4;i++){
+    const d=document.getElementById('pd-'+i);
+    if(d)d.classList.toggle('filled',i<state.pin.length);
+  }
+}
+
+function selStation(n){
+  state.loggedIn.kds=true;
+  updateLogoutBtn();
+  document.getElementById('kds-station').textContent=n;
+  goScreen('kds-main');
+  showToast('Estación: '+n);
+}
+
+function loginManager(){
+  state.loggedIn.manager=true;
+  updateLogoutBtn();
+  goScreen('mgr-dash');
+  showToast('Bienvenido, Ricardo ✓');
+}
+
+// COMANDERA
+function openMesa(num,st){
+  if(st==='libre'){
+    showToast(`Abriendo Mesa ${num}...`);
+    setTimeout(()=>{
+      state.currentMesa=num;
+      resetCart();
+      document.getElementById('ped-mesa').textContent=num;
+      document.getElementById('res-mesa').textContent=num;
+      document.getElementById('pay-mesa').textContent=num;
+      renderMenu();
+      goScreen('c-pedido');
+    },250);
+  }else if(st==='lista'){
+    state.currentMesa=num;
+    state.cart=[{...menu[0],qty:2},{...menu[1],qty:1},{...menu[8],qty:2}];
+    document.getElementById('res-mesa').textContent=num;
+    document.getElementById('pay-mesa').textContent=num;
+    updateCart();
+    goScreen('c-resumen');
+  }else if(st==='ocup'){
+    state.currentMesa=num;
+    document.getElementById('ped-mesa').textContent=num;
+    document.getElementById('res-mesa').textContent=num;
+    document.getElementById('pay-mesa').textContent=num;
+    renderMenu();
+    goScreen('c-pedido');
+  }else showToast(`Mesa ${num} en cobro`);
+}
+
+function renderMenu(f='todo'){
+  const list=document.getElementById('menu-list');
+  if(!list)return;
+  const items=f==='todo'?menu:menu.filter(i=>i.cat.includes(f));
+  list.innerHTML=items.map(i=>{
+    const c=state.cart.find(x=>x.id===i.id);
+    const q=c?c.qty:0;
+    return `<div class="mitem"><div class="memoji">${i.emoji}</div><div class="minfo"><div class="mname">${i.name}</div><div class="mdesc">${i.desc}</div></div><div class="mprice">$${i.price}</div>${q>0?`<div class="qty-ctrl"><button class="qty-btn" onclick="rm(${i.id})">−</button><span class="qty-val">${q}</span><button class="qty-btn" onclick="ad(${i.id})">+</button></div>`:`<button class="madd-btn" onclick="ad(${i.id})">+</button>`}</div>`;
+  }).join('');
+}
+function filterCat(el,c){
+  document.querySelectorAll('#app-comandera .cats .cpill').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+  renderMenu(c);
+}
+function getCat(){
+  const a=document.querySelector('#app-comandera .cats .cpill.on');
+  if(!a)return 'todo';
+  const m={'Todo':'todo','🔥 Popular':'pop','🥩 Carnes':'carne','🦐 Mariscos':'mar','🥤 Bebidas':'beb','🍰 Postres':'post'};
+  return m[a.textContent]||'todo';
+}
+function ad(id){
+  const i=menu.find(m=>m.id===id);
+  const e=state.cart.find(c=>c.id===id);
+  if(e)e.qty++;else state.cart.push({...i,qty:1});
+  updateCart();renderMenu(getCat());
+  showToast(`✓ ${i.name}`);
+}
+function rm(id){
+  const e=state.cart.find(c=>c.id===id);
+  if(!e)return;
+  e.qty--;
+  if(e.qty<=0)state.cart=state.cart.filter(c=>c.id!==id);
+  updateCart();renderMenu(getCat());
+}
+function updateCart(){
+  const cnt=state.cart.reduce((s,i)=>s+i.qty,0);
+  const tot=state.cart.reduce((s,i)=>s+i.price*i.qty,0);
+  const b=document.getElementById('cart-badge');
+  const su=document.getElementById('cart-summary');
+  if(b)b.textContent=cnt;
+  if(su)su.textContent=`${cnt} items · $${tot}`;
+  const gp=document.getElementById('go-pay');
+  if(gp){
+    if(cnt>0){gp.disabled=false;gp.style.opacity='1';gp.textContent=`Cobrar $${(tot*1.16).toFixed(2)} →`;}
+    else{gp.disabled=true;gp.style.opacity='.4';gp.textContent='Cobrar';}
+  }
+  renderCart();renderSum();
+}
+function renderCart(){
+  const l=document.getElementById('cart-list');
+  if(!l)return;
+  if(state.cart.length===0){l.innerHTML='<div style="text-align:center;padding:24px 0;color:var(--g500);font-size:12.5px">No hay items</div>';return;}
+  l.innerHTML=state.cart.map(i=>`<div class="orow"><div class="oqty">${i.qty}</div><span class="oname">${i.name}</span><span class="oprice">$${i.price*i.qty}</span></div>`).join('');
+}
+function renderSum(){
+  const s=state.cart.reduce((a,i)=>a+i.price*i.qty,0);
+  const iv=s*0.16,t=s+iv;
+  ['sub-tot','iva-tot','grand-tot'].forEach((id,k)=>{
+    const e=document.getElementById(id);
+    if(e)e.textContent=`$${[s,iv,t][k].toFixed(2)}`;
+  });
+  const p=document.getElementById('pay-amt');
+  if(p){const a=t.toFixed(2).split('.');p.innerHTML=`$${a[0]}<span class="total-dec">.${a[1]}</span>`;}
+}
+function selectPay(el){
+  document.querySelectorAll('.pmethod').forEach(m=>m.classList.remove('sel'));
+  el.classList.add('sel');
+  state.paymentMethod=el.dataset.pay;
+}
+function resetCart(){
+  state.cart=[];updateCart();
+  document.querySelectorAll('.pmethod').forEach(m=>m.classList.remove('sel'));
+  const e=document.querySelector('.pmethod[data-pay="efectivo"]');
+  if(e)e.classList.add('sel');
+  state.paymentMethod='efectivo';
+}
+
+// KDS
+function renderKDS(){
+  const w=document.getElementById('kds-wrap');
+  if(!w)return;
+  const ts=state.kdsFilter==='pending'?state.kdsTickets:state.completed;
+  document.getElementById('kds-pend').textContent=state.kdsTickets.length;
+  document.getElementById('kds-done').textContent=state.completed.length+34;
+  document.getElementById('kds-count').textContent=state.kdsTickets.length;
+  if(ts.length===0){
+    w.innerHTML=`<div class="empty"><div class="empty-icon">${state.kdsFilter==='pending'?'✓':'📋'}</div><div class="empty-title">${state.kdsFilter==='pending'?'Cocina al día':'Sin completados'}</div><div class="empty-desc">${state.kdsFilter==='pending'?'No hay tickets pendientes.':'Los listos aparecen aquí.'}</div></div>`;
+    return;
+  }
+  w.innerHTML=ts.map(t=>{
+    const sc=t.status==='urgent'?'urgent':'';
+    const hc=t.minutes>20?'thead-r':(t.minutes>10?'thead-a':'thead-g');
+    const tc=t.minutes>20?'ttimer-r':(t.minutes>10?'ttimer-a':'ttimer-g');
+    const pre=t.minutes>20?'⚠ ':'';
+    return `<div class="tcard ${sc}" onclick="openTk(${t.id})"><div class="thead ${hc}"><div style="flex:1"><div class="tmesa">Mesa ${t.mesa} · #${t.id}</div><div class="tmesero">${t.mesero}</div></div><span class="ttimer ${tc}">${pre}${t.minutes} min</span></div><div class="tbody">${t.items.map(i=>`<div class="titem"><span class="tq ${i.done?'tdone':''}">${i.q}×</span><span class="tn ${i.done?'tdone':''}">${i.name}${i.note?` — <span class="tnote">${i.note}</span>`:''}${i.noteAlert?` — <span class="tnote tnote-alert">${i.noteAlert}</span>`:''}</span></div>`).join('')}</div>${state.kdsFilter==='pending'?`<div class="tfoot"><button class="kbtn kbtn-dl" onclick="event.stopPropagation();mpDelayTicket(${t.id})">Demorar</button><button class="kbtn kbtn-ok" onclick="event.stopPropagation();completeTk(${t.id})">✓ Listo</button></div>`:''}</div>`;
+  }).join('');
+}
+function kdsFilter(f,el){
+  state.kdsFilter=f;
+  document.querySelectorAll('#app-kds .tabbar-item').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderKDS();
+}
+function openTk(id){
+  const t=state.kdsTickets.find(x=>x.id===id);
+  if(!t)return;
+  state.currentTicket=t;
+  document.getElementById('det-mesa').textContent=`Mesa ${t.mesa} · #${t.id}`;
+  document.getElementById('det-mesero').textContent=`Mesero: ${t.mesero}`;
+  const tm=document.getElementById('det-timer');
+  tm.textContent=`${t.minutes} min`;
+  tm.className='ttimer '+(t.minutes>20?'ttimer-r':t.minutes>10?'ttimer-a':'ttimer-g');
+  document.getElementById('det-items').innerHTML=t.items.map((i,idx)=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--g100)"><div style="width:22px;font-size:13px;font-weight:800">${i.q}×</div><div style="flex:1"><div style="font-size:13px;font-weight:700">${i.name}</div>${i.note?`<div style="font-size:10.5px;color:var(--c-k);margin-top:2px;font-weight:600">${i.note}</div>`:''}${i.noteAlert?`<div style="font-size:10.5px;color:var(--red);margin-top:2px;font-weight:700">⚠ ${i.noteAlert}</div>`:''}</div><div style="width:28px;height:28px;border-radius:8px;background:${i.done?'var(--c-k)':'var(--g50)'};border:1px solid ${i.done?'var(--c-k)':'var(--g200)'};display:flex;align-items:center;justify-content:center;color:${i.done?'white':'var(--g400)'};font-size:15px;cursor:pointer" onclick="togItem(${idx},this)">✓</div></div>`).join('');
+  goScreen('kds-det');
+}
+function togItem(idx,el){
+  const t=state.currentTicket;
+  t.items[idx].done=!t.items[idx].done;
+  if(t.items[idx].done){el.style.background='var(--c-k)';el.style.borderColor='var(--c-k)';el.style.color='white';}
+  else{el.style.background='var(--g50)';el.style.borderColor='var(--g200)';el.style.color='var(--g400)';}
+}
+function completeTicket(){if(state.currentTicket)completeTk(state.currentTicket.id);}
+function completeTk(id){
+  const idx=state.kdsTickets.findIndex(t=>t.id===id);
+  if(idx===-1)return;
+  const t=state.kdsTickets[idx];
+  t.items.forEach(i=>i.done=true);
+  state.completed.unshift(t);
+  state.kdsTickets.splice(idx,1);
+  renderKDS();
+  showToast(`✓ Mesa ${t.mesa} completada`);
+}
+
+// CDS
+function cdsSim(mode){
+  const m={idle:'cds-idle',order:'cds-order',paying:'cds-paying',thanks:'cds-thanks'};
+  goScreen(m[mode]);
+}
+function rateStar(n){
+  document.querySelectorAll('#app-cds .cds-star').forEach((s,i)=>s.classList.toggle('on',i<n));
+  showToast(`${n} estrella${n>1?'s':''} · ¡Gracias!`);
+  setTimeout(()=>cdsSim('idle'),1800);
+}
+
+function toggleSet(e,el){if(e)e.stopPropagation();el.classList.toggle('on');}
+function showHelp(){
+  const h={
+    comandera:'PIN: cualquier 4 dígitos. Toca mesa libre para abrir.',
+    kds:'✓ Listo marca el ticket completado.',
+    manager:'Login demo: cualquier email/password.',
+    cds:'Usa los botones arriba para ver los estados.'
+  };
+  showToast(h[state.currentApp]);
+}
+
+let tT;
+function showToast(m){
+  const t=document.getElementById('toast');
+  t.textContent=m;
+  t.style.opacity='1';
+  t.style.transform='translateX(-50%) translateY(0)';
+  clearTimeout(tT);
+  tT=setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(20px)';},2000);
+}
+
+// INIT
+renderMenu();
+renderKDS();
+state.cart=[{...menu[0],qty:2},{...menu[1],qty:1},{...menu[8],qty:2}];
+updateCart();
+renderMenu();
+</script>
+<script defer src="auth-helper.js"></script>
+<link rel="stylesheet" href="volvix-modals.css">
+<script defer src="volvix-modals.js"></script>
+<script src="volvix-multipos-wiring.js" defer></script>
+<script src="volvix-multipos-extra-wiring.js" defer></script>
+<script src="volvix-multipos-stubs-wiring.js" defer></script>
+<script src="volvix-ai-real-wiring.js" defer></script>
+<script src="volvix-charts-wiring.js" defer></script>
+<script src="volvix-notifications-wiring.js" defer></script>
+<script src="volvix-backup-wiring.js" defer></script>
+<script src="volvix-logger-wiring.js" defer></script>
+<script src="volvix-offline-wiring.js" defer></script>
+<script src="volvix-reports-wiring.js" defer></script>
+<script src="volvix-onboarding-wiring.js" defer></script>
+<script src="volvix-pwa-wiring.js" defer></script>
+<script src="volvix-i18n-wiring.js" defer></script>
+<script src="volvix-theme-wiring.js" defer></script>
+<script src="volvix-shortcuts-wiring.js" defer></script>
+<script src="volvix-search-wiring.js" defer></script>
+<script src="volvix-voice-wiring.js" defer></script>
+<script src="volvix-gamification-wiring.js" defer></script>
+<script src="volvix-perf-wiring.js" defer></script>
+<script src="volvix-email-wiring.js" defer></script>
+<script src="volvix-webrtc-wiring.js" defer></script>
+<script src="volvix-master-controller.js" defer></script>
+<script src="volvix-calendar-wiring.js" defer></script>
+<script src="volvix-payments-wiring.js" defer></script>
+<script src="volvix-realtime-wiring.js" defer></script>
+<script src="volvix-currency-wiring.js" defer></script>
+<script src="volvix-loyalty-wiring.js" defer></script>
+<script src="volvix-tax-wiring.js" defer></script>
+<script src="volvix-webhooks-wiring.js" defer></script>
+<script src="volvix-audit-wiring.js" defer></script>
+<script src="volvix-cache-wiring.js" defer></script>
+<script src="volvix-queue-wiring.js" defer></script>
+<script src="volvix-fulltext-wiring.js" defer></script>
+<script src="volvix-recommendations-wiring.js" defer></script>
+<script src="volvix-subscriptions-wiring.js" defer></script>
+<script src="volvix-plugins-wiring.js" defer></script>
+<script src="volvix-compliance-wiring.js" defer></script>
+<script src="volvix-cs-wiring.js" defer></script>
+<script src="volvix-ratelimit-wiring.js" defer></script>
+<script src="volvix-ab-testing-wiring.js" defer></script>
+<script src="volvix-feedback-wiring.js" defer></script>
+<script src="volvix-inventory-ai-wiring.js" defer></script>
+<script src="volvix-workflow-wiring.js" defer></script>
+<script src="volvix-mobile-wiring.js" defer></script>
+<script src="volvix-barcode-wiring.js" defer></script>
+<script src="volvix-printer-wiring.js" defer></script>
+<script src="volvix-cashdrawer-wiring.js" defer></script>
+<script src="volvix-scale-wiring.js" defer></script>
+<script src="volvix-kds-wiring.js" defer></script>
+<script src="volvix-tables-wiring.js" defer></script>
+<script src="volvix-reservations-wiring.js" defer></script>
+<script src="volvix-delivery-wiring.js" defer></script>
+<script src="volvix-inventory-pro-wiring.js" defer></script>
+<script src="volvix-purchase-wiring.js" defer></script>
+<script src="volvix-accounting-wiring.js" defer></script>
+<script src="volvix-hr-wiring.js" defer></script>
+<script src="volvix-crm-wiring.js" defer></script>
+<script src="volvix-marketing-wiring.js" defer></script>
+<script src="volvix-coupons-wiring.js" defer></script>
+<script src="volvix-returns-wiring.js" defer></script>
+<script src="volvix-layaway-wiring.js" defer></script>
+<script src="volvix-service-wiring.js" defer></script>
+<script src="volvix-appointments-wiring.js" defer></script>
+<script src="volvix-heatmap-wiring.js" defer></script>
+<script src="volvix-anomaly-wiring.js" defer></script>
+<script src="volvix-bi-wiring.js" defer></script>
+<script src="volvix-forecasting-wiring.js" defer></script>
+<script src="volvix-multistore-wiring.js" defer></script>
+<script src="volvix-receipt-customizer-wiring.js" defer></script>
+<script src="volvix-quickactions-wiring.js" defer></script>
+<script src="volvix-health-wiring.js" defer></script>
+<script src="volvix-pricing-wiring.js" defer></script>
+<script src="volvix-signature-wiring.js" defer></script>
+<script src="volvix-maps-wiring.js" defer></script>
+<script src="volvix-photo-wiring.js" defer></script>
+<script src="volvix-permissions-wiring.js" defer></script>
+<script src="volvix-pin-wiring.js" defer></script>
+<script src="volvix-modifiers-wiring.js" defer></script>
+<script src="volvix-categories-wiring.js" defer></script>
+<script src="volvix-tags-wiring.js" defer></script>
+<script src="volvix-reminders-wiring.js" defer></script>
+<script src="volvix-cron-wiring.js" defer></script>
+<script src="volvix-ui-accordion.js" defer></script>
+<script src="volvix-ui-animations.js" defer></script>
+<script src="volvix-ui-avatar.js" defer></script>
+<script src="volvix-ui-badge.js" defer></script>
+<script src="volvix-ui-banner.js" defer></script>
+<script src="volvix-ui-card.js" defer></script>
+<script src="volvix-ui-carousel.js" defer></script>
+<script src="volvix-ui-colorpicker.js" defer></script>
+<script src="volvix-ui-datepicker.js" defer></script>
+<script src="volvix-ui-drawer.js" defer></script>
+<script src="volvix-ui-dropdown.js" defer></script>
+<script src="volvix-ui-empty.js" defer></script>
+<script src="volvix-ui-errors.js" defer></script>
+<script src="volvix-ui-form.js" defer></script>
+<script src="volvix-ui-imageviewer.js" defer></script>
+<script src="volvix-ui-list.js" defer></script>
+<script src="volvix-ui-modal.js" defer></script>
+<script src="volvix-ui-pagination.js" defer></script>
+<script src="volvix-ui-progress.js" defer></script>
+<script src="volvix-ui-skeleton.js" defer></script>
+<script src="volvix-ui-slider.js" defer></script>
+<script src="volvix-ui-snackbar.js" defer></script>
+<script src="volvix-ui-splash.js" defer></script>
+<script src="volvix-ui-table.js" defer></script>
+<script src="volvix-ui-tabs.js" defer></script>
+<script src="volvix-ui-toggle.js" defer></script>
+<script src="volvix-ui-tooltip.js" defer></script>
+<script src="volvix-ui-tour.js" defer></script>
+<script src="volvix-ui-wizard.js" defer></script>
+<script src="volvix-vertical-buffet.js" defer></script>
+<script src="volvix-vertical-cafe.js" defer></script>
+<script src="volvix-vertical-carniceria.js" defer></script>
+<script src="volvix-vertical-estetica.js" defer></script>
+<script src="volvix-vertical-farmacia.js" defer></script>
+<script src="volvix-vertical-ferreteria.js" defer></script>
+<script src="volvix-vertical-floreria.js" defer></script>
+<script src="volvix-vertical-foodtruck.js" defer></script>
+<script src="volvix-vertical-gym.js" defer></script>
+<script src="volvix-vertical-helado.js" defer></script>
+<script src="volvix-vertical-hotel.js" defer></script>
+<script src="volvix-vertical-joyeria.js" defer></script>
+<script src="volvix-vertical-lavanderia.js" defer></script>
+<script src="volvix-vertical-libreria.js" defer></script>
+<script src="volvix-vertical-panaderia.js" defer></script>
+<script src="volvix-vertical-papeleria.js" defer></script>
+<script src="volvix-vertical-pizza.js" defer></script>
+<script src="volvix-vertical-ropa.js" defer></script>
+<script src="volvix-vertical-spa.js" defer></script>
+<script src="volvix-vertical-sushi.js" defer></script>
+<script src="volvix-vertical-tabaqueria.js" defer></script>
+<script src="volvix-vertical-tlapaleria.js" defer></script>
+<script src="volvix-vertical-vet.js" defer></script>
+<script src="volvix-vertical-vinateria.js" defer></script>
+<script src="volvix-vertical-zapateria.js" defer></script>
+<script src="volvix-fiscal-wiring.js" defer></script>
+<script src="volvix-stocktake-wiring.js" defer></script>
+<script src="volvix-drinks-wiring.js" defer></script>
+<script src="volvix-ui-contextmenu.js" defer></script>
+<script src="volvix-ui-editor.js" defer></script>
+<script src="volvix-ui-fileupload.js" defer></script>
+<script src="volvix-ui-kanban.js" defer></script>
+<script src="volvix-ui-searchbox.js" defer></script>
+<script src="volvix-ui-spinner.js" defer></script>
+<script src="volvix-ui-steps.js" defer></script>
+<script src="volvix-ui-timeline.js" defer></script>
+<script src="volvix-ui-treeview.js" defer></script>
+<script src="volvix-vertical-cafeinternet.js" defer></script>
+<script src="volvix-vertical-educacion.js" defer></script>
+<script src="volvix-vertical-eventos.js" defer></script>
+<script src="volvix-vertical-guarderia.js" defer></script>
+<script src="volvix-vertical-inmobiliaria.js" defer></script>
+<script src="volvix-vertical-mecanica.js" defer></script>
+<script src="volvix-workflow-closeday.js" defer></script>
+<script src="volvix-workflow-collections.js" defer></script>
+<script src="volvix-workflow-onboarding.js" defer></script>
+<script src="volvix-workflow-openday.js" defer></script>
+<script src="volvix-workflow-reconciliation.js" defer></script>
+<script src="volvix-workflow-restock.js" defer></script>
+<script src="volvix-a11y-wiring.js" defer></script>
+<script src="volvix-vertical-optometria.js" defer></script>
+<script src="volvix-vertical-dental.js" defer></script>
+<script src="volvix-vertical-pethotel.js" defer></script>
+<script src="volvix-vertical-autolavado.js" defer></script>
+<script src="volvix-vertical-parking.js" defer></script>
+<script src="volvix-vertical-cine.js" defer></script>
+<script src="volvix-vertical-karaoke.js" defer></script>
+<script src="volvix-vertical-bowling.js" defer></script>
+<script src="volvix-vertical-cantina.js" defer></script>
+<script src="volvix-vertical-disco.js" defer></script>
+<script src="volvix-vertical-fotografia.js" defer></script>
+<script src="volvix-vertical-tortilleria.js" defer></script>
+<script src="volvix-vertical-recauchutado.js" defer></script>
+<script src="volvix-ui-markdown.js" defer></script>
+<script src="volvix-ui-codeeditor.js" defer></script>
+<script src="volvix-ui-diff.js" defer></script>
+<script src="volvix-ui-colorwheel.js" defer></script>
+<script src="volvix-ui-charts-pro.js" defer></script>
+<script src="volvix-ui-map.js" defer></script>
+<script src="volvix-ui-whiteboard.js" defer></script>
+<script src="volvix-ui-mention.js" defer></script>
+<script src="volvix-ui-stars.js" defer></script>
+<script src="volvix-ui-otp.js" defer></script>
+<script src="volvix-ui-phone.js" defer></script>
+<script src="volvix-ui-numinput.js" defer></script>
+<script src="volvix-geofence-wiring.js" defer></script>
+<script src="volvix-webextensions-wiring.js" defer></script>
+<script src="volvix-routes-wiring.js" defer></script>
+<script src="volvix-pwa-install-prompt.js" defer></script>
+<!-- ===================================================================
+     VOLVIX BACKEND WIRING (v3 → REAL API)
+     Intercepta puntos de carga/guardado. Fallback a localStorage demo.
+     =================================================================== -->
+<script>
+(function(){
+  'use strict';
+  const TOKEN_KEYS=['volvix_token','volvixAuthToken'];
+  const getTok=()=>TOKEN_KEYS.map(k=>localStorage.getItem(k)).find(Boolean);
+  const tokenPayload=()=>{try{return JSON.parse(atob(getTok().split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));}catch{return{}}};
+  const API_BASE=(window.VOLVIX_API_BASE||'')+'/api';
+  const VBW={online:!!getTok(),products:[],customers:[],lastSale:null,realtime:null};
+  window.VBW=VBW;
+
+  // --- Auth gate ---
+  if(!getTok()){
+    const here=encodeURIComponent(location.pathname+location.search);
+    if(!/login\.html/.test(location.pathname)){
+      console.warn('[VBW] Sin token. Redirigiendo a login...');
+      // Permitir modo demo si el usuario añade ?demo=1
+      if(!/[?&]demo=1/.test(location.search)){
+        location.replace('/login.html?redirect='+here); return;
+      }
+      VBW.online=false;
+    }
+  }
+
+  async function api(path,opts={}){
+    const tok=getTok();
+    const h=Object.assign({'Content-Type':'application/json'},opts.headers||{});
+    if(tok)h.Authorization='Bearer '+tok;
+    const r=await fetch(API_BASE+path,Object.assign({},opts,{headers:h}));
+    if(!r.ok){
+      let msg=r.statusText;try{msg=(await r.json()).error||msg;}catch{}
+      throw new Error('API '+r.status+': '+msg);
+    }
+    const ct=r.headers.get('content-type')||'';
+    return ct.includes('json')?r.json():r.text();
+  }
+  VBW.api=api;
+
+  // --- Productos: GET /api/products → reemplaza array `menu` global ---
+  async function loadProducts(){
+    if(!VBW.online)return;
+    try{
+      const data=await api('/products');
+      const list=Array.isArray(data)?data:(data.products||data.data||[]);
+      if(!list.length){console.warn('[VBW] /api/products vacío, mantengo demo menu');return;}
+      // Mapear schema backend → schema UI (menu)
+      const mapped=list.map((p,i)=>({
+        id:p.id||p.product_id||i+1,
+        emoji:p.emoji||p.icon||'🍽',
+        name:p.name||p.nombre||'Producto',
+        desc:p.description||p.desc||p.descripcion||'',
+        price:Number(p.price||p.precio||0),
+        cat:p.categories||p.cat||(p.category?[p.category]:['pop']),
+        sku:p.sku,stock:p.stock,_raw:p
+      }));
+      // Mutar in-place el array `menu` (es const pero el array es mutable)
+      if(typeof menu!=='undefined'&&Array.isArray(menu)){
+        menu.length=0;mapped.forEach(m=>menu.push(m));
+        if(typeof renderMenu==='function')renderMenu();
+        if(typeof showToast==='function')showToast('Catálogo: '+mapped.length+' productos');
+      }
+      VBW.products=mapped;
+    }catch(e){console.error('[VBW] loadProducts',e);if(typeof showToast==='function')showToast('Error catálogo: '+e.message);}
+  }
+  VBW.loadProducts=loadProducts;
+
+  // --- Ventas: POST /api/sales (interceptamos goScreen('c-exito')) ---
+  const _goScreen=window.goScreen;
+  window.goScreen=function(name){
+    if(name==='c-exito'&&VBW.online){
+      // Disparar venta antes de navegar
+      submitSale().catch(e=>{
+        console.error('[VBW] submitSale',e);
+        if(typeof showToast==='function')showToast('Venta NO sincronizada: '+e.message);
+      });
+    }
+    return _goScreen?_goScreen.apply(this,arguments):undefined;
+  };
+
+  async function submitSale(){
+    if(!state||!state.cart||!state.cart.length)return;
+    const subtotal=state.cart.reduce((s,i)=>s+i.price*i.qty,0);
+    const tax=subtotal*0.16;
+    const total=subtotal+tax;
+    const payload={
+      mesa:state.currentMesa,
+      payment_method:state.paymentMethod,
+      subtotal,tax,total,
+      items:state.cart.map(i=>({
+        product_id:i.id,sku:i.sku,name:i.name,
+        qty:i.qty,price:i.price,line_total:i.price*i.qty
+      }))
+    };
+    try{
+      const sale=await api('/sales',{method:'POST',body:JSON.stringify(payload)});
+      VBW.lastSale=sale;
+      // Pago (idempotente; backend puede crearlo internamente)
+      if(sale&&sale.id){
+        try{await api('/payments',{method:'POST',body:JSON.stringify({sale_id:sale.id,method:state.paymentMethod,amount:total})});}catch{}
+      }
+      // Imprimir
+      printTicket(sale,payload).catch(()=>{});
+      if(typeof showToast==='function')showToast('Venta #'+(sale.folio||sale.id||'?')+' ✓');
+    }catch(e){throw e;}
+  }
+  VBW.submitSale=submitSale;
+
+  // --- Impresión ESC/POS ---
+  function escposBytes(sale,payload){
+    const ESC=0x1B,GS=0x1D;const buf=[];
+    const push=s=>{for(const c of s)buf.push(c.charCodeAt(0)&0xFF);};
+    buf.push(ESC,0x40);             // init
+    buf.push(ESC,0x61,0x01);        // center
+    push('VOLVIX POS\n');
+    buf.push(ESC,0x61,0x00);        // left
+    push('Folio: '+(sale&&sale.folio||sale&&sale.id||'-')+'\n');
+    push('Mesa:  '+(payload.mesa||'-')+'\n');
+    push('--------------------------------\n');
+    payload.items.forEach(it=>{push(it.qty+'x '+it.name.slice(0,22)+'\n   $'+it.line_total.toFixed(2)+'\n');});
+    push('--------------------------------\n');
+    push('Subtotal: $'+payload.subtotal.toFixed(2)+'\n');
+    push('IVA:      $'+payload.tax.toFixed(2)+'\n');
+    push('TOTAL:    $'+payload.total.toFixed(2)+'\n');
+    push('Pago: '+payload.payment_method+'\n\n');
+    push('Gracias por su visita\n\n\n');
+    buf.push(GS,0x56,0x00);         // cut
+    return buf;
+  }
+  async function printTicket(sale,payload){
+    if(!VBW.online){window.print();return;}
+    try{
+      await api('/printer/raw',{method:'POST',body:JSON.stringify({bytes:escposBytes(sale,payload)})});
+    }catch(e){console.warn('[VBW] printer fallback',e);try{window.print();}catch{}}
+  }
+  VBW.printTicket=printTicket;
+
+  // --- Clientes: búsqueda ---
+  VBW.searchCustomer=async function(q){
+    if(!VBW.online)return [];
+    try{return await api('/customers?q='+encodeURIComponent(q||''));}catch(e){return [];}
+  };
+
+  // --- Corte de caja ---
+  VBW.openCut=async function(opening_amount){return api('/cuts/open',{method:'POST',body:JSON.stringify({opening_amount})});};
+  VBW.closeCut=async function(cut_id,closing_amount){return api('/cuts/close',{method:'POST',body:JSON.stringify({cut_id,closing_amount})});};
+  VBW.getCutSummary=async function(id){return api('/cuts/'+id+'/summary');};
+
+  // --- Reportes ---
+  VBW.reportDaily=async function(from,to){
+    const qs='?from='+encodeURIComponent(from)+'&to='+encodeURIComponent(to);
+    return api('/reports/sales/daily'+qs);
+  };
+  VBW.dashboardToday=async function(){return api('/dashboard/today');};
+
+  // Cablear botones de manager si existen
+  document.addEventListener('click',function(e){
+    const t=e.target.closest('[data-vbw-action]');
+    if(!t)return;
+    const a=t.dataset.vbwAction;
+    if(a==='close-cut'){VBW.closeCut(t.dataset.cutId,Number(t.dataset.amount||0)).then(r=>showToast('Corte cerrado')).catch(err=>showToast(err.message));}
+    if(a==='daily-report'){VBW.reportDaily(t.dataset.from,t.dataset.to).then(r=>console.log('[VBW] report',r));}
+  });
+
+  // --- Realtime: Supabase channel pos_updates ---
+  function initRealtime(){
+    if(!window.supabase||!window.supabase.createClient)return;
+    try{
+      const url=window.VOLVIX_SUPABASE_URL,key=window.VOLVIX_SUPABASE_ANON;
+      if(!url||!key)return;
+      const sb=window.supabase.createClient(url,key,{global:{headers:{Authorization:'Bearer '+getTok()}}});
+      const ch=sb.channel('pos_updates');
+      ch.on('broadcast',{event:'product_update'},({payload})=>{
+        const p=payload&&payload.product;if(!p||typeof menu==='undefined')return;
+        const ix=menu.findIndex(m=>m.id===p.id);
+        if(ix>=0){Object.assign(menu[ix],{price:p.price,stock:p.stock});if(typeof renderMenu==='function')renderMenu();}
+      });
+      ch.on('broadcast',{event:'sale_created'},({payload})=>{
+        if(payload&&payload.tenant_id===tokenPayload().tenant_id){
+          if(typeof showToast==='function')showToast('Venta otra terminal: $'+(payload.total||0));
+          loadProducts(); // refrescar stocks
+        }
+      });
+      ch.subscribe();
+      VBW.realtime=ch;
+    }catch(e){console.warn('[VBW] realtime',e);}
+  }
+
+  // --- Boot ---
+  function boot(){
+    if(VBW.online){loadProducts();initRealtime();}
+    console.log('[VBW] wiring ready · online='+VBW.online);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);
+  else boot();
+})();
+
+// =====================================================
+// VBW v3 polish: live stats, realtime indicator, quick search (Ctrl+K)
+// =====================================================
+(function(){
+  'use strict';
+  function fmtMx(n){
+    try { return new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(+n||0); }
+    catch(e){ return '$'+Math.round(+n||0); }
+  }
+  function getTok(){
+    try { return localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || ''; } catch(e){ return ''; }
+  }
+  function authHeaders(){ var t=getTok(); return t?{Authorization:'Bearer '+t,'Content-Type':'application/json'}:{'Content-Type':'application/json'}; }
+
+  // ---- Realtime indicator ----
+  function setRtState(online){
+    var el = document.getElementById('vbwRtIndicator');
+    var lbl = document.getElementById('vbwRtLbl');
+    if (!el) return;
+    el.classList.toggle('online', !!online);
+    el.classList.toggle('offline', !online);
+    if (lbl) lbl.textContent = online ? 'Online' : 'Offline';
+  }
+  function updateRtFromNet(){ setRtState(navigator.onLine && !!getTok()); }
+  window.addEventListener('online',  updateRtFromNet);
+  window.addEventListener('offline', updateRtFromNet);
+
+  // ---- Stats refresher ----
+  async function refreshStats(){
+    if (!navigator.onLine || !getTok()) return;
+    try {
+      // Endpoint real: /api/dashboard/today (devuelve {total_sales, items_sold, tickets_count, ...})
+      var r = await fetch('/api/dashboard/today', { headers: authHeaders() });
+      if (r.status === 401) { /* token inválido — el flujo principal redirigirá */ return; }
+      if (r.status === 503) { return; }
+      if (!r.ok) throw new Error('HTTP '+r.status);
+      var d = await r.json();
+      var ventas    = d.total_sales ?? d.ventas ?? d.total ?? 0;
+      var items     = d.items_sold  ?? d.items  ?? 0;
+      var tickets   = d.tickets_count ?? d.tickets ?? 0;
+      var ticket    = d.avg_ticket  ?? d.ticket_promedio ?? (tickets ? ventas / tickets : 0);
+      var customers = d.customers_count ?? d.customers ?? d.clientes ?? tickets;
+      var occPct    = d.occupancy_pct ?? d.ocupacion ?? null;
+      var occUsed   = d.tables_occupied ?? null;
+      var occTotal  = d.tables_total ?? null;
+      var dventas   = d.delta_sales_pct;
+      // Stats bar (top header)
+      var v = document.getElementById('vbwStatVentas'); if (v) v.textContent = fmtMx(ventas);
+      var a = document.getElementById('vbwStatAvg');    if (a) a.textContent = fmtMx(ticket);
+      var i = document.getElementById('vbwStatItems');  if (i) i.textContent = String(items|0);
+      // Dashboard KPI grid (real data, replaces previous hardcoded $8,240 etc.)
+      var kV = document.getElementById('kpiVentas');     if (kV) kV.textContent = fmtMx(ventas);
+      var kC = document.getElementById('kpiClientes');   if (kC) kC.textContent = String(customers|0);
+      var kT = document.getElementById('kpiTicket');     if (kT) kT.textContent = fmtMx(ticket);
+      var kO = document.getElementById('kpiOcupacion');  if (kO) kO.textContent = (occPct != null ? Math.round(occPct) + '%' : (occTotal ? Math.round((occUsed||0)/occTotal*100) + '%' : '—'));
+      var kOSub = document.getElementById('kpiOcupacionSub');
+      if (kOSub && occUsed != null && occTotal != null) kOSub.textContent = (occUsed|0) + ' de ' + (occTotal|0);
+      var kVD = document.getElementById('kpiVentasDelta');
+      if (kVD && dventas != null) {
+        kVD.textContent = (dventas >= 0 ? '↗ +' : '↘ ') + Math.round(Math.abs(dventas)) + '% vs ayer';
+        kVD.classList.toggle('kpi-up', dventas >= 0);
+        kVD.classList.toggle('kpi-dn', dventas < 0);
+      }
+    } catch(e){ /* silent */ }
+  }
+
+  // ---- Quick search (Ctrl+K) ----
+  var qsState = { items: [], sel: 0, debTimer: null };
+  function openQs(){
+    var ov = document.getElementById('vbwQsOverlay');
+    if (!ov) return;
+    ov.classList.add('open');
+    var inp = document.getElementById('vbwQsInput');
+    if (inp){ inp.value=''; inp.focus(); }
+    renderQs([]);
+  }
+  function closeQs(){
+    var ov = document.getElementById('vbwQsOverlay');
+    if (ov) ov.classList.remove('open');
+  }
+  function renderQs(items){
+    qsState.items = items || [];
+    qsState.sel = 0;
+    var box = document.getElementById('vbwQsResults');
+    var count = document.getElementById('vbwQsCount');
+    if (!box) return;
+    if (!items || !items.length){
+      box.innerHTML = '<div class="vbw-qs-empty">Sin resultados</div>';
+      if (count) count.textContent = '';
+      return;
+    }
+    var byKind = {};
+    items.forEach(function(it){ (byKind[it.kind] = byKind[it.kind] || []).push(it); });
+    var labels = { product:'Productos', customer:'Clientes', sale:'Ventas' };
+    var html = '';
+    Object.keys(byKind).forEach(function(k){
+      html += '<div class="vbw-qs-group">'+(labels[k]||k)+'</div>';
+      byKind[k].forEach(function(it,i){
+        html += '<div class="vbw-qs-item" data-idx="'+items.indexOf(it)+'"><span>'+escHtml(it.label)+'</span><span class="meta">'+escHtml(it.meta||'')+'</span></div>';
+      });
+    });
+    box.innerHTML = html;
+    if (count) count.textContent = items.length+' resultado'+(items.length===1?'':'s');
+    box.querySelectorAll('.vbw-qs-item').forEach(function(el){
+      el.addEventListener('mouseenter', function(){ setSelQs(parseInt(el.dataset.idx,10)); });
+      el.addEventListener('click', function(){ selectQs(parseInt(el.dataset.idx,10)); });
+    });
+    setSelQs(0);
+  }
+  function setSelQs(i){
+    qsState.sel = Math.max(0, Math.min((qsState.items.length||1)-1, i));
+    var box = document.getElementById('vbwQsResults');
+    if (!box) return;
+    box.querySelectorAll('.vbw-qs-item').forEach(function(el){
+      el.classList.toggle('sel', parseInt(el.dataset.idx,10) === qsState.sel);
+    });
+    var sel = box.querySelector('.vbw-qs-item.sel');
+    if (sel && sel.scrollIntoView) sel.scrollIntoView({ block:'nearest' });
+  }
+  function selectQs(i){
+    var it = qsState.items[i];
+    if (!it) return;
+    closeQs();
+    if (it.url) { window.location.href = it.url; return; }
+    if (it.action && typeof window[it.action] === 'function') { try { window[it.action](it.payload); } catch(e){} }
+  }
+  function escHtml(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];}); }
+
+  async function searchQs(q){
+    q = (q||'').trim();
+    if (!q) { renderQs([]); return; }
+    var results = [];
+    // Local fallback: VBW.products in scope above (window.VBW may exist)
+    try {
+      if (window.VBW && Array.isArray(window.VBW.products)){
+        var ql = q.toLowerCase();
+        window.VBW.products.slice(0,200).forEach(function(p){
+          var name = (p.name||'').toString();
+          var sku  = (p.sku||'').toString();
+          if (name.toLowerCase().indexOf(ql)>=0 || sku.toLowerCase().indexOf(ql)>=0){
+            results.push({ kind:'product', label:name, meta: sku, url:'#', payload:p });
+          }
+        });
+      }
+    } catch(e){}
+    // Backend search (best effort)
+    if (navigator.onLine && getTok()){
+      try {
+        var r = await fetch('/api/search?q='+encodeURIComponent(q), { headers: authHeaders() });
+        if (r.ok){
+          var d = await r.json();
+          (d.products||[]).forEach(function(p){ results.push({kind:'product',label:p.name,meta:p.sku||'',url:p.url||'#'}); });
+          (d.customers||[]).forEach(function(c){ results.push({kind:'customer',label:c.name||c.full_name||c.email,meta:c.phone||c.email||'',url:c.url||'#'}); });
+          (d.sales||[]).forEach(function(s){ results.push({kind:'sale',label:'Venta #'+(s.id||s.folio),meta:fmtMx(s.total||0),url:s.url||'#'}); });
+        }
+      } catch(e){}
+    }
+    // Dedupe by label
+    var seen={}; results = results.filter(function(it){ var k=it.kind+'|'+it.label; if (seen[k]) return false; seen[k]=1; return true; });
+    renderQs(results.slice(0,30));
+  }
+
+  function wireQs(){
+    var btn = document.getElementById('vbwSearchOpen');
+    if (btn) btn.addEventListener('click', openQs);
+    var ov = document.getElementById('vbwQsOverlay');
+    if (ov) ov.addEventListener('click', function(e){ if (e.target === ov) closeQs(); });
+    var inp = document.getElementById('vbwQsInput');
+    if (inp) inp.addEventListener('input', function(){
+      clearTimeout(qsState.debTimer);
+      qsState.debTimer = setTimeout(function(){ searchQs(inp.value); }, 220);
+    });
+    document.addEventListener('keydown', function(e){
+      var open = ov && ov.classList.contains('open');
+      // Ctrl/Cmd + K
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')){
+        e.preventDefault(); open ? closeQs() : openQs();
+        return;
+      }
+      if (!open) return;
+      if (e.key === 'Escape'){ e.preventDefault(); closeQs(); }
+      else if (e.key === 'ArrowDown'){ e.preventDefault(); setSelQs(qsState.sel+1); }
+      else if (e.key === 'ArrowUp'){ e.preventDefault(); setSelQs(qsState.sel-1); }
+      else if (e.key === 'Enter'){ e.preventDefault(); selectQs(qsState.sel); }
+    });
+  }
+
+  function bootPolish(){
+    wireQs();
+    updateRtFromNet();
+    refreshStats();
+    setInterval(refreshStats, 30000);
+    // Re-evaluate realtime state when VBW reports it
+    setInterval(function(){
+      try {
+        if (window.VBW && typeof window.VBW.online !== 'undefined') setRtState(!!window.VBW.online && navigator.onLine);
+      } catch(e){}
+    }, 5000);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootPolish);
+  else bootPolish();
+})();
+</script>
+</body>
+</html>

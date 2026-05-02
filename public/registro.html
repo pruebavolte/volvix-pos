@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Registro · Volvix POS — Crea tu cuenta en 60 segundos</title>
+<meta name="description" content="Regístrate en Volvix POS con tu correo. Sin tarjeta, sin compromiso, listo en menos de 1 minuto.">
+<meta name="theme-color" content="#2D5F8F">
+<meta name="robots" content="noindex,follow">
+<link rel="canonical" href="https://systeminternational.app/registro.html">
+<link rel="icon" type="image/png" sizes="32x32" href="/marketplace-assets/favicon-32x32.png">
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 50%, #f0f9ff 100%);
+    color: #1e293b;
+    min-height: 100vh;
+    line-height: 1.5;
+  }
+  header.topbar {
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky; top: 0; z-index: 10;
+  }
+  header.topbar .brand {
+    font-weight: 800; font-size: 18px; color: #2D5F8F; letter-spacing: -0.02em;
+    text-decoration: none;
+  }
+  header.topbar .brand span { color: #f59e0b; }
+  header.topbar .login-link {
+    font-size: 14px; color: #2D5F8F; text-decoration: none; font-weight: 600;
+  }
+  header.topbar .login-link:hover { text-decoration: underline; }
+
+  .container { max-width: 520px; margin: 0 auto; padding: 30px 20px 60px; }
+  h1 { font-size: 28px; font-weight: 800; color: #1e293b; margin: 0 0 8px; letter-spacing: -0.02em; text-align: center; }
+  .subtitle { color: #64748b; font-size: 15px; text-align: center; margin: 0 0 28px; }
+
+  .progress-wrap { display: flex; align-items: center; margin: 0 0 28px; padding: 0 4px; }
+  .progress-step { flex: 1; text-align: center; }
+  .progress-step .dot {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: #e2e8f0; color: #94a3b8;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px; border: 2px solid #e2e8f0; transition: all 0.2s;
+  }
+  .progress-step.active .dot { background: #2D5F8F; color: white; border-color: #2D5F8F; box-shadow: 0 0 0 4px rgba(45,95,143,0.15); }
+  .progress-step.done .dot { background: #10b981; color: white; border-color: #10b981; }
+  .progress-step .label { display: block; font-size: 11px; color: #64748b; margin-top: 6px; font-weight: 600; }
+  .progress-step.active .label, .progress-step.done .label { color: #1e293b; }
+  .progress-bar { flex: 0 0 auto; width: 30px; height: 2px; background: #e2e8f0; margin: 0 -6px; align-self: flex-start; margin-top: 16px; }
+  .progress-bar.filled { background: #10b981; }
+
+  .card {
+    background: white; border: 1px solid #e2e8f0; border-radius: 16px;
+    padding: 28px 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+  }
+  .step { display: none; }
+  .step.active { display: block; }
+
+  .field { margin-bottom: 16px; position: relative; }
+  .field label { display: block; font-weight: 600; font-size: 13px; color: #334155; margin-bottom: 6px; }
+  .field label .req { color: #ef4444; }
+  .field label .opt { color: #94a3b8; font-weight: 400; font-size: 12px; }
+  .field input, .field select {
+    width: 100%; padding: 11px 12px; font-size: 15px;
+    border: 1px solid #cbd5e1; border-radius: 8px; background: white; color: #1e293b;
+    transition: border 0.15s, box-shadow 0.15s;
+  }
+  .field input:focus, .field select:focus {
+    outline: none; border-color: #2D5F8F; box-shadow: 0 0 0 3px rgba(45,95,143,0.12);
+  }
+  .field input.invalid { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.08); }
+  .field .hint { font-size: 12px; color: #64748b; margin-top: 5px; }
+  .field .err { font-size: 12px; color: #ef4444; margin-top: 5px; display: none; font-weight: 600; }
+  .field .err.show { display: block; }
+
+  /* Phone with +52 prefix */
+  .phone-row { display: flex; align-items: stretch; gap: 0; }
+  .phone-row .prefix {
+    background: #f1f5f9; border: 1px solid #cbd5e1; border-right: 0;
+    border-radius: 8px 0 0 8px; padding: 11px 12px; font-weight: 600; color: #475569;
+    display: flex; align-items: center; font-size: 15px;
+  }
+  .phone-row input { border-radius: 0 8px 8px 0 !important; }
+
+  /* Giro autocomplete */
+  .giro-autocomplete { position: relative; }
+  .giro-suggestions {
+    position: absolute; top: 100%; left: 0; right: 0; z-index: 20;
+    background: white; border: 1px solid #cbd5e1; border-top: 0;
+    border-radius: 0 0 10px 10px; max-height: 280px; overflow-y: auto;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08); display: none;
+  }
+  .giro-suggestions.show { display: block; }
+  .giro-suggestion {
+    padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #f1f5f9;
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .giro-suggestion:last-child { border-bottom: 0; }
+  .giro-suggestion:hover, .giro-suggestion.highlight { background: #eff6ff; }
+  .giro-suggestion .gname { font-weight: 600; font-size: 14px; color: #1e293b; }
+  .giro-suggestion mark { background: #fef3c7; color: #92400e; padding: 0 2px; border-radius: 3px; }
+  .giro-suggestion .ghint { font-size: 12px; color: #64748b; }
+
+  .password-strength { height: 4px; background: #e2e8f0; border-radius: 2px; margin-top: 6px; overflow: hidden; }
+  .password-strength .bar { height: 100%; width: 0%; transition: width 0.2s, background 0.2s; background: #ef4444; }
+  .password-strength .bar.medium { background: #f59e0b; width: 50%; }
+  .password-strength .bar.strong { background: #10b981; width: 100%; }
+
+  button.primary {
+    width: 100%; padding: 13px 20px; font-size: 15px; font-weight: 700;
+    background: #2D5F8F; color: white; border: none; border-radius: 10px;
+    cursor: pointer; transition: background 0.15s; margin-top: 8px;
+  }
+  button.primary:hover:not(:disabled) { background: #234a72; }
+  button.primary:disabled { background: #94a3b8; cursor: not-allowed; }
+  button.secondary {
+    width: 100%; padding: 11px 20px; font-size: 14px; font-weight: 600;
+    background: transparent; color: #2D5F8F; border: 1px solid #cbd5e1; border-radius: 10px;
+    cursor: pointer; margin-top: 10px;
+  }
+  button.secondary:hover { background: #f1f5f9; }
+
+  .alert { padding: 12px 14px; border-radius: 10px; font-size: 14px; margin-bottom: 14px; }
+  .alert.error { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+  .alert.success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #14532d; }
+  .alert.info { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e3a8a; }
+
+  /* OTP — un solo input grande para Web OTP API native auto-fill */
+  .otp-input {
+    width: 100%; max-width: 240px; margin: 12px auto;
+    display: block; padding: 14px 12px; font-size: 32px; font-weight: 700;
+    text-align: center; letter-spacing: 12px; border: 2px solid #cbd5e1;
+    border-radius: 12px; background: white; color: #1e293b;
+    -moz-appearance: textfield; font-family: 'Courier New', monospace;
+  }
+  .otp-input::-webkit-outer-spin-button, .otp-input::-webkit-inner-spin-button {
+    -webkit-appearance: none; margin: 0;
+  }
+  .otp-input:focus { outline: none; border-color: #2D5F8F; box-shadow: 0 0 0 4px rgba(45,95,143,0.15); }
+
+  .resend-link {
+    font-size: 13px; color: #2D5F8F; text-decoration: none; background: none;
+    border: none; cursor: pointer; padding: 6px 8px; font-weight: 600;
+  }
+  .resend-link:disabled { color: #94a3b8; cursor: not-allowed; }
+  .resend-link:hover:not(:disabled) { text-decoration: underline; }
+
+  .success-emoji { font-size: 64px; text-align: center; margin: 8px 0 4px; }
+  .tenant-id-box {
+    background: #f0f9ff; border: 1px dashed #2D5F8F;
+    padding: 14px; border-radius: 10px; text-align: center;
+    margin: 16px 0; font-family: 'Courier New', monospace;
+    font-size: 18px; font-weight: 700; color: #2D5F8F; letter-spacing: 0.05em;
+  }
+
+  footer { margin-top: 30px; padding: 20px; text-align: center; color: #64748b; font-size: 12px; }
+  footer a { color: #2D5F8F; text-decoration: none; margin: 0 6px; }
+  footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 640px) {
+    .container { padding: 20px 14px 40px; }
+    h1 { font-size: 22px; }
+    .card { padding: 22px 18px; border-radius: 12px; }
+    .otp-input { font-size: 26px; letter-spacing: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a href="/" class="brand">Volvix<span>POS</span></a>
+  <a href="/login.html" class="login-link">Ya tengo cuenta</a>
+</header>
+
+<div class="container">
+  <h1>Crea tu cuenta en 60 segundos</h1>
+  <p class="subtitle">Solo necesitas tu correo. Sin tarjeta, sin compromiso.</p>
+
+  <div class="progress-wrap" aria-hidden="true">
+    <div class="progress-step active" data-step="1"><span class="dot">1</span><span class="label">Tu negocio</span></div>
+    <div class="progress-bar"></div>
+    <div class="progress-step" data-step="2"><span class="dot">2</span><span class="label">Verifica</span></div>
+    <div class="progress-bar"></div>
+    <div class="progress-step" data-step="3"><span class="dot">3</span><span class="label">Listo</span></div>
+  </div>
+
+  <div class="card">
+    <div id="globalAlert" aria-live="polite" role="status"></div>
+
+    <!-- ============================ -->
+    <!-- PASO 1: email + negocio + giro + password (phone opcional) -->
+    <!-- ============================ -->
+    <div class="step active" data-step="1">
+      <div class="field">
+        <label for="email">Correo electrónico <span class="req">*</span></label>
+        <input id="email" name="email" type="email" inputmode="email"
+               placeholder="tu@correo.com" maxlength="120"
+               autocomplete="email">
+        <div class="hint">Te enviaremos un código de 6 dígitos para activar tu cuenta.</div>
+        <div class="err" data-err="email">Ingresa un correo válido.</div>
+      </div>
+
+      <div class="field">
+        <label for="phone">Teléfono <span style="color:#94a3b8;font-weight:500;font-size:12px">(opcional)</span></label>
+        <div class="phone-row">
+          <span class="prefix">+52</span>
+          <input id="phone" name="phone" type="tel" inputmode="numeric"
+                 placeholder="10 dígitos (opcional)" maxlength="10"
+                 autocomplete="tel-national" pattern="\d{10}">
+        </div>
+        <div class="hint">Lo usaremos para contactarte si lo necesitas.</div>
+        <div class="err" data-err="phone">Si lo agregas, deben ser 10 dígitos.</div>
+      </div>
+
+      <div class="field">
+        <label for="business_name">Nombre del negocio <span class="req">*</span></label>
+        <input id="business_name" name="business_name" type="text"
+               placeholder="Ej. Tacos Don Pepe" maxlength="100" autocomplete="organization">
+        <div class="err" data-err="business_name">Mínimo 3 caracteres.</div>
+      </div>
+
+      <div class="field giro-autocomplete">
+        <label for="giro">¿Qué vendes? <span class="req">*</span></label>
+        <input id="giro" name="giro" type="text" autocomplete="off"
+               placeholder="Ej. tacos, café, ropa, abarrotes…" maxlength="80">
+        <div class="hint">Escribe lo que vendes y te sugerimos el giro.</div>
+        <div class="err" data-err="giro">Selecciona un giro de la lista.</div>
+        <div class="giro-suggestions" id="giroSuggestions" role="listbox"></div>
+      </div>
+
+      <div class="field">
+        <label for="password">Contraseña <span class="req">*</span></label>
+        <input id="password" name="password" type="password"
+               placeholder="Mínimo 8 caracteres" autocomplete="new-password">
+        <div class="password-strength"><div class="bar" id="pwdBar"></div></div>
+        <div class="hint">Recomendado: mayúscula, número y símbolo.</div>
+        <div class="err" data-err="password">Mínimo 8 caracteres.</div>
+      </div>
+
+      <div class="field">
+        <label for="password2">Confirma tu contraseña <span class="req">*</span></label>
+        <input id="password2" name="password2" type="password"
+               placeholder="Repite la contraseña" autocomplete="new-password">
+        <div class="err" data-err="password2">Las contraseñas no coinciden.</div>
+      </div>
+
+      <button class="primary" id="btnRegister">Crear cuenta</button>
+    </div>
+
+    <!-- ============================ -->
+    <!-- PASO 2: OTP (Web OTP API) -->
+    <!-- ============================ -->
+    <div class="step" data-step="2">
+      <!-- Eco del correo al que se envió el código + opción "Cambiar" inline. -->
+      <div style="text-align:center;font-size:13px;color:#475569;margin-bottom:14px">
+        Código enviado a <strong id="otpEmailEcho">tu@correo.com</strong>
+        · <button class="resend-link" type="button" id="btnBackInline">Cambiar</button>
+      </div>
+
+      <div class="alert info" id="otpInfo">
+        Te enviamos un código de 6 dígitos a tu correo. Revisa tu bandeja (y spam por si acaso).
+      </div>
+
+      <div id="devOtpBanner" style="display:none;background:#fef3c7;border:1px solid #f59e0b;border-radius:10px;padding:14px 16px;margin:0 0 14px;color:#78350f;font-size:14px;line-height:1.5;">
+        <strong>Tu código está listo:</strong>
+        <code id="devOtpCode" style="display:inline-block;margin-left:6px;font-size:20px;font-weight:700;letter-spacing:6px;background:#fff;padding:4px 10px;border-radius:6px;border:1px dashed #f59e0b;color:#78350f;font-family:'Courier New',monospace;">000000</code>
+      </div>
+
+      <input id="otp" class="otp-input" type="text"
+             autocomplete="one-time-code" inputmode="numeric"
+             pattern="\d{6}" maxlength="6"
+             placeholder="••••••" aria-label="Código de verificación">
+
+      <div style="text-align:center;margin-top:12px;font-size:13px;color:#64748b;">
+        ¿No te llegó? <button class="resend-link" id="btnResend">Reenviar código</button>
+        <span id="resendCounter" style="color:#94a3b8;font-weight:600;display:none;"></span>
+      </div>
+
+      <button class="primary" id="btnVerify" disabled>Verificar y entrar</button>
+      <button class="secondary" id="btnBack">← Cambiar correo</button>
+    </div>
+
+    <!-- ============================ -->
+    <!-- PASO 3: éxito -->
+    <!-- ============================ -->
+    <div class="step" data-step="3">
+      <div class="success-emoji" aria-hidden="true">🎉</div>
+      <h2 style="text-align:center;margin:0 0 8px;font-size:22px;color:#1e293b;">¡Tu cuenta está lista!</h2>
+      <p style="text-align:center;color:#64748b;margin:0 0 16px;">
+        Bienvenido a Volvix POS. Tu sistema personalizado se está configurando.
+      </p>
+      <div class="tenant-id-box" id="tenantIdBox">TNT-XXXXX</div>
+      <p style="text-align:center;font-size:13px;color:#64748b;margin:0 0 12px;">
+        Guarda este identificador. Lo necesitarás para soporte.
+      </p>
+      <button class="primary" id="btnGoLauncher">Entrar a mi POS</button>
+    </div>
+  </div>
+
+  <footer>
+    <div><strong>Volvix POS</strong> · Hecho en México · 2026</div>
+    <div style="margin-top:8px;">
+      <a href="/aviso-privacidad.html">Aviso de Privacidad</a> ·
+      <a href="/terminos-condiciones.html">Términos</a> ·
+      <a href="/cookies-policy.html">Cookies</a> ·
+      <a href="mailto:soporte@volvix.com">Soporte</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var state = {
+    step: 1,
+    formData: {},
+    tenant_id: null,
+    user_id: null,
+    selected_giro: null,
+    resendIn: 0,
+    otpAbort: null
+  };
+
+  function $(s, root) { return (root || document).querySelector(s); }
+  function $$(s, root) { return Array.from((root || document).querySelectorAll(s)); }
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+    });
+  }
+  function debounce(fn, ms) {
+    var t; return function () {
+      var ctx = this, args = arguments;
+      clearTimeout(t); t = setTimeout(function () { fn.apply(ctx, args); }, ms);
+    };
+  }
+  function setStep(n) {
+    state.step = n;
+    $$('.step').forEach(function (el) {
+      el.classList.toggle('active', String(el.dataset.step) === String(n));
+    });
+    $$('.progress-step').forEach(function (el) {
+      var s = parseInt(el.dataset.step, 10);
+      el.classList.toggle('active', s === n);
+      el.classList.toggle('done', s < n);
+    });
+    $$('.progress-bar').forEach(function (el, i) {
+      el.classList.toggle('filled', (i + 1) < n);
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  function showErr(field, msg) {
+    var el = document.querySelector('[data-err="' + field + '"]');
+    var input = document.getElementById(field);
+    if (el) { if (msg) el.textContent = msg; el.classList.add('show'); }
+    if (input) input.classList.add('invalid');
+  }
+  function clearAllErrs() {
+    $$('.err').forEach(function (el) { el.classList.remove('show'); });
+    $$('input.invalid').forEach(function (el) { el.classList.remove('invalid'); });
+  }
+  function alertBox(type, msg) {
+    var box = $('#globalAlert');
+    box.innerHTML = '<div class="alert ' + type + '">' + escapeHtml(msg) + '</div>';
+    if (type === 'success' || type === 'info') {
+      setTimeout(function () { if (box.firstChild) box.innerHTML = ''; }, 6000);
+    }
+  }
+
+  // Validators
+  function validPhone10(v) { return /^\d{10}$/.test(String(v || '').replace(/\D/g, '')); }
+  function validBusiness(v) { return typeof v === 'string' && v.trim().length >= 3 && v.trim().length <= 100; }
+  function pwdStrength(v) {
+    if (!v || v.length < 8) return 'weak';
+    var has = { lower: /[a-z]/.test(v), upper: /[A-Z]/.test(v), num: /\d/.test(v), sym: /[^a-zA-Z0-9]/.test(v) };
+    var score = (has.lower?1:0)+(has.upper?1:0)+(has.num?1:0)+(has.sym?1:0);
+    if (v.length >= 12) score++;
+    if (score >= 4) return 'strong';
+    if (score >= 2) return 'medium';
+    return 'weak';
+  }
+
+  // ---------- Giro autocomplete ----------
+  var giroBox = $('#giro');
+  var giroSugBox = $('#giroSuggestions');
+  var giroHL = -1;
+  var giroResults = [];
+
+  function renderGiroSuggestions(q, results) {
+    if (!results || !results.length) {
+      giroSugBox.classList.remove('show');
+      giroSugBox.innerHTML = '';
+      return;
+    }
+    var html = '';
+    var qLow = String(q || '').toLowerCase();
+    for (var i = 0; i < results.length; i++) {
+      var r = results[i];
+      var name = r.name || r.slug;
+      var nameHtml = escapeHtml(name);
+      if (qLow && name.toLowerCase().indexOf(qLow) !== -1) {
+        var idx = name.toLowerCase().indexOf(qLow);
+        nameHtml = escapeHtml(name.slice(0, idx)) +
+                   '<mark>' + escapeHtml(name.slice(idx, idx + qLow.length)) + '</mark>' +
+                   escapeHtml(name.slice(idx + qLow.length));
+      }
+      html += '<div class="giro-suggestion" role="option" data-slug="' + escapeHtml(r.slug) + '" data-name="' + escapeHtml(name) + '" data-idx="' + i + '">' +
+        '<span class="gname">' + nameHtml + '</span>' +
+        '<span class="ghint">' + escapeHtml(r.slug) + '</span>' +
+        '</div>';
+    }
+    giroSugBox.innerHTML = html;
+    giroSugBox.classList.add('show');
+    giroHL = -1;
+  }
+  function selectGiro(slug, name) {
+    state.selected_giro = slug;
+    giroBox.value = name;
+    giroBox.dataset.slug = slug;
+    giroSugBox.classList.remove('show');
+    giroSugBox.innerHTML = '';
+  }
+  var fetchGiros = debounce(function (q) {
+    if (!q || q.length < 1) {
+      giroSugBox.classList.remove('show'); return;
+    }
+    fetch('/api/giros/autocomplete?q=' + encodeURIComponent(q) + '&limit=6')
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        giroResults = (data && Array.isArray(data.results)) ? data.results : [];
+        // Si autocomplete local no devolvió matches Y el texto es largo (>=10
+        // caracteres, ej. "vendo gorditas y campechanas"), llamar AI Gateway
+        // para clasificar lenguaje natural. La AI mapea a un giro de los 60+.
+        if (giroResults.length === 0 && q.length >= 10) {
+          aiClassifyGiro(q);
+          return;
+        }
+        renderGiroSuggestions(q, giroResults);
+      })
+      .catch(function () { /* silencioso */ });
+  }, 200);
+
+  // AI giro classifier — fallback para lenguaje natural ambiguo. Pinta
+  // sugerencia "✨ ¿Te referías a [giro]?" con confianza visual.
+  var aiInflight = null;
+  function aiClassifyGiro(text) {
+    // Cancelar request previo si el usuario sigue tipeando
+    if (aiInflight && aiInflight.abort) try { aiInflight.abort(); } catch (_) {}
+    var ac = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    aiInflight = ac;
+    // Pintar estado "pensando"
+    giroSugBox.innerHTML = '<div class="giro-suggestion" style="color:#9CA3AF;font-style:italic;cursor:wait">✨ Identificando tu giro…</div>';
+    giroSugBox.classList.add('show');
+    fetch('/api/ai/giro-classify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: text }),
+      signal: ac && ac.signal
+    })
+      .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+      .then(function (j) {
+        if (!j || !j.giro || j.giro === 'otro' || j.confidence < 0.5) {
+          giroSugBox.innerHTML = '<div class="giro-suggestion" style="color:#9CA3AF;font-style:italic;cursor:default">No reconocí ese giro. Intenta con palabras más simples (ej. "abarrotes", "tacos").</div>';
+          return;
+        }
+        // Validar que el giro sugerido tenga datos en el catálogo
+        return fetch('/api/giros/autocomplete?q=' + encodeURIComponent(j.giro) + '&limit=1')
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            var match = data && data.results && data.results[0];
+            if (!match) {
+              giroSugBox.innerHTML = '<div class="giro-suggestion" style="color:#9CA3AF;font-style:italic">No tenemos catálogo para "' + j.giro + '" todavía.</div>';
+              return;
+            }
+            // Render UNA sugerencia con la pista visual de IA
+            giroSugBox.innerHTML =
+              '<div class="giro-suggestion" data-slug="' + match.slug + '" data-name="' + (match.name || '').replace(/"/g, '&quot;') + '" style="display:flex;align-items:center;gap:8px;cursor:pointer">' +
+                '<span style="font-size:16px">✨</span>' +
+                '<div style="flex:1">' +
+                  '<div style="font-weight:500;color:#0B0B0F">' + (match.name || j.giro) + '</div>' +
+                  '<div style="font-size:11px;color:#6B7280;margin-top:1px">Identificado por IA · ' + Math.round((j.confidence || 0.85) * 100) + '% seguro · click para usar</div>' +
+                '</div>' +
+              '</div>';
+            giroResults = [match];
+          });
+      })
+      .catch(function (e) {
+        if (e && e.name === 'AbortError') return;
+        giroSugBox.innerHTML = '';
+        giroSugBox.classList.remove('show');
+      });
+  }
+
+  giroBox.addEventListener('input', function (e) {
+    state.selected_giro = null;
+    giroBox.dataset.slug = '';
+    fetchGiros(e.target.value);
+  });
+  giroBox.addEventListener('keydown', function (e) {
+    if (!giroSugBox.classList.contains('show')) return;
+    var items = $$('.giro-suggestion', giroSugBox);
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      giroHL = Math.min(items.length - 1, giroHL + 1);
+      items.forEach(function (it, i) { it.classList.toggle('highlight', i === giroHL); });
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      giroHL = Math.max(0, giroHL - 1);
+      items.forEach(function (it, i) { it.classList.toggle('highlight', i === giroHL); });
+    } else if (e.key === 'Enter') {
+      if (giroHL >= 0 && items[giroHL]) {
+        e.preventDefault();
+        selectGiro(items[giroHL].dataset.slug, items[giroHL].dataset.name);
+      }
+    } else if (e.key === 'Escape') {
+      giroSugBox.classList.remove('show');
+    }
+  });
+  giroSugBox.addEventListener('click', function (e) {
+    var item = e.target.closest('.giro-suggestion');
+    if (!item) return;
+    selectGiro(item.dataset.slug, item.dataset.name);
+  });
+  document.addEventListener('click', function (e) {
+    if (!giroBox.contains(e.target) && !giroSugBox.contains(e.target)) {
+      giroSugBox.classList.remove('show');
+    }
+  });
+
+  // ---------- Validar paso 1 ----------
+  function validEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(v || '').trim()); }
+
+  function validateStep1() {
+    clearAllErrs();
+    var ok = true;
+    var email = ($('#email').value || '').trim().toLowerCase();
+    var phone = ($('#phone').value || '').replace(/\D/g, '');
+    var name = $('#business_name').value;
+    var giroVal = $('#giro').value.trim();
+    var giroSlug = state.selected_giro || giroBox.dataset.slug;
+    var p1 = $('#password').value;
+    var p2 = $('#password2').value;
+
+    if (!validEmail(email)) { showErr('email'); ok = false; }
+    if (phone && !validPhone10(phone)) { showErr('phone'); ok = false; } // phone opcional
+    if (!validBusiness(name)) { showErr('business_name'); ok = false; }
+    if (!giroSlug || !giroVal) { showErr('giro'); ok = false; }
+    if (!p1 || p1.length < 8) { showErr('password'); ok = false; }
+    if (p1 !== p2) { showErr('password2'); ok = false; }
+
+    if (ok) {
+      state.formData = {
+        email: email,
+        business_name: name.trim(),
+        giro: giroSlug,
+        password: p1
+      };
+      if (phone) state.formData.phone = phone; // 10 dígitos crudos; backend agrega +52
+    }
+    return ok;
+  }
+
+  // ---------- POST /api/auth/register-simple ----------
+  function submitRegister() {
+    var btn = $('#btnRegister');
+    btn.disabled = true; btn.textContent = 'Enviando código a tu correo...';
+    fetch('/api/auth/register-simple', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(state.formData)
+    })
+      .then(function (r) { return r.json().then(function (j) { return { status: r.status, body: j }; }); })
+      .then(function (res) {
+        btn.disabled = false; btn.textContent = 'Crear cuenta';
+        if (res.status === 200 && res.body.ok) {
+          state.tenant_id = res.body.tenant_id;
+          state.user_id = res.body.user_id || null;
+          state.email = res.body.email || state.formData.email;
+
+          var banner = document.getElementById('devOtpBanner');
+          var bannerCode = document.getElementById('devOtpCode');
+          var info = document.getElementById('otpInfo');
+
+          if (res.body.dev_code) {
+            if (banner) banner.style.display = 'block';
+            if (bannerCode) bannerCode.textContent = String(res.body.dev_code);
+            if (info) info.style.display = 'none';
+            setTimeout(function () {
+              var inp = $('#otp');
+              if (inp) {
+                inp.value = String(res.body.dev_code);
+                $('#btnVerify').disabled = false;
+              }
+            }, 200);
+          } else {
+            if (banner) banner.style.display = 'none';
+            if (info) info.style.display = '';
+            alertBox('info', 'Código enviado a ' + state.email);
+          }
+          // Eco del correo
+          try {
+            var echoEl = document.getElementById('otpEmailEcho');
+            if (echoEl) echoEl.textContent = state.email || state.formData.email || '';
+          } catch (_) {}
+          setStep(2);
+          startResendCounter(60);
+          setTimeout(function () { var f = $('#otp'); if (f) f.focus(); }, 200);
+        } else {
+          var msg = (res.body && (res.body.error_message || res.body.message)) || 'Error al registrar.';
+          if (res.body && res.body.field) showErr(res.body.field, msg);
+          // 2026-05: si el backend devolvió folio, mostramos UI especial con
+          // botón para copiar folio + abrir email a soporte.
+          if (res.body && res.body.folio) {
+            var folio = res.body.folio;
+            var html = '<div style="text-align:left;line-height:1.5">' +
+              '<strong style="color:#92400e;display:block;margin-bottom:8px">⏳ Estamos validando tu solicitud</strong>' +
+              '<div style="font-size:13px;color:#78350f;margin-bottom:10px">Tu folio es:</div>' +
+              '<div style="background:#fff;border:2px dashed #f59e0b;padding:10px;border-radius:8px;font-family:monospace;font-size:16px;font-weight:700;text-align:center;color:#0f172a;letter-spacing:1px">' + folio + '</div>' +
+              '<div style="font-size:13px;color:#78350f;margin:10px 0 8px">Toma una captura de esta pantalla y envíala a:</div>' +
+              '<a href="mailto:soporte@systeminternational.app?subject=Folio%20' + encodeURIComponent(folio) + '%20-%20Activar%20cuenta&body=' + encodeURIComponent('Folio: ' + folio + '\nCorreo: ' + (state.formData ? state.formData.email : '') + '\nNegocio: ' + (state.formData ? state.formData.business_name : '')) + '" style="display:inline-block;background:#2563EB;color:#fff;padding:8px 14px;border-radius:8px;text-decoration:none;font-weight:600;font-size:13px">📧 Enviar a soporte</a>' +
+              ' <button type="button" onclick="navigator.clipboard.writeText(\'' + folio + '\').then(function(){this.textContent=\'✓ Copiado\'}.bind(this))" style="background:#fff;color:#2563EB;border:1px solid #2563EB;padding:8px 14px;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer">📋 Copiar folio</button>' +
+              '<div style="font-size:12px;color:#92400e;margin-top:10px">El equipo te autoriza la cuenta en menos de 1 hora.</div>' +
+              '</div>';
+            var ga = document.getElementById('globalAlert');
+            if (ga) { ga.innerHTML = '<div class="alert" style="background:#fef3c7;border:1px solid #f59e0b;border-radius:10px;padding:14px;margin:0 0 14px">' + html + '</div>'; }
+          } else {
+            alertBox('error', msg);
+          }
+        }
+      })
+      .catch(function () {
+        btn.disabled = false; btn.textContent = 'Crear cuenta';
+        alertBox('error', 'No se pudo conectar al servidor. Reintenta.');
+      });
+  }
+
+  // ---------- Web OTP API: auto-fill SMS code ----------
+  function startWebOtpListener() {
+    if (!('OTPCredential' in window)) return;
+    try {
+      if (state.otpAbort) state.otpAbort.abort();
+      state.otpAbort = new AbortController();
+      navigator.credentials.get({
+        otp: { transport: ['sms'] },
+        signal: state.otpAbort.signal
+      }).then(function (otp) {
+        if (otp && otp.code) {
+          var inp = $('#otp');
+          if (inp) {
+            inp.value = String(otp.code).slice(0, 6);
+            $('#btnVerify').disabled = inp.value.length !== 6;
+            if (inp.value.length === 6) submitOtp();
+          }
+        }
+      }).catch(function () { /* user rejected or aborted */ });
+    } catch (_) {}
+  }
+
+  // ---------- POST /api/auth/verify-simple ----------
+  function submitOtp() {
+    var code = ($('#otp').value || '').replace(/\D/g, '').slice(0, 6);
+    if (code.length !== 6) { alertBox('error', 'Ingresa los 6 dígitos.'); return; }
+    var btn = $('#btnVerify');
+    btn.disabled = true; btn.textContent = 'Verificando...';
+    fetch('/api/auth/verify-simple', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tenant_id: state.tenant_id,
+        email: state.email || (state.formData && state.formData.email) || null,
+        code: code
+      })
+    })
+      .then(function (r) { return r.json().then(function (j) { return { status: r.status, body: j }; }); })
+      .then(function (res) {
+        btn.disabled = false; btn.textContent = 'Verificar y entrar';
+        if (res.status === 200 && res.body.ok) {
+          if (res.body.token) {
+            try { localStorage.setItem('volvix_token', res.body.token); } catch (_) {}
+            try {
+              var sessJson = JSON.stringify(res.body.session || {});
+              localStorage.setItem('volvix_session', sessJson);
+              localStorage.setItem('volvixSession', sessJson);
+            } catch (_) {}
+          }
+          $('#tenantIdBox').textContent = state.tenant_id || 'TNT-XXXXX';
+          state._redirect = res.body.redirect || '/salvadorex_web_v25.html';
+          setStep(3);
+        } else {
+          var code2 = res.body && res.body.error_code;
+          if (code2 === 'OTP_LOCKOUT') {
+            alertBox('error', 'Demasiados intentos. Reenvía un código nuevo.');
+          } else if (code2 === 'OTP_EXPIRED') {
+            alertBox('error', 'El código expiró. Reenvía uno nuevo.');
+          } else {
+            alertBox('error', (res.body && res.body.error_message) || 'Código inválido.');
+            $('#otp').value = '';
+            $('#otp').focus();
+          }
+        }
+      })
+      .catch(function () {
+        btn.disabled = false; btn.textContent = 'Verificar y entrar';
+        alertBox('error', 'No se pudo conectar.');
+      });
+  }
+
+  // ---------- Reenviar OTP (reusa register-simple) ----------
+  function startResendCounter(secs) {
+    state.resendIn = secs;
+    var link = $('#btnResend'); var counter = $('#resendCounter');
+    link.disabled = true; counter.style.display = 'inline';
+    var tick = function () {
+      if (state.resendIn <= 0) {
+        link.disabled = false; counter.style.display = 'none'; counter.textContent = ''; return;
+      }
+      counter.textContent = ' (' + state.resendIn + 's)';
+      state.resendIn -= 1; setTimeout(tick, 1000);
+    };
+    tick();
+  }
+  function resendOtp() {
+    var btn = $('#btnResend'); btn.disabled = true;
+    // Reusamos /api/auth/resend-otp legacy; si falla, hacemos register-simple de nuevo
+    fetch('/api/auth/resend-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tenant_id: state.tenant_id })
+    })
+      .then(function (r) { return r.json().then(function (j) { return { status: r.status, body: j }; }); })
+      .then(function (res) {
+        if (res.status === 200 && res.body.ok) {
+          alertBox('info', 'Código reenviado.');
+          startResendCounter(60);
+        } else {
+          alertBox('error', (res.body && res.body.error_message) || 'Error reenviando.');
+          btn.disabled = false;
+        }
+      })
+      .catch(function () { alertBox('error', 'Error de red.'); btn.disabled = false; });
+  }
+
+  // ---------- Bind ----------
+  function bind() {
+    // 2026-05 audit B-13: deshabilitar ANTES del fetch para impedir doble-click
+    // que duplica registros (409 EMAIL_TAKEN o múltiples OTPs).
+    $('#btnRegister').addEventListener('click', function () {
+      var b = $('#btnRegister');
+      if (b.disabled) return;
+      if (!validateStep1()) return;
+      b.disabled = true; b.textContent = 'Enviando código a tu correo...';
+      submitRegister();
+    });
+    $('#btnVerify').addEventListener('click', function () {
+      var b = $('#btnVerify');
+      if (b.disabled) return;
+      submitOtp();
+    });
+    $('#btnBack').addEventListener('click', function () {
+      if (state.otpAbort) try { state.otpAbort.abort(); } catch (_) {}
+      setStep(1);
+    });
+    // Handler del nuevo "Cambiar" inline en el eco del teléfono
+    var btnBackInline = document.getElementById('btnBackInline');
+    if (btnBackInline) btnBackInline.addEventListener('click', function () {
+      if (state.otpAbort) try { state.otpAbort.abort(); } catch (_) {}
+      setStep(1);
+    });
+    $('#btnResend').addEventListener('click', resendOtp);
+    $('#btnGoLauncher').addEventListener('click', function () {
+      window.location.href = state._redirect || '/salvadorex_web_v25.html';
+    });
+
+    // OTP input — habilitar botón y auto-submit a los 6
+    $('#otp').addEventListener('input', function (e) {
+      var v = e.target.value.replace(/\D/g, '').slice(0, 6);
+      e.target.value = v;
+      $('#btnVerify').disabled = v.length !== 6;
+      if (v.length === 6) submitOtp();
+    });
+
+    // Phone — solo dígitos
+    $('#phone').addEventListener('input', function (e) {
+      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10);
+    });
+
+    // Password strength
+    $('#password').addEventListener('input', function (e) {
+      var s = pwdStrength(e.target.value);
+      var bar = $('#pwdBar');
+      bar.className = 'bar' + (s === 'medium' ? ' medium' : s === 'strong' ? ' strong' : '');
+    });
+  }
+
+  // ---------- Preselección de giro desde landings ----------
+  function preselectGiroFromUrl() {
+    try {
+      var params = new URLSearchParams(location.search);
+      var g = params.get('giro') || params.get('vertical') || '';
+      if (!g) return;
+      // Pedimos al backend la mejor match
+      fetch('/api/giros/autocomplete?q=' + encodeURIComponent(g) + '&limit=1')
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (data && Array.isArray(data.results) && data.results.length) {
+            selectGiro(data.results[0].slug, data.results[0].name);
+          }
+        }).catch(function () {});
+    } catch (_) {}
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    bind();
+    preselectGiroFromUrl();
+    setStep(1);
+  });
+})();
+</script>
+</body>
+</html>

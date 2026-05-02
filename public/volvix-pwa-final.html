@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta name="robots" content="noindex, nofollow">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<!-- B37 Security hardening: auth-gate (any authenticated user) -->
+<script src="/auth-gate.js"></script>
+<!-- R10d-C FIX-N4-6: client-side system health monitor -->
+<script defer src="/volvix-system-monitor.js"></script>
+<meta name="theme-color" content="#0f172a">
+<meta name="description" content="Volvix PWA Final — Demo completo de Progressive Web App con instalación, modo offline, push notifications, share target y protocol handlers.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Volvix PWA">
+<title>Volvix PWA Final — Demo Completo</title>
+<link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIlZvbHZpeCBQV0EgRmluYWwiLAogICJzaG9ydF9uYW1lIjogIlZvbHZpeCIsCiAgInN0YXJ0X3VybCI6ICIvIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMGYxNzJhIiwKICAidGhlbWVfY29sb3IiOiAiIzBmMTcyYSIKfQ==">
+<style>
+:root{
+  --bg:#0a0e1a; --bg-2:#0f172a; --card:#1e293b; --card-hover:#273449;
+  --border:#334155; --text:#f1f5f9; --text-dim:#94a3b8;
+  --primary:#6366f1; --primary-hover:#818cf8; --primary-glow:rgba(99,102,241,.4);
+  --success:#10b981; --warning:#f59e0b; --danger:#ef4444; --info:#3b82f6;
+  --gradient:linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#ec4899 100%);
+  --gradient-2:linear-gradient(135deg,#10b981 0%,#06b6d4 100%);
+  --shadow:0 10px 40px rgba(0,0,0,.4);
+  --shadow-glow:0 0 40px var(--primary-glow);
+  --radius:16px; --radius-sm:10px;
+  --transition:all .3s cubic-bezier(.4,0,.2,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+  background-image:
+    radial-gradient(circle at 20% 0%,rgba(99,102,241,.15) 0%,transparent 50%),
+    radial-gradient(circle at 80% 100%,rgba(236,72,153,.1) 0%,transparent 50%);
+}
+::selection{background:var(--primary);color:#fff}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:var(--bg-2)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:5px}
+::-webkit-scrollbar-thumb:hover{background:var(--primary)}
+
+/* HEADER */
+header{
+  position:sticky;top:0;z-index:100;
+  backdrop-filter:blur(20px);
+  background:rgba(10,14,26,.7);
+  border-bottom:1px solid var(--border);
+  padding:16px 24px;
+}
+.header-inner{
+  max-width:1280px;margin:0 auto;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+}
+.logo{display:flex;align-items:center;gap:12px;font-weight:800;font-size:20px}
+.logo-icon{
+  width:40px;height:40px;border-radius:12px;
+  background:var(--gradient);
+  display:grid;place-items:center;font-size:20px;
+  box-shadow:var(--shadow-glow);
+  animation:pulse 3s infinite;
+}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.status-pills{display:flex;gap:8px;flex-wrap:wrap}
+.pill{
+  padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;
+  background:var(--card);border:1px solid var(--border);
+  display:flex;align-items:center;gap:6px;
+}
+.pill.online{color:var(--success);border-color:rgba(16,185,129,.3)}
+.pill.offline{color:var(--danger);border-color:rgba(239,68,68,.3)}
+.pill .dot{width:8px;height:8px;border-radius:50%;background:currentColor;animation:blink 2s infinite}
+@keyframes blink{50%{opacity:.4}}
+
+/* HERO */
+.hero{
+  max-width:1280px;margin:0 auto;padding:80px 24px 40px;text-align:center;
+}
+.hero h1{
+  font-size:clamp(40px,7vw,72px);font-weight:900;line-height:1.05;letter-spacing:-.03em;
+  background:var(--gradient);-webkit-background-clip:text;background-clip:text;color:transparent;
+  margin-bottom:20px;
+}
+.hero p{font-size:clamp(16px,2vw,20px);color:var(--text-dim);max-width:640px;margin:0 auto 40px}
+.hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+/* BUTTONS */
+.btn{
+  padding:14px 24px;border-radius:var(--radius-sm);border:none;cursor:pointer;
+  font-size:15px;font-weight:600;font-family:inherit;
+  display:inline-flex;align-items:center;gap:10px;
+  transition:var(--transition);text-decoration:none;color:inherit;
+}
+.btn-primary{
+  background:var(--gradient);color:#fff;box-shadow:var(--shadow-glow);
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 0 60px var(--primary-glow)}
+.btn-secondary{background:var(--card);border:1px solid var(--border);color:var(--text)}
+.btn-secondary:hover{background:var(--card-hover);border-color:var(--primary)}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text-dim)}
+.btn-ghost:hover{color:var(--text);border-color:var(--primary)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+
+/* GRID */
+main{max-width:1280px;margin:0 auto;padding:40px 24px 100px}
+.section-title{
+  font-size:32px;font-weight:800;letter-spacing:-.02em;margin:60px 0 8px;
+  display:flex;align-items:center;gap:12px;
+}
+.section-title::before{
+  content:'';width:6px;height:32px;background:var(--gradient);border-radius:3px;
+}
+.section-sub{color:var(--text-dim);margin-bottom:32px}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+
+/* CARDS */
+.card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:28px;transition:var(--transition);position:relative;overflow:hidden;
+}
+.card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:var(--gradient);transform:scaleX(0);transform-origin:left;transition:transform .4s;
+}
+.card:hover{transform:translateY(-4px);border-color:var(--primary);box-shadow:var(--shadow)}
+.card:hover::before{transform:scaleX(1)}
+.card-icon{
+  width:56px;height:56px;border-radius:14px;
+  background:var(--gradient);
+  display:grid;place-items:center;font-size:28px;margin-bottom:20px;
+  box-shadow:0 8px 24px var(--primary-glow);
+}
+.card-icon.green{background:var(--gradient-2);box-shadow:0 8px 24px rgba(16,185,129,.4)}
+.card-icon.orange{background:linear-gradient(135deg,#f59e0b,#ef4444);box-shadow:0 8px 24px rgba(245,158,11,.4)}
+.card-icon.cyan{background:linear-gradient(135deg,#06b6d4,#3b82f6);box-shadow:0 8px 24px rgba(6,182,212,.4)}
+.card h3{font-size:20px;font-weight:700;margin-bottom:8px}
+.card p{color:var(--text-dim);font-size:14px;line-height:1.6;margin-bottom:20px}
+.card-status{
+  display:inline-flex;align-items:center;gap:6px;padding:4px 10px;
+  border-radius:999px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+  margin-bottom:16px;
+}
+.card-status.ok{background:rgba(16,185,129,.15);color:var(--success)}
+.card-status.warn{background:rgba(245,158,11,.15);color:var(--warning)}
+.card-status.err{background:rgba(239,68,68,.15);color:var(--danger)}
+
+/* CONSOLE */
+.console{
+  background:#020617;border:1px solid var(--border);border-radius:var(--radius);
+  padding:20px;font-family:'JetBrains Mono','Courier New',monospace;font-size:13px;
+  height:280px;overflow-y:auto;line-height:1.7;
+}
+.console-line{margin-bottom:6px;display:flex;gap:10px}
+.console-time{color:var(--text-dim);flex-shrink:0}
+.console-tag{
+  font-weight:700;flex-shrink:0;padding:0 6px;border-radius:4px;font-size:11px;
+}
+.console-tag.info{background:rgba(59,130,246,.2);color:var(--info)}
+.console-tag.ok{background:rgba(16,185,129,.2);color:var(--success)}
+.console-tag.warn{background:rgba(245,158,11,.2);color:var(--warning)}
+.console-tag.err{background:rgba(239,68,68,.2);color:var(--danger)}
+
+/* FEATURES TWO COL */
+.two-col{display:grid;grid-template-columns:1.2fr 1fr;gap:24px}
+@media(max-width:900px){.two-col{grid-template-columns:1fr}}
+
+/* INSTALL BANNER */
+.install-banner{
+  position:fixed;bottom:24px;left:24px;right:24px;max-width:480px;margin:0 auto;
+  background:var(--card);border:1px solid var(--primary);border-radius:var(--radius);
+  padding:20px;display:none;align-items:center;gap:16px;
+  box-shadow:var(--shadow),var(--shadow-glow);
+  z-index:200;animation:slideUp .4s ease;
+}
+.install-banner.show{display:flex}
+@keyframes slideUp{from{transform:translateY(100px);opacity:0}}
+.install-banner-icon{width:48px;height:48px;border-radius:12px;background:var(--gradient);display:grid;place-items:center;font-size:24px;flex-shrink:0}
+.install-banner-text{flex:1;min-width:0}
+.install-banner-text strong{display:block;margin-bottom:4px}
+.install-banner-text small{color:var(--text-dim);font-size:12px}
+.install-banner-close{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:20px}
+
+/* TABS */
+.tabs{display:flex;gap:4px;background:var(--card);padding:4px;border-radius:var(--radius-sm);margin-bottom:20px;flex-wrap:wrap}
+.tab{
+  flex:1;padding:10px 16px;border-radius:8px;background:none;border:none;color:var(--text-dim);
+  font-weight:600;cursor:pointer;transition:var(--transition);font-family:inherit;font-size:14px;
+}
+.tab.active{background:var(--primary);color:#fff}
+.tab-panel{display:none}
+.tab-panel.active{display:block;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}}
+
+/* CODE */
+pre{
+  background:#020617;border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:16px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:12px;
+  line-height:1.6;color:#cbd5e1;
+}
+pre .k{color:#c084fc}
+pre .s{color:#86efac}
+pre .c{color:#64748b;font-style:italic}
+
+/* INPUT */
+.input-group{display:flex;gap:8px;margin-bottom:12px}
+input[type=text],textarea{
+  flex:1;padding:12px 16px;background:var(--bg-2);border:1px solid var(--border);
+  border-radius:var(--radius-sm);color:var(--text);font-family:inherit;font-size:14px;
+}
+input:focus,textarea:focus{outline:none;border-color:var(--primary)}
+
+/* FOOTER */
+footer{
+  border-top:1px solid var(--border);padding:40px 24px;text-align:center;color:var(--text-dim);font-size:14px;
+  margin-top:60px;
+}
+footer a{color:var(--primary)}
+
+/* BADGE */
+.badge{
+  display:inline-block;padding:4px 12px;background:rgba(99,102,241,.15);color:var(--primary);
+  border-radius:999px;font-size:12px;font-weight:700;margin-bottom:24px;
+  border:1px solid rgba(99,102,241,.3);
+}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:32px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;text-align:center}
+.stat-value{font-size:28px;font-weight:800;background:var(--gradient);-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat-label{font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;margin-top:4px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">V</div>
+      <span>Volvix PWA</span>
+    </div>
+    <div class="status-pills">
+      <div class="pill online" id="netPill"><span class="dot"></span>Online</div>
+      <div class="pill" id="swPill">SW: cargando…</div>
+      <div class="pill" id="installPill">No instalada</div>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <span class="badge">PROGRESSIVE WEB APP DEMO v3.4.0</span>
+  <h1>Una app web<br>que se siente nativa</h1>
+  <p>Instalación con un click, modo offline, notificaciones push, share target y protocol handlers — todo en un solo HTML.</p>
+  <div class="hero-actions">
+    <button class="btn btn-primary" id="btnInstall" disabled>
+      <span>⬇</span> Instalar app
+    </button>
+    <button class="btn btn-secondary" id="btnNotify">
+      <span>🔔</span> Activar notificaciones
+    </button>
+    <a href="#features" class="btn btn-ghost">Ver características</a>
+  </div>
+</section>
+
+<main>
+
+<div class="stats">
+  <div class="stat"><div class="stat-value" id="statCache">0</div><div class="stat-label">Archivos en caché</div></div>
+  <div class="stat"><div class="stat-value" id="statSize">0 KB</div><div class="stat-label">Almacenamiento</div></div>
+  <div class="stat"><div class="stat-value" id="statNotifs">0</div><div class="stat-label">Notificaciones</div></div>
+  <div class="stat"><div class="stat-value" id="statShares">0</div><div class="stat-label">Compartidos</div></div>
+</div>
+
+<h2 class="section-title" id="features">Características PWA</h2>
+<p class="section-sub">Cada tarjeta corresponde a una capacidad real del estándar Web App Manifest + Service Worker.</p>
+
+<div class="grid">
+
+  <div class="card">
+    <div class="card-icon">⬇</div>
+    <span class="card-status warn" id="installStatus">Esperando evento</span>
+    <h3>Instalación nativa</h3>
+    <p>Detecta el evento <code>beforeinstallprompt</code> y permite instalar la app en el escritorio o pantalla de inicio del móvil.</p>
+    <button class="btn btn-secondary" id="btnInstall2" disabled>Instalar ahora</button>
+  </div>
+
+  <div class="card">
+    <div class="card-icon green">📡</div>
+    <span class="card-status ok" id="offlineStatus">Activo</span>
+    <h3>Modo offline</h3>
+    <p>Service Worker con estrategia cache-first para assets estáticos y network-first con fallback para datos dinámicos.</p>
+    <button class="btn btn-secondary" id="btnTestOffline">Probar offline</button>
+  </div>
+
+  <div class="card">
+    <div class="card-icon orange">🔔</div>
+    <span class="card-status warn" id="pushStatus">Permiso pendiente</span>
+    <h3>Push notifications</h3>
+    <p>Notificaciones nativas del sistema con acciones, vibración y badge — funcionan incluso con la pestaña cerrada.</p>
+    <button class="btn btn-secondary" id="btnSendPush">Enviar prueba</button>
+  </div>
+
+  <div class="card">
+    <div class="card-icon cyan">📤</div>
+    <span class="card-status ok">Registrado</span>
+    <h3>Share Target</h3>
+    <p>Aparece como destino al compartir desde otras apps. Acepta texto, URLs y archivos vía POST multipart.</p>
+    <button class="btn btn-secondary" id="btnShare">Compartir desde aquí</button>
+  </div>
+
+  <div class="card">
+    <div class="card-icon">🔗</div>
+    <span class="card-status ok">Activo</span>
+    <h3>Protocol Handlers</h3>
+    <p>Registra <code>web+volvix://</code> para manejar enlaces personalizados desde cualquier app del sistema.</p>
+    <button class="btn btn-secondary" id="btnProtocol">Probar protocolo</button>
+  </div>
+
+  <div class="card">
+    <div class="card-icon green">🔄</div>
+    <span class="card-status ok">Periódico</span>
+    <h3>Background Sync</h3>
+    <p>Cola de operaciones pendientes que se sincronizan cuando vuelve la conexión. Resistente a fallos de red.</p>
+    <button class="btn btn-secondary" id="btnSync">Encolar tarea</button>
+  </div>
+
+</div>
+
+<h2 class="section-title">Consola en vivo</h2>
+<p class="section-sub">Eventos del Service Worker, cambios de red y permisos en tiempo real.</p>
+
+<div class="two-col">
+  <div class="console" id="console"></div>
+  <div class="card" style="margin:0">
+    <h3 style="margin-bottom:16px">Compartir contenido</h3>
+    <div class="input-group">
+      <input type="text" id="shareTitle" placeholder="Título" value="Volvix PWA">
+    </div>
+    <div class="input-group">
+      <textarea id="shareText" rows="3" placeholder="Texto a compartir">Mira esta PWA increíble!</textarea>
+    </div>
+    <div class="input-group">
+      <input type="text" id="shareUrl" placeholder="URL" value="https://volvix.example.com">
+    </div>
+    <button class="btn btn-primary" id="btnShareNow" style="width:100%">
+      <span>📤</span> Compartir nativo
+    </button>
+  </div>
+</div>
+
+<h2 class="section-title">Configuración técnica</h2>
+<p class="section-sub">El manifest y service worker que potencian esta app.</p>
+
+<div class="tabs">
+  <button class="tab active" data-tab="manifest">manifest.json</button>
+  <button class="tab" data-tab="sw">service-worker.js</button>
+  <button class="tab" data-tab="register">Registro</button>
+  <button class="tab" data-tab="push">Push subscribe</button>
+</div>
+
+<div class="tab-panel active" data-panel="manifest">
+<pre><span class="c">// manifest.json</span>
+{
+  <span class="k">"name"</span>: <span class="s">"Volvix PWA Final"</span>,
+  <span class="k">"short_name"</span>: <span class="s">"Volvix"</span>,
+  <span class="k">"start_url"</span>: <span class="s">"/"</span>,
+  <span class="k">"display"</span>: <span class="s">"standalone"</span>,
+  <span class="k">"background_color"</span>: <span class="s">"#0a0e1a"</span>,
+  <span class="k">"theme_color"</span>: <span class="s">"#0f172a"</span>,
+  <span class="k">"orientation"</span>: <span class="s">"portrait-primary"</span>,
+  <span class="k">"scope"</span>: <span class="s">"/"</span>,
+  <span class="k">"id"</span>: <span class="s">"volvix-pwa-v340"</span>,
+  <span class="k">"icons"</span>: [
+    { <span class="k">"src"</span>: <span class="s">"/icon-192.png"</span>, <span class="k">"sizes"</span>: <span class="s">"192x192"</span>, <span class="k">"type"</span>: <span class="s">"image/png"</span>, <span class="k">"purpose"</span>: <span class="s">"any maskable"</span> },
+    { <span class="k">"src"</span>: <span class="s">"/icon-512.png"</span>, <span class="k">"sizes"</span>: <span class="s">"512x512"</span>, <span class="k">"type"</span>: <span class="s">"image/png"</span>, <span class="k">"purpose"</span>: <span class="s">"any maskable"</span> }
+  ],
+  <span class="k">"share_target"</span>: {
+    <span class="k">"action"</span>: <span class="s">"/share"</span>,
+    <span class="k">"method"</span>: <span class="s">"POST"</span>,
+    <span class="k">"enctype"</span>: <span class="s">"multipart/form-data"</span>,
+    <span class="k">"params"</span>: { <span class="k">"title"</span>: <span class="s">"title"</span>, <span class="k">"text"</span>: <span class="s">"text"</span>, <span class="k">"url"</span>: <span class="s">"url"</span> }
+  },
+  <span class="k">"protocol_handlers"</span>: [
+    { <span class="k">"protocol"</span>: <span class="s">"web+volvix"</span>, <span class="k">"url"</span>: <span class="s">"/handle?p=%s"</span> }
+  ],
+  <span class="k">"shortcuts"</span>: [
+    { <span class="k">"name"</span>: <span class="s">"Nuevo"</span>, <span class="k">"url"</span>: <span class="s">"/new"</span>, <span class="k">"icons"</span>: [{ <span class="k">"src"</span>: <span class="s">"/new.png"</span>, <span class="k">"sizes"</span>: <span class="s">"96x96"</span> }] },
+    { <span class="k">"name"</span>: <span class="s">"Buscar"</span>, <span class="k">"url"</span>: <span class="s">"/search"</span>, <span class="k">"icons"</span>: [{ <span class="k">"src"</span>: <span class="s">"/search.png"</span>, <span class="k">"sizes"</span>: <span class="s">"96x96"</span> }] }
+  ],
+  <span class="k">"categories"</span>: [<span class="s">"productivity"</span>, <span class="s">"utilities"</span>],
+  <span class="k">"lang"</span>: <span class="s">"es"</span>,
+  <span class="k">"dir"</span>: <span class="s">"ltr"</span>,
+  <span class="k">"prefer_related_applications"</span>: false
+}</pre>
+</div>
+
+<div class="tab-panel" data-panel="sw">
+<pre><span class="c">// service-worker.js</span>
+<span class="k">const</span> CACHE = <span class="s">'volvix-v340'</span>;
+<span class="k">const</span> ASSETS = [<span class="s">'/'</span>, <span class="s">'/index.html'</span>, <span class="s">'/styles.css'</span>, <span class="s">'/app.js'</span>, <span class="s">'/offline.html'</span>];
+
+self.addEventListener(<span class="s">'install'</span>, e =&gt; {
+  e.waitUntil(caches.open(CACHE).then(c =&gt; c.addAll(ASSETS)));
+  self.skipWaiting();
+});
+
+self.addEventListener(<span class="s">'activate'</span>, e =&gt; {
+  e.waitUntil(caches.keys().then(keys =&gt;
+    Promise.all(keys.filter(k =&gt; k !== CACHE).map(k =&gt; caches.delete(k)))
+  ));
+  self.clients.claim();
+});
+
+self.addEventListener(<span class="s">'fetch'</span>, e =&gt; {
+  <span class="k">const</span> { request } = e;
+  <span class="k">if</span> (request.mode === <span class="s">'navigate'</span>) {
+    e.respondWith(fetch(request).catch(() =&gt; caches.match(<span class="s">'/offline.html'</span>)));
+    <span class="k">return</span>;
+  }
+  e.respondWith(caches.match(request).then(r =&gt; r || fetch(request).then(res =&gt; {
+    <span class="k">const</span> copy = res.clone();
+    caches.open(CACHE).then(c =&gt; c.put(request, copy));
+    <span class="k">return</span> res;
+  })));
+});
+
+self.addEventListener(<span class="s">'push'</span>, e =&gt; {
+  <span class="k">const</span> data = e.data?.json() ?? { title: <span class="s">'Volvix'</span>, body: <span class="s">'Nueva notificación'</span> };
+  e.waitUntil(self.registration.showNotification(data.title, {
+    body: data.body, icon: <span class="s">'/icon-192.png'</span>, badge: <span class="s">'/badge.png'</span>,
+    vibrate: [200,100,200], actions: [{ action:<span class="s">'open'</span>, title:<span class="s">'Abrir'</span> }]
+  }));
+});
+
+self.addEventListener(<span class="s">'sync'</span>, e =&gt; {
+  <span class="k">if</span> (e.tag === <span class="s">'volvix-sync'</span>) e.waitUntil(syncQueue());
+});
+
+self.addEventListener(<span class="s">'periodicsync'</span>, e =&gt; {
+  <span class="k">if</span> (e.tag === <span class="s">'refresh-content'</span>) e.waitUntil(refreshContent());
+});</pre>
+</div>
+
+<div class="tab-panel" data-panel="register">
+<pre><span class="c">// Registro del Service Worker</span>
+<span class="k">if</span> (<span class="s">'serviceWorker'</span> <span class="k">in</span> navigator) {
+  navigator.serviceWorker.register(<span class="s">'/service-worker.js'</span>, { scope: <span class="s">'/'</span> })
+    .then(reg =&gt; {
+      console.log(<span class="s">'SW registrado'</span>, reg.scope);
+      reg.addEventListener(<span class="s">'updatefound'</span>, () =&gt; {
+        <span class="k">const</span> nw = reg.installing;
+        nw.addEventListener(<span class="s">'statechange'</span>, () =&gt; {
+          <span class="k">if</span> (nw.state === <span class="s">'installed'</span> &amp;&amp; navigator.serviceWorker.controller) {
+            showUpdateBanner();
+          }
+        });
+      });
+    })
+    .catch(err =&gt; console.error(<span class="s">'SW falló'</span>, err));
+}
+
+window.addEventListener(<span class="s">'beforeinstallprompt'</span>, e =&gt; {
+  e.preventDefault();
+  deferredPrompt = e;
+  showInstallButton();
+});</pre>
+</div>
+
+<div class="tab-panel" data-panel="push">
+<pre><span class="c">// Suscripción a Push</span>
+<span class="k">async function</span> subscribePush() {
+  <span class="k">const</span> reg = <span class="k">await</span> navigator.serviceWorker.ready;
+  <span class="k">const</span> permission = <span class="k">await</span> Notification.requestPermission();
+  <span class="k">if</span> (permission !== <span class="s">'granted'</span>) <span class="k">throw new</span> Error(<span class="s">'Permiso denegado'</span>);
+
+  <span class="k">const</span> sub = <span class="k">await</span> reg.pushManager.subscribe({
+    userVisibleOnly: <span class="k">true</span>,
+    applicationServerKey: urlB64ToUint8Array(VAPID_PUBLIC_KEY)
+  });
+
+  <span class="k">await</span> fetch(<span class="s">'/api/subscribe'</span>, {
+    method: <span class="s">'POST'</span>,
+    headers: { <span class="s">'Content-Type'</span>: <span class="s">'application/json'</span> },
+    body: JSON.stringify(sub)
+  });
+  <span class="k">return</span> sub;
+}
+
+<span class="k">function</span> urlB64ToUint8Array(b64) {
+  <span class="k">const</span> padding = <span class="s">'='</span>.repeat((4 - b64.length % 4) % 4);
+  <span class="k">const</span> base64 = (b64 + padding).replace(/-/g, <span class="s">'+'</span>).replace(/_/g, <span class="s">'/'</span>);
+  <span class="k">const</span> raw = atob(base64);
+  <span class="k">return</span> Uint8Array.from([...raw].map(c =&gt; c.charCodeAt(0)));
+}</pre>
+</div>
+
+</main>
+
+<div class="install-banner" id="installBanner">
+  <div class="install-banner-icon">⬇</div>
+  <div class="install-banner-text">
+    <strong>Instalar Volvix</strong>
+    <small>Acceso rápido desde tu pantalla de inicio</small>
+  </div>
+  <button class="btn btn-primary" id="btnInstallBanner">Instalar</button>
+  <button class="install-banner-close" id="btnCloseBanner">✕</button>
+</div>
+
+<footer>
+  <p>Volvix PWA Final v3.4.0 — Demo construido con Web Standards puros · <a href="#">Documentación</a> · <a href="#">GitHub</a></p>
+  <p style="margin-top:8px;font-size:12px">© 2026 Volvix · Todas las APIs usadas son estándar W3C/WHATWG</p>
+</footer>
+
+<script>
+// ============ STATE ============
+const state = {
+  deferredPrompt: null,
+  notifs: 0,
+  shares: 0,
+  swReg: null,
+  installed: false,
+};
+
+// ============ CONSOLE LOGGER ============
+const cons = document.getElementById('console');
+function log(tag, msg){
+  const t = new Date().toTimeString().slice(0,8);
+  const line = document.createElement('div');
+  line.className = 'console-line';
+  line.innerHTML = `<span class="console-time">${t}</span><span class="console-tag ${tag}">${tag.toUpperCase()}</span><span>${msg}</span>`;
+  cons.appendChild(line);
+  cons.scrollTop = cons.scrollHeight;
+}
+
+// ============ NETWORK STATUS ============
+const netPill = document.getElementById('netPill');
+function updateNet(){
+  const online = navigator.onLine;
+  netPill.className = 'pill ' + (online ? 'online' : 'offline');
+  netPill.innerHTML = `<span class="dot"></span>${online ? 'Online' : 'Offline'}`;
+  log(online?'ok':'warn', `Red: ${online ? 'conectado' : 'desconectado'}`);
+}
+window.addEventListener('online', updateNet);
+window.addEventListener('offline', updateNet);
+
+// ============ SERVICE WORKER (inline blob) ============
+const swCode = `
+const CACHE = 'volvix-v340';
+self.addEventListener('install', e => { self.skipWaiting(); });
+self.addEventListener('activate', e => { self.clients.claim(); });
+self.addEventListener('fetch', e => {
+  e.respondWith(caches.match(e.request).then(r => r || fetch(e.request).then(res => {
+    if (e.request.method === 'GET' && res.ok) {
+      const copy = res.clone();
+      caches.open(CACHE).then(c => c.put(e.request, copy));
+    }
+    return res;
+  }).catch(() => new Response('Offline', { status: 503 }))));
+});
+self.addEventListener('message', e => {
+  if (e.data?.type === 'SHOW_NOTIF') {
+    self.registration.showNotification(e.data.title || 'Volvix', {
+      body: e.data.body || 'Notificación de prueba',
+      icon: 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%236366f1%22 rx=%2220%22/><text x=%2250%22 y=%2270%22 font-size=%2260%22 text-anchor=%22middle%22 fill=%22white%22 font-family=%22sans-serif%22 font-weight=%22bold%22>V</text></svg>',
+      vibrate: [200,100,200],
+      tag: 'volvix-notif'
+    });
+  }
+});
+`;
+const swPill = document.getElementById('swPill');
+async function registerSW(){
+  if (!('serviceWorker' in navigator)) {
+    swPill.textContent = 'SW: no soportado';
+    log('err', 'Service Worker no soportado en este navegador');
+    return;
+  }
+  try {
+    const blob = new Blob([swCode], { type: 'text/javascript' });
+    const url = URL.createObjectURL(blob);
+    const reg = await navigator.serviceWorker.register(url);
+    state.swReg = reg;
+    swPill.textContent = 'SW: activo';
+    swPill.classList.add('online');
+    log('ok', `Service Worker registrado (scope: ${reg.scope})`);
+    document.getElementById('offlineStatus').textContent = 'Activo';
+  } catch (e) {
+    swPill.textContent = 'SW: error';
+    log('err', `SW falló: ${e.message}`);
+  }
+}
+
+// ============ INSTALL ============
+const btnInstall = document.getElementById('btnInstall');
+const btnInstall2 = document.getElementById('btnInstall2');
+const btnInstallBanner = document.getElementById('btnInstallBanner');
+const installBanner = document.getElementById('installBanner');
+const installPill = document.getElementById('installPill');
+const installStatus = document.getElementById('installStatus');
+
+// Smart A2HS timing — only show the install banner after the user has visited
+// 2+ times AND it hasn't been dismissed in the last 7 days. The install BUTTON
+// is enabled immediately on capture; the BANNER waits.
+const A2HS_VISITS_KEY    = 'volvix_pwa_visits';
+const A2HS_DISMISSED_KEY = 'volvix_pwa_banner_dismissed_at';
+const A2HS_INSTALLED_KEY = 'volvix_pwa_installed_at';
+(function bumpVisitCount(){
+  try {
+    const n = parseInt(localStorage.getItem(A2HS_VISITS_KEY) || '0', 10) || 0;
+    localStorage.setItem(A2HS_VISITS_KEY, String(n + 1));
+  } catch(_){}
+})();
+function shouldAutoShowA2HS(){
+  try {
+    if (localStorage.getItem(A2HS_INSTALLED_KEY)) return false;
+    const visits = parseInt(localStorage.getItem(A2HS_VISITS_KEY) || '0', 10) || 0;
+    if (visits < 2) return false;
+    const dismissedAt = parseInt(localStorage.getItem(A2HS_DISMISSED_KEY) || '0', 10) || 0;
+    const SEVEN_DAYS = 7 * 24 * 3600 * 1000;
+    if (dismissedAt && (Date.now() - dismissedAt) < SEVEN_DAYS) return false;
+    return true;
+  } catch(_) { return true; }
+}
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  state.deferredPrompt = e;
+  btnInstall.disabled = false;
+  btnInstall2.disabled = false;
+  if (shouldAutoShowA2HS()) {
+    installBanner.classList.add('show');
+    log('info', 'beforeinstallprompt capturado — banner mostrado (visitas >=2)');
+  } else {
+    log('info', 'beforeinstallprompt capturado — banner DIFERIDO (visita 1 o reciente dismiss)');
+  }
+  installStatus.textContent = 'Listo para instalar';
+  installStatus.className = 'card-status ok';
+});
+
+async function doInstall(){
+  if (!state.deferredPrompt) {
+    log('warn', 'Prompt de instalación no disponible (puede que ya esté instalada o el navegador no soporte)');
+    return;
+  }
+  state.deferredPrompt.prompt();
+  const { outcome } = await state.deferredPrompt.userChoice;
+  log(outcome==='accepted'?'ok':'warn', `Instalación: ${outcome}`);
+  state.deferredPrompt = null;
+  installBanner.classList.remove('show');
+}
+btnInstall.addEventListener('click', doInstall);
+btnInstall2.addEventListener('click', doInstall);
+btnInstallBanner.addEventListener('click', doInstall);
+document.getElementById('btnCloseBanner').addEventListener('click', () => {
+  installBanner.classList.remove('show');
+  try { localStorage.setItem(A2HS_DISMISSED_KEY, String(Date.now())); } catch(_){}
+});
+
+window.addEventListener('appinstalled', () => {
+  state.installed = true;
+  installPill.textContent = 'Instalada ✓';
+  installPill.classList.add('online');
+  installStatus.textContent = 'Instalada';
+  installStatus.className = 'card-status ok';
+  try { localStorage.setItem(A2HS_INSTALLED_KEY, String(Date.now())); } catch(_){}
+  log('ok', 'App instalada correctamente');
+});
+
+// Detectar si ya está instalada (display-mode)
+if (window.matchMedia('(display-mode: standalone)').matches) {
+  state.installed = true;
+  installPill.textContent = 'Modo standalone';
+  installPill.classList.add('online');
+}
+
+// ============ NOTIFICATIONS ============
+const btnNotify = document.getElementById('btnNotify');
+const btnSendPush = document.getElementById('btnSendPush');
+const pushStatus = document.getElementById('pushStatus');
+
+function refreshPushStatus(){
+  if (!('Notification' in window)) {
+    pushStatus.textContent = 'No soportado';
+    pushStatus.className = 'card-status err';
+    return;
+  }
+  const p = Notification.permission;
+  if (p === 'granted') { pushStatus.textContent = 'Activado'; pushStatus.className = 'card-status ok'; }
+  else if (p === 'denied') { pushStatus.textContent = 'Denegado'; pushStatus.className = 'card-status err'; }
+  else { pushStatus.textContent = 'Permiso pendiente'; pushStatus.className = 'card-status warn'; }
+}
+
+btnNotify.addEventListener('click', async () => {
+  if (!('Notification' in window)) { log('err', 'Notificaciones no soportadas'); return; }
+  const p = await Notification.requestPermission();
+  log(p==='granted'?'ok':'warn', `Permiso de notificaciones: ${p}`);
+  refreshPushStatus();
+  if (p === 'granted') {
+    sendTestNotif();
+    // Registrar push subscription en el backend
+    await registerPushSubscription();
+  }
+});
+
+// ============ PUSH SUBSCRIPTION (B47) ============
+async function registerPushSubscription() {
+  try {
+    if (!state.swReg || !state.swReg.pushManager) {
+      log('warn', 'PushManager no disponible (sin VAPID configurado)');
+      return null;
+    }
+    let sub = await state.swReg.pushManager.getSubscription();
+    if (!sub) {
+      try {
+        // Mock VAPID — endpoint público de placeholder. Reemplazar con clave real en prod.
+        const VAPID_PUB = (window.VOLVIX_VAPID_PUB || 'BO_mock_replace_with_real_VAPID_public_key_in_production');
+        sub = await state.swReg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(VAPID_PUB)
+        });
+      } catch (subErr) {
+        log('warn', 'No se pudo crear subscription (modo mock): ' + subErr.message);
+        // Fallback: registrar mock subscription para que el flujo pueda completarse
+        sub = { endpoint: 'mock://volvix/' + Date.now(), keys: { p256dh: 'mock', auth: 'mock' }, toJSON: function(){ return { endpoint: this.endpoint, keys: this.keys }; } };
+      }
+    }
+    const payload = sub.toJSON ? sub.toJSON() : { endpoint: sub.endpoint, keys: sub.keys };
+    const _tok = (function(){ try { return localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken'); } catch(_){ return null; } })();
+    const _hdrs = { 'Content-Type': 'application/json' };
+    if (_tok) _hdrs['Authorization'] = 'Bearer ' + _tok;
+    const r = await fetch('/api/push/subscribe', {
+      method: 'POST',
+      headers: _hdrs,
+      body: JSON.stringify(payload)
+    }).catch(() => null);
+    if (r && r.status === 503) { log('warn', 'Push no configurado en backend (503)'); return sub; }
+    if (r && r.ok) log('ok', 'Subscription registrada en el backend');
+    else log('warn', 'Backend de push no respondió (¿endpoint montado?)');
+    return sub;
+  } catch (e) {
+    log('err', 'Push subscribe falló: ' + e.message);
+    return null;
+  }
+}
+function urlBase64ToUint8Array(base64String) {
+  try {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const raw = atob(base64);
+    const out = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; ++i) out[i] = raw.charCodeAt(i);
+    return out;
+  } catch (_) {
+    // Si la clave es inválida (mock), devolvemos un buffer vacío — la subscribe fallará controladamente
+    return new Uint8Array(0);
+  }
+}
+
+async function sendTestNotif(){
+  if (Notification.permission !== 'granted') {
+    log('warn', 'Pide permiso primero');
+    return;
+  }
+  if (state.swReg) {
+    state.swReg.active?.postMessage({
+      type: 'SHOW_NOTIF',
+      title: 'Volvix PWA',
+      body: '¡Las notificaciones funcionan! 🎉'
+    });
+  } else {
+    new Notification('Volvix PWA', { body: '¡Las notificaciones funcionan! 🎉' });
+  }
+  state.notifs++;
+  document.getElementById('statNotifs').textContent = state.notifs;
+  log('ok', 'Notificación enviada');
+}
+btnSendPush.addEventListener('click', sendTestNotif);
+
+// ============ SHARE ============
+const btnShare = document.getElementById('btnShare');
+const btnShareNow = document.getElementById('btnShareNow');
+
+async function doShare(){
+  const data = {
+    title: document.getElementById('shareTitle').value,
+    text: document.getElementById('shareText').value,
+    url: document.getElementById('shareUrl').value,
+  };
+  if (!navigator.share) {
+    log('warn', 'Web Share API no disponible — copiando al portapapeles');
+    try {
+      await navigator.clipboard.writeText(`${data.title}\n${data.text}\n${data.url}`);
+      log('ok', 'Contenido copiado al portapapeles');
+    } catch(e){ log('err', e.message); }
+    return;
+  }
+  try {
+    await navigator.share(data);
+    state.shares++;
+    document.getElementById('statShares').textContent = state.shares;
+    log('ok', `Compartido: ${data.title}`);
+  } catch(e) {
+    if (e.name !== 'AbortError') log('err', `Share falló: ${e.message}`);
+  }
+}
+btnShare.addEventListener('click', doShare);
+btnShareNow.addEventListener('click', doShare);
+
+// ============ PROTOCOL HANDLER ============
+document.getElementById('btnProtocol').addEventListener('click', () => {
+  if ('registerProtocolHandler' in navigator) {
+    try {
+      navigator.registerProtocolHandler('web+volvix', '/handle?p=%s');
+      log('ok', 'Protocol handler web+volvix registrado');
+    } catch(e) {
+      log('warn', `Protocol handler: ${e.message}`);
+    }
+  } else {
+    log('err', 'registerProtocolHandler no disponible');
+  }
+});
+
+// ============ OFFLINE TEST ============
+document.getElementById('btnTestOffline').addEventListener('click', async () => {
+  log('info', 'Probando caché offline…');
+  try {
+    const cacheNames = await caches.keys();
+    log('ok', `Cachés activos: ${cacheNames.length} (${cacheNames.join(', ') || 'ninguno aún'})`);
+    let total = 0;
+    for (const name of cacheNames) {
+      const c = await caches.open(name);
+      const keys = await c.keys();
+      total += keys.length;
+    }
+    document.getElementById('statCache').textContent = total;
+    if (navigator.storage?.estimate) {
+      const est = await navigator.storage.estimate();
+      const kb = Math.round((est.usage||0)/1024);
+      document.getElementById('statSize').textContent = kb + ' KB';
+      log('ok', `Almacenamiento: ${kb} KB de ${Math.round((est.quota||0)/1024/1024)} MB`);
+    }
+  } catch(e) { log('err', e.message); }
+});
+
+// ============ BACKGROUND SYNC ============
+document.getElementById('btnSync').addEventListener('click', async () => {
+  if (!state.swReg) { log('err', 'SW no listo'); return; }
+  if ('sync' in state.swReg) {
+    try {
+      await state.swReg.sync.register('volvix-sync');
+      log('ok', 'Sync encolado: volvix-sync');
+    } catch(e) { log('err', e.message); }
+  } else {
+    log('warn', 'Background Sync no soportado — encolando localmente');
+    const queue = JSON.parse(localStorage.getItem('volvix-queue') || '[]');
+    queue.push({ ts: Date.now(), action: 'demo' });
+    localStorage.setItem('volvix-queue', JSON.stringify(queue));
+    log('ok', `Cola local: ${queue.length} tareas`);
+  }
+});
+
+// ============ TABS ============
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const target = tab.dataset.tab;
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === tab));
+    document.querySelectorAll('.tab-panel').forEach(p => {
+      p.classList.toggle('active', p.dataset.panel === target);
+    });
+  });
+});
+
+// ============ INIT ============
+log('info', 'Volvix PWA v3.4.0 inicializando…');
+updateNet();
+refreshPushStatus();
+registerSW();
+log('info', `User Agent: ${navigator.userAgent.slice(0,60)}…`);
+log('info', `Display mode: ${window.matchMedia('(display-mode: standalone)').matches ? 'standalone' : 'browser'}`);
+
+// Stats periódicos
+setInterval(async () => {
+  if (navigator.storage?.estimate) {
+    const est = await navigator.storage.estimate();
+    document.getElementById('statSize').textContent = Math.round((est.usage||0)/1024) + ' KB';
+  }
+  const cacheNames = await caches.keys();
+  let total = 0;
+  for (const name of cacheNames) {
+    const c = await caches.open(name);
+    total += (await c.keys()).length;
+  }
+  document.getElementById('statCache').textContent = total;
+}, 5000);
+</script>
+
+  <script defer src="auth-helper.js"></script>
+<link rel="stylesheet" href="volvix-modals.css">
+<script defer src="volvix-modals.js"></script>
+  <script defer src="volvix-i18n-wiring.js"></script>
+  <script defer src="volvix-recovery-wiring.js"></script>
+</body>
+</html>

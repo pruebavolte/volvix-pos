@@ -8,30 +8,16 @@
         "includeFiles": [
           "api/*.js",
           "api/admin/*.js",
-          "public/**/*.html",
-          "public/**/*.js",
-          "public/**/*.css",
-          "public/**/*.json",
-          "public/**/*.svg",
-          "public/**/*.png",
-          "*.html",
-          "*.js",
-          "*.css",
-          "*.json",
-          "*.yaml",
-          "*.yml",
-          "*.xml",
-          "*.txt",
-          "logos-demo/**",
-          "public/logos-demo/**",
-          "public/tutorials/**",
+          "data/**",
           "templates/**",
-          "data/**"
+          "logos-demo/**",
+          "public/logos-demo/**"
         ]
       }
     }
   ],
   "routes": [
+    { "src": "/api/(.*)", "dest": "/api/index.js" },
     { "src": "/internal/?", "dest": "/api/index.js" },
     { "src": "/internal/(index|BITACORA_LIVE|MATRIZ_PRUEBAS_LOCAL|MATRIZ_PRUEBAS_LOCAL_v1_backup|volvix-qa-scenarios|volvix-sandbox|volvix-modals-demo)\\.html", "dest": "/api/index.js" },
     { "src": "/internal/(.*)", "status": 404, "dest": "/404" },
@@ -44,13 +30,8 @@
     { "src": "/status\\.json", "status": 404, "dest": "/404" },
     { "src": "/TASKS_FOR_NEXT_AI\\.md", "status": 404, "dest": "/404" },
     { "src": "/VOLVIX_(.*)\\.md", "status": 404, "dest": "/404" },
-    { "src": "/api/(.*)", "dest": "/api/index.js" },
     { "src": "/volvix-onboarding-wizard\\.html", "status": 301, "headers": { "Location": "/volvix-onboarding-v2.html$querystring" } },
-    { "src": "/(.*\\.html)", "dest": "/api/index.js" },
-    { "src": "/(.*\\.js)", "dest": "/api/index.js" },
-    { "src": "/(.*\\.css)", "dest": "/api/index.js" },
-    { "src": "/(.*\\.json)", "dest": "/api/index.js" },
-    { "src": "/", "dest": "/api/index.js" },
+    { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/api/index.js" }
   ],
   "env": {

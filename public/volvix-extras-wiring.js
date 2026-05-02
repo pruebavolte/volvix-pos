@@ -1,0 +1,1472 @@
+/**
+ * volvix-extras-wiring.js
+ * ============================================================
+ * Cableado avanzado para:
+ *  - Etiqueta Designer (plantillas, drag-and-drop, QR/Barcode, print, PDF)
+ *  - Landing Page (lead capture, tracking, CTAs)
+ *  - Remote Control (sesiones remotas con código de soporte)
+ *  - Utilidades (IVA, comisiones, conversor unidades, CSV import/export)
+ *
+ * Autor: Agent-5 (Volvix POS)
+ * Fecha: 2026-04-25
+ * Backend: https://salvadorexoficial.com
+ * ============================================================
+ */
+(function() {
+  'use strict';
+
+  const API = location.origin;
+  const VERSION = '1.0.0';
+  let session = null;
+
+  console.log('[EXTRAS-WIRING] Activo v' + VERSION + ' - Backend: ' + API);
+
+  // ============================================================
+  // SESSION HELPERS
+  // ============================================================
+  function loadSession() {
+    try {
+      session = JSON.parse(localStorage.getItem('volvixSession') || 'null');
+    } catch {
+      session = null;
+    }
+    return session;
+  }
+
+  function saveSession(s) {
+    session = s;
+    localStorage.setItem('volvixSession', JSON.stringify(s));
+  }
+
+  function showToast(msg, type) {
+    type = type || 'info';
+    // Preferir VolvixUI.toast si existe
+    if (window.VolvixUI && typeof window.VolvixUI.toast === 'function') {
+      try { window.VolvixUI.toast({ type: type === 'warn' ? 'warning' : type, message: msg }); return; } catch {}
+    }
+    if (typeof window.showToast === 'function' && window.showToast !== showToast) {
+      try { window.showToast(msg, type); return; } catch {}
+    }
+    const div = document.createElement('div');
+    div.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#1e293b;color:#fff;padding:12px 18px;border-radius:8px;z-index:99999;font-family:sans-serif;box-shadow:0 4px 12px rgba(0,0,0,0.3);max-width:320px;';
+    if (type === 'error') div.style.background = '#dc2626';
+    if (type === 'success') div.style.background = '#16a34a';
+    if (type === 'warn') div.style.background = '#d97706';
+    div.textContent = msg;
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), 3500);
+  }
+
+  // ============================================================
+  // VOLVIXUI HELPERS — Migración de prompt/confirm/alert
+  // ============================================================
+  function uiAvailable() {
+    return !!(window.VolvixUI && typeof window.VolvixUI.form === 'function');
+  }
+
+  /**
+   * Muestra un formulario modal único con múltiples campos.
+   * Si VolvixUI no está disponible, hace fallback a prompt() nativos encadenados.
+   * @returns {Promise<Object|null>} valores ingresados o null si se canceló.
+   */
+  async function uiForm(opts) {
+    const { title, fields, submitText, onSubmit } = opts || {};
+    if (uiAvailable()) {
+      try {
+        return await window.VolvixUI.form({
+          title: title || 'Datos',
+          fields: fields || [],
+          submitText: submitText || 'Aceptar',
+          onSubmit: onSubmit
+        });
+      } catch (e) {
+        console.warn('[EXTRAS-WIRING] VolvixUI.form falló, fallback a prompt:', e);
+      }
+    } else {
+      console.warn('[EXTRAS-WIRING] VolvixUI no cargado, usando prompt nativo');
+    }
+    // Fallback: prompts encadenados
+    const result = {};
+    for (const f of (fields || [])) {
+      const label = f.label || f.name;
+      const def = f.default != null ? String(f.default) : '';
+      const val = prompt(label + (def ? ' (' + def + ')' : '') + ':', def);
+      if (val === null) return null;
+      let v = val.trim() || def;
+      if (f.type === 'number') v = parseFloat(v) || 0;
+      if (f.type === 'switch') v = /^(s|si|sí|y|yes|true|1)$/i.test(v);
+      result[f.name] = v;
+    }
+    if (typeof onSubmit === 'function') {
+      try { await onSubmit(result); } catch {}
+    }
+    return result;
+  }
+
+  /**
+   * Confirmación simple. Fallback a confirm() nativo.
+   * @returns {Promise<boolean>}
+   */
+  async function uiConfirm(opts) {
+    if (uiAvailable() && typeof window.VolvixUI.confirm === 'function') {
+      try { return !!(await window.VolvixUI.confirm(opts)); }
+      catch (e) { console.warn('[EXTRAS-WIRING] VolvixUI.confirm falló:', e); }
+    } else {
+      console.warn('[EXTRAS-WIRING] VolvixUI no cargado, fallback a confirm()');
+    }
+    return confirm((opts && (opts.title ? opts.title + '\n\n' : '') + (opts.message || '')) || '¿Confirmar?');
+  }
+
+  /**
+   * Confirmación destructiva (eliminar/anular). Requiere texto.
+   */
+  async function uiDestructiveConfirm(opts) {
+    if (uiAvailable() && typeof window.VolvixUI.destructiveConfirm === 'function') {
+      try { return !!(await window.VolvixUI.destructiveConfirm(opts)); }
+      catch (e) { console.warn('[EXTRAS-WIRING] destructiveConfirm falló:', e); }
+    } else if (uiAvailable() && typeof window.VolvixUI.confirm === 'function') {
+      try { return !!(await window.VolvixUI.confirm(Object.assign({ danger: true }, opts || {}))); }
+      catch (e) { console.warn('[EXTRAS-WIRING] confirm danger falló:', e); }
+    } else {
+      console.warn('[EXTRAS-WIRING] VolvixUI no cargado, fallback a confirm()');
+    }
+    const expected = (opts && opts.requireText) || 'ELIMINAR';
+    const txt = prompt((opts && opts.message ? opts.message + '\n\n' : '') + 'Escribe "' + expected + '" para confirmar:');
+    return txt === expected;
+  }
+
+  // ============================================================
+  // ETIQUETA DESIGNER - PLANTILLAS PREDEFINIDAS
+  // ============================================================
+  const ETIQUETA_TEMPLATES = {
+    precio: {
+      name: 'Etiqueta de Precio',
+      description: 'Etiqueta simple con producto, precio y código',
+      fields: ['producto', 'precio', 'codigo'],
+      html: `<div style="border:1px solid #000;padding:8px;display:inline-block;text-align:center;font-family:Arial, sans-serif;width:160px;">
+              <div style="font-size:11px;font-weight:bold;text-transform:uppercase;">{{producto}}</div>
+              <div style="font-size:24px;font-weight:bold;color:#dc2626;margin:4px 0;">$ {{precio}}</div>
+              <div style="font-size:9px;font-family:monospace;letter-spacing:1px;">{{codigo}}</div>
+            </div>`
+    },
+    producto: {
+      name: 'Etiqueta Producto Detallada',
+      description: 'Etiqueta amplia con todos los datos del producto',
+      fields: ['producto', 'codigo', 'categoria', 'precio'],
+      html: `<div style="border:2px solid #000;padding:10px;width:200px;font-family:Arial, sans-serif;">
+              <div style="font-size:14px;font-weight:bold;border-bottom:1px solid #000;padding-bottom:4px;">{{producto}}</div>
+              <div style="font-size:11px;margin-top:4px;">Código: <span style="font-family:monospace;">{{codigo}}</span></div>
+              <div style="font-size:11px;">Categoría: {{categoria}}</div>
+              <div style="font-size:18px;font-weight:bold;text-align:center;margin-top:8px;color:#22c55e;">$ {{precio}}</div>
+            </div>`
+    },
+    direccion: {
+      name: 'Etiqueta de Envío',
+      description: 'Etiqueta para paquetes y envíos',
+      fields: ['nombre', 'direccion', 'ciudad', 'cp', 'telefono'],
+      html: `<div style="border:1px solid #000;padding:12px;width:300px;font-family:Arial, sans-serif;">
+              <div style="font-size:10px;color:#666;text-transform:uppercase;">Destinatario:</div>
+              <div style="font-size:14px;font-weight:bold;margin-top:2px;">{{nombre}}</div>
+              <div style="font-size:11px;margin-top:4px;">{{direccion}}</div>
+              <div style="font-size:11px;">{{ciudad}}, CP {{cp}}</div>
+              <div style="font-size:11px;margin-top:4px;color:#444;">Tel: {{telefono}}</div>
+            </div>`
+    },
+    qr: {
+      name: 'Etiqueta con QR',
+      description: 'Etiqueta con código QR visual',
+      fields: ['producto', 'codigo'],
+      html: `<div style="border:1px solid #000;padding:8px;display:flex;gap:8px;align-items:center;font-family:Arial, sans-serif;">
+              <div data-qr="{{codigo}}" style="width:80px;height:80px;background:repeating-linear-gradient(45deg,#000,#000 4px,#fff 4px,#fff 8px);"></div>
+              <div>
+                <div style="font-size:12px;font-weight:bold;">{{producto}}</div>
+                <div style="font-size:10px;font-family:monospace;">{{codigo}}</div>
+              </div>
+            </div>`
+    },
+    barcode: {
+      name: 'Etiqueta con Código de Barras',
+      description: 'Etiqueta con barcode visual estilo EAN',
+      fields: ['producto', 'precio', 'codigo'],
+      html: `<div style="border:1px solid #000;padding:8px;width:220px;text-align:center;font-family:Arial, sans-serif;">
+              <div style="font-size:12px;font-weight:bold;">{{producto}}</div>
+              <div data-barcode="{{codigo}}" style="height:40px;background:repeating-linear-gradient(90deg,#000 0,#000 2px,#fff 2px,#fff 4px,#000 4px,#000 5px,#fff 5px,#fff 7px);margin:6px 0;"></div>
+              <div style="font-size:9px;font-family:monospace;letter-spacing:2px;">{{codigo}}</div>
+              <div style="font-size:16px;font-weight:bold;color:#dc2626;margin-top:4px;">$ {{precio}}</div>
+            </div>`
+    },
+    promo: {
+      name: 'Etiqueta de Promoción',
+      description: 'Etiqueta con descuento y precio anterior',
+      fields: ['producto', 'precioAntes', 'precioAhora', 'descuento'],
+      html: `<div style="border:3px solid #dc2626;padding:10px;width:180px;text-align:center;background:#fef2f2;font-family:Arial, sans-serif;">
+              <div style="background:#dc2626;color:#fff;padding:4px;font-size:14px;font-weight:bold;">¡{{descuento}}% OFF!</div>
+              <div style="font-size:13px;font-weight:bold;margin-top:6px;">{{producto}}</div>
+              <div style="font-size:12px;text-decoration:line-through;color:#888;margin-top:4px;">$ {{precioAntes}}</div>
+              <div style="font-size:22px;font-weight:bold;color:#dc2626;">$ {{precioAhora}}</div>
+            </div>`
+    }
+  };
+
+  // Almacén de plantillas custom (localStorage)
+  function getCustomTemplates() {
+    try { return JSON.parse(localStorage.getItem('volvix:etiqueta:custom') || '{}'); }
+    catch { return {}; }
+  }
+
+  function saveCustomTemplate(key, tpl) {
+    const customs = getCustomTemplates();
+    customs[key] = tpl;
+    localStorage.setItem('volvix:etiqueta:custom', JSON.stringify(customs));
+  }
+
+  function getAllTemplates() {
+    return Object.assign({}, ETIQUETA_TEMPLATES, getCustomTemplates());
+  }
+
+  // ============================================================
+  // ETIQUETA - APLICAR PLANTILLA
+  // ============================================================
+  window.etiquetaUseTemplate = async function(templateKey) {
+    const all = getAllTemplates();
+    const tpl = all[templateKey];
+    if (!tpl) {
+      showToast('Plantilla no encontrada: ' + templateKey, 'error');
+      return;
+    }
+
+    const designer = document.querySelector('#designer, .designer-area, [data-designer], #etiqueta-preview, .preview-area');
+    if (!designer) {
+      showToast('Área de diseño no encontrada en la página', 'warn');
+      return;
+    }
+
+    // Mapeo de campos -> tipos de input para VolvixUI
+    const fieldMeta = {
+      producto:    { label: 'Producto',         type: 'text' },
+      precio:      { label: 'Precio',           type: 'number', min: 0, step: 0.01 },
+      codigo:      { label: 'Código',           type: 'text' },
+      categoria:   { label: 'Categoría',        type: 'text' },
+      nombre:      { label: 'Nombre',           type: 'text' },
+      direccion:   { label: 'Dirección',        type: 'textarea' },
+      ciudad:      { label: 'Ciudad',           type: 'text' },
+      cp:          { label: 'CP',               type: 'text' },
+      telefono:    { label: 'Teléfono',         type: 'tel', mask: 'tel-mx' },
+      precioAntes: { label: 'Precio anterior',  type: 'number', min: 0, step: 0.01 },
+      precioAhora: { label: 'Precio ahora',     type: 'number', min: 0, step: 0.01 },
+      descuento:   { label: 'Descuento (%)',    type: 'number', min: 0, max: 100, step: 1 }
+    };
+
+    const fields = (tpl.fields || []).map(name => Object.assign(
+      { name: name, label: name, type: 'text', required: true },
+      fieldMeta[name] || {}
+    ));
+
+    const data = await uiForm({
+      title: 'Plantilla: ' + tpl.name,
+      fields: fields,
+      submitText: 'Aplicar plantilla'
+    });
+    if (!data) return; // cancelado
+
+    let html = tpl.html;
+    Object.keys(data).forEach(k => {
+      html = html.replace(new RegExp('{{' + k + '}}', 'g'), data[k] != null ? data[k] : '');
+    });
+
+    designer.innerHTML = html;
+    showToast('Plantilla cargada: ' + tpl.name, 'success');
+
+    // Guardar como última plantilla usada
+    localStorage.setItem('volvix:etiqueta:last', JSON.stringify({ key: templateKey, data, html }));
+  };
+
+  // ============================================================
+  // ETIQUETA - MOSTRAR LISTA DE PLANTILLAS
+  // ============================================================
+  window.etiquetaShowTemplates = async function() {
+    const all = getAllTemplates();
+    const keys = Object.keys(all);
+    if (keys.length === 0) { showToast('Sin plantillas', 'warn'); return; }
+    const options = keys.map(k => ({
+      value: k,
+      label: all[k].name + (all[k].description ? ' — ' + all[k].description : '')
+    }));
+    // 2-7 opciones -> radio, 8-50 -> select
+    const useRadio = options.length <= 7;
+    const data = await uiForm({
+      title: 'Elige plantilla',
+      fields: [{
+        name: 'tplKey',
+        label: 'Plantilla',
+        type: useRadio ? 'radio' : 'select',
+        options: options,
+        default: keys[0],
+        required: true
+      }],
+      submitText: 'Usar plantilla'
+    });
+    if (data && data.tplKey) {
+      window.etiquetaUseTemplate(data.tplKey);
+    }
+  };
+
+  // ============================================================
+  // ETIQUETA - GUARDAR PLANTILLA CUSTOM
+  // ============================================================
+  window.etiquetaSaveCurrentAsTemplate = async function() {
+    const designer = document.querySelector('#designer, .designer-area, [data-designer], #etiqueta-preview, .preview-area');
+    if (!designer || !designer.innerHTML.trim()) {
+      showToast('No hay diseño para guardar', 'warn');
+      return;
+    }
+
+    const data = await uiForm({
+      title: 'Guardar plantilla custom',
+      fields: [{
+        name: 'name',
+        label: 'Nombre de la plantilla',
+        type: 'text',
+        required: true,
+        placeholder: 'Mi plantilla'
+      }, {
+        name: 'description',
+        label: 'Descripción (opcional)',
+        type: 'textarea',
+        default: 'Plantilla personalizada del usuario'
+      }],
+      submitText: 'Guardar'
+    });
+    if (!data || !data.name) return;
+    const name = String(data.name).trim();
+    if (!name) return;
+
+    const key = 'custom_' + name.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+    const tpl = {
+      name: name,
+      description: data.description || 'Plantilla personalizada del usuario',
+      fields: [],
+      html: designer.innerHTML,
+      isCustom: true,
+      created: Date.now()
+    };
+
+    saveCustomTemplate(key, tpl);
+    showToast('Plantilla guardada: ' + name, 'success');
+  };
+
+  window.etiquetaListCustomTemplates = async function() {
+    const customs = getCustomTemplates();
+    const keys = Object.keys(customs);
+    if (keys.length === 0) {
+      showToast('Sin plantillas personalizadas guardadas', 'info');
+      return;
+    }
+    const options = keys.map(k => ({ value: k, label: customs[k].name }));
+    const useRadio = options.length <= 7;
+    const data = await uiForm({
+      title: 'Plantillas personalizadas',
+      fields: [{
+        name: 'tplKey',
+        label: 'Plantilla',
+        type: useRadio ? 'radio' : 'select',
+        options: options,
+        default: keys[0],
+        required: true
+      }],
+      submitText: 'Usar plantilla'
+    });
+    if (data && data.tplKey) {
+      window.etiquetaUseTemplate(data.tplKey);
+    }
+  };
+
+  window.etiquetaDeleteCustomTemplate = async function() {
+    const customs = getCustomTemplates();
+    const keys = Object.keys(customs);
+    if (keys.length === 0) {
+      showToast('Sin plantillas custom para borrar', 'info');
+      return;
+    }
+    const options = keys.map(k => ({ value: k, label: customs[k].name }));
+    const useRadio = options.length <= 7;
+    const data = await uiForm({
+      title: 'Borrar plantilla',
+      fields: [{
+        name: 'tplKey',
+        label: 'Plantilla a borrar',
+        type: useRadio ? 'radio' : 'select',
+        options: options,
+        default: keys[0],
+        required: true
+      }],
+      submitText: 'Continuar'
+    });
+    if (!data || !data.tplKey) return;
+    const ok = await uiDestructiveConfirm({
+      title: 'Eliminar plantilla',
+      message: '¿Borrar definitivamente "' + (customs[data.tplKey] ? customs[data.tplKey].name : data.tplKey) + '"? Esta acción no se puede deshacer.',
+      requireText: 'ELIMINAR',
+      danger: true
+    });
+    if (!ok) return;
+    delete customs[data.tplKey];
+    localStorage.setItem('volvix:etiqueta:custom', JSON.stringify(customs));
+    showToast('Plantilla eliminada', 'success');
+  };
+
+  // ============================================================
+  // ETIQUETA - GENERADOR MASIVO DESDE DB
+  // ============================================================
+  window.etiquetaGenerateMasive = async function() {
+    const ok = await uiConfirm({
+      title: 'Generar etiquetas masivas',
+      message: '¿Generar etiquetas para TODOS los productos del sistema? Se abrirá una ventana de impresión.'
+    });
+    if (!ok) return;
+
+    try {
+      showToast('Cargando productos...', 'info');
+      const res = await fetch(API + '/api/products');
+      let products = [];
+      try { products = await res.json(); } catch { products = []; }
+
+      if (!products || products.length === 0) {
+        // Fallback: tratar de leer de localStorage
+        try {
+          const local = JSON.parse(localStorage.getItem('volvix:products') || '[]');
+          if (local.length > 0) products = local;
+        } catch {}
+      }
+
+      if (!products || products.length === 0) {
+        showToast('Sin productos disponibles', 'error');
+        return;
+      }
+
+      const limit = Math.min(products.length, 100);
+      const html = products.slice(0, limit).map(p => `
+        <div style="border:1px solid #000;padding:8px;display:inline-block;margin:4px;text-align:center;width:150px;font-family:Arial,sans-serif;page-break-inside:avoid;">
+          <div style="font-size:11px;font-weight:bold;">${escapeHtml(p.name || p.producto || 'N/A')}</div>
+          <div style="font-size:20px;font-weight:bold;color:#dc2626;margin:4px 0;">$${escapeHtml(String(p.price || p.precio || '0'))}</div>
+          <div style="font-size:9px;font-family:monospace;letter-spacing:1px;">${escapeHtml(p.code || p.codigo || '----')}</div>
+        </div>
+      `).join('');
+
+      const printWin = window.open('', '_blank');
+      printWin.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Etiquetas Masivas - Volvix POS</title>
+          <style>
+            body { margin: 20px; font-family: Arial, sans-serif; }
+            h2 { border-bottom: 2px solid #000; padding-bottom: 8px; }
+            .info { background: #f1f5f9; padding: 8px; margin: 12px 0; border-radius: 4px; font-size: 12px; }
+            @media print { .info, h2, .actions { display: none; } body { margin: 0; } }
+            .actions button { padding: 8px 16px; font-size: 14px; cursor: pointer; }
+          </style>
+        </head>
+        <body>
+          <h2>Etiquetas Masivas - ${products.length} productos</h2>
+          <div class="info">Total: ${products.length} | Mostrando: ${limit}</div>
+          <div class="actions"><button onclick="window.print()">🖨️ Imprimir</button> <button onclick="window.close()">✖ Cerrar</button></div>
+          ${html}
+          <script>setTimeout(()=>window.print(),500);<\/script>
+        </body>
+        </html>
+      `);
+      printWin.document.close();
+      showToast('Generadas ' + limit + ' etiquetas', 'success');
+    } catch (e) {
+      showToast('Error: ' + e.message, 'error');
+    }
+  };
+
+  // ============================================================
+  // ETIQUETA - GENERADOR QR (visual)
+  // ============================================================
+  window.etiquetaGenerateQR = async function(text) {
+    if (!text) {
+      const data = await uiForm({
+        title: 'Generar QR',
+        fields: [{ name: 'text', label: 'Texto / URL para QR', type: 'text', required: true, placeholder: 'https://...' }],
+        submitText: 'Generar'
+      });
+      text = data && data.text;
+    }
+    if (!text) return null;
+
+    const size = 21;
+    const cells = [];
+    for (let i = 0; i < size * size; i++) {
+      const seed = (text.charCodeAt(i % text.length) * 7 + i * 3 + (i >> 4)) % 100;
+      cells.push(seed > 50);
+    }
+
+    // Marcar las 3 esquinas tipo QR (finder patterns)
+    function setFinderPattern(startRow, startCol) {
+      for (let r = 0; r < 7; r++) {
+        for (let c = 0; c < 7; c++) {
+          const idx = (startRow + r) * size + (startCol + c);
+          if (idx < cells.length) {
+            const isBorder = r === 0 || r === 6 || c === 0 || c === 6;
+            const isCenter = r >= 2 && r <= 4 && c >= 2 && c <= 4;
+            cells[idx] = isBorder || isCenter;
+          }
+        }
+      }
+    }
+    setFinderPattern(0, 0);
+    setFinderPattern(0, size - 7);
+    setFinderPattern(size - 7, 0);
+
+    return `<div style="display:inline-block;padding:8px;background:#fff;border:1px solid #ccc;">
+              <div style="display:grid;grid-template:repeat(${size},1fr)/repeat(${size},1fr);width:120px;height:120px;">
+                ${cells.map(c => `<div style="background:${c ? '#000' : '#fff'}"></div>`).join('')}
+              </div>
+              <div style="text-align:center;font-size:9px;font-family:monospace;margin-top:4px;color:#444;">${escapeHtml(text.slice(0, 24))}</div>
+            </div>`;
+  };
+
+  window.etiquetaInsertQR = async function() {
+    const data = await uiForm({
+      title: 'Insertar QR',
+      fields: [{ name: 'text', label: 'Texto / URL para QR', type: 'text', required: true, placeholder: 'https://...' }],
+      submitText: 'Insertar'
+    });
+    const text = data && data.text;
+    if (!text) return;
+    const designer = document.querySelector('#designer, .designer-area, [data-designer], #etiqueta-preview, .preview-area');
+    if (!designer) {
+      showToast('Área de diseño no encontrada', 'warn');
+      return;
+    }
+    designer.innerHTML += await window.etiquetaGenerateQR(text);
+    showToast('QR insertado', 'success');
+  };
+
+  // ============================================================
+  // ETIQUETA - GENERADOR BARCODE (visual EAN-like)
+  // ============================================================
+  window.etiquetaGenerateBarcode = async function(code) {
+    if (!code) {
+      const data = await uiForm({
+        title: 'Generar código de barras',
+        fields: [{ name: 'code', label: 'Código numérico', type: 'text', required: true, pattern: '^[0-9]+$', placeholder: '7501234567890' }],
+        submitText: 'Generar'
+      });
+      code = data && data.code;
+    }
+    if (!code) return null;
+
+    let bars = '';
+    for (let i = 0; i < code.length; i++) {
+      const digit = parseInt(code[i]) || 0;
+      const widths = [2, 1, 3, 1, 2, 1, 3, 2, 1, 3];
+      const w = widths[digit] || 2;
+      bars += `<div style="width:${w}px;height:50px;background:#000;"></div>`;
+      bars += `<div style="width:1px;height:50px;background:#fff;"></div>`;
+    }
+
+    return `<div style="display:inline-block;padding:8px;background:#fff;border:1px solid #ccc;text-align:center;">
+              <div style="display:flex;align-items:center;">${bars}</div>
+              <div style="font-family:monospace;font-size:11px;letter-spacing:2px;margin-top:4px;">${escapeHtml(code)}</div>
+            </div>`;
+  };
+
+  window.etiquetaInsertBarcode = async function() {
+    const data = await uiForm({
+      title: 'Insertar código de barras',
+      fields: [{ name: 'code', label: 'Código numérico', type: 'text', required: true, pattern: '^[0-9]+$', placeholder: '7501234567890' }],
+      submitText: 'Insertar'
+    });
+    const code = data && data.code;
+    if (!code) return;
+    const designer = document.querySelector('#designer, .designer-area, [data-designer], #etiqueta-preview, .preview-area');
+    if (!designer) {
+      showToast('Área de diseño no encontrada', 'warn');
+      return;
+    }
+    designer.innerHTML += await window.etiquetaGenerateBarcode(code);
+    showToast('Barcode insertado', 'success');
+  };
+
+  // ============================================================
+  // ETIQUETA - DRAG AND DROP
+  // ============================================================
+  window.etiquetaEnableDragDrop = function() {
+    const designer = document.querySelector('#designer, .designer-area, [data-designer], #etiqueta-preview, .preview-area');
+    if (!designer) {
+      showToast('Designer no encontrado', 'warn');
+      return;
+    }
+
+    designer.querySelectorAll('*').forEach(el => {
+      if (el === designer) return;
+      el.draggable = true;
+      el.style.cursor = 'move';
+
+      el.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', el.outerHTML);
+        e.dataTransfer.effectAllowed = 'move';
+        el.style.opacity = '0.5';
+      });
+
+      el.addEventListener('dragend', () => {
+        el.style.opacity = '';
+      });
+    });
+
+    designer.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+    });
+
+    designer.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const html = e.dataTransfer.getData('text/plain');
+      if (html) {
+        const tmp = document.createElement('div');
+        tmp.innerHTML = html;
+        const node = tmp.firstChild;
+        if (node) {
+          designer.appendChild(node);
+        }
+      }
+    });
+
+    showToast('Drag & Drop activado', 'success');
+  };
+
+  // ============================================================
+  // ETIQUETA - PRINT PREVIEW
+  // ============================================================
+  window.etiquetaPrintPreview = function() {
+    const designer = document.querySelector('#designer, .designer-area, [data-designer], #etiqueta-preview, .preview-area');
+    if (!designer || !designer.innerHTML.trim()) {
+      showToast('Sin diseño para imprimir', 'warn');
+      return;
+    }
+
+    const printWin = window.open('', '_blank');
+    printWin.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Print Preview - Volvix Etiqueta</title>
+        <style>
+          body { margin: 20px; font-family: Arial, sans-serif; background: #f1f5f9; }
+          .preview-container { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+          .toolbar { background: #1e293b; color: #fff; padding: 10px; border-radius: 4px; margin-bottom: 12px; }
+          .toolbar button { background: #3b82f6; color: #fff; border: 0; padding: 8px 14px; cursor: pointer; border-radius: 4px; margin-right: 8px; }
+          .toolbar button:hover { background: #2563eb; }
+          @media print {
+            .toolbar { display: none; }
+            body { margin: 0; background: #fff; }
+            .preview-container { box-shadow: none; padding: 0; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="toolbar">
+          <button onclick="window.print()">Imprimir</button>
+          <button onclick="window.close()">Cerrar</button>
+          <span style="font-size:12px;opacity:0.8;">Volvix POS — Print Preview</span>
+        </div>
+        <div class="preview-container">${designer.innerHTML}</div>
+      </body>
+      </html>
+    `);
+    printWin.document.close();
+  };
+
+  // ============================================================
+  // ETIQUETA - EXPORT A PDF (vía window.print)
+  // ============================================================
+  window.etiquetaExportPDF = function() {
+    const designer = document.querySelector('#designer, .designer-area, [data-designer], #etiqueta-preview, .preview-area');
+    if (!designer || !designer.innerHTML.trim()) {
+      showToast('Sin diseño para exportar', 'warn');
+      return;
+    }
+
+    const printWin = window.open('', '_blank');
+    printWin.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Etiqueta Volvix.pdf</title>
+        <style>
+          @page { margin: 10mm; }
+          body { margin: 0; font-family: Arial, sans-serif; }
+        </style>
+      </head>
+      <body>
+        ${designer.innerHTML}
+        <script>
+          window.onload = function() {
+            window.print();
+            setTimeout(function(){ window.close(); }, 1500);
+          };
+        <\/script>
+      </body>
+      </html>
+    `);
+    printWin.document.close();
+    showToast('Use "Guardar como PDF" en el diálogo de impresión', 'info');
+  };
+
+  window.etiquetaClear = async function() {
+    const designer = document.querySelector('#designer, .designer-area, [data-designer], #etiqueta-preview, .preview-area');
+    if (!designer) return;
+    const ok = await uiDestructiveConfirm({
+      title: 'Limpiar diseño',
+      message: '¿Limpiar el diseño actual? Se perderá el contenido sin guardar.',
+      requireText: 'ELIMINAR',
+      danger: true
+    });
+    if (ok) {
+      designer.innerHTML = '';
+      showToast('Diseño limpiado', 'info');
+    }
+  };
+
+  // ============================================================
+  // LANDING - LEAD CAPTURE
+  // ============================================================
+  window.landingCaptureLead = async function() {
+    const data = await uiForm({
+      title: 'Contáctanos',
+      fields: [
+        { name: 'name',     label: 'Nombre completo', type: 'text',     required: true,  placeholder: 'Juan Pérez' },
+        { name: 'email',    label: 'Email',           type: 'email',    required: false, placeholder: 'tu@correo.com' },
+        { name: 'phone',    label: 'Teléfono',        type: 'tel',      mask: 'tel-mx',  required: false },
+        { name: 'company',  label: 'Empresa (opcional)', type: 'text',  required: false },
+        { name: 'interest', label: '¿Qué te interesa?', type: 'radio',
+          options: [
+            { value: 'POS',         label: 'POS' },
+            { value: 'Inventario',  label: 'Inventario' },
+            { value: 'Etiquetas',   label: 'Etiquetas' },
+            { value: 'Demo',        label: 'Demo' },
+            { value: 'General',     label: 'General' }
+          ],
+          default: 'General', required: true }
+      ],
+      submitText: 'Enviar'
+    });
+    if (!data || !data.name || !String(data.name).trim()) return;
+
+    const name = String(data.name).trim();
+    const email = String(data.email || '').trim();
+    const phone = String(data.phone || '').trim();
+
+    const lead = {
+      id: 'LEAD-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+      name: name,
+      email: email,
+      phone: phone,
+      company: String(data.company || '').trim(),
+      interest: String(data.interest || 'General').trim(),
+      source: location.pathname,
+      url: location.href,
+      userAgent: navigator.userAgent,
+      created: Date.now(),
+      createdISO: new Date().toISOString()
+    };
+
+    const leads = JSON.parse(localStorage.getItem('volvix:leads') || '[]');
+    leads.push(lead);
+    localStorage.setItem('volvix:leads', JSON.stringify(leads));
+
+    // Intentar enviar al backend (silently)
+    fetch(API + '/api/leads', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(lead)
+    }).catch(() => { /* offline ok */ });
+
+    showToast('¡Gracias ' + name.split(' ')[0] + '! Te contactaremos pronto. ID: ' + lead.id, 'success');
+  };
+
+  window.landingRequestDemo = function() {
+    showToast('Te llamamos en 24 h. Demo en: ' + API + '/login.html (demo/demo123)', 'info');
+    window.landingCaptureLead();
+  };
+
+  window.landingRequestQuote = async function() {
+    const data = await uiForm({
+      title: 'Solicitar cotización',
+      fields: [
+        { name: 'product', label: 'Producto', type: 'radio',
+          options: [
+            { value: 'POS',           label: 'POS' },
+            { value: 'Inventario',    label: 'Inventario' },
+            { value: 'Multi-sucursal',label: 'Multi-sucursal' },
+            { value: 'Etiquetas',     label: 'Etiquetas' },
+            { value: 'Todo',          label: 'Todo' }
+          ],
+          default: 'Todo', required: true },
+        { name: 'employees', label: 'Empleados o terminales', type: 'radio',
+          options: [
+            { value: '1-5',   label: '1 a 5' },
+            { value: '6-20',  label: '6 a 20' },
+            { value: '21-50', label: '21 a 50' },
+            { value: '50+',   label: 'Más de 50' }
+          ],
+          default: '1-5', required: true }
+      ],
+      submitText: 'Continuar'
+    });
+    if (!data) return;
+
+    const quote = {
+      id: 'QUOTE-' + Date.now(),
+      product: data.product || 'Todo',
+      employees: data.employees || '1-5',
+      created: Date.now()
+    };
+    const quotes = JSON.parse(localStorage.getItem('volvix:quotes') || '[]');
+    quotes.push(quote);
+    localStorage.setItem('volvix:quotes', JSON.stringify(quotes));
+
+    showToast('Cotización registrada (' + quote.id + '). Captura tus datos para recibir propuesta.', 'success');
+    window.landingCaptureLead();
+  };
+
+  window.landingTrackVisit = function() {
+    const visits = JSON.parse(localStorage.getItem('volvix:visits') || '[]');
+    visits.push({
+      page: location.pathname,
+      url: location.href,
+      timestamp: Date.now(),
+      timestampISO: new Date().toISOString(),
+      referer: document.referrer || 'direct',
+      userAgent: navigator.userAgent,
+      screen: screen.width + 'x' + screen.height,
+      lang: navigator.language
+    });
+    // Mantener solo las últimas 200
+    localStorage.setItem('volvix:visits', JSON.stringify(visits.slice(-200)));
+  };
+
+  window.landingGetStats = async function() {
+    const visits = JSON.parse(localStorage.getItem('volvix:visits') || '[]');
+    const leads = JSON.parse(localStorage.getItem('volvix:leads') || '[]');
+    const quotes = JSON.parse(localStorage.getItem('volvix:quotes') || '[]');
+
+    const pageCount = {};
+    visits.forEach(v => {
+      pageCount[v.page] = (pageCount[v.page] || 0) + 1;
+    });
+
+    const topPages = Object.keys(pageCount)
+      .sort((a, b) => pageCount[b] - pageCount[a])
+      .slice(0, 5)
+      .map(p => p + ': ' + pageCount[p])
+      .join('\n');
+
+    const summary =
+      'Visitas totales: ' + visits.length + ' | ' +
+      'Leads: ' + leads.length + ' | ' +
+      'Cotizaciones: ' + quotes.length + '. ' +
+      'Top: ' + (topPages.replace(/\n/g, ' · ') || 'sin datos');
+    if (uiAvailable() && typeof window.VolvixUI.alert === 'function') {
+      try { await window.VolvixUI.alert({ title: 'Stats Landing', message: summary }); }
+      catch { showToast(summary, 'info'); }
+    } else {
+      showToast(summary, 'info');
+    }
+  };
+
+  window.landingExportLeads = function() {
+    const leads = JSON.parse(localStorage.getItem('volvix:leads') || '[]');
+    if (leads.length === 0) {
+      showToast('Sin leads para exportar', 'warn');
+      return;
+    }
+    const headers = ['id', 'name', 'email', 'phone', 'company', 'interest', 'source', 'createdISO'];
+    const csv = [
+      headers.join(','),
+      ...leads.map(l => headers.map(h => JSON.stringify(l[h] || '')).join(','))
+    ].join('\n');
+
+    downloadFile('leads-' + Date.now() + '.csv', csv, 'text/csv');
+    showToast('Leads exportados: ' + leads.length, 'success');
+  };
+
+  // ============================================================
+  // REMOTE CONTROL
+  // ============================================================
+  window.remoteValidateCode = async function() {
+    const data = await uiForm({
+      title: 'Soporte remoto',
+      fields: [{
+        name: 'code',
+        label: 'Código de soporte (4-8 dígitos)',
+        type: 'text',
+        required: true,
+        pattern: '^[0-9]{4,8}$',
+        placeholder: '123456',
+        help: 'Te lo proporciona el técnico de soporte'
+      }],
+      submitText: 'Conectar'
+    });
+    const code = data && data.code;
+    if (!code || !/^\d{4,8}$/.test(code)) {
+      if (data) showToast('Código inválido (debe ser 4-8 dígitos)', 'error');
+      return false;
+    }
+
+    // Simulación: códigos válidos terminan en par
+    const isValid = code.length >= 4 && (parseInt(code.slice(-1)) % 2 === 0);
+
+    if (!isValid) {
+      showToast('Código no válido o expirado', 'error');
+      return false;
+    }
+
+    showToast('Código validado, conectando...', 'success');
+    window.remoteSimulateConnection(code);
+    return true;
+  };
+
+  window.remoteSimulateConnection = function(code) {
+    let overlay = document.getElementById('remote-overlay');
+    if (overlay) overlay.remove();
+
+    overlay = document.createElement('div');
+    overlay.id = 'remote-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:99998;display:flex;align-items:center;justify-content:center;color:#fff;font-family:sans-serif;';
+    overlay.innerHTML = `
+      <div style="text-align:center;">
+        <div style="width:80px;height:80px;border:4px solid #3b82f6;border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 20px;"></div>
+        <div style="font-size:20px;margin-bottom:8px;">Conectando sesión remota...</div>
+        <div style="font-size:14px;opacity:0.7;">Código: ${escapeHtml(code)}</div>
+        <div id="remote-status" style="font-size:12px;margin-top:16px;opacity:0.8;">Estableciendo conexión segura...</div>
+        <button id="remote-cancel" style="margin-top:24px;padding:10px 22px;background:#dc2626;color:#fff;border:0;border-radius:6px;cursor:pointer;font-size:14px;">Cancelar</button>
+      </div>
+      <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+    `;
+    document.body.appendChild(overlay);
+
+    document.getElementById('remote-cancel').onclick = () => {
+      overlay.remove();
+      showToast('Sesión remota cancelada', 'warn');
+    };
+
+    const status = document.getElementById('remote-status');
+    const steps = [
+      'Estableciendo conexión segura...',
+      'Verificando credenciales...',
+      'Negociando protocolo...',
+      'Sesión activa: control remoto habilitado',
+    ];
+    let i = 0;
+    const interval = setInterval(() => {
+      if (!document.body.contains(overlay)) { clearInterval(interval); return; }
+      i++;
+      if (i < steps.length && status) status.textContent = steps[i];
+      if (i >= steps.length) {
+        clearInterval(interval);
+        setTimeout(() => {
+          if (document.body.contains(overlay)) {
+            overlay.remove();
+            window.remoteLogSession(code, 'connected');
+            showToast('Sesión remota activa: un técnico se conectó a tu sistema.', 'success');
+          }
+        }, 1000);
+      }
+    }, 1200);
+  };
+
+  window.remoteLogSession = function(code, status) {
+    const log = JSON.parse(localStorage.getItem('volvix:remote:log') || '[]');
+    log.push({
+      code, status,
+      timestamp: Date.now(),
+      timestampISO: new Date().toISOString(),
+      user: session ? (session.username || session.email) : 'anonymous'
+    });
+    localStorage.setItem('volvix:remote:log', JSON.stringify(log.slice(-50)));
+  };
+
+  window.remoteShowLog = async function() {
+    const log = JSON.parse(localStorage.getItem('volvix:remote:log') || '[]');
+    if (log.length === 0) {
+      showToast('Sin sesiones remotas registradas', 'info');
+      return;
+    }
+    const lines = log.slice(-10).reverse().map(l =>
+      l.timestampISO + ' | ' + l.code + ' | ' + l.status + ' | ' + l.user
+    ).join('\n');
+    if (uiAvailable() && typeof window.VolvixUI.alert === 'function') {
+      try { await window.VolvixUI.alert({ title: 'Últimas sesiones remotas', message: lines, monospace: true }); return; }
+      catch {}
+    }
+    showToast('Últimas sesiones: ' + lines.split('\n')[0], 'info');
+  };
+
+  window.remoteDisconnect = function() {
+    const overlay = document.getElementById('remote-overlay');
+    if (overlay) overlay.remove();
+    window.remoteLogSession('---', 'disconnected');
+    showToast('Sesión remota cerrada', 'info');
+  };
+
+  // ============================================================
+  // UTILIDADES - CALCULADORA IVA
+  // ============================================================
+  async function uiInfoAlert(title, message) {
+    if (uiAvailable() && typeof window.VolvixUI.alert === 'function') {
+      try { await window.VolvixUI.alert({ title: title, message: message }); return; }
+      catch {}
+    }
+    showToast(title + ': ' + message.replace(/\n/g, ' · '), 'info');
+  }
+
+  window.utilCalcIVA = async function() {
+    const data = await uiForm({
+      title: 'Calculadora IVA',
+      fields: [
+        { name: 'monto', label: 'Monto sin IVA', type: 'number', required: true, min: 0, step: 0.01 },
+        { name: 'tasa',  label: 'Tasa IVA (%)',  type: 'number', required: true, min: 0, max: 100, step: 0.01, default: 16 }
+      ],
+      submitText: 'Calcular'
+    });
+    if (!data) return;
+    const monto = parseFloat(data.monto) || 0;
+    const tasaPct = parseFloat(data.tasa);
+    if (!monto || isNaN(tasaPct)) return;
+    const tasa = tasaPct / 100;
+    const iva = monto * tasa;
+    const total = monto + iva;
+    await uiInfoAlert('Cálculo IVA',
+      'Subtotal: $' + monto.toFixed(2) + '\n' +
+      'IVA (' + tasaPct.toFixed(0) + '%): $' + iva.toFixed(2) + '\n' +
+      'TOTAL: $' + total.toFixed(2)
+    );
+  };
+
+  window.utilCalcComision = async function() {
+    const data = await uiForm({
+      title: 'Calculadora de comisión',
+      fields: [
+        { name: 'monto', label: 'Monto base',     type: 'number', required: true, min: 0, step: 0.01 },
+        { name: 'pct',   label: '% Comisión',     type: 'number', required: true, min: 0, max: 100, step: 0.01, default: 10 }
+      ],
+      submitText: 'Calcular'
+    });
+    if (!data) return;
+    const monto = parseFloat(data.monto) || 0;
+    const pct = parseFloat(data.pct);
+    if (!monto || isNaN(pct)) return;
+    const comision = monto * pct / 100;
+    const neto = monto - comision;
+    await uiInfoAlert('Cálculo Comisión',
+      'Bruto: $' + monto.toFixed(2) + '\n' +
+      'Comisión (' + pct + '%): $' + comision.toFixed(2) + '\n' +
+      'NETO: $' + neto.toFixed(2)
+    );
+  };
+
+  window.utilCalcDescuento = async function() {
+    const data = await uiForm({
+      title: 'Calculadora de descuento',
+      fields: [
+        { name: 'precio', label: 'Precio original', type: 'number', required: true, min: 0, step: 0.01 },
+        { name: 'desc',   label: '% Descuento',     type: 'number', required: true, min: 0, max: 100, step: 0.01 }
+      ],
+      submitText: 'Calcular'
+    });
+    if (!data) return;
+    const precio = parseFloat(data.precio) || 0;
+    const desc = parseFloat(data.desc);
+    if (!precio || isNaN(desc)) return;
+    const ahorro = precio * desc / 100;
+    const final = precio - ahorro;
+    await uiInfoAlert('Cálculo Descuento',
+      'Precio original: $' + precio.toFixed(2) + '\n' +
+      'Descuento (' + desc + '%): -$' + ahorro.toFixed(2) + '\n' +
+      'PRECIO FINAL: $' + final.toFixed(2)
+    );
+  };
+
+  // ============================================================
+  // UTILIDADES - CONVERSOR DE UNIDADES
+  // ============================================================
+  const UNIT_CONVERSIONS = {
+    longitud: {
+      m: 1, cm: 0.01, mm: 0.001, km: 1000,
+      in: 0.0254, ft: 0.3048, yd: 0.9144, mi: 1609.344
+    },
+    peso: {
+      kg: 1, g: 0.001, mg: 0.000001, ton: 1000,
+      lb: 0.45359237, oz: 0.0283495231
+    },
+    volumen: {
+      l: 1, ml: 0.001, m3: 1000,
+      gal: 3.78541, qt: 0.946353, pt: 0.473176
+    },
+    temperatura: { C: 'special', F: 'special', K: 'special' }
+  };
+
+  window.utilConvertUnit = async function() {
+    const cats = Object.keys(UNIT_CONVERSIONS);
+
+    // Paso 1: elegir categoría (radio, son <=7)
+    const step1 = await uiForm({
+      title: 'Conversor de unidades',
+      fields: [{
+        name: 'cat',
+        label: 'Categoría',
+        type: 'radio',
+        options: cats.map(c => ({ value: c, label: c.charAt(0).toUpperCase() + c.slice(1) })),
+        default: cats[0],
+        required: true
+      }],
+      submitText: 'Continuar'
+    });
+    if (!step1 || !step1.cat) return;
+    const cat = step1.cat;
+    const units = Object.keys(UNIT_CONVERSIONS[cat]);
+
+    // Paso 2: valor y unidades (radio si <=7, select si más)
+    const useRadio = units.length <= 7;
+    const step2 = await uiForm({
+      title: 'Conversión: ' + cat,
+      fields: [
+        { name: 'value',    label: 'Valor',          type: 'number', required: true, step: 0.0001 },
+        { name: 'fromUnit', label: 'Unidad origen',  type: useRadio ? 'radio' : 'select',
+          options: units.map(u => ({ value: u, label: u })), default: units[0], required: true },
+        { name: 'toUnit',   label: 'Unidad destino', type: useRadio ? 'radio' : 'select',
+          options: units.map(u => ({ value: u, label: u })), default: units[1] || units[0], required: true }
+      ],
+      submitText: 'Convertir'
+    });
+    if (!step2) return;
+
+    const value = parseFloat(step2.value);
+    if (isNaN(value)) return;
+    const fromUnit = step2.fromUnit, toUnit = step2.toUnit;
+    if (!fromUnit || !toUnit) return;
+
+    let result;
+    if (cat === 'temperatura') {
+      const toC   = (v, u) => u === 'C' ? v : u === 'F' ? (v - 32) * 5 / 9 : v - 273.15;
+      const fromC = (v, u) => u === 'C' ? v : u === 'F' ? v * 9 / 5 + 32   : v + 273.15;
+      result = fromC(toC(value, fromUnit), toUnit);
+    } else {
+      const factorFrom = UNIT_CONVERSIONS[cat][fromUnit];
+      const factorTo = UNIT_CONVERSIONS[cat][toUnit];
+      if (!factorFrom || !factorTo) {
+        showToast('Unidad inválida', 'error');
+        return;
+      }
+      result = (value * factorFrom) / factorTo;
+    }
+
+    await uiInfoAlert('Conversión', value + ' ' + fromUnit + ' = ' + result.toFixed(4) + ' ' + toUnit);
+  };
+
+  // ============================================================
+  // UTILIDADES - IMPORT/EXPORT CSV
+  // ============================================================
+  function parseCSVLine(line) {
+    const result = [];
+    let cur = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"' && line[i + 1] === '"') { cur += '"'; i++; continue; }
+      if (ch === '"') { inQuotes = !inQuotes; continue; }
+      if (ch === ',' && !inQuotes) { result.push(cur); cur = ''; continue; }
+      cur += ch;
+    }
+    result.push(cur);
+    return result.map(s => s.trim());
+  }
+
+  window.utilImportCSV = function() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.csv,.txt';
+    input.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const lines = text.split(/\r?\n/).filter(l => l.trim());
+        if (lines.length < 2) {
+          showToast('CSV vacío o inválido', 'error');
+          return;
+        }
+        const headers = parseCSVLine(lines[0]);
+        const products = [];
+        for (let i = 1; i < lines.length; i++) {
+          const values = parseCSVLine(lines[i]);
+          const product = {};
+          headers.forEach((h, idx) => {
+            let v = values[idx] || '';
+            if (h === 'price' || h === 'cost' || h === 'stock' || h === 'precio' || h === 'costo') {
+              const num = parseFloat(v);
+              v = isNaN(num) ? 0 : num;
+            }
+            product[h] = v;
+          });
+          products.push(product);
+        }
+
+        const okImport = await uiConfirm({
+          title: 'Importar CSV',
+          message: 'Encontrados ' + products.length + ' productos en el CSV. ¿Importar al sistema?'
+        });
+        if (!okImport) return;
+
+        showToast('Importando ' + products.length + ' productos...', 'info');
+        let success = 0, failed = 0;
+        for (const p of products) {
+          try {
+            const res = await fetch(API + '/api/products', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(p)
+            });
+            if (res.ok) success++; else failed++;
+          } catch { failed++; }
+        }
+
+        // Backup local
+        const local = JSON.parse(localStorage.getItem('volvix:products') || '[]');
+        localStorage.setItem('volvix:products', JSON.stringify(local.concat(products)));
+
+        const summary = 'Éxito: ' + success + ' · Fallaron: ' + failed + ' · Total: ' + products.length;
+        showToast('Importación completa — ' + summary, failed === 0 ? 'success' : 'warn');
+        if (uiAvailable() && typeof window.VolvixUI.alert === 'function') {
+          try { await window.VolvixUI.alert({ title: 'Importación completa', message: 'Éxito: ' + success + '\nFallaron: ' + failed + '\nTotal: ' + products.length }); } catch {}
+        }
+      } catch (err) {
+        showToast('Error leyendo CSV: ' + err.message, 'error');
+      }
+    };
+    input.click();
+  };
+
+  window.utilExportCSV = async function() {
+    let products = [];
+    try {
+      const res = await fetch(API + '/api/products');
+      products = await res.json();
+    } catch {}
+
+    if (!products || products.length === 0) {
+      try {
+        products = JSON.parse(localStorage.getItem('volvix:products') || '[]');
+      } catch {}
+    }
+
+    if (!products || products.length === 0) {
+      showToast('Sin productos para exportar', 'warn');
+      return;
+    }
+
+    const headers = ['code', 'name', 'category', 'price', 'cost', 'stock'];
+    const csv = [
+      headers.join(','),
+      ...products.map(p =>
+        headers.map(h => JSON.stringify(p[h] !== undefined && p[h] !== null ? p[h] : '')).join(',')
+      )
+    ].join('\n');
+
+    downloadFile('productos-' + Date.now() + '.csv', csv, 'text/csv');
+    showToast('Exportados ' + products.length + ' productos', 'success');
+  };
+
+  function downloadFile(filename, content, mime) {
+    const blob = new Blob([content], { type: mime || 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      a.remove();
+      URL.revokeObjectURL(url);
+    }, 100);
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  // ============================================================
+  // WIRING DE BOTONES (auto-detección)
+  // ============================================================
+  function wireButtons() {
+    document.querySelectorAll('button:not([data-extras-wired]), a[role="button"]:not([data-extras-wired])').forEach(btn => {
+      const text = (btn.textContent || '').trim().toLowerCase();
+      const onclick = btn.getAttribute('onclick') || '';
+      const id = (btn.id || '').toLowerCase();
+      const dataAction = (btn.getAttribute('data-action') || '').toLowerCase();
+
+      // Si ya está cableado por otro script, lo dejamos
+      if (onclick && (onclick.includes('etiqueta') || onclick.includes('landing') || onclick.includes('util') || onclick.includes('remote'))) {
+        btn.dataset.extrasWired = 'true';
+        return;
+      }
+
+      const matches = (...words) => words.some(w => text.includes(w) || id.includes(w) || dataAction.includes(w));
+      const wire = (fn) => {
+        btn.addEventListener('click', (e) => { e.preventDefault(); fn(); });
+        btn.dataset.extrasWired = 'true';
+      };
+
+      // ETIQUETA
+      if (matches('plantilla precio', 'tpl precio')) {
+        wire(() => window.etiquetaUseTemplate('precio'));
+      } else if (matches('plantilla qr', 'tpl qr', 'plantilla con qr')) {
+        wire(() => window.etiquetaUseTemplate('qr'));
+      } else if (matches('plantilla envio', 'plantilla envío', 'plantilla direccion')) {
+        wire(() => window.etiquetaUseTemplate('direccion'));
+      } else if (matches('plantilla promo', 'plantilla promocion')) {
+        wire(() => window.etiquetaUseTemplate('promo'));
+      } else if (matches('plantillas', 'templates', 'ver plantillas')) {
+        wire(() => window.etiquetaShowTemplates());
+      } else if (matches('guardar plantilla', 'save template')) {
+        wire(() => window.etiquetaSaveCurrentAsTemplate());
+      } else if (matches('mis plantillas', 'plantillas custom')) {
+        wire(() => window.etiquetaListCustomTemplates());
+      } else if (matches('insertar qr', 'agregar qr', 'add qr')) {
+        wire(() => window.etiquetaInsertQR());
+      } else if (matches('insertar barcode', 'codigo barras', 'insertar barras')) {
+        wire(() => window.etiquetaInsertBarcode());
+      } else if (matches('masivo', 'todos los productos', 'imprimir todos')) {
+        wire(() => window.etiquetaGenerateMasive());
+      } else if (matches('preview', 'vista previa', 'previsualizar')) {
+        wire(() => window.etiquetaPrintPreview());
+      } else if (matches('export pdf', 'exportar pdf', 'pdf')) {
+        wire(() => window.etiquetaExportPDF());
+      } else if (matches('limpiar diseño', 'clear design', 'limpiar etiqueta')) {
+        wire(() => window.etiquetaClear());
+      } else if (matches('drag', 'arrastrar')) {
+        wire(() => window.etiquetaEnableDragDrop());
+      }
+      // LANDING
+      else if (matches('demo', 'solicitar demo', 'request demo')) {
+        wire(() => window.landingRequestDemo());
+      } else if (matches('cotizar', 'cotización', 'quote')) {
+        wire(() => window.landingRequestQuote());
+      } else if (matches('contacto', 'contactar', 'contact')) {
+        wire(() => window.landingCaptureLead());
+      } else if (matches('exportar leads', 'export leads')) {
+        wire(() => window.landingExportLeads());
+      } else if (matches('stats landing', 'estadisticas landing')) {
+        wire(() => window.landingGetStats());
+      }
+      // REMOTE
+      else if (matches('soporte remoto', 'remote support', 'conectar soporte')) {
+        wire(() => window.remoteValidateCode());
+      } else if (matches('log remoto', 'historial remoto', 'sesiones remotas')) {
+        wire(() => window.remoteShowLog());
+      } else if (matches('desconectar remoto', 'cerrar remoto')) {
+        wire(() => window.remoteDisconnect());
+      }
+      // UTILS
+      else if (matches('importar csv', 'import csv')) {
+        wire(() => window.utilImportCSV());
+      } else if (matches('exportar csv', 'export csv')) {
+        wire(() => window.utilExportCSV());
+      } else if (matches('calculadora iva', 'calc iva', 'iva')) {
+        wire(() => window.utilCalcIVA());
+      } else if (matches('comision', 'calc comision', 'comisión')) {
+        wire(() => window.utilCalcComision());
+      } else if (matches('descuento', 'calc descuento')) {
+        wire(() => window.utilCalcDescuento());
+      } else if (matches('convertir unidad', 'conversor', 'unit convert')) {
+        wire(() => window.utilConvertUnit());
+      }
+    });
+  }
+
+  // ============================================================
+  // INIT
+  // ============================================================
+  function init() {
+    loadSession();
+
+    // Tracking automático en landing
+    if (location.pathname.includes('landing') || location.pathname === '/' || location.pathname === '/index.html') {
+      window.landingTrackVisit();
+    }
+
+    wireButtons();
+
+    // Re-cablear cada 2s (para botones añadidos dinámicamente)
+    setInterval(wireButtons, 2000);
+
+    // Mutation observer (más eficiente)
+    if (typeof MutationObserver !== 'undefined') {
+      const obs = new MutationObserver(() => wireButtons());
+      try {
+        obs.observe(document.body, { childList: true, subtree: true });
+      } catch {}
+    }
+
+    console.log('[EXTRAS-WIRING] Inicializado correctamente');
+  }
+
+  // ============================================================
+  // API EXPUESTA
+  // ============================================================
+  window.ExtrasAPI = {
+    version: VERSION,
+    // Etiqueta
+    useTemplate: window.etiquetaUseTemplate,
+    showTemplates: window.etiquetaShowTemplates,
+    saveTemplate: window.etiquetaSaveCurrentAsTemplate,
+    listCustom: window.etiquetaListCustomTemplates,
+    deleteCustom: window.etiquetaDeleteCustomTemplate,
+    generateMasive: window.etiquetaGenerateMasive,
+    generateQR: window.etiquetaGenerateQR,
+    insertQR: window.etiquetaInsertQR,
+    generateBarcode: window.etiquetaGenerateBarcode,
+    insertBarcode: window.etiquetaInsertBarcode,
+    enableDragDrop: window.etiquetaEnableDragDrop,
+    printPreview: window.etiquetaPrintPreview,
+    exportPDF: window.etiquetaExportPDF,
+    clearDesign: window.etiquetaClear,
+    // Landing
+    captureLead: window.landingCaptureLead,
+    requestDemo: window.landingRequestDemo,
+    requestQuote: window.landingRequestQuote,
+    trackVisit: window.landingTrackVisit,
+    getStats: window.landingGetStats,
+    exportLeads: window.landingExportLeads,
+    // Remote
+    validateRemoteCode: window.remoteValidateCode,
+    remoteLog: window.remoteShowLog,
+    remoteDisconnect: window.remoteDisconnect,
+    // Utils
+    importCSV: window.utilImportCSV,
+    exportCSV: window.utilExportCSV,
+    calcIVA: window.utilCalcIVA,
+    calcComision: window.utilCalcComision,
+    calcDescuento: window.utilCalcDescuento,
+    convertUnit: window.utilConvertUnit,
+    // Internal
+    _templates: ETIQUETA_TEMPLATES,
+    _wireButtons: wireButtons
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
