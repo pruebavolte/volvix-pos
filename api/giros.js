@@ -311,19 +311,23 @@ async function existsGiro(ctx, req, res, slug) {
   });
 }
 
-// ---------- AI generation ----------
-function callOpenAI(apiKey, prompt) {
+// ---------- AI generation (2026-05 refactor: HTML legacy → JSON estructurado) ----------
+// Acepta (apiKey, systemPrompt, userPrompt). Devuelve string contenido del LLM.
+function callOpenAI(apiKey, systemPrompt, userPrompt, opts) {
+  opts = opts || {};
   return new Promise((resolve, reject) => {
     const body = JSON.stringify({
-      model: 'gpt-4o-mini',
+      model: opts.model || 'gpt-4o-mini',
       messages: [
-        { role: 'system', content: 'You are an expert landing-page copywriter for SaaS POS verticals in Spanish (Mexico). Output ONLY valid HTML body content (no <html>, <head>, <body> wrappers).' },
-        { role: 'user', content: prompt },
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
       ],
-      max_tokens: 1500,
-      temperature: 0.7,
+      max_tokens: opts.max_tokens || 2500,
+      temperature: typeof opts.temperature === 'number' ? opts.temperature : 0.4,
+      // Forzar JSON cuando sea posible (gpt-4o family lo soporta)
+      response_format: opts.response_format || undefined,
     });
-    const opts = {
+    const reqOpts = {
       hostname: 'api.openai.com',
       port: 443,
       path: '/v1/chat/completions',
@@ -334,23 +338,271 @@ function callOpenAI(apiKey, prompt) {
         'Content-Length': Buffer.byteLength(body),
       },
     };
-    const req = https.request(opts, (res) => {
+    const r = https.request(reqOpts, (resp) => {
       let data = '';
-      res.on('data', (c) => data += c);
-      res.on('end', () => {
+      resp.on('data', (c) => data += c);
+      resp.on('end', () => {
         try {
           const parsed = JSON.parse(data);
-          if (res.statusCode >= 400) return reject(new Error('OpenAI ' + res.statusCode + ': ' + data));
+          if (resp.statusCode >= 400) return reject(new Error('OpenAI ' + resp.statusCode + ': ' + data));
           const content = parsed.choices && parsed.choices[0] && parsed.choices[0].message && parsed.choices[0].message.content;
           resolve(content || '');
         } catch (e) { reject(e); }
       });
     });
-    req.on('error', reject);
-    req.setTimeout(20000, () => { req.destroy(new Error('OpenAI timeout')); });
-    req.write(body);
-    req.end();
+    r.on('error', reject);
+    r.setTimeout(opts.timeout_ms || 20000, () => { r.destroy(new Error('OpenAI timeout')); });
+    r.write(body);
+    r.end();
   });
+}
+
+// Lista cerrada de modulos validos. Si el LLM devuelve algo fuera de aqui, falla validacion.
+const MODULOS_VALIDOS = new Set([
+  'pos','comandera','kds','mesas','kitchen','inventario','granel',
+  'recetas','modificadores','lealtad','membresias','delivery','whatsapp',
+  'reportes','corte','facturacion','comisiones','agenda','citas','pedidos',
+  'credito','abonos','productos_por_gramaje','caducidad','tallas_colores',
+  'multinivel','autoservicio','qr_pago'
+]);
+
+const CAMPOS_VALIDOS = new Set([
+  'gramaje','caducidad','sabor_variante','talla_color',
+  'comision_multinivel','receta','fecha_servicio','duracion_servicio'
+]);
+
+// Anti-genérico: estas palabras NO pueden aparecer como funcionalidades únicas.
+const FORBIDDEN_FUNCS_RE = /\b(ventas?|inventarios?|clientes?|reportes?|cobros?|punto de venta|POS|facturaci[oó]n|corte de caja)\b/i;
+
+function validateGiroResponse(json) {
+  if (!json || typeof json !== 'object') return { ok: false, error: 'not_object' };
+  const required = ['nombre_comercial','slug','descripcion','terminologia',
+                    'funcionalidades_unicas','productos_detectados',
+                    'modulos_a_activar','modulos_a_desactivar'];
+  for (const k of required) {
+    if (!(k in json)) return { ok: false, error: 'missing_field', detail: k };
+  }
+  if (typeof json.nombre_comercial !== 'string' || json.nombre_comercial.length < 3) return { ok:false, error:'nombre_invalid' };
+  if (typeof json.slug !== 'string' || !/^[a-z0-9-]+$/.test(json.slug)) return { ok:false, error:'slug_invalid' };
+  if (typeof json.descripcion !== 'string' || json.descripcion.length < 10) return { ok:false, error:'descripcion_short' };
+  if (!json.terminologia || typeof json.terminologia !== 'object') return { ok:false, error:'term_invalid' };
+
+  if (!Array.isArray(json.funcionalidades_unicas) || json.funcionalidades_unicas.length !== 3) {
+    return { ok:false, error:'funcs_must_be_3' };
+  }
+  for (const f of json.funcionalidades_unicas) {
+    if (typeof f !== 'string' || f.length < 20) return { ok:false, error:'func_too_short', detail:f };
+    if (FORBIDDEN_FUNCS_RE.test(f)) return { ok:false, error:'func_too_generic', detail:f };
+  }
+
+  if (!Array.isArray(json.productos_detectados) || json.productos_detectados.length !== 6) {
+    return { ok:false, error:'prods_must_be_6' };
+  }
+  for (const p of json.productos_detectados) {
+    if (!p || typeof p !== 'object') return { ok:false, error:'prod_invalid' };
+    if (typeof p.name !== 'string' || p.name.length < 3) return { ok:false, error:'prod_name_invalid', detail:p };
+  }
+
+  if (!Array.isArray(json.modulos_a_activar)) return { ok:false, error:'modulos_act_array' };
+  for (const m of json.modulos_a_activar) {
+    if (!MODULOS_VALIDOS.has(m)) return { ok:false, error:'modulo_desconocido', detail:m };
+  }
+  if (!Array.isArray(json.modulos_a_desactivar)) return { ok:false, error:'modulos_des_array' };
+  for (const m of json.modulos_a_desactivar) {
+    if (!MODULOS_VALIDOS.has(m)) return { ok:false, error:'modulo_desconocido', detail:m };
+  }
+
+  // campos_no_disponibles y synonyms son opcionales (con validación si vienen)
+  if (json.campos_no_disponibles && Array.isArray(json.campos_no_disponibles)) {
+    for (const c of json.campos_no_disponibles) {
+      if (!CAMPOS_VALIDOS.has(c)) return { ok:false, error:'campo_desconocido', detail:c };
+    }
+  }
+  if (json.synonyms && !Array.isArray(json.synonyms)) return { ok:false, error:'synonyms_array' };
+
+  return { ok: true };
+}
+
+const GIRO_SYSTEM_PROMPT =
+'Eres un experto en diseño de sistemas POS especializados para negocios MX.\n' +
+'Tu tarea: dado el nombre de un giro de negocio, devolver UN OBJETO JSON\n' +
+'estricto que describa cómo se debe configurar el POS para ese giro.\n\n' +
+'REGLAS DE ORO:\n' +
+'1. Las "funcionalidades_unicas" deben ser EXCLUSIVAS del giro. PROHIBIDO usar:\n' +
+'   "ventas", "inventario", "clientes", "reportes", "punto de venta", "POS",\n' +
+'   "cobros", "facturación", "corte de caja". Esos son básicos universales.\n' +
+'   Si no se te ocurren funciones únicas, piensa: ¿qué problema operativo\n' +
+'   resuelve este giro que NO tiene una farmacia? Eso es lo único.\n\n' +
+'2. Los "productos_detectados" deben ser productos REALES y RECONOCIBLES\n' +
+'   del giro (marcas y nombres específicos cuando sea apropiado, ej.\n' +
+'   "Fórmula 1" para Herbalife, "Sky Vodka" para bar). Si la marca no es\n' +
+'   conocida en MX, usa nombres genéricos pero SIEMPRE específicos del giro\n' +
+'   (ej. "Pastor por kilo" para taquería, no "carne genérica"). Mínimo 6,\n' +
+'   máximo 6.\n\n' +
+'3. La "terminologia" debe sustituir las palabras genéricas (cliente,\n' +
+'   producto, venta) por las palabras que el dueño REALMENTE usa en su día\n' +
+'   a día. Si en ese giro se dice "cliente", devuelve "Cliente" — no\n' +
+'   inventes.\n\n' +
+'4. "modulos_a_activar" / "modulos_a_desactivar" sólo de esta lista\n' +
+'   cerrada (no inventes módulos): pos, comandera, kds, mesas, kitchen,\n' +
+'   inventario, granel, recetas, modificadores, lealtad, membresias,\n' +
+'   delivery, whatsapp, reportes, corte, facturacion, comisiones, agenda,\n' +
+'   citas, pedidos, credito, abonos, productos_por_gramaje, caducidad,\n' +
+'   tallas_colores, multinivel, autoservicio, qr_pago.\n\n' +
+'5. "campos_no_disponibles" lista los campos que necesitarías en el\n' +
+'   formulario de producto pero NO existen hoy. Lista cerrada: gramaje,\n' +
+'   caducidad, sabor_variante, talla_color, comision_multinivel, receta,\n' +
+'   fecha_servicio, duracion_servicio.\n\n' +
+'OUTPUT: SOLO el JSON, sin markdown, sin explicación, sin texto antes o\n' +
+'después. Debe parsear con JSON.parse() directo.';
+
+function buildUserPrompt(giroInput, extraHint) {
+  const hint = extraHint ? ('\n\nNOTA: ' + extraHint) : '';
+  return (
+    'Giro de negocio: "' + giroInput + '"\n\n' +
+    'Devuelve el JSON con esta forma EXACTA (sin campos extra, sin omitir):\n\n' +
+    '{\n' +
+    '  "nombre_comercial": "string · 1-3 palabras pegado tipo HerbalifePro",\n' +
+    '  "slug": "string · lowercase-con-guiones, sin acentos",\n' +
+    '  "descripcion": "string · 1 oración, max 140 chars",\n' +
+    '  "terminologia": {\n' +
+    '    "cliente": "string",\n' +
+    '    "producto": "string",\n' +
+    '    "venta": "string"\n' +
+    '  },\n' +
+    '  "funcionalidades_unicas": [\n' +
+    '    "string · 1 oración con verbo de acción",\n' +
+    '    "string · ...",\n' +
+    '    "string · ..."\n' +
+    '  ],\n' +
+    '  "productos_detectados": [\n' +
+    '    {\n' +
+    '      "name": "string · max 60 chars",\n' +
+    '      "category": "string · max 30 chars",\n' +
+    '      "estimated_price": number,\n' +
+    '      "metadata": {\n' +
+    '        "unit": "pieza|kg|g|ml|l|servicio (opcional)",\n' +
+    '        "expires_in_days": number_o_null,\n' +
+    '        "variant": "sabor o variante si aplica",\n' +
+    '        "extra": {}\n' +
+    '      }\n' +
+    '    }\n' +
+    '  ],\n' +
+    '  "modulos_a_activar": ["string", "..."],\n' +
+    '  "modulos_a_desactivar": ["string", "..."],\n' +
+    '  "campos_no_disponibles": ["string", "..."],\n' +
+    '  "synonyms": ["string", "..."]\n' +
+    '}\n\n' +
+    'Recuerda: 3 funcionalidades únicas, 6 productos, sin frases genéricas.' + hint
+  );
+}
+
+// Limpia respuesta del LLM si viene con ```json ... ``` u otros adornos.
+function extractJson(raw) {
+  if (!raw) return null;
+  let s = String(raw).trim();
+  // Si viene con fence ```json ... ```
+  const fence = /^```(?:json)?\s*\n([\s\S]*?)\n```\s*$/i.exec(s);
+  if (fence) s = fence[1].trim();
+  // Buscar primer { y último }
+  const first = s.indexOf('{');
+  const last  = s.lastIndexOf('}');
+  if (first < 0 || last < 0 || last < first) return null;
+  s = s.substring(first, last + 1);
+  try { return JSON.parse(s); } catch (_) { return null; }
+}
+
+// 2026-05: persistencia transaccional best-effort en verticals + vertical_templates.
+// NO escribimos a giros_synonyms (sinónimos quedan en verticals.settings.synonyms).
+async function persistGeneratedGiro(ctx, slug, payload, originalQuery) {
+  if (!ctx || typeof ctx.supabaseRequest !== 'function') return { ok: false, reason: 'no_supabase_ctx' };
+
+  // 1) Upsert verticals (UNIQUE en code → resolution=merge-duplicates)
+  const verticalRow = {
+    code: slug,
+    name: payload.nombre_comercial,
+    description: payload.descripcion || null,
+    icon: '✨',
+    color: '#EA580C',
+    modules: Array.isArray(payload.modulos_a_activar) ? payload.modulos_a_activar : [],
+    settings: {
+      terminologia: payload.terminologia || {},
+      funcionalidades_unicas: payload.funcionalidades_unicas || [],
+      modulos_a_desactivar: payload.modulos_a_desactivar || [],
+      campos_no_disponibles: payload.campos_no_disponibles || [],
+      synonyms: Array.isArray(payload.synonyms) ? payload.synonyms : [],
+      generated_by_ai: true,
+      generated_at: new Date().toISOString(),
+      source_query: originalQuery
+    },
+    active: true
+  };
+
+  let verticalOk = false;
+  try {
+    // supabaseRequest helper acepta objeto o array; para upsert lo wrapeamos en array
+    // y pasamos resolution=merge-duplicates si el helper lo soporta via tercer param.
+    await ctx.supabaseRequest('POST', '/verticals?on_conflict=code', [verticalRow], {
+      'Prefer': 'resolution=merge-duplicates,return=minimal'
+    });
+    verticalOk = true;
+  } catch (e) {
+    // Si el helper no acepta headers extra, intentar fallback: DELETE + INSERT
+    try {
+      await ctx.supabaseRequest('DELETE', '/verticals?code=eq.' + encodeURIComponent(slug));
+    } catch (_) { /* puede no existir, ok */ }
+    try {
+      await ctx.supabaseRequest('POST', '/verticals', verticalRow);
+      verticalOk = true;
+    } catch (e2) { /* abortamos cache pero seguimos retornando JSON */ }
+  }
+
+  // 2) DELETE + INSERT batch en vertical_templates (limpia productos de regeneraciones)
+  let templatesInserted = 0;
+  if (verticalOk) {
+    try {
+      await ctx.supabaseRequest('DELETE', '/vertical_templates?vertical=eq.' + encodeURIComponent(slug));
+    } catch (_) { /* puede no existir, ok */ }
+
+    const productos = Array.isArray(payload.productos_detectados) ? payload.productos_detectados : [];
+    const rows = productos.map(function (p) {
+      const md = (p && p.metadata && typeof p.metadata === 'object') ? p.metadata : {};
+      return {
+        vertical: slug,
+        name: String(p.name || '').slice(0, 160),
+        sku: null,
+        price: Number(p.estimated_price || 0) || 0,
+        stock: 0,
+        barcode: null,
+        metadata: {
+          category: String(p.category || '').slice(0, 60),
+          unit: md.unit || null,
+          expires_in_days: typeof md.expires_in_days === 'number' ? md.expires_in_days : null,
+          variant: md.variant || null,
+          extra: md.extra || {},
+          source: 'ai_generated'
+        }
+      };
+    });
+
+    // Insertar en batch (Supabase REST acepta array para POST)
+    if (rows.length) {
+      try {
+        await ctx.supabaseRequest('POST', '/vertical_templates', rows);
+        templatesInserted = rows.length;
+      } catch (e) {
+        // Fallback row-by-row si el batch falla
+        for (const r of rows) {
+          try {
+            await ctx.supabaseRequest('POST', '/vertical_templates', r);
+            templatesInserted++;
+          } catch (_) { /* skip individual */ }
+        }
+      }
+    }
+  }
+
+  return { ok: verticalOk, vertical: verticalOk, templates: templatesInserted };
 }
 
 async function generateGiro(ctx, req, res) {
@@ -359,57 +611,125 @@ async function generateGiro(ctx, req, res) {
   catch (e) { return err(ctx, res, 400, 'BAD_BODY', 'Invalid JSON'); }
 
   const name = String((body && body.name) || '').trim();
-  const description = String((body && body.description) || '').trim();
   if (!name) return err(ctx, res, 400, 'MISSING_NAME', 'name is required');
 
   const slug = slugify(name);
   const apiKey = (process.env.OPENAI_API_KEY || '').trim();
 
-  // existing already?
+  // 1) Cache check: ¿ya hay landing estática?
   const giros = scanLandings();
-  const existing = giros.find((g) => g.slug === slug);
-  if (existing) {
-    return send(ctx, res, 200, { exists: true, slug, landing: existing.landing, generated: false });
+  const existingLanding = giros.find((g) => g.slug === slug);
+  if (existingLanding) {
+    return send(ctx, res, 200, {
+      cached: true, source: 'landing_html', slug,
+      landing: existingLanding.landing,
+    });
   }
 
+  // 2) Cache check: ¿ya está en BD verticals?
+  if (ctx && typeof ctx.supabaseRequest === 'function') {
+    try {
+      const cached = await ctx.supabaseRequest('GET',
+        '/verticals?code=eq.' + encodeURIComponent(slug) + '&select=code,name,description,icon,color,modules,settings&limit=1');
+      if (Array.isArray(cached) && cached.length > 0) {
+        const v = cached[0];
+        const tmpls = await ctx.supabaseRequest('GET',
+          '/vertical_templates?vertical=eq.' + encodeURIComponent(slug) +
+          '&select=name,price,metadata&order=created_at.asc&limit=6').catch(() => []);
+        return send(ctx, res, 200, {
+          cached: true, source: 'verticals_db', slug,
+          payload: {
+            nombre_comercial: v.name,
+            slug: v.code,
+            descripcion: v.description,
+            terminologia: (v.settings && v.settings.terminologia) || {},
+            funcionalidades_unicas: (v.settings && v.settings.funcionalidades_unicas) || [],
+            productos_detectados: (Array.isArray(tmpls) ? tmpls : []).map(t => ({
+              name: t.name,
+              category: (t.metadata && t.metadata.category) || '',
+              estimated_price: Number(t.price) || 0,
+              metadata: t.metadata || {}
+            })),
+            modulos_a_activar: v.modules || [],
+            modulos_a_desactivar: (v.settings && v.settings.modulos_a_desactivar) || [],
+            campos_no_disponibles: (v.settings && v.settings.campos_no_disponibles) || [],
+            synonyms: (v.settings && v.settings.synonyms) || []
+          },
+          landing: '/landing_dynamic.html?giro=' + encodeURIComponent(slug),
+        });
+      }
+    } catch (_) { /* fall through to LLM */ }
+  }
+
+  // 3) No cache y no API key → fallback suave (sin "no tenemos")
   if (!apiKey) {
     return send(ctx, res, 200, {
-      todo: true,
+      cached: false,
+      source: 'no_api_key',
       slug,
-      message: 'AI giro generator pending API key (set OPENAI_API_KEY)',
       fallback: '/landing_dynamic.html?giro=' + encodeURIComponent(slug),
+      message: 'AI key not configured; client may use generic template.',
     });
   }
 
-  // optional: persist a pending request to supabase if available
+  // 4) LLM call con validación + 1 retry
+  const userPrompt = buildUserPrompt(name);
+  let raw, parsed, validation;
   try {
-    if (ctx && typeof ctx.supabaseRequest === 'function') {
-      await ctx.supabaseRequest('POST', '/giros_generated', {
-        slug, name, description, status: 'generating', created_at: new Date().toISOString(),
-      }).catch(() => {});
+    raw = await callOpenAI(apiKey, GIRO_SYSTEM_PROMPT, userPrompt, {
+      max_tokens: 2500,
+      temperature: 0.4,
+      timeout_ms: 18000,
+      response_format: { type: 'json_object' }
+    });
+    parsed = extractJson(raw);
+    validation = parsed ? validateGiroResponse(parsed) : { ok: false, error: 'json_unparseable' };
+
+    // Retry si validación falla
+    if (!validation.ok) {
+      const hint = 'Tu respuesta anterior tuvo este error: "' + validation.error +
+                   (validation.detail ? ' (detalle: ' + JSON.stringify(validation.detail).slice(0, 80) + ')' : '') +
+                   '". Vuelve a generar respetando ESTA regla específica. SOLO el JSON.';
+      const retryPrompt = buildUserPrompt(name, hint);
+      raw = await callOpenAI(apiKey, GIRO_SYSTEM_PROMPT, retryPrompt, {
+        max_tokens: 2500,
+        temperature: 0.3,
+        timeout_ms: 18000,
+        response_format: { type: 'json_object' }
+      });
+      parsed = extractJson(raw);
+      validation = parsed ? validateGiroResponse(parsed) : { ok: false, error: 'json_unparseable_retry' };
     }
-  } catch (_) {}
-
-  const prompt = [
-    'Crea el contenido HTML (sin <html>, <head>, <body>) de una landing personalizada para un sistema POS.',
-    'Giro de negocio: "' + name + '".',
-    description ? ('Descripcion adicional: ' + description) : '',
-    'Incluye: hero con titulo y subtitulo, 4 modulos del sistema con iconos emoji, 3 testimonios ficticios realistas, CTA final.',
-    'Tono: profesional, cercano, en espanol mexicano. NO incluyas estilos inline ni <script>.',
-  ].filter(Boolean).join('\n');
-
-  try {
-    const html = await callOpenAI(apiKey, prompt);
-    return send(ctx, res, 200, {
-      generated: true,
-      slug,
-      name,
-      html,
-      landing: '/landing_dynamic.html?giro=' + encodeURIComponent(slug),
-    });
   } catch (e) {
-    return err(ctx, res, 502, 'AI_ERROR', 'AI generation failed', { detail: ctx && ctx.IS_PROD ? undefined : String(e.message) });
+    return err(ctx, res, 502, 'AI_ERROR', 'AI generation failed', {
+      detail: ctx && ctx.IS_PROD ? undefined : String(e.message)
+    });
   }
+
+  if (!validation.ok) {
+    return err(ctx, res, 502, 'AI_INVALID', 'AI returned invalid response', {
+      validation_error: validation.error,
+      detail: ctx && ctx.IS_PROD ? undefined : (validation.detail || null)
+    });
+  }
+
+  // Forzar slug servidor-side (no confiar en el del LLM si no coincide)
+  parsed.slug = slug;
+
+  // 5) Persistir best-effort (no aborta el response si falla)
+  let persistResult = { ok: false };
+  try {
+    persistResult = await persistGeneratedGiro(ctx, slug, parsed, name);
+  } catch (e) { /* swallow, devolvemos el JSON igual */ }
+
+  return send(ctx, res, 200, {
+    cached: false,
+    source: 'llm_fresh',
+    slug,
+    payload: parsed,
+    persisted: persistResult,
+    landing: '/landing_dynamic.html?giro=' + encodeURIComponent(slug),
+  });
 }
 
 // ---------- dispatcher ----------

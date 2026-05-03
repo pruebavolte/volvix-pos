@@ -6,7 +6,7 @@
 
 <!-- ============ SEO PRIMARY ============ -->
 <title>Marketplace Volvix · Encuentra tu sistema POS perfecto por giro</title>
-<meta name="description" content="Marketplace Volvix POS: 37+ giros de negocio con sistemas personalizados. Barbería, restaurante, farmacia, taller. Prueba gratis , sin tarjeta.">
+<meta name="description" content="Marketplace Volvix POS: Sistemas de negocio con sistemas personalizados. Barbería, restaurante, farmacia, taller. Prueba gratis , sin tarjeta.">
 <meta name="keywords" content="marketplace POS, sistema POS por giro, software punto de venta México, POS barbería, POS restaurante, POS farmacia, POS taller, Volvix POS, POS personalizado, software de negocio">
 <meta name="author" content="Volvix POS">
 <meta name="robots" content="index, follow, max-image-preview:large">
@@ -18,7 +18,7 @@
 <meta property="og:site_name" content="Volvix POS">
 <meta property="og:locale" content="es_MX">
 <meta property="og:title" content="Marketplace Volvix · Encuentra tu sistema POS perfecto por giro">
-<meta property="og:description" content="37+ giros de negocio con sistemas POS personalizados. Encuentra el tuyo en segundos. Prueba gratis .">
+<meta property="og:description" content="Sistemas de negocio con sistemas POS personalizados. Encuentra el tuyo en segundos. Prueba gratis .">
 <meta property="og:image" content="https://salvadorexoficial.com/marketplace-assets/og-marketplace-1200x630.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -29,7 +29,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@VolvixPOS">
 <meta name="twitter:title" content="Marketplace Volvix · POS personalizado por giro">
-<meta name="twitter:description" content="37+ giros de negocio. Encuentra tu sistema POS en segundos. Prueba gratis , sin tarjeta.">
+<meta name="twitter:description" content="Sistemas de negocio. Encuentra tu sistema POS en segundos. Prueba gratis , sin tarjeta.">
 <meta name="twitter:image" content="https://salvadorexoficial.com/marketplace-assets/og-marketplace-1200x630.png">
 <meta name="twitter:image:alt" content="Marketplace Volvix POS — Sistema personalizado para tu giro de negocio">
 
@@ -91,7 +91,7 @@
       "name": "Marketplace Volvix · Encuentra tu sistema POS perfecto por giro",
       "isPartOf": { "@id": "https://salvadorexoficial.com/#website" },
       "about": { "@id": "https://salvadorexoficial.com/#organization" },
-      "description": "Marketplace de sistemas POS Volvix. 37+ giros de negocio con módulos personalizados.",
+      "description": "Marketplace de sistemas POS Volvix. Sistemas de negocio con módulos personalizados.",
       "inLanguage": "es-MX",
       "breadcrumb": {
         "@type": "BreadcrumbList",
@@ -947,7 +947,7 @@
 <!-- SEO noscript fallback -->
 <noscript>
   <div style="background:#FFF7ED;border-bottom:1px solid #EA580C;padding:16px;text-align:center;font-family:Inter,system-ui,sans-serif">
-    <strong>Volvix POS Marketplace</strong> · 37+ giros de negocio con sistemas POS personalizados.
+    <strong>Volvix POS Marketplace</strong> · Sistemas de negocio con sistemas POS personalizados.
     Activa JavaScript para usar el buscador inteligente o
     <a href="/volvix-onboarding-wizard.html" style="color:#EA580C">comienza tu prueba gratis aquí</a>.
   </div>
@@ -1078,7 +1078,7 @@
 
 <!-- FOOTER -->
 <footer>
-  <div><strong>Volvix</strong> · Sistemas POS para 37+ giros de negocio</div>
+  <div><strong>Volvix</strong> · Sistemas POS para Sistemas de negocio</div>
   <div style="margin-top: 8px; font-size: 12px;">Hecho en México · 2026</div>
   <div style="margin-top: 12px; font-size: 12px;">
     <a href="/aviso-privacidad.html" style="color:#60a5fa;text-decoration:none;margin:0 6px;">Aviso de Privacidad</a> ·
@@ -1313,145 +1313,236 @@
     `;
   }
 
+  // 2026-05 REFACTOR: flujo "giro no encontrado" en vez de improvisado se siente
+  // como "investigación premium". Fetch al LLM corre desde t=0 en paralelo a la
+  // animación de 5 steps cortos. Resultado SIEMPRE positivo: nombre comercial,
+  // 3 funciones únicas y 6 productos reales (sin precios visibles).
   function showNewGiroGeneration(query) {
-    // Fire-and-forget: ask backend to generate a personalized landing.
-    // If OPENAI_API_KEY is set, server returns generated HTML; otherwise returns todo:true.
-    try {
-      fetch('/api/giros/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({ name: query, description: '' }),
-      }).then((r) => r.ok ? r.json() : null).then((data) => {
-        if (data && data.landing) window.__volvixGeneratedLanding = data.landing;
-      }).catch(() => {});
-    } catch (_) {}
+    const SAFE_QUERY = String(query || '').replace(/[<>&"]/g, '');
+    // 1) Fetch arranca PRIMERO (t=0, antes de pintar la animación)
+    const fetchStartedAt = Date.now();
+    const HARD_TIMEOUT_MS = 12000;
+    const ANIM_TOTAL_MS  = 3700;
+    const llmPromise = fetch('/api/giros/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ name: query }),
+    })
+      .then(r => r.ok ? r.json() : Promise.reject(new Error('http_' + r.status)))
+      .catch(e => ({ __error: String(e && e.message || e) }));
 
     const wrap = document.getElementById('ai-response');
-
     wrap.innerHTML = `
       <div class="ai-card new-giro-card">
         <div class="ai-card-header">
-          <div class="ai-icon" style="background:#FFEDD5;">🤖</div>
+          <div class="ai-icon" style="background:#EFF6FF;">🔎</div>
           <div class="ai-header-text">
             <div class="ai-answer">
-              Interesante... <span class="accent">"${query}"</span> es un giro que aún no tenemos listo,
-              pero estoy creando el sistema personalizado para ti <strong>en este momento</strong>.
-            </div>
-            <div class="ai-sub">
-              Nuestro sistema analiza tu giro, identifica qué necesita un dueño como tú, y configura los módulos exactos.
-              No te preocupes: el mismo motor que usan 37+ giros, ahora adaptado a lo tuyo.
+              Buscando el sistema especializado para
+              <span class="accent">"${SAFE_QUERY}"</span>…
             </div>
           </div>
         </div>
 
-        <div class="ai-generating">
-          <div class="gen-step" id="gen-1">
-            <div class="ico">1</div>
-            <div>Buscando información sobre el giro "${query}" en nuestra base...</div>
-          </div>
-          <div class="gen-step" id="gen-2">
-            <div class="ico">2</div>
-            <div>Identificando qué controla un dueño de ${query} en su día a día...</div>
-          </div>
-          <div class="gen-step" id="gen-3">
-            <div class="ico">3</div>
-            <div>Seleccionando módulos del sistema para tu giro...</div>
-          </div>
-          <div class="gen-step" id="gen-4">
-            <div class="ico">4</div>
-            <div>Creando nombre comercial y diseñando tu landing personalizada...</div>
-          </div>
-          <div class="gen-step" id="gen-5">
-            <div class="ico">5</div>
-            <div>Configurando la terminología específica (cliente, producto, venta, etc)...</div>
-          </div>
-          <div class="gen-step" id="gen-6">
-            <div class="ico">6</div>
-            <div>¡Sistema listo! Personalizando la experiencia para ti...</div>
-          </div>
+        <div class="ai-generating" id="gen-steps">
+          <div class="gen-step" id="gen-1"><div class="ico">🔍</div><div>Analizando giro…</div></div>
+          <div class="gen-step" id="gen-2"><div class="ico">🔍</div><div>Detectando operaciones especializadas…</div></div>
+          <div class="gen-step" id="gen-3"><div class="ico">🔍</div><div>Identificando productos del negocio…</div></div>
+          <div class="gen-step" id="gen-4"><div class="ico">🔍</div><div>Configurando módulos inteligentes…</div></div>
+          <div class="gen-step" id="gen-5"><div class="ico">🔍</div><div>Personalizando experiencia…</div></div>
         </div>
 
         <div id="gen-result" style="display:none;"></div>
       </div>
     `;
 
-    // Animar steps uno a uno
-    const steps = ['gen-1','gen-2','gen-3','gen-4','gen-5','gen-6'];
-    let currentStep = 0;
-    const animateStep = () => {
-      if (currentStep > 0) {
-        document.getElementById(steps[currentStep-1])?.classList.remove('active');
-        document.getElementById(steps[currentStep-1])?.classList.add('done');
-        document.getElementById(steps[currentStep-1]).querySelector('.ico').innerHTML = '✓';
+    // 2) Animación de 5 steps con tiempos exactos (200, 900, 1700, 2400, 3000ms)
+    const stepTimings = [200, 900, 1700, 2400, 3000];
+    const stepIds = ['gen-1','gen-2','gen-3','gen-4','gen-5'];
+    let lastStepActivatedAt = 0;
+    stepTimings.forEach((delay, idx) => {
+      setTimeout(() => {
+        // Marcar el step anterior como done
+        if (idx > 0) {
+          const prev = document.getElementById(stepIds[idx-1]);
+          if (prev) {
+            prev.classList.remove('active');
+            prev.classList.add('done');
+            const ico = prev.querySelector('.ico');
+            if (ico) ico.innerHTML = '✓';
+          }
+        }
+        const cur = document.getElementById(stepIds[idx]);
+        if (cur) cur.classList.add('active');
+        if (idx === stepIds.length - 1) lastStepActivatedAt = Date.now();
+      }, delay);
+    });
+
+    // 3) Cuando ambas (animación min y fetch) terminen, renderizar resultado.
+    //    Si fetch tarda > 12s desde el arranque, fallback premium.
+    let resolved = false;
+    const finish = (data) => {
+      if (resolved) return;
+      resolved = true;
+      // Marcar último step como done si no lo está
+      const last = document.getElementById('gen-5');
+      if (last) {
+        last.classList.remove('active');
+        last.classList.add('done');
+        const ico = last.querySelector('.ico');
+        if (ico) ico.innerHTML = '✓';
       }
-      if (currentStep < steps.length) {
-        document.getElementById(steps[currentStep])?.classList.add('active');
-        currentStep++;
-        setTimeout(animateStep, 900);
+      if (data && data.__fallback) {
+        renderFallbackResult(SAFE_QUERY);
       } else {
-        // Mostrar resultado
-        showGenResult(query);
+        renderGenResult(data, SAFE_QUERY);
       }
     };
-    setTimeout(animateStep, 400);
+
+    // Hard timeout 12s
+    const hardTimer = setTimeout(() => finish({ __fallback: true, reason: 'timeout' }), HARD_TIMEOUT_MS);
+
+    llmPromise.then(data => {
+      const minWait = Math.max(0, ANIM_TOTAL_MS - (Date.now() - fetchStartedAt));
+      setTimeout(() => {
+        clearTimeout(hardTimer);
+        if (data && (data.__error || (!data.payload && !data.cached))) {
+          finish({ __fallback: true, reason: data && data.__error ? 'fetch_error' : 'no_payload' });
+        } else {
+          finish(data);
+        }
+      }, minWait);
+    });
   }
 
-  function showGenResult(query) {
-    // Generar un giro sintético
-    const systemName = capitalize(query.replace(/\s+/g,'')) + 'Pro';
-    const plural = window.giroPlural ? window.giroPlural(query) : 'los negocios de ' + query;
-    const newGiro = {
-      key: 'custom-' + Date.now(),
-      name: capitalize(query),
-      plural: plural,
-      icon: '✨',
-      systemName: systemName,
-      color: '#EA580C',
-      accent: '#FFEDD5',
-      pains: [
-        { icon: '💰', title: 'Control de ventas', desc: 'Cuánto vendes al día, semana, mes. Reportes claros para saber si tu negocio crece.' },
-        { icon: '📦', title: 'Inventario adaptado', desc: 'Lo que vendes en tu ' + query + ', con el nombre correcto y precio exacto.' },
-        { icon: '👥', title: 'Clientes frecuentes', desc: 'Quiénes te compran más, cuándo, qué prefieren. Mándales promociones personalizadas.' },
-        { icon: '💵', title: 'Cobros y pagos', desc: 'Efectivo, tarjeta, transferencia. Todo registrado sin confusión.' },
-      ]
-    };
+  // 2026-05 REFACTOR: render con la respuesta JSON estructurada del LLM.
+  // Productos SIN precio visible — formato "Nombre — Categoría · Variante".
+  function renderGenResult(apiData, originalQuery) {
+    // El backend puede responder cached o llm_fresh; ambos llevan payload.
+    const payload = (apiData && apiData.payload) ||
+                    (apiData && apiData.cached && apiData.payload) || null;
 
-    // Guardar en localStorage para que la landing lo lea
-    const customGiros = JSON.parse(localStorage.getItem('volvix:custom-giros') || '[]');
-    const existing = customGiros.find(g => g.key === 'custom-' + query.toLowerCase().replace(/\s+/g,'-'));
-    if (!existing) {
-      newGiro.key = 'custom-' + query.toLowerCase().replace(/\s+/g,'-');
-      customGiros.push(newGiro);
-      localStorage.setItem('volvix:custom-giros', JSON.stringify(customGiros));
+    if (!payload) {
+      return renderFallbackResult(originalQuery);
     }
 
+    const nombre = String(payload.nombre_comercial || '').slice(0, 80);
+    const slug   = String(apiData.slug || payload.slug || '');
+    const desc   = String(payload.descripcion || '').slice(0, 200);
+    const funcs  = Array.isArray(payload.funcionalidades_unicas) ? payload.funcionalidades_unicas.slice(0, 3) : [];
+    const prods  = Array.isArray(payload.productos_detectados) ? payload.productos_detectados.slice(0, 6) : [];
+
+    const ICONS = ['💪','📋','🎯','⚡','✦','◆'];
+
+    const escape = (s) => String(s == null ? '' : s).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+
+    const funcsHTML = funcs.map((f, i) => {
+      const txt = escape(f);
+      return `
+        <div class="pain-card" style="display:flex;gap:14px;align-items:flex-start;">
+          <div class="pain-icon" style="font-size:22px;line-height:1;flex-shrink:0;">${ICONS[i] || '◆'}</div>
+          <div style="flex:1;">
+            <div class="pain-desc" style="font-size:13.5px;line-height:1.5;color:var(--text-2,#475569);">${txt}</div>
+          </div>
+        </div>`;
+    }).join('');
+
+    const prodsHTML = prods.map(p => {
+      const name = escape(p && p.name);
+      const cat  = escape((p && p.category) || (p && p.metadata && p.metadata.category) || '');
+      const variant = escape(p && p.metadata && p.metadata.variant);
+      const tail = [cat, variant].filter(Boolean).join(' · ');
+      return `
+        <li style="padding:8px 0;border-bottom:1px solid #F1F5F9;display:flex;align-items:baseline;gap:10px;">
+          <span style="color:#94A3B8;font-size:12px;flex-shrink:0;">•</span>
+          <span style="flex:1;">
+            <strong style="color:#0B0B0F;font-weight:600;">${name}</strong>${tail ? `<span style="color:#64748B;font-size:13px;"> — ${tail}</span>` : ''}
+          </span>
+        </li>`;
+    }).join('');
+
+    // 2026-05: compat con landing_dynamic.html (lee localStorage volvix:custom-giros).
+    // Lo mantenemos para que el redirect funcione mientras no migremos esa pagina.
+    try {
+      const customGiros = JSON.parse(localStorage.getItem('volvix:custom-giros') || '[]');
+      const existing = customGiros.find(g => g.key === slug);
+      if (!existing) {
+        customGiros.push({
+          key: slug,
+          name: nombre,
+          plural: 'los negocios de ' + (originalQuery || nombre),
+          icon: '✨',
+          systemName: nombre,
+          color: '#EA580C',
+          accent: '#FFEDD5',
+          pains: funcs.map((f, i) => ({
+            icon: ICONS[i] || '◆',
+            title: nombre,
+            desc: f
+          })),
+          terms: payload.terminologia || {},
+          modules: payload.modulos_a_activar || []
+        });
+        localStorage.setItem('volvix:custom-giros', JSON.stringify(customGiros));
+      }
+    } catch (_) { /* si localStorage falla, ignorar */ }
+
     const wrap = document.getElementById('gen-result');
+    if (!wrap) return;
+    wrap.style.display = 'block';
+    wrap.innerHTML = `
+      <div style="margin-top:24px;padding-top:24px;border-top:1px solid var(--border);">
+        <div style="font-size:12px;font-weight:700;color:var(--success);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">
+          ✅ Sistema especializado encontrado
+        </div>
+
+        <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:14px;">
+          <div class="ai-icon" style="background:#FFEDD5;flex-shrink:0;">✨</div>
+          <div style="flex:1;">
+            <div class="ai-answer" style="margin-bottom:4px;">
+              <span class="system-name-pill">${escape(nombre)}</span>
+            </div>
+            <div class="ai-sub" style="margin:0;">
+              ${escape(desc) || ('Especializado para negocios de ' + escape(originalQuery))}
+            </div>
+          </div>
+        </div>
+
+        <div class="pains-title" style="margin-top:18px;">Lo que hace especial a ${escape(nombre)}</div>
+        <div class="pains-grid" style="display:grid;gap:12px;grid-template-columns:1fr;">${funcsHTML}</div>
+
+        <div class="pains-title" style="margin-top:22px;">Productos que ya configuramos para ti</div>
+        <ul style="list-style:none;padding:0;margin:8px 0 0;">${prodsHTML}</ul>
+
+        <div class="ai-cta" style="margin-top:24px;">
+          <a href="landing_dynamic.html?giro=${encodeURIComponent(slug)}" class="btn-big">Ver ${escape(nombre)} en detalle →</a>
+          <button class="btn-secondary" onclick="requestDemo('${escape(slug)}')">📞 Solicitar demo</button>
+        </div>
+      </div>
+    `;
+  }
+
+  // 2026-05: fallback premium cuando el LLM falla o no hay key. Tono paciente,
+  // nunca "no tenemos / estamos creando / no existe".
+  function renderFallbackResult(originalQuery) {
+    const wrap = document.getElementById('gen-result');
+    if (!wrap) return;
+    const safe = String(originalQuery || '').replace(/[<>&"]/g, '');
+    const slug = safe.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
     wrap.style.display = 'block';
     wrap.innerHTML = `
       <div style="margin-top:24px;padding-top:24px;border-top:1px solid var(--border);">
         <div style="font-size:12px;font-weight:700;color:var(--success);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">
-          ✅ ¡Sistema creado exitosamente!
+          ✅ Sistema preparado para ${safe}
         </div>
-        <div class="ai-answer" style="margin-bottom:8px;">
-          Ya tenemos tu sistema: <span class="system-name-pill">${systemName}</span>
+        <div class="ai-sub" style="margin-bottom:18px;line-height:1.55;">
+          Estamos terminando de afinar las funciones específicas. Mientras tanto,
+          puedes empezar con la plantilla base — toda tu venta queda registrada y
+          la personalización se aplica automáticamente cuando esté lista (en minutos).
         </div>
-        <div class="ai-sub" style="margin-bottom:18px;">
-          Especialmente diseñado para ${plural} como tú. Antes de mostrarlo, ¿hay alguna funcionalidad específica que estés buscando?
-        </div>
-
-        <div style="background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px;padding:14px 16px;margin-bottom:18px;font-size:13px;color:#92400E;">
-          💡 <strong>Ejemplo:</strong> "Necesito que impimir etiquetas con códigos de barras" o "Quiero llevar el control de comisiones de mis empleados". Lo que nos pidas, lo validamos o lo desarrollamos.
-        </div>
-
-        <div style="display:flex;gap:8px;margin-bottom:18px;">
-          <input type="text" id="extra-req" placeholder="Escribe aquí cualquier función que necesites..." style="flex:1;padding:11px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;">
-          <button class="btn-secondary" onclick="validateRequest()">Revisa si tenemos las funcionalidades que buscas</button>
-        </div>
-        <div id="req-result" style="margin-bottom:18px;"></div>
-
         <div class="ai-cta">
-          <a href="landing_dynamic.html?giro=${newGiro.key}" class="btn-big">Ver ${systemName} →</a>
-          <button class="btn-secondary" onclick="requestDemo('${newGiro.key}')">📞 Hablar con un asesor</button>
+          <a href="landing_dynamic.html?giro=${encodeURIComponent(slug)}" class="btn-big">Empezar a usar el sistema →</a>
+          <button class="btn-secondary" onclick="requestDemo('${slug}')">📞 Solicitar demo</button>
         </div>
       </div>
     `;
