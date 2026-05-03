@@ -312,12 +312,37 @@ async function existsGiro(ctx, req, res, slug) {
 }
 
 // ---------- AI generation (2026-05 refactor: HTML legacy → JSON estructurado) ----------
-// Acepta (apiKey, systemPrompt, userPrompt). Devuelve string contenido del LLM.
-function callOpenAI(apiKey, systemPrompt, userPrompt, opts) {
+// Selección de provider:
+//   1) Vercel AI Gateway (preferido) — usa AI_GATEWAY_API_KEY + AI_GATEWAY_BASE/MODEL
+//   2) OpenAI directo (fallback) — usa OPENAI_API_KEY
+// Devuelve string contenido del LLM.
+function getAIConfig() {
+  const gw = (process.env.AI_GATEWAY_API_KEY || '').trim();
+  const oa = (process.env.OPENAI_API_KEY || '').trim();
+  if (gw) {
+    return {
+      provider: 'gateway',
+      apiKey: gw,
+      base: (process.env.AI_GATEWAY_BASE || 'https://ai-gateway.vercel.sh/v1').trim(),
+      model: (process.env.AI_GATEWAY_MODEL || 'openai/gpt-4o-mini').trim(),
+    };
+  }
+  if (oa) {
+    return {
+      provider: 'openai',
+      apiKey: oa,
+      base: 'https://api.openai.com/v1',
+      model: 'gpt-4o-mini',
+    };
+  }
+  return null;
+}
+
+function callLLM(cfg, systemPrompt, userPrompt, opts) {
   opts = opts || {};
   return new Promise((resolve, reject) => {
     const body = JSON.stringify({
-      model: opts.model || 'gpt-4o-mini',
+      model: opts.model || cfg.model,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
@@ -327,13 +352,14 @@ function callOpenAI(apiKey, systemPrompt, userPrompt, opts) {
       // Forzar JSON cuando sea posible (gpt-4o family lo soporta)
       response_format: opts.response_format || undefined,
     });
+    const baseUrl = new URL(cfg.base + '/chat/completions');
     const reqOpts = {
-      hostname: 'api.openai.com',
-      port: 443,
-      path: '/v1/chat/completions',
+      hostname: baseUrl.hostname,
+      port: baseUrl.port || 443,
+      path: baseUrl.pathname,
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer ' + apiKey,
+        'Authorization': 'Bearer ' + cfg.apiKey,
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(body),
       },
@@ -344,17 +370,27 @@ function callOpenAI(apiKey, systemPrompt, userPrompt, opts) {
       resp.on('end', () => {
         try {
           const parsed = JSON.parse(data);
-          if (resp.statusCode >= 400) return reject(new Error('OpenAI ' + resp.statusCode + ': ' + data));
+          if (resp.statusCode >= 400) return reject(new Error('LLM(' + cfg.provider + ') ' + resp.statusCode + ': ' + data.slice(0, 300)));
           const content = parsed.choices && parsed.choices[0] && parsed.choices[0].message && parsed.choices[0].message.content;
           resolve(content || '');
         } catch (e) { reject(e); }
       });
     });
     r.on('error', reject);
-    r.setTimeout(opts.timeout_ms || 20000, () => { r.destroy(new Error('OpenAI timeout')); });
+    r.setTimeout(opts.timeout_ms || 20000, () => { r.destroy(new Error('LLM timeout')); });
     r.write(body);
     r.end();
   });
+}
+
+// Alias retrocompatible (por si alguien llama callOpenAI desde otro lado)
+function callOpenAI(apiKey, systemPrompt, userPrompt, opts) {
+  return callLLM({
+    provider: 'openai',
+    apiKey: apiKey,
+    base: 'https://api.openai.com/v1',
+    model: 'gpt-4o-mini',
+  }, systemPrompt, userPrompt, opts);
 }
 
 // Lista cerrada de modulos validos. Si el LLM devuelve algo fuera de aqui, falla validacion.
@@ -614,7 +650,7 @@ async function generateGiro(ctx, req, res) {
   if (!name) return err(ctx, res, 400, 'MISSING_NAME', 'name is required');
 
   const slug = slugify(name);
-  const apiKey = (process.env.OPENAI_API_KEY || '').trim();
+  const aiCfg = getAIConfig();
 
   // 1) Cache check: ¿ya hay landing estática?
   const giros = scanLandings();
@@ -662,13 +698,13 @@ async function generateGiro(ctx, req, res) {
   }
 
   // 3) No cache y no API key → fallback suave (sin "no tenemos")
-  if (!apiKey) {
+  if (!aiCfg) {
     return send(ctx, res, 200, {
       cached: false,
       source: 'no_api_key',
       slug,
       fallback: '/landing_dynamic.html?giro=' + encodeURIComponent(slug),
-      message: 'AI key not configured; client may use generic template.',
+      message: 'AI provider not configured; client may use generic template.',
     });
   }
 
@@ -676,7 +712,7 @@ async function generateGiro(ctx, req, res) {
   const userPrompt = buildUserPrompt(name);
   let raw, parsed, validation;
   try {
-    raw = await callOpenAI(apiKey, GIRO_SYSTEM_PROMPT, userPrompt, {
+    raw = await callLLM(aiCfg, GIRO_SYSTEM_PROMPT, userPrompt, {
       max_tokens: 2500,
       temperature: 0.4,
       timeout_ms: 18000,
@@ -691,7 +727,7 @@ async function generateGiro(ctx, req, res) {
                    (validation.detail ? ' (detalle: ' + JSON.stringify(validation.detail).slice(0, 80) + ')' : '') +
                    '". Vuelve a generar respetando ESTA regla específica. SOLO el JSON.';
       const retryPrompt = buildUserPrompt(name, hint);
-      raw = await callOpenAI(apiKey, GIRO_SYSTEM_PROMPT, retryPrompt, {
+      raw = await callLLM(aiCfg, GIRO_SYSTEM_PROMPT, retryPrompt, {
         max_tokens: 2500,
         temperature: 0.3,
         timeout_ms: 18000,
@@ -702,6 +738,7 @@ async function generateGiro(ctx, req, res) {
     }
   } catch (e) {
     return err(ctx, res, 502, 'AI_ERROR', 'AI generation failed', {
+      provider: aiCfg.provider,
       detail: ctx && ctx.IS_PROD ? undefined : String(e.message)
     });
   }
