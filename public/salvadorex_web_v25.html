@@ -9,6 +9,9 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="format-detection" content="telephone=no">
+<!-- 2026-05: opt-out del visual-refresh global (la pagina tiene su propio dark theme) -->
+<meta name="vlx-theme" content="dark">
+<style>:root { color-scheme: dark; }</style>
 <link rel="canonical" href="https://systeminternational.app/salvadorex_web_v25.html">
 <title>SalvadoreX · Punto de Venta</title>
 <script src="/auth-gate.js"></script>
@@ -12946,11 +12949,11 @@
   window.cfdiLoad = async function () {
     var tbody = $('#cfdi-tbody'); if (!tbody) return;
     try {
-      // Verifica si tenant tiene CSD configurado
-      var hr = await _api('/api/facturama/status');
+      // Verifica si tenant tiene CSD configurado (B-2026-05: era /status que no existe -> credentials)
+      var hr = await _api('/api/facturama/credentials');
       var hd = await hr.json().catch(function(){return null;});
       var status = $('#cfdi-status');
-      if (status) status.style.display = (hd && hd.active) ? 'none' : '';
+      if (status) status.style.display = (hd && (hd.active || hd.has_csd)) ? 'none' : '';
       // Lista facturas
       var r = await _api('/api/facturama/invoices?limit=100');
       var data = await r.json().catch(function(){return null;});
