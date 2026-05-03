@@ -341,7 +341,7 @@ function getAIConfig() {
 function callLLM(cfg, systemPrompt, userPrompt, opts) {
   opts = opts || {};
   return new Promise((resolve, reject) => {
-    const body = JSON.stringify({
+    const payload = {
       model: opts.model || cfg.model,
       messages: [
         { role: 'system', content: systemPrompt },
@@ -349,9 +349,13 @@ function callLLM(cfg, systemPrompt, userPrompt, opts) {
       ],
       max_tokens: opts.max_tokens || 2500,
       temperature: typeof opts.temperature === 'number' ? opts.temperature : 0.4,
-      // Forzar JSON cuando sea posible (gpt-4o family lo soporta)
-      response_format: opts.response_format || undefined,
-    });
+    };
+    // response_format solo si explícitamente lo pasan Y provider no es gateway
+    // (Vercel AI Gateway no siempre soporta response_format y responde 400)
+    if (opts.response_format && cfg.provider !== 'gateway') {
+      payload.response_format = opts.response_format;
+    }
+    const body = JSON.stringify(payload);
     const baseUrl = new URL(cfg.base + '/chat/completions');
     const reqOpts = {
       hostname: baseUrl.hostname,
@@ -368,15 +372,25 @@ function callLLM(cfg, systemPrompt, userPrompt, opts) {
       let data = '';
       resp.on('data', (c) => data += c);
       resp.on('end', () => {
+        if (resp.statusCode >= 400) {
+          // Loguear a Vercel runtime logs para debug post-mortem
+          try { console.warn('[giros LLM ' + cfg.provider + ' ' + resp.statusCode + ']', data.slice(0, 500)); } catch(_){}
+          return reject(new Error('LLM(' + cfg.provider + ') HTTP ' + resp.statusCode + ': ' + data.slice(0, 300)));
+        }
         try {
           const parsed = JSON.parse(data);
-          if (resp.statusCode >= 400) return reject(new Error('LLM(' + cfg.provider + ') ' + resp.statusCode + ': ' + data.slice(0, 300)));
           const content = parsed.choices && parsed.choices[0] && parsed.choices[0].message && parsed.choices[0].message.content;
           resolve(content || '');
-        } catch (e) { reject(e); }
+        } catch (e) {
+          try { console.warn('[giros LLM ' + cfg.provider + ' parse]', e.message, data.slice(0, 300)); } catch(_){}
+          reject(new Error('LLM parse error: ' + e.message));
+        }
       });
     });
-    r.on('error', reject);
+    r.on('error', (e) => {
+      try { console.warn('[giros LLM ' + cfg.provider + ' net]', e.message); } catch(_){}
+      reject(e);
+    });
     r.setTimeout(opts.timeout_ms || 20000, () => { r.destroy(new Error('LLM timeout')); });
     r.write(body);
     r.end();
@@ -737,9 +751,13 @@ async function generateGiro(ctx, req, res) {
       validation = parsed ? validateGiroResponse(parsed) : { ok: false, error: 'json_unparseable_retry' };
     }
   } catch (e) {
+    // 2026-05 debug: temporalmente exponer detail en prod para diagnosticar
+    // problemas de gateway. Quitar despues de validar 3 escenarios live.
     return err(ctx, res, 502, 'AI_ERROR', 'AI generation failed', {
       provider: aiCfg.provider,
-      detail: ctx && ctx.IS_PROD ? undefined : String(e.message)
+      base: aiCfg.base,
+      model: aiCfg.model,
+      detail: String(e.message).slice(0, 400)
     });
   }
 
