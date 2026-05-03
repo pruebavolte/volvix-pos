@@ -9,9 +9,18 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="format-detection" content="telephone=no">
-<!-- 2026-05: opt-out del visual-refresh global (la pagina tiene su propio dark theme) -->
-<meta name="vlx-theme" content="dark">
-<style>:root { color-scheme: dark; }</style>
+<!-- 2026-05 CONTRASTE FIX v2: el POS tiene look dark exterior PERO usa botones
+     LIGHT hardcodeados (bg:#FFF). Si volvix-theme-wiring.js detecta auto+OS-dark,
+     pone --vlx-text:cream y los botones light tienen texto cream sobre blanco
+     = invisible. Forzar 'light' aquí para que --vlx-text resuelva a oscuro. -->
+<script>
+  try {
+    if (typeof localStorage !== 'undefined') {
+      var t = localStorage.getItem('volvix:theme');
+      if (t !== 'light') localStorage.setItem('volvix:theme', 'light');
+    }
+  } catch (_) {}
+</script>
 <link rel="canonical" href="https://systeminternational.app/salvadorex_web_v25.html">
 <title>SalvadoreX · Punto de Venta</title>
 <script src="/auth-gate.js"></script>
@@ -398,9 +407,23 @@
   }
   .platform-toggle-btn:hover { color: var(--text-2); }
   .platform-toggle-btn.active {
-    background: var(--text);
-    color: white;
+    /* 2026-05 CONTRASTE: bg pinned a #0B0B0F en lugar de var(--text) que en
+       dark mode era blanco -> texto blanco sobre blanco = invisible */
+    background: #0B0B0F;
+    color: #FFFFFF;
     box-shadow: var(--shadow-sm);
+  }
+  /* 2026-05 CONTRASTE: numpad-btn tienen inline bg:#FFF pero sin color
+     definido, heredando color:white del dark theme global. Forzar negro. */
+  .numpad-btn { color: #0B0B0F !important; }
+  .numpad-btn:hover { background: #F5F5F4 !important; }
+  /* 2026-05 CONTRASTE: bordes claros con texto claro = invisible. Los
+     botones del toolbar/footer del POS siempre tienen bg blanco/claro,
+     forzar texto oscuro siempre que tengan bg claro */
+  button[style*="background:#FFF"], button[style*="background: #FFF"],
+  button[style*="background:#fff"], button[style*="background: #fff"],
+  button[style*="background:white"], button[style*="background: white"] {
+    color: #0B0B0F !important;
   }
 
   /* ============ ELEVENTA MENU BAR ============ */
