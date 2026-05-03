@@ -751,13 +751,9 @@ async function generateGiro(ctx, req, res) {
       validation = parsed ? validateGiroResponse(parsed) : { ok: false, error: 'json_unparseable_retry' };
     }
   } catch (e) {
-    // 2026-05 debug: temporalmente exponer detail en prod para diagnosticar
-    // problemas de gateway. Quitar despues de validar 3 escenarios live.
     return err(ctx, res, 502, 'AI_ERROR', 'AI generation failed', {
       provider: aiCfg.provider,
-      base: aiCfg.base,
-      model: aiCfg.model,
-      detail: String(e.message).slice(0, 400)
+      detail: ctx && ctx.IS_PROD ? undefined : String(e.message).slice(0, 400)
     });
   }
 
