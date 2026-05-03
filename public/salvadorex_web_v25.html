@@ -4080,6 +4080,9 @@
               const sub = document.getElementById('inv-sub');
               if (sub) sub.textContent = products.length + ' productos · ' + lowStock + ' con stock bajo';
               if (typeof renderInv === 'function') renderInv();
+              // 2026-05: tambien refrescar KPIs (Total/Valor/BajoMin/SinStock) que
+              // quedaban en valores demo (8) hasta navegar a otra pagina.
+              if (typeof updateInvStats === 'function') updateInvStats();
             }
           }
         } catch(e) { console.warn('[VOLVIX] No se pudieron cargar productos:', e); }
