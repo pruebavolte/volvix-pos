@@ -2166,7 +2166,7 @@
       <div class="page-head">
         <div>
           <h1 class="page-title">Dashboard</h1>
-          <p class="page-sub">Resumen del día · 20/04/2026 · 14:35 hrs</p>
+          <p class="page-sub" id="dash-sub">Resumen del día</p>
         </div>
         <div class="btn-row">
           <button class="btn" onclick="exportDashboardCSV()">📤 Exportar</button>
@@ -2468,7 +2468,7 @@
     <!-- ============ CRÉDITO ============ -->
     <section id="screen-credito" class="screen-pad hidden">
       <div class="page-head">
-        <div><h1 class="page-title">Cuentas por cobrar</h1><p class="page-sub">6 clientes con crédito · $4,810 por cobrar</p></div>
+        <div><h1 class="page-title">Cuentas por cobrar</h1><p class="page-sub" id="cred-sub">— clientes con crédito · $0 por cobrar</p></div>
         <button class="btn accent">+ Registrar abono</button>
       </div>
       <div class="kpi-grid">
@@ -2745,7 +2745,7 @@
     <!-- ============ USUARIOS ============ -->
     <section id="screen-usuarios" class="screen-pad hidden">
       <div class="page-head">
-        <div><h1 class="page-title">Usuarios</h1><p class="page-sub">5 usuarios · permisos y roles</p></div>
+        <div><h1 class="page-title">Usuarios</h1><p class="page-sub" id="usr-sub">— usuarios · permisos y roles</p></div>
         <button class="btn accent">+ Nuevo usuario</button>
       </div>
       <div class="card">
@@ -4173,6 +4173,18 @@
     const el = $('#screen-' + name);
     if (el) el.classList.remove('hidden');
     $$('.menu-btn').forEach(b => b.classList.toggle('active', b.dataset.menu === name));
+    // 2026-05: actualizar fecha dinamica en Dashboard al activar (era hardcoded)
+    if (name === 'dashboard') {
+      try {
+        var dsub = document.getElementById('dash-sub');
+        if (dsub) {
+          var d = new Date();
+          var fecha = d.toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' });
+          var hora = d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: false });
+          dsub.textContent = 'Resumen del día · ' + fecha + ' · ' + hora + ' hrs';
+        }
+      } catch(_) {}
+    }
   }
 
   /* ============ TOAST ============ */
@@ -6576,8 +6588,22 @@
         <td style="color: var(--text-3); font-size: 11px;">${c[5]}</td>
         <td style="text-align: right;"><button class="btn sm">Ver</button></td>
       </tr>`).join('');
+    // 2026-05: mantener contador sincronizado en cada render — antes solo
+    // se actualizaba dentro del fetch try-catch, dejando "0 clientes" si
+    // CUSTOMERS se llenaba via otro path (volvix-real-data-loader, demo seed, etc.)
+    var sub = document.getElementById('cli-sub');
+    if (sub) sub.textContent = CUSTOMERS.length + ' clientes registrados';
   }
   function renderCredito() {
+    // 2026-05: contador dinamico (era hardcoded "6 clientes con credito · $4,810")
+    try {
+      var sub = document.getElementById('cred-sub');
+      if (sub) {
+        var conCredito = CREDIT.filter(c => Number(c[2]) > 0).length;
+        var totalDebt = CREDIT.reduce((acc, c) => acc + (Number(c[2]) || 0), 0);
+        sub.textContent = conCredito + ' cliente' + (conCredito === 1 ? '' : 's') + ' con crédito · $' + totalDebt.toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' por cobrar';
+      }
+    } catch(_) {}
     $('#cred-body').innerHTML = CREDIT.map(c => {
       const chip = c[5]==='ok'?'ok':c[5]==='vencido'?'err':'warn';
       const lbl = c[5]==='ok'?'Al corriente':c[5]==='vencido'?'Vencido':'Sin abonos';
@@ -6609,6 +6635,9 @@
     }).join('');
   }
   function renderUsuarios() {
+    // 2026-05: contador dinamico (era hardcoded "5 usuarios")
+    var sub = document.getElementById('usr-sub');
+    if (sub) sub.textContent = USERS.length + ' usuario' + (USERS.length === 1 ? '' : 's') + ' · permisos y roles';
     $('#usr-body').innerHTML = USERS.map(u => {
       const roleChip = u[1]==='Administrador'?'info':u[1]==='Gerente'?'accent':'ok';
       const ss = u[4]==='online'?'ok':'';
