@@ -1277,7 +1277,7 @@
     });
   }
 
-  function showFoundGiro(giro) {
+  async function showFoundGiro(giro) {
     const wrap = document.getElementById('ai-response');
     const painsHTML = giro.pains.map(p => `
       <div class="pain-card">
@@ -1305,103 +1305,61 @@
         <div class="pains-title">Lo que hace especial a ${giro.systemName}</div>
         <div class="pains-grid">${painsHTML}</div>
 
+        <div id="found-products-section" style="margin:20px 0;"></div>
+
         <div class="ai-cta">
           <a href="landing_dynamic.html?giro=${giro.key}" class="btn-big">Ver ${giro.systemName} en detalle →</a>
           <button class="btn-secondary" onclick="requestDemo('${giro.key}')">📞 Solicitar demo</button>
         </div>
       </div>
     `;
+
+    try {
+      const resp = await fetch(`/api/industry-seed?giro=${encodeURIComponent(giro.key)}`);
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data.products && data.products.length > 0) {
+          const section = document.getElementById('found-products-section');
+          if (section) {
+            const items = data.products.slice(0, 8).map(p => `
+              <div style="background:#F8FAFC;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                <span style="font-weight:600;">${p.name}</span>
+                ${p.price ? `<span style="color:var(--muted);font-weight:500;white-space:nowrap;">$${p.price}</span>` : ''}
+              </div>
+            `).join('');
+            const extra = data.products.length > 8 ? `+ ${data.products.length - 8} más listos para importar` : 'Todos listos para importar al abrir tu cuenta';
+            section.innerHTML = `
+              <div class="pains-title" style="margin-top:0;">Productos que ya configuramos para ti</div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-bottom:6px;">${items}</div>
+              <div style="font-size:12px;color:var(--muted);">${extra}</div>
+            `;
+          }
+        }
+      }
+    } catch (_) {}
   }
 
   function showNewGiroGeneration(query) {
-    // Fire-and-forget: ask backend to generate a personalized landing.
-    // If OPENAI_API_KEY is set, server returns generated HTML; otherwise returns todo:true.
+    // Fire-and-forget backend call (generates landing if OPENAI_API_KEY is configured).
     try {
       fetch('/api/giros/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({ name: query, description: '' }),
-      }).then((r) => r.ok ? r.json() : null).then((data) => {
+      }).then(r => r.ok ? r.json() : null).then(data => {
         if (data && data.landing) window.__volvixGeneratedLanding = data.landing;
       }).catch(() => {});
     } catch (_) {}
 
-    const wrap = document.getElementById('ai-response');
-
-    wrap.innerHTML = `
-      <div class="ai-card new-giro-card">
-        <div class="ai-card-header">
-          <div class="ai-icon" style="background:#FFEDD5;">🤖</div>
-          <div class="ai-header-text">
-            <div class="ai-answer">
-              Interesante... <span class="accent">"${query}"</span> es un giro que aún no tenemos listo,
-              pero estoy creando el sistema personalizado para ti <strong>en este momento</strong>.
-            </div>
-            <div class="ai-sub">
-              Nuestro sistema analiza tu giro, identifica qué necesita un dueño como tú, y configura los módulos exactos.
-              No te preocupes: el mismo motor que usan 37+ giros, ahora adaptado a lo tuyo.
-            </div>
-          </div>
-        </div>
-
-        <div class="ai-generating">
-          <div class="gen-step" id="gen-1">
-            <div class="ico">1</div>
-            <div>Buscando información sobre el giro "${query}" en nuestra base...</div>
-          </div>
-          <div class="gen-step" id="gen-2">
-            <div class="ico">2</div>
-            <div>Identificando qué controla un dueño de ${query} en su día a día...</div>
-          </div>
-          <div class="gen-step" id="gen-3">
-            <div class="ico">3</div>
-            <div>Seleccionando módulos del sistema para tu giro...</div>
-          </div>
-          <div class="gen-step" id="gen-4">
-            <div class="ico">4</div>
-            <div>Creando nombre comercial y diseñando tu landing personalizada...</div>
-          </div>
-          <div class="gen-step" id="gen-5">
-            <div class="ico">5</div>
-            <div>Configurando la terminología específica (cliente, producto, venta, etc)...</div>
-          </div>
-          <div class="gen-step" id="gen-6">
-            <div class="ico">6</div>
-            <div>¡Sistema listo! Personalizando la experiencia para ti...</div>
-          </div>
-        </div>
-
-        <div id="gen-result" style="display:none;"></div>
-      </div>
-    `;
-
-    // Animar steps uno a uno
-    const steps = ['gen-1','gen-2','gen-3','gen-4','gen-5','gen-6'];
-    let currentStep = 0;
-    const animateStep = () => {
-      if (currentStep > 0) {
-        document.getElementById(steps[currentStep-1])?.classList.remove('active');
-        document.getElementById(steps[currentStep-1])?.classList.add('done');
-        document.getElementById(steps[currentStep-1]).querySelector('.ico').innerHTML = '✓';
-      }
-      if (currentStep < steps.length) {
-        document.getElementById(steps[currentStep])?.classList.add('active');
-        currentStep++;
-        setTimeout(animateStep, 900);
-      } else {
-        // Mostrar resultado
-        showGenResult(query);
-      }
-    };
-    setTimeout(animateStep, 400);
+    showGenResult(query);
   }
 
   function showGenResult(query) {
-    // Generar un giro sintético
     const systemName = capitalize(query.replace(/\s+/g,'')) + 'Pro';
     const plural = window.giroPlural ? window.giroPlural(query) : 'los negocios de ' + query;
+    const giroKey = 'custom-' + query.toLowerCase().replace(/\s+/g,'-');
     const newGiro = {
-      key: 'custom-' + Date.now(),
+      key: giroKey,
       name: capitalize(query),
       plural: plural,
       icon: '✨',
@@ -1416,42 +1374,44 @@
       ]
     };
 
-    // Guardar en localStorage para que la landing lo lea
     const customGiros = JSON.parse(localStorage.getItem('volvix:custom-giros') || '[]');
-    const existing = customGiros.find(g => g.key === 'custom-' + query.toLowerCase().replace(/\s+/g,'-'));
-    if (!existing) {
-      newGiro.key = 'custom-' + query.toLowerCase().replace(/\s+/g,'-');
+    if (!customGiros.find(g => g.key === giroKey)) {
       customGiros.push(newGiro);
       localStorage.setItem('volvix:custom-giros', JSON.stringify(customGiros));
     }
 
-    const wrap = document.getElementById('gen-result');
-    wrap.style.display = 'block';
+    const painsHTML = newGiro.pains.map(p => `
+      <div class="pain-card">
+        <div class="pain-icon">${p.icon}</div>
+        <div class="pain-title">${p.title}</div>
+        <div class="pain-desc">${p.desc}</div>
+      </div>
+    `).join('');
+
+    const wrap = document.getElementById('ai-response');
     wrap.innerHTML = `
-      <div style="margin-top:24px;padding-top:24px;border-top:1px solid var(--border);">
-        <div style="font-size:12px;font-weight:700;color:var(--success);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">
-          ✅ ¡Sistema creado exitosamente!
-        </div>
-        <div class="ai-answer" style="margin-bottom:8px;">
-          Ya tenemos tu sistema: <span class="system-name-pill">${systemName}</span>
-        </div>
-        <div class="ai-sub" style="margin-bottom:18px;">
-          Especialmente diseñado para ${plural} como tú. Antes de mostrarlo, ¿hay alguna funcionalidad específica que estés buscando?
+      <div class="ai-card">
+        <div class="ai-card-header">
+          <div class="ai-icon" style="background:${newGiro.accent};">${newGiro.icon}</div>
+          <div class="ai-header-text">
+            <div style="font-size:12px;font-weight:700;color:var(--success);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">
+              ✅ Sistema preparado para ${newGiro.name}
+            </div>
+            <div class="ai-answer">
+              Tu sistema: <span class="system-name-pill">${systemName}</span>
+            </div>
+            <div class="ai-sub">
+              Especialmente configurado para <strong>${plural}</strong> como tú. Todos los módulos que necesitas para controlar tu negocio de ${query}.
+            </div>
+          </div>
         </div>
 
-        <div style="background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px;padding:14px 16px;margin-bottom:18px;font-size:13px;color:#92400E;">
-          💡 <strong>Ejemplo:</strong> "Necesito que impimir etiquetas con códigos de barras" o "Quiero llevar el control de comisiones de mis empleados". Lo que nos pidas, lo validamos o lo desarrollamos.
-        </div>
-
-        <div style="display:flex;gap:8px;margin-bottom:18px;">
-          <input type="text" id="extra-req" placeholder="Escribe aquí cualquier función que necesites..." style="flex:1;padding:11px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;">
-          <button class="btn-secondary" onclick="validateRequest()">Revisa si tenemos las funcionalidades que buscas</button>
-        </div>
-        <div id="req-result" style="margin-bottom:18px;"></div>
+        <div class="pains-title">Lo que hace especial a ${systemName}</div>
+        <div class="pains-grid">${painsHTML}</div>
 
         <div class="ai-cta">
-          <a href="landing_dynamic.html?giro=${newGiro.key}" class="btn-big">Ver ${systemName} →</a>
-          <button class="btn-secondary" onclick="requestDemo('${newGiro.key}')">📞 Hablar con un asesor</button>
+          <a href="landing_dynamic.html?giro=${giroKey}" class="btn-big">Ver ${systemName} →</a>
+          <button class="btn-secondary" onclick="requestDemo('${giroKey}')">📞 Hablar con un asesor</button>
         </div>
       </div>
     `;
