@@ -1478,19 +1478,43 @@
   /* ============ END R8d FIX-M1 ============ */
 
   /* ============ VISTA SWITCHER ============ */
-  .tb-btn.vista-btn {
-    background: rgba(45,95,143,0.12);
-    border: 1px solid rgba(45,95,143,0.25);
-    border-radius: 6px;
-    color: #2D5F8F;
+  /* Botón en el menubar */
+  .menu-btn.vista-menu-btn {
+    background: linear-gradient(135deg, #EDE9FE, #DDD6FE);
+    border: 1px solid #A78BFA;
+    color: #5B21B6;
     font-weight: 700;
-    padding: 5px 10px;
-    font-size: 11px;
-    letter-spacing: 0.3px;
-    transition: all .15s;
-    display: inline-flex; align-items: center; gap: 5px;
+    border-radius: 6px;
+    flex-shrink: 0;
   }
-  .tb-btn.vista-btn:hover { background: #2D5F8F; color: white; }
+  .menu-btn.vista-menu-btn:hover { background: #6D28D9; color: white; border-color: #6D28D9; }
+  .menu-btn.vista-menu-btn .ico * { stroke: currentColor; }
+
+  /* FAB flotante — siempre visible, esquina inferior izquierda del topbar+menubar */
+  #vista-fab {
+    position: fixed;
+    top: 54px; /* justo debajo del topbar (46px) + 8px */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9000;
+    background: #6D28D9;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+    box-shadow: 0 2px 10px rgba(109,40,217,.45);
+    transition: all .15s;
+    letter-spacing: .3px;
+    pointer-events: all;
+  }
+  #vista-fab:hover { background: #5B21B6; box-shadow: 0 4px 16px rgba(109,40,217,.55); transform: translateX(-50%) translateY(-1px); }
+  /* En vista 2 o 3 ajustar color del FAB */
+  body[data-vista="2"] #vista-fab { background: #4338CA; }
+  body[data-vista="3"] #vista-fab { background: #F05A22; top: 56px; }
 
   /* ======= VISTA 2 : Limpio / Moderno ======= */
   body[data-vista="2"] {
@@ -2021,11 +2045,6 @@
       </button>
     </div>
 
-    <button class="tb-btn vista-btn" id="vista-toggle-btn" onclick="toggleVista()" aria-label="Cambiar vista del POS" title="Cambiar vista (1 → 2 → Terminal)">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="3" width="10" height="18" rx="1.5"/><rect x="13" y="3" width="10" height="9" rx="1.5"/><rect x="13" y="15" width="10" height="6" rx="1.5"/></svg>
-      <span id="vista-label">Vista ①</span>
-    </button>
-
     <button class="tb-btn rapido" onclick="showScreen('quickpos')" aria-label="Modo caja rápida" title="Modo caja rápida">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
       <span>RÁPIDO</span>
@@ -2165,7 +2184,20 @@
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2.5"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
       <span>⋯ Más</span>
     </button>
+
+    <div class="menubar-divider"></div>
+
+    <button class="menu-btn vista-menu-btn" id="vista-menu-btn" onclick="toggleVista()" aria-label="Cambiar vista" title="Cambiar vista del POS (①②③)">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#6D28D9" stroke-width="2"><rect x="1" y="3" width="10" height="18" rx="1.5"/><rect x="13" y="3" width="10" height="9" rx="1.5"/><rect x="13" y="15" width="10" height="6" rx="1.5"/></svg>
+      <span id="vista-label">Vista ①</span>
+    </button>
   </nav>
+
+  <!-- Botón Vista flotante — siempre visible sin importar zoom -->
+  <button id="vista-fab" onclick="toggleVista()" title="Cambiar vista (①→②→Terminal)" aria-label="Cambiar vista">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="3" width="10" height="18" rx="1.5"/><rect x="13" y="3" width="10" height="9" rx="1.5"/><rect x="13" y="15" width="10" height="6" rx="1.5"/></svg>
+    <span id="vista-fab-label">Vista ①</span>
+  </button>
 
   <!-- ============ MAIN ============ -->
   <main class="main">
@@ -6909,8 +6941,11 @@
     var LABELS = { '1': 'Vista ①', '2': 'Vista ②', '3': 'Terminal' };
     function _applyVista(v) {
       document.body.setAttribute('data-vista', v);
+      var label = LABELS[v] || 'Vista ' + v;
       var el = document.getElementById('vista-label');
-      if (el) el.textContent = LABELS[v] || 'Vista ' + v;
+      if (el) el.textContent = label;
+      var fab = document.getElementById('vista-fab-label');
+      if (fab) fab.textContent = label;
       try { localStorage.setItem('salvx_vista', v); } catch(_) {}
     }
     window.toggleVista = function() {
