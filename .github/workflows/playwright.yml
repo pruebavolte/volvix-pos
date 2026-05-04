@@ -70,7 +70,15 @@ jobs:
         env:
           BASE_URL: ${{ steps.resolve_url.outputs.base_url }}
           PREVIEW_URL: ${{ secrets.PREVIEW_URL }}
-        run: npx playwright test --project=chromium
+        run: |
+          if [ "${{ steps.resolve_url.outputs.start_server }}" = "true" ]; then
+            # Local server.js only serves static files — run smoke tests only.
+            # Full API tests (registro, auth, sale-flow) require PREVIEW_URL.
+            echo "Running smoke tests only (no PREVIEW_URL configured)"
+            npx playwright test --project=chromium tests-e2e/smoke.spec.js
+          else
+            npx playwright test --project=chromium
+          fi
 
       - name: Upload Playwright report
         if: always()
