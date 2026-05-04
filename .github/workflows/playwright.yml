@@ -32,29 +32,45 @@ jobs:
       - name: Install Chromium for Playwright
         run: npx playwright install --with-deps chromium
 
-      - name: Check target URL
-        id: check_url
+      - name: Resolve BASE_URL
+        id: resolve_url
         env:
           PREVIEW_URL: ${{ secrets.PREVIEW_URL }}
         run: |
-          if [ -z "$PREVIEW_URL" ]; then
-            echo "PREVIEW_URL secret not configured — E2E tests require a live URL"
-            echo "skip=true" >> $GITHUB_OUTPUT
+          if [ -n "$PREVIEW_URL" ]; then
+            echo "base_url=$PREVIEW_URL" >> $GITHUB_OUTPUT
+            echo "start_server=false" >> $GITHUB_OUTPUT
           else
-            echo "skip=false" >> $GITHUB_OUTPUT
-            echo "BASE_URL=$PREVIEW_URL" >> $GITHUB_ENV
+            echo "base_url=http://localhost:3000" >> $GITHUB_OUTPUT
+            echo "start_server=true" >> $GITHUB_OUTPUT
           fi
 
-      - name: Run Playwright tests
-        if: steps.check_url.outputs.skip == 'false'
+      - name: Start local server (fallback when no PREVIEW_URL)
+        if: steps.resolve_url.outputs.start_server == 'true'
         env:
-          BASE_URL: ${{ secrets.PREVIEW_URL }}
+          PORT: 3000
+          PUBLIC_DIR: ./public
+          OPEN_BROWSER: false
+          NODE_ENV: test
+        run: |
+          node server.js &
+          echo "SERVER_PID=$!" >> $GITHUB_ENV
+          # Wait until server responds
+          for i in $(seq 1 15); do
+            sleep 1
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/health 2>/dev/null || echo "000")
+            if [ "$CODE" = "200" ] || [ "$CODE" = "503" ]; then
+              echo "Server ready (HTTP $CODE) after ${i}s"
+              break
+            fi
+            echo "Waiting for server... attempt $i (HTTP $CODE)"
+          done
+
+      - name: Run Playwright tests
+        env:
+          BASE_URL: ${{ steps.resolve_url.outputs.base_url }}
           PREVIEW_URL: ${{ secrets.PREVIEW_URL }}
         run: npx playwright test --project=chromium
-
-      - name: Skip notice (no PREVIEW_URL)
-        if: steps.check_url.outputs.skip == 'true'
-        run: echo "E2E skipped — configure PREVIEW_URL secret to enable against Vercel preview"
 
       - name: Upload Playwright report
         if: always()
