@@ -32,11 +32,29 @@ jobs:
       - name: Install Chromium for Playwright
         run: npx playwright install --with-deps chromium
 
-      - name: Run Playwright tests
+      - name: Check target URL
+        id: check_url
         env:
-          BASE_URL: ${{ secrets.PREVIEW_URL || 'http://localhost:3000' }}
+          PREVIEW_URL: ${{ secrets.PREVIEW_URL }}
+        run: |
+          if [ -z "$PREVIEW_URL" ]; then
+            echo "PREVIEW_URL secret not configured — E2E tests require a live URL"
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+            echo "BASE_URL=$PREVIEW_URL" >> $GITHUB_ENV
+          fi
+
+      - name: Run Playwright tests
+        if: steps.check_url.outputs.skip == 'false'
+        env:
+          BASE_URL: ${{ secrets.PREVIEW_URL }}
           PREVIEW_URL: ${{ secrets.PREVIEW_URL }}
         run: npx playwright test --project=chromium
+
+      - name: Skip notice (no PREVIEW_URL)
+        if: steps.check_url.outputs.skip == 'true'
+        run: echo "E2E skipped — configure PREVIEW_URL secret to enable against Vercel preview"
 
       - name: Upload Playwright report
         if: always()
