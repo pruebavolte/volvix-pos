@@ -1476,6 +1476,257 @@
   html.touch-device .modal-body { -webkit-overflow-scrolling: touch; }
   html.mobile-device .modal { width: 95vw; max-width: 95vw; }
   /* ============ END R8d FIX-M1 ============ */
+
+  /* ============ VISTA SWITCHER ============ */
+  .tb-btn.vista-btn {
+    background: rgba(45,95,143,0.12);
+    border: 1px solid rgba(45,95,143,0.25);
+    border-radius: 6px;
+    color: #2D5F8F;
+    font-weight: 700;
+    padding: 5px 10px;
+    font-size: 11px;
+    letter-spacing: 0.3px;
+    transition: all .15s;
+    display: inline-flex; align-items: center; gap: 5px;
+  }
+  .tb-btn.vista-btn:hover { background: #2D5F8F; color: white; }
+
+  /* ======= VISTA 2 : Limpio / Moderno ======= */
+  body[data-vista="2"] {
+    --bg: #EEF2FF;
+    --surface: #FFFFFF;
+    --surface-2: #F5F7FF;
+    --border: #C7D2FE;
+    --text: #1E1B4B;
+    --text-2: #4338CA;
+    --text-3: #818CF8;
+    --eleventa-blue: #4338CA;
+    --eleventa-blue-soft: #EEF2FF;
+  }
+  body[data-vista="2"] .topbar {
+    background: linear-gradient(90deg, #312E81 0%, #4338CA 100%);
+    border-bottom: none;
+    box-shadow: 0 2px 12px rgba(67,56,202,.35);
+  }
+  body[data-vista="2"] .topbar * { color: rgba(255,255,255,.85); }
+  body[data-vista="2"] .topbar .brand-logo { background: #F8FAFF; color: #4338CA; }
+  body[data-vista="2"] .topbar .brand-info .name { color: #ffffff; font-weight: 800; }
+  body[data-vista="2"] .topbar .brand-info .sub { color: rgba(255,255,255,.6); }
+  body[data-vista="2"] .topbar .sync-indicator { color: #A5F3FC; }
+  body[data-vista="2"] .topbar .tb-btn { color: rgba(255,255,255,.8); }
+  body[data-vista="2"] .topbar .tb-btn:hover { background: rgba(255,255,255,.15); color: #fff; }
+  body[data-vista="2"] .topbar .platform-toggle-btn { background: rgba(255,255,255,.1); color: rgba(255,255,255,.7); border-color: rgba(255,255,255,.2); }
+  body[data-vista="2"] .topbar .platform-toggle-btn.active { background: rgba(255,255,255,.25); color: #fff; }
+  body[data-vista="2"] .topbar .vista-btn { background: rgba(255,255,255,.2); border-color: rgba(255,255,255,.35); color: #fff; }
+  body[data-vista="2"] .topbar .vista-btn:hover { background: rgba(255,255,255,.35); }
+
+  body[data-vista="2"] .menubar {
+    background: #3730A3;
+    border-bottom: none;
+  }
+  body[data-vista="2"] .menu-btn { color: rgba(255,255,255,.65); border-radius: 6px; }
+  body[data-vista="2"] .menu-btn:hover { background: rgba(255,255,255,.1); color: #fff; }
+  body[data-vista="2"] .menu-btn.active { background: #ffffff; color: #3730A3; }
+  body[data-vista="2"] .menubar-divider { background: rgba(255,255,255,.15); }
+
+  body[data-vista="2"] .pos-screen { background: #EEF2FF; }
+  body[data-vista="2"] .pos-main-area { background: #EEF2FF; }
+
+  body[data-vista="2"] .pos-banner {
+    background: linear-gradient(90deg, #4338CA, #6D28D9);
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    padding: 10px 16px;
+    border-bottom: none;
+    box-shadow: 0 2px 8px rgba(67,56,202,.25);
+  }
+
+  body[data-vista="2"] .pos-code-bar {
+    background: #ffffff;
+    border-bottom: 1px solid #C7D2FE;
+    padding: 10px 14px;
+    gap: 10px;
+  }
+  body[data-vista="2"] .pos-code-bar label { color: #4338CA; font-weight: 600; }
+  body[data-vista="2"] .pos-code-input { background: #F5F3FF; border-color: #A5B4FC; color: #1E1B4B; font-size: 13px; border-radius: 8px; }
+  body[data-vista="2"] .pos-code-input:focus { border-color: #4338CA; box-shadow: 0 0 0 3px rgba(67,56,202,.15); }
+  body[data-vista="2"] .btn-enter { background: #4338CA; color: white; border-radius: 8px; border: none; }
+  body[data-vista="2"] .btn-enter:hover { background: #3730A3; }
+
+  body[data-vista="2"] .pos-actions { background: #ffffff; border-bottom: 1px solid #E0E7FF; padding: 8px 12px; gap: 6px; }
+  body[data-vista="2"] .action-btn { background: #F5F3FF; border-color: #C7D2FE; color: #4338CA; border-radius: 8px; font-weight: 600; }
+  body[data-vista="2"] .action-btn:hover { background: #4338CA; color: white; border-color: #4338CA; }
+  body[data-vista="2"] .action-btn.variant-warm { background: #FFF7ED; border-color: #FDE68A; color: #92400E; }
+  body[data-vista="2"] .action-btn.variant-orange { background: #FFF4E6; border-color: #FDBA74; color: #C2410C; }
+  body[data-vista="2"] .action-btn.variant-green { background: #F0FDF4; border-color: #BBF7D0; color: #15803D; }
+  body[data-vista="2"] .action-btn.variant-red { background: #FEF2F2; border-color: #FECACA; color: #B91C1C; }
+  body[data-vista="2"] .action-btn.variant-blue { background: #EFF6FF; border-color: #BFDBFE; color: #1D4ED8; }
+  body[data-vista="2"] .action-btn.variant-purple { background: #F5F3FF; border-color: #DDD6FE; color: #7C3AED; }
+
+  body[data-vista="2"] .pos-tabs { background: #fff; border-bottom: 1px solid #E0E7FF; }
+  body[data-vista="2"] .ticket-tab { background: #EEF2FF; border-color: #A5B4FC; color: #4338CA; border-radius: 6px 6px 0 0; }
+  body[data-vista="2"] .btn-new-ticket { background: #4338CA; color: white; border-radius: 6px; border: none; }
+
+  body[data-vista="2"] .pos-cart-wrap { background: #fff; }
+  body[data-vista="2"] .pos-cart th { background: #EEF2FF; color: #4338CA; border-bottom: 2px solid #A5B4FC; font-size: 11px; letter-spacing: .5px; }
+  body[data-vista="2"] .pos-cart td { border-bottom-color: #E0E7FF; color: #1E1B4B; }
+  body[data-vista="2"] .pos-cart tbody tr:hover { background: #F5F3FF; }
+  body[data-vista="2"] .pos-cart tbody tr.selected { background: #EDE9FE; }
+
+  body[data-vista="2"] .pos-bottom { background: #ffffff; border-top: 2px solid #A5B4FC; padding: 10px 16px; }
+  body[data-vista="2"] .bottom-btn { background: #EEF2FF; border-color: #C7D2FE; color: #4338CA; border-radius: 8px; }
+  body[data-vista="2"] .bottom-btn:hover { background: #4338CA; color: white; }
+  body[data-vista="2"] .btn-cobrar { background: linear-gradient(135deg, #4338CA, #6D28D9); border: none; border-radius: 10px; font-size: 14px; font-weight: 800; letter-spacing: .5px; box-shadow: 0 4px 14px rgba(67,56,202,.4); }
+  body[data-vista="2"] .btn-cobrar:hover { box-shadow: 0 6px 20px rgba(67,56,202,.5); transform: translateY(-1px); }
+  body[data-vista="2"] .total-big { color: #4338CA; font-size: 34px; font-weight: 800; }
+
+  body[data-vista="2"] .pos-coupon-bar { background: #F5F3FF; border-color: #C7D2FE; }
+  body[data-vista="2"] .pos-summary { background: #F0F4FF; border-top: 1px solid #C7D2FE; }
+  body[data-vista="2"] .pos-summary .lbl { color: #6366F1; }
+  body[data-vista="2"] .pos-summary .val { color: #1E1B4B; font-weight: 700; }
+  body[data-vista="2"] .pos-summary .cambio { color: #4338CA; }
+  body[data-vista="2"] .pos-footer { background: #312E81; color: rgba(255,255,255,.5); }
+
+  body[data-vista="2"] .pos-sidebar-right { background: #ffffff; border-left-color: #C7D2FE; }
+  body[data-vista="2"] .pos-sidebar-title { color: #6366F1; }
+  body[data-vista="2"] .cat-item { background: #F5F3FF; border-color: #C7D2FE; color: #4338CA; border-radius: 8px; }
+  body[data-vista="2"] .cat-item:hover { background: #EEF2FF; border-color: #818CF8; }
+  body[data-vista="2"] .cat-item.active { background: #4338CA; color: white; border-color: #4338CA; }
+  body[data-vista="2"] .qp-card { background: #F5F3FF; border-color: #C7D2FE; border-radius: 8px; }
+  body[data-vista="2"] .qp-card:hover { background: #4338CA; color: white; border-color: #4338CA; }
+
+  /* ======= VISTA 3 : Terminal Oscuro (OXXO-style) ======= */
+  body[data-vista="3"] {
+    --bg: #0F1419;
+    --surface: #1A2332;
+    --surface-2: #1F2D40;
+    --border: #2D3E54;
+    --text: #E8EDF2;
+    --text-2: #A8B8C8;
+    --text-3: #5A7080;
+    background: #0F1419;
+  }
+  body[data-vista="3"] .app, body[data-vista="3"] .main { background: #0F1419; }
+
+  body[data-vista="3"] .topbar {
+    background: #0A0F18;
+    border-bottom: 2px solid #F05A22;
+    box-shadow: 0 2px 20px rgba(240,90,34,.2);
+  }
+  body[data-vista="3"] .topbar .brand-logo { background: #F05A22; color: #fff; font-weight: 900; }
+  body[data-vista="3"] .topbar .brand-info .name { color: #F05A22; font-weight: 800; }
+  body[data-vista="3"] .topbar .brand-info .sub { color: #5A7080; }
+  body[data-vista="3"] .topbar .crumb { color: #5A7080; }
+  body[data-vista="3"] .topbar .sync-indicator { color: #F05A22; }
+  body[data-vista="3"] .topbar .sync-indicator .dot { background: #F05A22; }
+  body[data-vista="3"] .topbar .vendor-info { color: #5A7080; }
+  body[data-vista="3"] .topbar .tb-btn { color: #A8B8C8; border-radius: 5px; }
+  body[data-vista="3"] .topbar .tb-btn:hover { background: #1A2332; color: #F05A22; }
+  body[data-vista="3"] .topbar .platform-toggle { background: #0F1419; border: 1px solid #2D3E54; border-radius: 6px; }
+  body[data-vista="3"] .topbar .platform-toggle-btn { color: #5A7080; border-color: transparent; }
+  body[data-vista="3"] .topbar .platform-toggle-btn.active { background: #F05A22; color: #fff; }
+  body[data-vista="3"] .topbar .vista-btn { background: #F05A22; border-color: #F05A22; color: #fff; }
+  body[data-vista="3"] .topbar .tb-btn.rapido { background: #F05A22; color: white; }
+  body[data-vista="3"] .topbar .tb-btn.salir { color: #F05A22; }
+
+  body[data-vista="3"] .menubar {
+    background: #0A0F18;
+    border-bottom: 1px solid #2D3E54;
+  }
+  body[data-vista="3"] .menu-btn { color: #5A7080; border-radius: 5px; }
+  body[data-vista="3"] .menu-btn:hover { background: #1A2332; color: #E8EDF2; }
+  body[data-vista="3"] .menu-btn.active { background: #F05A22; color: #fff; box-shadow: 0 2px 8px rgba(240,90,34,.4); }
+  body[data-vista="3"] .menu-btn .ico * { stroke: currentColor; }
+  body[data-vista="3"] .menubar-divider { background: #2D3E54; }
+
+  body[data-vista="3"] .pos-screen { background: #0F1419; }
+  body[data-vista="3"] .pos-main-area { background: #0F1419; }
+
+  body[data-vista="3"] .pos-banner {
+    background: #0A0F18;
+    color: #F05A22;
+    border-bottom: 2px solid #F05A22;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  body[data-vista="3"] .pos-code-bar {
+    background: #1A2332;
+    border-bottom: 1px solid #2D3E54;
+  }
+  body[data-vista="3"] .pos-code-bar label { color: #F05A22; font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+  body[data-vista="3"] .pos-code-input {
+    background: #0A0F18;
+    color: #E8EDF2;
+    border-color: #F05A22;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+  }
+  body[data-vista="3"] .pos-code-input:focus { box-shadow: 0 0 0 3px rgba(240,90,34,.3); }
+  body[data-vista="3"] .btn-enter { background: #F05A22; color: white; border-radius: 4px; border: none; font-weight: 700; }
+  body[data-vista="3"] .btn-enter:hover { background: #D94B18; }
+
+  body[data-vista="3"] .pos-actions { background: #1A2332; border-bottom: 1px solid #2D3E54; }
+  body[data-vista="3"] .action-btn { background: #0F1419; border-color: #2D3E54; color: #A8B8C8; border-radius: 4px; }
+  body[data-vista="3"] .action-btn:hover { background: #F05A22; color: white; border-color: #F05A22; }
+  body[data-vista="3"] .action-btn.variant-warm,
+  body[data-vista="3"] .action-btn.variant-orange,
+  body[data-vista="3"] .action-btn.variant-green,
+  body[data-vista="3"] .action-btn.variant-red,
+  body[data-vista="3"] .action-btn.variant-blue,
+  body[data-vista="3"] .action-btn.variant-purple { background: #0F1419; color: #A8B8C8; border-color: #2D3E54; }
+
+  body[data-vista="3"] .pos-tabs { background: #0A0F18; border-bottom: 1px solid #2D3E54; }
+  body[data-vista="3"] .ticket-tab { background: #1A2332; border-color: #F05A22; color: #F05A22; font-family: 'JetBrains Mono', monospace; }
+  body[data-vista="3"] .btn-new-ticket { background: #F05A22; color: white; border: none; border-radius: 4px; }
+
+  body[data-vista="3"] .pos-cart-wrap { background: #0F1419; }
+  body[data-vista="3"] .pos-cart { background: #0F1419; }
+  body[data-vista="3"] .pos-cart th { background: #0A0F18; color: #F05A22; border-bottom: 2px solid #F05A22; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1px; }
+  body[data-vista="3"] .pos-cart td { border-bottom-color: #1A2332; color: #E8EDF2; font-family: 'JetBrains Mono', monospace; }
+  body[data-vista="3"] .pos-cart tbody tr:hover { background: #1A2332; }
+  body[data-vista="3"] .pos-cart tbody tr.selected { background: #1F2D40; outline: 1px solid #F05A22; }
+  body[data-vista="3"] .pos-cart .qty-btn { background: #2D3E54; color: #E8EDF2; border-radius: 3px; }
+  body[data-vista="3"] .pos-cart .qty-btn:hover { background: #F05A22; color: white; }
+
+  body[data-vista="3"] .pos-bottom { background: #0A0F18; border-top: 2px solid #F05A22; }
+  body[data-vista="3"] .item-counter-num { color: #F05A22; font-family: 'JetBrains Mono', monospace; font-size: 24px; }
+  body[data-vista="3"] .item-counter-txt { color: #5A7080; }
+  body[data-vista="3"] .bottom-btn { background: #1A2332; border-color: #2D3E54; color: #A8B8C8; border-radius: 4px; }
+  body[data-vista="3"] .bottom-btn:hover { background: #1F2D40; color: #F05A22; border-color: #F05A22; }
+  body[data-vista="3"] .btn-cobrar { background: #F05A22; border: none; border-radius: 6px; font-weight: 800; font-size: 14px; letter-spacing: .5px; box-shadow: 0 4px 16px rgba(240,90,34,.4); }
+  body[data-vista="3"] .btn-cobrar:hover { background: #D94B18; box-shadow: 0 6px 20px rgba(240,90,34,.55); }
+  body[data-vista="3"] .total-big { color: #F05A22; font-size: 38px; font-weight: 900; font-family: 'JetBrains Mono', monospace; text-shadow: 0 0 20px rgba(240,90,34,.35); }
+
+  body[data-vista="3"] .pos-coupon-bar { background: #1A2332; border-color: #2D3E54; }
+  body[data-vista="3"] #pos-coupon-code { background: #0A0F18; color: #E8EDF2; border-color: #2D3E54; }
+
+  body[data-vista="3"] .pos-summary { background: #0A0F18; border-top: 1px solid #2D3E54; }
+  body[data-vista="3"] .pos-summary .lbl { color: #5A7080; font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+  body[data-vista="3"] .pos-summary .val { color: #E8EDF2; font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+  body[data-vista="3"] .pos-summary .cambio { color: #F05A22; }
+  body[data-vista="3"] .pos-summary .bottom-btn { background: #1A2332; border-color: #2D3E54; color: #A8B8C8; }
+  body[data-vista="3"] .pos-footer { background: #0A0F18; color: #2D3E54; border-top: 1px solid #1A2332; }
+
+  body[data-vista="3"] .pos-sidebar-right { background: #1A2332; border-left-color: #2D3E54; }
+  body[data-vista="3"] .pos-sidebar-title { color: #F05A22; font-size: 9px; letter-spacing: 2px; }
+  body[data-vista="3"] .cat-item { background: #0F1419; border-color: #2D3E54; color: #A8B8C8; border-radius: 4px; }
+  body[data-vista="3"] .cat-item:hover { background: #1F2D40; color: #E8EDF2; border-color: #F05A22; }
+  body[data-vista="3"] .cat-item.active { background: #F05A22; color: white; border-color: #F05A22; }
+  body[data-vista="3"] .qp-card { background: #0F1419; border-color: #2D3E54; color: #A8B8C8; border-radius: 4px; }
+  body[data-vista="3"] .qp-card:hover { background: #F05A22; color: white; border-color: #F05A22; }
+  body[data-vista="3"] .qp-card-name { color: inherit; }
+
+  body[data-vista="3"] input:not(.pos-code-input):not(#pos-coupon-code) {
+    background: #1A2332; color: #E8EDF2; border-color: #2D3E54;
+  }
+  body[data-vista="3"] .pos-sidebar-toggle { background: #F05A22; color: white; border-radius: 4px; }
+  /* ============ END VISTA SWITCHER ============ */
 </style>
 <!-- B41 perf: defer added — these expose window.volvix/window.VolvixSync but downstream
      consumers (lines 1309+ all use defer) run AFTER, so order is preserved. -->
@@ -1769,6 +2020,11 @@
         <span>Web</span>
       </button>
     </div>
+
+    <button class="tb-btn vista-btn" id="vista-toggle-btn" onclick="toggleVista()" aria-label="Cambiar vista del POS" title="Cambiar vista (1 → 2 → Terminal)">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="3" width="10" height="18" rx="1.5"/><rect x="13" y="3" width="10" height="9" rx="1.5"/><rect x="13" y="15" width="10" height="6" rx="1.5"/></svg>
+      <span id="vista-label">Vista ①</span>
+    </button>
 
     <button class="tb-btn rapido" onclick="showScreen('quickpos')" aria-label="Modo caja rápida" title="Modo caja rápida">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
@@ -6647,6 +6903,29 @@
     btn.classList.add('active');
     showToast(`Vista ${plat.toUpperCase()} · previsualizando layout`);
   }
+
+  /* ============ VISTA SWITCHER ============ */
+  (function initVista() {
+    var LABELS = { '1': 'Vista ①', '2': 'Vista ②', '3': 'Terminal' };
+    function _applyVista(v) {
+      document.body.setAttribute('data-vista', v);
+      var el = document.getElementById('vista-label');
+      if (el) el.textContent = LABELS[v] || 'Vista ' + v;
+      try { localStorage.setItem('salvx_vista', v); } catch(_) {}
+    }
+    window.toggleVista = function() {
+      var cur = parseInt(document.body.getAttribute('data-vista') || '1', 10);
+      var next = cur >= 3 ? 1 : cur + 1;
+      _applyVista(String(next));
+      var names = { '1': 'Vista estándar', '2': 'Vista moderna (Indigo)', '3': 'Terminal oscuro (OXXO-style)' };
+      showToast('🎨 ' + (names[String(next)] || 'Vista ' + next));
+    };
+    // Restore from localStorage
+    try {
+      var saved = localStorage.getItem('salvx_vista');
+      if (saved && ['1','2','3'].includes(saved)) _applyVista(saved);
+    } catch(_) {}
+  })();
 
   /* ============ OWNER PANEL ============ */
   function openOwnerPanel() {
