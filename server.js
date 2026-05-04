@@ -39,7 +39,7 @@ const { exec } = require('child_process');
 const CONFIG = {
   host: process.env.HOST || 'localhost',
   preferredPort: parseInt(process.env.PORT) || 3000,
-  publicDir: path.resolve(process.env.PUBLIC_DIR || '.'),
+  publicDir: path.resolve(process.env.PUBLIC_DIR || './public'),
   dbPath: path.resolve(process.env.DB_PATH || './db/volvix.db'),
   apiKey: process.env.ANTHROPIC_API_KEY || '',
   openBrowser: process.env.OPEN_BROWSER !== 'false',

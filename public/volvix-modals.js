@@ -1020,27 +1020,10 @@
         return _nativePrompt(message, defaultValue);
       };
 
-      global.confirm = function (message) {
-        try {
-          if (global.VolvixUI && typeof global.VolvixUI.confirm === 'function') {
-            var msgStr = String(message || '¿Confirmar?');
-            global.VolvixUI.confirm({
-              title: 'Confirmar',
-              message: msgStr,
-              confirmText: 'Aceptar',
-              cancelText: 'Cancelar'
-            }).then(function (ok) {
-              if (ok) {
-                global.dispatchEvent(new CustomEvent('volvix:confirm-resolved', {
-                  detail: { message: msgStr, value: true }
-                }));
-              }
-            }).catch(function () {});
-            return false; // caller asume cancel
-          }
-        } catch (e) { /* ignore */ }
-        return _nativeConfirm(message);
-      };
+      // confirm() cannot be replaced with an async modal without breaking all
+      // synchronous callers (if (!confirm(...)) return). Restore to native.
+      // Use VolvixUI.confirm() explicitly in async flows instead.
+      global.confirm = _nativeConfirm;
 
       global.alert = function (message) {
         try {
