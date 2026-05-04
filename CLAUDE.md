@@ -63,72 +63,79 @@ La compactación la hace el sistema, no yo, cuando se llena el contexto. Para qu
 
 ## Estado actual (snapshot — actualizar cuando cambie)
 
-### Hecho
-- `server.js` reescrito con Zod, rate limit, captureError, header nosniff
-- `supabase-rls.sql` creado (RLS + Realtime publication; requiere `owner_user_id` en `volvix_tenants`)
-- 8 landing pages por vertical
-- Deploy en Vercel funcional
-- E2E pasando 17/17
-- **2026-04-24**: Claude AI entregó 7 archivos completos:
-  - `public/config.example.js` — configuración Supabase
-  - `public/volvix-tokens.css` — design tokens CSS (469 líneas)
-  - `public/volvix-api.js` — API client Supabase (535 líneas)
-  - `public/volvix-sync.js` — Sync Engine offline-first (602 líneas)
-  - `public/volvix-sync-widget.js` — Widget flotante estado sync (415 líneas)
-  - `public/auth-gate.js` — Auth Gate para todas las páginas protegidas (271 líneas)
-  - `public/pos.html` — POS corregido completo con auth-gate (1812 líneas)
+### **LIMPIEZA REPO 2026-05-04** ✅
+Gran limpieza ejecutada. El repo ahora es coherente:
+- `api/index.js` — servidor principal (~35K líneas, todos los endpoints)
+- `public/` — TODOS los HTMLs (129 archivos), CSS, JS servibles
+- `volvix-*.js`, `*.css` sueltos en root — módulos wiring activos (no tienen copia en public/)
+- `giros_catalog_v2.js` — catálogo activo (v1 es shim de compat)
+- Root `.md` — solo los 10 esenciales (CLAUDE.md, CHANGELOG, SECURITY, etc.)
+- `docs/` — docs de referencia
+- `docs/reports/` — 200+ reportes de sesiones anteriores
+- `scripts/` — herramientas de build/generate
+- `docs/session-2026-05-03/` — handoff detallado de sesión 2026-05-03
 
-### Pendiente P0 (bloquea producción)
-- [x] Aplicar `supabase-rls.sql` en dashboard de Supabase — **HECHO 2026-04-25**
-- [x] Crear `public/config.js` real con credenciales — **HECHO 2026-04-25**
-- [x] Implementar `public/login.html` — **HECHO 2026-04-25**
-- [x] Roles implementados via auth-gate.js (superadmin, owner, cajero)
-- [x] **FIX: Login infinito flasheo — HECHO 2026-04-25** ✅
-  - Problema: `/api/login` endpoint implementado server-side
-  - Antes: client-side async auth + buildVolvixSession() causaba timeout
-  - Ahora: servidor maneja Supabase auth + queries en una sola respuesta
-  - Pruebas: admin@volvix.test / Volvix2026! ✅ Funciona sin flasheo
+**ARREGLOS CRÍTICOS en limpieza:**
+- 6 archivos JS donde `public/` tenía versión INCOMPLETA vs root → reemplazados:
+  - `sw.js`: 13KB → 19KB (service worker completo, background sync)
+  - `volvix-modals.js`: 37KB → 44KB
+  - `volvix-returns-wiring.js`: 3.5KB stub → 20KB completo
+  - `volvix-stripe-wiring.js`: 7KB → 20KB
+  - `volvix-perf-wiring.js`: 7KB → 16KB
+  - `volvix-voice-wiring.js`: 7KB → 20KB
+- `.env.production` removido de git tracking (tenía JWT_SECRET y ADMIN_API_KEY)
+  **⚠️ ROTAR ESTAS KEYS** si no se ha hecho: ADMIN_API_KEY, JWT_SECRET en Vercel env
+- 15 JS duplicados (root shadowed por public/) → eliminados del root
 
-### **SISTEMA BASE COMPLETO + DISEÑO OFICIAL — 2026-04-25** ✅
-Claude AI confirmó: "El sistema base está completo."
-Todos los archivos core entregados, verificados y en producción (Vercel).
-**CRÍTICO ARREGLADO**: Login funciona con credenciales reales (sin inyección manual).
-**DISEÑO ACTUALIZADO**: login.html reemplazado con diseño profesional oficial (glassmorphism, modern UI).
+### Hecho (sistema completo en producción)
+- Sistema base: login, POS, inventario, corte, clientes, reportes, config ✅
+- Owner panel v7 (`/volvix_owner_panel_v7.html`) — panel principal negocio ✅
+- Owner panel v8 (`/volvix_owner_panel_v8.html`) — dashboard SaaS para @systeminternational.app ✅
+- Marketplace con selector de giro y autocomplete ✅
+- 59 landing pages en `public/` ✅
+- Registration wizard + OTP (`/registro.html`) ✅
+- Service Worker PWA con background sync ✅
+- 178 giros + 1068 productos en Supabase ✅
+- Launcher (`/volvix-launcher.html`) — hub de acceso por rol ✅
 
 ### Pendiente P1
 - [ ] Sentry DSN real configurado
 - [ ] Testing cross-browser real
+- [ ] **ROTAR** JWT_SECRET y ADMIN_API_KEY (estuvieron en git)
 
-### Pendiente P2 (Fase 4+ — bajo demanda, pedir a Claude AI con JSON spec)
-- [ ] `public/volvix_ai_engine.html` — motor auto-evolución
-- [ ] `public/volvix_ai_support.html` — soporte IA
-- [ ] `public/volvix_ai_academy.html` — academia videos
-- [ ] `public/volvix_remote.html` — control remoto VX-XXXX
-- [ ] `public/marketplace.html` — landing captación
-- [ ] `public/landing_dynamic.html` — 35 landings por giro
-- [ ] `public/multipos_suite_v3.html` — 4 apps restaurante
-- [ ] `public/etiqueta_designer.html` — diseñador etiquetas
-- [ ] Impresión térmica
+### Pendiente P2 (Fase 4+ — bajo demanda)
+- [ ] Impresión térmica (hardware)
 - [ ] Scanner barcode hardware
-- [ ] Onboarding wizard
+- [ ] Onboarding wizard paso a paso
 
 ---
 
-## Páginas existentes
+## Páginas existentes (todas en public/)
 
 | Ruta | Descripción | Estado |
 |---|---|---|
-| `/` | Landing principal | OK |
-| `/login.html` | Login | ✅ 26262 bytes |
-| `/pos.html` | Punto de venta | ✅ 1812 líneas |
-| `/pos-inventario.html` | Gestión stock | ✅ 55618 bytes, 1496 líneas |
-| `/pos-corte.html` | Corte de caja | ✅ 49726 bytes |
-| `/pos-clientes.html` | CRM clientes | ✅ 52627 bytes, 1391 líneas |
-| `/pos-reportes.html` | Reportes y analytics | ✅ 41813 bytes, 1000 líneas |
-| `/pos-config.html` | Configuración | ✅ 74361 bytes, 1505 líneas |
-| `/sw.js` | Service Worker PWA | ✅ 12747 bytes, 419 líneas |
-| `/manifest.json` | PWA Manifest | ✅ 902 bytes |
-| `/landing-*.html` | 8 verticales | OK |
+| `/` → `/marketplace.html` | Landing con selector de giro | ✅ |
+| `/login.html` | Login glassmorphism | ✅ |
+| `/registro.html` | Registro wizard + OTP | ✅ |
+| `/pos.html` | Punto de venta | ✅ |
+| `/pos-inventario.html` | Gestión stock | ✅ |
+| `/pos-corte.html` | Corte de caja | ✅ |
+| `/pos-clientes.html` | CRM clientes | ✅ |
+| `/pos-reportes.html` | Reportes y analytics | ✅ |
+| `/pos-config.html` | Configuración | ✅ |
+| `/volvix_owner_panel_v7.html` | Panel owner (negocio) | ✅ 264KB |
+| `/volvix_owner_panel_v8.html` | Dashboard SaaS (@systeminternational.app) | ✅ 48KB |
+| `/volvix-launcher.html` | Hub acceso por rol | ✅ |
+| `/volvix-user-management.html` | Gestión usuarios | ✅ |
+| `/multipos_suite_v3.html` | Multi-sucursales | ✅ |
+| `/etiqueta_designer.html` | Diseñador etiquetas | ✅ |
+| `/landing-*.html` | 59 landings por giro | ✅ |
+| `/sw.js` | Service Worker PWA completo | ✅ 19KB |
+| `/manifest.json` | PWA Manifest | ✅ |
+
+**Nota owner panel**: `/volvix_owner_panel_v7.html` es el panel de negocios.
+`/volvix_owner_panel_v8.html` es el dashboard de plataforma (solo para superadmin/@systeminternational.app).
+La navegación en pos.html, pos-inventario, etc. apunta a v7. auth-gate redirige v8 solo a superadmins.
 
 ---
 

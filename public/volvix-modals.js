@@ -291,8 +291,16 @@
       var spinnerSpan = el('span', { class: 'vx-spinner', style: { display: 'none' } });
       var submitLabel = el('span', null, opts.submitText || 'Guardar');
       var submitBtn = el('button', { class: 'vx-btn vx-primary', type: 'submit' }, [spinnerSpan, submitLabel]);
-      formEl.appendChild(el('div', { style: { display: 'none' } })); // spacer
-      // Submit en Enter handled by form submit
+      // FIX: Botones dentro del <form> para que submit funcione (Enter + click).
+      // El botón submit DEBE estar dentro del <form>, si no el click no dispara onsubmit.
+      var formFooter = el('div', { class: 'vx-modal-footer vx-form-footer' }, [cancelBtn, submitBtn]);
+      formEl.appendChild(formFooter);
+      // Click handler explícito como red de seguridad (por si form submit es bloqueado).
+      submitBtn.addEventListener('click', function (e) {
+        // Si el botón está dentro de <form>, el browser ya disparará submit.
+        // Este handler solo actúa si por alguna razón no se disparó (defensa en profundidad).
+        if (e.defaultPrevented) return;
+      });
 
       var inst = modal({
         title: opts.title,
@@ -300,7 +308,7 @@
         body: formEl,
         size: opts.size || 'md',
         dismissable: opts.dismissable !== false,
-        footer: [cancelBtn, submitBtn],
+        // footer omitido: ya está dentro del <form>
         onClose: function (result) {
           if (resolved) return;
           if (submitting) return false;
@@ -913,5 +921,143 @@
     loading: loading,
     _masks: Masks
   };
+
+  // ---------- Global hijack of native prompt/confirm/alert ----------
+  // Reemplaza los diálogos nativos del navegador con modales VolvixUI.
+  // Como prompt()/confirm() nativos son SÍNCRONOS y la API VolvixUI es async,
+  // los hijacks retornan null/false (caller asume cancel) y disparan un
+  // CustomEvent 'volvix:prompt-resolved' / 'volvix:confirm-resolved' al confirmar
+  // para que listeners globales puedan reaccionar. alert() se redirige a toast().
+  try {
+    if (typeof global.prompt === 'function' && !global.__volvixPromptHijacked) {
+      var _nativePrompt  = global.prompt.bind(global);
+      var _nativeConfirm = global.confirm.bind(global);
+      var _nativeAlert   = global.alert.bind(global);
+
+      // Helper: parsea el texto del prompt() y deriva (title, description, fieldType, fieldLabel, fieldOpts)
+      // sin duplicar el mensaje en el modal. Estrategia:
+      //  - Si message tiene varias líneas: primera línea -> description, última -> label
+      //  - Si message tiene una sola línea: usa "Acción requerida" como title y la línea como label
+      //  - Detecta type por palabras clave (number/email/tel/rfc/date/text)
+      function parsePromptMessage(msg, defaultVal) {
+        var raw = String(msg || '').trim();
+        var lines = raw.split(/\r?\n/).map(function (s) { return s.trim(); }).filter(Boolean);
+        var first = lines[0] || '';
+        var last  = lines[lines.length - 1] || first;
+        var corpus = raw.toLowerCase();
+
+        // Inferir título contextual a partir del corpus (no duplica el message)
+        var title = 'Acción requerida';
+        if (/stock/.test(corpus))         title = 'Editar stock';
+        else if (/precio/.test(corpus))   title = 'Editar precio';
+        else if (/descuento|%|porcent/.test(corpus)) title = 'Aplicar descuento';
+        else if (/cantidad|qty/.test(corpus))        title = 'Cantidad';
+        else if (/c[oó]digo|sku|barcode/.test(corpus)) title = 'Código';
+        else if (/correo|email/.test(corpus))        title = 'Email';
+        else if (/tel[eé]fono|phone|celular/.test(corpus)) title = 'Teléfono';
+        else if (/fecha|date/.test(corpus))          title = 'Fecha';
+        else if (/nombre/.test(corpus))              title = 'Nombre';
+        else if (/raz[oó]n|motivo/.test(corpus))     title = 'Motivo';
+
+        // description: primera línea solo si hay >1 línea (contexto), si no, vacío para no duplicar
+        var description = lines.length > 1 ? first : '';
+        // label: última línea si es corta y diferente a description; si no, "Valor"
+        var label = (last && last.length <= 60 && last !== description) ? last.replace(/[:\?]\s*$/, '') : 'Valor';
+
+        // Tipo + opciones del campo
+        var fieldType = 'text';
+        var fieldOpts = { default: defaultVal != null ? String(defaultVal) : '', required: false };
+
+        if (/cantidad|qty|stock|precio|monto|costo|%|porcent|descuento|amount|number|valor num|comisi[oó]n/i.test(corpus)) {
+          fieldType = 'number';
+          fieldOpts.min = 0;
+          fieldOpts.step = /%|porcent|descuento/i.test(corpus) ? 0.01 : (/stock|cantidad|qty/i.test(corpus) ? 1 : 0.01);
+          if (/%|porcent|descuento/i.test(corpus)) fieldOpts.max = 100;
+        } else if (/email|correo/i.test(corpus)) {
+          fieldType = 'email';
+        } else if (/tel[eé]fono|phone|celular|tel\b/i.test(corpus)) {
+          fieldType = 'tel';
+          fieldOpts.mask = 'tel-mx';
+        } else if (/\brfc\b/i.test(corpus)) {
+          fieldType = 'text';
+          fieldOpts.mask = 'rfc';
+        } else if (/fecha|date/i.test(corpus)) {
+          fieldType = 'date';
+        }
+
+        return { title: title, description: description, fieldType: fieldType, fieldLabel: label, fieldOpts: fieldOpts };
+      }
+      // Expone para tests / tooling
+      global.VolvixUI._parsePromptMessage = parsePromptMessage;
+
+      global.prompt = function (message, defaultValue) {
+        try {
+          if (global.VolvixUI && typeof global.VolvixUI.form === 'function') {
+            var msgStr = String(message || '');
+            var parsed = parsePromptMessage(msgStr, defaultValue);
+            var fieldDef = Object.assign({
+              name: 'value',
+              label: parsed.fieldLabel,
+              type: parsed.fieldType
+            }, parsed.fieldOpts);
+
+            global.VolvixUI.form({
+              title: parsed.title,
+              description: parsed.description || undefined,
+              size: 'sm',
+              fields: [fieldDef],
+              submitText: 'Aceptar'
+            }).then(function (r) {
+              if (r) {
+                global.dispatchEvent(new CustomEvent('volvix:prompt-resolved', {
+                  detail: { message: msgStr, value: r.value, defaultValue: defaultValue }
+                }));
+              }
+            }).catch(function () {});
+            return null; // caller asume cancel; no hace acción destructiva
+          }
+        } catch (e) { /* ignore */ }
+        return _nativePrompt(message, defaultValue);
+      };
+
+      global.confirm = function (message) {
+        try {
+          if (global.VolvixUI && typeof global.VolvixUI.confirm === 'function') {
+            var msgStr = String(message || '¿Confirmar?');
+            global.VolvixUI.confirm({
+              title: 'Confirmar',
+              message: msgStr,
+              confirmText: 'Aceptar',
+              cancelText: 'Cancelar'
+            }).then(function (ok) {
+              if (ok) {
+                global.dispatchEvent(new CustomEvent('volvix:confirm-resolved', {
+                  detail: { message: msgStr, value: true }
+                }));
+              }
+            }).catch(function () {});
+            return false; // caller asume cancel
+          }
+        } catch (e) { /* ignore */ }
+        return _nativeConfirm(message);
+      };
+
+      global.alert = function (message) {
+        try {
+          if (global.VolvixUI && typeof global.VolvixUI.toast === 'function') {
+            var msgStr = String(message || '');
+            var type = /error|fall[oó]|inv[aá]lido|inválid/i.test(msgStr)
+              ? 'error'
+              : (/[éxito✓✅]|exito|guardad|registr|aplicad/i.test(msgStr) ? 'success' : 'info');
+            global.VolvixUI.toast({ type: type, message: msgStr.slice(0, 240) });
+            return;
+          }
+        } catch (e) { /* ignore */ }
+        return _nativeAlert(message);
+      };
+
+      global.__volvixPromptHijacked = true;
+    }
+  } catch (e) { /* fail-safe: no rompemos la página */ }
 
 })(typeof window !== 'undefined' ? window : this);
