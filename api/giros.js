@@ -727,9 +727,32 @@ async function tryBingImage(query) {
   } catch (_) { return null; }
 }
 
-// Cadena: prueba cada engine hasta que uno devuelva URL.
+// 2026-05: Pexels API (imágenes profesionales catalogo).
+// Funciona desde Vercel datacenter (no como Google/Bing).
+// Free tier: 200 req/hora, 20.000 req/mes.
+const PEXELS_API_KEY = process.env.PEXELS_API_KEY || 'ltdq1hrsI4wNg453oKLxXhZPG1Mwpze8Y0E0MXA6eouKjhF3cqTHHMgk';
+
+async function tryPexelsImage(query) {
+  if (!query || !PEXELS_API_KEY) return null;
+  try {
+    const url = 'https://api.pexels.com/v1/search?per_page=3&orientation=square&query=' + encodeURIComponent(query);
+    const r = await fetchWithTimeout(url, {
+      headers: { 'Authorization': PEXELS_API_KEY, 'Accept': 'application/json' }
+    }, 6000);
+    if (!r || !r.ok) return null;
+    const j = await r.json();
+    const photos = (j && j.photos) || [];
+    if (!photos.length) return null;
+    const first = photos[0];
+    return (first.src && (first.src.large || first.src.medium || first.src.original)) || null;
+  } catch (_) { return null; }
+}
+
+// Cadena: Pexels primero (premium quality), luego DDG/Google/Bing como fallback.
 async function searchProductImageMulti(query) {
   if (!query || typeof query !== 'string') return null;
+  const urlPexels = await tryPexelsImage(query);
+  if (urlPexels) return urlPexels;
   const url = await tryDuckDuckGoImage(query);
   if (url) return url;
   const url2 = await tryGoogleImage(query);
@@ -838,14 +861,18 @@ async function persistGeneratedGiro(ctx, slug, payload, originalQuery) {
     } catch (_) { /* puede no existir, ok */ }
 
     const productos = Array.isArray(payload.productos_detectados) ? payload.productos_detectados : [];
-    // 2026-05: enriquecer cada producto con image_url real buscada en Bing
-    // (best-effort, paralelo, timeout corto). Solo se ejecuta 1 vez por giro al persistir.
-    const productosConImg = productos.map((p) => {
-      if (p && (p.image_url || (p.metadata && p.metadata.image_url))) return p; // ya tiene imagen
+    // 2026-05: enriquecer cada producto con image_url real via Pexels API.
+    // Server-side, paralelo, timeout 6s. Solo se ejecuta 1 vez por giro al persistir.
+    // Si Pexels falla, fallback a placeholder colorido.
+    const productosConImg = await Promise.all(productos.map(async (p) => {
+      if (p && (p.image_url || (p.metadata && p.metadata.image_url))) return p;
       if (!p || !p.name) return p;
-      const imgUrl = findProductImageBing(p.name, p.category);
+      // Preferir search_keywords_en (LLM ya generó en inglés). Si no, name+category.
+      const query = p.search_keywords_en || `${p.name} ${p.category || ''}`.trim();
+      const realUrl = await searchProductImageMulti(query).catch(() => null);
+      const imgUrl = realUrl || buildPlaceholderUrl(p.name);
       return { ...p, image_url: imgUrl };
-    });
+    }));
     const rows = productosConImg.map(function (p) {
       const md = (p && p.metadata && typeof p.metadata === 'object') ? p.metadata : {};
       return {
