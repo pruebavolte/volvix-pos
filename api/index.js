@@ -1330,12 +1330,15 @@ ${robosHTML ? `<section class="section alt"><div class="wrap"><div class="eyebro
       var j = await r.json();
       var pages = j && j.query && j.query.pages;
       if (!pages) return null;
-      // Buscar primera imagen válida (jpg/png/webp, no svg/pdf)
+      // Buscar primera imagen válida (jpg/png/webp, no svg/pdf/ogv/webm)
       for (var k in pages){
         var p = pages[k];
         var info = p && p.imageinfo && p.imageinfo[0];
-        if (info && info.thumburl && /\\.(jpe?g|png|webp)$/i.test(info.url || '')){
-          return info.thumburl;
+        if (info && info.thumburl){
+          var u = info.url || '';
+          if (/\\.(jpe?g|png|webp)(\\?|$)/i.test(u) && !/\\.(svg|pdf|ogv|webm|mp4|tiff?)/i.test(u)){
+            return info.thumburl;
+          }
         }
       }
     } catch(e){}
