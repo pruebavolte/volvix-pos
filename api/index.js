@@ -1288,7 +1288,7 @@ function renderLandingHTML(p) {
 <div class="strip">Soy mexicano · Hecho con orgullo en México</div>
 <div class="not-mine-bar">
   <span>¿No es lo que buscabas para tu negocio?</span>
-  <a href="/?q=${encodeURIComponent(p.nombre_comercial || p.slug || '')}&edit=1">🔍 Buscar de nuevo</a>
+  <a href="/?q=${encodeURIComponent(p.nombre_comercial || p.slug || '')}&edit=1&force_new=1">🔍 Buscar de nuevo</a>
 </div>
 <nav><div class="row">
   <a class="logo" href="/"><div class="logo-mark"></div><span>VOLVIX</span></a>

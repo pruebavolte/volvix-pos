@@ -892,21 +892,29 @@ async function generateGiro(ctx, req, res) {
   const name = String((body && body.name) || '').trim();
   if (!name) return err(ctx, res, 400, 'MISSING_NAME', 'name is required');
 
+  // 2026-05: force=true → bypass de TODOS los caches (landing estática + BD).
+  // Va directo al LLM con el texto EXACTO del usuario.
+  // Caso de uso: usuario clickeó "No es lo que busco" porque "café orgánico"
+  // se mapeó a "cafe" genérico — quiere giro específico para "café orgánico".
+  const force = !!(body && body.force);
+
   const slug = slugify(name);
   const aiCfg = getAIConfig();
 
-  // 1) Cache check: ¿ya hay landing estática?
-  const giros = scanLandings();
-  const existingLanding = giros.find((g) => g.slug === slug);
-  if (existingLanding) {
-    return send(ctx, res, 200, {
-      cached: true, source: 'landing_html', slug,
-      landing: existingLanding.landing,
-    });
+  // 1) Cache check: ¿ya hay landing estática? (saltado si force=true)
+  if (!force) {
+    const giros = scanLandings();
+    const existingLanding = giros.find((g) => g.slug === slug);
+    if (existingLanding) {
+      return send(ctx, res, 200, {
+        cached: true, source: 'landing_html', slug,
+        landing: existingLanding.landing,
+      });
+    }
   }
 
-  // 2) Cache check: ¿ya está en BD verticals?
-  if (ctx && typeof ctx.supabaseRequest === 'function') {
+  // 2) Cache check: ¿ya está en BD verticals? (saltado si force=true)
+  if (!force && ctx && typeof ctx.supabaseRequest === 'function') {
     try {
       const cached = await ctx.supabaseRequest('GET',
         '/verticals?code=eq.' + encodeURIComponent(slug) + '&select=code,name,description,icon,color,modules,settings&limit=1');

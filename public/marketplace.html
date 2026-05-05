@@ -1597,6 +1597,14 @@
     wrap.classList.add('visible');
     wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
+    // 2026-05: si window.__forceNewGiro está activo, BYPASS del AI classifier
+    // y de los caches de BD. Vamos directo a generar uno NUEVO con el texto exacto.
+    // Esto pasa cuando el user clickeó "No es lo que busco" en una landing.
+    if (window.__forceNewGiro === true) {
+      window.__forceNewGiro = false; // consumir flag (solo aplica una vez)
+      return showNewGiroGeneration(q, /* force */ true);
+    }
+
     fetch('/api/giros/search?q=' + encodeURIComponent(q), { headers: { 'Accept': 'application/json' } })
       .then((r) => r.ok ? r.json() : Promise.reject(new Error('search failed')))
       .then((data) => {
@@ -1691,15 +1699,15 @@
     `;
   }
 
-  function showNewGiroGeneration(query) {
+  function showNewGiroGeneration(query, force) {
     const SAFE_QUERY = String(query || '').replace(/[<>&"]/g, '');
     const fetchStartedAt = Date.now();
-    const HARD_TIMEOUT_MS = 12000;
+    const HARD_TIMEOUT_MS = 60000;  // 60s — el LLM puede tardar con timeout 45s
     const ANIM_TOTAL_MS  = 3700;
     const llmPromise = fetch('/api/giros/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({ name: query }),
+      body: JSON.stringify({ name: query, force: !!force }),
     })
       .then(r => r.ok ? r.json() : Promise.reject(new Error('http_' + r.status)))
       .catch(e => ({ __error: String(e && e.message || e) }));
@@ -1999,28 +2007,35 @@
   renderPopular();
 
   // 2026-05: si llega del landing con ?q=X&edit=1 → pre-poblar y enfocar input
-  // El user pidió: botón "No es lo que busco" en landing → trae al marketplace
-  // con su giro previo en el textbox para editarlo.
+  // Si además trae ?force_new=1, marca flag global para que la próxima búsqueda
+  // bypasee el AI classifier y genere un giro ESPECÍFICO con el texto exacto.
   (function preFillFromQuery(){
     try {
       const params = new URLSearchParams(location.search);
       const q = params.get('q');
       const edit = params.get('edit');
+      const forceNew = params.get('force_new');
+      if (forceNew === '1') {
+        window.__forceNewGiro = true;
+        // Mostrar pista visual al usuario
+        setTimeout(function(){
+          const banner = document.createElement('div');
+          banner.style.cssText = 'background:#FEF3C7;border:1px solid #FDE68A;color:#92400E;padding:10px 14px;border-radius:8px;font-size:13px;margin:10px auto;max-width:600px;text-align:center;';
+          banner.innerHTML = '✨ Edita el nombre para crear un sistema <strong>específicamente</strong> para tu giro de negocio (no el genérico).';
+          const hero = document.querySelector('.hero, section.hero, .search-wrap, [role="search"]');
+          if (hero && hero.parentNode) hero.parentNode.insertBefore(banner, hero.nextSibling);
+        }, 400);
+      }
       if (!q) return;
       const input = document.getElementById('giro-input');
       if (!input) return;
       input.value = q;
-      // Scroll al hero y focus al input para edición inmediata
       input.scrollIntoView({ behavior: 'smooth', block: 'center' });
       setTimeout(function(){
         input.focus();
-        // Seleccionar todo el texto para que el user pueda escribir encima
         try { input.select(); } catch(_){}
       }, 300);
-      // Limpiar la URL (sin recargar) para que no quede el ?q en navigation
       try { history.replaceState({}, '', '/'); } catch(_){}
-      // Si edit=1, NO disparar búsqueda automática (usuario quiere editar)
-      // Si edit no está, hacer búsqueda inmediata
       if (edit !== '1' && q.length >= 2) {
         if (typeof searchGiro === 'function') searchGiro();
       }
