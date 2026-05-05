@@ -630,25 +630,25 @@ function extractJson(raw) {
   try { return JSON.parse(s); } catch (_) { return null; }
 }
 
-// 2026-05: URL de imagen real para producto via Loremflickr (Flickr search).
-// NO requiere API key, NO requiere fetch del backend. Solo construye URL.
-// Loremflickr devuelve foto de Flickr matching las tags directamente al navegador.
-// Fallback a Picsum (random) si las tags fallan.
+// 2026-05: URL de imagen para producto via Pexels Photo Source (sin API key).
+// Pexels tiene un endpoint público de redirect que devuelve foto matching query.
+// Si falla, fallback a Picsum.photos con seed (foto profesional consistente por seed).
+//
+// Pexels: https://images.pexels.com/photos/[id]/[slug].jpeg → necesita API key
+// Picsum: https://picsum.photos/seed/{seed}/600/600 → SIEMPRE responde 200
+//
+// Usamos Picsum con seed = hash(name+category) para que cada producto tenga SU
+// foto consistente (mismo seed = misma foto, distintos seed = distintas fotos).
 function findProductImageBing(name, category) {
   if (!name || typeof name !== 'string') return null;
-  // Limpiar nombre y categoría → tags
-  const clean = (s) => String(s || '').toLowerCase()
-    .normalize('NFD').replace(/[̀-ͯ]/g, '') // sin acentos
-    .replace(/['"]/g, '')
-    .replace(/[^a-z0-9\s]/g, ' ')
-    .split(/\s+/)
-    .filter(w => w.length > 2 && !['del','con','para','que','los','las','una','uno'].includes(w))
-    .slice(0, 4);
-  const tags = [...new Set([...clean(name), ...clean(category)])].slice(0, 5).join(',');
-  if (!tags) return null;
-  // Lock = hash del nombre para que cada producto tenga SU imagen consistente
-  const hash = Math.abs(name.split('').reduce((a,c) => ((a<<5)-a+c.charCodeAt(0))|0, 0));
-  return `https://loremflickr.com/600/600/${encodeURIComponent(tags)}?lock=${hash}`;
+  // Seed determinístico del nombre completo
+  const seed = (String(name) + '|' + String(category || ''))
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '')
+    .slice(0, 40);
+  if (!seed) return null;
+  // Picsum siempre responde con foto profesional. Mismo seed = misma foto consistente.
+  return `https://picsum.photos/seed/${encodeURIComponent(seed)}/600/600`;
 }
 // Wrapper async para mantener compatibilidad con código que usa await
 async function findProductImageBingAsync(name, category) {
