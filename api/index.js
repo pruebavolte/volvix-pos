@@ -1201,7 +1201,11 @@ function renderLandingHTML(p) {
     const cat = esc(prod.category || '');
     const price = prod.estimated_price ? `$${esc(String(prod.estimated_price))}` : '';
     const realImg = prod.image_url || prod.image || '';
-    const isPlaceholder = !realImg || /placehold\.co|loremflickr|picsum/i.test(realImg);
+    // Marcar como placeholder si: vacío | placeholder | URL Wikimedia con título malo cacheado
+    const BAD_CACHED = /newspaper|daily|journal|lithograph|magazine|gazette|times|herald|tribune|baseball|football|cricket|red.stockings|advert(isement)?|poster|sheet.music|brooklyn.eagle|home_journal/i;
+    const isPlaceholder = !realImg
+      || /placehold\.co|loremflickr|picsum/i.test(realImg)
+      || BAD_CACHED.test(realImg);
     // Placeholder visual con inicial + gradient (no depende de servicios externos)
     const firstLetter = (prod.name || '?').trim().charAt(0).toUpperCase();
     const hash = String(prod.name || '').split('').reduce((a,c) => ((a<<5)-a+c.charCodeAt(0))|0, 0);
