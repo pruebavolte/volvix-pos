@@ -1199,9 +1199,17 @@ function renderLandingHTML(p) {
   const prodsHTML = prods.map(prod => {
     const name = esc(prod.name || '');
     const cat = esc(prod.category || '');
-    const img = (prod.image_url || prod.image || `https://source.unsplash.com/featured/300x300/?${encodeURIComponent(prod.name || '')}`);
     const price = prod.estimated_price ? `$${esc(String(prod.estimated_price))}` : '';
-    return `<div class="prod"><div class="img" style="background-image:url('${img}')"></div><div class="info"><div class="name">${name}</div>${cat ? `<div class="cat">${cat}</div>` : ''}${price ? `<div class="price">${price}</div>` : ''}</div></div>`;
+    // Placeholder visual con inicial + gradient (no depende de servicios externos)
+    const firstLetter = (prod.name || '?').trim().charAt(0).toUpperCase();
+    const hash = String(prod.name || '').split('').reduce((a,c) => ((a<<5)-a+c.charCodeAt(0))|0, 0);
+    const hue = Math.abs(hash) % 360;
+    const grad = `linear-gradient(135deg, hsl(${hue},65%,55%), hsl(${(hue+40)%360},70%,45%))`;
+    const imgStyle = (prod.image_url || prod.image)
+      ? `background-image:url('${esc(prod.image_url || prod.image)}'),${grad};background-size:cover,100% 100%;background-position:center`
+      : `background:${grad};display:flex;align-items:center;justify-content:center;color:#fff;font-size:64px;font-weight:800;letter-spacing:-2px;font-family:'Inter',sans-serif`;
+    const imgInner = (prod.image_url || prod.image) ? '' : firstLetter;
+    return `<div class="prod"><div class="img" style="${imgStyle}">${imgInner}</div><div class="info"><div class="name">${name}</div>${cat ? `<div class="cat">${cat}</div>` : ''}${price ? `<div class="price">${price}</div>` : ''}</div></div>`;
   }).join('');
   const robosHTML = robos.map((r, i) => {
     const t = esc(typeof r === 'string' ? r : (r.titulo || r.title || ''));

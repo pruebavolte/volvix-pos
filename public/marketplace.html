@@ -1792,16 +1792,23 @@
         </div>`;
     }).join('');
 
-    // 9 productos con imágenes en grid 3 columnas
+    // 9 productos con imágenes en grid 3 columnas (placeholder CSS si no hay image_url)
     const prodsHTML = prods.map(p => {
       const name = escape(p && p.name);
       const cat  = escape((p && p.category) || (p && p.metadata && p.metadata.category) || '');
-      const img  = (p && (p.image || p.image_url || p.img)) ||
-                   `https://source.unsplash.com/featured/200x200/?${encodeURIComponent((p && p.name) || originalQuery)},product`;
-      const price = (p && p.price) ? `$${escape(String(p.price))}` : '';
+      const img  = (p && (p.image || p.image_url || p.img));
+      const price = (p && (p.price || p.estimated_price)) ? `$${escape(String(p.price || p.estimated_price))}` : '';
+      const firstLetter = String((p && p.name) || '?').trim().charAt(0).toUpperCase();
+      const hash = String((p && p.name) || '').split('').reduce((a,c) => ((a<<5)-a+c.charCodeAt(0))|0, 0);
+      const hue = Math.abs(hash) % 360;
+      const grad = `linear-gradient(135deg, hsl(${hue},65%,55%), hsl(${(hue+40)%360},70%,45%))`;
+      const imgStyle = img
+        ? `background-image:url('${img}'),${grad};background-size:cover,100% 100%;background-position:center;`
+        : `background:${grad};display:flex;align-items:center;justify-content:center;color:#fff;font-size:42px;font-weight:800;letter-spacing:-2px;`;
+      const imgInner = img ? '' : firstLetter;
       return `
         <div style="background:#fff;border:1px solid #ececec;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;">
-          <div style="aspect-ratio:1;background:#fafafa url('${img}') center/cover no-repeat;border-bottom:1px solid #ececec;"></div>
+          <div style="aspect-ratio:1;${imgStyle}border-bottom:1px solid #ececec;">${imgInner}</div>
           <div style="padding:10px 12px;flex:1;display:flex;flex-direction:column;gap:2px;">
             <div style="font-size:13px;font-weight:600;color:#0a0a0a;line-height:1.3;">${name}</div>
             ${cat ? `<div style="font-size:11.5px;color:#6b6b6b;">${cat}</div>` : ''}
