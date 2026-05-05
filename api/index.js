@@ -1281,8 +1281,15 @@ function renderLandingHTML(p) {
   .foot{text-align:center;padding:30px 24px;color:#6b6b6b;font-size:13px;border-top:1px solid #ececec}
   @media(max-width:760px){.pains{grid-template-columns:1fr}.prods{grid-template-columns:repeat(2,1fr)}}
   @media(max-width:460px){.prods{grid-template-columns:1fr}}
+  .not-mine-bar{background:#FEF3C7;border-bottom:1px solid #FDE68A;padding:10px 24px;display:flex;align-items:center;justify-content:center;gap:14px;font-size:13.5px;color:#92400E;flex-wrap:wrap}
+  .not-mine-bar a{display:inline-flex;align-items:center;gap:6px;background:#0a0a0a;color:#fff;padding:7px 14px;border-radius:8px;font-weight:600;text-decoration:none;font-size:13px}
+  .not-mine-bar a:hover{background:#1a1a1a}
 </style></head><body>
 <div class="strip">Soy mexicano · Hecho con orgullo en México</div>
+<div class="not-mine-bar">
+  <span>¿No es lo que buscabas para tu negocio?</span>
+  <a href="/?q=${encodeURIComponent(p.nombre_comercial || p.slug || '')}&edit=1">🔍 Buscar de nuevo</a>
+</div>
 <nav><div class="row">
   <a class="logo" href="/"><div class="logo-mark"></div><span>VOLVIX</span></a>
   <a href="/registro.html" class="btn btn-dark">Probar gratis</a>

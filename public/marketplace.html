@@ -1998,6 +1998,35 @@
   renderIndustryFilters();
   renderPopular();
 
+  // 2026-05: si llega del landing con ?q=X&edit=1 → pre-poblar y enfocar input
+  // El user pidió: botón "No es lo que busco" en landing → trae al marketplace
+  // con su giro previo en el textbox para editarlo.
+  (function preFillFromQuery(){
+    try {
+      const params = new URLSearchParams(location.search);
+      const q = params.get('q');
+      const edit = params.get('edit');
+      if (!q) return;
+      const input = document.getElementById('giro-input');
+      if (!input) return;
+      input.value = q;
+      // Scroll al hero y focus al input para edición inmediata
+      input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(function(){
+        input.focus();
+        // Seleccionar todo el texto para que el user pueda escribir encima
+        try { input.select(); } catch(_){}
+      }, 300);
+      // Limpiar la URL (sin recargar) para que no quede el ?q en navigation
+      try { history.replaceState({}, '', '/'); } catch(_){}
+      // Si edit=1, NO disparar búsqueda automática (usuario quiere editar)
+      // Si edit no está, hacer búsqueda inmediata
+      if (edit !== '1' && q.length >= 2) {
+        if (typeof searchGiro === 'function') searchGiro();
+      }
+    } catch(_){}
+  })();
+
   // Instant search (debounced) que filtra la grilla de giros sin recargar
   (function setupInstantSearch(){
     const input = document.getElementById('giro-input');
