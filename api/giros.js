@@ -630,6 +630,42 @@ function extractJson(raw) {
   try { return JSON.parse(s); } catch (_) { return null; }
 }
 
+// 2026-05: búsqueda de imagen real para un producto via Bing Image Search.
+// Sin API key, scraping del HTML público. Best-effort con timeout 4s.
+// Devuelve URL de imagen o null.
+async function findProductImageBing(query) {
+  if (!query || typeof query !== 'string') return null;
+  const url = `https://www.bing.com/images/search?q=${encodeURIComponent(query)}&form=HDRSC2&first=1`;
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 4000);
+    const r = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml',
+        'Accept-Language': 'en-US,en;q=0.9'
+      },
+      signal: ctrl.signal
+    }).catch(() => null);
+    clearTimeout(t);
+    if (!r || !r.ok) return null;
+    const html = await r.text();
+    // Bing inserta resultados como JSON en data-attributes. Patrón: "murl":"https://..."
+    const m = html.match(/"murl":"([^"]+\.(?:jpg|jpeg|png|webp)[^"]*)"/i);
+    if (m && m[1]) {
+      let u = m[1].replace(/\\u002f/g, '/').replace(/\\\//g, '/').replace(/\\u0026/g, '&');
+      // Validar que es URL pública absoluta http(s)
+      if (/^https?:\/\//.test(u) && u.length < 1000) return u;
+    }
+    // Fallback: turl (thumbnail Bing)
+    const t2 = html.match(/"turl":"(https?:\/\/[^"]+)"/);
+    if (t2 && t2[1]) return t2[1].replace(/\\u002f/g, '/').replace(/\\\//g, '/').replace(/\\u0026/g, '&');
+    return null;
+  } catch (_) {
+    return null;
+  }
+}
+
 // 2026-05: persistencia transaccional best-effort en verticals + vertical_templates.
 // NO escribimos a giros_synonyms (sinónimos quedan en verticals.settings.synonyms).
 async function persistGeneratedGiro(ctx, slug, payload, originalQuery) {
@@ -685,7 +721,16 @@ async function persistGeneratedGiro(ctx, slug, payload, originalQuery) {
     } catch (_) { /* puede no existir, ok */ }
 
     const productos = Array.isArray(payload.productos_detectados) ? payload.productos_detectados : [];
-    const rows = productos.map(function (p) {
+    // 2026-05: enriquecer cada producto con image_url real buscada en Bing
+    // (best-effort, paralelo, timeout corto). Solo se ejecuta 1 vez por giro al persistir.
+    const productosConImg = await Promise.all(productos.map(async (p) => {
+      if (p && (p.image_url || (p.metadata && p.metadata.image_url))) return p; // ya tiene imagen
+      const query = (p && p.name) ? `${p.name}` : '';
+      if (!query) return p;
+      const imgUrl = await findProductImageBing(query).catch(() => null);
+      return { ...p, image_url: imgUrl };
+    }));
+    const rows = productosConImg.map(function (p) {
       const md = (p && p.metadata && typeof p.metadata === 'object') ? p.metadata : {};
       return {
         vertical: slug,
@@ -700,7 +745,8 @@ async function persistGeneratedGiro(ctx, slug, payload, originalQuery) {
           expires_in_days: typeof md.expires_in_days === 'number' ? md.expires_in_days : null,
           variant: md.variant || null,
           extra: md.extra || {},
-          source: 'ai_generated'
+          source: 'ai_generated',
+          image_url: p.image_url || md.image_url || null
         }
       };
     });
@@ -865,6 +911,47 @@ async function generateGiro(ctx, req, res) {
   });
 }
 
+// 2026-05: re-sincronizar imágenes de productos de un giro existente.
+// Busca productos en vertical_templates donde metadata.image_url sea null,
+// los pasa por findProductImageBing, y actualiza la BD. Útil para giros
+// generados antes de que existiera la búsqueda de imágenes.
+async function resyncImages(ctx, req, res) {
+  let body;
+  try { body = await readJson(req); }
+  catch (e) { return err(ctx, res, 400, 'BAD_BODY', 'Invalid JSON'); }
+  const slug = String((body && body.slug) || '').trim().toLowerCase();
+  if (!slug) return err(ctx, res, 400, 'MISSING_SLUG', 'slug is required');
+  if (!ctx || typeof ctx.supabaseRequest !== 'function') {
+    return err(ctx, res, 503, 'NO_DB', 'BD no disponible');
+  }
+  try {
+    const tmpls = await ctx.supabaseRequest('GET',
+      '/vertical_templates?vertical=eq.' + encodeURIComponent(slug) +
+      '&select=name,metadata&order=created_at.asc&limit=20');
+    if (!Array.isArray(tmpls) || !tmpls.length) {
+      return send(ctx, res, 404, { error: 'no_products', slug });
+    }
+    let updated = 0, failed = 0, skipped = 0;
+    for (const t of tmpls) {
+      const md = t.metadata || {};
+      if (md.image_url) { skipped++; continue; }
+      const url = await findProductImageBing(t.name).catch(() => null);
+      if (url) {
+        try {
+          await ctx.supabaseRequest('PATCH',
+            '/vertical_templates?vertical=eq.' + encodeURIComponent(slug) +
+            '&name=eq.' + encodeURIComponent(t.name),
+            { metadata: { ...md, image_url: url } });
+          updated++;
+        } catch (_) { failed++; }
+      } else { failed++; }
+    }
+    return send(ctx, res, 200, { slug, total: tmpls.length, updated, failed, skipped });
+  } catch (e) {
+    return err(ctx, res, 500, 'RESYNC_ERROR', String(e && e.message || e).slice(0, 200));
+  }
+}
+
 // ---------- dispatcher ----------
 function matchExistsPath(pathname) {
   const m = /^\/api\/giros\/([a-z0-9-]+)\/exists$/i.exec(pathname);
@@ -883,6 +970,7 @@ module.exports = async function handleGiros(req, res, parsedUrl, ctx) {
     if (method === 'GET'  && pathname === '/api/giros/search')        { await searchGiros(ctx, req, res, parsedUrl); return true; }
     if (method === 'GET'  && pathname === '/api/giros/autocomplete')  { await autocompleteGiros(ctx, req, res, parsedUrl); return true; }
     if (method === 'POST' && pathname === '/api/giros/generate')      { await generateGiro(ctx, req, res); return true; }
+    if (method === 'POST' && pathname === '/api/giros/resync-images')  { await resyncImages(ctx, req, res); return true; }
 
     const slug = matchExistsPath(pathname);
     if (slug && method === 'GET') { await existsGiro(ctx, req, res, slug); return true; }
