@@ -1047,6 +1047,38 @@ async function resyncImages(ctx, req, res) {
   }
 }
 
+// 2026-05: persistir image_url descubierta por el navegador del cliente
+// (que tiene IP residencial y SÍ puede scrapear DuckDuckGo/Google).
+// El cliente envía { slug, name, image_url } y guardamos en metadata.
+async function saveProductImage(ctx, req, res) {
+  let body;
+  try { body = await readJson(req); }
+  catch (e) { return err(ctx, res, 400, 'BAD_BODY', 'Invalid JSON'); }
+  const slug = String((body && body.slug) || '').trim().toLowerCase();
+  const name = String((body && body.name) || '').trim();
+  const imageUrl = String((body && body.image_url) || '').trim();
+  if (!slug || !name || !imageUrl) return err(ctx, res, 400, 'MISSING_FIELDS', 'slug, name, image_url required');
+  if (!/^https?:\/\//i.test(imageUrl) || imageUrl.length > 2000) return err(ctx, res, 400, 'BAD_URL', 'Invalid URL');
+  if (!ctx || typeof ctx.supabaseRequest !== 'function') return err(ctx, res, 503, 'NO_DB', 'BD no disponible');
+  try {
+    // Solo persistir si la URL actual es placeholder o falta
+    const rows = await ctx.supabaseRequest('GET',
+      '/vertical_templates?vertical=eq.' + encodeURIComponent(slug) +
+      '&name=eq.' + encodeURIComponent(name) + '&select=metadata&limit=1');
+    if (!Array.isArray(rows) || !rows.length) return send(ctx, res, 404, { error: 'product_not_found' });
+    const md = rows[0].metadata || {};
+    // Si ya tiene URL real (no placeholder), no sobrescribir
+    if (md.image_url && md.image_source === 'search') return send(ctx, res, 200, { skipped: 'already_has_real' });
+    await ctx.supabaseRequest('PATCH',
+      '/vertical_templates?vertical=eq.' + encodeURIComponent(slug) +
+      '&name=eq.' + encodeURIComponent(name),
+      { metadata: { ...md, image_url: imageUrl, image_source: 'search', image_origin: 'client_scraped' } });
+    return send(ctx, res, 200, { ok: true, slug, name });
+  } catch (e) {
+    return err(ctx, res, 500, 'SAVE_ERROR', String(e && e.message || e).slice(0, 200));
+  }
+}
+
 // ---------- dispatcher ----------
 function matchExistsPath(pathname) {
   const m = /^\/api\/giros\/([a-z0-9-]+)\/exists$/i.exec(pathname);
@@ -1066,6 +1098,7 @@ module.exports = async function handleGiros(req, res, parsedUrl, ctx) {
     if (method === 'GET'  && pathname === '/api/giros/autocomplete')  { await autocompleteGiros(ctx, req, res, parsedUrl); return true; }
     if (method === 'POST' && pathname === '/api/giros/generate')      { await generateGiro(ctx, req, res); return true; }
     if (method === 'POST' && pathname === '/api/giros/resync-images')  { await resyncImages(ctx, req, res); return true; }
+    if (method === 'POST' && pathname === '/api/giros/save-image')     { await saveProductImage(ctx, req, res); return true; }
 
     const slug = matchExistsPath(pathname);
     if (slug && method === 'GET') { await existsGiro(ctx, req, res, slug); return true; }

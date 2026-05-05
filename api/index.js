@@ -1200,16 +1200,20 @@ function renderLandingHTML(p) {
     const name = esc(prod.name || '');
     const cat = esc(prod.category || '');
     const price = prod.estimated_price ? `$${esc(String(prod.estimated_price))}` : '';
+    const realImg = prod.image_url || prod.image || '';
+    const isPlaceholder = !realImg || /placehold\.co|loremflickr|picsum/i.test(realImg);
     // Placeholder visual con inicial + gradient (no depende de servicios externos)
     const firstLetter = (prod.name || '?').trim().charAt(0).toUpperCase();
     const hash = String(prod.name || '').split('').reduce((a,c) => ((a<<5)-a+c.charCodeAt(0))|0, 0);
     const hue = Math.abs(hash) % 360;
     const grad = `linear-gradient(135deg, hsl(${hue},65%,55%), hsl(${(hue+40)%360},70%,45%))`;
-    const imgStyle = (prod.image_url || prod.image)
-      ? `background-image:url('${esc(prod.image_url || prod.image)}'),${grad};background-size:cover,100% 100%;background-position:center`
+    const imgStyle = (realImg && !isPlaceholder)
+      ? `background-image:url('${esc(realImg)}'),${grad};background-size:cover,100% 100%;background-position:center`
       : `background:${grad};display:flex;align-items:center;justify-content:center;color:#fff;font-size:64px;font-weight:800;letter-spacing:-2px;font-family:'Inter',sans-serif`;
-    const imgInner = (prod.image_url || prod.image) ? '' : firstLetter;
-    return `<div class="prod"><div class="img" style="${imgStyle}">${imgInner}</div><div class="info"><div class="name">${name}</div>${cat ? `<div class="cat">${cat}</div>` : ''}${price ? `<div class="price">${price}</div>` : ''}</div></div>`;
+    const imgInner = (realImg && !isPlaceholder) ? '' : firstLetter;
+    // data-* attrs para que JS client-side busque la imagen real via CORS proxy
+    const searchQ = esc(`${prod.name || ''} ${prod.category || ''}`.trim());
+    return `<div class="prod" data-name="${esc(prod.name || '')}" data-search="${searchQ}" data-needs-image="${isPlaceholder ? '1' : '0'}"><div class="img" style="${imgStyle}">${imgInner}</div><div class="info"><div class="name">${name}</div>${cat ? `<div class="cat">${cat}</div>` : ''}${price ? `<div class="price">${price}</div>` : ''}</div></div>`;
   }).join('');
   const robosHTML = robos.map((r, i) => {
     const t = esc(typeof r === 'string' ? r : (r.titulo || r.title || ''));
@@ -1288,6 +1292,85 @@ ${robosHTML ? `<section class="section alt"><div class="wrap"><div class="eyebro
   <a href="/registro.html" class="btn btn-dark">Probar gratis ahora →</a>
 </div></section>
 <div class="foot">© 2026 Volvix — POS multi-giro · <a href="/marketplace.html">Otros giros</a> · <a href="/soporte.html">Soporte</a></div>
+<script>
+// 2026-05: client-side image search for products without real images.
+// IP residencial del cliente bypass-ea bloqueos de buscadores que rechazan
+// datacenters Vercel. Resultados se persisten en BD via /api/giros/save-image
+// para que la próxima visita ya tenga la URL real cacheada.
+(function(){
+  var SLUG = ${JSON.stringify(p.slug || '')};
+  var CORS_PROXIES = [
+    'https://corsproxy.io/?url=',
+    'https://api.allorigins.win/raw?url=',
+    'https://api.codetabs.com/v1/proxy?quest='
+  ];
+  function timeoutFetch(url, ms){
+    return Promise.race([
+      fetch(url),
+      new Promise(function(_, rej){ setTimeout(function(){rej(new Error('timeout'))}, ms || 6000) })
+    ]);
+  }
+  async function searchDDG(query){
+    for (var i=0; i<CORS_PROXIES.length; i++){
+      try {
+        var u = CORS_PROXIES[i] + encodeURIComponent('https://duckduckgo.com/?q=' + encodeURIComponent(query) + '&iar=images&iax=images&ia=images');
+        var r = await timeoutFetch(u, 7000);
+        if (!r.ok) continue;
+        var html = await r.text();
+        var m = html.match(/vqd=['"]([^'"]+)['"]/) || html.match(/vqd=([0-9-]+)/);
+        if (!m) continue;
+        var vqd = m[1];
+        var u2 = CORS_PROXIES[i] + encodeURIComponent('https://duckduckgo.com/i.js?l=us-en&o=json&q=' + encodeURIComponent(query) + '&vqd=' + encodeURIComponent(vqd) + '&p=1');
+        var r2 = await timeoutFetch(u2, 7000);
+        if (!r2.ok) continue;
+        var j = await r2.json();
+        if (j && Array.isArray(j.results) && j.results.length){
+          var first = j.results.find(function(x){ return x && x.image && /^https?:\\/\\//.test(x.image); });
+          if (first) return first.image;
+        }
+      } catch(e){ /* try next proxy */ }
+    }
+    return null;
+  }
+  async function processCard(card){
+    var query = card.getAttribute('data-search') || card.getAttribute('data-name');
+    if (!query) return;
+    var name = card.getAttribute('data-name');
+    var url = await searchDDG(query);
+    if (url) {
+      var imgDiv = card.querySelector('.img');
+      if (imgDiv) {
+        // Pre-cargar imagen para evitar flash
+        var pre = new Image();
+        pre.onload = function(){
+          imgDiv.style.cssText = 'aspect-ratio:1;background-image:url(\\''+url+'\\');background-size:cover;background-position:center;border-bottom:1px solid #ececec';
+          imgDiv.textContent = '';
+        };
+        pre.onerror = function(){ /* keep placeholder */ };
+        pre.src = url;
+        // Persistir en BD (best-effort)
+        if (SLUG) {
+          fetch('/api/giros/save-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ slug: SLUG, name: name, image_url: url })
+          }).catch(function(){});
+        }
+      }
+    }
+  }
+  function start(){
+    var cards = document.querySelectorAll('.prod[data-needs-image="1"]');
+    // Stagger: 1 card cada 800ms para no quemar proxies
+    cards.forEach(function(card, i){
+      setTimeout(function(){ processCard(card); }, i * 800);
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start);
+  } else { start(); }
+})();
+</script>
 </body></html>`;
 }
 
