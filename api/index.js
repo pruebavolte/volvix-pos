@@ -1144,6 +1144,9 @@ async function tryServeDynamicLanding(res, pathname) {
       '/vertical_templates?vertical=eq.' + encodeURIComponent(slug) +
       '&select=name,price,metadata&order=created_at.asc&limit=9'
     ).catch(() => []);
+    if (Array.isArray(tmpls)) {
+      tmpls = tmpls.map(t => ({ ...t, search_keywords_en: t.metadata && t.metadata.search_keywords_en || null }));
+    }
     if (!v) {
       // Sin BD: build minimal landing from slug
       v = { code: slug, name: slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
@@ -1164,6 +1167,7 @@ async function tryServeDynamicLanding(res, pathname) {
         name: t.name, category: (t.metadata && t.metadata.category) || t.category || '',
         estimated_price: Number(t.price) || t.estimated_price || 0,
         image_url: (t.metadata && (t.metadata.image_url || t.metadata.image)) || null,
+        search_keywords_en: (t.metadata && t.metadata.search_keywords_en) || null,
         metadata: t.metadata || {}
       })) : [],
       terminologia: settings.terminologia || {}
@@ -1215,9 +1219,10 @@ function renderLandingHTML(p) {
       ? `background-image:url('${esc(realImg)}'),${grad};background-size:cover,100% 100%;background-position:center`
       : `background:${grad};display:flex;align-items:center;justify-content:center;color:#fff;font-size:64px;font-weight:800;letter-spacing:-2px;font-family:'Inter',sans-serif`;
     const imgInner = (realImg && !isPlaceholder) ? '' : firstLetter;
-    // data-* attrs para que JS client-side busque la imagen real via CORS proxy
+    // data-* attrs para JS client-side. Prefer search_keywords_en (LLM ya generó en inglés).
+    const searchEn = esc(prod.search_keywords_en || '');
     const searchQ = esc(`${prod.name || ''} ${prod.category || ''}`.trim());
-    return `<div class="prod" data-name="${esc(prod.name || '')}" data-search="${searchQ}" data-needs-image="${isPlaceholder ? '1' : '0'}"><div class="img" style="${imgStyle}">${imgInner}</div><div class="info"><div class="name">${name}</div>${cat ? `<div class="cat">${cat}</div>` : ''}${price ? `<div class="price">${price}</div>` : ''}</div></div>`;
+    return `<div class="prod" data-name="${esc(prod.name || '')}" data-search-en="${searchEn}" data-search="${searchQ}" data-needs-image="${isPlaceholder ? '1' : '0'}"><div class="img" style="${imgStyle}">${imgInner}</div><div class="info"><div class="name">${name}</div>${cat ? `<div class="cat">${cat}</div>` : ''}${price ? `<div class="price">${price}</div>` : ''}</div></div>`;
   }).join('');
   const robosHTML = robos.map((r, i) => {
     const t = esc(typeof r === 'string' ? r : (r.titulo || r.title || ''));
@@ -1367,7 +1372,9 @@ ${robosHTML ? `<section class="section alt"><div class="wrap"><div class="eyebro
   }
   async function processCard(card){
     var name = card.getAttribute('data-name');
-    var query = buildKeywords(name, '');
+    // Preferir keywords en inglés del LLM si vienen, sino derivar
+    var keywordsEn = card.getAttribute('data-search-en');
+    var query = (keywordsEn && keywordsEn.length > 2) ? keywordsEn : buildKeywords(name, '');
     if (!query) return;
     var url = await searchWikimedia(query);
     if (url) {

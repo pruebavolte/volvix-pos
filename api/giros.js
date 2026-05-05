@@ -588,7 +588,7 @@ function buildUserPrompt(giroInput, extraHint) {
     '      "name": "string · max 60 chars · producto REAL del giro con marca si aplica",\n' +
     '      "category": "string · max 30 chars",\n' +
     '      "estimated_price": number,\n' +
-    '      "image_url": "string · URL pública de imagen real del producto (Unsplash, Pexels, o sitio oficial). Si no estás seguro: https://source.unsplash.com/featured/200x200/?[nombre-producto-en-ingles]",\n' +
+    '      "search_keywords_en": "string · 1-3 PALABRAS EN INGLÉS para buscar foto del producto en Wikimedia Commons. Genéricas (no marcas). Ej: \\"acoustic guitar\\" para una Yamaha F310, \\"electric bass\\" para un bajo Fender, \\"guitar pick\\" para púas, \\"amplifier\\" para amplificador. SIEMPRE en inglés.",\n' +
     '      "metadata": {\n' +
     '        "unit": "pieza|kg|g|ml|l|servicio (opcional)",\n' +
     '        "expires_in_days": number_o_null,\n' +
@@ -837,7 +837,8 @@ async function persistGeneratedGiro(ctx, slug, payload, originalQuery) {
           variant: md.variant || null,
           extra: md.extra || {},
           source: 'ai_generated',
-          image_url: p.image_url || md.image_url || null
+          image_url: p.image_url || md.image_url || null,
+          search_keywords_en: String(p.search_keywords_en || '').slice(0, 100) || null
         }
       };
     });
