@@ -630,40 +630,29 @@ function extractJson(raw) {
   try { return JSON.parse(s); } catch (_) { return null; }
 }
 
-// 2026-05: búsqueda de imagen real para un producto via Bing Image Search.
-// Sin API key, scraping del HTML público. Best-effort con timeout 4s.
-// Devuelve URL de imagen o null.
-async function findProductImageBing(query) {
-  if (!query || typeof query !== 'string') return null;
-  const url = `https://www.bing.com/images/search?q=${encodeURIComponent(query)}&form=HDRSC2&first=1`;
-  try {
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 4000);
-    const r = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml',
-        'Accept-Language': 'en-US,en;q=0.9'
-      },
-      signal: ctrl.signal
-    }).catch(() => null);
-    clearTimeout(t);
-    if (!r || !r.ok) return null;
-    const html = await r.text();
-    // Bing inserta resultados como JSON en data-attributes. Patrón: "murl":"https://..."
-    const m = html.match(/"murl":"([^"]+\.(?:jpg|jpeg|png|webp)[^"]*)"/i);
-    if (m && m[1]) {
-      let u = m[1].replace(/\\u002f/g, '/').replace(/\\\//g, '/').replace(/\\u0026/g, '&');
-      // Validar que es URL pública absoluta http(s)
-      if (/^https?:\/\//.test(u) && u.length < 1000) return u;
-    }
-    // Fallback: turl (thumbnail Bing)
-    const t2 = html.match(/"turl":"(https?:\/\/[^"]+)"/);
-    if (t2 && t2[1]) return t2[1].replace(/\\u002f/g, '/').replace(/\\\//g, '/').replace(/\\u0026/g, '&');
-    return null;
-  } catch (_) {
-    return null;
-  }
+// 2026-05: URL de imagen real para producto via Loremflickr (Flickr search).
+// NO requiere API key, NO requiere fetch del backend. Solo construye URL.
+// Loremflickr devuelve foto de Flickr matching las tags directamente al navegador.
+// Fallback a Picsum (random) si las tags fallan.
+function findProductImageBing(name, category) {
+  if (!name || typeof name !== 'string') return null;
+  // Limpiar nombre y categoría → tags
+  const clean = (s) => String(s || '').toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '') // sin acentos
+    .replace(/['"]/g, '')
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length > 2 && !['del','con','para','que','los','las','una','uno'].includes(w))
+    .slice(0, 4);
+  const tags = [...new Set([...clean(name), ...clean(category)])].slice(0, 5).join(',');
+  if (!tags) return null;
+  // Lock = hash del nombre para que cada producto tenga SU imagen consistente
+  const hash = Math.abs(name.split('').reduce((a,c) => ((a<<5)-a+c.charCodeAt(0))|0, 0));
+  return `https://loremflickr.com/600/600/${encodeURIComponent(tags)}?lock=${hash}`;
+}
+// Wrapper async para mantener compatibilidad con código que usa await
+async function findProductImageBingAsync(name, category) {
+  return findProductImageBing(name, category);
 }
 
 // 2026-05: persistencia transaccional best-effort en verticals + vertical_templates.
@@ -723,13 +712,12 @@ async function persistGeneratedGiro(ctx, slug, payload, originalQuery) {
     const productos = Array.isArray(payload.productos_detectados) ? payload.productos_detectados : [];
     // 2026-05: enriquecer cada producto con image_url real buscada en Bing
     // (best-effort, paralelo, timeout corto). Solo se ejecuta 1 vez por giro al persistir.
-    const productosConImg = await Promise.all(productos.map(async (p) => {
+    const productosConImg = productos.map((p) => {
       if (p && (p.image_url || (p.metadata && p.metadata.image_url))) return p; // ya tiene imagen
-      const query = (p && p.name) ? `${p.name}` : '';
-      if (!query) return p;
-      const imgUrl = await findProductImageBing(query).catch(() => null);
+      if (!p || !p.name) return p;
+      const imgUrl = findProductImageBing(p.name, p.category);
       return { ...p, image_url: imgUrl };
-    }));
+    });
     const rows = productosConImg.map(function (p) {
       const md = (p && p.metadata && typeof p.metadata === 'object') ? p.metadata : {};
       return {
@@ -931,11 +919,11 @@ async function resyncImages(ctx, req, res) {
     if (!Array.isArray(tmpls) || !tmpls.length) {
       return send(ctx, res, 404, { error: 'no_products', slug });
     }
-    let updated = 0, failed = 0, skipped = 0;
+    let updated = 0, failed = 0, skipped = 0, force = !!(body && body.force);
     for (const t of tmpls) {
       const md = t.metadata || {};
-      if (md.image_url) { skipped++; continue; }
-      const url = await findProductImageBing(t.name).catch(() => null);
+      if (md.image_url && !force) { skipped++; continue; }
+      const url = findProductImageBing(t.name, md.category);
       if (url) {
         try {
           await ctx.supabaseRequest('PATCH',
