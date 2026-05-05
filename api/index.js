@@ -1139,10 +1139,11 @@ async function tryServeDynamicLanding(res, pathname) {
     // Lookup vertical by code=slug usando supabaseRequest local
     const verticals = await supabaseRequest('GET', '/verticals?code=eq.' + encodeURIComponent(slug) + '&select=*').catch(() => null);
     let v = (Array.isArray(verticals) && verticals[0]) ? verticals[0] : null;
-    let tmpls = [];
-    if (v && v.id) {
-      tmpls = await supabaseRequest('GET', '/vertical_templates?vertical_id=eq.' + encodeURIComponent(v.id) + '&select=*&order=position.asc').catch(() => []);
-    }
+    // vertical_templates: la FK es 'vertical' (string slug), NO 'vertical_id'
+    let tmpls = await supabaseRequest('GET',
+      '/vertical_templates?vertical=eq.' + encodeURIComponent(slug) +
+      '&select=name,price,metadata&order=created_at.asc&limit=9'
+    ).catch(() => []);
     if (!v) {
       // Sin BD: build minimal landing from slug
       v = { code: slug, name: slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
