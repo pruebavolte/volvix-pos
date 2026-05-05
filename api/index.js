@@ -1130,29 +1130,39 @@ function findFile(filename) {
 
 // 2026-05-05: render dinámico de /landing-{slug}.html para giros generados por IA.
 // Si la landing no existe físicamente, intenta servirla desde verticals.settings + vertical_templates.
+// Sirve incluso si BD tiene formato viejo (legacy) o vacío — usa fallbacks y placeholders.
 async function tryServeDynamicLanding(res, pathname) {
   const m = /^\/landing-([a-z0-9-]+)\.html$/i.exec(pathname);
   if (!m) return false;
   const slug = m[1];
   try {
     // Lookup vertical by code=slug usando supabaseRequest local
-    const verticals = await supabaseRequest('GET', '/verticals?code=eq.' + encodeURIComponent(slug) + '&select=*');
-    if (!Array.isArray(verticals) || !verticals.length) return false;
-    const v = verticals[0];
-    const tmpls = await supabaseRequest('GET', '/vertical_templates?vertical_id=eq.' + encodeURIComponent(v.id) + '&select=*&order=position.asc');
+    const verticals = await supabaseRequest('GET', '/verticals?code=eq.' + encodeURIComponent(slug) + '&select=*').catch(() => null);
+    let v = (Array.isArray(verticals) && verticals[0]) ? verticals[0] : null;
+    let tmpls = [];
+    if (v && v.id) {
+      tmpls = await supabaseRequest('GET', '/vertical_templates?vertical_id=eq.' + encodeURIComponent(v.id) + '&select=*&order=position.asc').catch(() => []);
+    }
+    if (!v) {
+      // Sin BD: build minimal landing from slug
+      v = { code: slug, name: slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+            description: 'Sistema POS especializado para tu negocio.', icon: '✨',
+            color: '#2563eb', settings: {} };
+    }
     const settings = v.settings || {};
     const payload = {
-      nombre_comercial: v.name,
-      descripcion: v.description,
-      slug: v.code,
+      nombre_comercial: v.name || slug,
+      descripcion: v.description || 'Sistema POS especializado para tu negocio.',
+      slug: v.code || slug,
       icon: v.icon || '✨',
       color: v.color || '#2563eb',
       dolores_especificos: settings.dolores_especificos || [],
       funcionalidades_unicas: settings.funcionalidades_unicas || [],
       formas_robo: settings.formas_robo || [],
       productos_detectados: Array.isArray(tmpls) ? tmpls.map(t => ({
-        name: t.name, category: t.category, estimated_price: t.estimated_price,
-        image_url: (t.metadata && t.metadata.image_url) || (t.metadata && t.metadata.image) || null,
+        name: t.name, category: (t.metadata && t.metadata.category) || t.category || '',
+        estimated_price: Number(t.price) || t.estimated_price || 0,
+        image_url: (t.metadata && (t.metadata.image_url || t.metadata.image)) || null,
         metadata: t.metadata || {}
       })) : [],
       terminologia: settings.terminologia || {}
@@ -1161,7 +1171,7 @@ async function tryServeDynamicLanding(res, pathname) {
     res.statusCode = 200;
     setSecurityHeaders(res);
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=86400');
+    res.setHeader('Cache-Control', 'public, max-age=600, s-maxage=3600');
     res.end(html);
     return true;
   } catch (e) {
@@ -1174,9 +1184,12 @@ function renderLandingHTML(p) {
   const esc = s => String(s == null ? '' : s).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
   const PAIN_ICONS = ['😤','💸','⏰','📉','🤯','🚨'];
   const ROBO_ICONS = ['🕵️','💼','🎭'];
-  const pains = (p.dolores_especificos || []).slice(0, 6);
-  const prods = (p.productos_detectados || []).slice(0, 9);
-  const robos = (p.formas_robo || []).slice(0, 3);
+  // Si no hay dolores_especificos, usar funcionalidades_unicas como fallback
+  let pains = Array.isArray(p.dolores_especificos) && p.dolores_especificos.length
+              ? p.dolores_especificos.slice(0, 6)
+              : (Array.isArray(p.funcionalidades_unicas) ? p.funcionalidades_unicas.slice(0, 6) : []);
+  let prods = (p.productos_detectados || []).slice(0, 9);
+  let robos = (p.formas_robo || []).slice(0, 3);
   const painsHTML = pains.map((d, i) => {
     const t = esc(typeof d === 'string' ? d : (d.titulo || d.title || ''));
     const s = esc(typeof d === 'object' ? (d.descripcion || d.desc || '') : '');

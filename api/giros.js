@@ -809,9 +809,9 @@ async function generateGiro(ctx, req, res) {
   let raw, parsed, validation;
   try {
     raw = await callLLM(aiCfg, GIRO_SYSTEM_PROMPT, userPrompt, {
-      max_tokens: 2500,
+      max_tokens: 4000,
       temperature: 0.4,
-      timeout_ms: 18000,
+      timeout_ms: 45000,
       response_format: { type: 'json_object' }
     });
     parsed = extractJson(raw);
@@ -824,9 +824,9 @@ async function generateGiro(ctx, req, res) {
                    '". Vuelve a generar respetando ESTA regla específica. SOLO el JSON.';
       const retryPrompt = buildUserPrompt(name, hint);
       raw = await callLLM(aiCfg, GIRO_SYSTEM_PROMPT, retryPrompt, {
-        max_tokens: 2500,
+        max_tokens: 4000,
         temperature: 0.3,
-        timeout_ms: 18000,
+        timeout_ms: 45000,
         response_format: { type: 'json_object' }
       });
       parsed = extractJson(raw);
