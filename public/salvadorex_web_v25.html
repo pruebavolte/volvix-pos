@@ -7664,7 +7664,7 @@
     // 2026-05 audit B-22: F2 y F12 ya no comparten openPayment(). F2 ahora va
     // a Créditos (pantalla que la UI prometía) y F12 mantiene Cobrar.
     if (e.key === 'F1') { e.preventDefault(); showScreen('pos'); }
-    if (e.key === 'F2') { e.preventDefault(); if (typeof showScreen === 'function') showScreen('creditos'); }
+    if (e.key === 'F2') { e.preventDefault(); if (typeof showScreen === 'function') showScreen('credito'); }
     if (e.key === 'F3') { e.preventDefault(); showScreen('inventario'); }
     if (e.key === 'F4') { e.preventDefault(); showScreen('kardex'); }
     if (!_typing && e.key === 'F5') { e.preventDefault(); if (typeof openSearch === 'function') openSearch(); }
