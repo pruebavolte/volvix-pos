@@ -1342,17 +1342,22 @@ ${robosHTML ? `<section class="section alt"><div class="wrap"><div class="eyebro
       var j = await r.json();
       var pages = j && j.query && j.query.pages;
       if (!pages) return null;
-      // Buscar primera imagen válida (jpg/png/webp, no svg/pdf/ogv/webm)
+      // Buscar primera imagen válida — excluir formatos malos Y títulos histórico/no-relevantes
+      var BAD_TITLE = /newspaper|daily|journal|lithograph|magazine|gazette|times|herald|tribune|baseball|football|cricket|red.stockings|advert(isement)?|poster|map|chart|diagram|sheet.music/i;
+      var ranked = [];
       for (var k in pages){
         var p = pages[k];
         var info = p && p.imageinfo && p.imageinfo[0];
-        if (info && info.thumburl){
-          var u = info.url || '';
-          if (/\\.(jpe?g|png|webp)(\\?|$)/i.test(u) && !/\\.(svg|pdf|ogv|webm|mp4|tiff?)/i.test(u)){
-            return info.thumburl;
-          }
-        }
+        if (!info || !info.thumburl) continue;
+        var u = info.url || '';
+        var title = p.title || '';
+        if (!/\\.(jpe?g|png|webp)(\\?|$)/i.test(u)) continue;
+        if (/\\.(svg|pdf|ogv|webm|mp4|tiff?)/i.test(u)) continue;
+        if (BAD_TITLE.test(title)) continue;
+        ranked.push({ score: -(p.index || 0), thumb: info.thumburl });
       }
+      ranked.sort(function(a,b){ return b.score - a.score; });
+      if (ranked.length) return ranked[0].thumb;
     } catch(e){}
     return null;
   }
