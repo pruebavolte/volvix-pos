@@ -14,7 +14,7 @@
 // que clientes carguen los fixes acumulados de R1-R6a.
 // Cuando exista build pipeline (esbuild/vite), reemplazar por hash generado.
 // Mientras tanto: bumpear VERSION manualmente en cada deploy con cambios.
-const VERSION   = 'v1.12.3-r6b';
+const VERSION   = 'v1.13.0-cross-origin-bypass';
 const CACHE     = `volvix-${VERSION}`;
 const API_CACHE = `volvix-api-${VERSION}`;
 const RT_CACHE  = `volvix-rt-${VERSION}`;
@@ -206,6 +206,12 @@ self.addEventListener('fetch', (event) => {
 
   // Ignorar extensiones de Chrome y schemes raros
   if (!url.protocol.startsWith('http')) return;
+
+  // 2026-05: NO interceptar requests cross-origin (corsproxy, duckduckgo, etc.)
+  // Si el SW intercepta un fetch a otro dominio y el browser bloquea por CORS,
+  // termina devolviendo 'Offline' 503. Mejor dejar que el browser maneje
+  // los cross-origin directo, sin pasar por el SW.
+  if (url.origin !== self.location.origin) return;
 
   // API: network-first con stale-while-revalidate
   if (url.pathname.startsWith('/api/') || url.hostname.includes('supabase')) {
