@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volvix POS · Welcome Wizard (R12-O-3-C)</title>
+<!-- B37 Security hardening: auth-gate (any authenticated user) -->
+<script src="/auth-gate.js"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,sans-serif}
+  body{min-height:100vh;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;padding:20px;color:#1f2937}
+  .wizard{background:#fff;width:100%;max-width:980px;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden}
+  .header{background:linear-gradient(135deg,#1e3c72,#2a5298);color:#fff;padding:28px 40px}
+  .header h1{font-size:26px;margin-bottom:4px}
+  .header p{opacity:.85;font-size:14px}
+  .progress-wrap{padding:22px 40px;background:#f8f9fb;border-bottom:1px solid #e5e7eb}
+  .progress-bar{height:8px;background:#e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:14px}
+  .progress-fill{height:100%;background:linear-gradient(90deg,#1e3c72,#2a5298);transition:width .35s}
+  .steps-row{display:flex;justify-content:space-between;font-size:11px;color:#6b7280;flex-wrap:wrap;gap:6px}
+  .step-pill{padding:4px 10px;border-radius:14px;background:#e5e7eb}
+  .step-pill.active{background:#1e3c72;color:#fff}
+  .step-pill.done{background:#10b981;color:#fff}
+  .body{padding:36px 40px;min-height:380px}
+  .step{display:none}
+  .step.active{display:block;animation:fade .3s}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  h2{font-size:22px;margin-bottom:6px;color:#1e3c72}
+  .subtitle{color:#6b7280;font-size:14px;margin-bottom:22px}
+  label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:#374151}
+  input,select,textarea{width:100%;padding:11px 13px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;outline:none;transition:border .2s;background:#fff;color:#1f2937}
+  input:focus,select:focus,textarea:focus{border-color:#2a5298;box-shadow:0 0 0 3px rgba(42,82,152,.15)}
+  input.invalid{border-color:#ef4444;background:#fef2f2}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+  .field{margin-bottom:16px}
+  .footer{padding:20px 40px;background:#f8f9fb;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  button{padding:11px 22px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:.2s}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  .btn-primary{background:linear-gradient(135deg,#1e3c72,#2a5298);color:#fff}
+  .btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 14px rgba(42,82,152,.4)}
+  .btn-ghost{background:#fff;color:#374151;border:1px solid #d1d5db}
+  .btn-ghost:hover{background:#f3f4f6}
+  .btn-skip{background:transparent;color:#6b7280;text-decoration:underline}
+  .btn-success{background:linear-gradient(135deg,#059669,#10b981);color:#fff}
+  .btn-success:hover{transform:translateY(-1px);box-shadow:0 6px 14px rgba(16,185,129,.4)}
+  .btn-danger{background:#fee2e2;color:#7f1d1d;border:1px solid #fecaca}
+  .giro-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;margin-top:8px}
+  .giro-card{padding:22px 12px;border:2px solid #e5e7eb;border-radius:12px;cursor:pointer;text-align:center;transition:.2s;background:#fff;position:relative}
+  .giro-card:hover{border-color:#2a5298;transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.06)}
+  .giro-card.selected{border-color:#1e3c72;background:#eef2ff;box-shadow:0 4px 14px rgba(30,60,114,.18)}
+  .giro-card.selected::after{content:"✓";position:absolute;top:6px;right:8px;background:#1e3c72;color:#fff;width:22px;height:22px;border-radius:50%;line-height:22px;font-size:14px}
+  .giro-card .icon{font-size:34px;margin-bottom:6px}
+  .giro-card .label{font-size:13px;font-weight:600;color:#1f2937}
+  .modules-preview{margin-top:18px;padding:16px;background:#f0f9ff;border-radius:10px;border-left:4px solid #0284c7;display:none}
+  .modules-preview.show{display:block}
+  .modules-preview h4{font-size:14px;color:#0c4a6e;margin-bottom:10px}
+  .modules-preview .mods{display:flex;flex-wrap:wrap;gap:8px}
+  .modules-preview .mod{padding:5px 10px;background:#fff;border-radius:14px;font-size:12px;color:#075985;border:1px solid #bae6fd}
+  .alert{padding:12px;background:#fef3c7;border-left:4px solid #f59e0b;border-radius:6px;font-size:13px;color:#78350f;margin-bottom:14px}
+  .ok{padding:12px;background:#d1fae5;border-left:4px solid #10b981;border-radius:6px;font-size:13px;color:#064e3b;margin-bottom:14px}
+  .err{padding:12px;background:#fee2e2;border-left:4px solid #ef4444;border-radius:6px;font-size:13px;color:#7f1d1d;margin-bottom:14px}
+  .info{padding:12px;background:#dbeafe;border-left:4px solid #2563eb;border-radius:6px;font-size:13px;color:#1e3a8a;margin-bottom:14px}
+  .complete-hero{text-align:center;padding:20px 0}
+  .complete-hero .emoji{font-size:72px;margin-bottom:12px;animation:bounce .8s}
+  @keyframes bounce{0%{transform:scale(0)}50%{transform:scale(1.2)}100%{transform:scale(1)}}
+  .complete-hero h2{font-size:28px;color:#059669;margin-bottom:10px}
+  .complete-hero p{color:#4b5563;font-size:15px;max-width:520px;margin:0 auto 22px}
+  .cta-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+  .small{font-size:12px;color:#6b7280}
+  .team-list{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+  .team-row{display:grid;grid-template-columns:1fr 1fr 130px 110px 36px;gap:8px;align-items:center;padding:10px;background:#f8f9fb;border-radius:8px;border:1px solid #e5e7eb}
+  .team-row input,.team-row select{padding:8px 10px;font-size:13px}
+  .team-row .rm{background:#fee2e2;color:#7f1d1d;border:0;width:32px;height:32px;border-radius:6px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .team-row .rm:hover{background:#fecaca}
+  .add-row{margin-top:10px;padding:10px;background:#eff6ff;border:1px dashed #93c5fd;border-radius:8px;color:#1e40af;text-align:center;cursor:pointer;font-size:13px;font-weight:600}
+  .add-row:hover{background:#dbeafe}
+  @media (max-width: 720px){
+    .grid2,.grid3{grid-template-columns:1fr}
+    .header,.body,.footer,.progress-wrap{padding-left:20px;padding-right:20px}
+    .team-row{grid-template-columns:1fr 1fr;gap:6px}
+    .team-row select,.team-row input[type=password]{grid-column:span 2}
+  }
+</style>
+</head>
+<body>
+<div class="wizard">
+  <div class="header">
+    <h1>Bienvenido a Volvix POS</h1>
+    <p>Configura tu negocio en 3 minutos</p>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:20%"></div></div>
+    <div class="steps-row" id="stepsRow"></div>
+  </div>
+
+  <div class="body" id="wizardBody">
+
+    <!-- STEP 1: Empresa -->
+    <div class="step active" data-step="1">
+      <h2>Datos de tu empresa</h2>
+      <p class="subtitle">Empezamos por lo básico. Estos datos aparecerán en tickets y facturas.</p>
+      <div class="field">
+        <label>Nombre comercial *</label>
+        <input id="bizName" placeholder="Mi negocio S.A. de C.V." required>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>RFC / Tax ID</label>
+          <input id="bizTaxId" placeholder="XAXX010101000">
+        </div>
+        <div class="field">
+          <label>Teléfono *</label>
+          <input id="bizPhone" type="tel" placeholder="55 1234 5678" required>
+        </div>
+      </div>
+      <div class="field">
+        <label>Dirección *</label>
+        <input id="bizAddress" placeholder="Calle, número, colonia, ciudad" required>
+      </div>
+      <div id="step1Msg"></div>
+    </div>
+
+    <!-- STEP 2: Giro -->
+    <div class="step" data-step="2">
+      <h2>¿Cuál es tu giro? *</h2>
+      <p class="subtitle">Activaremos los módulos que tu negocio realmente necesita.</p>
+      <div class="giro-grid" id="giroGrid"></div>
+      <div class="modules-preview" id="modulesPreview">
+        <h4>Módulos que se activarán:</h4>
+        <div class="mods" id="modulesMods"></div>
+      </div>
+      <div id="step2Msg"></div>
+    </div>
+
+    <!-- STEP 3: Equipo -->
+    <div class="step" data-step="3">
+      <h2>Tu equipo</h2>
+      <p class="subtitle">Agrega cajeros y gerentes. Recibirán acceso al sistema con su rol asignado.</p>
+      <div class="team-list" id="teamList"></div>
+      <div class="add-row" id="addTeamBtn">+ Agregar miembro del equipo</div>
+      <div class="info" style="margin-top:14px">
+        <strong>Tip:</strong> Las contraseñas se cifran con scrypt antes de guardarse. Comparte la inicial de forma segura; cada usuario podrá cambiarla en su primer ingreso.
+      </div>
+      <div id="step3Msg"></div>
+    </div>
+
+    <!-- STEP 4: Primer producto -->
+    <div class="step" data-step="4">
+      <h2>Tu primer producto *</h2>
+      <p class="subtitle">Crea un producto para empezar a vender. Podrás agregar más después.</p>
+      <div class="grid2">
+        <div class="field">
+          <label>Nombre del producto *</label>
+          <input id="prodName" placeholder="Ej: Café americano">
+        </div>
+        <div class="field">
+          <label>SKU / Código</label>
+          <input id="prodSku" placeholder="CAFE-001">
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>Precio de venta (sin IVA) *</label>
+          <input id="prodPrice" type="number" min="0" step="0.01" placeholder="35.00">
+        </div>
+        <div class="field">
+          <label>Stock inicial</label>
+          <input id="prodStock" type="number" min="0" step="1" placeholder="100">
+        </div>
+      </div>
+      <div class="field">
+        <label>Categoría</label>
+        <input id="prodCategory" placeholder="Ej: Bebidas">
+      </div>
+      <div id="step4Msg"></div>
+    </div>
+
+    <!-- STEP 5: Venta demo -->
+    <div class="step" data-step="5">
+      <h2>Primera venta de prueba</h2>
+      <p class="subtitle">Vamos a registrar una venta demo de tu producto para verificar que todo funciona.</p>
+      <div class="info" id="demoInfo">
+        Cargando datos del producto...
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>Cantidad</label>
+          <input id="demoQty" type="number" min="1" step="1" value="1">
+        </div>
+        <div class="field">
+          <label>Método de pago</label>
+          <select id="demoPayment">
+            <option value="cash">Efectivo</option>
+            <option value="card">Tarjeta</option>
+            <option value="transfer">Transferencia</option>
+          </select>
+        </div>
+      </div>
+      <div id="demoSummary" style="padding:14px;background:#f8f9fb;border-radius:8px;margin-top:8px;font-size:14px"></div>
+      <div id="step5Msg"></div>
+    </div>
+
+    <!-- FINAL: Listo -->
+    <div class="step" data-step="6">
+      <div class="complete-hero">
+        <div class="emoji">🎉</div>
+        <h2>¡Tu sistema está listo!</h2>
+        <p>Volvix POS está configurado para tu negocio. Ya tienes tu equipo, tu primer producto y tu primera venta registrada.</p>
+        <div class="ok" style="text-align:left">
+          <strong>Resumen de configuración</strong>
+          <div id="completeSummary" style="margin-top:8px;font-size:12px;line-height:1.7"></div>
+        </div>
+        <div class="cta-row">
+          <button class="btn-success" id="goLauncherBtn">▶️ Ir al Launcher de Volvix</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <button class="btn-ghost" id="prevBtn">← Atrás</button>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn-skip" id="skipAllBtn">Saltar configuración</button>
+      <button class="btn-skip" id="skipBtn">Saltar este paso</button>
+      <button class="btn-primary" id="nextBtn">Continuar →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const API_BASE = (window.VOLVIX_API_BASE || '/api');
+const TOTAL_STEPS = 6; // 5 wizard steps + final
+const STEP_LABELS = ['Empresa','Giro','Equipo','Producto','Venta','Listo'];
+const SS_KEY = 'vlx_onboarding';
+
+const GIROS = [
+  {id:'farmacia',     label:'Farmacia',    icon:'💊', mods:['inventory','barcode','prescriptions','loyalty','reports']},
+  {id:'restaurante',  label:'Restaurante', icon:'🍽️', mods:['tables','kds','modifiers','tickets','reservations']},
+  {id:'gym',          label:'Gimnasio',    icon:'🏋️', mods:['memberships','subscriptions','attendance','classes','loyalty']},
+  {id:'salon',        label:'Salón / Spa', icon:'💇', mods:['appointments','services','staff','commissions','reminders']},
+  {id:'ferreteria',   label:'Ferretería',  icon:'🔨', mods:['inventory','categories','suppliers','quotes','reports']},
+  {id:'papeleria',    label:'Papelería',   icon:'📚', mods:['inventory','barcode','printing','reports','loyalty']},
+  {id:'abarrotes',    label:'Abarrotes',   icon:'🛒', mods:['inventory','barcode','suppliers','price-changes','reports']},
+  {id:'custom',       label:'Personalizado',icon:'⚙️', mods:['inventory','reports']},
+];
+
+// ===== Estado (sessionStorage as required) =====
+function loadState(){
+  try { return JSON.parse(sessionStorage.getItem(SS_KEY) || '{}'); } catch(_) { return {}; }
+}
+function saveState(){ try { sessionStorage.setItem(SS_KEY, JSON.stringify(state)); } catch(_){} }
+
+const state = loadState();
+state.step = state.step || 1;
+state.empresa = state.empresa || {};
+state.giro = state.giro || null;
+state.modules = state.modules || [];
+state.team = state.team || [];
+state.product = state.product || {};
+state.sale = state.sale || {};
+state.createdProductId = state.createdProductId || null;
+state.createdUsers = state.createdUsers || [];
+
+function getToken(){
+  return localStorage.getItem('volvix_token') ||
+         localStorage.getItem('volvixAuthToken') ||
+         (window.session && window.session.token) || '';
+}
+function authHeaders(){
+  const t = getToken();
+  return Object.assign({'Content-Type':'application/json'}, t?{Authorization:'Bearer '+t}:{});
+}
+function toast(type, msg){
+  if(window.VolvixUI && VolvixUI.toast){ VolvixUI.toast({type, message:msg}); return; }
+  const div = document.createElement('div');
+  div.style.cssText = 'position:fixed;top:20px;right:20px;padding:14px 20px;border-radius:8px;color:#fff;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,.2);font-size:14px;'+
+    'background:'+(type==='error'?'#ef4444':type==='success'?'#10b981':'#3b82f6');
+  div.textContent = msg;
+  document.body.appendChild(div);
+  setTimeout(()=>div.remove(), 3500);
+}
+function setMsg(id, html){ const el = document.getElementById(id); if (el) el.innerHTML = html; }
+function clearMsg(id){ setMsg(id,''); }
+function markInvalid(ids){
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('invalid');
+  });
+}
+function clearInvalid(){
+  document.querySelectorAll('input.invalid,select.invalid').forEach(el => el.classList.remove('invalid'));
+}
+
+// ===== Render progress =====
+function renderProgress(){
+  const fill = ((state.step-1)/(TOTAL_STEPS-1))*100;
+  document.getElementById('progressFill').style.width = Math.max(16, fill) + '%';
+  const row = document.getElementById('stepsRow');
+  row.innerHTML = STEP_LABELS.map((l,i)=>{
+    const n = i+1;
+    const cls = n<state.step?'done': n===state.step?'active':'';
+    return `<span class="step-pill ${cls}">${n}. ${l}</span>`;
+  }).join('');
+}
+
+function showStep(n){
+  state.step = Math.max(1, Math.min(TOTAL_STEPS, n));
+  saveState();
+  document.querySelectorAll('.step').forEach(el=>el.classList.remove('active'));
+  const cur = document.querySelector(`.step[data-step="${state.step}"]`);
+  if (cur) cur.classList.add('active');
+  document.getElementById('prevBtn').style.visibility = state.step===1?'hidden':'visible';
+  const nextBtn = document.getElementById('nextBtn');
+  // Final step: no next button
+  nextBtn.style.display = state.step===TOTAL_STEPS?'none':'inline-block';
+  // Skip available except for required steps (1: empresa, 2: giro, 4: producto required) and final
+  const canSkip = (state.step === 3 || state.step === 5);
+  document.getElementById('skipBtn').style.display = canSkip?'inline':'none';
+  document.getElementById('skipAllBtn').style.display = state.step<TOTAL_STEPS?'inline':'none';
+  // Button label
+  if (state.step === 5) nextBtn.textContent = 'Registrar venta demo →';
+  else if (state.step === 4) nextBtn.textContent = 'Crear producto →';
+  else if (state.step === 3) nextBtn.textContent = 'Crear equipo →';
+  else nextBtn.textContent = 'Continuar →';
+  renderProgress();
+  if (state.step === 5) renderDemoSummary();
+  if (state.step === TOTAL_STEPS) renderCompleteSummary();
+  clearInvalid();
+  // Persist step progress to backend (per-step), debounced
+  if (typeof saveStepProgress === 'function') saveStepProgress(state.step);
+}
+
+// ===== Step 1: Empresa =====
+function bindStep1(){
+  const e = state.empresa;
+  if (e.name) document.getElementById('bizName').value = e.name;
+  if (e.tax_id) document.getElementById('bizTaxId').value = e.tax_id;
+  if (e.phone) document.getElementById('bizPhone').value = e.phone;
+  if (e.address) document.getElementById('bizAddress').value = e.address;
+}
+function validateStep1(){
+  clearInvalid(); clearMsg('step1Msg');
+  const name = document.getElementById('bizName').value.trim();
+  const phone = document.getElementById('bizPhone').value.trim();
+  const address = document.getElementById('bizAddress').value.trim();
+  const tax_id = document.getElementById('bizTaxId').value.trim();
+  const missing = [];
+  if (!name) missing.push('bizName');
+  if (!phone) missing.push('bizPhone');
+  if (!address) missing.push('bizAddress');
+  if (missing.length){
+    markInvalid(missing);
+    setMsg('step1Msg','<div class="err">Completa los campos requeridos (marcados en rojo).</div>');
+    return false;
+  }
+  state.empresa = { name, tax_id, phone, address };
+  saveState();
+  return true;
+}
+
+// ===== Step 2: Giros =====
+function renderGiros(){
+  const g = document.getElementById('giroGrid');
+  g.innerHTML = GIROS.map(v=>`
+    <div class="giro-card${state.giro===v.id?' selected':''}" data-giro="${v.id}" role="button" tabindex="0" aria-label="${v.label}">
+      <div class="icon">${v.icon}</div><div class="label">${v.label}</div>
+    </div>`).join('');
+  g.querySelectorAll('.giro-card').forEach(c=>{
+    c.onclick = ()=>{
+      g.querySelectorAll('.giro-card').forEach(x=>x.classList.remove('selected'));
+      c.classList.add('selected');
+      const id = c.dataset.giro;
+      state.giro = id;
+      const giro = GIROS.find(x=>x.id===id);
+      state.modules = giro.mods;
+      saveState();
+      showModulesPreview(giro);
+    };
+  });
+  if(state.giro){
+    const giro = GIROS.find(x=>x.id===state.giro);
+    if(giro) showModulesPreview(giro);
+  }
+}
+function showModulesPreview(giro){
+  const wrap = document.getElementById('modulesPreview');
+  const mods = document.getElementById('modulesMods');
+  mods.innerHTML = giro.mods.map(m=>`<span class="mod">✓ ${m}</span>`).join('');
+  wrap.classList.add('show');
+}
+function validateStep2(){
+  clearMsg('step2Msg');
+  if (!state.giro){
+    setMsg('step2Msg','<div class="err">Selecciona un giro para continuar.</div>');
+    return false;
+  }
+  return true;
+}
+
+// ===== Step 3: Equipo =====
+function renderTeam(){
+  const list = document.getElementById('teamList');
+  if (!state.team.length){
+    list.innerHTML = '<div class="small" style="padding:8px">Sin miembros aún. Puedes saltarte este paso si solo tú usarás el sistema.</div>';
+    return;
+  }
+  list.innerHTML = '';
+  state.team.forEach((m, idx) => {
+    const row = document.createElement('div');
+    row.className = 'team-row';
+    row.innerHTML = `
+      <input data-f="name" placeholder="Nombre" value="${(m.name||'').replace(/"/g,'&quot;')}">
+      <input data-f="email" type="email" placeholder="email@negocio.com" value="${(m.email||'').replace(/"/g,'&quot;')}">
+      <select data-f="role">
+        <option value="cashier"${m.role==='cashier'?' selected':''}>Cajero</option>
+        <option value="manager"${m.role==='manager'?' selected':''}>Gerente</option>
+      </select>
+      <input data-f="password" type="password" placeholder="Contraseña" value="${(m.password||'').replace(/"/g,'&quot;')}">
+      <button class="rm" aria-label="Eliminar miembro" data-rm="${idx}">×</button>
+    `;
+    row.querySelectorAll('[data-f]').forEach(inp => {
+      inp.oninput = () => {
+        state.team[idx][inp.dataset.f] = inp.value;
+        saveState();
+      };
+    });
+    row.querySelector('[data-rm]').onclick = () => {
+      state.team.splice(idx,1);
+      saveState();
+      renderTeam();
+    };
+    list.appendChild(row);
+  });
+}
+function bindStep3(){
+  document.getElementById('addTeamBtn').onclick = () => {
+    state.team.push({name:'', email:'', role:'cashier', password:''});
+    saveState();
+    renderTeam();
+  };
+  renderTeam();
+}
+function validateStep3Ready(){
+  // Empty team is allowed (skip); if any rows, all must be valid
+  clearMsg('step3Msg');
+  if (!state.team.length) return { ok:true, empty:true };
+  const errs = [];
+  state.team.forEach((m, i) => {
+    const name = (m.name||'').trim();
+    const email = (m.email||'').trim();
+    const pw = (m.password||'').trim();
+    if (!name) errs.push(`Fila ${i+1}: nombre requerido`);
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.push(`Fila ${i+1}: email no válido`);
+    if (pw.length < 6) errs.push(`Fila ${i+1}: contraseña mínimo 6 caracteres`);
+  });
+  if (errs.length){
+    setMsg('step3Msg','<div class="err">'+errs.join('<br>')+'</div>');
+    return { ok:false };
+  }
+  return { ok:true, empty:false };
+}
+async function createTeam(){
+  const v = validateStep3Ready();
+  if (!v.ok) return false;
+  if (v.empty) return true;
+  setMsg('step3Msg','<div class="alert">⏳ Creando usuarios...</div>');
+  const created = [];
+  const failed = [];
+  for (const m of state.team){
+    try {
+      const r = await fetch(`${API_BASE}/users`, {
+        method:'POST', headers: authHeaders(),
+        body: JSON.stringify({
+          name: m.name.trim(),
+          email: m.email.trim(),
+          role: m.role || 'cashier',
+          password: m.password,         // server hashes via scrypt
+          password_algo: 'scrypt',
+          send_welcome: true
+        })
+      });
+      if (!r.ok) throw new Error('HTTP '+r.status);
+      const d = await r.json().catch(()=>({}));
+      created.push({email: m.email, role: m.role, id: d.id || null});
+    } catch(e){
+      failed.push(m.email);
+      console.warn('[wizard] user create error', m.email, e);
+    }
+  }
+  state.createdUsers = created;
+  saveState();
+  if (failed.length){
+    setMsg('step3Msg', `<div class="alert">⚠️ Creados: ${created.length}. Fallidos: ${failed.join(', ')}. Podrás reintentarlos en Usuarios.</div>`);
+  } else {
+    setMsg('step3Msg', `<div class="ok">✓ ${created.length} usuario(s) creado(s) correctamente.</div>`);
+  }
+  return true;
+}
+
+// ===== Step 4: Producto =====
+function bindStep4(){
+  const p = state.product;
+  if (p.name) document.getElementById('prodName').value = p.name;
+  if (p.sku) document.getElementById('prodSku').value = p.sku;
+  if (p.price) document.getElementById('prodPrice').value = p.price;
+  if (p.stock != null) document.getElementById('prodStock').value = p.stock;
+  if (p.category) document.getElementById('prodCategory').value = p.category;
+}
+function validateStep4(){
+  clearInvalid(); clearMsg('step4Msg');
+  const name = document.getElementById('prodName').value.trim();
+  const price = parseFloat(document.getElementById('prodPrice').value);
+  const missing = [];
+  if (!name) missing.push('prodName');
+  if (!(price > 0)) missing.push('prodPrice');
+  if (missing.length){
+    markInvalid(missing);
+    setMsg('step4Msg','<div class="err">Nombre y precio (mayor a 0) son requeridos.</div>');
+    return false;
+  }
+  state.product = {
+    name,
+    sku: document.getElementById('prodSku').value.trim() || null,
+    price,
+    stock: parseInt(document.getElementById('prodStock').value) || 0,
+    category: document.getElementById('prodCategory').value.trim() || null
+  };
+  saveState();
+  return true;
+}
+async function createProduct(){
+  if (!validateStep4()) return false;
+  setMsg('step4Msg','<div class="alert">⏳ Creando producto...</div>');
+  try {
+    const r = await fetch(`${API_BASE}/products`, {
+      method:'POST', headers: authHeaders(),
+      body: JSON.stringify(state.product)
+    });
+    if (!r.ok) throw new Error('HTTP '+r.status);
+    const d = await r.json().catch(()=>({}));
+    state.createdProductId = d.id || d.product_id || null;
+    saveState();
+    setMsg('step4Msg', `<div class="ok">✓ Producto "${state.product.name}" creado.</div>`);
+    return true;
+  } catch(e){
+    console.warn('[wizard] product create error', e);
+    setMsg('step4Msg','<div class="alert">⚠️ No se pudo crear el producto. Continuamos con la venta demo simulada.</div>');
+    // Permitir avanzar para no romper el flujo offline
+    return true;
+  }
+}
+
+// ===== Step 5: Venta demo =====
+function renderDemoSummary(){
+  const p = state.product || {};
+  const qty = parseInt(document.getElementById('demoQty').value) || 1;
+  const unit = Number(p.price) || 0;
+  const subtotal = unit * qty;
+  const tax = +(subtotal * 0.16).toFixed(2);
+  const total = +(subtotal + tax).toFixed(2);
+  document.getElementById('demoInfo').innerHTML = p.name
+    ? `Producto: <strong>${p.name}</strong> · Precio unitario: <strong>$${unit.toFixed(2)}</strong>`
+    : 'Sin producto definido. Vuelve al paso anterior.';
+  document.getElementById('demoSummary').innerHTML = `
+    Subtotal: <strong>$${subtotal.toFixed(2)}</strong> ·
+    IVA 16%: <strong>$${tax.toFixed(2)}</strong> ·
+    Total: <strong style="color:#059669">$${total.toFixed(2)}</strong>
+  `;
+}
+function bindStep5(){
+  document.getElementById('demoQty').oninput = renderDemoSummary;
+  document.getElementById('demoPayment').onchange = renderDemoSummary;
+}
+async function createDemoSale(){
+  clearMsg('step5Msg');
+  const p = state.product || {};
+  if (!p.name || !p.price){
+    setMsg('step5Msg','<div class="err">No hay producto. Regresa al paso 4.</div>');
+    return false;
+  }
+  const qty = parseInt(document.getElementById('demoQty').value) || 1;
+  if (qty < 1){
+    setMsg('step5Msg','<div class="err">Cantidad debe ser al menos 1.</div>');
+    return false;
+  }
+  const payment = document.getElementById('demoPayment').value;
+  const subtotal = +(p.price * qty).toFixed(2);
+  const tax = +(subtotal * 0.16).toFixed(2);
+  const total = +(subtotal + tax).toFixed(2);
+  const items = [{
+    product_id: state.createdProductId || null,
+    name: p.name,
+    qty,
+    price: p.price,
+    line_total: subtotal
+  }];
+  state.sale = { items, subtotal, tax, total, payment, demo: true };
+  saveState();
+  setMsg('step5Msg','<div class="alert">⏳ Registrando venta demo...</div>');
+  try {
+    const r = await fetch(`${API_BASE}/sales`, {
+      method:'POST', headers: authHeaders(),
+      body: JSON.stringify({
+        items, subtotal, tax, total, payment,
+        demo: true,
+        source: 'onboarding_wizard'
+      })
+    });
+    if (!r.ok) throw new Error('HTTP '+r.status);
+    const d = await r.json().catch(()=>({}));
+    state.sale.id = d.id || d.sale_id || null;
+    saveState();
+    setMsg('step5Msg', `<div class="ok">✓ Venta demo registrada. Total $${total.toFixed(2)}.</div>`);
+    return true;
+  } catch(e){
+    console.warn('[wizard] sale create error', e);
+    setMsg('step5Msg','<div class="alert">⚠️ No se pudo registrar la venta en servidor (guardada localmente).</div>');
+    return true; // no bloqueamos
+  }
+}
+
+// ===== Final / Resumen =====
+function renderCompleteSummary(){
+  const giro = GIROS.find(x=>x.id===state.giro);
+  const lines = [];
+  if (state.empresa.name) lines.push(`🏢 Empresa: <strong>${state.empresa.name}</strong>`);
+  if (giro) lines.push(`📦 Giro: <strong>${giro.label}</strong> (${giro.mods.length} módulos)`);
+  if (state.createdUsers.length) lines.push(`👥 Equipo: <strong>${state.createdUsers.length} usuario(s)</strong> creado(s)`);
+  if (state.product.name) lines.push(`🛒 Producto: <strong>${state.product.name}</strong> · $${Number(state.product.price||0).toFixed(2)}`);
+  if (state.sale.total) lines.push(`💵 Venta demo: <strong>$${Number(state.sale.total).toFixed(2)}</strong> (${state.sale.payment||'cash'})`);
+  document.getElementById('completeSummary').innerHTML = lines.join('<br>') || 'Configuración completa.';
+}
+
+async function markFirstLoginDone(){
+  try {
+    await fetch(`${API_BASE}/users/me/first-login-complete`, {
+      method:'POST', headers: authHeaders(), body: JSON.stringify({ step: TOTAL_STEPS, completed: true })
+    });
+  } catch(e){ console.warn('[wizard] mark first-login error', e); }
+  localStorage.setItem('volvix_first_login_completed', '1');
+  localStorage.removeItem('volvix_show_setup_banner');
+}
+
+// Persist step progress to backend (best-effort, debounced).
+let __saveStepTimer = null;
+async function saveStepProgress(stepNum){
+  try { localStorage.setItem('volvix_onboarding_last_step', String(stepNum)); } catch(_){}
+  if (__saveStepTimer) clearTimeout(__saveStepTimer);
+  __saveStepTimer = setTimeout(async () => {
+    try {
+      await fetch(`${API_BASE}/users/me/first-login-complete`, {
+        method:'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ step: stepNum, completed: false })
+      });
+    } catch (e) {
+      // Silent failure — progress is also saved locally and will retry on next step
+      console.warn('[wizard] saveStepProgress error', e);
+    }
+  }, 500);
+}
+
+async function finishWizard(){
+  await markFirstLoginDone();
+  // Conserva snapshot del onboarding por si se quiere consultar
+  try { sessionStorage.removeItem(SS_KEY); } catch(_){}
+  window.location.href = '/volvix-launcher.html';
+}
+
+// ===== Botones =====
+document.getElementById('prevBtn').onclick = () => { if (state.step > 1) showStep(state.step - 1); };
+
+document.getElementById('skipBtn').onclick = () => {
+  // Solo permitido en steps 3 (equipo) y 5 (venta demo)
+  if (state.step === 3 || state.step === 5){
+    if (!confirm('¿Saltar este paso? Podrás completarlo después desde el panel.')) return;
+    showStep(state.step + 1);
+  }
+};
+
+document.getElementById('skipAllBtn').onclick = () => {
+  if (!confirm('¿Saltar toda la configuración inicial? Verás un banner para retomarla cuando quieras.')) return;
+  localStorage.setItem('volvix_show_setup_banner', '1');
+  try { sessionStorage.removeItem(SS_KEY); } catch(_){}
+  toast('info', 'Configuración saltada. Te llevamos al launcher.');
+  setTimeout(() => { window.location.href = '/volvix-launcher.html'; }, 600);
+};
+
+document.getElementById('goLauncherBtn').onclick = () => finishWizard();
+
+document.getElementById('nextBtn').onclick = async () => {
+  const btn = document.getElementById('nextBtn');
+  btn.disabled = true;
+  try {
+    if (state.step === 1){
+      if (validateStep1()) showStep(2);
+    } else if (state.step === 2){
+      if (validateStep2()) showStep(3);
+    } else if (state.step === 3){
+      const ok = await createTeam();
+      if (ok) showStep(4);
+    } else if (state.step === 4){
+      const ok = await createProduct();
+      if (ok) showStep(5);
+    } else if (state.step === 5){
+      const ok = await createDemoSale();
+      if (ok) showStep(6);
+    }
+  } finally {
+    btn.disabled = false;
+  }
+};
+
+// ===== Init =====
+bindStep1();
+renderGiros();
+bindStep3();
+bindStep4();
+bindStep5();
+showStep(state.step);
+</script>
+</body>
+</html>

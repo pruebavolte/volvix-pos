@@ -1,0 +1,47 @@
+{
+  "id": "cafe-first-sale",
+  "title": "Tu primera venta en cafe",
+  "industry": "cafe",
+  "duration_min": 3,
+  "modules_required": ["pos", "inventory"],
+  "roles": ["owner", "cashier", "manager"],
+  "demo_catalog_ref": "R12a",
+  "steps": [
+    {
+      "id": "step1",
+      "title": "Ya tienes 12 productos demo cargados",
+      "text": "Cafe Americano $30, Latte Vainilla $45, Espresso $35, Cappuccino $42, Mocha $48, Te Chai $38, Frappe $55, Croissant $25, Muffin Arandano $28, Galleta Avena $18, Pan Dulce $22, Sandwich Jamon $65. Si quieres ver todos, click en Inventario.",
+      "image": "/tutorials/01-primera-venta.html",
+      "action": "next"
+    },
+    {
+      "id": "step2",
+      "title": "Vendamos un Latte Vainilla",
+      "text": "En el buscador escribe 'latte'. Te aparecera Latte Vainilla $45.",
+      "highlight_selector": "#search-input",
+      "action": "wait_for_search",
+      "expected_query": "latte"
+    },
+    {
+      "id": "step3",
+      "title": "Agregalo al carrito",
+      "text": "Click en Latte Vainilla. Veras $45 en el total.",
+      "highlight_selector": ".search-result-item",
+      "action": "wait_for_cart"
+    },
+    {
+      "id": "step4",
+      "title": "Cobra con efectivo",
+      "text": "Press F12 o click 'Cobrar'. Selecciona Efectivo $50, calcula cambio $5.",
+      "highlight_selector": "#btn-cobrar",
+      "action": "wait_for_payment"
+    },
+    {
+      "id": "step5",
+      "title": "Vendiste!",
+      "text": "Tu primera venta quedo registrada. Ve a Reportes para verla.",
+      "action": "complete",
+      "next_link": "/reportes"
+    }
+  ]
+}

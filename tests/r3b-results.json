@@ -1,0 +1,453 @@
+{
+  "config": {
+    "configFile": "C:\\Users\\DELL\\Downloads\\verion 340\\tests\\playwright.r3b.config.js",
+    "rootDir": "C:/Users/DELL/Downloads/verion 340/tests",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/DELL/Downloads/verion 340/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "r3b-prod",
+        "name": "r3b-prod",
+        "testDir": "C:/Users/DELL/Downloads/verion 340/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/r3b-inventory-e2e\\.spec\\.js$/"
+        ],
+        "timeout": 120000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "r3b-results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.59.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "r3b-inventory-e2e.spec.js",
+      "file": "r3b-inventory-e2e.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "I1: Stock view + filters (4 KPIs + 3 filters)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "r3b-prod",
+              "projectName": "r3b-prod",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 17085,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-04-28T03:37:54.281Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "89a2d68144d19668db7a-fdbbb53ae355eee4d580",
+          "file": "r3b-inventory-e2e.spec.js",
+          "line": 294,
+          "column": 1
+        },
+        {
+          "title": "I2: +Stock (add 20 to a product, verify movement created)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "r3b-prod",
+              "projectName": "r3b-prod",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1084,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-04-28T03:38:12.747Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "89a2d68144d19668db7a-51ad8068a4830f1c4318",
+          "file": "r3b-inventory-e2e.spec.js",
+          "line": 365,
+          "column": 1
+        },
+        {
+          "title": "I3: -Stock subtract 5 + negative-stock guard",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "r3b-prod",
+              "projectName": "r3b-prod",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 613,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-04-28T03:38:13.858Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "89a2d68144d19668db7a-e8129a71a33cba251bd6",
+          "file": "r3b-inventory-e2e.spec.js",
+          "line": 443,
+          "column": 1
+        },
+        {
+          "title": "I4: Adjust stock to specific value (delta+ajuste type)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "r3b-prod",
+              "projectName": "r3b-prod",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1008,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-04-28T03:38:14.494Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "89a2d68144d19668db7a-90bd2c31acb7928d5347",
+          "file": "r3b-inventory-e2e.spec.js",
+          "line": 496,
+          "column": 1
+        },
+        {
+          "title": "I5: Kardex modal - chronological movements + CSV export",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "r3b-prod",
+              "projectName": "r3b-prod",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 17281,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-04-28T03:38:15.527Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "89a2d68144d19668db7a-fab248f0a80758fadc13",
+          "file": "r3b-inventory-e2e.spec.js",
+          "line": 560,
+          "column": 1
+        },
+        {
+          "title": "I6: Movements tab - list + filters (tipo/fecha/producto)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "r3b-prod",
+              "projectName": "r3b-prod",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 19448,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-04-28T03:38:32.844Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "89a2d68144d19668db7a-b68493cc60f602d23b83",
+          "file": "r3b-inventory-e2e.spec.js",
+          "line": 651,
+          "column": 1
+        },
+        {
+          "title": "I7: Physical Count flow - direct items endpoint (Steps A→D)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "r3b-prod",
+              "projectName": "r3b-prod",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2172,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-04-28T03:38:52.350Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "89a2d68144d19668db7a-c1528bda6724dcdd123b",
+          "file": "r3b-inventory-e2e.spec.js",
+          "line": 746,
+          "column": 1
+        },
+        {
+          "title": "I8: Bulk adjust - validates payload + applies + creates movements",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "r3b-prod",
+              "projectName": "r3b-prod",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1482,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-04-28T03:38:54.572Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "89a2d68144d19668db7a-1fec27b11d3de2109a0f",
+          "file": "r3b-inventory-e2e.spec.js",
+          "line": 840,
+          "column": 1
+        },
+        {
+          "title": "I9: /api/inventory/alerts widget data integrity",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "r3b-prod",
+              "projectName": "r3b-prod",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 12216,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-04-28T03:38:56.095Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "89a2d68144d19668db7a-dae5183ec940a4b77980",
+          "file": "r3b-inventory-e2e.spec.js",
+          "line": 914,
+          "column": 1
+        },
+        {
+          "title": "I10: Multi-tenant isolation (admin TNT001 vs owner TNT002)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "r3b-prod",
+              "projectName": "r3b-prod",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 789,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-04-28T03:39:08.361Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "89a2d68144d19668db7a-9a8d96c1cc952bbdc410",
+          "file": "r3b-inventory-e2e.spec.js",
+          "line": 978,
+          "column": 1
+        },
+        {
+          "title": "Z: write summary",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "r3b-prod",
+              "projectName": "r3b-prod",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-04-28T03:39:09.186Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "89a2d68144d19668db7a-8b70ed5b62faf8c91cab",
+          "file": "r3b-inventory-e2e.spec.js",
+          "line": 1036,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-04-28T03:37:51.690Z",
+    "duration": 162748.72,
+    "expected": 11,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

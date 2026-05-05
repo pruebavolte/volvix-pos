@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Mi Programa de Lealtad · Volvix</title>
+<style>
+  :root{
+    --bg:#0e1116; --panel:#161b22; --panel-2:#1c2330; --border:#2a323d;
+    --text:#e6edf3; --muted:#8b949e; --accent:#58a6ff; --green:#3fb950;
+    --gold:#e3b341; --silver:#c9d1d9; --bronze:#d57b3d;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font:14px/1.5 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+  h1{margin:0;font-size:20px;font-weight:600}
+  main{padding:24px;max-width:880px;margin:0 auto}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:16px}
+  .hero{background:linear-gradient(135deg,#1c2330,#161b22);text-align:center}
+  .hero .points{font-size:48px;font-weight:700;color:var(--accent);line-height:1.1}
+  .hero .label{color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-size:12px;margin-bottom:8px}
+  .tier-chip{display:inline-block;padding:6px 16px;border-radius:20px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin:12px 0}
+  .t-bronze{background:rgba(213,123,61,.2);color:var(--bronze)}
+  .t-silver{background:rgba(201,209,217,.2);color:var(--silver)}
+  .t-gold{background:rgba(227,179,65,.2);color:var(--gold)}
+  .t-platinum{background:rgba(88,166,255,.2);color:var(--accent)}
+  .progress{margin-top:16px}
+  .bar{background:var(--panel-2);border-radius:10px;height:10px;overflow:hidden;margin:8px 0}
+  .bar-fill{background:var(--accent);height:100%;transition:width .4s}
+  .reward{display:flex;justify-content:space-between;align-items:center;padding:14px;background:var(--panel-2);border-radius:8px;margin-bottom:8px}
+  .reward .name{font-weight:600}
+  .reward .desc{font-size:12px;color:var(--muted)}
+  .reward .cost{color:var(--accent);font-weight:700}
+  button{background:var(--accent);color:#fff;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;font-weight:500}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  button.share{background:var(--green);width:100%;padding:12px;font-size:15px}
+  .history-row{padding:10px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between}
+  .history-row:last-child{border:none}
+  .pos{color:var(--green);font-weight:700}
+  .neg{color:#f85149;font-weight:700}
+  input{background:var(--panel-2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:6px;font:inherit;width:100%;max-width:360px}
+  .empty{text-align:center;padding:24px;color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Mi Programa de Lealtad</h1>
+  <input id="customerId" placeholder="customer_id (uuid)" style="max-width:340px" />
+</header>
+<main>
+
+<div class="card hero">
+  <div class="label">Saldo de puntos</div>
+  <div class="points" id="balance">—</div>
+  <div id="tier"></div>
+  <div class="progress" id="progress"></div>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0">Catálogo de recompensas</h3>
+  <div id="rewards" class="empty">Carga tu cuenta arriba</div>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0">Historial</h3>
+  <div id="history" class="empty">—</div>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0">Comparte el programa</h3>
+  <p style="color:var(--muted);margin-top:0">Invita a tus amigos y gana puntos extra cuando compren.</p>
+  <button class="share" onclick="share()">Compartir mi link</button>
+</div>
+
+</main>
+<script>
+const $ = id => document.getElementById(id);
+let me = null;
+let tenantId = null;
+
+$('customerId').addEventListener('change', loadMe);
+
+function token() { return localStorage.getItem('volvix_token') || ''; }
+
+async function api(path, method, body) {
+  const opts = { method: method || 'GET', headers: { 'Content-Type': 'application/json' } };
+  const tk = token();
+  if (tk) opts.headers['Authorization'] = 'Bearer ' + tk;
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(path, opts);
+  if (r.status === 401) {
+    const back = encodeURIComponent(location.pathname + location.search);
+    location.replace('/login.html?expired=1&redirect=' + back);
+    return { ok: false, error: 'unauthorized' };
+  }
+  if (r.status === 503) {
+    try { (window.vlxToast || function(m){console.warn(m);})('Servicio no disponible (503)', 'warn'); } catch(_){}
+    return { ok: false, error: 'service_unavailable' };
+  }
+  return r.json().catch(() => ({ ok: false, error: 'parse_error' }));
+}
+
+function escape(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+
+async function loadMe() {
+  const id = $('customerId').value.trim();
+  if (!id) return;
+  const r = await api('/api/loyalty/customer/' + encodeURIComponent(id));
+  if (!r.ok) { alert('Error: ' + (r.error || '')); return; }
+  me = r;
+  tenantId = (r.customer && r.customer.tenant_id) || null;
+  render();
+  loadCatalog();
+}
+
+function render() {
+  if (!me) return;
+  $('balance').textContent = (me.balance || 0).toLocaleString();
+  const tier = me.tier || 'bronze';
+  $('tier').innerHTML = `<span class="tier-chip t-${tier}">${tier}</span>`;
+  if (me.progress && me.progress.next_tier) {
+    const p = me.progress;
+    const pct = Math.min(100, (p.current_spend / p.required_spend) * 100);
+    $('progress').innerHTML = `
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted)">
+        <span>Hacia ${p.next_tier}</span>
+        <span>$${p.current_spend.toLocaleString()} / $${p.required_spend.toLocaleString()}</span>
+      </div>
+      <div class="bar"><div class="bar-fill" style="width:${pct}%"></div></div>
+      <div style="font-size:12px;color:var(--muted);text-align:right">Te faltan $${p.remaining.toLocaleString()}</div>`;
+  } else {
+    $('progress').innerHTML = '<div style="color:var(--muted);text-align:center;margin-top:8px">Has alcanzado el tier máximo</div>';
+  }
+
+  const h = me.history || [];
+  $('history').className = '';
+  if (!h.length) { $('history').innerHTML = '<div class="empty">Sin movimientos</div>'; return; }
+  $('history').innerHTML = h.slice(0, 25).map(t => `
+    <div class="history-row">
+      <div>
+        <div>${escape(t.type)}${t.source ? ` · <span style="color:var(--muted)">${escape(t.source)}</span>` : ''}</div>
+        <div style="color:var(--muted);font-size:11px">${escape((t.ts || '').slice(0, 16).replace('T', ' '))}</div>
+      </div>
+      <div class="${t.points >= 0 ? 'pos' : 'neg'}">${t.points >= 0 ? '+' : ''}${t.points}</div>
+    </div>`).join('');
+}
+
+async function loadCatalog() {
+  if (!tenantId) {
+    $('rewards').innerHTML = '<div class="empty">Sin tenant asociado</div>';
+    return;
+  }
+  const r = await api('/api/loyalty/rewards-catalog?tenant_id=' + encodeURIComponent(tenantId));
+  if (!r.ok) { $('rewards').innerHTML = `<div class="empty">${r.error || 'error'}</div>`; return; }
+  const rows = r.rewards || [];
+  if (!rows.length) { $('rewards').innerHTML = '<div class="empty">Sin recompensas disponibles</div>'; return; }
+  $('rewards').className = '';
+  $('rewards').innerHTML = rows.map(rw => {
+    const can = (me.balance || 0) >= rw.points_cost;
+    return `<div class="reward">
+      <div>
+        <div class="name">${escape(rw.name)}</div>
+        <div class="desc">${escape(rw.description || '')} ${rw.tier_required ? `· requiere ${rw.tier_required}+` : ''}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="cost">${rw.points_cost} pts</div>
+        <button onclick="redeem('${rw.id}')" ${can ? '' : 'disabled'}>Canjear</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function redeem(rewardId) {
+  if (!me || !me.customer) return;
+  const r = await api('/api/loyalty/redeem-reward', 'POST', {
+    customer_id: me.customer.id,
+    reward_id: rewardId,
+  });
+  if (!r.ok) { alert('Error: ' + (r.error || '')); return; }
+  alert('Canjeado: ' + (r.redeemed && r.redeemed.name) + '. Saldo: ' + r.balance);
+  loadMe();
+}
+
+async function share() {
+  const r = await api('/api/loyalty/share-link');
+  if (!r.ok) { alert('Inicia sesión para compartir'); return; }
+  if (navigator.share) {
+    try { await navigator.share({ title: 'Volvix Loyalty', text: r.share_text, url: r.link }); }
+    catch (_) {}
+  } else {
+    try { await navigator.clipboard.writeText(r.link); alert('Link copiado al portapapeles'); }
+    catch (_) { prompt('Copia este link:', r.link); }
+  }
+}
+</script>
+</body>
+</html>

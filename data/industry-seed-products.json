@@ -1,0 +1,783 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "description": "Seed products por giro. 40 giros × 10 productos cada uno = 400 plantillas. El tenant nuevo elige su giro al registrar y se le pre-cargan estos productos. Cada producto tiene flags universales (usa_*) que activan/desactivan funcionalidades específicas.",
+    "feature_flags_universales": {
+      "usa_receta": "Producto compuesto/kit (six de cerveza = 6 latas, hamburguesa = 2 panes+carne)",
+      "usa_lote": "Lotes (medicamentos, comida, bebida)",
+      "usa_caducidad": "Fecha de caducidad",
+      "usa_serie": "Número de serie único (electrónica, IMEI, VIN)",
+      "usa_motor": "Datos de motor (autos)",
+      "usa_variantes": "Mismo producto con presentaciones distintas (frío/caliente, talla, color) — cambian precio/stock/SKU",
+      "usa_modificadores": "Extras opcionales (con queso, sin tomate, salsa A/B) — NO cambian identidad",
+      "usa_horarios": "Restricciones de venta por hora/día (alcohol, ley seca)",
+      "usa_compuestos": "Sinónimo de usa_receta",
+      "usa_insumos": "Material/ingredientes consumidos al producir",
+      "usa_comision": "Empleado gana % por venta",
+      "usa_garantia": "Garantía aplicable",
+      "usa_peso": "Se vende por peso (kilo, gramo)",
+      "usa_color": "Variante por color",
+      "usa_talla": "Variante por talla",
+      "usa_preparacion": "Tiempo de preparación (cocina)",
+      "usa_imei": "IMEI/ICCID (celulares)",
+      "usa_vin": "VIN (autos/talleres)",
+      "usa_alergenos": "Alérgenos (alimentos)",
+      "usa_patente": "Patente vs genérico (medicamentos)",
+      "usa_ingrediente_activo": "Ingrediente activo (medicamentos)",
+      "usa_temperatura": "Temperatura almacenamiento (medicamentos, perecederos)",
+      "usa_precio_mayoreo": "Precio mayoreo cuando se compra cantidad",
+      "usa_disponibilidad": "Toggle on/off por disponibilidad (cocina del día)",
+      "usa_combo": "Es un combo (paquete con descuento)",
+      "usa_promocion": "Tiene promoción activa",
+      "usa_pricing_rules": "Precio dinámico según hora/día/cliente"
+    },
+    "terminologia_dinamica": {
+      "_descripcion": "Diccionario per-tenant. El sistema reemplaza estas claves en el UI según el giro.",
+      "ejemplos": {
+        "abarrotes":   { "cliente": "cliente",   "venta": "venta",       "ticket": "ticket" },
+        "doctor":      { "cliente": "paciente",  "venta": "consulta",    "ticket": "expediente" },
+        "hotel":       { "cliente": "huésped",   "venta": "reservación", "ticket": "folio" },
+        "taller":      { "cliente": "propietario", "venta": "orden de trabajo", "ticket": "OT" },
+        "veterinaria": { "cliente": "tutor",     "venta": "consulta",    "ticket": "historial" },
+        "escuela":     { "cliente": "alumno",    "venta": "colegiatura", "ticket": "recibo" },
+        "gym":         { "cliente": "miembro",   "venta": "membresía",   "ticket": "recibo" },
+        "estetica":    { "cliente": "cliente",   "venta": "servicio",    "ticket": "comprobante" },
+        "agencia":     { "cliente": "viajero",   "venta": "paquete",     "ticket": "voucher" }
+      }
+    }
+  },
+
+  "abarrotes": {
+    "label": "Abarrotes / Tienda",
+    "default_flags": ["usa_lote", "usa_caducidad", "usa_precio_mayoreo", "usa_promocion"],
+    "products": [
+      { "name": "Coca Cola 600ml", "barcode": "7501055304004", "price": 18, "cost": 13, "category": "Bebidas", "unit": "pieza", "brand": "Coca-Cola" },
+      { "name": "Sabritas Original 45g", "barcode": "7501011102110", "price": 17, "cost": 12, "category": "Botanas", "unit": "pieza", "brand": "Sabritas" },
+      { "name": "Huevo blanco 30 piezas", "barcode": "7501030450010", "price": 78, "cost": 62, "category": "Lácteos y huevo", "unit": "paquete" },
+      { "name": "Leche Lala entera 1L", "barcode": "7501020512080", "price": 26, "cost": 20, "category": "Lácteos y huevo", "unit": "litro", "brand": "Lala", "flags": ["usa_caducidad"] },
+      { "name": "Pan Bimbo grande", "barcode": "7501030411108", "price": 56, "cost": 42, "category": "Panadería", "unit": "pieza", "brand": "Bimbo", "flags": ["usa_caducidad"] },
+      { "name": "Arroz Verde Valle 1kg", "barcode": "7501035003073", "price": 32, "cost": 24, "category": "Abarrotes", "unit": "kilo", "brand": "Verde Valle" },
+      { "name": "Frijol La Sierra 1kg", "barcode": "7501031310215", "price": 38, "cost": 28, "category": "Abarrotes", "unit": "kilo" },
+      { "name": "Atún Tuny en agua 140g", "barcode": "7501030411115", "price": 22, "cost": 16, "category": "Conservas", "unit": "pieza", "brand": "Tuny" },
+      { "name": "Papel higiénico Pétalo 4 rollos", "barcode": "7501025422122", "price": 48, "cost": 36, "category": "Higiene", "unit": "paquete", "brand": "Pétalo" },
+      { "name": "Shampoo Pantene 400ml", "barcode": "7501001141068", "price": 89, "cost": 64, "category": "Higiene", "unit": "pieza", "brand": "Pantene" }
+    ]
+  },
+
+  "deposito-cerveza": {
+    "label": "Depósito / Cervecería",
+    "default_flags": ["usa_lote", "usa_caducidad", "usa_horarios", "usa_compuestos", "usa_variantes", "usa_pricing_rules"],
+    "rules": {
+      "horario_alcohol": "L-V 9am-2am, Sáb 9am-2am, Dom bloqueado por defecto",
+      "ley_seca": "Bloquear venta de alcohol en días definidos",
+      "precio_after_2am": "Precio +25% después de 2am los días que sí se permite"
+    },
+    "products": [
+      { "name": "Six Tecate Light", "is_recipe": true, "recipe": [{ "sku": "tecate-light-lata", "qty": 6 }], "variants": [{ "name": "Frío", "price": 145 }, { "name": "Caliente", "price": 130 }], "category": "Cerveza", "flags": ["usa_horarios", "usa_variantes", "usa_compuestos"] },
+      { "name": "Tecate Light lata 355ml", "barcode": "7501032324004", "price": 24, "cost": 18, "category": "Cerveza", "brand": "Tecate" },
+      { "name": "Carta Blanca lata 355ml", "barcode": "7501046900015", "price": 23, "cost": 17, "category": "Cerveza", "brand": "Carta Blanca" },
+      { "name": "Indio botella 355ml", "barcode": "7501035000016", "price": 28, "cost": 21, "category": "Cerveza", "brand": "Indio" },
+      { "name": "XX Lager botella 325ml", "barcode": "7501045400009", "price": 28, "cost": 21, "category": "Cerveza", "brand": "Dos Equis" },
+      { "name": "Barril Tecate 19L", "price": 850, "cost": 680, "category": "Barriles", "flags": ["usa_horarios"] },
+      { "name": "Hielo bolsa 2kg", "price": 35, "cost": 18, "category": "Insumos" },
+      { "name": "Michelada preparada 1L", "is_recipe": true, "recipe": [{ "sku": "tecate-light-lata", "qty": 2 }, { "sku": "clamato-1l", "qty": 0.3 }, { "sku": "salsa-maggi", "qty": 1 }, { "sku": "limon", "qty": 2 }], "price": 95, "category": "Preparados", "flags": ["usa_compuestos", "usa_modificadores"] },
+      { "name": "Clamato 1L", "barcode": "7503006432034", "price": 75, "cost": 58, "category": "Bebidas" },
+      { "name": "Cigarros Marlboro Red", "barcode": "7501045500013", "price": 90, "cost": 75, "category": "Tabaco", "flags": ["usa_horarios"] }
+    ]
+  },
+
+  "restaurante": {
+    "label": "Restaurante",
+    "default_flags": ["usa_receta", "usa_modificadores", "usa_preparacion", "usa_alergenos", "usa_disponibilidad"],
+    "products": [
+      { "name": "Hamburguesa clásica", "is_recipe": true, "recipe": [{ "name": "pan brioche", "qty": 2 }, { "name": "carne 150g", "qty": 1 }, { "name": "queso amarillo", "qty": 1 }, { "name": "lechuga", "qty": 0.05 }, { "name": "tomate", "qty": 0.05 }], "modifiers": [{ "name": "extra queso", "price": 15 }, { "name": "sin tomate", "price": 0 }, { "name": "tocino", "price": 25 }], "price": 145, "prep_time": "12 minutos", "category": "Hamburguesas" },
+      { "name": "Pizza pepperoni mediana", "is_recipe": true, "modifiers": [{ "name": "extra queso", "price": 30 }, { "name": "orilla rellena", "price": 50 }], "price": 220, "prep_time": "18 minutos", "category": "Pizzas" },
+      { "name": "Tacos al pastor (3 pzas)", "is_recipe": true, "modifiers": [{ "name": "con piña", "price": 0 }, { "name": "sin cebolla", "price": 0 }, { "name": "doble carne", "price": 25 }], "price": 75, "category": "Tacos" },
+      { "name": "Papas a la francesa", "price": 55, "category": "Acompañamientos" },
+      { "name": "Refresco Coca Cola 600ml", "price": 30, "category": "Bebidas" },
+      { "name": "Combo familiar (4 hamburguesas + papas + refrescos)", "is_recipe": true, "price": 480, "category": "Combos", "flags": ["usa_combo"] },
+      { "name": "Ensalada César", "is_recipe": true, "modifiers": [{ "name": "con pollo", "price": 35 }, { "name": "con camarón", "price": 65 }], "price": 95, "category": "Ensaladas" },
+      { "name": "Café americano", "modifiers": [{ "name": "con leche", "price": 0 }, { "name": "doble shot", "price": 15 }], "price": 35, "category": "Bebidas calientes" },
+      { "name": "Pastel de chocolate", "price": 75, "category": "Postres" },
+      { "name": "Alitas BBQ (8 pzas)", "modifiers": [{ "name": "BBQ", "price": 0 }, { "name": "Buffalo", "price": 0 }, { "name": "Habanero", "price": 0 }, { "name": "Mango habanero", "price": 0 }], "price": 165, "category": "Alitas" }
+    ]
+  },
+
+  "farmacia": {
+    "label": "Farmacia",
+    "default_flags": ["usa_lote", "usa_caducidad", "usa_patente", "usa_ingrediente_activo", "usa_temperatura"],
+    "products": [
+      { "name": "Paracetamol 500mg 20 tabs", "active_ingredient": "Paracetamol", "concentration": "500mg", "barcode": "7501034500017", "price": 28, "cost": 18, "patent_or_generic": "genérico", "presentation": "caja" },
+      { "name": "Ibuprofeno 400mg 24 tabs", "active_ingredient": "Ibuprofeno", "concentration": "400mg", "price": 65, "cost": 42, "patent_or_generic": "genérico" },
+      { "name": "Omeprazol 20mg 14 caps", "active_ingredient": "Omeprazol", "concentration": "20mg", "price": 95, "cost": 60, "patent_or_generic": "genérico" },
+      { "name": "Aspirina Adulto 500mg 40 tabs", "active_ingredient": "Ácido acetilsalicílico", "concentration": "500mg", "price": 78, "cost": 52, "patent_or_generic": "patente", "brand": "Bayer" },
+      { "name": "Vitamina C 1g efervescente", "active_ingredient": "Ácido ascórbico", "concentration": "1g", "price": 145, "cost": 98 },
+      { "name": "Jarabe para tos Histiacil 120ml", "price": 110, "cost": 78, "presentation": "frasco" },
+      { "name": "Insulina Lantus 100UI/ml", "active_ingredient": "Insulina glargina", "price": 1450, "cost": 1180, "requires_prescription": true, "storage_temp": "refrigerado 2-8°C", "flags": ["usa_temperatura"] },
+      { "name": "Amoxicilina 500mg 12 caps", "active_ingredient": "Amoxicilina", "concentration": "500mg", "price": 220, "cost": 145, "requires_prescription": true, "patent_or_generic": "genérico" },
+      { "name": "Diclofenaco 100mg 20 tabs", "active_ingredient": "Diclofenaco", "concentration": "100mg", "price": 85, "cost": 56, "patent_or_generic": "genérico" },
+      { "name": "Alcohol etílico 70% 250ml", "price": 38, "cost": 22, "category": "Antisépticos" }
+    ]
+  },
+
+  "ferreteria": {
+    "label": "Ferretería",
+    "default_flags": ["usa_garantia"],
+    "products": [
+      { "name": "Martillo carpintero 16oz", "brand": "Truper", "price": 185, "cost": 125, "category": "Herramientas" },
+      { "name": "Taladro percutor Bosch GSB 550W", "brand": "Bosch", "price": 1850, "cost": 1450, "warranty": "1 año", "category": "Herramientas eléctricas", "flags": ["usa_garantia", "usa_serie"] },
+      { "name": "Tornillo cabeza hexagonal 1/4 x 2 (caja 100)", "price": 140, "cost": 85, "category": "Tornillería" },
+      { "name": "Cemento Tolteca 50kg", "brand": "Tolteca", "price": 235, "cost": 180, "category": "Construcción" },
+      { "name": "Pintura vinílica blanca Comex 4L", "brand": "Comex", "price": 580, "cost": 420, "category": "Pinturas" },
+      { "name": "Cable eléctrico THW 12 AWG (metro)", "price": 18, "cost": 11, "category": "Eléctrico", "unit": "metro" },
+      { "name": "Foco LED 9W luz blanca", "brand": "Philips", "price": 65, "cost": 38, "warranty": "2 años", "flags": ["usa_garantia"] },
+      { "name": "Llave inglesa 12 pulgadas", "brand": "Truper", "price": 320, "cost": 215, "category": "Herramientas" },
+      { "name": "Tubo PVC sanitario 4 pulgadas (6m)", "price": 480, "cost": 365, "category": "Plomería" },
+      { "name": "Cinta aislante 3M Scotch 19mm", "brand": "3M", "price": 28, "cost": 18, "category": "Eléctrico" }
+    ]
+  },
+
+  "papeleria": {
+    "label": "Papelería",
+    "products": [
+      { "name": "Cuaderno profesional Scribe 100hjs", "brand": "Scribe", "price": 38, "cost": 25 },
+      { "name": "Lápiz HB Mirado caja 12", "brand": "Mirado", "price": 65, "cost": 42 },
+      { "name": "Pluma Bic Cristal azul caja 50", "brand": "Bic", "price": 280, "cost": 195 },
+      { "name": "Impresión B/N hoja", "is_service": true, "price": 1, "cost": 0.4, "category": "Servicios" },
+      { "name": "Cartulina opalina blanca pliego", "price": 18, "cost": 11 },
+      { "name": "Engrapadora Pilot mediana", "price": 175, "cost": 120, "warranty": "6 meses" },
+      { "name": "Tijeras escolares Maped 13cm", "brand": "Maped", "price": 55, "cost": 35 },
+      { "name": "Mochila escolar Lizard 18 pulgadas", "price": 580, "cost": 380 },
+      { "name": "Colores Prismacolor 24 pzas", "brand": "Prismacolor", "price": 285, "cost": 195 },
+      { "name": "Resistol blanco escolar 250g", "price": 42, "cost": 28 }
+    ]
+  },
+
+  "taller-mecanico": {
+    "label": "Taller mecánico",
+    "default_flags": ["usa_motor", "usa_vin", "usa_garantia", "usa_comision"],
+    "products": [
+      { "name": "Cambio de aceite + filtro", "is_service": true, "price": 850, "labor_cost": 350, "warranty": "30 días", "estimated_time": "45 min" },
+      { "name": "Afinación mayor 4 cilindros", "is_service": true, "price": 2800, "labor_cost": 1500, "estimated_time": "3 horas", "warranty": "60 días" },
+      { "name": "Cambio de balatas delanteras", "is_service": true, "price": 1450, "labor_cost": 600, "warranty": "6 meses" },
+      { "name": "Cambio de batería", "is_service": true, "price": 2200, "labor_cost": 200, "warranty": "1 año" },
+      { "name": "Cambio de llantas (4)", "is_service": true, "price": 6800, "labor_cost": 400, "warranty": "1 año" },
+      { "name": "Diagnóstico computarizado", "is_service": true, "price": 350, "labor_cost": 350, "estimated_time": "30 min" },
+      { "name": "Cambio amortiguadores delanteros", "is_service": true, "price": 3200, "labor_cost": 800, "warranty": "6 meses" },
+      { "name": "Cambio de bujías", "is_service": true, "price": 580, "labor_cost": 200, "warranty": "30 días" },
+      { "name": "Cambio filtro de aire", "is_service": true, "price": 280, "labor_cost": 80, "estimated_time": "15 min" },
+      { "name": "Alineación + balanceo", "is_service": true, "price": 450, "labor_cost": 350, "warranty": "30 días" }
+    ]
+  },
+
+  "refaccionaria": {
+    "label": "Refaccionaria",
+    "default_flags": ["usa_motor", "usa_garantia"],
+    "products": [
+      { "name": "Bujía NGK Iridium IX", "brand": "NGK", "price": 240, "cost": 165, "warranty": "30 días" },
+      { "name": "Balata cerámica delantera Brembo", "brand": "Brembo", "price": 980, "cost": 680, "warranty": "6 meses" },
+      { "name": "Filtro de aceite Mann Hummel", "brand": "Mann Hummel", "price": 165, "cost": 110 },
+      { "name": "Aceite motor sintético Mobil 1 5W30 5L", "brand": "Mobil", "price": 1280, "cost": 920 },
+      { "name": "Banda de tiempo Gates", "brand": "Gates", "price": 1450, "cost": 980, "warranty": "1 año" },
+      { "name": "Batería Optima Yellow Top 75Ah", "brand": "Optima", "price": 4850, "cost": 3650, "warranty": "2 años" },
+      { "name": "Radiador completo aluminio", "price": 3850, "cost": 2780, "warranty": "1 año" },
+      { "name": "Faro principal LED universal", "price": 1850, "cost": 1280, "warranty": "6 meses" },
+      { "name": "Amortiguador trasero Monroe", "brand": "Monroe", "price": 1450, "cost": 1050, "warranty": "6 meses" },
+      { "name": "Alternador remanufacturado 80A", "price": 3450, "cost": 2480, "warranty": "1 año" }
+    ]
+  },
+
+  "tienda-ropa": {
+    "label": "Tienda de ropa",
+    "default_flags": ["usa_variantes", "usa_color", "usa_talla"],
+    "products": [
+      { "name": "Jeans clásico hombre", "variants_attrs": ["talla", "color"], "price": 580, "cost": 380, "category": "Pantalones" },
+      { "name": "Camisa formal manga larga", "variants_attrs": ["talla", "color"], "price": 480, "cost": 280, "category": "Camisas" },
+      { "name": "Sudadera con capucha", "variants_attrs": ["talla", "color"], "price": 650, "cost": 380, "category": "Sudaderas" },
+      { "name": "Playera básica algodón", "variants_attrs": ["talla", "color"], "price": 180, "cost": 95, "category": "Playeras" },
+      { "name": "Vestido casual largo", "variants_attrs": ["talla", "color"], "price": 850, "cost": 480, "category": "Vestidos" },
+      { "name": "Tenis deportivos", "variants_attrs": ["talla", "color"], "price": 1280, "cost": 780, "category": "Calzado" },
+      { "name": "Gorra béisbol ajustable", "variants_attrs": ["color"], "price": 280, "cost": 150 },
+      { "name": "Cinturón cuero", "variants_attrs": ["talla"], "price": 380, "cost": 220 },
+      { "name": "Chamarra de mezclilla", "variants_attrs": ["talla", "color"], "price": 980, "cost": 580, "category": "Chamarras" },
+      { "name": "Calcetas algodón paquete 6", "variants_attrs": ["talla", "color"], "price": 180, "cost": 95 }
+    ]
+  },
+
+  "zapateria": {
+    "label": "Zapatería",
+    "default_flags": ["usa_variantes", "usa_color", "usa_talla", "usa_garantia"],
+    "products": [
+      { "name": "Tenis Nike Revolution 6", "variants_attrs": ["talla", "color"], "price": 1480, "cost": 980, "warranty": "30 días" },
+      { "name": "Zapato formal Vincci negro", "variants_attrs": ["talla"], "price": 1850, "cost": 1180, "category": "Formal" },
+      { "name": "Bota Caterpillar industrial", "variants_attrs": ["talla", "color"], "price": 2480, "cost": 1680 },
+      { "name": "Sandalia Reef hombre", "variants_attrs": ["talla", "color"], "price": 580, "cost": 320 },
+      { "name": "Pantufla de borrega", "variants_attrs": ["talla"], "price": 280, "cost": 145 },
+      { "name": "Agujetas redondas 80cm", "price": 28, "cost": 12 },
+      { "name": "Plantilla ortopédica gel", "variants_attrs": ["talla"], "price": 280, "cost": 145 },
+      { "name": "Tacón 8cm dama", "variants_attrs": ["talla", "color"], "price": 980, "cost": 580 },
+      { "name": "Limpia zapatos crema", "price": 65, "cost": 38 },
+      { "name": "Mochila escolar Skechers", "variants_attrs": ["color"], "price": 850, "cost": 480 }
+    ]
+  },
+
+  "estetica": {
+    "label": "Estética / Salón / Spa",
+    "default_flags": ["usa_comision", "usa_preparacion"],
+    "products": [
+      { "name": "Corte de cabello dama", "is_service": true, "price": 250, "duration": "45 min", "specialist_required": true },
+      { "name": "Tinte completo + corte", "is_service": true, "price": 850, "duration": "2 horas", "specialist_required": true },
+      { "name": "Manicure clásico", "is_service": true, "price": 180, "duration": "45 min" },
+      { "name": "Corte caballero + barba", "is_service": true, "price": 280, "duration": "45 min" },
+      { "name": "Peinado para evento", "is_service": true, "price": 480, "duration": "1 hora" },
+      { "name": "Maquillaje profesional", "is_service": true, "price": 580, "duration": "1 hora" },
+      { "name": "Depilación piernas completas", "is_service": true, "price": 380, "duration": "45 min" },
+      { "name": "Tratamiento facial hidratante", "is_service": true, "price": 680, "duration": "1 hora" },
+      { "name": "Keratina alisado", "is_service": true, "price": 1850, "duration": "3 horas", "specialist_required": true },
+      { "name": "Masaje relajante 60 min", "is_service": true, "price": 850, "duration": "1 hora" }
+    ]
+  },
+
+  "celulares": {
+    "label": "Celulares / Electrónica",
+    "default_flags": ["usa_imei", "usa_serie", "usa_garantia"],
+    "products": [
+      { "name": "iPhone 15 128GB", "brand": "Apple", "price": 23999, "cost": 19500, "warranty": "1 año", "flags": ["usa_imei"] },
+      { "name": "Samsung Galaxy A55 256GB", "brand": "Samsung", "price": 12499, "cost": 9800, "warranty": "1 año", "flags": ["usa_imei"] },
+      { "name": "Xiaomi Redmi Note 13 256GB", "brand": "Xiaomi", "price": 6499, "cost": 4900, "warranty": "1 año", "flags": ["usa_imei"] },
+      { "name": "Mica de cristal templado", "price": 80, "cost": 25 },
+      { "name": "Cargador USB-C 20W", "price": 280, "cost": 150 },
+      { "name": "Audífonos Apple AirPods Pro 2", "brand": "Apple", "price": 5499, "cost": 4280, "warranty": "1 año", "flags": ["usa_serie"] },
+      { "name": "Funda silicón universal", "variants_attrs": ["color"], "price": 180, "cost": 65 },
+      { "name": "Reparación de pantalla", "is_service": true, "price": 1850, "warranty": "30 días" },
+      { "name": "Chip Telcel prepago", "price": 100, "cost": 60, "category": "Servicios telco" },
+      { "name": "Powerbank 20000mAh", "price": 580, "cost": 380, "warranty": "6 meses" }
+    ]
+  },
+
+  "electronica": {
+    "label": "Electrónica",
+    "default_flags": ["usa_serie", "usa_garantia"],
+    "products": [
+      { "name": "Laptop HP 15 i5 8GB 512GB", "brand": "HP", "price": 18999, "cost": 14500, "warranty": "1 año" },
+      { "name": "TV Samsung 55 4K Crystal UHD", "brand": "Samsung", "price": 12999, "cost": 9800, "warranty": "1 año" },
+      { "name": "Monitor Dell 27 IPS 1080p", "brand": "Dell", "price": 4980, "cost": 3680, "warranty": "1 año" },
+      { "name": "Mouse Logitech MX Master 3S", "brand": "Logitech", "price": 2480, "cost": 1850 },
+      { "name": "Teclado mecánico Razer BlackWidow V4", "brand": "Razer", "price": 3480, "cost": 2480 },
+      { "name": "Impresora HP LaserJet M111w", "brand": "HP", "price": 3480, "cost": 2480, "warranty": "1 año" },
+      { "name": "Cámara Canon EOS R50 + lente kit", "brand": "Canon", "price": 18999, "cost": 15500, "warranty": "1 año" },
+      { "name": "Bocina Bose SoundLink Flex", "brand": "Bose", "price": 3480, "cost": 2580, "warranty": "1 año" },
+      { "name": "Tablet iPad 10ma gen 64GB", "brand": "Apple", "price": 9999, "cost": 8200, "warranty": "1 año" },
+      { "name": "Disco duro externo Seagate 2TB", "brand": "Seagate", "price": 1480, "cost": 980, "warranty": "2 años" }
+    ]
+  },
+
+  "panaderia": {
+    "label": "Panadería",
+    "default_flags": ["usa_caducidad", "usa_alergenos", "usa_receta"],
+    "products": [
+      { "name": "Bolillo", "price": 4, "cost": 1.5, "expiry_days": 1 },
+      { "name": "Concha vainilla", "price": 12, "cost": 4.5, "expiry_days": 2, "allergens": ["gluten", "huevo", "lácteos"] },
+      { "name": "Dona glaseada", "price": 18, "cost": 6, "expiry_days": 1, "allergens": ["gluten", "huevo"] },
+      { "name": "Pastel de chocolate (rebanada)", "price": 65, "cost": 18, "allergens": ["gluten", "huevo", "lácteos"] },
+      { "name": "Pan integral grande", "price": 58, "cost": 22, "expiry_days": 5 },
+      { "name": "Galleta de avena (paq 12)", "price": 45, "cost": 18 },
+      { "name": "Café americano para llevar", "price": 35, "cost": 8, "is_recipe": true },
+      { "name": "Rosca de reyes mediana (temporada)", "price": 280, "cost": 110, "category": "Temporada" },
+      { "name": "Empanada de piña", "price": 18, "cost": 6, "expiry_days": 2 },
+      { "name": "Panqué de mantequilla", "price": 95, "cost": 38, "expiry_days": 5 }
+    ]
+  },
+
+  "carniceria": {
+    "label": "Carnicería",
+    "default_flags": ["usa_peso", "usa_lote", "usa_caducidad", "usa_temperatura"],
+    "products": [
+      { "name": "Bistec de res", "unit": "kilo", "price": 220, "cost": 180, "cut": "Bistec", "animal_origin": "res" },
+      { "name": "Arrachera marinada", "unit": "kilo", "price": 320, "cost": 240, "cut": "Arrachera", "animal_origin": "res" },
+      { "name": "Pollo entero", "unit": "kilo", "price": 95, "cost": 78, "animal_origin": "pollo" },
+      { "name": "Chuleta de cerdo ahumada", "unit": "kilo", "price": 180, "cost": 145, "animal_origin": "cerdo" },
+      { "name": "Carne molida especial", "unit": "kilo", "price": 165, "cost": 130, "animal_origin": "res" },
+      { "name": "Costilla de res", "unit": "kilo", "price": 280, "cost": 220, "animal_origin": "res" },
+      { "name": "Chorizo casero", "unit": "kilo", "price": 145, "cost": 95, "animal_origin": "cerdo" },
+      { "name": "Milanesa de res", "unit": "kilo", "price": 195, "cost": 160, "animal_origin": "res" },
+      { "name": "Pierna de pavo", "unit": "kilo", "price": 125, "cost": 95, "animal_origin": "pavo" },
+      { "name": "Tocino", "unit": "kilo", "price": 220, "cost": 175, "animal_origin": "cerdo" }
+    ]
+  },
+
+  "fruteria": {
+    "label": "Frutería / Verdulería",
+    "default_flags": ["usa_peso", "usa_caducidad"],
+    "products": [
+      { "name": "Manzana roja", "unit": "kilo", "price": 48, "cost": 32 },
+      { "name": "Plátano tabasco", "unit": "kilo", "price": 18, "cost": 11 },
+      { "name": "Naranja valencia", "unit": "kilo", "price": 22, "cost": 14 },
+      { "name": "Papa blanca", "unit": "kilo", "price": 28, "cost": 18 },
+      { "name": "Tomate saladette", "unit": "kilo", "price": 32, "cost": 22 },
+      { "name": "Aguacate hass", "unit": "kilo", "price": 95, "cost": 72 },
+      { "name": "Limón sin semilla", "unit": "kilo", "price": 45, "cost": 28 },
+      { "name": "Cebolla blanca", "unit": "kilo", "price": 25, "cost": 16 },
+      { "name": "Zanahoria", "unit": "kilo", "price": 22, "cost": 14 },
+      { "name": "Sandía", "unit": "kilo", "price": 18, "cost": 11 }
+    ]
+  },
+
+  "muebleria": {
+    "label": "Mueblería",
+    "default_flags": ["usa_garantia", "usa_variantes"],
+    "products": [
+      { "name": "Sala 3-2-1 Mónaco", "price": 18999, "cost": 13500, "warranty": "2 años", "category": "Salas" },
+      { "name": "Comedor 6 sillas Toscana", "price": 12480, "cost": 8800, "warranty": "1 año", "category": "Comedores" },
+      { "name": "Silla ejecutiva oficina", "variants_attrs": ["color"], "price": 1850, "cost": 1180, "warranty": "6 meses" },
+      { "name": "Mesa centro vidrio templado", "price": 2480, "cost": 1580, "warranty": "1 año" },
+      { "name": "Colchón King Size memory foam", "price": 12999, "cost": 9200, "warranty": "5 años" },
+      { "name": "Base cama King Size", "price": 4980, "cost": 3280, "warranty": "1 año" },
+      { "name": "Escritorio L industrial", "price": 3480, "cost": 2280, "warranty": "1 año" },
+      { "name": "Closet 4 puertas", "price": 8480, "cost": 5800, "warranty": "1 año" },
+      { "name": "Sofá cama individual", "price": 6480, "cost": 4480, "warranty": "1 año" },
+      { "name": "Mueble TV 65 pulgadas", "price": 4480, "cost": 2980, "warranty": "1 año" }
+    ]
+  },
+
+  "hotel": {
+    "label": "Hotel",
+    "default_flags": ["usa_pricing_rules"],
+    "products": [
+      { "name": "Habitación sencilla", "price": 1280, "cost": 480, "is_service": true, "capacity": 1 },
+      { "name": "Suite presidencial", "price": 4980, "cost": 1850, "is_service": true, "capacity": 4 },
+      { "name": "Habitación doble", "price": 1680, "cost": 580, "is_service": true, "capacity": 2 },
+      { "name": "Habitación con jacuzzi", "price": 2480, "cost": 980, "is_service": true, "capacity": 2 },
+      { "name": "Buffet desayuno", "price": 280, "cost": 110, "is_service": true },
+      { "name": "Servicio de lavandería (kilo)", "price": 65, "is_service": true, "unit": "kilo" },
+      { "name": "Minibar", "price": 0, "is_recipe": true, "category": "Servicios habitación" },
+      { "name": "Estacionamiento (noche)", "price": 80, "is_service": true },
+      { "name": "Room service", "price": 0, "is_service": true, "category": "Servicios habitación" },
+      { "name": "Tour ciudad guiado", "price": 480, "is_service": true, "duration": "3 horas" }
+    ]
+  },
+
+  "agencia-viajes": {
+    "label": "Agencia de viajes",
+    "products": [
+      { "name": "Vuelo redondo CDMX-Cancún", "price": 4980, "cost": 4180, "is_service": true },
+      { "name": "Hotel todo incluido Cancún 4 noches", "price": 18999, "cost": 14500, "is_service": true },
+      { "name": "Tour Chichen Itzá", "price": 1480, "cost": 980, "is_service": true, "duration": "1 día" },
+      { "name": "Seguro de viaje internacional", "price": 580, "cost": 280, "is_service": true },
+      { "name": "Transporte aeropuerto-hotel", "price": 380, "cost": 180, "is_service": true },
+      { "name": "Crucero Western Caribbean 7 noches", "price": 28999, "cost": 22500, "is_service": true },
+      { "name": "Paquete familiar Disney 5 noches", "price": 89999, "cost": 72500, "is_service": true },
+      { "name": "Europa 12 países 15 días", "price": 78999, "cost": 62500, "is_service": true },
+      { "name": "Disney Orlando 4 días + parques", "price": 45999, "cost": 36500, "is_service": true },
+      { "name": "Excursión Grutas Tolantongo", "price": 1280, "cost": 780, "is_service": true, "duration": "1 día" }
+    ]
+  },
+
+  "gimnasio": {
+    "label": "Gym / Fitness",
+    "default_flags": ["usa_pricing_rules"],
+    "products": [
+      { "name": "Mensualidad acceso completo", "price": 480, "cost": 120, "is_service": true, "duration_days": 30 },
+      { "name": "Proteína whey 5lb", "brand": "ON Gold Standard", "price": 1480, "cost": 980 },
+      { "name": "Creatina monohidrato 500g", "price": 580, "cost": 380 },
+      { "name": "Clase spinning", "price": 80, "cost": 25, "is_service": true, "duration": "45 min" },
+      { "name": "Entrenamiento personalizado", "price": 380, "cost": 180, "is_service": true, "duration": "1 hora", "flags": ["usa_comision"] },
+      { "name": "Plan rutina personalizada", "price": 680, "is_service": true, "duration": "1 mes" },
+      { "name": "Asesoría nutricional", "price": 480, "is_service": true, "duration": "45 min" },
+      { "name": "Toalla deportiva", "price": 180, "cost": 95 },
+      { "name": "Agua mineral 500ml", "price": 25, "cost": 8 },
+      { "name": "Inscripción anual", "price": 4980, "cost": 1200, "is_service": true, "duration_days": 365 }
+    ]
+  },
+
+  "veterinaria": {
+    "label": "Veterinaria",
+    "default_flags": ["usa_caducidad", "usa_lote", "usa_patente"],
+    "terminologia": { "cliente": "tutor", "venta": "consulta", "ticket": "historial" },
+    "products": [
+      { "name": "Consulta general perro/gato", "price": 380, "is_service": true, "duration": "30 min" },
+      { "name": "Vacuna polivalente", "price": 480, "cost": 220, "requires_prescription": false },
+      { "name": "Desparasitación interna", "price": 180, "cost": 75 },
+      { "name": "Cirugía esterilización hembra", "price": 1980, "is_service": true, "duration": "2 horas" },
+      { "name": "Royal Canin Adulto 15kg", "brand": "Royal Canin", "price": 1980, "cost": 1450 },
+      { "name": "Antipulgas Frontline", "price": 580, "cost": 380 },
+      { "name": "Limpieza dental anestesia", "price": 1480, "is_service": true, "duration": "1 hora" },
+      { "name": "Rayos X", "price": 580, "is_service": true },
+      { "name": "Hospitalización por día", "price": 680, "is_service": true },
+      { "name": "Eutanasia + cremación", "price": 1980, "is_service": true }
+    ]
+  },
+
+  "veterinaria-estetica": {
+    "label": "Estética veterinaria",
+    "products": [
+      { "name": "Baño básico perro pequeño", "price": 280, "is_service": true },
+      { "name": "Baño + corte raza pequeña", "price": 480, "is_service": true },
+      { "name": "Corte raza grande", "price": 580, "is_service": true },
+      { "name": "Baño medicado", "price": 380, "is_service": true },
+      { "name": "Corte de uñas", "price": 80, "is_service": true },
+      { "name": "Limpieza de oídos", "price": 60, "is_service": true },
+      { "name": "Plancha pelo", "price": 380, "is_service": true },
+      { "name": "Baño desparasitario", "price": 480, "is_service": true },
+      { "name": "Spa relajante", "price": 680, "is_service": true },
+      { "name": "Servicio a domicilio", "price": 880, "is_service": true }
+    ]
+  },
+
+  "doctor": {
+    "label": "Consultorio médico",
+    "default_flags": ["usa_comision"],
+    "terminologia": { "cliente": "paciente", "venta": "consulta", "ticket": "expediente" },
+    "products": [
+      { "name": "Consulta general medicina familiar", "price": 580, "is_service": true, "duration": "30 min" },
+      { "name": "Consulta especialidad cardiología", "price": 1280, "is_service": true, "duration": "45 min" },
+      { "name": "Electrocardiograma", "price": 480, "is_service": true },
+      { "name": "Ultrasonido abdominal", "price": 880, "is_service": true },
+      { "name": "Receta de medicamentos", "price": 0, "is_service": true },
+      { "name": "Certificado médico", "price": 280, "is_service": true },
+      { "name": "Consulta a domicilio", "price": 1480, "is_service": true },
+      { "name": "Curación de herida", "price": 380, "is_service": true },
+      { "name": "Inyección intramuscular", "price": 80, "is_service": true },
+      { "name": "Suero IV hidratante", "price": 480, "is_service": true }
+    ]
+  },
+
+  "dentista": {
+    "label": "Dentista",
+    "terminologia": { "cliente": "paciente", "venta": "tratamiento", "ticket": "expediente" },
+    "products": [
+      { "name": "Limpieza dental profunda", "price": 580, "is_service": true, "duration": "45 min" },
+      { "name": "Resina dental", "price": 480, "is_service": true },
+      { "name": "Extracción simple", "price": 480, "is_service": true },
+      { "name": "Extracción muela del juicio", "price": 1480, "is_service": true, "duration": "45 min" },
+      { "name": "Endodoncia", "price": 2480, "is_service": true, "duration": "2 horas" },
+      { "name": "Corona porcelana", "price": 4980, "is_service": true, "duration": "2 sesiones" },
+      { "name": "Blanqueamiento dental", "price": 1980, "is_service": true, "duration": "1 hora" },
+      { "name": "Ortodoncia mensualidad", "price": 980, "is_service": true },
+      { "name": "Implante dental", "price": 18999, "is_service": true, "duration": "varias sesiones" },
+      { "name": "Radiografía panorámica", "price": 480, "is_service": true }
+    ]
+  },
+
+  "optica": {
+    "label": "Óptica",
+    "default_flags": ["usa_garantia", "usa_variantes"],
+    "products": [
+      { "name": "Examen de la vista", "price": 0, "is_service": true, "duration": "30 min" },
+      { "name": "Armazón clásico unisex", "variants_attrs": ["color"], "price": 1480, "cost": 480 },
+      { "name": "Lente monofocal antirreflejo", "price": 980, "cost": 280, "warranty": "1 año" },
+      { "name": "Lente bifocal antirreflejo", "price": 1880, "cost": 580 },
+      { "name": "Lente progresivo Premium", "price": 4980, "cost": 1980 },
+      { "name": "Lentes de sol Ray-Ban Aviator", "brand": "Ray-Ban", "price": 4480, "cost": 2980, "warranty": "1 año" },
+      { "name": "Estuche rígido", "price": 280, "cost": 95 },
+      { "name": "Lentes de contacto blandos", "price": 880, "cost": 480 },
+      { "name": "Solución limpiadora 360ml", "price": 280, "cost": 145 },
+      { "name": "Ajuste de armazón", "price": 0, "is_service": true }
+    ]
+  },
+
+  "joyeria": {
+    "label": "Joyería",
+    "default_flags": ["usa_serie", "usa_garantia", "usa_peso"],
+    "products": [
+      { "name": "Anillo oro 14k", "unit": "gramo", "price": 1480, "cost": 980, "warranty": "1 año" },
+      { "name": "Cadena oro 14k", "unit": "gramo", "price": 1280, "cost": 880, "warranty": "1 año" },
+      { "name": "Pulsera plata 925", "unit": "gramo", "price": 280, "cost": 180, "warranty": "6 meses" },
+      { "name": "Aretes diamante 0.5ct", "price": 24999, "cost": 18500, "warranty": "1 año" },
+      { "name": "Reloj Casio G-Shock", "brand": "Casio", "price": 2480, "cost": 1680, "warranty": "2 años" },
+      { "name": "Reloj Rolex Submariner", "brand": "Rolex", "price": 198000, "cost": 165000, "warranty": "5 años" },
+      { "name": "Dije corazón oro", "unit": "gramo", "price": 980, "cost": 680 },
+      { "name": "Anillo compromiso solitario", "price": 18999, "cost": 12500, "warranty": "1 año" },
+      { "name": "Limpieza de joya", "price": 80, "is_service": true },
+      { "name": "Reparación cadena", "price": 280, "is_service": true, "warranty": "30 días" }
+    ]
+  },
+
+  "boutique": {
+    "label": "Boutique",
+    "default_flags": ["usa_variantes", "usa_color", "usa_talla"],
+    "products": [
+      { "name": "Vestido de gala", "variants_attrs": ["talla", "color"], "price": 4980, "cost": 1980, "category": "Vestidos" },
+      { "name": "Bolsa de mano premium", "variants_attrs": ["color"], "price": 2480, "cost": 1180 },
+      { "name": "Pañoleta de seda", "variants_attrs": ["color"], "price": 880, "cost": 380 },
+      { "name": "Cinturón de cuero italiano", "variants_attrs": ["talla", "color"], "price": 1280, "cost": 580 },
+      { "name": "Collar perlas naturales", "price": 4980, "cost": 2480 },
+      { "name": "Pulsera Pandora", "brand": "Pandora", "price": 1880, "cost": 1180 },
+      { "name": "Saco premium", "variants_attrs": ["talla", "color"], "price": 4480, "cost": 1980 },
+      { "name": "Falda midi", "variants_attrs": ["talla", "color"], "price": 1480, "cost": 580 },
+      { "name": "Mascada Hermès edición limitada", "price": 18999, "cost": 12000 },
+      { "name": "Lentes de sol diseñador", "variants_attrs": ["color"], "price": 3480, "cost": 1480 }
+    ]
+  },
+
+  "minisuper": {
+    "label": "Minisúper",
+    "default_flags": ["usa_caducidad", "usa_promocion"],
+    "products": [
+      { "name": "Coca Cola 600ml", "price": 18, "cost": 13 },
+      { "name": "Pan Bimbo grande", "price": 56, "cost": 42 },
+      { "name": "Leche Lala 1L", "price": 26, "cost": 20 },
+      { "name": "Huevo 12 piezas", "price": 38, "cost": 28 },
+      { "name": "Cigarros Marlboro", "price": 90, "cost": 75 },
+      { "name": "Hielo 2kg", "price": 35, "cost": 18 },
+      { "name": "Six Tecate", "price": 145, "cost": 108, "is_recipe": true, "flags": ["usa_horarios"] },
+      { "name": "Sabritas 45g", "price": 17, "cost": 12 },
+      { "name": "Gansito Marinela", "price": 12, "cost": 7 },
+      { "name": "Recarga Telcel $50", "price": 50, "cost": 47.5, "is_service": true, "category": "Servicios" }
+    ]
+  },
+
+  "cafeteria": {
+    "label": "Cafetería",
+    "default_flags": ["usa_modificadores", "usa_preparacion", "usa_receta"],
+    "products": [
+      { "name": "Café americano", "modifiers": [{ "name": "doble shot", "price": 15 }, { "name": "descafeinado", "price": 0 }], "price": 35 },
+      { "name": "Café latte", "modifiers": [{ "name": "vainilla", "price": 8 }, { "name": "caramelo", "price": 8 }, { "name": "leche almendras", "price": 12 }], "price": 55 },
+      { "name": "Capuccino", "price": 50 },
+      { "name": "Espresso", "price": 30 },
+      { "name": "Frappé caramel", "price": 75 },
+      { "name": "Té chai latte", "price": 55 },
+      { "name": "Croissant simple", "price": 38, "is_recipe": true },
+      { "name": "Sandwich jamón y queso", "price": 78, "is_recipe": true },
+      { "name": "Cheesecake fresa", "price": 65 },
+      { "name": "Brownie con helado", "price": 75 }
+    ]
+  },
+
+  "taqueria": {
+    "label": "Taquería",
+    "default_flags": ["usa_modificadores", "usa_preparacion"],
+    "products": [
+      { "name": "Taco al pastor", "modifiers": [{ "name": "con piña", "price": 0 }, { "name": "sin cebolla", "price": 0 }, { "name": "doble carne", "price": 8 }], "price": 18 },
+      { "name": "Taco de suadero", "price": 18 },
+      { "name": "Taco de bistec", "price": 22 },
+      { "name": "Taco de chorizo", "price": 18 },
+      { "name": "Taco de longaniza", "price": 18 },
+      { "name": "Quesadilla queso", "price": 35 },
+      { "name": "Quesadilla suadero", "price": 45 },
+      { "name": "Gringa pastor", "is_recipe": true, "price": 65 },
+      { "name": "Refresco 600ml", "price": 25 },
+      { "name": "Agua de horchata", "price": 25 }
+    ]
+  },
+
+  "pizzeria": {
+    "label": "Pizzería",
+    "default_flags": ["usa_variantes", "usa_modificadores", "usa_preparacion"],
+    "products": [
+      { "name": "Pizza pepperoni", "variants_attrs": ["tamaño"], "price": 220 },
+      { "name": "Pizza hawaiana", "variants_attrs": ["tamaño"], "price": 240 },
+      { "name": "Pizza 4 quesos", "variants_attrs": ["tamaño"], "price": 280 },
+      { "name": "Pizza vegetariana", "variants_attrs": ["tamaño"], "price": 240 },
+      { "name": "Pizza mexicana", "variants_attrs": ["tamaño"], "modifiers": [{ "name": "extra picante", "price": 0 }], "price": 260 },
+      { "name": "Boneless BBQ (8 pzas)", "price": 145 },
+      { "name": "Pan ajo con queso", "price": 95 },
+      { "name": "Refresco 2L", "price": 48 },
+      { "name": "Combo familiar 2 pizzas + refresco", "is_recipe": true, "price": 480, "flags": ["usa_combo"] },
+      { "name": "Lasagna porción individual", "price": 145 }
+    ]
+  },
+
+  "sushi": {
+    "label": "Sushi",
+    "default_flags": ["usa_modificadores", "usa_preparacion", "usa_alergenos"],
+    "products": [
+      { "name": "Roll Filadelfia", "price": 145, "allergens": ["pescado", "lácteos"] },
+      { "name": "Roll California", "price": 135 },
+      { "name": "Roll empanizado", "price": 155 },
+      { "name": "Sashimi salmón (5pz)", "price": 180 },
+      { "name": "Nigiri atún (2pz)", "price": 95 },
+      { "name": "Sopa miso", "price": 65 },
+      { "name": "Edamame", "price": 65 },
+      { "name": "Tempura camarón", "price": 180 },
+      { "name": "Combo sushi 24pz variado", "is_recipe": true, "price": 480 },
+      { "name": "Té verde japonés", "price": 35 }
+    ]
+  },
+
+  "mariscos": {
+    "label": "Mariscos",
+    "default_flags": ["usa_caducidad", "usa_temperatura"],
+    "products": [
+      { "name": "Coctel de camarón", "price": 180 },
+      { "name": "Aguachile verde", "price": 220 },
+      { "name": "Tostada de atún", "price": 95 },
+      { "name": "Pulpo a las brasas", "price": 280 },
+      { "name": "Pescado entero a la talla", "unit": "kilo", "price": 380 },
+      { "name": "Camarón al ajillo", "price": 280 },
+      { "name": "Filete de pescado empapelado", "price": 195 },
+      { "name": "Sopa marinera", "price": 220 },
+      { "name": "Ceviche mixto", "price": 240 },
+      { "name": "Mojarra frita", "price": 180 }
+    ]
+  },
+
+  "barberia": {
+    "label": "Barbería",
+    "default_flags": ["usa_comision", "usa_preparacion"],
+    "products": [
+      { "name": "Corte clásico caballero", "price": 180, "is_service": true, "duration": "30 min" },
+      { "name": "Corte + barba", "price": 280, "is_service": true, "duration": "45 min" },
+      { "name": "Solo barba", "price": 120, "is_service": true, "duration": "20 min" },
+      { "name": "Afeitado clásico navaja", "price": 180, "is_service": true, "duration": "30 min" },
+      { "name": "Tinte cabello", "price": 380, "is_service": true, "duration": "1 hora" },
+      { "name": "Corte fade", "price": 220, "is_service": true, "duration": "45 min" },
+      { "name": "Diseño corte (líneas)", "price": 80, "is_service": true },
+      { "name": "Lavado capilar", "price": 65, "is_service": true },
+      { "name": "Mascarilla facial", "price": 180, "is_service": true },
+      { "name": "Producto cera moldeadora", "price": 280, "category": "Productos" }
+    ]
+  },
+
+  "lavanderia": {
+    "label": "Lavandería",
+    "default_flags": ["usa_peso"],
+    "products": [
+      { "name": "Lavado normal x kilo", "unit": "kilo", "price": 35, "is_service": true },
+      { "name": "Lavado en seco vestido", "price": 280, "is_service": true },
+      { "name": "Lavado en seco saco", "price": 180, "is_service": true },
+      { "name": "Planchado camisa", "price": 35, "is_service": true },
+      { "name": "Express servicio mismo día", "is_service": true, "price": 0, "category": "Servicios extras" },
+      { "name": "Lavado edredón king", "price": 280, "is_service": true },
+      { "name": "Lavado tenis", "price": 180, "is_service": true },
+      { "name": "Quitar mancha especial", "price": 80, "is_service": true },
+      { "name": "Servicio a domicilio (recoger+entregar)", "price": 80, "is_service": true },
+      { "name": "Lavado tapete 2x3m", "price": 480, "is_service": true }
+    ]
+  },
+
+  "purificadora": {
+    "label": "Purificadora de agua",
+    "products": [
+      { "name": "Garrafón 20L", "price": 35, "cost": 8 },
+      { "name": "Garrafón 10L", "price": 22, "cost": 5 },
+      { "name": "Botella 1L", "price": 15, "cost": 3 },
+      { "name": "Bolsa 5L", "price": 18, "cost": 4 },
+      { "name": "Servicio a domicilio (1 garrafón)", "price": 45, "is_service": true },
+      { "name": "Pack 5 garrafones (descuento)", "price": 160, "is_recipe": true, "flags": ["usa_combo"] },
+      { "name": "Hielo bolsa 2kg", "price": 35, "cost": 18 },
+      { "name": "Hielo bolsa 5kg", "price": 75, "cost": 38 },
+      { "name": "Renta dispensador", "price": 280, "is_service": true, "duration": "1 mes" },
+      { "name": "Análisis de agua doméstica", "price": 380, "is_service": true }
+    ]
+  },
+
+  "tortilleria": {
+    "label": "Tortillería",
+    "default_flags": ["usa_peso"],
+    "products": [
+      { "name": "Tortilla maíz blanco", "unit": "kilo", "price": 22 },
+      { "name": "Tortilla maíz amarillo", "unit": "kilo", "price": 22 },
+      { "name": "Tortilla harina trigo", "unit": "kilo", "price": 38 },
+      { "name": "Tortilla nopal", "unit": "kilo", "price": 45 },
+      { "name": "Tortilla integral", "unit": "kilo", "price": 32 },
+      { "name": "Tlacoyo unidad", "price": 18 },
+      { "name": "Sope unidad", "price": 15 },
+      { "name": "Masa sin tortillear (kilo)", "unit": "kilo", "price": 18 },
+      { "name": "Tostada raspada (paq 25)", "price": 28 },
+      { "name": "Chicharrón de harina (paq)", "price": 35 }
+    ]
+  },
+
+  "heladeria": {
+    "label": "Heladería",
+    "default_flags": ["usa_temperatura", "usa_modificadores"],
+    "products": [
+      { "name": "Helado simple bola", "modifiers": [{ "name": "vainilla", "price": 0 }, { "name": "chocolate", "price": 0 }, { "name": "fresa", "price": 0 }], "price": 35 },
+      { "name": "Helado doble bola", "price": 55 },
+      { "name": "Banana split", "price": 95 },
+      { "name": "Sundae chocolate", "price": 75 },
+      { "name": "Malteada", "price": 65 },
+      { "name": "Paleta artesanal fruta", "price": 38 },
+      { "name": "Cono waffle", "price": 18 },
+      { "name": "Topping extra", "price": 12 },
+      { "name": "Smoothie tropical", "price": 75 },
+      { "name": "Frozen yogurt regular", "price": 65 }
+    ]
+  },
+
+  "naturista": {
+    "label": "Tienda naturista",
+    "default_flags": ["usa_caducidad", "usa_lote"],
+    "products": [
+      { "name": "Spirulina 60 caps", "price": 280, "cost": 145 },
+      { "name": "Té verde 30 sobres", "price": 95, "cost": 48 },
+      { "name": "Vitamina D3 5000UI", "price": 380, "cost": 180 },
+      { "name": "Aceite de coco orgánico 500ml", "price": 280, "cost": 145 },
+      { "name": "Miel de abeja natural 1kg", "price": 180, "cost": 95 },
+      { "name": "Linaza orgánica 500g", "price": 65, "cost": 32 },
+      { "name": "Chía orgánica 500g", "price": 95, "cost": 45 },
+      { "name": "Reishi cápsulas 60", "price": 480, "cost": 280 },
+      { "name": "Aceite de oliva extra virgen 750ml", "price": 280, "cost": 145 },
+      { "name": "Diente de león raíz 100g", "price": 65, "cost": 22 }
+    ]
+  },
+
+  "dulceria": {
+    "label": "Dulcería",
+    "default_flags": ["usa_caducidad"],
+    "products": [
+      { "name": "Mazapán de la Rosa (paq 8)", "brand": "De la Rosa", "price": 22, "cost": 14 },
+      { "name": "Carlos V chocolate", "brand": "Nestlé", "price": 8, "cost": 5 },
+      { "name": "Pulparindo (paq 20)", "price": 38, "cost": 22 },
+      { "name": "Bombón Marshmallow 100g", "price": 28, "cost": 16 },
+      { "name": "Chamoy líquido 250ml", "price": 35, "cost": 18 },
+      { "name": "Tamarindo Lucas Picachú", "price": 12, "cost": 7 },
+      { "name": "Paleta payaso", "price": 18, "cost": 10 },
+      { "name": "Gomitas haribo importadas 100g", "price": 65, "cost": 38 },
+      { "name": "Galletas Oreo paq 10", "brand": "Oreo", "price": 32, "cost": 22 },
+      { "name": "Chocolate Hershey's importado", "price": 95, "cost": 58, "imported": true }
+    ]
+  },
+
+  "tienda-mascotas": {
+    "label": "Tienda de mascotas",
+    "default_flags": ["usa_caducidad"],
+    "products": [
+      { "name": "Croquetas Royal Canin 15kg", "brand": "Royal Canin", "price": 1980, "cost": 1450 },
+      { "name": "Croquetas Pedigree 8kg", "brand": "Pedigree", "price": 480, "cost": 320 },
+      { "name": "Arena para gato 10kg", "price": 280, "cost": 180 },
+      { "name": "Hueso comestible para perro", "price": 65, "cost": 35 },
+      { "name": "Pelota juguete chillón", "price": 95, "cost": 38 },
+      { "name": "Collar antipulgas Frontline", "price": 580, "cost": 380 },
+      { "name": "Cama acolchada mediana", "price": 480, "cost": 280 },
+      { "name": "Pecera 30L con accesorios", "price": 980, "cost": 580 },
+      { "name": "Comida para peces 100g", "price": 65, "cost": 35 },
+      { "name": "Jaula para hamster mediana", "price": 380, "cost": 220 }
+    ]
+  },
+
+  "florerias": {
+    "label": "Floristería",
+    "default_flags": ["usa_caducidad"],
+    "products": [
+      { "name": "Ramo rosas 12 pzas", "price": 480, "cost": 220 },
+      { "name": "Ramo rosas 24 pzas", "price": 880, "cost": 380 },
+      { "name": "Centro de mesa boda", "price": 1280, "cost": 580 },
+      { "name": "Corona fúnebre", "price": 2480, "cost": 1280 },
+      { "name": "Flor de tallo único", "price": 35, "cost": 12 },
+      { "name": "Arreglo cumpleaños", "price": 580, "cost": 280 },
+      { "name": "Bouquet novia", "price": 1980, "cost": 980 },
+      { "name": "Flor seca decorativa", "price": 180, "cost": 65 },
+      { "name": "Maceta con planta interior", "price": 380, "cost": 180 },
+      { "name": "Servicio entrega a domicilio", "price": 80, "is_service": true }
+    ]
+  },
+
+  "panaderia-pasteles": {
+    "label": "Pastelería especializada",
+    "default_flags": ["usa_caducidad", "usa_alergenos", "usa_receta"],
+    "products": [
+      { "name": "Pastel cumpleaños 8 personas", "price": 580, "cost": 220 },
+      { "name": "Pastel boda 50 personas", "price": 4980, "cost": 1880 },
+      { "name": "Cupcake decorado individual", "price": 65, "cost": 22 },
+      { "name": "Tarta de manzana", "price": 380, "cost": 145 },
+      { "name": "Cheesecake completo", "price": 580, "cost": 220 },
+      { "name": "Pay de queso individual", "price": 75, "cost": 28 },
+      { "name": "Galletas decoradas (paq 12)", "price": 280, "cost": 95 },
+      { "name": "Macaron francés", "price": 35, "cost": 12 },
+      { "name": "Cupcake dietético sin azúcar", "price": 95, "cost": 45 },
+      { "name": "Diseño personalizado tema (cargo extra)", "price": 480, "is_service": true }
+    ]
+  }
+}

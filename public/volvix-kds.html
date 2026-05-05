@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<title>VOLVIX · KDS</title>
+<!-- B37 Security hardening: auth-gate (any authenticated user; cajero/manager/owner/superadmin) -->
+<script src="/auth-gate.js"></script>
+<script>
+(function(){
+  try {
+    var t = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+    if (!t) return;
+    var p = JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+    var role = (p.role || '').toLowerCase();
+    var allowed = ['cajero','manager','owner','superadmin'];
+    if (allowed.indexOf(role) === -1) {
+      window.location.replace('/volvix-launcher.html?denied=' + encodeURIComponent(location.pathname));
+    }
+  } catch(e){}
+})();
+</script>
+<link rel="stylesheet" href="volvix-modals.css">
+<script defer src="volvix-modals.js"></script>
+<!-- R8d FIX-M2: viewport + iOS PWA + safe-area -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:#0d1117;color:#e6edf3;height:100vh;overflow:hidden}
+  header{display:flex;justify-content:space-between;align-items:center;padding:10px 18px;background:#161b22;border-bottom:1px solid #30363d}
+  header h1{font-size:18px;letter-spacing:1px;color:#ffd43b}
+  header .meta{display:flex;gap:14px;align-items:center;font-size:13px;color:#8b949e}
+  header select,header button{background:#0d1117;color:#e6edf3;border:1px solid #30363d;padding:6px 10px;border-radius:6px;font-size:13px;cursor:pointer}
+  .board{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:10px;height:calc(100vh - 56px);overflow:hidden}
+  .col[data-st=needs_attention] h2{background:#4a1422;color:#ff5577}
+  .col{background:#161b22;border:1px solid #30363d;border-radius:10px;display:flex;flex-direction:column;overflow:hidden}
+  .col h2{padding:10px;font-size:14px;text-align:center;text-transform:uppercase;letter-spacing:2px;border-bottom:1px solid #30363d}
+  .col[data-st=received]  h2{background:#1f2d3d;color:#58a6ff}
+  .col[data-st=preparing] h2{background:#3d2f1f;color:#ffa657}
+  .col[data-st=ready]     h2{background:#1f3d2f;color:#3fb950}
+  .col-body{flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:8px}
+  .ticket{background:#0d1117;border:1px solid #30363d;border-left:5px solid #58a6ff;border-radius:8px;padding:10px;cursor:grab;transition:.15s}
+  .ticket.dragging{opacity:.4}
+  .ticket .head{display:flex;justify-content:space-between;font-size:12px;color:#8b949e;margin-bottom:6px}
+  .ticket .num{font-size:18px;font-weight:700;color:#fff}
+  .ticket .timer{font-variant-numeric:tabular-nums;font-weight:700}
+  .ticket ul{list-style:none;font-size:14px;line-height:1.5}
+  .ticket ul li::before{content:"• ";color:#ffd43b}
+  .ticket .notes{margin-top:6px;font-size:12px;color:#ffa657;font-style:italic}
+  .ticket.warn   {border-left-color:#ffa657;background:#2d2416}
+  .ticket.urgent {border-left-color:#f85149;background:#3d1f1f;animation:blink 1s infinite}
+  /* R5a GAP-K1: needs_attention badge — solid red with rapid pulse */
+  .ticket.attn   {border-left-color:#ff0044;background:#4a1422;animation:attn 0.6s infinite;box-shadow:0 0 12px #ff0044}
+  .ticket.attn::after{content:"!! REASIGNADO !!";position:absolute;top:4px;right:8px;color:#ff5577;font-weight:700;font-size:10px;letter-spacing:1px}
+  .ticket{position:relative}
+  @keyframes blink{50%{background:#5a2828}}
+  @keyframes attn{0%,100%{background:#4a1422}50%{background:#7a1530}}
+  .ticket .accept-btn{margin-top:6px;padding:4px 8px;background:#1f6feb;color:#fff;border:0;border-radius:4px;cursor:pointer;font-size:11px}
+  .ticket .accept-btn:disabled{background:#1f3d2f;color:#8b949e;cursor:default}
+  .ticket.accepted{opacity:.95}
+  .ticket.accepted .accept-btn{background:#1f3d2f;color:#3fb950}
+  .empty{color:#484f58;text-align:center;padding:20px;font-size:13px}
+  .dot{width:8px;height:8px;border-radius:50%;background:#3fb950;display:inline-block;margin-right:6px}
+
+  /* ============ R8d FIX-M1: KDS mobile breakpoints ============ */
+  body { padding-top: env(safe-area-inset-top, 0); padding-bottom: env(safe-area-inset-bottom, 0); }
+  @media (max-width: 1024px) {
+    .tickets, .grid, .columns { grid-template-columns: repeat(2, 1fr) !important; gap: 8px; }
+    header { font-size: 14px; padding: 8px 12px; flex-wrap: wrap; gap: 6px; }
+    header h1 { font-size: 16px; }
+  }
+  @media (max-width: 640px) {
+    .tickets, .grid, .columns { grid-template-columns: 1fr !important; gap: 8px; padding: 8px; }
+    .ticket { padding: 10px; }
+    .accept-btn, button { min-height: 44px; font-size: 14px; touch-action: manipulation; }
+    header .meta { gap: 8px; font-size: 11px; }
+    input, select, textarea { font-size: 16px; }
+  }
+  @media (hover: none) and (pointer: coarse) {
+    button, .accept-btn { min-height: 44px; -webkit-tap-highlight-color: rgba(255,255,255,0.08); touch-action: manipulation; }
+    .tickets-wrap, main { -webkit-overflow-scrolling: touch; }
+  }
+  /* ============ END R8d FIX-M1 ============ */
+</style>
+</head>
+<body>
+<header>
+  <h1>VOLVIX · KITCHEN DISPLAY</h1>
+  <div class="meta">
+    <span><span class="dot" id="dot"></span><span id="connStatus">conectado</span></span>
+    <select id="station">
+      <option value="">Todas</option>
+      <option value="grill">Parrilla</option>
+      <option value="cold">Fríos</option>
+      <option value="bar">Bar</option>
+      <option value="dessert">Postres</option>
+    </select>
+    <button id="soundBtn" aria-label="Alternar sonido de notificaciones">Sonido: ON</button>
+    <input id="soundVol" type="range" min="0" max="100" step="5" value="50" aria-label="Volumen de notificaciones" title="Volumen" style="width:80px;vertical-align:middle">
+    <span id="clock" aria-live="polite"></span>
+  </div>
+</header>
+
+<main class="board">
+  <section class="col" data-st="received"><h2>Recibido</h2><div class="col-body" id="col-received"></div></section>
+  <section class="col" data-st="preparing"><h2>Preparando</h2><div class="col-body" id="col-preparing"></div></section>
+  <section class="col" data-st="ready"><h2>Listo</h2><div class="col-body" id="col-ready"></div></section>
+  <section class="col" data-st="needs_attention"><h2>Atencion</h2><div class="col-body" id="col-needs_attention"></div></section>
+</main>
+
+<audio id="ding" preload="auto"
+  src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA="></audio>
+<!-- R5a GAP-K1: louder alert tone for needs_attention / offline-recovery old tickets -->
+<audio id="alert" preload="auto"
+  src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA="></audio>
+
+<script>
+const API = (window.VOLVIX_API || '') + '/api/kds/tickets';
+const ORDER_API = (window.VOLVIX_API || '') + '/api/kds/orders';
+let tickets = [], knownIds = new Set(), firstLoad = true;
+// Persisted sound config: on/off + volume 0..1
+let soundOn = (localStorage.getItem('kds_sound_on') !== '0');
+let soundVol = (function(){ const v = parseFloat(localStorage.getItem('kds_sound_vol')); return isFinite(v) ? Math.max(0,Math.min(1,v)) : 0.5; })();
+
+// Web Audio API beep (800Hz, 200ms) — replaces empty data-URI WAV
+let audioCtx = null;
+function beep(freq, ms){
+  if(!soundOn || soundVol <= 0) return;
+  try{
+    if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==='suspended') audioCtx.resume().catch(()=>{});
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type='sine'; o.frequency.value=freq||800;
+    g.gain.value = 0.3 * soundVol; // user-controlled volume
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime+(ms||200)/1000);
+  }catch(_){}
+}
+
+// Supabase Realtime subscription for kds_orders channel
+let realtimeChannel = null;
+async function initRealtime(){
+  try{
+    const cfg = await fetch((window.VOLVIX_API||'')+'/api/config/public').then(r=>r.json()).catch(()=>null);
+    if(!cfg || !cfg.supabase_url || !cfg.supabase_anon_key || cfg.mode!=='full') return;
+    if(!window.supabase || !window.supabase.createClient){
+      // Lazy-load supabase-js if not present
+      await new Promise((res,rej)=>{
+        const s=document.createElement('script');
+        s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+        s.onload=res; s.onerror=rej; document.head.appendChild(s);
+      });
+    }
+    const sb = window.supabase.createClient(cfg.supabase_url, cfg.supabase_anon_key);
+    realtimeChannel = sb.channel('kds_orders')
+      .on('broadcast', {event:'new_order'}, payload => {
+        beep(800, 200);
+        // Pull a refresh to ingest the new ticket
+        refresh();
+      })
+      .on('postgres_changes', {event:'INSERT', schema:'public', table:'kds_tickets'}, payload => {
+        beep(800, 200);
+        refresh();
+      })
+      .subscribe();
+  }catch(_){}
+}
+// R5a GAP-K5: delta sync state
+let lastSyncAt = localStorage.getItem('kds_last_sync_at') || null;
+// R5a GAP-K1: track which tickets we've already alerted on for needs_attention
+let alertedAttn = new Set();
+
+const $ = s => document.querySelector(s);
+const fmt = sec => `${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
+const tok = () => localStorage.getItem('volvix_token') || '';
+
+async function api(method, path, body){
+  const r = await fetch(API+path, {
+    method, headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok()},
+    body: body ? JSON.stringify(body) : undefined
+  });
+  if (r.status === 401) {
+    try { localStorage.removeItem('volvix_token'); localStorage.removeItem('volvixAuthToken'); } catch(_){}
+    const redir = encodeURIComponent(location.pathname + location.search);
+    location.replace('/login.html?expired=1&redirect=' + redir);
+    throw new Error('HTTP 401');
+  }
+  if (r.status === 503) {
+    if (window.VolvixUI) VolvixUI.toast({type:'error', message:'KDS no configurado (503)'});
+    throw new Error('HTTP 503');
+  }
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  return r.json();
+}
+
+// R5a GAP-K3: cocina marca recibido
+async function acceptTicket(id){
+  try{
+    await api('POST','/'+id+'/accept');
+    // optimistic: mark accepted_at locally so UI reflects immediately
+    const t = tickets.find(x=>x.id===id);
+    if(t) t.accepted_at = new Date().toISOString();
+    render();
+  }catch(e){ if(window.VolvixUI) VolvixUI.toast({type:'error', message:'No se pudo aceptar: '+e.message}); }
+}
+window.acceptTicket = acceptTicket;
+
+// Status change via POST /api/kds/orders/:id/status (used by botones En preparación / Listo / Cancelar)
+async function setStatus(id, status){
+  try{
+    const r = await fetch(ORDER_API+'/'+id+'/status', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok()},
+      body: JSON.stringify({status})
+    });
+    if (r.status === 401) {
+      try { localStorage.removeItem('volvix_token'); localStorage.removeItem('volvixAuthToken'); } catch(_){}
+      const redir = encodeURIComponent(location.pathname + location.search);
+      location.replace('/login.html?expired=1&redirect=' + redir);
+      return;
+    }
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    refresh();
+  }catch(e){
+    if(window.VolvixUI) VolvixUI.toast({type:'error', message:'No se pudo actualizar: '+e.message});
+  }
+}
+window.setStatus = setStatus;
+
+async function refresh(){
+  try{
+    const st = $('#station').value;
+    let r;
+    // R5a GAP-K5: if we have a last_sync_at, do a delta sync first to catch
+    // tickets that arrived while offline. Otherwise normal active fetch.
+    if(lastSyncAt){
+      try {
+        r = await api('GET','?since='+encodeURIComponent(lastSyncAt)+(st?'&station='+st:''));
+      } catch(_) {
+        // fall through to active fetch
+        r = await api('GET','/active'+(st?'?station='+st:''));
+      }
+    } else {
+      r = await api('GET','/active'+(st?'?station='+st:''));
+    }
+    tickets = r.items || r.tickets || [];
+    const newIds = new Set(tickets.map(t=>t.id));
+    const fresh = [...newIds].filter(id => !knownIds.has(id));
+
+    // R5a GAP-K1: needs_attention tickets get a louder "alert" tone (not normal ding)
+    const newAttn = tickets.filter(t => t.status==='needs_attention' && !alertedAttn.has(t.id));
+    newAttn.forEach(t => alertedAttn.add(t.id));
+
+    if(!firstLoad && soundOn){
+      if(newAttn.length){
+        // Web Audio API: louder alert (1000Hz, 400ms x2)
+        beep(1000, 400);
+        setTimeout(()=>beep(1000, 400), 600);
+      } else if (fresh.length){
+        // New order: 800Hz 200ms
+        beep(800, 200);
+      }
+    }
+
+    // R5a GAP-K5: persist last_sync_at for next reconnection cycle
+    if(r.server_time){
+      lastSyncAt = r.server_time;
+      try { localStorage.setItem('kds_last_sync_at', lastSyncAt); } catch(_){}
+    }
+
+    knownIds = newIds; firstLoad = false;
+    $('#dot').style.background = '#3fb950'; $('#connStatus').textContent = 'conectado';
+    render();
+  }catch(e){
+    $('#dot').style.background = '#f85149'; $('#connStatus').textContent = 'sin conexion';
+  }
+}
+
+function elapsed(t){
+  const start = new Date(t.created_at || t.started_at || Date.now()).getTime();
+  return Math.floor((Date.now()-start)/1000);
+}
+
+function render(){
+  ['received','preparing','ready','needs_attention'].forEach(st => {
+    const box = $('#col-'+st);
+    if(!box) return;
+    const list = tickets.filter(t => t.status===st);
+    if(!list.length){ box.innerHTML = '<div class="empty">— sin tickets —</div>'; return; }
+    box.innerHTML = list.map(t => {
+      const sec = elapsed(t), min = sec/60;
+      let cls = '';
+      if(t.status==='needs_attention') cls = 'attn';
+      else if(min>15) cls = 'urgent';
+      else if(min>10) cls = 'warn';
+      const accepted = !!t.accepted_at;
+      if(accepted) cls += ' accepted';
+      const items = (t.items||[]).map(i => `<li>${i.qty||1}x ${escapeHtml(i.name||i.title||'item')}${i.mods?` <em>(${escapeHtml(i.mods)})</em>`:''}</li>`).join('');
+      const reasignBadge = (t.reasigned_count && t.reasigned_count>0) ? `<span style="color:#ff5577;font-size:10px;font-weight:700">x${t.reasigned_count}</span>` : '';
+      return `<div class="ticket ${cls}" draggable="true" data-id="${t.id}">
+        <div class="head">
+          <span class="num">#${(t.sale_id||t.id||'').toString().slice(-5)} ${reasignBadge}</span>
+          <span class="timer">${fmt(sec)}</span>
+        </div>
+        <ul>${items}</ul>
+        ${t.notes?`<div class="notes">! ${escapeHtml(t.notes)}</div>`:''}
+        <button class="accept-btn" ${accepted?'disabled':''} aria-label="${accepted?'Ticket recibido':'Marcar ticket como recibido'}" onclick="acceptTicket('${t.id}')">${accepted?'Recibido OK':'Marcar recibido'}</button>
+        <div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap">
+          <button class="accept-btn" style="background:#ffa657;color:#1a1a1a" aria-label="Mover ticket a En preparación" onclick="setStatus('${t.id}','preparing')">En preparación</button>
+          <button class="accept-btn" style="background:#3fb950;color:#0d1117" aria-label="Marcar ticket como Listo" onclick="setStatus('${t.id}','ready')">Listo</button>
+          <button class="accept-btn" style="background:#f85149" aria-label="Cancelar ticket" onclick="setStatus('${t.id}','cancelled')">Cancelar</button>
+        </div>
+      </div>`;
+    }).join('');
+  });
+  bindDrag();
+}
+
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+function bindDrag(){
+  document.querySelectorAll('.ticket').forEach(el=>{
+    el.addEventListener('dragstart',e=>{e.dataTransfer.setData('id',el.dataset.id);el.classList.add('dragging');});
+    el.addEventListener('dragend',()=>el.classList.remove('dragging'));
+  });
+  document.querySelectorAll('.col-body').forEach(box=>{
+    box.addEventListener('dragover',e=>e.preventDefault());
+    box.addEventListener('drop',async e=>{
+      e.preventDefault();
+      const id = e.dataTransfer.getData('id');
+      const newStatus = box.parentElement.dataset.st;
+      let ok=true;
+      if(window.VolvixUI && typeof window.VolvixUI.confirm==='function'){
+        ok = await window.VolvixUI.confirm({
+          title:'Cambiar estado',
+          message:'¿Mover ticket '+id+' a estado "'+newStatus+'"?',
+          confirmText:'Mover'
+        });
+      }
+      if(!ok) return;
+      try{
+        await api('PATCH','/'+id+'/status',{status:newStatus});
+        refresh();
+      }catch(err){ VolvixUI.toast({type:'error', message:'Error: '+err.message}); }
+    });
+  });
+}
+
+// Sound config — toggle + volume, both persisted
+(function initSoundUI(){
+  const btn = $('#soundBtn'), vol = $('#soundVol');
+  if(btn){
+    btn.textContent = 'Sonido: ' + (soundOn?'ON':'OFF');
+    btn.setAttribute('aria-pressed', String(soundOn));
+    btn.onclick = () => {
+      soundOn = !soundOn;
+      try { localStorage.setItem('kds_sound_on', soundOn?'1':'0'); } catch(_){}
+      btn.textContent = 'Sonido: ' + (soundOn?'ON':'OFF');
+      btn.setAttribute('aria-pressed', String(soundOn));
+      if(soundOn) beep(800, 120); // audible confirmation when enabling
+    };
+  }
+  if(vol){
+    vol.value = String(Math.round(soundVol * 100));
+    vol.addEventListener('input', () => {
+      soundVol = Math.max(0, Math.min(1, (parseInt(vol.value,10)||0) / 100));
+      try { localStorage.setItem('kds_sound_vol', String(soundVol)); } catch(_){}
+    });
+    vol.addEventListener('change', () => { if(soundOn) beep(800, 120); });
+  }
+})();
+$('#station').onchange=refresh;
+
+// Tick clock + timers every second
+setInterval(()=>{
+  $('#clock').textContent = new Date().toLocaleTimeString();
+  document.querySelectorAll('.ticket').forEach(el=>{
+    const t = tickets.find(x=>x.id===el.dataset.id); if(!t) return;
+    const sec = elapsed(t), min = sec/60;
+    el.querySelector('.timer').textContent = fmt(sec);
+    el.classList.toggle('warn',  min>10 && min<=15);
+    el.classList.toggle('urgent',min>15);
+  });
+},1000);
+
+setInterval(refresh, 5000);
+refresh();
+initRealtime();
+</script>
+</body>
+</html>

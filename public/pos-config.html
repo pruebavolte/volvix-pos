@@ -1,0 +1,1838 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configuración · Volvix</title>
+  <meta name="theme-color" content="#1a237e">
+
+  <!-- 1. Auth gate -->
+  <script src="/auth-gate.js" data-roles="superadmin,owner"></script>
+
+  <!-- 2. Config -->
+  <script src="/config.js"></script>
+
+  <!-- 3. Fuentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+
+  <!-- 4. Design tokens -->
+  <link rel="stylesheet" href="/volvix-tokens.css">
+
+  <!-- 5. API + Sync + Widget -->
+  <script src="/volvix-api.js"></script>
+  <script src="/volvix-sync.js"></script>
+  <script src="/volvix-sync-widget.js"></script>
+
+<style>
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; }
+html, body {
+  height: 100%; margin: 0; padding: 0;
+  font-family: var(--font-primary); font-size: 14px;
+  color: var(--text); background: var(--bg-2);
+  -webkit-font-smoothing: antialiased; overflow: hidden;
+}
+
+/* ── APP ── */
+.app { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+/* ── TOPBAR ── */
+.topbar {
+  background: var(--navy); color: #fff; height: 40px;
+  display: flex; align-items: center; padding: 0 14px; gap: 10px; flex-shrink: 0;
+}
+.tb-brand { font-weight: 800; font-size: 15px; color: #fff; letter-spacing: -0.3px; }
+.tb-brand span { color: #90caf9; }
+.tb-section { font-size: 12px; color: #b3c5ff; padding: 2px 8px; background: rgba(255,255,255,0.1); border-radius: 4px; }
+.tb-sep { flex: 1; }
+.tb-tenant { font-size: 11.5px; color: #90caf9; }
+.tb-btn {
+  padding: 4px 11px; border-radius: 4px; font-size: 12px; font-weight: 600;
+  cursor: pointer; border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.08); color: #fff;
+  font-family: var(--font-primary); transition: background var(--t-base);
+}
+.tb-btn:hover { background: rgba(255,255,255,0.15); }
+.tb-exit { background: var(--danger); border-color: var(--danger); }
+.tb-exit:hover { background: var(--danger-2); }
+
+/* ── LAYOUT: sidebar + main ── */
+.layout {
+  flex: 1; display: grid;
+  grid-template-columns: 220px 1fr;
+  overflow: hidden; min-height: 0;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  background: var(--surface); border-right: 1px solid var(--border);
+  overflow-y: auto; padding: 10px 8px;
+}
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+.nav-section {
+  font-size: 10px; font-weight: 700; color: var(--text-4);
+  text-transform: uppercase; letter-spacing: 1px;
+  padding: 10px 10px 4px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 10px; border-radius: var(--radius-lg);
+  font-size: 13px; font-weight: 500; color: var(--text-2);
+  cursor: pointer; border: none; background: transparent;
+  width: 100%; text-align: left; font-family: var(--font-primary);
+  transition: all var(--t-fast);
+}
+.nav-item:hover { background: var(--bg-2); color: var(--text); }
+.nav-item.active { background: #e8eaf6; color: var(--navy); font-weight: 600; }
+.nav-item .icon { font-size: 15px; flex-shrink: 0; }
+
+/* ── MAIN ── */
+.main {
+  overflow-y: auto; background: var(--bg-2); padding: 24px 28px;
+}
+.main::-webkit-scrollbar { width: 6px; }
+.main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* ── PAGE ── */
+.page { display: none; animation: vlx-fade-up 0.2s var(--ease-out) both; }
+.page.active { display: block; }
+
+/* ── SECTION HEAD ── */
+.section-head { margin-bottom: 20px; }
+.section-title { font-size: 18px; font-weight: 800; letter-spacing: -0.4px; margin-bottom: 4px; }
+.section-sub   { font-size: 13px; color: var(--text-3); }
+
+/* ── CARD ── */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-xl); overflow: hidden; margin-bottom: 14px;
+}
+.card-head {
+  padding: 13px 18px; border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 8px; background: var(--bg-2);
+}
+.card-title { font-size: 13.5px; font-weight: 700; }
+.card-sub   { font-size: 11.5px; color: var(--text-3); margin-top: 2px; }
+.card-body  { padding: 18px; }
+
+/* ── FORM ── */
+.form-group { margin-bottom: 14px; }
+.form-label {
+  display: block; font-size: 11.5px; font-weight: 700;
+  color: var(--text-2); margin-bottom: 5px;
+  text-transform: uppercase; letter-spacing: 0.3px;
+}
+.form-hint { font-size: 11px; color: var(--text-3); margin-top: 3px; }
+.form-input, .form-select, .form-textarea {
+  width: 100%; padding: 9px 12px;
+  border: 1.5px solid var(--border); border-radius: var(--radius-lg);
+  font-size: 13px; font-family: var(--font-primary);
+  color: var(--text); background: var(--surface); outline: none;
+  transition: border-color var(--t-base), box-shadow var(--t-base);
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--navy); box-shadow: 0 0 0 3px rgba(26,35,126,0.08);
+}
+.form-input.mono { font-family: var(--font-mono); font-size: 12.5px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+/* ── BOTONES ── */
+.btn {
+  padding: 8px 16px; border-radius: var(--radius-lg);
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  border: 1px solid var(--border); background: var(--surface); color: var(--text-2);
+  font-family: var(--font-primary); transition: all var(--t-base);
+  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+}
+.btn:hover { border-color: var(--border-2); color: var(--text); }
+.btn.primary { background: var(--navy); color: #fff; border-color: var(--navy); }
+.btn.primary:hover { background: var(--navy2); }
+.btn.danger  { background: var(--danger-soft); color: var(--danger-2); border-color: var(--danger-border); }
+.btn.danger:hover { background: #ffcdd2; }
+.btn.green   { background: var(--green); color: #fff; border-color: var(--green); }
+.btn.green:hover { background: #1b5e20; }
+.btn.sm { padding: 5px 11px; font-size: 12px; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ── TOGGLE SWITCH ── */
+.toggle-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 14px; border-radius: var(--radius-lg);
+  background: var(--bg-2); margin-bottom: 8px;
+  border: 1px solid var(--border);
+}
+.toggle-row:last-child { margin-bottom: 0; }
+.toggle-info .label { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.toggle-info .sub   { font-size: 11.5px; color: var(--text-3); }
+.toggle {
+  position: relative; width: 42px; height: 24px;
+  background: var(--border-2); border-radius: 100px;
+  cursor: pointer; transition: background var(--t-base); flex-shrink: 0;
+}
+.toggle.on { background: var(--navy); }
+.toggle::after {
+  content: ''; position: absolute; width: 18px; height: 18px;
+  background: #fff; border-radius: 50%; top: 3px; left: 3px;
+  transition: transform var(--t-base); box-shadow: var(--shadow-sm);
+}
+.toggle.on::after { transform: translateX(18px); }
+
+/* ── USUARIO ROW ── */
+.user-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 14px; border-bottom: 1px solid var(--border);
+  transition: background var(--t-fast);
+}
+.user-row:last-child { border-bottom: none; }
+.user-row:hover { background: var(--bg-2); }
+.user-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.user-info { flex: 1; min-width: 0; }
+.user-name  { font-size: 13px; font-weight: 600; }
+.user-email { font-size: 11.5px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.role-pill {
+  padding: 2px 9px; border-radius: var(--radius-full);
+  font-size: 11px; font-weight: 700;
+}
+.role-owner     { background: rgba(26,35,126,0.1); color: var(--navy); }
+.role-cajero    { background: rgba(46,125,50,0.1); color: #2e7d32; }
+.role-superadmin{ background: rgba(251,191,36,0.15); color: #B45309; }
+
+/* ── IMPRESORA CARD ── */
+.printer-card {
+  display: flex; align-items: center; gap: 13px;
+  padding: 14px 16px; border: 1.5px solid var(--border);
+  border-radius: var(--radius-xl); margin-bottom: 10px;
+  transition: border-color var(--t-base);
+}
+.printer-card:hover { border-color: var(--border-2); }
+.printer-card.active { border-color: var(--navy); background: #f3f4ff; }
+.printer-icon { font-size: 30px; flex-shrink: 0; }
+.printer-info { flex: 1; min-width: 0; }
+.printer-name  { font-size: 13.5px; font-weight: 700; margin-bottom: 2px; }
+.printer-model { font-size: 11.5px; color: var(--text-3); }
+.printer-status {
+  font-size: 11px; font-weight: 700; padding: 2px 8px;
+  border-radius: var(--radius-full); flex-shrink: 0;
+}
+.status-ok  { background: var(--success-soft); color: var(--success-2); }
+.status-err { background: var(--danger-soft);  color: var(--danger-2);  }
+.status-off { background: var(--bg-3); color: var(--text-3); }
+
+/* ── PLAN CARD ── */
+.plan-card {
+  border: 2px solid var(--border); border-radius: var(--radius-xl);
+  padding: 18px 20px; transition: all var(--t-base); cursor: pointer;
+}
+.plan-card:hover { border-color: var(--navy); }
+.plan-card.active { border-color: var(--navy); background: #f3f4ff; }
+.plan-name  { font-size: 15px; font-weight: 800; margin-bottom: 4px; }
+.plan-price { font-size: 26px; font-weight: 900; letter-spacing: -1px; color: var(--navy); }
+.plan-price span { font-size: 12px; font-weight: 400; color: var(--text-3); }
+.plan-features { margin-top: 12px; display: flex; flex-direction: column; gap: 5px; }
+.plan-feat { font-size: 12px; color: var(--text-2); display: flex; align-items: center; gap: 6px; }
+
+/* ── BACKUP ITEM ── */
+.backup-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px; border-bottom: 1px solid var(--border);
+}
+.backup-item:last-child { border-bottom: none; }
+.backup-icon { font-size: 22px; flex-shrink: 0; }
+.backup-info { flex: 1; }
+.backup-name { font-size: 13px; font-weight: 600; }
+.backup-meta { font-size: 11px; color: var(--text-3); margin-top: 1px; }
+
+/* ── MODAL ── */
+.modal-bg {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+  z-index: var(--z-modal); display: none;
+  align-items: center; justify-content: center;
+  padding: 20px; backdrop-filter: blur(3px);
+}
+.modal-bg.open { display: flex; }
+.modal {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-2xl); width: 100%; max-width: 500px;
+  max-height: 92vh; overflow: hidden; display: flex; flex-direction: column;
+  animation: vlx-scale-in var(--t-base) var(--ease-out) both;
+  box-shadow: var(--shadow-2xl);
+}
+.modal-head {
+  padding: 15px 20px; border-bottom: 1px solid var(--border);
+  background: #e8eaf6; display: flex; justify-content: space-between; align-items: center;
+}
+.modal-title { font-size: 14px; font-weight: 700; color: var(--navy); }
+.modal-body  { padding: 20px; overflow-y: auto; flex: 1; }
+.modal-foot  { padding: 12px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+
+/* ── ALERT ── */
+.alert {
+  padding: 11px 14px; border-radius: var(--radius-lg);
+  font-size: 12.5px; line-height: 1.5; margin-bottom: 14px; display: flex; gap: 10px; align-items: flex-start;
+}
+.alert.info    { background: var(--info-soft);    border: 1px solid var(--info-border);    color: var(--info-2); }
+.alert.warn    { background: var(--warn-soft);    border: 1px solid var(--warn-border);    color: var(--warn-2); }
+.alert.success { background: var(--success-soft); border: 1px solid var(--success-border); color: var(--success-2); }
+.alert.danger  { background: var(--danger-soft);  border: 1px solid var(--danger-border);  color: var(--danger-2); }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 72px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--navy); color: #fff;
+  padding: 9px 20px; border-radius: var(--radius-full);
+  font-size: 13px; font-weight: 500; z-index: var(--z-toast);
+  opacity: 0; transition: all var(--t-slow); pointer-events: none;
+  white-space: nowrap; box-shadow: var(--shadow-lg);
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.ok   { background: var(--green); }
+.toast.err  { background: var(--red); }
+.toast.warn { background: var(--orange); }
+
+@media (max-width: 768px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .form-row, .form-row-3 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ── TOPBAR ── -->
+  <div class="topbar">
+    <div class="tb-brand">Vol<span>vix</span></div>
+    <div class="tb-section">⚙️ Configuración</div>
+    <div class="tb-sep"></div>
+    <div class="tb-tenant" id="tbTenant">Cargando...</div>
+    <button class="tb-btn" onclick="location.href='/salvadorex-pos.html'">🛒 POS</button>
+    <button class="tb-btn" onclick="location.href='/volvix-owner-panel.html'">▦ Panel</button>
+    <button class="tb-btn tb-exit" onclick="window.volvixLogout()">⏻ Salir</button>
+  </div>
+
+  <!-- ── LAYOUT ── -->
+  <div class="layout">
+
+    <!-- ── SIDEBAR ── -->
+    <nav class="sidebar">
+      <div class="nav-section">Mi negocio</div>
+      <button class="nav-item active" onclick="showPage('empresa', this)">
+        <span class="icon">🏪</span> Empresa
+      </button>
+      <button class="nav-item" onclick="showPage('regional', this)">
+        <span class="icon">🌎</span> Regional
+      </button>
+      <button class="nav-item" onclick="showPage('facturacion', this)">
+        <span class="icon">🧾</span> Facturación SAT
+      </button>
+
+      <div class="nav-section">POS</div>
+      <button class="nav-item" onclick="showPage('ticket', this)">
+        <span class="icon">🖨</span> Ticket imprimible
+      </button>
+      <button class="nav-item" onclick="showPage('impresoras', this)">
+        <span class="icon">🖨</span> Impresoras
+      </button>
+      <button class="nav-item" onclick="showPage('pagos', this)">
+        <span class="icon">💳</span> Métodos de pago
+      </button>
+
+      <div class="nav-section">Equipo</div>
+      <button class="nav-item" onclick="showPage('usuarios', this)">
+        <span class="icon">👥</span> Usuarios
+      </button>
+      <button class="nav-item" onclick="showPage('permisos', this)">
+        <span class="icon">🔒</span> Permisos
+      </button>
+
+      <div class="nav-section">Sistema</div>
+      <button class="nav-item" onclick="showPage('plan', this)">
+        <span class="icon">💎</span> Plan y licencia
+      </button>
+      <button class="nav-item" onclick="showPage('integraciones', this)">
+        <span class="icon">🔗</span> Integraciones
+      </button>
+      <button class="nav-item" onclick="showPage('backup', this)">
+        <span class="icon">☁️</span> Backup y datos
+      </button>
+      <button class="nav-item" onclick="showPage('avanzado', this)">
+        <span class="icon">⚡</span> Avanzado
+      </button>
+    </nav>
+
+    <!-- ── MAIN ── -->
+    <main class="main">
+
+      <!-- ════════ EMPRESA ════════ -->
+      <div class="page active" id="page-empresa">
+        <div class="section-head">
+          <div class="section-title">🏪 Datos de la empresa</div>
+          <div class="section-sub">Información que aparece en tickets, facturas y el sistema</div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Información general</div>
+            <button class="btn primary" onclick="guardarEmpresa()">✓ Guardar</button>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="form-label">Nombre del negocio *</label>
+              <input class="form-input" id="eNegocio" value="Abarrotes Don Chucho" placeholder="Nombre completo">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Giro / Tipo de negocio</label>
+                <select class="form-select" id="eGiro">
+                  <option value="abarrotes" selected>🏪 Abarrotes / Minisuper</option>
+                  <option value="restaurante">🍽️ Restaurante</option>
+                  <option value="barberia">💈 Barbería / Estética</option>
+                  <option value="farmacia">💊 Farmacia</option>
+                  <option value="gimnasio">🏋️ Gimnasio</option>
+                  <option value="colegio">🏫 Colegio / Academia</option>
+                  <option value="taller_mecanico">🔧 Taller mecánico</option>
+                  <option value="otro">🏢 Otro</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Teléfono</label>
+                <input class="form-input" id="eTelefono" type="tel" value="81 1234 5678" placeholder="Teléfono de contacto">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Dirección</label>
+              <input class="form-input" id="eDireccion" value="Av. Constitución 123, Centro, Monterrey, NL" placeholder="Dirección completa">
+              <div class="form-hint">Aparece en el pie del ticket de venta</div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Sitio web</label>
+                <input class="form-input" id="eWeb" type="url" placeholder="https://tu-negocio.com">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email de contacto</label>
+                <input class="form-input" id="eEmail" type="email" value="contacto@donchuchoaparrotes.com" placeholder="Email del negocio">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Mensaje de pie en ticket</label>
+              <input class="form-input" id="eFooter" value="¡Gracias por su preferencia!" placeholder="Ej. ¡Gracias por su compra!">
+              <div class="form-hint">Máximo 60 caracteres. Aparece al final del ticket impreso.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Logo y apariencia</div>
+          </div>
+          <div class="card-body">
+            <div class="alert info">
+              ℹ️ El logo aparece en la pantalla de clientes (CDS) y en las landings del marketplace. Formatos: PNG o SVG. Recomendado: fondo transparente, mínimo 200×200px.
+            </div>
+            <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+              <div style="width:80px;height:80px;border-radius:16px;background:linear-gradient(135deg,#FBBF24,#F59E0B);display:flex;align-items:center;justify-content:center;font-size:36px;box-shadow:var(--shadow-md)">🧠</div>
+              <div>
+                <div style="font-weight:600;margin-bottom:4px">Logo actual</div>
+                <div style="font-size:12px;color:var(--text-3);margin-bottom:10px">Emoji por defecto (sin logo cargado)</div>
+                <input type="file" id="vlx-logo-upload" accept="image/png,image/jpeg,image/svg+xml" style="display:none" onchange="vlxUploadLogo(this)">
+                <button class="btn sm" onclick="document.getElementById('vlx-logo-upload').click()">⬆ Cargar logo</button>
+                <script>
+                  // 2026-05 audit B-40: upload real (antes era stub que mostraba toast).
+                  // Sube como base64 → /api/tenant/settings { logo_url } usando data URL.
+                  // Para producción a escala, migrar a presigned-url + S3.
+                  window.vlxUploadLogo = async function (input) {
+                    const file = input && input.files && input.files[0];
+                    if (!file) return;
+                    if (file.size > 256 * 1024) {
+                      window.toast && window.toast('El logo no debe pesar más de 256 KB. Usa PNG/SVG optimizado.', 'error');
+                      return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = async function (e) {
+                      try {
+                        const dataUrl = String(e.target.result || '');
+                        const tok = localStorage.getItem('volvix_token') || '';
+                        const r = await fetch('/api/tenant/settings', {
+                          method: 'PATCH',
+                          headers: { 'Content-Type':'application/json', 'Authorization': 'Bearer ' + tok },
+                          body: JSON.stringify({ logo_url: dataUrl })
+                        });
+                        if (r.ok) {
+                          window.toast && window.toast('Logo guardado.', 'ok');
+                        } else {
+                          window.toast && window.toast('No pudimos guardar el logo. Verifica tu sesión.', 'error');
+                        }
+                      } catch (err) {
+                        window.toast && window.toast('Error de red al subir logo.', 'error');
+                      }
+                    };
+                    reader.readAsDataURL(file);
+                  };
+                </script>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════ REGIONAL ════════ -->
+      <div class="page" id="page-regional">
+        <div class="section-head">
+          <div class="section-title">🌎 Configuración regional</div>
+          <div class="section-sub">Zona horaria, moneda, idioma e impuestos</div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Zona horaria y fechas</div>
+            <button class="btn primary" onclick="guardarRegional()">✓ Guardar</button>
+          </div>
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Zona horaria</label>
+                <select class="form-select" id="rTimezone">
+                  <option value="America/Monterrey" selected>🕐 America/Monterrey (CST)</option>
+                  <option value="America/Mexico_City">🕐 America/Mexico_City (CST)</option>
+                  <option value="America/Tijuana">🕐 America/Tijuana (PST)</option>
+                  <option value="America/Cancun">🕐 America/Cancun (EST)</option>
+                  <option value="America/Chihuahua">🕐 America/Chihuahua (MST)</option>
+                </select>
+                <div class="form-hint">Afecta todos los timestamps del sistema</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Formato de fecha</label>
+                <select class="form-select" id="rDateFormat">
+                  <option value="dd/MM/yyyy" selected>DD/MM/AAAA (31/12/2026)</option>
+                  <option value="MM/dd/yyyy">MM/DD/AAAA (12/31/2026)</option>
+                  <option value="yyyy-MM-dd">AAAA-MM-DD (2026-12-31)</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Moneda principal</label>
+                <select class="form-select" id="rCurrency">
+                  <option value="MXN" selected>🇲🇽 MXN — Peso mexicano</option>
+                  <option value="USD">🇺🇸 USD — Dólar americano</option>
+                  <option value="EUR">🇪🇺 EUR — Euro</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Idioma del sistema</label>
+                <select class="form-select" id="rLocale">
+                  <option value="es-MX" selected>🇲🇽 Español (México)</option>
+                  <option value="es-ES">🇪🇸 Español (España)</option>
+                  <option value="en-US">🇺🇸 English (US)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Impuestos</div>
+            <button class="btn primary" onclick="guardarRegional()">✓ Guardar</button>
+          </div>
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">IVA default</label>
+                <select class="form-select" id="rIva">
+                  <option value="0.16" selected>16% (estándar México)</option>
+                  <option value="0.08">8% (zona fronteriza)</option>
+                  <option value="0.00">0% (exento)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Precios en catálogo</label>
+                <select class="form-select" id="rPrecioIva">
+                  <option value="con_iva" selected>Con IVA incluido</option>
+                  <option value="sin_iva">Sin IVA (se agrega al cobrar)</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Decimales en precios</label>
+                <select class="form-select" id="rDecimals">
+                  <option value="2" selected>2 decimales ($25.00)</option>
+                  <option value="0">Sin decimales ($25)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Separador de miles</label>
+                <select class="form-select" id="rSep">
+                  <option value="coma" selected>Coma ($1,250.00)</option>
+                  <option value="punto">Punto ($1.250,00)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════ FACTURACIÓN ════════ -->
+      <div class="page" id="page-facturacion">
+        <div class="section-head">
+          <div class="section-title">🧾 Facturación SAT · CFDI 4.0</div>
+          <div class="section-sub">Configuración para timbrado de facturas electrónicas</div>
+        </div>
+        <div class="alert warn" style="margin-bottom:14px">
+          ⚠️ Para timbrar facturas reales necesitas subir tu Certificado de Sello Digital (CSD) del SAT. En modo demo solo se simulan las facturas.
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Datos fiscales</div>
+            <button class="btn primary" onclick="guardarFiscal()">✓ Guardar</button>
+          </div>
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">RFC *</label>
+                <input class="form-input mono" id="fRfc" placeholder="XAXX010101000" style="text-transform:uppercase">
+                <div class="form-hint">RFC de persona física o moral</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Régimen fiscal</label>
+                <select class="form-select" id="fRegimen">
+                  <option value="626">626 — Simplificado de confianza</option>
+                  <option value="621">621 — Incorporación fiscal</option>
+                  <option value="612">612 — Personas físicas actividades empresariales</option>
+                  <option value="601">601 — General de ley personas morales</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Razón social</label>
+              <input class="form-input" id="fRazon" placeholder="Nombre completo o razón social tal como aparece en SAT">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Código postal fiscal</label>
+              <input class="form-input" id="fCp" placeholder="64000" maxlength="5" style="max-width:150px" inputmode="numeric">
+              <div class="form-hint">El del domicilio fiscal registrado en el SAT</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Certificado de Sello Digital (CSD)</div>
+          </div>
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Archivo .cer</label>
+                <input type="file" accept=".cer" style="font-size:13px" onchange="toast('CSD .cer cargado','ok')">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Archivo .key</label>
+                <input type="file" accept=".key" style="font-size:13px" onchange="toast('CSD .key cargado','ok')">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Contraseña del CSD</label>
+              <input class="form-input" type="password" id="fCsdPass" placeholder="Contraseña del certificado">
+            </div>
+            <div class="form-group">
+              <label class="form-label">PAC (Proveedor Autorizado de Certificación)</label>
+              <select class="form-select" id="fPac">
+                <option value="facturama">Facturama (recomendado)</option>
+                <option value="finkok">Finkok</option>
+                <option value="sw">SW Sapien</option>
+              </select>
+            </div>
+            <button class="btn green" onclick="toast('PAC configurado · modo sandbox activo','ok')">✓ Guardar y probar conexión PAC</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════ TICKET ════════ -->
+      <div class="page" id="page-ticket">
+        <div class="section-head">
+          <div class="section-title">🖨 Diseño del ticket</div>
+          <div class="section-sub">Personaliza lo que aparece en el ticket impreso</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 300px;gap:16px">
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">Contenido del ticket</div>
+              <button class="btn primary" onclick="guardarTicket()">✓ Guardar</button>
+            </div>
+            <div class="card-body">
+              <div id="togglesTicket">
+                <div class="toggle-row">
+                  <div class="toggle-info"><div class="label">Logo del negocio</div><div class="sub">Muestra el nombre en grande al inicio</div></div>
+                  <div class="toggle on" id="tLogo" onclick="toggleSwitch(this)"></div>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info"><div class="label">Fecha y hora</div><div class="sub">Timestamp de la venta</div></div>
+                  <div class="toggle on" id="tFecha" onclick="toggleSwitch(this)"></div>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info"><div class="label">Número de ticket</div><div class="sub">Folio correlativo de la venta</div></div>
+                  <div class="toggle on" id="tFolio" onclick="toggleSwitch(this)"></div>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info"><div class="label">Nombre del cajero</div><div class="sub">¿Quién atendió?</div></div>
+                  <div class="toggle on" id="tCajero" onclick="toggleSwitch(this)"></div>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info"><div class="label">Código de barras en ticket</div><div class="sub">Para devoluciones rápidas</div></div>
+                  <div class="toggle" id="tBarcode" onclick="toggleSwitch(this)"></div>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info"><div class="label">Desglose de IVA</div><div class="sub">Muestra subtotal + IVA + total</div></div>
+                  <div class="toggle" id="tIva" onclick="toggleSwitch(this)"></div>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info"><div class="label">Mensaje de puntos acumulados</div><div class="sub">Ej. "Acumulaste 3 puntos hoy"</div></div>
+                  <div class="toggle on" id="tPuntos" onclick="toggleSwitch(this)"></div>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info"><div class="label">QR para factura electrónica</div><div class="sub">Cliente escanea y solicita su CFDI</div></div>
+                  <div class="toggle" id="tQr" onclick="toggleSwitch(this)"></div>
+                </div>
+              </div>
+              <div class="form-group" style="margin-top:14px">
+                <label class="form-label">Ancho del papel (mm)</label>
+                <select class="form-select" id="tPaper" style="max-width:180px">
+                  <option value="58">58mm (papel chico)</option>
+                  <option value="80" selected>80mm (estándar)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preview del ticket -->
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Vista previa</div>
+            <div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:16px;font-family:var(--font-mono);font-size:11px;line-height:1.7;color:#000;box-shadow:var(--shadow-md)" id="ticketPreview">
+              <div style="text-align:center;font-weight:700;font-size:13px;margin-bottom:2px">ABARROTES DON CHUCHO</div>
+              <div style="text-align:center;font-size:10px">Av. Constitución 123, Centro</div>
+              <div style="text-align:center;font-size:10px;margin-bottom:4px">Tel: 81 1234 5678</div>
+              <div>================================</div>
+              <div>Ticket #1047</div>
+              <div>25/04/2026 14:32:15</div>
+              <div>Cajero: María López</div>
+              <div>--------------------------------</div>
+              <div>Coca-Cola 600ml  x2  $50.00</div>
+              <div>Pan dulce        x3  $25.50</div>
+              <div>Leche Lala 1L    x1  $32.00</div>
+              <div>--------------------------------</div>
+              <div>TOTAL:          $107.50</div>
+              <div>Pago (Efectivo): $120.00</div>
+              <div>Cambio:          $12.50</div>
+              <div>================================</div>
+              <div style="text-align:center;font-size:10px">Acumulaste 10 puntos hoy ⭐</div>
+              <div style="text-align:center;font-size:10px;margin-top:2px">¡Gracias por su preferencia!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════ IMPRESORAS ════════ -->
+      <div class="page" id="page-impresoras">
+        <div class="section-head">
+          <div class="section-title">🖨 Impresoras</div>
+          <div class="section-sub">Configura impresoras térmicas de tickets</div>
+        </div>
+        <div class="alert info" style="margin-bottom:14px">
+          ℹ️ Volvix soporta impresoras térmicas por USB, Bluetooth y WiFi. Protocolo ESC/POS compatible con Epson, Star, BIXOLON, Citizen, y clones.
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Impresoras detectadas</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn sm" onclick="detectarImpresoras()" aria-label="Buscar impresoras conectadas">🔍 Detectar</button>
+              <button class="btn sm" onclick="probarImpresora('USB local',{transport:'usb'})" aria-label="Probar impresora USB con permiso del navegador">🔌 Test USB</button>
+              <button class="btn sm" onclick="probarImpresora('BT local',{transport:'bluetooth'})" aria-label="Probar impresora Bluetooth con permiso del navegador">📱 Test BT</button>
+              <button class="btn sm primary" onclick="openModal('modalImpresora')" aria-label="Agregar impresora manualmente">+ Agregar manual</button>
+            </div>
+          </div>
+          <div style="padding:14px" id="printerList">
+            <div class="printer-card active">
+              <div class="printer-icon">🖨</div>
+              <div class="printer-info">
+                <div class="printer-name">Epson TM-T20III</div>
+                <div class="printer-model">USB · COM3 · ESC/POS</div>
+              </div>
+              <span class="printer-status status-ok">✓ Conectada</span>
+              <button class="btn sm" onclick="probarImpresora('Epson TM-T20III')">Probar</button>
+              <button class="btn sm" style="font-size:18px;padding:3px 6px">⚙️</button>
+            </div>
+            <div class="printer-card">
+              <div class="printer-icon">📱</div>
+              <div class="printer-info">
+                <div class="printer-name">Impresora Bluetooth</div>
+                <div class="printer-model">Bluetooth · No pareada</div>
+              </div>
+              <span class="printer-status status-err">✗ Sin conexión</span>
+              <button class="btn sm" onclick="pairBluetooth()">Parear</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">Comandas y KDS (restaurantes)</div></div>
+          <div class="card-body">
+            <div class="toggle-row">
+              <div class="toggle-info"><div class="label">Imprimir comanda en cocina</div><div class="sub">Envía ticket separado a la impresora de cocina al cobrar</div></div>
+              <div class="toggle" id="tComanda" onclick="toggleSwitch(this)"></div>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info"><div class="label">KDS en pantalla (Kitchen Display)</div><div class="sub">Muestra comandas en multipos-suite.html</div></div>
+              <div class="toggle" id="tKds" onclick="toggleSwitch(this)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════ MÉTODOS DE PAGO ════════ -->
+      <div class="page" id="page-pagos">
+        <div class="section-head">
+          <div class="section-title">💳 Métodos de pago</div>
+          <div class="section-sub">Activa los métodos que acepta tu negocio</div>
+        </div>
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-head">
+            <div class="card-title">Métodos disponibles</div>
+            <button class="btn primary" onclick="guardarPagos()">✓ Guardar</button>
+          </div>
+          <div class="card-body">
+            <div class="toggle-row">
+              <div class="toggle-info"><div class="label">💵 Efectivo</div><div class="sub">Siempre habilitado · no se puede desactivar</div></div>
+              <div class="toggle on" style="opacity:0.5;cursor:not-allowed"></div>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info"><div class="label">💳 Tarjeta (débito/crédito)</div><div class="sub">Requiere terminal bancaria física (TPV)</div></div>
+              <div class="toggle on" id="pTarjeta" onclick="toggleSwitch(this)"></div>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info"><div class="label">📲 Transferencia / SPEI</div><div class="sub">El cliente transfiere al número de cuenta del negocio</div></div>
+              <div class="toggle on" id="pTransfer" onclick="toggleSwitch(this)"></div>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info"><div class="label">📱 CoDi / DiMo</div><div class="sub">Pago con QR del banco mexicano</div></div>
+              <div class="toggle" id="pCodi" onclick="toggleSwitch(this)"></div>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info"><div class="label">💰 Crédito / Fiado</div><div class="sub">Cargo a cuenta del cliente registrado</div></div>
+              <div class="toggle on" id="pCredito" onclick="toggleSwitch(this)"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">Mercado Pago (pagos digitales)</div></div>
+          <div class="card-body">
+            <div class="alert info">
+              💡 Con Mercado Pago puedes generar QR para que los clientes paguen con cualquier billetera digital. La integración agrega la opción automáticamente en el modal de cobro.
+            </div>
+            <div class="form-group">
+              <label class="form-label">Access Token de Mercado Pago</label>
+              <input class="form-input mono" id="mpToken" type="password" placeholder="APP_USR-XXXX...">
+              <div class="form-hint">Obtenlo en developers.mercadopago.com · Credenciales de producción</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Concepto de pago</label>
+              <input class="form-input" id="mpConcepto" value="Compra en Abarrotes Don Chucho" placeholder="Texto que ve el cliente al pagar">
+            </div>
+            <button class="btn green" onclick="guardarPagos()">✓ Guardar y probar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════ USUARIOS ════════ -->
+      <div class="page" id="page-usuarios">
+        <div class="section-head">
+          <div class="section-title">👥 Usuarios del sistema</div>
+          <div class="section-sub">Quién puede entrar y con qué rol</div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Usuarios activos</div>
+            <button class="btn primary" onclick="openModal('modalUsuario')">+ Invitar usuario</button>
+          </div>
+          <div id="userList">
+            <div class="user-row">
+              <div class="user-avatar" style="background:#1a237e">DA</div>
+              <div class="user-info">
+                <div class="user-name">Daniel V.</div>
+                <div class="user-email">admin@volvix.test</div>
+              </div>
+              <span class="role-pill role-owner">Owner</span>
+              <button class="btn sm" onclick="toast('No puedes editar al owner principal','warn')" style="margin-left:10px">⚙️</button>
+            </div>
+            <div class="user-row">
+              <div class="user-avatar" style="background:#2e7d32">ML</div>
+              <div class="user-info">
+                <div class="user-name">María López</div>
+                <div class="user-email">maria@donchuchoaparrotes.com</div>
+              </div>
+              <span class="role-pill role-cajero">Cajero</span>
+              <button class="btn sm danger" onclick="eliminarUsuario('María López')" style="margin-left:10px">🗑️</button>
+            </div>
+            <div class="user-row">
+              <div class="user-avatar" style="background:#1565c0">CR</div>
+              <div class="user-info">
+                <div class="user-name">Carlos Ruiz</div>
+                <div class="user-email">carlos@donchuchoaparrotes.com</div>
+              </div>
+              <span class="role-pill role-cajero">Cajero</span>
+              <button class="btn sm danger" onclick="eliminarUsuario('Carlos Ruiz')" style="margin-left:10px">🗑️</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════ PERMISOS ════════ -->
+      <div class="page" id="page-permisos">
+        <div class="section-head">
+          <div class="section-title">🔒 Permisos por rol</div>
+          <div class="section-sub">Qué puede hacer cada tipo de usuario</div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">Matriz de permisos</div></div>
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:13px">
+              <thead>
+                <tr style="background:var(--bg-2)">
+                  <th style="padding:10px 16px;text-align:left;border-bottom:1px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-3)">Función</th>
+                  <th style="padding:10px 14px;text-align:center;border-bottom:1px solid var(--border);color:var(--navy)">👑 Owner</th>
+                  <th style="padding:10px 14px;text-align:center;border-bottom:1px solid var(--border);color:var(--green)">🛒 Cajero</th>
+                </tr>
+              </thead>
+              <tbody id="permisosTable">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════ PLAN ════════ -->
+      <div class="page" id="page-plan">
+        <div class="section-head">
+          <div class="section-title">💎 Plan y licencia</div>
+          <div class="section-sub">Tu suscripción actual y opciones de upgrade</div>
+        </div>
+        <div class="alert success" style="margin-bottom:16px">
+          ✓ Plan <strong>Pro · $799/mes</strong> — activo · próxima renovación: 25 mayo 2026
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:16px">
+          <div class="plan-card">
+            <div class="plan-name" style="color:var(--text-3)">Básico</div>
+            <div class="plan-price">$399<span>/mes</span></div>
+            <div class="plan-features">
+              <div class="plan-feat">✓ 1 dispositivo</div>
+              <div class="plan-feat">✓ POS + inventario</div>
+              <div class="plan-feat">✓ Reportes básicos</div>
+              <div class="plan-feat" style="color:var(--text-4)">✗ WhatsApp</div>
+              <div class="plan-feat" style="color:var(--text-4)">✗ Multi-sucursal</div>
+            </div>
+          </div>
+          <div class="plan-card active">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div class="plan-name" style="color:var(--navy)">Pro</div>
+              <span style="background:var(--navy);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px">ACTUAL</span>
+            </div>
+            <div class="plan-price">$799<span>/mes</span></div>
+            <div class="plan-features">
+              <div class="plan-feat">✓ 3 dispositivos</div>
+              <div class="plan-feat">✓ Todo lo de Básico</div>
+              <div class="plan-feat">✓ WhatsApp automático</div>
+              <div class="plan-feat">✓ Módulos del giro</div>
+              <div class="plan-feat" style="color:var(--text-4)">✗ Multi-sucursal</div>
+            </div>
+          </div>
+          <div class="plan-card">
+            <div class="plan-name" style="color:var(--orange)">Enterprise</div>
+            <div class="plan-price" style="color:var(--orange)">$1,499<span>/mes</span></div>
+            <div class="plan-features">
+              <div class="plan-feat">✓ Ilimitado dispositivos</div>
+              <div class="plan-feat">✓ Todo lo de Pro</div>
+              <div class="plan-feat">✓ Multi-sucursal</div>
+              <div class="plan-feat">✓ API pública</div>
+              <div class="plan-feat">✓ Soporte 24/7</div>
+            </div>
+            <button class="btn primary" style="width:100%;margin-top:12px;justify-content:center" onclick="toast('Te contactaremos para el upgrade a Enterprise','info')">
+              Upgrade →
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════ INTEGRACIONES ════════ -->
+      <div class="page" id="page-integraciones">
+        <div class="section-head">
+          <div class="section-title">🔗 Integraciones</div>
+          <div class="section-sub">Conecta servicios externos con tu sistema</div>
+        </div>
+        <div id="integracionesList">
+          <!-- generado por JS -->
+        </div>
+      </div>
+
+      <!-- ════════ BACKUP ════════ -->
+      <div class="page" id="page-backup">
+        <div class="section-head">
+          <div class="section-title">☁️ Backup y datos</div>
+          <div class="section-sub">Copias de seguridad y portabilidad de tus datos</div>
+        </div>
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-head">
+            <div class="card-title">Backups automáticos</div>
+            <button class="btn primary" onclick="crearBackup()">☁️ Crear backup ahora</button>
+          </div>
+          <div id="backupList">
+            <div class="backup-item">
+              <div class="backup-icon">☁️</div>
+              <div class="backup-info">
+                <div class="backup-name">backup_2026-04-25_02-00.json</div>
+                <div class="backup-meta">Automático · 2.4 MB · hace 12 horas</div>
+              </div>
+              <button class="btn sm" onclick="descargarBackup('2026-04-25')">⬇ Descargar</button>
+            </div>
+            <div class="backup-item">
+              <div class="backup-icon">☁️</div>
+              <div class="backup-info">
+                <div class="backup-name">backup_2026-04-24_02-00.json</div>
+                <div class="backup-meta">Automático · 2.3 MB · hace 36 horas</div>
+              </div>
+              <button class="btn sm" onclick="descargarBackup('2026-04-24')">⬇ Descargar</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">Exportar datos</div></div>
+          <div class="card-body" style="display:flex;flex-wrap:wrap;gap:10px">
+            <button class="btn" onclick="exportData('productos')">⬇ Productos CSV</button>
+            <button class="btn" onclick="exportData('clientes')">⬇ Clientes CSV</button>
+            <button class="btn" onclick="exportData('ventas')">⬇ Ventas CSV</button>
+            <button class="btn" onclick="exportData('movimientos')">⬇ Movimientos CSV</button>
+            <button class="btn primary" onclick="exportData('todo')">⬇ Todo (ZIP)</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title" style="color:var(--red)">⚠️ Zona de peligro</div></div>
+          <div class="card-body">
+            <div class="alert danger" style="margin-bottom:14px">
+              ⚠️ Las acciones de esta sección son irreversibles. Asegúrate de tener un backup antes de continuar.
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button class="btn danger" onclick="limpiarDatos()">🗑️ Limpiar datos de prueba</button>
+              <button class="btn danger" onclick="resetSistema()">⚠️ Reiniciar sistema</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════ AVANZADO ════════ -->
+      <div class="page" id="page-avanzado">
+        <div class="section-head">
+          <div class="section-title">⚡ Configuración avanzada</div>
+          <div class="section-sub">Feature flags, modo debug y opciones técnicas</div>
+        </div>
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-head">
+            <div class="card-title">Feature flags</div>
+            <button class="btn primary" onclick="guardarFlags()">✓ Guardar</button>
+          </div>
+          <div class="card-body" id="flagsContainer">
+            <!-- generado por JS -->
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-head"><div class="card-title">Service Worker y PWA</div></div>
+          <div class="card-body">
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="label">PWA · Instalar en pantalla de inicio</div>
+                <div class="sub">Permite instalar el POS como app en Android / Windows / Mac</div>
+              </div>
+              <div class="toggle on" id="tSw" onclick="toggleSwitch(this)"></div>
+            </div>
+            <div style="margin-top:12px;display:flex;gap:8px">
+              <button class="btn sm" onclick="limpiarCache()">🗑️ Limpiar cache del SW</button>
+              <button class="btn sm" onclick="toast('SW versión v7.0.0 · actualizado','ok')">↻ Forzar actualización</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">Info del sistema</div></div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:8px;font-size:12.5px" id="sysInfo">
+              <!-- generado por JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ════════ MODAL: INVITAR USUARIO ════════ -->
+<div class="modal-bg" id="modalUsuario" onclick="if(event.target===this)closeModal('modalUsuario')">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">+ Invitar usuario</span>
+      <button class="btn sm" onclick="closeModal('modalUsuario')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="alert info">
+        ℹ️ El usuario recibirá un email de invitación. Al aceptarlo podrá crear su contraseña y acceder al sistema con el rol asignado.
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email *</label>
+        <input class="form-input" id="uEmail" type="email" placeholder="correo@ejemplo.com" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nombre</label>
+        <input class="form-input" id="uNombre" placeholder="Nombre completo">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Rol</label>
+        <select class="form-select" id="uRol">
+          <option value="cajero">🛒 Cajero — solo puede usar el POS</option>
+          <option value="owner">👑 Owner — acceso completo (cuidado)</option>
+        </select>
+        <div class="form-hint">El cajero no puede ver reportes ni configuración</div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('modalUsuario')">Cancelar</button>
+      <button class="btn primary" onclick="invitarUsuario()">✉️ Enviar invitación</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ MODAL: AGREGAR IMPRESORA ════════ -->
+<div class="modal-bg" id="modalImpresora" onclick="if(event.target===this)closeModal('modalImpresora')">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-head">
+      <span class="modal-title">🖨 Agregar impresora</span>
+      <button class="btn sm" onclick="closeModal('modalImpresora')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Tipo de conexión</label>
+        <select class="form-select" id="iPrinterType" onchange="updatePrinterFields()">
+          <option value="usb">USB (COM / Serial)</option>
+          <option value="wifi">WiFi (IP en red local)</option>
+          <option value="bluetooth">Bluetooth</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Modelo</label>
+        <select class="form-select" id="iPrinterModel">
+          <option>Epson TM-T20III</option>
+          <option>Epson TM-T88VI</option>
+          <option>Star TSP100</option>
+          <option>BIXOLON SRP-350</option>
+          <option>Genérica ESC/POS</option>
+        </select>
+      </div>
+      <div class="form-group" id="iPortGroup">
+        <label class="form-label">Puerto / IP</label>
+        <input class="form-input mono" id="iPort" placeholder="COM3  ó  192.168.1.100">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('modalImpresora')">Cancelar</button>
+      <button class="btn primary" onclick="agregarImpresora()">✓ Agregar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+
+// ── Helpers ──
+const esc = (s) => window.volvix?.utils?.esc(s) ?? String(s ?? '');
+
+// ── Init sesión ──
+(function initSession() {
+  const u = window.VOLVIX_USER;
+  if (!u) return;
+  document.getElementById('tbTenant').textContent = u.tenant_name || u.email || '—';
+})();
+
+// ── Navegación ──
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id)?.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  btn.classList.add('active');
+
+  // Cargar datos de la sección
+  const loaders = {
+    permisos: renderPermisos,
+    integraciones: renderIntegraciones,
+    avanzado: renderAvanzado,
+  };
+  if (loaders[id]) loaders[id]();
+}
+
+// ── Toggle switch ──
+function toggleSwitch(el) { el.classList.toggle('on'); }
+
+// ── Modales ──
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ── Toast ──
+function toast(msg, type = 'info') {
+  if (window.volvix?.utils?.toast) { window.volvix.utils.toast(msg, type); return; }
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + type;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.className = 'toast', 2800);
+}
+
+// ══════════════════════════════════════════════
+// GUARDADO DE SECCIONES
+// ══════════════════════════════════════════════
+
+async function persistTenantSettings(section, data) {
+  const tenantId = window.volvix?.session?.getTenantId?.() || window.VOLVIX_USER?.tenant_id;
+  if (!tenantId) return false;
+  // Intento 1: PATCH /api/tenants/:id (settings.<section>)
+  try {
+    await window.volvix.api.raw('PATCH', '/api/tenants/' + encodeURIComponent(tenantId), {
+      settings: { [section]: data },
+    });
+    return true;
+  } catch {}
+  // Intento 2: PATCH /api/tenant/settings (alias si existiera)
+  try {
+    await window.volvix.api.raw('PATCH', '/api/tenant/settings', { section, data });
+    return true;
+  } catch {}
+  return false;
+}
+
+async function guardarEmpresa() {
+  const data = {
+    negocio:   document.getElementById('eNegocio').value,
+    giro:      document.getElementById('eGiro').value,
+    telefono:  document.getElementById('eTelefono').value,
+    direccion: document.getElementById('eDireccion').value,
+    web:       document.getElementById('eWeb').value,
+    email:     document.getElementById('eEmail').value,
+    footer:    document.getElementById('eFooter').value,
+  };
+  localStorage.setItem('volvix:config:empresa', JSON.stringify(data));
+  // Propagar a VOLVIX_BRAND
+  if (window.VOLVIX_BRAND) {
+    window.VOLVIX_BRAND.name = data.negocio;
+    window.VOLVIX_BRAND.company = data.negocio;
+  }
+  const ok = await persistTenantSettings('empresa', data);
+  toast(ok ? '✓ Datos de empresa guardados (servidor)' : '✓ Guardado local · pendiente sync', ok ? 'ok' : 'warn');
+}
+
+async function guardarRegional() {
+  const data = {
+    timezone:   document.getElementById('rTimezone').value,
+    currency:   document.getElementById('rCurrency').value,
+    locale:     document.getElementById('rLocale').value,
+    dateFormat: document.getElementById('rDateFormat')?.value,
+    iva:        document.getElementById('rIva').value,
+  };
+  localStorage.setItem('volvix:config:regional', JSON.stringify(data));
+  if (window.VOLVIX_REGION) {
+    window.VOLVIX_REGION.timezone = data.timezone;
+    window.VOLVIX_REGION.currency = data.currency;
+    window.VOLVIX_REGION.locale   = data.locale;
+  }
+  const ok = await persistTenantSettings('regional', data);
+  toast(ok ? '✓ Configuración regional guardada (servidor)' : '✓ Guardado local · pendiente sync', ok ? 'ok' : 'warn');
+}
+
+async function guardarFiscal() {
+  const rfc = document.getElementById('fRfc').value.trim().toUpperCase();
+  if (rfc && rfc.length < 12) { toast('RFC inválido · mínimo 12 caracteres', 'err'); return; }
+  const data = {
+    rfc,
+    regimen:  document.getElementById('fRegimen').value,
+    razon:    document.getElementById('fRazon').value,
+    cp:       document.getElementById('fCp').value,
+    pac:      document.getElementById('fPac').value,
+  };
+  localStorage.setItem('volvix:config:fiscal', JSON.stringify(data));
+  const ok = await persistTenantSettings('fiscal', data);
+  toast(ok ? '✓ Datos fiscales guardados (servidor)' : '✓ Guardado local · pendiente sync', ok ? 'ok' : 'warn');
+}
+
+async function guardarTicket() {
+  const data = {
+    logo:    document.getElementById('tLogo')?.classList.contains('on'),
+    fecha:   document.getElementById('tFecha')?.classList.contains('on'),
+    folio:   document.getElementById('tFolio')?.classList.contains('on'),
+    cajero:  document.getElementById('tCajero')?.classList.contains('on'),
+    barcode: document.getElementById('tBarcode')?.classList.contains('on'),
+    iva:     document.getElementById('tIva')?.classList.contains('on'),
+    puntos:  document.getElementById('tPuntos')?.classList.contains('on'),
+    qr:      document.getElementById('tQr')?.classList.contains('on'),
+    paper:   document.getElementById('tPaper')?.value,
+  };
+  localStorage.setItem('volvix:config:ticket', JSON.stringify(data));
+  const ok = await persistTenantSettings('ticket', data);
+  toast(ok ? '✓ Diseño del ticket guardado (servidor)' : '✓ Guardado local · pendiente sync', ok ? 'ok' : 'warn');
+}
+
+async function guardarPagos() {
+  const data = {
+    tarjeta:    document.getElementById('pTarjeta')?.classList.contains('on'),
+    transfer:   document.getElementById('pTransfer')?.classList.contains('on'),
+    codi:       document.getElementById('pCodi')?.classList.contains('on'),
+    credito:    document.getElementById('pCredito')?.classList.contains('on'),
+    mpToken:    document.getElementById('mpToken')?.value,
+    mpConcepto: document.getElementById('mpConcepto')?.value,
+  };
+  localStorage.setItem('volvix:config:pagos', JSON.stringify(data));
+  const ok = await persistTenantSettings('pagos', data);
+  toast(ok ? '✓ Métodos de pago guardados (servidor)' : '✓ Guardado local · pendiente sync', ok ? 'ok' : 'warn');
+}
+
+function guardarFlags() {
+  const flags = {};
+  document.querySelectorAll('[data-flag]').forEach(el => {
+    flags[el.dataset.flag] = el.classList.contains('on');
+  });
+  localStorage.setItem('volvix:config:flags', JSON.stringify(flags));
+  if (window.VOLVIX_FLAGS) Object.assign(window.VOLVIX_FLAGS, flags);
+  toast('✓ Feature flags guardados · recarga para aplicar', 'ok');
+}
+
+// ── Cargar config guardada (local primero, luego refresh desde backend) ──
+function applySavedConfig(empresa, regional, fiscal) {
+  if (empresa) {
+    if (empresa.negocio)   document.getElementById('eNegocio').value   = empresa.negocio;
+    if (empresa.giro)      document.getElementById('eGiro').value      = empresa.giro;
+    if (empresa.telefono)  document.getElementById('eTelefono').value  = empresa.telefono;
+    if (empresa.direccion) document.getElementById('eDireccion').value = empresa.direccion;
+    if (empresa.footer)    document.getElementById('eFooter')          && (document.getElementById('eFooter').value = empresa.footer);
+  }
+  if (regional) {
+    if (regional.timezone) document.getElementById('rTimezone') && (document.getElementById('rTimezone').value = regional.timezone);
+    if (regional.currency) document.getElementById('rCurrency') && (document.getElementById('rCurrency').value = regional.currency);
+    if (regional.locale)   document.getElementById('rLocale')   && (document.getElementById('rLocale').value   = regional.locale);
+    if (regional.iva)      document.getElementById('rIva')      && (document.getElementById('rIva').value      = regional.iva);
+  }
+  if (fiscal) {
+    if (fiscal.rfc)     document.getElementById('fRfc')     && (document.getElementById('fRfc').value     = fiscal.rfc);
+    if (fiscal.regimen) document.getElementById('fRegimen') && (document.getElementById('fRegimen').value = fiscal.regimen);
+    if (fiscal.razon)   document.getElementById('fRazon')   && (document.getElementById('fRazon').value   = fiscal.razon);
+    if (fiscal.cp)      document.getElementById('fCp')      && (document.getElementById('fCp').value      = fiscal.cp);
+    if (fiscal.pac)     document.getElementById('fPac')     && (document.getElementById('fPac').value     = fiscal.pac);
+  }
+}
+(function loadSavedConfig() {
+  const empresa  = JSON.parse(localStorage.getItem('volvix:config:empresa')  || '{}');
+  const regional = JSON.parse(localStorage.getItem('volvix:config:regional') || '{}');
+  const fiscal   = JSON.parse(localStorage.getItem('volvix:config:fiscal')   || '{}');
+  applySavedConfig(empresa, regional, fiscal);
+})();
+// Refrescar desde backend (auth automatico via volvix-api)
+(async function refreshFromBackend() {
+  const tenantId = window.volvix?.session?.getTenantId?.() || window.VOLVIX_USER?.tenant_id;
+  if (!tenantId) return;
+  try {
+    const t = await window.volvix.api.tenants.get(tenantId);
+    const s = t?.settings || {};
+    if (s.empresa)  localStorage.setItem('volvix:config:empresa',  JSON.stringify(s.empresa));
+    if (s.regional) localStorage.setItem('volvix:config:regional', JSON.stringify(s.regional));
+    if (s.fiscal)   localStorage.setItem('volvix:config:fiscal',   JSON.stringify(s.fiscal));
+    if (s.ticket)   localStorage.setItem('volvix:config:ticket',   JSON.stringify(s.ticket));
+    if (s.pagos)    localStorage.setItem('volvix:config:pagos',    JSON.stringify(s.pagos));
+    applySavedConfig(s.empresa, s.regional, s.fiscal);
+  } catch {}
+})();
+
+// ══════════════════════════════════════════════
+// PERMISOS
+// ══════════════════════════════════════════════
+function renderPermisos() {
+  const permisos = [
+    { fn:'Cobrar ventas',                  owner:true,  cajero:true  },
+    { fn:'Ver historial de ventas',        owner:true,  cajero:true  },
+    { fn:'Aplicar descuentos',             owner:true,  cajero:false },
+    { fn:'Cambiar precio en venta',        owner:true,  cajero:false },
+    { fn:'Hacer devoluciones',             owner:true,  cajero:false },
+    { fn:'Ver inventario',                 owner:true,  cajero:true  },
+    { fn:'Agregar / editar productos',     owner:true,  cajero:false },
+    { fn:'Ver reportes',                   owner:true,  cajero:false },
+    { fn:'Ver clientes',                   owner:true,  cajero:true  },
+    { fn:'Editar clientes',                owner:true,  cajero:false },
+    { fn:'Ver corte de caja',              owner:true,  cajero:true  },
+    { fn:'Imprimir corte Z',               owner:true,  cajero:false },
+    { fn:'Abrir / cerrar turno',           owner:true,  cajero:true  },
+    { fn:'Acceder a configuración',        owner:true,  cajero:false },
+    { fn:'Ver panel del dueño',            owner:true,  cajero:false },
+    { fn:'Gestionar usuarios',             owner:true,  cajero:false },
+  ];
+  document.getElementById('permisosTable').innerHTML = permisos.map(p => `
+    <tr>
+      <td style="padding:9px 16px;border-bottom:1px solid var(--border);font-size:13px">${esc(p.fn)}</td>
+      <td style="padding:9px 14px;border-bottom:1px solid var(--border);text-align:center">${p.owner ? '✅' : '—'}</td>
+      <td style="padding:9px 14px;border-bottom:1px solid var(--border);text-align:center">${p.cajero ? '✅' : '<span style="color:var(--text-4)">✗</span>'}</td>
+    </tr>`).join('');
+}
+
+// ══════════════════════════════════════════════
+// USUARIOS
+// ══════════════════════════════════════════════
+function invitarUsuario() {
+  const email  = document.getElementById('uEmail').value.trim();
+  const nombre = document.getElementById('uNombre').value.trim();
+  const rol    = document.getElementById('uRol').value;
+  if (!email || !email.includes('@')) { toast('Email inválido', 'err'); return; }
+  closeModal('modalUsuario');
+  toast(`✓ Invitación enviada a ${email} como ${rol}`, 'ok');
+}
+
+function eliminarUsuario(nombre) {
+  if (!confirm(`¿Eliminar acceso de ${nombre}? Esta acción no se puede deshacer.`)) return;
+  toast(`✓ Acceso de ${nombre} revocado`, 'ok');
+}
+
+// ══════════════════════════════════════════════
+// IMPRESORAS
+// ══════════════════════════════════════════════
+async function detectarImpresoras() {
+  toast('Buscando impresoras registradas...', 'info');
+  try {
+    const r = await window.volvix.api.raw('GET', '/api/printers');
+    const list = (r && Array.isArray(r.printers)) ? r.printers : [];
+    if (!list.length) {
+      toast('No hay impresoras registradas. Agrega una con "+ Nueva impresora" o usa Bluetooth.', 'warn');
+      return;
+    }
+    const names = list.map(p => p.name || p.model || p.port || 'impresora').slice(0,3).join(', ');
+    toast(`✓ ${list.length} impresora(s) registrada(s): ${names}`, 'ok');
+  } catch (e) {
+    toast('No se pudo consultar impresoras del servidor', 'err');
+  }
+}
+
+async function probarImpresora(nombre, opts) {
+  opts = opts || {};
+  toast(`Imprimiendo ticket de prueba en ${nombre}...`, 'info');
+  const sample = [
+    '================================',
+    '       VOLVIX POS · TEST',
+    '================================',
+    'Impresora: ' + nombre,
+    'Fecha: ' + new Date().toLocaleString('es-MX'),
+    '--------------------------------',
+    'Si lees esto, la impresora',
+    'esta conectada correctamente.',
+    '================================',
+    '\n\n\n', // feed paper
+  ].join('\n');
+
+  // 1) WebUSB direct path (if user opts in or transport explicitly = 'usb')
+  if (opts.transport === 'usb') {
+    try {
+      const ok = await testPrinterUSB(sample);
+      if (ok) { toast(`✓ Ticket de prueba enviado por USB a ${nombre}`, 'ok'); return; }
+    } catch (err) {
+      toast('USB: ' + (err && err.message || err), 'warn');
+      // fall through to backend
+    }
+  }
+  // 2) WebBluetooth direct path
+  if (opts.transport === 'bluetooth') {
+    try {
+      const ok = await testPrinterBluetooth(sample);
+      if (ok) { toast(`✓ Ticket de prueba enviado por BT a ${nombre}`, 'ok'); return; }
+    } catch (err) {
+      toast('Bluetooth: ' + (err && err.message || err), 'warn');
+    }
+  }
+  // 3) Server-side print queue (default)
+  try {
+    await window.volvix.api.raw('POST', '/api/printer/raw', { text: sample, printer: nombre });
+    toast(`✓ Ticket de prueba enviado a ${nombre}`, 'ok');
+  } catch (err) {
+    toast('Error: ' + err.message + ' · usa app nativa para impresoras locales', 'warn');
+  }
+}
+
+// Real USB test using WebUSB API (triggers permission prompt). Returns true if
+// the OS reported the bulk-out write succeeded. ESC/POS thermal printers are
+// vendor=class 7 (Printer) or 0xFF (Vendor-specific). We let the user pick.
+async function testPrinterUSB(payload) {
+  if (!navigator.usb || !navigator.usb.requestDevice) {
+    throw new Error('WebUSB no soportado. Usa Chrome/Edge sobre HTTPS.');
+  }
+  toast('Abriendo selector USB...', 'info');
+  // Common thermal printer vendor IDs (Epson, Star, Bixolon, Citizen, Xprinter clones)
+  const filters = [
+    { vendorId: 0x04b8 }, // Epson
+    { vendorId: 0x0519 }, // Star
+    { vendorId: 0x1504 }, // Bixolon
+    { vendorId: 0x1cbe }, // Citizen
+    { vendorId: 0x0fe6 }, // Xprinter / clones
+    { classCode: 7 }      // USB Printer class fallback
+  ];
+  const device = await navigator.usb.requestDevice({ filters });
+  if (!device) throw new Error('Sin dispositivo seleccionado');
+  await device.open();
+  if (device.configuration === null) await device.selectConfiguration(1);
+  // Find first interface with bulk-OUT endpoint
+  let ifaceNum = 0, epOut = 1;
+  outer:
+  for (const iface of (device.configuration && device.configuration.interfaces || [])) {
+    for (const alt of iface.alternates) {
+      for (const ep of alt.endpoints) {
+        if (ep.direction === 'out' && ep.type === 'bulk') {
+          ifaceNum = iface.interfaceNumber;
+          epOut = ep.endpointNumber;
+          break outer;
+        }
+      }
+    }
+  }
+  await device.claimInterface(ifaceNum);
+  const enc = new TextEncoder();
+  const result = await device.transferOut(epOut, enc.encode(payload));
+  try { await device.releaseInterface(ifaceNum); } catch(_){}
+  try { await device.close(); } catch(_){}
+  // Persist for reuse
+  try {
+    const stored = JSON.parse(localStorage.getItem('vlx_printers') || '[]');
+    const info = { id: 'usb-' + (device.vendorId||'?') + '-' + (device.productId||'?'), name: device.productName || ('USB ' + (device.vendorId||'')), type: 'usb', pairedAt: Date.now() };
+    const dedup = stored.filter(p => p.id !== info.id); dedup.push(info);
+    localStorage.setItem('vlx_printers', JSON.stringify(dedup));
+  } catch(_){}
+  return !!(result && result.status === 'ok');
+}
+
+// Real BT test: connects to a paired (or new) device and writes the payload.
+async function testPrinterBluetooth(payload) {
+  if (!navigator.bluetooth || !navigator.bluetooth.requestDevice) {
+    throw new Error('Web Bluetooth no soportado.');
+  }
+  toast('Abriendo selector Bluetooth...', 'info');
+  const device = await navigator.bluetooth.requestDevice({
+    filters: [
+      { namePrefix: 'Printer' }, { namePrefix: 'BT' }, { namePrefix: 'POS' },
+      { services: ['000018f0-0000-1000-8000-00805f9b34fb'] }
+    ],
+    optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb', 'e7810a71-73ae-499d-8c15-faa9aef0c3f2']
+  });
+  if (!device || !device.gatt) throw new Error('Sin dispositivo seleccionado');
+  const server = await device.gatt.connect();
+  // Try the SPP-like service used by most ESC/POS BT printers
+  const SVC = '000018f0-0000-1000-8000-00805f9b34fb';
+  const CHAR = '00002af1-0000-1000-8000-00805f9b34fb';
+  const svc = await server.getPrimaryService(SVC);
+  const ch  = await svc.getCharacteristic(CHAR);
+  const enc = new TextEncoder();
+  const data = enc.encode(payload);
+  // Most BT printers limit MTU around 100-180 bytes; chunk to be safe
+  const CHUNK = 120;
+  for (let i = 0; i < data.length; i += CHUNK) {
+    await ch.writeValueWithoutResponse(data.slice(i, i + CHUNK));
+  }
+  try { server.disconnect(); } catch(_){}
+  return true;
+}
+window.probarImpresora = probarImpresora;
+window.testPrinterUSB = testPrinterUSB;
+window.testPrinterBluetooth = testPrinterBluetooth;
+
+async function pairBluetooth() {
+  if (!('bluetooth' in navigator) || !navigator.bluetooth || !navigator.bluetooth.requestDevice) {
+    toast('Web Bluetooth no soportado en este navegador. Usa Chrome/Edge en HTTPS o app nativa.', 'warn');
+    return;
+  }
+  toast('Abriendo selector de dispositivos Bluetooth...', 'info');
+  try {
+    // Common ESC/POS thermal printer service UUIDs
+    var device = await navigator.bluetooth.requestDevice({
+      filters: [
+        { namePrefix: 'Printer' },
+        { namePrefix: 'BT' },
+        { namePrefix: 'POS' },
+        { services: ['000018f0-0000-1000-8000-00805f9b34fb'] },
+        { services: ['e7810a71-73ae-499d-8c15-faa9aef0c3f2'] }
+      ],
+      optionalServices: [
+        '000018f0-0000-1000-8000-00805f9b34fb',
+        'e7810a71-73ae-499d-8c15-faa9aef0c3f2',
+        '49535343-fe7d-4ae5-8fa9-9fafd205e455',
+        'battery_service'
+      ]
+    });
+    if (!device) { toast('Sin dispositivo seleccionado', 'warn'); return; }
+    // Persist the device id/name for reuse
+    var info = { id: device.id, name: device.name || 'Impresora BT', type: 'bluetooth', pairedAt: Date.now() };
+    try {
+      var stored = JSON.parse(localStorage.getItem('vlx_printers') || '[]');
+      // de-dupe by id
+      stored = stored.filter(function(p){ return p.id !== info.id; });
+      stored.push(info);
+      localStorage.setItem('vlx_printers', JSON.stringify(stored));
+    } catch(e){}
+    // Try connect for confirmation
+    try {
+      if (device.gatt && device.gatt.connect) {
+        var server = await device.gatt.connect();
+        if (server && server.disconnect) server.disconnect();
+      }
+    } catch(e){}
+    toast('✓ Pareada: ' + (device.name || device.id), 'ok');
+    appendBluetoothPrinter(info);
+  } catch (err) {
+    if (err && err.name === 'NotFoundError') {
+      toast('Sin dispositivo seleccionado', 'warn');
+    } else {
+      toast('Bluetooth: ' + (err && err.message ? err.message : 'error desconocido'), 'err');
+    }
+  }
+}
+
+function appendBluetoothPrinter(info){
+  var list = document.getElementById('printerList');
+  if (!list) return;
+  var row = document.createElement('div');
+  row.className = 'printer-card';
+  row.innerHTML =
+    '<div class="printer-icon">📱</div>' +
+    '<div class="printer-info">' +
+      '<div class="printer-name">' + esc(info.name) + '</div>' +
+      '<div class="printer-model">Bluetooth · id ' + esc((info.id||'').slice(0,12)) + '… · ESC/POS</div>' +
+    '</div>' +
+    '<span class="printer-status status-ok">✓ Pareada</span>' +
+    '<button class="btn sm" onclick="probarImpresora(\'' + esc(info.name).replace(/\\/g,'\\\\').replace(/\'/g,"\\'") + '\')">Probar</button>';
+  list.appendChild(row);
+}
+
+// Auto-render any previously paired Bluetooth devices on page load
+(function restorePairedBluetooth(){
+  try {
+    var stored = JSON.parse(localStorage.getItem('vlx_printers') || '[]');
+    if (!Array.isArray(stored) || !stored.length) return;
+    document.addEventListener('DOMContentLoaded', function(){
+      stored.forEach(function(p){ if (p && p.type === 'bluetooth') appendBluetoothPrinter(p); });
+    });
+  } catch(e){}
+})();
+
+function updatePrinterFields() {
+  const type = document.getElementById('iPrinterType').value;
+  const lbl  = { usb:'Puerto COM (ej. COM3)', wifi:'Dirección IP (ej. 192.168.1.100)', bluetooth:'Nombre del dispositivo BT' }[type];
+  const placeholder = { usb:'COM3', wifi:'192.168.1.100', bluetooth:'Impresora-BT' }[type];
+  document.getElementById('iPort').placeholder = placeholder;
+}
+
+function agregarImpresora() {
+  const tipo  = document.getElementById('iPrinterType').value;
+  const model = document.getElementById('iPrinterModel').value;
+  const port  = document.getElementById('iPort').value.trim();
+  if (!port) { toast('Ingresa el puerto o IP', 'err'); return; }
+  closeModal('modalImpresora');
+  toast(`✓ ${model} agregada por ${tipo.toUpperCase()}`, 'ok');
+}
+
+// ══════════════════════════════════════════════
+// INTEGRACIONES
+// ══════════════════════════════════════════════
+function renderIntegraciones() {
+  const integs = [
+    { nombre:'WhatsApp Business',  emoji:'💬', desc:'Envía tickets y notificaciones por WhatsApp automáticamente', status:'active', plan:'Pro+' },
+    { nombre:'Mercado Pago',        emoji:'💳', desc:'Genera QR de pago y cobra con cualquier billetera digital', status:'inactive', plan:'Básico+' },
+    { nombre:'Facturama (SAT)',     emoji:'🧾', desc:'Timbrado de CFDI 4.0 directamente desde el POS', status:'inactive', plan:'Pro+' },
+    { nombre:'ElevenLabs',          emoji:'🎙️', desc:'Voz en español para videos de capacitación automáticos', status:'active', plan:'Enterprise' },
+    { nombre:'Google Analytics',    emoji:'📊', desc:'Métricas del marketplace y las landings dinámicas', status:'inactive', plan:'Pro+' },
+    { nombre:'Zapier',              emoji:'⚡', desc:'Conecta Volvix con +5,000 apps externas via webhooks', status:'inactive', plan:'Enterprise' },
+  ];
+  const statusMap = { active:'green', inactive:'gray' };
+  const statusLabel = { active:'✓ Activo', inactive:'No activo' };
+  document.getElementById('integracionesList').innerHTML = integs.map(i => `
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-body" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+        <div style="font-size:34px;flex-shrink:0">${i.emoji}</div>
+        <div style="flex:1;min-width:200px">
+          <div style="font-size:14px;font-weight:700;margin-bottom:2px">${esc(i.nombre)}</div>
+          <div style="font-size:12px;color:var(--text-3)">${esc(i.desc)}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="background:var(--bg-3);color:var(--text-3);font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px">${esc(i.plan)}</span>
+          <span class="pill ${statusMap[i.status]}">${statusLabel[i.status]}</span>
+          <button class="btn sm ${i.status==='active'?'danger':''}" onclick="toggleIntegracion(this,'${esc(i.nombre)}','${i.status}')">
+            ${i.status === 'active' ? 'Desactivar' : 'Activar'}
+          </button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleIntegracion(btn, nombre, status) {
+  toast(`${status === 'active' ? 'Desactivando' : 'Activando'} ${nombre}...`, 'info');
+  setTimeout(() => toast(`✓ ${nombre} ${status === 'active' ? 'desactivado' : 'activado'}`, 'ok'), 1000);
+}
+
+// ══════════════════════════════════════════════
+// AVANZADO
+// ══════════════════════════════════════════════
+function renderAvanzado() {
+  const flags = window.VOLVIX_FLAGS || {};
+  const savedFlags = JSON.parse(localStorage.getItem('volvix:config:flags') || '{}');
+  const merged = { ...flags, ...savedFlags };
+
+  const flagDefs = [
+    { key:'realtimeSync',   label:'Sync en tiempo real', sub:'WebSocket para actualizaciones en vivo' },
+    { key:'offlineQueue',   label:'Cola offline',         sub:'Encola operaciones si no hay internet' },
+    { key:'aiEngine',       label:'AI Engine',            sub:'Motor de auto-evolución de features' },
+    { key:'aiSupport',      label:'AI Support',           sub:'Soporte automatizado con IA' },
+    { key:'remoteControl',  label:'Control remoto',       sub:'Sistema propio de control remoto VX-XXXX' },
+    { key:'serviceWorker',  label:'Service Worker (PWA)', sub:'Cache offline y app instalable' },
+    { key:'debugMode',      label:'Modo debug',           sub:'Logs verbosos en consola del navegador' },
+  ];
+
+  document.getElementById('flagsContainer').innerHTML = flagDefs.map(f => `
+    <div class="toggle-row">
+      <div class="toggle-info"><div class="label">${esc(f.label)}</div><div class="sub">${esc(f.sub)}</div></div>
+      <div class="toggle ${merged[f.key] !== false ? 'on' : ''}" data-flag="${esc(f.key)}" onclick="toggleSwitch(this)"></div>
+    </div>`).join('');
+
+  // Info del sistema
+  const u = window.VOLVIX_USER;
+  const b = window.VOLVIX_BRAND || {};
+  document.getElementById('sysInfo').innerHTML = [
+    { label:'Versión',          val: b.version || '7.0.0' },
+    { label:'Tenant ID',        val: u?.tenant_id || '—' },
+    { label:'Rol',              val: u?.role || '—' },
+    { label:'Online',           val: window.volvix?.sync?.isOnline?.() ? '✅ Sí' : '❌ No' },
+    { label:'Pendientes sync',  val: window.volvix?.sync?.pendingCount?.() ?? '—' },
+    { label:'User Agent',       val: navigator.userAgent.slice(0,60) + '...' },
+    { label:'Pantalla',         val: screen.width + 'x' + screen.height },
+    { label:'Supabase URL',     val: (window.SUPABASE_URL || '—').slice(0, 40) + '...' },
+  ].map(({ label, val }) => `
+    <div style="display:flex;gap:8px;padding:8px 12px;background:var(--bg-2);border-radius:8px">
+      <span style="color:var(--text-3);width:160px;flex-shrink:0;font-weight:600">${esc(label)}</span>
+      <span style="font-family:var(--font-mono);font-size:12px;word-break:break-all">${esc(String(val))}</span>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════
+// BACKUP
+// ══════════════════════════════════════════════
+function crearBackup() {
+  const data = {
+    version: '7.0.0',
+    fecha: new Date().toISOString(),
+    tenant_id: window.VOLVIX_USER?.tenant_id,
+    data: {
+      productos:  window.volvix?.offline?.list?.('productos') || [],
+      clientes:   window.volvix?.offline?.list?.('clientes')  || [],
+      ventas:     window.volvix?.offline?.list?.('ventas')    || [],
+    },
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `backup_volvix_${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  toast('✓ Backup descargado', 'ok');
+}
+
+async function descargarBackup(fecha) {
+  toast(`Descargando backup del ${fecha}...`, 'info');
+  try {
+    const headers = window.volvix?.session?.getAuthHeaders?.() || {};
+    const r = await fetch('/api/backup/export?format=json', { headers });
+    if (!r.ok) throw new Error('http ' + r.status);
+    const blob = await r.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `backup_${fecha || new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    toast('✓ Backup descargado', 'ok');
+  } catch (e) {
+    toast('No se pudo descargar el backup. Reintenta.', 'err');
+  }
+}
+
+async function exportData(type) {
+  const label = { productos:'Productos', clientes:'Clientes', ventas:'Ventas', movimientos:'Movimientos', todo:'Todo' }[type] || type;
+  toast(`Preparando exportación: ${label}...`, 'info');
+  try {
+    const headers = window.volvix?.session?.getAuthHeaders?.() || {};
+    const r = await fetch('/api/backup/export?format=json', { headers });
+    if (!r.ok) throw new Error('http ' + r.status);
+    const full = await r.json();
+    let payload = full;
+    if (type !== 'todo' && full && typeof full === 'object') {
+      const map = { productos:'products', clientes:'customers', ventas:'sales', movimientos:'movements' };
+      const key = map[type];
+      if (key && full[key] !== undefined) payload = { [key]: full[key] };
+    }
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${type}_${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    toast(`✓ ${label} exportado`, 'ok');
+  } catch (e) {
+    toast(`No se pudo exportar ${label}. Reintenta.`, 'err');
+  }
+}
+
+function limpiarDatos() {
+  if (!confirm('¿Limpiar todos los datos de prueba del localStorage? Esto NO borra datos en el servidor.')) return;
+  ['volvix:offline-data','volvix:sync:queue','volvix:sync:local','volvix:sync:meta'].forEach(k => localStorage.removeItem(k));
+  toast('✓ Datos de prueba limpiados · recarga la página', 'ok');
+}
+
+function resetSistema() {
+  if (!confirm('⚠️ ¿REINICIAR el sistema? Se borrarán TODOS los datos locales y la sesión.')) return;
+  if (!confirm('⚠️ SEGUNDA CONFIRMACIÓN: esta acción es irreversible. ¿Continuar?')) return;
+  localStorage.clear();
+  sessionStorage.clear();
+  toast('Sistema reiniciado · redirigiendo...', 'warn');
+  setTimeout(() => location.replace('/login.html'), 1500);
+}
+
+function limpiarCache() {
+  if ('caches' in window) {
+    caches.keys().then(names => names.forEach(n => caches.delete(n)));
+    toast('✓ Cache del Service Worker limpiado', 'ok');
+  } else {
+    toast('No hay cache activo', 'info');
+  }
+}
+
+// ── Keyboard ──
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.modal-bg.open').forEach(m => m.classList.remove('open'));
+});
+
+// ── INIT ──
+window.volvix.ready(() => {
+  // Cargar primera sección al init ya está activa por CSS
+});
+</script>
+</body>
+</html>

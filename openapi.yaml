@@ -1,0 +1,1347 @@
+openapi: 3.1.0
+info:
+  title: Volvix POS API
+  description: |
+    API serverless de Volvix POS conectada a Supabase. Multi-tenant, multi-rol (cajero, admin, owner, superadmin).
+    Autenticación basada en JWT (Bearer). Todas las rutas bajo `/api/*` salvo `/api/login`, `/api/logout`,
+    `/api/health`, `/api/health/deep`, `/api/errors/log`, y los endpoints de password-reset requieren `Authorization: Bearer <jwt>`.
+  version: 7.3.0-r14
+  contact:
+    name: Volvix POS
+    url: https://salvadorexoficial.com
+  license:
+    name: Proprietary
+servers:
+  - url: https://salvadorexoficial.com
+    description: Producción
+  - url: http://localhost:3000
+    description: Desarrollo local
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Auth
+  - name: Health
+  - name: Tenants
+  - name: Products
+  - name: Sales
+  - name: Customers
+  - name: Owner
+  - name: Features
+  - name: AI
+  - name: Tickets
+  - name: Inventory
+  - name: InventoryAdvanced
+  - name: Reports
+  - name: Sync
+  - name: Search
+  - name: Blobs
+  - name: Observability
+  - name: Admin
+  - name: Docs
+
+paths:
+  /api/login:
+    post:
+      tags: [Auth]
+      summary: Iniciar sesión y obtener JWT
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: Login OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LoginResponse' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /api/logout:
+    post:
+      tags: [Auth]
+      summary: Cerrar sesión (cliente debe descartar token)
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OkMessage' }
+
+  /api/auth/password-reset/request:
+    post:
+      tags: [Auth]
+      summary: Solicitar reset de contraseña (envía email con token)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email }
+      responses:
+        '200': { description: OK (siempre 200 por seguridad), content: { application/json: { schema: { $ref: '#/components/schemas/Ok' } } } }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /api/auth/password-reset/confirm:
+    post:
+      tags: [Auth]
+      summary: Confirmar reset de contraseña con token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, password]
+              properties:
+                token: { type: string }
+                password: { type: string, format: password, minLength: 8 }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Ok' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /api/health:
+    get:
+      tags: [Health]
+      summary: Health check ligero
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Health' }
+
+  /api/health/deep:
+    get:
+      tags: [Health]
+      summary: Health check profundo (Supabase, JWT, env)
+      security: []
+      responses:
+        '200': { description: Healthy, content: { application/json: { schema: { $ref: '#/components/schemas/HealthDeep' } } } }
+        '503': { description: Degraded, content: { application/json: { schema: { $ref: '#/components/schemas/HealthDeep' } } } }
+
+  /api/status:
+    get:
+      tags: [Health]
+      summary: Estado de cableado (status.json)
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: object, additionalProperties: true } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { description: status.json no encontrado, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /api/metrics:
+    get:
+      tags: [Observability]
+      summary: Métricas runtime (admin/owner/superadmin)
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Metrics' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /api/errors/log:
+    post:
+      tags: [Observability]
+      summary: Registrar error de cliente (telemetría)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ErrorLogEntry' }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Ok' } } } }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /api/tenants:
+    get:
+      tags: [Tenants]
+      summary: Listar tenants visibles
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Tenant' } } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '500': { $ref: '#/components/responses/ServerError' }
+    post:
+      tags: [Tenants]
+      summary: Crear tenant (admin/owner/superadmin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TenantInput' }
+      responses:
+        '200': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Tenant' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /api/tenants/{id}:
+    parameters:
+      - $ref: '#/components/parameters/UuidId'
+    patch:
+      tags: [Tenants]
+      summary: Actualizar tenant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TenantInput' }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Tenant' } } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/ServerError' }
+    delete:
+      tags: [Tenants]
+      summary: Suspender tenant (soft delete)
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/OkMessage' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /api/products:
+    get:
+      tags: [Products]
+      summary: Listar productos del tenant
+      parameters:
+        - in: query
+          name: tenant_id
+          schema: { type: string }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Product' } } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '500': { $ref: '#/components/responses/ServerError' }
+    post:
+      tags: [Products]
+      summary: Crear producto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProductInput' }
+      responses:
+        '200': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Product' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /api/products/{id}:
+    parameters:
+      - $ref: '#/components/parameters/UuidId'
+    patch:
+      tags: [Products]
+      summary: Actualizar producto
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/ProductInput' } } }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Product' } } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '500': { $ref: '#/components/responses/ServerError' }
+    delete:
+      tags: [Products]
+      summary: Eliminar producto
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Ok' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /api/sales:
+    get:
+      tags: [Sales]
+      summary: Listar ventas
+      parameters:
+        - in: query
+          name: user_id
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Sale' } } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '500': { $ref: '#/components/responses/ServerError' }
+    post:
+      tags: [Sales]
+      summary: Registrar venta (envía recibo por email si customer.email)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SaleInput' }
+      responses:
+        '200': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Sale' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /api/customers:
+    get:
+      tags: [Customers]
+      summary: Listar clientes
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Customer' } } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Customers]
+      summary: Crear cliente
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/CustomerInput' } } }
+      responses:
+        '200': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Customer' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /api/customers/{id}:
+    parameters:
+      - $ref: '#/components/parameters/UuidId'
+    patch:
+      tags: [Customers]
+      summary: Actualizar cliente
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/CustomerInput' } } }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Customer' } } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    delete:
+      tags: [Customers]
+      summary: Soft-delete cliente
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Ok' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/owner/dashboard:
+    get:
+      tags: [Owner]
+      summary: Dashboard agregado (admin/owner/superadmin)
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/OwnerDashboard' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/owner/tenants:
+    get:
+      tags: [Owner]
+      summary: Listar todos los tenants
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Tenant' } } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/owner/users:
+    get:
+      tags: [Owner]
+      summary: Listar usuarios del sistema
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/User' } } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [Owner]
+      summary: Crear usuario (envía email de bienvenida)
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/UserInput' } } }
+      responses:
+        '200': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/User' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/owner/sales-report:
+    get:
+      tags: [Owner]
+      summary: Reporte diario consolidado
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { type: object, additionalProperties: true } } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/owner/licenses:
+    get:
+      tags: [Owner]
+      summary: Listar licencias
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/License' } } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [Owner]
+      summary: Crear licencia
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/LicenseInput' } } }
+      responses:
+        '200': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/License' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/owner/domains:
+    get:
+      tags: [Owner]
+      summary: Listar dominios
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { type: object, additionalProperties: true } } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/owner/billing:
+    get:
+      tags: [Owner]
+      summary: Configuraciones de facturación
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { type: object, additionalProperties: true } } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/owner/low-stock:
+    get:
+      tags: [Owner]
+      summary: Productos con stock bajo (<20)
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Product' } } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/owner/sync-queue:
+    get:
+      tags: [Owner]
+      summary: Cola de sincronización pendiente
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { type: object, additionalProperties: true } } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/owner/settings:
+    get:
+      tags: [Owner]
+      summary: Obtener settings del owner
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: object, additionalProperties: true } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Owner]
+      summary: Guardar settings del owner
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, additionalProperties: true } } }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Ok' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/features:
+    get:
+      tags: [Features]
+      summary: Catálogo de features
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Feature' } } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/features/request:
+    post:
+      tags: [Features]
+      summary: Solicitar feature (la IA decide activate/extend/create)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [clientRequest]
+              properties:
+                clientRequest: { type: string }
+                tenantId: { type: string }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/FeatureDecision' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/features/activate:
+    post:
+      tags: [Features]
+      summary: Activar feature para un tenant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [featureId]
+              properties:
+                featureId: { type: string }
+                tenantId: { type: string }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/OkMessage' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/ai/decide:
+    post:
+      tags: [AI]
+      summary: Consultar IA (decisión libre)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                prompt: { type: string }
+                system: { type: string }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/AIResponse' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+
+  /api/ai/support:
+    post:
+      tags: [AI]
+      summary: IA de soporte técnico
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message: { type: string }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/AIResponse' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+
+  /api/ai/decisions:
+    get:
+      tags: [AI]
+      summary: Historial de decisiones de la IA
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { type: object, additionalProperties: true } } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/tickets:
+    get:
+      tags: [Tickets]
+      summary: Listar tickets
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Ticket' } } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Tickets]
+      summary: Crear ticket (la IA intenta resolver)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title]
+              properties:
+                title: { type: string }
+                description: { type: string }
+                tenant_id: { type: string }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: object, properties: { ok: { type: boolean }, ticket: { $ref: '#/components/schemas/Ticket' } } } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/inventory:
+    get:
+      tags: [Inventory]
+      summary: Listado simple de productos con stock
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Product' } } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/inventory/adjust:
+    post:
+      tags: [Inventory]
+      summary: Ajustar stock de un producto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [product_id, new_stock]
+              properties:
+                product_id: { type: string, format: uuid }
+                new_stock: { type: integer }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Ok' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/inventory/locations:
+    get:
+      tags: [InventoryAdvanced]
+      summary: Listar ubicaciones de inventario
+      parameters:
+        - in: query
+          name: type
+          schema: { type: string, enum: [warehouse, branch, transit] }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/InventoryLocation' } } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [InventoryAdvanced]
+      summary: Crear ubicación (no cajero)
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/InventoryLocationInput' } } }
+      responses:
+        '200': { description: Created, content: { application/json: { schema: { type: object, properties: { ok: { type: boolean }, result: { $ref: '#/components/schemas/InventoryLocation' } } } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/inventory/locations/{id}:
+    parameters:
+      - $ref: '#/components/parameters/UuidId'
+    patch:
+      tags: [InventoryAdvanced]
+      summary: Actualizar ubicación
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/InventoryLocationInput' } } }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/InventoryLocation' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/inventory/stock:
+    get:
+      tags: [InventoryAdvanced]
+      summary: Stock por ubicación / producto
+      parameters:
+        - in: query
+          name: location_id
+          schema: { type: string, format: uuid }
+        - in: query
+          name: product_id
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/StockRow' } } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/inventory/movements:
+    post:
+      tags: [InventoryAdvanced]
+      summary: Registrar movimiento (in/out/transfer/adjust/loss)
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/InventoryMovementInput' } } }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/InventoryMovement' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/inventory/counts/start:
+    post:
+      tags: [InventoryAdvanced]
+      summary: Iniciar conteo de inventario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [location_id]
+              properties:
+                location_id: { type: string, format: uuid }
+                notes: { type: string }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/InventoryCount' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/inventory/counts/{id}/lines:
+    parameters:
+      - $ref: '#/components/parameters/UuidId'
+    post:
+      tags: [InventoryAdvanced]
+      summary: Agregar línea a conteo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [product_id, counted_qty]
+              properties:
+                product_id: { type: string, format: uuid }
+                counted_qty: { type: number }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Ok' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/inventory/counts/{id}/finalize:
+    parameters:
+      - $ref: '#/components/parameters/UuidId'
+    post:
+      tags: [InventoryAdvanced]
+      summary: Finalizar conteo (ajusta stock)
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Ok' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/reports/daily:
+    get:
+      tags: [Reports]
+      summary: Reporte diario de ventas (30 días)
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { type: object, additionalProperties: true } } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/reports/sales:
+    get:
+      tags: [Reports]
+      summary: Reporte de ventas
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sales: { type: array, items: { $ref: '#/components/schemas/Sale' } }
+                  total: { type: number }
+                  count: { type: integer }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/reports/inventory:
+    get:
+      tags: [Reports]
+      summary: Reporte de inventario
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items: { type: array, items: { $ref: '#/components/schemas/Product' } }
+                  generated_at: { type: integer, format: int64 }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/sync:
+    post:
+      tags: [Sync]
+      summary: Sincronización offline (lote de items)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      type: { type: string, enum: [sale, customer] }
+                      data: { type: object, additionalProperties: true }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  synced: { type: integer, format: int64 }
+                  results: { type: array, items: { type: object, additionalProperties: true } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/search:
+    get:
+      tags: [Search]
+      summary: Búsqueda de productos
+      parameters:
+        - in: query
+          name: q
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results: { type: array, items: { $ref: '#/components/schemas/Product' } }
+                  q: { type: string }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Search]
+      summary: Indexar contenido (stub)
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, additionalProperties: true } } }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: object, properties: { ok: { type: boolean }, indexed: { type: integer } } } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/branches:
+    get: { tags: [Blobs], summary: 'Leer blob: branches', responses: { '200': { $ref: '#/components/responses/BlobValue' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+    post: { tags: [Blobs], summary: 'Guardar blob: branches', requestBody: { required: true, content: { application/json: { schema: { type: object, additionalProperties: true } } } }, responses: { '200': { $ref: '#/components/responses/BlobStored' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+  /api/branches/permissions:
+    get: { tags: [Blobs], summary: 'Leer blob: branches/permissions', responses: { '200': { $ref: '#/components/responses/BlobValue' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+    post: { tags: [Blobs], summary: 'Guardar blob: branches/permissions', requestBody: { required: true, content: { application/json: { schema: { type: object, additionalProperties: true } } } }, responses: { '200': { $ref: '#/components/responses/BlobStored' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+  /api/branches/cashboxes:
+    get: { tags: [Blobs], summary: 'Leer blob: branches/cashboxes', responses: { '200': { $ref: '#/components/responses/BlobValue' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+    post: { tags: [Blobs], summary: 'Guardar blob: branches/cashboxes', requestBody: { required: true, content: { application/json: { schema: { type: object, additionalProperties: true } } } }, responses: { '200': { $ref: '#/components/responses/BlobStored' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+  /api/branch_inventory:
+    get: { tags: [Blobs], summary: 'Leer blob: branch_inventory', responses: { '200': { $ref: '#/components/responses/BlobValue' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+    post: { tags: [Blobs], summary: 'Guardar blob: branch_inventory', requestBody: { required: true, content: { application/json: { schema: { type: object, additionalProperties: true } } } }, responses: { '200': { $ref: '#/components/responses/BlobStored' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+  /api/branch_inventory/transfers:
+    get: { tags: [Blobs], summary: 'Leer blob: branch_inventory/transfers', responses: { '200': { $ref: '#/components/responses/BlobValue' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+    post: { tags: [Blobs], summary: 'Guardar blob: branch_inventory/transfers', requestBody: { required: true, content: { application/json: { schema: { type: object, additionalProperties: true } } } }, responses: { '200': { $ref: '#/components/responses/BlobStored' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+  /api/forecasts:
+    get: { tags: [Blobs], summary: 'Leer blob: forecasts', responses: { '200': { $ref: '#/components/responses/BlobValue' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+    post: { tags: [Blobs], summary: 'Guardar blob: forecasts', requestBody: { required: true, content: { application/json: { schema: { type: object, additionalProperties: true } } } }, responses: { '200': { $ref: '#/components/responses/BlobStored' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+  /api/forecasts/{sub}:
+    parameters: [ { in: path, name: sub, required: true, schema: { type: string } } ]
+    get: { tags: [Blobs], summary: 'Leer sub-blob: forecasts/{sub}', responses: { '200': { $ref: '#/components/responses/BlobValue' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+    post: { tags: [Blobs], summary: 'Guardar sub-blob: forecasts/{sub}', requestBody: { required: true, content: { application/json: { schema: { type: object, additionalProperties: true } } } }, responses: { '200': { $ref: '#/components/responses/BlobStored' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+  /api/leads:
+    get: { tags: [Blobs], summary: 'Leer blob: leads', responses: { '200': { $ref: '#/components/responses/BlobValue' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+    post: { tags: [Blobs], summary: 'Guardar blob: leads', requestBody: { required: true, content: { application/json: { schema: { type: object, additionalProperties: true } } } }, responses: { '200': { $ref: '#/components/responses/BlobStored' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+  /api/crm:
+    get: { tags: [Blobs], summary: 'Leer blob: crm', responses: { '200': { $ref: '#/components/responses/BlobValue' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+    post: { tags: [Blobs], summary: 'Guardar blob: crm', requestBody: { required: true, content: { application/json: { schema: { type: object, additionalProperties: true } } } }, responses: { '200': { $ref: '#/components/responses/BlobStored' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+  /api/crm/stages:
+    get: { tags: [Blobs], summary: 'Leer blob: crm/stages', responses: { '200': { $ref: '#/components/responses/BlobValue' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+    post: { tags: [Blobs], summary: 'Guardar blob: crm/stages', requestBody: { required: true, content: { application/json: { schema: { type: object, additionalProperties: true } } } }, responses: { '200': { $ref: '#/components/responses/BlobStored' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+  /api/crm/{sub}:
+    parameters: [ { in: path, name: sub, required: true, schema: { type: string } } ]
+    get: { tags: [Blobs], summary: 'Leer sub-blob: crm/{sub}', responses: { '200': { $ref: '#/components/responses/BlobValue' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+    post: { tags: [Blobs], summary: 'Guardar sub-blob: crm/{sub}', requestBody: { required: true, content: { application/json: { schema: { type: object, additionalProperties: true } } } }, responses: { '200': { $ref: '#/components/responses/BlobStored' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+  /api/tax:
+    get: { tags: [Blobs], summary: 'Leer blob: tax', responses: { '200': { $ref: '#/components/responses/BlobValue' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+    post: { tags: [Blobs], summary: 'Guardar blob: tax', requestBody: { required: true, content: { application/json: { schema: { type: object, additionalProperties: true } } } }, responses: { '200': { $ref: '#/components/responses/BlobStored' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+  /api/tax/config:
+    get: { tags: [Blobs], summary: 'Leer blob: tax/config', responses: { '200': { $ref: '#/components/responses/BlobValue' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+    post: { tags: [Blobs], summary: 'Guardar blob: tax/config', requestBody: { required: true, content: { application/json: { schema: { type: object, additionalProperties: true } } } }, responses: { '200': { $ref: '#/components/responses/BlobStored' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+  /api/tax/{sub}:
+    parameters: [ { in: path, name: sub, required: true, schema: { type: string } } ]
+    get: { tags: [Blobs], summary: 'Leer sub-blob: tax/{sub}', responses: { '200': { $ref: '#/components/responses/BlobValue' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+    post: { tags: [Blobs], summary: 'Guardar sub-blob: tax/{sub}', requestBody: { required: true, content: { application/json: { schema: { type: object, additionalProperties: true } } } }, responses: { '200': { $ref: '#/components/responses/BlobStored' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+  /api/invoices:
+    get: { tags: [Blobs], summary: 'Leer blob: invoices', responses: { '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Invoice' } } } } }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+    post: { tags: [Blobs], summary: 'Guardar blob: invoices', requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/Invoice' } } } }, responses: { '200': { $ref: '#/components/responses/BlobStored' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+  /api/purchases:
+    get: { tags: [Blobs], summary: 'Leer blob: purchases', responses: { '200': { $ref: '#/components/responses/BlobValue' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+    post: { tags: [Blobs], summary: 'Guardar blob: purchases', requestBody: { required: true, content: { application/json: { schema: { type: object, additionalProperties: true } } } }, responses: { '200': { $ref: '#/components/responses/BlobStored' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+  /api/purchases/{sub}:
+    parameters: [ { in: path, name: sub, required: true, schema: { type: string } } ]
+    get: { tags: [Blobs], summary: 'Leer sub-blob: purchases/{sub}', responses: { '200': { $ref: '#/components/responses/BlobValue' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+    post: { tags: [Blobs], summary: 'Guardar sub-blob: purchases/{sub}', requestBody: { required: true, content: { application/json: { schema: { type: object, additionalProperties: true } } } }, responses: { '200': { $ref: '#/components/responses/BlobStored' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+  /api/suppliers:
+    get: { tags: [Blobs], summary: 'Leer blob: suppliers', responses: { '200': { $ref: '#/components/responses/BlobValue' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+    post: { tags: [Blobs], summary: 'Guardar blob: suppliers', requestBody: { required: true, content: { application/json: { schema: { type: object, additionalProperties: true } } } }, responses: { '200': { $ref: '#/components/responses/BlobStored' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+  /api/audit_log:
+    get: { tags: [Blobs], summary: 'Leer blob: audit_log', responses: { '200': { $ref: '#/components/responses/BlobValue' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+    post: { tags: [Blobs], summary: 'Guardar blob: audit_log', requestBody: { required: true, content: { application/json: { schema: { type: object, additionalProperties: true } } } }, responses: { '200': { $ref: '#/components/responses/BlobStored' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+  /api/products/departments:
+    get: { tags: [Blobs], summary: 'Leer blob: products/departments', responses: { '200': { $ref: '#/components/responses/BlobValue' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+    post: { tags: [Blobs], summary: 'Guardar blob: products/departments', requestBody: { required: true, content: { application/json: { schema: { type: object, additionalProperties: true } } } }, responses: { '200': { $ref: '#/components/responses/BlobStored' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+  /api/inventory/cash-open:
+    get: { tags: [Blobs], summary: 'Leer blob: inventory/cash-open', responses: { '200': { $ref: '#/components/responses/BlobValue' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+    post: { tags: [Blobs], summary: 'Guardar blob: inventory/cash-open', requestBody: { required: true, content: { application/json: { schema: { type: object, additionalProperties: true } } } }, responses: { '200': { $ref: '#/components/responses/BlobStored' }, '401': { $ref: '#/components/responses/Unauthorized' } } }
+
+  /api/admin/jobs/low-stock-alert:
+    post:
+      tags: [Admin]
+      summary: Ejecutar job de alerta de stock bajo (admin/owner/superadmin)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  alerted: { type: integer }
+                  items: { type: array, items: { $ref: '#/components/schemas/Product' } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /api/openapi.yaml:
+    get:
+      tags: [Docs]
+      summary: Servir spec OpenAPI 3.1 en YAML
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/yaml:
+              schema: { type: string }
+
+  /api/docs:
+    get:
+      tags: [Docs]
+      summary: Swagger UI (HTML) apuntando a /api/openapi.yaml
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            text/html:
+              schema: { type: string }
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    UuidId:
+      in: path
+      name: id
+      required: true
+      schema: { type: string, format: uuid }
+
+  responses:
+    BadRequest:
+      description: Petición inválida
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    Unauthorized:
+      description: No autenticado o JWT inválido
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    Forbidden:
+      description: Sin permisos para esta operación
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    NotFound:
+      description: Recurso no encontrado
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    RateLimited:
+      description: Demasiadas peticiones
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    ServerError:
+      description: Error interno
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    BlobValue:
+      description: Blob almacenado (último valor) o array vacío si no existe
+      content: { application/json: { schema: { oneOf: [ { type: object, additionalProperties: true }, { type: array, items: { type: object, additionalProperties: true } } ] } } }
+    BlobStored:
+      description: Confirmación de blob guardado
+      content: { application/json: { schema: { type: object, properties: { ok: { type: boolean }, key: { type: string }, stored: { type: integer, format: int64 } } } } }
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error: { type: string }
+    Ok:
+      type: object
+      properties:
+        ok: { type: boolean }
+    OkMessage:
+      type: object
+      properties:
+        ok: { type: boolean }
+        message: { type: string }
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, format: password }
+
+    LoginResponse:
+      type: object
+      properties:
+        ok: { type: boolean }
+        token: { type: string, description: 'JWT firmado, exp 8h' }
+        session:
+          type: object
+          properties:
+            user_id: { type: string, format: uuid }
+            email: { type: string, format: email }
+            role: { type: string, enum: [cajero, admin, owner, superadmin, manager] }
+            tenant_id: { type: string }
+            tenant_name: { type: string }
+            full_name: { type: string }
+            company_id: { type: string, format: uuid, nullable: true }
+            expires_at: { type: integer, format: int64 }
+            plan: { type: string }
+
+    User:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        role: { type: string }
+        is_active: { type: boolean }
+        plan: { type: string }
+        full_name: { type: string }
+        phone: { type: string, nullable: true }
+        company_id: { type: string, format: uuid, nullable: true }
+        last_login_at: { type: string, format: date-time, nullable: true }
+        created_at: { type: string, format: date-time }
+    UserInput:
+      type: object
+      required: [email]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, format: password }
+        role: { type: string, enum: [USER, ADMIN, OWNER, SUPERADMIN, MANAGER, CAJERO] }
+        is_active: { type: boolean }
+        plan: { type: string }
+        full_name: { type: string }
+        phone: { type: string }
+        company_id: { type: string, format: uuid }
+        notes: { oneOf: [ { type: string }, { type: object, additionalProperties: true } ] }
+
+    Tenant:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        owner_user_id: { type: string, format: uuid, nullable: true }
+        plan: { type: string, enum: [trial, free, pro, enterprise] }
+        is_active: { type: boolean }
+        created_at: { type: string, format: date-time }
+    TenantInput:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string }
+        owner_user_id: { type: string, format: uuid }
+        plan: { type: string }
+        is_active: { type: boolean }
+
+    Product:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        code: { type: string }
+        name: { type: string }
+        category: { type: string }
+        price: { type: number }
+        cost: { type: number }
+        stock: { type: number }
+        icon: { type: string }
+        tenant_id: { type: string }
+    ProductInput:
+      type: object
+      required: [name, price]
+      properties:
+        code: { type: string }
+        name: { type: string }
+        category: { type: string }
+        cost: { type: number }
+        price: { type: number }
+        stock: { type: number }
+        icon: { type: string }
+        pos_user_id: { type: string, format: uuid }
+
+    SaleItem:
+      type: object
+      properties:
+        product_id: { type: string, format: uuid }
+        code: { type: string }
+        name: { type: string }
+        qty: { type: number }
+        price: { type: number }
+        subtotal: { type: number }
+
+    Sale:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        pos_user_id: { type: string, format: uuid }
+        total: { type: number }
+        payment_method: { type: string, enum: [efectivo, tarjeta, transferencia, credito, mixto] }
+        items: { type: array, items: { $ref: '#/components/schemas/SaleItem' } }
+        created_at: { type: string, format: date-time }
+    SaleInput:
+      type: object
+      required: [total]
+      properties:
+        total: { type: number }
+        payment_method: { type: string }
+        items: { type: array, items: { $ref: '#/components/schemas/SaleItem' } }
+        customer:
+          type: object
+          properties:
+            email: { type: string, format: email }
+        customer_email: { type: string, format: email }
+
+    Customer:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        email: { type: string, format: email, nullable: true }
+        phone: { type: string, nullable: true }
+        address: { type: string, nullable: true }
+        credit_limit: { type: number }
+        credit_balance: { type: number }
+        points: { type: integer }
+        loyalty_points: { type: integer }
+        active: { type: boolean }
+        user_id: { type: string, format: uuid }
+        created_at: { type: string, format: date-time }
+    CustomerInput:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string }
+        email: { type: string, format: email }
+        phone: { type: string }
+        address: { type: string }
+        credit_limit: { type: number }
+        credit_balance: { type: number }
+        points: { type: integer }
+        loyalty_points: { type: integer }
+
+    Payment:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        sale_id: { type: string, format: uuid }
+        method: { type: string }
+        amount: { type: number }
+        currency: { type: string, default: MXN }
+        reference: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+
+    Invoice:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        uuid: { type: string, description: 'UUID CFDI 4.0' }
+        rfc_emisor: { type: string }
+        rfc_receptor: { type: string }
+        total: { type: number }
+        subtotal: { type: number }
+        impuestos: { type: number }
+        moneda: { type: string }
+        forma_pago: { type: string }
+        metodo_pago: { type: string }
+        uso_cfdi: { type: string }
+        xml: { type: string, nullable: true }
+        pdf_url: { type: string, format: uri, nullable: true }
+        status: { type: string, enum: [draft, stamped, cancelled] }
+        created_at: { type: string, format: date-time }
+
+    License:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        license_key: { type: string }
+        machine_name: { type: string }
+        platform: { type: string }
+        restaurant_id: { type: string }
+        restaurant_name: { type: string }
+        is_active: { type: boolean }
+        notes: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+    LicenseInput:
+      type: object
+      properties:
+        license_key: { type: string }
+        machine_name: { type: string }
+        platform: { type: string }
+        restaurant_id: { type: string }
+        restaurant_name: { type: string }
+        notes: { type: string }
+
+    Feature:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        module: { type: string }
+        status: { type: string, enum: [stable, new, extended, deprecated] }
+        usage: { type: integer }
+        price: { type: number }
+        createdByAI: { type: boolean }
+    FeatureDecision:
+      type: object
+      properties:
+        ok: { type: boolean }
+        decision: { type: string, enum: [activate, extend, create] }
+        feature: { $ref: '#/components/schemas/Feature' }
+
+    AIResponse:
+      type: object
+      properties:
+        content: { type: string }
+        simulated: { type: boolean, nullable: true }
+
+    Ticket:
+      type: object
+      properties:
+        id: { type: string }
+        tenant: { type: string }
+        title: { type: string }
+        status: { type: string, enum: [open, solved, escalated, closed] }
+        aiHandling: { type: boolean }
+        solvedBy: { type: string, nullable: true }
+        solvedInSec: { type: integer, nullable: true }
+        solution: { type: string, nullable: true }
+        opened: { type: integer, format: int64 }
+
+    InventoryLocation:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        tenant_id: { type: string }
+        name: { type: string }
+        type: { type: string, enum: [warehouse, branch, transit] }
+        is_active: { type: boolean }
+        created_at: { type: string, format: date-time }
+    InventoryLocationInput:
+      type: object
+      required: [name, type]
+      properties:
+        name: { type: string }
+        type: { type: string, enum: [warehouse, branch, transit] }
+        is_active: { type: boolean }
+        tenant_id: { type: string }
+
+    StockRow:
+      type: object
+      properties:
+        product_id: { type: string, format: uuid }
+        location_id: { type: string, format: uuid }
+        qty: { type: number }
+        updated_at: { type: string, format: date-time }
+
+    InventoryMovement:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        type: { type: string, enum: [in, out, transfer, adjust, loss] }
+        product_id: { type: string, format: uuid }
+        from_location_id: { type: string, format: uuid, nullable: true }
+        to_location_id: { type: string, format: uuid, nullable: true }
+        qty: { type: number }
+        notes: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+    InventoryMovementInput:
+      type: object
+      required: [type, product_id, qty]
+      properties:
+        type: { type: string, enum: [in, out, transfer, adjust, loss] }
+        product_id: { type: string, format: uuid }
+        from_location_id: { type: string, format: uuid }
+        to_location_id: { type: string, format: uuid }
+        qty: { type: number }
+        notes: { type: string }
+
+    InventoryCount:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        location_id: { type: string, format: uuid }
+        status: { type: string, enum: [open, finalized, cancelled] }
+        notes: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+
+    OwnerDashboard:
+      type: object
+      properties:
+        ok: { type: boolean }
+        metrics:
+          type: object
+          properties:
+            total_users: { type: integer }
+            active_users: { type: integer }
+            total_tenants: { type: integer }
+            active_tenants: { type: integer }
+            total_sales: { type: integer }
+            total_revenue: { type: number }
+            total_products: { type: integer }
+            low_stock_count: { type: integer }
+            total_customers: { type: integer }
+            active_customers: { type: integer }
+            mrr: { type: number }
+            arr: { type: number }
+        sales_by_day: { type: array, items: { type: object, additionalProperties: true } }
+        top_tenants: { type: array, items: { $ref: '#/components/schemas/Tenant' } }
+
+    Health:
+      type: object
+      properties:
+        ok: { type: boolean }
+        time: { type: integer, format: int64 }
+        version: { type: string }
+        database: { type: string }
+        supabase_connected: { type: boolean }
+        users_table_accessible: { type: boolean }
+    HealthDeep:
+      type: object
+      properties:
+        ok: { type: boolean }
+        checks: { type: object, additionalProperties: true }
+        time: { type: integer, format: int64 }
+        uptime_sec: { type: integer }
+
+    Metrics:
+      type: object
+      properties:
+        ok: { type: boolean }
+        uptime_ms: { type: integer, format: int64 }
+        uptime_sec: { type: integer }
+        request_count: { type: integer }
+        error_count: { type: integer }
+        latency_ms: { type: object, additionalProperties: true }
+        supabase_health: { type: object, additionalProperties: true }
+        env_status: { type: object, additionalProperties: { type: boolean } }
+        version: { type: string }
+        node_env: { type: string }
+        memory_mb: { type: integer }
+
+    ErrorLogEntry:
+      type: object
+      properties:
+        type: { type: string }
+        message: { type: string }
+        stack: { type: string }
+        source: { type: string }
+        lineno: { type: integer }
+        colno: { type: integer }
+        url: { type: string }
+        meta: { type: object, additionalProperties: true }

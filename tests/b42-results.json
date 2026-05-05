@@ -1,0 +1,53 @@
+{
+  "run_tag": "46594419",
+  "sub_tenant_id": "9600c4f1-df1b-4836-9066-6e9d0ddd0f3c",
+  "new_user_id": null,
+  "new_product_id": null,
+  "results": {
+    "U1": {
+      "pass": true,
+      "detail": "created sub_tenant_id=9600c4f1-df1b-4836-9066-6e9d0ddd0f3c name=\"Test Tenant Round2 46594419\""
+    },
+    "U2": {
+      "pass": false,
+      "detail": "status=500 body={\"error\":\"internal\",\"message\":\"Error interno del servidor\",\"request_id\":\"3a011e79-2f97-491d-84fc-b0edb6214030\"}"
+    },
+    "U3": {
+      "pass": false,
+      "detail": "login_status=401 body={\"error\":\"Credenciales inválidas\"}"
+    },
+    "U4": {
+      "pass": false,
+      "detail": "skipped: U3 sin token de nuevo usuario"
+    },
+    "U5": {
+      "pass": false,
+      "detail": "skipped: U3 sin token de nuevo usuario"
+    },
+    "U6": {
+      "pass": false,
+      "detail": "status=200 count=4 found_test_tenant=false"
+    },
+    "U7": {
+      "pass": true,
+      "detail": "status=200 count=0 cajero_leak=false sample=[]"
+    },
+    "U8": {
+      "pass": true,
+      "detail": "s1=200 s2=200 modules_in_response=true set_status=200 applied_count=0 recargas_after=enabled flag_actually_applied=false"
+    },
+    "U9": {
+      "pass": false,
+      "detail": "skipped: U2 no produjo new_user_id"
+    },
+    "U10": {
+      "pass": true,
+      "detail": "target_customer_id=b236fab4-0f4c-4acb-801d-27fd3d90235e cross_tenant_status=404 leaked=false expected=404|403"
+    }
+  },
+  "score": {
+    "pass": 4,
+    "total": 10,
+    "percent": 40
+  }
+}

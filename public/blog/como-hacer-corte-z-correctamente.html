@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cómo hacer un corte Z correctamente al cierre del día — Volvix Blog</title>
+<meta name="description" content="Paso a paso para hacer corte Z al cierre, diferencias con corte X, qué validar y cómo detectar faltantes en caja.">
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"Article",
+  "headline":"Cómo hacer un corte Z correctamente al cierre del día",
+  "description":"Paso a paso para hacer corte Z, diferencias con corte X, validaciones y faltantes.",
+  "datePublished":"2026-04-18",
+  "author":{"@type":"Organization","name":"Volvix POS"},
+  "publisher":{"@type":"Organization","name":"Volvix POS"},
+  "keywords":"corte Z, corte X, cierre de caja, POS, México"
+}
+</script>
+<style>
+  :root { --txt:#0f172a; --muted:#64748b; --accent:#3b82f6; --border:#e2e8f0 }
+  * { box-sizing:border-box }
+  body { margin:0; font-family:Georgia,Cambria,serif; color:var(--txt); line-height:1.7; background:#fff }
+  header { padding:20px 16px; border-bottom:1px solid var(--border); background:#fff }
+  header .inner { max-width:720px; margin:0 auto; display:flex; justify-content:space-between; align-items:center }
+  header a { font-family:system-ui; text-decoration:none; color:var(--txt); font-weight:700 }
+  header nav a { font-weight:400; color:var(--muted); font-size:14px }
+  .hero {
+    background:linear-gradient(135deg,#7f1d1d 0%,#ef4444 100%); color:#fff;
+    padding:64px 16px; text-align:center;
+  }
+  .hero .cat {
+    display:inline-block; background:rgba(255,255,255,.2); padding:4px 14px;
+    border-radius:99px; font-size:12px; font-family:system-ui; font-weight:600;
+    text-transform:uppercase; letter-spacing:1px; margin-bottom:16px;
+  }
+  .hero h1 { margin:0 0 12px; font-size:36px; line-height:1.2; max-width:720px; margin-left:auto; margin-right:auto }
+  .hero .meta { font-family:system-ui; font-size:14px; opacity:.85 }
+  article { max-width:720px; margin:0 auto; padding:48px 16px; font-size:18px }
+  article h2 { font-family:system-ui; margin-top:40px; font-size:26px }
+  article h3 { font-family:system-ui; margin-top:24px; font-size:20px }
+  article p { margin:16px 0 }
+  article ul, article ol { padding-left:20px }
+  article li { margin:8px 0 }
+  article code { background:#f1f5f9; padding:2px 6px; border-radius:4px; font-size:.9em }
+  table { width:100%; border-collapse:collapse; margin:16px 0; font-family:system-ui; font-size:15px }
+  th, td { border:1px solid var(--border); padding:10px; text-align:left }
+  th { background:#f8fafc }
+  .ejemplo { background:#fef2f2; border-left:4px solid #ef4444; padding:16px 20px; margin:20px 0; border-radius:0 8px 8px 0; font-family:system-ui; font-size:16px }
+  .cta {
+    background:#f8fafc; border:1px solid var(--border); border-radius:12px;
+    padding:32px; text-align:center; margin:48px 0; font-family:system-ui;
+  }
+  .cta h3 { margin:0 0 12px; font-size:22px }
+  .cta p { font-size:15px; color:var(--muted); margin:0 0 20px }
+  .cta a {
+    display:inline-block; background:var(--accent); color:#fff;
+    padding:12px 28px; border-radius:8px; text-decoration:none; font-weight:600;
+  }
+  footer { border-top:1px solid var(--border); padding:24px 16px; text-align:center; color:var(--muted); font-size:13px; font-family:system-ui }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="inner">
+    <a href="/">Volvix</a>
+    <nav><a href="/blog.html">← Volver al blog</a></nav>
+  </div>
+</header>
+
+<section class="hero">
+  <span class="cat">Operaciones</span>
+  <h1>Cómo hacer un corte Z correctamente al cierre del día</h1>
+  <div class="meta">18 de abril, 2026 · 7 min de lectura</div>
+</section>
+
+<article>
+  <p>El corte Z es el cierre fiscal del día en tu POS. Se hace una vez al final del turno y, una vez emitido, los totales del día quedan congelados. Si lo haces mal o lo saltas, los reportes de la semana se desconfiguran y vas a pasar horas reconciliando manualmente. Aquí está el flujo correcto y los errores más comunes.</p>
+
+  <h2>Diferencia entre corte X y corte Z</h2>
+  <p>Mucha gente los confunde:</p>
+  <ul>
+    <li><strong>Corte X:</strong> reporte parcial. Lo puedes hacer las veces que quieras durante el turno para ver cuánto llevas vendido. No cierra nada.</li>
+    <li><strong>Corte Z:</strong> cierre definitivo del día o turno. Resetea contadores. Solo se hace una vez al cierre.</li>
+  </ul>
+  <p>Regla simple: corte X durante el día, corte Z al final.</p>
+
+  <h2>Cuándo hacer el corte Z</h2>
+  <p>Lo ideal es justo al cerrar la tienda, después de la última venta y antes de guardar el efectivo. Si tu turno cruza medianoche (un bar, por ejemplo), define un horario fijo (ej. 4 AM) y cierra siempre a la misma hora. Inconsistencia en horarios genera reportes que no cuadran.</p>
+
+  <h2>Paso a paso del corte Z</h2>
+  <ol>
+    <li><strong>Genera corte X primero.</strong> Imprime el reporte parcial para tener un respaldo de los totales del POS antes de cerrar.</li>
+    <li><strong>Cuenta el efectivo en caja.</strong> Billetes y monedas. Anota el total real.</li>
+    <li><strong>Resta el fondo de caja.</strong> Si abriste con $500 de cambio, ese monto no es venta.</li>
+    <li><strong>Compara contra el reporte del POS.</strong> Lo que quedó en efectivo debe igualar al efectivo cobrado en el sistema.</li>
+    <li><strong>Anota faltante o sobrante.</strong> Si difiere, registra el monto y revisa el día.</li>
+    <li><strong>Cierra cobros con tarjeta.</strong> Imprime corte de la terminal bancaria. Compara con lo registrado en POS por método de pago.</li>
+    <li><strong>Genera el corte Z desde el POS.</strong> Una vez confirmados los números, ejecuta el cierre. El sistema reinicia contadores.</li>
+    <li><strong>Guarda el ticket Z firmado por el cajero.</strong> 5 años mínimo de archivo.</li>
+  </ol>
+
+  <h2>Qué validar en el reporte</h2>
+  <p>Un buen corte Z debe mostrar:</p>
+  <ul>
+    <li>Ventas brutas del día.</li>
+    <li>Devoluciones y cancelaciones.</li>
+    <li>Ventas netas.</li>
+    <li>Desglose por método de pago: efectivo, débito, crédito, transferencia, vales.</li>
+    <li>IVA cobrado.</li>
+    <li>Número de tickets emitidos.</li>
+    <li>Ticket promedio.</li>
+    <li>Folio inicial y final del día.</li>
+  </ul>
+
+  <div class="ejemplo">
+    <strong>Caso real:</strong> Una tienda de ropa en CDMX detectó faltantes de $80-$120 diarios durante 3 semanas. Al revisar los cortes Z notaron que el desglose por método de pago no cuadraba con los recibos de la terminal. Resultó que un cajero registraba ventas como "efectivo" pero cobraba con su tarjeta personal y se quedaba con el efectivo. Sin corte Z detallado por método, no lo habrían visto.
+  </div>
+
+  <h2>Errores comunes</h2>
+  <ul>
+    <li><strong>Cerrar sin contar el efectivo físicamente.</strong> Sin esa comparación no detectas robos ni errores de cobro.</li>
+    <li><strong>Contar el fondo como venta.</strong> Siempre resta el cambio inicial.</li>
+    <li><strong>Olvidar registrar gastos del día.</strong> Si pagaste al refresquero $300 con efectivo de la caja, debe estar como "salida de caja", no faltante.</li>
+    <li><strong>Hacer 2 cortes Z el mismo día.</strong> El segundo arranca de cero y tu reporte fiscal se rompe. Solo uno por día.</li>
+    <li><strong>No firmar el ticket.</strong> En auditoría laboral, sin firma del cajero no hay responsabilidad establecida.</li>
+  </ul>
+
+  <h2>Frecuencia de faltantes razonable</h2>
+  <p>Un faltante de $5-$30 al día puede ser normal por errores de cambio. Si tu faltante diario supera el 0.5% de las ventas, hay un problema:</p>
+  <ul>
+    <li>Errores de cobro repetidos (capacita al cajero).</li>
+    <li>Devoluciones no registradas.</li>
+    <li>Robo interno.</li>
+    <li>POS con bug en cálculo de IVA o redondeo.</li>
+  </ul>
+
+  <h2>Automatización con buen POS</h2>
+  <p>Un POS bien hecho debe:</p>
+  <ul>
+    <li>Avisarte si intentas cerrar sin haber contado efectivo.</li>
+    <li>Calcular faltante/sobrante automático.</li>
+    <li>Permitir registrar gastos como "salidas de caja" durante el turno.</li>
+    <li>Mandarte el corte Z por correo o WhatsApp al dueño automáticamente.</li>
+    <li>Bloquear nuevas ventas si el corte no se hizo del día anterior.</li>
+  </ul>
+
+  <div class="cta">
+    <h3>Volvix automatiza tu corte Z y te avisa de faltantes</h3>
+    <p>Cierra el día en 30 segundos, recibe el reporte por WhatsApp y detecta diferencias antes de que crezcan.</p>
+    <a href="/registro.html?giro=tienda">Probar gratis</a>
+  </div>
+</article>
+
+<footer>© Volvix POS. Esta guía es operativa, no fiscal. Consulta a tu contador para reportes oficiales al SAT.</footer>
+<script src="/volvix-newsletter-wiring.js" defer></script>
+</body>
+</html>

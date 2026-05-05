@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Página no encontrada · Volvix</title>
+  <meta name="robots" content="noindex">
+  <style>
+    :root{--bg:#0b1220;--panel:#121a2c;--text:#e2e8f0;--muted:#94a3b8;--accent:#fbbf24;--accent2:#3b82f6}
+    *{box-sizing:border-box}
+    html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+    .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+    .card{background:var(--panel);border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:48px 56px;max-width:560px;width:100%;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.4)}
+    .logo{width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#f59e0b);color:#0b1220;font-weight:800;font-size:28px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:18px;box-shadow:0 8px 20px rgba(251,191,36,.25)}
+    h1{font-size:88px;line-height:1;margin:0 0 4px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800}
+    h2{font-size:22px;margin:0 0 8px;font-weight:700}
+    p{color:var(--muted);margin:0 0 22px;font-size:14px;line-height:1.55}
+    .actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+    a.btn{display:inline-block;padding:11px 20px;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px;transition:transform .15s ease}
+    a.primary{background:var(--accent2);color:#fff}
+    a.ghost{background:transparent;border:1px solid rgba(255,255,255,.12);color:var(--text)}
+    a.btn:hover{transform:translateY(-1px)}
+    .path{margin-top:18px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;color:var(--muted);word-break:break-all;opacity:.7}
+    .svg-404{width:160px;height:96px;display:block;margin:0 auto 14px}
+    .svg-404 .digit{fill:none;stroke:url(#g404);stroke-width:8;stroke-linecap:round;stroke-linejoin:round;
+      stroke-dasharray:600;stroke-dashoffset:600;animation:drawDigit 1.4s ease forwards}
+    .svg-404 .digit.d2{animation-delay:.25s}
+    .svg-404 .digit.d3{animation-delay:.5s}
+    .svg-404 .orbit{transform-origin:center;animation:spin 6s linear infinite}
+    @keyframes drawDigit{to{stroke-dashoffset:0}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .popular{margin:0 0 18px;padding:14px;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);border-radius:10px;text-align:left;display:none}
+    .popular .ph{font-size:11px;color:var(--muted);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+    .popular ul{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+    .popular li a{display:block;padding:6px 8px;color:var(--accent);text-decoration:none;font-size:12.5px;border-radius:6px;background:rgba(251,191,36,0.06)}
+    .popular li a:hover{background:rgba(251,191,36,0.14)}
+    #countdown-bar{margin-top:14px;font-size:11px;color:var(--muted)}
+    #countdown-bar strong{color:var(--accent2)}
+    .countdown-cancel{background:transparent;border:1px solid rgba(255,255,255,0.12);color:var(--text);padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;margin-left:6px}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="card" role="alert">
+      <div class="logo">V</div>
+      <svg class="svg-404" viewBox="0 0 200 120" aria-hidden="true">
+        <defs>
+          <linearGradient id="g404" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#fbbf24"/>
+            <stop offset="100%" stop-color="#3b82f6"/>
+          </linearGradient>
+        </defs>
+        <g class="orbit">
+          <circle cx="100" cy="60" r="46" fill="none" stroke="rgba(251,191,36,0.18)" stroke-width="1" stroke-dasharray="3 4"/>
+        </g>
+        <path class="digit"    d="M30 80 L30 50 L60 80 L60 35"/>
+        <path class="digit d2" d="M85 50 a18 18 0 1 1 0 30 a18 18 0 1 1 0 -30"/>
+        <path class="digit d3" d="M140 80 L140 50 L170 80 L170 35"/>
+      </svg>
+      <h1>404</h1>
+      <h2>Página no encontrada</h2>
+      <p id="msg">La ruta que solicitaste no existe o fue movida. Puedes regresar al inicio o iniciar sesión.</p>
+      <div class="popular" id="popular">
+        <div class="ph">Páginas más populares</div>
+        <ul id="popular-list"></ul>
+      </div>
+      <div id="suggestion-box" style="display:none;margin:0 0 18px;padding:14px;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);border-radius:10px;text-align:left;">
+        <div style="font-size:12px;color:#94a3b8;margin-bottom:6px;">¿Quizás quisiste decir?</div>
+        <div id="suggestion-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+      </div>
+
+      <!-- B34+ : busqueda con autocomplete contra el sitemap -->
+      <div style="margin:0 0 18px;position:relative;text-align:left;">
+        <input id="search-input" type="text" placeholder="Buscar página… (ej: panel, kds, marketplace)"
+               style="width:100%;padding:11px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:var(--text);font-size:14px;outline:none;"
+               autocomplete="off">
+        <div id="ac-list" style="display:none;position:absolute;top:100%;left:0;right:0;background:#1a2238;border:1px solid rgba(255,255,255,0.12);border-radius:10px;margin-top:4px;max-height:240px;overflow:auto;z-index:50;"></div>
+      </div>
+
+      <div class="actions">
+        <a class="btn primary" href="/">Volver al inicio</a>
+        <a class="btn ghost" href="/salvadorex-pos.html">Ir al POS</a>
+        <a class="btn ghost" href="/soporte.html">Contactar soporte</a>
+      </div>
+      <div id="countdown-bar">
+        Te llevaré al inicio en <strong id="countdown-num">30</strong>s
+        <button type="button" class="countdown-cancel" id="cancel-countdown">Cancelar</button>
+      </div>
+      <div class="path" id="path"></div>
+    </div>
+  </main>
+  <script>
+    (function () {
+      try { document.getElementById('path').textContent = location.pathname || ''; } catch (e) {}
+      // B34: 404 inteligente — sugerir URLs similares y redirect automatico para typos comunes
+      var path = (location.pathname || '').toLowerCase();
+
+      // Mapa de redirects exactos (typos comunes / versiones desactualizadas)
+      var REDIRECTS = {
+        '/volvix_owner_panel_v2.html':  '/volvix-owner-panel.html',
+        '/volvix_owner_panel_v3.html':  '/volvix-owner-panel.html',
+        '/volvix_owner_panel_v4.html':  '/volvix-owner-panel.html',
+        '/volvix-owner-panel.html':  '/volvix-owner-panel.html',
+        '/volvix_owner_panel_v6.html':  '/volvix-owner-panel.html',
+        '/volvix_owner_panel.html':     '/volvix-owner-panel.html',
+        '/owner.html':                  '/volvix-owner-panel.html',
+        '/owner_panel.html':            '/volvix-owner-panel.html',
+        '/multipos.html':               '/multipos-suite.html',
+        '/multipos_suite.html':         '/multipos-suite.html',
+        '/multipos_v1.html':            '/multipos-suite.html',
+        '/multipos_v2.html':            '/multipos-suite.html',
+        '/salvadorex.html':             '/salvadorex-pos.html',
+        '/salvadorex_web.html':         '/salvadorex-pos.html',
+        '/salvadorex-pos.html':                    '/salvadorex-pos.html',
+        '/customer-portal.html':        '/volvix-customer-portal.html',
+        '/customer.html':               '/volvix-customer-portal.html',
+        // B37: Launcher / Portal shortcuts
+        '/launcher':                    '/volvix-launcher.html',
+        '/launcher.html':               '/volvix-launcher.html',
+        '/portal':                      '/volvix-launcher.html',
+        '/portal.html':                 '/volvix-launcher.html',
+        '/home':                        '/volvix-launcher.html',
+        '/home.html':                   '/volvix-launcher.html',
+        '/admin.html':                  '/volvix-admin-saas.html',
+        '/admin-saas.html':             '/volvix-admin-saas.html',
+        '/dashboard.html':              '/volvix-mega-dashboard.html',
+        '/kds.html':                    '/volvix-kds.html',
+        '/comandero.html':              '/volvix-kds.html',
+        '/kiosk.html':                  '/volvix-kiosk.html',
+        '/kiosko.html':                 '/volvix-kiosk.html',
+        '/etiquetas.html':              '/etiqueta_designer.html',
+        '/codigos-barras.html':         '/etiqueta_designer.html',
+        '/barcode.html':                '/etiqueta_designer.html',
+        '/vendor.html':                 '/volvix-vendor-portal.html',
+        '/proveedores.html':            '/volvix-vendor-portal.html',
+        // Industry landing shortcuts
+        '/abarrotes':                   '/landing-abarrotes.html',
+        '/abarrotes.html':              '/landing-abarrotes.html',
+        '/panaderia':                   '/landing-panaderia.html',
+        '/panaderia.html':              '/landing-panaderia.html',
+        '/farmacia':                    '/landing-farmacia.html',
+        '/farmacia.html':               '/landing-farmacia.html',
+        '/restaurant':                  '/landing-restaurante.html',
+        '/restaurante':                 '/landing-restaurante.html',
+        '/restaurant.html':             '/landing-restaurante.html',
+        '/restaurante.html':            '/landing-restaurante.html',
+        '/cafe':                        '/landing-cafeteria.html',
+        '/cafeteria':                   '/landing-cafeteria.html',
+        '/cafe.html':                   '/landing-cafeteria.html',
+        '/barberia':                    '/landing-barberia.html',
+        '/salon':                       '/landing-barberia.html',
+        '/barberia.html':               '/landing-barberia.html',
+        '/gasolinera':                  '/landing-gasolinera.html',
+        '/gasolinera.html':             '/landing-gasolinera.html',
+        '/ropa':                        '/landing-tienda-ropa.html',
+        '/boutique':                    '/landing-tienda-ropa.html',
+        '/ropa.html':                   '/landing-tienda-ropa.html',
+        '/electronica':                 '/landing-electronica.html',
+        '/electronica.html':            '/landing-electronica.html',
+        '/fitness':                     '/landing-gym.html',
+        '/gimnasio':                    '/landing-gym.html',
+        '/gym':                         '/landing-gym.html',
+        '/fitness.html':                '/landing-gym.html',
+        '/taqueria':                    '/landing-taqueria.html',
+        '/tacos':                       '/landing-taqueria.html',
+        '/pizzeria':                    '/landing-pizzeria.html',
+        '/pasteleria':                  '/landing-pasteleria.html',
+        '/heladeria':                   '/landing-heladeria.html',
+        '/tortilleria':                 '/landing-tortilleria.html',
+        '/estetica':                    '/landing-estetica.html',
+        '/spa':                         '/landing-spa.html',
+        '/nails':                       '/landing-nails.html',
+        '/manicure':                    '/landing-nails.html',
+        '/tatuajes':                    '/landing-tatuajes.html',
+        '/tattoo':                      '/landing-tatuajes.html',
+        '/clinica-dental':              '/landing-dental.html',
+        '/dentista':                    '/landing-dental.html',
+        '/veterinaria':                 '/landing-veterinaria.html',
+        '/optica':                      '/landing-optica.html',
+        '/lentes':                      '/landing-optica.html',
+        '/minisuper':                   '/landing-minisuper.html',
+        '/papeleria':                   '/landing-papeleria.html',
+        '/fruteria':                    '/landing-fruteria.html',
+        '/carniceria':                  '/landing-carniceria.html',
+        '/polleria':                    '/landing-polleria.html',
+        '/taller':                      '/landing-taller-mecanico.html',
+        '/mecanico':                    '/landing-taller-mecanico.html',
+        '/lavado-autos':                '/landing-lavado-autos.html',
+        '/autolavado':                  '/landing-lavado-autos.html',
+        '/servicio-celulares':          '/landing-servicio-celulares.html',
+        '/celulares':                   '/landing-servicio-celulares.html',
+        '/colegio':                     '/landing-colegio.html',
+        '/escuela':                     '/landing-colegio.html',
+        '/idiomas':                     '/landing-escuela-idiomas.html',
+        '/renta-autos':                 '/landing-renta-autos.html',
+        '/renta-salones':               '/landing-renta-salones.html',
+        '/foto-estudio':                '/landing-foto-estudio.html',
+        '/fotografia':                  '/landing-foto-estudio.html',
+        '/ferreteria':                  '/landing-ferreteria.html',
+        '/funeraria':                   '/landing-funeraria.html',
+        '/empeno':                      '/landing-casa-empeno.html',
+        '/casa-empeno':                 '/landing-casa-empeno.html',
+        '/purificadora':                '/landing-purificadora.html',
+        '/agua':                        '/landing-purificadora.html'
+      };
+
+      if (REDIRECTS[path]) {
+        // Redirect automatico a la URL canonica con flash de aviso
+        document.getElementById('msg').innerHTML =
+          'La URL ha cambiado. Redirigiendo a <strong>' + REDIRECTS[path] + '</strong>…';
+        setTimeout(function () { location.replace(REDIRECTS[path]); }, 1200);
+        return;
+      }
+
+      // Búsqueda fuzzy de páginas similares
+      var KNOWN_PAGES = [
+        ['/volvix-launcher.html', 'Launcher / Portal'],
+        ['/login.html', 'Login'],
+        ['/salvadorex-pos.html', 'POS SalvadoreX'],
+        ['/volvix-owner-panel.html', 'Panel del Owner'],
+        ['/multipos-suite.html', 'MultiPOS Suite'],
+        ['/volvix-admin-saas.html', 'Admin SaaS'],
+        ['/volvix-mega-dashboard.html', 'Mega Dashboard'],
+        ['/volvix-customer-portal.html', 'Portal de Clientes'],
+        ['/volvix-vendor-portal.html', 'Portal de Proveedores'],
+        ['/volvix-kds.html', 'KDS / Comandero'],
+        ['/volvix-kiosk.html', 'Kiosko Auto-servicio'],
+        ['/marketplace.html', 'Marketplace'],
+        ['/etiqueta_designer.html', 'Diseñador de Etiquetas (códigos de barras)'],
+        ['/volvix_ai_engine.html', 'AI Engine'],
+        ['/volvix_ai_academy.html', 'AI Academy'],
+        ['/volvix_ai_support.html', 'AI Support'],
+        ['/volvix-audit-viewer.html', 'Audit Viewer'],
+        ['/volvix-grand-tour.html', 'Grand Tour'],
+        ['/volvix-onboarding-wizard.html', 'Onboarding Wizard'],
+        ['/volvix-sitemap.html', 'Mapa del sitio'],
+        ['/docs.html', 'Documentación']
+      ];
+
+      function distance(a, b) {
+        // Levenshtein truncado
+        a = a.toLowerCase().replace(/[^a-z0-9]/g, '');
+        b = b.toLowerCase().replace(/[^a-z0-9]/g, '');
+        var m = a.length, n = b.length;
+        if (!m) return n; if (!n) return m;
+        var dp = [];
+        for (var i = 0; i <= m; i++) dp[i] = [i];
+        for (var j = 0; j <= n; j++) dp[0][j] = j;
+        for (var i = 1; i <= m; i++) for (var j = 1; j <= n; j++) {
+          dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1]
+                                       : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+        }
+        return dp[m][n];
+      }
+
+      var pathBase = path.replace(/^\//, '').replace(/\.html$/, '');
+      if (pathBase) {
+        var scored = KNOWN_PAGES.map(function (p) {
+          var base = p[0].replace(/^\//, '').replace(/\.html$/, '');
+          var d = distance(pathBase, base);
+          var contains = base.indexOf(pathBase) >= 0 || pathBase.indexOf(base) >= 0;
+          return { url: p[0], label: p[1], score: contains ? -100 + d : d };
+        }).sort(function (a, b) { return a.score - b.score; }).slice(0, 5);
+
+        if (scored.length && scored[0].score < 12) {
+          var box = document.getElementById('suggestion-box');
+          var list = document.getElementById('suggestion-list');
+          box.style.display = 'block';
+          list.innerHTML = scored.map(function (s) {
+            return '<a href="' + s.url + '" style="color:#3B82F6;text-decoration:none;font-size:13px;padding:6px 8px;border-radius:6px;background:rgba(59,130,246,0.05);"><span style="opacity:0.7">' + s.url + '</span> — <strong>' + s.label + '</strong></a>';
+          }).join('');
+        }
+      }
+
+      // ============ Track 404 en analytics ============
+      try {
+        if (typeof gtag === 'function') {
+          gtag('event', '404', {
+            path: location.pathname,
+            referrer: document.referrer || '(direct)',
+            search: location.search || ''
+          });
+        } else {
+          // Fallback: log a /api/analytics si existe
+          (function () {
+            try {
+              fetch('/api/analytics/404', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ path: location.pathname, referrer: document.referrer || '' }),
+                keepalive: true
+              }).catch(function(){});
+            } catch (_) {}
+          })();
+        }
+      } catch (_) {}
+
+      // ============ Busqueda + autocomplete contra sitemap ============
+      var input = document.getElementById('search-input');
+      var ac = document.getElementById('ac-list');
+      var ALL_PAGES = KNOWN_PAGES.slice();
+      // Cargar urls extra desde el sitemap.html (si existe) en background
+      (function () {
+        try {
+          fetch('/volvix-sitemap.html', { cache: 'force-cache' })
+            .then(function (r) { return r.ok ? r.text() : ''; })
+            .then(function (html) {
+              if (!html) return;
+              var found = [];
+              var re = /href=["']([^"'#?]+\.html)["'][^>]*>([^<]{2,80})</gi;
+              var m;
+              while ((m = re.exec(html)) !== null && found.length < 200) {
+                var u = m[1]; if (u.indexOf('/') !== 0) u = '/' + u;
+                found.push([u, m[2].trim()]);
+              }
+              // dedupe
+              var seen = {};
+              ALL_PAGES.forEach(function (p) { seen[p[0]] = 1; });
+              found.forEach(function (p) { if (!seen[p[0]]) { ALL_PAGES.push(p); seen[p[0]] = 1; } });
+            }).catch(function () {});
+        } catch (_) {}
+      })();
+
+      function renderAc(items) {
+        if (!items.length) { ac.style.display = 'none'; return; }
+        ac.innerHTML = items.map(function (p) {
+          return '<a href="' + p[0] + '" style="display:block;padding:9px 12px;color:#e2e8f0;text-decoration:none;font-size:13px;border-bottom:1px solid rgba(255,255,255,0.04);">' +
+            '<strong>' + (p[1] || p[0]) + '</strong>' +
+            '<div style="font-size:11px;color:#94a3b8;font-family:monospace;">' + p[0] + '</div>' +
+          '</a>';
+        }).join('');
+        ac.style.display = 'block';
+      }
+
+      // ============ Popular pages ============
+      (function loadPopular() {
+        var FALLBACK = [
+          ['/volvix-launcher.html', 'Launcher'],
+          ['/salvadorex-pos.html', 'POS'],
+          ['/volvix-owner-panel.html', 'Owner Panel'],
+          ['/volvix-mega-dashboard.html', 'Dashboard'],
+          ['/volvix-customer-portal.html', 'Portal de Clientes']
+        ];
+        function render(items) {
+          if (!items || !items.length) return;
+          var ul = document.getElementById('popular-list');
+          if (!ul) return;
+          ul.innerHTML = items.slice(0, 5).map(function (p) {
+            var href = p.url || p[0];
+            var label = p.label || p[1] || href;
+            return '<li><a href="' + href + '">' + label + '</a></li>';
+          }).join('');
+          document.getElementById('popular').style.display = 'block';
+        }
+        try {
+          fetch('/api/analytics/popular', { cache: 'no-store' })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (data) {
+              if (data && Array.isArray(data.pages) && data.pages.length) render(data.pages);
+              else if (Array.isArray(data) && data.length) render(data);
+              else render(FALLBACK);
+            })
+            .catch(function () { render(FALLBACK); });
+        } catch (_) { render(FALLBACK); }
+      })();
+
+      // ============ Auto-redirect con countdown (30s) ============
+      (function countdown() {
+        var sec = 30;
+        var num = document.getElementById('countdown-num');
+        var bar = document.getElementById('countdown-bar');
+        var btn = document.getElementById('cancel-countdown');
+        var cancelled = false;
+        var timer;
+        function tick() {
+          if (cancelled) return;
+          sec--;
+          if (num) num.textContent = sec;
+          if (sec <= 0) {
+            location.replace('/');
+            return;
+          }
+          timer = setTimeout(tick, 1000);
+        }
+        if (btn) {
+          btn.addEventListener('click', function () {
+            cancelled = true;
+            if (timer) clearTimeout(timer);
+            if (bar) bar.style.display = 'none';
+          });
+        }
+        // Si el usuario interactúa con el input/búsqueda, cancelamos
+        document.addEventListener('keydown', function () {
+          cancelled = true;
+          if (timer) clearTimeout(timer);
+          if (bar) bar.style.display = 'none';
+        }, { once: true });
+        timer = setTimeout(tick, 1000);
+      })();
+
+      if (input) {
+        input.addEventListener('input', function () {
+          var q = (input.value || '').toLowerCase().trim();
+          if (q.length < 2) { ac.style.display = 'none'; return; }
+          var hits = ALL_PAGES.filter(function (p) {
+            return p[0].toLowerCase().indexOf(q) >= 0 ||
+                   (p[1] || '').toLowerCase().indexOf(q) >= 0;
+          }).slice(0, 8);
+          // ordena por proximidad si hay typo
+          hits.sort(function (a, b) {
+            return distance(q, a[0].replace(/^\//, '').replace(/\.html$/, '')) -
+                   distance(q, b[0].replace(/^\//, '').replace(/\.html$/, ''));
+          });
+          renderAc(hits);
+        });
+        input.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') {
+            var firstA = ac.querySelector('a');
+            if (firstA) location.href = firstA.href;
+          } else if (e.key === 'Escape') { ac.style.display = 'none'; }
+        });
+        document.addEventListener('click', function (e) {
+          if (e.target !== input && !ac.contains(e.target)) ac.style.display = 'none';
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

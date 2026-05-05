@@ -1,0 +1,1018 @@
+{
+  "startTime": "2026-04-28T04:29:45.401Z",
+  "baseURL": "https://volvix-pos.vercel.app",
+  "screens": {
+    "salvadorex": {
+      "buttons": [
+        {
+          "label": "Vista Android",
+          "line": 1419,
+          "selector": "button.platform-toggle-btn[onclick*=\"android\"]",
+          "result": "✅ WORKS",
+          "observation": "toast: \"Vista ANDROID · previsualizando layout\""
+        },
+        {
+          "label": "Vista Web",
+          "line": 1423,
+          "selector": "button.platform-toggle-btn[onclick*=\"web\"]",
+          "result": "✅ WORKS",
+          "observation": "toast: \"Vista WEB · previsualizando layout\""
+        },
+        {
+          "label": "Notificaciones",
+          "line": 1404,
+          "selector": "button.tb-btn.notif",
+          "result": "✅ WORKS",
+          "observation": "modal abierto: modal-notifications"
+        },
+        {
+          "label": "Menu: Compras IA (locked)",
+          "line": 1553,
+          "selector": "button[data-menu=\"sugeridas\"]",
+          "result": "✅ WORKS",
+          "observation": "overlay aparece (z>500 fixed)"
+        },
+        {
+          "label": "POS: Mayoreo",
+          "line": 1613,
+          "selector": "button[data-feature=\"pos.mayoreo\"]",
+          "result": "✅ WORKS",
+          "observation": "toast: \"✓ Precios MAYOREO activados\""
+        },
+        {
+          "label": "POS: Entradas",
+          "line": 1617,
+          "selector": "button[data-feature=\"pos.entradas\"]",
+          "result": "✅ WORKS",
+          "observation": "modal abierto: modal-cash"
+        },
+        {
+          "label": "POS: Salidas",
+          "line": 1621,
+          "selector": "button[data-feature=\"pos.salidas\"]",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable después de cart-seeded"
+        },
+        {
+          "label": "POS: Borrar",
+          "line": 1625,
+          "selector": "button[data-feature=\"pos.borrar\"]",
+          "result": "✅ WORKS",
+          "observation": "toast: \"Último artículo eliminado\""
+        },
+        {
+          "label": "POS: Verificador",
+          "line": 1629,
+          "selector": "button[data-feature=\"pos.verificador\"]",
+          "result": "✅ WORKS",
+          "observation": "modal abierto: vx-modal vx-size-sm"
+        },
+        {
+          "label": "POS: Panel catálogo",
+          "line": 1636,
+          "selector": "button[data-feature=\"pos.panel\"]",
+          "result": "✅ WORKS",
+          "observation": "modal abierto: modal-cat-panel"
+        },
+        {
+          "label": "POS: Granel",
+          "line": 1644,
+          "selector": "button[data-feature=\"pos.granel\"]",
+          "result": "✅ WORKS",
+          "observation": "modal abierto: modal-granel"
+        },
+        {
+          "label": "POS: Descuento",
+          "line": 1648,
+          "selector": "button[data-feature=\"pos.descuento\"]",
+          "result": "✅ WORKS",
+          "observation": "modal abierto: vx-modal vx-size-sm"
+        },
+        {
+          "label": "POS: Recargas (tiempo aire)",
+          "line": 1652,
+          "selector": "button[data-feature=\"pos.recargas_btn\"]",
+          "result": "✅ WORKS",
+          "observation": "screen→recargas"
+        },
+        {
+          "label": "POS: Servicios",
+          "line": 1656,
+          "selector": "button[data-feature=\"pos.servicios_btn\"]",
+          "result": "✅ WORKS",
+          "observation": "screen→servicios"
+        },
+        {
+          "label": "POS: Calculadora",
+          "line": 1660,
+          "selector": "button[data-feature=\"pos.calculadora\"]",
+          "result": "✅ WORKS",
+          "observation": "modal abierto: modal-calc"
+        },
+        {
+          "label": "POS: Cambiar precio",
+          "line": 1702,
+          "selector": "button[data-feature=\"pos.cambiar\"]",
+          "result": "✅ WORKS",
+          "observation": "modal abierto: modal-change-price"
+        },
+        {
+          "label": "POS: Venta pendiente",
+          "line": 1706,
+          "selector": "button[data-feature=\"pos.pendiente\"]",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable después de cart-seeded"
+        },
+        {
+          "label": "POS: Eliminar venta",
+          "line": 1710,
+          "selector": "button[onclick=\"clearCart()\"]",
+          "result": "✅ WORKS",
+          "observation": "modal abierto: vx-modal vx-size-sm"
+        },
+        {
+          "label": "POS: Asignar cliente",
+          "line": 1714,
+          "selector": "button[onclick=\"openCustomerSelector()\"]",
+          "result": "✅ WORKS",
+          "observation": "modal abierto: modal-cust-sel"
+        },
+        {
+          "label": "POS: Enviar a impresora",
+          "line": 1749,
+          "selector": "button[onclick=\"enviarAImpresora()\"]",
+          "result": "✅ WORKS",
+          "observation": "toast: \"Error: Rate limit exceeded for default. Retry in 1\""
+        },
+        {
+          "label": "POS: Buscar (Enter)",
+          "line": 1593,
+          "selector": "button.btn-enter",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable después de cart-seeded"
+        },
+        {
+          "label": "Quickpos key 7",
+          "line": 2359,
+          "selector": "button.quickpos-key (7)",
+          "result": "✅ WORKS",
+          "observation": "qp-display: \"$0.00\" → \"$7\""
+        },
+        {
+          "label": "Quickpos key 8",
+          "line": 2359,
+          "selector": "button.quickpos-key (8)",
+          "result": "✅ WORKS",
+          "observation": "qp-display: \"$7\" → \"$78\""
+        },
+        {
+          "label": "Quickpos key 9",
+          "line": 2359,
+          "selector": "button.quickpos-key (9)",
+          "result": "✅ WORKS",
+          "observation": "qp-display: \"$78\" → \"$789\""
+        },
+        {
+          "label": "Quickpos key 4",
+          "line": 2359,
+          "selector": "button.quickpos-key (4)",
+          "result": "✅ WORKS",
+          "observation": "qp-display: \"$789\" → \"$7894\""
+        },
+        {
+          "label": "Quickpos key 5",
+          "line": 2359,
+          "selector": "button.quickpos-key (5)",
+          "result": "✅ WORKS",
+          "observation": "qp-display: \"$7894\" → \"$78945\""
+        },
+        {
+          "label": "Quickpos key 6",
+          "line": 2359,
+          "selector": "button.quickpos-key (6)",
+          "result": "✅ WORKS",
+          "observation": "qp-display: \"$78945\" → \"$789456\""
+        },
+        {
+          "label": "Quickpos key 1",
+          "line": 2359,
+          "selector": "button.quickpos-key (1)",
+          "result": "✅ WORKS",
+          "observation": "qp-display: \"$789456\" → \"$7894561\""
+        },
+        {
+          "label": "Quickpos key 2",
+          "line": 2359,
+          "selector": "button.quickpos-key (2)",
+          "result": "✅ WORKS",
+          "observation": "qp-display: \"$7894561\" → \"$78945612\""
+        },
+        {
+          "label": "Quickpos key 3",
+          "line": 2359,
+          "selector": "button.quickpos-key (3)",
+          "result": "✅ WORKS",
+          "observation": "qp-display: \"$78945612\" → \"$789456123\""
+        },
+        {
+          "label": "Quickpos key 0",
+          "line": 2359,
+          "selector": "button.quickpos-key (0)",
+          "result": "✅ WORKS",
+          "observation": "qp-display: \"$789456123\" → \"$7894561230\""
+        },
+        {
+          "label": "Quickpos key .",
+          "line": 2359,
+          "selector": "button.quickpos-key (.)",
+          "result": "✅ WORKS",
+          "observation": "qp-display: \"$7894561230\" → \"$7894561230.\""
+        },
+        {
+          "label": "Quickpos key C",
+          "line": 2359,
+          "selector": "button.quickpos-key (C)",
+          "result": "✅ WORKS",
+          "observation": "qp-display: \"$7894561230.\" → \"$0.00\""
+        }
+      ],
+      "notes": [
+        "Seed result: {\"ok\":true,\"count\":3}"
+      ]
+    },
+    "kds": {
+      "buttons": [
+        {
+          "label": "Sonido ON/OFF",
+          "line": 66,
+          "selector": "#soundBtn",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable después de cart-seeded"
+        }
+      ],
+      "notes": []
+    }
+  },
+  "consoleErrors": {
+    "salvadorex": [
+      {
+        "text": "Failed to load resource: the server responded with a status of 404 ()",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-tests-wiring.js",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/login.html",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 401 ()",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/api/sales",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 401 ()",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/api/products",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 401 ()",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/api/ai/decide",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 503 (Offline)",
+        "location": {
+          "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 503 (Offline)",
+        "location": {
+          "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "[ERROR] [VolvixPerf] fetch error: /api/owner/dashboard?tenant_id=TNT001 Rate limit exceeded for default. Retry in 555ms\nError: Rate limit exceeded for default. Retry in 555ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at wrapped (https://volvix-pos.verc",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[VolvixPerf] fetch error: /api/owner/dashboard?tenant_id=TNT001 Error: Rate limit exceeded for default. Retry in 555ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at window.fetch",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [VolvixPerf] fetch error: /api/owner/billing?tenant_id=TNT001 Rate limit exceeded for default. Retry in 550ms\nError: Rate limit exceeded for default. Retry in 550ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at wrapped (https://volvix-pos.vercel",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[VolvixPerf] fetch error: /api/owner/billing?tenant_id=TNT001 Error: Rate limit exceeded for default. Retry in 550ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at window.fetch (",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [VolvixPerf] fetch error: /api/billing/plans Rate limit exceeded for default. Retry in 545ms\nError: Rate limit exceeded for default. Retry in 545ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[VolvixPerf] fetch error: /api/billing/plans Error: Rate limit exceeded for default. Retry in 545ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at window.fetch (https://volvix-po",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [VolvixPerf] fetch error: /api/owner/seats?tenant_id=TNT001 Rate limit exceeded for default. Retry in 540ms\nError: Rate limit exceeded for default. Retry in 540ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at wrapped (https://volvix-pos.vercel.a",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[VolvixPerf] fetch error: /api/owner/seats?tenant_id=TNT001 Error: Rate limit exceeded for default. Retry in 540ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at window.fetch (ht",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 555ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 555ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at wrapped (https://volvix-pos.vercel.app/vol",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 555ms, stack: Error: Rate limit exceeded for default. Retry in 5…x-pos.vercel.app/volvix-real-data-loader.js:225:3, userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safari",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 550ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 550ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at wrapped (https://volvix-pos.vercel.app/vol",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 550ms, stack: Error: Rate limit exceeded for default. Retry in 5…x-pos.vercel.app/volvix-real-data-loader.js:225:3, userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safari",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 545ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 545ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at wrapped (https://volvix-pos.vercel.app/vol",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 545ms, stack: Error: Rate limit exceeded for default. Retry in 5…x-pos.vercel.app/volvix-real-data-loader.js:225:3, userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safari",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 540ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 540ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at wrapped (https://volvix-pos.vercel.app/vol",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 540ms, stack: Error: Rate limit exceeded for default. Retry in 5…x-pos.vercel.app/volvix-real-data-loader.js:225:3, userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safari",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [VolvixPerf] fetch error: https://volvix-pos.vercel.app/api/products?tenant_id=TNT001 Rate limit exceeded for default. Retry in 431ms\nError: Rate limit exceeded for default. Retry in 431ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at wrapped (h",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[VolvixPerf] fetch error: https://volvix-pos.vercel.app/api/products?tenant_id=TNT001 Error: Rate limit exceeded for default. Retry in 431ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:2",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 431ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 431ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at wrapped (https://volvix-pos.vercel.app/vol",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 431ms, stack: Error: Rate limit exceeded for default. Retry in 4…x-pos.vercel.app/salvadorex_web_v25.html:2947:20), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safari",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [VolvixPerf] fetch error: /api/inventory/alerts?tenant_id=TNT001 Rate limit exceeded for /api/inventory. Retry in 349ms\nError: Rate limit exceeded for /api/inventory. Retry in 349ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at wrapped (https://",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[VolvixPerf] fetch error: /api/inventory/alerts?tenant_id=TNT001 Error: Rate limit exceeded for /api/inventory. Retry in 349ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at wind",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for /api/inventory. Retry in 349ms\",\"stack\":\"Error: Rate limit exceeded for /api/inventory. Retry in 349ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at wrapped (https://volvix-pos.",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for /api/inventory. Retry in 349ms, stack: Error: Rate limit exceeded for /api/inventory. Ret…x-pos.vercel.app/salvadorex_web_v25.html:3961:52), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 404 ()",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-tests-wiring.js",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/salvadorex_web_v25.html",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 404 ()",
+        "location": {
+          "url": "https://api.stripe.com/v1",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "[ERROR] [VolvixPerf] fetch error: https://volvix-pos.vercel.app/api/ai/decide Rate limit exceeded for default. Retry in 1284ms\nError: Rate limit exceeded for default. Retry in 1284ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at wrapped (https://volvix-",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[VolvixPerf] fetch error: https://volvix-pos.vercel.app/api/ai/decide Error: Rate limit exceeded for default. Retry in 1284ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at windo",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 1284ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 1284ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at wrapped (https://volvix-pos.vercel.app/v",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 1284ms, stack: Error: Rate limit exceeded for default. Retry in 1…x-pos.vercel.app/volvix-ai-real-wiring.js:603:25), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safar",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [AI-REAL-WIRING] Health-check falló: Rate limit exceeded for default. Retry in 1284ms {}",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[AI-REAL-WIRING] Health-check falló: Rate limit exceeded for default. Retry in 1284ms",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [VolvixPerf] fetch error: https://volvix-pos.vercel.app/api/owner/low-stock Rate limit exceeded for default. Retry in 916ms\nError: Rate limit exceeded for default. Retry in 916ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at wrapped (https://vol",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[VolvixPerf] fetch error: https://volvix-pos.vercel.app/api/owner/low-stock Error: Rate limit exceeded for default. Retry in 916ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at ",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 916ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 916ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at wrapped (https://volvix-pos.vercel.app/vol",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 916ms, stack: Error: Rate limit exceeded for default. Retry in 9…vercel.app/volvix-notifications-wiring.js:367:25), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safari",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [VolvixPerf] fetch error: https://volvix-pos.vercel.app/api/owner/low-stock Rate limit exceeded for default. Retry in 688ms\nError: Rate limit exceeded for default. Retry in 688ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at wrapped (https://vol",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[VolvixPerf] fetch error: https://volvix-pos.vercel.app/api/owner/low-stock Error: Rate limit exceeded for default. Retry in 688ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at ",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 688ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 688ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at wrapped (https://volvix-pos.vercel.app/vol",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 688ms, stack: Error: Rate limit exceeded for default. Retry in 6…vercel.app/volvix-notifications-wiring.js:367:25), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safari",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [VolvixPerf] fetch error: https://volvix-pos.vercel.app/api/sales/latest Rate limit exceeded for default. Retry in 137ms\nError: Rate limit exceeded for default. Retry in 137ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at wrapped (https://volvix",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[VolvixPerf] fetch error: https://volvix-pos.vercel.app/api/sales/latest Error: Rate limit exceeded for default. Retry in 137ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at win",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 137ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 137ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at wrapped (https://volvix-pos.vercel.app/vol",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 137ms, stack: Error: Rate limit exceeded for default. Retry in 1…vercel.app/volvix-notifications-wiring.js:384:25), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safari",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [VolvixPerf] fetch error: https://volvix-pos.vercel.app/api/sync/status Rate limit exceeded for default. Retry in 398ms\nError: Rate limit exceeded for default. Retry in 398ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at wrapped (https://volvix-",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[VolvixPerf] fetch error: https://volvix-pos.vercel.app/api/sync/status Error: Rate limit exceeded for default. Retry in 398ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at wind",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 398ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 398ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at wrapped (https://volvix-pos.vercel.app/vol",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 398ms, stack: Error: Rate limit exceeded for default. Retry in 3…vercel.app/volvix-notifications-wiring.js:405:25), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safari",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [VolvixPerf] fetch error: https://volvix-pos.vercel.app/api/sync/status Rate limit exceeded for default. Retry in 30ms\nError: Rate limit exceeded for default. Retry in 30ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at wrapped (https://volvix-po",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[VolvixPerf] fetch error: https://volvix-pos.vercel.app/api/sync/status Error: Rate limit exceeded for default. Retry in 30ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at windo",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 30ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 30ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at wrapped (https://volvix-pos.vercel.app/volvi",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 30ms, stack: Error: Rate limit exceeded for default. Retry in 3…vercel.app/volvix-notifications-wiring.js:405:25), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safari/",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 404 ()",
+        "location": {
+          "url": "https://api.stripe.com/v1",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 403 ()",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/api/owner/low-stock",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 403 ()",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/api/owner/low-stock",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 404 ()",
+        "location": {
+          "url": "https://api.stripe.com/v1",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 400 ()",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/api/sales/pending",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "[ERROR] Unhandled promise rejection {reason: Failed to execute 'transaction' on 'IDBDatabase': One of the specified object stores was not found., stack: NotFoundError: Failed to execute 'transaction' on …ix-pos.vercel.app/salvadorex_web_v25.html:6332:7)}",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[ERROR] [ErrorHandler] {\"type\":\"unhandledrejection\",\"message\":\"Failed to execute 'transaction' on 'IDBDatabase': One of the specified object stores was not found.\",\"stack\":\"NotFoundError: Failed to execute 'transaction' on 'IDBDatabase': One of the specified object stores was not found.\\n    at http",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[ErrorHandler] {type: unhandledrejection, message: Failed to execute 'transaction' on 'IDBDatabase': One of the specified object stores was not found., stack: NotFoundError: Failed to execute 'transaction' on …ix-pos.vercel.app/salvadorex_web_v25.html:6332:7), userAgent: Mozilla/5.0 (Windows NT 10.0",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "PAGE ERROR: Failed to execute 'transaction' on 'IDBDatabase': One of the specified object stores was not found."
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 404 ()",
+        "location": {
+          "url": "https://api.stripe.com/v1",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "[ERROR] [VolvixPerf] fetch error: /api/printer/raw Rate limit exceeded for default. Retry in 1301ms\nError: Rate limit exceeded for default. Retry in 1301ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[VolvixPerf] fetch error: /api/printer/raw Error: Rate limit exceeded for default. Retry in 1301ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at window.fetch (https://volvix-pos",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 1301ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 1301ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at wrapped (https://volvix-pos.vercel.app/v",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 1301ms, stack: Error: Rate limit exceeded for default. Retry in 1…x-pos.vercel.app/salvadorex_web_v25.html:3346:23), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safar",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] impresora error: Rate limit exceeded for default. Retry in 1301ms\nError: Rate limit exceeded for default. Retry in 1301ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at w",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "impresora error: Error: Rate limit exceeded for default. Retry in 1301ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at window.fetch (https://volvix-pos.vercel.app/volvix-ui-erro",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      }
+    ],
+    "kds": [
+      {
+        "text": "Failed to load resource: the server responded with a status of 404 ()",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-tests-wiring.js",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/login.html",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 401 ()",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/api/products",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 401 ()",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/api/sales",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 401 ()",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/api/ai/decide",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Loading media from  'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=' violates the following Content Security Policy directive: \"default-src 'self'\". Note that 'media-src' was not explicitly set, so 'default-src' is used as a fallback. The action has been blocked.",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-kds.html",
+          "lineNumber": 189,
+          "columnNumber": 0
+        }
+      }
+    ]
+  },
+  "networkFailures": {
+    "salvadorex": [
+      {
+        "url": "https://volvix-pos.vercel.app/volvix-tests-wiring.js",
+        "status": 404,
+        "method": "GET"
+      },
+      {
+        "url": "https://volvix-pos.vercel.app/api/sales",
+        "status": 401,
+        "method": "GET"
+      },
+      {
+        "url": "https://volvix-pos.vercel.app/api/products",
+        "status": 401,
+        "method": "GET"
+      },
+      {
+        "url": "https://volvix-pos.vercel.app/api/ai/decide",
+        "status": 401,
+        "method": "POST"
+      },
+      {
+        "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap",
+        "status": 503,
+        "method": "GET"
+      },
+      {
+        "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap",
+        "status": 503,
+        "method": "GET"
+      },
+      {
+        "url": "https://volvix-pos.vercel.app/volvix-tests-wiring.js",
+        "status": 404,
+        "method": "GET"
+      },
+      {
+        "url": "https://api.stripe.com/v1",
+        "status": 404,
+        "method": "GET"
+      },
+      {
+        "url": "https://api.stripe.com/v1",
+        "status": 404,
+        "method": "GET"
+      },
+      {
+        "url": "https://volvix-pos.vercel.app/api/owner/low-stock",
+        "status": 403,
+        "method": "GET"
+      },
+      {
+        "url": "https://volvix-pos.vercel.app/api/owner/low-stock",
+        "status": 403,
+        "method": "GET"
+      },
+      {
+        "url": "https://api.stripe.com/v1",
+        "status": 404,
+        "method": "GET"
+      },
+      {
+        "url": "https://volvix-pos.vercel.app/api/sales/pending",
+        "status": 400,
+        "method": "POST"
+      },
+      {
+        "url": "https://api.stripe.com/v1",
+        "status": 404,
+        "method": "GET"
+      }
+    ],
+    "kds": [
+      {
+        "url": "https://volvix-pos.vercel.app/volvix-tests-wiring.js",
+        "status": 404,
+        "method": "GET"
+      },
+      {
+        "url": "https://volvix-pos.vercel.app/api/products",
+        "status": 401,
+        "method": "GET"
+      },
+      {
+        "url": "https://volvix-pos.vercel.app/api/sales",
+        "status": 401,
+        "method": "GET"
+      },
+      {
+        "url": "https://volvix-pos.vercel.app/api/ai/decide",
+        "status": 401,
+        "method": "POST"
+      }
+    ]
+  },
+  "screenshots": [
+    "01-pos-loaded.png",
+    "02-cart-seeded.png",
+    "03-quickpos-loaded.png",
+    "04-final-pos.png",
+    "kds-01-loaded.png",
+    "kds-02-final.png"
+  ],
+  "endTime": "2026-04-28T04:31:54.842Z"
+}

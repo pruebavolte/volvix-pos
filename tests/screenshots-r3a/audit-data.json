@@ -1,0 +1,1360 @@
+{
+  "startTime": "2026-04-28T04:01:02.457Z",
+  "baseURL": "https://volvix-pos.vercel.app",
+  "screens": {
+    "salvadorex": {
+      "buttons": [
+        {
+          "label": "Notificaciones",
+          "line": 1404,
+          "selector": "button.tb-btn.notif",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "Alertas stock bajo",
+          "line": 1409,
+          "selector": "button#tb-lowstock-bell",
+          "result": "✅ WORKS",
+          "observation": "screen→inventario"
+        },
+        {
+          "label": "Vista Windows",
+          "line": 1415,
+          "selector": "button.platform-toggle-btn[onclick*=\"windows\"]",
+          "result": "✅ WORKS",
+          "observation": "toast: \"Vista WINDOWS · previsualizando layout\""
+        },
+        {
+          "label": "Vista Android",
+          "line": 1419,
+          "selector": "button.platform-toggle-btn[onclick*=\"android\"]",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "Vista Web",
+          "line": 1423,
+          "selector": "button.platform-toggle-btn[onclick*=\"web\"]",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "Modo caja rápida (Quickpos)",
+          "line": 1429,
+          "selector": "button.tb-btn.rapido",
+          "result": "✅ WORKS",
+          "observation": "screen→Cashbox rápida"
+        },
+        {
+          "label": "SAAS Admin",
+          "line": 1434,
+          "selector": "button.tb-btn.saas",
+          "result": "✅ WORKS",
+          "observation": "toast: \"Abriendo Volvix Core en nueva pestaña…\""
+        },
+        {
+          "label": "Móvil (mobile-apps)",
+          "line": 1438,
+          "selector": "button.tb-btn.movil",
+          "result": "✅ WORKS",
+          "observation": "screen→Preview apps móviles"
+        },
+        {
+          "label": "LiveSync (salud)",
+          "line": 1442,
+          "selector": "button.tb-btn.livesync",
+          "result": "✅ WORKS",
+          "observation": "screen→Panel de Salud · LIVE SYNC"
+        },
+        {
+          "label": "Perfil",
+          "line": 1447,
+          "selector": "button.tb-btn.perfil",
+          "result": "✅ WORKS",
+          "observation": "screen→Mi Profile"
+        },
+        {
+          "label": "Ayuda",
+          "line": 1451,
+          "selector": "button.tb-btn.ayuda",
+          "result": "✅ WORKS",
+          "observation": "screen→Centro de Help"
+        },
+        {
+          "label": "Menu: POS",
+          "line": 1463,
+          "selector": "button[data-menu=\"pos\"]",
+          "result": "✅ WORKS",
+          "observation": "screen→pos"
+        },
+        {
+          "label": "Menu: Crédito",
+          "line": 1467,
+          "selector": "button[data-menu=\"credito\"]",
+          "result": "✅ WORKS",
+          "observation": "screen→credito"
+        },
+        {
+          "label": "Menu: Clientes",
+          "line": 1471,
+          "selector": "button[data-menu=\"clientes\"]",
+          "result": "✅ WORKS",
+          "observation": "screen→clientes"
+        },
+        {
+          "label": "Menu: Inventario",
+          "line": 1475,
+          "selector": "button[data-menu=\"inventario\"]",
+          "result": "✅ WORKS",
+          "observation": "screen→inventario"
+        },
+        {
+          "label": "Menu: Kardex",
+          "line": 1479,
+          "selector": "button[data-menu=\"kardex\"]",
+          "result": "✅ WORKS",
+          "observation": "screen→kardex"
+        },
+        {
+          "label": "Menu: Proveedores",
+          "line": 1483,
+          "selector": "button[data-menu=\"proveedores\"]",
+          "result": "✅ WORKS",
+          "observation": "screen→proveedores"
+        },
+        {
+          "label": "Menu: Configuración",
+          "line": 1487,
+          "selector": "button[data-menu=\"config\"]",
+          "result": "✅ WORKS",
+          "observation": "screen→config"
+        },
+        {
+          "label": "Menu: Facturación",
+          "line": 1491,
+          "selector": "button[data-menu=\"facturacion\"]",
+          "result": "✅ WORKS",
+          "observation": "screen→facturacion"
+        },
+        {
+          "label": "Menu: Corte",
+          "line": 1495,
+          "selector": "button[data-menu=\"corte\"]",
+          "result": "✅ WORKS",
+          "observation": "screen→corte"
+        },
+        {
+          "label": "Menu: Reportes",
+          "line": 1499,
+          "selector": "button[data-menu=\"reportes\"]",
+          "result": "✅ WORKS",
+          "observation": "screen→reportes"
+        },
+        {
+          "label": "Menu: Dashboard",
+          "line": 1506,
+          "selector": "button[data-menu=\"dashboard\"]",
+          "result": "✅ WORKS",
+          "observation": "screen→dashboard"
+        },
+        {
+          "label": "Menu: Apertura",
+          "line": 1510,
+          "selector": "button[data-menu=\"apertura\"]",
+          "result": "✅ WORKS",
+          "observation": "modal abierto: vx-modal vx-size-md"
+        },
+        {
+          "label": "Menu: Cotizaciones",
+          "line": 1514,
+          "selector": "button[data-menu=\"cotizaciones\"]",
+          "result": "✅ WORKS",
+          "observation": "modal abierto: vx-modal vx-size-md"
+        },
+        {
+          "label": "Menu: Devoluciones",
+          "line": 1518,
+          "selector": "button[data-menu=\"devoluciones\"]",
+          "result": "✅ WORKS",
+          "observation": "modal abierto: vx-modal vx-size-md"
+        },
+        {
+          "label": "Menu: Ventas",
+          "line": 1522,
+          "selector": "button[data-menu=\"ventas\"]",
+          "result": "✅ WORKS",
+          "observation": "screen→ventas"
+        },
+        {
+          "label": "Menu: Usuarios",
+          "line": 1526,
+          "selector": "button[data-menu=\"usuarios\"]",
+          "result": "✅ WORKS",
+          "observation": "screen→usuarios"
+        },
+        {
+          "label": "Menu: Recargas",
+          "line": 1533,
+          "selector": "button[data-menu=\"recargas\"]",
+          "result": "✅ WORKS",
+          "observation": "screen→recargas"
+        },
+        {
+          "label": "Menu: Servicios",
+          "line": 1537,
+          "selector": "button[data-menu=\"servicios\"]",
+          "result": "✅ WORKS",
+          "observation": "screen→servicios"
+        },
+        {
+          "label": "Menu: Tarjetas (locked)",
+          "line": 1541,
+          "selector": "button[data-menu=\"tarjetas\"]",
+          "result": "✅ WORKS",
+          "observation": "overlay aparece (z>500 fixed)"
+        },
+        {
+          "label": "Menu: Promociones",
+          "line": 1545,
+          "selector": "button[data-menu=\"promociones\"]",
+          "result": "✅ WORKS",
+          "observation": "screen→promociones"
+        },
+        {
+          "label": "Menu: Departamentos",
+          "line": 1549,
+          "selector": "button[data-menu=\"departamentos\"]",
+          "result": "✅ WORKS",
+          "observation": "screen→departamentos"
+        },
+        {
+          "label": "Menu: Compras IA (locked)",
+          "line": 1553,
+          "selector": "button[data-menu=\"sugeridas\"]",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "Menu: Actualizador",
+          "line": 1557,
+          "selector": "button[data-menu=\"actualizador\"]",
+          "result": "✅ WORKS",
+          "observation": "screen→actualizador"
+        },
+        {
+          "label": "Menu: Más módulos",
+          "line": 1564,
+          "selector": "button.menu-btn.more",
+          "result": "✅ WORKS",
+          "observation": "toast: \"Abriendo catálogo de módulos adicionales\""
+        },
+        {
+          "label": "POS: Varios/Kits",
+          "line": 1601,
+          "selector": "button[data-feature=\"pos.ins_varios\"]",
+          "result": "✅ WORKS",
+          "observation": "modal abierto: vx-modal vx-size-sm"
+        },
+        {
+          "label": "POS: Producto común",
+          "line": 1605,
+          "selector": "button[data-feature=\"pos.art_comun\"]",
+          "result": "✅ WORKS",
+          "observation": "modal abierto: vx-modal vx-size-sm"
+        },
+        {
+          "label": "POS: Buscar",
+          "line": 1609,
+          "selector": "button[data-feature=\"pos.buscar\"]",
+          "result": "✅ WORKS",
+          "observation": "modal abierto: modal-search"
+        },
+        {
+          "label": "POS: Mayoreo",
+          "line": 1613,
+          "selector": "button[data-feature=\"pos.mayoreo\"]",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "POS: Entradas",
+          "line": 1617,
+          "selector": "button[data-feature=\"pos.entradas\"]",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "POS: Salidas",
+          "line": 1621,
+          "selector": "button[data-feature=\"pos.salidas\"]",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "POS: Borrar",
+          "line": 1625,
+          "selector": "button[data-feature=\"pos.borrar\"]",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "POS: Verificador",
+          "line": 1629,
+          "selector": "button[data-feature=\"pos.verificador\"]",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "POS: Panel catálogo",
+          "line": 1636,
+          "selector": "button[data-feature=\"pos.panel\"]",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "POS: Catálogo visual",
+          "line": 1640,
+          "selector": "button[data-feature=\"pos.catalogo\"]",
+          "result": "✅ WORKS",
+          "observation": "overlay aparece (z>500 fixed)"
+        },
+        {
+          "label": "POS: Granel",
+          "line": 1644,
+          "selector": "button[data-feature=\"pos.granel\"]",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "POS: Descuento",
+          "line": 1648,
+          "selector": "button[data-feature=\"pos.descuento\"]",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "POS: Recargas (tiempo aire)",
+          "line": 1652,
+          "selector": "button[data-feature=\"pos.recargas_btn\"]",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "POS: Servicios",
+          "line": 1656,
+          "selector": "button[data-feature=\"pos.servicios_btn\"]",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "POS: Calculadora",
+          "line": 1660,
+          "selector": "button[data-feature=\"pos.calculadora\"]",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "POS: Cobrar",
+          "line": 1719,
+          "selector": "button.btn-cobrar",
+          "result": "✅ WORKS",
+          "observation": "toast: \"+ Manzanas kg\""
+        },
+        {
+          "label": "POS: Cambiar precio",
+          "line": 1702,
+          "selector": "button[data-feature=\"pos.cambiar\"]",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "POS: Venta pendiente",
+          "line": 1706,
+          "selector": "button[data-feature=\"pos.pendiente\"]",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "POS: Eliminar venta",
+          "line": 1710,
+          "selector": "button[onclick=\"clearCart()\"]",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "POS: Asignar cliente",
+          "line": 1714,
+          "selector": "button[onclick=\"openCustomerSelector()\"]",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "POS: Reimprimir",
+          "line": 1745,
+          "selector": "button[onclick=\"reimprimirUltimoTicket()\"]",
+          "result": "✅ WORKS",
+          "observation": "toast: \"+ Palomitas\""
+        },
+        {
+          "label": "POS: Enviar a impresora",
+          "line": 1749,
+          "selector": "button[onclick=\"enviarAImpresora()\"]",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "POS: Historial ventas",
+          "line": 1753,
+          "selector": "button[onclick*=\"showScreen('ventas')\"]",
+          "result": "✅ WORKS",
+          "observation": "DOM cambió 1.5%"
+        },
+        {
+          "label": "Barcode input field",
+          "line": 1593,
+          "selector": "input#barcode-input",
+          "result": "✅ WORKS",
+          "observation": "visible y editable"
+        },
+        {
+          "label": "POS: Buscar (Enter)",
+          "line": 1593,
+          "selector": "button.btn-enter",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "Quickpos key 7",
+          "line": 2359,
+          "selector": "button.quickpos-key (7)",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "Quickpos key 8",
+          "line": 2359,
+          "selector": "button.quickpos-key (8)",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "Quickpos key 9",
+          "line": 2359,
+          "selector": "button.quickpos-key (9)",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "Quickpos key 4",
+          "line": 2359,
+          "selector": "button.quickpos-key (4)",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "Quickpos key 5",
+          "line": 2359,
+          "selector": "button.quickpos-key (5)",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "Quickpos key 6",
+          "line": 2359,
+          "selector": "button.quickpos-key (6)",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "Quickpos key 1",
+          "line": 2359,
+          "selector": "button.quickpos-key (1)",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "Quickpos key 2",
+          "line": 2359,
+          "selector": "button.quickpos-key (2)",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "Quickpos key 3",
+          "line": 2359,
+          "selector": "button.quickpos-key (3)",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "Quickpos key 0",
+          "line": 2359,
+          "selector": "button.quickpos-key (0)",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "Quickpos key .",
+          "line": 2359,
+          "selector": "button.quickpos-key (.)",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "Quickpos key C",
+          "line": 2359,
+          "selector": "button.quickpos-key (C)",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "Quickpos Cobrar",
+          "line": 2371,
+          "selector": "button[onclick=\"quickPosCobrar()\"]",
+          "result": "✅ WORKS",
+          "observation": "toast: \"Ingresa un monto válido\""
+        },
+        {
+          "label": "Topbar: Salir",
+          "line": 1455,
+          "selector": "button.tb-btn.salir",
+          "result": "✅ WORKS",
+          "observation": "modal abierto: vx-modal vx-size-sm"
+        }
+      ],
+      "notes": [
+        "Post-login URL: https://volvix-pos.vercel.app/login.html",
+        "DEBUG: login-screen visible: false",
+        "DEBUG: visible text: Saltar al contenido principal | Saltar a la navegación | Saltar al pie de página | Saltar al contenido | S | SalvadoreX | Don Chucho · Caja 1 | 27 Abr 2026 | ONLINE | salvadorex.com | Le atiende: Administrator | ! | 3 | Windows | Android | Web | RÁPIDO | 👑 | SAAS | 📱 | MÓVIL | LIVE SYNC | AD | Sign out | F1 Sales | F2 Créditos | Customers | F3 Products | F4 Inventory | Purchases | Settings | Invoices | Cut | Reports | Dashboard | Opening | Quotes | Returns | Historial | Users | 📱 Recargas | 💡 Servicios | 🎬 Tarjetas | 🏷️ Promos | 🏢 Depto. | 🛒 Sugeridas | 💱 Actualizar | ⋯ Más | VENT",
+        "DEBUG: top buttons: [{\"text\":\"!\\n      3\",\"id\":\"\",\"cls\":\"tb-btn notif\",\"onclick\":\"openNotificationsPanel()\"},{\"text\":\"0\",\"id\":\"tb-lowstock-bell\",\"cls\":\"tb-btn lowstock\",\"onclick\":\"openLowStockAlerts()\"},{\"text\":\"Windows\",\"id\":\"\",\"cls\":\"platform-toggle-btn\",\"onclick\":\"selectPlatform(this, 'windows')\"},{\"text\":\"Android\",\"id\":\"\",\"cls\":\"platform-toggle-btn\",\"onclick\":\"selectPlatform(this, 'android')\"},{\"text\":\"Web\",\"id\":\"\",\"cls\":\"platform-toggle-btn active\",\"onclick\":\"selectPlatform(this, 'web')\"},{\"text\":\"RÁPIDO\",\"id\":\"\",\"cls\":\"tb-btn rapido\",\"onclick\":\"showScreen('quickpos')\"},{\"text\":\"👑 SAAS\",\"id\":\"\",\"cls\":\"tb-btn saas\",\"onclick\":\"openOwnerPanel()\"},{\"text\":\"📱 MÓVIL\",\"id\":\"\",\"cls\":\"tb-btn movil\",\"onclick\":\"showScreen('mobile-apps')\"},{\"text\":\"LIVE SYNC\",\"id\":\"\",\"cls\":\"tb-btn livesync\",\"onclick\":\"showScreen('salud')\"},{\"text\":\"AD\",\"id\":\"\",\"cls\":\"tb-btn perfil\",\"onclick\":\"showScreen('perfil')\"},{\"text\":\"\",\"id\":\"\",\"cls\":\"tb-btn ayuda\",\"onclick\":\"showScreen('ayuda')\"},{\"text\":\"Sign out\",\"id\":\"\",\"cls\":\"tb-btn salir\",\"onclick\":\"doLogout()\"},{\"text\":\"F1 Sales\",\"id\":\"\",\"cls\":\"menu-btn active\",\"onclick\":\"showScreen('pos')\"},{\"text\":\"F2 Créditos\",\"id\":\"\",\"cls\":\"menu-btn\",\"onclick\":\"showScreen('credito')\"},{\"text\":\"Customers\",\"id\":\"\",\"cls\":\"menu-btn\",\"onclick\":\"showScreen('clientes')\"},{\"text\":\"F3 Products\",\"id\":\"\",\"cls\":\"menu-btn\",\"onclick\":\"showScreen('inventario')\"},{\"text\":\"F4 Inventory\",\"id\":\"\",\"cls\":\"menu-btn\",\"onclick\":\"showScreen('kardex')\"},{\"text\":\"Purchases\",\"id\":\"\",\"cls\":\"menu-btn\",\"onclick\":\""
+      ]
+    },
+    "kds": {
+      "buttons": [
+        {
+          "label": "Sonido ON/OFF",
+          "line": 66,
+          "selector": "#soundBtn",
+          "result": "⚠️ PARTIAL",
+          "observation": "sin cambio detectable (DOM/heading/modal/url/toast)"
+        },
+        {
+          "label": "Filtro estación",
+          "line": 60,
+          "selector": "#station",
+          "result": "✅ WORKS",
+          "observation": "select cambia opciones"
+        }
+      ],
+      "notes": [
+        "Connection status: \"conectado\"",
+        "KDS columns rendered: 3 (esperado: 3)"
+      ]
+    }
+  },
+  "consoleErrors": {
+    "salvadorex": [
+      {
+        "text": "Failed to load resource: the server responded with a status of 404 ()",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-tests-wiring.js",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/login.html",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 401 ()",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/api/products",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 401 ()",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/api/sales",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 401 ()",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/api/ai/decide",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 503 (Offline)",
+        "location": {
+          "url": "https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 1402ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 1402ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel.",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 1402ms, stack: Error: Rate limit exceeded for default. Retry in 1…x-pos.vercel.app/volvix-real-data-loader.js:225:3, userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safar",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 1399ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 1399ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel.",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 1399ms, stack: Error: Rate limit exceeded for default. Retry in 1…x-pos.vercel.app/volvix-real-data-loader.js:225:3, userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safar",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 1396ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 1396ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel.",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 1396ms, stack: Error: Rate limit exceeded for default. Retry in 1…x-pos.vercel.app/volvix-real-data-loader.js:225:3, userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safar",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 1393ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 1393ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel.",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 1393ms, stack: Error: Rate limit exceeded for default. Retry in 1…x-pos.vercel.app/volvix-real-data-loader.js:225:3, userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safar",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 1390ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 1390ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel.",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 1390ms, stack: Error: Rate limit exceeded for default. Retry in 1…x-pos.vercel.app/volvix-real-data-loader.js:225:3, userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safar",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 1317ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 1317ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel.",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 1317ms, stack: Error: Rate limit exceeded for default. Retry in 1…x-pos.vercel.app/salvadorex_web_v25.html:2947:20), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safar",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for /api/inventory. Retry in 1248ms\",\"stack\":\"Error: Rate limit exceeded for /api/inventory. Retry in 1248ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volv",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for /api/inventory. Retry in 1248ms, stack: Error: Rate limit exceeded for /api/inventory. Ret…x-pos.vercel.app/salvadorex_web_v25.html:3961:52), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.1",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 503 (Offline)",
+        "location": {
+          "url": "https://fonts.gstatic.com/s/jetbrainsmono/v24/tDbv2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwBNntkaToggR7BYRbKPxDcwg.woff2",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 404 ()",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-tests-wiring.js",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/salvadorex_web_v25.html",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 404 ()",
+        "location": {
+          "url": "https://api.stripe.com/v1",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 1479ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 1479ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel.",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 1479ms, stack: Error: Rate limit exceeded for default. Retry in 1…x-pos.vercel.app/volvix-ai-real-wiring.js:603:25), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safar",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [AI-REAL-WIRING] Health-check falló: Rate limit exceeded for default. Retry in 1479ms {}",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[AI-REAL-WIRING] Health-check falló: Rate limit exceeded for default. Retry in 1479ms",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 1392ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 1392ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel.",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 1392ms, stack: Error: Rate limit exceeded for default. Retry in 1…vercel.app/volvix-notifications-wiring.js:367:25), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safar",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 1313ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 1313ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel.",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 1313ms, stack: Error: Rate limit exceeded for default. Retry in 1…vercel.app/volvix-notifications-wiring.js:367:25), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safar",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 435ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 435ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel.ap",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 435ms, stack: Error: Rate limit exceeded for default. Retry in 4…vercel.app/volvix-notifications-wiring.js:384:25), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safari",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 347ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 347ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel.ap",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 347ms, stack: Error: Rate limit exceeded for default. Retry in 3…vercel.app/volvix-notifications-wiring.js:384:25), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safari",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 349ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 349ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel.ap",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 349ms, stack: Error: Rate limit exceeded for default. Retry in 3…vercel.app/volvix-notifications-wiring.js:405:25), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safari",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 404 ()",
+        "location": {
+          "url": "https://api.stripe.com/v1",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 403 ()",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/api/owner/low-stock",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 403 ()",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/api/owner/low-stock",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 1954ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 1954ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel.",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 1954ms, stack: Error: Rate limit exceeded for default. Retry in 1…vix-pos.vercel.app/volvix-health-wiring.js:356:7), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safar",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 1949ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 1949ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel.",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 1949ms, stack: Error: Rate limit exceeded for default. Retry in 1…vix-pos.vercel.app/volvix-health-wiring.js:356:7), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safar",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 404 ()",
+        "location": {
+          "url": "https://api.stripe.com/v1",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "[ERROR] [Health] Overall status: ok -> down  {}",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[Health] Overall status: ok -> down ",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [Health] Integración sat-cfdi degradada {\"id\":\"sat-cfdi\",\"status\":\"down\",\"error\":\"Rate limit exceeded for default. Retry in 1954ms\"} {}",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[Health] Integración sat-cfdi degradada {id: sat-cfdi, status: down, error: Rate limit exceeded for default. Retry in 1954ms}",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [Health] Integración whatsapp degradada {\"id\":\"whatsapp\",\"status\":\"down\",\"error\":\"Rate limit exceeded for default. Retry in 1949ms\"} {}",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[Health] Integración whatsapp degradada {id: whatsapp, status: down, error: Rate limit exceeded for default. Retry in 1949ms}",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 1975ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 1975ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel.",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 1975ms, stack: Error: Rate limit exceeded for default. Retry in 1…vix-pos.vercel.app/volvix-health-wiring.js:356:7), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safar",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 1971ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 1971ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel.",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 157,
+          "columnNumber": 10
+        }
+      },
+      {
+        "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 1971ms, stack: Error: Rate limit exceeded for default. Retry in 1…vix-pos.vercel.app/volvix-health-wiring.js:356:7), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safar",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-logger-wiring.js",
+          "lineNumber": 241,
+          "columnNumber": 22
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 404 ()",
+        "location": {
+          "url": "https://api.stripe.com/v1",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 403 ()",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/api/owner/low-stock",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 403 ()",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/api/owner/low-stock",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 404 ()",
+        "location": {
+          "url": "https://api.stripe.com/v1",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 404 ()",
+        "location": {
+          "url": "https://api.stripe.com/v1",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 403 ()",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/api/owner/low-stock",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 403 ()",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/api/owner/low-stock",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 404 ()",
+        "location": {
+          "url": "https://api.stripe.com/v1",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 404 ()",
+        "location": {
+          "url": "https://api.stripe.com/v1",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 403 ()",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/api/owner/low-stock",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 403 ()",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/api/owner/low-stock",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 404 ()",
+        "location": {
+          "url": "https://api.stripe.com/v1",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      }
+    ],
+    "kds": [
+      {
+        "text": "Failed to load resource: the server responded with a status of 404 ()",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-tests-wiring.js",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/login.html",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 401 ()",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/api/sales",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 401 ()",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/api/products",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 401 ()",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/api/ai/decide",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 503 (Offline)",
+        "location": {
+          "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Failed to load resource: the server responded with a status of 503 (Offline)",
+        "location": {
+          "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "text": "Loading media from  'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=' violates the following Content Security Policy directive: \"default-src 'self'\". Note that 'media-src' was not explicitly set, so 'default-src' is used as a fallback. The action has been blocked.",
+        "location": {
+          "url": "https://volvix-pos.vercel.app/volvix-kds.html",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      }
+    ]
+  },
+  "networkFailures": {
+    "salvadorex": [
+      {
+        "url": "https://volvix-pos.vercel.app/volvix-tests-wiring.js",
+        "status": 404,
+        "method": "GET"
+      },
+      {
+        "url": "https://volvix-pos.vercel.app/api/products",
+        "status": 401,
+        "method": "GET"
+      },
+      {
+        "url": "https://volvix-pos.vercel.app/api/sales",
+        "status": 401,
+        "method": "GET"
+      },
+      {
+        "url": "https://volvix-pos.vercel.app/api/ai/decide",
+        "status": 401,
+        "method": "POST"
+      },
+      {
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2",
+        "status": 503,
+        "method": "GET"
+      },
+      {
+        "url": "https://fonts.gstatic.com/s/jetbrainsmono/v24/tDbv2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwBNntkaToggR7BYRbKPxDcwg.woff2",
+        "status": 503,
+        "method": "GET"
+      },
+      {
+        "url": "https://volvix-pos.vercel.app/volvix-tests-wiring.js",
+        "status": 404,
+        "method": "GET"
+      },
+      {
+        "url": "https://api.stripe.com/v1",
+        "status": 404,
+        "method": "GET"
+      },
+      {
+        "url": "https://api.stripe.com/v1",
+        "status": 404,
+        "method": "GET"
+      },
+      {
+        "url": "https://volvix-pos.vercel.app/api/owner/low-stock",
+        "status": 403,
+        "method": "GET"
+      },
+      {
+        "url": "https://volvix-pos.vercel.app/api/owner/low-stock",
+        "status": 403,
+        "method": "GET"
+      },
+      {
+        "url": "https://api.stripe.com/v1",
+        "status": 404,
+        "method": "GET"
+      },
+      {
+        "url": "https://api.stripe.com/v1",
+        "status": 404,
+        "method": "GET"
+      },
+      {
+        "url": "https://volvix-pos.vercel.app/api/owner/low-stock",
+        "status": 403,
+        "method": "GET"
+      },
+      {
+        "url": "https://volvix-pos.vercel.app/api/owner/low-stock",
+        "status": 403,
+        "method": "GET"
+      },
+      {
+        "url": "https://api.stripe.com/v1",
+        "status": 404,
+        "method": "GET"
+      },
+      {
+        "url": "https://api.stripe.com/v1",
+        "status": 404,
+        "method": "GET"
+      },
+      {
+        "url": "https://volvix-pos.vercel.app/api/owner/low-stock",
+        "status": 403,
+        "method": "GET"
+      },
+      {
+        "url": "https://volvix-pos.vercel.app/api/owner/low-stock",
+        "status": 403,
+        "method": "GET"
+      },
+      {
+        "url": "https://api.stripe.com/v1",
+        "status": 404,
+        "method": "GET"
+      },
+      {
+        "url": "https://api.stripe.com/v1",
+        "status": 404,
+        "method": "GET"
+      },
+      {
+        "url": "https://volvix-pos.vercel.app/api/owner/low-stock",
+        "status": 403,
+        "method": "GET"
+      },
+      {
+        "url": "https://volvix-pos.vercel.app/api/owner/low-stock",
+        "status": 403,
+        "method": "GET"
+      },
+      {
+        "url": "https://api.stripe.com/v1",
+        "status": 404,
+        "method": "GET"
+      }
+    ],
+    "kds": [
+      {
+        "url": "https://volvix-pos.vercel.app/volvix-tests-wiring.js",
+        "status": 404,
+        "method": "GET"
+      },
+      {
+        "url": "https://volvix-pos.vercel.app/api/sales",
+        "status": 401,
+        "method": "GET"
+      },
+      {
+        "url": "https://volvix-pos.vercel.app/api/products",
+        "status": 401,
+        "method": "GET"
+      },
+      {
+        "url": "https://volvix-pos.vercel.app/api/ai/decide",
+        "status": 401,
+        "method": "POST"
+      },
+      {
+        "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap",
+        "status": 503,
+        "method": "GET"
+      },
+      {
+        "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap",
+        "status": 503,
+        "method": "GET"
+      }
+    ]
+  },
+  "screenshots": [
+    "01-pos-loaded-pre-dismiss.png",
+    "01b-pos-loaded-post-dismiss.png",
+    "menu-pos.png",
+    "menu-credito.png",
+    "menu-clientes.png",
+    "menu-inventario.png",
+    "menu-kardex.png",
+    "menu-proveedores.png",
+    "menu-config.png",
+    "menu-facturacion.png",
+    "menu-corte.png",
+    "menu-reportes.png",
+    "menu-dashboard.png",
+    "menu-apertura.png",
+    "menu-cotizaciones.png",
+    "menu-devoluciones.png",
+    "menu-ventas.png",
+    "menu-usuarios.png",
+    "menu-recargas.png",
+    "menu-servicios.png",
+    "menu-tarjetas.png",
+    "menu-promociones.png",
+    "menu-departamentos.png",
+    "menu-sugeridas.png",
+    "menu-actualizador.png",
+    "02-pos-after-nav.png",
+    "03-after-pos-actions.png",
+    "04-barcode-filled.png",
+    "05-quickpos.png",
+    "06-after-logout.png",
+    "kds-01-loaded.png",
+    "kds-02-final.png"
+  ]
+}

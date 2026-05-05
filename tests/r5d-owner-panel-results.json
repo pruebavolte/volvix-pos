@@ -1,0 +1,532 @@
+{
+  "run_tag": "47830362",
+  "base": "https://volvix-pos.vercel.app",
+  "panel": "/volvix_owner_panel_v7.html",
+  "sub_tenant_id": "4e912a42-eee7-453b-b516-fa9d994c2900",
+  "new_user_id": "307ad541-e2db-4468-a139-cd4b53dfcf1d",
+  "score": {
+    "pass": 8,
+    "total": 12,
+    "percent": 67
+  },
+  "results": {
+    "O1": {
+      "pass": false,
+      "detail": "http=200 nav_visible=true console_errors=104 sample=[\"Failed to load resource: the server responded with a status of 404 ()\",\"Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.\",\"Failed to load resource: the server responded with a status of 401 ()\"]",
+      "evidence": "O1_panel_loaded.png"
+    },
+    "O2": {
+      "pass": false,
+      "detail": "nav_ok=0/14 users_wired=true sample_fail=[{\"label\":\"Overview\",\"section\":\"v-overview\",\"ok\":false,\"reason\":\"click_fail\"},{\"label\":\"Arquitectura\",\"section\":\"v-architecture\",\"ok\":false,\"reason\":\"click_fail\"},{\"label\":\"Verticales\",\"section\":\"v-verticals\",\"ok\":false,\"reason\":\"click_fail\"}]",
+      "evidence": "O2_nav_final.png"
+    },
+    "O3": {
+      "pass": true,
+      "detail": "created sub_tenant_id=4e912a42-eee7-453b-b516-fa9d994c2900 name=\"R5D Owner E2E 47830362\" plan=basic listed=true list_count=2",
+      "evidence": null
+    },
+    "O4": {
+      "pass": true,
+      "detail": "created user_id=307ad541-e2db-4468-a139-cd4b53dfcf1d email=r5d-user+47830362@volvix.test",
+      "evidence": null
+    },
+    "O5": {
+      "pass": true,
+      "detail": "target_user=307ad541-e2db-4468-a139-cd4b53dfcf1d status=200 applied_count=1 flag_present=true body={\"ok\":true,\"applied\":[{\"key\":\"module.recargas\",\"status\":\"disabled\"}],\"errors\":[]}",
+      "evidence": null
+    },
+    "O6": {
+      "pass": true,
+      "detail": "status=202 ok=true deploy_id=dep-1777347900588-4d897cb7 body={\"ok\":true,\"deploy_id\":\"dep-1777347900588-4d897cb7\",\"env\":\"staging\",\"branch\":\"main\",\"status\":\"queued\",\"note\":\"Deploy queued (real CI trigger TBD)\"}",
+      "evidence": null
+    },
+    "O7": {
+      "pass": true,
+      "detail": "path=/api/audit-log?limit=20 status=200 count=0",
+      "evidence": null
+    },
+    "O8": {
+      "pass": false,
+      "detail": "status=503 plan_back=undefined body={\"ok\":false,\"error\":\"schema_mismatch\",\"message\":\"Esquema de BD desactualizado\",\"request_id\":\"62082808-65e0-44aa-89e8-6da035fa5459\"}",
+      "evidence": null
+    },
+    "O9": {
+      "pass": false,
+      "detail": "patch_status=503 body={\"ok\":false,\"error\":\"schema_mismatch\",\"message\":\"Esquema de BD desactualizado\",\"request_id\":\"4df41f1c-df8b-46a7-975d-5c96eb5cbc73\"} listed_is_active=true suspended=undefined disabled_at=undefined considered_suspended=false",
+      "evidence": null
+    },
+    "O10": {
+      "pass": true,
+      "detail": "status=200 body={\"ok\":true,\"id\":\"f435832b-e6be-4cb7-b90e-743b5d9575ad\"} list_status=200",
+      "evidence": null
+    },
+    "O11": {
+      "pass": true,
+      "detail": "v25=true v24=false marketplace=true landing_template=false panel_v7=true panel_v2=false",
+      "evidence": "O11_panel_overview.png"
+    },
+    "O12": {
+      "pass": true,
+      "detail": "owner_customer_count=0 TNT001_leak=0 cajero_leak=false cross_target=b236fab4-0f4c-4acb-801d-27fd3d90235e cross_status=404 cross_leaked=false",
+      "evidence": null
+    }
+  },
+  "console_errors": [
+    {
+      "tag": "O1",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "tag": "O1",
+      "text": "Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled."
+    },
+    {
+      "tag": "O1",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "O1",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "O1",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "tag": "O1",
+      "text": "Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled."
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [VolvixPerf] fetch error: /api/owner/dashboard?tenant_id=TNT001 Rate limit exceeded for default. Retry in 622ms\nError: Rate limit exceeded for default. Retry in 622ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at window.fetch (https://volvix-pos"
+    },
+    {
+      "tag": "O1",
+      "text": "[VolvixPerf] fetch error: /api/owner/dashboard?tenant_id=TNT001 Error: Rate limit exceeded for default. Retry in 622ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at window.fetch (https://volvix-pos.vercel.app/volvix-sentry-wiring.js:280:14)\n    at wrapp"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [VolvixPerf] fetch error: /api/owner/billing?tenant_id=TNT001 Rate limit exceeded for default. Retry in 615ms\nError: Rate limit exceeded for default. Retry in 615ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at window.fetch (https://volvix-pos.v"
+    },
+    {
+      "tag": "O1",
+      "text": "[VolvixPerf] fetch error: /api/owner/billing?tenant_id=TNT001 Error: Rate limit exceeded for default. Retry in 615ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at window.fetch (https://volvix-pos.vercel.app/volvix-sentry-wiring.js:280:14)\n    at wrapped"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [VolvixPerf] fetch error: /api/billing/plans Rate limit exceeded for default. Retry in 608ms\nError: Rate limit exceeded for default. Retry in 608ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at window.fetch (https://volvix-pos.vercel.app/volvix-"
+    },
+    {
+      "tag": "O1",
+      "text": "[VolvixPerf] fetch error: /api/billing/plans Error: Rate limit exceeded for default. Retry in 608ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at window.fetch (https://volvix-pos.vercel.app/volvix-sentry-wiring.js:280:14)\n    at wrapped (https://volvix-"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [VolvixPerf] fetch error: /api/owner/seats?tenant_id=TNT001 Rate limit exceeded for default. Retry in 602ms\nError: Rate limit exceeded for default. Retry in 602ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at window.fetch (https://volvix-pos.ver"
+    },
+    {
+      "tag": "O1",
+      "text": "[VolvixPerf] fetch error: /api/owner/seats?tenant_id=TNT001 Error: Rate limit exceeded for default. Retry in 602ms\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\n    at window.fetch (https://volvix-pos.vercel.app/volvix-sentry-wiring.js:280:14)\n    at wrapped ("
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 622ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 622ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel.ap"
+    },
+    {
+      "tag": "O1",
+      "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 622ms, stack: Error: Rate limit exceeded for default. Retry in 6…x-pos.vercel.app/volvix-real-data-loader.js:225:3, userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…Gecko) HeadlessChrome/147.0.7727.15 Safari"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 615ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 615ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel.ap"
+    },
+    {
+      "tag": "O1",
+      "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 615ms, stack: Error: Rate limit exceeded for default. Retry in 6…x-pos.vercel.app/volvix-real-data-loader.js:225:3, userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…Gecko) HeadlessChrome/147.0.7727.15 Safari"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 608ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 608ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel.ap"
+    },
+    {
+      "tag": "O1",
+      "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 608ms, stack: Error: Rate limit exceeded for default. Retry in 6…x-pos.vercel.app/volvix-real-data-loader.js:225:3, userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…Gecko) HeadlessChrome/147.0.7727.15 Safari"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 602ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 602ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel.ap"
+    },
+    {
+      "tag": "O1",
+      "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 602ms, stack: Error: Rate limit exceeded for default. Retry in 6…x-pos.vercel.app/volvix-real-data-loader.js:225:3, userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…Gecko) HeadlessChrome/147.0.7727.15 Safari"
+    },
+    {
+      "tag": "O1",
+      "text": "Failed to load resource: the server responded with a status of 500 ()"
+    },
+    {
+      "tag": "O1",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] API GET /api/ai/tickets/stats?tenant_id=TNT001 failed: Failed to fetch {url: /api/ai/tickets/stats?tenant_id=TNT001, method: GET, error: Failed to fetch, stack: TypeError: Failed to fetch\n    at window.fetch (ht…-pos.vercel.app/volvix-real-data-loader.js:213:5)}"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] API GET /api/products failed: Failed to fetch {url: /api/products, method: GET, error: Failed to fetch, stack: TypeError: Failed to fetch\n    at window.fetch (ht…ercel.app/volvix-recommendations-wiring.js:526:22}"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] API GET /api/sales?tenant_id=TNT001 failed: Failed to fetch {url: /api/sales?tenant_id=TNT001, method: GET, error: Failed to fetch, stack: TypeError: Failed to fetch\n    at window.fetch (ht…-pos.vercel.app/volvix-real-data-loader.js:212:5)}"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] API GET /api/sales failed: Failed to fetch {url: /api/sales, method: GET, error: Failed to fetch, stack: TypeError: Failed to fetch\n    at window.fetch (ht…ercel.app/volvix-recommendations-wiring.js:526:22}"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] API GET /api/customers?tenant_id=TNT001 failed: Failed to fetch {url: /api/customers?tenant_id=TNT001, method: GET, error: Failed to fetch, stack: TypeError: Failed to fetch\n    at window.fetch (ht…-pos.vercel.app/volvix-real-data-loader.js:211:5)}"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] API GET /api/products?tenant_id=TNT001 failed: Failed to fetch {url: /api/products?tenant_id=TNT001, method: GET, error: Failed to fetch, stack: TypeError: Failed to fetch\n    at window.fetch (ht…-pos.vercel.app/volvix-real-data-loader.js:210:5)}"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [VolvixPerf] fetch error: /api/ai/tickets/stats?tenant_id=TNT001 Failed to fetch\nTypeError: Failed to fetch\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at global.fetch (http"
+    },
+    {
+      "tag": "O1",
+      "text": "[VolvixPerf] fetch error: /api/ai/tickets/stats?tenant_id=TNT001 TypeError: Failed to fetch\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at global.fetch (https://volvix-pos.vercel.ap"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [VolvixPerf] fetch error: /api/products Failed to fetch\nTypeError: Failed to fetch\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at global.fetch (https://volvix-pos.vercel.app"
+    },
+    {
+      "tag": "O1",
+      "text": "[VolvixPerf] fetch error: /api/products TypeError: Failed to fetch\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [VolvixPerf] fetch error: /api/sales?tenant_id=TNT001 Failed to fetch\nTypeError: Failed to fetch\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at global.fetch (https://volvix-"
+    },
+    {
+      "tag": "O1",
+      "text": "[VolvixPerf] fetch error: /api/sales?tenant_id=TNT001 TypeError: Failed to fetch\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ra"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [VolvixPerf] fetch error: /api/sales Failed to fetch\nTypeError: Failed to fetch\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at global.fetch (https://volvix-pos.vercel.app/vo"
+    },
+    {
+      "tag": "O1",
+      "text": "[VolvixPerf] fetch error: /api/sales TypeError: Failed to fetch\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [VolvixPerf] fetch error: /api/customers?tenant_id=TNT001 Failed to fetch\nTypeError: Failed to fetch\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at global.fetch (https://vol"
+    },
+    {
+      "tag": "O1",
+      "text": "[VolvixPerf] fetch error: /api/customers?tenant_id=TNT001 TypeError: Failed to fetch\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at global.fetch (https://volvix-pos.vercel.app/volvi"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [VolvixPerf] fetch error: /api/products?tenant_id=TNT001 Failed to fetch\nTypeError: Failed to fetch\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at global.fetch (https://volv"
+    },
+    {
+      "tag": "O1",
+      "text": "[VolvixPerf] fetch error: /api/products?tenant_id=TNT001 TypeError: Failed to fetch\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at global.fetch (https://volvix-pos.vercel.app/volvix"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [VolvixPerf] fetch error: /api/ai/tickets/stats?tenant_id=TNT001 Failed to fetch\nTypeError: Failed to fetch\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at global.fetch (http"
+    },
+    {
+      "tag": "O1",
+      "text": "[VolvixPerf] fetch error: /api/ai/tickets/stats?tenant_id=TNT001 TypeError: Failed to fetch\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at global.fetch (https://volvix-pos.vercel.ap"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [VolvixPerf] fetch error: /api/products Failed to fetch\nTypeError: Failed to fetch\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at global.fetch (https://volvix-pos.vercel.app"
+    },
+    {
+      "tag": "O1",
+      "text": "[VolvixPerf] fetch error: /api/products TypeError: Failed to fetch\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [VolvixPerf] fetch error: /api/sales?tenant_id=TNT001 Failed to fetch\nTypeError: Failed to fetch\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at global.fetch (https://volvix-"
+    },
+    {
+      "tag": "O1",
+      "text": "[VolvixPerf] fetch error: /api/sales?tenant_id=TNT001 TypeError: Failed to fetch\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ra"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [VolvixPerf] fetch error: /api/sales Failed to fetch\nTypeError: Failed to fetch\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at global.fetch (https://volvix-pos.vercel.app/vo"
+    },
+    {
+      "tag": "O1",
+      "text": "[VolvixPerf] fetch error: /api/sales TypeError: Failed to fetch\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [VolvixPerf] fetch error: /api/customers?tenant_id=TNT001 Failed to fetch\nTypeError: Failed to fetch\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at global.fetch (https://vol"
+    },
+    {
+      "tag": "O1",
+      "text": "[VolvixPerf] fetch error: /api/customers?tenant_id=TNT001 TypeError: Failed to fetch\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at global.fetch (https://volvix-pos.vercel.app/volvi"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [VolvixPerf] fetch error: /api/products?tenant_id=TNT001 Failed to fetch\nTypeError: Failed to fetch\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at global.fetch (https://volv"
+    },
+    {
+      "tag": "O1",
+      "text": "[VolvixPerf] fetch error: /api/products?tenant_id=TNT001 TypeError: Failed to fetch\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at global.fetch (https://volvix-pos.vercel.app/volvix"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Failed to fetch\",\"stack\":\"TypeError: Failed to fetch\\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\\n    at global.fetch (https://volvix"
+    },
+    {
+      "tag": "O1",
+      "text": "[ErrorHandler] {type: fetch, message: Failed to fetch, stack: TypeError: Failed to fetch\n    at window.fetch (ht…-pos.vercel.app/volvix-real-data-loader.js:213:5), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36, url: https://volvix-pos"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Failed to fetch\",\"stack\":\"TypeError: Failed to fetch\\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\\n    at global.fetch (https://volvix"
+    },
+    {
+      "tag": "O1",
+      "text": "[ErrorHandler] {type: fetch, message: Failed to fetch, stack: TypeError: Failed to fetch\n    at window.fetch (ht…ercel.app/volvix-recommendations-wiring.js:526:22, userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36, url: https://volvix-pos"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Failed to fetch\",\"stack\":\"TypeError: Failed to fetch\\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\\n    at global.fetch (https://volvix"
+    },
+    {
+      "tag": "O1",
+      "text": "[ErrorHandler] {type: fetch, message: Failed to fetch, stack: TypeError: Failed to fetch\n    at window.fetch (ht…-pos.vercel.app/volvix-real-data-loader.js:212:5), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36, url: https://volvix-pos"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Failed to fetch\",\"stack\":\"TypeError: Failed to fetch\\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\\n    at global.fetch (https://volvix"
+    },
+    {
+      "tag": "O1",
+      "text": "[ErrorHandler] {type: fetch, message: Failed to fetch, stack: TypeError: Failed to fetch\n    at window.fetch (ht…ercel.app/volvix-recommendations-wiring.js:526:22, userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36, url: https://volvix-pos"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Failed to fetch\",\"stack\":\"TypeError: Failed to fetch\\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\\n    at global.fetch (https://volvix"
+    },
+    {
+      "tag": "O1",
+      "text": "[ErrorHandler] {type: fetch, message: Failed to fetch, stack: TypeError: Failed to fetch\n    at window.fetch (ht…-pos.vercel.app/volvix-real-data-loader.js:211:5), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36, url: https://volvix-pos"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Failed to fetch\",\"stack\":\"TypeError: Failed to fetch\\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\\n    at global.fetch (https://volvix"
+    },
+    {
+      "tag": "O1",
+      "text": "[ErrorHandler] {type: fetch, message: Failed to fetch, stack: TypeError: Failed to fetch\n    at window.fetch (ht…-pos.vercel.app/volvix-real-data-loader.js:210:5), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36, url: https://volvix-pos"
+    },
+    {
+      "tag": "O1",
+      "text": "Failed to load resource: the server responded with a status of 503 (Offline)"
+    },
+    {
+      "tag": "O1",
+      "text": "Failed to load resource: the server responded with a status of 503 (Offline)"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 1705ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 1705ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel."
+    },
+    {
+      "tag": "O1",
+      "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 1705ms, stack: Error: Rate limit exceeded for default. Retry in 1…x-pos.vercel.app/volvix-real-data-loader.js:225:3, userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…Gecko) HeadlessChrome/147.0.7727.15 Safar"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 1700ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 1700ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel."
+    },
+    {
+      "tag": "O1",
+      "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 1700ms, stack: Error: Rate limit exceeded for default. Retry in 1…x-pos.vercel.app/volvix-real-data-loader.js:225:3, userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…Gecko) HeadlessChrome/147.0.7727.15 Safar"
+    },
+    {
+      "tag": "O1",
+      "text": "Failed to load resource: the server responded with a status of 500 ()"
+    },
+    {
+      "tag": "O1",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "tag": "O1",
+      "text": "Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled."
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 144ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 144ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel.ap"
+    },
+    {
+      "tag": "O1",
+      "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 144ms, stack: Error: Rate limit exceeded for default. Retry in 1…ercel.app/volvix-recommendations-wiring.js:526:22, userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…Gecko) HeadlessChrome/147.0.7727.15 Safari"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 141ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 141ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel.ap"
+    },
+    {
+      "tag": "O1",
+      "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 141ms, stack: Error: Rate limit exceeded for default. Retry in 1…ercel.app/volvix-recommendations-wiring.js:526:22, userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…Gecko) HeadlessChrome/147.0.7727.15 Safari"
+    },
+    {
+      "tag": "O1",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 1685ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 1685ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel."
+    },
+    {
+      "tag": "O1",
+      "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 1685ms, stack: Error: Rate limit exceeded for default. Retry in 1…pos.vercel.app/volvix_owner_panel_v7.html:4092:50, userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…Gecko) HeadlessChrome/147.0.7727.15 Safar"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 1679ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 1679ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel."
+    },
+    {
+      "tag": "O1",
+      "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 1679ms, stack: Error: Rate limit exceeded for default. Retry in 1…pos.vercel.app/volvix_owner_panel_v7.html:4093:51, userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…Gecko) HeadlessChrome/147.0.7727.15 Safar"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 1670ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 1670ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel."
+    },
+    {
+      "tag": "O1",
+      "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 1670ms, stack: Error: Rate limit exceeded for default. Retry in 1…pos.vercel.app/volvix_owner_panel_v7.html:4094:51, userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…Gecko) HeadlessChrome/147.0.7727.15 Safar"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 1665ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 1665ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel."
+    },
+    {
+      "tag": "O1",
+      "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 1665ms, stack: Error: Rate limit exceeded for default. Retry in 1…pos.vercel.app/volvix_owner_panel_v7.html:4095:51, userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…Gecko) HeadlessChrome/147.0.7727.15 Safar"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 1660ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 1660ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel."
+    },
+    {
+      "tag": "O1",
+      "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 1660ms, stack: Error: Rate limit exceeded for default. Retry in 1…pos.vercel.app/volvix_owner_panel_v7.html:4096:48, userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…Gecko) HeadlessChrome/147.0.7727.15 Safar"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 1654ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 1654ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel."
+    },
+    {
+      "tag": "O1",
+      "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 1654ms, stack: Error: Rate limit exceeded for default. Retry in 1…pos.vercel.app/volvix_owner_panel_v7.html:4097:51, userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…Gecko) HeadlessChrome/147.0.7727.15 Safar"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 1315ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 1315ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel."
+    },
+    {
+      "tag": "O1",
+      "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 1315ms, stack: Error: Rate limit exceeded for default. Retry in 1…x-pos.vercel.app/volvix-ai-real-wiring.js:603:25), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…Gecko) HeadlessChrome/147.0.7727.15 Safar"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [AI-REAL-WIRING] Health-check falló: Rate limit exceeded for default. Retry in 1315ms {}"
+    },
+    {
+      "tag": "O1",
+      "text": "[AI-REAL-WIRING] Health-check falló: Rate limit exceeded for default. Retry in 1315ms"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 1253ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 1253ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel."
+    },
+    {
+      "tag": "O1",
+      "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 1253ms, stack: Error: Rate limit exceeded for default. Retry in 1…vercel.app/volvix-notifications-wiring.js:367:25), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…Gecko) HeadlessChrome/147.0.7727.15 Safar"
+    },
+    {
+      "tag": "O1",
+      "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Rate limit exceeded for default. Retry in 1146ms\",\"stack\":\"Error: Rate limit exceeded for default. Retry in 1146ms\\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelimit-wiring.js:360:23)\\n    at window.fetch (https://volvix-pos.vercel."
+    },
+    {
+      "tag": "O1",
+      "text": "[ErrorHandler] {type: fetch, message: Rate limit exceeded for default. Retry in 1146ms, stack: Error: Rate limit exceeded for default. Retry in 1…vercel.app/volvix-notifications-wiring.js:367:25), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…Gecko) HeadlessChrome/147.0.7727.15 Safar"
+    }
+  ],
+  "network_failures": [
+    {
+      "tag": "O1",
+      "url": "https://volvix-pos.vercel.app/api/owner/users",
+      "status": 500,
+      "method": "GET"
+    },
+    {
+      "tag": "O1",
+      "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap",
+      "status": 503,
+      "method": "GET"
+    },
+    {
+      "tag": "O1",
+      "url": "https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js",
+      "status": 503,
+      "method": "GET"
+    },
+    {
+      "tag": "O1",
+      "url": "https://volvix-pos.vercel.app/api/owner/users",
+      "status": 500,
+      "method": "GET"
+    },
+    {
+      "tag": "O2",
+      "url": "https://volvix-pos.vercel.app/api/owner/users",
+      "status": 500,
+      "method": "GET"
+    },
+    {
+      "tag": "O11",
+      "url": "https://volvix-pos.vercel.app/api/owner/users",
+      "status": 500,
+      "method": "GET"
+    },
+    {
+      "tag": "O11",
+      "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap",
+      "status": 503,
+      "method": "GET"
+    },
+    {
+      "tag": "O11",
+      "url": "https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js",
+      "status": 503,
+      "method": "GET"
+    },
+    {
+      "tag": "O11",
+      "url": "https://volvix-pos.vercel.app/api/owner/users",
+      "status": 500,
+      "method": "GET"
+    }
+  ]
+}

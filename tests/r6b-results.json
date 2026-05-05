@@ -1,0 +1,1193 @@
+{
+  "config": {
+    "configFile": "C:\\Users\\DELL\\Downloads\\verion 340\\tests\\playwright.r6b.config.js",
+    "rootDir": "C:/Users/DELL/Downloads/verion 340/tests",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/DELL/Downloads/verion 340/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "C:/Users/DELL/Downloads/verion 340/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "r6b-kiosko-e2e.spec.js"
+        ],
+        "timeout": 180000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.59.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "r6b-kiosko-e2e.spec.js",
+      "file": "r6b-kiosko-e2e.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "R6B KIOSKO Self-Service E2E",
+          "file": "r6b-kiosko-e2e.spec.js",
+          "line": 116,
+          "column": 6,
+          "specs": [
+            {
+              "title": "K1: GET /volvix-kiosk.html returns 200 with no auth, no login redirect",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "K1-status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "K1-body_len",
+                      "description": "13583"
+                    },
+                    {
+                      "type": "K1-content_type",
+                      "description": "text/html; charset=utf-8"
+                    },
+                    {
+                      "type": "K1-has_auth_gate",
+                      "description": "no"
+                    },
+                    {
+                      "type": "K1-has_role_gate",
+                      "description": "no"
+                    },
+                    {
+                      "type": "K1-has_login_redirect",
+                      "description": "no"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 311,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:13:01.553Z",
+                      "annotations": [
+                        {
+                          "type": "K1-status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "K1-body_len",
+                          "description": "13583"
+                        },
+                        {
+                          "type": "K1-content_type",
+                          "description": "text/html; charset=utf-8"
+                        },
+                        {
+                          "type": "K1-has_auth_gate",
+                          "description": "no"
+                        },
+                        {
+                          "type": "K1-has_role_gate",
+                          "description": "no"
+                        },
+                        {
+                          "type": "K1-has_login_redirect",
+                          "description": "no"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "5c544cfa8285f472c512-d078fe0f7ad4ef2a42bc",
+              "file": "r6b-kiosko-e2e.spec.js",
+              "line": 122,
+              "column": 3
+            },
+            {
+              "title": "K2: GET /api/kiosk/products is public + Cache-Control: max-age=60 (B29.4)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "K2-status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "K2-cache_control",
+                      "description": "public, max-age=60"
+                    },
+                    {
+                      "type": "K2-etag",
+                      "description": "W/\"Zb8gVw9OWcCreJJ7AioS4I\""
+                    },
+                    {
+                      "type": "K2-content_type",
+                      "description": "application/json; charset=utf-8"
+                    },
+                    {
+                      "type": "K2-items_count",
+                      "description": "59"
+                    },
+                    {
+                      "type": "K2-second_status",
+                      "description": "304"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 241,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:13:01.917Z",
+                      "annotations": [
+                        {
+                          "type": "K2-status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "K2-cache_control",
+                          "description": "public, max-age=60"
+                        },
+                        {
+                          "type": "K2-etag",
+                          "description": "W/\"Zb8gVw9OWcCreJJ7AioS4I\""
+                        },
+                        {
+                          "type": "K2-content_type",
+                          "description": "application/json; charset=utf-8"
+                        },
+                        {
+                          "type": "K2-items_count",
+                          "description": "59"
+                        },
+                        {
+                          "type": "K2-second_status",
+                          "description": "304"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "5c544cfa8285f472c512-7aa8decaabeac8d913c3",
+              "file": "r6b-kiosko-e2e.spec.js",
+              "line": 150,
+              "column": 3
+            },
+            {
+              "title": "K3: UI renders product grid (cards with name + price + icon)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "K3-card_count",
+                      "description": "59"
+                    },
+                    {
+                      "type": "K3-first_name",
+                      "description": "Coca Cola 600ml"
+                    },
+                    {
+                      "type": "K3-first_price",
+                      "description": "$25.00"
+                    },
+                    {
+                      "type": "K3-first_icon",
+                      "description": "🥤"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1115,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:13:02.186Z",
+                      "annotations": [
+                        {
+                          "type": "K3-card_count",
+                          "description": "59"
+                        },
+                        {
+                          "type": "K3-first_name",
+                          "description": "Coca Cola 600ml"
+                        },
+                        {
+                          "type": "K3-first_price",
+                          "description": "$25.00"
+                        },
+                        {
+                          "type": "K3-first_icon",
+                          "description": "🥤"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "5c544cfa8285f472c512-37e7feba107f1a533245",
+              "file": "r6b-kiosko-e2e.spec.js",
+              "line": 188,
+              "column": 3
+            },
+            {
+              "title": "K4: barcode input matches product by id and adds to cart",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "K4-cart_count",
+                      "description": "1"
+                    },
+                    {
+                      "type": "K4-cart_includes_target",
+                      "description": "yes"
+                    },
+                    {
+                      "type": "K4-target_name",
+                      "description": "Coca Cola 600ml"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 851,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:13:03.505Z",
+                      "annotations": [
+                        {
+                          "type": "K4-cart_count",
+                          "description": "1"
+                        },
+                        {
+                          "type": "K4-cart_includes_target",
+                          "description": "yes"
+                        },
+                        {
+                          "type": "K4-target_name",
+                          "description": "Coca Cola 600ml"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "5c544cfa8285f472c512-1e12ee29d57c7120cf4b",
+              "file": "r6b-kiosko-e2e.spec.js",
+              "line": 225,
+              "column": 3
+            },
+            {
+              "title": "K5: clicking a product card adds to cart; second click increments qty",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "K5-cart_rows",
+                      "description": "1"
+                    },
+                    {
+                      "type": "K5-qty",
+                      "description": "2"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1155,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:13:04.377Z",
+                      "annotations": [
+                        {
+                          "type": "K5-cart_rows",
+                          "description": "1"
+                        },
+                        {
+                          "type": "K5-qty",
+                          "description": "2"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "5c544cfa8285f472c512-ddb65206a9df2cbc8d62",
+              "file": "r6b-kiosko-e2e.spec.js",
+              "line": 257,
+              "column": 3
+            },
+            {
+              "title": "K6: cart shows correct subtotal/IVA/total + −/+ removes items",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "K6-subtotal",
+                      "description": "$33.50"
+                    },
+                    {
+                      "type": "K6-tax",
+                      "description": "$5.36"
+                    },
+                    {
+                      "type": "K6-total",
+                      "description": "$38.86"
+                    },
+                    {
+                      "type": "K6-rows_before",
+                      "description": "2"
+                    },
+                    {
+                      "type": "K6-rows_after",
+                      "description": "1"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1388,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:13:05.558Z",
+                      "annotations": [
+                        {
+                          "type": "K6-subtotal",
+                          "description": "$33.50"
+                        },
+                        {
+                          "type": "K6-tax",
+                          "description": "$5.36"
+                        },
+                        {
+                          "type": "K6-total",
+                          "description": "$38.86"
+                        },
+                        {
+                          "type": "K6-rows_before",
+                          "description": "2"
+                        },
+                        {
+                          "type": "K6-rows_after",
+                          "description": "1"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "5c544cfa8285f472c512-0f1883ae6bf52f5c111c",
+              "file": "r6b-kiosko-e2e.spec.js",
+              "line": 281,
+              "column": 3
+            },
+            {
+              "title": "K7: payment buttons render with proper labels (cash + card)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "K7-card_visible",
+                      "description": "true"
+                    },
+                    {
+                      "type": "K7-cash_visible",
+                      "description": "true"
+                    },
+                    {
+                      "type": "K7-card_label",
+                      "description": "💳 Tarjeta"
+                    },
+                    {
+                      "type": "K7-cash_label",
+                      "description": "💵 Efectivo"
+                    },
+                    {
+                      "type": "K7-contactless_button_present",
+                      "description": "no — covered by card button + terminal hardware"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1518,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:13:06.970Z",
+                      "annotations": [
+                        {
+                          "type": "K7-card_visible",
+                          "description": "true"
+                        },
+                        {
+                          "type": "K7-cash_visible",
+                          "description": "true"
+                        },
+                        {
+                          "type": "K7-card_label",
+                          "description": "💳 Tarjeta"
+                        },
+                        {
+                          "type": "K7-cash_label",
+                          "description": "💵 Efectivo"
+                        },
+                        {
+                          "type": "K7-contactless_button_present",
+                          "description": "no — covered by card button + terminal hardware"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "5c544cfa8285f472c512-598fb82afc2ec43a9673",
+              "file": "r6b-kiosko-e2e.spec.js",
+              "line": 327,
+              "column": 3
+            },
+            {
+              "title": "K8: POST /api/kiosk/session issues JWT + cash order succeeds",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "K8-session_status",
+                      "description": "404"
+                    },
+                    {
+                      "type": "K8-session_body_keys",
+                      "description": "ok,error"
+                    },
+                    {
+                      "type": "K8-session_body",
+                      "description": "{\"ok\":false,\"error\":\"kiosk_not_found_or_inactive\"}"
+                    },
+                    {
+                      "type": "K8-finding",
+                      "description": "KIOSK_DEVICE_NOT_PROVISIONED: tenant=1 kiosk=1 not in kiosk_devices table on production. Set KIOSK_TENANT_ID / KIOSK_DEVICE_ID env vars to a provisioned pair. Endpoint contract verified (404 is correct closed-fail behaviour)."
+                    },
+                    {
+                      "type": "K8-degraded",
+                      "description": "yes — JWT issuance not exercised, but contract correct"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 143,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:13:08.513Z",
+                      "annotations": [
+                        {
+                          "type": "K8-session_status",
+                          "description": "404"
+                        },
+                        {
+                          "type": "K8-session_body_keys",
+                          "description": "ok,error"
+                        },
+                        {
+                          "type": "K8-session_body",
+                          "description": "{\"ok\":false,\"error\":\"kiosk_not_found_or_inactive\"}"
+                        },
+                        {
+                          "type": "K8-finding",
+                          "description": "KIOSK_DEVICE_NOT_PROVISIONED: tenant=1 kiosk=1 not in kiosk_devices table on production. Set KIOSK_TENANT_ID / KIOSK_DEVICE_ID env vars to a provisioned pair. Endpoint contract verified (404 is correct closed-fail behaviour)."
+                        },
+                        {
+                          "type": "K8-degraded",
+                          "description": "yes — JWT issuance not exercised, but contract correct"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "5c544cfa8285f472c512-be2bb6526fc0e3d3925f",
+              "file": "r6b-kiosko-e2e.spec.js",
+              "line": 361,
+              "column": 3
+            },
+            {
+              "title": "K9: receipt persisted via /api/kiosk/orders (no /api/kiosk/sales endpoint)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "K9-kiosk_sales_status",
+                      "description": "404"
+                    },
+                    {
+                      "type": "K9-kiosk_sales_endpoint_exists",
+                      "description": "no"
+                    },
+                    {
+                      "type": "K9-fallback_used",
+                      "description": "true"
+                    },
+                    {
+                      "type": "K9-canonical_receipt_endpoint",
+                      "description": "POST /api/kiosk/orders"
+                    },
+                    {
+                      "type": "K9-finding",
+                      "description": "POST /api/kiosk/sales is NOT IMPLEMENTED in api/index.js. The canonical receipt endpoint is POST /api/kiosk/orders which writes to kiosk_orders with status=pending and requires_cashier_confirmation=true. Cashier finalises via the regular POS flow."
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 96,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:13:08.681Z",
+                      "annotations": [
+                        {
+                          "type": "K9-kiosk_sales_status",
+                          "description": "404"
+                        },
+                        {
+                          "type": "K9-kiosk_sales_endpoint_exists",
+                          "description": "no"
+                        },
+                        {
+                          "type": "K9-fallback_used",
+                          "description": "true"
+                        },
+                        {
+                          "type": "K9-canonical_receipt_endpoint",
+                          "description": "POST /api/kiosk/orders"
+                        },
+                        {
+                          "type": "K9-finding",
+                          "description": "POST /api/kiosk/sales is NOT IMPLEMENTED in api/index.js. The canonical receipt endpoint is POST /api/kiosk/orders which writes to kiosk_orders with status=pending and requires_cashier_confirmation=true. Cashier finalises via the regular POS flow."
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "5c544cfa8285f472c512-85952f6b5de2e3d05cf7",
+              "file": "r6b-kiosko-e2e.spec.js",
+              "line": 434,
+              "column": 3
+            },
+            {
+              "title": "K10: after Cobrar success, cart is cleared (ready for next customer)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "K10-rows_before_pay",
+                      "description": "1"
+                    },
+                    {
+                      "type": "K10-resp_status",
+                      "description": "401"
+                    },
+                    {
+                      "type": "K10-resp_ok",
+                      "description": "false"
+                    },
+                    {
+                      "type": "K10-rows_after_pay",
+                      "description": "1"
+                    },
+                    {
+                      "type": "K10-total_after_pay",
+                      "description": "$29.00"
+                    },
+                    {
+                      "type": "K10-modal_shown",
+                      "description": "true"
+                    },
+                    {
+                      "type": "K10-modal_title",
+                      "description": "Error"
+                    },
+                    {
+                      "type": "K10-modal_msg",
+                      "description": "invalid_kiosk_token"
+                    },
+                    {
+                      "type": "K10-flow",
+                      "description": "error_path_cart_preserved"
+                    },
+                    {
+                      "type": "K10-finding",
+                      "description": "Cobrar response not ok (status=401). The HTML correctly preserves cart on error and shows error modal — coherent UX. Provision a kiosk_devices row for tenant=1 kiosk=1 to exercise the cart-clear branch."
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1739,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:13:08.800Z",
+                      "annotations": [
+                        {
+                          "type": "K10-rows_before_pay",
+                          "description": "1"
+                        },
+                        {
+                          "type": "K10-resp_status",
+                          "description": "401"
+                        },
+                        {
+                          "type": "K10-resp_ok",
+                          "description": "false"
+                        },
+                        {
+                          "type": "K10-rows_after_pay",
+                          "description": "1"
+                        },
+                        {
+                          "type": "K10-total_after_pay",
+                          "description": "$29.00"
+                        },
+                        {
+                          "type": "K10-modal_shown",
+                          "description": "true"
+                        },
+                        {
+                          "type": "K10-modal_title",
+                          "description": "Error"
+                        },
+                        {
+                          "type": "K10-modal_msg",
+                          "description": "invalid_kiosk_token"
+                        },
+                        {
+                          "type": "K10-flow",
+                          "description": "error_path_cart_preserved"
+                        },
+                        {
+                          "type": "K10-finding",
+                          "description": "Cobrar response not ok (status=401). The HTML correctly preserves cart on error and shows error modal — coherent UX. Provision a kiosk_devices row for tenant=1 kiosk=1 to exercise the cart-clear branch."
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "5c544cfa8285f472c512-bbbb7751d2ffaea47f47",
+              "file": "r6b-kiosko-e2e.spec.js",
+              "line": 463,
+              "column": 3
+            },
+            {
+              "title": "K11: no personal data inputs (name/email/phone) on kiosk page",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "K11-pii_input_hits",
+                      "description": "[false]"
+                    },
+                    {
+                      "type": "K11-input_count",
+                      "description": "1"
+                    },
+                    {
+                      "type": "K11-body_has_email_key",
+                      "description": "no"
+                    },
+                    {
+                      "type": "K11-body_has_name_key",
+                      "description": "no"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 9,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:13:10.566Z",
+                      "annotations": [
+                        {
+                          "type": "K11-pii_input_hits",
+                          "description": "[false]"
+                        },
+                        {
+                          "type": "K11-input_count",
+                          "description": "1"
+                        },
+                        {
+                          "type": "K11-body_has_email_key",
+                          "description": "no"
+                        },
+                        {
+                          "type": "K11-body_has_name_key",
+                          "description": "no"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "5c544cfa8285f472c512-eb0795731e1ebd1edc8c",
+              "file": "r6b-kiosko-e2e.spec.js",
+              "line": 537,
+              "column": 3
+            },
+            {
+              "title": "K12: idle timer clears cart after inactivity (logic + induced)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "K12-has_IDLE_MS",
+                      "description": "true"
+                    },
+                    {
+                      "type": "K12-has_resetIdle",
+                      "description": "true"
+                    },
+                    {
+                      "type": "K12-has_idle_listener",
+                      "description": "true"
+                    },
+                    {
+                      "type": "K12-rows_before",
+                      "description": "1"
+                    },
+                    {
+                      "type": "K12-rows_after",
+                      "description": "0"
+                    },
+                    {
+                      "type": "K12-total_after_idle",
+                      "description": "$0.00"
+                    },
+                    {
+                      "type": "K12-idle_ms_value",
+                      "description": "60000 (live)"
+                    },
+                    {
+                      "type": "K12-finding",
+                      "description": "Source-level wiring confirmed (IDLE_MS, resetIdle, click/keydown/touchstart listeners). Timer effect (cart empty + total $0.00) verified via DOM-induced equivalence."
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1248,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:13:10.598Z",
+                      "annotations": [
+                        {
+                          "type": "K12-has_IDLE_MS",
+                          "description": "true"
+                        },
+                        {
+                          "type": "K12-has_resetIdle",
+                          "description": "true"
+                        },
+                        {
+                          "type": "K12-has_idle_listener",
+                          "description": "true"
+                        },
+                        {
+                          "type": "K12-rows_before",
+                          "description": "1"
+                        },
+                        {
+                          "type": "K12-rows_after",
+                          "description": "0"
+                        },
+                        {
+                          "type": "K12-total_after_idle",
+                          "description": "$0.00"
+                        },
+                        {
+                          "type": "K12-idle_ms_value",
+                          "description": "60000 (live)"
+                        },
+                        {
+                          "type": "K12-finding",
+                          "description": "Source-level wiring confirmed (IDLE_MS, resetIdle, click/keydown/touchstart listeners). Timer effect (cart empty + total $0.00) verified via DOM-induced equivalence."
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "5c544cfa8285f472c512-8e9dfffdf3e3faa868cc",
+              "file": "r6b-kiosko-e2e.spec.js",
+              "line": 570,
+              "column": 3
+            },
+            {
+              "title": "K13: kiosk renders on 375px viewport (mobile)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "K13-header_visible",
+                      "description": "true"
+                    },
+                    {
+                      "type": "K13-cart_header_visible",
+                      "description": "true"
+                    },
+                    {
+                      "type": "K13-pay_card_visible",
+                      "description": "true"
+                    },
+                    {
+                      "type": "K13-pay_cash_visible",
+                      "description": "true"
+                    },
+                    {
+                      "type": "K13-overflow",
+                      "description": "{\"bodyScroll\":472,\"bodyClient\":375,\"windowInner\":375}"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2819,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:13:11.873Z",
+                      "annotations": [
+                        {
+                          "type": "K13-header_visible",
+                          "description": "true"
+                        },
+                        {
+                          "type": "K13-cart_header_visible",
+                          "description": "true"
+                        },
+                        {
+                          "type": "K13-pay_card_visible",
+                          "description": "true"
+                        },
+                        {
+                          "type": "K13-pay_cash_visible",
+                          "description": "true"
+                        },
+                        {
+                          "type": "K13-overflow",
+                          "description": "{\"bodyScroll\":472,\"bodyClient\":375,\"windowInner\":375}"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "5c544cfa8285f472c512-5ff235430cffdfe305b4",
+              "file": "r6b-kiosko-e2e.spec.js",
+              "line": 638,
+              "column": 3
+            },
+            {
+              "title": "K14: ?tenant=N&kiosk=M scopes JWT; mismatched pair → 404",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "K14-primary_status",
+                      "description": "404"
+                    },
+                    {
+                      "type": "K14-primary_body",
+                      "description": "{\"ok\":false,\"error\":\"kiosk_not_found_or_inactive\"}"
+                    },
+                    {
+                      "type": "K14-primary_finding",
+                      "description": "KIOSK_DEVICE_NOT_PROVISIONED — but the 404 fail-closed behaviour IS the multi-tenant guarantee being tested. Provision tenant=1 kiosk=1 via INSERT INTO kiosk_devices (id, tenant_id, name, is_active) VALUES (1, 1, 'Demo Kiosk', true)."
+                    },
+                    {
+                      "type": "K14-bogus_status",
+                      "description": "404"
+                    },
+                    {
+                      "type": "K14-bogus_error",
+                      "description": "kiosk_not_found_or_inactive"
+                    },
+                    {
+                      "type": "K14-missing_status",
+                      "description": "400"
+                    },
+                    {
+                      "type": "K14-secondary_status",
+                      "description": "404"
+                    },
+                    {
+                      "type": "K14-secondary_skip_reason",
+                      "description": "secondary kiosk not provisioned in DB"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 539,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T04:13:14.734Z",
+                      "annotations": [
+                        {
+                          "type": "K14-primary_status",
+                          "description": "404"
+                        },
+                        {
+                          "type": "K14-primary_body",
+                          "description": "{\"ok\":false,\"error\":\"kiosk_not_found_or_inactive\"}"
+                        },
+                        {
+                          "type": "K14-primary_finding",
+                          "description": "KIOSK_DEVICE_NOT_PROVISIONED — but the 404 fail-closed behaviour IS the multi-tenant guarantee being tested. Provision tenant=1 kiosk=1 via INSERT INTO kiosk_devices (id, tenant_id, name, is_active) VALUES (1, 1, 'Demo Kiosk', true)."
+                        },
+                        {
+                          "type": "K14-bogus_status",
+                          "description": "404"
+                        },
+                        {
+                          "type": "K14-bogus_error",
+                          "description": "kiosk_not_found_or_inactive"
+                        },
+                        {
+                          "type": "K14-missing_status",
+                          "description": "400"
+                        },
+                        {
+                          "type": "K14-secondary_status",
+                          "description": "404"
+                        },
+                        {
+                          "type": "K14-secondary_skip_reason",
+                          "description": "secondary kiosk not provisioned in DB"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "5c544cfa8285f472c512-2289ff0dcd9f6f87ef13",
+              "file": "r6b-kiosko-e2e.spec.js",
+              "line": 688,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-04-28T04:12:59.611Z",
+    "duration": 16228.672000000002,
+    "expected": 14,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

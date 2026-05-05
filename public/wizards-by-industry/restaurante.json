@@ -1,0 +1,54 @@
+{
+  "id": "restaurante-first-sale",
+  "title": "Tu primera venta en restaurante",
+  "industry": "restaurante",
+  "duration_min": 5,
+  "modules_required": ["pos", "inventory", "tables"],
+  "roles": ["owner", "cashier", "waiter", "manager"],
+  "demo_catalog_ref": "R12a",
+  "steps": [
+    {
+      "id": "step1",
+      "title": "Catalogo demo listo: 20 platillos",
+      "text": "Tienes Hamburguesa Clasica $120, Pizza Margarita $180, Ensalada Cesar $95, Pasta Alfredo $135, Filete Mignon $280, Sopa Tortilla $75, Tacos al Pastor (orden 3) $90, Quesadilla $65, Enchiladas Verdes $110, Mole Poblano $145, Pollo Asado $130, Costillas BBQ $195, Chiles Rellenos $115, Pescado Veracruzano $175, Camarones Diablo $210, Postre Flan $55, Pastel Chocolate $65, Cerveza $45, Refresco $35, Agua Fresca $30.",
+      "image": "/tutorials/01-primera-venta.html",
+      "action": "next"
+    },
+    {
+      "id": "step2",
+      "title": "Asigna una mesa",
+      "text": "Click en 'Mesas' del menu lateral. Selecciona Mesa 5 (libre). Esto abrira la cuenta.",
+      "highlight_selector": "#nav-tables",
+      "action": "wait_for_table_select"
+    },
+    {
+      "id": "step3",
+      "title": "Toma la orden",
+      "text": "Busca 'hamburguesa' y agrega Hamburguesa Clasica $120. Despues busca 'cerveza' y agrega 2 Cervezas $90.",
+      "highlight_selector": "#search-input",
+      "action": "wait_for_multiple_items",
+      "expected_items": 2
+    },
+    {
+      "id": "step4",
+      "title": "Envia a cocina",
+      "text": "Click 'Enviar a cocina'. La orden saldra en el ticket de impresora.",
+      "highlight_selector": "#btn-send-kitchen",
+      "action": "wait_for_kitchen_send"
+    },
+    {
+      "id": "step5",
+      "title": "Cobra la cuenta",
+      "text": "Cuando termine el cliente, click 'Cobrar'. Acepta tarjeta $210, propina 10% sugerida $21.",
+      "highlight_selector": "#btn-cobrar",
+      "action": "wait_for_payment"
+    },
+    {
+      "id": "step6",
+      "title": "Mesa cerrada",
+      "text": "Mesa 5 vuelve a estar libre. Ve a Reportes/Ventas del dia.",
+      "action": "complete",
+      "next_link": "/reportes"
+    }
+  ]
+}

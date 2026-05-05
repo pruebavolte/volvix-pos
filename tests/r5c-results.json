@@ -1,0 +1,1084 @@
+{
+  "config": {
+    "configFile": "C:\\Users\\DELL\\Downloads\\verion 340\\tests\\playwright.r5c.config.js",
+    "rootDir": "C:/Users/DELL/Downloads/verion 340/tests",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/DELL/Downloads/verion 340/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "C:/Users/DELL/Downloads/verion 340/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "r5c-kds-e2e.spec.js"
+        ],
+        "timeout": 180000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.59.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "r5c-kds-e2e.spec.js",
+      "file": "r5c-kds-e2e.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "R5C KDS Comandero E2E",
+          "file": "r5c-kds-e2e.spec.js",
+          "line": 146,
+          "column": 6,
+          "specs": [
+            {
+              "title": "K1: /volvix-kds.html serves with 200 and includes auth-gate redirect",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "K1-status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "K1-body_len",
+                      "description": "8408"
+                    },
+                    {
+                      "type": "K1-has_auth_gate",
+                      "description": "yes"
+                    },
+                    {
+                      "type": "K1-has_role_gate",
+                      "description": "yes"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 155,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:50:52.497Z",
+                      "annotations": [
+                        {
+                          "type": "K1-status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "K1-body_len",
+                          "description": "8408"
+                        },
+                        {
+                          "type": "K1-has_auth_gate",
+                          "description": "yes"
+                        },
+                        {
+                          "type": "K1-has_role_gate",
+                          "description": "yes"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "dc8c34e844e34585d1aa-77b2d5661280ef7b9ca6",
+              "file": "r5c-kds-e2e.spec.js",
+              "line": 179,
+              "column": 3
+            },
+            {
+              "title": "K2: POST /api/kds/pair returns 200 + DELETE/POST station works",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "K2-pair_status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "K2-pair_body",
+                      "description": "{\"ok\":true,\"pairing\":{\"tenant_id\":\"TNT001\",\"pair_code\":\"R5CG-8E21\",\"station\":\"grill\",\"paired_by\":\"cccccccc-cccc-cccc-cccc-ccccccccccc1\",\"paired_at\":\"2026-04-28T03:51:01.055Z\",\"device_type\":\"kds\"}}"
+                    },
+                    {
+                      "type": "K2-station_status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "K2-station_body",
+                      "description": "{\"ok\":true,\"station\":\"cold\"}"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 659,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:50:53.379Z",
+                      "annotations": [
+                        {
+                          "type": "K2-pair_status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "K2-pair_body",
+                          "description": "{\"ok\":true,\"pairing\":{\"tenant_id\":\"TNT001\",\"pair_code\":\"R5CG-8E21\",\"station\":\"grill\",\"paired_by\":\"cccccccc-cccc-cccc-cccc-ccccccccccc1\",\"paired_at\":\"2026-04-28T03:51:01.055Z\",\"device_type\":\"kds\"}}"
+                        },
+                        {
+                          "type": "K2-station_status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "K2-station_body",
+                          "description": "{\"ok\":true,\"station\":\"cold\"}"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "dc8c34e844e34585d1aa-b7a15ca48b135ae4a073",
+              "file": "r5c-kds-e2e.spec.js",
+              "line": 201,
+              "column": 3
+            },
+            {
+              "title": "K3: sale -> kitchen ticket appears in active queue",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "K3-sale_status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "K3-sale_id",
+                      "description": "df68b3fd-f626-4151-a8c0-901008666cac"
+                    },
+                    {
+                      "type": "K3-ticket_status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "K3-ticket_body",
+                      "description": "{\"ok\":true,\"ticket\":{\"id\":\"d6b1f486-7733-4e27-8847-da23b410536c\",\"sale_id\":\"df68b3fd-f626-4151-a8c0-901008666cac\",\"station\":\"grill\",\"status\":\"received\",\"items\":[{\"qty\":1,\"mods\":\"sin cebolla\",\"name\":\"R5C-Burger\"}],\"notes\":\"K3 — link to sale\",\"priority\":1,\"started_at\":null,\"ready_at\":null,\"served_at\":null,\"created_at\":\"2026-04-28 03:51:06.643516+00\",\"updated_at\":\"2026-04-28 03:51:06.643516+00\"}}"
+                    },
+                    {
+                      "type": "K3-active_count_before",
+                      "description": "13"
+                    },
+                    {
+                      "type": "K3-active_count_after",
+                      "description": "14"
+                    },
+                    {
+                      "type": "K3-kitchen_orders_status",
+                      "description": "201"
+                    },
+                    {
+                      "type": "K3-kitchen_orders_body",
+                      "description": "{\"ok\":true,\"order\":{\"id\":\"local-1777348267652\",\"tenant_id\":\"TNT001\",\"mesa\":\"5\",\"items\":[{\"qty\":1,\"name\":\"R5C-Burger\"}],\"status\":\"pending\",\"cashier_id\":\"cccccccc-cccc-cccc-cccc-ccccccccccc1\",\"created_at\":\"2026-04-28T03:51:07.613Z\"},\"persisted\":false}"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6157,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:50:54.065Z",
+                      "annotations": [
+                        {
+                          "type": "K3-sale_status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "K3-sale_id",
+                          "description": "df68b3fd-f626-4151-a8c0-901008666cac"
+                        },
+                        {
+                          "type": "K3-ticket_status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "K3-ticket_body",
+                          "description": "{\"ok\":true,\"ticket\":{\"id\":\"d6b1f486-7733-4e27-8847-da23b410536c\",\"sale_id\":\"df68b3fd-f626-4151-a8c0-901008666cac\",\"station\":\"grill\",\"status\":\"received\",\"items\":[{\"qty\":1,\"mods\":\"sin cebolla\",\"name\":\"R5C-Burger\"}],\"notes\":\"K3 — link to sale\",\"priority\":1,\"started_at\":null,\"ready_at\":null,\"served_at\":null,\"created_at\":\"2026-04-28 03:51:06.643516+00\",\"updated_at\":\"2026-04-28 03:51:06.643516+00\"}}"
+                        },
+                        {
+                          "type": "K3-active_count_before",
+                          "description": "13"
+                        },
+                        {
+                          "type": "K3-active_count_after",
+                          "description": "14"
+                        },
+                        {
+                          "type": "K3-kitchen_orders_status",
+                          "description": "201"
+                        },
+                        {
+                          "type": "K3-kitchen_orders_body",
+                          "description": "{\"ok\":true,\"order\":{\"id\":\"local-1777348267652\",\"tenant_id\":\"TNT001\",\"mesa\":\"5\",\"items\":[{\"qty\":1,\"name\":\"R5C-Burger\"}],\"status\":\"pending\",\"cashier_id\":\"cccccccc-cccc-cccc-cccc-ccccccccccc1\",\"created_at\":\"2026-04-28T03:51:07.613Z\"},\"persisted\":false}"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "dc8c34e844e34585d1aa-c1532cf33832bf75526a",
+              "file": "r5c-kds-e2e.spec.js",
+              "line": 245,
+              "column": 3
+            },
+            {
+              "title": "K4: timer elapsed math + warn/urgent threshold logic exists",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "K4-created_at",
+                      "description": "2026-04-28 03:51:06.643516+00"
+                    },
+                    {
+                      "type": "K4-elapsed_sec",
+                      "description": "-6"
+                    },
+                    {
+                      "type": "K4-server_clock_drift_sec",
+                      "description": "-6"
+                    },
+                    {
+                      "type": "K4-html_has_warn",
+                      "description": "yes"
+                    },
+                    {
+                      "type": "K4-html_has_urgent",
+                      "description": "yes"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 658,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:51:00.252Z",
+                      "annotations": [
+                        {
+                          "type": "K4-created_at",
+                          "description": "2026-04-28 03:51:06.643516+00"
+                        },
+                        {
+                          "type": "K4-elapsed_sec",
+                          "description": "-6"
+                        },
+                        {
+                          "type": "K4-server_clock_drift_sec",
+                          "description": "-6"
+                        },
+                        {
+                          "type": "K4-html_has_warn",
+                          "description": "yes"
+                        },
+                        {
+                          "type": "K4-html_has_urgent",
+                          "description": "yes"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "dc8c34e844e34585d1aa-9162b2fccdc4319db7ee",
+              "file": "r5c-kds-e2e.spec.js",
+              "line": 313,
+              "column": 3
+            },
+            {
+              "title": "K5: PATCH preparing -> status preparing + started_at set",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "K5-patch_status",
+                      "description": "400"
+                    },
+                    {
+                      "type": "K5-patch_body",
+                      "description": "{\"ok\":false,\"error\":\"bad_request\"}"
+                    },
+                    {
+                      "type": "K5-patch_query_status",
+                      "description": "400"
+                    },
+                    {
+                      "type": "K5-patch_query_body",
+                      "description": "{\"ok\":false,\"error\":\"bad_request\"}"
+                    },
+                    {
+                      "type": "K5-known_bug",
+                      "description": "PATCH bad_request — req.body not parsed by router"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 185,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:51:00.940Z",
+                      "annotations": [
+                        {
+                          "type": "K5-patch_status",
+                          "description": "400"
+                        },
+                        {
+                          "type": "K5-patch_body",
+                          "description": "{\"ok\":false,\"error\":\"bad_request\"}"
+                        },
+                        {
+                          "type": "K5-patch_query_status",
+                          "description": "400"
+                        },
+                        {
+                          "type": "K5-patch_query_body",
+                          "description": "{\"ok\":false,\"error\":\"bad_request\"}"
+                        },
+                        {
+                          "type": "K5-known_bug",
+                          "description": "PATCH bad_request — req.body not parsed by router"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "dc8c34e844e34585d1aa-7ff7ad0b96436c87e5fc",
+              "file": "r5c-kds-e2e.spec.js",
+              "line": 350,
+              "column": 3
+            },
+            {
+              "title": "K6: PATCH ready -> ready_at set + notify-waiter ok",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "K6-patch_status",
+                      "description": "400"
+                    },
+                    {
+                      "type": "K6-patch_body",
+                      "description": "{\"ok\":false,\"error\":\"bad_request\"}"
+                    },
+                    {
+                      "type": "K6-notify_status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "K6-notify_body",
+                      "description": "{\"ok\":true,\"notification\":{\"tenant_id\":\"TNT001\",\"ticket_id\":\"d6b1f486-7733-4e27-8847-da23b410536c\",\"mesa\":\"5\",\"reason\":\"ready\",\"notified_by\":\"cccccccc-cccc-cccc-cccc-ccccccccccc1\",\"created_at\":\"2026-04-28T03:51:08.824Z\"}}"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 251,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:51:01.159Z",
+                      "annotations": [
+                        {
+                          "type": "K6-patch_status",
+                          "description": "400"
+                        },
+                        {
+                          "type": "K6-patch_body",
+                          "description": "{\"ok\":false,\"error\":\"bad_request\"}"
+                        },
+                        {
+                          "type": "K6-notify_status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "K6-notify_body",
+                          "description": "{\"ok\":true,\"notification\":{\"tenant_id\":\"TNT001\",\"ticket_id\":\"d6b1f486-7733-4e27-8847-da23b410536c\",\"mesa\":\"5\",\"reason\":\"ready\",\"notified_by\":\"cccccccc-cccc-cccc-cccc-ccccccccccc1\",\"created_at\":\"2026-04-28T03:51:08.824Z\"}}"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "dc8c34e844e34585d1aa-cc7493b55675085af7f8",
+              "file": "r5c-kds-e2e.spec.js",
+              "line": 393,
+              "column": 3
+            },
+            {
+              "title": "K7: PATCH served -> served_at set + ticket leaves active feed",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "K7-patch_status",
+                      "description": "400"
+                    },
+                    {
+                      "type": "K7-patch_body",
+                      "description": "{\"ok\":false,\"error\":\"bad_request\"}"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 92,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:51:01.469Z",
+                      "annotations": [
+                        {
+                          "type": "K7-patch_status",
+                          "description": "400"
+                        },
+                        {
+                          "type": "K7-patch_body",
+                          "description": "{\"ok\":false,\"error\":\"bad_request\"}"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "dc8c34e844e34585d1aa-15a950a74a24cf26b99c",
+              "file": "r5c-kds-e2e.spec.js",
+              "line": 432,
+              "column": 3
+            },
+            {
+              "title": "K8: GET /api/kds/tickets/active?station=bar returns only bar tickets",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "K8-bar_count",
+                      "description": "2"
+                    },
+                    {
+                      "type": "K8-grill_leak",
+                      "description": "no"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 978,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:51:01.596Z",
+                      "annotations": [
+                        {
+                          "type": "K8-bar_count",
+                          "description": "2"
+                        },
+                        {
+                          "type": "K8-grill_leak",
+                          "description": "no"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "dc8c34e844e34585d1aa-7e9d4c6cd5cd6751b43a",
+              "file": "r5c-kds-e2e.spec.js",
+              "line": 463,
+              "column": 3
+            },
+            {
+              "title": "K9: 5 tickets created rapidly, all appear sorted by priority DESC, created_at ASC",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "K9-created",
+                      "description": "[{\"id\":\"9451aaca-5204-42db-9c39-8473c5ee2b43\",\"prio\":0,\"idx\":0},{\"id\":\"7172f372-51c1-4438-a6dd-b2308425cb91\",\"prio\":1,\"idx\":1},{\"id\":\"5423d542-5011-41e6-974e-4666268a6a0c\",\"prio\":0,\"idx\":2},{\"id\":\"2079c32b-9c78-43f6-8188-f1915fa9fa97\",\"prio\":2,\"idx\":3},{\"id\":\"7b0eefbd-5287-4571-a13f-512077961f5a\",\"prio\":1,\"idx\":4}]"
+                    },
+                    {
+                      "type": "K9-found_count",
+                      "description": "5"
+                    },
+                    {
+                      "type": "K9-api_order",
+                      "description": "[\"2@2026-04-28 03:51:11.186354+00\",\"1@2026-04-28 03:51:10.660782+00\",\"1@2026-04-28 03:51:11.565651+00\",\"0@2026-04-28 03:51:10.34844+00\",\"0@2026-04-28 03:51:10.940556+00\"]"
+                    },
+                    {
+                      "type": "K9-expected_order",
+                      "description": "[\"2@2026-04-28 03:51:11.186354+00\",\"1@2026-04-28 03:51:10.660782+00\",\"1@2026-04-28 03:51:11.565651+00\",\"0@2026-04-28 03:51:10.34844+00\",\"0@2026-04-28 03:51:10.940556+00\"]"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1873,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:51:02.600Z",
+                      "annotations": [
+                        {
+                          "type": "K9-created",
+                          "description": "[{\"id\":\"9451aaca-5204-42db-9c39-8473c5ee2b43\",\"prio\":0,\"idx\":0},{\"id\":\"7172f372-51c1-4438-a6dd-b2308425cb91\",\"prio\":1,\"idx\":1},{\"id\":\"5423d542-5011-41e6-974e-4666268a6a0c\",\"prio\":0,\"idx\":2},{\"id\":\"2079c32b-9c78-43f6-8188-f1915fa9fa97\",\"prio\":2,\"idx\":3},{\"id\":\"7b0eefbd-5287-4571-a13f-512077961f5a\",\"prio\":1,\"idx\":4}]"
+                        },
+                        {
+                          "type": "K9-found_count",
+                          "description": "5"
+                        },
+                        {
+                          "type": "K9-api_order",
+                          "description": "[\"2@2026-04-28 03:51:11.186354+00\",\"1@2026-04-28 03:51:10.660782+00\",\"1@2026-04-28 03:51:11.565651+00\",\"0@2026-04-28 03:51:10.34844+00\",\"0@2026-04-28 03:51:10.940556+00\"]"
+                        },
+                        {
+                          "type": "K9-expected_order",
+                          "description": "[\"2@2026-04-28 03:51:11.186354+00\",\"1@2026-04-28 03:51:10.660782+00\",\"1@2026-04-28 03:51:11.565651+00\",\"0@2026-04-28 03:51:10.34844+00\",\"0@2026-04-28 03:51:10.940556+00\"]"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "dc8c34e844e34585d1aa-030ae4d79a751d4a5f26",
+              "file": "r5c-kds-e2e.spec.js",
+              "line": 498,
+              "column": 3
+            },
+            {
+              "title": "K10: PATCH canceled removes from active feed",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "K10-cancel_status",
+                      "description": "400"
+                    },
+                    {
+                      "type": "K10-cancel_body",
+                      "description": "{\"ok\":false,\"error\":\"bad_request\"}"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 416,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:51:04.518Z",
+                      "annotations": [
+                        {
+                          "type": "K10-cancel_status",
+                          "description": "400"
+                        },
+                        {
+                          "type": "K10-cancel_body",
+                          "description": "{\"ok\":false,\"error\":\"bad_request\"}"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "dc8c34e844e34585d1aa-957cd029d751c2e02d08",
+              "file": "r5c-kds-e2e.spec.js",
+              "line": 539,
+              "column": 3
+            },
+            {
+              "title": "K11: POST /api/kitchen/notify-waiter persists notification (best-effort)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "K11-status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "K11-body",
+                      "description": "{\"ok\":true,\"notification\":{\"tenant_id\":\"TNT001\",\"ticket_id\":\"d6b1f486-7733-4e27-8847-da23b410536c\",\"mesa\":\"7\",\"reason\":\"attention\",\"notified_by\":\"cccccccc-cccc-cccc-cccc-ccccccccccc1\",\"created_at\":\"2026-04-28T03:51:12.527Z\"}}"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 157,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:51:04.978Z",
+                      "annotations": [
+                        {
+                          "type": "K11-status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "K11-body",
+                          "description": "{\"ok\":true,\"notification\":{\"tenant_id\":\"TNT001\",\"ticket_id\":\"d6b1f486-7733-4e27-8847-da23b410536c\",\"mesa\":\"7\",\"reason\":\"attention\",\"notified_by\":\"cccccccc-cccc-cccc-cccc-ccccccccccc1\",\"created_at\":\"2026-04-28T03:51:12.527Z\"}}"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "dc8c34e844e34585d1aa-ce84b3fa14b6f2b30a8e",
+              "file": "r5c-kds-e2e.spec.js",
+              "line": 573,
+              "column": 3
+            },
+            {
+              "title": "K12: UI flow — login + load /volvix-kds.html + screenshots",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "K12-board_present",
+                      "description": "1"
+                    },
+                    {
+                      "type": "K12-cols",
+                      "description": "3"
+                    },
+                    {
+                      "type": "K12-tickets_rendered",
+                      "description": "21"
+                    },
+                    {
+                      "type": "K12-timer_visible",
+                      "description": "true"
+                    },
+                    {
+                      "type": "K12-clock_text",
+                      "description": "9:51:11 PM"
+                    },
+                    {
+                      "type": "K12-uiOk",
+                      "description": "true"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6732,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:51:05.175Z",
+                      "annotations": [
+                        {
+                          "type": "K12-board_present",
+                          "description": "1"
+                        },
+                        {
+                          "type": "K12-cols",
+                          "description": "3"
+                        },
+                        {
+                          "type": "K12-tickets_rendered",
+                          "description": "21"
+                        },
+                        {
+                          "type": "K12-timer_visible",
+                          "description": "true"
+                        },
+                        {
+                          "type": "K12-clock_text",
+                          "description": "9:51:11 PM"
+                        },
+                        {
+                          "type": "K12-uiOk",
+                          "description": "true"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "dc8c34e844e34585d1aa-ea990e3c788c6b8fc711",
+              "file": "r5c-kds-e2e.spec.js",
+              "line": 595,
+              "column": 3
+            },
+            {
+              "title": "K13: pairing two stations sequentially (cocina + bebidas) accepted",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "K13-A_status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "K13-A_body",
+                      "description": "{\"ok\":true,\"pairing\":{\"tenant_id\":\"TNT001\",\"pair_code\":\"R5CK-521F\",\"station\":\"grill\",\"paired_by\":\"cccccccc-cccc-cccc-cccc-ccccccccccc1\",\"paired_at\":\"2026-04-28T03:51:19.945Z\",\"device_type\":\"kds\"}}"
+                    },
+                    {
+                      "type": "K13-B_status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "K13-B_body",
+                      "description": "{\"ok\":true,\"pairing\":{\"tenant_id\":\"TNT001\",\"pair_code\":\"R5CB-1AB6\",\"station\":\"bar\",\"paired_by\":\"cccccccc-cccc-cccc-cccc-ccccccccccc1\",\"paired_at\":\"2026-04-28T03:51:20.089Z\",\"device_type\":\"kds\"}}"
+                    },
+                    {
+                      "type": "K13-grill_off",
+                      "description": "0"
+                    },
+                    {
+                      "type": "K13-bar_off",
+                      "description": "0"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 897,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:51:12.405Z",
+                      "annotations": [
+                        {
+                          "type": "K13-A_status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "K13-A_body",
+                          "description": "{\"ok\":true,\"pairing\":{\"tenant_id\":\"TNT001\",\"pair_code\":\"R5CK-521F\",\"station\":\"grill\",\"paired_by\":\"cccccccc-cccc-cccc-cccc-ccccccccccc1\",\"paired_at\":\"2026-04-28T03:51:19.945Z\",\"device_type\":\"kds\"}}"
+                        },
+                        {
+                          "type": "K13-B_status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "K13-B_body",
+                          "description": "{\"ok\":true,\"pairing\":{\"tenant_id\":\"TNT001\",\"pair_code\":\"R5CB-1AB6\",\"station\":\"bar\",\"paired_by\":\"cccccccc-cccc-cccc-cccc-ccccccccccc1\",\"paired_at\":\"2026-04-28T03:51:20.089Z\",\"device_type\":\"kds\"}}"
+                        },
+                        {
+                          "type": "K13-grill_off",
+                          "description": "0"
+                        },
+                        {
+                          "type": "K13-bar_off",
+                          "description": "0"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "dc8c34e844e34585d1aa-aa59865ff7a0511920ca",
+              "file": "r5c-kds-e2e.spec.js",
+              "line": 664,
+              "column": 3
+            },
+            {
+              "title": "K14: cross-tenant — owner (TNT002) must not see TNT001 tickets",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "K14-owner_status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "K14-owner_count",
+                      "description": "22"
+                    },
+                    {
+                      "type": "K14-marker_leaked",
+                      "description": "yes"
+                    },
+                    {
+                      "type": "K14-leaked_ticket",
+                      "description": "{\"id\":\"8e7a2eab-c9a5-45b8-83d1-1578761a0323\",\"sale_id\":null,\"station\":\"cold\",\"status\":\"received\",\"items\":[{\"qty\":1,\"name\":\"K14-TNT001-marker\"}],\"notes\":\"K14 — must not leak to TNT002\",\"priority\":0,\"started_at\":null,\"ready_at\":null,\"served_at\":null,\"created_at\":\"2026-04-28 03:51:21.110798+00\",\"updated_at\":\"2026-04-28 03:51:21.110798+00\"}"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 662,
+                      "error": {
+                        "message": "Error: CRITICAL multi-tenant leak: owner@TNT002 sees TNT001 ticket\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeFalsy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31m{\"created_at\": \"2026-04-28 03:51:21.110798+00\", \"id\": \"8e7a2eab-c9a5-45b8-83d1-1578761a0323\", \"items\": [{\"name\": \"K14-TNT001-marker\", \"qty\": 1}], \"notes\": \"K14 — must not leak to TNT002\", \"priority\": 0, \"ready_at\": null, \"sale_id\": null, \"served_at\": null, \"started_at\": null, \"station\": \"cold\", \"status\": \"received\", \"updated_at\": \"2026-04-28 03:51:21.110798+00\"}\u001b[39m",
+                        "stack": "Error: CRITICAL multi-tenant leak: owner@TNT002 sees TNT001 ticket\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeFalsy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31m{\"created_at\": \"2026-04-28 03:51:21.110798+00\", \"id\": \"8e7a2eab-c9a5-45b8-83d1-1578761a0323\", \"items\": [{\"name\": \"K14-TNT001-marker\", \"qty\": 1}], \"notes\": \"K14 — must not leak to TNT002\", \"priority\": 0, \"ready_at\": null, \"sale_id\": null, \"served_at\": null, \"started_at\": null, \"station\": \"cold\", \"status\": \"received\", \"updated_at\": \"2026-04-28 03:51:21.110798+00\"}\u001b[39m\n    at C:\\Users\\DELL\\Downloads\\verion 340\\tests\\r5c-kds-e2e.spec.js:742:83",
+                        "location": {
+                          "file": "C:\\Users\\DELL\\Downloads\\verion 340\\tests\\r5c-kds-e2e.spec.js",
+                          "column": 83,
+                          "line": 742
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 740 |\u001b[39m     \u001b[90m// If this fails it means the kds_tickets table has no tenant_id\u001b[39m\n \u001b[90m 741 |\u001b[39m     \u001b[90m// column or the GET handler doesn't apply a WHERE filter.\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 742 |\u001b[39m     expect(leaked\u001b[33m,\u001b[39m \u001b[32m'CRITICAL multi-tenant leak: owner@TNT002 sees TNT001 ticket'\u001b[39m)\u001b[33m.\u001b[39mtoBeFalsy()\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                                                                   \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 743 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 744 |\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m 745 |\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\DELL\\Downloads\\verion 340\\tests\\r5c-kds-e2e.spec.js",
+                            "column": 83,
+                            "line": 742
+                          },
+                          "message": "Error: CRITICAL multi-tenant leak: owner@TNT002 sees TNT001 ticket\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeFalsy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31m{\"created_at\": \"2026-04-28 03:51:21.110798+00\", \"id\": \"8e7a2eab-c9a5-45b8-83d1-1578761a0323\", \"items\": [{\"name\": \"K14-TNT001-marker\", \"qty\": 1}], \"notes\": \"K14 — must not leak to TNT002\", \"priority\": 0, \"ready_at\": null, \"sale_id\": null, \"served_at\": null, \"started_at\": null, \"station\": \"cold\", \"status\": \"received\", \"updated_at\": \"2026-04-28 03:51:21.110798+00\"}\u001b[39m\n\n  740 |     // If this fails it means the kds_tickets table has no tenant_id\n  741 |     // column or the GET handler doesn't apply a WHERE filter.\n> 742 |     expect(leaked, 'CRITICAL multi-tenant leak: owner@TNT002 sees TNT001 ticket').toBeFalsy();\n      |                                                                                   ^\n  743 |   });\n  744 | });\n  745 |\n    at C:\\Users\\DELL\\Downloads\\verion 340\\tests\\r5c-kds-e2e.spec.js:742:83"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:51:13.329Z",
+                      "annotations": [
+                        {
+                          "type": "K14-owner_status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "K14-owner_count",
+                          "description": "22"
+                        },
+                        {
+                          "type": "K14-marker_leaked",
+                          "description": "yes"
+                        },
+                        {
+                          "type": "K14-leaked_ticket",
+                          "description": "{\"id\":\"8e7a2eab-c9a5-45b8-83d1-1578761a0323\",\"sale_id\":null,\"station\":\"cold\",\"status\":\"received\",\"items\":[{\"qty\":1,\"name\":\"K14-TNT001-marker\"}],\"notes\":\"K14 — must not leak to TNT002\",\"priority\":0,\"started_at\":null,\"ready_at\":null,\"served_at\":null,\"created_at\":\"2026-04-28 03:51:21.110798+00\",\"updated_at\":\"2026-04-28 03:51:21.110798+00\"}"
+                        }
+                      ],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\DELL\\Downloads\\verion 340\\test-results\\r5c-kds-e2e-R5C-KDS-Comand-78a6f-must-not-see-TNT001-tickets-chromium\\error-context.md"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\DELL\\Downloads\\verion 340\\test-results\\r5c-kds-e2e-R5C-KDS-Comand-78a6f-must-not-see-TNT001-tickets-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\DELL\\Downloads\\verion 340\\tests\\r5c-kds-e2e.spec.js",
+                        "column": 83,
+                        "line": 742
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "dc8c34e844e34585d1aa-5fbc2897874c7234c108",
+              "file": "r5c-kds-e2e.spec.js",
+              "line": 707,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-04-28T03:48:45.954Z",
+    "duration": 149320.705,
+    "expected": 13,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

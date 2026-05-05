@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Refiere y gana — Volvix</title>
+<style>
+  :root {
+    --bg:#0f172a; --card:#1e293b; --txt:#e2e8f0; --muted:#94a3b8;
+    --accent:#3b82f6; --green:#22c55e; --warn:#f59e0b;
+  }
+  * { box-sizing:border-box }
+  body {
+    margin:0; font-family:system-ui,-apple-system,Segoe UI,sans-serif;
+    background:var(--bg); color:var(--txt); padding:24px;
+  }
+  .wrap { max-width:960px; margin:0 auto }
+  h1 { font-size:32px; margin:0 0 8px }
+  .lead { color:var(--muted); margin:0 0 32px }
+  .card {
+    background:var(--card); border-radius:12px; padding:24px;
+    margin-bottom:24px; box-shadow:0 4px 12px rgba(0,0,0,.2);
+  }
+  .code-row { display:flex; gap:12px; flex-wrap:wrap; align-items:center }
+  .code-box {
+    background:#0b1220; padding:12px 18px; border-radius:8px;
+    font-family:ui-monospace,Menlo,monospace; font-size:20px; font-weight:700;
+    letter-spacing:2px; color:var(--accent);
+  }
+  .link-input {
+    flex:1; min-width:240px; background:#0b1220; color:var(--txt);
+    border:1px solid #334155; border-radius:8px; padding:12px;
+    font-family:ui-monospace,Menlo,monospace; font-size:13px;
+  }
+  button {
+    background:var(--accent); color:#fff; border:none; padding:10px 18px;
+    border-radius:8px; cursor:pointer; font-weight:600; font-size:14px;
+  }
+  button.ghost { background:transparent; border:1px solid #475569; color:var(--txt) }
+  .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:16px }
+  .stat { background:#0b1220; padding:16px; border-radius:8px; text-align:center }
+  .stat .n { font-size:28px; font-weight:700; color:var(--accent) }
+  .stat .l { font-size:12px; color:var(--muted); margin-top:4px; text-transform:uppercase }
+  table { width:100%; border-collapse:collapse }
+  th, td { text-align:left; padding:10px; border-bottom:1px solid #334155; font-size:14px }
+  th { color:var(--muted); font-weight:500; font-size:12px; text-transform:uppercase }
+  .badge {
+    display:inline-block; padding:2px 8px; border-radius:99px;
+    font-size:11px; font-weight:600; text-transform:uppercase;
+  }
+  .badge.pending { background:#374151; color:#d1d5db }
+  .badge.signed_up { background:#1e3a8a; color:#bfdbfe }
+  .badge.converted { background:#14532d; color:#bbf7d0 }
+  .share-btns { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px }
+  .share-btns a {
+    background:#0b1220; color:var(--txt); padding:10px 14px;
+    border-radius:8px; text-decoration:none; font-size:14px;
+    border:1px solid #334155;
+  }
+  #login-warn {
+    background:#7c2d12; padding:16px; border-radius:8px; display:none;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Refiere y gana</h1>
+  <p class="lead">Comparte tu link único: por cada negocio que se registre con tu referencia, ganas comisión.</p>
+
+  <div id="login-warn" class="card">
+    Necesitas iniciar sesión para ver tu código de referido. <a href="/login.html" style="color:#fbbf24">Inicia sesión</a>.
+  </div>
+
+  <div class="card" id="card-code" style="display:none">
+    <h2 style="margin-top:0">Tu código</h2>
+    <div class="code-row">
+      <div class="code-box" id="ref-code">--------</div>
+      <input type="text" id="ref-link" class="link-input" readonly>
+      <button id="btn-copy">Copiar link</button>
+    </div>
+    <div class="share-btns">
+      <a id="share-wa" href="#" target="_blank" rel="noopener">WhatsApp</a>
+      <a id="share-mail" href="#">Email</a>
+      <a id="share-x" href="#" target="_blank" rel="noopener">X (Twitter)</a>
+      <a id="share-fb" href="#" target="_blank" rel="noopener">Facebook</a>
+      <button type="button" id="btn-qr" class="ghost" style="background:transparent;border:1px solid #475569;color:var(--txt);padding:10px 14px;font-size:14px;font-weight:600;cursor:pointer;border-radius:8px">Ver QR</button>
+    </div>
+    <div id="qr-wrap" hidden style="margin-top:16px;text-align:center;padding:16px;background:#0b1220;border-radius:8px">
+      <img id="qr-img" alt="Código QR de tu link de referido" style="max-width:220px;width:100%;height:auto;border-radius:8px;background:#fff;padding:8px" loading="lazy">
+      <div style="font-size:12px;color:var(--muted);margin-top:8px">Escanea para abrir tu link</div>
+    </div>
+  </div>
+
+  <div class="card" id="card-stats" style="display:none">
+    <h2 style="margin-top:0">Estadísticas</h2>
+    <div class="stats">
+      <div class="stat"><div class="n" id="s-total">0</div><div class="l">Referidos</div></div>
+      <div class="stat"><div class="n" id="s-signed">0</div><div class="l">Registrados</div></div>
+      <div class="stat"><div class="n" id="s-conv">0</div><div class="l">Convertidos</div></div>
+      <div class="stat"><div class="n" id="s-comm">$0</div><div class="l">Comisión</div></div>
+    </div>
+  </div>
+
+  <div class="card" id="card-list" style="display:none">
+    <h2 style="margin-top:0">Tus referidos</h2>
+    <table>
+      <thead>
+        <tr><th>Email</th><th>Estatus</th><th>Comisión</th><th>Fecha</th></tr>
+      </thead>
+      <tbody id="ref-rows"><tr><td colspan="4" style="color:var(--muted)">Cargando...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+(function () {
+  function getToken() {
+    try {
+      return localStorage.getItem('volvix_token') ||
+             localStorage.getItem('volvixAuthToken') ||
+             localStorage.getItem('auth_token') ||
+             localStorage.getItem('token') || null;
+    } catch (_) { return null; }
+  }
+  function fmtMoney(n) {
+    n = Number(n) || 0;
+    return '$' + n.toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  }
+  function badge(status) {
+    var cls = (status === 'converted' || status === 'signed_up') ? status : 'pending';
+    return '<span class="badge ' + cls + '">' + (status || 'pending') + '</span>';
+  }
+  function fmtDate(s) {
+    if (!s) return '-';
+    try { return new Date(s).toLocaleDateString('es-MX'); } catch (_) { return s; }
+  }
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+    });
+  }
+
+  var token = getToken();
+  if (!token) {
+    document.getElementById('login-warn').style.display = 'block';
+    return;
+  }
+
+  function loadReferrals() {
+    return fetch('/api/referrals/me', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  }).then(function (r) {
+    if (r.status === 401) {
+      // Token expirado o inválido — limpiar y redirigir
+      try {
+        localStorage.removeItem('volvix_token');
+        localStorage.removeItem('volvixAuthToken');
+      } catch(_) {}
+      location.replace('/login.html?redirect=' + encodeURIComponent(location.pathname));
+      return Promise.reject(new Error('unauthenticated'));
+    }
+    if (r.status === 503) {
+      document.getElementById('login-warn').style.display = 'block';
+      document.getElementById('login-warn').textContent = 'Programa de referidos no configurado en este momento.';
+      return Promise.reject(new Error('unavailable'));
+    }
+    return r.json();
+  })
+    .then(function (j) {
+      if (!j || !j.ok) {
+        document.getElementById('login-warn').style.display = 'block';
+        document.getElementById('login-warn').textContent =
+          'No pudimos cargar tu información: ' + (j && j.error || 'error');
+        return;
+      }
+      document.getElementById('card-code').style.display = '';
+      document.getElementById('card-stats').style.display = '';
+      document.getElementById('card-list').style.display = '';
+
+      document.getElementById('ref-code').textContent = j.code || '--------';
+      document.getElementById('ref-link').value = j.link || '';
+      var msg = encodeURIComponent('Te recomiendo Volvix POS, regístrate con mi link: ' + (j.link || ''));
+      document.getElementById('share-wa').href   = 'https://wa.me/?text=' + msg;
+      document.getElementById('share-mail').href = 'mailto:?subject=' + encodeURIComponent('Te recomiendo Volvix POS') + '&body=' + msg;
+      document.getElementById('share-x').href    = 'https://twitter.com/intent/tweet?text=' + msg;
+      document.getElementById('share-fb').href   = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(j.link || '');
+
+      // QR code generator (sin librería externa: usa servicio público QR como fallback,
+      // funciona offline-aware si se cambia por canvas-qr-encoder más adelante)
+      if (j.link) {
+        var qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&format=png&data=' + encodeURIComponent(j.link);
+        var qrImg = document.getElementById('qr-img');
+        if (qrImg) qrImg.src = qrUrl;
+      }
+
+      var st = j.stats || {};
+      document.getElementById('s-total').textContent  = st.total || 0;
+      document.getElementById('s-signed').textContent = st.signed_up || 0;
+      document.getElementById('s-conv').textContent   = st.converted || 0;
+      document.getElementById('s-comm').textContent   = fmtMoney(st.commission_earned);
+
+      var tbody = document.getElementById('ref-rows');
+      var rows = Array.isArray(j.referrals) ? j.referrals : [];
+      if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted)">Aún no tienes referidos. Comparte tu link.</td></tr>';
+      } else {
+        tbody.innerHTML = rows.map(function (r) {
+          return '<tr>' +
+            '<td>' + escapeHtml(r.referred_email || r.referred_user_id || '-') + '</td>' +
+            '<td>' + badge(r.status) + '</td>' +
+            '<td>' + fmtMoney(r.commission_earned) + '</td>' +
+            '<td>' + fmtDate(r.created_at) + '</td>' +
+          '</tr>';
+        }).join('');
+      }
+    }).catch(function () {
+      document.getElementById('login-warn').style.display = 'block';
+      document.getElementById('login-warn').textContent = 'Error de red.';
+    });
+  }
+
+  // Carga inicial
+  loadReferrals();
+
+  // Auto-refresh stats cada 60s (silencioso, solo si la pestaña está visible)
+  setInterval(function () {
+    if (document.visibilityState === 'visible') {
+      loadReferrals();
+    }
+  }, 60000);
+
+  // Refrescar al volver a foco si lleva > 30s sin refrescar
+  var lastRefresh = Date.now();
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible' && (Date.now() - lastRefresh) > 30000) {
+      lastRefresh = Date.now();
+      loadReferrals();
+    }
+  });
+
+  // Copy-to-clipboard con feedback visual de confirmación
+  document.getElementById('btn-copy').addEventListener('click', function () {
+    var inp = document.getElementById('ref-link');
+    var self = this;
+    var done = function () {
+      self.textContent = '✓ Copiado al portapapeles';
+      self.style.background = '#22c55e';
+      setTimeout(function () {
+        self.textContent = 'Copiar link';
+        self.style.background = '';
+      }, 2000);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(inp.value).then(done).catch(function () {
+        try { inp.select(); document.execCommand('copy'); done(); } catch (_) {
+          self.textContent = 'No se pudo copiar';
+          setTimeout(function () { self.textContent = 'Copiar link'; }, 1800);
+        }
+      });
+    } else {
+      try { inp.select(); document.execCommand('copy'); done(); } catch (_) {}
+    }
+  });
+
+  // Toggle QR
+  var qrBtn = document.getElementById('btn-qr');
+  if (qrBtn) qrBtn.addEventListener('click', function () {
+    var wrap = document.getElementById('qr-wrap');
+    if (!wrap) return;
+    wrap.hidden = !wrap.hidden;
+    qrBtn.textContent = wrap.hidden ? 'Ver QR' : 'Ocultar QR';
+    qrBtn.setAttribute('aria-expanded', String(!wrap.hidden));
+  });
+})();
+</script>
+</body>
+</html>

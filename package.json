@@ -1,0 +1,72 @@
+{
+  "name": "volvix-saas",
+  "version": "20.0.0",
+  "description": "Volvix · SaaS POS multi-giro · Offline-first · IA autónoma · Web + Android + Windows + Mac · v20 single-source-of-truth snapshot 2026-05-05",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "prod": "NODE_ENV=production node server.js",
+    "build": "echo 'Volvix ready'",
+    "build:android": "node build-apps.js android",
+    "build:windows": "node build-apps.js windows",
+    "build:mac": "node build-apps.js mac",
+    "build:linux": "node build-apps.js linux",
+    "build:all": "node build-apps.js all",
+    "mobile:doctor": "node mobile-build.js doctor",
+    "mobile:install": "node mobile-build.js install",
+    "mobile:init": "node mobile-build.js init",
+    "mobile:sync": "node mobile-build.js sync",
+    "mobile:clean": "node mobile-build.js clean",
+    "mobile:android:debug": "node mobile-build.js android-debug",
+    "mobile:android:release": "node mobile-build.js android-release",
+    "mobile:android:bundle": "node mobile-build.js android-bundle",
+    "mobile:ios": "node mobile-build.js ios",
+    "deploy:vercel": "vercel --prod",
+    "deploy:railway": "railway up",
+    "electron:dev": "electron electron/main.js",
+    "electron:dev:offline": "cross-env VOLVIX_OFFLINE=1 electron electron/main.js",
+    "electron:build:win": "electron-builder --win --config electron-builder.yml",
+    "electron:build:mac": "electron-builder --mac --config electron-builder.yml",
+    "electron:build:linux": "electron-builder --linux --config electron-builder.yml",
+    "electron:build:all": "electron-builder -mwl --config electron-builder.yml",
+    "sitemap": "node scripts/generate-sitemap.js",
+    "test:e2e": "playwright test",
+    "test:smoke": "playwright test smoke.spec.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "pos",
+    "saas",
+    "ai",
+    "autonomous",
+    "offline-first"
+  ],
+  "license": "PROPRIETARY",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0"
+  },
+  "devDependencies": {
+    "@capacitor-community/barcode-scanner": "^4.0.1",
+    "@capacitor-community/keep-awake": "^8.0.1",
+    "@capacitor/android": "^8.3.1",
+    "@capacitor/app": "^8.1.0",
+    "@capacitor/camera": "^8.1.0",
+    "@capacitor/cli": "^8.3.1",
+    "@capacitor/core": "^8.3.1",
+    "@capacitor/device": "^8.0.2",
+    "@capacitor/filesystem": "^8.1.2",
+    "@capacitor/keyboard": "^8.0.3",
+    "@capacitor/network": "^8.0.1",
+    "@capacitor/preferences": "^8.0.1",
+    "@capacitor/share": "^8.0.1",
+    "@capacitor/splash-screen": "^8.0.1",
+    "@capacitor/status-bar": "^8.0.2",
+    "@playwright/test": "^1.59.1",
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.4.0",
+    "open": "^10.1.0"
+  }
+}

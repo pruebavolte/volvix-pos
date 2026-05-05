@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Volvix · Feature Flags & A/B Tests (Admin)</title>
+<style>
+  :root {
+    --bg:#0e1116; --panel:#161b22; --panel-2:#1c2330; --border:#2a323d;
+    --text:#e6edf3; --muted:#8b949e; --accent:#58a6ff; --green:#3fb950;
+    --red:#f85149; --yellow:#d29922;
+  }
+  * { box-sizing: border-box }
+  body {
+    margin:0; font:14px/1.5 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;
+    background:var(--bg); color:var(--text);
+  }
+  header {
+    padding:16px 24px; border-bottom:1px solid var(--border);
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  header h1 { margin:0; font-size:18px; font-weight:600 }
+  .tabs { display:flex; gap:0; border-bottom:1px solid var(--border); padding:0 24px; background:var(--panel) }
+  .tab {
+    padding:12px 20px; cursor:pointer; border:none; background:none; color:var(--muted);
+    font-size:14px; border-bottom:2px solid transparent;
+  }
+  .tab.active { color:var(--text); border-bottom-color:var(--accent) }
+  .tab:hover { color:var(--text) }
+  main { padding:24px; max-width:1280px; margin:0 auto }
+  .toolbar { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap }
+  button.btn {
+    background:var(--panel-2); color:var(--text); border:1px solid var(--border);
+    padding:6px 14px; border-radius:6px; cursor:pointer; font-size:13px;
+  }
+  button.btn:hover { border-color:var(--accent) }
+  button.btn.primary { background:var(--accent); color:#fff; border-color:var(--accent) }
+  table { width:100%; border-collapse:collapse; background:var(--panel); border-radius:8px; overflow:hidden }
+  th, td { padding:10px 14px; text-align:left; border-bottom:1px solid var(--border) }
+  th { background:var(--panel-2); font-weight:600; font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px }
+  tr:last-child td { border-bottom:none }
+  .badge {
+    display:inline-block; padding:2px 10px; border-radius:12px; font-size:11px; font-weight:600;
+  }
+  .badge.on { background:rgba(63,185,80,.15); color:var(--green) }
+  .badge.off { background:rgba(248,81,73,.15); color:var(--red) }
+  .badge.partial { background:rgba(210,153,34,.15); color:var(--yellow) }
+  .switch { position:relative; display:inline-block; width:42px; height:22px }
+  .switch input { display:none }
+  .slider { position:absolute; cursor:pointer; inset:0; background:#3a414b; transition:.2s; border-radius:22px }
+  .slider::before {
+    content:''; position:absolute; height:16px; width:16px; left:3px; bottom:3px;
+    background:#fff; border-radius:50%; transition:.2s;
+  }
+  .switch input:checked + .slider { background:var(--green) }
+  .switch input:checked + .slider::before { transform:translateX(20px) }
+  input[type="number"], input[type="text"], select {
+    background:var(--panel-2); color:var(--text); border:1px solid var(--border);
+    padding:5px 8px; border-radius:4px; font-size:13px; width:80px;
+  }
+  .modal-overlay {
+    position:fixed; inset:0; background:rgba(0,0,0,.6); display:none;
+    align-items:center; justify-content:center; z-index:50;
+  }
+  .modal-overlay.show { display:flex }
+  .modal {
+    background:var(--panel); border:1px solid var(--border); border-radius:8px;
+    padding:24px; width:min(640px, 92vw); max-height:90vh; overflow:auto;
+  }
+  .modal h2 { margin-top:0 }
+  .modal .close { float:right; cursor:pointer; color:var(--muted); font-size:20px; line-height:1 }
+  .row { display:flex; gap:12px; align-items:center; margin:8px 0 }
+  .meter {
+    width:160px; height:8px; background:var(--panel-2); border-radius:4px; overflow:hidden;
+  }
+  .meter > i { display:block; height:100%; background:var(--accent) }
+  .winner { color:var(--green); font-weight:600 }
+  .loading { text-align:center; padding:40px; color:var(--muted) }
+  .empty { text-align:center; padding:40px; color:var(--muted) }
+  code { background:var(--panel-2); padding:2px 6px; border-radius:3px; font-size:12px }
+</style>
+</head>
+<body>
+<header>
+  <h1>Volvix · Admin Panel</h1>
+  <div>
+    <button id="refreshBtn" class="btn">🔄 Recargar</button>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" data-tab="flags">Feature Flags</button>
+  <button class="tab" data-tab="experiments">Experimentos A/B</button>
+</nav>
+
+<main>
+  <!-- ──────────── FEATURE FLAGS TAB ──────────── -->
+  <section id="tab-flags">
+    <div class="toolbar">
+      <button class="btn" data-bulk="all">Aplicar a todos</button>
+      <button class="btn" data-bulk="10">Solo 10%</button>
+      <button class="btn" data-bulk="enterprise">Solo enterprise</button>
+    </div>
+    <table id="flagsTable">
+      <thead>
+        <tr>
+          <th>Key</th>
+          <th>Status</th>
+          <th>Toggle</th>
+          <th>Rollout %</th>
+          <th>Tenants</th>
+          <th>Plans</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody><tr><td colspan="7" class="loading">Cargando flags...</td></tr></tbody>
+    </table>
+  </section>
+
+  <!-- ──────────── EXPERIMENTS TAB ──────────── -->
+  <section id="tab-experiments" hidden>
+    <table id="expTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Variantes</th>
+          <th>Status</th>
+          <th>Inicio</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody><tr><td colspan="6" class="loading">Cargando experimentos...</td></tr></tbody>
+    </table>
+  </section>
+</main>
+
+<!-- ──────────── EXPERIMENT RESULTS MODAL ──────────── -->
+<div class="modal-overlay" id="expModal">
+  <div class="modal">
+    <span class="close" onclick="closeExpModal()">×</span>
+    <h2 id="expModalTitle">Resultados</h2>
+    <div id="expModalBody"></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ---------- helpers ---------- */
+function authHeaders() {
+  var t = localStorage.getItem('volvix_token') || localStorage.getItem('token') || '';
+  var h = { 'Content-Type': 'application/json' };
+  if (t) h['Authorization'] = 'Bearer ' + t;
+  return h;
+}
+
+function api(method, path, body) {
+  return fetch(path, {
+    method: method,
+    headers: authHeaders(),
+    body: body ? JSON.stringify(body) : undefined,
+    credentials: 'same-origin',
+  }).then(function (r) {
+    if (r.status === 401) {
+      var back = encodeURIComponent(location.pathname + location.search);
+      location.replace('/login.html?expired=1&redirect=' + back);
+      throw new Error('unauthorized');
+    }
+    if (r.status === 503) {
+      try { (window.vlxToast || function(m){alert(m);})('Servicio no disponible (503)', 'warn'); } catch(_){}
+      throw new Error('service_unavailable');
+    }
+    if (!r.ok) return r.json().catch(function(){return {};}).then(function (e) { throw new Error(e.error || ('HTTP ' + r.status)); });
+    return r.json();
+  });
+}
+
+function escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+  });
+}
+
+/* ---------- tabs ---------- */
+document.querySelectorAll('.tab').forEach(function (t) {
+  t.addEventListener('click', function () {
+    document.querySelectorAll('.tab').forEach(function (x) { x.classList.remove('active'); });
+    t.classList.add('active');
+    var name = t.getAttribute('data-tab');
+    document.getElementById('tab-flags').hidden = (name !== 'flags');
+    document.getElementById('tab-experiments').hidden = (name !== 'experiments');
+    if (name === 'experiments' && !window.__expsLoaded) loadExperiments();
+  });
+});
+
+/* ---------- flags ---------- */
+async function loadFlags() {
+  var tbody = document.querySelector('#flagsTable tbody');
+  tbody.innerHTML = '<tr><td colspan="7" class="loading">Cargando flags...</td></tr>';
+  try {
+    var res = null;
+    try { res = await api('GET', '/api/feature-flags/admin'); }
+    catch (_) {
+      // Fallback to public endpoint
+      res = await api('GET', '/api/feature-flags');
+    }
+    var flags = res.flags || res.modules || res.data || res;
+    if (Array.isArray(flags) === false && typeof flags === 'object') {
+      flags = Object.keys(flags).map(function (k) {
+        return {
+          key: k,
+          status: flags[k].status || flags[k] || 'enabled',
+          rollout_pct: flags[k].rollout_pct || 100,
+          target_tenants: flags[k].target_tenants || [],
+          target_plans: flags[k].target_plans || [],
+        };
+      });
+    }
+    if (!flags || !flags.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="empty">No hay flags definidos.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = '';
+    flags.forEach(renderFlagRow);
+  } catch (err) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">Error: ' + escapeHtml(err.message) + '</td></tr>';
+  }
+}
+
+function renderFlagRow(f) {
+  var key = f.key || f.module_key || f.id;
+  var status = String(f.status || f.default_status || 'enabled').toLowerCase();
+  var on = (status === 'enabled' || status === 'on' || status === 'true');
+  var rollout = f.rollout_pct != null ? f.rollout_pct : (on ? 100 : 0);
+  var tenants = Array.isArray(f.target_tenants) ? f.target_tenants.join(',') : (f.target_tenants || '');
+  var plans = Array.isArray(f.target_plans) ? f.target_plans.join(',') : (f.target_plans || '');
+
+  var tr = document.createElement('tr');
+  tr.dataset.key = key;
+  tr.innerHTML =
+    '<td><code>' + escapeHtml(key) + '</code></td>' +
+    '<td><span class="badge ' + (on ? 'on' : 'off') + '">' + escapeHtml(status) + '</span></td>' +
+    '<td><label class="switch"><input type="checkbox" ' + (on ? 'checked' : '') + ' data-act="toggle"><span class="slider"></span></label></td>' +
+    '<td><input type="number" min="0" max="100" value="' + rollout + '" data-act="rollout"></td>' +
+    '<td><input type="text" value="' + escapeHtml(tenants) + '" data-act="tenants" style="width:140px"></td>' +
+    '<td><input type="text" value="' + escapeHtml(plans) + '" data-act="plans" style="width:120px"></td>' +
+    '<td><button class="btn primary" data-act="save">Guardar</button></td>';
+  document.querySelector('#flagsTable tbody').appendChild(tr);
+
+  tr.querySelector('[data-act="save"]').addEventListener('click', function () { saveFlag(tr); });
+}
+
+async function saveFlag(tr) {
+  var key = tr.dataset.key;
+  var on = tr.querySelector('[data-act="toggle"]').checked;
+  var rollout = parseInt(tr.querySelector('[data-act="rollout"]').value, 10) || 0;
+  var tenants = tr.querySelector('[data-act="tenants"]').value
+    .split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+  var plans = tr.querySelector('[data-act="plans"]').value
+    .split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+
+  var btn = tr.querySelector('[data-act="save"]');
+  btn.disabled = true; btn.textContent = '...';
+  try {
+    await api('POST', '/api/feature-flags/' + encodeURIComponent(key), {
+      status: on ? 'enabled' : 'disabled',
+      rollout_pct: rollout,
+      target_tenants: tenants,
+      target_plans: plans,
+    });
+    btn.textContent = 'Guardado'; setTimeout(function () { btn.textContent = 'Guardar'; btn.disabled = false; }, 1200);
+  } catch (e) {
+    alert('Error: ' + e.message);
+    btn.textContent = 'Guardar'; btn.disabled = false;
+  }
+}
+
+document.querySelectorAll('[data-bulk]').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var mode = btn.getAttribute('data-bulk');
+    document.querySelectorAll('#flagsTable tbody tr').forEach(function (tr) {
+      var rolloutEl = tr.querySelector('[data-act="rollout"]');
+      var plansEl = tr.querySelector('[data-act="plans"]');
+      var toggleEl = tr.querySelector('[data-act="toggle"]');
+      if (!rolloutEl) return;
+      if (mode === 'all') { toggleEl.checked = true; rolloutEl.value = 100; plansEl.value = ''; }
+      if (mode === '10')  { toggleEl.checked = true; rolloutEl.value = 10; }
+      if (mode === 'enterprise') { toggleEl.checked = true; rolloutEl.value = 100; plansEl.value = 'enterprise'; }
+    });
+  });
+});
+
+/* ---------- experiments ---------- */
+async function loadExperiments() {
+  window.__expsLoaded = true;
+  var tbody = document.querySelector('#expTable tbody');
+  tbody.innerHTML = '<tr><td colspan="6" class="loading">Cargando...</td></tr>';
+  try {
+    var res = await api('GET', '/api/abtest/experiments');
+    var rows = res.data || [];
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="empty">Sin experimentos activos.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = '';
+    rows.forEach(function (e) {
+      var tr = document.createElement('tr');
+      var variants = Array.isArray(e.variants) ? e.variants.join(', ') : '';
+      tr.innerHTML =
+        '<td><code>' + escapeHtml(e.id) + '</code></td>' +
+        '<td>' + escapeHtml(e.name || '') + '</td>' +
+        '<td>' + escapeHtml(variants) + '</td>' +
+        '<td><span class="badge ' + (e.status === 'active' ? 'on' : 'off') + '">' + escapeHtml(e.status || '') + '</span></td>' +
+        '<td>' + escapeHtml((e.start_date || '').slice(0, 10)) + '</td>' +
+        '<td><button class="btn primary" data-exp="' + escapeHtml(e.id) + '">Ver resultados</button></td>';
+      tbody.appendChild(tr);
+    });
+    tbody.querySelectorAll('[data-exp]').forEach(function (b) {
+      b.addEventListener('click', function () { showResults(b.getAttribute('data-exp')); });
+    });
+  } catch (err) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty">Error: ' + escapeHtml(err.message) + '</td></tr>';
+  }
+}
+
+async function showResults(expId) {
+  var modal = document.getElementById('expModal');
+  var body = document.getElementById('expModalBody');
+  document.getElementById('expModalTitle').textContent = 'Resultados · ' + expId;
+  body.innerHTML = '<p class="loading">Calculando...</p>';
+  modal.classList.add('show');
+  try {
+    var res = await api('GET', '/api/abtest/results/' + encodeURIComponent(expId));
+    var html = '';
+    if (res.winner) html += '<p>Ganador estadístico: <span class="winner">' + escapeHtml(res.winner) + '</span></p>';
+    else html += '<p>Sin ganador estadísticamente significativo aún.</p>';
+
+    html += '<table style="margin-top:12px"><thead><tr>' +
+      '<th>Variante</th><th>Usuarios</th><th>Conversiones</th>' +
+      '<th>Conv. Rate</th><th>CI 95%</th><th></th></tr></thead><tbody>';
+    (res.variants || []).forEach(function (v) {
+      var rate = (v.conversion_rate * 100).toFixed(2);
+      var ciLow = (v.conversion_rate_ci_low * 100).toFixed(2);
+      var ciHigh = (v.conversion_rate_ci_high * 100).toFixed(2);
+      var pct = Math.min(100, v.conversion_rate * 100);
+      html += '<tr>' +
+        '<td><strong>' + escapeHtml(v.variant) + '</strong></td>' +
+        '<td>' + v.unique_users + '</td>' +
+        '<td>' + v.unique_converters + '</td>' +
+        '<td>' + rate + '%</td>' +
+        '<td>[' + ciLow + '% – ' + ciHigh + '%]</td>' +
+        '<td><div class="meter"><i style="width:' + pct + '%"></i></div></td>' +
+        '</tr>';
+    });
+    html += '</tbody></table>';
+    html += '<p style="margin-top:12px;color:var(--muted);font-size:12px">Total events: ' + (res.total_events || 0) + '</p>';
+    body.innerHTML = html;
+  } catch (e) {
+    body.innerHTML = '<p>Error: ' + escapeHtml(e.message) + '</p>';
+  }
+}
+
+function closeExpModal() {
+  document.getElementById('expModal').classList.remove('show');
+}
+window.closeExpModal = closeExpModal;
+
+document.getElementById('refreshBtn').addEventListener('click', function () {
+  loadFlags();
+  if (!document.getElementById('tab-experiments').hidden) loadExperiments();
+});
+
+/* ---------- boot ---------- */
+loadFlags();
+</script>
+</body>
+</html>

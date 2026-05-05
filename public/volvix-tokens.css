@@ -1,0 +1,453 @@
+/* ============================================================
+   VOLVIX · Design Tokens
+   ============================================================
+   Sistema de diseño completo. TODO archivo Volvix debe importar
+   este CSS antes de cualquier estilo propio:
+     <link rel="stylesheet" href="/volvix-tokens.css">
+   REGLA: cualquier color, tamaño o espaciado en Volvix debe usar
+   una variable de aqui. Si algo no tiene variable, NO lo inventes
+   — agrega la variable aqui primero.
+============================================================ */
+
+:root {
+  /* ========================================================
+     COLORES DE MARCA · Gold Volvix
+     ======================================================== */
+  --volvix-gold-50:  #FFFBEB;
+  --volvix-gold-100: #FEF3C7;
+  --volvix-gold-200: #FDE68A;
+  --volvix-gold-300: #FCD34D;
+  --volvix-gold-400: #FBBF24;  /* base */
+  --volvix-gold-500: #F59E0B;
+  --volvix-gold-600: #D97706;
+  --volvix-gold-700: #B45309;
+  --volvix-gold-800: #92400E;
+  --volvix-gold-900: #78350F;
+
+  /* ========================================================
+     COLORES POR CAPA · cada pantalla usa SU color como acento
+     ======================================================== */
+  --layer-pos:      #EA580C;  /* POS / retail (naranja Eleventa) */
+  --layer-pos-2:    #C2410C;  /* hover */
+  --layer-pos-soft: #FFEDD5;  /* bg suave */
+  --layer-owner:    #FBBF24;  /* panel del dueño SaaS (gold) */
+  --layer-owner-2:  #D97706;
+  --layer-owner-soft: #FEF3C7;
+  --layer-ai:       #A855F7;  /* motores de IA (morado) */
+  --layer-ai-2:     #7C3AED;
+  --layer-ai-soft:  #F3E8FF;
+  --layer-support:  #3B82F6;  /* soporte tecnico (azul) */
+  --layer-support-2:  #2563EB;
+  --layer-support-soft: #DBEAFE;
+  --layer-remote:   #1E40AF;  /* control remoto (azul oscuro) */
+  --layer-remote-2: #1E3A8A;
+  --layer-remote-soft: #DBEAFE;
+
+  /* ========================================================
+     COLORES FUNCIONALES · MODO CLARO (default)
+     ======================================================== */
+  --bg:        #FFFFFF;
+  --bg-2:      #FAFAF9;
+  --bg-3:      #F5F5F4;
+  --bg-4:      #E7E5E4;
+  --surface:   #FFFFFF;
+  --surface-2: #FAFAF9;
+  --border:    #E7E5E4;
+  --border-2:  #D6D3D1;
+  --border-3:  #A8A29E;
+  --text:      #0A0A0A;
+  --text-2:    #44403C;
+  --text-3:    #78716C;
+  --text-4:    #A8A29E;
+  --text-inv:  #FFFFFF;  /* sobre fondo oscuro */
+
+  /* ========================================================
+     COLORES FUNCIONALES · MODO OSCURO
+     Activado con: <body class="theme-dark"> o por pantalla
+     ======================================================== */
+  --bg-dark:        #0A0A0A;
+  --bg-2-dark:      #121212;
+  --bg-3-dark:      #1A1A1A;
+  --bg-4-dark:      #1F1F1E;
+  --surface-dark:   #1F1F1E;
+  --surface-2-dark: #2A2A28;
+  --border-dark:    #2E2E2C;
+  --border-2-dark:  #3A3A38;
+  --border-3-dark:  #525252;
+  --text-dark:      #FAFAF9;
+  --text-2-dark:    #D6D3D1;
+  --text-3-dark:    #A8A29E;
+  --text-4-dark:    #78716C;
+
+  /* ========================================================
+     SEMÁNTICOS (mismo en claro y oscuro)
+     ======================================================== */
+  --success:        #22C55E;
+  --success-2:      #16A34A;
+  --success-soft:   rgba(34, 197, 94, 0.10);
+  --success-border: rgba(34, 197, 94, 0.30);
+  --danger:         #EF4444;
+  --danger-2:       #DC2626;
+  --danger-soft:    rgba(239, 68, 68, 0.10);
+  --danger-border:  rgba(239, 68, 68, 0.30);
+  --warn:           #F97316;
+  --warn-2:         #EA580C;
+  --warn-soft:      rgba(249, 115, 22, 0.10);
+  --warn-border:    rgba(249, 115, 22, 0.30);
+  --info:           #3B82F6;
+  --info-2:         #2563EB;
+  --info-soft:      rgba(59, 130, 246, 0.10);
+  --info-border:    rgba(59, 130, 246, 0.30);
+
+  /* ========================================================
+     TIPOGRAFÍA
+     ======================================================== */
+  --font-primary: 'Inter', -apple-system, 'Segoe UI', Roboto, system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+  --font-display: 'Inter', sans-serif;
+
+  /* Escala de tamaños (rem, base 16px) */
+  --text-xs:    0.6875rem;  /* 11px - metadatos, footers */
+  --text-sm:    0.75rem;    /* 12px - inputs, labels chicos */
+  --text-base:  0.8125rem;  /* 13px - body UI */
+  --text-md:    0.875rem;   /* 14px - parrafos */
+  --text-lg:    1rem;       /* 16px - subtitulos */
+  --text-xl:    1.125rem;   /* 18px - h3 */
+  --text-2xl:   1.375rem;   /* 22px - h2 */
+  --text-3xl:   1.75rem;    /* 28px - h1 compacto */
+  --text-4xl:   2.25rem;    /* 36px - h1 landing */
+  --text-5xl:   3rem;       /* 48px - hero landing */
+
+  /* Pesos */
+  --fw-normal:  400;
+  --fw-medium:  500;
+  --fw-semi:    600;
+  --fw-bold:    700;
+  --fw-hvy:     800;
+  --fw-black:   900;
+
+  /* Line heights */
+  --lh-tight:   1.1;
+  --lh-snug:    1.25;
+  --lh-normal:  1.5;
+  --lh-relaxed: 1.625;
+  --lh-loose:   1.75;
+
+  /* Letter spacing */
+  --tracking-tighter: -0.05em;
+  --tracking-tight:   -0.025em;
+  --tracking-normal:  0em;
+  --tracking-wide:    0.025em;
+  --tracking-wider:   0.05em;
+  --tracking-widest:  0.1em;
+
+  /* ========================================================
+     ESPACIADO (escala consistente · multiplos de 4px)
+     NO uses valores fuera de esta escala.
+     ======================================================== */
+  --sp-0:   0;
+  --sp-px:  1px;
+  --sp-0-5: 0.125rem;  /* 2px  */
+  --sp-1:   0.25rem;   /* 4px  */
+  --sp-1-5: 0.375rem;  /* 6px  */
+  --sp-2:   0.5rem;    /* 8px  */
+  --sp-2-5: 0.625rem;  /* 10px */
+  --sp-3:   0.75rem;   /* 12px */
+  --sp-4:   1rem;      /* 16px */
+  --sp-5:   1.25rem;   /* 20px */
+  --sp-6:   1.5rem;    /* 24px */
+  --sp-7:   1.75rem;   /* 28px */
+  --sp-8:   2rem;      /* 32px */
+  --sp-10:  2.5rem;    /* 40px */
+  --sp-12:  3rem;      /* 48px */
+  --sp-14:  3.5rem;    /* 56px */
+  --sp-16:  4rem;      /* 64px */
+  --sp-20:  5rem;      /* 80px */
+  --sp-24:  6rem;      /* 96px */
+
+  /* ========================================================
+     RADIUS (bordes redondeados)
+     ======================================================== */
+  --radius-none: 0;
+  --radius-sm:   0.25rem;   /* 4px  - chips, micro */
+  --radius-md:   0.375rem;  /* 6px  - inputs default */
+  --radius-lg:   0.5rem;    /* 8px  - botones, cards chicos */
+  --radius-xl:   0.75rem;   /* 12px - cards */
+  --radius-2xl:  1rem;      /* 16px - modales */
+  --radius-3xl:  1.25rem;   /* 20px - hero cards */
+  --radius-full: 9999px;    /* pills, avatars, toggles */
+
+  /* ========================================================
+     SOMBRAS
+     ======================================================== */
+  --shadow-xs:  0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm:  0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md:  0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+  --shadow-lg:  0 10px 15px -3px rgba(0, 0, 0, 0.10), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+  --shadow-xl:  0 20px 25px -5px rgba(0, 0, 0, 0.10), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.20);
+  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+  --shadow-glow-gold:    0 0 30px rgba(251, 191, 36, 0.40);
+  --shadow-glow-success: 0 0 20px rgba(34, 197, 94, 0.30);
+  --shadow-glow-danger:  0 0 20px rgba(239, 68, 68, 0.30);
+  --shadow-glow-info:    0 0 20px rgba(59, 130, 246, 0.30);
+
+  /* ========================================================
+     TRANSICIONES
+     ======================================================== */
+  --t-fast:   100ms;
+  --t-base:   150ms;
+  --t-slow:   250ms;
+  --t-slower: 350ms;
+  --ease-linear:  linear;
+  --ease-out:     cubic-bezier(0, 0, 0.2, 1);
+  --ease-in:      cubic-bezier(0.4, 0, 1, 1);
+  --ease-in-out:  cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce:  cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* ========================================================
+     Z-INDEX (escala fija)
+     ======================================================== */
+  --z-base:        1;
+  --z-dropdown:    100;
+  --z-sticky:      200;
+  --z-fixed:       300;
+  --z-overlay:     400;
+  --z-modal:       500;
+  --z-popover:     600;
+  --z-tooltip:     700;
+  --z-toast:       800;
+  --z-top:         9999;
+
+  /* ========================================================
+     BREAKPOINTS (referencia · usar en media queries directo)
+     --bp-xs:  480px   movil chico
+     --bp-sm:  640px   movil grande
+     --bp-md:  768px   tablet
+     --bp-lg:  1024px  laptop
+     --bp-xl:  1280px  desktop
+     --bp-2xl: 1536px  desktop grande
+     ======================================================== */
+
+  /* ========================================================
+     LAYOUT (alturas standard)
+     ======================================================== */
+  --h-topbar:   3rem;       /* 48px */
+  --h-navbar:   3.5rem;     /* 56px */
+  --h-input:    2.5rem;     /* 40px */
+  --h-input-sm: 2rem;       /* 32px */
+  --h-input-lg: 3rem;       /* 48px */
+  --h-btn:      2.5rem;     /* 40px */
+  --h-btn-sm:   2rem;       /* 32px */
+  --h-btn-lg:   3rem;       /* 48px */
+  --w-sidebar:  16rem;      /* 256px */
+  --w-sidebar-collapsed: 4rem; /* 64px */
+
+  /* ========================================================
+     TIPOGRAFÍA POS (compatibilidad legacy con pos.html)
+     Estos son alias de los tokens nuevos para no romper el HTML
+     que ya usa --navy, --green, etc.
+     ======================================================== */
+  --navy:    #1A237E;
+  --navy2:   #283593;
+  --navy3:   #3949AB;
+  --accent:  #1565C0;
+  --green:   #2E7D32;
+  --orange:  #E65100;
+  --red:     #C62828;
+  --yellow:  #F57F17;
+  --purple:  #6A1B9A;
+  --teal:    #00695C;
+  --muted:   #757575;
+  --row-hover: #E8EAF6;
+  --row-alt:   #FAFAFA;
+  --white:     #FFFFFF;
+}
+
+/* ============================================================
+   MODO OSCURO · activar con <body class="theme-dark">
+   o con clase en cualquier contenedor
+============================================================ */
+.theme-dark {
+  --bg:        var(--bg-dark);
+  --bg-2:      var(--bg-2-dark);
+  --bg-3:      var(--bg-3-dark);
+  --bg-4:      var(--bg-4-dark);
+  --surface:   var(--surface-dark);
+  --surface-2: var(--surface-2-dark);
+  --border:    var(--border-dark);
+  --border-2:  var(--border-2-dark);
+  --border-3:  var(--border-3-dark);
+  --text:      var(--text-dark);
+  --text-2:    var(--text-2-dark);
+  --text-3:    var(--text-3-dark);
+  --text-4:    var(--text-4-dark);
+}
+
+/* ============================================================
+   AUTO MODO OSCURO · respeta preferencia del SO
+   Solo activo si el HTML tiene <html data-theme="auto">
+============================================================ */
+@media (prefers-color-scheme: dark) {
+  html[data-theme="auto"] {
+    --bg:        var(--bg-dark);
+    --bg-2:      var(--bg-2-dark);
+    --bg-3:      var(--bg-3-dark);
+    --bg-4:      var(--bg-4-dark);
+    --surface:   var(--surface-dark);
+    --surface-2: var(--surface-2-dark);
+    --border:    var(--border-dark);
+    --border-2:  var(--border-2-dark);
+    --border-3:  var(--border-3-dark);
+    --text:      var(--text-dark);
+    --text-2:    var(--text-2-dark);
+    --text-3:    var(--text-3-dark);
+    --text-4:    var(--text-4-dark);
+  }
+}
+
+/* ============================================================
+   RESET MÍNIMO (cross-browser baseline)
+============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+  font-family: var(--font-primary);
+  line-height: var(--lh-normal);
+  color: var(--text);
+  background: var(--bg);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-primary);
+  font-size: var(--text-md);
+  line-height: var(--lh-normal);
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Scrollbar consistente cross-browser */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-2) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--border-2);
+  border-radius: var(--radius-full);
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--border-3);
+}
+
+/* Focus visible accesible */
+:focus-visible {
+  outline: 2px solid var(--info);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   UTILIDADES DE TEXTO
+============================================================ */
+.txt-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.txt-mono {
+  font-family: var(--font-mono);
+}
+
+.txt-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.txt-no-select {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ============================================================
+   ANIMACIONES BASE (reutilizables)
+============================================================ */
+@keyframes vlx-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes vlx-fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes vlx-fade-down {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes vlx-scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes vlx-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.5; }
+}
+
+@keyframes vlx-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes vlx-bounce {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+
+.anim-fade-in   { animation: vlx-fade-in   var(--t-base) var(--ease-out) both; }
+.anim-fade-up   { animation: vlx-fade-up   var(--t-base) var(--ease-out) both; }
+.anim-fade-down { animation: vlx-fade-down var(--t-base) var(--ease-out) both; }
+.anim-scale-in  { animation: vlx-scale-in  var(--t-base) var(--ease-out) both; }
+.anim-pulse     { animation: vlx-pulse     1.8s ease-in-out infinite; }
+.anim-spin      { animation: vlx-spin      1s linear infinite; }
+.anim-bounce    { animation: vlx-bounce    1.2s ease-in-out infinite; }
+
+/* ============================================================
+   ACCESIBILIDAD · respetar reduced motion
+============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================================
+   PRINT (para tickets imprimibles)
+============================================================ */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .no-print { display: none !important; }
+  .print-only { display: block !important; }
+}
+.print-only { display: none; }

@@ -1,0 +1,40 @@
+name: Daily Backup
+
+on:
+  schedule:
+    - cron: '0 6 * * *'   # 06:00 UTC daily
+  workflow_dispatch:
+
+jobs:
+  backup:
+    name: Backup repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          repository: ${{ github.repository }}
+
+      - name: Verify repository target
+        run: |
+          echo "Repo: ${{ github.repository }}"
+          git remote -v
+          git log --oneline -5
+
+      - name: Create backup tarball
+        run: |
+          STAMP=$(date -u +'%Y%m%d-%H%M%S')
+          BACKUP_NAME="volvix-backup-${STAMP}.tar.gz"
+          tar --exclude='.git' --exclude='node_modules' -czf "/tmp/${BACKUP_NAME}" .
+          echo "BACKUP_NAME=${BACKUP_NAME}" >> $GITHUB_ENV
+          ls -lh "/tmp/${BACKUP_NAME}"
+
+      - name: Upload backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.BACKUP_NAME }}
+          path: /tmp/${{ env.BACKUP_NAME }}
+          retention-days: 30

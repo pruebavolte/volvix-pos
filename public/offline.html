@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0A0A0A">
+  <title>Sin conexión · Volvix POS</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" href="/icon-192.png">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: radial-gradient(circle at top, #1a1a1a 0%, #0A0A0A 70%);
+      color: #FAFAF9;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+    }
+    .card {
+      max-width: 440px;
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px;
+      padding: 40px 32px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+      animation: pulse 2.4s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .6; transform: scale(.95); } }
+    h1 { font-size: 24px; font-weight: 800; margin-bottom: 10px; letter-spacing: -.02em; }
+    p  { font-size: 14px; color: #A8A29E; line-height: 1.6; margin-bottom: 24px; }
+    .actions { display: flex; gap: 10px; flex-direction: column; }
+    button, a.btn {
+      background: #FBBF24;
+      color: #000;
+      border: none;
+      padding: 14px 24px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: transform .15s ease, opacity .15s ease;
+    }
+    button.secondary, a.btn.secondary {
+      background: transparent;
+      color: #FAFAF9;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    button:hover, a.btn:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(0); opacity: .85; }
+    .tip {
+      margin-top: 24px;
+      font-size: 12px;
+      color: #78716C;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 14px 16px;
+      text-align: left;
+      line-height: 1.7;
+    }
+    .tip strong { color: #FBBF24; }
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #A8A29E;
+      margin-top: 16px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+    }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: #EF4444; }
+    .dot.online { background: #22C55E; }
+    .queue {
+      margin-top: 18px;
+      font-size: 12px;
+      color: #A8A29E;
+    }
+    .queue b { color: #FBBF24; }
+  </style>
+</head>
+<body>
+  <main class="card" role="main">
+    <div class="icon" aria-hidden="true">📡</div>
+    <h1>Sin conexión</h1>
+    <p>
+      Volvix no pudo cargar esta página.<br>
+      Puedes seguir trabajando offline — todo se sincronizará cuando vuelva la conexión.
+    </p>
+    <div class="actions">
+      <button onclick="manualRetry()">Reintentar ahora</button>
+      <a class="btn secondary" id="offlinePosBtn" href="/salvadorex-pos.html?offline=1">Modo offline POS</a>
+    </div>
+    <div class="tip">
+      💡 <strong>Tus ventas se guardan localmente</strong> y se sincronizan al volver online.
+      Mientras no haya conexión, puedes seguir cobrando desde el POS — todo va a
+      <code>Volvix.offlineQueue</code> y se envía automáticamente al servidor.
+    </div>
+    <div class="queue" id="queueInfo">Verificando ventas pendientes…</div>
+    <div class="status" id="status"><span class="dot" id="dot"></span><span id="statusTxt">Sin conexión</span></div>
+    <div class="queue" id="retryInfo" style="margin-top:8px;font-size:11px;color:#78716C"></div>
+  </main>
+
+  <script>
+    (function () {
+      const dot = document.getElementById('dot');
+      const txt = document.getElementById('statusTxt');
+      const qInfo = document.getElementById('queueInfo');
+      const retryInfo = document.getElementById('retryInfo');
+
+      // Detectamos URL original (la que provocó la página offline)
+      const params = new URLSearchParams(location.search);
+      const originalUrl = params.get('from') || sessionStorage.getItem('volvix.offline.from') || '/';
+      try { sessionStorage.setItem('volvix.offline.from', originalUrl); } catch (_) {}
+
+      // Estado: 'offline' | 'reconnecting' | 'online'
+      let state = navigator.onLine ? 'reconnecting' : 'offline';
+      let attempt = 0;
+      let timer = null;
+
+      function setUi(s, msg) {
+        state = s;
+        if (s === 'online') {
+          dot.classList.add('online');
+          txt.textContent = 'Conectado';
+        } else if (s === 'reconnecting') {
+          dot.classList.remove('online');
+          txt.textContent = 'Reconectando…';
+        } else {
+          dot.classList.remove('online');
+          txt.textContent = 'Sin conexión';
+        }
+        if (msg) retryInfo.textContent = msg;
+      }
+
+      // Backoff: 5s, 10s, 20s, 40s, máx 60s
+      function nextDelay() {
+        return Math.min(5000 * Math.pow(2, attempt), 60000);
+      }
+
+      async function probe() {
+        // Pequeño HEAD a la raíz para confirmar conectividad real
+        try {
+          const ctrl = new AbortController();
+          const t = setTimeout(() => ctrl.abort(), 4000);
+          const r = await fetch('/?_p=' + Date.now(), { method: 'HEAD', cache: 'no-store', signal: ctrl.signal });
+          clearTimeout(t);
+          return r.ok || r.status > 0;
+        } catch (_) { return false; }
+      }
+
+      let countdownTimer = null;
+      function startCountdown(totalMs){
+        if (countdownTimer) clearInterval(countdownTimer);
+        let remain = Math.ceil(totalMs / 1000);
+        retryInfo.textContent = 'Próximo reintento en ' + remain + 's…';
+        countdownTimer = setInterval(() => {
+          remain--;
+          if (remain <= 0) { clearInterval(countdownTimer); countdownTimer = null; return; }
+          if (state !== 'offline') { clearInterval(countdownTimer); countdownTimer = null; return; }
+          retryInfo.textContent = 'Próximo reintento en ' + remain + 's…';
+        }, 1000);
+      }
+
+      async function tryReconnect() {
+        if (state === 'online') return;
+        attempt++;
+        if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+        setUi('reconnecting', 'Intento ' + attempt + '…');
+        const ok = await probe();
+        if (ok) {
+          setUi('online', 'Conexión restaurada — redirigiendo…');
+          try { gtag && gtag('event', 'offline_recovered', { attempts: attempt }); } catch(_){}
+          setTimeout(() => {
+            // Auto-redirect a la página original
+            try { location.replace(originalUrl); } catch (_) { location.reload(); }
+          }, 700);
+          return;
+        }
+        const d = nextDelay();
+        setUi('offline');
+        startCountdown(d);
+        timer = setTimeout(tryReconnect, d);
+      }
+
+      function manualRetry() {
+        if (timer) { clearTimeout(timer); timer = null; }
+        if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+        attempt = 0;
+        tryReconnect();
+      }
+      window.manualRetry = manualRetry;
+
+      // Mantener parametro ?from al pasar al POS
+      try {
+        const btn = document.getElementById('offlinePosBtn');
+        if (originalUrl && originalUrl !== '/' && btn) {
+          btn.href = '/salvadorex-pos.html?offline=1&return=' + encodeURIComponent(originalUrl);
+        }
+      } catch (_) {}
+
+      window.addEventListener('online',  () => { attempt = 0; tryReconnect(); });
+      window.addEventListener('offline', () => setUi('offline', 'Conexión perdida.'));
+
+      // Inicia el primer probe inmediatamente y arranca el ciclo
+      tryReconnect();
+
+      // Consultar la queue al SW
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        const ch = new MessageChannel();
+        ch.port1.onmessage = (e) => {
+          const n = ((e.data && e.data.items) || []).length;
+          qInfo.innerHTML = n
+            ? 'Tienes <b>' + n + '</b> operación(es) pendientes de sincronizar.'
+            : 'No hay operaciones pendientes.';
+        };
+        navigator.serviceWorker.controller.postMessage({ type: 'GET_QUEUE' }, [ch.port2]);
+      } else {
+        qInfo.textContent = 'Service Worker no disponible — sincroniza manual al volver online.';
+      }
+    })();
+  </script>
+</body>
+</html>

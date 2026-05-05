@@ -1,0 +1,937 @@
+{
+  "config": {
+    "configFile": "C:\\Users\\DELL\\Downloads\\verion 340\\tests\\playwright.r4c.config.js",
+    "rootDir": "C:/Users/DELL/Downloads/verion 340/tests",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/DELL/Downloads/verion 340/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "C:/Users/DELL/Downloads/verion 340/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/r4c-cortes-e2e\\.spec\\.js/"
+        ],
+        "timeout": 180000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.59.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "r4c-cortes-e2e.spec.js",
+      "file": "r4c-cortes-e2e.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "R4C Cortes de Caja E2E",
+          "file": "r4c-cortes-e2e.spec.js",
+          "line": 133,
+          "column": 6,
+          "specs": [
+            {
+              "title": "CT1: POST /api/cuts/open returns 201 + cut_id + opened_at",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "CT1-status",
+                      "description": "201"
+                    },
+                    {
+                      "type": "CT1-body",
+                      "description": "{\"ok\":true,\"cut\":{\"id\":\"79800d64-4635-423f-b0ce-c731d0328070\",\"tenant_id\":\"TNT001\",\"cashier_id\":\"cccccccc-cccc-cccc-cccc-ccccccccccc1\",\"station_id\":null,\"opening_balance\":500,\"opening_breakdown\":{\"bills\":[{\"qty\":5,\"denom\":100}]},\"closing_balance\":null,\"closing_breakdown\":null,\"total_sales\":0,\"total_cash_sales\":0,\"total_card_sales\":0,\"total_transfer_sales\":0,\"total_other_sales\":0,\"expected_balance\":null,\"discrepancy\":null,\"cash_in\":0,\"cash_out\":0,\"notes_open\":\"Turno mañana\",\"notes_close\":null,\"status\":\"open\",\"opened_at\":\"2026-04-28T03:17:09.785+00:00\",\"closed_at\":null,\"reconciled_at\":null,\"reconciled_by\":null,\"voided_at\":null,\"voided_by\":null,\"void_reason\":null,\"created_at\":\"2026-04-28T03:17:09.803517+00:00\",\"updated_at\":\"2026-04-28T03:17:09.803517+00:00\"}}"
+                    },
+                    {
+                      "type": "CT1-idem",
+                      "description": "CT1-open-1777346222123-c513a6ea"
+                    },
+                    {
+                      "type": "CT1-cut_id",
+                      "description": "79800d64-4635-423f-b0ce-c731d0328070"
+                    },
+                    {
+                      "type": "CT1-opened_at",
+                      "description": "2026-04-28T03:17:09.785+00:00"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 284,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:17:01.300Z",
+                      "annotations": [
+                        {
+                          "type": "CT1-status",
+                          "description": "201"
+                        },
+                        {
+                          "type": "CT1-body",
+                          "description": "{\"ok\":true,\"cut\":{\"id\":\"79800d64-4635-423f-b0ce-c731d0328070\",\"tenant_id\":\"TNT001\",\"cashier_id\":\"cccccccc-cccc-cccc-cccc-ccccccccccc1\",\"station_id\":null,\"opening_balance\":500,\"opening_breakdown\":{\"bills\":[{\"qty\":5,\"denom\":100}]},\"closing_balance\":null,\"closing_breakdown\":null,\"total_sales\":0,\"total_cash_sales\":0,\"total_card_sales\":0,\"total_transfer_sales\":0,\"total_other_sales\":0,\"expected_balance\":null,\"discrepancy\":null,\"cash_in\":0,\"cash_out\":0,\"notes_open\":\"Turno mañana\",\"notes_close\":null,\"status\":\"open\",\"opened_at\":\"2026-04-28T03:17:09.785+00:00\",\"closed_at\":null,\"reconciled_at\":null,\"reconciled_by\":null,\"voided_at\":null,\"voided_by\":null,\"void_reason\":null,\"created_at\":\"2026-04-28T03:17:09.803517+00:00\",\"updated_at\":\"2026-04-28T03:17:09.803517+00:00\"}}"
+                        },
+                        {
+                          "type": "CT1-idem",
+                          "description": "CT1-open-1777346222123-c513a6ea"
+                        },
+                        {
+                          "type": "CT1-cut_id",
+                          "description": "79800d64-4635-423f-b0ce-c731d0328070"
+                        },
+                        {
+                          "type": "CT1-opened_at",
+                          "description": "2026-04-28T03:17:09.785+00:00"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf5cab6c7c82951c4037-ece501b9ad714e31176b",
+              "file": "r4c-cortes-e2e.spec.js",
+              "line": 160,
+              "column": 3
+            },
+            {
+              "title": "CT2: opening a second cut while one is open returns 409 cut_already_open",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "CT2-status",
+                      "description": "409"
+                    },
+                    {
+                      "type": "CT2-body",
+                      "description": "{\"error\":\"cut_already_open\",\"open_cut_id\":\"79800d64-4635-423f-b0ce-c731d0328070\"}"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 188,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:17:02.425Z",
+                      "annotations": [
+                        {
+                          "type": "CT2-status",
+                          "description": "409"
+                        },
+                        {
+                          "type": "CT2-body",
+                          "description": "{\"error\":\"cut_already_open\",\"open_cut_id\":\"79800d64-4635-423f-b0ce-c731d0328070\"}"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf5cab6c7c82951c4037-a8a8c5e380a20d52f176",
+              "file": "r4c-cortes-e2e.spec.js",
+              "line": 210,
+              "column": 3
+            },
+            {
+              "title": "CT3: GET /api/cuts/{cut_id} returns the open cut (closed_at null)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "CT3-status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "CT3-body",
+                      "description": "{\"ok\":true,\"cut\":{\"id\":\"79800d64-4635-423f-b0ce-c731d0328070\",\"tenant_id\":\"TNT001\",\"cashier_id\":\"cccccccc-cccc-cccc-cccc-ccccccccccc1\",\"station_id\":null,\"opening_balance\":500,\"opening_breakdown\":{\"bills\":[{\"qty\":5,\"denom\":100}]},\"closing_balance\":null,\"closing_breakdown\":null,\"total_sales\":0,\"total_cash_sales\":0,\"total_card_sales\":0,\"total_transfer_sales\":0,\"total_other_sales\":0,\"expected_balance\":null,\"discrepancy\":null,\"cash_in\":0,\"cash_out\":0,\"notes_open\":\"Turno mañana\",\"notes_close\":null,\"status\":\"open\",\"opened_at\":\"2026-04-28T03:17:09.785+00:00\",\"closed_at\":null,\"reconciled_at\":null,\"reconciled_by\":null,\"voided_at\":null,\"voided_by\":null,\"void_reason\":null,\"created_at\":\"2026-04-28T03:17:09.803517+00:00\",\"updated_at\":\"2026-04-28T03:17:09.803517+00:00\"}}"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 187,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:17:02.638Z",
+                      "annotations": [
+                        {
+                          "type": "CT3-status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "CT3-body",
+                          "description": "{\"ok\":true,\"cut\":{\"id\":\"79800d64-4635-423f-b0ce-c731d0328070\",\"tenant_id\":\"TNT001\",\"cashier_id\":\"cccccccc-cccc-cccc-cccc-ccccccccccc1\",\"station_id\":null,\"opening_balance\":500,\"opening_breakdown\":{\"bills\":[{\"qty\":5,\"denom\":100}]},\"closing_balance\":null,\"closing_breakdown\":null,\"total_sales\":0,\"total_cash_sales\":0,\"total_card_sales\":0,\"total_transfer_sales\":0,\"total_other_sales\":0,\"expected_balance\":null,\"discrepancy\":null,\"cash_in\":0,\"cash_out\":0,\"notes_open\":\"Turno mañana\",\"notes_close\":null,\"status\":\"open\",\"opened_at\":\"2026-04-28T03:17:09.785+00:00\",\"closed_at\":null,\"reconciled_at\":null,\"reconciled_by\":null,\"voided_at\":null,\"voided_by\":null,\"void_reason\":null,\"created_at\":\"2026-04-28T03:17:09.803517+00:00\",\"updated_at\":\"2026-04-28T03:17:09.803517+00:00\"}}"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf5cab6c7c82951c4037-2bf87bec078285889bda",
+              "file": "r4c-cortes-e2e.spec.js",
+              "line": 230,
+              "column": 3
+            },
+            {
+              "title": "CT4: 5 sales (cash, card, transfer) get linked to the open cut",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "CT4-results",
+                      "description": "[{\"idx\":1,\"pm\":\"efectivo\",\"total\":10,\"status\":200,\"ok\":true,\"body_excerpt\":\"{\\\"id\\\":\\\"80ff5012-64e4-4d8f-bbb2-6860cf182a98\\\",\\\"pos_user_id\\\":\\\"cccccccc-cccc-cccc-cccc-ccccccccccc1\\\",\\\"total\\\":10,\\\"payment_method\\\":\\\"efectivo\\\",\\\"items\\\":[{\\\"qty\\\":1,\\\"name\\\":\\\"R4C-test-item-1\\\",\\\"price\\\":10}],\\\"create\"},{\"idx\":2,\"pm\":\"tarjeta\",\"total\":20,\"status\":200,\"ok\":true,\"body_excerpt\":\"{\\\"id\\\":\\\"159f3549-518e-4424-8058-9dc2623cc149\\\",\\\"pos_user_id\\\":\\\"cccccccc-cccc-cccc-cccc-ccccccccccc1\\\",\\\"total\\\":20,\\\"payment_method\\\":\\\"tarjeta\\\",\\\"items\\\":[{\\\"qty\\\":1,\\\"name\\\":\\\"R4C-test-item-2\\\",\\\"price\\\":20}],\\\"created\"},{\"idx\":3,\"pm\":\"transferencia\",\"total\":30,\"status\":200,\"ok\":true,\"body_excerpt\":\"{\\\"id\\\":\\\"9326575a-c2f5-468d-8930-93a48b01d632\\\",\\\"pos_user_id\\\":\\\"cccccccc-cccc-cccc-cccc-ccccccccccc1\\\",\\\"total\\\":30,\\\"payment_method\\\":\\\"transferencia\\\",\\\"items\\\":[{\\\"qty\\\":1,\\\"name\\\":\\\"R4C-test-item-3\\\",\\\"price\\\":30}],\\\"c\"},{\"idx\":4,\"pm\":\"efectivo\",\"total\":40,\"status\":200,\"ok\":true,\"body_excerpt\":\"{\\\"id\\\":\\\"2ee21f5b-8e95-40e1-a0bb-374bca1974a2\\\",\\\"pos_user_id\\\":\\\"cccccccc-cccc-cccc-cccc-ccccccccccc1\\\",\\\"total\\\":40,\\\"payment_method\\\":\\\"efectivo\\\",\\\"items\\\":[{\\\"qty\\\":1,\\\"name\\\":\\\"R4C-test-item-4\\\",\\\"price\\\":40}],\\\"create\"},{\"idx\":5,\"pm\":\"tarjeta\",\"total\":50,\"status\":200,\"ok\":true,\"body_excerpt\":\"{\\\"id\\\":\\\"a8896388-f51f-45d0-90e3-2948d0c81957\\\",\\\"pos_user_id\\\":\\\"cccccccc-cccc-cccc-cccc-ccccccccccc1\\\",\\\"total\\\":50,\\\"payment_method\\\":\\\"tarjeta\\\",\\\"items\\\":[{\\\"qty\\\":1,\\\"name\\\":\\\"R4C-test-item-5\\\",\\\"price\\"
+                    },
+                    {
+                      "type": "CT4-saleIds",
+                      "description": "[\"80ff5012-64e4-4d8f-bbb2-6860cf182a98\",\"159f3549-518e-4424-8058-9dc2623cc149\",\"9326575a-c2f5-468d-8930-93a48b01d632\",\"2ee21f5b-8e95-40e1-a0bb-374bca1974a2\",\"a8896388-f51f-45d0-90e3-2948d0c81957\"]"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 985,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:17:02.851Z",
+                      "annotations": [
+                        {
+                          "type": "CT4-results",
+                          "description": "[{\"idx\":1,\"pm\":\"efectivo\",\"total\":10,\"status\":200,\"ok\":true,\"body_excerpt\":\"{\\\"id\\\":\\\"80ff5012-64e4-4d8f-bbb2-6860cf182a98\\\",\\\"pos_user_id\\\":\\\"cccccccc-cccc-cccc-cccc-ccccccccccc1\\\",\\\"total\\\":10,\\\"payment_method\\\":\\\"efectivo\\\",\\\"items\\\":[{\\\"qty\\\":1,\\\"name\\\":\\\"R4C-test-item-1\\\",\\\"price\\\":10}],\\\"create\"},{\"idx\":2,\"pm\":\"tarjeta\",\"total\":20,\"status\":200,\"ok\":true,\"body_excerpt\":\"{\\\"id\\\":\\\"159f3549-518e-4424-8058-9dc2623cc149\\\",\\\"pos_user_id\\\":\\\"cccccccc-cccc-cccc-cccc-ccccccccccc1\\\",\\\"total\\\":20,\\\"payment_method\\\":\\\"tarjeta\\\",\\\"items\\\":[{\\\"qty\\\":1,\\\"name\\\":\\\"R4C-test-item-2\\\",\\\"price\\\":20}],\\\"created\"},{\"idx\":3,\"pm\":\"transferencia\",\"total\":30,\"status\":200,\"ok\":true,\"body_excerpt\":\"{\\\"id\\\":\\\"9326575a-c2f5-468d-8930-93a48b01d632\\\",\\\"pos_user_id\\\":\\\"cccccccc-cccc-cccc-cccc-ccccccccccc1\\\",\\\"total\\\":30,\\\"payment_method\\\":\\\"transferencia\\\",\\\"items\\\":[{\\\"qty\\\":1,\\\"name\\\":\\\"R4C-test-item-3\\\",\\\"price\\\":30}],\\\"c\"},{\"idx\":4,\"pm\":\"efectivo\",\"total\":40,\"status\":200,\"ok\":true,\"body_excerpt\":\"{\\\"id\\\":\\\"2ee21f5b-8e95-40e1-a0bb-374bca1974a2\\\",\\\"pos_user_id\\\":\\\"cccccccc-cccc-cccc-cccc-ccccccccccc1\\\",\\\"total\\\":40,\\\"payment_method\\\":\\\"efectivo\\\",\\\"items\\\":[{\\\"qty\\\":1,\\\"name\\\":\\\"R4C-test-item-4\\\",\\\"price\\\":40}],\\\"create\"},{\"idx\":5,\"pm\":\"tarjeta\",\"total\":50,\"status\":200,\"ok\":true,\"body_excerpt\":\"{\\\"id\\\":\\\"a8896388-f51f-45d0-90e3-2948d0c81957\\\",\\\"pos_user_id\\\":\\\"cccccccc-cccc-cccc-cccc-ccccccccccc1\\\",\\\"total\\\":50,\\\"payment_method\\\":\\\"tarjeta\\\",\\\"items\\\":[{\\\"qty\\\":1,\\\"name\\\":\\\"R4C-test-item-5\\\",\\\"price\\"
+                        },
+                        {
+                          "type": "CT4-saleIds",
+                          "description": "[\"80ff5012-64e4-4d8f-bbb2-6860cf182a98\",\"159f3549-518e-4424-8058-9dc2623cc149\",\"9326575a-c2f5-468d-8930-93a48b01d632\",\"2ee21f5b-8e95-40e1-a0bb-374bca1974a2\",\"a8896388-f51f-45d0-90e3-2948d0c81957\"]"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf5cab6c7c82951c4037-564485014684279c6a76",
+              "file": "r4c-cortes-e2e.spec.js",
+              "line": 248,
+              "column": 3
+            },
+            {
+              "title": "CT5: GET /api/cuts/{id}/summary exposes opening, total, expected",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "CT5-status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "CT5-body",
+                      "description": "{\"ok\":true,\"cut_id\":\"79800d64-4635-423f-b0ce-c731d0328070\",\"opening\":500,\"sales\":[{\"id\":\"80ff5012-64e4-4d8f-bbb2-6860cf182a98\",\"total\":10,\"payment_method\":\"efectivo\",\"created_at\":\"2026-04-28T03:17:10.482827+00:00\"},{\"id\":\"159f3549-518e-4424-8058-9dc2623cc149\",\"total\":20,\"payment_method\":\"tarjeta\",\"created_at\":\"2026-04-28T03:17:10.716072+00:00\"},{\"id\":\"9326575a-c2f5-468d-8930-93a48b01d632\",\"total\":30,\"payment_method\":\"transferencia\",\"created_at\":\"2026-04-28T03:17:10.893022+00:00\"},{\"id\":\"2ee21f5b-8e95-40e1-a0bb-374bca1974a2\",\"total\":40,\"payment_method\":\"efectivo\",\"created_at\":\"2026-04-28T03:17:11.071605+00:00\"},{\"id\":\"a8896388-f51f-45d0-90e3-2948d0c81957\",\"total\":50,\"payment_method\":\"tarjeta\",\"created_at\":\"2026-04-28T03:17:11.265556+00:00\"}],\"total\":150,\"expected\":650,\"counted\":null,\"discrepancy\":null,\"opened_at\":\"2026-04-28T03:17:09.785+00:00\",\"closed_at\":null}"
+                    },
+                    {
+                      "type": "CT5-opening",
+                      "description": "500"
+                    },
+                    {
+                      "type": "CT5-total",
+                      "description": "150"
+                    },
+                    {
+                      "type": "CT5-expected",
+                      "description": "650"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 207,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:17:03.861Z",
+                      "annotations": [
+                        {
+                          "type": "CT5-status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "CT5-body",
+                          "description": "{\"ok\":true,\"cut_id\":\"79800d64-4635-423f-b0ce-c731d0328070\",\"opening\":500,\"sales\":[{\"id\":\"80ff5012-64e4-4d8f-bbb2-6860cf182a98\",\"total\":10,\"payment_method\":\"efectivo\",\"created_at\":\"2026-04-28T03:17:10.482827+00:00\"},{\"id\":\"159f3549-518e-4424-8058-9dc2623cc149\",\"total\":20,\"payment_method\":\"tarjeta\",\"created_at\":\"2026-04-28T03:17:10.716072+00:00\"},{\"id\":\"9326575a-c2f5-468d-8930-93a48b01d632\",\"total\":30,\"payment_method\":\"transferencia\",\"created_at\":\"2026-04-28T03:17:10.893022+00:00\"},{\"id\":\"2ee21f5b-8e95-40e1-a0bb-374bca1974a2\",\"total\":40,\"payment_method\":\"efectivo\",\"created_at\":\"2026-04-28T03:17:11.071605+00:00\"},{\"id\":\"a8896388-f51f-45d0-90e3-2948d0c81957\",\"total\":50,\"payment_method\":\"tarjeta\",\"created_at\":\"2026-04-28T03:17:11.265556+00:00\"}],\"total\":150,\"expected\":650,\"counted\":null,\"discrepancy\":null,\"opened_at\":\"2026-04-28T03:17:09.785+00:00\",\"closed_at\":null}"
+                        },
+                        {
+                          "type": "CT5-opening",
+                          "description": "500"
+                        },
+                        {
+                          "type": "CT5-total",
+                          "description": "150"
+                        },
+                        {
+                          "type": "CT5-expected",
+                          "description": "650"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf5cab6c7c82951c4037-5dbea06cecb61e7ded9e",
+              "file": "r4c-cortes-e2e.spec.js",
+              "line": 279,
+              "column": 3
+            },
+            {
+              "title": "CT6: cash in/out movements during shift (best-effort)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "CT6-results",
+                      "description": "{\"in\":[{\"path\":\"/api/cash-movements\",\"status\":404},{\"path\":\"/api/cash/movement\",\"status\":404},{\"path\":\"/api/cuts/cash-in\",\"status\":404}],\"out\":[{\"path\":\"/api/cash-movements\",\"status\":404},{\"path\":\"/api/cash/movement\",\"status\":404},{\"path\":\"/api/cuts/cash-out\",\"status\":404}]}"
+                    },
+                    {
+                      "type": "CT6-inOk",
+                      "description": "false"
+                    },
+                    {
+                      "type": "CT6-outOk",
+                      "description": "false"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 577,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:17:04.094Z",
+                      "annotations": [
+                        {
+                          "type": "CT6-results",
+                          "description": "{\"in\":[{\"path\":\"/api/cash-movements\",\"status\":404},{\"path\":\"/api/cash/movement\",\"status\":404},{\"path\":\"/api/cuts/cash-in\",\"status\":404}],\"out\":[{\"path\":\"/api/cash-movements\",\"status\":404},{\"path\":\"/api/cash/movement\",\"status\":404},{\"path\":\"/api/cuts/cash-out\",\"status\":404}]}"
+                        },
+                        {
+                          "type": "CT6-inOk",
+                          "description": "false"
+                        },
+                        {
+                          "type": "CT6-outOk",
+                          "description": "false"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf5cab6c7c82951c4037-c47b734dd4745eae1f3f",
+              "file": "r4c-cortes-e2e.spec.js",
+              "line": 311,
+              "column": 3
+            },
+            {
+              "title": "CT7: POST /api/cuts/close returns 200 with discrepancy",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "CT7-status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "CT7-body",
+                      "description": "{\"ok\":true,\"cut_id\":\"79800d64-4635-423f-b0ce-c731d0328070\",\"opening\":500,\"total_sales\":150,\"expected\":650,\"counted\":580,\"discrepancy\":-70,\"result\":[{\"id\":\"79800d64-4635-423f-b0ce-c731d0328070\",\"tenant_id\":\"TNT001\",\"cashier_id\":\"cccccccc-cccc-cccc-cccc-ccccccccccc1\",\"station_id\":null,\"opening_balance\":500,\"opening_breakdown\":{\"bills\":[{\"qty\":5,\"denom\":100}]},\"closing_balance\":580,\"closing_breakdown\":{\"bills\":[{\"qty\":5,\"denom\":100},{\"qty\":4,\"denom\":20}]},\"total_sales\":150,\"total_cash_sales\":0,\"total_card_sales\":0,\"total_transfer_sales\":0,\"total_other_sales\":0,\"expected_balance\":650,\"discrepancy\":-70,\"cash_in\":0,\"cash_out\":0,\"notes_open\":\"Turno mañana\",\"notes_close\":\"[r4c-CT7] cierre normal\",\"status\":\"open\",\"opened_at\":\"2026-04-28T03:17:09.785+00:00\",\"closed_at\":\"2026-04-28T03:17:12.43+00:00\",\"reconciled_at\":null,\"reconciled_by\":null,\"voided_at\":null,\"voided_by\":null,\"void_reason\":null,\"created_at\":\"2026-04-28T03:17:09.803517+00:00\",\"updated_at\":\"2026-04-28T03:17:12.460454+00:00\"}]}"
+                    },
+                    {
+                      "type": "CT7-idem",
+                      "description": "CT7-close-1777346224735-5263da2a"
+                    },
+                    {
+                      "type": "CT7-cut_after",
+                      "description": "{\"ok\":true,\"cut\":{\"id\":\"79800d64-4635-423f-b0ce-c731d0328070\",\"tenant_id\":\"TNT001\",\"cashier_id\":\"cccccccc-cccc-cccc-cccc-ccccccccccc1\",\"station_id\":null,\"opening_balance\":500,\"opening_breakdown\":{\"bills\":[{\"qty\":5,\"denom\":100}]},\"closing_balance\":580,\"closing_breakdown\":{\"bills\":[{\"qty\":5,\"denom\":100},{\"qty\":4,\"denom\":20}]},\"total_sales\":150,\"total_cash_sales\":0,\"total_card_sales\":0,\"total_transfer_sales\":0,\"total_other_sales\":0,\"expected_balance\":650,\"discrepancy\":-70,\"cash_in\":0,\"cash_out\":0,\"notes_open\":\"Turno mañana\",\"notes_close\":\"[r4c-CT7] cierre normal\",\"status\":\"open\",\"opened_at\":\"2026-04-28T03:17:09.785+00:00\",\"closed_at\":\"2026-04-28T03:17:12.43+00:00\",\"reconciled_at\":null,\"reconciled_by\":null,\"voided_at\":null,\"voided_by\":null,\"void_reason\":null,\"created_at\":\"2026-04-28T03:17:09.803517+00:00\",\"updated_at\":\"2026-04-28T03:17:12.460454+00:00\"}}"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 466,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:17:04.705Z",
+                      "annotations": [
+                        {
+                          "type": "CT7-status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "CT7-body",
+                          "description": "{\"ok\":true,\"cut_id\":\"79800d64-4635-423f-b0ce-c731d0328070\",\"opening\":500,\"total_sales\":150,\"expected\":650,\"counted\":580,\"discrepancy\":-70,\"result\":[{\"id\":\"79800d64-4635-423f-b0ce-c731d0328070\",\"tenant_id\":\"TNT001\",\"cashier_id\":\"cccccccc-cccc-cccc-cccc-ccccccccccc1\",\"station_id\":null,\"opening_balance\":500,\"opening_breakdown\":{\"bills\":[{\"qty\":5,\"denom\":100}]},\"closing_balance\":580,\"closing_breakdown\":{\"bills\":[{\"qty\":5,\"denom\":100},{\"qty\":4,\"denom\":20}]},\"total_sales\":150,\"total_cash_sales\":0,\"total_card_sales\":0,\"total_transfer_sales\":0,\"total_other_sales\":0,\"expected_balance\":650,\"discrepancy\":-70,\"cash_in\":0,\"cash_out\":0,\"notes_open\":\"Turno mañana\",\"notes_close\":\"[r4c-CT7] cierre normal\",\"status\":\"open\",\"opened_at\":\"2026-04-28T03:17:09.785+00:00\",\"closed_at\":\"2026-04-28T03:17:12.43+00:00\",\"reconciled_at\":null,\"reconciled_by\":null,\"voided_at\":null,\"voided_by\":null,\"void_reason\":null,\"created_at\":\"2026-04-28T03:17:09.803517+00:00\",\"updated_at\":\"2026-04-28T03:17:12.460454+00:00\"}]}"
+                        },
+                        {
+                          "type": "CT7-idem",
+                          "description": "CT7-close-1777346224735-5263da2a"
+                        },
+                        {
+                          "type": "CT7-cut_after",
+                          "description": "{\"ok\":true,\"cut\":{\"id\":\"79800d64-4635-423f-b0ce-c731d0328070\",\"tenant_id\":\"TNT001\",\"cashier_id\":\"cccccccc-cccc-cccc-cccc-ccccccccccc1\",\"station_id\":null,\"opening_balance\":500,\"opening_breakdown\":{\"bills\":[{\"qty\":5,\"denom\":100}]},\"closing_balance\":580,\"closing_breakdown\":{\"bills\":[{\"qty\":5,\"denom\":100},{\"qty\":4,\"denom\":20}]},\"total_sales\":150,\"total_cash_sales\":0,\"total_card_sales\":0,\"total_transfer_sales\":0,\"total_other_sales\":0,\"expected_balance\":650,\"discrepancy\":-70,\"cash_in\":0,\"cash_out\":0,\"notes_open\":\"Turno mañana\",\"notes_close\":\"[r4c-CT7] cierre normal\",\"status\":\"open\",\"opened_at\":\"2026-04-28T03:17:09.785+00:00\",\"closed_at\":\"2026-04-28T03:17:12.43+00:00\",\"reconciled_at\":null,\"reconciled_by\":null,\"voided_at\":null,\"voided_by\":null,\"void_reason\":null,\"created_at\":\"2026-04-28T03:17:09.803517+00:00\",\"updated_at\":\"2026-04-28T03:17:12.460454+00:00\"}}"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf5cab6c7c82951c4037-5c51ed474a061fae483c",
+              "file": "r4c-cortes-e2e.spec.js",
+              "line": 362,
+              "column": 3
+            },
+            {
+              "title": "CT8: closing an already-closed cut returns 409 / 400",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "CT8-status",
+                      "description": "409"
+                    },
+                    {
+                      "type": "CT8-body",
+                      "description": "{\"error\":\"cut_already_closed\"}"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 178,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:17:05.219Z",
+                      "annotations": [
+                        {
+                          "type": "CT8-status",
+                          "description": "409"
+                        },
+                        {
+                          "type": "CT8-body",
+                          "description": "{\"error\":\"cut_already_closed\"}"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf5cab6c7c82951c4037-2bfc4fa5d5546e08554e",
+              "file": "r4c-cortes-e2e.spec.js",
+              "line": 400,
+              "column": 3
+            },
+            {
+              "title": "CT9: receipt content + POST /api/printer/raw returns ok (audit_only)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "CT9-receipt_excerpt",
+                      "description": "VOLVIX POS — CORTE DE CAJA\nFecha: 2026-04-28 03:17:05\nCut ID: 79800d64-4635-423f-b0ce-c731d0328070\nApertura: $500.00\nTotal ventas: $150.00\nEsperado: $650.00\nContado: $580.00\nDiscrepancia: $-70.00\n\n_____________________\nFirma del cajero\n"
+                    },
+                    {
+                      "type": "CT9-status",
+                      "description": "403"
+                    },
+                    {
+                      "type": "CT9-body",
+                      "description": "{\"error\":\"forbidden\"}"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 350,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:17:05.426Z",
+                      "annotations": [
+                        {
+                          "type": "CT9-receipt_excerpt",
+                          "description": "VOLVIX POS — CORTE DE CAJA\nFecha: 2026-04-28 03:17:05\nCut ID: 79800d64-4635-423f-b0ce-c731d0328070\nApertura: $500.00\nTotal ventas: $150.00\nEsperado: $650.00\nContado: $580.00\nDiscrepancia: $-70.00\n\n_____________________\nFirma del cajero\n"
+                        },
+                        {
+                          "type": "CT9-status",
+                          "description": "403"
+                        },
+                        {
+                          "type": "CT9-body",
+                          "description": "{\"error\":\"forbidden\"}"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf5cab6c7c82951c4037-a29fc269584a58dd6aa3",
+              "file": "r4c-cortes-e2e.spec.js",
+              "line": 419,
+              "column": 3
+            },
+            {
+              "title": "CT10: GET /api/cuts?from=...&to=... lists past cuts",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "CT10-status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "CT10-count",
+                      "description": "15"
+                    },
+                    {
+                      "type": "CT10-drill_status",
+                      "description": "200"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 352,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:17:05.809Z",
+                      "annotations": [
+                        {
+                          "type": "CT10-status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "CT10-count",
+                          "description": "15"
+                        },
+                        {
+                          "type": "CT10-drill_status",
+                          "description": "200"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf5cab6c7c82951c4037-425624686ca56cafdefb",
+              "file": "r4c-cortes-e2e.spec.js",
+              "line": 469,
+              "column": 3
+            },
+            {
+              "title": "CT11: discrepancy maths — opening 500 + sale 100 - close 580 = -20",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "CT11-open_status",
+                      "description": "201"
+                    },
+                    {
+                      "type": "CT11-sale_status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "CT11-close_status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "CT11-close_body",
+                      "description": "{\"ok\":true,\"cut_id\":\"73d1e1cb-65e1-41c2-b75b-51b3d3366b21\",\"opening\":500,\"total_sales\":100,\"expected\":600,\"counted\":580,\"discrepancy\":-20,\"result\":[{\"id\":\"73d1e1cb-65e1-41c2-b75b-51b3d3366b21\",\"tenant_id\":\"TNT001\",\"cashier_id\":\"cccccccc-cccc-cccc-cccc-ccccccccccc1\",\"station_id\":null,\"opening_balance\":500,\"opening_breakdown\":null,\"closing_balance\":580,\"closing_breakdown\":null,\"total_sales\":100,\"total_cash_sales\":0,\"total_card_sales\":0,\"total_transfer_sales\":0,\"total_other_sales\":0,\"expected_balance\":600,\"discrepancy\":-20,\"cash_in\":0,\"cash_out\":0,\"notes_open\":\"[CT11] discrepancy scenario\",\"notes_close\":\"[CT11] real count $580\",\"status\":\"open\",\"opened_at\":\"2026-04-28T03:17:14.344+00:00\",\"closed_at\":\"2026-04-28T03:17:14.864+00:00\",\"reconciled_at\":null,\"reconciled_by\":null,\"voided_at\":null,\"voided_by\":null,\"void_reason\":null,\"created_at\":\"2026-04-28T03:17:14.367393+00:00\",\"updated_at\":\"2026-04-28T03:17:14.882583+00:00\"}]}"
+                    },
+                    {
+                      "type": "CT11-actual_discrepancy",
+                      "description": "-20"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1269,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:17:06.184Z",
+                      "annotations": [
+                        {
+                          "type": "CT11-open_status",
+                          "description": "201"
+                        },
+                        {
+                          "type": "CT11-sale_status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "CT11-close_status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "CT11-close_body",
+                          "description": "{\"ok\":true,\"cut_id\":\"73d1e1cb-65e1-41c2-b75b-51b3d3366b21\",\"opening\":500,\"total_sales\":100,\"expected\":600,\"counted\":580,\"discrepancy\":-20,\"result\":[{\"id\":\"73d1e1cb-65e1-41c2-b75b-51b3d3366b21\",\"tenant_id\":\"TNT001\",\"cashier_id\":\"cccccccc-cccc-cccc-cccc-ccccccccccc1\",\"station_id\":null,\"opening_balance\":500,\"opening_breakdown\":null,\"closing_balance\":580,\"closing_breakdown\":null,\"total_sales\":100,\"total_cash_sales\":0,\"total_card_sales\":0,\"total_transfer_sales\":0,\"total_other_sales\":0,\"expected_balance\":600,\"discrepancy\":-20,\"cash_in\":0,\"cash_out\":0,\"notes_open\":\"[CT11] discrepancy scenario\",\"notes_close\":\"[CT11] real count $580\",\"status\":\"open\",\"opened_at\":\"2026-04-28T03:17:14.344+00:00\",\"closed_at\":\"2026-04-28T03:17:14.864+00:00\",\"reconciled_at\":null,\"reconciled_by\":null,\"voided_at\":null,\"voided_by\":null,\"void_reason\":null,\"created_at\":\"2026-04-28T03:17:14.367393+00:00\",\"updated_at\":\"2026-04-28T03:17:14.882583+00:00\"}]}"
+                        },
+                        {
+                          "type": "CT11-actual_discrepancy",
+                          "description": "-20"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf5cab6c7c82951c4037-a12c46e8a6298ffd7547",
+              "file": "r4c-cortes-e2e.spec.js",
+              "line": 495,
+              "column": 3
+            },
+            {
+              "title": "CT12: multi-cashier — admin opens its own cut, both close independently",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "CT12-admin_open_status",
+                      "description": "201"
+                    },
+                    {
+                      "type": "CT12-admin_open_body",
+                      "description": "{\"ok\":true,\"cut\":{\"id\":\"fa03e891-ccb2-4c5b-9313-5889207d11eb\",\"tenant_id\":\"TNT001\",\"cashier_id\":\"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1\",\"station_id\":null,\"opening_balance\":1000,\"opening_breakdown\":null,\"closing_balance\":null,\"closing_breakdown\":null,\"total_sales\":0,\"total_cash_sales\":0,\"total_card_sales\":0,\"total_transfer_sales\":0,\"total_other_sales\":0,\"expected_balance\":null,\"discrepancy\":null,\"cash_in\":0,\"cash_out\":0,\"notes_open\":\"[CT12] admin parallel cut\",\"notes_close\":null,\"status\":\"open\",\"opened_at\":\"2026-04-28T03:17:15.104+00:00\",\"closed_at\":null,\"reconciled_at\":null,\"reconciled_by\":null,\"voided_at\":null,\"voided_by\":null,\"void_reason\":null,\"created_at\":\"2026-04-28T03:17:15.123156+00:00\",\"updated_at\":\"2026-04-28T03:17:15.123156+00:00\"}}"
+                    },
+                    {
+                      "type": "CT12-admin_cut_id",
+                      "description": "fa03e891-ccb2-4c5b-9313-5889207d11eb"
+                    },
+                    {
+                      "type": "CT12-list_status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "CT12-admin_close_status",
+                      "description": "200"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 622,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:17:07.474Z",
+                      "annotations": [
+                        {
+                          "type": "CT12-admin_open_status",
+                          "description": "201"
+                        },
+                        {
+                          "type": "CT12-admin_open_body",
+                          "description": "{\"ok\":true,\"cut\":{\"id\":\"fa03e891-ccb2-4c5b-9313-5889207d11eb\",\"tenant_id\":\"TNT001\",\"cashier_id\":\"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1\",\"station_id\":null,\"opening_balance\":1000,\"opening_breakdown\":null,\"closing_balance\":null,\"closing_breakdown\":null,\"total_sales\":0,\"total_cash_sales\":0,\"total_card_sales\":0,\"total_transfer_sales\":0,\"total_other_sales\":0,\"expected_balance\":null,\"discrepancy\":null,\"cash_in\":0,\"cash_out\":0,\"notes_open\":\"[CT12] admin parallel cut\",\"notes_close\":null,\"status\":\"open\",\"opened_at\":\"2026-04-28T03:17:15.104+00:00\",\"closed_at\":null,\"reconciled_at\":null,\"reconciled_by\":null,\"voided_at\":null,\"voided_by\":null,\"void_reason\":null,\"created_at\":\"2026-04-28T03:17:15.123156+00:00\",\"updated_at\":\"2026-04-28T03:17:15.123156+00:00\"}}"
+                        },
+                        {
+                          "type": "CT12-admin_cut_id",
+                          "description": "fa03e891-ccb2-4c5b-9313-5889207d11eb"
+                        },
+                        {
+                          "type": "CT12-list_status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "CT12-admin_close_status",
+                          "description": "200"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf5cab6c7c82951c4037-94e216380fe5137908ed",
+              "file": "r4c-cortes-e2e.spec.js",
+              "line": 568,
+              "column": 3
+            },
+            {
+              "title": "CT13: UI flow apertura → venta → corte (best-effort)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "CT13-uiOk",
+                      "description": "true"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 20191,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:17:08.121Z",
+                      "annotations": [
+                        {
+                          "type": "CT13-uiOk",
+                          "description": "true"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf5cab6c7c82951c4037-1f11a1bd713eccf7c0ef",
+              "file": "r4c-cortes-e2e.spec.js",
+              "line": 612,
+              "column": 3
+            },
+            {
+              "title": "CT14: cross-tenant — admin (TNT001) cannot see TNT002 cuts",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "CT14-status",
+                      "description": "200"
+                    },
+                    {
+                      "type": "CT14-count",
+                      "description": "0"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 137,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-28T03:17:28.684Z",
+                      "annotations": [
+                        {
+                          "type": "CT14-status",
+                          "description": "200"
+                        },
+                        {
+                          "type": "CT14-count",
+                          "description": "0"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf5cab6c7c82951c4037-05077e88a3c4f04b31d0",
+              "file": "r4c-cortes-e2e.spec.js",
+              "line": 650,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-04-28T03:16:58.067Z",
+    "duration": 30975.332999999995,
+    "expected": 14,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

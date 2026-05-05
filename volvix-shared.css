@@ -1,0 +1,161 @@
+/* ============================================================
+   Volvix Shared Base CSS
+   Patrones comunes extraidos de:
+     - salvadorex-pos.html
+     - volvix-owner-panel.html
+     - multipos-suite.html
+
+   NOTA: Cada HTML conserva su propio :root (paleta) y componentes
+   especificos. Esto solo cubre reset + utilidades + animaciones
+   compartidas. NO modifica visualmente las apps.
+   ============================================================ */
+
+/* ---------- RESET ---------- */
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font-family:inherit;outline:none}
+button{cursor:pointer;border:none;background:none;color:inherit}
+
+/* ---------- UTILIDADES ---------- */
+.hidden{display:none !important}
+.mono{font-family:'JetBrains Mono','Geist Mono',monospace}
+
+/* ---------- ANIMACIONES BASE ---------- */
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+@keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes spinSlow{to{transform:rotate(360deg)}}
+
+/* ---------- SCROLLBAR HIDE COMUN ---------- */
+.no-scrollbar::-webkit-scrollbar{display:none}
+.no-scrollbar{scrollbar-width:none}
+
+/* ============ R8d FIX-M1: utilidades mobile responsive compartidas ============ */
+.hide-mobile{display:initial}
+@media (max-width:640px){
+  .hide-mobile{display:none !important}
+  .show-mobile-only{display:initial !important}
+  /* iOS no-zoom on focus */
+  input,select,textarea{font-size:16px}
+}
+.show-mobile-only{display:none}
+
+/* Tap targets accesibles (Apple HIG / Material) */
+@media (hover:none) and (pointer:coarse){
+  button,.btn,[role="button"],a.btn{
+    min-height:44px;min-width:44px;
+    touch-action:manipulation;
+    -webkit-tap-highlight-color:rgba(0,0,0,.08);
+  }
+  .scrollable,table,main{-webkit-overflow-scrolling:touch}
+}
+
+/* Modal en mobile fullscreen helper */
+@media (max-width:640px){
+  .modal.mobile-fullscreen{
+    width:100vw !important;max-width:100vw !important;
+    height:100vh !important;max-height:100vh !important;
+    border-radius:0 !important;margin:0 !important;
+  }
+}
+
+/* Safe-area helpers para PWA con notch */
+.safe-area-pad{padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0)}
+.safe-area-pad-top{padding-top:env(safe-area-inset-top,0)}
+.safe-area-pad-bottom{padding-bottom:env(safe-area-inset-bottom,0)}
+/* ============ END R8d FIX-M1 ============ */
+
+/* ============ R10c-B FIX-N3-5: Accessibility (large text + high contrast + 1-tap) ============ */
+body.volvix-large-text { font-size: 120% !important; line-height: 1.6 !important; }
+body.volvix-large-text button,
+body.volvix-large-text input,
+body.volvix-large-text select,
+body.volvix-large-text textarea,
+body.volvix-large-text a { font-size: 120% !important; min-height: 56px !important; }
+body.volvix-large-text label,
+body.volvix-large-text p,
+body.volvix-large-text span,
+body.volvix-large-text li,
+body.volvix-large-text td,
+body.volvix-large-text th,
+body.volvix-large-text h1,
+body.volvix-large-text h2,
+body.volvix-large-text h3 { font-size: 120% !important; }
+
+body.volvix-high-contrast { background: #000 !important; color: #fff !important; }
+body.volvix-high-contrast button,
+body.volvix-high-contrast .btn,
+body.volvix-high-contrast input[type="submit"],
+body.volvix-high-contrast input[type="button"] { background: #fff !important; color: #000 !important; border: 3px solid #fff !important; }
+body.volvix-high-contrast input[type="text"],
+body.volvix-high-contrast input[type="email"],
+body.volvix-high-contrast input[type="password"],
+body.volvix-high-contrast input[type="number"],
+body.volvix-high-contrast input[type="tel"],
+body.volvix-high-contrast input[type="search"],
+body.volvix-high-contrast textarea,
+body.volvix-high-contrast select { background: #000 !important; color: #fff !important; border: 2px solid #fff !important; }
+body.volvix-high-contrast a { color: #ffeb3b !important; text-decoration: underline !important; }
+body.volvix-high-contrast .card,
+body.volvix-high-contrast .panel,
+body.volvix-high-contrast .modal-content { background: #000 !important; color: #fff !important; border: 2px solid #fff !important; }
+
+body.volvix-1tap-mode .confirm-required,
+body.volvix-1tap-mode .double-tap-required,
+body.volvix-1tap-mode [data-confirm-required="true"] { display: none !important; }
+body.volvix-1tap-mode .one-tap-target { padding: 16px !important; min-height: 56px !important; }
+
+/* FAB y menú accesibilidad: garantizar que sean siempre clicables */
+#volvix-a11y-fab:hover { background: #155cb0 !important; }
+#volvix-a11y-fab:focus { outline: 3px solid #ffeb3b !important; outline-offset: 2px !important; }
+#volvix-a11y-menu button:hover { background: #e3f2fd !important; }
+#volvix-a11y-menu button:focus { outline: 3px solid #1a73e8 !important; }
+/* ============ END R10c-B FIX-N3-5 ============ */
+
+/* ============ R10d-C FIX-N4-6: System Monitor banners ============ */
+.volvix-sysmon-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #f59e0b;
+  color: #000;
+  padding: 10px 16px;
+  z-index: 99999;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.volvix-sysmon-banner + .volvix-sysmon-banner { top: 48px; }
+.volvix-sysmon-banner + .volvix-sysmon-banner + .volvix-sysmon-banner { top: 96px; }
+.volvix-sysmon-banner strong { font-weight: 700; }
+.volvix-sysmon-banner span { flex: 1; }
+.volvix-sysmon-banner button {
+  margin-left: auto;
+  background: none;
+  border: 1px solid #000;
+  border-radius: 4px;
+  padding: 2px 10px;
+  cursor: pointer;
+  color: #000;
+  font-size: 16px;
+  line-height: 1;
+  font-weight: 700;
+}
+.volvix-sysmon-banner button:hover { background: rgba(0,0,0,0.08); }
+.volvix-sysmon-banner button:focus { outline: 2px solid #000; outline-offset: 2px; }
+.volvix-sysmon-banner.volvix-sysmon-storage_low,
+.volvix-sysmon-banner.volvix-sysmon-indexeddb_fail,
+.volvix-sysmon-banner.volvix-sysmon-antivirus_block { background: #ef4444; color: #fff; }
+.volvix-sysmon-banner.volvix-sysmon-storage_low button,
+.volvix-sysmon-banner.volvix-sysmon-indexeddb_fail button,
+.volvix-sysmon-banner.volvix-sysmon-antivirus_block button { color: #fff; border-color: #fff; }
+@media (max-width: 600px) {
+  .volvix-sysmon-banner { font-size: 13px; padding: 8px 12px; }
+}
+/* ============ END R10d-C FIX-N4-6 ============ */

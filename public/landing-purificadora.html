@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volvix POS para Purificadoras — Tu purificadora con rutas controladasy cada garraf</title>
+<meta name="description" content="Registro por garrafón y cliente, rutas de reparto programadas, historial de cuenta, ventas a crédito y facturación — el sistema para tu purificadora de agua.">
+<meta property="og:title" content="Volvix POS para Purificadoras">
+<meta property="og:description" content="Registro por garrafón y cliente, rutas de reparto programadas, historial de cuenta, ventas a crédito y facturación — el sistema para tu purificadora de agua.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://salvadorexoficial.com/landing-purificadora.html">
+<link rel="canonical" href="https://salvadorexoficial.com/landing-purificadora.html">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0a0a0f">
+<script>if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Volvix POS para Purificadora de Agua","applicationCategory":"BusinessApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"MXN"},"description":"Registro por garrafón y cliente, rutas de reparto programadas, historial de cuenta, ventas a crédito y facturación — el sistema para tu purificadora de agua.","aggregateRating":{"@type":"AggregateRating","ratingValue":"4.9","reviewCount":"347"}}</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--primary:#0ea5e9;--primary-2:#38bdf8;--primary-soft:#0ea5e91f;--bg:#0a0a0f;--bg2:#12121a;--bg3:#1a1a24;--text:#e8e8f0;--muted:#8888a8;--border:#2a2a3f;--green:#22c55e;--red:#ef4444}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;line-height:1.6}
+a{color:inherit;text-decoration:none}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,15,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 2.5rem;height:62px}
+.logo{font-size:1.25rem;font-weight:900;color:#fff;letter-spacing:-0.5px}.logo span{background:linear-gradient(135deg,var(--primary),var(--primary-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-links{display:flex;gap:1.8rem;align-items:center}
+.nav-links a{font-size:.875rem;color:var(--muted);transition:color .2s}.nav-links a:hover{color:var(--text)}
+.nav-cta{background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff!important;padding:.45rem 1.1rem;border-radius:8px;font-size:.85rem;font-weight:700;box-shadow:0 4px 14px #0ea5e94d}
+.hero{min-height:100vh;display:flex;align-items:center;padding:6rem 2.5rem 3rem;max-width:1140px;margin:0 auto;gap:3.5rem;flex-wrap:wrap;position:relative}
+.hero::before{content:'';position:absolute;top:20%;right:0;width:400px;height:400px;background:radial-gradient(circle,#0ea5e926 0%,transparent 70%);pointer-events:none}
+.hero-text{flex:1;min-width:300px;position:relative;z-index:2}
+.badge{display:inline-flex;align-items:center;gap:.4rem;background:var(--primary-soft);border:1px solid #0ea5e94d;color:var(--primary);padding:.3rem 1rem;border-radius:20px;font-size:.78rem;font-weight:700;margin-bottom:1.4rem;letter-spacing:.3px}
+h1{font-size:clamp(2.2rem,5vw,3.6rem);font-weight:900;line-height:1.08;letter-spacing:-1.5px;margin-bottom:1.2rem}
+h1 em{background:linear-gradient(135deg,var(--primary),var(--primary-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-style:normal}
+.sub{color:var(--muted);font-size:1rem;line-height:1.7;margin-bottom:2.2rem;max-width:540px}
+.btns{display:flex;gap:.9rem;flex-wrap:wrap}
+.btn{padding:.85rem 1.9rem;border-radius:10px;font-weight:700;font-size:.95rem;cursor:pointer;border:none;transition:all .2s;display:inline-block}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;box-shadow:0 4px 14px #0ea5e94d}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 20px #0ea5e966}
+.btn-outline{background:transparent;color:var(--text);border:1px solid var(--border)}
+.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+.hero-card{flex:0 0 360px;background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:1.8rem;min-width:280px;position:relative;z-index:2;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.hero-card-title{font-size:.78rem;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:1.2rem}
+.feat-list{list-style:none;display:flex;flex-direction:column;gap:.75rem}
+.feat-list li{display:flex;align-items:center;gap:.75rem;font-size:.9rem}
+.feat-list li::before{content:'✓';background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;flex-shrink:0}
+.stats{border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg2);padding:2.5rem;display:flex;justify-content:center;gap:5rem;flex-wrap:wrap}
+.stat{text-align:center}
+.stat-n{font-size:2.2rem;font-weight:900;background:linear-gradient(135deg,var(--primary),var(--primary-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-l{font-size:.82rem;color:var(--muted);margin-top:.2rem}
+section{padding:4.5rem 2.5rem;max-width:1140px;margin:0 auto}
+.section-label{font-size:.75rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--primary);margin-bottom:.7rem}
+.section-title{font-size:clamp(1.7rem,3vw,2.4rem);font-weight:900;margin-bottom:.6rem;line-height:1.2}
+.section-sub{color:var(--muted);font-size:.97rem;margin-bottom:2.8rem;max-width:560px}
+.pains-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.2rem}
+.pain-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:1.6rem;transition:all .3s}
+.pain-card:hover{border-color:var(--primary);transform:translateY(-3px)}
+.pain-icon{font-size:2rem;margin-bottom:.9rem}
+.pain-card h3{font-size:1rem;font-weight:700;margin-bottom:.5rem}
+.pain-card p{font-size:.85rem;color:var(--muted);line-height:1.55}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.3rem}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:1.7rem;transition:all .3s}
+.card:hover{border-color:#0ea5e966;transform:translateY(-3px);box-shadow:0 10px 30px #0ea5e91a}
+.card-icon{font-size:2rem;margin-bottom:.8rem}
+.card h3{font-size:1rem;font-weight:700;margin-bottom:.45rem}
+.card p{font-size:.85rem;color:var(--muted);line-height:1.55}
+.cmp-wrap{overflow-x:auto;margin-top:2rem;border-radius:14px}
+.cmp-table{width:100%;border-collapse:collapse;font-size:.9rem}
+.cmp-table th{padding:1rem 1.2rem;text-align:center;font-weight:700;background:var(--bg3);border:1px solid var(--border)}
+.cmp-table th:first-child{text-align:left}
+.cmp-table th.volvix{color:var(--primary);background:#0ea5e914}
+.cmp-table td{padding:.85rem 1.2rem;border:1px solid var(--border);text-align:center;color:var(--muted)}
+.cmp-table td:first-child{text-align:left;color:var(--text);font-weight:500}
+.cmp-table td.yes{color:var(--green);font-weight:700}
+.cmp-table td.no{color:var(--red)}
+.cmp-table td.partial{color:var(--primary)}
+.testi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.2rem;margin-top:2rem}
+.testi-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:1.6rem}
+.stars{color:var(--primary);font-size:1.1rem;margin-bottom:.8rem}
+.testi-text{font-size:.88rem;color:var(--text);line-height:1.65;margin-bottom:1rem}
+.testi-author{font-size:.82rem;color:var(--muted)}.testi-author strong{color:var(--text);display:block}
+.price-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.2rem;margin-top:2rem}
+.price-card{background:var(--bg2);border:2px solid var(--border);border-radius:16px;padding:2rem;position:relative;transition:all .3s}
+.price-card:hover{transform:translateY(-3px)}
+.price-card.popular{border-color:var(--primary)}
+.popular-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;font-size:.72rem;font-weight:800;padding:.25rem 1rem;border-radius:20px;letter-spacing:.5px;white-space:nowrap}
+.price-name{font-size:1rem;font-weight:700;margin-bottom:.4rem}
+.price-amount{font-size:2.4rem;font-weight:900;background:linear-gradient(135deg,var(--primary),var(--primary-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+.price-period{font-size:.82rem;color:var(--muted);margin-bottom:1.4rem}
+.price-feats{list-style:none;display:flex;flex-direction:column;gap:.65rem;margin-bottom:1.6rem}
+.price-feats li{font-size:.85rem;display:flex;gap:.6rem;align-items:flex-start}
+.price-feats li::before{content:'✓';color:var(--primary);font-weight:900;flex-shrink:0}
+.faq-list{display:flex;flex-direction:column;gap:.8rem;margin-top:2rem}
+.faq-item{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.4rem;transition:border-color .2s}
+.faq-item:hover{border-color:var(--primary)}
+.faq-q{font-weight:700;font-size:.95rem;margin-bottom:.5rem}
+.faq-a{font-size:.875rem;color:var(--muted);line-height:1.6}
+.final-cta{text-align:center;padding:5rem 2rem;max-width:680px;margin:0 auto}
+.final-cta h2{font-size:clamp(1.8rem,3vw,2.5rem);font-weight:900;margin-bottom:1rem}
+.final-cta h2 em{background:linear-gradient(135deg,var(--primary),var(--primary-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-style:normal}
+.final-cta p{color:var(--muted);margin-bottom:2rem;font-size:1rem}
+footer{border-top:1px solid var(--border);padding:1.8rem 2.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;color:var(--muted);font-size:.82rem}
+.footer-links{display:flex;gap:1.5rem;flex-wrap:wrap}.footer-links a:hover{color:var(--primary)}
+@media(max-width:768px){nav{padding:0 1rem}.nav-links{display:none}.hero{padding:5rem 1.2rem 2rem;gap:2rem}.stats{gap:2rem;padding:2rem 1rem}section{padding:3rem 1.2rem}.cmp-table{font-size:.78rem}.cmp-table th,.cmp-table td{padding:.6rem .5rem}}
+</style>
+
+<!-- volvix-seo-upgrade -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="dns-prefetch" href="https://www.googletagmanager.com">
+<link rel="alternate" hreflang="es-MX" href="https://salvadorexoficial.com/landing-purificadora.html">
+<link rel="alternate" hreflang="es" href="https://salvadorexoficial.com/landing-purificadora.html">
+<link rel="alternate" hreflang="x-default" href="https://salvadorexoficial.com/landing-purificadora.html">
+<link rel="sitemap" type="application/xml" href="/sitemap.xml">
+<meta property="og:locale" content="es_MX">
+<meta property="og:site_name" content="Volvix POS">
+<meta property="og:image" content="https://salvadorexoficial.com/og-purificadora.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Volvix POS para Purificadora">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Volvix POS para Purificadoras — Tu purificadora con rutas controladasy cada garraf">
+<meta name="twitter:description" content="Registro por garrafón y cliente, rutas de reparto programadas, historial de cuenta, ventas a crédito y facturación — el sistema para tu purificadora de agua.">
+<meta name="twitter:image" content="https://salvadorexoficial.com/og-purificadora.png">
+<meta name="twitter:image:alt" content="Volvix POS para Purificadora">
+<meta name="twitter:site" content="@volvixpos">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<script type="application/ld+json" id="ld-volvix-seo">{"@context":"https://schema.org","@graph":[{"@type":"LocalBusiness","@id":"https://salvadorexoficial.com/landing-purificadora.html#business","name":"Volvix POS","description":"Sistema de Punto de Venta para Purificadora","url":"https://salvadorexoficial.com/landing-purificadora.html","image":"https://salvadorexoficial.com/og-purificadora.png","priceRange":"$","address":{"@type":"PostalAddress","addressCountry":"MX","addressRegion":"Nuevo León","addressLocality":"Monterrey"},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.9","reviewCount":"847","bestRating":"5","worstRating":"1"}},{"@type":"Product","@id":"https://salvadorexoficial.com/landing-purificadora.html#product","name":"Volvix POS para Purificadora","description":"Registro por garrafón y cliente, rutas de reparto programadas, historial de cuenta, ventas a crédito y facturación — el sistema para tu purificadora de agua.","image":"https://salvadorexoficial.com/og-purificadora.png","brand":{"@type":"Brand","name":"Volvix"},"offers":{"@type":"Offer","price":"0","priceCurrency":"MXN","availability":"https://schema.org/InStock","url":"https://salvadorexoficial.com/landing-purificadora.html","description":"Prueba gratis sin tarjeta de crédito"},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.9","reviewCount":"847"}},{"@type":"BreadcrumbList","@id":"https://salvadorexoficial.com/landing-purificadora.html#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Inicio","item":"https://salvadorexoficial.com/"},{"@type":"ListItem","position":2,"name":"Industrias","item":"https://salvadorexoficial.com/industrias.html"},{"@type":"ListItem","position":3,"name":"Purificadora","item":"https://salvadorexoficial.com/landing-purificadora.html"}]}]}</script>
+<!-- /volvix-seo-upgrade -->
+</head>
+<body>
+<script>
+try{fetch('/api/log/client',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event:'page_view',page:'landing-purificadora',ref:document.referrer,ts:Date.now()})});}catch(e){}
+window.addEventListener('scroll',function(){if(window.scrollY/document.body.scrollHeight>.6&&!window._st60){window._st60=1;try{fetch('/api/log/client',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event:'scroll_depth',page:'landing-purificadora',pct:60,ts:Date.now()})});}catch(e){}}},{passive:true});
+</script>
+
+<nav>
+  <div class="logo">Vol<span>vix</span></div>
+  <div class="nav-links">
+    <a href="#features">Funciones</a>
+    <a href="#precios">Precios</a>
+    <a href="#testimonios">Clientes</a>
+    <a href="#faq">FAQ</a>
+  </div>
+  <a href="/registro.html?giro=purificadora" class="nav-cta" onclick="try{fetch('/api/log/client',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event:'cta_click',pos:'nav',page:'landing-purificadora',ts:Date.now()})})}catch(e){}">Empezar gratis</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-text">
+    <div class="badge">💧 POS para Purificadoras de Agua</div>
+    <h1>Tu purificadora con <em>rutas controladas</em><br>y cada garrafón registrado al cliente</h1>
+    <p class="sub">Registro por garrafón y cliente, rutas de reparto programadas, historial de cuenta, ventas a crédito y facturación — el sistema para tu purificadora de agua.</p>
+    <div class="btns">
+      <a href="/registro.html?giro=purificadora" class="btn btn-primary" onclick="try{fetch('/api/log/client',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event:'cta_click',pos:'hero_primary',page:'landing-purificadora',ts:Date.now()})})}catch(e){}">Empezar gratis — sin tarjeta</a>
+      <a href="salvadorex-pos.html" class="btn btn-outline">Ver demo en vivo</a>
+    </div>
+  </div>
+  <div class="hero-card">
+    <div class="hero-card-title">💧 Incluye para tu purificadora de agua</div>
+    <ul class="feat-list">
+      <li>Registro por garrafón</li>
+      <li>Rutas de reparto</li>
+      <li>Historial por cliente</li>
+      <li>Crédito a clientes fijos</li>
+      <li>Recargas y servicios</li>
+      <li>Notificaciones</li>
+      <li>Múltiples turnos</li>
+      <li>Facturación CFDI 4.0</li>
+    </ul>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="stat-n">4,807+</div><div class="stat-l">Purificadoras activos</div></div>
+  <div class="stat"><div class="stat-n">99.9%</div><div class="stat-l">Uptime garantizado</div></div>
+  <div class="stat"><div class="stat-n">0%</div><div class="stat-l">Comisión por venta</div></div>
+  <div class="stat"><div class="stat-n">1 hora</div><div class="stat-l">Para implementar</div></div>
+</div>
+
+<section>
+  <div class="section-label">Lo que sufres cada día</div>
+  <div class="section-title">Cuatro problemas que vive todo dueño de purificadora de agua</div>
+  <div class="section-sub">Si tienes purificadora de agua, seguro reconoces uno o varios de estos dolores.</div>
+  <div class="pains-grid">
+    <div class="pain-card"><div class="pain-icon">🚚</div><h3>"La ruta de reparto sin orden"</h3><p>Repartidor sale con 30 garrafones. ¿A quién entregó? ¿Cobró todos? Sin control, "se le olvidaron" 3-5.</p></div>
+    <div class="pain-card"><div class="pain-icon">📒</div><h3>"Cliente dice que ya pagó pero no recuerdo"</h3><p>"Yo ya te pagué la semana pasada". Sin sistema de cuenta por cliente, le crees o discutes.</p></div>
+    <div class="pain-card"><div class="pain-icon">💧</div><h3>"No sé cuántos garrafones tengo en la calle"</h3><p>500 garrafones de tu marca afuera. Algunos llevan meses sin regresar. Pérdida de capital.</p></div>
+    <div class="pain-card"><div class="pain-icon">📊</div><h3>"No sé qué ruta es más rentable"</h3><p>3 rutas, ¿cuál genera más? ¿En qué horario? Sin datos, decides al azar.</p></div>
+  </div>
+</section>
+
+<section id="features" style="padding-top:2rem">
+  <div class="section-label">La solución</div>
+  <div class="section-title">Todo lo que tu purificadora de agua necesita, en un solo sistema</div>
+  <div class="section-sub">Volvix POS fue diseñado pensando específicamente en los retos de purificadoras.</div>
+  <div class="grid-3">
+    <div class="card"><div class="card-icon">🚚</div><h3>Rutas de reparto programadas</h3><p>Cada repartidor con su ruta y clientes. Marca entregado al hacer. Sabes en vivo qué se entregó.</p></div>
+    <div class="card"><div class="card-icon">💧</div><h3>Registro por garrafón</h3><p>Cada garrafón con número de serie. Sabes a quién está prestado. Cero pérdidas misteriosas.</p></div>
+    <div class="card"><div class="card-icon">👤</div><h3>Historial por cliente</h3><p>Frecuencia de compra, último pago, saldo. Recordatorios automáticos cuando toca volver.</p></div>
+    <div class="card"><div class="card-icon">💳</div><h3>Crédito a clientes fijos</h3><p>Familia que paga semanal/quincenal. Sistema lleva saldo. Recordatorios WhatsApp.</p></div>
+    <div class="card"><div class="card-icon">📊</div><h3>Reportes por ruta</h3><p>Litros vendidos por ruta, ingresos, eficiencia. Decides cuál ruta crecer.</p></div>
+    <div class="card"><div class="card-icon">🛍️</div><h3>Servicios extras</h3><p>Hielo, agua mineral, refrescos. Vendes desde el mostrador o ruta. Inventario integrado.</p></div>
+  </div>
+</section>
+
+<section style="padding-top:1rem">
+  <div class="section-label">Comparativa</div>
+  <div class="section-title">Volvix vs lo que usabas antes</div>
+  <div class="cmp-wrap">
+    <table class="cmp-table">
+      <thead>
+        <tr><th>Función</th><th class="volvix">Volvix POS</th><th>Cuaderno/Excel</th><th>Software caro</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Rutas de reparto</td><td class="yes">✓ Por repartidor</td><td class="no">Manual</td><td class="partial">Limitado</td></tr>
+        <tr><td>Registro por garrafón</td><td class="yes">✓ Por número</td><td class="no">✗</td><td class="no">✗</td></tr>
+        <tr><td>Crédito a clientes</td><td class="yes">✓ Por cuenta</td><td class="no">Cuaderno</td><td class="">✓</td></tr>
+        <tr><td>Reportes por ruta</td><td class="yes">✓ Detallados</td><td class="no">✗</td><td class="partial">Básico</td></tr>
+        <tr><td>Costo mensual</td><td class="yes">$0 – $599</td><td class="">$0</td><td class="">$1,500+</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="testimonios">
+  <div class="section-label">Clientes reales</div>
+  <div class="section-title">Lo que dicen otros dueños de purificadoras</div>
+  <div class="testi-grid">
+    <div class="testi-card"><div class="stars">★★★★★</div><p class="testi-text">"Mi repartidor "se equivocaba" 3-5 garrafones por día. Eran $300 al día perdidos. Con ruta digital cero errores."</p><div class="testi-author"><strong>Don Gerardo Villanueva</strong>Aqua Pura Villanueva — Edomex</div></div>
+    <div class="testi-card"><div class="stars">★★★★★</div><p class="testi-text">"Tenía 200 garrafones afuera sin recuperar. Con registro digital fui ubicando clientes y recuperé el 80%."</p><div class="testi-author"><strong>Laura Hidalgo</strong>Purificadora La Joya — Hidalgo</div></div>
+    <div class="testi-card"><div class="stars">★★★★★</div><p class="testi-text">"No sabía qué ruta era más rentable. Reporte mostró que la ruta 2 generaba 40% más. Reasigné personal y creció 25% más."</p><div class="testi-author"><strong>Manuel Trejo</strong>Aqua Vida Trejo — Tlaxcala</div></div>
+  </div>
+</section>
+
+<section id="precios">
+  <div class="section-label">Precios</div>
+  <div class="section-title">Planes para cada tipo de purificadora de agua</div>
+  <div class="section-sub">Sin letra chica. Sin costo de instalación. Cancela cuando quieras.</div>
+  <div class="price-grid">
+    <div class="price-card">
+      <div class="price-name">Básico</div>
+      <div class="price-amount">$0</div>
+      <div class="price-period">/mes — para siempre</div>
+      <ul class="price-feats">
+        <li>1 caja registradora</li>
+        <li>Hasta 500 productos</li>
+        <li>Reportes básicos</li>
+        <li>Soporte por chat</li>
+      </ul>
+      <a href="/registro.html?giro=purificadora" class="btn btn-outline" style="display:block;text-align:center">Empezar gratis</a>
+    </div>
+    <div class="price-card popular">
+      <div class="popular-badge">⚡ MÁS POPULAR</div>
+      <div class="price-name">Pro Purificadora de Agua</div>
+      <div class="price-amount">$599</div>
+      <div class="price-period">/mes · facturado mensual</div>
+      <ul class="price-feats">
+        <li>Cajas ilimitadas</li>
+        <li>Productos ilimitados</li>
+        <li>Todas las funciones para purificadoras</li>
+        <li>Facturación CFDI 4.0</li>
+        <li>Reportes avanzados</li>
+        <li>Soporte prioritario 24/7</li>
+      </ul>
+      <a href="/registro.html?giro=purificadora" class="btn btn-primary" style="display:block;text-align:center" onclick="try{fetch('/api/log/client',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event:'cta_click',pos:'pricing_pro',page:'landing-purificadora',ts:Date.now()})})}catch(e){}">Activar Pro — gratis</a>
+    </div>
+    <div class="price-card">
+      <div class="price-name">Cadena</div>
+      <div class="price-amount">$1,299</div>
+      <div class="price-period">/mes · multi-sucursal</div>
+      <ul class="price-feats">
+        <li>Todo el plan Pro</li>
+        <li>Hasta 10 sucursales</li>
+        <li>Reportes consolidados</li>
+        <li>API de integración</li>
+        <li>Gerente de cuenta dedicado</li>
+        <li>SLA respuesta 2 horas</li>
+      </ul>
+      <a href="/registro.html?giro=purificadora" class="btn btn-outline" style="display:block;text-align:center">Hablar con ventas</a>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="section-label">Preguntas frecuentes</div>
+  <div class="section-title">Todo lo que necesitas saber antes de empezar</div>
+  <div class="faq-list">
+    <div class="faq-item"><div class="faq-q">¿Maneja rutas de reparto?</div><div class="faq-a">Sí. Cada repartidor con su ruta, clientes y garrafones. Marca entregado al hacer. Reporte en vivo.</div></div>
+    <div class="faq-item"><div class="faq-q">¿Registro por número de garrafón?</div><div class="faq-a">Sí. Cada garrafón con serie. Sabes a quién está prestado, cuánto tiempo lleva afuera.</div></div>
+    <div class="faq-item"><div class="faq-q">¿Crédito a clientes fijos?</div><div class="faq-a">Sí. Cuenta por cliente, saldo siempre actualizado, recordatorios automáticos.</div></div>
+    <div class="faq-item"><div class="faq-q">¿Vendo otros productos (hielo, refrescos)?</div><div class="faq-a">Sí. Inventario completo, venta desde mostrador o ruta.</div></div>
+    <div class="faq-item"><div class="faq-q">¿Sirve para purificadora pequeña?</div><div class="faq-a">Sí, plan Básico gratis.</div></div>
+    <div class="faq-item"><div class="faq-q">¿Puedo emitir factura?</div><div class="faq-a">Sí, CFDI 4.0.</div></div>
+  </div>
+</section>
+
+<div class="final-cta">
+  <div style="font-size:3rem;margin-bottom:1rem">💧</div>
+  <h2>Tu purificadora de agua merece <em>orden y crecimiento</em></h2>
+  <p>Empieza gratis hoy. Sin tarjeta de crédito. Configura en menos de 1 hora.</p>
+  <a href="/registro.html?giro=purificadora" class="btn btn-primary" style="font-size:1.05rem" onclick="try{fetch('/api/log/client',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event:'cta_click',pos:'final',page:'landing-purificadora',ts:Date.now()})})}catch(e){}">Crear mi purificadora de agua digital — Gratis →</a>
+</div>
+
+<footer>
+  <div class="logo">Vol<span>vix</span> <span style="font-size:.8rem;font-weight:400;color:var(--muted)">POS para Purificadoras</span></div>
+  <div class="footer-links">
+    <a href="/">Inicio</a>
+    <a href="#features">Funciones</a>
+    <a href="#precios">Precios</a>
+    <a href="soporte.html">Soporte</a>
+  </div>
+  <span>© 2025 Volvix POS</span>
+</footer>
+<script>window.addEventListener('pagehide',()=>{try{navigator.sendBeacon('/api/log/client',JSON.stringify({event:'page_leave',page:'landing-purificadora',ts:Date.now()}));}catch(e){}});</script>
+</body>
+</html>

@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volvix · Activity Feed</title>
+<style>
+  :root {
+    --bg: #0a1020;
+    --panel: #12182d;
+    --panel-2: #1a2243;
+    --line: #2a3358;
+    --text: #e5ecff;
+    --muted: #8a96b8;
+    --accent: #6d8bff;
+    --accent-2: #9b6dff;
+    --ok: #3ddc84;
+    --warn: #ffb86b;
+    --err: #ff6b8a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: linear-gradient(135deg, var(--bg), #050813);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 24px; border-bottom: 1px solid var(--line);
+    background: rgba(10,16,32,.85); backdrop-filter: blur(8px);
+    position: sticky; top: 0; z-index: 10;
+  }
+  header h1 { margin: 0; font-size: 19px; }
+  .header-actions { display: flex; gap: 10px; align-items: center; }
+  .live-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--err); display: inline-block;
+    margin-right: 6px; vertical-align: middle;
+  }
+  .live-dot.on { background: var(--ok); animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(61,220,132,.6); } 100% { box-shadow: 0 0 0 10px rgba(61,220,132,0); } }
+  main { display: grid; grid-template-columns: 260px 1fr; gap: 0; min-height: calc(100vh - 60px); }
+  @media (max-width: 760px) { main { grid-template-columns: 1fr; } aside { border-right: 0 !important; border-bottom: 1px solid var(--line); } }
+  aside {
+    border-right: 1px solid var(--line);
+    padding: 22px 18px;
+    background: rgba(18,24,45,.4);
+  }
+  aside h3 { margin: 0 0 12px; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .filter-group { margin-bottom: 22px; }
+  .chip {
+    display: inline-block; padding: 6px 11px; border-radius: 999px;
+    background: var(--panel); border: 1px solid var(--line);
+    font-size: 12px; cursor: pointer; margin: 0 6px 6px 0;
+    user-select: none; transition: all .15s;
+  }
+  .chip:hover { border-color: var(--accent); }
+  .chip.active { background: var(--accent); color: #0b1220; border-color: var(--accent); font-weight: 600; }
+  aside input, aside select {
+    width: 100%; background: var(--panel); color: var(--text);
+    border: 1px solid var(--line); border-radius: 8px;
+    padding: 8px 10px; font-size: 13px;
+  }
+  section.feed { padding: 22px 28px; overflow: auto; }
+  .feed-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 18px;
+  }
+  .stats {
+    display: flex; gap: 10px; flex-wrap: wrap;
+  }
+  .stat {
+    background: var(--panel); border: 1px solid var(--line);
+    padding: 8px 14px; border-radius: 10px; font-size: 12px;
+    color: var(--muted);
+  }
+  .stat strong { color: var(--text); font-size: 16px; display: block; }
+  .event {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 12px; padding: 14px 16px;
+    margin-bottom: 10px; cursor: pointer;
+    display: flex; gap: 14px; align-items: flex-start;
+    transition: border-color .15s, transform .1s;
+    animation: slide-in .25s ease;
+  }
+  @keyframes slide-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+  .event:hover { border-color: var(--accent); }
+  .event.new { border-left: 3px solid var(--ok); }
+  .event-icon {
+    font-size: 22px; flex-shrink: 0;
+    width: 40px; height: 40px; display: flex;
+    align-items: center; justify-content: center;
+    background: var(--panel-2); border-radius: 10px;
+  }
+  .event-body { flex: 1; min-width: 0; }
+  .event-title { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+  .event-summary { color: var(--muted); font-size: 12px; word-break: break-word; }
+  .event-meta {
+    display: flex; gap: 12px; flex-wrap: wrap; margin-top: 6px;
+    font-size: 11px; color: var(--muted);
+  }
+  .event-meta span::before { content: "• "; opacity: .6; margin-right: 4px; }
+  .event-meta span:first-child::before { content: ""; margin: 0; }
+  .empty { color: var(--muted); padding: 60px 0; text-align: center; }
+
+  /* Modal */
+  .modal-bg {
+    position: fixed; inset: 0; background: rgba(5,8,19,.7);
+    display: none; align-items: center; justify-content: center;
+    z-index: 20; padding: 20px;
+  }
+  .modal-bg.show { display: flex; }
+  .modal {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 16px; max-width: 720px; width: 100%;
+    max-height: 80vh; overflow: auto; padding: 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.6);
+  }
+  .modal h2 { margin: 0 0 12px; font-size: 18px; }
+  .modal pre {
+    background: var(--panel-2); border: 1px solid var(--line);
+    border-radius: 10px; padding: 14px; font-size: 12px;
+    overflow: auto; color: #cdd5f0; max-height: 320px;
+  }
+  .modal .close {
+    float: right; cursor: pointer; color: var(--muted);
+    font-size: 22px; line-height: 1; background: none; border: 0;
+  }
+  .kv { display: grid; grid-template-columns: 130px 1fr; gap: 6px 14px; font-size: 13px; margin: 14px 0; }
+  .kv dt { color: var(--muted); }
+  .kv dd { margin: 0; word-break: break-word; }
+
+  /* Type colors */
+  .type-sale .event-icon { background: rgba(61,220,132,.18); }
+  .type-login .event-icon { background: rgba(109,139,255,.18); }
+  .type-edit .event-icon { background: rgba(255,184,107,.18); }
+  .type-delete .event-icon { background: rgba(255,107,138,.18); }
+  .type-payment .event-icon { background: rgba(155,109,255,.18); }
+</style>
+</head>
+<body>
+<header>
+  <h1>📡 Activity Feed</h1>
+  <div class="header-actions">
+    <span><span class="live-dot" id="liveDot"></span><span id="liveLabel">Conectando…</span></span>
+    <button class="chip" id="btnRefresh">↻ Refrescar</button>
+  </div>
+</header>
+
+<main>
+  <aside>
+    <div class="filter-group">
+      <h3>Tipo</h3>
+      <div id="typeChips">
+        <span class="chip active" data-type="">Todos</span>
+        <span class="chip" data-type="sale">🛒 Ventas</span>
+        <span class="chip" data-type="login">🔐 Logins</span>
+        <span class="chip" data-type="edit">✏️ Ediciones</span>
+        <span class="chip" data-type="delete">🗑️ Borrados</span>
+        <span class="chip" data-type="customer">👤 Clientes</span>
+        <span class="chip" data-type="product">📦 Productos</span>
+        <span class="chip" data-type="payment">💳 Pagos</span>
+        <span class="chip" data-type="user">👥 Usuarios</span>
+        <span class="chip" data-type="settings">⚙️ Config</span>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <h3>Usuario</h3>
+      <input type="text" id="filterUser" placeholder="user_id o email">
+    </div>
+
+    <div class="filter-group">
+      <h3>Tiempo</h3>
+      <select id="filterTime">
+        <option value="">Todo</option>
+        <option value="1h">Última hora</option>
+        <option value="6h">Últimas 6 horas</option>
+        <option value="24h" selected>Últimas 24 horas</option>
+        <option value="7d">Últimos 7 días</option>
+        <option value="30d">Últimos 30 días</option>
+      </select>
+    </div>
+  </aside>
+
+  <section class="feed">
+    <div class="feed-header">
+      <div class="stats">
+        <div class="stat"><strong id="stTotal">0</strong>Eventos</div>
+        <div class="stat"><strong id="stSales">0</strong>Ventas</div>
+        <div class="stat"><strong id="stLogins">0</strong>Logins</div>
+        <div class="stat"><strong id="stEdits">0</strong>Ediciones</div>
+      </div>
+    </div>
+    <div id="feedList"></div>
+  </section>
+</main>
+
+<!-- Detail modal -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <button class="close" id="modalClose">✕</button>
+    <h2 id="modalTitle"></h2>
+    <dl class="kv" id="modalKv"></dl>
+    <h3 style="margin: 14px 0 6px; font-size: 13px; color: var(--muted);">Detalle completo</h3>
+    <pre id="modalDetail"></pre>
+  </div>
+</div>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const state = {
+    filterType: '',
+    filterUser: '',
+    filterTime: '24h',
+    items: [],
+    seen: new Set(),
+    rt: null,
+    rtClient: null,
+    pollTimer: null,
+    lastTs: null,
+    pageSize: 50,
+    offset: 0,
+    loadingMore: false,
+    hasMore: true,
+  };
+
+  function getToken() {
+    try {
+      return (
+        localStorage.getItem('volvix_token') ||
+        sessionStorage.getItem('volvix_token') ||
+        document.cookie.split('; ').find((c) => c.startsWith('volvix_token='))?.split('=')[1] ||
+        ''
+      );
+    } catch (_) { return ''; }
+  }
+
+  function getSinceIso(label) {
+    if (!label) return null;
+    const map = { '1h': 60, '6h': 360, '24h': 1440, '7d': 10080, '30d': 43200 };
+    const min = map[label];
+    if (!min) return null;
+    return new Date(Date.now() - min * 60 * 1000).toISOString();
+  }
+
+  function relTime(ts) {
+    if (!ts) return '—';
+    const d = new Date(ts).getTime();
+    const diff = Math.max(0, Date.now() - d);
+    const s = Math.floor(diff / 1000);
+    if (s < 60) return 'hace ' + s + 's';
+    if (s < 3600) return 'hace ' + Math.floor(s / 60) + 'm';
+    if (s < 86400) return 'hace ' + Math.floor(s / 3600) + 'h';
+    return 'hace ' + Math.floor(s / 86400) + 'd';
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  async function fetchEvents() {
+    const params = new URLSearchParams();
+    const since = getSinceIso(state.filterTime);
+    if (since) params.set('since', since);
+    if (state.filterType) params.set('type', state.filterType);
+    if (state.filterUser) params.set('user_id', state.filterUser);
+    params.set('limit', String(state.pageSize || 50));
+    if (state.offset) params.set('offset', String(state.offset));
+    const headers = {};
+    const tok = getToken();
+    if (tok) headers['Authorization'] = 'Bearer ' + tok;
+    const r = await fetch('/api/activity?' + params.toString(), { headers, credentials: 'include' });
+    if (r.status === 401) {
+      const back = encodeURIComponent(location.pathname + location.search);
+      location.replace('/login.html?expired=1&redirect=' + back);
+      return [];
+    }
+    if (r.status === 503) {
+      try { (window.vlxToast || function(m){console.warn(m);})('Servicio no disponible (503)', 'warn'); } catch(_){}
+      return [];
+    }
+    if (!r.ok) return [];
+    const j = await r.json().catch(() => ({}));
+    return (j && j.items) || [];
+  }
+
+  function render(items) {
+    state.items = items;
+    state.seen = new Set(items.map((it) => it.id).filter(Boolean));
+    if (items.length) {
+      state.lastTs = items[0].ts;
+    }
+    $('stTotal').textContent = items.length;
+    $('stSales').textContent = items.filter((i) => i.type === 'sale').length;
+    $('stLogins').textContent = items.filter((i) => i.type === 'login').length;
+    $('stEdits').textContent = items.filter((i) => i.type === 'edit' || i.type === 'update').length;
+
+    const list = $('feedList');
+    if (!items.length) {
+      list.innerHTML = '<div class="empty">Sin eventos en este rango</div>';
+      return;
+    }
+    list.innerHTML = items.map((it, idx) => renderEvent(it, false)).join('');
+    list.querySelectorAll('.event').forEach((el, idx) => {
+      el.addEventListener('click', () => openModal(items[idx]));
+    });
+  }
+
+  function renderEvent(it, isNew) {
+    const cls = 'event type-' + (it.type || 'other') + (isNew ? ' new' : '');
+    const meta = [];
+    if (it.user_id) meta.push('<span>' + escapeHtml(String(it.user_id).slice(0, 24)) + '</span>');
+    if (it.country || it.city) {
+      const place = [it.city, it.country].filter(Boolean).join(', ');
+      meta.push('<span>📍 ' + escapeHtml(place) + '</span>');
+    }
+    if (it.resource) meta.push('<span>' + escapeHtml(it.resource) + '</span>');
+    meta.push('<span>' + relTime(it.ts) + '</span>');
+    return (
+      '<div class="' + cls + '">' +
+        '<div class="event-icon">' + (it.icon || '📌') + '</div>' +
+        '<div class="event-body">' +
+          '<div class="event-title">' + escapeHtml(it.title || 'Evento') + '</div>' +
+          '<div class="event-summary">' + escapeHtml(it.summary || '') + '</div>' +
+          '<div class="event-meta">' + meta.join('') + '</div>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  function prependEvent(it) {
+    if (!it || (it.id && state.seen.has(it.id))) return;
+    if (it.id) state.seen.add(it.id);
+    state.items.unshift(it);
+    state.items = state.items.slice(0, 300);
+    if (it.ts) state.lastTs = it.ts;
+    render(state.items);
+  }
+
+  function openModal(it) {
+    if (!it) return;
+    $('modalTitle').textContent = (it.icon || '') + ' ' + (it.title || 'Evento');
+    const kv = $('modalKv');
+    kv.innerHTML = '';
+    const fields = [
+      ['ID', it.id],
+      ['Fecha', it.ts ? new Date(it.ts).toLocaleString('es-MX') : '—'],
+      ['Tipo', it.type],
+      ['Usuario', it.user_id],
+      ['Recurso', it.resource],
+      ['Recurso ID', it.resource_id],
+      ['IP', it.ip],
+      ['Ubicación', [it.city, it.country].filter(Boolean).join(', ') || null],
+    ];
+    for (const [k, v] of fields) {
+      if (v == null || v === '') continue;
+      kv.insertAdjacentHTML('beforeend',
+        '<dt>' + escapeHtml(k) + '</dt><dd>' + escapeHtml(String(v)) + '</dd>');
+    }
+    $('modalDetail').textContent = JSON.stringify(it.details || {}, null, 2);
+    $('modalBg').classList.add('show');
+  }
+  $('modalClose').addEventListener('click', () => $('modalBg').classList.remove('show'));
+  $('modalBg').addEventListener('click', (e) => { if (e.target === $('modalBg')) $('modalBg').classList.remove('show'); });
+
+  // --- Filter wiring ---
+  $('typeChips').addEventListener('click', (e) => {
+    const c = e.target.closest('.chip'); if (!c) return;
+    document.querySelectorAll('#typeChips .chip').forEach((x) => x.classList.remove('active'));
+    c.classList.add('active');
+    state.filterType = c.dataset.type || '';
+    refresh();
+  });
+  $('filterUser').addEventListener('input', (e) => {
+    state.filterUser = e.target.value.trim();
+    clearTimeout($('filterUser')._t);
+    $('filterUser')._t = setTimeout(refresh, 350);
+  });
+  $('filterTime').addEventListener('change', (e) => {
+    state.filterTime = e.target.value;
+    refresh();
+  });
+  $('btnRefresh').addEventListener('click', refresh);
+
+  async function refresh() {
+    setLive(false, 'Cargando…');
+    state.offset = 0;
+    state.hasMore = true;
+    const items = await fetchEvents();
+    state.hasMore = items.length >= (state.pageSize || 50);
+    render(items);
+    setLive(state.rt ? true : false, state.rt ? 'En vivo' : 'Polling');
+  }
+
+  async function loadMore() {
+    if (state.loadingMore || !state.hasMore) return;
+    state.loadingMore = true;
+    state.offset = (state.items || []).length;
+    const more = await fetchEvents();
+    if (!more.length || more.length < (state.pageSize || 50)) state.hasMore = false;
+    if (more.length) {
+      // Append, dedupe by id
+      const seen = state.seen;
+      const fresh = more.filter((it) => !it.id || !seen.has(it.id));
+      fresh.forEach((it) => { if (it.id) seen.add(it.id); });
+      state.items = (state.items || []).concat(fresh);
+      // Re-render appending only (cheap: use full render to reuse logic)
+      render(state.items);
+    }
+    state.loadingMore = false;
+  }
+
+  // Sentinel for infinite scroll
+  function setupInfiniteScroll() {
+    try {
+      const list = $('feedList');
+      if (!list || !('IntersectionObserver' in window)) return;
+      let sentinel = document.getElementById('feedSentinel');
+      if (!sentinel) {
+        sentinel = document.createElement('div');
+        sentinel.id = 'feedSentinel';
+        sentinel.style.cssText = 'height:1px;';
+        list.parentNode.insertBefore(sentinel, list.nextSibling);
+      }
+      const io = new IntersectionObserver((entries) => {
+        if (entries.some((e) => e.isIntersecting)) loadMore();
+      }, { rootMargin: '200px' });
+      io.observe(sentinel);
+    } catch (_) {}
+  }
+  setupInfiniteScroll();
+
+  // --- Live: try Supabase Realtime, fall back to polling ---
+  function setLive(on, label) {
+    $('liveDot').classList.toggle('on', !!on);
+    $('liveLabel').textContent = label || (on ? 'En vivo' : 'Desconectado');
+  }
+
+  function tryRealtime() {
+    try {
+      // Optional: window.SUPABASE_URL + window.SUPABASE_ANON_KEY exposed by config.js
+      const url = window.SUPABASE_URL || (window.VOLVIX_CONFIG && window.VOLVIX_CONFIG.SUPABASE_URL);
+      const key = window.SUPABASE_ANON_KEY || (window.VOLVIX_CONFIG && window.VOLVIX_CONFIG.SUPABASE_ANON_KEY);
+      if (!url || !key || !window.supabase) return false;
+      const client = window.supabase.createClient(url, key);
+      const ch = client.channel('volvix_audit_log_feed')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'volvix_audit_log' }, (payload) => {
+          // Realtime delivers the raw row — re-fetch latest to get the mapped event
+          fetchLatest();
+        })
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') setLive(true, 'En vivo');
+          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') startPolling();
+        });
+      state.rt = ch; state.rtClient = client;
+      return true;
+    } catch (_) { return false; }
+  }
+
+  async function fetchLatest() {
+    const items = await fetchEvents();
+    if (!items.length) return;
+    const newOnes = items.filter((it) => it.id && !state.seen.has(it.id));
+    if (!newOnes.length) return;
+    for (const it of newOnes.reverse()) prependEvent(it);
+  }
+
+  function startPolling() {
+    if (state.pollTimer) return;
+    setLive(false, 'Polling cada 15s');
+    state.pollTimer = setInterval(fetchLatest, 15000);
+  }
+
+  // --- Init ---
+  refresh().then(() => {
+    if (!tryRealtime()) startPolling();
+  });
+  // Refresh relative timestamps every 30s
+  setInterval(() => render(state.items), 30000);
+})();
+</script>
+</body>
+</html>

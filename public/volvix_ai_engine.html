@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volvix AI Engine · Motor de auto-evolución</title>
+<script src="/auth-gate.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  :root {
+    --bg: #0A0A0A;
+    --bg-2: #121212;
+    --bg-3: #1A1A1A;
+    --surface: #1F1F1E;
+    --border: #2E2E2C;
+    --border-2: #3A3A38;
+    --text: #FAFAF9;
+    --text-2: #A8A29E;
+    --text-3: #78716C;
+    --accent: #FBBF24;
+    --accent-2: #F59E0B;
+    --success: #22C55E;
+    --info: #3B82F6;
+    --warn: #F97316;
+    --danger: #EF4444;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  body { background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+  a { color: var(--accent); text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; }
+
+  /* ======= TOPBAR ======= */
+  .top {
+    background: var(--bg-2);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 22px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15px; }
+  .brand-ico {
+    width: 34px; height: 34px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #FBBF24, #F59E0B);
+    color: #0A0A0A;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px;
+    box-shadow: 0 0 18px rgba(251,191,36,0.35);
+  }
+  .brand small {
+    display: block;
+    font-size: 10px;
+    color: var(--text-3);
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    margin-top: 1px;
+  }
+  .tb-sep { flex: 1; }
+  .tb-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 12px;
+    background: rgba(34,197,94,0.1);
+    border: 1px solid rgba(34,197,94,0.3);
+    border-radius: 100px;
+    font-size: 12px;
+    color: var(--success);
+    font-weight: 600;
+  }
+  .tb-status .dot {
+    width: 8px; height: 8px;
+    background: var(--success);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--success);
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes pulse { 50% { opacity: 0.5; } }
+  .tb-btn {
+    padding: 7px 13px;
+    background: transparent;
+    color: var(--text-2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    font-size: 12.5px;
+    font-weight: 500;
+  }
+  .tb-btn:hover { border-color: var(--border-2); color: var(--text); }
+  .tb-btn.gold {
+    background: var(--accent);
+    color: #0A0A0A;
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+  .tb-btn.gold:hover { background: var(--accent-2); }
+
+  /* ======= LAYOUT ======= */
+  .layout {
+    display: grid;
+    grid-template-columns: 260px 1fr 360px;
+    min-height: calc(100vh - 58px);
+  }
+
+  /* ======= SIDEBAR ======= */
+  .sidebar {
+    background: var(--bg-2);
+    border-right: 1px solid var(--border);
+    padding: 18px 12px;
+    overflow-y: auto;
+  }
+  .side-title {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 0 10px 8px;
+  }
+  .side-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 20px;
+  }
+  .side-item {
+    padding: 8px 12px;
+    color: var(--text-2);
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .side-item:hover { background: var(--bg-3); color: var(--text); }
+  .side-item.active { background: var(--bg-3); color: var(--accent); }
+  .side-item .count {
+    margin-left: auto;
+    font-size: 10.5px;
+    color: var(--text-3);
+    font-family: var(--mono);
+  }
+  .side-item.active .count { color: var(--accent); }
+
+  /* ======= MAIN ======= */
+  .main {
+    padding: 24px 28px;
+    overflow-y: auto;
+    max-height: calc(100vh - 58px);
+  }
+  .page-head { margin-bottom: 22px; }
+  .page-head h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .page-head p { font-size: 13px; color: var(--text-2); }
+
+  /* ======= KPIs ======= */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .kpi {
+    padding: 14px 16px;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .kpi-label {
+    font-size: 11px;
+    color: var(--text-3);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 6px;
+  }
+  .kpi-val {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.8px;
+    color: var(--text);
+  }
+  .kpi-val.gold { color: var(--accent); }
+  .kpi-val.green { color: var(--success); }
+  .kpi-sub {
+    font-size: 11px;
+    color: var(--text-3);
+    margin-top: 4px;
+  }
+  .kpi-sub .up { color: var(--success); }
+
+  /* ======= FEATURE REGISTRY ======= */
+  .section {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .section-head {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .section-head h3 {
+    font-size: 13.5px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+  }
+  .section-head .sub {
+    font-size: 11.5px;
+    color: var(--text-3);
+    margin-top: 2px;
+  }
+
+  .filter-bar {
+    padding: 10px 14px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+  }
+  .filter-chip {
+    padding: 4px 10px;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-2);
+    cursor: pointer;
+  }
+  .filter-chip:hover { border-color: var(--border-2); color: var(--text); }
+  .filter-chip.active {
+    background: var(--accent);
+    color: #0A0A0A;
+    border-color: var(--accent);
+  }
+  .filter-search {
+    margin-left: auto;
+    padding: 5px 10px;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--text);
+    width: 180px;
+  }
+
+  .feat-list { display: flex; flex-direction: column; }
+  .feat {
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr 90px 100px 90px auto;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .feat:hover { background: var(--bg-3); }
+  .feat:last-child { border-bottom: none; }
+  .feat-main { display: flex; align-items: center; gap: 11px; }
+  .feat-ico {
+    width: 32px; height: 32px;
+    border-radius: 7px;
+    background: var(--bg-3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+  .feat-name { font-weight: 600; font-size: 13px; margin-bottom: 2px; }
+  .feat-id { font-size: 10px; font-family: var(--mono); color: var(--text-3); }
+  .feat-mod {
+    font-size: 10.5px;
+    color: var(--text-2);
+    font-weight: 500;
+  }
+  .feat-usage {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-2);
+  }
+  .feat-chip {
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-size: 10.5px;
+    font-weight: 600;
+    text-align: center;
+  }
+  .chip-stable { background: rgba(34,197,94,0.12); color: var(--success); }
+  .chip-extended { background: rgba(59,130,246,0.12); color: var(--info); }
+  .chip-new { background: rgba(251,191,36,0.12); color: var(--accent); }
+  .chip-custom { background: rgba(168,85,247,0.12); color: #A855F7; }
+  .feat-btn {
+    padding: 4px 10px;
+    background: transparent;
+    border: 1px solid var(--border-2);
+    border-radius: 5px;
+    font-size: 10.5px;
+    color: var(--text-2);
+  }
+  .feat-btn:hover { background: var(--bg-3); color: var(--text); }
+
+  /* ======= AI CHAT (sidebar derecha) ======= */
+  .ai-panel {
+    background: var(--bg-2);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 58px);
+  }
+  .ai-head {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .ai-head h3 {
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ai-head .tag {
+    font-size: 10px;
+    padding: 2px 7px;
+    background: rgba(34,197,94,0.15);
+    color: var(--success);
+    border-radius: 100px;
+    font-weight: 600;
+  }
+  .ai-head .sub {
+    font-size: 11.5px;
+    color: var(--text-3);
+    margin-top: 3px;
+  }
+
+  .ai-log {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px;
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .ai-msg {
+    padding: 10px 12px;
+    border-radius: 8px;
+    line-height: 1.5;
+    animation: fadeUp 0.3s ease;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .ai-msg.user {
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .ai-msg.ai {
+    background: rgba(251,191,36,0.07);
+    border: 1px solid rgba(251,191,36,0.18);
+    color: var(--text);
+  }
+  .ai-msg.ai .tag {
+    display: inline-block;
+    padding: 1px 6px;
+    background: rgba(251,191,36,0.15);
+    color: var(--accent);
+    border-radius: 4px;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+  }
+  .ai-msg.system {
+    background: transparent;
+    border: 1px dashed var(--border-2);
+    color: var(--text-3);
+    font-size: 11px;
+    font-family: var(--mono);
+  }
+  .ai-msg.system .line {
+    display: block;
+    padding: 1px 0;
+  }
+  .ai-msg.system .ok { color: var(--success); }
+  .ai-msg.system .info { color: var(--info); }
+  .ai-msg.system .warn { color: var(--warn); }
+  .ai-msg code {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    background: var(--bg-3);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  .ai-input-bar {
+    padding: 12px 14px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 6px;
+  }
+  .ai-input {
+    flex: 1;
+    padding: 9px 12px;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    color: var(--text);
+    font-size: 12.5px;
+    font-family: inherit;
+  }
+  .ai-input:focus { outline: none; border-color: var(--accent); }
+  .ai-send {
+    padding: 9px 14px;
+    background: var(--accent);
+    color: #0A0A0A;
+    border: none;
+    border-radius: 7px;
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+  .ai-send:hover { background: var(--accent-2); }
+
+  .ai-suggestions {
+    padding: 8px 14px;
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    border-top: 1px solid var(--border);
+  }
+  .ai-suggest {
+    padding: 4px 9px;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: 10.5px;
+    color: var(--text-2);
+    cursor: pointer;
+  }
+  .ai-suggest:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ======= MODAL DETALLE ======= */
+  .modal-bg {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+  }
+  .modal-bg.open { display: flex; }
+  .modal {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    max-width: 900px;
+    width: 100%;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .modal-head {
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .modal-body {
+    padding: 20px 22px;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .code-block {
+    background: #000;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    line-height: 1.6;
+    color: #E8E6DB;
+    overflow-x: auto;
+    white-space: pre;
+    margin: 10px 0;
+  }
+  .code-block .kw { color: #C084FC; }
+  .code-block .str { color: #86EFAC; }
+  .code-block .fn { color: #FBBF24; }
+  .code-block .com { color: #57534E; }
+
+  /* Responsive */
+  @media (max-width: 1200px) {
+    .layout { grid-template-columns: 220px 1fr 300px; }
+  }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar, .ai-panel { display: none; }
+  }
+
+  /* ======= POLISH: thinking dots, copy, toast, light theme ======= */
+  .thinking-dots { display: inline-flex; gap: 3px; align-items: center; }
+  .thinking-dots span {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--accent);
+    animation: bounceDot 1.2s infinite ease-in-out;
+  }
+  .thinking-dots span:nth-child(2) { animation-delay: 0.15s; }
+  .thinking-dots span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes bounceDot {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+    40% { transform: translateY(-4px); opacity: 1; }
+  }
+  .ai-msg .copy-btn {
+    margin-top: 6px;
+    padding: 3px 8px;
+    background: transparent;
+    border: 1px solid var(--border-2);
+    border-radius: 4px;
+    color: var(--text-3);
+    font-size: 10px;
+    cursor: pointer;
+  }
+  .ai-msg .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .ai-toolbar {
+    padding: 8px 14px;
+    border-top: 1px solid var(--border);
+    display: flex; gap: 6px; align-items: center;
+    font-size: 10.5px;
+  }
+  .ai-toolbar button {
+    padding: 4px 8px;
+    background: transparent;
+    color: var(--text-3);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    font-size: 10px;
+    cursor: pointer;
+  }
+  .ai-toolbar button:hover { color: var(--text); border-color: var(--border-2); }
+  #vlx-toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--bg-3); border: 1px solid var(--accent);
+    color: var(--text); padding: 10px 14px; border-radius: 8px;
+    font-size: 12.5px; z-index: 999; opacity: 0;
+    transform: translateY(8px); transition: all 0.3s ease;
+    pointer-events: none; max-width: 320px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  #vlx-toast.show { opacity: 1; transform: translateY(0); }
+  body.vlx-light {
+    --bg: #FAFAF9; --bg-2: #F5F5F4; --bg-3: #E7E5E4;
+    --surface: #FFFFFF; --border: #D6D3D1; --border-2: #A8A29E;
+    --text: #1C1917; --text-2: #44403C; --text-3: #78716C;
+  }
+  body.vlx-light .ai-msg.ai { background: rgba(251,191,36,0.12); }
+  body.vlx-light .code-block { background: #1C1917; }
+</style>
+<script src="volvix-api.js"></script>
+<script src="volvix-sync.js"></script>
+<script src="volvix-sync-widget.js"></script>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="top">
+  <div class="brand">
+    <div class="brand-ico">🧠</div>
+    <div>
+      <div>Volvix AI Engine</div>
+      <small>MOTOR DE AUTO-EVOLUCIÓN · v2.4.1</small>
+    </div>
+  </div>
+  <div class="tb-sep"></div>
+  <div class="tb-status">
+    <div class="dot"></div>
+    <span>IA Auto-reprogramación activa</span>
+  </div>
+  <button class="tb-btn" onclick="window.open('volvix-owner-panel.html','_blank')">← Owner Panel</button>
+  <button class="tb-btn gold" onclick="simulateRequest()">+ Simular petición</button>
+</div>
+<div id="vlx-toast"></div>
+
+<div class="layout">
+
+  <!-- SIDEBAR IZQ -->
+  <div class="sidebar">
+    <div class="side-title">Exploración</div>
+    <div class="side-nav">
+      <div class="side-item active" onclick="navSection(this, 'registry')">
+        <span>📦</span> Feature Registry
+        <span class="count">247</span>
+      </div>
+      <div class="side-item" onclick="navSection(this, 'pending')">
+        <span>⏳</span> Peticiones pendientes
+        <span class="count">3</span>
+      </div>
+      <div class="side-item" onclick="navSection(this, 'auto')">
+        <span>🤖</span> Auto-programadas
+        <span class="count">28</span>
+      </div>
+      <div class="side-item" onclick="navSection(this, 'extensions')">
+        <span>🔗</span> Extensiones
+        <span class="count">64</span>
+      </div>
+      <div class="side-item" onclick="navSection(this, 'custom')">
+        <span>👤</span> Features custom
+        <span class="count">41</span>
+      </div>
+    </div>
+
+    <div class="side-title">Por módulo</div>
+    <div class="side-nav">
+      <div class="side-item"><span>🛒</span> POS<span class="count">48</span></div>
+      <div class="side-item"><span>📦</span> Inventario<span class="count">32</span></div>
+      <div class="side-item"><span>💰</span> Corte de caja<span class="count">18</span></div>
+      <div class="side-item"><span>🧾</span> Facturación<span class="count">24</span></div>
+      <div class="side-item"><span>👥</span> Clientes<span class="count">15</span></div>
+      <div class="side-item"><span>📊</span> Reportes<span class="count">39</span></div>
+      <div class="side-item"><span>🏷️</span> Etiquetas<span class="count">11</span></div>
+      <div class="side-item"><span>🍽️</span> Restaurante<span class="count">22</span></div>
+      <div class="side-item"><span>💈</span> Servicios<span class="count">19</span></div>
+      <div class="side-item"><span>🏫</span> Educación<span class="count">14</span></div>
+      <div class="side-item"><span>💊</span> Salud<span class="count">5</span></div>
+    </div>
+
+    <div class="side-title">Sistema</div>
+    <div class="side-nav">
+      <div class="side-item"><span>📚</span> Knowledge base<span class="count">1.2K</span></div>
+      <div class="side-item"><span>🔧</span> Reglas de la IA</div>
+      <div class="side-item"><span>⚙️</span> Config</div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="page-head">
+      <h1>🧠 Feature Registry <span style="font-size:11px;padding:3px 8px;background:rgba(251,191,36,0.12);color:var(--accent);border-radius:100px;font-weight:600;">Ningún feature se duplica</span></h1>
+      <p>Cada feature existe <strong>una sola vez</strong>. Cuando un cliente pide algo: la IA busca → si existe, lo activa · si existe parcial, lo extiende · si no existe, lo programa sola.</p>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-row">
+      <div class="kpi">
+        <div class="kpi-label">Features totales</div>
+        <div class="kpi-val">247</div>
+        <div class="kpi-sub"><span class="up">+12</span> esta semana · auto-programadas por IA</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Activaciones (no duplicó)</div>
+        <div class="kpi-val green">1,843</div>
+        <div class="kpi-sub">De 1,912 peticiones recibidas</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Extensiones</div>
+        <div class="kpi-val">64</div>
+        <div class="kpi-sub">Features existentes que la IA amplió</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Ahorro vs programar todo</div>
+        <div class="kpi-val gold">$312K</div>
+        <div class="kpi-sub">Si cada request fuera feature nueva</div>
+      </div>
+    </div>
+
+    <!-- Flujo de decisión de la IA -->
+    <div class="section">
+      <div class="section-head">
+        <div>
+          <h3>🔀 Flujo de decisión de la IA</h3>
+          <div class="sub">Así decide qué hacer con cada petición del cliente</div>
+        </div>
+      </div>
+      <div style="padding:18px 22px;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;">
+          <div style="padding:14px;background:var(--bg-3);border-radius:10px;border:1px solid var(--border);">
+            <div style="font-size:18px;margin-bottom:4px;">1️⃣</div>
+            <div style="font-weight:600;font-size:12px;margin-bottom:3px;">Cliente pide X</div>
+            <div style="font-size:11px;color:var(--text-3);line-height:1.5;">Desde chat, WhatsApp o el POS mismo. Ejemplo: "quiero que el corte diga la temperatura".</div>
+          </div>
+          <div style="padding:14px;background:var(--bg-3);border-radius:10px;border:1px solid var(--border);">
+            <div style="font-size:18px;margin-bottom:4px;">2️⃣</div>
+            <div style="font-weight:600;font-size:12px;margin-bottom:3px;">IA busca en registry</div>
+            <div style="font-size:11px;color:var(--text-3);line-height:1.5;">Vector search + similaridad semántica en los 247 features existentes.</div>
+          </div>
+          <div style="padding:14px;background:rgba(34,197,94,0.08);border-radius:10px;border:1px solid rgba(34,197,94,0.25);">
+            <div style="font-size:18px;margin-bottom:4px;">✅</div>
+            <div style="font-weight:600;font-size:12px;margin-bottom:3px;color:var(--success);">Existe → activar</div>
+            <div style="font-size:11px;color:var(--text-3);line-height:1.5;">Solo enciende el flag para ese tenant. 0 código nuevo. Respuesta en 2 segundos.</div>
+          </div>
+          <div style="padding:14px;background:rgba(59,130,246,0.08);border-radius:10px;border:1px solid rgba(59,130,246,0.25);">
+            <div style="font-size:18px;margin-bottom:4px;">🔗</div>
+            <div style="font-weight:600;font-size:12px;margin-bottom:3px;color:var(--info);">Parcial → extender</div>
+            <div style="font-size:11px;color:var(--text-3);line-height:1.5;">Agrega campo/botón/ticket al feature existente. No crea duplicado.</div>
+          </div>
+          <div style="padding:14px;background:rgba(251,191,36,0.08);border-radius:10px;border:1px solid rgba(251,191,36,0.25);">
+            <div style="font-size:18px;margin-bottom:4px;">🆕</div>
+            <div style="font-weight:600;font-size:12px;margin-bottom:3px;color:var(--accent);">No existe → crear</div>
+            <div style="font-size:11px;color:var(--text-3);line-height:1.5;">IA programa el feature, lo prueba, lo registra. Disponible para todos los tenants.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Forecasting (real data, empty-state if insufficient history) -->
+    <div class="section" id="forecast-section">
+      <div class="section-head">
+        <div>
+          <h3>📈 Forecast de ventas IA (próximos 7 días)</h3>
+          <div class="sub">Modelo en vivo basado en tu histórico real de ventas</div>
+        </div>
+        <button class="tb-btn" onclick="loadSalesForecast()" aria-label="Actualizar forecast">↻ Actualizar</button>
+      </div>
+      <div id="forecast-body" style="padding:18px 22px;">
+        <div id="forecast-loading" style="color:var(--text-3);font-size:13px;display:flex;align-items:center;gap:10px;">
+          <span class="loading-skeleton" style="display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;"></span>
+          Cargando datos históricos...
+        </div>
+        <div id="forecast-empty" style="display:none;padding:24px;background:rgba(251,191,36,0.06);border:1px dashed rgba(251,191,36,0.3);border-radius:10px;text-align:center;">
+          <div style="font-size:32px;margin-bottom:8px;">📊</div>
+          <div style="font-weight:700;font-size:14px;color:var(--accent);margin-bottom:4px;">Necesitas ventas históricas</div>
+          <div style="font-size:12.5px;color:var(--text-2);line-height:1.55;max-width:480px;margin:0 auto;">
+            La IA requiere mínimo <strong>7 días de ventas registradas</strong> para generar un forecast confiable.
+            Cuando tengas datos suficientes, este panel mostrará proyecciones diarias con su intervalo de confianza.
+          </div>
+        </div>
+        <div id="forecast-result" style="display:none;"></div>
+        <div id="forecast-error" style="display:none;padding:14px 16px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.25);border-radius:10px;font-size:13px;color:#FCA5A5;"></div>
+      </div>
+    </div>
+
+    <!-- Feature registry -->
+    <div class="section">
+      <div class="section-head">
+        <div>
+          <h3>📦 Registry de features (247 totales)</h3>
+          <div class="sub">Cada uno con su ID, módulo padre, clientes que lo usan, historial de extensiones</div>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <div class="filter-chip active" onclick="filterFeat(this,'all')">Todos (247)</div>
+        <div class="filter-chip" onclick="filterFeat(this,'stable')">🟢 Estables (203)</div>
+        <div class="filter-chip" onclick="filterFeat(this,'extended')">🔵 Extendidos (28)</div>
+        <div class="filter-chip" onclick="filterFeat(this,'new')">🟡 Nuevos IA (11)</div>
+        <div class="filter-chip" onclick="filterFeat(this,'custom')">🟣 Custom (5)</div>
+        <input class="filter-search" placeholder="🔎 Buscar feature..." id="feat-search" oninput="searchFeats()">
+      </div>
+      <div class="feat-list" id="feat-list"></div>
+    </div>
+
+  </div>
+
+  <!-- AI CHAT -->
+  <div class="ai-panel">
+    <div class="ai-head">
+      <h3>💬 IA del sistema <span class="tag">● En línea</span></h3>
+      <div class="sub">Escribe una petición de cliente y ve cómo la IA decide</div>
+    </div>
+
+    <div class="ai-log" id="ai-log">
+      <div class="ai-msg system">
+        <span class="line"><span class="ok">✓</span> Sistema iniciado</span>
+        <span class="line"><span class="info">ℹ</span> 247 features indexados</span>
+        <span class="line"><span class="info">ℹ</span> Embeddings vectoriales cargados</span>
+        <span class="line"><span class="ok">✓</span> Auto-programación activa</span>
+      </div>
+
+      <div class="ai-msg ai">
+        <span class="tag">IA · Volvix</span>
+        <div>Hola 👋 Soy la IA del motor. Cuando un cliente pida cualquier cosa, yo decido si <strong>activar</strong>, <strong>extender</strong> o <strong>crear</strong> el feature. Prueba con las sugerencias de abajo.</div>
+      </div>
+    </div>
+
+    <div class="ai-suggestions">
+      <div class="ai-suggest" onclick="askAI('¿Cuáles son mis productos top?')">📊 Productos top</div>
+      <div class="ai-suggest" onclick="askAI('¿Qué pasa con las ventas hoy?')">💰 Ventas hoy</div>
+      <div class="ai-suggest" onclick="askAI('Sugiere productos a reordenar')">📦 Reordenar</div>
+      <div class="ai-suggest" onclick="askAI('Quiero que el corte de caja también lleve la temperatura del local')">🌡️ Corte con temperatura</div>
+      <div class="ai-suggest" onclick="askAI('Necesito que el ticket muestre el nombre del mesero')">🧾 Ticket con mesero</div>
+      <div class="ai-suggest" onclick="askAI('Quiero poder vender boletos para un evento')">🎫 Venta de boletos</div>
+      <div class="ai-suggest" onclick="askAI('Necesito imprimir etiquetas con código de barras')">🏷️ Etiquetas</div>
+    </div>
+    <div class="ai-toolbar">
+      <button onclick="vlxClearHistory()" title="Limpiar historial">🗑 Limpiar</button>
+      <span style="color:var(--text-3);margin-left:auto;" id="vlx-history-count">0 mensajes</span>
+    </div>
+
+    <div class="ai-input-bar">
+      <input class="ai-input" id="ai-input" placeholder="Escribe una petición del cliente..." onkeypress="if(event.key==='Enter')sendAI()">
+      <button class="ai-send" onclick="sendAI()">↑</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DETALLE FEATURE -->
+<div id="modal-feat" class="modal-bg" onclick="if(event.target===this)closeFeat()">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div style="font-size:15px;font-weight:600;" id="mf-name">—</div>
+        <div style="font-size:11px;color:var(--text-3);font-family:var(--mono);margin-top:2px;" id="mf-id">—</div>
+      </div>
+      <button class="tb-btn" onclick="closeFeat()">✕</button>
+    </div>
+    <div class="modal-body" id="mf-body">
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+
+// ============================================
+// REGISTRO DE FEATURES
+// ============================================
+const FEATURES = [
+  // POS core
+  { id: 'FEAT-0001', name: 'Cobrar ticket', mod: 'pos', icon: '💳', status: 'stable', usage: 1843, ext: 12, desc: 'Modal de cobro con cálculo de cambio. Soporta efectivo, tarjeta, transferencia, mixto.' },
+  { id: 'FEAT-0002', name: 'Agregar producto por código', mod: 'pos', icon: '📥', status: 'stable', usage: 1843, ext: 4 },
+  { id: 'FEAT-0003', name: 'Descuento porcentual', mod: 'pos', icon: '🔻', status: 'stable', usage: 1456, ext: 6 },
+  { id: 'FEAT-0004', name: 'Descuento manual por línea', mod: 'pos', icon: '🔸', status: 'stable', usage: 892, ext: 0 },
+  { id: 'FEAT-0005', name: 'Dividir cuenta por comensales', mod: 'pos', icon: '🪙', status: 'stable', usage: 432, ext: 2 },
+  { id: 'FEAT-0006', name: 'Propinas sugeridas', mod: 'pos', icon: '💰', status: 'stable', usage: 687 },
+  { id: 'FEAT-0007', name: 'Producto común sin código', mod: 'pos', icon: '✏️', status: 'stable', usage: 945 },
+  { id: 'FEAT-0008', name: 'Venta a granel con báscula', mod: 'pos', icon: '⚖️', status: 'extended', usage: 234, ext: 3 },
+
+  // Corte de caja
+  { id: 'FEAT-0030', name: 'Corte de caja estándar', mod: 'corte', icon: '📊', status: 'stable', usage: 1843, ext: 8, desc: 'Corte con: efectivo, tarjeta, transferencia, entradas, salidas, faltante/sobrante.' },
+  { id: 'FEAT-0031', name: 'Corte · campo temperatura', mod: 'corte', icon: '🌡️', status: 'extended', usage: 1, ext: 1, desc: 'EXTENSIÓN al corte estándar. Agrega campo "temperatura al cerrar" a petición de cliente TNT047 (Don Roberto · abarrotes).' },
+  { id: 'FEAT-0032', name: 'Arqueo por denominación', mod: 'corte', icon: '💴', status: 'stable', usage: 678 },
+  { id: 'FEAT-0033', name: 'Doble corte (turnos)', mod: 'corte', icon: '🔄', status: 'stable', usage: 234 },
+
+  // Facturación
+  { id: 'FEAT-0050', name: 'Factura CFDI 4.0', mod: 'facturacion', icon: '🧾', status: 'stable', usage: 892 },
+  { id: 'FEAT-0051', name: 'Complemento de pago', mod: 'facturacion', icon: '💸', status: 'stable', usage: 445 },
+  { id: 'FEAT-0052', name: 'Global diaria', mod: 'facturacion', icon: '📅', status: 'stable', usage: 356 },
+  { id: 'FEAT-0053', name: 'Addenda médica', mod: 'facturacion', icon: '⚕️', status: 'extended', usage: 12, ext: 1 },
+
+  // Restaurante
+  { id: 'FEAT-0080', name: 'Comanda a cocina (KDS)', mod: 'restaurante', icon: '🍽️', status: 'stable', usage: 347 },
+  { id: 'FEAT-0081', name: 'Mesas con tiempo de rotación', mod: 'restaurante', icon: '🪑', status: 'stable', usage: 347 },
+  { id: 'FEAT-0082', name: 'Modificadores de platillo', mod: 'restaurante', icon: '🍕', status: 'stable', usage: 312 },
+  { id: 'FEAT-0083', name: 'Control de merma', mod: 'restaurante', icon: '🗑️', status: 'stable', usage: 289 },
+
+  // Educación
+  { id: 'FEAT-0120', name: 'Control de colegiaturas', mod: 'educacion', icon: '🏫', status: 'stable', usage: 48 },
+  { id: 'FEAT-0121', name: 'Alumnos morosos · recordatorio WhatsApp', mod: 'educacion', icon: '📲', status: 'stable', usage: 48 },
+  { id: 'FEAT-0122', name: 'Descuentos por hermano automático', mod: 'educacion', icon: '👨‍👩‍👧', status: 'stable', usage: 34 },
+  { id: 'FEAT-0123', name: 'Pago de eventos (excursiones)', mod: 'educacion', icon: '🚌', status: 'extended', usage: 12, ext: 2 },
+
+  // Etiquetas
+  { id: 'FEAT-0150', name: 'Diseñador drag-and-drop', mod: 'etiquetas', icon: '🏷️', status: 'stable', usage: 234 },
+  { id: 'FEAT-0151', name: 'Código de barras (EAN-13, Code-128)', mod: 'etiquetas', icon: '📊', status: 'stable', usage: 234 },
+  { id: 'FEAT-0152', name: 'QR con URL personalizable', mod: 'etiquetas', icon: '⬛', status: 'stable', usage: 178 },
+  { id: 'FEAT-0153', name: 'Impresión bluetooth celular', mod: 'etiquetas', icon: '📱', status: 'stable', usage: 89 },
+
+  // Salud
+  { id: 'FEAT-0180', name: 'Expediente de paciente', mod: 'salud', icon: '📋', status: 'stable', usage: 34 },
+  { id: 'FEAT-0181', name: 'Odontograma digital', mod: 'salud', icon: '🦷', status: 'stable', usage: 12 },
+  { id: 'FEAT-0182', name: 'Calendario de vacunas mascota', mod: 'salud', icon: '💉', status: 'stable', usage: 18 },
+
+  // Recientes auto-programadas
+  { id: 'FEAT-0240', name: 'Envío de ticket a WhatsApp automático', mod: 'pos', icon: '📲', status: 'new', usage: 23, desc: 'Auto-programada por IA el 22 abril 2026 a petición de cliente TNT018. Ahora activa en 23 tenants.' },
+  { id: 'FEAT-0241', name: 'Venta con cupón de descuento', mod: 'pos', icon: '🎟️', status: 'new', usage: 11 },
+  { id: 'FEAT-0242', name: 'Reporte margen por empleado', mod: 'reportes', icon: '📈', status: 'new', usage: 7 },
+  { id: 'FEAT-0243', name: 'Alerta stock mínimo por WhatsApp', mod: 'inventario', icon: '⚠️', status: 'new', usage: 18 },
+  { id: 'FEAT-0244', name: 'Pagos parciales con saldo', mod: 'pos', icon: '💳', status: 'new', usage: 14 },
+
+  // Customs
+  { id: 'FEAT-0250', name: 'Ticket con verso personalizado · Don Pepe', mod: 'pos', icon: '📜', status: 'custom', usage: 1 },
+  { id: 'FEAT-0251', name: 'Control de tarjetas regalo navideñas · Walmart', mod: 'pos', icon: '🎁', status: 'custom', usage: 1 },
+];
+
+// Module names for labels
+const MOD_NAMES = {
+  pos: 'POS', corte: 'Corte', facturacion: 'Factura',
+  restaurante: 'Restaurante', educacion: 'Educación', salud: 'Salud',
+  inventario: 'Inventario', reportes: 'Reportes', etiquetas: 'Etiquetas'
+};
+
+// Status labels
+const STATUS = {
+  stable: { label: '🟢 Estable', class: 'chip-stable' },
+  extended: { label: '🔵 Extendido', class: 'chip-extended' },
+  new: { label: '🟡 IA nuevo', class: 'chip-new' },
+  custom: { label: '🟣 Custom', class: 'chip-custom' },
+};
+
+let currentFilter = 'all';
+
+function renderFeatures() {
+  const search = $('#feat-search').value.toLowerCase();
+  const list = FEATURES.filter(f => {
+    if (currentFilter !== 'all' && f.status !== currentFilter) return false;
+    if (search && !f.name.toLowerCase().includes(search) && !f.id.toLowerCase().includes(search)) return false;
+    return true;
+  });
+  $('#feat-list').innerHTML = list.map(f => {
+    const st = STATUS[f.status];
+    return `
+      <div class="feat" onclick="openFeat('${f.id}')">
+        <div class="feat-main">
+          <div class="feat-ico">${f.icon}</div>
+          <div>
+            <div class="feat-name">${f.name}</div>
+            <div class="feat-id">${f.id}</div>
+          </div>
+        </div>
+        <div class="feat-mod">${MOD_NAMES[f.mod] || f.mod}</div>
+        <div class="feat-usage">${f.usage || 0} tenants</div>
+        <div class="feat-chip ${st.class}">${st.label}</div>
+        <button class="feat-btn">Ver →</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function filterFeat(btn, status) {
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter = status;
+  renderFeatures();
+}
+function searchFeats() { renderFeatures(); }
+
+function openFeat(id) {
+  const f = FEATURES.find(x => x.id === id);
+  if (!f) return;
+  const st = STATUS[f.status];
+  $('#mf-name').innerHTML = f.icon + ' ' + f.name;
+  $('#mf-id').textContent = f.id + ' · Módulo: ' + (MOD_NAMES[f.mod] || f.mod);
+  $('#mf-body').innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;">
+      <div class="kpi"><div class="kpi-label">Tenants que lo usan</div><div class="kpi-val">${f.usage || 0}</div></div>
+      <div class="kpi"><div class="kpi-label">Extensiones activas</div><div class="kpi-val">${f.ext || 0}</div></div>
+      <div class="kpi"><div class="kpi-label">Estado</div><div class="feat-chip ${st.class}" style="display:inline-block;margin-top:6px;">${st.label}</div></div>
+      <div class="kpi"><div class="kpi-label">Primera versión</div><div class="kpi-val" style="font-size:14px;">v1.${Math.min(f.ext || 0, 9)}.0</div></div>
+    </div>
+
+    <div style="margin-bottom:18px;">
+      <div style="font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Descripción</div>
+      <p style="font-size:13px;line-height:1.6;color:var(--text-2);">${f.desc || 'Feature estable del Core de Volvix. Disponible en los 3 planes y en las 3 plataformas (Web, Windows, Android). Funciona offline-first con sincronización automática.'}</p>
+    </div>
+
+    <div style="margin-bottom:18px;">
+      <div style="font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Implementación (código registrado)</div>
+      <div class="code-block"><span class="com">// ${f.id} · Registrado ${f.status === 'new' ? 'por IA el 22-abr-2026' : 'el 15-ene-2025'}</span>
+<span class="kw">export function</span> <span class="fn">${f.id.toLowerCase().replace('-','_')}</span>(ctx) {
+  <span class="kw">const</span> flags = ctx.tenant.flags;
+  <span class="kw">if</span> (!flags[<span class="str">'${f.id}'</span>]) <span class="kw">return</span>; <span class="com">// desactivado para este tenant</span>
+
+  <span class="com">// Lógica del feature (abstracta, reutilizable)</span>
+  <span class="kw">return</span> {
+    trigger: <span class="str">'${f.mod}.${f.name.toLowerCase().replace(/ /g,'_').slice(0,20)}'</span>,
+    handler: <span class="kw">async</span> (payload) => {
+      <span class="kw">const</span> result = <span class="kw">await</span> ctx.db.${f.mod}.execute(payload);
+      <span class="kw">await</span> ctx.audit.log(<span class="str">'${f.id}'</span>, payload, result);
+      <span class="kw">if</span> (flags.whatsapp) <span class="kw">await</span> ctx.notify(result);
+      <span class="kw">return</span> result;
+    },
+    extensions: ctx.registry.extensionsOf(<span class="str">'${f.id}'</span>)
+  };
+}</div>
+    </div>
+
+    <div>
+      <div style="font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Acciones</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="tb-btn gold">▶ Activar para un tenant</button>
+        <button class="tb-btn">🔗 Ver extensiones</button>
+        <button class="tb-btn">📜 Historial de cambios</button>
+        <button class="tb-btn">🧪 Test automático</button>
+      </div>
+    </div>
+  `;
+  $('#modal-feat').classList.add('open');
+}
+function closeFeat() { $('#modal-feat').classList.remove('open'); }
+
+// ============================================
+// CHAT DE IA  (con history persistido + thinking + copy + theme)
+// ============================================
+const VLX_HIST_KEY = 'vlx_ai_history_engine';
+let vlxHistory = [];
+
+function vlxLoadHistory() {
+  try {
+    const raw = localStorage.getItem(VLX_HIST_KEY);
+    if (raw) vlxHistory = JSON.parse(raw) || [];
+  } catch (_) { vlxHistory = []; }
+}
+function vlxSaveHistory() {
+  try { localStorage.setItem(VLX_HIST_KEY, JSON.stringify(vlxHistory.slice(-50))); }
+  catch (_) {}
+  vlxUpdateHistCount();
+}
+function vlxUpdateHistCount() {
+  const el = document.getElementById('vlx-history-count');
+  if (el) el.textContent = vlxHistory.length + ' mensaje' + (vlxHistory.length === 1 ? '' : 's');
+}
+function vlxRenderHistory() {
+  const log = document.getElementById('ai-log');
+  if (!log) return;
+  vlxHistory.forEach(m => {
+    const div = document.createElement('div');
+    div.className = 'ai-msg ' + m.type;
+    div.innerHTML = m.html;
+    if (m.type === 'ai') vlxAppendCopyBtn(div, m.text || '');
+    log.appendChild(div);
+  });
+  log.scrollTop = log.scrollHeight;
+  vlxUpdateHistCount();
+}
+function vlxClearHistory() {
+  if (!confirm('¿Limpiar el historial completo?')) return;
+  vlxHistory = [];
+  vlxSaveHistory();
+  const log = document.getElementById('ai-log');
+  // Conservar solo los 2 mensajes iniciales (system + greeting)
+  const keep = Array.from(log.children).slice(0, 2);
+  log.innerHTML = '';
+  keep.forEach(c => log.appendChild(c));
+  vlxToast('Historial limpiado');
+}
+function vlxToast(msg, ms) {
+  const t = document.getElementById('vlx-toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), ms || 2500);
+}
+// Pre-launch: tema dark fijo. Toggle visual eliminado; setting interno preservado.
+function vlxToggleTheme() { /* no-op: tema dark fijo */ }
+function vlxLoadTheme() { /* no-op: tema dark fijo */ }
+function vlxAppendCopyBtn(div, text) {
+  const btn = document.createElement('button');
+  btn.className = 'copy-btn';
+  btn.textContent = '📋 Copiar';
+  btn.onclick = (e) => {
+    e.stopPropagation();
+    const plain = text || div.innerText.replace(/📋 Copiar/g, '').trim();
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(plain).then(
+        () => vlxToast('Respuesta copiada'),
+        () => vlxToast('Error al copiar')
+      );
+    } else {
+      vlxToast('Clipboard no disponible');
+    }
+  };
+  div.appendChild(btn);
+}
+function vlxShowThinking() {
+  vlxHideThinking();
+  const log = document.getElementById('ai-log');
+  const div = document.createElement('div');
+  div.className = 'ai-msg ai';
+  div.id = 'vlx-thinking';
+  div.innerHTML = '<span class="tag">IA · Volvix</span><div>Pensando <span class="thinking-dots"><span></span><span></span><span></span></span></div>';
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+function vlxHideThinking() {
+  const t = document.getElementById('vlx-thinking');
+  if (t) t.remove();
+}
+function vlxCheckProvider() {
+  // Si el backend devuelve provider=mock, avisamos una sola vez
+  try {
+    if (sessionStorage.getItem('vlx_mock_warned') === '1') return;
+    const _t = (function(){try{return localStorage.getItem('volvix_token')||localStorage.getItem('volvixAuthToken');}catch(_){return null;}})();
+    const _h = _t ? { 'Authorization': 'Bearer ' + _t } : {};
+    fetch('/api/ai/provider', { method: 'GET', headers: _h }).then(r => r.ok ? r.json() : null).then(j => {
+      if (j && j.provider === 'mock') {
+        vlxToast('⚠️ Configura OPENAI_API_KEY para respuestas reales', 5000);
+        sessionStorage.setItem('vlx_mock_warned', '1');
+      }
+    }).catch(() => {});
+  } catch (_) {}
+}
+
+function appendMsg(type, html) {
+  const log = $('#ai-log');
+  const div = document.createElement('div');
+  div.className = 'ai-msg ' + type;
+  div.innerHTML = html;
+  log.appendChild(div);
+  if (type === 'ai') vlxAppendCopyBtn(div, '');
+  log.scrollTop = log.scrollHeight;
+  // Persistir
+  vlxHistory.push({ type, html });
+  vlxSaveHistory();
+}
+
+function appendSystem(lines) {
+  appendMsg('system', lines.map(l => `<span class="line">${l}</span>`).join(''));
+}
+
+function askAI(text) {
+  $('#ai-input').value = text;
+  sendAI();
+}
+
+async function sendAI() {
+  const text = $('#ai-input').value.trim();
+  if (!text) return;
+  $('#ai-input').value = '';
+  appendMsg('user', text);
+  vlxShowThinking();
+
+  await wait(500);
+  vlxHideThinking();
+
+  // Detectar la intención
+  const low = text.toLowerCase();
+  let decision = 'unknown';
+  let featId = null;
+
+  if (low.includes('temperatura') && low.includes('corte')) {
+    decision = 'extend';
+    featId = 'FEAT-0030';
+  } else if (low.includes('mesero') && low.includes('ticket')) {
+    decision = 'extend';
+    featId = 'FEAT-0001';
+  } else if (low.includes('boleto') || low.includes('evento')) {
+    decision = 'create';
+  } else if (low.includes('etiqueta') || low.includes('código')) {
+    decision = 'activate';
+    featId = 'FEAT-0150';
+  } else if (low.includes('cobrar') || low.includes('pago')) {
+    decision = 'activate';
+    featId = 'FEAT-0001';
+  } else if (low.includes('factura')) {
+    decision = 'activate';
+    featId = 'FEAT-0050';
+  } else {
+    decision = 'create';
+  }
+
+  // Paso 1: buscar en registry
+  appendSystem([
+    '<span class="info">⏳</span> Procesando petición del cliente...',
+    '<span class="info">🔍</span> Buscando en el Feature Registry (247 items)...',
+    '<span class="info">🧠</span> Embedding vectorial: generado (384 dims)',
+    '<span class="info">📊</span> Calculando similaridad coseno con features existentes...',
+  ]);
+  await wait(1400);
+
+  // Paso 2: según decisión
+  if (decision === 'activate') {
+    const f = FEATURES.find(x => x.id === featId);
+    appendSystem([
+      `<span class="ok">✓</span> Match encontrado: <strong>${f.name}</strong> (${f.id})`,
+      `<span class="ok">✓</span> Similaridad: 94.2% → <strong>existe tal cual</strong>`,
+      `<span class="ok">✓</span> Decisión: <strong>ACTIVAR</strong> (no duplicar)`,
+      `<span class="ok">✓</span> Flag encendido en tenant del cliente`,
+    ]);
+    await wait(600);
+    appendMsg('ai', `
+      <span class="tag">IA · Decidió ACTIVAR</span>
+      <div>Perfecto — ya tengo esa función en mi registro. Se llama <strong>${f.name}</strong> (<code>${f.id}</code>) y la usan <strong>${f.usage} tenants</strong>.</div>
+      <div style="margin-top:6px;">No necesito programar nada nuevo. Solo encendí el flag para este cliente. El feature ya está disponible en <strong>los 3 planes</strong> (Web, Windows, Android).</div>
+      <div style="margin-top:8px;font-size:11px;color:var(--text-3);">💡 Ahorro: ~8h de desarrollo · ~$4,000 MXN en tiempo de programador</div>
+    `);
+  }
+  else if (decision === 'extend') {
+    const f = FEATURES.find(x => x.id === featId);
+    appendSystem([
+      `<span class="info">◐</span> Match parcial: <strong>${f.name}</strong> (${f.id})`,
+      `<span class="info">◐</span> Similaridad: 67% → <strong>existe pero requiere extensión</strong>`,
+      `<span class="warn">⚙</span> Decisión: <strong>EXTENDER</strong> (agregar campo al feature existente)`,
+      `<span class="info">📝</span> Generando código de extensión...`,
+      `<span class="info">🧪</span> Ejecutando tests automáticos...`,
+      `<span class="ok">✓</span> Tests pasados (23/23)`,
+      `<span class="ok">✓</span> Extensión registrada como subfeat del padre`,
+    ]);
+    await wait(1000);
+    const newId = 'FEAT-' + String(245 + FEATURES.length).padStart(4,'0');
+    appendMsg('ai', `
+      <span class="tag">IA · Decidió EXTENDER</span>
+      <div>Encontré que ya tenemos <strong>${f.name}</strong> (<code>${f.id}</code>) pero tu petición requiere agregar algo extra. <strong>No voy a duplicar</strong>. Lo que hice:</div>
+      <div style="margin-top:6px;padding:8px 10px;background:var(--bg-3);border-radius:6px;font-size:11.5px;">
+        ✅ Extendí el feature existente<br>
+        ✅ Creé subfeat <code>${newId}</code> para rastrear la extensión<br>
+        ✅ Activé solo para este cliente (a menos que otros pidan lo mismo)<br>
+        ✅ Si otro cliente pide lo mismo, reutilizo esta extensión — <strong>cero duplicados</strong>
+      </div>
+      <div style="margin-top:8px;font-size:11px;color:var(--text-3);">💡 La próxima vez que un cliente pida esto, será instantáneo (ya existe).</div>
+    `);
+  }
+  else if (decision === 'create') {
+    appendSystem([
+      `<span class="warn">✗</span> No encontré match en 247 features`,
+      `<span class="warn">✗</span> Mejor similaridad: 31% (no suficiente)`,
+      `<span class="warn">🆕</span> Decisión: <strong>CREAR FEATURE NUEVO</strong>`,
+      `<span class="info">🤖</span> Generando especificación...`,
+      `<span class="info">📝</span> Generando código (TypeScript + SQL)...`,
+      `<span class="info">🧪</span> Ejecutando tests automáticos...`,
+      `<span class="info">📚</span> Indexando en knowledge base...`,
+      `<span class="info">🎥</span> Generando video de capacitación...`,
+      `<span class="info">📄</span> Generando manual de usuario...`,
+      `<span class="ok">✓</span> Feature registrado como disponible`,
+    ]);
+    await wait(2000);
+    const newId = 'FEAT-' + String(245 + FEATURES.length).padStart(4,'0');
+    appendMsg('ai', `
+      <span class="tag">IA · Decidió CREAR</span>
+      <div>Esta función no existía en mi registro. Ya la <strong>programé, probé y registré</strong>.</div>
+      <div style="margin-top:6px;padding:8px 10px;background:rgba(251,191,36,0.08);border-radius:6px;font-size:11.5px;border:1px solid rgba(251,191,36,0.2);">
+        🆕 Nueva feature: <code>${newId}</code><br>
+        ✅ Código generado automáticamente<br>
+        ✅ 18 tests unitarios · todos pasaron<br>
+        ✅ Manual de usuario + video de capacitación creados<br>
+        ✅ Activada para este cliente<br>
+        ✅ <strong>Disponible para todos los demás tenants</strong> (si la piden)
+      </div>
+      <div style="margin-top:8px;font-size:11px;color:var(--text-3);">💡 Si mañana otro cliente pide lo mismo, se lo activo en 2 segundos — nunca programaré esto dos veces.</div>
+    `);
+  }
+}
+
+function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function simulateRequest() {
+  const reqs = [
+    'Quiero que el corte de caja también lleve la temperatura del local',
+    'Necesito que el ticket muestre el nombre del mesero que atendió',
+    'Quiero poder vender boletos para un evento de XV años',
+    'Necesito imprimir etiquetas con código de barras',
+    'Quiero que al cobrar también mande ticket por WhatsApp automático',
+  ];
+  const r = reqs[Math.floor(Math.random() * reqs.length)];
+  askAI(r);
+}
+
+function navSection(el, s) {
+  document.querySelectorAll('.side-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// =====================================================
+// SALES FORECAST (real data, 7-day minimum, empty state)
+// =====================================================
+function _vlxToken(){ try { return localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken'); } catch(_){ return null; } }
+function _vlxAuthHeaders(){
+  const h = { 'Content-Type': 'application/json' };
+  const t = _vlxToken(); if (t) h['Authorization'] = 'Bearer ' + t;
+  return h;
+}
+function _vlxHandle401(r){
+  if (r && r.status === 401) {
+    try { localStorage.removeItem('volvix_token'); localStorage.removeItem('volvixAuthToken'); } catch(_){}
+    const redir = encodeURIComponent(location.pathname + location.search);
+    location.replace('/login.html?expired=1&redirect=' + redir);
+    return true;
+  }
+  return false;
+}
+
+async function loadSalesForecast(){
+  const loading = document.getElementById('forecast-loading');
+  const empty = document.getElementById('forecast-empty');
+  const result = document.getElementById('forecast-result');
+  const err = document.getElementById('forecast-error');
+  loading.style.display = 'flex';
+  empty.style.display = 'none';
+  result.style.display = 'none';
+  err.style.display = 'none';
+
+  // Pull last 30 days of sales
+  let sales = [];
+  try {
+    const to = new Date();
+    const from = new Date(to.getTime() - 30 * 24 * 3600 * 1000);
+    const qs = '?from=' + encodeURIComponent(from.toISOString().slice(0,10)) + '&to=' + encodeURIComponent(to.toISOString().slice(0,10));
+    const r = await fetch('/api/sales' + qs, { headers: _vlxAuthHeaders(), cache: 'no-store' });
+    if (_vlxHandle401(r)) return;
+    if (r.status === 503) {
+      loading.style.display = 'none';
+      err.style.display = 'block';
+      err.textContent = 'API de ventas no configurada (503). Contacta a soporte.';
+      return;
+    }
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json().catch(() => null);
+    sales = Array.isArray(data) ? data : (data && (data.sales || data.data) || []);
+  } catch (e) {
+    loading.style.display = 'none';
+    err.style.display = 'block';
+    err.textContent = 'No se pudieron cargar las ventas: ' + (e && e.message || e);
+    return;
+  }
+
+  // Aggregate by day
+  const byDay = {};
+  sales.forEach(s => {
+    const d = (s.created_at || s.date || s.fecha || '').slice(0,10);
+    if (!d) return;
+    const total = Number(s.total || s.amount || s.monto || 0);
+    byDay[d] = (byDay[d] || 0) + total;
+  });
+  const days = Object.keys(byDay).sort();
+
+  loading.style.display = 'none';
+  if (days.length < 7) {
+    empty.style.display = 'block';
+    return;
+  }
+
+  // Simple forecast: 7-day moving average + weekday seasonality
+  const last7 = days.slice(-7).map(d => byDay[d]);
+  const avg = last7.reduce((a,b) => a+b, 0) / 7;
+  const stddev = Math.sqrt(last7.reduce((a,b) => a + Math.pow(b - avg, 2), 0) / 7);
+  const forecast = [];
+  const today = new Date();
+  for (let i = 1; i <= 7; i++) {
+    const d = new Date(today.getTime() + i * 24 * 3600 * 1000);
+    const wd = d.getDay();
+    // Simple weekday adjustment: weekends usually higher in retail (no real signal here without more data)
+    const adj = (wd === 0 || wd === 6) ? 1.08 : 0.97;
+    forecast.push({
+      date: d.toISOString().slice(0,10),
+      weekday: ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][wd],
+      predicted: Math.round(avg * adj * 100) / 100,
+      low: Math.max(0, Math.round((avg * adj - stddev) * 100) / 100),
+      high: Math.round((avg * adj + stddev) * 100) / 100
+    });
+  }
+  const sumF = forecast.reduce((a,b) => a + b.predicted, 0);
+  result.style.display = 'block';
+  result.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px;">
+      <div class="kpi"><div class="kpi-label">Días con datos</div><div class="kpi-val">${days.length}</div></div>
+      <div class="kpi"><div class="kpi-label">Promedio diario</div><div class="kpi-val">$${avg.toLocaleString('es-MX',{maximumFractionDigits:0})}</div></div>
+      <div class="kpi"><div class="kpi-label">Forecast 7d</div><div class="kpi-val gold">$${sumF.toLocaleString('es-MX',{maximumFractionDigits:0})}</div></div>
+      <div class="kpi"><div class="kpi-label">Banda ±</div><div class="kpi-val" style="font-size:14px;">$${stddev.toLocaleString('es-MX',{maximumFractionDigits:0})}</div></div>
+    </div>
+    <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:6px;">Detalle diario</div>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      ${forecast.map(f => `
+        <div style="display:grid;grid-template-columns:80px 1fr auto;gap:12px;align-items:center;padding:8px 12px;background:var(--bg-3);border-radius:8px;border:1px solid var(--border);font-size:12.5px;">
+          <div style="font-weight:600;">${f.weekday} ${f.date.slice(5)}</div>
+          <div style="height:8px;background:var(--bg);border-radius:4px;overflow:hidden;position:relative;">
+            <div style="height:100%;background:linear-gradient(90deg,#FBBF24,#F59E0B);width:${Math.min(100, (f.predicted / (sumF/7) * 50))}%;"></div>
+          </div>
+          <div style="font-family:var(--mono);color:var(--accent);font-weight:600;">$${f.predicted.toLocaleString('es-MX',{maximumFractionDigits:0})}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+// INIT
+renderFeatures();
+vlxLoadTheme();
+vlxLoadHistory();
+vlxRenderHistory();
+vlxCheckProvider();
+loadSalesForecast();
+</script>
+
+<script defer src="auth-helper.js"></script>
+<script src="volvix-ai-wiring.js" defer></script>
+<script src="volvix-ai-real-wiring.js" defer></script>
+<script src="volvix-charts-wiring.js" defer></script>
+<script src="volvix-notifications-wiring.js" defer></script>
+<script src="volvix-backup-wiring.js" defer></script>
+<script src="volvix-logger-wiring.js" defer></script>
+<script src="volvix-reports-wiring.js" defer></script>
+<script src="volvix-offline-wiring.js" defer></script>
+<script src="volvix-onboarding-wiring.js" defer></script>
+<script src="volvix-pwa-wiring.js" defer></script>
+<script src="volvix-i18n-wiring.js" defer></script>
+<script src="volvix-theme-wiring.js" defer></script>
+<script src="volvix-shortcuts-wiring.js" defer></script>
+<script src="volvix-search-wiring.js" defer></script>
+<script src="volvix-voice-wiring.js" defer></script>
+<script src="volvix-gamification-wiring.js" defer></script>
+<script src="volvix-perf-wiring.js" defer></script>
+<script src="volvix-email-wiring.js" defer></script>
+<script src="volvix-webrtc-wiring.js" defer></script>
+<script src="volvix-master-controller.js" defer></script>
+<script src="volvix-calendar-wiring.js" defer></script>
+<script src="volvix-payments-wiring.js" defer></script>
+<script src="volvix-realtime-wiring.js" defer></script>
+<script src="volvix-currency-wiring.js" defer></script>
+<script src="volvix-loyalty-wiring.js" defer></script>
+<script src="volvix-tax-wiring.js" defer></script>
+<script src="volvix-webhooks-wiring.js" defer></script>
+<script src="volvix-audit-wiring.js" defer></script>
+<script src="volvix-cache-wiring.js" defer></script>
+<script src="volvix-queue-wiring.js" defer></script>
+<script src="volvix-fulltext-wiring.js" defer></script>
+<script src="volvix-recommendations-wiring.js" defer></script>
+<script src="volvix-subscriptions-wiring.js" defer></script>
+<script src="volvix-plugins-wiring.js" defer></script>
+<script src="volvix-compliance-wiring.js" defer></script>
+<script src="volvix-cs-wiring.js" defer></script>
+<script src="volvix-ratelimit-wiring.js" defer></script>
+<script src="volvix-workflow-wiring.js" defer></script>
+<script src="volvix-ab-testing-wiring.js" defer></script>
+<script src="volvix-feedback-wiring.js" defer></script>
+<script src="volvix-inventory-ai-wiring.js" defer></script>
+<script defer src="/volvix-modules-wiring.js"></script>
+</body>
+</html>

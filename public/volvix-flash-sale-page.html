@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Flash Sale · Volvix</title>
+<style>
+  :root {
+    --bg:#0e1116; --panel:#161b22; --panel-2:#1c2330; --border:#2a323d;
+    --text:#e6edf3; --muted:#8b949e; --accent:#fb8500; --green:#3fb950;
+    --red:#f85149;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font:15px/1.5 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  header{background:linear-gradient(135deg,#fb8500,#dc2626);padding:48px 24px;text-align:center}
+  header h1{margin:0 0 8px;font-size:36px;font-weight:800;text-transform:uppercase;letter-spacing:1px}
+  header .sub{font-size:16px;opacity:.95}
+  .countdown{display:flex;justify-content:center;gap:12px;margin-top:24px;flex-wrap:wrap}
+  .cd-box{background:rgba(0,0,0,.35);padding:14px 22px;border-radius:10px;min-width:80px}
+  .cd-num{font-size:36px;font-weight:800;line-height:1}
+  .cd-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.5px;opacity:.85;margin-top:4px}
+  main{max-width:1200px;margin:0 auto;padding:32px 24px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden;position:relative;transition:transform .2s}
+  .card:hover{transform:translateY(-4px)}
+  .card .img{aspect-ratio:1/1;background:var(--panel-2);display:flex;align-items:center;justify-content:center;font-size:48px;color:var(--muted)}
+  .card .img img{width:100%;height:100%;object-fit:cover}
+  .card .body{padding:14px}
+  .card h3{margin:0 0 6px;font-size:15px;font-weight:600}
+  .card .price{display:flex;align-items:baseline;gap:8px;margin:8px 0}
+  .card .now{font-size:22px;font-weight:800;color:var(--accent)}
+  .card .was{font-size:13px;color:var(--muted);text-decoration:line-through}
+  .card .badge{position:absolute;top:10px;right:10px;background:var(--red);color:#fff;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700}
+  .card button{width:100%;background:var(--accent);color:#fff;border:0;padding:10px;border-radius:6px;cursor:pointer;font-weight:600;font-size:14px}
+  .card button:hover{background:#dc2626}
+  .ended{text-align:center;padding:80px 24px;max-width:520px;margin:0 auto}
+  .ended h2{font-size:32px;margin:0 0 12px}
+  .ended p{color:var(--muted);font-size:16px;margin-bottom:24px}
+  .ended form{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+  .ended input{flex:1;min-width:240px;background:var(--panel-2);border:1px solid var(--border);color:var(--text);padding:12px;border-radius:6px;font:inherit}
+  .ended button{background:var(--accent);color:#fff;border:0;padding:12px 24px;border-radius:6px;cursor:pointer;font-weight:600}
+  .empty{text-align:center;padding:48px;color:var(--muted)}
+  #cartCount{position:fixed;bottom:20px;right:20px;background:var(--accent);color:#fff;padding:12px 20px;border-radius:30px;font-weight:700;display:none;box-shadow:0 4px 12px rgba(0,0,0,.4);cursor:pointer}
+  #cartCount.show{display:block}
+</style>
+</head>
+<body>
+
+<header id="hero">
+  <h1 id="saleName">⚡ Flash Sale</h1>
+  <div class="sub" id="saleSub">Descuentos por tiempo limitado</div>
+  <div class="countdown" id="countdown" hidden>
+    <div class="cd-box"><div class="cd-num" id="cdD">00</div><div class="cd-lbl">Días</div></div>
+    <div class="cd-box"><div class="cd-num" id="cdH">00</div><div class="cd-lbl">Horas</div></div>
+    <div class="cd-box"><div class="cd-num" id="cdM">00</div><div class="cd-lbl">Min</div></div>
+    <div class="cd-box"><div class="cd-num" id="cdS">00</div><div class="cd-lbl">Seg</div></div>
+  </div>
+</header>
+
+<main id="main">
+  <div id="products" class="grid">
+    <div class="empty">Cargando productos…</div>
+  </div>
+</main>
+
+<div id="endedView" class="ended" hidden>
+  <h2>⏰ Sale terminada</h2>
+  <p>No te pierdas las próximas ofertas. Suscríbete y te avisaremos.</p>
+  <form id="subForm">
+    <input type="email" required placeholder="tu@email.com" id="subEmail" />
+    <button type="submit">Suscribirme</button>
+  </form>
+  <p id="subOk" style="color:var(--green);margin-top:16px" hidden>¡Listo! Te avisaremos.</p>
+</div>
+
+<div id="cartCount" onclick="alert('Tu carrito se sincronizará al iniciar sesión en el POS')">🛒 <span id="cartN">0</span></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const params = new URLSearchParams(location.search);
+const tenantId = params.get('tenant_id') || params.get('t') || '';
+let cart = [];
+let endTime = null;
+let timer = null;
+
+function money(v) {
+  return new Intl.NumberFormat('es-MX', { style:'currency', currency:'MXN' }).format(Number(v)||0);
+}
+
+async function load() {
+  if (!tenantId) {
+    $('products').innerHTML = '<div class="empty">Falta tenant_id en la URL</div>';
+    return;
+  }
+  try {
+    const r = await fetch('/api/flash-sales/active?tenant_id=' + encodeURIComponent(tenantId));
+    if (r.status === 503) {
+      $('products').innerHTML = '<div class="empty">Servicio no disponible. Intenta más tarde.</div>';
+      return;
+    }
+    const data = await r.json();
+    const sales = data.flash_sales || [];
+    if (!sales.length) { showEnded(); return; }
+    const sale = sales[0]; // primera activa
+    $('saleName').textContent = '⚡ ' + (sale.name || 'Flash Sale');
+    if (sale.discount_pct) $('saleSub').textContent = 'Hasta ' + sale.discount_pct + '% OFF';
+
+    endTime = new Date(sale.end_at).getTime();
+    $('countdown').hidden = false;
+    startCountdown();
+
+    renderProducts(sale.products || []);
+  } catch (e) {
+    $('products').innerHTML = '<div class="empty">Error: ' + e.message + '</div>';
+  }
+}
+
+function renderProducts(products) {
+  if (!products.length) { $('products').innerHTML = '<div class="empty">Sin productos</div>'; return; }
+  $('products').innerHTML = products.map((p, i) => {
+    const sale = Number(p.sale_price)||0;
+    const orig = Number(p.original_price)||0;
+    const off = orig ? Math.round((1 - sale/orig) * 100) : null;
+    const stock = (p.stock != null) ? Number(p.stock) : (p.qty != null ? Number(p.qty) : null);
+    const soldOut = stock != null && stock <= 0;
+    const lowStock = stock != null && stock > 0 && stock <= 5;
+    const cardCls = 'card' + (soldOut ? ' sold-out' : '');
+    const btn = soldOut
+      ? `<button disabled aria-disabled="true" style="opacity:.5;cursor:not-allowed">Agotado</button>`
+      : `<button onclick='addCart(${JSON.stringify({i, name:p.name, price:sale, product_id:p.product_id})})'>Agregar</button>`;
+    const badges =
+      (soldOut ? `<span class="badge" style="background:#dc2626">AGOTADO</span>` : '') +
+      (!soldOut && lowStock ? `<span class="badge" style="background:#f59e0b">¡Solo ${stock} disp.!</span>` : '') +
+      (!soldOut && off ? `<span class="badge">AHORRO ${off}%</span>` : '');
+    return `<div class="${cardCls}" aria-label="${esc(p.name || 'Producto')}${soldOut ? ' (agotado)' : ''}">
+      ${badges}
+      <div class="img" style="${soldOut ? 'filter:grayscale(1) opacity(.55)' : ''}">${p.image_url ? '<img src="'+escAttr(p.image_url)+'" alt="">' : '🛒'}</div>
+      <div class="body">
+        <h3>${esc(p.name || 'Producto')}</h3>
+        <div class="price">
+          <span class="now">${money(sale)}</span>
+          ${orig ? `<span class="was">${money(orig)}</span>` : ''}
+        </div>
+        ${btn}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function addCart(item) {
+  cart.push(item);
+  $('cartN').textContent = cart.length;
+  $('cartCount').classList.add('show');
+}
+
+function startCountdown() {
+  if (timer) clearInterval(timer);
+  tick();
+  timer = setInterval(tick, 1000);
+}
+
+function tick() {
+  const ms = endTime - Date.now();
+  if (ms <= 0) {
+    clearInterval(timer);
+    showEnded();
+    return;
+  }
+  const s = Math.floor(ms/1000);
+  $('cdD').textContent = String(Math.floor(s/86400)).padStart(2,'0');
+  $('cdH').textContent = String(Math.floor((s%86400)/3600)).padStart(2,'0');
+  $('cdM').textContent = String(Math.floor((s%3600)/60)).padStart(2,'0');
+  $('cdS').textContent = String(s%60).padStart(2,'0');
+}
+
+function showEnded() {
+  $('main').hidden = true;
+  $('countdown').hidden = true;
+  $('endedView').hidden = false;
+  $('saleName').textContent = '⏰ Sale Terminada';
+  $('saleSub').textContent = 'Suscríbete para próximas ofertas';
+}
+
+$('subForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = $('subEmail').value.trim();
+  if (!email) return;
+  try {
+    await fetch('/api/newsletter/subscribe', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email, tenant_id: tenantId, source:'flash_sale' })
+    });
+  } catch (_) {}
+  $('subOk').hidden = false;
+  $('subEmail').value = '';
+});
+
+function esc(s) { return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escAttr(s) { return esc(s); }
+
+load();
+</script>
+</body>
+</html>

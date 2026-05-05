@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Volvix · Loyalty Admin</title>
+<style>
+  :root {
+    --bg:#0e1116; --panel:#161b22; --panel-2:#1c2330; --border:#2a323d;
+    --text:#e6edf3; --muted:#8b949e; --accent:#58a6ff; --green:#3fb950;
+    --red:#f85149; --yellow:#d29922; --gold:#e3b341; --silver:#c9d1d9; --bronze:#d57b3d;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font:14px/1.5 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  header{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+  h1{margin:0;font-size:18px;font-weight:600}
+  .tabs{display:flex;border-bottom:1px solid var(--border);padding:0 24px;background:var(--panel)}
+  .tab{padding:12px 20px;cursor:pointer;border:none;background:none;color:var(--muted);font-size:14px;border-bottom:2px solid transparent}
+  .tab.active{color:var(--text);border-bottom-color:var(--accent)}
+  main{padding:24px;max-width:1280px;margin:0 auto}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:16px}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px}
+  .stat{background:var(--panel-2);padding:16px;border-radius:6px;border:1px solid var(--border)}
+  .stat .v{font-size:24px;font-weight:700}
+  .stat .l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border)}
+  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase}
+  input,select,textarea{background:var(--panel-2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:6px;font:inherit;width:100%}
+  button{background:var(--accent);color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font:inherit;font-weight:500}
+  button.ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+  button.danger{background:var(--red)}
+  .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:12px}
+  .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;text-transform:uppercase}
+  .b-bronze{background:rgba(213,123,61,.15);color:var(--bronze)}
+  .b-silver{background:rgba(201,209,217,.15);color:var(--silver)}
+  .b-gold{background:rgba(227,179,65,.15);color:var(--gold)}
+  .b-platinum{background:rgba(88,166,255,.18);color:var(--accent)}
+  .toolbar{display:flex;gap:8px;margin-bottom:12px;align-items:center}
+  .toolbar input{max-width:280px}
+  .empty{text-align:center;padding:32px;color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Volvix · Loyalty Admin</h1>
+  <div class="toolbar">
+    <input id="tenantId" placeholder="tenant_id (uuid)" />
+    <button onclick="loadAll()">Cargar</button>
+  </div>
+</header>
+<div class="tabs">
+  <button class="tab active" data-tab="dashboard">Dashboard</button>
+  <button class="tab" data-tab="tiers">Tiers</button>
+  <button class="tab" data-tab="rewards">Rewards</button>
+  <button class="tab" data-tab="top">Top Customers</button>
+</div>
+<main>
+
+<section id="tab-dashboard">
+  <div class="stats" id="stats"></div>
+  <div class="panel">
+    <h3 style="margin-top:0">Distribución de Tiers</h3>
+    <div id="tierDist"></div>
+  </div>
+</section>
+
+<section id="tab-tiers" hidden>
+  <div class="panel">
+    <h3 style="margin-top:0">Configuración de Tiers</h3>
+    <p style="color:var(--muted)">Define el gasto anual mínimo y los puntos por $1 gastado para cada tier.</p>
+    <div id="tierEditor"></div>
+  </div>
+</section>
+
+<section id="tab-rewards" hidden>
+  <div class="panel">
+    <h3 style="margin-top:0">Crear Reward</h3>
+    <div class="row">
+      <input id="rwName" placeholder="Nombre del reward" />
+      <select id="rwType">
+        <option value="discount_pct">Descuento %</option>
+        <option value="free_product">Producto gratis</option>
+        <option value="cashback">Cashback</option>
+        <option value="physical_gift">Regalo físico</option>
+      </select>
+      <input id="rwValue" type="number" placeholder="Valor (ej. 10 = 10%)" />
+      <input id="rwCost" type="number" placeholder="Puntos requeridos" />
+      <select id="rwTier">
+        <option value="">Cualquier tier</option>
+        <option value="bronze">Bronze+</option>
+        <option value="silver">Silver+</option>
+        <option value="gold">Gold+</option>
+        <option value="platinum">Platinum</option>
+      </select>
+      <input id="rwStock" type="number" placeholder="Stock (vacío = ilimitado)" />
+    </div>
+    <input id="rwDesc" placeholder="Descripción" style="margin-bottom:12px" />
+    <button onclick="createReward()">Crear reward</button>
+  </div>
+
+  <div class="panel">
+    <h3 style="margin-top:0">Catálogo</h3>
+    <div id="rewardsList"></div>
+  </div>
+</section>
+
+<section id="tab-top" hidden>
+  <div class="panel">
+    <h3 style="margin-top:0">Top Customers (por puntos)</h3>
+    <div id="topList"></div>
+  </div>
+</section>
+
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+const TIERS = ['bronze', 'silver', 'gold', 'platinum'];
+
+document.querySelectorAll('.tab').forEach(t => {
+  t.onclick = () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.querySelectorAll('main > section').forEach(s => s.hidden = true);
+    $('tab-' + t.dataset.tab).hidden = false;
+  };
+});
+
+function token() {
+  return localStorage.getItem('volvix_token') || '';
+}
+
+async function api(path, method, body) {
+  const opts = { method: method || 'GET', headers: { 'Content-Type': 'application/json' } };
+  const tk = token();
+  if (tk) opts.headers['Authorization'] = 'Bearer ' + tk;
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(path, opts);
+  if (r.status === 401) {
+    const back = encodeURIComponent(location.pathname + location.search);
+    location.replace('/login.html?expired=1&redirect=' + back);
+    return { ok: false, error: 'unauthorized' };
+  }
+  if (r.status === 503) {
+    try { (window.vlxToast || function(m){alert(m);})('Servicio no disponible (503)', 'warn'); } catch(_){}
+    return { ok: false, error: 'service_unavailable' };
+  }
+  return r.json().catch(() => ({ ok: false, error: 'parse_error' }));
+}
+
+function tenant() {
+  const t = $('tenantId').value.trim();
+  if (!t) { alert('Ingresa tenant_id'); throw new Error('tenant_required'); }
+  return t;
+}
+
+function badge(tier) {
+  const t = String(tier || 'bronze').toLowerCase();
+  return `<span class="badge b-${t}">${t}</span>`;
+}
+
+async function loadAll() {
+  await Promise.all([loadStats(), loadTiers(), loadRewards(), loadTop()]);
+}
+
+async function loadStats() {
+  try {
+    const t = tenant();
+    const r = await api(`/api/loyalty/stats?tenant_id=${encodeURIComponent(t)}`);
+    if (!r.ok) { $('stats').innerHTML = `<div class="empty">${r.error || 'error'}</div>`; return; }
+    $('stats').innerHTML = `
+      <div class="stat"><div class="l">Puntos pendientes</div><div class="v">${r.total_points_outstanding.toLocaleString()}</div></div>
+      <div class="stat"><div class="l">Canjeados últimos 30d</div><div class="v">${r.redeemed_last_30d.toLocaleString()}</div></div>
+      <div class="stat"><div class="l">Customers</div><div class="v">${r.customers_count}</div></div>
+    `;
+    const d = r.tier_distribution || {};
+    $('tierDist').innerHTML = TIERS.map(t =>
+      `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+        ${badge(t)} <strong>${d[t] || 0}</strong>
+      </div>`).join('');
+  } catch (_) {}
+}
+
+async function loadTiers() {
+  try {
+    const t = tenant();
+    const r = await api(`/api/loyalty/tiers-config?tenant_id=${encodeURIComponent(t)}`);
+    if (!r.ok) return;
+    const tiers = r.tiers || {};
+    $('tierEditor').innerHTML = TIERS.map(name => {
+      const cfg = tiers[name] || { min_annual_spend: 0, points_per_dollar: 1, perks: [] };
+      return `
+        <div class="row" data-tier="${name}">
+          <div style="display:flex;align-items:center">${badge(name)}</div>
+          <input class="t-spend" type="number" value="${cfg.min_annual_spend}" placeholder="Min anual $" />
+          <input class="t-ppd" type="number" step="0.01" value="${cfg.points_per_dollar}" placeholder="Puntos por $1" />
+          <input class="t-perks" value="${(cfg.perks || []).join(',')}" placeholder="perks (csv)" />
+          <button onclick="saveTier('${name}', this.parentElement)">Guardar</button>
+        </div>`;
+    }).join('');
+  } catch (_) {}
+}
+
+async function saveTier(name, row) {
+  const t = tenant();
+  const body = {
+    tenant_id: t,
+    tier: name,
+    min_annual_spend: Number(row.querySelector('.t-spend').value || 0),
+    points_per_dollar: Number(row.querySelector('.t-ppd').value || 1),
+    perks: row.querySelector('.t-perks').value.split(',').map(s => s.trim()).filter(Boolean),
+  };
+  const r = await api('/api/loyalty/tiers-config', 'POST', body);
+  alert(r.ok ? 'Guardado' : ('Error: ' + (r.error || '')));
+}
+
+async function loadRewards() {
+  try {
+    const t = tenant();
+    const r = await api(`/api/loyalty/rewards-catalog?tenant_id=${encodeURIComponent(t)}`);
+    if (!r.ok) { $('rewardsList').innerHTML = `<div class="empty">${r.error || 'error'}</div>`; return; }
+    const rows = r.rewards || [];
+    if (!rows.length) { $('rewardsList').innerHTML = `<div class="empty">Sin rewards</div>`; return; }
+    $('rewardsList').innerHTML = `<table>
+      <thead><tr><th>Nombre</th><th>Tipo</th><th>Valor</th><th>Costo</th><th>Tier</th><th>Stock</th><th></th></tr></thead>
+      <tbody>${rows.map(r => `
+        <tr>
+          <td>${escape(r.name)}</td>
+          <td>${r.reward_type}</td>
+          <td>${r.value}</td>
+          <td>${r.points_cost} pts</td>
+          <td>${r.tier_required ? badge(r.tier_required) : '-'}</td>
+          <td>${r.stock === null || r.stock === undefined ? '∞' : r.stock}</td>
+          <td><button class="danger" onclick="deleteReward('${r.id}')">Borrar</button></td>
+        </tr>`).join('')}</tbody></table>`;
+  } catch (_) {}
+}
+
+async function createReward() {
+  const t = tenant();
+  const body = {
+    tenant_id: t,
+    name: $('rwName').value.trim(),
+    description: $('rwDesc').value.trim(),
+    reward_type: $('rwType').value,
+    value: Number($('rwValue').value || 0),
+    points_cost: Number($('rwCost').value || 0),
+    tier_required: $('rwTier').value || null,
+    stock: $('rwStock').value === '' ? null : Number($('rwStock').value),
+  };
+  if (!body.name) { alert('Nombre requerido'); return; }
+  const r = await api('/api/loyalty/rewards', 'POST', body);
+  if (!r.ok) { alert('Error: ' + (r.error || '')); return; }
+  ['rwName', 'rwDesc', 'rwValue', 'rwCost', 'rwStock'].forEach(id => $(id).value = '');
+  loadRewards();
+}
+
+async function deleteReward(id) {
+  if (!confirm('Desactivar este reward?')) return;
+  const r = await api('/api/loyalty/rewards/' + encodeURIComponent(id), 'DELETE');
+  if (r.ok) loadRewards();
+  else alert('Error: ' + (r.error || ''));
+}
+
+async function loadTop() {
+  try {
+    const t = tenant();
+    const r = await api(`/api/loyalty/top-customers?tenant_id=${encodeURIComponent(t)}&limit=50`);
+    if (!r.ok) { $('topList').innerHTML = `<div class="empty">${r.error || 'error'}</div>`; return; }
+    const rows = r.top || [];
+    if (!rows.length) { $('topList').innerHTML = `<div class="empty">Sin datos</div>`; return; }
+    $('topList').innerHTML = `<table>
+      <thead><tr><th>#</th><th>Nombre</th><th>Email</th><th>Tier</th><th>Puntos</th><th>Gasto anual</th></tr></thead>
+      <tbody>${rows.map((r, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${escape(r.name || '')}</td>
+          <td>${escape(r.email || '')}</td>
+          <td>${badge(r.tier)}</td>
+          <td><strong>${(r.loyalty_points || 0).toLocaleString()}</strong></td>
+          <td>$${(r.annual_spend || 0).toLocaleString()}</td>
+        </tr>`).join('')}</tbody></table>`;
+  } catch (_) {}
+}
+
+function escape(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+</script>
+</body>
+</html>

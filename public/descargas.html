@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Descarga Volvix POS para Web, Windows, Android, iOS o instálalo como PWA.">
+  <title>Descargas — Volvix POS</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      background:#0A0A0A;color:#F5F5F5;min-height:100vh;
+      line-height:1.6;-webkit-font-smoothing:antialiased;
+    }
+    header{
+      padding:32px 24px;text-align:center;
+      border-bottom:1px solid #222;
+    }
+    header h1{font-size:32px;font-weight:700;letter-spacing:-0.02em;margin-bottom:8px}
+    header p{color:#999;font-size:16px;max-width:600px;margin:0 auto}
+    main{max-width:1200px;margin:0 auto;padding:48px 24px}
+    .grid{
+      display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+      gap:24px;
+    }
+    .card{
+      background:#141414;border:1px solid #222;border-radius:16px;
+      padding:32px 24px;display:flex;flex-direction:column;
+      transition:border-color 0.2s,transform 0.2s;
+    }
+    .card:hover{border-color:#3B82F6;transform:translateY(-2px)}
+    .card-icon{
+      width:56px;height:56px;background:#1F2937;border-radius:12px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:28px;margin-bottom:20px;
+    }
+    .card h2{font-size:20px;font-weight:600;margin-bottom:8px}
+    .card .platform{color:#666;font-size:13px;margin-bottom:16px;text-transform:uppercase;letter-spacing:0.05em}
+    .card p{color:#BBB;font-size:14px;flex-grow:1;margin-bottom:24px}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:12px 20px;border-radius:8px;font-size:14px;font-weight:600;
+      text-decoration:none;cursor:pointer;border:none;
+      transition:background 0.2s,transform 0.1s;width:100%;
+    }
+    .btn:active{transform:scale(0.98)}
+    .btn-primary{background:#3B82F6;color:#fff}
+    .btn-primary:hover{background:#2563EB}
+    .btn-secondary{background:#222;color:#F5F5F5;border:1px solid #333}
+    .btn-secondary:hover{background:#2A2A2A}
+    .btn-disabled{background:#1A1A1A;color:#555;cursor:not-allowed}
+    .badge{
+      display:inline-block;background:#1F2937;color:#9CA3AF;
+      font-size:11px;padding:3px 8px;border-radius:4px;margin-left:8px;
+      text-transform:uppercase;letter-spacing:0.05em;font-weight:600;
+    }
+    .badge-soon{background:#451A03;color:#FCD34D}
+    .badge-new{background:#064E3B;color:#6EE7B7}
+    .badge-beta{background:#78350F;color:#FDE68A;border:1px solid #B45309}
+    .btn-beta{background:#B45309;color:#FFF7ED}
+    .btn-beta:hover{background:#92400E}
+    .pwa-instructions{
+      background:#0F1729;border:1px solid #1E3A8A;border-radius:8px;
+      padding:12px;font-size:12px;color:#93C5FD;margin-top:8px;
+      display:none;
+    }
+    .pwa-instructions.show{display:block}
+    footer{
+      max-width:1200px;margin:0 auto;padding:48px 24px 32px;
+      border-top:1px solid #222;color:#666;font-size:13px;text-align:center;
+    }
+    footer a{color:#999;text-decoration:none;margin:0 12px}
+    footer a:hover{color:#3B82F6}
+    .legal{margin-top:16px;font-size:11px;color:#444;line-height:1.5}
+    .req-list{
+      list-style:none;padding:12px 0 0;margin:0;
+      border-top:1px dashed #2A2A2A;font-size:12px;color:#888;
+    }
+    .req-list li{padding:3px 0;display:flex;gap:8px;align-items:flex-start}
+    .req-list li::before{content:'✓';color:#3B82F6;font-weight:700;flex-shrink:0}
+    .dl-counter{font-size:12px;color:#888;margin-top:8px;font-weight:500}
+    .dl-counter strong{color:#3B82F6}
+    .checksum{margin-top:6px;font-size:11px;color:#666;font-family:ui-monospace,monospace;word-break:break-all;line-height:1.45}
+    .checksum-label{color:#888;text-transform:uppercase;letter-spacing:0.05em;font-size:10px;margin-right:4px}
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Descargas — Volvix POS</h1>
+  <p>Elige cómo quieres usar Volvix POS. Web, móvil, escritorio o instalación nativa.</p>
+</header>
+
+<main>
+  <section class="grid" aria-label="Plataformas disponibles">
+
+    <!-- Versión Web -->
+    <article class="card" data-platform="web">
+      <div class="card-icon" aria-hidden="true">🌐</div>
+      <div class="platform">Web · Funciona en cualquier navegador</div>
+      <h2>Versión Web</h2>
+      <p>Acceso instantáneo desde Chrome, Safari, Firefox o Edge. No requiere instalación. Recomendada para empezar rápido.</p>
+      <a href="/login.html" class="btn btn-primary" data-track-platform="web" aria-label="Abrir Volvix POS Web">
+        Abrir
+      </a>
+      <ul class="req-list">
+        <li>Chrome 100+, Edge 100+, Firefox 100+, Safari 15+</li>
+        <li>Conexión inicial; luego funciona offline (PWA)</li>
+        <li>Recomendado: 4 GB RAM</li>
+      </ul>
+    </article>
+
+    <!-- Windows .exe -->
+    <article class="card" data-platform="windows">
+      <div class="card-icon" aria-hidden="true">🖥️</div>
+      <div class="platform">Windows 10 / 11 · Aplicación nativa</div>
+      <h2>Windows <span class="badge badge-soon">Próximamente</span></h2>
+      <p>Aplicación de escritorio para Windows con soporte offline, integración con impresoras y lectores USB.</p>
+      <a href="/downloads/volvix-pos-setup.exe" class="btn btn-disabled" data-track-platform="windows" data-probe-url="/downloads/volvix-pos-setup.exe" aria-disabled="true" onclick="return handleDownloadClick(event, this);">
+        Disponible pronto
+      </a>
+      <div class="dl-counter" data-counter-for="windows">Descargas: <strong>—</strong></div>
+      <div class="checksum"><span class="checksum-label">SHA256</span><span data-checksum-for="windows">pendiente — disponible en release final</span></div>
+      <ul class="req-list">
+        <li>Windows 10 (64-bit) o superior</li>
+        <li>Procesador 1 GHz, 2 GB RAM, 200 MB disco</li>
+        <li>Soporte para impresoras térmicas USB / Bluetooth</li>
+      </ul>
+    </article>
+
+    <!-- Android APK -->
+    <article class="card" data-platform="android">
+      <div class="card-icon" aria-hidden="true">📱</div>
+      <div class="platform">Android 8.0+ · APK directo</div>
+      <h2>Android APK <span class="badge badge-soon">Próximamente</span></h2>
+      <p>Instalación directa para Android. Soporte completo para cámara, escáner de barras y notificaciones push.</p>
+      <a href="/downloads/volvix-pos.apk" class="btn btn-disabled" data-track-platform="android" data-probe-url="/downloads/volvix-pos.apk" aria-disabled="true" onclick="return handleDownloadClick(event, this);">
+        Disponible pronto
+      </a>
+      <div class="dl-counter" data-counter-for="android">Descargas: <strong>—</strong></div>
+      <div class="checksum"><span class="checksum-label">SHA256</span><span data-checksum-for="android">pendiente — disponible en release final</span></div>
+      <ul class="req-list">
+        <li>Android 8.0 (Oreo) o superior</li>
+        <li>2 GB RAM, 100 MB disco</li>
+        <li>Permisos: cámara, almacenamiento, Bluetooth</li>
+      </ul>
+    </article>
+
+    <!-- macOS DMG -->
+    <article class="card" data-platform="macos">
+      <div class="card-icon" aria-hidden="true">🍎</div>
+      <div class="platform">macOS 11+ · DMG nativa</div>
+      <h2>macOS <span class="badge badge-soon">Próximamente</span></h2>
+      <p>App nativa para Mac (Apple Silicon e Intel). Optimizada para tiendas físicas con teclado y lector USB.</p>
+      <a href="/downloads/volvix-pos.dmg" class="btn btn-disabled" data-track-platform="macos" data-probe-url="/downloads/volvix-pos.dmg" aria-disabled="true" onclick="return handleDownloadClick(event, this);">
+        Disponible pronto
+      </a>
+      <div class="dl-counter" data-counter-for="macos">Descargas: <strong>—</strong></div>
+      <div class="checksum"><span class="checksum-label">SHA256</span><span data-checksum-for="macos">pendiente — disponible en release final</span></div>
+      <ul class="req-list">
+        <li>macOS 11 Big Sur o superior</li>
+        <li>Apple Silicon (M1/M2/M3) o Intel x64</li>
+        <li>250 MB disco</li>
+      </ul>
+    </article>
+
+    <!-- Linux DEB -->
+    <article class="card" data-platform="linux">
+      <div class="card-icon" aria-hidden="true">🐧</div>
+      <div class="platform">Linux · paquete .deb</div>
+      <h2>Linux <span class="badge badge-soon">Próximamente</span></h2>
+      <p>Paquete .deb para Ubuntu, Debian y derivados. Ideal para hardware POS de bajo consumo.</p>
+      <a href="/downloads/volvix-pos.deb" class="btn btn-disabled" data-track-platform="linux" data-probe-url="/downloads/volvix-pos.deb" aria-disabled="true" onclick="return handleDownloadClick(event, this);">
+        Disponible pronto
+      </a>
+      <div class="dl-counter" data-counter-for="linux">Descargas: <strong>—</strong></div>
+      <div class="checksum"><span class="checksum-label">SHA256</span><span data-checksum-for="linux">pendiente — disponible en release final</span></div>
+      <ul class="req-list">
+        <li>Ubuntu 20.04+ / Debian 11+ / derivados</li>
+        <li>Arquitectura x86_64 o arm64</li>
+        <li>CUPS para impresoras térmicas</li>
+      </ul>
+    </article>
+
+    <!-- PWA Install -->
+    <article class="card">
+      <div class="card-icon" aria-hidden="true">⚡</div>
+      <div class="platform">PWA · Instalable en cualquier dispositivo</div>
+      <h2>Instalar como PWA <span class="badge badge-new">Disponible</span></h2>
+      <p>Instala Volvix POS como aplicación en tu dispositivo. Funciona offline y se siente nativa.</p>
+      <button class="btn btn-secondary" onclick="togglePwaInstructions()" aria-expanded="false" aria-controls="pwa-help">
+        Ver instrucciones
+      </button>
+      <div id="pwa-help" class="pwa-instructions" role="region">
+        <strong>Chrome / Edge (Android, Windows):</strong><br>
+        Abre <a href="/login.html" style="color:#3B82F6">Volvix POS</a> → menú (⋮) → "Instalar app"<br><br>
+        <strong>Safari (iOS, macOS):</strong><br>
+        Abre <a href="/login.html" style="color:#3B82F6">Volvix POS</a> → botón compartir → "Añadir a pantalla de inicio"<br><br>
+        <strong>Firefox (Android):</strong><br>
+        Abre <a href="/login.html" style="color:#3B82F6">Volvix POS</a> → menú (⋮) → "Instalar"
+      </div>
+    </article>
+
+  </section>
+</main>
+
+<footer>
+  <nav aria-label="Enlaces legales">
+    <a href="/aviso-privacidad.html">Aviso de privacidad</a>
+    <a href="/cookies-policy.html">Política de cookies</a>
+    <a href="/docs.html">Documentación</a>
+    <a href="/login.html">Iniciar sesión</a>
+  </nav>
+  <p class="legal">
+    © 2026 Volvix POS. Todos los derechos reservados.<br>
+    Volvix POS es un servicio de Grupo Volvix. Las marcas y logos son propiedad de sus respectivos dueños.<br>
+    Al descargar o usar Volvix POS aceptas nuestros términos de servicio y política de privacidad. R12b.
+  </p>
+</footer>
+
+<script>
+  function togglePwaInstructions(){
+    var box=document.getElementById('pwa-help');
+    var btn=document.querySelector('[aria-controls="pwa-help"]');
+    var open=box.classList.toggle('show');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    btn.textContent = open ? 'Ocultar instrucciones' : 'Ver instrucciones';
+    trackDownload('pwa_instructions', null);
+  }
+
+  // ===== Tracking =====
+  function trackDownload(platform, version){
+    try { if (typeof gtag === 'function') gtag('event', 'download', { platform: platform, version: version || 'unknown' }); } catch(_) {}
+    try {
+      // anonymous track. IP is intentionally NOT sent from client; backend should
+      // anonymize from request socket. Body remains compatible with the spec.
+      fetch('/api/downloads/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ platform: platform, version: version || null, ts: new Date().toISOString(), ua: navigator.userAgent || '' }),
+        keepalive: true
+      }).catch(function(){});
+    } catch(_) {}
+  }
+
+  function handleDownloadClick(ev, anchor){
+    var disabled = anchor.classList.contains('btn-disabled');
+    if (disabled) {
+      ev.preventDefault();
+      var p = anchor.getAttribute('data-track-platform') || 'unknown';
+      trackDownload(p + '_unavailable', null);
+      return false;
+    }
+    var p = anchor.getAttribute('data-track-platform') || 'unknown';
+    trackDownload(p, null);
+    return true;
+  }
+  window.handleDownloadClick = handleDownloadClick;
+
+  // Load per-platform download counters from /api/downloads/stats (best-effort)
+  function loadDownloadStats(){
+    try {
+      fetch('/api/downloads/stats', { cache: 'no-store' })
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(data){
+          if (!data) return;
+          var stats = data.stats || data.platforms || data;
+          if (!stats || typeof stats !== 'object') return;
+          document.querySelectorAll('[data-counter-for]').forEach(function(el){
+            var p = el.getAttribute('data-counter-for');
+            var n = stats[p];
+            if (typeof n === 'number') {
+              el.querySelector('strong').textContent = n.toLocaleString();
+            }
+          });
+          if (data.checksums) {
+            document.querySelectorAll('[data-checksum-for]').forEach(function(el){
+              var p = el.getAttribute('data-checksum-for');
+              if (data.checksums[p]) el.textContent = data.checksums[p];
+            });
+          }
+        }).catch(function(){});
+    } catch(_) {}
+  }
+
+  // Dynamic version detection — replace placeholders if real downloads exist
+  document.addEventListener('DOMContentLoaded', function(){
+    loadDownloadStats();
+    // Track page view
+    try { if (typeof gtag === 'function') gtag('event', 'page_view', { page: 'descargas' }); } catch(_){}
+
+    // Web button always tracked on click
+    document.querySelectorAll('[data-track-platform="web"]').forEach(function(a){
+      a.addEventListener('click', function(){ trackDownload('web', null); });
+    });
+
+    var labels = {
+      windows: 'Descargar .exe',
+      android: 'Descargar APK',
+      macos:   'Descargar .dmg',
+      linux:   'Descargar .deb'
+    };
+    var betaLabels = {
+      windows: 'Descargar .exe (beta)',
+      android: 'Descargar APK (beta)',
+      macos:   'Descargar .dmg (beta)',
+      linux:   'Descargar .deb (beta)'
+    };
+
+    // Heuristic: if file is < 50KB OR Content-Length header ≤ 50KB → treat as placeholder/beta
+    var BETA_MAX_BYTES = 50 * 1024;
+
+    document.querySelectorAll('[data-probe-url]').forEach(function(btn){
+      var url = btn.getAttribute('data-probe-url');
+      var platform = btn.getAttribute('data-track-platform');
+      fetch(url, { method: 'HEAD', cache: 'no-store' }).then(function(r){
+        if (!r.ok) return;
+        var len = parseInt(r.headers.get('Content-Length') || '0', 10);
+        var isBeta = (len > 0 && len <= BETA_MAX_BYTES);
+
+        btn.classList.remove('btn-disabled');
+        btn.removeAttribute('aria-disabled');
+
+        var card = btn.closest('article');
+        var badge = card && card.querySelector('.badge-soon');
+
+        if (isBeta){
+          btn.classList.add('btn-beta');
+          btn.textContent = betaLabels[platform] || 'Descargar (beta)';
+          btn.title = 'Build de prueba — placeholder. Versión final próximamente.';
+          if (badge){
+            badge.classList.remove('badge-soon');
+            badge.classList.add('badge-beta');
+            badge.textContent = 'Build de prueba';
+          }
+        } else {
+          btn.classList.add('btn-primary');
+          btn.textContent = labels[platform] || 'Descargar';
+          if (badge){
+            badge.classList.remove('badge-soon');
+            badge.classList.add('badge-new');
+            badge.textContent = 'Disponible';
+          }
+        }
+
+        // Try to read version from response header (X-Version) or from filename
+        var ver = r.headers.get('X-Version') || r.headers.get('Last-Modified') || null;
+        btn.dataset.version = ver || '';
+        btn.dataset.beta = isBeta ? '1' : '0';
+      }).catch(function(){ /* keep próximamente */ });
+    });
+  });
+</script>
+
+</body>
+</html>

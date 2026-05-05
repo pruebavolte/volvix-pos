@@ -1,0 +1,100 @@
+name: Playwright E2E
+
+on:
+  pull_request:
+    branches: ['**']
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    name: Playwright Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install --no-audit --no-fund
+          fi
+          npm install -D @playwright/test
+
+      - name: Install Chromium for Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Resolve BASE_URL
+        id: resolve_url
+        env:
+          PREVIEW_URL: ${{ secrets.PREVIEW_URL }}
+        run: |
+          if [ -n "$PREVIEW_URL" ]; then
+            echo "base_url=$PREVIEW_URL" >> $GITHUB_OUTPUT
+            echo "start_server=false" >> $GITHUB_OUTPUT
+          else
+            echo "base_url=http://localhost:3000" >> $GITHUB_OUTPUT
+            echo "start_server=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Start local server (fallback when no PREVIEW_URL)
+        if: steps.resolve_url.outputs.start_server == 'true'
+        env:
+          PORT: 3000
+          PUBLIC_DIR: ./public
+          OPEN_BROWSER: false
+          NODE_ENV: test
+        run: |
+          node server.js &
+          echo "SERVER_PID=$!" >> $GITHUB_ENV
+          # Wait until server responds
+          for i in $(seq 1 15); do
+            sleep 1
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/health 2>/dev/null || echo "000")
+            if [ "$CODE" = "200" ] || [ "$CODE" = "503" ]; then
+              echo "Server ready (HTTP $CODE) after ${i}s"
+              break
+            fi
+            echo "Waiting for server... attempt $i (HTTP $CODE)"
+          done
+
+      - name: Run Playwright tests
+        env:
+          BASE_URL: ${{ steps.resolve_url.outputs.base_url }}
+          PREVIEW_URL: ${{ secrets.PREVIEW_URL }}
+        run: |
+          if [ "${{ steps.resolve_url.outputs.start_server }}" = "true" ]; then
+            # Local server.js only serves static files — run smoke tests only.
+            # Full API tests (registro, auth, sale-flow) require PREVIEW_URL.
+            echo "Running smoke tests only (no PREVIEW_URL configured)"
+            npx playwright test --project=chromium tests-e2e/smoke.spec.js
+          else
+            npx playwright test --project=chromium
+          fi
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+
+      - name: Upload screenshots & traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts
+          path: |
+            test-results/
+            screenshots/
+          retention-days: 14
+          if-no-files-found: ignore

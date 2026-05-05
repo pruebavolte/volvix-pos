@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volvix Remote · Control remoto</title>
+<script src="/auth-gate.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  :root {
+    --bg: #0A0A0A;
+    --surface: #121212;
+    --border: #2E2E2C;
+    --text: #FAFAF9;
+    --text-2: #A8A29E;
+    --accent: #3B82F6;
+    --success: #22C55E;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  body {
+    background: radial-gradient(circle at 30% 30%, #1E3A8A 0%, #0A0A0A 60%);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+
+  .container {
+    max-width: 480px;
+    width: 100%;
+  }
+
+  .logo-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 40px;
+    justify-content: center;
+  }
+  .brand-ico {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #3B82F6, #1E40AF);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 0 30px rgba(59,130,246,0.5);
+  }
+  .brand {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+  }
+  .brand small {
+    display: block;
+    font-size: 11px;
+    color: var(--text-2);
+    font-weight: 500;
+    letter-spacing: 1px;
+    margin-top: 2px;
+  }
+
+  .card {
+    background: rgba(18,18,18,0.8);
+    backdrop-filter: blur(14px);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px 30px;
+    text-align: center;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+  }
+
+  h1 {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.8px;
+    margin-bottom: 10px;
+  }
+  h1 span { color: var(--accent); }
+  .sub {
+    font-size: 14px;
+    color: var(--text-2);
+    line-height: 1.6;
+    margin-bottom: 28px;
+  }
+
+  .code-input {
+    display: flex;
+    gap: 8px;
+    margin: 0 auto 20px;
+    justify-content: center;
+  }
+  .code-input input {
+    width: 54px;
+    height: 64px;
+    background: rgba(255,255,255,0.04);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 28px;
+    font-weight: 700;
+    color: #FBBF24;
+    text-transform: uppercase;
+    transition: all 0.15s;
+  }
+  .code-input input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(59,130,246,0.15);
+  }
+  .code-input .dash {
+    display: flex;
+    align-items: center;
+    color: var(--text-2);
+    font-size: 22px;
+    font-weight: 600;
+  }
+
+  .connect-btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-bottom: 18px;
+  }
+  .connect-btn:hover { background: #2563EB; transform: translateY(-1px); }
+  .connect-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .hint {
+    font-size: 12px;
+    color: var(--text-2);
+    margin-bottom: 20px;
+  }
+  .hint strong { color: #FBBF24; }
+
+  .trust-row {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text-2);
+    flex-wrap: wrap;
+  }
+  .trust-item { display: flex; align-items: center; gap: 5px; }
+  .trust-item::before { content: '✓'; color: var(--success); font-weight: 700; }
+
+  /* Connection screen */
+  .connecting {
+    display: none;
+  }
+  .connecting.active { display: block; }
+  .card.connected { display: none; }
+  .card.connected.active { display: block; }
+
+  .connecting .loader {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    border: 4px solid rgba(59,130,246,0.2);
+    border-top-color: var(--accent);
+    margin: 10px auto 20px;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .logs {
+    text-align: left;
+    background: #000;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-family: var(--mono);
+    font-size: 11px;
+    max-height: 180px;
+    overflow-y: auto;
+    margin-top: 20px;
+    color: var(--text-2);
+  }
+  .logs .line { display: block; padding: 1px 0; }
+  .logs .ok { color: var(--success); }
+  .logs .info { color: var(--accent); }
+
+  /* Connected state */
+  .connected-wrap {
+    display: none;
+    background: rgba(18,18,18,0.9);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(34,197,94,0.3);
+    border-radius: 20px;
+    padding: 32px 28px;
+    text-align: center;
+    box-shadow: 0 30px 80px rgba(34,197,94,0.15);
+  }
+  .connected-wrap.active { display: block; }
+  .ok-icon {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: rgba(34,197,94,0.15);
+    border: 2px solid var(--success);
+    color: var(--success);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    margin: 0 auto 18px;
+    animation: scaleIn 0.4s ease;
+  }
+  @keyframes scaleIn { from { transform: scale(0); } to { transform: scale(1); } }
+
+  .agent-info {
+    margin: 18px 0;
+    padding: 14px;
+    background: rgba(251,191,36,0.08);
+    border: 1px solid rgba(251,191,36,0.25);
+    border-radius: 10px;
+    font-size: 12.5px;
+    color: #FBBF24;
+  }
+  .agent-info strong { color: var(--text); }
+
+  .actions-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .actions-row button {
+    flex: 1;
+    padding: 12px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .actions-row .disconnect {
+    background: rgba(239,68,68,0.1);
+    border-color: rgba(239,68,68,0.3);
+    color: #F87171;
+  }
+
+  .safety-note {
+    margin-top: 22px;
+    padding: 12px;
+    background: rgba(59,130,246,0.06);
+    border: 1px solid rgba(59,130,246,0.15);
+    border-radius: 10px;
+    font-size: 11px;
+    color: var(--text-2);
+    line-height: 1.55;
+  }
+  .safety-note strong { color: var(--text); }
+</style>
+<script src="volvix-api.js"></script>
+<script src="volvix-sync.js"></script>
+<script src="volvix-sync-widget.js"></script>
+</head>
+<body>
+
+<div class="container">
+  <div class="logo-row">
+    <div class="brand-ico">🖥️</div>
+    <div class="brand">
+      Volvix Remote
+      <small>CONTROL REMOTO SEGURO · SIN INSTALAR NADA</small>
+    </div>
+  </div>
+
+  <!-- Initial state -->
+  <div class="card" id="initial">
+    <h1>Ingresa tu código de <span>soporte</span></h1>
+    <p class="sub">Nuestra IA te lo dio en el chat. Es un código único, válido por 10 minutos.</p>
+
+    <div class="code-input">
+      <input type="text" maxlength="1" value="V" onkeyup="moveNext(event, 0)">
+      <input type="text" maxlength="1" value="X" onkeyup="moveNext(event, 1)">
+      <div class="dash">-</div>
+      <input type="text" maxlength="1" value="4" onkeyup="moveNext(event, 3)">
+      <input type="text" maxlength="1" value="8" onkeyup="moveNext(event, 4)">
+      <input type="text" maxlength="1" value="2" onkeyup="moveNext(event, 5)">
+      <input type="text" maxlength="1" value="1" onkeyup="moveNext(event, 6)">
+    </div>
+
+    <button class="connect-btn" onclick="connect()">🔒 Conectar con IA de soporte</button>
+
+    <div class="hint">💡 Tu código está en el chat de <strong>soporte.volvix.com</strong></div>
+
+    <div class="trust-row">
+      <div class="trust-item">Sin descargar nada</div>
+      <div class="trust-item">Encriptado end-to-end</div>
+      <div class="trust-item">Solo por 10 min</div>
+      <div class="trust-item">Puedes cortar en cualquier momento</div>
+    </div>
+  </div>
+
+  <!-- Connecting state -->
+  <div class="card connecting" id="connecting">
+    <div class="loader"></div>
+    <h1>Conectando con <span>IA...</span></h1>
+    <p class="sub">Por favor no cierres esta ventana. La conexión se establece en segundos.</p>
+
+    <div class="logs" id="logs"></div>
+  </div>
+
+  <!-- Connected state -->
+  <div class="connected-wrap" id="connected">
+    <div class="ok-icon">✓</div>
+    <h1 style="color:var(--success);">Conectado</h1>
+    <p class="sub">La IA de soporte ya tiene control de tu pantalla y está diagnosticando el problema automáticamente.</p>
+
+    <div class="agent-info">
+      <strong>🤖 Volvix AI Support</strong> · Agente #47B2<br>
+      <span style="font-size:11px;opacity:0.8;">Especialista: Impresoras térmicas · 47 casos resueltos</span>
+    </div>
+
+    <!-- Terminal status filter -->
+    <div id="terminalFilterPanel" style="margin-top:14px;padding:14px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;text-align:left">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <strong style="font-size:12px;color:var(--text)">Terminales</strong>
+        <span id="termCount" style="font-size:11px;color:var(--text-2)" aria-live="polite">0</span>
+      </div>
+      <div role="tablist" aria-label="Filtrar terminales por estado" style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+        <button type="button" data-filter="all"     class="term-filter active" aria-pressed="true"  style="padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:rgba(59,130,246,0.18);color:var(--text);font-size:11px;cursor:pointer">Todas</button>
+        <button type="button" data-filter="online"  class="term-filter"        aria-pressed="false" style="padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-2);font-size:11px;cursor:pointer">🟢 Online</button>
+        <button type="button" data-filter="idle"    class="term-filter"        aria-pressed="false" style="padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-2);font-size:11px;cursor:pointer">🟡 Idle</button>
+        <button type="button" data-filter="offline" class="term-filter"        aria-pressed="false" style="padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-2);font-size:11px;cursor:pointer">⚫ Offline</button>
+      </div>
+      <div id="termList" style="max-height:160px;overflow-y:auto;font-size:11.5px;color:var(--text-2)">
+        <div class="empty" style="padding:14px;text-align:center;font-size:11px">Cargando terminales…</div>
+      </div>
+    </div>
+
+    <div class="safety-note">
+      <strong>🛡️ Tu privacidad está protegida.</strong><br>
+      La IA solo ve la ventana del sistema POS. Tu escritorio personal, archivos y otros programas permanecen privados. Todo queda grabado y tú puedes revisarlo después.
+    </div>
+
+    <div class="actions-row">
+      <button>📹 Ver grabación</button>
+      <button>💬 Chatear con IA</button>
+      <button class="disconnect" onclick="location.reload()">Desconectar</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ---------------------------------------------------------------------------
+// B44: Remote control wiring — real backend
+//   GET  /api/remote/terminals
+//   POST /api/remote/terminals/:id/command
+//   GET  /api/remote/terminals/:id/logs
+//   POST /api/remote/heartbeat (used by terminals, not this UI)
+// Realtime updates: Supabase Realtime channel `terminal_status` (best-effort).
+// ---------------------------------------------------------------------------
+const VLX_REMOTE = (function () {
+  function token() {
+    try { return localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken'); }
+    catch (_) { return null; }
+  }
+  function logLine(type, text) {
+    const log = document.getElementById('logs');
+    if (!log) return;
+    const line = document.createElement('span');
+    line.className = 'line';
+    line.innerHTML = `<span class="${type}">${text}</span>`;
+    log.appendChild(line);
+    log.scrollTop = log.scrollHeight;
+  }
+  function ts() { return '[' + new Date().toLocaleTimeString() + ']'; }
+  async function api(method, path, body) {
+    const headers = { 'Content-Type': 'application/json' };
+    const t = token();
+    if (t) headers['Authorization'] = 'Bearer ' + t;
+    const opts = { method, headers, credentials: 'include' };
+    if (body) opts.body = JSON.stringify(body);
+    const r = await fetch(path, opts);
+    if (r.status === 401) {
+      try { localStorage.removeItem('volvix_token'); localStorage.removeItem('volvixAuthToken'); } catch(_){}
+      const redir = encodeURIComponent(location.pathname + location.search);
+      location.replace('/login.html?expired=1&redirect=' + redir);
+      return { ok:false, status:401, json:null };
+    }
+    if (r.status === 503) {
+      logLine('info', ts() + ' ⚠ Servicio remoto no configurado (503)');
+    }
+    let json = null;
+    try { json = await r.json(); } catch (_) {}
+    return { ok: r.ok, status: r.status, json };
+  }
+
+  let activeTerminal = null;
+  let logsTimer = null;
+  let lastLogSeen = null;
+
+  async function listTerminals() {
+    const r = await api('GET', '/api/remote/terminals');
+    if (!r.ok) return [];
+    return (r.json && r.json.terminals) || [];
+  }
+
+  async function sendCommand(terminalId, command, payload) {
+    return api('POST', '/api/remote/terminals/' + encodeURIComponent(terminalId) + '/command', {
+      command, payload: payload || {}
+    });
+  }
+
+  async function pollLogs(terminalId) {
+    const qs = lastLogSeen ? ('?since=' + encodeURIComponent(lastLogSeen)) : '';
+    const r = await api('GET', '/api/remote/terminals/' + encodeURIComponent(terminalId) + '/logs' + qs);
+    if (!r.ok) return;
+    const logs = (r.json && r.json.logs) || [];
+    if (logs.length) {
+      // logs come desc, render asc
+      logs.slice().reverse().forEach(function (l) {
+        logLine(l.status === 'completed' ? 'ok' : 'info',
+                ts() + ' ' + (l.command || '?') + ' · ' + (l.status || 'pending'));
+      });
+      lastLogSeen = (r.json && r.json.server_time) || new Date().toISOString();
+    }
+  }
+
+  function startLogsPoll(terminalId) {
+    if (logsTimer) clearInterval(logsTimer);
+    pollLogs(terminalId);
+    logsTimer = setInterval(function () { pollLogs(terminalId); }, 5000);
+  }
+  function stopLogsPoll() {
+    if (logsTimer) { clearInterval(logsTimer); logsTimer = null; }
+  }
+
+  // Best-effort Supabase Realtime subscription on the terminal_status channel.
+  // Only activates when window.supabase is loaded (lazy / optional).
+  function subscribeRealtime(onChange) {
+    try {
+      if (window.supabase && window.supabase.channel) {
+        const ch = window.supabase.channel('terminal_status')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'remote_terminals' },
+              function (payload) { try { onChange && onChange(payload); } catch (_) {} })
+          .subscribe();
+        return ch;
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  return {
+    listTerminals, sendCommand, startLogsPoll, stopLogsPoll, subscribeRealtime,
+    setActive: function (t) { activeTerminal = t; },
+    getActive: function () { return activeTerminal; },
+    logLine: logLine,
+  };
+})();
+
+function moveNext(e, idx) {
+  const inputs = document.querySelectorAll('.code-input input');
+  if (e.target.value.length === 1 && idx < inputs.length - 1) {
+    inputs[idx + 1].focus();
+  }
+  inputs.forEach(i => i.value = i.value.toUpperCase());
+}
+
+async function connect() {
+  document.getElementById('initial').style.display = 'none';
+  document.getElementById('connecting').classList.add('active');
+
+  const tag = function (t) { return '[' + new Date().toLocaleTimeString() + ']'; };
+  VLX_REMOTE.logLine('info', tag() + ' Validando sesión...');
+  // Validate auth with /api/health (lightweight) and load terminals from real API.
+  let terminals = [];
+  try {
+    terminals = await VLX_REMOTE.listTerminals();
+    VLX_REMOTE.logLine('ok', tag() + ' ✓ Conectado al backend · ' + terminals.length + ' terminal(es)');
+  } catch (e) {
+    VLX_REMOTE.logLine('info', tag() + ' ✗ No se pudo listar terminales: ' + (e && e.message || e));
+  }
+
+  if (!terminals.length) {
+    VLX_REMOTE.logLine('info', tag() + ' Sin terminales registrados. Espera el primer heartbeat...');
+    await wait(800);
+    document.getElementById('connecting').classList.remove('active');
+    document.getElementById('connected').classList.add('active');
+    return;
+  }
+
+  // Pick first online terminal, else first
+  const target = terminals.find(function (t) { return t.status === 'online'; }) || terminals[0];
+  VLX_REMOTE.setActive(target);
+  VLX_REMOTE.logLine('ok', tag() + ' ✓ Terminal seleccionado: ' + (target.device_name || target.device_id));
+  VLX_REMOTE.logLine('info', tag() + ' Estado: ' + target.status + ' · v' + (target.app_version || 'n/a'));
+
+  // Send a ping command to confirm channel works
+  const cmd = await VLX_REMOTE.sendCommand(target.id, 'ping', {});
+  if (cmd.ok) {
+    VLX_REMOTE.logLine('ok', tag() + ' ✓ Ping aceptado · cmd_id=' + (cmd.json && cmd.json.command_id || '').slice(0, 8));
+  } else {
+    VLX_REMOTE.logLine('info', tag() + ' ✗ Ping rechazado (' + cmd.status + ')');
+  }
+
+  // Start log streaming
+  VLX_REMOTE.startLogsPoll(target.id);
+
+  // Realtime subscription (best-effort)
+  VLX_REMOTE.subscribeRealtime(function (payload) {
+    VLX_REMOTE.logLine('info', tag() + ' 🔄 Update: ' + (payload && payload.eventType));
+  });
+
+  await wait(600);
+  document.getElementById('connecting').classList.remove('active');
+  document.getElementById('connected').classList.add('active');
+
+  // Wire connected-state action buttons
+  const buttons = document.querySelectorAll('#connected .actions-row button');
+  if (buttons.length >= 3) {
+    // [0] Ver grabación → enviar get_logs
+    buttons[0].textContent = '📋 Ver logs';
+    buttons[0].onclick = async function () {
+      const t = VLX_REMOTE.getActive(); if (!t) return;
+      buttons[0].disabled = true;
+      const r = await VLX_REMOTE.sendCommand(t.id, 'get_logs', {});
+      buttons[0].disabled = false;
+      VLX_REMOTE.logLine(r.ok ? 'ok' : 'info', tag() + (r.ok ? ' ✓ Solicitud de logs enviada' : ' ✗ Falló logs (' + r.status + ')'));
+    };
+    // [1] Chatear → enviar comando reload
+    buttons[1].textContent = '🔄 Reload';
+    buttons[1].onclick = async function () {
+      const t = VLX_REMOTE.getActive(); if (!t) return;
+      buttons[1].disabled = true;
+      const r = await VLX_REMOTE.sendCommand(t.id, 'reload', {});
+      buttons[1].disabled = false;
+      VLX_REMOTE.logLine(r.ok ? 'ok' : 'info', tag() + (r.ok ? ' ✓ Reload enviado' : ' ✗ Falló reload'));
+    };
+    // [2] Desconectar
+    buttons[2].onclick = function () {
+      VLX_REMOTE.stopLogsPoll();
+      location.reload();
+    };
+  }
+}
+
+function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ---------------------------------------------------------------------------
+// Terminal list + filter (status: all/online/idle/offline)
+// ---------------------------------------------------------------------------
+let __terminalsCache = [];
+let __terminalFilter = 'all';
+
+function _termStatus(t) {
+  // Derive idle state if backend doesn't provide it: online & last_heartbeat > 60s old
+  if (t.status) return String(t.status).toLowerCase();
+  if (t.last_seen_at) {
+    var ageSec = (Date.now() - new Date(t.last_seen_at).getTime()) / 1000;
+    if (ageSec < 30) return 'online';
+    if (ageSec < 300) return 'idle';
+    return 'offline';
+  }
+  return 'offline';
+}
+
+function renderTerminalList() {
+  var box = document.getElementById('termList');
+  var counter = document.getElementById('termCount');
+  if (!box) return;
+  var filtered = __terminalsCache.filter(function (t) {
+    if (__terminalFilter === 'all') return true;
+    return _termStatus(t) === __terminalFilter;
+  });
+  if (counter) counter.textContent = String(filtered.length) + (__terminalFilter==='all' ? '' : ' / ' + __terminalsCache.length);
+  if (!filtered.length) {
+    box.innerHTML = '<div class="empty" style="padding:14px;text-align:center;font-size:11px">No hay terminales' + (__terminalFilter!=='all' ? ' en estado "' + __terminalFilter + '"' : '') + '.</div>';
+    return;
+  }
+  var dot = function (s) {
+    if (s === 'online') return '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#22C55E;margin-right:6px"></span>';
+    if (s === 'idle')   return '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#FBBF24;margin-right:6px"></span>';
+    return '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#71717A;margin-right:6px"></span>';
+  };
+  box.innerHTML = filtered.map(function (t) {
+    var st = _termStatus(t);
+    var name = t.device_name || t.device_id || t.id || 'Terminal';
+    var v = t.app_version || 'n/a';
+    return '<div class="term-row" data-id="' + (t.id || '') + '" tabindex="0" role="button" aria-label="Seleccionar terminal ' + escAttr(name) + '" style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:6px;cursor:pointer;border:1px solid transparent">' +
+           '<span>' + dot(st) + '<strong style="color:var(--text)">' + escHtml(name) + '</strong> <span style="opacity:0.6">v' + escHtml(v) + '</span></span>' +
+           '<span style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-2)">' + st + '</span>' +
+           '</div>';
+  }).join('');
+  // Click → set active terminal
+  box.querySelectorAll('.term-row').forEach(function (row) {
+    row.addEventListener('click', function () {
+      var id = row.dataset.id;
+      var t = __terminalsCache.find(function (x) { return String(x.id) === String(id); });
+      if (!t) return;
+      VLX_REMOTE.setActive(t);
+      VLX_REMOTE.logLine('ok', '[' + new Date().toLocaleTimeString() + '] ✓ Terminal activo: ' + (t.device_name || t.device_id));
+      VLX_REMOTE.startLogsPoll(t.id);
+    });
+    row.addEventListener('keypress', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); row.click(); }
+    });
+  });
+}
+
+function escHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+function escAttr(s) { return escHtml(s); }
+
+// Refresh the cached list and re-render
+async function refreshTerminals() {
+  try {
+    var list = await VLX_REMOTE.listTerminals();
+    __terminalsCache = Array.isArray(list) ? list : [];
+    renderTerminalList();
+  } catch (_) {}
+}
+
+// Wire filter buttons after DOM ready
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.term-filter').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      __terminalFilter = btn.dataset.filter || 'all';
+      document.querySelectorAll('.term-filter').forEach(function (b) {
+        var active = b === btn;
+        b.classList.toggle('active', active);
+        b.setAttribute('aria-pressed', String(active));
+        b.style.background = active ? 'rgba(59,130,246,0.18)' : 'transparent';
+        b.style.color = active ? 'var(--text)' : 'var(--text-2)';
+      });
+      renderTerminalList();
+    });
+  });
+});
+
+// Hook into connect() flow: after the connect routine populates terminals, also
+// expose them to the filter UI. We monkey-patch by listening for the connected
+// state appearing.
+const __origConnect = window.connect;
+window.connect = async function () {
+  await __origConnect();
+  await refreshTerminals();
+  // Periodic refresh while connected
+  setInterval(refreshTerminals, 15000);
+};
+</script>
+
+<script defer src="auth-helper.js"></script>
+<script src="volvix-tools-wiring.js" defer></script>
+<script src="volvix-extras-wiring.js" defer></script>
+<script src="volvix-charts-wiring.js" defer></script>
+<script src="volvix-notifications-wiring.js" defer></script>
+<script src="volvix-backup-wiring.js" defer></script>
+<script src="volvix-logger-wiring.js" defer></script>
+<script src="volvix-reports-wiring.js" defer></script>
+<script src="volvix-offline-wiring.js" defer></script>
+<script src="volvix-onboarding-wiring.js" defer></script>
+<script src="volvix-pwa-wiring.js" defer></script>
+<script src="volvix-i18n-wiring.js" defer></script>
+<script src="volvix-theme-wiring.js" defer></script>
+<script src="volvix-shortcuts-wiring.js" defer></script>
+<script src="volvix-search-wiring.js" defer></script>
+<script src="volvix-voice-wiring.js" defer></script>
+<script src="volvix-gamification-wiring.js" defer></script>
+<script src="volvix-perf-wiring.js" defer></script>
+<script src="volvix-email-wiring.js" defer></script>
+<script src="volvix-webrtc-wiring.js" defer></script>
+<script src="volvix-master-controller.js" defer></script>
+<script src="volvix-calendar-wiring.js" defer></script>
+<script src="volvix-payments-wiring.js" defer></script>
+<script src="volvix-realtime-wiring.js" defer></script>
+<script src="volvix-currency-wiring.js" defer></script>
+<script src="volvix-loyalty-wiring.js" defer></script>
+<script src="volvix-tax-wiring.js" defer></script>
+<script src="volvix-webhooks-wiring.js" defer></script>
+<script src="volvix-audit-wiring.js" defer></script>
+<script src="volvix-cache-wiring.js" defer></script>
+<script src="volvix-queue-wiring.js" defer></script>
+<script src="volvix-fulltext-wiring.js" defer></script>
+<script src="volvix-recommendations-wiring.js" defer></script>
+<script src="volvix-subscriptions-wiring.js" defer></script>
+<script src="volvix-plugins-wiring.js" defer></script>
+<script src="volvix-compliance-wiring.js" defer></script>
+<script src="volvix-cs-wiring.js" defer></script>
+<script src="volvix-ratelimit-wiring.js" defer></script>
+<script src="volvix-workflow-wiring.js" defer></script>
+<script src="volvix-ab-testing-wiring.js" defer></script>
+<script src="volvix-feedback-wiring.js" defer></script>
+<script src="volvix-inventory-ai-wiring.js" defer></script>
+</body>
+</html>

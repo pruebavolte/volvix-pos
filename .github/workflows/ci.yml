@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
+
+jobs:
+  build:
+    name: Build & Validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          elif [ -f package.json ]; then
+            npm install --no-audit --no-fund
+          else
+            echo "No package.json found, skipping install"
+          fi
+
+      - name: Syntax check api/index.js
+        run: |
+          if [ -f api/index.js ]; then
+            node --check api/index.js
+          else
+            echo "api/index.js not found, skipping"
+          fi
+
+      - name: Syntax check main wirings
+        run: |
+          for f in api/*.js api/admin/*.js server.js; do
+            if [ -f "$f" ]; then
+              echo "Checking $f"
+              node --check "$f" || exit 1
+            fi
+          done
+
+      - name: ESLint (if configured)
+        run: |
+          if [ -f .eslintrc ] || [ -f .eslintrc.json ] || [ -f .eslintrc.js ] || [ -f eslint.config.js ]; then
+            npx eslint . --ext .js,.mjs,.cjs || exit 1
+          else
+            echo "No ESLint config found, skipping"
+          fi
+
+      - name: Smoke test (deploy preview /api/health)
+        if: ${{ github.event_name == 'pull_request' }}
+        env:
+          PREVIEW_URL: ${{ secrets.PREVIEW_URL }}
+        run: |
+          if [ -z "$PREVIEW_URL" ]; then
+            echo "PREVIEW_URL secret not set, skipping smoke test"
+            exit 0
+          fi
+          for i in 1 2 3 4 5; do
+            CODE=$(curl -s -o /tmp/health.json -w "%{http_code}" "$PREVIEW_URL/api/health" || echo "000")
+            if [ "$CODE" = "200" ]; then
+              echo "Health OK"
+              cat /tmp/health.json
+              exit 0
+            fi
+            echo "Attempt $i: HTTP $CODE — retrying"
+            sleep 5
+          done
+          echo "Smoke test failed"
+          exit 1

@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Corte de caja · Volvix</title>
+  <meta name="theme-color" content="#1a237e">
+
+  <!-- 1. Auth gate -->
+  <script src="/auth-gate.js" data-roles="superadmin,owner,cajero"></script>
+
+  <!-- 2. Config -->
+  <script src="/config.js"></script>
+
+  <!-- 3. Fuentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+  <!-- 4. Design tokens -->
+  <link rel="stylesheet" href="/volvix-tokens.css">
+
+  <!-- 5. API + Sync + Widget -->
+  <script src="/volvix-api.js"></script>
+  <script src="/volvix-sync.js"></script>
+  <script src="/volvix-sync-widget.js"></script>
+
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-primary);
+  font-size: 14px;
+  color: var(--text);
+  background: var(--bg-2);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  background: var(--navy);
+  color: #fff;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.tb-brand { font-weight: 800; font-size: 15px; color: #fff; letter-spacing: -0.3px; }
+.tb-brand span { color: #90caf9; }
+.tb-section { font-size: 12px; color: #b3c5ff; padding: 2px 8px; background: rgba(255,255,255,0.1); border-radius: 4px; }
+.tb-sep { flex: 1; }
+.tb-tenant { font-size: 11.5px; color: #90caf9; }
+.tb-btn {
+  padding: 4px 11px; border-radius: 4px; font-size: 12px; font-weight: 600;
+  cursor: pointer; border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.08); color: #fff;
+  font-family: var(--font-primary); transition: background var(--t-base);
+}
+.tb-btn:hover { background: rgba(255,255,255,0.15); }
+.tb-exit { background: var(--danger); border-color: var(--danger); }
+.tb-exit:hover { background: var(--danger-2); }
+
+/* ── TABS ── */
+.tabs {
+  background: var(--surface);
+  border-bottom: 2px solid var(--border);
+  display: flex;
+  flex-shrink: 0;
+}
+.tab {
+  padding: 8px 20px; font-size: 13px; font-weight: 600;
+  color: var(--text-3); cursor: pointer;
+  border-bottom: 2px solid transparent; margin-bottom: -2px;
+  transition: all var(--t-base); white-space: nowrap;
+}
+.tab:hover { color: var(--navy); background: #f3f4ff; }
+.tab.active { color: var(--navy); border-bottom-color: var(--navy); }
+
+/* ── MAIN GRID ── */
+.main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+}
+
+/* ── CARD ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+.card-head {
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  background: #e8eaf6;
+}
+.card-title { font-size: 13.5px; font-weight: 700; color: var(--navy); }
+.card-sub   { font-size: 12px; color: #5c6bc0; margin-top: 1px; }
+.card-body  { padding: 18px; }
+
+/* ── TURNO BANNER ── */
+.turno-banner {
+  border-radius: var(--radius-xl);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.turno-banner.open   { background: #e8f5e9; border: 1px solid #a5d6a7; }
+.turno-banner.closed { background: #fce4ec; border: 1px solid #f48fb1; }
+.turno-banner.none   { background: var(--bg-3); border: 1px dashed var(--border-2); }
+.turno-icon { font-size: 32px; flex-shrink: 0; }
+.turno-info { flex: 1; min-width: 160px; }
+.turno-title { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+.turno-meta  { font-size: 12px; color: var(--text-2); }
+.turno-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ── KPI GRID ── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+.kpi {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 14px 16px;
+}
+.kpi.highlight { border-color: var(--navy); background: #f3f4ff; }
+.kpi-label { font-size: 10.5px; color: var(--text-3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+.kpi-val { font-size: 22px; font-weight: 800; letter-spacing: -0.8px; color: var(--text); }
+.kpi-val.green  { color: var(--green); }
+.kpi-val.red    { color: var(--red); }
+.kpi-val.navy   { color: var(--navy); }
+.kpi-val.orange { color: var(--orange); }
+.kpi-sub { font-size: 11px; color: var(--text-3); margin-top: 3px; }
+
+/* ── MÉTODO DE PAGO CARDS ── */
+.pm-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+.pm-card {
+  padding: 16px;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.pm-card.efectivo    { border-color: #a5d6a7; background: #f1f8f1; }
+.pm-card.tarjeta     { border-color: #90caf9; background: #f0f4ff; }
+.pm-card.transferencia { border-color: #ce93d8; background: #faf0ff; }
+.pm-icon  { font-size: 22px; margin-bottom: 4px; }
+.pm-label { font-size: 11.5px; font-weight: 600; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.5px; }
+.pm-val   { font-size: 22px; font-weight: 800; letter-spacing: -0.8px; }
+.pm-card.efectivo    .pm-val { color: var(--green); }
+.pm-card.tarjeta     .pm-val { color: var(--navy); }
+.pm-card.transferencia .pm-val { color: #7b1fa2; }
+.pm-count { font-size: 11.5px; color: var(--text-3); }
+
+/* ── ENTRADAS / SALIDAS ── */
+.mov-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.mov-list { display: flex; flex-direction: column; gap: 6px; }
+.mov-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--bg-2);
+  border-radius: var(--radius-lg);
+  font-size: 13px;
+}
+.mov-concepto { color: var(--text-2); }
+.mov-monto { font-weight: 700; }
+.mov-monto.green { color: var(--green); }
+.mov-monto.red   { color: var(--red); }
+.mov-empty { font-size: 12px; color: var(--text-3); text-align: center; padding: 16px; }
+
+/* ── ARQUEO ── */
+.arqueo-table { width: 100%; border-collapse: collapse; }
+.arqueo-table th {
+  padding: 7px 12px;
+  text-align: left;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border);
+}
+.arqueo-table th.right { text-align: right; }
+.arqueo-table td {
+  padding: 9px 12px;
+  font-size: 13.5px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.arqueo-table td.right { text-align: right; font-family: var(--font-mono); }
+.arqueo-table td.bold  { font-weight: 700; }
+.arqueo-table tr.total-row td { background: #e8eaf6; font-weight: 800; font-size: 14px; color: var(--navy); }
+.arqueo-table tr.diff-ok  td { background: #e8f5e9; }
+.arqueo-table tr.diff-err td { background: #fce4ec; }
+
+.denom-input {
+  width: 72px;
+  padding: 4px 8px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-family: var(--font-mono);
+  text-align: right;
+  outline: none;
+  font-family: var(--font-primary);
+}
+.denom-input:focus { border-color: var(--navy); box-shadow: 0 0 0 2px rgba(26,35,126,0.1); }
+
+/* ── TICKET DE CORTE ── */
+.corte-ticket {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  white-space: pre;
+  line-height: 1.7;
+  max-height: 480px;
+  overflow-y: auto;
+  color: var(--text);
+}
+
+/* ── HISTORIAL ── */
+.hist-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border);
+  transition: background var(--t-fast);
+  cursor: pointer;
+}
+.hist-row:hover { background: var(--bg-2); }
+.hist-row:last-child { border-bottom: none; }
+.hist-icon { width: 34px; height: 34px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+.hist-info { flex: 1; min-width: 0; }
+.hist-title { font-size: 13px; font-weight: 600; }
+.hist-meta  { font-size: 11.5px; color: var(--text-3); margin-top: 1px; }
+.hist-total { font-size: 14px; font-weight: 800; color: var(--green); flex-shrink: 0; }
+
+/* ── PILL ── */
+.pill {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 2px 7px; border-radius: var(--radius-full);
+  font-size: 11px; font-weight: 600;
+}
+.pill.green  { background: rgba(46,125,50,0.1);  color: #2e7d32; }
+.pill.red    { background: rgba(198,40,40,0.1);  color: #c62828; }
+.pill.orange { background: rgba(230,81,0,0.1);   color: #e65100; }
+.pill.blue   { background: rgba(26,35,126,0.1);  color: var(--navy); }
+.pill.gray   { background: var(--bg-3); color: var(--text-3); }
+
+/* ── RESUMEN DE DIFERENCIA ── */
+.diff-box {
+  padding: 14px 18px;
+  border-radius: var(--radius-xl);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 14px;
+  font-weight: 600;
+}
+.diff-box.ok  { background: #e8f5e9; border: 1px solid #a5d6a7; color: var(--green); }
+.diff-box.err { background: #fce4ec; border: 1px solid #f48fb1; color: var(--red); }
+.diff-box.warn { background: #fff8e1; border: 1px solid #ffe082; color: var(--orange); }
+.diff-val { font-size: 22px; font-weight: 900; letter-spacing: -0.5px; }
+
+/* ── BTN ── */
+.btn {
+  padding: 7px 16px; border-radius: var(--radius-lg); font-size: 13px; font-weight: 600;
+  cursor: pointer; border: 1px solid var(--border); background: var(--surface);
+  color: var(--text-2); font-family: var(--font-primary);
+  transition: all var(--t-base); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+}
+.btn:hover { border-color: var(--border-2); color: var(--text); }
+.btn.primary { background: var(--green); color: #fff; border-color: var(--green); }
+.btn.primary:hover { background: #1b5e20; }
+.btn.navy { background: var(--navy); color: #fff; border-color: var(--navy); }
+.btn.navy:hover { background: var(--navy2); }
+.btn.danger { background: var(--danger-soft); color: var(--danger-2); border-color: var(--danger-border); }
+.btn.lg { padding: 11px 26px; font-size: 14px; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── MODAL ── */
+.modal-bg {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: var(--z-modal);
+  display: none; align-items: center; justify-content: center; padding: 20px;
+  backdrop-filter: blur(3px);
+}
+.modal-bg.open { display: flex; }
+.modal {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-2xl); width: 100%; max-width: 500px;
+  max-height: 92vh; overflow: hidden; display: flex; flex-direction: column;
+  animation: vlx-scale-in var(--t-base) var(--ease-out) both;
+  box-shadow: var(--shadow-2xl);
+}
+.modal-head { padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #e8eaf6; }
+.modal-head-title { font-size: 14px; font-weight: 700; color: var(--navy); }
+.modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+.modal-foot { padding: 12px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+.form-group { margin-bottom: 13px; }
+.form-label { display: block; font-size: 11.5px; font-weight: 700; color: var(--text-2); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.3px; }
+.form-input, .form-select {
+  width: 100%; padding: 8px 11px; border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg); font-size: 13px; font-family: var(--font-primary);
+  color: var(--text); background: var(--surface); outline: none;
+  transition: border-color var(--t-base);
+}
+.form-input:focus, .form-select:focus { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(26,35,126,0.1); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 72px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--navy); color: #fff;
+  padding: 9px 20px; border-radius: var(--radius-full); font-size: 13px; font-weight: 500;
+  z-index: var(--z-toast); opacity: 0; transition: all var(--t-slow);
+  pointer-events: none; white-space: nowrap; box-shadow: var(--shadow-lg);
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.ok   { background: var(--green); }
+.toast.err  { background: var(--red); }
+.toast.warn { background: var(--orange); }
+
+/* ── PRINT ── */
+@media print {
+  .topbar, .tabs, .no-print { display: none !important; }
+  .main { overflow: visible; padding: 0; }
+  .corte-ticket { max-height: none; border: none; }
+}
+
+@media (max-width: 640px) {
+  .pm-grid { grid-template-columns: 1fr; }
+  .mov-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ── TOPBAR ── -->
+  <div class="topbar">
+    <div class="tb-brand">Vol<span>vix</span></div>
+    <div class="tb-section">💰 Corte de caja</div>
+    <div class="tb-sep"></div>
+    <div class="tb-tenant" id="tbTenant">Cargando...</div>
+    <button class="tb-btn" onclick="location.href='/salvadorex-pos.html'">🛒 POS</button>
+    <button class="tb-btn" onclick="location.href='/volvix-owner-panel.html'">▦ Panel</button>
+    <button class="tb-btn tb-exit" onclick="window.volvixLogout()">⏻ Salir</button>
+  </div>
+
+  <!-- ── TABS ── -->
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('corte', this)">💰 Corte actual</div>
+    <div class="tab" onclick="switchTab('arqueo', this)">🪙 Arqueo de efectivo</div>
+    <div class="tab" onclick="switchTab('historial', this)">📋 Historial de cortes</div>
+  </div>
+
+  <!-- ── MAIN ── -->
+  <div class="main" id="main">
+
+    <!-- ══ TAB: CORTE ACTUAL ══ -->
+    <div id="tab-corte">
+
+      <!-- Turno banner -->
+      <div class="turno-banner" id="turnoBanner">
+        <div class="turno-icon">⏳</div>
+        <div class="turno-info">
+          <div class="turno-title">Cargando estado del turno...</div>
+          <div class="turno-meta" id="turnoMeta">—</div>
+        </div>
+      </div>
+
+      <!-- KPIs generales -->
+      <div class="kpi-grid">
+        <div class="kpi highlight">
+          <div class="kpi-label">Total de ventas</div>
+          <div class="kpi-val navy" id="kpiVentas">—</div>
+          <div class="kpi-sub" id="kpiVentasCount">0 transacciones</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Entradas de efectivo</div>
+          <div class="kpi-val green" id="kpiEntradas">—</div>
+          <div class="kpi-sub" id="kpiEntradasCount">0 movimientos</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Salidas de efectivo</div>
+          <div class="kpi-val red" id="kpiSalidas">—</div>
+          <div class="kpi-sub" id="kpiSalidasCount">0 movimientos</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Descuentos aplicados</div>
+          <div class="kpi-val orange" id="kpiDescuentos">—</div>
+        </div>
+        <div class="kpi highlight">
+          <div class="kpi-label">Efectivo esperado en caja</div>
+          <div class="kpi-val green" id="kpiEfectivoCaja">—</div>
+          <div class="kpi-sub">Fondo + ventas + entradas − salidas</div>
+        </div>
+      </div>
+
+      <!-- Ventas por método de pago -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Ventas por método de pago</div>
+            <div class="card-sub">Desglose del turno actual</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="pm-grid">
+            <div class="pm-card efectivo">
+              <div class="pm-icon">💵</div>
+              <div class="pm-label">Efectivo</div>
+              <div class="pm-val" id="pmEfectivo">$0.00</div>
+              <div class="pm-count" id="pmEfectivoCount">0 ventas</div>
+            </div>
+            <div class="pm-card tarjeta">
+              <div class="pm-icon">💳</div>
+              <div class="pm-label">Tarjeta</div>
+              <div class="pm-val" id="pmTarjeta">$0.00</div>
+              <div class="pm-count" id="pmTarjetaCount">0 ventas</div>
+            </div>
+            <div class="pm-card transferencia">
+              <div class="pm-icon">📲</div>
+              <div class="pm-label">Transferencia</div>
+              <div class="pm-val" id="pmTransfer">$0.00</div>
+              <div class="pm-count" id="pmTransferCount">0 ventas</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Entradas y Salidas -->
+      <div class="mov-grid">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">📥 Entradas de efectivo</div>
+            </div>
+            <button class="btn" style="font-size:12px" onclick="openMovimiento('entrada')">+ Entrada</button>
+          </div>
+          <div class="card-body" style="padding:12px">
+            <div class="mov-list" id="listaEntradas">
+              <div class="mov-empty">Sin entradas en este turno</div>
+            </div>
+            <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:12px;color:var(--text-3);font-weight:600">TOTAL ENTRADAS</span>
+              <span style="font-size:14px;font-weight:800;color:var(--green)" id="totalEntradas">$0.00</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">📤 Salidas de efectivo</div>
+            </div>
+            <button class="btn" style="font-size:12px" onclick="openMovimiento('salida')">+ Salida</button>
+          </div>
+          <div class="card-body" style="padding:12px">
+            <div class="mov-list" id="listaSalidas">
+              <div class="mov-empty">Sin salidas en este turno</div>
+            </div>
+            <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:12px;color:var(--text-3);font-weight:600">TOTAL SALIDAS</span>
+              <span style="font-size:14px;font-weight:800;color:var(--red)" id="totalSalidas">$0.00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botones de acción -->
+      <div style="display:flex;gap:10px;flex-wrap:wrap" class="no-print">
+        <button class="btn" onclick="imprimirCorte()">🖨️ Imprimir resumen</button>
+        <button class="btn primary" onclick="imprimirCorteZPdf()">🧾 Imprimir Corte Z (PDF)</button>
+        <button class="btn" onclick="switchTab('arqueo', document.querySelectorAll('.tab')[1])">🪙 Ir a arqueo</button>
+        <div style="flex:1"></div>
+        <button class="btn danger no-print" id="btnCerrarTurno" onclick="confirmarCerrarTurno()">
+          🔒 Cerrar turno (Corte Z)
+        </button>
+        <button class="btn navy no-print" id="btnAbrirTurno" onclick="confirmarAbrirTurno()" style="display:none">
+          🔓 Abrir nuevo turno
+        </button>
+      </div>
+
+    </div><!-- /tab-corte -->
+
+    <!-- ══ TAB: ARQUEO ══ -->
+    <div id="tab-arqueo" style="display:none">
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-head">
+          <div>
+            <div class="card-title">🪙 Arqueo de efectivo en caja</div>
+            <div class="card-sub">Cuenta el dinero físico por denominación</div>
+          </div>
+          <button class="btn" onclick="limpiarArqueo()">↺ Limpiar</button>
+        </div>
+        <div class="card-body" style="padding:0">
+          <table class="arqueo-table">
+            <thead>
+              <tr>
+                <th>Denominación</th>
+                <th class="right">Cantidad</th>
+                <th class="right">Total</th>
+              </tr>
+            </thead>
+            <tbody id="arqueoCuerpo"></tbody>
+            <tfoot>
+              <tr class="total-row">
+                <td class="bold">TOTAL CONTADO</td>
+                <td class="right bold" id="arqueoTotalBills">—</td>
+                <td class="right bold" id="arqueoTotal">$0.00</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- Diferencia -->
+      <div class="diff-box" id="diffBox">
+        <div>
+          <div style="font-size:13px;margin-bottom:4px">Diferencia (contado vs sistema)</div>
+          <div style="font-size:12px;opacity:0.8">Total contado − Efectivo esperado en caja</div>
+        </div>
+        <div class="diff-val" id="diffVal">—</div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+        <button class="btn" onclick="copiarArqueo()">📋 Copiar resumen</button>
+        <button class="btn navy" onclick="usarArqueoEnCorte()">✓ Usar este conteo en el corte</button>
+      </div>
+
+    </div><!-- /tab-arqueo -->
+
+    <!-- ══ TAB: HISTORIAL ══ -->
+    <div id="tab-historial" style="display:none">
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">📋 Historial de cortes</div>
+          <div style="display:flex;gap:6px">
+            <input type="date" id="filtroFecha" class="form-input" style="width:160px;padding:5px 10px;font-size:12px" onchange="loadHistorial()">
+          </div>
+        </div>
+        <div id="listaHistorial">
+          <div style="padding:60px;text-align:center;color:var(--text-3)">
+            <div style="font-size:44px;margin-bottom:12px;opacity:0.4">📋</div>
+            <div style="font-size:14px;font-weight:600;margin-bottom:6px;color:var(--text-2)">Sin cortes registrados</div>
+            <div style="font-size:13px">Los cortes de caja aparecerán aquí</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /tab-historial -->
+
+  </div><!-- /main -->
+
+</div><!-- /app -->
+
+<!-- ══════════ MODAL: MOVIMIENTO ══════════ -->
+<div class="modal-bg" id="modalMovimiento" onclick="if(event.target===this)closeModal('modalMovimiento')">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-head">
+      <span class="modal-head-title" id="movTitulo">Movimiento de efectivo</span>
+      <button class="btn" style="padding:4px 9px;font-size:12px" onclick="closeModal('modalMovimiento')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Concepto *</label>
+        <input class="form-input" id="movConcepto" placeholder="Ej. Cambio inicial, pago de proveedor...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Monto *</label>
+        <input class="form-input" id="movMonto" type="number" min="0" step="0.01" placeholder="0.00" style="font-size:20px;font-weight:700;text-align:right">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Autorizó</label>
+        <input class="form-input" id="movAutorizo" placeholder="Nombre del supervisor o dueño">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('modalMovimiento')">Cancelar</button>
+      <button class="btn primary" onclick="guardarMovimiento()">✓ Registrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ MODAL: APERTURA DE CAJA ══════════ -->
+<div class="modal-bg" id="modalApertura" onclick="if(event.target===this)closeModal('modalApertura')">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-head">
+      <span class="modal-head-title">🔓 Apertura de caja</span>
+      <button class="btn" style="padding:4px 9px;font-size:12px" onclick="closeModal('modalApertura')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Fondo inicial de caja *</label>
+        <input class="form-input" id="aperFondo" type="number" min="0" step="0.01" placeholder="500.00" style="font-size:22px;font-weight:700;text-align:right">
+        <div style="font-size:11.5px;color:var(--text-3);margin-top:4px">Dinero con el que arranca la caja este turno</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Cajero</label>
+        <input class="form-input" id="aperCajero" readonly>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notas</label>
+        <input class="form-input" id="aperNotas" placeholder="Observaciones de apertura...">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('modalApertura')">Cancelar</button>
+      <button class="btn primary" onclick="abrirTurno()">🔓 Abrir turno</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ MODAL: CORTE Z ══════════ -->
+<div class="modal-bg" id="modalCorteZ" onclick="if(event.target===this)closeModal('modalCorteZ')">
+  <div class="modal" style="max-width:680px">
+    <div class="modal-head">
+      <span class="modal-head-title">🔒 Corte Z — Cierre de turno</span>
+      <button class="btn" style="padding:4px 9px;font-size:12px" onclick="closeModal('modalCorteZ')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="corteTicketWrap">
+        <pre class="corte-ticket" id="corteTicketText"></pre>
+      </div>
+      <div style="margin-top:14px">
+        <label class="form-label">Efectivo físico contado en caja</label>
+        <input class="form-input" id="corteEfectivoFisico" type="number" min="0" step="0.01" placeholder="0.00" oninput="calcDiferenciaCorte()" style="font-size:18px;font-weight:700;text-align:right">
+      </div>
+      <div class="diff-box" id="corteDiffBox" style="margin-top:12px;display:none">
+        <div id="corteDiffLabel">Diferencia</div>
+        <div class="diff-val" id="corteDiffVal">—</div>
+      </div>
+      <div style="margin-top:12px">
+        <label class="form-label">Observaciones (opcional)</label>
+        <input class="form-input" id="corteObs" placeholder="Notas del cierre...">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('modalCorteZ')">Cancelar</button>
+      <button class="btn" onclick="imprimirCorte()">🖨️ Imprimir</button>
+      <button class="btn danger" onclick="ejecutarCorteZ()">🔒 Confirmar cierre</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+
+// ── Helpers ──
+const esc    = (s) => window.volvix?.utils?.esc(s) ?? String(s ?? '');
+const money  = (n) => window.volvix?.utils?.money(n) ?? ('$' + Number(n || 0).toFixed(2));
+const fmtDt  = (d) => window.volvix?.utils?.datetime(d) ?? new Date(d).toLocaleString('es-MX');
+const fmtTm  = (d) => window.volvix?.utils?.time(d) ?? new Date(d).toLocaleTimeString('es-MX');
+
+// ── Estado del turno ──
+const TURNO_KEY = 'volvix:turno:' + (window.VOLVIX_USER?.tenant_id || 'local');
+
+let turno = null; // { id, cajero, cajeroEmail, inicio, fondoInicial, estado }
+let ventas = [];
+let entradas = [];
+let salidas  = [];
+
+// ── Init sesión ──
+(function initSession() {
+  const u = window.VOLVIX_USER;
+  if (!u) return;
+  const el = document.getElementById('tbTenant');
+  if (el) el.textContent = u.tenant_name || u.email || '—';
+  const ap = document.getElementById('aperCajero');
+  if (ap) ap.value = u.email || u.role || '—';
+})();
+
+// ── Tabs ──
+function switchTab(tab, el) {
+  ['corte','arqueo','historial'].forEach(t => {
+    document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  if (el) el.classList.add('active');
+  if (tab === 'historial') loadHistorial();
+  if (tab === 'arqueo')    updateArqueo();
+}
+
+// ── Cargar datos del turno ──
+async function loadTurno() {
+  // Leer turno de localStorage (offline-first)
+  try {
+    const stored = localStorage.getItem(TURNO_KEY);
+    if (stored) turno = JSON.parse(stored);
+  } catch { turno = null; }
+
+  // Cargar ventas del día desde API
+  try {
+    const data = await window.volvix.api.ventas.list({
+      tenant_id: window.VOLVIX_USER?.tenant_id,
+    });
+    if (Array.isArray(data)) {
+      ventas = data;
+    }
+  } catch {
+    ventas = window.volvix?.offline?.list?.('ventas') || [];
+  }
+
+  // Filtrar ventas del turno actual
+  if (turno?.inicio) {
+    ventas = ventas.filter(v => {
+      const ts = new Date(v.created_at || v.timestamp || 0).getTime();
+      return ts >= new Date(turno.inicio).getTime();
+    });
+  }
+
+  // Cargar movimientos
+  try {
+    const stored = JSON.parse(localStorage.getItem('volvix:movimientos:' + (window.VOLVIX_USER?.tenant_id || 'local')) || '[]');
+    entradas = stored.filter(m => m.tipo === 'entrada' && (!turno || !m.turnoId || m.turnoId === turno.id));
+    salidas  = stored.filter(m => m.tipo === 'salida'  && (!turno || !m.turnoId || m.turnoId === turno.id));
+  } catch { entradas = []; salidas = []; }
+
+  renderTurno();
+  renderKPIs();
+  renderPMs();
+  renderMovimientos();
+}
+
+// ── Render banner de turno ──
+function renderTurno() {
+  const banner = document.getElementById('turnoBanner');
+  const meta   = document.getElementById('turnoMeta');
+  const btnCerrar  = document.getElementById('btnCerrarTurno');
+  const btnAbrir   = document.getElementById('btnAbrirTurno');
+
+  if (!turno || turno.estado === 'cerrado') {
+    banner.className = 'turno-banner none';
+    banner.innerHTML = `
+      <div class="turno-icon">🔒</div>
+      <div class="turno-info">
+        <div class="turno-title">No hay turno abierto</div>
+        <div class="turno-meta">Abre un turno para comenzar a registrar ventas</div>
+      </div>
+      <div class="turno-actions">
+        <button class="btn primary" onclick="confirmarAbrirTurno()">🔓 Abrir turno</button>
+      </div>`;
+    if (btnCerrar) btnCerrar.style.display = 'none';
+    if (btnAbrir)  btnAbrir.style.display  = 'inline-flex';
+  } else {
+    const dur = turno.inicio ? formatDuracion(Date.now() - new Date(turno.inicio).getTime()) : '—';
+    banner.className = 'turno-banner open';
+    banner.innerHTML = `
+      <div class="turno-icon">🟢</div>
+      <div class="turno-info">
+        <div class="turno-title">Turno abierto · ${esc(turno.cajero || '—')}</div>
+        <div class="turno-meta">Inicio: ${esc(fmtDt(turno.inicio))} · Duración: ${esc(dur)} · Fondo: ${money(turno.fondoInicial || 0)}</div>
+      </div>`;
+    if (btnCerrar) btnCerrar.style.display = 'inline-flex';
+    if (btnAbrir)  btnAbrir.style.display  = 'none';
+  }
+}
+
+// ── Render KPIs ──
+function renderKPIs() {
+  const totalVentas = ventas.reduce((s, v) => s + Number(v.total || 0), 0);
+  const txCount     = ventas.length;
+  const totalEnt    = entradas.reduce((s, e) => s + Number(e.monto || 0), 0);
+  const totalSal    = salidas.reduce((s,  s2) => s + Number(s2.monto || 0), 0);
+  const descuentos  = ventas.reduce((s, v) => s + Number(v.descuento_monto || 0), 0);
+  const fondo       = turno?.fondoInicial || 0;
+  const efectivoVentas = ventas.filter(v => v.metodo_pago === 'efectivo').reduce((s, v) => s + Number(v.total || 0), 0);
+  const efectivoCaja   = fondo + efectivoVentas + totalEnt - totalSal;
+
+  document.getElementById('kpiVentas').textContent        = money(totalVentas);
+  document.getElementById('kpiVentasCount').textContent   = `${txCount} transacción${txCount !== 1 ? 'es' : ''}`;
+  document.getElementById('kpiEntradas').textContent      = money(totalEnt);
+  document.getElementById('kpiEntradasCount').textContent = `${entradas.length} movimiento${entradas.length !== 1 ? 's' : ''}`;
+  document.getElementById('kpiSalidas').textContent       = money(totalSal);
+  document.getElementById('kpiSalidasCount').textContent  = `${salidas.length} movimiento${salidas.length !== 1 ? 's' : ''}`;
+  document.getElementById('kpiDescuentos').textContent    = money(descuentos);
+  document.getElementById('kpiEfectivoCaja').textContent  = money(efectivoCaja);
+}
+
+// ── Render por método de pago ──
+function renderPMs() {
+  const pms = { efectivo: 0, tarjeta: 0, transferencia: 0 };
+  const cnt = { efectivo: 0, tarjeta: 0, transferencia: 0 };
+  for (const v of ventas) {
+    const pm = v.metodo_pago || 'efectivo';
+    if (pm in pms) { pms[pm] += Number(v.total || 0); cnt[pm]++; }
+  }
+  document.getElementById('pmEfectivo').textContent      = money(pms.efectivo);
+  document.getElementById('pmEfectivoCount').textContent = `${cnt.efectivo} venta${cnt.efectivo !== 1 ? 's' : ''}`;
+  document.getElementById('pmTarjeta').textContent       = money(pms.tarjeta);
+  document.getElementById('pmTarjetaCount').textContent  = `${cnt.tarjeta} venta${cnt.tarjeta !== 1 ? 's' : ''}`;
+  document.getElementById('pmTransfer').textContent      = money(pms.transferencia);
+  document.getElementById('pmTransferCount').textContent = `${cnt.transferencia} venta${cnt.transferencia !== 1 ? 's' : ''}`;
+}
+
+// ── Render movimientos ──
+function renderMovimientos() {
+  renderMovList('listaEntradas', entradas, 'green');
+  renderMovList('listaSalidas',  salidas,  'red');
+  document.getElementById('totalEntradas').textContent = money(entradas.reduce((s, e) => s + Number(e.monto || 0), 0));
+  document.getElementById('totalSalidas').textContent  = money(salidas.reduce((s, e)  => s + Number(e.monto || 0), 0));
+}
+
+function renderMovList(containerId, movs, colorCls) {
+  const el = document.getElementById(containerId);
+  if (!movs.length) { el.innerHTML = '<div class="mov-empty">Sin movimientos</div>'; return; }
+  el.innerHTML = movs.map(m => `
+    <div class="mov-item">
+      <span class="mov-concepto">${esc(m.concepto || '—')}</span>
+      <span class="mov-monto ${colorCls}">${money(m.monto)}</span>
+    </div>`).join('');
+}
+
+// ── Apertura de turno ──
+function confirmarAbrirTurno() {
+  openModal('modalApertura');
+  setTimeout(() => document.getElementById('aperFondo').focus(), 80);
+}
+
+async function abrirTurno() {
+  const fondo = parseFloat(document.getElementById('aperFondo').value || '0');
+  if (fondo < 0) { toast('El fondo no puede ser negativo', 'err'); return; }
+  const u = window.VOLVIX_USER;
+  turno = {
+    id:           'TRN-' + Date.now(),
+    cajero:       u?.email || u?.role || 'Cajero',
+    cajeroEmail:  u?.email || '',
+    tenant_id:    u?.tenant_id,
+    inicio:       new Date().toISOString(),
+    fondoInicial: fondo,
+    estado:       'abierto',
+    notas:        document.getElementById('aperNotas').value,
+  };
+
+  // POST /api/cuts/open (auth via volvix-api → Authorization Bearer)
+  try {
+    const resp = await window.volvix.api.raw('POST', '/api/cuts/open', {
+      opening_amount: fondo,
+      cashier:        turno.cajero,
+      notes:          turno.notas,
+    });
+    if (resp?.id || resp?.cut_id) turno.id = resp.id || resp.cut_id;
+  } catch (err) {
+    toast('⚠ Apertura registrada localmente (offline): ' + err.message, 'warn');
+  }
+
+  saveTurno();
+  entradas = []; salidas = []; ventas = [];
+  closeModal('modalApertura');
+  renderTurno(); renderKPIs(); renderPMs(); renderMovimientos();
+  toast('✓ Turno abierto · Fondo: ' + money(fondo), 'ok');
+}
+
+// ── Cierre de turno (Corte Z) ──
+function confirmarCerrarTurno() {
+  if (!turno || turno.estado !== 'abierto') { toast('No hay turno abierto', 'err'); return; }
+  document.getElementById('corteTicketText').textContent = generarTicketTexto();
+  document.getElementById('corteEfectivoFisico').value   = '';
+  document.getElementById('corteObs').value              = '';
+  // Precalcular diferencia ANTES de pedir conteo: mostramos esperado y delta=esperado.
+  // Así el cajero ve el monto esperado al abrir el modal y la diff se actualiza
+  // al teclear el conteo físico.
+  calcDiferenciaCorte();
+  openModal('modalCorteZ');
+}
+
+function calcDiferenciaCorte() {
+  const fisicoEl   = document.getElementById('corteEfectivoFisico');
+  const fisicoRaw  = fisicoEl ? fisicoEl.value : '';
+  const hasFisico  = fisicoRaw !== '' && fisicoRaw !== null;
+  const fisico     = parseFloat(fisicoRaw || '0') || 0;
+  const efectivoVentas = ventas.filter(v => v.metodo_pago === 'efectivo').reduce((s, v) => s + Number(v.total || 0), 0);
+  const totalEnt   = entradas.reduce((s, e) => s + Number(e.monto || 0), 0);
+  const totalSal   = salidas.reduce((s, e)  => s + Number(e.monto || 0), 0);
+  const esperado   = (turno?.fondoInicial || 0) + efectivoVentas + totalEnt - totalSal;
+  const diff       = fisico - esperado;
+  const box        = document.getElementById('corteDiffBox');
+  const val        = document.getElementById('corteDiffVal');
+  const lbl        = document.getElementById('corteDiffLabel');
+  if (!box || !val || !lbl) return;
+  box.style.display = 'flex';
+  if (!hasFisico) {
+    // Modo precálculo (antes de contar) — mostramos esperado, no la diff
+    val.textContent = money(esperado);
+    box.className = 'diff-box ok';
+    lbl.textContent = 'Esperado en caja · ingresa el conteo físico para ver la diferencia';
+    return;
+  }
+  val.textContent  = money(Math.abs(diff));
+  if (Math.abs(diff) < 1) {
+    box.className = 'diff-box ok';
+    lbl.textContent = '✓ Cuadrado · sin diferencia';
+  } else if (diff > 0) {
+    box.className = 'diff-box warn';
+    lbl.textContent = '⚠ Sobrante en caja · ' + money(diff);
+  } else {
+    box.className = 'diff-box err';
+    lbl.textContent = '✗ Faltante en caja · ' + money(Math.abs(diff));
+  }
+}
+
+async function ejecutarCorteZ() {
+  if (!turno) return;
+  turno.estado   = 'cerrado';
+  turno.fin      = new Date().toISOString();
+  turno.efectivoFisico = parseFloat(document.getElementById('corteEfectivoFisico').value || '0');
+  turno.observaciones  = document.getElementById('corteObs').value;
+  turno.totalVentas    = ventas.reduce((s, v) => s + Number(v.total || 0), 0);
+  turno.ticket         = generarTicketTexto();
+
+  // Guardar en historial
+  const histKey = 'volvix:historial-cortes:' + (window.VOLVIX_USER?.tenant_id || 'local');
+  const hist    = JSON.parse(localStorage.getItem(histKey) || '[]');
+  hist.unshift({ ...turno });
+  localStorage.setItem(histKey, JSON.stringify(hist.slice(0, 100)));
+
+  // POST /api/cuts/close (auth via volvix-api → Authorization Bearer)
+  try {
+    const efectivoVentas = ventas.filter(v => v.metodo_pago === 'efectivo').reduce((s, v) => s + Number(v.total || 0), 0);
+    const totalEnt   = entradas.reduce((s, e) => s + Number(e.monto || 0), 0);
+    const totalSal   = salidas.reduce((s, e)  => s + Number(e.monto || 0), 0);
+    const expected   = (turno.fondoInicial || 0) + efectivoVentas + totalEnt - totalSal;
+    await window.volvix.api.raw('POST', '/api/cuts/close', {
+      cut_id:           turno.id,
+      closing_amount:   turno.efectivoFisico,
+      expected_amount:  expected,
+      total_sales:      turno.totalVentas,
+      cash_in:          totalEnt,
+      cash_out:         totalSal,
+      observations:     turno.observaciones,
+    });
+  } catch (err) {
+    toast('⚠ Cierre registrado localmente (offline): ' + err.message, 'warn');
+  }
+
+  // Sync alias /api/cortes (legado)
+  try {
+    await window.volvix.sync.execute({
+      type:     'create',
+      table:    'cortes',
+      data:     turno,
+      endpoint: '/api/cortes',
+      body:     turno,
+    });
+  } catch {}
+
+  // Limpiar turno actual
+  localStorage.removeItem(TURNO_KEY);
+  turno = null; ventas = []; entradas = []; salidas = [];
+  closeModal('modalCorteZ');
+  renderTurno(); renderKPIs(); renderPMs(); renderMovimientos();
+  toast('✓ Turno cerrado · Corte Z registrado', 'ok');
+}
+
+// ── Generar texto del ticket ──
+function generarTicketTexto() {
+  const u       = window.VOLVIX_USER;
+  const brand   = window.VOLVIX_BRAND?.name || 'VOLVIX';
+  const now     = new Date();
+  const sep     = '================================';
+  const sep2    = '--------------------------------';
+  const totalV  = ventas.reduce((s, v) => s + Number(v.total || 0), 0);
+  const pms     = { efectivo: 0, tarjeta: 0, transferencia: 0 };
+  ventas.forEach(v => { const pm = v.metodo_pago || 'efectivo'; if (pm in pms) pms[pm] += Number(v.total || 0); });
+  const totalEnt = entradas.reduce((s, e) => s + Number(e.monto || 0), 0);
+  const totalSal = salidas.reduce((s, e)  => s + Number(e.monto || 0), 0);
+  const fondo    = turno?.fondoInicial || 0;
+  const efectivoCaja = fondo + pms.efectivo + totalEnt - totalSal;
+
+  const pad = (label, value) => (label + ' ').padEnd(24, '.') + ' ' + money(value);
+  const padN = (label, value) => (label + ' ').padEnd(24, '.') + ' ' + value;
+
+  return [
+    sep,
+    `         ${brand}`,
+    `       CORTE DE CAJA`,
+    `   ${turno?.id || 'SIN-TURNO'}`,
+    sep2,
+    `Cajero: ${turno?.cajero || u?.email || '—'}`,
+    `Apertura: ${turno?.inicio ? fmtDt(turno.inicio) : '—'}`,
+    `Cierre:   ${fmtDt(now)}`,
+    sep2,
+    padN('Transacciones', ventas.length),
+    pad('TOTAL VENTAS', totalV),
+    sep2,
+    pad('Efectivo', pms.efectivo),
+    pad('Tarjeta', pms.tarjeta),
+    pad('Transferencia', pms.transferencia),
+    sep2,
+    pad('Fondo inicial', fondo),
+    pad('+ Entradas', totalEnt),
+    pad('- Salidas', totalSal),
+    sep2,
+    pad('EFECTIVO EN CAJA', efectivoCaja),
+    sep,
+    '   Volvix POS · Gracias',
+    sep,
+  ].join('\n');
+}
+
+// ── Imprimir ──
+function imprimirCorte() {
+  const ticket = generarTicketTexto();
+  const win = window.open('', '_blank', 'width=400,height=600');
+  win.document.write(`<pre style="font-family:Courier New,monospace;font-size:12px;padding:20px;line-height:1.6">${ticket}</pre>`);
+  win.document.close();
+  win.print();
+}
+
+// ── Imprimir Corte Z (PDF backend, fallback a impresora térmica raw) ──
+async function imprimirCorteZPdf() {
+  const cutId = turno?.id || '';
+  // Intento 1: PDF desde backend (auth header automático vía fetch+session)
+  try {
+    const headers = window.volvix?.session?.getAuthHeaders?.() || {};
+    const url = `/api/reports/cash-cut/pdf?cut_id=${encodeURIComponent(cutId)}`;
+    const resp = await fetch(url, { headers });
+    if (resp.ok) {
+      const blob = await resp.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = objectUrl;
+      a.download = `corte_z_${cutId || 'turno'}_${new Date().toISOString().slice(0,10)}.pdf`;
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 5000);
+      toast('✓ Corte Z (PDF) descargado', 'ok');
+      return;
+    }
+  } catch {}
+  // Fallback: enviar texto raw a impresora térmica
+  try {
+    await window.volvix.api.raw('POST', '/api/printer/raw', { text: generarTicketTexto() });
+    toast('✓ Corte Z enviado a impresora', 'ok');
+  } catch (err) {
+    imprimirCorte();
+  }
+}
+
+// ── Movimientos (entrada/salida) ──
+let movTipo = 'entrada';
+function openMovimiento(tipo) {
+  movTipo = tipo;
+  document.getElementById('movTitulo').textContent = tipo === 'entrada' ? '📥 Registrar entrada de efectivo' : '📤 Registrar salida de efectivo';
+  document.getElementById('movConcepto').value  = '';
+  document.getElementById('movMonto').value     = '';
+  document.getElementById('movAutorizo').value  = '';
+  openModal('modalMovimiento');
+  setTimeout(() => document.getElementById('movConcepto').focus(), 80);
+}
+
+async function guardarMovimiento() {
+  const concepto  = document.getElementById('movConcepto').value.trim();
+  const monto     = parseFloat(document.getElementById('movMonto').value || '0');
+  const autorizo  = document.getElementById('movAutorizo').value.trim();
+  if (!concepto)    { toast('El concepto es obligatorio', 'err'); return; }
+  if (monto <= 0)   { toast('El monto debe ser mayor a 0', 'err'); return; }
+
+  const mov = {
+    id:       'MOV-' + Date.now(),
+    tipo:     movTipo,
+    concepto,
+    monto,
+    autorizo,
+    turnoId:  turno?.id,
+    tenant_id: window.VOLVIX_USER?.tenant_id,
+    usuario:  window.VOLVIX_USER?.email,
+    fecha:    new Date().toISOString(),
+  };
+
+  if (movTipo === 'entrada') entradas.push(mov);
+  else salidas.push(mov);
+
+  // Persistir local
+  const key  = 'volvix:movimientos:' + (window.VOLVIX_USER?.tenant_id || 'local');
+  const all  = JSON.parse(localStorage.getItem(key) || '[]');
+  all.push(mov);
+  localStorage.setItem(key, JSON.stringify(all));
+
+  // POST al backend (auth automático)
+  try {
+    await window.volvix.api.raw('POST', '/api/cuts/' + encodeURIComponent(turno?.id || '') + '/adjustment', {
+      type:     movTipo === 'entrada' ? 'cash_in' : 'cash_out',
+      amount:   monto,
+      concept:  concepto,
+      authorized_by: autorizo,
+    });
+  } catch {
+    // offline-first → ya guardado en localStorage
+  }
+
+  closeModal('modalMovimiento');
+  renderKPIs();
+  renderMovimientos();
+  toast(`✓ ${movTipo === 'entrada' ? 'Entrada' : 'Salida'} registrada · ${money(monto)}`, 'ok');
+}
+
+// ── Arqueo ──
+const DENOMINACIONES = [
+  { val: 1000, label: '$1,000' }, { val: 500, label: '$500' },
+  { val: 200,  label: '$200'  }, { val: 100, label: '$100' },
+  { val:  50,  label: '$50'   }, { val:  20, label: '$20'  },
+  { val:  10,  label: '$10'   }, { val:   5, label: '$5'   },
+  { val:   2,  label: '$2'    }, { val:   1, label: '$1'   },
+  { val: 0.50, label: '$0.50' }, { val: 0.20, label: '$0.20' },
+  { val: 0.10, label: '$0.10' },
+];
+
+function renderArqueo() {
+  const tbody = document.getElementById('arqueoCuerpo');
+  tbody.innerHTML = DENOMINACIONES.map(d => `
+    <tr>
+      <td style="font-weight:600">${esc(d.label)}</td>
+      <td class="right">
+        <input class="denom-input" id="denom-${d.val.toString().replace('.','_')}"
+          type="number" min="0" step="1" value="0"
+          oninput="calcArqueoTotal()"
+          placeholder="0">
+      </td>
+      <td class="right" id="denom-total-${d.val.toString().replace('.','_')}" style="font-family:var(--font-mono)">$0.00</td>
+    </tr>`).join('');
+}
+
+function calcArqueoTotal() {
+  let total = 0;
+  let totalBills = 0;
+  for (const d of DENOMINACIONES) {
+    const id  = 'denom-' + d.val.toString().replace('.','_');
+    const cnt = parseInt(document.getElementById(id)?.value || '0') || 0;
+    const subtotal = cnt * d.val;
+    total += subtotal;
+    totalBills += cnt;
+    const tdId = 'denom-total-' + d.val.toString().replace('.','_');
+    const td = document.getElementById(tdId);
+    if (td) td.textContent = money(subtotal);
+  }
+  document.getElementById('arqueoTotal').textContent      = money(total);
+  document.getElementById('arqueoTotalBills').textContent = totalBills + ' piezas';
+  updateArqueo(total);
+}
+
+function updateArqueo(totalContado) {
+  if (totalContado === undefined) {
+    totalContado = 0;
+    for (const d of DENOMINACIONES) {
+      const id = 'denom-' + d.val.toString().replace('.','_');
+      totalContado += (parseInt(document.getElementById(id)?.value || '0') || 0) * d.val;
+    }
+  }
+  const efectivoVentas = ventas.filter(v => v.metodo_pago === 'efectivo').reduce((s, v) => s + Number(v.total || 0), 0);
+  const totalEnt   = entradas.reduce((s, e) => s + Number(e.monto || 0), 0);
+  const totalSal   = salidas.reduce((s, e)  => s + Number(e.monto || 0), 0);
+  const esperado   = (turno?.fondoInicial || 0) + efectivoVentas + totalEnt - totalSal;
+  const diff       = totalContado - esperado;
+  const box        = document.getElementById('diffBox');
+  const val        = document.getElementById('diffVal');
+  if (Math.abs(diff) < 0.01) {
+    box.className = 'diff-box ok';
+    val.textContent = '✓ Cuadrado';
+  } else {
+    box.className = diff > 0 ? 'diff-box warn' : 'diff-box err';
+    val.textContent = (diff > 0 ? '+' : '') + money(diff);
+  }
+}
+
+function limpiarArqueo() {
+  DENOMINACIONES.forEach(d => {
+    const el = document.getElementById('denom-' + d.val.toString().replace('.','_'));
+    if (el) el.value = '0';
+    const tel = document.getElementById('denom-total-' + d.val.toString().replace('.','_'));
+    if (tel) tel.textContent = '$0.00';
+  });
+  document.getElementById('arqueoTotal').textContent      = '$0.00';
+  document.getElementById('arqueoTotalBills').textContent = '—';
+  updateArqueo(0);
+}
+
+function copiarArqueo() {
+  let total = 0;
+  const lines = DENOMINACIONES.map(d => {
+    const cnt = parseInt(document.getElementById('denom-' + d.val.toString().replace('.','_'))?.value || '0') || 0;
+    if (!cnt) return null;
+    const sub = cnt * d.val;
+    total += sub;
+    return `${d.label} × ${cnt} = ${money(sub)}`;
+  }).filter(Boolean);
+  const text = `ARQUEO DE EFECTIVO\n${lines.join('\n')}\nTOTAL: ${money(total)}`;
+  navigator.clipboard?.writeText(text).then(() => toast('✓ Copiado al portapapeles', 'ok')).catch(() => toast('No se pudo copiar', 'err'));
+}
+
+function usarArqueoEnCorte() {
+  let total = 0;
+  DENOMINACIONES.forEach(d => {
+    total += (parseInt(document.getElementById('denom-' + d.val.toString().replace('.','_'))?.value || '0') || 0) * d.val;
+  });
+  switchTab('corte', document.querySelectorAll('.tab')[0]);
+  setTimeout(() => {
+    confirmarCerrarTurno();
+    setTimeout(() => {
+      const el = document.getElementById('corteEfectivoFisico');
+      if (el) { el.value = total.toFixed(2); calcDiferenciaCorte(); }
+    }, 200);
+  }, 100);
+}
+
+// ── Historial ──
+function loadHistorial() {
+  const key  = 'volvix:historial-cortes:' + (window.VOLVIX_USER?.tenant_id || 'local');
+  const hist = JSON.parse(localStorage.getItem(key) || '[]');
+  const lista = document.getElementById('listaHistorial');
+  if (!hist.length) {
+    lista.innerHTML = `<div style="padding:60px;text-align:center;color:var(--text-3)">
+      <div style="font-size:44px;margin-bottom:12px;opacity:0.4">📋</div>
+      <div style="font-size:14px;font-weight:600;margin-bottom:6px;color:var(--text-2)">Sin cortes registrados</div>
+      <div style="font-size:13px">Los cortes de caja aparecerán aquí</div>
+    </div>`;
+    return;
+  }
+  lista.innerHTML = hist.map((c, i) => {
+    const diff = c.efectivoFisico - ((c.fondoInicial || 0) + (c.totalVentas || 0));
+    const pillCls = Math.abs(diff) < 1 ? 'green' : diff > 0 ? 'orange' : 'red';
+    const pillLbl = Math.abs(diff) < 1 ? 'Cuadrado' : diff > 0 ? 'Sobrante' : 'Faltante';
+    return `<div class="hist-row" onclick="verCorte(${i})">
+      <div class="hist-icon" style="background:${Math.abs(diff) < 1 ? '#2e7d32' : '#c62828'}">
+        ${Math.abs(diff) < 1 ? '✓' : '✗'}
+      </div>
+      <div class="hist-info">
+        <div class="hist-title">${esc(c.id || 'Corte')} · ${esc(c.cajero || '—')}</div>
+        <div class="hist-meta">
+          Apertura: ${esc(fmtDt(c.inicio))} · Cierre: ${esc(fmtDt(c.fin))} · ${c.ventas?.length || 0} ventas
+        </div>
+      </div>
+      <span class="pill ${pillCls}" style="margin-right:10px">${pillLbl}</span>
+      <div class="hist-total">${money(c.totalVentas || 0)}</div>
+    </div>`;
+  }).join('');
+}
+
+function verCorte(idx) {
+  const key  = 'volvix:historial-cortes:' + (window.VOLVIX_USER?.tenant_id || 'local');
+  const hist = JSON.parse(localStorage.getItem(key) || '[]');
+  const c    = hist[idx];
+  if (!c) return;
+  const win  = window.open('', '_blank', 'width=400,height=600');
+  win.document.write(`<pre style="font-family:Courier New,monospace;font-size:12px;padding:20px;line-height:1.6">${c.ticket || 'Sin ticket'}</pre>`);
+  win.document.close();
+}
+
+// ── Persistir turno ──
+function saveTurno() {
+  if (turno) localStorage.setItem(TURNO_KEY, JSON.stringify(turno));
+  else localStorage.removeItem(TURNO_KEY);
+}
+
+// ── Formato duración ──
+function formatDuracion(ms) {
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  return `${h}h ${m}min`;
+}
+
+// ── Modal helpers ──
+function openModal(id)  { document.getElementById(id)?.classList.add('open'); }
+function closeModal(id) { document.getElementById(id)?.classList.remove('open'); }
+
+// ── Toast ──
+function toast(msg, type = 'info') {
+  if (window.volvix?.utils?.toast) { window.volvix.utils.toast(msg, type); return; }
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className   = 'toast show ' + type;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.className = 'toast', 2800);
+}
+
+// ── Keyboard ──
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-bg.open').forEach(m => m.classList.remove('open'));
+  }
+});
+
+// ── INIT ──
+window.volvix.ready(() => {
+  renderArqueo();
+  loadTurno();
+  // Fecha default en historial = hoy
+  const hoy = new Date().toISOString().slice(0, 10);
+  const fi  = document.getElementById('filtroFecha');
+  if (fi) fi.value = hoy;
+});
+</script>
+<script defer src="/volvix-modules-wiring.js"></script>
+</body>
+</html>

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volvix POS para Colegios, Primarias y Secundarias</title>
+<meta name="description" content="Volvix POS especializado para Colegios y Escuelas. software para colegio, sistema de inscripciones, control de mensualidades, calificaciones, lista de útiles, pos para escuela primaria. Empieza gratis 30 días.">
+<meta name="keywords" content="software para colegio, sistema de inscripciones, control de mensualidades, calificaciones, lista de útiles, pos para escuela primaria, volvix pos, punto de venta mexico">
+<meta property="og:title" content="Volvix POS para Colegios, Primarias y Secundarias">
+<meta property="og:description" content="Volvix POS especializado para Colegios y Escuelas. software para colegio, sistema de inscripciones, control de mensualidades, calificaciones, lista de útiles, pos para escuela primaria. Empieza gratis 30 días.">
+<meta property="og:type" content="website">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0a0a0f">
+<link rel="canonical" href="https://volvix.com/landing-colegio.html">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--primary:#e91e8c;--accent:#00d4aa;--bg:#0a0a0f;--bg2:#12121a;--bg3:#1a1a25;--text:#e8e8f0;--muted:#8888a8;--border:#2a2a3f}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;line-height:1.6}
+a{color:inherit;text-decoration:none}
+.container{max-width:1100px;margin:0 auto;padding:0 1.5rem}
+nav{position:sticky;top:0;z-index:100;background:rgba(10,10,15,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:60px}
+.logo{font-size:1.3rem;font-weight:800;color:#fff}.logo span{color:var(--primary)}
+.nav-cta{background:var(--primary);color:#fff;padding:.5rem 1.1rem;border-radius:8px;font-size:.85rem;font-weight:700}
+.hero{padding:5rem 1.5rem 4rem;text-align:center;background:radial-gradient(ellipse at top,rgba(233,30,140,.12),transparent 60%)}
+.tag{display:inline-block;background:rgba(233,30,140,.15);border:1px solid rgba(233,30,140,.35);color:var(--primary);padding:.35rem 1rem;border-radius:20px;font-size:.78rem;font-weight:700;margin-bottom:1.4rem;text-transform:uppercase;letter-spacing:.5px}
+h1{font-size:clamp(2rem,5vw,3.5rem);font-weight:900;line-height:1.1;letter-spacing:-1.5px;margin-bottom:1rem;max-width:900px;margin-left:auto;margin-right:auto}
+h1 span{color:var(--primary)}
+.hero-sub{color:var(--muted);font-size:1.1rem;max-width:680px;margin:0 auto 2rem}
+.btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.btn{padding:.9rem 2rem;border-radius:10px;font-weight:700;font-size:1rem;cursor:pointer;border:none;display:inline-block;transition:transform .15s ease,box-shadow .15s ease}
+.btn-primary{background:var(--primary);color:#fff;box-shadow:0 6px 24px rgba(233,30,140,.3)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(233,30,140,.4)}
+.btn-outline{background:transparent;color:#fff;border:1px solid var(--border)}
+.btn-outline:hover{background:var(--bg2)}
+section{padding:4rem 1.5rem}
+.section-head{text-align:center;margin-bottom:3rem}
+.section-head h2{font-size:clamp(1.5rem,3vw,2.4rem);font-weight:800;letter-spacing:-1px;margin-bottom:.6rem}
+.section-head p{color:var(--muted);max-width:600px;margin:0 auto}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.4rem;max-width:1100px;margin:0 auto}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:1.6rem;transition:transform .2s ease,border-color .2s ease}
+.card:hover{transform:translateY(-4px);border-color:var(--primary)}
+.card-icon{font-size:2rem;margin-bottom:1rem}
+.card h3{font-size:1.05rem;font-weight:700;margin-bottom:.5rem}
+.card p{color:var(--muted);font-size:.92rem}
+.pricing{background:var(--bg2)}
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.4rem;max-width:1000px;margin:0 auto}
+.plan{background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:2rem 1.6rem;text-align:center;position:relative}
+.plan.featured{border-color:var(--primary);transform:scale(1.04)}
+.plan.featured::before{content:'Más popular';position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--primary);color:#fff;padding:.25rem .9rem;border-radius:12px;font-size:.7rem;font-weight:700;letter-spacing:.5px}
+.plan h3{font-size:1.2rem;font-weight:700;margin-bottom:.4rem}
+.price{font-size:2.2rem;font-weight:900;margin:1rem 0;color:var(--primary)}
+.price small{font-size:.85rem;color:var(--muted);font-weight:500}
+.plan ul{list-style:none;text-align:left;margin:1.4rem 0}
+.plan li{padding:.45rem 0;color:var(--text);font-size:.92rem;display:flex;gap:.5rem}
+.plan li::before{content:'✓';color:var(--accent);font-weight:700}
+.testimonials{background:var(--bg)}
+.t-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.4rem;max-width:1100px;margin:0 auto}
+.testimonial{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:1.8rem}
+.testimonial .quote{font-style:italic;color:var(--text);margin-bottom:1.2rem;font-size:.95rem}
+.t-meta{display:flex;flex-direction:column}
+.t-meta strong{color:#fff;font-size:.95rem}
+.t-meta span{color:var(--muted);font-size:.82rem;margin-top:2px}
+.faq{background:var(--bg2)}
+.faq-list{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:.8rem}
+.faq-item{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1rem 1.4rem}
+.faq-item summary{cursor:pointer;font-weight:600;font-size:.98rem;padding:.4rem 0;outline:none;list-style:none;position:relative;padding-right:2rem}
+.faq-item summary::after{content:'+';position:absolute;right:0;top:50%;transform:translateY(-50%);color:var(--primary);font-weight:800;font-size:1.4rem}
+.faq-item[open] summary::after{content:'−'}
+.faq-item p{color:var(--muted);font-size:.92rem;margin-top:.6rem}
+.cta-final{text-align:center;background:linear-gradient(135deg,rgba(233,30,140,.18),rgba(0,212,170,.08));padding:5rem 1.5rem}
+.cta-final h2{font-size:clamp(1.6rem,3.5vw,2.6rem);font-weight:900;margin-bottom:1rem}
+.cta-final p{color:var(--muted);max-width:560px;margin:0 auto 2rem;font-size:1.05rem}
+footer{padding:2.5rem 1.5rem;border-top:1px solid var(--border);text-align:center;color:var(--muted);font-size:.85rem}
+footer a{color:#60a5fa;margin:0 .6rem}
+@media (max-width:600px){
+  nav{padding:0 1rem}
+  .plan.featured{transform:none}
+}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="logo">Volvix<span>POS</span></a>
+  <a href="/registro.html?giro=colegio" class="nav-cta">Empezar gratis</a>
+</nav>
+
+<header class="hero">
+  <span class="tag">Inscripciones, mensualidades, calificaciones</span>
+  <h1>El colegio que se <span>administra solo</span></h1>
+  <p class="hero-sub">Inscripciones digitales, cobro de mensualidades por hijo, calificaciones por bimestre y lista de útiles vendida desde el sistema.</p>
+  <div class="btns">
+    <a href="/registro.html?giro=colegio" class="btn btn-primary">Empezar gratis 30 días</a>
+    <a href="#features" class="btn btn-outline">Ver funciones</a>
+  </div>
+</header>
+
+<section id="features">
+  <div class="section-head">
+    <h2>Todo lo que necesitas para tu negocio de Colegios y Escuelas</h2>
+    <p>Sin instalaciones eternas. Configura en 1 día y empieza a vender.</p>
+  </div>
+  <div class="cards">
+    
+    <div class="card">
+      <div class="card-icon">📝</div>
+      <h3>Inscripciones digitales</h3>
+      <p>Captura datos del alumno y tutor, valida documentos y genera contrato de inscripción al instante.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">💵</div>
+      <h3>Mensualidades por familia</h3>
+      <p>Hermanos con descuento, becas configurables y recargos por mora calculados automáticamente.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📊</div>
+      <h3>Calificaciones por bimestre</h3>
+      <p>Captura por maestro, boletas en PDF, promedio acumulado y aviso al tutor por WhatsApp.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📚</div>
+      <h3>Lista de útiles vendida</h3>
+      <p>Convierte la lista en paquete vendible. El padre pide y paga desde un link, tú entregas.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">👨‍👩‍👧</div>
+      <h3>Portal del tutor</h3>
+      <p>Padres consultan saldo, calificaciones y avisos en su celular sin llamar a la administración.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🚌</div>
+      <h3>Transporte escolar</h3>
+      <p>Cobro de ruta de transporte, registro de subida/bajada y aviso al tutor cuando el bus llega.</p>
+    </div>
+  </div>
+</section>
+
+<section id="pricing" class="pricing">
+  <div class="section-head">
+    <h2>Planes simples, sin sorpresas</h2>
+    <p>Sin permanencia. Cancela cuando quieras. CFDI 4.0 incluido.</p>
+  </div>
+  <div class="plans">
+    <div class="plan">
+      <h3>Básico</h3>
+      <div class="price">$299<small>/mes</small></div>
+      <ul>
+        <li>1 sucursal · 2 usuarios</li>
+        <li>POS, inventario y reportes</li>
+        <li>CFDI 4.0 (40 timbres/mes)</li>
+        <li>Soporte por chat</li>
+      </ul>
+      <a href="/registro.html?giro=colegio&plan=basico" class="btn btn-outline">Empezar</a>
+    </div>
+    <div class="plan featured">
+      <h3>Pro</h3>
+      <div class="price">$499<small>/mes</small></div>
+      <ul>
+        <li>Hasta 3 sucursales · 8 usuarios</li>
+        <li>Todo lo del Básico +</li>
+        <li>CRM, lealtad y WhatsApp</li>
+        <li>CFDI ilimitado · Soporte prioritario</li>
+      </ul>
+      <a href="/registro.html?giro=colegio&plan=pro" class="btn btn-primary">Empezar gratis</a>
+    </div>
+    <div class="plan">
+      <h3>Enterprise</h3>
+      <div class="price">$899<small>/mes</small></div>
+      <ul>
+        <li>Sucursales y usuarios ilimitados</li>
+        <li>API, integraciones y BI</li>
+        <li>SLA 99.9% · Onboarding dedicado</li>
+        <li>Account manager personal</li>
+      </ul>
+      <a href="/registro.html?giro=colegio&plan=enterprise" class="btn btn-outline">Hablar con ventas</a>
+    </div>
+  </div>
+</section>
+
+<section class="testimonials">
+  <div class="section-head">
+    <h2>Negocios que ya confían en Volvix</h2>
+    <p>Miles de empresas usan Volvix POS todos los días.</p>
+  </div>
+  <div class="t-grid">
+    
+    <div class="testimonial">
+      <p class="quote">"Cerramos el ciclo escolar con 0 mensualidades vencidas. Antes teníamos 18%."</p>
+      <div class="t-meta">
+        <strong>Lic. Verónica Sandoval</strong>
+        <span>Colegio San Patricio, Querétaro</span>
+      </div>
+    </div>
+    <div class="testimonial">
+      <p class="quote">"Vender la lista de útiles desde el sistema nos generó 380,000 pesos extra el primer año."</p>
+      <div class="t-meta">
+        <strong>Profra. Carmen Ruiz</strong>
+        <span>Escuela Primaria Benavente, Puebla</span>
+      </div>
+    </div>
+    <div class="testimonial">
+      <p class="quote">"Las boletas digitales con WhatsApp ahorraron papel y los papás se enteran al momento."</p>
+      <div class="t-meta">
+        <strong>Dir. Luis Cervantes</strong>
+        <span>Instituto Cervantes, Aguascalientes</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="faq">
+  <div class="section-head">
+    <h2>Preguntas frecuentes</h2>
+  </div>
+  <div class="faq-list">
+    
+    <details class="faq-item">
+      <summary>¿Maneja descuentos por hermanos?</summary>
+      <p>Sí. Configura descuento por 2do, 3er hijo en adelante. Aplica automáticamente al cobrar.</p>
+    </details>
+    <details class="faq-item">
+      <summary>¿Genera boletas oficiales?</summary>
+      <p>Sí. Plantillas configurables por nivel (preescolar, primaria, secundaria) con formato SEP.</p>
+    </details>
+    <details class="faq-item">
+      <summary>¿Pueden los padres pagar en línea?</summary>
+      <p>Sí. Tarjeta, OXXO o SPEI desde un link. La conciliación es automática.</p>
+    </details>
+    <details class="faq-item">
+      <summary>¿Soporta múltiples niveles educativos?</summary>
+      <p>Sí. Un solo sistema para preescolar, primaria, secundaria y prepa con planes diferentes.</p>
+    </details>
+  </div>
+</section>
+
+<section class="cta-final">
+  <h2>Empieza hoy. Sin tarjeta. Sin riesgo.</h2>
+  <p>30 días gratis con todas las funciones del plan Pro. Si no te convence, simplemente no contratas.</p>
+  <a href="/registro.html?giro=colegio" class="btn btn-primary">Empezar gratis 30 días</a>
+</section>
+
+<footer>
+  <div>
+    <a href="/aviso-privacidad.html">Aviso de Privacidad</a>·
+    <a href="/terminos-condiciones.html">Términos</a>·
+    <a href="/cookies-policy.html">Cookies</a>·
+    <a href="mailto:soporte@volvix.com">Soporte</a>
+  </div>
+  <p style="margin-top:.8rem">© 2026 GrupoVolvix S.A. de C.V. — Volvix POS para Colegios y Escuelas</p>
+</footer>
+
+<script defer src="/volvix-modules-wiring.js"></script>
+</body>
+</html>

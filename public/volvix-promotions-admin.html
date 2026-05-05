@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Volvix · Promociones Admin</title>
+<style>
+  :root {
+    --bg:#0e1116; --panel:#161b22; --panel-2:#1c2330; --border:#2a323d;
+    --text:#e6edf3; --muted:#8b949e; --accent:#58a6ff; --green:#3fb950;
+    --red:#f85149; --yellow:#d29922; --orange:#fb8500;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font:14px/1.5 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  header{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+  h1{margin:0;font-size:18px;font-weight:600}
+  h3{margin-top:0}
+  .tabs{display:flex;border-bottom:1px solid var(--border);padding:0 24px;background:var(--panel);overflow-x:auto}
+  .tab{padding:12px 20px;cursor:pointer;border:none;background:none;color:var(--muted);font-size:14px;border-bottom:2px solid transparent;white-space:nowrap}
+  .tab.active{color:var(--text);border-bottom-color:var(--accent)}
+  main{padding:24px;max-width:1280px;margin:0 auto}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:16px}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px}
+  .stat{background:var(--panel-2);padding:16px;border-radius:6px;border:1px solid var(--border)}
+  .stat .v{font-size:24px;font-weight:700}
+  .stat .l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border)}
+  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase}
+  input,select,textarea{background:var(--panel-2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:6px;font:inherit;width:100%}
+  button{background:var(--accent);color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font:inherit;font-weight:500}
+  button.ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+  button.danger{background:var(--red)}
+  button.warn{background:var(--orange)}
+  .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:12px}
+  .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;text-transform:uppercase}
+  .b-active{background:rgba(63,185,80,.15);color:var(--green)}
+  .b-expired{background:rgba(248,81,73,.15);color:var(--red)}
+  .b-pending{background:rgba(210,153,34,.15);color:var(--yellow)}
+  .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .toolbar input{max-width:280px}
+  .empty{text-align:center;padding:32px;color:var(--muted)}
+  .preview{background:var(--panel-2);padding:12px;border-radius:6px;border:1px dashed var(--border);margin-top:12px;font-family:monospace;font-size:12px;white-space:pre-wrap}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media (max-width:720px){.grid-2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Volvix · Promociones Admin</h1>
+  <div class="toolbar">
+    <input id="tenantId" placeholder="tenant_id (uuid)" />
+    <button onclick="loadAll()">Cargar</button>
+  </div>
+</header>
+<div class="tabs">
+  <button class="tab active" data-tab="cupones">Cupones</button>
+  <button class="tab" data-tab="promos">Promos activas</button>
+  <button class="tab" data-tab="flash">Flash sales</button>
+  <button class="tab" data-tab="bundles">Bundles</button>
+  <button class="tab" data-tab="stats">Stats</button>
+</div>
+<main>
+
+<!-- ==== CUPONES ==== -->
+<section id="tab-cupones">
+  <div class="panel">
+    <h3>Wizard: Crear promoción</h3>
+    <div class="row">
+      <input id="pName" placeholder="Nombre interno" />
+      <input id="pCode" placeholder="Código cupón (opcional)" />
+      <select id="pType">
+        <option value="percent_off">Descuento %</option>
+        <option value="fixed_off">Descuento $</option>
+        <option value="bogo">BOGO (compra X, lleva Y)</option>
+        <option value="bundle">Bundle</option>
+        <option value="threshold">Gasta $X obtén Y</option>
+      </select>
+      <input id="pValue" type="number" step="0.01" placeholder="Valor (% o $)" />
+      <input id="pMin" type="number" step="0.01" placeholder="Subtotal mínimo" />
+    </div>
+    <div class="row" id="bogoFields" style="display:none">
+      <input id="pBuyQty" type="number" placeholder="buy_qty" />
+      <input id="pGetQty" type="number" placeholder="get_qty" />
+      <input id="pGetPct" type="number" placeholder="% desc en regalo (100=gratis)" />
+    </div>
+    <div class="row" id="thresholdFields" style="display:none">
+      <input id="pThreshold" type="number" placeholder="Gasto mínimo $" />
+      <input id="pRewardId" placeholder="Reward product_id (uuid)" />
+      <input id="pRewardQty" type="number" placeholder="qty regalo" value="1" />
+    </div>
+    <div class="row">
+      <input id="pStarts" type="datetime-local" />
+      <input id="pEnds" type="datetime-local" />
+      <input id="pMaxUses" type="number" placeholder="Max usos total" />
+      <input id="pMaxPerCust" type="number" placeholder="Max por cliente" />
+    </div>
+    <button onclick="createPromo()">Crear promoción</button>
+    <button class="ghost" onclick="renderPreview()">Preview</button>
+    <div id="previewBox" class="preview" style="display:none"></div>
+  </div>
+
+  <div class="panel">
+    <h3>Generar cupones masivos</h3>
+    <div class="row">
+      <input id="genPromoId" placeholder="promotion_id (uuid)" />
+      <input id="genCount" type="number" placeholder="Cantidad" value="100" />
+      <input id="genPrefix" placeholder="Prefijo (opcional)" />
+      <input id="genLength" type="number" placeholder="Largo (8)" value="8" />
+    </div>
+    <button onclick="genCoupons()">Generar</button>
+    <div id="genResult" class="preview" style="display:none"></div>
+  </div>
+
+  <div class="panel">
+    <h3>Cupones</h3>
+    <div id="couponsList"></div>
+  </div>
+</section>
+
+<!-- ==== PROMOS ACTIVAS ==== -->
+<section id="tab-promos" hidden>
+  <div class="panel">
+    <h3>Promociones activas hoy</h3>
+    <div id="activeList"></div>
+  </div>
+  <div class="panel">
+    <h3>Todas las promociones</h3>
+    <div id="allPromos"></div>
+  </div>
+</section>
+
+<!-- ==== FLASH SALES ==== -->
+<section id="tab-flash" hidden>
+  <div class="panel">
+    <h3>Crear Flash Sale</h3>
+    <div class="row">
+      <input id="fsName" placeholder="Nombre" />
+      <input id="fsDiscount" type="number" placeholder="% descuento" />
+      <input id="fsStart" type="datetime-local" />
+      <input id="fsEnd" type="datetime-local" />
+    </div>
+    <textarea id="fsProducts" rows="3" placeholder='Productos JSON: [{"product_id":"uuid","sale_price":99.99}]'></textarea>
+    <div style="margin-top:12px"><button onclick="createFlash()">Crear flash sale</button></div>
+  </div>
+  <div class="panel">
+    <h3>Flash sales</h3>
+    <div id="flashList"></div>
+  </div>
+</section>
+
+<!-- ==== BUNDLES ==== -->
+<section id="tab-bundles" hidden>
+  <div class="panel">
+    <h3>Crear Bundle</h3>
+    <div class="row">
+      <input id="bName" placeholder="Nombre del bundle" />
+      <input id="bPrice" type="number" step="0.01" placeholder="Precio total bundle" />
+      <input id="bImage" placeholder="image_url (opcional)" />
+    </div>
+    <textarea id="bProducts" rows="2" placeholder='Product IDs (uuids), uno por línea o separados por coma'></textarea>
+    <div style="margin-top:12px"><button onclick="createBundle()">Crear bundle</button></div>
+  </div>
+  <div class="panel">
+    <h3>Bundles</h3>
+    <div id="bundlesList"></div>
+  </div>
+</section>
+
+<!-- ==== STATS ==== -->
+<section id="tab-stats" hidden>
+  <div class="panel">
+    <h3>Resumen</h3>
+    <div class="stats" id="statsGrid"></div>
+  </div>
+  <div class="panel">
+    <h3>Top performing</h3>
+    <div id="topPerf"></div>
+  </div>
+</section>
+
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+const TABS = ['cupones','promos','flash','bundles','stats'];
+
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    TABS.forEach(name => {
+      const sec = $('tab-' + name);
+      if (sec) sec.hidden = (name !== t.dataset.tab);
+    });
+  });
+});
+
+$('pType').addEventListener('change', () => {
+  const t = $('pType').value;
+  $('bogoFields').style.display = (t === 'bogo') ? 'grid' : 'none';
+  $('thresholdFields').style.display = (t === 'threshold') ? 'grid' : 'none';
+});
+
+function token() {
+  return localStorage.getItem('volvix_token') || '';
+}
+
+async function api(method, path, body) {
+  const opts = {
+    method,
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token() }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(path, opts);
+  if (r.status === 401) {
+    const back = encodeURIComponent(location.pathname + location.search);
+    location.replace('/login.html?expired=1&redirect=' + back);
+    throw new Error('unauthorized');
+  }
+  if (r.status === 503) {
+    try { (window.vlxToast || function(m){alert(m);})('Servicio no disponible (503)', 'warn'); } catch(_){}
+    throw new Error('service_unavailable');
+  }
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.error || data.code || ('HTTP ' + r.status));
+  return data;
+}
+
+function tenantId() {
+  const v = $('tenantId').value.trim();
+  if (!v) { alert('Captura tenant_id'); throw new Error('no_tenant'); }
+  return v;
+}
+
+function fmtDate(d) { if (!d) return '-'; try { return new Date(d).toLocaleString('es-MX'); } catch { return d; } }
+function money(v) { return new Intl.NumberFormat('es-MX', { style:'currency', currency:'MXN' }).format(Number(v)||0); }
+
+function statusBadge(p) {
+  const now = Date.now();
+  if (p.starts_at && new Date(p.starts_at).getTime() > now) return '<span class="badge b-pending">Pendiente</span>';
+  if (p.ends_at && new Date(p.ends_at).getTime() < now)     return '<span class="badge b-expired">Expirada</span>';
+  if (p.active === false)                                    return '<span class="badge b-expired">Inactiva</span>';
+  return '<span class="badge b-active">Activa</span>';
+}
+
+// ---------- promociones ----------
+
+async function createPromo() {
+  try {
+    const body = {
+      tenant_id: tenantId(),
+      name: $('pName').value.trim(),
+      code: $('pCode').value.trim() || null,
+      type: $('pType').value,
+      value: Number($('pValue').value) || 0,
+      min_subtotal: Number($('pMin').value) || 0,
+      starts_at: $('pStarts').value ? new Date($('pStarts').value).toISOString() : null,
+      ends_at: $('pEnds').value ? new Date($('pEnds').value).toISOString() : null,
+      max_uses: $('pMaxUses').value ? Number($('pMaxUses').value) : null,
+      max_uses_per_customer: $('pMaxPerCust').value ? Number($('pMaxPerCust').value) : null,
+    };
+    const t = $('pType').value;
+    if (t === 'bogo') {
+      body.buy_qty = Number($('pBuyQty').value);
+      body.get_qty = Number($('pGetQty').value);
+      body.get_discount_pct = Number($('pGetPct').value) || 100;
+    }
+    if (t === 'threshold') {
+      body.threshold_amount = Number($('pThreshold').value);
+      body.reward_product_id = $('pRewardId').value.trim() || null;
+      body.reward_qty = Number($('pRewardQty').value) || 1;
+    }
+    const r = await api('POST', '/api/promotions', body);
+    alert('Creada: ' + r.promotion.id);
+    loadPromos();
+  } catch (e) { alert('Error: ' + e.message); }
+}
+
+function renderPreview() {
+  const t = $('pType').value;
+  const v = Number($('pValue').value) || 0;
+  let txt = 'Tipo: ' + t + '\n';
+  if (t === 'percent_off') txt += 'Aplicará ' + v + '% off al subtotal' + ($('pMin').value ? ' (min $' + $('pMin').value + ')' : '');
+  else if (t === 'fixed_off') txt += 'Restará ' + money(v) + ' al subtotal';
+  else if (t === 'bogo') txt += 'Compra ' + ($('pBuyQty').value||'?') + ', lleva ' + ($('pGetQty').value||'?') + ' con ' + ($('pGetPct').value||100) + '% desc';
+  else if (t === 'threshold') txt += 'Gasta ' + money($('pThreshold').value) + ' obtén regalo';
+  else txt += 'Bundle ' + v + '%';
+  $('previewBox').textContent = txt;
+  $('previewBox').style.display = 'block';
+}
+
+async function loadPromos() {
+  try {
+    const r = await api('GET', '/api/promotions?tenant_id=' + tenantId());
+    const rows = r.promotions || [];
+    if (!rows.length) { $('allPromos').innerHTML = '<div class="empty">Sin promociones</div>'; return; }
+    $('allPromos').innerHTML = '<table><tr><th>Nombre</th><th>Tipo</th><th>Code</th><th>Valor</th><th>Usos</th><th>Estado</th><th></th></tr>' +
+      rows.map(p => `<tr>
+        <td>${escapeHtml(p.name)}</td>
+        <td>${p.type}</td>
+        <td>${p.code || '-'}</td>
+        <td>${p.type==='fixed_off' ? money(p.value) : (p.value+'%')}</td>
+        <td>${p.uses_count || 0}${p.max_uses?'/'+p.max_uses:''}</td>
+        <td>${statusBadge(p)}</td>
+        <td><button class="danger" onclick="delPromo('${p.id}')">Eliminar</button></td>
+      </tr>`).join('') + '</table>';
+  } catch (e) { $('allPromos').innerHTML = '<div class="empty">Error: '+e.message+'</div>'; }
+}
+
+async function loadActivePromos() {
+  try {
+    const r = await api('GET', '/api/promotions/active?tenant_id=' + tenantId());
+    const rows = r.promotions || [];
+    if (!rows.length) { $('activeList').innerHTML = '<div class="empty">Ninguna activa</div>'; return; }
+    $('activeList').innerHTML = '<table><tr><th>Nombre</th><th>Tipo</th><th>Code</th><th>Termina</th></tr>' +
+      rows.map(p => `<tr><td>${escapeHtml(p.name)}</td><td>${p.type}</td><td>${p.code||'-'}</td><td>${fmtDate(p.ends_at)}</td></tr>`).join('') + '</table>';
+  } catch (e) { $('activeList').innerHTML = '<div class="empty">Error: '+e.message+'</div>'; }
+}
+
+async function delPromo(id) {
+  if (!confirm('Eliminar promoción?')) return;
+  try { await api('DELETE', '/api/promotions/' + id); loadPromos(); } catch (e) { alert('Error: '+e.message); }
+}
+
+// ---------- coupons ----------
+
+async function genCoupons() {
+  try {
+    const body = {
+      tenant_id: tenantId(),
+      promotion_id: $('genPromoId').value.trim(),
+      count: Number($('genCount').value) || 100,
+      prefix: $('genPrefix').value.trim() || undefined,
+      length: Number($('genLength').value) || 8,
+    };
+    const r = await api('POST', '/api/coupons/generate', body);
+    $('genResult').style.display = 'block';
+    $('genResult').textContent = 'Generados: ' + r.generated + '\nMuestra:\n' + (r.sample||[]).map(c=>c.code).join('\n');
+    loadCoupons();
+  } catch (e) { alert('Error: ' + e.message); }
+}
+
+async function loadCoupons() {
+  try {
+    const r = await api('GET', '/api/coupons?tenant_id=' + tenantId());
+    const rows = r.coupons || [];
+    if (!rows.length) { $('couponsList').innerHTML = '<div class="empty">Sin cupones</div>'; return; }
+    $('couponsList').innerHTML = '<table><tr><th>Code</th><th>Promo</th><th>Estado</th><th>Redimido</th></tr>' +
+      rows.slice(0,200).map(c => `<tr>
+        <td><code>${c.code}</code></td>
+        <td>${c.promotion_id.slice(0,8)}…</td>
+        <td>${c.redeemed_at ? '<span class="badge b-expired">Usado</span>' : '<span class="badge b-active">Disponible</span>'}</td>
+        <td>${fmtDate(c.redeemed_at)}</td>
+      </tr>`).join('') + '</table>' +
+      (rows.length>200?'<div class="empty">… '+(rows.length-200)+' más</div>':'');
+  } catch (e) { $('couponsList').innerHTML = '<div class="empty">Error: '+e.message+'</div>'; }
+}
+
+// ---------- flash sales ----------
+
+async function createFlash() {
+  try {
+    let products;
+    try { products = JSON.parse($('fsProducts').value); } catch { return alert('Productos JSON inválido'); }
+    const body = {
+      tenant_id: tenantId(),
+      name: $('fsName').value.trim() || 'Flash Sale',
+      products,
+      discount_pct: Number($('fsDiscount').value) || null,
+      start_at: $('fsStart').value ? new Date($('fsStart').value).toISOString() : null,
+      end_at: $('fsEnd').value ? new Date($('fsEnd').value).toISOString() : null,
+    };
+    const r = await api('POST', '/api/flash-sales', body);
+    alert('Creada: ' + r.flash_sale.id);
+    loadFlash();
+  } catch (e) { alert('Error: ' + e.message); }
+}
+
+async function loadFlash() {
+  try {
+    const r = await api('GET', '/api/flash-sales?tenant_id=' + tenantId());
+    const rows = r.flash_sales || [];
+    if (!rows.length) { $('flashList').innerHTML = '<div class="empty">Sin flash sales</div>'; return; }
+    $('flashList').innerHTML = '<table><tr><th>Nombre</th><th>Inicio</th><th>Fin</th><th>%</th><th>Productos</th><th></th></tr>' +
+      rows.map(f => `<tr>
+        <td>${escapeHtml(f.name)}</td>
+        <td>${fmtDate(f.start_at)}</td>
+        <td>${fmtDate(f.end_at)}</td>
+        <td>${f.discount_pct||'-'}</td>
+        <td>${(f.products||[]).length}</td>
+        <td><button class="danger" onclick="delFlash('${f.id}')">Eliminar</button></td>
+      </tr>`).join('') + '</table>';
+  } catch (e) { $('flashList').innerHTML = '<div class="empty">Error: '+e.message+'</div>'; }
+}
+
+async function delFlash(id) {
+  if (!confirm('Eliminar flash sale?')) return;
+  try { await api('DELETE', '/api/flash-sales/' + id); loadFlash(); } catch (e) { alert('Error: '+e.message); }
+}
+
+// ---------- bundles ----------
+
+async function createBundle() {
+  try {
+    const ids = $('bProducts').value.split(/[,\n]/).map(s => s.trim()).filter(Boolean);
+    if (ids.length < 2) return alert('Mínimo 2 product_ids');
+    const body = {
+      tenant_id: tenantId(),
+      name: $('bName').value.trim() || 'Bundle',
+      products: ids,
+      bundle_price: Number($('bPrice').value),
+      image_url: $('bImage').value.trim() || null,
+    };
+    const r = await api('POST', '/api/bundles', body);
+    alert('Creado: ' + r.bundle.id);
+    loadBundles();
+  } catch (e) { alert('Error: ' + e.message); }
+}
+
+async function loadBundles() {
+  try {
+    const r = await api('GET', '/api/bundles?tenant_id=' + tenantId());
+    const rows = r.bundles || [];
+    if (!rows.length) { $('bundlesList').innerHTML = '<div class="empty">Sin bundles</div>'; return; }
+    $('bundlesList').innerHTML = '<table><tr><th>Nombre</th><th>Productos</th><th>Precio</th><th></th></tr>' +
+      rows.map(b => `<tr>
+        <td>${escapeHtml(b.name)}</td>
+        <td>${(b.products||[]).length}</td>
+        <td>${money(b.bundle_price)}</td>
+        <td><button class="danger" onclick="delBundle('${b.id}')">Eliminar</button></td>
+      </tr>`).join('') + '</table>';
+  } catch (e) { $('bundlesList').innerHTML = '<div class="empty">Error: '+e.message+'</div>'; }
+}
+
+async function delBundle(id) {
+  if (!confirm('Eliminar bundle?')) return;
+  try { await api('DELETE', '/api/bundles/' + id); loadBundles(); } catch (e) { alert('Error: '+e.message); }
+}
+
+// ---------- stats ----------
+
+async function loadStats() {
+  try {
+    const r = await api('GET', '/api/promotions/stats?tenant_id=' + tenantId());
+    const s = r.stats || {};
+    $('statsGrid').innerHTML = `
+      <div class="stat"><div class="v">${s.total_promotions||0}</div><div class="l">Promociones</div></div>
+      <div class="stat"><div class="v">${s.total_coupons_issued||0}</div><div class="l">Cupones emitidos</div></div>
+      <div class="stat"><div class="v">${s.total_coupons_redeemed||0}</div><div class="l">Canjeados</div></div>
+      <div class="stat"><div class="v">${(s.redemption_rate||0).toFixed(1)}%</div><div class="l">Tasa canje</div></div>
+      <div class="stat"><div class="v">${money(s.total_revenue_impact)}</div><div class="l">Revenue impact</div></div>
+    `;
+    const top = s.top_performing || [];
+    if (!top.length) { $('topPerf').innerHTML = '<div class="empty">Sin datos</div>'; return; }
+    $('topPerf').innerHTML = '<table><tr><th>Nombre</th><th>Tipo</th><th>Usos</th><th>Revenue</th></tr>' +
+      top.map(p => `<tr><td>${escapeHtml(p.name)}</td><td>${p.type}</td><td>${p.uses_count||0}</td><td>${money(p.revenue_impact)}</td></tr>`).join('') + '</table>';
+  } catch (e) { $('statsGrid').innerHTML = '<div class="empty">Error: '+e.message+'</div>'; }
+}
+
+function escapeHtml(s) {
+  return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function loadAll() {
+  await Promise.allSettled([loadPromos(), loadActivePromos(), loadCoupons(), loadFlash(), loadBundles(), loadStats()]);
+}
+</script>
+</body>
+</html>

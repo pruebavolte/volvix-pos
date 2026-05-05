@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Volvix · Fraud Review</title>
+<link rel="stylesheet" href="volvix-modals.css">
+<script defer src="volvix-modals.js"></script>
+<style>
+  :root { --bg:#0f1115; --card:#181b22; --fg:#e7e9ee; --mut:#8a93a4;
+          --warn:#f59e0b; --bad:#ef4444; --ok:#22c55e; --br:#262a33; }
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--fg);
+    font:14px/1.4 system-ui,Segoe UI,Roboto,sans-serif}
+  header{padding:16px 22px;border-bottom:1px solid var(--br);
+    display:flex;justify-content:space-between;align-items:center}
+  h1{margin:0;font-size:18px} .pill{padding:2px 8px;border-radius:99px;
+    background:#262a33;font-size:11px}
+  main{padding:22px}
+  table{width:100%;border-collapse:collapse;background:var(--card);
+    border-radius:8px;overflow:hidden}
+  th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--br);
+    font-size:13px}
+  th{background:#1f232c;color:var(--mut);font-weight:600;text-transform:uppercase;
+    font-size:11px;letter-spacing:.5px}
+  tr:hover td{background:#1c1f27}
+  .score{font-weight:700} .s-hi{color:var(--bad)} .s-md{color:var(--warn)}
+  button{padding:6px 12px;border:0;border-radius:6px;cursor:pointer;
+    font-size:12px;font-weight:600;margin-right:6px}
+  .btn-ok{background:var(--ok);color:#062013}
+  .btn-bad{background:var(--bad);color:#2a0606}
+  .empty{text-align:center;padding:40px;color:var(--mut)}
+  .err{color:var(--bad);padding:10px;background:#2a1414;border-radius:6px;margin:10px 0}
+  details{background:#13161c;padding:6px 10px;border-radius:6px}
+  details summary{cursor:pointer;color:var(--mut)}
+  pre{white-space:pre-wrap;word-break:break-word;font-size:11px;color:var(--mut)}
+
+  /* Tabs */
+  .tabs{display:flex;gap:6px;padding:14px 22px 0;border-bottom:1px solid var(--br)}
+  .tabs .tab{padding:8px 14px;background:transparent;border:1px solid var(--br);border-bottom:none;
+    border-radius:6px 6px 0 0;color:var(--mut);font-size:12px;font-weight:600;cursor:pointer;margin-bottom:-1px}
+  .tabs .tab.active{background:var(--card);color:var(--fg);border-color:var(--br);border-bottom:1px solid var(--card)}
+  .panel{display:none}
+  .panel.active{display:block}
+
+  /* Rules editor */
+  .rules-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin-top:14px}
+  .rule-card{background:var(--card);border:1px solid var(--br);border-radius:8px;padding:16px}
+  .rule-card h4{margin:0 0 6px;font-size:13px}
+  .rule-card .desc{color:var(--mut);font-size:11.5px;margin-bottom:10px;line-height:1.4}
+  .rule-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px}
+  .rule-row label{color:var(--mut);min-width:90px;font-size:11px}
+  .rule-row input[type=range]{flex:1}
+  .rule-row .val{font-family:monospace;color:var(--warn);min-width:48px;text-align:right;font-weight:700}
+  .rules-actions{margin-top:18px;display:flex;gap:8px}
+  .btn-save{background:var(--ok);color:#062013}
+  .btn-reset{background:#374151;color:#fff}
+  .ok-msg{color:var(--ok);font-size:12px;margin-top:8px;display:none}
+</head>
+<body>
+<header>
+  <h1>Fraud Review <span class="pill" id="cnt">0</span></h1>
+  <div>
+    <select id="status">
+      <option value="pending">Pendientes</option>
+      <option value="approved">Aprobadas</option>
+      <option value="rejected">Rechazadas</option>
+    </select>
+    <button onclick="load()">🔄 Recargar</button>
+  </div>
+</header>
+<div class="tabs">
+  <button class="tab active" data-tab="alerts">📋 Alertas</button>
+  <button class="tab" data-tab="rules">⚙️ Reglas</button>
+</div>
+<main>
+  <div id="err" class="err" style="display:none"></div>
+
+  <div class="panel active" id="panel-alerts">
+    <table>
+      <thead><tr>
+        <th>Score</th><th>Sale ID</th><th>Customer</th>
+        <th>Reglas</th><th>Creada</th><th>Acciones</th>
+      </tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div id="empty" class="empty" style="display:none">Sin alertas.</div>
+  </div>
+
+  <div class="panel" id="panel-rules">
+    <h2 style="font-size:16px;margin:0 0 4px">Editor de reglas de scoring</h2>
+    <p style="color:var(--mut);font-size:13px;margin:0 0 12px">
+      Ajusta los umbrales que disparan alertas de fraude. Los cambios se guardan por tenant.
+    </p>
+    <div class="rules-grid">
+      <div class="rule-card">
+        <h4>🎟️ Tickets anómalamente grandes</h4>
+        <div class="desc">Marca como sospechoso si el total es N veces el promedio del cajero.</div>
+        <div class="rule-row">
+          <label>Multiplicador</label>
+          <input type="range" id="r-ticket-mult" min="1" max="10" step="0.5" value="3" oninput="ruleVal('r-ticket-mult','v-ticket-mult','x')">
+          <span class="val" id="v-ticket-mult">3.0x</span>
+        </div>
+      </div>
+
+      <div class="rule-card">
+        <h4>⚡ Velocidad de ventas</h4>
+        <div class="desc">N ventas en Y segundos del mismo cajero — posible cobro de aire.</div>
+        <div class="rule-row">
+          <label>Ventas (N)</label>
+          <input type="range" id="r-vel-n" min="2" max="20" step="1" value="5" oninput="ruleVal('r-vel-n','v-vel-n','')">
+          <span class="val" id="v-vel-n">5</span>
+        </div>
+        <div class="rule-row">
+          <label>En segundos</label>
+          <input type="range" id="r-vel-secs" min="10" max="300" step="5" value="60" oninput="ruleVal('r-vel-secs','v-vel-secs','s')">
+          <span class="val" id="v-vel-secs">60s</span>
+        </div>
+      </div>
+
+      <div class="rule-card">
+        <h4>💸 Descuentos altos</h4>
+        <div class="desc">Marca cuando el descuento supera el porcentaje configurado.</div>
+        <div class="rule-row">
+          <label>% mínimo</label>
+          <input type="range" id="r-disc-pct" min="5" max="80" step="1" value="20" oninput="ruleVal('r-disc-pct','v-disc-pct','%')">
+          <span class="val" id="v-disc-pct">20%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="rules-actions">
+      <button class="btn-save" onclick="saveRules()">💾 Guardar reglas</button>
+      <button class="btn-reset" onclick="resetRules()">↺ Restaurar defaults</button>
+    </div>
+    <div id="rules-ok" class="ok-msg">✓ Reglas guardadas correctamente</div>
+  </div>
+</main>
+<script>
+const API = (window.API_BASE || '') + '/api/fraud';
+// R28: usar la key estándar del sistema; redirigir a login si 401
+function token() {
+  return localStorage.getItem('volvix_token')
+      || localStorage.getItem('volvixAuthToken')
+      || localStorage.getItem('volvix_jwt')
+      || '';
+}
+function gotoLogin() {
+  const back = encodeURIComponent(location.pathname + location.search);
+  location.replace('/login.html?expired=1&redirect=' + back);
+}
+async function call(path, opts) {
+  opts = opts || {};
+  const tk = token();
+  if (!tk) { gotoLogin(); throw new Error('sin sesión'); }
+  opts.headers = Object.assign({
+    'Content-Type':'application/json',
+    'Authorization':'Bearer ' + tk
+  }, opts.headers || {});
+  const r = await fetch(API + path, opts);
+  if (r.status === 401 || r.status === 403) { gotoLogin(); throw new Error('sin permisos'); }
+  if (!r.ok) {
+    const txt = r.status >= 500 ? 'Servicio temporalmente no disponible' : 'No se pudieron cargar las alertas';
+    throw new Error(txt + ' (' + r.status + ')');
+  }
+  return r.json();
+}
+function fmtScore(s) {
+  const cls = s >= 85 ? 's-hi' : 's-md';
+  return '<span class="score ' + cls + '">' + s + '</span>';
+}
+function fmtRules(rs) {
+  if (!Array.isArray(rs) || !rs.length) return '<em>—</em>';
+  return rs.map(r => '<span class="pill">' + (r.name||r.id) + '</span>').join(' ');
+}
+async function review(saleId, action) {
+  let ok=false;
+  const isApprove = action === 'approve';
+  if(window.VolvixUI && typeof window.VolvixUI.confirm==='function'){
+    ok = await window.VolvixUI.confirm({
+      title: (isApprove?'Aprobar':'Rechazar')+' venta',
+      message: 'Confirmar ' + action.toUpperCase() + ' de la venta ' + saleId + '?',
+      danger: !isApprove,
+      confirmText: isApprove?'Aprobar':'Rechazar'
+    });
+  } else { ok = confirm('Confirmar ' + action.toUpperCase() + ' de la venta ' + saleId + '?'); }
+  if (!ok) return;
+  try {
+    await call('/review/' + saleId, {
+      method:'POST', body: JSON.stringify({ action })
+    });
+    load();
+  } catch (e) { showErr(e.message); }
+}
+function showErr(m) {
+  const el = document.getElementById('err');
+  el.textContent = m; el.style.display = 'block';
+}
+async function load() {
+  document.getElementById('err').style.display = 'none';
+  const status = document.getElementById('status').value;
+  try {
+    const rows = await call('/alerts?status=' + status);
+    document.getElementById('cnt').textContent = rows.length;
+    const tbody = document.getElementById('rows');
+    tbody.innerHTML = '';
+    document.getElementById('empty').style.display = rows.length ? 'none' : 'block';
+    for (const a of rows) {
+      const tr = document.createElement('tr');
+      const created = new Date(a.created_at).toLocaleString();
+      tr.innerHTML =
+        '<td>' + fmtScore(a.score) + '</td>' +
+        '<td><code>' + (a.sale_id||'').slice(0,8) + '</code></td>' +
+        '<td>' + (a.customer_id ? '<code>'+a.customer_id.slice(0,8)+'</code>' : '<em>guest</em>') + '</td>' +
+        '<td>' + fmtRules(a.triggered_rules) + '</td>' +
+        '<td>' + created + '</td>' +
+        '<td>' + (status==='pending' ?
+          '<button class="btn-ok" data-id="'+a.sale_id+'" data-act="approve">Aprobar</button>' +
+          '<button class="btn-bad" data-id="'+a.sale_id+'" data-act="reject">Rechazar</button>'
+          : '<em>'+a.status+'</em>') +
+        '</td>';
+      tbody.appendChild(tr);
+    }
+    tbody.querySelectorAll('button[data-id]').forEach(b => {
+      b.onclick = () => review(b.dataset.id, b.dataset.act);
+    });
+  } catch (e) { showErr(e.message); }
+}
+document.getElementById('status').addEventListener('change', load);
+load();
+setInterval(load, 30000);
+
+// ============ Tabs ============
+document.querySelectorAll('.tabs .tab').forEach(function(t){
+  t.addEventListener('click', function(){
+    document.querySelectorAll('.tabs .tab').forEach(function(x){x.classList.remove('active');});
+    t.classList.add('active');
+    document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+    var tab = t.getAttribute('data-tab');
+    document.getElementById('panel-' + tab).classList.add('active');
+    if (tab === 'rules') loadRules();
+  });
+});
+
+// ============ Rules Editor ============
+var DEFAULT_RULES = {
+  ticket_multiplier: 3,
+  velocity_n: 5,
+  velocity_secs: 60,
+  discount_pct: 20
+};
+
+function ruleVal(id, valId, suffix) {
+  var v = document.getElementById(id).value;
+  var fmt = (id === 'r-ticket-mult') ? (parseFloat(v).toFixed(1) + suffix) : (v + suffix);
+  document.getElementById(valId).textContent = fmt;
+}
+
+function applyRules(rules) {
+  rules = rules || DEFAULT_RULES;
+  document.getElementById('r-ticket-mult').value = rules.ticket_multiplier || 3;
+  document.getElementById('r-vel-n').value = rules.velocity_n || 5;
+  document.getElementById('r-vel-secs').value = rules.velocity_secs || 60;
+  document.getElementById('r-disc-pct').value = rules.discount_pct || 20;
+  ruleVal('r-ticket-mult','v-ticket-mult','x');
+  ruleVal('r-vel-n','v-vel-n','');
+  ruleVal('r-vel-secs','v-vel-secs','s');
+  ruleVal('r-disc-pct','v-disc-pct','%');
+}
+
+function readRules() {
+  return {
+    ticket_multiplier: parseFloat(document.getElementById('r-ticket-mult').value),
+    velocity_n: parseInt(document.getElementById('r-vel-n').value, 10),
+    velocity_secs: parseInt(document.getElementById('r-vel-secs').value, 10),
+    discount_pct: parseInt(document.getElementById('r-disc-pct').value, 10)
+  };
+}
+
+async function loadRules() {
+  try {
+    var r = await call('/rules');
+    if (r && r.rules) applyRules(r.rules);
+    else applyRules(DEFAULT_RULES);
+  } catch (e) {
+    // Si falla, mostrar defaults sin error ruidoso
+    applyRules(DEFAULT_RULES);
+  }
+}
+
+async function saveRules() {
+  var rules = readRules();
+  try {
+    await call('/rules', { method: 'POST', body: JSON.stringify({ rules: rules }) });
+    var ok = document.getElementById('rules-ok');
+    ok.style.display = 'block';
+    setTimeout(function(){ ok.style.display = 'none'; }, 2200);
+  } catch (e) { showErr(e.message); }
+}
+
+function resetRules() {
+  applyRules(DEFAULT_RULES);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,469 @@
+{
+  "run_tag": "49279774",
+  "base": "https://volvix-pos.vercel.app",
+  "surfaces": {
+    "marketplace": "/marketplace.html",
+    "portal": "/volvix-customer-portal.html",
+    "shop": "/volvix-shop.html"
+  },
+  "shop_slug": "don-chucho",
+  "score": {
+    "pass": 7,
+    "total": 14,
+    "percent": 50
+  },
+  "results": {
+    "MP1": {
+      "pass": true,
+      "detail": "http=200 grid_visible=true cards=12 hero=true",
+      "evidence": "MP1_marketplace_loaded.png"
+    },
+    "MP2": {
+      "pass": false,
+      "detail": "input=true search_btn=true ai_visible=false ai_has_content=false",
+      "evidence": "MP2_filter_search.png"
+    },
+    "MP3": {
+      "pass": false,
+      "detail": "href=landing_dynamic.html?giro=barberia target_status=null",
+      "evidence": "MP3_giro_detail.png"
+    },
+    "MP4": {
+      "pass": true,
+      "detail": "cta_present=true cta_count=2 shop_status=200 shop_cards=0 added_to_cart=false (slug=don-chucho)",
+      "evidence": "MP4_cta_to_shop_cart.png"
+    },
+    "MP5": {
+      "pass": false,
+      "detail": "empty_cart_status=500 (expect 400) | no_customer_status=500 (expect 400/404) | slug=don-chucho",
+      "evidence": null
+    },
+    "CP1": {
+      "pass": false,
+      "detail": "http=200 login_screen=false go_login_btn=false app_active=false",
+      "evidence": "CP1_portal_loaded.png"
+    },
+    "CP2": {
+      "pass": true,
+      "detail": "otp_request_status=200 no_otp_leak=true orders_unauth_status=401 (expect 401/403)",
+      "evidence": null
+    },
+    "CP3": {
+      "pass": true,
+      "detail": "loyalty_unauth_status=401 (expect 401/403; 404 means endpoint missing)",
+      "evidence": null
+    },
+    "CP4": {
+      "pass": true,
+      "detail": "support/tickets_status=401 | tickets_status=401 (any of 400/401/403 = endpoint exists & gated)",
+      "evidence": null
+    },
+    "SH1": {
+      "pass": false,
+      "detail": "http=200 header=true cart_btn=true grid=false",
+      "evidence": "SH1_shop_loaded.png"
+    },
+    "SH2": {
+      "pass": false,
+      "detail": "status=500 products_count=0 shop_meta=false slug=don-chucho",
+      "evidence": null
+    },
+    "SH3": {
+      "pass": true,
+      "detail": "card_count=0 cart_count_after=0 empty_state=true",
+      "evidence": "SH3_add_to_cart.png"
+    },
+    "X1": {
+      "pass": true,
+      "detail": "portal:og=true tw=true schema=false canon=true desc=true | marketplace:og=false tw=false schema=false canon=false desc=false | shop:og=false tw=false schema=false canon=false desc=false :: portalHasOg=true anyHasSchema=false anyHasCanon=true",
+      "evidence": null
+    },
+    "X2": {
+      "pass": false,
+      "detail": "marketplace:hero=true hOverflow=0 | portal:visible=false hOverflow=0 | shop:header=true hOverflow=0 :: ev=[X2_marketplace_375.png,X2_portal_375.png,X2_shop_375.png]",
+      "evidence": "X2_shop_375.png"
+    }
+  },
+  "console_errors": [
+    {
+      "tag": "MP1",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "MP1",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "tag": "MP1",
+      "text": "Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled."
+    },
+    {
+      "tag": "MP1",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "tag": "MP1",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "MP1",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "MP1",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "MP1",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "MP1",
+      "text": "Failed to load resource: the server responded with a status of 503 (Offline)"
+    },
+    {
+      "tag": "MP2",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "MP2",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "tag": "MP2",
+      "text": "Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled."
+    },
+    {
+      "tag": "MP2",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "tag": "MP2",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "MP2",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "MP2",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "MP2",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "MP2",
+      "text": "Failed to load resource: the server responded with a status of 503 (Offline)"
+    },
+    {
+      "tag": "MP2",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "MP2",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "tag": "MP2",
+      "text": "Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled."
+    },
+    {
+      "tag": "MP2",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "MP2",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "MP2",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "tag": "MP2",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "MP2",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "MP3",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "MP3",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "tag": "MP3",
+      "text": "Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled."
+    },
+    {
+      "tag": "MP3",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "tag": "MP3",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "MP3",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "MP3",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "MP3",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "MP3",
+      "text": "Failed to load resource: the server responded with a status of 503 (Offline)"
+    },
+    {
+      "tag": "MP4",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "MP4",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "tag": "MP4",
+      "text": "Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled."
+    },
+    {
+      "tag": "MP4",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "MP4",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "MP4",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "tag": "MP4",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "MP4",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "MP4",
+      "text": "[ERROR] API GET /api/fx/rates?base=MXN failed: Failed to fetch {url: /api/fx/rates?base=MXN, method: GET, error: Failed to fetch, stack: TypeError: Failed to fetch\n    at window.fetch (ht…-pos.vercel.app/volvix-currency-wiring.js:134:18)}"
+    },
+    {
+      "tag": "MP4",
+      "text": "[ERROR] [VolvixPerf] fetch error: /api/fx/rates?base=MXN Failed to fetch\nTypeError: Failed to fetch\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at global.fetch (https://volvix-pos.v"
+    },
+    {
+      "tag": "MP4",
+      "text": "[VolvixPerf] fetch error: /api/fx/rates?base=MXN TypeError: Failed to fetch\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelim"
+    },
+    {
+      "tag": "MP4",
+      "text": "[ERROR] [VolvixPerf] fetch error: /api/fx/rates?base=MXN Failed to fetch\nTypeError: Failed to fetch\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at global.fetch (https://volvix-pos.v"
+    },
+    {
+      "tag": "MP4",
+      "text": "[VolvixPerf] fetch error: /api/fx/rates?base=MXN TypeError: Failed to fetch\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\n    at global.fetch (https://volvix-pos.vercel.app/volvix-ratelim"
+    },
+    {
+      "tag": "MP4",
+      "text": "[ERROR] [ErrorHandler] {\"type\":\"fetch\",\"message\":\"Failed to fetch\",\"stack\":\"TypeError: Failed to fetch\\n    at window.fetch (https://volvix-pos.vercel.app/volvix-logger-wiring.js:266:27)\\n    at wrapped (https://volvix-pos.vercel.app/volvix-perf-wiring.js:167:27)\\n    at global.fetch (https://volvix"
+    },
+    {
+      "tag": "MP4",
+      "text": "[ErrorHandler] {type: fetch, message: Failed to fetch, stack: TypeError: Failed to fetch\n    at window.fetch (ht…-pos.vercel.app/volvix-currency-wiring.js:134:18), userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…L, like Gecko) Chrome/147.0.7727.15 Safari/537.36, url: https://volvix-pos"
+    },
+    {
+      "tag": "MP4",
+      "text": "Failed to load resource: the server responded with a status of 500 ()"
+    },
+    {
+      "tag": "MP4",
+      "text": "Failed to load resource: the server responded with a status of 500 ()"
+    },
+    {
+      "tag": "CP1",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "tag": "CP1",
+      "text": "Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled."
+    },
+    {
+      "tag": "CP1",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "CP1",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "CP1",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "SH1",
+      "text": "Failed to load resource: the server responded with a status of 500 ()"
+    },
+    {
+      "tag": "SH1",
+      "text": "Failed to load resource: the server responded with a status of 500 ()"
+    },
+    {
+      "tag": "SH3",
+      "text": "Failed to load resource: the server responded with a status of 500 ()"
+    },
+    {
+      "tag": "SH3",
+      "text": "Failed to load resource: the server responded with a status of 500 ()"
+    },
+    {
+      "tag": "X2",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "tag": "X2",
+      "text": "Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled."
+    },
+    {
+      "tag": "X2",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "X2",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "tag": "X2",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "X2",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "X2",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "X2",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "X2",
+      "text": "Failed to load resource: the server responded with a status of 503 (Offline)"
+    },
+    {
+      "tag": "X2",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "tag": "X2",
+      "text": "Refused to execute script from 'https://volvix-pos.vercel.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled."
+    },
+    {
+      "tag": "X2",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "X2",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "tag": "X2",
+      "text": "Failed to load resource: the server responded with a status of 500 ()"
+    },
+    {
+      "tag": "X2",
+      "text": "Failed to load resource: the server responded with a status of 500 ()"
+    }
+  ],
+  "network_failures": [
+    {
+      "tag": "MP1",
+      "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap",
+      "status": 503,
+      "method": "GET"
+    },
+    {
+      "tag": "MP2",
+      "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap",
+      "status": 503,
+      "method": "GET"
+    },
+    {
+      "tag": "MP3",
+      "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap",
+      "status": 503,
+      "method": "GET"
+    },
+    {
+      "tag": "MP4",
+      "url": "https://volvix-pos.vercel.app/api/shop/don-chucho/info",
+      "status": 500,
+      "method": "GET"
+    },
+    {
+      "tag": "MP4",
+      "url": "https://volvix-pos.vercel.app/api/shop/don-chucho/products?q=&category=",
+      "status": 500,
+      "method": "GET"
+    },
+    {
+      "tag": "SH1",
+      "url": "https://volvix-pos.vercel.app/api/shop/don-chucho/info",
+      "status": 500,
+      "method": "GET"
+    },
+    {
+      "tag": "SH1",
+      "url": "https://volvix-pos.vercel.app/api/shop/don-chucho/products?q=&category=",
+      "status": 500,
+      "method": "GET"
+    },
+    {
+      "tag": "SH3",
+      "url": "https://volvix-pos.vercel.app/api/shop/don-chucho/info",
+      "status": 500,
+      "method": "GET"
+    },
+    {
+      "tag": "SH3",
+      "url": "https://volvix-pos.vercel.app/api/shop/don-chucho/products?q=&category=",
+      "status": 500,
+      "method": "GET"
+    },
+    {
+      "tag": "X2",
+      "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap",
+      "status": 503,
+      "method": "GET"
+    },
+    {
+      "tag": "X2",
+      "url": "https://volvix-pos.vercel.app/api/shop/don-chucho/info",
+      "status": 500,
+      "method": "GET"
+    },
+    {
+      "tag": "X2",
+      "url": "https://volvix-pos.vercel.app/api/shop/don-chucho/products?q=&category=",
+      "status": 500,
+      "method": "GET"
+    }
+  ],
+  "portal_login_visible": false,
+  "shop_meta": null
+}

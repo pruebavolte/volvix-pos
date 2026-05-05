@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar sesión · Volvix</title>
+  <meta name="theme-color" content="#0A0A0A">
+  <meta name="description" content="Sistema POS SaaS multi-vertical Volvix. Login seguro para comerciantes.">
+  <link rel="canonical" href="https://salvadorexoficial.com/login.html">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Iniciar sesión · Volvix">
+  <meta property="og:description" content="Sistema POS SaaS multi-vertical. Accede a tu cuenta Volvix.">
+  <meta property="og:image" content="https://salvadorexoficial.com/og-default.png">
+  <meta property="og:url" content="https://salvadorexoficial.com/login.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Iniciar sesión · Volvix">
+  <meta name="twitter:description" content="Sistema POS SaaS multi-vertical. Accede a tu cuenta Volvix.">
+  <meta name="twitter:image" content="https://salvadorexoficial.com/og-default.png">
+
+  <!-- Fuentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+/* ── BASE ── */
+*, *::before, *::after { box-sizing: border-box; }
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* ── FONDO ── */
+.login-bg {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  background: radial-gradient(ellipse at 30% 20%, #1E3A8A 0%, #0A0A0A 65%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Partículas decorativas */
+.login-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1.5px 1.5px at 20% 30%, rgba(251,191,36,0.25) 0%, transparent 100%),
+    radial-gradient(1px 1px at 60% 70%, rgba(251,191,36,0.15) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 80% 20%, rgba(59,130,246,0.2) 0%, transparent 100%),
+    radial-gradient(1px 1px at 40% 80%, rgba(59,130,246,0.15) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+/* ── CARD ── */
+.login-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 400px;
+  background: rgba(18, 18, 18, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 24px;
+  padding: 40px 36px;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.04) inset;
+  animation: fadeUp 0.4s ease-out both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── LOGO ── */
+.login-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+.login-logo-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #FBBF24, #F59E0B);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  box-shadow: 0 0 0 1px rgba(251,191,36,0.3), 0 8px 24px rgba(251,191,36,0.35);
+  animation: bounce 3s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* ── TEXTOS ── */
+.login-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #FAFAF9;
+  text-align: center;
+  letter-spacing: -0.5px;
+  margin-bottom: 6px;
+}
+.login-sub {
+  font-size: 13.5px;
+  color: #78716C;
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+/* ── FORMULARIO ── */
+.form-group {
+  margin-bottom: 14px;
+}
+.form-label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #A8A29E;
+  margin-bottom: 6px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+.form-input {
+  width: 100%;
+  height: 46px;
+  padding: 0 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid rgba(255,255,255,0.10);
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #FAFAF9;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.form-input::placeholder { color: #52524E; }
+.form-input:focus {
+  border-color: #3B82F6;
+  background: rgba(59,130,246,0.06);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+}
+.form-input.error {
+  border-color: #EF4444;
+  box-shadow: 0 0 0 3px rgba(239,68,68,0.12);
+}
+
+/* ── BOTONES ── */
+.btn-primary {
+  width: 100%;
+  height: 46px;
+  background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0A0A0A;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px rgba(251,191,36,0.3);
+}
+.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.btn-primary.loading {
+  position: relative;
+  color: transparent;
+}
+.btn-primary.loading::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(10,10,10,0.3);
+  border-top-color: #0A0A0A;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── ALERTS ── */
+.alert {
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  display: none;
+  animation: slideIn 0.3s ease-out;
+}
+.alert.show { display: block; }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.alert.error {
+  background: rgba(239,68,68,0.15);
+  color: #FCA5A5;
+  border: 1px solid rgba(239,68,68,0.3);
+}
+.alert.success {
+  background: rgba(34,197,94,0.15);
+  color: #86EFAC;
+  border: 1px solid rgba(34,197,94,0.3);
+}
+.alert.info {
+  background: rgba(59,130,246,0.15);
+  color: #93C5FD;
+  border: 1px solid rgba(59,130,246,0.3);
+}
+
+/* ── LINKS ── */
+.login-link-row {
+  text-align: center;
+  margin-top: 16px;
+}
+.login-link-row a {
+  font-size: 12px;
+  color: #3B82F6;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+.login-link-row a:hover {
+  color: #60A5FA;
+}
+
+/* ── TEST CREDENTIALS ── */
+.test-creds {
+  background: rgba(59,130,246,0.1);
+  border: 1px solid rgba(59,130,246,0.3);
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 20px;
+  font-size: 11px;
+  color: #93C5FD;
+  line-height: 1.6;
+}
+.test-creds strong {
+  color: #FAFAF9;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .login-card { padding: 32px 24px; max-width: 92%; }
+  .login-title { font-size: 20px; }
+}
+@media (max-width: 480px) {
+  html, body { overflow: auto; }
+  .login-bg { padding: 16px 12px; min-height: 100dvh; }
+  .login-card { padding: 24px 18px; border-radius: 18px; }
+  .form-input { height: 48px; font-size: 16px; /* evita zoom iOS */ }
+  .btn-primary { height: 48px; font-size: 16px; }
+  .login-title { font-size: 18px; }
+  .login-sub { font-size: 12.5px; }
+}
+
+/* =====================================================================
+   === VLX MINIMAL LOGIN — visual override (premium, blanco editorial) ===
+   === Sin tocar HTML/JS/handlers. Solo CSS via !important.            ===
+   ===================================================================== */
+:root {
+  --vlx-ink: #0B0B0F;
+  --vlx-ink-2: #3F3F46;
+  --vlx-ink-3: #6B7280;
+  --vlx-ink-4: #9CA3AF;
+  --vlx-paper: #FFFFFF;
+  --vlx-paper-2: #FAFAFA;
+  --vlx-line: #ECECEE;
+  --vlx-line-2: #E5E5EA;
+}
+html, body { overflow: auto !important; height: auto !important; min-height: 100% !important; }
+body {
+  background: var(--vlx-paper) !important;
+  color: var(--vlx-ink) !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+}
+.login-bg {
+  background: var(--vlx-paper) !important;
+  min-height: 100vh !important;
+  min-height: 100dvh !important;
+  padding: 64px 20px !important;
+  align-items: center !important;
+}
+.login-bg::before { display: none !important; }
+
+/* Top bar minimalista (Hecho en MX) — sutil, encima del card */
+#vlx-login-topnav {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px max(20px, 5%);
+  font-size: 13px;
+  color: var(--vlx-ink-2);
+  z-index: 5;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--vlx-line);
+}
+#vlx-login-topnav .vlx-brand-text {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--vlx-ink);
+  font-size: 15px;
+}
+#vlx-lang-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 1px solid var(--vlx-line-2);
+  color: var(--vlx-ink-2);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 28px 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%236B7280' stroke-width='1.5' fill='none' stroke-linecap='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+#vlx-lang-select:focus { outline: none; border-color: var(--vlx-ink); }
+
+/* Card en blanco premium */
+.login-card {
+  background: var(--vlx-paper) !important;
+  border: 1px solid var(--vlx-line) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 1px 3px rgba(17,17,17,0.04), 0 24px 48px -12px rgba(17,17,17,0.08) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  padding: 48px 40px !important;
+  max-width: 420px !important;
+  animation: none !important;
+}
+
+/* Logo: discreto, monocromo */
+.login-logo-icon {
+  width: 44px !important; height: 44px !important;
+  background: var(--vlx-ink) !important;
+  border-radius: 10px !important;
+  font-size: 22px !important;
+  color: #FFFFFF !important;
+  box-shadow: none !important;
+  animation: none !important;
+}
+.login-logo { margin-bottom: 32px !important; }
+
+/* Tipografía editorial */
+.login-title {
+  color: var(--vlx-ink) !important;
+  font-size: 26px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.025em !important;
+  margin-bottom: 8px !important;
+}
+.login-sub {
+  color: var(--vlx-ink-3) !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  margin-bottom: 32px !important;
+}
+
+/* Inputs limpios */
+.form-label {
+  color: var(--vlx-ink-2) !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.02em !important;
+  text-transform: none !important;
+}
+.form-input {
+  background: var(--vlx-paper) !important;
+  border: 1px solid var(--vlx-line-2) !important;
+  border-radius: 8px !important;
+  color: var(--vlx-ink) !important;
+  height: 44px !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  transition: border-color .15s ease, box-shadow .15s ease !important;
+}
+.form-input::placeholder { color: var(--vlx-ink-4) !important; }
+.form-input:focus {
+  border-color: var(--vlx-ink) !important;
+  background: var(--vlx-paper) !important;
+  box-shadow: 0 0 0 4px rgba(17,17,17,0.04) !important;
+}
+
+/* Botón principal: negro sólido */
+.btn-primary {
+  background: var(--vlx-ink) !important;
+  color: #FFFFFF !important;
+  border-radius: 8px !important;
+  height: 44px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.005em !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+}
+.btn-primary:hover:not(:disabled) {
+  transform: none !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.10) !important;
+  opacity: 0.92 !important;
+}
+.btn-primary.loading::after {
+  border-color: rgba(255,255,255,0.3) !important;
+  border-top-color: #FFFFFF !important;
+}
+
+/* Alerts: outline finito */
+.alert {
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  padding: 10px 12px !important;
+}
+.alert.error {
+  background: #FEF2F2 !important;
+  color: #B91C1C !important;
+  border: 1px solid #FECACA !important;
+}
+.alert.success {
+  background: #F0FDF4 !important;
+  color: #15803D !important;
+  border: 1px solid #BBF7D0 !important;
+}
+.alert.info {
+  background: var(--vlx-paper-2) !important;
+  color: var(--vlx-ink-2) !important;
+  border: 1px solid var(--vlx-line) !important;
+}
+
+/* Link sutil */
+.login-link-row a {
+  color: var(--vlx-ink-2) !important;
+  font-weight: 500 !important;
+  font-size: 13px !important;
+}
+.login-link-row a:hover { color: var(--vlx-ink) !important; }
+
+/* Social buttons en monocromo */
+.social-btn {
+  background: var(--vlx-paper) !important;
+  border: 1px solid var(--vlx-line-2) !important;
+  color: var(--vlx-ink) !important;
+}
+.social-btn:hover { background: var(--vlx-paper-2) !important; }
+
+/* Test creds */
+.test-creds {
+  background: var(--vlx-paper-2) !important;
+  border: 1px solid var(--vlx-line) !important;
+  color: var(--vlx-ink-3) !important;
+}
+.test-creds strong { color: var(--vlx-ink) !important; }
+
+@media (max-width: 480px) {
+  .login-card { padding: 32px 22px !important; }
+  .login-title { font-size: 22px !important; }
+  #vlx-login-topnav { padding: 12px 16px !important; }
+  #vlx-login-topnav .vlx-brand-text { font-size: 13px !important; }
+}
+</style>
+  <script src="/volvix-uplift-wiring.js" defer></script>
+  <script src="/volvix-error-reporter.js" defer></script>
+</head>
+<body>
+  <!-- Top bar minimalista (brand + idioma) -->
+  <div id="vlx-login-topnav" role="banner">
+    <div class="vlx-brand-text">SYSTEM INTERNATIONAL</div>
+    <select id="vlx-lang-select" aria-label="Idioma" onchange="window.__vlxSetLang && window.__vlxSetLang(this.value)">
+      <option value="es">Español</option>
+      <option value="en">English</option>
+      <option value="pt">Português</option>
+      <option value="fr">Français</option>
+      <option value="de">Deutsch</option>
+      <option value="it">Italiano</option>
+      <option value="ja">日本語</option>
+    </select>
+  </div>
+
+  <div class="login-bg">
+    <div class="login-card">
+      <!-- Logo -->
+      <div class="login-logo">
+        <div class="login-logo-icon" aria-hidden="true">SI</div>
+      </div>
+
+      <!-- Títulos -->
+      <div class="login-title">Inicia sesión</div>
+      <div class="login-sub">System International · Plataforma POS</div>
+
+      <!-- Alert -->
+      <div id="alert" class="alert"></div>
+
+      <!-- Formulario -->
+      <form onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label class="form-label" for="emailInput">Correo o teléfono</label>
+          <!-- Antes era type=email — pero registro permite alta solo con phone, así que el
+               usuario que se registró con teléfono no podía volver. Cambio a type=text con
+               autocomplete=username; el handler en el backend ya acepta ambos formatos. -->
+          <input type="text" id="emailInput" class="form-input" placeholder="tu@correo.com  ó  5512345678" autocomplete="username" aria-label="Correo electrónico o teléfono de 10 dígitos" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="passwordInput">Contraseña</label>
+          <input type="password" id="passwordInput" class="form-input" placeholder="Contraseña" autocomplete="current-password" aria-label="Contraseña" required minlength="1">
+        </div>
+
+        <button type="submit" class="btn-primary" id="btnLogin">Entrar</button>
+      </form>
+
+      <div class="login-link-row">
+        <a href="#" id="forgotPasswordLink" aria-label="Recuperar contraseña olvidada">¿Olvidaste tu contraseña?</a>
+      </div>
+
+      <!-- Crear cuenta — entry point de registro (faltaba) -->
+      <div style="text-align:center;margin-top:18px;padding-top:18px;border-top:1px solid var(--vlx-line,#ECECEE);font-size:13px;color:var(--vlx-ink-3,#6B7280)">
+        ¿No tienes cuenta?
+        <a href="/registro.html" style="color:var(--vlx-ink,#0B0B0F);font-weight:500;text-decoration:none;margin-left:4px">Crear cuenta</a>
+      </div>
+
+      <!-- Social login fallback (oculto si OAuth no disponible) -->
+      <div id="socialLoginBox" hidden style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.08)">
+        <div style="text-align:center;font-size:11px;color:#52524E;margin-bottom:12px;letter-spacing:0.5px;text-transform:uppercase">o continúa con</div>
+        <div style="display:flex;gap:8px">
+          <button type="button" class="social-btn" data-provider="google" style="flex:1;height:42px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#FAFAF9;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">G Google</button>
+          <button type="button" class="social-btn" data-provider="microsoft" style="flex:1;height:42px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#FAFAF9;font-size:13px;font-weight:600;cursor:pointer">Microsoft</button>
+        </div>
+      </div>
+
+      <!-- Test credentials info (oculto en producción) -->
+      <div class="test-creds" id="testCreds" hidden>
+        <strong>Test:</strong> admin@volvix.test / Volvix2026!
+      </div>
+    </div>
+  </div>
+
+  <script>
+// Mostrar credenciales de prueba sólo en dev (localhost / 127.0.0.1 / *.local)
+(function revealTestCredsInDev(){
+  try {
+    const h = location.hostname;
+    const isDev = h === 'localhost' || h === '127.0.0.1' || h.endsWith('.local') || h === '';
+    if (isDev) {
+      const el = document.getElementById('testCreds');
+      if (el) el.hidden = false;
+    }
+  } catch(e){}
+})();
+
+// Auto-redirect si ya hay sesión válida (evita login forzado tras F5)
+// R29: respetar parámetro ?redirect= si viene desde otra página protegida
+(function checkExistingSession(){
+  try {
+    const token = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+    if (!token) return;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload.exp && payload.exp * 1000 > Date.now()) {
+        // 2026-05: redirect dependiente del rol — el dueño del negocio entra
+        // al POS, el dueño de la plataforma entra al launcher.
+        const role = String(payload.role || payload.rol || '').toLowerCase();
+        const email = String(payload.email || '').toLowerCase();
+        const isPlatform = role === 'superadmin' || role === 'platform_owner'
+                          || email.endsWith('@systeminternational.app');
+        let dest = isPlatform ? '/volvix-launcher.html' : '/salvadorex-pos.html';
+        try {
+          const params = new URLSearchParams(location.search);
+          const r = params.get('redirect');
+          // Solo aceptar paths internos (que empiecen con / y no //)
+          if (r && r.startsWith('/') && !r.startsWith('//') && !r.includes(':')) {
+            dest = decodeURIComponent(r);
+          }
+        } catch(e){}
+        location.href = dest;
+        return;
+      }
+    } catch(e) {}
+    localStorage.removeItem('volvix_token');
+    localStorage.removeItem('volvixAuthToken');
+  } catch(e) {}
+})();
+
+function showAlert(msg, type = 'info') {
+  const alert = document.getElementById('alert');
+  alert.textContent = msg;
+  alert.className = `alert show ${type}`;
+  setTimeout(() => alert.classList.remove('show'), 4000);
+}
+
+function setLoading(btn, loading, text) {
+  const button = document.getElementById(btn);
+  button.disabled = loading;
+  if (loading) {
+    button.classList.add('loading');
+  } else {
+    button.classList.remove('loading');
+    button.textContent = text || 'Entrar';
+  }
+}
+
+async function handleLogin(event) {
+  event.preventDefault();
+
+  const idValue = (document.getElementById('emailInput').value || '').trim();
+  const password = (document.getElementById('passwordInput').value || '').trim();
+
+  // Detectar si es email o teléfono (10 dígitos MX). El backend de /api/login
+  // ya soporta ambos via body.phone o body.email.
+  const isEmail = idValue.includes('@');
+  const phoneDigits = idValue.replace(/[\s\-\(\)\+]/g, '');
+  const isPhone = /^\d{10}$/.test(phoneDigits) || /^52\d{10}$/.test(phoneDigits);
+
+  if (!isEmail && !isPhone) {
+    document.getElementById('emailInput').classList.add('error');
+    showAlert('Ingresa un correo válido o tu teléfono de 10 dígitos', 'error');
+    return;
+  }
+  document.getElementById('emailInput').classList.remove('error');
+
+  if (!password) {
+    document.getElementById('passwordInput').classList.add('error');
+    showAlert('Ingresa tu contraseña', 'error');
+    return;
+  }
+  document.getElementById('passwordInput').classList.remove('error');
+
+  setLoading('btnLogin', true, 'Entrando...');
+
+  try {
+    const payload = isEmail
+      ? { email: idValue, password }
+      : { phone: phoneDigits.length === 10 ? '+52' + phoneDigits : '+' + phoneDigits, password };
+    const response = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (response.status === 503) {
+      throw new Error('Servicio de autenticación no configurado. Contacta soporte.');
+    }
+    if (!response.ok) {
+      let err = {};
+      try { err = await response.json(); } catch (e) {}
+      throw new Error(err.error || err.message || 'Error al iniciar sesión');
+    }
+
+    const result = await response.json();
+    if (!result.ok || !result.session) {
+      throw new Error(result.error || 'Sesión no válida');
+    }
+
+    // Guardar sesión (legacy)
+    localStorage.setItem('volvixSession', JSON.stringify(result.session));
+
+    // Guardar JWT Bearer token (R13 hardening) — keys consistentes con checkExistingSession
+    const jwt = result.token || (result.session && result.session.token) || null;
+    if (jwt) {
+      try {
+        localStorage.setItem('volvix_token', jwt);
+        localStorage.setItem('volvixAuthToken', jwt); // legacy back-compat
+      } catch (e) {}
+      if (window.Volvix && window.Volvix.auth && typeof window.Volvix.auth.saveToken === 'function') {
+        try { window.Volvix.auth.saveToken(jwt); } catch (e) {}
+      }
+    }
+
+    showAlert('¡Bienvenido!', 'success');
+
+    // 2026-05: redirect según rol — owner-de-tenant → POS; plataforma → launcher.
+    let dest = '/salvadorex-pos.html';
+    try {
+      const tok = (data && data.session && data.session.token) || (data && data.token) || '';
+      if (tok) {
+        const p = JSON.parse(atob(tok.split('.')[1]));
+        const role = String(p.role || p.rol || '').toLowerCase();
+        const email = String(p.email || '').toLowerCase();
+        const isPlatform = role === 'superadmin' || role === 'platform_owner'
+                          || email.endsWith('@systeminternational.app');
+        if (isPlatform) dest = '/volvix-launcher.html';
+      }
+      const params = new URLSearchParams(location.search);
+      const r = params.get('redirect');
+      if (r && r.startsWith('/') && !r.startsWith('//') && !r.includes(':')) {
+        dest = decodeURIComponent(r);
+      }
+    } catch(e){}
+    setTimeout(() => { window.location.href = dest; }, 600);
+  } catch (err) {
+    let msg = err.message || 'Error al iniciar sesión';
+    if (msg.includes('Credenciales')) msg = 'Correo o contraseña incorrectos';
+    showAlert(msg, 'error');
+  } finally {
+    setLoading('btnLogin', false, 'Entrar');
+  }
+}
+
+// Enter en inputs
+document.getElementById('emailInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('passwordInput')?.focus();
+});
+document.getElementById('passwordInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('btnLogin')?.click();
+});
+
+// ¿Olvidaste contraseña? → POST /api/email/password-reset
+(function setupForgotPassword(){
+  const link = document.getElementById('forgotPasswordLink');
+  if (!link) return;
+  link.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const email = (document.getElementById('emailInput').value || '').trim();
+    if (!email || !email.includes('@')) {
+      document.getElementById('emailInput').classList.add('error');
+      document.getElementById('emailInput').focus();
+      showAlert('Escribe tu correo arriba y vuelve a hacer clic', 'info');
+      return;
+    }
+    showAlert('Enviando instrucciones...', 'info');
+    try {
+      // 2026-05 audit B-12: el endpoint correcto es /api/auth/password-reset/request
+      // (antes apuntaba a /api/email/password-reset que no existe → siempre fallaba).
+      const r = await fetch('/api/auth/password-reset/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      if (r.status === 503) { showAlert('Servicio de email no configurado. Contacta soporte.', 'error'); return; }
+      if (r.status === 404) { showAlert('No encontramos una cuenta con ese correo', 'error'); return; }
+      if (r.status === 429) { showAlert('Demasiadas solicitudes. Espera unos minutos.', 'error'); return; }
+      if (!r.ok) { showAlert('No se pudo procesar la solicitud. Intenta más tarde.', 'error'); return; }
+      showAlert('Te enviamos un correo con los pasos para recuperar tu contraseña', 'success');
+    } catch (err) {
+      showAlert('Sin conexión. Verifica tu red.', 'error');
+    }
+  });
+})();
+
+// Social login: detectar disponibilidad y solo mostrar si OAuth está configurado
+(function setupSocialLogin(){
+  const box = document.getElementById('socialLoginBox');
+  if (!box) return;
+  fetch('/api/auth/oauth/providers', { headers: { 'Accept': 'application/json' } })
+    .then(r => r.ok ? r.json() : Promise.reject(new Error('not available')))
+    .then(data => {
+      const providers = (data && (data.providers || data.enabled)) || [];
+      if (Array.isArray(providers) && providers.length) {
+        box.hidden = false;
+        box.querySelectorAll('.social-btn').forEach(btn => {
+          const p = btn.dataset.provider;
+          if (!providers.includes(p)) btn.style.display = 'none';
+          btn.addEventListener('click', () => {
+            window.location.href = '/api/auth/oauth/' + encodeURIComponent(p) + '/start';
+          });
+        });
+      }
+    })
+    .catch(() => { /* OAuth no configurado: dejar oculto el box */ });
+})();
+  </script>
+<script src="auth-helper.js"></script>
+<link rel="stylesheet" href="volvix-modals.css">
+<script defer src="volvix-modals.js"></script>
+<script src="volvix-pwa-wiring.js" defer></script>
+<script src="volvix-i18n-wiring.js" defer></script>
+<script src="volvix-theme-wiring.js" defer></script>
+<script src="volvix-email-wiring.js" defer></script>
+<script src="volvix-webrtc-wiring.js" defer></script>
+<script src="volvix-master-controller.js" defer></script>
+<script src="volvix-calendar-wiring.js" defer></script>
+<script src="volvix-payments-wiring.js" defer></script>
+<script src="volvix-gamification-wiring.js" defer></script>
+<script src="volvix-perf-wiring.js" defer></script>
+<script src="volvix-realtime-wiring.js" defer></script>
+<script src="volvix-currency-wiring.js" defer></script>
+<script src="volvix-loyalty-wiring.js" defer></script>
+<script src="volvix-tax-wiring.js" defer></script>
+<script src="volvix-webhooks-wiring.js" defer></script>
+<script src="volvix-audit-wiring.js" defer></script>
+<script src="volvix-cache-wiring.js" defer></script>
+<script src="volvix-queue-wiring.js" defer></script>
+<script src="volvix-fulltext-wiring.js" defer></script>
+<script src="volvix-recommendations-wiring.js" defer></script>
+<script src="volvix-subscriptions-wiring.js" defer></script>
+<script src="volvix-plugins-wiring.js" defer></script>
+<script src="volvix-compliance-wiring.js" defer></script>
+<script src="volvix-cs-wiring.js" defer></script>
+<script src="volvix-ratelimit-wiring.js" defer></script>
+<script src="volvix-workflow-wiring.js" defer></script>
+<script src="volvix-ab-testing-wiring.js" defer></script>
+<script src="volvix-feedback-wiring.js" defer></script>
+<script src="volvix-inventory-ai-wiring.js" defer></script>
+
+<!-- R12b FIX-LEGAL-5: footer legal -->
+<footer style="text-align:center;padding:20px 16px;font-size:12px;color:#8a93a6;border-top:1px solid #1f2740;margin-top:24px;background:transparent;">
+  <div>© 2026 GrupoVolvix S.A. de C.V.</div>
+  <div style="margin-top:6px;">
+    <a href="/aviso-privacidad.html" style="color:#60a5fa;text-decoration:none;margin:0 6px;">Aviso de Privacidad</a> ·
+    <a href="/terminos-condiciones.html" style="color:#60a5fa;text-decoration:none;margin:0 6px;">Términos</a> ·
+    <a href="/cookies-policy.html" style="color:#60a5fa;text-decoration:none;margin:0 6px;">Cookies</a> ·
+    <a href="/volvix-gdpr-portal.html" style="color:#60a5fa;text-decoration:none;margin:0 6px;">Portal ARCO</a> ·
+    <a href="mailto:soporte@volvix.com" style="color:#60a5fa;text-decoration:none;margin:0 6px;">Soporte</a>
+  </div>
+</footer>
+<script defer src="/volvix-cookie-banner-wiring.js"></script>
+<script>
+// Idioma inline (login). Usa window.setLanguage() del i18n wiring si está
+// disponible (cambio in-place sin reload), si no fallback a reload.
+(function(){
+  try {
+    var sel = document.getElementById('vlx-lang-select');
+    if (!sel) return;
+    var cur = (localStorage.getItem('volvix_lang') || (navigator.language||'es').slice(0,2)).toLowerCase();
+    if (['es','en','pt','fr','de','it','ja'].indexOf(cur) >= 0) sel.value = cur;
+    window.__vlxSetLang = function(lang){
+      try { localStorage.setItem('volvix_lang', lang); } catch(_) {}
+      try { document.documentElement.setAttribute('lang', lang); } catch(_) {}
+      if (window.setLanguage && typeof window.setLanguage === 'function') {
+        try { window.setLanguage(lang); return; } catch(_) {}
+      }
+      if (window.Volvix && window.Volvix.i18n && typeof window.Volvix.i18n.setLanguage === 'function') {
+        try { window.Volvix.i18n.setLanguage(lang); return; } catch(_) {}
+      }
+      try { window.dispatchEvent(new CustomEvent('volvix:lang:change', { detail: { lang: lang } })); } catch(_) {}
+      setTimeout(function(){ location.reload(); }, 80);
+    };
+  } catch(_) {}
+})();
+</script>
+</body>
+</html>

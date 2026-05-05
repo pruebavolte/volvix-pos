@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>10 errores comunes al usar un POS en negocio pequeño — Volvix Blog</title>
+<meta name="description" content="Los 10 errores más frecuentes que cometen dueños de tiendas con su sistema POS y cómo evitarlos para no perder dinero.">
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"Article",
+  "headline":"10 errores comunes al usar un POS en negocio pequeño",
+  "description":"Errores frecuentes con sistemas POS y cómo evitarlos en tiendas en México.",
+  "datePublished":"2026-04-15",
+  "author":{"@type":"Organization","name":"Volvix POS"},
+  "publisher":{"@type":"Organization","name":"Volvix POS"},
+  "keywords":"POS, errores, tienda, México, punto de venta, abarrotes"
+}
+</script>
+<style>
+  :root { --txt:#0f172a; --muted:#64748b; --accent:#3b82f6; --border:#e2e8f0 }
+  * { box-sizing:border-box }
+  body { margin:0; font-family:Georgia,Cambria,serif; color:var(--txt); line-height:1.7; background:#fff }
+  header { padding:20px 16px; border-bottom:1px solid var(--border); background:#fff }
+  header .inner { max-width:720px; margin:0 auto; display:flex; justify-content:space-between; align-items:center }
+  header a { font-family:system-ui; text-decoration:none; color:var(--txt); font-weight:700 }
+  header nav a { font-weight:400; color:var(--muted); font-size:14px }
+  .hero {
+    background:linear-gradient(135deg,#78350f 0%,#f59e0b 100%); color:#fff;
+    padding:64px 16px; text-align:center;
+  }
+  .hero .cat {
+    display:inline-block; background:rgba(255,255,255,.2); padding:4px 14px;
+    border-radius:99px; font-size:12px; font-family:system-ui; font-weight:600;
+    text-transform:uppercase; letter-spacing:1px; margin-bottom:16px;
+  }
+  .hero h1 { margin:0 0 12px; font-size:36px; line-height:1.2; max-width:720px; margin-left:auto; margin-right:auto }
+  .hero .meta { font-family:system-ui; font-size:14px; opacity:.85 }
+  article { max-width:720px; margin:0 auto; padding:48px 16px; font-size:18px }
+  article h2 { font-family:system-ui; margin-top:40px; font-size:26px }
+  article h3 { font-family:system-ui; margin-top:24px; font-size:20px }
+  article p { margin:16px 0 }
+  article ul, article ol { padding-left:20px }
+  article li { margin:8px 0 }
+  article code { background:#f1f5f9; padding:2px 6px; border-radius:4px; font-size:.9em }
+  .num {
+    display:inline-block; background:var(--accent); color:#fff;
+    width:32px; height:32px; line-height:32px; border-radius:50%;
+    text-align:center; font-weight:700; font-family:system-ui; margin-right:8px;
+    font-size:15px;
+  }
+  .ejemplo { background:#fffbeb; border-left:4px solid #f59e0b; padding:16px 20px; margin:20px 0; border-radius:0 8px 8px 0; font-family:system-ui; font-size:16px }
+  .cta {
+    background:#f8fafc; border:1px solid var(--border); border-radius:12px;
+    padding:32px; text-align:center; margin:48px 0; font-family:system-ui;
+  }
+  .cta h3 { margin:0 0 12px; font-size:22px }
+  .cta p { font-size:15px; color:var(--muted); margin:0 0 20px }
+  .cta a {
+    display:inline-block; background:var(--accent); color:#fff;
+    padding:12px 28px; border-radius:8px; text-decoration:none; font-weight:600;
+  }
+  footer { border-top:1px solid var(--border); padding:24px 16px; text-align:center; color:var(--muted); font-size:13px; font-family:system-ui }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="inner">
+    <a href="/">Volvix</a>
+    <nav><a href="/blog.html">← Volver al blog</a></nav>
+  </div>
+</header>
+
+<section class="hero">
+  <span class="cat">POS</span>
+  <h1>10 errores comunes al usar un POS en negocio pequeño</h1>
+  <div class="meta">15 de abril, 2026 · 8 min de lectura</div>
+</section>
+
+<article>
+  <p>Hablamos con dueños de más de 200 tiendas en México y revisamos los problemas que más se repiten. La mayoría no son fallas del software: son errores de uso o de configuración inicial. Aquí están los 10 más comunes y cómo arreglarlos antes de que te cuesten dinero o problemas con el SAT.</p>
+
+  <h2><span class="num">1</span>No registrar el costo de cada producto</h2>
+  <p>Si solo capturas precio de venta, no sabes cuánto ganas. Sin costo, no hay utilidad bruta, no hay análisis de margen, no hay forma de saber qué SKU es el que de verdad te da dinero. Captura costo desde la primera compra.</p>
+
+  <h2><span class="num">2</span>Usar el RFC genérico para todo</h2>
+  <p>Funciona para ventas mostrador y factura global, pero si tu cliente pide factura a su nombre y le pones <code>XAXX010101000</code>, no se la puede deducir. Pierdes al cliente. Configura tu POS para preguntar siempre si quiere factura.</p>
+
+  <h2><span class="num">3</span>No hacer respaldos</h2>
+  <p>Si tu POS guarda todo localmente y se quema la SSD, perdiste años de ventas. Soluciones:</p>
+  <ul>
+    <li>POS en la nube: respaldo automático.</li>
+    <li>POS local con sync: configura backup diario a un disco externo o Google Drive.</li>
+    <li>Mínimo: exporta CSV de ventas semanalmente.</li>
+  </ul>
+
+  <h2><span class="num">4</span>Una sola cuenta para todos los cajeros</h2>
+  <p>Si todos usan "admin", no sabes quién hizo cada venta, cancelación o cambio de precio. Crea un usuario por cajero, aunque sean 2 personas. Te ahorra investigaciones internas en faltantes.</p>
+
+  <div class="ejemplo">
+    <strong>Caso real:</strong> Una papelería de barrio reportaba faltantes de $1,200 al mes. Al separar usuarios y revisar cancelaciones, descubrieron que un cajero cancelaba 4-5 ventas en efectivo al día y se quedaba con el dinero. Sin usuarios separados, era invisible.
+  </div>
+
+  <h2><span class="num">5</span>No usar código de barras</h2>
+  <p>Capturar precios a mano es lento y propenso a errores. Un lector de código de barras cuesta $250-$600 MXN y se paga solo en una semana de uso. Si tu producto no trae código, imprime etiquetas con código interno.</p>
+
+  <h2><span class="num">6</span>No actualizar precios en tiempo real</h2>
+  <p>El proveedor te subió la cerveza $5 pesos. Si no actualizas en el POS, vendes a precio viejo y perdiste el margen. Configura alertas de cambio de costo para que el sistema te avise cuando deberías revisar precio.</p>
+
+  <h2><span class="num">7</span>Ignorar las alertas de stock bajo</h2>
+  <p>Si tu POS te dice "quedan 3 unidades de Coca 600ml" y lo ignoras, al día siguiente pierdes ventas. Configura mínimos por SKU y revísalos cada mañana. Mejor: que el sistema te genere la orden de compra automática.</p>
+
+  <h2><span class="num">8</span>No emitir factura global de público en general</h2>
+  <p>Si vendes a público en general (sin facturar individualmente), debes emitir factura global periódica con los tickets acumulados. Si no la emites, esos ingresos quedan sin respaldo fiscal y en auditoría te van a hacer pagar ISR sobre todo. Genérala mensual mínimo.</p>
+
+  <h2><span class="num">9</span>Cobrar con un POS y facturar con otro</h2>
+  <p>Si usas POS para ventas y un sistema separado para facturas, los datos no cuadran. Te vas a pasar horas reconciliando y siempre van a haber diferencias. Usa un solo sistema con CFDI 4.0 integrado o asegúrate que ambos estén sincronizados por API.</p>
+
+  <h2><span class="num">10</span>No revisar el reporte del día</h2>
+  <p>El corte Z lo imprimen, lo doblan, no lo leen. Cada noche debe revisarse:</p>
+  <ul>
+    <li>Total de ventas vs día anterior.</li>
+    <li>Productos top vendidos.</li>
+    <li>Cancelaciones y devoluciones.</li>
+    <li>Faltantes/sobrantes en caja.</li>
+    <li>Pagos por método.</li>
+  </ul>
+  <p>5 minutos al día. Eso es todo. Te ahorra problemas de mes.</p>
+
+  <h2>Bono: cómo evitar todos estos errores</h2>
+  <p>La mayoría se solucionan eligiendo bien el POS desde el inicio. Busca uno que:</p>
+  <ul>
+    <li>Tenga usuarios y permisos por rol.</li>
+    <li>Maneje costos, stock mínimo y alertas.</li>
+    <li>Genere CFDI 4.0 y factura global automática.</li>
+    <li>Te mande el reporte diario por WhatsApp.</li>
+    <li>Respalde en la nube por defecto.</li>
+  </ul>
+  <p>Si tu POS actual no hace estas cosas, no es problema tuyo: es problema del POS. Considera migrar.</p>
+
+  <div class="cta">
+    <h3>Volvix evita los 10 errores por defecto</h3>
+    <p>Usuarios separados, costos, stock, CFDI 4.0, respaldo en la nube y reporte diario. Todo incluido.</p>
+    <a href="/registro.html?giro=abarrotes">Probar gratis</a>
+  </div>
+</article>
+
+<footer>© Volvix POS. Las recomendaciones son generales; consulta a tu contador para temas fiscales.</footer>
+<script src="/volvix-newsletter-wiring.js" defer></script>
+</body>
+</html>

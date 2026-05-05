@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tutorial 01 — Tu primera venta | Volvix POS</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  body{background:#0f172a;color:#e2e8f0;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px}
+  .tutorial-container{width:100%;max-width:760px;background:#1e293b;border-radius:14px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+  h1{font-size:1.4rem;margin-bottom:6px;color:#38bdf8}
+  .stage{position:relative;height:380px;background:#0b1220;border-radius:10px;border:1px solid #334155;overflow:hidden;margin-top:16px}
+  .step{position:absolute;inset:0;padding:20px;opacity:0}
+  .step h2{font-size:1.05rem;color:#fde047;margin-bottom:10px}
+  .pos-mockup{background:#fff;color:#0f172a;border-radius:8px;padding:14px;height:280px;position:relative}
+  .search-bar{width:100%;border:2px solid #cbd5e1;border-radius:6px;padding:8px 12px;font-size:.95rem}
+  .product-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+  .product{background:#f1f5f9;border-radius:6px;padding:10px;text-align:center;font-size:.78rem;border:1px solid transparent;transition:.3s}
+  .product.highlight{border-color:#3b82f6;background:#dbeafe}
+  .cart{position:absolute;top:14px;right:14px;background:#0f172a;color:#fff;padding:8px 12px;border-radius:6px;font-size:.8rem;min-width:120px}
+  .total-row{display:flex;justify-content:space-between;margin-top:6px;font-weight:600}
+  .pay-btn{background:#10b981;color:#fff;border:none;padding:10px 18px;border-radius:6px;font-weight:600;font-size:.9rem;margin-top:10px;cursor:pointer}
+  .receipt{background:#fef3c7;color:#0f172a;padding:12px;border-radius:6px;font-family:monospace;font-size:.8rem;line-height:1.5}
+  .cursor{position:absolute;font-size:1.6rem;pointer-events:none;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4));z-index:10;transition:.5s}
+  .caption{margin-top:14px;text-align:center;color:#94a3b8;font-size:.85rem}
+  .controls{display:flex;gap:10px;justify-content:center;margin-top:14px}
+  .controls button{background:#334155;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:.85rem}
+  .controls button:hover{background:#475569}
+  .progress{height:4px;background:#334155;border-radius:2px;margin-top:10px;overflow:hidden}
+  .progress-bar{height:100%;background:#38bdf8;width:0;animation:prog 30s linear infinite}
+  @keyframes prog{from{width:0}to{width:100%}}
+
+  /* Steps timeline 30s */
+  @keyframes s1{0%,16%{opacity:1}17%,100%{opacity:0}}
+  @keyframes s2{0%,16%{opacity:0}17%,33%{opacity:1}34%,100%{opacity:0}}
+  @keyframes s3{0%,33%{opacity:0}34%,50%{opacity:1}51%,100%{opacity:0}}
+  @keyframes s4{0%,50%{opacity:0}51%,66%{opacity:1}67%,100%{opacity:0}}
+  @keyframes s5{0%,66%{opacity:0}67%,83%{opacity:1}84%,100%{opacity:0}}
+  @keyframes s6{0%,83%{opacity:0}84%,100%{opacity:1}}
+  .step-1{animation:s1 30s infinite}
+  .step-2{animation:s2 30s infinite}
+  .step-3{animation:s3 30s infinite}
+  .step-4{animation:s4 30s infinite}
+  .step-5{animation:s5 30s infinite}
+  .step-6{animation:s6 30s infinite}
+  .paused .step,.paused .progress-bar,.paused .cursor{animation-play-state:paused!important}
+</style>
+</head>
+<body>
+<div class="tutorial-container" id="container">
+  <h1>Tutorial 01 — Tu primera venta</h1>
+  <div style="color:#94a3b8;font-size:.85rem">Buscar producto → agregar al carrito → cobrar → imprimir ticket</div>
+  <div class="stage" id="stage">
+    <div class="step step-1">
+      <h2>Paso 1 · Abre el POS</h2>
+      <div class="pos-mockup">
+        <input class="search-bar" placeholder="Buscar producto..." disabled>
+        <div class="product-grid">
+          <div class="product">Latte ☕</div>
+          <div class="product">Pan 🥖</div>
+          <div class="product">Jugo 🧃</div>
+        </div>
+        <div class="cursor" style="left:50%;top:55%">👆</div>
+      </div>
+    </div>
+    <div class="step step-2">
+      <h2>Paso 2 · Escribe el nombre del producto</h2>
+      <div class="pos-mockup">
+        <input class="search-bar" value="Latte" disabled>
+        <div class="product-grid">
+          <div class="product highlight">Latte ☕<br>$45</div>
+          <div class="product">Pan 🥖</div>
+          <div class="product">Jugo 🧃</div>
+        </div>
+        <div class="cursor" style="left:30%;top:18%">👆</div>
+      </div>
+    </div>
+    <div class="step step-3">
+      <h2>Paso 3 · Toca el producto para añadirlo</h2>
+      <div class="pos-mockup">
+        <div class="cart">
+          <div>🛒 Carrito (1)</div>
+          <div class="total-row"><span>Latte</span><span>$45</span></div>
+        </div>
+        <input class="search-bar" placeholder="Buscar otro..." disabled>
+        <div class="product-grid">
+          <div class="product highlight">Latte ☕<br>$45</div>
+          <div class="product">Pan 🥖</div>
+          <div class="product">Jugo 🧃</div>
+        </div>
+        <div class="cursor" style="left:18%;top:42%">👆</div>
+      </div>
+    </div>
+    <div class="step step-4">
+      <h2>Paso 4 · Pulsa COBRAR</h2>
+      <div class="pos-mockup">
+        <div class="cart">
+          <div>🛒 Carrito (1)</div>
+          <div class="total-row"><span>Latte</span><span>$45</span></div>
+          <div class="total-row" style="border-top:1px solid #334155;padding-top:4px">Total<span>$45</span></div>
+        </div>
+        <button class="pay-btn">💳 COBRAR $45</button>
+        <div class="cursor" style="left:32%;top:78%">👆</div>
+      </div>
+    </div>
+    <div class="step step-5">
+      <h2>Paso 5 · Selecciona método de pago</h2>
+      <div class="pos-mockup">
+        <h3 style="font-size:1rem;margin-bottom:10px">Método de pago</h3>
+        <div class="product-grid">
+          <div class="product highlight">💵 Efectivo</div>
+          <div class="product">💳 Tarjeta</div>
+          <div class="product">📱 Transfer</div>
+        </div>
+        <button class="pay-btn">CONFIRMAR</button>
+        <div class="cursor" style="left:18%;top:38%">👆</div>
+      </div>
+    </div>
+    <div class="step step-6">
+      <h2>Paso 6 · Imprime ticket ✓</h2>
+      <div class="pos-mockup">
+        <div class="receipt">
+          --- VOLVIX POS ---<br>
+          Latte ☕         $45<br>
+          ─────────────<br>
+          TOTAL          $45<br>
+          Pago: Efectivo<br>
+          ¡Gracias!  🎉
+        </div>
+        <button class="pay-btn" style="background:#3b82f6">🖨️ Imprimir</button>
+      </div>
+    </div>
+  </div>
+  <div class="progress"><div class="progress-bar"></div></div>
+  <div class="caption">Reproduciendo en bucle (30s). Refresca para repetir.</div>
+  <div class="controls">
+    <button onclick="document.getElementById('container').classList.toggle('paused')">⏯️ Pausar/Reanudar</button>
+    <button onclick="location.reload()">🔄 Reiniciar</button>
+  </div>
+</div>
+</body>
+</html>

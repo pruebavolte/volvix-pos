@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Video Tutorial: Tu primera venta en 60s — Volvix POS</title>
+<meta name="description" content="Aprende a hacer una venta en Volvix POS en 60 segundos. Tutorial interactivo con simulacion de pantalla paso a paso.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+body{background:linear-gradient(135deg,#0b1220 0%,#1e293b 100%);color:#e2e8f0;min-height:100vh;padding:24px 16px}
+.wrap{max-width:1280px;margin:0 auto}
+.hero{text-align:center;margin-bottom:24px}
+.hero .badge{display:inline-block;padding:4px 12px;border-radius:999px;background:#dc2626;color:#fff;font-size:.75rem;font-weight:700;letter-spacing:.05em;margin-bottom:8px}
+.hero h1{font-size:2rem;background:linear-gradient(90deg,#38bdf8,#a78bfa);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:8px}
+.hero p{color:#94a3b8;font-size:1rem}
+.layout{display:grid;grid-template-columns:1fr 360px;gap:24px;margin-top:24px}
+@media (max-width:980px){.layout{grid-template-columns:1fr}}
+
+/* ---------- PLAYER ---------- */
+.player{background:#000;border-radius:14px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.6);position:relative;border:1px solid #1f2937}
+.screen{position:relative;aspect-ratio:16/9;background:#0b1220;overflow:hidden}
+
+/* POS UI mock inside the screen */
+.pos-app{position:absolute;inset:0;background:#f8fafc;color:#0f172a;display:flex;flex-direction:column;font-size:13px}
+.pos-topbar{background:#0f172a;color:#fff;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;font-size:12px}
+.pos-topbar .brand{font-weight:700;color:#38bdf8}
+.pos-topbar .user{color:#cbd5e1}
+.pos-main{flex:1;display:flex;min-height:0}
+.pos-left{flex:1;background:#fff;border-right:1px solid #e2e8f0;display:flex;flex-direction:column}
+.pos-keys{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px;background:#f1f5f9;border-bottom:1px solid #e2e8f0}
+.pos-key{background:#fff;border:1px solid #cbd5e1;padding:8px;text-align:center;font-size:11px;font-weight:600;border-radius:6px;color:#334155;transition:.15s}
+.pos-key.f10{background:#dbeafe;border-color:#3b82f6;color:#1e40af}
+.pos-key.f12{background:#dcfce7;border-color:#16a34a;color:#15803d}
+.pos-key.flash{background:#3b82f6;color:#fff;transform:scale(1.05);box-shadow:0 0 0 4px rgba(59,130,246,.3)}
+.pos-ticket{flex:1;overflow:auto;padding:8px}
+.ticket-row{display:flex;justify-content:space-between;padding:6px 4px;border-bottom:1px dashed #e2e8f0;font-size:12px;opacity:0;transform:translateY(8px);transition:.4s}
+.ticket-row.show{opacity:1;transform:translateY(0)}
+.ticket-row .name{color:#0f172a;font-weight:500}
+.ticket-row .qty{color:#64748b;margin:0 8px}
+.ticket-row .price{color:#0f172a;font-weight:600;min-width:60px;text-align:right}
+.pos-empty{padding:24px 12px;text-align:center;color:#94a3b8;font-size:12px}
+.pos-right{width:36%;background:#0f172a;color:#fff;display:flex;flex-direction:column;padding:10px}
+.totals{font-size:11px;color:#94a3b8}
+.totals .line{display:flex;justify-content:space-between;padding:4px 0}
+.totals .total{font-size:1.4rem;color:#fde047;font-weight:700;padding-top:8px;border-top:1px solid #334155;margin-top:6px}
+.totals .total span:last-child{color:#fff}
+.pay-btn{margin-top:auto;background:#16a34a;color:#fff;border:0;padding:14px;border-radius:8px;font-weight:700;font-size:1rem;cursor:pointer;letter-spacing:.05em}
+.pay-btn.flash{background:#22c55e;box-shadow:0 0 0 6px rgba(34,197,94,.3)}
+
+/* Search modal */
+.modal{position:absolute;inset:0;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.3s}
+.modal.show{opacity:1;pointer-events:auto}
+.modal-box{background:#fff;color:#0f172a;border-radius:10px;width:70%;max-width:420px;padding:14px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.modal-box h3{font-size:.95rem;margin-bottom:8px;color:#1e40af}
+.search-input{width:100%;border:2px solid #cbd5e1;border-radius:6px;padding:8px 12px;font-size:13px;outline:none}
+.search-input:focus{border-color:#3b82f6}
+.search-results{margin-top:8px;max-height:140px;overflow:auto}
+.search-item{padding:8px;border-bottom:1px solid #f1f5f9;font-size:12px;display:flex;justify-content:space-between;cursor:pointer;border-radius:4px;transition:.15s}
+.search-item.hot{background:#dbeafe;border-color:#3b82f6}
+
+/* Pay modal */
+.pay-modal{position:absolute;inset:0;background:rgba(15,23,42,.65);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.3s}
+.pay-modal.show{opacity:1;pointer-events:auto}
+.pay-box{background:#fff;color:#0f172a;border-radius:10px;width:75%;max-width:460px;padding:16px}
+.pay-box h3{font-size:1rem;margin-bottom:10px}
+.pay-methods{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pay-m{background:#f1f5f9;border:2px solid transparent;border-radius:8px;padding:14px;text-align:center;cursor:pointer;font-size:12px;font-weight:600}
+.pay-m .ico{font-size:1.6rem;display:block;margin-bottom:4px}
+.pay-m.hot{background:#dcfce7;border-color:#16a34a;color:#15803d}
+.pay-confirm{margin-top:12px;display:flex;justify-content:flex-end}
+.pay-confirm button{background:#16a34a;color:#fff;border:0;padding:10px 18px;border-radius:6px;font-weight:600;cursor:pointer}
+.pay-confirm button.flash{box-shadow:0 0 0 5px rgba(22,163,74,.3)}
+
+/* Success overlay */
+.success{position:absolute;inset:0;background:rgba(255,255,255,.97);color:#0f172a;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.4s}
+.success.show{opacity:1;pointer-events:auto}
+.success .check{width:90px;height:90px;border-radius:50%;background:#22c55e;display:flex;align-items:center;justify-content:center;font-size:3rem;color:#fff;animation:pop .6s ease}
+.success h2{margin-top:14px;color:#16a34a;font-size:1.4rem}
+.success p{color:#64748b;margin-top:6px;font-size:.9rem}
+.receipt{margin-top:14px;background:#fff;border:1px dashed #94a3b8;padding:12px 18px;border-radius:6px;font-family:'Courier New',monospace;font-size:11px;color:#0f172a;min-width:240px}
+.receipt .r-line{display:flex;justify-content:space-between;padding:2px 0}
+.receipt .r-divider{border-top:1px dashed #cbd5e1;margin:6px 0}
+@keyframes pop{0%{transform:scale(0)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+
+/* Cursor */
+.cursor{position:absolute;width:22px;height:22px;pointer-events:none;z-index:50;transition:left .9s cubic-bezier(.4,0,.2,1),top .9s cubic-bezier(.4,0,.2,1);filter:drop-shadow(0 3px 6px rgba(0,0,0,.5))}
+.cursor svg{width:100%;height:100%}
+.cursor.click::after{content:"";position:absolute;left:-6px;top:-6px;width:34px;height:34px;border-radius:50%;border:3px solid #fbbf24;animation:ring .5s ease}
+@keyframes ring{0%{transform:scale(.4);opacity:1}100%{transform:scale(1.6);opacity:0}}
+
+/* Typing cursor inside input */
+.type-cursor{display:inline-block;width:2px;height:14px;background:#3b82f6;animation:blink 1s infinite;vertical-align:middle;margin-left:1px}
+@keyframes blink{0%,50%{opacity:1}51%,100%{opacity:0}}
+
+/* Player chrome (controls bar) */
+.player-overlay{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(transparent,rgba(0,0,0,.85));padding:14px 14px 10px;opacity:1;transition:.3s}
+.controls{display:flex;align-items:center;gap:10px;color:#fff;font-size:12px}
+.btn-icon{background:none;border:0;color:#fff;cursor:pointer;font-size:1.1rem;padding:4px;display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;transition:.15s}
+.btn-icon:hover{background:rgba(255,255,255,.15)}
+.progress-wrap{flex:1;height:5px;background:rgba(255,255,255,.25);border-radius:3px;cursor:pointer;position:relative}
+.progress-bar{height:100%;background:linear-gradient(90deg,#38bdf8,#a78bfa);border-radius:3px;width:0%;transition:width .2s linear;position:relative}
+.progress-bar::after{content:"";position:absolute;right:-6px;top:50%;transform:translateY(-50%);width:12px;height:12px;border-radius:50%;background:#fff;opacity:0;transition:.15s}
+.progress-wrap:hover .progress-bar::after{opacity:1}
+.time{font-variant-numeric:tabular-nums;color:#cbd5e1;font-size:11px;min-width:78px;text-align:center}
+.vol{display:flex;align-items:center;gap:4px}
+.vol-bar{width:50px;height:4px;background:rgba(255,255,255,.3);border-radius:2px;overflow:hidden}
+.vol-bar-fill{height:100%;width:70%;background:#fff}
+
+/* Big play button (when paused) */
+.big-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.4);cursor:pointer;transition:.25s;z-index:30}
+.big-play.hidden{opacity:0;pointer-events:none}
+.big-play .circle{width:84px;height:84px;border-radius:50%;background:rgba(220,38,38,.92);display:flex;align-items:center;justify-content:center;color:#fff;font-size:2.5rem;padding-left:8px;box-shadow:0 8px 30px rgba(0,0,0,.5);transition:.2s}
+.big-play:hover .circle{transform:scale(1.1)}
+
+/* Step caption inside player */
+.step-caption{position:absolute;left:14px;top:14px;background:rgba(15,23,42,.88);color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:600;backdrop-filter:blur(4px);z-index:25;display:flex;gap:6px;align-items:center}
+.step-caption .step-num{background:#38bdf8;color:#0b1220;border-radius:4px;padding:2px 6px;font-size:10px}
+
+/* ---------- SIDEBAR ---------- */
+.sidebar{background:#1e293b;border-radius:14px;padding:18px;border:1px solid #334155}
+.sidebar h2{font-size:1rem;color:#38bdf8;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.steps-list{list-style:none;display:flex;flex-direction:column;gap:8px}
+.step-item{display:flex;gap:10px;padding:10px;background:#0f172a;border-radius:8px;border:1px solid #334155;transition:.2s;cursor:pointer}
+.step-item:hover{border-color:#475569}
+.step-item.active{border-color:#38bdf8;background:#1e3a8a22;box-shadow:0 0 0 1px #38bdf8}
+.step-item.done .num{background:#16a34a;color:#fff}
+.step-item .num{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:#334155;color:#cbd5e1;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700}
+.step-item.active .num{background:#38bdf8;color:#0b1220}
+.step-item .body strong{color:#e2e8f0;font-size:.85rem;display:block;margin-bottom:2px}
+.step-item .body span{color:#94a3b8;font-size:.75rem}
+
+.actions{margin-top:18px;display:flex;flex-direction:column;gap:8px}
+.action-btn{padding:10px 14px;border:0;border-radius:8px;font-weight:600;font-size:.85rem;cursor:pointer;text-align:center;text-decoration:none;display:flex;align-items:center;gap:8px;justify-content:center;transition:.15s}
+.action-btn.primary{background:#16a34a;color:#fff}
+.action-btn.primary:hover{background:#15803d}
+.action-btn.secondary{background:#334155;color:#e2e8f0}
+.action-btn.secondary:hover{background:#475569}
+.action-btn.outline{background:transparent;color:#38bdf8;border:1px solid #38bdf8}
+.action-btn.outline:hover{background:#38bdf822}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#0f172a;color:#fff;padding:12px 20px;border-radius:8px;border:1px solid #38bdf8;font-size:.85rem;opacity:0;transition:.3s;z-index:100}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+footer{margin-top:32px;text-align:center;color:#64748b;font-size:.8rem}
+footer a{color:#38bdf8;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <span class="badge">VIDEO TUTORIAL</span>
+    <h1>Tu primera venta en Volvix POS</h1>
+    <p>60 segundos. Mira como un cajero hace una venta real, paso a paso.</p>
+  </div>
+
+  <div class="layout">
+
+    <!-- ============ PLAYER ============ -->
+    <div class="player" id="player">
+      <div class="screen" id="screen">
+
+        <!-- Step caption -->
+        <div class="step-caption" id="stepCaption" style="display:none">
+          <span class="step-num" id="stepNum">1</span>
+          <span id="stepText">Inicio</span>
+        </div>
+
+        <!-- Big play button -->
+        <div class="big-play" id="bigPlay">
+          <div class="circle">&#9654;</div>
+        </div>
+
+        <!-- POS app mock -->
+        <div class="pos-app">
+          <div class="pos-topbar">
+            <div class="brand">Volvix POS</div>
+            <div class="user">Cajero: Maria - Sucursal Centro</div>
+          </div>
+          <div class="pos-main">
+            <div class="pos-left">
+              <div class="pos-keys">
+                <div class="pos-key">F2 Cliente</div>
+                <div class="pos-key">F4 Inventario</div>
+                <div class="pos-key">F8 Descuento</div>
+                <div class="pos-key f10" id="keyF10">F10 Buscar</div>
+                <div class="pos-key">F11 Cancelar</div>
+                <div class="pos-key">F9 Cortes</div>
+                <div class="pos-key">F7 Ticket</div>
+                <div class="pos-key f12" id="keyF12">F12 Cobrar</div>
+              </div>
+              <div class="pos-ticket" id="ticketBox">
+                <div class="pos-empty" id="ticketEmpty">Carrito vacio. Presiona F10 para buscar producto.</div>
+                <div class="ticket-row" id="row1">
+                  <span class="name">Coca Cola 600ml</span>
+                  <span class="qty">x 1</span>
+                  <span class="price">$22.00</span>
+                </div>
+              </div>
+            </div>
+            <div class="pos-right">
+              <div class="totals">
+                <div class="line"><span>Subtotal</span><span id="subtotal">$0.00</span></div>
+                <div class="line"><span>IVA 16%</span><span id="iva">$0.00</span></div>
+                <div class="line total"><span>TOTAL</span><span id="total">$0.00</span></div>
+              </div>
+              <button class="pay-btn" id="payBtn">F12 - COBRAR</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Search modal -->
+        <div class="modal" id="searchModal">
+          <div class="modal-box">
+            <h3>Buscar producto (F10)</h3>
+            <div class="search-input" id="searchInput"><span id="searchTyped"></span><span class="type-cursor" id="typeCursor"></span></div>
+            <div class="search-results" id="searchResults">
+              <div class="search-item" id="searchItem1">
+                <span>Coca Cola 600ml</span><span>$22.00</span>
+              </div>
+              <div class="search-item">
+                <span>Coca Cola 2L</span><span>$45.00</span>
+              </div>
+              <div class="search-item">
+                <span>Coca Cola Zero 600ml</span><span>$22.00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pay modal -->
+        <div class="pay-modal" id="payModal">
+          <div class="pay-box">
+            <h3>Selecciona forma de pago</h3>
+            <div class="pay-methods">
+              <div class="pay-m" id="payCash"><span class="ico">&#128176;</span>Efectivo</div>
+              <div class="pay-m"><span class="ico">&#128179;</span>Tarjeta</div>
+              <div class="pay-m"><span class="ico">&#128241;</span>Transferencia</div>
+            </div>
+            <div class="pay-confirm">
+              <button id="payConfirmBtn">Confirmar pago</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Success -->
+        <div class="success" id="successScreen">
+          <div class="check">&#10003;</div>
+          <h2>Venta exitosa</h2>
+          <p>Folio #A-001234 - Cambio: $0.00</p>
+          <div class="receipt">
+            <div class="r-line"><span>VOLVIX POS</span><span>30/04/26</span></div>
+            <div class="r-divider"></div>
+            <div class="r-line"><span>Coca Cola 600ml</span><span>$22.00</span></div>
+            <div class="r-divider"></div>
+            <div class="r-line" style="font-weight:700"><span>TOTAL</span><span>$25.52</span></div>
+            <div class="r-line" style="color:#16a34a"><span>EFECTIVO</span><span>$25.52</span></div>
+          </div>
+        </div>
+
+        <!-- Cursor -->
+        <div class="cursor" id="cursor" style="left:50%;top:50%">
+          <svg viewBox="0 0 24 24" fill="#fff" stroke="#000" stroke-width="1"><path d="M3 2 L3 18 L7 14 L10 21 L13 20 L10 13 L16 13 Z"/></svg>
+        </div>
+
+      </div>
+
+      <!-- Player controls -->
+      <div class="player-overlay">
+        <div class="controls">
+          <button class="btn-icon" id="playPauseBtn" title="Play/Pause">&#9654;</button>
+          <button class="btn-icon" id="restartBtn" title="Reiniciar">&#8634;</button>
+          <div class="progress-wrap" id="progressWrap">
+            <div class="progress-bar" id="progressBar"></div>
+          </div>
+          <span class="time" id="timeDisplay">0:00 / 1:00</span>
+          <div class="vol">
+            <button class="btn-icon" title="Volumen">&#128266;</button>
+            <div class="vol-bar"><div class="vol-bar-fill"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SIDEBAR ============ -->
+    <aside class="sidebar">
+      <h2>&#128214; Pasos del tutorial</h2>
+      <ul class="steps-list" id="stepsList">
+        <li class="step-item" data-step="0"><div class="num">1</div><div class="body"><strong>Abrir busqueda</strong><span>Presiona F10 o click en el boton</span></div></li>
+        <li class="step-item" data-step="1"><div class="num">2</div><div class="body"><strong>Escribir producto</strong><span>Escribe "Coca Cola"</span></div></li>
+        <li class="step-item" data-step="2"><div class="num">3</div><div class="body"><strong>Agregar al ticket</strong><span>Click en el resultado correcto</span></div></li>
+        <li class="step-item" data-step="3"><div class="num">4</div><div class="body"><strong>Cobrar</strong><span>Presiona F12 cuando termines</span></div></li>
+        <li class="step-item" data-step="4"><div class="num">5</div><div class="body"><strong>Forma de pago</strong><span>Selecciona Efectivo y confirma</span></div></li>
+        <li class="step-item" data-step="5"><div class="num">6</div><div class="body"><strong>Comprobante</strong><span>Imprime y entrega al cliente</span></div></li>
+      </ul>
+
+      <div class="actions">
+        <button class="action-btn primary" id="restartActionBtn">&#8634; Volver a reproducir</button>
+        <a class="action-btn secondary" href="../salvadorex-pos.html">&#128187; Ir al POS real</a>
+        <button class="action-btn outline" id="shareBtn">&#128279; Compartir tutorial</button>
+      </div>
+    </aside>
+  </div>
+
+  <footer>
+    <p>Tutorial interactivo - Volvix POS - <a href="../INDICE-TUTORIALES.html">Ver todos los tutoriales</a></p>
+  </footer>
+</div>
+
+<div class="toast" id="toast">Link copiado al portapapeles</div>
+
+<script>
+(function(){
+  // ---- DOM ----
+  const $ = id => document.getElementById(id);
+  const screen = $('screen');
+  const cursor = $('cursor');
+  const bigPlay = $('bigPlay');
+  const playPauseBtn = $('playPauseBtn');
+  const restartBtn = $('restartBtn');
+  const restartActionBtn = $('restartActionBtn');
+  const progressBar = $('progressBar');
+  const progressWrap = $('progressWrap');
+  const timeDisplay = $('timeDisplay');
+  const stepCaption = $('stepCaption');
+  const stepNum = $('stepNum');
+  const stepText = $('stepText');
+  const stepsList = $('stepsList');
+  const shareBtn = $('shareBtn');
+  const toast = $('toast');
+
+  const DURATION = 60; // seconds
+  let elapsed = 0;
+  let playing = false;
+  let lastTick = null;
+  let rafId = null;
+
+  // Steps with timestamps
+  const steps = [
+    {t:0,  label:'Abrir busqueda (F10)'},
+    {t:10, label:'Escribir "Coca Cola"'},
+    {t:20, label:'Agregar producto al ticket'},
+    {t:30, label:'Presionar F12 Cobrar'},
+    {t:40, label:'Seleccionar Efectivo y confirmar'},
+    {t:50, label:'Venta exitosa - imprimir comprobante'}
+  ];
+
+  // ---- helpers ----
+  function fmt(s){
+    s = Math.max(0, Math.min(DURATION, Math.floor(s)));
+    const m = Math.floor(s/60);
+    const r = s%60;
+    return m + ':' + String(r).padStart(2,'0');
+  }
+
+  function rect(el){ return el.getBoundingClientRect(); }
+  function moveCursorTo(targetEl){
+    if(!targetEl) return;
+    const sr = rect(screen), tr = rect(targetEl);
+    const x = (tr.left - sr.left) + tr.width/2 - 11;
+    const y = (tr.top - sr.top) + tr.height/2 - 11;
+    cursor.style.left = x + 'px';
+    cursor.style.top = y + 'px';
+  }
+  function clickPulse(){
+    cursor.classList.remove('click');
+    void cursor.offsetWidth;
+    cursor.classList.add('click');
+  }
+  function show(el){ el && el.classList.add('show'); }
+  function hide(el){ el && el.classList.remove('show'); }
+  function flash(el){
+    if(!el) return;
+    el.classList.add('flash');
+    setTimeout(()=>el.classList.remove('flash'), 500);
+  }
+
+  // ---- Frame state computation ----
+  // Given elapsed time, set the entire stage to a deterministic state.
+  // This allows seeking by jumping to any t.
+  function applyState(t){
+    // Determine current step
+    let curStep = 0;
+    for (let i=0; i<steps.length; i++){
+      if (t >= steps[i].t) curStep = i;
+    }
+    // Update caption
+    stepCaption.style.display = playing || t > 0 ? 'flex' : 'none';
+    stepNum.textContent = curStep + 1;
+    stepText.textContent = steps[curStep].label;
+
+    // Sidebar highlighting
+    [...stepsList.children].forEach((li, i) => {
+      li.classList.toggle('active', i === curStep);
+      li.classList.toggle('done', i < curStep);
+    });
+
+    // ---- Step-driven UI ----
+    // Defaults
+    const searchModal = $('searchModal');
+    const payModal = $('payModal');
+    const success = $('successScreen');
+    const row1 = $('row1');
+    const ticketEmpty = $('ticketEmpty');
+    const subtotal = $('subtotal');
+    const iva = $('iva');
+    const total = $('total');
+    const keyF10 = $('keyF10');
+    const keyF12 = $('keyF12');
+    const payBtn = $('payBtn');
+    const searchTyped = $('searchTyped');
+    const searchItem1 = $('searchItem1');
+    const payCash = $('payCash');
+    const payConfirmBtn = $('payConfirmBtn');
+
+    // Reset visibility states (deterministic)
+    hide(searchModal); hide(payModal); hide(success);
+    row1.classList.remove('show');
+    ticketEmpty.style.display = 'block';
+    subtotal.textContent = '$0.00';
+    iva.textContent = '$0.00';
+    total.textContent = '$0.00';
+    searchItem1.classList.remove('hot');
+    payCash.classList.remove('hot');
+
+    // Step 0: 0-10s -> cursor moves to F10, click at ~7s
+    if (curStep === 0) {
+      const local = t - steps[0].t;
+      if (local < 5) {
+        moveCursorTo(keyF10);
+      } else {
+        moveCursorTo(keyF10);
+        if (local >= 7 && local < 8) {
+          flash(keyF10);
+        }
+        if (local >= 8) {
+          show(searchModal);
+          searchTyped.textContent = '';
+        }
+      }
+    }
+    // Step 1: 10-20s -> typing animation
+    else if (curStep === 1) {
+      show(searchModal);
+      moveCursorTo($('searchInput'));
+      const phrase = 'Coca Cola';
+      const local = t - steps[1].t;
+      const charsToShow = Math.min(phrase.length, Math.floor(local * 1.2));
+      searchTyped.textContent = phrase.slice(0, charsToShow);
+    }
+    // Step 2: 20-30s -> click result, ticket fills
+    else if (curStep === 2) {
+      const local = t - steps[2].t;
+      if (local < 4) {
+        show(searchModal);
+        searchTyped.textContent = 'Coca Cola';
+        moveCursorTo(searchItem1);
+        searchItem1.classList.add('hot');
+        if (local >= 3) flash(searchItem1);
+      } else {
+        // After click, modal closes, ticket gets the item
+        hide(searchModal);
+        ticketEmpty.style.display = 'none';
+        row1.classList.add('show');
+        subtotal.textContent = '$22.00';
+        iva.textContent = '$3.52';
+        total.textContent = '$25.52';
+        moveCursorTo($('ticketBox'));
+      }
+    }
+    // Step 3: 30-40s -> move to F12 / Cobrar
+    else if (curStep === 3) {
+      ticketEmpty.style.display = 'none';
+      row1.classList.add('show');
+      subtotal.textContent = '$22.00';
+      iva.textContent = '$3.52';
+      total.textContent = '$25.52';
+      const local = t - steps[3].t;
+      if (local < 6) {
+        moveCursorTo(payBtn);
+        if (local >= 5) flash(payBtn);
+      } else {
+        moveCursorTo(payBtn);
+        flash(keyF12);
+        show(payModal);
+      }
+    }
+    // Step 4: 40-50s -> select cash, confirm
+    else if (curStep === 4) {
+      ticketEmpty.style.display = 'none';
+      row1.classList.add('show');
+      subtotal.textContent = '$22.00';
+      iva.textContent = '$3.52';
+      total.textContent = '$25.52';
+      show(payModal);
+      const local = t - steps[4].t;
+      if (local < 4) {
+        moveCursorTo(payCash);
+        if (local >= 3) {
+          payCash.classList.add('hot');
+          flash(payCash);
+        }
+      } else if (local < 8) {
+        payCash.classList.add('hot');
+        moveCursorTo(payConfirmBtn);
+        if (local >= 7) flash(payConfirmBtn);
+      } else {
+        // Confirm clicked
+        hide(payModal);
+        show(success);
+      }
+    }
+    // Step 5: 50-60s -> success / receipt
+    else if (curStep === 5) {
+      ticketEmpty.style.display = 'none';
+      row1.classList.add('show');
+      subtotal.textContent = '$0.00';
+      iva.textContent = '$0.00';
+      total.textContent = '$0.00';
+      show(success);
+      moveCursorTo($('successScreen'));
+    }
+
+    // Progress bar + time
+    const pct = (t / DURATION) * 100;
+    progressBar.style.width = Math.min(100, pct) + '%';
+    timeDisplay.textContent = fmt(t) + ' / 1:00';
+  }
+
+  // ---- Play loop ----
+  function tick(now){
+    if (!playing) return;
+    if (lastTick == null) lastTick = now;
+    const dt = (now - lastTick) / 1000;
+    lastTick = now;
+    elapsed += dt;
+    if (elapsed >= DURATION){
+      elapsed = DURATION;
+      applyState(elapsed);
+      pause();
+      // Auto-show success screen permanently
+      return;
+    }
+    applyState(elapsed);
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function play(){
+    if (elapsed >= DURATION) elapsed = 0;
+    playing = true;
+    bigPlay.classList.add('hidden');
+    playPauseBtn.innerHTML = '&#10074;&#10074;';
+    lastTick = null;
+    rafId = requestAnimationFrame(tick);
+  }
+  function pause(){
+    playing = false;
+    playPauseBtn.innerHTML = '&#9654;';
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = null;
+  }
+  function toggle(){ playing ? pause() : play(); }
+  function restart(){
+    pause();
+    elapsed = 0;
+    applyState(0);
+    bigPlay.classList.remove('hidden');
+    stepCaption.style.display = 'none';
+    play();
+  }
+
+  // ---- Events ----
+  bigPlay.addEventListener('click', toggle);
+  playPauseBtn.addEventListener('click', toggle);
+  restartBtn.addEventListener('click', restart);
+  restartActionBtn.addEventListener('click', restart);
+
+  progressWrap.addEventListener('click', (e) => {
+    const r = progressWrap.getBoundingClientRect();
+    const pct = (e.clientX - r.left) / r.width;
+    elapsed = Math.max(0, Math.min(DURATION, pct * DURATION));
+    applyState(elapsed);
+    if (!playing) bigPlay.classList.add('hidden');
+  });
+
+  stepsList.addEventListener('click', (e) => {
+    const li = e.target.closest('.step-item');
+    if (!li) return;
+    const i = parseInt(li.dataset.step, 10);
+    if (isNaN(i)) return;
+    elapsed = steps[i].t;
+    bigPlay.classList.add('hidden');
+    applyState(elapsed);
+    if (!playing) play();
+  });
+
+  shareBtn.addEventListener('click', async () => {
+    const url = window.location.href;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = url; document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+      }
+      toast.classList.add('show');
+      setTimeout(()=>toast.classList.remove('show'), 2200);
+    } catch(e){
+      toast.textContent = 'No se pudo copiar el link';
+      toast.classList.add('show');
+      setTimeout(()=>toast.classList.remove('show'), 2200);
+    }
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space'){ e.preventDefault(); toggle(); }
+    if (e.key === 'r' || e.key === 'R'){ restart(); }
+  });
+
+  // Initial paint at t=0
+  applyState(0);
+  stepCaption.style.display = 'none';
+
+})();
+</script>
+</body>
+</html>

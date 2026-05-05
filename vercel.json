@@ -1,0 +1,76 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/index.js",
+      "use": "@vercel/node",
+      "config": {
+        "maxLambdaSize": "50mb",
+        "includeFiles": [
+          "api/*.js",
+          "api/admin/*.js",
+          "data/**",
+          "templates/**",
+          "logos-demo/**",
+          "public/**"
+        ]
+      }
+    }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/index.js" },
+    { "src": "/internal/?", "dest": "/api/index.js" },
+    { "src": "/internal/(index|BITACORA_LIVE|MATRIZ_PRUEBAS_LOCAL|MATRIZ_PRUEBAS_LOCAL_v1_backup|volvix-qa-scenarios|volvix-sandbox|volvix-modals-demo)\\.html", "dest": "/api/index.js" },
+    { "src": "/internal/(.*)", "status": 404, "dest": "/404" },
+    { "src": "/volvix-qa-scenarios\\.html", "status": 404, "dest": "/404" },
+    { "src": "/volvix-sandbox\\.html", "status": 404, "dest": "/404" },
+    { "src": "/volvix-modals-demo\\.html", "status": 404, "dest": "/404" },
+    { "src": "/MATRIZ_PRUEBAS_LOCAL(.*)\\.html", "status": 404, "dest": "/404" },
+    { "src": "/BITACORA_LIVE\\.html", "status": 404, "dest": "/404" },
+    { "src": "/BITACORA_PRUEBAS\\.md", "status": 404, "dest": "/404" },
+    { "src": "/status\\.json", "status": 404, "dest": "/404" },
+    { "src": "/TASKS_FOR_NEXT_AI\\.md", "status": 404, "dest": "/404" },
+    { "src": "/VOLVIX_(.*)\\.md", "status": 404, "dest": "/404" },
+    { "src": "/volvix-onboarding-wizard\\.html", "status": 301, "headers": { "Location": "/volvix-onboarding.html" } },
+    { "src": "/landing-gym\\.html", "status": 301, "headers": { "Location": "/landing-gimnasio.html" } },
+    { "src": "/landing-belleza\\.html", "status": 301, "headers": { "Location": "/landing-salon-belleza.html" } },
+    { "src": "/landing-estetica\\.html", "status": 301, "headers": { "Location": "/landing-salon-belleza.html" } },
+    { "src": "/api-docs\\.html", "status": 301, "headers": { "Location": "/volvix-api-docs.html" } },
+    { "src": "/tendero\\.html", "status": 301, "headers": { "Location": "/marketplace.html" } },
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/api/index.js" }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "crons": [
+    { "path": "/api/cron/daily-summary",   "schedule": "0 8 * * *" },
+    { "path": "/api/cron/weekly-report",   "schedule": "0 9 * * 1" },
+    { "path": "/api/cron/monthly-billing", "schedule": "0 10 1 * *" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "geolocation=(), camera=(), microphone=(), payment=()" },
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; connect-src 'self' https://systeminternational.app https://www.systeminternational.app https://salvadorexoficial.com https://*.supabase.co wss://*.supabase.co https://api.ipify.org https://api.exchangerate.host https://api.anthropic.com https://api.stripe.com https://api.openai.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com; frame-ancestors 'none'; base-uri 'self'" }
+      ]
+    },
+    {
+      "source": "/volvix-(.*)\\.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/(.*)\\.html",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+/**
+ * VOLVIX FEATURE FLAGS — Stylesheet
+ * Pair with volvix-feature-flags.js. Loaded on every page that has feature-gated UI.
+ */
+
+/* Disabled features: completely hidden from DOM */
+.vlx-feature-hidden {
+  display: none !important;
+}
+
+/* Coming-soon features: grayed out, click blocked, "Próximamente" tooltip on hover */
+.vlx-coming-soon {
+  position: relative !important;
+  opacity: 0.45 !important;
+  cursor: not-allowed !important;
+  pointer-events: auto !important; /* allow tooltip + outer click blocker */
+  filter: grayscale(0.6);
+  transition: opacity 0.18s ease;
+}
+
+/* Inner content cannot capture clicks (handler suppression done in JS too) */
+.vlx-coming-soon * {
+  pointer-events: none !important;
+}
+
+/* "Pronto" badge in corner */
+.vlx-coming-soon::before {
+  content: "Pronto";
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: #f59e0b;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 8px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  z-index: 5;
+  pointer-events: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+/* "Próximamente" tooltip on hover */
+.vlx-coming-soon:hover::after {
+  content: "Próximamente";
+  position: absolute;
+  top: -32px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1f2937;
+  color: #ffffff;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  z-index: 10000;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.vlx-coming-soon:hover {
+  opacity: 0.55 !important;
+}
+
+/* Visual polish for buttons specifically */
+button.vlx-coming-soon,
+.menu-btn.vlx-coming-soon {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 6px,
+    rgba(245, 158, 11, 0.06) 6px,
+    rgba(245, 158, 11, 0.06) 12px
+  );
+}
+
+/* Reduced motion: drop the grayscale filter for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .vlx-coming-soon {
+    filter: none;
+    transition: none;
+  }
+}

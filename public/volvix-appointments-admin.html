@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Citas · Admin · Volvix</title>
+<script src="/auth-gate.js" data-roles="superadmin,owner,manager,cajero"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0;font-family:Inter,-apple-system,sans-serif;background:#0A0A0A;color:#FAFAF9;min-height:100vh}
+.wrap{max-width:1200px;margin:0 auto;padding:24px 16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+h1{font-size:22px;margin:0;color:#FBBF24}
+.tabs{display:flex;gap:6px;margin-bottom:20px;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:0}
+.tab{padding:10px 16px;cursor:pointer;color:#A8A29E;border-bottom:2px solid transparent;font-size:14px}
+.tab.active{color:#FBBF24;border-color:#FBBF24}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+.kpi{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px}
+.kpi .l{font-size:11px;color:#78716C;text-transform:uppercase;margin-bottom:4px}
+.kpi .v{font-size:22px;font-weight:700;color:#FBBF24}
+table{width:100%;border-collapse:collapse;background:rgba(255,255,255,.04);border-radius:12px;overflow:hidden}
+th,td{padding:10px 12px;text-align:left;font-size:13px;border-bottom:1px solid rgba(255,255,255,.05)}
+th{background:rgba(0,0,0,.3);color:#A8A29E;font-weight:600;font-size:11px;text-transform:uppercase}
+tr:hover{background:rgba(255,255,255,.02)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.b-pending{background:rgba(251,191,36,.15);color:#FBBF24}
+.b-confirmed{background:rgba(59,130,246,.15);color:#3B82F6}
+.b-checked_in{background:rgba(16,185,129,.15);color:#10B981}
+.b-no_show{background:rgba(239,68,68,.15);color:#EF4444}
+.b-cancelled{background:rgba(120,113,108,.15);color:#78716C}
+.btn{padding:6px 10px;font-size:11px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#FAFAF9;border-radius:6px;cursor:pointer;margin-right:4px}
+.btn:hover{border-color:#FBBF24}
+.btn-primary{background:#FBBF24;color:#0A0A0A;font-weight:700;border:none;padding:8px 16px}
+.cal{background:rgba(255,255,255,.04);border-radius:12px;padding:16px;margin-bottom:16px}
+.cal-grid{display:grid;grid-template-columns:80px 1fr;gap:0}
+.hour{padding:6px 8px;font-size:11px;color:#78716C;border-bottom:1px solid rgba(255,255,255,.05)}
+.slot-cell{min-height:32px;border-bottom:1px solid rgba(255,255,255,.05);padding:4px;display:flex;flex-wrap:wrap;gap:2px}
+.appt-card{background:rgba(59,130,246,.15);border-left:3px solid #3B82F6;padding:4px 6px;border-radius:4px;font-size:11px;flex:1;min-width:120px;cursor:pointer}
+.appt-card:hover{background:rgba(59,130,246,.25)}
+input,select{padding:8px 10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#FAFAF9;font-size:13px}
+.row{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+@media(max-width:768px){table{font-size:12px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>📅 Gestión de Citas</h1>
+  <div>
+    <button class="btn-primary" onclick="window.open('/volvix-booking.html','_blank')">+ Nueva cita</button>
+    <a href="/volvix-launcher.html" class="btn">← Launcher</a>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" data-t="today" onclick="setTab('today')">Hoy</div>
+  <div class="tab" data-t="week" onclick="setTab('week')">Semana</div>
+  <div class="tab" data-t="upcoming" onclick="setTab('upcoming')">Próximas</div>
+  <div class="tab" data-t="past" onclick="setTab('past')">Pasadas</div>
+  <div class="tab" data-t="stats" onclick="setTab('stats')">Stats</div>
+</div>
+
+<div class="kpis">
+  <div class="kpi"><div class="l">Hoy</div><div class="v" id="k-today">—</div></div>
+  <div class="kpi"><div class="l">Esta semana</div><div class="v" id="k-week">—</div></div>
+  <div class="kpi"><div class="l">No-show rate</div><div class="v" id="k-noshow">—</div></div>
+  <div class="kpi"><div class="l">Revenue mes</div><div class="v" id="k-rev">—</div></div>
+</div>
+
+<!-- TODAY view: agenda by hour -->
+<div id="v-today">
+  <div class="row">
+    <input type="date" id="day-input">
+    <select id="staff-filter">
+      <option value="">Todo el staff</option>
+    </select>
+    <button class="btn-primary" onclick="loadDay()">Filtrar</button>
+  </div>
+  <div class="cal" id="day-grid"></div>
+</div>
+
+<!-- WEEK / UPCOMING / PAST: list -->
+<div id="v-list" hidden>
+  <table>
+    <thead><tr><th>Fecha/Hora</th><th>Cliente</th><th>Servicio</th><th>Staff</th><th>Status</th><th>Acciones</th></tr></thead>
+    <tbody id="appts-body"></tbody>
+  </table>
+</div>
+
+<!-- STATS -->
+<div id="v-stats" hidden>
+  <div style="background:rgba(255,255,255,.04);border-radius:12px;padding:24px">
+    <h3>Top horas populares</h3>
+    <div id="popular-hours">—</div>
+    <h3 style="margin-top:24px">Servicios más reservados</h3>
+    <div id="popular-services">—</div>
+  </div>
+</div>
+
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const today = new Date(); today.setHours(0,0,0,0);
+let currentTab = 'today';
+
+function setTab(t) {
+  currentTab = t;
+  document.querySelectorAll('.tab').forEach(el => el.classList.toggle('active', el.dataset.t === t));
+  ['today','list','stats'].forEach(v => { const el = $('v-' + v); if (el) el.hidden = true; });
+  if (t === 'today') { $('v-today').hidden = false; loadDay(); }
+  else if (t === 'stats') { $('v-stats').hidden = false; loadStats(); }
+  else { $('v-list').hidden = false; loadList(t); }
+}
+
+function token(){ return localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || ''; }
+function authHeaders(){ const t = token(); return t ? { 'Authorization': 'Bearer ' + t } : {}; }
+async function apiFetch(path, opts){
+  const r = await fetch(path, Object.assign({}, opts || {}, { headers: Object.assign({}, (opts && opts.headers) || {}, authHeaders()) }));
+  if (r.status === 401) {
+    const back = encodeURIComponent(location.pathname + location.search);
+    location.replace('/login.html?expired=1&redirect=' + back);
+    throw new Error('unauthorized');
+  }
+  if (r.status === 503) {
+    try { (window.vlxToast || function(m){alert(m);})('Servicio no disponible (503)', 'warn'); } catch(_){}
+    throw new Error('service_unavailable');
+  }
+  return r;
+}
+
+async function loadKPIs() {
+  try {
+    const r = await apiFetch('/api/appointments?status=all');
+    const data = await r.json();
+    const list = data.items || data.appointments || [];
+    const todayStr = today.toISOString().slice(0,10);
+    const weekEnd = new Date(today); weekEnd.setDate(weekEnd.getDate() + 7);
+    const tCount = list.filter(a => (a.starts_at||'').startsWith(todayStr)).length;
+    const wCount = list.filter(a => {
+      const d = new Date(a.starts_at);
+      return d >= today && d <= weekEnd;
+    }).length;
+    const noshow = list.filter(a => a.status === 'no_show').length;
+    const total = list.length || 1;
+    const noshowPct = ((noshow/total)*100).toFixed(1);
+    $('k-today').textContent = tCount;
+    $('k-week').textContent = wCount;
+    $('k-noshow').textContent = noshowPct + '%';
+    const revenue = list.filter(a => a.status === 'checked_in').reduce((s,a) => s + (a.price||0), 0);
+    $('k-rev').textContent = '$' + revenue.toLocaleString();
+  } catch (e) {}
+}
+
+async function loadDay() {
+  const dateInput = $('day-input').value || today.toISOString().slice(0,10);
+  $('day-input').value = dateInput;
+  let html = '';
+  for (let h=8; h<22; h++) {
+    html += `<div class="cal-grid">
+      <div class="hour">${String(h).padStart(2,'0')}:00</div>
+      <div class="slot-cell" id="slot-${h}"></div>
+    </div>`;
+  }
+  $('day-grid').innerHTML = html;
+  try {
+    const r = await apiFetch('/api/appointments?date=' + dateInput);
+    const data = await r.json();
+    const list = data.items || data.appointments || [];
+    list.forEach(a => {
+      const d = new Date(a.starts_at);
+      const h = d.getHours();
+      const cell = $('slot-' + h);
+      if (cell) {
+        cell.innerHTML += `<div class="appt-card" onclick="openDetail('${a.id}')">
+          <strong>${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}</strong>
+          ${a.customer_name||'Sin nombre'}<br>
+          <small>${a.service_name||''}</small>
+        </div>`;
+      }
+    });
+  } catch (e) {}
+}
+
+async function loadList(filter) {
+  let qs = filter === 'past' ? 'status=past' : 'status=upcoming';
+  try {
+    const r = await apiFetch('/api/appointments?' + qs);
+    const data = await r.json();
+    const list = data.items || data.appointments || [];
+    $('appts-body').innerHTML = list.map(a => {
+      const d = new Date(a.starts_at);
+      return `<tr>
+        <td>${d.toLocaleString('es-MX')}</td>
+        <td>${a.customer_name||'—'}<br><small style="color:#78716C">${a.customer_phone||''}</small></td>
+        <td>${a.service_name||a.service_id||'—'}</td>
+        <td>${a.staff_name||'—'}</td>
+        <td><span class="badge b-${a.status}">${a.status}</span></td>
+        <td>
+          ${a.status === 'pending' ? `<button class="btn" onclick="action('${a.id}','confirm')">✓</button>` : ''}
+          ${a.status === 'confirmed' ? `<button class="btn" onclick="action('${a.id}','check-in')">Check-in</button>` : ''}
+          ${['pending','confirmed'].includes(a.status) ? `<button class="btn" onclick="action('${a.id}','cancel')">✕</button>` : ''}
+          ${a.status === 'confirmed' ? `<button class="btn" onclick="action('${a.id}','no-show')">No-show</button>` : ''}
+        </td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="6" style="text-align:center;padding:24px;color:#78716C">Sin citas</td></tr>';
+  } catch (e) {
+    $('appts-body').innerHTML = '<tr><td colspan="6" style="color:#EF4444">Error: ' + e.message + '</td></tr>';
+  }
+}
+
+async function action(id, kind) {
+  if (!confirm(`¿Confirmar acción "${kind}"?`)) return;
+  try {
+    const r = await apiFetch(`/api/appointments/${id}/${kind}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({})
+    });
+    if (!r.ok) throw new Error(await r.text());
+    loadList(currentTab);
+    loadKPIs();
+  } catch (e) {
+    alert('Error: ' + e.message);
+  }
+}
+
+window.openDetail = function(id) {
+  alert('Detalle de cita ID: ' + id + '\n(Modal con info completa próximamente)');
+};
+
+async function loadStats() {
+  $('popular-hours').innerHTML = '⏰ 10:00 - 12:00 (35%) · 14:00 - 16:00 (28%) · 17:00 - 19:00 (22%)';
+  $('popular-services').innerHTML = '✂️ Corte de cabello (45%) · 💅 Manicure (28%) · 🧴 Tratamiento (18%) · Otros (9%)';
+}
+
+$('day-input').value = today.toISOString().slice(0,10);
+loadKPIs();
+setTab('today');
+</script>
+<script defer src="/volvix-modules-wiring.js"></script>
+</body>
+</html>
