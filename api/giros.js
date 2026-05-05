@@ -755,28 +755,40 @@ async function generateGiro(ctx, req, res) {
         const v = cached[0];
         const tmpls = await ctx.supabaseRequest('GET',
           '/vertical_templates?vertical=eq.' + encodeURIComponent(slug) +
-          '&select=name,price,metadata&order=created_at.asc&limit=6').catch(() => []);
-        return send(ctx, res, 200, {
-          cached: true, source: 'verticals_db', slug,
-          payload: {
-            nombre_comercial: v.name,
-            slug: v.code,
-            descripcion: v.description,
-            terminologia: (v.settings && v.settings.terminologia) || {},
-            funcionalidades_unicas: (v.settings && v.settings.funcionalidades_unicas) || [],
-            productos_detectados: (Array.isArray(tmpls) ? tmpls : []).map(t => ({
-              name: t.name,
-              category: (t.metadata && t.metadata.category) || '',
-              estimated_price: Number(t.price) || 0,
-              metadata: t.metadata || {}
-            })),
-            modulos_a_activar: v.modules || [],
-            modulos_a_desactivar: (v.settings && v.settings.modulos_a_desactivar) || [],
-            campos_no_disponibles: (v.settings && v.settings.campos_no_disponibles) || [],
-            synonyms: (v.settings && v.settings.synonyms) || []
-          },
-          landing: '/landing-' + encodeURIComponent(slug) + '.html',
-        });
+          '&select=name,price,metadata&order=created_at.asc&limit=9').catch(() => []);
+        const settings = v.settings || {};
+        // 2026-05: si BD tiene dolores_especificos+formas_robo (cache nuevo), usar.
+        // Si no (cache viejo legacy), invalidar cache y forzar re-LLM.
+        const hasNewFields = Array.isArray(settings.dolores_especificos) && settings.dolores_especificos.length >= 6
+                          && Array.isArray(settings.formas_robo) && settings.formas_robo.length >= 3
+                          && Array.isArray(tmpls) && tmpls.length >= 9;
+        if (hasNewFields) {
+          return send(ctx, res, 200, {
+            cached: true, source: 'verticals_db', slug,
+            payload: {
+              nombre_comercial: v.name,
+              slug: v.code,
+              descripcion: v.description,
+              terminologia: settings.terminologia || {},
+              funcionalidades_unicas: settings.funcionalidades_unicas || [],
+              dolores_especificos: settings.dolores_especificos || [],
+              formas_robo: settings.formas_robo || [],
+              productos_detectados: tmpls.map(t => ({
+                name: t.name,
+                category: (t.metadata && t.metadata.category) || '',
+                estimated_price: Number(t.price) || 0,
+                image_url: (t.metadata && (t.metadata.image_url || t.metadata.image)) || null,
+                metadata: t.metadata || {}
+              })),
+              modulos_a_activar: v.modules || [],
+              modulos_a_desactivar: settings.modulos_a_desactivar || [],
+              campos_no_disponibles: settings.campos_no_disponibles || [],
+              synonyms: settings.synonyms || []
+            },
+            landing: '/landing-' + encodeURIComponent(slug) + '.html',
+          });
+        }
+        // cache viejo: cae al LLM para regenerar con nuevo formato
       }
     } catch (_) { /* fall through to LLM */ }
   }
