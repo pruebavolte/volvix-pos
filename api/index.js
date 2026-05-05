@@ -1318,8 +1318,20 @@ ${robosHTML ? `<section class="section alt"><div class="wrap"><div class="eyebro
       .normalize('NFD').replace(/[\\u0300-\\u036f]/g, '')
       .replace(/['"]/g,' ').replace(/[^a-z0-9 ]/g,' ');
     var words = text.split(/\\s+/).filter(function(w){return w.length>2});
-    var translated = words.map(function(w){ return ES_EN[w] || w; });
-    return [...new Set(translated)].slice(0, 4).join(' ');
+    // Priorizar SOLO términos genéricos del map ES_EN (bra, thong, etc.)
+    // así Wikimedia no se confunde con marcas/nombres propios.
+    var generic = [];
+    for (var i=0; i<words.length; i++){
+      if (ES_EN[words[i]] && generic.indexOf(ES_EN[words[i]]) < 0){
+        generic.push(ES_EN[words[i]]);
+      }
+    }
+    if (generic.length){
+      // Devolver solo términos genéricos + 'lingerie' como contexto
+      return generic.slice(0, 2).join(' ') + ' lingerie';
+    }
+    // Si no hay match en map, fallback a primeras 2 palabras
+    return words.slice(0, 2).join(' ');
   }
   async function searchWikimedia(query){
     if (!query) return null;
