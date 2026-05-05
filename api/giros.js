@@ -630,25 +630,128 @@ function extractJson(raw) {
   try { return JSON.parse(s); } catch (_) { return null; }
 }
 
-// 2026-05: URL de imagen para producto via Pexels Photo Source (sin API key).
-// Pexels tiene un endpoint público de redirect que devuelve foto matching query.
-// Si falla, fallback a Picsum.photos con seed (foto profesional consistente por seed).
+// 2026-05: scraping multi-engine de imágenes de producto.
+// Estrategia del usuario: usar buscadores web (Google/Bing/DuckDuckGo),
+// extraer URL de primera imagen del HTML, guardar el LINK (no descargar).
+// Sin API key, sin tokens de IA, sin storage cost.
 //
-// Pexels: https://images.pexels.com/photos/[id]/[slug].jpeg → necesita API key
-// Picsum: https://picsum.photos/seed/{seed}/600/600 → SIEMPRE responde 200
-//
-// Usamos Picsum con seed = hash(name+category) para que cada producto tenga SU
-// foto consistente (mismo seed = misma foto, distintos seed = distintas fotos).
+// Cadena de fallbacks: DuckDuckGo → Google → Bing
+// (DuckDuckGo es el más permisivo desde datacenter IPs)
+
+const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+
+async function fetchWithTimeout(url, opts, ms) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), ms || 5000);
+  try {
+    const r = await fetch(url, { ...(opts || {}), signal: ctrl.signal });
+    clearTimeout(timer);
+    return r;
+  } catch (_) { clearTimeout(timer); return null; }
+}
+
+// DuckDuckGo Image Search (2-step: vqd token, then JSON results)
+async function tryDuckDuckGoImage(query) {
+  try {
+    const r1 = await fetchWithTimeout(`https://duckduckgo.com/?q=${encodeURIComponent(query)}&iar=images&iax=images&ia=images`,
+      { headers: { 'User-Agent': UA, 'Accept': 'text/html' } }, 4000);
+    if (!r1 || !r1.ok) return null;
+    const html = await r1.text();
+    const vqdMatch = html.match(/vqd=['"]([^'"]+)['"]/) || html.match(/vqd=([0-9-]+)/);
+    if (!vqdMatch) return null;
+    const vqd = vqdMatch[1];
+    const r2 = await fetchWithTimeout(`https://duckduckgo.com/i.js?l=us-en&o=json&q=${encodeURIComponent(query)}&vqd=${encodeURIComponent(vqd)}&p=1`,
+      { headers: { 'User-Agent': UA, 'Accept': 'application/json', 'Referer': 'https://duckduckgo.com/' } }, 4000);
+    if (!r2 || !r2.ok) return null;
+    const j = await r2.json().catch(() => null);
+    if (j && Array.isArray(j.results) && j.results.length) {
+      const first = j.results.find(x => x && x.image && /^https?:\/\//.test(x.image));
+      if (first) return first.image;
+    }
+    return null;
+  } catch (_) { return null; }
+}
+
+// Google Images search (modern HTML embeds image URLs)
+async function tryGoogleImage(query) {
+  try {
+    const r = await fetchWithTimeout(`https://www.google.com/search?q=${encodeURIComponent(query)}&udm=2&hl=es&gl=mx`,
+      { headers: { 'User-Agent': UA, 'Accept': 'text/html', 'Accept-Language': 'es-MX,es;q=0.9' } }, 5000);
+    if (!r || !r.ok) return null;
+    const html = await r.text();
+    // Modern Google: arrays like ["https://example.com/img.jpg",WIDTH,HEIGHT]
+    const m1 = html.match(/\["(https?:\/\/[^"]+\.(?:jpg|jpeg|png|webp)[^"]*)",\d+,\d+\]/i);
+    if (m1 && m1[1] && !/\bgstatic\.com|google\.com\/(?:images|logos)|encrypted-tbn/.test(m1[1])) return m1[1];
+    // Fallback: imgurl= in href
+    const m2 = html.match(/imgurl=(https?:\/\/[^&"]+\.(?:jpg|jpeg|png|webp)[^&"]*)/i);
+    if (m2 && m2[1]) return decodeURIComponent(m2[1]);
+    return null;
+  } catch (_) { return null; }
+}
+
+// Bing Images
+async function tryBingImage(query) {
+  try {
+    const r = await fetchWithTimeout(`https://www.bing.com/images/search?q=${encodeURIComponent(query)}&form=HDRSC2&first=1`,
+      { headers: { 'User-Agent': UA, 'Accept': 'text/html' } }, 4000);
+    if (!r || !r.ok) return null;
+    const html = await r.text();
+    const m = html.match(/"murl":"(https?:\/\/[^"]+\.(?:jpg|jpeg|png|webp)[^"]*)"/i);
+    if (m && m[1]) return m[1].replace(/\\u002f/g, '/').replace(/\\\//g, '/');
+    return null;
+  } catch (_) { return null; }
+}
+
+// Cadena: prueba cada engine hasta que uno devuelva URL.
+async function searchProductImageMulti(query) {
+  if (!query || typeof query !== 'string') return null;
+  const url = await tryDuckDuckGoImage(query);
+  if (url) return url;
+  const url2 = await tryGoogleImage(query);
+  if (url2) return url2;
+  const url3 = await tryBingImage(query);
+  if (url3) return url3;
+  return null;
+}
+
+// Wrapper sync para construir placeholder cuando los buscadores fallan.
+// Genera placeholder colorido con nombre del producto.
+function buildPlaceholderUrl(name) {
+  if (!name) return null;
+  const hash = Math.abs(String(name).split('').reduce((a,c) => ((a<<5)-a+c.charCodeAt(0))|0, 0));
+  const hue = hash % 360;
+  // HSL → hex aprox
+  const h = hue / 60;
+  const c = 0.65;
+  const x = c * (1 - Math.abs(h % 2 - 1));
+  let r=0, g=0, b=0;
+  if (h<1)      { r=c;g=x;b=0; }
+  else if (h<2) { r=x;g=c;b=0; }
+  else if (h<3) { r=0;g=c;b=x; }
+  else if (h<4) { r=0;g=x;b=c; }
+  else if (h<5) { r=x;g=0;b=c; }
+  else          { r=c;g=0;b=x; }
+  const m = 0.175;
+  const toHex = v => Math.round((v + m) * 255).toString(16).padStart(2, '0');
+  const bg = toHex(r) + toHex(g) + toHex(b);
+  const text = String(name).slice(0, 40)
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/['"]/g, '').replace(/\s+/g, '+');
+  return `https://placehold.co/600x600/${bg}/ffffff/png?text=${text}&font=lato`;
+}
+
+// Async: intenta multi-engine, fallback a placeholder.
+async function findProductImageAsync(name, category) {
+  if (!name) return null;
+  const query = category ? `${name} ${category}` : String(name);
+  const url = await searchProductImageMulti(query);
+  return url || buildPlaceholderUrl(name);
+}
+
+// Sync wrapper para retro-compatibilidad: devuelve placeholder de inmediato.
+// Las URLs reales se hidratan via /api/giros/resync-images (async).
 function findProductImageBing(name, category) {
-  if (!name || typeof name !== 'string') return null;
-  // Seed determinístico del nombre completo
-  const seed = (String(name) + '|' + String(category || ''))
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, '')
-    .slice(0, 40);
-  if (!seed) return null;
-  // Picsum siempre responde con foto profesional. Mismo seed = misma foto consistente.
-  return `https://picsum.photos/seed/${encodeURIComponent(seed)}/600/600`;
+  return buildPlaceholderUrl(name);
 }
 // Wrapper async para mantener compatibilidad con código que usa await
 async function findProductImageBingAsync(name, category) {
@@ -919,22 +1022,26 @@ async function resyncImages(ctx, req, res) {
     if (!Array.isArray(tmpls) || !tmpls.length) {
       return send(ctx, res, 404, { error: 'no_products', slug });
     }
-    let updated = 0, failed = 0, skipped = 0, force = !!(body && body.force);
+    let updated = 0, failed = 0, skipped = 0, fromSearch = 0, fromPlaceholder = 0;
+    const force = !!(body && body.force);
     for (const t of tmpls) {
       const md = t.metadata || {};
       if (md.image_url && !force) { skipped++; continue; }
-      const url = findProductImageBing(t.name, md.category);
+      const query = (md.category) ? `${t.name} ${md.category}` : t.name;
+      const realUrl = await searchProductImageMulti(query).catch(() => null);
+      const url = realUrl || buildPlaceholderUrl(t.name);
+      if (realUrl) fromSearch++; else fromPlaceholder++;
       if (url) {
         try {
           await ctx.supabaseRequest('PATCH',
             '/vertical_templates?vertical=eq.' + encodeURIComponent(slug) +
             '&name=eq.' + encodeURIComponent(t.name),
-            { metadata: { ...md, image_url: url } });
+            { metadata: { ...md, image_url: url, image_source: realUrl ? 'search' : 'placeholder' } });
           updated++;
         } catch (_) { failed++; }
       } else { failed++; }
     }
-    return send(ctx, res, 200, { slug, total: tmpls.length, updated, failed, skipped });
+    return send(ctx, res, 200, { slug, total: tmpls.length, updated, failed, skipped, fromSearch, fromPlaceholder });
   } catch (e) {
     return err(ctx, res, 500, 'RESYNC_ERROR', String(e && e.message || e).slice(0, 200));
   }
