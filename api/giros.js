@@ -498,9 +498,18 @@ function validateGiroResponse(json) {
   if (!Array.isArray(json.productos_detectados) || json.productos_detectados.length < 6) {
     return { ok:false, error:'prods_min_6' };
   }
+  let prodsMissingKeywords = 0;
   for (const p of json.productos_detectados) {
     if (!p || typeof p !== 'object') return { ok:false, error:'prod_invalid' };
     if (typeof p.name !== 'string' || p.name.length < 3) return { ok:false, error:'prod_name_invalid', detail:p };
+    // Track missing search_keywords_en (warn-level, not block)
+    if (typeof p.search_keywords_en !== 'string' || p.search_keywords_en.length < 2) {
+      prodsMissingKeywords++;
+    }
+  }
+  // Si MÁS de 3 productos vienen sin search_keywords_en, rechazar para retry
+  if (prodsMissingKeywords > 3) {
+    return { ok:false, error:'too_many_missing_keywords_en', detail: `${prodsMissingKeywords}/9 sin keywords_en` };
   }
 
   // dolores_especificos y formas_robo opcionales (si vienen, validar shape)
@@ -608,7 +617,19 @@ function buildUserPrompt(giroInput, extraHint) {
     '}\n\n' +
     'OBLIGATORIO:\n' +
     '- 6 dolores específicos (con terminología del giro, no genéricos)\n' +
-    '- 9 productos reales del giro CON image_url cargable\n' +
+    '- 9 productos reales del giro\n' +
+    '- CADA PRODUCTO DEBE INCLUIR el campo "search_keywords_en" con 1-3\n' +
+    '  palabras EN INGLÉS (genéricas, no marcas) para buscar foto en\n' +
+    '  Wikimedia Commons. Ejemplos:\n' +
+    '    "Yamaha F310 acústica" → "search_keywords_en": "acoustic guitar"\n' +
+    '    "Bajo Fender" → "search_keywords_en": "electric bass"\n' +
+    '    "Cuerdas D\\u0027Addario" → "search_keywords_en": "guitar strings"\n' +
+    '    "Pedal Boss DS-1" → "search_keywords_en": "guitar pedal"\n' +
+    '    "Sostén Victoria\\u0027s Secret" → "search_keywords_en": "push up bra"\n' +
+    '    "Concha de chocolate" → "search_keywords_en": "mexican pastry"\n' +
+    '    "Tacos al pastor" → "search_keywords_en": "tacos al pastor"\n' +
+    '    "Aceite Castrol 5W30" → "search_keywords_en": "motor oil"\n' +
+    '  NUNCA dejes search_keywords_en vacío. SIEMPRE en inglés.\n' +
     '- 3 formas de robo silencioso específicas (cómo se roba en ESE giro, no genérico)\n' +
     '- 3+ funcionalidades únicas (no usar palabras prohibidas)\n' +
     'Sin markdown, sin texto antes/después.' + hint
