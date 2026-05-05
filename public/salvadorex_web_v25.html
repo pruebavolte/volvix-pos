@@ -1516,110 +1516,115 @@
   body[data-vista="2"] #vista-fab { background: #4338CA; }
   body[data-vista="3"] #vista-fab { background: #F05A22; top: 56px; }
 
-  /* ======= VISTA 2 : Limpio / Moderno ======= */
+  /* ======= VISTA 2 : Loyverse / Tablet (Verde) ======= */
   body[data-vista="2"] {
-    --bg: #EEF2FF;
+    --bg: #F5F5F5;
     --surface: #FFFFFF;
-    --surface-2: #F5F7FF;
-    --border: #C7D2FE;
-    --text: #1E1B4B;
-    --text-2: #4338CA;
-    --text-3: #818CF8;
-    --eleventa-blue: #4338CA;
-    --eleventa-blue-soft: #EEF2FF;
+    --surface-2: #FAFAFA;
+    --border: #E0E0E0;
+    --text: #212121;
+    --text-2: #424242;
+    --text-3: #757575;
+    --eleventa-blue: #26A65B;
+    --eleventa-blue-soft: #E8F5E9;
   }
   body[data-vista="2"] .topbar {
-    background: linear-gradient(90deg, #312E81 0%, #4338CA 100%);
+    background: #26A65B;
     border-bottom: none;
-    box-shadow: 0 2px 12px rgba(67,56,202,.35);
+    box-shadow: 0 2px 4px rgba(0,0,0,.15);
   }
-  body[data-vista="2"] .topbar * { color: rgba(255,255,255,.85); }
-  body[data-vista="2"] .topbar .brand-logo { background: #F8FAFF; color: #4338CA; }
-  body[data-vista="2"] .topbar .brand-info .name { color: #ffffff; font-weight: 800; }
-  body[data-vista="2"] .topbar .brand-info .sub { color: rgba(255,255,255,.6); }
-  body[data-vista="2"] .topbar .sync-indicator { color: #A5F3FC; }
-  body[data-vista="2"] .topbar .tb-btn { color: rgba(255,255,255,.8); }
-  body[data-vista="2"] .topbar .tb-btn:hover { background: rgba(255,255,255,.15); color: #fff; }
-  body[data-vista="2"] .topbar .platform-toggle-btn { background: rgba(255,255,255,.1); color: rgba(255,255,255,.7); border-color: rgba(255,255,255,.2); }
-  body[data-vista="2"] .topbar .platform-toggle-btn.active { background: rgba(255,255,255,.25); color: #fff; }
-  body[data-vista="2"] .topbar .vista-btn { background: rgba(255,255,255,.2); border-color: rgba(255,255,255,.35); color: #fff; }
+  body[data-vista="2"] .topbar * { color: rgba(255,255,255,.92); }
+  body[data-vista="2"] .topbar .brand-logo { background: #ffffff; color: #26A65B; font-weight: 900; }
+  body[data-vista="2"] .topbar .brand-info .name { color: #ffffff; font-weight: 700; }
+  body[data-vista="2"] .topbar .brand-info .sub { color: rgba(255,255,255,.75); }
+  body[data-vista="2"] .topbar .sync-indicator { color: #C8E6C9; }
+  body[data-vista="2"] .topbar .tb-btn { color: rgba(255,255,255,.92); }
+  body[data-vista="2"] .topbar .tb-btn:hover { background: rgba(255,255,255,.18); color: #fff; }
+  body[data-vista="2"] .topbar .platform-toggle-btn { background: rgba(255,255,255,.12); color: rgba(255,255,255,.85); border-color: rgba(255,255,255,.25); }
+  body[data-vista="2"] .topbar .platform-toggle-btn.active { background: #ffffff; color: #26A65B; }
+  body[data-vista="2"] .topbar .vista-btn { background: rgba(255,255,255,.22); border-color: rgba(255,255,255,.4); color: #fff; }
   body[data-vista="2"] .topbar .vista-btn:hover { background: rgba(255,255,255,.35); }
 
   body[data-vista="2"] .menubar {
-    background: #3730A3;
-    border-bottom: none;
+    background: #ffffff;
+    border-bottom: 1px solid #E0E0E0;
+    box-shadow: 0 1px 2px rgba(0,0,0,.04);
   }
-  body[data-vista="2"] .menu-btn { color: rgba(255,255,255,.65); border-radius: 6px; }
-  body[data-vista="2"] .menu-btn:hover { background: rgba(255,255,255,.1); color: #fff; }
-  body[data-vista="2"] .menu-btn.active { background: #ffffff; color: #3730A3; }
-  body[data-vista="2"] .menubar-divider { background: rgba(255,255,255,.15); }
+  body[data-vista="2"] .menu-btn { color: #424242; border-radius: 4px; }
+  body[data-vista="2"] .menu-btn:hover { background: #E8F5E9; color: #26A65B; }
+  body[data-vista="2"] .menu-btn.active { background: #26A65B; color: #ffffff; box-shadow: 0 2px 6px rgba(38,166,91,.35); }
+  body[data-vista="2"] .menu-btn.active .ico * { stroke: #ffffff; }
+  body[data-vista="2"] .menubar-divider { background: #E0E0E0; }
 
-  body[data-vista="2"] .pos-screen { background: #EEF2FF; }
-  body[data-vista="2"] .pos-main-area { background: #EEF2FF; }
+  body[data-vista="2"] .pos-screen { background: #F5F5F5; }
+  body[data-vista="2"] .pos-main-area { background: #F5F5F5; }
 
   body[data-vista="2"] .pos-banner {
-    background: linear-gradient(90deg, #4338CA, #6D28D9);
+    background: #26A65B;
+    color: #ffffff;
     font-size: 14px;
-    font-weight: 800;
-    letter-spacing: 1.5px;
+    font-weight: 600;
+    letter-spacing: .5px;
     padding: 10px 16px;
     border-bottom: none;
-    box-shadow: 0 2px 8px rgba(67,56,202,.25);
+    box-shadow: 0 1px 3px rgba(0,0,0,.1);
   }
 
   body[data-vista="2"] .pos-code-bar {
     background: #ffffff;
-    border-bottom: 1px solid #C7D2FE;
+    border-bottom: 1px solid #E0E0E0;
     padding: 10px 14px;
     gap: 10px;
   }
-  body[data-vista="2"] .pos-code-bar label { color: #4338CA; font-weight: 600; }
-  body[data-vista="2"] .pos-code-input { background: #F5F3FF; border-color: #A5B4FC; color: #1E1B4B; font-size: 13px; border-radius: 8px; }
-  body[data-vista="2"] .pos-code-input:focus { border-color: #4338CA; box-shadow: 0 0 0 3px rgba(67,56,202,.15); }
-  body[data-vista="2"] .btn-enter { background: #4338CA; color: white; border-radius: 8px; border: none; }
-  body[data-vista="2"] .btn-enter:hover { background: #3730A3; }
+  body[data-vista="2"] .pos-code-bar label { color: #424242; font-weight: 500; }
+  body[data-vista="2"] .pos-code-input { background: #FAFAFA; border-color: #BDBDBD; color: #212121; font-size: 13px; border-radius: 4px; }
+  body[data-vista="2"] .pos-code-input:focus { border-color: #26A65B; box-shadow: 0 0 0 3px rgba(38,166,91,.15); }
+  body[data-vista="2"] .btn-enter { background: #26A65B; color: white; border-radius: 4px; border: none; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+  body[data-vista="2"] .btn-enter:hover { background: #1F8A4C; }
 
-  body[data-vista="2"] .pos-actions { background: #ffffff; border-bottom: 1px solid #E0E7FF; padding: 8px 12px; gap: 6px; }
-  body[data-vista="2"] .action-btn { background: #F5F3FF; border-color: #C7D2FE; color: #4338CA; border-radius: 8px; font-weight: 600; }
-  body[data-vista="2"] .action-btn:hover { background: #4338CA; color: white; border-color: #4338CA; }
-  body[data-vista="2"] .action-btn.variant-warm { background: #FFF7ED; border-color: #FDE68A; color: #92400E; }
-  body[data-vista="2"] .action-btn.variant-orange { background: #FFF4E6; border-color: #FDBA74; color: #C2410C; }
-  body[data-vista="2"] .action-btn.variant-green { background: #F0FDF4; border-color: #BBF7D0; color: #15803D; }
-  body[data-vista="2"] .action-btn.variant-red { background: #FEF2F2; border-color: #FECACA; color: #B91C1C; }
-  body[data-vista="2"] .action-btn.variant-blue { background: #EFF6FF; border-color: #BFDBFE; color: #1D4ED8; }
-  body[data-vista="2"] .action-btn.variant-purple { background: #F5F3FF; border-color: #DDD6FE; color: #7C3AED; }
+  body[data-vista="2"] .pos-actions { background: #ffffff; border-bottom: 1px solid #E0E0E0; padding: 8px 12px; gap: 6px; }
+  body[data-vista="2"] .action-btn { background: #ffffff; border-color: #E0E0E0; color: #424242; border-radius: 4px; font-weight: 500; }
+  body[data-vista="2"] .action-btn:hover { background: #26A65B; color: white; border-color: #26A65B; }
+  body[data-vista="2"] .action-btn.variant-warm { background: #FFF8E1; border-color: #FFE082; color: #F57F17; }
+  body[data-vista="2"] .action-btn.variant-orange { background: #FFF3E0; border-color: #FFCC80; color: #E65100; }
+  body[data-vista="2"] .action-btn.variant-green { background: #E8F5E9; border-color: #A5D6A7; color: #2E7D32; }
+  body[data-vista="2"] .action-btn.variant-red { background: #FFEBEE; border-color: #EF9A9A; color: #C62828; }
+  body[data-vista="2"] .action-btn.variant-blue { background: #E3F2FD; border-color: #90CAF9; color: #1565C0; }
+  body[data-vista="2"] .action-btn.variant-purple { background: #F3E5F5; border-color: #CE93D8; color: #6A1B9A; }
 
-  body[data-vista="2"] .pos-tabs { background: #fff; border-bottom: 1px solid #E0E7FF; }
-  body[data-vista="2"] .ticket-tab { background: #EEF2FF; border-color: #A5B4FC; color: #4338CA; border-radius: 6px 6px 0 0; }
-  body[data-vista="2"] .btn-new-ticket { background: #4338CA; color: white; border-radius: 6px; border: none; }
+  body[data-vista="2"] .pos-tabs { background: #fff; border-bottom: 1px solid #E0E0E0; }
+  body[data-vista="2"] .ticket-tab { background: #FAFAFA; border-color: #BDBDBD; color: #424242; border-radius: 4px 4px 0 0; }
+  body[data-vista="2"] .ticket-tab.active { background: #26A65B; color: #fff; border-color: #26A65B; }
+  body[data-vista="2"] .btn-new-ticket { background: #26A65B; color: white; border-radius: 4px; border: none; font-weight: 600; }
 
   body[data-vista="2"] .pos-cart-wrap { background: #fff; }
-  body[data-vista="2"] .pos-cart th { background: #EEF2FF; color: #4338CA; border-bottom: 2px solid #A5B4FC; font-size: 11px; letter-spacing: .5px; }
-  body[data-vista="2"] .pos-cart td { border-bottom-color: #E0E7FF; color: #1E1B4B; }
-  body[data-vista="2"] .pos-cart tbody tr:hover { background: #F5F3FF; }
-  body[data-vista="2"] .pos-cart tbody tr.selected { background: #EDE9FE; }
+  body[data-vista="2"] .pos-cart th { background: #FAFAFA; color: #757575; border-bottom: 1px solid #E0E0E0; font-size: 11px; letter-spacing: .5px; text-transform: uppercase; }
+  body[data-vista="2"] .pos-cart td { border-bottom-color: #EEEEEE; color: #212121; }
+  body[data-vista="2"] .pos-cart tbody tr:hover { background: #F5F5F5; }
+  body[data-vista="2"] .pos-cart tbody tr.selected { background: #E8F5E9; }
 
-  body[data-vista="2"] .pos-bottom { background: #ffffff; border-top: 2px solid #A5B4FC; padding: 10px 16px; }
-  body[data-vista="2"] .bottom-btn { background: #EEF2FF; border-color: #C7D2FE; color: #4338CA; border-radius: 8px; }
-  body[data-vista="2"] .bottom-btn:hover { background: #4338CA; color: white; }
-  body[data-vista="2"] .btn-cobrar { background: linear-gradient(135deg, #4338CA, #6D28D9); border: none; border-radius: 10px; font-size: 14px; font-weight: 800; letter-spacing: .5px; box-shadow: 0 4px 14px rgba(67,56,202,.4); }
-  body[data-vista="2"] .btn-cobrar:hover { box-shadow: 0 6px 20px rgba(67,56,202,.5); transform: translateY(-1px); }
-  body[data-vista="2"] .total-big { color: #4338CA; font-size: 34px; font-weight: 800; }
+  body[data-vista="2"] .pos-bottom { background: #ffffff; border-top: 1px solid #E0E0E0; padding: 10px 16px; box-shadow: 0 -1px 3px rgba(0,0,0,.04); }
+  body[data-vista="2"] .bottom-btn { background: #ffffff; border-color: #E0E0E0; color: #424242; border-radius: 4px; }
+  body[data-vista="2"] .bottom-btn:hover { background: #26A65B; color: white; border-color: #26A65B; }
+  body[data-vista="2"] .btn-cobrar { background: #26A65B; border: none; border-radius: 4px; font-size: 14px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; box-shadow: 0 2px 6px rgba(38,166,91,.4); }
+  body[data-vista="2"] .btn-cobrar:hover { background: #1F8A4C; box-shadow: 0 4px 12px rgba(38,166,91,.5); transform: translateY(-1px); }
+  body[data-vista="2"] .total-big { color: #26A65B; font-size: 34px; font-weight: 700; }
 
-  body[data-vista="2"] .pos-coupon-bar { background: #F5F3FF; border-color: #C7D2FE; }
-  body[data-vista="2"] .pos-summary { background: #F0F4FF; border-top: 1px solid #C7D2FE; }
-  body[data-vista="2"] .pos-summary .lbl { color: #6366F1; }
-  body[data-vista="2"] .pos-summary .val { color: #1E1B4B; font-weight: 700; }
-  body[data-vista="2"] .pos-summary .cambio { color: #4338CA; }
-  body[data-vista="2"] .pos-footer { background: #312E81; color: rgba(255,255,255,.5); }
+  body[data-vista="2"] .pos-coupon-bar { background: #FAFAFA; border-color: #E0E0E0; }
+  body[data-vista="2"] .pos-summary { background: #FAFAFA; border-top: 1px solid #E0E0E0; }
+  body[data-vista="2"] .pos-summary .lbl { color: #757575; }
+  body[data-vista="2"] .pos-summary .val { color: #212121; font-weight: 600; }
+  body[data-vista="2"] .pos-summary .cambio { color: #26A65B; }
+  body[data-vista="2"] .pos-footer { background: #FAFAFA; color: #9E9E9E; border-top: 1px solid #E0E0E0; }
 
-  body[data-vista="2"] .pos-sidebar-right { background: #ffffff; border-left-color: #C7D2FE; }
-  body[data-vista="2"] .pos-sidebar-title { color: #6366F1; }
-  body[data-vista="2"] .cat-item { background: #F5F3FF; border-color: #C7D2FE; color: #4338CA; border-radius: 8px; }
-  body[data-vista="2"] .cat-item:hover { background: #EEF2FF; border-color: #818CF8; }
-  body[data-vista="2"] .cat-item.active { background: #4338CA; color: white; border-color: #4338CA; }
-  body[data-vista="2"] .qp-card { background: #F5F3FF; border-color: #C7D2FE; border-radius: 8px; }
-  body[data-vista="2"] .qp-card:hover { background: #4338CA; color: white; border-color: #4338CA; }
+  body[data-vista="2"] .pos-sidebar-right { background: #ffffff; border-left-color: #E0E0E0; }
+  body[data-vista="2"] .pos-sidebar-title { color: #757575; font-size: 11px; letter-spacing: .8px; }
+  body[data-vista="2"] .cat-item { background: #ffffff; border-color: #E0E0E0; color: #424242; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+  body[data-vista="2"] .cat-item:hover { background: #E8F5E9; border-color: #A5D6A7; color: #2E7D32; }
+  body[data-vista="2"] .cat-item.active { background: #26A65B; color: white; border-color: #26A65B; }
+  body[data-vista="2"] .qp-card { background: #ffffff; border-color: #E0E0E0; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  body[data-vista="2"] .qp-card:hover { background: #E8F5E9; border-color: #26A65B; transform: translateY(-1px); box-shadow: 0 3px 8px rgba(38,166,91,.2); }
+  body[data-vista="2"] .qp-card-name { color: #212121; }
 
   /* ======= VISTA 3 : Terminal Oscuro (OXXO-style) ======= */
   body[data-vista="3"] {
@@ -1750,6 +1755,551 @@
     background: #1A2332; color: #E8EDF2; border-color: #2D3E54;
   }
   body[data-vista="3"] .pos-sidebar-toggle { background: #F05A22; color: white; border-radius: 4px; }
+
+  /* ======= VISTA 3 : OXXO Full Layout Clone (overlay) ======= */
+  #vista3-oxxo-shell {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #1a1a1a;
+    z-index: 8500;
+    font-family: -apple-system, system-ui, "Segoe UI", Roboto, sans-serif;
+    overflow: auto;
+    padding: 8px;
+    flex-direction: column;
+  }
+  body[data-vista="3"] #vista3-oxxo-shell { display: flex; }
+  body[data-vista="3"] .topbar,
+  body[data-vista="3"] .menubar,
+  body[data-vista="3"] .main,
+  body[data-vista="3"] #volvix-reports-fab,
+  body[data-vista="3"] #connection-status,
+  body[data-vista="3"] .volvix-transcript,
+  body[data-vista="3"] #vista-fab-orig-hide { display: none !important; }
+  body[data-vista="3"] #vista-fab { z-index: 9500; top: 12px; right: 14px; left: auto; transform: none; }
+  body[data-vista="3"] #vista-fab:hover { transform: translateY(-1px); }
+
+  .oxxo-header {
+    background: #E11C24;
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 6px 6px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 500;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .oxxo-store { display: flex; align-items: center; gap: 12px; }
+  .oxxo-logo {
+    background: #FFE600;
+    color: #E11C24;
+    padding: 4px 12px;
+    border-radius: 3px;
+    font-weight: 900;
+    font-size: 16px;
+    letter-spacing: 1px;
+    display: inline-block;
+  }
+  .oxxo-store-name { font-size: 13px; font-weight: 500; }
+  .oxxo-cashier-info { display: flex; gap: 14px; font-size: 12px; flex-wrap: wrap; }
+  .oxxo-cashier-info span { white-space: nowrap; }
+
+  .oxxo-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 6px;
+    background: #1a1a1a;
+    padding: 6px;
+    flex: 1;
+    min-height: 0;
+  }
+  .oxxo-cart-panel {
+    background: #fff;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    min-height: 380px;
+    overflow: hidden;
+  }
+  .oxxo-cart-head {
+    background: #f0f0f0;
+    padding: 8px 10px;
+    border-bottom: 1px solid #ccc;
+    font-size: 11px;
+    color: #555;
+    display: grid;
+    grid-template-columns: 1.6fr 0.5fr 0.7fr 0.7fr;
+    gap: 4px;
+    font-weight: 700;
+    letter-spacing: .3px;
+  }
+  .oxxo-cart-body {
+    flex: 1;
+    padding: 4px 0;
+    font-size: 12px;
+    color: #222;
+    overflow-y: auto;
+    min-height: 200px;
+  }
+  .oxxo-cart-body .oxxo-row {
+    display: grid;
+    grid-template-columns: 1.6fr 0.5fr 0.7fr 0.7fr;
+    gap: 4px;
+    padding: 6px 10px;
+    border-bottom: 1px dashed #eee;
+  }
+  .oxxo-cart-body .oxxo-row:nth-child(even) { background: #fafafa; }
+  .oxxo-cart-body .oxxo-empty { padding: 24px; text-align: center; color: #999; font-style: italic; font-size: 12px; }
+  .oxxo-cart-foot {
+    background: #1a1a1a;
+    color: #FFE600;
+    padding: 12px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-radius: 0 0 4px 4px;
+  }
+  .oxxo-items { font-size: 13px; opacity: .85; }
+  .oxxo-total { text-align: right; }
+  .oxxo-total-lbl { font-size: 11px; opacity: .75; letter-spacing: 1.5px; }
+  .oxxo-total-val { font-size: 28px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+
+  .oxxo-actions-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 0;
+  }
+  .oxxo-scan-box {
+    background: #2a2a2a;
+    padding: 6px;
+    border-radius: 4px;
+  }
+  .oxxo-scan-row { display: flex; gap: 4px; margin-bottom: 4px; }
+  #oxxo-scan {
+    flex: 1;
+    background: #fff;
+    border: none;
+    padding: 8px 10px;
+    border-radius: 3px;
+    font-size: 13px;
+    color: #222;
+    outline: none;
+    font-family: inherit;
+  }
+  #oxxo-scan:focus { box-shadow: 0 0 0 2px #FFE600; }
+  .oxxo-add {
+    background: #FFE600;
+    color: #1a1a1a;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    letter-spacing: .5px;
+    font-family: inherit;
+  }
+  .oxxo-add:hover { background: #FFD600; }
+  .oxxo-scan-hint { font-size: 10px; color: #999; padding: 0 4px; }
+
+  .oxxo-action-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+  }
+  .oxxo-kbtn {
+    color: #fff;
+    border: none;
+    padding: 14px 4px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    line-height: 1.2;
+    letter-spacing: .3px;
+    transition: transform .05s, filter .15s;
+    font-family: inherit;
+  }
+  .oxxo-kbtn:hover { filter: brightness(1.1); }
+  .oxxo-kbtn:active { transform: scale(.96); }
+  .oxxo-kbtn.oxxo-blue { background: #0066B3; }
+  .oxxo-kbtn.oxxo-green { background: #009A44; }
+  .oxxo-kbtn.oxxo-purple { background: #6A1B9A; }
+  .oxxo-kbtn.oxxo-orange { background: #E64A19; }
+  .oxxo-kbtn.oxxo-bluegray { background: #455A64; }
+  .oxxo-kbtn.oxxo-brown { background: #5D4037; }
+  .oxxo-kbtn.oxxo-red { background: #C62828; }
+  .oxxo-kbtn.oxxo-amber { background: #F57F17; }
+  .oxxo-kbtn.oxxo-teal { background: #00838F; }
+
+  .oxxo-numpad {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+  }
+  .oxxo-numbtn {
+    background: #fff;
+    border: 1px solid #ccc;
+    padding: 12px 0;
+    border-radius: 3px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    color: #222;
+    font-family: inherit;
+    transition: background .1s;
+  }
+  .oxxo-numbtn:active { background: #eee; transform: scale(.97); }
+  .oxxo-numbtn.oxxo-cancel { background: #B71C1C; color: #fff; border-color: #B71C1C; }
+  .oxxo-numbtn.oxxo-times { background: #424242; color: #fff; border-color: #424242; }
+  .oxxo-numbtn.oxxo-back { background: #424242; color: #fff; border-color: #424242; }
+  .oxxo-numbtn.oxxo-zero { grid-column: span 2; }
+  .oxxo-numbtn.oxxo-enter { background: #FFE600; color: #1a1a1a; border-color: #FFE600; font-weight: 900; letter-spacing: .5px; }
+  .oxxo-numbtn.oxxo-cancel:active { background: #8B0000; }
+  .oxxo-numbtn.oxxo-enter:active { background: #FFD600; }
+
+  .oxxo-pay-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+  }
+  .oxxo-paybtn {
+    color: #fff;
+    border: none;
+    padding: 14px 4px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    line-height: 1.2;
+    letter-spacing: .5px;
+    font-family: inherit;
+    transition: filter .15s;
+  }
+  .oxxo-paybtn:hover { filter: brightness(1.1); }
+  .oxxo-paybtn:active { transform: scale(.97); }
+  .oxxo-paybtn.oxxo-pay-cash { background: #2E7D32; }
+  .oxxo-paybtn.oxxo-pay-card { background: #1565C0; }
+  .oxxo-paybtn.oxxo-pay-qr { background: #6A1B9A; }
+
+  .oxxo-statusbar {
+    background: #FFE600;
+    color: #1a1a1a;
+    padding: 6px 14px;
+    font-size: 11px;
+    display: flex;
+    justify-content: space-between;
+    border-radius: 0 0 6px 6px;
+    font-weight: 600;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .oxxo-statusbar .dot-green { color: #1B5E20; font-size: 14px; line-height: 1; }
+
+  @media (max-width: 880px) {
+    .oxxo-grid { grid-template-columns: 1fr; }
+    .oxxo-cart-panel { min-height: 220px; }
+    .oxxo-header, .oxxo-cashier-info { font-size: 11px; }
+    .oxxo-logo { font-size: 14px; }
+    .oxxo-total-val { font-size: 22px; }
+  }
+
+  /* ======= VISTA 2 : Loyverse Full Layout Clone (overlay) ======= */
+  #vista2-loyverse-shell {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #F5F5F5;
+    z-index: 8500;
+    font-family: Roboto, -apple-system, system-ui, "Segoe UI", sans-serif;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  body[data-vista="2"] #vista2-loyverse-shell { display: flex; }
+  body[data-vista="2"] .topbar,
+  body[data-vista="2"] .menubar,
+  body[data-vista="2"] .main,
+  body[data-vista="2"] #volvix-reports-fab,
+  body[data-vista="2"] #connection-status,
+  body[data-vista="2"] .volvix-transcript { display: none !important; }
+  body[data-vista="2"] #vista-fab { z-index: 9500; top: 12px; right: 14px; left: auto; transform: none; }
+
+  .lv-header {
+    background: #26A65B;
+    color: #fff;
+    padding: 0 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 56px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,.15);
+  }
+  .lv-burger, .lv-bell, .lv-search {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 22px;
+    cursor: pointer;
+    padding: 8px 10px;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+    transition: background .15s;
+  }
+  .lv-burger:hover, .lv-bell:hover, .lv-search:hover { background: rgba(255,255,255,.18); }
+  .lv-bell { position: relative; }
+  .lv-bell-badge {
+    position: absolute;
+    top: 4px; right: 2px;
+    background: #FF5722;
+    color: #fff;
+    font-size: 10px;
+    padding: 1px 5px;
+    border-radius: 10px;
+    font-weight: 700;
+    min-width: 16px;
+    text-align: center;
+    pointer-events: none;
+  }
+  .lv-title { font-size: 20px; font-weight: 500; flex: 1; letter-spacing: .15px; }
+
+  .lv-grid {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .lv-products-pane {
+    display: flex;
+    flex-direction: column;
+    background: #f0f0f0;
+    overflow: hidden;
+    min-width: 0;
+  }
+  .lv-products-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 2px;
+    padding: 2px;
+    background: #ddd;
+    overflow-y: auto;
+    overflow-x: hidden;
+    align-content: start;
+    min-height: 0;
+  }
+  .lv-product-card {
+    background: #fff;
+    border: none;
+    cursor: pointer;
+    padding: 12px 8px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    min-height: 130px;
+    font-family: inherit;
+    transition: transform .1s, box-shadow .15s;
+  }
+  .lv-product-card:hover { transform: translateY(-2px); box-shadow: 0 3px 10px rgba(0,0,0,.18); z-index: 1; }
+  .lv-product-card:active { transform: scale(.97); }
+  .lv-product-img {
+    width: 72px;
+    height: 72px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    color: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,.12);
+  }
+  .lv-product-name {
+    font-size: 12px;
+    color: #333;
+    text-align: center;
+    font-weight: 500;
+    line-height: 1.25;
+    word-break: break-word;
+  }
+  .lv-product-price {
+    font-size: 11.5px;
+    color: #757575;
+    font-weight: 500;
+  }
+  .lv-product-empty {
+    grid-column: 1/-1;
+    padding: 50px 20px;
+    text-align: center;
+    color: #9e9e9e;
+    font-size: 14px;
+  }
+
+  .lv-cat-tabs {
+    display: flex;
+    background: #fff;
+    border-top: 1px solid #e0e0e0;
+    padding: 0;
+    height: 52px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex-shrink: 0;
+  }
+  .lv-cat-tabs::-webkit-scrollbar { height: 4px; }
+  .lv-cat-tabs::-webkit-scrollbar-thumb { background: #bdbdbd; }
+  .lv-cat-tab {
+    flex: 1;
+    min-width: 95px;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #757575;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    font-family: inherit;
+    white-space: nowrap;
+    transition: background .12s, color .12s;
+  }
+  .lv-cat-tab.active { color: #26A65B; border-bottom-color: #26A65B; background: #f9fdfb; }
+  .lv-cat-tab:hover { background: #f5f5f5; }
+  .lv-cat-grid-icon {
+    flex: 0 0 52px;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    background: #f5f5f5;
+    color: #757575;
+    font-size: 20px;
+    font-family: inherit;
+  }
+  .lv-cat-grid-icon:hover { background: #eeeeee; color: #424242; }
+
+  .lv-ticket-panel {
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid #e0e0e0;
+    min-width: 0;
+  }
+  .lv-ticket-head {
+    padding: 12px 18px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 56px;
+    flex-shrink: 0;
+  }
+  .lv-ticket-title { font-size: 18px; font-weight: 500; color: #333; flex: 1; }
+  .lv-ticket-icon {
+    background: transparent;
+    border: none;
+    color: #757575;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    font-family: inherit;
+  }
+  .lv-ticket-icon:hover { background: #f5f5f5; }
+  .lv-dinein {
+    padding: 12px 18px;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 14px;
+    color: #424242;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .lv-dinein:hover { background: #fafafa; }
+  .lv-dinein-arrow { color: #757575; font-size: 12px; }
+  .lv-ticket-items {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 0;
+    min-height: 0;
+  }
+  .lv-ticket-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 12px;
+    padding: 12px 18px;
+    font-size: 14px;
+    color: #333;
+    border-bottom: 1px solid #f5f5f5;
+    align-items: center;
+  }
+  .lv-row-name { font-weight: 400; }
+  .lv-row-qty { color: #9e9e9e; font-size: 13px; }
+  .lv-row-price { font-weight: 500; min-width: 60px; text-align: right; }
+  .lv-ticket-empty { padding: 32px 18px; text-align: center; color: #9e9e9e; font-size: 13px; }
+  .lv-ticket-tax {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 18px;
+    font-size: 13px;
+    color: #424242;
+    border-top: 1px solid #f0f0f0;
+  }
+  .lv-ticket-total {
+    display: flex;
+    justify-content: space-between;
+    padding: 14px 18px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #212121;
+    border-top: 1px solid #e0e0e0;
+    flex-shrink: 0;
+  }
+
+  .lv-action-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: #e0e0e0;
+    flex-shrink: 0;
+  }
+  .lv-btn-save, .lv-btn-charge {
+    border: none;
+    padding: 18px 0;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: .8px;
+    font-family: inherit;
+    text-transform: uppercase;
+    transition: background .15s;
+  }
+  .lv-btn-save { background: #fafafa; color: #757575; }
+  .lv-btn-save:hover { background: #eeeeee; color: #424242; }
+  .lv-btn-charge { background: #26A65B; color: #fff; }
+  .lv-btn-charge:hover { background: #1F8A4C; }
+  .lv-btn-charge:active { background: #1B7A40; }
+
+  @media (max-width: 880px) {
+    .lv-grid { grid-template-columns: 1fr; }
+    .lv-ticket-panel { border-left: none; border-top: 1px solid #e0e0e0; max-height: 45vh; }
+    .lv-products-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+  }
   /* ============ END VISTA SWITCHER ============ */
 </style>
 <!-- B41 perf: defer added — these expose window.volvix/window.VolvixSync but downstream
@@ -1887,11 +2437,22 @@
         user = await refreshUserFromServer() || user;
       }
       if (!user) return;
-      // 2026-05: NO redirigimos a /volvix-onboarding-v2.html. El usuario debe
-      // entrar directo al POS (que es donde trabaja). El primer-login se
-      // marca con un banner "Bienvenido — completa tu configuración" que es
-      // descartable y enlaza a config en la misma página.
+      // 2026-05 (revised): Para usuarios nuevos (is_first_login=true) y que aún
+      // NO hayan visto el wizard, redirigimos UNA VEZ a /volvix-onboarding-v2.html
+      // para que tengan guía inicial. Si ya lo vieron (o lo saltaron), mostramos
+      // el banner descartable como fallback. Esto evita que merchants nuevos caigan
+      // en un POS complejo sin orientación.
       if (shouldRedirectToWizard(user)) {
+        var wizardSeen = false;
+        try { wizardSeen = localStorage.getItem('volvix_wizard_seen') === '1'; } catch (e) {}
+        if (!wizardSeen) {
+          try { localStorage.setItem('volvix_wizard_seen', '1'); } catch (e) {}
+          try { localStorage.setItem('volvix_show_setup_banner', '1'); } catch (e) {}
+          var wizUrl = '/volvix-onboarding-v2.html';
+          // Preserve any redirect param so user lands back here after wizard
+          window.location.replace(wizUrl);
+          return;
+        }
         try { localStorage.setItem('volvix_show_welcome_banner', '1'); } catch (e) {}
         showWelcomeBanner(user);
         return;
@@ -6952,7 +7513,7 @@
       var cur = parseInt(document.body.getAttribute('data-vista') || '1', 10);
       var next = cur >= 3 ? 1 : cur + 1;
       _applyVista(String(next));
-      var names = { '1': 'Vista estándar', '2': 'Vista moderna (Indigo)', '3': 'Terminal oscuro (OXXO-style)' };
+      var names = { '1': 'Vista estándar', '2': 'Vista Loyverse (Verde)', '3': 'Terminal OXXO (Oscuro)' };
       showToast('🎨 ' + (names[String(next)] || 'Vista ' + next));
     };
     // Restore from localStorage
@@ -7426,7 +7987,7 @@
       '<div><label style="display:block;font-size:12px;color:#666;">Ultimos 4 digitos tarjeta</label>' +
       '<input type="text" id="r10a-find-card" maxlength="4" pattern="[0-9]{0,4}" placeholder="1234" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;"></div>' +
       '<div style="grid-column:span 2;"><label style="display:block;font-size:12px;color:#666;">Nombre cliente (opcional)</label>' +
-      '<input type="text" id="r10a-find-customer" placeholder="Nombre o telefono" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;"></div>' +
+      '<input type="text" id="r10a-find-customer" placeholder="Nombre o teléfono" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;"></div>' +
       '</div>' +
       '<button class="btn primary" onclick="r10aDoFindSale()" style="width:100%;padding:10px;">Buscar venta</button>' +
       '<div id="r10a-find-results" style="margin-top:15px;"></div>';
@@ -13500,5 +14061,509 @@
   });
 })();
 </script>
+
+<!-- ============ VISTA 2 LOYVERSE OVERLAY (clone) ============ -->
+<div id="vista2-loyverse-shell" aria-hidden="true">
+  <div class="lv-header">
+    <button class="lv-burger" type="button" id="lv-burger" aria-label="Menú">☰</button>
+    <span class="lv-title" id="lv-title">Punto de venta</span>
+    <button class="lv-search" type="button" id="lv-search" aria-label="Buscar">🔍</button>
+    <button class="lv-bell" type="button" id="lv-bell" aria-label="Notificaciones">🔔<span class="lv-bell-badge" id="lv-bell-badge">3</span></button>
+  </div>
+
+  <div class="lv-grid">
+    <div class="lv-products-pane">
+      <div class="lv-products-grid" id="lv-products-grid">
+        <div class="lv-product-empty">Cargando productos…</div>
+      </div>
+      <div class="lv-cat-tabs" id="lv-cat-tabs"></div>
+    </div>
+
+    <div class="lv-ticket-panel">
+      <div class="lv-ticket-head">
+        <span class="lv-ticket-title">Ticket</span>
+        <button class="lv-ticket-icon" type="button" aria-label="Cliente" id="lv-customer">👤</button>
+        <button class="lv-ticket-icon" type="button" id="lv-more" aria-label="Más">⋮</button>
+      </div>
+      <div class="lv-dinein" id="lv-dinein">
+        <span>Para llevar</span>
+        <span class="lv-dinein-arrow">▾</span>
+      </div>
+      <div class="lv-ticket-items" id="lv-ticket-items">
+        <div class="lv-ticket-empty">Selecciona productos</div>
+      </div>
+      <div class="lv-ticket-total">
+        <span>Total</span>
+        <span id="lv-ticket-total">$0.00</span>
+      </div>
+      <div class="lv-action-bar">
+        <button class="lv-btn-save" type="button" id="lv-btn-save">Guardar</button>
+        <button class="lv-btn-charge" type="button" id="lv-btn-charge">Cobrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  function vistaIs(v){return document.body.getAttribute('data-vista') === String(v);}
+  function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]);});}
+  function escapeAttr(s){return String(s||'').replace(/"/g,'&quot;');}
+
+  var lvColors = ['#4CAF50','#2196F3','#FF9800','#9C27B0','#F44336','#009688','#FF5722','#795548','#607D8B','#E91E63','#3F51B5','#00BCD4','#8BC34A','#FFC107','#673AB7'];
+  var lvIconMap = [
+    [/leche/i,'🥛'], [/queso/i,'🧀'], [/yogurt|yogur/i,'🥣'], [/huevo/i,'🥚'],
+    [/mantequilla/i,'🧈'], [/crema/i,'🥄'], [/coca|refresco|jugo|bebida/i,'🥤'],
+    [/agua/i,'💧'], [/cerveza/i,'🍺'], [/pan/i,'🍞'], [/galleta/i,'🍪'],
+    [/chocolate/i,'🍫'], [/manzana/i,'🍎'], [/plátano|platano/i,'🍌'],
+    [/tomate/i,'🍅'], [/limón|limon/i,'🍋'], [/papa|chip|sabrita|dorito/i,'🥔'],
+    [/pollo/i,'🍗'], [/carne|res/i,'🥩'], [/leche|láct|lact/i,'🥛'],
+    [/cigarro|tabaco/i,'🚬'], [/dulce/i,'🍬']
+  ];
+  function pickIcon(name) {
+    var n = String(name||'');
+    for (var i=0; i<lvIconMap.length; i++) {
+      if (lvIconMap[i][0].test(n)) return lvIconMap[i][1];
+    }
+    return '📦';
+  }
+
+  function syncLvProducts() {
+    if (!vistaIs(2)) return;
+    var grid = document.getElementById('lv-products-grid');
+    if (!grid) return;
+    var qps = Array.from(document.querySelectorAll('.qp-card'));
+    if (!qps.length) {
+      grid.innerHTML = '<div class="lv-product-empty">Sin productos en esta categoría.<br>Selecciona otra categoría abajo.</div>';
+      return;
+    }
+    var html = '';
+    qps.forEach(function(qp, i) {
+      var nameEl = qp.querySelector('.qp-card-name');
+      var name = (nameEl ? nameEl.textContent : qp.textContent.split('$')[0]).trim();
+      var priceMatch = qp.textContent.match(/\$[\d.,]+/);
+      var price = priceMatch ? priceMatch[0] : '';
+      var color = lvColors[i % lvColors.length];
+      var icon = pickIcon(name);
+      var oc = qp.getAttribute('onclick') || '';
+      html += '<button type="button" class="lv-product-card" data-lv-onclick="'+escapeAttr(oc)+'">'
+        + '<div class="lv-product-img" style="background:'+color+'">'+icon+'</div>'
+        + '<div class="lv-product-name">'+escapeHtml(name)+'</div>'
+        + '<div class="lv-product-price">'+escapeHtml(price)+'</div>'
+        + '</button>';
+    });
+    grid.innerHTML = html;
+  }
+
+  function syncLvCats() {
+    if (!vistaIs(2)) return;
+    var tabsHost = document.getElementById('lv-cat-tabs');
+    if (!tabsHost) return;
+    var cats = Array.from(document.querySelectorAll('.cat-item'));
+    var html = '';
+    var activeCatName = '';
+    cats.forEach(function(c, i) {
+      var raw = c.textContent.trim();
+      var lines = raw.split('\n').map(function(s){return s.trim();}).filter(Boolean);
+      var emoji = lines[0] || '';
+      var name = lines[1] || lines[0] || '';
+      var active = c.classList.contains('active');
+      if (active) activeCatName = name;
+      html += '<button type="button" class="lv-cat-tab '+(active?'active':'')+'" data-lv-cat-idx="'+i+'">'
+        + escapeHtml(emoji + ' ' + name.toUpperCase())
+        + '</button>';
+    });
+    html += '<button type="button" class="lv-cat-grid-icon" id="lv-grid-icon" aria-label="Más">⊞</button>';
+    tabsHost.innerHTML = html;
+    var titleEl = document.getElementById('lv-title');
+    if (titleEl) titleEl.textContent = activeCatName || 'Punto de venta';
+  }
+
+  function syncLvTicket() {
+    if (!vistaIs(2)) return;
+    var items = document.getElementById('lv-ticket-items');
+    var totalEl = document.getElementById('lv-ticket-total');
+    if (!items || !totalEl) return;
+    var rows = document.querySelectorAll('#cart-body tr');
+    if (!rows.length) {
+      items.innerHTML = '<div class="lv-ticket-empty">Selecciona productos</div>';
+      var origTotal0 = document.getElementById('total-big');
+      totalEl.textContent = origTotal0 ? origTotal0.textContent.trim() : '$0.00';
+      return;
+    }
+    var html = '';
+    rows.forEach(function(tr) {
+      var tds = tr.querySelectorAll('td');
+      if (tds.length < 5) return;
+      var desc = (tds[1] && tds[1].textContent || '').trim();
+      var qty = (tds[3] && tds[3].textContent || '').trim();
+      var importe = (tds[4] && tds[4].textContent || '').trim();
+      html += '<div class="lv-ticket-row">'
+        + '<span class="lv-row-name">'+escapeHtml(desc)+'</span>'
+        + '<span class="lv-row-qty">x '+escapeHtml(qty)+'</span>'
+        + '<span class="lv-row-price">'+escapeHtml(importe)+'</span>'
+        + '</div>';
+    });
+    items.innerHTML = html;
+    var origTotal = document.getElementById('total-big');
+    if (origTotal) totalEl.textContent = origTotal.textContent.trim();
+  }
+
+  function syncAll() { syncLvCats(); syncLvProducts(); syncLvTicket(); }
+
+  var bodyMo = new MutationObserver(function(muts) {
+    muts.forEach(function(m){
+      if (m.attributeName === 'data-vista' && vistaIs(2)) syncAll();
+    });
+  });
+  bodyMo.observe(document.body, {attributes: true, attributeFilter: ['data-vista']});
+  if (vistaIs(2)) syncAll();
+
+  function setupObservers() {
+    var cart = document.getElementById('cart-body');
+    if (!cart) { setTimeout(setupObservers, 500); return; }
+    new MutationObserver(syncLvTicket).observe(cart, {childList:true, subtree:true, characterData:true});
+    var total = document.getElementById('total-big');
+    if (total) new MutationObserver(syncLvTicket).observe(total, {childList:true, subtree:true, characterData:true});
+
+    var sb = document.querySelector('.pos-sidebar-right');
+    if (sb) {
+      new MutationObserver(function(){ if (vistaIs(2)) { syncLvCats(); syncLvProducts(); } })
+        .observe(sb, {childList:true, subtree:true});
+    }
+  }
+  setupObservers();
+
+  document.addEventListener('click', function(e) {
+    if (!vistaIs(2)) return;
+
+    var card = e.target.closest('.lv-product-card');
+    if (card) {
+      var oc = card.getAttribute('data-lv-onclick');
+      if (oc) {
+        try { (new Function(oc)).call(window); } catch(err) { console.warn('[lv-product]', err); }
+      }
+      return;
+    }
+
+    var tab = e.target.closest('.lv-cat-tab');
+    if (tab) {
+      var idx = parseInt(tab.getAttribute('data-lv-cat-idx'), 10);
+      var cats = document.querySelectorAll('.cat-item');
+      if (cats[idx]) {
+        try { cats[idx].click(); } catch(_){}
+        setTimeout(function(){ syncLvCats(); syncLvProducts(); }, 50);
+      }
+      return;
+    }
+
+    if (e.target.closest('#lv-btn-charge')) {
+      if (typeof window.openPayment === 'function') { try { window.openPayment(); } catch(_){} }
+      return;
+    }
+    if (e.target.closest('#lv-btn-save')) {
+      if (typeof window.savePendingSale === 'function') { try { window.savePendingSale(); } catch(_){} }
+      return;
+    }
+    if (e.target.closest('#lv-search')) {
+      if (typeof window.openSearch === 'function') { try { window.openSearch(); } catch(_){} }
+      return;
+    }
+    if (e.target.closest('#lv-customer')) {
+      if (typeof window.openCustomerSelector === 'function') { try { window.openCustomerSelector(); } catch(_){} }
+      return;
+    }
+    if (e.target.closest('#lv-burger')) {
+      // Burger → switch back to Vista 1 (full menu)
+      document.body.setAttribute('data-vista','1');
+      try { localStorage.setItem('salvx_vista','1'); } catch(_){}
+      var lab = document.getElementById('vista-label');
+      var fab = document.getElementById('vista-fab-label');
+      if (lab) lab.textContent = 'Vista ①';
+      if (fab) fab.textContent = 'Vista ①';
+      return;
+    }
+  }, false);
+})();
+</script>
+
+<!-- ============ VISTA 3 OXXO OVERLAY (clone) ============ -->
+<div id="vista3-oxxo-shell" aria-hidden="true">
+  <div class="oxxo-header">
+    <div class="oxxo-store">
+      <span class="oxxo-logo">OXXO</span>
+      <span class="oxxo-store-name" id="oxxo-store-name">Tienda 12483 · Escobedo Centro</span>
+    </div>
+    <div class="oxxo-cashier-info">
+      <span id="oxxo-cashier">Cajero: M. RAMÍREZ</span>
+      <span id="oxxo-clock">--:--:--</span>
+      <span>Turno #2</span>
+    </div>
+  </div>
+
+  <div class="oxxo-grid">
+    <div class="oxxo-cart-panel">
+      <div class="oxxo-cart-head">
+        <span>DESCRIPCIÓN</span>
+        <span style="text-align:center">CANT</span>
+        <span style="text-align:right">P.U.</span>
+        <span style="text-align:right">IMPORTE</span>
+      </div>
+      <div class="oxxo-cart-body" id="oxxo-cart-body">
+        <div class="oxxo-empty">Escanea un código o teclea un SKU para iniciar venta</div>
+      </div>
+      <div class="oxxo-cart-foot">
+        <span class="oxxo-items"><span id="oxxo-items-count">0</span> artículos</span>
+        <div class="oxxo-total">
+          <div class="oxxo-total-lbl">TOTAL</div>
+          <div class="oxxo-total-val" id="oxxo-total-val">$0.00</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="oxxo-actions-panel">
+      <div class="oxxo-scan-box">
+        <div class="oxxo-scan-row">
+          <input id="oxxo-scan" type="text" placeholder="Escanea código o teclea SKU…" autocomplete="off" inputmode="text">
+          <button class="oxxo-add" type="button" id="oxxo-add-btn">AGREGAR</button>
+        </div>
+        <div class="oxxo-scan-hint">F2 búsqueda · F4 cancelar partida · F8 cancelar venta</div>
+      </div>
+
+      <div class="oxxo-action-grid">
+        <button type="button" class="oxxo-kbtn oxxo-blue" data-oxxo-action="services">PAGO<br>SERVICIOS</button>
+        <button type="button" class="oxxo-kbtn oxxo-green" data-oxxo-action="recargas">RECARGAS<br>TAE</button>
+        <button type="button" class="oxxo-kbtn oxxo-purple" data-oxxo-action="spin">SPIN<br>BY OXXO</button>
+        <button type="button" class="oxxo-kbtn oxxo-orange" data-oxxo-action="oxxopay">OXXO<br>PAY</button>
+        <button type="button" class="oxxo-kbtn oxxo-bluegray" data-oxxo-action="deposito">DEPÓSITO<br>BANCARIO</button>
+        <button type="button" class="oxxo-kbtn oxxo-brown" data-oxxo-action="retiro">RETIRO<br>EFECTIVO</button>
+        <button type="button" class="oxxo-kbtn oxxo-red" data-oxxo-action="cigarros">CIGARROS 🔒</button>
+        <button type="button" class="oxxo-kbtn oxxo-amber" data-oxxo-action="cerveza">CERVEZA 🔒</button>
+        <button type="button" class="oxxo-kbtn oxxo-teal" data-oxxo-action="promo">PROMO 2X1</button>
+      </div>
+
+      <div class="oxxo-numpad">
+        <button type="button" class="oxxo-numbtn" data-oxxo-key="7">7</button>
+        <button type="button" class="oxxo-numbtn" data-oxxo-key="8">8</button>
+        <button type="button" class="oxxo-numbtn" data-oxxo-key="9">9</button>
+        <button type="button" class="oxxo-numbtn oxxo-cancel" data-oxxo-key="cancel">CANC</button>
+        <button type="button" class="oxxo-numbtn" data-oxxo-key="4">4</button>
+        <button type="button" class="oxxo-numbtn" data-oxxo-key="5">5</button>
+        <button type="button" class="oxxo-numbtn" data-oxxo-key="6">6</button>
+        <button type="button" class="oxxo-numbtn oxxo-times" data-oxxo-key="x">×</button>
+        <button type="button" class="oxxo-numbtn" data-oxxo-key="1">1</button>
+        <button type="button" class="oxxo-numbtn" data-oxxo-key="2">2</button>
+        <button type="button" class="oxxo-numbtn" data-oxxo-key="3">3</button>
+        <button type="button" class="oxxo-numbtn oxxo-back" data-oxxo-key="back">←</button>
+        <button type="button" class="oxxo-numbtn oxxo-zero" data-oxxo-key="0">0</button>
+        <button type="button" class="oxxo-numbtn" data-oxxo-key=".">.</button>
+        <button type="button" class="oxxo-numbtn oxxo-enter" data-oxxo-key="enter">ENTER</button>
+      </div>
+
+      <div class="oxxo-pay-row">
+        <button type="button" class="oxxo-paybtn oxxo-pay-cash" data-oxxo-pay="efectivo">EFECTIVO<br>F9</button>
+        <button type="button" class="oxxo-paybtn oxxo-pay-card" data-oxxo-pay="tarjeta">TARJETA<br>F10</button>
+        <button type="button" class="oxxo-paybtn oxxo-pay-qr" data-oxxo-pay="qr">QR / NFC<br>F11</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="oxxo-statusbar">
+    <span><span class="dot-green">●</span> EN LÍNEA</span>
+    <span id="oxxo-sync-status">Última sincronización: --:--</span>
+    <span>v.NPOS 7.4.2</span>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  function pad2(n){return String(n).padStart(2,'0');}
+  function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]);});}
+
+  function vistaIs(v){ return document.body.getAttribute('data-vista') === String(v); }
+
+  // Clock (only ticks while in Vista 3)
+  setInterval(function() {
+    if (!vistaIs(3)) return;
+    var el = document.getElementById('oxxo-clock');
+    if (!el) return;
+    var d = new Date();
+    el.textContent = pad2(d.getHours())+':'+pad2(d.getMinutes())+':'+pad2(d.getSeconds());
+  }, 1000);
+
+  function syncOxxoCart() {
+    if (!vistaIs(3)) return;
+    var oxxoBody = document.getElementById('oxxo-cart-body');
+    var countEl = document.getElementById('oxxo-items-count');
+    var totalEl = document.getElementById('oxxo-total-val');
+    if (!oxxoBody) return;
+
+    var rows = document.querySelectorAll('#cart-body tr');
+    if (!rows.length) {
+      oxxoBody.innerHTML = '<div class="oxxo-empty">Escanea un código o teclea un SKU para iniciar venta</div>';
+      if (countEl) countEl.textContent = '0';
+      var origTotal0 = document.getElementById('total-big');
+      if (totalEl) totalEl.textContent = origTotal0 ? origTotal0.textContent.trim() : '$0.00';
+      return;
+    }
+
+    var html = '';
+    var totalQty = 0;
+    rows.forEach(function(tr) {
+      var tds = tr.querySelectorAll('td');
+      if (tds.length < 5) return;
+      var desc = (tds[1] && tds[1].textContent || '').trim();
+      var price = (tds[2] && tds[2].textContent || '').trim();
+      var qty = (tds[3] && tds[3].textContent || '').trim();
+      var importe = (tds[4] && tds[4].textContent || '').trim();
+      var qtyN = parseFloat(qty) || 0;
+      totalQty += qtyN;
+      html += '<div class="oxxo-row">'
+        + '<span>' + escapeHtml(desc.toUpperCase()) + '</span>'
+        + '<span style="text-align:center">' + escapeHtml(qty) + '</span>'
+        + '<span style="text-align:right">' + escapeHtml(price.replace('$','').trim()) + '</span>'
+        + '<span style="text-align:right">' + escapeHtml(importe.replace('$','').trim()) + '</span>'
+        + '</div>';
+    });
+    oxxoBody.innerHTML = html;
+    if (countEl) countEl.textContent = String(Math.round(totalQty));
+    var origTotal = document.getElementById('total-big');
+    if (totalEl && origTotal) totalEl.textContent = origTotal.textContent.trim();
+  }
+
+  function setupCartObserver() {
+    var cart = document.getElementById('cart-body');
+    if (!cart) { setTimeout(setupCartObserver, 500); return; }
+    var mo = new MutationObserver(syncOxxoCart);
+    mo.observe(cart, {childList: true, subtree: true, characterData: true});
+    var total = document.getElementById('total-big');
+    if (total) {
+      var mo2 = new MutationObserver(syncOxxoCart);
+      mo2.observe(total, {childList: true, characterData: true, subtree: true});
+    }
+  }
+  setupCartObserver();
+
+  function onVistaChanged() {
+    if (vistaIs(3)) {
+      syncOxxoCart();
+      var syncEl = document.getElementById('oxxo-sync-status');
+      if (syncEl) {
+        var d = new Date();
+        syncEl.textContent = 'Última sincronización: ' + pad2(d.getHours())+':'+pad2(d.getMinutes());
+      }
+      // Try to put cashier name from session
+      try {
+        var who = (window.__currentUser && (window.__currentUser.email || window.__currentUser.name))
+                || document.querySelector('.brand-info .name')?.textContent
+                || 'M. RAMÍREZ';
+        var cEl = document.getElementById('oxxo-cashier');
+        if (cEl && who) cEl.textContent = 'Cajero: ' + String(who).split('@')[0].toUpperCase();
+      } catch(_) {}
+      setTimeout(function(){ var i = document.getElementById('oxxo-scan'); if (i) i.focus(); }, 80);
+    }
+  }
+  var bodyMo = new MutationObserver(function(muts) {
+    muts.forEach(function(m){ if (m.attributeName === 'data-vista') onVistaChanged(); });
+  });
+  bodyMo.observe(document.body, {attributes: true, attributeFilter: ['data-vista']});
+  if (vistaIs(3)) onVistaChanged();
+
+  function proxyToBarcode(value) {
+    var orig = document.getElementById('barcode-input');
+    if (!orig) return;
+    orig.value = value;
+    if (typeof window.searchProduct === 'function') {
+      try { window.searchProduct(value); } catch(e) { console.warn('[oxxo]', e); }
+    } else {
+      var ev = new KeyboardEvent('keypress', {key:'Enter', code:'Enter', keyCode:13, which:13, bubbles:true});
+      orig.dispatchEvent(ev);
+    }
+    var oxxoIn = document.getElementById('oxxo-scan');
+    if (oxxoIn) { oxxoIn.value = ''; oxxoIn.focus(); }
+  }
+
+  function handleKey(key) {
+    var input = document.getElementById('oxxo-scan');
+    if (!input) return;
+    if (key === 'cancel') {
+      input.value = '';
+      try { window.clearCart && window.clearCart(); } catch(e) {}
+      return;
+    }
+    if (key === 'back') { input.value = input.value.slice(0,-1); return; }
+    if (key === 'x') { input.value = ''; return; }
+    if (key === 'enter') {
+      if (input.value) proxyToBarcode(input.value);
+      return;
+    }
+    input.value += key;
+  }
+
+  var actionMap = {
+    services:  { screen: 'servicios',    toast: '💡 Pago de servicios' },
+    recargas:  { screen: 'recargas',     toast: '📱 Recargas TAE' },
+    spin:      { screen: 'recargas',     toast: '🎰 Spin by OXXO — recargas' },
+    oxxopay:   { screen: 'recargas',     toast: '💳 OXXO Pay' },
+    deposito:  { screen: 'apertura',     toast: '🏦 Depósito bancario' },
+    retiro:    { screen: 'apertura',     toast: '💵 Retiro de efectivo' },
+    cigarros:  { screen: null,           toast: '🚬 Cigarros — requiere autorización' },
+    cerveza:   { screen: null,           toast: '🍺 Cerveza — requiere autorización' },
+    promo:     { screen: 'promociones',  toast: '🏷️ Promociones 2x1' }
+  };
+
+  document.addEventListener('click', function(e) {
+    if (!vistaIs(3)) return;
+
+    var t = e.target.closest('[data-oxxo-key]');
+    if (t) { handleKey(t.getAttribute('data-oxxo-key')); return; }
+
+    if (e.target.closest('#oxxo-add-btn')) {
+      var input = document.getElementById('oxxo-scan');
+      if (input && input.value) proxyToBarcode(input.value);
+      return;
+    }
+
+    t = e.target.closest('[data-oxxo-action]');
+    if (t) {
+      var act = t.getAttribute('data-oxxo-action');
+      var cfg = actionMap[act] || {};
+      if (cfg.toast) { try { window.showToast && window.showToast(cfg.toast); } catch(_){} }
+      if (cfg.screen && typeof window.showScreen === 'function') {
+        // Switch to vista 1 first because navigation is hidden in vista 3
+        document.body.setAttribute('data-vista','1');
+        try { localStorage.setItem('salvx_vista','1'); } catch(_){}
+        var lab = document.getElementById('vista-label');
+        var fab = document.getElementById('vista-fab-label');
+        if (lab) lab.textContent = 'Vista ①';
+        if (fab) fab.textContent = 'Vista ①';
+        try { window.showScreen(cfg.screen); } catch(_){}
+      }
+      return;
+    }
+
+    t = e.target.closest('[data-oxxo-pay]');
+    if (t) {
+      if (typeof window.openPayment === 'function') {
+        try { window.openPayment(); } catch(_){}
+      }
+      return;
+    }
+  }, false);
+
+  document.addEventListener('keydown', function(e) {
+    if (!vistaIs(3)) return;
+    if (e.target && e.target.id === 'oxxo-scan' && e.key === 'Enter') {
+      e.preventDefault();
+      if (e.target.value) proxyToBarcode(e.target.value);
+    }
+  });
+})();
+</script>
+<script src="/volvix-onboarding-wizard.js"></script>
 </body>
 </html>
