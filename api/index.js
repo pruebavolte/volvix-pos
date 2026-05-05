@@ -1359,7 +1359,8 @@ ${robosHTML ? `<section class="section alt"><div class="wrap"><div class="eyebro
       var pages = j && j.query && j.query.pages;
       if (!pages) return null;
       // Buscar primera imagen válida — excluir formatos malos Y títulos histórico/no-relevantes
-      var BAD_TITLE = /newspaper|daily|journal|lithograph|magazine|gazette|times|herald|tribune|baseball|football|cricket|red.stockings|advert(isement)?|poster|map|chart|diagram|sheet.music/i;
+      // Lista expandida 2026-05: música/broadcasting/televisión/marcas no-relacionadas
+      var BAD_TITLE = /newspaper|daily|journal|lithograph|magazine|gazette|times|herald|tribune|baseball|football|cricket|red.stockings|advert(isement)?|poster|map|chart|diagram|sheet.music|musical.group|music.group|band.member|singer|vocalist|broadcaster|broadcasting|television.station|news.anchor|reporter|politician|election|war|battle|cathedral|church|monastery|portrait.of|lithography|engraving|sketch|painting|illustration.of|coat.of.arms|flag.of|seal.of|stamp|currency|coin|banknote|graffiti|protest|building|street|view.of|aerial.view|map.of|architecture|interior.of|exterior.of/i;
       var ranked = [];
       for (var k in pages){
         var p = pages[k];
