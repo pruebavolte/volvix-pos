@@ -1707,59 +1707,30 @@
     const wrap = document.getElementById('ai-response');
     wrap.innerHTML = `
       <div class="ai-card new-giro-card">
-        <div class="ai-card-header">
-          <div class="ai-icon" style="background:#EFF6FF;">🔎</div>
-          <div class="ai-header-text">
-            <div class="ai-answer">
-              Buscando el sistema especializado para
-              <span class="accent">"${SAFE_QUERY}"</span>…
-            </div>
+        <div class="ai-thinking" id="gen-loader" style="padding:40px 20px;text-align:center;">
+          <div style="display:inline-flex;gap:6px;align-items:center;justify-content:center;font-size:18px;font-weight:600;color:var(--text);">
+            <span class="dots" style="display:inline-flex;gap:4px;">
+              <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:linear-gradient(120deg,#2563eb,#7c3aed);animation:vlx-pulse 1.4s ease-in-out infinite;"></span>
+              <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:linear-gradient(120deg,#2563eb,#7c3aed);animation:vlx-pulse 1.4s ease-in-out 0.2s infinite;"></span>
+              <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:linear-gradient(120deg,#2563eb,#7c3aed);animation:vlx-pulse 1.4s ease-in-out 0.4s infinite;"></span>
+            </span>
+            <span style="margin-left:10px;">Buscando…</span>
           </div>
-        </div>
-
-        <div class="ai-generating" id="gen-steps">
-          <div class="gen-step" id="gen-1"><div class="ico">🔍</div><div>Analizando giro…</div></div>
-          <div class="gen-step" id="gen-2"><div class="ico">🔍</div><div>Detectando operaciones especializadas…</div></div>
-          <div class="gen-step" id="gen-3"><div class="ico">🔍</div><div>Identificando productos del negocio…</div></div>
-          <div class="gen-step" id="gen-4"><div class="ico">🔍</div><div>Configurando módulos inteligentes…</div></div>
-          <div class="gen-step" id="gen-5"><div class="ico">🔍</div><div>Personalizando experiencia…</div></div>
         </div>
 
         <div id="gen-result" style="display:none;"></div>
       </div>
+      <style>
+        @keyframes vlx-pulse { 0%, 100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.1); } }
+      </style>
     `;
-
-    const stepTimings = [200, 900, 1700, 2400, 3000];
-    const stepIds = ['gen-1','gen-2','gen-3','gen-4','gen-5'];
-    let lastStepActivatedAt = 0;
-    stepTimings.forEach((delay, idx) => {
-      setTimeout(() => {
-        if (idx > 0) {
-          const prev = document.getElementById(stepIds[idx-1]);
-          if (prev) {
-            prev.classList.remove('active');
-            prev.classList.add('done');
-            const ico = prev.querySelector('.ico');
-            if (ico) ico.innerHTML = '✓';
-          }
-        }
-        const cur = document.getElementById(stepIds[idx]);
-        if (cur) cur.classList.add('active');
-        if (idx === stepIds.length - 1) lastStepActivatedAt = Date.now();
-      }, delay);
-    });
 
     let resolved = false;
     const finish = (data) => {
       if (resolved) return;
       resolved = true;
-      const last = document.getElementById('gen-5');
-      if (last) {
-        last.classList.remove('active');
-        last.classList.add('done');
-        const ico = last.querySelector('.ico');
-        if (ico) ico.innerHTML = '✓';
-      }
+      const loader = document.getElementById('gen-loader');
+      if (loader) loader.style.display = 'none';
       if (data && data.__fallback) {
         renderFallbackResult(SAFE_QUERY);
       } else {
@@ -1793,36 +1764,64 @@
     const nombre = String(payload.nombre_comercial || '').slice(0, 80);
     const slug   = String(apiData.slug || payload.slug || '');
     const desc   = String(payload.descripcion || '').slice(0, 200);
-    const funcs  = Array.isArray(payload.funcionalidades_unicas) ? payload.funcionalidades_unicas.slice(0, 3) : [];
-    const prods  = Array.isArray(payload.productos_detectados) ? payload.productos_detectados.slice(0, 6) : [];
+    // 6 dolores específicos del giro
+    const pains  = Array.isArray(payload.dolores_especificos) && payload.dolores_especificos.length
+                   ? payload.dolores_especificos.slice(0, 6)
+                   : (Array.isArray(payload.funcionalidades_unicas) ? payload.funcionalidades_unicas.slice(0, 6) : []);
+    // 9 productos del giro con imágenes
+    const prods  = Array.isArray(payload.productos_detectados) ? payload.productos_detectados.slice(0, 9) : [];
+    // 3 formas de robo silencioso del giro
+    const robos  = Array.isArray(payload.formas_robo) ? payload.formas_robo.slice(0, 3) : [];
 
-    const ICONS = ['💪','📋','🎯','⚡','✦','◆'];
+    const PAIN_ICONS = ['😤','💸','⏰','📉','🤯','🚨'];
+    const ROBO_ICONS = ['🕵️','💼','🎭'];
 
     const escape = (s) => String(s == null ? '' : s).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
 
-    const funcsHTML = funcs.map((f, i) => {
-      const txt = escape(f);
+    // 6 dolores en grid 2 columnas
+    const painsHTML = pains.map((p, i) => {
+      const txt = escape(typeof p === 'string' ? p : (p.titulo || p.descripcion || p.title || p.desc || ''));
+      const sub = escape(typeof p === 'object' ? (p.descripcion || p.desc || '') : '');
       return `
-        <div class="pain-card" style="display:flex;gap:14px;align-items:flex-start;">
-          <div class="pain-icon" style="font-size:22px;line-height:1;flex-shrink:0;">${ICONS[i] || '◆'}</div>
+        <div class="pain-card" style="display:flex;gap:12px;align-items:flex-start;background:#fff;border:1px solid #ececec;border-radius:12px;padding:16px;">
+          <div style="font-size:24px;line-height:1;flex-shrink:0;">${PAIN_ICONS[i] || '◆'}</div>
           <div style="flex:1;">
-            <div class="pain-desc" style="font-size:13.5px;line-height:1.5;color:var(--text-2,#475569);">${txt}</div>
+            <div style="font-size:13.5px;line-height:1.45;color:#0a0a0a;font-weight:600;">${txt}</div>
+            ${sub ? `<div style="font-size:12.5px;line-height:1.4;color:#6b6b6b;margin-top:4px;">${sub}</div>` : ''}
           </div>
         </div>`;
     }).join('');
 
+    // 9 productos con imágenes en grid 3 columnas
     const prodsHTML = prods.map(p => {
       const name = escape(p && p.name);
       const cat  = escape((p && p.category) || (p && p.metadata && p.metadata.category) || '');
-      const variant = escape(p && p.metadata && p.metadata.variant);
-      const tail = [cat, variant].filter(Boolean).join(' · ');
+      const img  = (p && (p.image || p.image_url || p.img)) ||
+                   `https://source.unsplash.com/featured/200x200/?${encodeURIComponent((p && p.name) || originalQuery)},product`;
+      const price = (p && p.price) ? `$${escape(String(p.price))}` : '';
       return `
-        <li style="padding:8px 0;border-bottom:1px solid #F1F5F9;display:flex;align-items:baseline;gap:10px;">
-          <span style="color:#94A3B8;font-size:12px;flex-shrink:0;">•</span>
-          <span style="flex:1;">
-            <strong style="color:#0B0B0F;font-weight:600;">${name}</strong>${tail ? `<span style="color:#64748B;font-size:13px;"> — ${tail}</span>` : ''}
-          </span>
-        </li>`;
+        <div style="background:#fff;border:1px solid #ececec;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;">
+          <div style="aspect-ratio:1;background:#fafafa url('${img}') center/cover no-repeat;border-bottom:1px solid #ececec;"></div>
+          <div style="padding:10px 12px;flex:1;display:flex;flex-direction:column;gap:2px;">
+            <div style="font-size:13px;font-weight:600;color:#0a0a0a;line-height:1.3;">${name}</div>
+            ${cat ? `<div style="font-size:11.5px;color:#6b6b6b;">${cat}</div>` : ''}
+            ${price ? `<div style="font-size:12.5px;color:#16a34a;font-weight:600;margin-top:2px;">${price}</div>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+
+    // 3 formas de robo silencioso
+    const robosHTML = robos.map((r, i) => {
+      const txt = escape(typeof r === 'string' ? r : (r.titulo || r.descripcion || r.title || r.desc || ''));
+      const sub = escape(typeof r === 'object' ? (r.descripcion || r.desc || '') : '');
+      return `
+        <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:14px;display:flex;gap:10px;align-items:flex-start;">
+          <div style="font-size:22px;line-height:1;flex-shrink:0;">${ROBO_ICONS[i] || '🚨'}</div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:600;color:#991B1B;line-height:1.4;">${txt}</div>
+            ${sub ? `<div style="font-size:12px;color:#7F1D1D;margin-top:3px;line-height:1.4;">${sub}</div>` : ''}
+          </div>
+        </div>`;
     }).join('');
 
     try {
@@ -1849,35 +1848,43 @@
       }
     } catch (_) { /* si localStorage falla, ignorar */ }
 
+    // URL final: si el backend ya creó la landing real, usar /landing-{slug}.html.
+    // Si todavía no, fallback a landing_dynamic con el query.
+    const landingUrl = (apiData && apiData.landing) ? apiData.landing
+                     : `/landing-${encodeURIComponent(slug)}.html`;
+
     const wrap = document.getElementById('gen-result');
     if (!wrap) return;
     wrap.style.display = 'block';
     wrap.innerHTML = `
-      <div style="margin-top:24px;padding-top:24px;border-top:1px solid var(--border);">
-        <div style="font-size:12px;font-weight:700;color:var(--success);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">
-          ✅ Sistema especializado encontrado
-        </div>
-
-        <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:14px;">
-          <div class="ai-icon" style="background:#FFEDD5;flex-shrink:0;">✨</div>
+      <div style="margin-top:8px;">
+        <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:18px;">
+          <div class="ai-icon" style="background:#EEF2FF;flex-shrink:0;">✨</div>
           <div style="flex:1;">
             <div class="ai-answer" style="margin-bottom:4px;">
               <span class="system-name-pill">${escape(nombre)}</span>
             </div>
             <div class="ai-sub" style="margin:0;">
-              ${escape(desc) || ('Especializado para negocios de ' + escape(originalQuery))}
+              ${escape(desc) || ('Sistema POS especializado para ' + escape(originalQuery))}
             </div>
           </div>
         </div>
 
-        <div class="pains-title" style="margin-top:18px;">Lo que hace especial a ${escape(nombre)}</div>
-        <div class="pains-grid" style="display:grid;gap:12px;grid-template-columns:1fr;">${funcsHTML}</div>
+        ${painsHTML ? `
+        <div class="pains-title" style="margin-top:24px;font-size:14px;font-weight:700;color:#0a0a0a;">6 dolores que vivimos contigo</div>
+        <div style="display:grid;gap:10px;grid-template-columns:repeat(2, 1fr);margin-top:12px;">${painsHTML}</div>` : ''}
 
-        <div class="pains-title" style="margin-top:22px;">Productos que ya configuramos para ti</div>
-        <ul style="list-style:none;padding:0;margin:8px 0 0;">${prodsHTML}</ul>
+        ${prodsHTML ? `
+        <div class="pains-title" style="margin-top:26px;font-size:14px;font-weight:700;color:#0a0a0a;">9 productos listos para tu inventario</div>
+        <div style="display:grid;gap:10px;grid-template-columns:repeat(3, 1fr);margin-top:12px;">${prodsHTML}</div>` : ''}
 
-        <div class="ai-cta" style="margin-top:24px;">
-          <a href="landing_dynamic.html?giro=${encodeURIComponent(slug)}" class="btn-big">Ver ${escape(nombre)} en detalle →</a>
+        ${robosHTML ? `
+        <div class="pains-title" style="margin-top:26px;font-size:14px;font-weight:700;color:#991B1B;">⚠️ 3 formas comunes de robo silencioso en este giro</div>
+        <div style="font-size:12px;color:#6b6b6b;margin-top:4px;">Volvix te alerta y bloquea cada una automáticamente.</div>
+        <div style="display:grid;gap:10px;grid-template-columns:1fr;margin-top:12px;">${robosHTML}</div>` : ''}
+
+        <div class="ai-cta" style="margin-top:28px;display:flex;gap:10px;flex-wrap:wrap;">
+          <a href="${landingUrl}" class="btn-big">Ver ${escape(nombre)} en detalle →</a>
           <button class="btn-secondary" onclick="requestDemo('${escape(slug)}')">📞 Solicitar demo</button>
         </div>
       </div>
@@ -1891,17 +1898,18 @@
     const slug = safe.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
     wrap.style.display = 'block';
     wrap.innerHTML = `
-      <div style="margin-top:24px;padding-top:24px;border-top:1px solid var(--border);">
-        <div style="font-size:12px;font-weight:700;color:var(--success);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">
-          ✅ Sistema preparado para ${safe}
+      <div style="margin-top:8px;">
+        <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:18px;">
+          <div class="ai-icon" style="background:#EEF2FF;flex-shrink:0;">✨</div>
+          <div style="flex:1;">
+            <div class="ai-answer" style="margin-bottom:4px;">
+              <span class="system-name-pill">${safe}</span>
+            </div>
+            <div class="ai-sub" style="margin:0;">Sistema POS especializado para tu negocio.</div>
+          </div>
         </div>
-        <div class="ai-sub" style="margin-bottom:18px;line-height:1.55;">
-          Estamos terminando de afinar las funciones específicas. Mientras tanto,
-          puedes empezar con la plantilla base — toda tu venta queda registrada y
-          la personalización se aplica automáticamente cuando esté lista (en minutos).
-        </div>
-        <div class="ai-cta">
-          <a href="landing_dynamic.html?giro=${encodeURIComponent(slug)}" class="btn-big">Empezar a usar el sistema →</a>
+        <div class="ai-cta" style="margin-top:24px;display:flex;gap:10px;flex-wrap:wrap;">
+          <a href="/landing-${encodeURIComponent(slug)}.html" class="btn-big">Ver el sistema →</a>
           <button class="btn-secondary" onclick="requestDemo('${slug}')">📞 Solicitar demo</button>
         </div>
       </div>

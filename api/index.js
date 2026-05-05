@@ -1128,6 +1128,147 @@ function findFile(filename) {
   return null;
 }
 
+// 2026-05-05: render dinámico de /landing-{slug}.html para giros generados por IA.
+// Si la landing no existe físicamente, intenta servirla desde verticals.settings + vertical_templates.
+async function tryServeDynamicLanding(res, pathname) {
+  const m = /^\/landing-([a-z0-9-]+)\.html$/i.exec(pathname);
+  if (!m) return false;
+  const slug = m[1];
+  try {
+    // Lookup vertical by code=slug usando supabaseRequest local
+    const verticals = await supabaseRequest('GET', '/verticals?code=eq.' + encodeURIComponent(slug) + '&select=*');
+    if (!Array.isArray(verticals) || !verticals.length) return false;
+    const v = verticals[0];
+    const tmpls = await supabaseRequest('GET', '/vertical_templates?vertical_id=eq.' + encodeURIComponent(v.id) + '&select=*&order=position.asc');
+    const settings = v.settings || {};
+    const payload = {
+      nombre_comercial: v.name,
+      descripcion: v.description,
+      slug: v.code,
+      icon: v.icon || '✨',
+      color: v.color || '#2563eb',
+      dolores_especificos: settings.dolores_especificos || [],
+      funcionalidades_unicas: settings.funcionalidades_unicas || [],
+      formas_robo: settings.formas_robo || [],
+      productos_detectados: Array.isArray(tmpls) ? tmpls.map(t => ({
+        name: t.name, category: t.category, estimated_price: t.estimated_price,
+        image_url: (t.metadata && t.metadata.image_url) || (t.metadata && t.metadata.image) || null,
+        metadata: t.metadata || {}
+      })) : [],
+      terminologia: settings.terminologia || {}
+    };
+    const html = renderLandingHTML(payload);
+    res.statusCode = 200;
+    setSecurityHeaders(res);
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=86400');
+    res.end(html);
+    return true;
+  } catch (e) {
+    console.error('tryServeDynamicLanding error:', e && e.message);
+    return false;
+  }
+}
+
+function renderLandingHTML(p) {
+  const esc = s => String(s == null ? '' : s).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+  const PAIN_ICONS = ['😤','💸','⏰','📉','🤯','🚨'];
+  const ROBO_ICONS = ['🕵️','💼','🎭'];
+  const pains = (p.dolores_especificos || []).slice(0, 6);
+  const prods = (p.productos_detectados || []).slice(0, 9);
+  const robos = (p.formas_robo || []).slice(0, 3);
+  const painsHTML = pains.map((d, i) => {
+    const t = esc(typeof d === 'string' ? d : (d.titulo || d.title || ''));
+    const s = esc(typeof d === 'object' ? (d.descripcion || d.desc || '') : '');
+    return `<div class="card"><div class="ico">${PAIN_ICONS[i] || '◆'}</div><div class="body"><div class="t">${t}</div>${s ? `<div class="s">${s}</div>` : ''}</div></div>`;
+  }).join('');
+  const prodsHTML = prods.map(prod => {
+    const name = esc(prod.name || '');
+    const cat = esc(prod.category || '');
+    const img = (prod.image_url || prod.image || `https://source.unsplash.com/featured/300x300/?${encodeURIComponent(prod.name || '')}`);
+    const price = prod.estimated_price ? `$${esc(String(prod.estimated_price))}` : '';
+    return `<div class="prod"><div class="img" style="background-image:url('${img}')"></div><div class="info"><div class="name">${name}</div>${cat ? `<div class="cat">${cat}</div>` : ''}${price ? `<div class="price">${price}</div>` : ''}</div></div>`;
+  }).join('');
+  const robosHTML = robos.map((r, i) => {
+    const t = esc(typeof r === 'string' ? r : (r.titulo || r.title || ''));
+    const s = esc(typeof r === 'object' ? (r.descripcion || r.desc || '') : '');
+    return `<div class="robo"><div class="ico">${ROBO_ICONS[i] || '🚨'}</div><div class="body"><div class="t">${t}</div>${s ? `<div class="s">${s}</div>` : ''}</div></div>`;
+  }).join('');
+  return `<!doctype html><html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${esc(p.nombre_comercial || '')} · Volvix POS</title>
+<meta name="description" content="${esc(p.descripcion || '')}">
+<link rel="manifest" href="/manifest.json"><meta name="theme-color" content="#2563eb">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',system-ui,sans-serif;color:#0a0a0a;background:#fff;line-height:1.5;font-size:15px}
+  a{color:inherit;text-decoration:none}
+  .strip{background:#000;color:#f3f3f3;font-size:13px;text-align:center;padding:10px}
+  nav{border-bottom:1px solid #ececec;background:#fff;position:sticky;top:0;z-index:20}
+  nav .row{max-width:1180px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:18px 24px}
+  .logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px}
+  .logo-mark{width:18px;height:18px;border-radius:4px;background:#000}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:8px;font-size:14px;font-weight:600;border:1px solid transparent;text-decoration:none;cursor:pointer}
+  .btn-dark{background:#000;color:#fff}.btn-dark:hover{background:#1a1a1a}
+  .hero{max-width:1180px;margin:0 auto;padding:64px 24px 48px;text-align:center}
+  .hero h1{font-weight:800;font-size:clamp(36px,4.6vw,56px);line-height:1.05;letter-spacing:-0.025em;margin:0 0 18px}
+  .hero h1 .accent{background:linear-gradient(120deg,#2563eb 0%,#7c3aed 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .hero .lead{color:#6b6b6b;font-size:17px;max-width:720px;margin:0 auto 28px}
+  .section{padding:60px 24px;border-top:1px solid #ececec}
+  .section.alt{background:#fafafa}
+  .section .wrap{max-width:1180px;margin:0 auto}
+  .eyebrow{text-align:center;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#6b6b6b;margin-bottom:12px;font-weight:500}
+  .section h2{text-align:center;font-weight:700;font-size:clamp(26px,3vw,36px);letter-spacing:-.02em;margin-bottom:36px}
+  .pains{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  .card{background:#fff;border:1px solid #ececec;border-radius:12px;padding:18px;display:flex;gap:14px;align-items:flex-start}
+  .card .ico{font-size:28px;flex-shrink:0;line-height:1}
+  .card .body{flex:1}
+  .card .t{font-size:14.5px;font-weight:600;color:#0a0a0a;line-height:1.35}
+  .card .s{font-size:13px;color:#6b6b6b;margin-top:5px;line-height:1.45}
+  .prods{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .prod{background:#fff;border:1px solid #ececec;border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+  .prod .img{aspect-ratio:1;background:#fafafa center/cover no-repeat;border-bottom:1px solid #ececec}
+  .prod .info{padding:14px 16px;flex:1}
+  .prod .name{font-size:14px;font-weight:600;color:#0a0a0a;line-height:1.3}
+  .prod .cat{font-size:12px;color:#6b6b6b;margin-top:4px}
+  .prod .price{font-size:13.5px;color:#16a34a;font-weight:600;margin-top:6px}
+  .robos{display:grid;grid-template-columns:1fr;gap:12px;max-width:780px;margin:0 auto}
+  .robo{background:#FEF2F2;border:1px solid #FECACA;border-radius:12px;padding:18px;display:flex;gap:14px;align-items:flex-start}
+  .robo .ico{font-size:28px;flex-shrink:0}
+  .robo .t{font-size:14.5px;font-weight:600;color:#991B1B;line-height:1.35}
+  .robo .s{font-size:13px;color:#7F1D1D;margin-top:5px;line-height:1.45}
+  .final{max-width:1180px;margin:48px auto;background:#0a0a0a;color:#fff;border-radius:18px;padding:48px;text-align:center}
+  .final h2{font-size:clamp(28px,3.4vw,40px);margin-bottom:14px;color:#fff}
+  .final p{color:#cfcfcf;margin-bottom:24px}
+  .final .btn-dark{background:#fff;color:#000}
+  .foot{text-align:center;padding:30px 24px;color:#6b6b6b;font-size:13px;border-top:1px solid #ececec}
+  @media(max-width:760px){.pains{grid-template-columns:1fr}.prods{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:460px){.prods{grid-template-columns:1fr}}
+</style></head><body>
+<div class="strip">Soy mexicano · Hecho con orgullo en México</div>
+<nav><div class="row">
+  <a class="logo" href="/"><div class="logo-mark"></div><span>VOLVIX</span></a>
+  <a href="/registro.html" class="btn btn-dark">Probar gratis</a>
+</div></nav>
+<section class="hero">
+  <h1>Sistema POS para <span class="accent">${esc(p.nombre_comercial || 'tu negocio')}</span></h1>
+  <p class="lead">${esc(p.descripcion || 'Configurado especialmente para tu giro de negocio.')}</p>
+  <a href="/registro.html" class="btn btn-dark">Empezar ahora — sin tarjeta</a>
+</section>
+${painsHTML ? `<section class="section alt"><div class="wrap"><div class="eyebrow">Te entendemos</div><h2>6 dolores que vivimos contigo</h2><div class="pains">${painsHTML}</div></div></section>` : ''}
+${prodsHTML ? `<section class="section"><div class="wrap"><div class="eyebrow">Listos para vender</div><h2>9 productos ya configurados en tu inventario</h2><div class="prods">${prodsHTML}</div></div></section>` : ''}
+${robosHTML ? `<section class="section alt"><div class="wrap"><div class="eyebrow" style="color:#991B1B">Alerta importante</div><h2 style="color:#991B1B">3 formas comunes de robo silencioso</h2><p style="text-align:center;color:#6b6b6b;max-width:580px;margin:-24px auto 32px">Volvix las detecta y bloquea automáticamente.</p><div class="robos">${robosHTML}</div></div></section>` : ''}
+<section><div class="final">
+  <h2>Empieza hoy.</h2>
+  <p>Sin complicaciones. Únete a cientos de negocios creciendo con Volvix.</p>
+  <a href="/registro.html" class="btn btn-dark">Probar gratis ahora →</a>
+</div></section>
+<div class="foot">© 2026 Volvix — POS multi-giro · <a href="/marketplace.html">Otros giros</a> · <a href="/soporte.html">Soporte</a></div>
+</body></html>`;
+}
+
 function serveStaticFile(res, pathname, fullUrl) {
   // 2026-05-05: cleanup final. marketplace.html es la única landing principal.
   if (pathname === '/' || pathname === '') {
@@ -1136,6 +1277,32 @@ function serveStaticFile(res, pathname, fullUrl) {
   const filePath = findFile(pathname);
 
   if (!filePath) {
+    // 2026-05-05: si es /landing-{slug}.html que no existe físicamente,
+    // intentar servirlo desde BD (giros generados por IA persistidos).
+    if (/^\/landing-[a-z0-9-]+\.html$/i.test(pathname)) {
+      tryServeDynamicLanding(res, pathname).then(handled => {
+        if (!handled) {
+          // Fallback a 404 estándar
+          const customPath = findFile('/404.html');
+          if (customPath) {
+            try {
+              const html = fs.readFileSync(customPath, 'utf8');
+              res.statusCode = 404;
+              setSecurityHeaders(res);
+              res.setHeader('Content-Type', 'text/html; charset=utf-8');
+              res.setHeader('Cache-Control', 'no-store');
+              res.end(html);
+              return;
+            } catch (_) {}
+          }
+          res.statusCode = 404;
+          setSecurityHeaders(res);
+          res.setHeader('Content-Type', 'text/html; charset=utf-8');
+          res.end(`<h1>404</h1><p>${pathname}</p><p><a href="/marketplace.html">Marketplace</a></p>`);
+        }
+      });
+      return;
+    }
     // R28: servir 404.html custom con branding si existe
     const customPath = findFile('/404.html');
     if (customPath) {

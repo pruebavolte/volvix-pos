@@ -486,21 +486,26 @@ function validateGiroResponse(json) {
   if (typeof json.descripcion !== 'string' || json.descripcion.length < 10) return { ok:false, error:'descripcion_short' };
   if (!json.terminologia || typeof json.terminologia !== 'object') return { ok:false, error:'term_invalid' };
 
-  if (!Array.isArray(json.funcionalidades_unicas) || json.funcionalidades_unicas.length !== 3) {
-    return { ok:false, error:'funcs_must_be_3' };
+  // 2026-05: validación relajada — soportamos legacy (3 funcs, 6 prods) y nuevo (6 pains, 9 prods, 3 robos)
+  if (!Array.isArray(json.funcionalidades_unicas) || json.funcionalidades_unicas.length < 3) {
+    return { ok:false, error:'funcs_min_3' };
   }
   for (const f of json.funcionalidades_unicas) {
     if (typeof f !== 'string' || f.length < 20) return { ok:false, error:'func_too_short', detail:f };
     if (FORBIDDEN_FUNCS_RE.test(f)) return { ok:false, error:'func_too_generic', detail:f };
   }
 
-  if (!Array.isArray(json.productos_detectados) || json.productos_detectados.length !== 6) {
-    return { ok:false, error:'prods_must_be_6' };
+  if (!Array.isArray(json.productos_detectados) || json.productos_detectados.length < 6) {
+    return { ok:false, error:'prods_min_6' };
   }
   for (const p of json.productos_detectados) {
     if (!p || typeof p !== 'object') return { ok:false, error:'prod_invalid' };
     if (typeof p.name !== 'string' || p.name.length < 3) return { ok:false, error:'prod_name_invalid', detail:p };
   }
+
+  // dolores_especificos y formas_robo opcionales (si vienen, validar shape)
+  if (json.dolores_especificos && !Array.isArray(json.dolores_especificos)) return { ok:false, error:'dolores_array' };
+  if (json.formas_robo && !Array.isArray(json.formas_robo)) return { ok:false, error:'robos_array' };
 
   if (!Array.isArray(json.modulos_a_activar)) return { ok:false, error:'modulos_act_array' };
   for (const m of json.modulos_a_activar) {
@@ -565,34 +570,48 @@ function buildUserPrompt(giroInput, extraHint) {
     '  "slug": "string · lowercase-con-guiones, sin acentos",\n' +
     '  "descripcion": "string · 1 oración, max 140 chars",\n' +
     '  "terminologia": {\n' +
-    '    "cliente": "string",\n' +
-    '    "producto": "string",\n' +
-    '    "venta": "string"\n' +
+    '    "cliente": "string · cómo le dice el dueño",\n' +
+    '    "producto": "string · cómo le dice el dueño",\n' +
+    '    "venta": "string · cómo le dice el dueño"\n' +
     '  },\n' +
+    '  "dolores_especificos": [\n' +
+    '    { "titulo": "string · 4-8 palabras, terminología del giro", "descripcion": "string · 1 oración max 100 chars con la palabra exacta del giro" },\n' +
+    '    "... 6 objetos en total ..."\n' +
+    '  ],\n' +
     '  "funcionalidades_unicas": [\n' +
     '    "string · 1 oración con verbo de acción",\n' +
-    '    "string · ...",\n' +
-    '    "string · ..."\n' +
+    '    "...",\n' +
+    '    "..."\n' +
     '  ],\n' +
     '  "productos_detectados": [\n' +
     '    {\n' +
-    '      "name": "string · max 60 chars",\n' +
+    '      "name": "string · max 60 chars · producto REAL del giro con marca si aplica",\n' +
     '      "category": "string · max 30 chars",\n' +
     '      "estimated_price": number,\n' +
+    '      "image_url": "string · URL pública de imagen real del producto (Unsplash, Pexels, o sitio oficial). Si no estás seguro: https://source.unsplash.com/featured/200x200/?[nombre-producto-en-ingles]",\n' +
     '      "metadata": {\n' +
     '        "unit": "pieza|kg|g|ml|l|servicio (opcional)",\n' +
     '        "expires_in_days": number_o_null,\n' +
-    '        "variant": "sabor o variante si aplica",\n' +
-    '        "extra": {}\n' +
+    '        "variant": "sabor o variante si aplica"\n' +
     '      }\n' +
-    '    }\n' +
+    '    },\n' +
+    '    "... 9 productos en total ..."\n' +
+    '  ],\n' +
+    '  "formas_robo": [\n' +
+    '    { "titulo": "string · 4-8 palabras", "descripcion": "string · 1 oración max 120 chars: cómo el empleado o cliente roba en este giro SIN que el dueño se dé cuenta" },\n' +
+    '    "... 3 objetos en total ..."\n' +
     '  ],\n' +
     '  "modulos_a_activar": ["string", "..."],\n' +
     '  "modulos_a_desactivar": ["string", "..."],\n' +
     '  "campos_no_disponibles": ["string", "..."],\n' +
     '  "synonyms": ["string", "..."]\n' +
     '}\n\n' +
-    'Recuerda: 3 funcionalidades únicas, 6 productos, sin frases genéricas.' + hint
+    'OBLIGATORIO:\n' +
+    '- 6 dolores específicos (con terminología del giro, no genéricos)\n' +
+    '- 9 productos reales del giro CON image_url cargable\n' +
+    '- 3 formas de robo silencioso específicas (cómo se roba en ESE giro, no genérico)\n' +
+    '- 3+ funcionalidades únicas (no usar palabras prohibidas)\n' +
+    'Sin markdown, sin texto antes/después.' + hint
   );
 }
 
@@ -627,6 +646,8 @@ async function persistGeneratedGiro(ctx, slug, payload, originalQuery) {
     settings: {
       terminologia: payload.terminologia || {},
       funcionalidades_unicas: payload.funcionalidades_unicas || [],
+      dolores_especificos: payload.dolores_especificos || [],
+      formas_robo: payload.formas_robo || [],
       modulos_a_desactivar: payload.modulos_a_desactivar || [],
       campos_no_disponibles: payload.campos_no_disponibles || [],
       synonyms: Array.isArray(payload.synonyms) ? payload.synonyms : [],
@@ -754,7 +775,7 @@ async function generateGiro(ctx, req, res) {
             campos_no_disponibles: (v.settings && v.settings.campos_no_disponibles) || [],
             synonyms: (v.settings && v.settings.synonyms) || []
           },
-          landing: '/landing_dynamic.html?giro=' + encodeURIComponent(slug),
+          landing: '/landing-' + encodeURIComponent(slug) + '.html',
         });
       }
     } catch (_) { /* fall through to LLM */ }
@@ -766,7 +787,7 @@ async function generateGiro(ctx, req, res) {
       cached: false,
       source: 'no_api_key',
       slug,
-      fallback: '/landing_dynamic.html?giro=' + encodeURIComponent(slug),
+      fallback: '/landing-' + encodeURIComponent(slug) + '.html',
       message: 'AI provider not configured; client may use generic template.',
     });
   }
@@ -828,7 +849,7 @@ async function generateGiro(ctx, req, res) {
     slug,
     payload: parsed,
     persisted: persistResult,
-    landing: '/landing_dynamic.html?giro=' + encodeURIComponent(slug),
+    landing: '/landing-' + encodeURIComponent(slug) + '.html',
   });
 }
 
