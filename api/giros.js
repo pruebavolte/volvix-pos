@@ -51,10 +51,14 @@ async function readJson(req) {
   });
 }
 
+// Regex robusto independiente del encoding del archivo fuente
+// Strips Unicode combining marks U+0300 a U+036F
+const ACCENT_REGEX = new RegExp('[\\u0300-\\u036f]', 'g');
+
 function slugify(s) {
   return String(s || '')
     .toLowerCase()
-    .normalize('NFD').replace(/[̀-ͯ]/g, '') // strip accents
+    .normalize('NFD').replace(ACCENT_REGEX, '') // strip accents (combining marks)
     .replace(/[^a-z0-9\s-]/g, '')
     .trim()
     .replace(/\s+/g, '-')

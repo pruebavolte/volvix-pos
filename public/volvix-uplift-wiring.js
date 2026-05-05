@@ -848,4 +848,39 @@
   } else {
     init();
   }
+
+  // 2026-05: inyectar banner "No es lo que busco" en TODAS las landings.
+  // Detecta URL /landing-*.html (60+ estáticas + dinámicas) y agrega banner
+  // arriba con CTA al marketplace con ?force_new=1 para crear giro específico.
+  function injectNotMineBanner(){
+    try {
+      var path = location.pathname || '';
+      if (!/^\/landing(-|_)/.test(path)) return;
+      if (document.querySelector('.not-mine-bar')) return;
+      var slugMatch = path.match(/^\/landing[-_]([a-z0-9-]+)\.html$/i);
+      var slug = slugMatch ? slugMatch[1] : '';
+      if (!slug && /landing_dynamic/i.test(path)) {
+        var qs = new URLSearchParams(location.search);
+        slug = qs.get('giro') || '';
+      }
+      if (!slug) return;
+      var bar = document.createElement('div');
+      bar.className = 'not-mine-bar';
+      bar.style.cssText = 'background:#FEF3C7;border-bottom:1px solid #FDE68A;padding:10px 24px;display:flex;align-items:center;justify-content:center;gap:14px;font-size:13.5px;color:#92400E;flex-wrap:wrap;font-family:Inter,system-ui,sans-serif;position:relative;z-index:99999';
+      var text = document.createElement('span');
+      text.textContent = '¿No es lo que buscabas para tu negocio?';
+      var link = document.createElement('a');
+      link.href = '/?q=' + encodeURIComponent(slug.replace(/-/g, ' ')) + '&edit=1&force_new=1';
+      link.textContent = '🔍 Buscar de nuevo';
+      link.style.cssText = 'display:inline-flex;align-items:center;gap:6px;background:#0a0a0a;color:#fff;padding:7px 14px;border-radius:8px;font-weight:600;text-decoration:none;font-size:13px';
+      bar.appendChild(text);
+      bar.appendChild(link);
+      var first = document.body && document.body.firstChild;
+      if (first) document.body.insertBefore(bar, first);
+      else if (document.body) document.body.appendChild(bar);
+    } catch(_){}
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', injectNotMineBanner);
+  } else { injectNotMineBanner(); }
 })();
