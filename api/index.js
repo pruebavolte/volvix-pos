@@ -692,7 +692,7 @@ function setSecurityHeaders(res) {
   res.setHeader('Cross-Origin-Resource-Policy', 'same-site');
   res.setHeader(
     'Content-Security-Policy',
-    "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://js.stripe.com; connect-src 'self' https://salvadorexoficial.com https://www.salvadorexoficial.com https://salvadorexoficial.com https://*.supabase.co wss://*.supabase.co https://api.ipify.org https://api.exchangerate.host https://api.anthropic.com https://api.stripe.com https://api.openai.com https://api.sendgrid.com https://api.twilio.com https://corsproxy.io https://api.allorigins.win https://api.codetabs.com https://duckduckgo.com https://*.duckduckgo.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+    "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://js.stripe.com; connect-src 'self' https://salvadorexoficial.com https://www.salvadorexoficial.com https://salvadorexoficial.com https://*.supabase.co wss://*.supabase.co https://api.ipify.org https://api.exchangerate.host https://api.anthropic.com https://api.stripe.com https://api.openai.com https://api.sendgrid.com https://api.twilio.com https://corsproxy.io https://api.allorigins.win https://api.codetabs.com https://duckduckgo.com https://*.duckduckgo.com https://commons.wikimedia.org https://en.wikipedia.org https://*.wikipedia.org https://upload.wikimedia.org; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
   );
 }
 
@@ -1293,62 +1293,68 @@ ${robosHTML ? `<section class="section alt"><div class="wrap"><div class="eyebro
 </div></section>
 <div class="foot">© 2026 Volvix — POS multi-giro · <a href="/marketplace.html">Otros giros</a> · <a href="/soporte.html">Soporte</a></div>
 <script>
-// 2026-05: client-side image search for products without real images.
-// IP residencial del cliente bypass-ea bloqueos de buscadores que rechazan
-// datacenters Vercel. Resultados se persisten en BD via /api/giros/save-image
-// para que la próxima visita ya tenga la URL real cacheada.
+// 2026-05: client-side image search via Wikimedia Commons API.
+// Wikimedia tiene CORS oficial abierto (origin=*), no requiere proxies.
+// Sin API key, sin tokens IA, sin storage cost.
+//
+// Estrategia: extraer 1-3 keywords genéricos del producto y buscar en
+// commons.wikimedia.org. Wikimedia tiene MUCHAS fotos de productos
+// genéricos (bra, thong, bralette, etc.) en namespace 6 (File:).
 (function(){
   var SLUG = ${JSON.stringify(p.slug || '')};
-  var CORS_PROXIES = [
-    'https://corsproxy.io/?url=',
-    'https://api.allorigins.win/raw?url=',
-    'https://api.codetabs.com/v1/proxy?quest='
-  ];
-  function timeoutFetch(url, ms){
-    return Promise.race([
-      fetch(url),
-      new Promise(function(_, rej){ setTimeout(function(){rej(new Error('timeout'))}, ms || 6000) })
-    ]);
+  // Mapping ES → EN común para queries más efectivos
+  var ES_EN = {
+    'sosten':'bra','sostenes':'bra','brasier':'bra','brassiere':'bra',
+    'tanga':'thong','tangas':'thong','panty':'panties','pantis':'panties','pantys':'panties',
+    'bralette':'bralette','bralettes':'bralette',
+    'bodysuit':'bodysuit','bodysuits':'bodysuit','body':'bodysuit',
+    'pijama':'pajamas','pijamas':'pajamas',
+    'corset':'corset','corsets':'corset',
+    'lenceria':'lingerie','conjunto':'lingerie set','conjuntos':'lingerie set',
+    'medias':'stockings','liguero':'garter belt'
+  };
+  function buildKeywords(name, category){
+    var text = ((name||'')+' '+(category||'')).toLowerCase()
+      .normalize('NFD').replace(/[\\u0300-\\u036f]/g, '')
+      .replace(/['"]/g,' ').replace(/[^a-z0-9 ]/g,' ');
+    var words = text.split(/\\s+/).filter(function(w){return w.length>2});
+    var translated = words.map(function(w){ return ES_EN[w] || w; });
+    return [...new Set(translated)].slice(0, 4).join(' ');
   }
-  async function searchDDG(query){
-    for (var i=0; i<CORS_PROXIES.length; i++){
-      try {
-        var u = CORS_PROXIES[i] + encodeURIComponent('https://duckduckgo.com/?q=' + encodeURIComponent(query) + '&iar=images&iax=images&ia=images');
-        var r = await timeoutFetch(u, 7000);
-        if (!r.ok) continue;
-        var html = await r.text();
-        var m = html.match(/vqd=['"]([^'"]+)['"]/) || html.match(/vqd=([0-9-]+)/);
-        if (!m) continue;
-        var vqd = m[1];
-        var u2 = CORS_PROXIES[i] + encodeURIComponent('https://duckduckgo.com/i.js?l=us-en&o=json&q=' + encodeURIComponent(query) + '&vqd=' + encodeURIComponent(vqd) + '&p=1');
-        var r2 = await timeoutFetch(u2, 7000);
-        if (!r2.ok) continue;
-        var j = await r2.json();
-        if (j && Array.isArray(j.results) && j.results.length){
-          var first = j.results.find(function(x){ return x && x.image && /^https?:\\/\\//.test(x.image); });
-          if (first) return first.image;
+  async function searchWikimedia(query){
+    if (!query) return null;
+    var url = 'https://commons.wikimedia.org/w/api.php?action=query&format=json&generator=search&prop=imageinfo&iiprop=url&iiurlwidth=600&gsrsearch=' + encodeURIComponent(query) + '&gsrnamespace=6&gsrlimit=5&origin=*';
+    try {
+      var r = await fetch(url);
+      if (!r.ok) return null;
+      var j = await r.json();
+      var pages = j && j.query && j.query.pages;
+      if (!pages) return null;
+      // Buscar primera imagen válida (jpg/png/webp, no svg/pdf)
+      for (var k in pages){
+        var p = pages[k];
+        var info = p && p.imageinfo && p.imageinfo[0];
+        if (info && info.thumburl && /\\.(jpe?g|png|webp)$/i.test(info.url || '')){
+          return info.thumburl;
         }
-      } catch(e){ /* try next proxy */ }
-    }
+      }
+    } catch(e){}
     return null;
   }
   async function processCard(card){
-    var query = card.getAttribute('data-search') || card.getAttribute('data-name');
-    if (!query) return;
     var name = card.getAttribute('data-name');
-    var url = await searchDDG(query);
+    var query = buildKeywords(name, '');
+    if (!query) return;
+    var url = await searchWikimedia(query);
     if (url) {
       var imgDiv = card.querySelector('.img');
       if (imgDiv) {
-        // Pre-cargar imagen para evitar flash
         var pre = new Image();
         pre.onload = function(){
           imgDiv.style.cssText = 'aspect-ratio:1;background-image:url(\\''+url+'\\');background-size:cover;background-position:center;border-bottom:1px solid #ececec';
           imgDiv.textContent = '';
         };
-        pre.onerror = function(){ /* keep placeholder */ };
         pre.src = url;
-        // Persistir en BD (best-effort)
         if (SLUG) {
           fetch('/api/giros/save-image', {
             method: 'POST',
@@ -1361,9 +1367,8 @@ ${robosHTML ? `<section class="section alt"><div class="wrap"><div class="eyebro
   }
   function start(){
     var cards = document.querySelectorAll('.prod[data-needs-image="1"]');
-    // Stagger: 1 card cada 800ms para no quemar proxies
     cards.forEach(function(card, i){
-      setTimeout(function(){ processCard(card); }, i * 800);
+      setTimeout(function(){ processCard(card); }, i * 400);
     });
   }
   if (document.readyState === 'loading') {
