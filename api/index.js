@@ -6030,50 +6030,66 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
       if (!rateLimit('webhook:' + provider + ':' + ip, 60, 60 * 1000)) {
         return sendJSON(res, { error: 'rate_limited' }, 429);
       }
-      // S2 fix: rawBody capture defensivo contra middleware que pre-consumio el stream.
-      //   - Si readableEnded YA es true antes de nuestro listen, el body ya se leyo
-      //     en otro lado. Detectarlo y abortar con HTTP 500 explicito (no falsear con
-      //     'signature_mismatch' que confunde diagnostico).
-      //   - Timeout de seguridad 10s (si el client deja la conexion abierta sin enviar
-      //     end, no nos quedamos colgados).
+      // S2 fix v2: rawBody capture defensivo.
+      // En Vercel/Lambda el body PUEDE estar pre-buffered como req.body (parsed) +
+      // req.rawBody (string crudo) por la plataforma. Por eso NO podemos asumir
+      // que el stream esta vivo. Fallback ladder:
+      //   1. Si req.rawBody existe (Vercel @vercel/node lo expone), usarlo.
+      //   2. Si stream esta vivo (no readableEnded), capturar via 'data'/'end'.
+      //   3. Si stream pre-consumido pero req.body existe parsed, JSON.stringify
+      //      como ultimo recurso (esto cambia bytes del body original — la firma
+      //      HMAC PUEDE fallar — pero al menos no rompe el handler).
+      //   - Timeout de seguridad 10s
+      //   - Listener 'close' previene cuelgue por cliente que abandona conexion
       let rawBody = '';
-      // Detectar si el body ya fue consumido por algun middleware (S2 fix)
-      if (req.readableEnded || req.complete) {
-        try { console.error('[webhook] ' + provider + ' rawBody already consumed by upstream — cannot verify HMAC'); } catch (_) {}
-        return sendJSON(res, { error: 'body_pre_consumed' }, 500);
-      }
-      try {
-        await new Promise((resolve, reject) => {
-          const chunks = [];
-          let total = 0;
-          let settled = false;
-          const safeReject = (e) => { if (!settled) { settled = true; reject(e); } };
-          const safeResolve = () => { if (!settled) { settled = true; resolve(); } };
-          // Timeout de seguridad: si el cliente no termina en 10s, cortar.
-          const tHandle = setTimeout(() => safeReject(new Error('read_timeout')), 10000);
-          req.on('data', (c) => {
-            total += c.length;
-            if (total > 64 * 1024) { req.destroy(); clearTimeout(tHandle); safeReject(new Error('payload_too_large')); return; }
-            chunks.push(c);
-          });
-          req.on('end', () => {
-            clearTimeout(tHandle);
-            rawBody = Buffer.concat(chunks).toString('utf8');
-            safeResolve();
-          });
-          req.on('error', (e) => { clearTimeout(tHandle); safeReject(e); });
-          req.on('close', () => { clearTimeout(tHandle); if (!settled) safeReject(new Error('connection_closed')); });
-        });
-      } catch (e) {
-        const msg = String(e && e.message) || 'read_error';
-        if (msg === 'payload_too_large') {
+      if (typeof req.rawBody === 'string' && req.rawBody.length > 0) {
+        // Vercel/serverless con rawBody disponible — preferido para HMAC
+        if (req.rawBody.length > 64 * 1024) {
           return sendJSON(res, { error: 'payload_too_large', max: 65536 }, 413);
         }
-        if (msg === 'read_timeout') {
-          return sendJSON(res, { error: 'read_timeout' }, 408);
+        rawBody = req.rawBody;
+      } else if (Buffer.isBuffer(req.rawBody)) {
+        if (req.rawBody.length > 64 * 1024) {
+          return sendJSON(res, { error: 'payload_too_large', max: 65536 }, 413);
         }
-        return sendJSON(res, { error: 'read_error' }, 400);
+        rawBody = req.rawBody.toString('utf8');
+      } else if (!req.readableEnded && !req.complete) {
+        try {
+          await new Promise((resolve, reject) => {
+            const chunks = [];
+            let total = 0;
+            let settled = false;
+            const safeReject = (e) => { if (!settled) { settled = true; reject(e); } };
+            const safeResolve = () => { if (!settled) { settled = true; resolve(); } };
+            const tHandle = setTimeout(() => safeReject(new Error('read_timeout')), 10000);
+            req.on('data', (c) => {
+              total += c.length;
+              if (total > 64 * 1024) { req.destroy(); clearTimeout(tHandle); safeReject(new Error('payload_too_large')); return; }
+              chunks.push(c);
+            });
+            req.on('end', () => {
+              clearTimeout(tHandle);
+              rawBody = Buffer.concat(chunks).toString('utf8');
+              safeResolve();
+            });
+            req.on('error', (e) => { clearTimeout(tHandle); safeReject(e); });
+            req.on('close', () => { clearTimeout(tHandle); if (!settled) safeReject(new Error('connection_closed')); });
+          });
+        } catch (e) {
+          const msg = String(e && e.message) || 'read_error';
+          if (msg === 'payload_too_large') return sendJSON(res, { error: 'payload_too_large', max: 65536 }, 413);
+          if (msg === 'read_timeout') return sendJSON(res, { error: 'read_timeout' }, 408);
+          return sendJSON(res, { error: 'read_error' }, 400);
+        }
+      } else if (req.body) {
+        // Stream pre-consumido pero body parsed disponible. WARNING: la firma HMAC
+        // PUEDE fallar porque el JSON.stringify reorderea/normaliza bytes vs el
+        // payload original que firmó el provider. Logs explicitos.
+        try { console.warn('[webhook] ' + provider + ' stream pre-consumed; using JSON.stringify(req.body) as fallback (HMAC may fail)'); } catch (_) {}
+        try { rawBody = typeof req.body === 'string' ? req.body : JSON.stringify(req.body); } catch (_) { rawBody = ''; }
       }
+      // Si rawBody quedo vacio, dejar que verifyWebhookSignature falle naturalmente
+      // (devolvera signature_mismatch). El HMAC sobre '' nunca matchea una firma valida.
       // Verificar HMAC + replay (sigCheck.http = status apropiado)
       const sigCheck = verifyWebhookSignature(provider, rawBody, req.headers || {});
       if (!sigCheck.valid) {
