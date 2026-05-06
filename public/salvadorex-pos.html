@@ -2739,7 +2739,12 @@
     <div class="menubar-divider"></div>
 
     <!-- SECONDARY: Operacionales -->
-    <button class="menu-btn" data-feature="module.devoluciones" data-menu="devoluciones" onclick="showScreen('devoluciones')">
+    <!-- 2026-05 ia-arquitectura R2 (flujo de tarea): "Devoluciones" se hace DESDE
+         una venta en Historial. Boton oculto del menubar; el flujo correcto es:
+         Historial -> click venta -> "Devolver". showScreen('devoluciones') queda
+         intacto como deep-link de backward compat. -->
+    <button class="menu-btn" data-feature="module.devoluciones" data-menu="devoluciones" onclick="showScreen('devoluciones')"
+            style="display:none" data-ia-arq-moved-to="historial">
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#E67E22" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
       <span>↩️ Devoluciones</span>
     </button>
@@ -7541,6 +7546,13 @@
     $('#vnt-body').innerHTML = SALES.map(s => {
       const chip = s[6]==='completed'?'ok':'warn';
       const lbl = s[6]==='completed'?'Completada':'Devuelta';
+      // 2026-05 ia-arquitectura R2 (flujo de tarea): el boton "Devolver" vive
+      // dentro de cada venta en Historial, no como modulo separado en menubar.
+      // Solo se muestra para ventas completed (no para las ya devueltas).
+      const safeId = String(s[0]||'').replace(/'/g, "\\'");
+      const devolverBtn = s[6]==='completed'
+        ? `<button class="btn sm" onclick="startDevolucionFromSale('${safeId}')" title="Hacer devolucion de esta venta">↩️ Devolver</button>`
+        : '';
       return `<tr>
         <td class="mono" style="font-weight: 600;">${s[0]}</td>
         <td style="color: var(--text-3); font-size: 11px;">${s[1]}</td>
@@ -7549,10 +7561,30 @@
         <td><span class="chip">${s[4]}</span></td>
         <td class="num" style="font-weight: 600;">${fmt(s[5])}</td>
         <td><span class="chip ${chip}"><span class="dot"></span>${lbl}</span></td>
-        <td style="text-align: right;"><button class="btn sm">👁️</button></td>
+        <td style="text-align: right;"><button class="btn sm" title="Ver detalle">👁️</button> ${devolverBtn}</td>
       </tr>`;
     }).join('');
   }
+  // 2026-05 ia-arquitectura: helper invocado desde el boton "Devolver" de Historial.
+  // Lleva al usuario a la pantalla de devoluciones con el folio precargado en el
+  // input de busqueda, manteniendo la entidad screen-devoluciones intacta para
+  // backward compat (deep-links existentes a showScreen('devoluciones') siguen).
+  function startDevolucionFromSale(saleId) {
+    try {
+      if (typeof showScreen === 'function') showScreen('devoluciones');
+      // Pre-llenar el campo de busqueda de venta con el folio
+      setTimeout(function() {
+        var input = document.querySelector('#screen-devoluciones input[type="text"]');
+        if (input) {
+          input.value = String(saleId || '');
+          input.focus();
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      }, 100);
+    } catch (e) {}
+  }
+  // Exponer al global scope (renderVentas usa onclick=" attribute)
+  window.startDevolucionFromSale = startDevolucionFromSale;
   function renderUsuarios() {
     // 2026-05: contador dinamico (era hardcoded "5 usuarios")
     var sub = document.getElementById('usr-sub');
