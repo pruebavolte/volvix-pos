@@ -95,19 +95,32 @@ Reportes publicos: `R13_SECURITY_AUDIT.md`, `R22_SECURITY_FIXES.md`, `R24_SECURI
     sat_clave_unidad, sat_forma_pago, sat_metodo_pago, sat_uso_cfdi,
     sat_regimen_fiscal.
 
-  - **TOTAL aplicado: ~147 tablas con RLS service_role-only.**
-    Estado pasa de 154 sin RLS -> **solo 4 sin RLS**.
+  - **Phase 5 (4 tablas con realtime, sesion 2026-05-06)**:
+    pos_sales, pos_products, kds_tickets, kds_stations.
+    Policy hibrida:
+      - service_role: FOR ALL USING (true) WITH CHECK (true)
+      - anon + authenticated: FOR SELECT USING (true)
+    Esto cierra el advisor warning sin romper el wiring de Realtime client-side.
+    NO es la solucion final tenant-aware (anon todavia puede leer todas las
+    filas de todos los tenants), pero:
+      1. Bloquea writes desde anon (antes podia INSERT/UPDATE/DELETE)
+      2. Mantiene Realtime SELECT funcionando
+      3. Service_role conserva control total via api/index.js
 
-  - **4 tablas restantes** (requieren diseno especial por uso realtime client-side):
-    - `pos_sales` (436 filas)  - realtime via volvix-realtime-wiring.js
-    - `pos_products` (550 filas) - realtime via volvix-realtime-wiring.js
-    - `kds_tickets` (22 filas)  - realtime via volvix-kds.html canal kds_orders
-    - `kds_stations`            - relacionada con kds realtime
+  - **TOTAL aplicado: 154 de 154 tablas con RLS habilitada.**
+    **Advisor RLS_disabled CERRADO al 100% en sesion 2026-05-06.**
 
-    Aplicar service_role-only romperia el wiring client-side. Plan:
-    1. Implementar Supabase Auth o JWT custom claim con tenant_id.
-    2. Policy que use `auth.uid()` para limitar SELECT al tenant del usuario.
-    3. Anon bloqueado, service_role full access.
+  - **Phase 6 (futura iteracion - tenant-aware policies)**:
+    Para que un cliente con anon key SOLO vea sus propias ventas/productos:
+    1. Implementar Supabase Auth (signInWithPassword/Magic Link) o
+       firmar JWTs custom con `auth.uid()` y `tenant_id` claim.
+    2. Reemplazar policies de las 4 tablas realtime con:
+       FOR SELECT TO authenticated USING (
+         tenant_id = (SELECT tenant_id FROM volvix_tenants
+                      WHERE owner_user_id = auth.uid())
+       )
+    3. Anon role: revocar SELECT (ya no necesario si los clientes auth con Supabase).
+    4. Re-correr advisor para validar que policies son tenant-strict.
 
 ### HIGH
 

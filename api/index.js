@@ -6030,24 +6030,47 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
       if (!rateLimit('webhook:' + provider + ':' + ip, 60, 60 * 1000)) {
         return sendJSON(res, { error: 'rate_limited' }, 429);
       }
-      // readBody devuelve parsed JSON. Para HMAC necesitamos el rawBody.
-      // Captura el raw body manualmente para verificar firma.
+      // S2 fix: rawBody capture defensivo contra middleware que pre-consumio el stream.
+      //   - Si readableEnded YA es true antes de nuestro listen, el body ya se leyo
+      //     en otro lado. Detectarlo y abortar con HTTP 500 explicito (no falsear con
+      //     'signature_mismatch' que confunde diagnostico).
+      //   - Timeout de seguridad 10s (si el client deja la conexion abierta sin enviar
+      //     end, no nos quedamos colgados).
       let rawBody = '';
+      // Detectar si el body ya fue consumido por algun middleware (S2 fix)
+      if (req.readableEnded || req.complete) {
+        try { console.error('[webhook] ' + provider + ' rawBody already consumed by upstream — cannot verify HMAC'); } catch (_) {}
+        return sendJSON(res, { error: 'body_pre_consumed' }, 500);
+      }
       try {
         await new Promise((resolve, reject) => {
-          let chunks = [];
+          const chunks = [];
           let total = 0;
+          let settled = false;
+          const safeReject = (e) => { if (!settled) { settled = true; reject(e); } };
+          const safeResolve = () => { if (!settled) { settled = true; resolve(); } };
+          // Timeout de seguridad: si el cliente no termina en 10s, cortar.
+          const tHandle = setTimeout(() => safeReject(new Error('read_timeout')), 10000);
           req.on('data', (c) => {
             total += c.length;
-            if (total > 64 * 1024) { req.destroy(); reject(new Error('payload_too_large')); return; }
+            if (total > 64 * 1024) { req.destroy(); clearTimeout(tHandle); safeReject(new Error('payload_too_large')); return; }
             chunks.push(c);
           });
-          req.on('end', () => { rawBody = Buffer.concat(chunks).toString('utf8'); resolve(); });
-          req.on('error', reject);
+          req.on('end', () => {
+            clearTimeout(tHandle);
+            rawBody = Buffer.concat(chunks).toString('utf8');
+            safeResolve();
+          });
+          req.on('error', (e) => { clearTimeout(tHandle); safeReject(e); });
+          req.on('close', () => { clearTimeout(tHandle); if (!settled) safeReject(new Error('connection_closed')); });
         });
       } catch (e) {
-        if (String(e && e.message) === 'payload_too_large') {
+        const msg = String(e && e.message) || 'read_error';
+        if (msg === 'payload_too_large') {
           return sendJSON(res, { error: 'payload_too_large', max: 65536 }, 413);
+        }
+        if (msg === 'read_timeout') {
+          return sendJSON(res, { error: 'read_timeout' }, 408);
         }
         return sendJSON(res, { error: 'read_error' }, 400);
       }
