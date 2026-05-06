@@ -33389,7 +33389,11 @@ if (process.env.NODE_ENV === 'test') {
           tenant_name: business_name,
           business_type: giroNormalized,
         };
-        respPayload.redirect = '/salvadorex-pos.html';
+        // 2026-05-06 FIX: redirect a launcher (48KB, 1 wiring script) en vez de
+        // salvadorex-pos.html (807KB, 129 scripts) que congelaba el navegador
+        // del usuario tras registro. Desde el launcher el user ve sus apps
+        // (POS, Inventario, Clientes, etc.) y abre la que necesita.
+        respPayload.redirect = '/volvix-launcher.html';
         respPayload.email_verification_pending = !emailSent;
         // Registrar sesion activa para que requireAuth() la valide via jti
         try {
