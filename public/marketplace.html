@@ -1007,9 +1007,17 @@
   </div>
 </div>
 
-<!-- 2026-05-06: sello "Hecho en Nuevo León" lo inyecta automaticamente
-     volvix-mexico-pride-wiring.js (sticky bar arriba con franja blanca + logo
-     oficial desde /logos/hecho-en-nuevo-leon.png). NO duplicar aqui. -->
+<!-- 2026-05-06: sello "Hecho en Nuevo Leon" oficial. Apunta a /logos/
+     (carpeta canonica del proyecto). data-theme-skip evita oscurecer
+     el contenedor en dark mode. -->
+<div data-theme-skip style="display:flex;justify-content:center;align-items:center;padding:18px 16px 6px;background:#ffffff !important">
+  <a href="/" aria-label="Hecho en Nuevo Leon, Mexico" data-theme-skip style="display:inline-block;line-height:0;background:#ffffff">
+    <img src="/logos/hecho-en-nuevo-leon.png" alt="Hecho en Nuevo Leon, Mexico"
+         width="280" height="120"
+         data-theme-skip
+         style="max-width:90vw;height:auto;display:block;background:#ffffff">
+  </a>
+</div>
 
 <!-- NAV -->
 <nav class="top" aria-label="Navegación principal">
