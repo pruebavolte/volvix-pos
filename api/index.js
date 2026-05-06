@@ -5894,34 +5894,102 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
     } catch (err) { sendError(res, err); }
   });
 
-  // ============ WEBHOOKS DELIVERY (stubs — capturan payload, no procesan) ============
-  // FIX adversarial A3 + S3:
-  //  - Rate-limit por IP (60/min) anti storage-DoS y flooding
-  //  - Si el INSERT a Supabase falla, devolver 502 (no 200) para que el provider reintente
-  //  - Body capado a 64KB para evitar payloads gigantes
-  //  - TODO: agregar HMAC verification por proveedor (Uber X-Uber-Signature, etc.)
+  // ============ WEBHOOKS DELIVERY (HMAC verified) ============
+  // 2026-05 fix HMAC verification:
+  //  - Cada provider requiere su secret en env var (UBER_EATS_WEBHOOK_SECRET, etc.)
+  //  - Si el secret NO esta configurado, fall-open + log warning (no romper antes del setup)
+  //  - Si esta configurado, REQUIERE firma valida en header — 401 si falla
+  //  - Algoritmos por provider:
+  //      - Uber Eats:  HMAC SHA-256 over rawBody, header X-Uber-Signature (hex)
+  //      - Rappi:      HMAC SHA-256 over rawBody, header X-Rappi-Signature (hex)
+  //      - Didi Food:  HMAC SHA-256 over rawBody, header X-Didi-Signature (hex)
+  //  - constant-time compare via crypto.timingSafeEqual
+  //  - Rate-limit + size cap se mantienen
+  const WEBHOOK_CONFIG = {
+    'uber-eats': { secretEnv: 'UBER_EATS_WEBHOOK_SECRET', sigHeader: 'x-uber-signature' },
+    'rappi':     { secretEnv: 'RAPPI_WEBHOOK_SECRET',     sigHeader: 'x-rappi-signature' },
+    'didi-food': { secretEnv: 'DIDI_FOOD_WEBHOOK_SECRET', sigHeader: 'x-didi-signature' },
+  };
+
+  function verifyWebhookSignature(provider, rawBody, headers) {
+    const cfg = WEBHOOK_CONFIG[provider];
+    if (!cfg) return { valid: false, reason: 'unknown_provider' };
+    const secret = (process.env[cfg.secretEnv] || '').trim();
+    if (!secret) {
+      // Fall-open con warning hasta que el operador configure el secret
+      try { console.warn('[webhook] ' + provider + ' SECRET not set (' + cfg.secretEnv + ') — accepting unverified'); } catch (_) {}
+      return { valid: true, reason: 'no_secret_configured', warn: true };
+    }
+    const headerSig = String(headers[cfg.sigHeader] || headers[cfg.sigHeader.toLowerCase()] || '').trim();
+    if (!headerSig) return { valid: false, reason: 'missing_signature_header' };
+    let expectedSig;
+    try {
+      expectedSig = require('crypto').createHmac('sha256', secret).update(rawBody).digest('hex');
+    } catch (e) {
+      return { valid: false, reason: 'crypto_error' };
+    }
+    // Strip prefix 'sha256=' if present (some providers use it)
+    const provided = headerSig.replace(/^sha256=/i, '').toLowerCase();
+    if (provided.length !== expectedSig.length) return { valid: false, reason: 'signature_length_mismatch' };
+    let ok = false;
+    try {
+      const a = Buffer.from(expectedSig, 'hex');
+      const b = Buffer.from(provided, 'hex');
+      ok = a.length === b.length && require('crypto').timingSafeEqual(a, b);
+    } catch (_) { ok = false; }
+    return { valid: ok, reason: ok ? 'valid' : 'signature_mismatch' };
+  }
+
   const captureWebhook = (provider) => async (req, res) => {
     try {
       const ip = (typeof clientIp === 'function' ? clientIp(req) : 'unknown');
       if (!rateLimit('webhook:' + provider + ':' + ip, 60, 60 * 1000)) {
         return sendJSON(res, { error: 'rate_limited' }, 429);
       }
-      const body = await readBody(req).catch(() => ({}));
-      const serialized = JSON.stringify(body || {});
-      if (serialized.length > 64 * 1024) {
-        return sendJSON(res, { error: 'payload_too_large', max: 65536 }, 413);
+      // readBody devuelve parsed JSON. Para HMAC necesitamos el rawBody.
+      // Captura el raw body manualmente para verificar firma.
+      let rawBody = '';
+      try {
+        await new Promise((resolve, reject) => {
+          let chunks = [];
+          let total = 0;
+          req.on('data', (c) => {
+            total += c.length;
+            if (total > 64 * 1024) { req.destroy(); reject(new Error('payload_too_large')); return; }
+            chunks.push(c);
+          });
+          req.on('end', () => { rawBody = Buffer.concat(chunks).toString('utf8'); resolve(); });
+          req.on('error', reject);
+        });
+      } catch (e) {
+        if (String(e && e.message) === 'payload_too_large') {
+          return sendJSON(res, { error: 'payload_too_large', max: 65536 }, 413);
+        }
+        return sendJSON(res, { error: 'read_error' }, 400);
       }
+      // Verificar HMAC
+      const sigCheck = verifyWebhookSignature(provider, rawBody, req.headers || {});
+      if (!sigCheck.valid) {
+        try { console.warn('[webhook] ' + provider + ' signature invalid: ' + sigCheck.reason); } catch (_) {}
+        return sendJSON(res, { error: 'signature_invalid', reason: sigCheck.reason }, 401);
+      }
+      let body = {};
+      try { body = rawBody ? JSON.parse(rawBody) : {}; } catch (_) { body = { _raw: rawBody.slice(0, 256) }; }
       try {
         await supabaseRequest('POST', '/generic_blobs', {
           pos_user_id: 'system_webhook',
           key: 'webhook_' + provider + '_' + Date.now(),
-          value: { provider, body, ua: String(req.headers['user-agent'] || '').slice(0, 200) }
+          value: {
+            provider,
+            body,
+            ua: String(req.headers['user-agent'] || '').slice(0, 200),
+            sig_status: sigCheck.reason,
+          }
         });
       } catch (e) {
-        // Bubble error: provider reintentará en su próximo backoff.
         return sendJSON(res, { error: 'storage_failed', provider }, 502);
       }
-      ok(res, { ok: true, provider, received_at: new Date().toISOString() });
+      ok(res, { ok: true, provider, received_at: new Date().toISOString(), sig_status: sigCheck.reason });
     } catch (err) { sendError(res, err); }
   };
   handlers['POST /api/webhooks/uber-eats'] = captureWebhook('uber-eats');

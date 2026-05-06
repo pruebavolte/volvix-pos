@@ -7566,20 +7566,34 @@
     }).join('');
   }
   // 2026-05 ia-arquitectura: helper invocado desde el boton "Devolver" de Historial.
-  // Lleva al usuario a la pantalla de devoluciones con el folio precargado en el
-  // input de busqueda, manteniendo la entidad screen-devoluciones intacta para
-  // backward compat (deep-links existentes a showScreen('devoluciones') siguen).
+  // Flujo correcto verificado: screen-devoluciones tiene boton "+ Nueva devolución"
+  // que abre el modal openNewReturnModal() con input #nr-search-input que acepta
+  // folio/fecha/cliente. Aqui:
+  //   1. showScreen('devoluciones') (entidad existente intacta)
+  //   2. openNewReturnModal() (abre modal de nueva devolucion)
+  //   3. prefill #nr-search-input con el saleId
+  //   4. trigger newReturnSearchSales() para buscar la venta automaticamente
   function startDevolucionFromSale(saleId) {
     try {
       if (typeof showScreen === 'function') showScreen('devoluciones');
-      // Pre-llenar el campo de busqueda de venta con el folio
+      // Esperar a que el screen este renderizado, luego abrir modal
       setTimeout(function() {
-        var input = document.querySelector('#screen-devoluciones input[type="text"]');
-        if (input) {
-          input.value = String(saleId || '');
-          input.focus();
-          input.dispatchEvent(new Event('input', { bubbles: true }));
-        }
+        try {
+          if (typeof openNewReturnModal === 'function') {
+            openNewReturnModal();
+          }
+          // Esperar a que el modal este renderizado, luego prefill + buscar
+          setTimeout(function() {
+            var input = document.getElementById('nr-search-input');
+            if (input) {
+              input.value = String(saleId || '');
+              input.dispatchEvent(new Event('input', { bubbles: true }));
+              if (typeof newReturnSearchSales === 'function') {
+                newReturnSearchSales();
+              }
+            }
+          }, 150);
+        } catch (e) {}
       }, 100);
     } catch (e) {}
   }
