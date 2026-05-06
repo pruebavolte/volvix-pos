@@ -2616,7 +2616,13 @@
       <span class="badge">3</span>
     </button>
 
-    <button class="tb-btn lowstock" id="tb-lowstock-bell" onclick="openLowStockAlerts()" aria-label="Alertas de stock bajo" title="Alertas de stock bajo" style="position:relative;">
+    <!-- 2026-05 ia-arquitectura R1 + R7: 'Alertas Stock' es subset de Inventario.
+         Bell se queda como acceso rápido GLOBAL desde toolbar pero al click navega a
+         Inventario (fuente única de verdad). Antes: openLowStockAlerts() abría modal
+         flotante separado, lo que generaba sensación de "2 lugares para alertas". -->
+    <button class="tb-btn lowstock" id="tb-lowstock-bell"
+            onclick="(function(){ if (typeof showScreen==='function') showScreen('inventario'); var ev=new CustomEvent('volvix:show-low-stock-tab'); window.dispatchEvent(ev); })()"
+            aria-label="Alertas de stock bajo (abrir Inventario)" title="Alertas de stock bajo — abre Inventario" style="position:relative;">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       <span class="badge" id="tb-lowstock-badge" style="display:none;">0</span>
     </button>
@@ -2777,7 +2783,11 @@
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#34495E" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
       <span>📄 Historial</span>
     </button>
-    <button class="menu-btn" data-feature="module.usuarios" data-menu="usuarios" onclick="showScreen('usuarios')">
+    <!-- 2026-05 ia-arquitectura R1: 'Usuarios' es subset de 'Configuracion'. Se oculta
+         del menubar principal y se accede desde Config -> Equipo. La ruta showScreen('usuarios')
+         queda intacta para no romper deep-links existentes ni atajos de teclado. -->
+    <button class="menu-btn" data-feature="module.usuarios" data-menu="usuarios"
+            onclick="showScreen('usuarios')" style="display:none" data-ia-arq-moved-to="config">
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#16A085" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       <span>👨‍💼 Usuarios</span>
     </button>
@@ -3568,6 +3578,9 @@
         <div class="config-tabs">
           <button class="config-tab active" onclick="showCfg('general', this)">⚙️ General</button>
           <button class="config-tab" onclick="showCfg('negocio', this)">🏪 Datos del negocio</button>
+          <!-- 2026-05 ia-arquitectura R1: Usuarios es subset de Configuracion. Boton "Equipo"
+               navega a la pantalla 'usuarios' (mismo handler de antes), reusing showScreen. -->
+          <button class="config-tab" onclick="showScreen('usuarios')" data-ia-arq="usuarios-from-config">👥 Equipo</button>
           <button class="config-tab" onclick="showCfg('impuestos', this)">💰 Impuestos</button>
           <button class="config-tab" onclick="showCfg('impresion', this)">🖨️ Impresión</button>
           <button class="config-tab" onclick="showCfg('modulos', this)">🧩 Módulos y funciones</button>
