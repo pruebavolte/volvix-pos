@@ -757,13 +757,14 @@ async function tryPexelsImage(query) {
 
 // 2026-05: Google Custom Search JSON API (imágenes brand-specific reales).
 // Free tier: 100 queries/día. searchType=image devuelve imágenes directas (link).
-// Project: volvix-pos. Engine: volvix-images (cx=07ec88647a95540d0).
-// REQUIERE billing vinculado al proyecto GCP volvix-pos (sin cargo bajo 100 q/día).
-// Mientras NO esté vinculado, devuelve 403 PERMISSION_DENIED y la cadena cae a OFF/Wikipedia/Pexels.
-const GOOGLE_CSE_API_KEY = process.env.GOOGLE_CSE_API_KEY || 'AIzaSyAQkzNEPpOSj04ccuAzI9Zcyc6xB7s_zM4';
+// REQUIERE billing vinculado al proyecto GCP — usuario eligió saltar (decisión "C").
+// Función inerte hasta que el usuario agregue GOOGLE_CSE_API_KEY a Vercel env vars.
+// Sin env var explícita, retorna null en <1ms (NO consume el timeout de 6s en 403).
+const GOOGLE_CSE_API_KEY = process.env.GOOGLE_CSE_API_KEY || null;
 const GOOGLE_CSE_ID = process.env.GOOGLE_CSE_ID || '07ec88647a95540d0';
 
 async function tryGoogleCustomSearch(query) {
+  // Gate estricto en env var: sin billing/credencial, no malgastamos 6s por query.
   if (!query || !GOOGLE_CSE_API_KEY || !GOOGLE_CSE_ID) return null;
   try {
     const params = new URLSearchParams({
