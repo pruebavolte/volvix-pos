@@ -1612,15 +1612,30 @@
           window.location.assign(data.landing);
           return;
         }
+        // 2026-05 BUG-FIX: para queries multi-word brand (ej. "Café Lizingh"), saltar
+        // findGiro y classifyWithAI — pueden redirigir a giro genérico. Generar NUEVO.
+        if (isMultiWordBrandQuery(q)) {
+          return showNewGiroGeneration(q);
+        }
         const localHit = findGiro(q);
         if (localHit) { showFoundGiro(localHit); return; }
         return classifyWithAI(q);
       })
       .catch(() => {
+        if (isMultiWordBrandQuery(q)) { showNewGiroGeneration(q); return; }
         const localHit = findGiro(q);
         if (localHit) showFoundGiro(localHit);
         else showNewGiroGeneration(q);
       });
+  }
+
+  // Detecta queries multi-palabra con brand (>1 token de contenido post stop-words).
+  // Mantener sincronizado con searchGiros() en api/giros.js.
+  function isMultiWordBrandQuery(query) {
+    const STOP = new Set(['de','del','la','el','los','las','y','o','un','una','con','para','por','en','al','a']);
+    const tokens = String(query || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .split(/\s+/).filter(t => t.length >= 2 && !STOP.has(t));
+    return tokens.length > 1;
   }
 
   function classifyWithAI(text) {
