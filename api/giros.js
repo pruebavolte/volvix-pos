@@ -136,58 +136,34 @@ async function searchGiros(ctx, req, res, parsedUrl) {
   // 1) exact slug — siempre permitido (re-buscar un giro brand ya generado lo encuentra)
   let hit = giros.find((g) => g.slug === qSlug);
 
-  // 2) substring slug — SOLO single-word + word-boundary. Si q es multi-word brand
-  //    o si el match es solo un substring espurio, NO matchear genérico.
-  //    Evita "ferreteria-don-juan" → ferretería y "pantimedias-x" → panaderia.
-  if (!hit && !isMultiWord) {
-    hit = giros.find((g) => {
-      // Match solo si q es prefix EXACTO o suffix EXACTO del slug, o viceversa
-      // (no cualquier substring). Asi "pantimedias" no matcheara con "panaderia"
-      // que comparte prefijo "pan" pero son cosas diferentes.
-      return g.slug === qSlug ||
-             (qSlug.length >= 4 && g.slug.startsWith(qSlug + '-')) ||
-             (g.slug.length >= 4 && qSlug.startsWith(g.slug + '-'));
-    });
-  }
+  // 2026-05-06 STRICT MODE: el usuario quiere EXACT match de palabra.
+  // No mas substring, no mas startsWith, no mas pluralizacion. Solo:
+  //   - slug === qSlug (step 1, ya esta arriba)
+  //   - synonym === q (step 4)
+  // Si el usuario escribe "panificadora" (no es panaderia exacta), generar
+  // un giro nuevo en lugar de redirigir a panaderia.
+  // Step 2 (substring slug) y Step 3 (name token) ELIMINADOS — generaban
+  // colisiones tipo "pantimedias" → panaderia.
 
-  // 3) name token match — SOLO single-word + match exacto/prefix.
-  if (!hit && !isMultiWord) {
-    hit = giros.find((g) => {
-      const gName = normalize(g.name);
-      return gName === q || (q.length >= 4 && gName.startsWith(q));
-    });
-  }
-
-  // 4) FUZZY via synonyms map — multi-word exige TODOS los tokens cubiertos.
-  // 2026-05 BUG-FIX (pantimedias→panaderia): single-word ya NO usa q.includes(s)
-  // porque "pantimedias".includes("pan") era true. Ahora solo s===q (exacto) o
-  // s.startsWith(q) cuando q es lo bastante distintivo (>=3 chars, evita
-  // "ca" matchear "café"). q.includes(s) eliminado completamente.
+  // 4) Synonyms exact match. Multi-word exige TODOS los tokens cubiertos
+  //    (cada token === algun synonym/sells del corpus, no substring).
   if (!hit) {
     for (const [slug, info] of Object.entries(GIRO_SYNONYMS || {})) {
       const synonyms = (info.synonyms || []).map(normalize);
       const sells = (info.sells || []).map(normalize);
-      const allMatches = synonyms.concat(sells);
+      const allMatches = new Set(synonyms.concat(sells));
       let matched = false;
       if (isMultiWord) {
-        // STRICT: cada token del query debe aparecer en al menos un synonym/sells.
-        const corpusTokens = new Set(allMatches.flatMap(s => s.split(/\s+/)));
+        // STRICT: cada token del query DEBE existir como entrada en synonyms/sells.
+        // El corpus se split por espacios para que "venta de comida" pueda matchear
+        // "venta de comida" como query (each token in corpus tokens set).
+        const corpusTokens = new Set();
+        allMatches.forEach(s => s.split(/\s+/).forEach(t => { if (t) corpusTokens.add(t); }));
         matched = qTokens.every(t => corpusTokens.has(t));
       } else {
-        // SINGLE-WORD: solo exacto o "synonym empieza con query".
-        // q debe tener >=3 chars para evitar prefix-matches espurios.
-        matched = allMatches.some(s => {
-          if (!s) return false;
-          if (s === q) return true;
-          if (q.length >= 3 && s.startsWith(q)) return true;
-          // Casos plurales/singulares: q es synonym + 1 char (s/es).
-          // "tacos"->q, "taco"->s: q.startsWith(s) AND |q|-|s|<=2
-          if (s.length >= 3 && q.startsWith(s) && q.length - s.length <= 2 &&
-              /^[se]+$/i.test(q.slice(s.length))) {
-            return true;
-          }
-          return false;
-        });
+        // SINGLE-WORD: ESTRICTO. Solo si query === synonym/sells exactamente.
+        // No prefix, no substring, no plurales. El user lo pidio explicitamente.
+        matched = allMatches.has(q);
       }
       if (matched) {
         hit = giros.find(g => g.slug === slug.replace(/_/g, '-'));
