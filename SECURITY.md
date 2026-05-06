@@ -75,25 +75,39 @@ Reportes publicos: `R13_SECURITY_AUDIT.md`, `R22_SECURITY_FIXES.md`, `R24_SECURI
       server sigue accediendo. El anon key del cliente deja de poder leer/escribir.
     - **Verificado**: API endpoints `/api/giros/*`, `/api/queue`, `/api/menu-digital`,
       `/api/exchange-rates`, `/api/best-sellers` y landings siguen HTTP 200.
-  - **Pendiente — ~100 tablas con RLS aun deshabilitado**, agrupadas por motivo:
-    - **NO aplicar** (requieren realtime con anon key): `pos_sales`, `pos_products`.
-      Para estas hay que disenar policies que permitan SELECT al rol authenticated
-      filtrado por tenant_id, sin romper el wiring de realtime client-side.
-    - **Legacy schema (probablemente sin uso real)**: `categories`, `products`,
-      `orders`, `order_items`, `sale_items`, `customers`, `domains`, `verticals`,
-      `vertical_categories`, `landing_pages`, `roles`, `permissions`, `system_modules`.
-      Validar usage antes de tocar — si no se usa, RLS permisivo es seguro.
-    - **v3 schema**: tablas v3_* sin RLS deberian quedar en service_role-only,
-      es schema interno.
-    - **pos_* misc**: pos_employees, pos_companies, pos_sync_events,
-      pos_login_events, pos_download_events, pos_license_events — server-side
-      only, podran irse a service_role-only en Phase 3.
-  - **Roadmap sugerido**:
-    1. Fase 3: aplicar service_role-only a tablas pos_*/v3_* sin uso client.
-    2. Fase 4: para pos_sales/pos_products + tablas usadas client-side (realtime,
-       direct queries), disenar policies tenant-aware con auth.role() o JWT claim
-       custom de Supabase Auth.
-    3. Re-correr advisor para validar 0 tablas sin RLS.
+  - **Phase 3 (~65 tablas, sesion 2026-05-06)**: pos_employees, pos_companies,
+    pos_*_events, pos_cash_sessions, pos_credits, pos_tenants, pos_services,
+    pos_staff, pos_appointments, pos_waitlist, v3_* (7 tablas internas),
+    vertical_templates, giros_synonyms, verticals, vertical_template_products,
+    vertical_categories, inventory_warehouses + warehouse_*, vendors + vendor_*,
+    NFT/web3, companies, tenant_button_overrides, tenant_admin_notes, tenant_*,
+    promotion_uses, loyalty_tiers, loyalty_transactions, feature_modules,
+    module_pricing, service_providers, airtime_carriers, coupons, flash_sales,
+    bundles, product_recipes, product_variants_v2, product_modifiers,
+    product_rules, product_feature_flags, tenant_terminology, remote_terminals,
+    remote_commands, user_recent_apps, user_favorites_order, cfdi_templates.
+  - **Phase 4 (~28 tablas)**: legacy V1 schema (categories, global_products,
+    ingredients, recipes, orders, order_items, order_item_variants,
+    sale_item_variants, variant_types, product_variants, returns, return_items),
+    auth/perm legacy (permissions, roles, role_permissions, user_tenants,
+    system_modules), domains, landing_pages, subscription_plans, subscriptions,
+    subscription_events, subscription_invoices, sat_clave_prodserv,
+    sat_clave_unidad, sat_forma_pago, sat_metodo_pago, sat_uso_cfdi,
+    sat_regimen_fiscal.
+
+  - **TOTAL aplicado: ~147 tablas con RLS service_role-only.**
+    Estado pasa de 154 sin RLS -> **solo 4 sin RLS**.
+
+  - **4 tablas restantes** (requieren diseno especial por uso realtime client-side):
+    - `pos_sales` (436 filas)  - realtime via volvix-realtime-wiring.js
+    - `pos_products` (550 filas) - realtime via volvix-realtime-wiring.js
+    - `kds_tickets` (22 filas)  - realtime via volvix-kds.html canal kds_orders
+    - `kds_stations`            - relacionada con kds realtime
+
+    Aplicar service_role-only romperia el wiring client-side. Plan:
+    1. Implementar Supabase Auth o JWT custom claim con tenant_id.
+    2. Policy que use `auth.uid()` para limitar SELECT al tenant del usuario.
+    3. Anon bloqueado, service_role full access.
 
 ### HIGH
 
