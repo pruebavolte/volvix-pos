@@ -12,7 +12,10 @@
   <title>Volvix Launcher · Portal de Aplicaciones</title>
 
   <!-- Auth-gate: protege la página y redirige a login si no hay sesión -->
-  <script src="/auth-gate.js"></script>
+  <!-- 2026-05-06 cache-bust: auth-gate.js cambio (saco launcher de PLATFORM_ONLY).
+       Sin query string, navegadores con auth-gate.js cacheado seguian redirigiendo
+       tenants nuevos al POS pesado. Con ?v=20260506 forzamos refresh. -->
+  <script src="/auth-gate.js?v=20260506"></script>
   <script defer src="/auth-helper.js"></script>
   <!-- R10d-C FIX-N4-6: client-side system health monitor -->
   <script defer src="/volvix-system-monitor.js"></script>
