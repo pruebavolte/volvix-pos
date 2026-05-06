@@ -136,18 +136,33 @@ async function searchGiros(ctx, req, res, parsedUrl) {
   // 1) exact slug — siempre permitido (re-buscar un giro brand ya generado lo encuentra)
   let hit = giros.find((g) => g.slug === qSlug);
 
-  // 2) substring slug — SOLO single-word. Si q es multi-word brand, NO matchear genérico.
-  //    Evita que "ferreteria-don-juan" → ferretería.
+  // 2) substring slug — SOLO single-word + word-boundary. Si q es multi-word brand
+  //    o si el match es solo un substring espurio, NO matchear genérico.
+  //    Evita "ferreteria-don-juan" → ferretería y "pantimedias-x" → panaderia.
   if (!hit && !isMultiWord) {
-    hit = giros.find((g) => g.slug.includes(qSlug) || qSlug.includes(g.slug));
+    hit = giros.find((g) => {
+      // Match solo si q es prefix EXACTO o suffix EXACTO del slug, o viceversa
+      // (no cualquier substring). Asi "pantimedias" no matcheara con "panaderia"
+      // que comparte prefijo "pan" pero son cosas diferentes.
+      return g.slug === qSlug ||
+             (qSlug.length >= 4 && g.slug.startsWith(qSlug + '-')) ||
+             (g.slug.length >= 4 && qSlug.startsWith(g.slug + '-'));
+    });
   }
 
-  // 3) name token match — SOLO single-word por la misma razón que 2.
+  // 3) name token match — SOLO single-word + match exacto/prefix.
   if (!hit && !isMultiWord) {
-    hit = giros.find((g) => normalize(g.name).includes(q) || q.includes(normalize(g.name)));
+    hit = giros.find((g) => {
+      const gName = normalize(g.name);
+      return gName === q || (q.length >= 4 && gName.startsWith(q));
+    });
   }
 
   // 4) FUZZY via synonyms map — multi-word exige TODOS los tokens cubiertos.
+  // 2026-05 BUG-FIX (pantimedias→panaderia): single-word ya NO usa q.includes(s)
+  // porque "pantimedias".includes("pan") era true. Ahora solo s===q (exacto) o
+  // s.startsWith(q) cuando q es lo bastante distintivo (>=3 chars, evita
+  // "ca" matchear "café"). q.includes(s) eliminado completamente.
   if (!hit) {
     for (const [slug, info] of Object.entries(GIRO_SYNONYMS || {})) {
       const synonyms = (info.synonyms || []).map(normalize);
@@ -159,8 +174,20 @@ async function searchGiros(ctx, req, res, parsedUrl) {
         const corpusTokens = new Set(allMatches.flatMap(s => s.split(/\s+/)));
         matched = qTokens.every(t => corpusTokens.has(t));
       } else {
-        // SINGLE-WORD: matching flexible (legacy)
-        matched = allMatches.some(s => s === q || s.includes(q) || q.includes(s));
+        // SINGLE-WORD: solo exacto o "synonym empieza con query".
+        // q debe tener >=3 chars para evitar prefix-matches espurios.
+        matched = allMatches.some(s => {
+          if (!s) return false;
+          if (s === q) return true;
+          if (q.length >= 3 && s.startsWith(q)) return true;
+          // Casos plurales/singulares: q es synonym + 1 char (s/es).
+          // "tacos"->q, "taco"->s: q.startsWith(s) AND |q|-|s|<=2
+          if (s.length >= 3 && q.startsWith(s) && q.length - s.length <= 2 &&
+              /^[se]+$/i.test(q.slice(s.length))) {
+            return true;
+          }
+          return false;
+        });
       }
       if (matched) {
         hit = giros.find(g => g.slug === slug.replace(/_/g, '-'));
