@@ -2560,7 +2560,12 @@
 <!-- ============ /R8a FIX-H2 ============ -->
 
 <!-- ============ LOGIN ============ -->
-<div id="login-screen" class="login-screen">
+<!-- 2026-05-06: login local oculto por defecto. El SSO check de Volvix ya
+     redirige a /login.html si NO hay JWT. Este form local solo era para el
+     modo SQLite offline legacy. NUNCA debe verse en la app cloud — su
+     aparicion causa "doble login" reportado por el usuario.
+     class hidden por defecto + style display:none de safety belt. -->
+<div id="login-screen" class="login-screen hidden" style="display:none !important">
   <div class="login-card">
     <div class="login-logo">S</div>
     <h1 class="login-title">SalvadoreX</h1>

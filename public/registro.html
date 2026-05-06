@@ -790,7 +790,30 @@
           var bannerCode = document.getElementById('devOtpCode');
           var info = document.getElementById('otpInfo');
 
-          if (res.body.dev_code) {
+          // 2026-05-06: el banner DEV con codigo SOLO debe aparecer en local/dev.
+          // En produccion el backend YA NO devuelve dev_code (excepto si email falla,
+          // y en ese caso devuelve email_delivery_failed + support_folio).
+          // Heuristica adicional: aunque el backend mande dev_code, si estamos en
+          // produccion (host == systeminternational.app) NUNCA mostramos el codigo
+          // en pantalla. Defensa en profundidad.
+          var isProdHost = location.hostname === 'systeminternational.app' ||
+                           location.hostname === 'www.systeminternational.app';
+
+          if (res.body.email_delivery_failed && res.body.support_folio) {
+            // Email fallo en produccion — mostrar mensaje de soporte (NO codigo)
+            if (banner) banner.style.display = 'none';
+            if (info) {
+              info.style.display = '';
+              info.style.background = '#fef2f2';
+              info.style.borderColor = '#fca5a5';
+              info.style.color = '#991b1b';
+              info.innerHTML = 'No pudimos enviar el correo de verificacion. ' +
+                'Contacta a <a href="mailto:soporte@systeminternational.app?subject=Folio%20' +
+                encodeURIComponent(res.body.support_folio) + '" style="color:#991b1b;text-decoration:underline">soporte@systeminternational.app</a> ' +
+                'con el folio <strong>' + res.body.support_folio + '</strong> para activar tu cuenta.';
+            }
+          } else if (res.body.dev_code && !isProdHost) {
+            // Solo dev/local: mostrar codigo en pantalla para testing
             if (banner) banner.style.display = 'block';
             if (bannerCode) bannerCode.textContent = String(res.body.dev_code);
             if (info) info.style.display = 'none';
@@ -802,9 +825,10 @@
               }
             }, 200);
           } else {
+            // Caso normal: email enviado correctamente
             if (banner) banner.style.display = 'none';
             if (info) info.style.display = '';
-            alertBox('info', 'Código enviado a ' + state.email);
+            alertBox('info', 'Codigo enviado a ' + state.email);
           }
           // Eco del correo
           try {

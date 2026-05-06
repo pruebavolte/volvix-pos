@@ -33332,13 +33332,11 @@ if (process.env.NODE_ENV === 'test') {
         'auth.register_simple', 'pos_companies', { id: companyId, tenant_id: tenantId });
 
       // ---- Respuesta ----
-      // Bridge: si el email NO se envió (provider caído o no configurado), devolvemos
-      // dev_code para no bloquear el lanzamiento. En cuanto Resend funcione, este
-      // fallback no se activa.
+      // 2026-05-06: ELIMINADO el "bridge" que exponia dev_code en pantalla.
+      // El usuario reporta que NO quiere ver el codigo OTP en pantalla — debe
+      // llegar SOLO por email. Si email falla, mostramos un folio + soporte.
+      // dev_code SOLO se devuelve en local/dev (NODE_ENV !== 'production').
       const isProd = process.env.NODE_ENV === 'production';
-      const noEmailProvider = !hasEmailProvider;
-      const emailAttemptedButFailed = !emailSent && !!emailError && hasEmailProvider;
-      const allowDevVisibleBridge = !isProd || noEmailProvider || emailAttemptedButFailed;
       const respPayload = {
         ok: true,
         tenant_id: tenantId,
@@ -33351,15 +33349,39 @@ if (process.env.NODE_ENV === 'test') {
         email_sent: emailSent,
         email_provider: emailProvider || null
       };
-      if (!emailSent && allowDevVisibleBridge) {
+      // En DEV (no produccion) sí mostramos el codigo en pantalla para testing rapido.
+      if (!isProd && !emailSent) {
         respPayload.dev_code = otpCode;
-        if (noEmailProvider) {
-          respPayload.notice = 'Email provider no configurado. Código mostrado en pantalla.';
-        } else if (emailAttemptedButFailed) {
-          respPayload.notice = 'Correo no entregado (' + (emailError || 'unknown').slice(0, 80) + '). Código mostrado en pantalla.';
-        } else {
-          respPayload.notice = 'Correo no enviado (modo dev).';
-        }
+        respPayload.notice = '[DEV] Email no enviado — codigo visible en pantalla.';
+      }
+      // En PRODUCCION: si email fallo, NO mostramos el codigo. Devolvemos folio
+      // y mensaje claro al usuario para contactar soporte (NUNCA exponer codigo).
+      if (isProd && !emailSent) {
+        const supportFolio = 'OTP-' + Date.now().toString(36).toUpperCase() +
+          '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+        respPayload.email_delivery_failed = true;
+        respPayload.support_folio = supportFolio;
+        respPayload.notice = 'No pudimos enviar el correo de verificacion. ' +
+          'Por favor contacta a soporte@systeminternational.app con el folio ' +
+          supportFolio + ' para activar tu cuenta manualmente.';
+        // Log el error real internamente para que soporte pueda ayudar
+        try {
+          await supabaseRequest('POST', '/system_error_logs', {
+            level: 'error',
+            type: 'register-simple/email-failed-prod',
+            source: 'register-simple',
+            error_code: 'EMAIL_DELIVERY_FAILED_PROD',
+            error_message: emailError ? String(emailError).slice(0, 500) : 'unknown',
+            folio: supportFolio,
+            tenant_id: tenantId,
+            user_id: userId,
+            ip_address: ip,
+            user_agent: userAgent,
+            url: '/api/auth/register-simple',
+            context: { email: emailValue, otp_code_internal: otpCode, business_name },
+            created_at: new Date().toISOString()
+          });
+        } catch (_) {}
       }
       if (!emailSent && isProd && !noEmailProvider && emailError) {
         respPayload.email_error = String(emailError).slice(0, 120);
