@@ -108,20 +108,13 @@
     },
 
     _seed() {
+      // 2026-05-06: arrays demo (TNT001 Don Chucho + 8 productos hardcoded como
+      // Coca-Cola/Pan dulce/etc.) eliminados. El cache local arranca vacio y
+      // se hidrata desde la API real (/api/products, /api/customers, etc.)
+      // filtrada por tenant_id del JWT del usuario actual.
       return {
-        tenants: [
-          { id: 'TNT001', name: 'Abarrotes Don Chucho', giro: 'abarrotes', plan: 'pro', status: 'active', mrr: 799 },
-        ],
-        productos: [
-          { id: 'd1', codigo: '7501055303045', nombre: 'Coca-Cola 600ml', precio: 25, stock: 124, categoria: 'Bebidas' },
-          { id: 'd2', codigo: '7501030411025', nombre: 'Pan dulce', precio: 8.5, stock: 48, categoria: 'Panadería' },
-          { id: 'd3', codigo: '7501058634511', nombre: 'Queso fresco 250g', precio: 120, stock: 12, categoria: 'Lácteos' },
-          { id: 'd4', codigo: '7501055305018', nombre: 'Agua 1.5L', precio: 12, stock: 200, categoria: 'Bebidas' },
-          { id: 'd5', codigo: '7501031301013', nombre: 'Leche Lala 1L', precio: 32, stock: 55, categoria: 'Lácteos' },
-          { id: 'd6', codigo: '7501003130052', nombre: 'Arroz 1kg', precio: 28, stock: 80, categoria: 'Básicos' },
-          { id: 'd7', codigo: '7501003130069', nombre: 'Frijol negro 1kg', precio: 35, stock: 60, categoria: 'Básicos' },
-          { id: 'd8', codigo: '7501007861054', nombre: 'Sabritas Original', precio: 18, stock: 90, categoria: 'Snacks' },
-        ],
+        tenants: [],
+        productos: [],
         ventas: [],
         clientes: [],
         features: [],

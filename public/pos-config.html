@@ -388,7 +388,7 @@ html, body {
           <div class="card-body">
             <div class="form-group">
               <label class="form-label">Nombre del negocio *</label>
-              <input class="form-input" id="eNegocio" value="Abarrotes Don Chucho" placeholder="Nombre completo">
+              <input class="form-input" id="eNegocio" value="" placeholder="Nombre completo de tu negocio">
             </div>
             <div class="form-row">
               <div class="form-group">
@@ -421,7 +421,7 @@ html, body {
               </div>
               <div class="form-group">
                 <label class="form-label">Email de contacto</label>
-                <input class="form-input" id="eEmail" type="email" value="contacto@donchuchoaparrotes.com" placeholder="Email del negocio">
+                <input class="form-input" id="eEmail" type="email" value="" placeholder="contacto@tunegocio.com">
               </div>
             </div>
             <div class="form-group">
@@ -843,7 +843,7 @@ html, body {
             </div>
             <div class="form-group">
               <label class="form-label">Concepto de pago</label>
-              <input class="form-input" id="mpConcepto" value="Compra en Abarrotes Don Chucho" placeholder="Texto que ve el cliente al pagar">
+              <input class="form-input" id="mpConcepto" value="" placeholder="Compra en tu negocio">
             </div>
             <button class="btn green" onclick="guardarPagos()">✓ Guardar y probar</button>
           </div>
@@ -861,33 +861,11 @@ html, body {
             <div class="card-title">Usuarios activos</div>
             <button class="btn primary" onclick="openModal('modalUsuario')">+ Invitar usuario</button>
           </div>
+          <!-- 2026-05-06: filas demo (Daniel V., Maria Lopez, Carlos Ruiz @donchuchoaparrotes.com)
+               eliminadas. Usuarios reales se hidratan desde /api/users por cliente JS. -->
           <div id="userList">
-            <div class="user-row">
-              <div class="user-avatar" style="background:#1a237e">DA</div>
-              <div class="user-info">
-                <div class="user-name">Daniel V.</div>
-                <div class="user-email">admin@volvix.test</div>
-              </div>
-              <span class="role-pill role-owner">Owner</span>
-              <button class="btn sm" onclick="toast('No puedes editar al owner principal','warn')" style="margin-left:10px">⚙️</button>
-            </div>
-            <div class="user-row">
-              <div class="user-avatar" style="background:#2e7d32">ML</div>
-              <div class="user-info">
-                <div class="user-name">María López</div>
-                <div class="user-email">maria@donchuchoaparrotes.com</div>
-              </div>
-              <span class="role-pill role-cajero">Cajero</span>
-              <button class="btn sm danger" onclick="eliminarUsuario('María López')" style="margin-left:10px">🗑️</button>
-            </div>
-            <div class="user-row">
-              <div class="user-avatar" style="background:#1565c0">CR</div>
-              <div class="user-info">
-                <div class="user-name">Carlos Ruiz</div>
-                <div class="user-email">carlos@donchuchoaparrotes.com</div>
-              </div>
-              <span class="role-pill role-cajero">Cajero</span>
-              <button class="btn sm danger" onclick="eliminarUsuario('Carlos Ruiz')" style="margin-left:10px">🗑️</button>
+            <div style="text-align:center;padding:24px;color:#737371;font-size:13px">
+              Cargando usuarios…
             </div>
           </div>
         </div>
