@@ -849,6 +849,25 @@ async function handleLogin(event) {
       }
     } catch (e) {}
 
+    // 2026-05-06: guardar tambien en 'volvix_last_contact' para que /registro.html
+    // pueda auto-rellenar email + telefono en visitas futuras (la idea: el user
+    // solo tipea password si vuelve a registrarse o si abre registro por accidente).
+    try {
+      var prevContact = {};
+      try { prevContact = JSON.parse(localStorage.getItem('volvix_last_contact') || '{}') || {}; } catch(_){}
+      var emailToSave = idValue.includes('@') ? idValue.toLowerCase() : (prevContact.email || null);
+      var phoneToSave = (!idValue.includes('@') && /^\d{10,13}$/.test(idValue.replace(/\D/g, '')))
+        ? idValue.replace(/\D/g, '').slice(-10)
+        : (prevContact.phone || null);
+      if (emailToSave || phoneToSave) {
+        localStorage.setItem('volvix_last_contact', JSON.stringify({
+          email: emailToSave,
+          phone: phoneToSave,
+          saved_at: Date.now(),
+        }));
+      }
+    } catch (e) {}
+
     // Guardar JWT Bearer token (R13 hardening) — keys consistentes con checkExistingSession
     const jwt = result.token || (result.session && result.session.token) || null;
     if (jwt) {

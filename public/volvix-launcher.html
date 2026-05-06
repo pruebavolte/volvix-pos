@@ -501,7 +501,11 @@
       // 2026-05 fix: preservar 'volvix_remembered_users' (lista de usuarios para
       // quick-pick en proximo login) — no es sesion, es preferencia del dispositivo.
       try {
-        var KEEP = { 'volvix_remembered_users': true };
+        var KEEP = {
+          'volvix_remembered_users': true,
+          'volvix_last_contact': true,
+          'volvix_last_search': true,
+        };
         var toRemove = [];
         for (var i = 0; i < localStorage.length; i++) {
           var k = localStorage.key(i);

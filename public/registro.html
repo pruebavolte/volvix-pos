@@ -303,16 +303,84 @@
           return j && typeof j === 'object' ? j : {};
         } catch(e){ return {}; }
       }
-      function tryFillEmail(){
-        // Si hay un remembered users con un solo email, usarlo
+      // 2026-05-06: auto-fill email + phone desde TRES fuentes (orden de prioridad):
+      //   1. localStorage 'volvix_last_contact' — escrito en cada registro/login exitoso
+      //      o cuando el usuario tipea email/phone valido (capturado en blur).
+      //   2. localStorage 'volvix_remembered_users' — emails/phones de logins previos.
+      //   3. Browser native autofill — los inputs ya tienen autocomplete=email/tel.
+      // Si encontramos algo, llenamos el input. El usuario solo escribe el password.
+      function tryFillEmailAndPhone(){
+        var fillEmail = '';
+        var fillPhone = '';
+        // Fuente 1: ultimo contacto guardado (mas reciente y confiable)
         try {
-          var raw = localStorage.getItem('volvix_remembered_users');
-          if (!raw) return;
-          var arr = JSON.parse(raw);
-          if (Array.isArray(arr) && arr.length === 1 && arr[0].id && arr[0].id.includes('@')) {
-            setVal('email', arr[0].id);
+          var contactRaw = localStorage.getItem('volvix_last_contact');
+          if (contactRaw) {
+            var contact = JSON.parse(contactRaw) || {};
+            if (contact.email && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(contact.email)) {
+              fillEmail = contact.email;
+            }
+            if (contact.phone && /^\d{10}$/.test(String(contact.phone).replace(/\D/g, ''))) {
+              fillPhone = String(contact.phone).replace(/\D/g, '').slice(-10);
+            }
           }
         } catch(e){}
+        // Fuente 2: lista de remembered users (cualquiera de los logins previos)
+        try {
+          if (!fillEmail || !fillPhone) {
+            var raw = localStorage.getItem('volvix_remembered_users');
+            if (raw) {
+              var arr = JSON.parse(raw);
+              if (Array.isArray(arr)) {
+                for (var i = 0; i < arr.length; i++) {
+                  var id = arr[i] && arr[i].id;
+                  if (!id) continue;
+                  if (!fillEmail && id.indexOf('@') !== -1 && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(id)) {
+                    fillEmail = id;
+                  }
+                  if (!fillPhone) {
+                    var digits = String(id).replace(/\D/g, '');
+                    if (digits.length === 10) fillPhone = digits;
+                    else if (digits.length === 12 && digits.indexOf('52') === 0) fillPhone = digits.slice(2);
+                    else if (digits.length === 13 && digits.indexOf('521') === 0) fillPhone = digits.slice(3);
+                  }
+                  if (fillEmail && fillPhone) break;
+                }
+              }
+            }
+          }
+        } catch(e){}
+        if (fillEmail) setVal('email', fillEmail);
+        if (fillPhone) setVal('phone', fillPhone);
+      }
+
+      // Capturar email/phone al perder foco (blur) — si son validos, los guardamos
+      // en localStorage para que la proxima visita los auto-rellene. Asi aunque el
+      // user no termine el registro, el navegador "recuerda" sus datos.
+      function setupContactCapture(){
+        function persist(){
+          try {
+            var em = (document.getElementById('email')||{}).value || '';
+            var ph = ((document.getElementById('phone')||{}).value || '').replace(/\D/g, '');
+            var existing = {};
+            try { existing = JSON.parse(localStorage.getItem('volvix_last_contact') || '{}') || {}; } catch(_){}
+            var emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em);
+            var phoneValid = /^\d{10}$/.test(ph);
+            var next = {
+              email: emailValid ? em.toLowerCase().slice(0, 120) : (existing.email || null),
+              phone: phoneValid ? ph : (existing.phone || null),
+              saved_at: Date.now(),
+            };
+            // Solo escribir si hay al menos un valor valido, evita escribir basura
+            if (next.email || next.phone) {
+              localStorage.setItem('volvix_last_contact', JSON.stringify(next));
+            }
+          } catch(_){}
+        }
+        var em = document.getElementById('email');
+        var ph = document.getElementById('phone');
+        if (em) em.addEventListener('blur', persist);
+        if (ph) ph.addEventListener('blur', persist);
       }
 
       // Combinar URL params (mas prioridad) + sessionStorage cache
@@ -336,7 +404,8 @@
         if (gn) gn.textContent = giro || '(no detectado)';
       }
 
-      tryFillEmail();
+      tryFillEmailAndPhone();
+      setupContactCapture();
 
       // Boton "Editar" en card verde -> expande el details + scroll
       document.addEventListener('click', function (ev) {
@@ -706,6 +775,16 @@
           state.tenant_id = res.body.tenant_id;
           state.user_id = res.body.user_id || null;
           state.email = res.body.email || state.formData.email;
+
+          // 2026-05-06: guardar email + phone para que el proximo registro/login
+          // los auto-rellene. Asi el usuario solo escribe la contraseña.
+          try {
+            localStorage.setItem('volvix_last_contact', JSON.stringify({
+              email: state.formData.email,
+              phone: state.formData.phone,
+              saved_at: Date.now(),
+            }));
+          } catch (e) {}
 
           var banner = document.getElementById('devOtpBanner');
           var bannerCode = document.getElementById('devOtpCode');
