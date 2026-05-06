@@ -2075,14 +2075,36 @@ const handlers = {
   'GET /api/giro/config': requireAuth(async (req, res) => {
     try {
       const tenantId = resolveTenant(req, null);
-      // Derivar giro_slug del tenant: leer tenants.giro_slug si existe, sino 'default'.
+      // Derivar giro_slug del tenant: la fuente de verdad es
+      // pos_companies.business_type (lo escribe register-simple). Fallback:
+      // pos_users.notes JSON.business_type, luego 'default'.
       let giroSlug = 'default';
       try {
-        const tres = await supabaseFetch(
-          `/tenants?id=eq.${encodeURIComponent(tenantId)}&select=giro_slug,giro,industry&limit=1`
+        const cres = await supabaseFetch(
+          `/pos_companies?tenant_id=eq.${encodeURIComponent(tenantId)}&select=business_type&limit=1`
         );
-        if (tres && Array.isArray(tres) && tres.length) {
-          giroSlug = String(tres[0].giro_slug || tres[0].giro || tres[0].industry || 'default').toLowerCase();
+        if (cres && Array.isArray(cres) && cres.length && cres[0].business_type) {
+          giroSlug = String(cres[0].business_type).toLowerCase().trim();
+        } else {
+          // Fallback a pos_users.notes JSON
+          try {
+            const ures = await supabaseFetch(
+              `/pos_users?company_id.tenant_id=eq.${encodeURIComponent(tenantId)}&select=notes&limit=1`
+            );
+            // Eso no funciona en PostgREST sin embedding. Usar el approach simple:
+            // buscar el user owner por email del JWT
+            if ((!ures || !ures.length) && req.user && req.user.email) {
+              const ures2 = await supabaseFetch(
+                `/pos_users?email=eq.${encodeURIComponent(req.user.email)}&select=notes&limit=1`
+              );
+              if (ures2 && ures2.length && ures2[0].notes) {
+                try {
+                  const meta = JSON.parse(ures2[0].notes);
+                  if (meta && meta.business_type) giroSlug = String(meta.business_type).toLowerCase().trim();
+                } catch (_) {}
+              }
+            }
+          } catch (_) {}
         }
       } catch (_) {}
       // Validar que el giro existe en la tabla; si no, fallback a 'default'.

@@ -2757,8 +2757,8 @@
 
     <!-- TERTIARY: Gestión -->
     <button class="menu-btn" data-feature="module.clientes" data-menu="clientes" onclick="showScreen('clientes')">
-      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#3498DB" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>
-      <span>👥 Clientes</span>
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#3498DB" stroke-with="2" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>
+      <span>👥 <span data-i18n="cliente" data-i18n-plural>Clientes</span></span>
     </button>
     <button class="menu-btn" data-feature="module.config" data-menu="config" onclick="showScreen('config')">
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#7F8C8D" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -3030,7 +3030,7 @@
         </button>
         <button class="bottom-btn" onclick="openCustomerSelector()" aria-label="Asignar cliente" title="Asignar cliente">
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#3498DB" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-          <span>Asignar cliente</span>
+          <span>Asignar <span data-i18n="cliente">cliente</span></span>
         </button>
 
         <button class="btn-cobrar" data-vlx-button="F12_cobrar" onclick="openPayment()">
@@ -5331,7 +5331,39 @@
         }
       } catch(_) {}
     }
+    // 2026-05-06 (FASE 2): tras eliminar arrays demo, re-renderizar la pantalla
+    // activa cuando lleguen datos del DataLoader. Antes los modulos quedaban
+    // mostrando placeholders/empty si la pantalla se abria antes de que la API
+    // respondiera. Ahora cada vez que showScreen recibe un cambio, intentamos
+    // hacer render de los modulos relevantes.
+    try {
+      window.__currentScreen = name;
+      if (name === 'inventario' && typeof renderInventory === 'function') renderInventory();
+      else if (name === 'clientes' && typeof renderCustomers === 'function') renderCustomers();
+      else if (name === 'historial' && typeof renderSales === 'function') renderSales();
+      else if (name === 'pos' && typeof renderCart === 'function') renderCart();
+      else if (name === 'pos' && typeof renderQuickPick === 'function') renderQuickPick();
+    } catch (_) {}
   }
+  // 2026-05-06: re-render la pantalla activa cuando los datos lleguen del DataLoader.
+  document.addEventListener('volvix:products-loaded', function () {
+    try {
+      var s = window.__currentScreen;
+      if (s === 'inventario' && typeof renderInventory === 'function') renderInventory();
+      if ((s === 'pos' || !s) && typeof renderQuickPick === 'function') renderQuickPick();
+      if ((s === 'pos' || !s) && typeof renderCart === 'function') renderCart();
+    } catch (_) {}
+  });
+  document.addEventListener('volvix:customers-loaded', function () {
+    try {
+      if (window.__currentScreen === 'clientes' && typeof renderCustomers === 'function') renderCustomers();
+    } catch (_) {}
+  });
+  document.addEventListener('volvix:sales-loaded', function () {
+    try {
+      if (window.__currentScreen === 'historial' && typeof renderSales === 'function') renderSales();
+    } catch (_) {}
+  });
 
   /* ============ TOAST ============ */
   function showToast(msg) {
@@ -7519,6 +7551,43 @@
             <label style="grid-column:span 2;display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;">
               Descripción
               <textarea id="pf-desc" maxlength="500" rows="2" style="padding:9px;border:1px solid #E7E5E4;border-radius:7px;font-size:13.5px;resize:vertical;" placeholder="Notas internas, características…">${escapeHtml(p.description||'')}</textarea>
+            </label>
+            <!-- 2026-05-06 (FASE 7): campos giro-aware con data-flag.
+                 VolvixGiroConfig.apply() oculta los wrappers (label) cuando
+                 giros_campos.<giro>.producto.<flag>.visible === false.
+                 Defaults estan en seed: 'default' los oculta a todos, los giros
+                 que los necesitan (farmacia/vet/restaurante) los hacen visibles. -->
+            <label data-flag="caducidad" style="display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;">
+              Caducidad
+              <input id="pf-caducidad" type="date" value="${escapeAttr(p.expiry_date||p.caducidad||'')}" style="padding:9px;border:1px solid #E7E5E4;border-radius:7px;font-size:13.5px;">
+            </label>
+            <label data-flag="lote" style="display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;">
+              Lote / Serie
+              <input id="pf-lote" type="text" maxlength="40" value="${escapeAttr(p.lote||'')}" style="padding:9px;border:1px solid #E7E5E4;border-radius:7px;font-size:13.5px;" placeholder="L20240315-A1">
+            </label>
+            <label data-flag="ingrediente_activo" style="grid-column:span 2;display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;">
+              Ingrediente activo
+              <input id="pf-ingrediente" type="text" maxlength="120" value="${escapeAttr(p.ingrediente_activo||'')}" style="padding:9px;border:1px solid #E7E5E4;border-radius:7px;font-size:13.5px;" placeholder="Paracetamol 500mg, Amoxicilina 250mg…">
+            </label>
+            <label data-flag="marca_animal" style="grid-column:span 2;display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;">
+              Marca / talla animal
+              <input id="pf-marca-animal" type="text" maxlength="80" value="${escapeAttr(p.marca_animal||'')}" style="padding:9px;border:1px solid #E7E5E4;border-radius:7px;font-size:13.5px;" placeholder="Royal Canin Adulto Mediano">
+            </label>
+            <label data-flag="requiere_receta" style="display:flex;align-items:center;gap:8px;grid-column:span 2;font-size:12.5px;font-weight:500;cursor:pointer;">
+              <input id="pf-requiere-receta" type="checkbox" ${p.requiere_receta ? 'checked' : ''} style="width:16px;height:16px;cursor:pointer;">
+              Requiere receta médica
+            </label>
+            <label data-flag="controlado_sagarpa" style="display:flex;align-items:center;gap:8px;grid-column:span 2;font-size:12.5px;font-weight:500;cursor:pointer;">
+              <input id="pf-controlado" type="checkbox" ${p.controlado_sagarpa ? 'checked' : ''} style="width:16px;height:16px;cursor:pointer;">
+              Controlado SAGARPA / COFEPRIS
+            </label>
+            <label data-flag="modificadores" style="display:flex;align-items:center;gap:8px;grid-column:span 2;font-size:12.5px;font-weight:500;cursor:pointer;">
+              <input id="pf-modificadores" type="checkbox" ${p.tiene_modificadores ? 'checked' : ''} style="width:16px;height:16px;cursor:pointer;">
+              Tiene modificadores (sin cebolla, extra queso…)
+            </label>
+            <label data-flag="receta_bom" style="display:flex;align-items:center;gap:8px;grid-column:span 2;font-size:12.5px;font-weight:500;cursor:pointer;">
+              <input id="pf-receta-bom" type="checkbox" ${p.tiene_receta_bom ? 'checked' : ''} style="width:16px;height:16px;cursor:pointer;">
+              Tiene receta (BOM — descontar ingredientes al vender)
             </label>
             <div id="pf-msg" style="grid-column:span 2;font-size:12px;color:#DC2626;min-height:14px;"></div>
             <div style="grid-column:span 2;display:flex;gap:8px;justify-content:flex-end;margin-top:6px;">
