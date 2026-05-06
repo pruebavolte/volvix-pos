@@ -2083,9 +2083,17 @@ const handlers = {
       // B42 MVP-9 FIX: cashiers must see same products as owner — use OWNER's pos_user_id
       // 2026-05 N1 fix: si tenant desconocido, resolveOwnerPosUserId devuelve null
       // ahora (antes hacia fallback silencioso a TNT001). Devolver lista vacia.
+      // 2026-05-06 fix: tenants nuevos sin provisionar deben recibir 200 con lista
+      // vacia (no 404), si no el global fetch interceptor en volvix-ui-errors.js
+      // muestra un overlay bloqueante "Pagina no encontrada" en el primer load del POS.
       let posUserId = resolveOwnerPosUserId(tenantId);
       if (!posUserId) {
-        return sendJSON(res, { error: 'tenant_not_provisioned', tenant_id: tenantId }, 404);
+        return sendJSON(res, {
+          products: [],
+          tenant_not_provisioned: true,
+          tenant_id: tenantId,
+          message: 'Aun no hay productos. Crea tu primer producto para empezar.',
+        }, 200);
       }
 
       // R8f: branch filter (query param or user scope)

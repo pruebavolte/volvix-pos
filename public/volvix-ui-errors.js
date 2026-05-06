@@ -55,14 +55,24 @@
       });
 
       // Wrap fetch for network errors
+      // 2026-05-06 fix: NO mostrar overlay 404 bloqueante para llamadas /api/* —
+      // los endpoints API que devuelven 404 son recursos especificos (producto,
+      // cliente, etc.) y la UI los maneja localmente; solo el shell HTML/navegacion
+      // amerita un overlay 'Pagina no encontrada'. Lo mismo para 5xx/503: dejar que
+      // el caller decida si mostrar el overlay (un 5xx en /api/products no debe
+      // bloquear todo el POS si la pantalla puede degradar).
       const _fetch = window.fetch;
       if (_fetch) {
         window.fetch = (...args) => {
           return _fetch.apply(window, args).then((res) => {
             if (!res.ok) {
-              if (res.status === 404) ErrorHandler.show404({ url: args[0] });
-              else if (res.status >= 500) ErrorHandler.show500({ url: args[0], status: res.status });
-              else if (res.status === 503) ErrorHandler.showMaintenance();
+              const url = String(args[0] || '');
+              const isApi = url.indexOf('/api/') !== -1 || url.indexOf('/api?') !== -1;
+              if (!isApi) {
+                if (res.status === 404) ErrorHandler.show404({ url: args[0] });
+                else if (res.status >= 500) ErrorHandler.show500({ url: args[0], status: res.status });
+                else if (res.status === 503) ErrorHandler.showMaintenance();
+              }
             }
             return res;
           }).catch((err) => {

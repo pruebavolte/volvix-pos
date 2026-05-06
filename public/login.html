@@ -864,9 +864,10 @@ async function handleLogin(event) {
     showAlert('¡Bienvenido!', 'success');
 
     // 2026-05: redirect según rol — owner-de-tenant → POS; plataforma → launcher.
+    // 2026-05-06 fix: variable era `data` (typo) — la respuesta esta en `result`.
     let dest = '/salvadorex-pos.html';
     try {
-      const tok = (data && data.session && data.session.token) || (data && data.token) || '';
+      const tok = (result && result.session && result.session.token) || (result && result.token) || '';
       if (tok) {
         const p = JSON.parse(atob(tok.split('.')[1]));
         const role = String(p.role || p.rol || '').toLowerCase();
