@@ -3,6 +3,27 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<!-- 2026-05-06: forzar light mode en la home. Si el OS del usuario esta en
+     dark, el theme-wiring auto-detectaba 'dark' y la pagina principal salia
+     toda negra (logo y texto invisibles). La home es una landing publica que
+     debe ser SIEMPRE clara. Las apps internas (POS, launcher) si respetan
+     la preferencia del usuario. -->
+<script>
+  try {
+    localStorage.setItem('volvix:theme', 'light');
+    document.documentElement.setAttribute('data-vlx-theme', 'light');
+    document.documentElement.setAttribute('data-vlx-mode', 'light');
+    document.documentElement.style.colorScheme = 'light';
+  } catch (e) {}
+</script>
+<style>
+  /* Bloque defensivo: aunque algo intente forzar dark, la home se mantiene
+     clara. Escope al body de marketplace via class. */
+  html[data-vlx-theme] body, html body {
+    background-color: #ffffff !important;
+    color: #0B0B0F !important;
+  }
+</style>
 
 <!-- ============ SEO PRIMARY ============ -->
 <title>Marketplace Volvix · Encuentra tu sistema POS perfecto por giro</title>
@@ -986,12 +1007,14 @@
   </div>
 </div>
 
-<!-- 2026-05-06: sello "Hecho en Nuevo León" — origen del producto. -->
-<div style="display:flex;justify-content:center;align-items:center;padding:18px 16px 6px;background:#fff">
-  <a href="/" aria-label="Hecho en Nuevo León, México" style="display:inline-block;line-height:0">
+<!-- 2026-05-06: sello "Hecho en Nuevo León" — origen del producto.
+     data-theme-skip evita que el theme-wiring lo oscurezca en dark mode. -->
+<div data-theme-skip style="display:flex;justify-content:center;align-items:center;padding:18px 16px 6px;background:#ffffff !important">
+  <a href="/" aria-label="Hecho en Nuevo León, México" data-theme-skip style="display:inline-block;line-height:0;background:#ffffff">
     <img src="/img/hecho-en-nuevo-leon.svg" alt="Hecho en Nuevo León, México"
          width="240" height="98"
-         style="max-width:90vw;height:auto;display:block">
+         data-theme-skip
+         style="max-width:90vw;height:auto;display:block;background:#ffffff">
   </a>
 </div>
 
