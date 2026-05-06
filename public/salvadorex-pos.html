@@ -3627,11 +3627,11 @@
 
           <div id="cfg-negocio" class="card card-pad hidden">
             <h3 style="margin: 0 0 14px; font-size: 14px;">Datos del negocio</h3>
-            <div class="input-group"><label class="input-label">Nombre comercial</label><input class="input-field" value="Abarrotes Don Chucho"></div>
-            <div class="input-group"><label class="input-label">Razón social</label><input class="input-field" value="Jesús González Pérez"></div>
-            <div class="input-group"><label class="input-label">RFC</label><input class="input-field" value="GOPJ850315ABC"></div>
-            <div class="input-group"><label class="input-label">Dirección</label><input class="input-field" value="Av. Revolución 123"></div>
-            <div class="input-group"><label class="input-label">Teléfono</label><input class="input-field" value="55 1234 5678"></div>
+            <div class="input-group"><label class="input-label">Nombre comercial</label><input class="input-field" id="cfg-negocio-nombre" placeholder="Mi negocio" value=""></div>
+            <div class="input-group"><label class="input-label">Razón social</label><input class="input-field" id="cfg-negocio-razon" placeholder="Tu razón social" value=""></div>
+            <div class="input-group"><label class="input-label">RFC</label><input class="input-field" id="cfg-negocio-rfc" placeholder="XXXX000000XXX" value=""></div>
+            <div class="input-group"><label class="input-label">Dirección</label><input class="input-field" id="cfg-negocio-direccion" placeholder="Calle, número, colonia" value=""></div>
+            <div class="input-group"><label class="input-label">Teléfono</label><input class="input-field" id="cfg-negocio-telefono" placeholder="55 1234 5678" value=""></div>
           </div>
 
           <div id="cfg-impuestos" class="card card-pad hidden">
@@ -3774,8 +3774,8 @@
             <div style="font-size: 11.5px; color: var(--text-3);">Activo desde 2024</div>
           </div>
         </div>
-        <div class="input-group"><label class="input-label">Nombre completo</label><input class="input-field" value="Administrador de la Tienda"></div>
-        <div class="input-group"><label class="input-label">Email</label><input class="input-field" value="admin@donchucho.mx"></div>
+        <div class="input-group"><label class="input-label">Nombre completo</label><input class="input-field" id="perfil-nombre" placeholder="Tu nombre" value=""></div>
+        <div class="input-group"><label class="input-label">Email</label><input class="input-field" id="perfil-email" placeholder="tu@correo.com" value="" type="email"></div>
         <button class="btn accent" style="margin-top: 6px;">Guardar cambios</button>
       </div>
     </section>
@@ -4550,13 +4550,36 @@
      VOLVIX BRIDGE · Comunicación con el panel del dueño del sistema
      Usa localStorage (persistencia) + BroadcastChannel (tiempo real)
      ============================================================ */
-  const TENANT_ID = 'TNT001';
+  // 2026-05-06: TENANT_ID ahora se deriva del JWT del usuario actual, no es
+  // hardcoded. Asi cada cuenta nueva tiene su propio bridge state aislado y
+  // NO ve los productos/datos de otros tenants (era el bug de 'Don Chucho').
+  function __deriveTenantIdFromToken() {
+    try {
+      var t = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+      if (!t) return 'TNT001';
+      var parts = t.split('.');
+      if (parts.length < 2) return 'TNT001';
+      var p = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+      return p.tenant_id || p.tid || 'TNT001';
+    } catch (_) { return 'TNT001'; }
+  }
+  const TENANT_ID = __deriveTenantIdFromToken();
   const STORAGE_KEY = 'volvix:tenant:' + TENANT_ID;
   const CHANNEL_NAME = 'volvix-saas';
 
+  // 2026-05-06: derivamos nombre del tenant desde el JWT (claim tenant_name o
+  // business_name); fallback a 'Mi negocio' generico — NO mas 'Don Chucho'.
+  function __deriveTenantNameFromToken() {
+    try {
+      var t = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+      if (!t) return 'Mi negocio';
+      var p = JSON.parse(atob(t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+      return p.tenant_name || p.business_name || p.name || 'Mi negocio';
+    } catch (_) { return 'Mi negocio'; }
+  }
   const DEFAULT_TENANT_STATE = {
     id: TENANT_ID,
-    name: 'Abarrotes Don Chucho',
+    name: __deriveTenantNameFromToken(),
     brand: 'SalvadoreX',
     plan: 'Pro',
     status: 'active', // 'active' | 'suspended' | 'revoked' | 'expired'
@@ -4792,12 +4815,23 @@
     ['#000149', 'Hoy 13:42', 'Carlos Ramírez', 'Admin', 'Crédito', 890.00, 'completed'],
     ['#000148', 'Hoy 13:20', 'Público general', 'Admin', 'Efectivo', 125.00, 'refunded'],
   ];
-  const USERS = [
-    ['admin', 'Administrador', 'admin@donchucho.mx', 'En línea', 'online'],
-    ['maria.lopez', 'Cajero', 'maria.lopez@donchucho.mx', 'Hace 2 min', 'online'],
-    ['juan.perez', 'Gerente', 'juan.perez@donchucho.mx', 'Hoy 08:15 am', 'online'],
-    ['ana.rodriguez', 'Cajero', 'ana.r@donchucho.mx', 'Ayer 20:30', 'offline'],
-  ];
+  // 2026-05-06: USERS demo era hardcoded con emails @donchucho.mx — confundia
+  // a usuarios nuevos al ver gente que no es de su negocio. Ahora arrancamos
+  // con SOLO el admin actual (derivado del JWT); el owner agrega los demas
+  // empleados desde Configuracion -> Usuarios. NO mas datos de ejemplo de Don Chucho.
+  function __buildInitialUsersFromSession() {
+    try {
+      var t = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+      if (!t) return [['admin', 'Administrador', '', 'En linea', 'online']];
+      var p = JSON.parse(atob(t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+      var em = p.email || '';
+      var role = (p.role === 'owner' || p.role === 'admin' || p.role === 'superadmin') ? 'Administrador' :
+                 (p.role === 'manager' ? 'Gerente' :
+                 (p.role === 'cajero' || p.role === 'cashier' ? 'Cajero' : 'Administrador'));
+      return [[em.split('@')[0] || 'admin', role, em, 'En linea', 'online']];
+    } catch (_) { return [['admin', 'Administrador', '', 'En linea', 'online']]; }
+  }
+  const USERS = __buildInitialUsersFromSession();
 
   /* ============ CATEGORÍAS Y QUICK-PICK (panel derecho POS) ============ */
   const CATEGORIES = [
@@ -4915,12 +4949,26 @@
         return;
       }
       // Token Volvix válido → simular login local exitoso
+      // 2026-05-06: removido fallback 'don-chucho' / 'Abarrotes Don Chucho' —
+      // si el token no trae tenant, usamos placeholders genericos y tratamos de
+      // derivar nombre desde business_name del registro (recordado en
+      // localStorage volvix_last_search). NUNCA mas valores demo.
+      var __fallbackBiz = 'Mi negocio';
+      try {
+        var __raw = localStorage.getItem('volvix_last_search');
+        if (__raw) {
+          var __j = JSON.parse(__raw);
+          if (__j && (__j.business_name || __j.query)) {
+            __fallbackBiz = String(__j.business_name || __j.query).slice(0, 60);
+          }
+        }
+      } catch (_) {}
       const ssoSession = {
         user_id: payload.sub || payload.user_id || payload.email,
         email: payload.email,
         role: payload.role || 'admin',
-        tenant_id: payload.tenant_id || payload.tid || 'don-chucho',
-        tenant_name: payload.tenant_name || 'Abarrotes Don Chucho',
+        tenant_id: payload.tenant_id || payload.tid || (TENANT_ID || 'TNT001'),
+        tenant_name: payload.tenant_name || payload.business_name || __fallbackBiz,
         plan: payload.plan || 'Pro',
         via: 'sso'
       };
@@ -4943,6 +4991,31 @@
         const root = document.getElementById('app-root');
         if (root) root.classList.remove('login-active');
         document.body.classList.add('logged-in');
+        // 2026-05-06: HIDRATAR inputs de Perfil + Datos del negocio con valores
+        // del usuario actual. Antes estaban hardcoded a 'admin@donchucho.mx' /
+        // 'Abarrotes Don Chucho' lo cual confundia a los nuevos usuarios al ver
+        // datos de otra cuenta.
+        try {
+          var perfilNombre = document.getElementById('perfil-nombre');
+          var perfilEmail = document.getElementById('perfil-email');
+          var negNombre = document.getElementById('cfg-negocio-nombre');
+          var negTel = document.getElementById('cfg-negocio-telefono');
+          if (perfilNombre && !perfilNombre.value) {
+            perfilNombre.value = ssoSession.user_id && !ssoSession.user_id.includes('@')
+              ? ssoSession.user_id
+              : (ssoSession.email ? ssoSession.email.split('@')[0] : '');
+          }
+          if (perfilEmail && !perfilEmail.value) perfilEmail.value = ssoSession.email || '';
+          if (negNombre && !negNombre.value) negNombre.value = ssoSession.tenant_name || '';
+          // Telefono: si tenemos volvix_last_contact lo usamos
+          try {
+            var c = JSON.parse(localStorage.getItem('volvix_last_contact') || '{}');
+            if (negTel && !negTel.value && c.phone) negTel.value = c.phone;
+          } catch (_) {}
+          // Header: brand-info .name = brand, .sub = tenant_name + ' · Caja 1'
+          var brandSub2 = document.querySelector('.brand-info .sub');
+          if (brandSub2) brandSub2.textContent = (ssoSession.tenant_name || 'Mi negocio') + ' · Caja 1';
+        } catch (_) {}
         try {
           window.dispatchEvent(new CustomEvent('salvadorex:logged-in', { detail: ssoSession }));
           document.dispatchEvent(new CustomEvent('volvix:login', { detail: ssoSession }));

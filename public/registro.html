@@ -895,6 +895,14 @@
           $('#tenantIdBox').textContent = state.tenant_id || 'TNT-XXXXX';
           state._redirect = res.body.redirect || '/salvadorex-pos.html';
           setStep(3);
+          // 2026-05-06: AUTO-LOGIN — el usuario YA hizo register + OTP + token guardado.
+          // No tiene sentido pedirle un click manual y mucho menos un segundo login.
+          // Mostramos el paso 3 (confetti + tenant_id) por ~1.8s y redirigimos solos.
+          // Asi cumplimos: 1 solo login, automatico, directo a su POS.
+          setTimeout(function () {
+            try { window.location.href = state._redirect || '/salvadorex-pos.html'; }
+            catch (_) {}
+          }, 1800);
         } else {
           var code2 = res.body && res.body.error_code;
           if (code2 === 'OTP_LOCKOUT') {

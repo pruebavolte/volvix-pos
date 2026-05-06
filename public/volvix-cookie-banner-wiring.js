@@ -198,8 +198,57 @@
   };
 
   // ── Boot ────────────────────────────────────────────────────────────
+  // 2026-05-06: el banner ya no aparece globalmente (era intrusivo en POS,
+  // marketplace, login). Ahora SOLO se muestra cuando el usuario esta en una
+  // pagina/seccion donde tiene sentido revisar privacidad:
+  //   - paginas legales (cookies-policy, aviso-privacidad, terminos)
+  //   - en /salvadorex-pos.html cuando navega a la seccion "Mi Perfil" o
+  //     "Cliente: <perfil>" (hash #perfil o screen-perfil activo).
+  // Para forzar el banner manualmente: window.volvixCookies.reset() o
+  // window.volvixCookies.openSettings().
+  function shouldShowOnThisPage() {
+    try {
+      var p = (location.pathname || '').toLowerCase();
+      var h = (location.hash || '').toLowerCase();
+      // 1) Paginas legales: siempre mostrar (es el contexto correcto)
+      if (p.indexOf('cookies-policy') !== -1 ||
+          p.indexOf('aviso-privacidad') !== -1 ||
+          p.indexOf('terminos-condiciones') !== -1) {
+        return true;
+      }
+      // 2) En /salvadorex-pos.html: solo cuando el user esta en perfil/cliente
+      if (p.indexOf('salvadorex-pos') !== -1) {
+        if (h.indexOf('perfil') !== -1 || h.indexOf('cliente') !== -1) return true;
+        // Detectar via DOM: si la seccion #screen-perfil o #screen-clientes esta visible
+        try {
+          var perfilOpen = document.querySelector('#screen-perfil:not(.hidden)');
+          var clientesOpen = document.querySelector('#screen-clientes:not(.hidden)');
+          if (perfilOpen || clientesOpen) return true;
+        } catch (_) {}
+        return false;
+      }
+      // 3) Resto de paginas (POS, login, marketplace, registro): NO mostrar.
+      return false;
+    } catch (_) { return false; }
+  }
+
   function boot() {
     if (readConsent()) return; // ya decidió, no molestar
+    if (!shouldShowOnThisPage()) {
+      // Re-verificar cuando el usuario navegue a perfil/clientes dentro del POS
+      try {
+        window.addEventListener('hashchange', function () {
+          if (!readConsent() && shouldShowOnThisPage()) showBanner();
+        });
+        // Listener para clicks en menu del POS que abren perfil/clientes
+        document.addEventListener('click', function (ev) {
+          setTimeout(function () {
+            if (!readConsent() && shouldShowOnThisPage()) showBanner();
+          }, 50);
+        }, true);
+      } catch (_) {}
+      return;
+    }
     showBanner();
   }
 
