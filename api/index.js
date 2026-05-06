@@ -33389,9 +33389,11 @@ if (process.env.NODE_ENV === 'test') {
           tenant_name: business_name,
           business_type: giroNormalized,
         };
-        // 2026-05-06 (rev): tenant nuevo entra DIRECTO a su POS (no al
-        // launcher, ese es solo para el owner de plataforma).
-        respPayload.redirect = '/salvadorex-pos.html';
+        // 2026-05-06 (rev2): /salvadorex-pos.html cuelga el browser por su peso
+        // (810KB + 125 wirings). Redirigimos a /mi-pos.html que es un dashboard
+        // ligero (10KB sin deps) que muestra apps del tenant. Click en "Vender"
+        // abre el POS pesado solo si el user lo elige (lazy load on demand).
+        respPayload.redirect = '/mi-pos.html';
         respPayload.email_verification_pending = !emailSent;
         // Registrar sesion activa para que requireAuth() la valide via jti
         try {

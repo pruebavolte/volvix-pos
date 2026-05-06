@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi POS · Volvix</title>
+<meta name="theme-color" content="#0B1220">
+<meta name="robots" content="noindex,nofollow">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Inter,sans-serif;background:#F4F6FA;color:#0B0B0F;min-height:100vh;color-scheme:light}
+  .topbar{position:sticky;top:0;background:#0B1220;color:#fff;padding:14px 22px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 12px rgba(0,0,0,.12);z-index:100}
+  .topbar .logo{width:34px;height:34px;background:#EA580C;color:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;letter-spacing:-.04em}
+  .topbar .biz-info{flex:1;min-width:0}
+  .topbar .biz-name{font-weight:700;font-size:15px;letter-spacing:-.01em}
+  .topbar .biz-sub{font-size:12px;opacity:.65;margin-top:1px}
+  .topbar .btn-logout{background:none;color:#9CA3AF;border:1px solid #1F2937;padding:7px 14px;border-radius:8px;font-size:13px;cursor:pointer;transition:.12s}
+  .topbar .btn-logout:hover{color:#fff;border-color:#374151;background:#111827}
+  .container{max-width:1100px;margin:32px auto;padding:0 22px}
+  h1{font-size:28px;font-weight:800;letter-spacing:-.02em;margin-bottom:6px;color:#0B0B0F}
+  .sub{color:#475569;font-size:15px;margin-bottom:28px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+  .card{background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:20px;cursor:pointer;transition:.15s ease;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:8px;position:relative;overflow:hidden}
+  .card:hover{border-color:#2563EB;transform:translateY(-2px);box-shadow:0 8px 24px rgba(37,99,235,.12)}
+  .card .ico{font-size:32px;line-height:1}
+  .card h3{font-size:16px;font-weight:700;letter-spacing:-.01em;color:#0B0B0F}
+  .card p{font-size:13px;color:#64748B;line-height:1.45}
+  .card .badge{position:absolute;top:14px;right:14px;background:#FEF3C7;color:#92400E;font-size:10px;font-weight:700;padding:3px 8px;border-radius:99px;text-transform:uppercase;letter-spacing:.5px}
+  .empty{background:#fff;border:1px dashed #CBD5E1;border-radius:14px;padding:40px;text-align:center;color:#64748B}
+  .empty h3{color:#0B0B0F;margin-bottom:6px}
+  @media (max-width:520px){
+    h1{font-size:22px}
+    .grid{grid-template-columns:1fr}
+    .topbar{padding:10px 16px}
+  }
+</style>
+<script src="/auth-helper.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">V</div>
+  <div class="biz-info">
+    <div class="biz-name" id="biz-name">Mi negocio</div>
+    <div class="biz-sub"><span id="biz-role">Cargando…</span> · <span id="biz-tenant">—</span></div>
+  </div>
+  <button class="btn-logout" id="btn-logout">Salir</button>
+</header>
+
+<div class="container">
+  <h1>Hola, <span id="user-name">…</span></h1>
+  <div class="sub">Selecciona una app para empezar.</div>
+
+  <div class="grid" id="apps-grid">
+    <!-- Apps se inyectan via JS según rol y giro -->
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ──────────────────── AUTH GATE LIGHT ────────────────────
+  // Sin redirect-loops, sin auth-gate.js. Solo verifica JWT.
+  function getToken() {
+    try { return localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || ''; }
+    catch (_) { return ''; }
+  }
+  function decodeJwt(t) {
+    try {
+      var parts = String(t).split('.');
+      if (parts.length < 2) return null;
+      var b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      var pad = b64.length % 4 ? '='.repeat(4 - (b64.length % 4)) : '';
+      return JSON.parse(decodeURIComponent(escape(atob(b64 + pad))));
+    } catch (_) { return null; }
+  }
+  var token = getToken();
+  var payload = decodeJwt(token);
+  if (!token || !payload || (payload.exp && payload.exp * 1000 < Date.now())) {
+    location.replace('/login.html?redirect=' + encodeURIComponent(location.pathname));
+    return;
+  }
+
+  // ──────────────────── HEADER HYDRATION ────────────────────
+  var bizName = payload.tenant_name || payload.business_name || 'Mi negocio';
+  var role = String(payload.role || 'owner').toLowerCase();
+  var tenantId = payload.tenant_id || payload.tid || '';
+  var userName = (payload.email || '').split('@')[0] || 'usuario';
+  var roleLabel = ({ owner:'Dueño', superadmin:'Plataforma', manager:'Gerente', cajero:'Cajero', vendor:'Proveedor' })[role] || 'Usuario';
+
+  document.getElementById('biz-name').textContent = bizName;
+  document.getElementById('biz-role').textContent = roleLabel;
+  document.getElementById('biz-tenant').textContent = tenantId;
+  document.getElementById('user-name').textContent = userName;
+
+  // ──────────────────── APPS REGISTRY ────────────────────
+  // Lista canónica con minRole. Solo se renderizan las que el usuario puede usar.
+  var ROLE_RANK = { kiosk:0, cajero:1, vendor:1, manager:2, owner:3, superadmin:4 };
+  var APPS = [
+    { id:'pos',        ico:'🛒', title:'Vender',        desc:'Caja registradora, cobrar al cliente.',           url:'/salvadorex-pos.html',     minRole:'cajero',  badge:null },
+    { id:'inventario', ico:'📦', title:'Inventario',    desc:'Productos, stock, alertas, categorías.',          url:'/pos-inventario.html',     minRole:'cajero',  badge:null },
+    { id:'clientes',   ico:'👥', title:'Clientes',      desc:'Lista, alta, historial y crédito.',               url:'/pos-clientes.html',       minRole:'cajero',  badge:null },
+    { id:'corte',      ico:'💰', title:'Corte de caja', desc:'Cierre del día, arqueo y reportes diarios.',      url:'/pos-corte.html',          minRole:'manager', badge:null },
+    { id:'reportes',   ico:'📊', title:'Reportes',      desc:'Ventas, productos top, clientes frecuentes.',     url:'/volvix-mega-dashboard.html', minRole:'manager', badge:null },
+    { id:'config',     ico:'⚙️', title:'Configuración', desc:'Datos del negocio, usuarios, integraciones.',     url:'/pos-config.html',         minRole:'owner',   badge:null },
+    { id:'devolu',     ico:'↩️', title:'Devoluciones',   desc:'Cancelar ventas, reembolsos y notas de crédito.', url:'/pos-devoluciones.html',   minRole:'manager', badge:null },
+    { id:'kds',        ico:'🍳', title:'KDS Comandero', desc:'Pantalla de cocina para restaurantes.',           url:'/volvix-kds.html',         minRole:'cajero',  badge:'beta' },
+    { id:'shop',       ico:'🌐', title:'Tienda en linea', desc:'Tu micro-shop publica con catalogo y carrito.', url:'/volvix-shop.html',        minRole:'owner',   badge:null }
+  ];
+
+  function canAccess(app, userRole) {
+    return ROLE_RANK[userRole] >= ROLE_RANK[app.minRole];
+  }
+
+  var grid = document.getElementById('apps-grid');
+  var visible = APPS.filter(function(a){ return canAccess(a, role); });
+  if (visible.length === 0) {
+    grid.innerHTML = '<div class="empty"><h3>Tu cuenta no tiene apps activas</h3>' +
+      '<p>Contacta a tu administrador o a soporte@systeminternational.app</p></div>';
+  } else {
+    grid.innerHTML = visible.map(function(app) {
+      return '<a href="' + app.url + '" class="card" data-app="' + app.id + '">' +
+        '<div class="ico">' + app.ico + '</div>' +
+        '<h3>' + app.title + '</h3>' +
+        '<p>' + app.desc + '</p>' +
+        (app.badge ? '<span class="badge">' + app.badge + '</span>' : '') +
+        '</a>';
+    }).join('');
+  }
+
+  // ──────────────────── LOGOUT ────────────────────
+  document.getElementById('btn-logout').addEventListener('click', function() {
+    if (!confirm('¿Cerrar sesión?')) return;
+    try {
+      // Best-effort invalidate en backend
+      fetch('/api/logout', { method:'POST', headers: token ? { 'Authorization':'Bearer ' + token } : {}, credentials:'include' }).catch(function(){});
+    } catch (_) {}
+    // Limpiar token + sesion. NO borramos volvix_remembered_users ni volvix_last_contact.
+    var KEEP = { 'volvix_remembered_users': 1, 'volvix_last_contact': 1, 'volvix_last_search': 1 };
+    try {
+      var keys = [];
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k && !KEEP[k] && (k.indexOf('volvix') === 0 || k.indexOf('vlx') === 0 || k === 'jwt' || k === 'token')) keys.push(k);
+      }
+      keys.forEach(function(k) { localStorage.removeItem(k); });
+    } catch (_) {}
+    location.replace('/login.html');
+  });
+})();
+</script>
+
+</body>
+</html>
