@@ -35,6 +35,13 @@
   }
 </style>
 <script src="/auth-helper.js"></script>
+<!-- 2026-05-06: prefetch de las paginas mas usadas para que cuando el user
+     hace click la carga sea instantanea (browser ya las descargo en background). -->
+<link rel="prefetch" href="/pos-inventario.html" as="document">
+<link rel="prefetch" href="/pos-clientes.html" as="document">
+<link rel="prefetch" href="/pos-corte.html" as="document">
+<link rel="prefetch" href="/pos-config.html" as="document">
+<link rel="dns-prefetch" href="https://zhvwmzkcqngcaqpdxtwr.supabase.co">
 </head>
 <body>
 
