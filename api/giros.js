@@ -751,6 +751,8 @@ async function tryPexelsImage(query) {
 // 2026-05: Google Custom Search JSON API (imágenes brand-specific reales).
 // Free tier: 100 queries/día. searchType=image devuelve imágenes directas (link).
 // Project: volvix-pos. Engine: volvix-images (cx=07ec88647a95540d0).
+// REQUIERE billing vinculado al proyecto GCP volvix-pos (sin cargo bajo 100 q/día).
+// Mientras NO esté vinculado, devuelve 403 PERMISSION_DENIED y la cadena cae a OFF/Wikipedia/Pexels.
 const GOOGLE_CSE_API_KEY = process.env.GOOGLE_CSE_API_KEY || 'AIzaSyAQkzNEPpOSj04ccuAzI9Zcyc6xB7s_zM4';
 const GOOGLE_CSE_ID = process.env.GOOGLE_CSE_ID || '07ec88647a95540d0';
 
@@ -784,11 +786,90 @@ async function tryGoogleCustomSearch(query) {
   } catch (_) { return null; }
 }
 
-// Cadena: Google CSE primero (brand-specific), luego Pexels, luego DDG/Google scraping/Bing.
+// 2026-05: Open Food Facts API (productos de comida/bebida con marcas).
+// Cobertura excelente para café, snacks, bebidas, packaged goods (DXN, Illy, Nescafé...).
+// Sin auth pero rate-limited anónimo: usar User-Agent identificable es CRÍTICO.
+// Per OFF docs: registered apps with User-Agent are not rate-limited.
+const OFF_USER_AGENT = 'Volvix-POS/1.0 (https://systeminternational.app; soporte@systeminternational.app)';
+
+async function tryOpenFoodFacts(query) {
+  if (!query) return null;
+  try {
+    const url = 'https://world.openfoodfacts.org/cgi/search.pl?search_terms=' +
+      encodeURIComponent(query) + '&search_simple=1&action=process&json=1&page_size=5';
+    const r = await fetchWithTimeout(url, {
+      headers: { 'User-Agent': OFF_USER_AGENT, 'Accept': 'application/json' }
+    }, 6000);
+    if (!r || !r.ok) return null;
+    const j = await r.json().catch(() => null);
+    const products = (j && j.products) || [];
+    if (!products.length) return null;
+    // Pick first product with a usable image
+    for (const p of products) {
+      const img = p.image_front_url || p.image_url || p.image_small_url || p.image_thumb_url;
+      if (img && /^https?:\/\//i.test(img)) return img;
+    }
+    return null;
+  } catch (_) { return null; }
+}
+
+// 2026-05: Wikipedia REST API (imágenes de marcas y productos famosos).
+// Cobertura buena para marcas reconocidas (Nike, Apple, Coca-Cola, Heineken...).
+// Sin auth, sin rate-limit estricto, CORS abierto.
+async function tryWikipediaImage(query) {
+  if (!query) return null;
+  try {
+    // 1) Buscar el título de página más relevante
+    const searchUrl = 'https://en.wikipedia.org/w/api.php?action=query&list=search&format=json&origin=*&srsearch=' +
+      encodeURIComponent(query) + '&srlimit=3';
+    const sr = await fetchWithTimeout(searchUrl, {
+      headers: { 'User-Agent': OFF_USER_AGENT, 'Accept': 'application/json' }
+    }, 5000);
+    if (!sr || !sr.ok) return null;
+    const sj = await sr.json().catch(() => null);
+    const hits = sj && sj.query && sj.query.search;
+    if (!hits || !hits.length) return null;
+    // 2) Para cada hit, intentar pageimages
+    for (const hit of hits.slice(0, 3)) {
+      const title = hit.title;
+      if (!title) continue;
+      const imgUrl = 'https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=pageimages&piprop=original|thumbnail&pithumbsize=600&titles=' +
+        encodeURIComponent(title);
+      const ir = await fetchWithTimeout(imgUrl, {
+        headers: { 'User-Agent': OFF_USER_AGENT, 'Accept': 'application/json' }
+      }, 5000);
+      if (!ir || !ir.ok) continue;
+      const ij = await ir.json().catch(() => null);
+      const pages = ij && ij.query && ij.query.pages;
+      if (!pages) continue;
+      for (const pid of Object.keys(pages)) {
+        const page = pages[pid];
+        const orig = page.original && page.original.source;
+        const thumb = page.thumbnail && page.thumbnail.source;
+        const url = orig || thumb;
+        if (url && /^https?:\/\/.+\.(jpe?g|png|webp)(\?|$)/i.test(url)) return url;
+      }
+    }
+    return null;
+  } catch (_) { return null; }
+}
+
+// Cadena de PERFECCIÓN máxima posible:
+//   1. Google CSE        — best-in-class brand-specific (requiere billing)
+//   2. Open Food Facts   — comida/bebida con marca (DXN, Illy, Nescafé...)
+//   3. Wikipedia         — marcas famosas reconocidas
+//   4. Pexels            — stock profesional como red de seguridad
+//   5. DuckDuckGo        — last-resort scraping
+//   6. Google scraping   — last-resort scraping
+//   7. Bing scraping     — last-resort scraping
 async function searchProductImageMulti(query) {
   if (!query || typeof query !== 'string') return null;
   const urlGoogle = await tryGoogleCustomSearch(query);
   if (urlGoogle) return urlGoogle;
+  const urlOFF = await tryOpenFoodFacts(query);
+  if (urlOFF) return urlOFF;
+  const urlWiki = await tryWikipediaImage(query);
+  if (urlWiki) return urlWiki;
   const urlPexels = await tryPexelsImage(query);
   if (urlPexels) return urlPexels;
   const url = await tryDuckDuckGoImage(query);
