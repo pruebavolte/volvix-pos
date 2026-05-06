@@ -232,8 +232,12 @@
         <label for="giro">¿Qué vendes? <span class="req">*</span></label>
         <input id="giro" name="giro" type="text" autocomplete="off"
                placeholder="Ej. tacos, café, ropa, abarrotes…" maxlength="80">
-        <div class="hint">Escribe lo que vendes y te sugerimos el giro.</div>
-        <div class="err" data-err="giro">Selecciona un giro de la lista.</div>
+        <div class="hint">Escribe lo que vendes y elige un giro de las sugerencias.</div>
+        <!-- 2026-05 user-journey ETAPA 2 fix: antes el error decía "Selecciona un
+             giro de la lista" pero el placeholder sugería texto libre — confundía.
+             Ahora el mensaje refleja el comportamiento real: hay autocomplete + lista
+             de sugerencias, hay que elegir una. -->
+        <div class="err" data-err="giro">Elige un giro de las sugerencias que aparecen al escribir.</div>
         <div class="giro-suggestions" id="giroSuggestions" role="listbox"></div>
       </div>
 
