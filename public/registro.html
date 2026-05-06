@@ -197,8 +197,17 @@
     <div id="globalAlert" aria-live="polite" role="status"></div>
 
     <!-- ============================ -->
-    <!-- PASO 1: email + negocio + giro + password (phone opcional) -->
-    <!-- ============================ -->
+    <!-- ============================
+         PASO 1: SIMPLIFICADO 2026-05-06
+         Solo 3 inputs obligatorios: email, telefono, contraseña.
+         business_name + giro se AUTO-FILL desde:
+           - URL params (?giro=...&negocio=...)
+           - sessionStorage volvix_last_search (set en marketplace al buscar)
+           - localStorage volvix_remembered_users (ultimo email usado)
+         password2 (confirmacion) eliminado: 1 solo campo de contraseña.
+         Si los auto-fill estan vacios el usuario puede expandir "mas opciones"
+         para escribir nombre del negocio y giro manualmente.
+    ============================ -->
     <div class="step active" data-step="1">
       <div class="field">
         <label for="email">Correo electrónico <span class="req">*</span></label>
@@ -210,35 +219,15 @@
       </div>
 
       <div class="field">
-        <label for="phone">Teléfono <span style="color:#94a3b8;font-weight:500;font-size:12px">(opcional)</span></label>
+        <label for="phone">Teléfono <span class="req">*</span></label>
         <div class="phone-row">
           <span class="prefix">+52</span>
           <input id="phone" name="phone" type="tel" inputmode="numeric"
-                 placeholder="10 dígitos (opcional)" maxlength="10"
+                 placeholder="10 dígitos" maxlength="10"
                  autocomplete="tel-national" pattern="\d{10}">
         </div>
-        <div class="hint">Lo usaremos para contactarte si lo necesitas.</div>
-        <div class="err" data-err="phone">Si lo agregas, deben ser 10 dígitos.</div>
-      </div>
-
-      <div class="field">
-        <label for="business_name">Nombre del negocio <span class="req">*</span></label>
-        <input id="business_name" name="business_name" type="text"
-               placeholder="Ej. Tacos Don Pepe" maxlength="100" autocomplete="organization">
-        <div class="err" data-err="business_name">Mínimo 3 caracteres.</div>
-      </div>
-
-      <div class="field giro-autocomplete">
-        <label for="giro">¿Qué vendes? <span class="req">*</span></label>
-        <input id="giro" name="giro" type="text" autocomplete="off"
-               placeholder="Ej. tacos, café, ropa, abarrotes…" maxlength="80">
-        <div class="hint">Escribe lo que vendes y elige un giro de las sugerencias.</div>
-        <!-- 2026-05 user-journey ETAPA 2 fix: antes el error decía "Selecciona un
-             giro de la lista" pero el placeholder sugería texto libre — confundía.
-             Ahora el mensaje refleja el comportamiento real: hay autocomplete + lista
-             de sugerencias, hay que elegir una. -->
-        <div class="err" data-err="giro">Elige un giro de las sugerencias que aparecen al escribir.</div>
-        <div class="giro-suggestions" id="giroSuggestions" role="listbox"></div>
+        <div class="hint">Necesario para verificar tu cuenta y recuperarla.</div>
+        <div class="err" data-err="phone">Ingresa 10 dígitos válidos.</div>
       </div>
 
       <div class="field">
@@ -250,15 +239,118 @@
         <div class="err" data-err="password">Mínimo 8 caracteres.</div>
       </div>
 
-      <div class="field">
-        <label for="password2">Confirma tu contraseña <span class="req">*</span></label>
-        <input id="password2" name="password2" type="password"
-               placeholder="Repite la contraseña" autocomplete="new-password">
-        <div class="err" data-err="password2">Las contraseñas no coinciden.</div>
+      <!-- Detalles del negocio: auto-fill silencioso desde busqueda previa.
+           Se quedan invisibles si el sistema YA los detecto. Si quedaron
+           vacios (acceso directo a /registro.html), aparecen como
+           "Personalizar" expandible. -->
+      <div id="autoFillSummary" style="display:none;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:12px 14px;margin:0 0 14px;font-size:13px;color:#14532D;line-height:1.5">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <span style="font-size:18px">✓</span>
+          <strong>Detectamos tu negocio</strong>
+          <button type="button" id="btnEditBusiness" style="margin-left:auto;background:none;border:none;color:#0B0B0F;font-size:12px;cursor:pointer;text-decoration:underline">Editar</button>
+        </div>
+        <div><strong>Nombre:</strong> <span id="autoBizName">—</span></div>
+        <div><strong>Giro:</strong> <span id="autoGiroName">—</span></div>
       </div>
+
+      <details id="manualBusinessDetails" style="margin-bottom:14px">
+        <summary style="cursor:pointer;font-size:13px;color:#475569;padding:8px 0;user-select:none">¿Quieres personalizar el nombre o giro de tu negocio?</summary>
+        <div style="margin-top:10px;padding:14px;background:#F8FAFC;border-radius:10px;border:1px solid #E2E8F0">
+          <div class="field" style="margin-bottom:14px">
+            <label for="business_name">Nombre del negocio</label>
+            <input id="business_name" name="business_name" type="text"
+                   placeholder="Ej. Tacos Don Pepe" maxlength="100" autocomplete="organization">
+            <div class="err" data-err="business_name">Mínimo 3 caracteres.</div>
+          </div>
+
+          <div class="field giro-autocomplete" style="margin-bottom:0">
+            <label for="giro">¿Qué vendes?</label>
+            <input id="giro" name="giro" type="text" autocomplete="off"
+                   placeholder="Ej. tacos, café, ropa, abarrotes…" maxlength="80">
+            <div class="hint">Escribe lo que vendes y elige un giro de las sugerencias.</div>
+            <div class="err" data-err="giro">Elige un giro de las sugerencias que aparecen al escribir.</div>
+            <div class="giro-suggestions" id="giroSuggestions" role="listbox"></div>
+          </div>
+        </div>
+      </details>
 
       <button class="primary" id="btnRegister">Crear cuenta</button>
     </div>
+
+    <!-- 2026-05-06: AUTO-FILL desde marketplace search + URL params.
+         Lee sessionStorage 'volvix_last_search' (lo escribe marketplace.html
+         cuando el user hace una busqueda con resultado). Si trae giro y/o
+         business_name, se completan los inputs y el card verde se muestra. -->
+    <script>
+    (function autoFillFromCache(){
+      function $(s){ return document.querySelector(s); }
+      function setVal(id, v){
+        var el = document.getElementById(id);
+        if (el && v) { el.value = String(v).slice(0, 100); }
+      }
+      function getParam(k){
+        try {
+          var p = new URLSearchParams(location.search);
+          return (p.get(k) || '').trim();
+        } catch(e){ return ''; }
+      }
+      function getCache(){
+        try {
+          var raw = sessionStorage.getItem('volvix_last_search') ||
+                    localStorage.getItem('volvix_last_search');
+          if (!raw) return {};
+          var j = JSON.parse(raw);
+          return j && typeof j === 'object' ? j : {};
+        } catch(e){ return {}; }
+      }
+      function tryFillEmail(){
+        // Si hay un remembered users con un solo email, usarlo
+        try {
+          var raw = localStorage.getItem('volvix_remembered_users');
+          if (!raw) return;
+          var arr = JSON.parse(raw);
+          if (Array.isArray(arr) && arr.length === 1 && arr[0].id && arr[0].id.includes('@')) {
+            setVal('email', arr[0].id);
+          }
+        } catch(e){}
+      }
+
+      // Combinar URL params (mas prioridad) + sessionStorage cache
+      var cache = getCache();
+      var giro = getParam('giro') || cache.giro || cache.query || '';
+      var negocio = getParam('negocio') || cache.business_name || cache.nombre_comercial || '';
+      // Si tenemos giro pero no nombre, derivar nombre del giro:
+      // "Café Lizingh" -> nombre = "Café Lizingh", giro = "café"/"cafetería" si
+      // queda match exacto, o "Café Lizingh" como custom.
+      if (giro && !negocio) negocio = giro;
+
+      if (giro || negocio) {
+        setVal('giro', giro);
+        setVal('business_name', negocio);
+        // Mostrar card verde con resumen + ocultar details (no necesita expandir)
+        var summary = document.getElementById('autoFillSummary');
+        if (summary) summary.style.display = '';
+        var bn = document.getElementById('autoBizName');
+        var gn = document.getElementById('autoGiroName');
+        if (bn) bn.textContent = negocio || '(no detectado)';
+        if (gn) gn.textContent = giro || '(no detectado)';
+      }
+
+      tryFillEmail();
+
+      // Boton "Editar" en card verde -> expande el details + scroll
+      document.addEventListener('click', function (ev) {
+        if (ev.target && ev.target.id === 'btnEditBusiness') {
+          ev.preventDefault();
+          var det = document.getElementById('manualBusinessDetails');
+          if (det) {
+            det.open = true;
+            try { det.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(e){}
+          }
+        }
+      });
+    })();
+    </script>
 
     <!-- ============================ -->
     <!-- PASO 2: OTP (Web OTP API) -->
@@ -549,27 +641,51 @@
     var ok = true;
     var email = ($('#email').value || '').trim().toLowerCase();
     var phone = ($('#phone').value || '').replace(/\D/g, '');
-    var name = $('#business_name').value;
-    var giroVal = $('#giro').value.trim();
-    var giroSlug = state.selected_giro || giroBox.dataset.slug;
+    var nameInput = $('#business_name');
+    var giroInput = $('#giro');
+    var name = nameInput ? (nameInput.value || '').trim() : '';
+    var giroVal = giroInput ? (giroInput.value || '').trim() : '';
+    var giroSlug = state.selected_giro || (giroBox && giroBox.dataset && giroBox.dataset.slug) || '';
     var p1 = $('#password').value;
-    var p2 = $('#password2').value;
 
+    // 2026-05-06 form simplificado:
+    //   - email (obligatorio)
+    //   - phone (obligatorio, antes opcional)
+    //   - password (obligatorio, sin confirmar)
+    //   - business_name + giro: AUTO-FILL desde marketplace cache.
+    //     Si vienen vacios (acceso directo a /registro), derivar:
+    //       business_name <- giro (si existe) | "Mi negocio"
+    //       giro          <- nombre del giro detectado por search-API si llega
+    //                        a un slug conocido, sino usar el texto crudo
+    //                        como custom giro (genera nuevo).
     if (!validEmail(email)) { showErr('email'); ok = false; }
-    if (phone && !validPhone10(phone)) { showErr('phone'); ok = false; } // phone opcional
-    if (!validBusiness(name)) { showErr('business_name'); ok = false; }
-    if (!giroSlug || !giroVal) { showErr('giro'); ok = false; }
+    if (!phone || !validPhone10(phone)) { showErr('phone'); ok = false; } // phone AHORA obligatorio
     if (!p1 || p1.length < 8) { showErr('password'); ok = false; }
-    if (p1 !== p2) { showErr('password2'); ok = false; }
+
+    // business_name + giro: si el usuario NO los proporciono ni hay cache,
+    // permitir continuar con valores derivados (no bloquear).
+    if (!name) {
+      // Derivar de giro si esta disponible
+      name = giroVal || 'Mi negocio';
+    }
+    if (!giroSlug && giroVal) {
+      // Si solo escribieron texto pero no eligieron de la lista,
+      // generar slug custom para giro nuevo
+      giroSlug = giroVal.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
+    }
+    if (!giroSlug) {
+      // Sin giro alguno -> usar 'general'
+      giroSlug = 'general';
+    }
 
     if (ok) {
       state.formData = {
         email: email,
-        business_name: name.trim(),
+        phone: phone,
+        business_name: name.slice(0, 100),
         giro: giroSlug,
         password: p1
       };
-      if (phone) state.formData.phone = phone; // 10 dígitos crudos; backend agrega +52
     }
     return ok;
   }

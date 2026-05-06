@@ -1592,6 +1592,18 @@
       return;
     }
 
+    // 2026-05-06: cache del search para auto-fill en /registro.html.
+    // Si el user busca "Café Lizingh" y luego clickea "Crear cuenta", el form
+    // de registro detecta esto desde sessionStorage y pre-llena nombre+giro.
+    try {
+      sessionStorage.setItem('volvix_last_search', JSON.stringify({
+        query: q,
+        business_name: q,  // como default usar el texto buscado tal cual
+        giro: q,
+        ts: Date.now(),
+      }));
+    } catch (e) {}
+
     const wrap = document.getElementById('ai-response');
     wrap.innerHTML = '<div class="ai-thinking"><span class="dots"><span></span><span></span><span></span></span> Analizando tu giro de negocio...</div>';
     wrap.classList.add('visible');

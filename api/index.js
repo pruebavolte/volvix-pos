@@ -1311,12 +1311,12 @@ function renderLandingHTML(p) {
 </div>
 <nav><div class="row">
   <a class="logo" href="/"><div class="logo-mark"></div><span>VOLVIX</span></a>
-  <a href="/registro.html" class="btn btn-dark">Probar gratis</a>
+  <a href="/registro.html?giro=${encodeURIComponent(p.nombre_comercial || p.slug || '')}&negocio=${encodeURIComponent(p.nombre_comercial || '')}" class="btn btn-dark">Probar gratis</a>
 </div></nav>
 <section class="hero">
   <h1>Sistema POS para <span class="accent">${esc(p.nombre_comercial || 'tu negocio')}</span></h1>
   <p class="lead">${esc(p.descripcion || 'Configurado especialmente para tu giro de negocio.')}</p>
-  <a href="/registro.html" class="btn btn-dark">Empezar ahora — sin tarjeta</a>
+  <a href="/registro.html?giro=${encodeURIComponent(p.nombre_comercial || p.slug || '')}&negocio=${encodeURIComponent(p.nombre_comercial || '')}" class="btn btn-dark">Empezar ahora — sin tarjeta</a>
 </section>
 ${painsHTML ? `<section class="section alt"><div class="wrap"><div class="eyebrow">Te entendemos</div><h2>6 dolores que vivimos contigo</h2><div class="pains">${painsHTML}</div></div></section>` : ''}
 ${prodsHTML ? `<section class="section"><div class="wrap"><div class="eyebrow">Listos para vender</div><h2>9 productos ya configurados en tu inventario</h2><div class="prods">${prodsHTML}</div></div></section>` : ''}
@@ -1324,7 +1324,7 @@ ${robosHTML ? `<section class="section alt"><div class="wrap"><div class="eyebro
 <section><div class="final">
   <h2>Empieza hoy.</h2>
   <p>Sin complicaciones. Únete a cientos de negocios creciendo con Volvix.</p>
-  <a href="/registro.html" class="btn btn-dark">Probar gratis ahora →</a>
+  <a href="/registro.html?giro=${encodeURIComponent(p.nombre_comercial || p.slug || '')}&negocio=${encodeURIComponent(p.nombre_comercial || '')}" class="btn btn-dark">Probar gratis ahora →</a>
 </div></section>
 <div class="foot">© 2026 Volvix — POS multi-giro · <a href="/marketplace.html">Otros giros</a> · <a href="/soporte.html">Soporte</a></div>
 <script>
