@@ -816,12 +816,18 @@ async function tryOpenFoodFacts(query) {
 // 2026-05: Wikipedia REST API (imágenes de marcas y productos famosos).
 // Cobertura buena para marcas reconocidas (Nike, Apple, Coca-Cola, Heineken...).
 // Sin auth, sin rate-limit estricto, CORS abierto.
+//
+// BAD_TITLE filter: descarta hits a artículos de arte/anatomía/medicina/historia
+// que matchean palabras genéricas (ej. "thong" → Fine-art-buttocks.jpg).
+const WIKIPEDIA_BAD_TITLE = /\b(buttocks|nude|nudity|anatomy|anatomical|cadaver|fine[- ]art|painting|sculpture|fresco|mural|museum|history of|ancient|archaeology|archaeological|medical|disease|syndrome|disorder|symptom|surgery|surgical|species|genus|genome|biology|botanical|phylogeny)\b/i;
+const WIKIPEDIA_BAD_FILE = /\b(buttocks|nude|nudity|anatom|cadaver|painting|sculpture|fresco|fine[-_ ]art|museum|surgical|medical|disease|gomito|skeleton|skull)\b/i;
+
 async function tryWikipediaImage(query) {
   if (!query) return null;
   try {
     // 1) Buscar el título de página más relevante
     const searchUrl = 'https://en.wikipedia.org/w/api.php?action=query&list=search&format=json&origin=*&srsearch=' +
-      encodeURIComponent(query) + '&srlimit=3';
+      encodeURIComponent(query) + '&srlimit=5';
     const sr = await fetchWithTimeout(searchUrl, {
       headers: { 'User-Agent': OFF_USER_AGENT, 'Accept': 'application/json' }
     }, 5000);
@@ -829,10 +835,11 @@ async function tryWikipediaImage(query) {
     const sj = await sr.json().catch(() => null);
     const hits = sj && sj.query && sj.query.search;
     if (!hits || !hits.length) return null;
-    // 2) Para cada hit, intentar pageimages
-    for (const hit of hits.slice(0, 3)) {
+    // 2) Para cada hit, intentar pageimages (filtrando títulos malos)
+    for (const hit of hits.slice(0, 5)) {
       const title = hit.title;
       if (!title) continue;
+      if (WIKIPEDIA_BAD_TITLE.test(title)) continue;
       const imgUrl = 'https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=pageimages&piprop=original|thumbnail&pithumbsize=600&titles=' +
         encodeURIComponent(title);
       const ir = await fetchWithTimeout(imgUrl, {
@@ -847,7 +854,11 @@ async function tryWikipediaImage(query) {
         const orig = page.original && page.original.source;
         const thumb = page.thumbnail && page.thumbnail.source;
         const url = orig || thumb;
-        if (url && /^https?:\/\/.+\.(jpe?g|png|webp)(\?|$)/i.test(url)) return url;
+        if (!url) continue;
+        if (!/^https?:\/\/.+\.(jpe?g|png|webp)(\?|$)/i.test(url)) continue;
+        // Reject inappropriate filenames (e.g. Fine-art-buttocks.jpg)
+        if (WIKIPEDIA_BAD_FILE.test(url)) continue;
+        return url;
       }
     }
     return null;
@@ -857,21 +868,24 @@ async function tryWikipediaImage(query) {
 // Cadena de PERFECCIÓN máxima posible:
 //   1. Google CSE        — best-in-class brand-specific (requiere billing)
 //   2. Open Food Facts   — comida/bebida con marca (DXN, Illy, Nescafé...)
-//   3. Wikipedia         — marcas famosas reconocidas
-//   4. Pexels            — stock profesional como red de seguridad
+//   3. Pexels            — stock profesional, seguro, gran cobertura
+//   4. Wikipedia         — marcas globales reconocidas (filtrado BAD_TITLE)
 //   5. DuckDuckGo        — last-resort scraping
 //   6. Google scraping   — last-resort scraping
 //   7. Bing scraping     — last-resort scraping
+//
+// Pexels va ANTES de Wikipedia: Pexels es categoría-segura para queries íntimos
+// y de productos no-marca (Wikipedia matcheaba artículos de arte/anatomía).
 async function searchProductImageMulti(query) {
   if (!query || typeof query !== 'string') return null;
   const urlGoogle = await tryGoogleCustomSearch(query);
   if (urlGoogle) return urlGoogle;
   const urlOFF = await tryOpenFoodFacts(query);
   if (urlOFF) return urlOFF;
-  const urlWiki = await tryWikipediaImage(query);
-  if (urlWiki) return urlWiki;
   const urlPexels = await tryPexelsImage(query);
   if (urlPexels) return urlPexels;
+  const urlWiki = await tryWikipediaImage(query);
+  if (urlWiki) return urlWiki;
   const url = await tryDuckDuckGoImage(query);
   if (url) return url;
   const url2 = await tryGoogleImage(query);
