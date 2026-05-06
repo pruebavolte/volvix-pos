@@ -1000,6 +1000,143 @@ const api = {
     }
   }),
 
+  // =============== BARCODE LOOKUP (portado de 01123581321345589144233) ===============
+  'GET /api/barcode-lookup': async (req, res) => {
+    const q = url.parse(req.url, true).query;
+    const barcode = (q.barcode || '').trim();
+    if (!barcode) return json(res, { error: 'barcode requerido' }, 400);
+
+    // 1. Buscar en productos locales primero
+    const localMatch = store.all('productos').find(p => p.codigo === barcode || p.code === barcode);
+    if (localMatch) return json(res, { found: true, source: 'local', product: localMatch });
+
+    // 2. Buscar en Open Food Facts (API pública, sin costo)
+    try {
+      const offRes = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`, {
+        signal: AbortSignal.timeout(5000),
+        headers: { 'User-Agent': 'SystemInternational-POS/1.0' }
+      });
+      if (offRes.ok) {
+        const data = await offRes.json();
+        if (data.status === 1 && data.product) {
+          const p = data.product;
+          return json(res, {
+            found: true,
+            source: 'openfoodfacts',
+            product: {
+              nombre: p.product_name_es || p.product_name || '',
+              marca: p.brands || '',
+              categoria: p.categories_tags?.[0]?.replace('en:', '') || '',
+              imagen: p.image_url || '',
+              codigo: barcode,
+            }
+          });
+        }
+      }
+    } catch (_) { /* offline o timeout — continúa */ }
+
+    return json(res, { found: false, barcode });
+  },
+
+  // =============== DEVOLUCIONES (portado de 01123581321345589144233) ===============
+  'GET /api/devoluciones': (req, res) => {
+    const q = url.parse(req.url, true).query;
+    let items = store.all('devoluciones');
+    if (q.tenant_id) items = items.filter(d => d.tenant_id === q.tenant_id);
+    json(res, items.sort((a, b) => b.created_at > a.created_at ? 1 : -1));
+  },
+  'POST /api/devoluciones': async (req, res) => {
+    const body = await readBody(req);
+    const { venta_id, folio, cliente, items, motivo, tipo_reembolso, tenant_id } = body;
+    if (!items?.length) return json(res, { error: 'Se requiere al menos un producto' }, 400);
+    const total = items.reduce((s, i) => s + (i.precio * i.cantidad), 0);
+    const devId = 'DEV-' + Date.now();
+    const dev = store.insert('devoluciones', {
+      id: devId, venta_id: venta_id || null, folio: folio || '—',
+      cliente: cliente || 'Público general', items, motivo: motivo || 'Sin motivo',
+      tipo_reembolso: tipo_reembolso || 'efectivo', total, tenant_id: tenant_id || 'TNT001',
+      status: 'completada', created_at: new Date().toISOString(),
+    });
+    // Si es nota de crédito, crearla
+    if (tipo_reembolso === 'nota_credito') {
+      store.insert('notas_credito', {
+        id: 'NC-' + Date.now(), devolucion_id: devId,
+        cliente: cliente || 'Público general', monto_original: total,
+        monto_disponible: total, tenant_id: tenant_id || 'TNT001',
+        status: 'activa', created_at: new Date().toISOString(),
+        vence_at: new Date(Date.now() + 90 * 86400000).toISOString(), // 90 días
+      });
+    }
+    json(res, { ok: true, devolucion: dev });
+  },
+  'GET /api/notas-credito': (req, res) => {
+    const q = url.parse(req.url, true).query;
+    let items = store.all('notas_credito');
+    if (q.tenant_id) items = items.filter(n => n.tenant_id === q.tenant_id);
+    json(res, items);
+  },
+
+  // =============== FILA VIRTUAL (portado de 01123581321345589144233) ===============
+  'GET /api/queue': (req, res) => {
+    const q = url.parse(req.url, true).query;
+    let items = store.all('fila_virtual');
+    if (q.tenant_id) items = items.filter(f => f.tenant_id === q.tenant_id);
+    // Solo los activos, ordenados por posición
+    const activos = items
+      .filter(f => ['esperando', 'llamado'].includes(f.status))
+      .sort((a, b) => a.posicion - b.posicion);
+    json(res, activos);
+  },
+  'POST /api/queue': async (req, res) => {
+    const body = await readBody(req);
+    const { tenant_id, nombre, telefono } = body;
+    const filaActiva = store.all('fila_virtual').filter(
+      f => f.tenant_id === (tenant_id || 'TNT001') && ['esperando', 'llamado'].includes(f.status)
+    );
+    const posicion = filaActiva.length + 1;
+    const ticket = store.insert('fila_virtual', {
+      id: 'TURN-' + Date.now(),
+      tenant_id: tenant_id || 'TNT001',
+      numero: posicion,
+      posicion,
+      nombre: nombre || 'Cliente',
+      telefono: telefono || '',
+      status: 'esperando',
+      created_at: new Date().toISOString(),
+    });
+    json(res, { ok: true, ticket, posicion, total: posicion });
+  },
+  'PATCH /api/queue/:id': async (req, res) => {
+    const body = await readBody(req);
+    const updated = store.update('fila_virtual', params.id, body);
+    if (!updated) return json(res, { error: 'Turno no encontrado' }, 404);
+    json(res, { ok: true, ticket: updated });
+  },
+  'POST /api/queue/:id/atender': async (req, res) => {
+    const ticket = store.find('fila_virtual', params.id);
+    if (!ticket) return json(res, { error: 'Turno no encontrado' }, 404);
+    store.update('fila_virtual', params.id, { status: 'atendido', atendido_at: new Date().toISOString() });
+    // Reposicionar los restantes
+    const restantes = store.all('fila_virtual').filter(
+      f => f.tenant_id === ticket.tenant_id && f.status === 'esperando'
+    ).sort((a, b) => a.posicion - b.posicion);
+    restantes.forEach((f, i) => store.update('fila_virtual', f.id, { posicion: i + 1 }));
+    json(res, { ok: true });
+  },
+  'DELETE /api/queue/:id': async (req, res) => {
+    store.delete('fila_virtual', params.id);
+    json(res, { ok: true });
+  },
+  'GET /api/queue/status/:id': (req, res) => {
+    const ticket = store.find('fila_virtual', params.id);
+    if (!ticket) return json(res, { error: 'Turno no encontrado' }, 404);
+    const filaActiva = store.all('fila_virtual').filter(
+      f => f.tenant_id === ticket.tenant_id && f.status === 'esperando'
+    ).sort((a, b) => a.posicion - b.posicion);
+    const posActual = filaActiva.findIndex(f => f.id === params.id);
+    json(res, { ...ticket, posicion_actual: posActual + 1, total_espera: filaActiva.length });
+  },
+
   // =============== STATS ===============
   'GET /api/stats': (req, res) => {
     const tenants = store.all('tenants');

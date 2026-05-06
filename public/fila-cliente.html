@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <title>Mi turno · Fila Virtual</title>
+  <meta name="theme-color" content="#1a237e">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #F5F5F4; color: #1C1917; -webkit-font-smoothing: antialiased; }
+
+    .app { display: flex; flex-direction: column; min-height: 100vh; max-width: 480px; margin: 0 auto; }
+
+    /* HEADER */
+    .header { background: #1E3A5F; color: #fff; padding: 20px 20px 16px; text-align: center; }
+    .header h1 { font-size: 20px; font-weight: 800; margin: 0 0 4px; }
+    .header p { font-size: 12px; opacity: .7; margin: 0; }
+
+    /* TURNO GRANDE */
+    .turno-section { padding: 24px 20px; text-align: center; }
+    .turno-label { font-size: 13px; color: #78716C; font-weight: 500; margin-bottom: 8px; }
+    .turno-numero { font-size: 80px; font-weight: 900; color: #1E3A5F; line-height: 1; }
+    .turno-estado { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; padding: 6px 16px; border-radius: 20px; margin-top: 12px; }
+    .estado-espera { background: #EDE9FE; color: #6D28D9; }
+    .estado-llamado { background: #FEF9C3; color: #854D0E; animation: pulse-warn 1s ease-in-out infinite; }
+    .estado-atendido { background: #DCFCE7; color: #15803D; }
+    @keyframes pulse-warn { 0%,100%{transform:scale(1)} 50%{transform:scale(1.03)} }
+
+    /* INFO ── */
+    .info-card { margin: 0 20px 16px; background: #fff; border-radius: 14px; padding: 16px; border: 1px solid #E7E5E4; }
+    .info-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #F5F5F4; }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { font-size: 12px; color: #78716C; }
+    .info-val { font-size: 14px; font-weight: 600; }
+
+    /* BARRA DE PROGRESO */
+    .progress-section { margin: 0 20px 20px; }
+    .prog-label { font-size: 12px; color: #78716C; margin-bottom: 8px; }
+    .prog-bar { height: 8px; background: #E7E5E4; border-radius: 20px; overflow: hidden; }
+    .prog-fill { height: 100%; background: linear-gradient(90deg, #1E3A5F, #3B82F6); border-radius: 20px; transition: width .5s; }
+
+    /* FORMULARIO */
+    .form-section { margin: 0 20px 16px; background: #fff; border-radius: 14px; padding: 16px; border: 1px solid #E7E5E4; }
+    .form-title { font-size: 14px; font-weight: 700; margin-bottom: 14px; }
+    .form-group { margin-bottom: 12px; }
+    .form-label { display: block; font-size: 11px; font-weight: 600; color: #78716C; margin-bottom: 5px; }
+    .form-input { width: 100%; padding: 10px 13px; border: 1px solid #E7E5E4; border-radius: 8px; font-size: 14px; background: #F9F9F8; color: #1C1917; font-family: inherit; }
+    .form-input:focus { outline: none; border-color: #1E3A5F; background: #fff; }
+    .btn-unirse { width: 100%; padding: 13px; border-radius: 10px; border: none; background: #1E3A5F; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; transition: all .12s; }
+    .btn-unirse:hover { background: #283593; }
+    .btn-unirse:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* REFRESH */
+    .refresh-section { text-align: center; padding: 0 20px 24px; }
+    .btn-refresh { padding: 10px 20px; border-radius: 8px; border: 1px solid #E7E5E4; background: #fff; font-size: 13px; font-weight: 500; cursor: pointer; color: #57534E; }
+    .btn-refresh:hover { background: #F5F5F4; }
+
+    /* ALERTA LLAMADO */
+    .alerta-llamado { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 999; align-items: center; justify-content: center; text-align: center; padding: 20px; }
+    .alerta-llamado.show { display: flex; }
+    .alerta-box { background: #fff; border-radius: 20px; padding: 32px 24px; max-width: 360px; }
+    .alerta-icon { font-size: 60px; margin-bottom: 12px; animation: shake .5s ease-in-out 3; }
+    @keyframes shake { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-10deg)} 75%{transform:rotate(10deg)} }
+    .alerta-title { font-size: 22px; font-weight: 800; margin-bottom: 8px; color: #1E3A5F; }
+    .alerta-sub { font-size: 14px; color: #78716C; margin-bottom: 20px; }
+    .btn-ok { padding: 12px 32px; border-radius: 10px; border: none; background: #1E3A5F; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; }
+
+    .footer { text-align: center; padding: 16px; font-size: 11px; color: #A8A29E; }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <h1 id="negocio-nombre">Fila Virtual</h1>
+    <p>Sistema International · Tu turno digital</p>
+  </div>
+
+  <!-- ESTADO: Sin turno -->
+  <div id="view-sin-turno">
+    <div class="form-section" style="margin-top:20px">
+      <div class="form-title">📱 Únete a la fila</div>
+      <div class="form-group">
+        <label class="form-label">Tu nombre (opcional)</label>
+        <input class="form-input" id="clienteNombre" placeholder="Ej. María" maxlength="50">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tu teléfono (opcional)</label>
+        <input class="form-input" id="clienteTelefono" type="tel" placeholder="8181234567" maxlength="15">
+      </div>
+      <button class="btn-unirse" id="btnUnirse" onclick="unirseAFila()">
+        Unirme a la fila
+      </button>
+    </div>
+    <div id="info-fila-publica" style="margin:0 20px;font-size:13px;color:#78716C;text-align:center"></div>
+  </div>
+
+  <!-- ESTADO: Con turno -->
+  <div id="view-con-turno" style="display:none">
+    <div class="turno-section">
+      <div class="turno-label">Tu número de turno</div>
+      <div class="turno-numero" id="turno-num">—</div>
+      <div class="turno-estado estado-espera" id="turno-estado">⏳ Esperando</div>
+    </div>
+
+    <div class="info-card">
+      <div class="info-row">
+        <span class="info-label">Tu nombre</span>
+        <span class="info-val" id="turno-nombre">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Personas adelante</span>
+        <span class="info-val" id="turno-adelante">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Tiempo estimado</span>
+        <span class="info-val" id="turno-tiempo">—</span>
+      </div>
+    </div>
+
+    <div class="progress-section">
+      <div class="prog-label" id="prog-label">Calculando tu posición...</div>
+      <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+
+    <div class="refresh-section">
+      <button class="btn-refresh" onclick="actualizarEstado()">↺ Actualizar estado</button>
+      <div style="margin-top:8px;font-size:11px;color:#A8A29E">Se actualiza automáticamente cada 20 seg</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ALERTA LLAMADO -->
+<div class="alerta-llamado" id="alerta-llamado">
+  <div class="alerta-box">
+    <div class="alerta-icon">🔔</div>
+    <div class="alerta-title">¡Es tu turno!</div>
+    <div class="alerta-sub">Por favor acércate a la caja. Te están llamando.</div>
+    <button class="btn-ok" onclick="cerrarAlerta()">✓ Entendido</button>
+  </div>
+</div>
+
+<script>
+var params = new URLSearchParams(window.location.search);
+var tenantId = params.get('tenant') || 'TNT001';
+var miTurnoId = localStorage.getItem('si_mi_turno_' + tenantId);
+var miTurnoData = null;
+var fueAvisado = false;
+
+function unirseAFila() {
+  var nombre = document.getElementById('clienteNombre').value.trim();
+  var telefono = document.getElementById('clienteTelefono').value.trim();
+  var btn = document.getElementById('btnUnirse');
+  btn.disabled = true;
+  btn.textContent = 'Uniéndote...';
+
+  fetch('/api/queue', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tenant_id: tenantId, nombre: nombre || 'Cliente', telefono: telefono })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.ticket) {
+      miTurnoId = d.ticket.id;
+      miTurnoData = d.ticket;
+      localStorage.setItem('si_mi_turno_' + tenantId, miTurnoId);
+      mostrarConTurno(d.ticket, d.posicion, d.total);
+    } else {
+      btn.disabled = false; btn.textContent = 'Unirme a la fila';
+    }
+  })
+  .catch(function() {
+    // Offline: generar turno local
+    var turno = { id: 'LOCAL-' + Date.now(), nombre: nombre || 'Cliente', telefono: telefono, status: 'esperando', created_at: new Date().toISOString() };
+    miTurnoId = turno.id;
+    miTurnoData = turno;
+    localStorage.setItem('si_mi_turno_' + tenantId, miTurnoId);
+    mostrarConTurno(turno, 1, 1);
+  });
+}
+
+function mostrarConTurno(ticket, posicion, total) {
+  document.getElementById('view-sin-turno').style.display = 'none';
+  document.getElementById('view-con-turno').style.display = '';
+  actualizarUI(ticket, posicion || 1, total || 1);
+}
+
+function actualizarUI(ticket, posicion, total) {
+  document.getElementById('turno-num').textContent = posicion;
+  document.getElementById('turno-nombre').textContent = ticket.nombre || 'Cliente';
+  var adelante = Math.max(0, posicion - 1);
+  document.getElementById('turno-adelante').textContent = adelante === 0 ? '¡Eres el primero!' : adelante;
+  document.getElementById('turno-tiempo').textContent = '~' + (adelante * 3) + ' min';
+
+  var pct = total > 0 ? Math.round(((total - posicion) / total) * 100) : 0;
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = posicion + ' de ' + total + ' en la fila';
+
+  var estadoEl = document.getElementById('turno-estado');
+  if (ticket.status === 'llamado') {
+    estadoEl.className = 'turno-estado estado-llamado';
+    estadoEl.textContent = '📢 ¡Te están llamando!';
+    if (!fueAvisado) { fueAvisado = true; mostrarAlerta(); }
+  } else if (ticket.status === 'atendido') {
+    estadoEl.className = 'turno-estado estado-atendido';
+    estadoEl.textContent = '✅ Atendido';
+  } else {
+    estadoEl.className = 'turno-estado estado-espera';
+    estadoEl.textContent = '⏳ Esperando';
+  }
+}
+
+function actualizarEstado() {
+  if (!miTurnoId) return;
+  fetch('/api/queue/status/' + miTurnoId)
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.id) actualizarUI(d, d.posicion_actual, d.total_espera);
+    })
+    .catch(function() {});
+}
+
+function mostrarAlerta() {
+  document.getElementById('alerta-llamado').classList.add('show');
+  try { if (navigator.vibrate) navigator.vibrate([300, 100, 300]); } catch(_) {}
+}
+function cerrarAlerta() { document.getElementById('alerta-llamado').classList.remove('show'); }
+
+// Auto-refresh
+setInterval(actualizarEstado, 20000);
+
+// Init
+(function() {
+  // Cargar info del negocio
+  fetch('/api/config').then(function(r) { return r.json(); }).then(function(d) {
+    if (d.tenant_name) document.getElementById('negocio-nombre').textContent = d.tenant_name;
+  }).catch(function(){});
+
+  // Ver cuántos hay en fila
+  fetch('/api/queue?tenant_id=' + tenantId).then(function(r) { return r.json(); }).then(function(d) {
+    if (Array.isArray(d)) {
+      var el = document.getElementById('info-fila-publica');
+      if (el) el.textContent = d.length > 0 ? 'Hay ' + d.length + ' persona(s) en la fila ahora' : 'La fila está vacía, ¡serás el primero!';
+    }
+  }).catch(function(){});
+
+  // Si ya tenía turno
+  if (miTurnoId) {
+    actualizarEstado();
+    document.getElementById('view-sin-turno').style.display = 'none';
+    document.getElementById('view-con-turno').style.display = '';
+    document.getElementById('turno-num').textContent = '...';
+    document.getElementById('turno-nombre').textContent = 'Cargando...';
+  }
+})();
+</script>
+</body>
+</html>

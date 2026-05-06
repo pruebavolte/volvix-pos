@@ -614,8 +614,11 @@ input[type="checkbox"] { cursor: pointer; accent-color: var(--navy); }
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Código de barras</label>
-          <input class="form-input mono" id="pCodigo" placeholder="7501055303045" maxlength="13" style="font-family:var(--font-mono)">
-          <div class="form-hint">EAN-13 · deja vacío para auto-generar</div>
+          <div style="display:flex;gap:6px">
+            <input class="form-input mono" id="pCodigo" placeholder="7501055303045" maxlength="13" style="font-family:var(--font-mono)" oninput="onBarcodeLookup(this.value)">
+            <button class="btn" id="btnLookup" onclick="lookupBarcode()" title="Buscar en base de datos global" style="padding:8px 10px;flex-shrink:0;white-space:nowrap">🔍 Buscar</button>
+          </div>
+          <div class="form-hint" id="barcodeHint">EAN-13 · deja vacío para auto-generar · o presiona 🔍 para buscar en Open Food Facts</div>
         </div>
         <div class="form-group">
           <label class="form-label">SKU interno</label>
@@ -1552,6 +1555,60 @@ function toast(msg, type = 'info') {
 }
 
 // ── Generador EAN simple (no certificado, para uso interno) ──
+// ── BARCODE LOOKUP (portado de 01123581321345589144233 via Open Food Facts) ──
+var _barcodeTimer = null;
+function onBarcodeLookup(val) {
+  clearTimeout(_barcodeTimer);
+  if (val.length >= 8) {
+    _barcodeTimer = setTimeout(function() { lookupBarcode(); }, 800);
+  }
+}
+
+async function lookupBarcode() {
+  var codigo = document.getElementById('pCodigo').value.trim();
+  if (!codigo || codigo.length < 8) {
+    toast('Ingresa al menos 8 dígitos del código', 'err');
+    return;
+  }
+  var hint = document.getElementById('barcodeHint');
+  var btn = document.getElementById('btnLookup');
+  hint.textContent = '🔍 Buscando en base de datos...';
+  btn.disabled = true;
+  btn.textContent = '...';
+
+  try {
+    var r = await fetch('/api/barcode-lookup?barcode=' + encodeURIComponent(codigo));
+    var data = await r.json();
+
+    if (data.found && data.product) {
+      var p = data.product;
+      // Rellenar campos automáticamente
+      if (p.nombre || p.name) document.getElementById('pNombre').value = p.nombre || p.name;
+      if (p.categoria || p.category) {
+        var catSelect = document.getElementById('pCategoria');
+        var catVal = p.categoria || p.category;
+        for (var i = 0; i < catSelect.options.length; i++) {
+          if (catSelect.options[i].text.toLowerCase().includes(catVal.toLowerCase())) {
+            catSelect.value = catSelect.options[i].value;
+            break;
+          }
+        }
+      }
+      var source = data.source === 'local' ? '✅ Encontrado en tu inventario' : '✅ Encontrado en Open Food Facts';
+      if (p.marca) source += ' · ' + p.marca;
+      hint.textContent = source;
+      toast('✅ Producto encontrado: ' + (p.nombre || p.name), 'ok');
+    } else {
+      hint.textContent = '❌ No encontrado en la base de datos global. Ingresa los datos manualmente.';
+    }
+  } catch(_) {
+    hint.textContent = '⚠ Sin conexión — rellena los datos manualmente';
+  }
+
+  btn.disabled = false;
+  btn.textContent = '🔍 Buscar';
+}
+
 function genEAN() {
   const base = '200' + String(Date.now()).slice(-9);
   let sum = 0;

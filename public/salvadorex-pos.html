@@ -340,6 +340,30 @@
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
   }
+  /* ── VOICE ORDER ── */
+  .tb-btn.voice { background: var(--surface-1); border: 1px solid var(--border); color: var(--text-2); transition: all .15s; }
+  .tb-btn.voice:hover { background: var(--surface-2); color: var(--text); }
+  .tb-btn.voice.vox-listening { background: #DCFCE7; border-color: #16A34A; color: #15803D; animation: vox-pulse 1s ease-in-out infinite; }
+  .tb-btn.voice.vox-processing { background: #DBEAFE; border-color: #2563EB; color: #1D4ED8; }
+  .tb-btn.voice.vox-error { background: #FEE2E2; border-color: #DC2626; color: #B91C1C; }
+  @keyframes vox-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(22,163,74,.4)} 50%{box-shadow:0 0 0 6px rgba(22,163,74,0)} }
+  #vox-panel {
+    position: fixed; top: 56px; right: 12px; width: 280px;
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,.12);
+    z-index: 9990; padding: 14px; display: none; flex-direction: column; gap: 10px;
+  }
+  #vox-panel.open { display: flex; }
+  #vox-status-bar { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-2); }
+  #vox-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-3); flex-shrink: 0; transition: background .2s; }
+  #vox-dot.listening { background: #16A34A; animation: vox-pulse 1s ease-in-out infinite; }
+  #vox-dot.processing { background: #2563EB; }
+  #vox-transcript { font-size: 13px; color: var(--text); font-style: italic; min-height: 18px; }
+  #vox-feedback { font-size: 12px; color: var(--text-2); min-height: 16px; }
+  #vox-commands { border-top: 1px solid var(--border); padding-top: 8px; }
+  #vox-commands p { font-size: 10px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 5px; }
+  #vox-commands ul { list-style: none; padding: 0; margin: 0; }
+  #vox-commands li { font-size: 11px; color: var(--text-3); padding: 1px 0; }
   .tb-btn.rapido {
     background: linear-gradient(180deg, #3B82F6, #1D4ED8);
     color: white;
@@ -2630,6 +2654,32 @@
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
         <span>Web</span>
       </button>
+    </div>
+
+    <!-- VOICE ORDER (portado de 01123581321345589144233) -->
+    <button class="tb-btn voice" id="vox-btn" onclick="voxToggle()" aria-label="Orden por voz" title="Orden por voz — di 'agrega 2 tacos'">
+      <svg id="vox-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+      <span>VOZ</span>
+    </button>
+
+    <!-- Panel flotante de voz -->
+    <div id="vox-panel">
+      <div id="vox-status-bar">
+        <div id="vox-dot"></div>
+        <span id="vox-status-text">Presiona VOZ para hablar</span>
+      </div>
+      <div id="vox-transcript"></div>
+      <div id="vox-feedback"></div>
+      <div id="vox-commands">
+        <p>Comandos</p>
+        <ul>
+          <li>• "agrega 3 tacos"</li>
+          <li>• "quita las sabritas"</li>
+          <li>• "cambia coca a 5"</li>
+          <li>• "total" / "cobrar"</li>
+          <li>• "cancela la venta"</li>
+        </ul>
+      </div>
     </div>
 
     <button class="tb-btn rapido" onclick="showScreen('quickpos')" aria-label="Modo caja rápida" title="Modo caja rápida">
@@ -14606,5 +14656,270 @@
 })();
 </script>
 <script src="/volvix-onboarding-wizard.js"></script>
+<!-- ================================================================
+     VOICE ORDER SYSTEM — portado de pruebavolte/01123581321345589144233
+     Usa Web Speech API nativa (Chrome/Edge). No requiere API keys.
+     Lógica original: src/components/pos/voice-order-system.tsx
+                      src/hooks/use-voice-orders.ts
+                      src/lib/services/elevenlabs.ts (parseVoiceCommand, fuzzySearchProduct)
+     ================================================================ -->
+<script>
+(function() {
+  'use strict';
+
+  /* ---------- Estado ---------- */
+  var _voxState = 'idle'; // idle | listening | processing
+  var _voxRecognition = null;
+  var _voxPanelOpen = false;
+  var _voxSupported = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+
+  /* ---------- UI helpers ---------- */
+  function voxSetState(state, statusText, transcriptText, feedbackText) {
+    _voxState = state;
+    var btn = document.getElementById('vox-btn');
+    var dot = document.getElementById('vox-dot');
+    var stTxt = document.getElementById('vox-status-text');
+    var trTxt = document.getElementById('vox-transcript');
+    var fbTxt = document.getElementById('vox-feedback');
+    if (!btn) return;
+
+    btn.classList.remove('vox-listening', 'vox-processing', 'vox-error');
+    dot.className = '';
+    if (state === 'listening') { btn.classList.add('vox-listening'); dot.className = 'listening'; }
+    if (state === 'processing') { btn.classList.add('vox-processing'); dot.className = 'processing'; }
+    if (state === 'error') { btn.classList.add('vox-error'); }
+
+    if (statusText !== undefined) stTxt.textContent = statusText;
+    if (transcriptText !== undefined) trTxt.textContent = transcriptText ? '«' + transcriptText + '»' : '';
+    if (feedbackText !== undefined) fbTxt.textContent = feedbackText;
+  }
+
+  function voxOpenPanel() {
+    var panel = document.getElementById('vox-panel');
+    if (panel) panel.classList.add('open');
+    _voxPanelOpen = true;
+  }
+
+  function voxClosePanel() {
+    var panel = document.getElementById('vox-panel');
+    if (panel) panel.classList.remove('open');
+    _voxPanelOpen = false;
+  }
+
+  /* ---------- Cerrar panel al click fuera ---------- */
+  document.addEventListener('click', function(e) {
+    if (!_voxPanelOpen) return;
+    var panel = document.getElementById('vox-panel');
+    var btn = document.getElementById('vox-btn');
+    if (panel && btn && !panel.contains(e.target) && !btn.contains(e.target)) {
+      voxClosePanel();
+      voxStop();
+    }
+  });
+
+  /* ---------- Toggle principal (botón VOZ) ---------- */
+  window.voxToggle = function() {
+    if (!_voxSupported) {
+      showToast('Tu navegador no soporta comandos de voz. Usa Chrome o Edge.');
+      return;
+    }
+    if (_voxState === 'idle') {
+      voxOpenPanel();
+      voxStart();
+    } else {
+      voxStop();
+      voxClosePanel();
+    }
+  };
+
+  /* ---------- Iniciar reconocimiento ---------- */
+  function voxStart() {
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    _voxRecognition = new SR();
+    _voxRecognition.lang = 'es-MX';
+    _voxRecognition.continuous = false;
+    _voxRecognition.interimResults = false;
+    _voxRecognition.maxAlternatives = 1;
+
+    voxSetState('listening', 'Escuchando...', '', '');
+
+    _voxRecognition.onresult = function(event) {
+      var transcript = event.results[0][0].transcript.toLowerCase().trim();
+      voxSetState('processing', 'Procesando...', transcript, '');
+      var result = voxProcessCommand(transcript);
+      voxSetState('idle', 'Listo. Presiona VOZ para otro comando.', transcript, result.message);
+      if (result.success) {
+        showToast('🎤 ' + result.message);
+      } else {
+        showToast('🎤 ' + result.message);
+      }
+    };
+
+    _voxRecognition.onerror = function(event) {
+      var msg = event.error === 'not-allowed'
+        ? 'Permiso de micrófono denegado'
+        : event.error === 'no-speech'
+        ? 'No escuché nada, intenta de nuevo'
+        : 'Error: ' + event.error;
+      voxSetState('error', msg, '', '');
+      showToast('🎤 ' + msg);
+    };
+
+    _voxRecognition.onend = function() {
+      if (_voxState === 'listening') {
+        voxSetState('idle', 'No escuché nada. Presiona VOZ para intentar.', '', '');
+      }
+    };
+
+    try {
+      _voxRecognition.start();
+    } catch(e) {
+      voxSetState('error', 'Error al iniciar el micrófono', '', '');
+    }
+  }
+
+  /* ---------- Detener ---------- */
+  function voxStop() {
+    if (_voxRecognition) {
+      try { _voxRecognition.stop(); } catch(_) {}
+      _voxRecognition = null;
+    }
+    voxSetState('idle', 'Presiona VOZ para hablar', '', '');
+  }
+
+  /* ---------- Fuzzy search (portado de fuzzySearchProduct en elevenlabs.ts) ---------- */
+  var VOX_STOPWORDS = ['la','las','los','el','un','una','unos','unas','de','del','al','me','le','se','y','o','a','por','para'];
+  function voxNormWord(w) {
+    if (w.endsWith('es') && w.length > 3) return w.slice(0, -2);
+    if (w.endsWith('s') && w.length > 3) return w.slice(0, -1);
+    return w;
+  }
+  function voxFuzzySearch(query, names) {
+    var q = query.toLowerCase().trim();
+    var exact = names.filter(function(n) { return n.toLowerCase() === q; });
+    if (exact.length) return exact;
+    var starts = names.filter(function(n) { return n.toLowerCase().startsWith(q); });
+    if (starts.length) return starts;
+    var contains = names.filter(function(n) { return n.toLowerCase().includes(q); });
+    if (contains.length) return contains;
+    var words = q.split(/\s+/)
+      .filter(function(w) { return w.length > 2 && VOX_STOPWORDS.indexOf(w) < 0; })
+      .map(voxNormWord);
+    if (words.length) {
+      var partial = names.filter(function(n) {
+        var nl = n.toLowerCase();
+        return words.some(function(w) { return nl.includes(w); });
+      });
+      if (partial.length) return partial;
+    }
+    return [];
+  }
+
+  /* ---------- Parser de comandos (portado de parseVoiceCommand en elevenlabs.ts) ---------- */
+  function voxParseCommand(text) {
+    // Agregar
+    var addPatterns = [
+      /agrega?r?\s+(\d+)\s+(.+)/,
+      /añad[ei]r?\s+(\d+)\s+(.+)/,
+      /pon[ei]?\s+(\d+)\s+(.+)/,
+      /dame\s+(\d+)\s+(.+)/,
+      /^(\d+)\s+(.+)/,
+    ];
+    for (var i = 0; i < addPatterns.length; i++) {
+      var m = text.match(addPatterns[i]);
+      if (m) return { type: 'add', qty: parseInt(m[1]), product: m[2].trim() };
+    }
+    // Quitar
+    var removePatterns = [/quita?r?\s+(.+)/, /elimina?r?\s+(.+)/, /borra?r?\s+(.+)/, /retira?r?\s+(.+)/];
+    for (var i = 0; i < removePatterns.length; i++) {
+      var m = text.match(removePatterns[i]);
+      if (m) return { type: 'remove', product: m[1].trim() };
+    }
+    // Actualizar cantidad
+    var updatePatterns = [/cambia?\s+(.+)\s+a\s+(\d+)/, /modifica?\s+(.+)\s+a\s+(\d+)/, /pon\s+(.+)\s+en\s+(\d+)/];
+    for (var i = 0; i < updatePatterns.length; i++) {
+      var m = text.match(updatePatterns[i]);
+      if (m) return { type: 'update', product: m[1].trim(), qty: parseInt(m[2]) };
+    }
+    // Cobrar / total
+    if (/cobr[ae]|total|cu[aá]nto|finali[sz]|termina|cierra la venta/.test(text)) return { type: 'finish' };
+    // Cancelar
+    if (/cancela|nuevo ticket|limpia/.test(text)) return { type: 'cancel' };
+    // Buscar
+    var buscarM = text.match(/busc[ae]?\s+(.+)|encuentra?\s+(.+)/);
+    if (buscarM) return { type: 'search', product: (buscarM[1] || buscarM[2]).trim() };
+    return { type: 'unknown' };
+  }
+
+  /* ---------- Ejecutar comando sobre el POS ---------- */
+  function voxProcessCommand(transcript) {
+    var cmd = voxParseCommand(transcript);
+    var catalog = (typeof CATALOG !== 'undefined') ? CATALOG : [];
+    var names = catalog.map(function(p) { return p.name; });
+
+    switch (cmd.type) {
+
+      case 'add': {
+        if (!cmd.product) return { success: false, message: 'No entendí el producto' };
+        var matches = voxFuzzySearch(cmd.product, names);
+        if (!matches.length) return { success: false, message: 'No encontré «' + cmd.product + '» en el catálogo' };
+        if (matches.length > 3) return { success: false, message: 'Encontré varios: ' + matches.slice(0,3).join(', ') + '. Sé más específico' };
+        var prod = catalog.find(function(p) { return p.name === matches[0]; });
+        if (!prod) return { success: false, message: 'Error al encontrar el producto' };
+        var qty = cmd.qty || 1;
+        for (var i = 0; i < qty; i++) { try { addToCart(prod); } catch(_) {} }
+        return { success: true, message: 'Agregué ' + qty + ' ' + prod.name };
+      }
+
+      case 'remove': {
+        if (!cmd.product) return { success: false, message: 'No entendí qué quitar' };
+        var matches = voxFuzzySearch(cmd.product, names);
+        if (!matches.length) return { success: false, message: 'No encontré «' + cmd.product + '» en el carrito' };
+        var prod = catalog.find(function(p) { return p.name === matches[0]; });
+        if (!prod) return { success: false, message: 'Error al localizar el producto' };
+        var cart = (typeof CART !== 'undefined') ? CART : [];
+        var idx = cart.findIndex(function(c) { return c.name === prod.name || c.code === prod.code; });
+        if (idx < 0) return { success: false, message: prod.name + ' no está en el carrito' };
+        try { removeFromCart(idx); } catch(_) {}
+        return { success: true, message: 'Quité ' + prod.name };
+      }
+
+      case 'update': {
+        if (!cmd.product || !cmd.qty) return { success: false, message: 'No entendí el producto o la cantidad' };
+        var matches = voxFuzzySearch(cmd.product, names);
+        if (!matches.length) return { success: false, message: 'No encontré «' + cmd.product + '»' };
+        var prod = catalog.find(function(p) { return p.name === matches[0]; });
+        var cart = (typeof CART !== 'undefined') ? CART : [];
+        var item = cart.find(function(c) { return c.name === prod.name || c.code === prod.code; });
+        if (item) {
+          item.qty = cmd.qty;
+          try { renderCart(); } catch(_) {}
+          return { success: true, message: prod.name + ' → ' + cmd.qty + ' unidades' };
+        }
+        return { success: false, message: prod.name + ' no está en el carrito' };
+      }
+
+      case 'finish':
+        try { openPayment(); } catch(_) {}
+        return { success: true, message: 'Abriendo cobro...' };
+
+      case 'cancel':
+        try { clearCart(); } catch(_) {}
+        return { success: true, message: 'Carrito limpiado' };
+
+      case 'search': {
+        if (!cmd.product) return { success: false, message: 'No entendí qué buscar' };
+        var matches = voxFuzzySearch(cmd.product, names);
+        if (!matches.length) return { success: false, message: 'No encontré «' + cmd.product + '»' };
+        return { success: true, message: 'Encontré: ' + matches.slice(0,3).join(', ') };
+      }
+
+      default:
+        return { success: false, message: 'No entendí el comando. Di "agrega 2 tacos" o "cobrar".' };
+    }
+  }
+
+})();
+</script>
 </body>
 </html>

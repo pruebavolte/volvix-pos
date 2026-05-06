@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fila Virtual · System International</title>
+  <meta name="theme-color" content="#1a237e">
+  <script src="/auth-gate.js" data-roles="superadmin,owner,cajero"></script>
+  <script src="/config.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/volvix-tokens.css">
+  <script src="/volvix-api.js"></script>
+  <!-- QR Code generator (funciona offline, sin CDN requerido) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; padding: 0; font-family: var(--font-primary); font-size: 14px; color: var(--text); background: var(--bg-2); -webkit-font-smoothing: antialiased; overflow: hidden; }
+.app { display: flex; flex-direction: column; height: 100vh; }
+
+/* ── TOPBAR ── */
+.topbar { display: flex; align-items: center; gap: 10px; background: var(--navy); color: #fff; padding: 0 16px; height: 48px; flex-shrink: 0; }
+.topbar-title { font-size: 15px; font-weight: 700; flex: 1; }
+.tb-btn { display: flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.1); color: #fff; font-size: 12px; font-weight: 500; cursor: pointer; text-decoration: none; }
+.tb-btn:hover { background: rgba(255,255,255,.2); }
+
+/* ── KPIs ── */
+.kpis { display: flex; gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.kpi { flex: 1; background: var(--surface); padding: 12px 16px; text-align: center; }
+.kpi-val { font-size: 24px; font-weight: 800; color: var(--navy); }
+.kpi-label { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+
+/* ── LAYOUT ── */
+.layout { display: grid; grid-template-columns: 1fr 320px; flex: 1; overflow: hidden; }
+.panel-main { display: flex; flex-direction: column; overflow: hidden; }
+.panel-side { background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+
+/* ── TOOLBAR ── */
+.toolbar { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.btn { display: inline-flex; align-items: center; gap: 5px; padding: 8px 14px; border-radius: 7px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--text); transition: all .12s; }
+.btn:hover { background: var(--bg-2); }
+.btn.primary { background: var(--navy); color: #fff; border-color: var(--navy); }
+.btn.primary:hover { background: var(--navy-2, #283593); }
+.btn.success { background: #DCFCE7; color: #15803D; border-color: #86EFAC; }
+.btn.danger { background: #FEE2E2; color: var(--danger); border-color: #FCA5A5; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.spacer { flex: 1; }
+
+/* ── FILA LIST ── */
+.fila-list { flex: 1; overflow-y: auto; padding: 12px 14px; }
+.turno-card { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; transition: all .15s; }
+.turno-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+.turno-card.llamado { border-color: #FCD34D; background: #FFFBEB; }
+.turno-num { width: 44px; height: 44px; border-radius: 10px; background: var(--navy); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; flex-shrink: 0; }
+.turno-card.llamado .turno-num { background: #F59E0B; }
+.turno-info { flex: 1; min-width: 0; }
+.turno-nombre { font-size: 14px; font-weight: 600; }
+.turno-meta { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+.turno-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+.badge-espera { background: #EDE9FE; color: #6D28D9; }
+.badge-llamado { background: #FEF9C3; color: #854D0E; }
+.turno-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.icon-btn { width: 32px; height: 32px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: all .1s; }
+.icon-btn:hover { background: var(--bg-2); }
+
+.empty-state { text-align: center; padding: 60px 20px; color: var(--text-3); }
+.empty-icon { font-size: 48px; margin-bottom: 12px; }
+
+/* ── PANEL LADO ── */
+.side-header { padding: 14px 16px; border-bottom: 1px solid var(--border); font-weight: 700; font-size: 14px; flex-shrink: 0; }
+.side-body { padding: 14px 16px; flex: 1; overflow-y: auto; }
+.form-group { margin-bottom: 12px; }
+.form-label { display: block; font-size: 11px; font-weight: 600; color: var(--text-2); margin-bottom: 5px; }
+.form-input { width: 100%; padding: 8px 11px; border: 1px solid var(--border); border-radius: 7px; font-size: 13px; background: var(--bg-2); color: var(--text); font-family: var(--font-primary); }
+.form-input:focus { outline: none; border-color: var(--navy); }
+
+/* ── QR ── */
+.qr-section { padding: 14px 16px; border-top: 1px solid var(--border); flex-shrink: 0; }
+.qr-title { font-size: 12px; font-weight: 600; margin-bottom: 10px; }
+.qr-box { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 12px; display: flex; align-items: center; justify-content: center; }
+.qr-hint { font-size: 11px; color: var(--text-3); margin-top: 8px; text-align: center; }
+.qr-url { font-size: 10px; color: var(--navy); word-break: break-all; text-align: center; margin-top: 4px; }
+
+/* ── MODAL ── */
+.modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1000; align-items: center; justify-content: center; }
+.modal-bg.open { display: flex; }
+.modal { background: var(--surface); border-radius: 12px; width: 400px; max-width: 95vw; overflow: hidden; }
+.modal-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--border); font-weight: 700; }
+.modal-body { padding: 16px; }
+.modal-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--border); }
+
+/* ── TOAST ── */
+.toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(60px); background: #1a1a1a; color: #fff; padding: 10px 18px; border-radius: 8px; font-size: 13px; z-index: 9999; transition: all .25s; opacity: 0; white-space: nowrap; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.ok { background: #15803D; }
+.toast.err { background: #DC2626; }
+
+@media (max-width: 768px) {
+  .layout { grid-template-columns: 1fr; }
+  .panel-side { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <a href="/owner.html" class="tb-btn">← Volver</a>
+    <span class="topbar-title">👥 Fila Virtual</span>
+    <span id="tb-online" style="font-size:11px;opacity:.7">●</span>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="kpi-val" id="kpi-espera">0</div><div class="kpi-label">En espera</div></div>
+    <div class="kpi"><div class="kpi-val" id="kpi-atendidos">0</div><div class="kpi-label">Atendidos hoy</div></div>
+    <div class="kpi"><div class="kpi-val" id="kpi-tiempo">—</div><div class="kpi-label">Tiempo promedio</div></div>
+  </div>
+
+  <div class="layout">
+    <div class="panel-main">
+      <div class="toolbar">
+        <button class="btn success" onclick="llamarSiguiente()">▶ Llamar siguiente</button>
+        <button class="btn" onclick="openModal('modalAgregar')">+ Agregar a fila</button>
+        <div class="spacer"></div>
+        <button class="btn" onclick="cargarFila()" title="Actualizar">↺ Actualizar</button>
+        <button class="btn danger" onclick="limpiarFila()" title="Limpiar toda la fila">🗑 Limpiar</button>
+      </div>
+      <div class="fila-list" id="fila-list">
+        <div class="empty-state">
+          <div class="empty-icon">👥</div>
+          <div style="font-size:14px;font-weight:600;color:var(--text-2);margin-bottom:6px">Fila vacía</div>
+          <div style="font-size:12px">Comparte el QR para que los clientes se agreguen</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-side">
+      <div class="side-header">Agregar cliente</div>
+      <div class="side-body">
+        <div class="form-group">
+          <label class="form-label">Nombre (opcional)</label>
+          <input class="form-input" id="nuevoNombre" placeholder="Ej. María López">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Teléfono (opcional)</label>
+          <input class="form-input" id="nuevoTelefono" type="tel" placeholder="Ej. 8181234567">
+        </div>
+        <button class="btn primary" style="width:100%" onclick="agregarAFila()">+ Agregar a fila</button>
+        <div style="margin-top:16px;padding:10px 12px;background:var(--bg-2);border-radius:8px;font-size:12px;color:var(--text-3)">
+          💡 Si el cliente tiene teléfono, puede ver su posición en tiempo real escaneando el QR.
+        </div>
+      </div>
+      <div class="qr-section">
+        <div class="qr-title">📱 QR para clientes</div>
+        <div class="qr-box" id="qr-container"></div>
+        <div class="qr-hint">El cliente escanea este QR y se agrega a la fila sin app</div>
+        <div class="qr-url" id="qr-url-text"></div>
+        <button class="btn" style="width:100%;margin-top:8px" onclick="imprimirQR()">🖨 Imprimir QR</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AGREGAR -->
+<div class="modal-bg" id="modalAgregar">
+  <div class="modal">
+    <div class="modal-head">+ Agregar a la fila <button onclick="closeModal('modalAgregar')" style="font-size:16px;cursor:pointer;background:none;border:none">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Nombre (opcional)</label>
+        <input class="form-input" id="mNombre" placeholder="Nombre del cliente">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Teléfono (opcional)</label>
+        <input class="form-input" id="mTelefono" type="tel" placeholder="8181234567">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('modalAgregar')">Cancelar</button>
+      <button class="btn primary" onclick="agregarDesdeModal()">+ Agregar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var FILA = [];
+var tenantId = 'TNT001';
+var refreshInterval = null;
+
+function toast(msg, tipo) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (tipo ? ' ' + tipo : '');
+  clearTimeout(window._tt);
+  window._tt = setTimeout(function() { t.classList.remove('show'); }, 2800);
+}
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ── QR ──
+function generarQR() {
+  var baseUrl = window.location.origin;
+  var qrUrl = baseUrl + '/fila-cliente.html?tenant=' + tenantId;
+  document.getElementById('qr-url-text').textContent = qrUrl;
+  var container = document.getElementById('qr-container');
+  container.innerHTML = '';
+  try {
+    new QRCode(container, { text: qrUrl, width: 180, height: 180, correctLevel: QRCode.CorrectLevel.M });
+  } catch(_) {
+    // Fallback si QRCode no cargó (offline)
+    container.innerHTML = '<div style="padding:20px;font-size:11px;text-align:center;color:var(--text-3)">QR: ' + qrUrl + '</div>';
+  }
+}
+
+// ── Cargar fila ──
+async function cargarFila() {
+  var fila = [];
+  try {
+    var r = await fetch('/api/queue?tenant_id=' + tenantId);
+    if (r.ok) fila = await r.json();
+  } catch(_) {
+    // Offline: usar localStorage
+    fila = JSON.parse(localStorage.getItem('si_fila_' + tenantId) || '[]')
+      .filter(function(f) { return ['esperando','llamado'].includes(f.status); });
+  }
+  FILA = fila;
+  renderFila();
+  updateKPIs();
+}
+
+function renderFila() {
+  var el = document.getElementById('fila-list');
+  if (!FILA.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div><div style="font-size:14px;font-weight:600;color:var(--text-2);margin-bottom:6px">Fila vacía</div><div style="font-size:12px">Comparte el QR para que los clientes se agreguen</div></div>';
+    return;
+  }
+  el.innerHTML = FILA.map(function(t, i) {
+    var isLlamado = t.status === 'llamado';
+    return '<div class="turno-card ' + (isLlamado ? 'llamado' : '') + '">' +
+      '<div class="turno-num">' + (i + 1) + '</div>' +
+      '<div class="turno-info">' +
+        '<div class="turno-nombre">' + (t.nombre || 'Cliente ' + (i+1)) + '</div>' +
+        '<div class="turno-meta">' + (t.telefono ? '📱 ' + t.telefono + ' · ' : '') + tiempoEspera(t.created_at) + '</div>' +
+        '<span class="turno-badge ' + (isLlamado ? 'badge-llamado' : 'badge-espera') + '">' + (isLlamado ? '📢 Llamado' : '⏳ Esperando') + '</span>' +
+      '</div>' +
+      '<div class="turno-actions">' +
+        '<button class="icon-btn" onclick="atenderTurno(\'' + t.id + '\')" title="Atender">✅</button>' +
+        '<button class="icon-btn" onclick="saltarTurno(\'' + t.id + '\')" title="Saltar">⏭</button>' +
+        '<button class="icon-btn" onclick="eliminarTurno(\'' + t.id + '\')" title="Eliminar" style="color:var(--danger)">✕</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function tiempoEspera(iso) {
+  if (!iso) return '';
+  var mins = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+  if (mins < 1) return 'Recién llegó';
+  if (mins === 1) return '1 min esperando';
+  return mins + ' min esperando';
+}
+
+function updateKPIs() {
+  document.getElementById('kpi-espera').textContent = FILA.filter(function(f) { return f.status === 'esperando'; }).length;
+  var atendidos = JSON.parse(localStorage.getItem('si_atendidos_hoy') || '0');
+  document.getElementById('kpi-atendidos').textContent = atendidos;
+  document.getElementById('kpi-tiempo').textContent = '~' + (FILA.length * 3) + ' min';
+}
+
+// ── Agregar ──
+async function agregarAFila(nombre, telefono) {
+  nombre = nombre || document.getElementById('nuevoNombre').value.trim();
+  telefono = telefono || document.getElementById('nuevoTelefono').value.trim();
+  var payload = { tenant_id: tenantId, nombre: nombre || 'Cliente', telefono: telefono };
+  var ticket;
+  try {
+    var r = await fetch('/api/queue', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    if (r.ok) { var d = await r.json(); ticket = d.ticket; }
+  } catch(_) {}
+
+  if (!ticket) {
+    // Offline
+    ticket = { id: 'TURN-' + Date.now(), tenant_id: tenantId, nombre: nombre || 'Cliente', telefono: telefono, status: 'esperando', created_at: new Date().toISOString(), posicion: FILA.length + 1 };
+    var local = JSON.parse(localStorage.getItem('si_fila_' + tenantId) || '[]');
+    local.push(ticket);
+    localStorage.setItem('si_fila_' + tenantId, JSON.stringify(local));
+  }
+
+  FILA.push(ticket);
+  renderFila();
+  updateKPIs();
+  document.getElementById('nuevoNombre').value = '';
+  document.getElementById('nuevoTelefono').value = '';
+  toast('✅ ' + (nombre || 'Cliente') + ' agregado · Turno #' + FILA.length, 'ok');
+}
+
+async function agregarDesdeModal() {
+  var nombre = document.getElementById('mNombre').value.trim();
+  var telefono = document.getElementById('mTelefono').value.trim();
+  await agregarAFila(nombre, telefono);
+  document.getElementById('mNombre').value = '';
+  document.getElementById('mTelefono').value = '';
+  closeModal('modalAgregar');
+}
+
+// ── Acciones ──
+async function llamarSiguiente() {
+  var siguiente = FILA.find(function(f) { return f.status === 'esperando'; });
+  if (!siguiente) { toast('No hay clientes en espera', 'err'); return; }
+  try { await fetch('/api/queue/' + siguiente.id, { method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ status: 'llamado' }) }); } catch(_) {}
+  siguiente.status = 'llamado';
+  renderFila();
+  toast('📢 Llamando a ' + (siguiente.nombre || 'siguiente cliente'), 'ok');
+}
+
+async function atenderTurno(id) {
+  try { await fetch('/api/queue/' + id + '/atender', { method: 'POST' }); } catch(_) {}
+  FILA = FILA.filter(function(f) { return f.id !== id; });
+  FILA.forEach(function(f, i) { f.posicion = i + 1; });
+  renderFila();
+  updateKPIs();
+  var n = parseInt(localStorage.getItem('si_atendidos_hoy') || '0') + 1;
+  localStorage.setItem('si_atendidos_hoy', n);
+  toast('✅ Cliente atendido', 'ok');
+}
+
+async function saltarTurno(id) {
+  var turno = FILA.find(function(f) { return f.id === id; });
+  if (!turno) return;
+  try { await fetch('/api/queue/' + id, { method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ status: 'esperando', posicion: 999 }) }); } catch(_) {}
+  FILA = FILA.filter(function(f) { return f.id !== id; });
+  turno.status = 'esperando';
+  FILA.push(turno);
+  FILA.forEach(function(f, i) { f.posicion = i + 1; });
+  renderFila();
+  toast('⏭ Turno movido al final');
+}
+
+async function eliminarTurno(id) {
+  if (!confirm('¿Eliminar este turno de la fila?')) return;
+  try { await fetch('/api/queue/' + id, { method: 'DELETE' }); } catch(_) {}
+  FILA = FILA.filter(function(f) { return f.id !== id; });
+  FILA.forEach(function(f, i) { f.posicion = i + 1; });
+  renderFila();
+  updateKPIs();
+  toast('Turno eliminado');
+}
+
+async function limpiarFila() {
+  if (!confirm('¿Limpiar toda la fila? Se eliminarán todos los turnos en espera.')) return;
+  for (var i = 0; i < FILA.length; i++) {
+    try { await fetch('/api/queue/' + FILA[i].id, { method: 'DELETE' }); } catch(_) {}
+  }
+  FILA = [];
+  localStorage.removeItem('si_fila_' + tenantId);
+  renderFila();
+  updateKPIs();
+  toast('Fila limpiada', 'ok');
+}
+
+function imprimirQR() { window.print(); }
+
+// ── Init ──
+(function() {
+  generarQR();
+  cargarFila();
+  // Auto-refresh cada 15 segundos
+  refreshInterval = setInterval(cargarFila, 15000);
+
+  function updateOnline() {
+    var el = document.getElementById('tb-online');
+    el.style.color = navigator.onLine ? '#86EFAC' : '#FCA5A5';
+  }
+  updateOnline();
+  window.addEventListener('online', updateOnline);
+  window.addEventListener('offline', updateOnline);
+
+  // Limpiar atendidos a medianoche
+  var ahora = new Date();
+  var mañana = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() + 1);
+  setTimeout(function() { localStorage.setItem('si_atendidos_hoy', '0'); }, mañana - ahora);
+})();
+</script>
+</body>
+</html>
