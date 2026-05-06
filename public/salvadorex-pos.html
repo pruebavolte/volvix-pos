@@ -2551,6 +2551,48 @@
 </head>
 <body>
 
+<!-- ============ 2026-05-06 SPLASH DE CARGA ============
+     El POS pesa 810KB con 125 scripts wiring. En conexiones lentas o
+     cold-start de Vercel puede tomar varios segundos. Mostramos un
+     splash con spinner desde el primer paint para que el usuario
+     vea que el sistema esta arrancando, no una pagina blanca.
+     Se oculta automaticamente cuando salvadorex:logged-in dispara
+     o cuando window.load completa (whichever first). -->
+<div id="vlx-pos-splash" style="position:fixed;inset:0;z-index:2147483600;background:linear-gradient(135deg,#1E3A8A 0%,#2D5F8F 40%,#EA580C 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-family:-apple-system,Segoe UI,Roboto,sans-serif;transition:opacity .35s ease">
+  <div style="background:#fff;color:#EA580C;font-weight:900;font-size:36px;width:78px;height:78px;display:flex;align-items:center;justify-content:center;border-radius:18px;box-shadow:0 14px 40px rgba(0,0,0,.25);letter-spacing:-.04em">S</div>
+  <div style="margin-top:18px;font-size:24px;font-weight:700;letter-spacing:-.02em">Cargando tu sistema…</div>
+  <div style="margin-top:8px;font-size:14px;opacity:.85">Esto toma unos segundos la primera vez.</div>
+  <div style="margin-top:28px;width:42px;height:42px;border:3px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:vlxsplashspin 1s linear infinite"></div>
+  <style>
+    @keyframes vlxsplashspin { to { transform: rotate(360deg); } }
+    .vlx-splash-hide { opacity: 0 !important; pointer-events: none; }
+  </style>
+</div>
+<script>
+  // Ocultar splash cuando todo este listo (window.load) o tras 8s timeout
+  (function () {
+    var splash = document.getElementById('vlx-pos-splash');
+    if (!splash) return;
+    var hidden = false;
+    function hide() {
+      if (hidden) return;
+      hidden = true;
+      try { splash.classList.add('vlx-splash-hide'); } catch (_) {}
+      setTimeout(function () { try { splash.remove(); } catch (_) {} }, 400);
+    }
+    // Si ya cargo, ocultar ya
+    if (document.readyState === 'complete') {
+      setTimeout(hide, 200);
+    } else {
+      window.addEventListener('load', function () { setTimeout(hide, 200); });
+    }
+    // Tambien escuchar el evento de salvadorex (login completo) — lo dispara hideLogin()
+    document.addEventListener('volvix:login', function () { setTimeout(hide, 200); });
+    // Failsafe: 8s max para no atrapar al usuario
+    setTimeout(hide, 8000);
+  })();
+</script>
+
 <!-- ============ R8a FIX-H2: OFFLINE BANNER (visible cuando navigator.onLine=false) ============ -->
 <div id="r8a-offline-banner" role="alert" aria-live="polite" style="display:none;position:fixed;top:0;left:0;right:0;z-index:99999;background:linear-gradient(135deg,#DC2626,#B91C1C);color:#fff;padding:10px 16px;text-align:center;font-size:13px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.2);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
   <span style="font-size:16px;vertical-align:middle;">📶</span>
