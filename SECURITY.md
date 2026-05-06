@@ -54,12 +54,46 @@ Reportes publicos: `R13_SECURITY_AUDIT.md`, `R22_SECURITY_FIXES.md`, `R24_SECURI
 
 ### CRITICAL (urgente, antes de prod escalable)
 
-- **154 tablas Supabase sin RLS habilitado** (detectado 2026-05 via mcp Supabase advisor).
-  - Impacto: cualquiera con la anon key puede leer/modificar todas las filas.
-  - Tablas afectadas (parcial): `categories`, `products`, `pos_products`, `pos_sales`, `customers`, `verticals`, `vertical_templates`, `giros_synonyms`, `ingredients`, `recipes`, `volvix_audit_log_archive`, +144 mas.
-  - Bloqueo: enabling RLS sin policies bloquea TODO acceso. Hay que disenar policies por tabla antes de habilitar.
-  - Plan sugerido: empezar por las que contienen PII (`customers`, `pos_users`, `volvix_audit_log_archive`) — agregar policies `auth.uid()` + `tenant_id` match — luego enable.
-  - SQL de remediacion (sin policies, NO ejecutar tal cual): disponible en log de mcp `list_tables` advisory `rls_disabled`.
+- **RLS Supabase — progreso 2026-05:**
+  - **Estado inicial:** 154 tablas sin RLS (advisory crítico de mcp Supabase).
+  - **Aplicado en sesion 2026-05:** **54 tablas** con RLS + policy `service_role-only`.
+    - Migraciones aplicadas: `volvix_batch1_devoluciones_queue`, `volvix_create_generic_blobs`,
+      `volvix_rls_pii_phase1` (7 tablas), `volvix_rls_phase2_business_tables` (47 tablas).
+    - **Phase 1 (PII/auth/financial)**: customer_otps, mfa_attempts, pos_credit_payments,
+      pos_customer_rfc_history, pos_customer_payment_log, pos_oversell_log, portal_customers.
+    - **Phase 2 (business)**: whatsapp_messages, whatsapp_subscribers, accounting_*,
+      crm_*, leads, pipeline_stages, attendance, time_off, performance_reviews,
+      employee_documents, ml_oauth_tokens, ml_listings, ml_orders, gdpr_requests,
+      referrals, customer_wishlist, shop_reviews, customer_segments, segment_*,
+      email_campaigns, email_*, drip_*, newsletter_subscribers, abtest_*,
+      system_error_logs, system_health_pings, system_incidents,
+      volvix_audit_log_archive, volvix_backup_history, user_tutorials,
+      user_academy_progress, loyalty_*, shop_orders, request_nonces,
+      feature_flag_requests, _backup_* (3 tablas).
+    - **Policy aplicada**: `FOR ALL TO service_role USING (true) WITH CHECK (true)`.
+      El api/index.js usa `SUPABASE_SERVICE_KEY` que ES service_role, asi que el
+      server sigue accediendo. El anon key del cliente deja de poder leer/escribir.
+    - **Verificado**: API endpoints `/api/giros/*`, `/api/queue`, `/api/menu-digital`,
+      `/api/exchange-rates`, `/api/best-sellers` y landings siguen HTTP 200.
+  - **Pendiente — ~100 tablas con RLS aun deshabilitado**, agrupadas por motivo:
+    - **NO aplicar** (requieren realtime con anon key): `pos_sales`, `pos_products`.
+      Para estas hay que disenar policies que permitan SELECT al rol authenticated
+      filtrado por tenant_id, sin romper el wiring de realtime client-side.
+    - **Legacy schema (probablemente sin uso real)**: `categories`, `products`,
+      `orders`, `order_items`, `sale_items`, `customers`, `domains`, `verticals`,
+      `vertical_categories`, `landing_pages`, `roles`, `permissions`, `system_modules`.
+      Validar usage antes de tocar — si no se usa, RLS permisivo es seguro.
+    - **v3 schema**: tablas v3_* sin RLS deberian quedar en service_role-only,
+      es schema interno.
+    - **pos_* misc**: pos_employees, pos_companies, pos_sync_events,
+      pos_login_events, pos_download_events, pos_license_events — server-side
+      only, podran irse a service_role-only en Phase 3.
+  - **Roadmap sugerido**:
+    1. Fase 3: aplicar service_role-only a tablas pos_*/v3_* sin uso client.
+    2. Fase 4: para pos_sales/pos_products + tablas usadas client-side (realtime,
+       direct queries), disenar policies tenant-aware con auth.role() o JWT claim
+       custom de Supabase Auth.
+    3. Re-correr advisor para validar 0 tablas sin RLS.
 
 ### HIGH
 
