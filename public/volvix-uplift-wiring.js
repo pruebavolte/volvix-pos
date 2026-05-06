@@ -35,6 +35,9 @@
   (function _enforcePlatformOnlyImmediate() {
     try {
       var path = (window.location && window.location.pathname) || '/';
+      // 2026-05-06 FIX: launcher.html y mis-modulos.html removidos de PLATFORM_ONLY.
+      // Eran el bug que redirigia tenants regulares al POS pesado (807KB,
+      // congelaba). El launcher YA filtra apps por minRole internamente.
       var PLATFORM = [
         '/volvix-owner-panel.html',
         '/volvix-admin-saas.html',
@@ -44,9 +47,7 @@
         '/volvix-emergency-mode.html',
         '/volvix-backup-admin.html',
         '/volvix-mega-dashboard.html',
-        '/volvix-api-docs.html',
-        '/volvix-launcher.html',
-        '/mis-modulos.html'
+        '/volvix-api-docs.html'
       ];
       var matches = PLATFORM.some(function (p) { return path === p || path.endsWith(p); });
       if (!matches) return;

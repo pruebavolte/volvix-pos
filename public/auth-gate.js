@@ -60,6 +60,13 @@
   // entrar es redirigido al POS (/salvadorex-pos.html).
   // El launcher y mis-modulos también son del equipo plataforma — el owner
   // del negocio NO los necesita; va directo al POS donde está todo.
+  // 2026-05-06 FIX: removidos /volvix-launcher.html y /mis-modulos.html.
+  // Estos son paneles que TODO tenant (owner/manager/cajero) debe poder usar
+  // para ver sus apps (POS, Inventario, Clientes, etc.). Internamente el
+  // launcher filtra apps por minRole, asi que un tenant regular ve solo
+  // las apps con minRole<=owner; un superadmin ve todo. NO necesita este
+  // gate global. Antes redirigia tenants nuevos a salvadorex-pos.html
+  // (807KB, congelaba), ahora pueden usar el launcher (48KB, fluido).
   const PLATFORM_ONLY_PAGES = [
     '/volvix-owner-panel.html',
     '/volvix-admin-saas.html',
@@ -69,9 +76,7 @@
     '/volvix-emergency-mode.html',
     '/volvix-backup-admin.html',
     '/volvix-mega-dashboard.html',
-    '/volvix-api-docs.html',
-    '/volvix-launcher.html',
-    '/mis-modulos.html'
+    '/volvix-api-docs.html'
   ];
   function _decodeJwt(tok) {
     try {
