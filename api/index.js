@@ -5638,32 +5638,28 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
   handlers['POST /api/queue'] = async (req, res) => {
     try {
       // FIX adversarial A1: rate-limit anti-spam por IP (5/min) y por tenant (50/min).
-      // Permite QR público sin auth pero evita inundar la fila de un negocio.
+      // Permite QR publico sin auth pero evita inundar la fila de un negocio.
       const ip = (typeof clientIp === 'function' ? clientIp(req) : 'unknown');
       const body = await readBody(req);
       const tenant = String((body && body.tenant_id) || 'TNT001').slice(0, 40);
-      if (!/^[A-Za-z0-9_-]{1,40}$/.test(tenant)) return bad(res, 'tenant_id inválido');
+      if (!/^[A-Za-z0-9_-]{1,40}$/.test(tenant)) return bad(res, 'tenant_id invalido');
       if (!rateLimit('queue:ip:' + ip, 5, 60 * 1000)) {
         return sendJSON(res, { error: 'rate_limited', retry_after_ms: rateLimitRetryMs('queue:ip:' + ip, 60000) }, 429);
       }
       if (!rateLimit('queue:tenant:' + tenant, 50, 60 * 1000)) {
         return sendJSON(res, { error: 'tenant_rate_limited', retry_after_ms: rateLimitRetryMs('queue:tenant:' + tenant, 60000) }, 429);
       }
-      const activos = await supabaseRequest('GET',
-        '/volvix_fila_virtual?tenant_id=eq.' + encodeURIComponent(tenant) +
-        '&status=in.(esperando,llamado)&select=id&limit=200').catch(() => []);
-      const posicion = (activos || []).length + 1;
-      const ticket = {
-        id: 'TURN-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
-        tenant_id: tenant,
-        numero: posicion,
-        posicion,
-        nombre: String(body.nombre || 'Cliente').slice(0, 80),
-        telefono: String(body.telefono || '').slice(0, 30),
-        status: 'esperando',
-      };
-      await supabaseRequest('POST', '/volvix_fila_virtual', ticket);
-      ok(res, { ok: true, ticket, posicion, total: posicion });
+      // FIX S1 (adversarial): usar RPC con pg_advisory_xact_lock para serializar
+      // la asignacion de posicion por tenant. Antes: 2 POST simultaneos al mismo
+      // tenant podian leer COUNT=5 y ambos insertar con posicion=6. Ahora la
+      // funcion volvix_queue_create_ticket toma el lock dentro de la transaccion.
+      const ticket = await supabaseRequest('POST', '/rpc/volvix_queue_create_ticket', {
+        p_tenant_id: tenant,
+        p_nombre: String(body.nombre || 'Cliente').slice(0, 80),
+        p_telefono: String(body.telefono || '').slice(0, 30),
+      });
+      const t = ticket || {};
+      ok(res, { ok: true, ticket: t, posicion: t.posicion, total: t.posicion });
     } catch (err) { sendError(res, err); }
   };
   handlers['PATCH /api/queue/:id'] = requireAuth(async (req, res, params) => {
