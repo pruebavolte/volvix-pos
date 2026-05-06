@@ -2789,7 +2789,8 @@
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#8E44AD" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
       <span>🚚 Proveedores</span>
     </button>
-    <button class="menu-btn" data-feature="module.facturacion" data-menu="facturacion" onclick="showScreen('facturacion')">
+    <button class="menu-btn" data-feature="module.facturacion" data-menu="facturacion" onclick="showScreen('facturacion')"
+            style="display:none" data-ia-arq-moved-to="reportes">
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#16A085" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
       <span>🧾 Facturas</span>
     </button>
@@ -7579,39 +7580,59 @@
       </tr>`;
     }).join('');
   }
-  // 2026-05 ia-arquitectura: helper invocado desde el boton "Devolver" de Historial.
-  // Flujo correcto verificado: screen-devoluciones tiene boton "+ Nueva devolución"
-  // que abre el modal openNewReturnModal() con input #nr-search-input que acepta
-  // folio/fecha/cliente. Aqui:
-  //   1. showScreen('devoluciones') (entidad existente intacta)
-  //   2. openNewReturnModal() (abre modal de nueva devolucion)
-  //   3. prefill #nr-search-input con el saleId
-  //   4. trigger newReturnSearchSales() para buscar la venta automaticamente
+  // 2026-05 ia-arquitectura R2 (flujo de tarea): helper invocado desde "Devolver"
+  // en cada fila de Historial. Reemplaza el modulo Devoluciones independiente
+  // del menubar. Flujo:
+  //   1. showScreen('devoluciones') — pantalla existente
+  //   2. openNewReturnModal() — abre wizard de nueva devolucion
+  //   3. Prefill #nr-search-input con el saleId
+  //   4. Trigger newReturnSearchSales() para buscar la venta
+  //
+  // 2026-05 fix N1 adversarial: en lugar de setTimeout con delays hardcoded
+  // (250ms total, frágil en dispositivos lentos), polling con limite de
+  // intentos. Si tras N intentos el modal/input no aparecio, log + fail abierto.
   function startDevolucionFromSale(saleId) {
-    try {
-      if (typeof showScreen === 'function') showScreen('devoluciones');
-      // Esperar a que el screen este renderizado, luego abrir modal
-      setTimeout(function() {
-        try {
-          if (typeof openNewReturnModal === 'function') {
-            openNewReturnModal();
+    var sid = String(saleId || '');
+    if (!sid) return;
+    if (typeof showScreen === 'function') {
+      try { showScreen('devoluciones'); } catch (_) {}
+    }
+    // Poll para abrir modal: cada 50ms hasta 1.5s (30 intentos)
+    var openAttempts = 0;
+    var openIv = setInterval(function () {
+      openAttempts++;
+      if (openAttempts > 30) {
+        clearInterval(openIv);
+        try { console.warn('[startDevolucionFromSale] timeout abriendo modal'); } catch (_) {}
+        return;
+      }
+      if (typeof openNewReturnModal === 'function' &&
+          document.getElementById('screen-devoluciones') &&
+          !document.getElementById('screen-devoluciones').classList.contains('hidden')) {
+        clearInterval(openIv);
+        try { openNewReturnModal(); } catch (_) {}
+        // Poll para prefillear el input dentro del modal
+        var inputAttempts = 0;
+        var inputIv = setInterval(function () {
+          inputAttempts++;
+          if (inputAttempts > 30) {
+            clearInterval(inputIv);
+            try { console.warn('[startDevolucionFromSale] timeout prellenando input'); } catch (_) {}
+            return;
           }
-          // Esperar a que el modal este renderizado, luego prefill + buscar
-          setTimeout(function() {
-            var input = document.getElementById('nr-search-input');
-            if (input) {
-              input.value = String(saleId || '');
-              input.dispatchEvent(new Event('input', { bubbles: true }));
-              if (typeof newReturnSearchSales === 'function') {
-                newReturnSearchSales();
-              }
-            }
-          }, 150);
-        } catch (e) {}
-      }, 100);
-    } catch (e) {}
+          var input = document.getElementById('nr-search-input');
+          if (input) {
+            clearInterval(inputIv);
+            input.value = sid;
+            try { input.dispatchEvent(new Event('input', { bubbles: true })); } catch (_) {}
+            try {
+              if (typeof newReturnSearchSales === 'function') newReturnSearchSales();
+            } catch (_) {}
+          }
+        }, 50);
+      }
+    }, 50);
   }
-  // Exponer al global scope (renderVentas usa onclick=" attribute)
   window.startDevolucionFromSale = startDevolucionFromSale;
   function renderUsuarios() {
     // 2026-05: contador dinamico (era hardcoded "5 usuarios")
