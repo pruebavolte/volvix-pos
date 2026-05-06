@@ -5403,6 +5403,12 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
     try {
       const body = await readBody(req);
       try {
+        // FIX S2 (adversarial): UPSERT pattern para evitar unbounded growth.
+        // Antes: cada POST creaba row nuevo, tabla crece sin limite.
+        // Ahora: DELETE existente + INSERT nuevo (atomic-enough para single user/key).
+        await supabaseRequest('DELETE',
+          '/generic_blobs?pos_user_id=eq.' + encodeURIComponent(req.user.id) +
+          '&key=eq.' + encodeURIComponent(key)).catch(() => {});
         await supabaseRequest('POST', '/generic_blobs', {
           pos_user_id: req.user.id, key, value: body
         });
@@ -5506,6 +5512,12 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
   }
   async function blobPut(req, key, value) {
     try {
+      // FIX S2 (adversarial): UPSERT pattern via DELETE + INSERT.
+      // Previene unbounded growth (antes generic_blobs crecia forever).
+      // El UNIQUE constraint en (pos_user_id, key) tambien bloquearia duplicados.
+      await supabaseRequest('DELETE',
+        '/generic_blobs?pos_user_id=eq.' + encodeURIComponent(req.user.id) +
+        '&key=eq.' + encodeURIComponent(key)).catch(() => {});
       await supabaseRequest('POST', '/generic_blobs', {
         pos_user_id: req.user.id, key, value
       });
