@@ -74,6 +74,25 @@ Reportes publicos: `R13_SECURITY_AUDIT.md`, `R22_SECURITY_FIXES.md`, `R24_SECURI
 - HTMLs en public/ asumen que `/auth-gate.js` valida roles client-side. Validar tambien server-side por endpoint (ya esta en la mayoria, auditar nuevos `/api/devoluciones`, `/api/queue`, `/api/marketing`, etc).
 - Webhooks `/api/webhooks/uber-eats|rappi|didi-food` actualmente capturan payload sin validar firma. Antes de consumir en produccion, agregar HMAC verification por proveedor.
 
+### Info Architecture / UX cleanup (skill ia-arquitectura)
+
+- **Skill instalada:** `~/.claude/skills/ia-arquitectura/SKILL.md`
+- **Quejas del usuario que motivan esto:**
+  - "Alertas Stock" como boton hermano de "Inventario" -> deberia estar DENTRO
+  - "Usuarios" como boton hermano de "Configuracion" -> deberia estar DENTRO
+  - "Devoluciones" como boton hermano de "Historial Ventas" -> deberia estar DENTRO (flujo: ventas -> seleccionar venta -> Devolver)
+  - Inputs de fecha pidiendo texto libre ("20-12-2026" o "veinte de diciembre") -> deberian ser date picker
+  - Otros inputs mal usados (text donde deberia ser dropdown/radio/toggle/etc)
+- **Reglas a aplicar:**
+  - R1 Subconjunto: si A es parte de B, A va dentro de B
+  - R2 Flujo de tarea: agrupar por flujo del usuario, no entidad tecnica
+  - R3 Miller (7+-2): menu principal max 7 items, ideal 5
+  - R4 Profundidad <= 3 niveles
+  - R5 Lenguaje del usuario, no del programador
+  - R6 Accion frecuente arriba, rara en submenus
+  - R7 Una sola fuente de verdad (no duplicacion)
+- **Proceso (sesion en curso):** FASE 1 mapeo -> FASE 2 analisis -> ESPERAR APROBACION -> FASE 3 plan commits -> FASE 4 aplicar uno a uno con OK individual
+
 ## Hall of Fame
 
 Investigadores que reportaron responsablemente — bajo demanda, con permiso.
