@@ -522,6 +522,15 @@ body {
       <!-- Alert -->
       <div id="alert" class="alert"></div>
 
+      <!-- 2026-05-06: Remembered users — pills clickeables con avatar + nombre.
+           Click sobre uno = pre-llena el correo, focus en password.
+           "X" pequeña en hover = remueve de la lista. Persistencia: localStorage. -->
+      <div id="rememberedUsersWrap" style="display:none;margin-bottom:16px">
+        <div style="font-size:11px;color:var(--vlx-ink-3,#6B7280);font-weight:500;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Usar sesión guardada</div>
+        <div id="rememberedUsersGrid" style="display:flex;flex-wrap:wrap;gap:8px;max-height:160px;overflow-y:auto;padding-right:4px"></div>
+        <div style="text-align:center;margin-top:8px"><button type="button" id="newUserBtn" style="background:none;border:none;color:var(--vlx-ink-3,#6B7280);font-size:12px;cursor:pointer;text-decoration:underline">Iniciar con otro usuario</button></div>
+      </div>
+
       <!-- Formulario -->
       <form onsubmit="handleLogin(event)">
         <div class="form-group">
@@ -567,6 +576,145 @@ body {
   </div>
 
   <script>
+// 2026-05-06: Remembered users — quick-pick de cuentas que ya iniciaron sesion
+// en este dispositivo. Click sobre un pill = prefill email + focus password.
+// localStorage key: 'volvix_remembered_users' = array de objetos
+//   { id: 'email_o_phone', label: 'Daniel V.', role: 'owner', last_login_at: ISO }.
+// Limitamos a maximo 8 usuarios (LRU). NO se guarda contraseña — eso es del usuario.
+(function rememberedUsers(){
+  var STORAGE_KEY = 'volvix_remembered_users';
+  var MAX_USERS = 8;
+
+  function getRemembered() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return [];
+      var arr = JSON.parse(raw);
+      return Array.isArray(arr) ? arr.filter(u => u && u.id) : [];
+    } catch (e) { return []; }
+  }
+
+  function saveRemembered(arr) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr.slice(0, MAX_USERS))); } catch (e) {}
+  }
+
+  function htmlEsc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function initials(label) {
+    return String(label || '?').trim().split(/\s+/).slice(0, 2).map(s => s[0]).join('').toUpperCase().slice(0, 2);
+  }
+
+  function avatarColor(seed) {
+    // hash determinista del seed (id) → hue HSL para que el avatar de un user sea consistente
+    var s = String(seed || '');
+    var h = 0;
+    for (var i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+    return 'hsl(' + (Math.abs(h) % 360) + ', 65%, 55%)';
+  }
+
+  function pickUser(id) {
+    var inp = document.getElementById('emailInput');
+    var pwd = document.getElementById('passwordInput');
+    if (inp) inp.value = id;
+    if (pwd) { pwd.value = ''; pwd.focus(); }
+    // Marcar este como mas reciente (mover al frente)
+    var arr = getRemembered();
+    var idx = arr.findIndex(u => u.id === id);
+    if (idx > 0) { var u = arr[idx]; arr.splice(idx, 1); arr.unshift(u); saveRemembered(arr); }
+  }
+
+  function removeUser(id) {
+    var arr = getRemembered().filter(u => u.id !== id);
+    saveRemembered(arr);
+    renderRemembered();
+  }
+
+  function renderRemembered() {
+    var wrap = document.getElementById('rememberedUsersWrap');
+    var grid = document.getElementById('rememberedUsersGrid');
+    if (!wrap || !grid) return;
+    var arr = getRemembered();
+    if (!arr.length) { wrap.style.display = 'none'; return; }
+    wrap.style.display = '';
+    grid.innerHTML = arr.map(u => {
+      var safeId = htmlEsc(u.id);
+      var safeLabel = htmlEsc(u.label || u.id);
+      var ini = initials(u.label || u.id);
+      var bg = avatarColor(u.id);
+      var roleTxt = u.role ? htmlEsc(u.role) : '';
+      return ''
+        + '<div class="remembered-pill" data-id="' + safeId + '" '
+        + ' style="position:relative;display:flex;align-items:center;gap:8px;padding:8px 14px 8px 8px;background:#F5F5F4;border:1px solid #E7E5E4;border-radius:999px;cursor:pointer;transition:all 0.12s;font-size:13px;max-width:200px">'
+        +   '<div style="width:28px;height:28px;border-radius:50%;background:' + bg + ';color:#fff;font-weight:700;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + htmlEsc(ini) + '</div>'
+        +   '<div style="flex:1;min-width:0;text-align:left">'
+        +     '<div style="font-weight:600;color:#0B0B0F;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px">' + safeLabel + '</div>'
+        +     (roleTxt ? '<div style="font-size:10px;color:#6B7280;text-transform:capitalize">' + roleTxt + '</div>' : '')
+        +   '</div>'
+        +   '<button type="button" class="remove-user-btn" data-id="' + safeId + '" aria-label="Quitar usuario" '
+        +    'style="position:absolute;top:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:#fff;border:1px solid #E7E5E4;cursor:pointer;font-size:11px;line-height:1;color:#6B7280;display:none;align-items:center;justify-content:center;padding:0">×</button>'
+        + '</div>';
+    }).join('');
+    // Click handlers
+    grid.querySelectorAll('.remembered-pill').forEach(el => {
+      el.addEventListener('click', function (ev) {
+        if (ev.target && ev.target.classList && ev.target.classList.contains('remove-user-btn')) return;
+        pickUser(el.getAttribute('data-id'));
+      });
+      el.addEventListener('mouseenter', function () {
+        var btn = el.querySelector('.remove-user-btn');
+        if (btn) btn.style.display = 'flex';
+        el.style.background = '#EAE7E4';
+      });
+      el.addEventListener('mouseleave', function () {
+        var btn = el.querySelector('.remove-user-btn');
+        if (btn) btn.style.display = 'none';
+        el.style.background = '#F5F5F4';
+      });
+    });
+    grid.querySelectorAll('.remove-user-btn').forEach(el => {
+      el.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        removeUser(el.getAttribute('data-id'));
+      });
+    });
+  }
+
+  // API: agregar/actualizar un user post-login.
+  function addUser(opts) {
+    if (!opts || !opts.id) return;
+    var arr = getRemembered();
+    arr = arr.filter(u => u.id !== opts.id);
+    arr.unshift({
+      id: String(opts.id).slice(0, 100),
+      label: String(opts.label || opts.id).slice(0, 60),
+      role: opts.role ? String(opts.role).slice(0, 30) : null,
+      last_login_at: new Date().toISOString(),
+    });
+    saveRemembered(arr);
+  }
+
+  // Boton "Iniciar con otro usuario": limpia el input para que escriba uno nuevo
+  document.addEventListener('DOMContentLoaded', function () {
+    var newBtn = document.getElementById('newUserBtn');
+    if (newBtn) {
+      newBtn.addEventListener('click', function () {
+        var inp = document.getElementById('emailInput');
+        var pwd = document.getElementById('passwordInput');
+        if (inp) { inp.value = ''; inp.focus(); }
+        if (pwd) pwd.value = '';
+      });
+    }
+    renderRemembered();
+  });
+
+  // Exponer API global para que handleLogin la use
+  window.VolvixRememberedUsers = { add: addUser, render: renderRemembered, get: getRemembered, remove: removeUser };
+})();
+
 // Mostrar credenciales de prueba sólo en dev (localhost / 127.0.0.1 / *.local)
 (function revealTestCredsInDev(){
   try {
@@ -684,6 +832,22 @@ async function handleLogin(event) {
 
     // Guardar sesión (legacy)
     localStorage.setItem('volvixSession', JSON.stringify(result.session));
+
+    // 2026-05-06: agregar a remembered users para quick-pick en proximo login.
+    try {
+      if (window.VolvixRememberedUsers && typeof window.VolvixRememberedUsers.add === 'function') {
+        var sess = result.session || {};
+        var u = sess.user || result.user || {};
+        var label = u.full_name || u.name || u.display_name || u.business_name ||
+                    (u.first_name && u.last_name ? u.first_name + ' ' + u.last_name : null) ||
+                    (idValue.includes('@') ? idValue.split('@')[0] : idValue);
+        window.VolvixRememberedUsers.add({
+          id: idValue,
+          label: label,
+          role: u.role || u.rol || null,
+        });
+      }
+    } catch (e) {}
 
     // Guardar JWT Bearer token (R13 hardening) — keys consistentes con checkExistingSession
     const jwt = result.token || (result.session && result.session.token) || null;
