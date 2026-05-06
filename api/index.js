@@ -1090,10 +1090,29 @@ function resolvePosUserId(req, tenantId) {
 // B42 FIX MVP-9: resolveOwnerPosUserId returns the TENANT OWNER's pos_user_id
 // regardless of who's logged in. Use this for tenant-shared reads (products,
 // customers, sales) so cashiers see the same data as the owner.
+//
+// 2026-05 N1 audit fix (adversarial): antes esta funcion hacia fallback SILENCIOSO
+// a TNT001 owner para cualquier tenantId desconocido — leak cross-tenant si un
+// tenant nuevo (o malformado) llegaba aqui obtenia datos de TNT001. Ahora:
+//   - Mapeo explicito de tenants conocidos
+//   - Tenants desconocidos: logWarning + return null (caller debe manejar)
+//   - El fix de menu-digital (whitelist KNOWN_TENANTS) ya bloquea unknown
+//     tenants antes de invocar esta funcion. Otros callers pueden recibir null
+//     y deben tratarlo como "no data" en lugar de leak.
 function resolveOwnerPosUserId(tenantId) {
-  if (tenantId === 'TNT002') return 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1';
-  // TNT001 or default
-  return 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1';
+  const KNOWN_TENANT_OWNERS = {
+    'TNT001': 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1',
+    'TNT002': 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1',
+  };
+  if (tenantId && KNOWN_TENANT_OWNERS[tenantId]) {
+    return KNOWN_TENANT_OWNERS[tenantId];
+  }
+  // Tenant desconocido: NO hacer fallback silencioso. Log y null.
+  try {
+    console.warn('[resolveOwnerPosUserId] unknown tenant:', String(tenantId).slice(0, 40),
+                 '— returning null. Add to KNOWN_TENANT_OWNERS if legitimate.');
+  } catch (_) {}
+  return null;
 }
 
 // =============================================================
@@ -2062,7 +2081,12 @@ const handlers = {
       // FIX R13 (#6): tenant del JWT, no del query
       const tenantId = resolveTenant(req, parsed.query.tenant_id);
       // B42 MVP-9 FIX: cashiers must see same products as owner — use OWNER's pos_user_id
+      // 2026-05 N1 fix: si tenant desconocido, resolveOwnerPosUserId devuelve null
+      // ahora (antes hacia fallback silencioso a TNT001). Devolver lista vacia.
       let posUserId = resolveOwnerPosUserId(tenantId);
+      if (!posUserId) {
+        return sendJSON(res, { error: 'tenant_not_provisioned', tenant_id: tenantId }, 404);
+      }
 
       // R8f: branch filter (query param or user scope)
       const branchFilter = parsed.query.branch_id ? String(parsed.query.branch_id) : null;
@@ -5894,50 +5918,110 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
     } catch (err) { sendError(res, err); }
   });
 
-  // ============ WEBHOOKS DELIVERY (HMAC verified) ============
-  // 2026-05 fix HMAC verification:
-  //  - Cada provider requiere su secret en env var (UBER_EATS_WEBHOOK_SECRET, etc.)
-  //  - Si el secret NO esta configurado, fall-open + log warning (no romper antes del setup)
-  //  - Si esta configurado, REQUIERE firma valida en header — 401 si falla
-  //  - Algoritmos por provider:
-  //      - Uber Eats:  HMAC SHA-256 over rawBody, header X-Uber-Signature (hex)
-  //      - Rappi:      HMAC SHA-256 over rawBody, header X-Rappi-Signature (hex)
-  //      - Didi Food:  HMAC SHA-256 over rawBody, header X-Didi-Signature (hex)
-  //  - constant-time compare via crypto.timingSafeEqual
-  //  - Rate-limit + size cap se mantienen
+  // ============ WEBHOOKS DELIVERY (HMAC verified + replay-protected) ============
+  // 2026-05 hardened post-adversarial review (issues A1, A2, S1, S3):
+  //
+  //  - A2 fix: header names actualizados a los REALES de cada provider:
+  //      Uber Eats:  x-uber-signature  + x-uber-timestamp  (Webhooks API v1)
+  //                  Algunos despliegues nuevos: x-uber-eats-signature.
+  //                  Aceptamos AMBOS para compat (fallback).
+  //      Rappi:      x-rappi-signature
+  //      Didi Food:  x-didi-signature
+  //    OJO: si el provider cambia el header, ajustar AMBAS variantes aqui.
+  //
+  //  - A1 fix: fall-open AHORA es OPT-IN. Solo si WEBHOOK_FALL_OPEN=1 esta
+  //    explicitamente seteado. Default = STRICT (sin secret -> 503 al request).
+  //    En produccion el operador DEBE setear el secret antes de enchufar el provider.
+  //
+  //  - S1 fix: buffer-length check despues del hex decode (no antes). Buffer.from('hex')
+  //    descarta non-hex chars silenciosamente; comparar longitudes ANTES del decode
+  //    no es seguro.
+  //
+  //  - S3 fix: replay protection via timestamp window (5 minutos). Si el provider
+  //    envia un header de timestamp (x-uber-timestamp para Uber, etc.), validamos
+  //    que esta dentro de ±300s. Mitiga replays simples.
+  //
+  //  - N3 fix: sig_status NO se persiste en generic_blobs (solo en la response).
+  //
+  //  - Rate-limit + size cap se mantienen.
+  const WEBHOOK_REPLAY_WINDOW_MS = 5 * 60 * 1000;
   const WEBHOOK_CONFIG = {
-    'uber-eats': { secretEnv: 'UBER_EATS_WEBHOOK_SECRET', sigHeader: 'x-uber-signature' },
-    'rappi':     { secretEnv: 'RAPPI_WEBHOOK_SECRET',     sigHeader: 'x-rappi-signature' },
-    'didi-food': { secretEnv: 'DIDI_FOOD_WEBHOOK_SECRET', sigHeader: 'x-didi-signature' },
+    'uber-eats': {
+      secretEnv: 'UBER_EATS_WEBHOOK_SECRET',
+      sigHeaders: ['x-uber-signature', 'x-uber-eats-signature'],
+      tsHeader: 'x-uber-timestamp',
+    },
+    'rappi': {
+      secretEnv: 'RAPPI_WEBHOOK_SECRET',
+      sigHeaders: ['x-rappi-signature'],
+      tsHeader: 'x-rappi-timestamp',
+    },
+    'didi-food': {
+      secretEnv: 'DIDI_FOOD_WEBHOOK_SECRET',
+      sigHeaders: ['x-didi-signature'],
+      tsHeader: 'x-didi-timestamp',
+    },
   };
+  const WEBHOOK_FALL_OPEN = process.env.WEBHOOK_FALL_OPEN === '1';
 
   function verifyWebhookSignature(provider, rawBody, headers) {
     const cfg = WEBHOOK_CONFIG[provider];
-    if (!cfg) return { valid: false, reason: 'unknown_provider' };
+    if (!cfg) return { valid: false, reason: 'unknown_provider', http: 400 };
     const secret = (process.env[cfg.secretEnv] || '').trim();
     if (!secret) {
-      // Fall-open con warning hasta que el operador configure el secret
-      try { console.warn('[webhook] ' + provider + ' SECRET not set (' + cfg.secretEnv + ') — accepting unverified'); } catch (_) {}
-      return { valid: true, reason: 'no_secret_configured', warn: true };
+      if (WEBHOOK_FALL_OPEN) {
+        try { console.warn('[webhook] ' + provider + ' SECRET not set + WEBHOOK_FALL_OPEN=1 — accepting unverified (NO production!)'); } catch (_) {}
+        return { valid: true, reason: 'fall_open_no_secret', http: 200 };
+      }
+      // STRICT default: reject hasta que el operador configure el secret
+      try { console.error('[webhook] ' + provider + ' SECRET not set (' + cfg.secretEnv + '). Returning 503.'); } catch (_) {}
+      return { valid: false, reason: 'secret_not_configured', http: 503 };
     }
-    const headerSig = String(headers[cfg.sigHeader] || headers[cfg.sigHeader.toLowerCase()] || '').trim();
-    if (!headerSig) return { valid: false, reason: 'missing_signature_header' };
+    // Recolectar firma de cualquier header valido (multi-header compat)
+    let headerSig = '';
+    for (const h of cfg.sigHeaders) {
+      const v = headers[h] || headers[h.toLowerCase()];
+      if (v) { headerSig = String(v).trim(); break; }
+    }
+    if (!headerSig) return { valid: false, reason: 'missing_signature_header', http: 401 };
+
+    // Replay protection via timestamp (S3 fix)
+    const tsRaw = headers[cfg.tsHeader] || headers[cfg.tsHeader.toLowerCase()];
+    if (tsRaw) {
+      const tsNum = Number(String(tsRaw).trim());
+      if (Number.isFinite(tsNum)) {
+        const tsMs = tsNum > 1e12 ? tsNum : tsNum * 1000; // accept seconds OR ms
+        const drift = Math.abs(Date.now() - tsMs);
+        if (drift > WEBHOOK_REPLAY_WINDOW_MS) {
+          return { valid: false, reason: 'timestamp_outside_window', http: 401, drift_ms: drift };
+        }
+      }
+    }
+    // (sin tsHeader, no podemos enforcer replay protection contra firmas viejas;
+    //  Rappi/Didi: si no envian timestamp en su API real, requerir secret + idempotency
+    //  per-event a nivel de processing es la mitigacion final.)
+
     let expectedSig;
     try {
       expectedSig = require('crypto').createHmac('sha256', secret).update(rawBody).digest('hex');
     } catch (e) {
-      return { valid: false, reason: 'crypto_error' };
+      return { valid: false, reason: 'crypto_error', http: 500 };
     }
-    // Strip prefix 'sha256=' if present (some providers use it)
     const provided = headerSig.replace(/^sha256=/i, '').toLowerCase();
-    if (provided.length !== expectedSig.length) return { valid: false, reason: 'signature_length_mismatch' };
     let ok = false;
     try {
       const a = Buffer.from(expectedSig, 'hex');
       const b = Buffer.from(provided, 'hex');
-      ok = a.length === b.length && require('crypto').timingSafeEqual(a, b);
-    } catch (_) { ok = false; }
-    return { valid: ok, reason: ok ? 'valid' : 'signature_mismatch' };
+      // S1 fix: comparar BUFFER lengths despues del decode (Buffer.from descarta
+      // non-hex chars silenciosamente y puede producir buffers mas cortos).
+      if (a.length !== b.length || a.length === 0) {
+        return { valid: false, reason: 'signature_length_mismatch', http: 401 };
+      }
+      ok = require('crypto').timingSafeEqual(a, b);
+    } catch (e) {
+      return { valid: false, reason: 'compare_error', http: 401 };
+    }
+    return { valid: ok, reason: ok ? 'valid' : 'signature_mismatch', http: ok ? 200 : 401 };
   }
 
   const captureWebhook = (provider) => async (req, res) => {
@@ -5967,15 +6051,19 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
         }
         return sendJSON(res, { error: 'read_error' }, 400);
       }
-      // Verificar HMAC
+      // Verificar HMAC + replay (sigCheck.http = status apropiado)
       const sigCheck = verifyWebhookSignature(provider, rawBody, req.headers || {});
       if (!sigCheck.valid) {
-        try { console.warn('[webhook] ' + provider + ' signature invalid: ' + sigCheck.reason); } catch (_) {}
-        return sendJSON(res, { error: 'signature_invalid', reason: sigCheck.reason }, 401);
+        try { console.warn('[webhook] ' + provider + ' rejected: ' + sigCheck.reason); } catch (_) {}
+        // No leak interno: solo el status HTTP correcto + razón generica
+        const safeReason = sigCheck.reason === 'secret_not_configured' ? 'service_misconfigured' : 'signature_invalid';
+        return sendJSON(res, { error: safeReason }, sigCheck.http || 401);
       }
       let body = {};
       try { body = rawBody ? JSON.parse(rawBody) : {}; } catch (_) { body = { _raw: rawBody.slice(0, 256) }; }
       try {
+        // N3 fix: sig_status NO se persiste en generic_blobs (era leak de internals).
+        // Si en el futuro hace falta debugging, agregar otra tabla solo-admin.
         await supabaseRequest('POST', '/generic_blobs', {
           pos_user_id: 'system_webhook',
           key: 'webhook_' + provider + '_' + Date.now(),
@@ -5983,13 +6071,12 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
             provider,
             body,
             ua: String(req.headers['user-agent'] || '').slice(0, 200),
-            sig_status: sigCheck.reason,
           }
         });
       } catch (e) {
         return sendJSON(res, { error: 'storage_failed', provider }, 502);
       }
-      ok(res, { ok: true, provider, received_at: new Date().toISOString(), sig_status: sigCheck.reason });
+      ok(res, { ok: true, provider, received_at: new Date().toISOString() });
     } catch (err) { sendError(res, err); }
   };
   handlers['POST /api/webhooks/uber-eats'] = captureWebhook('uber-eats');

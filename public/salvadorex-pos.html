@@ -7542,6 +7542,17 @@
       </tr>`;
     }).join('');
   }
+  // 2026-05 adversarial fix A3+N2: escape para HTML attribute y text-content.
+  // Antes solo se reemplazaba ' por \', dejando " < > etc. crudos. Si un sale_id
+  // venia con caracteres raros (import malformado, attack), inyectaba HTML.
+  function htmlEsc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
   function renderVentas() {
     $('#vnt-body').innerHTML = SALES.map(s => {
       const chip = s[6]==='completed'?'ok':'warn';
@@ -7549,16 +7560,19 @@
       // 2026-05 ia-arquitectura R2 (flujo de tarea): el boton "Devolver" vive
       // dentro de cada venta en Historial, no como modulo separado en menubar.
       // Solo se muestra para ventas completed (no para las ya devueltas).
-      const safeId = String(s[0]||'').replace(/'/g, "\\'");
+      // Doble escape: para el atributo (htmlEsc) y dentro del attr ya esta
+      // protegido por las " del HTML.
+      const sIdRaw = String(s[0]||'');
+      const sIdAttr = htmlEsc(sIdRaw);
       const devolverBtn = s[6]==='completed'
-        ? `<button class="btn sm" onclick="startDevolucionFromSale('${safeId}')" title="Hacer devolucion de esta venta">↩️ Devolver</button>`
+        ? `<button class="btn sm" onclick="startDevolucionFromSale('${sIdAttr}')" title="Hacer devolucion de esta venta">↩️ Devolver</button>`
         : '';
       return `<tr>
-        <td class="mono" style="font-weight: 600;">${s[0]}</td>
-        <td style="color: var(--text-3); font-size: 11px;">${s[1]}</td>
-        <td class="primary-col">${s[2]}</td>
-        <td style="color: var(--text-3);">${s[3]}</td>
-        <td><span class="chip">${s[4]}</span></td>
+        <td class="mono" style="font-weight: 600;">${htmlEsc(s[0])}</td>
+        <td style="color: var(--text-3); font-size: 11px;">${htmlEsc(s[1])}</td>
+        <td class="primary-col">${htmlEsc(s[2])}</td>
+        <td style="color: var(--text-3);">${htmlEsc(s[3])}</td>
+        <td><span class="chip">${htmlEsc(s[4])}</span></td>
         <td class="num" style="font-weight: 600;">${fmt(s[5])}</td>
         <td><span class="chip ${chip}"><span class="dot"></span>${lbl}</span></td>
         <td style="text-align: right;"><button class="btn sm" title="Ver detalle">👁️</button> ${devolverBtn}</td>
