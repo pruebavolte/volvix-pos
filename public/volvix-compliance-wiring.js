@@ -237,8 +237,48 @@
       if (this.el) { this.el.remove(); this.el = null; }
     },
 
+    // 2026-05-06: el banner ya no aparece globalmente. Solo se muestra cuando
+    // el usuario esta en una pagina/seccion donde tiene sentido revisar el
+    // consentimiento de cookies:
+    //   - Paginas legales: cookies-policy, aviso-privacidad, terminos-condiciones
+    //   - Seccion 'Mi Perfil' / 'Clientes' dentro de salvadorex-pos.html
+    // Para forzarlo manualmente: window.VolvixCompliance.showBanner()
+    _shouldShowOnThisPage() {
+      try {
+        var p = (location.pathname || '').toLowerCase();
+        var h = (location.hash || '').toLowerCase();
+        if (p.indexOf('cookies-policy') !== -1 ||
+            p.indexOf('aviso-privacidad') !== -1 ||
+            p.indexOf('terminos-condiciones') !== -1) return true;
+        if (p.indexOf('salvadorex-pos') !== -1) {
+          if (h.indexOf('perfil') !== -1 || h.indexOf('cliente') !== -1) return true;
+          try {
+            if (document.querySelector('#screen-perfil:not(.hidden)') ||
+                document.querySelector('#screen-clientes:not(.hidden)')) return true;
+          } catch (_) {}
+        }
+        return false;
+      } catch (_) { return false; }
+    },
+
     showIfNeeded() {
-      if (!Consent.state.decided) this.render();
+      if (Consent.state.decided) return;
+      if (!this._shouldShowOnThisPage()) {
+        // Re-evaluar cuando el user navegue a perfil/clientes dentro del POS
+        var self = this;
+        try {
+          window.addEventListener('hashchange', function () {
+            if (!Consent.state.decided && self._shouldShowOnThisPage() && !self.el) self.render();
+          });
+          document.addEventListener('click', function () {
+            setTimeout(function () {
+              if (!Consent.state.decided && self._shouldShowOnThisPage() && !self.el) self.render();
+            }, 50);
+          }, true);
+        } catch (_) {}
+        return;
+      }
+      this.render();
     }
   };
 
