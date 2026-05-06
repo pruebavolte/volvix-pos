@@ -267,14 +267,11 @@
         // Re-evaluar cuando el user navegue a perfil/clientes dentro del POS
         var self = this;
         try {
+          // 2026-05-06 FIX: el listener global de click ejecutaba en cada
+          // interaccion del usuario, bloqueando la app post-registro. Removido.
           window.addEventListener('hashchange', function () {
             if (!Consent.state.decided && self._shouldShowOnThisPage() && !self.el) self.render();
           });
-          document.addEventListener('click', function () {
-            setTimeout(function () {
-              if (!Consent.state.decided && self._shouldShowOnThisPage() && !self.el) self.render();
-            }, 50);
-          }, true);
         } catch (_) {}
         return;
       }

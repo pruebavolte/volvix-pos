@@ -235,17 +235,16 @@
   function boot() {
     if (readConsent()) return; // ya decidió, no molestar
     if (!shouldShowOnThisPage()) {
-      // Re-verificar cuando el usuario navegue a perfil/clientes dentro del POS
+      // 2026-05-06 FIX: el listener global de click + setTimeout que tenia
+      // antes ejecutaba shouldShowOnThisPage() en CADA click del DOM. Esto
+      // bloqueaba la app cuando el usuario interactuaba mucho (cuelgue
+      // reportado en salvadorex-pos.html post-registro). Ahora SOLO listener
+      // de hashchange (barato) — si el user quiere ver banner en perfil debe
+      // navegar via hash (#perfil) o usar window.volvixCookies.openSettings().
       try {
         window.addEventListener('hashchange', function () {
           if (!readConsent() && shouldShowOnThisPage()) showBanner();
         });
-        // Listener para clicks en menu del POS que abren perfil/clientes
-        document.addEventListener('click', function (ev) {
-          setTimeout(function () {
-            if (!readConsent() && shouldShowOnThisPage()) showBanner();
-          }, 50);
-        }, true);
       } catch (_) {}
       return;
     }

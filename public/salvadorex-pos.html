@@ -4804,18 +4804,27 @@
   //   - Oculta/muestra campos del modal producto segun campos.producto[X].visible
   window.VolvixGiroConfig = {
     config: null,
+    _loading: false,
     async load() {
+      if (this._loading || this.config) return; // no concurrente, no re-load
+      this._loading = true;
       var token = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
-      if (!token) return;
+      if (!token) { this._loading = false; return; }
       try {
+        // 2026-05-06 FIX: AbortController con timeout 6s para no colgar la app.
+        var ctl = new AbortController();
+        var timer = setTimeout(function () { try { ctl.abort(); } catch (_) {} }, 6000);
         var r = await fetch('/api/giro/config', {
           headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
           credentials: 'include',
+          signal: ctl.signal,
         });
-        if (!r.ok) return;
+        clearTimeout(timer);
+        if (!r.ok) { this._loading = false; return; }
         this.config = await r.json();
         this.apply();
       } catch (e) { console.warn('[GiroConfig] load:', e); }
+      this._loading = false;
     },
     apply() {
       if (!this.config) return;
@@ -4872,28 +4881,41 @@
       try { document.dispatchEvent(new CustomEvent('volvix:giro-config-applied', { detail: cfg })); } catch (_) {}
     }
   };
-  document.addEventListener('volvix:login', function () {
+  // 2026-05-06 FIX: misma logica que DataLoader — un solo entry point.
+  setTimeout(function () {
     try { window.VolvixGiroConfig.load(); } catch (_) {}
-  });
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () {
-      try { window.VolvixGiroConfig.load(); } catch (_) {}
-    });
-  } else {
-    try { window.VolvixGiroConfig.load(); } catch (_) {}
-  }
+  }, 100);
 
   // Loader que llena CATALOG/CUSTOMERS/SALES desde la API real del tenant.
   // Se invoca despues del SSO check, cuando ya hay JWT valido.
+  // 2026-05-06 FIX: AbortController con timeout 8s + flag para evitar runs
+  // simultaneos. El bug "pagina blanca/colgada" post-registro se debia a
+  // multiples loadAll() concurrentes (volvix:login + DOMContentLoaded) que
+  // mantenian fetches abiertos sin timeout.
   window.VolvixDataLoader = {
+    _running: false,
+    async _fetchTO(url, headers, timeoutMs) {
+      var ctl = new AbortController();
+      var timer = setTimeout(function () { try { ctl.abort(); } catch (_) {} }, timeoutMs || 8000);
+      try {
+        var r = await fetch(url, { headers: headers, credentials: 'include', signal: ctl.signal });
+        clearTimeout(timer);
+        return r;
+      } catch (e) {
+        clearTimeout(timer);
+        return null;
+      }
+    },
     async loadAll() {
+      if (this._running) return; // evitar runs concurrentes
+      this._running = true;
       var token = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
-      if (!token) return;
+      if (!token) { this._running = false; return; }
       var headers = { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
       // Productos (CATALOG)
       try {
-        var r = await fetch('/api/products?limit=1000', { headers: headers, credentials: 'include' });
-        if (r.ok) {
+        var r = await this._fetchTO('/api/products?limit=1000', headers, 8000);
+        if (r && r.ok) {
           var j = await r.json();
           var arr = (j && Array.isArray(j.products)) ? j.products : (Array.isArray(j) ? j : []);
           CATALOG.length = 0;
@@ -4912,8 +4934,8 @@
       } catch (e) { console.warn('[DataLoader] productos:', e); }
       // Clientes
       try {
-        var rc = await fetch('/api/customers?limit=500', { headers: headers, credentials: 'include' });
-        if (rc.ok) {
+        var rc = await this._fetchTO('/api/customers?limit=500', headers, 8000);
+        if (rc && rc.ok) {
           var jc = await rc.json();
           var arrc = (jc && Array.isArray(jc.customers)) ? jc.customers : (Array.isArray(jc) ? jc : []);
           CUSTOMERS.length = 0;
@@ -4932,8 +4954,8 @@
       } catch (e) { console.warn('[DataLoader] clientes:', e); }
       // Ventas (historial)
       try {
-        var rs = await fetch('/api/sales?limit=200', { headers: headers, credentials: 'include' });
-        if (rs.ok) {
+        var rs = await this._fetchTO('/api/sales?limit=200', headers, 8000);
+        if (rs && rs.ok) {
           var js = await rs.json();
           var arrs = (js && Array.isArray(js.sales)) ? js.sales : (Array.isArray(js) ? js : []);
           SALES.length = 0;
@@ -4951,20 +4973,17 @@
           try { document.dispatchEvent(new CustomEvent('volvix:sales-loaded', { detail: { count: SALES.length } })); } catch (_) {}
         }
       } catch (e) { console.warn('[DataLoader] ventas:', e); }
+      this._running = false; // liberar flag al terminar
     }
   };
-  // Disparar carga cuando el SSO confirme login
-  document.addEventListener('volvix:login', function () {
+  // 2026-05-06 FIX: ANTES disparabamos loadAll() en TRES lugares (volvix:login,
+  // DOMContentLoaded, inmediato) — eso podia hacer que el browser tuviera 9
+  // fetches concurrentes (3 endpoints x 3 triggers) y se colgara. Ahora UNA sola
+  // entrada: setTimeout 100ms post script-load. El flag _running protege
+  // contra otros llamados.
+  setTimeout(function () {
     try { window.VolvixDataLoader.loadAll(); } catch (_) {}
-  });
-  // Tambien al cargar DOM (por si el SSO ya pasó)
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () {
-      try { window.VolvixDataLoader.loadAll(); } catch (_) {}
-    });
-  } else {
-    try { window.VolvixDataLoader.loadAll(); } catch (_) {}
-  }
+  }, 100);
   // 2026-05-06: USERS demo era hardcoded con emails @donchucho.mx — confundia
   // a usuarios nuevos al ver gente que no es de su negocio. Ahora arrancamos
   // con SOLO el admin actual (derivado del JWT); el owner agrega los demas
