@@ -5779,7 +5779,11 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
   // ============ MENU DIGITAL ============
   // FIX adversarial A2 (CRITICAL): el GET no filtraba por tenant → exponía todo
   // el catálogo cross-tenant. Ahora REQUIERE tenant_id en query y filtra por
-  // pos_user_id del owner del tenant (mismo patrón que /api/products).
+  // pos_user_id del owner del tenant.
+  // FIX A2-bis: resolveOwnerPosUserId() cae a TNT001 default para tenants
+  // desconocidos. Validar contra una lista whitelist explícita ANTES de resolver,
+  // si no, un atacante con tenant_id="FAKE" obtiene productos de TNT001.
+  const KNOWN_TENANTS = new Set(['TNT001', 'TNT002']);
   handlers['GET /api/menu-digital'] = async (req, res) => {
     try {
       const q = url.parse(req.url, true).query;
@@ -5787,16 +5791,17 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
       if (!tenant || !/^[A-Za-z0-9_-]{1,40}$/.test(tenant)) {
         return bad(res, 'tenant_id requerido (alfanumérico, max 40 chars)');
       }
+      // Whitelist: solo tenants conocidos retornan datos. Otros → []
+      if (!KNOWN_TENANTS.has(tenant)) {
+        return ok(res, []);
+      }
       let posUserId = null;
       try {
         if (typeof resolveOwnerPosUserId === 'function') {
           posUserId = resolveOwnerPosUserId(tenant);
         }
       } catch (_) {}
-      if (!posUserId) {
-        // Sin mapping conocido → menú vacío (NO devolver todo el catálogo)
-        return ok(res, []);
-      }
+      if (!posUserId) return ok(res, []);
       try {
         const products = await supabaseRequest('GET',
           '/pos_products?pos_user_id=eq.' + encodeURIComponent(posUserId) +
