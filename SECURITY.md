@@ -50,6 +50,30 @@ Fuera de scope:
 
 Reportes publicos: `R13_SECURITY_AUDIT.md`, `R22_SECURITY_FIXES.md`, `R24_SECURITY_HEADERS.md`.
 
+## Pendientes de seguridad — TODO
+
+### CRITICAL (urgente, antes de prod escalable)
+
+- **154 tablas Supabase sin RLS habilitado** (detectado 2026-05 via mcp Supabase advisor).
+  - Impacto: cualquiera con la anon key puede leer/modificar todas las filas.
+  - Tablas afectadas (parcial): `categories`, `products`, `pos_products`, `pos_sales`, `customers`, `verticals`, `vertical_templates`, `giros_synonyms`, `ingredients`, `recipes`, `volvix_audit_log_archive`, +144 mas.
+  - Bloqueo: enabling RLS sin policies bloquea TODO acceso. Hay que disenar policies por tabla antes de habilitar.
+  - Plan sugerido: empezar por las que contienen PII (`customers`, `pos_users`, `volvix_audit_log_archive`) — agregar policies `auth.uid()` + `tenant_id` match — luego enable.
+  - SQL de remediacion (sin policies, NO ejecutar tal cual): disponible en log de mcp `list_tables` advisory `rls_disabled`.
+
+### HIGH
+
+- **Rotar Pexels API key + Google CSE API key** (committed en git history publico).
+  - Pexels: rotar en https://www.pexels.com/api/ → reset key
+  - Google CSE: rotar en https://console.cloud.google.com/apis/credentials?project=volvix-pos
+  - Despues: agregar como Vercel env vars (NO en codigo).
+  - Codigo ya gateado: si env var no existe, funcion retorna null (commit b570677).
+
+### MEDIUM
+
+- HTMLs en public/ asumen que `/auth-gate.js` valida roles client-side. Validar tambien server-side por endpoint (ya esta en la mayoria, auditar nuevos `/api/devoluciones`, `/api/queue`, `/api/marketing`, etc).
+- Webhooks `/api/webhooks/uber-eats|rappi|didi-food` actualmente capturan payload sin validar firma. Antes de consumir en produccion, agregar HMAC verification por proveedor.
+
 ## Hall of Fame
 
 Investigadores que reportaron responsablemente — bajo demanda, con permiso.
