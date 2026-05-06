@@ -32976,8 +32976,18 @@ if (process.env.NODE_ENV === 'test') {
       if (business_name.length < 3 || business_name.length > 100) {
         return sendJSON(res, { ok: false, field: 'business_name', error_code: 'INVALID_NAME', error_message: 'Nombre del negocio inválido (3-100 caracteres).' }, 400);
       }
-      if (!VALID_GIROS.has(giro)) {
-        return sendJSON(res, { ok: false, field: 'giro', error_code: 'INVALID_GIRO', error_message: 'Selecciona un giro válido.' }, 400);
+      // 2026-05-06: NO bloquear si el giro es nuevo. Si no esta en VALID_GIROS,
+      // lo aceptamos como giro custom (slug = el texto sanitizado). El sistema
+      // usa giros_modulos default si no encuentra el giro especifico, asi que
+      // funciona sin necesidad de pre-configurar TODOS los giros posibles.
+      // Reemplazo del 'Selecciona un giro valido' que reportaba el usuario.
+      let giroNormalized = giro || 'otro';
+      if (!VALID_GIROS.has(giroNormalized)) {
+        // Sanitizar a slug: lowercase, sin acentos, espacios -> guion bajo
+        giroNormalized = String(giroNormalized).toLowerCase()
+          .normalize('NFD').replace(/[̀-ͯ]/g, '')
+          .replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '')
+          .slice(0, 60) || 'otro';
       }
 
       // ---- Email duplicado ---- (canal primario: si abandonó, lo reusamos)
@@ -33047,8 +33057,8 @@ if (process.env.NODE_ENV === 'test') {
         volvix_role: 'owner',
         tenant_id: tenantId,
         tenant_name: business_name,
-        business_type: giro,
-        registration_flow: 'simple_email'
+        business_type: giroNormalized,
+        registration_flow: 'simple_email_no_otp'
       });
       let userId = reuseUserId || null;
       try {
@@ -33131,7 +33141,7 @@ if (process.env.NODE_ENV === 'test') {
             companyId = existCo[0].id;
             // Refrescar nombre/giro por si cambiaron
             await supabaseRequest('PATCH', '/pos_companies?id=eq.' + companyId, {
-              name: business_name, business_type: giro
+              name: business_name, business_type: giroNormalized
             }).catch(function () {});
           }
         }
@@ -33141,14 +33151,18 @@ if (process.env.NODE_ENV === 'test') {
           // is_active, expires_at, created_at, updated_at, plan_changed_at,
           // previous_plan, status, business_type, rfc, city, state, phone, tenant_id.
           // NO incluye 'email' — eso queda en pos_users.
+          // 2026-05-06: cuenta se ACTIVA INMEDIATAMENTE al registrarse.
+          // Antes status='pending' + is_active=false bloqueaba al user en
+          // pantalla OTP. Ahora se activa directo y el email de verificacion
+          // es solo para confirmacion (no bloquea acceso).
           const companyPayload = {
             name: business_name,
             owner_user_id: userId,
             tenant_id: tenantId,
-            business_type: giro,
+            business_type: giroNormalized,
             plan: 'trial',
-            status: 'pending',
-            is_active: false,
+            status: 'active',
+            is_active: true,
             created_at: new Date().toISOString()
           };
           if (phone) companyPayload.phone = phone;
@@ -33342,49 +33356,82 @@ if (process.env.NODE_ENV === 'test') {
         tenant_id: tenantId,
         user_id: userId,
         email: emailValue,
-        otp_required: true,
-        otp_channel: 'email',
-        otp_sent_to: emailSent ? ['email'] : [],
-        otp_expires_at: expiresAt,
+        // 2026-05-06 NUEVO FLUJO: usuario entra DIRECTO al sistema. NO OTP bloqueante.
+        // El email es solo para "verificar tu cuenta" (informativo, no bloquea).
+        otp_required: false,
         email_sent: emailSent,
-        email_provider: emailProvider || null
+        email_provider: emailProvider || null,
       };
-      // En DEV (no produccion) sí mostramos el codigo en pantalla para testing rapido.
-      if (!isProd && !emailSent) {
-        respPayload.dev_code = otpCode;
-        respPayload.notice = '[DEV] Email no enviado — codigo visible en pantalla.';
+
+      // GENERAR JWT INMEDIATAMENTE — el usuario entra directo al POS
+      try {
+        const token = signJWT({
+          sub: userId,
+          user_id: userId,
+          email: emailValue,
+          role: 'owner',
+          tenant_id: tenantId,
+          tenant_name: business_name,
+          business_name: business_name,
+          business_type: giroNormalized,
+          plan: 'trial'
+        });
+        respPayload.token = token;
+        respPayload.session = {
+          token: token,
+          user: {
+            id: userId,
+            email: emailValue,
+            role: 'owner',
+            full_name: business_name
+          },
+          tenant_id: tenantId,
+          tenant_name: business_name,
+          business_type: giroNormalized,
+        };
+        respPayload.redirect = '/salvadorex-pos.html';
+        respPayload.email_verification_pending = !emailSent;
+        // Registrar sesion activa para que requireAuth() la valide via jti
+        try {
+          const decoded = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+          await supabaseRequest('POST', '/pos_active_sessions', {
+            jti: decoded.jti,
+            user_id: userId,
+            tenant_id: tenantId,
+            issued_at: new Date(decoded.iat * 1000).toISOString(),
+            expires_at: new Date(decoded.exp * 1000).toISOString(),
+            ip_address: ip,
+            user_agent: userAgent,
+          }).catch(function () {});
+        } catch (_) {}
+      } catch (jwtErr) {
+        // Si JWT falla, no bloquear — caer al flujo legacy de OTP
+        respPayload.token = null;
+        respPayload.otp_required = true;
+        respPayload.otp_channel = 'email';
+        respPayload.otp_expires_at = expiresAt;
+        if (!isProd) respPayload.dev_code = otpCode;
       }
-      // En PRODUCCION: si email fallo, NO mostramos el codigo. Devolvemos folio
-      // y mensaje claro al usuario para contactar soporte (NUNCA exponer codigo).
-      if (isProd && !emailSent) {
-        const supportFolio = 'OTP-' + Date.now().toString(36).toUpperCase() +
-          '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
-        respPayload.email_delivery_failed = true;
-        respPayload.support_folio = supportFolio;
-        respPayload.notice = 'No pudimos enviar el correo de verificacion. ' +
-          'Por favor contacta a soporte@systeminternational.app con el folio ' +
-          supportFolio + ' para activar tu cuenta manualmente.';
-        // Log el error real internamente para que soporte pueda ayudar
+
+      // Si email NO se envio en prod: log interno (NO mostrar al usuario el codigo).
+      // El usuario YA tiene JWT y entrara al POS, asi que no necesita el codigo.
+      if (isProd && !emailSent && hasEmailProvider) {
         try {
           await supabaseRequest('POST', '/system_error_logs', {
-            level: 'error',
-            type: 'register-simple/email-failed-prod',
+            level: 'warn',
+            type: 'register-simple/verification-email-failed',
             source: 'register-simple',
-            error_code: 'EMAIL_DELIVERY_FAILED_PROD',
+            error_code: 'VERIFICATION_EMAIL_NOT_SENT',
             error_message: emailError ? String(emailError).slice(0, 500) : 'unknown',
-            folio: supportFolio,
             tenant_id: tenantId,
             user_id: userId,
             ip_address: ip,
             user_agent: userAgent,
             url: '/api/auth/register-simple',
-            context: { email: emailValue, otp_code_internal: otpCode, business_name },
-            created_at: new Date().toISOString()
+            context: { email: emailValue, business_name },
+            created_at: new Date().toISOString(),
           });
         } catch (_) {}
-      }
-      if (!emailSent && isProd && !noEmailProvider && emailError) {
-        respPayload.email_error = String(emailError).slice(0, 120);
       }
       return sendJSON(res, respPayload);
     } catch (err) {

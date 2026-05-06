@@ -786,58 +786,52 @@
             }));
           } catch (e) {}
 
-          var banner = document.getElementById('devOtpBanner');
-          var bannerCode = document.getElementById('devOtpCode');
-          var info = document.getElementById('otpInfo');
-
-          // 2026-05-06: el banner DEV con codigo SOLO debe aparecer en local/dev.
-          // En produccion el backend YA NO devuelve dev_code (excepto si email falla,
-          // y en ese caso devuelve email_delivery_failed + support_folio).
-          // Heuristica adicional: aunque el backend mande dev_code, si estamos en
-          // produccion (host == systeminternational.app) NUNCA mostramos el codigo
-          // en pantalla. Defensa en profundidad.
-          var isProdHost = location.hostname === 'systeminternational.app' ||
-                           location.hostname === 'www.systeminternational.app';
-
-          if (res.body.email_delivery_failed && res.body.support_folio) {
-            // Email fallo en produccion — mostrar mensaje de soporte (NO codigo)
-            if (banner) banner.style.display = 'none';
-            if (info) {
-              info.style.display = '';
-              info.style.background = '#fef2f2';
-              info.style.borderColor = '#fca5a5';
-              info.style.color = '#991b1b';
-              info.innerHTML = 'No pudimos enviar el correo de verificacion. ' +
-                'Contacta a <a href="mailto:soporte@systeminternational.app?subject=Folio%20' +
-                encodeURIComponent(res.body.support_folio) + '" style="color:#991b1b;text-decoration:underline">soporte@systeminternational.app</a> ' +
-                'con el folio <strong>' + res.body.support_folio + '</strong> para activar tu cuenta.';
-            }
-          } else if (res.body.dev_code && !isProdHost) {
-            // Solo dev/local: mostrar codigo en pantalla para testing
-            if (banner) banner.style.display = 'block';
-            if (bannerCode) bannerCode.textContent = String(res.body.dev_code);
-            if (info) info.style.display = 'none';
-            setTimeout(function () {
-              var inp = $('#otp');
-              if (inp) {
-                inp.value = String(res.body.dev_code);
-                $('#btnVerify').disabled = false;
+          // 2026-05-06 NUEVO FLUJO: si el backend devuelve token, entramos DIRECTO
+          // al POS sin pantalla OTP. El email de verificacion se envia en background
+          // (informativo, no bloquea). Asi el usuario solo escribe contraseña, da
+          // click "Crear cuenta" y entra al sistema, como pidio el usuario.
+          if (res.body.token && res.body.session) {
+            try { localStorage.setItem('volvix_token', res.body.token); } catch (_) {}
+            try { localStorage.setItem('volvixAuthToken', res.body.token); } catch (_) {}
+            try { localStorage.setItem('volvixSession', JSON.stringify(res.body.session)); } catch (_) {}
+            try { localStorage.setItem('volvix_session', JSON.stringify(res.body.session)); } catch (_) {}
+            // Mostrar paso 3 (confetti + tenant_id) brevemente y entrar al POS
+            $('#tenantIdBox').textContent = state.tenant_id || 'TNT-XXXXX';
+            state._redirect = res.body.redirect || '/salvadorex-pos.html';
+            setStep(3);
+            // Notificacion de email de verificacion (no bloquea)
+            try {
+              var msg3 = document.querySelector('.step[data-step="3"] p');
+              if (msg3 && res.body.email_verification_pending !== undefined) {
+                if (res.body.email_sent) {
+                  msg3.innerHTML = 'Bienvenido a Volvix POS. Te enviamos un correo de verificacion ' +
+                    'a <strong>' + (state.email || '') + '</strong> (informativo, ya tienes acceso).';
+                } else {
+                  msg3.innerHTML = 'Bienvenido a Volvix POS. (El correo de verificacion se enviara en breve a ' +
+                    '<strong>' + (state.email || '') + '</strong>).';
+                }
               }
-            }, 200);
+            } catch (_) {}
+            setTimeout(function () {
+              try { window.location.href = state._redirect || '/salvadorex-pos.html'; }
+              catch (_) {}
+            }, 1500);
           } else {
-            // Caso normal: email enviado correctamente
+            // Fallback legacy: si por alguna razon no hay token (JWT fallo), seguir
+            // con OTP como antes (modo degradado).
+            var banner = document.getElementById('devOtpBanner');
+            var info = document.getElementById('otpInfo');
             if (banner) banner.style.display = 'none';
             if (info) info.style.display = '';
             alertBox('info', 'Codigo enviado a ' + state.email);
+            try {
+              var echoEl = document.getElementById('otpEmailEcho');
+              if (echoEl) echoEl.textContent = state.email || state.formData.email || '';
+            } catch (_) {}
+            setStep(2);
+            startResendCounter(60);
+            setTimeout(function () { var f = $('#otp'); if (f) f.focus(); }, 200);
           }
-          // Eco del correo
-          try {
-            var echoEl = document.getElementById('otpEmailEcho');
-            if (echoEl) echoEl.textContent = state.email || state.formData.email || '';
-          } catch (_) {}
-          setStep(2);
-          startResendCounter(60);
-          setTimeout(function () { var f = $('#otp'); if (f) f.focus(); }, 200);
         } else {
           var msg = (res.body && (res.body.error_message || res.body.message)) || 'Error al registrar.';
           if (res.body && res.body.field) showErr(res.body.field, msg);
