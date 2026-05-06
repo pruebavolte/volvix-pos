@@ -126,23 +126,45 @@ async function searchGiros(ctx, req, res, parsedUrl) {
   const giros = scanLandings();
   const qSlug = slugify(q);
 
-  // 1) exact slug
-  let hit = giros.find((g) => g.slug === qSlug);
-  // 2) substring
-  if (!hit) hit = giros.find((g) => g.slug.includes(qSlug) || qSlug.includes(g.slug));
-  // 3) name token match
-  if (!hit) hit = giros.find((g) => normalize(g.name).includes(q) || q.includes(normalize(g.name)));
+  // 2026-05 BUG-FIX: distinguir queries genéricas de marca-específicas.
+  // "café" → cafetería ✓ (1 token, genérico). "Café Lizingh" → NEW giro ✓ (brand).
+  // Heurística: query con >1 token de contenido (post stop-words) = marca-específica.
+  const STOP_WORDS = new Set(['de','del','la','el','los','las','y','o','un','una','con','para','por','en','al','a']);
+  const qTokens = q.split(/\s+/).filter(t => t.length >= 2 && !STOP_WORDS.has(t));
+  const isMultiWord = qTokens.length > 1;
 
-  // 4) FUZZY via synonyms map — 'tacos' → taqueria, 'comida' → restaurante, etc.
+  // 1) exact slug — siempre permitido (re-buscar un giro brand ya generado lo encuentra)
+  let hit = giros.find((g) => g.slug === qSlug);
+
+  // 2) substring slug — SOLO single-word. Si q es multi-word brand, NO matchear genérico.
+  //    Evita que "ferreteria-don-juan" → ferretería.
+  if (!hit && !isMultiWord) {
+    hit = giros.find((g) => g.slug.includes(qSlug) || qSlug.includes(g.slug));
+  }
+
+  // 3) name token match — SOLO single-word por la misma razón que 2.
+  if (!hit && !isMultiWord) {
+    hit = giros.find((g) => normalize(g.name).includes(q) || q.includes(normalize(g.name)));
+  }
+
+  // 4) FUZZY via synonyms map — multi-word exige TODOS los tokens cubiertos.
   if (!hit) {
     for (const [slug, info] of Object.entries(GIRO_SYNONYMS || {})) {
       const synonyms = (info.synonyms || []).map(normalize);
       const sells = (info.sells || []).map(normalize);
       const allMatches = synonyms.concat(sells);
-      if (allMatches.some(s => s === q || s.includes(q) || q.includes(s))) {
+      let matched = false;
+      if (isMultiWord) {
+        // STRICT: cada token del query debe aparecer en al menos un synonym/sells.
+        const corpusTokens = new Set(allMatches.flatMap(s => s.split(/\s+/)));
+        matched = qTokens.every(t => corpusTokens.has(t));
+      } else {
+        // SINGLE-WORD: matching flexible (legacy)
+        matched = allMatches.some(s => s === q || s.includes(q) || q.includes(s));
+      }
+      if (matched) {
         hit = giros.find(g => g.slug === slug.replace(/_/g, '-'));
         if (!hit) {
-          // Synthesize from synonyms map even if no landing file exists
           hit = {
             slug: slug.replace(/_/g, '-'),
             name: info.name,
