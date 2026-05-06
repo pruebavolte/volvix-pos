@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marketing Social · System International</title>
+  <meta name="theme-color" content="#1a237e">
+  <script src="/auth-gate.js" data-roles="superadmin,owner"></script>
+  <script src="/config.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/volvix-tokens.css">
+  <script src="/volvix-api.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%;margin:0;padding:0;font-family:var(--font-primary);font-size:14px;color:var(--text);background:var(--bg-2);-webkit-font-smoothing:antialiased;overflow:hidden}
+.app{display:flex;flex-direction:column;height:100vh}
+.topbar{display:flex;align-items:center;gap:10px;background:var(--navy);color:#fff;padding:0 16px;height:48px;flex-shrink:0}
+.topbar-title{font-size:15px;font-weight:700;flex:1}
+.tb-btn{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:6px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;font-size:12px;font-weight:500;cursor:pointer;text-decoration:none}
+.tb-btn:hover{background:rgba(255,255,255,.2)}
+.layout{display:grid;grid-template-columns:1fr 360px;flex:1;overflow:hidden}
+.panel-main{display:flex;flex-direction:column;overflow:hidden}
+.panel-side{background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.toolbar{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 14px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text);transition:all .12s}
+.btn:hover{background:var(--bg-2)}
+.btn.primary{background:var(--navy);color:#fff;border-color:var(--navy)}
+.btn.ai{background:linear-gradient(135deg,#6D28D9,#2563EB);color:#fff;border:none}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.spacer{flex:1}
+.posts-list{flex:1;overflow-y:auto;padding:12px 14px}
+.post-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden;transition:all .15s}
+.post-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.07)}
+.post-header{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border)}
+.plat-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.plat-ig{background:#f8d7e3}
+.plat-fb{background:#d9e8fb}
+.plat-tt{background:#e8e8e8}
+.post-meta{flex:1;min-width:0}
+.post-title{font-size:13px;font-weight:600}
+.post-sub{font-size:11px;color:var(--text-3);margin-top:2px}
+.post-status{font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px}
+.s-borrador{background:var(--bg-2);color:var(--text-3)}
+.s-programado{background:#FEF9C3;color:#854D0E}
+.s-publicado{background:#DCFCE7;color:#15803D}
+.post-body{padding:12px 14px;font-size:13px;color:var(--text-2);line-height:1.5;white-space:pre-wrap}
+.post-actions{display:flex;gap:6px;padding:8px 14px;border-top:1px solid var(--border)}
+.plat-tabs{display:flex;gap:6px;padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto}
+.plat-tab{padding:5px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text-2);white-space:nowrap;transition:all .1s}
+.plat-tab.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.side-header{padding:14px 16px;border-bottom:1px solid var(--border);font-size:14px;font-weight:700;flex-shrink:0}
+.side-body{padding:14px 16px;flex:1;overflow-y:auto}
+.form-group{margin-bottom:12px}
+.form-label{display:block;font-size:11px;font-weight:600;color:var(--text-2);margin-bottom:5px}
+.form-input,.form-select,.form-textarea{width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:7px;font-size:13px;background:var(--bg-2);color:var(--text);font-family:var(--font-primary)}
+.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--navy)}
+.form-textarea{resize:vertical;line-height:1.5}
+.ai-preview{background:linear-gradient(135deg,rgba(109,40,217,.04),rgba(37,99,235,.04));border:1px solid rgba(109,40,217,.15);border-radius:8px;padding:12px;margin-top:10px;white-space:pre-wrap;font-size:13px;line-height:1.6;color:var(--text-2)}
+.char-count{font-size:11px;color:var(--text-3);text-align:right;margin-top:3px}
+.tono-row{display:flex;gap:5px;flex-wrap:wrap}
+.tono-btn{padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);font-size:11px;cursor:pointer;transition:all .1s}
+.tono-btn.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.empty{text-align:center;padding:48px 20px;color:var(--text-3)}
+.empty-icon{font-size:40px;margin-bottom:10px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(60px);background:#1a1a1a;color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;z-index:9999;transition:all .25s;opacity:0;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{background:#15803D}
+.toast.err{background:#DC2626}
+@media(max-width:768px){.layout{grid-template-columns:1fr}.panel-side{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <a href="/owner.html" class="tb-btn">← Volver</a>
+    <span class="topbar-title">📱 Marketing Social</span>
+  </div>
+  <div class="layout">
+    <div class="panel-main">
+      <div class="plat-tabs">
+        <div class="plat-tab active" onclick="filtrarPlat('',this)">📋 Todos</div>
+        <div class="plat-tab" onclick="filtrarPlat('instagram',this)">📸 Instagram</div>
+        <div class="plat-tab" onclick="filtrarPlat('facebook',this)">👥 Facebook</div>
+        <div class="plat-tab" onclick="filtrarPlat('tiktok',this)">🎵 TikTok</div>
+        <div class="plat-tab" onclick="filtrarPlat('whatsapp',this)">💬 WhatsApp</div>
+      </div>
+      <div class="toolbar">
+        <button class="btn ai" onclick="nuevaPublicacion()">✨ Generar post con IA</button>
+        <button class="btn primary" onclick="nuevaManual()">+ Post manual</button>
+        <div class="spacer"></div>
+        <span style="font-size:12px;color:var(--text-3)"><span id="cnt-posts">0</span> publicaciones</span>
+      </div>
+      <div class="posts-list" id="posts-list">
+        <div class="empty"><div class="empty-icon">📱</div><div style="font-size:14px;font-weight:600;color:var(--text-2);margin-bottom:6px">Sin publicaciones</div><div style="font-size:12px">Genera tu primer post con IA</div></div>
+      </div>
+    </div>
+    <div class="panel-side">
+      <div class="side-header" id="side-title">✨ Generar post con IA</div>
+      <div class="side-body">
+        <div class="form-group">
+          <label class="form-label">Plataforma</label>
+          <select class="form-select" id="gen-plat">
+            <option value="instagram">📸 Instagram</option>
+            <option value="facebook">👥 Facebook</option>
+            <option value="tiktok">🎵 TikTok (descripción)</option>
+            <option value="whatsapp">💬 WhatsApp Status</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">¿Qué quieres promocionar?</label>
+          <input class="form-input" id="gen-producto" placeholder="Ej. Tacos de bistec, Promoción 2x1, Nuevo platillo...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tono</label>
+          <div class="tono-row">
+            <button class="tono-btn active" onclick="setTono('amigable',this)">😊 Amigable</button>
+            <button class="tono-btn" onclick="setTono('profesional',this)">💼 Profesional</button>
+            <button class="tono-btn" onclick="setTono('divertido',this)">🎉 Divertido</button>
+            <button class="tono-btn" onclick="setTono('urgente',this)">🔥 Urgente</button>
+          </div>
+        </div>
+        <button class="btn ai" style="width:100%;margin-bottom:12px" id="btnGenerar" onclick="generarPost()">✨ Generar post</button>
+        <div id="gen-preview" style="display:none">
+          <div class="form-label">Vista previa:</div>
+          <div class="ai-preview" id="gen-text" contenteditable="true"></div>
+          <div class="char-count" id="char-count">0 caracteres</div>
+          <div class="form-group" style="margin-top:10px">
+            <label class="form-label">Programar para</label>
+            <input class="form-input" id="gen-fecha" type="datetime-local">
+          </div>
+          <button class="btn primary" style="width:100%;margin-bottom:6px" onclick="guardarPost('programado')">📅 Programar</button>
+          <button class="btn" style="width:100%" onclick="guardarPost('borrador')">💾 Guardar como borrador</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+var posts = [];
+var platActual = '';
+var tonoActual = 'amigable';
+var platIcons = { instagram:'📸', facebook:'👥', tiktok:'🎵', whatsapp:'💬' };
+var platColors = { instagram:'plat-ig', facebook:'plat-fb', tiktok:'plat-tt', whatsapp:'plat-ig' };
+
+function toast(msg,tipo){var t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(tipo?' '+tipo:'');clearTimeout(window._tt);window._tt=setTimeout(function(){t.classList.remove('show');},2800);}
+function money(n){return '$'+Number(n||0).toFixed(2);}
+
+function setTono(tono,el){tonoActual=tono;document.querySelectorAll('.tono-btn').forEach(function(b){b.classList.remove('active');});el.classList.add('active');}
+function filtrarPlat(plat,el){platActual=plat;document.querySelectorAll('.plat-tab').forEach(function(t){t.classList.remove('active');});el.classList.add('active');renderPosts();}
+
+async function cargarPosts(){
+  try{var r=await fetch('/api/marketing/posts');if(r.ok)posts=await r.json();}catch(_){posts=JSON.parse(localStorage.getItem('si_posts')||'[]');}
+  renderPosts();
+}
+
+function renderPosts(){
+  var filtered=platActual?posts.filter(function(p){return p.plataforma===platActual;}):posts;
+  document.getElementById('cnt-posts').textContent=filtered.length;
+  var el=document.getElementById('posts-list');
+  if(!filtered.length){el.innerHTML='<div class="empty"><div class="empty-icon">📱</div><div style="font-size:14px;font-weight:600;color:var(--text-2);margin-bottom:6px">Sin publicaciones</div><div style="font-size:12px">Genera tu primer post con IA</div></div>';return;}
+  el.innerHTML=filtered.map(function(p){
+    var icon=platIcons[p.plataforma]||'📱';
+    var color=platColors[p.plataforma]||'';
+    var statusClass='s-'+(p.status||'borrador');
+    var statusLabel=p.status==='programado'?'📅 Programado':p.status==='publicado'?'✅ Publicado':'📝 Borrador';
+    return '<div class="post-card">'+
+      '<div class="post-header">'+
+        '<div class="plat-icon '+color+'">'+icon+'</div>'+
+        '<div class="post-meta"><div class="post-title">'+(p.plataforma||'Post').charAt(0).toUpperCase()+(p.plataforma||'post').slice(1)+(p.producto?' · '+p.producto:'')+'</div>'+
+        '<div class="post-sub">'+(p.fecha_programada?'📅 '+new Date(p.fecha_programada).toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'Sin fecha')+'</div></div>'+
+        '<span class="post-status '+statusClass+'">'+statusLabel+'</span>'+
+      '</div>'+
+      '<div class="post-body">'+(p.texto||'').substring(0,200)+(p.texto?.length>200?'...':'')+'</div>'+
+      '<div class="post-actions">'+
+        '<button class="btn" style="font-size:12px;padding:5px 10px" onclick="copiarTexto(\''+p.id+'\')">📋 Copiar</button>'+
+        (p.status==='borrador'?'<button class="btn" style="font-size:12px;padding:5px 10px" onclick="cambiarStatus(\''+p.id+'\',\'publicado\')">✅ Marcar publicado</button>':'')+
+        '<button class="btn" style="font-size:12px;padding:5px 10px;color:var(--danger)" onclick="eliminarPost(\''+p.id+'\')">🗑</button>'+
+      '</div></div>';
+  }).join('');
+}
+
+function nuevaPublicacion(){document.getElementById('side-title').textContent='✨ Generar post con IA';}
+function nuevaManual(){document.getElementById('gen-preview').style.display='';document.getElementById('gen-text').textContent='Escribe tu post aquí...';document.getElementById('side-title').textContent='✏ Post manual';}
+
+async function generarPost(){
+  var producto=document.getElementById('gen-producto').value.trim();
+  var plat=document.getElementById('gen-plat').value;
+  if(!producto){toast('Escribe qué quieres promocionar','err');return;}
+  var btn=document.getElementById('btnGenerar');
+  btn.disabled=true;btn.textContent='✨ Generando...';
+  var texto='';
+  try{
+    var r=await fetch('/api/marketing/generar-post',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({producto,plataforma:plat,tono:tonoActual})});
+    var d=await r.json();
+    if(d.post)texto=d.post;
+  }catch(_){}
+  if(!texto){
+    // Fallback local
+    var tonos={amigable:'¡Prueba nuestro delicioso',profesional:'Te presentamos',divertido:'¡No te puedes perder',urgente:'⚡ ¡OFERTA HOY SOLO!'};
+    texto=(tonos[tonoActual]||'Descubre')+' '+producto+'! 🌟\n\nVen y disfruta de lo mejor. Tu satisfacción es lo más importante para nosotros.\n\n#'+producto.replace(/\s+/g,'').toLowerCase()+' #comidamexicana #'+plat;
+  }
+  btn.disabled=false;btn.textContent='✨ Generar post';
+  document.getElementById('gen-preview').style.display='';
+  document.getElementById('gen-text').textContent=texto;
+  document.getElementById('char-count').textContent=texto.length+' caracteres';
+  document.getElementById('gen-text').oninput=function(){document.getElementById('char-count').textContent=this.textContent.length+' caracteres';};
+}
+
+async function guardarPost(status){
+  var texto=document.getElementById('gen-text').textContent.trim();
+  var plat=document.getElementById('gen-plat').value;
+  var fecha=document.getElementById('gen-fecha').value;
+  if(!texto){toast('El post no puede estar vacío','err');return;}
+  var data={plataforma:plat,texto,producto:document.getElementById('gen-producto').value,status,fecha_programada:fecha||null,created_at:new Date().toISOString()};
+  try{var r=await fetch('/api/marketing/posts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});var d=await r.json();if(d.post)posts.unshift(d.post);}catch(_){var p={...data,id:'POST-'+Date.now()};posts.unshift(p);var saved=JSON.parse(localStorage.getItem('si_posts')||'[]');saved.unshift(p);localStorage.setItem('si_posts',JSON.stringify(saved));}
+  document.getElementById('gen-preview').style.display='none';
+  document.getElementById('gen-producto').value='';
+  renderPosts();
+  toast('✅ Post '+(status==='programado'?'programado':'guardado'),'ok');
+}
+
+function copiarTexto(id){var p=posts.find(function(x){return x.id===id;});if(p&&p.texto)navigator.clipboard.writeText(p.texto).then(function(){toast('📋 Texto copiado','ok');}).catch(function(){toast('No se pudo copiar');});}
+function cambiarStatus(id,status){var p=posts.find(function(x){return x.id===id;});if(p){p.status=status;renderPosts();toast('✅ Marcado como publicado','ok');}}
+function eliminarPost(id){if(!confirm('¿Eliminar este post?'))return;posts=posts.filter(function(p){return p.id!==id;});renderPosts();toast('Post eliminado');}
+
+cargarPosts();
+</script>
+</body>
+</html>

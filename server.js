@@ -1137,6 +1137,336 @@ const api = {
     json(res, { ...ticket, posicion_actual: posActual + 1, total_espera: filaActiva.length });
   },
 
+  // =============== BARCODE LOOKUP (portado de 01123581321345589144233) ===============
+  'GET /api/barcode-lookup': async (req, res) => {
+    const q = url.parse(req.url, true).query;
+    const barcode = (q.barcode || '').trim();
+    if (!barcode) return json(res, { error: 'barcode requerido' }, 400);
+    const localMatch = store.all('productos').find(p => p.codigo === barcode || p.code === barcode);
+    if (localMatch) return json(res, { found: true, source: 'local', product: localMatch });
+    try {
+      const offRes = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`, { signal: AbortSignal.timeout(5000), headers: { 'User-Agent': 'SystemInternational-POS/1.0' } });
+      if (offRes.ok) {
+        const data = await offRes.json();
+        if (data.status === 1 && data.product) {
+          const p = data.product;
+          return json(res, { found: true, source: 'openfoodfacts', product: { nombre: p.product_name_es || p.product_name || '', marca: p.brands || '', categoria: p.categories_tags?.[0]?.replace('en:','') || '', imagen: p.image_url || '', codigo: barcode } });
+        }
+      }
+    } catch (_) {}
+    return json(res, { found: false, barcode });
+  },
+
+  // =============== DEVOLUCIONES ===============
+  'GET /api/devoluciones': (req, res) => {
+    const q = url.parse(req.url, true).query;
+    let items = store.all('devoluciones');
+    if (q.tenant_id) items = items.filter(d => d.tenant_id === q.tenant_id);
+    json(res, items.sort((a,b) => b.created_at > a.created_at ? 1 : -1));
+  },
+  'POST /api/devoluciones': async (req, res) => {
+    const body = await readBody(req);
+    const { venta_id, folio, cliente, items, motivo, tipo_reembolso, tenant_id } = body;
+    if (!items?.length) return json(res, { error: 'Se requiere al menos un producto' }, 400);
+    const total = items.reduce((s,i) => s + (i.precio * i.cantidad), 0);
+    const devId = 'DEV-' + Date.now();
+    const dev = store.insert('devoluciones', { id: devId, venta_id: venta_id||null, folio: folio||'—', cliente: cliente||'Público general', items, motivo: motivo||'Sin motivo', tipo_reembolso: tipo_reembolso||'efectivo', total, tenant_id: tenant_id||'TNT001', status: 'completada', created_at: new Date().toISOString() });
+    if (tipo_reembolso === 'nota_credito') {
+      store.insert('notas_credito', { id: 'NC-'+Date.now(), devolucion_id: devId, cliente: cliente||'Público general', monto_original: total, monto_disponible: total, tenant_id: tenant_id||'TNT001', status: 'activa', created_at: new Date().toISOString(), vence_at: new Date(Date.now()+90*86400000).toISOString() });
+    }
+    json(res, { ok: true, devolucion: dev });
+  },
+  'GET /api/notas-credito': (req, res) => {
+    const q = url.parse(req.url, true).query;
+    let items = store.all('notas_credito');
+    if (q.tenant_id) items = items.filter(n => n.tenant_id === q.tenant_id);
+    json(res, items);
+  },
+
+  // =============== FILA VIRTUAL ===============
+  'GET /api/queue': (req, res) => {
+    const q = url.parse(req.url, true).query;
+    let items = store.all('fila_virtual');
+    if (q.tenant_id) items = items.filter(f => f.tenant_id === q.tenant_id);
+    json(res, items.filter(f => ['esperando','llamado'].includes(f.status)).sort((a,b) => a.posicion - b.posicion));
+  },
+  'POST /api/queue': async (req, res) => {
+    const body = await readBody(req);
+    const { tenant_id, nombre, telefono } = body;
+    const filaActiva = store.all('fila_virtual').filter(f => f.tenant_id===(tenant_id||'TNT001') && ['esperando','llamado'].includes(f.status));
+    const posicion = filaActiva.length + 1;
+    const ticket = store.insert('fila_virtual', { id: 'TURN-'+Date.now(), tenant_id: tenant_id||'TNT001', numero: posicion, posicion, nombre: nombre||'Cliente', telefono: telefono||'', status: 'esperando', created_at: new Date().toISOString() });
+    json(res, { ok: true, ticket, posicion, total: posicion });
+  },
+  'PATCH /api/queue/:id': async (req, res) => {
+    const body = await readBody(req);
+    const updated = store.update('fila_virtual', params.id, body);
+    if (!updated) return json(res, { error: 'Turno no encontrado' }, 404);
+    json(res, { ok: true, ticket: updated });
+  },
+  'POST /api/queue/:id/atender': async (req, res) => {
+    const ticket = store.find('fila_virtual', params.id);
+    if (!ticket) return json(res, { error: 'No encontrado' }, 404);
+    store.update('fila_virtual', params.id, { status: 'atendido', atendido_at: new Date().toISOString() });
+    store.all('fila_virtual').filter(f => f.tenant_id===ticket.tenant_id && f.status==='esperando').sort((a,b)=>a.posicion-b.posicion).forEach((f,i) => store.update('fila_virtual', f.id, { posicion: i+1 }));
+    json(res, { ok: true });
+  },
+  'DELETE /api/queue/:id': async (req, res) => { store.delete('fila_virtual', params.id); json(res, { ok: true }); },
+  'GET /api/queue/status/:id': (req, res) => {
+    const ticket = store.find('fila_virtual', params.id);
+    if (!ticket) return json(res, { error: 'No encontrado' }, 404);
+    const filaActiva = store.all('fila_virtual').filter(f => f.tenant_id===ticket.tenant_id && f.status==='esperando').sort((a,b)=>a.posicion-b.posicion);
+    const posActual = filaActiva.findIndex(f => f.id===params.id);
+    json(res, { ...ticket, posicion_actual: posActual+1, total_espera: filaActiva.length });
+  },
+
+  // =============== INGREDIENTES / RECETAS ===============
+  'GET /api/ingredientes': (req, res) => {
+    const q = url.parse(req.url, true).query;
+    let items = store.all('ingredientes');
+    if (q.tenant_id) items = items.filter(i => i.tenant_id === q.tenant_id);
+    json(res, items);
+  },
+  'POST /api/ingredientes': async (req, res) => {
+    const body = await readBody(req);
+    const ing = store.insert('ingredientes', { id: 'ING-'+Date.now(), ...body, created_at: new Date().toISOString() });
+    json(res, { ok: true, ingrediente: ing });
+  },
+  'PATCH /api/ingredientes/:id': async (req, res) => {
+    const body = await readBody(req);
+    const updated = store.update('ingredientes', params.id, body);
+    json(res, { ok: true, ingrediente: updated });
+  },
+  'DELETE /api/ingredientes/:id': (req, res) => { store.delete('ingredientes', params.id); json(res, { ok: true }); },
+  'GET /api/recetas': (req, res) => {
+    const q = url.parse(req.url, true).query;
+    let items = store.all('recetas');
+    if (q.producto_id) items = items.filter(r => r.producto_id === q.producto_id);
+    json(res, items);
+  },
+  'POST /api/recetas': async (req, res) => {
+    const body = await readBody(req);
+    const rec = store.insert('recetas', { id: 'REC-'+Date.now(), ...body, created_at: new Date().toISOString() });
+    json(res, { ok: true, receta: rec });
+  },
+  'POST /api/recetas/suggest': async (req, res) => {
+    const body = await readBody(req);
+    const { producto_nombre } = body;
+    if (!CONFIG.apiKey) {
+      // Sin API key: sugerir ingredientes genéricos según nombre
+      const sugerencias = generarIngredientesDemo(producto_nombre);
+      return json(res, { ok: true, ingredientes: sugerencias, source: 'demo' });
+    }
+    try {
+      const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': CONFIG.apiKey, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001', max_tokens: 500,
+          messages: [{ role: 'user', content: `Lista los ingredientes típicos para preparar "${producto_nombre}" en un negocio de comida mexicano. Responde SOLO con JSON: [{"nombre":"...","unidad":"g/ml/pza","cantidad_tipica":0,"costo_estimado":0}]. Máximo 8 ingredientes.` }]
+        })
+      });
+      const aiData = await aiRes.json();
+      const text = aiData.content?.[0]?.text || '[]';
+      const clean = text.replace(/```json|```/g,'').trim();
+      const ingredientes = JSON.parse(clean);
+      json(res, { ok: true, ingredientes, source: 'ai' });
+    } catch(_) {
+      json(res, { ok: true, ingredientes: generarIngredientesDemo(producto_nombre), source: 'demo' });
+    }
+  },
+
+  // =============== MENÚ DIGITAL ===============
+  'GET /api/menu-digital': (req, res) => {
+    const q = url.parse(req.url, true).query;
+    const productos = store.all('productos').filter(p => {
+      if (q.tenant_id && p.tenant_id !== q.tenant_id) return false;
+      return p.visible_menu !== false;
+    });
+    json(res, productos);
+  },
+  'PATCH /api/menu-digital/:id/toggle': async (req, res) => {
+    const prod = store.find('productos', params.id);
+    if (!prod) return json(res, { error: 'Producto no encontrado' }, 404);
+    store.update('productos', params.id, { visible_menu: !prod.visible_menu });
+    json(res, { ok: true, visible: !prod.visible_menu });
+  },
+  'POST /api/menu-digital/digitalize': async (req, res) => {
+    const body = await readBody(req);
+    const { texto_menu, tenant_id } = body;
+    if (!CONFIG.apiKey) return json(res, { ok: false, error: 'Se requiere ANTHROPIC_API_KEY para digitalizar menú con IA' }, 400);
+    try {
+      const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': CONFIG.apiKey, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001', max_tokens: 1500,
+          messages: [{ role: 'user', content: `Extrae los productos de este menú y devuelve SOLO JSON: [{"nombre":"...","precio":0,"categoria":"...","descripcion":"..."}]\n\nMenú:\n${texto_menu}` }]
+        })
+      });
+      const aiData = await aiRes.json();
+      const text = aiData.content?.[0]?.text || '[]';
+      const productos = JSON.parse(text.replace(/```json|```/g,'').trim());
+      json(res, { ok: true, productos });
+    } catch(_) { json(res, { ok: false, error: 'Error al procesar con IA' }, 500); }
+  },
+
+  // =============== TIPOS DE CAMBIO (Banxico) ===============
+  'GET /api/exchange-rates': async (req, res) => {
+    const cached = store.find('cache', 'exchange-rates');
+    if (cached && Date.now() - cached.ts < 3600000) return json(res, cached.data);
+    const fallback = { MXN_USD: 0.058, MXN_EUR: 0.053, MXN_CAD: 0.079, updated_at: new Date().toISOString(), source: 'fallback' };
+    try {
+      const token = process.env.BANXICO_API_TOKEN;
+      if (!token) return json(res, fallback);
+      const r = await fetch('https://www.banxico.org.mx/SieAPIRest/service/v1/series/SF43718,SF46410/datos/oportuno', { headers: { 'Bmx-Token': token }, signal: AbortSignal.timeout(5000) });
+      if (!r.ok) return json(res, fallback);
+      const data = await r.json();
+      const rates = { updated_at: new Date().toISOString(), source: 'banxico' };
+      data.bmx?.series?.forEach(s => {
+        const val = parseFloat(s.datos?.[0]?.dato || 0);
+        if (s.idSerie === 'SF43718') rates.MXN_USD = val ? 1/val : fallback.MXN_USD;
+        if (s.idSerie === 'SF46410') rates.MXN_EUR = val ? 1/val : fallback.MXN_EUR;
+      });
+      store.update('cache', 'exchange-rates', { ts: Date.now(), data: rates }) || store.insert('cache', { id: 'exchange-rates', ts: Date.now(), data: rates });
+      json(res, rates);
+    } catch(_) { json(res, fallback); }
+  },
+
+  // =============== BEST SELLERS / REPORTES ===============
+  'GET /api/best-sellers': (req, res) => {
+    const q = url.parse(req.url, true).query;
+    const ventas = store.all('ventas');
+    const conteo = {};
+    ventas.forEach(v => {
+      (v.items||[]).forEach(item => {
+        if (!conteo[item.nombre]) conteo[item.nombre] = { nombre: item.nombre, cantidad: 0, total: 0 };
+        conteo[item.nombre].cantidad += item.cantidad || 1;
+        conteo[item.nombre].total += (item.precio || 0) * (item.cantidad || 1);
+      });
+    });
+    const sorted = Object.values(conteo).sort((a,b) => b.cantidad - a.cantidad).slice(0, parseInt(q.limit)||10);
+    json(res, sorted);
+  },
+  'GET /api/reportes': (req, res) => {
+    const ventas = store.all('ventas');
+    const hoy = new Date().toDateString();
+    const ventasHoy = ventas.filter(v => new Date(v.created_at).toDateString() === hoy);
+    const totalHoy = ventasHoy.reduce((s,v) => s + (v.total||0), 0);
+    const totalMes = ventas.filter(v => {
+      const d = new Date(v.created_at);
+      const now = new Date();
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    }).reduce((s,v) => s + (v.total||0), 0);
+    json(res, { ventas_hoy: ventasHoy.length, total_hoy: totalHoy, total_mes: totalMes, ventas_total: ventas.length });
+  },
+
+  // =============== MARKETING SOCIAL ===============
+  'POST /api/marketing/generar-post': async (req, res) => {
+    const body = await readBody(req);
+    const { producto, plataforma, tono } = body;
+    if (!CONFIG.apiKey) return json(res, { ok: false, error: 'Se requiere ANTHROPIC_API_KEY' }, 400);
+    try {
+      const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': CONFIG.apiKey, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001', max_tokens: 400,
+          messages: [{ role: 'user', content: `Crea un post para ${plataforma||'Instagram'} para promocionar "${producto}" en un negocio mexicano. Tono: ${tono||'amigable y casual'}. Incluye emojis y hashtags relevantes. Máximo 150 palabras. Responde SOLO con el texto del post.` }]
+        })
+      });
+      const aiData = await aiRes.json();
+      json(res, { ok: true, post: aiData.content?.[0]?.text || '', plataforma });
+    } catch(_) { json(res, { ok: false, error: 'Error generando post' }, 500); }
+  },
+  'GET /api/marketing/posts': (req, res) => {
+    const q = url.parse(req.url, true).query;
+    let posts = store.all('marketing_posts');
+    if (q.tenant_id) posts = posts.filter(p => p.tenant_id === q.tenant_id);
+    json(res, posts.sort((a,b) => b.created_at > a.created_at ? 1 : -1));
+  },
+  'POST /api/marketing/posts': async (req, res) => {
+    const body = await readBody(req);
+    const post = store.insert('marketing_posts', { id: 'POST-'+Date.now(), ...body, status: body.status||'borrador', created_at: new Date().toISOString() });
+    json(res, { ok: true, post });
+  },
+
+  // =============== WEBHOOKS DELIVERY ===============
+  'POST /api/webhooks/uber-eats': async (req, res) => {
+    const body = await readBody(req);
+    store.insert('pedidos_externos', { id: 'UBR-'+Date.now(), plataforma: 'uber_eats', ...body, created_at: new Date().toISOString() });
+    json(res, { ok: true });
+  },
+  'POST /api/webhooks/rappi': async (req, res) => {
+    const body = await readBody(req);
+    store.insert('pedidos_externos', { id: 'RPP-'+Date.now(), plataforma: 'rappi', ...body, created_at: new Date().toISOString() });
+    json(res, { ok: true });
+  },
+  'POST /api/webhooks/didi-food': async (req, res) => {
+    const body = await readBody(req);
+    store.insert('pedidos_externos', { id: 'DDI-'+Date.now(), plataforma: 'didi_food', ...body, created_at: new Date().toISOString() });
+    json(res, { ok: true });
+  },
+  'GET /api/pedidos-externos': (req, res) => {
+    const q = url.parse(req.url, true).query;
+    let items = store.all('pedidos_externos');
+    if (q.plataforma) items = items.filter(p => p.plataforma === q.plataforma);
+    json(res, items.slice(-50));
+  },
+
+  // =============== TERMINAL FÍSICA (Clip / Mercado Pago) ===============
+  'POST /api/terminals/payment-intent': async (req, res) => {
+    const body = await readBody(req);
+    const { provider, device_id, amount, reference } = body;
+    if (!amount || amount <= 0) return json(res, { error: 'Monto inválido' }, 400);
+    // Demo mode si no hay token real
+    const intentId = 'PI-' + Date.now();
+    store.insert('terminal_intents', { id: intentId, provider: provider||'demo', device_id: device_id||'DEMO', amount, reference: reference||'', status: 'pending', created_at: new Date().toISOString() });
+    if (provider === 'mercadopago') {
+      const token = process.env.MP_ACCESS_TOKEN;
+      if (token && token.length > 20) {
+        try {
+          const r = await fetch('https://api.mercadopago.com/point/integration-api/devices/' + device_id + '/payment-intents', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            body: JSON.stringify({ amount, additional_info: { external_reference: reference||intentId } })
+          });
+          const data = await r.json();
+          if (data.id) { store.update('terminal_intents', intentId, { mp_intent_id: data.id }); return json(res, { ok: true, intent_id: intentId, mp_intent_id: data.id, status: 'pending' }); }
+        } catch(_) {}
+      }
+    }
+    // Demo: simular éxito después de 3 seg
+    setTimeout(() => store.update('terminal_intents', intentId, { status: 'approved' }), 3000);
+    json(res, { ok: true, intent_id: intentId, status: 'pending', demo: true });
+  },
+  'GET /api/terminals/payment-status/:id': (req, res) => {
+    const intent = store.find('terminal_intents', params.id);
+    if (!intent) return json(res, { error: 'No encontrado' }, 404);
+    json(res, intent);
+  },
+
+  // =============== PLAN DE NEGOCIO (IA) ===============
+  'POST /api/business-plan': async (req, res) => {
+    const body = await readBody(req);
+    const { giro, ciudad, presupuesto } = body;
+    if (!CONFIG.apiKey) return json(res, { ok: true, plan: planNegocioDemo(giro, ciudad, presupuesto), source: 'demo' });
+    try {
+      const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': CONFIG.apiKey, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001', max_tokens: 1500,
+          messages: [{ role: 'user', content: `Genera un plan de negocio para: giro="${giro}", ciudad="${ciudad||'México'}", presupuesto=$${presupuesto||50000} MXN. Responde SOLO con JSON: {"costos_arranque":[{"item":"","costo":0}],"costos_mensuales":[{"item":"","costo":0}],"ingresos_estimados":0,"punto_equilibrio_meses":0,"permisos":[""],"proveedores":[""],"resumen":""}` }]
+        })
+      });
+      const aiData = await aiRes.json();
+      const text = aiData.content?.[0]?.text || '{}';
+      const plan = JSON.parse(text.replace(/```json|```/g,'').trim());
+      json(res, { ok: true, plan, source: 'ai' });
+    } catch(_) { json(res, { ok: true, plan: planNegocioDemo(giro, ciudad, presupuesto), source: 'demo' }); }
+  },
+
   // =============== STATS ===============
   'GET /api/stats': (req, res) => {
     const tenants = store.all('tenants');
@@ -1163,8 +1493,61 @@ const api = {
 };
 
 // ============================================================
-// ROUTER
+// HELPERS DE NEGOCIO
 // ============================================================
+function generarIngredientesDemo(nombre) {
+  const n = (nombre||'').toLowerCase();
+  if (n.includes('taco') || n.includes('quesadilla') || n.includes('burrito')) return [
+    {nombre:'Tortilla de maíz',unidad:'pza',cantidad_tipica:3,costo_estimado:2},
+    {nombre:'Carne de res',unidad:'g',cantidad_tipica:100,costo_estimado:20},
+    {nombre:'Cebolla',unidad:'g',cantidad_tipica:20,costo_estimado:1},
+    {nombre:'Cilantro',unidad:'g',cantidad_tipica:5,costo_estimado:0.5},
+    {nombre:'Salsa verde',unidad:'ml',cantidad_tipica:30,costo_estimado:1.5},
+  ];
+  if (n.includes('pizza')) return [
+    {nombre:'Masa para pizza',unidad:'g',cantidad_tipica:200,costo_estimado:8},
+    {nombre:'Salsa de tomate',unidad:'ml',cantidad_tipica:80,costo_estimado:3},
+    {nombre:'Queso mozzarella',unidad:'g',cantidad_tipica:100,costo_estimado:15},
+  ];
+  if (n.includes('café') || n.includes('cafe')) return [
+    {nombre:'Café molido',unidad:'g',cantidad_tipica:20,costo_estimado:5},
+    {nombre:'Leche',unidad:'ml',cantidad_tipica:150,costo_estimado:3},
+    {nombre:'Azúcar',unidad:'g',cantidad_tipica:10,costo_estimado:0.5},
+  ];
+  return [
+    {nombre:'Ingrediente principal',unidad:'g',cantidad_tipica:100,costo_estimado:10},
+    {nombre:'Condimentos',unidad:'g',cantidad_tipica:20,costo_estimado:2},
+    {nombre:'Empaque',unidad:'pza',cantidad_tipica:1,costo_estimado:1},
+  ];
+}
+
+function planNegocioDemo(giro, ciudad, presupuesto) {
+  const p = parseInt(presupuesto) || 50000;
+  return {
+    costos_arranque: [
+      {item:'Equipo y mobiliario', costo: Math.round(p*0.4)},
+      {item:'Inventario inicial', costo: Math.round(p*0.25)},
+      {item:'Renta primer mes + depósito', costo: Math.round(p*0.15)},
+      {item:'Licencias y permisos', costo: Math.round(p*0.05)},
+      {item:'Publicidad inicial', costo: Math.round(p*0.08)},
+      {item:'Capital de trabajo', costo: Math.round(p*0.07)},
+    ],
+    costos_mensuales: [
+      {item:'Renta', costo: Math.round(p*0.08)},
+      {item:'Nómina', costo: Math.round(p*0.12)},
+      {item:'Inventario/Insumos', costo: Math.round(p*0.15)},
+      {item:'Servicios (luz, agua, internet)', costo: Math.round(p*0.02)},
+      {item:'Marketing', costo: Math.round(p*0.02)},
+    ],
+    ingresos_estimados: Math.round(p*0.5),
+    punto_equilibrio_meses: 8,
+    permisos: ['Registro ante el SAT','Licencia municipal de funcionamiento','Permiso de uso de suelo','COFEPRIS (si aplica)'],
+    proveedores: ['CHEDRAUI mayoreo','COSTCO Business Center','Mercado de abasto local','Distribuidores locales del giro'],
+    resumen: `Plan de negocio para ${giro||'tu negocio'} en ${ciudad||'México'}. Con un presupuesto de $${p.toLocaleString()} MXN se estima alcanzar el punto de equilibrio en aproximadamente 8 meses.`,
+  };
+}
+
+
 function matchRoute(method, pathname) {
   // Busca ruta exacta primero
   const exact = api[`${method} ${pathname}`];

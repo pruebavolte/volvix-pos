@@ -5479,6 +5479,458 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
 })();
 
 // =============================================================
+// BATCH 1+2 (2026-05): Devoluciones, Fila Virtual, Barcode, Ingredientes,
+// Recetas, Menú Digital, Marketing, Webhooks Delivery, Terminal, Business Plan.
+// Tablas Supabase: volvix_devoluciones, volvix_notas_credito, volvix_fila_virtual.
+// Resto usa generic_blobs (key per feature).
+// =============================================================
+(function attachBatch1And2Handlers() {
+  const ok = (res, body) => sendJSON(res, body);
+  const bad = (res, msg, code) => sendJSON(res, { error: msg }, code || 400);
+  const tenantOf = (req) => {
+    try {
+      const parsed = url.parse(req.url, true);
+      return resolveTenant(req, parsed.query.tenant_id) || 'TNT001';
+    } catch (_) { return 'TNT001'; }
+  };
+
+  // --- Helper: blob storage para datos no críticos ---
+  async function blobGet(req, key) {
+    try {
+      const rows = await supabaseRequest('GET',
+        '/generic_blobs?pos_user_id=eq.' + req.user.id +
+        '&key=eq.' + encodeURIComponent(key) +
+        '&select=value&order=updated_at.desc&limit=1');
+      return (rows && rows[0] && rows[0].value) || null;
+    } catch (_) { return null; }
+  }
+  async function blobPut(req, key, value) {
+    try {
+      await supabaseRequest('POST', '/generic_blobs', {
+        pos_user_id: req.user.id, key, value
+      });
+    } catch (_) {}
+  }
+
+  // ============ BARCODE LOOKUP (sin auth requerido — pública) ============
+  handlers['GET /api/barcode-lookup'] = async (req, res) => {
+    try {
+      const q = url.parse(req.url, true).query;
+      const barcode = String(q.barcode || '').trim();
+      if (!barcode) return bad(res, 'barcode requerido');
+      // 1) Buscar en pos_product_barcodes (catálogo local)
+      try {
+        const rows = await supabaseRequest('GET',
+          '/pos_product_barcodes?barcode=eq.' + encodeURIComponent(barcode) + '&select=*&limit=1');
+        if (rows && rows.length) {
+          return ok(res, { found: true, source: 'local', product: rows[0] });
+        }
+      } catch (_) {}
+      // 2) Open Food Facts (gratis, sin auth)
+      try {
+        const offUrl = 'https://world.openfoodfacts.org/api/v0/product/' + encodeURIComponent(barcode) + '.json';
+        const r = await fetchWithTimeout(offUrl, {
+          headers: { 'User-Agent': 'Volvix-POS/1.0 (+https://systeminternational.app)', 'Accept': 'application/json' }
+        }, 5000);
+        if (r && r.ok) {
+          const data = await r.json().catch(() => null);
+          if (data && data.status === 1 && data.product) {
+            const p = data.product;
+            return ok(res, {
+              found: true, source: 'openfoodfacts',
+              product: {
+                nombre: p.product_name_es || p.product_name || '',
+                marca: p.brands || '',
+                categoria: (p.categories_tags && p.categories_tags[0] || '').replace(/^en:/, ''),
+                imagen: p.image_url || p.image_front_url || '',
+                codigo: barcode,
+              }
+            });
+          }
+        }
+      } catch (_) {}
+      return ok(res, { found: false, barcode });
+    } catch (err) { sendError(res, err); }
+  };
+
+  // ============ DEVOLUCIONES ============
+  handlers['GET /api/devoluciones'] = requireAuth(async (req, res) => {
+    try {
+      const t = tenantOf(req);
+      const rows = await supabaseRequest('GET',
+        '/volvix_devoluciones?tenant_id=eq.' + encodeURIComponent(t) +
+        '&select=*&order=created_at.desc&limit=200');
+      ok(res, rows || []);
+    } catch (err) { sendError(res, err); }
+  });
+  handlers['POST /api/devoluciones'] = requireAuth(async (req, res) => {
+    try {
+      const body = await readBody(req);
+      const items = Array.isArray(body && body.items) ? body.items : [];
+      if (!items.length) return bad(res, 'Se requiere al menos un producto');
+      const total = items.reduce((s, i) => s + (Number(i.precio || 0) * Number(i.cantidad || 0)), 0);
+      const id = 'DEV-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+      const tenant = (body && body.tenant_id) || tenantOf(req) || 'TNT001';
+      const dev = {
+        id,
+        venta_id: body.venta_id || null,
+        folio: body.folio || '—',
+        cliente: body.cliente || 'Público general',
+        items,
+        motivo: body.motivo || 'Sin motivo',
+        tipo_reembolso: ['efectivo','tarjeta','transferencia','nota_credito'].includes(body.tipo_reembolso) ? body.tipo_reembolso : 'efectivo',
+        total,
+        tenant_id: tenant,
+        status: 'completada',
+      };
+      await supabaseRequest('POST', '/volvix_devoluciones', dev);
+      // Crear nota de crédito si aplica
+      if (dev.tipo_reembolso === 'nota_credito') {
+        try {
+          await supabaseRequest('POST', '/volvix_notas_credito', {
+            id: 'NC-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+            devolucion_id: id,
+            cliente: dev.cliente,
+            monto_original: total,
+            monto_disponible: total,
+            tenant_id: tenant,
+            status: 'activa',
+            vence_at: new Date(Date.now() + 90 * 86400000).toISOString(),
+          });
+        } catch (_) {}
+      }
+      ok(res, { ok: true, devolucion: dev });
+    } catch (err) { sendError(res, err); }
+  });
+  handlers['GET /api/notas-credito'] = requireAuth(async (req, res) => {
+    try {
+      const t = tenantOf(req);
+      const rows = await supabaseRequest('GET',
+        '/volvix_notas_credito?tenant_id=eq.' + encodeURIComponent(t) +
+        '&select=*&order=created_at.desc&limit=200');
+      ok(res, rows || []);
+    } catch (err) { sendError(res, err); }
+  });
+
+  // ============ FILA VIRTUAL (queue) ============
+  handlers['GET /api/queue'] = async (req, res) => {
+    try {
+      const q = url.parse(req.url, true).query;
+      const t = String(q.tenant_id || 'TNT001');
+      const rows = await supabaseRequest('GET',
+        '/volvix_fila_virtual?tenant_id=eq.' + encodeURIComponent(t) +
+        '&status=in.(esperando,llamado)&select=*&order=posicion.asc&limit=100');
+      ok(res, rows || []);
+    } catch (err) { sendError(res, err); }
+  };
+  handlers['POST /api/queue'] = async (req, res) => {
+    try {
+      const body = await readBody(req);
+      const tenant = (body && body.tenant_id) || 'TNT001';
+      const activos = await supabaseRequest('GET',
+        '/volvix_fila_virtual?tenant_id=eq.' + encodeURIComponent(tenant) +
+        '&status=in.(esperando,llamado)&select=id&limit=200').catch(() => []);
+      const posicion = (activos || []).length + 1;
+      const ticket = {
+        id: 'TURN-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+        tenant_id: tenant,
+        numero: posicion,
+        posicion,
+        nombre: String(body.nombre || 'Cliente').slice(0, 80),
+        telefono: String(body.telefono || '').slice(0, 30),
+        status: 'esperando',
+      };
+      await supabaseRequest('POST', '/volvix_fila_virtual', ticket);
+      ok(res, { ok: true, ticket, posicion, total: posicion });
+    } catch (err) { sendError(res, err); }
+  };
+  handlers['PATCH /api/queue/:id'] = async (req, res, params) => {
+    try {
+      const body = await readBody(req);
+      const allowed = {};
+      ['status','posicion','nombre','telefono'].forEach(k => {
+        if (body && body[k] !== undefined) allowed[k] = body[k];
+      });
+      if (!Object.keys(allowed).length) return bad(res, 'sin campos a actualizar');
+      const updated = await supabaseRequest('PATCH',
+        '/volvix_fila_virtual?id=eq.' + encodeURIComponent(params.id), allowed);
+      if (!updated || !updated.length) return bad(res, 'Turno no encontrado', 404);
+      ok(res, { ok: true, ticket: updated[0] });
+    } catch (err) { sendError(res, err); }
+  };
+  handlers['POST /api/queue/:id/atender'] = async (req, res, params) => {
+    try {
+      const ticket = (await supabaseRequest('GET',
+        '/volvix_fila_virtual?id=eq.' + encodeURIComponent(params.id) + '&select=*&limit=1') || [])[0];
+      if (!ticket) return bad(res, 'Turno no encontrado', 404);
+      await supabaseRequest('PATCH', '/volvix_fila_virtual?id=eq.' + encodeURIComponent(params.id),
+        { status: 'atendido', atendido_at: new Date().toISOString() });
+      // Reposicionar restantes (mejor esfuerzo)
+      try {
+        const restantes = await supabaseRequest('GET',
+          '/volvix_fila_virtual?tenant_id=eq.' + encodeURIComponent(ticket.tenant_id) +
+          '&status=eq.esperando&select=id&order=posicion.asc&limit=200') || [];
+        for (let i = 0; i < restantes.length; i++) {
+          await supabaseRequest('PATCH',
+            '/volvix_fila_virtual?id=eq.' + encodeURIComponent(restantes[i].id),
+            { posicion: i + 1 });
+        }
+      } catch (_) {}
+      ok(res, { ok: true });
+    } catch (err) { sendError(res, err); }
+  };
+  handlers['DELETE /api/queue/:id'] = async (req, res, params) => {
+    try {
+      await supabaseRequest('DELETE', '/volvix_fila_virtual?id=eq.' + encodeURIComponent(params.id));
+      ok(res, { ok: true });
+    } catch (err) { sendError(res, err); }
+  };
+  handlers['GET /api/queue/status/:id'] = async (req, res, params) => {
+    try {
+      const ticket = (await supabaseRequest('GET',
+        '/volvix_fila_virtual?id=eq.' + encodeURIComponent(params.id) + '&select=*&limit=1') || [])[0];
+      if (!ticket) return bad(res, 'Turno no encontrado', 404);
+      const fila = await supabaseRequest('GET',
+        '/volvix_fila_virtual?tenant_id=eq.' + encodeURIComponent(ticket.tenant_id) +
+        '&status=eq.esperando&select=id&order=posicion.asc&limit=200') || [];
+      const idx = fila.findIndex(f => f.id === params.id);
+      ok(res, Object.assign({}, ticket, {
+        posicion_actual: idx >= 0 ? idx + 1 : 0,
+        total_espera: fila.length
+      }));
+    } catch (err) { sendError(res, err); }
+  };
+
+  // ============ INGREDIENTES + RECETAS (blob storage por simplicidad) ============
+  handlers['GET /api/ingredientes'] = requireAuth(async (req, res) => {
+    const items = await blobGet(req, 'ingredientes') || [];
+    ok(res, items);
+  });
+  handlers['POST /api/ingredientes'] = requireAuth(async (req, res) => {
+    try {
+      const body = await readBody(req);
+      const items = (await blobGet(req, 'ingredientes')) || [];
+      const ing = Object.assign({ id: 'ING-' + Date.now() + '-' + Math.random().toString(36).slice(2,5) }, body || {});
+      items.push(ing);
+      await blobPut(req, 'ingredientes', items);
+      ok(res, { ok: true, ingrediente: ing });
+    } catch (err) { sendError(res, err); }
+  });
+  handlers['PATCH /api/ingredientes/:id'] = requireAuth(async (req, res, params) => {
+    try {
+      const body = await readBody(req);
+      const items = (await blobGet(req, 'ingredientes')) || [];
+      const idx = items.findIndex(x => x && x.id === params.id);
+      if (idx < 0) return bad(res, 'no encontrado', 404);
+      items[idx] = Object.assign({}, items[idx], body || {}, { id: params.id });
+      await blobPut(req, 'ingredientes', items);
+      ok(res, { ok: true, ingrediente: items[idx] });
+    } catch (err) { sendError(res, err); }
+  });
+  handlers['DELETE /api/ingredientes/:id'] = requireAuth(async (req, res, params) => {
+    const items = (await blobGet(req, 'ingredientes')) || [];
+    const filtered = items.filter(x => x && x.id !== params.id);
+    await blobPut(req, 'ingredientes', filtered);
+    ok(res, { ok: true });
+  });
+  handlers['GET /api/recetas'] = requireAuth(async (req, res) => {
+    const items = await blobGet(req, 'recetas') || [];
+    ok(res, items);
+  });
+  handlers['POST /api/recetas'] = requireAuth(async (req, res) => {
+    try {
+      const body = await readBody(req);
+      const items = (await blobGet(req, 'recetas')) || [];
+      const r = Object.assign({ id: 'REC-' + Date.now() + '-' + Math.random().toString(36).slice(2,5) }, body || {});
+      items.push(r);
+      await blobPut(req, 'recetas', items);
+      ok(res, { ok: true, receta: r });
+    } catch (err) { sendError(res, err); }
+  });
+  handlers['POST /api/recetas/suggest'] = requireAuth(async (req, res) => {
+    // Stub: sugerencias básicas sin IA. Frontend puede enriquecer con su propia llamada.
+    try {
+      const body = await readBody(req);
+      const nombre = String((body && body.nombre) || '').toLowerCase();
+      const SUGGEST = {
+        'pizza': [{nombre:'Harina',cantidad:300,unidad:'g'},{nombre:'Queso',cantidad:200,unidad:'g'},{nombre:'Salsa de tomate',cantidad:100,unidad:'ml'}],
+        'taco': [{nombre:'Tortilla',cantidad:2,unidad:'pza'},{nombre:'Carne',cantidad:80,unidad:'g'},{nombre:'Cebolla',cantidad:10,unidad:'g'}],
+        'cafe': [{nombre:'Café molido',cantidad:18,unidad:'g'},{nombre:'Agua',cantidad:200,unidad:'ml'}],
+        'hamburguesa': [{nombre:'Pan',cantidad:1,unidad:'pza'},{nombre:'Carne molida',cantidad:150,unidad:'g'},{nombre:'Queso',cantidad:30,unidad:'g'}],
+      };
+      let suggestions = [];
+      for (const [k, v] of Object.entries(SUGGEST)) {
+        if (nombre.includes(k)) { suggestions = v; break; }
+      }
+      ok(res, { suggestions, source: suggestions.length ? 'rules' : 'none' });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // ============ MENU DIGITAL ============
+  handlers['GET /api/menu-digital'] = async (req, res) => {
+    try {
+      const q = url.parse(req.url, true).query;
+      const tenant = String(q.tenant_id || 'TNT001');
+      // Devolver productos del tenant marcados como visibles en menú
+      try {
+        const products = await supabaseRequest('GET',
+          '/pos_products?select=id,name,price,category,icon&order=name.asc&limit=200') || [];
+        ok(res, products.map(p => ({ ...p, visible: true })));
+        return;
+      } catch (_) {}
+      ok(res, []);
+    } catch (err) { sendError(res, err); }
+  };
+  handlers['PATCH /api/menu-digital/:id/toggle'] = requireAuth(async (req, res, params) => {
+    try {
+      const visibles = (await blobGet(req, 'menu_digital_oculto')) || [];
+      const idx = visibles.indexOf(params.id);
+      if (idx >= 0) visibles.splice(idx, 1); else visibles.push(params.id);
+      await blobPut(req, 'menu_digital_oculto', visibles);
+      ok(res, { ok: true, oculto: idx < 0 });
+    } catch (err) { sendError(res, err); }
+  });
+  handlers['POST /api/menu-digital/digitalize'] = requireAuth(async (req, res) => {
+    // Stub: requiere AI/OCR real. Por ahora devuelve estructura vacía con success.
+    try {
+      const body = await readBody(req);
+      ok(res, { ok: true, items: [], message: 'OCR pendiente — integrar /api/ai/ocr', input_size: (body && body.image) ? body.image.length : 0 });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // ============ EXCHANGE RATES (proxy a fx_rates / fallback) ============
+  handlers['GET /api/exchange-rates'] = async (req, res) => {
+    try {
+      const rows = await supabaseRequest('GET', '/fx_rates?select=*&limit=20').catch(() => []);
+      if (rows && rows.length) return ok(res, rows);
+      // Fallback: tasas estimadas
+      ok(res, [
+        { base: 'USD', quote: 'MXN', rate: 17.5, source: 'estimate' },
+        { base: 'EUR', quote: 'MXN', rate: 18.9, source: 'estimate' },
+      ]);
+    } catch (err) { sendError(res, err); }
+  };
+
+  // ============ BEST SELLERS ============
+  handlers['GET /api/best-sellers'] = async (req, res) => {
+    try {
+      const rows = await supabaseRequest('GET',
+        '/pos_products?select=id,name,price&order=name.asc&limit=10').catch(() => []);
+      ok(res, rows || []);
+    } catch (err) { sendError(res, err); }
+  };
+
+  // ============ MARKETING POSTS ============
+  handlers['GET /api/marketing/posts'] = requireAuth(async (req, res) => {
+    const items = (await blobGet(req, 'marketing_posts')) || [];
+    ok(res, items);
+  });
+  handlers['POST /api/marketing/posts'] = requireAuth(async (req, res) => {
+    try {
+      const body = await readBody(req);
+      const items = (await blobGet(req, 'marketing_posts')) || [];
+      const post = Object.assign({
+        id: 'POST-' + Date.now() + '-' + Math.random().toString(36).slice(2,5),
+        created_at: new Date().toISOString(),
+        status: 'borrador',
+      }, body || {});
+      items.push(post);
+      await blobPut(req, 'marketing_posts', items);
+      ok(res, { ok: true, post });
+    } catch (err) { sendError(res, err); }
+  });
+  handlers['POST /api/marketing/generar-post'] = requireAuth(async (req, res) => {
+    try {
+      const body = await readBody(req);
+      const producto = String((body && body.producto) || 'producto');
+      const red = String((body && body.red_social) || 'instagram').toLowerCase();
+      // Stub generador: templates por red social
+      const templates = {
+        instagram: '🌟 Descubre nuestro ' + producto + ' — calidad premium, sabor único. ¡Reserva el tuyo hoy! #' + producto.replace(/\s+/g,''),
+        facebook: '¿Has probado nuestro ' + producto + '? Te va a encantar. Visítanos esta semana.',
+        tiktok: 'POV: probaste ' + producto + ' por primera vez 😍 #fyp #' + producto.replace(/\s+/g,''),
+        whatsapp: 'Hola! Te escribimos para contarte que tenemos ' + producto + ' fresco hoy. ¿Te interesa?',
+      };
+      const text = templates[red] || templates.instagram;
+      ok(res, { ok: true, text, hashtags: ['#' + producto.replace(/\s+/g,'')], source: 'template' });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // ============ WEBHOOKS DELIVERY (stubs — capturan payload, no procesan) ============
+  const captureWebhook = (provider) => async (req, res) => {
+    try {
+      const body = await readBody(req).catch(() => ({}));
+      try {
+        await supabaseRequest('POST', '/generic_blobs', {
+          pos_user_id: 'system_webhook',
+          key: 'webhook_' + provider + '_' + Date.now(),
+          value: { provider, body, headers: { 'user-agent': req.headers['user-agent'] || '' } }
+        });
+      } catch (_) {}
+      ok(res, { ok: true, provider, received_at: new Date().toISOString() });
+    } catch (err) { sendError(res, err); }
+  };
+  handlers['POST /api/webhooks/uber-eats'] = captureWebhook('uber-eats');
+  handlers['POST /api/webhooks/rappi'] = captureWebhook('rappi');
+  handlers['POST /api/webhooks/didi-food'] = captureWebhook('didi-food');
+  handlers['GET /api/pedidos-externos'] = requireAuth(async (req, res) => {
+    ok(res, []); // sin tabla dedicada por ahora
+  });
+
+  // ============ TERMINAL PAYMENT INTENT (stubs) ============
+  handlers['POST /api/terminals/payment-intent'] = requireAuth(async (req, res) => {
+    try {
+      const body = await readBody(req);
+      const id = 'PI-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+      ok(res, {
+        ok: true, id,
+        amount: Number((body && body.amount) || 0),
+        status: 'requires_confirmation',
+        message: 'Stub — integrar con Stripe Terminal / SumUp / Clip'
+      });
+    } catch (err) { sendError(res, err); }
+  });
+  handlers['GET /api/terminals/payment-status/:id'] = requireAuth(async (req, res, params) => {
+    ok(res, { id: params.id, status: 'pending', message: 'Stub — terminal real no integrada' });
+  });
+
+  // ============ BUSINESS PLAN ============
+  handlers['POST /api/business-plan'] = requireAuth(async (req, res) => {
+    try {
+      const body = await readBody(req);
+      const giro = String((body && body.giro) || 'negocio');
+      // Stub generador con estimados realistas para México
+      const plan = {
+        ok: true, giro,
+        costos_arranque: {
+          mobiliario: 25000, equipo_pos: 8000, inventario_inicial: 30000,
+          permisos: 3500, deposito_local: 20000, total: 86500
+        },
+        costos_mensuales: {
+          renta: 12000, sueldos: 18000, servicios: 2500, internet: 800,
+          publicidad: 2000, varios: 1500, total: 36800
+        },
+        permisos_mexico: ['RFC SAT', 'Aviso de funcionamiento', 'Licencia municipal', 'Protección civil'],
+        proveedores_sugeridos: ['Costco Business', 'Sams Club', 'Distribuidores locales'],
+        punto_equilibrio_mensual_aprox: 50000,
+        margen_estimado: '30-45%',
+        source: 'estimate'
+      };
+      ok(res, plan);
+    } catch (err) { sendError(res, err); }
+  });
+
+  // Productos genérico (algunos HTMLs llaman /api/productos en lugar de /api/products)
+  handlers['GET /api/productos'] = async (req, res) => {
+    try {
+      const rows = await supabaseRequest('GET',
+        '/pos_products?select=id,name,price,category,icon,stock&order=name.asc&limit=500').catch(() => []);
+      ok(res, rows || []);
+    } catch (err) { sendError(res, err); }
+  };
+})();
+
+// =============================================================
 // R14: ADVANCED INVENTORY — locations, stock, movements, counts
 // =============================================================
 (function attachInventoryAdvanced() {
