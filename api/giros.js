@@ -743,8 +743,15 @@ async function tryPexelsImage(query) {
     const j = await r.json();
     const photos = (j && j.photos) || [];
     if (!photos.length) return null;
-    const first = photos[0];
-    return (first.src && (first.src.large || first.src.medium || first.src.original)) || null;
+    // Iterate photos, validate each candidate URL (SSRF defense)
+    for (const photo of photos) {
+      if (!photo || !photo.src) continue;
+      const candidates = [photo.src.large, photo.src.medium, photo.src.original, photo.src.large2x];
+      for (const u of candidates) {
+        if (isValidImageUrl(u)) return u;
+      }
+    }
+    return null;
   } catch (_) { return null; }
 }
 
@@ -774,24 +781,46 @@ async function tryGoogleCustomSearch(query) {
     const j = await r.json();
     const items = (j && j.items) || [];
     if (!items.length) return null;
-    // Filter out svg/gif/data URIs and pick first valid http(s) image
+    // Pick first valid https:// image (no fallback to raw items[0].link to avoid SSRF)
     for (const item of items) {
       const link = item && item.link;
-      if (link && /^https?:\/\//i.test(link) && /\.(jpe?g|png|webp)(\?|$)/i.test(link)) {
-        return link;
-      }
+      if (isValidImageUrl(link)) return link;
     }
-    // Fallback: first item even if extension match fails
-    return items[0] && items[0].link || null;
+    return null;
   } catch (_) { return null; }
 }
 
-// 2026-05: Open Food Facts API (productos de comida/bebida con marcas).
-// Cobertura excelente para café, snacks, bebidas, packaged goods (DXN, Illy, Nescafé...).
-// Sin auth pero rate-limited anónimo: usar User-Agent identificable es CRÍTICO.
-// Per OFF docs: registered apps with User-Agent are not rate-limited.
-const OFF_USER_AGENT = 'Volvix-POS/1.0 (https://systeminternational.app; soporte@systeminternational.app)';
+// 2026-05: SSRF + scheme defense. ALL external image URLs MUST pass through
+// this allowlist before being stored in DB or returned to clients.
+// Blocks: javascript:, data:, file:, http:// (non-TLS), private/local IPs,
+// AWS metadata endpoint, link-local addresses, malformed URLs.
+function isValidImageUrl(u) {
+  if (!u || typeof u !== 'string') return false;
+  if (u.length > 2048) return false;
+  let parsed;
+  try { parsed = new URL(u); } catch (_) { return false; }
+  if (parsed.protocol !== 'https:') return false;
+  const host = parsed.hostname.toLowerCase();
+  // Block private/loopback/link-local IPs
+  if (host === 'localhost' || host === '0.0.0.0') return false;
+  if (/^127\./.test(host)) return false;
+  if (/^10\./.test(host)) return false;
+  if (/^192\.168\./.test(host)) return false;
+  if (/^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(host)) return false;
+  if (/^169\.254\./.test(host)) return false; // AWS metadata
+  if (/^::1$|^fc00:|^fe80:/i.test(host)) return false; // IPv6 loopback/private
+  // Must be jpeg/jpg/png/webp (allow query string after extension)
+  if (!/\.(jpe?g|png|webp)(\?|#|$)/i.test(parsed.pathname + (parsed.search || ''))) return false;
+  return true;
+}
 
+// 2026-05: User-Agents — separados por servicio para evitar leak cruzado.
+// OFF requiere identificación de bot (con email contacto) para no banear.
+// Wikipedia recomienda User-Agent pero sin email de contacto público.
+const OFF_USER_AGENT = 'Volvix-POS/1.0 (+https://systeminternational.app; bot@systeminternational.app)';
+const WIKI_USER_AGENT = 'Volvix-POS/1.0 (+https://systeminternational.app)';
+
+// 2026-05: Open Food Facts API (productos de comida/bebida con marcas).
 async function tryOpenFoodFacts(query) {
   if (!query) return null;
   try {
@@ -804,38 +833,44 @@ async function tryOpenFoodFacts(query) {
     const j = await r.json().catch(() => null);
     const products = (j && j.products) || [];
     if (!products.length) return null;
-    // Pick first product with a usable image
     for (const p of products) {
-      const img = p.image_front_url || p.image_url || p.image_small_url || p.image_thumb_url;
-      if (img && /^https?:\/\//i.test(img)) return img;
+      const candidates = [p.image_front_url, p.image_url, p.image_small_url, p.image_thumb_url];
+      for (const img of candidates) {
+        if (isValidImageUrl(img)) return img;
+      }
     }
     return null;
   } catch (_) { return null; }
 }
 
-// 2026-05: Wikipedia REST API (imágenes de marcas y productos famosos).
-// Cobertura buena para marcas reconocidas (Nike, Apple, Coca-Cola, Heineken...).
-// Sin auth, sin rate-limit estricto, CORS abierto.
-//
-// BAD_TITLE filter: descarta hits a artículos de arte/anatomía/medicina/historia
-// que matchean palabras genéricas (ej. "thong" → Fine-art-buttocks.jpg).
-const WIKIPEDIA_BAD_TITLE = /\b(buttocks|nude|nudity|anatomy|anatomical|cadaver|fine[- ]art|painting|sculpture|fresco|mural|museum|history of|ancient|archaeology|archaeological|medical|disease|syndrome|disorder|symptom|surgery|surgical|species|genus|genome|biology|botanical|phylogeny)\b/i;
-const WIKIPEDIA_BAD_FILE = /\b(buttocks|nude|nudity|anatom|cadaver|painting|sculpture|fresco|fine[-_ ]art|museum|surgical|medical|disease|gomito|skeleton|skull)\b/i;
+// 2026-05: Wikipedia REST API.
+// BAD_TITLE filter: descarta hits a artículos de arte/anatomía/medicina.
+// "history of" eliminado (false-negative en marcas: "History of Coca-Cola" es
+//  el artículo más rico para Coca-Cola). Usamos solo señales claras de no-producto.
+const WIKIPEDIA_BAD_TITLE = /\b(buttocks|nude|nudity|anatomy|anatomical|cadaver|fine[- ]art|painting|sculpture|fresco|archaeology|archaeological|disease|syndrome|disorder|symptom|surgery|surgical|species|genus|genome|phylogeny)\b/i;
+const WIKIPEDIA_BAD_FILE = /\b(buttocks|nude|nudity|anatom|cadaver|painting|sculpture|fresco|fine[-_ ]art|surgical|disease|skeleton|skull)\b/i;
+const WIKI_GLOBAL_TIMEOUT_MS = 10000;
 
 async function tryWikipediaImage(query) {
   if (!query) return null;
+  // Wrap entire chain in a single global timeout (S2 fix)
+  return Promise.race([
+    _wikipediaInner(query),
+    new Promise(resolve => setTimeout(() => resolve(null), WIKI_GLOBAL_TIMEOUT_MS))
+  ]);
+}
+
+async function _wikipediaInner(query) {
   try {
-    // 1) Buscar el título de página más relevante
     const searchUrl = 'https://en.wikipedia.org/w/api.php?action=query&list=search&format=json&origin=*&srsearch=' +
       encodeURIComponent(query) + '&srlimit=5';
     const sr = await fetchWithTimeout(searchUrl, {
-      headers: { 'User-Agent': OFF_USER_AGENT, 'Accept': 'application/json' }
-    }, 5000);
+      headers: { 'User-Agent': WIKI_USER_AGENT, 'Accept': 'application/json' }
+    }, 4000);
     if (!sr || !sr.ok) return null;
     const sj = await sr.json().catch(() => null);
     const hits = sj && sj.query && sj.query.search;
     if (!hits || !hits.length) return null;
-    // 2) Para cada hit, intentar pageimages (filtrando títulos malos)
     for (const hit of hits.slice(0, 5)) {
       const title = hit.title;
       if (!title) continue;
@@ -843,8 +878,8 @@ async function tryWikipediaImage(query) {
       const imgUrl = 'https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=pageimages&piprop=original|thumbnail&pithumbsize=600&titles=' +
         encodeURIComponent(title);
       const ir = await fetchWithTimeout(imgUrl, {
-        headers: { 'User-Agent': OFF_USER_AGENT, 'Accept': 'application/json' }
-      }, 5000);
+        headers: { 'User-Agent': WIKI_USER_AGENT, 'Accept': 'application/json' }
+      }, 3000);
       if (!ir || !ir.ok) continue;
       const ij = await ir.json().catch(() => null);
       const pages = ij && ij.query && ij.query.pages;
@@ -854,9 +889,7 @@ async function tryWikipediaImage(query) {
         const orig = page.original && page.original.source;
         const thumb = page.thumbnail && page.thumbnail.source;
         const url = orig || thumb;
-        if (!url) continue;
-        if (!/^https?:\/\/.+\.(jpe?g|png|webp)(\?|$)/i.test(url)) continue;
-        // Reject inappropriate filenames (e.g. Fine-art-buttocks.jpg)
+        if (!isValidImageUrl(url)) continue;
         if (WIKIPEDIA_BAD_FILE.test(url)) continue;
         return url;
       }
@@ -865,33 +898,30 @@ async function tryWikipediaImage(query) {
   } catch (_) { return null; }
 }
 
-// Cadena de PERFECCIÓN máxima posible:
-//   1. Google CSE        — best-in-class brand-specific (requiere billing)
-//   2. Open Food Facts   — comida/bebida con marca (DXN, Illy, Nescafé...)
-//   3. Pexels            — stock profesional, seguro, gran cobertura
-//   4. Wikipedia         — marcas globales reconocidas (filtrado BAD_TITLE)
-//   5. DuckDuckGo        — last-resort scraping
-//   6. Google scraping   — last-resort scraping
-//   7. Bing scraping     — last-resort scraping
-//
-// Pexels va ANTES de Wikipedia: Pexels es categoría-segura para queries íntimos
-// y de productos no-marca (Wikipedia matcheaba artículos de arte/anatomía).
+// Cadena de PERFECCIÓN máxima posible (con telemetría):
 async function searchProductImageMulti(query) {
   if (!query || typeof query !== 'string') return null;
-  const urlGoogle = await tryGoogleCustomSearch(query);
-  if (urlGoogle) return urlGoogle;
-  const urlOFF = await tryOpenFoodFacts(query);
-  if (urlOFF) return urlOFF;
-  const urlPexels = await tryPexelsImage(query);
-  if (urlPexels) return urlPexels;
-  const urlWiki = await tryWikipediaImage(query);
-  if (urlWiki) return urlWiki;
-  const url = await tryDuckDuckGoImage(query);
-  if (url) return url;
-  const url2 = await tryGoogleImage(query);
-  if (url2) return url2;
-  const url3 = await tryBingImage(query);
-  if (url3) return url3;
+  const sources = [
+    ['google_cse', tryGoogleCustomSearch],
+    ['off',        tryOpenFoodFacts],
+    ['pexels',     tryPexelsImage],
+    ['wikipedia',  tryWikipediaImage],
+    ['ddg',        tryDuckDuckGoImage],
+    ['google_scrape', tryGoogleImage],
+    ['bing',       tryBingImage],
+  ];
+  for (const [name, fn] of sources) {
+    try {
+      const url = await fn(query);
+      if (url && isValidImageUrl(url)) {
+        try { console.log('[img-search] hit', name, JSON.stringify(query).slice(0, 80)); } catch (_) {}
+        return url;
+      }
+    } catch (e) {
+      try { console.log('[img-search] err', name, String(e && e.message || e).slice(0, 80)); } catch (_) {}
+    }
+  }
+  try { console.log('[img-search] miss-all', JSON.stringify(query).slice(0, 80)); } catch (_) {}
   return null;
 }
 
