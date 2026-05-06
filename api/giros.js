@@ -623,7 +623,7 @@ function buildUserPrompt(giroInput, extraHint) {
     '      "name": "string · max 60 chars · producto REAL del giro con marca si aplica",\n' +
     '      "category": "string · max 30 chars",\n' +
     '      "estimated_price": number,\n' +
-    '      "search_keywords_en": "string · 1-3 PALABRAS EN INGLÉS para buscar foto del producto en Wikimedia Commons. Genéricas (no marcas). Ej: \\"acoustic guitar\\" para una Yamaha F310, \\"electric bass\\" para un bajo Fender, \\"guitar pick\\" para púas, \\"amplifier\\" para amplificador. SIEMPRE en inglés.",\n' +
+    '      "search_keywords_en": "string · 2-4 PALABRAS EN INGLÉS para buscar foto del producto. INCLUIR la MARCA si está en el nombre (Lavazza, Silk, Torani, Yamaha, Fender, etc.) seguida del tipo de producto. Ej: \\"Yamaha acoustic guitar\\" para Yamaha F310, \\"Lavazza espresso coffee\\" para Café Lavazza, \\"Silk almond milk\\" para Leche de Almendras Silk, \\"Torani vanilla syrup bottle\\" para Sirope Torani. SIEMPRE en inglés.",\n' +
     '      "metadata": {\n' +
     '        "unit": "pieza|kg|g|ml|l|servicio (opcional)",\n' +
     '        "expires_in_days": number_o_null,\n' +
@@ -644,17 +644,22 @@ function buildUserPrompt(giroInput, extraHint) {
     'OBLIGATORIO:\n' +
     '- 6 dolores específicos (con terminología del giro, no genéricos)\n' +
     '- 9 productos reales del giro\n' +
-    '- CADA PRODUCTO DEBE INCLUIR el campo "search_keywords_en" con 1-3\n' +
-    '  palabras EN INGLÉS (genéricas, no marcas) para buscar foto en\n' +
-    '  Wikimedia Commons. Ejemplos:\n' +
-    '    "Yamaha F310 acústica" → "search_keywords_en": "acoustic guitar"\n' +
-    '    "Bajo Fender" → "search_keywords_en": "electric bass"\n' +
-    '    "Cuerdas D\\u0027Addario" → "search_keywords_en": "guitar strings"\n' +
-    '    "Pedal Boss DS-1" → "search_keywords_en": "guitar pedal"\n' +
-    '    "Sostén Victoria\\u0027s Secret" → "search_keywords_en": "push up bra"\n' +
-    '    "Concha de chocolate" → "search_keywords_en": "mexican pastry"\n' +
-    '    "Tacos al pastor" → "search_keywords_en": "tacos al pastor"\n' +
-    '    "Aceite Castrol 5W30" → "search_keywords_en": "motor oil"\n' +
+    '- CADA PRODUCTO DEBE INCLUIR el campo "search_keywords_en" con 2-4\n' +
+    '  palabras EN INGLÉS para buscar foto del producto.\n' +
+    '  REGLA CLAVE: si el nombre tiene MARCA, INCLUIRLA en el query.\n' +
+    '  Si no tiene marca, usar términos genéricos. Ejemplos:\n' +
+    '    "Yamaha F310 acústica" → "Yamaha acoustic guitar"\n' +
+    '    "Bajo Fender" → "Fender bass guitar"\n' +
+    '    "Cuerdas D\\u0027Addario" → "D\\u0027Addario guitar strings"\n' +
+    '    "Pedal Boss DS-1" → "Boss DS-1 distortion pedal"\n' +
+    '    "Café Espresso Lavazza" → "Lavazza espresso coffee bag"\n' +
+    '    "Leche de Almendras Silk" → "Silk almond milk carton"\n' +
+    '    "Sirope de Vainilla Torani" → "Torani vanilla syrup bottle"\n' +
+    '    "Cacao en Polvo Hershey\\u0027s" → "Hershey cocoa powder"\n' +
+    '    "Sostén Victoria\\u0027s Secret" → "Victoria Secret push up bra"\n' +
+    '    "Concha de chocolate" → "concha pan dulce mexican"\n' +
+    '    "Tacos al pastor" → "tacos al pastor mexican"\n' +
+    '    "Aceite Castrol 5W30" → "Castrol 5W30 motor oil"\n' +
     '  NUNCA dejes search_keywords_en vacío. SIEMPRE en inglés.\n' +
     '- 3 formas de robo silencioso específicas (cómo se roba en ESE giro, no genérico)\n' +
     '- 3+ funcionalidades únicas (no usar palabras prohibidas)\n' +
@@ -1274,7 +1279,11 @@ async function resyncImages(ctx, req, res) {
     for (const t of tmpls) {
       const md = t.metadata || {};
       if (md.image_url && !force) { skipped++; continue; }
-      const query = (md.category) ? `${t.name} ${md.category}` : t.name;
+      // 2026-05: priorizar search_keywords_en del LLM (incluye marca cuando aplica).
+      // Fallback a name+category solo si no hay keywords. Esto sube acierto en
+      // queries brand-specific tipo "Lavazza espresso coffee" vs "Café Espresso Lavazza Café".
+      const kw = String(md.search_keywords_en || '').trim();
+      const query = kw.length >= 2 ? kw : ((md.category) ? `${t.name} ${md.category}` : t.name);
       const realUrl = await searchProductImageMulti(query).catch(() => null);
       const url = realUrl || buildPlaceholderUrl(t.name);
       if (realUrl) fromSearch++; else fromPlaceholder++;
