@@ -5625,8 +5625,18 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
   };
   handlers['POST /api/queue'] = async (req, res) => {
     try {
+      // FIX adversarial A1: rate-limit anti-spam por IP (5/min) y por tenant (50/min).
+      // Permite QR público sin auth pero evita inundar la fila de un negocio.
+      const ip = (typeof clientIp === 'function' ? clientIp(req) : 'unknown');
       const body = await readBody(req);
-      const tenant = (body && body.tenant_id) || 'TNT001';
+      const tenant = String((body && body.tenant_id) || 'TNT001').slice(0, 40);
+      if (!/^[A-Za-z0-9_-]{1,40}$/.test(tenant)) return bad(res, 'tenant_id inválido');
+      if (!rateLimit('queue:ip:' + ip, 5, 60 * 1000)) {
+        return sendJSON(res, { error: 'rate_limited', retry_after_ms: rateLimitRetryMs('queue:ip:' + ip, 60000) }, 429);
+      }
+      if (!rateLimit('queue:tenant:' + tenant, 50, 60 * 1000)) {
+        return sendJSON(res, { error: 'tenant_rate_limited', retry_after_ms: rateLimitRetryMs('queue:tenant:' + tenant, 60000) }, 429);
+      }
       const activos = await supabaseRequest('GET',
         '/volvix_fila_virtual?tenant_id=eq.' + encodeURIComponent(tenant) +
         '&status=in.(esperando,llamado)&select=id&limit=200').catch(() => []);
@@ -5644,7 +5654,7 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
       ok(res, { ok: true, ticket, posicion, total: posicion });
     } catch (err) { sendError(res, err); }
   };
-  handlers['PATCH /api/queue/:id'] = async (req, res, params) => {
+  handlers['PATCH /api/queue/:id'] = requireAuth(async (req, res, params) => {
     try {
       const body = await readBody(req);
       const allowed = {};
@@ -5657,8 +5667,8 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
       if (!updated || !updated.length) return bad(res, 'Turno no encontrado', 404);
       ok(res, { ok: true, ticket: updated[0] });
     } catch (err) { sendError(res, err); }
-  };
-  handlers['POST /api/queue/:id/atender'] = async (req, res, params) => {
+  });
+  handlers['POST /api/queue/:id/atender'] = requireAuth(async (req, res, params) => {
     try {
       const ticket = (await supabaseRequest('GET',
         '/volvix_fila_virtual?id=eq.' + encodeURIComponent(params.id) + '&select=*&limit=1') || [])[0];
@@ -5678,13 +5688,13 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
       } catch (_) {}
       ok(res, { ok: true });
     } catch (err) { sendError(res, err); }
-  };
-  handlers['DELETE /api/queue/:id'] = async (req, res, params) => {
+  });
+  handlers['DELETE /api/queue/:id'] = requireAuth(async (req, res, params) => {
     try {
       await supabaseRequest('DELETE', '/volvix_fila_virtual?id=eq.' + encodeURIComponent(params.id));
       ok(res, { ok: true });
     } catch (err) { sendError(res, err); }
-  };
+  });
   handlers['GET /api/queue/status/:id'] = async (req, res, params) => {
     try {
       const ticket = (await supabaseRequest('GET',
@@ -5767,16 +5777,31 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
   });
 
   // ============ MENU DIGITAL ============
+  // FIX adversarial A2 (CRITICAL): el GET no filtraba por tenant → exponía todo
+  // el catálogo cross-tenant. Ahora REQUIERE tenant_id en query y filtra por
+  // pos_user_id del owner del tenant (mismo patrón que /api/products).
   handlers['GET /api/menu-digital'] = async (req, res) => {
     try {
       const q = url.parse(req.url, true).query;
-      const tenant = String(q.tenant_id || 'TNT001');
-      // Devolver productos del tenant marcados como visibles en menú
+      const tenant = String(q.tenant_id || '').trim();
+      if (!tenant || !/^[A-Za-z0-9_-]{1,40}$/.test(tenant)) {
+        return bad(res, 'tenant_id requerido (alfanumérico, max 40 chars)');
+      }
+      let posUserId = null;
+      try {
+        if (typeof resolveOwnerPosUserId === 'function') {
+          posUserId = resolveOwnerPosUserId(tenant);
+        }
+      } catch (_) {}
+      if (!posUserId) {
+        // Sin mapping conocido → menú vacío (NO devolver todo el catálogo)
+        return ok(res, []);
+      }
       try {
         const products = await supabaseRequest('GET',
-          '/pos_products?select=id,name,price,category,icon&order=name.asc&limit=200') || [];
-        ok(res, products.map(p => ({ ...p, visible: true })));
-        return;
+          '/pos_products?pos_user_id=eq.' + encodeURIComponent(posUserId) +
+          '&select=id,name,price,category,icon&order=name.asc&limit=200') || [];
+        return ok(res, products.map(p => ({ ...p, visible: true })));
       } catch (_) {}
       ok(res, []);
     } catch (err) { sendError(res, err); }
@@ -5857,16 +5882,32 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
   });
 
   // ============ WEBHOOKS DELIVERY (stubs — capturan payload, no procesan) ============
+  // FIX adversarial A3 + S3:
+  //  - Rate-limit por IP (60/min) anti storage-DoS y flooding
+  //  - Si el INSERT a Supabase falla, devolver 502 (no 200) para que el provider reintente
+  //  - Body capado a 64KB para evitar payloads gigantes
+  //  - TODO: agregar HMAC verification por proveedor (Uber X-Uber-Signature, etc.)
   const captureWebhook = (provider) => async (req, res) => {
     try {
+      const ip = (typeof clientIp === 'function' ? clientIp(req) : 'unknown');
+      if (!rateLimit('webhook:' + provider + ':' + ip, 60, 60 * 1000)) {
+        return sendJSON(res, { error: 'rate_limited' }, 429);
+      }
       const body = await readBody(req).catch(() => ({}));
+      const serialized = JSON.stringify(body || {});
+      if (serialized.length > 64 * 1024) {
+        return sendJSON(res, { error: 'payload_too_large', max: 65536 }, 413);
+      }
       try {
         await supabaseRequest('POST', '/generic_blobs', {
           pos_user_id: 'system_webhook',
           key: 'webhook_' + provider + '_' + Date.now(),
-          value: { provider, body, headers: { 'user-agent': req.headers['user-agent'] || '' } }
+          value: { provider, body, ua: String(req.headers['user-agent'] || '').slice(0, 200) }
         });
-      } catch (_) {}
+      } catch (e) {
+        // Bubble error: provider reintentará en su próximo backoff.
+        return sendJSON(res, { error: 'storage_failed', provider }, 502);
+      }
       ok(res, { ok: true, provider, received_at: new Date().toISOString() });
     } catch (err) { sendError(res, err); }
   };
