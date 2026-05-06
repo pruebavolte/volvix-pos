@@ -2564,7 +2564,7 @@
   <div class="login-card">
     <div class="login-logo">S</div>
     <h1 class="login-title">SalvadoreX</h1>
-    <p class="login-sub">Abarrotes Don Chucho · Caja 1</p>
+    <p class="login-sub" id="login-tenant-sub">Mi negocio · Caja 1</p>
 
     <div class="input-group">
       <label class="input-label">Usuario</label>
@@ -2592,7 +2592,7 @@
       <div class="brand-logo">S</div>
       <div class="brand-info">
         <div class="name">SalvadoreX</div>
-        <div class="sub">Don Chucho · Caja 1</div>
+        <div class="sub">Mi negocio · Caja 1</div>
       </div>
     </div>
 
@@ -4687,7 +4687,7 @@
       const brandName = document.querySelector('.brand-info .name');
       if (brandName) brandName.textContent = state.brand || 'SalvadoreX';
       const brandSub = document.querySelector('.brand-info .sub');
-      if (brandSub) brandSub.textContent = (state.name || 'Don Chucho') + ' · Caja 1';
+      if (brandSub) brandSub.textContent = (state.name || 'Mi negocio') + ' · Caja 1';
 
       // Efecto visual si el cambio vino del owner en vivo
       if (fromLive) {
@@ -5015,6 +5015,9 @@
           // Header: brand-info .name = brand, .sub = tenant_name + ' · Caja 1'
           var brandSub2 = document.querySelector('.brand-info .sub');
           if (brandSub2) brandSub2.textContent = (ssoSession.tenant_name || 'Mi negocio') + ' · Caja 1';
+          // Tambien el login-screen sub (por si el flash inicial alcanza a verse)
+          var loginSub = document.getElementById('login-tenant-sub');
+          if (loginSub) loginSub.textContent = (ssoSession.tenant_name || 'Mi negocio') + ' · Caja 1';
         } catch (_) {}
         try {
           window.dispatchEvent(new CustomEvent('salvadorex:logged-in', { detail: ssoSession }));
