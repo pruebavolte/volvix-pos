@@ -110,6 +110,21 @@ Reportes publicos: `R13_SECURITY_AUDIT.md`, `R22_SECURITY_FIXES.md`, `R24_SECURI
   - **TOTAL aplicado: 154 de 154 tablas con RLS habilitada.**
     **Advisor RLS_disabled CERRADO al 100% en sesion 2026-05-06.**
 
+  - **Bonus: 14 SECURITY DEFINER views fixed** (commit f3a0a8e+):
+    Views v_returns_stats, v_returns_compensation, low_stock_products,
+    shop_public_products, mfa_recent_failures, pos_users_owner_count_view,
+    cashier_last_checkin, pos_hardware_health_24h, kds_unaccepted_view,
+    v_agenda_today, daily_sales_report, v_accounting_balance,
+    ai_chat_cost_monthly, v_security_kpi_24h.
+    Todas pasadas a `SET (security_invoker = on)` para que respeten RLS
+    de las tablas subyacentes en lugar de bypassearlas.
+
+  - **Estado advisor post-sesion**:
+    Antes: 1 CRITICAL (rls_disabled) + 14 ERROR (security_definer_view) + WARN/INFO
+    Ahora: **0 ERROR / 0 CRITICAL.** Solo quedan 18 INFO (rls_enabled_no_policy:
+    tablas con RLS pero sin policy = anon bloqueado, mas seguro que antes) y
+    167 WARN (function_search_path_mutable + rls_policy_always_true + etc.).
+
   - **Phase 6 (futura iteracion - tenant-aware policies)**:
     Para que un cliente con anon key SOLO vea sus propias ventas/productos:
     1. Implementar Supabase Auth (signInWithPassword/Magic Link) o
