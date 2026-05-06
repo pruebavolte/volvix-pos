@@ -4779,42 +4779,187 @@
   VOLVIX.init();
 
   /* ============ DATA ============ */
-  const CATALOG = [
-    {code:'7501055303045', name:'Coca Cola 600ml', price:25, stock:124},
-    {code:'7501030411025', name:'Pan dulce', price:8.5, stock:48},
-    {code:'7501058634511', name:'Queso fresco 250g', price:120, stock:12},
-    {code:'7501234567890', name:'Palomitas', price:15, stock:67},
-    {code:'7501456789012', name:'Manzanas kg', price:35, stock:89},
-    {code:'7501000001234', name:'Mantequilla', price:45, stock:23},
-    {code:'7501000005555', name:'Leche Lala 1L', price:28, stock:54},
-    {code:'7501000008888', name:'Arroz Verde Valle', price:32, stock:76},
-  ];
-  let CART = [
-    {code:'7501055303045', name:'Coca Cola 600ml', price:25, qty:2, stock:124},
-    {code:'7501030411025', name:'Pan dulce', price:8.5, qty:3, stock:48},
-    {code:'7501058634511', name:'Queso fresco 250g', price:120, qty:1, stock:12},
-  ];
-  let CUSTOMERS = [
-    ['María López García', '55 1234 5678', 2000, 450, 120, '15/04/2026'],
-    ['Carlos Ramírez Torres', '55 4567 8901', 3000, 1200, 35, '10/04/2026'],
-    ['Ana Rodríguez Martínez', '55 3456 7890', 1000, 320, 210, '18/04/2026'],
-    ['Roberto Gutiérrez', '55 6789 0123', 2500, 780, 89, '12/04/2026'],
-  ];
-  const CREDIT = [
-    ['María López García', 2000, 450, 1550, '15/04/2026', 'ok'],
-    ['Carlos Ramírez Torres', 3000, 1200, 1800, '10/04/2026', 'vencido'],
-    ['Ana Rodríguez', 1000, 320, 680, '18/04/2026', 'ok'],
-    ['Roberto Gutiérrez', 2500, 780, 1720, '12/04/2026', 'ok'],
-    ['Miguel Castro', 1200, 560, 640, '08/04/2026', 'vencido'],
-    ['Adriana Flores', 1500, 1500, 0, '—', 'sin_abonos'],
-  ];
-  let SALES = [
-    ['#000152', 'Hoy 14:32', 'Público general', 'Admin', 'Efectivo', 222.47, 'completed'],
-    ['#000151', 'Hoy 14:15', 'Ana Rodríguez', 'Admin', 'Tarjeta', 487.00, 'completed'],
-    ['#000150', 'Hoy 13:58', 'Público general', 'Admin', 'Efectivo', 45.50, 'completed'],
-    ['#000149', 'Hoy 13:42', 'Carlos Ramírez', 'Admin', 'Crédito', 890.00, 'completed'],
-    ['#000148', 'Hoy 13:20', 'Público general', 'Admin', 'Efectivo', 125.00, 'refunded'],
-  ];
+  // 2026-05-06: arrays demo CATALOG/CART/CUSTOMERS/CREDIT/SALES eliminados.
+  // Antes mostraban Coca Cola, Pan dulce, Maria Lopez, Carlos Ramirez a TODOS
+  // los usuarios — contaminacion visual cross-tenant. Ahora arrancan vacios y
+  // se hidratan desde la API filtrada por tenant_id del JWT.
+  // Hidratacion ocurre en VolvixDataLoader (definido mas abajo); cada modulo
+  // re-renderiza cuando los datos llegan. Si la API falla, el modulo muestra
+  // empty state, NO datos demo.
+  const CATALOG = [];
+  let CART = [];
+  let CUSTOMERS = [];
+  const CREDIT = [];
+  let SALES = [];
+
+  // 2026-05-06 (FASE 6+7 CLAUDE.md): config por giro — UN solo sistema, multiples
+  // comportamientos. Lee /api/giro/config y aplica:
+  //   - Oculta menu-btn que no esten en modulos[]
+  //   - Reemplaza terminos i18n: data-i18n="cliente" -> "Paciente" para vet/medico
+  //   - Oculta/muestra campos del modal producto segun campos.producto[X].visible
+  window.VolvixGiroConfig = {
+    config: null,
+    async load() {
+      var token = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+      if (!token) return;
+      try {
+        var r = await fetch('/api/giro/config', {
+          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+          credentials: 'include',
+        });
+        if (!r.ok) return;
+        this.config = await r.json();
+        this.apply();
+      } catch (e) { console.warn('[GiroConfig] load:', e); }
+    },
+    apply() {
+      if (!this.config) return;
+      var cfg = this.config;
+      // 1) Modulos: ocultar .menu-btn[data-menu] que no este en cfg.modulos
+      try {
+        var modulos = cfg.modulos || [];
+        document.querySelectorAll('.menu-btn[data-menu]').forEach(function (el) {
+          var m = el.getAttribute('data-menu');
+          if (!modulos.length || modulos.indexOf(m) === -1) {
+            // Modulo no activo para este giro -> ocultar
+            // Permitimos siempre los 6 nucleo (vender/inventario/clientes/corte/reportes/config)
+            var nucleo = ['vender','inventario','clientes','corte','reportes','config'];
+            if (nucleo.indexOf(m) === -1) {
+              el.style.display = 'none';
+              el.setAttribute('data-giro-hidden', '1');
+            }
+          } else {
+            el.style.display = '';
+            el.removeAttribute('data-giro-hidden');
+          }
+        });
+      } catch (_) {}
+      // 2) Terminologia: reemplazar textos en elementos con data-i18n="X"
+      try {
+        var term = cfg.terminologia || {};
+        document.querySelectorAll('[data-i18n]').forEach(function (el) {
+          var key = el.getAttribute('data-i18n');
+          var plural = el.hasAttribute('data-i18n-plural');
+          if (term[key]) {
+            el.textContent = plural ? term[key].plural : term[key].singular;
+          }
+        });
+      } catch (_) {}
+      // 3) Campos del modal producto: ocultar inputs/checkboxes con data-flag
+      try {
+        var camposProducto = (cfg.campos && cfg.campos.producto) || {};
+        document.querySelectorAll('[data-flag]').forEach(function (el) {
+          var flag = el.getAttribute('data-flag');
+          var meta = camposProducto[flag];
+          if (meta && meta.visible === false) {
+            // Ocultar el wrapper (div padre) si lo hay
+            var wrap = el.closest('.field, .input-group, label') || el;
+            wrap.style.display = 'none';
+            wrap.setAttribute('data-giro-hidden', '1');
+          } else if (meta && meta.visible) {
+            var wrap2 = el.closest('.field, .input-group, label') || el;
+            wrap2.style.display = '';
+            wrap2.removeAttribute('data-giro-hidden');
+          }
+        });
+      } catch (_) {}
+      // Disparar evento para que otros modulos sepan que la config esta lista
+      try { document.dispatchEvent(new CustomEvent('volvix:giro-config-applied', { detail: cfg })); } catch (_) {}
+    }
+  };
+  document.addEventListener('volvix:login', function () {
+    try { window.VolvixGiroConfig.load(); } catch (_) {}
+  });
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () {
+      try { window.VolvixGiroConfig.load(); } catch (_) {}
+    });
+  } else {
+    try { window.VolvixGiroConfig.load(); } catch (_) {}
+  }
+
+  // Loader que llena CATALOG/CUSTOMERS/SALES desde la API real del tenant.
+  // Se invoca despues del SSO check, cuando ya hay JWT valido.
+  window.VolvixDataLoader = {
+    async loadAll() {
+      var token = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+      if (!token) return;
+      var headers = { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
+      // Productos (CATALOG)
+      try {
+        var r = await fetch('/api/products?limit=1000', { headers: headers, credentials: 'include' });
+        if (r.ok) {
+          var j = await r.json();
+          var arr = (j && Array.isArray(j.products)) ? j.products : (Array.isArray(j) ? j : []);
+          CATALOG.length = 0;
+          arr.forEach(function (p) {
+            CATALOG.push({
+              code: String(p.sku || p.code || p.barcode || ''),
+              name: String(p.name || p.nombre || ''),
+              price: Number(p.price || p.precio_venta || 0),
+              stock: Number(p.stock || 0),
+              category: p.category || p.categoria || null,
+              raw: p,
+            });
+          });
+          try { document.dispatchEvent(new CustomEvent('volvix:products-loaded', { detail: { count: CATALOG.length } })); } catch (_) {}
+        }
+      } catch (e) { console.warn('[DataLoader] productos:', e); }
+      // Clientes
+      try {
+        var rc = await fetch('/api/customers?limit=500', { headers: headers, credentials: 'include' });
+        if (rc.ok) {
+          var jc = await rc.json();
+          var arrc = (jc && Array.isArray(jc.customers)) ? jc.customers : (Array.isArray(jc) ? jc : []);
+          CUSTOMERS.length = 0;
+          arrc.forEach(function (c) {
+            CUSTOMERS.push([
+              String(c.name || c.nombre || ''),
+              String(c.phone || c.telefono || ''),
+              Number(c.credit_limit || 0),
+              Number(c.debt || c.deuda || 0),
+              Number(c.purchases_count || 0),
+              c.last_purchase_at || c.last_visit || '—',
+            ]);
+          });
+          try { document.dispatchEvent(new CustomEvent('volvix:customers-loaded', { detail: { count: CUSTOMERS.length } })); } catch (_) {}
+        }
+      } catch (e) { console.warn('[DataLoader] clientes:', e); }
+      // Ventas (historial)
+      try {
+        var rs = await fetch('/api/sales?limit=200', { headers: headers, credentials: 'include' });
+        if (rs.ok) {
+          var js = await rs.json();
+          var arrs = (js && Array.isArray(js.sales)) ? js.sales : (Array.isArray(js) ? js : []);
+          SALES.length = 0;
+          arrs.forEach(function (s) {
+            SALES.push([
+              String('#' + (s.folio || s.id || '').toString().padStart(6, '0')),
+              s.created_at || s.fecha || '',
+              String(s.customer_name || s.cliente || 'Publico general'),
+              String(s.cashier || s.cajero || ''),
+              String(s.payment_method || s.metodo || 'Efectivo'),
+              Number(s.total || 0),
+              s.status || 'completed',
+            ]);
+          });
+          try { document.dispatchEvent(new CustomEvent('volvix:sales-loaded', { detail: { count: SALES.length } })); } catch (_) {}
+        }
+      } catch (e) { console.warn('[DataLoader] ventas:', e); }
+    }
+  };
+  // Disparar carga cuando el SSO confirme login
+  document.addEventListener('volvix:login', function () {
+    try { window.VolvixDataLoader.loadAll(); } catch (_) {}
+  });
+  // Tambien al cargar DOM (por si el SSO ya pasó)
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () {
+      try { window.VolvixDataLoader.loadAll(); } catch (_) {}
+    });
+  } else {
+    try { window.VolvixDataLoader.loadAll(); } catch (_) {}
+  }
   // 2026-05-06: USERS demo era hardcoded con emails @donchucho.mx — confundia
   // a usuarios nuevos al ver gente que no es de su negocio. Ahora arrancamos
   // con SOLO el admin actual (derivado del JWT); el owner agrega los demas

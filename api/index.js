@@ -2066,6 +2066,77 @@ const handlers = {
     } catch (err) { sendError(res, err); }
   }, ['superadmin', 'platform_owner']),
 
+  // ============ CONFIGURACION POR GIRO ============
+  // 2026-05-06 (FASE 6+7 CLAUDE.md): devuelve la config dinamica del giro
+  // del tenant actual: que modulos se activan, terminologia (Cliente vs
+  // Paciente vs Comensal) y que campos se ven en cada modal (producto, etc.).
+  // El frontend (salvadorex-pos.html) usa esto para activar/desactivar UI
+  // sin duplicar codigo — UN solo sistema, comportamiento por config.
+  'GET /api/giro/config': requireAuth(async (req, res) => {
+    try {
+      const tenantId = resolveTenant(req, null);
+      // Derivar giro_slug del tenant: leer tenants.giro_slug si existe, sino 'default'.
+      let giroSlug = 'default';
+      try {
+        const tres = await supabaseFetch(
+          `/tenants?id=eq.${encodeURIComponent(tenantId)}&select=giro_slug,giro,industry&limit=1`
+        );
+        if (tres && Array.isArray(tres) && tres.length) {
+          giroSlug = String(tres[0].giro_slug || tres[0].giro || tres[0].industry || 'default').toLowerCase();
+        }
+      } catch (_) {}
+      // Validar que el giro existe en la tabla; si no, fallback a 'default'.
+      try {
+        const exists = await supabaseFetch(
+          `/giros_modulos?giro_slug=eq.${encodeURIComponent(giroSlug)}&select=giro_slug&limit=1`
+        );
+        if (!exists || !exists.length) giroSlug = 'default';
+      } catch (_) { giroSlug = 'default'; }
+
+      // Cargar las 3 config tables en paralelo
+      const [modulos, terminologia, campos] = await Promise.all([
+        supabaseFetch(`/giros_modulos?giro_slug=eq.${encodeURIComponent(giroSlug)}&select=modulo,activo,orden&order=orden.asc`).catch(() => []),
+        supabaseFetch(`/giros_terminologia?giro_slug=eq.${encodeURIComponent(giroSlug)}&select=clave,valor_singular,valor_plural`).catch(() => []),
+        supabaseFetch(`/giros_campos?giro_slug=eq.${encodeURIComponent(giroSlug)}&select=modal,campo,visible,requerido,orden,label_override&order=modal.asc,orden.asc`).catch(() => []),
+      ]);
+
+      // Tambien cargar 'default' como fallback para campos no definidos en el giro especifico
+      const defaultCampos = giroSlug !== 'default'
+        ? await supabaseFetch(`/giros_campos?giro_slug=eq.default&select=modal,campo,visible,requerido,orden,label_override`).catch(() => [])
+        : [];
+
+      // Merge: defaults + override del giro
+      const camposByModal = {};
+      (defaultCampos || []).forEach(r => {
+        camposByModal[r.modal] = camposByModal[r.modal] || {};
+        camposByModal[r.modal][r.campo] = r;
+      });
+      (campos || []).forEach(r => {
+        camposByModal[r.modal] = camposByModal[r.modal] || {};
+        camposByModal[r.modal][r.campo] = r;
+      });
+
+      // Terminologia como objeto plano: { cliente: {singular:'Paciente', plural:'Pacientes'} }
+      const term = {};
+      (terminologia || []).forEach(t => {
+        term[t.clave] = { singular: t.valor_singular, plural: t.valor_plural || t.valor_singular };
+      });
+
+      sendJSON(res, {
+        ok: true,
+        tenant_id: tenantId,
+        giro_slug: giroSlug,
+        modulos: (modulos || []).filter(m => m.activo).map(m => m.modulo),
+        modulos_full: modulos || [],
+        terminologia: term,
+        campos: camposByModal,
+        cached_at: new Date().toISOString(),
+      });
+    } catch (err) {
+      sendError(res, err);
+    }
+  }),
+
   // ============ PRODUCTOS ============
   // GAP-1 R1 (typo tolerance): si el cliente escribe "cocacola" buscamos también "coca cola".
   // Estrategia: normalizamos el query (lower + strip acentos + strip no-alfa-num) y comparamos
