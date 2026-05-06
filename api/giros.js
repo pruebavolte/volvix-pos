@@ -748,9 +748,47 @@ async function tryPexelsImage(query) {
   } catch (_) { return null; }
 }
 
-// Cadena: Pexels primero (premium quality), luego DDG/Google/Bing como fallback.
+// 2026-05: Google Custom Search JSON API (imágenes brand-specific reales).
+// Free tier: 100 queries/día. searchType=image devuelve imágenes directas (link).
+// Project: volvix-pos. Engine: volvix-images (cx=07ec88647a95540d0).
+const GOOGLE_CSE_API_KEY = process.env.GOOGLE_CSE_API_KEY || 'AIzaSyAQkzNEPpOSj04ccuAzI9Zcyc6xB7s_zM4';
+const GOOGLE_CSE_ID = process.env.GOOGLE_CSE_ID || '07ec88647a95540d0';
+
+async function tryGoogleCustomSearch(query) {
+  if (!query || !GOOGLE_CSE_API_KEY || !GOOGLE_CSE_ID) return null;
+  try {
+    const params = new URLSearchParams({
+      key: GOOGLE_CSE_API_KEY,
+      cx: GOOGLE_CSE_ID,
+      q: query,
+      searchType: 'image',
+      num: '3',
+      safe: 'off',
+      imgSize: 'medium'
+    });
+    const url = 'https://www.googleapis.com/customsearch/v1?' + params.toString();
+    const r = await fetchWithTimeout(url, { headers: { 'Accept': 'application/json' } }, 6000);
+    if (!r || !r.ok) return null;
+    const j = await r.json();
+    const items = (j && j.items) || [];
+    if (!items.length) return null;
+    // Filter out svg/gif/data URIs and pick first valid http(s) image
+    for (const item of items) {
+      const link = item && item.link;
+      if (link && /^https?:\/\//i.test(link) && /\.(jpe?g|png|webp)(\?|$)/i.test(link)) {
+        return link;
+      }
+    }
+    // Fallback: first item even if extension match fails
+    return items[0] && items[0].link || null;
+  } catch (_) { return null; }
+}
+
+// Cadena: Google CSE primero (brand-specific), luego Pexels, luego DDG/Google scraping/Bing.
 async function searchProductImageMulti(query) {
   if (!query || typeof query !== 'string') return null;
+  const urlGoogle = await tryGoogleCustomSearch(query);
+  if (urlGoogle) return urlGoogle;
   const urlPexels = await tryPexelsImage(query);
   if (urlPexels) return urlPexels;
   const url = await tryDuckDuckGoImage(query);
