@@ -2156,6 +2156,10 @@ renderMenu();
 <script src="volvix-webextensions-wiring.js" defer></script>
 <script src="volvix-routes-wiring.js" defer></script>
 <script src="volvix-pwa-install-prompt.js" defer></script>
+<!-- Module flag filter: oculta/bloquea modulos segun el giro/plan del tenant
+     Lee GET /api/tenant/active-modules y aplica state=hidden|locked sobre
+     elementos con data-module / data-menu / data-feature. -->
+<script src="volvix-module-flags-wiring.js" defer></script>
 <!-- ===================================================================
      VOLVIX BACKEND WIRING (v3 → REAL API)
      Intercepta puntos de carga/guardado. Fallback a localStorage demo.
