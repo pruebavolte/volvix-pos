@@ -4603,7 +4603,38 @@
 <!-- ============ TOAST ============ -->
 <div id="toast" class="toast"></div>
 
-<script defer src="/volvix-pos-bridge.js"></script>
+<!-- 2026-05-07 RADICAL perf fix: bridge.js (451KB) NO se carga eager.
+     Solo se inyecta tras la PRIMERA interaccion del usuario (click/keydown/scroll/touch)
+     o tras 8s de idle. Esto evita que parsear 451KB bloquee TTI en navegadores
+     tipo Firefox que mostraban "Esta pagina ralentiza Firefox". -->
+<script>
+(function () {
+  if (window.__vlxBridgeLazyLoaded) return;
+  var loaded = false;
+  function loadBridge() {
+    if (loaded) return; loaded = true; window.__vlxBridgeLazyLoaded = true;
+    var s = document.createElement('script');
+    s.src = '/volvix-pos-bridge.js';
+    s.async = true;
+    s.onerror = function () { console.warn('[bridge] load failed, retrying in 2s'); setTimeout(loadBridge, 2000); };
+    document.head.appendChild(s);
+    // Quita listeners cuando ya se cargo
+    ['click','keydown','scroll','touchstart','pointerdown','mousemove'].forEach(function (ev) {
+      window.removeEventListener(ev, loadBridge, { capture: true, passive: true });
+    });
+  }
+  // Triggers de primera interaccion
+  ['click','keydown','scroll','touchstart','pointerdown','mousemove'].forEach(function (ev) {
+    window.addEventListener(ev, loadBridge, { capture: true, passive: true, once: true });
+  });
+  // Failsafe: si el usuario no interactua en 8s, carga el bridge igual
+  if (typeof window.requestIdleCallback === 'function') {
+    window.requestIdleCallback(loadBridge, { timeout: 8000 });
+  } else {
+    setTimeout(loadBridge, 8000);
+  }
+})();
+</script>
 <!-- 2026-05-06 perf: 452KB inline movido a archivo externo con defer -->
 
 <script src="volvix-i18n-wiring.js" defer></script>
