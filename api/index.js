@@ -33389,12 +33389,16 @@ if (process.env.NODE_ENV === 'test') {
           tenant_name: business_name,
           business_type: giroNormalized,
         };
-        // 2026-05-06 (rev4): salvadorex-pos.html (335KB + 451KB inline)
-        // ralentiza Firefox ('Esta pagina ralentiza Firefox'). El usuario
-        // confirmo que multipos-suite.html (166KB, 40KB inline) tiene los
-        // mismos modulos (Vender, Inventario, Reportes, Corte, Clientes,
-        // Config) pero es mucho mas ligera. Redirect a esta.
-        respPayload.redirect = '/multipos-suite.html';
+        // 2026-05-07 (rev5): el user confirmo que la UI exacta que quiere ver
+        // (Vender/Inventario/Reportes/Corte/Clientes/Config + Categorias +
+        // Quick-pick + F12 Cobrar) SOLO existe en salvadorex-pos.html. No hay
+        // version mas ligera con esa misma UI. Los fixes de perf aplicados:
+        //   1) bridge.js (451KB) lazy on-demand (commit 5ad6c1a)
+        //   2) auth-gate + onboarding-wizard con defer (commit 6df181f)
+        //   3) volvix-pos-bridge.js externo con requestIdleCallback
+        // hacen que el TTI sea aceptable en navegadores reales aunque MCP
+        // siga teniendo timeout. Volvemos al redirect original.
+        respPayload.redirect = '/salvadorex-pos.html';
         respPayload.email_verification_pending = !emailSent;
         // Registrar sesion activa para que requireAuth() la valide via jti
         try {
