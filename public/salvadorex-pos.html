@@ -23,7 +23,7 @@
 </script>
 <link rel="canonical" href="https://systeminternational.app/salvadorex-pos.html">
 <title>SalvadoreX · Punto de Venta</title>
-<script src="/auth-gate.js"></script>
+<script src="/auth-gate.js" defer></script>
 <!-- B43: Console-error reducer — intercept known-404 scripts + Stripe ping spam BEFORE other wirings load.
      Wraps fetch / appendChild to:
        - Block GET /volvix-tests-wiring.js (intentionally not deployed; .vercelignore line 30)
@@ -6184,7 +6184,7 @@
   });
 })();
 </script>
-<script src="/volvix-onboarding-wizard.js"></script>
+<script src="/volvix-onboarding-wizard.js" defer></script>
 <!-- ================================================================
      VOICE ORDER SYSTEM — portado de pruebavolte/01123581321345589144233
      Usa Web Speech API nativa (Chrome/Edge). No requiere API keys.
