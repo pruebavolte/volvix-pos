@@ -355,6 +355,11 @@ function logWarn(msg, meta) { logStructured('warn', msg, meta); }
 function logErr(msg, meta) { logStructured('error', msg, meta); }
 
 function rateLimit(key, max, windowMs) {
+  // 2026-05-07 dev bypass: permitir tests locales sin chocar con rate limits
+  // (registro, OTP, login). Activado solo si el wrapper local-prod-server.js
+  // setea process.env.VOLVIX_DEV_DISABLE_RATELIMIT='1' ANTES de require.
+  // En produccion (Vercel) este env var nunca se setea.
+  if (process.env.VOLVIX_DEV_DISABLE_RATELIMIT === '1') return true;
   const now = Date.now();
   const b = rateBuckets.get(key);
   if (!b || b.resetAt < now) {

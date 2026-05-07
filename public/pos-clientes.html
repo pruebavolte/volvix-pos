@@ -781,74 +781,10 @@ let currentFilter  = 'todos';
 let currentDtab    = 'compras';
 let movType = 'cargo';
 
-// ── Datos demo ──
-const DEMO_CLIENTS = [
-  {
-    id: 'CLI001', nombre: 'Roberto García López', telefono: '81 1234 5678', email: 'roberto@gmail.com',
-    rfc: 'GARR800101XXX', direccion: 'Av. Constitución 123, Centro', notas: 'Paga quincenas',
-    saldoCredito: -280, limiteCredito: 500, puntos: 840,
-    compras: 47, totalComprado: 12480, ultimaCompra: Date.now() - 86400000 * 3,
-    created: Date.now() - 86400000 * 180,
-  },
-  {
-    id: 'CLI002', nombre: 'María Elena Torres', telefono: '81 9876 5432', email: 'maria@hotmail.com',
-    rfc: '', direccion: 'Calle Morelos 45, Col. Industrial', notas: '',
-    saldoCredito: 0, limiteCredito: 0, puntos: 1250,
-    compras: 83, totalComprado: 28900, ultimaCompra: Date.now() - 86400000 * 1,
-    created: Date.now() - 86400000 * 365,
-  },
-  {
-    id: 'CLI003', nombre: 'Juan Antonio Pérez', telefono: '81 5555 0001', email: '',
-    rfc: '', direccion: '', notas: 'Siempre paga en efectivo',
-    saldoCredito: -150, limiteCredito: 300, puntos: 320,
-    compras: 18, totalComprado: 4200, ultimaCompra: Date.now() - 86400000 * 14,
-    created: Date.now() - 86400000 * 90,
-  },
-  {
-    id: 'CLI004', nombre: 'Ana Lucía Martínez', telefono: '81 2468 1357', email: 'ana.lucia@empresa.com',
-    rfc: 'MARA850215BBB', direccion: 'Prolongación Corregidora 88, Guadalupe', notas: 'Requiere factura siempre',
-    saldoCredito: 0, limiteCredito: 2000, puntos: 4720,
-    compras: 156, totalComprado: 94000, ultimaCompra: Date.now() - 86400000 * 0.5,
-    created: Date.now() - 86400000 * 730,
-  },
-  {
-    id: 'CLI005', nombre: 'Carlos Hernández Vega', telefono: '81 1111 2222', email: '',
-    rfc: '', direccion: 'Sin dirección registrada', notas: '',
-    saldoCredito: 0, limiteCredito: 0, puntos: 0,
-    compras: 3, totalComprado: 280, ultimaCompra: Date.now() - 86400000 * 60,
-    created: Date.now() - 86400000 * 70,
-  },
-];
-
-// Historial demo por cliente
-const DEMO_HISTORIAL = {
-  CLI001: [
-    { id:'V001', total:380, fecha: Date.now() - 86400000 * 3, metodo:'credito',      items:['Coca-Cola x4', 'Arroz x2', 'Leche x3'] },
-    { id:'V002', total:120, fecha: Date.now() - 86400000 * 10, metodo:'efectivo',    items:['Pan dulce x6', 'Agua x5'] },
-    { id:'V003', total:540, fecha: Date.now() - 86400000 * 24, metodo:'credito',     items:['Frijol x4', 'Queso x2', 'Sabritas x8'] },
-  ],
-  CLI002: [
-    { id:'V004', total:890, fecha: Date.now() - 86400000 * 1,  metodo:'tarjeta',     items:['Compra semanal varios'] },
-    { id:'V005', total:240, fecha: Date.now() - 86400000 * 8,  metodo:'efectivo',    items:['Bebidas y snacks'] },
-  ],
-  CLI004: [
-    { id:'V006', total:4800, fecha: Date.now() - 86400000 * 0.5, metodo:'transferencia', items:['Compra de mes'] },
-    { id:'V007', total:3200, fecha: Date.now() - 86400000 * 30, metodo:'transferencia', items:['Compra quincenal'] },
-  ],
-};
-
-// Movimientos de crédito demo
-const DEMO_MOVIMIENTOS = {
-  CLI001: [
-    { tipo:'cargo',  monto: 540, concepto:'Compra a crédito',       fecha: Date.now() - 86400000 * 24 },
-    { tipo:'abono',  monto: 400, concepto:'Abono en efectivo',       fecha: Date.now() - 86400000 * 20 },
-    { tipo:'cargo',  monto: 380, concepto:'Compra a crédito',       fecha: Date.now() - 86400000 * 3  },
-    { tipo:'abono',  monto: 240, concepto:'Abono con tarjeta',       fecha: Date.now() - 86400000 * 1  },
-  ],
-  CLI003: [
-    { tipo:'cargo',  monto: 150, concepto:'Compra a crédito',       fecha: Date.now() - 86400000 * 5  },
-  ],
-};
+// 2026-05-07 cleanup: hardcoded demo data removido. Historial y movimientos se obtienen vía API o quedan vacíos.
+// DEMO_HISTORIAL y DEMO_MOVIMIENTOS ahora son objetos vacíos (mutables) para que el flujo de "agregar movimiento" siga funcionando localmente hasta que el backend tenga endpoints.
+const DEMO_HISTORIAL = {};
+const DEMO_MOVIMIENTOS = {};
 
 // ── Colores de avatar ──
 const AVATAR_COLORS = ['#1a237e','#2e7d32','#1565c0','#6a1b9a','#c62828','#e65100','#00695c','#4a148c'];
@@ -868,14 +804,29 @@ function initials(nombre) {
 })();
 
 // ── Cargar clientes ──
+// 2026-05-07 cleanup: hardcoded demo data removido, ahora desde API real (/api/customers).
 async function loadClientes() {
   try {
     const data = await window.volvix.api.clientes.list();
-    allClients = Array.isArray(data) && data.length
-      ? data.map(normalizeCliente)
-      : DEMO_CLIENTS;
+    if (Array.isArray(data) && data.length) {
+      allClients = data.map(normalizeCliente);
+    } else {
+      // Fallback directo con Bearer token
+      const token = localStorage.getItem('volvix_token') || '';
+      const res = await fetch('/api/customers', {
+        headers: { Authorization: 'Bearer ' + token },
+        credentials: 'include',
+      });
+      if (res.ok) {
+        const json = await res.json();
+        const arr  = Array.isArray(json) ? json : (json?.customers || json?.clients || json?.items || []);
+        allClients = (arr || []).map(normalizeCliente);
+      } else {
+        allClients = window.volvix?.offline?.list?.('clientes')?.map(normalizeCliente) || [];
+      }
+    }
   } catch {
-    allClients = window.volvix?.offline?.list?.('clientes')?.map(normalizeCliente) || DEMO_CLIENTS;
+    allClients = window.volvix?.offline?.list?.('clientes')?.map(normalizeCliente) || [];
   }
   applyFilter();
 }

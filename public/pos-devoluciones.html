@@ -338,10 +338,18 @@ async function buscarVenta() {
   // Buscar offline primero
   var ventas = [];
   try { ventas = window.volvix?.offline?.list?.('ventas') || []; } catch(_) {}
-  // También intenta desde API
+  // 2026-05-07 cleanup: hardcoded demo data removido. Ahora con Bearer auth real.
   try {
-    var r = await fetch('/api/sales?search=' + encodeURIComponent(folio));
-    if (r.ok) { var d = await r.json(); if (Array.isArray(d)) ventas = d; }
+    var token = localStorage.getItem('volvix_token') || '';
+    var r = await fetch('/api/sales?search=' + encodeURIComponent(folio), {
+      headers: { Authorization: 'Bearer ' + token },
+      credentials: 'include',
+    });
+    if (r.ok) {
+      var d = await r.json();
+      var arr = Array.isArray(d) ? d : (d?.sales || d?.items || d?.ventas || []);
+      if (Array.isArray(arr) && arr.length) ventas = arr;
+    }
   } catch(_) {}
 
   var venta = ventas.find(function(v) {
@@ -349,18 +357,18 @@ async function buscarVenta() {
   });
 
   if (!venta) {
-    // Demo: crear venta ficticia para mostrar el flujo
-    venta = {
-      id: 'DEMO-' + Date.now(), folio: folio, status: 'completada',
-      cliente: 'Público general', created_at: new Date().toISOString(),
-      items: [
-        { id: 'P1', nombre: 'Coca-Cola 600ml', precio: 20, cantidad: 3, subtotal: 60 },
-        { id: 'P2', nombre: 'Sabritas 45g', precio: 15, cantidad: 2, subtotal: 30 },
-        { id: 'P3', nombre: 'Agua Mineral 500ml', precio: 10, cantidad: 1, subtotal: 10 },
-      ],
-      total: 100, metodo_pago: 'Efectivo',
-    };
-    toast('⚠ Venta de demostración (folio no encontrado en historial)', 'warn');
+    // 2026-05-07 cleanup: ya NO se inventa una venta demo. Empty state real.
+    ventaActual = null;
+    var area = document.getElementById('productos-area');
+    if (area) {
+      area.innerHTML = '<div style="padding:48px 24px;text-align:center;color:var(--text-3)">' +
+        '<div style="font-size:48px;margin-bottom:12px">🔍</div>' +
+        '<h3 style="margin:0 0 8px;color:var(--text-1)">Folio no encontrado</h3>' +
+        '<p style="margin:0">No encontramos ninguna venta con folio <strong>' + folio + '</strong>. Verifica el número o consulta tu historial de ventas.</p>' +
+        '</div>';
+    }
+    toast('Folio no encontrado en historial', 'warn');
+    return;
   }
 
   ventaActual = venta;
@@ -371,20 +379,32 @@ async function buscarVenta() {
 async function cargarUltimasVentas() {
   var ventas = [];
   try { ventas = window.volvix?.offline?.list?.('ventas') || []; } catch(_) {}
+  // 2026-05-07 cleanup: si no hay ventas locales, intentamos API real con Bearer.
   if (!ventas.length) {
-    // Demo
-    ventaActual = {
-      id: 'DEMO-001', folio: '#1042', status: 'completada',
-      cliente: 'Juan García', created_at: new Date(Date.now() - 3600000).toISOString(),
-      items: [
-        { id: 'P1', nombre: 'Taco de bistec', precio: 25, cantidad: 2, subtotal: 50 },
-        { id: 'P2', nombre: 'Agua Mineral', precio: 10, cantidad: 1, subtotal: 10 },
-      ],
-      total: 60, metodo_pago: 'Efectivo',
-    };
-    document.getElementById('folioInput').value = '#1042';
-    itemsSeleccionados = {};
-    renderVenta();
+    try {
+      var token = localStorage.getItem('volvix_token') || '';
+      var r = await fetch('/api/sales?limit=10', {
+        headers: { Authorization: 'Bearer ' + token },
+        credentials: 'include',
+      });
+      if (r.ok) {
+        var d = await r.json();
+        var arr = Array.isArray(d) ? d : (d?.sales || d?.items || d?.ventas || []);
+        if (Array.isArray(arr) && arr.length) ventas = arr;
+      }
+    } catch(_) {}
+  }
+  if (!ventas.length) {
+    // Empty state real (sin demo)
+    ventaActual = null;
+    var area = document.getElementById('productos-area');
+    if (area) {
+      area.innerHTML = '<div style="padding:48px 24px;text-align:center;color:var(--text-3)">' +
+        '<div style="font-size:48px;margin-bottom:12px">📭</div>' +
+        '<h3 style="margin:0 0 8px;color:var(--text-1)">Aún no tienes ventas registradas</h3>' +
+        '<p style="margin:0">Cuando registres tu primera venta podrás procesar devoluciones aquí.</p>' +
+        '</div>';
+    }
     return;
   }
   ventaActual = ventas[ventas.length - 1];

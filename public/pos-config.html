@@ -861,34 +861,9 @@ html, body {
             <div class="card-title">Usuarios activos</div>
             <button class="btn primary" onclick="openModal('modalUsuario')">+ Invitar usuario</button>
           </div>
+          <!-- 2026-05-07 cleanup: hardcoded demo users removidos, ahora desde API real /api/users -->
           <div id="userList">
-            <div class="user-row">
-              <div class="user-avatar" style="background:#1a237e">DA</div>
-              <div class="user-info">
-                <div class="user-name">Daniel V.</div>
-                <div class="user-email">admin@volvix.test</div>
-              </div>
-              <span class="role-pill role-owner">Owner</span>
-              <button class="btn sm" onclick="toast('No puedes editar al owner principal','warn')" style="margin-left:10px">⚙️</button>
-            </div>
-            <div class="user-row">
-              <div class="user-avatar" style="background:#2e7d32">ML</div>
-              <div class="user-info">
-                <div class="user-name">María López</div>
-                <div class="user-email">maria@donchuchoaparrotes.com</div>
-              </div>
-              <span class="role-pill role-cajero">Cajero</span>
-              <button class="btn sm danger" onclick="eliminarUsuario('María López')" style="margin-left:10px">🗑️</button>
-            </div>
-            <div class="user-row">
-              <div class="user-avatar" style="background:#1565c0">CR</div>
-              <div class="user-info">
-                <div class="user-name">Carlos Ruiz</div>
-                <div class="user-email">carlos@donchuchoaparrotes.com</div>
-              </div>
-              <span class="role-pill role-cajero">Cajero</span>
-              <button class="btn sm danger" onclick="eliminarUsuario('Carlos Ruiz')" style="margin-left:10px">🗑️</button>
-            </div>
+            <div style="padding:24px;text-align:center;color:var(--text-3)">Cargando usuarios…</div>
           </div>
         </div>
       </div>
@@ -1407,6 +1382,64 @@ function eliminarUsuario(nombre) {
   if (!confirm(`¿Eliminar acceso de ${nombre}? Esta acción no se puede deshacer.`)) return;
   toast(`✓ Acceso de ${nombre} revocado`, 'ok');
 }
+
+// 2026-05-07 cleanup: hardcoded demo data removido, ahora desde API real /api/users.
+async function cargarUsuarios() {
+  const container = document.getElementById('userList');
+  if (!container) return;
+  const colorFor = (s) => { const palette = ['#1a237e','#2e7d32','#1565c0','#6a1b9a','#c62828','#e65100']; return palette[(s||'?').charCodeAt(0) % palette.length]; };
+  const initialsOf = (n) => { const p = (n||'?').trim().split(' '); return ((p[0]||'?')[0] + (p[1]?.[0]||'')).toUpperCase(); };
+  let users = [];
+  try {
+    const token = localStorage.getItem('volvix_token') || '';
+    const res = await fetch('/api/users', {
+      headers: { Authorization: 'Bearer ' + token },
+      credentials: 'include',
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const arr = Array.isArray(data) ? data : (data?.users || data?.items || []);
+      users = (arr || []).map(u => ({
+        nombre: u.name || u.nombre || u.email || '—',
+        email:  u.email || '',
+        rol:    u.role || u.rol || 'cajero',
+        is_owner: !!(u.is_owner || u.role === 'owner' || u.rol === 'owner'),
+      }));
+    }
+  } catch {}
+  // Si no hay usuarios devueltos por API, mostrar el dueño actual de la sesión como mínimo
+  if (!users.length && window.VOLVIX_USER) {
+    users = [{
+      nombre: window.VOLVIX_USER.tenant_name || window.VOLVIX_USER.name || window.VOLVIX_USER.email || 'Owner',
+      email: window.VOLVIX_USER.email || '',
+      rol: 'owner',
+      is_owner: true,
+    }];
+  }
+  if (!users.length) {
+    container.innerHTML = '<div style="padding:32px 16px;text-align:center;color:var(--text-3)">Aún no tienes usuarios registrados. Usa "+ Invitar usuario" para agregar tu equipo.</div>';
+    return;
+  }
+  container.innerHTML = users.map(u => {
+    const safeName = (u.nombre || '').replace(/'/g, "\\'");
+    const isOwner = u.is_owner;
+    const pillClass = isOwner ? 'role-pill role-owner' : 'role-pill role-cajero';
+    const pillLabel = isOwner ? 'Owner' : (u.rol === 'admin' ? 'Admin' : 'Cajero');
+    const action = isOwner
+      ? `<button class="btn sm" onclick="toast('No puedes editar al owner principal','warn')" style="margin-left:10px">⚙️</button>`
+      : `<button class="btn sm danger" onclick="eliminarUsuario('${safeName}')" style="margin-left:10px">🗑️</button>`;
+    return `<div class="user-row">
+      <div class="user-avatar" style="background:${colorFor(u.nombre)}">${initialsOf(u.nombre)}</div>
+      <div class="user-info">
+        <div class="user-name">${u.nombre}</div>
+        <div class="user-email">${u.email || '—'}</div>
+      </div>
+      <span class="${pillClass}">${pillLabel}</span>
+      ${action}
+    </div>`;
+  }).join('');
+}
+document.addEventListener('DOMContentLoaded', cargarUsuarios);
 
 // ══════════════════════════════════════════════
 // IMPRESORAS

@@ -449,58 +449,65 @@ function hideDemoBanner() {
   if (el) el.style.display = 'none';
 }
 
-// Ventas cacheadas para esta vista
+// Caches por tab (2026-05-07 cleanup: declarados explícitamente para evitar ReferenceError)
 let _ventasCache = null;
+let _productosCache = null;
+let _clientesCache = null;
+let _metodosCache = null;
+let _cajerosCache = null;
 async function getVentas() {
   if (_ventasCache) return _ventasCache;
-  const real = await fetchVentasReales();
+  // 2026-05-07 cleanup: hardcoded demo data removido, ahora desde API real.
+  // Intentamos primero con volvix.api.raw (auth automático), luego con fetch directo /api/sales.
+  let real = await fetchVentasReales();
+  if (!real || !real.length) {
+    real = await fetchVentasDirecto();
+  }
   if (real && real.length) {
     _ventasCache = real;
     _isDemoData = false;
     hideDemoBanner();
   } else {
-    _ventasCache = generateDemoVentas();
-    _isDemoData = true;
-    showDemoBanner('Tu cuenta aún no tiene ventas registradas o el servicio no está disponible.');
+    _ventasCache = []; // empty, NO demo data
+    _isDemoData = false;
+    hideDemoBanner();
   }
   return _ventasCache;
 }
 function invalidateVentas() { _ventasCache = null; }
 
-// ── Datos demo (fallback) ──
-function generateDemoVentas() {
-  const ventas = [];
-  const productos = ['Coca-Cola 600ml','Pan dulce','Leche Lala 1L','Arroz 1kg','Frijol negro 1kg','Queso fresco 250g','Agua 1.5L','Sabritas Original'];
-  const cajeros   = ['María López','Carlos Ruiz','Ana Torres'];
-  const metodos   = ['efectivo','tarjeta','transferencia'];
-  const { from }  = getRange();
-  const dias      = currentPeriod === 'hoy' ? 1 : currentPeriod === 'semana' ? 7 : currentPeriod === 'mes' ? 30 : currentPeriod === 'anio' ? 365 : 7;
+// 2026-05-07 cleanup: fetch directo a /api/sales con Bearer token, fallback de fetchVentasReales.
+async function fetchVentasDirecto() {
+  try {
+    const token = localStorage.getItem('volvix_token') || '';
+    const { from, to } = getRange();
+    const params = new URLSearchParams({
+      from: from.toISOString().slice(0, 10),
+      to:   to.toISOString().slice(0, 10),
+    });
+    const res = await fetch('/api/sales?' + params.toString(), {
+      headers: { Authorization: 'Bearer ' + token },
+      credentials: 'include',
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    const arr  = Array.isArray(data) ? data : (data?.sales || data?.items || data?.ventas || data?.daily || []);
+    if (!Array.isArray(arr)) return [];
+    return arr.map(d => ({
+      id:     d.id || ('V' + Date.now()),
+      fecha:  new Date(d.date || d.fecha || d.created_at || Date.now()),
+      total:  Number(d.total || d.amount || 0),
+      items:  Array.isArray(d.items) ? d.items : [],
+      metodo: d.metodo || d.payment_method || d.method || 'efectivo',
+      cajero: d.cajero || d.cashier || d.user_name || '—',
+      _real:  true,
+    }));
+  } catch { return []; }
+}
 
-  for (let d = 0; d < dias; d++) {
-    const fechaDia = new Date(from.getTime() + d * 86400000);
-    const ticketsDia = Math.floor(8 + Math.random() * 20);
-    for (let t = 0; t < ticketsDia; t++) {
-      const items = [];
-      const numItems = Math.floor(1 + Math.random() * 6);
-      let total = 0;
-      for (let i = 0; i < numItems; i++) {
-        const prod = productos[Math.floor(Math.random() * productos.length)];
-        const qty  = Math.floor(1 + Math.random() * 4);
-        const precio = 8 + Math.random() * 120;
-        items.push({ nombre: prod, qty, precio: Math.round(precio * 100) / 100 });
-        total += qty * precio;
-      }
-      ventas.push({
-        id:      'V' + String(d * 100 + t).padStart(4,'0'),
-        fecha:   new Date(fechaDia.getTime() + Math.random() * 50000000),
-        total:   Math.round(total * 100) / 100,
-        items,
-        metodo:  metodos[Math.floor(Math.random() * metodos.length)],
-        cajero:  cajeros[Math.floor(Math.random() * cajeros.length)],
-      });
-    }
-  }
-  return ventas;
+// 2026-05-07 cleanup: ya NO genera datos demo. Mantenido por compatibilidad — siempre retorna [].
+function generateDemoVentas() {
+  return [];
 }
 
 // ── Tabs ──
@@ -1040,17 +1047,64 @@ window.vlxClearDayFilter = vlxClearDayFilter;
 // ══════════════════════════════════════════════
 // TAB: PRODUCTOS
 // ══════════════════════════════════════════════
-function renderProductos() {
-  const productos = [
-    { nombre:'Coca-Cola 600ml',  categoria:'Bebidas',  vendidos:284, ingresos:7100, margen:38 },
-    { nombre:'Leche Lala 1L',    categoria:'Lácteos',  vendidos:196, ingresos:6272, margen:22 },
-    { nombre:'Pan dulce',        categoria:'Panadería',vendidos:412, ingresos:3502, margen:55 },
-    { nombre:'Arroz 1kg',        categoria:'Básicos',  vendidos:143, ingresos:4004, margen:30 },
-    { nombre:'Frijol negro 1kg', categoria:'Básicos',  vendidos:118, ingresos:4130, margen:28 },
-    { nombre:'Queso fresco 250g',categoria:'Lácteos',  vendidos:87,  ingresos:10440,margen:35 },
-    { nombre:'Sabritas Original',categoria:'Snacks',   vendidos:203, ingresos:3654, margen:42 },
-    { nombre:'Agua 1.5L',        categoria:'Bebidas',  vendidos:347, ingresos:4164, margen:20 },
-  ];
+// 2026-05-07 cleanup: hardcoded demo data removido, ahora desde API real (/api/products + /api/sales/top-products).
+async function fetchProductosReales() {
+  try {
+    const token = localStorage.getItem('volvix_token') || '';
+    const { from, to } = getRange();
+    const params = new URLSearchParams({
+      from: from.toISOString().slice(0, 10),
+      to:   to.toISOString().slice(0, 10),
+    });
+    // Primero intenta endpoint específico de top-products con métricas
+    let res = await fetch('/api/sales/top-products?' + params.toString(), {
+      headers: { Authorization: 'Bearer ' + token },
+      credentials: 'include',
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const arr = Array.isArray(data) ? data : (data?.products || data?.items || []);
+      if (Array.isArray(arr) && arr.length) {
+        return arr.map(p => ({
+          nombre:    p.name || p.nombre || '—',
+          categoria: p.category || p.categoria || 'Sin categoría',
+          vendidos:  Number(p.qty || p.vendidos || p.sold || 0),
+          ingresos:  Number(p.revenue || p.ingresos || p.total || 0),
+          margen:    Number(p.margin || p.margen || 0),
+        }));
+      }
+    }
+    // Fallback: deriva top productos a partir del cache de ventas reales
+    const ventas = await getVentas();
+    if (Array.isArray(ventas) && ventas.length) {
+      const map = {};
+      ventas.forEach(v => {
+        (v.items || []).forEach(it => {
+          const k = it.nombre || it.name || '—';
+          if (!map[k]) map[k] = { nombre:k, categoria:it.categoria || it.category || 'Sin categoría', vendidos:0, ingresos:0, margen: it.margen || 0 };
+          map[k].vendidos += Number(it.qty || 1);
+          map[k].ingresos += Number((it.precio || it.price || 0) * (it.qty || 1));
+        });
+      });
+      return Object.values(map);
+    }
+  } catch {}
+  return [];
+}
+async function renderProductos() {
+  const productos = await fetchProductosReales();
+  if (!productos.length) {
+    const content = document.getElementById('mainContent');
+    content.innerHTML = `
+      <div class="card" style="padding:48px 24px;text-align:center">
+        <div style="font-size:48px;margin-bottom:12px">📦</div>
+        <h3 style="margin:0 0 8px;color:var(--text-1)">Aún no hay productos vendidos</h3>
+        <p style="color:var(--text-3);margin:0 0 16px">Cuando registres ventas, aquí verás tus productos top, ingresos y márgenes.</p>
+        <a href="/salvadorex-pos.html" class="btn primary" style="display:inline-block;padding:10px 18px;border-radius:8px;background:var(--navy);color:#fff;text-decoration:none;font-weight:600">Ir al POS →</a>
+      </div>`;
+    return;
+  }
+  _productosCache = productos;
 
   // Por categoría
   const cats = {};
@@ -1166,14 +1220,46 @@ function renderProductos() {
 // ══════════════════════════════════════════════
 // TAB: CLIENTES
 // ══════════════════════════════════════════════
-function renderClientes() {
-  const clientes = [
-    { nombre:'Ana Lucía Martínez', compras:156, total:94000, ticket:602, puntos:4720, ultima: Date.now()-43200000 },
-    { nombre:'María Elena Torres', compras:83,  total:28900, ticket:348, puntos:1250, ultima: Date.now()-86400000 },
-    { nombre:'Roberto García López',compras:47, total:12480, ticket:265, puntos:840,  ultima: Date.now()-259200000 },
-    { nombre:'Juan Antonio Pérez', compras:18,  total:4200,  ticket:233, puntos:320,  ultima: Date.now()-1209600000 },
-    { nombre:'Carlos Hernández',   compras:3,   total:280,   ticket:93,  puntos:0,    ultima: Date.now()-5184000000 },
-  ];
+// 2026-05-07 cleanup: hardcoded demo data removido, ahora desde API real /api/customers.
+async function fetchClientesReales() {
+  try {
+    const token = localStorage.getItem('volvix_token') || '';
+    const { from, to } = getRange();
+    const params = new URLSearchParams({
+      from: from.toISOString().slice(0, 10),
+      to:   to.toISOString().slice(0, 10),
+    });
+    const res = await fetch('/api/customers?' + params.toString(), {
+      headers: { Authorization: 'Bearer ' + token },
+      credentials: 'include',
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    const arr  = Array.isArray(data) ? data : (data?.customers || data?.clients || data?.items || []);
+    return (arr || []).map(c => ({
+      nombre:  c.name || c.nombre || '—',
+      compras: Number(c.purchases || c.compras || c.tickets || 0),
+      total:   Number(c.total || c.spent || 0),
+      ticket:  Number(c.avg_ticket || c.ticket || (c.total && c.purchases ? c.total/c.purchases : 0)),
+      puntos:  Number(c.points || c.puntos || 0),
+      ultima:  c.last_purchase || c.ultima || c.updated_at || Date.now(),
+    }));
+  } catch { return []; }
+}
+async function renderClientes() {
+  const clientes = await fetchClientesReales();
+  if (!clientes.length) {
+    const content = document.getElementById('mainContent');
+    content.innerHTML = `
+      <div class="card" style="padding:48px 24px;text-align:center">
+        <div style="font-size:48px;margin-bottom:12px">👥</div>
+        <h3 style="margin:0 0 8px;color:var(--text-1)">Aún no tienes clientes registrados</h3>
+        <p style="color:var(--text-3);margin:0 0 16px">Cuando registres ventas con clientes, aquí verás tu top de compradores frecuentes.</p>
+        <a href="/pos-clientes.html" class="btn primary" style="display:inline-block;padding:10px 18px;border-radius:8px;background:var(--navy);color:#fff;text-decoration:none;font-weight:600">Gestionar clientes →</a>
+      </div>`;
+    return;
+  }
+  _clientesCache = clientes;
 
   const content = document.getElementById('mainContent');
   content.innerHTML = `
@@ -1335,12 +1421,63 @@ async function renderMetodos() {
 // ══════════════════════════════════════════════
 // TAB: CAJEROS
 // ══════════════════════════════════════════════
-function renderCajeros() {
-  const cajeros = [
-    { nombre:'María López',  turno:'Mañana', tickets:187, total:48900, promedio:261, devoluciones:3 },
-    { nombre:'Carlos Ruiz',  turno:'Tarde',  tickets:143, total:38400, promedio:268, devoluciones:1 },
-    { nombre:'Ana Torres',   turno:'Mixto',  tickets:98,  total:22100, promedio:225, devoluciones:2 },
-  ];
+// 2026-05-07 cleanup: hardcoded demo data removido, ahora desde API real /api/cashiers o derivado de ventas.
+async function fetchCajerosReales() {
+  try {
+    const token = localStorage.getItem('volvix_token') || '';
+    const { from, to } = getRange();
+    const params = new URLSearchParams({
+      from: from.toISOString().slice(0, 10),
+      to:   to.toISOString().slice(0, 10),
+    });
+    const res = await fetch('/api/cashiers?' + params.toString(), {
+      headers: { Authorization: 'Bearer ' + token },
+      credentials: 'include',
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const arr  = Array.isArray(data) ? data : (data?.cashiers || data?.cajeros || data?.items || []);
+      if (Array.isArray(arr) && arr.length) {
+        return arr.map(c => ({
+          nombre:       c.name || c.nombre || '—',
+          turno:        c.shift || c.turno || 'General',
+          tickets:      Number(c.tickets || 0),
+          total:        Number(c.total || c.amount || 0),
+          promedio:     Number(c.avg_ticket || c.promedio || 0),
+          devoluciones: Number(c.returns || c.devoluciones || 0),
+        }));
+      }
+    }
+    // Fallback: derivar del cache de ventas
+    const ventas = await getVentas();
+    if (Array.isArray(ventas) && ventas.length) {
+      const map = {};
+      ventas.forEach(v => {
+        const k = v.cajero || '—';
+        if (!map[k]) map[k] = { nombre:k, turno:'General', tickets:0, total:0, promedio:0, devoluciones:0 };
+        map[k].tickets++;
+        map[k].total += Number(v.total || 0);
+      });
+      Object.values(map).forEach(m => { m.promedio = m.tickets ? Math.round(m.total / m.tickets) : 0; });
+      return Object.values(map);
+    }
+  } catch {}
+  return [];
+}
+async function renderCajeros() {
+  const cajeros = await fetchCajerosReales();
+  if (!cajeros.length) {
+    const content = document.getElementById('mainContent');
+    content.innerHTML = `
+      <div class="card" style="padding:48px 24px;text-align:center">
+        <div style="font-size:48px;margin-bottom:12px">🧑‍💼</div>
+        <h3 style="margin:0 0 8px;color:var(--text-1)">Aún no hay cajeros con ventas</h3>
+        <p style="color:var(--text-3);margin:0 0 16px">Cuando tu equipo registre ventas, aquí verás el rendimiento por cajero.</p>
+        <a href="/salvadorex-pos.html" class="btn primary" style="display:inline-block;padding:10px 18px;border-radius:8px;background:var(--navy);color:#fff;text-decoration:none;font-weight:600">Ir al POS →</a>
+      </div>`;
+    return;
+  }
+  _cajerosCache = cajeros;
 
   const content = document.getElementById('mainContent');
   content.innerHTML = `

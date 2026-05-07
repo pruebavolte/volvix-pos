@@ -906,25 +906,46 @@ function renderTenants(list){
 }
 
 // ============ TOP PRODUCTS ============
-const TOP_PRODS = [
-  {n:'Coca-Cola 600ml',q:284,r:8520},
-  {n:'Sabritas Original',q:198,r:3960},
-  {n:'Marlboro Rojo',q:142,r:8520},
-  {n:'Pan Bimbo Grande',q:124,r:4960},
-  {n:'Leche Lala 1L',q:118,r:3540},
-  {n:'Cerveza Tecate 6pk',q:96,r:14400},
-  {n:'Tortillas Maseca 1kg',q:87,r:1740},
-  {n:'Aceite Capullo 1L',q:64,r:3840}
-];
-document.getElementById('top-products').innerHTML = TOP_PRODS.map((P,i)=>`
-  <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-    <div style="width:24px;height:24px;border-radius:6px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px">${i+1}</div>
-    <div style="flex:1">
-      <div style="font-size:13px;font-weight:600">${P.n}</div>
-      <div style="font-size:11px;color:var(--muted)">${P.q} unidades</div>
-    </div>
-    <div style="font-weight:700;color:var(--green);font-size:13px">$${P.r.toLocaleString()}</div>
-  </div>`).join('');
+// 2026-05-07 cleanup: hardcoded demo data removido, ahora desde API real /api/sales/top-products.
+async function loadTopProducts(){
+  const el = document.getElementById('top-products');
+  if (!el) return;
+  let prods = [];
+  try {
+    const token = localStorage.getItem('volvix_token') || '';
+    const res = await fetch('/api/sales/top-products', {
+      headers: { Authorization: 'Bearer ' + token },
+      credentials: 'include',
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const arr = Array.isArray(data) ? data : (data?.products || data?.items || data?.top || []);
+      prods = (arr || []).map(p => ({
+        n: p.name || p.nombre || p.n || '—',
+        q: Number(p.qty || p.quantity || p.q || 0),
+        r: Number(p.revenue || p.total || p.r || 0),
+      })).slice(0, 8);
+    }
+  } catch {}
+  if (!prods.length) {
+    el.innerHTML = `<div style="padding:24px 12px;text-align:center;color:var(--muted);font-size:13px">
+      <div style="font-size:32px;margin-bottom:8px">📦</div>
+      Sin ventas registradas todavía.<br>
+      <span style="font-size:11px">Cuando tus tenants vendan, aquí aparecerán los productos top.</span>
+    </div>`;
+    return;
+  }
+  el.innerHTML = prods.map((P,i)=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="width:24px;height:24px;border-radius:6px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px">${i+1}</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600">${P.n}</div>
+        <div style="font-size:11px;color:var(--muted)">${P.q} unidades</div>
+      </div>
+      <div style="font-weight:700;color:var(--green);font-size:13px">$${P.r.toLocaleString()}</div>
+    </div>`).join('');
+}
+loadTopProducts();
 
 // ============ API HEALTH ============
 const APIS = [
@@ -949,22 +970,39 @@ document.getElementById('api-list').innerHTML = APIS.map(A=>{
 }).join('');
 
 // ============ RECENT SALES STREAM ============
-let salesArr = [];
-function pushSale(){
-  const items = ['Coca-Cola','Sabritas','Marlboro','Pan Bimbo','Leche Lala','Cerveza','Tortillas','Aceite'];
-  const tenant = ['V-Centro','V-Norte','V-Sur','V-Plaza','V-Express'];
-  const total = (Math.random()*450+25).toFixed(2);
-  const time = new Date().toLocaleTimeString('es-MX',{hour12:false});
-  salesArr.unshift({
-    id:'VTA-'+Math.floor(Math.random()*99999),
-    t:time,
-    item:items[Math.floor(Math.random()*items.length)],
-    qty:Math.ceil(Math.random()*5),
-    total,
-    ten:tenant[Math.floor(Math.random()*tenant.length)]
-  });
-  if(salesArr.length>15) salesArr.pop();
-  document.getElementById('recent-sales').innerHTML = salesArr.map(S=>`
+// 2026-05-07 cleanup: hardcoded demo data removido, ahora desde API real /api/sales/recent.
+async function loadRecentSales(){
+  const el = document.getElementById('recent-sales');
+  if (!el) return;
+  let salesArr = [];
+  try {
+    const token = localStorage.getItem('volvix_token') || '';
+    const res = await fetch('/api/sales/recent?limit=15', {
+      headers: { Authorization: 'Bearer ' + token },
+      credentials: 'include',
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const arr = Array.isArray(data) ? data : (data?.sales || data?.recent || data?.items || []);
+      salesArr = (arr || []).map(s => ({
+        id:    s.id || s.folio || ('VTA-' + Math.floor(Math.random()*99999)),
+        t:     s.time || (s.created_at ? new Date(s.created_at).toLocaleTimeString('es-MX',{hour12:false}) : ''),
+        item:  s.item || s.first_item || s.product || (Array.isArray(s.items) && s.items[0] ? (s.items[0].name || s.items[0].nombre) : '—'),
+        qty:   Number(s.qty || s.quantity || (Array.isArray(s.items) ? s.items.reduce((a,b)=>a+Number(b.qty||1),0) : 1)),
+        total: Number(s.total || s.amount || 0).toFixed(2),
+        ten:   s.tenant || s.tenant_name || s.tenant_code || '—',
+      }));
+    }
+  } catch {}
+  if (!salesArr.length) {
+    el.innerHTML = `<div style="padding:24px 12px;text-align:center;color:var(--muted);font-size:13px">
+      <div style="font-size:32px;margin-bottom:8px">🛒</div>
+      Sin ventas registradas todavía.<br>
+      <span style="font-size:11px">Cuando llegue una venta nueva aparecerá aquí en vivo.</span>
+    </div>`;
+    return;
+  }
+  el.innerHTML = salesArr.map(S=>`
     <div style="padding:10px;background:var(--bg3);border-radius:8px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;font-size:12px">
       <div>
         <div style="font-weight:700">${S.id}</div>
@@ -973,8 +1011,8 @@ function pushSale(){
       <div style="font-weight:800;color:var(--green);font-size:14px">$${S.total}</div>
     </div>`).join('');
 }
-for(let i=0;i<8;i++) pushSale();
-setInterval(pushSale, 3500);
+loadRecentSales();
+setInterval(loadRecentSales, 30000); // refresh cada 30s
 
 // ============ HEATMAP ============
 function renderHeat(){

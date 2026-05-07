@@ -4988,57 +4988,81 @@
   }
   const USERS = __buildInitialUsersFromSession();
 
-  /* ============ CATEGORÍAS Y QUICK-PICK (panel derecho POS) ============ */
-  const CATEGORIES = [
-    {key:'lacteos',    icon:'🥛', name:'Lácteos'},
-    {key:'bebidas',    icon:'🥤', name:'Bebidas'},
-    {key:'snacks',     icon:'🍿', name:'Snacks'},
-    {key:'enlatados',  icon:'🥫', name:'Enlatados'},
-    {key:'panaderia',  icon:'🍞', name:'Panadería'},
-    {key:'limpieza',   icon:'🧽', name:'Limpieza'},
-    {key:'frutas',     icon:'🍎', name:'Frutas y Verduras'},
-  ];
+  /* ============ CATEGORÍAS Y QUICK-PICK (panel derecho POS) ============
+     2026-05-07 cleanup: ya NO hay productos hardcodeados. Todo se carga
+     desde /api/products (Supabase real). Si el tenant no tiene productos
+     todavia, se muestra empty state limpio. */
+  let CATEGORIES = [];
+  let QUICKPICK = [];
+  let selectedCategory = null;
 
-  const QUICKPICK = [
-    // Lácteos
-    {cat:'lacteos',    icon:'🥛', name:'Leche Lala',    price:26, code:'750105', stock:54},
-    {cat:'lacteos',    icon:'🧀', name:'Queso Oax',     price:120, code:'750402', stock:12},
-    {cat:'lacteos',    icon:'🥣', name:'Yogurt',        price:18, code:'750420', stock:38},
-    {cat:'lacteos',    icon:'🥚', name:'Huevos',        price:32, code:'750500', stock:44},
-    {cat:'lacteos',    icon:'🧈', name:'Mantequilla',   price:45, code:'750430', stock:23},
-    {cat:'lacteos',    icon:'🍦', name:'Crema',         price:38, code:'750440', stock:17},
-    // Bebidas
-    {cat:'bebidas',    icon:'🥤', name:'Coca Cola',     price:38, code:'750205', stock:124},
-    {cat:'bebidas',    icon:'🍹', name:'Del Valle',     price:22, code:'750220', stock:58},
-    {cat:'bebidas',    icon:'💧', name:'Ciel 1L',       price:14, code:'750210', stock:96},
-    {cat:'bebidas',    icon:'🧃', name:'Boing',         price:12, code:'750215', stock:72},
-    // Snacks
-    {cat:'snacks',     icon:'🍿', name:'Palomitas',     price:15, code:'750701', stock:67},
-    {cat:'snacks',     icon:'🍪', name:'Galletas',      price:20, code:'750720', stock:45},
-    {cat:'snacks',     icon:'🥜', name:'Cacahuates',    price:18, code:'750730', stock:33},
-    {cat:'snacks',     icon:'🍫', name:'Chocolate',     price:24, code:'750740', stock:52},
-    // Enlatados
-    {cat:'enlatados',  icon:'🥫', name:'Atún',          price:35, code:'750801', stock:88},
-    {cat:'enlatados',  icon:'🫘', name:'Frijoles',      price:28, code:'750802', stock:63},
-    {cat:'enlatados',  icon:'🌽', name:'Elote',         price:22, code:'750803', stock:41},
-    {cat:'enlatados',  icon:'🍅', name:'Chiles',        price:26, code:'750804', stock:37},
-    // Panadería
-    {cat:'panaderia',  icon:'🍞', name:'Pan Bimbo',     price:24, code:'750600', stock:48},
-    {cat:'panaderia',  icon:'🥖', name:'Baguette',      price:18, code:'750610', stock:22},
-    {cat:'panaderia',  icon:'🥐', name:'Cuernito',      price:12, code:'750620', stock:36},
-    {cat:'panaderia',  icon:'🧁', name:'Mantecada',     price:8,  code:'750630', stock:54},
-    // Limpieza
-    {cat:'limpieza',   icon:'🧽', name:'Fabuloso',      price:42, code:'750901', stock:41},
-    {cat:'limpieza',   icon:'🧼', name:'Jabón',         price:15, code:'750910', stock:78},
-    {cat:'limpieza',   icon:'🧴', name:'Shampoo',       price:68, code:'750920', stock:25},
-    // Frutas
-    {cat:'frutas',     icon:'🍎', name:'Manzana kg',    price:35, code:'750302', stock:89},
-    {cat:'frutas',     icon:'🍌', name:'Plátano kg',    price:18, code:'750303', stock:112},
-    {cat:'frutas',     icon:'🍊', name:'Naranja kg',    price:22, code:'750304', stock:94},
-    {cat:'frutas',     icon:'🥑', name:'Aguacate',      price:15, code:'750305', stock:67},
-  ];
+  function __slugifyCat(s) {
+    return String(s || 'general').toLowerCase()
+      .normalize('NFD').replace(/\p{Diacritic}/gu, '')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'general';
+  }
 
-  let selectedCategory = 'lacteos';
+  // Iconos por nombre de categoria (fallback solo visual; no afecta logica)
+  const __CAT_ICONS = {
+    'lacteos': '🥛', 'lácteos': '🥛',
+    'bebidas': '🥤',
+    'snacks': '🍿', 'botanas': '🍿',
+    'enlatados': '🥫',
+    'panaderia': '🍞', 'panadería': '🍞', 'pan': '🍞',
+    'limpieza': '🧽',
+    'frutas y verduras': '🍎', 'frutas': '🍎', 'verduras': '🥦',
+    'carnes': '🥩', 'pollo': '🍗',
+    'mariscos': '🐟', 'pescados': '🐟',
+    'cremeria': '🧀', 'cremería': '🧀',
+    'abarrotes': '🛒',
+    'higiene': '🧴',
+    'farmacia': '💊', 'medicamentos': '💊',
+    'bebes': '👶', 'bebés': '👶',
+    'mascotas': '🐶',
+    'electronica': '📱', 'electrónica': '📱',
+    'general': '📦',
+  };
+  function __iconForCategory(name) {
+    const k = String(name || '').toLowerCase().trim();
+    return __CAT_ICONS[k] || __CAT_ICONS[__slugifyCat(name)] || '📦';
+  }
+
+  async function loadProductsFromAPI() {
+    try {
+      const token = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+      const r = await fetch('/api/products?limit=2000', { headers, credentials: 'include' });
+      if (!r.ok) { console.warn('[POS] loadProducts status:', r.status); return; }
+      const data = await r.json();
+      const products = Array.isArray(data) ? data : (data.products || []);
+      if (!Array.isArray(products) || products.length === 0) {
+        CATEGORIES = []; QUICKPICK = []; selectedCategory = null;
+        return;
+      }
+      // Construir CATEGORIES unicas desde products[*].category
+      const catMap = new Map();
+      products.forEach(p => {
+        const name = p.category || p.department || p.cat_name || 'General';
+        const key = __slugifyCat(name);
+        if (!catMap.has(key)) catMap.set(key, { key, name, icon: __iconForCategory(name) });
+      });
+      CATEGORIES = Array.from(catMap.values());
+      QUICKPICK = products.map(p => ({
+        cat: __slugifyCat(p.category || p.department || 'General'),
+        icon: p.icon || __iconForCategory(p.category || ''),
+        name: p.name || p.title || 'Producto sin nombre',
+        price: Number(p.price || p.unit_price || p.precio_venta || 0),
+        code: String(p.code || p.sku || p.barcode || p.id || ''),
+        stock: Number(p.stock || p.qty || p.cantidad || 0),
+      }));
+      if (CATEGORIES.length && !selectedCategory) selectedCategory = CATEGORIES[0].key;
+      // Tambien rellenamos CATALOG (usado por el modal de busqueda) si esta vacio
+      if (Array.isArray(CATALOG) && CATALOG.length === 0) {
+        QUICKPICK.forEach(p => CATALOG.push(p));
+      }
+    } catch (e) { console.warn('[POS] loadProducts error:', e); }
+  }
 
   const FF_TREE = [
     { key:'pos', icon:'🛒', name:'Punto de venta (F1)', desc:'Caja, cobro, tickets', on:true, children:[
@@ -8647,7 +8671,13 @@
 
   /* ============ CATEGORÍAS Y QUICK-PICK ============ */
   function renderCategories() {
-    $('#cat-list').innerHTML = CATEGORIES.map(c => `
+    const wrap = $('#cat-list');
+    if (!wrap) return;
+    if (!CATEGORIES.length) {
+      wrap.innerHTML = '<div style="padding: 16px 12px; text-align: center; color: var(--text-3); font-size: 12px; line-height: 1.5;">Aún no tienes categorías.<br><a href="/pos-config.html" style="color: var(--accent); text-decoration: underline;">Crear primer producto →</a></div>';
+      return;
+    }
+    wrap.innerHTML = CATEGORIES.map(c => `
       <button class="cat-item ${c.key === selectedCategory ? 'active' : ''}" data-cat="${c.key}" onclick="selectCategory('${c.key}')">
         <span class="ico">${c.icon}</span>
         <span>${c.name}</span>
@@ -8660,8 +8690,14 @@
     renderQuickPick();
   }
   function renderQuickPick() {
-    const items = QUICKPICK.filter(p => p.cat === selectedCategory);
-    $('#qp-grid').innerHTML = items.length === 0
+    const grid = $('#qp-grid');
+    if (!grid) return;
+    if (!QUICKPICK.length) {
+      grid.innerHTML = '<div style="grid-column: span 2; padding: 20px; text-align: center; color: var(--text-3); font-size: 11.5px;">Sin productos cargados.<br>Agrega tu primer producto desde Inventario.</div>';
+      return;
+    }
+    const items = selectedCategory ? QUICKPICK.filter(p => p.cat === selectedCategory) : QUICKPICK;
+    grid.innerHTML = items.length === 0
       ? '<div style="grid-column: span 2; padding: 20px; text-align: center; color: var(--text-3); font-size: 11.5px;">Sin productos en esta categoría</div>'
       : items.map(p => `
         <button class="qp-card" onclick="addQuickPick('${p.code}')" aria-label="${p.name} - ${fmt(p.price)}" title="${p.name} - ${fmt(p.price)}">
@@ -8688,7 +8724,8 @@
   }
 
   /* ============ INIT ============ */
-  window.addEventListener('DOMContentLoaded', () => {
+  window.addEventListener('DOMContentLoaded', async () => {
+    // Render inicial con placeholders (mientras carga el API)
     renderCart();
     renderInv();
     renderClientes();
@@ -8696,6 +8733,10 @@
     renderVentas();
     renderUsuarios();
     renderFFTree();
+    renderCategories();
+    renderQuickPick();
+    // 2026-05-07: cargar productos REALES desde Supabase y re-render
+    await loadProductsFromAPI();
     renderCategories();
     renderQuickPick();
     // Aplicar estado del tenant (controlado por el dueño del sistema)
