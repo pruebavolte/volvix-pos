@@ -2542,8 +2542,8 @@
     tryMount();
   });
 </script>
-  <script src="/volvix-uplift-wiring.js" async></script>
-  <script src="/volvix-error-reporter.js" async></script>
+  <script src="/volvix-uplift-wiring.js" defer></script>
+  <script src="/volvix-error-reporter.js" defer></script>
 </head>
 <body>
 
@@ -4603,41 +4603,15 @@
 <!-- ============ TOAST ============ -->
 <div id="toast" class="toast"></div>
 
-<!-- 2026-05-07 RADICAL perf fix: bridge.js (451KB) NO se carga eager.
-     Solo se inyecta tras la PRIMERA interaccion del usuario (click/keydown/scroll/touch)
-     o tras 8s de idle. Esto evita que parsear 451KB bloquee TTI en navegadores
-     tipo Firefox que mostraban "Esta pagina ralentiza Firefox". -->
-<script>
-(function () {
-  if (window.__vlxBridgeLazyLoaded) return;
-  var loaded = false;
-  function loadBridge() {
-    if (loaded) return; loaded = true; window.__vlxBridgeLazyLoaded = true;
-    var s = document.createElement('script');
-    s.src = '/volvix-pos-bridge.js';
-    s.async = true;
-    s.onerror = function () { console.warn('[bridge] load failed, retrying in 2s'); setTimeout(loadBridge, 2000); };
-    document.head.appendChild(s);
-    // Quita listeners cuando ya se cargo
-    ['click','keydown','scroll','touchstart','pointerdown','mousemove'].forEach(function (ev) {
-      window.removeEventListener(ev, loadBridge, { capture: true, passive: true });
-    });
-  }
-  // Triggers de primera interaccion
-  ['click','keydown','scroll','touchstart','pointerdown','mousemove'].forEach(function (ev) {
-    window.addEventListener(ev, loadBridge, { capture: true, passive: true, once: true });
-  });
-  // Failsafe: si el usuario no interactua en 8s, carga el bridge igual
-  if (typeof window.requestIdleCallback === 'function') {
-    window.requestIdleCallback(loadBridge, { timeout: 8000 });
-  } else {
-    setTimeout(loadBridge, 8000);
-  }
-})();
-</script>
+<!-- 2026-05-07 (rev2): bridge.js carga con defer NORMAL.
+     El lazy-on-click anterior rompia los handlers (el primer click se perdia
+     porque bridge.js bajaba DESPUES del click). El root cause real del freeze
+     era el feedback loop de i18n MutationObserver (commit 4c25be2), no el
+     tamano de bridge.js. Con i18n arreglado, bridge.js puede cargar normal. -->
+<script src="/volvix-pos-bridge.js" defer></script>
 <!-- 2026-05-06 perf: 452KB inline movido a archivo externo con defer -->
 
-<script src="volvix-i18n-wiring.js" async></script>
+<script src="volvix-i18n-wiring.js" defer></script>
 <link rel="stylesheet" href="volvix-shared.css">
 <script src="volvix-ui-badge.js" async></script>
 <script src="volvix-ui-colorpicker.js" async></script>
@@ -4700,7 +4674,7 @@
 <script src="volvix-ui-mindmap.js" async></script>
 <script src="volvix-ui-spreadsheet.js" async></script>
 <script src="volvix-ui-signature.js" async></script>
-<script src="volvix-real-data-loader.js" async></script>
+<script src="volvix-real-data-loader.js" defer></script>
 
 <!-- ============ R8c: Sale search + late invoice + reprint + CFDI cancel/refacturar ============ -->
 <script>
@@ -6199,7 +6173,7 @@ setTimeout(function(){
 })();
 }, 0);
 </script>
-<script src="/volvix-onboarding-wizard.js" async></script>
+<script src="/volvix-onboarding-wizard.js" defer></script>
 <!-- ================================================================
      VOICE ORDER SYSTEM — portado de pruebavolte/01123581321345589144233
      Usa Web Speech API nativa (Chrome/Edge). No requiere API keys.
