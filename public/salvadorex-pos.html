@@ -4704,6 +4704,8 @@
 
 <!-- ============ R8c: Sale search + late invoice + reprint + CFDI cancel/refacturar ============ -->
 <script>
+/* PERF 2026-05-07: defer to next tick to free main thread */
+setTimeout(function(){
 (function () {
   // Estado del módulo R8c
   var __r8c = {
@@ -5006,6 +5008,7 @@
     };
   }
 })();
+}, 0);
 </script>
 <!-- ============================================================ -->
 <!-- FIX-N5-B1 + FIX-N5-B2: Modales de verificación de pagos NIVEL 5 -->
@@ -5087,6 +5090,8 @@
 <style>@keyframes vlxApSpin { to { transform: rotate(360deg); } }</style>
 <script>
 /* FIX-N5-B1 + FIX-N5-B2  —  Verificación pagos transferencia / app-pago */
+/* PERF 2026-05-07: defer to next tick to free main thread */
+setTimeout(function(){
 (function () {
   'use strict';
   function _isManager() {
@@ -5289,6 +5294,7 @@
     _toast('Pago cancelado.', 'error');
   };
 })();
+}, 0);
 </script>
 <!-- R10c-B FIX-N3-5: Accessibility wiring (large text + high contrast + 1-tap) -->
 <script defer src="/volvix-pos-payments-integration.js"></script>
@@ -5306,6 +5312,8 @@
 
 <!-- 2026-05: wiring de los módulos previamente placeholders ahora funcionales -->
 <script>
+/* PERF 2026-05-07: defer to next tick to free main thread */
+setTimeout(function(){
 (function () {
   'use strict';
   function $(s, r) { return (r || document).querySelector(s); }
@@ -5680,6 +5688,7 @@
     e.preventDefault(); window.__vlxDeferredPwaPrompt = e;
   });
 })();
+}, 0);
 </script>
 
 <!-- ============ VISTA 2 LOYVERSE OVERLAY (clone) ============ -->
@@ -5725,6 +5734,8 @@
 </div>
 
 <script>
+/* PERF 2026-05-07: defer to next tick to free main thread */
+setTimeout(function(){
 (function() {
   'use strict';
 
@@ -5907,6 +5918,7 @@
     }
   }, false);
 })();
+}, 0);
 </script>
 
 <!-- ============ VISTA 3 OXXO OVERLAY (clone) ============ -->
@@ -5998,6 +6010,8 @@
 </div>
 
 <script>
+/* PERF 2026-05-07: defer to next tick to free main thread */
+setTimeout(function(){
 (function() {
   'use strict';
 
@@ -6183,6 +6197,7 @@
     }
   });
 })();
+}, 0);
 </script>
 <script src="/volvix-onboarding-wizard.js" defer></script>
 <!-- ================================================================
@@ -6193,6 +6208,8 @@
                       src/lib/services/elevenlabs.ts (parseVoiceCommand, fuzzySearchProduct)
      ================================================================ -->
 <script>
+/* PERF 2026-05-07: defer to next tick to free main thread */
+setTimeout(function(){
 (function() {
   'use strict';
 
@@ -6449,6 +6466,7 @@
   }
 
 })();
+}, 0);
 </script>
 </body>
 </html>
