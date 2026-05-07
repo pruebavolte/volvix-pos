@@ -2355,8 +2355,6 @@
 <!-- B41 perf: defer added — these expose window.volvix/window.VolvixSync but downstream
      consumers (lines 1309+ all use defer) run AFTER, so order is preserved. -->
 <script src="volvix-api.js" defer></script>
-<script src="volvix-sync.js" defer></script>
-<script src="volvix-sync-widget.js" defer></script>
 <!-- 2026-05-06 perf: 92 wiring scripts no esenciales removidos del POS
      (integraciones externas, AI, audit, gamification, etc.). Se cargan
      lazy on-demand cuando el user invoca esa feature. -->
@@ -2364,12 +2362,9 @@
 <script defer src="auth-helper.js"></script>
 <link rel="stylesheet" href="volvix-modals.css">
 <script defer src="volvix-modals.js"></script>
-<script defer src="volvix-ai-assistant.js"></script>
 <script src="volvix-pos-wiring.js" defer></script>
 <script src="volvix-pos-extra-wiring.js" defer></script>
 <!-- B19: búsqueda inteligente offline-first + barcode cascade -->
-<script src="volvix-product-search.js" defer></script>
-<script src="volvix-barcode-resolver.js" defer></script>
 <!-- R12-O-3-B FIX-O3-B-2: auto-trigger welcome wizard en first_login + banner pendiente -->
 <script defer>
   // R12-O-3-B FIX-O3-B-2 / FIX-O3-B-4
@@ -13518,30 +13513,10 @@
 
 <script src="volvix-i18n-wiring.js" defer></script>
 <link rel="stylesheet" href="volvix-shared.css">
-<script src="volvix-master-controller.js" defer></script>
-<script src="volvix-vertical-cafe.js" defer></script>
-<script src="volvix-vertical-carniceria.js" defer></script>
-<script src="volvix-vertical-estetica.js" defer></script>
-<script src="volvix-vertical-farmacia.js" defer></script>
-<script src="volvix-vertical-ferreteria.js" defer></script>
-<script src="volvix-vertical-floreria.js" defer></script>
-<script src="volvix-vertical-gym.js" defer></script>
-<script src="volvix-vertical-helado.js" defer></script>
-<script src="volvix-vertical-hotel.js" defer></script>
-<script src="volvix-vertical-lavanderia.js" defer></script>
-<script src="volvix-vertical-pizza.js" defer></script>
-<script src="volvix-vertical-ropa.js" defer></script>
-<script src="volvix-vertical-sushi.js" defer></script>
-<script src="volvix-vertical-tlapaleria.js" defer></script>
-<script src="volvix-vertical-vet.js" defer></script>
-<script src="volvix-ui-animations.js" defer></script>
 <script src="volvix-ui-badge.js" defer></script>
 <script src="volvix-ui-colorpicker.js" defer></script>
 <script src="volvix-ui-datepicker.js" defer></script>
 <script src="volvix-ui-drawer.js" defer></script>
-<script src="volvix-ui-empty.js" defer></script>
-<script src="volvix-ui-errors.js" defer></script>
-<script src="volvix-ui-form.js" defer></script>
 <script src="volvix-ui-modal.js" defer></script>
 <script src="volvix-ui-skeleton.js" defer></script>
 <script src="volvix-ui-splash.js" defer></script>
@@ -13564,16 +13539,6 @@
 <script src="volvix-ui-snackbar.js" defer></script>
 <script src="volvix-ui-tooltip.js" defer></script>
 <script src="volvix-ui-wizard.js" defer></script>
-<script src="volvix-vertical-buffet.js" defer></script>
-<script src="volvix-vertical-foodtruck.js" defer></script>
-<script src="volvix-vertical-joyeria.js" defer></script>
-<script src="volvix-vertical-libreria.js" defer></script>
-<script src="volvix-vertical-panaderia.js" defer></script>
-<script src="volvix-vertical-papeleria.js" defer></script>
-<script src="volvix-vertical-spa.js" defer></script>
-<script src="volvix-vertical-tabaqueria.js" defer></script>
-<script src="volvix-vertical-vinateria.js" defer></script>
-<script src="volvix-vertical-zapateria.js" defer></script>
 <script src="volvix-ui-spinner.js" defer></script>
 <script src="volvix-ui-contextmenu.js" defer></script>
 <script src="volvix-ui-editor.js" defer></script>
@@ -13583,34 +13548,12 @@
 <script src="volvix-ui-steps.js" defer></script>
 <script src="volvix-ui-timeline.js" defer></script>
 <script src="volvix-ui-treeview.js" defer></script>
-<script src="volvix-vertical-cafeinternet.js" defer></script>
-<script src="volvix-vertical-educacion.js" defer></script>
-<script src="volvix-vertical-eventos.js" defer></script>
-<script src="volvix-vertical-guarderia.js" defer></script>
-<script src="volvix-vertical-inmobiliaria.js" defer></script>
-<script src="volvix-vertical-mecanica.js" defer></script>
 <script src="volvix-workflow-closeday.js" defer></script>
 <script src="volvix-workflow-collections.js" defer></script>
 <script src="volvix-workflow-onboarding.js" defer></script>
 <script src="volvix-workflow-openday.js" defer></script>
 <script src="volvix-workflow-reconciliation.js" defer></script>
 <script src="volvix-workflow-restock.js" defer></script>
-<script src="volvix-changelog-auto.js" defer></script>
-<script src="volvix-keyboard-nav.js" defer></script>
-<script src="volvix-perf-monitor.js" defer></script>
-<script src="volvix-vertical-optometria.js" defer></script>
-<script src="volvix-vertical-dental.js" defer></script>
-<script src="volvix-vertical-pethotel.js" defer></script>
-<script src="volvix-vertical-autolavado.js" defer></script>
-<script src="volvix-vertical-parking.js" defer></script>
-<script src="volvix-vertical-cine.js" defer></script>
-<script src="volvix-vertical-karaoke.js" defer></script>
-<script src="volvix-vertical-bowling.js" defer></script>
-<script src="volvix-vertical-cantina.js" defer></script>
-<script src="volvix-vertical-disco.js" defer></script>
-<script src="volvix-vertical-fotografia.js" defer></script>
-<script src="volvix-vertical-tortilleria.js" defer></script>
-<script src="volvix-vertical-recauchutado.js" defer></script>
 <script src="volvix-ui-markdown.js" defer></script>
 <script src="volvix-ui-diff.js" defer></script>
 <script src="volvix-ui-colorwheel.js" defer></script>
@@ -13623,19 +13566,6 @@
 <script src="volvix-ui-charts-pro.js" defer></script>
 <script src="volvix-ui-map.js" defer></script>
 <script src="volvix-ui-phone.js" defer></script>
-<script src="volvix-pwa-install-prompt.js" defer></script>
-<script src="volvix-vertical-bicicletas.js" defer></script>
-<script src="volvix-vertical-funeraria.js" defer></script>
-<script src="volvix-vertical-notaria.js" defer></script>
-<script src="volvix-vertical-tintoreria.js" defer></script>
-<script src="volvix-vertical-paqueteria.js" defer></script>
-<script src="volvix-vertical-rentaequipo.js" defer></script>
-<script src="volvix-vertical-muebleria.js" defer></script>
-<script src="volvix-vertical-polleria.js" defer></script>
-<script src="volvix-vertical-pescaderia.js" defer></script>
-<script src="volvix-vertical-fruteria.js" defer></script>
-<script src="volvix-vertical-cremeria.js" defer></script>
-<script src="volvix-vertical-dulceria.js" defer></script>
 <script src="volvix-ui-fullcalendar.js" defer></script>
 <script src="volvix-ui-gantt.js" defer></script>
 <script src="volvix-ui-orgchart.js" defer></script>
@@ -13643,13 +13573,7 @@
 <script src="volvix-ui-pivot.js" defer></script>
 <script src="volvix-ui-mindmap.js" defer></script>
 <script src="volvix-ui-spreadsheet.js" defer></script>
-<script src="volvix-ui-form-designer.js" defer></script>
 <script src="volvix-ui-signature.js" defer></script>
-<script src="volvix-lighthouse-lite.js" defer></script>
-<script src="volvix-security-scan.js" defer></script>
-<script src="volvix-abtest-suite.js" defer></script>
-<script src="volvix-print-hub.js" defer></script>
-<script src="volvix-offline-queue.js" defer></script>
 <script src="volvix-real-data-loader.js" defer></script>
 
 <!-- ============ R8c: Sale search + late invoice + reprint + CFDI cancel/refacturar ============ -->
