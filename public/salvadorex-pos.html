@@ -182,10 +182,18 @@
   .hidden { display: none !important; }
   .mono { font-family: 'JetBrains Mono', monospace; }
 
-  /* ============ LOGIN ============ */
+  /* ============ LOGIN ============
+     2026-05-07: este login local de SalvadoreX (Usuario + Contraseña + chip
+     "SQLite local · v1.0.0") era un duplicado redundante. La autenticacion
+     real ya la hace /login.html (Volvix SSO). Si el usuario llega aqui sin
+     token valido, ssoCheck() redirige automaticamente a /login.html. Por
+     eso ocultamos esta pantalla con display:none — ya no debe verse nunca. */
   .login-screen {
+    display: none !important;
+  }
+  .__login-screen-orig {
     position: fixed; inset: 0;
-    display: flex; align-items: center; justify-content: center;
+    align-items: center; justify-content: center;
     background: linear-gradient(135deg, #1E3A8A 0%, #2D5F8F 40%, #EA580C 100%);
     padding: 20px;
     z-index: 1000;
@@ -236,7 +244,9 @@
 
   /* ============ APP LAYOUT ============ */
   .app { display: flex; flex-direction: column; height: 100vh; }
-  .app.login-active { display: none; }
+  /* 2026-05-07: login-active ya no oculta el app porque eliminamos el login
+     local de SalvadoreX. ssoCheck redirige a /login.html si no hay sesion. */
+  .app.login-active { /* display: none; */ }
 
   /* ============ TOPBAR ============ */
   .topbar {
