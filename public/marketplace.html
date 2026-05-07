@@ -148,7 +148,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="volvix-modals.css">
+<!-- 2026-05-06 perf: volvix-modals.css carga ASYNC (no bloquea render).
+     Truco: media=print -> onload cambia a all. Funciona en todo browser.
+     fallback noscript para usuarios sin JS. -->
+<link rel="stylesheet" href="volvix-modals.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="volvix-modals.css"></noscript>
 <script defer src="volvix-modals.js"></script>
 
 <style>
@@ -984,9 +988,12 @@
     .popular-grid{ grid-template-columns: repeat(2, 1fr); }
   }
 </style>
-<script src="volvix-api.js"></script>
-<script src="volvix-sync.js"></script>
-<script src="volvix-sync-widget.js"></script>
+<!-- 2026-05-06 perf: volvix-api.js, sync.js, sync-widget.js ahora con defer
+     para no bloquear el parser. Antes eran scripts sync que retrasaban el
+     LCP por ~1.6s. PageSpeed reportaba 'render-blocking' en estos 3. -->
+<script defer src="volvix-api.js"></script>
+<script defer src="volvix-sync.js"></script>
+<script defer src="volvix-sync-widget.js"></script>
 <script src="/volvix-uplift-wiring.js" defer></script>
 <script src="/volvix-error-reporter.js" defer></script>
 </head>
