@@ -3140,11 +3140,9 @@
           <div class="tbl-wrap">
             <table class="tbl">
               <thead><tr><th>Producto</th><th class="num">Vendidos</th><th class="num">Ingresos</th></tr></thead>
-              <tbody>
-                <tr><td class="primary-col">🥤 Coca Cola 600ml</td><td class="num">42</td><td class="num">$1,050</td></tr>
-                <tr><td class="primary-col">🍞 Pan dulce</td><td class="num">38</td><td class="num">$323</td></tr>
-                <tr><td class="primary-col">🥛 Leche Lala 1L</td><td class="num">22</td><td class="num">$616</td></tr>
-                <tr><td class="primary-col">🌾 Arroz</td><td class="num">14</td><td class="num">$448</td></tr>
+              <tbody id="dash-top-products-tbody">
+                <!-- 2026-05-07 cleanup: hardcoded demo data removido, ahora desde API real -->
+                <tr><td colspan="3" style="text-align:center;padding:20px;color:var(--text-3);font-size:12px">Sin ventas registradas todavía</td></tr>
               </tbody>
             </table>
           </div>
@@ -4526,10 +4524,9 @@
     <div class="modal-body" style="padding:20px;">
       <label style="font-size:12px;font-weight:600;color:var(--text-2);">Producto</label>
       <select id="granel-product" style="width:100%;margin:6px 0 14px;padding:10px;border:1px solid var(--border);border-radius:8px;">
-        <option>Queso Oaxaca · $180/kg</option>
-        <option>Jamón Virginia · $220/kg</option>
-        <option>Manzana · $45/kg</option>
-        <option>Tomate · $30/kg</option>
+        <!-- 2026-05-07 cleanup: hardcoded demo data removido, ahora desde API real
+             options se inyectan dinamicamente desde QUICKPICK filtrado por unit:'kg' -->
+        <option value="" data-price="0">Sin productos a granel — Crea uno con unidad "kg"</option>
       </select>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
         <div>
@@ -8739,6 +8736,7 @@
     await loadProductsFromAPI();
     renderCategories();
     renderQuickPick();
+    populateGranelSelect(); // poblar select de venta a granel desde productos reales
     // Aplicar estado del tenant (controlado por el dueño del sistema)
     VOLVIX.applyState(VOLVIX.getState());
     setTimeout(() => $('#barcode-input')?.focus(), 200);
@@ -9090,22 +9088,46 @@
     showToast('📡 Báscula: ' + peso + ' kg');
   }
   function addGranelToCart() {
-    const sel = $('#granel-product').selectedIndex;
-    const names = ['Queso Oaxaca', 'Jamón Virginia', 'Manzana', 'Tomate'];
-    const prices = [180, 220, 45, 30];
+    // 2026-05-07 cleanup: hardcoded names/prices removido, ahora desde el option seleccionado
+    const selectEl = $('#granel-product');
+    const opt = selectEl && selectEl.options[selectEl.selectedIndex];
+    if (!opt || !opt.value) { showToast('No hay productos a granel — crea uno primero'); return; }
+    const name = opt.dataset.name || opt.textContent.split(' · ')[0] || 'Producto a granel';
+    const price = parseFloat(opt.dataset.price || '0');
     const peso = parseFloat($('#granel-peso').value) || 0;
     if (peso <= 0) { showToast('Peso inválido'); return; }
-    const total = peso * prices[sel];
+    if (price <= 0) { showToast('Precio inválido'); return; }
+    const total = peso * price;
     CART.push({
       code: 'GRN' + Date.now(),
-      name: names[sel] + ' (' + peso + ' kg)',
+      name: name + ' (' + peso + ' kg)',
       price: total,
       qty: 1,
       stock: 999,
     });
     renderCart();
     closeModal('modal-granel');
-    showToast('+ ' + names[sel] + ' · ' + peso + 'kg');
+    showToast('+ ' + name + ' · ' + peso + 'kg');
+  }
+
+  // 2026-05-07 cleanup: poblar select de granel desde QUICKPICK (productos
+  // con unit/unidad === 'kg' o nombre que indique granel). Se llama despues
+  // de loadProductsFromAPI() o cada vez que se abre el modal granel.
+  function populateGranelSelect() {
+    const selectEl = document.getElementById('granel-product');
+    if (!selectEl) return;
+    const granelItems = (Array.isArray(QUICKPICK) ? QUICKPICK : []).filter(p => {
+      const u = String(p.unit || p.unidad || '').toLowerCase();
+      const n = String(p.name || '').toLowerCase();
+      return u === 'kg' || u === 'gramo' || u === 'g' || /\bkg\b|granel/.test(n);
+    });
+    if (!granelItems.length) {
+      selectEl.innerHTML = '<option value="" data-price="0">Sin productos a granel — crea uno con unidad "kg"</option>';
+      return;
+    }
+    selectEl.innerHTML = granelItems.map(p =>
+      `<option value="${p.code}" data-name="${(p.name||'').replace(/"/g,'&quot;')}" data-price="${p.price}">${(p.name||'').replace(/</g,'&lt;')} · ${fmt(p.price)}/kg</option>`
+    ).join('');
   }
 
   // R7b FIX-N3: este listener fue REMOVIDO. Sus atajos (F5, F9, F11, F12, Escape) se
