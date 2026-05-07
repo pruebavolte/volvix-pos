@@ -1729,12 +1729,25 @@
     } else {
       translateAll();
     }
-    // Re-traducir periódicamente para SPA dinámicas
-    setInterval(translateAll, 3000);
-    // MutationObserver para nodos nuevos
-    if (window.MutationObserver) {
-      const obs = new MutationObserver(() => translateAll());
-      obs.observe(document.body, { childList: true, subtree: true });
+    // 2026-05-07 PERF FIX: el setInterval+MutationObserver creaba un feedback
+    // loop CRITICO. Con 50+ scripts mutando el DOM en paralelo durante load,
+    // el observer disparaba translateAll() (4x querySelectorAll + TreeWalker)
+    // miles de veces, congelando el renderer (45+ segundos sin responder).
+    //
+    // Fix: si currentLang === 'es' (default), NO observamos NADA — no hay nada
+    // que traducir. Si es otro idioma, observamos con DEBOUNCE de 800ms para
+    // que el burst inicial de mutaciones se colapse a un solo translateAll().
+    if (currentLang !== 'es') {
+      // Solo recorrer DOM periodicamente cuando hay traduccion activa
+      setInterval(translateAll, 5000); // 5s en vez de 3s
+      if (window.MutationObserver) {
+        let _t = null;
+        const obs = new MutationObserver(() => {
+          if (_t) clearTimeout(_t);
+          _t = setTimeout(translateAll, 800); // debounce
+        });
+        obs.observe(document.body, { childList: true, subtree: true });
+      }
     }
   }
 
