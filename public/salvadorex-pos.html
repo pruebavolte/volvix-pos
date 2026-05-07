@@ -2357,6 +2357,9 @@
 <script src="volvix-api.js" defer></script>
 <script src="volvix-sync.js" defer></script>
 <script src="volvix-sync-widget.js" defer></script>
+<!-- 2026-05-06 perf: 92 wiring scripts no esenciales removidos del POS
+     (integraciones externas, AI, audit, gamification, etc.). Se cargan
+     lazy on-demand cuando el user invoca esa feature. -->
 <script src="volvix-wiring.js" defer></script>
 <script defer src="auth-helper.js"></script>
 <link rel="stylesheet" href="volvix-modals.css">
@@ -13500,86 +13503,32 @@
 
 </script>
 
-<script src="volvix-ai-real-wiring.js" defer></script>
 <script src="volvix-charts-wiring.js" defer></script>
 <script src="volvix-notifications-wiring.js" defer></script>
-<script src="volvix-backup-wiring.js" defer></script>
 <script src="volvix-logger-wiring.js" defer></script>
 <script src="volvix-offline-wiring.js" defer></script>
 <script src="volvix-reports-wiring.js" defer></script>
-<script src="volvix-onboarding-wiring.js" defer></script>
-<script src="volvix-pwa-wiring.js" defer></script>
 <script src="volvix-i18n-wiring.js" defer></script>
 <link rel="stylesheet" href="volvix-shared.css">
 <script src="volvix-theme-wiring.js" defer></script>
 <script src="volvix-shortcuts-wiring.js" defer></script>
 <script src="volvix-search-wiring.js" defer></script>
-<script src="volvix-voice-wiring.js" defer></script>
-<script src="volvix-gamification-wiring.js" defer></script>
 <script src="volvix-perf-wiring.js" defer></script>
-<script src="volvix-email-wiring.js" defer></script>
-<script src="volvix-webrtc-wiring.js" defer></script>
 <script src="volvix-master-controller.js" defer></script>
-<script src="volvix-calendar-wiring.js" defer></script>
 <script src="volvix-payments-wiring.js" defer></script>
-<script src="volvix-realtime-wiring.js" defer></script>
 <script src="volvix-currency-wiring.js" defer></script>
-<script src="volvix-loyalty-wiring.js" defer></script>
-<script src="volvix-tax-wiring.js" defer></script>
-<script src="volvix-webhooks-wiring.js" defer></script>
-<script src="volvix-audit-wiring.js" defer></script>
 <script src="volvix-cache-wiring.js" defer></script>
-<script src="volvix-queue-wiring.js" defer></script>
-<script src="volvix-fulltext-wiring.js" defer></script>
-<script src="volvix-recommendations-wiring.js" defer></script>
-<script src="volvix-subscriptions-wiring.js" defer></script>
-<script src="volvix-plugins-wiring.js" defer></script>
-<script src="volvix-compliance-wiring.js" defer></script>
-<script src="volvix-cs-wiring.js" defer></script>
-<script src="volvix-ratelimit-wiring.js" defer></script>
-<script src="volvix-ab-testing-wiring.js" defer></script>
-<script src="volvix-feedback-wiring.js" defer></script>
-<script src="volvix-inventory-ai-wiring.js" defer></script>
-<script src="volvix-workflow-wiring.js" defer></script>
-<script src="volvix-mobile-wiring.js" defer></script>
 <script src="volvix-barcode-wiring.js" defer></script>
 <script src="volvix-printer-wiring.js" defer></script>
 <script src="volvix-cashdrawer-wiring.js" defer></script>
-<script src="volvix-scale-wiring.js" defer></script>
-<script src="volvix-kds-wiring.js" defer></script>
-<script src="volvix-tables-wiring.js" defer></script>
-<script src="volvix-reservations-wiring.js" defer></script>
-<script src="volvix-delivery-wiring.js" defer></script>
-<script src="volvix-inventory-pro-wiring.js" defer></script>
-<script src="volvix-purchase-wiring.js" defer></script>
-<script src="volvix-accounting-wiring.js" defer></script>
-<script src="volvix-hr-wiring.js" defer></script>
-<script src="volvix-crm-wiring.js" defer></script>
-<script src="volvix-marketing-wiring.js" defer></script>
 <script src="volvix-coupons-wiring.js" defer></script>
 <script src="volvix-returns-wiring.js" defer></script>
-<script src="volvix-layaway-wiring.js" defer></script>
-<script src="volvix-service-wiring.js" defer></script>
-<script src="volvix-appointments-wiring.js" defer></script>
-<script src="volvix-heatmap-wiring.js" defer></script>
-<script src="volvix-anomaly-wiring.js" defer></script>
-<script src="volvix-bi-wiring.js" defer></script>
-<script src="volvix-forecasting-wiring.js" defer></script>
-<script src="volvix-multistore-wiring.js" defer></script>
 <script src="volvix-receipt-customizer-wiring.js" defer></script>
-<script src="volvix-quickactions-wiring.js" defer></script>
-<script src="volvix-health-wiring.js" defer></script>
-<script src="volvix-pricing-wiring.js" defer></script>
-<script src="volvix-signature-wiring.js" defer></script>
-<script src="volvix-maps-wiring.js" defer></script>
-<script src="volvix-photo-wiring.js" defer></script>
 <script src="volvix-permissions-wiring.js" defer></script>
 <script src="volvix-pin-wiring.js" defer></script>
 <script src="volvix-modifiers-wiring.js" defer></script>
 <script src="volvix-categories-wiring.js" defer></script>
 <script src="volvix-tags-wiring.js" defer></script>
-<script src="volvix-reminders-wiring.js" defer></script>
-<script src="volvix-cron-wiring.js" defer></script>
 <script src="volvix-vertical-cafe.js" defer></script>
 <script src="volvix-vertical-carniceria.js" defer></script>
 <script src="volvix-vertical-estetica.js" defer></script>
@@ -13611,12 +13560,7 @@
 <script src="volvix-ui-toggle.js" defer></script>
 <script src="volvix-ui-tour.js" defer></script>
 <!-- R8d FIX-M3+M4+M5: mobile responsive + touch + onboarding tour -->
-<script src="volvix-mobile-responsive-wiring.js" defer></script>
-<script src="volvix-wallet-wiring.js" defer></script>
-<script src="volvix-donations-wiring.js" defer></script>
-<script src="volvix-lottery-wiring.js" defer></script>
 <script src="volvix-stocktake-wiring.js" defer></script>
-<script src="volvix-drinks-wiring.js" defer></script>
 <script src="volvix-ui-accordion.js" defer></script>
 <script src="volvix-ui-avatar.js" defer></script>
 <script src="volvix-ui-banner.js" defer></script>
@@ -13641,7 +13585,6 @@
 <script src="volvix-vertical-tabaqueria.js" defer></script>
 <script src="volvix-vertical-vinateria.js" defer></script>
 <script src="volvix-vertical-zapateria.js" defer></script>
-<script src="volvix-fiscal-wiring.js" defer></script>
 <script src="volvix-ui-spinner.js" defer></script>
 <script src="volvix-ui-contextmenu.js" defer></script>
 <script src="volvix-ui-editor.js" defer></script>
@@ -13663,7 +13606,6 @@
 <script src="volvix-workflow-openday.js" defer></script>
 <script src="volvix-workflow-reconciliation.js" defer></script>
 <script src="volvix-workflow-restock.js" defer></script>
-<script src="volvix-a11y-wiring.js" defer></script>
 <script src="volvix-changelog-auto.js" defer></script>
 <script src="volvix-keyboard-nav.js" defer></script>
 <script src="volvix-perf-monitor.js" defer></script>
@@ -13692,9 +13634,6 @@
 <script src="volvix-ui-charts-pro.js" defer></script>
 <script src="volvix-ui-map.js" defer></script>
 <script src="volvix-ui-phone.js" defer></script>
-<script src="volvix-geofence-wiring.js" defer></script>
-<script src="volvix-webextensions-wiring.js" defer></script>
-<script src="volvix-routes-wiring.js" defer></script>
 <script src="volvix-pwa-install-prompt.js" defer></script>
 <script src="volvix-vertical-bicicletas.js" defer></script>
 <script src="volvix-vertical-funeraria.js" defer></script>
@@ -13714,39 +13653,12 @@
 <script src="volvix-ui-flowchart.js" defer></script>
 <script src="volvix-ui-pivot.js" defer></script>
 <script src="volvix-ui-mindmap.js" defer></script>
-<script src="volvix-telegram-wiring.js" defer></script>
-<script src="volvix-whatsapp-wiring.js" defer></script>
-<script src="volvix-stripe-wiring.js" defer></script>
-<script src="volvix-mercadopago-wiring.js" defer></script>
-<script src="volvix-paypal-wiring.js" defer></script>
-<script src="volvix-conekta-wiring.js" defer></script>
-<script src="volvix-clip-wiring.js" defer></script>
-<script src="volvix-quickbooks-wiring.js" defer></script>
 <script src="volvix-ui-spreadsheet.js" defer></script>
 <script src="volvix-ui-form-designer.js" defer></script>
 <script src="volvix-ui-signature.js" defer></script>
-<script src="volvix-mailchimp-wiring.js" defer></script>
-<script src="volvix-twilio-wiring.js" defer></script>
-<script src="volvix-sendgrid-wiring.js" defer></script>
-<script src="volvix-slack-wiring.js" defer></script>
-<script src="volvix-discord-wiring.js" defer></script>
-<script src="volvix-zapier-wiring.js" defer></script>
-<script src="volvix-google-analytics-wiring.js" defer></script>
-<script src="volvix-fb-pixel-wiring.js" defer></script>
-<script src="volvix-hotjar-wiring.js" defer></script>
-<script src="volvix-sentry-wiring.js" defer></script>
-<script src="volvix-intercom-wiring.js" defer></script>
-<script src="volvix-hubspot-wiring.js" defer></script>
-<script src="volvix-airtable-wiring.js" defer></script>
-<script src="volvix-notion-wiring.js" defer></script>
-<script src="volvix-trello-wiring.js" defer></script>
-<script src="volvix-asana-wiring.js" defer></script>
 <script src="volvix-lighthouse-lite.js" defer></script>
 <script src="volvix-security-scan.js" defer></script>
-<script src="volvix-seo-wiring.js" defer></script>
 <script src="volvix-abtest-suite.js" defer></script>
-<script src="volvix-indexeddb-wiring.js" defer></script>
-<script src="volvix-crypto-wiring.js" defer></script>
 <script src="volvix-print-hub.js" defer></script>
 <script src="volvix-offline-queue.js" defer></script>
 <script src="volvix-real-data-loader.js" defer></script>
@@ -14340,7 +14252,6 @@
 })();
 </script>
 <!-- R10c-B FIX-N3-5: Accessibility wiring (large text + high contrast + 1-tap) -->
-<script src="volvix-accessibility-wiring.js" defer></script>
 <script defer src="/volvix-pos-payments-integration.js"></script>
 <script defer src="/volvix-modules-wiring.js"></script>
 <script defer src="/volvix-owner-only-wiring.js"></script>
