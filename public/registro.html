@@ -813,7 +813,7 @@
               }
             } catch (_) {}
             setTimeout(function () {
-              try { window.location.href = state._redirect || '/mi-pos.html'; }
+              try { window.location.href = state._redirect || '/salvadorex-pos.html'; }
               catch (_) {}
             }, 1500);
           } else {
@@ -918,7 +918,7 @@
           // Mostramos el paso 3 (confetti + tenant_id) por ~1.8s y redirigimos solos.
           // Asi cumplimos: 1 solo login, automatico, directo a su POS.
           setTimeout(function () {
-            try { window.location.href = state._redirect || '/mi-pos.html'; }
+            try { window.location.href = state._redirect || '/salvadorex-pos.html'; }
             catch (_) {}
           }, 1800);
         } else {
@@ -1003,7 +1003,7 @@
     });
     $('#btnResend').addEventListener('click', resendOtp);
     $('#btnGoLauncher').addEventListener('click', function () {
-      window.location.href = state._redirect || '/mi-pos.html';
+      window.location.href = state._redirect || '/salvadorex-pos.html';
     });
 
     // OTP input — habilitar botón y auto-submit a los 6

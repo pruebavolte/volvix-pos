@@ -33389,11 +33389,11 @@ if (process.env.NODE_ENV === 'test') {
           tenant_name: business_name,
           business_type: giroNormalized,
         };
-        // 2026-05-06 (rev2): /salvadorex-pos.html cuelga el browser por su peso
-        // (810KB + 125 wirings). Redirigimos a /mi-pos.html que es un dashboard
-        // ligero (10KB sin deps) que muestra apps del tenant. Click en "Vender"
-        // abre el POS pesado solo si el user lo elige (lazy load on demand).
-        respPayload.redirect = '/mi-pos.html';
+        // 2026-05-06 (rev3): tenant nuevo entra DIRECTO al POS real. mi-pos.html
+        // fue un workaround que el usuario no quiere — la vision correcta es
+        // UN SOLO POS donde se activan/desactivan modulos via tenant_module_flags
+        // segun el giro del tenant. No paginas separadas inventadas.
+        respPayload.redirect = '/salvadorex-pos.html';
         respPayload.email_verification_pending = !emailSent;
         // Registrar sesion activa para que requireAuth() la valide via jti
         try {

@@ -2564,15 +2564,19 @@
 <div id="vlx-pos-splash" style="position:fixed;inset:0;z-index:2147483600;background:linear-gradient(135deg,#1E3A8A 0%,#2D5F8F 40%,#EA580C 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-family:-apple-system,Segoe UI,Roboto,sans-serif;transition:opacity .35s ease">
   <div style="background:#fff;color:#EA580C;font-weight:900;font-size:36px;width:78px;height:78px;display:flex;align-items:center;justify-content:center;border-radius:18px;box-shadow:0 14px 40px rgba(0,0,0,.25);letter-spacing:-.04em">S</div>
   <div style="margin-top:18px;font-size:24px;font-weight:700;letter-spacing:-.02em">Cargando tu sistema…</div>
-  <div style="margin-top:8px;font-size:14px;opacity:.85">Esto toma unos segundos la primera vez.</div>
+  <div style="margin-top:8px;font-size:14px;opacity:.85" id="vlx-splash-sub">Esto toma unos segundos la primera vez.</div>
   <div style="margin-top:28px;width:42px;height:42px;border:3px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:vlxsplashspin 1s linear infinite"></div>
+  <button id="vlx-splash-skip" style="margin-top:24px;background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.3);padding:9px 20px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;display:none">Continuar al sistema →</button>
   <style>
     @keyframes vlxsplashspin { to { transform: rotate(360deg); } }
     .vlx-splash-hide { opacity: 0 !important; pointer-events: none; }
+    #vlx-splash-skip:hover { background: rgba(255,255,255,.2) !important; }
   </style>
 </div>
 <script>
-  // Ocultar splash cuando todo este listo (window.load) o tras 8s timeout
+  // 2026-05-06: splash con failsafe agresivo + boton skip.
+  // Antes el failsafe era 8s pero el usuario reporto que se quedaba atorado.
+  // Ahora 3s + boton 'Continuar' visible desde el primer segundo.
   (function () {
     var splash = document.getElementById('vlx-pos-splash');
     if (!splash) return;
@@ -2581,18 +2585,29 @@
       if (hidden) return;
       hidden = true;
       try { splash.classList.add('vlx-splash-hide'); } catch (_) {}
-      setTimeout(function () { try { splash.remove(); } catch (_) {} }, 400);
+      setTimeout(function () { try { splash.remove(); } catch (_) {} }, 350);
     }
     // Si ya cargo, ocultar ya
     if (document.readyState === 'complete') {
-      setTimeout(hide, 200);
+      setTimeout(hide, 100);
     } else {
-      window.addEventListener('load', function () { setTimeout(hide, 200); });
+      // window.load + DOMContentLoaded (whichever first)
+      window.addEventListener('load', function () { setTimeout(hide, 100); });
+      document.addEventListener('DOMContentLoaded', function () { setTimeout(hide, 800); });
     }
-    // Tambien escuchar el evento de salvadorex (login completo) — lo dispara hideLogin()
-    document.addEventListener('volvix:login', function () { setTimeout(hide, 200); });
-    // Failsafe: 8s max para no atrapar al usuario
-    setTimeout(hide, 8000);
+    document.addEventListener('volvix:login', function () { setTimeout(hide, 100); });
+    // Failsafe agresivo: 3s max
+    setTimeout(hide, 3000);
+    // Boton skip visible despues de 1s — el user puede saltar la espera
+    setTimeout(function () {
+      var btn = document.getElementById('vlx-splash-skip');
+      var sub = document.getElementById('vlx-splash-sub');
+      if (btn) {
+        btn.style.display = 'inline-block';
+        btn.addEventListener('click', hide);
+      }
+      if (sub) sub.textContent = 'Si tarda mucho, presiona el boton para continuar.';
+    }, 1000);
   })();
 </script>
 
