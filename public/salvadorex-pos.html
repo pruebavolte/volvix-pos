@@ -14269,6 +14269,15 @@
 <!-- R10c-B FIX-N3-5: Accessibility wiring (large text + high contrast + 1-tap) -->
 <script defer src="/volvix-pos-payments-integration.js"></script>
 <script defer src="/volvix-modules-wiring.js"></script>
+<!-- 2026-05-06: wiring que activa/desactiva modulos del POS por tenant.
+     Lee GET /api/tenant/active-modules con el JWT del user, mapea contra
+     data-module / data-menu / data-feature de los menu-btn y aplica:
+       state='hidden' -> remove del DOM
+       state='locked' -> overlay candado + modal "Habla con ventas"
+       state='enabled' -> visible normal (default)
+     Asi cada giro ve solo los modulos que necesita SIN crear paginas
+     diferentes — UN solo POS, configurado dinamicamente. -->
+<script defer src="/volvix-module-flags-wiring.js"></script>
 <script defer src="/volvix-owner-only-wiring.js"></script>
 
 <!-- 2026-05: wiring de los módulos previamente placeholders ahora funcionales -->

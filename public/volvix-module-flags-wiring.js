@@ -173,9 +173,15 @@
     var hasButtonFlags = flags.buttons && Object.keys(flags.buttons).length > 0;
     if (!hasModuleFlags && !hasButtonFlags && flags.defaults_open) return;
 
-    // Aplicar a módulos: <* data-module="X">
-    document.querySelectorAll('[data-module]').forEach(function (el) {
-      var key = el.getAttribute('data-module');
+    // Aplicar a módulos. 2026-05-06: el POS (salvadorex-pos.html) ya tiene
+    // data-menu="X" en sus menu-btn. Lo reconocemos como key de modulo tambien
+    // para evitar editar HTML. Tambien data-feature="module.X" (ya presente).
+    var modSelectors = '[data-module],[data-menu],[data-feature^="module."]';
+    document.querySelectorAll(modSelectors).forEach(function (el) {
+      var key = el.getAttribute('data-module') ||
+                el.getAttribute('data-menu') ||
+                (el.getAttribute('data-feature') || '').replace(/^module\./, '');
+      if (!key) return;
       var f = flags.modules && flags.modules[key];
       // Si no hay flag para este módulo, defecto = enabled
       if (!f) return;
