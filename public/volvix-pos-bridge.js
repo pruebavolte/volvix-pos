@@ -3,7 +3,15 @@
    Asi el HTML parsea rapido, splash pinta, este script ejecuta
    tras DOMContentLoaded sin bloquear el render. */
 
-  /* ============================================================
+// 2026-05-06: el body original (462KB) ejecutaba sincronicamente bloqueando
+// el main thread por varios segundos. Lo envolvemos en requestIdleCallback
+// (fallback setTimeout 50ms) para que el browser tenga oportunidad de pintar
+// el splash + UI inicial ANTES de ejecutar este modulo. El user ve la pagina
+// inmediato; el modulo se inicializa cuando el browser este idle.
+(function () {
+  function _runVolvixBridge() {
+    try {
+      /* ============================================================
      VOLVIX BRIDGE · Comunicación con el panel del dueño del sistema
      Usa localStorage (persistencia) + BroadcastChannel (tiempo real)
      ============================================================ */
@@ -8907,4 +8915,13 @@
     wrapped.__b43Wrapped = true;
     window.showScreen = wrapped;
   })();
-
+    } catch (err) {
+      console.error('[volvix-pos-bridge] init error:', err);
+    }
+  }
+  if (typeof window.requestIdleCallback === 'function') {
+    window.requestIdleCallback(_runVolvixBridge, { timeout: 2000 });
+  } else {
+    setTimeout(_runVolvixBridge, 50);
+  }
+})();
