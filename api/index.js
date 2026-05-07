@@ -33389,11 +33389,12 @@ if (process.env.NODE_ENV === 'test') {
           tenant_name: business_name,
           business_type: giroNormalized,
         };
-        // 2026-05-06 (rev3): tenant nuevo entra DIRECTO al POS real. mi-pos.html
-        // fue un workaround que el usuario no quiere — la vision correcta es
-        // UN SOLO POS donde se activan/desactivan modulos via tenant_module_flags
-        // segun el giro del tenant. No paginas separadas inventadas.
-        respPayload.redirect = '/salvadorex-pos.html';
+        // 2026-05-06 (rev4): salvadorex-pos.html (335KB + 451KB inline)
+        // ralentiza Firefox ('Esta pagina ralentiza Firefox'). El usuario
+        // confirmo que multipos-suite.html (166KB, 40KB inline) tiene los
+        // mismos modulos (Vender, Inventario, Reportes, Corte, Clientes,
+        // Config) pero es mucho mas ligera. Redirect a esta.
+        respPayload.redirect = '/multipos-suite.html';
         respPayload.email_verification_pending = !emailSent;
         // Registrar sesion activa para que requireAuth() la valide via jti
         try {
