@@ -852,6 +852,9 @@
 
   /* ───────────────────────── Panel flotante ───────────────────────── */
   function injectFloatingPanel() {
+    // 2026-05-07 cleanup: FAB deshabilitado, gateado por feature flag.
+    // Para re-habilitar: window.VOLVIX_MULTIPOS_FAB = true antes de cargar.
+    if (window.VOLVIX_MULTIPOS_FAB !== true) return;
     if (document.getElementById('mp-extra-panel')) return;
     const panel = document.createElement('div');
     panel.id = 'mp-extra-panel';

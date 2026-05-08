@@ -507,6 +507,9 @@
   }
 
   function createButtons() {
+    // 2026-05-07 cleanup: FAB deshabilitado, gateado por feature flag.
+    // Para re-habilitar: window.VOLVIX_BACKUP_FAB = true antes de cargar.
+    if (window.VOLVIX_BACKUP_FAB !== true) return;
     if (document.getElementById('volvix-backup-ui')) return;
     const container = document.createElement('div');
     container.id = 'volvix-backup-ui';

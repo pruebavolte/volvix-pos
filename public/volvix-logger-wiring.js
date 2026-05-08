@@ -443,6 +443,9 @@
   }
 
   function createButton() {
+    // 2026-05-07 cleanup: FAB deshabilitado, gateado por feature flag.
+    // Para re-habilitar: window.VOLVIX_LOGGER_FAB = true antes de cargar.
+    if (window.VOLVIX_LOGGER_FAB !== true) return;
     if (document.getElementById('logger-fab')) return;
     const btn = document.createElement('button');
     btn.id = 'logger-fab';

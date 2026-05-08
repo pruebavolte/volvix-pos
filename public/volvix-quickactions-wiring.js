@@ -364,6 +364,9 @@
   // ───────────────────────────────────────────────────────────
   var QuickActionsAPI = {
     mount: function (containerSelector) {
+      // 2026-05-07 cleanup: barra inferior de QuickActions deshabilitada por
+      // feature flag. Para re-habilitar: window.VOLVIX_QUICKACTIONS_FAB = true.
+      if (global.VOLVIX_QUICKACTIONS_FAB !== true) return;
       if (state.mounted) return;
       injectStyles();
       var doc = global.document;

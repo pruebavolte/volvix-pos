@@ -115,6 +115,9 @@
   }
 
   function buildFab() {
+    // 2026-05-07 cleanup: FAB deshabilitado, gateado por feature flag.
+    // Para re-habilitar: window.VOLVIX_WHATSAPP_FAB = true antes de cargar.
+    if (window.VOLVIX_WHATSAPP_FAB !== true) return;
     if (document.getElementById('vlx-wa-fab')) return;
     var b = document.createElement('button');
     b.id = 'vlx-wa-fab';

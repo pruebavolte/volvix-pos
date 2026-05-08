@@ -445,6 +445,10 @@
 
   // ─────────────────────── HELP BUTTON ──────────────────────────
   function createHelpButton() {
+    // 2026-05-07 cleanup: FAB deshabilitado, gateado por feature flag.
+    // Duplica el FAB de helpdesk (Ayuda). Para re-habilitar:
+    // window.VOLVIX_ONBOARDING_HELP_FAB = true antes de cargar.
+    if (window.VOLVIX_ONBOARDING_HELP_FAB !== true) return;
     if (document.getElementById('volvix-help-btn')) return;
     const btn = document.createElement('button');
     btn.id = 'volvix-help-btn';

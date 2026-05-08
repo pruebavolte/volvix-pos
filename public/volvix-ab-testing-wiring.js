@@ -517,8 +517,11 @@
   }
 
   // Auto-trigger dashboard via querystring ?abdash=1
+  // 2026-05-07 cleanup: FAB/dashboard flotante adicionalmente gateado por
+  // feature flag. Para re-habilitar: window.VOLVIX_ABTEST_DASHBOARD_FAB = true.
   try {
-    if (global.location && /[?&]abdash=1/.test(global.location.search)) {
+    if (global.VOLVIX_ABTEST_DASHBOARD_FAB === true &&
+        global.location && /[?&]abdash=1/.test(global.location.search)) {
       global.addEventListener && global.addEventListener('load', function () {
         var div = global.document.createElement('div');
         div.id = 'volvix-abtest-dashboard';

@@ -275,6 +275,9 @@
   // 8. BOTÓN RÁPIDO 💰
   // -------------------------------------------------------------------------
   function mountQuickButton(target) {
+    // 2026-05-07 cleanup: FAB deshabilitado, gateado por feature flag.
+    // Para re-habilitar: window.VOLVIX_CASHDRAWER_FAB = true antes de cargar.
+    if (window.VOLVIX_CASHDRAWER_FAB !== true) return null;
     if (typeof document === 'undefined') return null;
     const host = target || document.body;
     if (!host) return null;

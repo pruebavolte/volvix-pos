@@ -439,6 +439,9 @@
 
   // ----- volvix_ai_academy.html: no chat surface — inject floating widget --
   function setupAcademyAi() {
+    // 2026-05-07 cleanup: FAB deshabilitado, gateado por feature flag.
+    // Para re-habilitar: window.VOLVIX_ACADEMY_AI_FAB = true antes de cargar.
+    if (window.VOLVIX_ACADEMY_AI_FAB !== true) return;
     if (document.getElementById('vlx-academy-ai')) return;
     // Pre-launch: avatar/IA flotante (círculo con bot) deshabilitado.
     // Solo se activa con ?debug=1 o si la página opta-in con <body data-vlx-academy-ai="1">.

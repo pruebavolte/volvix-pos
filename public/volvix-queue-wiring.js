@@ -412,6 +412,9 @@
   }
 
   function buildPanel() {
+    // 2026-05-07 cleanup: FAB deshabilitado, gateado por feature flag.
+    // Para re-habilitar: window.VOLVIX_QUEUE_FAB = true antes de cargar.
+    if (window.VOLVIX_QUEUE_FAB !== true) return;
     if (panelEl) return;
     ensurePanelStyles();
 

@@ -165,6 +165,9 @@
   // UI: Botón + onda + transcripción
   // ═══════════════════════════════════════════════════════════════
   function buildUI() {
+    // 2026-05-07 cleanup: FAB deshabilitado, gateado por feature flag.
+    // Para re-habilitar: window.VOLVIX_VOICE_FAB = true antes de cargar.
+    if (window.VOLVIX_VOICE_FAB !== true) return;
     // Botón micrófono
     const btn = document.createElement('button');
     btn.className = 'volvix-mic-btn';

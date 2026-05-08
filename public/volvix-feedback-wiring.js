@@ -413,6 +413,9 @@
     _emit(evt, data) { (this.listeners[evt] || []).forEach(fn => { try { fn(data); } catch {} }); }
 
     _renderButton() {
+      // 2026-05-07 cleanup: FAB deshabilitado, gateado por feature flag.
+      // Para re-habilitar: window.VOLVIX_FEEDBACK_FAB = true antes de cargar.
+      if (window.VOLVIX_FEEDBACK_FAB !== true) return;
       this.button = $('button', {
         class: 'vfb-btn',
         'aria-label': this.t.buttonLabel,
