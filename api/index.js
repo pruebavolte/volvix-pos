@@ -36421,13 +36421,13 @@ if (process.env.NODE_ENV === 'test') {
       if (saveError) {
         return sendJSON(res, { ok: false, error: 'persist_failed', detail: saveError }, 500);
       }
-      // Audit (best-effort)
+      // Audit (best-effort) — scope CHECK permite solo {tenant,role,user}
       supabaseRequest('POST', '/feature_flag_audit', {
-        tenant_id: tid, scope: 'module', scope_ref: moduleKey, module_key: moduleKey,
+        tenant_id: tid, scope: 'tenant', scope_ref: 'module:' + moduleKey, module_key: moduleKey,
         old_status: oldState, new_status: newState,
         changed_by: req.user?.id || null,
         changed_at: new Date().toISOString(),
-        note: 'PERM panel toggle',
+        note: 'PERM panel toggle module',
       }).catch(() => null);
       sendJSON(res, { ok: true, module: saved && saved[0] ? saved[0] : row });
     } catch (err) { sendError(res, err); }
@@ -36463,7 +36463,7 @@ if (process.env.NODE_ENV === 'test') {
         return sendJSON(res, { ok: false, error: 'persist_failed', detail: saveError }, 500);
       }
       supabaseRequest('POST', '/feature_flag_audit', {
-        tenant_id: tid, scope: 'button', scope_ref: buttonKey, module_key: buttonKey,
+        tenant_id: tid, scope: 'tenant', scope_ref: 'button:' + buttonKey, module_key: buttonKey,
         old_status: oldState, new_status: newState,
         changed_by: req.user?.id || null,
         changed_at: new Date().toISOString(),

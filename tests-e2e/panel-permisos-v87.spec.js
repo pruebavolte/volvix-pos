@@ -258,13 +258,19 @@ test('14. UI: tab Jerarquía muestra superadmin + tenants + empleados', async ({
   }, TOKEN);
   await page.goto(BASE + '/salvadorex-pos.html#permisos', { waitUntil: 'domcontentloaded' });
   await page.waitForSelector('#perm-tab-hierarchy', { timeout: 10000 });
-  // Quitar onboarding overlay si reapareció (lo añade un script tras el goto)
+  // Bypass onboarding y disparar la pestaña directo via JS API (evita overlay)
   await page.evaluate(() => {
     const ov = document.getElementById('volvix-onboarding-overlay');
     if (ov) ov.remove();
+    if (window.PERM && typeof window.PERM.showTab === 'function') {
+      window.PERM.showTab('hierarchy', document.getElementById('perm-tab-hierarchy'));
+    }
   });
-  await page.click('#perm-tab-hierarchy', { force: true });
-  await page.waitForTimeout(3000); // dejar que loadHierarchy termine
+  // Esperar a que el tree termine de renderizar (no quede en "Cargando…")
+  await page.waitForFunction(() => {
+    const el = document.getElementById('perm-hierarchy-tree');
+    return el && !el.textContent.trim().startsWith('Cargando');
+  }, { timeout: 15000 });
   const treeText = await page.textContent('#perm-hierarchy-tree');
   console.log('  primeros 200 chars:', treeText.slice(0, 200));
   expect(treeText).toContain('PLATFORM OWNERS');
