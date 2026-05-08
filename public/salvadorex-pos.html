@@ -3031,7 +3031,7 @@
           <span>Asignar cliente</span>
         </button>
 
-        <button class="btn-cobrar" data-vlx-button="F12_cobrar" onclick="openPayment()">
+        <button class="btn-cobrar" data-vlx-button="F12_cobrar" data-feature="pos.cobrar" onclick="openPayment()">
           <svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="#27AE60" stroke="#27AE60" stroke-width="2"><circle cx="12" cy="12" r="10" fill="#27AE60"/><path d="M12 6v12M9 9h6M9 15h6" stroke="white" fill="none" stroke-width="2"/></svg>
           <span>F12 - Cobrar</span>
         </button>
@@ -3709,6 +3709,81 @@
             <thead><tr><th>Usuario</th><th>Rol</th><th>Email</th><th>Última conexión</th><th>Estado</th><th></th></tr></thead>
             <tbody id="usr-body"></tbody>
           </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PERMISOS (Super Admin only) ============
+         2026-05-08: panel del platform-owner para activar/desactivar modulos
+         y botones de OTROS tenants/usuarios. Se accede vía /salvadorex-pos.html#permisos
+         pero el contenido solo se renderea si el usuario es superadmin/platform_owner. -->
+    <section id="screen-permisos" class="screen-pad hidden">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">🛡️ Control de Permisos</h1>
+          <p class="page-sub">Activa o desactiva módulos y botones por tenant. Solo Platform Owner.</p>
+        </div>
+        <div class="btn-row">
+          <button class="btn" id="perm-refresh" onclick="window.PERM.reload()">🔄 Refrescar</button>
+          <button class="btn accent" id="perm-broadcast" onclick="window.PERM.broadcastNow()" title="Forzar push a tabs abiertas">📡 Broadcast en vivo</button>
+        </div>
+      </div>
+
+      <!-- Acceso denegado si no es superadmin -->
+      <div id="perm-denied" class="card card-pad hidden" style="text-align:center;padding:40px;">
+        <div style="font-size:48px;margin-bottom:12px;">🔒</div>
+        <h3 style="margin:0 0 8px;">Acceso restringido</h3>
+        <p style="color:var(--text-2);margin:0;">Solo el Platform Owner puede gestionar permisos de tenants.</p>
+      </div>
+
+      <!-- Selector de tenant + tabs (super admin) -->
+      <div id="perm-content" class="hidden">
+        <div class="card card-pad" style="margin-bottom:12px;">
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <label style="font-size:12.5px;font-weight:600;color:var(--text-2);">Tenant:</label>
+            <select id="perm-tenant-sel" class="btn" style="min-width:240px;"></select>
+            <span class="chip ok" id="perm-status-chip"><span class="dot"></span><span id="perm-status-text">active</span></span>
+            <select id="perm-status-sel" class="btn" style="min-width:140px;" onchange="window.PERM.changeStatus(this.value)">
+              <option value="active">✅ Activo</option>
+              <option value="suspended">⏸️ Suspendido</option>
+              <option value="revoked">🔒 Revocado</option>
+              <option value="expired">⏰ Vencido</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Tabs: Módulos / Botones -->
+        <div class="config-tabs" style="margin-bottom:10px;">
+          <button class="config-tab active" id="perm-tab-mods" onclick="window.PERM.showTab('mods', this)">📦 Módulos (24)</button>
+          <button class="config-tab" id="perm-tab-feats" onclick="window.PERM.showTab('feats', this)">🔘 Botones / Features (18)</button>
+          <button class="config-tab" id="perm-tab-users" onclick="window.PERM.showTab('users', this)">👤 Override por usuario</button>
+        </div>
+
+        <!-- Tab: Módulos -->
+        <div id="perm-pane-mods" class="card card-pad">
+          <p style="margin:0 0 14px;font-size:12.5px;color:var(--text-2);">Módulos disponibles para este tenant. Si los desactivas, desaparecen del POS de TODOS los usuarios del tenant.</p>
+          <div id="perm-mods-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;"></div>
+        </div>
+
+        <!-- Tab: Features/Botones -->
+        <div id="perm-pane-feats" class="card card-pad hidden">
+          <p style="margin:0 0 14px;font-size:12.5px;color:var(--text-2);">Botones individuales del POS. Si los desactivas, se ocultan del POS (clase <code>.ff-off</code>) o pueden quedar deshabilitados.</p>
+          <div id="perm-feats-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;"></div>
+        </div>
+
+        <!-- Tab: Override por usuario -->
+        <div id="perm-pane-users" class="card card-pad hidden">
+          <p style="margin:0 0 14px;font-size:12.5px;color:var(--text-2);">Permisos individuales que sobrescriben los del tenant. Útil para deshabilitar "Cobrar" SOLO a un cajero específico.</p>
+          <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+            <input id="perm-user-email" class="btn" type="email" placeholder="email del usuario" style="flex:1;min-width:220px;">
+            <select id="perm-user-key" class="btn" style="min-width:200px;"></select>
+            <select id="perm-user-status" class="btn">
+              <option value="deny">❌ Bloquear</option>
+              <option value="allow">✅ Permitir</option>
+            </select>
+            <button class="btn accent" onclick="window.PERM.addOverride()">+ Agregar override</button>
+          </div>
+          <div id="perm-users-list"></div>
         </div>
       </div>
     </section>
@@ -5150,6 +5225,9 @@
       'pos.catalogo': true, 'pos.granel': true, 'pos.descuento': true,
       'pos.recargas_btn': true, 'pos.servicios_btn': true, 'pos.calculadora': true,
       'pos.cambiar': true, 'pos.pendiente': true, 'pos.quickpick_panel': true,
+      // 2026-05-08: pos.cobrar agregado para que el platform-owner pueda
+      // desactivar el boton "F12 Cobrar" en tenants/usuarios especificos
+      'pos.cobrar': true,
       'ui.saas_btn': true
     },
     broadcast: null
@@ -5325,6 +5403,9 @@
 
   // Inicializar el bridge inmediatamente
   VOLVIX.init();
+  // 2026-05-08: exponer VOLVIX globalmente para que el panel de permisos
+  // (script separado al final del body) pueda llamar VOLVIX.getState/setState.
+  try { window.VOLVIX = VOLVIX; } catch(_) {}
 
   /* ============ DATA ============ */
   // 2026-05-06: arrays demo CATALOG/CART/CUSTOMERS/CREDIT/SALES eliminados.
@@ -17286,6 +17367,292 @@ window.addEventListener('volvix:version-loaded', function(e){
       }
     });
   }
+})();
+</script>
+
+<!-- ============================================================
+     2026-05-08: PANEL DE CONTROL DE PERMISOS (Platform Owner)
+     Permite al super-admin activar/desactivar modulos y botones
+     de cualquier tenant en tiempo real (BroadcastChannel sincroniza
+     todas las tabs abiertas del POS).
+     ============================================================ -->
+<script>
+(function () {
+  'use strict';
+
+  // Etiquetas amigables para cada modulo y feature
+  const MOD_LABELS = {
+    pos: '🛒 Punto de Venta', dashboard: '📊 Dashboard', apertura: '🔓 Apertura caja',
+    corte: '💼 Corte caja', inventario: '📦 Inventario', kardex: '📒 Kardex',
+    clientes: '👥 Clientes', credito: '💳 Crédito', proveedores: '🚚 Proveedores',
+    cotizaciones: '📝 Cotizaciones', devoluciones: '↩️ Devoluciones',
+    ventas: '🧾 Ventas', reportes: '📈 Reportes', facturacion: '📄 Facturación CFDI',
+    recargas: '📱 Recargas', servicios: '💡 Pago servicios', tarjetas: '🎬 Tarjetas virtuales',
+    promociones: '🎁 Promociones', departamentos: '🏢 Departamentos',
+    sugeridas: '🧠 Compras sugeridas', actualizador: '💱 Actualizador masivo',
+    usuarios: '👤 Gestión usuarios', config: '⚙️ Configuración',
+  };
+  const FEAT_LABELS = {
+    'pos.cobrar': '💵 F12 — Cobrar', 'pos.descuento': '% Descuento',
+    'pos.mayoreo': 'F11 — Mayoreo', 'pos.granel': '⚖ Granel',
+    'pos.calculadora': '🧮 Calculadora', 'pos.cambiar': 'F5 — Cambiar precio',
+    'pos.pendiente': 'F6 — Pendiente', 'pos.borrar': 'DEL — Borrar artículo',
+    'pos.buscar': 'F10 — Buscar', 'pos.entradas': 'F7 — Entradas',
+    'pos.salidas': 'F8 — Salidas', 'pos.verificador': 'F9 — Verificador',
+    'pos.panel': '📒 Panel categorías', 'pos.catalogo': '📷 Catálogo',
+    'pos.recargas_btn': '📱 Btn Recargas', 'pos.servicios_btn': '💡 Btn Servicios',
+    'pos.ins_varios': 'INS — Varios', 'pos.art_comun': 'CTRL+P Artículo común',
+    'pos.quickpick_panel': 'Panel QuickPick', 'ui.saas_btn': '👑 Btn SaaS Admin',
+  };
+
+  function getCurrentRole() {
+    try {
+      const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+      if (!tok) return '';
+      const p = JSON.parse(atob(tok.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+      return String(p.role || '').toLowerCase();
+    } catch(_) { return ''; }
+  }
+
+  function isPlatformOwner() {
+    const r = getCurrentRole();
+    return r === 'superadmin' || r === 'platform_owner';
+  }
+
+  // PERM API
+  const PERM = {
+    init() {
+      const denied = document.getElementById('perm-denied');
+      const content = document.getElementById('perm-content');
+      if (!denied || !content) return;
+      if (!isPlatformOwner()) {
+        denied.classList.remove('hidden');
+        content.classList.add('hidden');
+        return;
+      }
+      denied.classList.add('hidden');
+      content.classList.remove('hidden');
+      this.loadTenants();
+      this.populateUserKeySelect();
+    },
+
+    loadTenants() {
+      const sel = document.getElementById('perm-tenant-sel');
+      if (!sel) return;
+      // Por ahora: el tenant actual (mas adelante extender via /api/admin/tenants)
+      const currentTid = (window.VOLVIX && VOLVIX.getState && VOLVIX.getState().id) || 'TNT001';
+      const currentName = (window.VOLVIX && VOLVIX.getState && VOLVIX.getState().name) || 'Mi negocio';
+      sel.innerHTML = '<option value="' + currentTid + '">' + currentName + ' (' + currentTid + ')</option>';
+      sel.onchange = () => this.renderForTenant(sel.value);
+      this.renderForTenant(currentTid);
+    },
+
+    // Default modulos/features por si el state actual no los tiene
+    // (puede pasar si ssoCheck sobrescribio el state con solo 5 campos).
+    DEFAULT_MODS: {
+      pos:true, dashboard:true, apertura:true, corte:true, inventario:true,
+      kardex:true, clientes:true, credito:true, proveedores:true, cotizaciones:true,
+      devoluciones:true, ventas:true, reportes:true, facturacion:false,
+      recargas:true, servicios:true, tarjetas:false, promociones:true,
+      departamentos:true, sugeridas:false, actualizador:true, usuarios:true, config:true,
+    },
+    DEFAULT_FEATS: {
+      'pos.cobrar':true, 'pos.descuento':true, 'pos.mayoreo':true, 'pos.granel':true,
+      'pos.calculadora':true, 'pos.cambiar':true, 'pos.pendiente':true, 'pos.borrar':true,
+      'pos.buscar':true, 'pos.entradas':true, 'pos.salidas':true, 'pos.verificador':true,
+      'pos.panel':true, 'pos.catalogo':true, 'pos.recargas_btn':true, 'pos.servicios_btn':true,
+      'pos.ins_varios':true, 'pos.art_comun':true, 'pos.quickpick_panel':true, 'ui.saas_btn':true,
+    },
+
+    // Garantiza que state tenga modules + features (merge con defaults)
+    ensureFullState() {
+      let state = window.VOLVIX && VOLVIX.getState ? VOLVIX.getState() : {};
+      if (!state.modules || Object.keys(state.modules).length === 0) {
+        state.modules = Object.assign({}, this.DEFAULT_MODS);
+      }
+      if (!state.features || Object.keys(state.features).length === 0) {
+        state.features = Object.assign({}, this.DEFAULT_FEATS);
+      }
+      if (!state.id) state.id = state.tenantId || 'TNT001';
+      if (!state.name) state.name = state.tenantName || 'Mi negocio';
+      if (!state.status) state.status = 'active';
+      VOLVIX.setState(state);
+      return state;
+    },
+
+    renderForTenant(tid) {
+      const state = this.ensureFullState();
+      if (!state) return;
+      // Status
+      const statusSel = document.getElementById('perm-status-sel');
+      const statusChip = document.getElementById('perm-status-chip');
+      const statusText = document.getElementById('perm-status-text');
+      if (statusSel) statusSel.value = state.status || 'active';
+      if (statusText) statusText.textContent = state.status || 'active';
+      if (statusChip) {
+        statusChip.className = 'chip ' + (state.status === 'active' ? 'ok' : 'err');
+      }
+      // Modulos
+      const modsGrid = document.getElementById('perm-mods-grid');
+      if (modsGrid) {
+        modsGrid.innerHTML = Object.keys(state.modules || {}).map(k => {
+          const on = !!state.modules[k];
+          return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--surface-2,#f5f5f4);border-radius:8px;border:1px solid var(--border);">' +
+            '<span style="font-size:13px;">' + (MOD_LABELS[k] || k) + '</span>' +
+            '<button onclick="window.PERM.toggleModule(\'' + k + '\')" class="btn sm" style="background:' + (on ? '#10b981' : '#94a3b8') + ';color:#fff;min-width:60px;">' + (on ? 'ON' : 'OFF') + '</button>' +
+            '</div>';
+        }).join('');
+      }
+      // Features
+      const featsGrid = document.getElementById('perm-feats-grid');
+      if (featsGrid) {
+        featsGrid.innerHTML = Object.keys(state.features || {}).map(k => {
+          const on = !!state.features[k];
+          return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--surface-2,#f5f5f4);border-radius:8px;border:1px solid var(--border);">' +
+            '<span style="font-size:12.5px;"><code style="font-size:11px;background:rgba(0,0,0,0.05);padding:1px 5px;border-radius:3px;">' + k + '</code><br><span style="color:var(--text-2);font-size:11px;">' + (FEAT_LABELS[k] || '') + '</span></span>' +
+            '<button onclick="window.PERM.toggleFeature(\'' + k + '\')" class="btn sm" style="background:' + (on ? '#10b981' : '#94a3b8') + ';color:#fff;min-width:60px;">' + (on ? 'ON' : 'OFF') + '</button>' +
+            '</div>';
+        }).join('');
+      }
+    },
+
+    toggleModule(key) {
+      const state = VOLVIX.getState();
+      state.modules[key] = !state.modules[key];
+      VOLVIX.setState(state);
+      VOLVIX.applyState(state);
+      this.renderForTenant(state.id);
+      console.log('[PERM] modulo', key, '→', state.modules[key]);
+    },
+
+    toggleFeature(key) {
+      const state = VOLVIX.getState();
+      if (!state.features) state.features = {};
+      state.features[key] = !state.features[key];
+      VOLVIX.setState(state);
+      VOLVIX.applyState(state);
+      this.renderForTenant(state.id);
+      console.log('[PERM] feature', key, '→', state.features[key]);
+    },
+
+    changeStatus(newStatus) {
+      const state = VOLVIX.getState();
+      state.status = newStatus;
+      VOLVIX.setState(state);
+      VOLVIX.applyState(state);
+      this.renderForTenant(state.id);
+      console.log('[PERM] status →', newStatus);
+    },
+
+    showTab(name, btn) {
+      document.querySelectorAll('#screen-permisos .config-tab').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      ['mods','feats','users'].forEach(t => {
+        const pane = document.getElementById('perm-pane-' + t);
+        if (pane) pane.classList.toggle('hidden', t !== name);
+      });
+    },
+
+    reload() {
+      this.loadTenants();
+      if (window.toast) window.toast('Permisos refrescados', 'ok');
+    },
+
+    broadcastNow() {
+      const state = VOLVIX.getState();
+      if (VOLVIX.channel) {
+        VOLVIX.channel.postMessage({ type: 'state-update', tenantId: state.id, state });
+      }
+      if (window.toast) window.toast('Estado broadcast a tabs abiertas', 'ok');
+    },
+
+    populateUserKeySelect() {
+      const sel = document.getElementById('perm-user-key');
+      if (!sel) return;
+      const opts = [];
+      Object.keys(MOD_LABELS).forEach(k => opts.push('<option value="module.' + k + '">📦 ' + MOD_LABELS[k] + '</option>'));
+      Object.keys(FEAT_LABELS).forEach(k => opts.push('<option value="' + k + '">🔘 ' + (FEAT_LABELS[k] || k) + '</option>'));
+      sel.innerHTML = opts.join('');
+    },
+
+    addOverride() {
+      const email = (document.getElementById('perm-user-email').value || '').trim().toLowerCase();
+      const key = document.getElementById('perm-user-key').value;
+      const status = document.getElementById('perm-user-status').value;
+      if (!email) { alert('Email requerido'); return; }
+      // Por ahora: persistir en localStorage del navegador.
+      // Roadmap: POST /api/admin/user-module-overrides para escribir en la
+      // tabla user_module_overrides de Supabase.
+      const ovKey = 'volvix:overrides:' + email;
+      let map = {};
+      try { map = JSON.parse(localStorage.getItem(ovKey) || '{}'); } catch(_) {}
+      map[key] = status;
+      localStorage.setItem(ovKey, JSON.stringify(map));
+      this.renderOverridesList();
+      if (window.toast) window.toast('Override aplicado para ' + email, 'ok');
+    },
+
+    renderOverridesList() {
+      const wrap = document.getElementById('perm-users-list');
+      if (!wrap) return;
+      // Buscar en localStorage todos volvix:overrides:*
+      const items = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith('volvix:overrides:')) {
+          try {
+            const email = k.replace('volvix:overrides:','');
+            const map = JSON.parse(localStorage.getItem(k) || '{}');
+            Object.keys(map).forEach(featKey => {
+              items.push({ email, featKey, status: map[featKey] });
+            });
+          } catch(_){}
+        }
+      }
+      if (!items.length) {
+        wrap.innerHTML = '<p style="color:var(--text-3);font-size:13px;">Sin overrides aún. Agrega uno arriba.</p>';
+        return;
+      }
+      wrap.innerHTML = '<table class="tbl"><thead><tr><th>Email</th><th>Permiso</th><th>Estado</th><th></th></tr></thead><tbody>' +
+        items.map(it => '<tr>' +
+          '<td>' + it.email + '</td>' +
+          '<td><code style="font-size:11px;">' + it.featKey + '</code></td>' +
+          '<td>' + (it.status === 'allow' ? '<span class="chip ok">✅ Permitido</span>' : '<span class="chip err">❌ Bloqueado</span>') + '</td>' +
+          '<td><button class="btn sm" onclick="window.PERM.removeOverride(\'' + it.email + '\',\'' + it.featKey + '\')">🗑️</button></td>' +
+        '</tr>').join('') + '</tbody></table>';
+    },
+
+    removeOverride(email, featKey) {
+      const ovKey = 'volvix:overrides:' + email;
+      try {
+        const map = JSON.parse(localStorage.getItem(ovKey) || '{}');
+        delete map[featKey];
+        if (Object.keys(map).length === 0) localStorage.removeItem(ovKey);
+        else localStorage.setItem(ovKey, JSON.stringify(map));
+      } catch(_){}
+      this.renderOverridesList();
+    },
+  };
+
+  window.PERM = PERM;
+
+  // Init cuando se entra a la pantalla
+  const _origShowScreen = window.showScreen;
+  if (typeof _origShowScreen === 'function') {
+    window.showScreen = function(name) {
+      _origShowScreen(name);
+      if (name === 'permisos') {
+        setTimeout(() => PERM.init(), 100);
+      }
+    };
+  }
+
+  // Tambien si la pagina arranca con #permisos
+  window.addEventListener('hashchange', () => {
+    if ((location.hash || '').replace('#','') === 'permisos') setTimeout(() => PERM.init(), 200);
+  });
+
+  console.log('[PERM] panel disponible en /salvadorex-pos.html#permisos');
 })();
 </script>
 
