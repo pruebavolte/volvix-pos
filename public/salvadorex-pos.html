@@ -3081,13 +3081,17 @@
       </div>
 
       <!-- Footer -->
+      <!-- 2026-05-07: version + fecha ahora son DINAMICAS, cargadas desde
+           /version.json via volvix-version-display.js (incluido al final del body).
+           Cada commit auto-incrementa el patch (ej. 1.0.73 -> 1.0.74). -->
       <div class="pos-footer">
-        <div>SalvadoreX (1.0.0). Derechos reservados (2026) GrupoVolvix S.A. de C.V. (soporte@salvadorex.mx)</div>
+        <div>SalvadoreX (<span id="footer-version-pkg">cargando…</span>). Derechos reservados (<span id="footer-year"></span>) GrupoVolvix S.A. de C.V. (soporte@salvadorex.mx)</div>
         <div style="display: flex; gap: 14px;">
-          <span>Ver. 1.0.0</span>
-          <span class="mono" id="footer-date">20 - Abr 1:04 pm</span>
+          <span id="footer-version">Ver. cargando…</span>
+          <span class="mono" id="footer-date">cargando…</span>
         </div>
       </div>
+      <script>(function(){var y=document.getElementById('footer-year');if(y)y.textContent=new Date().getFullYear();})();</script>
 
       </div><!-- /pos-main-area -->
 
@@ -15356,6 +15360,18 @@
   }
 
 })();
+</script>
+
+<!-- 2026-05-07: version dinamica auto-incrementada en cada commit -->
+<script src="/volvix-version-display.js" defer></script>
+<script>
+// Tambien rellena el "(1.0.X)" del texto de copyright
+window.addEventListener('volvix:version-loaded', function(e){
+  try {
+    var pkg = document.getElementById('footer-version-pkg');
+    if (pkg && e.detail && e.detail.version) pkg.textContent = e.detail.version;
+  } catch(_) {}
+});
 </script>
 </body>
 </html>
