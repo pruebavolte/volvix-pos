@@ -315,44 +315,180 @@
     const existing = document.getElementById('welcome-modal');
     if (existing) existing.remove();
 
+    // 2026-05-07: Modal de bienvenida con VIDEO REAL de presentadora
+    // (mujer hablando) en lugar del cuadro de texto plano. La presentadora
+    // saluda al usuario por su nombre y le explica que puede tomar el tour.
+    //
+    // Estrategia de fuentes de video (con fallback en cascada):
+    //   1) /welcome-video.mp4 — si el negocio sube su propio video
+    //      (drop-in en public/welcome-video.mp4) toma prioridad.
+    //   2) URL CDN libre (Pexels/Pixabay) — video stock de mujer profesional.
+    //   3) Fallback final: avatar SVG animado + SpeechSynthesis (voz del navegador).
+    //
+    // El audio arranca MUTED (politica del browser) y el usuario lo desmutea
+    // con un boton, para no asustar con sonido inesperado.
+
     const modal = document.createElement('div');
     modal.id = 'welcome-modal';
     modal.style.cssText =
-      'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:' + Z_OVERLAY + ';' +
-      'display:flex;align-items:center;justify-content:center;font-family:system-ui,sans-serif;';
+      'position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:' + Z_OVERLAY + ';' +
+      'display:flex;align-items:center;justify-content:center;font-family:system-ui,-apple-system,Segoe UI,sans-serif;' +
+      'animation:vlxFadeIn .25s ease-out;';
 
     const hasResume = state[role] && typeof state[role].step === 'number' && !state[role].completed && state[role].step > 0;
     const resumeBtn = hasResume
-      ? '<button id="wm-resume" style="background:#10b981;color:#fff;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;font-weight:bold;">Continuar (paso ' + (state[role].step + 1) + ')</button>'
+      ? '<button id="wm-resume" style="background:#10b981;color:#fff;border:none;padding:13px 22px;border-radius:9px;cursor:pointer;font-weight:700;font-size:14px;">▶ Continuar (paso ' + (state[role].step + 1) + ')</button>'
       : '';
 
+    // Saludo personalizado por nombre o por email-prefix
+    const userName = (function () {
+      const e = session.email || '';
+      if (!e || e === 'usuario') return 'amigo';
+      const local = String(e).split('@')[0];
+      // Capitalizar y limpiar prefijo si parece nombre real
+      if (/^[a-z]{2,12}$/i.test(local)) return local.charAt(0).toUpperCase() + local.slice(1).toLowerCase();
+      return local.length > 16 ? 'amigo' : local;
+    })();
+
+    const roleLabel = ({ owner:'dueño', admin:'administrador', manager:'gerente', cajero:'cajero', vendor:'vendedor' })[role] || role;
+    const speech = `¡Hola ${userName}! Bienvenido a Volvix POS. Soy tu asistente. Te voy a mostrar como dominar tu sistema en menos de dos minutos. ¿Empezamos el tour?`;
+
+    // URLs de video con fallback
+    // welcome-video.mp4 local → Pixabay CDN (free stock, mujer profesional sonriendo)
+    const VIDEO_LOCAL = '/welcome-video.mp4';
+    const VIDEO_FALLBACK = 'https://cdn.pixabay.com/video/2023/05/04/162157-823831793_tiny.mp4';
+
     modal.innerHTML =
-      '<div style="background:#1e293b;color:#fff;padding:40px;border-radius:16px;max-width:520px;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,0.6);">' +
-        '<div style="font-size:54px;line-height:1;">⚡</div>' +
-        '<h2 style="margin:15px 0 6px 0;font-size:22px;">¡Bienvenido a Volvix POS!</h2>' +
-        '<p style="color:#cbd5e1;margin:0 0 6px 0;">Hola <b>' + (session.email || 'usuario') + '</b></p>' +
-        '<p style="color:#94a3b8;font-size:13px;margin-bottom:22px;">Rol: ' + role + '. ¿Quieres un tutorial guiado?</p>' +
-        '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">' +
-          '<button id="wm-start" style="background:#3b82f6;color:#fff;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;font-weight:bold;">Empezar tutorial</button>' +
-          resumeBtn +
-          '<button id="wm-later" style="background:none;color:#94a3b8;border:1px solid #475569;padding:12px 24px;border-radius:8px;cursor:pointer;">Después</button>' +
+      '<style>@keyframes vlxFadeIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}' +
+      '@keyframes vlxBlink{0%,90%,100%{opacity:1}95%{opacity:0}}' +
+      '@keyframes vlxMouthTalk{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.4)}}' +
+      '.vlx-avatar-svg .mouth{animation:vlxMouthTalk .35s ease-in-out infinite;transform-origin:center}' +
+      '.vlx-avatar-svg.muted .mouth{animation:none}' +
+      '.vlx-avatar-svg .eye{animation:vlxBlink 4.5s infinite}</style>' +
+      '<div style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;padding:0;border-radius:18px;max-width:540px;width:92%;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,0.7);overflow:hidden;border:1px solid rgba(255,255,255,0.08);">' +
+        // Video container
+        '<div style="position:relative;width:100%;aspect-ratio:16/10;background:#000;overflow:hidden;">' +
+          '<video id="wm-video" autoplay muted loop playsinline preload="auto" ' +
+                 'style="width:100%;height:100%;object-fit:cover;display:block;background:#1e293b;" ' +
+                 'poster="data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 540 340\'><rect fill=\'%23334155\' width=\'540\' height=\'340\'/><text x=\'270\' y=\'180\' font-family=\'system-ui\' font-size=\'18\' fill=\'%2394a3b8\' text-anchor=\'middle\'>Cargando presentación…</text></svg>">' +
+            '<source id="wm-video-src1" src="' + VIDEO_LOCAL + '" type="video/mp4">' +
+            '<source id="wm-video-src2" src="' + VIDEO_FALLBACK + '" type="video/mp4">' +
+          '</video>' +
+          // Fallback avatar overlay (visible solo si video falla)
+          '<div id="wm-avatar-fallback" style="display:none;position:absolute;inset:0;background:linear-gradient(135deg,#a78bfa 0%,#3b82f6 100%);align-items:center;justify-content:center;">' +
+            '<svg class="vlx-avatar-svg" width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">' +
+              '<circle cx="100" cy="100" r="95" fill="#fde2c8"/>' +
+              '<path d="M30 80 Q100 -20 170 80 L170 60 Q100 0 30 60 Z" fill="#3b1f0e"/>' +
+              '<circle class="eye" cx="76" cy="100" r="6" fill="#1e293b"/>' +
+              '<circle class="eye" cx="124" cy="100" r="6" fill="#1e293b" style="animation-delay:.1s"/>' +
+              '<path d="M70 95 Q76 88 82 95" stroke="#3b1f0e" stroke-width="2" fill="none"/>' +
+              '<path d="M118 95 Q124 88 130 95" stroke="#3b1f0e" stroke-width="2" fill="none"/>' +
+              '<ellipse class="mouth" cx="100" cy="135" rx="14" ry="7" fill="#c2185b"/>' +
+              '<path d="M85 145 Q100 158 115 145" stroke="#fff" stroke-width="1" fill="none" opacity=".5"/>' +
+            '</svg>' +
+          '</div>' +
+          // Overlay con badge "EN VIVO" (estetico)
+          '<div style="position:absolute;top:14px;left:14px;background:rgba(220,38,38,0.92);color:#fff;font-size:10px;font-weight:800;letter-spacing:1.2px;padding:5px 10px;border-radius:5px;display:flex;gap:6px;align-items:center;text-transform:uppercase;">' +
+            '<span style="width:7px;height:7px;background:#fff;border-radius:50%;animation:vlxBlink 1.4s infinite;"></span>BIENVENIDA' +
+          '</div>' +
+          // Boton mute/unmute
+          '<button id="wm-mute" aria-label="Activar sonido" title="Activar sonido" style="position:absolute;top:14px;right:14px;width:38px;height:38px;border-radius:50%;background:rgba(0,0,0,0.55);border:1px solid rgba(255,255,255,0.2);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;">🔇</button>' +
+          // Subtitulo del speech (caption)
+          '<div id="wm-caption" style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.85));color:#fff;font-size:14px;font-weight:600;padding:30px 20px 16px;line-height:1.5;text-shadow:0 1px 3px #000;"></div>' +
         '</div>' +
-        '<div style="margin-top:18px;font-size:11px;color:#64748b;">Puedes reabrirlo desde el botón “?” en cualquier momento.</div>' +
+        // Mensaje + botones
+        '<div style="padding:24px 28px 28px;">' +
+          '<h2 style="margin:0 0 4px 0;font-size:20px;font-weight:800;letter-spacing:-.3px;">¡Hola, ' + userName + '! 👋</h2>' +
+          '<p style="color:#cbd5e1;margin:0 0 4px 0;font-size:13.5px;">Bienvenido a Volvix POS</p>' +
+          '<p style="color:#94a3b8;font-size:12px;margin:0 0 20px 0;">Tu rol: <b style="color:#a5b4fc;">' + roleLabel + '</b> · Toma el tour guiado y aprende lo esencial en 2 minutos.</p>' +
+          '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">' +
+            '<button id="wm-start" style="background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;border:none;padding:13px 26px;border-radius:9px;cursor:pointer;font-weight:700;font-size:14px;box-shadow:0 4px 14px rgba(59,130,246,0.4);">▶ Empezar tour</button>' +
+            resumeBtn +
+            '<button id="wm-later" style="background:none;color:#94a3b8;border:1px solid #475569;padding:13px 22px;border-radius:9px;cursor:pointer;font-size:13.5px;">Después</button>' +
+          '</div>' +
+          '<div style="margin-top:16px;font-size:11px;color:#64748b;">Puedes reabrirlo desde el botón "Ayuda" en cualquier momento.</div>' +
+        '</div>' +
       '</div>';
 
     document.body.appendChild(modal);
 
-    document.getElementById('wm-start').onclick = function () { modal.remove(); startTour(role); };
+    // Wire: video fallback en cascada — si el local 404, intentar CDN; si falla, mostrar avatar SVG + TTS
+    var video = document.getElementById('wm-video');
+    var src1 = document.getElementById('wm-video-src1');
+    var src2 = document.getElementById('wm-video-src2');
+    var avatarFallback = document.getElementById('wm-avatar-fallback');
+    var captionEl = document.getElementById('wm-caption');
+    var muteBtn = document.getElementById('wm-mute');
+
+    var videoFailed = false;
+    function activateAvatarFallback() {
+      if (videoFailed) return;
+      videoFailed = true;
+      try { video.style.display = 'none'; } catch(_) {}
+      if (avatarFallback) avatarFallback.style.display = 'flex';
+      // Reproducir caption y TTS si esta disponible
+      try {
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+          var u = new SpeechSynthesisUtterance(speech);
+          u.lang = 'es-MX';
+          u.rate = 1.02; u.pitch = 1.1;
+          // Buscar voz femenina en español
+          var voices = window.speechSynthesis.getVoices() || [];
+          var female = voices.find(function(v){return /es/i.test(v.lang) && /female|mujer|lucia|paulina|monica/i.test(v.name);})
+                    || voices.find(function(v){return /es/i.test(v.lang);});
+          if (female) u.voice = female;
+          window.speechSynthesis.speak(u);
+        }
+      } catch(_) {}
+    }
+    if (video) {
+      video.addEventListener('error', activateAvatarFallback);
+      // Si el primer source falla, el browser auto-prueba el segundo. Si ambos fallan, dispara error.
+      if (src1) src1.addEventListener('error', function(){ /* browser intentara src2 */ });
+      // Animar caption con texto del speech (palabra por palabra)
+      var words = speech.split(' ');
+      var idx = 0;
+      var captionInterval = setInterval(function () {
+        if (idx >= words.length) { clearInterval(captionInterval); return; }
+        captionEl.textContent = words.slice(0, ++idx).join(' ');
+      }, 220);
+    }
+
+    // Mute toggle
+    if (muteBtn && video) {
+      muteBtn.onclick = function () {
+        video.muted = !video.muted;
+        muteBtn.textContent = video.muted ? '🔇' : '🔊';
+        muteBtn.setAttribute('aria-label', video.muted ? 'Activar sonido' : 'Silenciar');
+        // Si avatar fallback esta activo y el user prendio sonido, hablar TTS
+        if (videoFailed && !video.muted) activateAvatarFallback();
+      };
+    }
+
+    // Botones
+    document.getElementById('wm-start').onclick = function () {
+      try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch(_) {}
+      try { video && video.pause(); } catch(_) {}
+      modal.remove();
+      startTour(role);
+    };
     document.getElementById('wm-later').onclick = function () {
-      // R28: persistir dismiss para no reaparecer en cada nav
       try {
         const dismissKey = 'volvix_welcome_dismissed_' + (session.email || 'anon') + '_' + role;
         localStorage.setItem(dismissKey, String(Date.now()));
       } catch (e) {}
+      try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch(_) {}
+      try { video && video.pause(); } catch(_) {}
       modal.remove();
     };
     if (hasResume) {
-      document.getElementById('wm-resume').onclick = function () { modal.remove(); startTour(role, { resume: true }); };
+      document.getElementById('wm-resume').onclick = function () {
+        try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch(_) {}
+        try { video && video.pause(); } catch(_) {}
+        modal.remove();
+        startTour(role, { resume: true });
+      };
     }
   }
 
