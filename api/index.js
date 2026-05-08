@@ -36331,32 +36331,60 @@ if (process.env.NODE_ENV === 'test') {
   // Todos requieren rol superadmin.
   // ═══════════════════════════════════════════════════════════════════════════
 
+  // 2026-05-08 FIX: estos 2 handlers ESTABAN duplicados (también en linea 11866
+  // y al final del archivo). El más reciente registrado ganaba, y este
+  // consultaba pos_tenants (vacía: 0 rows) en vez de pos_companies (55 rows),
+  // por eso el dropdown del super-admin estaba vacío. Lo consolidamos aquí.
+
   // GET /api/admin/tenants — lista de tenants (para selector multi-tenant)
+  // Devuelve TANTO `items` (formato nuevo) como `tenants` (legacy) por compat.
   handlers['GET /api/admin/tenants'] = requireAuth(async function (req, res) {
     if (!requireSuper(req, res)) return;
     try {
       const rows = await supabaseRequest('GET',
-        '/pos_tenants?select=id,name,is_active,created_at,shop_slug,shop_name&order=created_at.desc&limit=500'
+        '/pos_companies?select=id,tenant_id,name,business_type,plan,is_active,status,created_at&order=created_at.desc&limit=500'
       ).catch(() => []);
-      sendJSON(res, { ok: true, tenants: Array.isArray(rows) ? rows : [] });
+      const items = Array.isArray(rows) ? rows : [];
+      sendJSON(res, { ok: true, items, tenants: items, total: items.length });
     } catch (err) { sendError(res, err); }
   });
 
-  // GET /api/admin/tenant/:tid/flags — modulos + botones para un tenant
+  // GET /api/admin/tenant/:tid/flags — modulos + botones + status + nombre
+  // (Formato esperado por el cliente PERM: modules y buttons como objetos
+  // keyed por module_key/button_key con valor boolean.)
   handlers['GET /api/admin/tenant/:tid/flags'] = requireAuth(async function (req, res, params) {
     if (!requireSuper(req, res)) return;
     try {
       const tid = String(params.tid || '').trim();
       if (!tid) return sendJSON(res, { error: 'tenant_id requerido' }, 400);
-      const [mods, btns] = await Promise.all([
-        supabaseRequest('GET', `/tenant_module_flags?tenant_id=eq.${encodeURIComponent(tid)}&select=*&limit=200`).catch(() => []),
-        supabaseRequest('GET', `/tenant_button_flags?tenant_id=eq.${encodeURIComponent(tid)}&select=*&limit=500`).catch(() => []),
+      const [modRows, btnRows, companyRows] = await Promise.all([
+        supabaseRequest('GET',
+          `/tenant_module_flags?tenant_id=eq.${encodeURIComponent(tid)}&select=module_key,enabled,state`
+        ).catch(() => []),
+        supabaseRequest('GET',
+          `/tenant_button_flags?tenant_id=eq.${encodeURIComponent(tid)}&select=button_key,enabled,state`
+        ).catch(() => []),
+        supabaseRequest('GET',
+          `/pos_companies?tenant_id=eq.${encodeURIComponent(tid)}&select=name,is_active,status&limit=1`
+        ).catch(() => []),
       ]);
+      const modules = {};
+      (Array.isArray(modRows) ? modRows : []).forEach(r => {
+        modules[r.module_key] = (r.state ? r.state === 'enabled' : !!r.enabled);
+      });
+      const buttons = {};
+      (Array.isArray(btnRows) ? btnRows : []).forEach(r => {
+        buttons[r.button_key] = (r.state ? r.state === 'enabled' : !!r.enabled);
+      });
+      const company = (Array.isArray(companyRows) && companyRows[0]) || {};
       sendJSON(res, {
         ok: true,
         tenant_id: tid,
-        modules: Array.isArray(mods) ? mods : [],
-        buttons: Array.isArray(btns) ? btns : [],
+        name: company.name || tid,
+        status: company.status || (company.is_active === false ? 'suspended' : 'active'),
+        modules,
+        buttons,
+        ts: new Date().toISOString(),
       });
     } catch (err) { sendError(res, err); }
   });
@@ -36522,46 +36550,7 @@ if (process.env.NODE_ENV === 'test') {
     } catch (err) { sendError(res, err); }
   });
 
-  // 2026-05-08 FIX C: GET /api/admin/tenant/:tid/flags — devuelve modulos +
-  // botones + status + nombre para que el panel de super-admin pueda
-  // renderizar CUALQUIER tenant (no solo el suyo). Lee de tenant_module_flags
-  // y tenant_button_flags (mismo schema que /api/tenant/active-modules).
-  handlers['GET /api/admin/tenant/:tid/flags'] = requireAuth(async function (req, res, params) {
-    if (!requireSuper(req, res)) return;
-    try {
-      const tid = String(params.tid || '').trim();
-      if (!tid) return sendJSON(res, { error: 'tenant_id requerido' }, 400);
-      const [modRows, btnRows, companyRows] = await Promise.all([
-        supabaseRequest('GET',
-          `/tenant_module_flags?tenant_id=eq.${encodeURIComponent(tid)}&select=module_key,enabled,state`
-        ).catch(() => []),
-        supabaseRequest('GET',
-          `/tenant_button_flags?tenant_id=eq.${encodeURIComponent(tid)}&select=button_key,enabled,state`
-        ).catch(() => []),
-        supabaseRequest('GET',
-          `/pos_companies?tenant_id=eq.${encodeURIComponent(tid)}&select=name,is_active,status&limit=1`
-        ).catch(() => []),
-      ]);
-      const modules = {};
-      (Array.isArray(modRows) ? modRows : []).forEach(r => {
-        modules[r.module_key] = (r.state ? r.state === 'enabled' : !!r.enabled);
-      });
-      const buttons = {};
-      (Array.isArray(btnRows) ? btnRows : []).forEach(r => {
-        buttons[r.button_key] = (r.state ? r.state === 'enabled' : !!r.enabled);
-      });
-      const company = (Array.isArray(companyRows) && companyRows[0]) || {};
-      sendJSON(res, {
-        ok: true,
-        tenant_id: tid,
-        name: company.name || tid,
-        status: company.status || (company.is_active === false ? 'suspended' : 'active'),
-        modules,
-        buttons,
-        ts: new Date().toISOString(),
-      });
-    } catch (err) { sendError(res, err); }
-  });
+  // (handler de /flags consolidado arriba en línea ~36346)
 
   // 2026-05-08 FIX C: GET /api/admin/user/by-email?email=... — resuelve email
   // a UUID de pos_users para que addOverride pueda usar user_id real (no email)
