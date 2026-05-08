@@ -2697,9 +2697,8 @@
       👑 <span>SAAS</span>
     </button>
 
-    <button class="tb-btn movil" onclick="showScreen('mobile-apps')" aria-label="Preview apps móviles" title="Preview apps móviles">
-      📱 <span>MÓVIL</span>
-    </button>
+    <!-- 2026-05-07 cleanup: boton MÓVIL movido a Configuración → tab "📱 Apps móviles".
+         showScreen('mobile-apps') sigue funcionando para invocacion programatica. -->
 
     <button class="tb-btn livesync" onclick="showScreen('salud')" aria-label="Panel de salud del sistema" title="Panel de salud del sistema">
       <span class="dot"></span>
@@ -3612,6 +3611,9 @@
           <button class="config-tab" onclick="showCfg('modulos', this)">🧩 Módulos y funciones</button>
           <button class="config-tab" onclick="showCfg('licencia', this)">🔑 Licencia</button>
           <button class="config-tab" onclick="showCfg('sync', this)">🔄 Sincronización</button>
+          <!-- 2026-05-07: boton MÓVIL antes flotaba en la topbar, ahora vive aqui
+               como tab de Configuracion. Reusa showScreen para no duplicar pantalla. -->
+          <button class="config-tab" onclick="showScreen('mobile-apps')" data-ia-arq="mobile-apps-from-config">📱 Apps móviles</button>
         </div>
 
         <div>
