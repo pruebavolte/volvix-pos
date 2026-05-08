@@ -36522,5 +36522,217 @@ if (process.env.NODE_ENV === 'test') {
     } catch (err) { sendError(res, err); }
   });
 
+  // 2026-05-08 FIX C: GET /api/admin/tenant/:tid/flags — devuelve modulos +
+  // botones + status + nombre para que el panel de super-admin pueda
+  // renderizar CUALQUIER tenant (no solo el suyo). Lee de tenant_module_flags
+  // y tenant_button_flags (mismo schema que /api/tenant/active-modules).
+  handlers['GET /api/admin/tenant/:tid/flags'] = requireAuth(async function (req, res, params) {
+    if (!requireSuper(req, res)) return;
+    try {
+      const tid = String(params.tid || '').trim();
+      if (!tid) return sendJSON(res, { error: 'tenant_id requerido' }, 400);
+      const [modRows, btnRows, companyRows] = await Promise.all([
+        supabaseRequest('GET',
+          `/tenant_module_flags?tenant_id=eq.${encodeURIComponent(tid)}&select=module_key,enabled,state`
+        ).catch(() => []),
+        supabaseRequest('GET',
+          `/tenant_button_flags?tenant_id=eq.${encodeURIComponent(tid)}&select=button_key,enabled,state`
+        ).catch(() => []),
+        supabaseRequest('GET',
+          `/pos_companies?tenant_id=eq.${encodeURIComponent(tid)}&select=name,is_active,status&limit=1`
+        ).catch(() => []),
+      ]);
+      const modules = {};
+      (Array.isArray(modRows) ? modRows : []).forEach(r => {
+        modules[r.module_key] = (r.state ? r.state === 'enabled' : !!r.enabled);
+      });
+      const buttons = {};
+      (Array.isArray(btnRows) ? btnRows : []).forEach(r => {
+        buttons[r.button_key] = (r.state ? r.state === 'enabled' : !!r.enabled);
+      });
+      const company = (Array.isArray(companyRows) && companyRows[0]) || {};
+      sendJSON(res, {
+        ok: true,
+        tenant_id: tid,
+        name: company.name || tid,
+        status: company.status || (company.is_active === false ? 'suspended' : 'active'),
+        modules,
+        buttons,
+        ts: new Date().toISOString(),
+      });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // 2026-05-08 FIX C: GET /api/admin/user/by-email?email=... — resuelve email
+  // a UUID de pos_users para que addOverride pueda usar user_id real (no email)
+  handlers['GET /api/admin/user/by-email'] = requireAuth(async function (req, res) {
+    if (!requireSuper(req, res)) return;
+    try {
+      const parsed = url.parse(req.url, true);
+      const email = String(parsed.query.email || '').trim().toLowerCase();
+      if (!email) return sendJSON(res, { error: 'email requerido' }, 400);
+      const rows = await supabaseRequest('GET',
+        `/pos_users?email=eq.${encodeURIComponent(email)}&select=id,email,role,notes,created_at&limit=1`
+      ).catch(() => []);
+      const u = (Array.isArray(rows) && rows[0]) || null;
+      if (!u) return sendJSON(res, { ok: false, error: 'not_found' }, 404);
+      // Extraer tenant_id desde notes JSON (de forma segura)
+      let tenant_id = null, volvix_role = null, business_type = null, tenant_name = null;
+      if (u.notes) {
+        try {
+          const trimmed = String(u.notes).trim();
+          if (trimmed[0] === '{' || trimmed[0] === '[') {
+            const meta = JSON.parse(trimmed);
+            tenant_id = meta.tenant_id || null;
+            volvix_role = meta.volvix_role || null;
+            business_type = meta.business_type || null;
+            tenant_name = meta.tenant_name || null;
+          }
+        } catch(_) {}
+      }
+      sendJSON(res, { ok: true, user: { id: u.id, email: u.email, db_role: u.role, volvix_role, tenant_id, tenant_name, business_type } });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // 2026-05-08 GET /api/admin/users/hierarchy — devuelve TODOS los usuarios
+  // organizados como árbol: superadmins → owners por tenant → empleados.
+  // Resuelve la jerarquía mezclando pos_users (notes JSON) + pos_companies +
+  // tenant_users (relación owner→empleado real).
+  handlers['GET /api/admin/users/hierarchy'] = requireAuth(async function (req, res) {
+    if (!requireSuper(req, res)) return;
+    try {
+      const [usersRows, companiesRows, employeesRows] = await Promise.all([
+        supabaseRequest('GET', '/pos_users?select=id,email,role,notes,created_at,last_login_at&order=created_at.desc&limit=500').catch(() => []),
+        supabaseRequest('GET', '/pos_companies?select=id,tenant_id,name,business_type,is_active,status,created_at&limit=500').catch(() => []),
+        supabaseRequest('GET', '/tenant_users?select=id,tenant_id,user_id,email,role,disabled_at,last_login_at,created_at&limit=2000').catch(() => []),
+      ]);
+      const users = Array.isArray(usersRows) ? usersRows : [];
+      const companies = Array.isArray(companiesRows) ? companiesRows : [];
+      const employees = Array.isArray(employeesRows) ? employeesRows : [];
+
+      // Indexar
+      const companyBySlug = {};
+      const companyByUuid = {};
+      companies.forEach(c => { if (c.tenant_id) companyBySlug[c.tenant_id] = c; if (c.id) companyByUuid[c.id] = c; });
+
+      // Detectar emails sospechosos (QA/test) para ocultarlos
+      const isQa = (email) => {
+        if (!email) return true;
+        const e = email.toLowerCase();
+        return e.endsWith('@volvix.test') || e.endsWith('@volvixtest.com') || e.endsWith('@volvixqa.com') ||
+               e.endsWith('@phone.volvix.local') || e.includes('smoke') || e.includes('e2e') ||
+               e.includes('twilio_test') || e.includes('test_177') || e.includes('grupovolvix.com') ||
+               e.endsWith('@aksdasd.com');
+      };
+
+      // Parse notes JSON safely
+      const parseNotes = (notes) => {
+        if (!notes) return {};
+        const t = String(notes).trim();
+        if (t[0] !== '{' && t[0] !== '[') return {};
+        try { return JSON.parse(t); } catch(_) { return {}; }
+      };
+
+      // Clasificar usuarios
+      const superadmins = [];
+      const ownersByTenant = {}; // tenant_slug → [user]
+      users.forEach(u => {
+        const meta = parseNotes(u.notes);
+        const vrole = (meta.volvix_role || '').toLowerCase();
+        const u2 = {
+          id: u.id, email: u.email, db_role: u.role, volvix_role: meta.volvix_role || null,
+          tenant_id: meta.tenant_id || null, tenant_name: meta.tenant_name || null,
+          business_type: meta.business_type || null, last_login_at: u.last_login_at,
+          created_at: u.created_at, qa: isQa(u.email),
+        };
+        if (vrole === 'superadmin' || vrole === 'platform_owner') superadmins.push(u2);
+        else if (meta.tenant_id) {
+          if (!ownersByTenant[meta.tenant_id]) ownersByTenant[meta.tenant_id] = [];
+          ownersByTenant[meta.tenant_id].push(u2);
+        }
+      });
+
+      // Empleados de tenant_users — agrupar por tenant_id (puede ser UUID de pos_companies.id o slug)
+      const employeesByTenantSlug = {};
+      employees.forEach(e => {
+        const tidRaw = String(e.tenant_id || '').trim();
+        // Resolver UUID → slug si aplica
+        let slug = tidRaw;
+        if (companyByUuid[tidRaw]) slug = companyByUuid[tidRaw].tenant_id;
+        if (!employeesByTenantSlug[slug]) employeesByTenantSlug[slug] = [];
+        employeesByTenantSlug[slug].push({
+          id: e.user_id || e.id, email: e.email, role: e.role,
+          disabled: !!e.disabled_at, last_login_at: e.last_login_at, created_at: e.created_at,
+        });
+      });
+
+      // Construir árbol: tenant → owner(s) + employees
+      const tenants = companies.map(c => {
+        const slug = c.tenant_id;
+        const owners = ownersByTenant[slug] || [];
+        const emps = employeesByTenantSlug[slug] || [];
+        const realOwners = owners.filter(o => !o.qa);
+        return {
+          tenant_id: slug,
+          name: c.name,
+          business_type: c.business_type,
+          is_active: c.is_active !== false,
+          status: c.status || 'active',
+          created_at: c.created_at,
+          is_qa: realOwners.length === 0 && owners.length > 0,
+          owners,
+          employees: emps,
+          stats: { owners: owners.length, employees: emps.length, real_owners: realOwners.length },
+        };
+      });
+
+      // Tenants huérfanos: aparecen en pos_users.notes pero NO en pos_companies
+      const orphanTenants = [];
+      Object.keys(ownersByTenant).forEach(slug => {
+        if (!companyBySlug[slug]) {
+          orphanTenants.push({
+            tenant_id: slug, name: '(huérfano)', orphan: true,
+            owners: ownersByTenant[slug], employees: [], stats: { owners: ownersByTenant[slug].length, employees: 0 },
+          });
+        }
+      });
+
+      sendJSON(res, {
+        ok: true,
+        ts: new Date().toISOString(),
+        totals: { users: users.length, companies: companies.length, employees: employees.length },
+        platform_owners: superadmins,
+        tenants: tenants.concat(orphanTenants).sort((a, b) => {
+          // Ordenar: reales primero (no QA), luego por última actividad
+          if (a.is_qa !== b.is_qa) return a.is_qa ? 1 : -1;
+          return String(b.created_at || '').localeCompare(String(a.created_at || ''));
+        }),
+      });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // 2026-05-08 GET /api/admin/tenant/:tid/employees — lista empleados (cajeros)
+  handlers['GET /api/admin/tenant/:tid/employees'] = requireAuth(async function (req, res, params) {
+    if (!requireSuper(req, res)) return;
+    try {
+      const slug = String(params.tid || '').trim();
+      if (!slug) return sendJSON(res, { error: 'tenant_id requerido' }, 400);
+      // Resolver slug → pos_companies.id (UUID) si aplica, ya que tenant_users
+      // a veces guarda UUID en tenant_id (legacy)
+      const compRows = await supabaseRequest('GET',
+        `/pos_companies?tenant_id=eq.${encodeURIComponent(slug)}&select=id,name&limit=1`
+      ).catch(() => []);
+      const compUuid = (compRows && compRows[0] && compRows[0].id) || null;
+      // Buscar por slug Y por uuid (tolerante a ambos esquemas)
+      const filter = compUuid
+        ? `tenant_id=in.(${encodeURIComponent(slug)},${encodeURIComponent(compUuid)})`
+        : `tenant_id=eq.${encodeURIComponent(slug)}`;
+      const rows = await supabaseRequest('GET',
+        `/tenant_users?${filter}&select=id,user_id,email,display_name,role,disabled_at,last_login_at,created_at&order=created_at.desc&limit=500`
+      ).catch(() => []);
+      sendJSON(res, { ok: true, tenant_id: slug, employees: Array.isArray(rows) ? rows : [] });
+    } catch (err) { sendError(res, err); }
+  });
+
 })();
 

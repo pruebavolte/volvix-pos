@@ -3766,6 +3766,7 @@
           <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
             <label style="font-size:12.5px;font-weight:600;color:var(--text-2);">Tenant:</label>
             <select id="perm-tenant-sel" class="btn" style="min-width:240px;"></select>
+            <span id="perm-tenant-banner" style="margin-left:6px;"></span>
             <span class="chip ok" id="perm-status-chip"><span class="dot"></span><span id="perm-status-text">active</span></span>
             <select id="perm-status-sel" class="btn" style="min-width:140px;" onchange="window.PERM.changeStatus(this.value)">
               <option value="active">✅ Activo</option>
@@ -3794,6 +3795,7 @@
           <button class="config-tab active" id="perm-tab-mods" onclick="window.PERM.showTab('mods', this)">📦 Módulos (24)</button>
           <button class="config-tab" id="perm-tab-feats" onclick="window.PERM.showTab('feats', this)">🔘 Botones / Features (18)</button>
           <button class="config-tab" id="perm-tab-users" onclick="window.PERM.showTab('users', this)">👤 Override por usuario</button>
+          <button class="config-tab" id="perm-tab-hierarchy" onclick="window.PERM.showTab('hierarchy', this)">🌳 Jerarquía real</button>
           <button class="config-tab" id="perm-tab-audit" onclick="window.PERM.showTab('audit', this)">📜 Audit Log</button>
         </div>
 
@@ -3807,6 +3809,17 @@
         <div id="perm-pane-feats" class="card card-pad hidden">
           <p style="margin:0 0 14px;font-size:12.5px;color:var(--text-2);">Botones individuales del POS. Si los desactivas, se ocultan del POS (clase <code>.ff-off</code>) o pueden quedar deshabilitados.</p>
           <div id="perm-feats-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;"></div>
+        </div>
+
+        <!-- Tab: Jerarquía real (2026-05-08) -->
+        <div id="perm-pane-hierarchy" class="card card-pad hidden">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+            <p style="margin:0;font-size:12.5px;color:var(--text-2);">Quién es el dueño total · quién dueño de cada negocio · quién empleado. Datos REALES de Supabase.</p>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+              <input type="checkbox" id="perm-hier-show-qa"> Mostrar usuarios de prueba (QA)
+            </label>
+          </div>
+          <div id="perm-hierarchy-tree">Cargando…</div>
         </div>
 
         <!-- Tab: Audit Log -->
@@ -17503,31 +17516,94 @@ window.addEventListener('volvix:version-loaded', function(e){
       document.body.classList.toggle('vlx-perm-disable-mode', this.mode === 'disable');
     },
 
+    // 2026-05-08 FIX C: la API devuelve { ok, items, total }, no { tenants }.
+    // Y cada item de pos_companies trae tenant_id (slug TNT-XXX) e id (UUID);
+    // el slug es lo que usamos como currentTid. Antes se comparaba t.id contra
+    // currentTid, no matcheaba nunca, asi que se duplicaban filas.
     async loadTenants() {
       const sel = document.getElementById('perm-tenant-sel');
       if (!sel) return;
-      // Multi-tenant via /api/admin/tenants (requiere superadmin)
       let tenants = [];
       try {
         const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
         const r = await fetch('/api/admin/tenants', { headers: { 'Authorization': 'Bearer ' + tok }});
         if (r.ok) {
           const j = await r.json();
-          tenants = j.tenants || [];
+          tenants = Array.isArray(j.items) ? j.items
+                  : Array.isArray(j.tenants) ? j.tenants
+                  : [];
+        } else if (r.status === 403) {
+          console.warn('[PERM] /api/admin/tenants → 403 (no eres superadmin)');
         }
       } catch(e) { console.warn('[PERM] load tenants:', e); }
-      // Tenant actual (siempre primero)
+      // Tenant actual del usuario logueado
       const currentTid = (window.VOLVIX && VOLVIX.getState && VOLVIX.getState().id) || 'TNT001';
       const currentName = (window.VOLVIX && VOLVIX.getState && VOLVIX.getState().name) || 'Mi negocio';
-      const opts = ['<option value="' + currentTid + '">📍 ' + currentName + ' (' + currentTid + ') · ACTUAL</option>'];
-      tenants.forEach(t => {
-        if (t.id === currentTid) return; // skip duplicate
-        const label = (t.name || t.shop_name || '(sin nombre)') + ' (' + t.id + ')';
-        opts.push('<option value="' + t.id + '">' + (t.is_active === false ? '⛔ ' : '🟢 ') + label + '</option>');
-      });
+      // Si el superadmin está logueado, mostrar TODOS los tenants. Su propio
+      // negocio se marca con "📍 ACTUAL" pero NO se duplica.
+      const seen = new Set();
+      const opts = [];
+      // Helper: id real del tenant en cada row (puede venir como tenant_id o id)
+      const slugOf = t => String(t.tenant_id || t.id || '').trim();
+      // 1. Empuja el actual primero
+      opts.push('<option value="' + currentTid + '" data-current="1">📍 ' + currentName + ' (' + currentTid + ') · ACTUAL</option>');
+      seen.add(currentTid);
+      // 2. Empuja el resto, ordenados por nombre
+      tenants
+        .map(t => ({ slug: slugOf(t), name: t.name || t.shop_name || '(sin nombre)', active: t.is_active !== false }))
+        .filter(t => t.slug && !seen.has(t.slug))
+        .sort((a, b) => a.name.localeCompare(b.name, 'es'))
+        .forEach(t => {
+          seen.add(t.slug);
+          opts.push('<option value="' + t.slug + '">' + (t.active ? '🟢 ' : '⛔ ') + t.name + ' (' + t.slug + ')</option>');
+        });
       sel.innerHTML = opts.join('');
       sel.onchange = () => this.renderForTenant(sel.value);
+      this.selectedTid = currentTid;
       this.renderForTenant(currentTid);
+      console.log('[PERM] tenants cargados:', tenants.length, '· seleccionado:', currentTid);
+    },
+
+    // Cache por-tenant para no refetch en cada toggle
+    _flagCache: {},
+    selectedTid: null,
+
+    // Carga flags REALES desde Supabase para CUALQUIER tenant (super-admin)
+    async fetchTenantFlags(tid) {
+      if (!tid) return null;
+      if (this._flagCache[tid] && (Date.now() - this._flagCache[tid]._ts) < 30000) {
+        return this._flagCache[tid];
+      }
+      const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+      const headers = { 'Authorization': 'Bearer ' + tok };
+      try {
+        // tenant_module_flags + tenant_button_flags (mismo schema que usa /tenant/active-modules)
+        const r = await fetch('/api/admin/tenant/' + encodeURIComponent(tid) + '/flags', { headers });
+        if (r.ok) {
+          const j = await r.json();
+          const cache = {
+            _ts: Date.now(),
+            modules: j.modules || {},
+            features: j.buttons || j.features || {},
+            status: j.status || 'active',
+            id: tid,
+            name: j.name || tid,
+          };
+          this._flagCache[tid] = cache;
+          return cache;
+        }
+      } catch(e) { console.warn('[PERM] fetchTenantFlags fail, usando defaults:', e); }
+      // Fallback: defaults
+      const cache = {
+        _ts: Date.now(),
+        modules: Object.assign({}, this.DEFAULT_MODS),
+        features: Object.assign({}, this.DEFAULT_FEATS),
+        status: 'active',
+        id: tid,
+        name: tid,
+      };
+      this._flagCache[tid] = cache;
+      return cache;
     },
 
     // Default modulos/features por si el state actual no los tiene
@@ -17563,23 +17639,53 @@ window.addEventListener('volvix:version-loaded', function(e){
       return state;
     },
 
-    renderForTenant(tid) {
-      const state = this.ensureFullState();
-      if (!state) return;
+    // 2026-05-08 FIX C: si el tid seleccionado es OTRO tenant (no el del super-
+    // admin), debemos fetchear sus flags reales del servidor. Antes ignorabamos
+    // tid y siempre renderizabamos el state local del super-admin.
+    async renderForTenant(tid) {
+      this.selectedTid = tid || this.selectedTid;
+      const localState = this.ensureFullState();
+      const isOwnTenant = (this.selectedTid === localState.id);
+      // Si es nuestro propio tenant: usar state local (broadcast inmediato).
+      // Si es otro: fetchear flags reales del servidor.
+      let view;
+      if (isOwnTenant) {
+        view = {
+          id: localState.id,
+          name: localState.name,
+          status: localState.status || 'active',
+          modules: Object.assign({}, this.DEFAULT_MODS, localState.modules || {}),
+          features: Object.assign({}, this.DEFAULT_FEATS, localState.features || {}),
+        };
+      } else {
+        const remote = await this.fetchTenantFlags(this.selectedTid);
+        view = {
+          id: remote.id,
+          name: remote.name,
+          status: remote.status || 'active',
+          modules: Object.assign({}, this.DEFAULT_MODS, remote.modules || {}),
+          features: Object.assign({}, this.DEFAULT_FEATS, remote.features || {}),
+        };
+      }
+      // Banner indicador de qué tenant estamos viendo
+      const banner = document.getElementById('perm-tenant-banner');
+      if (banner) {
+        banner.innerHTML = isOwnTenant
+          ? '<span style="background:#dbeafe;color:#1e40af;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;">📍 Editando MI propio negocio (' + view.id + ')</span>'
+          : '<span style="background:#fef3c7;color:#92400e;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;">⚠️ Editando OTRO tenant: ' + view.name + ' (' + view.id + ')</span>';
+      }
       // Status
       const statusSel = document.getElementById('perm-status-sel');
       const statusChip = document.getElementById('perm-status-chip');
       const statusText = document.getElementById('perm-status-text');
-      if (statusSel) statusSel.value = state.status || 'active';
-      if (statusText) statusText.textContent = state.status || 'active';
-      if (statusChip) {
-        statusChip.className = 'chip ' + (state.status === 'active' ? 'ok' : 'err');
-      }
+      if (statusSel) statusSel.value = view.status;
+      if (statusText) statusText.textContent = view.status;
+      if (statusChip) statusChip.className = 'chip ' + (view.status === 'active' ? 'ok' : 'err');
       // Modulos
       const modsGrid = document.getElementById('perm-mods-grid');
       if (modsGrid) {
-        modsGrid.innerHTML = Object.keys(state.modules || {}).map(k => {
-          const on = !!state.modules[k];
+        modsGrid.innerHTML = Object.keys(view.modules).map(k => {
+          const on = !!view.modules[k];
           return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--surface-2,#f5f5f4);border-radius:8px;border:1px solid var(--border);">' +
             '<span style="font-size:13px;">' + (MOD_LABELS[k] || k) + '</span>' +
             '<button onclick="window.PERM.toggleModule(\'' + k + '\')" class="btn sm" style="background:' + (on ? '#10b981' : '#94a3b8') + ';color:#fff;min-width:60px;">' + (on ? 'ON' : 'OFF') + '</button>' +
@@ -17589,8 +17695,8 @@ window.addEventListener('volvix:version-loaded', function(e){
       // Features
       const featsGrid = document.getElementById('perm-feats-grid');
       if (featsGrid) {
-        featsGrid.innerHTML = Object.keys(state.features || {}).map(k => {
-          const on = !!state.features[k];
+        featsGrid.innerHTML = Object.keys(view.features).map(k => {
+          const on = !!view.features[k];
           return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--surface-2,#f5f5f4);border-radius:8px;border:1px solid var(--border);">' +
             '<span style="font-size:12.5px;"><code style="font-size:11px;background:rgba(0,0,0,0.05);padding:1px 5px;border-radius:3px;">' + k + '</code><br><span style="color:var(--text-2);font-size:11px;">' + (FEAT_LABELS[k] || '') + '</span></span>' +
             '<button onclick="window.PERM.toggleFeature(\'' + k + '\')" class="btn sm" style="background:' + (on ? '#10b981' : '#94a3b8') + ';color:#fff;min-width:60px;">' + (on ? 'ON' : 'OFF') + '</button>' +
@@ -17615,40 +17721,61 @@ window.addEventListener('volvix:version-loaded', function(e){
       }
     },
 
+    // 2026-05-08 FIX C: usar this.selectedTid (no state.id) para que el toggle
+    // afecte al tenant seleccionado en el dropdown, no siempre al del usuario.
     async toggleModule(key) {
-      const state = VOLVIX.getState();
-      const current = state.modules[key] !== false;
-      const newVal = !current;
-      // 1. Local + broadcast (instantaneo)
-      state.modules[key] = newVal;
-      VOLVIX.setState(state);
-      VOLVIX.applyState(state);
-      this.renderForTenant(state.id);
-      // 2. Persist a Supabase (en background)
-      this._apiCall('POST', '/api/admin/tenant/' + encodeURIComponent(state.id) + '/module',
+      const tid = this.selectedTid || (VOLVIX.getState && VOLVIX.getState().id);
+      if (!tid) return;
+      const localState = VOLVIX.getState();
+      const isOwnTenant = (tid === localState.id);
+      // Calcular nuevo valor desde la cache o state local
+      const cur = isOwnTenant
+        ? (localState.modules && localState.modules[key] !== false)
+        : (this._flagCache[tid] && this._flagCache[tid].modules[key] !== false);
+      const newVal = !cur;
+      // Si es propio: actualizar local + broadcast inmediato
+      if (isOwnTenant) {
+        if (!localState.modules) localState.modules = {};
+        localState.modules[key] = newVal;
+        VOLVIX.setState(localState);
+        VOLVIX.applyState(localState);
+      } else if (this._flagCache[tid]) {
+        this._flagCache[tid].modules[key] = newVal;
+      }
+      this.renderForTenant(tid);
+      // Persistir
+      this._apiCall('POST', '/api/admin/tenant/' + encodeURIComponent(tid) + '/module',
         { module_key: key, enabled: newVal });
-      console.log('[PERM] modulo', key, '→', newVal);
+      console.log('[PERM] modulo', key, '→', newVal, '(tid=' + tid + ')');
     },
 
     async toggleFeature(key) {
-      const state = VOLVIX.getState();
-      if (!state.features) state.features = {};
-      const current = state.features[key] !== false;
-      const newVal = !current;
-      state.features[key] = newVal;
-      VOLVIX.setState(state);
-      VOLVIX.applyState(state);
-      this.renderForTenant(state.id);
-      this._apiCall('POST', '/api/admin/tenant/' + encodeURIComponent(state.id) + '/button',
+      const tid = this.selectedTid || (VOLVIX.getState && VOLVIX.getState().id);
+      if (!tid) return;
+      const localState = VOLVIX.getState();
+      const isOwnTenant = (tid === localState.id);
+      const cur = isOwnTenant
+        ? (localState.features && localState.features[key] !== false)
+        : (this._flagCache[tid] && this._flagCache[tid].features[key] !== false);
+      const newVal = !cur;
+      if (isOwnTenant) {
+        if (!localState.features) localState.features = {};
+        localState.features[key] = newVal;
+        VOLVIX.setState(localState);
+        VOLVIX.applyState(localState);
+      } else if (this._flagCache[tid]) {
+        this._flagCache[tid].features[key] = newVal;
+      }
+      this.renderForTenant(tid);
+      this._apiCall('POST', '/api/admin/tenant/' + encodeURIComponent(tid) + '/button',
         { button_key: key, enabled: newVal });
-      console.log('[PERM] feature', key, '→', newVal);
+      console.log('[PERM] feature', key, '→', newVal, '(tid=' + tid + ')');
     },
 
     async loadAudit() {
       const wrap = document.getElementById('perm-audit-list');
       if (!wrap) return;
-      const state = VOLVIX.getState();
-      const tid = state.id || 'TNT001';
+      const tid = this.selectedTid || (VOLVIX.getState && VOLVIX.getState().id) || 'TNT001';
       wrap.innerHTML = 'Cargando…';
       const j = await this._apiCall('GET', '/api/admin/tenant/' + encodeURIComponent(tid) + '/audit');
       if (!j || !j.audit || j.audit.length === 0) {
@@ -17670,25 +17797,125 @@ window.addEventListener('volvix:version-loaded', function(e){
     },
 
     async changeStatus(newStatus) {
-      const state = VOLVIX.getState();
-      state.status = newStatus;
-      VOLVIX.setState(state);
-      VOLVIX.applyState(state);
-      this.renderForTenant(state.id);
-      // Audit en Supabase (no hay tabla dedicada para status, registramos en feature_flag_audit)
-      this._apiCall('POST', '/api/admin/tenant/' + encodeURIComponent(state.id) + '/module',
+      const tid = this.selectedTid || (VOLVIX.getState && VOLVIX.getState().id);
+      if (!tid) return;
+      const localState = VOLVIX.getState();
+      const isOwnTenant = (tid === localState.id);
+      if (isOwnTenant) {
+        localState.status = newStatus;
+        VOLVIX.setState(localState);
+        VOLVIX.applyState(localState);
+      } else if (this._flagCache[tid]) {
+        this._flagCache[tid].status = newStatus;
+      }
+      this.renderForTenant(tid);
+      this._apiCall('POST', '/api/admin/tenant/' + encodeURIComponent(tid) + '/module',
         { module_key: '__tenant_status__', enabled: newStatus === 'active', lock_message: 'status=' + newStatus });
-      console.log('[PERM] status →', newStatus);
+      console.log('[PERM] status →', newStatus, '(tid=' + tid + ')');
     },
 
     showTab(name, btn) {
       document.querySelectorAll('#screen-permisos .config-tab').forEach(b => b.classList.remove('active'));
       if (btn) btn.classList.add('active');
-      ['mods','feats','users','audit'].forEach(t => {
+      ['mods','feats','users','hierarchy','audit'].forEach(t => {
         const pane = document.getElementById('perm-pane-' + t);
         if (pane) pane.classList.toggle('hidden', t !== name);
       });
       if (name === 'audit') this.loadAudit();
+      if (name === 'hierarchy') this.loadHierarchy();
+    },
+
+    // 2026-05-08 Vista de jerarquia real desde Supabase
+    async loadHierarchy() {
+      const wrap = document.getElementById('perm-hierarchy-tree');
+      if (!wrap) return;
+      wrap.innerHTML = 'Cargando…';
+      const j = await this._apiCall('GET', '/api/admin/users/hierarchy');
+      if (!j || !j.ok) {
+        wrap.innerHTML = '<p style="color:#dc2626;">No se pudo cargar. ¿Eres superadmin?</p>';
+        return;
+      }
+      const showQa = !!(document.getElementById('perm-hier-show-qa') && document.getElementById('perm-hier-show-qa').checked);
+      const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+      let html = '';
+      // Resumen
+      html += '<div style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;">' +
+        '<div class="chip ok">👑 ' + j.platform_owners.length + ' superadmin(s)</div>' +
+        '<div class="chip">🏪 ' + j.totals.companies + ' negocios</div>' +
+        '<div class="chip">👥 ' + j.totals.users + ' usuarios</div>' +
+        '<div class="chip">👨‍💼 ' + j.totals.employees + ' empleados (tabla tenant_users)</div>' +
+        '</div>';
+
+      // Platform Owners
+      html += '<div style="background:linear-gradient(135deg,#fef3c7,#fde68a);padding:14px;border-radius:10px;margin-bottom:14px;border:2px solid #f59e0b;">' +
+        '<h3 style="margin:0 0 10px;font-size:14px;">👑 PLATFORM OWNERS (dueños totales del SaaS)</h3>';
+      j.platform_owners.forEach(po => {
+        const last = po.last_login_at ? new Date(po.last_login_at).toLocaleString('es-MX') : 'nunca';
+        html += '<div style="background:#fff;padding:8px 12px;border-radius:6px;margin-bottom:6px;font-size:13px;">' +
+          '<strong>' + esc(po.email) + '</strong> · ' +
+          '<code style="font-size:11px;">' + esc(po.id.slice(0,8)) + '…</code> · ' +
+          'último login: ' + esc(last) +
+          (po.tenant_id ? ' · también owner de <code>' + esc(po.tenant_id) + '</code>' : '') +
+          '</div>';
+      });
+      html += '</div>';
+
+      // Tenants
+      const tenantsToShow = j.tenants.filter(t => showQa || !t.is_qa);
+      const realCount = j.tenants.filter(t => !t.is_qa).length;
+      const qaCount = j.tenants.length - realCount;
+      html += '<h3 style="margin:0 0 10px;font-size:14px;">🏪 NEGOCIOS (' + realCount + ' reales' +
+        (qaCount > 0 ? ' · <span style="color:#94a3b8;">' + qaCount + ' de prueba ocultos</span>' : '') + ')</h3>';
+
+      tenantsToShow.forEach(t => {
+        const realOwners = (t.owners || []).filter(o => !o.qa);
+        const ownerToShow = (showQa ? t.owners : realOwners) || [];
+        if (ownerToShow.length === 0 && !showQa) return;
+        const orphanBadge = t.orphan ? '<span class="chip err" style="margin-left:6px;">⚠️ huérfano (no en pos_companies)</span>' : '';
+        html += '<details style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 14px;margin-bottom:8px;" ' + (realOwners.length > 0 ? 'open' : '') + '>' +
+          '<summary style="cursor:pointer;font-size:13px;">' +
+          '<strong>' + esc(t.name || t.tenant_id) + '</strong> · ' +
+          '<code style="font-size:11px;">' + esc(t.tenant_id) + '</code>' +
+          (t.business_type ? ' · <span style="color:#64748b;">' + esc(t.business_type) + '</span>' : '') +
+          ' · 👤 ' + (t.stats ? t.stats.owners : 0) + ' owner(s)' +
+          ' · 👨‍💼 ' + (t.stats ? t.stats.employees : 0) + ' empleado(s)' +
+          orphanBadge +
+          '</summary>' +
+          '<div style="margin-top:10px;padding-left:14px;border-left:3px solid #3b82f6;">';
+        // Owners
+        ownerToShow.forEach(o => {
+          const last = o.last_login_at ? new Date(o.last_login_at).toLocaleDateString('es-MX') : '—';
+          html += '<div style="font-size:12.5px;padding:4px 0;">👤 <strong>' + esc(o.email || '(sin email)') + '</strong>' +
+            ' · <code style="font-size:11px;">' + esc(String(o.id).slice(0,8)) + '…</code>' +
+            ' · ' + esc(o.volvix_role || o.db_role || '?') +
+            ' · login: ' + esc(last) +
+            (o.qa ? ' <span style="color:#94a3b8;font-size:10px;">[QA]</span>' : '') +
+            '</div>';
+        });
+        // Empleados
+        if (t.employees && t.employees.length) {
+          html += '<div style="margin-top:6px;padding-left:14px;border-left:2px dashed #10b981;">';
+          t.employees.forEach(e => {
+            html += '<div style="font-size:12px;padding:3px 0;color:#475569;">👨‍💼 ' + esc(e.email || '(sin email)') +
+              ' · ' + esc(e.role || '?') +
+              (e.disabled ? ' <span class="chip err">DESHABILITADO</span>' : '') +
+              '</div>';
+          });
+          html += '</div>';
+        } else {
+          html += '<div style="margin-top:4px;font-size:11.5px;color:#94a3b8;font-style:italic;">Sin empleados registrados.</div>';
+        }
+        html += '</div></details>';
+      });
+
+      wrap.innerHTML = html;
+      // Re-render al cambiar QA toggle
+      const qaCb = document.getElementById('perm-hier-show-qa');
+      if (qaCb && !qaCb._wired) {
+        qaCb._wired = true;
+        qaCb.onchange = () => this.loadHierarchy();
+      }
     },
 
     reload() {
@@ -17718,15 +17945,23 @@ window.addEventListener('volvix:version-loaded', function(e){
       const key = document.getElementById('perm-user-key').value;
       const status = document.getElementById('perm-user-status').value;
       if (!email) { alert('Email requerido'); return; }
-      // module_key vs feature: si key empieza con "module." es modulo, sino es feature/button
       const modKey = key.replace(/^module\./, '');
-      const state = VOLVIX.getState();
-      // Para mapear email → user_id necesitariamos un GET /api/users/by-email,
-      // pero como interim usamos email como user_id (Supabase RLS no chequeara
-      // estricto si superadmin). Roadmap: resolver email → uuid.
+      // Tenant target = el seleccionado en el dropdown (puede no ser el del super-admin)
+      const tid = this.selectedTid || (VOLVIX.getState && VOLVIX.getState().id);
+      // Resolver email → user_id (UUID) si el endpoint existe; si no, fallback a email.
+      let resolvedUserId = email;
+      try {
+        const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+        const r = await fetch('/api/admin/user/by-email?email=' + encodeURIComponent(email),
+          { headers: { 'Authorization': 'Bearer ' + tok }});
+        if (r.ok) {
+          const j = await r.json();
+          if (j && j.user && j.user.id) resolvedUserId = j.user.id;
+        }
+      } catch(_) {}
       const j = await this._apiCall('POST', '/api/admin/user-override', {
-        tenant_id: state.id, user_id: email, module_key: modKey, status,
-        reason: 'PERM panel — override aplicado por superadmin',
+        tenant_id: tid, user_id: resolvedUserId, module_key: modKey, status,
+        reason: 'PERM panel — override aplicado por superadmin (' + email + ')',
       });
       if (j && j.ok) {
         if (window.toast) window.toast('Override aplicado para ' + email, 'ok');
