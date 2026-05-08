@@ -258,7 +258,12 @@ test('14. UI: tab Jerarquía muestra superadmin + tenants + empleados', async ({
   }, TOKEN);
   await page.goto(BASE + '/salvadorex-pos.html#permisos', { waitUntil: 'domcontentloaded' });
   await page.waitForSelector('#perm-tab-hierarchy', { timeout: 10000 });
-  await page.click('#perm-tab-hierarchy');
+  // Quitar onboarding overlay si reapareció (lo añade un script tras el goto)
+  await page.evaluate(() => {
+    const ov = document.getElementById('volvix-onboarding-overlay');
+    if (ov) ov.remove();
+  });
+  await page.click('#perm-tab-hierarchy', { force: true });
   await page.waitForTimeout(3000); // dejar que loadHierarchy termine
   const treeText = await page.textContent('#perm-hierarchy-tree');
   console.log('  primeros 200 chars:', treeText.slice(0, 200));

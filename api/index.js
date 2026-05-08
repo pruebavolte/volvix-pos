@@ -36400,7 +36400,8 @@ if (process.env.NODE_ENV === 'test') {
       const moduleKey = String(body.module_key || '').trim();
       if (!tid || !moduleKey) return sendJSON(res, { error: 'tenant_id + module_key requeridos' }, 400);
       const enabled = !!body.enabled;
-      const newState = enabled ? 'enabled' : 'disabled';
+      // CHECK constraint en DB: solo {enabled, hidden, locked}. 'disabled' falla silenciosamente.
+      const newState = enabled ? 'enabled' : 'hidden';
       // Lookup current state for audit
       const current = await supabaseRequest('GET',
         `/tenant_module_flags?tenant_id=eq.${encodeURIComponent(tid)}&module_key=eq.${encodeURIComponent(moduleKey)}&select=state`
@@ -36415,8 +36416,12 @@ if (process.env.NODE_ENV === 'test') {
         lock_message: body.lock_message || null,
         created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
       };
-      const saved = await supabaseRequest('POST', '/tenant_module_flags', row).catch(() => null);
-      // Audit
+      let saveError = null;
+      const saved = await supabaseRequest('POST', '/tenant_module_flags', row).catch(e => { saveError = String(e && e.message || e); return null; });
+      if (saveError) {
+        return sendJSON(res, { ok: false, error: 'persist_failed', detail: saveError }, 500);
+      }
+      // Audit (best-effort)
       supabaseRequest('POST', '/feature_flag_audit', {
         tenant_id: tid, scope: 'module', scope_ref: moduleKey, module_key: moduleKey,
         old_status: oldState, new_status: newState,
@@ -36438,7 +36443,8 @@ if (process.env.NODE_ENV === 'test') {
       const buttonKey = String(body.button_key || '').trim();
       if (!tid || !buttonKey) return sendJSON(res, { error: 'tenant_id + button_key requeridos' }, 400);
       const enabled = !!body.enabled;
-      const newState = enabled ? 'enabled' : 'disabled';
+      // CHECK constraint en DB: solo {enabled, hidden, locked}. 'disabled' falla silenciosamente.
+      const newState = enabled ? 'enabled' : 'hidden';
       const current = await supabaseRequest('GET',
         `/tenant_button_flags?tenant_id=eq.${encodeURIComponent(tid)}&button_key=eq.${encodeURIComponent(buttonKey)}&select=state`
       ).catch(() => []);
@@ -36451,7 +36457,11 @@ if (process.env.NODE_ENV === 'test') {
         lock_message: body.lock_message || null,
         created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
       };
-      const saved = await supabaseRequest('POST', '/tenant_button_flags', row).catch(() => null);
+      let saveError = null;
+      const saved = await supabaseRequest('POST', '/tenant_button_flags', row).catch(e => { saveError = String(e && e.message || e); return null; });
+      if (saveError) {
+        return sendJSON(res, { ok: false, error: 'persist_failed', detail: saveError }, 500);
+      }
       supabaseRequest('POST', '/feature_flag_audit', {
         tenant_id: tid, scope: 'button', scope_ref: buttonKey, module_key: buttonKey,
         old_status: oldState, new_status: newState,
