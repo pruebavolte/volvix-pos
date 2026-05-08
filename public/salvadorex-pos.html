@@ -3777,6 +3777,27 @@
           </div>
         </div>
 
+        <!-- 2026-05-08: Perfil por giro (preset multi-negocio) -->
+        <div class="card card-pad" style="margin-bottom:10px;background:linear-gradient(135deg,#eef2ff,#e0e7ff);border:1px solid #6366f1;">
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <strong style="font-size:13px;">🎯 Perfil del giro:</strong>
+            <span id="perm-profile-current" style="font-size:12px;color:#4338ca;font-weight:600;">—</span>
+            <select id="perm-profile-sel" class="btn" style="min-width:180px;font-size:12.5px;"></select>
+            <button class="btn accent" onclick="window.PERM.applyProfile()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;">
+              ⚡ Aplicar perfil al tenant
+            </button>
+            <button class="btn" onclick="window.PERM.previewProfile()" style="font-size:12px;">
+              👁 Ver qué cambia
+            </button>
+          </div>
+          <div id="perm-profile-diff" style="margin-top:10px;font-size:12px;display:none;"></div>
+          <p style="margin:8px 0 0;font-size:11px;color:#475569;line-height:1.4;">
+            El perfil define <strong>módulos por default</strong> según el giro. Después puedes
+            personalizar uno por uno (toggle individual sobrescribe el preset). Útil para onboarding
+            rápido de nuevos negocios.
+          </p>
+        </div>
+
         <!-- Modo: ocultar vs deshabilitar -->
         <div class="card card-pad" style="margin-bottom:10px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;">
           <strong style="font-size:12.5px;">Cuando desactivas un permiso:</strong>
@@ -17462,6 +17483,69 @@ window.addEventListener('volvix:version-loaded', function(e){
     'pos.quickpick_panel': 'Panel QuickPick', 'ui.saas_btn': '👑 Btn SaaS Admin',
   };
 
+  // 2026-05-08: Perfiles por giro de negocio. Cada perfil define los DEFAULTS
+  // de módulos para ese giro. El platform owner puede aplicarlos de golpe en
+  // el panel; después cada negocio puede personalizar (toggle individual gana).
+  // Si un giro no está listado aquí, usamos PROFILE_GENERIC (todo lo común).
+  // ─────────────────────────────────────────────────────────────────────────
+  const PROFILE_GENERIC = { // 9 módulos comunes a TODOS los giros
+    pos:true, dashboard:true, apertura:true, corte:true, ventas:true,
+    reportes:true, clientes:true, usuarios:true, config:true, devoluciones:true,
+  };
+  const INDUSTRY_PROFILES = {
+    abarrotes:    { ...PROFILE_GENERIC, inventario:true, kardex:true, credito:true, proveedores:true, recargas:true, servicios:true, promociones:true, departamentos:true, sugeridas:true, actualizador:true },
+    minisuper:    { ...PROFILE_GENERIC, inventario:true, kardex:true, credito:true, proveedores:true, recargas:true, servicios:true, promociones:true, departamentos:true, actualizador:true },
+    'tienda-conveniencia': { ...PROFILE_GENERIC, inventario:true, kardex:true, proveedores:true, recargas:true, servicios:true, promociones:true, departamentos:true, actualizador:true },
+    farmacia:     { ...PROFILE_GENERIC, inventario:true, kardex:true, credito:true, proveedores:true, facturacion:true, promociones:true, departamentos:true, sugeridas:true, actualizador:true },
+    fruteria:     { ...PROFILE_GENERIC, inventario:true, departamentos:true, promociones:true },
+    carniceria:   { ...PROFILE_GENERIC, inventario:true, departamentos:true, promociones:true, proveedores:true },
+    polleria:     { ...PROFILE_GENERIC, inventario:true, departamentos:true, promociones:true, proveedores:true },
+    tortilleria:  { ...PROFILE_GENERIC, inventario:true, departamentos:true, promociones:true },
+    panaderia:    { ...PROFILE_GENERIC, inventario:true, departamentos:true, promociones:true },
+    pasteleria:   { ...PROFILE_GENERIC, inventario:true, departamentos:true, promociones:true },
+    cafeteria:    { ...PROFILE_GENERIC, inventario:true, departamentos:true, promociones:true },
+    restaurante:  { ...PROFILE_GENERIC, departamentos:true, promociones:true },
+    taqueria:     { ...PROFILE_GENERIC, departamentos:true, promociones:true },
+    pizzeria:     { ...PROFILE_GENERIC, departamentos:true, promociones:true },
+    heladeria:    { ...PROFILE_GENERIC, inventario:true, departamentos:true, promociones:true },
+    jugos_naturales: { ...PROFILE_GENERIC, inventario:true, departamentos:true, promociones:true },
+    'jugos-naturales': { ...PROFILE_GENERIC, inventario:true, departamentos:true, promociones:true },
+    barberia:     { ...PROFILE_GENERIC, servicios:true, promociones:true },
+    'salon-belleza': { ...PROFILE_GENERIC, servicios:true, promociones:true, inventario:true },
+    nails:        { ...PROFILE_GENERIC, servicios:true, promociones:true, inventario:true },
+    spa:          { ...PROFILE_GENERIC, servicios:true, promociones:true },
+    veterinaria:  { ...PROFILE_GENERIC, inventario:true, credito:true, facturacion:true, promociones:true, servicios:true },
+    'clinica-dental': { ...PROFILE_GENERIC, inventario:true, credito:true, facturacion:true, servicios:true },
+    optica:       { ...PROFILE_GENERIC, inventario:true, credito:true, facturacion:true },
+    ropa:         { ...PROFILE_GENERIC, inventario:true, kardex:true, credito:true, proveedores:true, departamentos:true, promociones:true, cotizaciones:true, facturacion:true },
+    'tienda-ropa': { ...PROFILE_GENERIC, inventario:true, kardex:true, credito:true, proveedores:true, departamentos:true, promociones:true, cotizaciones:true, facturacion:true },
+    zapateria:    { ...PROFILE_GENERIC, inventario:true, kardex:true, credito:true, proveedores:true, departamentos:true, promociones:true },
+    muebleria:    { ...PROFILE_GENERIC, inventario:true, kardex:true, credito:true, proveedores:true, cotizaciones:true, facturacion:true, promociones:true },
+    papeleria:    { ...PROFILE_GENERIC, inventario:true, kardex:true, proveedores:true, departamentos:true, promociones:true, cotizaciones:true, recargas:true },
+    ferreteria:   { ...PROFILE_GENERIC, inventario:true, kardex:true, credito:true, proveedores:true, departamentos:true, promociones:true, cotizaciones:true, sugeridas:true },
+    refaccionaria: { ...PROFILE_GENERIC, inventario:true, kardex:true, credito:true, proveedores:true, cotizaciones:true, sugeridas:true, facturacion:true },
+    'taller-mecanico': { ...PROFILE_GENERIC, servicios:true, cotizaciones:true, credito:true, facturacion:true },
+    carwash:      { ...PROFILE_GENERIC, servicios:true, promociones:true },
+    purificadora: { ...PROFILE_GENERIC, inventario:true, credito:true },
+    lavanderia:   { ...PROFILE_GENERIC, servicios:true, promociones:true },
+    gimnasio:     { ...PROFILE_GENERIC, servicios:true, promociones:true },
+    sabanas_premium: { ...PROFILE_GENERIC, inventario:true, kardex:true, proveedores:true, departamentos:true, promociones:true },
+  };
+  const INDUSTRY_LABELS = {
+    abarrotes:'🛒 Abarrotes', minisuper:'🏪 Minisúper', 'tienda-conveniencia':'🏪 Tienda de conveniencia',
+    farmacia:'💊 Farmacia', fruteria:'🍎 Frutería', carniceria:'🥩 Carnicería', polleria:'🍗 Pollería',
+    tortilleria:'🌽 Tortillería', panaderia:'🥖 Panadería', pasteleria:'🎂 Pastelería',
+    cafeteria:'☕ Cafetería', restaurante:'🍽️ Restaurante', taqueria:'🌮 Taquería', pizzeria:'🍕 Pizzería',
+    heladeria:'🍦 Heladería', jugos_naturales:'🥤 Jugos naturales', 'jugos-naturales':'🥤 Jugos naturales',
+    barberia:'💈 Barbería', 'salon-belleza':'💇 Salón de belleza', nails:'💅 Nails', spa:'🧖 Spa',
+    veterinaria:'🐶 Veterinaria', 'clinica-dental':'🦷 Clínica dental', optica:'👓 Óptica',
+    ropa:'👕 Ropa', 'tienda-ropa':'👕 Tienda de ropa', zapateria:'👟 Zapatería',
+    muebleria:'🪑 Mueblería', papeleria:'📚 Papelería', ferreteria:'🔧 Ferretería',
+    refaccionaria:'🔩 Refaccionaria', 'taller-mecanico':'🔧 Taller mecánico', carwash:'🚗 Carwash',
+    purificadora:'💧 Purificadora', lavanderia:'🧺 Lavandería', gimnasio:'💪 Gimnasio',
+    sabanas_premium:'🛏️ Sábanas premium',
+  };
+
   function getCurrentRole() {
     try {
       const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
@@ -17501,6 +17585,106 @@ window.addEventListener('volvix:version-loaded', function(e){
       this.applyModeStyle();
       this.loadTenants();
       this.populateUserKeySelect();
+      this.populateProfileSelect();
+    },
+
+    // 2026-05-08: dropdown de perfiles por giro (lista todos los industry profiles)
+    populateProfileSelect() {
+      const sel = document.getElementById('perm-profile-sel');
+      if (!sel) return;
+      const opts = ['<option value="">— Selecciona giro —</option>'];
+      Object.keys(INDUSTRY_PROFILES).sort().forEach(k => {
+        opts.push('<option value="' + k + '">' + (INDUSTRY_LABELS[k] || k) + '</option>');
+      });
+      sel.innerHTML = opts.join('');
+    },
+
+    // Devuelve el perfil del tenant actual basado en business_type (o null)
+    getActiveProfile() {
+      const tid = this.selectedTid;
+      if (!tid) return null;
+      // Buscar business_type en el cache de tenants (loadTenants lo cachea ya)
+      // o en _flagCache cuando es un fetch de otro tenant
+      const t = (this._tenantsList || []).find(x => (x.tenant_id || x.id) === tid);
+      const giro = t && (t.business_type || '');
+      const profile = INDUSTRY_PROFILES[giro];
+      return profile ? { giro, profile, label: INDUSTRY_LABELS[giro] || giro } : null;
+    },
+
+    // Aplica el perfil seleccionado al tenant: setea cada módulo del preset
+    async applyProfile() {
+      const sel = document.getElementById('perm-profile-sel');
+      const giro = sel && sel.value;
+      if (!giro) { alert('Selecciona un giro primero'); return; }
+      const tid = this.selectedTid;
+      if (!tid) { alert('No hay tenant seleccionado'); return; }
+      const profile = INDUSTRY_PROFILES[giro];
+      if (!profile) { alert('Giro desconocido: ' + giro); return; }
+      const total = Object.keys(profile).length;
+      if (!confirm('Aplicar perfil "' + (INDUSTRY_LABELS[giro] || giro) + '" a ' + tid + '?\n\nEsto va a setear ' + total + ' módulos al estado base del giro. Los toggles individuales que hagas DESPUÉS de esto sobrescriben el preset.')) return;
+      const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+      const errors = [];
+      let okCount = 0;
+      // Aplicar uno por uno para tener feedback (mejor UX que un bulk silencioso)
+      for (const [mod, enabled] of Object.entries(profile)) {
+        try {
+          const r = await fetch('/api/admin/tenant/' + encodeURIComponent(tid) + '/module', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ module_key: mod, enabled: !!enabled }),
+          });
+          if (r.ok) okCount++;
+          else errors.push(mod + ': HTTP ' + r.status);
+        } catch (e) { errors.push(mod + ': ' + e.message); }
+      }
+      // Refrescar cache + render
+      delete this._flagCache[tid];
+      this.renderForTenant(tid);
+      if (window.toast) window.toast('Perfil aplicado: ' + okCount + '/' + total + ' módulos' + (errors.length ? ' · ' + errors.length + ' errores' : ''), errors.length ? 'warn' : 'ok');
+      console.log('[PERM] applyProfile', giro, '→', tid, 'ok:', okCount, 'errores:', errors);
+    },
+
+    // Muestra qué módulos cambiarían si aplicáramos el perfil seleccionado
+    async previewProfile() {
+      const sel = document.getElementById('perm-profile-sel');
+      const diff = document.getElementById('perm-profile-diff');
+      if (!sel || !diff) return;
+      const giro = sel.value;
+      if (!giro) { diff.style.display = 'none'; return; }
+      const profile = INDUSTRY_PROFILES[giro];
+      if (!profile) return;
+      const tid = this.selectedTid;
+      const localState = window.VOLVIX && VOLVIX.getState ? VOLVIX.getState() : {};
+      const isOwn = (tid === localState.id);
+      const current = isOwn
+        ? Object.assign({}, this.DEFAULT_MODS, localState.modules || {})
+        : (this._flagCache[tid] && Object.assign({}, this.DEFAULT_MODS, this._flagCache[tid].modules)) || {};
+      const willEnable = [], willDisable = [], unchanged = [];
+      // Universo: union de keys de current + profile + DEFAULT_MODS
+      const allKeys = new Set([...Object.keys(current), ...Object.keys(profile), ...Object.keys(this.DEFAULT_MODS)]);
+      allKeys.forEach(k => {
+        const cur = current[k] !== false;
+        const want = !!profile[k]; // profile no listado = false
+        if (cur === want) unchanged.push(k);
+        else if (want) willEnable.push(k);
+        else willDisable.push(k);
+      });
+      diff.style.display = '';
+      diff.innerHTML =
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">' +
+          '<div style="background:#dcfce7;padding:8px;border-radius:6px;">' +
+            '<strong style="color:#15803d;font-size:11px;">✅ SE ACTIVAN (' + willEnable.length + ')</strong>' +
+            '<div style="font-size:11px;color:#166534;margin-top:4px;">' + (willEnable.map(k => MOD_LABELS[k] || k).join('<br>') || '<em>ninguno</em>') + '</div>' +
+          '</div>' +
+          '<div style="background:#fee2e2;padding:8px;border-radius:6px;">' +
+            '<strong style="color:#b91c1c;font-size:11px;">❌ SE DESACTIVAN (' + willDisable.length + ')</strong>' +
+            '<div style="font-size:11px;color:#991b1b;margin-top:4px;">' + (willDisable.map(k => MOD_LABELS[k] || k).join('<br>') || '<em>ninguno</em>') + '</div>' +
+          '</div>' +
+          '<div style="background:#f1f5f9;padding:8px;border-radius:6px;">' +
+            '<strong style="color:#475569;font-size:11px;">➖ SIN CAMBIO (' + unchanged.length + ')</strong>' +
+            '<div style="font-size:11px;color:#64748b;margin-top:4px;">' + unchanged.length + ' módulos ya están en el estado del perfil</div>' +
+          '</div>' +
+        '</div>';
     },
 
     // 2026-05-08: modo de desactivacion (hide=ocultar / disable=gris)
@@ -17536,6 +17720,7 @@ window.addEventListener('volvix:version-loaded', function(e){
           console.warn('[PERM] /api/admin/tenants → 403 (no eres superadmin)');
         }
       } catch(e) { console.warn('[PERM] load tenants:', e); }
+      this._tenantsList = tenants; // cache para getActiveProfile()
       // Tenant actual del usuario logueado
       const currentTid = (window.VOLVIX && VOLVIX.getState && VOLVIX.getState().id) || 'TNT001';
       const currentName = (window.VOLVIX && VOLVIX.getState && VOLVIX.getState().name) || 'Mi negocio';
@@ -17674,6 +17859,21 @@ window.addEventListener('volvix:version-loaded', function(e){
           ? '<span style="background:#dbeafe;color:#1e40af;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;">📍 Editando MI propio negocio (' + view.id + ')</span>'
           : '<span style="background:#fef3c7;color:#92400e;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;">⚠️ Editando OTRO tenant: ' + view.name + ' (' + view.id + ')</span>';
       }
+      // Auto-seleccionar el giro del tenant en el dropdown de perfiles
+      const activeProfile = this.getActiveProfile();
+      const profileSel = document.getElementById('perm-profile-sel');
+      const profileLabel = document.getElementById('perm-profile-current');
+      if (profileSel && activeProfile) {
+        if (profileSel.value !== activeProfile.giro) profileSel.value = activeProfile.giro;
+      }
+      if (profileLabel) {
+        profileLabel.textContent = activeProfile
+          ? activeProfile.label + ' (giro registrado del tenant)'
+          : 'sin giro registrado';
+      }
+      // Limpiar diff al cambiar tenant
+      const diffEl = document.getElementById('perm-profile-diff');
+      if (diffEl) diffEl.style.display = 'none';
       // Status
       const statusSel = document.getElementById('perm-status-sel');
       const statusChip = document.getElementById('perm-status-chip');
@@ -17681,13 +17881,23 @@ window.addEventListener('volvix:version-loaded', function(e){
       if (statusSel) statusSel.value = view.status;
       if (statusText) statusText.textContent = view.status;
       if (statusChip) statusChip.className = 'chip ' + (view.status === 'active' ? 'ok' : 'err');
-      // Modulos
+      // Modulos — decorar con badge baseline-del-giro vs custom-override
       const modsGrid = document.getElementById('perm-mods-grid');
       if (modsGrid) {
+        const profile = activeProfile && activeProfile.profile;
         modsGrid.innerHTML = Object.keys(view.modules).map(k => {
           const on = !!view.modules[k];
+          let badge = '';
+          if (profile) {
+            const baseline = !!profile[k];
+            if (baseline === on) {
+              badge = '<span title="Coincide con baseline del giro" style="font-size:9px;background:#dbeafe;color:#1e40af;padding:1px 6px;border-radius:8px;margin-left:4px;font-weight:700;">🎯 BASELINE</span>';
+            } else {
+              badge = '<span title="Custom — diferente al baseline del giro" style="font-size:9px;background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:8px;margin-left:4px;font-weight:700;">⭐ CUSTOM</span>';
+            }
+          }
           return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--surface-2,#f5f5f4);border-radius:8px;border:1px solid var(--border);">' +
-            '<span style="font-size:13px;">' + (MOD_LABELS[k] || k) + '</span>' +
+            '<span style="font-size:13px;">' + (MOD_LABELS[k] || k) + badge + '</span>' +
             '<button onclick="window.PERM.toggleModule(\'' + k + '\')" class="btn sm" style="background:' + (on ? '#10b981' : '#94a3b8') + ';color:#fff;min-width:60px;">' + (on ? 'ON' : 'OFF') + '</button>' +
             '</div>';
         }).join('');

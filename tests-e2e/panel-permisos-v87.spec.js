@@ -279,6 +279,32 @@ test('14. UI: tab Jerarquía muestra superadmin + tenants + empleados', async ({
   await page.screenshot({ path: 'tests/_screenshots/14-jerarquia-tab.png', fullPage: true });
 });
 
+// ESCENARIO 15.5: UI — perfiles por giro renderizan en el panel
+test('15b. UI: perfiles por giro están disponibles', async ({ page }) => {
+  await page.goto(BASE + '/salvadorex-pos.html', { waitUntil: 'domcontentloaded' });
+  await page.evaluate((tok) => {
+    localStorage.setItem('volvix_token', tok);
+    localStorage.setItem('volvixAuthToken', tok);
+    localStorage.setItem('volvix_onboarding_done', '1');
+    localStorage.setItem('volvix_onboarding_dismissed', '1');
+    localStorage.setItem('volvix_first_login_completed', '1');
+    const ov = document.getElementById('volvix-onboarding-overlay');
+    if (ov) ov.remove();
+  }, TOKEN);
+  await page.goto(BASE + '/salvadorex-pos.html#permisos', { waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('#perm-profile-sel', { timeout: 10000 });
+  await page.waitForTimeout(2000);
+  // Verificar que el dropdown de perfiles tiene >10 giros
+  const profileCount = await page.$$eval('#perm-profile-sel option', opts => opts.length);
+  console.log('  perfiles disponibles:', profileCount);
+  expect(profileCount).toBeGreaterThan(10);
+  // Verificar que abarrotes y farmacia están en la lista
+  const values = await page.$$eval('#perm-profile-sel option', opts => opts.map(o => o.value));
+  expect(values).toContain('abarrotes');
+  expect(values).toContain('farmacia');
+  expect(values).toContain('barberia');
+});
+
 // ESCENARIO 15: UI — clic en otro tenant cambia el banner
 test('15. UI: cambiar tenant en dropdown actualiza banner', async ({ page }) => {
   await page.goto(BASE + '/salvadorex-pos.html', { waitUntil: 'domcontentloaded' });
