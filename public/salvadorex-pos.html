@@ -4187,6 +4187,546 @@
       </div>
     </section>
 
+    <!-- ============ FILA VIRTUAL ============ -->
+    <!-- 2026-05-07 merge-fila: consolidado desde pos-fila.html -->
+    <section id="screen-fila" class="screen-pad hidden">
+      <style>
+        .fila-wrap{display:flex;flex-direction:column;height:100%;}
+        .fila-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border,#E5E5EA);border:1px solid var(--border,#E5E5EA);border-radius:8px;overflow:hidden;margin-bottom:14px}
+        .fila-kpi{background:#fff;padding:12px 16px;text-align:center}
+        .fila-kpi-val{font-size:24px;font-weight:800;color:var(--navy,#1a237e)}
+        .fila-kpi-label{font-size:11px;color:var(--text-3,#64748B);margin-top:2px}
+        .fila-layout{display:grid;grid-template-columns:1fr 320px;gap:14px;flex:1;min-height:480px}
+        .fila-panel-main{display:flex;flex-direction:column;background:#fff;border:1px solid var(--border,#E5E5EA);border-radius:10px;overflow:hidden}
+        .fila-panel-side{background:#fff;border:1px solid var(--border,#E5E5EA);border-radius:10px;display:flex;flex-direction:column;overflow:hidden}
+        .fila-toolbar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border,#E5E5EA);flex-wrap:wrap}
+        .fila-list{flex:1;overflow-y:auto;padding:12px 14px;min-height:220px}
+        .fila-turno-card{display:flex;align-items:center;gap:12px;padding:12px 14px;background:#fff;border:1px solid var(--border,#E5E5EA);border-radius:10px;margin-bottom:8px}
+        .fila-turno-card.llamado{border-color:#FCD34D;background:#FFFBEB}
+        .fila-turno-num{width:44px;height:44px;border-radius:10px;background:var(--navy,#1a237e);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;flex-shrink:0}
+        .fila-turno-card.llamado .fila-turno-num{background:#F59E0B}
+        .fila-turno-info{flex:1;min-width:0}
+        .fila-turno-nombre{font-size:14px;font-weight:600}
+        .fila-turno-meta{font-size:11px;color:var(--text-3,#64748B);margin-top:2px}
+        .fila-turno-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}
+        .fila-badge-espera{background:#EDE9FE;color:#6D28D9}
+        .fila-badge-llamado{background:#FEF9C3;color:#854D0E}
+        .fila-turno-actions{display:flex;gap:6px;flex-shrink:0}
+        .fila-icon-btn{width:32px;height:32px;border-radius:6px;border:1px solid var(--border,#E5E5EA);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px}
+        .fila-icon-btn:hover{background:#F4F4F7}
+        .fila-empty{text-align:center;padding:40px 20px;color:var(--text-3,#64748B)}
+        .fila-side-header{padding:12px 14px;border-bottom:1px solid var(--border,#E5E5EA);font-weight:700;font-size:14px}
+        .fila-side-body{padding:14px;flex:1;overflow-y:auto}
+        .fila-form-group{margin-bottom:12px}
+        .fila-form-label{display:block;font-size:11px;font-weight:600;color:var(--text-2,#374151);margin-bottom:5px}
+        .fila-form-input{width:100%;padding:8px 11px;border:1px solid var(--border,#E5E5EA);border-radius:7px;font-size:13px;background:#FAFAF9;color:var(--text,#0F172A)}
+        .fila-qr-section{padding:14px;border-top:1px solid var(--border,#E5E5EA)}
+        .fila-qr-box{background:#fff;border:1px solid var(--border,#E5E5EA);border-radius:10px;padding:12px;display:flex;align-items:center;justify-content:center;min-height:200px}
+        .fila-qr-url{font-size:10px;color:var(--navy,#1a237e);word-break:break-all;text-align:center;margin-top:6px}
+        @media (max-width: 900px){.fila-layout{grid-template-columns:1fr}.fila-panel-side{display:none}}
+      </style>
+      <div class="page-head">
+        <div><h1 class="page-title">👥 Fila Virtual</h1><p class="page-sub">Gestión de turnos y QR para clientes</p></div>
+      </div>
+      <div class="fila-wrap">
+        <div class="fila-kpis">
+          <div class="fila-kpi"><div class="fila-kpi-val" id="fila-kpi-espera">0</div><div class="fila-kpi-label">En espera</div></div>
+          <div class="fila-kpi"><div class="fila-kpi-val" id="fila-kpi-atendidos">0</div><div class="fila-kpi-label">Atendidos hoy</div></div>
+          <div class="fila-kpi"><div class="fila-kpi-val" id="fila-kpi-tiempo">—</div><div class="fila-kpi-label">Tiempo promedio</div></div>
+        </div>
+        <div class="fila-layout">
+          <div class="fila-panel-main">
+            <div class="fila-toolbar">
+              <button class="btn success" onclick="filaApp.llamarSiguiente()">▶ Llamar siguiente</button>
+              <button class="btn" onclick="filaApp.openModal('fila-modalAgregar')">+ Agregar a fila</button>
+              <div style="flex:1"></div>
+              <button class="btn" onclick="filaApp.cargarFila()" title="Actualizar">↺ Actualizar</button>
+              <button class="btn danger" onclick="filaApp.limpiarFila()" title="Limpiar">🗑 Limpiar</button>
+            </div>
+            <div class="fila-list" id="fila-list">
+              <div class="fila-empty"><div style="font-size:48px;margin-bottom:10px">👥</div><div style="font-size:14px;font-weight:600;margin-bottom:6px">Fila vacía</div><div style="font-size:12px">Comparte el QR para que los clientes se agreguen</div></div>
+            </div>
+          </div>
+          <div class="fila-panel-side">
+            <div class="fila-side-header">Agregar cliente</div>
+            <div class="fila-side-body">
+              <div class="fila-form-group"><label class="fila-form-label">Nombre (opcional)</label><input class="fila-form-input" id="fila-nuevoNombre" placeholder="Ej. María López"></div>
+              <div class="fila-form-group"><label class="fila-form-label">Teléfono (opcional)</label><input class="fila-form-input" id="fila-nuevoTelefono" type="tel" placeholder="Ej. 8181234567"></div>
+              <button class="btn primary" style="width:100%" onclick="filaApp.agregarAFila()">+ Agregar a fila</button>
+              <div style="margin-top:14px;padding:10px;background:#F4F4F7;border-radius:8px;font-size:12px;color:var(--text-3,#64748B)">💡 Si el cliente tiene teléfono, puede ver su posición escaneando el QR.</div>
+            </div>
+            <div class="fila-qr-section">
+              <div style="font-size:12px;font-weight:600;margin-bottom:8px">📱 QR para clientes</div>
+              <div class="fila-qr-box" id="fila-qr-container"></div>
+              <div class="fila-qr-url" id="fila-qr-url-text"></div>
+              <button class="btn" style="width:100%;margin-top:8px" onclick="window.print()">🖨 Imprimir QR</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Modal agregar fila -->
+      <div class="modal-bg" id="fila-modalAgregar" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center">
+        <div style="background:#fff;border-radius:12px;width:400px;max-width:95vw;overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border,#E5E5EA);font-weight:700">+ Agregar a la fila <button onclick="filaApp.closeModal('fila-modalAgregar')" style="font-size:16px;cursor:pointer;background:none;border:none">✕</button></div>
+          <div style="padding:16px">
+            <div class="fila-form-group"><label class="fila-form-label">Nombre (opcional)</label><input class="fila-form-input" id="fila-mNombre"></div>
+            <div class="fila-form-group"><label class="fila-form-label">Teléfono (opcional)</label><input class="fila-form-input" id="fila-mTelefono" type="tel"></div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;padding:12px 16px;border-top:1px solid var(--border,#E5E5EA)">
+            <button class="btn" onclick="filaApp.closeModal('fila-modalAgregar')">Cancelar</button>
+            <button class="btn primary" onclick="filaApp.agregarDesdeModal()">+ Agregar</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ INGREDIENTES Y RECETAS ============ -->
+    <!-- 2026-05-07 merge-ing: consolidado desde pos-ingredientes.html -->
+    <section id="screen-ingredientes" class="screen-pad hidden">
+      <style>
+        .ing-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border,#E5E5EA);border:1px solid var(--border,#E5E5EA);border-radius:8px;overflow:hidden;margin-bottom:12px}
+        .ing-kpi{background:#fff;padding:10px 14px;text-align:center}
+        .ing-kpi-val{font-size:20px;font-weight:800;color:var(--navy,#1a237e)}
+        .ing-kpi-label{font-size:10px;color:var(--text-3,#64748B)}
+        .ing-tabs{display:flex;border-bottom:1px solid var(--border,#E5E5EA);background:#fff;border-radius:8px 8px 0 0}
+        .ing-tab{flex:1;padding:10px;text-align:center;font-size:12px;font-weight:600;cursor:pointer;color:var(--text-3,#64748B);border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none}
+        .ing-tab.active{color:var(--navy,#1a237e);border-bottom-color:var(--navy,#1a237e)}
+        .ing-view{display:none}
+        .ing-view.active{display:block}
+        .ing-toolbar{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#fff;border-bottom:1px solid var(--border,#E5E5EA)}
+        .ing-table-wrap{background:#fff;border:1px solid var(--border,#E5E5EA);border-top:none;border-radius:0 0 8px 8px;overflow:auto;max-height:60vh}
+        .ing-table{width:100%;border-collapse:collapse}
+        .ing-table thead th{padding:10px 14px;font-size:11px;font-weight:600;color:var(--text-3,#64748B);text-transform:uppercase;background:#fff;border-bottom:1px solid var(--border,#E5E5EA);text-align:left;position:sticky;top:0}
+        .ing-table tbody tr:hover{background:#FAFAF9}
+        .ing-table td{padding:10px 14px;font-size:13px;border-bottom:1px solid var(--border,#E5E5EA)}
+        .ing-badge-stock{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}
+        .ing-badge-ok{background:#DCFCE7;color:#15803D}
+        .ing-badge-low{background:#FEF9C3;color:#854D0E}
+        .ing-badge-out{background:#FEE2E2;color:#DC2626}
+        .ing-icon-btn{width:28px;height:28px;border-radius:5px;border:1px solid var(--border,#E5E5EA);background:#fff;cursor:pointer;font-size:13px}
+        .ing-icon-btn.danger:hover{background:#FEE2E2;color:#DC2626}
+        .ing-empty{text-align:center;padding:40px 20px;color:var(--text-3,#64748B)}
+        .ing-form-group{margin-bottom:12px}
+        .ing-form-label{display:block;font-size:11px;font-weight:600;color:var(--text-2,#374151);margin-bottom:5px}
+        .ing-form-input,.ing-form-select{width:100%;padding:8px 11px;border:1px solid var(--border,#E5E5EA);border-radius:7px;font-size:13px;background:#FAFAF9}
+        .ing-form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+        .ing-form-hint{font-size:11px;color:var(--text-3,#64748B);margin-top:3px}
+        .ing-receta-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border,#E5E5EA);border-radius:7px;margin-bottom:6px;font-size:12px}
+        .btn-ai-ing{background:linear-gradient(135deg,#6D28D9,#2563EB);color:#fff;border:none}
+        .ing-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center}
+        .ing-modal-bg.open{display:flex}
+        .ing-modal{background:#fff;border-radius:12px;width:460px;max-width:95vw;overflow:hidden;max-height:90vh;display:flex;flex-direction:column}
+        .ing-ai-result{background:linear-gradient(135deg,rgba(109,40,217,.05),rgba(37,99,235,.05));border:1px solid rgba(109,40,217,.2);border-radius:8px;padding:12px;margin-top:10px}
+        .ing-ai-badge{font-size:10px;font-weight:600;color:#6D28D9;background:rgba(109,40,217,.1);padding:2px 7px;border-radius:10px;margin-bottom:8px;display:inline-block}
+      </style>
+      <div class="page-head">
+        <div><h1 class="page-title">🧪 Ingredientes y Recetas</h1><p class="page-sub">Composición de productos y costo unitario</p></div>
+      </div>
+      <div class="ing-kpi-row">
+        <div class="ing-kpi"><div class="ing-kpi-val" id="ing-kpi-ings">0</div><div class="ing-kpi-label">Ingredientes</div></div>
+        <div class="ing-kpi"><div class="ing-kpi-val" id="ing-kpi-recetas">0</div><div class="ing-kpi-label">Recetas</div></div>
+        <div class="ing-kpi"><div class="ing-kpi-val" id="ing-kpi-low" style="color:#DC2626">0</div><div class="ing-kpi-label">Stock bajo</div></div>
+        <div class="ing-kpi"><div class="ing-kpi-val" id="ing-kpi-costo">$0</div><div class="ing-kpi-label">Costo prom.</div></div>
+      </div>
+      <div class="ing-tabs">
+        <button class="ing-tab active" onclick="ingApp.switchTab('ingredientes',this)">📦 Ingredientes</button>
+        <button class="ing-tab" onclick="ingApp.switchTab('recetas',this)">📋 Recetas</button>
+      </div>
+      <div class="ing-view active" id="ing-view-ingredientes">
+        <div class="ing-toolbar">
+          <button class="btn primary" onclick="ingApp.openModal('ing-modalIng')">+ Nuevo ingrediente</button>
+          <div style="flex:1"></div>
+          <input type="text" placeholder="Buscar..." oninput="ingApp.filtrarIng(this.value)" style="padding:7px 11px;border:1px solid var(--border,#E5E5EA);border-radius:7px;font-size:12px;background:#FAFAF9;width:200px">
+        </div>
+        <div class="ing-table-wrap">
+          <table class="ing-table">
+            <thead><tr><th>Ingrediente</th><th>Unidad</th><th>Stock</th><th>Costo/u</th><th>Stock mín.</th><th></th></tr></thead>
+            <tbody id="ing-tbody-ings"><tr><td colspan="6"><div class="ing-empty"><div style="font-size:40px">📦</div><div>Cargando...</div></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="ing-view" id="ing-view-recetas">
+        <div class="ing-toolbar">
+          <button class="btn primary" onclick="ingApp.openModal('ing-modalReceta')">+ Nueva receta</button>
+          <button class="btn btn-ai-ing" onclick="ingApp.openModalSuggest()">✨ IA sugiere ingredientes</button>
+          <div style="flex:1"></div>
+        </div>
+        <div class="ing-table-wrap">
+          <table class="ing-table">
+            <thead><tr><th>Producto</th><th>Ingredientes</th><th>Costo receta</th><th>Precio venta</th><th>Margen</th><th></th></tr></thead>
+            <tbody id="ing-tbody-recetas"><tr><td colspan="6"><div class="ing-empty"><div style="font-size:40px">📋</div><div>Sin recetas registradas</div></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <!-- Modal ingrediente -->
+      <div class="ing-modal-bg" id="ing-modalIng">
+        <div class="ing-modal">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border,#E5E5EA);font-weight:700"><span id="ing-modalIngTitle">+ Nuevo ingrediente</span><button onclick="ingApp.closeModal('ing-modalIng')" style="font-size:16px;cursor:pointer;background:none;border:none">✕</button></div>
+          <div style="padding:16px;overflow-y:auto;flex:1">
+            <div class="ing-form-group"><label class="ing-form-label">Nombre *</label><input class="ing-form-input" id="ing-nombre" placeholder="Ej. Carne de res, Tortilla, Aceite"></div>
+            <div class="ing-form-row">
+              <div class="ing-form-group"><label class="ing-form-label">Unidad *</label>
+                <select class="ing-form-select" id="ing-unidad">
+                  <option value="g">Gramos (g)</option><option value="kg">Kilogramos (kg)</option><option value="ml">Mililitros (ml)</option><option value="l">Litros (l)</option><option value="pza">Pieza (pza)</option><option value="caja">Caja</option><option value="bolsa">Bolsa</option>
+                </select>
+              </div>
+              <div class="ing-form-group"><label class="ing-form-label">Costo por unidad *</label><input class="ing-form-input" id="ing-costo" type="number" min="0" step="0.01" placeholder="0.00"><div class="ing-form-hint">Costo de 1 g / 1 ml / 1 pza</div></div>
+            </div>
+            <div class="ing-form-row">
+              <div class="ing-form-group"><label class="ing-form-label">Stock actual</label><input class="ing-form-input" id="ing-stock" type="number" min="0" placeholder="0"></div>
+              <div class="ing-form-group"><label class="ing-form-label">Stock mínimo</label><input class="ing-form-input" id="ing-minimo" type="number" min="0" placeholder="0"></div>
+            </div>
+            <div class="ing-form-group"><label class="ing-form-label">Proveedor</label><input class="ing-form-input" id="ing-proveedor"></div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;padding:12px 16px;border-top:1px solid var(--border,#E5E5EA)">
+            <button class="btn" onclick="ingApp.closeModal('ing-modalIng')">Cancelar</button>
+            <button class="btn primary" onclick="ingApp.guardarIngrediente()">✓ Guardar</button>
+          </div>
+        </div>
+      </div>
+      <!-- Modal receta -->
+      <div class="ing-modal-bg" id="ing-modalReceta">
+        <div class="ing-modal">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border,#E5E5EA);font-weight:700">📋 Nueva receta <button onclick="ingApp.closeModal('ing-modalReceta')" style="font-size:16px;cursor:pointer;background:none;border:none">✕</button></div>
+          <div style="padding:16px;overflow-y:auto;flex:1">
+            <div class="ing-form-group"><label class="ing-form-label">Producto *</label><select class="ing-form-select" id="ing-rec-producto"><option value="">Selecciona un producto...</option></select></div>
+            <div style="font-size:12px;font-weight:600;margin-bottom:8px">Ingredientes de la receta:</div>
+            <div id="ing-rec-items"></div>
+            <button class="btn" style="width:100%;margin-bottom:10px" onclick="ingApp.agregarItemReceta()">+ Agregar ingrediente</button>
+            <div style="font-size:12px;color:var(--text-3,#64748B);padding:8px;background:#F4F4F7;border-radius:7px">Costo total de la receta: <strong id="ing-rec-costo-total">$0.00</strong></div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;padding:12px 16px;border-top:1px solid var(--border,#E5E5EA)">
+            <button class="btn" onclick="ingApp.closeModal('ing-modalReceta')">Cancelar</button>
+            <button class="btn primary" onclick="ingApp.guardarReceta()">✓ Guardar receta</button>
+          </div>
+        </div>
+      </div>
+      <!-- Modal IA suggest -->
+      <div class="ing-modal-bg" id="ing-modalSuggest">
+        <div class="ing-modal">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border,#E5E5EA);font-weight:700">✨ IA sugiere ingredientes <button onclick="ingApp.closeModal('ing-modalSuggest')" style="font-size:16px;cursor:pointer;background:none;border:none">✕</button></div>
+          <div style="padding:16px;overflow-y:auto;flex:1">
+            <div class="ing-form-group"><label class="ing-form-label">Nombre del producto</label><input class="ing-form-input" id="ing-suggest-producto" placeholder="Ej. Taco de bistec, Pizza margarita, Café americano"></div>
+            <div id="ing-suggest-result"></div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;padding:12px 16px;border-top:1px solid var(--border,#E5E5EA)">
+            <button class="btn" onclick="ingApp.closeModal('ing-modalSuggest')">Cancelar</button>
+            <button class="btn btn-ai-ing" id="ing-btnSuggest" onclick="ingApp.sugerirIngredientes()">✨ Sugerir con IA</button>
+            <button class="btn primary" id="ing-btnImportarSuggest" style="display:none" onclick="ingApp.importarSugeridos()">⬆ Importar ingredientes</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ MENÚ DIGITAL ============ -->
+    <!-- 2026-05-07 merge-menu: consolidado desde pos-menu-digital.html -->
+    <section id="screen-menu-digital" class="screen-pad hidden">
+      <style>
+        .menu-layout{display:grid;grid-template-columns:1fr 300px;gap:14px;min-height:520px}
+        .menu-panel-main{display:flex;flex-direction:column;background:#fff;border:1px solid var(--border,#E5E5EA);border-radius:10px;overflow:hidden}
+        .menu-panel-side{background:#fff;border:1px solid var(--border,#E5E5EA);border-radius:10px;display:flex;flex-direction:column;overflow:hidden}
+        .menu-toolbar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border,#E5E5EA);flex-wrap:wrap}
+        .menu-cat-filter{display:flex;gap:6px;padding:8px 14px;border-bottom:1px solid var(--border,#E5E5EA);overflow-x:auto}
+        .menu-cat-chip{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border,#E5E5EA);background:#fff;color:var(--text-2,#374151);white-space:nowrap}
+        .menu-cat-chip.active{background:var(--navy,#1a237e);color:#fff;border-color:var(--navy,#1a237e)}
+        .menu-products-grid{flex:1;overflow-y:auto;padding:12px 14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;align-content:start}
+        .menu-prod-card{background:#fff;border:2px solid var(--border,#E5E5EA);border-radius:10px;overflow:hidden;cursor:pointer;position:relative}
+        .menu-prod-card.visible{border-color:#86EFAC}
+        .menu-prod-card.oculto{opacity:.6}
+        .menu-prod-img-placeholder{width:100%;height:100px;background:#F4F4F7;display:flex;align-items:center;justify-content:center;font-size:32px}
+        .menu-prod-body{padding:10px}
+        .menu-prod-name{font-size:12px;font-weight:600;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .menu-prod-price{font-size:13px;font-weight:700;color:var(--navy,#1a237e)}
+        .menu-prod-cat{font-size:10px;color:var(--text-3,#64748B);margin-top:2px}
+        .menu-toggle-vis{position:absolute;top:6px;right:6px;width:28px;height:16px;border-radius:8px;border:none;cursor:pointer;font-size:0}
+        .menu-toggle-vis.on{background:#16A34A}
+        .menu-toggle-vis.off{background:#D1D5DB}
+        .menu-toggle-vis::after{content:'';position:absolute;width:12px;height:12px;border-radius:50%;background:#fff;top:2px;transition:left .15s}
+        .menu-toggle-vis.on::after{left:14px}
+        .menu-toggle-vis.off::after{left:2px}
+        .menu-side-section{padding:12px 14px;border-bottom:1px solid var(--border,#E5E5EA)}
+        .menu-side-title{font-size:12px;font-weight:700;margin-bottom:10px}
+        .menu-qr-box{background:#fff;border:1px solid var(--border,#E5E5EA);border-radius:10px;padding:12px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;min-height:140px}
+        .menu-qr-url{font-size:10px;color:var(--navy,#1a237e);word-break:break-all;margin-bottom:8px;text-align:center}
+        .menu-stat-row{display:flex;justify-content:space-between;font-size:12px;padding:4px 0}
+        .menu-stat-val{font-weight:700;color:var(--navy,#1a237e)}
+        .menu-lang-row{display:flex;gap:6px;flex-wrap:wrap}
+        .menu-lang-btn{padding:4px 10px;border-radius:6px;border:1px solid var(--border,#E5E5EA);background:#fff;font-size:11px;cursor:pointer}
+        .menu-lang-btn.active{background:var(--navy,#1a237e);color:#fff;border-color:var(--navy,#1a237e)}
+        .menu-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center}
+        .menu-modal-bg.open{display:flex}
+        .menu-modal{background:#fff;border-radius:12px;width:460px;max-width:95vw;overflow:hidden;max-height:90vh;display:flex;flex-direction:column}
+        .menu-import-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border,#E5E5EA);border-radius:8px;margin-bottom:6px;font-size:12px}
+        @media(max-width:900px){.menu-layout{grid-template-columns:1fr}.menu-panel-side{display:none}}
+      </style>
+      <div class="page-head">
+        <div><h1 class="page-title">🍽 Menú Digital</h1><p class="page-sub">QR para clientes y digitalización con IA</p></div>
+        <div class="btn-row">
+          <button class="btn" onclick="menuApp.openModal('menu-modalQR')">📱 Ver QR</button>
+          <button class="btn" onclick="menuApp.abrirMenuPublico()">👁 Vista cliente</button>
+        </div>
+      </div>
+      <div class="menu-layout">
+        <div class="menu-panel-main">
+          <div class="menu-toolbar">
+            <button class="btn primary" onclick="menuApp.openModal('menu-modalDigitalizar')">✨ Digitalizar menú con IA</button>
+            <button class="btn" onclick="menuApp.activarTodos()">✅ Activar todos</button>
+            <button class="btn" onclick="menuApp.desactivarTodos()">❌ Ocultar todos</button>
+            <div style="flex:1"></div>
+            <span style="font-size:12px;color:var(--text-3,#64748B)">Visibles: <strong id="menu-cnt-visibles">0</strong> / <span id="menu-cnt-total">0</span></span>
+          </div>
+          <div class="menu-cat-filter" id="menu-cat-filter">
+            <div class="menu-cat-chip active" onclick="menuApp.filtrarCat('',this)">Todos</div>
+          </div>
+          <div class="menu-products-grid" id="menu-products-grid">
+            <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-3,#64748B)">Cargando productos...</div>
+          </div>
+        </div>
+        <div class="menu-panel-side">
+          <div class="menu-side-section">
+            <div class="menu-side-title">📊 Estado del menú</div>
+            <div class="menu-stat-row"><span>Visibles en menú</span><span class="menu-stat-val" id="menu-stat-vis">—</span></div>
+            <div class="menu-stat-row"><span>Categorías activas</span><span class="menu-stat-val" id="menu-stat-cats">—</span></div>
+            <div class="menu-stat-row"><span>Idioma activo</span><span class="menu-stat-val" id="menu-stat-lang">ES</span></div>
+          </div>
+          <div class="menu-side-section">
+            <div class="menu-side-title">🌐 Idioma del menú</div>
+            <div class="menu-lang-row">
+              <button class="menu-lang-btn active" onclick="menuApp.setLang('es',this)">🇲🇽 ES</button>
+              <button class="menu-lang-btn" onclick="menuApp.setLang('en',this)">🇺🇸 EN</button>
+              <button class="menu-lang-btn" onclick="menuApp.setLang('fr',this)">🇫🇷 FR</button>
+            </div>
+          </div>
+          <div class="menu-side-section">
+            <div class="menu-side-title">📱 QR del menú público</div>
+            <div class="menu-qr-box" id="menu-qr-mini"></div>
+            <div class="menu-qr-url" id="menu-qr-url-text"></div>
+            <button class="btn" style="width:100%" onclick="menuApp.openModal('menu-modalQR')">Ampliar QR</button>
+          </div>
+          <div style="padding:14px">
+            <div class="menu-side-title">🔗 Enlace directo</div>
+            <button class="btn" style="width:100%;margin-bottom:6px" onclick="menuApp.copiarLink()">📋 Copiar enlace</button>
+            <button class="btn" style="width:100%" onclick="menuApp.abrirMenuPublico()">👁 Abrir en nueva pestaña</button>
+          </div>
+        </div>
+      </div>
+      <!-- Modal QR grande -->
+      <div class="menu-modal-bg" id="menu-modalQR">
+        <div class="menu-modal" style="max-width:380px">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border,#E5E5EA);font-weight:700">📱 QR del menú <button onclick="menuApp.closeModal('menu-modalQR')" style="font-size:16px;cursor:pointer;background:none;border:none">✕</button></div>
+          <div style="padding:16px;text-align:center;flex:1;overflow-y:auto">
+            <div id="menu-qr-grande" style="display:flex;justify-content:center;margin-bottom:12px"></div>
+            <div id="menu-qr-url-grande" style="font-size:11px;color:var(--navy,#1a237e);word-break:break-all;margin-bottom:12px"></div>
+            <p style="font-size:12px;color:var(--text-3,#64748B)">Coloca este QR en tus mesas, ventana o mostrador.</p>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;padding:12px 16px;border-top:1px solid var(--border,#E5E5EA)">
+            <button class="btn" onclick="window.print()">🖨 Imprimir</button>
+            <button class="btn primary" onclick="menuApp.closeModal('menu-modalQR')">Cerrar</button>
+          </div>
+        </div>
+      </div>
+      <!-- Modal digitalizar -->
+      <div class="menu-modal-bg" id="menu-modalDigitalizar">
+        <div class="menu-modal">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border,#E5E5EA);font-weight:700">✨ Digitalizar menú con IA <button onclick="menuApp.closeModal('menu-modalDigitalizar')" style="font-size:16px;cursor:pointer;background:none;border:none">✕</button></div>
+          <div style="padding:16px;flex:1;overflow-y:auto">
+            <p style="font-size:13px;color:var(--text-2,#374151);margin-bottom:14px">Pega el texto de tu menú físico y la IA extraerá los productos automáticamente.</p>
+            <div style="margin-bottom:12px"><label style="display:block;font-size:11px;font-weight:600;color:var(--text-2,#374151);margin-bottom:5px">Texto del menú *</label>
+              <textarea id="menu-textoMenu" rows="8" style="width:100%;padding:8px 11px;border:1px solid var(--border,#E5E5EA);border-radius:7px;font-size:12px;background:#FAFAF9;resize:vertical" placeholder="Ejemplo:&#10;Tacos de bistec $25&#10;Quesadilla $35"></textarea>
+            </div>
+            <div id="menu-digitalizar-result" style="display:none">
+              <div style="font-size:12px;font-weight:600;margin-bottom:8px">Productos encontrados:</div>
+              <div id="menu-digitalizar-items"></div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;padding:12px 16px;border-top:1px solid var(--border,#E5E5EA)">
+            <button class="btn" onclick="menuApp.closeModal('menu-modalDigitalizar')">Cancelar</button>
+            <button class="btn primary" id="menu-btnDigitalizar" onclick="menuApp.digitalizarMenu()">✨ Digitalizar con IA</button>
+            <button class="btn primary" id="menu-btnImportarDig" onclick="menuApp.importarDigitalizados()" style="display:none">⬆ Importar productos</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ MARKETING SOCIAL ============ -->
+    <!-- 2026-05-07 merge-mkt: consolidado desde pos-marketing-social.html -->
+    <section id="screen-marketing" class="screen-pad hidden">
+      <style>
+        .mkt-layout{display:grid;grid-template-columns:1fr 360px;gap:14px;min-height:520px}
+        .mkt-panel-main{display:flex;flex-direction:column;background:#fff;border:1px solid var(--border,#E5E5EA);border-radius:10px;overflow:hidden}
+        .mkt-panel-side{background:#fff;border:1px solid var(--border,#E5E5EA);border-radius:10px;display:flex;flex-direction:column;overflow:hidden}
+        .mkt-plat-tabs{display:flex;gap:6px;padding:10px 14px;border-bottom:1px solid var(--border,#E5E5EA);overflow-x:auto}
+        .mkt-plat-tab{padding:5px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border,#E5E5EA);background:#fff;color:var(--text-2,#374151);white-space:nowrap}
+        .mkt-plat-tab.active{background:var(--navy,#1a237e);color:#fff;border-color:var(--navy,#1a237e)}
+        .mkt-toolbar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border,#E5E5EA)}
+        .mkt-posts-list{flex:1;overflow-y:auto;padding:12px 14px;min-height:220px}
+        .mkt-post-card{background:#fff;border:1px solid var(--border,#E5E5EA);border-radius:10px;margin-bottom:10px;overflow:hidden}
+        .mkt-post-header{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border,#E5E5EA)}
+        .mkt-plat-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+        .mkt-plat-ig{background:#f8d7e3}
+        .mkt-plat-fb{background:#d9e8fb}
+        .mkt-plat-tt{background:#e8e8e8}
+        .mkt-post-meta{flex:1;min-width:0}
+        .mkt-post-title{font-size:13px;font-weight:600}
+        .mkt-post-sub{font-size:11px;color:var(--text-3,#64748B);margin-top:2px}
+        .mkt-post-status{font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px}
+        .mkt-s-borrador{background:#F4F4F7;color:var(--text-3,#64748B)}
+        .mkt-s-programado{background:#FEF9C3;color:#854D0E}
+        .mkt-s-publicado{background:#DCFCE7;color:#15803D}
+        .mkt-post-body{padding:12px 14px;font-size:13px;color:var(--text-2,#374151);line-height:1.5;white-space:pre-wrap}
+        .mkt-post-actions{display:flex;gap:6px;padding:8px 14px;border-top:1px solid var(--border,#E5E5EA)}
+        .mkt-side-header{padding:14px;border-bottom:1px solid var(--border,#E5E5EA);font-size:14px;font-weight:700}
+        .mkt-side-body{padding:14px;flex:1;overflow-y:auto}
+        .mkt-form-group{margin-bottom:12px}
+        .mkt-form-label{display:block;font-size:11px;font-weight:600;color:var(--text-2,#374151);margin-bottom:5px}
+        .mkt-form-input,.mkt-form-select,.mkt-form-textarea{width:100%;padding:8px 11px;border:1px solid var(--border,#E5E5EA);border-radius:7px;font-size:13px;background:#FAFAF9}
+        .mkt-form-textarea{resize:vertical;line-height:1.5}
+        .mkt-ai-preview{background:linear-gradient(135deg,rgba(109,40,217,.04),rgba(37,99,235,.04));border:1px solid rgba(109,40,217,.15);border-radius:8px;padding:12px;margin-top:10px;white-space:pre-wrap;font-size:13px;line-height:1.6}
+        .mkt-tono-row{display:flex;gap:5px;flex-wrap:wrap}
+        .mkt-tono-btn{padding:4px 10px;border-radius:6px;border:1px solid var(--border,#E5E5EA);background:#fff;font-size:11px;cursor:pointer}
+        .mkt-tono-btn.active{background:var(--navy,#1a237e);color:#fff;border-color:var(--navy,#1a237e)}
+        .mkt-empty{text-align:center;padding:40px 20px;color:var(--text-3,#64748B)}
+        .mkt-btn-ai{background:linear-gradient(135deg,#6D28D9,#2563EB);color:#fff;border:none}
+        @media(max-width:900px){.mkt-layout{grid-template-columns:1fr}.mkt-panel-side{display:none}}
+      </style>
+      <div class="page-head">
+        <div><h1 class="page-title">📱 Marketing Social</h1><p class="page-sub">Genera publicaciones con IA y agéndalas</p></div>
+      </div>
+      <div class="mkt-layout">
+        <div class="mkt-panel-main">
+          <div class="mkt-plat-tabs">
+            <div class="mkt-plat-tab active" onclick="mktApp.filtrarPlat('',this)">📋 Todos</div>
+            <div class="mkt-plat-tab" onclick="mktApp.filtrarPlat('instagram',this)">📸 Instagram</div>
+            <div class="mkt-plat-tab" onclick="mktApp.filtrarPlat('facebook',this)">👥 Facebook</div>
+            <div class="mkt-plat-tab" onclick="mktApp.filtrarPlat('tiktok',this)">🎵 TikTok</div>
+            <div class="mkt-plat-tab" onclick="mktApp.filtrarPlat('whatsapp',this)">💬 WhatsApp</div>
+          </div>
+          <div class="mkt-toolbar">
+            <button class="btn mkt-btn-ai" onclick="mktApp.nuevaPublicacion()">✨ Generar post con IA</button>
+            <button class="btn primary" onclick="mktApp.nuevaManual()">+ Post manual</button>
+            <div style="flex:1"></div>
+            <span style="font-size:12px;color:var(--text-3,#64748B)"><span id="mkt-cnt-posts">0</span> publicaciones</span>
+          </div>
+          <div class="mkt-posts-list" id="mkt-posts-list">
+            <div class="mkt-empty"><div style="font-size:40px;margin-bottom:10px">📱</div><div style="font-size:14px;font-weight:600;color:var(--text-2,#374151);margin-bottom:6px">Sin publicaciones</div><div style="font-size:12px">Genera tu primer post con IA</div></div>
+          </div>
+        </div>
+        <div class="mkt-panel-side">
+          <div class="mkt-side-header" id="mkt-side-title">✨ Generar post con IA</div>
+          <div class="mkt-side-body">
+            <div class="mkt-form-group"><label class="mkt-form-label">Plataforma</label>
+              <select class="mkt-form-select" id="mkt-gen-plat">
+                <option value="instagram">📸 Instagram</option><option value="facebook">👥 Facebook</option><option value="tiktok">🎵 TikTok</option><option value="whatsapp">💬 WhatsApp Status</option>
+              </select>
+            </div>
+            <div class="mkt-form-group"><label class="mkt-form-label">¿Qué quieres promocionar?</label><input class="mkt-form-input" id="mkt-gen-producto" placeholder="Ej. Tacos de bistec, Promoción 2x1..."></div>
+            <div class="mkt-form-group"><label class="mkt-form-label">Tono</label>
+              <div class="mkt-tono-row">
+                <button class="mkt-tono-btn active" onclick="mktApp.setTono('amigable',this)">😊 Amigable</button>
+                <button class="mkt-tono-btn" onclick="mktApp.setTono('profesional',this)">💼 Profesional</button>
+                <button class="mkt-tono-btn" onclick="mktApp.setTono('divertido',this)">🎉 Divertido</button>
+                <button class="mkt-tono-btn" onclick="mktApp.setTono('urgente',this)">🔥 Urgente</button>
+              </div>
+            </div>
+            <button class="btn mkt-btn-ai" style="width:100%;margin-bottom:12px" id="mkt-btnGenerar" onclick="mktApp.generarPost()">✨ Generar post</button>
+            <div id="mkt-gen-preview" style="display:none">
+              <div class="mkt-form-label">Vista previa:</div>
+              <div class="mkt-ai-preview" id="mkt-gen-text" contenteditable="true"></div>
+              <div style="font-size:11px;color:var(--text-3,#64748B);text-align:right;margin-top:3px" id="mkt-char-count">0 caracteres</div>
+              <div class="mkt-form-group" style="margin-top:10px"><label class="mkt-form-label">Programar para</label><input class="mkt-form-input" id="mkt-gen-fecha" type="datetime-local"></div>
+              <button class="btn primary" style="width:100%;margin-bottom:6px" onclick="mktApp.guardarPost('programado')">📅 Programar</button>
+              <button class="btn" style="width:100%" onclick="mktApp.guardarPost('borrador')">💾 Guardar como borrador</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PLAN DE NEGOCIO ============ -->
+    <!-- 2026-05-07 merge-plan: consolidado desde pos-plan-negocio.html -->
+    <section id="screen-plan" class="screen-pad hidden">
+      <style>
+        .plan-layout{display:grid;grid-template-columns:380px 1fr;gap:20px;max-width:1200px;margin:0 auto}
+        .plan-card{background:#fff;border:1px solid var(--border,#E5E5EA);border-radius:12px;padding:20px;margin-bottom:16px}
+        .plan-card-title{font-size:14px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:7px}
+        .plan-form-group{margin-bottom:14px}
+        .plan-form-label{display:block;font-size:11px;font-weight:600;color:var(--text-2,#374151);margin-bottom:5px}
+        .plan-form-input,.plan-form-select{width:100%;padding:9px 12px;border:1px solid var(--border,#E5E5EA);border-radius:8px;font-size:13px;background:#FAFAF9}
+        .plan-btn-ai{background:linear-gradient(135deg,#6D28D9,#2563EB);color:#fff;border:none;width:100%;justify-content:center;font-size:14px;font-weight:600;padding:12px}
+        .plan-table{width:100%;border-collapse:collapse;font-size:13px}
+        .plan-table td,.plan-table th{padding:8px 10px;border-bottom:1px solid var(--border,#E5E5EA);text-align:left}
+        .plan-table thead th{font-size:11px;font-weight:600;color:var(--text-3,#64748B);text-transform:uppercase}
+        .plan-table tbody tr:last-child td{border-bottom:none}
+        .plan-total-row td{font-weight:700;border-top:2px solid var(--border,#E5E5EA)}
+        .plan-kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+        .plan-kpi{background:#fff;border:1px solid var(--border,#E5E5EA);border-radius:10px;padding:14px;text-align:center}
+        .plan-kpi-val{font-size:22px;font-weight:800;color:var(--navy,#1a237e)}
+        .plan-kpi-label{font-size:11px;color:var(--text-3,#64748B);margin-top:3px}
+        .plan-pills{display:flex;flex-wrap:wrap;gap:6px}
+        .plan-pill{font-size:11px;padding:4px 10px;background:#F4F4F7;border:1px solid var(--border,#E5E5EA);border-radius:20px;color:var(--text-2,#374151)}
+        .plan-summary-box{background:linear-gradient(135deg,#EEF2FF,#E0E7FF);border:1px solid rgba(99,102,241,.2);border-radius:10px;padding:14px;font-size:13px;line-height:1.6;color:#3730A3}
+        .plan-loading{text-align:center;padding:60px;color:var(--text-3,#64748B)}
+        .plan-loading-spinner{font-size:40px;animation:plan-spin 1.5s linear infinite;display:block;margin-bottom:12px}
+        @keyframes plan-spin{to{transform:rotate(360deg)}}
+        .plan-result-panel{display:none}
+        .plan-result-panel.visible{display:block}
+        @media(max-width:900px){.plan-layout{grid-template-columns:1fr}.plan-kpi-grid{grid-template-columns:1fr 1fr}}
+      </style>
+      <div class="page-head">
+        <div><h1 class="page-title">📊 Plan de Negocio con IA</h1><p class="page-sub">Proyecciones, costos y permisos para tu giro</p></div>
+      </div>
+      <div class="plan-layout">
+        <div>
+          <div class="plan-card">
+            <div class="plan-card-title">🏪 Datos del negocio</div>
+            <div class="plan-form-group"><label class="plan-form-label">Giro o tipo de negocio *</label>
+              <select class="plan-form-select" id="plan-giro">
+                <option value="">Selecciona...</option>
+                <option>Taquería</option><option>Restaurante</option><option>Cafetería</option>
+                <option>Panadería</option><option>Tienda de abarrotes</option><option>Farmacia</option>
+                <option>Ferretería</option><option>Salón de belleza</option><option>Barbería</option>
+                <option>Tienda de ropa</option><option>Zapatería</option><option>Lavandería</option>
+                <option>Gimnasio</option><option>Veterinaria</option><option>Papelería</option>
+                <option>Otro (escribe abajo)</option>
+              </select>
+            </div>
+            <div class="plan-form-group"><label class="plan-form-label">Giro personalizado</label><input class="plan-form-input" id="plan-giro-custom" placeholder="Ej. Pastelería artesanal, Pet shop..."></div>
+            <div class="plan-form-group"><label class="plan-form-label">Ciudad o municipio</label><input class="plan-form-input" id="plan-ciudad" placeholder="Ej. Monterrey, Guadalajara..."></div>
+            <div class="plan-form-group"><label class="plan-form-label">Presupuesto de arranque (MXN)</label><input class="plan-form-input" id="plan-presupuesto" type="number" min="0" step="1000" placeholder="50000"></div>
+            <button class="btn plan-btn-ai" id="plan-btnPlan" onclick="planApp.generarPlan()">📊 Generar plan de negocio con IA</button>
+            <div style="font-size:11px;color:var(--text-3,#64748B);text-align:center;margin-top:8px">Powered by Claude AI · Funciona offline con estimados</div>
+          </div>
+        </div>
+        <div>
+          <div id="plan-loading-state" style="display:none" class="plan-card">
+            <div class="plan-loading"><span class="plan-loading-spinner">🤖</span><div style="font-size:14px;font-weight:600">Generando tu plan...</div><div style="font-size:12px;margin-top:6px">Esto puede tomar unos segundos</div></div>
+          </div>
+          <div id="plan-result-panel" class="plan-result-panel">
+            <div class="plan-kpi-grid">
+              <div class="plan-kpi"><div class="plan-kpi-val" id="plan-kpi-arranque">—</div><div class="plan-kpi-label">Inversión inicial</div></div>
+              <div class="plan-kpi"><div class="plan-kpi-val" id="plan-kpi-ingreso">—</div><div class="plan-kpi-label">Ingreso est./mes</div></div>
+              <div class="plan-kpi"><div class="plan-kpi-val" id="plan-kpi-equilibrio">—</div><div class="plan-kpi-label">Meses al equilibrio</div></div>
+            </div>
+            <div class="plan-card"><div class="plan-card-title">💰 Costos de arranque</div>
+              <table class="plan-table"><thead><tr><th>Concepto</th><th style="text-align:right">Costo</th></tr></thead><tbody id="plan-tbody-arranque"></tbody></table>
+            </div>
+            <div class="plan-card"><div class="plan-card-title">📅 Costos mensuales</div>
+              <table class="plan-table"><thead><tr><th>Concepto</th><th style="text-align:right">Costo</th></tr></thead><tbody id="plan-tbody-mensuales"></tbody></table>
+            </div>
+            <div class="plan-card"><div class="plan-card-title">📋 Permisos necesarios</div><div class="plan-pills" id="plan-pills-permisos"></div></div>
+            <div class="plan-card"><div class="plan-card-title">🛒 Proveedores sugeridos</div><div class="plan-pills" id="plan-pills-proveedores"></div></div>
+            <div class="plan-card"><div class="plan-card-title">📝 Resumen ejecutivo</div><div class="plan-summary-box" id="plan-resumen-box"></div></div>
+            <button class="btn" style="width:100%;justify-content:center" onclick="window.print()">🖨 Imprimir / Exportar PDF</button>
+          </div>
+          <div id="plan-empty-state" class="plan-card" style="text-align:center;padding:40px">
+            <div style="font-size:40px;margin-bottom:12px">📊</div>
+            <div style="font-size:14px;font-weight:600;color:var(--text-2,#374151);margin-bottom:6px">Tu plan aparecerá aquí</div>
+            <div style="font-size:12px;color:var(--text-3,#64748B)">Llena el formulario y presiona "Generar"</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
   </main>
 </div>
 
@@ -16177,5 +16717,561 @@ window.addEventListener('volvix:version-loaded', function(e){
   window.closeInvModal     = closeInvModal;
 })();
 </script>
+
+<!-- 2026-05-07 merge: QRCode lib (offline-friendly) usada por screen-fila y screen-menu-digital -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<!-- 2026-05-07 merge: lógica consolidada de pos-fila / pos-ingredientes / pos-menu-digital / pos-marketing / pos-plan -->
+<script>
+(function consolidatedScreens(){
+  // Toast helper local (reusa el del POS si existe)
+  function _toast(msg, tipo){
+    if (typeof window.showToast === 'function') { window.showToast(msg); return; }
+    var t=document.createElement('div');
+    t.textContent=msg;
+    t.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:'+(tipo==='err'?'#DC2626':tipo==='ok'?'#15803D':'#1a1a1a')+';color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,.2)';
+    document.body.appendChild(t);
+    setTimeout(function(){t.remove();},2800);
+  }
+  function money(n){ return '$'+Number(n||0).toFixed(2); }
+  function tenantId(){ try { return (window.volvix?.tenantId)||localStorage.getItem('si_tenant_id')||'TNT001'; } catch(_) { return 'TNT001'; } }
+
+  // ============ FILA VIRTUAL ============
+  // 2026-05-07 merge-fila: portado desde pos-fila.html
+  var filaApp = (function(){
+    var FILA=[]; var refreshInterval=null; var initialized=false;
+    function openModal(id){ var m=document.getElementById(id); if(m){m.style.display='flex';} }
+    function closeModal(id){ var m=document.getElementById(id); if(m){m.style.display='none';} }
+    function generarQR(){
+      var baseUrl=window.location.origin;
+      var qrUrl=baseUrl+'/fila-cliente.html?tenant='+tenantId();
+      var ut=document.getElementById('fila-qr-url-text'); if(ut)ut.textContent=qrUrl;
+      var container=document.getElementById('fila-qr-container'); if(!container)return;
+      container.innerHTML='';
+      try{ if(typeof QRCode==='function') new QRCode(container,{text:qrUrl,width:180,height:180,correctLevel:QRCode.CorrectLevel.M});
+        else container.innerHTML='<div style="padding:20px;font-size:11px;text-align:center;color:#64748B">QR: '+qrUrl+'</div>';
+      }catch(_){ container.innerHTML='<div style="padding:20px;font-size:11px;text-align:center;color:#64748B">QR: '+qrUrl+'</div>'; }
+    }
+    async function cargarFila(){
+      var fila=[];
+      try{ var r=await fetch('/api/queue?tenant_id='+tenantId()); if(r.ok)fila=await r.json(); }catch(_){
+        try{ fila=JSON.parse(localStorage.getItem('si_fila_'+tenantId())||'[]').filter(function(f){return ['esperando','llamado'].includes(f.status);}); }catch(__){}
+      }
+      FILA=fila; renderFila(); updateKPIs();
+    }
+    function renderFila(){
+      var el=document.getElementById('fila-list'); if(!el)return;
+      if(!FILA.length){ el.innerHTML='<div class="fila-empty"><div style="font-size:48px;margin-bottom:10px">👥</div><div style="font-size:14px;font-weight:600;margin-bottom:6px">Fila vacía</div><div style="font-size:12px">Comparte el QR para que los clientes se agreguen</div></div>'; return; }
+      el.innerHTML=FILA.map(function(t,i){
+        var isLlamado=t.status==='llamado';
+        return '<div class="fila-turno-card '+(isLlamado?'llamado':'')+'">'+
+          '<div class="fila-turno-num">'+(i+1)+'</div>'+
+          '<div class="fila-turno-info"><div class="fila-turno-nombre">'+(t.nombre||'Cliente '+(i+1))+'</div>'+
+          '<div class="fila-turno-meta">'+(t.telefono?'📱 '+t.telefono+' · ':'')+tiempoEspera(t.created_at)+'</div>'+
+          '<span class="fila-turno-badge '+(isLlamado?'fila-badge-llamado':'fila-badge-espera')+'">'+(isLlamado?'📢 Llamado':'⏳ Esperando')+'</span></div>'+
+          '<div class="fila-turno-actions">'+
+            '<button class="fila-icon-btn" onclick="filaApp.atenderTurno(\''+t.id+'\')" title="Atender">✅</button>'+
+            '<button class="fila-icon-btn" onclick="filaApp.saltarTurno(\''+t.id+'\')" title="Saltar">⏭</button>'+
+            '<button class="fila-icon-btn" onclick="filaApp.eliminarTurno(\''+t.id+'\')" title="Eliminar" style="color:#DC2626">✕</button>'+
+          '</div></div>';
+      }).join('');
+    }
+    function tiempoEspera(iso){ if(!iso)return ''; var mins=Math.round((Date.now()-new Date(iso).getTime())/60000); if(mins<1)return 'Recién llegó'; if(mins===1)return '1 min esperando'; return mins+' min esperando'; }
+    function updateKPIs(){
+      var e=document.getElementById('fila-kpi-espera'); if(e)e.textContent=FILA.filter(function(f){return f.status==='esperando';}).length;
+      var atendidos=parseInt(localStorage.getItem('si_atendidos_hoy')||'0');
+      var a=document.getElementById('fila-kpi-atendidos'); if(a)a.textContent=atendidos;
+      var t=document.getElementById('fila-kpi-tiempo'); if(t)t.textContent='~'+(FILA.length*3)+' min';
+    }
+    async function agregarAFila(nombre,telefono){
+      nombre=nombre||document.getElementById('fila-nuevoNombre').value.trim();
+      telefono=telefono||document.getElementById('fila-nuevoTelefono').value.trim();
+      var payload={tenant_id:tenantId(),nombre:nombre||'Cliente',telefono:telefono};
+      var ticket;
+      try{ var r=await fetch('/api/queue',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); if(r.ok){ var d=await r.json(); ticket=d.ticket; } }catch(_){}
+      if(!ticket){
+        ticket={id:'TURN-'+Date.now(),tenant_id:tenantId(),nombre:nombre||'Cliente',telefono:telefono,status:'esperando',created_at:new Date().toISOString(),posicion:FILA.length+1};
+        try{ var local=JSON.parse(localStorage.getItem('si_fila_'+tenantId())||'[]'); local.push(ticket); localStorage.setItem('si_fila_'+tenantId(),JSON.stringify(local)); }catch(_){}
+      }
+      FILA.push(ticket); renderFila(); updateKPIs();
+      document.getElementById('fila-nuevoNombre').value=''; document.getElementById('fila-nuevoTelefono').value='';
+      _toast('✅ '+(nombre||'Cliente')+' agregado · Turno #'+FILA.length,'ok');
+    }
+    async function agregarDesdeModal(){
+      var nombre=document.getElementById('fila-mNombre').value.trim();
+      var telefono=document.getElementById('fila-mTelefono').value.trim();
+      await agregarAFila(nombre,telefono);
+      document.getElementById('fila-mNombre').value=''; document.getElementById('fila-mTelefono').value='';
+      closeModal('fila-modalAgregar');
+    }
+    async function llamarSiguiente(){
+      var siguiente=FILA.find(function(f){return f.status==='esperando';});
+      if(!siguiente){ _toast('No hay clientes en espera','err'); return; }
+      try{ await fetch('/api/queue/'+siguiente.id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'llamado'})}); }catch(_){}
+      siguiente.status='llamado'; renderFila();
+      _toast('📢 Llamando a '+(siguiente.nombre||'siguiente cliente'),'ok');
+    }
+    async function atenderTurno(id){
+      try{ await fetch('/api/queue/'+id+'/atender',{method:'POST'}); }catch(_){}
+      FILA=FILA.filter(function(f){return f.id!==id;}); FILA.forEach(function(f,i){f.posicion=i+1;});
+      renderFila(); updateKPIs();
+      var n=parseInt(localStorage.getItem('si_atendidos_hoy')||'0')+1; localStorage.setItem('si_atendidos_hoy',n);
+      _toast('✅ Cliente atendido','ok');
+    }
+    async function saltarTurno(id){
+      var turno=FILA.find(function(f){return f.id===id;}); if(!turno)return;
+      try{ await fetch('/api/queue/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'esperando',posicion:999})}); }catch(_){}
+      FILA=FILA.filter(function(f){return f.id!==id;}); turno.status='esperando'; FILA.push(turno);
+      FILA.forEach(function(f,i){f.posicion=i+1;}); renderFila();
+      _toast('⏭ Turno movido al final');
+    }
+    async function eliminarTurno(id){
+      if(!confirm('¿Eliminar este turno de la fila?'))return;
+      try{ await fetch('/api/queue/'+id,{method:'DELETE'}); }catch(_){}
+      FILA=FILA.filter(function(f){return f.id!==id;}); FILA.forEach(function(f,i){f.posicion=i+1;});
+      renderFila(); updateKPIs();
+      _toast('Turno eliminado');
+    }
+    async function limpiarFila(){
+      if(!confirm('¿Limpiar toda la fila?'))return;
+      for(var i=0;i<FILA.length;i++){ try{ await fetch('/api/queue/'+FILA[i].id,{method:'DELETE'}); }catch(_){} }
+      FILA=[]; localStorage.removeItem('si_fila_'+tenantId()); renderFila(); updateKPIs();
+      _toast('Fila limpiada','ok');
+    }
+    function init(){ if(initialized)return; initialized=true; generarQR(); cargarFila(); refreshInterval=setInterval(cargarFila,15000); }
+    return { init, openModal, closeModal, cargarFila, agregarAFila, agregarDesdeModal, llamarSiguiente, atenderTurno, saltarTurno, eliminarTurno, limpiarFila };
+  })();
+  window.filaApp=filaApp;
+
+  // ============ INGREDIENTES Y RECETAS ============
+  // 2026-05-07 merge-ing: portado desde pos-ingredientes.html
+  var ingApp = (function(){
+    var ingredientes=[],recetas=[],productos=[],editingIngId=null,sugeridos=[],recetaItems=[],initialized=false;
+    function openModal(id){ var m=document.getElementById(id); if(m)m.classList.add('open'); }
+    function closeModal(id){ var m=document.getElementById(id); if(m)m.classList.remove('open'); }
+    function switchTab(tab,el){
+      document.querySelectorAll('.ing-tab').forEach(function(t){t.classList.remove('active');});
+      document.querySelectorAll('.ing-view').forEach(function(v){v.classList.remove('active');});
+      el.classList.add('active');
+      var view=document.getElementById('ing-view-'+tab); if(view)view.classList.add('active');
+      if(tab==='recetas') cargarProductosSel();
+    }
+    async function cargarTodo(){ await Promise.all([cargarIngredientes(),cargarRecetas()]); }
+    async function cargarIngredientes(){
+      try{ var r=await fetch('/api/ingredientes'); if(r.ok)ingredientes=await r.json(); }catch(_){
+        try{ ingredientes=JSON.parse(localStorage.getItem('si_ingredientes')||'[]'); }catch(__){}
+      }
+      renderIngredientes(); updateKPIs();
+    }
+    async function cargarRecetas(){
+      try{ var r=await fetch('/api/recetas'); if(r.ok)recetas=await r.json(); }catch(_){
+        try{ recetas=JSON.parse(localStorage.getItem('si_recetas')||'[]'); }catch(__){}
+      }
+      renderRecetas();
+    }
+    async function cargarProductosSel(){
+      if(!productos.length){ try{ var r=await fetch('/api/productos'); if(r.ok)productos=await r.json(); }catch(_){} if(!productos.length)productos=[{id:'P1',nombre:'Taco de bistec',precio:25},{id:'P2',nombre:'Quesadilla',precio:35}]; }
+      var sel=document.getElementById('ing-rec-producto'); if(sel) sel.innerHTML='<option value="">Selecciona...</option>'+productos.map(function(p){return '<option value="'+p.id+'">'+p.nombre+'</option>';}).join('');
+    }
+    function renderIngredientes(filtro){
+      var ings=filtro?ingredientes.filter(function(i){return i.nombre.toLowerCase().includes(filtro.toLowerCase());}):ingredientes;
+      var tb=document.getElementById('ing-tbody-ings'); if(!tb)return;
+      if(!ings.length){ tb.innerHTML='<tr><td colspan="6"><div class="ing-empty"><div style="font-size:40px">📦</div><div>Sin ingredientes. Agrega el primero.</div></div></td></tr>'; return; }
+      tb.innerHTML=ings.map(function(ing){
+        var stockClass=ing.stock<=0?'ing-badge-out':ing.stock<=(ing.minimo||5)?'ing-badge-low':'ing-badge-ok';
+        var stockLabel=ing.stock<=0?'Sin stock':ing.stock<=(ing.minimo||5)?'Bajo':'OK';
+        return '<tr><td><strong>'+ing.nombre+'</strong>'+(ing.proveedor?'<br><span style="font-size:11px;color:#64748B">'+ing.proveedor+'</span>':'')+'</td><td>'+ing.unidad+'</td><td><span class="ing-badge-stock '+stockClass+'">'+stockLabel+'</span> '+ing.stock+'</td><td>'+money(ing.costo)+'</td><td>'+ing.minimo+'</td><td style="text-align:right"><button class="ing-icon-btn" onclick="ingApp.editarIng(\''+ing.id+'\')" title="Editar">✏</button><button class="ing-icon-btn danger" onclick="ingApp.eliminarIng(\''+ing.id+'\')" title="Eliminar">🗑</button></td></tr>';
+      }).join('');
+    }
+    function renderRecetas(){
+      var tb=document.getElementById('ing-tbody-recetas'); if(!tb)return;
+      if(!recetas.length){ tb.innerHTML='<tr><td colspan="6"><div class="ing-empty"><div style="font-size:40px">📋</div><div>Sin recetas. Crea la primera.</div></div></td></tr>'; return; }
+      tb.innerHTML=recetas.map(function(r){
+        var prod=productos.find(function(p){return p.id===r.producto_id;})||{nombre:r.producto_nombre||'—',precio:0};
+        var costo=(r.items||[]).reduce(function(s,i){return s+(i.costo_unitario||0)*(i.cantidad||0);},0);
+        var margen=prod.precio>0?Math.round(((prod.precio-costo)/prod.precio)*100):0;
+        return '<tr><td><strong>'+prod.nombre+'</strong></td><td style="font-size:12px;color:#64748B">'+(r.items||[]).map(function(i){return i.nombre+' ('+i.cantidad+i.unidad+')';}).join(', ')+'</td><td>'+money(costo)+'</td><td>'+money(prod.precio)+'</td><td><span class="ing-badge-stock '+(margen>40?'ing-badge-ok':margen>20?'ing-badge-low':'ing-badge-out')+'">'+margen+'%</span></td><td style="text-align:right"><button class="ing-icon-btn danger" onclick="ingApp.eliminarReceta(\''+r.id+'\')" title="Eliminar">🗑</button></td></tr>';
+      }).join('');
+    }
+    function filtrarIng(val){ renderIngredientes(val); }
+    function updateKPIs(){
+      var k1=document.getElementById('ing-kpi-ings'); if(k1)k1.textContent=ingredientes.length;
+      var k2=document.getElementById('ing-kpi-recetas'); if(k2)k2.textContent=recetas.length;
+      var k3=document.getElementById('ing-kpi-low'); if(k3)k3.textContent=ingredientes.filter(function(i){return i.stock<=(i.minimo||5);}).length;
+      var avg=ingredientes.length?ingredientes.reduce(function(s,i){return s+(i.costo||0);},0)/ingredientes.length:0;
+      var k4=document.getElementById('ing-kpi-costo'); if(k4)k4.textContent=money(avg);
+    }
+    function editarIng(id){
+      editingIngId=id; var ing=ingredientes.find(function(i){return i.id===id;}); if(!ing)return;
+      document.getElementById('ing-modalIngTitle').textContent='✏ Editar ingrediente';
+      document.getElementById('ing-nombre').value=ing.nombre;
+      document.getElementById('ing-unidad').value=ing.unidad||'g';
+      document.getElementById('ing-costo').value=ing.costo||0;
+      document.getElementById('ing-stock').value=ing.stock||0;
+      document.getElementById('ing-minimo').value=ing.minimo||0;
+      document.getElementById('ing-proveedor').value=ing.proveedor||'';
+      openModal('ing-modalIng');
+    }
+    async function guardarIngrediente(){
+      var nombre=document.getElementById('ing-nombre').value.trim();
+      if(!nombre){ _toast('El nombre es obligatorio','err'); return; }
+      var data={nombre:nombre,unidad:document.getElementById('ing-unidad').value,costo:parseFloat(document.getElementById('ing-costo').value||0),stock:parseInt(document.getElementById('ing-stock').value||0),minimo:parseInt(document.getElementById('ing-minimo').value||0),proveedor:document.getElementById('ing-proveedor').value.trim()};
+      try{
+        if(editingIngId){
+          await fetch('/api/ingredientes/'+editingIngId,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+          var idx=ingredientes.findIndex(function(i){return i.id===editingIngId;}); if(idx>=0)Object.assign(ingredientes[idx],data);
+        } else {
+          var r=await fetch('/api/ingredientes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+          var d=await r.json(); if(d.ingrediente)ingredientes.push(d.ingrediente);
+        }
+      }catch(_){
+        var ing=Object.assign({},data,{id:'ING-'+Date.now(),created_at:new Date().toISOString()});
+        ingredientes.push(ing);
+        try{ var saved=JSON.parse(localStorage.getItem('si_ingredientes')||'[]'); saved.push(ing); localStorage.setItem('si_ingredientes',JSON.stringify(saved)); }catch(__){}
+      }
+      closeModal('ing-modalIng'); editingIngId=null;
+      document.getElementById('ing-modalIngTitle').textContent='+ Nuevo ingrediente';
+      ['ing-nombre','ing-costo','ing-stock','ing-minimo','ing-proveedor'].forEach(function(id){ var el=document.getElementById(id); if(el)el.value=''; });
+      renderIngredientes(); updateKPIs();
+      _toast('✅ Ingrediente guardado','ok');
+    }
+    async function eliminarIng(id){
+      if(!confirm('¿Eliminar este ingrediente?'))return;
+      try{ await fetch('/api/ingredientes/'+id,{method:'DELETE'}); }catch(_){}
+      ingredientes=ingredientes.filter(function(i){return i.id!==id;}); renderIngredientes(); updateKPIs();
+      _toast('Ingrediente eliminado');
+    }
+    function agregarItemReceta(){ recetaItems.push({id:Date.now(),ing_id:'',cantidad:1}); renderRecetaItems(); }
+    function renderRecetaItems(){
+      var container=document.getElementById('ing-rec-items'); if(!container)return;
+      container.innerHTML=recetaItems.map(function(item,i){
+        var ingOpts=ingredientes.map(function(ing){return '<option value="'+ing.id+'" '+(ing.id===item.ing_id?'selected':'')+'>'+ing.nombre+' ('+ing.unidad+')</option>';}).join('');
+        return '<div class="ing-receta-item"><select style="flex:1;padding:5px;border:1px solid #E5E5EA;border-radius:5px;font-size:12px" onchange="ingApp.setIngReceta('+i+',this.value)"><option value="">Ingrediente...</option>'+ingOpts+'</select><input type="number" min="0" step="0.1" value="'+item.cantidad+'" onchange="ingApp.setCantReceta('+i+',this.value)" style="width:70px;padding:5px;border:1px solid #E5E5EA;border-radius:5px;font-size:12px"><button class="ing-icon-btn danger" onclick="ingApp.quitarItemReceta('+i+')">✕</button></div>';
+      }).join('');
+      recalcCostoReceta();
+    }
+    function setIngReceta(i,val){ recetaItems[i].ing_id=val; recalcCostoReceta(); }
+    function setCantReceta(i,val){ recetaItems[i].cantidad=parseFloat(val)||0; recalcCostoReceta(); }
+    function quitarItemReceta(i){ recetaItems.splice(i,1); renderRecetaItems(); }
+    function recalcCostoReceta(){
+      var costo=recetaItems.reduce(function(s,item){ var ing=ingredientes.find(function(i){return i.id===item.ing_id;}); return s+(ing?ing.costo*item.cantidad:0); },0);
+      var el=document.getElementById('ing-rec-costo-total'); if(el)el.textContent=money(costo);
+    }
+    async function guardarReceta(){
+      var prodId=document.getElementById('ing-rec-producto').value;
+      if(!prodId){ _toast('Selecciona un producto','err'); return; }
+      if(!recetaItems.length){ _toast('Agrega al menos un ingrediente','err'); return; }
+      var items=recetaItems.map(function(item){ var ing=ingredientes.find(function(i){return i.id===item.ing_id;}); return {ing_id:item.ing_id,nombre:ing&&ing.nombre||'',unidad:ing&&ing.unidad||'',cantidad:item.cantidad,costo_unitario:ing&&ing.costo||0}; }).filter(function(i){return i.ing_id;});
+      var prod=productos.find(function(p){return p.id===prodId;});
+      var data={producto_id:prodId,producto_nombre:prod&&prod.nombre||'',items:items};
+      try{ var r=await fetch('/api/recetas',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}); var d=await r.json(); if(d.receta)recetas.push(d.receta); }catch(_){
+        var rec=Object.assign({},data,{id:'REC-'+Date.now(),created_at:new Date().toISOString()}); recetas.push(rec);
+      }
+      closeModal('ing-modalReceta'); recetaItems=[]; renderRecetas(); updateKPIs();
+      _toast('✅ Receta guardada','ok');
+    }
+    async function eliminarReceta(id){
+      if(!confirm('¿Eliminar esta receta?'))return;
+      try{ await fetch('/api/recetas/'+id,{method:'DELETE'}); }catch(_){}
+      recetas=recetas.filter(function(r){return r.id!==id;}); renderRecetas();
+      _toast('Receta eliminada');
+    }
+    function openModalSuggest(){ sugeridos=[]; document.getElementById('ing-suggest-result').innerHTML=''; document.getElementById('ing-btnImportarSuggest').style.display='none'; document.getElementById('ing-suggest-producto').value=''; openModal('ing-modalSuggest'); }
+    async function sugerirIngredientes(){
+      var nombre=document.getElementById('ing-suggest-producto').value.trim();
+      if(!nombre){ _toast('Escribe el nombre del producto','err'); return; }
+      var btn=document.getElementById('ing-btnSuggest'); btn.disabled=true; btn.textContent='✨ Pensando...';
+      var ings=[];
+      try{ var r=await fetch('/api/recetas/suggest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({producto_nombre:nombre})}); var d=await r.json(); if(d.ingredientes)ings=d.ingredientes; }catch(_){}
+      btn.disabled=false; btn.textContent='✨ Sugerir con IA';
+      if(!ings.length){ _toast('No se pudieron generar sugerencias','err'); return; }
+      sugeridos=ings;
+      var html='<div class="ing-ai-result"><span class="ing-ai-badge">✨ Sugerencia de IA</span>';
+      html+=ings.map(function(ing,i){ return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(109,40,217,.1)"><input type="checkbox" id="ing-sug-'+i+'" checked style="width:14px;height:14px"><label for="ing-sug-'+i+'" style="flex:1;font-size:12px"><strong>'+ing.nombre+'</strong> — '+ing.cantidad_tipica+' '+ing.unidad+' — Costo est.: '+money(ing.costo_estimado)+'</label></div>'; }).join('');
+      html+='</div>';
+      document.getElementById('ing-suggest-result').innerHTML=html;
+      document.getElementById('ing-btnImportarSuggest').style.display='';
+      _toast('✅ '+ings.length+' ingredientes sugeridos','ok');
+    }
+    async function importarSugeridos(){
+      var sel=sugeridos.filter(function(_,i){ var el=document.getElementById('ing-sug-'+i); return el&&el.checked; });
+      if(!sel.length){ _toast('Selecciona al menos uno','err'); return; }
+      for(var i=0;i<sel.length;i++){
+        var s=sel[i];
+        var ya=ingredientes.find(function(ing){return ing.nombre.toLowerCase()===s.nombre.toLowerCase();});
+        if(!ya){
+          var data={nombre:s.nombre,unidad:s.unidad||'g',costo:s.costo_estimado||0,stock:0,minimo:5};
+          try{ var r=await fetch('/api/ingredientes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}); var d=await r.json(); if(d.ingrediente)ingredientes.push(d.ingrediente); }catch(_){ ingredientes.push(Object.assign({},data,{id:'ING-'+Date.now()})); }
+        }
+      }
+      closeModal('ing-modalSuggest'); renderIngredientes(); updateKPIs();
+      _toast('✅ Ingredientes importados','ok');
+    }
+    function init(){ if(initialized)return; initialized=true; cargarTodo(); }
+    return { init, openModal, closeModal, switchTab, filtrarIng, editarIng, guardarIngrediente, eliminarIng, agregarItemReceta, setIngReceta, setCantReceta, quitarItemReceta, guardarReceta, eliminarReceta, openModalSuggest, sugerirIngredientes, importarSugeridos };
+  })();
+  window.ingApp=ingApp;
+
+  // ============ MENÚ DIGITAL ============
+  // 2026-05-07 merge-menu: portado desde pos-menu-digital.html
+  var menuApp = (function(){
+    var todosProductos=[],catActual='',digitalizados=[],langActual='es',menuUrl='',initialized=false;
+    function openModal(id){ var m=document.getElementById(id); if(m){m.classList.add('open'); generarQRModal(id);} }
+    function closeModal(id){ var m=document.getElementById(id); if(m)m.classList.remove('open'); }
+    async function cargarProductos(){
+      var prods=[];
+      try{ var r=await fetch('/api/menu-digital?tenant_id='+tenantId()); if(r.ok)prods=await r.json(); }catch(_){
+        try{ prods=window.volvix&&window.volvix.offline&&window.volvix.offline.list&&window.volvix.offline.list('productos')||[]; }catch(__){}
+      }
+      if(!prods.length){
+        prods=[
+          {id:'P1',nombre:'Taco de bistec',precio:25,categoria:'Tacos',visible_menu:true},
+          {id:'P2',nombre:'Quesadilla',precio:35,categoria:'Antojitos',visible_menu:true},
+          {id:'P3',nombre:'Coca-Cola 600ml',precio:20,categoria:'Bebidas',visible_menu:true},
+          {id:'P4',nombre:'Agua mineral',precio:10,categoria:'Bebidas',visible_menu:false},
+          {id:'P5',nombre:'Burrito de res',precio:45,categoria:'Burritos',visible_menu:true},
+          {id:'P6',nombre:'Horchata',precio:18,categoria:'Bebidas',visible_menu:true}
+        ];
+      }
+      todosProductos=prods; renderCategorias(); renderProductos(); updateStats(); generarQRs();
+    }
+    function renderCategorias(){
+      var cats=Array.from(new Set(todosProductos.map(function(p){return p.categoria;}).filter(Boolean)));
+      var el=document.getElementById('menu-cat-filter'); if(!el)return;
+      el.innerHTML='<div class="menu-cat-chip active" onclick="menuApp.filtrarCat(\'\',this)">Todos</div>';
+      cats.forEach(function(cat){ el.innerHTML+='<div class="menu-cat-chip" onclick="menuApp.filtrarCat(\''+cat+'\',this)">'+cat+'</div>'; });
+    }
+    function filtrarCat(cat,el){ catActual=cat; document.querySelectorAll('.menu-cat-chip').forEach(function(c){c.classList.remove('active');}); el.classList.add('active'); renderProductos(); }
+    function renderProductos(){
+      var prods=catActual?todosProductos.filter(function(p){return p.categoria===catActual;}):todosProductos;
+      var grid=document.getElementById('menu-products-grid'); if(!grid)return;
+      if(!prods.length){ grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:#64748B">Sin productos en esta categoría</div>'; return; }
+      grid.innerHTML=prods.map(function(p){
+        var vis=p.visible_menu!==false;
+        return '<div class="menu-prod-card '+(vis?'visible':'oculto')+'">'+
+          '<button class="menu-toggle-vis '+(vis?'on':'off')+'" onclick="menuApp.toggleVisibilidad(\''+p.id+'\',event)" title="'+(vis?'Visible':'Oculto')+'"></button>'+
+          (p.imagen?'<img class="menu-prod-img" src="'+p.imagen+'" alt="'+p.nombre+'" onerror="this.style.display=\'none\'" style="width:100%;height:100px;object-fit:cover;background:#F4F4F7">':'<div class="menu-prod-img-placeholder">🍽</div>')+
+          '<div class="menu-prod-body"><div class="menu-prod-name" title="'+p.nombre+'">'+p.nombre+'</div><div class="menu-prod-price">'+money(p.precio)+'</div>'+(p.categoria?'<div class="menu-prod-cat">'+p.categoria+'</div>':'')+'</div></div>';
+      }).join('');
+      updateStats();
+    }
+    async function toggleVisibilidad(id,evt){
+      evt.stopPropagation();
+      var prod=todosProductos.find(function(p){return p.id===id;}); if(!prod)return;
+      prod.visible_menu=!prod.visible_menu;
+      try{ await fetch('/api/menu-digital/'+id+'/toggle',{method:'PATCH'}); }catch(_){}
+      renderProductos();
+      _toast((prod.visible_menu?'✅ Visible':'❌ Oculto')+': '+prod.nombre);
+    }
+    function activarTodos(){ todosProductos.forEach(function(p){p.visible_menu=true;}); renderProductos(); _toast('✅ Todos visibles','ok'); }
+    function desactivarTodos(){ todosProductos.forEach(function(p){p.visible_menu=false;}); renderProductos(); _toast('❌ Todos ocultos'); }
+    function updateStats(){
+      var visibles=todosProductos.filter(function(p){return p.visible_menu!==false;}).length;
+      var cats=new Set(todosProductos.filter(function(p){return p.visible_menu!==false;}).map(function(p){return p.categoria;}).filter(Boolean)).size;
+      var e1=document.getElementById('menu-cnt-visibles'); if(e1)e1.textContent=visibles;
+      var e2=document.getElementById('menu-cnt-total'); if(e2)e2.textContent=todosProductos.length;
+      var e3=document.getElementById('menu-stat-vis'); if(e3)e3.textContent=visibles+' / '+todosProductos.length;
+      var e4=document.getElementById('menu-stat-cats'); if(e4)e4.textContent=cats;
+    }
+    function generarQRs(){
+      menuUrl=window.location.origin+'/portal-cliente.html?tenant='+tenantId()+'&lang='+langActual;
+      var u=document.getElementById('menu-qr-url-text'); if(u)u.textContent=menuUrl;
+      var mini=document.getElementById('menu-qr-mini'); if(!mini)return;
+      mini.innerHTML='';
+      try{ if(typeof QRCode==='function') new QRCode(mini,{text:menuUrl,width:120,height:120,correctLevel:QRCode.CorrectLevel.M});
+        else mini.innerHTML='<div style="font-size:10px;padding:10px;color:#64748B">'+menuUrl+'</div>';
+      }catch(_){ mini.innerHTML='<div style="font-size:10px;padding:10px;color:#64748B">'+menuUrl+'</div>'; }
+    }
+    function generarQRModal(id){
+      if(id==='menu-modalQR'){
+        var u=document.getElementById('menu-qr-url-grande'); if(u)u.textContent=menuUrl;
+        var grande=document.getElementById('menu-qr-grande'); if(!grande)return;
+        grande.innerHTML='';
+        setTimeout(function(){ try{ if(typeof QRCode==='function') new QRCode(grande,{text:menuUrl,width:200,height:200}); }catch(_){} },100);
+      }
+    }
+    function setLang(lang,el){ langActual=lang; document.querySelectorAll('.menu-lang-btn').forEach(function(b){b.classList.remove('active');}); el.classList.add('active'); var s=document.getElementById('menu-stat-lang'); if(s)s.textContent=lang.toUpperCase(); generarQRs(); _toast('Idioma: '+lang.toUpperCase()); }
+    function copiarLink(){ if(navigator.clipboard){ navigator.clipboard.writeText(menuUrl).then(function(){_toast('✅ Enlace copiado','ok');}).catch(function(){_toast('Enlace: '+menuUrl);}); } else { _toast('Enlace: '+menuUrl); } }
+    function abrirMenuPublico(){ window.open(menuUrl,'_blank'); }
+    async function digitalizarMenu(){
+      var texto=document.getElementById('menu-textoMenu').value.trim();
+      if(!texto){ _toast('Escribe el texto del menú','err'); return; }
+      var btn=document.getElementById('menu-btnDigitalizar'); btn.disabled=true; btn.textContent='✨ Procesando...';
+      var prods=[];
+      try{ var r=await fetch('/api/menu-digital/digitalize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({texto_menu:texto,tenant_id:tenantId()})}); var d=await r.json(); if(d.productos)prods=d.productos; }catch(_){}
+      if(!prods.length){
+        texto.split('\n').forEach(function(linea){ linea=linea.trim(); if(!linea)return; var m=linea.match(/^(.+?)\s*\$?(\d+(?:\.\d{2})?)$/); if(m)prods.push({nombre:m[1].trim(),precio:parseFloat(m[2]),categoria:'General'}); });
+      }
+      btn.disabled=false; btn.textContent='✨ Digitalizar con IA';
+      if(!prods.length){ _toast('No se encontraron productos','err'); return; }
+      digitalizados=prods;
+      var itemsHtml=prods.map(function(p,i){ return '<div class="menu-import-item"><input type="checkbox" id="menu-dig-'+i+'" checked style="width:16px;height:16px"><label for="menu-dig-'+i+'" style="flex:1"><strong>'+p.nombre+'</strong> — '+money(p.precio)+(p.categoria?' · '+p.categoria:'')+'</label></div>'; }).join('');
+      document.getElementById('menu-digitalizar-items').innerHTML=itemsHtml;
+      document.getElementById('menu-digitalizar-result').style.display='';
+      document.getElementById('menu-btnImportarDig').style.display='';
+      _toast('✅ '+prods.length+' productos','ok');
+    }
+    async function importarDigitalizados(){
+      var sel=digitalizados.filter(function(_,i){ var el=document.getElementById('menu-dig-'+i); return el&&el.checked; });
+      if(!sel.length){ _toast('Selecciona al menos uno','err'); return; }
+      var btn=document.getElementById('menu-btnImportarDig'); btn.disabled=true; btn.textContent='Importando...';
+      var importados=0;
+      for(var i=0;i<sel.length;i++){ var p=sel[i]; try{ await fetch('/api/productos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nombre:p.nombre,precio:p.precio,categoria:p.categoria||'General',visible_menu:true,stock:99,minimo:5,tenant_id:tenantId()})}); importados++; }catch(_){} }
+      btn.disabled=false; btn.textContent='⬆ Importar productos';
+      closeModal('menu-modalDigitalizar');
+      _toast('✅ '+importados+' importados','ok');
+      await cargarProductos();
+    }
+    function init(){ if(initialized)return; initialized=true; cargarProductos(); }
+    return { init, openModal, closeModal, filtrarCat, toggleVisibilidad, activarTodos, desactivarTodos, setLang, copiarLink, abrirMenuPublico, digitalizarMenu, importarDigitalizados };
+  })();
+  window.menuApp=menuApp;
+
+  // ============ MARKETING SOCIAL ============
+  // 2026-05-07 merge-mkt: portado desde pos-marketing-social.html
+  var mktApp = (function(){
+    var posts=[],platActual='',tonoActual='amigable',initialized=false;
+    var platIcons={instagram:'📸',facebook:'👥',tiktok:'🎵',whatsapp:'💬'};
+    var platColors={instagram:'mkt-plat-ig',facebook:'mkt-plat-fb',tiktok:'mkt-plat-tt',whatsapp:'mkt-plat-ig'};
+    function setTono(tono,el){ tonoActual=tono; document.querySelectorAll('.mkt-tono-btn').forEach(function(b){b.classList.remove('active');}); el.classList.add('active'); }
+    function filtrarPlat(plat,el){ platActual=plat; document.querySelectorAll('.mkt-plat-tab').forEach(function(t){t.classList.remove('active');}); el.classList.add('active'); renderPosts(); }
+    async function cargarPosts(){ try{ var r=await fetch('/api/marketing/posts'); if(r.ok)posts=await r.json(); }catch(_){ try{ posts=JSON.parse(localStorage.getItem('si_posts')||'[]'); }catch(__){} } renderPosts(); }
+    function renderPosts(){
+      var filtered=platActual?posts.filter(function(p){return p.plataforma===platActual;}):posts;
+      var c=document.getElementById('mkt-cnt-posts'); if(c)c.textContent=filtered.length;
+      var el=document.getElementById('mkt-posts-list'); if(!el)return;
+      if(!filtered.length){ el.innerHTML='<div class="mkt-empty"><div style="font-size:40px;margin-bottom:10px">📱</div><div style="font-size:14px;font-weight:600;color:#374151;margin-bottom:6px">Sin publicaciones</div><div style="font-size:12px">Genera tu primer post con IA</div></div>'; return; }
+      el.innerHTML=filtered.map(function(p){
+        var icon=platIcons[p.plataforma]||'📱';
+        var color=platColors[p.plataforma]||'';
+        var statusClass='mkt-s-'+(p.status||'borrador');
+        var statusLabel=p.status==='programado'?'📅 Programado':p.status==='publicado'?'✅ Publicado':'📝 Borrador';
+        return '<div class="mkt-post-card">'+
+          '<div class="mkt-post-header"><div class="mkt-plat-icon '+color+'">'+icon+'</div>'+
+          '<div class="mkt-post-meta"><div class="mkt-post-title">'+(p.plataforma||'Post').charAt(0).toUpperCase()+(p.plataforma||'post').slice(1)+(p.producto?' · '+p.producto:'')+'</div>'+
+          '<div class="mkt-post-sub">'+(p.fecha_programada?'📅 '+new Date(p.fecha_programada).toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'Sin fecha')+'</div></div>'+
+          '<span class="mkt-post-status '+statusClass+'">'+statusLabel+'</span></div>'+
+          '<div class="mkt-post-body">'+(p.texto||'').substring(0,200)+(p.texto&&p.texto.length>200?'...':'')+'</div>'+
+          '<div class="mkt-post-actions">'+
+            '<button class="btn" style="font-size:12px;padding:5px 10px" onclick="mktApp.copiarTexto(\''+p.id+'\')">📋 Copiar</button>'+
+            (p.status==='borrador'?'<button class="btn" style="font-size:12px;padding:5px 10px" onclick="mktApp.cambiarStatus(\''+p.id+'\',\'publicado\')">✅ Publicado</button>':'')+
+            '<button class="btn" style="font-size:12px;padding:5px 10px;color:#DC2626" onclick="mktApp.eliminarPost(\''+p.id+'\')">🗑</button>'+
+          '</div></div>';
+      }).join('');
+    }
+    function nuevaPublicacion(){ document.getElementById('mkt-side-title').textContent='✨ Generar post con IA'; }
+    function nuevaManual(){ document.getElementById('mkt-gen-preview').style.display=''; document.getElementById('mkt-gen-text').textContent='Escribe tu post aquí...'; document.getElementById('mkt-side-title').textContent='✏ Post manual'; }
+    async function generarPost(){
+      var producto=document.getElementById('mkt-gen-producto').value.trim();
+      var plat=document.getElementById('mkt-gen-plat').value;
+      if(!producto){ _toast('Escribe qué quieres promocionar','err'); return; }
+      var btn=document.getElementById('mkt-btnGenerar'); btn.disabled=true; btn.textContent='✨ Generando...';
+      var texto='';
+      try{ var r=await fetch('/api/marketing/generar-post',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({producto:producto,plataforma:plat,tono:tonoActual})}); var d=await r.json(); if(d.post)texto=d.post; }catch(_){}
+      if(!texto){
+        var tonos={amigable:'¡Prueba nuestro delicioso',profesional:'Te presentamos',divertido:'¡No te puedes perder',urgente:'⚡ ¡OFERTA HOY SOLO!'};
+        texto=(tonos[tonoActual]||'Descubre')+' '+producto+'! 🌟\n\nVen y disfruta de lo mejor.\n\n#'+producto.replace(/\s+/g,'').toLowerCase()+' #'+plat;
+      }
+      btn.disabled=false; btn.textContent='✨ Generar post';
+      document.getElementById('mkt-gen-preview').style.display='';
+      var gt=document.getElementById('mkt-gen-text'); gt.textContent=texto;
+      document.getElementById('mkt-char-count').textContent=texto.length+' caracteres';
+      gt.oninput=function(){ document.getElementById('mkt-char-count').textContent=this.textContent.length+' caracteres'; };
+    }
+    async function guardarPost(status){
+      var texto=document.getElementById('mkt-gen-text').textContent.trim();
+      var plat=document.getElementById('mkt-gen-plat').value;
+      var fecha=document.getElementById('mkt-gen-fecha').value;
+      if(!texto){ _toast('El post no puede estar vacío','err'); return; }
+      var data={plataforma:plat,texto:texto,producto:document.getElementById('mkt-gen-producto').value,status:status,fecha_programada:fecha||null,created_at:new Date().toISOString()};
+      try{ var r=await fetch('/api/marketing/posts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}); var d=await r.json(); if(d.post)posts.unshift(d.post); }catch(_){
+        var p=Object.assign({},data,{id:'POST-'+Date.now()}); posts.unshift(p);
+        try{ var saved=JSON.parse(localStorage.getItem('si_posts')||'[]'); saved.unshift(p); localStorage.setItem('si_posts',JSON.stringify(saved)); }catch(__){}
+      }
+      document.getElementById('mkt-gen-preview').style.display='none';
+      document.getElementById('mkt-gen-producto').value='';
+      renderPosts();
+      _toast('✅ Post '+(status==='programado'?'programado':'guardado'),'ok');
+    }
+    function copiarTexto(id){ var p=posts.find(function(x){return x.id===id;}); if(p&&p.texto&&navigator.clipboard) navigator.clipboard.writeText(p.texto).then(function(){_toast('📋 Copiado','ok');}).catch(function(){_toast('No se pudo copiar');}); }
+    function cambiarStatus(id,status){ var p=posts.find(function(x){return x.id===id;}); if(p){p.status=status; renderPosts(); _toast('✅ Marcado como publicado','ok');} }
+    function eliminarPost(id){ if(!confirm('¿Eliminar este post?'))return; posts=posts.filter(function(p){return p.id!==id;}); renderPosts(); _toast('Post eliminado'); }
+    function init(){ if(initialized)return; initialized=true; cargarPosts(); }
+    return { init, setTono, filtrarPlat, nuevaPublicacion, nuevaManual, generarPost, guardarPost, copiarTexto, cambiarStatus, eliminarPost };
+  })();
+  window.mktApp=mktApp;
+
+  // ============ PLAN DE NEGOCIO ============
+  // 2026-05-07 merge-plan: portado desde pos-plan-negocio.html
+  var planApp = (function(){
+    function moneyMX(n){ return '$'+Number(n||0).toLocaleString('es-MX',{minimumFractionDigits:0,maximumFractionDigits:0}); }
+    async function generarPlan(){
+      var giro=document.getElementById('plan-giro-custom').value.trim()||document.getElementById('plan-giro').value;
+      var ciudad=document.getElementById('plan-ciudad').value.trim()||'México';
+      var presupuesto=parseInt(document.getElementById('plan-presupuesto').value)||50000;
+      if(!giro){ _toast('Selecciona o escribe el giro del negocio','err'); return; }
+      var btn=document.getElementById('plan-btnPlan'); btn.disabled=true; btn.textContent='⏳ Generando...';
+      document.getElementById('plan-empty-state').style.display='none';
+      document.getElementById('plan-result-panel').classList.remove('visible');
+      document.getElementById('plan-loading-state').style.display='';
+      var plan=null;
+      try{ var r=await fetch('/api/business-plan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({giro:giro,ciudad:ciudad,presupuesto:presupuesto})}); var d=await r.json(); if(d.plan)plan=d.plan; }catch(_){}
+      btn.disabled=false; btn.textContent='📊 Generar plan de negocio con IA';
+      document.getElementById('plan-loading-state').style.display='none';
+      if(!plan){ _toast('Error generando el plan','err'); document.getElementById('plan-empty-state').style.display=''; return; }
+      renderPlan(plan,giro,presupuesto);
+    }
+    function renderPlan(plan,giro,presupuesto){
+      var totalArranque=(plan.costos_arranque||[]).reduce(function(s,i){return s+i.costo;},0);
+      var totalMes=(plan.costos_mensuales||[]).reduce(function(s,i){return s+i.costo;},0);
+      document.getElementById('plan-kpi-arranque').textContent=moneyMX(totalArranque);
+      document.getElementById('plan-kpi-ingreso').textContent=moneyMX(plan.ingresos_estimados||0);
+      document.getElementById('plan-kpi-equilibrio').textContent=(plan.punto_equilibrio_meses||'—')+' meses';
+      document.getElementById('plan-tbody-arranque').innerHTML=(plan.costos_arranque||[]).map(function(i){return '<tr><td>'+i.item+'</td><td style="text-align:right;font-variant-numeric:tabular-nums">'+moneyMX(i.costo)+'</td></tr>';}).join('')+'<tr class="plan-total-row"><td>Total</td><td style="text-align:right">'+moneyMX(totalArranque)+'</td></tr>';
+      document.getElementById('plan-tbody-mensuales').innerHTML=(plan.costos_mensuales||[]).map(function(i){return '<tr><td>'+i.item+'</td><td style="text-align:right;font-variant-numeric:tabular-nums">'+moneyMX(i.costo)+'</td></tr>';}).join('')+'<tr class="plan-total-row"><td>Total mensual</td><td style="text-align:right">'+moneyMX(totalMes)+'</td></tr>';
+      document.getElementById('plan-pills-permisos').innerHTML=(plan.permisos||[]).map(function(p){return '<span class="plan-pill">📋 '+p+'</span>';}).join('');
+      document.getElementById('plan-pills-proveedores').innerHTML=(plan.proveedores||[]).map(function(p){return '<span class="plan-pill">🛒 '+p+'</span>';}).join('');
+      document.getElementById('plan-resumen-box').textContent=plan.resumen||'Plan generado para '+giro+' con presupuesto de '+moneyMX(presupuesto)+'.';
+      document.getElementById('plan-result-panel').classList.add('visible');
+      _toast('✅ Plan de negocio generado','ok');
+    }
+    return { generarPlan };
+  })();
+  window.planApp=planApp;
+
+  // ── Lazy-init: arrancar la lógica solo cuando el usuario abre cada pantalla ──
+  // 2026-05-07 merge: hook al showScreen para inicializar al primer acceso
+  if (typeof window.showScreen === 'function') {
+    var origShow = window.showScreen;
+    window.showScreen = function(name){
+      try { origShow.apply(this, arguments); } catch(_){}
+      try {
+        if (name === 'fila' && filaApp.init) filaApp.init();
+        else if (name === 'ingredientes' && ingApp.init) ingApp.init();
+        else if (name === 'menu-digital' && menuApp.init) menuApp.init();
+        else if (name === 'marketing' && mktApp.init) mktApp.init();
+        // plan no requiere init (es por demanda al hacer click en Generar)
+      } catch(e) { console.warn('[merge-screens] init error', name, e); }
+    };
+  } else {
+    // Fallback: si showScreen aún no existe (defer), retry tras DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', function(){
+      if (typeof window.showScreen === 'function') {
+        var origShow = window.showScreen;
+        window.showScreen = function(name){
+          try { origShow.apply(this, arguments); } catch(_){}
+          try {
+            if (name === 'fila' && filaApp.init) filaApp.init();
+            else if (name === 'ingredientes' && ingApp.init) ingApp.init();
+            else if (name === 'menu-digital' && menuApp.init) menuApp.init();
+            else if (name === 'marketing' && mktApp.init) mktApp.init();
+          } catch(e) {}
+        };
+      }
+    });
+  }
+})();
+</script>
+
 </body>
 </html>
