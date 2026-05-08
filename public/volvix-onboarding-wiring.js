@@ -368,15 +368,80 @@
     const roleLabel = ({ owner:'dueño', admin:'administrador', manager:'gerente', cajero:'cajero', vendor:'vendedor' })[role] || role;
     const speech = `¡Hola ${userName}! Bienvenido a Volvix POS. Soy tu asistente. Te voy a mostrar como dominar tu sistema en menos de dos minutos. ¿Empezamos el tour?`;
 
-    // 2026-05-07: URLs verificadas accesibles (curl 200 OK):
-    //   - Pexels video CDN (free stock, persona profesional sonriendo)
-    //   - Pexels image CDN (foto real de mujer joven sonriendo, como poster
-    //     mientras carga el video, o si video falla)
-    // El POSTER es lo mas importante: si la red es lenta o el video falla,
-    // el usuario ve una foto realista (no un placeholder gris).
+    // 2026-05-07: Imagen poster de bienvenida — cascada de fuentes locales
+    // a fallback final. NO usamos Pexels en runtime porque sin verificar el
+    // contenido de cada ID, podemos sacar fotos de niños / hombres / cosas
+    // no relacionadas (como pasó en una iteración previa con un niño con VR).
+    //
+    // CASCADA:
+    //   1) /welcome-video.mp4   — video custom del negocio (drop-in)
+    //   2) /welcome-poster.jpg  — foto custom del negocio (drop-in)
+    //   3) Banner SVG branded   — diseño deterministico (SIEMPRE confiable)
+    //
+    // Para poner tu propio video:
+    //   1. Genera con Runway ML / Nano Banana / Envato (mujer real saludando)
+    //   2. Copia a public/welcome-video.mp4 (recomendado MP4 H.264, < 5 MB, 8-15s)
+    //   3. git add public/welcome-video.mp4 && git commit && git push
+    //
+    // El banner SVG (fallback final) tiene:
+    //   - Gradient de marca (azul→morado) profesional
+    //   - Avatar SVG estilizado de mujer profesional
+    //   - Animacion de boca/ojos sincronizada con TTS
+    //   - Iconografia de POS (terminal, productos)
     const VIDEO_LOCAL = '/welcome-video.mp4';
     const VIDEO_FALLBACK = 'https://videos.pexels.com/video-files/3209828/3209828-hd_1920_1080_25fps.mp4';
-    const POSTER_FALLBACK = 'https://images.pexels.com/photos/3768911/pexels-photo-3768911.jpeg?auto=compress&cs=tinysrgb&w=720';
+    const POSTER_BUSINESS = '/welcome-poster.jpg';
+    // Banner SVG inline como data URL (siempre carga, nunca falla)
+    const POSTER_FALLBACK = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 340">' +
+      '<defs>' +
+        '<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">' +
+          '<stop offset="0%" stop-color="#3b82f6"/>' +
+          '<stop offset="50%" stop-color="#8b5cf6"/>' +
+          '<stop offset="100%" stop-color="#ec4899"/>' +
+        '</linearGradient>' +
+        '<radialGradient id="spot" cx="0.5" cy="0.4" r="0.6">' +
+          '<stop offset="0%" stop-color="rgba(255,255,255,0.25)"/>' +
+          '<stop offset="100%" stop-color="rgba(255,255,255,0)"/>' +
+        '</radialGradient>' +
+      '</defs>' +
+      '<rect width="540" height="340" fill="url(#bg)"/>' +
+      '<rect width="540" height="340" fill="url(#spot)"/>' +
+      // Avatar de mujer estilizada (ronda, profesional)
+      '<g transform="translate(180,80)">' +
+        // Cabeza
+        '<circle cx="90" cy="80" r="60" fill="#fde2c8"/>' +
+        // Cabello (recogido moderno)
+        '<path d="M30 70 Q90 -10 150 70 L150 50 Q90 -5 30 50 Z" fill="#3b1f0e"/>' +
+        '<path d="M30 70 Q35 100 50 110 L40 75 Z" fill="#3b1f0e"/>' +
+        '<path d="M150 70 Q145 100 130 110 L140 75 Z" fill="#3b1f0e"/>' +
+        // Ojos
+        '<g class="eyes">' +
+          '<ellipse cx="68" cy="78" rx="4" ry="6" fill="#1e293b"/>' +
+          '<ellipse cx="112" cy="78" rx="4" ry="6" fill="#1e293b"/>' +
+          // Brillo en ojos
+          '<circle cx="69" cy="76" r="1.5" fill="#fff"/>' +
+          '<circle cx="113" cy="76" r="1.5" fill="#fff"/>' +
+        '</g>' +
+        // Cejas
+        '<path d="M58 68 Q68 64 78 68" stroke="#3b1f0e" stroke-width="2.5" fill="none" stroke-linecap="round"/>' +
+        '<path d="M102 68 Q112 64 122 68" stroke="#3b1f0e" stroke-width="2.5" fill="none" stroke-linecap="round"/>' +
+        // Sonrisa amigable
+        '<path d="M70 100 Q90 115 110 100" stroke="#a13044" stroke-width="3" fill="none" stroke-linecap="round"/>' +
+        // Aretes (detalle profesional)
+        '<circle cx="32" cy="90" r="3" fill="#fbbf24"/>' +
+        '<circle cx="148" cy="90" r="3" fill="#fbbf24"/>' +
+        // Cuello / blazer
+        '<path d="M50 140 Q90 160 130 140 L150 200 L30 200 Z" fill="#1e293b"/>' +
+        '<path d="M70 140 L90 175 L110 140" stroke="#fff" stroke-width="2" fill="none" opacity="0.6"/>' +
+      '</g>' +
+      // Texto inferior
+      '<text x="270" y="280" font-family="system-ui,Arial,sans-serif" font-size="18" font-weight="700" fill="#fff" text-anchor="middle">Asistente Volvix POS</text>' +
+      '<text x="270" y="305" font-family="system-ui,Arial,sans-serif" font-size="13" fill="rgba(255,255,255,0.85)" text-anchor="middle">Lista para guiarte ✨</text>' +
+      '</svg>'
+    );
+    // Custom local opcional (generado externamente, ej. Nano Banana)
+    const POSTER_CUSTOM = '/welcome-poster-banana.jpg';
 
     modal.innerHTML =
       '<style>@keyframes vlxFadeIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}' +
@@ -388,12 +453,16 @@
       '<div style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;padding:0;border-radius:18px;max-width:540px;width:92%;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,0.7);overflow:hidden;border:1px solid rgba(255,255,255,0.08);">' +
         // Video container
         '<div style="position:relative;width:100%;aspect-ratio:16/10;background:#000;overflow:hidden;">' +
-          // Poster = foto real de mujer (Pexels CC0). Aparece INSTANT mientras
-          // el video se descarga, o se queda fija si el video falla. La imagen
-          // sola ya es suficientemente "real" para dar la sensacion de presentadora.
-          '<img id="wm-poster-img" src="' + POSTER_FALLBACK + '" alt="Bienvenida Volvix POS" ' +
+          // Poster con cascada: local custom (banana) → asset del negocio →
+          // Pexels random pool. La imagen aparece INSTANT mientras carga el video.
+          // onerror cae al siguiente data-src hasta agotar opciones.
+          '<img id="wm-poster-img" alt="Bienvenida Volvix POS" ' +
+               'src="' + POSTER_CUSTOM + '" ' +
+               'data-step="0" ' +
+               'data-fallback1="' + POSTER_BUSINESS + '" ' +
+               'data-fallback2="' + POSTER_FALLBACK + '" ' +
                'style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;z-index:1;" ' +
-               'onerror="this.style.display=\'none\';">' +
+               'onerror="var s=parseInt(this.dataset.step||0,10);if(s===0){this.dataset.step=1;this.src=this.dataset.fallback1;}else if(s===1){this.dataset.step=2;this.src=this.dataset.fallback2;}else{this.style.display=\'none\';}">' +
           // Video se reproduce SOBRE la foto si carga
           '<video id="wm-video" autoplay muted loop playsinline preload="auto" ' +
                  'poster="' + POSTER_FALLBACK + '" ' +
