@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+<title>Tutoriales · System International</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #312e81 100%);
+    color: #fff;
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
+  .header { text-align: center; max-width: 800px; margin: 0 auto 40px; }
+  .badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    padding: 6px 14px; border-radius: 20px;
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 16px;
+  }
+  h1 {
+    font-size: clamp(28px, 5vw, 44px);
+    font-weight: 900; letter-spacing: -1px; margin-bottom: 8px;
+  }
+  .sub { color: rgba(255,255,255,0.7); font-size: 16px; line-height: 1.5; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+    gap: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .card {
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 22px;
+    transition: transform .2s, border-color .2s;
+  }
+  .card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.2); }
+  .card-head {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+  }
+  .num {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    color: #fff; font-weight: 800; font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 10px;
+  }
+  .ttl { font-size: 18px; font-weight: 700; }
+  .desc { color: rgba(255,255,255,0.7); font-size: 13.5px; line-height: 1.5; margin-bottom: 14px; }
+  video {
+    width: 100%; aspect-ratio: 16/9;
+    border-radius: 10px; background: #000;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+  }
+  .actions { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn {
+    flex: 1; min-width: 100px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #fff; padding: 8px 12px; border-radius: 8px;
+    font-size: 12.5px; font-weight: 600; cursor: pointer;
+    text-decoration: none; text-align: center;
+  }
+  .btn:hover { background: rgba(255,255,255,0.2); }
+  .btn.primary {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    border-color: transparent;
+  }
+  .footer {
+    margin-top: 40px; text-align: center;
+    color: rgba(255,255,255,0.5); font-size: 13px;
+  }
+  .footer a { color: rgba(255,255,255,0.8); }
+  @media (max-width: 600px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="badge">📹 Centro de tutoriales</div>
+    <h1>Aprende System International en 4 pasos</h1>
+    <p class="sub">Videos cortos con voz en español. Cada tutorial es independiente — tómalos en orden o salta al que necesites.</p>
+  </div>
+
+  <div class="grid">
+    <article class="card">
+      <div class="card-head">
+        <div class="num">1</div>
+        <div class="ttl">Agregar tu primer producto</div>
+      </div>
+      <p class="desc">Aprende a registrar productos con nombre, precio, código y categoría. La base de tu inventario.</p>
+      <video controls preload="metadata" poster="">
+        <source src="/tutorial-paso-1.mp4" type="video/mp4">
+      </video>
+      <div class="actions">
+        <a class="btn primary" href="/salvadorex-pos.html#inventario">Ir a Inventario</a>
+        <a class="btn" href="/tutorial-paso-1.mp4" download>⬇ Descargar</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="card-head">
+        <div class="num">2</div>
+        <div class="ttl">Configurar tu inventario</div>
+      </div>
+      <p class="desc">Importa productos masivamente, exporta tu catálogo y gestiona alertas de stock.</p>
+      <video controls preload="metadata">
+        <source src="/tutorial-paso-2.mp4" type="video/mp4">
+      </video>
+      <div class="actions">
+        <a class="btn primary" href="/salvadorex-pos.html#inventario">Ir a Inventario</a>
+        <a class="btn" href="/tutorial-paso-2.mp4" download>⬇ Descargar</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="card-head">
+        <div class="num">3</div>
+        <div class="ttl">Realizar tu primera venta</div>
+      </div>
+      <p class="desc">El flujo completo: escanea producto, agrega al ticket y cobra al cliente.</p>
+      <video controls preload="metadata">
+        <source src="/tutorial-paso-3.mp4" type="video/mp4">
+      </video>
+      <div class="actions">
+        <a class="btn primary" href="/salvadorex-pos.html">Ir al POS</a>
+        <a class="btn" href="/tutorial-paso-3.mp4" download>⬇ Descargar</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="card-head">
+        <div class="num">4</div>
+        <div class="ttl">Ver reportes</div>
+      </div>
+      <p class="desc">Entiende el desempeño de tu negocio: ventas del día, productos top, mejores clientes.</p>
+      <video controls preload="metadata">
+        <source src="/tutorial-paso-4.mp4" type="video/mp4">
+      </video>
+      <div class="actions">
+        <a class="btn primary" href="/salvadorex-pos.html#reportes">Ir a Reportes</a>
+        <a class="btn" href="/tutorial-paso-4.mp4" download>⬇ Descargar</a>
+      </div>
+    </article>
+  </div>
+
+  <div class="footer">
+    Generado con <code>npm run tutorials:build</code> · Playwright + msedge-tts + ffmpeg<br>
+    <a href="/salvadorex-pos.html">← Volver al sistema</a>
+  </div>
+
+  <!-- Eliminar viejo /tutorial-paso-1.html — usar /tutoriales.html como index oficial -->
+</body>
+</html>

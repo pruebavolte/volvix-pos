@@ -1,6 +1,6 @@
 {
   "name": "volvix-saas",
-  "version": "1.0.83",
+  "version": "1.0.84",
   "description": "Volvix · SaaS POS multi-giro · Offline-first · IA autónoma · Web + Android + Windows + Mac · v20 single-source-of-truth snapshot 2026-05-05",
   "main": "server.js",
   "scripts": {
@@ -32,6 +32,10 @@
     "electron:build:all": "electron-builder -mwl --config electron-builder.yml",
     "sitemap": "node scripts/generate-sitemap.js",
     "tutorials:paso1": "tsx tutorials/scripts/paso-1-agregar-producto.ts",
+    "tutorials:paso2": "tsx tutorials/scripts/paso-2-configurar-inventario.ts",
+    "tutorials:paso3": "tsx tutorials/scripts/paso-3-primera-venta.ts",
+    "tutorials:paso4": "tsx tutorials/scripts/paso-4-ver-reportes.ts",
+    "tutorials:build": "npm run tutorials:paso1 && npm run tutorials:paso2 && npm run tutorials:paso3 && npm run tutorials:paso4",
     "test:e2e": "playwright test",
     "test:smoke": "playwright test smoke.spec.js"
   },

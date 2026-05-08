@@ -16683,10 +16683,26 @@ window.addEventListener('volvix:version-loaded', function(e){
 
   // ── Hash routing: /salvadorex-pos.html#inventario abre la pantalla ──
   // 2026-05-07 merge: hash routing para redirect desde pos-inventario.html
+  // 2026-05-08 merge-modulos: anadido handler especial para hash que apunten a sub-tabs
+  // de Configuracion (modulos, licencia, sync, impuestos, impresion, general, negocio).
   (function applyHashRoute() {
+    // hashes que son sub-tabs dentro de screen-config (no screens propias)
+    var CFG_SUBTABS = ['modulos','licencia','sync','impuestos','impresion','general','negocio'];
     function go() {
       const h = (location.hash || '').replace('#','').toLowerCase();
-      if (h && typeof window.showScreen === 'function') {
+      if (!h) return;
+      if (CFG_SUBTABS.indexOf(h) !== -1) {
+        // primero abrimos la pantalla Configuracion y luego activamos la sub-tab
+        try { if (typeof window.showScreen === 'function') window.showScreen('config'); } catch(_){}
+        try {
+          if (typeof window.showCfg === 'function') {
+            var btn = document.querySelector('.config-tab[onclick*="showCfg(\''+h+'\'"]');
+            window.showCfg(h, btn || document.querySelector('.config-tab'));
+          }
+        } catch(_){}
+        return;
+      }
+      if (typeof window.showScreen === 'function') {
         try { window.showScreen(h); } catch(_){}
       }
     }
