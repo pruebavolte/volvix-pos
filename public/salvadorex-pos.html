@@ -15373,5 +15373,809 @@ window.addEventListener('volvix:version-loaded', function(e){
   } catch(_) {}
 });
 </script>
+
+<!-- 2026-05-07 merge: CSS portado desde pos-inventario.html para los modales de inventario.
+     Se prefijan los selectores con #modalProducto/#modalAjuste/#modalImport para
+     no chocar con .modal-backdrop / .modal existentes en el resto del POS. -->
+<style id="vlx-inv-merge-css">
+/* Modal-bg generico (solo cuando se usa como overlay de inventario) */
+#modalProducto.modal-bg, #modalAjuste.modal-bg, #modalImport.modal-bg {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(3px);
+}
+#modalProducto.modal-bg.open, #modalAjuste.modal-bg.open, #modalImport.modal-bg.open { display: flex; }
+#modalProducto .modal, #modalAjuste .modal, #modalImport .modal {
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #E7E5E4);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 540px;
+  max-height: 92vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+}
+#modalProducto .modal-head, #modalAjuste .modal-head, #modalImport .modal-head {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border, #E7E5E4);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #e8eaf6;
+}
+#modalProducto .modal-head-title, #modalAjuste .modal-head-title, #modalImport .modal-head-title {
+  font-size: 14px; font-weight: 700; color: var(--navy, #1a237e);
+}
+#modalProducto .modal-body, #modalAjuste .modal-body, #modalImport .modal-body { padding: 18px; overflow-y: auto; flex: 1; }
+#modalProducto .modal-foot, #modalAjuste .modal-foot, #modalImport .modal-foot {
+  padding: 11px 18px;
+  border-top: 1px solid var(--border, #E7E5E4);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+/* Form (alcance limitado a estos modales) */
+#modalProducto .form-group, #modalAjuste .form-group, #modalImport .form-group { margin-bottom: 12px; }
+#modalProducto .form-label, #modalAjuste .form-label, #modalImport .form-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-2, #444);
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+#modalProducto .form-input, #modalProducto .form-select, #modalProducto .form-textarea,
+#modalAjuste .form-input, #modalAjuste .form-select, #modalAjuste .form-textarea,
+#modalImport .form-input, #modalImport .form-select, #modalImport .form-textarea {
+  width: 100%;
+  padding: 8px 11px;
+  border: 1.5px solid var(--border, #E7E5E4);
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text, #111);
+  background: var(--surface, #fff);
+  outline: none;
+}
+#modalProducto .form-input:focus, #modalProducto .form-select:focus, #modalProducto .form-textarea:focus,
+#modalAjuste .form-input:focus, #modalAjuste .form-select:focus, #modalAjuste .form-textarea:focus,
+#modalImport .form-input:focus, #modalImport .form-select:focus, #modalImport .form-textarea:focus {
+  border-color: var(--navy, #1a237e);
+  box-shadow: 0 0 0 3px rgba(26,35,126,0.10);
+}
+#modalProducto .form-row, #modalAjuste .form-row, #modalImport .form-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+}
+#modalProducto .form-hint, #modalAjuste .form-hint, #modalImport .form-hint {
+  font-size: 11px; color: var(--text-3, #888); margin-top: 3px;
+}
+/* Stock pills usadas dentro del modal */
+#modalProducto .stock-pill {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 2px 7px; border-radius: 999px; font-size: 11px; font-weight: 700;
+}
+#modalProducto .stock-ok  { background: rgba(46,125,50,0.10);  color: #2e7d32; }
+#modalProducto .stock-low { background: rgba(230,81,0,0.10);   color: #e65100; }
+#modalProducto .stock-out { background: rgba(198,40,40,0.10);  color: #c62828; }
+</style>
+
+<!-- 2026-05-07 merge: modales portados desde pos-inventario.html. IDs y onclick
+     se PRESERVAN tal cual para que el tutorial (paso-1-agregar-producto.ts)
+     siga funcionando sin cambios: openNuevo, #pNombre, #pPrecio, #pStock,
+     #pCategoria, #btnGuardar, etc. -->
+<div class="modal-bg" id="modalProducto" onclick="if(event.target===this)closeInvModal('modalProducto')">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-head-title" id="modalTitle">+ Nuevo producto</span>
+      <button class="btn sm" onclick="closeInvModal('modalProducto')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Nombre del producto *</label>
+        <input class="form-input" id="pNombre" placeholder="Ej. Coca-Cola 600ml" autocomplete="off">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Código de barras</label>
+          <div style="display:flex;gap:6px">
+            <input class="form-input mono" id="pCodigo" placeholder="7501055303045" maxlength="13" oninput="onBarcodeLookup(this.value)">
+            <button class="btn" id="btnLookup" onclick="lookupBarcode()" title="Buscar en base de datos global" style="padding:8px 10px;flex-shrink:0;white-space:nowrap">🔍 Buscar</button>
+          </div>
+          <div class="form-hint" id="barcodeHint">EAN-13 · deja vacío para auto-generar · o presiona 🔍 para buscar en Open Food Facts</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">SKU interno</label>
+          <input class="form-input" id="pSku" placeholder="PROD-001">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Categoría</label>
+          <select class="form-select" id="pCategoria">
+            <option value="">Sin categoría</option>
+            <option value="Bebidas">Bebidas</option>
+            <option value="Lácteos">Lácteos</option>
+            <option value="Básicos">Básicos</option>
+            <option value="Snacks">Snacks</option>
+            <option value="Panadería">Panadería</option>
+            <option value="Limpieza">Limpieza</option>
+            <option value="Higiene">Higiene</option>
+            <option value="Varios">Varios</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Unidad de medida</label>
+          <select class="form-select" id="pUnidad">
+            <option value="pieza">Pieza</option>
+            <option value="kg">Kilogramo</option>
+            <option value="litro">Litro</option>
+            <option value="caja">Caja</option>
+            <option value="paquete">Paquete</option>
+            <option value="metro">Metro</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Precio de venta *</label>
+          <input class="form-input" id="pPrecio" type="number" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Precio de costo</label>
+          <input class="form-input" id="pCosto" type="number" min="0" step="0.01" placeholder="0.00">
+          <div class="form-hint" id="margenHint"></div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Stock actual *</label>
+          <input class="form-input" id="pStock" type="number" min="0" step="1" placeholder="0" oninput="recalcStockBadge()" aria-describedby="stockBadgePreview">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Stock mínimo (alerta)</label>
+          <input class="form-input" id="pMin" type="number" min="0" step="1" placeholder="5" oninput="recalcStockBadge()">
+          <div class="form-hint">Recibirás alerta cuando baje de este número</div>
+          <div id="stockBadgePreview" class="form-hint" aria-live="polite" style="margin-top:6px;font-weight:600"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Proveedor</label>
+        <input class="form-input" id="pProveedor" placeholder="Nombre del proveedor">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notas</label>
+        <textarea class="form-textarea" id="pNotas" rows="2" placeholder="Notas internas..."></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeInvModal('modalProducto')">Cancelar</button>
+      <button class="btn primary" id="btnGuardar" onclick="guardarProducto()">✓ Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- 2026-05-07 merge: modal de ajuste de stock -->
+<div class="modal-bg" id="modalAjuste" onclick="if(event.target===this)closeInvModal('modalAjuste')">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-head">
+      <span class="modal-head-title">⚖️ Ajustar stock</span>
+      <button class="btn sm" onclick="closeInvModal('modalAjuste')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:13px;font-weight:600;margin-bottom:14px" id="ajusteProductoNombre">—</div>
+      <div class="form-group">
+        <label class="form-label">Tipo de movimiento</label>
+        <select class="form-select" id="ajusteTipo">
+          <option value="entrada">📥 Entrada (compra/devolución)</option>
+          <option value="salida">📤 Salida (merma/ajuste)</option>
+          <option value="ajuste">🔧 Ajuste directo (contar físico)</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Cantidad *</label>
+          <input class="form-input" id="ajusteCantidad" type="number" min="0" step="1" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Stock resultante</label>
+          <input class="form-input" id="ajusteResultante" readonly style="background:var(--bg-2,#f5f5f4);font-weight:700">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Motivo</label>
+        <input class="form-input" id="ajusteMotivo" placeholder="Ej. Compra a proveedor, merma, conteo físico...">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeInvModal('modalAjuste')">Cancelar</button>
+      <button class="btn primary" onclick="guardarAjuste()">✓ Aplicar ajuste</button>
+    </div>
+  </div>
+</div>
+
+<!-- 2026-05-07 merge: modal de importacion CSV -->
+<div class="modal-bg" id="modalImport" onclick="if(event.target===this)closeInvModal('modalImport')">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-head">
+      <span class="modal-head-title">⬆ Importar productos desde CSV</span>
+      <button class="btn sm" onclick="closeInvModal('modalImport')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="padding:20px;border:2px dashed var(--border,#E7E5E4);border-radius:12px;text-align:center;margin-bottom:14px;cursor:pointer" onclick="document.getElementById('csvFileInv').click()" id="dropZoneInv">
+        <div style="font-size:36px;margin-bottom:8px">📄</div>
+        <div style="font-weight:600;margin-bottom:4px">Clic para seleccionar CSV</div>
+        <div style="font-size:12px;color:var(--text-3,#888)">o arrastra el archivo aquí</div>
+        <input type="file" id="csvFileInv" accept=".csv" style="display:none" onchange="previewCSV(this)">
+      </div>
+      <div style="background:var(--bg-2,#f5f5f4);border-radius:8px;padding:12px;font-size:11.5px;margin-bottom:10px">
+        <strong>Formato esperado del CSV:</strong><br>
+        <code style="font-size:10.5px">nombre,codigo,categoria,precio,costo,stock,minimo</code><br><br>
+        <a href="#" onclick="downloadTemplate();return false" style="color:var(--navy,#1a237e)">⬇ Descargar plantilla CSV</a>
+      </div>
+      <div id="csvPreview"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeInvModal('modalImport')">Cancelar</button>
+      <button class="btn primary" id="btnImport" onclick="importarCSV()" disabled>⬆ Importar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="invToast" style="position:fixed;bottom:72px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a237e;color:#fff;padding:9px 20px;border-radius:999px;font-size:13px;font-weight:500;z-index:1100;opacity:0;transition:all 0.25s;pointer-events:none;white-space:nowrap;box-shadow:0 6px 18px rgba(0,0,0,0.22);"></div>
+<style>
+#invToast.show { opacity: 1 !important; transform: translateX(-50%) translateY(0) !important; }
+#invToast.ok   { background: #2e7d32 !important; }
+#invToast.err  { background: #c62828 !important; }
+#invToast.warn { background: #e65100 !important; }
+</style>
+
+<!-- 2026-05-07 merge: funciones JS portadas desde pos-inventario.html.
+     Encapsuladas en IIFE para no contaminar el scope del POS principal,
+     pero exponemos en window las funciones que el tutorial / botones HTML
+     necesitan llamar por nombre (openNuevo, guardarProducto, etc).
+     Adaptaciones clave:
+       - allProducts/filteredProducts/editingId reescritos para vivir en window.
+       - guardarProducto() ademas pushea a CATALOG[] (estructura del POS) y
+         dispara renderInv() para que la tabla del POS refleje el cambio.
+       - openModal/closeModal renombrados a openInvModal/closeInvModal para
+         no chocar con los del POS (que aplican .modal-backdrop). -->
+<script>
+(function() {
+  'use strict';
+
+  // ── Estado del modulo (compartido con CATALOG via syncCatalog) ──
+  let allProducts = window.__INV_allProducts__ || [];
+  window.__INV_allProducts__ = allProducts;
+  let editingId = null;
+  let ajustingProduct = null;
+
+  // ── Helpers ──
+  const moneyInv = (n) => (window.volvix?.utils?.money) ? window.volvix.utils.money(n) : ('$' + Number(n || 0).toFixed(2));
+  const escInv   = (s) => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+  // ── Toast con fallback (no usar el del POS para no chocar) ──
+  function invToast(msg, type) {
+    type = type || 'info';
+    if (window.volvix?.utils?.toast) { try { window.volvix.utils.toast(msg, type); return; } catch(_){} }
+    const el = document.getElementById('invToast');
+    if (!el) { try { console.log('[inv]', msg); } catch(_){} return; }
+    el.textContent = msg;
+    el.className = 'toast show ' + type;
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.className = '', 2800);
+  }
+
+  // ── Modal helpers (renombrados para no chocar con closeModal del POS) ──
+  function openInvModal(id)  { const el = document.getElementById(id); if (el) el.classList.add('open'); }
+  function closeInvModal(id) { const el = document.getElementById(id); if (el) el.classList.remove('open'); }
+
+  // ── Sincroniza un producto del modal hacia el CATALOG global del POS ──
+  function syncToCatalog(prod) {
+    try {
+      if (!Array.isArray(window.CATALOG)) return;
+      const C = window.CATALOG;
+      const code = prod.codigo || prod.code || '';
+      const idx = C.findIndex(x => (x.code === code && code) || (x.id && x.id === prod.id));
+      const row = {
+        id:       prod.id,
+        code:     prod.codigo,
+        barcode:  prod.codigo,
+        sku:      prod.sku,
+        name:     prod.nombre,
+        category: prod.categoria || 'General',
+        categoria:prod.categoria || 'General',
+        price:    Number(prod.precio || 0),
+        cost:     Number(prod.costo  || 0),
+        stock:    Number(prod.stock  || 0),
+        min_stock:Number(prod.minimo || 5),
+        minimo:   Number(prod.minimo || 5),
+        unit:     prod.unidad || 'pieza',
+        supplier: prod.proveedor || '',
+        notes:    prod.notas || ''
+      };
+      if (idx >= 0) C[idx] = Object.assign({}, C[idx], row);
+      else C.push(row);
+      // Re-render tabla de inventario y quickpick
+      if (typeof window.renderInv === 'function') {
+        try { window.renderInv(); } catch(_){}
+      }
+      if (typeof window.renderQuickPick === 'function') {
+        try { window.renderQuickPick(); } catch(_){}
+      }
+    } catch(_) {}
+  }
+
+  // ── openNuevo: limpia campos y abre modal ──
+  function openNuevo() {
+    editingId = null;
+    const tEl = document.getElementById('modalTitle'); if (tEl) tEl.textContent = '+ Nuevo producto';
+    const bEl = document.getElementById('btnGuardar'); if (bEl) bEl.textContent = '✓ Guardar';
+    ['pNombre','pCodigo','pSku','pPrecio','pCosto','pStock','pMin','pProveedor','pNotas'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.value = '';
+    });
+    const cat = document.getElementById('pCategoria'); if (cat) cat.value = '';
+    const uni = document.getElementById('pUnidad');    if (uni) uni.value = 'pieza';
+    const min = document.getElementById('pMin');       if (min) min.value = '5';
+    const mh  = document.getElementById('margenHint'); if (mh)  mh.textContent = '';
+    openInvModal('modalProducto');
+    setTimeout(() => document.getElementById('pNombre')?.focus(), 80);
+  }
+
+  // ── openEditar (usado por botones futuros) ──
+  function openEditar(idOrCode) {
+    // Buscar en allProducts y, si no esta, derivar de CATALOG
+    let p = allProducts.find(x => x.id === idOrCode || x.codigo === idOrCode);
+    if (!p && Array.isArray(window.CATALOG)) {
+      const c = window.CATALOG.find(x => x.id === idOrCode || x.code === idOrCode);
+      if (c) {
+        p = {
+          id: c.id, nombre: c.name, codigo: c.code, sku: c.sku || '',
+          categoria: c.category || c.categoria || '', unidad: c.unit || 'pieza',
+          precio: c.price, costo: c.cost, stock: c.stock,
+          minimo: c.min_stock || c.minimo || 5,
+          proveedor: c.supplier || '', notas: c.notes || ''
+        };
+      }
+    }
+    if (!p) return;
+    editingId = p.id || p.codigo;
+    const tEl = document.getElementById('modalTitle'); if (tEl) tEl.textContent = '✏️ Editar producto';
+    const bEl = document.getElementById('btnGuardar'); if (bEl) bEl.textContent = '✓ Actualizar';
+    const set = (id, v) => { const e = document.getElementById(id); if (e) e.value = v == null ? '' : v; };
+    set('pNombre', p.nombre); set('pCodigo', p.codigo); set('pSku', p.sku);
+    set('pCategoria', p.categoria); set('pUnidad', p.unidad || 'pieza');
+    set('pPrecio', p.precio); set('pCosto', p.costo);
+    set('pStock', p.stock);   set('pMin',   p.minimo);
+    set('pProveedor', p.proveedor); set('pNotas', p.notas);
+    updateMargen(); recalcStockBadge();
+    openInvModal('modalProducto');
+    setTimeout(() => document.getElementById('pNombre')?.focus(), 80);
+  }
+
+  function updateMargen() {
+    const precio = parseFloat(document.getElementById('pPrecio')?.value || 0);
+    const costo  = parseFloat(document.getElementById('pCosto')?.value  || 0);
+    const hint   = document.getElementById('margenHint');
+    if (!hint) return;
+    if (precio > 0 && costo > 0) {
+      const margen = Math.round((precio - costo) / precio * 100);
+      hint.textContent = 'Margen: ' + margen + '% · Ganancia: ' + moneyInv(precio - costo);
+      hint.style.color = margen >= 30 ? '#2e7d32' : margen >= 15 ? '#e65100' : '#c62828';
+    } else { hint.textContent = ''; }
+  }
+
+  // ── recalcStockBadge ──
+  function recalcStockBadge() {
+    const stockEl = document.getElementById('pStock');
+    const minEl   = document.getElementById('pMin');
+    const out     = document.getElementById('stockBadgePreview');
+    if (!stockEl || !minEl || !out) return;
+    const stock = parseInt(stockEl.value || 0, 10) || 0;
+    const minimo = parseInt(minEl.value || 5, 10) || 0;
+    let cls, label;
+    if (stock === 0)              { cls = 'stock-out'; label = '✗ Sin stock'; }
+    else if (stock <= minimo)     { cls = 'stock-low'; label = '⚠ Stock crítico (≤ mínimo)'; }
+    else                          { cls = 'stock-ok';  label = '✓ Stock normal'; }
+    out.innerHTML = '<span class="stock-pill ' + cls + '">' + label + '</span>';
+  }
+
+  // ── genEAN ──
+  function genEAN() {
+    const base = '200' + String(Date.now()).slice(-9);
+    let sum = 0;
+    for (let i = 0; i < 12; i++) sum += parseInt(base[i]) * (i % 2 === 0 ? 1 : 3);
+    const check = (10 - (sum % 10)) % 10;
+    return base + check;
+  }
+
+  // ── guardarProducto (crea/actualiza, sincroniza con CATALOG) ──
+  async function guardarProducto() {
+    const nombre = (document.getElementById('pNombre')?.value || '').trim();
+    if (!nombre) { invToast('El nombre es obligatorio', 'err'); document.getElementById('pNombre')?.focus(); return; }
+    const precio = parseFloat(document.getElementById('pPrecio')?.value || 0);
+    if (!(precio > 0)) { invToast('El precio debe ser mayor a 0', 'err'); document.getElementById('pPrecio')?.focus(); return; }
+
+    const producto = {
+      nombre,
+      codigo:    (document.getElementById('pCodigo')?.value || '').trim() || genEAN(),
+      sku:       (document.getElementById('pSku')?.value || '').trim(),
+      categoria: document.getElementById('pCategoria')?.value || '',
+      unidad:    document.getElementById('pUnidad')?.value    || 'pieza',
+      precio,
+      costo:     parseFloat(document.getElementById('pCosto')?.value    || 0),
+      stock:     parseInt(  document.getElementById('pStock')?.value    || 0),
+      minimo:    parseInt(  document.getElementById('pMin')?.value      || 5),
+      proveedor: (document.getElementById('pProveedor')?.value || '').trim(),
+      notas:     (document.getElementById('pNotas')?.value || '').trim(),
+      updated_at:new Date().toISOString(),
+    };
+
+    const btn = document.getElementById('btnGuardar');
+    if (btn) { btn.disabled = true; btn.textContent = 'Guardando...'; }
+
+    try {
+      let savedId = editingId;
+      if (window.volvix?.sync?.execute) {
+        if (editingId) {
+          await window.volvix.sync.execute({
+            type:'update', table:'productos', id: editingId, data: producto,
+            endpoint: '/api/productos/' + editingId, body: producto,
+          });
+        } else {
+          const result = await window.volvix.sync.execute({
+            type:'create', table:'productos', data: producto,
+            endpoint: '/api/productos', body: producto,
+          });
+          savedId = result?.result?.id || ('local-' + Date.now());
+        }
+      } else {
+        // Fallback offline: solo memoria + localStorage
+        savedId = editingId || ('local-' + Date.now());
+        try {
+          const ls = JSON.parse(localStorage.getItem('volvix:productos') || '[]');
+          if (editingId) {
+            const i = ls.findIndex(x => x.id === editingId);
+            if (i >= 0) ls[i] = Object.assign({}, ls[i], producto, { id: editingId });
+          } else { ls.push(Object.assign({ id: savedId }, producto)); }
+          localStorage.setItem('volvix:productos', JSON.stringify(ls));
+        } catch(_) {}
+      }
+
+      // Mantener allProducts sincronizado
+      if (editingId) {
+        const idx = allProducts.findIndex(p => p.id === editingId);
+        if (idx >= 0) allProducts[idx] = Object.assign({}, allProducts[idx], producto, { id: editingId });
+        else allProducts.push(Object.assign({}, producto, { id: editingId }));
+      } else {
+        allProducts.push(Object.assign({}, producto, { id: savedId }));
+      }
+      // Sincronizar al CATALOG del POS y re-render
+      syncToCatalog(Object.assign({}, producto, { id: savedId }));
+
+      invToast(editingId ? '✓ Producto actualizado' : '✓ Producto creado', 'ok');
+      closeInvModal('modalProducto');
+    } catch (err) {
+      invToast('Error: ' + (err && err.message ? err.message : err), 'err');
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = editingId ? '✓ Actualizar' : '✓ Guardar'; }
+    }
+  }
+
+  // ── openAjuste / calcResultante / guardarAjuste ──
+  function openAjuste(idOrCode) {
+    let p = allProducts.find(x => x.id === idOrCode || x.codigo === idOrCode);
+    if (!p && Array.isArray(window.CATALOG)) {
+      const c = window.CATALOG.find(x => x.id === idOrCode || x.code === idOrCode);
+      if (c) p = { id: c.id, nombre: c.name, codigo: c.code, stock: Number(c.stock||0), unidad: c.unit || 'pieza' };
+    }
+    if (!p) return;
+    ajustingProduct = p;
+    const nameEl = document.getElementById('ajusteProductoNombre');
+    if (nameEl) nameEl.textContent = p.nombre + ' · Stock actual: ' + (p.stock||0) + ' ' + (p.unidad||'pieza');
+    const set = (id, v) => { const e = document.getElementById(id); if (e) e.value = v; };
+    set('ajusteCantidad', '');
+    set('ajusteResultante', p.stock || 0);
+    set('ajusteMotivo', '');
+    set('ajusteTipo', 'entrada');
+    openInvModal('modalAjuste');
+    setTimeout(() => document.getElementById('ajusteCantidad')?.focus(), 80);
+  }
+
+  function calcResultante() {
+    if (!ajustingProduct) return;
+    const tipo     = document.getElementById('ajusteTipo')?.value || 'entrada';
+    const cantidad = parseInt(document.getElementById('ajusteCantidad')?.value || 0);
+    const actual   = ajustingProduct.stock || 0;
+    let resultante = actual;
+    if      (tipo === 'entrada') resultante = actual + cantidad;
+    else if (tipo === 'salida')  resultante = Math.max(0, actual - cantidad);
+    else                         resultante = cantidad;
+    const r = document.getElementById('ajusteResultante'); if (r) r.value = resultante;
+    return { cantidad, resultante };
+  }
+
+  async function guardarAjuste() {
+    if (!ajustingProduct) return;
+    const calc = calcResultante() || {};
+    const cantidad   = calc.cantidad;
+    const resultante = calc.resultante;
+    const motivo = (document.getElementById('ajusteMotivo')?.value || '').trim();
+    const tipo   = document.getElementById('ajusteTipo')?.value || 'entrada';
+    if (!cantidad && tipo !== 'ajuste') { invToast('Ingresa una cantidad', 'err'); return; }
+    if (!motivo) { invToast('El motivo es obligatorio', 'err'); document.getElementById('ajusteMotivo')?.focus(); return; }
+
+    try {
+      // Update local stock
+      const p = allProducts.find(x => x.id === ajustingProduct.id);
+      if (p) p.stock = resultante;
+      // CATALOG sync
+      if (Array.isArray(window.CATALOG)) {
+        const c = window.CATALOG.find(x => x.id === ajustingProduct.id || x.code === ajustingProduct.codigo);
+        if (c) c.stock = resultante;
+      }
+      // Backend best-effort
+      if (window.volvix?.api?.raw) {
+        try {
+          if (tipo === 'ajuste') {
+            await window.volvix.api.raw('POST', '/api/inventory/bulk-adjust', {
+              items: [{ product_id: ajustingProduct.id, qty_diff: resultante - (ajustingProduct.stock || 0), reason: motivo }],
+            });
+          } else {
+            await window.volvix.api.raw('POST', '/api/inventory/movements', {
+              type: tipo === 'entrada' ? 'in' : 'out',
+              product_id: ajustingProduct.id, qty: cantidad, notes: motivo,
+            });
+          }
+        } catch(_){}
+      }
+      // Re-render
+      if (typeof window.renderInv === 'function') { try { window.renderInv(); } catch(_){} }
+      closeInvModal('modalAjuste');
+      invToast('✓ Stock ajustado · ' + ajustingProduct.nombre + ': ' + resultante, 'ok');
+    } catch (err) {
+      invToast('Error al ajustar: ' + (err && err.message ? err.message : err), 'err');
+    }
+  }
+
+  // ── BARCODE LOOKUP ──
+  let _barcodeTimer = null;
+  function onBarcodeLookup(val) {
+    clearTimeout(_barcodeTimer);
+    if ((val || '').length >= 8) _barcodeTimer = setTimeout(lookupBarcode, 800);
+  }
+  async function lookupBarcode() {
+    const codigo = (document.getElementById('pCodigo')?.value || '').trim();
+    if (!codigo || codigo.length < 8) { invToast('Ingresa al menos 8 dígitos del código', 'err'); return; }
+    const hint = document.getElementById('barcodeHint');
+    const btn  = document.getElementById('btnLookup');
+    if (hint) hint.textContent = '🔍 Buscando en base de datos...';
+    if (btn) { btn.disabled = true; btn.textContent = '...'; }
+    try {
+      const r = await fetch('/api/barcode-lookup?barcode=' + encodeURIComponent(codigo));
+      const data = await r.json();
+      if (data.found && data.product) {
+        const p = data.product;
+        if (p.nombre || p.name) {
+          const ne = document.getElementById('pNombre'); if (ne) ne.value = p.nombre || p.name;
+        }
+        if (p.categoria || p.category) {
+          const catSel = document.getElementById('pCategoria');
+          const v = p.categoria || p.category;
+          if (catSel && v) {
+            for (let i = 0; i < catSel.options.length; i++) {
+              if (catSel.options[i].text.toLowerCase().includes(String(v).toLowerCase())) {
+                catSel.value = catSel.options[i].value; break;
+              }
+            }
+          }
+        }
+        const source = data.source === 'local' ? '✅ Encontrado en tu inventario' : '✅ Encontrado en Open Food Facts';
+        if (hint) hint.textContent = source + (p.marca ? (' · ' + p.marca) : '');
+        invToast('✅ Producto encontrado: ' + (p.nombre || p.name), 'ok');
+      } else if (hint) {
+        hint.textContent = '❌ No encontrado en la base de datos global. Ingresa los datos manualmente.';
+      }
+    } catch(_) {
+      if (hint) hint.textContent = '⚠ Sin conexión — rellena los datos manualmente';
+    }
+    if (btn) { btn.disabled = false; btn.textContent = '🔍 Buscar'; }
+  }
+
+  // ── CSV import / export / template ──
+  let csvParsed = [];
+  function openImport() { openInvModal('modalImport'); }
+  function previewCSV(input) {
+    const file = input.files && input.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text  = e.target.result;
+      const lines = String(text).split('\n').filter(l => l.trim());
+      if (!lines.length) return;
+      const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+      csvParsed = lines.slice(1).map(line => {
+        const vals = line.split(',').map(v => v.trim().replace(/^"|"$/g,''));
+        return {
+          nombre:    vals[headers.indexOf('nombre')]    || '',
+          codigo:    vals[headers.indexOf('codigo')]    || '',
+          categoria: vals[headers.indexOf('categoria')] || '',
+          precio:    parseFloat(vals[headers.indexOf('precio')]    || 0),
+          costo:     parseFloat(vals[headers.indexOf('costo')]     || 0),
+          stock:     parseInt(  vals[headers.indexOf('stock')]     || 0),
+          minimo:    parseInt(  vals[headers.indexOf('minimo')]    || 5),
+        };
+      }).filter(p => p.nombre);
+      const preview = document.getElementById('csvPreview');
+      if (preview) {
+        preview.innerHTML = '<div style="font-size:13px;font-weight:600;margin-bottom:8px;color:#2e7d32">✓ ' + csvParsed.length + ' productos encontrados</div>' +
+          '<div style="max-height:180px;overflow-y:auto;font-size:12px;border:1px solid var(--border,#E7E5E4);border-radius:8px">' +
+          csvParsed.slice(0,5).map(p => '<div style="padding:5px 10px;border-bottom:1px solid var(--border,#E7E5E4)">' + escInv(p.nombre) + ' · ' + moneyInv(p.precio) + ' · Stock: ' + p.stock + '</div>').join('') +
+          (csvParsed.length > 5 ? '<div style="padding:5px 10px;color:var(--text-3,#888)">...y ' + (csvParsed.length - 5) + ' más</div>' : '') +
+          '</div>';
+      }
+      const bI = document.getElementById('btnImport'); if (bI) bI.disabled = csvParsed.length === 0;
+    };
+    reader.readAsText(file, 'UTF-8');
+  }
+  async function importarCSV() {
+    if (!csvParsed.length) return;
+    const btn = document.getElementById('btnImport');
+    if (btn) { btn.disabled = true; btn.textContent = 'Importando...'; }
+    let ok = 0, fail = 0;
+    try {
+      if (window.volvix?.api?.raw) {
+        const resp = await window.volvix.api.raw('POST', '/api/products/import', { items: csvParsed });
+        ok   = Number(resp?.imported ?? resp?.ok ?? csvParsed.length) || 0;
+        fail = Number(resp?.failed ?? resp?.errors?.length ?? 0) || 0;
+      } else { throw new Error('offline'); }
+    } catch(_) {
+      // Fallback: uno-a-uno + CATALOG
+      for (const p of csvParsed) {
+        try {
+          if (window.volvix?.sync?.execute) {
+            await window.volvix.sync.execute({ type:'create', table:'productos', data:p, endpoint:'/api/productos', body:p });
+          }
+          const id = 'csv-' + Date.now() + '-' + Math.random().toString(36).slice(2,7);
+          allProducts.push(Object.assign({ id }, p));
+          syncToCatalog(Object.assign({ id }, p));
+          ok++;
+        } catch { fail++; }
+      }
+    }
+    closeInvModal('modalImport');
+    invToast('✓ Importados ' + ok + ' productos' + (fail ? (' · ' + fail + ' con error') : ''), ok > 0 ? 'ok' : 'err');
+    if (btn) { btn.disabled = false; btn.textContent = '⬆ Importar'; }
+    csvParsed = [];
+  }
+  function downloadTemplate() {
+    const csv = 'nombre,codigo,categoria,precio,costo,stock,minimo\nCoca-Cola 600ml,7501055303045,Bebidas,25,15,100,20\nPan dulce,,Panadería,8.5,4,50,10';
+    const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = 'plantilla_productos_volvix.csv';
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
+  }
+
+  // ── exportCSV: NO sobrescribe exportProductsCSV (ya existe en salvadorex-pos.html).
+  //    Provee una version compatible con la API que usa el tutorial. ──
+  function exportCSVInv() {
+    if (typeof window.exportProductsCSV === 'function') { try { return window.exportProductsCSV(); } catch(_){} }
+    const prods = allProducts.length ? allProducts : (Array.isArray(window.CATALOG)
+      ? window.CATALOG.map(c => ({
+          nombre:c.name, codigo:c.code, categoria:c.category||c.categoria||'',
+          precio:c.price, costo:c.cost, stock:c.stock, minimo:c.min_stock||c.minimo||5,
+          unidad:c.unit||'pieza', proveedor:c.supplier||''
+        }))
+      : []);
+    if (!prods.length) { invToast('No hay productos para exportar', 'warn'); return; }
+    const headers = ['nombre','codigo','categoria','precio','costo','stock','minimo','unidad','proveedor'];
+    const rows = prods.map(p => headers.map(h => {
+      const v = p[h] ?? '';
+      return typeof v === 'string' && v.includes(',') ? ('"' + v + '"') : v;
+    }).join(','));
+    const csv  = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob(['﻿' + csv], { type:'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = 'inventario_volvix_' + new Date().toISOString().slice(0,10) + '.csv';
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
+    invToast('✓ Exportados ' + prods.length + ' productos', 'ok');
+  }
+
+  // ── seedFromGiro (audit B-17) ──
+  async function seedFromGiro() {
+    const btn = (typeof event !== 'undefined' && event) ? event.target : null;
+    const origLabel = btn ? btn.textContent : '';
+    if (btn) { btn.disabled = true; btn.textContent = 'Cargando plantilla...'; }
+    try {
+      let giroParam = '';
+      try {
+        const sess = JSON.parse(localStorage.getItem('volvix_session') || localStorage.getItem('volvixSession') || '{}');
+        if (sess && sess.business_type) giroParam = '?giro=' + encodeURIComponent(sess.business_type);
+      } catch(_){}
+      const r = await fetch('/api/products/seed-from-giro' + giroParam, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(localStorage.getItem('volvix_token') ? { 'Authorization': 'Bearer ' + localStorage.getItem('volvix_token') } : {})
+        }
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || !j.ok) {
+        alert((j && j.error_message) || 'No pudimos cargar la plantilla. Intenta importar CSV o crear uno por uno.');
+        if (btn) { btn.disabled = false; btn.textContent = origLabel; }
+        return;
+      }
+      alert('¡Listo! Pre-cargamos ' + (j.inserted || 0) + ' productos típicos de tu giro.');
+      if (typeof window.loadProductsFromAPI === 'function') { try { await window.loadProductsFromAPI(); } catch(_){} }
+      if (typeof window.renderInv === 'function') { try { window.renderInv(); } catch(_){} }
+    } catch(_) {
+      alert('Error de red. Verifica tu conexión.');
+      if (btn) { btn.disabled = false; btn.textContent = origLabel; }
+    }
+  }
+
+  // ── Eventos en vivo del modal (margen, badge, ajuste) ──
+  document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('pPrecio')?.addEventListener('input', updateMargen);
+    document.getElementById('pCosto')?.addEventListener('input',  updateMargen);
+    document.getElementById('ajusteTipo')?.addEventListener('change', calcResultante);
+    document.getElementById('ajusteCantidad')?.addEventListener('input', calcResultante);
+    // ESC cierra los modales de inventario
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        ['modalProducto','modalAjuste','modalImport'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el && el.classList.contains('open')) el.classList.remove('open');
+        });
+      }
+    });
+  });
+
+  // ── Hash routing: /salvadorex-pos.html#inventario abre la pantalla ──
+  // 2026-05-07 merge: hash routing para redirect desde pos-inventario.html
+  (function applyHashRoute() {
+    function go() {
+      const h = (location.hash || '').replace('#','').toLowerCase();
+      if (h && typeof window.showScreen === 'function') {
+        try { window.showScreen(h); } catch(_){}
+      }
+    }
+    window.addEventListener('hashchange', go);
+    setTimeout(go, 500);
+  })();
+
+  // ── Exponer al global SOLO lo que el HTML inline / tutorial necesita ──
+  // NO sobrescribimos nombres que ya existan en el POS (saveProduct, exportProductsCSV).
+  window.openNuevo         = openNuevo;
+  window.openEditar        = openEditar;
+  window.guardarProducto   = guardarProducto;
+  window.openAjuste        = openAjuste;
+  window.calcResultante    = calcResultante;
+  window.guardarAjuste     = guardarAjuste;
+  window.recalcStockBadge  = recalcStockBadge;
+  window.updateMargen      = updateMargen;
+  window.genEAN            = genEAN;
+  window.onBarcodeLookup   = onBarcodeLookup;
+  window.lookupBarcode     = lookupBarcode;
+  window.openImport        = openImport;
+  window.previewCSV        = previewCSV;
+  window.importarCSV       = importarCSV;
+  window.downloadTemplate  = downloadTemplate;
+  window.exportCSV         = exportCSVInv; // alias compat tutorial
+  window.seedFromGiro      = seedFromGiro;
+  window.openInvModal      = openInvModal;
+  window.closeInvModal     = closeInvModal;
+})();
+</script>
 </body>
 </html>
