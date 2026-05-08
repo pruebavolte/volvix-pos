@@ -368,10 +368,15 @@
     const roleLabel = ({ owner:'dueño', admin:'administrador', manager:'gerente', cajero:'cajero', vendor:'vendedor' })[role] || role;
     const speech = `¡Hola ${userName}! Bienvenido a Volvix POS. Soy tu asistente. Te voy a mostrar como dominar tu sistema en menos de dos minutos. ¿Empezamos el tour?`;
 
-    // URLs de video con fallback
-    // welcome-video.mp4 local → Pixabay CDN (free stock, mujer profesional sonriendo)
+    // 2026-05-07: URLs verificadas accesibles (curl 200 OK):
+    //   - Pexels video CDN (free stock, persona profesional sonriendo)
+    //   - Pexels image CDN (foto real de mujer joven sonriendo, como poster
+    //     mientras carga el video, o si video falla)
+    // El POSTER es lo mas importante: si la red es lenta o el video falla,
+    // el usuario ve una foto realista (no un placeholder gris).
     const VIDEO_LOCAL = '/welcome-video.mp4';
-    const VIDEO_FALLBACK = 'https://cdn.pixabay.com/video/2023/05/04/162157-823831793_tiny.mp4';
+    const VIDEO_FALLBACK = 'https://videos.pexels.com/video-files/3209828/3209828-hd_1920_1080_25fps.mp4';
+    const POSTER_FALLBACK = 'https://images.pexels.com/photos/3768911/pexels-photo-3768911.jpeg?auto=compress&cs=tinysrgb&w=720';
 
     modal.innerHTML =
       '<style>@keyframes vlxFadeIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}' +
@@ -383,12 +388,25 @@
       '<div style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;padding:0;border-radius:18px;max-width:540px;width:92%;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,0.7);overflow:hidden;border:1px solid rgba(255,255,255,0.08);">' +
         // Video container
         '<div style="position:relative;width:100%;aspect-ratio:16/10;background:#000;overflow:hidden;">' +
+          // Poster = foto real de mujer (Pexels CC0). Aparece INSTANT mientras
+          // el video se descarga, o se queda fija si el video falla. La imagen
+          // sola ya es suficientemente "real" para dar la sensacion de presentadora.
+          '<img id="wm-poster-img" src="' + POSTER_FALLBACK + '" alt="Bienvenida Volvix POS" ' +
+               'style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;z-index:1;" ' +
+               'onerror="this.style.display=\'none\';">' +
+          // Video se reproduce SOBRE la foto si carga
           '<video id="wm-video" autoplay muted loop playsinline preload="auto" ' +
-                 'style="width:100%;height:100%;object-fit:cover;display:block;background:#1e293b;" ' +
-                 'poster="data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 540 340\'><rect fill=\'%23334155\' width=\'540\' height=\'340\'/><text x=\'270\' y=\'180\' font-family=\'system-ui\' font-size=\'18\' fill=\'%2394a3b8\' text-anchor=\'middle\'>Cargando presentación…</text></svg>">' +
+                 'poster="' + POSTER_FALLBACK + '" ' +
+                 'style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:transparent;z-index:2;">' +
             '<source id="wm-video-src1" src="' + VIDEO_LOCAL + '" type="video/mp4">' +
             '<source id="wm-video-src2" src="' + VIDEO_FALLBACK + '" type="video/mp4">' +
           '</video>' +
+          // Indicador "EN VIVO" tipo broadcast: pulse + onda animada (estetica de
+          // mujer hablando aunque el video no haya arrancado)
+          '<div id="wm-live-pulse" style="position:absolute;bottom:60px;left:14px;display:flex;gap:6px;align-items:center;background:rgba(0,0,0,0.55);color:#fff;padding:6px 12px;border-radius:20px;font-size:11px;z-index:3;backdrop-filter:blur(8px);">' +
+            '<span style="display:inline-block;width:8px;height:8px;background:#22c55e;border-radius:50%;animation:vlxBlink 1s infinite;"></span>' +
+            '<span style="font-weight:600;">Mensaje de bienvenida</span>' +
+          '</div>' +
           // Fallback avatar overlay (visible solo si video falla)
           '<div id="wm-avatar-fallback" style="display:none;position:absolute;inset:0;background:linear-gradient(135deg,#a78bfa 0%,#3b82f6 100%);align-items:center;justify-content:center;">' +
             '<svg class="vlx-avatar-svg" width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">' +
@@ -435,31 +453,54 @@
     var captionEl = document.getElementById('wm-caption');
     var muteBtn = document.getElementById('wm-mute');
 
+    // 2026-05-07: TTS SIEMPRE activo. La SpeechSynthesis del navegador habla
+    // el mensaje en voz femenina española sobre el video o la foto poster.
+    // Asi el usuario SIEMPRE oye/ve un saludo realista incluso si el video stock
+    // no carga.
+    var ttsSpoken = false;
+    function speakWelcome() {
+      if (ttsSpoken) return; ttsSpoken = true;
+      try {
+        if (!('speechSynthesis' in window)) return;
+        window.speechSynthesis.cancel();
+        // Cargar voces puede ser async en algunos browsers
+        var trySpeak = function () {
+          var u = new SpeechSynthesisUtterance(speech);
+          u.lang = 'es-MX';
+          u.rate = 1.02; u.pitch = 1.05;
+          var voices = window.speechSynthesis.getVoices() || [];
+          // Preferencias de voz femenina española en orden
+          var preferredNames = ['Paulina','Lucia','Monica','Mónica','Sabina','Sofia','Helena','Ines','Inés'];
+          var female = null;
+          for (var i = 0; i < preferredNames.length && !female; i++) {
+            female = voices.find(function (v) { return v.name && v.name.indexOf(preferredNames[i]) !== -1; });
+          }
+          if (!female) female = voices.find(function (v) { return /es/i.test(v.lang) && /female|mujer/i.test(v.name); });
+          if (!female) female = voices.find(function (v) { return /^es/i.test(v.lang); });
+          if (female) u.voice = female;
+          window.speechSynthesis.speak(u);
+        };
+        if ((window.speechSynthesis.getVoices() || []).length === 0) {
+          // Esperar al evento voiceschanged
+          window.speechSynthesis.addEventListener('voiceschanged', trySpeak, { once: true });
+          // Tambien forzar despues de 1s por si nunca llega el evento
+          setTimeout(trySpeak, 1000);
+        } else {
+          trySpeak();
+        }
+      } catch (_) {}
+    }
+
     var videoFailed = false;
     function activateAvatarFallback() {
       if (videoFailed) return;
       videoFailed = true;
       try { video.style.display = 'none'; } catch(_) {}
+      // El poster img sigue mostrandose. Mostrar tambien el avatar SVG arriba.
       if (avatarFallback) avatarFallback.style.display = 'flex';
-      // Reproducir caption y TTS si esta disponible
-      try {
-        if ('speechSynthesis' in window) {
-          window.speechSynthesis.cancel();
-          var u = new SpeechSynthesisUtterance(speech);
-          u.lang = 'es-MX';
-          u.rate = 1.02; u.pitch = 1.1;
-          // Buscar voz femenina en español
-          var voices = window.speechSynthesis.getVoices() || [];
-          var female = voices.find(function(v){return /es/i.test(v.lang) && /female|mujer|lucia|paulina|monica/i.test(v.name);})
-                    || voices.find(function(v){return /es/i.test(v.lang);});
-          if (female) u.voice = female;
-          window.speechSynthesis.speak(u);
-        }
-      } catch(_) {}
     }
     if (video) {
       video.addEventListener('error', activateAvatarFallback);
-      // Si el primer source falla, el browser auto-prueba el segundo. Si ambos fallan, dispara error.
       if (src1) src1.addEventListener('error', function(){ /* browser intentara src2 */ });
       // Animar caption con texto del speech (palabra por palabra)
       var words = speech.split(' ');
@@ -470,14 +511,22 @@
       }, 220);
     }
 
-    // Mute toggle
+    // Hablar el saludo despues de un breve delay (para que el modal este montado
+    // y el browser permita TTS — algunos browsers requieren interaccion previa).
+    setTimeout(speakWelcome, 600);
+
+    // Mute toggle: alterna mute del video Y para/reanuda TTS
     if (muteBtn && video) {
+      // Por defecto inicio MUTED para video, pero el TTS SI suena.
+      // Si el user pulsa el boton, des-mutea video Y reinicia TTS si fue cancelado.
       muteBtn.onclick = function () {
         video.muted = !video.muted;
         muteBtn.textContent = video.muted ? '🔇' : '🔊';
         muteBtn.setAttribute('aria-label', video.muted ? 'Activar sonido' : 'Silenciar');
-        // Si avatar fallback esta activo y el user prendio sonido, hablar TTS
-        if (videoFailed && !video.muted) activateAvatarFallback();
+        if (!video.muted && !ttsSpoken) speakWelcome();
+        if (video.muted) {
+          try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch(_) {}
+        }
       };
     }
 
