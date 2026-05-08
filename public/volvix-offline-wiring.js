@@ -103,7 +103,13 @@
   }
 
   /* ---------- 2. INDICADOR ONLINE/OFFLINE ---------- */
+  // 2026-05-07 cleanup: indicador flotante esquina superior derecha eliminado
+  // por feedback de UX. La topbar de salvadorex-pos.html ya tiene un indicador
+  // "EN LÍNEA" embedido (#sync-indicator) que cumple la misma funcion. Si una
+  // pagina necesita el flotante, setea window.VOLVIX_OFFLINE_INDICATOR = true
+  // ANTES de cargar este script.
   function createIndicator() {
+    if (window.VOLVIX_OFFLINE_INDICATOR !== true) return;
     if (document.getElementById('connection-status')) return;
     const ind = document.createElement('div');
     ind.id = 'connection-status';

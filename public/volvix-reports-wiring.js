@@ -733,6 +733,17 @@
   }
 
   function init() {
+    // 2026-05-07 cleanup: FABs flotantes (5 botones de colores en esquina inferior
+    // derecha) deshabilitados por feedback de UX. Las mismas funciones de reporte
+    // ya estan accesibles desde la topbar:
+    //   - Ventas/Productos/Clientes/Cajeros → menu "Reportes"
+    //   - Inventario → menu "Inventario"
+    //   - Cierre de Caja → menu "Corte"
+    // Las funciones globales (window.reportSales, window.reportInventory, etc.)
+    // siguen disponibles para invocacion directa desde otros modulos.
+    // Si quieres re-habilitar FABs flotantes en alguna pagina especifica,
+    // setea window.VOLVIX_REPORTS_FABS = true ANTES de cargar este script.
+    if (window.VOLVIX_REPORTS_FABS !== true) return;
     const p = location.pathname.toLowerCase();
     if (p.includes('owner_panel') || p.includes('multipos') ||
         p.includes('salvadorex') || p.includes('pos')) {
