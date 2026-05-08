@@ -2659,20 +2659,10 @@
       <span class="badge" id="r10a-pending-pay-badge" style="display:none;">0</span>
     </button>
 
-    <div class="platform-toggle">
-      <button class="platform-toggle-btn" onclick="selectPlatform(this, 'windows')" aria-label="Vista Windows" title="Vista Windows">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.479 10 4.5V11H3V5.479zM3 18.521 10 19.5V13H3v5.521zM11 19.635 21 21V13H11v6.635zM11 4.365V11h10V3L11 4.365z"/></svg>
-        <span>Windows</span>
-      </button>
-      <button class="platform-toggle-btn" onclick="selectPlatform(this, 'android')" aria-label="Vista Android" title="Vista Android">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-        <span>Android</span>
-      </button>
-      <button class="platform-toggle-btn active" onclick="selectPlatform(this, 'web')" aria-label="Vista Web" title="Vista Web">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-        <span>Web</span>
-      </button>
-    </div>
+    <!-- 2026-05-07 cleanup: platform-toggle (Windows/Android/Web) eliminado por
+         feedback de UX. Era confuso para el usuario final — el sistema deberia
+         detectar automaticamente la plataforma. Si necesitas re-habilitarlo,
+         setea window.VOLVIX_PLATFORM_TOGGLE = true antes del DOMContentLoaded. -->
 
     <!-- VOICE ORDER (portado de 01123581321345589144233) -->
     <button class="tb-btn voice" id="vox-btn" onclick="voxToggle()" aria-label="Orden por voz" title="Orden por voz — di 'agrega 2 tacos'">
@@ -2700,10 +2690,8 @@
       </div>
     </div>
 
-    <button class="tb-btn rapido" onclick="showScreen('quickpos')" aria-label="Modo caja rápida" title="Modo caja rápida">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-      <span>RÁPIDO</span>
-    </button>
+    <!-- 2026-05-07 cleanup: boton RÁPIDO eliminado por feedback de UX.
+         Modo caja rapida sigue accesible programaticamente via showScreen('quickpos'). -->
 
     <button class="tb-btn saas" data-feature="ui.saas_btn" data-vlx-owner-only="systeminternational" onclick="openOwnerPanel()" aria-label="Panel SaaS Admin (dueño del sistema)" title="Panel SaaS Admin (dueño del sistema)" style="display:none">
       👑 <span>SAAS</span>
