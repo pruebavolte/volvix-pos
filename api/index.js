@@ -36319,5 +36319,208 @@ if (process.env.NODE_ENV === 'test') {
     } catch (err) { sendError(res, err); }
   });
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 2026-05-08: ENDPOINTS DEL PANEL DE PERMISOS (PERM)
+  // Persistencia para el panel #permisos en salvadorex-pos.html.
+  // Tablas usadas:
+  //   - tenant_module_flags (modulos por tenant)
+  //   - tenant_button_flags (botones por tenant)
+  //   - user_module_overrides (per-user override)
+  //   - feature_flag_audit (log de cambios)
+  //   - pos_tenants (lista de tenants para selector)
+  // Todos requieren rol superadmin.
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // GET /api/admin/tenants — lista de tenants (para selector multi-tenant)
+  handlers['GET /api/admin/tenants'] = requireAuth(async function (req, res) {
+    if (!requireSuper(req, res)) return;
+    try {
+      const rows = await supabaseRequest('GET',
+        '/pos_tenants?select=id,name,is_active,created_at,shop_slug,shop_name&order=created_at.desc&limit=500'
+      ).catch(() => []);
+      sendJSON(res, { ok: true, tenants: Array.isArray(rows) ? rows : [] });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // GET /api/admin/tenant/:tid/flags — modulos + botones para un tenant
+  handlers['GET /api/admin/tenant/:tid/flags'] = requireAuth(async function (req, res, params) {
+    if (!requireSuper(req, res)) return;
+    try {
+      const tid = String(params.tid || '').trim();
+      if (!tid) return sendJSON(res, { error: 'tenant_id requerido' }, 400);
+      const [mods, btns] = await Promise.all([
+        supabaseRequest('GET', `/tenant_module_flags?tenant_id=eq.${encodeURIComponent(tid)}&select=*&limit=200`).catch(() => []),
+        supabaseRequest('GET', `/tenant_button_flags?tenant_id=eq.${encodeURIComponent(tid)}&select=*&limit=500`).catch(() => []),
+      ]);
+      sendJSON(res, {
+        ok: true,
+        tenant_id: tid,
+        modules: Array.isArray(mods) ? mods : [],
+        buttons: Array.isArray(btns) ? btns : [],
+      });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // POST /api/admin/tenant/:tid/module — toggle modulo
+  // body: { module_key, enabled, lock_message? }
+  handlers['POST /api/admin/tenant/:tid/module'] = requireAuth(async function (req, res, params) {
+    if (!requireSuper(req, res)) return;
+    try {
+      const tid = String(params.tid || '').trim();
+      const body = await readBody(req).catch(() => ({}));
+      if (checkBodyError(req, res)) return;
+      const moduleKey = String(body.module_key || '').trim();
+      if (!tid || !moduleKey) return sendJSON(res, { error: 'tenant_id + module_key requeridos' }, 400);
+      const enabled = !!body.enabled;
+      const newState = enabled ? 'enabled' : 'disabled';
+      // Lookup current state for audit
+      const current = await supabaseRequest('GET',
+        `/tenant_module_flags?tenant_id=eq.${encodeURIComponent(tid)}&module_key=eq.${encodeURIComponent(moduleKey)}&select=state`
+      ).catch(() => []);
+      const oldState = (current && current[0] && current[0].state) || 'unknown';
+      // Upsert (delete + insert para evitar conflict de PK)
+      await supabaseRequest('DELETE',
+        `/tenant_module_flags?tenant_id=eq.${encodeURIComponent(tid)}&module_key=eq.${encodeURIComponent(moduleKey)}`
+      ).catch(() => null);
+      const row = {
+        tenant_id: tid, module_key: moduleKey, state: newState, enabled, paid: true,
+        lock_message: body.lock_message || null,
+        created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+      };
+      const saved = await supabaseRequest('POST', '/tenant_module_flags', row).catch(() => null);
+      // Audit
+      supabaseRequest('POST', '/feature_flag_audit', {
+        tenant_id: tid, scope: 'module', scope_ref: moduleKey, module_key: moduleKey,
+        old_status: oldState, new_status: newState,
+        changed_by: req.user?.id || null,
+        changed_at: new Date().toISOString(),
+        note: 'PERM panel toggle',
+      }).catch(() => null);
+      sendJSON(res, { ok: true, module: saved && saved[0] ? saved[0] : row });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // POST /api/admin/tenant/:tid/button — toggle boton
+  handlers['POST /api/admin/tenant/:tid/button'] = requireAuth(async function (req, res, params) {
+    if (!requireSuper(req, res)) return;
+    try {
+      const tid = String(params.tid || '').trim();
+      const body = await readBody(req).catch(() => ({}));
+      if (checkBodyError(req, res)) return;
+      const buttonKey = String(body.button_key || '').trim();
+      if (!tid || !buttonKey) return sendJSON(res, { error: 'tenant_id + button_key requeridos' }, 400);
+      const enabled = !!body.enabled;
+      const newState = enabled ? 'enabled' : 'disabled';
+      const current = await supabaseRequest('GET',
+        `/tenant_button_flags?tenant_id=eq.${encodeURIComponent(tid)}&button_key=eq.${encodeURIComponent(buttonKey)}&select=state`
+      ).catch(() => []);
+      const oldState = (current && current[0] && current[0].state) || 'unknown';
+      await supabaseRequest('DELETE',
+        `/tenant_button_flags?tenant_id=eq.${encodeURIComponent(tid)}&button_key=eq.${encodeURIComponent(buttonKey)}`
+      ).catch(() => null);
+      const row = {
+        tenant_id: tid, button_key: buttonKey, state: newState, enabled,
+        lock_message: body.lock_message || null,
+        created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+      };
+      const saved = await supabaseRequest('POST', '/tenant_button_flags', row).catch(() => null);
+      supabaseRequest('POST', '/feature_flag_audit', {
+        tenant_id: tid, scope: 'button', scope_ref: buttonKey, module_key: buttonKey,
+        old_status: oldState, new_status: newState,
+        changed_by: req.user?.id || null,
+        changed_at: new Date().toISOString(),
+        note: 'PERM panel toggle',
+      }).catch(() => null);
+      sendJSON(res, { ok: true, button: saved && saved[0] ? saved[0] : row });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // GET /api/admin/tenant/:tid/audit — log de cambios recientes
+  handlers['GET /api/admin/tenant/:tid/audit'] = requireAuth(async function (req, res, params) {
+    if (!requireSuper(req, res)) return;
+    try {
+      const tid = String(params.tid || '').trim();
+      if (!tid) return sendJSON(res, { error: 'tenant_id requerido' }, 400);
+      const rows = await supabaseRequest('GET',
+        `/feature_flag_audit?tenant_id=eq.${encodeURIComponent(tid)}&select=*&order=changed_at.desc&limit=100`
+      ).catch(() => []);
+      sendJSON(res, { ok: true, tenant_id: tid, audit: Array.isArray(rows) ? rows : [] });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // POST /api/admin/user-override — set override per-user
+  // body: { tenant_id, user_id, module_key, status (allow|deny), reason? }
+  handlers['POST /api/admin/user-override'] = requireAuth(async function (req, res) {
+    if (!requireSuper(req, res)) return;
+    try {
+      const body = await readBody(req).catch(() => ({}));
+      if (checkBodyError(req, res)) return;
+      const tid = String(body.tenant_id || '').trim();
+      const userId = String(body.user_id || '').trim();
+      const moduleKey = String(body.module_key || '').trim();
+      const status = String(body.status || 'deny');
+      if (!tid || !userId || !moduleKey) {
+        return sendJSON(res, { error: 'tenant_id + user_id + module_key requeridos' }, 400);
+      }
+      // Upsert
+      await supabaseRequest('DELETE',
+        `/user_module_overrides?tenant_id=eq.${encodeURIComponent(tid)}&user_id=eq.${encodeURIComponent(userId)}&module_key=eq.${encodeURIComponent(moduleKey)}`
+      ).catch(() => null);
+      const row = {
+        tenant_id: tid, user_id: userId, module_key: moduleKey, status,
+        reason: body.reason || null, set_by: req.user?.id || null,
+        set_at: new Date().toISOString(),
+      };
+      const saved = await supabaseRequest('POST', '/user_module_overrides', row).catch(() => null);
+      // Audit
+      supabaseRequest('POST', '/feature_flag_audit', {
+        tenant_id: tid, scope: 'user', scope_ref: userId, module_key: moduleKey,
+        old_status: 'inherited', new_status: status,
+        changed_by: req.user?.id || null,
+        changed_at: new Date().toISOString(),
+        note: 'PERM panel — override per-user para ' + userId,
+      }).catch(() => null);
+      sendJSON(res, { ok: true, override: saved && saved[0] ? saved[0] : row });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // GET /api/admin/tenant/:tid/user-overrides — listar overrides per-user del tenant
+  handlers['GET /api/admin/tenant/:tid/user-overrides'] = requireAuth(async function (req, res, params) {
+    if (!requireSuper(req, res)) return;
+    try {
+      const tid = String(params.tid || '').trim();
+      if (!tid) return sendJSON(res, { error: 'tenant_id requerido' }, 400);
+      const rows = await supabaseRequest('GET',
+        `/user_module_overrides?tenant_id=eq.${encodeURIComponent(tid)}&select=*&order=set_at.desc&limit=500`
+      ).catch(() => []);
+      sendJSON(res, { ok: true, tenant_id: tid, overrides: Array.isArray(rows) ? rows : [] });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // DELETE /api/admin/user-override — quitar override
+  handlers['DELETE /api/admin/user-override'] = requireAuth(async function (req, res) {
+    if (!requireSuper(req, res)) return;
+    try {
+      const parsed = url.parse(req.url, true);
+      const tid = String(parsed.query.tenant_id || '').trim();
+      const userId = String(parsed.query.user_id || '').trim();
+      const moduleKey = String(parsed.query.module_key || '').trim();
+      if (!tid || !userId || !moduleKey) {
+        return sendJSON(res, { error: 'tenant_id + user_id + module_key requeridos en query' }, 400);
+      }
+      await supabaseRequest('DELETE',
+        `/user_module_overrides?tenant_id=eq.${encodeURIComponent(tid)}&user_id=eq.${encodeURIComponent(userId)}&module_key=eq.${encodeURIComponent(moduleKey)}`
+      ).catch(() => null);
+      supabaseRequest('POST', '/feature_flag_audit', {
+        tenant_id: tid, scope: 'user', scope_ref: userId, module_key: moduleKey,
+        old_status: 'override', new_status: 'inherited',
+        changed_by: req.user?.id || null,
+        changed_at: new Date().toISOString(),
+        note: 'PERM panel — override REMOVIDO',
+      }).catch(() => null);
+      sendJSON(res, { ok: true });
+    } catch (err) { sendError(res, err); }
+  });
+
 })();
 

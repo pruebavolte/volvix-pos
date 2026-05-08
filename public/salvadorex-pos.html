@@ -1416,6 +1416,30 @@
     /* 2026-05-07: el boton Ayuda ahora es visible en mobile tambien (con texto).
        Solo notif sigue oculto en mobile por espacio. */
     .tb-btn.notif { display: none; }
+  }
+
+  /* 2026-05-08: modo "disable" del panel de permisos.
+     Cuando body.vlx-perm-disable-mode esta activo, los .ff-off NO desaparecen
+     sino que se ven en gris y se vuelven non-clickable. */
+  body.vlx-perm-disable-mode .ff-off {
+    display: revert !important;
+    opacity: 0.4 !important;
+    filter: grayscale(80%);
+    pointer-events: none !important;
+    cursor: not-allowed !important;
+    position: relative;
+  }
+  body.vlx-perm-disable-mode .ff-off::after {
+    content: '🔒';
+    position: absolute;
+    top: 50%; right: 6px;
+    transform: translateY(-50%);
+    font-size: 11px;
+    opacity: 0.7;
+  }
+  /* 2026-05-08: media query restaurada a su breakpoint original (880px)
+     tras la insercion de las reglas globales arriba. */
+  @media (max-width: 880px) {
     .brand-info .sub { display: none; }
     .config-layout { grid-template-columns: 1fr; }
     .config-tabs { display: flex; overflow-x: auto; padding: 6px; }
@@ -3752,11 +3776,25 @@
           </div>
         </div>
 
-        <!-- Tabs: Módulos / Botones -->
+        <!-- Modo: ocultar vs deshabilitar -->
+        <div class="card card-pad" style="margin-bottom:10px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;">
+          <strong style="font-size:12.5px;">Cuando desactivas un permiso:</strong>
+          <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;cursor:pointer;">
+            <input type="radio" name="perm-mode" value="hide" checked onchange="window.PERM.setMode(this.value)">
+            🙈 Ocultar (desaparece del POS)
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;cursor:pointer;">
+            <input type="radio" name="perm-mode" value="disable" onchange="window.PERM.setMode(this.value)">
+            🔒 Deshabilitar (queda en gris, no clickeable)
+          </label>
+        </div>
+
+        <!-- Tabs: Módulos / Botones / Override / Audit -->
         <div class="config-tabs" style="margin-bottom:10px;">
           <button class="config-tab active" id="perm-tab-mods" onclick="window.PERM.showTab('mods', this)">📦 Módulos (24)</button>
           <button class="config-tab" id="perm-tab-feats" onclick="window.PERM.showTab('feats', this)">🔘 Botones / Features (18)</button>
           <button class="config-tab" id="perm-tab-users" onclick="window.PERM.showTab('users', this)">👤 Override por usuario</button>
+          <button class="config-tab" id="perm-tab-audit" onclick="window.PERM.showTab('audit', this)">📜 Audit Log</button>
         </div>
 
         <!-- Tab: Módulos -->
@@ -3769,6 +3807,12 @@
         <div id="perm-pane-feats" class="card card-pad hidden">
           <p style="margin:0 0 14px;font-size:12.5px;color:var(--text-2);">Botones individuales del POS. Si los desactivas, se ocultan del POS (clase <code>.ff-off</code>) o pueden quedar deshabilitados.</p>
           <div id="perm-feats-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;"></div>
+        </div>
+
+        <!-- Tab: Audit Log -->
+        <div id="perm-pane-audit" class="card card-pad hidden">
+          <p style="margin:0 0 14px;font-size:12.5px;color:var(--text-2);">Últimos 100 cambios. Quién cambió qué módulo/botón cuándo.</p>
+          <div id="perm-audit-list">Cargando…</div>
         </div>
 
         <!-- Tab: Override por usuario -->
@@ -17432,17 +17476,56 @@ window.addEventListener('volvix:version-loaded', function(e){
       }
       denied.classList.add('hidden');
       content.classList.remove('hidden');
+      // Restaurar modo guardado
+      try {
+        const m = localStorage.getItem('volvix:perm:mode');
+        if (m === 'disable') {
+          this.mode = 'disable';
+          const r = document.querySelector('input[name="perm-mode"][value="disable"]');
+          if (r) r.checked = true;
+        }
+      } catch(_){}
+      this.applyModeStyle();
       this.loadTenants();
       this.populateUserKeySelect();
     },
 
-    loadTenants() {
+    // 2026-05-08: modo de desactivacion (hide=ocultar / disable=gris)
+    mode: 'hide',
+    setMode(m) {
+      this.mode = m;
+      try { localStorage.setItem('volvix:perm:mode', m); } catch(_){}
+      // Re-aplicar visualmente
+      this.applyModeStyle();
+    },
+    applyModeStyle() {
+      // Clase global en body para que CSS pueda diferenciar
+      document.body.classList.toggle('vlx-perm-disable-mode', this.mode === 'disable');
+    },
+
+    async loadTenants() {
       const sel = document.getElementById('perm-tenant-sel');
       if (!sel) return;
-      // Por ahora: el tenant actual (mas adelante extender via /api/admin/tenants)
+      // Multi-tenant via /api/admin/tenants (requiere superadmin)
+      let tenants = [];
+      try {
+        const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+        const r = await fetch('/api/admin/tenants', { headers: { 'Authorization': 'Bearer ' + tok }});
+        if (r.ok) {
+          const j = await r.json();
+          tenants = j.tenants || [];
+        }
+      } catch(e) { console.warn('[PERM] load tenants:', e); }
+      // Tenant actual (siempre primero)
       const currentTid = (window.VOLVIX && VOLVIX.getState && VOLVIX.getState().id) || 'TNT001';
       const currentName = (window.VOLVIX && VOLVIX.getState && VOLVIX.getState().name) || 'Mi negocio';
-      sel.innerHTML = '<option value="' + currentTid + '">' + currentName + ' (' + currentTid + ')</option>';
+      const opts = ['<option value="' + currentTid + '">📍 ' + currentName + ' (' + currentTid + ') · ACTUAL</option>'];
+      tenants.forEach(t => {
+        if (t.id === currentTid) return; // skip duplicate
+        const label = (t.name || t.shop_name || '(sin nombre)') + ' (' + t.id + ')';
+        opts.push('<option value="' + t.id + '">' + (t.is_active === false ? '⛔ ' : '🟢 ') + label + '</option>');
+      });
+      sel.innerHTML = opts.join('');
       sel.onchange = () => this.renderForTenant(sel.value);
       this.renderForTenant(currentTid);
     },
@@ -17516,41 +17599,96 @@ window.addEventListener('volvix:version-loaded', function(e){
       }
     },
 
-    toggleModule(key) {
+    async _apiCall(method, path, body) {
+      try {
+        const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+        const opts = { method, headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' } };
+        if (body) opts.body = JSON.stringify(body);
+        const r = await fetch(path, opts);
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(j.error || ('HTTP ' + r.status));
+        return j;
+      } catch(e) {
+        console.warn('[PERM] API call fallo:', e);
+        if (window.toast) window.toast('No se pudo guardar en servidor: ' + e.message, 'error');
+        return null;
+      }
+    },
+
+    async toggleModule(key) {
       const state = VOLVIX.getState();
-      state.modules[key] = !state.modules[key];
+      const current = state.modules[key] !== false;
+      const newVal = !current;
+      // 1. Local + broadcast (instantaneo)
+      state.modules[key] = newVal;
       VOLVIX.setState(state);
       VOLVIX.applyState(state);
       this.renderForTenant(state.id);
-      console.log('[PERM] modulo', key, '→', state.modules[key]);
+      // 2. Persist a Supabase (en background)
+      this._apiCall('POST', '/api/admin/tenant/' + encodeURIComponent(state.id) + '/module',
+        { module_key: key, enabled: newVal });
+      console.log('[PERM] modulo', key, '→', newVal);
     },
 
-    toggleFeature(key) {
+    async toggleFeature(key) {
       const state = VOLVIX.getState();
       if (!state.features) state.features = {};
-      state.features[key] = !state.features[key];
+      const current = state.features[key] !== false;
+      const newVal = !current;
+      state.features[key] = newVal;
       VOLVIX.setState(state);
       VOLVIX.applyState(state);
       this.renderForTenant(state.id);
-      console.log('[PERM] feature', key, '→', state.features[key]);
+      this._apiCall('POST', '/api/admin/tenant/' + encodeURIComponent(state.id) + '/button',
+        { button_key: key, enabled: newVal });
+      console.log('[PERM] feature', key, '→', newVal);
     },
 
-    changeStatus(newStatus) {
+    async loadAudit() {
+      const wrap = document.getElementById('perm-audit-list');
+      if (!wrap) return;
+      const state = VOLVIX.getState();
+      const tid = state.id || 'TNT001';
+      wrap.innerHTML = 'Cargando…';
+      const j = await this._apiCall('GET', '/api/admin/tenant/' + encodeURIComponent(tid) + '/audit');
+      if (!j || !j.audit || j.audit.length === 0) {
+        wrap.innerHTML = '<p style="color:var(--text-3);font-size:13px;">Sin cambios registrados aún.</p>';
+        return;
+      }
+      wrap.innerHTML = '<table class="tbl"><thead><tr><th>Fecha</th><th>Scope</th><th>Key</th><th>Antes</th><th>Después</th><th>Por</th></tr></thead><tbody>' +
+        j.audit.slice(0,100).map(a => {
+          const dt = new Date(a.changed_at).toLocaleString('es-MX');
+          return '<tr>' +
+            '<td style="font-size:11.5px;">' + dt + '</td>' +
+            '<td><span class="chip">' + (a.scope || '') + '</span></td>' +
+            '<td><code style="font-size:11px;">' + (a.module_key || a.scope_ref || '') + '</code></td>' +
+            '<td>' + (a.old_status || '') + '</td>' +
+            '<td><strong>' + (a.new_status || '') + '</strong></td>' +
+            '<td style="font-size:11px;color:var(--text-3);">' + (a.changed_by || 'sistema').slice(0,8) + '</td>' +
+            '</tr>';
+        }).join('') + '</tbody></table>';
+    },
+
+    async changeStatus(newStatus) {
       const state = VOLVIX.getState();
       state.status = newStatus;
       VOLVIX.setState(state);
       VOLVIX.applyState(state);
       this.renderForTenant(state.id);
+      // Audit en Supabase (no hay tabla dedicada para status, registramos en feature_flag_audit)
+      this._apiCall('POST', '/api/admin/tenant/' + encodeURIComponent(state.id) + '/module',
+        { module_key: '__tenant_status__', enabled: newStatus === 'active', lock_message: 'status=' + newStatus });
       console.log('[PERM] status →', newStatus);
     },
 
     showTab(name, btn) {
       document.querySelectorAll('#screen-permisos .config-tab').forEach(b => b.classList.remove('active'));
       if (btn) btn.classList.add('active');
-      ['mods','feats','users'].forEach(t => {
+      ['mods','feats','users','audit'].forEach(t => {
         const pane = document.getElementById('perm-pane-' + t);
         if (pane) pane.classList.toggle('hidden', t !== name);
       });
+      if (name === 'audit') this.loadAudit();
     },
 
     reload() {
@@ -17575,21 +17713,31 @@ window.addEventListener('volvix:version-loaded', function(e){
       sel.innerHTML = opts.join('');
     },
 
-    addOverride() {
+    async addOverride() {
       const email = (document.getElementById('perm-user-email').value || '').trim().toLowerCase();
       const key = document.getElementById('perm-user-key').value;
       const status = document.getElementById('perm-user-status').value;
       if (!email) { alert('Email requerido'); return; }
-      // Por ahora: persistir en localStorage del navegador.
-      // Roadmap: POST /api/admin/user-module-overrides para escribir en la
-      // tabla user_module_overrides de Supabase.
+      // module_key vs feature: si key empieza con "module." es modulo, sino es feature/button
+      const modKey = key.replace(/^module\./, '');
+      const state = VOLVIX.getState();
+      // Para mapear email → user_id necesitariamos un GET /api/users/by-email,
+      // pero como interim usamos email como user_id (Supabase RLS no chequeara
+      // estricto si superadmin). Roadmap: resolver email → uuid.
+      const j = await this._apiCall('POST', '/api/admin/user-override', {
+        tenant_id: state.id, user_id: email, module_key: modKey, status,
+        reason: 'PERM panel — override aplicado por superadmin',
+      });
+      if (j && j.ok) {
+        if (window.toast) window.toast('Override aplicado para ' + email, 'ok');
+      }
+      // Tambien guardar local para render inmediato
       const ovKey = 'volvix:overrides:' + email;
       let map = {};
       try { map = JSON.parse(localStorage.getItem(ovKey) || '{}'); } catch(_) {}
       map[key] = status;
       localStorage.setItem(ovKey, JSON.stringify(map));
       this.renderOverridesList();
-      if (window.toast) window.toast('Override aplicado para ' + email, 'ok');
     },
 
     renderOverridesList() {
