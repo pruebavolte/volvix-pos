@@ -300,17 +300,32 @@
     const session = getSession();
     const state = getState();
     const role = session.role || 'cajero';
-    if (state[role] && state[role].completed) return;
-    // R28: respetar dismiss persistente (botón "Después" o tras 3 dismisses)
+
+    // 2026-05-07: bypass forzado via URL param (?welcome=force) o
+    // window.OnboardingAPI.showWelcome({ force: true }). Util para preview/demo
+    // del video de bienvenida sin tener que limpiar localStorage manualmente.
+    let force = false;
     try {
-      const dismissKey = 'volvix_welcome_dismissed_' + (session.email || 'anon') + '_' + role;
-      const dismissedAt = localStorage.getItem(dismissKey);
-      if (dismissedAt) {
-        const ageMs = Date.now() - parseInt(dismissedAt, 10);
-        // dismiss vale 30 días; tras eso reaparece
-        if (ageMs >= 0 && ageMs < 30 * 24 * 3600 * 1000) return;
-      }
-    } catch (e) {}
+      const usp = new URLSearchParams(location.search);
+      const w = (usp.get('welcome') || '').toLowerCase();
+      if (w === 'force' || w === '1' || w === 'true') force = true;
+    } catch (_) {}
+    // Tambien puede venir como argumento programatico
+    if (arguments[0] && arguments[0].force) force = true;
+
+    if (!force) {
+      if (state[role] && state[role].completed) return;
+      // R28: respetar dismiss persistente (botón "Después" o tras 3 dismisses)
+      try {
+        const dismissKey = 'volvix_welcome_dismissed_' + (session.email || 'anon') + '_' + role;
+        const dismissedAt = localStorage.getItem(dismissKey);
+        if (dismissedAt) {
+          const ageMs = Date.now() - parseInt(dismissedAt, 10);
+          // dismiss vale 30 días; tras eso reaparece
+          if (ageMs >= 0 && ageMs < 30 * 24 * 3600 * 1000) return;
+        }
+      } catch (e) {}
+    }
 
     const existing = document.getElementById('welcome-modal');
     if (existing) existing.remove();
