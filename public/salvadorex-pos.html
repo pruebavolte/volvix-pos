@@ -19928,8 +19928,11 @@ window.addEventListener('volvix:version-loaded', function(e){
     const wrap = $('#permv14-modules-list');
     if (!wrap) return;
     const MOD = window.MOD_LABELS_PUBLIC || null;
-    // MOD_LABELS está en closure del IIFE original; reusamos la copia hoist.
-    const MOD_LABELS_LOCAL = MOD_LABELS_GLOBAL;
+    // 2026-05-09: cargar catálogo BD en background (no await — render inmediato con
+    // hardcoded, re-render automático cuando llegue BD via setActiveNav re-trigger).
+    if (!v14.catalogs.modules) loadAllCatalogs().then(() => renderModulesList());
+    // Catálogo unificado: BD si disponible, fallback a constante.
+    const MOD_LABELS_LOCAL = getModuleLabelsFromCatalog();
     const state = getCombinedState();
     const search = ($('#permv14-mod-search') && $('#permv14-mod-search').value || '').toLowerCase();
     let html = '';
@@ -19965,7 +19968,8 @@ window.addEventListener('volvix:version-loaded', function(e){
   // ─── COLUMNA 3: config pane del módulo seleccionado ───
   function renderConfigPane() {
     const FEAT_LABELS_LOCAL = FEAT_LABELS_GLOBAL;
-    const MOD_LABELS_LOCAL = MOD_LABELS_GLOBAL;
+    // 2026-05-09: catálogo unificado (BD canónico, hardcoded fallback)
+    const MOD_LABELS_LOCAL = getModuleLabelsFromCatalog();
 
     const labelEl = $('#permv14-current-mod-label');
     const buttonsTable = $('[data-permv14-target="buttons"]');
@@ -20266,8 +20270,11 @@ window.addEventListener('volvix:version-loaded', function(e){
   async function renderGirosList() {
     const wrap = $('#permv14-modules-list');
     if (!wrap) return;
-    const PROFILES = window.INDUSTRY_PROFILES || {};
-    const LABELS = window.INDUSTRY_LABELS || {};
+    // 2026-05-09: hidratar catálogos unificados ANTES de renderizar.
+    // Combina BD (canónico) + constantes hardcoded (fallback / overlay legacy).
+    await loadAllCatalogs();
+    const PROFILES = Object.assign({}, window.INDUSTRY_PROFILES || {}, window.INDUSTRY_PROFILES_FROM_BD || {});
+    const LABELS = Object.assign({}, window.INDUSTRY_LABELS || {}, window.INDUSTRY_LABELS_FROM_BD || {});
     const counts = await loadTenantCountsByGiro();
     if (!v14.selectedGiro) {
       // auto-seleccionar el primero del primer giro disponible
@@ -20318,12 +20325,31 @@ window.addEventListener('volvix:version-loaded', function(e){
 
   // ─── COL 3: detalle del giro seleccionado (módulos preset, terminología, reglas) ───
   function renderGiroDetail() {
-    const PROFILES = window.INDUSTRY_PROFILES || {};
-    const LABELS = window.INDUSTRY_LABELS || {};
+    // 2026-05-09: prioridad a BD, fallback a constantes
+    const PROFILES = Object.assign({}, window.INDUSTRY_PROFILES || {}, window.INDUSTRY_PROFILES_FROM_BD || {});
+    const LABELS = Object.assign({}, window.INDUSTRY_LABELS || {}, window.INDUSTRY_LABELS_FROM_BD || {});
     const TERMS = window.INDUSTRY_TERMS || {};
     const PRODUCT_FIELDS = window.INDUSTRY_PRODUCT_FIELDS || {};
     const SELL_RULES = window.INDUSTRY_SELL_RULES || {};
-    const MOD_LABELS_LOCAL = MOD_LABELS_GLOBAL;
+    // Si el catálogo BD trae el giro con sus terms/fields, usarlos también
+    const giroFromBd = getGiroFromCatalog(v14.selectedGiro);
+    if (giroFromBd) {
+      // Sobreescribir terms/fields con datos canónicos de BD
+      if (giroFromBd.terms && Object.keys(giroFromBd.terms).length) {
+        TERMS[v14.selectedGiro] = TERMS[v14.selectedGiro] || {};
+        Object.entries(giroFromBd.terms).forEach(([k, v]) => {
+          // BD shape: { singular, plural }; legacy shape: string. Convertir a string para compat con renderizador legacy.
+          TERMS[v14.selectedGiro][k] = typeof v === 'object' ? (v.singular || v.plural || '') : v;
+        });
+      }
+      if (giroFromBd.product_fields && giroFromBd.product_fields.length) {
+        PRODUCT_FIELDS[v14.selectedGiro] = giroFromBd.product_fields.map(f => ({
+          key: f.campo, label: f.label_override || f.campo, type: 'text', required: !!f.requerido,
+        }));
+      }
+    }
+    // MOD_LABELS_LOCAL: usar el catálogo BD si está hidratado (con icon de fallback)
+    const MOD_LABELS_LOCAL = getModuleLabelsFromCatalog();
 
     const labelEl = $('#permv14-current-mod-label');
     const buttonsTable = $('[data-permv14-target="buttons"]');
@@ -21038,6 +21064,66 @@ window.addEventListener('volvix:version-loaded', function(e){
   // ─────────────────────────────────────────────────────────────────────
   let _usersHierarchyCache = null;
   let _giroCatalogCache = null;
+  let _featureModulesCache = null;
+  // 2026-05-09: catálogos unificados — single source of truth para los 3 sub-módulos.
+  // Antes: Usuarios→/api/admin/giros, Giros→window.INDUSTRY_PROFILES, Módulos→MOD_LABELS_GLOBAL
+  // Ahora: TODOS leen de v14.catalogs.{giros, modules} que se hidrata desde BD una vez.
+  // Si BD falla, fallback a las constantes hardcoded para no romper.
+  v14.catalogs = { giros: null, modules: null, lastLoaded: 0 };
+  async function loadAllCatalogs(force) {
+    const TTL = 60000; // 60s
+    if (!force && v14.catalogs.giros && v14.catalogs.modules && (Date.now() - v14.catalogs.lastLoaded) < TTL) {
+      return v14.catalogs;
+    }
+    try {
+      const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+      const auth = { 'Authorization': 'Bearer ' + tok };
+      const [rg, rm] = await Promise.all([
+        fetch('/api/admin/giros', { headers: auth }).then(r => r.ok ? r.json() : { items: [] }).catch(() => ({ items: [] })),
+        fetch('/api/admin/feature-modules', { headers: auth }).then(r => r.ok ? r.json() : { items: [] }).catch(() => ({ items: [] })),
+      ]);
+      // Normalizar feature_modules: key viene como 'module.pos' pero giros_modulos.modulo es 'pos'.
+      // Exponemos ambas formas para conveniencia: bareKey ('pos') y fullKey ('module.pos').
+      const modules = (rm.items || []).map(m => Object.assign({}, m, {
+        bareKey: String(m.key || '').replace(/^module\./, ''),
+        fullKey: String(m.key || ''),
+      }));
+      v14.catalogs.giros = rg.items || [];
+      v14.catalogs.modules = modules;
+      v14.catalogs.lastLoaded = Date.now();
+      // Backward compat: shim INDUSTRY_PROFILES + INDUSTRY_LABELS si no existen
+      if (!window.INDUSTRY_PROFILES_FROM_BD) {
+        window.INDUSTRY_PROFILES_FROM_BD = {};
+        window.INDUSTRY_LABELS_FROM_BD = {};
+        v14.catalogs.giros.forEach(g => {
+          if (!g.slug) return;
+          window.INDUSTRY_PROFILES_FROM_BD[g.slug] = g.modules || {};
+          window.INDUSTRY_LABELS_FROM_BD[g.slug] = g.name || g.slug;
+        });
+      }
+      console.log('[PERMv14] catalogs loaded: giros=' + v14.catalogs.giros.length + ' modules=' + v14.catalogs.modules.length);
+    } catch (e) {
+      console.warn('[PERMv14] catalogs load fail (using fallback constants):', e);
+      v14.catalogs.giros = v14.catalogs.giros || [];
+      v14.catalogs.modules = v14.catalogs.modules || [];
+    }
+    return v14.catalogs;
+  }
+  // Helper: dado un slug devuelve el giro completo (con modules/terms/fields)
+  function getGiroFromCatalog(slug) {
+    if (!v14.catalogs.giros) return null;
+    return v14.catalogs.giros.find(g => g.slug === slug) || null;
+  }
+  // Helper: si v14.catalogs.modules está cargado, retorna {pos: '🛒 Punto de Venta', ...}
+  function getModuleLabelsFromCatalog() {
+    if (!v14.catalogs.modules || !v14.catalogs.modules.length) return MOD_LABELS_GLOBAL;
+    const map = {};
+    v14.catalogs.modules.forEach(m => {
+      const icon = m.icon || (MOD_LABELS_GLOBAL[m.bareKey] ? MOD_LABELS_GLOBAL[m.bareKey].split(' ')[0] : '📦');
+      map[m.bareKey] = icon + ' ' + (m.name || m.bareKey);
+    });
+    return map;
+  }
   // 2026-05-09: Excel-like Users table state.
   // v14.usersDirty Map<key,{rowId,rowType,field,oldValue,newValue}> donde
   //   key = `${rowType}:${rowId}:${field}` para detectar dups y poder revertir.
