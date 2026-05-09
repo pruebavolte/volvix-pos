@@ -3942,9 +3942,35 @@
                   <input type="checkbox" id="perm-hier-show-qa"> QA
                 </label>
                 <button class="permv14-btn-soft" id="permv14-users-refresh" title="Refrescar">🔄</button>
-                <button class="permv14-btn-accent" id="permv14-users-add-override" title="Agregar override a un usuario">+ Override</button>
+                <button class="permv14-btn-soft" id="permv14-users-add-override" title="Agregar override a un usuario">+ Override</button>
+                <!-- 2026-05-09: Excel-like edit mode — dirty count + Guardar/Descartar -->
+                <span id="permv14-users-dirty-badge" class="permv14-dirty-badge" hidden>● 0 cambios</span>
+                <button class="permv14-btn-soft" id="permv14-users-discard" title="Descartar cambios sin guardar" hidden>❌ Descartar</button>
+                <button class="permv14-btn-accent" id="permv14-users-save" title="Guardar todos los cambios" disabled>💾 Guardar</button>
               </div>
             </div>
+            <!-- Datalists para autocomplete-comboboxes en cells de la tabla -->
+            <datalist id="permv14-dl-status">
+              <option value="active">Activo</option>
+              <option value="suspended">Suspendido</option>
+              <option value="revoked">Revocado</option>
+              <option value="expired">Vencido</option>
+            </datalist>
+            <datalist id="permv14-dl-plan">
+              <option value="trial">Trial</option>
+              <option value="pro">Pro</option>
+              <option value="enterprise">Enterprise</option>
+              <option value="marca_blanca">Marca Blanca</option>
+            </datalist>
+            <datalist id="permv14-dl-giros"><!-- popula desde /api/admin/giros --></datalist>
+            <datalist id="permv14-dl-roles">
+              <option value="ADMIN">Admin</option>
+              <option value="USER">Usuario</option>
+              <option value="cajero">Cajero</option>
+              <option value="vendedor">Vendedor</option>
+              <option value="manager">Manager</option>
+              <option value="superadmin">Superadmin</option>
+            </datalist>
             <div class="permv14-pane-body permv14-users-body">
               <div id="permv14-users-table-wrap">
                 <p class="permv14-empty-row" style="padding:14px;">Cargando…</p>
@@ -18222,6 +18248,32 @@ window.addEventListener('volvix:version-loaded', function(e){
     font-size: 11.5px; color: var(--pv-text-muted);
   }
   #screen-permisos.permv14 .permv14-users-summary strong { color: var(--pv-text); font-weight: 600; }
+  /* === 2026-05-09: Excel-like editable cells === */
+  #screen-permisos.permv14 .permv14-users-table input.permv14-cell {
+    width: 100%; box-sizing: border-box;
+    background: transparent; border: 1px solid transparent; outline: none;
+    padding: 4px 6px; font-family: var(--pv-font-body); font-size: 12px; color: var(--pv-text);
+    border-radius: 4px;
+  }
+  #screen-permisos.permv14 .permv14-users-table input.permv14-cell:hover { border-color: var(--pv-border); background: var(--pv-bg-paper); }
+  #screen-permisos.permv14 .permv14-users-table input.permv14-cell:focus { border-color: var(--pv-accent); background: #fff; box-shadow: 0 0 0 2px rgba(195,108,80,.15); }
+  #screen-permisos.permv14 .permv14-users-table input.permv14-cell.is-dirty {
+    background: linear-gradient(0deg,#fef3c7 60%,#fde68a 100%); border-color: #f59e0b;
+  }
+  #screen-permisos.permv14 .permv14-users-table input.permv14-cell.has-error {
+    background: #fee2e2; border-color: #dc2626; color: #991b1b;
+  }
+  #screen-permisos.permv14 .permv14-users-table tr.row-dirty td:first-child { border-left: 3px solid #f59e0b; }
+  #screen-permisos.permv14 .permv14-users-table tr.row-dirty { background: rgba(254,243,199,.30); }
+  #screen-permisos.permv14 .permv14-dirty-badge {
+    background: #fef3c7; color: #92400e; padding: 4px 10px; border-radius: 999px;
+    font-family: var(--pv-font-mono); font-size: 11px; font-weight: 700; letter-spacing: .04em;
+    border: 1px solid #f59e0b;
+  }
+  #screen-permisos.permv14 .permv14-users-table input.permv14-cell.is-readonly {
+    color: var(--pv-text-muted); cursor: default;
+  }
+  #screen-permisos.permv14 .permv14-users-table input.permv14-cell.is-readonly:hover { border-color: transparent; background: transparent; }
   /* Inline selects (status / giro) dentro de filas de tenant — pequeños y sutiles */
   #screen-permisos.permv14 .permv14-users-table .u-inline-select {
     background: var(--pv-bg-paper); border: 1px solid var(--pv-border);
@@ -19693,6 +19745,17 @@ window.addEventListener('volvix:version-loaded', function(e){
      - Si window.PERM no existe (página sin permisos cargados) este script no hace nada.
      ============================================================ -->
 <script id="permv14-wiring">
+/* ────────────────────────────────────────────────────────────────────────────
+ * 2026-05-09 NOTA SOBRE TOKENS DE AUTENTICACIÓN
+ * Este wiring lee el token desde localStorage usando el patrón:
+ *     localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken')
+ *
+ *   - 'volvix_token'      ← clave CANÓNICA / moderna. Todo código nuevo debe escribir/leer esta.
+ *   - 'volvixAuthToken'   ← clave LEGADA. Se mantiene como fallback para
+ *                            sesiones antiguas que aún no migraron. Eliminarla
+ *                            requiere una migración separada (forzar relogin
+ *                            de todas las sesiones activas) — NO removerla aquí.
+ * ──────────────────────────────────────────────────────────────────────────── */
 (function () {
   'use strict';
 
@@ -19742,7 +19805,72 @@ window.addEventListener('volvix:version-loaded', function(e){
     device: 'desktop',
     // overlay local sobre _flagCache para preview reactivo (cambios pendientes de persistir)
     pendingOverrides: { modules: {}, features: {} },
+    // 2026-05-09: dirty flag por giro — se setea cuando el usuario muta
+    // window.INDUSTRY_PROFILES / INDUSTRY_TERMS / giroFeatureOverrides en
+    // memoria (toggles de chips, edición de términos, drill-down de features)
+    // y aún no aplicó el preset a ningún tenant. Consumido por el indicador
+    // visible en renderGiroDetail y por el handler beforeunload.
+    giroIsDirty: {},
   };
+
+  // ─── 2026-05-09: CANONICAL MAPS (deduplicados) ──────────────────────────
+  // Antes había 5 copias casi-idénticas de MOD_LABELS_LOCAL y 2 de
+  // FEAT_LABELS_*. Se hoistan aquí como única fuente de verdad. Cada render
+  // hace `const X_LOCAL = X_GLOBAL` para preservar las referencias existentes
+  // sin cambiar comportamiento.
+  const MOD_LABELS_GLOBAL = {
+    pos:'🛒 Punto de Venta', dashboard:'📊 Dashboard', apertura:'🔓 Apertura caja',
+    corte:'💼 Corte caja', inventario:'📦 Inventario', kardex:'📒 Kardex',
+    clientes:'👥 Clientes', credito:'💳 Crédito', proveedores:'🚚 Proveedores',
+    cotizaciones:'📝 Cotizaciones', devoluciones:'↩️ Devoluciones',
+    ventas:'🧾 Ventas', reportes:'📈 Reportes', facturacion:'📄 Facturación CFDI',
+    recargas:'📱 Recargas', servicios:'💡 Pago servicios', tarjetas:'🎬 Tarjetas virtuales',
+    promociones:'🎁 Promociones', departamentos:'🏢 Departamentos',
+    sugeridas:'🧠 Compras sugeridas', actualizador:'💱 Actualizador masivo',
+    usuarios:'👤 Gestión usuarios', config:'⚙️ Configuración',
+  };
+  const FEAT_LABELS_GLOBAL = {
+    'pos.cobrar':'💵 F12 — Cobrar','pos.descuento':'% Descuento',
+    'pos.mayoreo':'F11 — Mayoreo','pos.granel':'⚖ Granel',
+    'pos.calculadora':'🧮 Calculadora','pos.cambiar':'F5 — Cambiar precio',
+    'pos.pendiente':'F6 — Pendiente','pos.borrar':'DEL — Borrar artículo',
+    'pos.buscar':'F10 — Buscar','pos.entradas':'F7 — Entradas',
+    'pos.salidas':'F8 — Salidas','pos.verificador':'F9 — Verificador',
+    'pos.panel':'📒 Panel categorías','pos.catalogo':'📷 Catálogo',
+    'pos.recargas_btn':'📱 Btn Recargas','pos.servicios_btn':'💡 Btn Servicios',
+    'pos.ins_varios':'INS — Varios','pos.art_comun':'CTRL+P Artículo común',
+    'pos.quickpick_panel':'Panel QuickPick','ui.saas_btn':'👑 Btn SaaS Admin',
+  };
+
+  // 2026-05-09: allowlist para validar `featKey` que el usuario ingresa por
+  // prompt() en addOverride. Acepta:
+  //   - claves directas de FEAT_LABELS_GLOBAL (ej: 'pos.cobrar')
+  //   - 'module.<modKey>' donde modKey es válido en MOD_LABELS_GLOBAL
+  //   - 'module.<parentMod>' derivado del prefijo de FEAT_LABELS_GLOBAL
+  // Evita persistir overrides con claves inexistentes.
+  const _ALLOWED_FEAT_KEYS = new Set(
+    Object.keys(FEAT_LABELS_GLOBAL)
+      .concat(Object.keys(MOD_LABELS_GLOBAL).map(k => 'module.' + k))
+      .concat(Object.keys(FEAT_LABELS_GLOBAL).map(k => 'module.' + k.split('.')[0]))
+  );
+  function isValidFeatKey(s) {
+    return !!(s && _ALLOWED_FEAT_KEYS.has(String(s).trim()));
+  }
+
+  // 2026-05-09: aviso al recargar/cerrar pestaña si hay giros con cambios
+  // en memoria sin aplicar. Se registra UNA sola vez (idempotente).
+  if (!window.__permv14_beforeunloadWired) {
+    window.__permv14_beforeunloadWired = true;
+    window.addEventListener('beforeunload', (ev) => {
+      const dirty = v14.giroIsDirty || {};
+      const dirtySlugs = Object.keys(dirty).filter(s => dirty[s]);
+      if (dirtySlugs.length) {
+        ev.preventDefault();
+        ev.returnValue = 'Tienes cambios en presets de giros sin aplicar (' + dirtySlugs.join(', ') + '). Si recargas se perderán.';
+        return ev.returnValue;
+      }
+    });
+  }
 
   function $(sel, root) { return (root || document).querySelector(sel); }
   function $$(sel, root) { return Array.from((root || document).querySelectorAll(sel)); }
@@ -19773,18 +19901,8 @@ window.addEventListener('volvix:version-loaded', function(e){
     const wrap = $('#permv14-modules-list');
     if (!wrap) return;
     const MOD = window.MOD_LABELS_PUBLIC || null;
-    // MOD_LABELS está en closure del IIFE original; lo reproducimos para no parsear DOM.
-    const MOD_LABELS_LOCAL = {
-      pos:'🛒 Punto de Venta', dashboard:'📊 Dashboard', apertura:'🔓 Apertura caja',
-      corte:'💼 Corte caja', inventario:'📦 Inventario', kardex:'📒 Kardex',
-      clientes:'👥 Clientes', credito:'💳 Crédito', proveedores:'🚚 Proveedores',
-      cotizaciones:'📝 Cotizaciones', devoluciones:'↩️ Devoluciones',
-      ventas:'🧾 Ventas', reportes:'📈 Reportes', facturacion:'📄 Facturación CFDI',
-      recargas:'📱 Recargas', servicios:'💡 Pago servicios', tarjetas:'🎬 Tarjetas virtuales',
-      promociones:'🎁 Promociones', departamentos:'🏢 Departamentos',
-      sugeridas:'🧠 Compras sugeridas', actualizador:'💱 Actualizador masivo',
-      usuarios:'👤 Gestión usuarios', config:'⚙️ Configuración',
-    };
+    // MOD_LABELS está en closure del IIFE original; reusamos la copia hoist.
+    const MOD_LABELS_LOCAL = MOD_LABELS_GLOBAL;
     const state = getCombinedState();
     const search = ($('#permv14-mod-search') && $('#permv14-mod-search').value || '').toLowerCase();
     let html = '';
@@ -19819,29 +19937,8 @@ window.addEventListener('volvix:version-loaded', function(e){
 
   // ─── COLUMNA 3: config pane del módulo seleccionado ───
   function renderConfigPane() {
-    const FEAT_LABELS_LOCAL = {
-      'pos.cobrar':'💵 F12 — Cobrar','pos.descuento':'% Descuento',
-      'pos.mayoreo':'F11 — Mayoreo','pos.granel':'⚖ Granel',
-      'pos.calculadora':'🧮 Calculadora','pos.cambiar':'F5 — Cambiar precio',
-      'pos.pendiente':'F6 — Pendiente','pos.borrar':'DEL — Borrar artículo',
-      'pos.buscar':'F10 — Buscar','pos.entradas':'F7 — Entradas',
-      'pos.salidas':'F8 — Salidas','pos.verificador':'F9 — Verificador',
-      'pos.panel':'📒 Panel categorías','pos.catalogo':'📷 Catálogo',
-      'pos.recargas_btn':'📱 Btn Recargas','pos.servicios_btn':'💡 Btn Servicios',
-      'pos.ins_varios':'INS — Varios','pos.art_comun':'CTRL+P Artículo común',
-      'pos.quickpick_panel':'Panel QuickPick','ui.saas_btn':'👑 Btn SaaS Admin',
-    };
-    const MOD_LABELS_LOCAL = {
-      pos:'🛒 Punto de Venta', dashboard:'📊 Dashboard', apertura:'🔓 Apertura caja',
-      corte:'💼 Corte caja', inventario:'📦 Inventario', kardex:'📒 Kardex',
-      clientes:'👥 Clientes', credito:'💳 Crédito', proveedores:'🚚 Proveedores',
-      cotizaciones:'📝 Cotizaciones', devoluciones:'↩️ Devoluciones',
-      ventas:'🧾 Ventas', reportes:'📈 Reportes', facturacion:'📄 Facturación CFDI',
-      recargas:'📱 Recargas', servicios:'💡 Pago servicios', tarjetas:'🎬 Tarjetas virtuales',
-      promociones:'🎁 Promociones', departamentos:'🏢 Departamentos',
-      sugeridas:'🧠 Compras sugeridas', actualizador:'💱 Actualizador masivo',
-      usuarios:'👤 Gestión usuarios', config:'⚙️ Configuración',
-    };
+    const FEAT_LABELS_LOCAL = FEAT_LABELS_GLOBAL;
+    const MOD_LABELS_LOCAL = MOD_LABELS_GLOBAL;
 
     const labelEl = $('#permv14-current-mod-label');
     const buttonsTable = $('[data-permv14-target="buttons"]');
@@ -20029,18 +20126,7 @@ window.addEventListener('volvix:version-loaded', function(e){
     };
     const moduleName = labelMap[k] || k;
     const childButtons = Object.keys(FEAT_PARENT_MOD).filter(bk => FEAT_PARENT_MOD[bk] === k);
-    const FEAT_LABELS_LOCAL = {
-      'pos.cobrar':'💵 F12 — Cobrar','pos.descuento':'% Descuento',
-      'pos.mayoreo':'F11 — Mayoreo','pos.granel':'⚖ Granel',
-      'pos.calculadora':'🧮 Calculadora','pos.cambiar':'F5 — Cambiar precio',
-      'pos.pendiente':'F6 — Pendiente','pos.borrar':'DEL — Borrar artículo',
-      'pos.buscar':'F10 — Buscar','pos.entradas':'F7 — Entradas',
-      'pos.salidas':'F8 — Salidas','pos.verificador':'F9 — Verificador',
-      'pos.panel':'📒 Panel categorías','pos.catalogo':'📷 Catálogo',
-      'pos.recargas_btn':'📱 Btn Recargas','pos.servicios_btn':'💡 Btn Servicios',
-      'pos.ins_varios':'INS — Varios','pos.art_comun':'CTRL+P Artículo común',
-      'pos.quickpick_panel':'Panel QuickPick','ui.saas_btn':'👑 Btn SaaS Admin',
-    };
+    const FEAT_LABELS_LOCAL = FEAT_LABELS_GLOBAL;
 
     const buttonRows = childButtons.length === 0
       ? '<div class="permv14-empty-row">(este módulo no expone botones individuales)</div>'
@@ -20127,19 +20213,8 @@ window.addEventListener('volvix:version-loaded', function(e){
   v14.giroFeatureOverrides = {};       // { slug: { 'pos.cobrar': false, ... } } toggles del usuario
   v14.giroTermOverrides = {};          // { slug: { cliente: 'NuevoLabel', ... } } edición inline
   // Catálogo de botones por módulo (usado en col 4 drill-down de Giros).
-  // Reproducido del FEAT_LABELS del IIFE original; mantener sincronizado.
-  const FEAT_LABELS_GIRO = {
-    'pos.cobrar':'💵 F12 — Cobrar','pos.descuento':'% Descuento',
-    'pos.mayoreo':'F11 — Mayoreo','pos.granel':'⚖ Granel',
-    'pos.calculadora':'🧮 Calculadora','pos.cambiar':'F5 — Cambiar precio',
-    'pos.pendiente':'F6 — Pendiente','pos.borrar':'DEL — Borrar artículo',
-    'pos.buscar':'F10 — Buscar','pos.entradas':'F7 — Entradas',
-    'pos.salidas':'F8 — Salidas','pos.verificador':'F9 — Verificador',
-    'pos.panel':'📒 Panel categorías','pos.catalogo':'📷 Catálogo',
-    'pos.recargas_btn':'📱 Btn Recargas','pos.servicios_btn':'💡 Btn Servicios',
-    'pos.ins_varios':'INS — Varios','pos.art_comun':'CTRL+P Artículo común',
-    'pos.quickpick_panel':'Panel QuickPick','ui.saas_btn':'👑 Btn SaaS Admin',
-  };
+  // 2026-05-09: deduplicado contra FEAT_LABELS_GLOBAL (hoist) — alias preservado.
+  const FEAT_LABELS_GIRO = FEAT_LABELS_GLOBAL;
 
   async function loadTenantCountsByGiro() {
     if (_girosTenantCounts !== null) return _girosTenantCounts;
@@ -20221,17 +20296,7 @@ window.addEventListener('volvix:version-loaded', function(e){
     const TERMS = window.INDUSTRY_TERMS || {};
     const PRODUCT_FIELDS = window.INDUSTRY_PRODUCT_FIELDS || {};
     const SELL_RULES = window.INDUSTRY_SELL_RULES || {};
-    const MOD_LABELS_LOCAL = {
-      pos:'🛒 Punto de Venta', dashboard:'📊 Dashboard', apertura:'🔓 Apertura caja',
-      corte:'💼 Corte caja', inventario:'📦 Inventario', kardex:'📒 Kardex',
-      clientes:'👥 Clientes', credito:'💳 Crédito', proveedores:'🚚 Proveedores',
-      cotizaciones:'📝 Cotizaciones', devoluciones:'↩️ Devoluciones',
-      ventas:'🧾 Ventas', reportes:'📈 Reportes', facturacion:'📄 Facturación CFDI',
-      recargas:'📱 Recargas', servicios:'💡 Pago servicios', tarjetas:'🎬 Tarjetas virtuales',
-      promociones:'🎁 Promociones', departamentos:'🏢 Departamentos',
-      sugeridas:'🧠 Compras sugeridas', actualizador:'💱 Actualizador masivo',
-      usuarios:'👤 Gestión usuarios', config:'⚙️ Configuración',
-    };
+    const MOD_LABELS_LOCAL = MOD_LABELS_GLOBAL;
 
     const labelEl = $('#permv14-current-mod-label');
     const buttonsTable = $('[data-permv14-target="buttons"]');
@@ -20250,7 +20315,16 @@ window.addEventListener('volvix:version-loaded', function(e){
     const fullLabel = LABELS[slug] || slug;
     const m = fullLabel.match(/^(\S+)\s+(.+)$/) || [null, '🎯', fullLabel];
 
-    if (labelEl) labelEl.textContent = m[2];
+    if (labelEl) {
+      // 2026-05-09: indicador dirty si el usuario modificó el preset/terms en
+      // memoria sin aplicarlo a ningún tenant. Reset al hacer ⚡ Aplicar (ver más abajo).
+      const isDirty = !!(v14.giroIsDirty && v14.giroIsDirty[slug]);
+      if (isDirty) {
+        labelEl.innerHTML = escapeText(m[2]) + '<span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;margin-left:8px;">● MODIFICADO (sin guardar)</span>';
+      } else {
+        labelEl.textContent = m[2];
+      }
+    }
     if (buttonsHeadName) buttonsHeadName.textContent = '✓ Módulos del preset';
     if (moduleHeadName) moduleHeadName.textContent = '🌷 Terminología y reglas';
 
@@ -20288,6 +20362,7 @@ window.addEventListener('volvix:version-loaded', function(e){
           const k = el.dataset.giroModToggle;
           if (!window.INDUSTRY_PROFILES[slug]) window.INDUSTRY_PROFILES[slug] = {};
           window.INDUSTRY_PROFILES[slug][k] = !window.INDUSTRY_PROFILES[slug][k];
+          v14.giroIsDirty[slug] = true; // 2026-05-09
           if (window.toast) window.toast('Preset modificado en memoria — aplica con ⚡', 'info');
           renderGiroDetail();
           renderGiroPreview();
@@ -20366,7 +20441,9 @@ window.addEventListener('volvix:version-loaded', function(e){
           const newVal = inp.value.trim();
           if (newVal !== window.INDUSTRY_TERMS[slug][k]) {
             window.INDUSTRY_TERMS[slug][k] = newVal;
+            v14.giroIsDirty[slug] = true; // 2026-05-09
             if (window.toast) window.toast('Terminología "' + k + '" → "' + newVal + '" (en memoria)', 'info');
+            renderGiroDetail();
             renderGiroPreview();
           }
         };
@@ -20433,6 +20510,10 @@ window.addEventListener('volvix:version-loaded', function(e){
           applyBtn.textContent = 'Aplicar';
           if (window.toast) window.toast('✅ Perfil "' + (LABELS[slug] || slug) + '" aplicado a ' + targetTid, 'ok');
           _girosTenantCounts = null;
+          // 2026-05-09: limpiar dirty flag tras aplicar — los cambios ya
+          // viajaron al tenant. Si el usuario quiere modificar de nuevo,
+          // el flag se re-activará en el siguiente toggle/edición.
+          if (v14.giroIsDirty) delete v14.giroIsDirty[slug];
           renderGirosList();
           renderGiroDetail();
         });
@@ -20465,18 +20546,13 @@ window.addEventListener('volvix:version-loaded', function(e){
 
     if (urlEl) urlEl.textContent = 'tenant.salvadorex.app/' + slug;
 
-    const MOD_LABELS_LOCAL = {
-      pos:'🛒 Punto de Venta', dashboard:'📊 Dashboard', apertura:'🔓 Apertura',
-      corte:'💼 Corte', inventario: terms.inventario || '📦 Inventario', kardex:'📒 Kardex',
-      clientes: terms.cliente || '👥 Clientes', credito:'💳 Crédito', proveedores:'🚚 Proveedores',
-      cotizaciones:'📝 Cotizaciones', devoluciones:'↩️ Devoluciones',
-      ventas: terms.venta || '🧾 Ventas', reportes:'📈 Reportes',
-      facturacion:'📄 Facturación CFDI', recargas:'📱 Recargas',
-      servicios:'💡 Pago servicios', tarjetas:'🎬 Tarjetas',
-      promociones:'🎁 Promociones', departamentos:'🏢 Departamentos',
-      sugeridas:'🧠 Sugeridas', actualizador:'💱 Actualizador',
-      usuarios:'👤 Usuarios', config:'⚙️ Configuración',
-    };
+    // 2026-05-09: base = MOD_LABELS_GLOBAL hoist; overlay dinámico con
+    // terminología del giro solo para las claves que tengan term aplicable
+    // (cliente/inventario/venta). Conserva el comportamiento previo.
+    const MOD_LABELS_LOCAL = Object.assign({}, MOD_LABELS_GLOBAL);
+    if (terms.cliente)    MOD_LABELS_LOCAL.clientes   = terms.cliente;
+    if (terms.inventario) MOD_LABELS_LOCAL.inventario = terms.inventario;
+    if (terms.venta)      MOD_LABELS_LOCAL.ventas     = terms.venta;
 
     const onMods = Object.keys(MOD_LABELS_LOCAL).filter(k => profile[k]);
     const offMods = Object.keys(MOD_LABELS_LOCAL).filter(k => !profile[k]);
@@ -20561,7 +20637,9 @@ window.addEventListener('volvix:version-loaded', function(e){
           // default true → false; false → true (delete override)
           if (cur === false) delete v14.giroFeatureOverrides[slug][bk];
           else v14.giroFeatureOverrides[slug][bk] = false;
+          v14.giroIsDirty[slug] = true; // 2026-05-09
           if (window.toast) window.toast('Botón "' + bk + '" alternado en memoria — aplica con ⚡', 'info');
+          renderGiroDetail();
           renderGiroPreview();
         });
       });
@@ -20932,6 +21010,56 @@ window.addEventListener('volvix:version-loaded', function(e){
   //      / MARCA BLANCA (cuando tenant.is_white_label === true).
   // ─────────────────────────────────────────────────────────────────────
   let _usersHierarchyCache = null;
+  let _giroCatalogCache = null;
+  // 2026-05-09: Excel-like Users table state.
+  // v14.usersDirty Map<key,{rowId,rowType,field,oldValue,newValue}> donde
+  //   key = `${rowType}:${rowId}:${field}` para detectar dups y poder revertir.
+  // v14.giroCatalog: catálogo de giros desde /api/admin/giros (para datalist).
+  v14.usersDirty = new Map();
+  v14.giroCatalog = [];
+  async function fetchGiroCatalog() {
+    if (_giroCatalogCache) return _giroCatalogCache;
+    try {
+      const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+      const r = await fetch('/api/admin/giros', { headers: { 'Authorization': 'Bearer ' + tok }});
+      if (!r.ok) return [];
+      const j = await r.json();
+      _giroCatalogCache = j.items || [];
+      v14.giroCatalog = _giroCatalogCache;
+      return _giroCatalogCache;
+    } catch(e) { console.warn('[PERMv14 Users] giro catalog fail', e); return []; }
+  }
+  // ─── Helper: render una celda editable (Excel-like) ───
+  // opts: { rowId, rowType ('user'|'tenant'), field, value, list?, readOnly? }
+  function cellInput(opts) {
+    const k = (opts.rowType || '') + ':' + (opts.rowId || '') + ':' + (opts.field || '');
+    const dirty = v14.usersDirty.get(k);
+    const cur = dirty ? dirty.newValue : (opts.value == null ? '' : String(opts.value));
+    const orig = opts.value == null ? '' : String(opts.value);
+    const cls = 'permv14-cell' + (dirty ? ' is-dirty' : '') + (opts.readOnly ? ' is-readonly' : '');
+    const ro = opts.readOnly ? ' readonly' : '';
+    const list = opts.list ? ' list="' + escapeAttr(opts.list) + '"' : '';
+    return '<input type="text" class="' + cls + '" value="' + escapeAttr(cur) + '" '
+      + 'data-pv14-cell="1" '
+      + 'data-row-type="' + escapeAttr(opts.rowType || '') + '" '
+      + 'data-row-id="' + escapeAttr(opts.rowId || '') + '" '
+      + 'data-field="' + escapeAttr(opts.field || '') + '" '
+      + 'data-original="' + escapeAttr(orig) + '"'
+      + list + ro + '>';
+  }
+  // Recalcula contador de cambios pendientes y enable/disable del botón Guardar
+  function refreshDirtyBadge() {
+    const n = v14.usersDirty.size;
+    const badge = $('#permv14-users-dirty-badge');
+    const saveBtn = $('#permv14-users-save');
+    const discardBtn = $('#permv14-users-discard');
+    if (badge) {
+      badge.textContent = '● ' + n + ' cambio' + (n === 1 ? '' : 's');
+      badge.hidden = (n === 0);
+    }
+    if (saveBtn) saveBtn.disabled = (n === 0);
+    if (discardBtn) discardBtn.hidden = (n === 0);
+  }
   async function fetchHierarchy() {
     if (_usersHierarchyCache) return _usersHierarchyCache;
     try {
@@ -20974,6 +21102,13 @@ window.addEventListener('volvix:version-loaded', function(e){
     // Asegurar que tenemos el cache de tenants (para plan, is_white_label, etc.)
     if (window.PERM && !window.PERM._tenantsList && typeof window.PERM.loadTenants === 'function') {
       try { await window.PERM.loadTenants(); } catch(_) {}
+    }
+    // 2026-05-09: cargar catálogo de giros desde BD para poblar datalist
+    const giroCatalog = await fetchGiroCatalog();
+    const dlGiros = $('#permv14-dl-giros');
+    if (dlGiros && giroCatalog.length && !dlGiros._pv14Filled) {
+      dlGiros._pv14Filled = true;
+      dlGiros.innerHTML = giroCatalog.map(g => '<option value="' + escapeAttr(g.slug) + '">' + escapeText(g.name || g.slug) + '</option>').join('');
     }
     const tenantsList = (window.PERM && window.PERM._tenantsList) || [];
     const tenantsByTid = {};
@@ -21042,31 +21177,22 @@ window.addEventListener('volvix:version-loaded', function(e){
       const empsFilt      = employees.filter(e => tenantMatches || matchesSearch(e.email));
       if (!tenantMatches && !ownersFilt.length && !empsFilt.length) return;
 
-      // Helpers locales para celdas inline (status / giro / actions del tenant)
-      const STATUS_OPTS = [
-        ['active','✅ Activo'], ['suspended','⏸ Suspendido'],
-        ['revoked','🔒 Revocado'], ['expired','⏰ Vencido'],
-      ];
-      const PROFILES = window.INDUSTRY_PROFILES || {};
-      const LABELS_GIRO = window.INDUSTRY_LABELS || {};
-      const inlineStatusCell = (tid, current) => ''
-        + '<td>'
-        +   '<select class="u-inline-select" data-pv14-row-status data-pv14-tid="' + escapeAttr(tid) + '" title="Cambiar estado del tenant">'
-        +     STATUS_OPTS.map(([v,l]) => '<option value="' + v + '"' + (v === current ? ' selected' : '') + '>' + l + '</option>').join('')
-        +   '</select>'
+      // 2026-05-09: Helpers locales para celdas Excel-like (autocomplete-combobox).
+      // Cada celda es un <input> editable con datalist HTML5 (escribir + sugerencias).
+      // Cambios se acumulan en v14.usersDirty hasta que el usuario haga 💾 Guardar.
+      const inlineStatusCell = (tid, current) => '<td>'
+        + cellInput({ rowType: 'tenant', rowId: tid, field: 'status', value: current, list: 'permv14-dl-status' })
         + '</td>';
-      const inlineGiroCell = (tid, currentSlug) => {
-        const opts = ['<option value="">— sin giro —</option>']
-          .concat(Object.keys(PROFILES).sort().map(slug => {
-            const lbl = LABELS_GIRO[slug] || slug;
-            return '<option value="' + escapeAttr(slug) + '"' + (slug === currentSlug ? ' selected' : '') + '>' + escapeText(lbl) + '</option>';
-          }));
-        return '<td>'
-          +   '<select class="u-inline-select u-inline-giro" data-pv14-row-giro data-pv14-tid="' + escapeAttr(tid) + '" title="Cambiar perfil de giro">'
-          +     opts.join('')
-          +   '</select>'
-          + '</td>';
-      };
+      const inlineGiroCell = (tid, currentSlug) => '<td>'
+        + cellInput({ rowType: 'tenant', rowId: tid, field: 'business_type', value: currentSlug, list: 'permv14-dl-giros' })
+        + '</td>';
+      const planCell = (tid, currentPlan) => '<td>'
+        + cellInput({ rowType: 'tenant', rowId: tid, field: 'plan', value: currentPlan === '—' ? '' : currentPlan, list: 'permv14-dl-plan' })
+        + '</td>';
+      const emailCell = (userId, email) => '<td>'
+        + cellInput({ rowType: 'user', rowId: userId, field: 'email', value: email })
+        + '</td>';
+      const nameCell = (userId, name) => cellInput({ rowType: 'user', rowId: userId, field: 'full_name', value: name });
       const inlineTenantActions = (tid, email) => '<td class="u-actions">'
         + '<button data-pv14-edit-tenant="' + escapeAttr(tid) + '" title="Editar permisos del tenant">✏️</button>'
         + '<button data-pv14-diff-tenant="' + escapeAttr(tid) + '" title="Ver diff del giro vs estado actual">👁 diff</button>'
@@ -21077,14 +21203,14 @@ window.addEventListener('volvix:version-loaded', function(e){
 
       // Owners (filas padre)
       if (!ownersFilt.length) {
-        // tenant huérfano: mostrar fila stub con info del tenant
-        html += '<tr class="permv14-users-row-tenant">'
+        // tenant huérfano: mostrar fila stub con info del tenant (giro/estado/plan editables, sin user_id)
+        html += '<tr class="permv14-users-row-tenant" data-pv14-row-tid="' + escapeAttr(t.tenant_id) + '">'
           + '<td><span class="u-email">🏪 (sin owner) — ' + escapeText(t.name || t.tenant_id) + '</span></td>'
           + '<td><span class="u-tag normal">—</span></td>'
           + inlineGiroCell(t.tenant_id, giroSlug)
           + inlineStatusCell(t.tenant_id, tenantStatus)
           + '<td>—</td>'
-          + '<td>' + escapeText(plan) + '</td>'
+          + planCell(t.tenant_id, plan)
           + '<td><a class="u-url" href="https://' + escapeAttr(landing) + '" target="_blank" rel="noopener">' + escapeText(landing) + '</a></td>'
           + '<td><a class="u-url" href="https://' + escapeAttr(acceso) + '" target="_blank" rel="noopener">' + escapeText(acceso) + '</a></td>'
           + inlineTenantActions(t.tenant_id, '')
@@ -21095,10 +21221,10 @@ window.addEventListener('volvix:version-loaded', function(e){
         const last = fmtLastLogin(o.last_login_at);
         const isFirstOfTenant = (idx === 0);
         const rowClass = (isFirstOfTenant ? 'permv14-users-row-tenant' : 'permv14-users-row-parent');
-        html += '<tr class="' + rowClass + '">'
-          + '<td><span class="u-email">👤 ' + escapeText(o.email || '(sin email)') + '</span></td>'
+        html += '<tr class="' + rowClass + '" data-pv14-row-tid="' + escapeAttr(t.tenant_id) + '" data-pv14-row-uid="' + escapeAttr(o.id || o.user_id || '') + '">'
+          + '<td>👤 ' + emailCell(o.id || o.user_id || o.email, o.email || '') + '</td>'
           + '<td><span class="u-tag ' + ut.tag + '">' + escapeText(ut.label) + '</span></td>'
-          // Giro y Estado: SELECT inline solo en la primera fila del tenant
+          // Giro y Estado: SELECT inline solo en la primera fila del tenant (heredan del padre)
           + (isFirstOfTenant
               ? inlineGiroCell(t.tenant_id, giroSlug)
               : '<td><span style="opacity:.5;font-size:11px;">' + escapeText(giroLabel) + '</span></td>')
@@ -21106,7 +21232,7 @@ window.addEventListener('volvix:version-loaded', function(e){
               ? inlineStatusCell(t.tenant_id, tenantStatus)
               : '<td><span class="u-state ' + tenantStatus + '">' + escapeText(tenantStatus) + '</span></td>')
           + '<td>' + escapeText(last) + '</td>'
-          + '<td>' + escapeText(plan) + '</td>'
+          + (isFirstOfTenant ? planCell(t.tenant_id, plan) : '<td>' + escapeText(plan) + '</td>')
           + '<td><a class="u-url" href="https://' + escapeAttr(landing) + '" target="_blank" rel="noopener">' + escapeText(landing) + '</a></td>'
           + '<td><a class="u-url" href="https://' + escapeAttr(acceso) + '" target="_blank" rel="noopener">' + escapeText(acceso) + '</a></td>'
           + (isFirstOfTenant
@@ -21118,13 +21244,14 @@ window.addEventListener('volvix:version-loaded', function(e){
           + '</tr>';
       });
 
-      // Empleados (filas hijo, indentadas)
+      // Empleados (filas hijo, indentadas) — email editable, role editable con datalist
       empsFilt.forEach(e => {
         const ut = userTypeFor(e.email || '', meta);
         const empState = e.disabled ? 'disabled' : tenantStatus;
-        html += '<tr class="permv14-users-row-child">'
-          + '<td><span class="u-email">' + escapeText(e.email || '(sin email)') + '</span></td>'
-          + '<td><span class="u-tag empleado">' + escapeText(e.role || 'empleado') + '</span>'
+        const empUid = e.id || e.user_id || e.email;
+        html += '<tr class="permv14-users-row-child" data-pv14-row-tid="' + escapeAttr(t.tenant_id) + '" data-pv14-row-uid="' + escapeAttr(empUid) + '">'
+          + '<td>' + emailCell(empUid, e.email || '') + '</td>'
+          + '<td>' + cellInput({ rowType: 'user', rowId: empUid, field: 'role', value: e.role || 'cajero', list: 'permv14-dl-roles' })
           +     ' <span class="u-tag ' + ut.tag + '">' + escapeText(ut.label) + '</span></td>'
           + '<td>' + escapeText(giroLabel) + '</td>'
           + '<td><span class="u-state ' + empState + '">' + escapeText(empState) + '</span></td>'
@@ -21174,6 +21301,13 @@ window.addEventListener('volvix:version-loaded', function(e){
         if (!email) return;
         const featKey = prompt('Permiso (ej: module.cobrar, module.devoluciones):');
         if (!featKey) return;
+        // 2026-05-09: validar contra allowlist (FEAT_LABELS + MOD_LABELS) para
+        // evitar persistir overrides con claves inexistentes que romperían el
+        // motor de permisos del cliente.
+        if (!isValidFeatKey(featKey)) {
+          alert('Permiso inválido: "' + featKey + '". Usa una clave de FEAT_LABELS (ej: pos.cobrar) o un module.<key> válido.');
+          return;
+        }
         const status = confirm('OK = ❌ Bloquear · Cancelar = ✅ Permitir') ? 'deny' : 'allow';
         // Inyectar en los inputs ocultos legacy y disparar addOverride
         $('#perm-user-email').value = email;
@@ -21187,47 +21321,120 @@ window.addEventListener('volvix:version-loaded', function(e){
     // 2026-05-09: la toolbar fue eliminada — ahora seteamos selectedTid
     // y disparamos renderForTenant directamente. PERM ya tolera ambos
     // patrones (tid arg + this.selectedTid fallback).
-    const switchToTenant = (tid) => {
+    // 2026-05-09 fix(race): convertido a async — `await switchToTenant(...)`
+    // garantiza que renderForTenant resolvió antes de que el caller dispare
+    // applyProfile/changeStatus/previewProfile (antes había setTimeout(200) frágil).
+    const switchToTenant = async (tid) => {
       if (!tid || !window.PERM) return;
       window.PERM.selectedTid = tid;
-      if (window.PERM.renderForTenant) window.PERM.renderForTenant(tid);
+      if (window.PERM.renderForTenant) await window.PERM.renderForTenant(tid);
     };
 
     // Click handlers para botones generados
     wrap.querySelectorAll('button[data-pv14-edit-tenant]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        switchToTenant(btn.dataset.pv14EditTenant);
+      btn.addEventListener('click', async () => {
+        await switchToTenant(btn.dataset.pv14EditTenant);
         setActiveNav('modules');
       });
     });
 
-    // Inline status select por fila — cambia el estado del tenant
-    wrap.querySelectorAll('select[data-pv14-row-status]').forEach(sel => {
-      sel.addEventListener('change', () => {
-        const tid = sel.dataset.pv14Tid;
-        const newStatus = sel.value;
-        if (!tid) return;
-        if (!confirm('Cambiar el estado de ' + tid + ' a "' + newStatus + '"?')) {
-          // revertir visualmente
-          renderUsersUnified();
+    // 2026-05-09: Cells editables Excel-like. Track input changes en v14.usersDirty.
+    //   - Cuando el valor difiere del original → marcar dirty + highlight amarillo
+    //   - Cuando vuelve al original → quitar dirty
+    //   - Refresca contador + estado del botón Guardar
+    wrap.querySelectorAll('input[data-pv14-cell="1"]').forEach(inp => {
+      const onCellChange = () => {
+        const rowType = inp.dataset.rowType;
+        const rowId = inp.dataset.rowId;
+        const field = inp.dataset.field;
+        const orig = inp.dataset.original || '';
+        const cur = inp.value;
+        const k = rowType + ':' + rowId + ':' + field;
+        if (cur === orig) {
+          v14.usersDirty.delete(k);
+          inp.classList.remove('is-dirty');
+        } else {
+          v14.usersDirty.set(k, { rowId, rowType, field, oldValue: orig, newValue: cur });
+          inp.classList.add('is-dirty');
+        }
+        const tr = inp.closest('tr');
+        if (tr) {
+          const anyDirty = tr.querySelectorAll('input.is-dirty').length > 0;
+          tr.classList.toggle('row-dirty', anyDirty);
+        }
+        refreshDirtyBadge();
+      };
+      inp.addEventListener('input', onCellChange);
+      inp.addEventListener('change', onCellChange);
+    });
+    refreshDirtyBadge();
+
+    // ─── Save / Discard handlers (idempotentes) ───
+    const saveBtn = $('#permv14-users-save');
+    const discardBtn = $('#permv14-users-discard');
+    if (saveBtn && !saveBtn._pv14Wired) {
+      saveBtn._pv14Wired = true;
+      saveBtn.addEventListener('click', async () => {
+        if (!v14.usersDirty.size) return;
+        const userUpdates = new Map(); // id → patch
+        const tenantUpdates = new Map(); // tid → patch
+        for (const d of v14.usersDirty.values()) {
+          if (d.rowType === 'user') {
+            const cur = userUpdates.get(d.rowId) || { id: d.rowId };
+            cur[d.field] = d.newValue;
+            userUpdates.set(d.rowId, cur);
+          } else if (d.rowType === 'tenant') {
+            const cur = tenantUpdates.get(d.rowId) || { tenant_id: d.rowId };
+            cur[d.field] = d.newValue;
+            tenantUpdates.set(d.rowId, cur);
+          }
+        }
+        const usersArr = Array.from(userUpdates.values());
+        const tenantsArr = Array.from(tenantUpdates.values());
+        const totalRows = usersArr.length + tenantsArr.length;
+        if (!confirm('Guardar ' + v14.usersDirty.size + ' cambios en ' + totalRows + ' filas (' + usersArr.length + ' usuarios + ' + tenantsArr.length + ' tenants)?')) return;
+        saveBtn.disabled = true; saveBtn.textContent = 'Guardando…';
+        const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+        const auth = { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' };
+        let okCount = 0, failCount = 0;
+        const failures = [];
+        try {
+          if (usersArr.length) {
+            const r = await fetch('/api/admin/users/bulk', { method: 'PATCH', headers: auth, body: JSON.stringify({ updates: usersArr }) });
+            const j = await r.json().catch(() => ({}));
+            (j.results || []).forEach(rs => { if (rs.ok) okCount++; else { failCount++; failures.push(rs); }});
+          }
+          if (tenantsArr.length) {
+            const r = await fetch('/api/admin/tenants/bulk', { method: 'PATCH', headers: auth, body: JSON.stringify({ updates: tenantsArr }) });
+            const j = await r.json().catch(() => ({}));
+            (j.results || []).forEach(rs => { if (rs.ok) okCount++; else { failCount++; failures.push(rs); }});
+          }
+        } catch (e) {
+          alert('Error de red al guardar: ' + e.message);
+          saveBtn.disabled = false; saveBtn.textContent = '💾 Guardar';
           return;
         }
-        switchToTenant(tid);
-        // Esperar al render para que perm-status-sel exista y window.PERM.changeStatus tenga selectedTid correcto
-        setTimeout(() => {
-          if (window.PERM && window.PERM.changeStatus) {
-            window.PERM.changeStatus(newStatus);
-            setTimeout(() => { _usersHierarchyCache = null; renderUsersUnified(); }, 800);
-          }
-        }, 200);
+        if (failCount > 0) {
+          if (window.toast) window.toast('⚠ Guardado con errores: ' + okCount + ' OK, ' + failCount + ' fallaron', 'warn');
+          console.warn('[Excel-save] failures:', failures);
+        } else {
+          if (window.toast) window.toast('✅ ' + okCount + ' filas guardadas exitosamente', 'ok');
+        }
+        v14.usersDirty.clear();
+        _usersHierarchyCache = null;
+        saveBtn.textContent = '💾 Guardar';
+        renderUsersUnified();
       });
-    });
-
-    // Inline giro select por fila — solo cambia la selección visual; aplicar es el botón ⚡
-    // El slug se pasa explícitamente al PERM en los handlers de ⚡/👁 (no hay select global).
-    wrap.querySelectorAll('select[data-pv14-row-giro]').forEach(sel => {
-      sel.addEventListener('change', () => { /* no-op: el slug se lee al click del botón */ });
-    });
+    }
+    if (discardBtn && !discardBtn._pv14Wired) {
+      discardBtn._pv14Wired = true;
+      discardBtn.addEventListener('click', () => {
+        if (!v14.usersDirty.size) return;
+        if (!confirm('Descartar ' + v14.usersDirty.size + ' cambios sin guardar?')) return;
+        v14.usersDirty.clear();
+        renderUsersUnified();
+      });
+    }
 
     // ⚡ Aplicar perfil: usa el giro elegido en el mismo row
     wrap.querySelectorAll('button[data-pv14-apply-tenant]').forEach(btn => {
@@ -21238,29 +21445,24 @@ window.addEventListener('volvix:version-loaded', function(e){
         const slug = giroSel && giroSel.value;
         if (!slug) { alert('Elige un giro en el dropdown de esta fila antes de aplicar.'); return; }
         if (!confirm('Aplicar perfil "' + slug + '" a ' + tid + '?\n\nVa a setear los módulos al estado base del giro.')) return;
-        switchToTenant(tid);
-        // Pequeño delay para que selectedTid quede establecido antes del applyProfile
-        setTimeout(async () => {
-          if (window.PERM && window.PERM.applyProfile) await window.PERM.applyProfile(slug);
-          if (window.toast) window.toast('✅ Perfil "' + slug + '" aplicado a ' + tid, 'ok');
-          _usersHierarchyCache = null;
-          setTimeout(() => renderUsersUnified(), 600);
-        }, 200);
+        await switchToTenant(tid);
+        if (window.PERM && window.PERM.applyProfile) await window.PERM.applyProfile(slug);
+        if (window.toast) window.toast('✅ Perfil "' + slug + '" aplicado a ' + tid, 'ok');
+        _usersHierarchyCache = null;
+        renderUsersUnified();
       });
     });
 
     // 👁 Ver diff: muestra qué cambia si aplico el giro elegido
     wrap.querySelectorAll('button[data-pv14-diff-tenant]').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', async () => {
         const tid = btn.dataset.pv14DiffTenant;
         const tr = btn.closest('tr');
         const giroSel = tr && tr.querySelector('select[data-pv14-row-giro]');
         const slug = giroSel && giroSel.value;
         if (!slug) { alert('Elige un giro en el dropdown antes de ver el diff.'); return; }
-        switchToTenant(tid);
-        setTimeout(() => {
-          if (window.PERM && window.PERM.previewProfile) window.PERM.previewProfile(slug);
-        }, 200);
+        await switchToTenant(tid);
+        if (window.PERM && window.PERM.previewProfile) await window.PERM.previewProfile(slug);
       });
     });
     // 👁 Ver como — abre el POS en una nueva pestaña con ?impersonate=<email>&tid=<tid>
@@ -21281,12 +21483,17 @@ window.addEventListener('volvix:version-loaded', function(e){
       });
     });
     wrap.querySelectorAll('button[data-pv14-add-override]').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', async () => {
         const email = btn.dataset.pv14AddOverride;
         const tid = btn.dataset.pv14Tid;
-        if (tid) switchToTenant(tid);
+        if (tid) await switchToTenant(tid);
         const featKey = prompt('Permiso a override para ' + email + ' (ej: module.cobrar):');
         if (!featKey) return;
+        // 2026-05-09: validar contra allowlist (ver isValidFeatKey arriba).
+        if (!isValidFeatKey(featKey)) {
+          alert('Permiso inválido: "' + featKey + '". Usa una clave de FEAT_LABELS (ej: pos.cobrar) o un module.<key> válido.');
+          return;
+        }
         const status = confirm('OK = ❌ Bloquear · Cancelar = ✅ Permitir') ? 'deny' : 'allow';
         $('#perm-user-email').value = email;
         $('#perm-user-key').value = featKey;

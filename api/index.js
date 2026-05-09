@@ -997,8 +997,21 @@ function requireAuth(handler, requiredRoles) {
       id: payload.id, email: payload.email,
       role: payload.role, tenant_id: payload.tenant_id, via: 'jwt',
       iat: payload.iat,
-      jti: payload.jti  // R8b FIX-R2: heartbeat necesita jti para PATCH last_seen_at
+      jti: payload.jti,  // R8b FIX-R2: heartbeat necesita jti para PATCH last_seen_at
+      is_impersonation: payload.is_impersonation === true,
+      impersonated_by_user_id: payload.impersonated_by_user_id || payload.impersonated_by || null,
     };
+    // Phase D: server-side enforcement of read-only impersonation. If JWT carries
+    // is_impersonation=true, only safe (read) methods are allowed. Strict: NO
+    // mutating endpoints are whitelisted.
+    if (payload.is_impersonation === true && req.method !== 'GET' && req.method !== 'HEAD') {
+      return sendJSON(res, {
+        error: 'impersonation_read_only',
+        impersonated_by: payload.impersonated_by_user_id || payload.impersonated_by || null,
+        method: req.method,
+        hint: 'Active impersonation sessions cannot perform mutating operations.',
+      }, 403);
+    }
     // R7a FIX-4 (P0 — V2): capturar TENANT_REQUIRED lanzado por resolveTenant
     try {
       return await handler(req, res, params);
@@ -36238,25 +36251,39 @@ if (process.env.NODE_ENV === 'test') {
         impersonated_by: req.user.id || null,
         impersonated_email: req.user.email || null,
         is_impersonation: true,
+        impersonated_by_user_id: req.user.id || null, // Phase D: server-side enforcement
         jti,
         iat: now,
         exp: now + IMPERSONATE_TTL_SEC,
       };
+
+      // Phase D fail-closed: persist audit log BEFORE minting the token. If the
+      // audit insert fails, return 503 and DO NOT issue the token (no untraceable
+      // impersonation sessions). Previous .catch(()=>{}) silently swallowed errors.
+      try {
+        await supabaseRequest('POST', '/tenant_impersonation_log', {
+          super_admin_id: req.user.id || null,
+          super_admin_email: req.user.email || null,
+          tenant_id: tid,
+          reason,
+          jti,
+          expires_at: new Date((now + IMPERSONATE_TTL_SEC) * 1000).toISOString(),
+        });
+      } catch (auditErr) {
+        return sendJSON(res, {
+          ok: false,
+          error: 'audit_log_unavailable',
+          detail: String(auditErr && auditErr.message || auditErr),
+          hint: 'Impersonation requires successful audit log insert (fail-closed).',
+        }, 503);
+      }
+
+      // Mint token only AFTER audit log is durable
       const header = { alg: 'HS256', typ: 'JWT' };
       const h = b64url(JSON.stringify(header));
       const p = b64url(JSON.stringify(payload));
       const sig = b64url(crypto.createHmac('sha256', JWT_SECRET).update(`${h}.${p}`).digest());
       const token = `${h}.${p}.${sig}`;
-
-      // Audit
-      await supabaseRequest('POST', '/tenant_impersonation_log', {
-        super_admin_id: req.user.id || null,
-        super_admin_email: req.user.email || null,
-        tenant_id: tid,
-        reason,
-        jti,
-        expires_at: new Date((now + IMPERSONATE_TTL_SEC) * 1000).toISOString(),
-      }).catch(() => {});
 
       sendJSON(res, {
         ok: true,
@@ -36564,6 +36591,8 @@ if (process.env.NODE_ENV === 'test') {
   });
 
   // GET /api/admin/tenant/:tid/user-overrides — listar overrides per-user del tenant
+  // Phase E: also returns `items` with email JOIN from pos_users (additive — keeps
+  // legacy `overrides` for backward compat).
   handlers['GET /api/admin/tenant/:tid/user-overrides'] = requireAuth(async function (req, res, params) {
     if (!requireSuper(req, res)) return;
     try {
@@ -36572,7 +36601,28 @@ if (process.env.NODE_ENV === 'test') {
       const rows = await supabaseRequest('GET',
         `/user_module_overrides?tenant_id=eq.${encodeURIComponent(tid)}&select=*&order=set_at.desc&limit=500`
       ).catch(() => []);
-      sendJSON(res, { ok: true, tenant_id: tid, overrides: Array.isArray(rows) ? rows : [] });
+      const overrides = Array.isArray(rows) ? rows : [];
+      // Phase E: JOIN pos_users to enrich each row with `email`.
+      const userIds = Array.from(new Set(overrides.map(r => r.user_id).filter(Boolean)));
+      let emailById = {};
+      if (userIds.length) {
+        try {
+          const userRows = await supabaseRequest('GET',
+            `/pos_users?id=in.(${userIds.map(encodeURIComponent).join(',')})&select=id,email&limit=${userIds.length}`
+          );
+          (Array.isArray(userRows) ? userRows : []).forEach(u => { emailById[u.id] = u.email; });
+        } catch (_) { /* fail-open: items will have email=null */ }
+      }
+      const items = overrides.map(r => ({
+        user_id: r.user_id,
+        email: emailById[r.user_id] || null,
+        module_key: r.module_key,
+        status: r.status,
+        reason: r.reason || null,
+        set_by: r.set_by || null,
+        set_at: r.set_at || null,
+      }));
+      sendJSON(res, { ok: true, tenant_id: tid, items, overrides });
     } catch (err) { sendError(res, err); }
   });
 
@@ -36771,6 +36821,338 @@ if (process.env.NODE_ENV === 'test') {
         `/tenant_users?${filter}&select=id,user_id,email,display_name,role,disabled_at,last_login_at,created_at&order=created_at.desc&limit=500`
       ).catch(() => []);
       sendJSON(res, { ok: true, tenant_id: slug, employees: Array.isArray(rows) ? rows : [] });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // =========================================================================
+  // Phase B — Giros catalog endpoints (BD-driven)
+  // =========================================================================
+  // Helper: build a normalized giro shape by merging the 4 source tables.
+  function _buildGirosCatalog(verticals, modulos, terminologia, campos) {
+    const modBySlug = {};
+    (Array.isArray(modulos) ? modulos : []).forEach(r => {
+      if (!r || !r.giro_slug) return;
+      modBySlug[r.giro_slug] = modBySlug[r.giro_slug] || {};
+      modBySlug[r.giro_slug][r.modulo] = !!r.activo;
+    });
+    const termBySlug = {};
+    (Array.isArray(terminologia) ? terminologia : []).forEach(r => {
+      if (!r || !r.giro_slug) return;
+      termBySlug[r.giro_slug] = termBySlug[r.giro_slug] || {};
+      termBySlug[r.giro_slug][r.clave] = {
+        singular: r.valor_singular,
+        plural: r.valor_plural || r.valor_singular,
+      };
+    });
+    const fieldsBySlug = {};
+    (Array.isArray(campos) ? campos : []).forEach(r => {
+      if (!r || !r.giro_slug) return;
+      fieldsBySlug[r.giro_slug] = fieldsBySlug[r.giro_slug] || [];
+      fieldsBySlug[r.giro_slug].push({
+        modal: r.modal,
+        campo: r.campo,
+        visible: !!r.visible,
+        requerido: !!r.requerido,
+        orden: r.orden || 0,
+        label_override: r.label_override || null,
+      });
+    });
+    return (Array.isArray(verticals) ? verticals : []).map(v => ({
+      slug: v.code,
+      name: v.name,
+      category_id: v.category_id || null,
+      modules: modBySlug[v.code] || {},
+      terms: termBySlug[v.code] || {},
+      product_fields: (fieldsBySlug[v.code] || []).sort((a, b) => (a.orden || 0) - (b.orden || 0)),
+      active: v.active !== false,
+      icon: v.icon || null,
+      color: v.color || null,
+      settings: v.settings || null,
+    }));
+  }
+
+  // GET /api/admin/giros — full catalog (joins 4 tables in parallel)
+  handlers['GET /api/admin/giros'] = requireAuth(async function (req, res) {
+    if (!requireSuper(req, res)) return;
+    try {
+      const [verticals, modulos, terminologia, campos] = await Promise.all([
+        supabaseRequest('GET', '/verticals?select=code,name,category_id,modules,settings,active,icon,color&order=name.asc&limit=500').catch(() => []),
+        supabaseRequest('GET', '/giros_modulos?select=giro_slug,modulo,activo,orden&limit=5000').catch(() => []),
+        supabaseRequest('GET', '/giros_terminologia?select=giro_slug,clave,valor_singular,valor_plural&limit=5000').catch(() => []),
+        supabaseRequest('GET', '/giros_campos?select=giro_slug,modal,campo,visible,requerido,orden,label_override&limit=5000').catch(() => []),
+      ]);
+      const items = _buildGirosCatalog(verticals, modulos, terminologia, campos);
+      sendJSON(res, { ok: true, items });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // GET /api/admin/giros/:slug — single giro
+  handlers['GET /api/admin/giros/:slug'] = requireAuth(async function (req, res, params) {
+    if (!requireSuper(req, res)) return;
+    try {
+      const slug = String(params.slug || '').trim();
+      if (!slug) return sendJSON(res, { error: 'slug requerido' }, 400);
+      const enc = encodeURIComponent(slug);
+      const [verticals, modulos, terminologia, campos] = await Promise.all([
+        supabaseRequest('GET', `/verticals?code=eq.${enc}&select=code,name,category_id,modules,settings,active,icon,color&limit=1`).catch(() => []),
+        supabaseRequest('GET', `/giros_modulos?giro_slug=eq.${enc}&select=giro_slug,modulo,activo,orden&limit=500`).catch(() => []),
+        supabaseRequest('GET', `/giros_terminologia?giro_slug=eq.${enc}&select=giro_slug,clave,valor_singular,valor_plural&limit=500`).catch(() => []),
+        supabaseRequest('GET', `/giros_campos?giro_slug=eq.${enc}&select=giro_slug,modal,campo,visible,requerido,orden,label_override&limit=500`).catch(() => []),
+      ]);
+      const items = _buildGirosCatalog(verticals, modulos, terminologia, campos);
+      if (!items.length) return sendJSON(res, { ok: false, error: 'not_found' }, 404);
+      sendJSON(res, { ok: true, item: items[0] });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // PATCH /api/admin/giros/:slug — upsert modules / terms / product_fields
+  // body: { modules?: {modulo:bool}, terms?: {clave:{singular,plural}}, product_fields?: [{modal,campo,visible,requerido,orden,label_override}] }
+  handlers['PATCH /api/admin/giros/:slug'] = requireAuth(async function (req, res, params) {
+    if (!requireSuper(req, res)) return;
+    try {
+      const slug = String(params.slug || '').trim();
+      if (!slug) return sendJSON(res, { error: 'slug requerido' }, 400);
+      const body = await readBody(req).catch(() => ({}));
+      if (checkBodyError(req, res)) return;
+      const enc = encodeURIComponent(slug);
+      const applied = { modules: 0, terms: 0, product_fields: 0 };
+
+      // ── Modules ──
+      if (body.modules && typeof body.modules === 'object') {
+        const keys = Object.keys(body.modules);
+        // Delete existing rows NOT in provided set
+        if (keys.length) {
+          const keepList = keys.map(k => encodeURIComponent(String(k))).join(',');
+          await supabaseRequest('DELETE',
+            `/giros_modulos?giro_slug=eq.${enc}&modulo=not.in.(${keepList})`
+          ).catch(() => null);
+        } else {
+          await supabaseRequest('DELETE', `/giros_modulos?giro_slug=eq.${enc}`).catch(() => null);
+        }
+        // Upsert each module
+        const rows = keys.map((k, idx) => ({
+          giro_slug: slug,
+          modulo: String(k),
+          activo: !!body.modules[k],
+          orden: idx,
+        }));
+        if (rows.length) {
+          await supabaseRequest('POST',
+            '/giros_modulos?on_conflict=giro_slug,modulo',
+            rows
+          );
+        }
+        applied.modules = rows.length;
+      }
+
+      // ── Terms ──
+      if (body.terms && typeof body.terms === 'object') {
+        const keys = Object.keys(body.terms);
+        if (keys.length) {
+          const keepList = keys.map(k => encodeURIComponent(String(k))).join(',');
+          await supabaseRequest('DELETE',
+            `/giros_terminologia?giro_slug=eq.${enc}&clave=not.in.(${keepList})`
+          ).catch(() => null);
+        } else {
+          await supabaseRequest('DELETE', `/giros_terminologia?giro_slug=eq.${enc}`).catch(() => null);
+        }
+        const rows = keys.map(k => {
+          const v = body.terms[k] || {};
+          return {
+            giro_slug: slug,
+            clave: String(k),
+            valor_singular: v.singular || '',
+            valor_plural: v.plural || v.singular || '',
+          };
+        });
+        if (rows.length) {
+          await supabaseRequest('POST',
+            '/giros_terminologia?on_conflict=giro_slug,clave',
+            rows
+          );
+        }
+        applied.terms = rows.length;
+      }
+
+      // ── Product fields ──
+      if (Array.isArray(body.product_fields)) {
+        // Delete-then-insert: simpler than computing the keep-set on (modal,campo) tuples.
+        await supabaseRequest('DELETE', `/giros_campos?giro_slug=eq.${enc}`).catch(() => null);
+        const rows = body.product_fields.map((f, idx) => ({
+          giro_slug: slug,
+          modal: String(f.modal || 'product'),
+          campo: String(f.campo || ''),
+          visible: f.visible !== false,
+          requerido: !!f.requerido,
+          orden: typeof f.orden === 'number' ? f.orden : idx,
+          label_override: f.label_override || null,
+        })).filter(r => r.campo);
+        if (rows.length) {
+          await supabaseRequest('POST',
+            '/giros_campos?on_conflict=giro_slug,modal,campo',
+            rows
+          );
+        }
+        applied.product_fields = rows.length;
+      }
+
+      try { logAudit(req, 'giro.updated', 'giros_modulos', { id: slug, after: { slug, applied } }); } catch (_) {}
+      sendJSON(res, { ok: true, slug, applied });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // =========================================================================
+  // Phase C — Module registry (feature_modules) admin endpoints
+  // =========================================================================
+  // GET /api/admin/feature-modules — list all modules from feature_modules table
+  handlers['GET /api/admin/feature-modules'] = requireAuth(async function (req, res) {
+    if (!requireSuper(req, res)) return;
+    try {
+      const rows = await supabaseRequest('GET',
+        '/feature_modules?select=key,name,description,category,icon,dependencies,default_status,display_order&order=display_order.asc&limit=500'
+      ).catch(() => []);
+      const items = (Array.isArray(rows) ? rows : []).map(r => ({
+        key: r.key,
+        name: r.name || null,
+        description: r.description || null,
+        category: r.category || null,
+        icon: r.icon || null,
+        dependencies: r.dependencies || null,
+        default_status: r.default_status || 'enabled',
+        display_order: r.display_order || 0,
+      }));
+      sendJSON(res, { ok: true, items });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // PATCH /api/admin/feature-modules/:key — update a module row
+  // body: { name?, description?, category?, icon?, default_status?, display_order? }
+  handlers['PATCH /api/admin/feature-modules/:key'] = requireAuth(async function (req, res, params) {
+    if (!requireSuper(req, res)) return;
+    try {
+      const key = String(params.key || '').trim();
+      if (!key) return sendJSON(res, { error: 'key requerido' }, 400);
+      const body = await readBody(req).catch(() => ({}));
+      if (checkBodyError(req, res)) return;
+      const allowed = ['name', 'description', 'category', 'icon', 'default_status', 'display_order'];
+      const patch = {};
+      allowed.forEach(k => { if (body[k] !== undefined) patch[k] = body[k]; });
+      if (!Object.keys(patch).length) {
+        return sendJSON(res, { error: 'no_fields', hint: 'allowed: ' + allowed.join(',') }, 400);
+      }
+      const updated = await supabaseRequest('PATCH',
+        `/feature_modules?key=eq.${encodeURIComponent(key)}`, patch);
+      try { logAudit(req, 'feature_module.updated', 'feature_modules', { id: key, after: patch }); } catch (_) {}
+      sendJSON(res, { ok: true, key, item: (Array.isArray(updated) && updated[0]) || updated || null, applied: patch });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // =========================================================================
+  // Task 5 — Bulk save endpoints (Excel-style UI)
+  // =========================================================================
+  // PATCH /api/admin/users/bulk
+  // body: { updates: [{ id, email?, plan?, role?, full_name?, phone?, notes?, is_active? }] }
+  handlers['PATCH /api/admin/users/bulk'] = requireAuth(async function (req, res) {
+    if (!requireSuper(req, res)) return;
+    try {
+      const body = await readBody(req).catch(() => ({}));
+      if (checkBodyError(req, res)) return;
+      const updates = Array.isArray(body.updates) ? body.updates : [];
+      if (!updates.length) return sendJSON(res, { error: 'updates_required' }, 400);
+      if (updates.length > 500) return sendJSON(res, { error: 'too_many', max: 500 }, 400);
+      const allowed = ['email', 'plan', 'role', 'full_name', 'phone', 'notes', 'is_active'];
+      const results = [];
+      for (const u of updates) {
+        const id = String((u && u.id) || '').trim();
+        if (!id) { results.push({ id: null, ok: false, error: 'id_required' }); continue; }
+        try {
+          // Verify user exists
+          const exists = await supabaseRequest('GET',
+            `/pos_users?id=eq.${encodeURIComponent(id)}&select=id,email&limit=1`
+          ).catch(() => []);
+          if (!Array.isArray(exists) || !exists.length) {
+            results.push({ id, ok: false, error: 'not_found' });
+            continue;
+          }
+          const patch = {};
+          allowed.forEach(k => { if (u[k] !== undefined) patch[k] = u[k]; });
+          // Email collision check
+          if (patch.email && String(patch.email).trim() && String(patch.email).toLowerCase() !== String(exists[0].email || '').toLowerCase()) {
+            const conflict = await supabaseRequest('GET',
+              `/pos_users?email=eq.${encodeURIComponent(String(patch.email).trim())}&id=neq.${encodeURIComponent(id)}&select=id&limit=1`
+            ).catch(() => []);
+            if (Array.isArray(conflict) && conflict.length) {
+              // Skip the email change but try the rest
+              delete patch.email;
+              if (!Object.keys(patch).length) {
+                results.push({ id, ok: false, error: 'email_conflict' });
+                continue;
+              }
+            }
+          }
+          if (!Object.keys(patch).length) {
+            results.push({ id, ok: true, skipped: true });
+            continue;
+          }
+          await supabaseRequest('PATCH', `/pos_users?id=eq.${encodeURIComponent(id)}`, patch);
+          try { logAudit(req, 'user.bulk_updated', 'pos_users', { id, after: patch }); } catch (_) {}
+          results.push({ id, ok: true });
+        } catch (e) {
+          results.push({ id, ok: false, error: String(e && e.message || e) });
+        }
+      }
+      sendJSON(res, { ok: true, results });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // PATCH /api/admin/tenants/bulk
+  // body: { updates: [{ tenant_id, name?, business_type?, plan?, status?, is_active? }] }
+  handlers['PATCH /api/admin/tenants/bulk'] = requireAuth(async function (req, res) {
+    if (!requireSuper(req, res)) return;
+    try {
+      const body = await readBody(req).catch(() => ({}));
+      if (checkBodyError(req, res)) return;
+      const updates = Array.isArray(body.updates) ? body.updates : [];
+      if (!updates.length) return sendJSON(res, { error: 'updates_required' }, 400);
+      if (updates.length > 500) return sendJSON(res, { error: 'too_many', max: 500 }, 400);
+      const allowed = ['name', 'business_type', 'plan', 'status', 'is_active'];
+      const results = [];
+      for (const u of updates) {
+        const tid = String((u && u.tenant_id) || '').trim();
+        if (!tid) { results.push({ tenant_id: null, ok: false, error: 'tenant_id_required' }); continue; }
+        try {
+          // Verify tenant exists. Match by tenant_id (slug like TNT-XXX) primero;
+          // si no aparece y `tid` parece UUID v4, intentar por id. Evita el
+          // PostgREST "invalid input syntax for type uuid" cuando tid es slug.
+          const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(tid);
+          let exists = await supabaseRequest('GET',
+            `/pos_companies?tenant_id=eq.${encodeURIComponent(tid)}&select=id,tenant_id&limit=1`
+          ).catch(() => []);
+          if ((!Array.isArray(exists) || !exists.length) && isUuid) {
+            exists = await supabaseRequest('GET',
+              `/pos_companies?id=eq.${encodeURIComponent(tid)}&select=id,tenant_id&limit=1`
+            ).catch(() => []);
+          }
+          if (!Array.isArray(exists) || !exists.length) {
+            results.push({ tenant_id: tid, ok: false, error: 'not_found' });
+            continue;
+          }
+          const patch = {};
+          allowed.forEach(k => { if (u[k] !== undefined) patch[k] = u[k]; });
+          if (!Object.keys(patch).length) {
+            results.push({ tenant_id: tid, ok: true, skipped: true });
+            continue;
+          }
+          // Patch by id (the row's primary key, resolved above)
+          await supabaseRequest('PATCH',
+            `/pos_companies?id=eq.${encodeURIComponent(exists[0].id)}`, patch);
+          try { logAudit(req, 'tenant.bulk_updated', 'pos_companies', { id: tid, after: patch }); } catch (_) {}
+          results.push({ tenant_id: tid, ok: true });
+        } catch (e) {
+          results.push({ tenant_id: tid, ok: false, error: String(e && e.message || e) });
+        }
+      }
+      sendJSON(res, { ok: true, results });
     } catch (err) { sendError(res, err); }
   });
 
