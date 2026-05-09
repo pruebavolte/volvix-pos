@@ -36066,10 +36066,26 @@ if (process.env.NODE_ENV === 'test') {
     ],
   };
 
-  // Helper: solo super-admin
+  // 2026-05-09 fix(BUG-3): centralizar quién es admin de plataforma.
+  // Antes requireSuper exigía role==='superadmin' EXACTO. Pero el cliente
+  // (isPlatformOwner en salvadorex-pos.html) acepta tanto 'superadmin' como
+  // 'platform_owner'. Resultado: usuarios con role='platform_owner' veían el
+  // panel pero los toggles fallaban con 403 silencioso.
+  // Roles aceptados: 'superadmin' (legacy) | 'platform_owner' (nuevo nombre).
+  // Si en el futuro agregas un tercer rol admin (ej: 'support_agent') basta
+  // con añadirlo aquí.
+  function isPlatformAdmin(role) {
+    return role === 'superadmin' || role === 'platform_owner';
+  }
+  // Expose para que otros módulos del API lo puedan importar
+  if (typeof module !== 'undefined' && module.exports) {
+    try { module.exports.isPlatformAdmin = isPlatformAdmin; } catch(_) {}
+  }
+
+  // Helper: solo plataforma-admin (super-admin o platform_owner)
   function requireSuper(req, res) {
-    if (!req.user || req.user.role !== 'superadmin') {
-      sendJSON(res, { error: 'forbidden', reason: 'superadmin_required' }, 403);
+    if (!req.user || !isPlatformAdmin(req.user.role)) {
+      sendJSON(res, { error: 'forbidden', reason: 'platform_admin_required' }, 403);
       return false;
     }
     return true;
