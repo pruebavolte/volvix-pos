@@ -2589,6 +2589,128 @@
 </head>
 <body>
 
+<!-- ============ 2026-05-09 IMPERSONATION (?impersonate=email&tid=tid) ============
+     Cuando el superadmin hace click en "👁 Ver como" desde el módulo Usuarios,
+     abre el POS en una nueva pestaña con estos params. Aquí:
+       1. Detectamos los params y seteamos window.IMPERSONATING
+       2. Mostramos banner amarillo permanente con botón "Cerrar vista"
+       3. Interceptamos fetch para BLOQUEAR todo método ≠ GET/HEAD (modo lectura)
+       4. Cuando VOLVIX esté listo, cargamos los flags del tenant impersonado
+          y aplicamos los overrides locales del email impersonado
+     ================================================================================ -->
+<script id="impersonation-bootstrap">
+(function(){
+  var params = new URLSearchParams(location.search);
+  var imEmail = params.get('impersonate');
+  var imTid = params.get('tid');
+  if (!imEmail) return;
+  window.IMPERSONATING = { email: imEmail, tid: imTid || null, since: Date.now() };
+  console.warn('[IMPERSONATING] vista como:', imEmail, '@', imTid);
+
+  // 0) Stylesheet inyectado — resistente a manipulaciones inline. El !important
+  //    en body padding evita que otros wirings de Volvix lo sobreescriban.
+  var styleEl = document.createElement('style');
+  styleEl.id = 'impersonation-style';
+  styleEl.textContent = ''
+    + 'body { padding-top: 50px !important; }'
+    + '#impersonation-banner { position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; z-index: 2147483647 !important; }'
+    + '#r8a-offline-banner { top: 50px !important; }';
+  (document.head || document.documentElement).appendChild(styleEl);
+
+  // 1) Fetch interceptor: bloquea writes (POST/PUT/PATCH/DELETE) excepto los del propio bootstrap.
+  var origFetch = window.fetch;
+  window.fetch = function(input, init){
+    var method = ((init && init.method) || (typeof input === 'object' && input && input.method) || 'GET').toUpperCase();
+    var url = (typeof input === 'string') ? input : (input && input.url) || '';
+    if (method !== 'GET' && method !== 'HEAD') {
+      // Permitir el endpoint que carga los flags del tenant para impersonar (siempre es GET, así que esto es sólo defensivo)
+      console.warn('[IMPERSONATING] BLOQUEADO ' + method + ' ' + url);
+      try { if (window.toast) window.toast('🔒 Modo lectura: acción bloqueada (impersonando ' + imEmail + ')', 'warn'); } catch(_){}
+      return Promise.resolve(new Response(JSON.stringify({error:'impersonation_read_only',email:imEmail}), {status:403,statusText:'IMPERSONATING'}));
+    }
+    return origFetch.apply(this, arguments);
+  };
+
+  // 2) Banner permanente — esperar a que <body> esté listo
+  function injectBanner(){
+    if (document.getElementById('impersonation-banner')) return;
+    var b = document.createElement('div');
+    b.id = 'impersonation-banner';
+    b.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99998;background:linear-gradient(90deg,#fef3c7,#fde68a);border-bottom:2px solid #f59e0b;color:#78350f;padding:8px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,.1);';
+    b.innerHTML = ''
+      + '<div style="flex:1;min-width:0;">'
+      +   '<span style="font-size:18px;vertical-align:middle;">👁</span>'
+      +   ' <strong style="vertical-align:middle;">VISTA COMO</strong>'
+      +   ' <code style="background:#fff;padding:1px 8px;border-radius:4px;border:1px solid #f59e0b;font-size:12px;vertical-align:middle;">' + imEmail.replace(/[<>&"]/g, function(c){return ({"<":"&lt;",">":"&gt;","&":"&amp;","\"":"&quot;"})[c];}) + '</code>'
+      +   (imTid ? ' <span style="vertical-align:middle;color:#92400e;">@</span> <code style="background:#fff;padding:1px 8px;border-radius:4px;border:1px solid #f59e0b;font-size:12px;vertical-align:middle;">' + imTid.replace(/[<>&"]/g, function(c){return ({"<":"&lt;",">":"&gt;","&":"&amp;","\"":"&quot;"})[c];}) + '</code>' : '')
+      +   ' <span style="background:#dc2626;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;letter-spacing:.5px;margin-left:6px;vertical-align:middle;">MODO LECTURA</span>'
+      + '</div>'
+      + '<button id="impersonation-close" style="background:#fff;border:1px solid #f59e0b;padding:5px 14px;border-radius:5px;cursor:pointer;font-weight:600;color:#78350f;font-size:12.5px;flex-shrink:0;">✕ Cerrar vista</button>';
+    document.body.insertBefore(b, document.body.firstChild);
+    // El padding-top del body lo aplica el stylesheet inyectado al inicio
+    // (más resistente que inline style). Si el banner crece a 2 líneas en
+    // pantallas estrechas, ajustamos la regla del stylesheet dinámicamente.
+    var adjustPad = function(){
+      var h = b.offsetHeight || 50;
+      var s = document.getElementById('impersonation-style');
+      if (s) s.textContent = s.textContent.replace(/padding-top:\s*\d+px/, 'padding-top: ' + h + 'px');
+    };
+    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(adjustPad);
+    else setTimeout(adjustPad, 50);
+    window.addEventListener('resize', adjustPad);
+    document.getElementById('impersonation-close').addEventListener('click', function(){
+      var u = new URL(location.href);
+      u.searchParams.delete('impersonate');
+      u.searchParams.delete('tid');
+      // Limpiar todo: flag, fetch, stylesheet, clase
+      try { delete window.IMPERSONATING; } catch(_){}
+      window.fetch = origFetch;
+      var s = document.getElementById('impersonation-style'); if (s) s.remove();
+      location.href = u.toString();
+    });
+  }
+  if (document.body) injectBanner();
+  else document.addEventListener('DOMContentLoaded', injectBanner);
+
+  // 3) Cargar flags del tenant impersonado y aplicar overrides locales del email impersonado
+  function loadImpersonatedState(){
+    if (!imTid || !window.VOLVIX || !VOLVIX.applyState || !VOLVIX.getState) {
+      // Esperar a VOLVIX
+      if ((loadImpersonatedState._tries||0) < 50) {
+        loadImpersonatedState._tries = (loadImpersonatedState._tries||0) + 1;
+        return setTimeout(loadImpersonatedState, 200);
+      }
+      return console.warn('[IMPERSONATING] VOLVIX no apareció');
+    }
+    var tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+    origFetch('/api/admin/tenant/' + encodeURIComponent(imTid) + '/flags', {
+      headers: tok ? { 'Authorization': 'Bearer ' + tok } : {}
+    }).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
+      if (!j || !j.ok) { console.warn('[IMPERSONATING] no se pudo cargar flags del tenant', imTid); return; }
+      var s = VOLVIX.getState() || {};
+      s.id = imTid;
+      s.name = j.name || imTid;
+      s.status = j.status || 'active';
+      s.modules = j.modules || {};
+      s.features = j.buttons || {};
+      // Overrides locales del email impersonado (deny/allow por feature_key)
+      try {
+        var ovKey = 'volvix:overrides:' + imEmail;
+        var ov = JSON.parse(localStorage.getItem(ovKey) || '{}');
+        Object.keys(ov).forEach(function(featKey){
+          var modKey = featKey.replace(/^module\./,'');
+          if (ov[featKey] === 'deny')  { s.modules[modKey] = false; }
+          if (ov[featKey] === 'allow') { s.modules[modKey] = true; }
+        });
+      } catch(_){}
+      VOLVIX.applyState(s);
+      console.warn('[IMPERSONATING] estado aplicado:', s);
+    }).catch(function(e){ console.warn('[IMPERSONATING] error fetch flags:', e); });
+  }
+  loadImpersonatedState();
+})();
+</script>
+
 <!-- ============ R8a FIX-H2: OFFLINE BANNER (visible cuando navigator.onLine=false) ============ -->
 <div id="r8a-offline-banner" role="alert" aria-live="polite" style="display:none;position:fixed;top:0;left:0;right:0;z-index:99999;background:linear-gradient(135deg,#DC2626,#B91C1C);color:#fff;padding:10px 16px;text-align:center;font-size:13px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.2);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
   <span style="font-size:16px;vertical-align:middle;">📶</span>
@@ -3756,37 +3878,11 @@
       </div>
 
       <div id="perm-content" class="hidden permv14-shell">
-        <!-- ───── TOOLBAR SUPERIOR DE CONTEXTO DE TENANT (36px alto) ───── -->
-        <div class="permv14-topbar">
-          <div class="permv14-topbar-group permv14-topbar-left">
-            <span class="permv14-topbar-label">Editando para:</span>
-            <select id="perm-tenant-sel" class="permv14-tenant-sel"></select>
-            <span id="perm-tenant-banner" class="permv14-tenant-banner"></span>
-          </div>
-          <div class="permv14-topbar-group permv14-topbar-mid">
-            <span class="permv14-chip" id="perm-status-chip">
-              <span class="dot"></span><span id="perm-status-text">active</span>
-            </span>
-            <select id="perm-status-sel" class="permv14-status-sel" onchange="window.PERM.changeStatus(this.value)" title="Cambiar estado del tenant">
-              <option value="active">✅ Activo</option>
-              <option value="suspended">⏸️ Suspendido</option>
-              <option value="revoked">🔒 Revocado</option>
-              <option value="expired">⏰ Vencido</option>
-            </select>
-            <span class="permv14-divider"></span>
-            <span class="permv14-topbar-label">Giro:</span>
-            <span id="perm-profile-current" class="permv14-profile-current">—</span>
-            <select id="perm-profile-sel" class="permv14-profile-sel" title="Perfil de giro"></select>
-            <button class="permv14-btn-soft" onclick="window.PERM.previewProfile()" title="Ver qué módulos cambian si aplico el preset">👁 Ver diff</button>
-            <button class="permv14-btn-accent" onclick="window.PERM.applyProfile()" title="Aplicar el preset del giro al tenant seleccionado">⚡ Aplicar perfil</button>
-          </div>
-          <div class="permv14-topbar-group permv14-topbar-right">
-            <button class="permv14-icon-btn" id="perm-refresh" onclick="window.PERM.reload()" title="Refrescar lista de tenants">🔄</button>
-            <button class="permv14-icon-btn" id="perm-broadcast" onclick="window.PERM.broadcastNow()" title="Forzar push a tabs abiertas (mismo navegador)">📡</button>
-          </div>
-        </div>
-
-        <!-- Diff del perfil — sigue mostrándose en el div original (lo dejamos visible bajo toolbar cuando aplica) -->
+        <!-- 2026-05-09: la toolbar superior fue eliminada. Sus controles
+             (tenant, status, giro, ver diff, aplicar perfil) se movieron a
+             las filas del módulo Usuarios — cada fila padre = un tenant con
+             sus controles inline. Esto elimina la duplicación visual.
+             Diff del perfil flota al inicio del shell cuando se invoca. -->
         <div id="perm-profile-diff" class="permv14-profile-diff" style="display:none;"></div>
 
         <!-- ───── LAYOUT 4 COLUMNAS ───── -->
@@ -3797,11 +3893,11 @@
             <button class="permv14-nav-icon active" data-permv14-nav="modules" title="Módulos">
               📦<span class="permv14-nav-tooltip">Módulos <span class="permv14-nav-tooltip-count" data-permv14-count="modules">23</span></span>
             </button>
-            <button class="permv14-nav-icon" data-permv14-nav="users" title="Override por usuario">
-              👤<span class="permv14-nav-tooltip">Overrides usuario</span>
+            <button class="permv14-nav-icon" data-permv14-nav="giros" title="Giros (perfiles de negocio)">
+              🎯<span class="permv14-nav-tooltip">Giros <span class="permv14-nav-tooltip-count" data-permv14-count="giros">37</span></span>
             </button>
-            <button class="permv14-nav-icon" data-permv14-nav="hierarchy" title="Jerarquía real">
-              🌳<span class="permv14-nav-tooltip">Jerarquía</span>
+            <button class="permv14-nav-icon" data-permv14-nav="users" title="Usuarios (jerarquía + overrides)">
+              👤<span class="permv14-nav-tooltip">Usuarios</span>
             </button>
             <button class="permv14-nav-icon" data-permv14-nav="audit" title="Audit log">
               📜<span class="permv14-nav-tooltip">Audit log</span>
@@ -3829,37 +3925,43 @@
             </div>
           </aside>
 
-          <!-- Pane: Override usuario (oculto hasta que sidebar lo elija) -->
-          <section class="permv14-side-pane" data-permv14-pane="users" hidden>
+          <!-- Pane: Giros — usa el MISMO grid 3-cols que Modules.
+               Las 3 columnas (split-list, config-pane, preview-pane) son las
+               mismas; lo que cambia es QUÉ renderizamos dentro según
+               v14.selectedNav. Esto evita duplicar layout y mantiene la UX
+               consistente con Modules. -->
+
+          <!-- Pane: Usuarios (unificado: jerarquía padre→empleados + tipo según override) -->
+          <section class="permv14-side-pane permv14-side-pane-wide" data-permv14-pane="users" hidden>
             <div class="permv14-pane-head">
-              <h3>👤 Override por usuario</h3>
-              <p class="permv14-pane-help">Permisos individuales que sobrescriben los del tenant. Útil para deshabilitar "Cobrar" SOLO a un cajero específico.</p>
+              <h3>👤 Usuarios</h3>
+              <p class="permv14-pane-help">Dueños de negocio (padres) y sus empleados (hijos). El "Tipo" indica si tienen permisos personalizados (overrides) sobre el preset base del tenant.</p>
+              <div class="permv14-users-toolbar">
+                <input id="permv14-users-search" type="search" placeholder="Buscar email, giro, plan…" class="permv14-input" style="flex:1;">
+                <label class="permv14-checkbox-line" style="margin:0;">
+                  <input type="checkbox" id="perm-hier-show-qa"> QA
+                </label>
+                <button class="permv14-btn-soft" id="permv14-users-refresh" title="Refrescar">🔄</button>
+                <button class="permv14-btn-accent" id="permv14-users-add-override" title="Agregar override a un usuario">+ Override</button>
+              </div>
             </div>
-            <div class="permv14-pane-body">
-              <div class="permv14-form-row">
-                <input id="perm-user-email" type="email" placeholder="email del usuario" class="permv14-input">
-                <select id="perm-user-key" class="permv14-select"></select>
-                <select id="perm-user-status" class="permv14-select" style="max-width:120px;">
+            <div class="permv14-pane-body permv14-users-body">
+              <div id="permv14-users-table-wrap">
+                <p class="permv14-empty-row" style="padding:14px;">Cargando…</p>
+              </div>
+              <!-- Backward-compat: IDs originales conservados pero ocultos.
+                   addOverride/removeOverride siguen funcionando porque leen
+                   estos campos. -->
+              <div hidden aria-hidden="true">
+                <input id="perm-user-email" type="email">
+                <select id="perm-user-key"></select>
+                <select id="perm-user-status">
                   <option value="deny">❌ Bloquear</option>
                   <option value="allow">✅ Permitir</option>
                 </select>
-                <button class="permv14-btn-accent" onclick="window.PERM.addOverride()">+ Agregar</button>
+                <div id="perm-users-list"></div>
+                <div id="perm-hierarchy-tree"></div>
               </div>
-              <div id="perm-users-list" class="permv14-overrides-list"></div>
-            </div>
-          </section>
-
-          <!-- Pane: Jerarquía -->
-          <section class="permv14-side-pane" data-permv14-pane="hierarchy" hidden>
-            <div class="permv14-pane-head">
-              <h3>🌳 Jerarquía real</h3>
-              <p class="permv14-pane-help">Quién es el dueño total · quién dueño de cada negocio · quién empleado. Datos REALES de Supabase.</p>
-              <label class="permv14-checkbox-line">
-                <input type="checkbox" id="perm-hier-show-qa"> Mostrar usuarios de prueba (QA)
-              </label>
-            </div>
-            <div class="permv14-pane-body">
-              <div id="perm-hierarchy-tree">Cargando…</div>
             </div>
           </section>
 
@@ -18031,6 +18133,108 @@ window.addEventListener('volvix:version-loaded', function(e){
     font-family: var(--pv-font-mono); font-size: 11px;
   }
 
+  /* === USUARIOS UNIFICADOS (jerarquía + override + meta tenant) === */
+  #screen-permisos.permv14 .permv14-users-toolbar {
+    display: flex; gap: 8px; align-items: center;
+    margin-top: 10px; flex-wrap: wrap;
+  }
+  #screen-permisos.permv14 .permv14-users-body { padding: 0; }
+  #screen-permisos.permv14 .permv14-users-table {
+    width: 100%; border-collapse: collapse;
+    background: var(--pv-bg-paper);
+    font-family: var(--pv-font-body); font-size: 12px;
+  }
+  #screen-permisos.permv14 .permv14-users-table thead th {
+    position: sticky; top: 0; z-index: 2;
+    background: var(--pv-surface);
+    text-align: left; padding: 9px 12px;
+    font-family: var(--pv-font-mono); font-size: 10px;
+    text-transform: uppercase; letter-spacing: .06em;
+    color: var(--pv-text-muted);
+    border-bottom: 1px solid var(--pv-border);
+    font-weight: 600;
+  }
+  #screen-permisos.permv14 .permv14-users-table tbody td {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--pv-border);
+    vertical-align: middle;
+  }
+  #screen-permisos.permv14 .permv14-users-row-tenant td {
+    background: linear-gradient(0deg, var(--pv-bg-paper), var(--pv-surface));
+    border-top: 2px solid var(--pv-accent-soft, #e9d5c8);
+    font-weight: 500;
+  }
+  #screen-permisos.permv14 .permv14-users-row-parent td { background: var(--pv-bg-paper); }
+  #screen-permisos.permv14 .permv14-users-row-child td {
+    background: var(--pv-bg);
+    color: var(--pv-text-muted);
+  }
+  #screen-permisos.permv14 .permv14-users-row-child td:first-child {
+    padding-left: 38px; position: relative;
+  }
+  #screen-permisos.permv14 .permv14-users-row-child td:first-child::before {
+    content: "└─"; position: absolute; left: 18px;
+    color: var(--pv-text-muted); font-family: var(--pv-font-mono);
+  }
+  #screen-permisos.permv14 .permv14-users-row-empty td {
+    padding: 12px; color: var(--pv-text-muted); font-style: italic;
+    background: var(--pv-bg);
+  }
+  #screen-permisos.permv14 .permv14-users-table tr:hover td { filter: brightness(0.985); }
+  #screen-permisos.permv14 .permv14-users-table .u-email {
+    font-family: var(--pv-font-mono); font-size: 11.5px;
+  }
+  #screen-permisos.permv14 .permv14-users-table .u-tag {
+    display: inline-block; padding: 2px 8px; border-radius: 999px;
+    font-family: var(--pv-font-mono); font-size: 10px; font-weight: 600;
+    letter-spacing: .04em;
+  }
+  #screen-permisos.permv14 .permv14-users-table .u-tag.normal { background: #e2e8f0; color: #475569; }
+  #screen-permisos.permv14 .permv14-users-table .u-tag.personalizado { background: #fef3c7; color: #92400e; }
+  #screen-permisos.permv14 .permv14-users-table .u-tag.marcablanca { background: #1f2937; color: #fff; }
+  #screen-permisos.permv14 .permv14-users-table .u-tag.empleado { background: #dbeafe; color: #1e40af; }
+  #screen-permisos.permv14 .permv14-users-table .u-state.active { color: #047857; font-weight: 600; }
+  #screen-permisos.permv14 .permv14-users-table .u-state.suspended { color: #b45309; font-weight: 600; }
+  #screen-permisos.permv14 .permv14-users-table .u-state.revoked,
+  #screen-permisos.permv14 .permv14-users-table .u-state.expired { color: #b91c1c; font-weight: 600; }
+  #screen-permisos.permv14 .permv14-users-table .u-state.disabled { color: #9ca3af; font-weight: 600; text-decoration: line-through; }
+  #screen-permisos.permv14 .permv14-users-table .u-url {
+    font-family: var(--pv-font-mono); font-size: 10.5px;
+    color: var(--pv-text-muted);
+    text-decoration: none;
+    max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    display: inline-block;
+  }
+  #screen-permisos.permv14 .permv14-users-table .u-url:hover { color: var(--pv-accent); text-decoration: underline; }
+  #screen-permisos.permv14 .permv14-users-table .u-actions { white-space: nowrap; text-align: right; }
+  #screen-permisos.permv14 .permv14-users-table .u-actions button {
+    border: 1px solid var(--pv-border); background: var(--pv-bg-paper);
+    border-radius: 5px; padding: 3px 8px; font-size: 11px; cursor: pointer;
+    margin-left: 4px;
+  }
+  #screen-permisos.permv14 .permv14-users-table .u-actions button:hover {
+    border-color: var(--pv-accent); color: var(--pv-accent);
+  }
+  #screen-permisos.permv14 .permv14-users-summary {
+    padding: 10px 16px; background: var(--pv-bg);
+    border-bottom: 1px solid var(--pv-border);
+    display: flex; gap: 12px; flex-wrap: wrap;
+    font-size: 11.5px; color: var(--pv-text-muted);
+  }
+  #screen-permisos.permv14 .permv14-users-summary strong { color: var(--pv-text); font-weight: 600; }
+  /* Inline selects (status / giro) dentro de filas de tenant — pequeños y sutiles */
+  #screen-permisos.permv14 .permv14-users-table .u-inline-select {
+    background: var(--pv-bg-paper); border: 1px solid var(--pv-border);
+    border-radius: 5px; padding: 3px 6px;
+    font-family: var(--pv-font-body); font-size: 11.5px; color: var(--pv-text);
+    max-width: 180px;
+  }
+  #screen-permisos.permv14 .permv14-users-table .u-inline-select:hover { border-color: var(--pv-accent); }
+  #screen-permisos.permv14 .permv14-users-table .u-inline-select:focus {
+    outline: 2px solid var(--pv-accent); outline-offset: 1px;
+  }
+  #screen-permisos.permv14 .permv14-users-table .u-inline-giro { max-width: 200px; }
+
   /* === COL 3: CONFIG PANE (380px) === */
   #screen-permisos.permv14 .permv14-config-pane {
     overflow-y: auto;
@@ -18327,6 +18531,110 @@ window.addEventListener('volvix:version-loaded', function(e){
     font-size: 12px; color: var(--pv-text-muted); margin: 0 0 16px;
   }
 
+
+   /* === GIROS PANE — catálogo de perfiles === */
+  #screen-permisos.permv14 .permv14-giros-toolbar {
+    display: flex; gap: 8px; align-items: center; margin-top: 12px;
+  }
+  #screen-permisos.permv14 .permv14-giros-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 14px;
+  }
+  #screen-permisos.permv14 .permv14-giros-cat-section {
+    grid-column: 1 / -1;
+    padding: 12px 0 4px;
+    font-family: var(--pv-font-mono); font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--pv-text-dim); border-bottom: 1px solid var(--pv-border);
+  }
+  #screen-permisos.permv14 .permv14-giro-card {
+    background: var(--pv-bg-paper); border: 1px solid var(--pv-border);
+    border-radius: 10px; padding: 14px;
+    display: flex; flex-direction: column; gap: 8px;
+    transition: border-color 0.15s, transform 0.15s;
+  }
+  #screen-permisos.permv14 .permv14-giro-card:hover {
+    border-color: var(--pv-accent-line);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(184,93,58,0.08);
+  }
+  #screen-permisos.permv14 .permv14-giro-head {
+    display: flex; align-items: baseline; gap: 8px;
+  }
+  #screen-permisos.permv14 .permv14-giro-name {
+    font-family: var(--pv-font-display); font-size: 16px; font-weight: 500;
+    color: var(--pv-text); letter-spacing: -0.01em;
+  }
+  #screen-permisos.permv14 .permv14-giro-slug {
+    font-family: var(--pv-font-mono); font-size: 9.5px;
+    color: var(--pv-text-dim);
+    background: var(--pv-surface); padding: 2px 6px; border-radius: 4px;
+    margin-left: auto;
+  }
+  #screen-permisos.permv14 .permv14-giro-tenants {
+    font-family: var(--pv-font-mono); font-size: 10px;
+    color: var(--pv-text-muted);
+  }
+  #screen-permisos.permv14 .permv14-giro-tenants.zero { color: var(--pv-text-dim); }
+  #screen-permisos.permv14 .permv14-giro-tenants.has { color: var(--pv-active); }
+  #screen-permisos.permv14 .permv14-giro-meta-line {
+    display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px;
+  }
+  #screen-permisos.permv14 .permv14-giro-mod-chip {
+    font-size: 10px; padding: 2px 7px; border-radius: 999px;
+    background: var(--pv-active-soft); color: var(--pv-active);
+    font-weight: 500;
+  }
+  #screen-permisos.permv14 .permv14-giro-mod-chip.off {
+    background: var(--pv-hidden-soft); color: var(--pv-text-dim);
+    text-decoration: line-through;
+  }
+  #screen-permisos.permv14 .permv14-giro-section-label {
+    font-family: var(--pv-font-mono); font-size: 9px;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--pv-text-dim); margin-top: 4px;
+  }
+  #screen-permisos.permv14 .permv14-giro-rule {
+    background: var(--pv-upsell-soft); color: var(--pv-upsell);
+    border-left: 3px solid var(--pv-upsell);
+    padding: 6px 10px; border-radius: 4px;
+    font-size: 11.5px; line-height: 1.35;
+  }
+  #screen-permisos.permv14 .permv14-giro-actions {
+    display: flex; gap: 6px; margin-top: 6px;
+    padding-top: 8px; border-top: 1px dashed var(--pv-border);
+  }
+  #screen-permisos.permv14 .permv14-giro-actions select {
+    flex: 1; padding: 5px 8px; border: 1px solid var(--pv-border);
+    border-radius: 5px; font-family: var(--pv-font-body); font-size: 12px;
+    background: var(--pv-bg-paper);
+  }
+  #screen-permisos.permv14 .permv14-giro-actions button {
+    padding: 5px 10px; border: 1px solid var(--pv-accent);
+    background: var(--pv-accent); color: white;
+    border-radius: 5px; font-size: 11px; font-weight: 500; cursor: pointer;
+    white-space: nowrap;
+  }
+  #screen-permisos.permv14 .permv14-giro-actions button:hover { background: #a04f30; }
+  #screen-permisos.permv14 .permv14-giro-actions button:disabled {
+    background: var(--pv-hidden); border-color: var(--pv-hidden); cursor: not-allowed;
+  }
+
+  /* === BUG-6 banner: tenant suspendido === */
+  #screen-permisos.permv14 .permv14-suspend-banner {
+    display: flex; gap: 12px; align-items: flex-start;
+    background: var(--pv-upsell-soft); color: var(--pv-upsell);
+    border-left: 4px solid var(--pv-upsell);
+    padding: 12px 16px; margin: 0 16px 12px;
+    border-radius: 0 6px 6px 0;
+    font-size: 13px; line-height: 1.4;
+  }
+  #screen-permisos.permv14 .permv14-state-select:disabled,
+  #screen-permisos.permv14 .permv14-master-select:disabled {
+    opacity: 0.45; cursor: not-allowed;
+  }
+
   /* legacy bloque oculto */
   #screen-permisos.permv14 .permv14-legacy-shadow { display: none !important; }
 
@@ -18590,6 +18898,8 @@ window.addEventListener('volvix:version-loaded', function(e){
   window.INDUSTRY_TERMS = INDUSTRY_TERMS;
   window.INDUSTRY_PRODUCT_FIELDS = INDUSTRY_PRODUCT_FIELDS;
   window.INDUSTRY_SELL_RULES = INDUSTRY_SELL_RULES;
+  window.INDUSTRY_PROFILES = INDUSTRY_PROFILES; // 2026-05-09: usado por panel #permisos > Giros
+  window.INDUSTRY_LABELS = INDUSTRY_LABELS;     // 2026-05-09: usado por panel #permisos > Giros
   window.applyIndustryTerminology = applyIndustryTerminology;
 
   function getCurrentRole() {
@@ -18657,10 +18967,16 @@ window.addEventListener('volvix:version-loaded', function(e){
       return profile ? { giro, profile, label: INDUSTRY_LABELS[giro] || giro } : null;
     },
 
-    // Aplica el perfil seleccionado al tenant: setea cada módulo del preset
-    async applyProfile() {
-      const sel = document.getElementById('perm-profile-sel');
-      const giro = sel && sel.value;
+    // Aplica el perfil seleccionado al tenant: setea cada módulo del preset.
+    // 2026-05-09: ahora acepta `giroArg` explícito (la nueva UI de Usuarios pasa
+    // el slug desde el row). Backward compat: si no se pasa argumento, lee del
+    // legacy #perm-profile-sel cuando exista.
+    async applyProfile(giroArg) {
+      let giro = giroArg;
+      if (!giro) {
+        const sel = document.getElementById('perm-profile-sel');
+        giro = sel && sel.value;
+      }
       if (!giro) { alert('Selecciona un giro primero'); return; }
       const tid = this.selectedTid;
       if (!tid) { alert('No hay tenant seleccionado'); return; }
@@ -18690,12 +19006,16 @@ window.addEventListener('volvix:version-loaded', function(e){
       console.log('[PERM] applyProfile', giro, '→', tid, 'ok:', okCount, 'errores:', errors);
     },
 
-    // Muestra qué módulos cambiarían si aplicáramos el perfil seleccionado
-    async previewProfile() {
-      const sel = document.getElementById('perm-profile-sel');
+    // Muestra qué módulos cambiarían si aplicáramos el perfil seleccionado.
+    // 2026-05-09: acepta `giroArg` explícito; fallback al legacy select.
+    async previewProfile(giroArg) {
       const diff = document.getElementById('perm-profile-diff');
-      if (!sel || !diff) return;
-      const giro = sel.value;
+      let giro = giroArg;
+      if (!giro) {
+        const sel = document.getElementById('perm-profile-sel');
+        giro = sel && sel.value;
+      }
+      if (!diff) return;
       if (!giro) { diff.style.display = 'none'; return; }
       const profile = INDUSTRY_PROFILES[giro];
       if (!profile) return;
@@ -18751,8 +19071,9 @@ window.addEventListener('volvix:version-loaded', function(e){
     // el slug es lo que usamos como currentTid. Antes se comparaba t.id contra
     // currentTid, no matcheaba nunca, asi que se duplicaban filas.
     async loadTenants() {
-      const sel = document.getElementById('perm-tenant-sel');
-      if (!sel) return;
+      // 2026-05-09: el dropdown global se eliminó; ahora la lista de tenants
+      // se renderiza en el módulo Usuarios. Solo cacheamos `_tenantsList`.
+      const sel = document.getElementById('perm-tenant-sel'); // puede ser null
       let tenants = [];
       try {
         const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
@@ -18788,8 +19109,11 @@ window.addEventListener('volvix:version-loaded', function(e){
           seen.add(t.slug);
           opts.push('<option value="' + t.slug + '">' + (t.active ? '🟢 ' : '⛔ ') + t.name + ' (' + t.slug + ')</option>');
         });
-      sel.innerHTML = opts.join('');
-      sel.onchange = () => this.renderForTenant(sel.value);
+      // Si todavía existe el select legacy (compat / tests), poblarlo.
+      if (sel) {
+        sel.innerHTML = opts.join('');
+        sel.onchange = () => this.renderForTenant(sel.value);
+      }
       this.selectedTid = currentTid;
       this.renderForTenant(currentTid);
       console.log('[PERM] tenants cargados:', tenants.length, '· seleccionado:', currentTid);
@@ -19757,18 +20081,556 @@ window.addEventListener('volvix:version-loaded', function(e){
       el.classList.toggle('active', el.dataset.permv14Nav === navKey);
     });
     // Mostrar/ocultar columnas según pane
-    const isModules = navKey === 'modules';
-    $$('.permv14-split-list').forEach(el => el.hidden = !isModules);
-    $$('.permv14-config-pane').forEach(el => el.hidden = !isModules);
-    $$('.permv14-preview-pane').forEach(el => el.hidden = !isModules);
-    // Side-panes específicos
+    // 'modules' y 'giros' comparten el mismo grid 3-cols (lista | config | preview)
+    const usesGrid3Cols = (navKey === 'modules' || navKey === 'giros');
+    $$('.permv14-split-list').forEach(el => el.hidden = !usesGrid3Cols);
+    $$('.permv14-config-pane').forEach(el => el.hidden = !usesGrid3Cols);
+    $$('.permv14-preview-pane').forEach(el => el.hidden = !usesGrid3Cols);
+    // Side-panes específicos (override/hierarchy/audit/settings)
     $$('.permv14-side-pane').forEach(el => {
       el.hidden = (el.dataset.permv14Pane !== navKey);
     });
-    // Si entró a hierarchy / audit / users → invocar el load original
+    // Si entró a audit → invocar load original. Hierarchy ya no es nav top-level
+    // (se fusionó con Users) pero conservamos el handler por compat.
     if (navKey === 'hierarchy' && window.PERM && window.PERM.loadHierarchy) window.PERM.loadHierarchy();
     if (navKey === 'audit' && window.PERM && window.PERM.loadAudit) window.PERM.loadAudit();
-    if (navKey === 'users' && window.PERM && window.PERM.renderOverridesList) window.PERM.renderOverridesList();
+    if (navKey === 'users') renderUsersUnified();
+    // Render según el modo activo
+    if (navKey === 'modules') {
+      renderModulesList(); renderConfigPane(); renderPreview();
+    } else if (navKey === 'giros') {
+      renderGirosList();
+      renderGiroDetail();
+      renderGiroPreview();
+    }
+  }
+
+  // ─── MÓDULO GIROS — catálogo de los 37 perfiles ───
+  // Lee directamente de window.INDUSTRY_PROFILES, INDUSTRY_LABELS, INDUSTRY_TERMS,
+  // INDUSTRY_PRODUCT_FIELDS, INDUSTRY_SELL_RULES (todos expuestos por el IIFE de PERM).
+  // Cuenta tenants reales por business_type usando los items que PERM ya cacheó.
+  // ─────────────────────────────────────────────────────────────────────────────
+  const GIRO_CATEGORIES = {
+    'comida-bebida':  { label: 'Comida & Bebida', items: ['restaurante','taqueria','pizzeria','cafeteria','panaderia','pasteleria','heladeria','jugos_naturales','jugos-naturales'] },
+    'frescos':        { label: 'Frescos & Mostrador', items: ['fruteria','carniceria','polleria','tortilleria'] },
+    'tienda':         { label: 'Tienda & Abarrotes', items: ['abarrotes','minisuper','tienda-conveniencia'] },
+    'salud':          { label: 'Salud', items: ['farmacia','veterinaria','clinica-dental','optica'] },
+    'belleza':        { label: 'Belleza & Cuidado', items: ['barberia','salon-belleza','nails','spa'] },
+    'retail':         { label: 'Retail', items: ['ropa','tienda-ropa','zapateria','muebleria','papeleria','ferreteria','sabanas_premium','floreria'] },
+    'automotriz':     { label: 'Automotriz', items: ['refaccionaria','taller-mecanico','carwash'] },
+    'servicios':      { label: 'Servicios', items: ['purificadora','lavanderia','gimnasio'] },
+  };
+
+  let _girosTenantCounts = null;
+  v14.selectedGiro = null;
+
+  async function loadTenantCountsByGiro() {
+    if (_girosTenantCounts !== null) return _girosTenantCounts;
+    const counts = {};
+    try {
+      const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+      const r = await fetch('/api/admin/tenants', { headers: { 'Authorization': 'Bearer ' + tok }});
+      if (r.ok) {
+        const j = await r.json();
+        const items = j.items || j.tenants || [];
+        items.forEach(t => {
+          const bt = String(t.business_type || '').toLowerCase().trim();
+          if (bt) counts[bt] = (counts[bt] || 0) + 1;
+        });
+      }
+    } catch (e) { console.warn('[PERMv14 Giros] no pude cargar tenant counts', e); }
+    _girosTenantCounts = counts;
+    return counts;
+  }
+
+  // ─── COL 2: lista vertical de giros agrupada por categoría ───
+  async function renderGirosList() {
+    const wrap = $('#permv14-modules-list');
+    if (!wrap) return;
+    const PROFILES = window.INDUSTRY_PROFILES || {};
+    const LABELS = window.INDUSTRY_LABELS || {};
+    const counts = await loadTenantCountsByGiro();
+    if (!v14.selectedGiro) {
+      // auto-seleccionar el primero del primer giro disponible
+      for (const cat of Object.values(GIRO_CATEGORIES)) {
+        for (const slug of cat.items) {
+          if (PROFILES[slug]) { v14.selectedGiro = slug; break; }
+        }
+        if (v14.selectedGiro) break;
+      }
+    }
+    const search = ($('#permv14-mod-search') && $('#permv14-mod-search').value || '').toLowerCase();
+    const usedSlugs = new Set();
+    let html = '';
+    Object.entries(GIRO_CATEGORIES).forEach(([catKey, cat]) => {
+      const visible = cat.items.filter(slug => {
+        if (usedSlugs.has(slug) || !PROFILES[slug]) return false;
+        const label = LABELS[slug] || slug;
+        return !search || label.toLowerCase().includes(search) || slug.toLowerCase().includes(search);
+      });
+      if (!visible.length) return;
+      html += '<div class="permv14-split-group-label">' + cat.label + '</div>';
+      visible.forEach(slug => {
+        usedSlugs.add(slug);
+        const label = LABELS[slug] || slug;
+        const m = label.match(/^(\S+)\s+(.+)$/) || [null, '🎯', label];
+        const tenantCount = counts[slug] || 0;
+        const sel = (v14.selectedGiro === slug) ? ' selected' : '';
+        const countBadge = tenantCount > 0
+          ? '<span class="permv14-list-item-state" title="' + tenantCount + ' tenant(s) usando este giro" style="background:var(--pv-active);color:white;font-family:var(--pv-font-mono);font-size:9px;font-weight:600;padding:1px 5px;border-radius:8px;width:auto;height:auto;line-height:1;">' + tenantCount + '</span>'
+          : '';
+        html += '<div class="permv14-list-item' + sel + '" data-permv14-giro="' + escapeAttr(slug) + '">'
+              + '<span class="permv14-list-item-icon">' + m[1] + '</span>'
+              + escapeText(m[2])
+              + countBadge
+              + '</div>';
+      });
+    });
+    wrap.innerHTML = html || '<div class="permv14-empty-row">Sin giros.</div>';
+    $$('.permv14-list-item[data-permv14-giro]', wrap).forEach(el => {
+      el.addEventListener('click', () => {
+        v14.selectedGiro = el.dataset.permv14Giro;
+        renderGirosList();
+        renderGiroDetail();
+        renderGiroPreview();
+      });
+    });
+  }
+
+  // ─── COL 3: detalle del giro seleccionado (módulos preset, terminología, reglas) ───
+  function renderGiroDetail() {
+    const PROFILES = window.INDUSTRY_PROFILES || {};
+    const LABELS = window.INDUSTRY_LABELS || {};
+    const TERMS = window.INDUSTRY_TERMS || {};
+    const PRODUCT_FIELDS = window.INDUSTRY_PRODUCT_FIELDS || {};
+    const SELL_RULES = window.INDUSTRY_SELL_RULES || {};
+    const MOD_LABELS_LOCAL = {
+      pos:'🛒 Punto de Venta', dashboard:'📊 Dashboard', apertura:'🔓 Apertura caja',
+      corte:'💼 Corte caja', inventario:'📦 Inventario', kardex:'📒 Kardex',
+      clientes:'👥 Clientes', credito:'💳 Crédito', proveedores:'🚚 Proveedores',
+      cotizaciones:'📝 Cotizaciones', devoluciones:'↩️ Devoluciones',
+      ventas:'🧾 Ventas', reportes:'📈 Reportes', facturacion:'📄 Facturación CFDI',
+      recargas:'📱 Recargas', servicios:'💡 Pago servicios', tarjetas:'🎬 Tarjetas virtuales',
+      promociones:'🎁 Promociones', departamentos:'🏢 Departamentos',
+      sugeridas:'🧠 Compras sugeridas', actualizador:'💱 Actualizador masivo',
+      usuarios:'👤 Gestión usuarios', config:'⚙️ Configuración',
+    };
+
+    const labelEl = $('#permv14-current-mod-label');
+    const buttonsTable = $('[data-permv14-target="buttons"]');
+    const moduleTable = $('[data-permv14-target="module"]');
+    const buttonsCount = $('[data-permv14-count-buttons]');
+    const buttonsHeadName = document.querySelector('[data-permv14-section="buttons"] .permv14-section-head-name');
+    const moduleHeadName = document.querySelector('[data-permv14-section="module"] .permv14-section-head-name');
+
+    if (!v14.selectedGiro) {
+      if (labelEl) labelEl.textContent = 'Selecciona un giro';
+      return;
+    }
+
+    const slug = v14.selectedGiro;
+    const profile = PROFILES[slug] || {};
+    const fullLabel = LABELS[slug] || slug;
+    const m = fullLabel.match(/^(\S+)\s+(.+)$/) || [null, '🎯', fullLabel];
+
+    if (labelEl) labelEl.textContent = m[2];
+    if (buttonsHeadName) buttonsHeadName.textContent = '✓ Módulos del preset';
+    if (moduleHeadName) moduleHeadName.textContent = '🌷 Terminología y reglas';
+
+    // Sección "Módulos del preset" (los que vienen ON por default)
+    const allMods = Object.keys(MOD_LABELS_LOCAL);
+    const onMods = allMods.filter(k => profile[k]);
+    if (buttonsCount) buttonsCount.textContent = String(onMods.length);
+
+    if (buttonsTable) {
+      // Tabla con: módulo · ON/OFF según preset (no editable aquí — la edición es en módulos)
+      buttonsTable.innerHTML = allMods.map(k => {
+        const lbl = MOD_LABELS_LOCAL[k];
+        const bm = lbl.match(/^(\S+)\s+(.+)$/) || [null, '📦', lbl];
+        const enabled = !!profile[k];
+        const stateClass = enabled ? 's-on' : 's-hi';
+        const stateText = enabled ? '✓ INCLUIDO' : '— EXCLUIDO';
+        return '<div class="permv14-perm-row">'
+          + '<div class="permv14-perm-icon">' + bm[1] + '</div>'
+          + '<input class="permv14-perm-name-input" value="' + escapeAttr(bm[2]) + '" readonly>'
+          + '<span class="permv14-state-select ' + stateClass + '" style="text-align:center;cursor:default;">'
+          +   stateText
+          + '</span>'
+          + '</div>';
+      }).join('');
+    }
+
+    if (moduleTable) {
+      const terms = TERMS[slug];
+      const rules = SELL_RULES[slug];
+      const fields = PRODUCT_FIELDS[slug] || [];
+      const tenantCount = (_girosTenantCounts || {})[slug] || 0;
+
+      let html = '';
+      // Tenants usando este giro
+      html += '<div class="permv14-perm-row">'
+        + '<div class="permv14-perm-icon">🏪</div>'
+        + '<input class="permv14-perm-name-input" value="Tenants usando este giro" readonly>'
+        + '<span class="permv14-state-select ' + (tenantCount > 0 ? 's-on' : 's-hi') + '" style="text-align:center;cursor:default;">'
+        +   tenantCount + ' activo' + (tenantCount === 1 ? '' : 's')
+        + '</span>'
+        + '</div>';
+      // Terminología
+      if (terms) {
+        Object.entries(terms).forEach(([k, v]) => {
+          if (k === 'producto' && !v) return;
+          html += '<div class="permv14-perm-row">'
+            + '<div class="permv14-perm-icon">🔤</div>'
+            + '<input class="permv14-perm-name-input" value="' + escapeAttr(k + ' →') + '" readonly>'
+            + '<span class="permv14-state-select s-on" style="text-align:center;cursor:default;">' + escapeText(v) + '</span>'
+            + '</div>';
+        });
+      }
+      // Reglas de venta
+      if (rules) {
+        Object.entries(rules).forEach(([flag, rule]) => {
+          html += '<div class="permv14-perm-row" title="' + escapeAttr(rule.message) + '">'
+            + '<div class="permv14-perm-icon">🔒</div>'
+            + '<input class="permv14-perm-name-input" value="' + escapeAttr(rule.label) + '" readonly>'
+            + '<span class="permv14-state-select s-up" style="text-align:center;cursor:default;">REQUIERE</span>'
+            + '</div>';
+        });
+      }
+      // Campos extra del producto (resumen)
+      if (fields.length) {
+        html += '<div class="permv14-perm-row">'
+          + '<div class="permv14-perm-icon">📋</div>'
+          + '<input class="permv14-perm-name-input" value="Campos extra del producto" readonly>'
+          + '<span class="permv14-state-select s-on" style="text-align:center;cursor:default;">' + fields.length + ' campos</span>'
+          + '</div>';
+        fields.slice(0, 6).forEach(f => {
+          html += '<div class="permv14-perm-row" style="opacity:.85;">'
+            + '<div class="permv14-perm-icon">·</div>'
+            + '<input class="permv14-perm-name-input" value="' + escapeAttr(f.label) + '" readonly>'
+            + '<span class="permv14-state-select s-on" style="text-align:center;cursor:default;font-size:9px;">' + escapeText(f.type || 'text').toUpperCase() + '</span>'
+            + '</div>';
+        });
+      }
+
+      moduleTable.innerHTML = html || '<div class="permv14-empty-row">Sin metadata adicional para este giro.</div>';
+    }
+
+    // Tab "Considera": acción de aplicar a un tenant
+    const gotchasWrap = $('[data-permv14-gotchas]');
+    if (gotchasWrap) {
+      const tenants = (window.PERM && window.PERM._tenantsList) || [];
+      gotchasWrap.innerHTML = ''
+        + '<div class="permv14-gotcha info">'
+        +   '<span class="permv14-gotcha-icon">🎯</span>'
+        +   '<div>'
+        +     '<div class="permv14-gotcha-title">Aplicar este perfil a un tenant</div>'
+        +     '<div style="display:flex;gap:6px;margin-top:8px;">'
+        +       '<select id="permv14-giro-apply-target" style="flex:1;padding:5px 8px;border:1px solid var(--pv-border);border-radius:5px;font-family:var(--pv-font-body);font-size:12px;background:var(--pv-bg-paper);">'
+        +         '<option value="">— Selecciona tenant —</option>'
+        +         tenants.map(t => {
+                    const tslug = t.tenant_id || t.id || '';
+                    return '<option value="' + escapeAttr(tslug) + '">' + escapeText(t.name || tslug) + ' (' + escapeText(tslug) + ')</option>';
+                  }).join('')
+        +       '</select>'
+        +       '<button id="permv14-giro-apply-btn" class="permv14-btn-accent">Aplicar</button>'
+        +     '</div>'
+        +     '<div style="margin-top:6px;font-size:11px;color:var(--pv-text-muted);">Setea ' + onMods.length + ' módulos en el tenant seleccionado. Los toggles individuales que el admin haga DESPUÉS sobrescriben este preset.</div>'
+        +   '</div>'
+        + '</div>';
+      const applyBtn = $('#permv14-giro-apply-btn');
+      if (applyBtn) {
+        applyBtn.addEventListener('click', async () => {
+          const tenantSel = $('#permv14-giro-apply-target');
+          const targetTid = tenantSel && tenantSel.value;
+          if (!targetTid) { alert('Selecciona un tenant primero.'); return; }
+          if (!confirm('Aplicar el perfil "' + (LABELS[slug] || slug) + '" a ' + targetTid + '?\n\nVa a setear ' + onMods.length + ' módulos al estado base del giro.')) return;
+          applyBtn.disabled = true;
+          applyBtn.textContent = 'Aplicando…';
+          if (window.PERM) {
+            window.PERM.selectedTid = targetTid;
+            // 2026-05-09: pasar slug explícito (toolbar global eliminada).
+            await window.PERM.applyProfile(slug);
+          }
+          applyBtn.disabled = false;
+          applyBtn.textContent = 'Aplicar';
+          if (window.toast) window.toast('✅ Perfil "' + (LABELS[slug] || slug) + '" aplicado a ' + targetTid, 'ok');
+          _girosTenantCounts = null;
+          renderGirosList();
+          renderGiroDetail();
+        });
+      }
+    }
+  }
+
+  // ─── COL 4: preview del POS con el preset del giro ───
+  function renderGiroPreview() {
+    const PROFILES = window.INDUSTRY_PROFILES || {};
+    const LABELS = window.INDUSTRY_LABELS || {};
+    const TERMS = window.INDUSTRY_TERMS || {};
+    const desktopEl = $('#permv14-preview-desktop');
+    const mobileEl = $('#permv14-preview-mobile');
+    const urlEl = $('#permv14-preview-url');
+
+    if (!v14.selectedGiro) {
+      const empty = '<div class="permv14-empty-row">Selecciona un giro.</div>';
+      if (desktopEl) desktopEl.innerHTML = empty;
+      if (mobileEl) mobileEl.innerHTML = empty;
+      return;
+    }
+
+    const slug = v14.selectedGiro;
+    const profile = PROFILES[slug] || {};
+    const fullLabel = LABELS[slug] || slug;
+    const m = fullLabel.match(/^(\S+)\s+(.+)$/) || [null, '🎯', fullLabel];
+    const giroName = m[2];
+    const terms = TERMS[slug] || {};
+
+    if (urlEl) urlEl.textContent = 'tenant.salvadorex.app/' + slug;
+
+    const MOD_LABELS_LOCAL = {
+      pos:'🛒 Punto de Venta', dashboard:'📊 Dashboard', apertura:'🔓 Apertura',
+      corte:'💼 Corte', inventario: terms.inventario || '📦 Inventario', kardex:'📒 Kardex',
+      clientes: terms.cliente || '👥 Clientes', credito:'💳 Crédito', proveedores:'🚚 Proveedores',
+      cotizaciones:'📝 Cotizaciones', devoluciones:'↩️ Devoluciones',
+      ventas: terms.venta || '🧾 Ventas', reportes:'📈 Reportes',
+      facturacion:'📄 Facturación CFDI', recargas:'📱 Recargas',
+      servicios:'💡 Pago servicios', tarjetas:'🎬 Tarjetas',
+      promociones:'🎁 Promociones', departamentos:'🏢 Departamentos',
+      sugeridas:'🧠 Sugeridas', actualizador:'💱 Actualizador',
+      usuarios:'👤 Usuarios', config:'⚙️ Configuración',
+    };
+
+    const onMods = Object.keys(MOD_LABELS_LOCAL).filter(k => profile[k]);
+    const offMods = Object.keys(MOD_LABELS_LOCAL).filter(k => !profile[k]);
+
+    const modRows = onMods.length === 0
+      ? '<div class="permv14-empty-row">(este giro no incluye módulos)</div>'
+      : onMods.map(k => {
+          const lbl = MOD_LABELS_LOCAL[k];
+          const x = lbl.match(/^(\S+)\s+(.+)$/) || [null, '📦', lbl];
+          return '<div class="permv14-mock-section">'
+            +   '<div class="mk-icon">' + x[1] + '</div>'
+            +   '<span>' + escapeText(x[2]) + '</span>'
+            + '</div>';
+        }).join('');
+
+    const offRows = offMods.length === 0 ? '' : ''
+      + '<div class="permv14-mock-h2" style="font-size:14px;margin-top:18px;">Módulos NO incluidos en este giro</div>'
+      + '<p class="permv14-mock-sub">El admin puede activarlos manualmente después.</p>'
+      + offMods.map(k => {
+          const lbl = MOD_LABELS_LOCAL[k];
+          const x = lbl.match(/^(\S+)\s+(.+)$/) || [null, '📦', lbl];
+          return '<div class="permv14-mock-section is-hidden">'
+            +   '<div class="mk-icon">' + x[1] + '</div>'
+            +   '<span>' + escapeText(x[2]) + '</span>'
+            +   '<span class="permv14-mock-tag s-hi">EXCLUIDO</span>'
+            + '</div>';
+        }).join('');
+
+    const desktopHtml = ''
+      + '<div>'
+      +   '<h2 class="permv14-mock-h2">' + escapeText(giroName) + ' <em>· preset preview</em></h2>'
+      +   '<p class="permv14-mock-sub">Así verá el POS un tenant nuevo de este giro tras aplicar el perfil.</p>'
+      +   modRows
+      +   offRows
+      + '</div>';
+
+    const mobileHtml = ''
+      + '<div>'
+      +   '<div style="font-family:var(--pv-font-display);font-size:16px;font-weight:500;margin-bottom:8px;">' + escapeText(giroName) + '</div>'
+      +   '<div style="font-size:11px;color:var(--pv-text-muted);margin-bottom:12px;">' + onMods.length + ' módulos · ' + offMods.length + ' excluidos</div>'
+      +   onMods.slice(0, 8).map(k => {
+            const lbl = MOD_LABELS_LOCAL[k];
+            const x = lbl.match(/^(\S+)\s+(.+)$/) || [null, '📦', lbl];
+            return '<div class="permv14-mock-section"><div class="mk-icon">' + x[1] + '</div><span>' + escapeText(x[2]) + '</span></div>';
+          }).join('')
+      + '</div>';
+
+    if (desktopEl) desktopEl.innerHTML = desktopHtml;
+    if (mobileEl) mobileEl.innerHTML = mobileHtml;
+  }
+
+  async function renderGirosPane() {
+    const grid = $('#permv14-giros-grid');
+    if (!grid) return;
+    // Si window.PERM._tenantsList no existe aún (no se ha entrado a 'modules'),
+    // cargarlo ahora para que el dropdown "Aplicar a tenant" tenga opciones.
+    if (window.PERM && !window.PERM._tenantsList && typeof window.PERM.loadTenants === 'function') {
+      try { await window.PERM.loadTenants(); } catch(_) {}
+    }
+    const PROFILES = window.INDUSTRY_PROFILES || {};
+    const LABELS = window.INDUSTRY_LABELS || {};
+    const TERMS = window.INDUSTRY_TERMS || {};
+    const PRODUCT_FIELDS = window.INDUSTRY_PRODUCT_FIELDS || {};
+    const SELL_RULES = window.INDUSTRY_SELL_RULES || {};
+    const MOD_LABELS_LOCAL = {
+      pos:'🛒 Punto de Venta', dashboard:'📊 Dashboard', apertura:'🔓 Apertura',
+      corte:'💼 Corte', inventario:'📦 Inventario', kardex:'📒 Kardex',
+      clientes:'👥 Clientes', credito:'💳 Crédito', proveedores:'🚚 Proveedores',
+      cotizaciones:'📝 Cotizaciones', devoluciones:'↩️ Devoluciones',
+      ventas:'🧾 Ventas', reportes:'📈 Reportes', facturacion:'📄 Facturación',
+      recargas:'📱 Recargas', servicios:'💡 Servicios', tarjetas:'🎬 Tarjetas',
+      promociones:'🎁 Promos', departamentos:'🏢 Deptos',
+      sugeridas:'🧠 Sugeridas', actualizador:'💱 Actualizador',
+      usuarios:'👤 Usuarios', config:'⚙️ Config',
+    };
+
+    // Poblar dropdown de categorías solo una vez
+    const filterEl = $('#permv14-giros-filter-cat');
+    if (filterEl && filterEl.options.length <= 1) {
+      Object.entries(GIRO_CATEGORIES).forEach(([key, cat]) => {
+        const opt = document.createElement('option');
+        opt.value = key; opt.textContent = cat.label;
+        filterEl.appendChild(opt);
+      });
+      filterEl.addEventListener('change', () => renderGirosPane());
+    }
+    const searchEl = $('#permv14-giros-search');
+    if (searchEl && !searchEl._wired) {
+      searchEl._wired = true;
+      searchEl.addEventListener('input', () => renderGirosPane());
+    }
+
+    grid.innerHTML = '<div class="permv14-empty-row">Cargando tenants…</div>';
+    loadTenantCountsByGiro().then(counts => {
+      const search = (searchEl && searchEl.value || '').toLowerCase().trim();
+      const filterCat = filterEl && filterEl.value;
+      let html = '';
+      let totalGiros = 0, totalTenants = 0;
+      let usedSlugs = new Set();
+
+      Object.entries(GIRO_CATEGORIES).forEach(([catKey, cat]) => {
+        if (filterCat && filterCat !== catKey) return;
+        const cards = [];
+        cat.items.forEach(slug => {
+          if (usedSlugs.has(slug)) return;
+          usedSlugs.add(slug);
+          const profile = PROFILES[slug];
+          if (!profile) return;
+          const label = LABELS[slug] || slug;
+          if (search && !label.toLowerCase().includes(search) && !slug.toLowerCase().includes(search)) return;
+
+          const tenantCount = counts[slug] || 0;
+          totalGiros++;
+          totalTenants += tenantCount;
+
+          // Lista de módulos ON/OFF: tomamos los keys del profile (ON) y luego DEFAULT_MODS para los OFF
+          const profileModules = Object.keys(profile);
+          const defaultMods = Object.keys((window.PERM && window.PERM.DEFAULT_MODS) || MOD_LABELS_LOCAL);
+          const onMods = profileModules.filter(k => profile[k]);
+          const offMods = defaultMods.filter(k => !profile[k]);
+
+          // Reglas de venta del giro
+          const rules = SELL_RULES[slug];
+          let rulesHtml = '';
+          if (rules) {
+            rulesHtml = Object.entries(rules).map(([flag, rule]) => ''
+              + '<div class="permv14-giro-rule" title="' + escapeAttr(rule.message) + '">'
+              + '🔒 ' + escapeText(rule.label) + ' &nbsp;<span style="opacity:.7">(flag: ' + escapeText(flag) + ')</span>'
+              + '</div>'
+            ).join('');
+          }
+
+          // Campos extra del modal de producto que este giro habilita
+          const extraFields = PRODUCT_FIELDS[slug] || [];
+          const extraFieldsLine = extraFields.length
+            ? '<div class="permv14-giro-section-label">Campos extra del producto (' + extraFields.length + ')</div>'
+              + '<div style="font-size:11px;color:var(--pv-text-muted);">'
+              + extraFields.slice(0,5).map(f => escapeText(f.label)).join(' · ')
+              + (extraFields.length > 5 ? ' · …' : '')
+              + '</div>'
+            : '';
+
+          // Terminologías custom
+          const terms = TERMS[slug];
+          const termsLine = terms
+            ? '<div class="permv14-giro-section-label">Terminología custom</div>'
+              + '<div style="font-size:11px;color:var(--pv-text-muted);">'
+              + 'cliente → ' + escapeText(terms.cliente || '—') + ' · '
+              + 'producto → ' + escapeText(terms.producto || '—')
+              + '</div>'
+            : '';
+
+          const tenantBadgeClass = tenantCount === 0 ? 'zero' : 'has';
+          cards.push(''
+            + '<div class="permv14-giro-card" data-permv14-giro="' + escapeAttr(slug) + '">'
+            + '<div class="permv14-giro-head">'
+            +   '<span class="permv14-giro-name">' + escapeText(label) + '</span>'
+            +   '<span class="permv14-giro-slug">' + escapeText(slug) + '</span>'
+            + '</div>'
+            + '<div class="permv14-giro-tenants ' + tenantBadgeClass + '">'
+            +   (tenantCount === 0 ? '⚪ Sin tenants usando este giro' : ('🟢 ' + tenantCount + ' tenant' + (tenantCount > 1 ? 's':'') + ' activo' + (tenantCount > 1 ? 's':'')))
+            + '</div>'
+            + '<div class="permv14-giro-section-label">Módulos por default (' + onMods.length + ')</div>'
+            + '<div class="permv14-giro-meta-line">'
+            +   onMods.map(k => '<span class="permv14-giro-mod-chip">' + escapeText((MOD_LABELS_LOCAL[k]||k).split(' ')[1] || k) + '</span>').join('')
+            + '</div>'
+            + (offMods.length ? ''
+              + '<div class="permv14-giro-section-label">No incluidos (' + offMods.length + ')</div>'
+              + '<div class="permv14-giro-meta-line">'
+              +   offMods.map(k => '<span class="permv14-giro-mod-chip off">' + escapeText((MOD_LABELS_LOCAL[k]||k).split(' ')[1] || k) + '</span>').join('')
+              + '</div>'
+              : '')
+            + termsLine
+            + extraFieldsLine
+            + (rulesHtml ? '<div class="permv14-giro-section-label">Reglas de venta</div>' + rulesHtml : '')
+            + '<div class="permv14-giro-actions">'
+            +   '<select data-permv14-giro-target-tenant="' + escapeAttr(slug) + '">'
+            +     '<option value="">— Aplicar a tenant… —</option>'
+            +     ((window.PERM && window.PERM._tenantsList) || []).map(t => {
+                    const tslug = t.tenant_id || t.id || '';
+                    return '<option value="' + escapeAttr(tslug) + '">' + escapeText(t.name || tslug) + '</option>';
+                  }).join('')
+            +   '</select>'
+            +   '<button data-permv14-giro-apply="' + escapeAttr(slug) + '">Aplicar</button>'
+            + '</div>'
+            + '</div>'
+          );
+        });
+        if (cards.length > 0) {
+          html += '<div class="permv14-giros-cat-section">' + cat.label + ' (' + cards.length + ')</div>';
+          html += cards.join('');
+        }
+      });
+
+      const countLabel = $('#permv14-giros-count');
+      if (countLabel) countLabel.textContent = totalGiros + ' giros · ' + totalTenants + ' tenant' + (totalTenants !== 1 ? 's':'') + ' usando estos giros';
+
+      grid.innerHTML = html || '<div class="permv14-empty-row">Sin giros que coincidan con la búsqueda.</div>';
+
+      // Wire botones "Aplicar"
+      $$('[data-permv14-giro-apply]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const slug = btn.dataset.permv14GiroApply;
+          const tenantSel = grid.querySelector('[data-permv14-giro-target-tenant="' + slug + '"]');
+          const targetTid = tenantSel && tenantSel.value;
+          if (!targetTid) { alert('Selecciona un tenant primero en el dropdown del card.'); return; }
+          const profile = PROFILES[slug];
+          if (!profile) return;
+          const moduleCount = Object.keys(profile).length;
+          if (!confirm('Aplicar el perfil "' + (LABELS[slug] || slug) + '" a ' + targetTid + '?\n\nVa a setear ' + moduleCount + ' módulos al estado base del giro. Cambios futuros (toggles individuales) sobrescriben este preset.')) return;
+
+          // Disable mientras procesa
+          btn.disabled = true;
+          const origLabel = btn.textContent;
+          btn.textContent = 'Aplicando…';
+
+          // Cambiar el tenant seleccionado del PERM y disparar applyProfile() oficial
+          if (window.PERM) {
+            window.PERM.selectedTid = targetTid;
+            // 2026-05-09: pasar slug explícito (toolbar global eliminada).
+            await window.PERM.applyProfile(slug);
+          }
+
+          btn.disabled = false;
+          btn.textContent = origLabel;
+          if (window.toast) window.toast('✅ Perfil "' + (LABELS[slug] || slug) + '" aplicado a ' + targetTid, 'ok');
+          // Invalidar cache de counts y re-render
+          _girosTenantCounts = null;
+          renderGirosPane();
+        });
+      });
+    });
   }
 
   // ─── TABS DE LA COLUMNA 3 (componentes / deps / considera) ───
@@ -19849,10 +20711,439 @@ window.addEventListener('volvix:version-loaded', function(e){
       // Re-renderizar nueva UI con state actualizado
       try { renderModulesList(); renderConfigPane(); renderPreview(); }
       catch (e) { console.warn('[PERMv14] render fail:', e); }
+      // 2026-05-09 fix(BUG-6): si el tenant seleccionado tiene status !== 'active'
+      // bloquear edición — los cambios sobre tenants suspendidos/revocados/expirados
+      // persisten en BD igual pero el cliente del tenant no los aplica hasta
+      // reactivar. Para evitar confusión, deshabilitamos los toggles + master + apply.
+      try { applyTenantStatusGuard(); } catch(e) { console.warn('[PERMv14] status guard:', e); }
       return r;
     };
     window.PERM._v14Patched = true;
     return true;
+  }
+
+  // 2026-05-09 fix(BUG-6): si tenant.status !== 'active', desactivar todos los
+  // controles de edición de permisos y mostrar banner amarillo. Lectura sigue
+  // siendo permitida (queremos que el admin VEA qué tiene el tenant antes de
+  // reactivar).
+  function applyTenantStatusGuard() {
+    const tid = window.PERM && window.PERM.selectedTid;
+    if (!tid) return;
+    const cache = (window.PERM._flagCache && window.PERM._flagCache[tid]) || {};
+    const localState = window.PERM && window.PERM.getState ? window.PERM.getState() : (window.VOLVIX && window.VOLVIX.getState ? window.VOLVIX.getState() : {});
+    const isOwn = (tid === localState.id);
+    // Para mi propio tenant uso state local; para otros, el cache fetched
+    const status = isOwn ? (localState.status || 'active') : (cache.status || 'active');
+    const blocked = (status !== 'active');
+
+    // 1) Banner amarillo arriba del config-pane
+    const configPane = document.querySelector('.permv14-config-pane');
+    if (configPane) {
+      let banner = configPane.querySelector('.permv14-suspend-banner');
+      if (blocked) {
+        if (!banner) {
+          banner = document.createElement('div');
+          banner.className = 'permv14-suspend-banner';
+          configPane.insertBefore(banner, configPane.firstChild);
+        }
+        const statusLabel = { suspended: 'SUSPENDIDO', revoked: 'REVOCADO', expired: 'VENCIDO', pending: 'PENDIENTE' }[status] || status.toUpperCase();
+        banner.innerHTML = '<span style="font-size:18px;">⚠️</span><div><strong>Tenant ' + statusLabel + '</strong><br><span style="font-size:11.5px;">Reactiva el tenant desde el módulo Usuarios (selector de Estado en la fila) antes de editar sus permisos.</span></div>';
+      } else if (banner) {
+        banner.remove();
+      }
+    }
+
+    // 2) Deshabilitar toggles y master de col 3
+    document.querySelectorAll('[data-permv14-mod-toggle], [data-permv14-feat-toggle], [data-permv14-master]').forEach(el => {
+      el.disabled = blocked;
+      el.title = blocked ? 'Edición bloqueada — tenant ' + status : '';
+    });
+
+    // 3) Deshabilitar botones de "Aplicar perfil" inline (en filas de Usuarios)
+    //    para el tenant bloqueado. El selector busca botones cuyo data-pv14-apply-tenant
+    //    coincida con el tid bloqueado.
+    document.querySelectorAll('button[data-pv14-apply-tenant="' + tid + '"], button[data-pv14-diff-tenant="' + tid + '"]').forEach(btn => {
+      btn.disabled = blocked;
+      btn.style.opacity = blocked ? '0.4' : '';
+      btn.style.cursor = blocked ? 'not-allowed' : '';
+    });
+
+    // 4) Deshabilitar form legacy de override (los inputs ocultos siguen vivos)
+    document.querySelectorAll('#perm-user-email, #perm-user-key, #perm-user-status').forEach(el => {
+      el.disabled = blocked;
+    });
+  }
+
+  // ─── MÓDULO USUARIOS unificado (jerarquía + override + meta tenant) ───
+  // Reemplaza los antiguos panes "Override por usuario" y "Jerarquía real".
+  // Una tabla por tenant: dueño(s) como fila padre, empleados como hijas.
+  // Tipo = Normal (sin override) / Personalizado (con override en localStorage)
+  //      / MARCA BLANCA (cuando tenant.is_white_label === true).
+  // ─────────────────────────────────────────────────────────────────────
+  let _usersHierarchyCache = null;
+  async function fetchHierarchy() {
+    if (_usersHierarchyCache) return _usersHierarchyCache;
+    try {
+      const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+      const r = await fetch('/api/admin/users/hierarchy', { headers: { 'Authorization': 'Bearer ' + tok }});
+      if (!r.ok) return { ok: false, status: r.status };
+      _usersHierarchyCache = await r.json();
+      return _usersHierarchyCache;
+    } catch (e) { console.warn('[PERMv14 Users] hierarchy fail', e); return { ok: false, error: String(e) }; }
+  }
+  function getOverridesByEmail(email) {
+    try {
+      const k = 'volvix:overrides:' + email;
+      const m = JSON.parse(localStorage.getItem(k) || '{}');
+      return Object.keys(m).length ? m : null;
+    } catch(_) { return null; }
+  }
+  function userTypeFor(email, tenantMeta) {
+    if (tenantMeta && (tenantMeta.is_white_label || (String(tenantMeta.plan||'').toLowerCase() === 'marca_blanca'))) {
+      return { tag: 'marcablanca', label: 'MARCA BLANCA' };
+    }
+    return getOverridesByEmail(email)
+      ? { tag: 'personalizado', label: 'Personalizado' }
+      : { tag: 'normal',        label: 'Normal' };
+  }
+  function fmtLastLogin(iso) {
+    if (!iso) return '—';
+    try {
+      const d = new Date(iso);
+      const dias = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+      const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+      return dias[d.getDay()] + ' ' + d.getDate() + ' de ' + meses[d.getMonth()] + ' ' + d.getFullYear();
+    } catch(_) { return '—'; }
+  }
+  async function renderUsersUnified() {
+    const wrap = $('#permv14-users-table-wrap');
+    if (!wrap) return;
+    wrap.innerHTML = '<p class="permv14-empty-row" style="padding:14px;">Cargando…</p>';
+
+    // Asegurar que tenemos el cache de tenants (para plan, is_white_label, etc.)
+    if (window.PERM && !window.PERM._tenantsList && typeof window.PERM.loadTenants === 'function') {
+      try { await window.PERM.loadTenants(); } catch(_) {}
+    }
+    const tenantsList = (window.PERM && window.PERM._tenantsList) || [];
+    const tenantsByTid = {};
+    tenantsList.forEach(t => {
+      const id = t.tenant_id || t.id;
+      if (id) tenantsByTid[id] = t;
+    });
+
+    const j = await fetchHierarchy();
+    if (!j || !j.ok) {
+      wrap.innerHTML = '<p class="permv14-empty-row" style="padding:14px;color:#b91c1c;">No se pudo cargar la jerarquía. ¿Eres superadmin?</p>';
+      return;
+    }
+    const showQa = !!($('#perm-hier-show-qa') && $('#perm-hier-show-qa').checked);
+    const search = ($('#permv14-users-search') && $('#permv14-users-search').value || '').trim().toLowerCase();
+
+    // Header summary
+    const summary = ''
+      + '<div class="permv14-users-summary">'
+      +   '<span>👑 <strong>' + (j.platform_owners || []).length + '</strong> superadmin(s)</span>'
+      +   '<span>🏪 <strong>' + (j.totals && j.totals.companies || 0) + '</strong> negocios</span>'
+      +   '<span>👥 <strong>' + (j.totals && j.totals.users || 0) + '</strong> usuarios</span>'
+      +   '<span>👨‍💼 <strong>' + (j.totals && j.totals.employees || 0) + '</strong> empleados</span>'
+      + '</div>';
+
+    // Tabla
+    const cols = ['Usuario','Tipo','Giro','Estado','Último uso','Plan','URL landing','URL acceso',''];
+    let html = summary
+      + '<table class="permv14-users-table">'
+      +   '<thead><tr>' + cols.map(c => '<th>' + escapeText(c) + '</th>').join('') + '</tr></thead>'
+      +   '<tbody>';
+
+    // Platform owners primero (siempre visibles, no dependen de tenant)
+    (j.platform_owners || []).forEach(po => {
+      const last = fmtLastLogin(po.last_login_at);
+      if (search && !(po.email || '').toLowerCase().includes(search) && !'superadmin'.includes(search)) return;
+      html += '<tr class="permv14-users-row-tenant">'
+        + '<td><span class="u-email">👑 ' + escapeText(po.email || '(sin email)') + '</span></td>'
+        + '<td><span class="u-tag marcablanca">SUPERADMIN</span></td>'
+        + '<td>—</td>'
+        + '<td><span class="u-state active">activo</span></td>'
+        + '<td>' + escapeText(last) + '</td>'
+        + '<td>—</td>'
+        + '<td>—</td>'
+        + '<td>—</td>'
+        + '<td class="u-actions"></td>'
+        + '</tr>';
+    });
+
+    // Tenants con sus owners (parent) y empleados (child)
+    const tenantsToShow = (j.tenants || []).filter(t => showQa || !t.is_qa);
+    tenantsToShow.forEach(t => {
+      const meta = tenantsByTid[t.tenant_id] || {};
+      const giroSlug = (t.business_type || meta.business_type || '').toLowerCase();
+      const giroLabel = (window.INDUSTRY_LABELS && window.INDUSTRY_LABELS[giroSlug]) || giroSlug || '—';
+      const tenantStatus = meta.status || (meta.is_active === false ? 'suspended' : 'active');
+      const plan = (meta.plan || '—');
+      const landing = 'salvadorex.app/' + (t.tenant_id || meta.tenant_id || '');
+      const acceso  = (t.tenant_id || meta.tenant_id || '') + '.salvadorex.app/login';
+
+      const realOwners = (t.owners || []).filter(o => showQa || !o.qa);
+      const employees  = (t.employees || []);
+      const matchesSearch = (txt) => !search || String(txt || '').toLowerCase().includes(search);
+      const tenantMatches = matchesSearch(t.name) || matchesSearch(t.tenant_id) || matchesSearch(giroLabel) || matchesSearch(plan);
+      const ownersFilt    = realOwners.filter(o => tenantMatches || matchesSearch(o.email));
+      const empsFilt      = employees.filter(e => tenantMatches || matchesSearch(e.email));
+      if (!tenantMatches && !ownersFilt.length && !empsFilt.length) return;
+
+      // Helpers locales para celdas inline (status / giro / actions del tenant)
+      const STATUS_OPTS = [
+        ['active','✅ Activo'], ['suspended','⏸ Suspendido'],
+        ['revoked','🔒 Revocado'], ['expired','⏰ Vencido'],
+      ];
+      const PROFILES = window.INDUSTRY_PROFILES || {};
+      const LABELS_GIRO = window.INDUSTRY_LABELS || {};
+      const inlineStatusCell = (tid, current) => ''
+        + '<td>'
+        +   '<select class="u-inline-select" data-pv14-row-status data-pv14-tid="' + escapeAttr(tid) + '" title="Cambiar estado del tenant">'
+        +     STATUS_OPTS.map(([v,l]) => '<option value="' + v + '"' + (v === current ? ' selected' : '') + '>' + l + '</option>').join('')
+        +   '</select>'
+        + '</td>';
+      const inlineGiroCell = (tid, currentSlug) => {
+        const opts = ['<option value="">— sin giro —</option>']
+          .concat(Object.keys(PROFILES).sort().map(slug => {
+            const lbl = LABELS_GIRO[slug] || slug;
+            return '<option value="' + escapeAttr(slug) + '"' + (slug === currentSlug ? ' selected' : '') + '>' + escapeText(lbl) + '</option>';
+          }));
+        return '<td>'
+          +   '<select class="u-inline-select u-inline-giro" data-pv14-row-giro data-pv14-tid="' + escapeAttr(tid) + '" title="Cambiar perfil de giro">'
+          +     opts.join('')
+          +   '</select>'
+          + '</td>';
+      };
+      const inlineTenantActions = (tid, email) => '<td class="u-actions">'
+        + '<button data-pv14-edit-tenant="' + escapeAttr(tid) + '" title="Editar permisos del tenant">✏️</button>'
+        + '<button data-pv14-diff-tenant="' + escapeAttr(tid) + '" title="Ver diff del giro vs estado actual">👁 diff</button>'
+        + '<button data-pv14-apply-tenant="' + escapeAttr(tid) + '" title="Aplicar el preset del giro seleccionado">⚡</button>'
+        + (email ? '<button data-pv14-view-as="' + escapeAttr(email) + '" data-pv14-tid="' + escapeAttr(tid) + '" title="Abrir el POS como lo ve este usuario (modo lectura)">👁 Ver como</button>' : '')
+        + (email ? '<button data-pv14-add-override="' + escapeAttr(email) + '" data-pv14-tid="' + escapeAttr(tid) + '" title="Agregar override individual">+ Override</button>' : '')
+        + '</td>';
+
+      // Owners (filas padre)
+      if (!ownersFilt.length) {
+        // tenant huérfano: mostrar fila stub con info del tenant
+        html += '<tr class="permv14-users-row-tenant">'
+          + '<td><span class="u-email">🏪 (sin owner) — ' + escapeText(t.name || t.tenant_id) + '</span></td>'
+          + '<td><span class="u-tag normal">—</span></td>'
+          + inlineGiroCell(t.tenant_id, giroSlug)
+          + inlineStatusCell(t.tenant_id, tenantStatus)
+          + '<td>—</td>'
+          + '<td>' + escapeText(plan) + '</td>'
+          + '<td><a class="u-url" href="https://' + escapeAttr(landing) + '" target="_blank" rel="noopener">' + escapeText(landing) + '</a></td>'
+          + '<td><a class="u-url" href="https://' + escapeAttr(acceso) + '" target="_blank" rel="noopener">' + escapeText(acceso) + '</a></td>'
+          + inlineTenantActions(t.tenant_id, '')
+          + '</tr>';
+      }
+      ownersFilt.forEach((o, idx) => {
+        const ut = userTypeFor(o.email || '', meta);
+        const last = fmtLastLogin(o.last_login_at);
+        const isFirstOfTenant = (idx === 0);
+        const rowClass = (isFirstOfTenant ? 'permv14-users-row-tenant' : 'permv14-users-row-parent');
+        html += '<tr class="' + rowClass + '">'
+          + '<td><span class="u-email">👤 ' + escapeText(o.email || '(sin email)') + '</span></td>'
+          + '<td><span class="u-tag ' + ut.tag + '">' + escapeText(ut.label) + '</span></td>'
+          // Giro y Estado: SELECT inline solo en la primera fila del tenant
+          + (isFirstOfTenant
+              ? inlineGiroCell(t.tenant_id, giroSlug)
+              : '<td><span style="opacity:.5;font-size:11px;">' + escapeText(giroLabel) + '</span></td>')
+          + (isFirstOfTenant
+              ? inlineStatusCell(t.tenant_id, tenantStatus)
+              : '<td><span class="u-state ' + tenantStatus + '">' + escapeText(tenantStatus) + '</span></td>')
+          + '<td>' + escapeText(last) + '</td>'
+          + '<td>' + escapeText(plan) + '</td>'
+          + '<td><a class="u-url" href="https://' + escapeAttr(landing) + '" target="_blank" rel="noopener">' + escapeText(landing) + '</a></td>'
+          + '<td><a class="u-url" href="https://' + escapeAttr(acceso) + '" target="_blank" rel="noopener">' + escapeText(acceso) + '</a></td>'
+          + (isFirstOfTenant
+              ? inlineTenantActions(t.tenant_id, o.email || '')
+              : '<td class="u-actions">'
+                  + '<button data-pv14-view-as="' + escapeAttr(o.email || '') + '" data-pv14-tid="' + escapeAttr(t.tenant_id) + '" title="Abrir el POS como lo ve este usuario (modo lectura)">👁 Ver como</button>'
+                  + '<button data-pv14-add-override="' + escapeAttr(o.email || '') + '" data-pv14-tid="' + escapeAttr(t.tenant_id) + '" title="Agregar override individual">+ Override</button>'
+                + '</td>')
+          + '</tr>';
+      });
+
+      // Empleados (filas hijo, indentadas)
+      empsFilt.forEach(e => {
+        const ut = userTypeFor(e.email || '', meta);
+        const empState = e.disabled ? 'disabled' : tenantStatus;
+        html += '<tr class="permv14-users-row-child">'
+          + '<td><span class="u-email">' + escapeText(e.email || '(sin email)') + '</span></td>'
+          + '<td><span class="u-tag empleado">' + escapeText(e.role || 'empleado') + '</span>'
+          +     ' <span class="u-tag ' + ut.tag + '">' + escapeText(ut.label) + '</span></td>'
+          + '<td>' + escapeText(giroLabel) + '</td>'
+          + '<td><span class="u-state ' + empState + '">' + escapeText(empState) + '</span></td>'
+          + '<td>—</td>'
+          + '<td>' + escapeText(plan) + '</td>'
+          + '<td><a class="u-url" href="https://' + escapeAttr(landing) + '" target="_blank" rel="noopener">' + escapeText(landing) + '</a></td>'
+          + '<td><a class="u-url" href="https://' + escapeAttr(acceso) + '" target="_blank" rel="noopener">' + escapeText(acceso) + '</a></td>'
+          + '<td class="u-actions">'
+          +   '<button data-pv14-view-as="' + escapeAttr(e.email || '') + '" data-pv14-tid="' + escapeAttr(t.tenant_id) + '" title="Abrir el POS como lo ve este empleado (modo lectura)">👁 Ver como</button>'
+          +   '<button data-pv14-add-override="' + escapeAttr(e.email || '') + '" data-pv14-tid="' + escapeAttr(t.tenant_id) + '" title="Agregar override individual">+ Override</button>'
+          + '</td>'
+          + '</tr>';
+      });
+    });
+
+    if (html.indexOf('<tr') === html.lastIndexOf('<tr')) {
+      html += '<tr class="permv14-users-row-empty"><td colspan="' + cols.length + '">Sin resultados con el filtro actual.</td></tr>';
+    }
+    html += '</tbody></table>';
+    wrap.innerHTML = html;
+
+    // Wire búsqueda + QA + refresh + add-override (una vez)
+    const searchEl = $('#permv14-users-search');
+    if (searchEl && !searchEl._pv14Wired) {
+      searchEl._pv14Wired = true;
+      searchEl.addEventListener('input', () => renderUsersUnified());
+    }
+    const qaEl = $('#perm-hier-show-qa');
+    if (qaEl && !qaEl._pv14Wired) {
+      qaEl._pv14Wired = true;
+      qaEl.addEventListener('change', () => { _usersHierarchyCache = null; renderUsersUnified(); });
+    }
+    const refreshEl = $('#permv14-users-refresh');
+    if (refreshEl && !refreshEl._pv14Wired) {
+      refreshEl._pv14Wired = true;
+      refreshEl.addEventListener('click', () => { _usersHierarchyCache = null; renderUsersUnified(); });
+    }
+    const addOvBtn = $('#permv14-users-add-override');
+    if (addOvBtn && !addOvBtn._pv14Wired) {
+      addOvBtn._pv14Wired = true;
+      addOvBtn.addEventListener('click', () => {
+        // 2026-05-09: ya no hay select global de tenant. Usamos el tenant
+        // actualmente activo (selectedTid) como contexto del override.
+        const tid = window.PERM && window.PERM.selectedTid;
+        if (!tid) { alert('Primero haz click en una fila de tenant (✏️) para activar su contexto.'); return; }
+        const email = prompt('Email del usuario al que aplicar override (tenant activo: ' + tid + '):');
+        if (!email) return;
+        const featKey = prompt('Permiso (ej: module.cobrar, module.devoluciones):');
+        if (!featKey) return;
+        const status = confirm('OK = ❌ Bloquear · Cancelar = ✅ Permitir') ? 'deny' : 'allow';
+        // Inyectar en los inputs ocultos legacy y disparar addOverride
+        $('#perm-user-email').value = email;
+        $('#perm-user-key').value = featKey;
+        $('#perm-user-status').value = status;
+        if (window.PERM && window.PERM.addOverride) window.PERM.addOverride();
+        setTimeout(() => renderUsersUnified(), 600);
+      });
+    }
+    // Helper: marcar el tenant activo en window.PERM (sin DOM intermedio).
+    // 2026-05-09: la toolbar fue eliminada — ahora seteamos selectedTid
+    // y disparamos renderForTenant directamente. PERM ya tolera ambos
+    // patrones (tid arg + this.selectedTid fallback).
+    const switchToTenant = (tid) => {
+      if (!tid || !window.PERM) return;
+      window.PERM.selectedTid = tid;
+      if (window.PERM.renderForTenant) window.PERM.renderForTenant(tid);
+    };
+
+    // Click handlers para botones generados
+    wrap.querySelectorAll('button[data-pv14-edit-tenant]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        switchToTenant(btn.dataset.pv14EditTenant);
+        setActiveNav('modules');
+      });
+    });
+
+    // Inline status select por fila — cambia el estado del tenant
+    wrap.querySelectorAll('select[data-pv14-row-status]').forEach(sel => {
+      sel.addEventListener('change', () => {
+        const tid = sel.dataset.pv14Tid;
+        const newStatus = sel.value;
+        if (!tid) return;
+        if (!confirm('Cambiar el estado de ' + tid + ' a "' + newStatus + '"?')) {
+          // revertir visualmente
+          renderUsersUnified();
+          return;
+        }
+        switchToTenant(tid);
+        // Esperar al render para que perm-status-sel exista y window.PERM.changeStatus tenga selectedTid correcto
+        setTimeout(() => {
+          if (window.PERM && window.PERM.changeStatus) {
+            window.PERM.changeStatus(newStatus);
+            setTimeout(() => { _usersHierarchyCache = null; renderUsersUnified(); }, 800);
+          }
+        }, 200);
+      });
+    });
+
+    // Inline giro select por fila — solo cambia la selección visual; aplicar es el botón ⚡
+    // El slug se pasa explícitamente al PERM en los handlers de ⚡/👁 (no hay select global).
+    wrap.querySelectorAll('select[data-pv14-row-giro]').forEach(sel => {
+      sel.addEventListener('change', () => { /* no-op: el slug se lee al click del botón */ });
+    });
+
+    // ⚡ Aplicar perfil: usa el giro elegido en el mismo row
+    wrap.querySelectorAll('button[data-pv14-apply-tenant]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const tid = btn.dataset.pv14ApplyTenant;
+        const tr = btn.closest('tr');
+        const giroSel = tr && tr.querySelector('select[data-pv14-row-giro]');
+        const slug = giroSel && giroSel.value;
+        if (!slug) { alert('Elige un giro en el dropdown de esta fila antes de aplicar.'); return; }
+        if (!confirm('Aplicar perfil "' + slug + '" a ' + tid + '?\n\nVa a setear los módulos al estado base del giro.')) return;
+        switchToTenant(tid);
+        // Pequeño delay para que selectedTid quede establecido antes del applyProfile
+        setTimeout(async () => {
+          if (window.PERM && window.PERM.applyProfile) await window.PERM.applyProfile(slug);
+          if (window.toast) window.toast('✅ Perfil "' + slug + '" aplicado a ' + tid, 'ok');
+          _usersHierarchyCache = null;
+          setTimeout(() => renderUsersUnified(), 600);
+        }, 200);
+      });
+    });
+
+    // 👁 Ver diff: muestra qué cambia si aplico el giro elegido
+    wrap.querySelectorAll('button[data-pv14-diff-tenant]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tid = btn.dataset.pv14DiffTenant;
+        const tr = btn.closest('tr');
+        const giroSel = tr && tr.querySelector('select[data-pv14-row-giro]');
+        const slug = giroSel && giroSel.value;
+        if (!slug) { alert('Elige un giro en el dropdown antes de ver el diff.'); return; }
+        switchToTenant(tid);
+        setTimeout(() => {
+          if (window.PERM && window.PERM.previewProfile) window.PERM.previewProfile(slug);
+        }, 200);
+      });
+    });
+    // 👁 Ver como — abre el POS en una nueva pestaña con ?impersonate=<email>&tid=<tid>
+    // El boot del POS detecta los params, muestra banner amarillo, bloquea writes,
+    // y aplica los flags del tenant + overrides locales del usuario.
+    wrap.querySelectorAll('button[data-pv14-view-as]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const email = btn.dataset.pv14ViewAs;
+        const tid = btn.dataset.pv14Tid;
+        if (!email || !tid) { alert('Faltan datos para impersonar.'); return; }
+        const url = new URL(location.href);
+        url.search = ''; url.hash = '';
+        url.searchParams.set('_v', '14h');
+        url.searchParams.set('impersonate', email);
+        url.searchParams.set('tid', tid);
+        // Nueva pestaña — la sesión actual del superadmin queda intacta
+        window.open(url.toString(), '_blank', 'noopener');
+      });
+    });
+    wrap.querySelectorAll('button[data-pv14-add-override]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const email = btn.dataset.pv14AddOverride;
+        const tid = btn.dataset.pv14Tid;
+        if (tid) switchToTenant(tid);
+        const featKey = prompt('Permiso a override para ' + email + ' (ej: module.cobrar):');
+        if (!featKey) return;
+        const status = confirm('OK = ❌ Bloquear · Cancelar = ✅ Permitir') ? 'deny' : 'allow';
+        $('#perm-user-email').value = email;
+        $('#perm-user-key').value = featKey;
+        $('#perm-user-status').value = status;
+        if (window.PERM && window.PERM.addOverride) window.PERM.addOverride();
+        setTimeout(() => renderUsersUnified(), 600);
+      });
+    });
   }
 
   // Helpers HTML safe
