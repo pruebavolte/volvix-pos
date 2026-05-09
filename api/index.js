@@ -37060,11 +37060,21 @@ if (process.env.NODE_ENV === 'test') {
       const updates = Array.isArray(body.updates) ? body.updates : [];
       if (!updates.length) return sendJSON(res, { error: 'updates_required' }, 400);
       if (updates.length > 500) return sendJSON(res, { error: 'too_many', max: 500 }, 400);
-      const allowed = ['email', 'plan', 'role', 'full_name', 'phone', 'notes', 'is_active'];
+      // 2026-05-09 fix(CRIT-3): `email` REMOVIDO del whitelist. Cambiar email
+      // de un usuario implica account-takeover (los password reset llegan al
+      // email), así que requiere flujo separado con MFA. Use endpoint
+      // dedicado: POST /api/admin/users/:id/change-email (TBD).
+      // 2026-05-09 fix(HIGH-6): allowlists para enums (role/plan).
+      const allowed = ['plan', 'role', 'full_name', 'phone', 'notes', 'is_active'];
+      const ALLOWED_ROLES = new Set(['ADMIN','USER','superadmin','platform_owner','owner','manager','cajero','vendedor']);
+      const ALLOWED_PLANS = new Set(['trial','pro','enterprise','marca_blanca']);
+      // id puede ser UUID; validar formato. Rechazar email-as-id (CRIT-1).
+      const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
       const results = [];
       for (const u of updates) {
         const id = String((u && u.id) || '').trim();
         if (!id) { results.push({ id: null, ok: false, error: 'id_required' }); continue; }
+        if (!UUID_RE.test(id)) { results.push({ id, ok: false, error: 'invalid_uuid' }); continue; }
         try {
           // Verify user exists
           const exists = await supabaseRequest('GET',
@@ -37076,19 +37086,12 @@ if (process.env.NODE_ENV === 'test') {
           }
           const patch = {};
           allowed.forEach(k => { if (u[k] !== undefined) patch[k] = u[k]; });
-          // Email collision check
-          if (patch.email && String(patch.email).trim() && String(patch.email).toLowerCase() !== String(exists[0].email || '').toLowerCase()) {
-            const conflict = await supabaseRequest('GET',
-              `/pos_users?email=eq.${encodeURIComponent(String(patch.email).trim())}&id=neq.${encodeURIComponent(id)}&select=id&limit=1`
-            ).catch(() => []);
-            if (Array.isArray(conflict) && conflict.length) {
-              // Skip the email change but try the rest
-              delete patch.email;
-              if (!Object.keys(patch).length) {
-                results.push({ id, ok: false, error: 'email_conflict' });
-                continue;
-              }
-            }
+          // Enum validation
+          if (patch.role !== undefined && !ALLOWED_ROLES.has(String(patch.role))) {
+            results.push({ id, ok: false, error: 'invalid_role', value: patch.role }); continue;
+          }
+          if (patch.plan !== undefined && patch.plan !== '' && !ALLOWED_PLANS.has(String(patch.plan))) {
+            results.push({ id, ok: false, error: 'invalid_plan', value: patch.plan }); continue;
           }
           if (!Object.keys(patch).length) {
             results.push({ id, ok: true, skipped: true });
@@ -37116,6 +37119,20 @@ if (process.env.NODE_ENV === 'test') {
       if (!updates.length) return sendJSON(res, { error: 'updates_required' }, 400);
       if (updates.length > 500) return sendJSON(res, { error: 'too_many', max: 500 }, 400);
       const allowed = ['name', 'business_type', 'plan', 'status', 'is_active'];
+      // 2026-05-09 fix(HIGH-1+6): server-side allowlists para enums.
+      // datalist HTML5 no constraina input — el frontend acepta cualquier
+      // string, así que validar AQUÍ es la única defensa.
+      const ALLOWED_STATUS = new Set(['active','suspended','revoked','expired','pending']);
+      const ALLOWED_PLANS = new Set(['trial','pro','enterprise','marca_blanca']);
+      // Cargar slugs válidos de business_type desde verticals (cache 60s).
+      let allowedGiros = handlers.__giros_cache && (Date.now() - handlers.__giros_cache_ts < 60000)
+        ? handlers.__giros_cache : null;
+      if (!allowedGiros) {
+        const verts = await supabaseRequest('GET', '/verticals?select=code&limit=500').catch(() => []);
+        allowedGiros = new Set((Array.isArray(verts) ? verts : []).map(v => v.code));
+        handlers.__giros_cache = allowedGiros;
+        handlers.__giros_cache_ts = Date.now();
+      }
       const results = [];
       for (const u of updates) {
         const tid = String((u && u.tenant_id) || '').trim();
@@ -37139,6 +37156,16 @@ if (process.env.NODE_ENV === 'test') {
           }
           const patch = {};
           allowed.forEach(k => { if (u[k] !== undefined) patch[k] = u[k]; });
+          // Enum validation
+          if (patch.status !== undefined && !ALLOWED_STATUS.has(String(patch.status))) {
+            results.push({ tenant_id: tid, ok: false, error: 'invalid_status', value: patch.status }); continue;
+          }
+          if (patch.plan !== undefined && patch.plan !== '' && !ALLOWED_PLANS.has(String(patch.plan))) {
+            results.push({ tenant_id: tid, ok: false, error: 'invalid_plan', value: patch.plan }); continue;
+          }
+          if (patch.business_type !== undefined && patch.business_type !== '' && !allowedGiros.has(String(patch.business_type))) {
+            results.push({ tenant_id: tid, ok: false, error: 'invalid_business_type', value: patch.business_type }); continue;
+          }
           if (!Object.keys(patch).length) {
             results.push({ tenant_id: tid, ok: true, skipped: true });
             continue;

@@ -21221,8 +21221,15 @@ window.addEventListener('volvix:version-loaded', function(e){
         const last = fmtLastLogin(o.last_login_at);
         const isFirstOfTenant = (idx === 0);
         const rowClass = (isFirstOfTenant ? 'permv14-users-row-tenant' : 'permv14-users-row-parent');
-        html += '<tr class="' + rowClass + '" data-pv14-row-tid="' + escapeAttr(t.tenant_id) + '" data-pv14-row-uid="' + escapeAttr(o.id || o.user_id || '') + '">'
-          + '<td>👤 ' + emailCell(o.id || o.user_id || o.email, o.email || '') + '</td>'
+        // 2026-05-09 fix CRIT-1: NUNCA usar email como rowId — colisiona con
+        // duplicados y el server hace lookup por UUID. Si no hay id real,
+        // mostrar email como texto plano (no editable).
+        const realUid = o.id || o.user_id || null;
+        const emailColHtml = realUid
+          ? emailCell(realUid, o.email || '')
+          : '<span class="u-email" title="Sin UUID — no editable">' + escapeText(o.email || '(sin email)') + '</span>';
+        html += '<tr class="' + rowClass + '" data-pv14-row-tid="' + escapeAttr(t.tenant_id) + '" data-pv14-row-uid="' + escapeAttr(realUid || '') + '">'
+          + '<td>👤 ' + emailColHtml + '</td>'
           + '<td><span class="u-tag ' + ut.tag + '">' + escapeText(ut.label) + '</span></td>'
           // Giro y Estado: SELECT inline solo en la primera fila del tenant (heredan del padre)
           + (isFirstOfTenant
@@ -21248,10 +21255,15 @@ window.addEventListener('volvix:version-loaded', function(e){
       empsFilt.forEach(e => {
         const ut = userTypeFor(e.email || '', meta);
         const empState = e.disabled ? 'disabled' : tenantStatus;
-        const empUid = e.id || e.user_id || e.email;
-        html += '<tr class="permv14-users-row-child" data-pv14-row-tid="' + escapeAttr(t.tenant_id) + '" data-pv14-row-uid="' + escapeAttr(empUid) + '">'
-          + '<td>' + emailCell(empUid, e.email || '') + '</td>'
-          + '<td>' + cellInput({ rowType: 'user', rowId: empUid, field: 'role', value: e.role || 'cajero', list: 'permv14-dl-roles' })
+        // 2026-05-09 fix CRIT-1: idem ownersFilt — empleado sin UUID = read-only
+        const empUid = e.id || e.user_id || null;
+        const empEmailHtml = empUid ? emailCell(empUid, e.email || '') : '<span class="u-email">' + escapeText(e.email || '(sin email)') + '</span>';
+        const empRoleHtml = empUid
+          ? cellInput({ rowType: 'user', rowId: empUid, field: 'role', value: e.role || 'cajero', list: 'permv14-dl-roles' })
+          : '<span class="u-tag empleado">' + escapeText(e.role || 'empleado') + '</span>';
+        html += '<tr class="permv14-users-row-child" data-pv14-row-tid="' + escapeAttr(t.tenant_id) + '" data-pv14-row-uid="' + escapeAttr(empUid || '') + '">'
+          + '<td>' + empEmailHtml + '</td>'
+          + '<td>' + empRoleHtml
           +     ' <span class="u-tag ' + ut.tag + '">' + escapeText(ut.label) + '</span></td>'
           + '<td>' + escapeText(giroLabel) + '</td>'
           + '<td><span class="u-state ' + empState + '">' + escapeText(empState) + '</span></td>'
@@ -21287,7 +21299,13 @@ window.addEventListener('volvix:version-loaded', function(e){
     const refreshEl = $('#permv14-users-refresh');
     if (refreshEl && !refreshEl._pv14Wired) {
       refreshEl._pv14Wired = true;
-      refreshEl.addEventListener('click', () => { _usersHierarchyCache = null; renderUsersUnified(); });
+      refreshEl.addEventListener('click', () => {
+        // 2026-05-09 fix(HIGH-3): bust giro catalog cache también
+        _usersHierarchyCache = null;
+        _giroCatalogCache = null;
+        const dl = $('#permv14-dl-giros'); if (dl) dl._pv14Filled = false;
+        renderUsersUnified();
+      });
     }
     const addOvBtn = $('#permv14-users-add-override');
     if (addOvBtn && !addOvBtn._pv14Wired) {
@@ -21398,29 +21416,45 @@ window.addEventListener('volvix:version-loaded', function(e){
         const auth = { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' };
         let okCount = 0, failCount = 0;
         const failures = [];
+        // 2026-05-09 fix(HIGH-2): construir set de rowIds que SÍ se guardaron para
+        // saber cuáles entries del dirty Map borrar. Las que fallaron se quedan
+        // en el Map para que el usuario pueda reintentar/corregir/descartar.
+        const succeededIds = { user: new Set(), tenant: new Set() };
         try {
           if (usersArr.length) {
             const r = await fetch('/api/admin/users/bulk', { method: 'PATCH', headers: auth, body: JSON.stringify({ updates: usersArr }) });
             const j = await r.json().catch(() => ({}));
-            (j.results || []).forEach(rs => { if (rs.ok) okCount++; else { failCount++; failures.push(rs); }});
+            (j.results || []).forEach(rs => {
+              if (rs.ok) { okCount++; succeededIds.user.add(String(rs.id)); }
+              else { failCount++; failures.push(Object.assign({ scope: 'user' }, rs)); }
+            });
           }
           if (tenantsArr.length) {
             const r = await fetch('/api/admin/tenants/bulk', { method: 'PATCH', headers: auth, body: JSON.stringify({ updates: tenantsArr }) });
             const j = await r.json().catch(() => ({}));
-            (j.results || []).forEach(rs => { if (rs.ok) okCount++; else { failCount++; failures.push(rs); }});
+            (j.results || []).forEach(rs => {
+              if (rs.ok) { okCount++; succeededIds.tenant.add(String(rs.tenant_id)); }
+              else { failCount++; failures.push(Object.assign({ scope: 'tenant' }, rs)); }
+            });
           }
         } catch (e) {
           alert('Error de red al guardar: ' + e.message);
           saveBtn.disabled = false; saveBtn.textContent = '💾 Guardar';
           return;
         }
+        // Borrar SOLO entries que se guardaron exitosamente
+        for (const [k, d] of Array.from(v14.usersDirty.entries())) {
+          if ((d.rowType === 'user' && succeededIds.user.has(String(d.rowId))) ||
+              (d.rowType === 'tenant' && succeededIds.tenant.has(String(d.rowId)))) {
+            v14.usersDirty.delete(k);
+          }
+        }
         if (failCount > 0) {
-          if (window.toast) window.toast('⚠ Guardado con errores: ' + okCount + ' OK, ' + failCount + ' fallaron', 'warn');
-          console.warn('[Excel-save] failures:', failures);
+          if (window.toast) window.toast('⚠ ' + okCount + ' guardadas, ' + failCount + ' fallaron (revisa consola). Cambios fallidos siguen en cola.', 'warn');
+          console.warn('[Excel-save] failures (still dirty):', failures);
         } else {
           if (window.toast) window.toast('✅ ' + okCount + ' filas guardadas exitosamente', 'ok');
         }
-        v14.usersDirty.clear();
         _usersHierarchyCache = null;
         saveBtn.textContent = '💾 Guardar';
         renderUsersUnified();
