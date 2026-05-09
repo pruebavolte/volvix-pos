@@ -19196,33 +19196,54 @@ window.addEventListener('volvix:version-loaded', function(e){
       sel.innerHTML = opts.join('');
     },
 
+    // 2026-05-09 fix(BUG-1): si /api/admin/user/by-email retorna 404,
+    // ABORTAR con toast rojo visible. Antes se hacía fallback resolvedUserId=email
+    // (string en columna UUID) → INSERT fallaba en silencio y la UI mentía
+    // mostrando "Override aplicado" cuando la BD quedaba intacta.
     async addOverride() {
       const email = (document.getElementById('perm-user-email').value || '').trim().toLowerCase();
       const key = document.getElementById('perm-user-key').value;
       const status = document.getElementById('perm-user-status').value;
       if (!email) { alert('Email requerido'); return; }
       const modKey = key.replace(/^module\./, '');
-      // Tenant target = el seleccionado en el dropdown (puede no ser el del super-admin)
       const tid = this.selectedTid || (VOLVIX.getState && VOLVIX.getState().id);
-      // Resolver email → user_id (UUID) si el endpoint existe; si no, fallback a email.
-      let resolvedUserId = email;
+      // ── Resolver email → user_id (UUID). OBLIGATORIO; si falla, abort.
+      let resolvedUserId = null;
+      let resolveError = null;
       try {
         const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
         const r = await fetch('/api/admin/user/by-email?email=' + encodeURIComponent(email),
           { headers: { 'Authorization': 'Bearer ' + tok }});
-        if (r.ok) {
+        if (r.status === 404) {
+          resolveError = 'NO_SUCH_USER';
+        } else if (r.ok) {
           const j = await r.json();
           if (j && j.user && j.user.id) resolvedUserId = j.user.id;
+          else resolveError = 'NO_USER_ID_IN_RESPONSE';
+        } else {
+          resolveError = 'HTTP_' + r.status;
         }
-      } catch(_) {}
+      } catch(e) { resolveError = 'NETWORK_' + (e && e.message || 'unknown'); }
+
+      if (!resolvedUserId) {
+        const msg = resolveError === 'NO_SUCH_USER'
+          ? 'No existe ningún usuario con email "' + email + '". Override NO aplicado.'
+          : 'No se pudo resolver el usuario: ' + resolveError + '. Override NO aplicado.';
+        if (window.toast) window.toast('❌ ' + msg, 'error');
+        else alert('❌ ' + msg);
+        return; // ← abort sin tocar BD ni localStorage
+      }
+
       const j = await this._apiCall('POST', '/api/admin/user-override', {
         tenant_id: tid, user_id: resolvedUserId, module_key: modKey, status,
         reason: 'PERM panel — override aplicado por superadmin (' + email + ')',
       });
-      if (j && j.ok) {
-        if (window.toast) window.toast('Override aplicado para ' + email, 'ok');
+      if (!j || !j.ok) {
+        // _apiCall ya muestra toast de error si rebota
+        return;
       }
-      // Tambien guardar local para render inmediato
+      if (window.toast) window.toast('✅ Override aplicado para ' + email, 'ok');
+      // Cache local para render inmediato (espejo del BD)
       const ovKey = 'volvix:overrides:' + email;
       let map = {};
       try { map = JSON.parse(localStorage.getItem(ovKey) || '{}'); } catch(_) {}
@@ -19261,7 +19282,50 @@ window.addEventListener('volvix:version-loaded', function(e){
         '</tr>').join('') + '</tbody></table>';
     },
 
-    removeOverride(email, featKey) {
+    // 2026-05-09 fix(BUG-2): además de limpiar localStorage, llamar al endpoint
+    // DELETE /api/admin/user-override para borrar el override de la BD.
+    // Antes solo se borraba el cache local y el override seguía aplicándose
+    // al usuario en el server. Acepta 404 como éxito (ya no existía en BD).
+    async removeOverride(email, featKey) {
+      const tid = this.selectedTid || (VOLVIX.getState && VOLVIX.getState().id);
+      const modKey = String(featKey || '').replace(/^module\./, '');
+      // Resolver email → user_id
+      let resolvedUserId = null;
+      try {
+        const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+        const r = await fetch('/api/admin/user/by-email?email=' + encodeURIComponent(email),
+          { headers: { 'Authorization': 'Bearer ' + tok }});
+        if (r.ok) {
+          const j = await r.json();
+          if (j && j.user && j.user.id) resolvedUserId = j.user.id;
+        }
+      } catch(_) {}
+
+      // Si NO podemos resolver el user, igual limpiamos local pero advertimos.
+      // Caso típico: override quedó en localStorage de pruebas viejas con email
+      // que no existe en pos_users — el server nunca tuvo el override, no hay
+      // qué borrar en BD.
+      if (resolvedUserId && tid) {
+        try {
+          const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+          const url = '/api/admin/user-override'
+            + '?tenant_id=' + encodeURIComponent(tid)
+            + '&user_id='   + encodeURIComponent(resolvedUserId)
+            + '&module_key=' + encodeURIComponent(modKey);
+          const r = await fetch(url, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + tok }});
+          // 200 OK o 404 (ya no existe) son éxitos. Otros códigos = error real.
+          if (!r.ok && r.status !== 404) {
+            if (window.toast) window.toast('⚠ Override borrado local pero falló en server (HTTP ' + r.status + ')', 'warn');
+          }
+        } catch(e) {
+          if (window.toast) window.toast('⚠ Override borrado local pero hubo error de red al sincronizar', 'warn');
+        }
+      } else if (!resolvedUserId) {
+        // No es error fatal — solo limpia local. Aviso suave.
+        if (window.toast) window.toast('ℹ Override removido del cache local (usuario no existe en BD)', 'info');
+      }
+
+      // Limpiar cache local SIEMPRE
       const ovKey = 'volvix:overrides:' + email;
       try {
         const map = JSON.parse(localStorage.getItem(ovKey) || '{}');

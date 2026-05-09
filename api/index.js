@@ -36510,7 +36510,7 @@ if (process.env.NODE_ENV === 'test') {
       if (!tid || !userId || !moduleKey) {
         return sendJSON(res, { error: 'tenant_id + user_id + module_key requeridos' }, 400);
       }
-      // Upsert
+      // Upsert: el DELETE puede fallar (no había nada) — eso SÍ se puede tragar
       await supabaseRequest('DELETE',
         `/user_module_overrides?tenant_id=eq.${encodeURIComponent(tid)}&user_id=eq.${encodeURIComponent(userId)}&module_key=eq.${encodeURIComponent(moduleKey)}`
       ).catch(() => null);
@@ -36519,8 +36519,23 @@ if (process.env.NODE_ENV === 'test') {
         reason: body.reason || null, set_by: req.user?.id || null,
         set_at: new Date().toISOString(),
       };
-      const saved = await supabaseRequest('POST', '/user_module_overrides', row).catch(() => null);
-      // Audit
+      // 2026-05-09 fix(BUG-9): NO tragar error del INSERT a Supabase. Antes, si
+      // CHECK constraint o FK violation rebotaban (ej: status='deny' no es válido,
+      // module_key='pos.cobrar' no existe en feature_modules), el .catch silenciaba
+      // y el endpoint retornaba {ok:true} — la UI mentía mostrando "Override
+      // aplicado" cuando la BD quedaba vacía. Ahora retornamos 500 con detalle.
+      let saveError = null;
+      const saved = await supabaseRequest('POST', '/user_module_overrides', row)
+        .catch(e => { saveError = String(e && e.message || e); return null; });
+      if (saveError) {
+        return sendJSON(res, {
+          ok: false,
+          error: 'persist_failed',
+          detail: saveError,
+          hint: 'BUG-7/8 conocidos: status debe ser enabled|disabled|coming-soon y module_key debe existir en feature_modules con prefijo (module.X)',
+        }, 500);
+      }
+      // Audit (best-effort — sí permitimos que falle silenciosamente)
       supabaseRequest('POST', '/feature_flag_audit', {
         tenant_id: tid, scope: 'user', scope_ref: userId, module_key: moduleKey,
         old_status: 'inherited', new_status: status,
