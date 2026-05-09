@@ -1801,12 +1801,16 @@ const handlers = {
 
       // First-login / forced-change detection
       const mustChangePassword = !!(notes && notes.must_change_password) || !user.last_login_at;
+      // 2026-05-09: incluir business_type en la session response para que el
+      // cliente aplique terminologías y campos extras del giro al cargar el POS.
+      const businessType = (notes && notes.business_type) || (user.giro) || null;
       const resp = {
         ok: true,
         token, // nuevo
         session: {
           user_id: user.id, email: user.email, role: volvixRole,
           tenant_id: tenantId, tenant_name: tenantName,
+          business_type: businessType,
           full_name: user.full_name, company_id: user.company_id,
           expires_at: Date.now() + (JWT_EXPIRES_SECONDS * 1000), plan: user.plan,
           jti,
@@ -31896,7 +31900,13 @@ if (process.env.NODE_ENV === 'test') {
     'papeleria','fruteria','carniceria','polleria','taller_mecanico',
     'lavado_autos','servicio_celulares','colegio','gimnasio','escuela_idiomas',
     'renta_autos','renta_salones','foto_estudio','ferreteria','gasolinera',
-    'funeraria','purificadora','otro'
+    'funeraria','purificadora','otro',
+    // 2026-05-09 ampliacion: giros que el cliente sugiere pero el server rechazaba
+    'floreria','dulceria','tienda-conveniencia','salon-belleza','salud',
+    'jugos_naturales','jugos-naturales','sabanas_premium','refaccionaria',
+    'lavanderia','muebleria','zapateria','ropa','tienda-ropa','dental',
+    'belleza','rentas','retail','automotriz','fitness','gym','dental',
+    'agencia-viajes','hotel','casa-empeno','educacion','carwash'
   ]);
 
   // ---- Demo seeds por giro (FIX-O1-4 bootstrap) ----
