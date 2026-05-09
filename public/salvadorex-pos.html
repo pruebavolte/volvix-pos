@@ -20123,6 +20123,23 @@ window.addEventListener('volvix:version-loaded', function(e){
 
   let _girosTenantCounts = null;
   v14.selectedGiro = null;
+  v14.selectedGiroMod = null;          // 2026-05-09: cuál módulo está siendo drill-down
+  v14.giroFeatureOverrides = {};       // { slug: { 'pos.cobrar': false, ... } } toggles del usuario
+  v14.giroTermOverrides = {};          // { slug: { cliente: 'NuevoLabel', ... } } edición inline
+  // Catálogo de botones por módulo (usado en col 4 drill-down de Giros).
+  // Reproducido del FEAT_LABELS del IIFE original; mantener sincronizado.
+  const FEAT_LABELS_GIRO = {
+    'pos.cobrar':'💵 F12 — Cobrar','pos.descuento':'% Descuento',
+    'pos.mayoreo':'F11 — Mayoreo','pos.granel':'⚖ Granel',
+    'pos.calculadora':'🧮 Calculadora','pos.cambiar':'F5 — Cambiar precio',
+    'pos.pendiente':'F6 — Pendiente','pos.borrar':'DEL — Borrar artículo',
+    'pos.buscar':'F10 — Buscar','pos.entradas':'F7 — Entradas',
+    'pos.salidas':'F8 — Salidas','pos.verificador':'F9 — Verificador',
+    'pos.panel':'📒 Panel categorías','pos.catalogo':'📷 Catálogo',
+    'pos.recargas_btn':'📱 Btn Recargas','pos.servicios_btn':'💡 Btn Servicios',
+    'pos.ins_varios':'INS — Varios','pos.art_comun':'CTRL+P Artículo común',
+    'pos.quickpick_panel':'Panel QuickPick','ui.saas_btn':'👑 Btn SaaS Admin',
+  };
 
   async function loadTenantCountsByGiro() {
     if (_girosTenantCounts !== null) return _girosTenantCounts;
@@ -20243,21 +20260,47 @@ window.addEventListener('volvix:version-loaded', function(e){
     if (buttonsCount) buttonsCount.textContent = String(onMods.length);
 
     if (buttonsTable) {
-      // Tabla con: módulo · ON/OFF según preset (no editable aquí — la edición es en módulos)
+      // 2026-05-09: filas INTERACTIVAS — chip toggleable + fila clickable para drill-down.
+      // El estado se guarda mutando window.INDUSTRY_PROFILES[slug] en memoria.
+      // Al hacer ⚡ Aplicar, applyProfile lee el objeto mutado.
       buttonsTable.innerHTML = allMods.map(k => {
         const lbl = MOD_LABELS_LOCAL[k];
         const bm = lbl.match(/^(\S+)\s+(.+)$/) || [null, '📦', lbl];
         const enabled = !!profile[k];
         const stateClass = enabled ? 's-on' : 's-hi';
         const stateText = enabled ? '✓ INCLUIDO' : '— EXCLUIDO';
-        return '<div class="permv14-perm-row">'
+        const isSel = (v14.selectedGiroMod === k);
+        const rowStyle = isSel
+          ? 'cursor:pointer;border-left:3px solid var(--pv-accent);background:rgba(195,108,80,.06);'
+          : 'cursor:pointer;';
+        return '<div class="permv14-perm-row" data-giro-mod-row="' + k + '" style="' + rowStyle + '" title="Click para ver botones de este módulo en col 4">'
           + '<div class="permv14-perm-icon">' + bm[1] + '</div>'
           + '<input class="permv14-perm-name-input" value="' + escapeAttr(bm[2]) + '" readonly>'
-          + '<span class="permv14-state-select ' + stateClass + '" style="text-align:center;cursor:default;">'
+          + '<span class="permv14-state-select ' + stateClass + '" data-giro-mod-toggle="' + k + '" style="text-align:center;cursor:pointer;" title="Click para alternar INCLUIDO/EXCLUIDO en el preset">'
           +   stateText
           + '</span>'
           + '</div>';
       }).join('');
+      // Wire chip click — toggle preset
+      $$('[data-giro-mod-toggle]', buttonsTable).forEach(el => {
+        el.addEventListener('click', ev => {
+          ev.stopPropagation();
+          const k = el.dataset.giroModToggle;
+          if (!window.INDUSTRY_PROFILES[slug]) window.INDUSTRY_PROFILES[slug] = {};
+          window.INDUSTRY_PROFILES[slug][k] = !window.INDUSTRY_PROFILES[slug][k];
+          if (window.toast) window.toast('Preset modificado en memoria — aplica con ⚡', 'info');
+          renderGiroDetail();
+          renderGiroPreview();
+        });
+      });
+      // Wire row click — drill-down a col 4 mostrando botones del módulo
+      $$('[data-giro-mod-row]', buttonsTable).forEach(el => {
+        el.addEventListener('click', () => {
+          v14.selectedGiroMod = el.dataset.giroModRow;
+          renderGiroDetail();
+          renderGiroPreview();
+        });
+      });
     }
 
     if (moduleTable) {
@@ -20275,14 +20318,16 @@ window.addEventListener('volvix:version-loaded', function(e){
         +   tenantCount + ' activo' + (tenantCount === 1 ? '' : 's')
         + '</span>'
         + '</div>';
-      // Terminología
+      // Terminología — INPUT EDITABLE 2026-05-09. Mutación en memoria de
+      // window.INDUSTRY_TERMS[slug][k]; al hacer ⚡ Aplicar el motor de
+      // terminología (applyIndustryTerminology) ya lo recoge de ahí.
       if (terms) {
         Object.entries(terms).forEach(([k, v]) => {
           if (k === 'producto' && !v) return;
           html += '<div class="permv14-perm-row">'
             + '<div class="permv14-perm-icon">🔤</div>'
             + '<input class="permv14-perm-name-input" value="' + escapeAttr(k + ' →') + '" readonly>'
-            + '<span class="permv14-state-select s-on" style="text-align:center;cursor:default;">' + escapeText(v) + '</span>'
+            + '<input class="permv14-perm-term-input" data-giro-term-key="' + escapeAttr(k) + '" value="' + escapeAttr(v) + '" style="flex:0 0 auto;width:140px;background:var(--pv-bg-paper);border:1px solid var(--pv-border);border-radius:5px;padding:4px 8px;font-family:var(--pv-font-body);font-size:11.5px;color:var(--pv-text);" title="Editable: cambia la palabra que verá el usuario del POS">'
             + '</div>';
         });
       }
@@ -20313,6 +20358,21 @@ window.addEventListener('volvix:version-loaded', function(e){
       }
 
       moduleTable.innerHTML = html || '<div class="permv14-empty-row">Sin metadata adicional para este giro.</div>';
+      // Wire inputs editables de terminología — guarda al perder foco / Enter.
+      $$('input[data-giro-term-key]', moduleTable).forEach(inp => {
+        const save = () => {
+          const k = inp.dataset.giroTermKey;
+          if (!window.INDUSTRY_TERMS[slug]) window.INDUSTRY_TERMS[slug] = {};
+          const newVal = inp.value.trim();
+          if (newVal !== window.INDUSTRY_TERMS[slug][k]) {
+            window.INDUSTRY_TERMS[slug][k] = newVal;
+            if (window.toast) window.toast('Terminología "' + k + '" → "' + newVal + '" (en memoria)', 'info');
+            renderGiroPreview();
+          }
+        };
+        inp.addEventListener('blur', save);
+        inp.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); inp.blur(); } });
+      });
     }
 
     // Tab "Considera": acción de aplicar a un tenant
@@ -20350,6 +20410,24 @@ window.addEventListener('volvix:version-loaded', function(e){
             window.PERM.selectedTid = targetTid;
             // 2026-05-09: pasar slug explícito (toolbar global eliminada).
             await window.PERM.applyProfile(slug);
+            // 2026-05-09: además aplicar los toggles individuales de botones del giro (drill-down).
+            //   POST /api/admin/tenant/:tid/button por cada feature override.
+            //   Errores se loguean pero no abortan — applyProfile principal ya pasó.
+            const featOverrides = v14.giroFeatureOverrides[slug] || {};
+            const featKeys = Object.keys(featOverrides);
+            if (featKeys.length) {
+              const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+              for (const bk of featKeys) {
+                try {
+                  await fetch('/api/admin/tenant/' + encodeURIComponent(targetTid) + '/button', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ button_key: bk, enabled: featOverrides[bk] !== false }),
+                  });
+                } catch (e) { console.warn('[PERMv14 Giros] feature apply fail', bk, e); }
+              }
+              if (window.toast) window.toast('✓ ' + featKeys.length + ' toggles de botones también aplicados', 'ok');
+            }
           }
           applyBtn.disabled = false;
           applyBtn.textContent = 'Aplicar';
@@ -20427,10 +20505,83 @@ window.addEventListener('volvix:version-loaded', function(e){
             + '</div>';
         }).join('');
 
+    // ─── 2026-05-09: si hay un módulo seleccionado en col 3 (drill-down),
+    //     col 4 muestra los BOTONES/componentes de ese módulo (en vez del mockup).
+    //     Cada botón es toggleable; el estado se guarda en
+    //     v14.giroFeatureOverrides[slug][featKey] = false (default true).
+    if (v14.selectedGiroMod) {
+      const mod = v14.selectedGiroMod;
+      const modLbl = MOD_LABELS_LOCAL[mod] || mod;
+      const mm = modLbl.match(/^(\S+)\s+(.+)$/) || [null, '📦', modLbl];
+      const childButtons = Object.keys(FEAT_LABELS_GIRO).filter(bk => FEAT_PARENT_MOD[bk] === mod);
+      const overrides = v14.giroFeatureOverrides[slug] || {};
+      const moduleEnabled = !!profile[mod];
+
+      const drillBody = childButtons.length === 0
+        ? '<div class="permv14-empty-row" style="padding:16px;">Este módulo no expone botones individuales editables en el preset.</div>'
+        : childButtons.map(bk => {
+            const lbl = FEAT_LABELS_GIRO[bk];
+            const bm2 = lbl.match(/^(\S+)\s+(.+)$/) || [null, '🔘', lbl];
+            const enabled = overrides[bk] !== false; // default: incluido
+            const stateClass = enabled ? 's-on' : 's-hi';
+            const stateText = enabled ? '✓ Activo' : '— Inactivo';
+            return '<div class="permv14-perm-row">'
+              + '<div class="permv14-perm-icon">' + bm2[1] + '</div>'
+              + '<input class="permv14-perm-name-input" value="' + escapeAttr(bm2[2]) + '" readonly>'
+              + '<span class="permv14-state-select ' + stateClass + '" data-giro-feat-toggle="' + escapeAttr(bk) + '" style="text-align:center;cursor:pointer;" title="Click para toggle activo/inactivo en este giro">'
+              +   stateText
+              + '</span>'
+              + '</div>';
+          }).join('');
+
+      const drillHtml = ''
+        + '<div>'
+        +   '<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">'
+        +     '<button data-giro-back-to-preview style="background:transparent;border:1px solid var(--pv-border);padding:5px 12px;border-radius:5px;cursor:pointer;font-size:11.5px;font-family:var(--pv-font-body);">← Volver al preview</button>'
+        +     '<h2 style="margin:0;font-family:var(--pv-font-display);font-size:18px;font-weight:500;letter-spacing:-0.01em;">' + mm[1] + ' Componentes de <em style="color:var(--pv-accent);">' + escapeText(mm[2]) + '</em></h2>'
+        +   '</div>'
+        +   '<p class="permv14-mock-sub">Botones / componentes que el módulo expondrá. Toggle individual aplica al hacer ⚡ Aplicar.'
+        +     (moduleEnabled ? '' : ' <strong style="color:#b91c1c;">⚠ Este módulo está EXCLUIDO del preset — sus botones no se renderizarán al cliente aunque estén activos aquí.</strong>')
+        +   '</p>'
+        +   '<div style="background:var(--pv-bg-paper);border:1px solid var(--pv-border);border-radius:8px;padding:8px;">'
+        +     drillBody
+        +   '</div>'
+        + '</div>';
+
+      if (desktopEl) desktopEl.innerHTML = drillHtml;
+      if (mobileEl) mobileEl.innerHTML = '<div class="permv14-empty-row" style="padding:14px;">Vista de componentes solo en desktop.</div>';
+
+      // Wire toggles de features
+      $$('[data-giro-feat-toggle]', desktopEl).forEach(el => {
+        el.addEventListener('click', ev => {
+          ev.stopPropagation();
+          const bk = el.dataset.giroFeatToggle;
+          if (!v14.giroFeatureOverrides[slug]) v14.giroFeatureOverrides[slug] = {};
+          const cur = v14.giroFeatureOverrides[slug][bk];
+          // default true → false; false → true (delete override)
+          if (cur === false) delete v14.giroFeatureOverrides[slug][bk];
+          else v14.giroFeatureOverrides[slug][bk] = false;
+          if (window.toast) window.toast('Botón "' + bk + '" alternado en memoria — aplica con ⚡', 'info');
+          renderGiroPreview();
+        });
+      });
+      // Wire botón "Volver al preview"
+      const backBtn = desktopEl && desktopEl.querySelector('[data-giro-back-to-preview]');
+      if (backBtn) {
+        backBtn.addEventListener('click', () => {
+          v14.selectedGiroMod = null;
+          renderGiroDetail();
+          renderGiroPreview();
+        });
+      }
+      return;
+    }
+
+    // ─── Modo default: preview mockup ───
     const desktopHtml = ''
       + '<div>'
       +   '<h2 class="permv14-mock-h2">' + escapeText(giroName) + ' <em>· preset preview</em></h2>'
-      +   '<p class="permv14-mock-sub">Así verá el POS un tenant nuevo de este giro tras aplicar el perfil.</p>'
+      +   '<p class="permv14-mock-sub">Así verá el POS un tenant nuevo de este giro tras aplicar el perfil. <strong>Click en un módulo de la columna izquierda</strong> para ver/editar sus componentes.</p>'
       +   modRows
       +   offRows
       + '</div>';
