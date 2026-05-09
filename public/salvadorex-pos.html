@@ -2604,8 +2604,35 @@
   var imEmail = params.get('impersonate');
   var imTid = params.get('tid');
   if (!imEmail) return;
-  window.IMPERSONATING = { email: imEmail, tid: imTid || null, since: Date.now() };
-  console.warn('[IMPERSONATING] vista como:', imEmail, '@', imTid);
+  // 2026-05-09: leer el token de impersonación del URL fragment (#imp_token=...).
+  // El fragment no viaja al server — más seguro que query string.
+  // Si está presente: se guarda en sessionStorage (per-tab, no contamina el super-admin
+  // login del otro tab), y se monkey-patchea localStorage.getItem para que TODA fetch
+  // use el JWT read-only (con is_impersonation:true que el server enforza).
+  var imToken = null;
+  try {
+    var hashParams = new URLSearchParams((location.hash || '').replace(/^#/, ''));
+    imToken = hashParams.get('imp_token');
+    if (imToken) {
+      sessionStorage.setItem('volvix_impersonation_token', imToken);
+      // Limpiar el fragment del URL para que no quede visible
+      try { history.replaceState(null, '', location.pathname + location.search); } catch(_){}
+    } else {
+      imToken = sessionStorage.getItem('volvix_impersonation_token');
+    }
+    if (imToken) {
+      // Monkey-patch localStorage.getItem para devolver imp token cuando se pida volvix_token
+      var origGetItem = Storage.prototype.getItem;
+      Storage.prototype.getItem = function(k) {
+        if (this === localStorage && (k === 'volvix_token' || k === 'volvixAuthToken')) {
+          return imToken;
+        }
+        return origGetItem.call(this, k);
+      };
+    }
+  } catch(e) { console.warn('[IMPERSONATING] token bootstrap fail', e); }
+  window.IMPERSONATING = { email: imEmail, tid: imTid || null, since: Date.now(), hasToken: !!imToken };
+  console.warn('[IMPERSONATING] vista como:', imEmail, '@', imTid, 'token:', imToken ? 'YES (read-only JWT)' : 'NO (fallback to super JWT)');
 
   // 0) Stylesheet inyectado — resistente a manipulaciones inline. El !important
   //    en body padding evita que otros wirings de Volvix lo sobreescriban.
@@ -21503,17 +21530,42 @@ window.addEventListener('volvix:version-loaded', function(e){
     // El boot del POS detecta los params, muestra banner amarillo, bloquea writes,
     // y aplica los flags del tenant + overrides locales del usuario.
     wrap.querySelectorAll('button[data-pv14-view-as]').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', async () => {
         const email = btn.dataset.pv14ViewAs;
         const tid = btn.dataset.pv14Tid;
         if (!email || !tid) { alert('Faltan datos para impersonar.'); return; }
-        const url = new URL(location.href);
-        url.search = ''; url.hash = '';
-        url.searchParams.set('_v', '14h');
-        url.searchParams.set('impersonate', email);
-        url.searchParams.set('tid', tid);
-        // Nueva pestaña — la sesión actual del superadmin queda intacta
-        window.open(url.toString(), '_blank', 'noopener');
+        // 2026-05-09: ANTES de abrir la pestaña, mintear un JWT read-only via
+        // POST /api/admin/tenant/:tid/impersonate. El JWT lleva is_impersonation:true
+        // y el server bloquea TODO write con ese JWT (defensa real, no solo client).
+        // El token viaja por URL fragment (#imp_token=...) — fragmentos NO viajan al
+        // server ni quedan en logs/referers. La nueva pestaña lo lee del fragment
+        // y lo guarda en sessionStorage (per-tab, no contamina la sesión del super).
+        btn.disabled = true; const origLabel = btn.textContent; btn.textContent = '⏳';
+        try {
+          const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+          const r = await fetch('/api/admin/tenant/' + encodeURIComponent(tid) + '/impersonate', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reason: 'view_as_user:' + email }),
+          });
+          const j = await r.json();
+          if (!r.ok || !j.token) {
+            alert('No se pudo crear sesión de impersonación: ' + (j.error || r.status));
+            return;
+          }
+          const url = new URL(location.href);
+          url.search = ''; url.hash = '';
+          url.searchParams.set('_v', '14h');
+          url.searchParams.set('impersonate', email);
+          url.searchParams.set('tid', tid);
+          // Token va en fragment — NO logs, NO referers, NO query strings
+          url.hash = 'imp_token=' + encodeURIComponent(j.token);
+          window.open(url.toString(), '_blank', 'noopener');
+        } catch (e) {
+          alert('Error: ' + e.message);
+        } finally {
+          btn.disabled = false; btn.textContent = origLabel;
+        }
       });
     });
     wrap.querySelectorAll('button[data-pv14-add-override]').forEach(btn => {
