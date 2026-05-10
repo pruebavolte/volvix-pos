@@ -32,6 +32,8 @@
 | `public/volvix-platform-orders.js` | Pedidos PWA → POS modal rojo | ~390 |
 | `api/index.js` | Backend Vercel function (todos los `/api/*`) | ~38k |
 | `vercel.json` | Routing + CSP + headers | 78 |
+| `electron/main.js` | Electron wrapper Win/Mac/Linux (carga URL Vercel) | 77 |
+| `electron/preload.js` | contextBridge `window.volvixElectron` | 11 |
 
 ---
 
@@ -200,8 +202,8 @@ Sin redeploy. Frontend lee al boot y aplica.
 | **Web principal** (`marketplace.html`) | ✅ activo | Vercel auto-deploy | API REST `/api/*` |
 | **PWA POS dueño** (`salvadorex-pos.html`) | ✅ activo | Vercel + manifest.json + sw.js | API + IndexedDB offline-first |
 | **PWA App Cliente** (`/app/index.html`) | ✅ activo | Vercel | API `/api/app/*` |
-| **Electron .exe Win** | ⚙️ scripts listos (`npm run electron:build:win`) | manual build → distribuye .exe | Misma API HTTPS |
-| **Electron .dmg Mac** | ⚙️ scripts listos (`electron:build:mac`) | manual | Misma API |
+| **Electron .exe Win** | ✅ wrapper listo (`electron/main.js` carga `volvix-pos.vercel.app/salvadorex-pos.html`) | `npm run electron:build:win` | Misma API HTTPS |
+| **Electron .dmg Mac** | ✅ wrapper listo (mismo `main.js`) | `npm run electron:build:mac` | Misma API |
 | **APK Android (Capacitor)** | ⚙️ scripts listos (`mobile:android:release`) | manual `mobile:sync` + Android Studio | Misma API |
 | **iOS** | ⚙️ scripts listos (`mobile:ios`) | requiere Xcode | Misma API |
 
