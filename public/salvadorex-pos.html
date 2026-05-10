@@ -21521,7 +21521,10 @@ window.addEventListener('volvix:version-loaded', function(e){
         // visual (la PWA mostrará "tenant_no_encontrado" pero el QR sirve como demo).
         const tenantSlug = (tenantExample && (tenantExample.tenant_id || tenantExample.id)) || ('demo-' + slug);
         const baseOrigin = (typeof location !== 'undefined' && location.origin) ? location.origin : 'https://volvix-pos.vercel.app';
-        const appUrl = baseOrigin + '/app/?t=' + encodeURIComponent(tenantSlug);
+        // 2026-05-09 fix(QR): apuntar a /app/index.html (ruta de filesystem directa) en vez
+        // de /app/ que requiere rewrite. Garantiza que el QR funcione aunque Vercel routes
+        // no haya recargado, y es URL canónica estable.
+        const appUrl = baseOrigin + '/app/index.html?t=' + encodeURIComponent(tenantSlug);
         const qrApi = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&margin=8&data=' + encodeURIComponent(appUrl);
         const qrShareHtml = ''
           + '<div style="margin-top:18px;display:flex;gap:18px;align-items:center;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:14px;max-width:640px;margin-left:auto;margin-right:auto;">'
