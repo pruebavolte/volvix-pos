@@ -1,0 +1,29 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Volvix POS - Dev Server",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["server.js"],
+      "port": 3000
+    },
+    {
+      "name": "Volvix POS - Production Server",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "prod"],
+      "port": 3000
+    },
+    {
+      "name": "Volvix POS - Electron Desktop",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "electron:dev"],
+      "port": 3000
+    },
+    {
+      "name": "Volvix POS - Electron Offline Mode",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "electron:dev:offline"],
+      "port": 3000
+    }
+  ]
+}

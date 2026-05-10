@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+<title>Tutorial · Paso 1 — Agregar tu primer producto</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #312e81 100%);
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .header {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  .badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+  }
+  h1 {
+    font-size: clamp(24px, 4vw, 36px);
+    margin-bottom: 6px;
+    letter-spacing: -0.5px;
+  }
+  .sub {
+    color: rgba(255,255,255,0.7);
+    font-size: 15px;
+  }
+  .video-wrap {
+    width: 100%;
+    max-width: 1100px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+    background: #000;
+    position: relative;
+  }
+  video {
+    width: 100%;
+    display: block;
+  }
+  .controls {
+    margin-top: 24px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .btn {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    backdrop-filter: blur(8px);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn:hover { background: rgba(255,255,255,0.2); }
+  .btn.primary {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    border-color: transparent;
+  }
+  .meta {
+    margin-top: 32px;
+    text-align: center;
+    color: rgba(255,255,255,0.5);
+    font-size: 13px;
+  }
+  .meta code { background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 5px; font-family: ui-monospace, monospace; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="badge">📹 Tutorial · Paso 1 de 4</div>
+    <h1>Cómo agregar tu primer producto</h1>
+    <p class="sub">94 segundos · Voz en español · Cursor visible · Captions sincronizados</p>
+  </div>
+
+  <div class="video-wrap">
+    <video controls autoplay playsinline preload="auto">
+      <source src="/tutorial-paso-1.mp4" type="video/mp4">
+      Tu navegador no soporta el tag de video.
+    </video>
+  </div>
+
+  <div class="controls">
+    <a href="/tutorial-paso-1.mp4" download="paso-1-agregar-producto.mp4" class="btn primary">⬇ Descargar MP4</a>
+    <a href="/salvadorex-pos.html" class="btn">📦 Ir al POS</a>
+    <a href="/pos-inventario.html" class="btn">📋 Ir a Inventario</a>
+  </div>
+
+  <div class="meta">
+    Generado con <code>npm run tutorials:paso1</code> · Playwright + msedge-tts + ffmpeg
+  </div>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Test Wizard Real — Subir menus del usuario</title>
+<style>
+body{font:14px system-ui;margin:20px;background:#f8fafc;color:#0f172a}
+h1{color:#0b5fff}h2{margin-top:24px;color:#0f172a;font-size:16px}
+.row{display:flex;gap:16px;align-items:center;margin:8px 0;padding:8px;background:#fff;border:1px solid #e5e7eb;border-radius:8px}
+.thumb{width:120px;max-height:80px;object-fit:cover;border-radius:4px;border:1px solid #e5e7eb}
+button{background:#10b981;color:#fff;border:0;padding:8px 16px;border-radius:6px;font-weight:700;cursor:pointer;font-size:13px;margin:0 4px}
+button:hover{background:#059669}button.primary{background:#0b5fff}
+.status{padding:6px 10px;border-radius:4px;font-size:12px;font-weight:600}
+.ok{background:#d1fae5;color:#065f46}.err{background:#fee2e2;color:#991b1b}.info{background:#dbeafe;color:#1e40af}
+#log{margin-top:12px;background:#1e293b;color:#e2e8f0;padding:12px;border-radius:6px;font-family:Consolas,monospace;font-size:12px;max-height:280px;overflow:auto}
+table.results{width:100%;background:#fff;border-collapse:collapse;margin-top:8px;font-size:12px}
+table.results th,table.results td{border:1px solid #e5e7eb;padding:5px 8px;text-align:left}
+table.results th{background:#f1f5f9}
+</style>
+</head>
+<body>
+<h1>Test Wizard Real — Imágenes del usuario</h1>
+<p>Carga el módulo <code>volvix-import-wizard.js</code> (con fix #5 parseJSON) + Tesseract.js (sin CSP local). Procesa físicamente cada imagen via la UI del wizard como lo haría un humano.</p>
+
+<div id="menus"></div>
+
+<button class="primary" onclick="runAll()">▶ Procesar las 4 imágenes (en cadena)</button>
+<button onclick="openWizardOnly()">📥 Abrir wizard sólo (manual)</button>
+
+<div id="log"></div>
+
+<h2>Resultados (con desglose por imagen)</h2>
+<div id="results"></div>
+
+<!-- Tesseract.js sin CSP local -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.4/dist/tesseract.min.js"></script>
+<!-- Wizard real (con fix #5 ya aplicado) -->
+<script src="../public/volvix-import-wizard.js"></script>
+
+<script>
+const FILES = [
+  {key: '8002ca13580b405dd00b006cb7e08280.jpg',  label: 'menu A — 218KB'},
+  {key: 'descarga (1).jpg',                       label: 'menu B — descarga(1) 14KB'},
+  {key: 'descarga.jpg',                           label: 'menu C — descarga 8.4KB'},
+  {key: 'restaurant-menu-digital-display-design-template-5d2609decd85935bedd2a3a6d9a9982e_screen.jpg', label: 'menu D — display design 118KB'}
+];
+
+const log = (msg, kind) => {
+  const d = document.getElementById('log');
+  const cls = kind || 'info';
+  d.innerHTML += `<div class="${cls}" style="margin:2px 0">[${new Date().toISOString().substring(11,19)}] ${msg}</div>`;
+  d.scrollTop = d.scrollHeight;
+};
+
+// Render thumbnails
+FILES.forEach((f, i) => {
+  const div = document.createElement('div');
+  div.className = 'row';
+  div.innerHTML = `
+    <img class="thumb" src="user-menus/${encodeURIComponent(f.key)}" alt="">
+    <div style="flex:1">
+      <strong>#${i+1}</strong> ${f.label}<br>
+      <small>${f.key}</small>
+    </div>
+    <button onclick="processOne(${i})">Procesar #${i+1}</button>
+  `;
+  document.getElementById('menus').appendChild(div);
+});
+
+function openWizardOnly() {
+  window.VolvixImport.openWizard();
+  log('Wizard abierto manualmente. Usa el botón "Subir archivo" en el modal.', 'info');
+}
+
+async function processOne(i) {
+  const f = FILES[i];
+  log(`#${i+1} → ${f.label} · fetch`, 'info');
+  const r = await fetch(`user-menus/${encodeURIComponent(f.key)}`);
+  const blob = await r.blob();
+  log(`#${i+1} → ${(blob.size/1024).toFixed(0)} KB · abriendo wizard`, 'info');
+
+  // 1) Abrir el wizard (UI real del usuario)
+  if (!document.getElementById('volvix-import-modal')) window.VolvixImport.openWizard();
+  await new Promise(r => setTimeout(r, 400));
+
+  // 2) Encontrar input file
+  const input = document.getElementById('volvix-imp-file');
+  if (!input) { log(`#${i+1} → ERR: input file no encontrado`, 'err'); return; }
+
+  // 3) Crear File real y simular cambio (igual a drag&drop o click+select)
+  const file = new File([blob], f.key, {type: blob.type});
+  const dt = new DataTransfer();
+  dt.items.add(file);
+  input.files = dt.files;
+  input.dispatchEvent(new Event('change', {bubbles: true}));
+
+  // 4) Esperar a que la UI muestre la tabla o un mensaje de error
+  log(`#${i+1} → wizard procesando OCR (puede tardar 8-25s)`, 'info');
+  const t0 = Date.now();
+  let resolved = null;
+  for (let t = 0; t < 60; t++) {
+    await new Promise(r => setTimeout(r, 1000));
+    const wiz = document.getElementById('volvix-import-modal');
+    if (!wiz) break;
+    const txt = wiz.innerText;
+    if (/no pudimos extraer/i.test(txt)) { resolved = {ok: false, reason: 'sin productos extraídos'}; break; }
+    const rows = wiz.querySelectorAll('table tbody tr');
+    if (rows.length > 0) {
+      const data = Array.from(rows).slice(0, 30).map(r => Array.from(r.querySelectorAll('input')).map(i => i.value));
+      resolved = {ok: true, rowsCount: rows.length, sample: data};
+      break;
+    }
+  }
+  const ms = Date.now() - t0;
+  if (!resolved) resolved = {ok: false, reason: 'timeout 60s'};
+
+  // 5) Render resultado
+  const div = document.createElement('div');
+  div.style.cssText = 'background:#fff;padding:12px;margin:8px 0;border:1px solid #e5e7eb;border-radius:8px';
+  if (resolved.ok) {
+    log(`#${i+1} → ✅ ${resolved.rowsCount} productos en ${(ms/1000).toFixed(1)}s`, 'ok');
+    div.innerHTML = `<h3>#${i+1} ${f.label}</h3><span class="status ok">✅ ${resolved.rowsCount} productos · ${(ms/1000).toFixed(1)}s</span><table class="results"><tr><th>Categoría</th><th>Nombre</th><th>Costo</th><th>Precio</th><th>Stock</th></tr>${resolved.sample.map(r => '<tr>' + r.map(c => '<td>' + (c||'') + '</td>').join('') + '</tr>').join('')}</table>`;
+  } else {
+    log(`#${i+1} → ❌ ${resolved.reason} (${(ms/1000).toFixed(1)}s)`, 'err');
+    div.innerHTML = `<h3>#${i+1} ${f.label}</h3><span class="status err">❌ ${resolved.reason} · ${(ms/1000).toFixed(1)}s</span>`;
+  }
+  document.getElementById('results').appendChild(div);
+
+  // 6) Cerrar el wizard antes del siguiente
+  const closeBtn = document.getElementById('volvix-imp-close');
+  if (closeBtn) closeBtn.click();
+  await new Promise(r => setTimeout(r, 300));
+}
+
+async function runAll() {
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('log').innerHTML = '';
+  log('Iniciando procesamiento de las 4 imágenes del usuario', 'info');
+  for (let i = 0; i < FILES.length; i++) {
+    await processOne(i);
+  }
+  log('Todos los tests completados.', 'ok');
+  window._done = true;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Volvix Wizard — Test Local de OCR + Parser</title>
+<style>
+body{font:14px system-ui;margin:20px;background:#0f172a;color:#e2e8f0}
+h1{color:#10b981}h2{color:#fbbf24;margin-top:24px}
+table{border-collapse:collapse;margin:8px 0;width:100%;background:#1e293b}
+th,td{border:1px solid #334155;padding:6px 8px;text-align:left;font-size:13px;vertical-align:top}
+th{background:#0b1220}
+.ok{color:#10b981;font-weight:600}.err{color:#ef4444;font-weight:600}.warn{color:#fbbf24}
+pre{background:#0b1220;padding:8px;border-radius:6px;overflow:auto;max-height:200px;font-size:11px}
+.thumb{width:140px;max-height:90px;object-fit:cover;border-radius:4px}
+button{background:#10b981;color:#fff;border:0;padding:10px 20px;border-radius:6px;font-weight:700;cursor:pointer;font-size:15px}
+button:hover{background:#059669}button:disabled{opacity:0.5;cursor:not-allowed}
+#log{margin-top:16px;font-family:Consolas,monospace;font-size:12px;background:#0b1220;padding:12px;border-radius:6px;max-height:300px;overflow:auto}
+.progress{height:6px;background:#334155;border-radius:3px;margin:6px 0;overflow:hidden}
+.progress > div{height:100%;background:#10b981;transition:width .3s}
+</style>
+</head>
+<body>
+<h1>Volvix Wizard — Test Local de OCR + Parser</h1>
+<p>Procesa los 10 menus reales descargados de Wikimedia Commons. Sin CSP, sin restrictions.</p>
+<button id="run">Run all 10 tests</button>
+<button id="run-one">Run only menu_1 (rapido)</button>
+<div id="log"></div>
+<h2>Resultados</h2>
+<div id="results"></div>
+
+<!-- Tesseract.js v5 desde CDN (sin CSP local) -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.4/dist/tesseract.min.js"></script>
+
+<!-- Versión local del wizard parser (con fix #5 ya aplicado) -->
+<script src="../public/volvix-import-wizard.js"></script>
+
+<script>
+const log = (msg, kind) => {
+  const d = document.getElementById('log');
+  const c = kind === 'err' ? 'err' : kind === 'ok' ? 'ok' : kind === 'warn' ? 'warn' : '';
+  d.innerHTML += `<div class="${c}">[${new Date().toISOString().substring(11,19)}] ${msg}</div>`;
+  d.scrollTop = d.scrollHeight;
+};
+
+const results = document.getElementById('results');
+const renderRow = (idx, file, statusHtml, parseRes) => {
+  const url = `menu_${idx}.jpg`;
+  const rowsCount = Array.isArray(parseRes) ? parseRes.length : 0;
+  const sample = Array.isArray(parseRes) ? parseRes.slice(0, 6) : [];
+  const tableHtml = sample.length
+    ? '<table><tr>' + sample[0].map(h => '<th>' + h + '</th>').join('') + '</tr>' +
+      sample.slice(1).map(r => '<tr>' + r.map(c => '<td>' + (c || '') + '</td>').join('') + '</tr>').join('') +
+      '</table>'
+    : '<i>(sin filas)</i>';
+  results.insertAdjacentHTML('beforeend', `
+    <h2>#${idx} — ${file} (${rowsCount} filas extraídas)</h2>
+    <div style="display:flex;gap:16px;align-items:flex-start">
+      <img class="thumb" src="${url}" alt="">
+      <div style="flex:1">${statusHtml}${tableHtml}</div>
+    </div>
+  `);
+};
+
+async function runOne(idx) {
+  const path = `menu_${idx}.jpg`;
+  log(`#${idx} → fetch ${path}`);
+  const r = await fetch(path);
+  const blob = await r.blob();
+  const file = new File([blob], path, {type: blob.type});
+  log(`#${idx} → ${(blob.size/1024).toFixed(0)} KB · parseFile()`);
+  const t0 = Date.now();
+  try {
+    const result = await window.VolvixImport.parseFile(file);
+    const ms = Date.now() - t0;
+    const rows = Array.isArray(result) ? result.length : 0;
+    log(`#${idx} → ${rows} filas en ${ms}ms`, rows > 1 ? 'ok' : 'warn');
+    renderRow(idx, path, `<div class="ok">parseFile OK · ${ms}ms · ${rows} filas</div>`, result);
+    return {idx, ok: true, rows, ms};
+  } catch (e) {
+    const ms = Date.now() - t0;
+    log(`#${idx} → ERR ${String(e).substring(0,200)} (${ms}ms)`, 'err');
+    renderRow(idx, path, `<div class="err">ERROR: ${String(e).substring(0,200)}</div>`, []);
+    return {idx, ok: false, err: String(e), ms};
+  }
+}
+
+document.getElementById('run-one').onclick = async () => {
+  results.innerHTML = '';
+  document.getElementById('log').innerHTML = '';
+  await runOne(1);
+};
+
+document.getElementById('run').onclick = async () => {
+  results.innerHTML = '';
+  document.getElementById('log').innerHTML = '';
+  log('Iniciando 10 tests con archivos reales locales');
+  const summary = [];
+  for (let i = 1; i <= 10; i++) {
+    summary.push(await runOne(i));
+  }
+  const ok = summary.filter(s => s.ok && s.rows > 1).length;
+  const empty = summary.filter(s => s.ok && s.rows <= 1).length;
+  const fail = summary.filter(s => !s.ok).length;
+  log(`RESUMEN: ${ok} extrajeron datos · ${empty} parsearon vacío · ${fail} errores`, 'ok');
+  window._summary = summary;
+};
+</script>
+</body>
+</html>

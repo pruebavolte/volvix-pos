@@ -11062,6 +11062,17 @@
   }
 
   /* ============ INIT ============ */
+  // 2026-05-10 fix: re-render automático cuando DataLoader async termina de
+  // llenar arrays globales. Antes los contadores quedaban en 0 si CUSTOMERS
+  // se llenaba después del primer render.
+  document.addEventListener('volvix:customers-loaded', () => {
+    try { if (typeof renderClientes === 'function') renderClientes(); } catch (_) {}
+    try { if (typeof renderCredito === 'function') renderCredito(); } catch (_) {}
+  });
+  document.addEventListener('volvix:products-loaded', () => {
+    try { if (typeof renderInv === 'function') renderInv(); } catch (_) {}
+    try { if (typeof renderCategories === 'function') renderCategories(); } catch (_) {}
+  });
   window.addEventListener('DOMContentLoaded', async () => {
     // Render inicial con placeholders (mientras carga el API)
     renderCart();

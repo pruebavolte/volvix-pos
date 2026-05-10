@@ -1,0 +1,59 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Batch test 10 nuevos formatos</title>
+<style>body{font:13px monospace;padding:20px;background:#0f172a;color:#e2e8f0}
+table{border-collapse:collapse;width:100%}
+th,td{border:1px solid #334155;padding:6px;text-align:left;font-size:12px;vertical-align:top}
+th{background:#1e293b;color:#fbbf24}
+.ok{color:#10b981}.err{color:#ef4444}.warn{color:#fbbf24}
+button{background:#10b981;color:#fff;border:0;padding:10px 20px;border-radius:6px;cursor:pointer;font-size:14px}</style></head>
+<body>
+<h1>Batch test 10 nuevos formatos del usuario</h1>
+<button onclick="runAll()">▶ Procesar TODOS (~3-5 min)</button>
+<div id="log"></div>
+<table id="results"><thead><tr><th>#</th><th>Archivo</th><th>Tamaño</th><th>Estado</th><th>Productos</th><th>Muestra</th></tr></thead><tbody></tbody></table>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.4/dist/tesseract.min.js"></script>
+<script src="../public/volvix-import-wizard.js"></script>
+<script>
+const FILES = [
+  {p:'user-menus/1131w-Chz14uZvuZo.webp', label:'WebP'},
+  {p:'user-menus/comida-restaurante.pdf', label:'PDF mediano'},
+  {p:'user-menus/insurgentes-sur-espanol.pdf', label:'PDF grande 3.4MB'},
+  {p:'user-menus/restaurant_menu_test_pack/menu_1.csv', label:'CSV pack'},
+  {p:'user-menus/restaurant_menu_test_pack/menu_1.jpg', label:'JPG pack'},
+  {p:'user-menus/restaurant_menu_test_pack/menu_1.png', label:'PNG pack'},
+  {p:'user-menus/restaurant_menu_test_pack/menu_1.txt', label:'TXT pack'},
+  {p:'user-menus/restaurant_menu_test_pack/menus.docx', label:'DOCX'},
+  {p:'user-menus/restaurant_menu_test_pack/menus.pptx', label:'PPTX'},
+  {p:'user-menus/restaurant_menu_test_pack/menus.xlsx', label:'XLSX'},
+];
+const log = m => { document.getElementById('log').insertAdjacentHTML('beforeend', '<div>' + new Date().toISOString().substring(11,19) + ' ' + m + '</div>'); };
+async function runAll() {
+  document.querySelector('#results tbody').innerHTML = '';
+  document.getElementById('log').innerHTML = '';
+  let i = 0;
+  for (const f of FILES) {
+    i++;
+    log('#' + i + ' ' + f.label + ' fetch ' + f.p);
+    try {
+      const r = await fetch(f.p);
+      const blob = await r.blob();
+      const file = new File([blob], f.p.split('/').pop(), {type: blob.type});
+      const t0 = Date.now();
+      const result = await window.VolvixImport.parseFile(file);
+      const data = Array.isArray(result) ? result.slice(1, 5) : [];
+      const cell = '<tr><td>' + i + '</td><td>' + f.label + '</td><td>' + (blob.size/1024).toFixed(0) + ' KB</td>' +
+        '<td class="' + (data.length > 0 ? 'ok' : 'warn') + '">' + (data.length > 0 ? '✅ OK ' + (Date.now()-t0) + 'ms' : '⚠ vacío') + '</td>' +
+        '<td>' + data.length + '</td>' +
+        '<td>' + data.slice(0,3).map(r => '<div>' + (r[0]||'') + ' · ' + (r[1]||'') + ' · $' + (r[3]||r[2]||'?') + '</div>').join('') + '</td></tr>';
+      document.querySelector('#results tbody').insertAdjacentHTML('beforeend', cell);
+      log('#' + i + ' → ' + data.length + ' productos');
+    } catch (e) {
+      document.querySelector('#results tbody').insertAdjacentHTML('beforeend',
+        '<tr><td>' + i + '</td><td>' + f.label + '</td><td>?</td><td class="err">❌ ' + String(e).substring(0,60) + '</td><td>0</td><td></td></tr>');
+      log('#' + i + ' ERR ' + String(e).substring(0,80));
+    }
+  }
+  log('✅ DONE');
+  window._batchDone = true;
+}
+</script></body></html>
