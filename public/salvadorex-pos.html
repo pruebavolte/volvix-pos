@@ -7431,24 +7431,129 @@
   //           y auto-focus inteligente (si tenemos nombre → cursor en PRECIO,
   //           si no → cursor en NOMBRE)
   // Cada nivel tiene timeout para que el botón "Buscando..." no se cuelgue.
+  // 2026-05-10: normalización TOLERANTE para que "coca 600" = "coca600" = "coca-cola"
+  // Quita espacios, guiones, underscores, puntos, comas, paréntesis, acentos.
+  function _normalize(s) {
+    return String(s || '')
+      .toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g, '') // quita acentos
+      .replace(/[\s\-_.,()\/]/g, '');
+  }
+
+  // 2026-05-10: tracking de productos RECIENTES (último uso) para boost de ranking.
+  // Persistido en localStorage. Usado al pre-cargar CATALOG y en autocomplete.
+  // Estructura: { items: [{id,code,name,price,_lastUsed,_useCount}], maxSize: 50 }
+  const _RECENT_KEY = 'volvix_recent_products';
+  function _getRecents() {
+    try { return JSON.parse(localStorage.getItem(_RECENT_KEY) || '{"items":[]}').items || []; }
+    catch (_) { return []; }
+  }
+  function _trackRecent(p) {
+    if (!p || (!p.id && !p.code)) return;
+    try {
+      const items = _getRecents();
+      const key = p.id || p.code;
+      const existing = items.findIndex(x => (x.id || x.code) === key);
+      const entry = {
+        id: p.id, code: p.code || p.barcode, name: p.name || p.nombre,
+        price: Number(p.price || p.precio || 0),
+        _lastUsed: Date.now(),
+        _useCount: existing >= 0 ? (items[existing]._useCount || 0) + 1 : 1
+      };
+      if (existing >= 0) items.splice(existing, 1);
+      items.unshift(entry);
+      // Cap a 50 items
+      const truncated = items.slice(0, 50);
+      localStorage.setItem(_RECENT_KEY, JSON.stringify({ items: truncated, ts: Date.now() }));
+    } catch (_) {}
+  }
+  // Pre-cargar recents al CATALOG global cuando el sistema arranca (boost ranking)
+  function _preloadRecentsToCatalog() {
+    const recents = _getRecents();
+    if (!recents.length || typeof CATALOG === 'undefined') return;
+    recents.forEach(r => {
+      if (!CATALOG.find(c => (c.id || c.code) === (r.id || r.code))) {
+        CATALOG.push(r);
+      }
+    });
+  }
+  document.addEventListener('DOMContentLoaded', function () { setTimeout(_preloadRecentsToCatalog, 1500); });
+  window._getRecents = _getRecents;
+  window._trackRecent = _trackRecent;
+
   async function _searchProductInner(trimmed, isBarcode, lower, opts) {
     opts = opts || {};
+    const normQ = _normalize(trimmed);
 
-    // ── Level 1: CATALOG en memoria (instantáneo) ─────────────────────────
+    // ── Level 1: CATALOG en memoria (instantáneo, ~0ms) ──────────────────
     if (typeof CATALOG !== 'undefined' && Array.isArray(CATALOG)) {
-      // Match por barcode/code primero (exacto), después por nombre (parcial)
+      // Match por barcode/code primero (exacto), después por nombre normalizado
       let hit = CATALOG.find(x => x.code === trimmed || x.barcode === trimmed);
-      if (!hit) hit = CATALOG.find(x => (x.name || '').toLowerCase() === lower);
+      if (!hit) hit = CATALOG.find(x => _normalize(x.code) === normQ || _normalize(x.barcode) === normQ);
+      if (!hit) hit = CATALOG.find(x => _normalize(x.name) === normQ);
       if (!hit && !opts.onlyDigits) {
-        // Solo búsqueda parcial por nombre si NO es solo dígitos (evita match raro de código)
-        hit = CATALOG.find(x => (x.name || '').toLowerCase().includes(lower));
+        hit = CATALOG.find(x => _normalize(x.name).includes(normQ));
       }
       if (hit) {
         addToCart(hit);
         $('#barcode-input').value = ''; $('#barcode-input').focus();
         showToast('✓ ' + (hit.name || hit.nombre) + ' (catálogo local)');
+        try { _trackRecent(hit); } catch (_) {}
         return;
       }
+    }
+
+    // ── Level 1.5: IndexedDB local (VolvixProductSearch) — OFFLINE FIRST ──
+    // Esta es la pieza que faltaba: búsqueda en IndexedDB ANTES de cualquier fetch.
+    // Si el usuario está offline o el endpoint /api/productos cuelga, este nivel
+    // responde en ~20ms con ranking inteligente (exact 100, prefix 80, contains 60,
+    // fuzzy 40). Si match exacto por código de barras → agregar directo.
+    if (window.VolvixProductSearch && typeof window.VolvixProductSearch.search === 'function') {
+      try {
+        // Primero intento por código exacto (rápido O(1) si existe getByCode)
+        if (isBarcode && typeof window.VolvixProductSearch.getByCode === 'function') {
+          const byCode = await Promise.race([
+            window.VolvixProductSearch.getByCode(trimmed),
+            new Promise(r => setTimeout(() => r(null), 600))
+          ]);
+          if (byCode) {
+            addToCart(normalizeProductForCart(byCode));
+            showToast('✓ ' + (byCode.name || byCode.nombre) + ' (IndexedDB local)');
+            try { _trackRecent(byCode); } catch (_) {}
+            $('#barcode-input').value = ''; $('#barcode-input').focus();
+            return;
+          }
+        }
+        // Después búsqueda fuzzy con score (para nombre o mixto)
+        const idbResults = await Promise.race([
+          window.VolvixProductSearch.search(trimmed, { limit: 10 }),
+          new Promise(r => setTimeout(() => r([]), 800))
+        ]);
+        if (idbResults && idbResults.length === 1) {
+          const p = idbResults[0].product || idbResults[0];
+          addToCart(normalizeProductForCart(p));
+          showToast('✓ ' + (p.name || p.nombre) + ' (IndexedDB local)');
+          try { _trackRecent(p); } catch (_) {}
+          $('#barcode-input').value = ''; $('#barcode-input').focus();
+          return;
+        }
+        if (idbResults && idbResults.length > 1) {
+          // Múltiples → modal selector
+          const items = idbResults.map(r => r.product || r);
+          const picked = await _showSearchPickerModal({
+            query: trimmed,
+            kind: isBarcode ? 'codigo_barras' : 'nombre',
+            items
+          });
+          if (picked) {
+            addToCart(normalizeProductForCart(picked));
+            showToast('✓ ' + (picked.name || picked.nombre) + ' agregado');
+            try { _trackRecent(picked); } catch (_) {}
+          }
+          $('#barcode-input').value = ''; $('#barcode-input').focus();
+          return;
+        }
+      } catch (e) { console.warn('[search L1.5 IDB] err', e); }
     }
 
     // ── Level 2: Tenant DB (con timeout 3s) ───────────────────────────────
@@ -7653,6 +7758,8 @@
     else CART.push({...p, qty:1});
     renderCart();
     try { __r8aSaveCartDraft(); } catch (_) {}
+    // 2026-05-10: track recent on every cart add (boost ranking siguiente vez)
+    try { if (typeof _trackRecent === 'function') _trackRecent(p); } catch (_) {}
   }
   let SELECTED_CART_INDEX = -1;
 
