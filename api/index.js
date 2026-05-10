@@ -36421,13 +36421,21 @@ if (process.env.NODE_ENV === 'test') {
           `/pos_companies?tenant_id=eq.${encodeURIComponent(tid)}&select=name,is_active,status&limit=1`
         ).catch(() => []),
       ]);
+      // 2026-05-09: además del bool legacy, exponer state directo (enabled/hidden/locked)
+      // para que el cliente pueda aplicar visual locked (greyed) además del simple show/hide.
       const modules = {};
+      const modulesState = {};
       (Array.isArray(modRows) ? modRows : []).forEach(r => {
-        modules[r.module_key] = (r.state ? r.state === 'enabled' : !!r.enabled);
+        const st = r.state || (r.enabled ? 'enabled' : 'hidden');
+        modules[r.module_key] = (st === 'enabled');
+        modulesState[r.module_key] = st;
       });
       const buttons = {};
+      const buttonsState = {};
       (Array.isArray(btnRows) ? btnRows : []).forEach(r => {
-        buttons[r.button_key] = (r.state ? r.state === 'enabled' : !!r.enabled);
+        const st = r.state || (r.enabled ? 'enabled' : 'hidden');
+        buttons[r.button_key] = (st === 'enabled');
+        buttonsState[r.button_key] = st;
       });
       const company = (Array.isArray(companyRows) && companyRows[0]) || {};
       sendJSON(res, {
@@ -36435,8 +36443,10 @@ if (process.env.NODE_ENV === 'test') {
         tenant_id: tid,
         name: company.name || tid,
         status: company.status || (company.is_active === false ? 'suspended' : 'active'),
-        modules,
-        buttons,
+        modules,         // legacy bool map
+        buttons,         // legacy bool map
+        modulesState,    // 2026-05-09: state directo {key: 'enabled'|'hidden'|'locked'}
+        buttonsState,
         ts: new Date().toISOString(),
       });
     } catch (err) { sendError(res, err); }

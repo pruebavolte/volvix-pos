@@ -2610,16 +2610,23 @@
   // login del otro tab), y se monkey-patchea localStorage.getItem para que TODA fetch
   // use el JWT read-only (con is_impersonation:true que el server enforza).
   var imToken = null;
+  // 2026-05-09: capturamos el token SUPER-ADMIN ANTES del monkey-patch.
+  // El bootstrap necesita usar el super token para fetchear /flags
+  // (que requireSuper); las wirings normales del POS usarán el imp token
+  // patcheado para sus llamadas READ-only.
+  var superToken = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
   try {
     var hashParams = new URLSearchParams((location.hash || '').replace(/^#/, ''));
     imToken = hashParams.get('imp_token');
     if (imToken) {
       sessionStorage.setItem('volvix_impersonation_token', imToken);
-      // Limpiar el fragment del URL para que no quede visible
       try { history.replaceState(null, '', location.pathname + location.search); } catch(_){}
     } else {
       imToken = sessionStorage.getItem('volvix_impersonation_token');
     }
+    // Guardar superToken en sessionStorage también (sobrevive reload de tab)
+    if (superToken) sessionStorage.setItem('volvix_super_token', superToken);
+    else superToken = sessionStorage.getItem('volvix_super_token');
     if (imToken) {
       // Monkey-patch localStorage.getItem para devolver imp token cuando se pida volvix_token
       var origGetItem = Storage.prototype.getItem;
@@ -2709,7 +2716,10 @@
       }
       return console.warn('[IMPERSONATING] VOLVIX no apareció');
     }
-    var tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+    // 2026-05-09: usar el SUPER token (no el imp token) para fetch /flags porque
+    // el endpoint requireSuper. localStorage.getItem está monkey-patcheado para
+    // devolver imToken — usamos directamente la variable superToken capturada antes.
+    var tok = superToken || localStorage.getItem('volvix_token');
     origFetch('/api/admin/tenant/' + encodeURIComponent(imTid) + '/flags', {
       headers: tok ? { 'Authorization': 'Bearer ' + tok } : {}
     }).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
@@ -2720,6 +2730,9 @@
       s.status = j.status || 'active';
       s.modules = j.modules || {};
       s.features = j.buttons || {};
+      // 2026-05-09: state directo (enabled/hidden/locked) para que applyHide aplique locked visual
+      s.modulesState = j.modulesState || {};
+      s.buttonsState = j.buttonsState || {};
       // Overrides locales del email impersonado (deny/allow por feature_key)
       try {
         var ovKey = 'volvix:overrides:' + imEmail;
@@ -2764,18 +2777,36 @@
           promociones: ['Promociones','🎁 Promociones'],
           cotizaciones: ['Cotizaciones','📝 Cotizaciones'],
         };
+        // 2026-05-09: aplicar 3 estados (enabled/hidden/locked).
+        // hidden → display:none; locked → opacity .4 + pointer-events:none + cursor:not-allowed
+        var modulesState = s.modulesState || {};
+        // Si el server no envió modulesState (legacy), derivar desde modules bool
+        Object.keys(s.modules || {}).forEach(function(k){
+          if (!(k in modulesState)) modulesState[k] = s.modules[k] ? 'enabled' : 'hidden';
+        });
         var applyHide = function(){
-          Object.entries(s.modules || {}).forEach(function(entry){
-            var key = entry[0], on = !!entry[1];
-            if (on) return;
+          Object.entries(modulesState).forEach(function(entry){
+            var key = entry[0], st = entry[1];
+            if (st === 'enabled') return;
             var labels = moduleLabelMap[key] || [];
             if (!labels.length) return;
             document.querySelectorAll('button, a, [role="tab"], .tab, .crumb').forEach(function(el){
-              if (el.dataset && el.dataset.impersonationHidden) return; // already hidden
+              if (el.dataset && el.dataset.impersonationApplied === st) return; // already applied
               var t = (el.textContent || '').trim();
               if (labels.some(function(L){ return t === L || t.indexOf(L) === 0; })) {
-                el.style.display = 'none';
-                el.dataset.impersonationHidden = key;
+                if (st === 'hidden') {
+                  el.style.display = 'none';
+                  el.dataset.impersonationHidden = key;
+                  el.dataset.impersonationApplied = 'hidden';
+                } else if (st === 'locked') {
+                  el.style.opacity = '0.4';
+                  el.style.pointerEvents = 'none';
+                  el.style.cursor = 'not-allowed';
+                  el.style.filter = 'grayscale(100%)';
+                  el.title = '🔒 Bloqueado en este tenant — contacta al admin';
+                  el.dataset.impersonationLocked = key;
+                  el.dataset.impersonationApplied = 'locked';
+                }
               }
             });
           });
