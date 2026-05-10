@@ -36296,6 +36296,52 @@ if (process.env.NODE_ENV === 'test') {
     } catch (err) { sendError(res, err); }
   });
 
+  // 2026-05-09 fix(H8): refresh del imp_token sin requerir recarga de UI.
+  // Mintea un nuevo token con la misma identidad/tenant que el handler
+  // /impersonate, pero NO reaudita (la sesión inicial ya generó el audit row).
+  // body opcional: { old_jti } para tracking del token previo.
+  handlers['POST /api/admin/tenant/:id/impersonate/refresh'] = requireAuth(async function (req, res, params) {
+    if (!requireSuper(req, res)) return;
+    try {
+      const tid = String(params.id || '').trim();
+      if (!tid) return sendJSON(res, { error: 'tenant_id required' }, 400);
+      const body = await readBody(req).catch(() => ({}));
+      const oldJti = body && body.old_jti ? String(body.old_jti).slice(0, 64) : null;
+
+      const IMPERSONATE_TTL_SEC = 30 * 60;
+      const now = Math.floor(Date.now() / 1000);
+      const jti = crypto.randomBytes(16).toString('hex');
+      const payload = {
+        id: req.user.id || null,
+        email: req.user.email || null,
+        role: 'owner',
+        tenant_id: tid,
+        impersonated_by: req.user.id || null,
+        impersonated_email: req.user.email || null,
+        is_impersonation: true,
+        impersonated_by_user_id: req.user.id || null,
+        jti,
+        prev_jti: oldJti,
+        iat: now,
+        exp: now + IMPERSONATE_TTL_SEC,
+      };
+      const header = { alg: 'HS256', typ: 'JWT' };
+      const h = b64url(JSON.stringify(header));
+      const p = b64url(JSON.stringify(payload));
+      const sig = b64url(crypto.createHmac('sha256', JWT_SECRET).update(`${h}.${p}`).digest());
+      const token = `${h}.${p}.${sig}`;
+
+      sendJSON(res, {
+        ok: true,
+        token,
+        tenant_id: tid,
+        expires_in: IMPERSONATE_TTL_SEC,
+        jti,
+        prev_jti: oldJti,
+      });
+    } catch (err) { sendError(res, err); }
+  });
+
   // ── GET /api/admin/tenant/:id/metrics ──────────────────────────────────────
   handlers['GET /api/admin/tenant/:id/metrics'] = requireAuth(async function (req, res, params) {
     if (!requireSuper(req, res)) return;
@@ -36438,17 +36484,27 @@ if (process.env.NODE_ENV === 'test') {
         buttonsState[r.button_key] = st;
       });
       const company = (Array.isArray(companyRows) && companyRows[0]) || {};
-      sendJSON(res, {
+      // 2026-05-09 fix(H4): si el tenant está inactivo o suspendido/revoked,
+      // NO bloquear el GET pero adjuntar `warning` para que el cliente lo
+      // muestre (antes fallaba silencioso devolviendo flags como si todo OK).
+      const status = company.status || (company.is_active === false ? 'suspended' : 'active');
+      const out = {
         ok: true,
         tenant_id: tid,
         name: company.name || tid,
-        status: company.status || (company.is_active === false ? 'suspended' : 'active'),
+        status,
         modules,         // legacy bool map
         buttons,         // legacy bool map
         modulesState,    // 2026-05-09: state directo {key: 'enabled'|'hidden'|'locked'}
         buttonsState,
         ts: new Date().toISOString(),
-      });
+      };
+      if (company.is_active === false) {
+        out.warning = 'tenant_status_inactive';
+      } else if (status === 'suspended' || status === 'revoked' || status === 'expired') {
+        out.warning = 'tenant_status_' + status;
+      }
+      sendJSON(res, out);
     } catch (err) { sendError(res, err); }
   });
 
@@ -36946,6 +37002,41 @@ if (process.env.NODE_ENV === 'test') {
     } catch (err) { sendError(res, err); }
   });
 
+  // 2026-05-09 fix(C4): DELETE /api/admin/giros/:slug — eliminar giro custom.
+  // BLOQUEA si hay tenants usando este giro (no dejar tenants huérfanos).
+  // El frontend ya envía el DELETE — este handler completa el flujo.
+  handlers['DELETE /api/admin/giros/:slug'] = requireAuth(async function (req, res, params) {
+    if (!requireSuper(req, res)) return;
+    try {
+      const slug = String(params.slug || '').trim();
+      if (!slug) return sendJSON(res, { error: 'slug requerido' }, 400);
+      const enc = encodeURIComponent(slug);
+      // Bloquear si hay tenants usando este giro
+      const usedBy = await supabaseRequest('GET',
+        `/pos_companies?business_type=eq.${enc}&select=tenant_id&limit=10`
+      ).catch(() => []);
+      if (Array.isArray(usedBy) && usedBy.length) {
+        return sendJSON(res, {
+          error: 'in_use',
+          tenants_count: usedBy.length,
+          sample: usedBy.slice(0, 3).map(t => t.tenant_id),
+          hint: 'Reasigna estos tenants a otro giro antes de eliminar.',
+        }, 409);
+      }
+      // Cascade delete: borrar modules + terms + campos + buttons del giro
+      await Promise.all([
+        supabaseRequest('DELETE', `/giros_modulos?giro_slug=eq.${enc}`).catch(() => null),
+        supabaseRequest('DELETE', `/giros_terminologia?giro_slug=eq.${enc}`).catch(() => null),
+        supabaseRequest('DELETE', `/giros_campos?giro_slug=eq.${enc}`).catch(() => null),
+        supabaseRequest('DELETE', `/giros_buttons?giro_slug=eq.${enc}`).catch(() => null),
+      ]);
+      // Borrar el vertical en sí
+      await supabaseRequest('DELETE', `/verticals?code=eq.${enc}`);
+      try { logAudit(req, 'giro.deleted', 'verticals', { slug }); } catch (_) {}
+      sendJSON(res, { ok: true, slug });
+    } catch (err) { sendError(res, err); }
+  });
+
   // POST /api/admin/giros — create a new giro (vertical + opcional modules)
   // body: { slug, name, modules?, terms?, product_fields?, buttons? }
   handlers['POST /api/admin/giros'] = requireAuth(async function (req, res) {
@@ -36953,9 +37044,20 @@ if (process.env.NODE_ENV === 'test') {
     try {
       const body = await readBody(req).catch(() => ({}));
       if (checkBodyError(req, res)) return;
-      const slug = String(body.slug || '').trim().toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+      // 2026-05-09 fix(H2): VALIDAR slug en vez de transformarlo silenciosamente.
+      // El comportamiento previo (`replace(/[^a-z0-9_-]/g, '_')`) consumía
+      // caracteres extraños sin avisar al admin, lo que producía slugs
+      // sorprendentes ("café" → "caf_") difíciles de depurar.
+      const slugRaw = String(body.slug || '').trim();
+      if (!slugRaw) return sendJSON(res, { error: 'slug requerido' }, 400);
+      if (!/^[a-z0-9][a-z0-9_-]{1,39}$/.test(slugRaw)) {
+        return sendJSON(res, {
+          error: 'invalid_slug',
+          detail: 'Solo a-z, 0-9, _, -. Debe empezar con letra/número. Max 40 chars.',
+        }, 400);
+      }
+      const slug = slugRaw;
       const name = String(body.name || slug).trim();
-      if (!slug) return sendJSON(res, { error: 'slug requerido' }, 400);
       // Verificar que no exista
       const exists = await supabaseRequest('GET', `/verticals?code=eq.${encodeURIComponent(slug)}&select=code&limit=1`).catch(() => []);
       if (Array.isArray(exists) && exists.length) {
@@ -37031,6 +37133,25 @@ if (process.env.NODE_ENV === 'test') {
       // {modulo: { activo, state, name_override }}.
       if (body.modules && typeof body.modules === 'object') {
         const keys = Object.keys(body.modules);
+        // 2026-05-09 fix(H3): soft-validate module keys contra feature_modules.key.
+        // No bloquea el insert (admin puede tener razón al adelantarse al
+        // catálogo), pero deja warnings en `applied.warnings` para revisar.
+        try {
+          const fmRows = await supabaseRequest('GET',
+            '/feature_modules?select=key&limit=1000'
+          ).catch(() => []);
+          const knownKeys = new Set((Array.isArray(fmRows) ? fmRows : []).map(r => r.key));
+          const warnings = [];
+          for (const k of keys) {
+            const bare = String(k).replace(/^module\./, '');
+            if (!knownKeys.has(bare) && !knownKeys.has(String(k))) {
+              warnings.push('unknown_module:' + k);
+            }
+          }
+          if (warnings.length) {
+            applied.warnings = (applied.warnings || []).concat(warnings);
+          }
+        } catch (_) { /* fail-open: validation is best-effort */ }
         await supabaseRequest('DELETE', `/giros_modulos?giro_slug=eq.${enc}`).catch(() => null);
         const rows = keys.map((k, idx) => {
           const v = body.modules[k];
@@ -37115,33 +37236,95 @@ if (process.env.NODE_ENV === 'test') {
       }
 
       // ── Cascade a tenants del giro (opt-in via body.cascade=true) ──
-      // 2026-05-09: si se pide, propagar los cambios de modules a todos los tenants
-      // donde business_type = slug. Itera tenant_module_flags + UPSERT por (tenant_id, module_key).
+      // 2026-05-09 fix(C1): UPSERT selectivo en vez de DELETE-ALL + insert-all.
+      // El comportamiento previo borraba TODOS los flags del tenant y reinsertaba
+      // desde el preset, perdiendo overrides manuales del admin per-tenant.
+      // Ahora:
+      //  - Sólo INSERT flags faltantes (módulos del preset que el tenant no tenía)
+      //  - Si el tenant ya tiene un flag con state distinto al preset → NO sobrescribe
+      //    (preserva override) y lo reporta en `preserved_overrides`.
+      //  - Flags del tenant cuya module_key ya no está en el preset → state='hidden'
+      //    (módulo removido del giro).
       let cascadedTenants = 0;
+      const preservedOverridesSample = [];
+      let preservedOverridesTotal = 0;
       if (body.cascade === true && body.modules && typeof body.modules === 'object') {
         try {
           const tenants = await supabaseRequest('GET',
             `/pos_companies?business_type=eq.${enc}&select=tenant_id&limit=500`
           ).catch(() => []);
           const tids = (Array.isArray(tenants) ? tenants : []).map(t => t.tenant_id).filter(Boolean);
+          // Pre-compute preset state map { module_key → state }
+          const presetState = {};
+          Object.entries(body.modules).forEach(([k, v]) => {
+            const isObj = (typeof v === 'object' && v !== null);
+            const stRaw = isObj ? (v.state || ((v.activo !== false) ? 'enabled' : 'hidden')) : (v ? 'enabled' : 'hidden');
+            presetState[String(k)] = stRaw;
+          });
+          const presetKeys = Object.keys(presetState);
           for (const tid of tids) {
             const tEnc = encodeURIComponent(tid);
-            // Borrar flags actuales y reinsertar desde el giro
-            await supabaseRequest('DELETE', `/tenant_module_flags?tenant_id=eq.${tEnc}`).catch(() => null);
-            const flagRows = Object.entries(body.modules).map(([k, v]) => ({
-              tenant_id: tid,
-              module_key: String(k),
-              enabled: !!v,
-              state: v ? 'enabled' : 'hidden',
-              paid: true,
-            }));
-            if (flagRows.length) {
-              await supabaseRequest('POST', '/tenant_module_flags', flagRows).catch(e => console.warn('cascade flag fail', tid, e.message));
+            const existing = await supabaseRequest('GET',
+              `/tenant_module_flags?tenant_id=eq.${tEnc}&select=module_key,state,enabled&limit=500`
+            ).catch(() => []);
+            const existingMap = {};
+            (Array.isArray(existing) ? existing : []).forEach(r => {
+              const st = r.state || (r.enabled ? 'enabled' : 'hidden');
+              existingMap[r.module_key] = st;
+            });
+            // 1) Insert flags del preset que el tenant aún no tiene
+            const toInsert = [];
+            for (const mk of presetKeys) {
+              if (!(mk in existingMap)) {
+                const st = presetState[mk];
+                toInsert.push({
+                  tenant_id: tid,
+                  module_key: mk,
+                  enabled: (st === 'enabled'),
+                  state: st,
+                  paid: true,
+                });
+              } else if (existingMap[mk] !== presetState[mk]) {
+                // 2) Tenant tiene state distinto → preservar override
+                preservedOverridesTotal++;
+                if (preservedOverridesSample.length < 20) {
+                  preservedOverridesSample.push({
+                    tenant_id: tid,
+                    module_key: mk,
+                    tenant_state: existingMap[mk],
+                    preset_state: presetState[mk],
+                  });
+                }
+              }
+            }
+            if (toInsert.length) {
+              await supabaseRequest('POST', '/tenant_module_flags', toInsert)
+                .catch(e => console.warn('cascade insert fail', tid, e.message));
+            }
+            // 3) Flags del tenant que YA NO están en el preset → state='hidden'
+            for (const mk of Object.keys(existingMap)) {
+              if (!(mk in presetState) && existingMap[mk] !== 'hidden') {
+                const mkEnc = encodeURIComponent(mk);
+                await supabaseRequest('PATCH',
+                  `/tenant_module_flags?tenant_id=eq.${tEnc}&module_key=eq.${mkEnc}`,
+                  { state: 'hidden', enabled: false }
+                ).catch(e => console.warn('cascade orphan-hide fail', tid, mk, e.message));
+              }
             }
             cascadedTenants++;
           }
           applied.cascaded_tenants = cascadedTenants;
-          try { logAudit(req, 'giro.cascaded', 'tenant_module_flags', { slug, tenants_affected: cascadedTenants }); } catch(_){}
+          applied.preserved_overrides = {
+            count: preservedOverridesTotal,
+            sample: preservedOverridesSample,
+          };
+          try {
+            logAudit(req, 'giro.cascaded', 'tenant_module_flags', {
+              slug,
+              tenants_affected: cascadedTenants,
+              preserved_overrides: preservedOverridesTotal,
+            });
+          } catch(_){}
         } catch (e) { console.warn('cascade err', e); }
       }
 
@@ -37257,6 +37440,33 @@ if (process.env.NODE_ENV === 'test') {
           }
           const patch = {};
           allowed.forEach(k => { if (u[k] !== undefined) patch[k] = u[k]; });
+          // 2026-05-09 fix(H5): si el row trae `email` Y trae otros campos, y
+          // el email colisiona con OTRO usuario, rechazar el row entero
+          // (atómico per-row). El comportamiento previo descartaba `email`
+          // silenciosamente y aplicaba el resto del patch — un update parcial
+          // sorprendente. NOTA: cambiar email sigue requiriendo el flujo
+          // dedicado /change-email (CRIT-3); aquí sólo aseguramos que un
+          // email-conflict no produzca un commit parcial.
+          if (u.email !== undefined && String(u.email).trim() !== '') {
+            const emClean = String(u.email).trim().toLowerCase();
+            const currentEmail = String(exists[0].email || '').toLowerCase();
+            if (emClean !== currentEmail) {
+              const conflict = await supabaseRequest('GET',
+                `/pos_users?email=eq.${encodeURIComponent(emClean)}&select=id&limit=1`
+              ).catch(() => []);
+              const hasConflict = Array.isArray(conflict) && conflict.length && conflict[0].id !== id;
+              const otherFields = Object.keys(patch).filter(k => k !== 'email');
+              if (hasConflict && otherFields.length > 0) {
+                results.push({
+                  id,
+                  ok: false,
+                  error: 'email_conflict_row_skipped',
+                  detail: 'no se aplicó ningún cambio del row',
+                });
+                continue;
+              }
+            }
+          }
           // Enum validation
           if (patch.role !== undefined && !ALLOWED_ROLES.has(String(patch.role))) {
             results.push({ id, ok: false, error: 'invalid_role', value: patch.role }); continue;
@@ -37341,11 +37551,39 @@ if (process.env.NODE_ENV === 'test') {
             results.push({ tenant_id: tid, ok: true, skipped: true });
             continue;
           }
+          // 2026-05-09 fix(C5): si business_type cambia, auditar el cambio antes
+          // del PATCH para que existan registros del giro previo (los productos /
+          // clientes con custom fields del giro anterior pueden quedar huérfanos).
+          // No bloquea: solo advierte y deja rastro.
+          let bizTypeWarning = null;
+          if (patch.business_type !== undefined) {
+            const beforeRow = await supabaseRequest('GET',
+              `/pos_companies?id=eq.${encodeURIComponent(exists[0].id)}&select=business_type&limit=1`
+            ).catch(() => []);
+            const oldBiz = (Array.isArray(beforeRow) && beforeRow[0] && beforeRow[0].business_type) || null;
+            const newBiz = patch.business_type;
+            if (String(oldBiz || '') !== String(newBiz || '')) {
+              try {
+                await supabaseRequest('POST', '/volvix_audit_log', {
+                  user_id: (req.user && (req.user.id || req.user.email)) || 'anon',
+                  tenant_id: tid,
+                  action: 'UPDATE',
+                  resource: 'pos_companies',
+                  resource_id: String(exists[0].id),
+                  before: { business_type: oldBiz },
+                  after: { business_type: newBiz, _semantic: 'business_type.changed' },
+                }).catch(() => {});
+              } catch (_) {}
+              bizTypeWarning = `business_type changed from ${oldBiz || '(none)'} to ${newBiz}; product custom fields may be orphaned`;
+            }
+          }
           // Patch by id (the row's primary key, resolved above)
           await supabaseRequest('PATCH',
             `/pos_companies?id=eq.${encodeURIComponent(exists[0].id)}`, patch);
           try { logAudit(req, 'tenant.bulk_updated', 'pos_companies', { id: tid, after: patch }); } catch (_) {}
-          results.push({ tenant_id: tid, ok: true });
+          const rowOut = { tenant_id: tid, ok: true };
+          if (bizTypeWarning) rowOut.warning = bizTypeWarning;
+          results.push(rowOut);
         } catch (e) {
           results.push({ tenant_id: tid, ok: false, error: String(e && e.message || e) });
         }

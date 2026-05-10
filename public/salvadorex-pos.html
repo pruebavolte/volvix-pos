@@ -2610,6 +2610,8 @@
   // login del otro tab), y se monkey-patchea localStorage.getItem para que TODA fetch
   // use el JWT read-only (con is_impersonation:true que el server enforza).
   var imToken = null;
+  // 2026-05-09 fix(M4): IMPERSONATION_GIRO ahora es variable del closure (no window.*)
+  var IMPERSONATION_GIRO = null;
   // 2026-05-09: capturamos el token SUPER-ADMIN ANTES del monkey-patch.
   // El bootstrap necesita usar el super token para fetchear /flags
   // (que requireSuper); las wirings normales del POS usarán el imp token
@@ -2628,11 +2630,18 @@
     if (superToken) sessionStorage.setItem('volvix_super_token', superToken);
     else superToken = sessionStorage.getItem('volvix_super_token');
     if (imToken) {
-      // Monkey-patch localStorage.getItem para devolver imp token cuando se pida volvix_token
+      // 2026-05-09 fix(C3): allowlist explícito para el monkey-patch.
+      // Sólo interceptamos EXACTAMENTE estos keys de auth. NO setItem ni removeItem.
+      // Cualquier otro key con prefijo volvix se loguea con warn (debug) por si
+      // algún wiring intenta leer un key de auth no esperado y quiere "impersonarse" sin querer.
+      var _PATCH_ALLOWLIST = new Set(['volvix_token','volvixAuthToken']);
       var origGetItem = Storage.prototype.getItem;
       Storage.prototype.getItem = function(k) {
-        if (this === localStorage && (k === 'volvix_token' || k === 'volvixAuthToken')) {
+        if (this === localStorage && _PATCH_ALLOWLIST.has(k)) {
           return imToken;
+        }
+        if (this === localStorage && typeof k === 'string' && /^(volvix|volvixAuth)/i.test(k) && !_PATCH_ALLOWLIST.has(k)) {
+          try { console.warn('[IMPERSONATING] getItem("' + k + '") NO interceptado (no está en allowlist)'); } catch(_){}
         }
         return origGetItem.call(this, k);
       };
@@ -2665,6 +2674,34 @@
     return origFetch.apply(this, arguments);
   };
 
+  // 2026-05-09 fix(C2): cleanup cross-tab cuando el super-admin se desloguea.
+  // Si en otra pestaña desaparece el token de auth (ambos keys), este tab queda
+  // en una vista de impersonación huérfana — limpiamos sessionStorage, mostramos
+  // overlay rojo full-screen y restauramos fetch original.
+  // Usamos Storage.prototype.getItem (sin patch) para chequear el state real.
+  var _rawGetItem = Storage.prototype.getItem;
+  window.addEventListener('storage', function(ev){
+    if (ev.key !== 'volvix_token' && ev.key !== 'volvixAuthToken') return;
+    if (ev.newValue !== null) return;
+    var stillHas = _rawGetItem.call(localStorage, 'volvix_token') || _rawGetItem.call(localStorage, 'volvixAuthToken');
+    if (stillHas) return;
+    try { sessionStorage.removeItem('volvix_super_token'); } catch(_){}
+    try { sessionStorage.removeItem('volvix_impersonation_token'); } catch(_){}
+    try { window.fetch = origFetch; } catch(_){}
+    if (document.getElementById('impersonation-logout-overlay')) return;
+    var ov = document.createElement('div');
+    ov.id = 'impersonation-logout-overlay';
+    ov.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:rgba(127,29,29,.96);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif;text-align:center;';
+    ov.innerHTML = ''
+      + '<div style="font-size:64px;line-height:1;">🔒</div>'
+      + '<div style="font-size:22px;font-weight:700;max-width:560px;">Sesión cerrada en otra pestaña.</div>'
+      + '<div style="font-size:15px;max-width:560px;opacity:.92;">Esta vista de impersonación ya no es válida.</div>'
+      + '<button id="impersonation-logout-close" style="margin-top:8px;background:#fff;color:#7f1d1d;border:0;padding:10px 22px;border-radius:6px;font-weight:700;cursor:pointer;font-size:14px;">Cerrar tab</button>';
+    (document.body || document.documentElement).appendChild(ov);
+    var btn = document.getElementById('impersonation-logout-close');
+    if (btn) btn.addEventListener('click', function(){ try { window.close(); } catch(_){} });
+  });
+
   // 2) Banner permanente — esperar a que <body> esté listo
   function injectBanner(){
     if (document.getElementById('impersonation-banner')) return;
@@ -2678,6 +2715,8 @@
       +   ' <code style="background:#fff;padding:1px 8px;border-radius:4px;border:1px solid #f59e0b;font-size:12px;vertical-align:middle;">' + imEmail.replace(/[<>&"]/g, function(c){return ({"<":"&lt;",">":"&gt;","&":"&amp;","\"":"&quot;"})[c];}) + '</code>'
       +   (imTid ? ' <span style="vertical-align:middle;color:#92400e;">@</span> <code style="background:#fff;padding:1px 8px;border-radius:4px;border:1px solid #f59e0b;font-size:12px;vertical-align:middle;">' + imTid.replace(/[<>&"]/g, function(c){return ({"<":"&lt;",">":"&gt;","&":"&amp;","\"":"&quot;"})[c];}) + '</code>' : '')
       +   ' <span style="background:#dc2626;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;letter-spacing:.5px;margin-left:6px;vertical-align:middle;">MODO LECTURA</span>'
+      // 2026-05-09 fix(B2): timer visible del JWT (cuenta atrás del exp).
+      +   ' <span id="impersonation-timer" style="background:#fff;color:#78350f;padding:2px 8px;border-radius:4px;border:1px solid #f59e0b;font-size:11px;font-weight:600;margin-left:6px;vertical-align:middle;font-family:ui-monospace,Menlo,Consolas,monospace;">⏱ --:--</span>'
       + '</div>'
       + '<button id="impersonation-close" style="background:#fff;border:1px solid #f59e0b;padding:5px 14px;border-radius:5px;cursor:pointer;font-weight:600;color:#78350f;font-size:12.5px;flex-shrink:0;">✕ Cerrar vista</button>';
     document.body.insertBefore(b, document.body.firstChild);
@@ -2692,6 +2731,74 @@
     if (typeof requestAnimationFrame === 'function') requestAnimationFrame(adjustPad);
     else setTimeout(adjustPad, 50);
     window.addEventListener('resize', adjustPad);
+
+    // 2026-05-09 fix(B2): timer cuenta atrás del JWT exp.
+    // Decodificamos el payload del imToken (atob) para extraer exp (epoch sec).
+    // Cada 30s repintamos. Cuando llega a 0: badge rojo "EXPIRADO" + botón "Renovar".
+    (function setupTimer(){
+      var timerEl = document.getElementById('impersonation-timer');
+      if (!timerEl || !imToken) { if (timerEl) timerEl.style.display = 'none'; return; }
+      var expEpoch = 0;
+      try {
+        var parts = imToken.split('.');
+        if (parts.length >= 2) {
+          var b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+          while (b64.length % 4) b64 += '=';
+          var payload = JSON.parse(atob(b64));
+          if (payload && typeof payload.exp === 'number') expEpoch = payload.exp;
+        }
+      } catch(e) { console.warn('[IMPERSONATING] decode JWT exp fail', e); }
+      if (!expEpoch) { timerEl.style.display = 'none'; return; }
+      var renewing = false;
+      var renderExpired = function(){
+        timerEl.style.background = '#dc2626';
+        timerEl.style.color = '#fff';
+        timerEl.style.borderColor = '#7f1d1d';
+        timerEl.innerHTML = '⚠️ EXPIRADO <button id="impersonation-renew" style="margin-left:6px;background:#fff;color:#7f1d1d;border:0;padding:1px 7px;border-radius:3px;font-size:10.5px;font-weight:700;cursor:pointer;">Renovar</button>';
+        var rb = document.getElementById('impersonation-renew');
+        if (rb) rb.addEventListener('click', function(){
+          if (renewing) return;
+          renewing = true;
+          rb.disabled = true; rb.textContent = 'Renovando...';
+          var rtok = (typeof superToken !== 'undefined' && superToken) || sessionStorage.getItem('volvix_super_token');
+          origFetch('/api/admin/tenant/' + encodeURIComponent(imTid || '') + '/impersonate/refresh', {
+            method: 'POST',
+            headers: rtok ? { 'Authorization': 'Bearer ' + rtok, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' }
+          }).then(function(r){
+            if (r.status === 404) { alert('Renovación no disponible — recarga el tab'); renewing = false; rb.disabled = false; rb.textContent = 'Renovar'; return null; }
+            return r.ok ? r.json() : null;
+          }).then(function(j){
+            if (j && j.token) {
+              imToken = j.token;
+              try { sessionStorage.setItem('volvix_impersonation_token', j.token); } catch(_){}
+              location.reload();
+            } else if (j !== null) {
+              alert('Renovación falló — recarga el tab');
+              renewing = false; rb.disabled = false; rb.textContent = 'Renovar';
+            }
+          }).catch(function(){
+            alert('Renovación falló — recarga el tab');
+            renewing = false; rb.disabled = false; rb.textContent = 'Renovar';
+          });
+        });
+      };
+      var tick = function(){
+        var nowSec = Math.floor(Date.now() / 1000);
+        var delta = expEpoch - nowSec;
+        if (delta <= 0) { renderExpired(); return; }
+        var mm = Math.floor(delta / 60);
+        var ss = delta % 60;
+        var pad = function(n){ return n < 10 ? '0' + n : '' + n; };
+        timerEl.textContent = '⏱ ' + pad(mm) + ':' + pad(ss);
+      };
+      tick();
+      var intv = setInterval(function(){
+        var nowSec = Math.floor(Date.now() / 1000);
+        if (nowSec >= expEpoch) { clearInterval(intv); renderExpired(); }
+        else tick();
+      }, 30000);
+    })();
+
     document.getElementById('impersonation-close').addEventListener('click', function(){
       var u = new URL(location.href);
       u.searchParams.delete('impersonate');
@@ -2803,7 +2910,11 @@
           var rg = await origFetch('/api/admin/giros/' + encodeURIComponent(giroSlug), { headers: { 'Authorization': 'Bearer ' + (superToken || tok) }}).catch(function(){return null;});
           if (rg && rg.ok) {
             var gj = await rg.json();
-            window.IMPERSONATION_GIRO = gj.item;
+            // 2026-05-09 fix(M4): NO ensuciar window con IMPERSONATION_GIRO global.
+            // Lo guardamos en variable de closure (IMPERSONATION_GIRO al inicio del IIFE).
+            // Para debug exponemos bajo prefijo __ (privado).
+            IMPERSONATION_GIRO = gj.item;
+            try { window.__IMPERSONATING_DEBUG = { giro: gj.item }; } catch(_){}
             // Schedule renames repetidamente (UI async)
             var doRenames = function(){
               var n = applyModuleRenames(gj.item);
@@ -2812,6 +2923,21 @@
             doRenames();
             [500, 1500, 3000, 5000, 8000].forEach(function(d){ setTimeout(doRenames, d); });
           }
+        } else {
+          // 2026-05-09 fix(M10): tenant sin business_type asignado — NO crashear.
+          // Mostrar warn en consola y badge amarillo en el banner indicando "sin giro".
+          try { console.warn('[IMPERSONATING] tenant', imTid, 'sin giro asignado — sin renombres'); } catch(_){}
+          try {
+            var bannerEl = document.getElementById('impersonation-banner');
+            if (bannerEl && !document.getElementById('impersonation-no-giro-badge')) {
+              var noGiro = document.createElement('span');
+              noGiro.id = 'impersonation-no-giro-badge';
+              noGiro.style.cssText = 'background:#fcd34d;color:#78350f;padding:1px 8px;border-radius:4px;border:1px solid #d97706;font-size:10.5px;margin-left:6px;vertical-align:middle;font-weight:600;';
+              noGiro.textContent = '(sin giro asignado — sin renombres)';
+              var firstDiv = bannerEl.querySelector('div');
+              if (firstDiv) firstDiv.appendChild(noGiro);
+            }
+          } catch(_){}
         }
       } catch(rerr) { console.warn('[IMPERSONATING] renames fail', rerr); }
       // 2026-05-09: La UI del POS no reacciona dinámicamente a cambios de
@@ -20496,6 +20622,11 @@ window.addEventListener('volvix:version-loaded', function(e){
     const counts = await loadTenantCountsByGiro();
     // 2026-05-09: botón "+ Nuevo Giro" inyectado al inicio del wrap (sticky)
     // Solo lo inyecta UNA vez (idempotente); el handler abre prompt y POSTea.
+    // 2026-05-09 fix(H9): al cambiar de pane el wrap.parentNode puede haber
+    // cambiado y dejar hosts huérfanos. Removerlos antes de evaluar el guard.
+    document.querySelectorAll('#permv14-giro-create-btn-host').forEach(el => {
+      if (el.parentNode !== wrap.parentNode) el.remove();
+    });
     if (!document.getElementById('permv14-giro-create-btn-host')) {
       const host = document.createElement('div');
       host.id = 'permv14-giro-create-btn-host';
@@ -20544,7 +20675,13 @@ window.addEventListener('volvix:version-loaded', function(e){
       const visible = cat.items.filter(slug => {
         if (usedSlugs.has(slug) || !PROFILES[slug]) return false;
         const label = LABELS[slug] || slug;
-        return !search || label.toLowerCase().includes(search) || slug.toLowerCase().includes(search);
+        if (!search) return true;
+        if (label.toLowerCase().includes(search) || slug.toLowerCase().includes(search)) return true;
+        // 2026-05-09 fix(M3): match contra moduleNameOverrides (renombres custom por giro)
+        const giroBd = (v14.catalogs.giros || []).find(g => g && g.slug === slug);
+        const overrides = giroBd && giroBd.moduleNameOverrides;
+        if (overrides && Object.values(overrides).some(n => String(n||'').toLowerCase().includes(search))) return true;
+        return false;
       });
       if (!visible.length) return;
       html += '<div class="permv14-split-group-label">' + cat.label + '</div>';
@@ -20590,7 +20727,18 @@ window.addEventListener('volvix:version-loaded', function(e){
     wrap.innerHTML = html || '<div class="permv14-empty-row">Sin giros.</div>';
     $$('.permv14-list-item[data-permv14-giro]', wrap).forEach(el => {
       el.addEventListener('click', () => {
-        v14.selectedGiro = el.dataset.permv14Giro;
+        const nextSlug = el.dataset.permv14Giro;
+        const currentSlug = v14.selectedGiro;
+        // 2026-05-09 fix(H1): warning si hay cambios sin guardar antes de cambiar de giro
+        if (currentSlug && currentSlug !== nextSlug && v14.giroIsDirty && v14.giroIsDirty[currentSlug]) {
+          const curLabel = (LABELS[currentSlug] || currentSlug);
+          const nxtLabel = (LABELS[nextSlug] || nextSlug);
+          if (!confirm('Tienes cambios sin guardar en "' + curLabel + '". ¿Descartarlos y cambiar a "' + nxtLabel + '"?')) return;
+          // descartar cambios in-memory del giro previo
+          if (window._giroEditOverlay) delete window._giroEditOverlay[currentSlug];
+          delete v14.giroIsDirty[currentSlug];
+        }
+        v14.selectedGiro = nextSlug;
         renderGirosList();
         renderGiroDetail();
         renderGiroPreview();
@@ -20661,10 +20809,16 @@ window.addEventListener('volvix:version-loaded', function(e){
       // Cuando el usuario modifica chips/terms del giro, los cambios persisten en BD
       // y propagan a TODOS los tenants de ese giro automáticamente.
       const isDirty = !!(v14.giroIsDirty && v14.giroIsDirty[slug]);
+      // 2026-05-09 fix(C4): determinar si el giro es custom (NO está en GIRO_CATEGORIES)
+      // para mostrar el botón "🗑 Eliminar Giro". Los hardcoded no se pueden borrar.
+      const isCustomGiro = !Object.values(GIRO_CATEGORIES).some(cat => (cat.items || []).includes(slug));
       let html = escapeText(m[2]);
       if (isDirty) {
         html += '<span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;margin-left:8px;">● MODIFICADO (sin guardar)</span>';
         html += '<button id="permv14-giro-save-bd" style="margin-left:10px;background:var(--pv-accent);color:#fff;border:none;padding:5px 14px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;">💾 Guardar Giro</button>';
+      }
+      if (isCustomGiro) {
+        html += '<button id="permv14-giro-delete-bd" style="margin-left:8px;background:#b91c1c;color:#fff;border:none;padding:5px 14px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;" title="Borrar este giro custom permanentemente">🗑 Eliminar</button>';
       }
       labelEl.innerHTML = html;
       // Wire save button (idempotente — sólo se crea cuando isDirty)
@@ -20700,11 +20854,27 @@ window.addEventListener('volvix:version-loaded', function(e){
             if (typeof v === 'object') termsPatch[k] = v;
             else termsPatch[k] = { singular: v, plural: v };
           });
+          // 2026-05-09 fix(H6): construir payload buttons {state, name_override}
+          // desde v14.giroEditOverlay[slug].buttons + v14.giroFeatureOverrides (legacy)
+          const buttonsPatch = {};
+          const btnOvSave = (v14.giroEditOverlay && v14.giroEditOverlay[slug] && v14.giroEditOverlay[slug].buttons) || {};
+          const featOvSave = v14.giroFeatureOverrides[slug] || {};
+          const allBtnKeys = new Set([
+            ...Object.keys(btnOvSave),
+            ...Object.keys(featOvSave),
+          ]);
+          allBtnKeys.forEach(bk => {
+            const ovB = btnOvSave[bk] || {};
+            const state = ovB.state || (featOvSave[bk] === false ? 'hidden' : 'enabled');
+            const entry = { state, activo: (state === 'enabled') };
+            if (ovB.name_override) entry.name_override = ovB.name_override;
+            buttonsPatch[bk] = entry;
+          });
           try {
             const r = await fetch('/api/admin/giros/' + encodeURIComponent(slug), {
               method: 'PATCH',
               headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
-              body: JSON.stringify({ modules: modulesPatch, terms: termsPatch, cascade: true }),
+              body: JSON.stringify({ modules: modulesPatch, terms: termsPatch, buttons: buttonsPatch, cascade: true }),
             });
             const j = await r.json();
             if (!r.ok) {
@@ -20720,6 +20890,44 @@ window.addEventListener('volvix:version-loaded', function(e){
           } catch (e) {
             alert('Error de red: ' + e.message);
             saveBtn.disabled = false; saveBtn.textContent = '💾 Guardar Giro';
+          }
+        });
+      }
+      // 2026-05-09 fix(C4): wire botón eliminar giro custom
+      const delBtn = document.getElementById('permv14-giro-delete-bd');
+      if (delBtn) {
+        delBtn.addEventListener('click', async () => {
+          const giroName = (m[2] || slug);
+          // Confirm doble: primero genérico, luego con texto exacto
+          if (!confirm('Borrar el giro "' + giroName + '" PERMANENTEMENTE?\n\nTenants que lo usan quedarán huérfanos. Esta acción NO se puede deshacer.')) return;
+          if (!confirm('CONFIRMACIÓN FINAL: ¿borrar "' + giroName + '" (slug: ' + slug + ') de la BD?')) return;
+          delBtn.disabled = true; delBtn.textContent = 'Borrando…';
+          const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+          try {
+            const r = await fetch('/api/admin/giros/' + encodeURIComponent(slug), {
+              method: 'DELETE',
+              headers: { 'Authorization': 'Bearer ' + tok },
+            });
+            let j = {}; try { j = await r.json(); } catch (_) {}
+            if (!r.ok) {
+              alert('Error al borrar: ' + (j.error || r.status) + (r.status === 404 ? ' (endpoint backend no existe aún)' : ''));
+              delBtn.disabled = false; delBtn.textContent = '🗑 Eliminar';
+              return;
+            }
+            if (window.toast) window.toast('🗑 Giro "' + giroName + '" eliminado', 'ok');
+            v14.selectedGiro = null;
+            v14.selectedGiroMod = null;
+            if (v14.giroIsDirty) delete v14.giroIsDirty[slug];
+            if (window._giroEditOverlay) delete window._giroEditOverlay[slug];
+            // Bustear catálogos y re-renderizar
+            v14.catalogs.lastLoaded = 0;
+            try { _giroCatalogCache = null; } catch (_) {}
+            renderGirosList();
+            renderGiroDetail();
+            renderGiroPreview();
+          } catch (e) {
+            alert('Error de red: ' + e.message);
+            delBtn.disabled = false; delBtn.textContent = '🗑 Eliminar';
           }
         });
       }
@@ -20773,9 +20981,24 @@ window.addEventListener('volvix:version-loaded', function(e){
           + '</div>';
       }).join('');
       // Wire state select
+      // 2026-05-09 fix(M6): módulos críticos requieren confirm al desactivarse
+      const CRITICAL_MODS = ['pos','corte'];
       $$('[data-giro-mod-state]', buttonsTable).forEach(sel => {
+        // Guardar el valor previo para poder revertir si el usuario cancela
+        sel.dataset.prevValue = sel.value;
         sel.addEventListener('change', ev => {
           const k = sel.dataset.giroModState;
+          if (CRITICAL_MODS.includes(k) && sel.value !== 'enabled') {
+            const moduleLabel = k === 'pos' ? 'POS' : k.toUpperCase();
+            const warnMsg = k === 'pos'
+              ? '⚠️ Estás desactivando POS — los tenants de este giro NO podrán cobrar. ¿Continuar?'
+              : '⚠️ Estás desactivando ' + moduleLabel + ' (módulo crítico). ¿Continuar?';
+            if (!confirm(warnMsg)) {
+              sel.value = sel.dataset.prevValue || 'enabled';
+              return;
+            }
+          }
+          sel.dataset.prevValue = sel.value;
           ov.states[k] = sel.value;
           // Mantener bool de profile sincronizado para que applyProfile siga funcionando
           window.INDUSTRY_PROFILES[slug] = window.INDUSTRY_PROFILES[slug] || {};
@@ -21033,21 +21256,38 @@ window.addEventListener('volvix:version-loaded', function(e){
       const childButtons = Object.keys(FEAT_LABELS_GIRO).filter(bk => FEAT_PARENT_MOD[bk] === mod);
       const overrides = v14.giroFeatureOverrides[slug] || {};
       const moduleEnabled = !!profile[mod];
+      // 2026-05-09 fix(H6): overlay editable de botones por giro {state, name_override}
+      v14.giroEditOverlay = v14.giroEditOverlay || {};
+      v14.giroEditOverlay[slug] = v14.giroEditOverlay[slug] || { buttons: {}, modules: {} };
+      const btnOv = v14.giroEditOverlay[slug].buttons = v14.giroEditOverlay[slug].buttons || {};
+      // Hidratar desde BD (si el catálogo trae buttonOverrides)
+      const giroBdForButtons = (typeof getGiroFromCatalog === 'function') ? getGiroFromCatalog(slug) : null;
+      const bdButtons = (giroBdForButtons && giroBdForButtons.buttonOverrides) || {};
+
+      const STATE_OPTS_BTN = [
+        { v: 'enabled', label: '✓ Activo', cls: 's-on' },
+        { v: 'hidden',  label: '🙈 Oculto', cls: 's-hi' },
+        { v: 'locked',  label: '🔒 Bloqueado', cls: 's-up' },
+      ];
 
       const drillBody = childButtons.length === 0
         ? '<div class="permv14-empty-row" style="padding:16px;">Este módulo no expone botones individuales editables en el preset.</div>'
         : childButtons.map(bk => {
             const lbl = FEAT_LABELS_GIRO[bk];
             const bm2 = lbl.match(/^(\S+)\s+(.+)$/) || [null, '🔘', lbl];
-            const enabled = overrides[bk] !== false; // default: incluido
-            const stateClass = enabled ? 's-on' : 's-hi';
-            const stateText = enabled ? '✓ Activo' : '— Inactivo';
+            // 2026-05-09 fix(H6): state desde overlay > BD > legacy bool > 'enabled'
+            const ovEntry = btnOv[bk] || {};
+            const bdEntry = bdButtons[bk] || {};
+            let curState = ovEntry.state || bdEntry.state;
+            if (!curState) curState = (overrides[bk] === false) ? 'hidden' : 'enabled';
+            const curName = (ovEntry.name_override !== undefined ? ovEntry.name_override : (bdEntry.name_override || ''));
+            const optBtn = STATE_OPTS_BTN.find(o => o.v === curState) || STATE_OPTS_BTN[0];
             return '<div class="permv14-perm-row">'
               + '<div class="permv14-perm-icon">' + bm2[1] + '</div>'
-              + '<input class="permv14-perm-name-input" value="' + escapeAttr(bm2[2]) + '" readonly>'
-              + '<span class="permv14-state-select ' + stateClass + '" data-giro-feat-toggle="' + escapeAttr(bk) + '" style="text-align:center;cursor:pointer;" title="Click para toggle activo/inactivo en este giro">'
-              +   stateText
-              + '</span>'
+              + '<input class="permv14-perm-name-input" data-giro-btn-name="' + escapeAttr(bk) + '" value="' + escapeAttr(curName || bm2[2]) + '" placeholder="' + escapeAttr(bm2[2]) + '" title="Edita el nombre del botón para tenants de este giro" style="' + (curName ? 'background:#fef3c7;border:1px solid #f59e0b;' : '') + '">'
+              + '<select class="permv14-state-select ' + optBtn.cls + '" data-giro-btn-state="' + escapeAttr(bk) + '" title="3 estados: visible+clickeable / no aparece / visible pero greyed">'
+              +   STATE_OPTS_BTN.map(o => '<option value="' + o.v + '"' + (o.v === curState ? ' selected' : '') + '>' + o.label + '</option>').join('')
+              + '</select>'
               + '</div>';
           }).join('');
 
@@ -21068,21 +21308,51 @@ window.addEventListener('volvix:version-loaded', function(e){
       if (desktopEl) desktopEl.innerHTML = drillHtml;
       if (mobileEl) mobileEl.innerHTML = '<div class="permv14-empty-row" style="padding:14px;">Vista de componentes solo en desktop.</div>';
 
-      // Wire toggles de features
-      $$('[data-giro-feat-toggle]', desktopEl).forEach(el => {
-        el.addEventListener('click', ev => {
-          ev.stopPropagation();
-          const bk = el.dataset.giroFeatToggle;
+      // 2026-05-09 fix(H6): wire state select 3-estados de cada botón (overlay buttons)
+      $$('[data-giro-btn-state]', desktopEl).forEach(sel => {
+        sel.addEventListener('change', ev => {
+          const bk = sel.dataset.giroBtnState;
+          if (!v14.giroEditOverlay[slug]) v14.giroEditOverlay[slug] = { buttons: {}, modules: {} };
+          if (!v14.giroEditOverlay[slug].buttons) v14.giroEditOverlay[slug].buttons = {};
+          const cur = v14.giroEditOverlay[slug].buttons[bk] || {};
+          cur.state = sel.value;
+          v14.giroEditOverlay[slug].buttons[bk] = cur;
+          // Mantener legacy bool en sync para compat con applyProfile/featureOverrides
           if (!v14.giroFeatureOverrides[slug]) v14.giroFeatureOverrides[slug] = {};
-          const cur = v14.giroFeatureOverrides[slug][bk];
-          // default true → false; false → true (delete override)
-          if (cur === false) delete v14.giroFeatureOverrides[slug][bk];
+          if (sel.value === 'enabled') delete v14.giroFeatureOverrides[slug][bk];
           else v14.giroFeatureOverrides[slug][bk] = false;
-          v14.giroIsDirty[slug] = true; // 2026-05-09
-          if (window.toast) window.toast('Botón "' + bk + '" alternado en memoria — aplica con ⚡', 'info');
+          v14.giroIsDirty[slug] = true;
+          if (window.toast) window.toast('Botón "' + bk + '" → ' + sel.value + ' (sin guardar — usa 💾)', 'info');
           renderGiroDetail();
           renderGiroPreview();
         });
+      });
+      // 2026-05-09 fix(H6): wire input editable de name_override por botón
+      $$('input[data-giro-btn-name]', desktopEl).forEach(inp => {
+        const saveBtnName = () => {
+          const bk = inp.dataset.giroBtnName;
+          const newVal = inp.value.trim();
+          const defaultLbl = ((FEAT_LABELS_GIRO[bk] || '').match(/^\S+\s+(.+)$/) || [null, ''])[1];
+          if (!v14.giroEditOverlay[slug]) v14.giroEditOverlay[slug] = { buttons: {}, modules: {} };
+          if (!v14.giroEditOverlay[slug].buttons) v14.giroEditOverlay[slug].buttons = {};
+          const cur = v14.giroEditOverlay[slug].buttons[bk] || {};
+          if (newVal && newVal !== defaultLbl) {
+            cur.name_override = newVal;
+            inp.style.background = '#fef3c7';
+            inp.style.border = '1px solid #f59e0b';
+            v14.giroEditOverlay[slug].buttons[bk] = cur;
+            v14.giroIsDirty[slug] = true;
+          } else if (cur.name_override) {
+            delete cur.name_override;
+            if (!cur.state) delete v14.giroEditOverlay[slug].buttons[bk];
+            else v14.giroEditOverlay[slug].buttons[bk] = cur;
+            inp.style.background = '';
+            inp.style.border = '';
+            v14.giroIsDirty[slug] = true;
+          }
+        };
+        inp.addEventListener('blur', saveBtnName);
+        inp.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); inp.blur(); } });
       });
       // Wire botón "Volver al preview"
       const backBtn = desktopEl && desktopEl.querySelector('[data-giro-back-to-preview]');
@@ -21518,6 +21788,10 @@ window.addEventListener('volvix:version-loaded', function(e){
   // v14.giroCatalog: catálogo de giros desde /api/admin/giros (para datalist).
   v14.usersDirty = new Map();
   v14.giroCatalog = [];
+  // 2026-05-09 fix(H7): paginación client-side de la tabla de usuarios.
+  // Para tenants > 50 el render completo era lento. Estado fuera de
+  // renderUsersUnified para preservar página actual entre re-renders.
+  v14.usersPagination = { page: 0, perPage: 50 };
   async function fetchGiroCatalog() {
     if (_giroCatalogCache) return _giroCatalogCache;
     try {
@@ -21660,7 +21934,17 @@ window.addEventListener('volvix:version-loaded', function(e){
     });
 
     // Tenants con sus owners (parent) y empleados (child)
-    const tenantsToShow = (j.tenants || []).filter(t => showQa || !t.is_qa);
+    // 2026-05-09 fix(H7): aplicar paginación SOBRE la lista filtrada de tenants.
+    // Conservamos `tenantsTotal` para mostrar "N-M de TOTAL" en el footer.
+    // Si la página actual quedó fuera de rango (ej. tras un filtro o borrado),
+    // resetear a la 0 para evitar render vacío con datos disponibles.
+    const tenantsAll = (j.tenants || []).filter(t => showQa || !t.is_qa);
+    const _pp = (v14.usersPagination && v14.usersPagination.perPage) || 50;
+    const _maxPage = Math.max(0, Math.ceil(tenantsAll.length / _pp) - 1);
+    if (!v14.usersPagination) v14.usersPagination = { page: 0, perPage: 50 };
+    if (v14.usersPagination.page > _maxPage) v14.usersPagination.page = 0;
+    const _pg = v14.usersPagination.page;
+    const tenantsToShow = tenantsAll.slice(_pg * _pp, (_pg + 1) * _pp);
     tenantsToShow.forEach(t => {
       const meta = tenantsByTid[t.tenant_id] || {};
       const giroSlug = (t.business_type || meta.business_type || '').toLowerCase();
@@ -21784,7 +22068,44 @@ window.addEventListener('volvix:version-loaded', function(e){
       html += '<tr class="permv14-users-row-empty"><td colspan="' + cols.length + '">Sin resultados con el filtro actual.</td></tr>';
     }
     html += '</tbody></table>';
+    // 2026-05-09 fix(H7): footer de paginación. Solo se renderiza si la lista
+    // total de tenants supera el perPage actual (ahorra ruido visual). El footer
+    // se inyecta dentro de wrap (no dentro de la tabla) para no romper thead/tbody.
+    const _ppFooter = (v14.usersPagination && v14.usersPagination.perPage) || 50;
+    const _totalT = tenantsAll.length;
+    if (_totalT > _ppFooter) {
+      const _pgF = (v14.usersPagination && v14.usersPagination.page) || 0;
+      const _pages = Math.max(1, Math.ceil(_totalT / _ppFooter));
+      const _from = _totalT === 0 ? 0 : (_pgF * _ppFooter + 1);
+      const _to = Math.min(_totalT, (_pgF + 1) * _ppFooter);
+      const _prevDis = _pgF <= 0 ? ' disabled' : '';
+      const _nextDis = _pgF >= _pages - 1 ? ' disabled' : '';
+      const _opts = [25, 50, 100, 500].map(n => '<option value="' + n + '"' + (n === _ppFooter ? ' selected' : '') + '>' + n + '</option>').join('');
+      html += '<div id="permv14-users-pagination" style="display:flex;gap:8px;align-items:center;padding:10px 16px;border-top:1px solid var(--pv-border);font-size:13px;">'
+        +   '<button id="permv14-users-prev"' + _prevDis + '>‹ Anterior</button>'
+        +   '<span>Página ' + (_pgF + 1) + ' de ' + _pages + ' · Mostrando ' + _from + '-' + _to + ' de ' + _totalT + '</span>'
+        +   '<button id="permv14-users-next"' + _nextDis + '>Siguiente ›</button>'
+        +   '<select id="permv14-users-perpage" style="margin-left:auto;">' + _opts + '</select>'
+        + '</div>';
+    }
     wrap.innerHTML = html;
+
+    // 2026-05-09 fix(H7): wire de prev/next/perPage. No usamos _pv14Wired
+    // porque estos controles se re-crean en cada render (viven dentro de wrap).
+    const _prevBtn = $('#permv14-users-prev');
+    const _nextBtn = $('#permv14-users-next');
+    const _perPageSel = $('#permv14-users-perpage');
+    if (_prevBtn) _prevBtn.addEventListener('click', () => {
+      if (v14.usersPagination.page > 0) { v14.usersPagination.page--; renderUsersUnified(); }
+    });
+    if (_nextBtn) _nextBtn.addEventListener('click', () => {
+      const _max = Math.max(0, Math.ceil(tenantsAll.length / v14.usersPagination.perPage) - 1);
+      if (v14.usersPagination.page < _max) { v14.usersPagination.page++; renderUsersUnified(); }
+    });
+    if (_perPageSel) _perPageSel.addEventListener('change', () => {
+      const n = parseInt(_perPageSel.value, 10);
+      if (n > 0) { v14.usersPagination.perPage = n; v14.usersPagination.page = 0; renderUsersUnified(); }
+    });
 
     // Wire búsqueda + QA + refresh + add-override (una vez)
     const searchEl = $('#permv14-users-search');
@@ -21921,13 +22242,25 @@ window.addEventListener('volvix:version-loaded', function(e){
         // saber cuáles entries del dirty Map borrar. Las que fallaron se quedan
         // en el Map para que el usuario pueda reintentar/corregir/descartar.
         const succeededIds = { user: new Set(), tenant: new Set() };
+        // 2026-05-09 fix(H5): trackear conflictos de email por separado para
+        // marcar visualmente el row tras el re-render. Backend puede devolver
+        // `error: 'email_conflict'` o `'email_conflict_row_skipped'` (ambos =
+        // "ese email ya está en uso por otro usuario").
+        const emailConflicts = []; // [{ id }]
         try {
           if (usersArr.length) {
             const r = await fetch('/api/admin/users/bulk', { method: 'PATCH', headers: auth, body: JSON.stringify({ updates: usersArr }) });
             const j = await r.json().catch(() => ({}));
             (j.results || []).forEach(rs => {
               if (rs.ok) { okCount++; succeededIds.user.add(String(rs.id)); }
-              else { failCount++; failures.push(Object.assign({ scope: 'user' }, rs)); }
+              else {
+                failCount++;
+                failures.push(Object.assign({ scope: 'user' }, rs));
+                // 2026-05-09 fix(H5): clasificar email_conflict para UX dedicada.
+                if (rs.error === 'email_conflict' || rs.error === 'email_conflict_row_skipped') {
+                  emailConflicts.push({ id: String(rs.id || '') });
+                }
+              }
             });
           }
           if (tenantsArr.length) {
@@ -21943,6 +22276,23 @@ window.addEventListener('volvix:version-loaded', function(e){
           saveBtn.disabled = false; saveBtn.textContent = '💾 Guardar';
           return;
         }
+        // 2026-05-09 fix(H5): para email conflicts, eliminar la dirty entry de
+        // email del row afectado. Spec dice "KEEP la entry" pero también
+        // "revertir el input al original" — combinarlos crearía drift entre el
+        // dirty buffer (bad value) y el DOM (orig value), porque cellInput()
+        // re-render leería el bad value del Map. Decisión: borrar SOLO el
+        // campo email del row (otros campos del mismo user, si los hay,
+        // siguen pendientes), dejar el row visualmente marcado con has-error
+        // tras el re-render. Resultado: usuario ve row con error, input limpio
+        // al valor original, listo para corregir y reintentar.
+        const emailConflictIds = new Set(emailConflicts.map(c => c.id).filter(Boolean));
+        if (emailConflictIds.size) {
+          for (const [k, d] of Array.from(v14.usersDirty.entries())) {
+            if (d.rowType === 'user' && d.field === 'email' && emailConflictIds.has(String(d.rowId))) {
+              v14.usersDirty.delete(k);
+            }
+          }
+        }
         // Borrar SOLO entries que se guardaron exitosamente
         for (const [k, d] of Array.from(v14.usersDirty.entries())) {
           if ((d.rowType === 'user' && succeededIds.user.has(String(d.rowId))) ||
@@ -21952,13 +22302,37 @@ window.addEventListener('volvix:version-loaded', function(e){
         }
         if (failCount > 0) {
           if (window.toast) window.toast('⚠ ' + okCount + ' guardadas, ' + failCount + ' fallaron (revisa consola). Cambios fallidos siguen en cola.', 'warn');
+          // 2026-05-09 fix(H5): toast adicional dedicado a email conflicts.
+          if (emailConflicts.length && window.toast) {
+            window.toast('⚠ ' + emailConflicts.length + ' fila(s) con conflicto de email — corregir y reintentar', 'warn');
+          }
           console.warn('[Excel-save] failures (still dirty):', failures);
         } else {
           if (window.toast) window.toast('✅ ' + okCount + ' filas guardadas exitosamente', 'ok');
         }
         _usersHierarchyCache = null;
         saveBtn.textContent = '💾 Guardar';
-        renderUsersUnified();
+        await renderUsersUnified();
+        // 2026-05-09 fix(H5): tras el re-render, marcar inputs de email con
+        // conflicto. has-error + title tooltip + revert al dataset.original.
+        // Se hace post-render porque renderUsersUnified() reconstruye todo el
+        // DOM de wrap y borraría cualquier marcado previo.
+        if (emailConflictIds.size) {
+          const wrapEl = $('#permv14-users-table-wrap');
+          if (wrapEl) {
+            emailConflictIds.forEach(uid => {
+              if (!uid) return;
+              const safeUid = (window.CSS && CSS.escape) ? CSS.escape(uid) : uid;
+              const tr = wrapEl.querySelector('tr[data-pv14-row-uid="' + safeUid + '"]');
+              if (!tr) return;
+              const inp = tr.querySelector('input[data-field="email"]');
+              if (!inp) return;
+              inp.classList.add('has-error');
+              inp.title = 'Email ya está en uso por otro usuario';
+              inp.value = inp.dataset.original || '';
+            });
+          }
+        }
       });
     }
     if (discardBtn && !discardBtn._pv14Wired) {
