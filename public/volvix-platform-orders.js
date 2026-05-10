@@ -57,90 +57,102 @@
   // UI: sección Pedidos de Plataformas (montada en el POS)
   // ────────────────────────────────────────────────────────────────────
   function _injectStyles() {
-    if (document.getElementById('vlx-plat-styles')) return;
+    if (document.getElementById('volvix-plat-styles')) return;
     const s = document.createElement('style');
-    s.id = 'vlx-plat-styles';
+    s.id = 'volvix-plat-styles';
     s.textContent = `
-      #vlx-plat-section{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px;margin:10px 0;font-family:-apple-system,Segoe UI,Roboto,sans-serif}
-      #vlx-plat-section.alert{border-color:#dc2626;animation:vlx-plat-blink 1s infinite}
-      #vlx-plat-section.alert .vlx-plat-h{color:#dc2626}
-      @keyframes vlx-plat-blink{0%,100%{background:#fff;border-color:#dc2626}50%{background:#fef3c7;border-color:#f59e0b}}
-      .vlx-plat-h{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#0f172a;margin:0 0 8px;text-transform:uppercase;letter-spacing:.04em}
-      .vlx-plat-badge{background:#dc2626;color:#fff;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700;display:none}
-      .vlx-plat-badge.show{display:inline-block}
-      .vlx-plat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
-      .vlx-plat-card{padding:10px;border:1px solid #e5e7eb;border-radius:8px;background:#fafafa;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:all .15s;text-align:center}
-      .vlx-plat-card:hover{background:#f0fdf4;border-color:#10b981}
-      .vlx-plat-card.disabled{opacity:.5;cursor:not-allowed;filter:grayscale(1)}
-      .vlx-plat-card.disabled:hover{background:#fafafa;border-color:#e5e7eb}
-      .vlx-plat-ico{font-size:24px}
-      .vlx-plat-name{font-size:12.5px;font-weight:600;color:#0f172a}
-      .vlx-plat-sub{font-size:10.5px;color:#64748b}
-      .vlx-plat-list{margin-top:8px;font-size:12px;color:#475569}
-      .vlx-plat-pending{padding:6px 8px;background:#fee2e2;border-left:3px solid #dc2626;border-radius:4px;margin:4px 0;display:flex;justify-content:space-between;align-items:center;gap:6px}
-      .vlx-plat-pending b{color:#0f172a}
-      .vlx-plat-pending button{padding:3px 8px;font-size:11px;border-radius:4px;border:0;background:#dc2626;color:#fff;cursor:pointer;font-weight:600}
+      #volvix-plat-section{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px;margin:10px 0;font-family:-apple-system,Segoe UI,Roboto,sans-serif}
+      #volvix-plat-section.alert{border-color:#dc2626;animation:volvix-plat-blink 1s infinite}
+      #volvix-plat-section.alert .volvix-plat-h{color:#dc2626}
+      @keyframes volvix-plat-blink{0%,100%{background:#fff;border-color:#dc2626}50%{background:#fef3c7;border-color:#f59e0b}}
+      .volvix-plat-h{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#0f172a;margin:0 0 8px;text-transform:uppercase;letter-spacing:.04em}
+      .volvix-plat-badge{background:#dc2626;color:#fff;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700;display:none}
+      .volvix-plat-badge.show{display:inline-block}
+      .volvix-plat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+      .volvix-plat-card{padding:10px;border:1px solid #e5e7eb;border-radius:8px;background:#fafafa;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:all .15s;text-align:center}
+      .volvix-plat-card:hover{background:#f0fdf4;border-color:#10b981}
+      .volvix-plat-card.disabled{opacity:.5;cursor:not-allowed;filter:grayscale(1)}
+      .volvix-plat-card.disabled:hover{background:#fafafa;border-color:#e5e7eb}
+      .volvix-plat-ico{font-size:24px}
+      .volvix-plat-name{font-size:12.5px;font-weight:600;color:#0f172a}
+      .volvix-plat-sub{font-size:10.5px;color:#64748b}
+      .volvix-plat-list{margin-top:8px;font-size:12px;color:#475569}
+      .volvix-plat-pending{padding:6px 8px;background:#fee2e2;border-left:3px solid #dc2626;border-radius:4px;margin:4px 0;display:flex;justify-content:space-between;align-items:center;gap:6px}
+      .volvix-plat-pending b{color:#0f172a}
+      .volvix-plat-pending button{padding:3px 8px;font-size:11px;border-radius:4px;border:0;background:#dc2626;color:#fff;cursor:pointer;font-weight:600}
       /* Modal nuevo pedido */
-      #vlx-order-modal{position:fixed;inset:0;background:rgba(220,38,38,.85);display:flex;align-items:center;justify-content:center;z-index:99997;padding:18px;backdrop-filter:blur(4px);animation:vlx-fadein .2s}
-      @keyframes vlx-fadein{from{opacity:0}to{opacity:1}}
-      #vlx-order-card{background:#fff;border-radius:14px;width:100%;max-width:520px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5);border:3px solid #dc2626}
-      .vlx-ord-head{background:linear-gradient(135deg,#dc2626,#991b1b);color:#fff;padding:18px 22px;text-align:center}
-      .vlx-ord-h{margin:0;font-size:20px;font-weight:800}
-      .vlx-ord-sub{margin:4px 0 0;font-size:13px;opacity:.95}
-      .vlx-ord-body{flex:1;overflow:auto;padding:18px 22px}
-      .vlx-ord-row{display:flex;gap:8px;font-size:13.5px;color:#0f172a;margin:6px 0;line-height:1.5}
-      .vlx-ord-row b{min-width:100px;color:#475569}
-      .vlx-ord-items{margin-top:12px;padding:10px 12px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;color:#334155;line-height:1.7}
-      .vlx-ord-foot{padding:14px 22px;background:#f8fafc;display:flex;gap:10px;border-top:1px solid #e5e7eb}
-      .vlx-ord-btn{flex:1;padding:14px;font-weight:700;font-size:14px;border:0;border-radius:9px;cursor:pointer}
-      .vlx-ord-btn.accept{background:#10b981;color:#fff}
-      .vlx-ord-btn.reject{background:#fff;color:#dc2626;border:1.5px solid #dc2626}
-      .vlx-ord-btn:hover{transform:translateY(-1px)}
+      #volvix-order-modal{position:fixed;inset:0;background:rgba(220,38,38,.85);display:flex;align-items:center;justify-content:center;z-index:99997;padding:18px;backdrop-filter:blur(4px);animation:volvix-fadein .2s}
+      @keyframes volvix-fadein{from{opacity:0}to{opacity:1}}
+      #volvix-order-card{background:#fff;border-radius:14px;width:100%;max-width:520px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5);border:3px solid #dc2626}
+      .volvix-ord-head{background:linear-gradient(135deg,#dc2626,#991b1b);color:#fff;padding:18px 22px;text-align:center}
+      .volvix-ord-h{margin:0;font-size:20px;font-weight:800}
+      .volvix-ord-sub{margin:4px 0 0;font-size:13px;opacity:.95}
+      .volvix-ord-body{flex:1;overflow:auto;padding:18px 22px}
+      .volvix-ord-row{display:flex;gap:8px;font-size:13.5px;color:#0f172a;margin:6px 0;line-height:1.5}
+      .volvix-ord-row b{min-width:100px;color:#475569}
+      .volvix-ord-items{margin-top:12px;padding:10px 12px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;color:#334155;line-height:1.7}
+      .volvix-ord-foot{padding:14px 22px;background:#f8fafc;display:flex;gap:10px;border-top:1px solid #e5e7eb}
+      .volvix-ord-btn{flex:1;padding:14px;font-weight:700;font-size:14px;border:0;border-radius:9px;cursor:pointer}
+      .volvix-ord-btn.accept{background:#10b981;color:#fff}
+      .volvix-ord-btn.reject{background:#fff;color:#dc2626;border:1.5px solid #dc2626}
+      .volvix-ord-btn:hover{transform:translateY(-1px)}
     `;
     document.head.appendChild(s);
   }
 
   function _mountSection() {
-    if (document.getElementById('vlx-plat-section')) return;
+    if (document.getElementById('volvix-plat-section')) return;
     // Buscar contenedor adecuado: el lateral del POS o crear uno
     const target = document.querySelector('.pos-cart-side, .pos-sidebar, #screen-pos .pos-main-area, #screen-pos');
     if (!target) return;
     const sec = document.createElement('div');
-    sec.id = 'vlx-plat-section';
+    sec.id = 'volvix-plat-section';
     sec.innerHTML = `
-      <div class="vlx-plat-h">📦 Pedidos de Plataformas <span class="vlx-plat-badge" id="vlx-plat-badge">0</span></div>
-      <div class="vlx-plat-grid">
-        <div class="vlx-plat-card" id="vlx-plat-app" title="Pedidos desde tu app cliente">
-          <div class="vlx-plat-ico">📱</div>
-          <div class="vlx-plat-name">Tu aplicación</div>
-          <div class="vlx-plat-sub">Activa</div>
+      <div class="volvix-plat-h">📦 Pedidos de Plataformas <span class="volvix-plat-badge" id="volvix-plat-badge">0</span></div>
+      <div class="volvix-plat-grid">
+        <div class="volvix-plat-card" id="volvix-plat-app" title="Pedidos desde tu app cliente">
+          <div class="volvix-plat-ico">📱</div>
+          <div class="volvix-plat-name">Tu aplicación</div>
+          <div class="volvix-plat-sub">Activa</div>
         </div>
-        <div class="vlx-plat-card disabled" title="Próximamente">
-          <div class="vlx-plat-ico">🟢</div>
-          <div class="vlx-plat-name">Uber Eats</div>
-          <div class="vlx-plat-sub">Próximamente</div>
+        <div class="volvix-plat-card disabled" title="Próximamente">
+          <div class="volvix-plat-ico">🟢</div>
+          <div class="volvix-plat-name">Uber Eats</div>
+          <div class="volvix-plat-sub">Próximamente</div>
         </div>
-        <div class="vlx-plat-card disabled" title="Próximamente">
-          <div class="vlx-plat-ico">🟠</div>
-          <div class="vlx-plat-name">Didi Food</div>
-          <div class="vlx-plat-sub">Próximamente</div>
+        <div class="volvix-plat-card disabled" title="Próximamente">
+          <div class="volvix-plat-ico">🟠</div>
+          <div class="volvix-plat-name">Didi Food</div>
+          <div class="volvix-plat-sub">Próximamente</div>
         </div>
-        <div class="vlx-plat-card disabled" title="Próximamente">
-          <div class="vlx-plat-ico">🛵</div>
-          <div class="vlx-plat-name">Rappi</div>
-          <div class="vlx-plat-sub">Próximamente</div>
+        <div class="volvix-plat-card disabled" title="Próximamente">
+          <div class="volvix-plat-ico">🛵</div>
+          <div class="volvix-plat-name">Rappi</div>
+          <div class="volvix-plat-sub">Próximamente</div>
         </div>
       </div>
-      <div class="vlx-plat-list" id="vlx-plat-list"></div>
+      <div class="volvix-plat-list" id="volvix-plat-list"></div>
     `;
     // Insertar al inicio del POS si es posible, fallback al body
     if (target.id === 'screen-pos') target.insertBefore(sec, target.firstChild);
     else target.appendChild(sec);
+    // 2026-05-10 anti-hide: force display:block !important para sobrescribir
+    // cualquier inline display:none que un wiring anti-floater inyecte.
+    function _forceShow() {
+      try {
+        sec.style.setProperty('display', 'block', 'important');
+        sec.style.setProperty('visibility', 'visible', 'important');
+        sec.style.setProperty('opacity', '1', 'important');
+      } catch (_) {}
+    }
+    _forceShow();
+    let tries = 0;
+    const intv = setInterval(() => { _forceShow(); if (++tries > 8) clearInterval(intv); }, 250);
     _renderPendingList();
   }
 
   function _renderPendingList() {
-    const list = document.getElementById('vlx-plat-list');
+    const list = document.getElementById('volvix-plat-list');
     if (!list) return;
     if (!_state.pendingCount) {
       list.innerHTML = '';
@@ -148,7 +160,7 @@
     }
     // Lista compacta de pedidos pendientes
     list.innerHTML = Array.from(_state.seenIds).slice(0, 5).map(id =>
-      '<div class="vlx-plat-pending"><b>Pedido #' + id + ' pendiente</b>' +
+      '<div class="volvix-plat-pending"><b>Pedido #' + id + ' pendiente</b>' +
       '<button data-pend-open="' + id + '">Ver</button></div>'
     ).join('');
     list.querySelectorAll('[data-pend-open]').forEach(b => {
@@ -157,10 +169,10 @@
   }
 
   function _setAlert(on) {
-    const sec = document.getElementById('vlx-plat-section');
+    const sec = document.getElementById('volvix-plat-section');
     if (!sec) return;
     sec.classList.toggle('alert', !!on);
-    const badge = document.getElementById('vlx-plat-badge');
+    const badge = document.getElementById('volvix-plat-badge');
     if (badge) {
       badge.classList.toggle('show', _state.pendingCount > 0);
       badge.textContent = _state.pendingCount;
@@ -227,33 +239,33 @@
     }
     if (!order) return;
 
-    const old = document.getElementById('vlx-order-modal');
+    const old = document.getElementById('volvix-order-modal');
     if (old) old.remove();
 
     const modal = document.createElement('div');
-    modal.id = 'vlx-order-modal';
+    modal.id = 'volvix-order-modal';
     const itemsHtml = (Array.isArray(order.items_json) ? order.items_json : []).map(it =>
       '• ' + _esc(typeof it === 'string' ? it : (it.name || it.descripcion || JSON.stringify(it)))
     ).join('<br>') || _esc(order.notes || '(sin items)');
 
     modal.innerHTML = `
-      <div id="vlx-order-card">
-        <div class="vlx-ord-head">
-          <h2 class="vlx-ord-h">🎉 Felicidades, han hecho una compra en tu aplicación</h2>
-          <p class="vlx-ord-sub">Pedido #${order.id} · ${new Date(order.created_at).toLocaleString('es-MX')}</p>
+      <div id="volvix-order-card">
+        <div class="volvix-ord-head">
+          <h2 class="volvix-ord-h">🎉 Felicidades, han hecho una compra en tu aplicación</h2>
+          <p class="volvix-ord-sub">Pedido #${order.id} · ${new Date(order.created_at).toLocaleString('es-MX')}</p>
         </div>
-        <div class="vlx-ord-body">
-          <div class="vlx-ord-row"><b>Cliente:</b> <span>${_esc(order.client_name || '—')}</span></div>
-          <div class="vlx-ord-row"><b>Email:</b> <span>${_esc(order.client_email || '—')}</span></div>
-          <div class="vlx-ord-row"><b>Teléfono:</b> <span>${_esc(order.client_phone || '—')}</span></div>
-          <div class="vlx-ord-row"><b>Tipo:</b> <span>${_esc(order.kind || 'pedido')}</span></div>
-          ${order.total ? '<div class="vlx-ord-row"><b>Total:</b> <span>$' + Number(order.total).toFixed(2) + '</span></div>' : ''}
-          ${order.notes ? '<div class="vlx-ord-row"><b>Notas:</b> <span>' + _esc(order.notes) + '</span></div>' : ''}
-          <div class="vlx-ord-items">${itemsHtml}</div>
+        <div class="volvix-ord-body">
+          <div class="volvix-ord-row"><b>Cliente:</b> <span>${_esc(order.client_name || '—')}</span></div>
+          <div class="volvix-ord-row"><b>Email:</b> <span>${_esc(order.client_email || '—')}</span></div>
+          <div class="volvix-ord-row"><b>Teléfono:</b> <span>${_esc(order.client_phone || '—')}</span></div>
+          <div class="volvix-ord-row"><b>Tipo:</b> <span>${_esc(order.kind || 'pedido')}</span></div>
+          ${order.total ? '<div class="volvix-ord-row"><b>Total:</b> <span>$' + Number(order.total).toFixed(2) + '</span></div>' : ''}
+          ${order.notes ? '<div class="volvix-ord-row"><b>Notas:</b> <span>' + _esc(order.notes) + '</span></div>' : ''}
+          <div class="volvix-ord-items">${itemsHtml}</div>
         </div>
-        <div class="vlx-ord-foot">
-          <button class="vlx-ord-btn reject" id="vlx-ord-reject">❌ Rechazar</button>
-          <button class="vlx-ord-btn accept" id="vlx-ord-accept">✓ Aceptar</button>
+        <div class="volvix-ord-foot">
+          <button class="volvix-ord-btn reject" id="volvix-ord-reject">❌ Rechazar</button>
+          <button class="volvix-ord-btn accept" id="volvix-ord-accept">✓ Aceptar</button>
         </div>
       </div>
     `;
@@ -262,12 +274,12 @@
     modal.style.setProperty('display', 'flex', 'important');
     modal.style.setProperty('z-index', '99999', 'important');
 
-    document.getElementById('vlx-ord-accept').addEventListener('click', () => _decide(order, 'aceptado'));
-    document.getElementById('vlx-ord-reject').addEventListener('click', () => _decide(order, 'rechazado'));
+    document.getElementById('volvix-ord-accept').addEventListener('click', () => _decide(order, 'aceptado'));
+    document.getElementById('volvix-ord-reject').addEventListener('click', () => _decide(order, 'rechazado'));
   }
 
   async function _decide(order, status) {
-    const modal = document.getElementById('vlx-order-modal');
+    const modal = document.getElementById('volvix-order-modal');
     const tok = _getTok();
     try {
       const r = await fetch('/api/app/orders/' + order.id, {
