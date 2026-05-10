@@ -343,47 +343,47 @@
     const s = document.createElement('style');
     s.id = 'vlx-import-styles';
     s.textContent = `
-      #vlx-import-modal{position:fixed;inset:0;background:rgba(15,23,42,.7);display:flex;align-items:center;justify-content:center;z-index:99996;padding:18px;backdrop-filter:blur(4px);font-family:-apple-system,Segoe UI,Roboto,sans-serif}
-      #vlx-import-card{background:#fff;border-radius:14px;width:100%;max-width:880px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4)}
-      .vlx-imp-head{padding:18px 22px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;gap:12px;background:linear-gradient(135deg,#f0fdf4,#dbeafe)}
-      .vlx-imp-h{margin:0;font-size:18px;font-weight:700;color:#0f172a}
-      .vlx-imp-sub{margin:3px 0 0;font-size:12px;color:#475569}
-      .vlx-imp-x{background:transparent;border:0;font-size:22px;cursor:pointer;color:#64748b;padding:4px 10px;border-radius:6px}
-      .vlx-imp-x:hover{background:rgba(0,0,0,.06)}
-      .vlx-imp-body{flex:1;overflow:auto;padding:22px}
-      .vlx-imp-foot{padding:14px 22px;border-top:1px solid #e5e7eb;background:#f8fafc;display:flex;justify-content:space-between;align-items:center;gap:10px}
-      .vlx-imp-foot .info{font-size:11.5px;color:#64748b}
-      .vlx-imp-btn{padding:9px 16px;border:1px solid #d1d5db;background:#fff;border-radius:8px;font-weight:600;cursor:pointer;font-size:13px;color:#0f172a}
-      .vlx-imp-btn.primary{background:#10b981;color:#fff;border-color:#059669}
-      .vlx-imp-btn:disabled{opacity:.5;cursor:not-allowed}
-      .vlx-imp-2cards{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-      @media(max-width:640px){.vlx-imp-2cards{grid-template-columns:1fr}}
-      .vlx-imp-card-opt{border:2px dashed #cbd5e1;border-radius:12px;padding:32px 22px;text-align:center;cursor:pointer;transition:all .15s;background:#fff}
-      .vlx-imp-card-opt:hover{border-color:#10b981;background:#f0fdf4;transform:translateY(-2px)}
-      .vlx-imp-card-opt.dragover{border-color:#10b981;background:#f0fdf4}
-      .vlx-imp-card-ico{font-size:48px;margin-bottom:8px}
-      .vlx-imp-card-t{font-weight:700;font-size:15px;color:#0f172a;margin-bottom:4px}
-      .vlx-imp-card-d{font-size:12px;color:#64748b;line-height:1.5}
-      .vlx-imp-formats{font-size:10.5px;color:#94a3b8;margin-top:8px;font-family:ui-monospace,monospace}
-      .vlx-imp-progress{padding:60px 20px;text-align:center}
-      .vlx-imp-progress .spin{display:inline-block;width:32px;height:32px;border:3px solid #e5e7eb;border-top-color:#10b981;border-radius:50%;animation:vlx-imp-spin 1s linear infinite;margin-bottom:12px}
-      @keyframes vlx-imp-spin{to{transform:rotate(360deg)}}
-      .vlx-imp-table-wrap{overflow:auto;max-height:48vh;border:1px solid #e5e7eb;border-radius:8px}
-      .vlx-imp-table{width:100%;border-collapse:collapse;font-size:13px;background:#fff}
-      .vlx-imp-table th{position:sticky;top:0;background:#f8fafc;text-align:left;padding:8px 10px;border-bottom:2px solid #e5e7eb;font-weight:700;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:#475569;z-index:1}
-      .vlx-imp-table td{padding:0;border-bottom:1px solid #f1f5f9;vertical-align:middle}
-      .vlx-imp-table td input{border:0;background:transparent;width:100%;padding:8px 10px;font:inherit;color:#0f172a;outline:none}
-      .vlx-imp-table td input:focus{background:#fffbeb;outline:1px solid #f59e0b}
-      .vlx-imp-table tr:hover td{background:#f9fafb}
-      .vlx-imp-row-del{background:transparent;border:0;color:#ef4444;cursor:pointer;font-size:16px;padding:4px 8px}
-      .vlx-imp-stat{display:flex;gap:14px;font-size:12px;color:#475569;margin-bottom:10px}
-      .vlx-imp-stat b{color:#0f172a;font-weight:700}
-      #vlx-cam-video{width:100%;max-width:480px;display:block;margin:0 auto;border-radius:8px;background:#000}
-      #vlx-cam-canvas{display:none}
-      .vlx-cam-actions{display:flex;gap:10px;justify-content:center;margin-top:12px}
-      .vlx-msg{margin-top:10px;padding:8px 12px;border-radius:6px;font-size:12.5px}
-      .vlx-msg.err{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
-      .vlx-msg.ok{background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0}
+      #volvix-import-modal{position:fixed;inset:0;background:rgba(15,23,42,.7);display:flex;align-items:center;justify-content:center;z-index:99996;padding:18px;backdrop-filter:blur(4px);font-family:-apple-system,Segoe UI,Roboto,sans-serif}
+      #volvix-import-card{background:#fff;border-radius:14px;width:100%;max-width:880px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+      .volvix-imp-head{padding:18px 22px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;gap:12px;background:linear-gradient(135deg,#f0fdf4,#dbeafe)}
+      .volvix-imp-h{margin:0;font-size:18px;font-weight:700;color:#0f172a}
+      .volvix-imp-sub{margin:3px 0 0;font-size:12px;color:#475569}
+      .volvix-imp-x{background:transparent;border:0;font-size:22px;cursor:pointer;color:#64748b;padding:4px 10px;border-radius:6px}
+      .volvix-imp-x:hover{background:rgba(0,0,0,.06)}
+      .volvix-imp-body{flex:1;overflow:auto;padding:22px}
+      .volvix-imp-foot{padding:14px 22px;border-top:1px solid #e5e7eb;background:#f8fafc;display:flex;justify-content:space-between;align-items:center;gap:10px}
+      .volvix-imp-foot .info{font-size:11.5px;color:#64748b}
+      .volvix-imp-btn{padding:9px 16px;border:1px solid #d1d5db;background:#fff;border-radius:8px;font-weight:600;cursor:pointer;font-size:13px;color:#0f172a}
+      .volvix-imp-btn.primary{background:#10b981;color:#fff;border-color:#059669}
+      .volvix-imp-btn:disabled{opacity:.5;cursor:not-allowed}
+      .volvix-imp-2cards{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+      @media(max-width:640px){.volvix-imp-2cards{grid-template-columns:1fr}}
+      .volvix-imp-card-opt{border:2px dashed #cbd5e1;border-radius:12px;padding:32px 22px;text-align:center;cursor:pointer;transition:all .15s;background:#fff}
+      .volvix-imp-card-opt:hover{border-color:#10b981;background:#f0fdf4;transform:translateY(-2px)}
+      .volvix-imp-card-opt.dragover{border-color:#10b981;background:#f0fdf4}
+      .volvix-imp-card-ico{font-size:48px;margin-bottom:8px}
+      .volvix-imp-card-t{font-weight:700;font-size:15px;color:#0f172a;margin-bottom:4px}
+      .volvix-imp-card-d{font-size:12px;color:#64748b;line-height:1.5}
+      .volvix-imp-formats{font-size:10.5px;color:#94a3b8;margin-top:8px;font-family:ui-monospace,monospace}
+      .volvix-imp-progress{padding:60px 20px;text-align:center}
+      .volvix-imp-progress .spin{display:inline-block;width:32px;height:32px;border:3px solid #e5e7eb;border-top-color:#10b981;border-radius:50%;animation:volvix-imp-spin 1s linear infinite;margin-bottom:12px}
+      @keyframes volvix-imp-spin{to{transform:rotate(360deg)}}
+      .volvix-imp-table-wrap{overflow:auto;max-height:48vh;border:1px solid #e5e7eb;border-radius:8px}
+      .volvix-imp-table{width:100%;border-collapse:collapse;font-size:13px;background:#fff}
+      .volvix-imp-table th{position:sticky;top:0;background:#f8fafc;text-align:left;padding:8px 10px;border-bottom:2px solid #e5e7eb;font-weight:700;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:#475569;z-index:1}
+      .volvix-imp-table td{padding:0;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+      .volvix-imp-table td input{border:0;background:transparent;width:100%;padding:8px 10px;font:inherit;color:#0f172a;outline:none}
+      .volvix-imp-table td input:focus{background:#fffbeb;outline:1px solid #f59e0b}
+      .volvix-imp-table tr:hover td{background:#f9fafb}
+      .volvix-imp-row-del{background:transparent;border:0;color:#ef4444;cursor:pointer;font-size:16px;padding:4px 8px}
+      .volvix-imp-stat{display:flex;gap:14px;font-size:12px;color:#475569;margin-bottom:10px}
+      .volvix-imp-stat b{color:#0f172a;font-weight:700}
+      #volvix-cam-video{width:100%;max-width:480px;display:block;margin:0 auto;border-radius:8px;background:#000}
+      #volvix-cam-canvas{display:none}
+      .volvix-cam-actions{display:flex;gap:10px;justify-content:center;margin-top:12px}
+      .volvix-msg{margin-top:10px;padding:8px 12px;border-radius:6px;font-size:12.5px}
+      .volvix-msg.err{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
+      .volvix-msg.ok{background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0}
     `;
     document.head.appendChild(s);
   }
@@ -391,39 +391,57 @@
   function openWizard() {
     _injectStyles();
     _state = { products: [], file: null, parsing: false };
-    let modal = document.getElementById('vlx-import-modal');
+    let modal = document.getElementById('volvix-import-modal');
     if (modal) modal.remove();
     modal = document.createElement('div');
-    modal.id = 'vlx-import-modal';
+    modal.id = 'volvix-import-modal';
     modal.innerHTML = `
-      <div id="vlx-import-card">
-        <div class="vlx-imp-head">
+      <div id="volvix-import-card">
+        <div class="volvix-imp-head">
           <div>
-            <h2 class="vlx-imp-h">📥 Importar productos</h2>
-            <p class="vlx-imp-sub">Migra tu inventario sin teclear nada — desde tu sistema anterior, una foto del menú, o un archivo de Excel</p>
+            <h2 class="volvix-imp-h">📥 Importar productos</h2>
+            <p class="volvix-imp-sub">Migra tu inventario sin teclear nada — desde tu sistema anterior, una foto del menú, o un archivo de Excel</p>
           </div>
-          <button class="vlx-imp-x" id="vlx-imp-close" aria-label="Cerrar">×</button>
+          <button class="volvix-imp-x" id="volvix-imp-close" aria-label="Cerrar">×</button>
         </div>
-        <div class="vlx-imp-body" id="vlx-imp-body"></div>
-        <div class="vlx-imp-foot">
-          <div class="info" id="vlx-imp-info">Solo lectura · nunca ejecutamos el archivo · max 50MB</div>
-          <div id="vlx-imp-actions"></div>
+        <div class="volvix-imp-body" id="volvix-imp-body"></div>
+        <div class="volvix-imp-foot">
+          <div class="info" id="volvix-imp-info">Solo lectura · nunca ejecutamos el archivo · max 50MB</div>
+          <div id="volvix-imp-actions"></div>
         </div>
       </div>
     `;
     document.body.appendChild(modal);
-    document.getElementById('vlx-imp-close').addEventListener('click', closeWizard);
+    // 2026-05-10 anti-hide: algún wiring del POS inyecta `display:none !important`
+    // a elementos floater no autorizados. Forzamos display:flex con !important via
+    // setProperty para sobrescribir cualquier conflicto, y re-aplicamos cada 250ms
+    // por 2s en caso de que un MutationObserver lo vuelva a ocultar.
+    function _forceShow() {
+      try {
+        modal.style.setProperty('display', 'flex', 'important');
+        modal.style.setProperty('visibility', 'visible', 'important');
+        modal.style.setProperty('opacity', '1', 'important');
+        modal.style.setProperty('z-index', '99999', 'important');
+        modal.removeAttribute('aria-hidden');
+        modal.classList.remove('vlx-feature-hidden', 'vlx-coming-soon', 'tv-hidden');
+      } catch (_) {}
+    }
+    _forceShow();
+    let _showTries = 0;
+    const _showInt = setInterval(() => { _forceShow(); if (++_showTries > 8) clearInterval(_showInt); }, 250);
+
+    document.getElementById('volvix-imp-close').addEventListener('click', closeWizard);
     modal.addEventListener('click', e => { if (e.target === modal) closeWizard(); });
     document.addEventListener('keydown', _escHandler);
     renderStep1();
   }
 
   function _escHandler(e) {
-    if (e.key === 'Escape' && document.getElementById('vlx-import-modal')) closeWizard();
+    if (e.key === 'Escape' && document.getElementById('volvix-import-modal')) closeWizard();
   }
 
   function closeWizard() {
-    const m = document.getElementById('vlx-import-modal');
+    const m = document.getElementById('volvix-import-modal');
     if (m) m.remove();
     document.removeEventListener('keydown', _escHandler);
     try { _stopCamera(); } catch (_) {}
@@ -431,30 +449,30 @@
 
   // STEP 1: pick source (file or camera)
   function renderStep1() {
-    const body = document.getElementById('vlx-imp-body');
-    const acts = document.getElementById('vlx-imp-actions');
+    const body = document.getElementById('volvix-imp-body');
+    const acts = document.getElementById('volvix-imp-actions');
     body.innerHTML = `
-      <div class="vlx-imp-2cards">
-        <div class="vlx-imp-card-opt" id="vlx-opt-file" tabindex="0">
-          <div class="vlx-imp-card-ico">📁</div>
-          <div class="vlx-imp-card-t">Subir archivo</div>
-          <div class="vlx-imp-card-d">Selecciona o arrastra cualquier archivo aquí</div>
-          <div class="vlx-imp-formats">Excel · CSV · PDF · Word · PowerPoint · Imagen · TXT · SQL · Eleventa · Parrot · MyBusinessPOS · SoftRestaurant</div>
-          <input type="file" id="vlx-imp-file" accept=".xlsx,.xls,.csv,.tsv,.txt,.log,.json,.pdf,.docx,.pptx,.sql,.sdf,.jpg,.jpeg,.png,.webp,.heic,.heif" style="display:none;">
+      <div class="volvix-imp-2cards">
+        <div class="volvix-imp-card-opt" id="volvix-opt-file" tabindex="0">
+          <div class="volvix-imp-card-ico">📁</div>
+          <div class="volvix-imp-card-t">Subir archivo</div>
+          <div class="volvix-imp-card-d">Selecciona o arrastra cualquier archivo aquí</div>
+          <div class="volvix-imp-formats">Excel · CSV · PDF · Word · PowerPoint · Imagen · TXT · SQL · Eleventa · Parrot · MyBusinessPOS · SoftRestaurant</div>
+          <input type="file" id="volvix-imp-file" accept=".xlsx,.xls,.csv,.tsv,.txt,.log,.json,.pdf,.docx,.pptx,.sql,.sdf,.jpg,.jpeg,.png,.webp,.heic,.heif" style="display:none;">
         </div>
-        <div class="vlx-imp-card-opt" id="vlx-opt-cam" tabindex="0">
-          <div class="vlx-imp-card-ico">📷</div>
-          <div class="vlx-imp-card-t">Tomar fotografía</div>
-          <div class="vlx-imp-card-d">Apunta tu cámara al menú o lista de precios</div>
-          <div class="vlx-imp-formats">OCR español + inglés · funciona offline</div>
+        <div class="volvix-imp-card-opt" id="volvix-opt-cam" tabindex="0">
+          <div class="volvix-imp-card-ico">📷</div>
+          <div class="volvix-imp-card-t">Tomar fotografía</div>
+          <div class="volvix-imp-card-d">Apunta tu cámara al menú o lista de precios</div>
+          <div class="volvix-imp-formats">OCR español + inglés · funciona offline</div>
         </div>
       </div>
-      <div id="vlx-imp-msg"></div>
+      <div id="volvix-imp-msg"></div>
     `;
     acts.innerHTML = '';
-    const fileCard = document.getElementById('vlx-opt-file');
-    const fileInput = document.getElementById('vlx-imp-file');
-    const camCard = document.getElementById('vlx-opt-cam');
+    const fileCard = document.getElementById('volvix-opt-file');
+    const fileInput = document.getElementById('volvix-imp-file');
+    const camCard = document.getElementById('volvix-opt-cam');
     fileCard.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', () => {
       const f = fileInput.files && fileInput.files[0];
@@ -474,21 +492,21 @@
 
   // STEP 2: parsing
   function renderParsing() {
-    const body = document.getElementById('vlx-imp-body');
+    const body = document.getElementById('volvix-imp-body');
     body.innerHTML = `
-      <div class="vlx-imp-progress">
+      <div class="volvix-imp-progress">
         <div class="spin"></div>
         <div style="font-weight:600;color:#0f172a;font-size:14px;margin-bottom:4px;">Leyendo archivo…</div>
-        <div style="font-size:12px;color:#64748b;" id="vlx-imp-prog-msg">No ejecutamos nada · solo lectura segura</div>
+        <div style="font-size:12px;color:#64748b;" id="volvix-imp-prog-msg">No ejecutamos nada · solo lectura segura</div>
       </div>
     `;
-    document.getElementById('vlx-imp-actions').innerHTML = '';
+    document.getElementById('volvix-imp-actions').innerHTML = '';
   }
 
   // STEP 3: editable table
   function renderEditTable(products) {
     _state.products = products;
-    const body = document.getElementById('vlx-imp-body');
+    const body = document.getElementById('volvix-imp-body');
     if (!products.length) {
       body.innerHTML = `
         <div style="padding:40px 20px;text-align:center;">
@@ -497,21 +515,21 @@
           <div style="font-size:12px;color:#64748b;">Intenta otro archivo, o usa la cámara para tomar foto del menú</div>
         </div>
       `;
-      document.getElementById('vlx-imp-actions').innerHTML = `
-        <button class="vlx-imp-btn" id="vlx-imp-back">← Probar otro archivo</button>
+      document.getElementById('volvix-imp-actions').innerHTML = `
+        <button class="volvix-imp-btn" id="volvix-imp-back">← Probar otro archivo</button>
       `;
-      document.getElementById('vlx-imp-back').addEventListener('click', renderStep1);
+      document.getElementById('volvix-imp-back').addEventListener('click', renderStep1);
       return;
     }
 
     body.innerHTML = `
-      <div class="vlx-imp-stat">
+      <div class="volvix-imp-stat">
         <div><b>${products.length}</b> productos detectados</div>
         <div>· Edita cualquier celda como Excel</div>
         <div>· Borra los que no quieras</div>
       </div>
-      <div class="vlx-imp-table-wrap">
-        <table class="vlx-imp-table" id="vlx-imp-tbl">
+      <div class="volvix-imp-table-wrap">
+        <table class="volvix-imp-table" id="volvix-imp-tbl">
           <thead><tr>
             <th style="width:24%">Categoría</th>
             <th style="width:32%">Nombre del producto</th>
@@ -520,22 +538,22 @@
             <th style="width:11%">Inventario</th>
             <th style="width:5%"></th>
           </tr></thead>
-          <tbody id="vlx-imp-tbody"></tbody>
+          <tbody id="volvix-imp-tbody"></tbody>
         </table>
       </div>
-      <div id="vlx-imp-msg"></div>
+      <div id="volvix-imp-msg"></div>
     `;
     _renderRows();
-    document.getElementById('vlx-imp-actions').innerHTML = `
-      <button class="vlx-imp-btn" id="vlx-imp-back">← Otro archivo</button>
-      <button class="vlx-imp-btn primary" id="vlx-imp-save">💾 Guardar ${products.length} productos</button>
+    document.getElementById('volvix-imp-actions').innerHTML = `
+      <button class="volvix-imp-btn" id="volvix-imp-back">← Otro archivo</button>
+      <button class="volvix-imp-btn primary" id="volvix-imp-save">💾 Guardar ${products.length} productos</button>
     `;
-    document.getElementById('vlx-imp-back').addEventListener('click', renderStep1);
-    document.getElementById('vlx-imp-save').addEventListener('click', saveAll);
+    document.getElementById('volvix-imp-back').addEventListener('click', renderStep1);
+    document.getElementById('volvix-imp-save').addEventListener('click', saveAll);
   }
 
   function _renderRows() {
-    const body = document.getElementById('vlx-imp-tbody');
+    const body = document.getElementById('volvix-imp-tbody');
     if (!body) return;
     body.innerHTML = _state.products.map((p, i) => `
       <tr data-row="${i}">
@@ -544,7 +562,7 @@
         <td><input type="number" step="0.01" data-f="cost" value="${p.cost || 0}" style="text-align:right;"></td>
         <td><input type="number" step="0.01" data-f="price" value="${p.price || 0}" style="text-align:right;"></td>
         <td><input type="number" step="1" data-f="stock" value="${p.stock || 0}" style="text-align:right;"></td>
-        <td><button class="vlx-imp-row-del" data-del="${i}" title="Eliminar fila">×</button></td>
+        <td><button class="volvix-imp-row-del" data-del="${i}" title="Eliminar fila">×</button></td>
       </tr>
     `).join('');
     // Wire edits + delete
@@ -565,7 +583,7 @@
         const i = parseInt(b.dataset.del, 10);
         _state.products.splice(i, 1);
         _renderRows();
-        const saveBtn = document.getElementById('vlx-imp-save');
+        const saveBtn = document.getElementById('volvix-imp-save');
         if (saveBtn) saveBtn.textContent = '💾 Guardar ' + _state.products.length + ' productos';
       });
     });
@@ -574,21 +592,21 @@
   // CAMERA
   let _camStream = null;
   async function renderCamera() {
-    const body = document.getElementById('vlx-imp-body');
+    const body = document.getElementById('volvix-imp-body');
     body.innerHTML = `
-      <video id="vlx-cam-video" autoplay playsinline></video>
-      <canvas id="vlx-cam-canvas"></canvas>
-      <div class="vlx-cam-actions">
-        <button class="vlx-imp-btn" id="vlx-cam-cancel">← Volver</button>
-        <button class="vlx-imp-btn primary" id="vlx-cam-snap">📸 Capturar y procesar</button>
+      <video id="volvix-cam-video" autoplay playsinline></video>
+      <canvas id="volvix-cam-canvas"></canvas>
+      <div class="volvix-cam-actions">
+        <button class="volvix-imp-btn" id="volvix-cam-cancel">← Volver</button>
+        <button class="volvix-imp-btn primary" id="volvix-cam-snap">📸 Capturar y procesar</button>
       </div>
-      <div id="vlx-imp-msg"></div>
+      <div id="volvix-imp-msg"></div>
     `;
-    document.getElementById('vlx-imp-actions').innerHTML = '';
-    document.getElementById('vlx-cam-cancel').addEventListener('click', () => { _stopCamera(); renderStep1(); });
-    document.getElementById('vlx-cam-snap').addEventListener('click', async () => {
-      const video = document.getElementById('vlx-cam-video');
-      const canvas = document.getElementById('vlx-cam-canvas');
+    document.getElementById('volvix-imp-actions').innerHTML = '';
+    document.getElementById('volvix-cam-cancel').addEventListener('click', () => { _stopCamera(); renderStep1(); });
+    document.getElementById('volvix-cam-snap').addEventListener('click', async () => {
+      const video = document.getElementById('volvix-cam-video');
+      const canvas = document.getElementById('volvix-cam-canvas');
       canvas.width = video.videoWidth; canvas.height = video.videoHeight;
       canvas.getContext('2d').drawImage(video, 0, 0);
       _stopCamera();
@@ -606,7 +624,7 @@
     });
     try {
       _camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-      document.getElementById('vlx-cam-video').srcObject = _camStream;
+      document.getElementById('volvix-cam-video').srcObject = _camStream;
     } catch (e) {
       _showMsg('No se pudo acceder a la cámara: ' + e.message + '. Intenta subir un archivo.', 'err');
     }
@@ -616,9 +634,9 @@
   }
 
   function _showMsg(text, kind) {
-    const el = document.getElementById('vlx-imp-msg');
+    const el = document.getElementById('volvix-imp-msg');
     if (!el) return;
-    el.innerHTML = '<div class="vlx-msg ' + (kind || 'err') + '">' + _esc(text) + '</div>';
+    el.innerHTML = '<div class="volvix-msg ' + (kind || 'err') + '">' + _esc(text) + '</div>';
   }
 
   // FILE handler
@@ -638,7 +656,7 @@
 
   // SAVE bulk
   async function saveAll() {
-    const btn = document.getElementById('vlx-imp-save');
+    const btn = document.getElementById('volvix-imp-save');
     if (btn) { btn.disabled = true; btn.textContent = '⏳ Guardando…'; }
     const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
     try {
@@ -677,7 +695,7 @@
       if (empty && attempts >= 5) {
         clearInterval(poll);
         // Solo si no hay otro modal abierto
-        if (!document.querySelector('#modal-product-form, #vlx-import-modal, #volvix-err-overlay')) {
+        if (!document.querySelector('#modal-product-form, #volvix-import-modal, #volvix-err-overlay')) {
           openWizard();
         }
       }
