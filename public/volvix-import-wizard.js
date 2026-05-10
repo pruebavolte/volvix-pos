@@ -245,12 +245,117 @@
     return parseTXTHeuristic(text);
   }
 
-  // Imagen via Tesseract.js
+  // ─── PIPELINE MULTI-ENGINE OCR (Tier 1: offline + gratis) ───────────
+  // 2026-05-10 Sprint 1: en lugar de un solo OCR, corre engines en paralelo
+  // y arma rompecabezas con resultados parciales. Cada engine extrae lo que
+  // puede; el merger toma el nombre más completo y el precio donde lo encuentre.
+  //
+  // Tier 1 (offline, funciona sin internet una vez cacheados los modelos):
+  //   1a. window.TextDetector     - Native Chrome API ~50ms (si existe)
+  //   1b. Tesseract.js spa+eng    - Default PSM=auto
+  //   1c. Tesseract.js spa+eng    - PSM=11 sparse-text (mejor menus)
+  //
+  // Si Tier 1 ≥ 5 productos confiables → STOP. Si no, futuros tiers (2-4)
+  // se llaman manualmente desde la UI con consentimiento del usuario.
+
+  async function _engineNativeTextDetector(file) {
+    if (typeof global.TextDetector !== 'function') return { engine: 'native-text', text: '', skipped: true };
+    try {
+      const td = new global.TextDetector();
+      const bitmap = await createImageBitmap(file);
+      const detections = await td.detect(bitmap);
+      const text = detections.map(d => d.rawValue || '').join('\n');
+      bitmap.close && bitmap.close();
+      return { engine: 'native-text', text, ms: 0 };
+    } catch (e) {
+      return { engine: 'native-text', text: '', err: String(e).substring(0, 100) };
+    }
+  }
+
+  async function _engineTesseract(file, opts) {
+    const t0 = Date.now();
+    try {
+      await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5.0.4/dist/tesseract.min.js');
+      if (!global.Tesseract) throw new Error('Tesseract no disponible');
+      const tessOpts = opts && opts.psm ? { tessedit_pageseg_mode: String(opts.psm) } : {};
+      const r = await global.Tesseract.recognize(file, 'spa+eng', tessOpts);
+      return { engine: opts && opts.label || 'tesseract-default', text: r.data.text || '', conf: r.data.confidence, ms: Date.now() - t0 };
+    } catch (e) {
+      return { engine: opts && opts.label || 'tesseract-default', text: '', err: String(e).substring(0, 100), ms: Date.now() - t0 };
+    }
+  }
+
+  // Similitud de strings simple (Sørensen–Dice de bigramas) — sin libs
+  function _similarity(a, b) {
+    const norm = s => String(s || '').toLowerCase().replace(/[^a-z0-9áéíóúüñ ]/gi, '').trim();
+    a = norm(a); b = norm(b);
+    if (a === b) return 1;
+    if (a.length < 2 || b.length < 2) return 0;
+    const bg = s => { const out = new Set(); for (let i = 0; i < s.length - 1; i++) out.add(s.slice(i, i + 2)); return out; };
+    const A = bg(a), B = bg(b);
+    let inter = 0;
+    A.forEach(x => { if (B.has(x)) inter++; });
+    return (2 * inter) / (A.size + B.size);
+  }
+
+  // Merge resultados de N engines en una lista única de productos
+  function _mergeEngineResults(engineResults) {
+    // Cada engine devuelve { engine, text }. Aplicamos parseTXTHeuristic a cada
+    // texto, recolectamos productos, y luego deduplicamos por similitud.
+    const buckets = []; // [{name, price, sources:[engineNames]}]
+    engineResults.forEach(r => {
+      if (!r.text) return;
+      const rows = parseTXTHeuristic(r.text);
+      if (!rows || rows.length < 2) return;
+      // skipear header [0]
+      for (let i = 1; i < rows.length; i++) {
+        const [name, price] = rows[i];
+        if (!name || name.length < 3) continue;
+        // Buscar bucket existente por similitud
+        const match = buckets.find(b => _similarity(b.name, name) >= 0.7);
+        if (match) {
+          // Tomar nombre más LARGO (más completo)
+          if (name.length > match.name.length) match.name = name;
+          // Tomar precio si el bucket no tenía o el nuevo > 0
+          const np = parseFloat(price);
+          if ((!match.price || match.price === 0) && isFinite(np) && np > 0) match.price = np;
+          if (!match.sources.includes(r.engine)) match.sources.push(r.engine);
+        } else {
+          buckets.push({ name: name.trim(), price: parseFloat(price) || 0, sources: [r.engine] });
+        }
+      }
+    });
+    // Volver a formato rows [['nombre','precio'], ...]
+    if (!buckets.length) return [];
+    const out = [['nombre', 'precio']];
+    buckets.forEach(b => out.push([b.name, String(b.price || 0)]));
+    return out;
+  }
+
+  // Orquestador principal: Tier 1 en paralelo, luego merger
   async function parseImageOCR(file) {
-    await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5.0.4/dist/tesseract.min.js');
-    if (!global.Tesseract) throw new Error('Tesseract no disponible');
-    const r = await global.Tesseract.recognize(file, 'spa+eng');
-    return parseTXTHeuristic(r.data.text || '');
+    // Lanzar engines de Tier 1 en paralelo (cada uno tolera errores propios)
+    const tasks = [
+      _engineNativeTextDetector(file),
+      _engineTesseract(file, { label: 'tesseract-auto' }),
+      _engineTesseract(file, { label: 'tesseract-sparse', psm: 11 }),
+    ];
+    const results = await Promise.all(tasks);
+    if (typeof console !== 'undefined') {
+      results.forEach(r => console.log('[wizard-ocr]', r.engine, '·', r.ms || 0, 'ms', '·', (r.text || '').length, 'chars', r.err ? '· ERR ' + r.err : ''));
+    }
+    // Si TODOS fallaron, lanzar error del último
+    const anyText = results.some(r => r.text && r.text.length > 5);
+    if (!anyText) {
+      const lastErr = results.map(r => r.err).filter(Boolean).join(' | ');
+      throw new Error('OCR fallo en todos los engines: ' + (lastErr || 'sin texto'));
+    }
+    // Merge de resultados → productos únicos
+    const merged = _mergeEngineResults(results);
+    // Si merge produjo algo, retornar; sino fallback a heurística sobre el texto más largo
+    if (merged.length > 1) return merged;
+    const longest = results.reduce((a, b) => (a.text.length > b.text.length ? a : b));
+    return parseTXTHeuristic(longest.text);
   }
 
   // Dispatcher principal
