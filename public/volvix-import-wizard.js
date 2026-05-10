@@ -245,6 +245,52 @@
     return parseTXTHeuristic(text);
   }
 
+  // ─── PRE-PROCESSOR de imagen (upscale + binarización) ──────────────
+  // 2026-05-10 Sprint 1.5: imágenes pequeñas (<800px ancho) o de baja
+  // calidad fallan en Tesseract por insuficiente densidad de pixeles.
+  // Pre-procesamos: upscale a 1600+ ancho con smoothing alto + conversión
+  // a B/N alto contraste para mejorar reconocimiento.
+  async function _preprocessImage(file) {
+    try {
+      const bitmap = await createImageBitmap(file);
+      const w = bitmap.width, h = bitmap.height;
+      // Si ya es razonable (>=900 ancho), no toques nada
+      if (w >= 900) { bitmap.close && bitmap.close(); return file; }
+      // Upscale 2-3x
+      const scale = w < 400 ? 4 : w < 700 ? 3 : 2;
+      const newW = Math.round(w * scale);
+      const newH = Math.round(h * scale);
+      const c = document.createElement('canvas');
+      c.width = newW; c.height = newH;
+      const ctx = c.getContext('2d');
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(bitmap, 0, 0, newW, newH);
+      bitmap.close && bitmap.close();
+      // Binarización adaptiva simple: convertir a luminance + threshold
+      try {
+        const imgData = ctx.getImageData(0, 0, newW, newH);
+        const d = imgData.data;
+        // Calcular mean luminance para threshold dinámico
+        let sum = 0;
+        for (let i = 0; i < d.length; i += 4) sum += 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
+        const meanLum = sum / (d.length / 4);
+        const threshold = meanLum * 0.85; // bias hacia más negro (texto)
+        for (let i = 0; i < d.length; i += 4) {
+          const lum = 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
+          const v = lum < threshold ? 0 : 255;
+          d[i] = v; d[i+1] = v; d[i+2] = v;
+        }
+        ctx.putImageData(imgData, 0, 0);
+      } catch (_) { /* canvas tainted, skip binarization */ }
+      const blob = await new Promise(r => c.toBlob(r, 'image/png'));
+      return new File([blob], 'preprocessed-' + (file.name || 'img.png'), { type: 'image/png' });
+    } catch (e) {
+      console.warn('[wizard-ocr] preprocess failed, usando original:', e.message);
+      return file;
+    }
+  }
+
   // ─── PIPELINE MULTI-ENGINE OCR (Tier 1: offline + gratis) ───────────
   // 2026-05-10 Sprint 1: en lugar de un solo OCR, corre engines en paralelo
   // y arma rompecabezas con resultados parciales. Cada engine extrae lo que
@@ -334,11 +380,14 @@
 
   // Orquestador principal: Tier 1 en paralelo, luego merger
   async function parseImageOCR(file) {
+    // Pre-procesar: upscale + binarización si la imagen es pequeña
+    const processed = await _preprocessImage(file);
+    if (processed !== file) console.log('[wizard-ocr] pre-processed', file.name, '→', processed.size, 'bytes');
     // Lanzar engines de Tier 1 en paralelo (cada uno tolera errores propios)
     const tasks = [
-      _engineNativeTextDetector(file),
-      _engineTesseract(file, { label: 'tesseract-auto' }),
-      _engineTesseract(file, { label: 'tesseract-sparse', psm: 11 }),
+      _engineNativeTextDetector(processed),
+      _engineTesseract(processed, { label: 'tesseract-auto' }),
+      _engineTesseract(processed, { label: 'tesseract-sparse', psm: 11 }),
     ];
     const results = await Promise.all(tasks);
     if (typeof console !== 'undefined') {
