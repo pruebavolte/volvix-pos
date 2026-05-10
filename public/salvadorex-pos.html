@@ -15080,7 +15080,17 @@
 <script src="volvix-logger-wiring.js" defer></script>
 <script src="volvix-offline-wiring.js" defer></script>
 <script src="volvix-reports-wiring.js" defer></script>
-<script src="volvix-onboarding-wiring.js" defer></script>
+<!-- 2026-05-09 user request: removido onboarding/tutorial tour -->
+<!-- <script src="volvix-onboarding-wiring.js" defer></script> -->
+<script>
+  // 2026-05-09: stub para que cualquier código legacy que llame estas APIs no falle.
+  window.startOnboarding = function(){ console.log('[onboarding disabled per user request]'); };
+  window.launchOnboarding = window.startOnboarding;
+  window.startTour = window.startOnboarding;
+  window.showOnboarding = window.startOnboarding;
+  // Limpiar flags de localStorage para que no se intente re-mostrar
+  try { localStorage.removeItem('volvix_onboarding_done'); localStorage.removeItem('volvix_tour_step'); localStorage.removeItem('volvix_first_run'); } catch(_) {}
+</script>
 <script src="volvix-pwa-wiring.js" defer></script>
 <script src="volvix-i18n-wiring.js" defer></script>
 <link rel="stylesheet" href="volvix-shared.css">
