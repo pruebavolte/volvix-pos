@@ -192,23 +192,26 @@
   function parseTXTHeuristic(text) {
     const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
     const rows = [['nombre', 'precio']];
-    // Anchored: nombre inicia con 3+ letras (no símbolos / no dígitos),
-    // separador opcional, currency opcional, precio, currency opcional, fin
-    const re = /^([A-Za-zÁÉÍÓÚÜÑáéíóúüñÄÖÜßäöüçÇ][\wÁÉÍÓÚÜÑáéíóúüñÄÖÜßäöüçÇ\s,'.&\/()\-]{2,80}?)[\s\.\-_|]+(?:[€$¢]|MXN|USD|MX\$)?\s*([0-9]{1,5}(?:[.,][0-9]{1,2})?)\s*(?:[€$¢]|MXN|USD|MX\$|pesos|dolares|d[oó]lares)?\s*$/i;
+    // 2026-05-10 fix v2: regex GLOBAL no-anchored para capturar MULTIPLES
+    // pares "Nombre ...... precio" en una sola línea (típico menu 2-columnas).
+    // Patrón: palabra(s) que empiezan con 3+ letras + separadores + número.
+    // Char class incluye em-dash (—) y en-dash (–) tanto en nombre como en
+    // separador — son comunes en menús OCR ("Item ........— $25").
+    const reGlobal = /([A-Za-zÁÉÍÓÚÜÑáéíóúüñÄÖÜßäöüçÇ][A-Za-zÁÉÍÓÚÜÑáéíóúüñÄÖÜßäöüçÇ\s'&\/()\-—–]{2,60}?)[\s\.\-_|—–]{2,}(?:[€$¢]|MXN|USD|MX\$)?\s*([0-9]{1,5}(?:[.,][0-9]{1,2})?)/gi;
     let matched = 0;
     lines.forEach(l => {
-      if (l.length < 5 || l.length > 200) return;
-      const m = l.match(re);
-      if (!m) return;
-      let name = m[1].trim().replace(/[\.\-_|·•:]+$/, '').trim();
-      // Nombre debe tener una palabra inicial de 3+ letras Unicode
-      if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñÄÖÜßäöüçÇ]{3,}/.test(name)) return;
-      // Rechazar descripciones largas con muchas comas (no productos)
-      if (name.length > 50 && (name.match(/,/g) || []).length >= 3) return;
-      const price = parseFloat(m[2].replace(',', '.'));
-      if (!isFinite(price) || price < 0.5 || price > 99999) return;
-      rows.push([name, String(price)]);
-      matched++;
+      if (l.length < 5 || l.length > 400) return;
+      let m;
+      const reLocal = new RegExp(reGlobal.source, 'gi');
+      while ((m = reLocal.exec(l)) !== null) {
+        let name = m[1].trim().replace(/[\.\-_|·•:,]+$/, '').replace(/^[\.\-_|·•:,\s]+/, '').trim();
+        if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñÄÖÜßäöüçÇ]{3,}/.test(name)) continue;
+        if (name.length > 50 && (name.match(/,/g) || []).length >= 3) continue;
+        const price = parseFloat(m[2].replace(',', '.'));
+        if (!isFinite(price) || price < 0.5 || price > 99999) continue;
+        rows.push([name, String(price)]);
+        matched++;
+      }
     });
     return matched > 0 ? rows : [];
   }
@@ -267,21 +270,25 @@
       ctx.imageSmoothingQuality = 'high';
       ctx.drawImage(bitmap, 0, 0, newW, newH);
       bitmap.close && bitmap.close();
-      // Binarización adaptiva simple: convertir a luminance + threshold
+      // Binarización SOLO si imagen es de fondo claro (papel blanco típico).
+      // Imágenes con fondos artísticos/oscuros (menús reales fotografiados con
+      // decoración) pierden info crítica al binarizar — mejor solo upscale.
       try {
         const imgData = ctx.getImageData(0, 0, newW, newH);
         const d = imgData.data;
-        // Calcular mean luminance para threshold dinámico
         let sum = 0;
         for (let i = 0; i < d.length; i += 4) sum += 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
         const meanLum = sum / (d.length / 4);
-        const threshold = meanLum * 0.85; // bias hacia más negro (texto)
-        for (let i = 0; i < d.length; i += 4) {
-          const lum = 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
-          const v = lum < threshold ? 0 : 255;
-          d[i] = v; d[i+1] = v; d[i+2] = v;
+        // Solo binarizar si fondo CLARO (>180 = casi blanco). En oscuros, skip.
+        if (meanLum > 180) {
+          const threshold = meanLum * 0.75;
+          for (let i = 0; i < d.length; i += 4) {
+            const lum = 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
+            const v = lum < threshold ? 0 : 255;
+            d[i] = v; d[i+1] = v; d[i+2] = v;
+          }
+          ctx.putImageData(imgData, 0, 0);
         }
-        ctx.putImageData(imgData, 0, 0);
       } catch (_) { /* canvas tainted, skip binarization */ }
       const blob = await new Promise(r => c.toBlob(r, 'image/png'));
       return new File([blob], 'preprocessed-' + (file.name || 'img.png'), { type: 'image/png' });
