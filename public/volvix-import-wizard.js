@@ -509,9 +509,56 @@
     return parseTXTHeuristic(longest.text);
   }
 
+  // 2026-05-10: auto-compresión transparente para archivos > 50MB.
+  // Imágenes (jpg/png/webp/heic) → re-encodear con calidad reducida y resize si necesario.
+  // Otros (PDF/DOCX/XLSX/etc) → no se pueden comprimir client-side; warn al usuario.
+  // Documentación de límites:
+  //  - Memoria browser móvil ~200-400MB total → archivos grandes la consumen toda
+  //  - Tesseract.js carga la imagen a canvas: 4096x4096 RGBA = 64MB en RAM
+  //  - PDF.js de igual forma rasteriza a canvas → consumo cuadrático con DPI
+  //  - Tiempo: 50MB+ tarda 30+ seg sólo en cargar a memoria
+  //  - No es restricción del SERVER (todo es client-side, nunca se sube original)
+  //  - Es restricción de RECURSOS DEL DISPOSITIVO (RAM + CPU del browser)
+  async function _autoCompressIfBig(file) {
+    if (file.size <= MAX_FILE_BYTES) return file;
+    const type = (file.type || '').toLowerCase();
+    const ext = String(file.name || '').toLowerCase().split('.').pop();
+    const isImage = type.startsWith('image/') || ['jpg','jpeg','png','webp','heic','heif'].includes(ext);
+    if (!isImage) {
+      // No se puede comprimir client-side → mostrar mensaje claro pero seguir intentando
+      console.warn('[wizard] Archivo > 50MB no es imagen, intentando procesar tal cual:', file.size);
+      return file;
+    }
+    try {
+      const bitmap = await createImageBitmap(file);
+      let w = bitmap.width, h = bitmap.height;
+      // Reducir si exceso de pixeles (límite 4096 lado mayor)
+      const maxSide = 4096;
+      if (Math.max(w, h) > maxSide) {
+        const scale = maxSide / Math.max(w, h);
+        w = Math.round(w * scale); h = Math.round(h * scale);
+      }
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      const ctx = c.getContext('2d');
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(bitmap, 0, 0, w, h);
+      bitmap.close && bitmap.close();
+      // Quality 0.7 para reducir tamaño manteniendo legibilidad OCR
+      const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', 0.7));
+      console.log('[wizard] auto-compresión:', (file.size/1024/1024).toFixed(1) + 'MB → ' + (blob.size/1024/1024).toFixed(1) + 'MB');
+      return new File([blob], 'compressed-' + (file.name || 'image.jpg'), { type: 'image/jpeg' });
+    } catch (e) {
+      console.warn('[wizard] auto-compresión falló, usando original:', e.message);
+      return file;
+    }
+  }
+
   // Dispatcher principal
   async function parseFile(file) {
-    if (file.size > MAX_FILE_BYTES) throw new Error('Archivo muy grande (max 50MB)');
+    // 2026-05-10: auto-compresión transparente en lugar de rechazar
+    file = await _autoCompressIfBig(file);
     const name = String(file.name || '').toLowerCase();
     const ext = name.split('.').pop();
     // Magic bytes
@@ -659,8 +706,8 @@
       .volvix-imp-btn{padding:9px 16px;border:1px solid #d1d5db;background:#fff;border-radius:8px;font-weight:600;cursor:pointer;font-size:13px;color:#0f172a}
       .volvix-imp-btn.primary{background:#10b981;color:#fff;border-color:#059669}
       .volvix-imp-btn:disabled{opacity:.5;cursor:not-allowed}
-      .volvix-imp-2cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
-      @media(max-width:880px){.volvix-imp-2cards{grid-template-columns:1fr 1fr}}
+      .volvix-imp-2cards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+      @media(min-width:920px){.volvix-imp-2cards{grid-template-columns:1fr 1fr 1fr 1fr}}
       @media(max-width:640px){.volvix-imp-2cards{grid-template-columns:1fr}}
       .volvix-imp-card-opt{border:2px dashed #cbd5e1;border-radius:12px;padding:32px 22px;text-align:center;cursor:pointer;transition:all .15s;background:#fff}
       .volvix-imp-card-opt:hover{border-color:#10b981;background:#f0fdf4;transform:translateY(-2px)}
@@ -710,7 +757,7 @@
         </div>
         <div class="volvix-imp-body" id="volvix-imp-body"></div>
         <div class="volvix-imp-foot">
-          <div class="info" id="volvix-imp-info">Solo lectura · nunca ejecutamos el archivo · max 50MB</div>
+          <div class="info" id="volvix-imp-info">Solo lectura · nunca ejecutamos el archivo · auto-comprime imágenes &gt; 50MB</div>
           <div id="volvix-imp-actions"></div>
         </div>
       </div>
@@ -776,6 +823,12 @@
           <div class="volvix-imp-card-d">Empieza con 10 productos base de tu giro</div>
           <div class="volvix-imp-formats">Edita después · ahorra capturar desde cero</div>
         </div>
+        <div class="volvix-imp-card-opt" id="volvix-opt-blank" tabindex="0">
+          <div class="volvix-imp-card-ico">📝</div>
+          <div class="volvix-imp-card-t">Empezar en blanco</div>
+          <div class="volvix-imp-card-d">Yo agregaré manualmente todos los productos</div>
+          <div class="volvix-imp-formats">Tabla vacía editable · 0 productos al inicio</div>
+        </div>
       </div>
       <div id="volvix-imp-msg"></div>
     `;
@@ -784,6 +837,7 @@
     const fileInput = document.getElementById('volvix-imp-file');
     const camCard = document.getElementById('volvix-opt-cam');
     const tplCard = document.getElementById('volvix-opt-template');
+    const blankCard = document.getElementById('volvix-opt-blank');
     fileCard.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', () => {
       const f = fileInput.files && fileInput.files[0];
@@ -800,6 +854,16 @@
     });
     camCard.addEventListener('click', renderCamera);
     tplCard.addEventListener('click', _useBaseTemplate);
+    if (blankCard) blankCard.addEventListener('click', _startBlank);
+  }
+
+  // 2026-05-10: empezar en blanco con 1 fila vacía editable
+  function _startBlank() {
+    const blank = [{
+      name: '', code: '', price: 0, cost: 0, stock: 0, category: '', _row: 1
+    }];
+    renderEditTable(blank);
+    if (typeof _showMsg === 'function') _showMsg('📝 Empieza a agregar productos. Edita la fila o presiona "+ agregar fila" para añadir más.', 'ok');
   }
 
   // 2026-05-10 user-request: si el cliente no tiene catálogo, ofrecer 10
@@ -984,23 +1048,133 @@
 
   // CAMERA
   let _camStream = null;
+  // 2026-05-10 fix cámara: permission flow + retry + instrucciones claras
+  // Mobile-first: la mayoría de usuarios usarán celular/tablet.
+  //
+  // Errores comunes y su tratamiento:
+  //   NotAllowedError  → usuario denegó permiso (o bloqueado en config)
+  //   NotFoundError    → no hay cámara en el dispositivo
+  //   NotReadableError → cámara en uso por otra app (común en iOS)
+  //   OverconstrainedError → facingMode 'environment' no disponible (iOS desktop) → retry sin constraint
+  //   SecurityError    → contexto no-HTTPS (Vercel ya es HTTPS)
+  //   AbortError       → usuario cerró el prompt
   async function renderCamera() {
     const body = document.getElementById('volvix-imp-body');
     body.innerHTML = `
-      <video id="volvix-cam-video" autoplay playsinline></video>
-      <canvas id="volvix-cam-canvas"></canvas>
-      <div class="volvix-cam-actions">
+      <div id="volvix-cam-prompt" style="text-align:center;padding:40px 20px;">
+        <div style="font-size:56px;margin-bottom:12px;">📷</div>
+        <h3 style="margin:0 0 8px;color:#0f172a;">Activar cámara</h3>
+        <p style="margin:0 0 20px;color:#64748b;font-size:13px;line-height:1.5;">
+          Tu navegador te pedirá permiso para usar la cámara.<br>
+          <strong>Toca "Permitir"</strong> cuando aparezca el aviso.
+        </p>
+        <button class="volvix-imp-btn primary" id="volvix-cam-start" style="font-size:15px;padding:12px 24px;">Activar cámara</button>
+        <div id="volvix-cam-help" style="display:none;margin-top:18px;text-align:left;background:#fef3c7;border:1px solid #fbbf24;border-radius:8px;padding:14px;font-size:13px;color:#78350f;"></div>
+      </div>
+      <video id="volvix-cam-video" autoplay playsinline muted style="display:none;width:100%;max-height:60vh;border-radius:10px;background:#000;"></video>
+      <canvas id="volvix-cam-canvas" style="display:none;"></canvas>
+      <div id="volvix-cam-actions-bar" class="volvix-cam-actions" style="display:none;margin-top:14px;justify-content:center;gap:10px;">
         <button class="volvix-imp-btn" id="volvix-cam-cancel">← Volver</button>
         <button class="volvix-imp-btn primary" id="volvix-cam-snap">📸 Capturar y procesar</button>
       </div>
       <div id="volvix-imp-msg"></div>
     `;
     document.getElementById('volvix-imp-actions').innerHTML = '';
-    document.getElementById('volvix-cam-cancel').addEventListener('click', () => { _stopCamera(); renderStep1(); });
+
+    function backToStep1() { _stopCamera(); renderStep1(); }
+    document.getElementById('volvix-cam-start').addEventListener('click', () => requestCamera());
+
+    // Detectar si los permisos ya están denegados antes de pedir (Permissions API)
+    async function tryRequestPermission() {
+      // 1) Verificar via Permissions API si está disponible (Chrome desktop, Android)
+      try {
+        if (navigator.permissions && navigator.permissions.query) {
+          const status = await navigator.permissions.query({ name: 'camera' });
+          if (status.state === 'denied') {
+            return { state: 'denied' };
+          }
+          // Reescuchar cambios para auto-retry cuando el usuario cambie en config
+          status.onchange = () => {
+            if (status.state === 'granted' && _camStream === null) requestCamera();
+          };
+        }
+      } catch (_) { /* iOS Safari no tiene Permissions API, seguir directo */ }
+      return { state: 'unknown' };
+    }
+
+    function showHelp(html) {
+      const h = document.getElementById('volvix-cam-help');
+      if (!h) return;
+      h.style.display = 'block';
+      h.innerHTML = html;
+    }
+
+    async function requestCamera(retry) {
+      const help = document.getElementById('volvix-cam-help');
+      if (help) help.style.display = 'none';
+      // Detectar denegación previa
+      const perm = await tryRequestPermission();
+      if (perm.state === 'denied') {
+        showHelp(
+          '<strong>🚫 Permiso bloqueado</strong><br>' +
+          'La cámara fue bloqueada en una visita anterior. Para activarla:<br>' +
+          '<strong>Chrome/Edge:</strong> toca el 🔒 a la izquierda de la URL → Cámara → Permitir → recarga.<br>' +
+          '<strong>iPhone Safari:</strong> Ajustes → Safari → Cámara → Permitir.<br>' +
+          '<strong>Android:</strong> Ajustes → Apps → Chrome → Permisos → Cámara → Permitir.'
+        );
+        return;
+      }
+      // Pedir cámara — primero trasera (mejor para menús), si falla intentar default
+      try {
+        const constraints = retry
+          ? { video: true } // fallback a cualquier cámara
+          : { video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } } };
+        _camStream = await navigator.mediaDevices.getUserMedia(constraints);
+        // Mostrar video y ocultar prompt
+        const promptEl = document.getElementById('volvix-cam-prompt');
+        const video = document.getElementById('volvix-cam-video');
+        const actionsBar = document.getElementById('volvix-cam-actions-bar');
+        if (promptEl) promptEl.style.display = 'none';
+        if (video) { video.style.display = 'block'; video.srcObject = _camStream; }
+        if (actionsBar) actionsBar.style.display = 'flex';
+      } catch (e) {
+        const errName = e && e.name || '';
+        const errMsg = e && e.message || String(e);
+        console.warn('[wizard] cámara error:', errName, errMsg);
+        // OverconstrainedError → reintentar sin facingMode
+        if ((errName === 'OverconstrainedError' || errName === 'NotFoundError') && !retry) {
+          return requestCamera(true);
+        }
+        // Mensajes específicos por error
+        let html = '<strong>⚠️ No se pudo activar la cámara</strong><br>';
+        if (errName === 'NotAllowedError' || errName === 'PermissionDeniedError') {
+          html += 'Negaste el permiso. Para reintentar:<br>' +
+            '<strong>Móvil:</strong> recarga la página y toca "Permitir" cuando aparezca el aviso.<br>' +
+            '<strong>Si ya bloqueaste antes:</strong> abre Ajustes del navegador → Permisos → Cámara → Permitir para este sitio.';
+        } else if (errName === 'NotFoundError') {
+          html += 'No se detectó cámara en este dispositivo. Prueba subir una foto desde la galería en su lugar.';
+        } else if (errName === 'NotReadableError') {
+          html += 'La cámara está siendo usada por otra app. Cierra otras apps (zoom, meet, instagram) e inténtalo de nuevo.';
+        } else if (errName === 'SecurityError') {
+          html += 'El navegador bloqueó la cámara por motivos de seguridad. Asegúrate de estar en https://';
+        } else if (errName === 'AbortError') {
+          html += 'Cancelaste el aviso. Toca "Activar cámara" otra vez.';
+        } else {
+          html += 'Error: ' + (errMsg || errName) + '. Intenta recargar la página.';
+        }
+        html += '<br><br><button class="volvix-imp-btn primary" id="volvix-cam-retry" style="font-size:13px;padding:8px 16px;">🔄 Reintentar</button>';
+        showHelp(html);
+        const retryBtn = document.getElementById('volvix-cam-retry');
+        if (retryBtn) retryBtn.addEventListener('click', () => requestCamera());
+      }
+    }
+
+    document.getElementById('volvix-cam-cancel').addEventListener('click', backToStep1);
     document.getElementById('volvix-cam-snap').addEventListener('click', async () => {
       const video = document.getElementById('volvix-cam-video');
       const canvas = document.getElementById('volvix-cam-canvas');
-      canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+      canvas.width = video.videoWidth || 1280;
+      canvas.height = video.videoHeight || 720;
       canvas.getContext('2d').drawImage(video, 0, 0);
       _stopCamera();
       renderParsing();
@@ -1012,15 +1186,9 @@
         renderEditTable(products);
       } catch (e) {
         renderEditTable([]);
-        _showMsg('Error OCR: ' + e.message, 'err');
+        _showMsg('Error OCR: ' + (e && e.message || e), 'err');
       }
     });
-    try {
-      _camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-      document.getElementById('volvix-cam-video').srcObject = _camStream;
-    } catch (e) {
-      _showMsg('No se pudo acceder a la cámara: ' + e.message + '. Intenta subir un archivo.', 'err');
-    }
   }
   function _stopCamera() {
     if (_camStream) { _camStream.getTracks().forEach(t => t.stop()); _camStream = null; }
