@@ -2428,6 +2428,18 @@
 <!-- B19: búsqueda inteligente offline-first + barcode cascade -->
 <script src="volvix-product-search.js" defer></script>
 <script src="volvix-barcode-resolver.js" defer></script>
+<!-- 2026-05-10 user-request: wizard de migración cero-teclas (Excel/PDF/imagen
+     OCR/cámara/SQL/Eleventa/Parrot/MyBusinessPOS/SoftRestaurant). Auto-abre si
+     CATALOG está vacío. Solo lee — nunca ejecuta. -->
+<script src="volvix-import-wizard.js" defer></script>
+<script defer>
+  // Auto-trigger del wizard si el tenant no tiene productos
+  document.addEventListener('DOMContentLoaded', function () {
+    setTimeout(function () {
+      try { if (window.VolvixImport && window.VolvixImport.openWizardIfEmpty) window.VolvixImport.openWizardIfEmpty(); } catch (e) {}
+    }, 4500); // esperar que loadCatalogReal corra primero
+  });
+</script>
 <!-- R12-O-3-B FIX-O3-B-2: auto-trigger welcome wizard en first_login + banner pendiente -->
 <script src="volvix-onboarding-tour-wiring.js" defer></script>
 <script defer>
@@ -9654,9 +9666,25 @@
     if (btnNew) btnNew.addEventListener('click', async () => { const d = await promptProductForm(); if (d) await saveProduct(d); });
     const btnExp = document.getElementById('btn-export-prod');
     if (btnExp) btnExp.addEventListener('click', exportProductsCSV);
+    // 2026-05-10 user-request: el botón "📥 Importar" abre el WIZARD nuevo
+    // (volvix-import-wizard.js) que soporta Excel, PDF, Word, PowerPoint, imagen
+    // OCR, cámara en vivo, CSV, SQL, archivos Eleventa/Parrot/MyBusinessPOS/etc.
+    // Si el wizard NO está cargado, fallback al import CSV legacy.
     const btnImp = document.getElementById('btn-import-prod');
     const fileInp = document.getElementById('inv-import-file');
-    if (btnImp && fileInp) { btnImp.addEventListener('click', () => fileInp.click()); fileInp.addEventListener('change', e => { if (e.target.files[0]) importProductsCSV(e.target.files[0]); e.target.value=''; }); }
+    if (btnImp) {
+      btnImp.addEventListener('click', () => {
+        if (window.VolvixImport && typeof window.VolvixImport.openWizard === 'function') {
+          window.VolvixImport.openWizard();
+        } else if (fileInp) {
+          fileInp.click();
+        } else {
+          alert('Wizard de importación no disponible aún. Recarga la página.');
+        }
+      });
+    }
+    // Conservar input legacy para compat en caso de fallback
+    if (fileInp) fileInp.addEventListener('change', e => { if (e.target.files[0] && typeof importProductsCSV === 'function') importProductsCSV(e.target.files[0]); e.target.value=''; });
     // Search wiring is handled by initInventoryModule() with full filter opts
     const body = document.getElementById('inv-body');
     if (body) body.addEventListener('click', async (e) => {

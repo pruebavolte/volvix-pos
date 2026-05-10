@@ -37244,6 +37244,81 @@ if (process.env.NODE_ENV === 'test') {
   });
 
   // ─────────────────────────────────────────────────────────────────────
+  // 2026-05-10 Wizard de migración: bulk-import desde Excel/PDF/imagen/etc.
+  // POST /api/products/bulk-import {items:[{name,code,price,cost,stock,category}]}
+  //   → inserta TODOS los productos en una sola llamada para el tenant del caller.
+  //   Items duplicados (mismo code en el tenant) se actualizan en vez de duplicar.
+  //   Cada item se sanitiza (max length, price/stock numéricos, name required).
+  //   Devuelve {ok:true, inserted, updated, skipped, errors:[{row,reason}]}.
+  // ─────────────────────────────────────────────────────────────────────
+  handlers['POST /api/products/bulk-import'] = requireAuth(async function (req, res) {
+    try {
+      const body = await readBody(req).catch(() => ({}));
+      if (checkBodyError && checkBodyError(req, res)) return;
+      const tnt = (req.user && (req.user.tenant_id || req.user.tnt)) || '';
+      if (!tnt) return sendJSON(res, { error: 'tenant_required' }, 400);
+      const items = Array.isArray(body.items) ? body.items : [];
+      if (!items.length) return sendJSON(res, { error: 'sin_items' }, 400);
+      if (items.length > 5000) return sendJSON(res, { error: 'demasiados_items', max: 5000 }, 400);
+
+      // Sanitizar cada item
+      const cleaned = [];
+      const errors = [];
+      items.forEach((it, i) => {
+        const name = String(it.name || '').trim().slice(0, 200);
+        if (!name) { errors.push({ row: i + 1, reason: 'nombre_vacio' }); return; }
+        const price = Number(it.price);
+        const cost = Number(it.cost);
+        const stock = parseInt(it.stock, 10);
+        const codeRaw = String(it.code || '').trim().slice(0, 64);
+        const code = codeRaw || ('IMP-' + Date.now().toString(36).toUpperCase().slice(-4) + '-' + i);
+        cleaned.push({
+          tenant_id: tnt,
+          name,
+          code,
+          barcode: String(it.barcode || codeRaw || '').trim().slice(0, 64) || null,
+          price: isFinite(price) && price >= 0 ? price : 0,
+          cost:  isFinite(cost)  && cost  >= 0 ? cost  : 0,
+          stock: isFinite(stock) && stock >= 0 ? stock : 0,
+          category: String(it.category || '').trim().slice(0, 100) || null,
+        });
+      });
+
+      if (!cleaned.length) return sendJSON(res, { error: 'todos_invalidos', errors }, 400);
+
+      // UPSERT en chunks de 100 para no saturar PostgREST
+      let inserted = 0, updated = 0, failed = 0;
+      const CHUNK = 100;
+      for (let i = 0; i < cleaned.length; i += CHUNK) {
+        const chunk = cleaned.slice(i, i + CHUNK);
+        try {
+          const r = await supabaseRequest('POST', '/products', chunk, {
+            'Prefer': 'resolution=merge-duplicates,return=minimal'
+          });
+          inserted += chunk.length;
+        } catch (e) {
+          // Reintentar chunk individual
+          for (const item of chunk) {
+            try {
+              await supabaseRequest('POST', '/products', item, { 'Prefer': 'resolution=merge-duplicates,return=minimal' });
+              inserted++;
+            } catch (_) { failed++; }
+          }
+        }
+      }
+
+      sendJSON(res, {
+        ok: true,
+        inserted,
+        updated,
+        failed,
+        skipped: items.length - cleaned.length,
+        errors: errors.slice(0, 50)
+      });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // ─────────────────────────────────────────────────────────────────────
   // 2026-05-10 Motor inteligencia: top sellers + search log
   // GET  /api/products/top?limit=500   → productos más vendidos del tenant
   //                                      para pre-sync IndexedDB al boot
