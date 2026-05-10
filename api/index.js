@@ -37522,9 +37522,10 @@ if (process.env.NODE_ENV === 'test') {
   handlers['GET /api/app/orders'] = async function (req, res) {
     try {
       const url = new URL(req.url, 'http://x');
-      const tenantSlug = String(url.searchParams.get('t') || '').trim();
-      const email = String(url.searchParams.get('email') || '').trim().toLowerCase();
-      if (!tenantSlug || !email) return sendJSON(res, { error: 'tenant_slug y email requeridos' }, 400);
+      // 2026-05-10 fix: aceptar aliases de naming (t, tenant_slug, tenant_id) y (email, client_email, customer_email)
+      const tenantSlug = String(url.searchParams.get('t') || url.searchParams.get('tenant_slug') || url.searchParams.get('tenant_id') || url.searchParams.get('tenant') || '').trim();
+      const email = String(url.searchParams.get('email') || url.searchParams.get('client_email') || url.searchParams.get('customer_email') || '').trim().toLowerCase();
+      if (!tenantSlug || !email) return sendJSON(res, { error: 'tenant (t|tenant_slug|tenant_id) y email (email|client_email) requeridos' }, 400);
       const enc = encodeURIComponent(tenantSlug);
       const ee = encodeURIComponent(email);
       const orders = await supabaseRequest('GET',
@@ -37538,9 +37539,10 @@ if (process.env.NODE_ENV === 'test') {
     try {
       const body = await readBody(req).catch(() => ({}));
       if (checkBodyError && checkBodyError(req, res)) return;
-      const tenantSlug = String(body.tenant_slug || '').trim();
-      const email = String(body.email || '').trim().toLowerCase();
-      if (!tenantSlug || !email) return sendJSON(res, { error: 'tenant_slug y email requeridos' }, 400);
+      // 2026-05-10 fix: aceptar aliases de naming (tenant_slug|tenant_id) y (email|client_email)
+      const tenantSlug = String(body.tenant_slug || body.tenant_id || body.tenant || '').trim();
+      const email = String(body.email || body.client_email || body.customer_email || '').trim().toLowerCase();
+      if (!tenantSlug || !email) return sendJSON(res, { error: 'tenant (tenant_slug|tenant_id) y email (email|client_email) requeridos' }, 400);
       const enc = encodeURIComponent(tenantSlug);
       // Verificar que tenant + cliente existan
       const tenants = await supabaseRequest('GET',
@@ -37553,13 +37555,15 @@ if (process.env.NODE_ENV === 'test') {
       ).catch(() => []);
       if (!clients || !clients.length) return sendJSON(res, { error: 'cliente_no_registrado' }, 403);
       const c = clients[0];
+      // 2026-05-10 fix items_json: aceptar tanto body.items como body.items_json
+      const itemsArr = Array.isArray(body.items_json) ? body.items_json : (Array.isArray(body.items) ? body.items : []);
       const ins = await supabaseRequest('POST', '/pos_app_orders', {
         tenant_id: tenantSlug,
         client_email: email,
-        client_name: c.name,
-        client_phone: c.phone,
+        client_name: String(body.client_name || body.name || c.name || '').slice(0, 100),
+        client_phone: String(body.client_phone || body.phone || c.phone || '').slice(0, 20),
         kind: String(body.kind || 'pedido').slice(0, 20),
-        items_json: Array.isArray(body.items) ? body.items : [],
+        items_json: itemsArr,
         notes: String(body.notes || '').slice(0, 1000),
         total: Number(body.total) || 0,
         status: 'nuevo',
@@ -37675,10 +37679,11 @@ if (process.env.NODE_ENV === 'test') {
       const body = await readBody(req).catch(() => ({}));
       if (checkBodyError && checkBodyError(req, res)) return;
       // 2026-05-09 fix: tenant_id es case-sensitive (TNT-XXXXX) — NO lowercase
-      const tenantSlug = String(body.tenant_slug || '').trim();
-      const email = String(body.email || '').trim().toLowerCase();
-      const phone = String(body.phone || '').replace(/\D/g, '');
-      const name = String(body.name || '').trim();
+      // 2026-05-10 fix: aceptar aliases tenant_id/tenant_slug
+      const tenantSlug = String(body.tenant_slug || body.tenant_id || body.tenant || '').trim();
+      const email = String(body.email || body.client_email || '').trim().toLowerCase();
+      const phone = String(body.phone || body.client_phone || '').replace(/\D/g, '');
+      const name = String(body.name || body.client_name || '').trim();
       if (!tenantSlug) return sendJSON(res, { error: 'tenant_slug requerido' }, 400);
       if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return sendJSON(res, { error: 'email_invalido' }, 400);
       if (!phone || phone.length < 10) return sendJSON(res, { error: 'phone_invalido' }, 400);
