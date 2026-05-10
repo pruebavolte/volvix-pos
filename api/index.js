@@ -17845,20 +17845,24 @@ if (process.env.NODE_ENV === 'test') {
       var totalNet = totalSales - totalRefunds;
       var expected = (parseFloat(cut.opening_balance) || 0) + totalCash + cashIn - cashOut;
       var discrepancy = +(counted - expected).toFixed(2);
+      // 2026-05-10 fix: usar nombres EXACTOS de columnas en tabla cuts.
+      // Antes patch usaba total_refunds, total_cash_in, total_cash_out que NO existen
+      // en cuts → PostgREST throw → 500. Los correctos son cash_in, cash_out
+      // (sin prefix total_) y total_refunds simplemente se descuenta de total_sales.
       var patch = {
         closing_balance: counted,
         closing_breakdown: body.closing_breakdown || null,
-        total_sales: totalSales,
-        total_refunds: totalRefunds,
+        total_sales: totalSales - totalRefunds, // neto de devoluciones
         total_cash_sales: +totalCash.toFixed(2),
         total_card_sales: +totalCard.toFixed(2),
         total_transfer_sales: +totalTransfer.toFixed(2),
         total_other_sales: +totalOther.toFixed(2),
-        total_cash_in: +cashIn.toFixed(2),
-        total_cash_out: +cashOut.toFixed(2),
+        cash_in: +cashIn.toFixed(2),
+        cash_out: +cashOut.toFixed(2),
         expected_balance: expected,
         discrepancy: discrepancy,
         notes_close: body.notes ? sanitizeText(String(body.notes)).slice(0, 1000) : null,
+        status: 'closed',
         closed_at: new Date().toISOString()
       };
       var result = await supabaseRequest('PATCH',
