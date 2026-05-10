@@ -2706,6 +2706,46 @@
   if (document.body) injectBanner();
   else document.addEventListener('DOMContentLoaded', injectBanner);
 
+  // 3b) Helper: aplicar renombres de módulos/botones del giro
+  // Lee giro.moduleNameOverrides + buttonNameOverrides y RENOMBRA los textContent
+  // de los botones/tabs cuyo label original coincida con el módulo.
+  function applyModuleRenames(giroData){
+    if (!giroData) return;
+    var moduleLabelMap = {
+      pos: ['Vender','🛒 Vender','🍎 Vender','💵 Vender','🛒 Punto de Venta'],
+      reportes: ['Reportes','📊 Reportes','📈 Reportes'],
+      clientes: ['Clientes','👥 Clientes','🍎 Clientes'],
+      kardex: ['Kardex','📒 Kardex','📋 Kardex'],
+      inventario: ['Inventario','📦 Inventario'],
+      credito: ['Crédito','Créditos','💳 Créditos','💳 Crédito'],
+      facturacion: ['Facturas','📄 Facturas','Facturación','📄 Facturación CFDI'],
+      recargas: ['Recargas','📱 Recargas'],
+      servicios: ['Servicios','💡 Servicios','Pago de Servicios'],
+      tarjetas: ['Tarjetas','🎬 Tarjetas','Tarjetas Virtuales'],
+      devoluciones: ['Devoluciones','↩️ Devoluciones'],
+      corte: ['Corte','💼 Corte','🔐 Corte','Corte de Caja'],
+      apertura: ['Apertura','🔓 Apertura','Apertura de Caja'],
+      config: ['Config','⚙️ Config','Configuración'],
+    };
+    var renames = giroData.moduleNameOverrides || {};
+    var renamed = 0;
+    Object.entries(renames).forEach(function(entry){
+      var key = entry[0], newLabel = entry[1];
+      if (!newLabel) return;
+      var labels = moduleLabelMap[key] || [];
+      document.querySelectorAll('button, a, [role="tab"], .tab').forEach(function(el){
+        if (el.dataset && el.dataset.impersonationRenamed === key) return;
+        var t = (el.textContent || '').trim();
+        if (labels.some(function(L){ return t === L || t.indexOf(L) === 0; })) {
+          el.textContent = newLabel;
+          el.dataset.impersonationRenamed = key;
+          renamed++;
+        }
+      });
+    });
+    return renamed;
+  }
+
   // 3) Cargar flags del tenant impersonado y aplicar overrides locales del email impersonado
   function loadImpersonatedState(){
     if (!imTid || !window.VOLVIX || !VOLVIX.applyState || !VOLVIX.getState) {
@@ -2722,7 +2762,7 @@
     var tok = superToken || localStorage.getItem('volvix_token');
     origFetch('/api/admin/tenant/' + encodeURIComponent(imTid) + '/flags', {
       headers: tok ? { 'Authorization': 'Bearer ' + tok } : {}
-    }).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
+    }).then(function(r){ return r.ok ? r.json() : null; }).then(async function(j){
       if (!j || !j.ok) { console.warn('[IMPERSONATING] no se pudo cargar flags del tenant', imTid); return; }
       var s = VOLVIX.getState() || {};
       s.id = imTid;
@@ -2745,6 +2785,35 @@
       } catch(_){}
       VOLVIX.applyState(s);
       console.warn('[IMPERSONATING] estado aplicado:', s);
+      // 2026-05-09: Cargar el GIRO del tenant para aplicar renames + locked styling.
+      // /api/admin/giros/:slug devuelve moduleNameOverrides.
+      try {
+        var giroSlug = (j.business_type || (j.tenant_id && (j.modules ? null : null)));
+        // Si el tenant tiene business_type (no incluido en /flags), pedirlo
+        if (!giroSlug) {
+          // Hack: pedir tenants list y matchear por tid
+          var rt = await origFetch('/api/admin/tenants', { headers: { 'Authorization': 'Bearer ' + (superToken || tok) }}).catch(function(){return null;});
+          if (rt && rt.ok) {
+            var tj = await rt.json();
+            var t = (tj.items || []).find(function(x){ return x.tenant_id === imTid; });
+            if (t) giroSlug = t.business_type;
+          }
+        }
+        if (giroSlug) {
+          var rg = await origFetch('/api/admin/giros/' + encodeURIComponent(giroSlug), { headers: { 'Authorization': 'Bearer ' + (superToken || tok) }}).catch(function(){return null;});
+          if (rg && rg.ok) {
+            var gj = await rg.json();
+            window.IMPERSONATION_GIRO = gj.item;
+            // Schedule renames repetidamente (UI async)
+            var doRenames = function(){
+              var n = applyModuleRenames(gj.item);
+              if (n) console.log('[IMPERSONATING] renombrados', n, 'elementos');
+            };
+            doRenames();
+            [500, 1500, 3000, 5000, 8000].forEach(function(d){ setTimeout(doRenames, d); });
+          }
+        }
+      } catch(rerr) { console.warn('[IMPERSONATING] renames fail', rerr); }
       // 2026-05-09: La UI del POS no reacciona dinámicamente a cambios de
       // state.modules después del boot. Inyectamos CSS que OCULTA botones
       // de módulos cuyo flag esté en false, Y lo re-aplicamos varias veces

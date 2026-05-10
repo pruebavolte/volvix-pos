@@ -36859,12 +36859,34 @@ if (process.env.NODE_ENV === 'test') {
   // Phase B — Giros catalog endpoints (BD-driven)
   // =========================================================================
   // Helper: build a normalized giro shape by merging the 4 source tables.
-  function _buildGirosCatalog(verticals, modulos, terminologia, campos) {
+  function _buildGirosCatalog(verticals, modulos, terminologia, campos, btns) {
     const modBySlug = {};
+    const modStateBySlug = {}; // 2026-05-09: enabled/hidden/locked
+    const modNameOverrideBySlug = {}; // 2026-05-09: per-giro module rename
     (Array.isArray(modulos) ? modulos : []).forEach(r => {
       if (!r || !r.giro_slug) return;
       modBySlug[r.giro_slug] = modBySlug[r.giro_slug] || {};
       modBySlug[r.giro_slug][r.modulo] = !!r.activo;
+      modStateBySlug[r.giro_slug] = modStateBySlug[r.giro_slug] || {};
+      modStateBySlug[r.giro_slug][r.modulo] = r.state || (r.activo ? 'enabled' : 'hidden');
+      if (r.name_override) {
+        modNameOverrideBySlug[r.giro_slug] = modNameOverrideBySlug[r.giro_slug] || {};
+        modNameOverrideBySlug[r.giro_slug][r.modulo] = r.name_override;
+      }
+    });
+    const btnsBySlug = {};
+    const btnStateBySlug = {};
+    const btnNameOverrideBySlug = {};
+    (Array.isArray(btns) ? btns : []).forEach(r => {
+      if (!r || !r.giro_slug) return;
+      btnsBySlug[r.giro_slug] = btnsBySlug[r.giro_slug] || {};
+      btnsBySlug[r.giro_slug][r.button_key] = !!r.activo;
+      btnStateBySlug[r.giro_slug] = btnStateBySlug[r.giro_slug] || {};
+      btnStateBySlug[r.giro_slug][r.button_key] = r.state || (r.activo ? 'enabled' : 'hidden');
+      if (r.name_override) {
+        btnNameOverrideBySlug[r.giro_slug] = btnNameOverrideBySlug[r.giro_slug] || {};
+        btnNameOverrideBySlug[r.giro_slug][r.button_key] = r.name_override;
+      }
     });
     const termBySlug = {};
     (Array.isArray(terminologia) ? terminologia : []).forEach(r => {
@@ -36893,6 +36915,11 @@ if (process.env.NODE_ENV === 'test') {
       name: v.name,
       category_id: v.category_id || null,
       modules: modBySlug[v.code] || {},
+      modulesState: modStateBySlug[v.code] || {},
+      moduleNameOverrides: modNameOverrideBySlug[v.code] || {},
+      buttons: btnsBySlug[v.code] || {},
+      buttonsState: btnStateBySlug[v.code] || {},
+      buttonNameOverrides: btnNameOverrideBySlug[v.code] || {},
       terms: termBySlug[v.code] || {},
       product_fields: (fieldsBySlug[v.code] || []).sort((a, b) => (a.orden || 0) - (b.orden || 0)),
       active: v.active !== false,
@@ -36902,18 +36929,69 @@ if (process.env.NODE_ENV === 'test') {
     }));
   }
 
-  // GET /api/admin/giros — full catalog (joins 4 tables in parallel)
+  // GET /api/admin/giros — full catalog (joins 5 tables: verticals + giros_modulos +
+  // giros_terminologia + giros_campos + giros_buttons)
   handlers['GET /api/admin/giros'] = requireAuth(async function (req, res) {
     if (!requireSuper(req, res)) return;
     try {
-      const [verticals, modulos, terminologia, campos] = await Promise.all([
+      const [verticals, modulos, terminologia, campos, btns] = await Promise.all([
         supabaseRequest('GET', '/verticals?select=code,name,category_id,modules,settings,active,icon,color&order=name.asc&limit=500').catch(() => []),
-        supabaseRequest('GET', '/giros_modulos?select=giro_slug,modulo,activo,orden&limit=5000').catch(() => []),
+        supabaseRequest('GET', '/giros_modulos?select=giro_slug,modulo,activo,orden,name_override,state&limit=5000').catch(() => []),
         supabaseRequest('GET', '/giros_terminologia?select=giro_slug,clave,valor_singular,valor_plural&limit=5000').catch(() => []),
         supabaseRequest('GET', '/giros_campos?select=giro_slug,modal,campo,visible,requerido,orden,label_override&limit=5000').catch(() => []),
+        supabaseRequest('GET', '/giros_buttons?select=giro_slug,button_key,activo,state,name_override,orden&limit=5000').catch(() => []),
       ]);
-      const items = _buildGirosCatalog(verticals, modulos, terminologia, campos);
+      const items = _buildGirosCatalog(verticals, modulos, terminologia, campos, btns);
       sendJSON(res, { ok: true, items });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // POST /api/admin/giros — create a new giro (vertical + opcional modules)
+  // body: { slug, name, modules?, terms?, product_fields?, buttons? }
+  handlers['POST /api/admin/giros'] = requireAuth(async function (req, res) {
+    if (!requireSuper(req, res)) return;
+    try {
+      const body = await readBody(req).catch(() => ({}));
+      if (checkBodyError(req, res)) return;
+      const slug = String(body.slug || '').trim().toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+      const name = String(body.name || slug).trim();
+      if (!slug) return sendJSON(res, { error: 'slug requerido' }, 400);
+      // Verificar que no exista
+      const exists = await supabaseRequest('GET', `/verticals?code=eq.${encodeURIComponent(slug)}&select=code&limit=1`).catch(() => []);
+      if (Array.isArray(exists) && exists.length) {
+        return sendJSON(res, { error: 'slug_exists', slug }, 409);
+      }
+      // Insertar vertical
+      await supabaseRequest('POST', '/verticals', {
+        code: slug, name, active: true, modules: [],
+      });
+      // Si vienen modules/terms/etc, delegar al PATCH para reaprovechar lógica
+      if (body.modules || body.terms || body.product_fields || body.buttons) {
+        // Inline call al handler PATCH
+        const patchHandler = handlers['PATCH /api/admin/giros/:slug'];
+        if (patchHandler) {
+          // Simulamos params + reusamos la lógica
+          const fakeReq = Object.assign({}, req, {
+            method: 'PATCH',
+            url: '/api/admin/giros/' + encodeURIComponent(slug),
+            // body ya consumido — re-asignamos directamente a un mock readBody
+          });
+          // Implementación simple: re-invocar con un wrapper
+          // Para no complicar, replicamos las inserciones aquí:
+          if (body.modules) {
+            const rows = Object.entries(body.modules).map(([k, v], idx) => ({
+              giro_slug: slug, modulo: String(k),
+              activo: typeof v === 'object' ? !!v.activo : !!v,
+              state: typeof v === 'object' ? (v.state || (v.activo ? 'enabled' : 'hidden')) : (v ? 'enabled' : 'hidden'),
+              name_override: typeof v === 'object' ? (v.name_override || null) : null,
+              orden: idx * 10,
+            }));
+            if (rows.length) await supabaseRequest('POST', '/giros_modulos', rows).catch(()=>null);
+          }
+        }
+      }
+      try { logAudit(req, 'giro.created', 'verticals', { slug, name }); } catch(_){}
+      sendJSON(res, { ok: true, slug, name });
     } catch (err) { sendError(res, err); }
   });
 
@@ -36924,9 +37002,9 @@ if (process.env.NODE_ENV === 'test') {
       const slug = String(params.slug || '').trim();
       if (!slug) return sendJSON(res, { error: 'slug requerido' }, 400);
       const enc = encodeURIComponent(slug);
-      const [verticals, modulos, terminologia, campos] = await Promise.all([
+      const [verticals, modulos, terminologia, campos, btns] = await Promise.all([
         supabaseRequest('GET', `/verticals?code=eq.${enc}&select=code,name,category_id,modules,settings,active,icon,color&limit=1`).catch(() => []),
-        supabaseRequest('GET', `/giros_modulos?giro_slug=eq.${enc}&select=giro_slug,modulo,activo,orden&limit=500`).catch(() => []),
+        supabaseRequest('GET', `/giros_modulos?giro_slug=eq.${enc}&select=giro_slug,modulo,activo,orden,name_override,state&limit=500`).catch(() => []),
         supabaseRequest('GET', `/giros_terminologia?giro_slug=eq.${enc}&select=giro_slug,clave,valor_singular,valor_plural&limit=500`).catch(() => []),
         supabaseRequest('GET', `/giros_campos?giro_slug=eq.${enc}&select=giro_slug,modal,campo,visible,requerido,orden,label_override&limit=500`).catch(() => []),
       ]);
@@ -36948,23 +37026,70 @@ if (process.env.NODE_ENV === 'test') {
       const enc = encodeURIComponent(slug);
       const applied = { modules: 0, terms: 0, product_fields: 0 };
 
-      // ── Modules ── (2026-05-09: delete-then-insert por giro entero — más simple
-      // que upsert con on_conflict que requiere Prefer:resolution=merge-duplicates
-      // que el helper supabaseRequest no soporta. Para 38 giros×~20 módulos = trivial.)
+      // ── Modules ── (2026-05-09: delete-then-insert por giro entero)
+      // Acepta tanto formato corto {modulo: bool} como rico
+      // {modulo: { activo, state, name_override }}.
       if (body.modules && typeof body.modules === 'object') {
         const keys = Object.keys(body.modules);
-        // Borrar TODO el preset de este giro y re-insertar el nuevo.
         await supabaseRequest('DELETE', `/giros_modulos?giro_slug=eq.${enc}`).catch(() => null);
-        const rows = keys.map((k, idx) => ({
-          giro_slug: slug,
-          modulo: String(k),
-          activo: !!body.modules[k],
-          orden: idx * 10,
-        }));
+        const rows = keys.map((k, idx) => {
+          const v = body.modules[k];
+          if (typeof v === 'object' && v !== null) {
+            const activo = v.activo !== false && v.state !== 'hidden';
+            return {
+              giro_slug: slug,
+              modulo: String(k),
+              activo,
+              state: v.state || (activo ? 'enabled' : 'hidden'),
+              name_override: v.name_override || null,
+              orden: typeof v.orden === 'number' ? v.orden : (idx * 10),
+            };
+          }
+          return {
+            giro_slug: slug,
+            modulo: String(k),
+            activo: !!v,
+            state: v ? 'enabled' : 'hidden',
+            name_override: null,
+            orden: idx * 10,
+          };
+        });
         if (rows.length) {
           await supabaseRequest('POST', '/giros_modulos', rows);
         }
         applied.modules = rows.length;
+      }
+
+      // ── Buttons ── (idem patrón)
+      if (body.buttons && typeof body.buttons === 'object') {
+        const keys = Object.keys(body.buttons);
+        await supabaseRequest('DELETE', `/giros_buttons?giro_slug=eq.${enc}`).catch(() => null);
+        const rows = keys.map((k, idx) => {
+          const v = body.buttons[k];
+          if (typeof v === 'object' && v !== null) {
+            const activo = v.activo !== false && v.state !== 'hidden';
+            return {
+              giro_slug: slug,
+              button_key: String(k),
+              activo,
+              state: v.state || (activo ? 'enabled' : 'hidden'),
+              name_override: v.name_override || null,
+              orden: typeof v.orden === 'number' ? v.orden : (idx * 10),
+            };
+          }
+          return {
+            giro_slug: slug,
+            button_key: String(k),
+            activo: !!v,
+            state: v ? 'enabled' : 'hidden',
+            name_override: null,
+            orden: idx * 10,
+          };
+        });
+        if (rows.length) {
+          await supabaseRequest('POST', '/giros_buttons', rows);
+        }
+        applied.buttons = rows.length;
       }
 
       // ── Terms ── (mismo patrón delete-then-insert)
