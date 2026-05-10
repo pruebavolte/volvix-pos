@@ -2432,6 +2432,10 @@
      OCR/cámara/SQL/Eleventa/Parrot/MyBusinessPOS/SoftRestaurant). Auto-abre si
      CATALOG está vacío. Solo lee — nunca ejecuta. -->
 <script src="volvix-import-wizard.js" defer></script>
+<!-- 2026-05-10 user-request: Pedidos de Plataformas (Tu app + Uber/Didi/Rappi
+     gris). Polling /api/pos/app-orders, modal rojo + sonido si Ticket 1 vacío,
+     parpadeo rojo↔amarillo si Ticket 1 ocupado. Aceptar = Ticket 2 + cliente. -->
+<script src="volvix-platform-orders.js" defer></script>
 <script defer>
   // Auto-trigger del wizard si el tenant no tiene productos
   document.addEventListener('DOMContentLoaded', function () {
@@ -11024,6 +11028,27 @@
       } else {
         console.log('[VOLVIX] sin giro detectado:', giro);
       }
+      // 2026-05-10 user-request: aplicar moduleNameOverrides desde BD (no hardcoded).
+      // Trae el giro completo via /api/app/config?t=<tenant_id> y renombra módulos
+      // como "Inventario" → "Productos / Inventario" según el giro del negocio.
+      try {
+        const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+        if (tok) {
+          const p = JSON.parse(atob(tok.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+          const tnt = p.tenant_id || p.tnt;
+          if (tnt) {
+            const r = await fetch('/api/app/config?t=' + encodeURIComponent(tnt));
+            if (r.ok) {
+              const j = await r.json();
+              if (j.giro && j.giro.moduleNameOverrides && typeof applyModuleRenames === 'function') {
+                window.__volvixGiroData = j.giro;
+                const renamed = applyModuleRenames(j.giro);
+                console.log('[VOLVIX] moduleNameOverrides aplicados:', renamed, 'cambios');
+              }
+            }
+          }
+        }
+      } catch (e) { console.warn('[VOLVIX] moduleNameOverrides err:', e); }
     } catch (e) { console.warn('[VOLVIX] terminología:', e); }
     setTimeout(() => $('#barcode-input')?.focus(), 200);
   });

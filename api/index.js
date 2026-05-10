@@ -37086,6 +37086,15 @@ if (process.env.NODE_ENV === 'test') {
         buttonsState[r.button_key] = r.state || (r.activo ? 'enabled' : 'hidden');
         if (r.name_override) buttonNameOverrides[r.button_key] = r.name_override;
       });
+      // 2026-05-10 user-request: incluir moduleNameOverrides para que el frontend
+      // pueda renombrar "Inventario" → "Productos / Inventario" según giro.
+      const moduleNameOverrides = {};
+      const modulesState = {};
+      (Array.isArray(modulos) ? modulos : []).forEach(r => {
+        if (!r || !r.modulo) return;
+        modulesState[r.modulo] = r.state || (r.activo ? 'enabled' : 'hidden');
+        if (r.name_override) moduleNameOverrides[r.modulo] = r.name_override;
+      });
       const terms = {};
       (Array.isArray(terminologia) ? terminologia : []).forEach(r => {
         if (!r || !r.clave) return;
@@ -37119,7 +37128,7 @@ if (process.env.NODE_ENV === 'test') {
       sendJSON(res, {
         ok: true,
         tenant: { slug: tenant.tenant_id, name: tenant.name, phone: tenant.phone || null },
-        giro: v ? { slug: v.code, name: v.name, terms, buttons, buttonsState, buttonNameOverrides } : null,
+        giro: v ? { slug: v.code, name: v.name, terms, buttons, buttonsState, buttonNameOverrides, moduleNameOverrides, modulesState } : null,
         branding,
         media,
       });
@@ -37455,6 +37464,53 @@ if (process.env.NODE_ENV === 'test') {
     } catch (err) { sendError(res, err); }
   };
 
+  // ─────────────────────────────────────────────────────────────────────
+  // 2026-05-10 user-request: pedidos del POS — vista del DUEÑO
+  // GET   /api/pos/app-orders?status=nuevo&since=ISO  → lista pedidos de la app
+  //                                                     de SU tenant (auth required)
+  // PATCH /api/app/orders/:id  {status:'aceptado'|'rechazado'|'en_preparacion'|'entregado'|'cancelado'}
+  //                            → marca el pedido + opcionalmente notifica al cliente
+  // ─────────────────────────────────────────────────────────────────────
+  handlers['GET /api/pos/app-orders'] = requireAuth(async function (req, res) {
+    try {
+      const tnt = (req.user && (req.user.tenant_id || req.user.tnt)) || '';
+      if (!tnt) return sendJSON(res, { error: 'tenant_required' }, 400);
+      const url = new URL(req.url, 'http://x');
+      const status = url.searchParams.get('status'); // ej. 'nuevo' o null=todos
+      const since = url.searchParams.get('since');   // ISO timestamp
+      const limit = Math.min(parseInt(url.searchParams.get('limit') || '50', 10), 200);
+      const enc = encodeURIComponent(tnt);
+      let query = `/pos_app_orders?tenant_id=eq.${enc}&select=*&order=created_at.desc&limit=${limit}`;
+      if (status) query += '&status=eq.' + encodeURIComponent(status);
+      if (since)  query += '&created_at=gt.' + encodeURIComponent(since);
+      const items = await supabaseRequest('GET', query).catch(() => []);
+      sendJSON(res, { ok: true, items: Array.isArray(items) ? items : [], server_time: new Date().toISOString() });
+    } catch (err) { sendError(res, err); }
+  });
+
+  handlers['PATCH /api/app/orders/:id'] = requireAuth(async function (req, res, params) {
+    try {
+      const id = parseInt(params.id, 10);
+      if (!id) return sendJSON(res, { error: 'id_invalido' }, 400);
+      const body = await readBody(req).catch(() => ({}));
+      if (checkBodyError && checkBodyError(req, res)) return;
+      // Verificar pertenencia: solo el tenant dueño puede cambiar status
+      const tnt = (req.user && (req.user.tenant_id || req.user.tnt)) || '';
+      const cur = await supabaseRequest('GET', `/pos_app_orders?id=eq.${id}&select=tenant_id,client_email,status&limit=1`).catch(() => []);
+      if (!cur || !cur.length) return sendJSON(res, { error: 'not_found' }, 404);
+      if (cur[0].tenant_id !== tnt) return sendJSON(res, { error: 'forbidden' }, 403);
+      const status = String(body.status || '').toLowerCase();
+      const ALLOWED = ['nuevo','aceptado','rechazado','en_preparacion','entregado','cancelado'];
+      if (!ALLOWED.includes(status)) return sendJSON(res, { error: 'status_invalido', allowed: ALLOWED }, 400);
+      const patch = { status, updated_at: new Date().toISOString() };
+      if (body.notes) patch.notes = String(body.notes).slice(0, 1000);
+      const upd = await supabaseRequest('PATCH', `/pos_app_orders?id=eq.${id}`, patch,
+        { 'Prefer': 'return=representation' }).catch(e => ({ _err: e }));
+      if (upd && upd._err) return sendJSON(res, { error: 'db_error', detail: String(upd._err.message || upd._err) }, 500);
+      sendJSON(res, { ok: true, order: (Array.isArray(upd) && upd[0]) || {} });
+    } catch (err) { sendError(res, err); }
+  });
+
   // PATCH /api/app/branding {tenant_slug, logo_url?, primary_color?, ...}
   // REQUIERE AUTH del dueño/admin del tenant.
   handlers['PATCH /api/app/branding'] = requireAuth(async function (req, res) {
@@ -37541,6 +37597,31 @@ if (process.env.NODE_ENV === 'test') {
       }, { 'Prefer': 'return=representation' }).catch((e) => ({ _err: e }));
       if (ins && ins._err) return sendJSON(res, { error: 'db_error', detail: String(ins._err.message || ins._err) }, 500);
       const client = (Array.isArray(ins) && ins[0]) || { email, phone, name };
+      // 2026-05-10 user-request: vincular AUTOMÁTICAMENTE este cliente a la lista
+      // de customers del tenant (sin intervención manual). Si ya existe (email
+      // duplicado en ese tenant) no lo duplica — sólo upsert. Source='app' para
+      // identificar origen.
+      try {
+        // Necesitamos el UUID del tenant (customers.tenant_id es uuid) — busquemos por tenant_id text
+        const compRow = await supabaseRequest('GET',
+          `/pos_companies?tenant_id=eq.${enc}&select=id&limit=1`
+        ).catch(() => []);
+        const tenantUuid = (compRow && compRow[0] && compRow[0].id) || null;
+        if (tenantUuid) {
+          // Verificar duplicado por email + tenant_id en customers
+          const existing = await supabaseRequest('GET',
+            `/customers?tenant_id=eq.${encodeURIComponent(tenantUuid)}&email=eq.${ee}&select=id&limit=1`
+          ).catch(() => []);
+          if (!existing || !existing.length) {
+            await supabaseRequest('POST', '/customers', {
+              tenant_id: tenantUuid,
+              name, email, phone,
+              source: 'app',
+              active: true,
+            }).catch(e => console.warn('[app-register] customers insert err', e && e.message));
+          }
+        }
+      } catch (linkErr) { console.warn('[app-register] link customer fail', linkErr && linkErr.message); }
       sendJSON(res, { ok: true, client: { email: client.email, phone: client.phone, name: client.name } });
     } catch (err) { sendError(res, err); }
   };
