@@ -33220,6 +33220,37 @@ if (process.env.NODE_ENV === 'test') {
         supabaseRequest('PATCH', '/pos_users?id=eq.' + userId, { company_id: companyId }).catch(function () {});
       }
 
+      // 2026-05-10 fix: auto-poblar tenant_module_overrides desde giros_modulos
+      // para que el tenant nuevo arranque con los módulos correctos del giro
+      // (enabled/disabled/coming-soon). Antes el frontend leia giros_modulos
+      // directo, pero asi el dueño puede customizar despues sin afectar a otros.
+      // Best-effort: si falla, el sistema sigue funcionando con el catalogo del giro.
+      try {
+        const giroModules = await supabaseRequest('GET',
+          '/giros_modulos?giro_slug=eq.' + encodeURIComponent(giro) + '&select=modulo,state,name_override');
+        if (Array.isArray(giroModules) && giroModules.length > 0) {
+          const inserts = giroModules.map(m => ({
+            tenant_id: tenantId,
+            module_key: 'module.' + m.modulo,
+            status: m.state || 'enabled',
+            name_override: m.name_override || null,
+            created_at: new Date().toISOString()
+          }));
+          // chunks de 50 para no sobrepasar limites PostgREST
+          for (let i = 0; i < inserts.length; i += 50) {
+            const chunk = inserts.slice(i, i + 50);
+            await supabaseRequest('POST', '/tenant_module_overrides', chunk, {
+              'Prefer': 'resolution=merge-duplicates,return=minimal'
+            }).catch(function (e) {
+              console.warn('[register] tenant_module_overrides chunk fail:', e.message);
+            });
+          }
+          console.log('[register] auto-poblados', inserts.length, 'modulos para tenant', tenantId, 'giro', giro);
+        }
+      } catch (e) {
+        console.warn('[register] no se pudieron auto-poblar modulos:', e.message);
+      }
+
       // ---- OTP (DB) ---- (resilient to schema variations)
       const otpCode = genOtp();
       const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
