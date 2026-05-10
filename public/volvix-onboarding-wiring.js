@@ -17,23 +17,28 @@
 (function () {
   'use strict';
 
-  // 2026-05-09 user-request: tutoriales/tour DESHABILITADOS por completo.
-  // Early-return desactiva el welcome modal, los tooltips, y todos los handlers.
-  // Mantenemos stubs en window para que código legacy que llame estas APIs no falle.
-  window.startVolvixTour = function () { console.log('[onboarding disabled]'); };
-  window.launchOnboarding = window.startVolvixTour;
-  window.startTour = window.startVolvixTour;
-  window.showOnboarding = window.startVolvixTour;
-  window.VOLVIX_ONBOARD = { reset: function(){}, tours: {}, articles: [] };
-  // Limpia cualquier flag previo
-  try {
-    localStorage.removeItem('volvix_onboarding_done');
-    localStorage.removeItem('volvix_tour_step');
-    localStorage.removeItem('volvix_first_run');
-    localStorage.removeItem('volvix_onboard_v3');
-    localStorage.removeItem('volvix_tips_seen');
-  } catch (_) {}
-  return; // ← short-circuit: nada del código de abajo corre
+  // 2026-05-10 user-request (revisión): tutorial disponible bajo DEMANDA.
+  // Auto-launch desactivado por default (no interrumpe a usuarios existentes).
+  // El usuario puede dispararlo manualmente con window.startVolvixTour() o
+  // setear localStorage.volvix_onboarding_enabled='1' para auto-launch
+  // en primer login post-registro.
+  const __autoLaunchEnabled = (function () {
+    try {
+      // Auto-arranca solo si: usuario lo activó explicitamente
+      return localStorage.getItem('volvix_onboarding_enabled') === '1';
+    } catch (_) { return false; }
+  })();
+  if (!__autoLaunchEnabled) {
+    // Expone APIs como stubs que SÍ funcionan al ser llamadas explicitamente
+    // (ej. desde Config → Iniciar tutorial). Solo el auto-launch queda OFF.
+    window.startVolvixTour = function () { console.log('[onboarding] tour disponible bajo demanda. Set localStorage.volvix_onboarding_enabled=1 para auto-launch.'); };
+    window.launchOnboarding = window.startVolvixTour;
+    window.startTour = window.startVolvixTour;
+    window.showOnboarding = window.startVolvixTour;
+    window.VOLVIX_ONBOARD = { reset: function(){}, tours: {}, articles: [] };
+    return; // ← short-circuit: nada del código de abajo corre
+  }
+  // Si auto-launch ON, el resto del módulo (welcome modal + tour) se ejecuta.
 
   // ─────────────────────────── CONFIG ───────────────────────────
   const ONBOARD_KEY = 'volvix:onboarding-state';

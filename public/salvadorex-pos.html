@@ -5755,7 +5755,8 @@
     </div>
     <div class="modal-foot">
       <button class="btn" onclick="closeModal('modal-pay')">Cancelar</button>
-      <button class="btn success" onclick="completePay()">✓ F12 - Completar cobro</button>
+      <!-- 2026-05-10 user-fix: autofocus para que F12+Enter cobre directo -->
+      <button class="btn success" id="modal-pay-confirm" onclick="completePay()">✓ F12 - Completar cobro</button>
     </div>
   </div>
 </div>
@@ -8737,6 +8738,12 @@
       if (VOLVIX_CART_CHANNEL) VOLVIX_CART_CHANNEL.postMessage({ type: 'cart-checkout-started', token: tok, ts: Date.now() });
     } catch (_) {}
     $('#modal-pay').classList.add('open');
+    // 2026-05-10 user-fix: autofocus al botón "✓ F12 - Completar cobro" para
+    // que F12 + Enter cobre directo (cajeros expertos no necesitan más clicks).
+    setTimeout(function () {
+      var btn = document.getElementById('modal-pay-confirm');
+      if (btn) btn.focus();
+    }, 80);
   }
   function closeModal(id) { $('#'+id).classList.remove('open'); }
   function setPayMethod(el) {
