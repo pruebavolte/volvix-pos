@@ -11173,13 +11173,14 @@
                       document.querySelectorAll('[data-feature="module.' + key + '"]').forEach(function(el){
                         if (el.dataset.giroVisApplied === st) return; // idempotente
                         if (st === 'hidden') {
-                          el.style.display = 'none';
+                          // !important para que NO sea sobrescrito por otros wirings async
+                          el.style.setProperty('display', 'none', 'important');
                           el.dataset.giroVisApplied = 'hidden';
                         } else if (st === 'locked') {
-                          el.style.opacity = '0.4';
-                          el.style.pointerEvents = 'none';
-                          el.style.cursor = 'not-allowed';
-                          el.style.filter = 'grayscale(100%)';
+                          el.style.setProperty('opacity', '0.4', 'important');
+                          el.style.setProperty('pointer-events', 'none', 'important');
+                          el.style.setProperty('cursor', 'not-allowed', 'important');
+                          el.style.setProperty('filter', 'grayscale(100%)', 'important');
                           el.title = '🔒 No disponible para tu giro';
                           el.dataset.giroVisApplied = 'locked';
                         } else if (st === 'enabled') {
