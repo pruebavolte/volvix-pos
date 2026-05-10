@@ -22,7 +22,7 @@ test('login page loads', async ({ page }) => {
   await expect(inputs.first()).toBeVisible();
 });
 
-test('404 returns proper response', async ({ request }) => {
+test('unknown route returns 404', async ({ request }) => {
   const resp = await request.get('/ruta-que-no-existe-' + Date.now());
-  expect([404, 200, 301, 302]).toContain(resp.status());
+  expect(resp.status()).toBe(404);
 });
