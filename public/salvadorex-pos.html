@@ -11158,78 +11158,63 @@
                 const renamed = applyModuleRenames(j.giro);
                 console.log('[VOLVIX] moduleNameOverrides aplicados:', renamed, 'cambios');
               }
-              // 2026-05-10 user-fix: aplicar tambien modulesState (enabled/hidden/locked) para
-              // tenants normales (antes solo se aplicaba en impersonation).
-              // Oculta botones de modulos NO usados por el giro (state='hidden' en BD).
+              // 2026-05-10 user-fix v2: aplicar modulesState + name_override usando
+              // [data-feature="module.<slug>"] (TODOS los botones del menubar tienen
+              // este atributo). Mucho mas robusto que matchear por texto.
               try {
                 const ms = (j.giro && j.giro.modulesState) || {};
-                if (ms && Object.keys(ms).length) {
-                  // Mapeo modulo→labels (lo mismo que en applyHide impersonation)
-                  const moduleLabelMap = {
-                    pos:['Vender','💰 Vender','POS'],
-                    inventario:['Inventario','📦 Inventario','Productos','Productos / Inventario'],
-                    reportes:['Reportes','📊 Reportes','Dashboard'],
-                    devoluciones:['Devoluciones','↩️ Devoluciones'],
-                    corte:['Corte','🔐 Corte','Apertura','🏪 Apertura'],
-                    clientes:['Clientes','👥 Clientes'],
-                    config:['Config','⚙️ Config','Configuración'],
-                    credito:['Créditos','💳 Créditos'],
-                    kardex:['Kardex','📋 Kardex'],
-                    proveedores:['Proveedores','🚚 Proveedores'],
-                    facturacion:['Facturas','🧾 Facturas','Facturación'],
-                    historial:['Historial','📄 Historial'],
-                    usuarios:['Usuarios','👨‍💼 Usuarios'],
-                    dashboard:['Dashboard','📈 Dashboard'],
-                    apertura:['Apertura','🏪 Apertura'],
-                    cotizaciones:['Cotizaciones','💬 Cotizaciones'],
-                    recargas:['Recargas','📱 Recargas'],
-                    servicios:['Servicios','💡 Servicios'],
-                    tarjetas:['Tarjetas','🎬 Tarjetas'],
-                    promociones:['Promos','🏷️ Promos','Promociones'],
-                    departamentos:['Depto.','🏢 Depto.','Departamentos'],
-                    mesas:['Mesas','🍽️ Mesas'],
-                    meseros:['Meseros','👨‍🍳 Meseros'],
-                    cocina:['Cocina','🍳 Cocina'],
-                    comandas:['Comandas','📋 Comandas'],
-                    citas:['Citas','📅 Citas'],
-                    mascotas:['Mascotas','🐾 Mascotas'],
-                    vacunas:['Vacunas','💉 Vacunas'],
-                    recetas_medicas:['Recetas','📜 Recetas'],
-                    expediente_clinico:['Expediente','🗂️ Expediente'],
-                    estilistas:['Estilistas','💇 Estilistas'],
-                    servicios_belleza:['Servicios Belleza'],
-                    estetica:['Estética','💅 Estética'],
-                    consultas:['Consultas','🩺 Consultas']
-                  };
-                  const applyVisibility = function(){
+                const renames = (j.giro && j.giro.moduleNameOverrides) || {};
+                if ((ms && Object.keys(ms).length) || (renames && Object.keys(renames).length)) {
+                  const applyByFeature = function(){
+                    // Aplicar modulesState (hidden/locked)
                     Object.entries(ms).forEach(function(entry){
                       var key = entry[0], st = entry[1];
-                      if (st === 'enabled') return;
-                      var labels = moduleLabelMap[key] || [];
-                      if (!labels.length) return;
-                      document.querySelectorAll('button.menu-btn, button, a, [role="tab"], .tab').forEach(function(el){
-                        if (el.dataset && el.dataset.giroVisApplied === st) return;
-                        var t = (el.textContent || '').trim();
-                        if (labels.some(function(L){ return t === L || t.indexOf(L) === 0; })) {
-                          if (st === 'hidden') {
-                            el.style.display = 'none';
-                            el.dataset.giroVisHidden = key;
-                            el.dataset.giroVisApplied = 'hidden';
-                          } else if (st === 'locked') {
-                            el.style.opacity = '0.4';
-                            el.style.pointerEvents = 'none';
-                            el.style.cursor = 'not-allowed';
-                            el.style.filter = 'grayscale(100%)';
-                            el.title = '🔒 No disponible para tu giro';
-                            el.dataset.giroVisApplied = 'locked';
+                      // Buscar TODOS los elementos con data-feature="module.<key>"
+                      document.querySelectorAll('[data-feature="module.' + key + '"]').forEach(function(el){
+                        if (el.dataset.giroVisApplied === st) return; // idempotente
+                        if (st === 'hidden') {
+                          el.style.display = 'none';
+                          el.dataset.giroVisApplied = 'hidden';
+                        } else if (st === 'locked') {
+                          el.style.opacity = '0.4';
+                          el.style.pointerEvents = 'none';
+                          el.style.cursor = 'not-allowed';
+                          el.style.filter = 'grayscale(100%)';
+                          el.title = '🔒 No disponible para tu giro';
+                          el.dataset.giroVisApplied = 'locked';
+                        } else if (st === 'enabled') {
+                          // Restaurar si previamente estaba hidden/locked
+                          if (el.dataset.giroVisApplied) {
+                            el.style.display = '';
+                            el.style.opacity = '';
+                            el.style.pointerEvents = '';
+                            el.style.cursor = '';
+                            el.style.filter = '';
+                            el.removeAttribute('title');
+                            delete el.dataset.giroVisApplied;
                           }
                         }
                       });
                     });
+                    // Aplicar name_override (renames) por feature
+                    Object.entries(renames).forEach(function(entry){
+                      var key = entry[0], newName = entry[1];
+                      if (!newName) return;
+                      document.querySelectorAll('[data-feature="module.' + key + '"]').forEach(function(el){
+                        if (el.dataset.giroRenameApplied === newName) return;
+                        // Preservar emoji al inicio si existe (primer char no alfabético)
+                        var orig = (el.textContent || '').trim();
+                        var emojiMatch = orig.match(/^([^\w\s]+\s)/);
+                        var emoji = emojiMatch ? emojiMatch[1] : '';
+                        el.textContent = emoji + newName;
+                        el.dataset.giroRenameApplied = newName;
+                      });
+                    });
                   };
-                  applyVisibility();
-                  [500,1500,3000,5000,8000].forEach(function(d){ setTimeout(applyVisibility, d); });
-                  console.log('[VOLVIX] modulesState aplicado:', Object.keys(ms).length, 'estados');
+                  applyByFeature();
+                  // Re-aplicar varias veces porque wirings async pueden inyectar/reemplazar botones tarde
+                  [300,800,1500,3000,5000,8000].forEach(function(d){ setTimeout(applyByFeature, d); });
+                  console.log('[VOLVIX] modulesState aplicado (data-feature):', Object.keys(ms).length, 'estados,', Object.keys(renames).length, 'renames');
                 }
               } catch (e) { console.warn('[VOLVIX] modulesState err:', e); }
             }

@@ -37110,7 +37110,7 @@ if (process.env.NODE_ENV === 'test') {
       const ge = giroSlug ? encodeURIComponent(giroSlug) : null;
       const [verticals, modulos, terminologia, btns, brandingRows, mediaRows] = await Promise.all([
         ge ? supabaseRequest('GET', `/verticals?code=eq.${ge}&select=code,name&limit=1`).catch(() => []) : [],
-        ge ? supabaseRequest('GET', `/giros_modulos?giro_slug=eq.${ge}&select=modulo,activo,state&limit=500`).catch(() => []) : [],
+        ge ? supabaseRequest('GET', `/giros_modulos?giro_slug=eq.${ge}&select=modulo,activo,state,name_override&limit=500`).catch(() => []) : [],
         ge ? supabaseRequest('GET', `/giros_terminologia?giro_slug=eq.${ge}&select=clave,valor_singular,valor_plural&limit=500`).catch(() => []) : [],
         ge ? supabaseRequest('GET', `/giros_buttons?giro_slug=eq.${ge}&select=button_key,activo,state,name_override&limit=500`).catch(() => []) : [],
         // 2026-05-09: branding por tenant (logo, colores, redes sociales, dirección, horarios)
