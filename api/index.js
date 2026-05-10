@@ -695,9 +695,14 @@ function setSecurityHeaders(res) {
   // B30.2: Cross-Origin policies
   res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
   res.setHeader('Cross-Origin-Resource-Policy', 'same-site');
+  // 2026-05-10 fix: agregado 'wasm-unsafe-eval' (Tesseract.js WASM), worker-src
+  // 'self' blob: (workers de OCR), tessdata.projectnaptha.com (modelos de
+  // idiomas), unpkg.com (CDN alterno), blob: en img-src/connect-src para
+  // compartir frames cámara→worker. Antes el OCR fallaba con throw undefined
+  // en producción aunque corriera bien en local.
   res.setHeader(
     'Content-Security-Policy',
-    "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://js.stripe.com; connect-src 'self' https://salvadorexoficial.com https://www.salvadorexoficial.com https://salvadorexoficial.com https://*.supabase.co wss://*.supabase.co https://api.ipify.org https://api.exchangerate.host https://api.anthropic.com https://api.stripe.com https://api.openai.com https://api.sendgrid.com https://api.twilio.com https://corsproxy.io https://api.allorigins.win https://api.codetabs.com https://duckduckgo.com https://*.duckduckgo.com https://commons.wikimedia.org https://en.wikipedia.org https://*.wikipedia.org https://upload.wikimedia.org; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+    "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://tessdata.projectnaptha.com https://js.stripe.com; worker-src 'self' blob:; connect-src 'self' blob: https://salvadorexoficial.com https://www.salvadorexoficial.com https://*.supabase.co wss://*.supabase.co https://api.ipify.org https://api.exchangerate.host https://api.anthropic.com https://api.stripe.com https://api.openai.com https://api.sendgrid.com https://api.twilio.com https://corsproxy.io https://api.allorigins.win https://api.codetabs.com https://duckduckgo.com https://*.duckduckgo.com https://commons.wikimedia.org https://en.wikipedia.org https://*.wikipedia.org https://upload.wikimedia.org https://cdn.jsdelivr.net https://tessdata.projectnaptha.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
   );
 }
 
