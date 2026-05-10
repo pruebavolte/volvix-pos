@@ -371,30 +371,38 @@
   }
 
   // ─── Render: tab Pedir (carrito simple — formulario texto + WhatsApp) ───
+  // 2026-05-09: ZERO hardcoded — todo se construye desde la terminología del giro en BD.
   function renderPedir() {
-    const productLabel = term('producto','plural') || 'productos';
+    const productSing = term('producto','singular') || 'producto';
+    const productPlur = term('producto','plural') || 'productos';
+    const ventaLabel  = term('venta','singular') || 'pedido';
+    const tabLabel    = btnName('app.bottom_carrito', 'Pedir');
     return '<div class="vapp-card">' +
-      '<h2 class="vapp-h">Hacer pedido</h2>' +
-      '<p class="vapp-sm">Escribe los ' + escHtml(productLabel.toLowerCase()) + ' que quieres pedir. El negocio recibirá tu solicitud y te contactará para confirmar.</p>' +
+      '<h2 class="vapp-h">' + escHtml(tabLabel) + '</h2>' +
+      '<p class="vapp-sm">Escribe los ' + escHtml(productPlur.toLowerCase()) + ' que quieres pedir. ' + escHtml(tenantName()) + ' recibirá tu solicitud y te contactará para confirmar.</p>' +
       '<div id="vp-msg"></div>' +
-      '<textarea class="vapp-textarea" id="vp-items" placeholder="Ejemplo: 2 paracetamol 500mg, 1 jarabe para tos"></textarea>' +
-      '<input class="vapp-input" id="vp-notes" type="text" placeholder="Notas (opcional): dirección de entrega, hora preferida, etc.">' +
-      '<button class="vapp-btn" id="vp-send">📨 Enviar pedido al negocio</button>' +
+      '<textarea class="vapp-textarea" id="vp-items" placeholder="' + escAttr('Lista los ' + productPlur.toLowerCase() + ' que quieres pedir, uno por línea') + '"></textarea>' +
+      '<input class="vapp-input" id="vp-notes" type="text" placeholder="Notas (opcional): dirección, hora preferida, instrucciones, etc.">' +
+      '<button class="vapp-btn" id="vp-send">📨 Enviar ' + escHtml(ventaLabel.toLowerCase()) + ' al negocio</button>' +
       '<button class="vapp-btn alt" id="vp-wa" style="margin-top:6px;">💬 Enviar por WhatsApp</button>' +
     '</div>';
   }
 
   // ─── Render: tab Citas ───
+  // 2026-05-09: ZERO hardcoded — usa terminología del giro (servicio/cita) y nombre del tab.
   function renderCitas() {
+    const citaLabel = term('cita','singular') || term('servicio','singular') || 'cita';
+    const servicioLabel = term('servicio','singular') || term('producto','singular') || 'servicio';
+    const tabLabel = btnName('app.bottom_citas', 'Citas');
     return '<div class="vapp-card">' +
-      '<h2 class="vapp-h">Agendar cita</h2>' +
-      '<p class="vapp-sm">Solicita una cita. El negocio confirmará disponibilidad por WhatsApp.</p>' +
+      '<h2 class="vapp-h">' + escHtml(tabLabel) + '</h2>' +
+      '<p class="vapp-sm">Solicita ' + (/^[aeiouAEIOU]/.test(citaLabel) ? 'una ' : 'un ') + escHtml(citaLabel.toLowerCase()) + '. ' + escHtml(tenantName()) + ' confirmará disponibilidad por WhatsApp.</p>' +
       '<div id="vp-msg"></div>' +
       '<input class="vapp-input" id="vc-date" type="date" placeholder="Fecha">' +
       '<input class="vapp-input" id="vc-time" type="time" placeholder="Hora">' +
-      '<input class="vapp-input" id="vc-service" type="text" placeholder="Servicio (ej: Corte de cabello)">' +
+      '<input class="vapp-input" id="vc-service" type="text" placeholder="' + escAttr(servicioLabel.charAt(0).toUpperCase() + servicioLabel.slice(1)) + '">' +
       '<input class="vapp-input" id="vc-notes" type="text" placeholder="Notas (opcional)">' +
-      '<button class="vapp-btn" id="vc-send">📅 Solicitar cita</button>' +
+      '<button class="vapp-btn" id="vc-send">📅 Solicitar ' + escHtml(citaLabel.toLowerCase()) + '</button>' +
     '</div>';
   }
 
@@ -407,15 +415,17 @@
       const msgEl = document.getElementById('vp-msg');
       if (!items) { msgEl.innerHTML = '<div class="vapp-error">Escribe qué quieres pedir.</div>'; return; }
       const client = (getSess() || {}).client;
+      const ventaLabel = term('venta','singular') || 'pedido';
+      const origText = send.textContent;
       send.disabled = true; send.textContent = 'Enviando…';
       const r = await apiOrderCreate({email: client.email, kind:'pedido', items: items.split(/\n+/).map(s=>({name:s.trim()})).filter(x=>x.name), notes, total:0});
       if (r && r.ok) {
-        msgEl.innerHTML = '<div class="vapp-ok">✅ Pedido #' + r.order.id + ' enviado. El negocio te contactará pronto.</div>';
+        msgEl.innerHTML = '<div class="vapp-ok">✅ ' + escHtml(ventaLabel) + ' #' + r.order.id + ' enviado. ' + escHtml(tenantName()) + ' te contactará pronto.</div>';
         document.getElementById('vp-items').value = ''; document.getElementById('vp-notes').value = '';
       } else {
         msgEl.innerHTML = '<div class="vapp-error">' + escHtml(r && r.error || 'Error al enviar.') + '</div>';
       }
-      send.disabled = false; send.textContent = '📨 Enviar pedido al negocio';
+      send.disabled = false; send.textContent = origText;
     });
     if (wa) wa.addEventListener('click', () => {
       const items = (document.getElementById('vp-items').value || '').trim();
@@ -436,13 +446,15 @@
       const service = (document.getElementById('vc-service').value || '').trim();
       const notes = (document.getElementById('vc-notes').value || '').trim();
       const msgEl = document.getElementById('vp-msg');
-      if (!date || !time || !service) { msgEl.innerHTML = '<div class="vapp-error">Faltan fecha, hora o servicio.</div>'; return; }
+      if (!date || !time || !service) { msgEl.innerHTML = '<div class="vapp-error">Faltan fecha, hora o ' + escHtml((term('servicio','singular')||'servicio').toLowerCase()) + '.</div>'; return; }
       const client = (getSess() || {}).client;
+      const citaLabel = term('cita','singular') || 'cita';
+      const origText = send.textContent;
       send.disabled = true; send.textContent = 'Enviando…';
       const r = await apiOrderCreate({email: client.email, kind:'cita', items:[{date,time,service}], notes, total:0});
-      if (r && r.ok) msgEl.innerHTML = '<div class="vapp-ok">✅ Cita #' + r.order.id + ' solicitada. Te confirmaremos.</div>';
+      if (r && r.ok) msgEl.innerHTML = '<div class="vapp-ok">✅ ' + escHtml(citaLabel) + ' #' + r.order.id + ' solicitada. ' + escHtml(tenantName()) + ' te confirmará.</div>';
       else msgEl.innerHTML = '<div class="vapp-error">' + escHtml(r && r.error || 'Error al enviar.') + '</div>';
-      send.disabled = false; send.textContent = '📅 Solicitar cita';
+      send.disabled = false; send.textContent = origText;
     });
   }
 
