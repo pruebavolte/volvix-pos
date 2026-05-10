@@ -20163,6 +20163,12 @@ window.addEventListener('volvix:version-loaded', function(e){
     fiscal:     { label: 'Fiscal',        items: ['facturacion','cotizaciones'] },
     servicios:  { label: 'Servicios',     items: ['recargas','servicios','tarjetas','promociones'] },
     admin:      { label: 'Admin',         items: ['usuarios','config'] },
+    // 2026-05-09 fix: módulos customer-facing y de cocina
+    cliente:    { label: 'Cliente Final',  items: ['aplicacion','marketplace'] },
+    cocina:     { label: 'Cocina & KDS',   items: ['kds'] },
+    // 2026-05-09 fix: bucket "Otros" se rellena dinámicamente en runtime con
+    // cualquier módulo de BD que no esté listado arriba (single source of truth).
+    otros:      { label: 'Otros',          items: [] },
   };
 
   // Mapeo botón → módulo padre (FEAT_LABELS keys → MOD key)
@@ -20316,6 +20322,15 @@ window.addEventListener('volvix:version-loaded', function(e){
     if (!v14.catalogs.modules) loadAllCatalogs().then(() => renderModulesList());
     // Catálogo unificado: BD si disponible, fallback a constante.
     const MOD_LABELS_LOCAL = getModuleLabelsFromCatalog();
+    // 2026-05-09 SYNC FIX: rellenar bucket "Otros" con módulos de BD/labels que
+    // no estén en ninguna categoría hardcoded. Garantiza que TODO módulo del
+    // catálogo BD se renderice (incluyendo nuevos como 'aplicacion' antes del fix).
+    const catalogedSet = new Set();
+    for (const cat of Object.values(MOD_CATEGORIES)) {
+      cat.items.forEach(k => catalogedSet.add(k));
+    }
+    const allModKeys = Object.keys(MOD_LABELS_LOCAL);
+    MOD_CATEGORIES.otros.items = allModKeys.filter(k => !catalogedSet.has(k));
     const state = getCombinedState();
     const search = ($('#permv14-mod-search') && $('#permv14-mod-search').value || '').toLowerCase();
     let html = '';
@@ -20673,14 +20688,19 @@ window.addEventListener('volvix:version-loaded', function(e){
   // Cuenta tenants reales por business_type usando los items que PERM ya cacheó.
   // ─────────────────────────────────────────────────────────────────────────────
   const GIRO_CATEGORIES = {
-    'comida-bebida':  { label: 'Comida & Bebida', items: ['restaurante','taqueria','pizzeria','cafeteria','panaderia','pasteleria','heladeria','jugos_naturales','jugos-naturales'] },
-    'frescos':        { label: 'Frescos & Mostrador', items: ['fruteria','carniceria','polleria','tortilleria'] },
-    'tienda':         { label: 'Tienda & Abarrotes', items: ['abarrotes','minisuper','tienda-conveniencia'] },
-    'salud':          { label: 'Salud', items: ['farmacia','veterinaria','clinica-dental','optica'] },
-    'belleza':        { label: 'Belleza & Cuidado', items: ['barberia','salon-belleza','nails','spa'] },
-    'retail':         { label: 'Retail', items: ['ropa','tienda-ropa','zapateria','muebleria','papeleria','ferreteria','sabanas_premium','floreria'] },
-    'automotriz':     { label: 'Automotriz', items: ['refaccionaria','taller-mecanico','carwash'] },
-    'servicios':      { label: 'Servicios', items: ['purificadora','lavanderia','gimnasio'] },
+    'comida-bebida':  { label: 'Comida & Bebida', items: ['restaurante','taqueria','pizzeria','cafeteria','panaderia','pasteleria','heladeria','jugos_naturales','jugos-naturales','marisqueria','sushi','hamburguesas','pollo_frito','pollos_asados','antojitos','tacos_vapor','comida_corrida','dark_kitchen','ghost_kitchen','banquetes'] },
+    'frescos':        { label: 'Frescos & Mostrador', items: ['fruteria','carniceria','polleria','tortilleria','cremeria'] },
+    'tienda':         { label: 'Tienda & Abarrotes', items: ['abarrotes','minisuper','tienda-conveniencia','deposito','tienda_china','dulceria','naturista','refresqueria','purificadora','vape_shop','sex_shop','cerveza_artesanal','ecologica','regalos','bazar'] },
+    'salud':          { label: 'Salud', items: ['farmacia','veterinaria','clinica-dental','dentista','medico','optica','tienda_mascotas'] },
+    'belleza':        { label: 'Belleza & Cuidado', items: ['barberia','salon-belleza','estetica','nails','spa','cosmeticos'] },
+    'retail':         { label: 'Retail', items: ['ropa','tienda-ropa','boutique','zapateria','muebleria','papeleria','ferreteria','tlapaleria','sabanas_premium','floreria','joyeria','electronica','electrodomesticos','computacion','celulares','reparacion_celulares','gamer','deportes','vidrieria'] },
+    'automotriz':     { label: 'Automotriz', items: ['refaccionaria','taller-mecanico','carwash','llantera','vulcanizadora','agencia_autos'] },
+    'servicios':      { label: 'Servicios', items: ['lavanderia','gimnasio','agencia_de_viajes','imprenta','carpinteria','herreria','cerrajeria','aluminio','construccion','paneles_solares','cctv','sonido','fotografia','escuela','guarderia','hotel','motel','casa_empeno','wisp','coworking','domotica'] },
+    'tecnologia':     { label: 'Tecnología', items: ['software','marketing_digital','hosting_web','impresion_3d','drones','automatizacion','ia_chatbots','criptomonedas'] },
+    // 2026-05-09 SYNC FIX: bucket "Otros (BD)" se rellena en runtime con cualquier
+    // giro de BD que no esté en una categoría arriba. Garantiza que TODOS los
+    // giros de verticals (271) se vean en el panel.
+    'otros':          { label: 'Otros giros (BD)', items: [] },
   };
 
   let _girosTenantCounts = null;
@@ -20720,6 +20740,14 @@ window.addEventListener('volvix:version-loaded', function(e){
     await loadAllCatalogs();
     const PROFILES = Object.assign({}, window.INDUSTRY_PROFILES || {}, window.INDUSTRY_PROFILES_FROM_BD || {});
     const LABELS = Object.assign({}, window.INDUSTRY_LABELS || {}, window.INDUSTRY_LABELS_FROM_BD || {});
+    // 2026-05-09 SYNC FIX: rellenar bucket "Otros (BD)" con giros de BD que no
+    // están listados en GIRO_CATEGORIES. Garantiza que los 271 giros aparezcan.
+    const catalogedGiroSet = new Set();
+    for (const cat of Object.values(GIRO_CATEGORIES)) {
+      if (cat !== GIRO_CATEGORIES.otros) cat.items.forEach(s => catalogedGiroSet.add(s));
+    }
+    const allGiroSlugs = Object.keys(PROFILES);
+    GIRO_CATEGORIES.otros.items = allGiroSlugs.filter(s => !catalogedGiroSet.has(s)).sort();
     const counts = await loadTenantCountsByGiro();
     // 2026-05-09: botón "+ Nuevo Giro" inyectado al inicio del wrap (sticky)
     // Solo lo inyecta UNA vez (idempotente); el handler abre prompt y POSTea.
