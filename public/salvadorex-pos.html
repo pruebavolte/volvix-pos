@@ -11159,63 +11159,73 @@
                 console.log('[VOLVIX] moduleNameOverrides aplicados:', renamed, 'cambios');
               }
               // 2026-05-10 user-fix v2: aplicar modulesState + name_override usando
-              // [data-feature="module.<slug>"] (TODOS los botones del menubar tienen
-              // este atributo). Mucho mas robusto que matchear por texto.
+              // [data-feature="module.<slug>"] y [data-vlx-button="<key>"]
+              // (TODOS los botones tienen uno de estos atributos). Data-driven total.
               try {
                 const ms = (j.giro && j.giro.modulesState) || {};
                 const renames = (j.giro && j.giro.moduleNameOverrides) || {};
-                if ((ms && Object.keys(ms).length) || (renames && Object.keys(renames).length)) {
+                const bs = (j.giro && j.giro.buttonsState) || {};
+                const brenames = (j.giro && j.giro.buttonNameOverrides) || {};
+                if ((ms && Object.keys(ms).length) || (renames && Object.keys(renames).length) ||
+                    (bs && Object.keys(bs).length) || (brenames && Object.keys(brenames).length)) {
+                  // Helper: aplicar estado a un elemento (hidden/locked/enabled)
+                  const applyState = function(el, st){
+                    if (el.dataset.giroVisApplied === st) return;
+                    if (st === 'hidden') {
+                      el.style.setProperty('display', 'none', 'important');
+                      el.dataset.giroVisApplied = 'hidden';
+                    } else if (st === 'locked') {
+                      el.style.setProperty('opacity', '0.4', 'important');
+                      el.style.setProperty('pointer-events', 'none', 'important');
+                      el.style.setProperty('cursor', 'not-allowed', 'important');
+                      el.style.setProperty('filter', 'grayscale(100%)', 'important');
+                      el.title = '🔒 No disponible para tu giro';
+                      el.dataset.giroVisApplied = 'locked';
+                    } else if (st === 'enabled') {
+                      if (el.dataset.giroVisApplied) {
+                        el.style.display = '';
+                        el.style.opacity = '';
+                        el.style.pointerEvents = '';
+                        el.style.cursor = '';
+                        el.style.filter = '';
+                        el.removeAttribute('title');
+                        delete el.dataset.giroVisApplied;
+                      }
+                    }
+                  };
+                  // Helper: aplicar rename preservando emoji
+                  const applyRename = function(el, newName){
+                    if (!newName || el.dataset.giroRenameApplied === newName) return;
+                    var orig = (el.textContent || '').trim();
+                    var emojiMatch = orig.match(/^([^\w\s]+\s)/);
+                    var emoji = emojiMatch ? emojiMatch[1] : '';
+                    el.textContent = emoji + newName;
+                    el.dataset.giroRenameApplied = newName;
+                  };
                   const applyByFeature = function(){
-                    // Aplicar modulesState (hidden/locked)
+                    // 1) MODULOS — selector [data-feature="module.<key>"]
                     Object.entries(ms).forEach(function(entry){
                       var key = entry[0], st = entry[1];
-                      // Buscar TODOS los elementos con data-feature="module.<key>"
-                      document.querySelectorAll('[data-feature="module.' + key + '"]').forEach(function(el){
-                        if (el.dataset.giroVisApplied === st) return; // idempotente
-                        if (st === 'hidden') {
-                          // !important para que NO sea sobrescrito por otros wirings async
-                          el.style.setProperty('display', 'none', 'important');
-                          el.dataset.giroVisApplied = 'hidden';
-                        } else if (st === 'locked') {
-                          el.style.setProperty('opacity', '0.4', 'important');
-                          el.style.setProperty('pointer-events', 'none', 'important');
-                          el.style.setProperty('cursor', 'not-allowed', 'important');
-                          el.style.setProperty('filter', 'grayscale(100%)', 'important');
-                          el.title = '🔒 No disponible para tu giro';
-                          el.dataset.giroVisApplied = 'locked';
-                        } else if (st === 'enabled') {
-                          // Restaurar si previamente estaba hidden/locked
-                          if (el.dataset.giroVisApplied) {
-                            el.style.display = '';
-                            el.style.opacity = '';
-                            el.style.pointerEvents = '';
-                            el.style.cursor = '';
-                            el.style.filter = '';
-                            el.removeAttribute('title');
-                            delete el.dataset.giroVisApplied;
-                          }
-                        }
-                      });
+                      document.querySelectorAll('[data-feature="module.' + key + '"]').forEach(function(el){ applyState(el, st); });
                     });
-                    // Aplicar name_override (renames) por feature
                     Object.entries(renames).forEach(function(entry){
                       var key = entry[0], newName = entry[1];
-                      if (!newName) return;
-                      document.querySelectorAll('[data-feature="module.' + key + '"]').forEach(function(el){
-                        if (el.dataset.giroRenameApplied === newName) return;
-                        // Preservar emoji al inicio si existe (primer char no alfabético)
-                        var orig = (el.textContent || '').trim();
-                        var emojiMatch = orig.match(/^([^\w\s]+\s)/);
-                        var emoji = emojiMatch ? emojiMatch[1] : '';
-                        el.textContent = emoji + newName;
-                        el.dataset.giroRenameApplied = newName;
-                      });
+                      document.querySelectorAll('[data-feature="module.' + key + '"]').forEach(function(el){ applyRename(el, newName); });
+                    });
+                    // 2) BOTONES INTERNOS — selector [data-vlx-button="<key>"]
+                    Object.entries(bs).forEach(function(entry){
+                      var key = entry[0], st = entry[1];
+                      document.querySelectorAll('[data-vlx-button="' + key + '"]').forEach(function(el){ applyState(el, st); });
+                    });
+                    Object.entries(brenames).forEach(function(entry){
+                      var key = entry[0], newName = entry[1];
+                      document.querySelectorAll('[data-vlx-button="' + key + '"]').forEach(function(el){ applyRename(el, newName); });
                     });
                   };
                   applyByFeature();
                   // Re-aplicar varias veces porque wirings async pueden inyectar/reemplazar botones tarde
                   [300,800,1500,3000,5000,8000].forEach(function(d){ setTimeout(applyByFeature, d); });
-                  console.log('[VOLVIX] modulesState aplicado (data-feature):', Object.keys(ms).length, 'estados,', Object.keys(renames).length, 'renames');
+                  console.log('[VOLVIX] aplicado:', Object.keys(ms).length, 'mod-states,', Object.keys(renames).length, 'mod-renames,', Object.keys(bs).length, 'btn-states,', Object.keys(brenames).length, 'btn-renames');
                 }
               } catch (e) { console.warn('[VOLVIX] modulesState err:', e); }
             }
