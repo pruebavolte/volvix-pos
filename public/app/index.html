@@ -160,10 +160,18 @@
     const map = (CFG && CFG.giro && CFG.giro.buttonsState) || {};
     return map[key] || 'enabled';
   }
-  function btnOn(key) { return btnState(key) === 'enabled'; }
+  // 2026-05-10 Volvix Adapt: 3 estados — enabled (renderiza+click), locked (renderiza+gris), hidden (no renderiza).
+  // btnOn devuelve true si NO es hidden (renderizar). btnLocked indica deshabilitado visual.
+  function btnOn(key) { return btnState(key) !== 'hidden'; }
+  function btnLocked(key) { return btnState(key) === 'locked'; }
   function btnName(key, def) {
     const ov = (CFG && CFG.giro && CFG.giro.buttonNameOverrides) || {};
     return ov[key] || def;
+  }
+  // Aplica style + attrs locked a un elemento renderizado
+  function applyLockedStyle(html, key) {
+    if (!btnLocked(key)) return html;
+    return html.replace(/^(<[^>]+?)(>)/, '$1 style="opacity:.4;pointer-events:none;cursor:not-allowed;filter:grayscale(100%)" title="🔒 No disponible"$2');
   }
   function tenantName() { return (CFG && CFG.tenant && CFG.tenant.name) || tenantSlug; }
   function tenantPhone() { return (CFG && CFG.tenant && CFG.tenant.phone) || (CFG && CFG.branding && CFG.branding.whatsapp) || ''; }
@@ -249,9 +257,10 @@
       { k:'app.bottom_carrito',   id:'carrito',   ic:'🛒', l:'Pedir' },
     ].filter(t => btnOn(t.k));
     if (!tabs.length) return '';
-    return '<div class="vapp-bottom">' + tabs.map(t =>
-      '<button type="button" class="vapp-tab' + (TAB===t.id ? ' active' : '') + '" data-tab="' + t.id + '"><div class="vapp-tab-ico">' + t.ic + '</div><div>' + escHtml(btnName(t.k, t.l)) + '</div></button>'
-    ).join('') + '</div>';
+    return '<div class="vapp-bottom">' + tabs.map(t => {
+      const html = '<button type="button" class="vapp-tab' + (TAB===t.id ? ' active' : '') + '" data-tab="' + t.id + '" data-vlx-button="' + t.k + '"><div class="vapp-tab-ico">' + t.ic + '</div><div>' + escHtml(btnName(t.k, t.l)) + '</div></button>';
+      return applyLockedStyle(html, t.k);
+    }).join('') + '</div>';
   }
 
   function wireTabs() {
