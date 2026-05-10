@@ -37054,20 +37054,21 @@ if (process.env.NODE_ENV === 'test') {
       const enc = encodeURIComponent(tenantSlug);
       // pos_companies usa tenant_id (TNT-XXXX) como key. ?t= acepta tenant_id directo.
       const tenants = await supabaseRequest('GET',
-        `/pos_companies?tenant_id=eq.${enc}&select=tenant_id,name,business_type&limit=1`
+        `/pos_companies?tenant_id=eq.${enc}&select=tenant_id,name,business_type,phone,city,state&limit=1`
       ).catch(() => []);
       const tenant = (Array.isArray(tenants) && tenants[0]) || null;
       if (!tenant) return sendJSON(res, { error: 'tenant_no_encontrado' }, 404);
       const giroSlug = String(tenant.business_type || '').toLowerCase();
-      if (!giroSlug) return sendJSON(res, { ok: true, tenant: { slug: tenant.tenant_id, name: tenant.name }, giro: null });
-      const ge = encodeURIComponent(giroSlug);
-      const [verticals, modulos, terminologia, btns] = await Promise.all([
-        supabaseRequest('GET', `/verticals?code=eq.${ge}&select=code,name&limit=1`).catch(() => []),
-        supabaseRequest('GET', `/giros_modulos?giro_slug=eq.${ge}&select=modulo,activo,state&limit=500`).catch(() => []),
-        supabaseRequest('GET', `/giros_terminologia?giro_slug=eq.${ge}&select=clave,valor_singular,valor_plural&limit=500`).catch(() => []),
-        supabaseRequest('GET', `/giros_buttons?giro_slug=eq.${ge}&select=button_key,activo,state,name_override&limit=500`).catch(() => []),
+      const ge = giroSlug ? encodeURIComponent(giroSlug) : null;
+      const [verticals, modulos, terminologia, btns, brandingRows] = await Promise.all([
+        ge ? supabaseRequest('GET', `/verticals?code=eq.${ge}&select=code,name&limit=1`).catch(() => []) : [],
+        ge ? supabaseRequest('GET', `/giros_modulos?giro_slug=eq.${ge}&select=modulo,activo,state&limit=500`).catch(() => []) : [],
+        ge ? supabaseRequest('GET', `/giros_terminologia?giro_slug=eq.${ge}&select=clave,valor_singular,valor_plural&limit=500`).catch(() => []) : [],
+        ge ? supabaseRequest('GET', `/giros_buttons?giro_slug=eq.${ge}&select=button_key,activo,state,name_override&limit=500`).catch(() => []) : [],
+        // 2026-05-09: branding por tenant (logo, colores, redes sociales, dirección, horarios)
+        supabaseRequest('GET', `/pos_app_branding?tenant_id=eq.${enc}&select=*&limit=1`).catch(() => []),
       ]);
-      const v = (Array.isArray(verticals) && verticals[0]) || { code: giroSlug, name: giroSlug };
+      const v = (Array.isArray(verticals) && verticals[0]) || (giroSlug ? { code: giroSlug, name: giroSlug } : null);
       const buttons = {}, buttonsState = {}, buttonNameOverrides = {};
       (Array.isArray(btns) ? btns : []).forEach(r => {
         if (!r || !r.button_key) return;
@@ -37080,13 +37081,136 @@ if (process.env.NODE_ENV === 'test') {
         if (!r || !r.clave) return;
         terms[r.clave] = { singular: r.valor_singular, plural: r.valor_plural || r.valor_singular };
       });
+      // Branding (default si no hay row personalizada)
+      const b = (Array.isArray(brandingRows) && brandingRows[0]) || {};
+      const branding = {
+        logo_url: b.logo_url || null,
+        primary_color: b.primary_color || '#10b981',
+        accent_color: b.accent_color || '#065f46',
+        background_color: b.background_color || '#f5f3ee',
+        whatsapp: b.whatsapp || (tenant.phone ? String(tenant.phone).replace(/\D/g, '') : null),
+        instagram: b.instagram || null,
+        facebook: b.facebook || null,
+        tiktok: b.tiktok || null,
+        youtube: b.youtube || null,
+        email_publico: b.email_publico || null,
+        address: b.address || [tenant.city, tenant.state].filter(Boolean).join(', ') || null,
+        hours_text: b.hours_text || null,
+        about_text: b.about_text || null,
+      };
       sendJSON(res, {
         ok: true,
-        tenant: { slug: tenant.tenant_id, name: tenant.name },
-        giro: { slug: v.code, name: v.name, terms, buttons, buttonsState, buttonNameOverrides },
+        tenant: { slug: tenant.tenant_id, name: tenant.name, phone: tenant.phone || null },
+        giro: v ? { slug: v.code, name: v.name, terms, buttons, buttonsState, buttonNameOverrides } : null,
+        branding,
       });
     } catch (err) { sendError(res, err); }
   };
+
+  // ─────────────────────────────────────────────────────────────────────
+  // PWA cliente: pedidos/citas
+  // GET  /api/app/orders?t=<tenant>&email=<email>  → historial del cliente
+  // POST /api/app/orders {tenant_slug,email,kind,items,notes,total} → crear
+  // ─────────────────────────────────────────────────────────────────────
+  handlers['GET /api/app/orders'] = async function (req, res) {
+    try {
+      const url = new URL(req.url, 'http://x');
+      const tenantSlug = String(url.searchParams.get('t') || '').trim();
+      const email = String(url.searchParams.get('email') || '').trim().toLowerCase();
+      if (!tenantSlug || !email) return sendJSON(res, { error: 'tenant_slug y email requeridos' }, 400);
+      const enc = encodeURIComponent(tenantSlug);
+      const ee = encodeURIComponent(email);
+      const orders = await supabaseRequest('GET',
+        `/pos_app_orders?tenant_id=eq.${enc}&client_email=eq.${ee}&select=id,kind,items_json,notes,total,status,created_at&order=created_at.desc&limit=50`
+      ).catch(() => []);
+      sendJSON(res, { ok: true, items: Array.isArray(orders) ? orders : [] });
+    } catch (err) { sendError(res, err); }
+  };
+
+  handlers['POST /api/app/orders'] = async function (req, res) {
+    try {
+      const body = await readBody(req).catch(() => ({}));
+      if (checkBodyError && checkBodyError(req, res)) return;
+      const tenantSlug = String(body.tenant_slug || '').trim();
+      const email = String(body.email || '').trim().toLowerCase();
+      if (!tenantSlug || !email) return sendJSON(res, { error: 'tenant_slug y email requeridos' }, 400);
+      const enc = encodeURIComponent(tenantSlug);
+      // Verificar que tenant + cliente existan
+      const tenants = await supabaseRequest('GET',
+        `/pos_companies?tenant_id=eq.${enc}&select=tenant_id&limit=1`
+      ).catch(() => []);
+      if (!tenants || !tenants.length) return sendJSON(res, { error: 'tenant_no_encontrado' }, 404);
+      const ee = encodeURIComponent(email);
+      const clients = await supabaseRequest('GET',
+        `/pos_app_clients?tenant_id=eq.${enc}&email=eq.${ee}&select=name,phone&limit=1`
+      ).catch(() => []);
+      if (!clients || !clients.length) return sendJSON(res, { error: 'cliente_no_registrado' }, 403);
+      const c = clients[0];
+      const ins = await supabaseRequest('POST', '/pos_app_orders', {
+        tenant_id: tenantSlug,
+        client_email: email,
+        client_name: c.name,
+        client_phone: c.phone,
+        kind: String(body.kind || 'pedido').slice(0, 20),
+        items_json: Array.isArray(body.items) ? body.items : [],
+        notes: String(body.notes || '').slice(0, 1000),
+        total: Number(body.total) || 0,
+        status: 'nuevo',
+      }, { 'Prefer': 'return=representation' }).catch((e) => ({ _err: e }));
+      if (ins && ins._err) return sendJSON(res, { error: 'db_error', detail: String(ins._err.message || ins._err) }, 500);
+      const order = (Array.isArray(ins) && ins[0]) || {};
+      sendJSON(res, { ok: true, order });
+    } catch (err) { sendError(res, err); }
+  };
+
+  // PATCH /api/app/branding {tenant_slug, logo_url?, primary_color?, ...}
+  // REQUIERE AUTH del dueño/admin del tenant.
+  handlers['PATCH /api/app/branding'] = requireAuth(async function (req, res) {
+    try {
+      const body = await readBody(req).catch(() => ({}));
+      if (checkBodyError && checkBodyError(req, res)) return;
+      const tenantSlug = String(body.tenant_slug || '').trim();
+      if (!tenantSlug) return sendJSON(res, { error: 'tenant_slug requerido' }, 400);
+      // Verificar que el caller sea super_admin O dueño del tenant
+      let role = '';
+      let callerTenant = '';
+      try {
+        const tok = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+        const p = JSON.parse(Buffer.from(tok.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8'));
+        role = String(p.role || '').toLowerCase();
+        callerTenant = String(p.tenant_id || '');
+      } catch (_) {}
+      const isSuper = role === 'superadmin' || role === 'platform_owner';
+      const isOwnerOfTenant = callerTenant === tenantSlug && (role === 'dueno' || role === 'gerente' || role === 'owner');
+      if (!isSuper && !isOwnerOfTenant) return sendJSON(res, { error: 'forbidden' }, 403);
+      // Whitelist de campos editables
+      const allowed = ['logo_url','primary_color','accent_color','background_color','whatsapp','instagram','facebook','tiktok','youtube','email_publico','address','hours_text','about_text'];
+      const patch = { tenant_id: tenantSlug, updated_at: new Date().toISOString() };
+      allowed.forEach(k => {
+        if (body[k] !== undefined) patch[k] = body[k] === '' ? null : body[k];
+      });
+      // UPSERT
+      const enc = encodeURIComponent(tenantSlug);
+      const exists = await supabaseRequest('GET',
+        `/pos_app_branding?tenant_id=eq.${enc}&select=tenant_id&limit=1`
+      ).catch(() => []);
+      let result;
+      if (exists && exists.length) {
+        result = await supabaseRequest('PATCH',
+          `/pos_app_branding?tenant_id=eq.${enc}`,
+          patch,
+          { 'Prefer': 'return=representation' }
+        ).catch((e) => ({ _err: e }));
+      } else {
+        result = await supabaseRequest('POST', '/pos_app_branding', patch,
+          { 'Prefer': 'return=representation' }
+        ).catch((e) => ({ _err: e }));
+      }
+      if (result && result._err) return sendJSON(res, { error: 'db_error', detail: String(result._err.message || result._err) }, 500);
+      const row = (Array.isArray(result) && result[0]) || patch;
+      sendJSON(res, { ok: true, branding: row });
+    } catch (err) { sendError(res, err); }
+  });
 
   handlers['POST /api/app/register'] = async function (req, res) {
     try {

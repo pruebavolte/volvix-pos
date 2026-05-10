@@ -3,36 +3,55 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#10b981">
+  <meta name="theme-color" content="#10b981" id="vapp-theme-meta">
   <title>Volvix · App Cliente</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <style>
     *{box-sizing:border-box}
-    html,body{margin:0;padding:0;background:#f5f3ee;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#0f172a}
-    .vapp{max-width:480px;margin:0 auto;min-height:100vh;background:#f5f3ee;position:relative;padding-bottom:80px}
-    .vapp-header{background:#10b981;color:#fff;padding:16px;display:flex;align-items:center;gap:12px}
-    .vapp-avatar{width:40px;height:40px;background:rgba(255,255,255,.25);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700}
+    html,body{margin:0;padding:0;background:var(--vapp-bg,#f5f3ee);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#0f172a}
+    .vapp{max-width:480px;margin:0 auto;min-height:100vh;background:var(--vapp-bg,#f5f3ee);position:relative;padding-bottom:88px}
+    .vapp-header{background:var(--vapp-primary,#10b981);color:#fff;padding:16px;display:flex;align-items:center;gap:12px}
+    .vapp-avatar{width:46px;height:46px;background:rgba(255,255,255,.25);border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:700;overflow:hidden;flex-shrink:0}
+    .vapp-avatar img{width:100%;height:100%;object-fit:cover;display:block}
     .vapp-title{font-weight:700;font-size:15px;line-height:1.2}
-    .vapp-sub{font-size:12px;opacity:.9}
+    .vapp-sub{font-size:12px;opacity:.92;margin-top:2px}
     .vapp-section{padding:16px}
     .vapp-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px;margin-bottom:12px}
     .vapp-h{font-size:18px;font-weight:600;font-family:Georgia,serif;letter-spacing:-.02em;margin:0 0 4px}
-    .vapp-sm{font-size:11.5px;color:#64748b;margin:0 0 10px}
-    .vapp-input{width:100%;padding:11px 13px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;background:#fff;margin-bottom:10px;font-family:inherit}
-    .vapp-input:focus{outline:none;border-color:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,.15)}
-    .vapp-btn{width:100%;padding:12px 14px;border:0;background:#10b981;color:#fff;font-weight:700;border-radius:9px;font-size:14px;cursor:pointer;font-family:inherit}
+    .vapp-sm{font-size:11.5px;color:#64748b;margin:0 0 10px;line-height:1.45}
+    .vapp-input,.vapp-textarea{width:100%;padding:11px 13px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;background:#fff;margin-bottom:10px;font-family:inherit;color:#0f172a}
+    .vapp-textarea{resize:vertical;min-height:80px}
+    .vapp-input:focus,.vapp-textarea:focus{outline:none;border-color:var(--vapp-primary,#10b981);box-shadow:0 0 0 3px rgba(16,185,129,.15)}
+    .vapp-btn{width:100%;padding:12px 14px;border:0;background:var(--vapp-primary,#10b981);color:#fff;font-weight:700;border-radius:9px;font-size:14px;cursor:pointer;font-family:inherit}
     .vapp-btn:disabled{opacity:.5;cursor:not-allowed}
-    .vapp-btn.alt{background:#fff;color:#10b981;border:1.5px solid #10b981}
+    .vapp-btn.alt{background:#fff;color:var(--vapp-primary,#10b981);border:1.5px solid var(--vapp-primary,#10b981)}
+    .vapp-btn.ghost{background:transparent;color:var(--vapp-accent,#065f46);border:1px solid #e5e7eb}
     .vapp-error{background:#fef2f2;border:1px solid #fecaca;color:#991b1b;padding:8px 12px;border-radius:8px;font-size:12.5px;margin-bottom:10px}
+    .vapp-ok{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;padding:8px 12px;border-radius:8px;font-size:12.5px;margin-bottom:10px}
     .vapp-bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1px solid #e5e7eb;display:flex;justify-content:space-around;padding:9px 0 14px;z-index:10}
-    .vapp-tab{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;color:#64748b;cursor:pointer;font-size:9.5px;font-weight:600;text-decoration:none}
-    .vapp-tab.active{color:#065f46}
+    .vapp-tab{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;color:#64748b;cursor:pointer;font-size:9.5px;font-weight:600;text-decoration:none;background:transparent;border:0;padding:6px 0;font-family:inherit}
+    .vapp-tab.active{color:var(--vapp-accent,#065f46)}
     .vapp-tab-ico{font-size:18px}
     .vapp-loading{padding:48px 16px;text-align:center;color:#64748b}
     .vapp-empty{padding:32px 16px;text-align:center;color:#94a3b8;font-size:13px}
     .news{background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:10px;padding:11px;margin:10px 0}
     .news-tag{font-size:11px;font-weight:700;color:#92400e;letter-spacing:.04em}
     .news-body{font-size:12.5px;margin-top:4px;color:#78350f}
+    .social-row{display:flex;gap:10px;justify-content:space-around;margin-top:8px;flex-wrap:wrap}
+    .social-btn{display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:#0f172a;font-size:10.5px;padding:8px 6px;border-radius:8px;background:#f8fafc;border:1px solid #e5e7eb;min-width:60px}
+    .social-btn:hover{background:#f1f5f9}
+    .social-ico{font-size:22px;line-height:1}
+    .order-row{padding:10px 12px;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:8px;background:#fff}
+    .order-h{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:4px}
+    .order-status{font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;text-transform:uppercase;letter-spacing:.04em}
+    .st-nuevo{background:#dbeafe;color:#1e40af}
+    .st-encurso,.st-en_curso{background:#fef3c7;color:#92400e}
+    .st-listo{background:#dcfce7;color:#166534}
+    .st-cancelado{background:#fee2e2;color:#991b1b}
+    .order-date{font-size:11px;color:#64748b}
+    .order-items{font-size:12.5px;color:#334155;line-height:1.5}
+    .order-total{font-weight:700;color:var(--vapp-accent,#065f46);font-size:13px;margin-top:6px}
+    a{color:var(--vapp-accent,#065f46)}
   </style>
 </head>
 <body>
@@ -49,166 +68,337 @@
   const root = document.getElementById('vapp');
 
   if (!tenantSlug) {
-    root.innerHTML = '<div class="vapp-section"><div class="vapp-card"><h2 class="vapp-h">App no disponible</h2><p class="vapp-sm">Falta el parámetro <code>?t=&lt;slug-del-negocio&gt;</code> en la URL. Pide al negocio que te comparta el QR o link correcto.</p></div></div>';
+    root.innerHTML = '<div class="vapp-section"><div class="vapp-card"><h2 class="vapp-h">App no disponible</h2><p class="vapp-sm">Falta el parámetro <code>?t=&lt;tenant_id&gt;</code> en la URL.</p></div></div>';
     return;
   }
 
-  // ─── Persistent client session per tenant ───
+  // ─── State ───
   const SESS_KEY = 'volvix_client_sess_' + tenantSlug;
   function getSess(){ try { return JSON.parse(localStorage.getItem(SESS_KEY) || 'null'); } catch(_){ return null; } }
   function setSess(s){ try { localStorage.setItem(SESS_KEY, JSON.stringify(s)); } catch(_){} }
   function clearSess(){ try { localStorage.removeItem(SESS_KEY); } catch(_){} }
+  let CFG = null;     // tenant + giro + branding
+  let TAB = 'inicio'; // inicio | historial | citas | carrito
 
-  // ─── Fetch tenant + giro config ───
-  // Endpoint público (sin auth): /api/app/config?t=<slug>
-  // Devuelve: { tenant: {name,slug}, giro: {slug,name,terms,buttons,buttonsState} }
-  async function fetchAppConfig() {
+  // ─── API helpers ───
+  async function apiConfig() {
     try {
-      const r = await fetch('/api/app/config?t=' + encodeURIComponent(tenantSlug), { headers: { 'Accept': 'application/json' }});
-      if (!r.ok) throw new Error('http ' + r.status);
+      const r = await fetch('/api/app/config?t=' + encodeURIComponent(tenantSlug), { headers: { 'Accept':'application/json' }});
+      if (!r.ok) return null;
       return await r.json();
-    } catch(e) {
-      console.warn('[vapp] fetchAppConfig fail', e);
-      return null;
-    }
+    } catch(_) { return null; }
   }
-
-  // ─── Register / login (cliente final del tenant) ───
-  // POST /api/app/register {tenant_slug, email, phone, name}
-  // POST /api/app/login    {tenant_slug, email}
   async function apiRegister({email, phone, name}) {
-    const r = await fetch('/api/app/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tenant_slug: tenantSlug, email, phone, name })
-    });
-    return await r.json().catch(() => ({ error: 'parse_error' }));
+    const r = await fetch('/api/app/register', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({tenant_slug:tenantSlug, email, phone, name}) });
+    return await r.json().catch(() => ({ error:'parse_error' }));
   }
   async function apiLogin({email}) {
-    const r = await fetch('/api/app/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tenant_slug: tenantSlug, email })
-    });
-    return await r.json().catch(() => ({ error: 'parse_error' }));
+    const r = await fetch('/api/app/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({tenant_slug:tenantSlug, email}) });
+    return await r.json().catch(() => ({ error:'parse_error' }));
+  }
+  async function apiOrdersList(email) {
+    const r = await fetch('/api/app/orders?t=' + encodeURIComponent(tenantSlug) + '&email=' + encodeURIComponent(email));
+    return await r.json().catch(() => ({ items:[] }));
+  }
+  async function apiOrderCreate({email, kind, items, notes, total}) {
+    const r = await fetch('/api/app/orders', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({tenant_slug:tenantSlug, email, kind, items, notes, total}) });
+    return await r.json().catch(() => ({ error:'parse_error' }));
   }
 
-  // ─── Render: login/register form ───
-  function renderAuth(cfg, mode) {
+  function escHtml(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function escAttr(s){ return escHtml(s); }
+
+  // ─── Apply branding (CSS vars + meta theme) ───
+  function applyBranding(b) {
+    if (!b) return;
+    document.documentElement.style.setProperty('--vapp-primary', b.primary_color || '#10b981');
+    document.documentElement.style.setProperty('--vapp-accent', b.accent_color || '#065f46');
+    document.documentElement.style.setProperty('--vapp-bg', b.background_color || '#f5f3ee');
+    const meta = document.getElementById('vapp-theme-meta');
+    if (meta) meta.setAttribute('content', b.primary_color || '#10b981');
+  }
+
+  // ─── Helpers per giro ───
+  function term(key, which) {
+    const t = CFG && CFG.giro && CFG.giro.terms && CFG.giro.terms[key];
+    if (!t) return '';
+    return which === 'plural' ? (t.plural || t.singular) : (t.singular || t.plural);
+  }
+  function btnState(key) {
+    const map = (CFG && CFG.giro && CFG.giro.buttonsState) || {};
+    return map[key] || 'enabled';
+  }
+  function btnOn(key) { return btnState(key) === 'enabled'; }
+  function btnName(key, def) {
+    const ov = (CFG && CFG.giro && CFG.giro.buttonNameOverrides) || {};
+    return ov[key] || def;
+  }
+  function tenantName() { return (CFG && CFG.tenant && CFG.tenant.name) || tenantSlug; }
+  function tenantPhone() { return (CFG && CFG.tenant && CFG.tenant.phone) || (CFG && CFG.branding && CFG.branding.whatsapp) || ''; }
+
+  // ─── Render: header (logo o avatar) ───
+  function renderHeader(extraText) {
+    const sess = getSess();
+    const client = (sess && sess.client) || null;
+    const b = (CFG && CFG.branding) || {};
+    const initials = (tenantName() || 'V').split(/\s+/).slice(0,2).map(w => (w[0]||'').toUpperCase()).join('') || 'V';
+    const avatarInner = b.logo_url
+      ? '<img src="' + escAttr(b.logo_url) + '" alt="logo">'
+      : escHtml(initials);
+    const subtitle = client
+      ? 'Hola ' + escHtml((client.name || '').split(' ')[0]) + ' 👋'
+      : (extraText || ('App de ' + escHtml((term('cliente','plural')||'clientes').toLowerCase())));
+    const logoutBtn = client
+      ? '<button id="vapp-logout" style="margin-left:auto;background:transparent;border:0;color:#fff;opacity:.85;font-size:12px;cursor:pointer;">Salir</button>'
+      : '';
+    return '<div class="vapp-header"><div class="vapp-avatar">' + avatarInner + '</div><div style="flex:1;min-width:0;"><div class="vapp-title">' + escHtml(tenantName()) + '</div><div class="vapp-sub">' + subtitle + '</div></div>' + logoutBtn + '</div>';
+  }
+
+  function wireLogout() {
+    const out = document.getElementById('vapp-logout');
+    if (out) out.addEventListener('click', () => { if (confirm('¿Cerrar sesión?')) { clearSess(); renderAuth('login'); } });
+  }
+
+  // ─── Render: auth (login / register) ───
+  function renderAuth(mode) {
     mode = mode || 'login';
-    const tenantName = (cfg && cfg.tenant && cfg.tenant.name) || tenantSlug;
-    const initials = tenantName.split(/\s+/).slice(0,2).map(w => (w[0]||'').toUpperCase()).join('') || 'V';
-    const terms = (cfg && cfg.giro && cfg.giro.terms) || {};
-    const clientLabel = (terms.cliente && (terms.cliente.singular || terms.cliente)) || 'Cliente';
     root.innerHTML =
-      '<div class="vapp-header"><div class="vapp-avatar">' + initials + '</div><div><div class="vapp-title">' + escHtml(tenantName) + '</div><div class="vapp-sub">App de ' + escHtml(clientLabel.toLowerCase()) + 's</div></div></div>' +
+      renderHeader('App de ' + ((term('cliente','plural')||'clientes').toLowerCase())) +
       '<div class="vapp-section">' +
         '<div class="vapp-card">' +
           '<h2 class="vapp-h">' + (mode === 'register' ? 'Crear cuenta' : 'Iniciar sesión') + '</h2>' +
           '<p class="vapp-sm">' + (mode === 'register' ? 'Regístrate para ver tu historial, hacer pedidos/citas y recibir promociones.' : 'Ingresa con tu correo para continuar.') + '</p>' +
-          '<div id="vapp-err"></div>' +
+          '<div id="vf-err"></div>' +
           (mode === 'register' ? '<input class="vapp-input" id="vf-name" type="text" placeholder="Nombre completo" autocomplete="name">' : '') +
           '<input class="vapp-input" id="vf-email" type="email" placeholder="Correo electrónico" autocomplete="email">' +
           (mode === 'register' ? '<input class="vapp-input" id="vf-phone" type="tel" placeholder="Teléfono (10 dígitos)" autocomplete="tel" inputmode="numeric">' : '') +
           '<button class="vapp-btn" id="vf-submit">' + (mode === 'register' ? 'Crear cuenta' : 'Entrar') + '</button>' +
           '<div style="text-align:center;margin-top:10px;font-size:12.5px;color:#64748b;">' +
             (mode === 'register'
-              ? '¿Ya tienes cuenta? <a href="#" id="vf-toggle" style="color:#10b981;font-weight:600;">Iniciar sesión</a>'
-              : '¿Eres nuevo? <a href="#" id="vf-toggle" style="color:#10b981;font-weight:600;">Crear cuenta</a>'
+              ? '¿Ya tienes cuenta? <a href="#" id="vf-toggle">Iniciar sesión</a>'
+              : '¿Eres nuevo? <a href="#" id="vf-toggle">Crear cuenta</a>'
             ) +
           '</div>' +
         '</div>' +
       '</div>';
-    document.getElementById('vf-toggle').addEventListener('click', (e) => {
-      e.preventDefault();
-      renderAuth(cfg, mode === 'register' ? 'login' : 'register');
-    });
+    document.getElementById('vf-toggle').addEventListener('click', (e) => { e.preventDefault(); renderAuth(mode === 'register' ? 'login' : 'register'); });
     document.getElementById('vf-submit').addEventListener('click', async () => {
-      const errEl = document.getElementById('vf-err') || document.getElementById('vapp-err');
+      const errEl = document.getElementById('vf-err');
       errEl.innerHTML = '';
       const email = (document.getElementById('vf-email').value || '').trim().toLowerCase();
-      if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-        errEl.innerHTML = '<div class="vapp-error">Correo inválido.</div>'; return;
-      }
+      if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { errEl.innerHTML = '<div class="vapp-error">Correo inválido.</div>'; return; }
       const btn = document.getElementById('vf-submit');
       btn.disabled = true; btn.textContent = '…';
       try {
         if (mode === 'register') {
           const name = (document.getElementById('vf-name').value || '').trim();
           const phone = (document.getElementById('vf-phone').value || '').trim();
-          if (!name) { errEl.innerHTML = '<div class="vapp-error">Falta tu nombre.</div>'; btn.disabled = false; btn.textContent = 'Crear cuenta'; return; }
-          if (!phone || phone.replace(/\D/g,'').length < 10) { errEl.innerHTML = '<div class="vapp-error">Teléfono inválido (10 dígitos).</div>'; btn.disabled = false; btn.textContent = 'Crear cuenta'; return; }
+          if (!name) { errEl.innerHTML = '<div class="vapp-error">Falta tu nombre.</div>'; return; }
+          if (!phone || phone.replace(/\D/g,'').length < 10) { errEl.innerHTML = '<div class="vapp-error">Teléfono inválido (10 dígitos).</div>'; return; }
           const r = await apiRegister({email, phone, name});
-          if (r && r.ok && r.client) { setSess({ client: r.client, ts: Date.now() }); renderHome(cfg); return; }
+          if (r && r.ok && r.client) { setSess({ client: r.client, ts: Date.now() }); TAB = 'inicio'; renderApp(); return; }
           errEl.innerHTML = '<div class="vapp-error">' + escHtml(r && r.error || 'Error al registrar.') + '</div>';
         } else {
           const r = await apiLogin({email});
-          if (r && r.ok && r.client) { setSess({ client: r.client, ts: Date.now() }); renderHome(cfg); return; }
-          errEl.innerHTML = '<div class="vapp-error">' + escHtml(r && r.error || 'Correo no encontrado. ¿Crear cuenta?') + '</div>';
+          if (r && r.ok && r.client) { setSess({ client: r.client, ts: Date.now() }); TAB = 'inicio'; renderApp(); return; }
+          errEl.innerHTML = '<div class="vapp-error">' + escHtml(r && r.error || 'No se encontró tu cuenta. ¿Crear una?') + '</div>';
         }
-      } catch(e) {
-        errEl.innerHTML = '<div class="vapp-error">No se pudo conectar. Intenta de nuevo.</div>';
-      } finally {
-        btn.disabled = false; btn.textContent = mode === 'register' ? 'Crear cuenta' : 'Entrar';
-      }
+      } catch(e) { errEl.innerHTML = '<div class="vapp-error">No se pudo conectar.</div>'; }
+      finally { btn.disabled = false; btn.textContent = mode === 'register' ? 'Crear cuenta' : 'Entrar'; }
     });
   }
 
-  // ─── Render: home (post-login) ───
-  function renderHome(cfg) {
-    const sess = getSess();
-    const client = (sess && sess.client) || { name: 'Invitado', email: '' };
-    const tenantName = (cfg && cfg.tenant && cfg.tenant.name) || tenantSlug;
-    const initials = (client.name || 'C').split(/\s+/).slice(0,2).map(w => (w[0]||'').toUpperCase()).join('');
-    const buttons = (cfg && cfg.giro && cfg.giro.buttons) || {};
-    const buttonsState = (cfg && cfg.giro && cfg.giro.buttonsState) || {};
-    const isOn = (key) => (buttonsState[key] || (buttons[key] !== false ? 'enabled' : 'hidden')) === 'enabled';
-    const terms = (cfg && cfg.giro && cfg.giro.terms) || {};
-    const clientPlural = (terms.cliente && (terms.cliente.plural || terms.cliente)) || 'Clientes';
-
-    root.innerHTML =
-      (isOn('app.section_profile') ? '<div class="vapp-header"><div class="vapp-avatar">' + escHtml(initials || 'C') + '</div><div><div class="vapp-title">' + escHtml(tenantName) + '</div><div class="vapp-sub">Hola ' + escHtml((client.name || '').split(' ')[0]) + ' 👋</div></div><a href="#" id="vapp-logout" style="margin-left:auto;color:#fff;opacity:.85;text-decoration:none;font-size:12px;">Salir</a></div>' : '') +
-      '<div class="vapp-section">' +
-        (isOn('app.section_main_list')
-          ? '<div class="vapp-card"><h2 class="vapp-h">Tu cuenta</h2><p class="vapp-sm">Bienvenido a la app de ' + escHtml(tenantName) + '. Aquí verás tu historial, podrás hacer pedidos/citas, etc.</p><div style="font-size:12.5px;color:#475569;line-height:1.6;"><b>Correo:</b> ' + escHtml(client.email) + '<br><b>Teléfono:</b> ' + escHtml(client.phone || '—') + '</div></div>'
-          : '') +
-        (isOn('app.section_news') ? '<div class="news"><div class="news-tag">📰 NOTICIA</div><div class="news-body">Promo del mes — pregunta en mostrador.</div></div>' : '') +
-        (isOn('app.section_contact')
-          ? '<div class="vapp-card"><h2 class="vapp-h">Contacto</h2><p class="vapp-sm">¿Necesitas ayuda?</p><div style="display:flex;justify-content:space-around;font-size:22px;">📞 💬 📸 👍</div></div>'
-          : '') +
-      '</div>' +
-      renderTabs(buttons, buttonsState);
-
-    const out = document.getElementById('vapp-logout');
-    if (out) out.addEventListener('click', (e) => { e.preventDefault(); if (confirm('¿Cerrar sesión?')) { clearSess(); renderAuth(cfg, 'login'); } });
-  }
-
-  function renderTabs(buttons, buttonsState) {
-    const isOn = (k) => (buttonsState[k] || (buttons[k] !== false ? 'enabled' : 'hidden')) === 'enabled';
+  // ─── Render: tabs (bottom nav) ───
+  function renderTabs() {
     const tabs = [
-      { k:'app.bottom_inicio',    ic:'🏠', l:'Inicio' },
-      { k:'app.bottom_historial', ic:'🕐', l:'Historial' },
-      { k:'app.bottom_citas',     ic:'📅', l:'Citas' },
-      { k:'app.bottom_carrito',   ic:'🛒', l:'Pedir' },
-    ].filter(t => isOn(t.k));
+      { k:'app.bottom_inicio',    id:'inicio',    ic:'🏠', l:'Inicio' },
+      { k:'app.bottom_historial', id:'historial', ic:'🕐', l:'Historial' },
+      { k:'app.bottom_citas',     id:'citas',     ic:'📅', l:'Citas' },
+      { k:'app.bottom_carrito',   id:'carrito',   ic:'🛒', l:'Pedir' },
+    ].filter(t => btnOn(t.k));
     if (!tabs.length) return '';
-    return '<div class="vapp-bottom">' + tabs.map((t,i) =>
-      '<a href="#" class="vapp-tab' + (i===0 ? ' active' : '') + '"><div class="vapp-tab-ico">' + t.ic + '</div><div>' + escHtml(t.l) + '</div></a>'
+    return '<div class="vapp-bottom">' + tabs.map(t =>
+      '<button type="button" class="vapp-tab' + (TAB===t.id ? ' active' : '') + '" data-tab="' + t.id + '"><div class="vapp-tab-ico">' + t.ic + '</div><div>' + escHtml(btnName(t.k, t.l)) + '</div></button>'
     ).join('') + '</div>';
   }
 
-  function escHtml(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function wireTabs() {
+    Array.from(document.querySelectorAll('[data-tab]')).forEach(el => {
+      el.addEventListener('click', () => { TAB = el.dataset.tab; renderApp(); });
+    });
+  }
+
+  // ─── Render: tab Inicio ───
+  function renderInicio() {
+    const sess = getSess();
+    const client = sess && sess.client;
+    const b = (CFG && CFG.branding) || {};
+    const t = (CFG && CFG.tenant) || {};
+    let html = '';
+    if (btnOn('app.section_main_list')) {
+      html += '<div class="vapp-card">' +
+        '<h2 class="vapp-h">Tu cuenta</h2>' +
+        '<p class="vapp-sm">' + escHtml(b.about_text || ('Bienvenido a la app de ' + tenantName() + '.')) + '</p>' +
+        '<div style="font-size:12.5px;color:#475569;line-height:1.7;">' +
+          '<b>Correo:</b> ' + escHtml(client.email) + '<br>' +
+          '<b>Teléfono:</b> ' + escHtml(client.phone || '—') +
+        '</div></div>';
+    }
+    if (btnOn('app.section_news')) {
+      html += '<div class="news"><div class="news-tag">📰 NOTICIA</div><div class="news-body">' + escHtml(btnName('app.section_news','Promo del mes — pregunta en mostrador.')) + '</div></div>';
+    }
+    if (btnOn('app.section_contact')) {
+      const phone = b.whatsapp || tenantPhone() || '';
+      const phoneClean = String(phone).replace(/\D/g,'');
+      const social = [];
+      if (phoneClean) social.push({ico:'📞',l:'Llamar',href:'tel:+'+phoneClean});
+      if (phoneClean) social.push({ico:'💬',l:'WhatsApp',href:'https://wa.me/'+phoneClean});
+      if (b.instagram) social.push({ico:'📸',l:'Instagram',href:'https://instagram.com/'+b.instagram.replace(/^@/,'')});
+      if (b.facebook) social.push({ico:'👍',l:'Facebook',href:'https://facebook.com/'+b.facebook});
+      if (b.tiktok) social.push({ico:'🎵',l:'TikTok',href:'https://tiktok.com/@'+b.tiktok.replace(/^@/,'')});
+      if (b.youtube) social.push({ico:'▶️',l:'YouTube',href:'https://youtube.com/@'+b.youtube.replace(/^@/,'')});
+      if (b.email_publico) social.push({ico:'✉️',l:'Correo',href:'mailto:'+b.email_publico});
+      html += '<div class="vapp-card">' +
+        '<h2 class="vapp-h">Contacto</h2>' +
+        (b.address ? '<p class="vapp-sm">📍 ' + escHtml(b.address) + '</p>' : '') +
+        (b.hours_text ? '<p class="vapp-sm">🕐 ' + escHtml(b.hours_text) + '</p>' : '') +
+        (social.length
+          ? '<div class="social-row">' + social.map(s => '<a class="social-btn" href="' + escAttr(s.href) + '" target="_blank" rel="noopener"><div class="social-ico">' + s.ico + '</div><div>' + escHtml(s.l) + '</div></a>').join('') + '</div>'
+          : '<p class="vapp-sm">El negocio aún no ha agregado sus contactos.</p>'
+        ) +
+      '</div>';
+    }
+    return html || '<div class="vapp-empty">Inicio sin contenido configurado.</div>';
+  }
+
+  // ─── Render: tab Historial ───
+  async function renderHistorial() {
+    const client = (getSess() || {}).client;
+    if (!client) return '<div class="vapp-empty">Inicia sesión para ver historial.</div>';
+    const r = await apiOrdersList(client.email);
+    const items = (r && r.items) || [];
+    if (!items.length) return '<div class="vapp-card"><h2 class="vapp-h">Historial</h2><p class="vapp-sm">Aún no tienes pedidos ni citas registrados. Cuando hagas tu primer pedido aparecerá aquí.</p></div>';
+    return '<div class="vapp-card"><h2 class="vapp-h">Historial</h2><div>' + items.map(o => {
+      const dt = new Date(o.created_at);
+      const fmt = dt.toLocaleString('es-MX', {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+      const items_str = Array.isArray(o.items_json) && o.items_json.length
+        ? o.items_json.map(it => '• ' + (typeof it === 'string' ? it : (it.name || it.descripcion || JSON.stringify(it)))).join('<br>')
+        : (o.notes || '(sin detalle)');
+      const stClass = 'st-' + String(o.status || 'nuevo').replace(/\s+/g,'_');
+      return '<div class="order-row">' +
+        '<div class="order-h"><div><b>' + escHtml(String(o.kind||'pedido').toUpperCase()) + ' #' + o.id + '</b><div class="order-date">' + fmt + '</div></div>' +
+        '<div class="order-status ' + stClass + '">' + escHtml(o.status||'nuevo') + '</div></div>' +
+        '<div class="order-items">' + items_str + '</div>' +
+        (o.total ? '<div class="order-total">Total: $' + Number(o.total).toFixed(2) + '</div>' : '') +
+      '</div>';
+    }).join('') + '</div></div>';
+  }
+
+  // ─── Render: tab Pedir (carrito simple — formulario texto + WhatsApp) ───
+  function renderPedir() {
+    const productLabel = term('producto','plural') || 'productos';
+    return '<div class="vapp-card">' +
+      '<h2 class="vapp-h">Hacer pedido</h2>' +
+      '<p class="vapp-sm">Escribe los ' + escHtml(productLabel.toLowerCase()) + ' que quieres pedir. El negocio recibirá tu solicitud y te contactará para confirmar.</p>' +
+      '<div id="vp-msg"></div>' +
+      '<textarea class="vapp-textarea" id="vp-items" placeholder="Ejemplo: 2 paracetamol 500mg, 1 jarabe para tos"></textarea>' +
+      '<input class="vapp-input" id="vp-notes" type="text" placeholder="Notas (opcional): dirección de entrega, hora preferida, etc.">' +
+      '<button class="vapp-btn" id="vp-send">📨 Enviar pedido al negocio</button>' +
+      '<button class="vapp-btn alt" id="vp-wa" style="margin-top:6px;">💬 Enviar por WhatsApp</button>' +
+    '</div>';
+  }
+
+  // ─── Render: tab Citas ───
+  function renderCitas() {
+    return '<div class="vapp-card">' +
+      '<h2 class="vapp-h">Agendar cita</h2>' +
+      '<p class="vapp-sm">Solicita una cita. El negocio confirmará disponibilidad por WhatsApp.</p>' +
+      '<div id="vp-msg"></div>' +
+      '<input class="vapp-input" id="vc-date" type="date" placeholder="Fecha">' +
+      '<input class="vapp-input" id="vc-time" type="time" placeholder="Hora">' +
+      '<input class="vapp-input" id="vc-service" type="text" placeholder="Servicio (ej: Corte de cabello)">' +
+      '<input class="vapp-input" id="vc-notes" type="text" placeholder="Notas (opcional)">' +
+      '<button class="vapp-btn" id="vc-send">📅 Solicitar cita</button>' +
+    '</div>';
+  }
+
+  function wirePedir() {
+    const send = document.getElementById('vp-send');
+    const wa = document.getElementById('vp-wa');
+    if (send) send.addEventListener('click', async () => {
+      const items = (document.getElementById('vp-items').value || '').trim();
+      const notes = (document.getElementById('vp-notes').value || '').trim();
+      const msgEl = document.getElementById('vp-msg');
+      if (!items) { msgEl.innerHTML = '<div class="vapp-error">Escribe qué quieres pedir.</div>'; return; }
+      const client = (getSess() || {}).client;
+      send.disabled = true; send.textContent = 'Enviando…';
+      const r = await apiOrderCreate({email: client.email, kind:'pedido', items: items.split(/\n+/).map(s=>({name:s.trim()})).filter(x=>x.name), notes, total:0});
+      if (r && r.ok) {
+        msgEl.innerHTML = '<div class="vapp-ok">✅ Pedido #' + r.order.id + ' enviado. El negocio te contactará pronto.</div>';
+        document.getElementById('vp-items').value = ''; document.getElementById('vp-notes').value = '';
+      } else {
+        msgEl.innerHTML = '<div class="vapp-error">' + escHtml(r && r.error || 'Error al enviar.') + '</div>';
+      }
+      send.disabled = false; send.textContent = '📨 Enviar pedido al negocio';
+    });
+    if (wa) wa.addEventListener('click', () => {
+      const items = (document.getElementById('vp-items').value || '').trim();
+      const notes = (document.getElementById('vp-notes').value || '').trim();
+      const phone = ((CFG.branding && CFG.branding.whatsapp) || tenantPhone() || '').replace(/\D/g,'');
+      if (!phone) { document.getElementById('vp-msg').innerHTML = '<div class="vapp-error">El negocio no tiene WhatsApp configurado.</div>'; return; }
+      const client = (getSess() || {}).client;
+      const text = 'Hola, soy ' + (client.name || '') + ' (' + client.email + '). Quiero pedir:\n' + items + (notes ? '\n\nNotas: ' + notes : '');
+      window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(text), '_blank');
+    });
+  }
+
+  function wireCitas() {
+    const send = document.getElementById('vc-send');
+    if (send) send.addEventListener('click', async () => {
+      const date = document.getElementById('vc-date').value;
+      const time = document.getElementById('vc-time').value;
+      const service = (document.getElementById('vc-service').value || '').trim();
+      const notes = (document.getElementById('vc-notes').value || '').trim();
+      const msgEl = document.getElementById('vp-msg');
+      if (!date || !time || !service) { msgEl.innerHTML = '<div class="vapp-error">Faltan fecha, hora o servicio.</div>'; return; }
+      const client = (getSess() || {}).client;
+      send.disabled = true; send.textContent = 'Enviando…';
+      const r = await apiOrderCreate({email: client.email, kind:'cita', items:[{date,time,service}], notes, total:0});
+      if (r && r.ok) msgEl.innerHTML = '<div class="vapp-ok">✅ Cita #' + r.order.id + ' solicitada. Te confirmaremos.</div>';
+      else msgEl.innerHTML = '<div class="vapp-error">' + escHtml(r && r.error || 'Error al enviar.') + '</div>';
+      send.disabled = false; send.textContent = '📅 Solicitar cita';
+    });
+  }
+
+  // ─── Master render ───
+  async function renderApp() {
+    const sess = getSess();
+    if (!sess || !sess.client) { renderAuth('login'); return; }
+    let inner = '';
+    if (TAB === 'inicio')         inner = renderInicio();
+    else if (TAB === 'historial') inner = '<div class="vapp-loading">Cargando historial…</div>';
+    else if (TAB === 'carrito')   inner = renderPedir();
+    else if (TAB === 'citas')     inner = renderCitas();
+    root.innerHTML = renderHeader() + '<div class="vapp-section">' + inner + '</div>' + renderTabs();
+    wireLogout(); wireTabs();
+    if (TAB === 'historial') {
+      const html = await renderHistorial();
+      const sec = root.querySelector('.vapp-section');
+      if (sec) sec.innerHTML = html;
+    }
+    if (TAB === 'carrito') wirePedir();
+    if (TAB === 'citas') wireCitas();
+  }
 
   // ─── Boot ───
   (async function boot(){
-    const cfg = await fetchAppConfig();
-    if (!cfg) {
-      root.innerHTML = '<div class="vapp-section"><div class="vapp-card"><h2 class="vapp-h">Negocio no encontrado</h2><p class="vapp-sm">No se pudo cargar la configuración del negocio <code>' + escHtml(tenantSlug) + '</code>. Verifica el link.</p></div></div>';
+    CFG = await apiConfig();
+    if (!CFG || CFG.error) {
+      root.innerHTML = '<div class="vapp-section"><div class="vapp-card"><h2 class="vapp-h">Negocio no encontrado</h2><p class="vapp-sm">No se pudo cargar la configuración del negocio <code>' + escHtml(tenantSlug) + '</code>.</p></div></div>';
       return;
     }
-    const sess = getSess();
-    if (sess && sess.client && sess.client.email) renderHome(cfg);
-    else renderAuth(cfg, 'login');
+    applyBranding(CFG.branding);
+    renderApp();
   })();
 })();
 </script>
