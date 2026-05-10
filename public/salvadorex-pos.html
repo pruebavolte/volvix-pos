@@ -4182,6 +4182,31 @@
                   <button class="btn accent" id="cfg-pwa-save">💾 Guardar cambios</button>
                   <button class="btn" id="cfg-pwa-preview" type="button">👁 Ver app de mi cliente</button>
                 </div>
+
+                <!-- 2026-05-09: GESTIÓN DE MULTIMEDIA — banners, videos, flyers ilimitados -->
+                <h4 style="margin:24px 0 6px;font-size:13px;border-top:1px solid var(--border);padding-top:18px;">📸 Multimedia (banners · videos · flyers)</h4>
+                <p style="font-size:11px;color:var(--text-2);margin:0 0 10px;">Sube imágenes y videos que tus clientes verán en la PWA. Los banners aparecen como carrusel en Inicio. Los videos se reproducen con player. Los flyers son cards destacadas. Puedes subir cuántos quieras y desactivar/eliminar cuando quieras.</p>
+                <div id="cfg-pwa-media-list" style="margin-bottom:8px;"></div>
+                <div style="background:var(--bg-2);border:1px dashed var(--border);border-radius:8px;padding:10px;">
+                  <div style="font-weight:600;font-size:12px;margin-bottom:6px;">+ Nuevo media</div>
+                  <div style="display:grid;grid-template-columns:120px 1fr;gap:6px;align-items:center;">
+                    <label style="font-size:11px;">Tipo</label>
+                    <select class="input-field" id="cfg-pwa-media-kind" style="font-size:12px;">
+                      <option value="banner">📰 Banner (imagen carrusel)</option>
+                      <option value="video">🎬 Video (YouTube/Vimeo/MP4)</option>
+                      <option value="flyer">🎴 Flyer (card destacada)</option>
+                    </select>
+                    <label style="font-size:11px;">URL</label>
+                    <input class="input-field" id="cfg-pwa-media-url" placeholder="https://..." style="font-size:12px;">
+                    <label style="font-size:11px;">Título</label>
+                    <input class="input-field" id="cfg-pwa-media-title" placeholder="Promo del mes" style="font-size:12px;">
+                    <label style="font-size:11px;">Subtítulo</label>
+                    <input class="input-field" id="cfg-pwa-media-subtitle" placeholder="20% off en vitamínicos" style="font-size:12px;">
+                    <label style="font-size:11px;">Link al tocar (opcional)</label>
+                    <input class="input-field" id="cfg-pwa-media-link" placeholder="https://wa.me/525544332211" style="font-size:12px;">
+                  </div>
+                  <button class="btn accent" id="cfg-pwa-media-add" style="margin-top:8px;font-size:12px;">+ Agregar a la app</button>
+                </div>
               </div>
               <div style="flex:0 0 320px;">
                 <div style="font-size:11px;color:var(--text-2);margin-bottom:6px;font-weight:600;">VISTA PREVIA EN VIVO</div>
@@ -9469,11 +9494,93 @@
         document.getElementById('cfg-pwa-preview').addEventListener('click', () => window.open(url, '_blank'));
         document.getElementById('cfg-pwa-refresh').addEventListener('click', () => { const f = document.getElementById('cfg-pwa-iframe'); f.src = f.src; });
       }
+      // 2026-05-09: cargar multimedia + wire form agregar
+      await cfgPwaMediaLoad(tenantId, tok);
+      const addBtn = document.getElementById('cfg-pwa-media-add');
+      if (addBtn && !addBtn.dataset.wired) {
+        addBtn.dataset.wired = '1';
+        addBtn.addEventListener('click', async () => {
+          const kind = document.getElementById('cfg-pwa-media-kind').value;
+          const url = document.getElementById('cfg-pwa-media-url').value.trim();
+          const title = document.getElementById('cfg-pwa-media-title').value.trim();
+          const subtitle = document.getElementById('cfg-pwa-media-subtitle').value.trim();
+          const link_url = document.getElementById('cfg-pwa-media-link').value.trim();
+          if (!url) { alert('Falta la URL del media.'); return; }
+          addBtn.disabled = true; addBtn.textContent = 'Subiendo…';
+          try {
+            const r = await fetch('/api/app/media', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok },
+              body: JSON.stringify({ tenant_slug: tenantId, kind, url, title: title || null, subtitle: subtitle || null, link_url: link_url || null })
+            });
+            const j = await r.json();
+            if (r.ok && j.ok) {
+              document.getElementById('cfg-pwa-media-url').value = '';
+              document.getElementById('cfg-pwa-media-title').value = '';
+              document.getElementById('cfg-pwa-media-subtitle').value = '';
+              document.getElementById('cfg-pwa-media-link').value = '';
+              await cfgPwaMediaLoad(tenantId, tok);
+              const f = document.getElementById('cfg-pwa-iframe'); if (f) f.src = f.src;
+            } else { alert('Error: ' + (j.error || 'desconocido')); }
+          } catch(e) { alert('Error de red: ' + e.message); }
+          addBtn.disabled = false; addBtn.textContent = '+ Agregar a la app';
+        });
+      }
     } catch (e) {
       console.error('[cfgPwaLoad]', e);
     }
   }
   window.cfgPwaLoad = cfgPwaLoad;
+
+  // 2026-05-09: cargar lista multimedia del tenant + render con botones eliminar/toggle
+  async function cfgPwaMediaLoad(tenantId, tok) {
+    const wrap = document.getElementById('cfg-pwa-media-list');
+    if (!wrap) return;
+    try {
+      const r = await fetch('/api/app/media?t=' + encodeURIComponent(tenantId));
+      const j = await r.json();
+      const items = (j && j.items) || [];
+      if (!items.length) {
+        wrap.innerHTML = '<div style="padding:12px;background:var(--bg-2);border:1px dashed var(--border);border-radius:6px;font-size:11.5px;color:var(--text-2);text-align:center;">Aún no has subido nada. Agrega tu primer banner abajo ↓</div>';
+        return;
+      }
+      wrap.innerHTML = items.map(m => {
+        const ico = m.kind === 'banner' ? '📰' : m.kind === 'video' ? '🎬' : m.kind === 'flyer' ? '🎴' : '📰';
+        const activeBadge = m.active
+          ? '<span style="background:#dcfce7;color:#166534;padding:2px 6px;border-radius:99px;font-size:10px;font-weight:600;">ACTIVO</span>'
+          : '<span style="background:#fef3c7;color:#92400e;padding:2px 6px;border-radius:99px;font-size:10px;font-weight:600;">PAUSADO</span>';
+        return '<div style="display:flex;gap:10px;align-items:center;padding:8px;border:1px solid var(--border);border-radius:6px;margin-bottom:6px;background:#fff;">' +
+          '<div style="font-size:24px;">' + ico + '</div>' +
+          '<div style="flex:1;min-width:0;">' +
+            '<div style="font-weight:600;font-size:12.5px;color:#0f172a;">' + (m.title ? escapeText(m.title) : '<i style="color:#94a3b8;">(sin título)</i>') + ' ' + activeBadge + '</div>' +
+            '<div style="font-size:11px;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:340px;" title="' + escapeAttr(m.url) + '">' + escapeText(m.url) + '</div>' +
+            (m.subtitle ? '<div style="font-size:11px;color:#64748b;">' + escapeText(m.subtitle) + '</div>' : '') +
+          '</div>' +
+          '<button class="btn sm" data-pwa-media-toggle="' + m.id + '" data-active="' + (!m.active) + '" style="font-size:10.5px;">' + (m.active ? 'Pausar' : 'Activar') + '</button>' +
+          '<button class="btn sm" data-pwa-media-del="' + m.id + '" style="font-size:10.5px;background:#fef2f2;color:#991b1b;border-color:#fecaca;">🗑</button>' +
+        '</div>';
+      }).join('');
+      // Wire toggle/delete
+      wrap.querySelectorAll('[data-pwa-media-toggle]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const id = btn.dataset.pwaMediaToggle;
+          const active = btn.dataset.active === 'true';
+          const r2 = await fetch('/api/app/media/' + id, { method:'PATCH', headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok}, body: JSON.stringify({active}) });
+          if (r2.ok) { await cfgPwaMediaLoad(tenantId, tok); const f = document.getElementById('cfg-pwa-iframe'); if (f) f.src = f.src; }
+        });
+      });
+      wrap.querySelectorAll('[data-pwa-media-del]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (!confirm('¿Eliminar este media? No se puede deshacer.')) return;
+          const id = btn.dataset.pwaMediaDel;
+          const r2 = await fetch('/api/app/media/' + id, { method:'DELETE', headers:{'Authorization':'Bearer '+tok} });
+          if (r2.ok) { await cfgPwaMediaLoad(tenantId, tok); const f = document.getElementById('cfg-pwa-iframe'); if (f) f.src = f.src; }
+        });
+      });
+    } catch(e) {
+      wrap.innerHTML = '<div style="padding:8px;background:#fef2f2;color:#991b1b;border-radius:4px;font-size:11.5px;">Error cargando multimedia.</div>';
+    }
+  }
 
   /* ============ QUICK POS ============ */
   let qpVal = '';
@@ -21627,19 +21734,17 @@ window.addEventListener('volvix:version-loaded', function(e){
           </div>`).join('')}
         </div>` : '';
 
-        const phoneFrame = `<div style="position:relative;width:280px;height:560px;background:#000;border-radius:34px;padding:8px;box-shadow:0 12px 40px rgba(0,0,0,.25);margin:0 auto;">
+        // 2026-05-09 fix(PREVIEW-REAL): el mockup hardcoded mentía — mostraba contenido genérico
+        // que no coincidía con la PWA real. Ahora cargamos un IFRAME del /app/index.html?t=<tenant>
+        // para que el super_admin vea EXACTAMENTE lo que verá el cliente final (con branding,
+        // colores, banners, videos, terminología y todo del giro/tenant en vivo).
+        const previewTenant = (tenantExample && (tenantExample.tenant_id || tenantExample.id)) || ('demo-' + slug);
+        const phoneFrame = `<div style="position:relative;width:300px;height:600px;background:#000;border-radius:34px;padding:8px;box-shadow:0 12px 40px rgba(0,0,0,.25);margin:0 auto;">
           <div style="position:absolute;top:18px;left:50%;transform:translateX(-50%);width:90px;height:18px;background:#000;border-radius:14px;z-index:2;"></div>
-          <div style="position:relative;width:100%;height:100%;background:#f5f3ee;border-radius:28px;overflow:hidden;font-family:-apple-system,sans-serif;">
-            <div style="background:#10b981;height:30px;color:#fff;font-size:10px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;">
-              <span style="font-weight:600;">9:41</span><span>📶 📵 🔋</span>
-            </div>
-            ${headerHtml}
-            ${mainListHtml}
-            ${newsHtml}
-            ${flyerHtml}
-            ${contactHtml}
-            ${tabsHtml}
-          </div>
+          <iframe src="/app/index.html?t=${encodeURIComponent(previewTenant)}" style="position:relative;width:100%;height:100%;border:0;border-radius:28px;background:#f5f3ee;display:block;" title="PWA preview de ${escapeAttr(slug)}"></iframe>
+        </div>
+        <div style="text-align:center;margin-top:8px;font-size:10.5px;color:var(--pv-text-secondary,#64748b);">
+          ${tenantExample ? '🟢 Vista REAL del tenant <b>' + escapeText(previewTenant) + '</b>' : '⚪ Demo virtual (sin tenant real para giro <b>' + escapeText(slug) + '</b>) — la PWA mostrará "tenant_no_encontrado" hasta que un cliente real use este giro'}
         </div>`;
 
         // 2026-05-09 fix(APP-QR): URL compartible + QR para que el dueño la pase a sus clientes.

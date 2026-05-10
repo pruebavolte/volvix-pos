@@ -52,6 +52,27 @@
     .order-items{font-size:12.5px;color:#334155;line-height:1.5}
     .order-total{font-weight:700;color:var(--vapp-accent,#065f46);font-size:13px;margin-top:6px}
     a{color:var(--vapp-accent,#065f46)}
+    /* Carrusel banners */
+    .banner-scroll{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:0 0 6px;margin:0 -16px;padding-left:16px;padding-right:16px;-webkit-overflow-scrolling:touch}
+    .banner-scroll::-webkit-scrollbar{display:none}
+    .banner-card{flex:0 0 280px;scroll-snap-align:start;border-radius:12px;overflow:hidden;background:#fff;border:1px solid #e5e7eb;text-decoration:none;color:inherit;display:flex;flex-direction:column}
+    .banner-img{width:100%;height:140px;object-fit:cover;display:block;background:#e5e7eb}
+    .banner-body{padding:10px 12px}
+    .banner-title{font-weight:700;font-size:13px;margin:0 0 2px;color:#0f172a}
+    .banner-sub{font-size:11.5px;color:#64748b;margin:0;line-height:1.4}
+    /* Videos */
+    .video-card{border-radius:12px;overflow:hidden;background:#000;border:1px solid #e5e7eb;margin-bottom:10px}
+    .video-iframe{width:100%;aspect-ratio:16/9;border:0;display:block;background:#000}
+    .video-meta{padding:8px 12px;background:#fff}
+    .video-title{font-weight:700;font-size:13px;margin:0 0 2px;color:#0f172a}
+    .video-sub{font-size:11px;color:#64748b;margin:0}
+    /* Flyer destacado */
+    .flyer-card{position:relative;border-radius:12px;overflow:hidden;margin-bottom:10px;background:#1f2937;color:#fff;text-decoration:none;display:block;border:1px solid #e5e7eb}
+    .flyer-img{width:100%;height:180px;object-fit:cover;display:block;opacity:.85}
+    .flyer-overlay{position:absolute;left:0;right:0;bottom:0;padding:12px 14px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.85));color:#fff}
+    .flyer-title{font-weight:700;font-size:14px;margin:0 0 2px}
+    .flyer-sub{font-size:12px;opacity:.9;margin:0}
+    .section-h{font-size:12px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.06em;margin:14px 0 8px;padding:0 4px}
   </style>
 </head>
 <body>
@@ -234,6 +255,7 @@
     const client = sess && sess.client;
     const b = (CFG && CFG.branding) || {};
     const t = (CFG && CFG.tenant) || {};
+    const m = (CFG && CFG.media) || { banners:[], videos:[], flyers:[], noticias:[] };
     let html = '';
     if (btnOn('app.section_main_list')) {
       html += '<div class="vapp-card">' +
@@ -244,8 +266,62 @@
           '<b>Teléfono:</b> ' + escHtml(client.phone || '—') +
         '</div></div>';
     }
-    if (btnOn('app.section_news')) {
-      html += '<div class="news"><div class="news-tag">📰 NOTICIA</div><div class="news-body">' + escHtml(btnName('app.section_news','Promo del mes — pregunta en mostrador.')) + '</div></div>';
+    // 2026-05-09: BANNERS — carrusel horizontal de imágenes que sube el dueño
+    if (btnOn('app.section_news') && m.banners && m.banners.length) {
+      html += '<div class="section-h">📰 Promociones</div>' +
+        '<div class="banner-scroll">' + m.banners.map(bn => {
+          const tag = bn.link_url ? 'a' : 'div';
+          const linkAttr = bn.link_url ? ' href="' + escAttr(bn.link_url) + '" target="_blank" rel="noopener"' : '';
+          return '<' + tag + ' class="banner-card"' + linkAttr + '>' +
+            '<img class="banner-img" src="' + escAttr(bn.url) + '" alt="' + escAttr(bn.title || '') + '" loading="lazy">' +
+            (bn.title || bn.subtitle ? '<div class="banner-body">' +
+              (bn.title ? '<p class="banner-title">' + escHtml(bn.title) + '</p>' : '') +
+              (bn.subtitle ? '<p class="banner-sub">' + escHtml(bn.subtitle) + '</p>' : '') +
+            '</div>' : '') +
+          '</' + tag + '>';
+        }).join('') + '</div>';
+    } else if (btnOn('app.section_news')) {
+      // Fallback noticia genérica si no hay banners aún
+      html += '<div class="news"><div class="news-tag">📰 NOTICIA</div><div class="news-body">' + escHtml(btnName('app.section_news','Pregunta en mostrador por nuestras promos.')) + '</div></div>';
+    }
+    // 2026-05-09: VIDEOS — embeds (YouTube/Vimeo) o <video> directos
+    if (m.videos && m.videos.length) {
+      html += '<div class="section-h">🎬 Videos</div>' + m.videos.map(v => {
+        const isYt = /youtube\.com\/embed|youtube\.com\/watch|youtu\.be\//.test(v.url);
+        const isVimeo = /vimeo\.com/.test(v.url);
+        const isMp4 = /\.(mp4|webm|ogg)(\?|$)/i.test(v.url);
+        let player;
+        if (isYt) {
+          let embed = v.url.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/');
+          player = '<iframe class="video-iframe" src="' + escAttr(embed) + '" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>';
+        } else if (isVimeo) {
+          player = '<iframe class="video-iframe" src="' + escAttr(v.url) + '" allowfullscreen></iframe>';
+        } else if (isMp4) {
+          player = '<video class="video-iframe" controls preload="metadata" src="' + escAttr(v.url) + '"></video>';
+        } else {
+          player = '<a href="' + escAttr(v.url) + '" target="_blank" rel="noopener" style="display:block;background:#1f2937;color:#fff;padding:24px;text-align:center;text-decoration:none;">▶ Ver video</a>';
+        }
+        return '<div class="video-card">' + player +
+          (v.title || v.subtitle ? '<div class="video-meta">' +
+            (v.title ? '<p class="video-title">' + escHtml(v.title) + '</p>' : '') +
+            (v.subtitle ? '<p class="video-sub">' + escHtml(v.subtitle) + '</p>' : '') +
+          '</div>' : '') +
+        '</div>';
+      }).join('');
+    }
+    // 2026-05-09: FLYERS — full-bleed cards con overlay (campañas/eventos)
+    if (btnOn('app.section_flyer') && m.flyers && m.flyers.length) {
+      html += '<div class="section-h">🎴 Flyers</div>' + m.flyers.map(f => {
+        const tag = f.link_url ? 'a' : 'div';
+        const linkAttr = f.link_url ? ' href="' + escAttr(f.link_url) + '" target="_blank" rel="noopener"' : '';
+        return '<' + tag + ' class="flyer-card"' + linkAttr + '>' +
+          '<img class="flyer-img" src="' + escAttr(f.url) + '" alt="' + escAttr(f.title || '') + '" loading="lazy">' +
+          (f.title || f.subtitle ? '<div class="flyer-overlay">' +
+            (f.title ? '<p class="flyer-title">' + escHtml(f.title) + '</p>' : '') +
+            (f.subtitle ? '<p class="flyer-sub">' + escHtml(f.subtitle) + '</p>' : '') +
+          '</div>' : '') +
+        '</' + tag + '>';
+      }).join('');
     }
     if (btnOn('app.section_contact')) {
       const phone = b.whatsapp || tenantPhone() || '';

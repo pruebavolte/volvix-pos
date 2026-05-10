@@ -37060,13 +37060,15 @@ if (process.env.NODE_ENV === 'test') {
       if (!tenant) return sendJSON(res, { error: 'tenant_no_encontrado' }, 404);
       const giroSlug = String(tenant.business_type || '').toLowerCase();
       const ge = giroSlug ? encodeURIComponent(giroSlug) : null;
-      const [verticals, modulos, terminologia, btns, brandingRows] = await Promise.all([
+      const [verticals, modulos, terminologia, btns, brandingRows, mediaRows] = await Promise.all([
         ge ? supabaseRequest('GET', `/verticals?code=eq.${ge}&select=code,name&limit=1`).catch(() => []) : [],
         ge ? supabaseRequest('GET', `/giros_modulos?giro_slug=eq.${ge}&select=modulo,activo,state&limit=500`).catch(() => []) : [],
         ge ? supabaseRequest('GET', `/giros_terminologia?giro_slug=eq.${ge}&select=clave,valor_singular,valor_plural&limit=500`).catch(() => []) : [],
         ge ? supabaseRequest('GET', `/giros_buttons?giro_slug=eq.${ge}&select=button_key,activo,state,name_override&limit=500`).catch(() => []) : [],
         // 2026-05-09: branding por tenant (logo, colores, redes sociales, dirección, horarios)
         supabaseRequest('GET', `/pos_app_branding?tenant_id=eq.${enc}&select=*&limit=1`).catch(() => []),
+        // 2026-05-09: multimedia (banners, videos, flyers) que el dueño sube
+        supabaseRequest('GET', `/pos_app_media?tenant_id=eq.${enc}&active=eq.true&order=position.asc,id.asc&select=id,kind,title,subtitle,url,thumbnail_url,link_url,position`).catch(() => []),
       ]);
       const v = (Array.isArray(verticals) && verticals[0]) || (giroSlug ? { code: giroSlug, name: giroSlug } : null);
       const buttons = {}, buttonsState = {}, buttonNameOverrides = {};
@@ -37098,14 +37100,117 @@ if (process.env.NODE_ENV === 'test') {
         hours_text: b.hours_text || null,
         about_text: b.about_text || null,
       };
+      // Agrupar media por kind para fácil consumo en frontend
+      const mediaArr = Array.isArray(mediaRows) ? mediaRows : [];
+      const media = {
+        banners: mediaArr.filter(m => m.kind === 'banner'),
+        videos:  mediaArr.filter(m => m.kind === 'video'),
+        flyers:  mediaArr.filter(m => m.kind === 'flyer'),
+        noticias:mediaArr.filter(m => m.kind === 'noticia'),
+      };
       sendJSON(res, {
         ok: true,
         tenant: { slug: tenant.tenant_id, name: tenant.name, phone: tenant.phone || null },
         giro: v ? { slug: v.code, name: v.name, terms, buttons, buttonsState, buttonNameOverrides } : null,
         branding,
+        media,
       });
     } catch (err) { sendError(res, err); }
   };
+
+  // ─────────────────────────────────────────────────────────────────────
+  // PWA cliente: multimedia (banners/videos/flyers)
+  // GET    /api/app/media?t=<tenant>            → todos los media activos (público)
+  // POST   /api/app/media     {tenant_slug,kind,title,...}  (auth dueño)
+  // PATCH  /api/app/media/:id {kind?,title?,active?,...}    (auth dueño)
+  // DELETE /api/app/media/:id ?t=<tenant>                    (auth dueño)
+  // ─────────────────────────────────────────────────────────────────────
+  function checkOwnerOrSuper(req, res, tenantSlug) {
+    let role = '', callerTenant = '';
+    try {
+      const tok = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+      const p = JSON.parse(Buffer.from(tok.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8'));
+      role = String(p.role || '').toLowerCase();
+      callerTenant = String(p.tenant_id || '');
+    } catch (_) {}
+    const isSuper = role === 'superadmin' || role === 'platform_owner';
+    const isOwner = callerTenant === tenantSlug && (role === 'dueno' || role === 'gerente' || role === 'owner');
+    if (!isSuper && !isOwner) { sendJSON(res, { error: 'forbidden' }, 403); return false; }
+    return true;
+  }
+
+  handlers['GET /api/app/media'] = async function (req, res) {
+    try {
+      const url = new URL(req.url, 'http://x');
+      const tenantSlug = String(url.searchParams.get('t') || '').trim();
+      if (!tenantSlug) return sendJSON(res, { error: 'tenant_slug requerido (?t=)' }, 400);
+      const enc = encodeURIComponent(tenantSlug);
+      const items = await supabaseRequest('GET',
+        `/pos_app_media?tenant_id=eq.${enc}&order=kind.asc,position.asc,id.asc&select=*`
+      ).catch(() => []);
+      sendJSON(res, { ok: true, items: Array.isArray(items) ? items : [] });
+    } catch (err) { sendError(res, err); }
+  };
+
+  handlers['POST /api/app/media'] = requireAuth(async function (req, res) {
+    try {
+      const body = await readBody(req).catch(() => ({}));
+      if (checkBodyError && checkBodyError(req, res)) return;
+      const tenantSlug = String(body.tenant_slug || '').trim();
+      if (!tenantSlug) return sendJSON(res, { error: 'tenant_slug requerido' }, 400);
+      if (!checkOwnerOrSuper(req, res, tenantSlug)) return;
+      const kind = String(body.kind || '').toLowerCase();
+      if (!['banner','video','flyer','noticia'].includes(kind)) return sendJSON(res, { error: 'kind invalido (banner|video|flyer|noticia)' }, 400);
+      const url = String(body.url || '').trim();
+      if (!url) return sendJSON(res, { error: 'url requerida' }, 400);
+      const ins = await supabaseRequest('POST', '/pos_app_media', {
+        tenant_id: tenantSlug,
+        kind,
+        title: body.title ? String(body.title).slice(0, 200) : null,
+        subtitle: body.subtitle ? String(body.subtitle).slice(0, 500) : null,
+        url,
+        thumbnail_url: body.thumbnail_url || null,
+        link_url: body.link_url || null,
+        position: Number.isFinite(Number(body.position)) ? Number(body.position) : 0,
+        active: body.active === false ? false : true,
+      }, { 'Prefer': 'return=representation' }).catch(e => ({ _err: e }));
+      if (ins && ins._err) return sendJSON(res, { error: 'db_error', detail: String(ins._err.message || ins._err) }, 500);
+      sendJSON(res, { ok: true, item: (Array.isArray(ins) && ins[0]) || {} });
+    } catch (err) { sendError(res, err); }
+  });
+
+  handlers['PATCH /api/app/media/:id'] = requireAuth(async function (req, res, params) {
+    try {
+      const id = parseInt(params.id, 10);
+      if (!id) return sendJSON(res, { error: 'id invalido' }, 400);
+      const body = await readBody(req).catch(() => ({}));
+      if (checkBodyError && checkBodyError(req, res)) return;
+      // Cargar tenant_id para autorización
+      const cur = await supabaseRequest('GET', `/pos_app_media?id=eq.${id}&select=tenant_id&limit=1`).catch(() => []);
+      if (!cur || !cur.length) return sendJSON(res, { error: 'not_found' }, 404);
+      if (!checkOwnerOrSuper(req, res, cur[0].tenant_id)) return;
+      const allowed = ['kind','title','subtitle','url','thumbnail_url','link_url','position','active'];
+      const patch = { updated_at: new Date().toISOString() };
+      allowed.forEach(k => { if (body[k] !== undefined) patch[k] = body[k]; });
+      const upd = await supabaseRequest('PATCH', `/pos_app_media?id=eq.${id}`, patch,
+        { 'Prefer': 'return=representation' }).catch(e => ({ _err: e }));
+      if (upd && upd._err) return sendJSON(res, { error: 'db_error', detail: String(upd._err.message || upd._err) }, 500);
+      sendJSON(res, { ok: true, item: (Array.isArray(upd) && upd[0]) || {} });
+    } catch (err) { sendError(res, err); }
+  });
+
+  handlers['DELETE /api/app/media/:id'] = requireAuth(async function (req, res, params) {
+    try {
+      const id = parseInt(params.id, 10);
+      if (!id) return sendJSON(res, { error: 'id invalido' }, 400);
+      const cur = await supabaseRequest('GET', `/pos_app_media?id=eq.${id}&select=tenant_id&limit=1`).catch(() => []);
+      if (!cur || !cur.length) return sendJSON(res, { error: 'not_found' }, 404);
+      if (!checkOwnerOrSuper(req, res, cur[0].tenant_id)) return;
+      const del = await supabaseRequest('DELETE', `/pos_app_media?id=eq.${id}`).catch(e => ({ _err: e }));
+      if (del && del._err) return sendJSON(res, { error: 'db_error', detail: String(del._err.message || del._err) }, 500);
+      sendJSON(res, { ok: true, deleted: id });
+    } catch (err) { sendError(res, err); }
+  });
 
   // ─────────────────────────────────────────────────────────────────────
   // PWA cliente: pedidos/citas
