@@ -37307,21 +37307,76 @@ if (process.env.NODE_ENV === 'test') {
 
       if (!cleaned.length) return sendJSON(res, { error: 'todos_invalidos', errors }, 400);
 
-      // UPSERT en chunks de 100 para no saturar PostgREST
+      // 2026-05-10 fix idempotente: pre-cargar codes existentes del tenant para
+      // saber qué hacer con cada item (INSERT nuevo vs PATCH existente).
+      // Esto evita duplicados cuando el usuario re-importa el mismo archivo.
+      const allCodes = cleaned.map(c => c.code).filter(Boolean);
+      let existingByCode = {}; // { code: id }
+      if (allCodes.length) {
+        try {
+          // PostgREST: filtrar por code IN (...) y tenant_id=eq
+          const codesEnc = allCodes.map(c => '"' + String(c).replace(/"/g,'\\"') + '"').join(',');
+          const existing = await supabaseRequest('GET',
+            '/pos_products?tenant_id=eq.' + encodeURIComponent(tnt) +
+            '&code=in.(' + encodeURIComponent(codesEnc) +
+            ')&select=id,code&limit=' + (allCodes.length + 10));
+          if (Array.isArray(existing)) {
+            existing.forEach(r => { if (r.code) existingByCode[r.code] = r.id; });
+          }
+        } catch (e) { console.warn('[bulk-import] check existentes:', e.message); }
+      }
+
+      // Separar items en NEW vs UPDATE
+      const newItems = [], updateItems = [];
+      cleaned.forEach((it, idx) => {
+        if (existingByCode[it.code]) {
+          updateItems.push({ ...it, _existingId: existingByCode[it.code], _origIdx: idx });
+        } else {
+          newItems.push({ ...it, _origIdx: idx });
+        }
+      });
+
       let inserted = 0, updated = 0, failed = 0;
+
+      // UPDATE existentes (uno por uno por simplicidad — son los menos comunes)
+      for (const item of updateItems) {
+        const existingId = item._existingId;
+        const patchPayload = {
+          name: item.name,
+          barcode: item.barcode,
+          price: item.price,
+          cost: item.cost,
+          stock: item.stock,
+          category: item.category,
+          updated_at: new Date().toISOString()
+        };
+        try {
+          await supabaseRequest('PATCH',
+            '/pos_products?id=eq.' + existingId,
+            patchPayload,
+            { 'Prefer': 'return=minimal' });
+          updated++;
+        } catch (e) {
+          failed++;
+          errors.push({ row: item._origIdx + 1, reason: 'update_failed: ' + String(e.message || e).slice(0, 150) });
+        }
+      }
+
+      // INSERT nuevos en chunks de 100
       const CHUNK = 100;
-      for (let i = 0; i < cleaned.length; i += CHUNK) {
-        const chunk = cleaned.slice(i, i + CHUNK);
+      for (let i = 0; i < newItems.length; i += CHUNK) {
+        const chunk = newItems.slice(i, i + CHUNK).map(it => {
+          const { _existingId, _origIdx, ...rest } = it; return rest;
+        });
         try {
           await supabaseRequest('POST', '/pos_products', chunk, {
             'Prefer': 'resolution=merge-duplicates,return=minimal'
           });
           inserted += chunk.length;
         } catch (e) {
-          // Loguear el error real del chunk (PostgREST suele devolver detalle)
           const chunkErrMsg = (e && (e.message || e.toString())) || 'unknown';
           console.error('[bulk-import] chunk fail:', chunkErrMsg.slice(0, 500));
-          // Reintentar chunk individual y guardar razón por fila
+          // Reintentar chunk individual
           for (let k = 0; k < chunk.length; k++) {
             const item = chunk[k];
             try {
