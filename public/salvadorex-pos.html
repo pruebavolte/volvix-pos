@@ -3556,7 +3556,7 @@
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#E74C3C" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
           <span>Eliminar</span>
         </button>
-        <button class="bottom-btn" onclick="openCustomerSelector()" aria-label="Asignar cliente" title="Asignar cliente">
+        <button class="bottom-btn" data-vlx-button="asignar_cliente" onclick="openCustomerSelector()" aria-label="Asignar cliente" title="Asignar cliente">
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#3498DB" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
           <span>Asignar cliente</span>
         </button>
@@ -3596,15 +3596,15 @@
 
         <div class="pos-summary-spacer"></div>
 
-        <button class="bottom-btn" onclick="reimprimirUltimoTicket()" aria-label="Reimprimir último ticket" title="Reimprimir último ticket (vista previa + impresora)">
+        <button class="bottom-btn" data-vlx-button="reimprimir_ticket" onclick="reimprimirUltimoTicket()" aria-label="Reimprimir último ticket" title="Reimprimir último ticket (vista previa + impresora)">
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#3498DB" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
           <span>Reimprimir Último Ticket</span>
         </button>
-        <button class="bottom-btn" onclick="enviarAImpresora()" aria-label="Enviar a impresora térmica" title="Enviar a impresora térmica conectada">
+        <button class="bottom-btn" data-vlx-button="enviar_impresora" onclick="enviarAImpresora()" aria-label="Enviar a impresora térmica" title="Enviar a impresora térmica conectada">
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/><circle cx="18" cy="11" r="1.5" fill="#10B981"/></svg>
           <span>Enviar a Impresora</span>
         </button>
-        <button class="bottom-btn" onclick="showScreen('ventas')" aria-label="Ventas y devoluciones del día" title="Ventas y devoluciones del día">
+        <button class="bottom-btn" data-vlx-button="ventas_dia" onclick="showScreen('ventas')" aria-label="Ventas y devoluciones del día" title="Ventas y devoluciones del día">
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#9B59B6" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/></svg>
           <span>Ventas del día y Devoluciones</span>
         </button>
