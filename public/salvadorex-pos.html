@@ -7499,6 +7499,7 @@
         $('#barcode-input').value = ''; $('#barcode-input').focus();
         showToast('✓ ' + (hit.name || hit.nombre) + ' (catálogo local)');
         try { _trackRecent(hit); } catch (_) {}
+        try { _logSearch(trimmed, hit, 'L1_catalog', true); } catch (_) {}
         return;
       }
     }
@@ -7556,64 +7557,64 @@
       } catch (e) { console.warn('[search L1.5 IDB] err', e); }
     }
 
-    // ── Level 2: Tenant DB (con timeout 3s) ───────────────────────────────
-    let tenantItems = [];
-    try {
-      // Si es mixto, buscamos AMBAS cosas (barcode/code O name)
-      const params = isBarcode
-        ? 'or=(barcode.eq.' + encodeURIComponent(trimmed) + ',code.eq.' + encodeURIComponent(trimmed) + ')'
-        : (opts.isMixed
-          ? 'or=(barcode.eq.' + encodeURIComponent(trimmed) + ',code.eq.' + encodeURIComponent(trimmed) + ',name.ilike.' + encodeURIComponent('%' + trimmed + '%') + ')'
-          : 'name=ilike.' + encodeURIComponent('%' + trimmed + '%'));
-      const r = await _fetchWithTimeout('/api/productos?' + params + '&select=*&limit=10', { credentials: 'include' }, 3000);
-      if (r && r.ok) {
-        const j = await r.json().catch(() => ({}));
-        tenantItems = j.items || j.data || [];
-        if (tenantItems.length === 1) {
-          // 1 match — agregar directo (no modal, UX rápida)
-          addToCart(normalizeProductForCart(tenantItems[0]));
-          showToast('✓ ' + (tenantItems[0].name || tenantItems[0].nombre) + ' (catálogo del negocio)');
-          $('#barcode-input').value = ''; $('#barcode-input').focus();
-          return;
-        }
-        if (tenantItems.length > 1) {
-          // Múltiples matches → modal identificador para elegir
-          const picked = await _showSearchPickerModal({
-            query: trimmed,
-            kind: isBarcode ? 'codigo_barras' : 'nombre',
-            items: tenantItems
-          });
-          if (picked) {
-            addToCart(normalizeProductForCart(picked));
-            showToast('✓ ' + (picked.name || picked.nombre) + ' agregado');
-          }
-          $('#barcode-input').value = ''; $('#barcode-input').focus();
-          return;
-        }
-      }
-    } catch (_) {}
+    // ── Level 2 + Level 3 PARALELOS (Promise.allSettled) ─────────────────
+    // 2026-05-10 user-request: las queries L2 (tenant DB) y L3 (owner global)
+    // se hacen en PARALELO (no secuencial). El primero que responda con resultados
+    // gana. Worst case ya no es 3s+4s=7s sino max(3s,4s)=4s.
+    const tenantParams = isBarcode
+      ? 'or=(barcode.eq.' + encodeURIComponent(trimmed) + ',code.eq.' + encodeURIComponent(trimmed) + ')'
+      : (opts.isMixed
+        ? 'or=(barcode.eq.' + encodeURIComponent(trimmed) + ',code.eq.' + encodeURIComponent(trimmed) + ',name.ilike.' + encodeURIComponent('%' + trimmed + '%') + ')'
+        : 'name=ilike.' + encodeURIComponent('%' + trimmed + '%'));
+    const [tenantRes, ownerRes] = await Promise.allSettled([
+      _fetchWithTimeout('/api/productos?' + tenantParams + '&select=*&limit=10', { credentials: 'include' }, 3000)
+        .then(r => (r && r.ok) ? r.json().catch(() => ({})) : null)
+        .then(j => j ? (j.items || j.data || []) : []),
+      _fetchWithTimeout('/api/owner/products/lookup?q=' + encodeURIComponent(trimmed), { credentials: 'include' }, 4000)
+        .then(r => (r && r.ok) ? r.json().catch(() => ({})) : null)
+        .then(j => (j && j.items) ? j.items : [])
+    ]);
+    const tenantItems = (tenantRes.status === 'fulfilled' && tenantRes.value) || [];
+    const ownerItems  = (ownerRes.status === 'fulfilled' && ownerRes.value)  || [];
 
-    // ── Level 3: BD GLOBAL del sistema (productos curados / aportados por todos) ──
-    // Si encontramos algo aquí Y es barcode exacto → importar al tenant + agregar.
-    // Si es match parcial por nombre → guardamos como sugerencia para pre-llenar modal.
-    let ownerSuggestion = null;
-    try {
-      const r = await _fetchWithTimeout('/api/owner/products/lookup?q=' + encodeURIComponent(trimmed), { credentials: 'include' }, 4000);
-      if (r && r.ok) {
-        const j = await r.json().catch(() => ({}));
-        if (j.items && j.items.length) {
-          ownerSuggestion = j.items[0];
-          // Match exacto por barcode → importar y agregar
-          if (isBarcode && (ownerSuggestion.barcode === trimmed || ownerSuggestion.code === trimmed)) {
-            try { await _importProductToTenant(ownerSuggestion); } catch (_) {}
-            addToCart(normalizeProductForCart(ownerSuggestion));
-            showToast('✓ ' + (ownerSuggestion.name || 'producto') + ' (catálogo global · importado)');
-            $('#barcode-input').value = ''; $('#barcode-input').focus();
-            return;
-          }
-        }
+    // PRIORIDAD: tenant DB gana sobre owner global (más relevante para el negocio)
+    if (tenantItems.length === 1) {
+      addToCart(normalizeProductForCart(tenantItems[0]));
+      showToast('✓ ' + (tenantItems[0].name || tenantItems[0].nombre) + ' (catálogo del negocio)');
+      try { _trackRecent(tenantItems[0]); } catch (_) {}
+      try { if (window.VolvixProductSearch && window.VolvixProductSearch.upsert) window.VolvixProductSearch.upsert(tenantItems[0]); } catch (_) {}
+      try { _logSearch(trimmed, tenantItems[0], 'L2_tenant', true); } catch (_) {}
+      $('#barcode-input').value = ''; $('#barcode-input').focus();
+      return;
+    }
+    if (tenantItems.length > 1) {
+      const picked = await _showSearchPickerModal({
+        query: trimmed, kind: isBarcode ? 'codigo_barras' : 'nombre', items: tenantItems
+      });
+      if (picked) {
+        addToCart(normalizeProductForCart(picked));
+        showToast('✓ ' + (picked.name || picked.nombre) + ' agregado');
+        try { _trackRecent(picked); } catch (_) {}
       }
-    } catch (_) {}
+      $('#barcode-input').value = ''; $('#barcode-input').focus();
+      return;
+    }
+
+    // ── Level 3 fallthrough: si tenant no encontró, usar owner global ──
+    let ownerSuggestion = null;
+    if (ownerItems.length) {
+      ownerSuggestion = ownerItems[0];
+      if (isBarcode && (ownerSuggestion.barcode === trimmed || ownerSuggestion.code === trimmed)) {
+        try { await _importProductToTenant(ownerSuggestion); } catch (_) {}
+        addToCart(normalizeProductForCart(ownerSuggestion));
+        showToast('✓ ' + (ownerSuggestion.name || 'producto') + ' (catálogo global · importado)');
+        try { _trackRecent(ownerSuggestion); } catch (_) {}
+        try { if (window.VolvixProductSearch && window.VolvixProductSearch.upsert) window.VolvixProductSearch.upsert(ownerSuggestion); } catch (_) {}
+        try { _logSearch(trimmed, ownerSuggestion, 'L3_global', true); } catch (_) {}
+        $('#barcode-input').value = ''; $('#barcode-input').focus();
+        return;
+      }
+    }
 
     // ── Level 4: Internet (solo barcodes — UPCitemDB + Open Food Facts) ───
     let internetSuggestion = null;
@@ -7669,11 +7670,14 @@
           const p = saved && saved.id ? saved : Object.assign({ id: 'tmp_' + Date.now() }, data);
           addToCart(normalizeProductForCart(p));
           showToast('✓ ' + (p.name || 'producto') + ' guardado y agregado');
+          try { _logSearch(trimmed, p, ownerSuggestion ? 'L3_prefill_save' : 'L4_internet_save', true); } catch (_) {}
         }
         $('#barcode-input').focus();
         return;
       } catch (e) { console.warn('[searchProduct] prefill modal err', e); }
     }
+    // 2026-05-10: si llegamos aquí es un MISS — log para analytics
+    try { _logSearch(trimmed, null, 'miss', false); } catch (_) {}
     // 3. No existe → abrir modal "Nuevo producto" con prefill inteligente.
     //    - Si lo escrito parece código de barras → prefill barcode + code, focus en NAME
     //    - Si parece nombre (jamón, leche, etc.) → prefill name, focus en PRICE
@@ -9022,8 +9026,77 @@
         barcode: p.barcode || p.codigo_barras || p.code || ''
       }));
       if (typeof renderInv === 'function') renderInv();
+      // 2026-05-10: tras CATALOG, syncar TOP 500 a IndexedDB local (offline-first)
+      try { _syncTopProductsToIDB(items); } catch (_) {}
     } catch(e){ console.warn('[VOLVIX] loadCatalogReal:', e); }
   }
+
+  // 2026-05-10 Motor inteligencia: pre-sync de los TOP productos del tenant
+  // a IndexedDB local. Garantiza que la primera búsqueda OFFLINE encuentre todo.
+  // Se ejecuta:
+  //   1. Inmediatamente después de loadCatalogReal()
+  //   2. En boot del POS (DOMContentLoaded + 3s delay)
+  //   3. Cada 30 min en background (refresh)
+  async function _syncTopProductsToIDB(items) {
+    if (!window.VolvixProductSearch || typeof window.VolvixProductSearch.upsert !== 'function') return;
+    if (!Array.isArray(items) || !items.length) return;
+    let ok = 0, fail = 0;
+    for (const p of items) {
+      try { await window.VolvixProductSearch.upsert(p); ok++; }
+      catch (_) { fail++; }
+    }
+    console.log('[volvix-search] Pre-sync IDB: ' + ok + ' OK, ' + fail + ' fail');
+  }
+  async function _fetchTopSellersAndSync() {
+    try {
+      const r = await _fetchWithTimeout('/api/products/top?limit=500', { credentials: 'include' }, 5000);
+      if (!r || !r.ok) return;
+      const j = await r.json().catch(() => ({}));
+      const items = (j && j.items) || [];
+      if (!items.length) return;
+      // Inyectar al CATALOG memoria los que no estén
+      items.forEach(p => {
+        if (!CATALOG.find(c => (c.id || c.code) === (p.id || p.code))) {
+          CATALOG.push({
+            id: p.id, code: p.code, name: p.name, price: Number(p.price) || 0,
+            stock: Number(p.stock || 0), category: p.category || '',
+            barcode: p.barcode || p.code || ''
+          });
+        }
+      });
+      // Y syncar a IndexedDB para offline
+      await _syncTopProductsToIDB(items);
+      console.log('[volvix-search] Top sellers sync: ' + items.length + ' items');
+    } catch (e) { console.warn('[volvix-search] top sellers sync fail', e); }
+  }
+  // Boot: 3s después de DOMContentLoaded (no bloquear primer render)
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(_fetchTopSellersAndSync, 3000);
+    // Refresh cada 30 min
+    setInterval(_fetchTopSellersAndSync, 30 * 60 * 1000);
+  });
+
+  // 2026-05-10 Motor inteligencia: log fire-and-forget de búsquedas para
+  // que el server agregue stats top (por tenant + cross-device).
+  function _logSearch(query, hit, source, matched) {
+    try {
+      const tok = (typeof _vToken === 'function') ? _vToken() : '';
+      if (!tok) return;
+      // Fire and forget — no esperar respuesta
+      fetch('/api/search/log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok },
+        body: JSON.stringify({
+          query: String(query || '').slice(0, 200),
+          hit_product_id: hit ? String(hit.id || hit.code || '') : null,
+          hit_product_name: hit ? String(hit.name || hit.nombre || '') : null,
+          source: source || 'unknown',
+          matched: !!matched
+        })
+      }).catch(() => {});
+    } catch (_) {}
+  }
+  window._logSearch = _logSearch;
   async function saveProduct(data, productId){
     const url = productId ? '/api/products/' + encodeURIComponent(productId) : '/api/products';
     // Use PATCH for update (per spec), POST for create

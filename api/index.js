@@ -37244,6 +37244,87 @@ if (process.env.NODE_ENV === 'test') {
   });
 
   // ─────────────────────────────────────────────────────────────────────
+  // 2026-05-10 Motor inteligencia: top sellers + search log
+  // GET  /api/products/top?limit=500   → productos más vendidos del tenant
+  //                                      para pre-sync IndexedDB al boot
+  // POST /api/search/log {query,hit_id?,hit_name?,source,matched}
+  //                                    → graba búsqueda para analytics
+  // GET  /api/search/top?limit=20      → top queries del tenant (boost UI)
+  // ─────────────────────────────────────────────────────────────────────
+  handlers['GET /api/products/top'] = requireAuth(async function (req, res) {
+    try {
+      const url = new URL(req.url, 'http://x');
+      const limit = Math.min(Math.max(parseInt(url.searchParams.get('limit') || '500', 10), 1), 1000);
+      const tnt = (req.user && (req.user.tenant_id || req.user.tnt)) || '';
+      // Productos del tenant ordenados por updated_at DESC (proxy de "más activos")
+      // En futuro joinar con sale_items.qty SUM para "más vendidos" real.
+      const enc = encodeURIComponent(tnt);
+      const items = await supabaseRequest('GET',
+        `/pos_products?tenant_id=eq.${enc}&select=id,name,code,barcode,price,stock,category&order=updated_at.desc&limit=${limit}`
+      ).catch(() => []);
+      // Si falla pos_products (tabla por tenant) intentar 'products' general
+      let result = Array.isArray(items) ? items : [];
+      if (!result.length) {
+        try {
+          const items2 = await supabaseRequest('GET',
+            `/products?tenant_id=eq.${enc}&select=id,name,code,barcode,price,stock,category&order=updated_at.desc&limit=${limit}`
+          ).catch(() => []);
+          if (Array.isArray(items2)) result = items2;
+        } catch (_) {}
+      }
+      sendJSON(res, { ok: true, items: result, count: result.length });
+    } catch (err) { sendError(res, err); }
+  });
+
+  handlers['POST /api/search/log'] = requireAuth(async function (req, res) {
+    try {
+      const body = await readBody(req).catch(() => ({}));
+      if (checkBodyError && checkBodyError(req, res)) return;
+      const tnt = (req.user && (req.user.tenant_id || req.user.tnt)) || '';
+      if (!tnt) return sendJSON(res, { ok: true, skipped: 'no_tenant' });
+      const userId = req.user && req.user.id;
+      // Fire-and-forget — no esperar resultado en frontend
+      const row = {
+        tenant_id: tnt,
+        user_id: userId || null,
+        query: String(body.query || '').slice(0, 200),
+        hit_product_id: body.hit_product_id ? String(body.hit_product_id).slice(0, 100) : null,
+        hit_product_name: body.hit_product_name ? String(body.hit_product_name).slice(0, 200) : null,
+        source: String(body.source || 'unknown').slice(0, 50),
+        matched: !!body.matched,
+      };
+      supabaseRequest('POST', '/pos_search_log', row).catch(() => {});
+      sendJSON(res, { ok: true });
+    } catch (err) { sendError(res, err); }
+  });
+
+  handlers['GET /api/search/top'] = requireAuth(async function (req, res) {
+    try {
+      const url = new URL(req.url, 'http://x');
+      const limit = Math.min(Math.max(parseInt(url.searchParams.get('limit') || '20', 10), 1), 100);
+      const tnt = (req.user && (req.user.tenant_id || req.user.tnt)) || '';
+      if (!tnt) return sendJSON(res, { ok: true, items: [] });
+      const enc = encodeURIComponent(tnt);
+      // Top queries últimos 30 días (PostgREST no soporta GROUP BY directo;
+      // usamos rpc/raw query si existe, fallback a count en frontend desde rows recientes)
+      const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      const rows = await supabaseRequest('GET',
+        `/pos_search_log?tenant_id=eq.${enc}&matched=eq.true&created_at=gte.${encodeURIComponent(since)}&select=query,hit_product_id,hit_product_name,source&order=created_at.desc&limit=2000`
+      ).catch(() => []);
+      // Count en memoria (limit 2000 = OK)
+      const counts = {};
+      (Array.isArray(rows) ? rows : []).forEach(r => {
+        if (!r.hit_product_id) return;
+        const k = r.hit_product_id;
+        if (!counts[k]) counts[k] = { product_id: r.hit_product_id, name: r.hit_product_name, count: 0, last_query: r.query };
+        counts[k].count++;
+      });
+      const top = Object.values(counts).sort((a, b) => b.count - a.count).slice(0, limit);
+      sendJSON(res, { ok: true, items: top, total_logged: rows.length });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // ─────────────────────────────────────────────────────────────────────
   // PWA cliente: pedidos/citas
   // GET  /api/app/orders?t=<tenant>&email=<email>  → historial del cliente
   // POST /api/app/orders {tenant_slug,email,kind,items,notes,total} → crear
