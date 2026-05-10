@@ -665,7 +665,25 @@
     color: var(--text-3);
     padding: 8px 6px 6px;
   }
-  .cat-list { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
+  /* 2026-05-10 user-fix: Categorías capped a ~40% del alto del sidebar
+     con scroll interno, así Quick-pick siempre queda visible debajo.
+     Antes la lista crecía vertical sin límite y empujaba Quick-pick
+     fuera de la vista. */
+  .cat-list {
+    display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px;
+    max-height: 40vh; overflow-y: auto;
+    padding-right: 2px;
+    scrollbar-width: thin;
+  }
+  .cat-list::-webkit-scrollbar { width: 5px; }
+  .cat-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  /* En pantallas chicas (laptop 13"), limitar aún más para que QP gane espacio */
+  @media (max-height: 800px) {
+    .cat-list { max-height: 32vh; }
+  }
+  @media (max-height: 650px) {
+    .cat-list { max-height: 25vh; }
+  }
   .cat-item {
     display: flex; align-items: center; gap: 8px;
     padding: 9px 12px;
@@ -693,7 +711,16 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
+    /* 2026-05-10 user-fix: Quick-pick conserva su propio scroll y siempre
+       queda visible aunque haya muchas categorías arriba. */
+    overflow-y: auto;
+    flex: 1 1 auto;
+    min-height: 200px;
+    padding-right: 2px;
+    scrollbar-width: thin;
   }
+  .qp-grid::-webkit-scrollbar { width: 5px; }
+  .qp-grid::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
   .qp-card {
     display: flex;
     flex-direction: column;
