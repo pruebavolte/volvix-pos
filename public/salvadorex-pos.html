@@ -20173,6 +20173,12 @@ window.addEventListener('volvix:version-loaded', function(e){
     'pos.quickpick_panel':'pos',
     'pos.recargas_btn':'recargas','pos.servicios_btn':'servicios',
     'ui.saas_btn':'config',
+    // 2026-05-09 fix(APP): los 9 sub-componentes pertenecen al módulo 'aplicacion'
+    'app.bottom_inicio':'aplicacion','app.bottom_historial':'aplicacion',
+    'app.bottom_citas':'aplicacion','app.bottom_carrito':'aplicacion',
+    'app.section_main_list':'aplicacion','app.section_news':'aplicacion',
+    'app.section_flyer':'aplicacion','app.section_contact':'aplicacion',
+    'app.section_profile':'aplicacion',
   };
 
   // "Considera esto" — warnings curados por módulo
@@ -20222,6 +20228,8 @@ window.addEventListener('volvix:version-loaded', function(e){
     promociones:'🎁 Promociones', departamentos:'🏢 Departamentos',
     sugeridas:'🧠 Compras sugeridas', actualizador:'💱 Actualizador masivo',
     usuarios:'👤 Gestión usuarios', config:'⚙️ Configuración',
+    // 2026-05-09 fix(APP): módulo customer-facing — PWA del cliente final
+    aplicacion:'📱 Aplicación PWA Cliente',
   };
   const FEAT_LABELS_GLOBAL = {
     'pos.cobrar':'💵 F12 — Cobrar','pos.descuento':'% Descuento',
@@ -20234,6 +20242,12 @@ window.addEventListener('volvix:version-loaded', function(e){
     'pos.recargas_btn':'📱 Btn Recargas','pos.servicios_btn':'💡 Btn Servicios',
     'pos.ins_varios':'INS — Varios','pos.art_comun':'CTRL+P Artículo común',
     'pos.quickpick_panel':'Panel QuickPick','ui.saas_btn':'👑 Btn SaaS Admin',
+    // 2026-05-09 fix(APP): sub-componentes del módulo Aplicación PWA
+    'app.bottom_inicio':'🏠 Tab Inicio','app.bottom_historial':'🕐 Tab Historial',
+    'app.bottom_citas':'📅 Tab Citas','app.bottom_carrito':'🛒 Tab Carrito/Pedir',
+    'app.section_main_list':'📋 Lista principal','app.section_news':'📰 Noticias / Banners',
+    'app.section_flyer':'🎴 Flyer destacado','app.section_contact':'📞 Contacto y redes',
+    'app.section_profile':'👤 Expediente del cliente',
   };
 
   // 2026-05-09: allowlist para validar `featKey` que el usuario ingresa por
@@ -21372,6 +21386,118 @@ window.addEventListener('volvix:version-loaded', function(e){
       const mod = v14.selectedGiroMod;
       const modLbl = MOD_LABELS_LOCAL[mod] || mod;
       const mm = modLbl.match(/^(\S+)\s+(.+)$/) || [null, '📦', modLbl];
+
+      // 2026-05-09 fix(APP): si el módulo es 'aplicacion' renderizar mockup PWA
+      // mobile-first usando terminología del giro + datos del tenant.
+      // Reemplaza el listado plano de botones con vista interactiva de la app.
+      if (mod === 'aplicacion') {
+        const giroBd = (typeof getGiroFromCatalog === 'function') ? getGiroFromCatalog(slug) : null;
+        const giroName = (giroBd && giroBd.name) || slug;
+        const terms = (giroBd && giroBd.terms) || {};
+        const buttonsBd = (giroBd && giroBd.buttons) || {};
+        const buttonsState = (giroBd && giroBd.buttonsState) || {};
+        const buttonRenames = (giroBd && giroBd.buttonNameOverrides) || {};
+        // Helper: estado de un sub-componente (default: enabled si el módulo está)
+        const compState = (key) => buttonsState[key] || (buttonsBd[key] !== false ? 'enabled' : 'hidden');
+        const compName = (key, def) => buttonRenames[key] || def;
+        const isOn = (key) => compState(key) === 'enabled';
+        const isLocked = (key) => compState(key) === 'locked';
+        // Tenant ejemplo (primero que usa este giro, o placeholder)
+        const tenantExample = (window.PERM && window.PERM._tenantsList || []).find(t => t.business_type === slug);
+        const tenantName = (tenantExample && tenantExample.name) || (giroName.replace(/^\S+\s+/, '') + ' Demo');
+        const tenantInitials = tenantName.split(/\s+/).slice(0,2).map(w => w[0]).join('').toUpperCase();
+        // Terminología principal: para vet=mascotas, dental=pacientes, barberia=clientes, etc
+        const mainSingular = (terms.cliente && (terms.cliente.singular || terms.cliente)) || 'Cliente';
+        const mainPlural = (terms.cliente && (terms.cliente.plural || terms.cliente)) || 'Clientes';
+        const itemsExamples = {
+          veterinaria: [{name:'Firulais', sub:'Especie · Raza', icon:'🐶'}],
+          'clinica-dental': [{name:'María González', sub:'Última visita: 2024-12', icon:'🦷'}],
+          barberia: [{name:'Carlos López', sub:'Próximo corte: 5 abr', icon:'✂️'}],
+          'salon-belleza': [{name:'Lucía Martínez', sub:'Servicio favorito: Tinte', icon:'💇'}],
+          spa: [{name:'Ana Pérez', sub:'Membership: Gold', icon:'🧖'}],
+          gimnasio: [{name:'Plan PRO', sub:'Vence: 30 abr · 12 visitas', icon:'💪'}],
+          farmacia: [{name:'Receta #4521', sub:'Ibuprofeno 600mg · 2 cajas', icon:'💊'}],
+          restaurante: [{name:'Mesa para 4', sub:'Sábado 8:00 PM', icon:'🍽'}],
+        };
+        const items = itemsExamples[slug] || [{name:'Ejemplo 1', sub:'Detalle del item', icon:'📝'}];
+        // Render del frame teléfono
+        const headerHtml = isOn('app.section_profile')
+          ? `<div style="background:#10b981;padding:14px 16px;color:#fff;display:flex;align-items:center;gap:10px;${isLocked('app.section_profile')?'opacity:.4;':''}">
+              <div style="width:32px;height:32px;background:rgba(255,255,255,.25);border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">${tenantInitials.slice(0,2)}</div>
+              <div><div style="font-weight:700;font-size:13px;">${escapeText(tenantName)}</div><div style="font-size:11px;opacity:.9;">Hola 👋</div></div>
+            </div>` : '';
+        const mainListHtml = isOn('app.section_main_list')
+          ? `<div style="padding:14px 16px;${isLocked('app.section_main_list')?'opacity:.4;':''}">
+              <div style="font-family:Georgia,serif;font-size:18px;font-weight:600;letter-spacing:-.02em;">${escapeText(compName('app.section_main_list','Tus ' + mainPlural.toLowerCase()))}</div>
+              <div style="font-size:11px;color:#92400e;margin-top:2px;">Toca para ver el expediente</div>
+              ${items.map(it => `<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:11px 13px;margin-top:10px;display:flex;align-items:center;gap:10px;">
+                <div style="width:34px;height:34px;background:#d1fae5;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;">${it.icon}</div>
+                <div style="flex:1;"><div style="font-weight:600;font-size:13px;">${escapeText(it.name)}</div><div style="font-size:11px;color:#64748b;">${escapeText(it.sub)}</div></div>
+                <div style="color:#9ca3af;">›</div>
+              </div>`).join('')}
+              <div style="margin-top:10px;border:1.5px dashed #d1d5db;border-radius:10px;padding:11px;text-align:center;font-size:12px;color:#64748b;">+ Agregar ${escapeText(mainSingular.toLowerCase())}</div>
+            </div>` : '';
+        const newsHtml = isOn('app.section_news')
+          ? `<div style="margin:0 16px 14px;background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:10px;padding:11px;${isLocked('app.section_news')?'opacity:.4;':''}">
+              <div style="font-size:11px;font-weight:700;color:#92400e;letter-spacing:.04em;">📰 NOTICIA</div>
+              <div style="font-size:12px;margin-top:4px;color:#78350f;">${escapeText(compName('app.section_news','Promo del mes — 20% en servicios premium'))}</div>
+            </div>` : '';
+        const flyerHtml = isOn('app.section_flyer')
+          ? `<div style="margin:0 16px 14px;background:#1f2937;border-radius:10px;padding:14px;color:#fff;text-align:center;${isLocked('app.section_flyer')?'opacity:.4;':''}">
+              <div style="font-size:9px;letter-spacing:.06em;opacity:.7;">🎴 FLYER</div>
+              <div style="font-weight:700;margin-top:5px;font-size:13px;">${escapeText(tenantName.toUpperCase())}</div>
+              <div style="font-size:10px;opacity:.85;margin-top:3px;">Evento especial — más info dentro</div>
+            </div>` : '';
+        const contactHtml = isOn('app.section_contact')
+          ? `<div style="margin:0 16px 14px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:11px;display:flex;justify-content:space-around;font-size:18px;${isLocked('app.section_contact')?'opacity:.4;':''}">
+              <span title="Teléfono">📞</span><span title="WhatsApp">💬</span><span title="Instagram">📸</span><span title="Facebook">👍</span>
+            </div>` : '';
+        // Bottom nav
+        const tabs = [
+          { key:'app.bottom_inicio',    icon:'🏠', def:'Inicio' },
+          { key:'app.bottom_historial', icon:'🕐', def:'Historial' },
+          { key:'app.bottom_citas',     icon:'📅', def:'Citas' },
+          { key:'app.bottom_carrito',   icon:'🛒', def:'Pedir' },
+        ].filter(t => isOn(t.key) || isLocked(t.key));
+        const tabsHtml = tabs.length ? `<div style="position:absolute;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e5e7eb;display:flex;justify-content:space-around;padding:9px 0 14px;">
+          ${tabs.map((t,i) => `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;${isLocked(t.key)?'opacity:.4;cursor:not-allowed;filter:grayscale(.5);':''}${i===0?'background:#d1fae5;color:#065f46;border-radius:18px;margin:0 8px;padding:4px 0;':''}">
+            <div style="font-size:18px;">${t.icon}</div><div style="font-size:9.5px;font-weight:600;${i===0?'color:#065f46;':'color:#64748b;'}">${escapeText(compName(t.key, t.def))}</div>
+          </div>`).join('')}
+        </div>` : '';
+
+        const phoneFrame = `<div style="position:relative;width:280px;height:560px;background:#000;border-radius:34px;padding:8px;box-shadow:0 12px 40px rgba(0,0,0,.25);margin:0 auto;">
+          <div style="position:absolute;top:18px;left:50%;transform:translateX(-50%);width:90px;height:18px;background:#000;border-radius:14px;z-index:2;"></div>
+          <div style="position:relative;width:100%;height:100%;background:#f5f3ee;border-radius:28px;overflow:hidden;font-family:-apple-system,sans-serif;">
+            <div style="background:#10b981;height:30px;color:#fff;font-size:10px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;">
+              <span style="font-weight:600;">9:41</span><span>📶 📵 🔋</span>
+            </div>
+            ${headerHtml}
+            ${mainListHtml}
+            ${newsHtml}
+            ${flyerHtml}
+            ${contactHtml}
+            ${tabsHtml}
+          </div>
+        </div>`;
+
+        const drillHtml = ''
+          + '<div>'
+          +   '<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">'
+          +     '<button data-giro-back-to-preview style="background:transparent;border:1px solid var(--pv-border);padding:5px 12px;border-radius:5px;cursor:pointer;font-size:11.5px;font-family:var(--pv-font-body);">← Volver al preview</button>'
+          +     '<h2 style="margin:0;font-family:var(--pv-font-display);font-size:18px;font-weight:500;letter-spacing:-0.01em;">📱 Vista previa de la <em style="color:var(--pv-accent);">App Cliente</em></h2>'
+          +   '</div>'
+          +   '<p class="permv14-mock-sub" style="margin-bottom:14px;">Así verá el cliente final la PWA cuando el dueño le pase el QR. Los componentes que <strong>desactivas/bloqueas</strong> en la columna de Comp. se reflejan acá.</p>'
+          +   phoneFrame
+          + '</div>';
+
+        if (desktopEl) desktopEl.innerHTML = drillHtml;
+        if (mobileEl) mobileEl.innerHTML = '<div class="permv14-empty-row" style="padding:14px;">Vista PWA solo en desktop preview.</div>';
+
+        const backBtn = desktopEl && desktopEl.querySelector('[data-giro-back-to-preview]');
+        if (backBtn) backBtn.addEventListener('click', () => { v14.selectedGiroMod = null; renderGiroDetail(); renderGiroPreview(); });
+        return;
+      }
+      // Resto: fallback al renderer existente de drill-down genérico
       const childButtons = Object.keys(FEAT_LABELS_GIRO).filter(bk => FEAT_PARENT_MOD[bk] === mod);
       const overrides = v14.giroFeatureOverrides[slug] || {};
       const moduleEnabled = !!profile[mod];
