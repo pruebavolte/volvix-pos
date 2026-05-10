@@ -586,7 +586,8 @@
       .volvix-imp-btn{padding:9px 16px;border:1px solid #d1d5db;background:#fff;border-radius:8px;font-weight:600;cursor:pointer;font-size:13px;color:#0f172a}
       .volvix-imp-btn.primary{background:#10b981;color:#fff;border-color:#059669}
       .volvix-imp-btn:disabled{opacity:.5;cursor:not-allowed}
-      .volvix-imp-2cards{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+      .volvix-imp-2cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+      @media(max-width:880px){.volvix-imp-2cards{grid-template-columns:1fr 1fr}}
       @media(max-width:640px){.volvix-imp-2cards{grid-template-columns:1fr}}
       .volvix-imp-card-opt{border:2px dashed #cbd5e1;border-radius:12px;padding:32px 22px;text-align:center;cursor:pointer;transition:all .15s;background:#fff}
       .volvix-imp-card-opt:hover{border-color:#10b981;background:#f0fdf4;transform:translateY(-2px)}
@@ -696,6 +697,12 @@
           <div class="volvix-imp-card-d">Apunta tu cámara al menú o lista de precios</div>
           <div class="volvix-imp-formats">OCR español + inglés · funciona offline</div>
         </div>
+        <div class="volvix-imp-card-opt" id="volvix-opt-template" tabindex="0">
+          <div class="volvix-imp-card-ico">✨</div>
+          <div class="volvix-imp-card-t">No lo tengo</div>
+          <div class="volvix-imp-card-d">Empieza con 10 productos base de tu giro</div>
+          <div class="volvix-imp-formats">Edita después · ahorra capturar desde cero</div>
+        </div>
       </div>
       <div id="volvix-imp-msg"></div>
     `;
@@ -703,6 +710,7 @@
     const fileCard = document.getElementById('volvix-opt-file');
     const fileInput = document.getElementById('volvix-imp-file');
     const camCard = document.getElementById('volvix-opt-cam');
+    const tplCard = document.getElementById('volvix-opt-template');
     fileCard.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', () => {
       const f = fileInput.files && fileInput.files[0];
@@ -718,6 +726,88 @@
       if (f) handleFile(f);
     });
     camCard.addEventListener('click', renderCamera);
+    tplCard.addEventListener('click', _useBaseTemplate);
+  }
+
+  // 2026-05-10 user-request: si el cliente no tiene catálogo, ofrecer 10
+  // productos base del giro (abarrotes, restaurante, etc.) para arrancar.
+  // Detecta giro desde JWT/config actual; fallback a 'general'.
+  function _useBaseTemplate() {
+    const TEMPLATES = {
+      abarrotes: [
+        ['Bebidas', 'Coca Cola 600ml', 12, 18, 50],
+        ['Bebidas', 'Pepsi 600ml', 11, 17, 30],
+        ['Bebidas', 'Agua Ciel 1L', 8, 14, 40],
+        ['Botanas', 'Sabritas Original', 8, 15, 40],
+        ['Botanas', 'Doritos Nacho', 9, 16, 35],
+        ['Panaderia', 'Pan Bimbo Grande', 28, 42, 12],
+        ['Lacteos', 'Leche Lala 1L', 18, 28, 25],
+        ['Abarrotes', 'Huevo Docena', 32, 48, 20],
+        ['Abarrotes', 'Arroz Verde Valle 1kg', 22, 32, 18],
+        ['Abarrotes', 'Frijol Bayo 1kg', 28, 40, 15],
+      ],
+      restaurante: [
+        ['Tacos', 'Tacos al Pastor', 12, 25, 100],
+        ['Tacos', 'Tacos de Suadero', 11, 25, 80],
+        ['Antojitos', 'Quesadilla de Queso', 15, 30, 60],
+        ['Antojitos', 'Sope con Frijol', 18, 35, 40],
+        ['Hamburguesas', 'Hamburguesa Sencilla', 40, 80, 30],
+        ['Hamburguesas', 'Hamburguesa Doble', 55, 110, 25],
+        ['Bebidas', 'Refresco 600ml', 12, 25, 80],
+        ['Bebidas', 'Agua de Horchata', 8, 20, 60],
+        ['Bebidas', 'Café Americano', 10, 25, 50],
+        ['Postres', 'Pastel de Chocolate', 30, 60, 15],
+      ],
+      farmacia: [
+        ['Analgesicos', 'Paracetamol 500mg 10pzs', 18, 35, 100],
+        ['Analgesicos', 'Ibuprofeno 400mg 10pzs', 22, 42, 80],
+        ['Antigripales', 'Tafil C 24pzs', 28, 55, 60],
+        ['Vitaminas', 'Vitamina C 30 tabs', 35, 70, 40],
+        ['Cuidado personal', 'Shampoo H&S 400ml', 60, 120, 30],
+        ['Cuidado personal', 'Pasta Colgate 100ml', 22, 45, 50],
+        ['Higiene', 'Papel Higienico 4 rollos', 38, 72, 80],
+        ['Higiene', 'Toallas Femeninas 10pzs', 28, 55, 60],
+        ['Bebes', 'Pañales Huggies M 30pzs', 220, 380, 20],
+        ['Bebes', 'Toallitas Húmedas 80pzs', 38, 72, 40],
+      ],
+      papeleria: [
+        ['Cuadernos', 'Cuaderno Profesional 100h', 28, 55, 100],
+        ['Cuadernos', 'Cuaderno Italiano 100h', 24, 48, 80],
+        ['Escritura', 'Lápiz Mirado #2', 4, 8, 200],
+        ['Escritura', 'Bolígrafo Bic Negro', 5, 10, 150],
+        ['Escritura', 'Marcador Sharpie', 22, 45, 60],
+        ['Oficina', 'Hojas Bond Carta 500hjs', 90, 165, 40],
+        ['Oficina', 'Folder Manila Carta', 4, 8, 200],
+        ['Útiles', 'Tijeras Escolares', 15, 30, 50],
+        ['Útiles', 'Pegamento Resistol Blanco', 12, 25, 60],
+        ['Útiles', 'Calculadora Casio Básica', 75, 150, 20],
+      ],
+      general: [
+        ['General', 'Producto 1', 10, 20, 10],
+        ['General', 'Producto 2', 12, 24, 10],
+        ['General', 'Producto 3', 15, 30, 10],
+        ['General', 'Producto 4', 18, 36, 10],
+        ['General', 'Producto 5', 20, 40, 10],
+        ['General', 'Producto 6', 25, 50, 10],
+        ['General', 'Producto 7', 30, 60, 10],
+        ['General', 'Producto 8', 35, 70, 10],
+        ['General', 'Producto 9', 40, 80, 10],
+        ['General', 'Producto 10', 50, 100, 10],
+      ],
+    };
+    // Detectar giro desde window.__volvixGiroData o JWT
+    let giro = 'general';
+    try {
+      if (global.__volvixGiroData && global.__volvixGiroData.slug) giro = global.__volvixGiroData.slug;
+    } catch (_) {}
+    const picked = TEMPLATES[giro] || TEMPLATES.general;
+    // Convertir a rows formato wizard: [['nombre','precio'], ...]
+    // Pero rowsToProducts espera headers + data con name/code/price/cost/stock/category
+    const rows = [['categoria', 'nombre', 'costo', 'precio', 'inventario']];
+    picked.forEach(p => rows.push(p.map(String)));
+    const products = rowsToProducts(rows);
+    renderEditTable(products);
+    if (typeof _showMsg === 'function') _showMsg('✨ Plantilla de ' + giro + ' (' + products.length + ' productos). Edita los que quieras y guarda.', 'ok');
   }
 
   // STEP 2: parsing

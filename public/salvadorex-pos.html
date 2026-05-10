@@ -4275,6 +4275,33 @@
             <p style="margin:14px 0 0;color:var(--text-3);font-size:11px;">El cambio se aplica de inmediato. Para alternar también hay un botón en el menubar superior.</p>
           </div>
 
+          <!-- 2026-05-10 user-request: Bloqueo por inactividad — DESACTIVADO por default -->
+          <div id="cfg-bloqueo" class="card card-pad">
+            <h3 style="margin: 0 0 6px; font-size: 14px;">🔒 Bloquear equipo por inactividad</h3>
+            <p style="margin:0 0 14px;color:var(--text-2);font-size:11.5px;">Después de N minutos sin actividad, el equipo se bloquea y pide PIN para reactivar. Útil cuando dejas el POS desatendido. <strong>Desactivado por default.</strong></p>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px;background:var(--bg-2,#f8fafc);border-radius:8px;margin-bottom:12px;">
+              <input type="checkbox" id="cfg-bloqueo-enabled" style="width:18px;height:18px;cursor:pointer;">
+              <div>
+                <div style="font-weight:600;font-size:13px;">Activar bloqueo por inactividad</div>
+                <div style="color:var(--text-3,#94a3b8);font-size:11px;">Cuando esté activado, el equipo pedirá PIN tras inactividad.</div>
+              </div>
+            </label>
+            <div id="cfg-bloqueo-config" style="display:none;padding:12px;background:var(--bg-2,#f8fafc);border-radius:8px;border:1px solid var(--border,#e5e7eb);">
+              <div style="display:flex;gap:12px;align-items:end;flex-wrap:wrap;">
+                <label style="flex:1;min-width:140px;">
+                  <div style="font-size:11px;color:var(--text-2);margin-bottom:4px;">PIN de desbloqueo (4–8 dígitos)</div>
+                  <input type="password" id="cfg-bloqueo-pin" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="••••" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:14px;letter-spacing:4px;">
+                </label>
+                <label style="flex:1;min-width:140px;">
+                  <div style="font-size:11px;color:var(--text-2);margin-bottom:4px;">Minutos antes de bloquear</div>
+                  <input type="number" id="cfg-bloqueo-min" min="1" max="120" value="15" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:14px;">
+                </label>
+                <button class="btn primary" id="cfg-bloqueo-save" style="padding:9px 18px;">💾 Guardar</button>
+              </div>
+              <p style="margin:10px 0 0;color:var(--text-3);font-size:11px;">El PIN se guarda solo en este equipo (localStorage). Cambios surten efecto al recargar la página.</p>
+            </div>
+          </div>
+
           <div id="cfg-sync" class="card card-pad hidden">
             <h3 style="margin: 0 0 14px; font-size: 14px;">Sincronización offline</h3>
             <div class="summary-item" style="justify-content: space-between; width: 100%; padding: 6px 0;"><span style="color: var(--text-2);">Estado</span><span class="chip ok"><span class="dot"></span>Sincronizado</span></div>
@@ -8189,12 +8216,61 @@
     }
   }
   function __r8bStartInactivityTracker() {
+    // 2026-05-10 user-request: bloqueo por inactividad DESACTIVADO por default
+    // (impedía trabajar). Se controla via Config → Bloquear equipo.
+    // localStorage: volvix_inactivity_lock_enabled = '1' para activar.
+    try {
+      if (localStorage.getItem('volvix_inactivity_lock_enabled') !== '1') {
+        console.log('[volvix] inactivity lock OFF (Config → Bloquear equipo)');
+        return;
+      }
+      // Override timeout custom del usuario si existe
+      var customMin = parseInt(localStorage.getItem('volvix_inactivity_lock_min'), 10);
+      if (Number.isFinite(customMin) && customMin > 0) R8B.sessionTimeoutMin = customMin;
+    } catch (_) { return; }
     ['mousemove','click','keydown','scroll','touchstart'].forEach(function (ev) {
       document.addEventListener(ev, __r8bMarkActivity, { passive: true });
     });
     if (R8B.inactivityTimer) clearInterval(R8B.inactivityTimer);
     R8B.inactivityTimer = setInterval(__r8bCheckInactivity, 15000);
   }
+  // 2026-05-10 wiring del UI Config → Bloquear equipo
+  document.addEventListener('DOMContentLoaded', function () {
+    var chk = document.getElementById('cfg-bloqueo-enabled');
+    var box = document.getElementById('cfg-bloqueo-config');
+    var pin = document.getElementById('cfg-bloqueo-pin');
+    var min = document.getElementById('cfg-bloqueo-min');
+    var save = document.getElementById('cfg-bloqueo-save');
+    if (!chk || !save) return;
+    try {
+      chk.checked = localStorage.getItem('volvix_inactivity_lock_enabled') === '1';
+      if (box) box.style.display = chk.checked ? 'block' : 'none';
+      var savedMin = localStorage.getItem('volvix_inactivity_lock_min');
+      if (savedMin && min) min.value = savedMin;
+    } catch (_) {}
+    chk.addEventListener('change', function () {
+      if (box) box.style.display = chk.checked ? 'block' : 'none';
+    });
+    save.addEventListener('click', function () {
+      try {
+        var pinVal = (pin && pin.value || '').trim();
+        var minVal = parseInt(min && min.value, 10) || 15;
+        if (chk.checked && (!pinVal || pinVal.length < 4)) {
+          alert('El PIN debe tener al menos 4 dígitos para activar el bloqueo.');
+          return;
+        }
+        localStorage.setItem('volvix_inactivity_lock_enabled', chk.checked ? '1' : '0');
+        if (chk.checked) {
+          localStorage.setItem('volvix_inactivity_lock_pin', pinVal);
+          localStorage.setItem('volvix_inactivity_lock_min', String(minVal));
+        }
+        var msg = chk.checked
+          ? '✅ Bloqueo activado · PIN guardado · timeout ' + minVal + ' min · recarga la página para aplicar'
+          : '✅ Bloqueo desactivado · recarga la página para aplicar';
+        if (typeof showToast === 'function') showToast(msg); else alert(msg);
+      } catch (e) { alert('Error guardando: ' + e.message); }
+    });
+  });
   async function __r8bLoadSessionConfig() {
     try {
       var r = await __r8bAuthFetch('/api/auth/session-config', { method: 'GET' });
