@@ -182,14 +182,33 @@
   }
 
   // TXT con líneas estilo "Producto $precio"
+  // 2026-05-10 fix #6: parser robusto para OCR de menús reales:
+  //  · Acepta currencies €/$/¢/MXN/USD/MX$ antes o después del precio
+  //  · Tolera separadores OCR (...., ___, ----, |) entre nombre y precio
+  //  · Exige nombre con palabra inicial de 3+ letras (rechaza "y orégano…")
+  //  · Rechaza descripciones largas con muchas comas (no son productos)
+  //  · Filtra precios fuera de rango razonable (0.50 – 99,999)
+  //  · Caso especial "Producto ........... $25" (líneas-puntos típicas de menú)
   function parseTXTHeuristic(text) {
     const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
     const rows = [['nombre', 'precio']];
-    const re = /^(.+?)\s+\$?\s*([0-9]+(?:[.,][0-9]{1,3})?)\s*$/;
+    // Anchored: nombre inicia con 3+ letras (no símbolos / no dígitos),
+    // separador opcional, currency opcional, precio, currency opcional, fin
+    const re = /^([A-Za-zÁÉÍÓÚÜÑáéíóúüñÄÖÜßäöüçÇ][\wÁÉÍÓÚÜÑáéíóúüñÄÖÜßäöüçÇ\s,'.&\/()\-]{2,80}?)[\s\.\-_|]+(?:[€$¢]|MXN|USD|MX\$)?\s*([0-9]{1,5}(?:[.,][0-9]{1,2})?)\s*(?:[€$¢]|MXN|USD|MX\$|pesos|dolares|d[oó]lares)?\s*$/i;
     let matched = 0;
     lines.forEach(l => {
+      if (l.length < 5 || l.length > 200) return;
       const m = l.match(re);
-      if (m) { rows.push([m[1].trim(), m[2].replace(',', '.')]); matched++; }
+      if (!m) return;
+      let name = m[1].trim().replace(/[\.\-_|·•:]+$/, '').trim();
+      // Nombre debe tener una palabra inicial de 3+ letras Unicode
+      if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñÄÖÜßäöüçÇ]{3,}/.test(name)) return;
+      // Rechazar descripciones largas con muchas comas (no productos)
+      if (name.length > 50 && (name.match(/,/g) || []).length >= 3) return;
+      const price = parseFloat(m[2].replace(',', '.'));
+      if (!isFinite(price) || price < 0.5 || price > 99999) return;
+      rows.push([name, String(price)]);
+      matched++;
     });
     return matched > 0 ? rows : [];
   }
