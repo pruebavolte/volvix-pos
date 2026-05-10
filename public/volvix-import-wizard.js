@@ -868,8 +868,11 @@
 
   // 2026-05-10 user-request: si el cliente no tiene catálogo, ofrecer 10
   // productos base del giro (abarrotes, restaurante, etc.) para arrancar.
-  // Detecta giro desde JWT/config actual; fallback a 'general'.
-  function _useBaseTemplate() {
+  // Detecta giro vía 3 fuentes (en orden):
+  //   1. window.__volvixGiroData.slug (set por applyModuleRenames al boot)
+  //   2. /api/app/config?t=<tenant> giro.slug (fetch on-demand si no existe)
+  //   3. fallback 'general'
+  async function _useBaseTemplate() {
     const TEMPLATES = {
       abarrotes: [
         ['Bebidas', 'Coca Cola 600ml', 12, 18, 50],
@@ -1016,10 +1019,31 @@
         ['General', 'Producto 10', 50, 100, 10],
       ],
     };
-    // Detectar giro desde window.__volvixGiroData o JWT
+    // Detectar giro: prioridad cache → JWT tenant → fetch config endpoint
     let giro = 'general';
     try {
-      if (global.__volvixGiroData && global.__volvixGiroData.slug) giro = global.__volvixGiroData.slug;
+      if (global.__volvixGiroData && global.__volvixGiroData.slug) {
+        giro = global.__volvixGiroData.slug;
+      } else {
+        // Fetch on-demand desde /api/app/config con tenant_id del JWT
+        const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+        if (tok) {
+          try {
+            const payload = JSON.parse(atob(tok.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+            const tnt = payload && (payload.tenant_id || payload.tnt);
+            if (tnt) {
+              const r = await fetch('/api/app/config?t=' + encodeURIComponent(tnt));
+              if (r.ok) {
+                const j = await r.json();
+                if (j && j.giro && j.giro.slug) {
+                  giro = j.giro.slug;
+                  global.__volvixGiroData = j.giro; // cachear para próxima vez
+                }
+              }
+            }
+          } catch (_) {}
+        }
+      }
     } catch (_) {}
     const picked = TEMPLATES[giro] || TEMPLATES.general;
     // Convertir a rows formato wizard: [['nombre','precio'], ...]
