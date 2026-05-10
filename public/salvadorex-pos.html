@@ -7378,16 +7378,42 @@
   }
   window._showSearchPickerModal = _showSearchPickerModal;
 
+  // 2026-05-10 user-request: helper de fetch con TIMEOUT para evitar que el botón
+  // "Buscando..." se cuelgue indefinidamente. Si el endpoint tarda más de N ms,
+  // aborta y devuelve null para que el flujo continúe al siguiente nivel.
+  async function _fetchWithTimeout(url, opts, ms) {
+    ms = ms || 4000;
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), ms);
+    try {
+      const r = await fetch(url, Object.assign({ signal: ctrl.signal }, opts || {}));
+      return r;
+    } catch (e) {
+      console.warn('[search] fetch timeout/abort:', url, ms + 'ms');
+      return null;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
   async function searchProduct(code) {
     if (__searchProductBusy) return;
     if (!code) { showToast('Escribe un código antes de presionar ENTER'); return; }
     const trimmed = String(code).trim();
     if (!trimmed) { showToast('Escribe un código antes de presionar ENTER'); return; }
-    const isBarcode = /^\d{6,}$/.test(trimmed);
+    // 2026-05-10: detección mejorada — el usuario pidió:
+    //   solo dígitos          → buscar en CÓDIGO DE BARRAS
+    //   solo letras           → buscar por NOMBRE
+    //   mixto (letras+nums)   → buscar en AMBOS (priorizando barcode si hay 6+ digitos)
+    const onlyDigits = /^\d+$/.test(trimmed);
+    const onlyLetters = /^[a-zA-ZÀ-ſ\s.,()\/-]+$/.test(trimmed);
+    const isBarcode = onlyDigits && trimmed.length >= 6;
+    const isMixed = !onlyDigits && !onlyLetters;
+    // En modo mixto buscamos también por barcode (algunos códigos tienen guiones/letras)
     const lower = trimmed.toLowerCase();
     __searchProductBusy = true;
     _setScanBusy(true);
-    try { return await _searchProductInner(trimmed, isBarcode, lower); }
+    try { return await _searchProductInner(trimmed, isBarcode, lower, { onlyDigits, onlyLetters, isMixed }); }
     finally {
       __searchProductBusy = false;
       _setScanBusy(false);
@@ -7396,49 +7422,61 @@
       try { document.getElementById('barcode-input').focus(); } catch (_) {}
     }
   }
-  async function _searchProductInner(trimmed, isBarcode, lower) {
+  // 2026-05-10 user-request: refactor del flujo según la prioridad pedida:
+  //   L1: CATALOG memoria local (instantáneo, sin red)
+  //   L2: BD propia del tenant (/api/productos) — timeout 3s
+  //   L3: BD GLOBAL del sistema (/api/owner/products/lookup) — timeout 4s
+  //   L4: Internet (solo si es barcode — UPCitemDB / Open Food Facts) — timeout 5s
+  //   FINAL: Modal "Nuevo producto" pre-llenado con lo que extrajimos en L3/L4
+  //           y auto-focus inteligente (si tenemos nombre → cursor en PRECIO,
+  //           si no → cursor en NOMBRE)
+  // Cada nivel tiene timeout para que el botón "Buscando..." no se cuelgue.
+  async function _searchProductInner(trimmed, isBarcode, lower, opts) {
+    opts = opts || {};
 
     // ── Level 1: CATALOG en memoria (instantáneo) ─────────────────────────
     if (typeof CATALOG !== 'undefined' && Array.isArray(CATALOG)) {
-      const hit = CATALOG.find(x =>
-        x.code === trimmed || x.barcode === trimmed ||
-        (x.name || '').toLowerCase() === lower ||
-        (x.name || '').toLowerCase().includes(lower)
-      );
+      // Match por barcode/code primero (exacto), después por nombre (parcial)
+      let hit = CATALOG.find(x => x.code === trimmed || x.barcode === trimmed);
+      if (!hit) hit = CATALOG.find(x => (x.name || '').toLowerCase() === lower);
+      if (!hit && !opts.onlyDigits) {
+        // Solo búsqueda parcial por nombre si NO es solo dígitos (evita match raro de código)
+        hit = CATALOG.find(x => (x.name || '').toLowerCase().includes(lower));
+      }
       if (hit) {
         addToCart(hit);
         $('#barcode-input').value = ''; $('#barcode-input').focus();
+        showToast('✓ ' + (hit.name || hit.nombre) + ' (catálogo local)');
         return;
       }
     }
 
-    // ── Level 2: Tenant DB ────────────────────────────────────────────────
+    // ── Level 2: Tenant DB (con timeout 3s) ───────────────────────────────
+    let tenantItems = [];
     try {
+      // Si es mixto, buscamos AMBAS cosas (barcode/code O name)
       const params = isBarcode
         ? 'or=(barcode.eq.' + encodeURIComponent(trimmed) + ',code.eq.' + encodeURIComponent(trimmed) + ')'
-        : 'name=ilike.' + encodeURIComponent('%' + trimmed + '%');
-      const r = await fetch('/api/productos?' + params + '&select=*&limit=10', { credentials: 'include' });
-      if (r.ok) {
-        const j = await r.json();
-        const items = j.items || j.data || [];
-        if (items.length) {
-          // 2026-05-09 user-request: si SÓLO hay 1 match Y es código de barras exacto →
-          // agregar directo (UX rápida para escáner). En cualquier otro caso (múltiples
-          // resultados, match parcial por nombre, ambigüedad) → mostrar modal identificador
-          // para que el usuario VEA qué encontró y elija.
-          const exactBarcode = isBarcode && items.length === 1
-            && (items[0].barcode === trimmed || items[0].code === trimmed);
-          if (exactBarcode) {
-            addToCart(normalizeProductForCart(items[0]));
-            showToast('✓ ' + (items[0].name || items[0].nombre) + ' (catálogo del negocio)');
-            $('#barcode-input').value = ''; $('#barcode-input').focus();
-            return;
-          }
-          // Mostrar modal de identificación: muestra TIPO de búsqueda + resultados
+        : (opts.isMixed
+          ? 'or=(barcode.eq.' + encodeURIComponent(trimmed) + ',code.eq.' + encodeURIComponent(trimmed) + ',name.ilike.' + encodeURIComponent('%' + trimmed + '%') + ')'
+          : 'name=ilike.' + encodeURIComponent('%' + trimmed + '%'));
+      const r = await _fetchWithTimeout('/api/productos?' + params + '&select=*&limit=10', { credentials: 'include' }, 3000);
+      if (r && r.ok) {
+        const j = await r.json().catch(() => ({}));
+        tenantItems = j.items || j.data || [];
+        if (tenantItems.length === 1) {
+          // 1 match — agregar directo (no modal, UX rápida)
+          addToCart(normalizeProductForCart(tenantItems[0]));
+          showToast('✓ ' + (tenantItems[0].name || tenantItems[0].nombre) + ' (catálogo del negocio)');
+          $('#barcode-input').value = ''; $('#barcode-input').focus();
+          return;
+        }
+        if (tenantItems.length > 1) {
+          // Múltiples matches → modal identificador para elegir
           const picked = await _showSearchPickerModal({
             query: trimmed,
             kind: isBarcode ? 'codigo_barras' : 'nombre',
-            items
+            items: tenantItems
           });
           if (picked) {
             addToCart(normalizeProductForCart(picked));
@@ -7450,18 +7488,19 @@
       }
     } catch (_) {}
 
-    // ── Level 3: Owner global library (productos curados por systeminternational) ─
+    // ── Level 3: BD GLOBAL del sistema (productos curados / aportados por todos) ──
+    // Si encontramos algo aquí Y es barcode exacto → importar al tenant + agregar.
+    // Si es match parcial por nombre → guardamos como sugerencia para pre-llenar modal.
     let ownerSuggestion = null;
     try {
-      const r = await fetch('/api/owner/products/lookup?q=' + encodeURIComponent(trimmed), { credentials: 'include' });
-      if (r.ok) {
-        const j = await r.json();
+      const r = await _fetchWithTimeout('/api/owner/products/lookup?q=' + encodeURIComponent(trimmed), { credentials: 'include' }, 4000);
+      if (r && r.ok) {
+        const j = await r.json().catch(() => ({}));
         if (j.items && j.items.length) {
           ownerSuggestion = j.items[0];
-          // Si match exacto por barcode → agregar directo
+          // Match exacto por barcode → importar y agregar
           if (isBarcode && (ownerSuggestion.barcode === trimmed || ownerSuggestion.code === trimmed)) {
-            // Importar a tenant DB y agregar al cart
-            await _importProductToTenant(ownerSuggestion);
+            try { await _importProductToTenant(ownerSuggestion); } catch (_) {}
             addToCart(normalizeProductForCart(ownerSuggestion));
             showToast('✓ ' + (ownerSuggestion.name || 'producto') + ' (catálogo global · importado)');
             $('#barcode-input').value = ''; $('#barcode-input').focus();
@@ -7471,27 +7510,64 @@
       }
     } catch (_) {}
 
-    // ── Level 4: Internet (solo barcodes — Open Food Facts + UPCitemDB) ───
+    // ── Level 4: Internet (solo barcodes — UPCitemDB + Open Food Facts) ───
+    let internetSuggestion = null;
     if (isBarcode && window.VolvixBarcodeResolver) {
       try {
-        const result = await window.VolvixBarcodeResolver.scan(trimmed);
-        if (result.found && result.product) {
-          const p = result.product;
-          let final = p;
-          if (window.VolvixProductSearch && p.id) {
-            const fresh = await window.VolvixProductSearch.getById(p.id);
-            if (fresh) final = fresh;
-          }
-          addToCart(normalizeProductForCart(final));
-          showToast('✓ ' + (final.name || final.nombre) + ' (' + (result.source || 'internet') + ')');
-          $('#barcode-input').value = ''; $('#barcode-input').focus();
-          return;
-        }
-        if (result.error === 'user_cancelled') {
-          $('#barcode-input').value = ''; $('#barcode-input').focus();
-          return;
+        // Wrap con timeout (5s max para internet)
+        const internetPromise = window.VolvixBarcodeResolver.scan(trimmed);
+        const result = await Promise.race([
+          internetPromise,
+          new Promise(resolve => setTimeout(() => resolve({ found: false, error: 'timeout' }), 5000))
+        ]);
+        if (result && result.found && result.product) {
+          internetSuggestion = result.product;
+          // Si tiene barcode exacto → es un match perfecto, pre-llenar modal con NOMBRE +
+          // BARCODE y dejar al usuario solo capturar el PRECIO. El usuario pidió esto:
+          // "extraer el nombre del codigo de barras al que pertenece ese producto" → modal
+          // se abre con nombre PRE-LLENADO y cursor va directo al PRECIO.
         }
       } catch (e) { console.warn('[searchProduct] internet resolver fail', e); }
+    }
+
+    // Si tenemos sugerencia (de owner global o internet), prefill el modal con ella
+    if (ownerSuggestion || internetSuggestion) {
+      const sug = ownerSuggestion || internetSuggestion;
+      const prefill = {
+        code: sug.code || sug.barcode || trimmed,
+        barcode: sug.barcode || sug.code || trimmed,
+        name: sug.name || sug.nombre || '',
+        price: 0, // ← usuario debe capturar el precio (puede variar por negocio)
+        cost: 0,
+        stock: 1,
+        _source: ownerSuggestion ? 'global' : 'internet',
+        _focus: 'price' // ← cursor va directo al precio
+      };
+      try {
+        $('#barcode-input').value = '';
+        const data = await promptProductForm(prefill);
+        if (data) {
+          let saved = null;
+          try { if (typeof saveProduct === 'function') saved = await saveProduct(data); } catch (_) {}
+          if (!saved || !saved.id) {
+            try {
+              const tnt = (typeof _vTenant === 'function') ? _vTenant() : 'TNT001';
+              const r = await _fetchWithTimeout('/api/products', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify(Object.assign({ tenant_id: tnt }, data))
+              }, 4000);
+              if (r && r.ok) saved = await r.json().catch(() => null);
+            } catch (_) {}
+          }
+          const p = saved && saved.id ? saved : Object.assign({ id: 'tmp_' + Date.now() }, data);
+          addToCart(normalizeProductForCart(p));
+          showToast('✓ ' + (p.name || 'producto') + ' guardado y agregado');
+        }
+        $('#barcode-input').focus();
+        return;
+      } catch (e) { console.warn('[searchProduct] prefill modal err', e); }
     }
     // 3. No existe → abrir modal "Nuevo producto" con prefill inteligente.
     //    - Si lo escrito parece código de barras → prefill barcode + code, focus en NAME
@@ -9208,6 +9284,45 @@
         if (ev.shiftKey && document.activeElement === first) { ev.preventDefault(); last.focus(); }
         else if (!ev.shiftKey && document.activeElement === last) { ev.preventDefault(); first.focus(); }
       });
+      // 2026-05-10 user-request: auto-focus inteligente + ENTER chain.
+      // Si el caller pidió focus en 'price' (porque el nombre vino pre-llenado de
+      // BD global o internet), ponemos cursor directo en pf-price. Si no, pf-name.
+      // ENTER en cualquier campo NO submitea — pasa al siguiente (nombre→barcode→
+      // price→cost→stock→GUARDAR). En el botón Guardar, ENTER sí submitea.
+      const _focusOrder = ['pf-name', 'pf-barcode', 'pf-price', 'pf-cost', 'pf-stock', 'pf-min', 'pf-cat', 'pf-desc', 'pf-submit'];
+      const _initialFocus = (p && p._focus === 'price') ? 'pf-price' : 'pf-name';
+      setTimeout(() => {
+        try {
+          const el = modal.querySelector('#' + _initialFocus);
+          if (el) { el.focus(); el.select && el.select(); }
+        } catch (_) {}
+      }, 60);
+      // ENTER chain: en cualquier input del form, Enter avanza al siguiente
+      // (excepto en textarea donde es nueva línea, y en submit donde dispara).
+      modal.querySelector('#pf-form').addEventListener('keydown', (ev) => {
+        if (ev.key !== 'Enter') return;
+        const tag = (ev.target.tagName || '').toUpperCase();
+        if (tag === 'TEXTAREA') return; // newline normal
+        if (ev.target.id === 'pf-submit') return; // dejar que el browser submitee
+        ev.preventDefault();
+        const idx = _focusOrder.indexOf(ev.target.id);
+        if (idx < 0) return;
+        // Si estamos en stock (campo requerido) Y todos los requeridos están OK → ir a submit directo
+        const nextId = _focusOrder[idx + 1];
+        if (!nextId) {
+          // Final de la cadena → submit
+          modal.querySelector('#pf-submit').click();
+          return;
+        }
+        // Si llegamos al final útil (stock), saltar a submit (cost/min/cat/desc son opcionales)
+        if (ev.target.id === 'pf-stock') {
+          modal.querySelector('#pf-submit').focus();
+          return;
+        }
+        const next = modal.querySelector('#' + nextId);
+        if (next) { next.focus(); if (next.select) try { next.select(); } catch (_) {} }
+      });
+
       modal.querySelector('#pf-form').addEventListener('submit', (e) => {
         e.preventDefault();
         const msg = modal.querySelector('#pf-msg'); msg.textContent = '';
