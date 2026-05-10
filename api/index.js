@@ -2813,12 +2813,24 @@ const handlers = {
       const isPriv = req.user.role === 'owner' || req.user.role === 'admin' || req.user.role === 'superadmin';
       // Default: deleted_at IS NULL. Only owner/admin/superadmin can ?include_deleted=1.
       const softFilter = (includeDeleted && isPriv) ? '' : '&deleted_at=is.null';
-      // Construir filtro: superadmin ve todo; owner/admin/staff ve por tenant_id; fallback user_id.
+      // 2026-05-10 fix: customers.tenant_id es UUID, pero req.user.tenant_id viene como
+      // alias text 'TNT-XXXXX'. Resolver alias→UUID antes del query.
+      let tntUuid = null;
+      if (tnt && !/^[0-9a-f]{8}-/.test(String(tnt))) {
+        try {
+          const compRow = await supabaseRequest('GET',
+            `/pos_companies?tenant_id=eq.${encodeURIComponent(tnt)}&select=id&limit=1`);
+          if (Array.isArray(compRow) && compRow[0] && compRow[0].id) tntUuid = compRow[0].id;
+        } catch (_) {}
+      } else {
+        tntUuid = tnt;
+      }
+      // Construir filtro: superadmin ve todo; owner/admin/staff ve por tenant_id (UUID); fallback user_id.
       let baseQs;
       if (req.user.role === 'superadmin') {
         baseQs = `?select=*&order=created_at.desc&limit=${limit}&offset=${offset}${softFilter}`;
-      } else if (tnt) {
-        baseQs = `?tenant_id=eq.${encodeURIComponent(tnt)}&select=*&order=created_at.desc&limit=${limit}&offset=${offset}${softFilter}`;
+      } else if (tntUuid) {
+        baseQs = `?tenant_id=eq.${encodeURIComponent(tntUuid)}&select=*&order=created_at.desc&limit=${limit}&offset=${offset}${softFilter}`;
       } else {
         baseQs = `?user_id=eq.${encodeURIComponent(req.user.id)}&select=*&order=created_at.desc&limit=${limit}&offset=${offset}${softFilter}`;
       }
@@ -2831,8 +2843,8 @@ const handlers = {
         try {
           const noSoftQs = req.user.role === 'superadmin'
             ? `?select=*&order=created_at.desc&limit=${limit}&offset=${offset}`
-            : (tnt
-                ? `?tenant_id=eq.${encodeURIComponent(tnt)}&select=*&order=created_at.desc&limit=${limit}&offset=${offset}`
+            : (tntUuid
+                ? `?tenant_id=eq.${encodeURIComponent(tntUuid)}&select=*&order=created_at.desc&limit=${limit}&offset=${offset}`
                 : `?user_id=eq.${encodeURIComponent(req.user.id)}&select=*&order=created_at.desc&limit=${limit}&offset=${offset}`);
           customers = await supabaseRequest('GET', '/customers' + noSoftQs);
         } catch (_e2) {
