@@ -961,31 +961,23 @@
   // -----------------------------------------------------------------
   // Inject buttons into existing cobro modal
   // -----------------------------------------------------------------
+  // 2026-05-09 fix: la heurística previa montaba los botones gigantes en CUALQUIER
+  // contenedor que tuviera "transferencia/tarjeta/efectivo" — incluyendo el menú de
+  // tabs de Permisos donde aparecía el pill "Transferencia" como texto. Resultado:
+  // botones de 397px tapaban la topbar en TODA la app. Solución: SOLO insertar en
+  // contenedores explícitamente marcados; nunca por heurística text-match.
   function findPaymentMethodsHost() {
-    // Look for known containers, or any element with multiple .pay-method buttons
+    // Solo containers explícitamente marcados como host de payment buttons.
     const candidates = [
-      '.pay-methods', '#pay-methods', '.payment-methods',
-      '#payment-methods', '.cobro-methods', '#cobro-methods',
+      '#payment-methods', '.payment-methods',
+      '#cobro-methods', '.cobro-methods',
+      '#pay-methods', '.pay-methods',
       '[data-vlx-pay-methods]'
     ];
     for (let i = 0; i < candidates.length; i++) {
       const el = document.querySelector(candidates[i]);
-      if (el) return el;
-    }
-    // Heuristic: any container with >= 2 .pay-method children
-    const groups = document.querySelectorAll('.pay-method');
-    if (groups.length >= 2) {
-      const parent = groups[0].parentElement;
-      if (parent && parent.querySelectorAll('.pay-method').length >= 2) return parent;
-    }
-    // Or: a fieldset / div with buttons named Efectivo/Tarjeta/Transferencia
-    const buttons = Array.from(document.querySelectorAll('button'));
-    const found = buttons.filter(function (b) {
-      const t = (b.textContent || '').trim().toLowerCase();
-      return /efectivo|tarjeta|transferencia/.test(t);
-    });
-    if (found.length >= 2 && found[0].parentElement) {
-      return found[0].parentElement;
+      // Restringir a contenedores VISIBLES para evitar montar en pantallas hidden
+      if (el && el.offsetParent !== null) return el;
     }
     return null;
   }
@@ -1095,6 +1087,48 @@
   } else {
     init();
   }
+
+  // -----------------------------------------------------------------
+  // 2026-05-09 fix: limpiar payment buttons mal-inyectados en topbar/menubar/etc
+  // por la heurística vieja. Corre al cargar y cada vez que el DOM cambia.
+  // -----------------------------------------------------------------
+  function cleanupMisplacedPayButtons() {
+    const FORBIDDEN_PARENTS = ['.menubar', '.topbar', '.config-tabs', '.pos-tabs', 'header', 'nav.menubar'];
+    document.querySelectorAll('.vlx-pay-row, .vlx-pay-btn').forEach(function (el) {
+      let cur = el;
+      while (cur && cur !== document.body) {
+        for (let i = 0; i < FORBIDDEN_PARENTS.length; i++) {
+          if (cur.matches && cur.matches(FORBIDDEN_PARENTS[i])) {
+            // Si está dentro de topbar/menubar/etc → quitar
+            const root = el.classList.contains('vlx-pay-row') ? el : el.closest('.vlx-pay-row') || el;
+            try { root.parentElement && root.parentElement.removeAttribute('data-vlx-payment-injected'); } catch(_){}
+            try { root.remove(); } catch(_){}
+            return;
+          }
+        }
+        cur = cur.parentElement;
+      }
+    });
+  }
+  // Cleanup al cargar
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', cleanupMisplacedPayButtons);
+  } else {
+    cleanupMisplacedPayButtons();
+  }
+  // Y observar mutaciones por si el script viejo intenta re-inyectar
+  try {
+    new MutationObserver(function (muts) {
+      for (const m of muts) {
+        for (const n of m.addedNodes || []) {
+          if (n && n.nodeType === 1 && (n.matches?.('.vlx-pay-row, .vlx-pay-btn') || n.querySelector?.('.vlx-pay-row, .vlx-pay-btn'))) {
+            cleanupMisplacedPayButtons();
+            break;
+          }
+        }
+      }
+    }).observe(document.body, { childList: true, subtree: true });
+  } catch (_) {}
 
   // -----------------------------------------------------------------
   // Public API (for debugging / manual trigger)
