@@ -37140,11 +37140,18 @@ if (process.env.NODE_ENV === 'test') {
           const fmRows = await supabaseRequest('GET',
             '/feature_modules?select=key&limit=1000'
           ).catch(() => []);
-          const knownKeys = new Set((Array.isArray(fmRows) ? fmRows : []).map(r => r.key));
+          // 2026-05-09 fix(H3 retry): normalizar knownKeys quitándoles el prefix
+          // 'module.' porque feature_modules.key tiene formato 'module.pos' pero
+          // giros_modulos.modulo es bare 'pos'. La comparación previa daba 100%
+          // false positives (todos los módulos reportados como unknown).
+          const knownKeysFull = new Set((Array.isArray(fmRows) ? fmRows : []).map(r => r.key));
+          const knownKeysBare = new Set();
+          knownKeysFull.forEach(k => knownKeysBare.add(String(k).replace(/^module\./, '')));
           const warnings = [];
           for (const k of keys) {
             const bare = String(k).replace(/^module\./, '');
-            if (!knownKeys.has(bare) && !knownKeys.has(String(k))) {
+            // Match contra ambos formatos
+            if (!knownKeysBare.has(bare) && !knownKeysFull.has(String(k))) {
               warnings.push('unknown_module:' + k);
             }
           }

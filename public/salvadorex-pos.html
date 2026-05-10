@@ -2836,12 +2836,19 @@
     };
     var renames = giroData.moduleNameOverrides || {};
     var renamed = 0;
+    // 2026-05-09 fix(M7): expandido para cubrir más lugares — headers (h2/h3/h4),
+    // notificaciones internas (.notification-title, .toast-title) y breadcrumbs
+    // (.crumb, .breadcrumb). NO toca templates de email (server-side).
+    var renameSelector = 'button, a, [role="tab"], .tab, h2, h3, h4, .notification-title, .toast-title, .crumb, .breadcrumb';
     Object.entries(renames).forEach(function(entry){
       var key = entry[0], newLabel = entry[1];
       if (!newLabel) return;
       var labels = moduleLabelMap[key] || [];
-      document.querySelectorAll('button, a, [role="tab"], .tab').forEach(function(el){
+      document.querySelectorAll(renameSelector).forEach(function(el){
         if (el.dataset && el.dataset.impersonationRenamed === key) return;
+        // No tocar elementos con muchos hijos (ej: cards con texto adicional) — solo
+        // los que su textContent es esencialmente el label del módulo.
+        if (el.children && el.children.length > 2) return;
         var t = (el.textContent || '').trim();
         if (labels.some(function(L){ return t === L || t.indexOf(L) === 0; })) {
           el.textContent = newLabel;
@@ -4196,22 +4203,28 @@
              sus controles inline. Esto elimina la duplicación visual.
              Diff del perfil flota al inicio del shell cuando se invoca. -->
         <div id="perm-profile-diff" class="permv14-profile-diff" style="display:none;"></div>
+        <!-- 2026-05-09 fix(M8): badge global de cambios sin guardar (suma Excel users + Giros + overlays) -->
+        <div id="permv14-global-dirty-bar" hidden style="padding:6px 12px;background:#fff7ed;border-bottom:1px solid #fdba74;display:flex;align-items:center;gap:8px;font-family:var(--pv-font-body);font-size:12px;color:#9a3412;">
+          <span id="permv14-global-dirty-badge">● 0 cambios sin guardar</span>
+          <span style="color:#c2410c;font-size:11px;opacity:.85;">Recuerda guardar antes de salir.</span>
+        </div>
 
         <!-- ───── LAYOUT 4 COLUMNAS ───── -->
         <div class="permv14-grid">
           <!-- COLUMNA 1: SIDEBAR COLAPSADA (52px) -->
           <aside class="permv14-sidebar">
             <div class="permv14-brand-mark">S</div>
-            <button class="permv14-nav-icon active" data-permv14-nav="modules" title="Módulos">
+            <!-- 2026-05-09 fix(B3): aria-label en cada nav icon para accesibilidad -->
+            <button class="permv14-nav-icon active" data-permv14-nav="modules" title="Módulos" aria-label="Módulos">
               📦<span class="permv14-nav-tooltip">Módulos <span class="permv14-nav-tooltip-count" data-permv14-count="modules">23</span></span>
             </button>
-            <button class="permv14-nav-icon" data-permv14-nav="giros" title="Giros (perfiles de negocio)">
+            <button class="permv14-nav-icon" data-permv14-nav="giros" title="Giros (perfiles de negocio)" aria-label="Giros (perfiles de negocio)">
               🎯<span class="permv14-nav-tooltip">Giros <span class="permv14-nav-tooltip-count" data-permv14-count="giros">37</span></span>
             </button>
-            <button class="permv14-nav-icon" data-permv14-nav="users" title="Usuarios (jerarquía + overrides)">
+            <button class="permv14-nav-icon" data-permv14-nav="users" title="Usuarios (jerarquía + overrides)" aria-label="Usuarios (jerarquía + overrides)">
               👤<span class="permv14-nav-tooltip">Usuarios</span>
             </button>
-            <button class="permv14-nav-icon" data-permv14-nav="audit" title="Audit log">
+            <button class="permv14-nav-icon" data-permv14-nav="audit" title="Audit log" aria-label="Audit log">
               📜<span class="permv14-nav-tooltip">Audit log</span>
             </button>
             <!-- 2026-05-09: ⚙ Modo de desactivación REMOVIDO del sidebar.
@@ -4311,6 +4324,23 @@
               <p class="permv14-pane-help">Últimos 100 cambios. Quién cambió qué módulo/botón cuándo.</p>
             </div>
             <div class="permv14-pane-body">
+              <!-- 2026-05-09 fix(M9): filtros client-side sobre el array ya cargado -->
+              <div id="perm-audit-filters" style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;align-items:center;">
+                <input id="perm-audit-search" type="search" placeholder="Buscar tenant/usuario/módulo…" style="flex:1;min-width:180px;padding:6px 9px;border:1px solid var(--pv-border);border-radius:5px;font-size:12px;font-family:var(--pv-font-body);background:var(--pv-bg-paper);">
+                <select id="perm-audit-type" style="padding:6px 9px;border:1px solid var(--pv-border);border-radius:5px;font-size:12px;font-family:var(--pv-font-body);background:var(--pv-bg-paper);">
+                  <option value="">Todos los tipos</option>
+                  <option value="module.toggle">module.toggle</option>
+                  <option value="button.toggle">button.toggle</option>
+                  <option value="giro.applied">giro.applied</option>
+                  <option value="impersonation">impersonation</option>
+                </select>
+                <select id="perm-audit-range" style="padding:6px 9px;border:1px solid var(--pv-border);border-radius:5px;font-size:12px;font-family:var(--pv-font-body);background:var(--pv-bg-paper);">
+                  <option value="all">Todo</option>
+                  <option value="today">Hoy</option>
+                  <option value="week">Última semana</option>
+                  <option value="month">Último mes</option>
+                </select>
+              </div>
               <div id="perm-audit-list">Cargando…</div>
             </div>
           </section>
@@ -18723,6 +18753,12 @@ window.addEventListener('volvix:version-loaded', function(e){
     background-color: var(--pv-hidden-soft); color: var(--pv-text-muted);
     border-color: rgba(148,144,139,0.3);
   }
+  /* 2026-05-09 fix(M2): clase específica para "🔒 Bloqueado" (3-state toggle).
+     Antes usaba s-up (mismo color que "REQUIERE" en sell rules) → confuso. */
+  #screen-permisos.permv14 .permv14-state-select.s-locked {
+    background-color: #fde68a; color: #92400e;
+    border: 1px solid #f59e0b;
+  }
 
   #screen-permisos.permv14 .permv14-empty-row {
     padding: 14px; text-align: center;
@@ -19727,8 +19763,53 @@ window.addEventListener('volvix:version-loaded', function(e){
         wrap.innerHTML = '<p style="color:var(--text-3);font-size:13px;">Sin cambios registrados aún.</p>';
         return;
       }
+      // 2026-05-09 fix(M9): cachear el array y delegar render a renderAuditFiltered
+      this._auditCache = j.audit;
+      this._wireAuditFilters();
+      this._renderAuditFiltered();
+    },
+    // 2026-05-09 fix(M9): wire filtros (idempotente)
+    _wireAuditFilters() {
+      if (this._auditFiltersWired) return;
+      ['perm-audit-search','perm-audit-type','perm-audit-range'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', () => this._renderAuditFiltered());
+      });
+      this._auditFiltersWired = true;
+    },
+    // 2026-05-09 fix(M9): aplica filtros client-side y re-renderiza
+    _renderAuditFiltered() {
+      const wrap = document.getElementById('perm-audit-list');
+      if (!wrap || !this._auditCache) return;
+      const q = (document.getElementById('perm-audit-search')||{}).value || '';
+      const typeFilter = (document.getElementById('perm-audit-type')||{}).value || '';
+      const range = (document.getElementById('perm-audit-range')||{}).value || 'all';
+      const qLower = q.trim().toLowerCase();
+      const now = Date.now();
+      const ranges = { today: 86400000, week: 7*86400000, month: 30*86400000 };
+      const rangeMs = ranges[range] || null;
+      const filtered = this._auditCache.filter(a => {
+        if (typeFilter) {
+          const scope = String(a.scope || '');
+          if (scope !== typeFilter && scope.indexOf(typeFilter) === -1) return false;
+        }
+        if (rangeMs) {
+          const t = new Date(a.changed_at).getTime();
+          if (!t || (now - t) > rangeMs) return false;
+        }
+        if (qLower) {
+          const blob = [a.tenant_id, a.changed_by, a.module_key, a.scope_ref, a.scope, a.old_status, a.new_status]
+            .map(v => String(v||'').toLowerCase()).join(' ');
+          if (blob.indexOf(qLower) === -1) return false;
+        }
+        return true;
+      });
+      if (!filtered.length) {
+        wrap.innerHTML = '<p style="color:var(--text-3);font-size:13px;">Sin resultados para los filtros aplicados.</p>';
+        return;
+      }
       wrap.innerHTML = '<table class="tbl"><thead><tr><th>Fecha</th><th>Scope</th><th>Key</th><th>Antes</th><th>Después</th><th>Por</th></tr></thead><tbody>' +
-        j.audit.slice(0,100).map(a => {
+        filtered.slice(0,100).map(a => {
           const dt = new Date(a.changed_at).toLocaleString('es-MX');
           return '<tr>' +
             '<td style="font-size:11.5px;">' + dt + '</td>' +
@@ -20289,7 +20370,8 @@ window.addEventListener('volvix:version-loaded', function(e){
       const stateMap = scope === 'features' ? state.features : state.modules;
       return stateMap[key] === false ? 'hidden' : 'enabled';
     };
-    const stateClassFor = (s) => s === 'enabled' ? 's-on' : (s === 'locked' ? 's-up' : 's-hi');
+    // 2026-05-09 fix(M2): 'locked' usa s-locked (amarillo) — antes s-up colisionaba con "REQUIERE"
+    const stateClassFor = (s) => s === 'enabled' ? 's-on' : (s === 'locked' ? 's-locked' : 's-hi');
 
     // Renderizar fila del módulo completo (3-state)
     if (moduleTable) {
@@ -20371,7 +20453,8 @@ window.addEventListener('volvix:version-loaded', function(e){
     ind.textContent = text || '✅ Guardado';
     ind.style.opacity = '1';
     clearTimeout(flashSaveIndicator._t);
-    flashSaveIndicator._t = setTimeout(() => { ind.style.opacity = '0'; }, 2500);
+    // 2026-05-09 fix(B4): 4500ms en vez de 2500ms — más fácil de ver el mensaje "✅ Guardado"
+    flashSaveIndicator._t = setTimeout(() => { ind.style.opacity = '0'; }, 4500);
   }
 
   // 2026-05-09: 3-state toggle — POST /api/admin/tenant/:tid/module con body.state directo
@@ -20380,8 +20463,9 @@ window.addEventListener('volvix:version-loaded', function(e){
     const newState = selectEl.value; // 'enabled' | 'hidden' | 'locked'
     const tid = window.PERM && window.PERM.selectedTid;
     if (!tid) return;
-    selectEl.classList.remove('s-on','s-up','s-hi');
-    selectEl.classList.add(newState === 'enabled' ? 's-on' : (newState === 'locked' ? 's-up' : 's-hi'));
+    // 2026-05-09 fix(M2): usar s-locked para "🔒 Bloqueado"
+    selectEl.classList.remove('s-on','s-up','s-hi','s-locked');
+    selectEl.classList.add(newState === 'enabled' ? 's-on' : (newState === 'locked' ? 's-locked' : 's-hi'));
     flashSaveIndicator('⏳ Guardando…');
     try {
       const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
@@ -20415,8 +20499,9 @@ window.addEventListener('volvix:version-loaded', function(e){
     const newState = selectEl.value;
     const tid = window.PERM && window.PERM.selectedTid;
     if (!tid) return;
-    selectEl.classList.remove('s-on','s-up','s-hi');
-    selectEl.classList.add(newState === 'enabled' ? 's-on' : (newState === 'locked' ? 's-up' : 's-hi'));
+    // 2026-05-09 fix(M2): usar s-locked para "🔒 Bloqueado"
+    selectEl.classList.remove('s-on','s-up','s-hi','s-locked');
+    selectEl.classList.add(newState === 'enabled' ? 's-on' : (newState === 'locked' ? 's-locked' : 's-hi'));
     flashSaveIndicator('⏳ Guardando botón…');
     try {
       const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
@@ -20634,10 +20719,22 @@ window.addEventListener('volvix:version-loaded', function(e){
       host.innerHTML = '<button id="permv14-giro-create-btn" style="width:100%;background:var(--pv-accent);color:#fff;border:none;padding:6px 10px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;">+ Nuevo Giro</button>';
       wrap.parentNode.insertBefore(host, wrap);
       host.querySelector('button').addEventListener('click', async () => {
-        const name = prompt('Nombre del nuevo giro (ej: 🧶 Boutique Artesanal):');
-        if (!name) return;
-        const slugSuggested = name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40);
-        const slug = prompt('Slug único (sin espacios, solo a-z, 0-9, _, -):', slugSuggested);
+        // 2026-05-09 fix(M5): UN solo modal con 2 fields en vez de 2 prompts nativos.
+        const res = await permv14Modal({
+          title: '+ Nuevo Giro',
+          body: 'Crea un nuevo giro (perfil de negocio). El slug debe ser único — solo a-z, 0-9, _, -.',
+          fields: [
+            { name: 'name', label: 'Nombre', placeholder: '🧶 Boutique Artesanal' },
+            { name: 'slug', label: 'Slug', placeholder: 'boutique_artesanal' },
+          ],
+          confirmLabel: 'Crear',
+        });
+        if (!res || !res.name) return;
+        const name = res.name;
+        let slug = res.slug;
+        if (!slug) {
+          slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40);
+        }
         if (!slug) return;
         const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
         try {
@@ -20726,14 +20823,21 @@ window.addEventListener('volvix:version-loaded', function(e){
     }
     wrap.innerHTML = html || '<div class="permv14-empty-row">Sin giros.</div>';
     $$('.permv14-list-item[data-permv14-giro]', wrap).forEach(el => {
-      el.addEventListener('click', () => {
+      el.addEventListener('click', async () => {
         const nextSlug = el.dataset.permv14Giro;
         const currentSlug = v14.selectedGiro;
         // 2026-05-09 fix(H1): warning si hay cambios sin guardar antes de cambiar de giro
         if (currentSlug && currentSlug !== nextSlug && v14.giroIsDirty && v14.giroIsDirty[currentSlug]) {
           const curLabel = (LABELS[currentSlug] || currentSlug);
           const nxtLabel = (LABELS[nextSlug] || nextSlug);
-          if (!confirm('Tienes cambios sin guardar en "' + curLabel + '". ¿Descartarlos y cambiar a "' + nxtLabel + '"?')) return;
+          // 2026-05-09 fix(M5): modal estilizado en vez de confirm() nativo
+          const ok = await permv14Modal({
+            title: 'Cambios sin guardar',
+            body: 'Tienes cambios sin guardar en "' + curLabel + '". ¿Descartarlos y cambiar a "' + nxtLabel + '"?',
+            confirmLabel: 'Descartar y cambiar',
+            cancelLabel: 'Quedarme aquí',
+          });
+          if (!ok) return;
           // descartar cambios in-memory del giro previo
           if (window._giroEditOverlay) delete window._giroEditOverlay[currentSlug];
           delete v14.giroIsDirty[currentSlug];
@@ -20827,7 +20931,13 @@ window.addEventListener('volvix:version-loaded', function(e){
         saveBtn.addEventListener('click', async () => {
           // 2026-05-09: 2 confirmaciones en 1: (a) guardar el preset; (b) cascadear
           // a tenants (los que ya tienen ese giro reciben los cambios al instante).
-          const cascade = confirm('Guardar cambios del giro "' + (m[2] || slug) + '" en BD?\n\nOK = guardar Y propagar a TODOS los tenants de este giro (recarga inmediata).\nCancel = no guardar nada.');
+          // 2026-05-09 fix(M5): modal estilizado en vez de confirm() nativo
+          const cascade = await permv14Modal({
+            title: '💾 Guardar Giro',
+            body: 'Guardar cambios del giro "' + (m[2] || slug) + '" en BD?\n\nSe propagará a TODOS los tenants de este giro (recarga inmediata).',
+            confirmLabel: 'Guardar y propagar',
+            cancelLabel: 'Cancelar',
+          });
           if (!cascade) return;
           saveBtn.disabled = true; saveBtn.textContent = 'Guardando…';
           const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
@@ -20957,7 +21067,8 @@ window.addEventListener('volvix:version-loaded', function(e){
       const STATE_OPTS = [
         { v: 'enabled', label: '✓ Activo', cls: 's-on' },
         { v: 'hidden',  label: '🙈 Oculto', cls: 's-hi' },
-        { v: 'locked',  label: '🔒 Bloqueado', cls: 's-up' },
+        // 2026-05-09 fix(M2): s-locked (amarillo) en vez de s-up (color de "REQUIERE")
+        { v: 'locked',  label: '🔒 Bloqueado', cls: 's-locked' },
       ];
 
       buttonsTable.innerHTML = allMods.map(k => {
@@ -20974,7 +21085,7 @@ window.addEventListener('volvix:version-loaded', function(e){
           : '';
         return '<div class="permv14-perm-row" data-giro-mod-row="' + k + '" style="' + rowStyle + '" title="Click en el chip para abrir drill-down de botones">'
           + '<div class="permv14-perm-icon">' + bm[1] + '</div>'
-          + '<input class="permv14-perm-name-input" data-giro-mod-name="' + escapeAttr(k) + '" value="' + escapeAttr(curName || bm[2]) + '" placeholder="' + escapeAttr(bm[2]) + '" title="Edita el nombre que verá este módulo en el POS de los tenants de este giro" style="' + (curName ? 'background:#fef3c7;border:1px solid #f59e0b;' : '') + '">'
+          + '<input class="permv14-perm-name-input" data-giro-mod-name="' + escapeAttr(k) + '" value="' + escapeAttr(curName || bm[2]) + '" placeholder="' + escapeAttr(bm[2]) + '" title="Edita el nombre que verá este módulo en el POS solo para tenants de este giro. Otros giros conservan el nombre original." style="' + (curName ? 'background:#fef3c7;border:1px solid #f59e0b;' : '') + '">'
           + '<select class="permv14-state-select ' + opt.cls + '" data-giro-mod-state="' + escapeAttr(k) + '" title="3 estados: visible+clickeable / no aparece / visible pero greyed">'
           +   STATE_OPTS.map(o => '<option value="' + o.v + '"' + (o.v === curState ? ' selected' : '') + '>' + o.label + '</option>').join('')
           + '</select>'
@@ -21144,7 +21255,13 @@ window.addEventListener('volvix:version-loaded', function(e){
           const tenantSel = $('#permv14-giro-apply-target');
           const targetTid = tenantSel && tenantSel.value;
           if (!targetTid) { alert('Selecciona un tenant primero.'); return; }
-          if (!confirm('Aplicar el perfil "' + (LABELS[slug] || slug) + '" a ' + targetTid + '?\n\nVa a setear ' + onMods.length + ' módulos al estado base del giro.')) return;
+          // 2026-05-09 fix(M5): modal estilizado en vez de confirm() nativo
+          const ok = await permv14Modal({
+            title: '⚡ Aplicar perfil',
+            body: 'Aplicar el perfil "' + (LABELS[slug] || slug) + '" a ' + targetTid + '?\n\nVa a setear ' + onMods.length + ' módulos al estado base del giro.',
+            confirmLabel: 'Aplicar',
+          });
+          if (!ok) return;
           applyBtn.disabled = true;
           applyBtn.textContent = 'Aplicando…';
           if (window.PERM) {
@@ -21183,6 +21300,8 @@ window.addEventListener('volvix:version-loaded', function(e){
         });
       }
     }
+    // 2026-05-09 fix(M8): refrescar badge global al final del render de detalle
+    try { updateGlobalDirtyBadge(); } catch(_) {}
   }
 
   // ─── COL 4: preview del POS con el preset del giro ───
@@ -21267,7 +21386,8 @@ window.addEventListener('volvix:version-loaded', function(e){
       const STATE_OPTS_BTN = [
         { v: 'enabled', label: '✓ Activo', cls: 's-on' },
         { v: 'hidden',  label: '🙈 Oculto', cls: 's-hi' },
-        { v: 'locked',  label: '🔒 Bloqueado', cls: 's-up' },
+        // 2026-05-09 fix(M2): s-locked en vez de s-up
+        { v: 'locked',  label: '🔒 Bloqueado', cls: 's-locked' },
       ];
 
       const drillBody = childButtons.length === 0
@@ -21548,7 +21668,13 @@ window.addEventListener('volvix:version-loaded', function(e){
           const profile = PROFILES[slug];
           if (!profile) return;
           const moduleCount = Object.keys(profile).length;
-          if (!confirm('Aplicar el perfil "' + (LABELS[slug] || slug) + '" a ' + targetTid + '?\n\nVa a setear ' + moduleCount + ' módulos al estado base del giro. Cambios futuros (toggles individuales) sobrescriben este preset.')) return;
+          // 2026-05-09 fix(M5): modal estilizado en vez de confirm() nativo
+          const ok = await permv14Modal({
+            title: '⚡ Aplicar perfil',
+            body: 'Aplicar el perfil "' + (LABELS[slug] || slug) + '" a ' + targetTid + '?\n\nVa a setear ' + moduleCount + ' módulos al estado base del giro. Cambios futuros (toggles individuales) sobrescriben este preset.',
+            confirmLabel: 'Aplicar',
+          });
+          if (!ok) return;
 
           // Disable mientras procesa
           btn.disabled = true;
@@ -21729,7 +21855,7 @@ window.addEventListener('volvix:version-loaded', function(e){
   // Si BD falla, fallback a las constantes hardcoded para no romper.
   v14.catalogs = { giros: null, modules: null, lastLoaded: 0 };
   async function loadAllCatalogs(force) {
-    const TTL = 60000; // 60s
+    const TTL = 15000; // 2026-05-09 fix(M1): 15s para detectar cambios cross-admin más rápido
     if (!force && v14.catalogs.giros && v14.catalogs.modules && (Date.now() - v14.catalogs.lastLoaded) < TTL) {
       return v14.catalogs;
     }
@@ -21834,6 +21960,39 @@ window.addEventListener('volvix:version-loaded', function(e){
     }
     if (saveBtn) saveBtn.disabled = (n === 0);
     if (discardBtn) discardBtn.hidden = (n === 0);
+    // 2026-05-09 fix(M8): refrescar badge global tras cualquier cambio en users
+    try { updateGlobalDirtyBadge(); } catch(_) {}
+  }
+  // 2026-05-09 fix(M8): suma global de cambios pendientes (Excel users + Giros + overlays)
+  function getTotalDirtyCount() {
+    let total = 0;
+    try { total += (v14.usersDirty && v14.usersDirty.size) || 0; } catch(_) {}
+    try {
+      const giroDirty = v14.giroIsDirty || {};
+      total += Object.keys(giroDirty).filter(s => giroDirty[s]).length;
+    } catch(_) {}
+    // overlays in-memory: contar slugs con states/names no vacíos
+    try {
+      const ov = window._giroEditOverlay || {};
+      Object.keys(ov).forEach(slug => {
+        const e = ov[slug] || {};
+        const hasStates = e.states && Object.keys(e.states).length > 0;
+        const hasNames = e.names && Object.values(e.names).some(v => v && String(v).trim());
+        // sólo contar si el giro NO está ya marcado como dirty (evitar doble conteo)
+        if ((hasStates || hasNames) && !(v14.giroIsDirty && v14.giroIsDirty[slug])) total++;
+      });
+    } catch(_) {}
+    return total;
+  }
+  // 2026-05-09 fix(M8): actualiza el badge global en la barra superior del shell
+  function updateGlobalDirtyBadge() {
+    const n = getTotalDirtyCount();
+    const bar = document.getElementById('permv14-global-dirty-bar');
+    const badge = document.getElementById('permv14-global-dirty-badge');
+    if (badge) {
+      badge.textContent = '● ' + n + ' cambio' + (n === 1 ? '' : 's') + ' sin guardar';
+    }
+    if (bar) bar.hidden = (n === 0);
   }
   async function fetchHierarchy() {
     if (_usersHierarchyCache) return _usersHierarchyCache;
@@ -22353,7 +22512,13 @@ window.addEventListener('volvix:version-loaded', function(e){
         const giroSel = tr && tr.querySelector('select[data-pv14-row-giro]');
         const slug = giroSel && giroSel.value;
         if (!slug) { alert('Elige un giro en el dropdown de esta fila antes de aplicar.'); return; }
-        if (!confirm('Aplicar perfil "' + slug + '" a ' + tid + '?\n\nVa a setear los módulos al estado base del giro.')) return;
+        // 2026-05-09 fix(M5): modal estilizado en vez de confirm() nativo
+        const ok = await permv14Modal({
+          title: '⚡ Aplicar perfil',
+          body: 'Aplicar perfil "' + slug + '" a ' + tid + '?\n\nVa a setear los módulos al estado base del giro.',
+          confirmLabel: 'Aplicar',
+        });
+        if (!ok) return;
         await switchToTenant(tid);
         if (window.PERM && window.PERM.applyProfile) await window.PERM.applyProfile(slug);
         if (window.toast) window.toast('✅ Perfil "' + slug + '" aplicado a ' + tid, 'ok');
@@ -22444,6 +22609,77 @@ window.addEventListener('volvix:version-loaded', function(e){
   }
   function escapeAttr(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // 2026-05-09 fix(M5): modal estilizado para reemplazar alert/prompt/confirm nativos.
+  // Uso:
+  //   await permv14Modal({ title:'Confirmar', body:'Texto?', confirmLabel:'OK' })
+  //   await permv14Modal({ title:'Nuevo', fields:[{name:'x',label:'X',value:''}], confirmLabel:'Crear' })
+  // Retorna: null si cancela. Si hay fields → {x: 'valor', ...}. Si no hay fields → true.
+  function permv14Modal(opts) {
+    opts = opts || {};
+    const fields = Array.isArray(opts.fields) ? opts.fields : [];
+    const confirmLabel = opts.confirmLabel || 'Aceptar';
+    const cancelLabel = opts.cancelLabel || 'Cancelar';
+    return new Promise(resolve => {
+      const overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(15,15,15,0.55);z-index:99999;display:flex;align-items:center;justify-content:center;font-family:var(--pv-font-body, system-ui);';
+      const box = document.createElement('div');
+      box.style.cssText = 'background:var(--pv-bg-paper,#fff);border:1px solid var(--pv-border,#e5e1dc);border-radius:10px;box-shadow:0 12px 40px rgba(0,0,0,0.25);max-width:480px;width:92%;padding:18px 20px 16px;';
+      let inner = '';
+      if (opts.title) {
+        inner += '<div style="font-size:14px;font-weight:600;color:var(--pv-text,#222);margin-bottom:10px;font-family:var(--pv-font-body,system-ui);">' + escapeText(opts.title) + '</div>';
+      }
+      if (opts.body) {
+        inner += '<div style="font-size:13px;color:var(--pv-text-muted,#555);margin-bottom:14px;line-height:1.45;white-space:pre-wrap;">' + escapeText(opts.body) + '</div>';
+      }
+      fields.forEach((f, i) => {
+        inner += '<div style="margin-bottom:10px;">'
+              + '<label style="display:block;font-size:11px;color:var(--pv-text-muted,#666);font-weight:500;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.04em;">' + escapeText(f.label || f.name) + '</label>'
+              + '<input data-pv14m-field="' + escapeAttr(f.name) + '" type="text" value="' + escapeAttr(f.value == null ? '' : f.value) + '" placeholder="' + escapeAttr(f.placeholder || '') + '" '
+              + 'style="width:100%;padding:7px 9px;border:1px solid var(--pv-border,#ddd);border-radius:5px;font-size:13px;font-family:var(--pv-font-body,system-ui);background:#fff;color:var(--pv-text,#222);box-sizing:border-box;">'
+              + '</div>';
+      });
+      inner += '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px;">'
+            + '<button data-pv14m-cancel style="padding:7px 14px;border:1px solid var(--pv-border,#ddd);background:#fff;color:var(--pv-text,#222);border-radius:5px;font-size:12px;cursor:pointer;font-family:var(--pv-font-body,system-ui);">' + escapeText(cancelLabel) + '</button>'
+            + '<button data-pv14m-ok style="padding:7px 14px;border:none;background:var(--pv-accent,#c36c50);color:#fff;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--pv-font-body,system-ui);">' + escapeText(confirmLabel) + '</button>'
+            + '</div>';
+      box.innerHTML = inner;
+      overlay.appendChild(box);
+      document.body.appendChild(overlay);
+      const finish = (val) => {
+        try { document.body.removeChild(overlay); } catch (_) {}
+        resolve(val);
+      };
+      const collect = () => {
+        if (!fields.length) return true;
+        const out = {};
+        let allEmpty = true;
+        fields.forEach(f => {
+          const inp = box.querySelector('input[data-pv14m-field="' + f.name + '"]');
+          out[f.name] = inp ? inp.value.trim() : '';
+          if (out[f.name]) allEmpty = false;
+        });
+        // Si todos vacíos y hay required:true en algún field, devolver null
+        const hasRequired = fields.some(f => f.required !== false);
+        if (allEmpty && hasRequired) return null;
+        return out;
+      };
+      box.querySelector('[data-pv14m-ok]').addEventListener('click', () => finish(collect()));
+      box.querySelector('[data-pv14m-cancel]').addEventListener('click', () => finish(null));
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) finish(null); });
+      // Auto-focus 1er input o botón OK
+      setTimeout(() => {
+        const firstInp = box.querySelector('input[data-pv14m-field]');
+        if (firstInp) firstInp.focus();
+        else box.querySelector('[data-pv14m-ok]').focus();
+      }, 30);
+      // Enter envía, Esc cancela
+      box.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); finish(collect()); }
+        else if (e.key === 'Escape') { e.preventDefault(); finish(null); }
+      });
+    });
   }
 
   // Bootstrap: corre cuando entramos a #permisos
