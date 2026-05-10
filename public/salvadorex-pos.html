@@ -4089,6 +4089,10 @@
           <!-- 2026-05-07: boton MÓVIL antes flotaba en la topbar, ahora vive aqui
                como tab de Configuracion. Reusa showScreen para no duplicar pantalla. -->
           <button class="config-tab" onclick="showScreen('mobile-apps')" data-ia-arq="mobile-apps-from-config">📱 Apps móviles</button>
+          <!-- 2026-05-09: nuevo tab para personalizar la PWA del cliente final
+               (logo, colores, redes sociales, dirección, horarios). El dueño
+               edita aquí y los cambios se ven inmediatamente en /app/?t=<TNT>. -->
+          <button class="config-tab" onclick="showCfg('pwa', this); cfgPwaLoad();">🎨 App Cliente PWA</button>
         </div>
 
         <div>
@@ -4145,6 +4149,45 @@
               <div class="summary-item" style="justify-content: space-between; width: 100%;"><span style="color: var(--text-2);">Seats Web</span><span>3 / 3</span></div>
               <div class="summary-item" style="justify-content: space-between; width: 100%;"><span style="color: var(--text-2);">Seats Windows</span><span>2 / 2</span></div>
               <div class="summary-item" style="justify-content: space-between; width: 100%;"><span style="color: var(--text-2);">Seats Android</span><span>1 / 2</span></div>
+            </div>
+          </div>
+
+          <!-- 2026-05-09: sección PWA App Cliente — el dueño personaliza branding
+               (logo, colores, redes sociales, dirección, horarios) y ve preview en vivo. -->
+          <div id="cfg-pwa" class="card card-pad hidden">
+            <div style="display:flex;align-items:flex-start;gap:18px;flex-wrap:wrap;">
+              <div style="flex:1;min-width:320px;">
+                <h3 style="margin:0 0 6px;font-size:14px;">🎨 Personalizar App Cliente PWA</h3>
+                <p style="margin:0 0 14px;color:var(--text-2);font-size:11.5px;">Estos cambios se ven al instante en la app que tus clientes usan al escanear tu QR. Pásales el link: <a id="cfg-pwa-link" href="#" target="_blank" style="color:var(--accent);"></a></p>
+                <div id="cfg-pwa-msg"></div>
+                <div class="input-group"><label class="input-label">URL del logo (PNG/JPG, idealmente 200×200)</label><input class="input-field" id="cfg-pwa-logo" placeholder="https://…/mi-logo.png"></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+                  <div class="input-group"><label class="input-label">Color primario</label><input class="input-field" type="color" id="cfg-pwa-primary" value="#10b981"></div>
+                  <div class="input-group"><label class="input-label">Color acento</label><input class="input-field" type="color" id="cfg-pwa-accent" value="#065f46"></div>
+                  <div class="input-group"><label class="input-label">Fondo</label><input class="input-field" type="color" id="cfg-pwa-bg" value="#f5f3ee"></div>
+                </div>
+                <div class="input-group"><label class="input-label">Sobre el negocio (texto en Inicio)</label><textarea class="input-field" id="cfg-pwa-about" rows="2" placeholder="Tu negocio en 1-2 líneas"></textarea></div>
+                <div class="input-group"><label class="input-label">Dirección física</label><input class="input-field" id="cfg-pwa-address" placeholder="Calle, número, colonia, CP"></div>
+                <div class="input-group"><label class="input-label">Horarios (texto libre)</label><input class="input-field" id="cfg-pwa-hours" placeholder="Lun-Sáb 9:00-21:00"></div>
+                <h4 style="margin:14px 0 6px;font-size:12.5px;">Redes sociales y contacto</h4>
+                <div class="input-group"><label class="input-label">WhatsApp (10 dígitos con LADA país, ej. 525544332211)</label><input class="input-field" id="cfg-pwa-wa" inputmode="numeric" placeholder="525544332211"></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                  <div class="input-group"><label class="input-label">Instagram (sin @)</label><input class="input-field" id="cfg-pwa-ig" placeholder="mi_negocio"></div>
+                  <div class="input-group"><label class="input-label">Facebook (página)</label><input class="input-field" id="cfg-pwa-fb" placeholder="mi.negocio.oficial"></div>
+                  <div class="input-group"><label class="input-label">TikTok (sin @)</label><input class="input-field" id="cfg-pwa-tt" placeholder="mi_negocio"></div>
+                  <div class="input-group"><label class="input-label">YouTube (canal)</label><input class="input-field" id="cfg-pwa-yt" placeholder="MiNegocio"></div>
+                </div>
+                <div class="input-group"><label class="input-label">Correo público</label><input class="input-field" id="cfg-pwa-email" type="email" placeholder="contacto@minegocio.com"></div>
+                <div style="display:flex;gap:8px;margin-top:12px;">
+                  <button class="btn accent" id="cfg-pwa-save">💾 Guardar cambios</button>
+                  <button class="btn" id="cfg-pwa-preview" type="button">👁 Ver app de mi cliente</button>
+                </div>
+              </div>
+              <div style="flex:0 0 320px;">
+                <div style="font-size:11px;color:var(--text-2);margin-bottom:6px;font-weight:600;">VISTA PREVIA EN VIVO</div>
+                <iframe id="cfg-pwa-iframe" src="about:blank" style="width:320px;height:580px;border:1px solid var(--border);border-radius:18px;background:#000;"></iframe>
+                <button class="btn" id="cfg-pwa-refresh" type="button" style="margin-top:8px;width:100%;font-size:11px;">🔄 Refrescar preview</button>
+              </div>
             </div>
           </div>
 
@@ -9341,11 +9384,96 @@
   function showCfg(tab, btn) {
     $$('.config-tab').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
-    ['general','negocio','impuestos','impresion','modulos','licencia','sync'].forEach(t => {
+    // 2026-05-09: agregada 'pwa' a la lista de tabs
+    ['general','negocio','impuestos','impresion','modulos','licencia','sync','pwa'].forEach(t => {
       const el = $('#cfg-' + t);
       if (el) el.classList.toggle('hidden', t !== tab);
     });
   }
+
+  // 2026-05-09: panel App Cliente PWA — hidrata desde /api/app/config y guarda
+  // via PATCH /api/app/branding. Solo accesible para dueño/admin del tenant.
+  async function cfgPwaLoad() {
+    try {
+      const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+      if (!tok) return;
+      let tenantId = '';
+      try {
+        const p = JSON.parse(atob(tok.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+        tenantId = p.tenant_id || '';
+      } catch(_) {}
+      if (!tenantId) { document.getElementById('cfg-pwa-msg').innerHTML = '<div style="background:#fef2f2;border:1px solid #fecaca;color:#991b1b;padding:8px;border-radius:6px;font-size:12px;margin-bottom:10px;">No se pudo identificar tu tenant. Cierra sesión y vuelve a entrar.</div>'; return; }
+      const linkEl = document.getElementById('cfg-pwa-link');
+      const url = location.origin + '/app/index.html?t=' + encodeURIComponent(tenantId);
+      if (linkEl) { linkEl.textContent = url; linkEl.href = url; }
+      // Cargar config actual
+      const r = await fetch('/api/app/config?t=' + encodeURIComponent(tenantId));
+      const j = await r.json().catch(() => ({}));
+      const b = j.branding || {};
+      const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v == null ? '' : v; };
+      setVal('cfg-pwa-logo', b.logo_url);
+      setVal('cfg-pwa-primary', b.primary_color || '#10b981');
+      setVal('cfg-pwa-accent', b.accent_color || '#065f46');
+      setVal('cfg-pwa-bg', b.background_color || '#f5f3ee');
+      setVal('cfg-pwa-about', b.about_text);
+      setVal('cfg-pwa-address', b.address);
+      setVal('cfg-pwa-hours', b.hours_text);
+      setVal('cfg-pwa-wa', b.whatsapp);
+      setVal('cfg-pwa-ig', b.instagram);
+      setVal('cfg-pwa-fb', b.facebook);
+      setVal('cfg-pwa-tt', b.tiktok);
+      setVal('cfg-pwa-yt', b.youtube);
+      setVal('cfg-pwa-email', b.email_publico);
+      // Preview iframe
+      const iframe = document.getElementById('cfg-pwa-iframe');
+      if (iframe) iframe.src = url;
+      // Wire save
+      const saveBtn = document.getElementById('cfg-pwa-save');
+      if (saveBtn && !saveBtn.dataset.wired) {
+        saveBtn.dataset.wired = '1';
+        saveBtn.addEventListener('click', async () => {
+          const msgEl = document.getElementById('cfg-pwa-msg');
+          msgEl.innerHTML = '';
+          saveBtn.disabled = true; saveBtn.textContent = '⏳ Guardando…';
+          const payload = {
+            tenant_slug: tenantId,
+            logo_url: document.getElementById('cfg-pwa-logo').value.trim() || null,
+            primary_color: document.getElementById('cfg-pwa-primary').value,
+            accent_color: document.getElementById('cfg-pwa-accent').value,
+            background_color: document.getElementById('cfg-pwa-bg').value,
+            about_text: document.getElementById('cfg-pwa-about').value.trim() || null,
+            address: document.getElementById('cfg-pwa-address').value.trim() || null,
+            hours_text: document.getElementById('cfg-pwa-hours').value.trim() || null,
+            whatsapp: document.getElementById('cfg-pwa-wa').value.replace(/\D/g,'') || null,
+            instagram: document.getElementById('cfg-pwa-ig').value.replace(/^@/,'').trim() || null,
+            facebook: document.getElementById('cfg-pwa-fb').value.trim() || null,
+            tiktok: document.getElementById('cfg-pwa-tt').value.replace(/^@/,'').trim() || null,
+            youtube: document.getElementById('cfg-pwa-yt').value.replace(/^@/,'').trim() || null,
+            email_publico: document.getElementById('cfg-pwa-email').value.trim() || null,
+          };
+          try {
+            const r2 = await fetch('/api/app/branding', { method:'PATCH', headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok}, body: JSON.stringify(payload) });
+            const j2 = await r2.json().catch(() => ({}));
+            if (r2.ok && j2.ok) {
+              msgEl.innerHTML = '<div style="background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;padding:8px;border-radius:6px;font-size:12px;margin-bottom:10px;">✅ Cambios guardados. La PWA se actualizará al refrescar.</div>';
+              const iframe = document.getElementById('cfg-pwa-iframe');
+              if (iframe) iframe.src = iframe.src;
+            } else {
+              msgEl.innerHTML = '<div style="background:#fef2f2;border:1px solid #fecaca;color:#991b1b;padding:8px;border-radius:6px;font-size:12px;margin-bottom:10px;">❌ ' + (j2.error || 'error') + '</div>';
+            }
+          } catch(e) {
+            msgEl.innerHTML = '<div style="background:#fef2f2;border:1px solid #fecaca;color:#991b1b;padding:8px;border-radius:6px;font-size:12px;margin-bottom:10px;">❌ Error de red.</div>';
+          }
+          saveBtn.disabled = false; saveBtn.textContent = '💾 Guardar cambios';
+        });
+        document.getElementById('cfg-pwa-preview').addEventListener('click', () => window.open(url, '_blank'));
+        document.getElementById('cfg-pwa-refresh').addEventListener('click', () => { const f = document.getElementById('cfg-pwa-iframe'); f.src = f.src; });
+      }
+    } catch (e) {
+      console.error('[cfgPwaLoad]', e);
+    }
+  }
+  window.cfgPwaLoad = cfgPwaLoad;
 
   /* ============ QUICK POS ============ */
   let qpVal = '';
