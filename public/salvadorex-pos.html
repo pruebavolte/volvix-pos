@@ -3103,9 +3103,41 @@
 <!-- ============ R8a FIX-H2: OFFLINE BANNER (visible cuando navigator.onLine=false) ============ -->
 <div id="r8a-offline-banner" role="alert" aria-live="polite" style="display:none;position:fixed;top:0;left:0;right:0;z-index:99999;background:linear-gradient(135deg,#DC2626,#B91C1C);color:#fff;padding:10px 16px;text-align:center;font-size:13px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.2);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
   <span style="font-size:16px;vertical-align:middle;">📶</span>
-  <span style="vertical-align:middle;margin-left:6px;">SIN CONEXIÓN — las ventas se guardan localmente y se sincronizan al reconectar.</span>
+  <span style="vertical-align:middle;margin-left:6px;">Revisa tu conexión a internet — las ventas se guardan localmente.</span>
   <span style="vertical-align:middle;margin-left:8px;background:rgba(255,255,255,.18);padding:2px 8px;border-radius:10px;font-size:12px;">Pendientes: <span id="r8a-queue-count">0</span></span>
+  <button id="r8a-offline-refresh" type="button" onclick="window.__volvixOfflineRefresh && window.__volvixOfflineRefresh()" style="margin-left:12px;padding:5px 14px;background:#fff;color:#B91C1C;border:0;border-radius:980px;font-weight:700;font-size:12px;cursor:pointer;vertical-align:middle;">🔄 Actualizar</button>
 </div>
+<script>
+  // 2026-05-10 user-request: botón "Actualizar" reintenta sincronización,
+  // busca nuevas versiones, limpia caches/cookies, revalida conexión.
+  window.__volvixOfflineRefresh = async function () {
+    var btn = document.getElementById('r8a-offline-refresh');
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Sincronizando…'; }
+    try {
+      // 1) Limpiar caches de Service Worker (forzar fetch fresh del próximo navegación)
+      if ('serviceWorker' in navigator && window.caches) {
+        try { var keys = await caches.keys(); for (var k of keys) await caches.delete(k); } catch(_){}
+      }
+      // 2) Re-registrar SW para descargar nueva versión
+      if ('serviceWorker' in navigator) {
+        try { var regs = await navigator.serviceWorker.getRegistrations(); for (var r of regs) await r.update(); } catch(_){}
+      }
+      // 3) Vaciar cola de eventos pendientes (intentar reenvío)
+      try { if (typeof __r8aProcessQueue === 'function') await __r8aProcessQueue(); } catch(_){}
+      try { if (typeof __r8bHeartbeat === 'function') await __r8bHeartbeat(); } catch(_){}
+      // 4) Si hay internet, recargar página para versión nueva (cache-bust)
+      if (navigator.onLine) {
+        location.href = location.pathname + '?_t=' + Date.now() + location.hash;
+      } else {
+        if (btn) { btn.disabled = false; btn.textContent = '🔄 Actualizar'; }
+        try { if (typeof showToast === 'function') showToast('⚠ Aún sin conexión. Verifica tu WiFi/datos.'); } catch(_){}
+      }
+    } catch (e) {
+      if (btn) { btn.disabled = false; btn.textContent = '🔄 Actualizar'; }
+      try { if (typeof showToast === 'function') showToast('Error al sincronizar: ' + e.message); } catch(_){}
+    }
+  };
+</script>
 <!-- ============ /R8a FIX-H2 ============ -->
 
 <!-- ============ LOGIN ============ -->

@@ -193,6 +193,35 @@ Sin redeploy. Frontend lee al boot y aplica.
 
 ---
 
+## 🏛️ Arquitectura multi-canal
+
+| Canal | Estado | Build/Deploy | Sync centralizado |
+|-------|--------|--------------|-------------------|
+| **Web principal** (`marketplace.html`) | ✅ activo | Vercel auto-deploy | API REST `/api/*` |
+| **PWA POS dueño** (`salvadorex-pos.html`) | ✅ activo | Vercel + manifest.json + sw.js | API + IndexedDB offline-first |
+| **PWA App Cliente** (`/app/index.html`) | ✅ activo | Vercel | API `/api/app/*` |
+| **Electron .exe Win** | ⚙️ scripts listos (`npm run electron:build:win`) | manual build → distribuye .exe | Misma API HTTPS |
+| **Electron .dmg Mac** | ⚙️ scripts listos (`electron:build:mac`) | manual | Misma API |
+| **APK Android (Capacitor)** | ⚙️ scripts listos (`mobile:android:release`) | manual `mobile:sync` + Android Studio | Misma API |
+| **iOS** | ⚙️ scripts listos (`mobile:ios`) | requiere Xcode | Misma API |
+
+### Cómo se "cablea" todo
+- **Una sola fuente de verdad**: `https://volvix-pos.vercel.app/api/*`
+- **Mismo backend**: todos los canales hablan al mismo `api/index.js` en Vercel
+- **Mismo BD**: Supabase `zhvwmzkcqngcaqpdxtwr`
+- **Misma config por giro**: `GET /api/app/config?t=<tnt>` retorna idéntico JSON sin importar el canal
+- **Misma terminología custom**: `tenant_terminology` aplica a todos los canales del tenant
+- **Sync offline → online**: IndexedDB queue (`volvix-db`) reenvía pendientes cuando reconecta
+
+### Botón "🔄 Actualizar" (banner offline)
+Disponible en `salvadorex-pos.html` cuando `navigator.onLine === false`. Al click:
+1. Limpia caches (`caches.delete()`)
+2. Re-registra Service Worker (descarga nueva versión)
+3. Procesa cola de eventos offline (`__r8aProcessQueue`)
+4. Heartbeat (`__r8bHeartbeat`)
+5. Si hay internet → recarga con cache-bust `?_t=<timestamp>`
+6. Si sigue offline → toast "Aún sin conexión"
+
 ## 🚀 Última versión deploy
 
 Ver `public/version.json` y `git log -3 --oneline` para el snapshot vigente.
