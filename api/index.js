@@ -37120,16 +37120,27 @@ if (process.env.NODE_ENV === 'test') {
       if (!tenant) return sendJSON(res, { error: 'tenant_no_encontrado' }, 404);
       const giroSlug = String(tenant.business_type || '').toLowerCase();
       const ge = giroSlug ? encodeURIComponent(giroSlug) : null;
-      const [verticals, modulos, terminologia, btns, brandingRows, mediaRows] = await Promise.all([
+      // 2026-05-10 fix: pos_companies.id (UUID) necesario para tenant_terminology
+      const [verticals, modulos, terminologia, btns, brandingRows, mediaRows, tenantUuidRow] = await Promise.all([
         ge ? supabaseRequest('GET', `/verticals?code=eq.${ge}&select=code,name&limit=1`).catch(() => []) : [],
         ge ? supabaseRequest('GET', `/giros_modulos?giro_slug=eq.${ge}&select=modulo,activo,state,name_override&limit=500`).catch(() => []) : [],
         ge ? supabaseRequest('GET', `/giros_terminologia?giro_slug=eq.${ge}&select=clave,valor_singular,valor_plural&limit=500`).catch(() => []) : [],
         ge ? supabaseRequest('GET', `/giros_buttons?giro_slug=eq.${ge}&select=button_key,activo,state,name_override&limit=500`).catch(() => []) : [],
-        // 2026-05-09: branding por tenant (logo, colores, redes sociales, dirección, horarios)
         supabaseRequest('GET', `/pos_app_branding?tenant_id=eq.${enc}&select=*&limit=1`).catch(() => []),
-        // 2026-05-09: multimedia (banners, videos, flyers) que el dueño sube
         supabaseRequest('GET', `/pos_app_media?tenant_id=eq.${enc}&active=eq.true&order=position.asc,id.asc&select=id,kind,title,subtitle,url,thumbnail_url,link_url,position`).catch(() => []),
+        supabaseRequest('GET', `/pos_companies?tenant_id=eq.${enc}&select=id&limit=1`).catch(() => []),
       ]);
+      // 2026-05-10 user-request: tenant_terminology override per-tenant
+      // (cuando dueño cambia "Tutor"→"Mamá/Papá" solo afecta su negocio)
+      let tenantTerms = [];
+      try {
+        const tUuid = (Array.isArray(tenantUuidRow) && tenantUuidRow[0] && tenantUuidRow[0].id) || null;
+        if (tUuid) {
+          tenantTerms = await supabaseRequest('GET',
+            `/tenant_terminology?tenant_id=eq.${encodeURIComponent(tUuid)}&select=term_key,term_value&limit=500`
+          ).catch(() => []);
+        }
+      } catch (_) {}
       const v = (Array.isArray(verticals) && verticals[0]) || (giroSlug ? { code: giroSlug, name: giroSlug } : null);
       const buttons = {}, buttonsState = {}, buttonNameOverrides = {};
       (Array.isArray(btns) ? btns : []).forEach(r => {
@@ -37151,6 +37162,12 @@ if (process.env.NODE_ENV === 'test') {
       (Array.isArray(terminologia) ? terminologia : []).forEach(r => {
         if (!r || !r.clave) return;
         terms[r.clave] = { singular: r.valor_singular, plural: r.valor_plural || r.valor_singular };
+      });
+      // 2026-05-10 OVERRIDE per-tenant: si dueño customizo terminología,
+      // sobreescribe el default del giro. Persistente solo para este tenant.
+      (Array.isArray(tenantTerms) ? tenantTerms : []).forEach(r => {
+        if (!r || !r.term_key) return;
+        terms[r.term_key] = { singular: r.term_value, plural: r.term_value };
       });
       // Branding (default si no hay row personalizada)
       const b = (Array.isArray(brandingRows) && brandingRows[0]) || {};
