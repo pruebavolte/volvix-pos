@@ -37048,7 +37048,8 @@ if (process.env.NODE_ENV === 'test') {
   handlers['GET /api/app/config'] = async function (req, res) {
     try {
       const url = new URL(req.url, 'http://x');
-      const tenantSlug = String(url.searchParams.get('t') || '').trim().toLowerCase();
+      // 2026-05-09 fix: tenant_id viene como 'TNT-XXXXX' (case-sensitive) — NO lowercase
+      const tenantSlug = String(url.searchParams.get('t') || '').trim();
       if (!tenantSlug) return sendJSON(res, { error: 'tenant_slug requerido (?t=)' }, 400);
       const enc = encodeURIComponent(tenantSlug);
       // pos_companies usa tenant_id (TNT-XXXX) como key. ?t= acepta tenant_id directo.
@@ -37091,7 +37092,8 @@ if (process.env.NODE_ENV === 'test') {
     try {
       const body = await readBody(req).catch(() => ({}));
       if (checkBodyError && checkBodyError(req, res)) return;
-      const tenantSlug = String(body.tenant_slug || '').trim().toLowerCase();
+      // 2026-05-09 fix: tenant_id es case-sensitive (TNT-XXXXX) — NO lowercase
+      const tenantSlug = String(body.tenant_slug || '').trim();
       const email = String(body.email || '').trim().toLowerCase();
       const phone = String(body.phone || '').replace(/\D/g, '');
       const name = String(body.name || '').trim();
@@ -37127,7 +37129,8 @@ if (process.env.NODE_ENV === 'test') {
     try {
       const body = await readBody(req).catch(() => ({}));
       if (checkBodyError && checkBodyError(req, res)) return;
-      const tenantSlug = String(body.tenant_slug || '').trim().toLowerCase();
+      // 2026-05-09 fix: tenant_id es case-sensitive (TNT-XXXXX) — NO lowercase
+      const tenantSlug = String(body.tenant_slug || '').trim();
       const email = String(body.email || '').trim().toLowerCase();
       if (!tenantSlug || !email) return sendJSON(res, { error: 'tenant_slug y email requeridos' }, 400);
       const enc = encodeURIComponent(tenantSlug);
