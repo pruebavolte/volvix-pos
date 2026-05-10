@@ -2732,6 +2732,65 @@
       } catch(_){}
       VOLVIX.applyState(s);
       console.warn('[IMPERSONATING] estado aplicado:', s);
+      // 2026-05-09: La UI del POS no reacciona dinámicamente a cambios de
+      // state.modules después del boot. Inyectamos CSS que OCULTA botones
+      // de módulos cuyo flag esté en false, Y lo re-aplicamos varias veces
+      // porque los wirings del POS añaden botones de forma async.
+      try {
+        var moduleHideCss = '';
+        Object.entries(s.modules || {}).forEach(function(entry){
+          var key = entry[0], on = !!entry[1];
+          if (on) return;
+          moduleHideCss += '[data-module="'+key+'"], [data-vlx-module="'+key+'"], .module-'+key+', .vlx-module-'+key+' { display:none !important; }\n';
+        });
+        if (moduleHideCss) {
+          var styleHide = document.getElementById('impersonation-modules-hide');
+          if (!styleHide) {
+            styleHide = document.createElement('style');
+            styleHide.id = 'impersonation-modules-hide';
+            (document.head || document.documentElement).appendChild(styleHide);
+          }
+          styleHide.textContent = moduleHideCss;
+        }
+        var moduleLabelMap = {
+          recargas: ['Recargas','📱 Recargas'],
+          servicios: ['Servicios','💡 Servicios','Pago de Servicios'],
+          tarjetas: ['Tarjetas','🎬 Tarjetas','Tarjetas Virtuales'],
+          credito: ['Crédito','Créditos','💳 Créditos','💳 Crédito'],
+          kardex: ['Kardex','📒 Kardex','📋 Kardex'],
+          inventario: ['Inventario','📦 Inventario'],
+          devoluciones: ['Devoluciones','↩️ Devoluciones'],
+          facturacion: ['Facturas','📄 Facturas','Facturación','📄 Facturación CFDI'],
+          promociones: ['Promociones','🎁 Promociones'],
+          cotizaciones: ['Cotizaciones','📝 Cotizaciones'],
+        };
+        var applyHide = function(){
+          Object.entries(s.modules || {}).forEach(function(entry){
+            var key = entry[0], on = !!entry[1];
+            if (on) return;
+            var labels = moduleLabelMap[key] || [];
+            if (!labels.length) return;
+            document.querySelectorAll('button, a, [role="tab"], .tab, .crumb').forEach(function(el){
+              if (el.dataset && el.dataset.impersonationHidden) return; // already hidden
+              var t = (el.textContent || '').trim();
+              if (labels.some(function(L){ return t === L || t.indexOf(L) === 0; })) {
+                el.style.display = 'none';
+                el.dataset.impersonationHidden = key;
+              }
+            });
+          });
+        };
+        // Re-aplicar varias veces porque los wirings async pueden inyectar botones tarde.
+        applyHide();
+        [500, 1500, 3000, 5000, 8000].forEach(function(delay){ setTimeout(applyHide, delay); });
+        // MutationObserver para futuros nodos
+        if (typeof MutationObserver === 'function') {
+          var mo = new MutationObserver(function(){ applyHide(); });
+          mo.observe(document.body, { childList: true, subtree: true });
+          // Auto-disconnect after 30s para no quedar polling forever
+          setTimeout(function(){ mo.disconnect(); }, 30000);
+        }
+      } catch(cssErr) { console.warn('[IMPERSONATING] css hide fail', cssErr); }
     }).catch(function(e){ console.warn('[IMPERSONATING] error fetch flags:', e); });
   }
   loadImpersonatedState();
@@ -20325,9 +20384,22 @@ window.addEventListener('volvix:version-loaded', function(e){
 
   // ─── COL 3: detalle del giro seleccionado (módulos preset, terminología, reglas) ───
   function renderGiroDetail() {
-    // 2026-05-09: prioridad a BD, fallback a constantes
-    const PROFILES = Object.assign({}, window.INDUSTRY_PROFILES || {}, window.INDUSTRY_PROFILES_FROM_BD || {});
-    const LABELS = Object.assign({}, window.INDUSTRY_LABELS || {}, window.INDUSTRY_LABELS_FROM_BD || {});
+    // 2026-05-09: BD es fallback INICIAL, las mutaciones in-memory de window.INDUSTRY_PROFILES
+    // ganan (clicks de chip). Hidratar window.INDUSTRY_PROFILES desde BD UNA SOLA VEZ por giro
+    // (si no existe ya), después las mutaciones quedan persistentes hasta hard reload o save.
+    if (v14.selectedGiro && window.INDUSTRY_PROFILES_FROM_BD && window.INDUSTRY_PROFILES_FROM_BD[v14.selectedGiro]) {
+      window.INDUSTRY_PROFILES = window.INDUSTRY_PROFILES || {};
+      if (!window.INDUSTRY_PROFILES[v14.selectedGiro] || !window._hydratedFromBd?.[v14.selectedGiro]) {
+        window.INDUSTRY_PROFILES[v14.selectedGiro] = Object.assign({},
+          window.INDUSTRY_PROFILES[v14.selectedGiro] || {},
+          window.INDUSTRY_PROFILES_FROM_BD[v14.selectedGiro] || {}
+        );
+        window._hydratedFromBd = window._hydratedFromBd || {};
+        window._hydratedFromBd[v14.selectedGiro] = true;
+      }
+    }
+    const PROFILES = window.INDUSTRY_PROFILES || {};
+    const LABELS = Object.assign({}, window.INDUSTRY_LABELS_FROM_BD || {}, window.INDUSTRY_LABELS || {});
     const TERMS = window.INDUSTRY_TERMS || {};
     const PRODUCT_FIELDS = window.INDUSTRY_PRODUCT_FIELDS || {};
     const SELL_RULES = window.INDUSTRY_SELL_RULES || {};
@@ -20369,13 +20441,55 @@ window.addEventListener('volvix:version-loaded', function(e){
     const m = fullLabel.match(/^(\S+)\s+(.+)$/) || [null, '🎯', fullLabel];
 
     if (labelEl) {
-      // 2026-05-09: indicador dirty si el usuario modificó el preset/terms en
-      // memoria sin aplicarlo a ningún tenant. Reset al hacer ⚡ Aplicar (ver más abajo).
+      // 2026-05-09: indicador dirty + botón GUARDAR GIRO (PATCH /api/admin/giros/:slug)
+      // Cuando el usuario modifica chips/terms del giro, los cambios persisten en BD
+      // y propagan a TODOS los tenants de ese giro automáticamente.
       const isDirty = !!(v14.giroIsDirty && v14.giroIsDirty[slug]);
+      let html = escapeText(m[2]);
       if (isDirty) {
-        labelEl.innerHTML = escapeText(m[2]) + '<span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;margin-left:8px;">● MODIFICADO (sin guardar)</span>';
-      } else {
-        labelEl.textContent = m[2];
+        html += '<span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;margin-left:8px;">● MODIFICADO (sin guardar)</span>';
+        html += '<button id="permv14-giro-save-bd" style="margin-left:10px;background:var(--pv-accent);color:#fff;border:none;padding:5px 14px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;">💾 Guardar Giro</button>';
+      }
+      labelEl.innerHTML = html;
+      // Wire save button (idempotente — sólo se crea cuando isDirty)
+      const saveBtn = document.getElementById('permv14-giro-save-bd');
+      if (saveBtn) {
+        saveBtn.addEventListener('click', async () => {
+          // 2026-05-09: 2 confirmaciones en 1: (a) guardar el preset; (b) cascadear
+          // a tenants (los que ya tienen ese giro reciben los cambios al instante).
+          const cascade = confirm('Guardar cambios del giro "' + (m[2] || slug) + '" en BD?\n\nOK = guardar Y propagar a TODOS los tenants de este giro (recarga inmediata).\nCancel = no guardar nada.');
+          if (!cascade) return;
+          saveBtn.disabled = true; saveBtn.textContent = 'Guardando…';
+          const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+          const modulesPatch = window.INDUSTRY_PROFILES[slug] || {};
+          const termsRaw = window.INDUSTRY_TERMS[slug] || {};
+          const termsPatch = {};
+          Object.entries(termsRaw).forEach(([k, v]) => {
+            if (typeof v === 'object') termsPatch[k] = v;
+            else termsPatch[k] = { singular: v, plural: v };
+          });
+          try {
+            const r = await fetch('/api/admin/giros/' + encodeURIComponent(slug), {
+              method: 'PATCH',
+              headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ modules: modulesPatch, terms: termsPatch, cascade: true }),
+            });
+            const j = await r.json();
+            if (!r.ok) {
+              alert('Error al guardar: ' + (j.error || r.status));
+              saveBtn.disabled = false; saveBtn.textContent = '💾 Guardar Giro';
+              return;
+            }
+            if (window.toast) window.toast('✅ Giro "' + slug + '" guardado: ' + (j.applied?.modules || 0) + ' módulos + ' + (j.applied?.terms || 0) + ' terms — cascadeado a ' + (j.applied?.cascaded_tenants || 0) + ' tenants', 'ok');
+            if (v14.giroIsDirty) delete v14.giroIsDirty[slug];
+            v14.catalogs.lastLoaded = 0;
+            _giroCatalogCache = null;
+            renderGiroDetail();
+          } catch (e) {
+            alert('Error de red: ' + e.message);
+            saveBtn.disabled = false; saveBtn.textContent = '💾 Guardar Giro';
+          }
+        });
       }
     }
     if (buttonsHeadName) buttonsHeadName.textContent = '✓ Módulos del preset';

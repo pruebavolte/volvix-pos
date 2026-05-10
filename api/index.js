@@ -36917,61 +36917,76 @@ if (process.env.NODE_ENV === 'test') {
       const enc = encodeURIComponent(slug);
       const applied = { modules: 0, terms: 0, product_fields: 0 };
 
-      // ── Modules ──
+      // ── Modules ── (2026-05-09: delete-then-insert por giro entero — más simple
+      // que upsert con on_conflict que requiere Prefer:resolution=merge-duplicates
+      // que el helper supabaseRequest no soporta. Para 38 giros×~20 módulos = trivial.)
       if (body.modules && typeof body.modules === 'object') {
         const keys = Object.keys(body.modules);
-        // Delete existing rows NOT in provided set
-        if (keys.length) {
-          const keepList = keys.map(k => encodeURIComponent(String(k))).join(',');
-          await supabaseRequest('DELETE',
-            `/giros_modulos?giro_slug=eq.${enc}&modulo=not.in.(${keepList})`
-          ).catch(() => null);
-        } else {
-          await supabaseRequest('DELETE', `/giros_modulos?giro_slug=eq.${enc}`).catch(() => null);
-        }
-        // Upsert each module
+        // Borrar TODO el preset de este giro y re-insertar el nuevo.
+        await supabaseRequest('DELETE', `/giros_modulos?giro_slug=eq.${enc}`).catch(() => null);
         const rows = keys.map((k, idx) => ({
           giro_slug: slug,
           modulo: String(k),
           activo: !!body.modules[k],
-          orden: idx,
+          orden: idx * 10,
         }));
         if (rows.length) {
-          await supabaseRequest('POST',
-            '/giros_modulos?on_conflict=giro_slug,modulo',
-            rows
-          );
+          await supabaseRequest('POST', '/giros_modulos', rows);
         }
         applied.modules = rows.length;
       }
 
-      // ── Terms ──
+      // ── Terms ── (mismo patrón delete-then-insert)
       if (body.terms && typeof body.terms === 'object') {
         const keys = Object.keys(body.terms);
-        if (keys.length) {
-          const keepList = keys.map(k => encodeURIComponent(String(k))).join(',');
-          await supabaseRequest('DELETE',
-            `/giros_terminologia?giro_slug=eq.${enc}&clave=not.in.(${keepList})`
-          ).catch(() => null);
-        } else {
-          await supabaseRequest('DELETE', `/giros_terminologia?giro_slug=eq.${enc}`).catch(() => null);
-        }
+        await supabaseRequest('DELETE', `/giros_terminologia?giro_slug=eq.${enc}`).catch(() => null);
         const rows = keys.map(k => {
           const v = body.terms[k] || {};
+          // Acepta tanto {singular,plural} como string plano (legacy)
+          const sing = (typeof v === 'object' ? v.singular : v) || '';
+          const plur = (typeof v === 'object' ? v.plural : v) || sing;
           return {
             giro_slug: slug,
             clave: String(k),
-            valor_singular: v.singular || '',
-            valor_plural: v.plural || v.singular || '',
+            valor_singular: String(sing),
+            valor_plural: String(plur),
           };
-        });
+        }).filter(r => r.valor_singular); // Skip empty
         if (rows.length) {
-          await supabaseRequest('POST',
-            '/giros_terminologia?on_conflict=giro_slug,clave',
-            rows
-          );
+          await supabaseRequest('POST', '/giros_terminologia', rows);
         }
         applied.terms = rows.length;
+      }
+
+      // ── Cascade a tenants del giro (opt-in via body.cascade=true) ──
+      // 2026-05-09: si se pide, propagar los cambios de modules a todos los tenants
+      // donde business_type = slug. Itera tenant_module_flags + UPSERT por (tenant_id, module_key).
+      let cascadedTenants = 0;
+      if (body.cascade === true && body.modules && typeof body.modules === 'object') {
+        try {
+          const tenants = await supabaseRequest('GET',
+            `/pos_companies?business_type=eq.${enc}&select=tenant_id&limit=500`
+          ).catch(() => []);
+          const tids = (Array.isArray(tenants) ? tenants : []).map(t => t.tenant_id).filter(Boolean);
+          for (const tid of tids) {
+            const tEnc = encodeURIComponent(tid);
+            // Borrar flags actuales y reinsertar desde el giro
+            await supabaseRequest('DELETE', `/tenant_module_flags?tenant_id=eq.${tEnc}`).catch(() => null);
+            const flagRows = Object.entries(body.modules).map(([k, v]) => ({
+              tenant_id: tid,
+              module_key: String(k),
+              enabled: !!v,
+              state: v ? 'enabled' : 'hidden',
+              paid: true,
+            }));
+            if (flagRows.length) {
+              await supabaseRequest('POST', '/tenant_module_flags', flagRows).catch(e => console.warn('cascade flag fail', tid, e.message));
+            }
+            cascadedTenants++;
+          }
+          applied.cascaded_tenants = cascadedTenants;
+          try { logAudit(req, 'giro.cascaded', 'tenant_module_flags', { slug, tenants_affected: cascadedTenants }); } catch(_){}
+        } catch (e) { console.warn('cascade err', e); }
       }
 
       // ── Product fields ──
