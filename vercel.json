@@ -37,8 +37,8 @@
     { "src": "/landing-estetica\\.html", "status": 301, "headers": { "Location": "/landing-salon-belleza.html" } },
     { "src": "/api-docs\\.html", "status": 301, "headers": { "Location": "/volvix-api-docs.html" } },
     { "src": "/tendero\\.html", "status": 301, "headers": { "Location": "/marketplace.html" } },
-    { "src": "/app/?", "dest": "/app/index.html" },
-    { "src": "/app/manifest\\.webmanifest", "dest": "/app/manifest.webmanifest" },
+    { "src": "/app", "status": 308, "headers": { "Location": "/app/index.html" } },
+    { "src": "/app/", "status": 308, "headers": { "Location": "/app/index.html" } },
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/api/index.js" }
   ],
