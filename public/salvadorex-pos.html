@@ -3988,9 +3988,10 @@
             <button class="permv14-nav-icon" data-permv14-nav="audit" title="Audit log">
               📜<span class="permv14-nav-tooltip">Audit log</span>
             </button>
-            <button class="permv14-nav-icon" data-permv14-nav="settings" title="Modo desactivación">
-              ⚙<span class="permv14-nav-tooltip">Modo</span>
-            </button>
+            <!-- 2026-05-09: ⚙ Modo de desactivación REMOVIDO del sidebar.
+                 Ahora cada módulo/botón tiene su propio 3-state (Activo/Oculto/Bloqueado)
+                 directamente en su select. El pane settings sigue existiendo
+                 oculto por backward-compat con window.PERM.setMode (legacy). -->
             <div class="permv14-sidebar-spacer"></div>
             <div class="permv14-sidebar-foot" title="Conectado"></div>
           </aside>
@@ -20051,23 +20052,35 @@ window.addEventListener('volvix:version-loaded', function(e){
 
     const state = getCombinedState();
 
-    // Renderizar fila del módulo completo
+    // 2026-05-09: Helper 3-state — lee tanto state.modules.X (boolean compat)
+    // como state.modulesState.X (state directo del flag cache). Devuelve uno
+    // de 'enabled' | 'hidden' | 'locked'.
+    const cur3State = (key, scope) => {
+      const cache = (window.PERM && window.PERM._flagCache && window.PERM._flagCache[window.PERM.selectedTid]) || {};
+      const stMap = scope === 'features' ? (cache.buttonsState || {}) : (cache.modulesState || {});
+      const direct = stMap[key];
+      if (direct === 'enabled' || direct === 'hidden' || direct === 'locked') return direct;
+      const stateMap = scope === 'features' ? state.features : state.modules;
+      return stateMap[key] === false ? 'hidden' : 'enabled';
+    };
+    const stateClassFor = (s) => s === 'enabled' ? 's-on' : (s === 'locked' ? 's-up' : 's-hi');
+
+    // Renderizar fila del módulo completo (3-state)
     if (moduleTable) {
-      const enabled = state.modules[k] !== false;
-      const stateVal = enabled ? 'on' : 'hidden';
-      const stateClass = enabled ? 's-on' : 's-hi';
+      const cur = cur3State(k, 'modules');
       moduleTable.innerHTML =
         '<div class="permv14-perm-row" data-permv14-mod="' + k + '">'
         + '<div class="permv14-perm-icon">' + m[1] + '</div>'
         + '<input class="permv14-perm-name-input" value="' + escapeAttr(m[2]) + '" data-readonly="true">'
-        + '<select class="permv14-state-select ' + stateClass + '" data-permv14-mod-toggle="' + k + '">'
-        +   '<option value="on"' + (stateVal==='on'?' selected':'') + '>✓ Activo</option>'
-        +   '<option value="hidden"' + (stateVal==='hidden'?' selected':'') + '>— Oculto</option>'
+        + '<select class="permv14-state-select ' + stateClassFor(cur) + '" data-permv14-mod-toggle="' + k + '" title="Activo: visible+clickeable. Oculto: no aparece. Bloqueado: visible pero deshabilitado (greyed)">'
+        +   '<option value="enabled"' + (cur==='enabled'?' selected':'') + '>✓ Activo</option>'
+        +   '<option value="hidden"'  + (cur==='hidden' ?' selected':'') + '>🙈 Oculto</option>'
+        +   '<option value="locked"'  + (cur==='locked' ?' selected':'') + '>🔒 Bloqueado</option>'
         + '</select>'
         + '</div>';
     }
 
-    // Renderizar botones del módulo
+    // Renderizar botones del módulo (3-state)
     if (buttonsTable) {
       const childButtons = Object.keys(FEAT_LABELS_LOCAL).filter(bk => FEAT_PARENT_MOD[bk] === k);
       if (buttonsCount) buttonsCount.textContent = String(childButtons.length);
@@ -20077,15 +20090,14 @@ window.addEventListener('volvix:version-loaded', function(e){
         buttonsTable.innerHTML = childButtons.map(bk => {
           const lbl = FEAT_LABELS_LOCAL[bk];
           const bm = lbl.match(/^(\S+)\s+(.+)$/) || [null, '🔘', lbl];
-          const enabled = state.features[bk] !== false;
-          const stateVal = enabled ? 'on' : 'hidden';
-          const stateClass = enabled ? 's-on' : 's-hi';
+          const cur = cur3State(bk, 'features');
           return '<div class="permv14-perm-row" data-permv14-feat="' + bk + '">'
               + '<div class="permv14-perm-icon">' + bm[1] + '</div>'
               + '<input class="permv14-perm-name-input" value="' + escapeAttr(bm[2]) + '" data-readonly="true">'
-              + '<select class="permv14-state-select ' + stateClass + '" data-permv14-feat-toggle="' + bk + '">'
-              +   '<option value="on"' + (stateVal==='on'?' selected':'') + '>✓ Activo</option>'
-              +   '<option value="hidden"' + (stateVal==='hidden'?' selected':'') + '>— Oculto</option>'
+              + '<select class="permv14-state-select ' + stateClassFor(cur) + '" data-permv14-feat-toggle="' + bk + '" title="Activo / Oculto / Bloqueado">'
+              +   '<option value="enabled"' + (cur==='enabled'?' selected':'') + '>✓ Activo</option>'
+              +   '<option value="hidden"'  + (cur==='hidden' ?' selected':'') + '>🙈 Oculto</option>'
+              +   '<option value="locked"'  + (cur==='locked' ?' selected':'') + '>🔒 Bloqueado</option>'
               + '</select>'
               + '</div>';
         }).join('');
@@ -20118,44 +20130,91 @@ window.addEventListener('volvix:version-loaded', function(e){
     renderGotchas(MOD_GOTCHAS[k] || []);
   }
 
-  function onModToggle(selectEl) {
-    const k = selectEl.dataset.permv14ModToggle;
-    const enabled = selectEl.value === 'on';
-    // 1) Actualizar overlay local para reactividad inmediata del preview
-    v14.pendingOverrides.modules[k] = enabled;
-    // 2) Llamar al toggle original (que persiste en server + actualiza _flagCache + broadcast)
-    if (window.PERM && typeof window.PERM.toggleModule === 'function') {
-      // toggleModule lee el estado ACTUAL y lo invierte. Si nuestro nuevo estado coincide con el actual, no llamamos.
-      const tid = window.PERM.selectedTid;
-      const cache = (window.PERM._flagCache && window.PERM._flagCache[tid]) || {};
-      const cur = cache.modules ? (cache.modules[k] !== false) : (window.PERM.DEFAULT_MODS && window.PERM.DEFAULT_MODS[k] !== false);
-      if (cur !== enabled) {
-        window.PERM.toggleModule(k);
-      }
+  // 2026-05-09: helper para mostrar/ocultar indicador "Auto-guardado"
+  // que aparece junto al label del módulo cuando un toggle persiste en BD.
+  function flashSaveIndicator(text) {
+    const labelEl = $('#permv14-current-mod-label');
+    if (!labelEl) return;
+    let ind = document.getElementById('permv14-mod-save-indicator');
+    if (!ind) {
+      ind = document.createElement('span');
+      ind.id = 'permv14-mod-save-indicator';
+      ind.style.cssText = 'margin-left:10px;background:#dcfce7;color:#15803d;padding:3px 10px;border-radius:5px;font-size:11px;font-weight:600;border:1px solid #86efac;transition:opacity .3s;';
+      labelEl.parentElement.appendChild(ind);
     }
-    // Estilo del select
-    selectEl.classList.remove('s-on','s-up','s-hi');
-    selectEl.classList.add(enabled ? 's-on' : 's-hi');
-    // Refrescar lista col 2 + preview
-    renderModulesList();
-    renderPreview();
+    ind.textContent = text || '✅ Guardado';
+    ind.style.opacity = '1';
+    clearTimeout(flashSaveIndicator._t);
+    flashSaveIndicator._t = setTimeout(() => { ind.style.opacity = '0'; }, 2500);
   }
 
-  function onFeatToggle(selectEl) {
-    const k = selectEl.dataset.permv14FeatToggle;
-    const enabled = selectEl.value === 'on';
-    v14.pendingOverrides.features[k] = enabled;
-    if (window.PERM && typeof window.PERM.toggleFeature === 'function') {
-      const tid = window.PERM.selectedTid;
-      const cache = (window.PERM._flagCache && window.PERM._flagCache[tid]) || {};
-      const cur = cache.features ? (cache.features[k] !== false) : (window.PERM.DEFAULT_FEATS && window.PERM.DEFAULT_FEATS[k] !== false);
-      if (cur !== enabled) {
-        window.PERM.toggleFeature(k);
-      }
-    }
+  // 2026-05-09: 3-state toggle — POST /api/admin/tenant/:tid/module con body.state directo
+  async function onModToggle(selectEl) {
+    const k = selectEl.dataset.permv14ModToggle;
+    const newState = selectEl.value; // 'enabled' | 'hidden' | 'locked'
+    const tid = window.PERM && window.PERM.selectedTid;
+    if (!tid) return;
     selectEl.classList.remove('s-on','s-up','s-hi');
-    selectEl.classList.add(enabled ? 's-on' : 's-hi');
-    renderPreview();
+    selectEl.classList.add(newState === 'enabled' ? 's-on' : (newState === 'locked' ? 's-up' : 's-hi'));
+    flashSaveIndicator('⏳ Guardando…');
+    try {
+      const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+      const r = await fetch('/api/admin/tenant/' + encodeURIComponent(tid) + '/module', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ module_key: k, state: newState }),
+      });
+      const j = await r.json();
+      if (!r.ok) {
+        flashSaveIndicator('❌ Error: ' + (j.error || r.status));
+        return;
+      }
+      // Actualizar cache local
+      const cache = (window.PERM._flagCache = window.PERM._flagCache || {});
+      cache[tid] = cache[tid] || { modules: {}, features: {} };
+      cache[tid].modules = cache[tid].modules || {};
+      cache[tid].modulesState = cache[tid].modulesState || {};
+      cache[tid].modules[k] = (newState === 'enabled');
+      cache[tid].modulesState[k] = newState;
+      flashSaveIndicator('✅ Guardado · ' + ({enabled:'Activo',hidden:'Oculto',locked:'Bloqueado'}[newState]));
+      renderModulesList();
+      renderPreview();
+    } catch (e) {
+      flashSaveIndicator('❌ Red: ' + e.message);
+    }
+  }
+
+  async function onFeatToggle(selectEl) {
+    const k = selectEl.dataset.permv14FeatToggle;
+    const newState = selectEl.value;
+    const tid = window.PERM && window.PERM.selectedTid;
+    if (!tid) return;
+    selectEl.classList.remove('s-on','s-up','s-hi');
+    selectEl.classList.add(newState === 'enabled' ? 's-on' : (newState === 'locked' ? 's-up' : 's-hi'));
+    flashSaveIndicator('⏳ Guardando botón…');
+    try {
+      const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+      const r = await fetch('/api/admin/tenant/' + encodeURIComponent(tid) + '/button', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ button_key: k, state: newState }),
+      });
+      const j = await r.json();
+      if (!r.ok) {
+        flashSaveIndicator('❌ Error: ' + (j.error || r.status));
+        return;
+      }
+      const cache = (window.PERM._flagCache = window.PERM._flagCache || {});
+      cache[tid] = cache[tid] || { modules: {}, features: {} };
+      cache[tid].features = cache[tid].features || {};
+      cache[tid].buttonsState = cache[tid].buttonsState || {};
+      cache[tid].features[k] = (newState === 'enabled');
+      cache[tid].buttonsState[k] = newState;
+      flashSaveIndicator('✅ Botón guardado · ' + ({enabled:'Activo',hidden:'Oculto',locked:'Bloqueado'}[newState]));
+      renderPreview();
+    } catch (e) {
+      flashSaveIndicator('❌ Red: ' + e.message);
+    }
   }
 
   function renderGotchas(arr) {

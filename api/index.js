@@ -36443,7 +36443,10 @@ if (process.env.NODE_ENV === 'test') {
   });
 
   // POST /api/admin/tenant/:tid/module — toggle modulo
-  // body: { module_key, enabled, lock_message? }
+  // body: { module_key, enabled?, state?, lock_message? }
+  // 2026-05-09: ahora acepta `state` directo ('enabled'|'hidden'|'locked')
+  // para soportar el 3rd estado "visible-pero-bloqueado" (greyed out).
+  // Si `state` no se pasa, usa `enabled` boolean para compat (true→enabled, false→hidden).
   handlers['POST /api/admin/tenant/:tid/module'] = requireAuth(async function (req, res, params) {
     if (!requireSuper(req, res)) return;
     try {
@@ -36452,9 +36455,18 @@ if (process.env.NODE_ENV === 'test') {
       if (checkBodyError(req, res)) return;
       const moduleKey = String(body.module_key || '').trim();
       if (!tid || !moduleKey) return sendJSON(res, { error: 'tenant_id + module_key requeridos' }, 400);
-      const enabled = !!body.enabled;
-      // CHECK constraint en DB: solo {enabled, hidden, locked}. 'disabled' falla silenciosamente.
-      const newState = enabled ? 'enabled' : 'hidden';
+      const ALLOWED_STATES = new Set(['enabled', 'hidden', 'locked']);
+      let newState;
+      if (body.state !== undefined) {
+        if (!ALLOWED_STATES.has(String(body.state))) {
+          return sendJSON(res, { error: 'invalid_state', allowed: Array.from(ALLOWED_STATES) }, 400);
+        }
+        newState = String(body.state);
+      } else {
+        // legacy fallback: enabled boolean
+        newState = !!body.enabled ? 'enabled' : 'hidden';
+      }
+      const enabled = (newState === 'enabled');
       // Lookup current state for audit
       const current = await supabaseRequest('GET',
         `/tenant_module_flags?tenant_id=eq.${encodeURIComponent(tid)}&module_key=eq.${encodeURIComponent(moduleKey)}&select=state`
@@ -36495,9 +36507,18 @@ if (process.env.NODE_ENV === 'test') {
       if (checkBodyError(req, res)) return;
       const buttonKey = String(body.button_key || '').trim();
       if (!tid || !buttonKey) return sendJSON(res, { error: 'tenant_id + button_key requeridos' }, 400);
-      const enabled = !!body.enabled;
-      // CHECK constraint en DB: solo {enabled, hidden, locked}. 'disabled' falla silenciosamente.
-      const newState = enabled ? 'enabled' : 'hidden';
+      // 2026-05-09: acepta state directo ('enabled'|'hidden'|'locked')
+      const ALLOWED_STATES_BTN = new Set(['enabled', 'hidden', 'locked']);
+      let newState;
+      if (body.state !== undefined) {
+        if (!ALLOWED_STATES_BTN.has(String(body.state))) {
+          return sendJSON(res, { error: 'invalid_state', allowed: Array.from(ALLOWED_STATES_BTN) }, 400);
+        }
+        newState = String(body.state);
+      } else {
+        newState = !!body.enabled ? 'enabled' : 'hidden';
+      }
+      const enabled = (newState === 'enabled');
       const current = await supabaseRequest('GET',
         `/tenant_button_flags?tenant_id=eq.${encodeURIComponent(tid)}&button_key=eq.${encodeURIComponent(buttonKey)}&select=state`
       ).catch(() => []);
