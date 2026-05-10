@@ -20494,6 +20494,40 @@ window.addEventListener('volvix:version-loaded', function(e){
     const PROFILES = Object.assign({}, window.INDUSTRY_PROFILES || {}, window.INDUSTRY_PROFILES_FROM_BD || {});
     const LABELS = Object.assign({}, window.INDUSTRY_LABELS || {}, window.INDUSTRY_LABELS_FROM_BD || {});
     const counts = await loadTenantCountsByGiro();
+    // 2026-05-09: botón "+ Nuevo Giro" inyectado al inicio del wrap (sticky)
+    // Solo lo inyecta UNA vez (idempotente); el handler abre prompt y POSTea.
+    if (!document.getElementById('permv14-giro-create-btn-host')) {
+      const host = document.createElement('div');
+      host.id = 'permv14-giro-create-btn-host';
+      host.style.cssText = 'padding:8px 10px;border-bottom:1px solid var(--pv-border);background:var(--pv-bg-paper);position:sticky;top:0;z-index:5;';
+      host.innerHTML = '<button id="permv14-giro-create-btn" style="width:100%;background:var(--pv-accent);color:#fff;border:none;padding:6px 10px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;">+ Nuevo Giro</button>';
+      wrap.parentNode.insertBefore(host, wrap);
+      host.querySelector('button').addEventListener('click', async () => {
+        const name = prompt('Nombre del nuevo giro (ej: 🧶 Boutique Artesanal):');
+        if (!name) return;
+        const slugSuggested = name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40);
+        const slug = prompt('Slug único (sin espacios, solo a-z, 0-9, _, -):', slugSuggested);
+        if (!slug) return;
+        const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+        try {
+          const r = await fetch('/api/admin/giros', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ slug, name }),
+          });
+          const j = await r.json();
+          if (!r.ok) { alert('Error: ' + (j.error || r.status) + (j.slug ? ' (slug: ' + j.slug + ')' : '')); return; }
+          if (window.toast) window.toast('✅ Giro "' + name + '" creado. Ahora agrega módulos.', 'ok');
+          // Bust catalog cache + seleccionar el nuevo
+          v14.catalogs.lastLoaded = 0; _giroCatalogCache = null;
+          await loadAllCatalogs(true);
+          v14.selectedGiro = slug;
+          renderGirosList();
+          renderGiroDetail();
+          renderGiroPreview();
+        } catch (e) { alert('Error de red: ' + e.message); }
+      });
+    }
     if (!v14.selectedGiro) {
       // auto-seleccionar el primero del primer giro disponible
       for (const cat of Object.values(GIRO_CATEGORIES)) {
@@ -20530,6 +20564,29 @@ window.addEventListener('volvix:version-loaded', function(e){
               + '</div>';
       });
     });
+    // 2026-05-09: agregar giros que existen en BD pero NO están en GIRO_CATEGORIES
+    // (los nuevos creados via "+ Nuevo Giro"). Sección "🆕 Nuevos / Custom".
+    const bdOnlyGiros = (v14.catalogs.giros || []).filter(g =>
+      g && g.slug && !usedSlugs.has(g.slug) && (!search || (g.name||'').toLowerCase().includes(search) || g.slug.toLowerCase().includes(search))
+    );
+    if (bdOnlyGiros.length) {
+      html += '<div class="permv14-split-group-label">🆕 Nuevos / Custom</div>';
+      bdOnlyGiros.forEach(g => {
+        usedSlugs.add(g.slug);
+        const label = g.name || g.slug;
+        const m = label.match(/^(\S+)\s+(.+)$/) || [null, '🆕', label];
+        const tenantCount = counts[g.slug] || 0;
+        const sel = (v14.selectedGiro === g.slug) ? ' selected' : '';
+        const countBadge = tenantCount > 0
+          ? '<span class="permv14-list-item-state" style="background:var(--pv-active);color:white;font-family:var(--pv-font-mono);font-size:9px;font-weight:600;padding:1px 5px;border-radius:8px;width:auto;height:auto;line-height:1;">' + tenantCount + '</span>'
+          : '';
+        html += '<div class="permv14-list-item' + sel + '" data-permv14-giro="' + escapeAttr(g.slug) + '">'
+              + '<span class="permv14-list-item-icon">' + m[1] + '</span>'
+              + escapeText(m[2])
+              + countBadge
+              + '</div>';
+      });
+    }
     wrap.innerHTML = html || '<div class="permv14-empty-row">Sin giros.</div>';
     $$('.permv14-list-item[data-permv14-giro]', wrap).forEach(el => {
       el.addEventListener('click', () => {
@@ -20620,7 +20677,23 @@ window.addEventListener('volvix:version-loaded', function(e){
           if (!cascade) return;
           saveBtn.disabled = true; saveBtn.textContent = 'Guardando…';
           const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
-          const modulesPatch = window.INDUSTRY_PROFILES[slug] || {};
+          // 2026-05-09: construir payload rico {state, name_override} por módulo
+          // a partir del overlay de edición + window.INDUSTRY_PROFILES (legacy bool).
+          const modulesPatch = {};
+          const ov = (window._giroEditOverlay && window._giroEditOverlay[slug]) || { states: {}, names: {} };
+          const profileBool = window.INDUSTRY_PROFILES[slug] || {};
+          // Universo de keys: profile bool + overlay states + overlay names
+          const allKeys = new Set([
+            ...Object.keys(profileBool),
+            ...Object.keys(ov.states || {}),
+            ...Object.keys(ov.names || {}),
+          ]);
+          allKeys.forEach(k => {
+            const state = ov.states[k] || (profileBool[k] ? 'enabled' : 'hidden');
+            const entry = { state, activo: (state === 'enabled') };
+            if (ov.names[k]) entry.name_override = ov.names[k];
+            modulesPatch[k] = entry;
+          });
           const termsRaw = window.INDUSTRY_TERMS[slug] || {};
           const termsPatch = {};
           Object.entries(termsRaw).forEach(([k, v]) => {
@@ -20663,40 +20736,82 @@ window.addEventListener('volvix:version-loaded', function(e){
       // 2026-05-09: filas INTERACTIVAS — chip toggleable + fila clickable para drill-down.
       // El estado se guarda mutando window.INDUSTRY_PROFILES[slug] en memoria.
       // Al hacer ⚡ Aplicar, applyProfile lee el objeto mutado.
+      // 2026-05-09: por giro, leer state per-módulo (enabled/hidden/locked) +
+      // name_override desde el catálogo BD (v14.catalogs.giros).
+      const giroFromBd = getGiroFromCatalog(slug);
+      const moduleStates = (giroFromBd && giroFromBd.modulesState) || {};
+      const moduleNameOv = (giroFromBd && giroFromBd.moduleNameOverrides) || {};
+      // Init in-memory overlay si no existe
+      window._giroEditOverlay = window._giroEditOverlay || {};
+      window._giroEditOverlay[slug] = window._giroEditOverlay[slug] || { states: {}, names: {} };
+      const ov = window._giroEditOverlay[slug];
+
+      const STATE_OPTS = [
+        { v: 'enabled', label: '✓ Activo', cls: 's-on' },
+        { v: 'hidden',  label: '🙈 Oculto', cls: 's-hi' },
+        { v: 'locked',  label: '🔒 Bloqueado', cls: 's-up' },
+      ];
+
       buttonsTable.innerHTML = allMods.map(k => {
         const lbl = MOD_LABELS_LOCAL[k];
         const bm = lbl.match(/^(\S+)\s+(.+)$/) || [null, '📦', lbl];
-        const enabled = !!profile[k];
-        const stateClass = enabled ? 's-on' : 's-hi';
-        const stateText = enabled ? '✓ INCLUIDO' : '— EXCLUIDO';
+        // State actual: overlay > BD > derivado de profile bool
+        const curState = ov.states[k] || moduleStates[k] || (profile[k] ? 'enabled' : 'hidden');
+        const opt = STATE_OPTS.find(o => o.v === curState) || STATE_OPTS[0];
+        // Name actual: overlay > BD override > default label
+        const curName = (ov.names[k] !== undefined ? ov.names[k] : (moduleNameOv[k] || ''));
         const isSel = (v14.selectedGiroMod === k);
         const rowStyle = isSel
-          ? 'cursor:pointer;border-left:3px solid var(--pv-accent);background:rgba(195,108,80,.06);'
-          : 'cursor:pointer;';
-        return '<div class="permv14-perm-row" data-giro-mod-row="' + k + '" style="' + rowStyle + '" title="Click para ver botones de este módulo en col 4">'
+          ? 'border-left:3px solid var(--pv-accent);background:rgba(195,108,80,.06);'
+          : '';
+        return '<div class="permv14-perm-row" data-giro-mod-row="' + k + '" style="' + rowStyle + '" title="Click en el chip para abrir drill-down de botones">'
           + '<div class="permv14-perm-icon">' + bm[1] + '</div>'
-          + '<input class="permv14-perm-name-input" value="' + escapeAttr(bm[2]) + '" readonly>'
-          + '<span class="permv14-state-select ' + stateClass + '" data-giro-mod-toggle="' + k + '" style="text-align:center;cursor:pointer;" title="Click para alternar INCLUIDO/EXCLUIDO en el preset">'
-          +   stateText
-          + '</span>'
+          + '<input class="permv14-perm-name-input" data-giro-mod-name="' + escapeAttr(k) + '" value="' + escapeAttr(curName || bm[2]) + '" placeholder="' + escapeAttr(bm[2]) + '" title="Edita el nombre que verá este módulo en el POS de los tenants de este giro" style="' + (curName ? 'background:#fef3c7;border:1px solid #f59e0b;' : '') + '">'
+          + '<select class="permv14-state-select ' + opt.cls + '" data-giro-mod-state="' + escapeAttr(k) + '" title="3 estados: visible+clickeable / no aparece / visible pero greyed">'
+          +   STATE_OPTS.map(o => '<option value="' + o.v + '"' + (o.v === curState ? ' selected' : '') + '>' + o.label + '</option>').join('')
+          + '</select>'
           + '</div>';
       }).join('');
-      // Wire chip click — toggle preset
-      $$('[data-giro-mod-toggle]', buttonsTable).forEach(el => {
-        el.addEventListener('click', ev => {
-          ev.stopPropagation();
-          const k = el.dataset.giroModToggle;
-          if (!window.INDUSTRY_PROFILES[slug]) window.INDUSTRY_PROFILES[slug] = {};
-          window.INDUSTRY_PROFILES[slug][k] = !window.INDUSTRY_PROFILES[slug][k];
-          v14.giroIsDirty[slug] = true; // 2026-05-09
-          if (window.toast) window.toast('Preset modificado en memoria — aplica con ⚡', 'info');
+      // Wire state select
+      $$('[data-giro-mod-state]', buttonsTable).forEach(sel => {
+        sel.addEventListener('change', ev => {
+          const k = sel.dataset.giroModState;
+          ov.states[k] = sel.value;
+          // Mantener bool de profile sincronizado para que applyProfile siga funcionando
+          window.INDUSTRY_PROFILES[slug] = window.INDUSTRY_PROFILES[slug] || {};
+          window.INDUSTRY_PROFILES[slug][k] = (sel.value === 'enabled');
+          v14.giroIsDirty[slug] = true;
+          if (window.toast) window.toast('Estado "' + k + '" → ' + sel.value + ' (sin guardar — usa 💾)', 'info');
           renderGiroDetail();
           renderGiroPreview();
         });
       });
-      // Wire row click — drill-down a col 4 mostrando botones del módulo
+      // Wire name input
+      $$('input[data-giro-mod-name]', buttonsTable).forEach(inp => {
+        const save = () => {
+          const k = inp.dataset.giroModName;
+          const newVal = inp.value.trim();
+          const defaultLbl = (MOD_LABELS_LOCAL[k] || '').replace(/^\S+\s+/, '');
+          if (newVal && newVal !== defaultLbl) {
+            ov.names[k] = newVal;
+            inp.style.background = '#fef3c7';
+            inp.style.border = '1px solid #f59e0b';
+            v14.giroIsDirty[slug] = true;
+          } else if (ov.names[k]) {
+            delete ov.names[k];
+            inp.style.background = '';
+            inp.style.border = '';
+            v14.giroIsDirty[slug] = true;
+          }
+          renderGiroPreview();
+        };
+        inp.addEventListener('blur', save);
+        inp.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); inp.blur(); } });
+      });
+      // Row click → drill-down (sólo si NO clickeó en input/select)
       $$('[data-giro-mod-row]', buttonsTable).forEach(el => {
-        el.addEventListener('click', () => {
+        el.addEventListener('click', ev => {
+          if (ev.target.tagName === 'INPUT' || ev.target.tagName === 'SELECT' || ev.target.tagName === 'OPTION') return;
           v14.selectedGiroMod = el.dataset.giroModRow;
           renderGiroDetail();
           renderGiroPreview();
