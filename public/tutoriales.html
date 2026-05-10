@@ -157,6 +157,30 @@
     <a href="/salvadorex-pos.html">← Volver al sistema</a>
   </div>
 
+  <!-- 2026-05-09: Tour interactivo movido aquí (estaba en /salvadorex-pos.html y se
+       autoiniciaba al abrir el POS, agregando peso y modal innecesario). Se preserva
+       el código en este index para uso futuro: cuando quieras reactivar el tour, mete
+       <script src="volvix-onboarding-wiring.js"></script> de vuelta en login.html y
+       comenta el `return;` early-return de la línea 18 de ese archivo. -->
+  <div style="max-width:760px;margin:24px auto;padding:18px;background:#f8fafc;border:1px dashed #cbd5e1;border-radius:10px;font-size:13px;color:#475569;">
+    <strong style="color:#0f172a;">📚 Tour interactivo guiado (deshabilitado)</strong>
+    <p style="margin:8px 0 0;line-height:1.6;">
+      Antes el sistema mostraba un modal "¡Hola, amigo! Bienvenido a Volvix POS · Empezar tour"
+      al abrir el POS. Lo deshabilitamos por petición del usuario para que el sistema arranque
+      directo sin mensajes ni overlays.
+    </p>
+    <p style="margin:8px 0 0;line-height:1.6;">
+      <strong>Para reactivarlo:</strong> editar <code>public/volvix-onboarding-wiring.js</code>
+      línea 18 — quitar el <code>return;</code> que lo desactiva. El sistema vuelve a mostrar
+      el welcome modal con tours por rol (cajero, admin, owner, superadmin), tooltips
+      contextuales y botón de progreso.
+    </p>
+    <p style="margin:8px 0 0;line-height:1.6;">
+      Antes también incluía el texto: "Puedes reabrirlo desde el botón <em>Ayuda</em> en
+      cualquier momento". Ahora ese acceso vive solo aquí, en <code>/tutoriales.html</code>.
+    </p>
+  </div>
+
   <!-- Eliminar viejo /tutorial-paso-1.html — usar /tutoriales.html como index oficial -->
 </body>
 </html>

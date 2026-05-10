@@ -26178,11 +26178,15 @@ if (process.env.NODE_ENV === 'test') {
   // FIX-R4a: GET /api/events/poll?since=<ISO> — multi-device sync polling
   // -------------------------------------------------------------------------
   handlers['GET /api/events/poll'] = requireAuth(async function (req, res) {
+    // 2026-05-09 fix: este endpoint es BACKGROUND polling. Si falla cualquier cosa
+    // (no hay tenant, no hay user, supabase down) devolver 200 con events:[] en
+    // vez de 4xx/5xx para evitar que el modal global "Algo salió mal" interrumpa
+    // al usuario. El polling reintentará en el próximo ciclo.
     try {
       var tnt = r8bTenant(req);
-      if (!tnt) return sendJSON(res, { error: 'tenant_required' }, 400);
+      if (!tnt) return sendJSON(res, { ok: true, events: [], count: 0, since: new Date().toISOString(), server_time: new Date().toISOString(), note: 'no_tenant_in_session' });
       var userId = req.user && req.user.id;
-      if (!userId) return sendJSON(res, { error: 'user_required' }, 400);
+      if (!userId) return sendJSON(res, { ok: true, events: [], count: 0, since: new Date().toISOString(), server_time: new Date().toISOString(), note: 'no_user_in_session' });
       // Rate-limit: 6/min/user (polling cada 30s = 2/min holgura)
       if (!rateLimit('r8b:poll:' + userId, 6, 60000)) {
         return send429(res, rateLimitRetryMs('r8b:poll:' + userId, 60000));
@@ -26243,7 +26247,11 @@ if (process.env.NODE_ENV === 'test') {
         since: since,
         server_time: new Date().toISOString()
       });
-    } catch (err) { sendError(res, err); }
+    } catch (err) {
+      // 2026-05-09: degradación graciosa — polling NO debe romper UI
+      try { sendJSON(res, { ok: true, events: [], count: 0, since: new Date().toISOString(), server_time: new Date().toISOString(), note: 'graceful_degradation', error_type: String(err && err.message || 'unknown').slice(0, 80) }); }
+      catch (_) { sendError(res, err); }
+    }
   });
 
   // -------------------------------------------------------------------------

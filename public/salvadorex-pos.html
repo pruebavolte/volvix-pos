@@ -473,6 +473,29 @@
     height: 40px;
   }
   .menubar::-webkit-scrollbar { height: 0; }
+
+  /* 2026-05-09 user-request: en pantalla ANCHA (≥1280px) hay espacio sobrado en
+     el menubar — revelar los módulos que están con display:none por ia-arquitectura
+     (servicios, tarjetas, promociones, departamentos, sugeridas, actualizador,
+     devoluciones). En pantalla más chica siguen ocultos y se acceden vía "+ Más".
+     Los módulos con clase .locked siguen ocultos hasta que se desbloqueen. */
+  @media (min-width: 1280px) {
+    .menubar .menu-btn[data-ia-arq-moved-to]:not(.locked) {
+      display: inline-flex !important;
+    }
+    /* En esa misma pantalla ancha, el botón "+ Más" se oculta porque ya no hay
+       nada extra que listar (todo está visible). Si hay locked aún cuenta como
+       hidden y "+ Más" sigue útil — JS detecta esto al cargar. */
+  }
+  /* En pantallas medianas (768-1279) mantenemos el menubar más compacto */
+  @media (min-width: 1600px) {
+    /* Ultra-wide: incluso revelar locked como visibles greyed para que el dueño
+       sepa qué hay disponible para desbloquear */
+    .menubar .menu-btn.locked[data-feature^="module."] {
+      display: inline-flex !important;
+      opacity: .55;
+    }
+  }
   .menubar-divider {
     width: 1px;
     background: var(--border);
@@ -2515,6 +2538,10 @@
       } catch (e) { return null; }
     }
     async function check() {
+      // 2026-05-09 user-request: NO mostrar ningún banner/modal/wizard al abrir POS.
+      // El sistema arranca DIRECTO a trabajar. Si en el futuro se quiere reactivar
+      // el flujo de onboarding+welcome banner+wizard redirect, quitar este return.
+      return;
       // Solo aplicamos en la pantalla principal del POS
       var path = (location.pathname || '').toLowerCase();
       if (path.indexOf('onboarding') >= 0 || path.indexOf('login') >= 0) return;
@@ -3095,16 +3122,11 @@
       <span class="badge">3</span>
     </button>
 
-    <!-- 2026-05 ia-arquitectura R1 + R7: 'Alertas Stock' es subset de Inventario.
-         Bell se queda como acceso rápido GLOBAL desde toolbar pero al click navega a
-         Inventario (fuente única de verdad). Antes: openLowStockAlerts() abría modal
-         flotante separado, lo que generaba sensación de "2 lugares para alertas". -->
-    <button class="tb-btn lowstock" id="tb-lowstock-bell"
-            onclick="(function(){ if (typeof showScreen==='function') showScreen('inventario'); var ev=new CustomEvent('volvix:show-low-stock-tab'); window.dispatchEvent(ev); })()"
-            aria-label="Alertas de stock bajo (abrir Inventario)" title="Alertas de stock bajo — abre Inventario" style="position:relative;">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      <span class="badge" id="tb-lowstock-badge" style="display:none;">0</span>
-    </button>
+    <!-- 2026-05-09 user-request: campanita 'Alertas Stock' REMOVIDA del topbar.
+         Era duplicada con módulo Inventario (ambos abrían lo mismo). El usuario
+         accede a alertas de stock directamente desde el menubar → Inventario.
+         El badge sigue actualizándose en background si algo lo lee. -->
+    <span id="tb-lowstock-badge" style="display:none;">0</span>
 
     <!-- 2026-05-07 cleanup: boton "Buscar venta" movido a la pantalla
          "Ventas del día y Devoluciones" (screen-ventas) — su contexto natural.
@@ -3339,11 +3361,9 @@
     </button>
   </nav>
 
-  <!-- Botón Vista flotante — siempre visible sin importar zoom -->
-  <button id="vista-fab" onclick="toggleVista()" title="Cambiar vista (①→②→Terminal)" aria-label="Cambiar vista">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="3" width="10" height="18" rx="1.5"/><rect x="13" y="3" width="10" height="9" rx="1.5"/><rect x="13" y="15" width="10" height="6" rx="1.5"/></svg>
-    <span id="vista-fab-label">Vista ①</span>
-  </button>
+  <!-- 2026-05-09 user-request: removido #vista-fab flotante. El control vive ahora
+       SOLO en el menubar (#vista-menu-btn) y en Configuración → 🖥️ Vista del POS. -->
+  <!-- <button id="vista-fab" ...></button> -->
 
   <!-- ============ MAIN ============ -->
   <main class="main">
@@ -4093,6 +4113,8 @@
                (logo, colores, redes sociales, dirección, horarios). El dueño
                edita aquí y los cambios se ven inmediatamente en /app/?t=<TNT>. -->
           <button class="config-tab" onclick="showCfg('pwa', this); cfgPwaLoad();">🎨 App Cliente PWA</button>
+          <!-- 2026-05-09 user-request: Vista del POS movida del FAB flotante a aquí -->
+          <button class="config-tab" onclick="showCfg('vista', this);">🖥️ Vista del POS</button>
         </div>
 
         <div>
@@ -4214,6 +4236,27 @@
                 <button class="btn" id="cfg-pwa-refresh" type="button" style="margin-top:8px;width:100%;font-size:11px;">🔄 Refrescar preview</button>
               </div>
             </div>
+          </div>
+
+          <!-- 2026-05-09: Vista del POS (antes FAB flotante) -->
+          <div id="cfg-vista" class="card card-pad hidden">
+            <h3 style="margin: 0 0 6px; font-size: 14px;">🖥️ Vista del POS</h3>
+            <p style="margin:0 0 14px;color:var(--text-2);font-size:11.5px;">Cambia el layout del Punto de Venta. Cada vista está optimizada para un caso de uso distinto.</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;">
+              <button type="button" class="btn" onclick="if(window.setVista){window.setVista(1);}else{document.body.dataset.vista='1';}showToast('Vista 1 · Clásico');" style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:14px;text-align:left;height:auto;">
+                <div style="font-size:14px;font-weight:700;">① Clásico</div>
+                <div style="font-size:11px;color:var(--text-2);">Vista tradicional · botones grandes · ideal para mostrador.</div>
+              </button>
+              <button type="button" class="btn" onclick="if(window.setVista){window.setVista(2);}else{document.body.dataset.vista='2';}showToast('Vista 2 · Tablet');" style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:14px;text-align:left;height:auto;">
+                <div style="font-size:14px;font-weight:700;">② Tablet (Loyverse)</div>
+                <div style="font-size:11px;color:var(--text-2);">Layout horizontal · grid de productos · pantallas táctiles.</div>
+              </button>
+              <button type="button" class="btn" onclick="if(window.setVista){window.setVista(3);}else{document.body.dataset.vista='3';}showToast('Vista 3 · Terminal');" style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:14px;text-align:left;height:auto;">
+                <div style="font-size:14px;font-weight:700;">③ Terminal (OXXO)</div>
+                <div style="font-size:11px;color:var(--text-2);">Modo oscuro · texto grande · estilo terminal de minisuper.</div>
+              </button>
+            </div>
+            <p style="margin:14px 0 0;color:var(--text-3);font-size:11px;">El cambio se aplica de inmediato. Para alternar también hay un botón en el menubar superior.</p>
           </div>
 
           <div id="cfg-sync" class="card card-pad hidden">
@@ -7242,6 +7285,99 @@
       }
     }
   }
+  // 2026-05-09 user-request: Modal identificador para búsqueda en POS Ventas.
+  // Cuando ENTER o "Buscar" produce >1 resultado o match parcial, muestra un
+  // overlay con el TIPO de búsqueda detectado (código de barras / nombre /
+  // descripción) y la lista de matches. Usuario elige con click o Enter.
+  // Resuelve con el item seleccionado o null si cancela.
+  function _showSearchPickerModal(opts) {
+    return new Promise(function (resolve) {
+      const { query, kind, items } = opts;
+      const KIND_LABEL = {
+        codigo_barras: { ico: '🔢', name: 'Código de barras', hint: 'Buscando por barcode/code exacto' },
+        nombre:        { ico: '🔤', name: 'Nombre',           hint: 'Coincidencia parcial en el nombre del producto' },
+        descripcion:   { ico: '📝', name: 'Descripción',      hint: 'Buscando en descripción/SKU' }
+      };
+      const k = KIND_LABEL[kind] || KIND_LABEL.nombre;
+
+      const old = document.getElementById('vlx-search-picker');
+      if (old) old.remove();
+
+      const overlay = document.createElement('div');
+      overlay.id = 'vlx-search-picker';
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.6);display:flex;align-items:center;justify-content:center;z-index:99999;padding:20px;backdrop-filter:blur(4px);';
+
+      const card = document.createElement('div');
+      card.style.cssText = 'background:#fff;border-radius:14px;max-width:540px;width:100%;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4);font-family:inherit;';
+
+      function _esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+      const itemsHtml = items.map(function (it, idx) {
+        const name = it.name || it.nombre || '(sin nombre)';
+        const code = it.code || it.barcode || '';
+        const price = Number(it.price || it.precio || 0);
+        const stock = it.stock != null ? it.stock : (it.existencia != null ? it.existencia : null);
+        const isFirst = idx === 0;
+        return '<button type="button" data-pick-idx="' + idx + '" tabindex="0" '
+          + 'style="display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px;border:0;border-bottom:1px solid #f1f5f9;background:' + (isFirst ? '#f0fdf4' : '#fff') + ';cursor:pointer;text-align:left;font-family:inherit;transition:background .1s;" '
+          + 'onmouseover="this.style.background=\'#ecfeff\'" '
+          + 'onmouseout="this.style.background=\'' + (isFirst ? '#f0fdf4' : '#fff') + '\'">'
+          + '<div style="flex:1;min-width:0;">'
+          +   '<div style="font-weight:600;font-size:14px;color:#0f172a;margin-bottom:2px;">' + _esc(name) + '</div>'
+          +   '<div style="font-size:11.5px;color:#64748b;font-family:ui-monospace,monospace;">' + _esc(code) + (stock != null ? ' · stock: ' + stock : '') + '</div>'
+          + '</div>'
+          + '<div style="font-weight:700;color:#065f46;font-size:15px;white-space:nowrap;">$' + price.toFixed(2) + '</div>'
+          + (isFirst ? '<div style="font-size:10px;background:#dcfce7;color:#166534;padding:2px 7px;border-radius:99px;font-weight:700;margin-left:8px;">ENTER</div>' : '')
+          + '</button>';
+      }).join('');
+
+      card.innerHTML =
+        '<div style="padding:14px 18px;border-bottom:1px solid #e5e7eb;background:#f8fafc;">'
+        +   '<div style="display:flex;align-items:center;gap:10px;">'
+        +     '<div style="font-size:24px;">' + k.ico + '</div>'
+        +     '<div style="flex:1;">'
+        +       '<div style="font-weight:700;font-size:14px;color:#0f172a;">Buscando como ' + k.name + '</div>'
+        +       '<div style="font-size:11.5px;color:#64748b;">' + k.hint + '</div>'
+        +     '</div>'
+        +     '<button type="button" id="vlx-pick-close" aria-label="Cerrar" style="background:transparent;border:0;font-size:22px;cursor:pointer;color:#64748b;padding:4px 10px;">×</button>'
+        +   '</div>'
+        +   '<div style="margin-top:8px;font-family:ui-monospace,monospace;font-size:13px;background:#fff;border:1px solid #e5e7eb;border-radius:6px;padding:6px 10px;color:#0f172a;">' + _esc(query) + '</div>'
+        + '</div>'
+        + '<div style="flex:1;overflow:auto;">'
+        +   '<div style="padding:10px 18px 6px;font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;font-weight:600;">' + items.length + ' resultado' + (items.length === 1 ? '' : 's') + ' · selecciona uno</div>'
+        +   itemsHtml
+        + '</div>'
+        + '<div style="padding:10px 18px;border-top:1px solid #e5e7eb;background:#f8fafc;font-size:11px;color:#64748b;display:flex;justify-content:space-between;">'
+        +   '<span>↑↓ navegar · Enter selecciona · Esc cancela</span>'
+        +   '<button type="button" id="vlx-pick-cancel" style="background:transparent;border:1px solid #cbd5e1;padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;color:#475569;">Cancelar</button>'
+        + '</div>';
+
+      overlay.appendChild(card);
+      document.body.appendChild(overlay);
+
+      function cleanup(result) {
+        try { document.removeEventListener('keydown', onKey); } catch (_) {}
+        overlay.remove();
+        resolve(result);
+      }
+      function onKey(e) {
+        if (e.key === 'Escape') { e.preventDefault(); cleanup(null); }
+        else if (e.key === 'Enter') { e.preventDefault(); cleanup(items[0]); }
+      }
+      document.addEventListener('keydown', onKey);
+      document.getElementById('vlx-pick-close').addEventListener('click', function () { cleanup(null); });
+      document.getElementById('vlx-pick-cancel').addEventListener('click', function () { cleanup(null); });
+      overlay.addEventListener('click', function (e) { if (e.target === overlay) cleanup(null); });
+      card.querySelectorAll('[data-pick-idx]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          const i = parseInt(btn.dataset.pickIdx, 10);
+          cleanup(items[i] || null);
+        });
+      });
+    });
+  }
+  window._showSearchPickerModal = _showSearchPickerModal;
+
   async function searchProduct(code) {
     if (__searchProductBusy) return;
     if (!code) { showToast('Escribe un código antes de presionar ENTER'); return; }
@@ -7281,14 +7417,33 @@
       const params = isBarcode
         ? 'or=(barcode.eq.' + encodeURIComponent(trimmed) + ',code.eq.' + encodeURIComponent(trimmed) + ')'
         : 'name=ilike.' + encodeURIComponent('%' + trimmed + '%');
-      const r = await fetch('/api/productos?' + params + '&select=*&limit=5', { credentials: 'include' });
+      const r = await fetch('/api/productos?' + params + '&select=*&limit=10', { credentials: 'include' });
       if (r.ok) {
         const j = await r.json();
         const items = j.items || j.data || [];
         if (items.length) {
-          const final = items[0];
-          addToCart(normalizeProductForCart(final));
-          showToast('✓ ' + (final.name || final.nombre) + ' (catálogo del negocio)');
+          // 2026-05-09 user-request: si SÓLO hay 1 match Y es código de barras exacto →
+          // agregar directo (UX rápida para escáner). En cualquier otro caso (múltiples
+          // resultados, match parcial por nombre, ambigüedad) → mostrar modal identificador
+          // para que el usuario VEA qué encontró y elija.
+          const exactBarcode = isBarcode && items.length === 1
+            && (items[0].barcode === trimmed || items[0].code === trimmed);
+          if (exactBarcode) {
+            addToCart(normalizeProductForCart(items[0]));
+            showToast('✓ ' + (items[0].name || items[0].nombre) + ' (catálogo del negocio)');
+            $('#barcode-input').value = ''; $('#barcode-input').focus();
+            return;
+          }
+          // Mostrar modal de identificación: muestra TIPO de búsqueda + resultados
+          const picked = await _showSearchPickerModal({
+            query: trimmed,
+            kind: isBarcode ? 'codigo_barras' : 'nombre',
+            items
+          });
+          if (picked) {
+            addToCart(normalizeProductForCart(picked));
+            showToast('✓ ' + (picked.name || picked.nombre) + ' agregado');
+          }
           $('#barcode-input').value = ''; $('#barcode-input').focus();
           return;
         }
@@ -9409,8 +9564,8 @@
   function showCfg(tab, btn) {
     $$('.config-tab').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
-    // 2026-05-09: agregada 'pwa' a la lista de tabs
-    ['general','negocio','impuestos','impresion','modulos','licencia','sync','pwa'].forEach(t => {
+    // 2026-05-09: agregada 'pwa' y 'vista' a la lista de tabs
+    ['general','negocio','impuestos','impresion','modulos','licencia','sync','pwa','vista'].forEach(t => {
       const el = $('#cfg-' + t);
       if (el) el.classList.toggle('hidden', t !== tab);
     });
@@ -9634,9 +9789,113 @@
   function showLocked(name) {
     showToast(`🔒 "${name}" no está activo — solicítalo a tu proveedor`);
   }
+  // 2026-05-09 user-request: funcional. Lista TODOS los módulos del menubar que
+  // están con display:none (subset de otros módulos / locked / movidos por
+  // ia-arquitectura) y permite navegar a ellos en un modal. Antes solo mostraba
+  // toast y no hacía nada.
   function openMasModulos() {
-    showToast('Abriendo catálogo de módulos adicionales…');
+    // Capturar los menu-btn ocultos del menubar (no los del propio "+ Más")
+    const hidden = Array.from(document.querySelectorAll('.menubar .menu-btn'))
+      .filter(b => {
+        const cs = window.getComputedStyle(b);
+        return cs.display === 'none' && !b.classList.contains('more')
+               && b.dataset.menu // tienen target screen
+               && b.getAttribute('onclick'); // tienen handler
+      })
+      .map(b => {
+        const span = b.querySelector('span');
+        const label = span ? span.textContent.trim() : (b.dataset.menu || '');
+        const onclickAttr = b.getAttribute('onclick') || '';
+        const isLocked = b.classList.contains('locked');
+        return {
+          label,
+          menu: b.dataset.menu || '',
+          feature: b.dataset.feature || '',
+          locked: isLocked,
+          onclickAttr,
+          movedTo: b.dataset.iaArqMovedTo || null
+        };
+      });
+
+    // Cualquier modal anterior se elimina
+    const old = document.getElementById('mas-modulos-modal');
+    if (old) old.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'mas-modulos-modal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.6);display:flex;align-items:center;justify-content:center;z-index:99998;padding:20px;backdrop-filter:blur(4px);';
+
+    const card = document.createElement('div');
+    card.style.cssText = 'background:#fff;border-radius:14px;max-width:680px;width:100%;max-height:84vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.4);overflow:hidden;';
+    card.innerHTML =
+      '<div style="padding:18px 20px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;gap:12px;">' +
+        '<div><h2 style="margin:0;font-size:18px;font-weight:700;color:#0f172a;">⋯ Más módulos</h2>' +
+        '<p style="margin:4px 0 0;font-size:12px;color:#64748b;">Funcionalidades que están ocultas del menú principal por organización (subset de otros módulos) o requieren desbloqueo.</p></div>' +
+        '<button id="mas-modulos-close" type="button" style="background:transparent;border:0;font-size:22px;cursor:pointer;color:#64748b;padding:4px 10px;">×</button>' +
+      '</div>' +
+      '<div style="flex:1;overflow:auto;padding:14px 20px;">' +
+        (hidden.length === 0
+          ? '<div style="text-align:center;padding:32px;color:#94a3b8;font-size:13px;">No hay módulos adicionales para mostrar — todos están en el menú principal.</div>'
+          : '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;">' +
+            hidden.map((m, i) =>
+              '<button type="button" data-mas-idx="' + i + '" ' +
+                'style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:14px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;cursor:pointer;text-align:left;font-family:inherit;transition:transform .08s,box-shadow .15s;' +
+                  (m.locked ? 'opacity:.7;background:#fafafa;' : '') + '" ' +
+                'onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 4px 12px rgba(0,0,0,.08)\'" ' +
+                'onmouseout="this.style.transform=\'translateY(0)\';this.style.boxShadow=\'none\'">' +
+                '<div style="font-size:14px;font-weight:600;color:#0f172a;">' + _escMas(m.label) + '</div>' +
+                '<div style="font-size:11px;color:#64748b;font-family:ui-monospace,monospace;">' + _escMas(m.feature || m.menu) + '</div>' +
+                (m.locked ? '<div style="font-size:10px;background:#fef3c7;color:#92400e;padding:2px 7px;border-radius:99px;font-weight:600;">🔒 BLOQUEADO</div>' : '') +
+                (m.movedTo ? '<div style="font-size:10px;background:#dbeafe;color:#1e40af;padding:2px 7px;border-radius:99px;font-weight:600;">→ ' + m.movedTo + '</div>' : '') +
+              '</button>'
+            ).join('') +
+          '</div>'
+        ) +
+      '</div>' +
+      '<div style="padding:12px 20px;border-top:1px solid #e5e7eb;background:#f8fafc;font-size:11px;color:#64748b;">' +
+        '<b>' + hidden.length + '</b> módulo(s) listado(s). Para activar permanentemente uno bloqueado, ve a Permisos → Módulos.' +
+      '</div>';
+    modal.appendChild(card);
+    document.body.appendChild(modal);
+
+    // Wire close + click backdrop
+    document.getElementById('mas-modulos-close').addEventListener('click', () => modal.remove());
+    modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+
+    // Wire cards: click ejecuta el onclick original del button hidden
+    card.querySelectorAll('[data-mas-idx]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const m = hidden[parseInt(btn.dataset.masIdx, 10)];
+        if (!m) return;
+        modal.remove();
+        try {
+          // Ejecutar el onclick original (ej. showScreen('servicios') o showLocked(...))
+          (new Function(m.onclickAttr))();
+        } catch (err) {
+          console.error('[openMasModulos] error executing', m, err);
+          if (m.menu && typeof showScreen === 'function') showScreen(m.menu);
+        }
+      });
+    });
   }
+  // Helper escape local para openMasModulos (evita colisión con cualquier escAttr global)
+  function _escMas(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  // 2026-05-09: ocultar el botón "+ Más" del menubar cuando NO hay módulos hidden
+  // que mostrar (porque @media (min-width:1280px) los reveló todos). Re-evalúa
+  // al cargar y al resize.
+  function _refreshMasButtonVisibility() {
+    const moreBtn = document.querySelector('.menubar .menu-btn.more');
+    if (!moreBtn) return;
+    const hidden = Array.from(document.querySelectorAll('.menubar .menu-btn'))
+      .filter(b => {
+        const cs = window.getComputedStyle(b);
+        return cs.display === 'none' && !b.classList.contains('more');
+      });
+    moreBtn.style.display = hidden.length ? '' : 'none';
+  }
+  document.addEventListener('DOMContentLoaded', _refreshMasButtonVisibility);
+  window.addEventListener('resize', () => { try { _refreshMasButtonVisibility(); } catch(_){} });
 
   /* ============ OFFLINE DETECTION ============ */
   /* R8a FIX-H2: banner ROJO persistente cuando offline + contador de queue + toast al recuperar */
@@ -21745,16 +22004,32 @@ window.addEventListener('volvix:version-loaded', function(e){
         </div>` : '';
 
         // 2026-05-09 fix(PREVIEW-REAL): el mockup hardcoded mentía — mostraba contenido genérico
-        // que no coincidía con la PWA real. Ahora cargamos un IFRAME del /app/index.html?t=<tenant>
-        // para que el super_admin vea EXACTAMENTE lo que verá el cliente final (con branding,
-        // colores, banners, videos, terminología y todo del giro/tenant en vivo).
-        const previewTenant = (tenantExample && (tenantExample.tenant_id || tenantExample.id)) || ('demo-' + slug);
+        // que no coincidía con la PWA real. Ahora cargamos un IFRAME del /app/index.html?t=<tenant>.
+        // Estrategia de selección de tenant para preview (en orden):
+        //   1. Tenant ejemplo del giro seleccionado (si existe en _tenantsList)
+        //   2. PRIMER tenant de pos_companies con ese business_type (lookup async)
+        //   3. Fallback HARDCODED conocido (TNT-8ZA83 farmacia / TNT-LXBKY vet / etc.)
+        //   4. Si nada existe → mostrar mensaje claro SIN iframe roto
+        // Antes el fallback "demo-<slug>" daba 404 ("tenant_no_encontrado") y el usuario
+        // veía la PWA con mensaje de error. Ahora si no hay tenant real, se evita el iframe.
+        const _knownDemoTenants = { farmacia:'TNT-8ZA83', veterinaria:'TNT-LXBKY', barberia:'TNT-GGNMJ', fruteria:'TNT-P5E74' };
+        const previewTenant = (tenantExample && (tenantExample.tenant_id || tenantExample.id))
+                           || _knownDemoTenants[slug]
+                           || null;
+        const _previewTenantSafe = previewTenant ? encodeURIComponent(previewTenant) : '';
+        const phoneFrameContent = previewTenant
+          ? `<iframe src="/app/index.html?t=${_previewTenantSafe}" style="position:relative;width:100%;height:100%;border:0;border-radius:28px;background:#f5f3ee;display:block;" title="PWA preview de ${escapeAttr(slug)}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>`
+          : `<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;flex-direction:column;gap:14px;padding:32px;background:#f8fafc;border-radius:28px;text-align:center;color:#64748b;font-size:13px;line-height:1.5;">
+              <div style="font-size:42px;">📱</div>
+              <div style="font-weight:600;color:#0f172a;font-size:14px;">Sin tenant real para este giro</div>
+              <div>El giro <b>${escapeText(slug)}</b> aún no tiene un negocio registrado en la BD para mostrar la PWA en vivo. Crea un tenant con este giro y la vista previa funcionará.</div>
+            </div>`;
         const phoneFrame = `<div style="position:relative;width:300px;height:600px;background:#000;border-radius:34px;padding:8px;box-shadow:0 12px 40px rgba(0,0,0,.25);margin:0 auto;">
           <div style="position:absolute;top:18px;left:50%;transform:translateX(-50%);width:90px;height:18px;background:#000;border-radius:14px;z-index:2;"></div>
-          <iframe src="/app/index.html?t=${encodeURIComponent(previewTenant)}" style="position:relative;width:100%;height:100%;border:0;border-radius:28px;background:#f5f3ee;display:block;" title="PWA preview de ${escapeAttr(slug)}"></iframe>
+          ${phoneFrameContent}
         </div>
         <div style="text-align:center;margin-top:8px;font-size:10.5px;color:var(--pv-text-secondary,#64748b);">
-          ${tenantExample ? '🟢 Vista REAL del tenant <b>' + escapeText(previewTenant) + '</b>' : '⚪ Demo virtual (sin tenant real para giro <b>' + escapeText(slug) + '</b>) — la PWA mostrará "tenant_no_encontrado" hasta que un cliente real use este giro'}
+          ${previewTenant ? '🟢 Vista REAL del tenant <b>' + escapeText(previewTenant) + '</b>' : '⚪ Sin tenant disponible para giro <b>' + escapeText(slug) + '</b>'}
         </div>`;
 
         // 2026-05-09 fix(APP-QR): URL compartible + QR para que el dueño la pase a sus clientes.

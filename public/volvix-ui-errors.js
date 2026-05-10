@@ -61,6 +61,15 @@
       // amerita un overlay 'Pagina no encontrada'. Lo mismo para 5xx/503: dejar que
       // el caller decida si mostrar el overlay (un 5xx en /api/products no debe
       // bloquear todo el POS si la pantalla puede degradar).
+      // 2026-05-09 fix: lista de URLs de BACKGROUND que NUNCA deben mostrar el
+      // modal global "Algo salió mal" — son polling/telemetry que reintentan solos.
+      // Antes el modal interrumpía la UI cuando estos endpoints fallaban.
+      const BACKGROUND_PATHS = [
+        '/api/events/poll', '/api/events/emit',
+        '/api/observability', '/api/log/client', '/api/analytics',
+        '/api/sync/', '/api/health', '/api/heartbeat',
+        '/api/push/subscribe', '/api/push/unsubscribe',
+      ];
       const _fetch = window.fetch;
       if (_fetch) {
         window.fetch = (...args) => {
@@ -68,7 +77,8 @@
             if (!res.ok) {
               const url = String(args[0] || '');
               const isApi = url.indexOf('/api/') !== -1 || url.indexOf('/api?') !== -1;
-              if (!isApi) {
+              const isBg = BACKGROUND_PATHS.some(p => url.indexOf(p) !== -1);
+              if (!isApi && !isBg) {
                 if (res.status === 404) ErrorHandler.show404({ url: args[0] });
                 else if (res.status >= 500) ErrorHandler.show500({ url: args[0], status: res.status });
                 else if (res.status === 503) ErrorHandler.showMaintenance();
@@ -76,7 +86,9 @@
             }
             return res;
           }).catch((err) => {
-            ErrorHandler.handle({ type: 'fetch', message: err.message, stack: err.stack });
+            // 2026-05-09: solo log a Sentry/console; NO modal por errores de fetch
+            // (offline, timeouts, etc. ya tienen su propio banner offline)
+            try { ErrorHandler.handle({ type: 'fetch', message: err.message, stack: err.stack }); } catch (_) {}
             throw err;
           });
         };
