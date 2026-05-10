@@ -318,6 +318,34 @@
     }
   }
 
+  // Tier 2: OCR.space API (online, free 25K/mes, mejores modelos para
+  // imágenes de baja calidad). Llamado solo si Tier 1 < 3 productos buenos.
+  async function _engineOCRSpace(file) {
+    const t0 = Date.now();
+    try {
+      const fd = new FormData();
+      fd.append('file', file, file.name || 'image.jpg');
+      fd.append('language', 'spa');         // OCR.space soporta spa, eng, etc.
+      fd.append('scale', 'true');            // auto-upscale
+      fd.append('isTable', 'true');          // mejor estructura para menus
+      fd.append('OCREngine', '2');           // engine 2 = mejor para variantes
+      // API key 'helloworld' es la pública de OCR.space para tests/uso ligero
+      // Reemplazar con key tuya en production (registro gratis en ocr.space)
+      const r = await fetch('https://api.ocr.space/parse/image', {
+        method: 'POST',
+        headers: { 'apikey': 'helloworld' },
+        body: fd
+      });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const j = await r.json();
+      if (j.IsErroredOnProcessing) throw new Error(j.ErrorMessage || 'OCR.space error');
+      const text = (j.ParsedResults || []).map(p => p.ParsedText || '').join('\n');
+      return { engine: 'ocrspace-tier2', text, ms: Date.now() - t0 };
+    } catch (e) {
+      return { engine: 'ocrspace-tier2', text: '', err: String(e).substring(0, 100), ms: Date.now() - t0 };
+    }
+  }
+
   async function _engineTesseract(file, opts) {
     const t0 = Date.now();
     try {
@@ -399,8 +427,24 @@
       const lastErr = results.map(r => r.err).filter(Boolean).join(' | ');
       throw new Error('OCR fallo en todos los engines: ' + (lastErr || 'sin texto'));
     }
-    // Merge de resultados → productos únicos
-    const merged = _mergeEngineResults(results);
+    // Merge de resultados Tier 1 → productos únicos
+    let merged = _mergeEngineResults(results);
+    const tier1Count = merged.length - 1; // -1 por el header
+    console.log('[wizard-ocr] Tier 1 extrajo', tier1Count, 'productos');
+
+    // Tier 2: si Tier 1 fue pobre (<3 productos) Y hay internet, llamar OCR.space
+    if (tier1Count < 3 && typeof navigator !== 'undefined' && navigator.onLine !== false) {
+      console.log('[wizard-ocr] Tier 1 < 3 prods → escalando a Tier 2 OCR.space');
+      try {
+        const tier2 = await _engineOCRSpace(processed);
+        console.log('[wizard-ocr]', tier2.engine, '·', tier2.ms, 'ms', '·', (tier2.text || '').length, 'chars', tier2.err ? '· ERR ' + tier2.err : '');
+        if (tier2.text && tier2.text.length > 5) {
+          // Re-merge incluyendo Tier 2
+          merged = _mergeEngineResults([...results, tier2]);
+        }
+      } catch (e) { console.warn('[wizard-ocr] Tier 2 falló:', e.message); }
+    }
+
     // Si merge produjo algo, retornar; sino fallback a heurística sobre el texto más largo
     if (merged.length > 1) return merged;
     const longest = results.reduce((a, b) => (a.text.length > b.text.length ? a : b));
