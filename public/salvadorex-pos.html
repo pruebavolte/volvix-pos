@@ -19346,9 +19346,11 @@ window.addEventListener('volvix:version-loaded', function(e){
     },
 
     // 2026-05-08: dropdown de perfiles por giro (lista todos los industry profiles)
-    populateProfileSelect() {
+    // 2026-05-09 SYNC FIX: hidratar BD antes de listar (271 giros de verticals)
+    async populateProfileSelect() {
       const sel = document.getElementById('perm-profile-sel');
       if (!sel) return;
+      try { if (typeof loadAllCatalogs === 'function') await loadAllCatalogs(); } catch(_){}
       const opts = ['<option value="">— Selecciona giro —</option>'];
       Object.keys(INDUSTRY_PROFILES).sort().forEach(k => {
         opts.push('<option value="' + k + '">' + (INDUSTRY_LABELS[k] || k) + '</option>');
@@ -21319,7 +21321,11 @@ window.addEventListener('volvix:version-loaded', function(e){
   }
 
   // ─── COL 4: preview del POS con el preset del giro ───
+  // 2026-05-09 SYNC FIX: hidratar BD (kick-off async, no bloquea render — la próxima
+  // re-renderización ya verá los 271 giros). El render usa window.INDUSTRY_PROFILES
+  // que es el MISMO objeto mutado por loadAllCatalogs.
   function renderGiroPreview() {
+    try { if (typeof loadAllCatalogs === 'function') loadAllCatalogs(); } catch(_){}
     const PROFILES = window.INDUSTRY_PROFILES || {};
     const LABELS = window.INDUSTRY_LABELS || {};
     const TERMS = window.INDUSTRY_TERMS || {};
@@ -21480,6 +21486,35 @@ window.addEventListener('volvix:version-loaded', function(e){
           </div>
         </div>`;
 
+        // 2026-05-09 fix(APP-QR): URL compartible + QR para que el dueño la pase a sus clientes.
+        // pos_companies usa tenant_id (TNT-XXXX) como key. La PWA cliente vive en
+        // /app/?t=<tenant_id> y consulta /api/app/config para giro/terms/buttons.
+        // Si no hay tenant ejemplo (preview puro), pasamos el slug del giro como fallback
+        // visual (la PWA mostrará "tenant_no_encontrado" pero el QR sirve como demo).
+        const tenantSlug = (tenantExample && (tenantExample.tenant_id || tenantExample.id)) || ('demo-' + slug);
+        const baseOrigin = (typeof location !== 'undefined' && location.origin) ? location.origin : 'https://volvix-pos.vercel.app';
+        const appUrl = baseOrigin + '/app/?t=' + encodeURIComponent(tenantSlug);
+        const qrApi = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&margin=8&data=' + encodeURIComponent(appUrl);
+        const qrShareHtml = ''
+          + '<div style="margin-top:18px;display:flex;gap:18px;align-items:center;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:14px;max-width:640px;margin-left:auto;margin-right:auto;">'
+          +   '<div style="flex-shrink:0;background:#fff;padding:6px;border:1px solid #e5e7eb;border-radius:8px;">'
+          +     '<img src="' + qrApi + '" alt="QR de descarga PWA" style="display:block;width:160px;height:160px;" loading="lazy">'
+          +   '</div>'
+          +   '<div style="flex:1;min-width:0;">'
+          +     '<div style="font-size:13px;font-weight:600;color:#0f172a;margin-bottom:4px;">📲 Compártela con tus ' + escapeText(mainPlural.toLowerCase()) + '</div>'
+          +     '<div style="font-size:11.5px;color:#64748b;margin-bottom:10px;line-height:1.5;">Escanean el QR o tocan el link y se les instala la app del negocio. Ven tus servicios, hacen pedidos/citas y se registran con su correo + teléfono.</div>'
+          +     '<div style="display:flex;gap:6px;align-items:center;background:#fff;border:1px solid #d1d5db;border-radius:6px;padding:6px 10px;font-size:11.5px;font-family:monospace;color:#1f2937;overflow:hidden;">'
+          +       '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + escapeAttr(appUrl) + '">' + escapeText(appUrl) + '</span>'
+          +     '</div>'
+          +     '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">'
+          +       '<button type="button" data-app-copy-link="' + escapeAttr(appUrl) + '" style="font-size:11px;padding:5px 10px;border:1px solid #10b981;background:#ecfdf5;color:#065f46;border-radius:5px;cursor:pointer;font-weight:600;">📋 Copiar link</button>'
+          +       '<button type="button" data-app-share-link="' + escapeAttr(appUrl) + '" data-app-share-name="' + escapeAttr(tenantName) + '" style="font-size:11px;padding:5px 10px;border:1px solid #3b82f6;background:#eff6ff;color:#1e40af;border-radius:5px;cursor:pointer;font-weight:600;">📤 Compartir</button>'
+          +       '<a href="' + escapeAttr(appUrl) + '" target="_blank" rel="noopener" style="font-size:11px;padding:5px 10px;border:1px solid #8b5cf6;background:#f5f3ff;color:#5b21b6;border-radius:5px;cursor:pointer;font-weight:600;text-decoration:none;display:inline-block;">🔗 Abrir app</a>'
+          +       '<a href="' + escapeAttr(qrApi) + '" download="qr-' + escapeAttr(tenantSlug) + '.png" style="font-size:11px;padding:5px 10px;border:1px solid #f59e0b;background:#fffbeb;color:#92400e;border-radius:5px;cursor:pointer;font-weight:600;text-decoration:none;display:inline-block;">⬇ Descargar QR</a>'
+          +     '</div>'
+          +   '</div>'
+          + '</div>';
+
         const drillHtml = ''
           + '<div>'
           +   '<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">'
@@ -21488,6 +21523,7 @@ window.addEventListener('volvix:version-loaded', function(e){
           +   '</div>'
           +   '<p class="permv14-mock-sub" style="margin-bottom:14px;">Así verá el cliente final la PWA cuando el dueño le pase el QR. Los componentes que <strong>desactivas/bloqueas</strong> en la columna de Comp. se reflejan acá.</p>'
           +   phoneFrame
+          +   qrShareHtml
           + '</div>';
 
         if (desktopEl) desktopEl.innerHTML = drillHtml;
@@ -21495,6 +21531,39 @@ window.addEventListener('volvix:version-loaded', function(e){
 
         const backBtn = desktopEl && desktopEl.querySelector('[data-giro-back-to-preview]');
         if (backBtn) backBtn.addEventListener('click', () => { v14.selectedGiroMod = null; renderGiroDetail(); renderGiroPreview(); });
+
+        // Wire copy/share buttons del QR
+        const copyBtn = desktopEl && desktopEl.querySelector('[data-app-copy-link]');
+        if (copyBtn) copyBtn.addEventListener('click', async () => {
+          const url = copyBtn.getAttribute('data-app-copy-link');
+          try {
+            await navigator.clipboard.writeText(url);
+            const orig = copyBtn.innerHTML;
+            copyBtn.innerHTML = '✅ ¡Copiado!';
+            setTimeout(() => { copyBtn.innerHTML = orig; }, 1500);
+          } catch(e) {
+            // fallback: select+execCommand
+            try {
+              const ta = document.createElement('textarea'); ta.value = url; document.body.appendChild(ta);
+              ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+              copyBtn.innerHTML = '✅ ¡Copiado!';
+              setTimeout(() => { copyBtn.innerHTML = '📋 Copiar link'; }, 1500);
+            } catch(_) { alert('No se pudo copiar. Selecciona el link manualmente.'); }
+          }
+        });
+        const shareBtn = desktopEl && desktopEl.querySelector('[data-app-share-link]');
+        if (shareBtn) shareBtn.addEventListener('click', async () => {
+          const url = shareBtn.getAttribute('data-app-share-link');
+          const name = shareBtn.getAttribute('data-app-share-name') || 'tu negocio';
+          if (navigator.share) {
+            try { await navigator.share({ title: name, text: 'Descarga la app de ' + name, url }); }
+            catch(_) {}
+          } else {
+            // fallback: WhatsApp
+            const wa = 'https://wa.me/?text=' + encodeURIComponent('Descarga la app de ' + name + ': ' + url);
+            window.open(wa, '_blank');
+          }
+        });
         return;
       }
       // Resto: fallback al renderer existente de drill-down genérico
@@ -21644,6 +21713,9 @@ window.addEventListener('volvix:version-loaded', function(e){
     if (window.PERM && !window.PERM._tenantsList && typeof window.PERM.loadTenants === 'function') {
       try { await window.PERM.loadTenants(); } catch(_) {}
     }
+    // 2026-05-09 SYNC FIX: hidratar window.INDUSTRY_PROFILES desde BD (271 giros)
+    // ANTES de leer. Sin esto, este pane mostraba solo los ~38 hardcoded.
+    try { if (typeof loadAllCatalogs === 'function') await loadAllCatalogs(); } catch(_){}
     const PROFILES = window.INDUSTRY_PROFILES || {};
     const LABELS = window.INDUSTRY_LABELS || {};
     const TERMS = window.INDUSTRY_TERMS || {};
@@ -22001,17 +22073,32 @@ window.addEventListener('volvix:version-loaded', function(e){
       v14.catalogs.giros = rg.items || [];
       v14.catalogs.modules = modules;
       v14.catalogs.lastLoaded = Date.now();
-      // Backward compat: shim INDUSTRY_PROFILES + INDUSTRY_LABELS si no existen
-      if (!window.INDUSTRY_PROFILES_FROM_BD) {
-        window.INDUSTRY_PROFILES_FROM_BD = {};
-        window.INDUSTRY_LABELS_FROM_BD = {};
-        v14.catalogs.giros.forEach(g => {
-          if (!g.slug) return;
-          window.INDUSTRY_PROFILES_FROM_BD[g.slug] = g.modules || {};
-          window.INDUSTRY_LABELS_FROM_BD[g.slug] = g.name || g.slug;
-        });
-      }
-      console.log('[PERMv14] catalogs loaded: giros=' + v14.catalogs.giros.length + ' modules=' + v14.catalogs.modules.length);
+      // 2026-05-09 SYNC FIX: BD es la única fuente de verdad. SIEMPRE refrescar
+      // (no condicional) y MERGEAR a window.INDUSTRY_PROFILES/LABELS para que
+      // las vistas legacy que leen `Object.keys(INDUSTRY_PROFILES)` directo vean
+      // los 271 giros de BD, no solo los ~38 hardcoded.
+      window.INDUSTRY_PROFILES_FROM_BD = {};
+      window.INDUSTRY_LABELS_FROM_BD = {};
+      window.INDUSTRY_PROFILES = window.INDUSTRY_PROFILES || {};
+      window.INDUSTRY_LABELS = window.INDUSTRY_LABELS || {};
+      v14.catalogs.giros.forEach(g => {
+        if (!g.slug) return;
+        const mods = g.modules || {};
+        window.INDUSTRY_PROFILES_FROM_BD[g.slug] = mods;
+        window.INDUSTRY_LABELS_FROM_BD[g.slug] = g.name || g.slug;
+        // BD pisa hardcoded para que aparezcan los 271 giros en TODAS las vistas
+        // que leen window.INDUSTRY_PROFILES (Permisos > Giros, datalists, etc.)
+        window.INDUSTRY_PROFILES[g.slug] = Object.assign({},
+          window.INDUSTRY_PROFILES[g.slug] || {},
+          mods
+        );
+        if (!window.INDUSTRY_LABELS[g.slug]) {
+          window.INDUSTRY_LABELS[g.slug] = g.name || g.slug;
+        }
+      });
+      console.log('[PERMv14] catalogs loaded: giros=' + v14.catalogs.giros.length
+        + ' modules=' + v14.catalogs.modules.length
+        + ' INDUSTRY_PROFILES.size=' + Object.keys(window.INDUSTRY_PROFILES).length);
     } catch (e) {
       console.warn('[PERMv14] catalogs load fail (using fallback constants):', e);
       v14.catalogs.giros = v14.catalogs.giros || [];

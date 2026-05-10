@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#10b981">
+  <title>Volvix · App Cliente</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <style>
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:#f5f3ee;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#0f172a}
+    .vapp{max-width:480px;margin:0 auto;min-height:100vh;background:#f5f3ee;position:relative;padding-bottom:80px}
+    .vapp-header{background:#10b981;color:#fff;padding:16px;display:flex;align-items:center;gap:12px}
+    .vapp-avatar{width:40px;height:40px;background:rgba(255,255,255,.25);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .vapp-title{font-weight:700;font-size:15px;line-height:1.2}
+    .vapp-sub{font-size:12px;opacity:.9}
+    .vapp-section{padding:16px}
+    .vapp-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px;margin-bottom:12px}
+    .vapp-h{font-size:18px;font-weight:600;font-family:Georgia,serif;letter-spacing:-.02em;margin:0 0 4px}
+    .vapp-sm{font-size:11.5px;color:#64748b;margin:0 0 10px}
+    .vapp-input{width:100%;padding:11px 13px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;background:#fff;margin-bottom:10px;font-family:inherit}
+    .vapp-input:focus{outline:none;border-color:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,.15)}
+    .vapp-btn{width:100%;padding:12px 14px;border:0;background:#10b981;color:#fff;font-weight:700;border-radius:9px;font-size:14px;cursor:pointer;font-family:inherit}
+    .vapp-btn:disabled{opacity:.5;cursor:not-allowed}
+    .vapp-btn.alt{background:#fff;color:#10b981;border:1.5px solid #10b981}
+    .vapp-error{background:#fef2f2;border:1px solid #fecaca;color:#991b1b;padding:8px 12px;border-radius:8px;font-size:12.5px;margin-bottom:10px}
+    .vapp-bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1px solid #e5e7eb;display:flex;justify-content:space-around;padding:9px 0 14px;z-index:10}
+    .vapp-tab{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;color:#64748b;cursor:pointer;font-size:9.5px;font-weight:600;text-decoration:none}
+    .vapp-tab.active{color:#065f46}
+    .vapp-tab-ico{font-size:18px}
+    .vapp-loading{padding:48px 16px;text-align:center;color:#64748b}
+    .vapp-empty{padding:32px 16px;text-align:center;color:#94a3b8;font-size:13px}
+    .news{background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:10px;padding:11px;margin:10px 0}
+    .news-tag{font-size:11px;font-weight:700;color:#92400e;letter-spacing:.04em}
+    .news-body{font-size:12.5px;margin-top:4px;color:#78350f}
+  </style>
+</head>
+<body>
+<div class="vapp" id="vapp">
+  <div class="vapp-loading">Cargando…</div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  // ─── Read tenant slug from ?t=<slug> ───
+  const params = new URLSearchParams(location.search);
+  const tenantSlug = (params.get('t') || '').trim();
+  const root = document.getElementById('vapp');
+
+  if (!tenantSlug) {
+    root.innerHTML = '<div class="vapp-section"><div class="vapp-card"><h2 class="vapp-h">App no disponible</h2><p class="vapp-sm">Falta el parámetro <code>?t=&lt;slug-del-negocio&gt;</code> en la URL. Pide al negocio que te comparta el QR o link correcto.</p></div></div>';
+    return;
+  }
+
+  // ─── Persistent client session per tenant ───
+  const SESS_KEY = 'volvix_client_sess_' + tenantSlug;
+  function getSess(){ try { return JSON.parse(localStorage.getItem(SESS_KEY) || 'null'); } catch(_){ return null; } }
+  function setSess(s){ try { localStorage.setItem(SESS_KEY, JSON.stringify(s)); } catch(_){} }
+  function clearSess(){ try { localStorage.removeItem(SESS_KEY); } catch(_){} }
+
+  // ─── Fetch tenant + giro config ───
+  // Endpoint público (sin auth): /api/app/config?t=<slug>
+  // Devuelve: { tenant: {name,slug}, giro: {slug,name,terms,buttons,buttonsState} }
+  async function fetchAppConfig() {
+    try {
+      const r = await fetch('/api/app/config?t=' + encodeURIComponent(tenantSlug), { headers: { 'Accept': 'application/json' }});
+      if (!r.ok) throw new Error('http ' + r.status);
+      return await r.json();
+    } catch(e) {
+      console.warn('[vapp] fetchAppConfig fail', e);
+      return null;
+    }
+  }
+
+  // ─── Register / login (cliente final del tenant) ───
+  // POST /api/app/register {tenant_slug, email, phone, name}
+  // POST /api/app/login    {tenant_slug, email}
+  async function apiRegister({email, phone, name}) {
+    const r = await fetch('/api/app/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tenant_slug: tenantSlug, email, phone, name })
+    });
+    return await r.json().catch(() => ({ error: 'parse_error' }));
+  }
+  async function apiLogin({email}) {
+    const r = await fetch('/api/app/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tenant_slug: tenantSlug, email })
+    });
+    return await r.json().catch(() => ({ error: 'parse_error' }));
+  }
+
+  // ─── Render: login/register form ───
+  function renderAuth(cfg, mode) {
+    mode = mode || 'login';
+    const tenantName = (cfg && cfg.tenant && cfg.tenant.name) || tenantSlug;
+    const initials = tenantName.split(/\s+/).slice(0,2).map(w => (w[0]||'').toUpperCase()).join('') || 'V';
+    const terms = (cfg && cfg.giro && cfg.giro.terms) || {};
+    const clientLabel = (terms.cliente && (terms.cliente.singular || terms.cliente)) || 'Cliente';
+    root.innerHTML =
+      '<div class="vapp-header"><div class="vapp-avatar">' + initials + '</div><div><div class="vapp-title">' + escHtml(tenantName) + '</div><div class="vapp-sub">App de ' + escHtml(clientLabel.toLowerCase()) + 's</div></div></div>' +
+      '<div class="vapp-section">' +
+        '<div class="vapp-card">' +
+          '<h2 class="vapp-h">' + (mode === 'register' ? 'Crear cuenta' : 'Iniciar sesión') + '</h2>' +
+          '<p class="vapp-sm">' + (mode === 'register' ? 'Regístrate para ver tu historial, hacer pedidos/citas y recibir promociones.' : 'Ingresa con tu correo para continuar.') + '</p>' +
+          '<div id="vapp-err"></div>' +
+          (mode === 'register' ? '<input class="vapp-input" id="vf-name" type="text" placeholder="Nombre completo" autocomplete="name">' : '') +
+          '<input class="vapp-input" id="vf-email" type="email" placeholder="Correo electrónico" autocomplete="email">' +
+          (mode === 'register' ? '<input class="vapp-input" id="vf-phone" type="tel" placeholder="Teléfono (10 dígitos)" autocomplete="tel" inputmode="numeric">' : '') +
+          '<button class="vapp-btn" id="vf-submit">' + (mode === 'register' ? 'Crear cuenta' : 'Entrar') + '</button>' +
+          '<div style="text-align:center;margin-top:10px;font-size:12.5px;color:#64748b;">' +
+            (mode === 'register'
+              ? '¿Ya tienes cuenta? <a href="#" id="vf-toggle" style="color:#10b981;font-weight:600;">Iniciar sesión</a>'
+              : '¿Eres nuevo? <a href="#" id="vf-toggle" style="color:#10b981;font-weight:600;">Crear cuenta</a>'
+            ) +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    document.getElementById('vf-toggle').addEventListener('click', (e) => {
+      e.preventDefault();
+      renderAuth(cfg, mode === 'register' ? 'login' : 'register');
+    });
+    document.getElementById('vf-submit').addEventListener('click', async () => {
+      const errEl = document.getElementById('vf-err') || document.getElementById('vapp-err');
+      errEl.innerHTML = '';
+      const email = (document.getElementById('vf-email').value || '').trim().toLowerCase();
+      if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+        errEl.innerHTML = '<div class="vapp-error">Correo inválido.</div>'; return;
+      }
+      const btn = document.getElementById('vf-submit');
+      btn.disabled = true; btn.textContent = '…';
+      try {
+        if (mode === 'register') {
+          const name = (document.getElementById('vf-name').value || '').trim();
+          const phone = (document.getElementById('vf-phone').value || '').trim();
+          if (!name) { errEl.innerHTML = '<div class="vapp-error">Falta tu nombre.</div>'; btn.disabled = false; btn.textContent = 'Crear cuenta'; return; }
+          if (!phone || phone.replace(/\D/g,'').length < 10) { errEl.innerHTML = '<div class="vapp-error">Teléfono inválido (10 dígitos).</div>'; btn.disabled = false; btn.textContent = 'Crear cuenta'; return; }
+          const r = await apiRegister({email, phone, name});
+          if (r && r.ok && r.client) { setSess({ client: r.client, ts: Date.now() }); renderHome(cfg); return; }
+          errEl.innerHTML = '<div class="vapp-error">' + escHtml(r && r.error || 'Error al registrar.') + '</div>';
+        } else {
+          const r = await apiLogin({email});
+          if (r && r.ok && r.client) { setSess({ client: r.client, ts: Date.now() }); renderHome(cfg); return; }
+          errEl.innerHTML = '<div class="vapp-error">' + escHtml(r && r.error || 'Correo no encontrado. ¿Crear cuenta?') + '</div>';
+        }
+      } catch(e) {
+        errEl.innerHTML = '<div class="vapp-error">No se pudo conectar. Intenta de nuevo.</div>';
+      } finally {
+        btn.disabled = false; btn.textContent = mode === 'register' ? 'Crear cuenta' : 'Entrar';
+      }
+    });
+  }
+
+  // ─── Render: home (post-login) ───
+  function renderHome(cfg) {
+    const sess = getSess();
+    const client = (sess && sess.client) || { name: 'Invitado', email: '' };
+    const tenantName = (cfg && cfg.tenant && cfg.tenant.name) || tenantSlug;
+    const initials = (client.name || 'C').split(/\s+/).slice(0,2).map(w => (w[0]||'').toUpperCase()).join('');
+    const buttons = (cfg && cfg.giro && cfg.giro.buttons) || {};
+    const buttonsState = (cfg && cfg.giro && cfg.giro.buttonsState) || {};
+    const isOn = (key) => (buttonsState[key] || (buttons[key] !== false ? 'enabled' : 'hidden')) === 'enabled';
+    const terms = (cfg && cfg.giro && cfg.giro.terms) || {};
+    const clientPlural = (terms.cliente && (terms.cliente.plural || terms.cliente)) || 'Clientes';
+
+    root.innerHTML =
+      (isOn('app.section_profile') ? '<div class="vapp-header"><div class="vapp-avatar">' + escHtml(initials || 'C') + '</div><div><div class="vapp-title">' + escHtml(tenantName) + '</div><div class="vapp-sub">Hola ' + escHtml((client.name || '').split(' ')[0]) + ' 👋</div></div><a href="#" id="vapp-logout" style="margin-left:auto;color:#fff;opacity:.85;text-decoration:none;font-size:12px;">Salir</a></div>' : '') +
+      '<div class="vapp-section">' +
+        (isOn('app.section_main_list')
+          ? '<div class="vapp-card"><h2 class="vapp-h">Tu cuenta</h2><p class="vapp-sm">Bienvenido a la app de ' + escHtml(tenantName) + '. Aquí verás tu historial, podrás hacer pedidos/citas, etc.</p><div style="font-size:12.5px;color:#475569;line-height:1.6;"><b>Correo:</b> ' + escHtml(client.email) + '<br><b>Teléfono:</b> ' + escHtml(client.phone || '—') + '</div></div>'
+          : '') +
+        (isOn('app.section_news') ? '<div class="news"><div class="news-tag">📰 NOTICIA</div><div class="news-body">Promo del mes — pregunta en mostrador.</div></div>' : '') +
+        (isOn('app.section_contact')
+          ? '<div class="vapp-card"><h2 class="vapp-h">Contacto</h2><p class="vapp-sm">¿Necesitas ayuda?</p><div style="display:flex;justify-content:space-around;font-size:22px;">📞 💬 📸 👍</div></div>'
+          : '') +
+      '</div>' +
+      renderTabs(buttons, buttonsState);
+
+    const out = document.getElementById('vapp-logout');
+    if (out) out.addEventListener('click', (e) => { e.preventDefault(); if (confirm('¿Cerrar sesión?')) { clearSess(); renderAuth(cfg, 'login'); } });
+  }
+
+  function renderTabs(buttons, buttonsState) {
+    const isOn = (k) => (buttonsState[k] || (buttons[k] !== false ? 'enabled' : 'hidden')) === 'enabled';
+    const tabs = [
+      { k:'app.bottom_inicio',    ic:'🏠', l:'Inicio' },
+      { k:'app.bottom_historial', ic:'🕐', l:'Historial' },
+      { k:'app.bottom_citas',     ic:'📅', l:'Citas' },
+      { k:'app.bottom_carrito',   ic:'🛒', l:'Pedir' },
+    ].filter(t => isOn(t.k));
+    if (!tabs.length) return '';
+    return '<div class="vapp-bottom">' + tabs.map((t,i) =>
+      '<a href="#" class="vapp-tab' + (i===0 ? ' active' : '') + '"><div class="vapp-tab-ico">' + t.ic + '</div><div>' + escHtml(t.l) + '</div></a>'
+    ).join('') + '</div>';
+  }
+
+  function escHtml(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  // ─── Boot ───
+  (async function boot(){
+    const cfg = await fetchAppConfig();
+    if (!cfg) {
+      root.innerHTML = '<div class="vapp-section"><div class="vapp-card"><h2 class="vapp-h">Negocio no encontrado</h2><p class="vapp-sm">No se pudo cargar la configuración del negocio <code>' + escHtml(tenantSlug) + '</code>. Verifica el link.</p></div></div>';
+      return;
+    }
+    const sess = getSess();
+    if (sess && sess.client && sess.client.email) renderHome(cfg);
+    else renderAuth(cfg, 'login');
+  })();
+})();
+</script>
+</body>
+</html>

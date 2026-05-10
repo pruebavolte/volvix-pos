@@ -37037,6 +37037,114 @@ if (process.env.NODE_ENV === 'test') {
     } catch (err) { sendError(res, err); }
   });
 
+  // ─────────────────────────────────────────────────────────────────────
+  // 2026-05-09 PWA cliente final: 3 endpoints PÚBLICOS (sin requireAuth)
+  // que sirven la app /app/?t=<tenant_slug>
+  //   GET  /api/app/config?t=<slug> — devuelve tenant + giro (terms/buttons)
+  //   POST /api/app/register        — crea cliente final del tenant
+  //   POST /api/app/login           — login email-only del cliente
+  // Tabla: pos_app_clients (tenant_slug, email, phone, name, created_at)
+  // ─────────────────────────────────────────────────────────────────────
+  handlers['GET /api/app/config'] = async function (req, res) {
+    try {
+      const url = new URL(req.url, 'http://x');
+      const tenantSlug = String(url.searchParams.get('t') || '').trim().toLowerCase();
+      if (!tenantSlug) return sendJSON(res, { error: 'tenant_slug requerido (?t=)' }, 400);
+      const enc = encodeURIComponent(tenantSlug);
+      // pos_companies usa tenant_id (TNT-XXXX) como key. ?t= acepta tenant_id directo.
+      const tenants = await supabaseRequest('GET',
+        `/pos_companies?tenant_id=eq.${enc}&select=tenant_id,name,business_type&limit=1`
+      ).catch(() => []);
+      const tenant = (Array.isArray(tenants) && tenants[0]) || null;
+      if (!tenant) return sendJSON(res, { error: 'tenant_no_encontrado' }, 404);
+      const giroSlug = String(tenant.business_type || '').toLowerCase();
+      if (!giroSlug) return sendJSON(res, { ok: true, tenant: { slug: tenant.tenant_id, name: tenant.name }, giro: null });
+      const ge = encodeURIComponent(giroSlug);
+      const [verticals, modulos, terminologia, btns] = await Promise.all([
+        supabaseRequest('GET', `/verticals?code=eq.${ge}&select=code,name&limit=1`).catch(() => []),
+        supabaseRequest('GET', `/giros_modulos?giro_slug=eq.${ge}&select=modulo,activo,state&limit=500`).catch(() => []),
+        supabaseRequest('GET', `/giros_terminologia?giro_slug=eq.${ge}&select=clave,valor_singular,valor_plural&limit=500`).catch(() => []),
+        supabaseRequest('GET', `/giros_buttons?giro_slug=eq.${ge}&select=button_key,activo,state,name_override&limit=500`).catch(() => []),
+      ]);
+      const v = (Array.isArray(verticals) && verticals[0]) || { code: giroSlug, name: giroSlug };
+      const buttons = {}, buttonsState = {}, buttonNameOverrides = {};
+      (Array.isArray(btns) ? btns : []).forEach(r => {
+        if (!r || !r.button_key) return;
+        buttons[r.button_key] = !!r.activo;
+        buttonsState[r.button_key] = r.state || (r.activo ? 'enabled' : 'hidden');
+        if (r.name_override) buttonNameOverrides[r.button_key] = r.name_override;
+      });
+      const terms = {};
+      (Array.isArray(terminologia) ? terminologia : []).forEach(r => {
+        if (!r || !r.clave) return;
+        terms[r.clave] = { singular: r.valor_singular, plural: r.valor_plural || r.valor_singular };
+      });
+      sendJSON(res, {
+        ok: true,
+        tenant: { slug: tenant.tenant_id, name: tenant.name },
+        giro: { slug: v.code, name: v.name, terms, buttons, buttonsState, buttonNameOverrides },
+      });
+    } catch (err) { sendError(res, err); }
+  };
+
+  handlers['POST /api/app/register'] = async function (req, res) {
+    try {
+      const body = await readBody(req).catch(() => ({}));
+      if (checkBodyError && checkBodyError(req, res)) return;
+      const tenantSlug = String(body.tenant_slug || '').trim().toLowerCase();
+      const email = String(body.email || '').trim().toLowerCase();
+      const phone = String(body.phone || '').replace(/\D/g, '');
+      const name = String(body.name || '').trim();
+      if (!tenantSlug) return sendJSON(res, { error: 'tenant_slug requerido' }, 400);
+      if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return sendJSON(res, { error: 'email_invalido' }, 400);
+      if (!phone || phone.length < 10) return sendJSON(res, { error: 'phone_invalido' }, 400);
+      if (!name) return sendJSON(res, { error: 'name_requerido' }, 400);
+      const enc = encodeURIComponent(tenantSlug);
+      const tenants = await supabaseRequest('GET',
+        `/pos_companies?tenant_id=eq.${enc}&select=tenant_id&limit=1`
+      ).catch(() => []);
+      if (!tenants || !tenants.length) return sendJSON(res, { error: 'tenant_no_encontrado' }, 404);
+      const tenantId = tenants[0].tenant_id;
+      // Verificar duplicado
+      const ee = encodeURIComponent(email);
+      const dup = await supabaseRequest('GET',
+        `/pos_app_clients?tenant_id=eq.${encodeURIComponent(tenantId)}&email=eq.${ee}&select=id&limit=1`
+      ).catch(() => []);
+      if (dup && dup.length) return sendJSON(res, { error: 'email_ya_registrado' }, 409);
+      // Insertar
+      const ins = await supabaseRequest('POST', '/pos_app_clients', {
+        tenant_id: tenantId,
+        tenant_slug: tenantSlug,
+        email, phone, name,
+      }, { 'Prefer': 'return=representation' }).catch((e) => ({ _err: e }));
+      if (ins && ins._err) return sendJSON(res, { error: 'db_error', detail: String(ins._err.message || ins._err) }, 500);
+      const client = (Array.isArray(ins) && ins[0]) || { email, phone, name };
+      sendJSON(res, { ok: true, client: { email: client.email, phone: client.phone, name: client.name } });
+    } catch (err) { sendError(res, err); }
+  };
+
+  handlers['POST /api/app/login'] = async function (req, res) {
+    try {
+      const body = await readBody(req).catch(() => ({}));
+      if (checkBodyError && checkBodyError(req, res)) return;
+      const tenantSlug = String(body.tenant_slug || '').trim().toLowerCase();
+      const email = String(body.email || '').trim().toLowerCase();
+      if (!tenantSlug || !email) return sendJSON(res, { error: 'tenant_slug y email requeridos' }, 400);
+      const enc = encodeURIComponent(tenantSlug);
+      const tenants = await supabaseRequest('GET',
+        `/pos_companies?tenant_id=eq.${enc}&select=tenant_id&limit=1`
+      ).catch(() => []);
+      if (!tenants || !tenants.length) return sendJSON(res, { error: 'tenant_no_encontrado' }, 404);
+      const tenantId = tenants[0].tenant_id;
+      const ee = encodeURIComponent(email);
+      const found = await supabaseRequest('GET',
+        `/pos_app_clients?tenant_id=eq.${encodeURIComponent(tenantId)}&email=eq.${ee}&select=email,phone,name&limit=1`
+      ).catch(() => []);
+      if (!found || !found.length) return sendJSON(res, { error: 'cliente_no_encontrado' }, 404);
+      sendJSON(res, { ok: true, client: found[0] });
+    } catch (err) { sendError(res, err); }
+  };
+
   // POST /api/admin/giros — create a new giro (vertical + opcional modules)
   // body: { slug, name, modules?, terms?, product_fields?, buttons? }
   handlers['POST /api/admin/giros'] = requireAuth(async function (req, res) {
