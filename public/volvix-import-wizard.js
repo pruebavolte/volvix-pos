@@ -197,20 +197,40 @@
     // Patrón: palabra(s) que empiezan con 3+ letras + separadores + número.
     // Char class incluye em-dash (—) y en-dash (–) tanto en nombre como en
     // separador — son comunes en menús OCR ("Item ........— $25").
-    const reGlobal = /([A-Za-zÁÉÍÓÚÜÑáéíóúüñÄÖÜßäöüçÇ][A-Za-zÁÉÍÓÚÜÑáéíóúüñÄÖÜßäöüçÇ\s'&\/()\-—–]{2,60}?)[\s\.\-_|—–]{2,}(?:[€$¢]|MXN|USD|MX\$)?\s*([0-9]{1,5}(?:[.,][0-9]{1,2})?)/gi;
+    // 2026-05-10 fix v3: 2 patrones combinados:
+    //  1) PREFERIDO con currency $/€/¢ — captura "HOT CAKES $175" (1 espacio basta)
+    //  2) FALLBACK con 2+ separadores — captura "Item ......... 25" (sin $)
+    const reWithCurrency = /([A-Za-zÁÉÍÓÚÜÑáéíóúüñÄÖÜßäöüçÇ][A-Za-zÁÉÍÓÚÜÑáéíóúüñÄÖÜßäöüçÇ0-9\s'&\/()\-—–]{2,80}?)\s*[\.\-_|—–]*\s*[$€¢]\s*([0-9]{1,5}(?:[.,][0-9]{1,2})?)/gi;
+    const reWithSeparators = /([A-Za-zÁÉÍÓÚÜÑáéíóúüñÄÖÜßäöüçÇ][A-Za-zÁÉÍÓÚÜÑáéíóúüñÄÖÜßäöüçÇ\s'&\/()\-—–]{2,60}?)[\s\.\-_|—–]{2,}(?:MXN|USD|MX\$)?\s*([0-9]{1,5}(?:[.,][0-9]{1,2})?)/gi;
     let matched = 0;
-    lines.forEach(l => {
-      if (l.length < 5 || l.length > 400) return;
+    function tryRegex(line, re) {
+      const out = [];
+      const reL = new RegExp(re.source, 'gi');
       let m;
-      const reLocal = new RegExp(reGlobal.source, 'gi');
-      while ((m = reLocal.exec(l)) !== null) {
+      while ((m = reL.exec(line)) !== null) {
         let name = m[1].trim().replace(/[\.\-_|·•:,]+$/, '').replace(/^[\.\-_|·•:,\s]+/, '').trim();
         if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñÄÖÜßäöüçÇ]{3,}/.test(name)) continue;
         if (name.length > 50 && (name.match(/,/g) || []).length >= 3) continue;
         const price = parseFloat(m[2].replace(',', '.'));
         if (!isFinite(price) || price < 0.5 || price > 99999) continue;
-        rows.push([name, String(price)]);
-        matched++;
+        out.push([name, String(price)]);
+      }
+      return out;
+    }
+    lines.forEach(l => {
+      if (l.length < 5) return;
+      // 2026-05-10 fix: PDFs text-layer junta items con espacio sin \n —
+      // pueden ser líneas de 5000+ chars. No descartar por longitud, dejar
+      // que el regex global itere. Limit max razonable: 50000 (50KB linea).
+      if (l.length > 50000) return;
+      // Patrón 1: con currency — más confiable
+      const r1 = tryRegex(l, reWithCurrency);
+      if (r1.length > 0) {
+        r1.forEach(p => { rows.push(p); matched++; });
+      } else {
+        // Fallback: separadores múltiples
+        const r2 = tryRegex(l, reWithSeparators);
+        r2.forEach(p => { rows.push(p); matched++; });
       }
     });
     return matched > 0 ? rows : [];
@@ -233,17 +253,48 @@
     return parseTXTHeuristic(result.value || '');
   }
 
-  // PDF via pdf.js
+  // PDF via pdf.js — con fallback OCR para PDFs escaneados (sin text layer)
+  // 2026-05-10 fix #11: muchos PDFs de menús son escaneos (todo es imagen).
+  // pdf.js extrae texto de la text-layer, pero scanned PDFs no la tienen →
+  // 0 chars → 0 productos. Fallback: si texto extraído < 50 chars total,
+  // rasterizar cada página a canvas y pasar por parseImageOCR.
   async function parsePDF(arrayBuffer) {
     await loadScript('https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js');
     if (!global.pdfjsLib) throw new Error('pdf.js no disponible');
     global.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
     const doc = await global.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
     let text = '';
-    for (let i = 1; i <= Math.min(doc.numPages, 50); i++) {
+    const maxPages = Math.min(doc.numPages, 20); // limit para no colgar en PDFs grandes
+    const pages = [];
+    for (let i = 1; i <= maxPages; i++) {
       const page = await doc.getPage(i);
+      pages.push(page);
       const tc = await page.getTextContent();
       text += tc.items.map(it => it.str).join(' ') + '\n';
+    }
+    // Si el text-layer extrajo muy poco, asumir PDF escaneado → OCR cada página
+    if (text.trim().length < 50) {
+      console.log('[wizard-ocr] PDF parece escaneado (', text.length, 'chars) → rasterizando ' + maxPages + ' páginas a OCR');
+      let allRows = [['nombre', 'precio']];
+      for (let i = 0; i < pages.length && i < 5; i++) { // limit 5 páginas para no quemar tiempo
+        try {
+          const page = pages[i];
+          const viewport = page.getViewport({ scale: 2.0 });
+          const canvas = document.createElement('canvas');
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          const ctx = canvas.getContext('2d');
+          await page.render({ canvasContext: ctx, viewport }).promise;
+          const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+          const file = new File([blob], 'pdf-page-' + (i + 1) + '.png', { type: 'image/png' });
+          const ocrRows = await parseImageOCR(file);
+          if (Array.isArray(ocrRows) && ocrRows.length > 1) {
+            // Skip header [0], append data rows
+            allRows = allRows.concat(ocrRows.slice(1));
+          }
+        } catch (e) { console.warn('[wizard-ocr] PDF page ' + (i + 1) + ' OCR err', e.message); }
+      }
+      return allRows.length > 1 ? allRows : [];
     }
     return parseTXTHeuristic(text);
   }
@@ -485,6 +536,28 @@
     if (kind === 'xlsx')  return await parseXLSX(buf);
     if (kind === 'docx')  return await parseDOCX(buf);
     if (kind === 'pptx') {
+      // 2026-05-10 fix #12: PPTX usa DEFLATE, parser zip casero solo lee
+      // entries sin compresión → 0 chars. Usar JSZip que sí descomprime.
+      try {
+        await loadScript('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');
+        if (global.JSZip) {
+          const zip = await global.JSZip.loadAsync(buf);
+          let text = '';
+          const slidePromises = [];
+          zip.forEach((relPath, entry) => {
+            if (/^ppt\/slides\/slide\d+\.xml$/.test(relPath)) {
+              slidePromises.push(entry.async('string').then(s => { text += s + '\n'; }));
+            }
+          });
+          await Promise.all(slidePromises);
+          // Extraer solo el texto entre <a:t>...</a:t> (texto runs de PowerPoint)
+          const textRuns = (text.match(/<a:t[^>]*>([^<]+)<\/a:t>/g) || [])
+            .map(m => m.replace(/<[^>]+>/g, ''))
+            .join('\n');
+          return parseTXTHeuristic(textRuns || text.replace(/<[^>]+>/g, ' '));
+        }
+      } catch (e) { console.warn('[wizard] PPTX JSZip falló, fallback parser casero', e.message); }
+      // Fallback al parser casero si JSZip no carga
       const text = await _readZipTextEntries(buf, /ppt\/slides\/slide\d+\.xml$/);
       return parseTXTHeuristic(text.replace(/<[^>]+>/g, ' '));
     }
