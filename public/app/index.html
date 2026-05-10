@@ -128,6 +128,17 @@
 
   function escHtml(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function escAttr(s){ return escHtml(s); }
+  // 2026-05-09 sec: defensa en profundidad — sanea URLs antes de pintarlas como href.
+  // Si la URL tiene protocolo peligroso (javascript:, data:, vbscript:), retorna '#'
+  // para que el click no haga nada en lugar de ejecutar JS. Backend YA filtra al
+  // guardar pero este es second layer en caso de que haya rows legacy en BD.
+  function safeHref(s){
+    if (s == null || s === '') return '';
+    const t = String(s).trim();
+    const lower = t.toLowerCase();
+    if (lower.startsWith('javascript:') || lower.startsWith('data:') || lower.startsWith('vbscript:') || lower.startsWith('file:')) return '#';
+    return escHtml(t);
+  }
 
   // ─── Apply branding (CSS vars + meta theme) ───
   function applyBranding(b) {
@@ -164,7 +175,7 @@
     const b = (CFG && CFG.branding) || {};
     const initials = (tenantName() || 'V').split(/\s+/).slice(0,2).map(w => (w[0]||'').toUpperCase()).join('') || 'V';
     const avatarInner = b.logo_url
-      ? '<img src="' + escAttr(b.logo_url) + '" alt="logo">'
+      ? '<img src="' + safeHref(b.logo_url) + '" alt="logo">'
       : escHtml(initials);
     const subtitle = client
       ? 'Hola ' + escHtml((client.name || '').split(' ')[0]) + ' 👋'
@@ -271,9 +282,9 @@
       html += '<div class="section-h">📰 Promociones</div>' +
         '<div class="banner-scroll">' + m.banners.map(bn => {
           const tag = bn.link_url ? 'a' : 'div';
-          const linkAttr = bn.link_url ? ' href="' + escAttr(bn.link_url) + '" target="_blank" rel="noopener"' : '';
+          const linkAttr = bn.link_url ? ' href="' + safeHref(bn.link_url) + '" target="_blank" rel="noopener"' : '';
           return '<' + tag + ' class="banner-card"' + linkAttr + '>' +
-            '<img class="banner-img" src="' + escAttr(bn.url) + '" alt="' + escAttr(bn.title || '') + '" loading="lazy">' +
+            '<img class="banner-img" src="' + safeHref(bn.url) + '" alt="' + escAttr(bn.title || '') + '" loading="lazy">' +
             (bn.title || bn.subtitle ? '<div class="banner-body">' +
               (bn.title ? '<p class="banner-title">' + escHtml(bn.title) + '</p>' : '') +
               (bn.subtitle ? '<p class="banner-sub">' + escHtml(bn.subtitle) + '</p>' : '') +
@@ -293,13 +304,13 @@
         let player;
         if (isYt) {
           let embed = v.url.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/');
-          player = '<iframe class="video-iframe" src="' + escAttr(embed) + '" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>';
+          player = '<iframe class="video-iframe" src="' + safeHref(embed) + '" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>';
         } else if (isVimeo) {
-          player = '<iframe class="video-iframe" src="' + escAttr(v.url) + '" allowfullscreen></iframe>';
+          player = '<iframe class="video-iframe" src="' + safeHref(v.url) + '" allowfullscreen></iframe>';
         } else if (isMp4) {
-          player = '<video class="video-iframe" controls preload="metadata" src="' + escAttr(v.url) + '"></video>';
+          player = '<video class="video-iframe" controls preload="metadata" src="' + safeHref(v.url) + '"></video>';
         } else {
-          player = '<a href="' + escAttr(v.url) + '" target="_blank" rel="noopener" style="display:block;background:#1f2937;color:#fff;padding:24px;text-align:center;text-decoration:none;">▶ Ver video</a>';
+          player = '<a href="' + safeHref(v.url) + '" target="_blank" rel="noopener" style="display:block;background:#1f2937;color:#fff;padding:24px;text-align:center;text-decoration:none;">▶ Ver video</a>';
         }
         return '<div class="video-card">' + player +
           (v.title || v.subtitle ? '<div class="video-meta">' +
@@ -313,9 +324,9 @@
     if (btnOn('app.section_flyer') && m.flyers && m.flyers.length) {
       html += '<div class="section-h">🎴 Flyers</div>' + m.flyers.map(f => {
         const tag = f.link_url ? 'a' : 'div';
-        const linkAttr = f.link_url ? ' href="' + escAttr(f.link_url) + '" target="_blank" rel="noopener"' : '';
+        const linkAttr = f.link_url ? ' href="' + safeHref(f.link_url) + '" target="_blank" rel="noopener"' : '';
         return '<' + tag + ' class="flyer-card"' + linkAttr + '>' +
-          '<img class="flyer-img" src="' + escAttr(f.url) + '" alt="' + escAttr(f.title || '') + '" loading="lazy">' +
+          '<img class="flyer-img" src="' + safeHref(f.url) + '" alt="' + escAttr(f.title || '') + '" loading="lazy">' +
           (f.title || f.subtitle ? '<div class="flyer-overlay">' +
             (f.title ? '<p class="flyer-title">' + escHtml(f.title) + '</p>' : '') +
             (f.subtitle ? '<p class="flyer-sub">' + escHtml(f.subtitle) + '</p>' : '') +
@@ -339,7 +350,7 @@
         (b.address ? '<p class="vapp-sm">📍 ' + escHtml(b.address) + '</p>' : '') +
         (b.hours_text ? '<p class="vapp-sm">🕐 ' + escHtml(b.hours_text) + '</p>' : '') +
         (social.length
-          ? '<div class="social-row">' + social.map(s => '<a class="social-btn" href="' + escAttr(s.href) + '" target="_blank" rel="noopener"><div class="social-ico">' + s.ico + '</div><div>' + escHtml(s.l) + '</div></a>').join('') + '</div>'
+          ? '<div class="social-row">' + social.map(s => '<a class="social-btn" href="' + safeHref(s.href) + '" target="_blank" rel="noopener"><div class="social-ico">' + s.ico + '</div><div>' + escHtml(s.l) + '</div></a>').join('') + '</div>'
           : '<p class="vapp-sm">El negocio aún no ha agregado sus contactos.</p>'
         ) +
       '</div>';

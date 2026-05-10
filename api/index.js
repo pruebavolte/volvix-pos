@@ -37152,6 +37152,20 @@ if (process.env.NODE_ENV === 'test') {
     } catch (err) { sendError(res, err); }
   };
 
+  // 2026-05-09 sec: validar URLs — solo http(s) o protocolos seguros wa.me/tel/mailto
+  // Bloquea javascript:, data:, vbscript:, file: que permitirían XSS al hacer click.
+  function _isSafeUrl(s, opts) {
+    if (s == null || s === '') return true; // null/empty OK
+    s = String(s).trim();
+    const lower = s.toLowerCase();
+    if (lower.startsWith('javascript:') || lower.startsWith('data:') || lower.startsWith('vbscript:') || lower.startsWith('file:')) return false;
+    // link_url permite mailto/tel/wa.me además de http(s)
+    if (opts && opts.allowExtra) {
+      if (lower.startsWith('mailto:') || lower.startsWith('tel:') || lower.startsWith('https://wa.me/') || lower.startsWith('https://api.whatsapp.com/')) return true;
+    }
+    return lower.startsWith('http://') || lower.startsWith('https://');
+  }
+
   handlers['POST /api/app/media'] = requireAuth(async function (req, res) {
     try {
       const body = await readBody(req).catch(() => ({}));
@@ -37163,14 +37177,19 @@ if (process.env.NODE_ENV === 'test') {
       if (!['banner','video','flyer','noticia'].includes(kind)) return sendJSON(res, { error: 'kind invalido (banner|video|flyer|noticia)' }, 400);
       const url = String(body.url || '').trim();
       if (!url) return sendJSON(res, { error: 'url requerida' }, 400);
+      if (!_isSafeUrl(url)) return sendJSON(res, { error: 'url_protocolo_no_permitido', allowed: 'http(s)' }, 400);
+      const linkUrl = body.link_url || null;
+      if (linkUrl && !_isSafeUrl(linkUrl, { allowExtra: true })) return sendJSON(res, { error: 'link_url_protocolo_no_permitido', allowed: 'http(s)/mailto/tel/wa.me' }, 400);
+      const thumb = body.thumbnail_url || null;
+      if (thumb && !_isSafeUrl(thumb)) return sendJSON(res, { error: 'thumbnail_url_protocolo_no_permitido' }, 400);
       const ins = await supabaseRequest('POST', '/pos_app_media', {
         tenant_id: tenantSlug,
         kind,
         title: body.title ? String(body.title).slice(0, 200) : null,
         subtitle: body.subtitle ? String(body.subtitle).slice(0, 500) : null,
         url,
-        thumbnail_url: body.thumbnail_url || null,
-        link_url: body.link_url || null,
+        thumbnail_url: thumb,
+        link_url: linkUrl,
         position: Number.isFinite(Number(body.position)) ? Number(body.position) : 0,
         active: body.active === false ? false : true,
       }, { 'Prefer': 'return=representation' }).catch(e => ({ _err: e }));
@@ -37189,6 +37208,10 @@ if (process.env.NODE_ENV === 'test') {
       const cur = await supabaseRequest('GET', `/pos_app_media?id=eq.${id}&select=tenant_id&limit=1`).catch(() => []);
       if (!cur || !cur.length) return sendJSON(res, { error: 'not_found' }, 404);
       if (!checkOwnerOrSuper(req, res, cur[0].tenant_id)) return;
+      // 2026-05-09 sec: valida URLs en PATCH también
+      if (body.url !== undefined && body.url && !_isSafeUrl(body.url)) return sendJSON(res, { error: 'url_protocolo_no_permitido' }, 400);
+      if (body.link_url !== undefined && body.link_url && !_isSafeUrl(body.link_url, { allowExtra: true })) return sendJSON(res, { error: 'link_url_protocolo_no_permitido' }, 400);
+      if (body.thumbnail_url !== undefined && body.thumbnail_url && !_isSafeUrl(body.thumbnail_url)) return sendJSON(res, { error: 'thumbnail_url_protocolo_no_permitido' }, 400);
       const allowed = ['kind','title','subtitle','url','thumbnail_url','link_url','position','active'];
       const patch = { updated_at: new Date().toISOString() };
       allowed.forEach(k => { if (body[k] !== undefined) patch[k] = body[k]; });
@@ -37288,6 +37311,10 @@ if (process.env.NODE_ENV === 'test') {
       const isSuper = role === 'superadmin' || role === 'platform_owner';
       const isOwnerOfTenant = callerTenant === tenantSlug && (role === 'dueno' || role === 'gerente' || role === 'owner');
       if (!isSuper && !isOwnerOfTenant) return sendJSON(res, { error: 'forbidden' }, 403);
+      // 2026-05-09 sec: validar logo_url protocolo
+      if (body.logo_url !== undefined && body.logo_url && !_isSafeUrl(body.logo_url)) {
+        return sendJSON(res, { error: 'logo_url_protocolo_no_permitido' }, 400);
+      }
       // Whitelist de campos editables
       const allowed = ['logo_url','primary_color','accent_color','background_color','whatsapp','instagram','facebook','tiktok','youtube','email_publico','address','hours_text','about_text'];
       const patch = { tenant_id: tenantSlug, updated_at: new Date().toISOString() };
