@@ -41,9 +41,11 @@
   function _hasItemsInCart() {
     try {
       if (Array.isArray(global.CART) && global.CART.length > 0) return true;
-      // Fallback: contar filas en tabla de ticket
+      // Fallback DOM: contar filas reales (excluyendo placeholder "carrito vacío")
       const rows = document.querySelectorAll('#cart-body tr, .cart-item, [data-cart-item]');
-      return rows.length > 0;
+      let real = 0;
+      rows.forEach(r => { if (!r.querySelector('.cart-empty-block, .empty, .placeholder')) real++; });
+      return real > 0;
     } catch (_) { return false; }
   }
 

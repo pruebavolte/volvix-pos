@@ -37270,6 +37270,11 @@ if (process.env.NODE_ENV === 'test') {
       if (!items.length) return sendJSON(res, { error: 'sin_items' }, 400);
       if (items.length > 5000) return sendJSON(res, { error: 'demasiados_items', max: 5000 }, 400);
 
+      // 2026-05-10 fix: la tabla destino es pos_products (text tenant_id, pos_user_id NOT NULL)
+      // — la antigua /products usa tenant_id uuid y exige sku NOT NULL → todos los inserts fallaban silenciosamente.
+      const userId = req.user && req.user.id;
+      if (!userId) return sendJSON(res, { error: 'user_required' }, 400);
+
       // Sanitizar cada item
       const cleaned = [];
       const errors = [];
@@ -37283,6 +37288,7 @@ if (process.env.NODE_ENV === 'test') {
         const code = codeRaw || ('IMP-' + Date.now().toString(36).toUpperCase().slice(-4) + '-' + i);
         cleaned.push({
           tenant_id: tnt,
+          pos_user_id: userId,
           name,
           code,
           barcode: String(it.barcode || codeRaw || '').trim().slice(0, 64) || null,
@@ -37290,6 +37296,7 @@ if (process.env.NODE_ENV === 'test') {
           cost:  isFinite(cost)  && cost  >= 0 ? cost  : 0,
           stock: isFinite(stock) && stock >= 0 ? stock : 0,
           category: String(it.category || '').trim().slice(0, 100) || null,
+          source: 'wizard_import',
         });
       });
 
@@ -37301,17 +37308,25 @@ if (process.env.NODE_ENV === 'test') {
       for (let i = 0; i < cleaned.length; i += CHUNK) {
         const chunk = cleaned.slice(i, i + CHUNK);
         try {
-          const r = await supabaseRequest('POST', '/products', chunk, {
+          await supabaseRequest('POST', '/pos_products', chunk, {
             'Prefer': 'resolution=merge-duplicates,return=minimal'
           });
           inserted += chunk.length;
         } catch (e) {
-          // Reintentar chunk individual
-          for (const item of chunk) {
+          // Loguear el error real del chunk (PostgREST suele devolver detalle)
+          const chunkErrMsg = (e && (e.message || e.toString())) || 'unknown';
+          console.error('[bulk-import] chunk fail:', chunkErrMsg.slice(0, 500));
+          // Reintentar chunk individual y guardar razón por fila
+          for (let k = 0; k < chunk.length; k++) {
+            const item = chunk[k];
             try {
-              await supabaseRequest('POST', '/products', item, { 'Prefer': 'resolution=merge-duplicates,return=minimal' });
+              await supabaseRequest('POST', '/pos_products', item, { 'Prefer': 'resolution=merge-duplicates,return=minimal' });
               inserted++;
-            } catch (_) { failed++; }
+            } catch (e2) {
+              failed++;
+              const msg = (e2 && (e2.message || e2.toString())) || 'insert_failed';
+              errors.push({ row: i + k + 1, reason: msg.slice(0, 200) });
+            }
           }
         }
       }

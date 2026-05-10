@@ -7773,9 +7773,12 @@
     };
   }
   function addToCart(p) {
+    // 2026-05-10 fix: respetar p.qty (antes se ignoraba — bug afectaba a
+    // _convertToTicket de pedidos PWA con qty>1, que cargaban siempre qty:1).
+    const reqQty = Math.max(1, parseInt(p && p.qty, 10) || 1);
     const existing = CART.find(c => c.code === p.code);
-    if (existing) existing.qty++;
-    else CART.push({...p, qty:1});
+    if (existing) existing.qty += reqQty;
+    else CART.push({...p, qty: reqQty});
     renderCart();
     try { __r8aSaveCartDraft(); } catch (_) {}
     // 2026-05-10: track recent on every cart add (boost ranking siguiente vez)

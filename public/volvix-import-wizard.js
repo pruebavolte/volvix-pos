@@ -125,7 +125,13 @@
   // JSON (array de objetos o array de arrays)
   function parseJSON(text) {
     try {
-      const j = JSON.parse(text);
+      let j = JSON.parse(text);
+      // 2026-05-10 fix: aceptar wrappers comunes — antes solo array root devolvía rows.
+      // Casos reales que rechazaba: {products:[...]}, {items:[...]}, {data:[...]}.
+      if (!Array.isArray(j) && j && typeof j === 'object') {
+        const wrapKey = ['products','items','data','rows','menu','catalog','catalogo','productos'].find(k => Array.isArray(j[k]));
+        if (wrapKey) j = j[wrapKey];
+      }
       if (!Array.isArray(j)) return [];
       if (j.length && typeof j[0] === 'object' && !Array.isArray(j[0])) {
         const keys = Object.keys(j[0]);
