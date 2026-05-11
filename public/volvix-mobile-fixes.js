@@ -91,6 +91,18 @@
           modal.style.setProperty('visibility', 'visible', 'important');
           modal.style.setProperty('opacity', '1', 'important');
           modal.style.setProperty('z-index', '99996', 'important');
+          // Marcar como dismissed cuando el usuario cierre el wizard
+          const closeBtn = modal.querySelector('.volvix-imp-close, [data-close], .close');
+          if (closeBtn && !closeBtn.__vlxDismissWired) {
+            closeBtn.__vlxDismissWired = true;
+            closeBtn.addEventListener('click', () => {
+              localStorage.setItem('volvix_wizard_dismissed', 'true');
+            });
+          }
+          // Escape también marca dismissed
+          modal.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') localStorage.setItem('volvix_wizard_dismissed', 'true');
+          });
         }
       }, 120);
       return true;
@@ -102,12 +114,36 @@
   }
 
   // ── B-1) Auto-abrir wizard al boot si CATALOG está vacío ──────────
+  // 2026-05-11: NO auto-abrir si:
+  //   (a) hay productos en CATALOG (cualquier cantidad >0)
+  //   (b) hay productos visibles en el DOM (tabla de inventario rendereada)
+  //   (c) ya hay otro modal abierto (modal-product-form, etc.)
+  //   (d) el usuario ya descartó el wizard antes (localStorage flag)
+  function isAnyModalOpen() {
+    const sel = '#modal-product-form, .modal.open, [role="dialog"]:not([hidden])';
+    return Array.from(document.querySelectorAll(sel)).some(m => {
+      const s = getComputedStyle(m);
+      return s.display !== 'none' && s.visibility !== 'hidden' && m.offsetParent !== null;
+    });
+  }
+  function hasInventoryProducts() {
+    // Catalog en memoria
+    if (window.CATALOG && Array.isArray(window.CATALOG) && window.CATALOG.length > 0) return true;
+    // Filas en la tabla de inventario (renderizadas desde DB)
+    const rows = document.querySelectorAll('#inv-table tbody tr, #screen-inventario tbody tr');
+    if (rows.length > 0) return true;
+    // Stat de "TOTAL PRODUCTOS" en el dashboard de inventario
+    const totalEl = document.querySelector('[data-stat="total-products"], #inv-total-products');
+    if (totalEl && parseInt(totalEl.textContent || '0', 10) > 0) return true;
+    return false;
+  }
   function autoOpenIfEmpty() {
-    const isEmpty = () => !window.CATALOG || !Array.isArray(window.CATALOG) || window.CATALOG.length === 0;
-    // Esperar 5s para que loadCatalogReal corra; si sigue vacío, abrir flow guiado
+    // Si el usuario ya descartó el wizard en esta sesión, NO re-abrir
+    if (localStorage.getItem('volvix_wizard_dismissed') === 'true') return;
+
     setTimeout(() => {
-      if (!isEmpty()) return;
-      // Ir a pantalla de Inventario primero, así el usuario ve el contexto detrás del modal
+      if (hasInventoryProducts()) return;     // ya tiene productos → no molestar
+      if (isAnyModalOpen()) return;            // otro modal abierto → no superponer
       try {
         if (typeof window.showScreen === 'function') window.showScreen('inventario');
       } catch (_) {}
@@ -135,11 +171,14 @@
     } else {
       area.insertBefore(banner, area.firstChild);
     }
-    // Mostrar/ocultar según CATALOG
+    // Mostrar/ocultar según presencia REAL de productos (no solo CATALOG)
     function syncEmptyBanner() {
-      const empty = !window.CATALOG || !Array.isArray(window.CATALOG) || window.CATALOG.length === 0;
-      // setProperty + !important para vencer cualquier observer que lo oculte
-      if (empty) {
+      // 2026-05-11: usar hasInventoryProducts() que también chequea DOM/DB
+      // El banner reportaba "no tienes productos" aunque el inventario mostraba 284
+      const hasProducts = (typeof hasInventoryProducts === 'function')
+        ? hasInventoryProducts()
+        : !!(window.CATALOG && Array.isArray(window.CATALOG) && window.CATALOG.length > 0);
+      if (!hasProducts) {
         banner.style.setProperty('display', 'flex', 'important');
         banner.style.setProperty('visibility', 'visible', 'important');
         banner.classList.remove('vlx-feature-hidden', 'tv-hidden');
@@ -150,9 +189,17 @@
     syncEmptyBanner();
     // Re-evaluar cuando se cargan productos
     document.addEventListener('volvix:products-loaded', syncEmptyBanner);
-    // Polling de respaldo (CATALOG puede mutar sin disparar evento)
-    const intv = setInterval(syncEmptyBanner, 2000);
-    setTimeout(() => clearInterval(intv), 60000); // 1 min max
+    document.addEventListener('volvix:inventory-loaded', syncEmptyBanner);
+    // Polling de respaldo más agresivo (cada 1s primero 30s, luego cada 5s)
+    let _bannerTicks = 0;
+    const intv = setInterval(() => {
+      syncEmptyBanner();
+      _bannerTicks++;
+      if (_bannerTicks > 30) clearInterval(intv); // 30s de polling rápido
+    }, 1000);
+    // Polling más lento de respaldo (5 min)
+    const intvSlow = setInterval(syncEmptyBanner, 5000);
+    setTimeout(() => clearInterval(intvSlow), 5 * 60 * 1000);
   }
 
   // ── B-3) 5ta card "Capturar 1 por 1" en wizard step 1 ─────────────
@@ -331,6 +378,22 @@
     }
   });
   obs.observe(document.body || document.documentElement, { childList: true, subtree: true });
+
+  // ── D) Anti-superposición: si abre modal-product-form, cerrar wizard ─
+  // 2026-05-11: reportado que ambos modales se superponen cuando el wizard
+  // auto-abre y simultáneamente el usuario escanea un producto.
+  const antiOverlapObs = new MutationObserver(() => {
+    const pf = document.getElementById('modal-product-form');
+    const pfVisible = pf && getComputedStyle(pf).display !== 'none' && getComputedStyle(pf).visibility !== 'hidden';
+    if (pfVisible) {
+      const wiz = document.getElementById('volvix-import-modal');
+      if (wiz) {
+        wiz.remove(); // cerrar wizard cuando aparece modal de producto
+        localStorage.setItem('volvix_wizard_dismissed', 'true');
+      }
+    }
+  });
+  antiOverlapObs.observe(document.body || document.documentElement, { childList: true, subtree: true });
 
   // ==================================================================
   // C) PARCHES PARA PIN LOCK Y TOURS (desactivados por defecto)
