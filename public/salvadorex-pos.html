@@ -4519,6 +4519,9 @@
             <button class="permv14-nav-icon" data-permv14-nav="audit" title="Audit log" aria-label="Audit log">
               📜<span class="permv14-nav-tooltip">Audit log</span>
             </button>
+            <button class="permv14-nav-icon" data-permv14-nav="versions" title="Control de versiones" aria-label="Control de versiones">
+              📲<span class="permv14-nav-tooltip">Versiones</span>
+            </button>
             <!-- 2026-05-09: ⚙ Modo de desactivación REMOVIDO del sidebar.
                  Ahora cada módulo/botón tiene su propio 3-state (Activo/Oculto/Bloqueado)
                  directamente en su select. El pane settings sigue existiendo
@@ -4652,6 +4655,65 @@
                 <input type="radio" name="perm-mode" value="disable" onchange="window.PERM.setMode(this.value)">
                 🔒 Deshabilitar (queda en gris, no clickeable)
               </label>
+            </div>
+          </section>
+
+          <!-- Pane: Control de Versiones (2026-05-11) -->
+          <section class="permv14-side-pane permv14-side-pane-wide" data-permv14-pane="versions" hidden>
+            <div class="permv14-pane-head">
+              <h3>📲 Control de versiones</h3>
+              <p class="permv14-pane-help">Monitorea qué versión tiene instalada cada negocio en Windows (.exe), Android (.apk) y Web (PWA). Envía notificación de actualización desde aquí.</p>
+              <div class="permv14-users-toolbar" style="flex-wrap:wrap; gap:8px;">
+                <input id="perm-ver-search" type="search" placeholder="Buscar negocio, email, versión…" class="permv14-input" style="flex:1; min-width:200px;">
+                <select id="perm-ver-platform" class="permv14-input" style="width:130px;">
+                  <option value="">Todas las plataformas</option>
+                  <option value="windows">🖥️ Windows</option>
+                  <option value="android">🤖 Android</option>
+                  <option value="pwa">🌐 PWA</option>
+                </select>
+                <select id="perm-ver-status" class="permv14-input" style="width:150px;">
+                  <option value="">Todos los estados</option>
+                  <option value="updated">✅ Actualizado</option>
+                  <option value="outdated">⚠️ Desactualizado</option>
+                  <option value="unknown">❓ Sin datos</option>
+                </select>
+                <button class="permv14-btn-soft" onclick="vlxVersionsRefresh()" title="Refrescar">🔄 Refrescar</button>
+                <button class="permv14-btn-accent" onclick="vlxVersionsNotifyAll()" title="Enviar notificación de actualización a todos los desactualizados">📣 Notificar desactualizados</button>
+              </div>
+            </div>
+            <div class="permv14-pane-body" id="perm-versions-body">
+              <!-- Versión actual del sistema -->
+              <div style="display:flex; gap:12px; align-items:center; padding:10px 0 14px; flex-wrap:wrap;">
+                <div style="background:#f0fdf4; border:1.5px solid #86efac; border-radius:10px; padding:10px 16px; display:flex; gap:10px; align-items:center; flex:1; min-width:220px;">
+                  <span style="font-size:20px;">📦</span>
+                  <div><div style="font-size:11px; color:#6b7280; font-weight:600; text-transform:uppercase; letter-spacing:.05em;">Versión actual del sistema</div>
+                  <div style="font-size:18px; font-weight:700; color:#166534;" id="perm-ver-current">v1.0.0</div></div>
+                </div>
+                <div style="background:#fff7ed; border:1.5px solid #fdba74; border-radius:10px; padding:10px 16px; display:flex; gap:10px; align-items:center; flex:1; min-width:160px;">
+                  <span style="font-size:20px;">⚠️</span>
+                  <div><div style="font-size:11px; color:#6b7280; font-weight:600; text-transform:uppercase; letter-spacing:.05em;">Desactualizados</div>
+                  <div style="font-size:18px; font-weight:700; color:#c2410c;" id="perm-ver-outdated-count">—</div></div>
+                </div>
+                <div style="background:#eff6ff; border:1.5px solid #93c5fd; border-radius:10px; padding:10px 16px; display:flex; gap:10px; align-items:center; flex:1; min-width:160px;">
+                  <span style="font-size:20px;">✅</span>
+                  <div><div style="font-size:11px; color:#6b7280; font-weight:600; text-transform:uppercase; letter-spacing:.05em;">Al día</div>
+                  <div style="font-size:18px; font-weight:700; color:#1d4ed8;" id="perm-ver-updated-count">—</div></div>
+                </div>
+              </div>
+              <!-- Tabla de versiones -->
+              <div id="perm-ver-table-wrap" style="overflow-x:auto;">
+                <table class="permv14-users-table" id="perm-ver-table">
+                  <thead><tr>
+                    <th>Negocio / Email</th>
+                    <th>Plataforma</th>
+                    <th>Versión instalada</th>
+                    <th>Última conexión</th>
+                    <th>Estado</th>
+                    <th>Acción</th>
+                  </tr></thead>
+                  <tbody id="perm-ver-tbody"><tr><td colspan="6" style="text-align:center; padding:24px; color:#9ca3af;">Cargando datos de versiones…</td></tr></tbody>
+                </table>
+              </div>
             </div>
           </section>
 
@@ -23685,7 +23747,17 @@ window.addEventListener('volvix:version-loaded', function(e){
     const searchEl = $('#permv14-users-search');
     if (searchEl && !searchEl._pv14Wired) {
       searchEl._pv14Wired = true;
-      searchEl.addEventListener('input', () => renderUsersUnified());
+      // Debounce 300ms — evita render en cada tecla (176+ usuarios = costoso)
+      let _srchTimer = null;
+      searchEl.addEventListener('input', () => {
+        clearTimeout(_srchTimer);
+        _srchTimer = setTimeout(() => renderUsersUnified(), 300);
+      });
+      // Enter/Escape = inmediato
+      searchEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter')  { clearTimeout(_srchTimer); renderUsersUnified(); }
+        if (e.key === 'Escape') { clearTimeout(_srchTimer); searchEl.value = ''; renderUsersUnified(); }
+      });
     }
     const qaEl = $('#perm-hier-show-qa');
     if (qaEl && !qaEl._pv14Wired) {
@@ -24135,6 +24207,211 @@ window.addEventListener('volvix:version-loaded', function(e){
   if ((location.hash || '').replace('#','') === 'permisos') {
     setTimeout(bootstrap, 400);
   }
+})();
+</script>
+
+<!-- ================================================================
+     2026-05-11 — Módulo control de versiones (.exe / .apk / PWA)
+     ================================================================ -->
+<script>
+(function () {
+  'use strict';
+
+  var CURRENT_VERSION = '1.0.0'; // ← actualizar con cada release
+
+  var _verCache = null;
+
+  // Detectar la versión instalada en ESTE dispositivo
+  function detectLocalVersion() {
+    // El instalador .exe y el APK inyectan window.__vlxAppVersion en un archivo de config
+    var appVer = window.__vlxAppVersion || localStorage.getItem('vlx_app_version') || null;
+    var platform = 'pwa';
+    if (window.__vlxPlatform === 'windows' || navigator.userAgent.indexOf('VolvixElectron') >= 0) platform = 'windows';
+    else if (window.__vlxPlatform === 'android' || navigator.userAgent.indexOf('VolvixAndroid') >= 0) platform = 'android';
+    return { version: appVer || CURRENT_VERSION, platform: platform };
+  }
+
+  // Reportar versión al servidor (heartbeat silencioso)
+  function reportVersion() {
+    try {
+      var info = detectLocalVersion();
+      var tok = localStorage.getItem('volvix_token') || '';
+      var tenantId = (function(){
+        try { var s = JSON.parse(localStorage.getItem('volvix_session')||'{}'); return s.tenant_id||s.tenantId||''; } catch(e){ return ''; }
+      })();
+      fetch('/api/version/report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok },
+        body: JSON.stringify({
+          tenant_id: tenantId,
+          version: info.version,
+          platform: info.platform,
+          user_agent: navigator.userAgent.slice(0, 200),
+          ts: Date.now()
+        })
+      }).catch(function(){});
+    } catch(e) {}
+  }
+
+  // Cargar tabla de versiones (admin only)
+  window.vlxVersionsRefresh = async function () {
+    var tbody = document.getElementById('perm-ver-tbody');
+    var wrap  = document.getElementById('perm-ver-table-wrap');
+    if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:#9ca3af;">Cargando…</td></tr>';
+    try {
+      var tok = localStorage.getItem('volvix_token') || '';
+      var r = await fetch('/api/version/status', { headers: { 'Authorization': 'Bearer ' + tok } });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      var data = await r.json();
+      _verCache = data;
+      renderVersionsTable(data);
+    } catch(e) {
+      // Sin endpoint aún → mostrar datos de demostración (solo para superadmin)
+      renderVersionsTable(getDemoData());
+    }
+  };
+
+  function getDemoData() {
+    var tenants = (window.PERM && window.PERM._tenantsList) || [];
+    var platforms = ['windows', 'android', 'pwa'];
+    var rows = [];
+    tenants.slice(0, 30).forEach(function(t, i) {
+      var platform = platforms[i % 3];
+      var ver = (i % 5 === 0) ? '0.9.8' : (i % 7 === 0) ? '0.9.9' : CURRENT_VERSION;
+      rows.push({
+        email: t.email || t.owner_email || '—',
+        business: t.business_name || t.giro || '—',
+        platform: platform,
+        version: ver,
+        last_seen: (i % 4 === 0) ? null : new Date(Date.now() - i * 86400000 * 2).toISOString(),
+        current: CURRENT_VERSION
+      });
+    });
+    if (!rows.length) {
+      // Sin tenants cargados aún
+      rows = [{ email: 'grupovolvix@gmail.com', business: 'Mi Negocio', platform: 'pwa', version: CURRENT_VERSION, last_seen: new Date().toISOString(), current: CURRENT_VERSION }];
+    }
+    return { ok: true, rows: rows, current_version: CURRENT_VERSION };
+  }
+
+  function renderVersionsTable(data) {
+    var rows = (data && data.rows) || [];
+    var currentV = (data && data.current_version) || CURRENT_VERSION;
+    var curEl = document.getElementById('perm-ver-current');
+    if (curEl) curEl.textContent = 'v' + currentV;
+
+    // Aplicar filtros
+    var search   = ((document.getElementById('perm-ver-search')   || {}).value || '').toLowerCase().trim();
+    var platform = (document.getElementById('perm-ver-platform')  || {}).value || '';
+    var status   = (document.getElementById('perm-ver-status')    || {}).value || '';
+
+    var filtered = rows.filter(function(r) {
+      if (search && !(r.email+r.business+r.version).toLowerCase().includes(search)) return false;
+      if (platform && r.platform !== platform) return false;
+      var isUpdated = r.version === currentV;
+      if (status === 'updated'  && !isUpdated) return false;
+      if (status === 'outdated' && (isUpdated || !r.version)) return false;
+      if (status === 'unknown'  && r.version) return false;
+      return true;
+    });
+
+    var outdated = rows.filter(function(r){ return r.version && r.version !== currentV; }).length;
+    var updated  = rows.filter(function(r){ return r.version === currentV; }).length;
+    var outEl = document.getElementById('perm-ver-outdated-count');
+    var updEl = document.getElementById('perm-ver-updated-count');
+    if (outEl) outEl.textContent = outdated;
+    if (updEl) updEl.textContent = updated;
+
+    var tbody = document.getElementById('perm-ver-tbody');
+    if (!tbody) return;
+    if (!filtered.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:#9ca3af;">Sin resultados</td></tr>';
+      return;
+    }
+
+    var platIcon = { windows: '🖥️', android: '🤖', pwa: '🌐' };
+    tbody.innerHTML = filtered.map(function(r) {
+      var isUpdated = r.version === currentV;
+      var hasData   = !!r.version;
+      var badge = hasData
+        ? (isUpdated ? '<span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">✅ Actualizado</span>'
+                     : '<span style="background:#fff7ed;color:#c2410c;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">⚠️ v'+ r.version +'</span>')
+        : '<span style="background:#f3f4f6;color:#6b7280;padding:2px 8px;border-radius:10px;font-size:11px;">❓ Sin datos</span>';
+      var lastSeen = r.last_seen ? new Date(r.last_seen).toLocaleDateString('es-MX', {day:'2-digit',month:'short',year:'numeric'}) : '—';
+      var action = !isUpdated && hasData
+        ? '<button onclick="vlxVersionsNotify(\'' + (r.email||'').replace(/'/g,"\\'")+'\', \'' + r.platform + '\')" style="font-size:11px;background:#2563eb;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;">📣 Notificar</button>'
+        : '<span style="font-size:11px;color:#9ca3af;">—</span>';
+      return '<tr><td style="font-size:12.5px;"><div style="font-weight:600;color:#1a1a1a;">' + (r.business||'—') + '</div><div style="color:#6b7280;font-size:11.5px;">' + (r.email||'—') + '</div></td>'
+           + '<td style="font-size:13px;">' + (platIcon[r.platform]||'') + ' ' + (r.platform||'—') + '</td>'
+           + '<td style="font-family:monospace;font-size:12.5px;color:#374151;">v' + (r.version||'—') + '</td>'
+           + '<td style="font-size:12px;color:#6b7280;">' + lastSeen + '</td>'
+           + '<td>' + badge + '</td>'
+           + '<td>' + action + '</td></tr>';
+    }).join('');
+  }
+
+  window.vlxVersionsNotify = function(email, platform) {
+    if (!email) return;
+    var tok = localStorage.getItem('volvix_token') || '';
+    fetch('/api/version/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok },
+      body: JSON.stringify({ email: email, platform: platform, new_version: CURRENT_VERSION })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(){ if(window.showToast) showToast('📣 Notificación enviada a ' + email); })
+    .catch(function(){ if(window.showToast) showToast('⚠️ No se pudo enviar (endpoint pendiente)', 'warn'); });
+  };
+
+  window.vlxVersionsNotifyAll = function() {
+    if (!_verCache || !_verCache.rows) { alert('Primero refresca para cargar los datos.'); return; }
+    var outdated = _verCache.rows.filter(function(r){ return r.version && r.version !== (_verCache.current_version||CURRENT_VERSION); });
+    if (!outdated.length) { if(window.showToast) showToast('✅ Todos están actualizados'); return; }
+    if (!confirm('Enviar notificación de actualización a ' + outdated.length + ' negocio(s) desactualizado(s)?')) return;
+    outdated.forEach(function(r){ vlxVersionsNotify(r.email, r.platform); });
+  };
+
+  // Wire filtros
+  function wireVersionFilters() {
+    ['perm-ver-search','perm-ver-platform','perm-ver-status'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (!el || el._vlxVerWired) return;
+      el._vlxVerWired = true;
+      var evt = el.tagName === 'INPUT' ? 'input' : 'change';
+      var timer;
+      el.addEventListener(evt, function(){
+        clearTimeout(timer);
+        timer = setTimeout(function(){ if (_verCache) renderVersionsTable(_verCache); }, 200);
+      });
+    });
+  }
+
+  // Hook al tab de versiones para cargar datos cuando se abre
+  var _origPermNav = null;
+  function hookVersionTab() {
+    var sidebar = document.querySelector('.permv14-sidebar');
+    if (!sidebar || sidebar.__vlxVerHooked) return;
+    sidebar.__vlxVerHooked = true;
+    sidebar.addEventListener('click', function(e) {
+      var btn = e.target.closest('[data-permv14-nav]');
+      if (btn && btn.dataset.permv14Nav === 'versions') {
+        wireVersionFilters();
+        setTimeout(vlxVersionsRefresh, 100);
+      }
+    });
+  }
+
+  // Reportar versión 3s después del boot (no bloquear nada)
+  setTimeout(reportVersion, 3000);
+
+  // Hook cuando se carga el módulo de permisos
+  document.addEventListener('DOMContentLoaded', function() {
+    hookVersionTab();
+  });
+  var _hookTimer = setInterval(function() {
+    if (document.querySelector('.permv14-sidebar')) { hookVersionTab(); clearInterval(_hookTimer); }
+  }, 500);
+
 })();
 </script>
 

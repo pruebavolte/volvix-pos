@@ -36831,6 +36831,67 @@ if (process.env.NODE_ENV === 'test') {
     } catch (err) { sendError(res, err); }
   });
 
+  // 2026-05-11: POST /api/version/report — cada app reporta su versión instalada
+  // Body: { tenant_id, version, platform ('windows'|'android'|'pwa'), user_agent, ts }
+  handlers['POST /api/version/report'] = async function (req, res) {
+    try {
+      const { tenant_id, version, platform, user_agent } = req.body || {};
+      if (!version) return sendJSON(res, { ok: false, error: 'version requerida' });
+      // Upsert en app_versions (crear tabla si no existe — graceful)
+      await supabase.from('volvix_app_versions').upsert({
+        tenant_id: tenant_id || null,
+        platform: platform || 'pwa',
+        version: String(version).slice(0, 20),
+        user_agent: (user_agent || '').slice(0, 300),
+        last_seen: new Date().toISOString()
+      }, { onConflict: 'tenant_id,platform', ignoreDuplicates: false }).catch(() => {});
+      sendJSON(res, { ok: true });
+    } catch (err) { sendJSON(res, { ok: false }); }
+  };
+
+  // 2026-05-11: GET /api/version/status — lista versiones por tenant (superadmin)
+  handlers['GET /api/version/status'] = requireAuth(async function (req, res) {
+    if (!requireSuper(req, res)) return;
+    try {
+      const CURRENT = '1.0.0';
+      const { data: versions } = await supabase.from('volvix_app_versions')
+        .select('tenant_id, platform, version, last_seen').order('last_seen', { ascending: false });
+      // Enriquecer con email/nombre del tenant
+      const { data: users } = await supabase.from('pos_users').select('id, email, business_name').limit(500);
+      const byId = {};
+      (users || []).forEach(u => { byId[u.id] = u; });
+      const rows = (versions || []).map(v => ({
+        ...v,
+        email: (byId[v.tenant_id] || {}).email || v.tenant_id || '—',
+        business: (byId[v.tenant_id] || {}).business_name || '—',
+        current: CURRENT
+      }));
+      sendJSON(res, { ok: true, rows, current_version: CURRENT });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // 2026-05-11: POST /api/version/notify — enviar email de actualización
+  handlers['POST /api/version/notify'] = requireAuth(async function (req, res) {
+    if (!requireSuper(req, res)) return;
+    try {
+      const { email, platform, new_version } = req.body || {};
+      if (!email) return sendJSON(res, { ok: false, error: 'email requerido' });
+      // Log en audit
+      await supabase.from('volvix_audit').insert({ action: 'version.notify', target_email: email, platform, new_version, ts: new Date().toISOString() }).catch(() => {});
+      // TODO: enviar email real via Resend cuando esté configurado
+      sendJSON(res, { ok: true, message: 'Notificación registrada. Configura Resend para email real.' });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // 2026-05-11: GET /api/downloads/track — registrar descarga (no requiere auth)
+  handlers['POST /api/downloads/track'] = async function (req, res) {
+    try {
+      const { type, platform } = req.body || {};
+      await supabase.from('volvix_download_stats').insert({ type, platform, ts: new Date().toISOString() }).catch(() => {});
+      sendJSON(res, { ok: true });
+    } catch (err) { sendJSON(res, { ok: true }); } // silencioso
+  };
+
   // 2026-05-08 GET /api/admin/users/hierarchy — devuelve TODOS los usuarios
   // organizados como árbol: superadmins → owners por tenant → empleados.
   // Resuelve la jerarquía mezclando pos_users (notes JSON) + pos_companies +
