@@ -137,12 +137,25 @@
     if (totalEl && parseInt(totalEl.textContent || '0', 10) > 0) return true;
     return false;
   }
+  // 2026-05-11: consulta la BD del tenant para saber si hay productos.
+  // Imprescindible porque CATALOG local puede estar vacío aunque haya 284 productos en DB.
+  async function tenantHasProductsInDB() {
+    try {
+      const r = await fetch('/api/productos?select=id&limit=1', { credentials: 'include' });
+      if (!r.ok) return false;
+      const j = await r.json();
+      const items = (j && (j.items || j.data)) || [];
+      return items.length > 0;
+    } catch (_) { return false; }
+  }
+
   function autoOpenIfEmpty() {
     // Si el usuario ya descartó el wizard en esta sesión, NO re-abrir
     if (localStorage.getItem('volvix_wizard_dismissed') === 'true') return;
 
-    setTimeout(() => {
-      if (hasInventoryProducts()) return;     // ya tiene productos → no molestar
+    setTimeout(async () => {
+      if (hasInventoryProducts()) return;     // ya tiene productos local → no molestar
+      if (await tenantHasProductsInDB()) return; // ya tiene productos en BD → no molestar
       if (isAnyModalOpen()) return;            // otro modal abierto → no superponer
       try {
         if (typeof window.showScreen === 'function') window.showScreen('inventario');

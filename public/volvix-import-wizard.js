@@ -1581,18 +1581,34 @@
     }
   }
 
-  // AUTO-OPEN si CATALOG vacío
+  // 2026-05-11: chequear si el tenant tiene productos en la BD (no solo CATALOG)
+  async function tenantHasProductsInDB() {
+    try {
+      const r = await fetch('/api/productos?select=id&limit=1', { credentials: 'include' });
+      if (!r.ok) return false;
+      const j = await r.json();
+      const items = (j && (j.items || j.data)) || [];
+      return items.length > 0;
+    } catch (_) { return false; }
+  }
+
+  // AUTO-OPEN si CATALOG vacío Y la BD del tenant también está vacía
   function openWizardIfEmpty() {
-    // Esperar a que CATALOG se hidrate
+    // Si el usuario ya descartó el wizard antes, NO re-abrir
+    try {
+      if (localStorage.getItem('volvix_wizard_dismissed') === 'true') return;
+    } catch (_) {}
+
     let attempts = 0;
-    const poll = setInterval(() => {
+    const poll = setInterval(async () => {
       attempts++;
       const empty = !window.CATALOG || (Array.isArray(window.CATALOG) && window.CATALOG.length === 0);
-      // Si después de 10s (~5 polls de 2s) sigue vacío → abrir
       if (empty && attempts >= 5) {
         clearInterval(poll);
+        // CRÍTICO: verificar BD ANTES de abrir, no solo CATALOG local
+        if (await tenantHasProductsInDB()) return;
         // Solo si no hay otro modal abierto
-        if (!document.querySelector('#modal-product-form, #volvix-import-modal, #volvix-err-overlay')) {
+        if (!document.querySelector('#modal-product-form, #volvix-import-modal, #volvix-err-overlay, #volvix-onboarding-overlay')) {
           openWizard();
         }
       }

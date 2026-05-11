@@ -12,10 +12,27 @@
 
   const STORAGE_KEY = 'volvix_onboarding_completed';
 
+  // 2026-05-11: chequear si el usuario YA tiene productos en su tenant.
+  // Si tiene productos, el wizard de "primeros pasos" no aplica.
+  async function userHasProducts() {
+    try {
+      const r = await fetch('/api/productos?select=id&limit=1', { credentials: 'include' });
+      if (!r.ok) return false;
+      const j = await r.json();
+      const items = (j && (j.items || j.data)) || [];
+      return items.length > 0;
+    } catch (_) { return false; }
+  }
+
   // Esperar a que el DOM esté listo + auth-gate se complete
-  function checkAndShowOnboarding() {
+  async function checkAndShowOnboarding() {
     if (localStorage.getItem(STORAGE_KEY)) {
       return; // Ya completado, no mostrar
+    }
+    // 2026-05-11: si el usuario ya tiene productos, NO mostrar wizard de primeros pasos
+    if (await userHasProducts()) {
+      try { localStorage.setItem(STORAGE_KEY, '1'); } catch (_) {}
+      return;
     }
 
     // Crear el HTML del wizard
