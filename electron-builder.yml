@@ -6,10 +6,21 @@ directories:
   buildResources: electron
 files:
   - electron/**/*
+  # 2026-05-11: incluir public/ para que la app funcione 100% offline.
+  # Antes el .exe solo cargaba la URL de Vercel — si no había internet o tardaba,
+  # se congelaba toda la computadora.
+  - public/**/*
+  - "!public/api/**"
+  - "!public/docs/**"
+  - "!public/tutorials/**"
+  - "!public/MATRIZ_PRUEBAS_LOCAL_v1_backup.html"
+  - "!public/volvix-sandbox.html"
+  - "!public/volvix-modals-demo.html"
   - "!**/node_modules/**/{CHANGELOG.md,README.md,readme.md,test,__tests__,tests,*.map}"
 asar: true
 extraMetadata:
   main: electron/main.js
+  name: volvix-pos
 win:
   target:
     - nsis
@@ -25,6 +36,8 @@ nsis:
   createDesktopShortcut: true
   createStartMenuShortcut: true
   shortcutName: Volvix POS
+  # 2026-05-11: instalador OFFLINE (no descarga nada de internet durante instalación)
+  differentialPackage: false
 mac:
   target:
     - dmg
