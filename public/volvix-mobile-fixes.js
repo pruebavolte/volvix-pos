@@ -148,6 +148,24 @@
         if (typeof window.showScreen === 'function') window.showScreen('inventario');
       } catch (_) {}
       openWizardSafe();
+
+      // Watcher: si el catalog se puebla DESPUÉS de abrir el wizard
+      // (data load tardó más de 5.2s), cerrar el wizard automáticamente
+      // porque ya no hace sentido mostrarlo.
+      let _watcherTicks = 0;
+      const _watcher = setInterval(() => {
+        _watcherTicks++;
+        if (hasInventoryProducts()) {
+          const wiz = document.getElementById('volvix-import-modal');
+          if (wiz) {
+            wiz.remove();
+            localStorage.setItem('volvix_wizard_dismissed', 'true');
+            console.log('[mob-fix] wizard auto-closed: catalog populated after open');
+          }
+          clearInterval(_watcher);
+        }
+        if (_watcherTicks > 30) clearInterval(_watcher); // máximo 30s de watch
+      }, 1000);
     }, 5200);
   }
 
