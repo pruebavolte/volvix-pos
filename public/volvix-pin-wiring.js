@@ -106,10 +106,22 @@
   // ==========================================================
   // Idle timer
   // ==========================================================
+  // 2026-05-11: el PIN lock está DESACTIVADO por defecto. El usuario lo activa
+  // explícitamente desde Config → General toggle "Bloqueo PIN".
+  // localStorage flag: 'volvix_pin_enabled' === 'true' → habilitado
+  function isPinLockEnabled() {
+    try { return localStorage.getItem('volvix_pin_enabled') === 'true'; }
+    catch (_) { return false; }
+  }
+
   function resetIdleTimer() {
     if (state.idleTimer) clearTimeout(state.idleTimer);
     if (state.locked) return;
+    // Si PIN lock está desactivado, NO programar el auto-lock idle
+    if (!isPinLockEnabled()) return;
     state.idleTimer = setTimeout(() => {
+      // Re-chequear al disparar (por si el usuario lo desactivó mientras tanto)
+      if (!isPinLockEnabled()) return;
       console.log('[PinAPI] Idle timeout - auto lock');
       lock('idle');
     }, CONFIG.idleTimeoutMs);
@@ -404,6 +416,12 @@
   // ==========================================================
   function lock(reason) {
     if (state.locked) return;
+    // 2026-05-11: bloqueo del lock cuando PIN está desactivado (excepto manual)
+    if (reason !== 'manual' && !isPinLockEnabled()) {
+      if (state.idleTimer) clearTimeout(state.idleTimer);
+      console.log('[PinAPI] lock skipped — disabled in Config');
+      return;
+    }
     state.locked = true;
     state.buffer = '';
     if (state.idleTimer) clearTimeout(state.idleTimer);
