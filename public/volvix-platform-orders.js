@@ -64,6 +64,8 @@
     s.id = 'volvix-plat-styles';
     s.textContent = `
       #volvix-plat-section{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px;margin:10px 0;font-family:-apple-system,Segoe UI,Roboto,sans-serif}
+      #volvix-plat-fab{display:none}
+      #volvix-plat-drawer{display:none}
       #volvix-plat-section.alert{border-color:#dc2626;animation:volvix-plat-blink 1s infinite}
       #volvix-plat-section.alert .volvix-plat-h{color:#dc2626}
       @keyframes volvix-plat-blink{0%,100%{background:#fff;border-color:#dc2626}50%{background:#fef3c7;border-color:#f59e0b}}
