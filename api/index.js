@@ -36831,50 +36831,78 @@ if (process.env.NODE_ENV === 'test') {
     } catch (err) { sendError(res, err); }
   });
 
-  // 2026-05-11: POST /api/version/report — cada app reporta su versión instalada
-  // Body: { tenant_id, version, platform ('windows'|'android'|'pwa'), user_agent, ts }
+  // ============================================================================
+  // VERSION TRACKING + DOWNLOAD STATS (2026-05-11)
+  // Reutiliza volvix_audit_log (tabla existente) — sin DDL
+  // ============================================================================
+
+  // POST /api/version/report — cada app reporta su versión instalada
   handlers['POST /api/version/report'] = async function (req, res) {
     try {
       const body = await readBody(req, { maxBytes: 4 * 1024 });
       if (checkBodyError(req, res)) return;
       const { tenant_id, version, platform, user_agent } = body || {};
       if (!version) return sendJSON(res, { ok: false, error: 'version requerida' });
-      // Upsert en app_versions (crear tabla si no existe — graceful)
       try {
-        await supabase.from('volvix_app_versions').upsert({
+        await supabaseRequest('POST', '/volvix_audit_log', {
           tenant_id: tenant_id || null,
-          platform: platform || 'pwa',
-          version: String(version).slice(0, 20),
+          action: 'version.report',
+          resource: 'app',
+          resource_id: platform || 'pwa',
+          after: { version: String(version).slice(0, 20), platform: platform || 'pwa' },
           user_agent: (user_agent || '').slice(0, 300),
-          last_seen: new Date().toISOString()
-        }, { onConflict: 'tenant_id,platform', ignoreDuplicates: false });
-      } catch (_) { /* tabla puede no existir aún, silencioso */ }
+          ts: new Date().toISOString()
+        });
+      } catch (_) {}
       sendJSON(res, { ok: true });
-    } catch (err) { sendJSON(res, { ok: false, error: String(err && err.message || err) }); }
+    } catch (err) { sendJSON(res, { ok: false, error: String(err && err.message || err).slice(0, 200) }); }
   };
 
-  // 2026-05-11: GET /api/version/status — lista versiones por tenant (superadmin)
+  // GET /api/version/status — lista versión más reciente por (tenant, platform)
   handlers['GET /api/version/status'] = requireAuth(async function (req, res) {
     if (!requireSuper(req, res)) return;
     try {
-      const CURRENT = '1.0.0';
-      const { data: versions } = await supabase.from('volvix_app_versions')
-        .select('tenant_id, platform, version, last_seen').order('last_seen', { ascending: false });
-      // Enriquecer con email/nombre del tenant
-      const { data: users } = await supabase.from('pos_users').select('id, email, business_name').limit(500);
-      const byId = {};
-      (users || []).forEach(u => { byId[u.id] = u; });
-      const rows = (versions || []).map(v => ({
+      const CURRENT = '1.0.157';
+      // Trae los últimos 1000 reportes de versión (más reciente primero)
+      let reports = [];
+      try {
+        reports = await supabaseRequest('GET',
+          '/volvix_audit_log?action=eq.version.report&select=tenant_id,resource_id,after,user_agent,ts&order=ts.desc&limit=1000'
+        ) || [];
+      } catch (_) {}
+      // Quedarse solo con el reporte MÁS RECIENTE por (tenant_id, platform)
+      const latest = {};
+      reports.forEach(r => {
+        const platform = r.resource_id || (r.after && r.after.platform) || 'pwa';
+        const key = (r.tenant_id || 'anon') + ':' + platform;
+        if (!latest[key]) {
+          latest[key] = {
+            tenant_id: r.tenant_id,
+            platform: platform,
+            version: r.after && r.after.version || '—',
+            last_seen: r.ts,
+            user_agent: r.user_agent
+          };
+        }
+      });
+      // Enriquecer con email/business desde pos_users
+      let users = [];
+      try {
+        users = await supabaseRequest('GET', '/pos_users?select=id,email,full_name,tenant_id&limit=500') || [];
+      } catch (_) {}
+      const byTid = {};
+      users.forEach(u => { if (u.tenant_id) byTid[u.tenant_id] = u; });
+      const rows = Object.values(latest).map(v => ({
         ...v,
-        email: (byId[v.tenant_id] || {}).email || v.tenant_id || '—',
-        business: (byId[v.tenant_id] || {}).business_name || '—',
-        current: CURRENT
+        email:    (byTid[v.tenant_id] || {}).email || v.tenant_id || '—',
+        business: (byTid[v.tenant_id] || {}).full_name || '—',
+        current:  CURRENT
       }));
       sendJSON(res, { ok: true, rows, current_version: CURRENT });
     } catch (err) { sendError(res, err); }
   });
 
-  // 2026-05-11: POST /api/version/notify — enviar email de actualización
+  // POST /api/version/notify — registra el intento de notificación (superadmin)
   handlers['POST /api/version/notify'] = requireAuth(async function (req, res) {
     if (!requireSuper(req, res)) return;
     try {
@@ -36882,26 +36910,36 @@ if (process.env.NODE_ENV === 'test') {
       if (checkBodyError(req, res)) return;
       const { email, platform, new_version } = body || {};
       if (!email) return sendJSON(res, { ok: false, error: 'email requerido' });
-      // Log en audit (silencioso si la tabla no existe)
       try {
-        await supabase.from('volvix_audit').insert({ action: 'version.notify', target_email: email, platform, new_version, ts: new Date().toISOString() });
+        await supabaseRequest('POST', '/volvix_audit_log', {
+          action: 'version.notify',
+          resource: 'email',
+          resource_id: email,
+          after: { platform, new_version },
+          ts: new Date().toISOString()
+        });
       } catch (_) {}
-      // TODO: enviar email real via Resend cuando esté configurado
-      sendJSON(res, { ok: true, message: 'Notificación registrada. Configura Resend para email real.' });
+      sendJSON(res, { ok: true, message: 'Notificación registrada en audit log' });
     } catch (err) { sendError(res, err); }
   });
 
-  // 2026-05-11: POST /api/downloads/track — registrar descarga (no requiere auth)
+  // POST /api/downloads/track — registrar descarga (público, sin auth)
   handlers['POST /api/downloads/track'] = async function (req, res) {
     try {
       const body = await readBody(req, { maxBytes: 2 * 1024 });
       if (checkBodyError(req, res)) return;
       const { type, platform } = body || {};
       try {
-        await supabase.from('volvix_download_stats').insert({ type, platform, ts: new Date().toISOString() });
+        await supabaseRequest('POST', '/volvix_audit_log', {
+          action: 'download.track',
+          resource: 'installer',
+          resource_id: String(type || '').slice(0, 30),
+          after: { platform: String(platform || '').slice(0, 30) },
+          ts: new Date().toISOString()
+        });
       } catch (_) {}
       sendJSON(res, { ok: true });
-    } catch (_) { sendJSON(res, { ok: true }); } // siempre OK (silencioso)
+    } catch (_) { sendJSON(res, { ok: true }); }
   };
 
   // 2026-05-08 GET /api/admin/users/hierarchy — devuelve TODOS los usuarios
