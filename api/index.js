@@ -36835,18 +36835,22 @@ if (process.env.NODE_ENV === 'test') {
   // Body: { tenant_id, version, platform ('windows'|'android'|'pwa'), user_agent, ts }
   handlers['POST /api/version/report'] = async function (req, res) {
     try {
-      const { tenant_id, version, platform, user_agent } = req.body || {};
+      const body = await readBody(req, { maxBytes: 4 * 1024 });
+      if (checkBodyError(req, res)) return;
+      const { tenant_id, version, platform, user_agent } = body || {};
       if (!version) return sendJSON(res, { ok: false, error: 'version requerida' });
       // Upsert en app_versions (crear tabla si no existe — graceful)
-      await supabase.from('volvix_app_versions').upsert({
-        tenant_id: tenant_id || null,
-        platform: platform || 'pwa',
-        version: String(version).slice(0, 20),
-        user_agent: (user_agent || '').slice(0, 300),
-        last_seen: new Date().toISOString()
-      }, { onConflict: 'tenant_id,platform', ignoreDuplicates: false }).catch(() => {});
+      try {
+        await supabase.from('volvix_app_versions').upsert({
+          tenant_id: tenant_id || null,
+          platform: platform || 'pwa',
+          version: String(version).slice(0, 20),
+          user_agent: (user_agent || '').slice(0, 300),
+          last_seen: new Date().toISOString()
+        }, { onConflict: 'tenant_id,platform', ignoreDuplicates: false });
+      } catch (_) { /* tabla puede no existir aún, silencioso */ }
       sendJSON(res, { ok: true });
-    } catch (err) { sendJSON(res, { ok: false }); }
+    } catch (err) { sendJSON(res, { ok: false, error: String(err && err.message || err) }); }
   };
 
   // 2026-05-11: GET /api/version/status — lista versiones por tenant (superadmin)
@@ -36874,22 +36878,30 @@ if (process.env.NODE_ENV === 'test') {
   handlers['POST /api/version/notify'] = requireAuth(async function (req, res) {
     if (!requireSuper(req, res)) return;
     try {
-      const { email, platform, new_version } = req.body || {};
+      const body = await readBody(req, { maxBytes: 4 * 1024 });
+      if (checkBodyError(req, res)) return;
+      const { email, platform, new_version } = body || {};
       if (!email) return sendJSON(res, { ok: false, error: 'email requerido' });
-      // Log en audit
-      await supabase.from('volvix_audit').insert({ action: 'version.notify', target_email: email, platform, new_version, ts: new Date().toISOString() }).catch(() => {});
+      // Log en audit (silencioso si la tabla no existe)
+      try {
+        await supabase.from('volvix_audit').insert({ action: 'version.notify', target_email: email, platform, new_version, ts: new Date().toISOString() });
+      } catch (_) {}
       // TODO: enviar email real via Resend cuando esté configurado
       sendJSON(res, { ok: true, message: 'Notificación registrada. Configura Resend para email real.' });
     } catch (err) { sendError(res, err); }
   });
 
-  // 2026-05-11: GET /api/downloads/track — registrar descarga (no requiere auth)
+  // 2026-05-11: POST /api/downloads/track — registrar descarga (no requiere auth)
   handlers['POST /api/downloads/track'] = async function (req, res) {
     try {
-      const { type, platform } = req.body || {};
-      await supabase.from('volvix_download_stats').insert({ type, platform, ts: new Date().toISOString() }).catch(() => {});
+      const body = await readBody(req, { maxBytes: 2 * 1024 });
+      if (checkBodyError(req, res)) return;
+      const { type, platform } = body || {};
+      try {
+        await supabase.from('volvix_download_stats').insert({ type, platform, ts: new Date().toISOString() });
+      } catch (_) {}
       sendJSON(res, { ok: true });
-    } catch (err) { sendJSON(res, { ok: true }); } // silencioso
+    } catch (_) { sendJSON(res, { ok: true }); } // siempre OK (silencioso)
   };
 
   // 2026-05-08 GET /api/admin/users/hierarchy — devuelve TODOS los usuarios
