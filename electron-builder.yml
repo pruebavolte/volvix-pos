@@ -13,8 +13,11 @@ extraMetadata:
 win:
   target:
     - nsis
-  icon: electron/icons/icon.ico
+  icon: electron/icons/icon.png
   artifactName: "Volvix POS Setup ${version}.${ext}"
+  signAndEditExecutable: false
+  signtoolOptions:
+    sign: null
 nsis:
   oneClick: false
   perMachine: false
