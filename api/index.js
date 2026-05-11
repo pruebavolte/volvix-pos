@@ -36848,10 +36848,8 @@ if (process.env.NODE_ENV === 'test') {
       if (checkBodyError(req, res)) return;
       const { version, platform, user_agent, email } = body || {};
       if (!version) return sendJSON(res, { ok: false, error: 'version requerida' });
-      let insertResult = null;
-      let insertError = null;
       try {
-        insertResult = await supabaseRequest('POST', '/pos_download_events', {
+        await supabaseRequest('POST', '/pos_download_events', {
           file_type: ('heartbeat:' + (platform || 'pwa')).slice(0, 30),
           file_name: 'version-report',
           version: String(version).slice(0, 20),
@@ -36859,10 +36857,8 @@ if (process.env.NODE_ENV === 'test') {
           email: email || null,
           ip: getClientIp(req)
         });
-      } catch (e) {
-        insertError = String(e && e.message || e).slice(0, 400);
-      }
-      sendJSON(res, { ok: true, persisted: !insertError, error: insertError });
+      } catch (_) {}
+      sendJSON(res, { ok: true });
     } catch (err) { sendJSON(res, { ok: false, error: String(err && err.message || err).slice(0, 200) }); }
   };
 
