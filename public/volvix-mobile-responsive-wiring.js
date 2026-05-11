@@ -389,6 +389,14 @@
 
   function maybeAutoStartTour() {
     try {
+      // 2026-05-11: respetar flag 'volvix_tours_enabled' del Config → General
+      // Default OFF — el tour solo arranca si el usuario lo activó manualmente.
+      // ?tour=1 en URL sigue funcionando para testing.
+      var enabled = false;
+      try { enabled = localStorage.getItem('volvix_tours_enabled') === 'true'; } catch (_) {}
+      var fromQuery = /[\?&]tour=1\b/.test(location.search);
+      if (!enabled && !fromQuery) return;
+
       var done = localStorage.getItem(TOUR_KEY);
       var ver = localStorage.getItem(TOUR_VERSION_KEY);
       // Only auto-start once per major version, and only when DOM is settled
