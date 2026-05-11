@@ -7811,13 +7811,27 @@
       : (opts.isMixed
         ? 'or=(barcode.eq.' + encodeURIComponent(trimmed) + ',code.eq.' + encodeURIComponent(trimmed) + ',name.ilike.' + encodeURIComponent('%' + trimmed + '%') + ')'
         : 'name=ilike.' + encodeURIComponent('%' + trimmed + '%'));
+    // CLIENT-SIDE filter — el backend a veces ignora ?or=() y devuelve TODO el catálogo,
+    // lo que disparaba el modal "Múltiples resultados" con productos que NO matchean.
+    // Después del fetch validamos que cada item tenga match real al query (barcode/code/nombre).
+    const _matchesQuery = (p) => {
+      if (!p) return false;
+      const code = String(p.code || p.barcode || '').toLowerCase();
+      const name = String(p.name || p.nombre || '').toLowerCase();
+      const lowQ = trimmed.toLowerCase();
+      if (isBarcode) return code === lowQ;
+      if (opts.isMixed) return code === lowQ || name.includes(lowQ);
+      return name.includes(lowQ);
+    };
     const tenantPromise = _fetchWithTimeout('/api/productos?' + tenantParams + '&select=*&limit=10', { credentials: 'include' }, 1200)
       .then(r => (r && r.ok) ? r.json().catch(() => ({})) : null)
       .then(j => j ? (j.items || j.data || []) : [])
+      .then(items => items.filter(_matchesQuery))
       .catch(() => []);
     const ownerPromise = _fetchWithTimeout('/api/owner/products/lookup?q=' + encodeURIComponent(trimmed), { credentials: 'include' }, 1500)
       .then(r => (r && r.ok) ? r.json().catch(() => ({})) : null)
       .then(j => (j && j.items) ? j.items : [])
+      .then(items => items.filter(_matchesQuery))
       .catch(() => []);
     const [tenantRes, ownerRes] = await Promise.allSettled([tenantPromise, ownerPromise]);
     const tenantItems = (tenantRes.status === 'fulfilled' && tenantRes.value) || [];
