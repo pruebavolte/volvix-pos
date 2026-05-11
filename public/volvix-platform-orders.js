@@ -98,6 +98,67 @@
       .volvix-ord-btn.accept{background:#10b981;color:#fff}
       .volvix-ord-btn.reject{background:#fff;color:#dc2626;border:1.5px solid #dc2626}
       .volvix-ord-btn:hover{transform:translateY(-1px)}
+      /* ── Mobile responsive: ocultar panel lateral, mostrar FAB ── */
+      @media (max-width: 768px) {
+        #volvix-plat-section { display: none !important; }
+        #volvix-plat-fab {
+          position: fixed;
+          bottom: 80px;
+          right: 14px;
+          z-index: 9500;
+          background: #dc2626;
+          color: #fff;
+          border: none;
+          border-radius: 50px;
+          padding: 10px 16px;
+          font-size: 14px;
+          font-weight: 700;
+          cursor: pointer;
+          display: none;
+          align-items: center;
+          gap: 6px;
+          box-shadow: 0 4px 16px rgba(220,38,38,.5);
+          animation: volvix-fadein .2s;
+          touch-action: manipulation;
+          min-height: 44px;
+        }
+        #volvix-plat-fab.show { display: flex; }
+        #volvix-plat-fab-count {
+          background: #fff;
+          color: #dc2626;
+          border-radius: 99px;
+          font-size: 11px;
+          font-weight: 800;
+          padding: 1px 7px;
+          min-width: 20px;
+          text-align: center;
+        }
+        /* Panel drawer mobile: aparece desde abajo al tocar el FAB */
+        #volvix-plat-drawer {
+          position: fixed;
+          inset: 0;
+          z-index: 9400;
+          display: none;
+        }
+        #volvix-plat-drawer.open { display: block; }
+        #volvix-plat-drawer-backdrop {
+          position: absolute;
+          inset: 0;
+          background: rgba(0,0,0,.45);
+        }
+        #volvix-plat-drawer-panel {
+          position: absolute;
+          bottom: 0; left: 0; right: 0;
+          background: #fff;
+          border-radius: 16px 16px 0 0;
+          padding: 16px;
+          max-height: 75vh;
+          overflow-y: auto;
+          box-shadow: 0 -4px 24px rgba(0,0,0,.2);
+        }
+        #volvix-plat-drawer-panel .volvix-plat-h { font-size: 15px; margin-bottom: 12px; }
+        #volvix-plat-drawer-panel .volvix-plat-grid { grid-template-columns: repeat(2, 1fr); }
+      }
     `;
     document.head.appendChild(s);
   }
@@ -138,9 +199,9 @@
     // Insertar al inicio del POS si es posible, fallback al body
     if (target.id === 'screen-pos') target.insertBefore(sec, target.firstChild);
     else target.appendChild(sec);
-    // 2026-05-10 anti-hide: force display:block !important para sobrescribir
-    // cualquier inline display:none que un wiring anti-floater inyecte.
+    // Solo forzar visibilidad en desktop; en móvil el FAB toma el control
     function _forceShow() {
+      if (window.innerWidth <= 768) return;
       try {
         sec.style.setProperty('display', 'block', 'important');
         sec.style.setProperty('visibility', 'visible', 'important');
@@ -150,7 +211,64 @@
     _forceShow();
     let tries = 0;
     const intv = setInterval(() => { _forceShow(); if (++tries > 8) clearInterval(intv); }, 250);
+    _mountMobileFab();
     _renderPendingList();
+  }
+
+  function _mountMobileFab() {
+    if (document.getElementById('volvix-plat-fab')) return;
+    // FAB (solo visible en móvil cuando hay pedidos pendientes)
+    const fab = document.createElement('button');
+    fab.id = 'volvix-plat-fab';
+    fab.innerHTML = '📦 Pedidos <span id="volvix-plat-fab-count">0</span>';
+    fab.setAttribute('aria-label', 'Ver pedidos de plataformas');
+    fab.addEventListener('click', _openMobileDrawer);
+    document.body.appendChild(fab);
+    // Drawer (bottom sheet)
+    const drawer = document.createElement('div');
+    drawer.id = 'volvix-plat-drawer';
+    drawer.innerHTML = `
+      <div id="volvix-plat-drawer-backdrop"></div>
+      <div id="volvix-plat-drawer-panel">
+        <div class="volvix-plat-h">📦 Pedidos de Plataformas <span class="volvix-plat-badge show" id="volvix-plat-drawer-badge">0</span></div>
+        <div class="volvix-plat-grid">
+          <div class="volvix-plat-card" id="volvix-plat-drawer-app" title="Pedidos desde tu app cliente">
+            <div class="volvix-plat-ico">📱</div>
+            <div class="volvix-plat-name">Tu aplicación</div>
+            <div class="volvix-plat-sub">Activa</div>
+          </div>
+          <div class="volvix-plat-card disabled"><div class="volvix-plat-ico">🟢</div><div class="volvix-plat-name">Uber Eats</div><div class="volvix-plat-sub">Próximamente</div></div>
+          <div class="volvix-plat-card disabled"><div class="volvix-plat-ico">🟠</div><div class="volvix-plat-name">Didi Food</div><div class="volvix-plat-sub">Próximamente</div></div>
+          <div class="volvix-plat-card disabled"><div class="volvix-plat-ico">🛵</div><div class="volvix-plat-name">Rappi</div><div class="volvix-plat-sub">Próximamente</div></div>
+        </div>
+        <div class="volvix-plat-list" id="volvix-plat-drawer-list"></div>
+      </div>
+    `;
+    drawer.querySelector('#volvix-plat-drawer-backdrop').addEventListener('click', _closeMobileDrawer);
+    document.body.appendChild(drawer);
+  }
+
+  function _openMobileDrawer() {
+    const drawer = document.getElementById('volvix-plat-drawer');
+    if (drawer) drawer.classList.add('open');
+    _renderDrawerList();
+  }
+
+  function _closeMobileDrawer() {
+    const drawer = document.getElementById('volvix-plat-drawer');
+    if (drawer) drawer.classList.remove('open');
+  }
+
+  function _renderDrawerList() {
+    const list = document.getElementById('volvix-plat-drawer-list');
+    if (!list || !_state.pendingCount) { if (list) list.innerHTML = ''; return; }
+    list.innerHTML = Array.from(_state.seenIds).slice(0, 5).map(id =>
+      '<div class="volvix-plat-pending"><b>Pedido #' + id + ' pendiente</b>' +
+      '<button data-pend-drawer="' + id + '">Ver</button></div>'
+    ).join('');
+    list.querySelectorAll('[data-pend-drawer]').forEach(b => {
+      b.addEventListener('click', () => { _closeMobileDrawer(); _openOrderModal(parseInt(b.dataset.pendDrawer, 10)); });
+    });
   }
 
   function _renderPendingList() {
@@ -172,13 +290,23 @@
 
   function _setAlert(on) {
     const sec = document.getElementById('volvix-plat-section');
-    if (!sec) return;
-    sec.classList.toggle('alert', !!on);
+    if (sec) sec.classList.toggle('alert', !!on);
+    // Badge en el panel desktop
     const badge = document.getElementById('volvix-plat-badge');
     if (badge) {
       badge.classList.toggle('show', _state.pendingCount > 0);
       badge.textContent = _state.pendingCount;
     }
+    // FAB móvil: solo visible cuando hay pedidos pendientes
+    const fab = document.getElementById('volvix-plat-fab');
+    if (fab) {
+      fab.classList.toggle('show', _state.pendingCount > 0);
+      const cnt = document.getElementById('volvix-plat-fab-count');
+      if (cnt) cnt.textContent = _state.pendingCount;
+    }
+    // Badge en el drawer móvil
+    const dbadge = document.getElementById('volvix-plat-drawer-badge');
+    if (dbadge) dbadge.textContent = _state.pendingCount;
   }
 
   // ────────────────────────────────────────────────────────────────────
