@@ -295,10 +295,21 @@
   }
 
   // ====== Auto-trigger después de cargar ======
+  // 2026-05-11: respetar flag 'volvix_tours_enabled' del Config → General.
+  // El default es OFF — el tour solo se autoarranca si el usuario lo activó
+  // explícitamente desde Config, O si llegó vía ?tour=1 en la URL.
+  function toursEnabled() {
+    try { return localStorage.getItem('volvix_tours_enabled') === 'true'; }
+    catch (_) { return false; }
+  }
   function maybeAutoStart() {
     var fromWizard = false;
     try { fromWizard = sessionStorage.getItem('volvix_launch_tour_after_load') === '1'; } catch (e) {}
     var fromQuery = /[\?&]tour=1\b/.test(location.search);
+    if (!fromQuery && !toursEnabled()) {
+      // Tours desactivados en Config; solo ?tour=1 los enciende para test
+      return;
+    }
     if (fromWizard || fromQuery) {
       try { sessionStorage.removeItem('volvix_launch_tour_after_load'); } catch (e) {}
       // Esperar a que la UI esté completamente montada

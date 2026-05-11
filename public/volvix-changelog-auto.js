@@ -297,7 +297,16 @@
         },
 
         // Auto-check: shows modal only if current version > last seen
+        // 2026-05-11: respetar flag 'volvix_changelog_autoshow' (default OFF)
+        // Por default NO interrumpe al usuario; el usuario lo activa desde
+        // Config si quiere. La versión actual se marca como vista igual.
         autoCheck: function () {
+            try {
+                if (localStorage.getItem('volvix_changelog_autoshow') !== 'true') {
+                    try { localStorage.setItem(SEEN_KEY, detectCurrentVersion()); } catch (_) {}
+                    return;
+                }
+            } catch (_) {}
             if (this.hasNewVersion()) showModal(false);
         },
 
