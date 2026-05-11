@@ -36833,69 +36833,70 @@ if (process.env.NODE_ENV === 'test') {
 
   // ============================================================================
   // VERSION TRACKING + DOWNLOAD STATS (2026-05-11)
-  // Reutiliza volvix_audit_log (tabla existente) — sin DDL
+  // Reutiliza pos_download_events (tabla existente con columnas: file_type,
+  // version, user_agent, ip, user_id, email, created_at) — sin DDL
   // ============================================================================
 
-  // POST /api/version/report — cada app reporta su versión instalada
+  function getClientIp(req) {
+    return (req.headers['x-forwarded-for'] || req.connection?.remoteAddress || '').split(',')[0].trim().slice(0, 60);
+  }
+
+  // POST /api/version/report — heartbeat: cada app reporta su versión al iniciar
   handlers['POST /api/version/report'] = async function (req, res) {
     try {
       const body = await readBody(req, { maxBytes: 4 * 1024 });
       if (checkBodyError(req, res)) return;
-      const { tenant_id, version, platform, user_agent } = body || {};
+      const { version, platform, user_agent, email } = body || {};
       if (!version) return sendJSON(res, { ok: false, error: 'version requerida' });
       try {
-        await supabaseRequest('POST', '/volvix_audit_log', {
-          tenant_id: tenant_id || null,
-          action: 'version.report',
-          resource: 'app',
-          resource_id: platform || 'pwa',
-          after: { version: String(version).slice(0, 20), platform: platform || 'pwa' },
-          user_agent: (user_agent || '').slice(0, 300),
-          ts: new Date().toISOString()
+        await supabaseRequest('POST', '/pos_download_events', {
+          file_type: 'heartbeat:' + (platform || 'pwa').slice(0, 15),
+          file_name: 'version-report',
+          version: String(version).slice(0, 20),
+          user_agent: (user_agent || req.headers['user-agent'] || '').slice(0, 300),
+          email: email || null,
+          ip: getClientIp(req)
         });
       } catch (_) {}
       sendJSON(res, { ok: true });
     } catch (err) { sendJSON(res, { ok: false, error: String(err && err.message || err).slice(0, 200) }); }
   };
 
-  // GET /api/version/status — lista versión más reciente por (tenant, platform)
+  // GET /api/version/status — lista la versión más reciente por (email, plataforma)
   handlers['GET /api/version/status'] = requireAuth(async function (req, res) {
     if (!requireSuper(req, res)) return;
     try {
       const CURRENT = '1.0.157';
-      // Trae los últimos 1000 reportes de versión (más reciente primero)
-      let reports = [];
+      // Trae los últimos 1500 heartbeats + descargas (más reciente primero)
+      let events = [];
       try {
-        reports = await supabaseRequest('GET',
-          '/volvix_audit_log?action=eq.version.report&select=tenant_id,resource_id,after,user_agent,ts&order=ts.desc&limit=1000'
+        events = await supabaseRequest('GET',
+          '/pos_download_events?file_type=like.heartbeat:*&select=email,user_id,file_type,version,user_agent,created_at,ip&order=created_at.desc&limit=1500'
         ) || [];
       } catch (_) {}
-      // Quedarse solo con el reporte MÁS RECIENTE por (tenant_id, platform)
+      // Quedarse solo con el evento MÁS RECIENTE por (identifier, platform)
       const latest = {};
-      reports.forEach(r => {
-        const platform = r.resource_id || (r.after && r.after.platform) || 'pwa';
-        const key = (r.tenant_id || 'anon') + ':' + platform;
+      events.forEach(r => {
+        const platform = (r.file_type || '').replace('heartbeat:', '') || 'pwa';
+        const idKey = r.email || r.user_id || r.ip || 'anon';
+        const key = idKey + ':' + platform;
         if (!latest[key]) {
           latest[key] = {
-            tenant_id: r.tenant_id,
+            identifier: idKey,
+            email: r.email,
+            user_id: r.user_id,
             platform: platform,
-            version: r.after && r.after.version || '—',
-            last_seen: r.ts,
-            user_agent: r.user_agent
+            version: r.version || '—',
+            last_seen: r.created_at,
+            user_agent: r.user_agent,
+            ip: r.ip
           };
         }
       });
-      // Enriquecer con email/business desde pos_users
-      let users = [];
-      try {
-        users = await supabaseRequest('GET', '/pos_users?select=id,email,full_name,tenant_id&limit=500') || [];
-      } catch (_) {}
-      const byTid = {};
-      users.forEach(u => { if (u.tenant_id) byTid[u.tenant_id] = u; });
       const rows = Object.values(latest).map(v => ({
         ...v,
-        email:    (byTid[v.tenant_id] || {}).email || v.tenant_id || '—',
-        business: (byTid[v.tenant_id] || {}).full_name || '—',
+        business: '—',
+        tenant_id: v.user_id || null,
         current:  CURRENT
       }));
       sendJSON(res, { ok: true, rows, current_version: CURRENT });
@@ -36911,15 +36912,16 @@ if (process.env.NODE_ENV === 'test') {
       const { email, platform, new_version } = body || {};
       if (!email) return sendJSON(res, { ok: false, error: 'email requerido' });
       try {
-        await supabaseRequest('POST', '/volvix_audit_log', {
-          action: 'version.notify',
-          resource: 'email',
-          resource_id: email,
-          after: { platform, new_version },
-          ts: new Date().toISOString()
+        await supabaseRequest('POST', '/pos_download_events', {
+          file_type: 'notify:update',
+          file_name: 'version-notify',
+          email: email,
+          version: new_version || null,
+          user_agent: 'admin-notify-' + (platform || ''),
+          ip: getClientIp(req)
         });
       } catch (_) {}
-      sendJSON(res, { ok: true, message: 'Notificación registrada en audit log' });
+      sendJSON(res, { ok: true, message: 'Notificación registrada' });
     } catch (err) { sendError(res, err); }
   });
 
@@ -36928,14 +36930,15 @@ if (process.env.NODE_ENV === 'test') {
     try {
       const body = await readBody(req, { maxBytes: 2 * 1024 });
       if (checkBodyError(req, res)) return;
-      const { type, platform } = body || {};
+      const { type, platform, version } = body || {};
       try {
-        await supabaseRequest('POST', '/volvix_audit_log', {
-          action: 'download.track',
-          resource: 'installer',
-          resource_id: String(type || '').slice(0, 30),
-          after: { platform: String(platform || '').slice(0, 30) },
-          ts: new Date().toISOString()
+        await supabaseRequest('POST', '/pos_download_events', {
+          file_type: String(type || 'unknown').slice(0, 30),
+          file_name: 'VolvixPOS-' + String(platform || '').slice(0, 15),
+          version: String(version || '1.0.157').slice(0, 20),
+          user_agent: (req.headers['user-agent'] || '').slice(0, 300),
+          referrer: (req.headers['referer'] || req.headers['referrer'] || '').slice(0, 200),
+          ip: getClientIp(req)
         });
       } catch (_) {}
       sendJSON(res, { ok: true });
