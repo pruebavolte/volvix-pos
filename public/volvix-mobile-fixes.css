@@ -1,0 +1,448 @@
+/* =====================================================================
+ * volvix-mobile-fixes.css
+ * Fixes UX móvil reportados 2026-05-11:
+ *   1) Click delay / doble-tap (touch-action + hover-media)
+ *   2) Textboxes/botones/modales cortados (box-sizing + max-width)
+ *   3) Sidebar Categorías/Quick-pick que se quedaba fijo (force off-canvas)
+ *   4) Botón Importar que abría wizard pero no se veía (z-index + safe area)
+ *
+ * Cargar al FINAL de <head> para máxima especificidad.
+ * ===================================================================== */
+
+/* ---------- 1) CLICK DELAY / DOUBLE-TAP ---------- */
+/* touch-action: manipulation elimina el 300ms delay de mobile Safari y
+   evita que un :hover requiera un primer tap para "activar" el elemento. */
+button,
+a,
+.btn,
+[role="button"],
+input[type="button"],
+input[type="submit"],
+.tab,
+.config-tab,
+.menu-btn,
+.tb-btn,
+.action-btn,
+.bottom-btn,
+.btn-cobrar,
+.pos-sidebar-toggle,
+.volvix-imp-card-opt,
+.cat-item,
+.qp-item,
+.kpi,
+label.btn {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(0,0,0,0.06);
+}
+
+/* :hover sólo en dispositivos con puntero fino (mouse). En táctil, hover NO
+   debe disparar nada — convertía botones en "doble-tap" en muchos navegadores
+   móviles (1er tap = hover, 2do tap = click). */
+@media (hover: none), (pointer: coarse) {
+  /* Reset transforms/colors que dependían de :hover */
+  button:hover,
+  a:hover,
+  .btn:hover,
+  .tab:hover,
+  .menu-btn:hover,
+  .tb-btn:hover,
+  .action-btn:hover,
+  .bottom-btn:hover,
+  .btn-cobrar:hover,
+  .volvix-imp-card-opt:hover {
+    transform: none !important;
+    /* Conservar el color base sin trigger de hover en touch */
+  }
+}
+
+/* En touch, dar feedback visual con :active en vez de :hover */
+@media (hover: none) {
+  button:active,
+  a:active,
+  .btn:active,
+  .tab:active,
+  .menu-btn:active,
+  .action-btn:active,
+  .bottom-btn:active,
+  .volvix-imp-card-opt:active {
+    opacity: 0.7;
+    transition: opacity 0.08s;
+  }
+}
+
+/* ---------- 2) TEXTBOXES / BOTONES / MODALES CORTADOS ---------- */
+/* box-sizing global para que padding no overflow en mobile */
+@media (max-width: 768px) {
+  input,
+  textarea,
+  select,
+  button,
+  .btn,
+  .modal,
+  .modal-content,
+  [class*="modal"][class*="content"] {
+    box-sizing: border-box;
+    max-width: 100%;
+  }
+
+  /* Inputs/textareas deben ocupar todo el ancho disponible sin overflow */
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="password"],
+  input[type="search"],
+  textarea,
+  select {
+    width: 100%;
+    min-width: 0;
+    /* min-width 16px previene zoom auto-in en iOS */
+    font-size: 16px;
+  }
+
+  /* Modales: NUNCA pueden ser más anchos que el viewport */
+  .modal,
+  .modal-content,
+  [class*="modal"][class*="content"],
+  #volvix-import-card,
+  #volvix-plat-drawer-panel,
+  .dialog,
+  [role="dialog"] > div {
+    max-width: calc(100vw - 16px) !important;
+    width: calc(100vw - 16px) !important;
+    margin: 0 auto !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Modal overlay no debe tener padding excesivo que recorte el contenido */
+  #volvix-import-modal {
+    padding: 8px !important;
+  }
+
+  /* Botones del modal: no salirse */
+  .modal button,
+  .modal-content button,
+  #volvix-import-card button {
+    max-width: 100%;
+    white-space: normal;
+    word-wrap: break-word;
+  }
+
+  /* Tablas dentro de modales scrollean horizontal si no caben */
+  .modal table,
+  .modal-content table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+  }
+}
+
+/* ---------- 3) SIDEBAR CATEGORÍAS/QUICK-PICK STUCK ---------- */
+/* En mobile, el sidebar derecho DEBE empezar fuera de la pantalla.
+   Usamos !important para vencer cualquier inline-style residual de scripts. */
+@media (max-width: 880px) {
+  .pos-sidebar-right,
+  #pos-sidebar-right {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: min(280px, 85vw) !important;
+    z-index: 9450 !important;
+    transform: translateX(110%) !important;
+    transition: transform 0.25s ease !important;
+    background: var(--surface, #fff) !important;
+    box-shadow: -4px 0 24px rgba(0,0,0,0.25) !important;
+    overflow-y: auto !important;
+  }
+
+  .pos-sidebar-right.open,
+  #pos-sidebar-right.open {
+    transform: translateX(0) !important;
+  }
+
+  /* Backdrop cuando el sidebar está abierto. Inyectamos via JS porque el
+     marcado HTML no lo tiene. Usa el pseudo ::before del body con la clase
+     vlx-sb-open. */
+  body.vlx-sb-open::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 9440;
+    backdrop-filter: blur(2px);
+  }
+
+  /* Toggle button — visible, fija, encima del sidebar */
+  .pos-sidebar-toggle {
+    display: inline-flex !important;
+    position: fixed !important;
+    top: 60px !important;
+    right: 10px !important;
+    z-index: 9500 !important;
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 50% !important;
+    background: var(--surface, #fff) !important;
+    border: 1px solid var(--border, #e2e8f0) !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 18px !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0,0,0,0.1);
+    /* Cuando el sidebar está abierto, el toggle se mueve a su esquina */
+  }
+
+  body.vlx-sb-open .pos-sidebar-toggle {
+    right: calc(min(280px, 85vw) + 10px) !important;
+    z-index: 9500 !important;
+  }
+}
+
+/* ---------- 4) IMPORT WIZARD MODAL VISIBILITY ---------- */
+@media (max-width: 768px) {
+  /* Garantizar que el wizard esté SIEMPRE encima de cualquier otra cosa */
+  #volvix-import-modal {
+    z-index: 99996 !important;
+    align-items: flex-start !important;
+    padding: 12px !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  #volvix-import-card {
+    max-height: calc(100vh - 24px) !important;
+    margin: 12px auto !important;
+  }
+
+  /* Cards 1-columna en mobile (ya está en wizard CSS pero refuerza) */
+  .volvix-imp-2cards {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .volvix-imp-card-opt {
+    padding: 20px 16px !important;
+    min-height: 90px !important;
+  }
+
+  .volvix-imp-card-ico {
+    font-size: 36px !important;
+    margin-bottom: 4px !important;
+  }
+
+  .volvix-imp-head {
+    padding: 12px 14px !important;
+  }
+
+  .volvix-imp-h {
+    font-size: 15px !important;
+  }
+
+  .volvix-imp-sub {
+    font-size: 11px !important;
+    line-height: 1.3 !important;
+  }
+
+  .volvix-imp-body {
+    padding: 14px !important;
+  }
+
+  .volvix-imp-foot {
+    padding: 10px 14px !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+}
+
+/* ---------- 5) MARGEN INFERIOR PARA FAB Y SAFE-AREA ---------- */
+@media (max-width: 768px) {
+  /* Espacio para el FAB de Pedidos de Plataformas (bottom: 80px) y la
+     barra inferior fija del POS. Sin esto, el contenido queda tapado. */
+  .pos-main-area {
+    padding-bottom: 100px;
+  }
+
+  /* La barra inferior del POS (pos-bottom) debe quedarse visible */
+  .pos-bottom {
+    position: sticky;
+    bottom: 0;
+    z-index: 50;
+    background: var(--surface, #fff);
+    border-top: 1px solid var(--border-strong, #cbd5e1);
+  }
+
+  /* Botones grandes táctiles (mínimo 44x44 según Apple HIG) */
+  .btn-cobrar,
+  .bottom-btn,
+  .action-btn {
+    min-height: 44px;
+  }
+}
+
+/* ---------- 6) VIEWPORT FIX SI EL VIEWPORT META FALLA ---------- */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  /* Evitar que el body crezca horizontal por contenido off-screen */
+  overflow-x: hidden;
+}
+
+/* =====================================================================
+ * ONBOARDING GUIADO (2026-05-11)
+ * - Banner rojo "No tienes productos" en pantalla Ventas
+ * - Card "De 1 por 1" en wizard step 1
+ * - Input scan con parpadeo rojo + tooltip cuando se entra al modo guiado
+ * - Banner rojo dentro de modal "Nuevo producto"
+ * ===================================================================== */
+
+/* ---------- Banner rojo "No tienes productos" ---------- */
+#vlx-empty-products-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin: 0;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  border: 0;
+  border-bottom: 2px solid #991B1B;
+  cursor: pointer;
+  text-align: center;
+  letter-spacing: 0.01em;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.35);
+  animation: vlxEmptyBannerPulse 2.5s ease-in-out infinite;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(255,255,255,0.2);
+  font-family: inherit;
+}
+#vlx-empty-products-banner:hover,
+#vlx-empty-products-banner:active {
+  background: linear-gradient(135deg, #B91C1C 0%, #991B1B 100%);
+}
+#vlx-empty-products-banner strong { font-weight: 800; }
+#vlx-empty-products-banner u { text-decoration: underline; text-underline-offset: 2px; }
+
+@keyframes vlxEmptyBannerPulse {
+  0%, 100% { box-shadow: 0 2px 8px rgba(220, 38, 38, 0.35); }
+  50%      { box-shadow: 0 4px 16px rgba(220, 38, 38, 0.65), 0 0 0 4px rgba(220, 38, 38, 0.18); }
+}
+
+@media (max-width: 768px) {
+  #vlx-empty-products-banner {
+    font-size: 13px;
+    padding: 12px 14px;
+    flex-wrap: wrap;
+  }
+}
+
+/* ---------- 5ta card "De 1 por 1" del wizard ---------- */
+.vlx-card-onebyone {
+  border-color: #DC2626 !important;
+  background: linear-gradient(135deg, #FEF2F2 0%, #FECACA 100%) !important;
+}
+.vlx-card-onebyone:hover {
+  border-color: #B91C1C !important;
+  background: linear-gradient(135deg, #FECACA 0%, #FCA5A5 100%) !important;
+  transform: translateY(-2px);
+}
+.vlx-card-onebyone .volvix-imp-card-t {
+  color: #DC2626 !important;
+}
+
+/* ---------- Tooltip "solo escribe el nombre…" arriba del scan ---------- */
+#vlx-onebyone-tip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 10px 12px 6px;
+  padding: 10px 14px;
+  background: #FEF3C7;
+  color: #92400E;
+  border: 1px solid #F59E0B;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 500;
+  text-align: center;
+  animation: vlxTipFadeIn .3s ease;
+  line-height: 1.4;
+}
+#vlx-onebyone-tip strong { color: #B91C1C; font-weight: 700; }
+
+@keyframes vlxTipFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 640px) {
+  #vlx-onebyone-tip {
+    font-size: 12.5px;
+    padding: 9px 12px;
+    margin: 8px 10px 4px;
+  }
+}
+
+/* ---------- Input scan con parpadeo rojo (modo guiado 1-por-1) ---------- */
+.vlx-blink-red {
+  border: 2px solid #DC2626 !important;
+  box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7) !important;
+  color: #DC2626 !important;
+  animation: vlxBlinkRed 1.2s ease-in-out infinite;
+  caret-color: #DC2626;
+}
+.vlx-blink-red::placeholder { color: #DC2626 !important; opacity: 0.7; }
+
+@keyframes vlxBlinkRed {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.6);
+    border-color: #DC2626;
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(220, 38, 38, 0.15), 0 0 12px rgba(220, 38, 38, 0.4);
+    border-color: #B91C1C;
+  }
+}
+
+/* ---------- Banner rojo dentro del modal Nuevo producto ---------- */
+#vlx-product-form-banner {
+  background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%);
+  border: 1.5px solid #DC2626;
+  color: #991B1B;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0 0 14px;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-weight: 500;
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.15);
+}
+#vlx-product-form-banner strong { color: #DC2626; font-weight: 700; }
+
+@media (max-width: 768px) {
+  #vlx-product-form-banner {
+    font-size: 12.5px;
+    padding: 10px 12px;
+  }
+}
+
+/* ---------- Feedback de touch (clase agregada via JS) ---------- */
+.vlx-touched {
+  opacity: 0.7 !important;
+  transition: opacity 0.08s !important;
+}

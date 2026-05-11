@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Mobile Test — 390px iPhone</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #1a1a2e; font-family: monospace; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; }
+  h1 { color: #e0e0e0; font-size: 14px; margin-bottom: 12px; }
+  .device-shell {
+    background: #111;
+    border-radius: 44px;
+    padding: 14px 12px;
+    box-shadow: 0 0 0 2px #444, 0 0 0 4px #222, 0 20px 60px rgba(0,0,0,.8);
+    width: 414px;
+  }
+  .screen {
+    border-radius: 32px;
+    overflow: hidden;
+    width: 390px;
+    height: 844px;
+    position: relative;
+    background: #000;
+  }
+  iframe {
+    width: 390px;
+    height: 844px;
+    border: none;
+    display: block;
+  }
+  .controls {
+    margin-top: 16px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  button {
+    background: #374151;
+    color: #e5e7eb;
+    border: 1px solid #4b5563;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  button:hover { background: #4b5563; }
+  .label { color: #9ca3af; font-size: 11px; text-align: center; margin-top: 8px; }
+</style>
+</head>
+<body>
+<h1>📱 Simulador iPhone 14 Pro — 390 × 844 px</h1>
+<div class="device-shell">
+  <div class="screen">
+    <iframe id="frame" src="/salvadorex-pos.html"></iframe>
+  </div>
+</div>
+<div class="controls">
+  <button onclick="loadPage('/salvadorex-pos.html')">POS Principal</button>
+  <button onclick="loadPage('/pos.html')">pos.html</button>
+  <button onclick="loadPage('/login.html')">Login</button>
+  <button onclick="document.getElementById('frame').contentWindow.location.reload()">Reload</button>
+</div>
+<div class="label">390px × 844px — todos los @media (max-width: 768px) aplican</div>
+<script>
+function loadPage(url) {
+  document.getElementById('frame').src = url;
+}
+</script>
+</body>
+</html>

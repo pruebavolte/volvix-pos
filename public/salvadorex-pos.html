@@ -2463,6 +2463,11 @@
      gris). Polling /api/pos/app-orders, modal rojo + sonido si Ticket 1 vacío,
      parpadeo rojo↔amarillo si Ticket 1 ocupado. Aceptar = Ticket 2 + cliente. -->
 <script src="volvix-platform-orders.js" defer></script>
+<!-- 2026-05-11 fix móvil: tap-delay, modales cortados, sidebar derecho stuck,
+     botón Importar que no abría el wizard. CSS al final del head con !important
+     para vencer specificity de scripts previos. -->
+<link rel="stylesheet" href="/volvix-mobile-fixes.css">
+<script src="/volvix-mobile-fixes.js" defer></script>
 <script defer>
   // Auto-trigger del wizard si el tenant no tiene productos
   document.addEventListener('DOMContentLoaded', function () {
@@ -3322,7 +3327,7 @@
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#3498DB" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>
       <span data-term="cliente">👥 Clientes</span>
     </button>
-    <button class="menu-btn" data-feature="module.config" data-menu="config" onclick="showScreen('config')">
+    <button class="menu-btn" data-menu="config" onclick="showScreen('config')">
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#7F8C8D" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       <span>⚙️ Config</span>
     </button>
@@ -4200,6 +4205,15 @@
             <div class="input-group"><label class="input-label">Zona horaria</label><select class="input-field"><option>America/Mexico_City (GMT-6)</option></select></div>
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-top: 1px solid var(--border); margin-top: 12px;"><div><strong style="font-size: 12.5px;">Sonido al cobrar</strong><div style="font-size: 11px; color: var(--text-3);">Reproduce sonido al completar venta</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-top: 1px solid var(--border);"><div><strong style="font-size: 12.5px;">Abrir cajón al cobrar</strong><div style="font-size: 11px; color: var(--text-3);">Manda señal al cajón automático</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+            <!-- 2026-05-11: Toggles de tours y PIN — desactivados por defecto -->
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-top: 1px solid var(--border);">
+              <div><strong style="font-size: 12.5px;">🎓 Tour de bienvenida</strong><div style="font-size: 11px; color: var(--text-3);">Muestra guía interactiva al nuevo usuario</div></div>
+              <div id="cfg-toggle-tours" class="toggle" onclick="vlxToggleTours(this)" title="Activar/desactivar tour"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-top: 1px solid var(--border);">
+              <div><strong style="font-size: 12.5px;">🔒 Bloqueo de pantalla PIN</strong><div style="font-size: 11px; color: var(--text-3);">Pide PIN tras 5 min de inactividad</div></div>
+              <div id="cfg-toggle-pin" class="toggle" onclick="vlxTogglePin(this)" title="Activar/desactivar bloqueo PIN"></div>
+            </div>
           </div>
 
           <div id="cfg-negocio" class="card card-pad hidden">
@@ -4218,11 +4232,76 @@
           </div>
 
           <div id="cfg-impresion" class="card card-pad hidden">
-            <h3 style="margin: 0 0 14px; font-size: 14px;">Impresión</h3>
-            <div class="input-group"><label class="input-label">Impresora</label><select class="input-field"><option>EPSON TM-T20III (USB)</option></select></div>
-            <div class="input-group"><label class="input-label">Ancho ticket</label><select class="input-field"><option>80mm</option><option>58mm</option></select></div>
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-top: 1px solid var(--border); margin-top: 12px;"><div><strong style="font-size: 12.5px;">Imprimir ticket auto</strong></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-top: 1px solid var(--border);"><div><strong style="font-size: 12.5px;">Enviar por WhatsApp</strong></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+            <h3 style="margin: 0 0 14px; font-size: 14px;">🖨️ Configuración de impresora</h3>
+
+            <!-- Tipo de conexión -->
+            <div class="input-group">
+              <label class="input-label">Tipo de conexión</label>
+              <select class="input-field" id="cfg-printer-type" onchange="vlxPrinterTypeChange(this.value)">
+                <option value="browser">🌐 Navegador (PDF / diálogo del sistema)</option>
+                <option value="bluetooth">📶 Bluetooth (iOS · Android · Web BT)</option>
+                <option value="network">🌐 Red — IP / Ethernet (LAN)</option>
+                <option value="usb">🔌 USB (Chrome en escritorio)</option>
+              </select>
+            </div>
+
+            <!-- Panel Bluetooth -->
+            <div id="cfg-printer-bt" style="display:none; margin-top:8px;">
+              <p style="font-size:12px; color:var(--text-2); margin:0 0 10px;">Activa el Bluetooth del dispositivo, luego presiona Conectar.</p>
+              <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                <button class="btn sm" onclick="vlxPrinterBtConnect()" id="btn-printer-bt-connect">📶 Conectar Bluetooth</button>
+                <span id="cfg-printer-bt-status" style="font-size:12px; color:var(--text-2);">Sin conexión</span>
+              </div>
+            </div>
+
+            <!-- Panel Red (IP/Ethernet) -->
+            <div id="cfg-printer-net" style="display:none; margin-top:8px;">
+              <div style="display:grid; grid-template-columns:1fr auto; gap:8px; align-items:end;">
+                <div class="input-group" style="margin:0;">
+                  <label class="input-label">Dirección IP de la impresora</label>
+                  <input class="input-field" id="cfg-printer-ip" placeholder="192.168.1.100" type="text" inputmode="decimal">
+                </div>
+                <div class="input-group" style="margin:0; width:90px;">
+                  <label class="input-label">Puerto</label>
+                  <input class="input-field" id="cfg-printer-port" value="9100" type="number" min="1" max="65535">
+                </div>
+              </div>
+              <button class="btn sm" style="margin-top:10px;" onclick="vlxPrinterNetTest()">🔍 Probar conexión</button>
+              <span id="cfg-printer-net-status" style="font-size:12px; color:var(--text-2); margin-left:8px;"></span>
+            </div>
+
+            <!-- Panel USB -->
+            <div id="cfg-printer-usb" style="display:none; margin-top:8px;">
+              <p style="font-size:12px; color:var(--text-2); margin:0 0 10px;">Conecta la impresora USB y presiona Conectar (requiere Chrome en escritorio).</p>
+              <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                <button class="btn sm" onclick="vlxPrinterUsbConnect()" id="btn-printer-usb-connect">🔌 Conectar USB</button>
+                <span id="cfg-printer-usb-status" style="font-size:12px; color:var(--text-2);">Sin conexión</span>
+              </div>
+            </div>
+
+            <!-- Ancho de ticket + opciones comunes -->
+            <div class="input-group" style="margin-top:14px;">
+              <label class="input-label">Ancho del ticket</label>
+              <select class="input-field" id="cfg-printer-width" onchange="vlxPrinterSaveConfig()">
+                <option value="80">80 mm (estándar)</option>
+                <option value="58">58 mm (compacto)</option>
+              </select>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-top:1px solid var(--border); margin-top:4px;">
+              <div><strong style="font-size:12.5px;">Imprimir ticket automáticamente</strong><div style="font-size:11px; color:var(--text-3);">Al completar cada venta</div></div>
+              <div class="toggle on" id="cfg-printer-auto" onclick="this.classList.toggle('on'); vlxPrinterSaveConfig()"></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-top:1px solid var(--border);">
+              <div><strong style="font-size:12.5px;">Enviar ticket por WhatsApp</strong></div>
+              <div class="toggle" id="cfg-printer-wa" onclick="this.classList.toggle('on'); vlxPrinterSaveConfig()"></div>
+            </div>
+
+            <div style="margin-top:14px; display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn sm" onclick="vlxPrinterTestPrint()">🖨️ Imprimir ticket de prueba</button>
+              <button class="btn sm secondary" onclick="vlxPrinterSaveConfig()">💾 Guardar configuración</button>
+            </div>
+            <div id="cfg-printer-msg" style="font-size:12px; margin-top:8px; color:var(--text-2);"></div>
           </div>
 
           <div id="cfg-modulos" class="hidden">
@@ -24056,6 +24135,204 @@ window.addEventListener('volvix:version-loaded', function(e){
   if ((location.hash || '').replace('#','') === 'permisos') {
     setTimeout(bootstrap, 400);
   }
+})();
+</script>
+
+<!-- ================================================================
+     2026-05-11 — Tours, PIN lock y Printer config UI helpers
+     ================================================================ -->
+<script>
+(function () {
+  'use strict';
+
+  // ── Helpers de localStorage ──────────────────────────────────────
+  function lsGet(k, def) { try { var v = localStorage.getItem(k); return v !== null ? v : def; } catch(e) { return def; } }
+  function lsSet(k, v)   { try { localStorage.setItem(k, v); } catch(e) {} }
+
+  // ── Tours ─────────────────────────────────────────────────────────
+  // Default: desactivados (string 'false')
+  window.vlxToggleTours = function (el) {
+    var enabled = el.classList.toggle('on');
+    lsSet('volvix_tours_enabled', enabled ? 'true' : 'false');
+    showToast && showToast(enabled ? '🎓 Tour activado' : '🎓 Tour desactivado');
+  };
+
+  function initTourToggle() {
+    var el = document.getElementById('cfg-toggle-tours');
+    if (!el) return;
+    var enabled = lsGet('volvix_tours_enabled', 'false') === 'true';
+    el.classList.toggle('on', enabled);
+  }
+
+  // ── PIN lock ──────────────────────────────────────────────────────
+  // Default: desactivado
+  window.vlxTogglePin = function (el) {
+    var enabled = el.classList.toggle('on');
+    lsSet('volvix_pin_enabled', enabled ? 'true' : 'false');
+    showToast && showToast(enabled ? '🔒 Bloqueo PIN activado' : '🔓 Bloqueo PIN desactivado');
+    // Si se desactiva en caliente, cancelar el timer del PIN
+    if (!enabled && window.PinAPI) {
+      try {
+        clearTimeout(window.PinAPI._state && window.PinAPI._state.idleTimer);
+      } catch(e) {}
+    }
+  };
+
+  function initPinToggle() {
+    var el = document.getElementById('cfg-toggle-pin');
+    if (!el) return;
+    var enabled = lsGet('volvix_pin_enabled', 'false') === 'true';
+    el.classList.toggle('on', enabled);
+  }
+
+  // ── Printer config UI ─────────────────────────────────────────────
+  function printerMsg(txt, ok) {
+    var el = document.getElementById('cfg-printer-msg');
+    if (!el) return;
+    el.textContent = txt;
+    el.style.color = ok ? 'var(--success, #16a34a)' : 'var(--text-2)';
+  }
+
+  window.vlxPrinterTypeChange = function (val) {
+    ['bt','net','usb'].forEach(function(k){
+      var p = document.getElementById('cfg-printer-' + k);
+      if (p) p.style.display = 'none';
+    });
+    if (val === 'bluetooth') { var p = document.getElementById('cfg-printer-bt');  if(p) p.style.display = ''; }
+    if (val === 'network')   { var p = document.getElementById('cfg-printer-net'); if(p) p.style.display = ''; }
+    if (val === 'usb')       { var p = document.getElementById('cfg-printer-usb'); if(p) p.style.display = ''; }
+    vlxPrinterSaveConfig();
+  };
+
+  window.vlxPrinterSaveConfig = function () {
+    var type  = (document.getElementById('cfg-printer-type')  || {}).value  || 'browser';
+    var width = (document.getElementById('cfg-printer-width') || {}).value  || '80';
+    var ip    = (document.getElementById('cfg-printer-ip')    || {}).value  || '';
+    var port  = (document.getElementById('cfg-printer-port')  || {}).value  || '9100';
+    var autoP = document.getElementById('cfg-printer-auto');
+    var wa    = document.getElementById('cfg-printer-wa');
+    var cfg = { type: type, width: width, ip: ip, port: parseInt(port,10)||9100,
+                auto: autoP ? autoP.classList.contains('on') : true,
+                whatsapp: wa ? wa.classList.contains('on') : false };
+    lsSet('volvix_printer_cfg', JSON.stringify(cfg));
+    // Sincronizar con Volvix.printer si está disponible
+    if (window.Volvix && window.Volvix.printer && window.Volvix.printer.setConfig) {
+      try { window.Volvix.printer.setConfig(cfg); } catch(e) {}
+    }
+    printerMsg('✓ Configuración guardada', true);
+    setTimeout(function(){ printerMsg('',''); }, 2000);
+  };
+
+  window.vlxPrinterBtConnect = function () {
+    var btn = document.getElementById('btn-printer-bt-connect');
+    var st  = document.getElementById('cfg-printer-bt-status');
+    if (btn) btn.disabled = true;
+    if (st)  st.textContent = 'Buscando…';
+    if (window.Volvix && window.Volvix.printer && window.Volvix.printer.bluetooth) {
+      window.Volvix.printer.bluetooth.connect()
+        .then(function(){
+          if (st)  st.textContent = '✅ Conectado';
+          if (btn) btn.textContent = '📶 Reconectar';
+          vlxPrinterSaveConfig();
+        })
+        .catch(function(e){
+          if (st)  st.textContent = '❌ ' + (e.message || 'Error');
+        })
+        .finally(function(){ if (btn) btn.disabled = false; });
+    } else {
+      if (st)  st.textContent = '⚠️ Web Bluetooth no disponible en este navegador';
+      if (btn) btn.disabled = false;
+    }
+  };
+
+  window.vlxPrinterUsbConnect = function () {
+    var btn = document.getElementById('btn-printer-usb-connect');
+    var st  = document.getElementById('cfg-printer-usb-status');
+    if (btn) btn.disabled = true;
+    if (st)  st.textContent = 'Buscando…';
+    if (window.Volvix && window.Volvix.printer && window.Volvix.printer.usb) {
+      window.Volvix.printer.usb.connect()
+        .then(function(){
+          if (st)  st.textContent = '✅ Conectado';
+          if (btn) btn.textContent = '🔌 Reconectar';
+          vlxPrinterSaveConfig();
+        })
+        .catch(function(e){
+          if (st)  st.textContent = '❌ ' + (e.message || 'Error');
+        })
+        .finally(function(){ if (btn) btn.disabled = false; });
+    } else {
+      if (st)  st.textContent = '⚠️ WebUSB no disponible en este navegador';
+      if (btn) btn.disabled = false;
+    }
+  };
+
+  window.vlxPrinterNetTest = function () {
+    var ip   = (document.getElementById('cfg-printer-ip')   || {}).value || '';
+    var port = (document.getElementById('cfg-printer-port') || {}).value || '9100';
+    var st   = document.getElementById('cfg-printer-net-status');
+    if (!ip) { if(st) st.textContent = '⚠️ Ingresa la IP'; return; }
+    if (st)  st.textContent = 'Probando…';
+    // Intento de ping vía fetch (solo válido si el servidor tiene proxy o CORS abierto)
+    fetch('http://' + ip + ':' + port, { method:'GET', signal: AbortSignal.timeout(3000) })
+      .then(function(){ if(st) st.textContent = '✅ Impresora alcanzable'; vlxPrinterSaveConfig(); })
+      .catch(function(e){
+        // TCP open pero CORS fallado = impresora alcanzable
+        if (e.name !== 'AbortError') { if(st) st.textContent = '✅ Puerto alcanzable (CORS)'; vlxPrinterSaveConfig(); }
+        else { if(st) st.textContent = '❌ Sin respuesta (timeout 3s)'; }
+      });
+  };
+
+  window.vlxPrinterTestPrint = function () {
+    if (window.Volvix && window.Volvix.printer && window.Volvix.printer.printReceipt) {
+      window.Volvix.printer.printReceipt({ id: 'TEST', total: 0, lines: [], test: true })
+        .then(function(r){ printerMsg(r && r.ok ? '✓ Ticket de prueba enviado' : '⚠️ Impresora no respondió — revisa conexión', !!(r&&r.ok)); })
+        .catch(function(e){ printerMsg('❌ ' + (e.message||'Error'), false); });
+    } else {
+      window.print();
+    }
+  };
+
+  function loadPrinterConfig() {
+    try {
+      var raw = lsGet('volvix_printer_cfg', null);
+      if (!raw) return;
+      var cfg = JSON.parse(raw);
+      var sel = document.getElementById('cfg-printer-type');
+      if (sel && cfg.type) { sel.value = cfg.type; vlxPrinterTypeChange(cfg.type); }
+      var wsel = document.getElementById('cfg-printer-width');
+      if (wsel && cfg.width) wsel.value = cfg.width;
+      var ip = document.getElementById('cfg-printer-ip');
+      if (ip && cfg.ip) ip.value = cfg.ip;
+      var port = document.getElementById('cfg-printer-port');
+      if (port && cfg.port) port.value = cfg.port;
+      var autoEl = document.getElementById('cfg-printer-auto');
+      if (autoEl) autoEl.classList.toggle('on', cfg.auto !== false);
+      var waEl = document.getElementById('cfg-printer-wa');
+      if (waEl) waEl.classList.toggle('on', !!cfg.whatsapp);
+    } catch(e) {}
+  }
+
+  // ── Boot ──────────────────────────────────────────────────────────
+  function onReady(fn) {
+    if (document.readyState !== 'loading') fn();
+    else document.addEventListener('DOMContentLoaded', fn);
+  }
+
+  onReady(function () {
+    initTourToggle();
+    initPinToggle();
+    loadPrinterConfig();
+  });
+
+  // showCfg hook: cargar config de impresora cuando se abre el tab
+  var _origShowCfg = window.showCfg;
+  window.showCfg = function (name, el) {
+    if (typeof _origShowCfg === 'function') _origShowCfg.apply(this, arguments);
+    if (name === 'impresion') { setTimeout(loadPrinterConfig, 50); }
+    if (name === 'general')   { initTourToggle(); initPinToggle(); }
+  };
+
 })();
 </script>
 
