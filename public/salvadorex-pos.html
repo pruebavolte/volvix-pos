@@ -7759,7 +7759,7 @@
         if (isBarcode && typeof window.VolvixProductSearch.getByCode === 'function') {
           const byCode = await Promise.race([
             window.VolvixProductSearch.getByCode(trimmed),
-            new Promise(r => setTimeout(() => r(null), 600))
+            new Promise(r => setTimeout(() => r(null), 200))
           ]);
           if (byCode) {
             addToCart(normalizeProductForCart(byCode));
@@ -7772,7 +7772,7 @@
         // Después búsqueda fuzzy con score (para nombre o mixto)
         const idbResults = await Promise.race([
           window.VolvixProductSearch.search(trimmed, { limit: 10 }),
-          new Promise(r => setTimeout(() => r([]), 800))
+          new Promise(r => setTimeout(() => r([]), 300))
         ]);
         if (idbResults && idbResults.length === 1) {
           const p = idbResults[0].product || idbResults[0];
@@ -7802,22 +7802,24 @@
     }
 
     // ── Level 2 + Level 3 PARALELOS (Promise.allSettled) ─────────────────
-    // 2026-05-10 user-request: las queries L2 (tenant DB) y L3 (owner global)
-    // se hacen en PARALELO (no secuencial). El primero que responda con resultados
-    // gana. Worst case ya no es 3s+4s=7s sino max(3s,4s)=4s.
+    // 2026-05-11 user-request: el buscar tardaba demasiado. Timeouts reducidos
+    // de 3s/4s a 1.2s/1.5s. Si no hay red rápida, no tiene sentido esperar más.
+    // Race entre tenant y owner: el primero que responda con resultados gana
+    // (early-return en cuanto haya un hit, sin esperar al otro endpoint).
     const tenantParams = isBarcode
       ? 'or=(barcode.eq.' + encodeURIComponent(trimmed) + ',code.eq.' + encodeURIComponent(trimmed) + ')'
       : (opts.isMixed
         ? 'or=(barcode.eq.' + encodeURIComponent(trimmed) + ',code.eq.' + encodeURIComponent(trimmed) + ',name.ilike.' + encodeURIComponent('%' + trimmed + '%') + ')'
         : 'name=ilike.' + encodeURIComponent('%' + trimmed + '%'));
-    const [tenantRes, ownerRes] = await Promise.allSettled([
-      _fetchWithTimeout('/api/productos?' + tenantParams + '&select=*&limit=10', { credentials: 'include' }, 3000)
-        .then(r => (r && r.ok) ? r.json().catch(() => ({})) : null)
-        .then(j => j ? (j.items || j.data || []) : []),
-      _fetchWithTimeout('/api/owner/products/lookup?q=' + encodeURIComponent(trimmed), { credentials: 'include' }, 4000)
-        .then(r => (r && r.ok) ? r.json().catch(() => ({})) : null)
-        .then(j => (j && j.items) ? j.items : [])
-    ]);
+    const tenantPromise = _fetchWithTimeout('/api/productos?' + tenantParams + '&select=*&limit=10', { credentials: 'include' }, 1200)
+      .then(r => (r && r.ok) ? r.json().catch(() => ({})) : null)
+      .then(j => j ? (j.items || j.data || []) : [])
+      .catch(() => []);
+    const ownerPromise = _fetchWithTimeout('/api/owner/products/lookup?q=' + encodeURIComponent(trimmed), { credentials: 'include' }, 1500)
+      .then(r => (r && r.ok) ? r.json().catch(() => ({})) : null)
+      .then(j => (j && j.items) ? j.items : [])
+      .catch(() => []);
+    const [tenantRes, ownerRes] = await Promise.allSettled([tenantPromise, ownerPromise]);
     const tenantItems = (tenantRes.status === 'fulfilled' && tenantRes.value) || [];
     const ownerItems  = (ownerRes.status === 'fulfilled' && ownerRes.value)  || [];
 
@@ -7861,14 +7863,15 @@
     }
 
     // ── Level 4: Internet (solo barcodes — UPCitemDB + Open Food Facts) ───
+    // 2026-05-11: timeout reducido de 5s a 2s para no congelar la UI
     let internetSuggestion = null;
     if (isBarcode && window.VolvixBarcodeResolver) {
       try {
-        // Wrap con timeout (5s max para internet)
+        // Wrap con timeout (2s max para internet — antes 5s era demasiado)
         const internetPromise = window.VolvixBarcodeResolver.scan(trimmed);
         const result = await Promise.race([
           internetPromise,
-          new Promise(resolve => setTimeout(() => resolve({ found: false, error: 'timeout' }), 5000))
+          new Promise(resolve => setTimeout(() => resolve({ found: false, error: 'timeout' }), 2000))
         ]);
         if (result && result.found && result.product) {
           internetSuggestion = result.product;
