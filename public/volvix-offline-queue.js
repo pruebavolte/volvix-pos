@@ -329,9 +329,10 @@
     return { action: 'replace', body: item.body };
   }
 
-  // 2026-05-11: paralelización con concurrencia limitada (default 8).
-  // Antes procesaba SECUENCIAL → 100 items con 300ms latencia = 30s.
-  // Ahora con 8 paralelos = 100/8 * 300ms = ~3.7s.
+  // 2026-05-11: paralelización con concurrencia limitada (default 8) + drain loop.
+  // Antes: procesaba SECUENCIAL → 100 items en 30s+.
+  // Ahora: 8 workers paralelos + loop hasta cola vacía (items nuevos durante sync
+  // también se procesan en la misma sesión, no esperan al próximo setInterval).
   async function syncNow() {
     if (syncing) return;
     if (!navigator.onLine) return;
@@ -339,45 +340,54 @@
     emit('sync-start');
     updateIndicator();
     try {
-      const all = await getAll();
-      const now = Date.now();
-      const due = all
-        .filter(x => x.nextAttempt <= now)
-        .sort((a, b) => a.createdAt - b.createdAt);
+      // DRAIN LOOP: seguir procesando hasta que no haya más items pendientes
+      // o se alcance un máximo de iteraciones (anti loop infinito por items en error).
+      const MAX_ROUNDS = 20;
+      for (let round = 0; round < MAX_ROUNDS; round++) {
+        if (!navigator.onLine) break;
+        const all = await getAll();
+        const now = Date.now();
+        const due = all
+          .filter(x => x.nextAttempt <= now)
+          .sort((a, b) => a.createdAt - b.createdAt);
 
-      // Coalescing: si hay varios items idénticos por (method+url+body.name+body.code),
-      // solo procesar el ÚLTIMO (createdAt más reciente). Los anteriores se descartan.
-      // Esto resuelve el caso "Producto A: $10 → $20 → $30 → $50" — solo $50 llega.
-      const seen = new Map();
-      const winners = [];
-      // Recorre del más reciente al más viejo
-      for (let i = due.length - 1; i >= 0; i--) {
-        const it = due[i];
-        const k = (it.method || 'POST') + '|' + (it.url || '') + '|' +
-                  (it.body && (it.body.code || it.body.barcode || it.body.name) || '');
-        if (seen.has(k)) {
-          // ya hay un winner más reciente; eliminar éste de IDB
-          await deleteRequest(it.id);
-          emit('coalesced', { item: it, kept: seen.get(k) });
-        } else {
-          seen.set(k, it.id);
-          winners.unshift(it); // mantener orden por createdAt
+        if (due.length === 0) break;
+
+        // Coalescing: si hay varios items idénticos por (method+url+body.code|barcode|name),
+        // solo procesar el ÚLTIMO (createdAt más reciente). Los anteriores se descartan.
+        // Esto resuelve el caso "Producto A: $10 → $20 → $30 → $50" — solo $50 llega.
+        const seen = new Map();
+        const winners = [];
+        for (let i = due.length - 1; i >= 0; i--) {
+          const it = due[i];
+          const k = (it.method || 'POST') + '|' + (it.url || '') + '|' +
+                    (it.body && (it.body.code || it.body.barcode || it.body.name) || '');
+          if (seen.has(k)) {
+            await deleteRequest(it.id);
+            emit('coalesced', { item: it, kept: seen.get(k) });
+          } else {
+            seen.set(k, it.id);
+            winners.unshift(it);
+          }
         }
+
+        if (winners.length === 0) break;
+
+        // Procesar en paralelo con concurrencia limitada
+        const concurrency = cfg.concurrency || 8;
+        let idx = 0;
+        const workers = Array(Math.min(concurrency, winners.length)).fill(0).map(async () => {
+          while (idx < winners.length) {
+            if (!navigator.onLine) return;
+            const item = winners[idx++];
+            if (!item) return;
+            try { await processItem(item); }
+            catch (e) { warn('worker err', e); }
+          }
+        });
+        await Promise.all(workers);
+        // Loop continúa — verifica si llegaron items nuevos durante el sync
       }
-
-      // Procesar en paralelo con concurrencia limitada
-      const concurrency = cfg.concurrency || 8;
-      let idx = 0;
-      const workers = Array(Math.min(concurrency, winners.length)).fill(0).map(async () => {
-        while (idx < winners.length) {
-          if (!navigator.onLine) return;
-          const item = winners[idx++];
-          if (!item) return;
-          try { await processItem(item); }
-          catch (e) { warn('worker err', e); }
-        }
-      });
-      await Promise.all(workers);
     } catch (e) {
       err('sync error', e);
     } finally {
