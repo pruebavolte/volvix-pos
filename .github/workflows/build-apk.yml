@@ -7,6 +7,7 @@ on:
       - 'android/**'
       - 'public/**'
       - 'capacitor.config.json'
+      - 'package.json'
       - '.github/workflows/build-apk.yml'
   workflow_dispatch:
 
@@ -35,16 +36,47 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Read version from package.json
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+          echo "App version: v$VERSION"
+
+      - name: Inject version into salvadorex-pos.html
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          # Insertar meta tag con la version antes del primer script
+          sed -i "s|<script src=\"/volvix-capacitor-bridge.js\">|<meta name=\"version\" content=\"$VERSION\"><script>window.__vlxAppVersion='$VERSION';</script><script src=\"/volvix-capacitor-bridge.js\">|" public/salvadorex-pos.html
+          echo "Version $VERSION inyectada en HTML"
+
       - name: Install dependencies
         run: npm ci || npm install --no-audit --no-fund
 
-      - name: Sync Capacitor
+      - name: Sync Capacitor (bundle public/ into APK assets)
         run: npx cap sync android
+
+      - name: Verify bundle includes public/
+        run: |
+          PUBLIC_BUNDLED=$(find android/app/src/main/assets/public -name "salvadorex-pos.html" 2>/dev/null | head -1)
+          if [ -z "$PUBLIC_BUNDLED" ]; then
+            echo "ERROR: salvadorex-pos.html NOT bundled in APK assets"
+            ls -la android/app/src/main/assets/ || true
+            exit 1
+          fi
+          echo "Bundle OK: $PUBLIC_BUNDLED"
+          BRIDGE=$(find android/app/src/main/assets/public -name "volvix-capacitor-bridge.js" 2>/dev/null | head -1)
+          if [ -z "$BRIDGE" ]; then
+            echo "ERROR: capacitor-bridge.js NOT bundled"
+            exit 1
+          fi
+          echo "Bridge OK: $BRIDGE"
 
       - name: Make gradlew executable
         run: chmod +x android/gradlew
 
-      - name: Generate debug keystore (autosign)
+      - name: Generate keystore (auto-sign)
         run: |
           cd android/app
           if [ ! -f volvix-release.keystore ]; then
@@ -55,6 +87,17 @@ jobs:
               -storepass volvix2026 -keypass volvix2026 \
               -dname "CN=Volvix POS, OU=Volvix, O=Volvix, L=Monterrey, ST=NL, C=MX"
           fi
+
+      - name: Update versionCode + versionName in build.gradle
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          # versionCode: convertir "1.0.172" a 1000172 (X*1000000 + Y*1000 + Z)
+          IFS='.' read -r MAJ MIN PATCH <<< "$VERSION"
+          VCODE=$(( MAJ * 1000000 + MIN * 1000 + PATCH ))
+          echo "versionCode=$VCODE versionName=$VERSION"
+          sed -i "s|versionCode [0-9]\+|versionCode $VCODE|" android/app/build.gradle
+          sed -i "s|versionName \"[^\"]*\"|versionName \"$VERSION\"|" android/app/build.gradle
+          grep -E "versionCode|versionName" android/app/build.gradle | head -3
 
       - name: Build release APK
         run: |
@@ -71,27 +114,39 @@ jobs:
           if [ -z "$APK" ]; then
             APK=$(find android -name "*.apk" | head -1)
           fi
+          SIZE_MB=$(du -m "$APK" | cut -f1)
           echo "apk_path=$APK" >> $GITHUB_OUTPUT
+          echo "apk_size_mb=$SIZE_MB" >> $GITHUB_OUTPUT
           ls -lh "$APK"
 
-      - name: Rename APK
-        run: cp "${{ steps.locate.outputs.apk_path }}" VolvixPOS.apk
+      - name: Rename APK with version
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          cp "${{ steps.locate.outputs.apk_path }}" VolvixPOS-$VERSION.apk
+          cp "${{ steps.locate.outputs.apk_path }}" VolvixPOS.apk
+          ls -lh VolvixPOS*.apk
 
-      - name: Upload artifact
+      - name: Upload artifact (CI access)
         uses: actions/upload-artifact@v4
         with:
-          name: VolvixPOS-apk
-          path: VolvixPOS.apk
+          name: VolvixPOS-apk-${{ steps.version.outputs.version }}
+          path: VolvixPOS*.apk
           retention-days: 90
 
-      - name: Attach to latest release
+      - name: Attach APK to GitHub Release
         if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Borrar asset existente si ya existe (idempotente)
-          gh release delete-asset v1.0.157 VolvixPOS.apk --yes || true
-          gh release upload v1.0.157 VolvixPOS.apk --clobber || \
-            gh release create v1.0.157 VolvixPOS.apk \
-              --title "Volvix POS v1.0.157" \
-              --notes "APK Android auto-construido por GitHub Actions"
+          TAG="${{ steps.version.outputs.tag }}"
+          VERSION="${{ steps.version.outputs.version }}"
+          # Crear release si no existe
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" \
+              --title "Volvix POS $TAG" \
+              --notes "APK Android v$VERSION auto-construido por GitHub Actions · Offline-first (todo bundleado)"
+          fi
+          # Subir versionado + alias sin version
+          gh release upload "$TAG" "VolvixPOS-$VERSION.apk" --clobber
+          gh release upload "$TAG" "VolvixPOS.apk" --clobber
+          echo "APK ($VERSION) subido al release $TAG"

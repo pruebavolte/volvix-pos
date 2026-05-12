@@ -3,20 +3,8 @@
   "appName": "Volvix POS",
   "webDir": "public",
   "bundledWebRuntime": false,
-  "server": {
-    "url": "https://salvadorexoficial.com",
-    "cleartext": false,
-    "androidScheme": "https",
-    "allowNavigation": [
-      "salvadorexoficial.com",
-      "zhvwmzkcqngcaqpdxtwr.supabase.co",
-      "api.stripe.com",
-      "checkout.stripe.com",
-      "billing.stripe.com"
-    ]
-  },
   "android": {
-    "allowMixedContent": false,
+    "allowMixedContent": true,
     "captureInput": true,
     "webContentsDebuggingEnabled": false,
     "buildOptions": {
@@ -28,21 +16,37 @@
     "scheme": "Volvix POS",
     "contentInset": "always"
   },
+  "server": {
+    "androidScheme": "https",
+    "cleartext": false,
+    "allowNavigation": [
+      "volvix-pos.vercel.app",
+      "salvadorexoficial.com",
+      "zhvwmzkcqngcaqpdxtwr.supabase.co",
+      "api.stripe.com",
+      "checkout.stripe.com",
+      "billing.stripe.com",
+      "github.com",
+      "*.githubusercontent.com"
+    ]
+  },
   "plugins": {
     "SplashScreen": {
-      "launchShowDuration": 2000,
-      "backgroundColor": "#0A0A0A",
-      "androidSplashResourceName": "splash",
+      "launchShowDuration": 0,
+      "launchAutoHide": true,
+      "backgroundColor": "#FFFFFF",
       "androidScaleType": "CENTER_CROP",
-      "showSpinner": false
+      "showSpinner": false,
+      "splashFullScreen": false,
+      "splashImmersive": false
     },
     "StatusBar": {
       "style": "dark",
-      "backgroundColor": "#0A0A0A"
+      "backgroundColor": "#FFFFFF"
     },
     "Keyboard": {
       "resize": "body",
-      "style": "DARK",
+      "style": "LIGHT",
       "resizeOnFullScreen": true
     },
     "Camera": {
