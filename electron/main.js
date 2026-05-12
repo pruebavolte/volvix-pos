@@ -167,12 +167,16 @@ function startLocalServer() {
 
 // ─── ELECTRON WINDOW ─────────────────────────────────────────────────────────
 function createWindow () {
-  mainWindow = new BrowserWindow({
+  // Detectar Windows 11 (build 22000+) — soporta esquinas nativas vía DWM
+  const isWin11Plus = process.platform === 'win32' &&
+    /^10\.0\.(2[2-9]|[3-9])\d{3}/.test(require('os').release());
+
+  const winOpts = {
     width: 1440,
     height: 900,
     minWidth: 1024,
     minHeight: 700,
-    show: true,                      // mostrar inmediato — no esperar load
+    show: true,
     autoHideMenuBar: true,
     webPreferences: {
       contextIsolation: true,
@@ -182,7 +186,38 @@ function createWindow () {
       backgroundThrottling: false
     },
     title: 'Volvix POS',
-    backgroundColor: '#0a0a0a'
+    backgroundColor: '#0a0a0a',
+    // 2026-05-11: esquinas redondeadas estilo macOS / Windows 11
+    // - Win 11: roundedCorners + titleBarOverlay (botones nativos + esquinas)
+    // - macOS: hiddenInset (titlebar embebido, esquinas nativas)
+    // - Win 10: titleBarStyle hidden + custom CSS overlay para esquinas
+    roundedCorners: true,
+    titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'hidden',
+    titleBarOverlay: process.platform === 'win32' ? {
+      color: '#0a0a0a',
+      symbolColor: '#ffffff',
+      height: 36
+    } : false,
+    trafficLightPosition: { x: 14, y: 14 },
+    hasShadow: true,
+    thickFrame: false
+  };
+
+  mainWindow = new BrowserWindow(winOpts);
+
+  // Inyectar CSS al body cargado para look más fino + drag region en topbar
+  mainWindow.webContents.on('did-finish-load', () => {
+    mainWindow.webContents.insertCSS(`
+      /* Drag region: el usuario puede mover la ventana arrastrando la topbar */
+      .topbar, header, .menubar, .pos-topbar { -webkit-app-region: drag; }
+      /* Botones/inputs/links NO son drag (para que clics funcionen) */
+      .topbar button, .topbar a, .topbar input, .topbar select, .topbar [role="button"],
+      header button, header a, header input, header select,
+      .menubar button, .menubar a,
+      .pos-topbar button, .pos-topbar a, .pos-topbar input { -webkit-app-region: no-drag; }
+      /* Padding extra arriba para no chocar con titlebar overlay (36px Windows) */
+      body { padding-top: env(titlebar-area-height, 0); }
+    `).catch(() => {});
   });
 
   // Pantalla de loading INMEDIATA — para que el user vea progreso
