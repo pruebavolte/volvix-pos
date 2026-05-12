@@ -1,0 +1,45 @@
+name: Monitoring Cron
+
+on:
+  schedule:
+    - cron: '0 * * * *'   # hourly alerts check
+    - cron: '0 3 * * *'   # daily smoke at 3am UTC
+  workflow_dispatch: {}   # manual trigger
+
+jobs:
+  alerts:
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 * * * *'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: Run alerts checker
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node monitoring/alerts.js
+      - name: Upload alerts log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alerts-${{ github.run_id }}
+          path: |
+            alerts-output.json
+          if-no-files-found: ignore
+          retention-days: 30
+
+  smoke:
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 3 * * *'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: Run daily smoke test
+        env:
+          VOLVIX_EMAIL: ${{ secrets.MONITOR_EMAIL }}
+          VOLVIX_PWD: ${{ secrets.MONITOR_PWD }}
+        run: node monitoring/daily_smoke.js
