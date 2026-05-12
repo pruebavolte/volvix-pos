@@ -171,6 +171,12 @@ function createWindow () {
   const isWin11Plus = process.platform === 'win32' &&
     /^10\.0\.(2[2-9]|[3-9])\d{3}/.test(require('os').release());
 
+  // 2026-05-11 fix v1.0.172: simplificado.
+  // - SIN transparent: causaba pantalla negra mientras carga (renderer aún sin pintar)
+  // - SIN frame:false: requería transparent para esquinas, y eso rompía la UX
+  // - CON roundedCorners + frame nativo: en Win 11 redondea por DWM (~8px) gratis,
+  //   en Win 10/Mac usa frame nativo (Mac ya redondea, Win 10 queda cuadrado pero estable)
+  // - SIN splash screen data URL — el server local responde en <50ms, no hace falta
   const winOpts = {
     width: 1440,
     height: 900,
@@ -186,129 +192,28 @@ function createWindow () {
       backgroundThrottling: false
     },
     title: 'Volvix POS',
-    // 2026-05-11: frameless + transparent + CSS rounded para esquinas REALES
-    // estilo macOS / Vista en Windows 10/11. Custom titlebar con drag region.
-    frame: false,
-    transparent: true,
-    backgroundColor: '#00000000',
-    titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'hidden',
+    backgroundColor: '#ffffff',  // BLANCO (no transparent) — sin pantalla negra al cargar
+    roundedCorners: true,        // Win 11 nativo (~8px DWM)
+    titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
     trafficLightPosition: { x: 14, y: 14 },
-    hasShadow: true,
-    thickFrame: false,
-    roundedCorners: true             // refuerzo Win 11
+    hasShadow: true
   };
 
   mainWindow = new BrowserWindow(winOpts);
 
-  // Inyectar CSS + custom titlebar al body cargado
+  // Solo drag region en topbar/menubar para que la barra nativa funcione bien.
+  // SIN custom titlebar, SIN border-radius CSS, SIN splash data URL —
+  // todo eso causaba pantalla negra y bloqueos en recargas.
   mainWindow.webContents.on('did-finish-load', () => {
-    const isDarwin = process.platform === 'darwin';
     mainWindow.webContents.insertCSS(`
-      /* Esquinas redondeadas reales: clip al body completo */
-      html { background: transparent; }
-      body {
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 0 0 1px rgba(255,255,255,0.06);
-      }
-      /* Drag region — toda la topbar / menubar es arrastrable */
+      /* Drag region en topbar (Windows: no hace daño, no se ve) */
       .topbar, header, .menubar, .pos-topbar { -webkit-app-region: drag; }
-      /* Botones/inputs/links NO arrastrables (para que clics funcionen) */
       .topbar button, .topbar a, .topbar input, .topbar select, .topbar [role="button"],
       header button, header a, header input, header select,
       .menubar button, .menubar a,
       .pos-topbar button, .pos-topbar a, .pos-topbar input { -webkit-app-region: no-drag; }
-      /* Custom titlebar buttons (solo Win/Linux — Mac usa traffic lights nativos) */
-      ${isDarwin ? '' : `
-      /* Forzar !important para vencer feature-flags wiring que oculta divs nuevos */
-      #vlx-titlebar-btns {
-        position: fixed !important; top: 0 !important; right: 0 !important;
-        height: 32px !important; z-index: 2147483647 !important;
-        display: flex !important; visibility: visible !important; opacity: 1 !important;
-        -webkit-app-region: no-drag !important; pointer-events: auto !important;
-        background: rgba(0,0,0,0.55) !important; backdrop-filter: blur(8px);
-        border-bottom-left-radius: 10px !important;
-      }
-      #vlx-titlebar-btns button {
-        width: 46px !important; height: 32px !important; border: 0 !important;
-        background: transparent !important; cursor: pointer !important;
-        color: rgba(255,255,255,0.9) !important;
-        display: flex !important; align-items: center !important; justify-content: center !important;
-        padding: 0 !important; margin: 0 !important;
-      }
-      #vlx-titlebar-btns button:hover { background: rgba(255,255,255,0.15) !important; }
-      #vlx-titlebar-btns button.close:hover { background: #e81123 !important; }
-      #vlx-titlebar-btns svg { width: 11px !important; height: 11px !important; }
-      /* Drag region superior (donde no hay topbar) */
-      body::before {
-        content: ''; position: fixed; top: 0; left: 0; right: 138px; height: 32px;
-        -webkit-app-region: drag; z-index: 99998; pointer-events: none;
-      }
-      `}
     `).catch(() => {});
-
-    // Inyectar HTML de botones titlebar (solo Win/Linux)
-    if (!isDarwin) {
-      mainWindow.webContents.executeJavaScript(`
-        (function(){
-          function makeBar(){
-            var existing = document.getElementById('vlx-titlebar-btns');
-            if (existing) existing.remove();
-            var d = document.createElement('div');
-            d.id = 'vlx-titlebar-btns';
-            d.setAttribute('data-vlx-system','titlebar');
-            d.innerHTML = \`
-              <button title="Minimizar" onclick="window.electronAPI&&window.electronAPI.minimize()">
-                <svg viewBox="0 0 10 10"><path d="M0 5 L10 5" stroke="currentColor" stroke-width="1"/></svg>
-              </button>
-              <button title="Maximizar" onclick="window.electronAPI&&window.electronAPI.toggleMax()">
-                <svg viewBox="0 0 10 10"><rect x="0.5" y="0.5" width="9" height="9" fill="none" stroke="currentColor" stroke-width="1"/></svg>
-              </button>
-              <button class="close" title="Cerrar" onclick="window.electronAPI&&window.electronAPI.close()">
-                <svg viewBox="0 0 10 10"><path d="M0 0 L10 10 M10 0 L0 10" stroke="currentColor" stroke-width="1.2"/></svg>
-              </button>
-            \`;
-            document.body.appendChild(d);
-          }
-          makeBar();
-          // Re-force visibility cada 500ms por 30s (vencer feature-flag wiring)
-          var ticks = 0;
-          var iv = setInterval(function(){
-            var d = document.getElementById('vlx-titlebar-btns');
-            if (!d) { makeBar(); return; }
-            d.style.setProperty('display','flex','important');
-            d.style.setProperty('visibility','visible','important');
-            d.classList.remove('vlx-feature-hidden','tv-hidden','hidden');
-            if (++ticks > 60) clearInterval(iv);
-          }, 500);
-        })();
-      `).catch(() => {});
-    }
   });
-
-  // IPC handlers para los botones titlebar custom (Win/Linux)
-  const { ipcMain } = require('electron');
-  ipcMain.handle('vlx-window-minimize', () => mainWindow && mainWindow.minimize());
-  ipcMain.handle('vlx-window-toggle-max', () => {
-    if (!mainWindow) return;
-    mainWindow.isMaximized() ? mainWindow.unmaximize() : mainWindow.maximize();
-  });
-  ipcMain.handle('vlx-window-close', () => mainWindow && mainWindow.close());
-
-  // Pantalla de loading INMEDIATA — para que el user vea progreso
-  const loadingHTML = `
-    <!doctype html><html><head><meta charset="utf-8"><title>Volvix POS · Cargando…</title>
-    <style>
-      html,body{margin:0;height:100%;background:#0a0a0a;color:#fff;font-family:system-ui,sans-serif;
-                display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px}
-      .l{width:54px;height:54px;border:4px solid #1a1a1a;border-top-color:#f97316;border-radius:50%;
-         animation:s 1s linear infinite}
-      @keyframes s{to{transform:rotate(360deg)}}
-      h1{font-size:18px;font-weight:600;margin:0}
-      p{color:#9ca3af;font-size:13px;margin:0}
-    </style></head>
-    <body><div class="l"></div><h1>Volvix POS v1.0.158 ✨</h1><p>Cargando aplicación local…</p></body></html>`;
-  mainWindow.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(loadingHTML));
 
   // Determinar URL a cargar
   let targetURL;
@@ -322,20 +227,21 @@ function createWindow () {
   }
   console.log('[volvix] Cargando:', targetURL);
 
-  setTimeout(() => {
-    mainWindow.loadURL(targetURL).catch(err => {
-      console.error('[volvix] loadURL falló:', err.message);
-      const errHTML = `
-        <!doctype html><html><head><meta charset="utf-8"><title>Error</title>
-        <style>body{margin:0;padding:40px;background:#0a0a0a;color:#fff;font-family:system-ui;text-align:center}
-        h1{color:#f97316}button{margin-top:20px;padding:10px 20px;background:#f97316;border:0;color:#fff;
-        font-size:14px;border-radius:6px;cursor:pointer}</style></head>
-        <body><h1>⚠️ Error al cargar Volvix POS</h1>
-        <p>${err.message}</p><button onclick="location.reload()">Reintentar</button>
-        </body></html>`;
-      mainWindow.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(errHTML));
-    });
-  }, 100);
+  // Cargar URL DIRECTO al crear ventana — sin splash data URL intermedio.
+  // El server local responde en <50ms, la página HTML aparece instantáneo.
+  // Si falla, muestro un error simple sobre fondo blanco (no negro).
+  mainWindow.loadURL(targetURL).catch(err => {
+    console.error('[volvix] loadURL falló:', err.message);
+    const errHTML = `
+      <!doctype html><html><head><meta charset="utf-8"><title>Error</title>
+      <style>body{margin:0;padding:40px;background:#fff;color:#1a1a1a;font-family:system-ui;text-align:center}
+      h1{color:#dc2626}button{margin-top:20px;padding:10px 20px;background:#1a1a1a;border:0;color:#fff;
+      font-size:14px;border-radius:6px;cursor:pointer}</style></head>
+      <body><h1>Error al cargar Volvix POS</h1>
+      <p>${err.message}</p><button onclick="location.reload()">Reintentar</button>
+      </body></html>`;
+    mainWindow.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(errHTML));
+  });
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url);
