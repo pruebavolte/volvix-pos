@@ -28,12 +28,15 @@ const handlePromotionsEngine = require('./promotions-engine');
 const handleUsageBilling = require('./usage-billing');
 const __geoIp = (() => { try { return require('./geo-ip'); } catch (_) { return null; } })();
 const { rateLimitMiddleware } = require('./rate-limit');
+// 2026-05-11: subido de 60 → 1200 req/min/usuario para soportar sync masivos
+// del offline-queue (8 workers paralelos + bulk imports). Sigue habiendo
+// rate-limit específico por endpoint (products: 600/min) y por login.
 const __apiRateLimiter = rateLimitMiddleware({
   windowMs: 60 * 1000,
-  max: parseInt(process.env.API_RATE_LIMIT_PER_MIN || '60', 10),
+  max: parseInt(process.env.API_RATE_LIMIT_PER_MIN || '1200', 10),
   keyPrefix: 'volvix-api',
   scope: 'api',
-  skipPaths: ['/api/health', '/api/static-assets'],
+  skipPaths: ['/api/health', '/api/static-assets', '/api/version/report', '/api/downloads/track'],
 });
 
 // =============================================================
