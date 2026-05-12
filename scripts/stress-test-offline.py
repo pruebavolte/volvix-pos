@@ -300,6 +300,14 @@ log("TEST 4: CARGA MASIVA (100 productos pendientes)", "TEST")
 log("="*60, "TEST")
 BULK_MARKER = f"STRESS-BULK-{ts}"
 
+# Esperar que la cola se vacíe antes de empezar TEST 4 (no acumular tests anteriores)
+log("Esperando que la cola anterior se vacíe...")
+for _ in range(30):
+    cur = cdp.ej("(async()=>await OfflineQueue.size())()")
+    if cur == 0: break
+    time.sleep(2)
+log(f"  Cola final antes TEST 4: {cur}")
+
 log("Encolando 100 productos...")
 cdp.ej(f"""
   (async()=>{{
@@ -320,16 +328,16 @@ results["test4_queue_size_initial"] = sz
 
 # Sync masivo
 t0 = time.time()
-log("Iniciando sync masivo...")
+log("Iniciando sync masivo... (esperando hasta 120s)")
 cdp.ej("(async()=>await OfflineQueue.syncNow())()")
-# Esperar hasta que la cola se vacíe o 60s
-for _ in range(30):
+# Esperar hasta que la cola se vacíe o 120s (era 60s, insuficiente para 100 items con backoff)
+for _ in range(60):
     time.sleep(2)
     cur = cdp.ej("(async()=>await OfflineQueue.size())()")
     if cur == 0:
         log(f"  Queue vaciada en {time.time()-t0:.1f}s")
         break
-    log(f"  Sync progress: {cur} pending...")
+    if _ % 5 == 0: log(f"  Sync progress: {cur} pending (t={int(time.time()-t0)}s)")
 
 elapsed = time.time() - t0
 log(f"Tiempo total de sync: {elapsed:.1f}s")
@@ -351,6 +359,13 @@ log("\n" + "="*60, "TEST")
 log("TEST 5: PERSISTENCIA DE QUEUE TRAS REFRESH (simula reboot)", "TEST")
 log("="*60, "TEST")
 PERSIST_MARKER = f"STRESS-PERSIST-{ts}"
+
+# Esperar cola vacía primero
+log("Esperando que la cola se vacíe antes de TEST 5...")
+for _ in range(60):
+    cur = cdp.ej("(async()=>await OfflineQueue.size())()")
+    if cur == 0: break
+    time.sleep(2)
 
 # Encolar 5 productos
 log("Encolando 5 productos...")
