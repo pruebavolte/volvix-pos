@@ -8,12 +8,20 @@
 //
 // Antes el .exe cargaba PROD_URL directo → si la red tardaba, congelaba PC.
 
-const { app, BrowserWindow, Menu, shell } = require('electron');
+const { app, BrowserWindow, Menu, shell, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const http = require('http');
 const https = require('https');
 const url = require('url');
+
+// Auto-updater (electron-updater) — descarga solo el diff binario desde GitHub Releases
+let autoUpdater = null;
+try {
+  autoUpdater = require('electron-updater').autoUpdater;
+} catch (e) {
+  console.warn('[volvix] electron-updater no disponible:', e.message);
+}
 
 const PROD_BASE = 'https://volvix-pos.vercel.app';
 const DEV_URL   = process.env.VOLVIX_DEV_URL || 'http://127.0.0.1:8765/salvadorex-pos.html';
@@ -178,7 +186,7 @@ function createWindow () {
       h1{font-size:18px;font-weight:600;margin:0}
       p{color:#9ca3af;font-size:13px;margin:0}
     </style></head>
-    <body><div class="l"></div><h1>Volvix POS</h1><p>Cargando aplicación local…</p></body></html>`;
+    <body><div class="l"></div><h1>Volvix POS v1.0.158 ✨</h1><p>Cargando aplicación local…</p></body></html>`;
   mainWindow.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(loadingHTML));
 
   // Determinar URL a cargar
@@ -233,17 +241,77 @@ const menuTemplate = [
       { label: 'Abrir versión online (Vercel)', click: () => {
         if (mainWindow) mainWindow.loadURL(PROD_BASE + '/salvadorex-pos.html');
       }},
+      { label: 'Buscar actualizaciones', click: async () => {
+        if (!autoUpdater) return;
+        try {
+          const r = await autoUpdater.checkForUpdates();
+          if (r && r.updateInfo) {
+            console.log('[updater] manual check → ', r.updateInfo.version);
+          }
+        } catch (e) { console.warn('[updater] check manual falló:', e.message); }
+      }},
       { type: 'separator' },
       { label: 'Salir', accelerator: 'CmdOrCtrl+Q', click: () => app.quit() }
     ]
   }
 ];
 
+// ─── AUTO-UPDATER ────────────────────────────────────────────────────────────
+function setupAutoUpdater() {
+  if (!autoUpdater || isDev) return;
+  autoUpdater.autoDownload = true;       // descarga automática al detectar update
+  autoUpdater.autoInstallOnAppQuit = true; // instala al cerrar la app
+  autoUpdater.allowDowngrade = false;
+  autoUpdater.logger = { info: (...a) => console.log('[updater]', ...a),
+                         warn: (...a) => console.warn('[updater]', ...a),
+                         error: (...a) => console.error('[updater]', ...a) };
+
+  autoUpdater.on('checking-for-update', () => console.log('[updater] buscando actualización…'));
+  autoUpdater.on('update-available', (info) => {
+    console.log('[updater] update disponible:', info.version);
+    if (mainWindow) mainWindow.webContents.executeJavaScript(
+      `try{showToast&&showToast('🔄 Descargando actualización v${info.version}…','info');}catch(_){}`
+    ).catch(()=>{});
+  });
+  autoUpdater.on('update-not-available', () => console.log('[updater] ya está en la última versión'));
+  autoUpdater.on('error', (err) => console.error('[updater] error:', err && err.message));
+  autoUpdater.on('download-progress', (p) => {
+    console.log(`[updater] descarga ${Math.round(p.percent)}% (${Math.round(p.bytesPerSecond/1024)} KB/s)`);
+  });
+  autoUpdater.on('update-downloaded', (info) => {
+    console.log('[updater] update descargada:', info.version);
+    if (mainWindow) {
+      dialog.showMessageBox(mainWindow, {
+        type: 'info',
+        title: 'Actualización lista',
+        message: `Nueva versión ${info.version} descargada.`,
+        detail: 'Se aplicará al cerrar la aplicación. ¿Reiniciar ahora?',
+        buttons: ['Reiniciar ahora', 'Después'],
+        defaultId: 0
+      }).then(r => {
+        if (r.response === 0) autoUpdater.quitAndInstall();
+      }).catch(() => {});
+    }
+  });
+
+  // Chequear updates 5s después de arrancar (no bloquear UI)
+  setTimeout(() => {
+    autoUpdater.checkForUpdatesAndNotify().catch(err => {
+      console.warn('[updater] check falló:', err.message);
+    });
+  }, 5000);
+  // Re-chequear cada 30 min mientras la app está abierta
+  setInterval(() => {
+    autoUpdater.checkForUpdates().catch(() => {});
+  }, 30 * 60 * 1000);
+}
+
 app.whenReady().then(async () => {
   Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
   // Arrancar servidor local ANTES de crear ventana — es rápido (~10ms)
   await startLocalServer();
   createWindow();
+  setupAutoUpdater();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();

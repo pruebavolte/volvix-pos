@@ -21,11 +21,20 @@ asar: true
 extraMetadata:
   main: electron/main.js
   name: volvix-pos
+# 2026-05-11: auto-updater vía GitHub Releases
+# El .exe instalado consulta latest.yml en releases/latest y descarga solo
+# el diff binario (no toda la app) usando electron-updater.
+publish:
+  - provider: github
+    owner: pruebavolte
+    repo: volvix-pos
+    releaseType: release
 win:
   target:
     - nsis
   icon: electron/icons/icon.png
-  artifactName: "Volvix POS Setup ${version}.${ext}"
+  # 2026-05-11: nombre sin espacios para que match con latest.yml del auto-updater
+  artifactName: "VolvixPOS-Setup-${version}.${ext}"
   signAndEditExecutable: false
   signtoolOptions:
     sign: null
@@ -37,7 +46,9 @@ nsis:
   createStartMenuShortcut: true
   shortcutName: Volvix POS
   # 2026-05-11: instalador OFFLINE (no descarga nada de internet durante instalación)
-  differentialPackage: false
+  # differentialPackage activado → genera .blockmap para que electron-updater
+  # descargue SOLO el diff binario (no el .exe completo) en próximas updates
+  differentialPackage: true
 mac:
   target:
     - dmg
