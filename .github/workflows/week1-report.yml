@@ -5,7 +5,7 @@ on:
     # 19 mayo 2026, 15:00 UTC = 09:00 Monterrey (UTC-6).
     # Cron normal corre cada año en esa fecha — el script verifica fecha exacta.
     - cron: '0 15 19 5 *'
-  workflow_dispatch: {}
+  workflow_dispatch:
 
 jobs:
   generate:
