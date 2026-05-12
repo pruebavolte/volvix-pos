@@ -265,6 +265,9 @@
     return { action: 'replace', body: item.body };
   }
 
+  // 2026-05-11: paralelización con concurrencia limitada (default 8).
+  // Antes procesaba SECUENCIAL → 100 items con 300ms latencia = 30s.
+  // Ahora con 8 paralelos = 100/8 * 300ms = ~3.7s.
   async function syncNow() {
     if (syncing) return;
     if (!navigator.onLine) return;
@@ -277,10 +280,40 @@
       const due = all
         .filter(x => x.nextAttempt <= now)
         .sort((a, b) => a.createdAt - b.createdAt);
-      for (const item of due) {
-        if (!navigator.onLine) break;
-        await processItem(item);
+
+      // Coalescing: si hay varios items idénticos por (method+url+body.name+body.code),
+      // solo procesar el ÚLTIMO (createdAt más reciente). Los anteriores se descartan.
+      // Esto resuelve el caso "Producto A: $10 → $20 → $30 → $50" — solo $50 llega.
+      const seen = new Map();
+      const winners = [];
+      // Recorre del más reciente al más viejo
+      for (let i = due.length - 1; i >= 0; i--) {
+        const it = due[i];
+        const k = (it.method || 'POST') + '|' + (it.url || '') + '|' +
+                  (it.body && (it.body.code || it.body.barcode || it.body.name) || '');
+        if (seen.has(k)) {
+          // ya hay un winner más reciente; eliminar éste de IDB
+          await deleteRequest(it.id);
+          emit('coalesced', { item: it, kept: seen.get(k) });
+        } else {
+          seen.set(k, it.id);
+          winners.unshift(it); // mantener orden por createdAt
+        }
       }
+
+      // Procesar en paralelo con concurrencia limitada
+      const concurrency = cfg.concurrency || 8;
+      let idx = 0;
+      const workers = Array(Math.min(concurrency, winners.length)).fill(0).map(async () => {
+        while (idx < winners.length) {
+          if (!navigator.onLine) return;
+          const item = winners[idx++];
+          if (!item) return;
+          try { await processItem(item); }
+          catch (e) { warn('worker err', e); }
+        }
+      });
+      await Promise.all(workers);
     } catch (e) {
       err('sync error', e);
     } finally {
