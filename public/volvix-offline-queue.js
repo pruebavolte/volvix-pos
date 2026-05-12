@@ -343,10 +343,21 @@
   // Antes: procesaba SECUENCIAL → 100 items en 30s+.
   // Ahora: 8 workers paralelos + loop hasta cola vacía (items nuevos durante sync
   // también se procesan en la misma sesión, no esperan al próximo setInterval).
+  // ANTI-DEADLOCK: si syncing está pegado > 60s, se asume crashed y se resetea.
+  let __syncStartedAt = 0;
   async function syncNow() {
-    if (syncing) return;
+    if (syncing) {
+      // Anti-deadlock: si lleva más de 60s "sincronizando", reset y continuar
+      if (__syncStartedAt && (Date.now() - __syncStartedAt) > 60000) {
+        warn('[offline-queue] FORZANDO reset de syncing — pegado por >60s');
+        syncing = false;
+      } else {
+        return;
+      }
+    }
     if (!navigator.onLine) return;
     syncing = true;
+    __syncStartedAt = Date.now();
     emit('sync-start');
     updateIndicator();
     try {
