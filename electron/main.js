@@ -60,6 +60,16 @@ function getPublicRoot() {
 const PUBLIC_ROOT = getPublicRoot();
 console.log('[volvix] PUBLIC_ROOT =', PUBLIC_ROOT);
 
+// HTTPS agent con keepAlive para reusar conexiones TLS a Vercel.
+// Sin esto, cada request paralelo abre nuevo TLS handshake (~150ms).
+// 100 requests = 100 handshakes secuenciales = 15s+ adicional.
+const __vercelAgent = new https.Agent({
+  keepAlive: true,
+  keepAliveMsecs: 30000,
+  maxSockets: 50,
+  maxFreeSockets: 10
+});
+
 function proxyToVercel(req, res) {
   // Proxy /api/* a Vercel; si no hay red en 4s → 503
   const targetURL = PROD_BASE + req.url;
@@ -69,7 +79,8 @@ function proxyToVercel(req, res) {
     port: 443,
     path: u.path,
     method: req.method,
-    headers: Object.assign({}, req.headers, { host: u.hostname })
+    headers: Object.assign({}, req.headers, { host: u.hostname }),
+    agent: __vercelAgent
   };
   const proxyReq = https.request(opts, (proxyRes) => {
     res.writeHead(proxyRes.statusCode || 502, proxyRes.headers);
