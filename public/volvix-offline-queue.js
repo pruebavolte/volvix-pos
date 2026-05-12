@@ -347,9 +347,9 @@
   let __syncStartedAt = 0;
   async function syncNow() {
     if (syncing) {
-      // Anti-deadlock: si lleva más de 60s "sincronizando", reset y continuar
-      if (__syncStartedAt && (Date.now() - __syncStartedAt) > 60000) {
-        warn('[offline-queue] FORZANDO reset de syncing — pegado por >60s');
+      // Anti-deadlock: si lleva >45s "sincronizando", reset y continuar
+      if (__syncStartedAt && (Date.now() - __syncStartedAt) > 45000) {
+        warn('[offline-queue] FORZANDO reset — pegado por >45s');
         syncing = false;
       } else {
         return;
@@ -360,41 +360,32 @@
     __syncStartedAt = Date.now();
     emit('sync-start');
     updateIndicator();
+
     try {
-      // DRAIN LOOP: seguir procesando hasta que no haya más items pendientes
-      // o se alcance un máximo de iteraciones (anti loop infinito por items en error).
-      const MAX_ROUNDS = 20;
-      for (let round = 0; round < MAX_ROUNDS; round++) {
-        if (!navigator.onLine) break;
-        const all = await getAll();
-        const now = Date.now();
-        const due = all
-          .filter(x => x.nextAttempt <= now)
-          .sort((a, b) => a.createdAt - b.createdAt);
+      const all = await getAll();
+      const now = Date.now();
+      const due = all
+        .filter(x => x.nextAttempt <= now)
+        .sort((a, b) => a.createdAt - b.createdAt);
 
-        if (due.length === 0) break;
-
-        // Coalescing: si hay varios items idénticos por (method+url+body.code|barcode|name),
-        // solo procesar el ÚLTIMO (createdAt más reciente). Los anteriores se descartan.
-        // Esto resuelve el caso "Producto A: $10 → $20 → $30 → $50" — solo $50 llega.
-        const seen = new Map();
-        const winners = [];
-        for (let i = due.length - 1; i >= 0; i--) {
-          const it = due[i];
-          const k = (it.method || 'POST') + '|' + (it.url || '') + '|' +
-                    (it.body && (it.body.code || it.body.barcode || it.body.name) || '');
-          if (seen.has(k)) {
-            await deleteRequest(it.id);
-            emit('coalesced', { item: it, kept: seen.get(k) });
-          } else {
-            seen.set(k, it.id);
-            winners.unshift(it);
-          }
+      // Coalescing por (method+url+body.code|barcode|name)
+      const seen = new Map();
+      const winners = [];
+      for (let i = due.length - 1; i >= 0; i--) {
+        const it = due[i];
+        const k = (it.method || 'POST') + '|' + (it.url || '') + '|' +
+                  (it.body && (it.body.code || it.body.barcode || it.body.name) || '');
+        if (seen.has(k)) {
+          await deleteRequest(it.id);
+          emit('coalesced', { item: it, kept: seen.get(k) });
+        } else {
+          seen.set(k, it.id);
+          winners.unshift(it);
         }
+      }
 
-        if (winners.length === 0) break;
-
-        // Procesar en paralelo con concurrencia limitada
+      if (winners.length > 0) {
+        // Paralelo con concurrencia limitada + TIMEOUT GLOBAL (30s por round)
         const concurrency = cfg.concurrency || 8;
         let idx = 0;
         const workers = Array(Math.min(concurrency, winners.length)).fill(0).map(async () => {
@@ -406,8 +397,15 @@
             catch (e) { warn('worker err', e); }
           }
         });
-        await Promise.all(workers);
-        // Loop continúa — verifica si llegaron items nuevos durante el sync
+        // Race contra timeout 30s para evitar deadlock permanente
+        const TIMEOUT_MS = 30000;
+        await Promise.race([
+          Promise.all(workers),
+          new Promise(resolve => setTimeout(() => {
+            warn('[offline-queue] round timeout 30s, abandono workers en background');
+            resolve('timeout');
+          }, TIMEOUT_MS))
+        ]);
       }
     } catch (e) {
       err('sync error', e);
@@ -415,9 +413,7 @@
       syncing = false;
       emit('sync-end');
       updateIndicator();
-      // 2026-05-11: si quedaron items en backoff (nextAttempt > now),
-      // programar próximo sync para el minNextAttempt. Antes esperaba al
-      // setInterval lejano (15-30s) y los items se atascaban en cola.
+      // Auto-reschedule si quedan items pendientes
       try {
         const remaining = await getAll();
         if (remaining.length > 0 && navigator.onLine) {
