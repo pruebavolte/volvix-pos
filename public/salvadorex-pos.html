@@ -9064,6 +9064,13 @@
         cashier_email: session?.email || 'unknown',
         ticket_number: 'TKT-' + folio,
         items: CART.map(i => ({
+          // 2026-05-12 BUG-F6 FIX: el backend descuenta stock filtrando por
+          // it.id (api/index.js:2638 decrement_stock_atomic). Antes solo
+          // se mandaba product_id -> filtro vacío -> stock NUNCA descontaba
+          // -> OVERSELLING. Ahora se manda id (UUID del producto) que es
+          // lo que el backend espera. Conservamos product_id para retro-
+          // compatibilidad con otros endpoints/reportes legacy.
+          id: i.id || null,
           product_id: i.id || null,
           code: i.code,
           name: i.name,
@@ -16326,6 +16333,7 @@
 <script src="volvix-crypto-wiring.js" defer></script>
 <script src="volvix-print-hub.js" defer></script>
 <script src="volvix-offline-queue.js" defer></script>
+<script src="volvix-queue-fail-notifier.js" defer></script>
 <script src="volvix-real-data-loader.js" defer></script>
 
 <!-- ============ R8c: Sale search + late invoice + reprint + CFDI cancel/refacturar ============ -->

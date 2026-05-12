@@ -205,6 +205,15 @@
   }
 
   async function processItem(item) {
+    // 2026-05-12 BUG-F3 FIX: items corruptos (retries=NaN/null/undefined,
+    // nextAttempt=NaN) quedan en limbo permanente porque `NaN >= maxRetries`
+    // es false y `NaN <= now` también es false. Defensiva: resetear a 0/now.
+    if (typeof item.retries !== 'number' || !Number.isFinite(item.retries)) {
+      item.retries = 0;
+    }
+    if (typeof item.nextAttempt !== 'number' || !Number.isFinite(item.nextAttempt)) {
+      item.nextAttempt = Date.now();
+    }
     try {
       // 2026-05-11: timeout de 10s para evitar deadlocks si la red cuelga.
       // Sin esto, un fetch que nunca responda mantiene syncing=true permanente.
@@ -223,9 +232,15 @@
           if (tok) authHeader = 'Bearer ' + tok;
         } catch (_) {}
       }
+      // 2026-05-12 BUG-F2 FIX: enviar Idempotency-Key como header HTTP cuando
+      // item.idempotencyKey existe. Antes: el queue guardaba el key pero NUNCA
+      // se trasladaba al header -> POST /api/sales devolvía 400
+      // idempotency_key_required -> BUG #1 fix lo marcaba isClientError ->
+      // delete del queue -> DATA LOSS SILENCIOSO. Ahora se envía.
       const finalHeaders = Object.assign(
         { 'Content-Type': 'application/json' },
         authHeader ? { 'Authorization': authHeader } : {},
+        item.idempotencyKey ? { 'Idempotency-Key': String(item.idempotencyKey).slice(0, 200) } : {},
         item.headers || {}
       );
 
