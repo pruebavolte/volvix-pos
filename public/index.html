@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Volvix POS</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #ffffff; font-family: system-ui, sans-serif; }
+  .l { display: flex; align-items: center; justify-content: center; height: 100%; flex-direction: column; gap: 14px; }
+  .s { width: 38px; height: 38px; border: 3px solid #e5e7eb; border-top-color: #2563eb; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  p { color: #6b7280; font-size: 13px; margin: 0; }
+</style>
+</head>
+<body>
+<div class="l"><div class="s"></div><p>Iniciando…</p></div>
+<script>
+  // Entry point para Capacitor APK / PWA / browser:
+  // Redirige al POS principal (salvadorex-pos.html) o login según haya sesión.
+  (function () {
+    try {
+      var token = null;
+      try { token = localStorage.getItem('volvix_token'); } catch (_) {}
+      // Detectar Capacitor por user-agent o protocol
+      var isCapacitor =
+        (window.location.protocol === 'capacitor:') ||
+        (window.location.hostname === 'localhost' &&
+         navigator.userAgent.indexOf('Mobile') >= 0);
+      var target;
+      if (token) {
+        target = './salvadorex-pos.html';
+      } else if (isCapacitor) {
+        target = './login.html';
+      } else {
+        // Browser web — si están en la raíz, mandar al marketplace
+        target = './marketplace.html';
+      }
+      window.location.replace(target);
+    } catch (e) {
+      window.location.replace('./salvadorex-pos.html');
+    }
+  })();
+</script>
+</body>
+</html>
