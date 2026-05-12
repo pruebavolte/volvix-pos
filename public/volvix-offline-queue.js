@@ -287,16 +287,20 @@
               } catch (_) {}
             }
             // Reintentar como PATCH con version (optimistic locking)
+            // 2026-05-12 BUG #8 FIX: NO enviar header If-Match. Vercel CDN lo
+            // intercepta como cache validation (ETag) y devuelve 412
+            // PRECONDITION_FAILED antes de llegar al backend. La version
+            // viaja en body.version que el backend lee con getExpectedVersion().
             const patchBody = Object.assign({}, item.body, {
               version: existingVersion !== undefined ? existingVersion : 1
             });
             const patchResp = await fetch('/api/products/' + existingId, {
               method: 'PATCH',
-              headers: {
-                'Content-Type': 'application/json',
-                'If-Match': String(existingVersion !== undefined ? existingVersion : 1),
-                ...item.headers
-              },
+              headers: Object.assign(
+                { 'Content-Type': 'application/json' },
+                item.headers || {}
+                // Antes incluiamos 'If-Match' aquí pero Vercel CDN lo rompía
+              ),
               body: JSON.stringify(patchBody)
             });
             if (patchResp.ok) {
