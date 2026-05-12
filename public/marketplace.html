@@ -2172,46 +2172,9 @@ function vlxShareClientPWA(){ var url = location.origin + '/app/'; if(navigator.
     }
   }
 
-  async function requestDemo(giroKey) {
-    if(window.VolvixUI && typeof window.VolvixUI.form==='function'){
-      const r = await window.VolvixUI.form({
-        title: 'Solicitar demo · KYC',
-        size: 'md',
-        fields: [
-          { name:'nombre',   type:'text',     label:'Nombre completo',     required:true },
-          { name:'empresa',  type:'text',     label:'Razón social / Negocio', required:true },
-          { name:'rfc',      type:'text',     label:'RFC',                 mask:'rfc',    placeholder:'XAXX010101000' },
-          { name:'email',    type:'email',    label:'Correo electrónico',  required:true },
-          { name:'tel',      type:'text',     label:'Teléfono',            required:true, mask:'tel-mx' },
-          { name:'cp',       type:'text',     label:'Código postal',       mask:'cp-mx' },
-          { name:'sucursales', type:'select', label:'Número de sucursales',
-            options:[
-              {value:'1',  label:'1'},
-              {value:'2-5',label:'2 a 5'},
-              {value:'6+', label:'6 o más'}
-            ] },
-          { name:'notas',    type:'textarea', label:'Cuéntanos sobre tu operación', rows:3, placeholder:'Tipo de productos, volumen, etc.' },
-          { name:'acepta',   type:'checkbox', label:'Acepto que un asesor me contacte', required:true }
-        ],
-        submitText: 'Enviar solicitud'
-      });
-      if(!r) return;
-      const ok = await _postLead({
-        name: r.nombre || '',
-        email: r.email || '',
-        phone: r.tel || '',
-        giro: giroKey || '',
-        message: 'Demo request · ' + (r.empresa||'') + ' · RFC:' + (r.rfc||'-') + ' · CP:' + (r.cp||'-') + ' · Sucursales:' + (r.sucursales||'-') + ' · ' + (r.notas||''),
-        source: 'marketplace-demo',
-      });
-      if (ok) VolvixUI.toast({type:'success', message:'✓ Solicitud enviada. Un asesor te contactará en breve.'});
-      return;
-    }
-    const email = (window.prompt('Tu correo para que te contacte un asesor:') || '').trim();
-    if (!email) return;
-    const ok = await _postLead({ email, giro: giroKey, source: 'marketplace-demo-fallback', message: 'Demo request' });
-    if (ok && window.VolvixUI) VolvixUI.toast({type:'info', message:'Un asesor te contactará en breve.'});
-  }
+  // 2026-05-12: bloque demo eliminado del UI (solo queda CTA "Ver el sistema").
+  // La función helper que abría el modal KYC se removió por dead code.
+  // Si se necesita en el futuro, recuperar desde git (antes de 2026-05-12).
 
   function capitalize(s) {
     return s.charAt(0).toUpperCase() + s.slice(1);
