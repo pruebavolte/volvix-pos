@@ -311,8 +311,41 @@
     } catch (e) {
       item.retries += 1;
       item.lastError = String(e && e.message || e);
+
+      // 2026-05-12 BUG #1 FIX: NO eliminar items por errores de red.
+      // Antes: tras 6 retries con HTTP 503/timeout/NetworkError, el item se
+      // eliminaba permanentemente → PERDIDA DE DATOS si offline > 1 minuto.
+      // Ahora: solo eliminamos en errores DEFINITIVOS (4xx cliente: 400/401/403/404/422)
+      // o cuando el conflict resolver decidió 'drop'. Errores de red/5xx se
+      // reintentan indefinidamente hasta que vuelva la conexión.
+      const errStr = item.lastError;
+      const httpMatch = errStr.match(/^HTTP (\d{3})/);
+      const httpCode = httpMatch ? parseInt(httpMatch[1], 10) : 0;
+      const isClientError = httpCode >= 400 && httpCode < 500 && httpCode !== 408 && httpCode !== 429;
+      const isNetworkError = !httpCode || httpCode >= 500 ||
+        /NetworkError|Failed to fetch|abort|timeout|ECONNREFUSED|ENOTFOUND|offline/i.test(errStr);
+
       if (item.retries >= cfg.maxRetries) {
-        emit('fail', { item, error: item.lastError });
+        if (isClientError) {
+          // Error de cliente real (400, 401, 403, etc.) — el request es invalido,
+          // reintentarlo no va a ayudar. Eliminar y notificar.
+          emit('fail', { item, error: item.lastError, reason: 'client-error' });
+          await deleteRequest(item.id);
+          return;
+        }
+        if (isNetworkError) {
+          // Error de red persistente. NO eliminar — el usuario espera que sus
+          // datos sobrevivan. Resetar retries a maxRetries/2 y darle un delay
+          // largo (5 min) para que no se quede en retry-loop, pero que vuelva
+          // a intentar cuando la red regrese.
+          item.retries = Math.floor(cfg.maxRetries / 2);
+          item.nextAttempt = Date.now() + 5 * 60 * 1000; // 5 minutos
+          await putRequest(item);
+          emit('retry-paused', { item, reason: 'network-error-persistent', resumeIn: 5 * 60 * 1000 });
+          return;
+        }
+        // Otro tipo de error desconocido — comportamiento original (eliminar)
+        emit('fail', { item, error: item.lastError, reason: 'unknown-error' });
         await deleteRequest(item.id);
         return;
       }
@@ -345,11 +378,15 @@
   // también se procesan en la misma sesión, no esperan al próximo setInterval).
   // ANTI-DEADLOCK: si syncing está pegado > 60s, se asume crashed y se resetea.
   let __syncStartedAt = 0;
-  async function syncNow() {
+  async function syncNow(opts) {
+    const force = !!(opts && opts.force);
     if (syncing) {
-      // Anti-deadlock: si lleva >45s "sincronizando", reset y continuar
-      if (__syncStartedAt && (Date.now() - __syncStartedAt) > 45000) {
-        warn('[offline-queue] FORZANDO reset — pegado por >45s');
+      // Anti-deadlock: si lleva >45s "sincronizando", reset y continuar.
+      // 2026-05-12 BUG #2 FIX: si la llamada es forzada (force=true), reseteamos
+      // syncing sin esperar 45s — el caller sabe lo que hace (ej. usuario hizo click).
+      const stuck = __syncStartedAt && (Date.now() - __syncStartedAt) > 45000;
+      if (stuck || force) {
+        warn('[offline-queue] FORZANDO reset', force ? '(force=true)' : '(>45s)');
         syncing = false;
       } else {
         return;
@@ -360,6 +397,26 @@
     __syncStartedAt = Date.now();
     emit('sync-start');
     updateIndicator();
+
+    // 2026-05-12 BUG #2 FIX: cuando se llama syncNow forzado, resetear el
+    // nextAttempt de TODOS los items que tienen lastError, para procesarlos
+    // de inmediato. Antes podian quedarse en "pause" indefinida si su backoff
+    // los empujaba al futuro y syncNow nunca alcanzaba a procesarlos.
+    if (force) {
+      try {
+        const all = await getAll();
+        const now = Date.now();
+        let touched = 0;
+        for (const item of all) {
+          if (item.lastError && item.nextAttempt > now) {
+            item.nextAttempt = now;
+            await putRequest(item);
+            touched++;
+          }
+        }
+        if (touched > 0) log('[offline-queue] force=true reseteo nextAttempt en', touched, 'items');
+      } catch (e) { warn('force reset err', e); }
+    }
 
     try {
       const all = await getAll();

@@ -14,7 +14,7 @@
 // que clientes carguen los fixes acumulados de R1-R6a.
 // Cuando exista build pipeline (esbuild/vite), reemplazar por hash generado.
 // Mientras tanto: bumpear VERSION manualmente en cada deploy con cambios.
-const VERSION   = 'v1.13.0-cross-origin-bypass';
+const VERSION   = 'v1.14.0-offline-reload-fix';
 const CACHE     = `volvix-${VERSION}`;
 const API_CACHE = `volvix-api-${VERSION}`;
 const RT_CACHE  = `volvix-rt-${VERSION}`;
@@ -274,18 +274,46 @@ async function networkFirst(req) {
 }
 
 async function htmlStrategy(req) {
+  // 2026-05-12 BUG #4 FIX: network-first con timeout corto (3s).
+  // Antes: si red lenta, el fetch no hace timeout y termina mostrando
+  // chrome-error://chromewebdata/ al usuario en lugar del cache.
+  // Ahora: race entre fetch real vs timeout 3s. Si gana timeout, intentamos cache.
   try {
-    const res = await fetch(req);
+    const NETWORK_TIMEOUT_MS = 3000;
+    const networkPromise = fetch(req);
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('network-timeout')), NETWORK_TIMEOUT_MS)
+    );
+    const res = await Promise.race([networkPromise, timeoutPromise]);
     if (res && res.ok) {
       const clone = res.clone();
       caches.open(CACHE).then((c) => c.put(req, clone));
     }
     return res;
   } catch (e) {
-    const cached = await caches.match(req);
+    // 2026-05-12 BUG #4 FIX: ignoreSearch en cache.match para que URLs con
+    // query params (ej. /login.html?expired=1&redirect=...) hagan match con
+    // el /login.html cacheado durante install.
+    let cached = await caches.match(req, { ignoreSearch: true });
+    if (cached) {
+      console.log('[SW] HTML offline, sirviendo cache:', req.url);
+      return cached;
+    }
+    // Fallback: pagina principal cacheada
+    cached = await caches.match('/salvadorex-pos.html', { ignoreSearch: true });
     if (cached) return cached;
-    const fallback = await caches.match('/login.html');
-    return fallback || new Response('Offline', { status: 503 });
+    cached = await caches.match('/login.html', { ignoreSearch: true });
+    if (cached) return cached;
+    cached = await caches.match('/', { ignoreSearch: true });
+    if (cached) return cached;
+    // Como ultimo recurso, devolver HTML offline minimo (mejor que chrome-error)
+    return new Response(
+      '<!doctype html><html><head><meta charset="utf-8"><title>Offline</title></head>' +
+      '<body style="font-family:sans-serif;text-align:center;padding:40px">' +
+      '<h2>Sin conexion</h2><p>Reintentando...</p>' +
+      '<script>setTimeout(()=>location.reload(), 5000)</script></body></html>',
+      { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+    );
   }
 }
 
