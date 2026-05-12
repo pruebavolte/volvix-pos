@@ -206,11 +206,21 @@
 
   async function processItem(item) {
     try {
-      const resp = await fetch(item.url, {
-        method: item.method,
-        headers: { 'Content-Type': 'application/json', ...item.headers },
-        body: item.body != null ? JSON.stringify(item.body) : undefined,
-      });
+      // 2026-05-11: timeout de 10s para evitar deadlocks si la red cuelga.
+      // Sin esto, un fetch que nunca responda mantiene syncing=true permanente.
+      const ctrl = new AbortController();
+      const t = setTimeout(() => { try { ctrl.abort(); } catch (_) {} }, 10000);
+      let resp;
+      try {
+        resp = await fetch(item.url, {
+          method: item.method,
+          headers: { 'Content-Type': 'application/json', ...item.headers },
+          body: item.body != null ? JSON.stringify(item.body) : undefined,
+          signal: ctrl.signal,
+        });
+      } finally {
+        clearTimeout(t);
+      }
 
       if (resp.status === 409) {
         // Conflicto — caso especial: si es BARCODE_TAKEN o PRODUCT_DUPLICATE_SKU
