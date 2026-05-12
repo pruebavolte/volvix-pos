@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Volvix - Monitoring</title>
+<script src="/volvix-capacitor-bridge.js"></script>
+<style>
+body{font-family:system-ui,sans-serif;margin:0;padding:20px;background:#0a0a0a;color:#e5e7eb}
+h1{margin:0 0 20px;font-size:22px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
+.card{background:#1f2937;border:1px solid #374151;border-radius:8px;padding:16px}
+.card h2{margin:0 0 12px;font-size:14px;color:#9ca3af;text-transform:uppercase}
+.metric{font-size:32px;font-weight:700}.metric.ok{color:#10b981}.metric.warn{color:#f59e0b}.metric.crit{color:#ef4444}
+.sub{font-size:12px;color:#9ca3af;margin-top:4px}
+code{background:#374151;padding:2px 5px;border-radius:3px;font-size:12px}
+</style></head><body>
+<h1>Volvix POS - Monitoring (post v1.0.181)</h1>
+<p style="color:#9ca3af;font-size:13px">Telemetria persistida en <code>client_errors</code> con <code>message LIKE 'telemetry.%'</code>. Para metricas reales: <code>node monitoring/alerts.js</code></p>
+<div class="grid">
+  <div class="card"><h2>M1: Queue fails (1h)</h2><div class="metric ok" id="m1">-</div><div class="sub">Umbral: &gt;5/hr/tenant</div></div>
+  <div class="card"><h2>M2: Sale latency p95</h2><div class="metric warn" id="m2">~909ms</div><div class="sub">Baseline post-fix. Umbral: &gt;2000ms 3h</div></div>
+  <div class="card"><h2>M3: Items con retries</h2><div class="metric ok" id="m3">-</div><div class="sub">Umbral: crece &gt;10/dia</div></div>
+  <div class="card"><h2>M4: Idempotency cache hits</h2><div class="metric ok" id="m4">-</div><div class="sub">Umbral: &gt;10%</div></div>
+  <div class="card"><h2>M5: Local vs Nube</h2><div class="metric ok" id="m5">-</div><div class="sub">Daily smoke. Umbral: diff &gt;0.5% 2 dias</div></div>
+  <div class="card"><h2>Comandos</h2>
+    <p style="font-size:13px"><b>Alerts check:</b><br><code>node monitoring/alerts.js</code></p>
+    <p style="font-size:13px"><b>Daily smoke:</b><br><code>node monitoring/daily_smoke.js</code></p>
+    <p style="font-size:13px"><b>Runbook:</b> ver <code>monitoring/RUNBOOK.md</code></p>
+  </div>
+</div>
+<script>
+// Dashboard standalone. Requiere SUPABASE service-role para lectura, no embeded aqui.
+// Solo muestra placeholder + comandos. Datos reales via alerts.js (Node CLI).
+document.title = 'Volvix Monitoring - ' + new Date().toISOString().slice(0,10);
+</script>
+</body></html>
