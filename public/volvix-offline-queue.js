@@ -210,11 +210,30 @@
       // Sin esto, un fetch que nunca responda mantiene syncing=true permanente.
       const ctrl = new AbortController();
       const t = setTimeout(() => { try { ctrl.abort(); } catch (_) {} }, 10000);
+
+      // 2026-05-12 BUG #6 FIX: incluir Authorization desde localStorage si no se
+      // pasó explicitamente en item.headers. Antes: enqueue sin Authorization
+      // -> backend devolvía 401 -> retries hasta agotar -> data loss (con BUG #1)
+      // o pause indefinida (con BUG #1 fix). Ahora: siempre intenta con el token
+      // mas reciente del localStorage si no hay header explicito.
+      let authHeader = item.headers && (item.headers['Authorization'] || item.headers['authorization']);
+      if (!authHeader) {
+        try {
+          const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+          if (tok) authHeader = 'Bearer ' + tok;
+        } catch (_) {}
+      }
+      const finalHeaders = Object.assign(
+        { 'Content-Type': 'application/json' },
+        authHeader ? { 'Authorization': authHeader } : {},
+        item.headers || {}
+      );
+
       let resp;
       try {
         resp = await fetch(item.url, {
           method: item.method,
-          headers: { 'Content-Type': 'application/json', ...item.headers },
+          headers: finalHeaders,
           body: item.body != null ? JSON.stringify(item.body) : undefined,
           signal: ctrl.signal,
         });
