@@ -64,13 +64,19 @@ const IS_PROD = process.env.NODE_ENV === 'production';
 // 2026-05-12 BUG #5 FIX: agregar origins de Capacitor para que el APK Android
 // pueda hacer fetch a /api/*. Capacitor con androidScheme=https sirve la app
 // en https://localhost. iOS y desktop tambien tienen schemes propios.
-const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS ||
-  'https://salvadorexoficial.com,https://www.salvadorexoficial.com,' +
-  'https://volvix-pos.vercel.app,' +
-  'https://localhost,http://localhost,' +              // Capacitor Android
-  'capacitor://localhost,ionic://localhost,' +         // Capacitor iOS schemes
-  'file://')                                            // Electron file:// scheme
+// IMPORTANTE: estos origins SIEMPRE se incluyen (no son override-able via env)
+// porque sin ellos el APK no funciona en producción.
+const __CAPACITOR_ORIGINS = [
+  'https://localhost',       // Capacitor Android (androidScheme=https)
+  'http://localhost',        // Capacitor Android dev (androidScheme=http)
+  'capacitor://localhost',   // Capacitor iOS default scheme
+  'ionic://localhost',       // Ionic webview scheme
+  'file://'                  // Electron file:// scheme
+];
+const __ENV_ORIGINS = (process.env.ALLOWED_ORIGINS ||
+  'https://salvadorexoficial.com,https://www.salvadorexoficial.com,https://volvix-pos.vercel.app')
   .split(',').map(s => s.trim()).filter(Boolean);
+const ALLOWED_ORIGINS = Array.from(new Set([...__ENV_ORIGINS, ...__CAPACITOR_ORIGINS]));
 
 // =============================================================
 // SUPABASE REST API CLIENT
