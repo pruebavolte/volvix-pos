@@ -394,6 +394,17 @@
       syncing = false;
       emit('sync-end');
       updateIndicator();
+      // 2026-05-11: si quedaron items en backoff (nextAttempt > now),
+      // programar próximo sync para el minNextAttempt. Antes esperaba al
+      // setInterval lejano (15-30s) y los items se atascaban en cola.
+      try {
+        const remaining = await getAll();
+        if (remaining.length > 0 && navigator.onLine) {
+          const minNext = Math.min.apply(null, remaining.map(x => x.nextAttempt || 0));
+          const delay = Math.max(500, minNext - Date.now());
+          setTimeout(() => syncNow(), delay);
+        }
+      } catch (_) {}
     }
   }
 
