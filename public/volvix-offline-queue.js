@@ -243,18 +243,40 @@
             } catch (_) {}
           }
           if (existingId) {
-            // Reintentar como PATCH al endpoint del producto existente
+            // Necesitamos el `version` del producto para optimistic locking del PATCH.
+            // El response 409 puede incluirlo en existing.version; si no, hacemos GET.
+            let existingVersion = serverData.existing && serverData.existing.version;
+            if (existingVersion === undefined) {
+              try {
+                const r = await fetch('/api/productos?id=eq.' + existingId + '&select=version&limit=1', {
+                  headers: { ...item.headers }
+                });
+                if (r.ok) {
+                  const arr = await r.json().then(j => j.items || j.data || j || []);
+                  if (Array.isArray(arr) && arr[0]) existingVersion = arr[0].version;
+                }
+              } catch (_) {}
+            }
+            // Reintentar como PATCH con version (optimistic locking)
+            const patchBody = Object.assign({}, item.body, {
+              version: existingVersion !== undefined ? existingVersion : 1
+            });
             const patchResp = await fetch('/api/products/' + existingId, {
               method: 'PATCH',
-              headers: { 'Content-Type': 'application/json', ...item.headers },
-              body: JSON.stringify(item.body)
+              headers: {
+                'Content-Type': 'application/json',
+                'If-Match': String(existingVersion !== undefined ? existingVersion : 1),
+                ...item.headers
+              },
+              body: JSON.stringify(patchBody)
             });
             if (patchResp.ok) {
               await deleteRequest(item.id);
               emit('done', { item, upserted: true, id: existingId });
               return;
             }
-            // PATCH también falló — caer a flujo normal de conflict resolution
+            // PATCH también falló — log y caer a flujo normal
+            console.warn('[offline-queue] PATCH upsert failed:', patchResp.status, await patchResp.text().catch(() => ''));
           }
         }
         const resolved = await resolveConflict(item, serverData);

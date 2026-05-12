@@ -29022,7 +29022,7 @@ if (process.env.NODE_ENV === 'test') {
                   var dupSku = await supabaseRequest('GET',
                     '/pos_products?pos_user_id=eq.' + encodeURIComponent(posUserId)
                     + '&code=eq.' + encodeURIComponent(safeCode)
-                    + '&select=id,code,name,price,cost&limit=3').catch(function(){return [];});
+                    + '&select=id,code,name,price,cost,version&limit=3').catch(function(){return [];});
                   if (Array.isArray(dupSku) && dupSku.length > 0) {
                     return sendJSON(res, {
                       error: 'PRODUCT_DUPLICATE_SKU',
