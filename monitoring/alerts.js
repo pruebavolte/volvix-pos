@@ -7,12 +7,12 @@ const https = require('https');
 const SUPA_URL = process.env.SUPABASE_URL, SUPA_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (!SUPA_URL || !SUPA_KEY) { console.error('SUPABASE_URL+KEY required'); process.exit(2); }
 function req(method, path, body) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const u = new URL(SUPA_URL + '/rest/v1' + path);
     const r = https.request({ hostname: u.hostname, path: u.pathname + u.search, method,
       headers: { apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', Prefer: 'return=representation' } },
-      res => { let d = ''; res.on('data', c => d += c); res.on('end', () => { try { resolve(JSON.parse(d || '[]')); } catch (_) { resolve(d); } }); });
-    r.on('error', reject); if (body) r.write(JSON.stringify(body)); r.end();
+      res => { let d = ''; res.on('data', c => d += c); res.on('end', () => { let p; try { p = JSON.parse(d || '[]'); } catch (_) { p = []; } resolve(Array.isArray(p) ? p : []); }); });
+    r.on('error', () => resolve([])); if (body) r.write(JSON.stringify(body)); r.end();
   });
 }
 const since1h = new Date(Date.now() - 3600000).toISOString();
