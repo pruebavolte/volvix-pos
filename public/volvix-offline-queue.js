@@ -213,8 +213,48 @@
       });
 
       if (resp.status === 409) {
-        // Conflicto
+        // Conflicto — caso especial: si es BARCODE_TAKEN para POST /api/products,
+        // significa que el producto YA EXISTE. Reintentar como PATCH /api/products/:id
+        // con el id retornado por el backend. Esto convierte el flujo "crear-si-no-existe"
+        // en "upsert" desde el cliente.
         const serverData = await resp.json().catch(() => ({}));
+        const isBarcodeTaken = serverData && (
+          serverData.error_code === 'BARCODE_TAKEN' ||
+          (serverData.existing && (serverData.existing.id || serverData.existing.name))
+        );
+        if (isBarcodeTaken && item.method === 'POST' && /^\/api\/products$/.test(item.url)) {
+          // Necesitamos el ID del producto existente. El backend lo devuelve en `existing.id`
+          // si está disponible. Si no, hacemos GET por code para obtenerlo.
+          let existingId = serverData.existing && serverData.existing.id;
+          if (!existingId && item.body && (item.body.code || item.body.barcode)) {
+            try {
+              const lookupParam = item.body.code
+                ? 'code=eq.' + encodeURIComponent(item.body.code)
+                : 'barcode=eq.' + encodeURIComponent(item.body.barcode);
+              const r = await fetch('/api/productos?' + lookupParam + '&select=id&limit=1', {
+                headers: { ...item.headers }
+              });
+              if (r.ok) {
+                const arr = await r.json().then(j => j.items || j.data || j || []);
+                if (Array.isArray(arr) && arr[0] && arr[0].id) existingId = arr[0].id;
+              }
+            } catch (_) {}
+          }
+          if (existingId) {
+            // Reintentar como PATCH al endpoint del producto existente
+            const patchResp = await fetch('/api/products/' + existingId, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json', ...item.headers },
+              body: JSON.stringify(item.body)
+            });
+            if (patchResp.ok) {
+              await deleteRequest(item.id);
+              emit('done', { item, upserted: true, id: existingId });
+              return;
+            }
+            // PATCH también falló — caer a flujo normal de conflict resolution
+          }
+        }
         const resolved = await resolveConflict(item, serverData);
         if (resolved.action === 'drop') {
           await deleteRequest(item.id);

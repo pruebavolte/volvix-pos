@@ -2298,9 +2298,10 @@ const handlers = {
 
   'POST /api/products': requireAuth(async (req, res) => {
     try {
-      // B31.3: rate-limit per-tenant — 120 productos/min/tenant
+      // B31.3 + 2026-05-11: rate-limit per-tenant — 600/min para sync masivos offline
+      // (antes 120 saturaba con offline queue paralelo de 8 workers)
       const tnt = (req.user && req.user.tenant_id) || 'anon';
-      if (!rateLimit('products:tenant:' + tnt, 120, 60_000)) {
+      if (!rateLimit('products:tenant:' + tnt, 600, 60_000)) {
         return send429(res, rateLimitRetryMs('products:tenant:' + tnt, 60_000), 'Limite de productos/min alcanzado para tenant');
       }
       const body = await readBody(req, { maxBytes: 100 * 1024, strictJson: true });
@@ -2359,7 +2360,8 @@ const handlers = {
               error_code: 'BARCODE_TAKEN',
               error: 'Ese código ya está ocupado',
               field: 'barcode',
-              existing: { name: dup[0].name || null }
+              // 2026-05-11: incluir id para que offline-queue pueda hacer PATCH upsert
+              existing: { id: dup[0].id, name: dup[0].name || null }
             }, 409);
           }
         } catch (_) { /* si el lookup falla, seguir e dejar que el DB constraint capture */ }
