@@ -2364,21 +2364,25 @@ const handlers = {
       // S2 — server-side dup check antes del INSERT (cierra TOCTOU del client-side
       // check-barcode). Si el barcode/code ya existe en este tenant, devolver 409
       // con info para que el modal muestre el error inline en rojo.
-      if (safe.code) {
+      // 2026-05-12 BUG #7 FIX: el dup check filtraba por tenant_id pero los productos
+      // se guardan con pos_user_id (no hay columna tenant_id en pos_products → query
+      // siempre regresaba vacio → permitia duplicados). Ahora filtra por pos_user_id.
+      if (safe.code && ownerUserId) {
         try {
           const dup = await supabaseRequest('GET',
-            '/pos_products?tenant_id=eq.' + encodeURIComponent(tenantId) +
+            '/pos_products?pos_user_id=eq.' + encodeURIComponent(ownerUserId) +
             '&or=(code.eq.' + encodeURIComponent(safe.code) +
             (body.barcode ? ',barcode.eq.' + encodeURIComponent(String(body.barcode)) : '') +
-            ')&select=id,name&limit=1');
+            ')&select=id,name,version&limit=1');
           if (Array.isArray(dup) && dup.length > 0) {
             return sendJSON(res, {
               ok: false,
-              error_code: 'BARCODE_TAKEN',
+              error_code: 'PRODUCT_DUPLICATE_SKU',
               error: 'Ese código ya está ocupado',
               field: 'barcode',
               // 2026-05-11: incluir id para que offline-queue pueda hacer PATCH upsert
-              existing: { id: dup[0].id, name: dup[0].name || null }
+              // 2026-05-12: incluir version para optimistic locking del PATCH
+              existing: { id: dup[0].id, name: dup[0].name || null, version: dup[0].version }
             }, 409);
           }
         } catch (_) { /* si el lookup falla, seguir e dejar que el DB constraint capture */ }
