@@ -32202,9 +32202,27 @@ if (process.env.NODE_ENV === 'test') {
   // SCHEMA NOTE: pos_products NO tiene tenant_id/company_id/sku — los productos
   // se aíslan por pos_user_id (cada owner ve solo sus productos).
   async function bootstrapTenant(opts) {
-    // opts: { tenant_id, company_id, user_id, business_type, business_name }
+    // opts: { tenant_id, company_id, user_id, business_type, business_name, custom_data? }
     const giro = String(opts.business_type || '').trim();
-    const products = DEMO_PRODUCTS[giro] || DEFAULT_DEMO_PRODUCTS;
+    // 2026-05-12: prioridad para productos personalizados del marketplace.
+    // Si el usuario buscó un giro custom (ej. "renta_trajes"), marketplace ya
+    // le mostró 9+ productos específicos. Los usamos como semilla en vez de
+    // los DEMO_PRODUCTS hardcoded.
+    let products;
+    const customProducts = (opts.custom_data && Array.isArray(opts.custom_data.products))
+      ? opts.custom_data.products.filter(function(p){ return p && p.name; })
+      : [];
+    if (customProducts.length > 0) {
+      products = customProducts.map(function(p, i){
+        return {
+          name: p.name,
+          price: typeof p.price === 'number' && p.price > 0 ? p.price : 50,
+          sku: p.sku || (giro.toUpperCase().slice(0,4) + '-' + String(i + 1).padStart(3, '0'))
+        };
+      });
+    } else {
+      products = DEMO_PRODUCTS[giro] || DEFAULT_DEMO_PRODUCTS;
+    }
     const nowIso = new Date().toISOString();
     const ownerId = opts.user_id;
 
@@ -32339,7 +32357,8 @@ if (process.env.NODE_ENV === 'test') {
       if (business_name.length < 3 || business_name.length > 100) {
         return sendJSON(res, { ok: false, field: 'business_name', error: 'INVALID_NAME', error_message: 'Nombre del negocio inválido (3-100 caracteres).' }, 400);
       }
-      if (!VALID_GIROS.has(business_type)) {
+      // 2026-05-12 FIX: aceptar slugs custom generados por /api/giros/generate
+      if (!VALID_GIROS.has(business_type) && !/^[a-z0-9][a-z0-9_-]{1,59}$/.test(business_type)) {
         return sendJSON(res, { ok: false, field: 'business_type', error: 'INVALID_GIRO', error_message: 'Selecciona un giro válido.' }, 400);
       }
       if (rfc && !isValidRfcServer(rfc)) {
@@ -33039,7 +33058,11 @@ if (process.env.NODE_ENV === 'test') {
       if (business_name.length < 3 || business_name.length > 100) {
         return sendJSON(res, { ok: false, field: 'business_name', error_code: 'INVALID_NAME', error_message: 'Nombre del negocio inválido (3-100 caracteres).' }, 400);
       }
-      if (!VALID_GIROS.has(giro)) {
+      // 2026-05-12 FIX: aceptar slugs custom generados por /api/giros/generate
+      // (marketplace permite que el usuario invente giros nuevos como "renta_trajes").
+      // Si no está en la lista canónica, validar que sea un slug bien formado.
+      const isCustomGiroSlug = /^[a-z0-9][a-z0-9_-]{1,59}$/.test(giro);
+      if (!VALID_GIROS.has(giro) && !isCustomGiroSlug) {
         return sendJSON(res, { ok: false, field: 'giro', error_code: 'INVALID_GIRO', error_message: 'Selecciona un giro válido.' }, 400);
       }
 
@@ -33106,13 +33129,44 @@ if (process.env.NODE_ENV === 'test') {
       // ---- Crear pos_users (o reusar el abandonado y refrescar pass/notes) ----
       const passwordHash = hashPasswordScrypt(password);
       const emailValue = email; // email es requerido ahora
-      const notes = JSON.stringify({
+      // 2026-05-12: si el cliente envió custom_data (productos/dolores generados
+      // por el marketplace para giros nuevos), lo guardamos en notes para que
+      // bootstrapTenant lo use después de la verificación de OTP.
+      let customDataSafe = null;
+      try {
+        if (body.custom_data && typeof body.custom_data === 'object') {
+          const cd = body.custom_data;
+          customDataSafe = {
+            system_name: cd.system_name ? String(cd.system_name).slice(0, 100) : null,
+            pains: Array.isArray(cd.pains) ? cd.pains.slice(0, 6).map(function(p){
+              return {
+                icon: p && p.icon ? String(p.icon).slice(0, 8) : '',
+                title: p && p.title ? String(p.title).slice(0, 80) : '',
+                desc: p && p.desc ? String(p.desc).slice(0, 240) : ''
+              };
+            }) : [],
+            products: Array.isArray(cd.products) ? cd.products.slice(0, 30).map(function(p){
+              return {
+                name: p && p.name ? String(p.name).slice(0, 80) : '',
+                price: p && typeof p.price === 'number' ? Math.max(0, Math.min(999999, p.price)) : 0,
+                sku: p && p.sku ? String(p.sku).slice(0, 40) : ''
+              };
+            }).filter(function(p){ return p.name && p.name.length >= 2; }) : [],
+            modules: Array.isArray(cd.modules) ? cd.modules.slice(0, 30).map(function(m){ return String(m).slice(0,40); }) : [],
+            terms: (cd.terms && typeof cd.terms === 'object') ? cd.terms : {}
+          };
+        }
+      } catch (_) { customDataSafe = null; }
+
+      const notesObj = {
         volvix_role: 'owner',
         tenant_id: tenantId,
         tenant_name: business_name,
         business_type: giro,
         registration_flow: 'simple_email'
-      });
+      };
+      if (customDataSafe) notesObj.custom_data = customDataSafe;
+      const notes = JSON.stringify(notesObj);
       let userId = reuseUserId || null;
       try {
         if (reuseUserId) {
@@ -33641,7 +33695,9 @@ if (process.env.NODE_ENV === 'test') {
           company_id: user.company_id,
           user_id: user.id,
           business_type: businessType,
-          business_name: tenantName
+          business_name: tenantName,
+          // 2026-05-12: pasar custom_data al bootstrap si el marketplace lo generó
+          custom_data: notesObj.custom_data || null
         });
       } catch (_) {}
 

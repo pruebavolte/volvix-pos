@@ -1906,7 +1906,6 @@ function vlxShareClientPWA(){ var url = location.origin + '/app/'; if(navigator.
 
         <div class="ai-cta">
           <a href="landing_dynamic.html?giro=${giro.key}" class="btn-big">Ver ${giro.systemName} en detalle →</a>
-          <button class="btn-secondary" onclick="requestDemo('${giro.key}')">📞 Solicitar demo</button>
         </div>
       </div>
     `;
@@ -1927,22 +1926,25 @@ function vlxShareClientPWA(){ var url = location.origin + '/app/'; if(navigator.
 
     const wrap = document.getElementById('ai-response');
     wrap.innerHTML = `
-      <div class="ai-card new-giro-card">
-        <div class="ai-thinking" id="gen-loader" style="padding:40px 20px;text-align:center;">
-          <div style="display:inline-flex;gap:6px;align-items:center;justify-content:center;font-size:18px;font-weight:600;color:var(--text);">
-            <span class="dots" style="display:inline-flex;gap:4px;">
-              <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:linear-gradient(120deg,#2563eb,#7c3aed);animation:vlx-pulse 1.4s ease-in-out infinite;"></span>
-              <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:linear-gradient(120deg,#2563eb,#7c3aed);animation:vlx-pulse 1.4s ease-in-out 0.2s infinite;"></span>
-              <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:linear-gradient(120deg,#2563eb,#7c3aed);animation:vlx-pulse 1.4s ease-in-out 0.4s infinite;"></span>
+      <!-- Overlay full-screen — el spinner queda en mero medio de la pantalla -->
+      <div id="gen-loader-overlay" style="position:fixed;inset:0;background:rgba(255,255,255,0.96);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:99998;padding:24px;">
+        <div class="ai-thinking" id="gen-loader" style="text-align:center;max-width:680px;">
+          <div style="display:flex;gap:14px;align-items:center;justify-content:center;margin-bottom:22px;">
+            <span class="dots" style="display:inline-flex;gap:10px;">
+              <span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:linear-gradient(120deg,#2563eb,#7c3aed);animation:vlx-pulse 1.4s ease-in-out infinite;"></span>
+              <span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:linear-gradient(120deg,#2563eb,#7c3aed);animation:vlx-pulse 1.4s ease-in-out 0.2s infinite;"></span>
+              <span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:linear-gradient(120deg,#2563eb,#7c3aed);animation:vlx-pulse 1.4s ease-in-out 0.4s infinite;"></span>
             </span>
-            <span style="margin-left:10px;">Buscando…</span>
+          </div>
+          <div style="font-size:28px;font-weight:700;color:var(--text);line-height:1.25;margin:0 16px;">
+            Un momento, estoy buscando el sistema para <span style="background:linear-gradient(120deg,#2563eb,#7c3aed);-webkit-background-clip:text;background-clip:text;color:transparent;">${SAFE_QUERY || 'tu negocio'}</span>
           </div>
         </div>
-
-        <div id="gen-result" style="display:none;"></div>
       </div>
+
+      <div id="gen-result" style="display:none;"></div>
       <style>
-        @keyframes vlx-pulse { 0%, 100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.1); } }
+        @keyframes vlx-pulse { 0%, 100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.15); } }
       </style>
     `;
 
@@ -1950,6 +1952,8 @@ function vlxShareClientPWA(){ var url = location.origin + '/app/'; if(navigator.
     const finish = (data) => {
       if (resolved) return;
       resolved = true;
+      const overlay = document.getElementById('gen-loader-overlay');
+      if (overlay) overlay.remove();
       const loader = document.getElementById('gen-loader');
       if (loader) loader.style.display = 'none';
       if (data && data.__fallback) {
@@ -2060,7 +2064,7 @@ function vlxShareClientPWA(){ var url = location.origin + '/app/'; if(navigator.
           key: slug,
           name: nombre,
           plural: 'los negocios de ' + (originalQuery || nombre),
-          icon: '✨',
+          icon: '🏪',
           systemName: nombre,
           color: '#EA580C',
           accent: '#FFEDD5',
@@ -2087,7 +2091,7 @@ function vlxShareClientPWA(){ var url = location.origin + '/app/'; if(navigator.
     wrap.innerHTML = `
       <div style="margin-top:8px;">
         <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:18px;">
-          <div class="ai-icon" style="background:#EEF2FF;flex-shrink:0;">✨</div>
+          <div class="ai-icon" style="background:#EEF2FF;flex-shrink:0;">🏪</div>
           <div style="flex:1;">
             <div class="ai-answer" style="margin-bottom:4px;">
               <span class="system-name-pill">${escape(nombre)}</span>
@@ -2113,7 +2117,6 @@ function vlxShareClientPWA(){ var url = location.origin + '/app/'; if(navigator.
 
         <div class="ai-cta" style="margin-top:28px;display:flex;gap:10px;flex-wrap:wrap;">
           <a href="${landingUrl}" class="btn-big">Ver ${escape(nombre)} en detalle →</a>
-          <button class="btn-secondary" onclick="requestDemo('${escape(slug)}')">📞 Solicitar demo</button>
         </div>
       </div>
     `;
@@ -2128,7 +2131,7 @@ function vlxShareClientPWA(){ var url = location.origin + '/app/'; if(navigator.
     wrap.innerHTML = `
       <div style="margin-top:8px;">
         <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:18px;">
-          <div class="ai-icon" style="background:#EEF2FF;flex-shrink:0;">✨</div>
+          <div class="ai-icon" style="background:#EEF2FF;flex-shrink:0;">🏪</div>
           <div style="flex:1;">
             <div class="ai-answer" style="margin-bottom:4px;">
               <span class="system-name-pill">${safe}</span>
@@ -2138,7 +2141,6 @@ function vlxShareClientPWA(){ var url = location.origin + '/app/'; if(navigator.
         </div>
         <div class="ai-cta" style="margin-top:24px;display:flex;gap:10px;flex-wrap:wrap;">
           <a href="/landing-${encodeURIComponent(slug)}.html" class="btn-big">Ver el sistema →</a>
-          <button class="btn-secondary" onclick="requestDemo('${slug}')">📞 Solicitar demo</button>
         </div>
       </div>
     `;
@@ -2234,7 +2236,7 @@ function vlxShareClientPWA(){ var url = location.origin + '/app/'; if(navigator.
         setTimeout(function(){
           const banner = document.createElement('div');
           banner.style.cssText = 'background:#FEF3C7;border:1px solid #FDE68A;color:#92400E;padding:10px 14px;border-radius:8px;font-size:13px;margin:10px auto;max-width:600px;text-align:center;';
-          banner.innerHTML = '✨ Edita el nombre para crear un sistema <strong>específicamente</strong> para tu giro de negocio (no el genérico).';
+          banner.innerHTML = 'Edita el nombre para crear un sistema <strong>específicamente</strong> para tu giro de negocio (no el genérico).';
           const hero = document.querySelector('.hero, section.hero, .search-wrap, [role="search"]');
           if (hero && hero.parentNode) hero.parentNode.insertBefore(banner, hero.nextSibling);
         }, 400);
