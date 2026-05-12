@@ -186,39 +186,114 @@ function createWindow () {
       backgroundThrottling: false
     },
     title: 'Volvix POS',
-    backgroundColor: '#0a0a0a',
-    // 2026-05-11: esquinas redondeadas estilo macOS / Windows 11
-    // - Win 11: roundedCorners + titleBarOverlay (botones nativos + esquinas)
-    // - macOS: hiddenInset (titlebar embebido, esquinas nativas)
-    // - Win 10: titleBarStyle hidden + custom CSS overlay para esquinas
-    roundedCorners: true,
+    // 2026-05-11: frameless + transparent + CSS rounded para esquinas REALES
+    // estilo macOS / Vista en Windows 10/11. Custom titlebar con drag region.
+    frame: false,
+    transparent: true,
+    backgroundColor: '#00000000',
     titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'hidden',
-    titleBarOverlay: process.platform === 'win32' ? {
-      color: '#0a0a0a',
-      symbolColor: '#ffffff',
-      height: 36
-    } : false,
     trafficLightPosition: { x: 14, y: 14 },
     hasShadow: true,
-    thickFrame: false
+    thickFrame: false,
+    roundedCorners: true             // refuerzo Win 11
   };
 
   mainWindow = new BrowserWindow(winOpts);
 
-  // Inyectar CSS al body cargado para look más fino + drag region en topbar
+  // Inyectar CSS + custom titlebar al body cargado
   mainWindow.webContents.on('did-finish-load', () => {
+    const isDarwin = process.platform === 'darwin';
     mainWindow.webContents.insertCSS(`
-      /* Drag region: el usuario puede mover la ventana arrastrando la topbar */
+      /* Esquinas redondeadas reales: clip al body completo */
+      html { background: transparent; }
+      body {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 0 0 1px rgba(255,255,255,0.06);
+      }
+      /* Drag region — toda la topbar / menubar es arrastrable */
       .topbar, header, .menubar, .pos-topbar { -webkit-app-region: drag; }
-      /* Botones/inputs/links NO son drag (para que clics funcionen) */
+      /* Botones/inputs/links NO arrastrables (para que clics funcionen) */
       .topbar button, .topbar a, .topbar input, .topbar select, .topbar [role="button"],
       header button, header a, header input, header select,
       .menubar button, .menubar a,
       .pos-topbar button, .pos-topbar a, .pos-topbar input { -webkit-app-region: no-drag; }
-      /* Padding extra arriba para no chocar con titlebar overlay (36px Windows) */
-      body { padding-top: env(titlebar-area-height, 0); }
+      /* Custom titlebar buttons (solo Win/Linux — Mac usa traffic lights nativos) */
+      ${isDarwin ? '' : `
+      /* Forzar !important para vencer feature-flags wiring que oculta divs nuevos */
+      #vlx-titlebar-btns {
+        position: fixed !important; top: 0 !important; right: 0 !important;
+        height: 32px !important; z-index: 2147483647 !important;
+        display: flex !important; visibility: visible !important; opacity: 1 !important;
+        -webkit-app-region: no-drag !important; pointer-events: auto !important;
+        background: rgba(0,0,0,0.55) !important; backdrop-filter: blur(8px);
+        border-bottom-left-radius: 10px !important;
+      }
+      #vlx-titlebar-btns button {
+        width: 46px !important; height: 32px !important; border: 0 !important;
+        background: transparent !important; cursor: pointer !important;
+        color: rgba(255,255,255,0.9) !important;
+        display: flex !important; align-items: center !important; justify-content: center !important;
+        padding: 0 !important; margin: 0 !important;
+      }
+      #vlx-titlebar-btns button:hover { background: rgba(255,255,255,0.15) !important; }
+      #vlx-titlebar-btns button.close:hover { background: #e81123 !important; }
+      #vlx-titlebar-btns svg { width: 11px !important; height: 11px !important; }
+      /* Drag region superior (donde no hay topbar) */
+      body::before {
+        content: ''; position: fixed; top: 0; left: 0; right: 138px; height: 32px;
+        -webkit-app-region: drag; z-index: 99998; pointer-events: none;
+      }
+      `}
     `).catch(() => {});
+
+    // Inyectar HTML de botones titlebar (solo Win/Linux)
+    if (!isDarwin) {
+      mainWindow.webContents.executeJavaScript(`
+        (function(){
+          function makeBar(){
+            var existing = document.getElementById('vlx-titlebar-btns');
+            if (existing) existing.remove();
+            var d = document.createElement('div');
+            d.id = 'vlx-titlebar-btns';
+            d.setAttribute('data-vlx-system','titlebar');
+            d.innerHTML = \`
+              <button title="Minimizar" onclick="window.electronAPI&&window.electronAPI.minimize()">
+                <svg viewBox="0 0 10 10"><path d="M0 5 L10 5" stroke="currentColor" stroke-width="1"/></svg>
+              </button>
+              <button title="Maximizar" onclick="window.electronAPI&&window.electronAPI.toggleMax()">
+                <svg viewBox="0 0 10 10"><rect x="0.5" y="0.5" width="9" height="9" fill="none" stroke="currentColor" stroke-width="1"/></svg>
+              </button>
+              <button class="close" title="Cerrar" onclick="window.electronAPI&&window.electronAPI.close()">
+                <svg viewBox="0 0 10 10"><path d="M0 0 L10 10 M10 0 L0 10" stroke="currentColor" stroke-width="1.2"/></svg>
+              </button>
+            \`;
+            document.body.appendChild(d);
+          }
+          makeBar();
+          // Re-force visibility cada 500ms por 30s (vencer feature-flag wiring)
+          var ticks = 0;
+          var iv = setInterval(function(){
+            var d = document.getElementById('vlx-titlebar-btns');
+            if (!d) { makeBar(); return; }
+            d.style.setProperty('display','flex','important');
+            d.style.setProperty('visibility','visible','important');
+            d.classList.remove('vlx-feature-hidden','tv-hidden','hidden');
+            if (++ticks > 60) clearInterval(iv);
+          }, 500);
+        })();
+      `).catch(() => {});
+    }
   });
+
+  // IPC handlers para los botones titlebar custom (Win/Linux)
+  const { ipcMain } = require('electron');
+  ipcMain.handle('vlx-window-minimize', () => mainWindow && mainWindow.minimize());
+  ipcMain.handle('vlx-window-toggle-max', () => {
+    if (!mainWindow) return;
+    mainWindow.isMaximized() ? mainWindow.unmaximize() : mainWindow.maximize();
+  });
+  ipcMain.handle('vlx-window-close', () => mainWindow && mainWindow.close());
 
   // Pantalla de loading INMEDIATA — para que el user vea progreso
   const loadingHTML = `
