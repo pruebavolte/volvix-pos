@@ -213,16 +213,18 @@
       });
 
       if (resp.status === 409) {
-        // Conflicto — caso especial: si es BARCODE_TAKEN para POST /api/products,
-        // significa que el producto YA EXISTE. Reintentar como PATCH /api/products/:id
-        // con el id retornado por el backend. Esto convierte el flujo "crear-si-no-existe"
-        // en "upsert" desde el cliente.
+        // Conflicto — caso especial: si es BARCODE_TAKEN o PRODUCT_DUPLICATE_SKU
+        // para POST /api/products, el producto YA EXISTE. Reintentar como
+        // PATCH /api/products/:id con el id retornado. Esto convierte
+        // "crear-si-no-existe" en UPSERT real desde el cliente.
         const serverData = await resp.json().catch(() => ({}));
-        const isBarcodeTaken = serverData && (
+        const isDuplicateProduct = serverData && (
           serverData.error_code === 'BARCODE_TAKEN' ||
-          (serverData.existing && (serverData.existing.id || serverData.existing.name))
+          serverData.error_code === 'PRODUCT_DUPLICATE_SKU' ||
+          serverData.error === 'PRODUCT_DUPLICATE_SKU' ||
+          (serverData.existing && serverData.existing.id)
         );
-        if (isBarcodeTaken && item.method === 'POST' && /^\/api\/products$/.test(item.url)) {
+        if (isDuplicateProduct && item.method === 'POST' && /^\/api\/products$/.test(item.url)) {
           // Necesitamos el ID del producto existente. El backend lo devuelve en `existing.id`
           // si está disponible. Si no, hacemos GET por code para obtenerlo.
           let existingId = serverData.existing && serverData.existing.id;
