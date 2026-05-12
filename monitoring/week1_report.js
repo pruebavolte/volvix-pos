@@ -17,14 +17,15 @@ function req(path) {
 }
 const since7d = new Date(Date.now() - 7 * 86400000).toISOString();
 (async () => {
-  const fails = await req('/client_errors?message=like.telemetry.queue_fail*&ts=gte.' + since7d + '&select=meta&limit=10000');
-  const sales = await req('/client_errors?message=eq.telemetry.sale_latency&ts=gte.' + since7d + '&select=meta&limit=10000');
-  const stats = await req('/client_errors?message=eq.telemetry.queue_stats&ts=gte.' + since7d + '&select=meta&limit=10000');
-  const smokes = await req('/client_errors?message=eq.telemetry.smoke_test&ts=gte.' + since7d + '&select=meta&limit=200');
-  const durs = sales.map(r => r.meta && r.meta.duration_ms).filter(n => typeof n === 'number').sort((a, b) => a - b);
+  // Lee de observability_events (tabla existente). type LIKE 'telemetry.%'
+  const fails = await req('/observability_events?type=eq.telemetry.queue_fail&received_at=gte.' + since7d + '&select=payload&limit=10000');
+  const sales = await req('/observability_events?type=eq.telemetry.sale_latency&received_at=gte.' + since7d + '&select=payload&limit=10000');
+  const stats = await req('/observability_events?type=eq.telemetry.queue_stats&received_at=gte.' + since7d + '&select=payload&limit=10000');
+  const smokes = await req('/observability_events?type=eq.telemetry.smoke_test&received_at=gte.' + since7d + '&select=payload&limit=200');
+  const durs = sales.map(r => r.payload && r.payload.duration_ms).filter(n => typeof n === 'number').sort((a, b) => a - b);
   const p95 = durs.length ? durs[Math.floor(durs.length * 0.95)] : null;
-  const smokeFails = smokes.filter(s => s.meta && s.meta.all_pass === false).length;
-  const maxRetries = Math.max(0, ...stats.map(r => (r.meta && r.meta.with_retries) || 0));
+  const smokeFails = smokes.filter(s => s.payload && s.payload.all_pass === false).length;
+  const maxRetries = Math.max(0, ...stats.map(r => (r.payload && r.payload.with_retries) || 0));
   let verdict = 'STABLE';
   if (smokeFails >= 2 || (p95 && p95 > 3000) || fails.length > 500) verdict = 'REGRESSION';
   else if ((p95 && p95 > 1500) || maxRetries > 20) verdict = 'DEGRADING';
