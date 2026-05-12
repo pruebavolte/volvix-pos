@@ -61,7 +61,15 @@ const ANTHROPIC_API_KEY = (process.env.ANTHROPIC_API_KEY || '').trim().replace(/
 const IS_PROD = process.env.NODE_ENV === 'production';
 
 // FIX R13 (#8): CORS whitelist
-const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'https://salvadorexoficial.com,https://www.salvadorexoficial.com,https://salvadorexoficial.com')
+// 2026-05-12 BUG #5 FIX: agregar origins de Capacitor para que el APK Android
+// pueda hacer fetch a /api/*. Capacitor con androidScheme=https sirve la app
+// en https://localhost. iOS y desktop tambien tienen schemes propios.
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS ||
+  'https://salvadorexoficial.com,https://www.salvadorexoficial.com,' +
+  'https://volvix-pos.vercel.app,' +
+  'https://localhost,http://localhost,' +              // Capacitor Android
+  'capacitor://localhost,ionic://localhost,' +         // Capacitor iOS schemes
+  'file://')                                            // Electron file:// scheme
   .split(',').map(s => s.trim()).filter(Boolean);
 
 // =============================================================

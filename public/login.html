@@ -3,6 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- 2026-05-12 BUG #5 FIX: APK Capacitor sirve login.html desde https://localhost/.
+       Sin este bridge, fetch('/api/login') resuelve a https://localhost/api/login
+       (que no existe en el bundle, sirve index.html SPA fallback) en lugar de Vercel.
+       MUST be loaded BEFORE any other script que use fetch. -->
+  <script src="/volvix-capacitor-bridge.js"></script>
   <title>Iniciar sesión · Volvix</title>
   <meta name="theme-color" content="#0A0A0A">
   <meta name="description" content="Sistema POS SaaS multi-vertical Volvix. Login seguro para comerciantes.">
