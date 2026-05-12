@@ -15851,7 +15851,12 @@ module.exports = async (req, res) => {
   // FIX R13 (#8): CORS dinámico (no '*')
   applyCorsHeaders(req, res);
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization,apikey');
+  // 2026-05-12 BUG-F7 FIX: agregar headers custom que el cliente Capacitor
+  // necesita enviar. Sin estos en CORS Allow-Headers, el browser hace preflight
+  // OPTIONS, ve la lista, NO incluye Idempotency-Key/X-Cart-Token, y bloquea
+  // la petición con "Failed to fetch" antes de que llegue al backend.
+  // Esto rompía el fix de BUG-F2 (sync de ventas offline).
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization,apikey,Idempotency-Key,X-Cart-Token,If-Match');
 
   // Domain canonicalization: redirect www and legacy vercel domain to canonical salvadorexoficial.com
   // Only active when CANONICAL_REDIRECT_ENABLED=1 (after DNS is configured for salvadorexoficial.com)
