@@ -3924,6 +3924,10 @@
     promociones: '🎁 Promociones', departamentos: '🏢 Departamentos',
     sugeridas: '🧠 Compras sugeridas', actualizador: '💱 Actualizador masivo',
     usuarios: '👤 Gestión usuarios', config: '⚙️ Configuración',
+    // 2026-05-12: módulos verticales — UI real en preview-{key}.html que carga
+    // window.RentaEquipoAPI y window.ReservationsAPI con datos demo. La vista
+    // previa del panel hace iframe a esos previews (ver renderPreview).
+    rentas: '🔑 Renta de Equipo', reservaciones: '📅 Reservaciones',
   };
   const FEAT_LABELS = {
     'pos.cobrar': '💵 F12 — Cobrar', 'pos.descuento': '% Descuento',
@@ -5018,6 +5022,8 @@
     // 2026-05-09 fix: módulos customer-facing y de cocina
     cliente:    { label: 'Cliente Final',  items: ['aplicacion','marketplace'] },
     cocina:     { label: 'Cocina & KDS',   items: ['kds'] },
+    // 2026-05-12: módulos verticales (giros específicos)
+    verticales: { label: 'Verticales',     items: ['rentas','reservaciones'] },
     // 2026-05-09 fix: bucket "Otros" se rellena dinámicamente en runtime con
     // cualquier módulo de BD que no esté listado arriba (single source of truth).
     otros:      { label: 'Otros',          items: [] },
@@ -5466,7 +5472,37 @@
       tarjetas: 'Tarjetas virtuales', promociones: 'Promociones', departamentos: 'Departamentos',
       sugeridas: 'Compras sugeridas', actualizador: 'Actualizador', kardex: 'Kardex',
       usuarios: 'Usuarios', config: 'Configuración',
+      rentas: 'Renta de Equipo', reservaciones: 'Reservaciones',
     };
+
+    // 2026-05-12: para módulos verticales con UI completa propia (rentas,
+    // reservaciones), montar la vista real con un iframe sandbox que carga
+    // /preview-{k}.html. Así el dueño ve EXACTAMENTE lo mismo que ven sus
+    // cajeros, no una lista de botones. Se mantiene la lógica de OFF arriba.
+    const PREVIEW_FRAME_MODULES = { rentas: 'preview-rentas.html', reservaciones: 'preview-reservaciones.html' };
+    if (PREVIEW_FRAME_MODULES[k]) {
+      const src = PREVIEW_FRAME_MODULES[k];
+      const moduleName = labelMap[k] || k;
+      const iframeDesktop = ''
+        + '<div>'
+        +   '<h2 class="permv14-mock-h2">' + escapeText(moduleName) + ' <em>· vista cliente</em></h2>'
+        +   '<p class="permv14-mock-sub">Así verá este módulo el dueño y los cajeros del tenant.</p>'
+        +   '<iframe src="' + src + '" loading="lazy" '
+        +     'sandbox="allow-scripts allow-same-origin" '
+        +     'style="width:100%;height:680px;border:1px solid var(--pv-border, #E0DEDB);border-radius:8px;background:#fff;display:block;" '
+        +     'title="' + escapeText(moduleName) + ' preview"></iframe>'
+        + '</div>';
+      const iframeMobile = ''
+        + '<div>'
+        +   '<div style="font-family:var(--pv-font-display);font-size:16px;font-weight:500;margin-bottom:8px;">' + escapeText(moduleName) + '</div>'
+        +   '<iframe src="' + src + '" loading="lazy" '
+        +     'sandbox="allow-scripts allow-same-origin" '
+        +     'style="width:100%;height:560px;border:1px solid var(--pv-border, #E0DEDB);border-radius:8px;background:#fff;display:block;"></iframe>'
+        + '</div>';
+      if (desktopEl) desktopEl.innerHTML = iframeDesktop;
+      if (mobileEl)  mobileEl.innerHTML  = iframeMobile;
+      return;
+    }
     const moduleName = labelMap[k] || k;
     const childButtons = Object.keys(FEAT_PARENT_MOD).filter(bk => FEAT_PARENT_MOD[bk] === k);
     const FEAT_LABELS_LOCAL = FEAT_LABELS_GLOBAL;

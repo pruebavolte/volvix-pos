@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Renta de Equipo · Vista cliente</title>
+<style>
+  :root {
+    --bg: #F5F5F4; --surface: #FFFFFF; --border: #E0DEDB; --border-strong: #C9C7C3;
+    --text: #1C1917; --text-2: #57534E; --text-3: #A8A29E;
+    --accent: #EA580C; --accent-soft: #FFEDD5; --success: #16A34A; --warn: #F59E0B; --danger: #DC2626;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif; background:var(--bg); color:var(--text); }
+  .pad { padding: 16px 18px; }
+  .hd { display:flex; align-items:center; gap:10px; padding:14px 18px; border-bottom:1px solid var(--border); background:#fff; }
+  .hd h1 { margin:0; font-size:18px; font-weight:700; }
+  .hd .sub { color:var(--text-2); font-size:12px; }
+  .toolbar { display:flex; gap:8px; padding:10px 18px; background:#fff; border-bottom:1px solid var(--border); flex-wrap:wrap; align-items:center; }
+  .btn { font:13px/1 inherit; padding:8px 14px; border:1px solid var(--border-strong); background:#fff; border-radius:7px; cursor:pointer; color:var(--text); }
+  .btn:hover { background:var(--bg); }
+  .btn.accent { background:var(--accent); color:#fff; border-color:var(--accent); font-weight:600; }
+  .btn.accent:hover { background:#c2410c; }
+  .btn.ghost { border-color:var(--border); color:var(--text-2); }
+  .tabs { display:flex; gap:0; padding:0 18px; background:#fff; border-bottom:1px solid var(--border); }
+  .tab { padding:10px 16px; font-size:13px; color:var(--text-2); cursor:pointer; border-bottom:2px solid transparent; font-weight:500; }
+  .tab.active { color:var(--accent); border-bottom-color:var(--accent); font-weight:600; }
+  .grid { display:grid; gap:12px; padding:16px 18px; }
+  .cards { grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); }
+  .card { background:#fff; border:1px solid var(--border); border-radius:10px; padding:14px; }
+  .card .row { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px; }
+  .card .nm { font-weight:600; font-size:14px; }
+  .pill { display:inline-block; font-size:11px; font-weight:600; padding:2px 8px; border-radius:999px; }
+  .pill.disp { background:#D1FAE5; color:#065F46; }
+  .pill.rent { background:#DBEAFE; color:#1E3A8A; }
+  .pill.dano { background:#FEE2E2; color:#991B1B; }
+  .pill.mant { background:#FEF3C7; color:#92400E; }
+  .pill.cancel { background:#F3F4F6; color:#374151; }
+  .card .meta { font-size:12px; color:var(--text-2); margin-top:4px; }
+  .card .actions { display:flex; gap:6px; margin-top:10px; }
+  table { width:100%; border-collapse:collapse; background:#fff; font-size:13px; }
+  th, td { padding:8px 12px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background:#FAFAF9; font-weight:600; font-size:12px; color:var(--text-2); text-transform:uppercase; letter-spacing:.4px; }
+  .kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; padding:14px 18px; }
+  .kpi { background:#fff; border:1px solid var(--border); border-radius:10px; padding:12px 14px; }
+  .kpi .lbl { font-size:11px; color:var(--text-2); text-transform:uppercase; letter-spacing:.4px; }
+  .kpi .val { font-size:22px; font-weight:700; margin-top:4px; }
+  .kpi .delta { font-size:11px; color:var(--text-3); margin-top:2px; }
+  .hide { display:none; }
+  @media (max-width:680px){ .kpi-row{ grid-template-columns:repeat(2,1fr); } }
+</style>
+</head>
+<body>
+
+<div class="hd">
+  <div style="font-size:22px;">🔑</div>
+  <div style="flex:1;">
+    <h1>Renta de Equipo</h1>
+    <div class="sub">Vista del cliente · Inventario rentable, contratos, depósitos y devoluciones</div>
+  </div>
+</div>
+
+<div class="toolbar">
+  <button class="btn accent" data-act="nuevo-contrato">+ Nueva renta</button>
+  <button class="btn" data-act="agregar-equipo">+ Agregar equipo</button>
+  <button class="btn" data-act="devolucion">↩️ Registrar devolución</button>
+  <button class="btn ghost" data-act="historial">📜 Historial</button>
+  <span style="margin-left:auto;font-size:11px;color:var(--text-3);">Tasa mora: 5%/día · Depósito default: 30%</span>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-tab="equipos">Equipos</div>
+  <div class="tab" data-tab="contratos">Contratos activos</div>
+  <div class="tab" data-tab="movimientos">Movimientos</div>
+</div>
+
+<div class="kpi-row" id="kpis"></div>
+
+<div id="view-equipos"><div class="grid cards" id="grid-equipos"></div></div>
+<div id="view-contratos" class="hide pad">
+  <table>
+    <thead><tr><th>#</th><th>Equipo</th><th>Cliente</th><th>Inicio</th><th>Vence</th><th>Estado</th><th>Depósito</th></tr></thead>
+    <tbody id="tbody-contratos"></tbody>
+  </table>
+</div>
+<div id="view-movimientos" class="hide pad">
+  <table>
+    <thead><tr><th>Fecha</th><th>Tipo</th><th>Referencia</th><th>Detalle</th></tr></thead>
+    <tbody id="tbody-movs"></tbody>
+  </table>
+</div>
+
+<!-- API real del módulo -->
+<script src="volvix-vertical-rentaequipo.js"></script>
+
+<script>
+(function () {
+  'use strict';
+
+  function api(){ return window.RentaEquipoAPI; }
+  function state(){ try { return api()._state(); } catch(_) { return {equipos:[],clientes:[],contratos:[],movimientos:[]}; } }
+
+  function seedDemoIfEmpty() {
+    if (!api()) {
+      document.body.insertAdjacentHTML('beforeend',
+        '<div style="padding:16px;color:#991B1B;background:#FEE2E2;margin:18px;border-radius:8px;">' +
+        '⚠️ API RentaEquipoAPI no disponible (verifica que volvix-vertical-rentaequipo.js esté cargando).</div>');
+      return;
+    }
+    if (state().equipos.length > 0) return; // ya tiene datos reales
+
+    const EQS = [
+      { codigo:'EQ-001', nombre:'Sonido JBL EON 615 (par)', categoria:'audio',     valor:18000, tarifas:{ hora:0, dia:800,  semana:4500, mes:14000 }, ubicacion:'Bodega A' },
+      { codigo:'EQ-002', nombre:'Carpa 3x6 blanca',          categoria:'carpas',    valor:25000, tarifas:{ hora:0, dia:1200, semana:6500, mes:18000 }, ubicacion:'Bodega B' },
+      { codigo:'EQ-003', nombre:'Mesa redonda + 8 sillas',    categoria:'mobiliario',valor:4500,  tarifas:{ hora:0, dia:350,  semana:1500, mes:4000  }, ubicacion:'Bodega A' },
+      { codigo:'EQ-004', nombre:'Inflable castillo medieval', categoria:'inflables', valor:35000, tarifas:{ hora:0, dia:1800, semana:0,    mes:0     }, ubicacion:'Taller'   },
+      { codigo:'EQ-005', nombre:'Generador eléctrico 5KW',    categoria:'energia',   valor:22000, tarifas:{ hora:120, dia:1500, semana:7500, mes:22000 }, ubicacion:'Bodega A' },
+      { codigo:'EQ-006', nombre:'Proyector 4K + pantalla 3m', categoria:'av',        valor:30000, tarifas:{ hora:0, dia:1600, semana:7000, mes:0     }, ubicacion:'Bodega B' },
+    ];
+    EQS.forEach(e => { try { api().registrarEquipo(e); } catch(_){} });
+
+    let c1, c2;
+    try {
+      c1 = api().registrarCliente({ nombre:'Eventos Lupita SA de CV', identificacion:'EVL890212XX1', telefono:'8112345678', email:'contacto@eventoslupita.mx' });
+      c2 = api().registrarCliente({ nombre:'Bodas Montserrat',         identificacion:'BMO930514YY2', telefono:'8118765432', email:'reservas@bodasmontserrat.com' });
+    } catch(_){}
+
+    // Marcar 1 equipo en mantenimiento (estado real, no solo etiqueta)
+    try { api().cambiarEstadoEquipo('EQ-004', 'mantenimiento', 'demo seed'); } catch(_){}
+
+    // Crear 2 contratos demo (esto pone EQ-001 y EQ-005 en rentado)
+    if (c1 && c2) {
+      try { api().crearContrato({ clienteId:c1.id, equipoId:'EQ-001', cantidad:3, unidad:'dia',  observaciones:'Evento corporativo viernes' }); } catch(_){}
+      try { api().crearContrato({ clienteId:c2.id, equipoId:'EQ-005', cantidad:2, unidad:'dia',  observaciones:'Boda en jardín sin electricidad' }); } catch(_){}
+    }
+  }
+
+  function $(s){ return document.querySelector(s); }
+  function $$(s){ return Array.from(document.querySelectorAll(s)); }
+  function fmt(n){ return '$' + Number(n||0).toLocaleString('es-MX', { minimumFractionDigits:0, maximumFractionDigits:2 }); }
+  function esc(s){ return String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
+  function pillClass(s){ return ({disponible:'disp', rentado:'rent', mantenimiento:'mant', danado:'dano', baja:'cancel'}[s]||'disp'); }
+  function pillLabel(s){ return ({disponible:'Disponible', rentado:'Rentado', mantenimiento:'Mantenim.', danado:'Dañado', baja:'Baja'}[s]||s); }
+
+  function renderKPIs(){
+    const s = state();
+    const disponibles = s.equipos.filter(e=>e.estado==='disponible').length;
+    const rentados    = s.equipos.filter(e=>e.estado==='rentado').length;
+    const activos     = s.contratos.filter(c=>c.estado==='activo');
+    const ingresoMes  = activos.reduce((a,c)=>a+(c.total||0),0);
+    const depositos   = activos.reduce((a,c)=>a+(c.deposito||0),0);
+    $('#kpis').innerHTML = ''
+      + '<div class="kpi"><div class="lbl">Equipos disponibles</div><div class="val">'+disponibles+'</div><div class="delta">de '+s.equipos.length+' totales</div></div>'
+      + '<div class="kpi"><div class="lbl">Rentados ahora</div><div class="val">'+rentados+'</div><div class="delta">'+activos.length+' contratos activos</div></div>'
+      + '<div class="kpi"><div class="lbl">Facturado en curso</div><div class="val">'+fmt(ingresoMes)+'</div><div class="delta">total contratos abiertos</div></div>'
+      + '<div class="kpi"><div class="lbl">Depósitos en custodia</div><div class="val">'+fmt(depositos)+'</div><div class="delta">se devuelven al cerrar</div></div>';
+  }
+
+  function renderEquipos(){
+    const eqs = state().equipos;
+    if (!eqs.length){
+      $('#grid-equipos').innerHTML = '<div style="padding:20px;color:#A8A29E;">Sin equipos. Agrega uno arriba.</div>';
+      return;
+    }
+    $('#grid-equipos').innerHTML = eqs.map(e => ''
+      + '<div class="card">'
+      +   '<div class="row"><span class="nm">'+esc(e.nombre)+'</span><span class="pill '+pillClass(e.estado)+'">'+pillLabel(e.estado)+'</span></div>'
+      +   '<div class="meta">📦 '+esc(e.codigo)+' · '+esc(e.categoria||'sin categoría')+' · '+esc(e.ubicacion||'')+'</div>'
+      +   '<div class="meta">Valor: '+fmt(e.valor)+' · Día: '+fmt((e.tarifas||{}).dia||0)+' · Semana: '+fmt((e.tarifas||{}).semana||0)+'</div>'
+      +   '<div class="actions">'
+      +     '<button class="btn" data-eq="'+esc(e.codigo)+'" data-act="rentar">Rentar</button>'
+      +     '<button class="btn ghost" data-eq="'+esc(e.codigo)+'" data-act="mantenim">Mantenim.</button>'
+      +   '</div>'
+      + '</div>'
+    ).join('');
+  }
+
+  function renderContratos(){
+    const s = state();
+    const byCli = {}; s.clientes.forEach(c => byCli[c.id] = c);
+    const byEq  = {}; s.equipos .forEach(e => byEq [e.id] = e);
+    if (!s.contratos.length){
+      $('#tbody-contratos').innerHTML = '<tr><td colspan="7" style="color:#A8A29E;text-align:center;padding:20px;">Sin contratos activos.</td></tr>';
+      return;
+    }
+    $('#tbody-contratos').innerHTML = s.contratos.map(c => {
+      const cli = byCli[c.clienteId] || {};
+      const eq  = byEq[c.equipoId]  || {};
+      const fi  = c.fechaInicio ? c.fechaInicio.slice(0,10) : '—';
+      const ff  = c.fechaFinProgramada ? c.fechaFinProgramada.slice(0,10) : '—';
+      const cls = c.estado === 'activo' ? 'rent' : (c.estado === 'devuelto' ? 'disp' : 'cancel');
+      return ''
+        + '<tr>'
+        +   '<td><strong>'+esc(c.id)+'</strong></td>'
+        +   '<td>'+esc(eq.codigo||'—')+' · '+esc(eq.nombre||'')+'</td>'
+        +   '<td>'+esc(cli.nombre||'(cliente eliminado)')+'</td>'
+        +   '<td>'+esc(fi)+'</td>'
+        +   '<td>'+esc(ff)+'</td>'
+        +   '<td><span class="pill '+cls+'">'+esc(c.estado||'activo')+'</span></td>'
+        +   '<td>'+fmt(c.deposito||0)+'</td>'
+        + '</tr>';
+    }).join('');
+  }
+
+  function renderMovs(){
+    const movs = state().movimientos;
+    if (!movs.length){
+      $('#tbody-movs').innerHTML = '<tr><td colspan="4" style="color:#A8A29E;text-align:center;padding:20px;">Sin movimientos registrados.</td></tr>';
+      return;
+    }
+    $('#tbody-movs').innerHTML = movs.slice(-40).reverse().map(m => {
+      const det = m.detalle ? Object.entries(m.detalle).map(([k,v])=>esc(k)+':'+esc(v)).join(' · ') : '';
+      return ''
+        + '<tr><td>'+esc((m.ts||'').slice(0,16).replace('T',' '))+'</td>'
+        +   '<td>'+esc(m.tipo||'—')+'</td>'
+        +   '<td>'+esc(m.refId||'—')+'</td>'
+        +   '<td>'+det+'</td>'
+        + '</tr>';
+    }).join('');
+  }
+
+  function setTab(t){
+    $$('.tab').forEach(el => el.classList.toggle('active', el.dataset.tab===t));
+    $('#view-equipos').classList.toggle('hide', t!=='equipos');
+    $('#view-contratos').classList.toggle('hide', t!=='contratos');
+    $('#view-movimientos').classList.toggle('hide', t!=='movimientos');
+  }
+
+  function toast(msg){
+    const t = document.createElement('div');
+    t.style.cssText='position:fixed;top:14px;right:14px;background:#1c1917;color:#fff;padding:10px 16px;border-radius:6px;font-size:13px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.18);';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(()=>t.remove(), 2400);
+  }
+
+  document.addEventListener('click', function(ev){
+    const t = ev.target.closest('[data-tab]');
+    if (t){ setTab(t.dataset.tab); return; }
+    const a = ev.target.closest('[data-act]');
+    if (a){
+      const act = a.dataset.act;
+      const eq  = a.dataset.eq;
+      const map = {
+        'nuevo-contrato': '➕ Nueva renta · abre modal: elegir cliente + equipo + plazo',
+        'agregar-equipo': '➕ Alta de equipo · abre modal con código/nombre/valor/tarifas',
+        'devolucion':     '↩️ Devolución · selecciona contrato y registra daños/mora',
+        'historial':      '📜 Historial · navega a movimientos por equipo/cliente',
+        'rentar':         '🆕 Crear renta para '+eq+' · cliente + plazo + depósito',
+        'mantenim':       '🔧 Marcar '+eq+' en mantenimiento (motivo)',
+      };
+      toast(map[act] || act);
+    }
+  });
+
+  seedDemoIfEmpty();
+  renderKPIs();
+  renderEquipos();
+  renderContratos();
+  renderMovs();
+})();
+</script>
+
+</body>
+</html>
