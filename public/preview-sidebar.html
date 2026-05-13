@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preview · Columna de módulos del panel</title>
+<style>
+  :root {
+    --pv-bg: #FAFAF9; --pv-surface: #FFFFFF; --pv-border: #E0DEDB; --pv-border-strong: #C9C7C3;
+    --pv-text: #1C1917; --pv-text-2: #57534E; --pv-text-3: #A8A29E;
+    --pv-accent: #EA580C; --pv-accent-soft: #FFEDD5;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif; background:var(--pv-bg); color:var(--pv-text); }
+  .layout { display:grid; grid-template-columns: 280px 1fr; min-height:100vh; }
+  .col2 { background:#fff; border-right:1px solid var(--pv-border); overflow-y:auto; }
+  .search { padding:12px 14px; border-bottom:1px solid var(--pv-border); }
+  .search input { width:100%; padding:8px 10px; border:1px solid var(--pv-border); border-radius:6px; font:13px inherit; }
+  .group-label { padding:14px 14px 6px; font-size:11px; font-weight:700; color:var(--pv-text-2); letter-spacing:1.5px; text-transform:uppercase; }
+  .item { padding:9px 14px; display:flex; align-items:center; gap:10px; cursor:pointer; font-size:14px; color:var(--pv-text); border-left:3px solid transparent; transition: background .12s; }
+  .item:hover { background:var(--pv-bg); }
+  .item.selected { background:#FFF7ED; border-left-color:var(--pv-accent); font-weight:600; color:#9a3412; }
+  .item .icon { font-size:18px; flex-shrink:0; width:22px; text-align:center; }
+  .item .name { flex:1; }
+  .item .dot { width:8px; height:8px; border-radius:50%; background:#16A34A; flex-shrink:0; }
+  .item.is-hidden .dot { background:#A8A29E; }
+  .item.new { box-shadow: inset 0 0 0 1px #fde68a; background:#fffbeb; }
+  .item.new::after { content:'NUEVO'; font-size:9px; font-weight:700; color:#92400E; background:#fef3c7; padding:1px 5px; border-radius:3px; margin-left:6px; letter-spacing:.5px; }
+
+  .col-explain { padding:30px 36px; }
+  .col-explain h1 { font-size:22px; margin:0 0 8px; }
+  .col-explain .sub { color:var(--pv-text-2); font-size:14px; line-height:1.6; max-width:680px; }
+  .col-explain .arrow { font-size:60px; color:var(--pv-accent); line-height:1; margin:30px 0 18px; }
+  .col-explain .badge { display:inline-block; background:var(--pv-accent-soft); color:#9a3412; font-weight:700; padding:4px 10px; border-radius:999px; font-size:12px; letter-spacing:.5px; }
+  .meta { margin-top:24px; padding:14px 18px; background:#fff; border:1px solid var(--pv-border); border-radius:10px; max-width:680px; font-size:13px; line-height:1.6; color:var(--pv-text-2); }
+  .meta strong { color:var(--pv-text); }
+  .meta code { background:var(--pv-bg); padding:1px 5px; border-radius:3px; font-size:12px; }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- COLUMNA 2 — réplica exacta del panel real -->
+  <aside class="col2">
+    <div class="search"><input type="search" placeholder="Buscar módulo..."></div>
+    <div id="list"></div>
+  </aside>
+
+  <!-- Explicación -->
+  <main class="col-explain">
+    <span class="badge">DEMOSTRACIÓN VISUAL</span>
+    <h1 style="margin-top:14px;">Así se ve hoy la columna de módulos del panel</h1>
+    <p class="sub">
+      Esta página NO es el panel real (que requiere login con cuenta <code>@systeminternational.app</code>).
+      Es una réplica exacta de cómo el código deployed en <code>paneldecontrol.html</code> renderiza la
+      columna 2 ("lista de módulos"). Está usando los <strong>mismos</strong> <code>MOD_CATEGORIES</code>
+      y <code>MOD_LABELS</code> que tu panel real cargará al iniciar sesión.
+    </p>
+
+    <div class="arrow">←</div>
+
+    <div class="meta">
+      <strong>Lo que cambió en el commit <code>686a131</code>:</strong><br>
+      <br>
+      1. La categoría que antes decía <strong>"OPERACIÓN"</strong> ahora dice <strong>"MÓDULOS"</strong> (arriba de todo).<br>
+      2. Se agregó una categoría nueva <strong>"VERTICALES"</strong> con dos módulos marcados como <em>NUEVO</em>:<br>
+      &nbsp;&nbsp;&nbsp;• <strong>🔑 Renta de Equipo</strong><br>
+      &nbsp;&nbsp;&nbsp;• <strong>📅 Reservaciones</strong><br>
+      <br>
+      Al hacer click en cualquiera de ellos en el panel real, la columna 4 (vista cliente) monta un <code>&lt;iframe&gt;</code> con la UI real del módulo
+      (los previews que ya viste en las otras dos pestañas).
+    </div>
+  </main>
+
+</div>
+
+<script>
+(function(){
+  // Réplica EXACTA de MOD_CATEGORIES y MOD_LABELS del commit 686a131.
+  // Si esto se desactualiza, el archivo verdadero (paneldecontrol.html) gana.
+  const MOD_LABELS = {
+    pos: '🛒 Punto de Venta', dashboard: '📊 Dashboard', apertura: '🔓 Apertura caja',
+    corte: '💼 Corte caja', inventario: '📦 Inventario', kardex: '📒 Kardex',
+    clientes: '👥 Clientes', credito: '💳 Crédito', proveedores: '🚚 Proveedores',
+    cotizaciones: '📝 Cotizaciones', devoluciones: '↩️ Devoluciones',
+    ventas: '🧾 Ventas', reportes: '📈 Reportes', facturacion: '📄 Facturación CFDI',
+    recargas: '📱 Recargas', servicios: '💡 Pago servicios', tarjetas: '🎬 Tarjetas virtuales',
+    promociones: '🎁 Promociones', departamentos: '🏢 Departamentos',
+    sugeridas: '🧠 Compras sugeridas', actualizador: '💱 Actualizador masivo',
+    usuarios: '👤 Gestión usuarios', config: '⚙️ Configuración',
+    rentas: '🔑 Renta de Equipo', reservaciones: '📅 Reservaciones',
+  };
+  const MOD_CATEGORIES = {
+    operacion:  { label: 'Módulos',       items: ['pos','apertura','corte','ventas','devoluciones','clientes','credito'] },
+    inventario: { label: 'Inventario',    items: ['inventario','kardex','departamentos','proveedores','sugeridas','actualizador'] },
+    reportes:   { label: 'Reportes & IA', items: ['dashboard','reportes'] },
+    fiscal:     { label: 'Fiscal',        items: ['facturacion','cotizaciones'] },
+    servicios:  { label: 'Servicios',     items: ['recargas','servicios','tarjetas','promociones'] },
+    admin:      { label: 'Admin',         items: ['usuarios','config'] },
+    verticales: { label: 'Verticales',    items: ['rentas','reservaciones'] },
+  };
+  const NEW_KEYS = new Set(['rentas','reservaciones']);
+
+  let html = '';
+  for (const [catKey, cat] of Object.entries(MOD_CATEGORIES)) {
+    html += '<div class="group-label">' + cat.label + '</div>';
+    cat.items.forEach(k => {
+      const label = MOD_LABELS[k];
+      if (!label) return;
+      const m = label.match(/^(\S+)\s+(.+)$/) || [null, '📦', label];
+      const icon = m[1];
+      const name = m[2];
+      const newCls = NEW_KEYS.has(k) ? ' new' : '';
+      const selCls = (k === 'pos') ? ' selected' : '';
+      html +=
+        '<div class="item' + selCls + newCls + '" data-mod="' + k + '">'
+      +   '<span class="icon">' + icon + '</span>'
+      +   '<span class="name">' + name + '</span>'
+      +   '<span class="dot"></span>'
+      + '</div>';
+    });
+  }
+  document.getElementById('list').innerHTML = html;
+})();
+</script>
+
+</body>
+</html>
