@@ -7902,7 +7902,16 @@
 
   // Bootstrap: corre cuando entramos a #permisos
   function bootstrap() {
-    // Esperar a que window.PERM exista
+    // 2026-05-12 FIX (lentitud): render INMEDIATO de la lista de módulos sin
+    // esperar a window.PERM. La lista solo depende de MOD_CATEGORIES + MOD_LABELS_GLOBAL
+    // (constantes locales del IIFE, ya disponibles). Antes esperabamos hasta 3s
+    // a PERM antes de pintar nada — si PERM tardaba más o el IIFE legacy seguía
+    // evaluándose, la lista quedaba vacía y el usuario veía pantalla en blanco.
+    // Render instantáneo → PERM aparece después → upgrade a versión con estado.
+    try { renderModulesList(); } catch(e) { console.warn('[PERMv14] pre-render:', e); }
+
+    // Después, polling normal para enganchar PERM. Timeout extendido a 10s
+    // para tenants con muchos giros/módulos donde el IIFE legacy es lento.
     let tries = 0;
     const iv = setInterval(() => {
       tries++;
@@ -7910,16 +7919,14 @@
         clearInterval(iv);
         if (patchPerm()) {
           initV14();
-          // 2026-05-12 FIX: renderizar la lista de módulos SIEMPRE en bootstrap,
-          // no solo cuando hay tenant cargado. Antes quedaba vacía si el
-          // backend tardaba o devolvía 401 — los módulos son client-side
-          // (MOD_CATEGORIES + MOD_LABELS) así que pueden mostrarse sin tenant.
-          // El estado on/off por módulo aparece cuando el tenant llega.
+          // Re-render con estado del tenant (los modules on/off, features, etc).
+          // El render inmediato ya pintó los módulos sin estado; este re-paint
+          // los muestra con sus pills verdes/grises de activo/oculto.
           renderModulesList(); renderConfigPane(); renderPreview();
         }
-      } else if (tries > 30) {
+      } else if (tries > 100) { // 100 × 100ms = 10s
         clearInterval(iv);
-        console.warn('[PERMv14] window.PERM no apareció tras 3s');
+        console.warn('[PERMv14] window.PERM no apareció tras 10s — la lista de módulos sigue funcional sin estado de tenant');
       }
     }, 100);
   }
@@ -7936,9 +7943,16 @@
   window.addEventListener('hashchange', () => {
     if ((location.hash || '').replace('#','') === 'permisos') setTimeout(bootstrap, 200);
   });
-  // Si la página arranca ya en #permisos
-  if ((location.hash || '').replace('#','') === 'permisos') {
-    setTimeout(bootstrap, 400);
+  // Si la página arranca ya en #permisos (o sin hash, porque paneldecontrol es
+  // panel-solo, el hash es para retro-compatibilidad)
+  // 2026-05-12 FIX (lentitud): bootstrap más temprano (50ms en vez de 400ms) y
+  // también disparar incluso si no hay hash, porque paneldecontrol.html es la
+  // página dedicada de permisos.
+  const _h = (location.hash || '').replace('#','');
+  if (_h === 'permisos' || _h === '' || !_h) {
+    setTimeout(bootstrap, 50);
+    // Doble seguro: re-disparar a 1s si por alguna razón no corrió
+    setTimeout(() => { if (!initV14._done) bootstrap(); }, 1000);
   }
 })();
 </script>
