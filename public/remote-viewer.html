@@ -7,20 +7,35 @@
 <style>
   * { box-sizing: border-box; }
   body { margin:0; font:14px/1.5 -apple-system,Segoe UI,sans-serif; background:#0F172A; color:#fff; height:100vh; display:flex; flex-direction:column; }
-  .topbar { padding:10px 16px; background:#1E293B; display:flex; align-items:center; gap:12px; border-bottom:1px solid #334155; }
+  .topbar { padding:10px 16px; background:#1E293B; display:flex; align-items:center; gap:12px; border-bottom:1px solid #334155; flex-wrap:wrap; }
   .topbar h1 { margin:0; font-size:14px; font-weight:600; flex:1; }
   .topbar .stat { font-size:11px; color:#94A3B8; }
   .topbar .badge { padding:3px 8px; border-radius:999px; font-size:10px; font-weight:700; }
-  .topbar .badge.live { background:#16A34A; color:#fff; }
+  .topbar .badge.live { background:#16A34A; color:#fff; animation: pulse 2s infinite; }
   .topbar .badge.wait { background:#F59E0B; color:#fff; }
-  .topbar button { padding:6px 14px; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:12px; }
-  .topbar .btn-end { background:#DC2626; color:#fff; }
+  .topbar .badge.err  { background:#DC2626; color:#fff; }
+  @keyframes pulse { 0%,100%{ opacity:1 } 50%{ opacity:.6 } }
+  .topbar button { padding:6px 12px; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:11px; }
+  .btn-qs { background:#F97316; color:#fff; }
+  .btn-end { background:#DC2626; color:#fff; }
   .main { flex:1; position:relative; background:#000; display:flex; align-items:center; justify-content:center; }
   video { max-width:100%; max-height:100%; }
-  .placeholder { text-align:center; padding:40px; }
+  .placeholder { text-align:center; padding:40px; max-width:560px; }
   .placeholder .emoji { font-size:64px; margin-bottom:14px; }
-  .placeholder p { color:#94A3B8; max-width:520px; margin:8px auto; }
+  .placeholder p { color:#94A3B8; margin:8px auto; }
   .err { color:#FCA5A5; font-size:12px; margin-top:14px; }
+  .qs-modal { position:fixed; inset:0; background:rgba(15,23,42,.9); display:none; align-items:center; justify-content:center; z-index:10; padding:20px; }
+  .qs-card { background:#fff; color:#0F172A; padding:24px; border-radius:14px; max-width:520px; width:100%; font:14px/1.5 -apple-system,sans-serif; }
+  .qs-card h2 { margin:0 0 10px; font-size:18px; }
+  .qs-card p { color:#475569; margin:6px 0; }
+  .qs-card .opt { display:flex; gap:10px; align-items:center; padding:12px; border:2px solid #E5E7EB; border-radius:10px; margin:8px 0; cursor:pointer; }
+  .qs-card .opt:hover { border-color:#0073E6; background:#EFF6FF; }
+  .qs-card .opt img { width:36px; height:36px; }
+  .qs-card .opt b { display:block; }
+  .qs-card .opt span { font-size:12px; color:#64748B; }
+  .qs-card .actions { display:flex; gap:8px; justify-content:flex-end; margin-top:14px; }
+  .qs-card .actions button { padding:8px 14px; border:1px solid #C9C7C3; background:#fff; border-radius:7px; cursor:pointer; font-weight:600; }
+  .qs-card .actions button.cancel { color:#475569; }
 </style>
 </head>
 <body>
@@ -29,18 +44,38 @@
   <h1>🖥 Visor de control remoto</h1>
   <span class="stat">Sesión: <code id="sid" style="font-family:monospace;">—</code></span>
   <span class="badge wait" id="state">Conectando…</span>
+  <button class="btn-qs" onclick="askQuickSupport()" title="Solicitar control total con TeamViewer/AnyDesk">🔧 Solicitar control total</button>
   <button class="btn-end" onclick="endSession()">🛑 Terminar</button>
 </div>
 
 <div class="main">
   <div class="placeholder" id="placeholder">
     <div class="emoji">⏳</div>
-    <h2>Esperando stream del usuario…</h2>
-    <p>El usuario debe abrir su POS y compartir su pantalla cuando aparezca la solicitud.</p>
-    <p style="font-size:11px;color:#64748B;margin-top:24px;">Nota: el control remoto via WebRTC requiere que el usuario use un navegador moderno (Chrome/Edge/Safari) y permita acceso a su pantalla cuando el sistema se lo solicite.</p>
+    <h2 id="ph-title">Esperando stream del usuario…</h2>
+    <p id="ph-text">El usuario debe seleccionar qué pantalla compartir cuando aparezca el popup nativo de su navegador.</p>
+    <p style="font-size:11px;color:#64748B;margin-top:18px;">Limitación de WebRTC: en este modo solo puedes VER la pantalla. Si necesitas CONTROL TOTAL (mouse, teclado, archivos), usa el botón "Solicitar control total" arriba para activar TeamViewer/AnyDesk QuickSupport.</p>
     <p class="err" id="err"></p>
   </div>
-  <video id="vid" autoplay playsinline style="display:none;"></video>
+  <video id="vid" autoplay playsinline style="display:none;background:#000;"></video>
+</div>
+
+<div class="qs-modal" id="qs-modal">
+  <div class="qs-card">
+    <h2>🔧 Solicitar control total al usuario</h2>
+    <p>Para tomar control completo del equipo (mouse, teclado, archivos), el usuario debe descargar una herramienta gratuita. Solo se ejecuta — <b>no se instala</b>. Al cerrarla, pierdes el control.</p>
+    <div class="opt" data-provider="teamviewer">
+      <span style="font-size:32px;">🔵</span>
+      <div><b>TeamViewer QuickSupport</b><span>El estándar para soporte técnico · 3 MB · sin instalación</span></div>
+    </div>
+    <div class="opt" data-provider="anydesk">
+      <span style="font-size:32px;">🔴</span>
+      <div><b>AnyDesk</b><span>Alternativa más liviana · 5 MB · sin instalación</span></div>
+    </div>
+    <p style="font-size:12px;color:#94A3B8;">Al presionar, el usuario verá un banner en su POS con el botón de descarga y las instrucciones paso a paso para compartir su ID/contraseña contigo.</p>
+    <div class="actions">
+      <button class="cancel" onclick="closeQs()">Cancelar</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -49,46 +84,120 @@
   const qs = new URLSearchParams(location.search);
   const sid = qs.get('session');
   document.getElementById('sid').textContent = sid || '—';
+  const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
+  let pc = null;
+  let pollIv = null;
+  let signalIv = null;
+
   if (!sid) {
     document.getElementById('err').textContent = 'Falta ?session= en la URL.';
     return;
   }
 
-  // Polling: revisa cada 3s el estado de la sesión. Si está 'active' o
-  // 'verified', muestra placeholder hasta que el otro lado conecte WebRTC.
-  // Si está 'ended' o 'rejected', cierra la ventana.
-  let pollIv = null;
-  const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
-  async function poll() {
+  // Polling del estado de la sesión
+  async function pollStatus() {
     try {
       const r = await fetch('/api/admin/remote-support/status?session_id=' + encodeURIComponent(sid),
         { headers: { 'Authorization': 'Bearer ' + tok } });
       const j = await r.json();
       if (!j.ok) return;
       const state = document.getElementById('state');
-      if (j.status === 'verified' || j.status === 'active') {
-        state.className = 'badge live';
-        state.textContent = '● En sesión';
-      } else if (j.status === 'ended' || j.status === 'rejected' || j.status === 'expired') {
-        clearInterval(pollIv);
+      if (j.status === 'ended' || j.status === 'rejected' || j.status === 'expired') {
         state.className = 'badge wait';
-        state.textContent = 'Sesión terminada';
+        state.textContent = 'Terminada';
+        cleanup();
         document.getElementById('placeholder').innerHTML =
           '<div class="emoji">✓</div><h2>Sesión finalizada</h2><p>Puedes cerrar esta ventana.</p>';
       }
     } catch (_) {}
   }
-  poll();
-  pollIv = setInterval(poll, 3000);
+  pollStatus();
+  pollIv = setInterval(pollStatus, 3000);
 
-  // 2026-05-13 — WebRTC: viewer espera offer del cliente (que comparte
-  // pantalla via getDisplayMedia). Por ahora es proof-of-concept; el
-  // intercambio SDP se hace via long-polling en /api/remote-support/signal
-  // (a implementar). Mientras tanto, mostramos placeholder + estado.
-  // Cuando el cliente envíe su stream, llamamos a:
-  //   const pc = new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});
-  //   pc.ontrack = (ev) => { document.getElementById('vid').srcObject = ev.streams[0]; };
-  //   // ... offer/answer via signal endpoint ...
+  // Setup WebRTC: el admin es PASSIVE — espera offer del cliente
+  function ensurePC() {
+    if (pc) return pc;
+    pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+    pc.ontrack = (ev) => {
+      const v = document.getElementById('vid');
+      v.srcObject = ev.streams[0];
+      v.style.display = 'block';
+      document.getElementById('placeholder').style.display = 'none';
+      const s = document.getElementById('state');
+      s.className = 'badge live'; s.textContent = '● En sesión';
+    };
+    pc.onicecandidate = (ev) => {
+      if (ev.candidate) signalSend({ type:'ice', candidate: ev.candidate });
+    };
+    pc.onconnectionstatechange = () => {
+      if (pc && (pc.connectionState === 'failed' || pc.connectionState === 'disconnected' || pc.connectionState === 'closed')) {
+        const s = document.getElementById('state');
+        s.className = 'badge err'; s.textContent = 'Desconectado';
+      }
+    };
+    return pc;
+  }
+
+  function signalSend(message) {
+    return fetch('/api/remote-support/signal', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+tok },
+      body: JSON.stringify({ session_id: sid, to: 'client', message: message })
+    }).catch(()=>{});
+  }
+
+  async function signalPoll() {
+    try {
+      const r = await fetch('/api/remote-support/signal-pull?session_id='+encodeURIComponent(sid)+'&role=admin',
+        { headers:{ 'Authorization':'Bearer '+tok }});
+      const j = await r.json();
+      if (!j.ok || !j.messages) return;
+      for (const m of j.messages) {
+        const msg = m.message || {};
+        if (msg.type === 'offer') {
+          ensurePC();
+          await pc.setRemoteDescription({ type:'offer', sdp: msg.sdp });
+          const answer = await pc.createAnswer();
+          await pc.setLocalDescription(answer);
+          signalSend({ type:'answer', sdp: answer.sdp });
+        } else if (msg.type === 'ice' && pc && msg.candidate) {
+          try { await pc.addIceCandidate(msg.candidate); } catch(_){}
+        }
+      }
+    } catch(_){}
+  }
+  signalIv = setInterval(signalPoll, 1500);
+
+  // QuickSupport
+  window.askQuickSupport = function () {
+    document.getElementById('qs-modal').style.display = 'flex';
+  };
+  window.closeQs = function () {
+    document.getElementById('qs-modal').style.display = 'none';
+  };
+  document.querySelectorAll('.qs-card .opt').forEach(el => {
+    el.addEventListener('click', async () => {
+      const provider = el.getAttribute('data-provider');
+      try {
+        const r = await fetch('/api/admin/remote-support/escalate-quicksupport', {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+tok },
+          body: JSON.stringify({ session_id: sid, provider: provider })
+        });
+        const j = await r.json();
+        if (!j.ok) { alert('Error: '+(j.error||'')); return; }
+        // Mandar al cliente la info via signal para que muestre el área de descarga
+        signalSend({ type:'quicksupport',
+          download_url: j.download_url,
+          download_url_mac: j.download_url_mac,
+          instructions_es: j.instructions_es,
+          provider: provider
+        });
+        closeQs();
+        alert('✓ El usuario verá un banner con el link de descarga y las instrucciones.\n\nPídele su ID/contraseña cuando termine de descargar.');
+      } catch(e){ alert('Error: '+e.message); }
+    });
+  });
 
   window.endSession = function () {
     if (!sid) return;
@@ -96,8 +205,15 @@
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok },
       body: JSON.stringify({ session_id: sid })
-    }).finally(() => { window.close(); });
+    }).finally(() => { cleanup(); window.close(); });
   };
+
+  function cleanup() {
+    try { if (pollIv) clearInterval(pollIv); } catch(_){}
+    try { if (signalIv) clearInterval(signalIv); } catch(_){}
+    try { if (pc) { pc.close(); pc = null; } } catch(_){}
+  }
+  window.addEventListener('beforeunload', cleanup);
 })();
 </script>
 

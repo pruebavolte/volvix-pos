@@ -12154,6 +12154,89 @@ handlers['GET /api/config/public'] = async (req, res) => {
     } catch (err) { sendError(res, err); }
   }, ['superadmin','platform_owner']);
 
+  // 2026-05-13 — SIGNALING WEBRTC para sesion remote-support
+  // Cada sesion almacena 2 colas de mensajes (offer/answer/ice-candidates).
+  // El lado admin POSTea mensajes para el cliente, el cliente POSTea para el admin.
+  // Long-polling: GET espera hasta 20s si no hay mensaje, después responde [].
+  const _rsSignals = (global.__VOLVIX_RSS_SIG = global.__VOLVIX_RSS_SIG || new Map());
+  function _sigQueue(sid, role){ const k=sid+':'+role; if(!_rsSignals.has(k)) _rsSignals.set(k,[]); return _rsSignals.get(k); }
+
+  handlers['POST /api/remote-support/signal'] = requireAuth(async (req, res) => {
+    try {
+      const body = await readBody(req, { maxBytes: 32*1024 });
+      if (checkBodyError(req, res)) return;
+      const sid = String(body.session_id || '');
+      const to = String(body.to || '');  // 'admin' | 'client'
+      const msg = body.message;
+      const s = _rsGet(sid);
+      if (!s) return sendJSON(res, { ok:false, error:'sesion no existe' }, 404);
+      if (s.status !== 'verified' && s.status !== 'active' && s.status !== 'accepted') {
+        return sendJSON(res, { ok:false, error:'sesion no esta activa' }, 409);
+      }
+      const me = String((req.user && req.user.email) || '').toLowerCase();
+      // Validar identidad: admin solo puede mandar a client, client solo a admin
+      const isAdmin = (s.requester_email === me);
+      const isClient = (s.target_email === me);
+      if (!isAdmin && !isClient) return sendJSON(res, { ok:false, error:'no participas' }, 403);
+      if (to !== 'admin' && to !== 'client') return sendJSON(res, { ok:false, error:'to invalido' }, 400);
+      // Push a la cola del destinatario
+      _sigQueue(sid, to).push({ from: isAdmin?'admin':'client', message: msg, ts: Date.now() });
+      // Marcar sesion como active si llegó el primer mensaje SDP
+      if (s.status === 'verified') _rsSet(sid, { status:'active' });
+      return sendJSON(res, { ok:true });
+    } catch (err) { sendError(res, err); }
+  });
+
+  handlers['GET /api/remote-support/signal-pull'] = requireAuth(async (req, res) => {
+    try {
+      const u = new URL(req.url, 'http://x');
+      const sid = u.searchParams.get('session_id') || '';
+      const role = u.searchParams.get('role') || '';  // 'admin' | 'client'
+      const s = _rsGet(sid);
+      if (!s) return sendJSON(res, { ok:false, error:'sesion no existe' }, 404);
+      const me = String((req.user && req.user.email) || '').toLowerCase();
+      const expected = (role === 'admin') ? s.requester_email : s.target_email;
+      if (expected !== me) return sendJSON(res, { ok:false, error:'no eres '+role+' de esta sesion' }, 403);
+      // Drain cola (long-polling corto: 1 intento, sin espera real para no bloquear lambda)
+      const q = _sigQueue(sid, role);
+      const msgs = q.splice(0);
+      return sendJSON(res, { ok:true, messages: msgs, session_status: s.status });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // 2026-05-13 — QuickSupport (TeamViewer/AnyDesk): admin solicita y el cliente
+  // ve un banner adicional con link directo. Útil cuando getDisplayMedia es
+  // insuficiente (necesita control de mouse/teclado/archivos).
+  handlers['POST /api/admin/remote-support/escalate-quicksupport'] = requireAuth(async (req, res) => {
+    const role = String((req.user && req.user.role) || '').toLowerCase();
+    if (role !== 'superadmin' && role !== 'platform_owner') return sendJSON(res, { ok:false, error:'forbidden' }, 403);
+    try {
+      const body = await readBody(req, { maxBytes: 2*1024 });
+      if (checkBodyError(req, res)) return;
+      const sid = String(body.session_id || '');
+      const provider = String(body.provider || 'teamviewer'); // 'teamviewer' | 'anydesk'
+      const s = _rsGet(sid);
+      if (!s) return sendJSON(res, { ok:false, error:'sesion no existe' }, 404);
+      const links = {
+        teamviewer: 'https://download.teamviewer.com/download/TeamViewerQS.exe',
+        teamviewer_mac: 'https://download.teamviewer.com/download/TeamViewerQS.dmg',
+        anydesk: 'https://download.anydesk.com/AnyDesk.exe',
+        anydesk_mac: 'https://download.anydesk.com/anydesk.dmg'
+      };
+      _rsSet(sid, { quicksupport_requested: true, quicksupport_provider: provider });
+      try { logAudit(req, 'remote_support.quicksupport_requested', 'pos_users', { session_id: sid, provider: provider, target: s.target_email }); } catch(_){}
+      return sendJSON(res, {
+        ok: true,
+        provider: provider,
+        download_url: links[provider] || links.teamviewer,
+        download_url_mac: links[provider + '_mac'] || links.teamviewer_mac,
+        instructions_es: provider === 'teamviewer'
+          ? '1. Descarga y abre TeamViewer QuickSupport (no requiere instalar)\n2. Te aparecerá un ID y contraseña\n3. Compártelos con el técnico por teléfono'
+          : '1. Descarga AnyDesk (no requiere instalar)\n2. Te aparecerá un código\n3. Compártelo con el técnico por teléfono'
+      });
+    } catch (err) { sendError(res, err); }
+  }, ['superadmin','platform_owner']);
+
   // Cierra la sesion (cualquier participante)
   handlers['POST /api/remote-support/end'] = requireAuth(async (req, res) => {
     try {
