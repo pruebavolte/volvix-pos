@@ -7611,7 +7611,17 @@
         if (!cells.length) { tr.style.display = ''; return; }
         // Mapeo columna→índice (ajustado con el offset del checkbox col=0):
         // 1=Usuario, 2=Tipo, 3=Giro, 4=Estado, 5=Último, 6=En sesión, 7=Plan, 8=Landing, 9=Acceso
-        function _txt(idx){ return ((cells[idx]||{}).innerText || (cells[idx]||{}).textContent || '').toLowerCase(); }
+        // 2026-05-13 FIX: leer también <input value> de celdas editables
+        // (algunas como Giro, Estado, Plan son cellInput, no texto plano).
+        function _txt(idx){
+          const c = cells[idx]; if (!c) return '';
+          let t = (c.innerText || c.textContent || '').toLowerCase();
+          c.querySelectorAll('input,select').forEach(el => {
+            if (el.type !== 'checkbox') t += ' ' + String(el.value || '').toLowerCase();
+          });
+          // Quitar tildes para que "cafe" matchee "cafetería"
+          return t.normalize('NFD').replace(/[̀-ͯ]/g,'');
+        }
         let ok = true;
         if (fs.usuario && _txt(1).indexOf(fs.usuario) === -1) ok = false;
         if (ok && fs.tipo) {
