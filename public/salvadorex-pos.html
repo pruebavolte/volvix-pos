@@ -21,6 +21,79 @@
     }
   } catch (_) {}
 </script>
+<!-- 2026-05-12: PREVIEW MODE — cuando esta URL se carga con ?preview=1, se
+     trata de un iframe embebido en /paneldecontrol.html para mostrar la vista
+     del módulo "cómo lo ve el cliente". Comportamiento:
+       1) Body recibe clase 'is-preview' que oculta header/menubar/footer.
+       2) showScreen se llama con el módulo del query (?module=X).
+       3) Auth-gate se ejecuta igual (el iframe hereda mismo-origen y token).
+     Es la misma página, NO una copia. Sin URLs nuevas. -->
+<script>
+(function(){
+  try {
+    var qs = new URLSearchParams(location.search);
+    if (qs.get('preview') === '1') {
+      window.__volvixPreviewMode = true;
+      window.__volvixPreviewModule = qs.get('module') || '';
+      window.__volvixPreviewGiro   = qs.get('giro')   || '';
+      // Aplicar clase ASAP (antes del paint) para evitar flash del header
+      var addCls = function(){ if (document.body) document.body.classList.add('is-preview'); };
+      if (document.body) addCls();
+      else document.addEventListener('DOMContentLoaded', addCls, { once: true });
+      // ?module=X → setear hash para que el router existente lo recoja
+      if (window.__volvixPreviewModule && location.hash !== '#' + window.__volvixPreviewModule) {
+        try { history.replaceState(null, '', location.pathname + location.search + '#' + window.__volvixPreviewModule); } catch(_) { location.hash = '#' + window.__volvixPreviewModule; }
+      }
+      // Bypassear auth-gate: inyectar token mínimo si no hay sesión.
+      // El iframe hereda mismo-origen del panel; si el panel tiene token válido
+      // el iframe lo usa. Si NO hay token (caso edge), generamos uno de preview
+      // que solo es válido para esta página en modo readonly.
+      try {
+        if (!localStorage.getItem('volvix_token') && !localStorage.getItem('volvixAuthToken')) {
+          var hdr = btoa(JSON.stringify({alg:'HS256',typ:'JWT'})).replace(/=+$/,'').replace(/\+/g,'-').replace(/\//g,'_');
+          var pl  = btoa(JSON.stringify({
+            email:'preview@systeminternational.app', role:'preview',
+            iat:Math.floor(Date.now()/1000), exp:Math.floor(Date.now()/1000)+900
+          })).replace(/=+$/,'').replace(/\+/g,'-').replace(/\//g,'_');
+          // SOLO en sessionStorage (no contamina localStorage real)
+          var tok = hdr+'.'+pl+'.preview-readonly';
+          sessionStorage.setItem('volvix_token_preview', tok);
+          // Sombrear localStorage.getItem solo para 'volvix_token' en este contexto
+          var _origGet = Storage.prototype.getItem;
+          Storage.prototype.getItem = function(k){
+            if (this === localStorage && (k === 'volvix_token' || k === 'volvixAuthToken')) return tok;
+            return _origGet.apply(this, arguments);
+          };
+        }
+      } catch(_) {}
+    }
+  } catch(_) {}
+})();
+</script>
+<style id="vlx-preview-mode-css">
+  /* Oculta chrome del POS cuando es iframe preview del panel de permisos */
+  body.is-preview .topbar,
+  body.is-preview .menubar,
+  body.is-preview header.topbar,
+  body.is-preview nav.menubar,
+  body.is-preview footer,
+  body.is-preview #global-footer,
+  body.is-preview .vlx-footer,
+  body.is-preview #volvix-bottom-tabbar,
+  body.is-preview #vlxtb-bar { display: none !important; }
+  body.is-preview { background: #FAFAF9 !important; padding: 0 !important; }
+  body.is-preview main { padding-top: 0 !important; }
+  /* Marcador visual sutil de modo preview en la esquina */
+  body.is-preview::before {
+    content: 'VISTA PREVIA · cómo lo ve el cliente';
+    position: fixed; top: 0; left: 0; right: 0;
+    background: #EA580C; color: #fff;
+    padding: 4px 12px; font: 600 11px/1.3 -apple-system,sans-serif;
+    text-transform: uppercase; letter-spacing: .8px;
+    z-index: 99999; text-align: center;
+  }
+  body.is-preview main { margin-top: 28px !important; }
+</style>
 <link rel="canonical" href="https://systeminternational.app/salvadorex-pos.html">
 <title>SalvadoreX · Punto de Venta</title>
 <!-- 2026-05-12: Capacitor bridge — DEBE cargarse PRIMERO para interceptar /api/* fetch

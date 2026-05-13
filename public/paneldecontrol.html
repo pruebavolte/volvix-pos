@@ -5511,17 +5511,43 @@
               + '</div>';
         }).join('');
 
+    // 2026-05-12: la vista previa ahora muestra la pantalla REAL del POS
+    // embebida en iframe. salvadorex-pos.html?preview=1&module=X&giro=G oculta
+    // header/menubar y carga solo la sección del módulo seleccionado. Esto
+    // reemplaza el mock anterior (solo lista de botones) por la UI completa
+    // que verán los cajeros. La lista de botones individuales queda como
+    // fallback compacto debajo para tener referencia rápida del estado on/off.
+    const tenantId   = (window.PERM && window.PERM.getCurrentTenant && window.PERM.getCurrentTenant()) || '';
+    const giroParam  = (window.PERM && window.PERM._flagCache && tenantId && window.PERM._flagCache[tenantId] && window.PERM._flagCache[tenantId].giro) || '';
+    const previewUrl = '/salvadorex-pos.html?preview=1'
+      + '&module=' + encodeURIComponent(k)
+      + (giroParam ? '&giro=' + encodeURIComponent(giroParam) : '')
+      + '#' + encodeURIComponent(k);
+
+    const iframeDesktop = '<iframe '
+      + 'src="' + previewUrl + '" '
+      + 'loading="lazy" '
+      + 'sandbox="allow-scripts allow-same-origin" '
+      + 'style="width:100%;height:560px;border:1px solid var(--pv-border,#E0DEDB);border-radius:8px;background:#fff;display:block;" '
+      + 'title="' + escapeText(moduleName) + ' preview"></iframe>';
+    const iframeMobile = '<iframe '
+      + 'src="' + previewUrl + '" '
+      + 'loading="lazy" '
+      + 'sandbox="allow-scripts allow-same-origin" '
+      + 'style="width:100%;height:520px;border:1px solid var(--pv-border,#E0DEDB);border-radius:8px;background:#fff;display:block;"></iframe>';
+
     const desktopHtml = ''
       + '<div>'
       +   '<h2 class="permv14-mock-h2">' + escapeText(moduleName) + ' <em>· vista cliente</em></h2>'
       +   '<p class="permv14-mock-sub">Así verá este módulo el dueño y los cajeros del tenant.</p>'
-      +   buttonRows
+      +   iframeDesktop
+      +   (childButtons.length ? '<details style="margin-top:10px;"><summary style="cursor:pointer;font-size:12px;color:var(--pv-text-2,#57534E);">Ver botones individuales (' + childButtons.length + ')</summary><div style="margin-top:8px;">' + buttonRows + '</div></details>' : '')
       + '</div>';
 
     const mobileHtml = ''
       + '<div>'
       +   '<div style="font-family:var(--pv-font-display);font-size:16px;font-weight:500;margin-bottom:8px;">' + escapeText(moduleName) + '</div>'
-      +   buttonRows
+      +   iframeMobile
       + '</div>';
 
     if (desktopEl) desktopEl.innerHTML = desktopHtml;
