@@ -3361,8 +3361,12 @@
     margin-top: 10px; flex-wrap: wrap;
   }
   #screen-permisos.permv14 .permv14-users-body { padding: 0; }
+  /* 2026-05-13: table-layout fixed + overflow hidden por celda para que las
+     columnas cuadren con el header sin importar el contenido (URLs largas,
+     emails, etc). */
   #screen-permisos.permv14 .permv14-users-table {
     width: 100%; border-collapse: collapse;
+    table-layout: fixed;
     background: var(--pv-bg-paper);
     font-family: var(--pv-font-body); font-size: 12px;
   }
@@ -3375,11 +3379,17 @@
     color: var(--pv-text-muted);
     border-bottom: 1px solid var(--pv-border);
     font-weight: 600;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    box-sizing: border-box;
   }
   #screen-permisos.permv14 .permv14-users-table tbody td {
     padding: 9px 12px;
     border-bottom: 1px solid var(--pv-border);
     vertical-align: middle;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    box-sizing: border-box;
   }
   #screen-permisos.permv14 .permv14-users-row-tenant td {
     background: linear-gradient(0deg, var(--pv-bg-paper), var(--pv-surface));
@@ -3391,11 +3401,13 @@
     background: var(--pv-bg);
     color: var(--pv-text-muted);
   }
-  #screen-permisos.permv14 .permv14-users-row-child td:first-child {
-    padding-left: 38px; position: relative;
+  /* 2026-05-13 FIX: aplicar indent al segundo td (la columna de email/usuario)
+     NO al primero (que ahora es el checkbox). Antes esto rompia la alineacion. */
+  #screen-permisos.permv14 .permv14-users-row-child td:nth-child(2) {
+    padding-left: 32px; position: relative;
   }
-  #screen-permisos.permv14 .permv14-users-row-child td:first-child::before {
-    content: "└─"; position: absolute; left: 18px;
+  #screen-permisos.permv14 .permv14-users-row-child td:nth-child(2)::before {
+    content: "└─"; position: absolute; left: 10px;
     color: var(--pv-text-muted); font-family: var(--pv-font-mono);
   }
   #screen-permisos.permv14 .permv14-users-row-empty td {
@@ -7321,12 +7333,13 @@
       { label: '',            w: 160  }
     ];
     // Barra de acciones masivas (oculta hasta que haya selección)
-    const bulkBar = '<div id="pv14-users-bulk" style="display:none;padding:8px 14px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;margin-bottom:8px;font-size:13px;color:#9a3412;align-items:center;gap:10px;">'
+    const bulkBar = '<div id="pv14-users-bulk" style="display:none;padding:8px 14px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;margin-bottom:8px;font-size:13px;color:#9a3412;align-items:center;gap:10px;flex-wrap:wrap;">'
       + '<span><b id="pv14-users-bulk-count">0</b> seleccionados</span>'
-      + '<button data-pv14-bulk="suspend"  class="permv14-btn-soft" style="padding:4px 10px;font-size:12px;">🚫 Suspender</button>'
+      + '<button data-pv14-bulk="suspend"    class="permv14-btn-soft" style="padding:4px 10px;font-size:12px;">🚫 Suspender</button>'
       + '<button data-pv14-bulk="reactivate" class="permv14-btn-soft" style="padding:4px 10px;font-size:12px;">✓ Reactivar</button>'
-      + '<button data-pv14-bulk="email"     class="permv14-btn-soft" style="padding:4px 10px;font-size:12px;">📧 Enviar email</button>'
-      + '<button data-pv14-bulk="clear"     class="permv14-btn-soft" style="padding:4px 10px;font-size:12px;margin-left:auto;">Limpiar</button>'
+      + '<button data-pv14-bulk="email"      class="permv14-btn-soft" style="padding:4px 10px;font-size:12px;">📧 Email</button>'
+      + '<button data-pv14-bulk="delete"     class="permv14-btn-soft" style="padding:4px 10px;font-size:12px;background:#FEE2E2;border-color:#FCA5A5;color:#991B1B;">🗑 Eliminar</button>'
+      + '<button data-pv14-bulk="clear"      class="permv14-btn-soft" style="padding:4px 10px;font-size:12px;margin-left:auto;">Limpiar</button>'
       + '</div>';
 
     let html = summary + bulkBar
@@ -7409,10 +7422,11 @@
       const nameCell = (userId, name) => cellInput({ rowType: 'user', rowId: userId, field: 'full_name', value: name });
       const inlineTenantActions = (tid, email) => '<td class="u-actions">'
         + '<button data-pv14-edit-tenant="' + escapeAttr(tid) + '" title="Editar permisos del tenant">✏️</button>'
-        + '<button data-pv14-diff-tenant="' + escapeAttr(tid) + '" title="Ver diff del giro vs estado actual">👁 diff</button>'
+        + '<button data-pv14-diff-tenant="' + escapeAttr(tid) + '" title="Ver diff del giro vs estado actual">👁</button>'
         + '<button data-pv14-apply-tenant="' + escapeAttr(tid) + '" title="Aplicar el preset del giro seleccionado">⚡</button>'
-        + (email ? '<button data-pv14-view-as="' + escapeAttr(email) + '" data-pv14-tid="' + escapeAttr(tid) + '" title="Abrir el POS como lo ve este usuario (modo lectura)">👁 Ver como</button>' : '')
-        + (email ? '<button data-pv14-add-override="' + escapeAttr(email) + '" data-pv14-tid="' + escapeAttr(tid) + '" title="Agregar override individual">+ Override</button>' : '')
+        + (email ? '<button data-pv14-view-as="' + escapeAttr(email) + '" data-pv14-tid="' + escapeAttr(tid) + '" title="Ver como este usuario">👁‍🗨</button>' : '')
+        + (email ? '<button data-pv14-add-override="' + escapeAttr(email) + '" data-pv14-tid="' + escapeAttr(tid) + '" title="Agregar override individual">+</button>' : '')
+        + '<button data-pv14-delete="' + escapeAttr(tid) + '" data-pv14-deltype="tenant" data-pv14-dellabel="' + escapeAttr((t.name||tid)) + '" title="Eliminar tenant + sus usuarios" style="color:#DC2626;">🗑</button>'
         + '</td>';
 
       // Owners (filas padre)
@@ -7460,8 +7474,9 @@
           + (isFirstOfTenant
               ? inlineTenantActions(t.tenant_id, o.email || '')
               : '<td class="u-actions">'
-                  + '<button data-pv14-view-as="' + escapeAttr(o.email || '') + '" data-pv14-tid="' + escapeAttr(t.tenant_id) + '" title="Abrir el POS como lo ve este usuario (modo lectura)">👁 Ver como</button>'
-                  + '<button data-pv14-add-override="' + escapeAttr(o.email || '') + '" data-pv14-tid="' + escapeAttr(t.tenant_id) + '" title="Agregar override individual">+ Override</button>'
+                  + '<button data-pv14-view-as="' + escapeAttr(o.email || '') + '" data-pv14-tid="' + escapeAttr(t.tenant_id) + '" title="Ver como">👁‍🗨</button>'
+                  + '<button data-pv14-add-override="' + escapeAttr(o.email || '') + '" data-pv14-tid="' + escapeAttr(t.tenant_id) + '" title="Override">+</button>'
+                  + '<button data-pv14-delete="' + escapeAttr(realUid || o.email) + '" data-pv14-deltype="user" data-pv14-dellabel="' + escapeAttr(o.email || '') + '" title="Eliminar usuario" style="color:#DC2626;">🗑</button>'
                 + '</td>')
           + '</tr>';
       });
@@ -7490,8 +7505,9 @@
           + '<td style="overflow:hidden;text-overflow:ellipsis;"><a class="u-url" href="https://' + escapeAttr(landing) + '" target="_blank" rel="noopener">' + escapeText(landing) + '</a></td>'
           + '<td style="overflow:hidden;text-overflow:ellipsis;"><a class="u-url" href="https://' + escapeAttr(acceso) + '" target="_blank" rel="noopener">' + escapeText(acceso) + '</a></td>'
           + '<td class="u-actions">'
-          +   '<button data-pv14-view-as="' + escapeAttr(e.email || '') + '" data-pv14-tid="' + escapeAttr(t.tenant_id) + '" title="Abrir el POS como lo ve este empleado (modo lectura)">👁 Ver como</button>'
-          +   '<button data-pv14-add-override="' + escapeAttr(e.email || '') + '" data-pv14-tid="' + escapeAttr(t.tenant_id) + '" title="Agregar override individual">+ Override</button>'
+          +   '<button data-pv14-view-as="' + escapeAttr(e.email || '') + '" data-pv14-tid="' + escapeAttr(t.tenant_id) + '" title="Ver como">👁‍🗨</button>'
+          +   '<button data-pv14-add-override="' + escapeAttr(e.email || '') + '" data-pv14-tid="' + escapeAttr(t.tenant_id) + '" title="Override">+</button>'
+          +   '<button data-pv14-delete="' + escapeAttr(empUid || e.email) + '" data-pv14-deltype="user" data-pv14-dellabel="' + escapeAttr(e.email || '') + '" title="Eliminar empleado" style="color:#DC2626;">🗑</button>'
           + '</td>'
           + '</tr>';
       });
@@ -7551,8 +7567,16 @@
       refreshBulkBar();
     });
     $$('.pv14-users-cb').forEach(cb => cb.addEventListener('change', refreshBulkBar));
-    // Bulk actions handler
+    // Bulk actions handler + Delete individual con doble confirmación
     if (wrap.parentNode) wrap.parentNode.addEventListener('click', (ev) => {
+      // Delete individual (botón 🗑 en cada fila)
+      const del1 = ev.target.closest('[data-pv14-delete]');
+      if (del1) {
+        const id = del1.getAttribute('data-pv14-delete');
+        const type = del1.getAttribute('data-pv14-deltype') || 'user';
+        const label = del1.getAttribute('data-pv14-dellabel') || id;
+        return _pv14ConfirmDelete([{ id: id, type: type, label: label }]);
+      }
       const b = ev.target.closest('[data-pv14-bulk]'); if (!b) return;
       const action = b.getAttribute('data-pv14-bulk');
       const sel = $$('.pv14-users-cb').filter(cb => cb.checked).map(cb => ({ id: cb.getAttribute('data-pv14-cb'), type: cb.getAttribute('data-pv14-cbtype') }));
@@ -7568,12 +7592,16 @@
         location.href = 'mailto:?bcc=' + encodeURIComponent(emails.join(','));
         return;
       }
+      if (action === 'delete') {
+        // Bulk delete con doble confirmación
+        const labels = sel.map(s => ({ id: s.id, type: s.type, label: s.id }));
+        return _pv14ConfirmDelete(labels);
+      }
       if (action === 'suspend' || action === 'reactivate') {
         const msg = action === 'suspend'
           ? '¿Suspender ' + sel.length + ' usuario(s)? Quedarán bloqueados de iniciar sesión hasta reactivar.'
           : '¿Reactivar ' + sel.length + ' usuario(s)?';
         if (!confirm(msg)) return;
-        // Marcar como dirty para batch save (reusa pipeline existente de v14.usersDirty)
         sel.forEach(s => {
           if (s.type === 'tenant') {
             v14.usersDirty.set('tenant:' + s.id + ':status', { rowType: 'tenant', rowId: s.id, field: 'status', newValue: action === 'suspend' ? 'suspended' : 'active' });
@@ -7581,11 +7609,72 @@
             v14.usersDirty.set('user:' + s.id + ':is_active', { rowType: 'user', rowId: s.id, field: 'is_active', newValue: action === 'reactivate' });
           }
         });
-        // Disparar el save existente
         const saveBtn = $('#permv14-users-save');
         if (saveBtn) { saveBtn.disabled = false; saveBtn.click(); }
       }
     });
+
+    // 2026-05-13 — Doble confirmación de eliminación.
+    // Paso 1: confirm() nativo. Paso 2: palabra aleatoria que el usuario debe
+    // tipear exacto para confirmar (defensa contra clicks accidentales).
+    function _pv14ConfirmDelete(items){
+      const n = items.length;
+      const first = n === 1
+        ? '¿REALMENTE deseas eliminar a "' + (items[0].label || items[0].id) + '"?\n\nEsta acción NO se puede deshacer.'
+        : '¿REALMENTE deseas eliminar ' + n + ' usuarios/tenants?\n\nEsta acción NO se puede deshacer.';
+      if (!confirm(first)) return;
+      // Generar palabra aleatoria de 6 caracteres mayúsculas
+      const palabra = Array.from({length:6}, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*32)]).join('');
+      const listHtml = items.length === 1
+        ? '<p style="margin:0 0 6px;font-size:13px;"><b>' + escapeText(items[0].label||items[0].id) + '</b></p>'
+        : '<details style="margin:0 0 8px;font-size:12px;"><summary style="cursor:pointer;color:#475569;">Ver los ' + n + ' a eliminar</summary>'
+            + '<ul style="margin:6px 0 0 18px;padding:0;color:#64748B;">' + items.map(i => '<li>' + escapeText(i.label||i.id) + '</li>').join('') + '</ul></details>';
+      _pdcMiniModal({
+        title: '🗑 CONFIRMACIÓN FINAL — eliminar ' + (n===1 ? 'usuario' : n + ' usuarios'),
+        bodyHtml: '<div style="background:#FEF2F2;border:1px solid #FECACA;padding:12px;border-radius:8px;margin-bottom:14px;">'
+          + listHtml
+          + '<p style="font-size:13px;color:#991B1B;margin:0 0 10px;line-height:1.5;">Para confirmar, escribe exactamente esta palabra:</p>'
+          + '<div style="background:#fff;padding:8px 14px;border:2px dashed #DC2626;border-radius:6px;font-family:monospace;font-size:24px;font-weight:700;letter-spacing:6px;text-align:center;color:#991B1B;user-select:all;">' + palabra + '</div>'
+          + '</div>',
+        fields: [
+          { name:'confirmacion', label:'Escribe la palabra para confirmar', required:true, placeholder:palabra, autocomplete:'off' }
+        ],
+        submitLabel: '🗑 Eliminar definitivamente',
+        onSubmit: function(data){
+          if (String(data.confirmacion||'').trim().toUpperCase() !== palabra) {
+            tToast('Palabra incorrecta — eliminación cancelada', 'error');
+            return false; // mantiene modal abierto
+          }
+          _pv14DoDelete(items);
+          return true;
+        }
+      });
+    }
+
+    async function _pv14DoDelete(items){
+      const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
+      let okCount = 0, failCount = 0;
+      for (const it of items) {
+        const url = it.type === 'tenant'
+          ? '/api/admin/tenants/' + encodeURIComponent(it.id)
+          : '/api/admin/users/' + encodeURIComponent(it.id);
+        try {
+          const r = await fetch(url, { method:'DELETE', headers:{ 'Authorization':'Bearer ' + tok } });
+          if (r.ok) okCount++; else failCount++;
+        } catch(e){ failCount++; }
+      }
+      tToast(okCount + ' eliminados' + (failCount ? ', ' + failCount + ' fallaron' : ''), failCount ? 'error' : 'success');
+      try { renderUsersUnified(); } catch(_) {}
+    }
+    function tToast(msg, type){
+      if (typeof window.showToast === 'function') return window.showToast(msg, type);
+      try {
+        var t = document.createElement('div');
+        t.style.cssText='position:fixed;top:14px;right:14px;background:'+(type==='error'?'#DC2626':type==='success'?'#16A34A':'#1c1917')+';color:#fff;padding:10px 16px;border-radius:6px;font-size:13px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,.2);';
+        t.textContent = msg; document.body.appendChild(t);
+        setTimeout(function(){ t.remove(); }, 3200);
+      } catch(_){}
+    }
 
     // 2026-05-09 fix(H7): wire de prev/next/perPage. No usamos _pv14Wired
     // porque estos controles se re-crean en cada render (viven dentro de wrap).

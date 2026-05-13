@@ -12005,6 +12005,82 @@ handlers['GET /api/config/public'] = async (req, res) => {
     } catch (_) { sendJSON(res, { ok: true, items: [], total: 0 }); }
   };
   // /api/admin/tenants — list tenants (superadmin only). Bulk POST ya existe.
+  // 2026-05-13 — Soft-delete de usuario (superadmin) — desde panel de permisos
+  // Marca is_active=false, email_verified=false, agrega notes.deleted_at.
+  // No borra row para preservar audit log + posibilidad de restore.
+  handlers['DELETE /api/admin/users/:id'] = requireAuth(async (req, res, params) => {
+    const role = String((req.user && (req.user.role || req.user.rol)) || '').toLowerCase();
+    if (role !== 'superadmin' && role !== 'platform_owner') {
+      return sendJSON(res, { ok: false, error: 'forbidden' }, 403);
+    }
+    try {
+      const id = params.id;
+      if (!id) return sendJSON(res, { ok: false, error: 'invalid id' }, 400);
+      // Si el id parece UUID, búsqueda directa; si parece email, buscar por email
+      let userId = id;
+      if (id.indexOf('@') !== -1) {
+        const u = await supabaseRequest('GET', '/pos_users?email=eq.' + encodeURIComponent(id) + '&select=id,notes&limit=1');
+        if (!Array.isArray(u) || !u.length) return sendJSON(res, { ok: false, error: 'not_found' }, 404);
+        userId = u[0].id;
+      }
+      // Leer notes para agregar deleted_at sin borrar otros campos
+      let n = {};
+      try {
+        const row = await supabaseRequest('GET', '/pos_users?id=eq.' + encodeURIComponent(userId) + '&select=notes&limit=1');
+        if (Array.isArray(row) && row[0] && row[0].notes) n = JSON.parse(row[0].notes);
+      } catch(_) {}
+      n.deleted_at = new Date().toISOString();
+      n.deleted_by = (req.user && req.user.email) || 'unknown';
+      await supabaseRequest('PATCH', '/pos_users?id=eq.' + encodeURIComponent(userId), {
+        is_active: false,
+        email_verified: false,
+        notes: JSON.stringify(n),
+        updated_at: new Date().toISOString()
+      });
+      try { logAudit(req, 'admin.user_deleted', 'pos_users', { id: userId, deleted_by: n.deleted_by }); } catch(_){}
+      sendJSON(res, { ok: true, deleted: true, id: userId });
+    } catch (err) { sendError(res, err); }
+  }, ['superadmin','platform_owner']);
+
+  // 2026-05-13 — Soft-delete de tenant (suspende + sus usuarios)
+  handlers['DELETE /api/admin/tenants/:id'] = requireAuth(async (req, res, params) => {
+    const role = String((req.user && (req.user.role || req.user.rol)) || '').toLowerCase();
+    if (role !== 'superadmin' && role !== 'platform_owner') {
+      return sendJSON(res, { ok: false, error: 'forbidden' }, 403);
+    }
+    try {
+      const tenantId = params.id;
+      if (!tenantId) return sendJSON(res, { ok: false, error: 'invalid tenant_id' }, 400);
+      const now = new Date().toISOString();
+      const deletedBy = (req.user && req.user.email) || 'unknown';
+      // Soft-delete del tenant
+      try {
+        await supabaseRequest('PATCH', '/pos_companies?tenant_id=eq.' + encodeURIComponent(tenantId), {
+          is_active: false, status: 'deleted', updated_at: now
+        });
+      } catch (e) {
+        // Fallback si la tabla usa "id" en lugar de "tenant_id"
+        try { await supabaseRequest('PATCH', '/pos_companies?id=eq.' + encodeURIComponent(tenantId), { is_active: false, status: 'deleted', updated_at: now }); } catch(_){}
+      }
+      // Suspender a todos los users del tenant (los buscamos por notes.tenant_id)
+      try {
+        const allUsers = await supabaseRequest('GET', '/pos_users?select=id,notes&limit=2000');
+        const matches = (allUsers || []).filter(u => {
+          try { return JSON.parse(u.notes||'{}').tenant_id === tenantId; } catch(_) { return false; }
+        });
+        for (const u of matches) {
+          let n = {}; try { n = JSON.parse(u.notes||'{}'); } catch(_){}
+          n.deleted_at = now; n.deleted_by = deletedBy; n.deleted_with_tenant = true;
+          await supabaseRequest('PATCH', '/pos_users?id=eq.' + encodeURIComponent(u.id), {
+            is_active: false, notes: JSON.stringify(n), updated_at: now
+          });
+        }
+      } catch (_) {}
+      try { logAudit(req, 'admin.tenant_deleted', 'pos_companies', { tenant_id: tenantId, deleted_by: deletedBy }); } catch(_){}
+      sendJSON(res, { ok: true, deleted: true, tenant_id: tenantId });
+    } catch (err) { sendError(res, err); }
+  }, ['superadmin','platform_owner']);
+
   handlers['GET /api/admin/tenants'] = requireAuth(async (req, res) => {
     const role = String((req.user && (req.user.role || req.user.rol)) || '').toLowerCase();
     if (role !== 'superadmin' && role !== 'platform_owner') {
