@@ -5013,7 +5013,7 @@
 
   // Categorías para agrupar módulos en Col 2 (puramente visual, no toca datos)
   const MOD_CATEGORIES = {
-    operacion:  { label: 'Operación',     items: ['pos','apertura','corte','ventas','devoluciones','clientes','credito'] },
+    operacion:  { label: 'Módulos',       items: ['pos','apertura','corte','ventas','devoluciones','clientes','credito'] },
     inventario: { label: 'Inventario',    items: ['inventario','kardex','departamentos','proveedores','sugeridas','actualizador'] },
     reportes:   { label: 'Reportes & IA', items: ['dashboard','reportes'] },
     fiscal:     { label: 'Fiscal',        items: ['facturacion','cotizaciones'] },
@@ -7047,7 +7047,12 @@
   // Helper: si v14.catalogs.modules está cargado, retorna {pos: '🛒 Punto de Venta', ...}
   function getModuleLabelsFromCatalog() {
     if (!v14.catalogs.modules || !v14.catalogs.modules.length) return MOD_LABELS_GLOBAL;
-    const map = {};
+    // 2026-05-12 FIX: hacer merge BD + hardcoded en lugar de reemplazar.
+    // Antes se devolvían SOLO los módulos de BD, así los nuevos hardcoded
+    // (rentas, reservaciones) no aparecían en la columna 2. Ahora el BD
+    // tiene prioridad para los que existen, pero los hardcoded sirven de
+    // fallback para los que aún no están en el catálogo BD.
+    const map = Object.assign({}, MOD_LABELS_GLOBAL);
     v14.catalogs.modules.forEach(m => {
       const icon = m.icon || (MOD_LABELS_GLOBAL[m.bareKey] ? MOD_LABELS_GLOBAL[m.bareKey].split(' ')[0] : '📦');
       map[m.bareKey] = icon + ' ' + (m.name || m.bareKey);
