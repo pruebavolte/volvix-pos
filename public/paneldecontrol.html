@@ -7765,6 +7765,54 @@
       }
     });
 
+    // 2026-05-13 — Implementacion de _pdcMiniModal (faltaba, causaba
+    // ReferenceError silencioso al clickear 🖥 control remoto y 🗑 eliminar).
+    // Modal generico con titulo, body HTML, campos input opcionales y submit/cancel.
+    // onSubmit(data) -> bool: true=cerrar modal, false=mantener abierto (para validar).
+    function _pdcMiniModal(opts){
+      // Limpiar uno previo si existe
+      const prev = document.getElementById('pdc-mini-backdrop');
+      if (prev) prev.remove();
+      const back = document.createElement('div');
+      back.id = 'pdc-mini-backdrop';
+      back.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.6);display:flex;align-items:center;justify-content:center;z-index:99998;padding:20px;';
+      const card = document.createElement('div');
+      card.style.cssText = 'background:#fff;border-radius:12px;max-width:540px;width:100%;max-height:90vh;overflow:auto;padding:22px;font:14px/1.5 -apple-system,sans-serif;color:#0F172A;box-shadow:0 20px 60px rgba(0,0,0,.4);';
+      let html = '<h2 style="margin:0 0 14px;font-size:18px;font-weight:700;">' + (opts.title || '') + '</h2>';
+      if (opts.bodyHtml) html += '<div>' + opts.bodyHtml + '</div>';
+      const fields = opts.fields || [];
+      fields.forEach((f, i) => {
+        html += '<div style="margin:10px 0;">'
+          + (f.label ? '<label style="display:block;font-size:12px;color:#475569;margin-bottom:4px;font-weight:600;">' + f.label + '</label>' : '')
+          + '<input type="' + (f.type||'text') + '" name="' + f.name + '" data-pdc-field="1" '
+          + 'placeholder="' + (f.placeholder||'') + '" autocomplete="' + (f.autocomplete||'off') + '" '
+          + 'style="width:100%;padding:9px 11px;border:1.5px solid #CBD5E1;border-radius:7px;font-size:14px;box-sizing:border-box;">'
+          + '</div>';
+      });
+      html += '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">'
+        + '<button type="button" data-pdc-cancel style="padding:9px 16px;border:1px solid #CBD5E1;background:#fff;border-radius:7px;cursor:pointer;font-weight:600;color:#475569;">Cancelar</button>'
+        + '<button type="button" data-pdc-submit style="padding:9px 16px;border:none;background:#DC2626;color:#fff;border-radius:7px;cursor:pointer;font-weight:700;">' + (opts.submitLabel || 'Confirmar') + '</button>'
+        + '</div>';
+      card.innerHTML = html;
+      back.appendChild(card);
+      document.body.appendChild(back);
+      // Focus primer campo
+      const firstField = card.querySelector('[data-pdc-field]');
+      if (firstField) setTimeout(() => firstField.focus(), 50);
+      // Cancel
+      card.querySelector('[data-pdc-cancel]').addEventListener('click', () => back.remove());
+      back.addEventListener('click', (e) => { if (e.target === back) back.remove(); });
+      // Submit
+      function doSubmit(){
+        const data = {};
+        card.querySelectorAll('[data-pdc-field]').forEach(el => { data[el.name] = el.value; });
+        const result = opts.onSubmit ? opts.onSubmit(data) : true;
+        if (result !== false) back.remove();
+      }
+      card.querySelector('[data-pdc-submit]').addEventListener('click', doSubmit);
+      card.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.dataset.pdcField) { e.preventDefault(); doSubmit(); } });
+    }
+
     // 2026-05-13 — Doble confirmación de eliminación.
     // Paso 1: confirm() nativo. Paso 2: palabra aleatoria que el usuario debe
     // tipear exacto para confirmar (defensa contra clicks accidentales).
@@ -7809,12 +7857,16 @@
     // Paso 4: cuando acepta → admin escribe el código de 6 dígitos que el
     //         usuario ve en su pantalla (defensa contra suplantación)
     // Paso 5: verify-code OK → abrir /remote-viewer.html?session=X (WebRTC)
+    // 2026-05-13 — Simplificado: click 🖥 en una fila → POST request → abre el
+    // visor en una ventana nueva inmediatamente. El visor maneja TODO el flujo
+    // (espera de consentimiento del usuario + input del codigo de 6 digitos +
+    // stream WebRTC). Antes esto llamaba a _pdcMiniModal que nunca existio →
+    // ReferenceError silencioso, el admin solo veia el confirm() y nada mas.
     async function _pv14StartRemoteSupport(targetEmail){
       const ok1 = confirm(
         '¿Solicitar control remoto a ' + targetEmail + '?\n\n' +
-        'El usuario verá un banner en su POS pidiendo consentimiento.\n' +
-        'Solo si ACEPTA podrás ver/controlar su pantalla.\n' +
-        'Todo queda registrado en audit log.'
+        'Se abrira una ventana de control remoto. El usuario vera un banner en\n' +
+        'su POS pidiendo consentimiento. Solo si ACEPTA podras ver su pantalla.'
       );
       if (!ok1) return;
       const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
@@ -7829,83 +7881,17 @@
         if (!sess || !sess.ok) { alert('No se pudo iniciar: '+(sess&&sess.error||'error')); return; }
       } catch(e){ alert('Error de red: '+e.message); return; }
 
-      _pdcMiniModal({
-        title: '🖥 Solicitud de control remoto · ' + targetEmail,
-        bodyHtml:
-            '<div id="pv14-remote-step1" style="background:#EFF6FF;border:1px solid #BFDBFE;padding:14px;border-radius:8px;margin-bottom:14px;">'
-          +   '<div style="font-size:14px;font-weight:600;color:#1E3A8A;margin-bottom:8px;">⏳ Esperando que el usuario acepte…</div>'
-          +   '<div style="font-size:13px;color:#475569;line-height:1.5;">El usuario está viendo un banner en su POS con la solicitud y el aviso de consentimiento legal. Mientras no acepte, NO puedes ver su pantalla.</div>'
-          +   '<div style="font-size:11px;color:#94A3B8;margin-top:10px;">Sesión: <code style="font-family:monospace;">'+sess.session_id+'</code></div>'
-          + '</div>'
-          + '<div id="pv14-remote-step2" style="display:none;background:#F0FDF4;border:1px solid #BBF7D0;padding:14px;border-radius:8px;margin-bottom:14px;">'
-          +   '<div style="font-size:14px;font-weight:600;color:#14532D;margin-bottom:8px;">✓ Usuario aceptó · pide el código</div>'
-          +   '<div style="font-size:13px;color:#475569;line-height:1.5;">El usuario ve en su pantalla un código de <b>6 dígitos</b>. Pídeselo (por llamada/chat) y escríbelo aquí para confirmar identidad:</div>'
-          + '</div>'
-          + '<div id="pv14-remote-step3" style="display:none;background:#FEF2F2;border:1px solid #FECACA;padding:14px;border-radius:8px;">'
-          +   '<div style="font-size:13px;color:#991B1B;" id="pv14-remote-error"></div>'
-          + '</div>',
-        fields: [
-          { name:'code', label:'Código de 6 dígitos (que el usuario ve)', type:'text', placeholder:'_ _ _ _ _ _', autocomplete:'off' }
-        ],
-        submitLabel: '🖥 Conectar',
-        onSubmit: function(data){
-          const code = String(data.code||'').replace(/\D/g,'').trim();
-          if (code.length !== 6) {
-            const errEl = document.getElementById('pv14-remote-error');
-            const errBox = document.getElementById('pv14-remote-step3');
-            if (errEl) errEl.textContent = 'El código debe tener 6 dígitos';
-            if (errBox) errBox.style.display = 'block';
-            return false;
-          }
-          _pv14VerifyCodeAndOpen(sess.session_id, code);
-          return false; // mantener modal abierto hasta confirmar
-        }
-      });
-
-      // Polling cada 3s para detectar accept/reject
-      const pollIv = setInterval(async () => {
-        try {
-          const r = await fetch('/api/admin/remote-support/status?session_id='+encodeURIComponent(sess.session_id), {
-            headers:{ 'Authorization':'Bearer '+tok }
-          });
-          const j = await r.json();
-          if (!j || !j.ok) { clearInterval(pollIv); return; }
-          if (j.status === 'accepted') {
-            clearInterval(pollIv);
-            document.getElementById('pv14-remote-step1').style.display = 'none';
-            document.getElementById('pv14-remote-step2').style.display = 'block';
-          }
-          if (j.status === 'rejected' || j.status === 'expired' || j.status === 'ended') {
-            clearInterval(pollIv);
-            tToast('Usuario ' + (j.status === 'rejected' ? 'rechazó' : 'no aceptó a tiempo') + ' la solicitud', 'error');
-            const bk = document.getElementById('pdc-mini-backdrop'); if (bk) bk.remove();
-          }
-        } catch(_){}
-      }, 3000);
-      // Cancelar polling si cerrar el modal manualmente
-      setTimeout(() => { if (!document.getElementById('pdc-mini-backdrop')) clearInterval(pollIv); }, 5*60*1000);
-    }
-    async function _pv14VerifyCodeAndOpen(sid, code){
-      const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
-      try {
-        const r = await fetch('/api/admin/remote-support/verify-code', {
-          method:'POST',
-          headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+tok },
-          body: JSON.stringify({ session_id: sid, code: code })
-        });
-        const j = await r.json();
-        if (!j.ok) {
-          const errEl = document.getElementById('pv14-remote-error');
-          const errBox = document.getElementById('pv14-remote-step3');
-          if (errEl) errEl.textContent = j.error + (j.attempts_remaining!=null ? ' · '+j.attempts_remaining+' intentos restantes' : '');
-          if (errBox) errBox.style.display = 'block';
-          return;
-        }
-        const bk = document.getElementById('pdc-mini-backdrop'); if (bk) bk.remove();
-        // Abrir visor en nueva ventana
-        const w = window.open('/remote-viewer.html?session='+encodeURIComponent(sid)+'&role=admin', '_blank', 'width=1200,height=800');
-        if (!w) tToast('Permite popups para abrir el visor de control remoto', 'error');
-      } catch(e){ tToast('Error: '+e.message, 'error'); }
+      // Abrir el visor directamente con session_id + target_email para que muestre
+      // estado de espera, input de codigo, y stream cuando se verifique.
+      const url = '/remote-viewer.html?session=' + encodeURIComponent(sess.session_id)
+        + '&target=' + encodeURIComponent(targetEmail)
+        + '&role=admin';
+      const w = window.open(url, '_blank', 'width=1200,height=800');
+      if (!w) {
+        // Bloqueo de popups: copiar URL al portapapeles y mostrar como link
+        try { navigator.clipboard.writeText(window.location.origin + url); } catch(_){}
+        alert('Popups bloqueados. URL del visor copiada al portapapeles:\n\n' + url);
+      }
     }
 
     async function _pv14DoDelete(items){
