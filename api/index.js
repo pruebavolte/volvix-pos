@@ -7991,19 +7991,72 @@ async function logEmail(row) {
 
 function sendEmail({ to, subject, html, text, template }) {
   return new Promise((resolve) => {
-    if (!SENDGRID_API_KEY) {
-      try { process.stdout.write(JSON.stringify({
-        ts: new Date().toISOString(), level: 'warn',
-        msg: 'SENDGRID_API_KEY missing, email not sent', to, subject
-      }) + '\n'); } catch (_) {}
-      logEmail({ to, subject, template, status: 'failed', error: 'SENDGRID_API_KEY missing' });
-      return resolve({ ok: false, error: 'SENDGRID_API_KEY missing' });
-    }
     if (!to || !subject) {
       logEmail({ to, subject, template, status: 'failed', error: 'missing to/subject' });
       return resolve({ ok: false, error: 'missing to/subject' });
     }
 
+    // 2026-05-13 — RESEND PRIMERO (ya estaba configurado en BD/env vars).
+    // Si RESEND_API_KEY existe, lo usamos. Si falla o no existe, caemos
+    // a SendGrid como respaldo. Antes solo intentaba SendGrid y silenciaba todo.
+    const resendKey = (process.env.RESEND_API_KEY || '').trim();
+    if (resendKey) {
+      const resendFrom = process.env.RESEND_FROM || (SENDGRID_FROM_NAME + ' <' + SENDGRID_FROM + '>');
+      const resendBody = JSON.stringify({
+        from: resendFrom, to: [to], subject: subject,
+        html: html ? String(html) : undefined,
+        text: text ? String(text) : undefined,
+      });
+      const rReq = https.request({
+        hostname: 'api.resend.com', port: 443, path: '/emails', method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + resendKey,
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(resendBody),
+        }
+      }, (resp) => {
+        let data = '';
+        resp.on('data', c => data += c);
+        resp.on('end', () => {
+          if (resp.statusCode >= 200 && resp.statusCode < 300) {
+            let providerId = null;
+            try { providerId = JSON.parse(data).id || null; } catch(_){}
+            logEmail({ to, subject, template, status: 'sent', provider_id: providerId, provider: 'resend' });
+            return resolve({ ok: true, status: resp.statusCode, provider_id: providerId, provider: 'resend' });
+          }
+          // Resend falló — si tenemos SendGrid, lo intentamos como fallback
+          if (SENDGRID_API_KEY) {
+            return _sendViaSendgrid({ to, subject, html, text, template, resolve, resendError: data });
+          }
+          logEmail({ to, subject, template, status: 'failed', error: 'resend ' + resp.statusCode + ': ' + data });
+          return resolve({ ok: false, status: resp.statusCode, error: data, provider: 'resend' });
+        });
+      });
+      rReq.on('error', (e) => {
+        if (SENDGRID_API_KEY) return _sendViaSendgrid({ to, subject, html, text, template, resolve, resendError: e.message });
+        logEmail({ to, subject, template, status: 'failed', error: 'resend ' + e.message });
+        resolve({ ok: false, error: e.message, provider: 'resend' });
+      });
+      rReq.write(resendBody);
+      rReq.end();
+      return;
+    }
+
+    // Sin Resend → intentamos SendGrid
+    if (!SENDGRID_API_KEY) {
+      try { process.stdout.write(JSON.stringify({
+        ts: new Date().toISOString(), level: 'warn',
+        msg: 'Ningún proveedor de email configurado (ni RESEND_API_KEY ni SENDGRID_API_KEY)', to, subject
+      }) + '\n'); } catch (_) {}
+      logEmail({ to, subject, template, status: 'failed', error: 'no email provider configured' });
+      return resolve({ ok: false, error: 'no email provider configured' });
+    }
+    return _sendViaSendgrid({ to, subject, html, text, template, resolve });
+  });
+}
+
+// Helper interno para SendGrid (extraído para reusar como fallback de Resend)
+function _sendViaSendgrid({ to, subject, html, text, template, resolve, resendError }) {
     const payload = {
       personalizations: [{ to: [{ email: to }] }],
       from: { email: SENDGRID_FROM, name: SENDGRID_FROM_NAME },
@@ -8047,7 +8100,6 @@ function sendEmail({ to, subject, html, text, template }) {
     });
     req2.write(body);
     req2.end();
-  });
 }
 
 // =============================================================
