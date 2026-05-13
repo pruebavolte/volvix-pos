@@ -5191,13 +5191,30 @@
   // ─── COLUMNA 2: lista de módulos agrupada ───
   function renderModulesList() {
     const wrap = $('#permv14-modules-list');
-    if (!wrap) return;
+    if (!wrap) {
+      // 2026-05-12 fix: DOM aun no listo. Reintentar en 100ms (max 20 retries = 2s).
+      // Antes la funcion retornaba silenciosamente y la lista quedaba vacia
+      // hasta el siguiente trigger (que podia tardar mucho si APIs lentas).
+      renderModulesList._retries = (renderModulesList._retries || 0) + 1;
+      if (renderModulesList._retries < 20) setTimeout(renderModulesList, 100);
+      return;
+    }
+    renderModulesList._retries = 0;
     const MOD = window.MOD_LABELS_PUBLIC || null;
     // 2026-05-09: cargar catálogo BD en background (no await — render inmediato con
     // hardcoded, re-render automático cuando llegue BD via setActiveNav re-trigger).
-    if (!v14.catalogs.modules) loadAllCatalogs().then(() => renderModulesList());
+    // 2026-05-12 fix: tolerar v14 no inicializado todavia (panel aun cargando)
+    if (typeof v14 === 'undefined' || !v14 || !v14.catalogs) {
+      // v14 aun no existe — render con MOD_LABELS_GLOBAL directo
+      // y reintentar render completo cuando v14 este disponible
+      setTimeout(renderModulesList, 200);
+    } else if (!v14.catalogs.modules) {
+      try { loadAllCatalogs().then(() => renderModulesList()).catch(()=>{}); } catch(_){}
+    }
     // Catálogo unificado: BD si disponible, fallback a constante.
-    const MOD_LABELS_LOCAL = getModuleLabelsFromCatalog();
+    const MOD_LABELS_LOCAL = (typeof getModuleLabelsFromCatalog === 'function')
+      ? getModuleLabelsFromCatalog()
+      : MOD_LABELS_GLOBAL;
     // 2026-05-09 SYNC FIX: rellenar bucket "Otros" con módulos de BD/labels que
     // no estén en ninguna categoría hardcoded. Garantiza que TODO módulo del
     // catálogo BD se renderice (incluyendo nuevos como 'aplicacion' antes del fix).
@@ -5207,7 +5224,12 @@
     }
     const allModKeys = Object.keys(MOD_LABELS_LOCAL);
     MOD_CATEGORIES.otros.items = allModKeys.filter(k => !catalogedSet.has(k));
-    const state = getCombinedState();
+    // 2026-05-12 fix: state puede no existir aun (PERM sin tenant cargado).
+    // Antes esto rompia y nunca se renderizaba la lista.
+    let state;
+    try { state = (typeof getCombinedState === 'function') ? getCombinedState() : { modules:{}, features:{} }; }
+    catch(_) { state = { modules:{}, features:{} }; }
+    if (!state || typeof state.modules !== 'object') state = { modules:{}, features:{} };
     const search = ($('#permv14-mod-search') && $('#permv14-mod-search').value || '').toLowerCase().trim();
     // 2026-05-12 FIX: el filtro ahora busca también por nombre de CATEGORÍA + key,
     // y normaliza singular/plural (ej: "rentas"→"renta", "vertical"→"verticales").
@@ -5236,7 +5258,7 @@
         const icon = m[1], name = m[2];
         const enabled = state.modules[k] !== false;
         const stateClass = enabled ? '' : 's-hi';
-        const sel = (v14.selectedMod === k) ? ' selected' : '';
+        const sel = (typeof v14 !== 'undefined' && v14 && v14.selectedMod === k) ? ' selected' : '';
         html += '<div class="permv14-list-item' + sel + '" data-mod="' + k + '">'
               + '<span class="permv14-list-item-icon">' + icon + '</span>'
               + name
