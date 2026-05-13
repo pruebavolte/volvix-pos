@@ -3940,6 +3940,16 @@
     'pos.recargas_btn': '📱 Btn Recargas', 'pos.servicios_btn': '💡 Btn Servicios',
     'pos.ins_varios': 'INS — Varios', 'pos.art_comun': 'CTRL+P Artículo común',
     'pos.quickpick_panel': 'Panel QuickPick', 'ui.saas_btn': '👑 Btn SaaS Admin',
+    // 2026-05-12: botones del módulo Renta de Equipo
+    'rentas.nuevo_contrato': '➕ Nueva renta', 'rentas.agregar_equipo': '📦 Agregar equipo',
+    'rentas.devolucion': '↩️ Registrar devolución', 'rentas.historial': '📜 Historial',
+    'rentas.tab_equipos': '🔑 Tab Equipos', 'rentas.tab_contratos': '📄 Tab Contratos',
+    'rentas.tab_movimientos': '📊 Tab Movimientos',
+    // 2026-05-12: botones del módulo Reservaciones
+    'reservaciones.nueva': '➕ Nueva reserva', 'reservaciones.mesas': '🪑 Configurar mesas',
+    'reservaciones.waitlist': '⏳ Lista de espera', 'reservaciones.confirmar': '✓ Confirmar',
+    'reservaciones.sentar': '🪑 Sentar', 'reservaciones.cancelar': '✗ Cancelar',
+    'reservaciones.calendario': '📅 Vista calendario',
   };
 
   // 2026-05-08: Perfiles por giro de negocio. Cada perfil define los DEFAULTS
@@ -5045,6 +5055,14 @@
     'app.section_main_list':'aplicacion','app.section_news':'aplicacion',
     'app.section_flyer':'aplicacion','app.section_contact':'aplicacion',
     'app.section_profile':'aplicacion',
+    // 2026-05-12: botones de módulos verticales
+    'rentas.nuevo_contrato':'rentas','rentas.agregar_equipo':'rentas',
+    'rentas.devolucion':'rentas','rentas.historial':'rentas',
+    'rentas.tab_equipos':'rentas','rentas.tab_contratos':'rentas','rentas.tab_movimientos':'rentas',
+    'reservaciones.nueva':'reservaciones','reservaciones.mesas':'reservaciones',
+    'reservaciones.waitlist':'reservaciones','reservaciones.confirmar':'reservaciones',
+    'reservaciones.sentar':'reservaciones','reservaciones.cancelar':'reservaciones',
+    'reservaciones.calendario':'reservaciones',
   };
 
   // "Considera esto" — warnings curados por módulo
@@ -5474,35 +5492,6 @@
       usuarios: 'Usuarios', config: 'Configuración',
       rentas: 'Renta de Equipo', reservaciones: 'Reservaciones',
     };
-
-    // 2026-05-12: para módulos verticales con UI completa propia (rentas,
-    // reservaciones), montar la vista real con un iframe sandbox que carga
-    // /preview-{k}.html. Así el dueño ve EXACTAMENTE lo mismo que ven sus
-    // cajeros, no una lista de botones. Se mantiene la lógica de OFF arriba.
-    const PREVIEW_FRAME_MODULES = { rentas: 'preview-rentas.html', reservaciones: 'preview-reservaciones.html' };
-    if (PREVIEW_FRAME_MODULES[k]) {
-      const src = PREVIEW_FRAME_MODULES[k];
-      const moduleName = labelMap[k] || k;
-      const iframeDesktop = ''
-        + '<div>'
-        +   '<h2 class="permv14-mock-h2">' + escapeText(moduleName) + ' <em>· vista cliente</em></h2>'
-        +   '<p class="permv14-mock-sub">Así verá este módulo el dueño y los cajeros del tenant.</p>'
-        +   '<iframe src="' + src + '" loading="lazy" '
-        +     'sandbox="allow-scripts allow-same-origin" '
-        +     'style="width:100%;height:680px;border:1px solid var(--pv-border, #E0DEDB);border-radius:8px;background:#fff;display:block;" '
-        +     'title="' + escapeText(moduleName) + ' preview"></iframe>'
-        + '</div>';
-      const iframeMobile = ''
-        + '<div>'
-        +   '<div style="font-family:var(--pv-font-display);font-size:16px;font-weight:500;margin-bottom:8px;">' + escapeText(moduleName) + '</div>'
-        +   '<iframe src="' + src + '" loading="lazy" '
-        +     'sandbox="allow-scripts allow-same-origin" '
-        +     'style="width:100%;height:560px;border:1px solid var(--pv-border, #E0DEDB);border-radius:8px;background:#fff;display:block;"></iframe>'
-        + '</div>';
-      if (desktopEl) desktopEl.innerHTML = iframeDesktop;
-      if (mobileEl)  mobileEl.innerHTML  = iframeMobile;
-      return;
-    }
     const moduleName = labelMap[k] || k;
     const childButtons = Object.keys(FEAT_PARENT_MOD).filter(bk => FEAT_PARENT_MOD[bk] === k);
     const FEAT_LABELS_LOCAL = FEAT_LABELS_GLOBAL;

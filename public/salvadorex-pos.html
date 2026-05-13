@@ -3431,6 +3431,17 @@
 
     <div class="menubar-divider"></div>
 
+    <!-- 2026-05-12: Verticales — Renta de Equipo y Reservaciones (siguen convención
+         menu-btn + data-feature module.X + showScreen) -->
+    <button class="menu-btn" data-feature="module.rentas" data-menu="rentas" onclick="showScreen('rentas')">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#0891B2" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+      <span data-term="rentas_menu">🔑 Rentas</span>
+    </button>
+    <button class="menu-btn" data-feature="module.reservaciones" data-menu="reservaciones" onclick="showScreen('reservaciones')">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span data-term="reservaciones_menu">📅 Reservas</span>
+    </button>
+
     <button class="menu-btn more" onclick="openMasModulos()">
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2.5"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
       <span>⋯ Más</span>
@@ -5500,6 +5511,74 @@
             <div style="font-size:12px;color:var(--text-3,#64748B)">Llena el formulario y presiona "Generar"</div>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- ============ RENTAS (Renta de Equipo) — vertical (2026-05-12) ============
+         Sigue convención: section #screen-rentas + clase 'screen-pad hidden'.
+         showScreen('rentas') la hace visible. Render delegado a window.RentasUI
+         (definido en script abajo) que llama a window.RentaEquipoAPI.
+         data-term=* expone strings configurables por giro (terminología). -->
+    <section id="screen-rentas" class="screen-pad hidden">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title" data-term="rentas_title">🔑 Rentas</h1>
+          <p class="page-sub" id="rentas-sub">Inventario rentable · contratos · depósitos · devoluciones</p>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn" data-feature="rentas.agregar_equipo" onclick="RentasUI && RentasUI.agregarEquipo()">📦 Agregar equipo</button>
+          <button class="btn" data-feature="rentas.devolucion" onclick="RentasUI && RentasUI.registrarDevolucion()">↩️ <span data-term="devolucion">Devolución</span></button>
+          <button class="btn accent" data-feature="rentas.nuevo_contrato" onclick="RentasUI && RentasUI.nuevoContrato()">+ <span data-term="renta_nueva">Nueva renta</span></button>
+        </div>
+      </div>
+      <div class="card card-pad" style="margin-bottom:14px;">
+        <div id="rentas-kpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;"></div>
+      </div>
+      <div class="card">
+        <div class="config-tabs">
+          <button class="config-tab active" data-feature="rentas.tab_equipos"   id="rentas-tab-equipos">🔑 <span data-term="equipos">Equipos</span></button>
+          <button class="config-tab"        data-feature="rentas.tab_contratos" id="rentas-tab-contratos">📄 <span data-term="contratos">Contratos</span></button>
+          <button class="config-tab"        data-feature="rentas.tab_movimientos" id="rentas-tab-movimientos">📊 Movimientos</button>
+        </div>
+        <div id="rentas-pane-equipos"     style="padding:12px;"></div>
+        <div id="rentas-pane-contratos"   style="padding:12px;display:none;"></div>
+        <div id="rentas-pane-movimientos" style="padding:12px;display:none;"></div>
+      </div>
+    </section>
+
+    <!-- ============ RESERVACIONES — vertical (2026-05-12) ============
+         Sigue convención: section #screen-reservaciones + clase 'screen-pad hidden'.
+         showScreen('reservaciones') la hace visible. Render delegado a
+         window.ReservacionesUI que llama a window.ReservationsAPI.
+         data-term=* permite cambiar 'Reserva'→'Cita', 'Mesa'→'Box' por giro. -->
+    <section id="screen-reservaciones" class="screen-pad hidden">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title" data-term="reservaciones_title">📅 Reservaciones</h1>
+          <p class="page-sub" id="resv-sub">Calendario · slots · mesas · waitlist · recordatorios</p>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="btn" data-feature="reservaciones.mesas" onclick="ReservacionesUI && ReservacionesUI.configMesas()">🪑 <span data-term="mesas">Mesas</span></button>
+          <button class="btn" data-feature="reservaciones.waitlist" onclick="ReservacionesUI && ReservacionesUI.waitlist()">⏳ Waitlist</button>
+          <button class="btn accent" data-feature="reservaciones.nueva" onclick="ReservacionesUI && ReservacionesUI.nuevaReserva()">+ <span data-term="reserva_nueva">Nueva reserva</span></button>
+        </div>
+      </div>
+      <div class="card card-pad" style="margin-bottom:14px;">
+        <div id="resv-kpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;"></div>
+      </div>
+      <div class="card card-pad" style="margin-bottom:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <button class="btn" onclick="ReservacionesUI && ReservacionesUI.shiftDay(-1)">‹ Día anterior</button>
+        <input type="date" id="resv-date" style="padding:7px 10px;border:1px solid var(--border, #E0DEDB);border-radius:7px;font:13px inherit;">
+        <button class="btn" onclick="ReservacionesUI && ReservacionesUI.shiftDay(+1)">Día siguiente ›</button>
+        <button class="btn ghost" onclick="ReservacionesUI && ReservacionesUI.today()">Hoy</button>
+        <span style="margin-left:auto;font-size:11px;color:var(--text-3,#A8A29E);">Slots 30 min · 12:00–23:00 · Recordatorios 24h+2h</span>
+      </div>
+      <div class="card" data-feature="reservaciones.calendario">
+        <div style="padding:10px 14px;border-bottom:1px solid var(--border,#E0DEDB);display:flex;justify-content:space-between;align-items:center;">
+          <span id="resv-day-label" style="font-weight:600;">—</span>
+          <span id="resv-count" style="font-size:12px;color:var(--text-2,#57534E);">0 reservaciones</span>
+        </div>
+        <div id="resv-grid-wrap" style="overflow:auto;"></div>
       </div>
     </section>
 
@@ -19332,6 +19411,233 @@ window.addEventListener('volvix:version-loaded', function(e){
     if (name === 'general')   { initTourToggle(); initPinToggle(); }
   };
 
+})();
+</script>
+
+<!-- ============================================================
+     2026-05-12 — Wiring de pantallas verticales (Rentas + Reservaciones)
+     Carga los APIs en demand, renderiza UI en las secciones screen-rentas
+     y screen-reservaciones. Sigue convención: render se dispara cuando
+     showScreen las hace visibles. Hash routing #rentas / #reservaciones.
+     ============================================================ -->
+<script src="/volvix-vertical-rentaequipo.js" defer></script>
+<script src="/volvix-reservations-wiring.js" defer></script>
+<script>
+(function () {
+  'use strict';
+  function $(s, r){ return (r||document).querySelector(s); }
+  function fmt(n){ return '$' + Number(n||0).toLocaleString('es-MX', { minimumFractionDigits:0, maximumFractionDigits:2 }); }
+  function esc(s){ return String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
+  function todayStr(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  function tToast(msg){ if (typeof window.showToast === 'function') return window.showToast(msg); console.log('[toast]', msg); }
+
+  // ─────────────────────────────── RENTAS ───────────────────────────────
+  var RentasUI = {
+    seeded: false,
+    api: function(){ return window.RentaEquipoAPI; },
+    state: function(){ try { return this.api()._state(); } catch(_) { return {equipos:[],clientes:[],contratos:[],movimientos:[]}; } },
+    seedIfEmpty: function(){
+      if (this.seeded || !this.api()) return; this.seeded = true;
+      if (this.state().equipos.length > 0) return;
+      var EQS = [
+        { codigo:'EQ-001', nombre:'Sonido JBL EON 615 (par)',  categoria:'audio',      valor:18000, tarifas:{ hora:0, dia:800,  semana:4500, mes:14000 }, ubicacion:'Bodega A' },
+        { codigo:'EQ-002', nombre:'Carpa 3x6 blanca',           categoria:'carpas',     valor:25000, tarifas:{ hora:0, dia:1200, semana:6500, mes:18000 }, ubicacion:'Bodega B' },
+        { codigo:'EQ-003', nombre:'Mesa redonda + 8 sillas',    categoria:'mobiliario', valor:4500,  tarifas:{ hora:0, dia:350,  semana:1500, mes:4000  }, ubicacion:'Bodega A' },
+        { codigo:'EQ-004', nombre:'Inflable castillo medieval', categoria:'inflables',  valor:35000, tarifas:{ hora:0, dia:1800, semana:0,    mes:0     }, ubicacion:'Taller'   },
+        { codigo:'EQ-005', nombre:'Generador eléctrico 5KW',    categoria:'energia',    valor:22000, tarifas:{ hora:120, dia:1500, semana:7500, mes:22000 }, ubicacion:'Bodega A' },
+      ];
+      var self = this;
+      EQS.forEach(function(e){ try { self.api().registrarEquipo(e); } catch(_){} });
+      try { self.api().cambiarEstadoEquipo('EQ-004','mantenimiento','seed'); } catch(_){}
+      try {
+        var c = self.api().registrarCliente({ nombre:'Eventos Lupita SA', identificacion:'EVL890212XX1', telefono:'8112345678', email:'contacto@eventoslupita.mx' });
+        self.api().crearContrato({ clienteId:c.id, equipoId:'EQ-001', cantidad:3, unidad:'dia' });
+      } catch(_){}
+    },
+    pillClass: function(s){ return ({disponible:'#D1FAE5;color:#065F46', rentado:'#DBEAFE;color:#1E3A8A', mantenimiento:'#FEF3C7;color:#92400E', danado:'#FEE2E2;color:#991B1B'}[s] || '#F3F4F6;color:#374151'); },
+    pillLabel: function(s){ return ({disponible:'Disponible', rentado:'Rentado', mantenimiento:'Mantenim.', danado:'Dañado', baja:'Baja'}[s] || s); },
+    renderKPIs: function(){
+      var s = this.state();
+      var disp = s.equipos.filter(function(e){return e.estado==='disponible';}).length;
+      var rent = s.equipos.filter(function(e){return e.estado==='rentado';}).length;
+      var act  = s.contratos.filter(function(c){return c.estado==='activo';});
+      var ing  = act.reduce(function(a,c){return a+(c.total||0);},0);
+      var dep  = act.reduce(function(a,c){return a+(c.deposito||0);},0);
+      var el = $('#rentas-kpis'); if (!el) return;
+      el.innerHTML =
+          '<div><div style="font-size:11px;color:#57534E;text-transform:uppercase;">Disponibles</div><div style="font-size:22px;font-weight:700;">'+disp+'</div><div style="font-size:11px;color:#A8A29E;">de '+s.equipos.length+' totales</div></div>'
+        + '<div><div style="font-size:11px;color:#57534E;text-transform:uppercase;">Rentados</div><div style="font-size:22px;font-weight:700;">'+rent+'</div><div style="font-size:11px;color:#A8A29E;">'+act.length+' contratos</div></div>'
+        + '<div><div style="font-size:11px;color:#57534E;text-transform:uppercase;">Facturado</div><div style="font-size:22px;font-weight:700;">'+fmt(ing)+'</div><div style="font-size:11px;color:#A8A29E;">contratos abiertos</div></div>'
+        + '<div><div style="font-size:11px;color:#57534E;text-transform:uppercase;">Depósitos</div><div style="font-size:22px;font-weight:700;">'+fmt(dep)+'</div><div style="font-size:11px;color:#A8A29E;">en custodia</div></div>';
+    },
+    renderEquipos: function(){
+      var eqs = this.state().equipos;
+      var el = $('#rentas-pane-equipos'); if (!el) return;
+      if (!eqs.length){ el.innerHTML = '<div style="color:#A8A29E;padding:14px;">Sin equipos.</div>'; return; }
+      var self = this;
+      el.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">'
+        + eqs.map(function(e){
+          return '<div style="background:#fff;border:1px solid #E0DEDB;border-radius:10px;padding:14px;">'
+              +    '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;">'
+              +      '<span style="font-weight:600;">'+esc(e.nombre)+'</span>'
+              +      '<span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:'+self.pillClass(e.estado)+';">'+self.pillLabel(e.estado)+'</span>'
+              +    '</div>'
+              +    '<div style="font-size:12px;color:#57534E;">📦 '+esc(e.codigo)+' · '+esc(e.categoria)+' · '+esc(e.ubicacion)+'</div>'
+              +    '<div style="font-size:12px;color:#57534E;">Valor '+fmt(e.valor)+' · Día '+fmt(e.tarifas.dia)+' · Sem '+fmt(e.tarifas.semana)+'</div>'
+              + '</div>';
+        }).join('') + '</div>';
+    },
+    renderContratos: function(){
+      var s = this.state();
+      var byCli={}; s.clientes.forEach(function(c){byCli[c.id]=c;});
+      var byEq ={}; s.equipos .forEach(function(e){byEq[e.id]=e;});
+      var el = $('#rentas-pane-contratos'); if (!el) return;
+      if (!s.contratos.length){ el.innerHTML = '<div style="color:#A8A29E;padding:14px;">Sin contratos.</div>'; return; }
+      el.innerHTML = '<table style="width:100%;border-collapse:collapse;font-size:13px;"><thead><tr style="background:#FAFAF9;text-align:left;font-size:11px;color:#57534E;text-transform:uppercase;letter-spacing:.4px;"><th style="padding:8px 12px;">#</th><th style="padding:8px 12px;">Equipo</th><th style="padding:8px 12px;">Cliente</th><th style="padding:8px 12px;">Inicio</th><th style="padding:8px 12px;">Vence</th><th style="padding:8px 12px;">Estado</th><th style="padding:8px 12px;">Depósito</th></tr></thead><tbody>'
+        + s.contratos.map(function(c){
+          var cli=byCli[c.clienteId]||{}, eq=byEq[c.equipoId]||{};
+          return '<tr style="border-bottom:1px solid #E0DEDB;"><td style="padding:8px 12px;"><strong>'+esc(c.id)+'</strong></td><td style="padding:8px 12px;">'+esc(eq.codigo||'')+'</td><td style="padding:8px 12px;">'+esc(cli.nombre||'')+'</td><td style="padding:8px 12px;">'+esc((c.fechaInicio||'').slice(0,10))+'</td><td style="padding:8px 12px;">'+esc((c.fechaFinProgramada||'').slice(0,10))+'</td><td style="padding:8px 12px;">'+esc(c.estado)+'</td><td style="padding:8px 12px;">'+fmt(c.deposito)+'</td></tr>';
+        }).join('') + '</tbody></table>';
+    },
+    renderMovs: function(){
+      var movs = this.state().movimientos;
+      var el = $('#rentas-pane-movimientos'); if (!el) return;
+      if (!movs.length){ el.innerHTML = '<div style="color:#A8A29E;padding:14px;">Sin movimientos.</div>'; return; }
+      el.innerHTML = '<table style="width:100%;border-collapse:collapse;font-size:13px;"><thead><tr style="background:#FAFAF9;text-align:left;font-size:11px;color:#57534E;text-transform:uppercase;letter-spacing:.4px;"><th style="padding:8px 12px;">Fecha</th><th style="padding:8px 12px;">Tipo</th><th style="padding:8px 12px;">Ref</th></tr></thead><tbody>'
+        + movs.slice(-40).reverse().map(function(m){
+          return '<tr style="border-bottom:1px solid #E0DEDB;"><td style="padding:8px 12px;">'+esc((m.ts||'').slice(0,16).replace('T',' '))+'</td><td style="padding:8px 12px;">'+esc(m.tipo)+'</td><td style="padding:8px 12px;">'+esc(m.refId||'')+'</td></tr>';
+        }).join('') + '</tbody></table>';
+    },
+    setTab: function(t){
+      ['equipos','contratos','movimientos'].forEach(function(name){
+        var btn  = document.getElementById('rentas-tab-'+name);
+        var pane = document.getElementById('rentas-pane-'+name);
+        if (btn)  btn.classList.toggle('active', name===t);
+        if (pane) pane.style.display = name===t ? '' : 'none';
+      });
+    },
+    render: function(){
+      if (!this.api()) { setTimeout(this.render.bind(this), 250); return; }
+      this.seedIfEmpty();
+      this.renderKPIs();
+      this.renderEquipos();
+      this.renderContratos();
+      this.renderMovs();
+    },
+    nuevoContrato:       function(){ tToast('Nueva renta · abre modal cliente+equipo+plazo'); },
+    agregarEquipo:       function(){ tToast('Alta equipo · código/nombre/valor/tarifas'); },
+    registrarDevolucion: function(){ tToast('Devolución · selecciona contrato + daños'); },
+  };
+  window.RentasUI = RentasUI;
+
+  // ─────────────────────────────── RESERVACIONES ───────────────────────────────
+  var ReservacionesUI = {
+    seeded: false,
+    api: function(){ return window.ReservationsAPI; },
+    seedIfEmpty: function(){
+      if (this.seeded || !this.api()) return; this.seeded = true;
+      if (this.api().tables.list().length === 0) {
+        try { this.api().tables.add('Mesa 1',2); this.api().tables.add('Mesa 2',4); this.api().tables.add('Mesa 3',4); this.api().tables.add('Mesa 4',6); this.api().tables.add('Terraza',8); } catch(_){}
+      }
+      var today = todayStr();
+      if (this.api().reservations.list({date:today}).length === 0) {
+        var ts = this.api().tables.list(); var self=this;
+        function t(i){ return (ts[i]||ts[0]||{}).id || null; }
+        try { self.api().reservations.create({customerName:'Familia Hernández',phone:'8112345678',partySize:4,date:today,time:'13:00',tableId:t(1),notes:'Cumpleaños'}); } catch(_){}
+        try { self.api().reservations.create({customerName:'José y Ana',       phone:'8118765432',partySize:2,date:today,time:'14:30',tableId:t(0)}); } catch(_){}
+        try { self.api().reservations.create({customerName:'Reunión Microsoft',phone:'8112222222',partySize:6,date:today,time:'19:00',tableId:t(3),notes:'Corporativo'}); } catch(_){}
+        try { self.api().reservations.create({customerName:'Boda Ramírez',     phone:'8113333333',partySize:8,date:today,time:'20:30',tableId:t(4)}); } catch(_){}
+        var all = self.api().reservations.list({date:today});
+        if (all[0]) try { self.api().confirm(all[0].id); } catch(_){}
+        if (all[2]) try { self.api().confirm(all[2].id); } catch(_){}
+      }
+    },
+    renderKPIs: function(date){
+      var rsv = this.api().reservations.list({date}), tables=this.api().tables.list();
+      var conf = rsv.filter(function(r){return r.status==='confirmed'||r.status==='seated';}).length;
+      var pend = rsv.filter(function(r){return r.status==='pending';}).length;
+      var occ  = tables.length ? Math.round((new Set(rsv.filter(function(r){return r.status!=='cancelled';}).map(function(r){return r.tableId;})).size / tables.length)*100) : 0;
+      var el = $('#resv-kpis'); if (!el) return;
+      el.innerHTML =
+          '<div><div style="font-size:11px;color:#57534E;text-transform:uppercase;">Mesas</div><div style="font-size:22px;font-weight:700;">'+tables.length+'</div><div style="font-size:11px;color:#A8A29E;">'+tables.reduce(function(a,t){return a+(t.capacity||0);},0)+' lugares</div></div>'
+        + '<div><div style="font-size:11px;color:#57534E;text-transform:uppercase;">Reservas hoy</div><div style="font-size:22px;font-weight:700;">'+rsv.length+'</div><div style="font-size:11px;color:#A8A29E;">'+pend+' por confirmar</div></div>'
+        + '<div><div style="font-size:11px;color:#57534E;text-transform:uppercase;">Confirmadas</div><div style="font-size:22px;font-weight:700;">'+conf+'</div><div style="font-size:11px;color:#A8A29E;">listas para recibir</div></div>'
+        + '<div><div style="font-size:11px;color:#57534E;text-transform:uppercase;">Ocupación</div><div style="font-size:22px;font-weight:700;">'+occ+'%</div><div style="font-size:11px;color:#A8A29E;">mesas con reserva</div></div>';
+    },
+    renderGrid: function(date){
+      var tables=this.api().tables.list(), slots=this.api().slots.forDate(date), rsv=this.api().reservations.list({date});
+      var map = {}; rsv.forEach(function(r){ if (r.status==='cancelled'||r.status==='noshow') return; map[r.time]=map[r.time]||{}; map[r.time][r.tableId]=r; });
+      var tplCols = '80px ' + tables.map(function(){return '1fr';}).join(' ');
+      var html = '<div style="display:grid;grid-template-columns:'+tplCols+';background:#FAFAF9;">'
+        + '<div style="padding:10px;font-size:11px;font-weight:600;color:#57534E;text-transform:uppercase;text-align:center;border-right:1px solid #E0DEDB;border-bottom:1px solid #E0DEDB;">Hora</div>';
+      tables.forEach(function(t){ html += '<div style="padding:10px;font-size:11px;font-weight:600;color:#57534E;text-transform:uppercase;text-align:center;border-right:1px solid #E0DEDB;border-bottom:1px solid #E0DEDB;">'+esc(t.name)+' <span style="font-weight:400;color:#A8A29E;font-size:10px;">('+t.capacity+'p)</span></div>'; });
+      html += '</div><div style="display:grid;grid-template-columns:'+tplCols+';">';
+      slots.forEach(function(time){
+        html += '<div style="padding:8px;font-size:12px;color:#57534E;text-align:right;border-right:1px solid #E0DEDB;border-bottom:1px solid #E0DEDB;background:#FAFAF9;">'+time+'</div>';
+        tables.forEach(function(t){
+          var r = (map[time]||{})[t.id];
+          if (r) {
+            var bg = r.status==='pending'?'#92400E':(r.status==='confirmed'?'#2563EB':(r.status==='seated'?'#065F46':'#374151'));
+            html += '<div style="min-height:36px;padding:4px;border-right:1px solid #E0DEDB;border-bottom:1px solid #E0DEDB;"><span style="display:block;padding:4px 6px;background:'+bg+';color:#fff;font-size:11px;font-weight:600;border-radius:5px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(r.customerName)+' · '+(r.partySize||0)+'p</span></div>';
+          } else {
+            html += '<div style="min-height:36px;border-right:1px solid #E0DEDB;border-bottom:1px solid #E0DEDB;"></div>';
+          }
+        });
+      });
+      html += '</div>';
+      $('#resv-grid-wrap').innerHTML = html;
+      $('#resv-day-label').textContent = date;
+      $('#resv-count').textContent = rsv.length + ' reservacion' + (rsv.length===1?'':'es');
+    },
+    refresh: function(date){
+      if (!this.api()) { setTimeout(this.refresh.bind(this,date), 250); return; }
+      this.seedIfEmpty();
+      this.renderKPIs(date);
+      this.renderGrid(date);
+    },
+    shiftDay: function(delta){
+      var d = $('#resv-date').value || todayStr();
+      var p = d.split('-').map(Number);
+      var dt = new Date(p[0], p[1]-1, p[2]); dt.setDate(dt.getDate()+delta);
+      var ns = dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
+      $('#resv-date').value = ns; this.refresh(ns);
+    },
+    today: function(){ var t=todayStr(); $('#resv-date').value=t; this.refresh(t); },
+    render: function(){ if (!$('#resv-date').value) $('#resv-date').value = todayStr(); this.refresh($('#resv-date').value); },
+    nuevaReserva: function(){ tToast('Nueva reserva · modal cliente+fecha+hora+party'); },
+    configMesas:  function(){ tToast('Configurar mesas · agregar/quitar/capacidad'); },
+    waitlist:     function(){ tToast('Waitlist · ver cola y promover'); },
+  };
+  window.ReservacionesUI = ReservacionesUI;
+
+  // Hook click en tabs de rentas
+  document.addEventListener('click', function(ev){
+    var t = ev.target.closest('[id^="rentas-tab-"]');
+    if (t) {
+      var name = t.id.replace('rentas-tab-','');
+      RentasUI.setTab(name);
+    }
+  });
+  $('#resv-date') && $('#resv-date').addEventListener('change', function(e){ ReservacionesUI.refresh(e.target.value || todayStr()); });
+
+  // Hook showScreen para inicializar las pantallas al entrar
+  var _origShow = window.showScreen;
+  window.showScreen = function(name){
+    if (typeof _origShow === 'function') _origShow.apply(this, arguments);
+    if (name === 'rentas')        try { RentasUI.render(); } catch(e){ console.error('[rentas]', e); }
+    if (name === 'reservaciones') try { ReservacionesUI.render(); } catch(e){ console.error('[resv]', e); }
+  };
+
+  // Hash routing inicial
+  function bootIfHash(){
+    var h = (location.hash||'').replace('#','');
+    if (h === 'rentas' || h === 'reservaciones') {
+      if (typeof window.showScreen === 'function') window.showScreen(h);
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootIfHash);
+  else bootIfHash();
+  window.addEventListener('hashchange', bootIfHash);
 })();
 </script>
 
