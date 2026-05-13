@@ -33515,9 +33515,200 @@ if (process.env.NODE_ENV === 'test') {
       if (!emailSent && isProd && !noEmailProvider && emailError) {
         respPayload.email_error = String(emailError).slice(0, 120);
       }
+
+      // 2026-05-13 — VERIFICACIÓN POR LINK + AUTO-LOGIN INMEDIATO
+      // Nuevo flujo: genera verify_token único, manda correo con LINK (además del
+      // OTP existente como respaldo), y firma JWT para que el cliente entre al POS
+      // SIN esperar la verificación. El POS mostrará banner amarillo/rojo "Verifica
+      // tu correo o se eliminará tu cuenta" hasta que se haga click en el link.
+      try {
+        const verifyToken = crypto.randomBytes(32).toString('hex');
+        // Guardar token en pos_users.notes para que el endpoint /verify-email-link lo encuentre
+        try {
+          const userRow = await supabaseRequest('GET', '/pos_users?id=eq.' + encodeURIComponent(userId) + '&select=notes&limit=1');
+          let nObj = {};
+          if (Array.isArray(userRow) && userRow[0] && userRow[0].notes) {
+            try { nObj = JSON.parse(userRow[0].notes); } catch(_) { nObj = {}; }
+          }
+          nObj.verify_token = verifyToken;
+          nObj.verify_token_created = Date.now();
+          nObj.verify_expires_at = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 días
+          await supabaseRequest('PATCH', '/pos_users?id=eq.' + encodeURIComponent(userId),
+            { notes: JSON.stringify(nObj) });
+        } catch (e) { /* no-fatal */ }
+
+        // Mandar correo con link grande (además del OTP como respaldo)
+        const host = req.headers && (req.headers['x-forwarded-host'] || req.headers.host) || 'systeminternational.app';
+        const verifyUrl = 'https://' + host + '/verify-email.html?token=' + verifyToken;
+        const html = ''
+          + '<div style="font-family:-apple-system,Segoe UI,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#1c1917;">'
+          +   '<h2 style="font-size:22px;margin:0 0 8px;color:#0F172A;">¡Bienvenido a Volvix POS!</h2>'
+          +   '<p style="font-size:15px;line-height:1.5;color:#475569;margin:0 0 16px;">Para activar tu cuenta, haz click en el siguiente botón. Tu sistema ya está listo esperándote.</p>'
+          +   '<div style="text-align:center;margin:24px 0;">'
+          +     '<a href="' + verifyUrl + '" style="display:inline-block;background:#EA580C;color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;">✓ Verificar mi correo</a>'
+          +   '</div>'
+          +   '<p style="font-size:13px;color:#64748B;margin:16px 0 6px;">O copia este link en tu navegador:</p>'
+          +   '<p style="font-size:12px;color:#94A3B8;word-break:break-all;background:#F8FAFC;padding:8px 12px;border-radius:6px;">' + verifyUrl + '</p>'
+          +   '<hr style="border:none;border-top:1px solid #E2E8F0;margin:24px 0;">'
+          +   '<p style="font-size:13px;color:#64748B;margin:0 0 6px;">¿No puedes hacer click? Usa este código manual:</p>'
+          +   '<p style="font-family:monospace;font-size:22px;font-weight:700;letter-spacing:6px;background:#FEF3C7;padding:10px 16px;border-radius:6px;display:inline-block;color:#78350F;">' + otpCode + '</p>'
+          +   '<p style="font-size:11px;color:#94A3B8;margin:24px 0 0;">⚠️ Si no verificas en 7 días, tu cuenta será eliminada por seguridad.</p>'
+          + '</div>';
+        try {
+          await sendEmail({
+            to: emailValue,
+            subject: 'Verifica tu correo · Volvix POS',
+            html: html,
+            text: 'Verifica tu cuenta haciendo click: ' + verifyUrl + '\nO usa el código: ' + otpCode + '\nSi no verificas en 7 días, tu cuenta será eliminada.',
+            template: 'verify_email_link'
+          });
+        } catch (_) { /* no bloquea — el banner en POS se encargará */ }
+
+        // Firmar JWT inmediato para auto-login (cuenta queda email_verified=false
+        // hasta que el usuario haga click en el link).
+        const jti = crypto.randomBytes(16).toString('hex');
+        const autoToken = signJWT({
+          id: userId, email: emailValue,
+          role: 'owner', tenant_id: tenantId,
+          email_verified: false,
+          jti: jti
+        });
+        respPayload.token = autoToken;
+        respPayload.session = {
+          user_id: userId, email: emailValue, tenant_id: tenantId,
+          role: 'owner', email_verified: false,
+          expires_at: Date.now() + 7 * 24 * 60 * 60 * 1000
+        };
+        respPayload.redirect = '/salvadorex-pos.html?welcome=1';
+        respPayload.verify_pending = true;
+      } catch (e) { /* si algo falla aquí, el viejo flujo OTP sigue funcional */ }
+
       return sendJSON(res, respPayload);
     } catch (err) {
       sendError(res, err);
+    }
+  };
+
+  // =================================================================
+  // POST /api/auth/resend-verify  (body: { email })
+  // Regenera el verify_token y reenvía el correo. Usado por el botón
+  // "📩 Reenviar correo" del banner amarillo/rojo en el POS.
+  // =================================================================
+  handlers['POST /api/auth/resend-verify'] = async (req, res) => {
+    try {
+      const ip = clientIp(req);
+      if (!rateLimit('resend-verify:ip:' + ip, 5, 60 * 60 * 1000)) {
+        return send429(res, 60000, 'Demasiados reenvíos. Espera 1 hora.');
+      }
+      const body = await readBody(req, { maxBytes: 1024 });
+      if (checkBodyError(req, res)) return;
+      const email = String(body.email || '').toLowerCase().trim();
+      if (!email || !isValidEmailServer(email)) {
+        return sendJSON(res, { ok: false, error: 'INVALID_EMAIL' }, 400);
+      }
+      const users = await supabaseRequest('GET',
+        '/pos_users?email=eq.' + encodeURIComponent(email) + '&select=id,email,notes,email_verified&limit=1');
+      if (!Array.isArray(users) || users.length === 0) {
+        return sendJSON(res, { ok: true, sent: false, reason: 'not_found' }); // no leak
+      }
+      const u = users[0];
+      if (u.email_verified) return sendJSON(res, { ok: true, sent: false, reason: 'already_verified' });
+      const verifyToken = crypto.randomBytes(32).toString('hex');
+      let nObj = {}; try { nObj = JSON.parse(u.notes || '{}'); } catch(_){}
+      nObj.verify_token = verifyToken;
+      nObj.verify_token_created = Date.now();
+      nObj.verify_expires_at = Date.now() + 7 * 24 * 60 * 60 * 1000;
+      try { await supabaseRequest('PATCH', '/pos_users?id=eq.' + encodeURIComponent(u.id), { notes: JSON.stringify(nObj) }); } catch(_){}
+      const host = req.headers && (req.headers['x-forwarded-host'] || req.headers.host) || 'systeminternational.app';
+      const verifyUrl = 'https://' + host + '/verify-email.html?token=' + verifyToken;
+      const html = ''
+        + '<div style="font-family:-apple-system,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#1c1917;">'
+        +   '<h2 style="font-size:22px;margin:0 0 8px;">Verifica tu correo</h2>'
+        +   '<p style="font-size:15px;line-height:1.5;color:#475569;margin:0 0 20px;">Haz click en el botón para activar tu cuenta de Volvix POS:</p>'
+        +   '<div style="text-align:center;margin:24px 0;"><a href="' + verifyUrl + '" style="display:inline-block;background:#EA580C;color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:700;">✓ Verificar mi correo</a></div>'
+        +   '<p style="font-size:12px;color:#94A3B8;word-break:break-all;background:#F8FAFC;padding:8px 12px;border-radius:6px;">' + verifyUrl + '</p>'
+        +   '<p style="font-size:11px;color:#94A3B8;margin-top:20px;">⚠️ Si no verificas en 7 días, tu cuenta será eliminada por seguridad.</p>'
+        + '</div>';
+      try {
+        await sendEmail({
+          to: email,
+          subject: 'Verifica tu correo · Volvix POS (reenvío)',
+          html: html,
+          text: 'Verifica tu cuenta: ' + verifyUrl,
+          template: 'verify_email_link_resend'
+        });
+      } catch(_) {}
+      return sendJSON(res, { ok: true, sent: true });
+    } catch (err) { sendError(res, err); }
+  };
+
+  // =================================================================
+  // GET /api/auth/verify-email-link?token=XYZ
+  // Verifica el correo del usuario que hizo click en el link enviado por
+  // register-simple. Marca email_verified=true, limpia el verify_token,
+  // redirige al POS con flag ?verified=1.
+  // =================================================================
+  handlers['GET /api/auth/verify-email-link'] = async (req, res) => {
+    try {
+      const u = new URL(req.url, 'http://x');
+      const token = u.searchParams.get('token') || '';
+      if (!token || token.length < 32) {
+        res.writeHead(302, { Location: '/verify-email.html?status=invalid' });
+        return res.end();
+      }
+      // Buscar el user que tenga este token en notes.verify_token
+      // (PostgREST no soporta búsqueda en JSON fácilmente, así que listamos los usuarios
+      // recientes y filtramos client-side. Cap 500 últimas 14 días para que sea barato.)
+      const cutoffIso = new Date(Date.now() - 14 * 86400000).toISOString();
+      const users = await supabaseRequest('GET',
+        '/pos_users?created_at=gte.' + encodeURIComponent(cutoffIso) +
+        '&select=id,email,notes,company_id,email_verified&limit=500&order=created_at.desc');
+      let match = null;
+      if (Array.isArray(users)) {
+        for (let i = 0; i < users.length; i++) {
+          try {
+            const n = JSON.parse(users[i].notes || '{}');
+            if (n.verify_token === token) {
+              // Validar expiración
+              if (n.verify_expires_at && Date.now() > Number(n.verify_expires_at)) {
+                res.writeHead(302, { Location: '/verify-email.html?status=expired' });
+                return res.end();
+              }
+              match = { user: users[i], notesObj: n };
+              break;
+            }
+          } catch (_) { /* skip */ }
+        }
+      }
+      if (!match) {
+        res.writeHead(302, { Location: '/verify-email.html?status=invalid' });
+        return res.end();
+      }
+      // Marcar verified
+      const nObj = match.notesObj;
+      delete nObj.verify_token;
+      delete nObj.verify_token_created;
+      delete nObj.verify_expires_at;
+      nObj.email_verified_at = new Date().toISOString();
+      try {
+        await supabaseRequest('PATCH', '/pos_users?id=eq.' + encodeURIComponent(match.user.id), {
+          email_verified: true,
+          is_active: true,
+          notes: JSON.stringify(nObj)
+        });
+        if (match.user.company_id) {
+          await supabaseRequest('PATCH', '/pos_companies?id=eq.' + encodeURIComponent(match.user.company_id),
+            { status: 'active', is_active: true, updated_at: new Date().toISOString() }).catch(() => {});
+        }
+      } catch (_) { /* no-fatal */ }
+      // Redirect a la página de verificación con flag OK
+      res.writeHead(302, { Location: '/verify-email.html?status=ok&email=' + encodeURIComponent(match.user.email || '') });
+      return res.end();
+    } catch (err) {
+      try {
+        res.writeHead(302, { Location: '/verify-email.html?status=error' });
+        res.end();
+      } catch (_) { sendError(res, err); }
     }
   };
 

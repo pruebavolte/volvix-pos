@@ -827,8 +827,6 @@
           state.user_id = res.body.user_id || null;
           state.email = res.body.email || state.formData.email;
 
-          // 2026-05-06: guardar email + phone para que el proximo registro/login
-          // los auto-rellene. Asi el usuario solo escribe la contraseña.
           try {
             localStorage.setItem('volvix_last_contact', JSON.stringify({
               email: state.formData.email,
@@ -837,6 +835,33 @@
             }));
           } catch (e) {}
 
+          // 2026-05-13 — VERIFY BY LINK: si el backend devolvió token+session,
+          // hacer auto-login DIRECTO al POS sin pedir OTP. El usuario verá un
+          // banner amarillo/rojo en el POS hasta que haga click en el link.
+          if (res.body.token && res.body.verify_pending) {
+            try { localStorage.setItem('volvix_token', res.body.token); } catch (_) {}
+            try {
+              var sj = JSON.stringify(res.body.session || {});
+              localStorage.setItem('volvix_session', sj);
+              localStorage.setItem('volvixSession', sj);
+            } catch (_) {}
+            $('#tenantIdBox').textContent = state.tenant_id || 'TNT-XXXXX';
+            // Mostrar paso 3 brevemente con mensaje "revisa tu correo"
+            try {
+              var step3 = document.querySelector('.step[data-step="3"]');
+              var h2 = step3 && step3.querySelector('h2');
+              var p  = step3 && step3.querySelector('p');
+              if (h2) h2.textContent = '¡Cuenta creada!';
+              if (p)  p.innerHTML = 'Te enviamos un correo a <b>'+state.email+'</b>. Revísalo y haz click en "Verificar mi correo".';
+            } catch(_) {}
+            setStep(3);
+            setTimeout(function () {
+              try { window.location.href = res.body.redirect || '/salvadorex-pos.html?welcome=1'; } catch (_) {}
+            }, 800);
+            return;
+          }
+
+          // Fallback al flujo OTP (legacy) si el backend no devolvió token
           var banner = document.getElementById('devOtpBanner');
           var bannerCode = document.getElementById('devOtpCode');
           var info = document.getElementById('otpInfo');
@@ -857,7 +882,6 @@
             if (info) info.style.display = '';
             alertBox('info', 'Código enviado a ' + state.email);
           }
-          // Eco del correo
           try {
             var echoEl = document.getElementById('otpEmailEcho');
             if (echoEl) echoEl.textContent = state.email || state.formData.email || '';

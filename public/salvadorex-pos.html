@@ -2740,6 +2740,107 @@
 </head>
 <body>
 
+<!-- ============ 2026-05-13 — BANNER VERIFICACIÓN EMAIL ============
+     Si la sesión actual tiene email_verified=false, mostramos un banner
+     persistente arriba del POS con mensaje rojo/amarillo: "Verifica tu correo
+     o se eliminará tu cuenta". Se oculta automáticamente cuando el usuario
+     hace click en el link del correo (?verified=1) o si email_verified=true
+     en la sesión guardada. ============================================== -->
+<div id="vlx-verify-banner" style="display:none;position:sticky;top:0;z-index:9998;
+     background:linear-gradient(90deg,#DC2626,#F59E0B);color:#fff;padding:10px 16px;
+     font:600 13px/1.4 -apple-system,Segoe UI,sans-serif;text-align:center;
+     box-shadow:0 2px 8px rgba(0,0,0,.15);">
+  <span style="font-size:16px;margin-right:6px;">⚠️</span>
+  <span>Ve a tu correo y haz click en el link de verificación · </span>
+  <strong>tu cuenta se eliminará en 7 días si no la verificas</strong>
+  <button onclick="window.__vlxResendVerify && window.__vlxResendVerify()"
+          style="margin-left:10px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);
+                 color:#fff;padding:3px 10px;border-radius:5px;cursor:pointer;font:600 11px inherit;">
+    📩 Reenviar correo
+  </button>
+  <button onclick="document.getElementById('vlx-verify-banner').style.display='none'"
+          style="margin-left:6px;background:none;border:none;color:#fff;cursor:pointer;
+                 font:600 11px inherit;opacity:.7;" title="Recordar más tarde">Cerrar</button>
+</div>
+<script>
+(function(){
+  'use strict';
+  // Mostrar banner si email_verified=false en la sesion guardada
+  function evaluateBanner(){
+    var session = null;
+    try {
+      var raw = localStorage.getItem('volvix_session') || localStorage.getItem('volvixSession');
+      if (raw) session = JSON.parse(raw);
+    } catch(_){}
+    var verified = session && session.email_verified;
+    if (verified === false) {
+      var el = document.getElementById('vlx-verify-banner');
+      if (el) el.style.display = 'block';
+    }
+  }
+  // Si la URL trae ?verified=1, ocultar banner + actualizar sesion + toast
+  function handleVerifyFlag(){
+    try {
+      var qs = new URLSearchParams(location.search);
+      if (qs.get('verified') === '1') {
+        try {
+          var raw = localStorage.getItem('volvix_session');
+          if (raw) {
+            var s = JSON.parse(raw);
+            s.email_verified = true;
+            localStorage.setItem('volvix_session', JSON.stringify(s));
+            localStorage.setItem('volvixSession', JSON.stringify(s));
+          }
+        } catch(_){}
+        var el = document.getElementById('vlx-verify-banner');
+        if (el) el.style.display = 'none';
+        // Toast verde de bienvenida
+        setTimeout(function(){
+          if (typeof window.showToast === 'function') {
+            window.showToast('✓ Correo verificado — tu cuenta ya está activa', 'success');
+          }
+        }, 800);
+        // Limpiar el param de la URL sin recargar
+        try { history.replaceState(null, '', location.pathname + location.hash); } catch(_){}
+      }
+      if (qs.get('welcome') === '1') {
+        setTimeout(function(){
+          if (typeof window.showToast === 'function') {
+            window.showToast('👋 ¡Bienvenido! Revisa tu correo para activar tu cuenta', 'info');
+          }
+        }, 800);
+        try { history.replaceState(null, '', location.pathname + location.hash); } catch(_){}
+      }
+    } catch(_){}
+  }
+  // Helper para reenviar correo de verificación
+  window.__vlxResendVerify = function(){
+    var session = null;
+    try { session = JSON.parse(localStorage.getItem('volvix_session') || '{}'); } catch(_){ session = {}; }
+    var email = session.email;
+    if (!email) { alert('No pudimos detectar tu email. Cierra sesión e inicia de nuevo.'); return; }
+    var tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
+    fetch('/api/auth/resend-verify', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+tok },
+      body: JSON.stringify({ email: email })
+    }).then(function(r){
+      if (r.ok) {
+        if (typeof window.showToast === 'function') window.showToast('📩 Correo reenviado a '+email,'success');
+        else alert('Correo reenviado a '+email);
+      } else {
+        if (typeof window.showToast === 'function') window.showToast('No pudimos reenviar. Intenta más tarde.','error');
+      }
+    }).catch(function(){
+      if (typeof window.showToast === 'function') window.showToast('Error de red. Intenta más tarde.','error');
+    });
+  };
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function(){ evaluateBanner(); handleVerifyFlag(); });
+  } else { evaluateBanner(); handleVerifyFlag(); }
+})();
+</script>
+
 <!-- ============ 2026-05-09 IMPERSONATION (?impersonate=email&tid=tid) ============
      Cuando el superadmin hace click en "👁 Ver como" desde el módulo Usuarios,
      abre el POS en una nueva pestaña con estos params. Aquí:

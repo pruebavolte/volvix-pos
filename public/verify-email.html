@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Verifica tu correo · Volvix POS</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin:0; font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;
+    background:#FAFAF9; color:#1C1917; min-height:100vh;
+    display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  .card {
+    background:#fff; border-radius:14px; padding:32px 28px; max-width:480px; width:100%;
+    box-shadow:0 8px 32px rgba(0,0,0,.08); text-align:center;
+  }
+  .emoji { font-size:64px; line-height:1; margin-bottom:14px; }
+  h1 { font-size:22px; margin:0 0 10px; font-weight:700; }
+  p  { font-size:14px; color:#475569; margin:0 0 8px; line-height:1.55; }
+  .email-display { background:#F1F5F9; padding:6px 12px; border-radius:6px; font-family:monospace; font-size:13px; display:inline-block; margin:6px 0; color:#1E293B; }
+  .btn {
+    display:inline-block; margin-top:18px; padding:12px 28px;
+    background:#EA580C; color:#fff; border:none; border-radius:8px;
+    font:600 14px inherit; cursor:pointer; text-decoration:none;
+  }
+  .btn:hover { background:#c2410c; }
+  .btn.secondary { background:#fff; color:#475569; border:1px solid #C9C7C3; margin-left:8px; }
+  .countdown { font-size:12px; color:#94A3B8; margin-top:14px; }
+  .ok    .emoji { color:#16A34A; }
+  .err   .emoji { color:#DC2626; }
+  .warn  .emoji { color:#F59E0B; }
+  .pending .emoji { color:#0284C7; }
+</style>
+</head>
+<body>
+
+<div class="card" id="card">
+  <div class="emoji" id="emoji">⏳</div>
+  <h1 id="title">Verificando tu correo…</h1>
+  <p id="msg">Un momento, estamos confirmando tu cuenta.</p>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var card  = document.getElementById('card');
+  var emoji = document.getElementById('emoji');
+  var title = document.getElementById('title');
+  var msg   = document.getElementById('msg');
+
+  var qs = new URLSearchParams(location.search);
+  var status = qs.get('status');
+  var token  = qs.get('token');
+  var email  = qs.get('email') || '';
+
+  function render(state, payload){
+    card.className = 'card ' + state;
+    emoji.textContent = payload.emoji || '';
+    title.textContent = payload.title || '';
+    msg.innerHTML = payload.msg || '';
+    if (payload.cta) msg.insertAdjacentHTML('beforeend', payload.cta);
+  }
+
+  // Si la URL trae ?status= (redirect del backend), mostramos resultado directo
+  if (status === 'ok') {
+    render('ok', {
+      emoji: '✅',
+      title: '¡Correo verificado!',
+      msg: (email ? '<div class="email-display">' + escapeHtml(email) + '</div><br>' : '') +
+           'Tu cuenta está activa. Te llevamos a tu POS en <span id="cd">3</span> segundos…' +
+           '<div><a href="/salvadorex-pos.html?verified=1" class="btn">Ir a mi POS ahora</a></div>'
+    });
+    var cd = 3;
+    var iv = setInterval(function(){
+      cd--;
+      var el = document.getElementById('cd');
+      if (el) el.textContent = cd;
+      if (cd <= 0) { clearInterval(iv); location.replace('/salvadorex-pos.html?verified=1'); }
+    }, 1000);
+    return;
+  }
+  if (status === 'expired') {
+    render('warn', {
+      emoji: '⏰',
+      title: 'El link expiró',
+      msg: 'Han pasado más de 7 días desde que creaste tu cuenta. Por favor inicia sesión y solicita un nuevo correo de verificación.' +
+           '<div><a href="/login.html" class="btn">Iniciar sesión</a></div>'
+    });
+    return;
+  }
+  if (status === 'invalid' || status === 'error') {
+    render('err', {
+      emoji: '⚠️',
+      title: 'No pudimos verificar tu cuenta',
+      msg: 'El link es inválido o ya fue usado. Si tu cuenta ya está verificada, simplemente inicia sesión.' +
+           '<div><a href="/login.html" class="btn">Iniciar sesión</a> <a href="/registro.html" class="btn secondary">Crear otra cuenta</a></div>'
+    });
+    return;
+  }
+
+  // Si solo trae ?token=, redirigir al endpoint backend que hace la verificación
+  if (token && token.length >= 32) {
+    location.replace('/api/auth/verify-email-link?token=' + encodeURIComponent(token));
+    return;
+  }
+
+  // Sin status ni token — landing genérica
+  render('pending', {
+    emoji: '📬',
+    title: 'Verifica tu correo',
+    msg: 'Te enviamos un correo de verificación a tu cuenta. Haz click en el botón "✓ Verificar mi correo" dentro del email.' +
+         '<div><a href="/salvadorex-pos.html" class="btn">Ir a mi POS</a></div>'
+  });
+
+  function escapeHtml(s){ return String(s).replace(/[<>&"']/g,function(c){return ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'})[c];}); }
+})();
+</script>
+
+</body>
+</html>
