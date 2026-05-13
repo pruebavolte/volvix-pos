@@ -5033,7 +5033,7 @@
     cliente:    { label: 'Cliente Final',  items: ['aplicacion','marketplace'] },
     cocina:     { label: 'Cocina & KDS',   items: ['kds'] },
     // 2026-05-12: módulos verticales (giros específicos)
-    verticales: { label: 'Verticales',     items: ['rentas','reservaciones'] },
+    verticales: { label: 'Verticales',     items: ['rentas','reservaciones','mapa'] },
     // 2026-05-09 fix: bucket "Otros" se rellena dinámicamente en runtime con
     // cualquier módulo de BD que no esté listado arriba (single source of truth).
     otros:      { label: 'Otros',          items: [] },
@@ -5118,6 +5118,8 @@
     // no MOD_LABELS de mas arriba — por eso rentas/reservaciones no aparecían
     // a pesar de estar en MOD_CATEGORIES.verticales.items)
     rentas:'🔑 Renta de Equipo', reservaciones:'📅 Reservaciones',
+    // 2026-05-13: motor visual de distribución (universal layout builder)
+    mapa:'🗺️ Mapa del lugar',
   };
   const FEAT_LABELS_GLOBAL = {
     'pos.cobrar':'💵 F12 — Cobrar','pos.descuento':'% Descuento',
@@ -5535,7 +5537,7 @@
       tarjetas: 'Tarjetas virtuales', promociones: 'Promociones', departamentos: 'Departamentos',
       sugeridas: 'Compras sugeridas', actualizador: 'Actualizador', kardex: 'Kardex',
       usuarios: 'Usuarios', config: 'Configuración',
-      rentas: 'Renta de Equipo', reservaciones: 'Reservaciones',
+      rentas: 'Renta de Equipo', reservaciones: 'Reservaciones', mapa: 'Mapa del lugar',
     };
     const moduleName = labelMap[k] || k;
     const childButtons = Object.keys(FEAT_PARENT_MOD).filter(bk => FEAT_PARENT_MOD[bk] === k);

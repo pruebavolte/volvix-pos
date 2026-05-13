@@ -3514,6 +3514,10 @@
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       <span data-term="reservaciones_menu">📅 Reservas</span>
     </button>
+    <button class="menu-btn" data-feature="module.mapa" data-menu="mapa" onclick="showScreen('mapa')">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+      <span data-term="mapa_menu">🗺️ Mapa</span>
+    </button>
 
     <button class="menu-btn more" onclick="openMasModulos()">
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2.5"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
@@ -5652,6 +5656,65 @@
           <span id="resv-count" style="font-size:12px;color:var(--text-2,#57534E);">0 reservaciones</span>
         </div>
         <div id="resv-grid-wrap" style="overflow:auto;"></div>
+      </div>
+    </section>
+
+    <!-- ============ MAPA DEL LUGAR — motor visual universal (2026-05-13) ============
+         Layout builder estilo Canva+Figma+Google Maps. Objetos arrastrables
+         (mesa/silla/barra/escenario/pared/etc.) en capas (terrazas/pisos/zonas).
+         Modo Diseñador (editar layout) y Operación (cambiar status: libre/
+         ocupada/reservada/limpieza). Persiste como JSON en volvix.mapa.v1.
+         Funciona para restaurante/bar/cine/casino/salón/hotel/cualquier giro. -->
+    <section id="screen-mapa" class="screen-pad hidden">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title" data-term="mapa_title">🗺️ Mapa del lugar</h1>
+          <p class="page-sub" id="mapa-sub">Diseñador visual de espacios · objetos · capas · plantillas</p>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="btn" id="mapa-mode-toggle" onclick="MapaUI && MapaUI.toggleMode()">⚙️ Modo diseñador</button>
+          <button class="btn" data-feature="mapa.templates" onclick="MapaUI && MapaUI.openTemplates()">📐 Plantillas</button>
+          <button class="btn" data-feature="mapa.exportar"  onclick="MapaUI && MapaUI.exportar()">⬇️ Exportar JSON</button>
+          <button class="btn" data-feature="mapa.importar"  onclick="MapaUI && MapaUI.importar()">⬆️ Importar JSON</button>
+        </div>
+      </div>
+
+      <!-- Layout 3-cols: toolbox | canvas | properties -->
+      <div style="display:grid;grid-template-columns:200px 1fr 240px;gap:12px;margin-top:10px;height:calc(100vh - 180px);min-height:520px;">
+
+        <!-- COL 1: Toolbox + Layers -->
+        <div class="card" style="overflow:auto;padding:0;">
+          <div style="padding:10px 12px;border-bottom:1px solid var(--border,#E0DEDB);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text-2,#57534E);">Objetos</div>
+          <div id="mapa-toolbox" style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;padding:10px;"></div>
+          <div style="padding:10px 12px;border-top:1px solid var(--border,#E0DEDB);border-bottom:1px solid var(--border,#E0DEDB);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text-2,#57534E);display:flex;justify-content:space-between;align-items:center;">
+            <span>Capas</span>
+            <button data-feature="mapa.add_layer" onclick="MapaUI && MapaUI.addLayer()" style="background:none;border:none;color:#EA580C;cursor:pointer;font-size:14px;font-weight:700;">＋</button>
+          </div>
+          <div id="mapa-layers" style="padding:6px 0;"></div>
+        </div>
+
+        <!-- COL 2: Canvas wrapper -->
+        <div class="card" style="overflow:hidden;position:relative;padding:0;background:#fafaf9;">
+          <div style="padding:6px 10px;border-bottom:1px solid var(--border,#E0DEDB);display:flex;gap:6px;align-items:center;font-size:12px;background:#fff;">
+            <button data-feature="mapa.zoom_out" onclick="MapaUI && MapaUI.zoomBy(-0.1)" style="border:1px solid var(--border-strong,#C9C7C3);background:#fff;border-radius:4px;cursor:pointer;width:24px;height:24px;">−</button>
+            <span id="mapa-zoom-label" style="min-width:50px;text-align:center;font-variant-numeric:tabular-nums;">100%</span>
+            <button data-feature="mapa.zoom_in" onclick="MapaUI && MapaUI.zoomBy(0.1)" style="border:1px solid var(--border-strong,#C9C7C3);background:#fff;border-radius:4px;cursor:pointer;width:24px;height:24px;">＋</button>
+            <button data-feature="mapa.zoom_fit" onclick="MapaUI && MapaUI.zoomFit()" style="border:1px solid var(--border-strong,#C9C7C3);background:#fff;border-radius:4px;cursor:pointer;padding:0 8px;height:24px;font-size:11px;">Ajustar</button>
+            <span style="margin-left:auto;color:var(--text-2,#57534E);" id="mapa-status">Listo</span>
+          </div>
+          <div id="mapa-canvas-wrap" style="position:absolute;top:38px;bottom:0;left:0;right:0;overflow:auto;background:#fafaf9;cursor:default;">
+            <canvas id="mapa-canvas" width="1600" height="1200" style="display:block;background:#fff;background-image:linear-gradient(#E0DEDB 1px,transparent 1px),linear-gradient(90deg,#E0DEDB 1px,transparent 1px);background-size:20px 20px;"></canvas>
+          </div>
+        </div>
+
+        <!-- COL 3: Properties panel -->
+        <div class="card" style="overflow:auto;padding:12px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text-2,#57534E);margin-bottom:10px;">Propiedades</div>
+          <div id="mapa-props">
+            <div style="color:var(--text-3,#A8A29E);font-size:13px;font-style:italic;">Selecciona un objeto en el canvas para editarlo.</div>
+          </div>
+        </div>
+
       </div>
     </section>
 
@@ -19910,6 +19973,488 @@ window.addEventListener('volvix:version-loaded', function(e){
   };
   window.ReservacionesUI = ReservacionesUI;
 
+  // ════════════════════════════════ MAPA DEL LUGAR ════════════════════════════════
+  // Motor visual universal: arrastrar objetos en canvas, capas, plantillas.
+  // Persistencia JSON en localStorage. Modo Diseñador / Operación.
+  var MAPA_STORAGE = 'volvix.mapa.v1';
+  var OBJ_TYPES = {
+    'table-round':  { label:'Mesa redonda',  emoji:'🟢', w:60, h:60,  shape:'circle',   color:'#3B82F6', defaultCap:4 },
+    'table-square': { label:'Mesa cuadrada', emoji:'⬛', w:70, h:70,  shape:'rect',     color:'#2563EB', defaultCap:4 },
+    'table-rect':   { label:'Mesa rectangular', emoji:'▭', w:120, h:60, shape:'rect',   color:'#1D4ED8', defaultCap:6 },
+    'chair':        { label:'Silla',         emoji:'🪑', w:24, h:24,  shape:'circle',   color:'#94A3B8', defaultCap:1 },
+    'sofa':         { label:'Sofá / sillón', emoji:'🛋', w:140, h:50, shape:'rect',     color:'#A78BFA', defaultCap:3 },
+    'bar':          { label:'Barra',         emoji:'🍸', w:200, h:40, shape:'rect',     color:'#92400E', defaultCap:0 },
+    'stage':        { label:'Escenario',     emoji:'🎤', w:200, h:80, shape:'rect',     color:'#7C3AED', defaultCap:0 },
+    'screen':       { label:'Pantalla / TV', emoji:'📺', w:160, h:30, shape:'rect',     color:'#0F172A', defaultCap:0 },
+    'door':         { label:'Puerta',        emoji:'🚪', w:40, h:12,  shape:'rect',     color:'#84CC16', defaultCap:0 },
+    'wall':         { label:'Pared',         emoji:'▮',  w:200, h:8,  shape:'rect',     color:'#1F2937', defaultCap:0 },
+    'area':         { label:'Área / zona',   emoji:'⬜', w:240, h:160, shape:'area',    color:'#FED7AA', defaultCap:0 },
+    'bathroom':     { label:'Baños',         emoji:'🚻', w:80, h:60,  shape:'rect',     color:'#06B6D4', defaultCap:0 },
+    'kitchen':      { label:'Cocina',        emoji:'🍳', w:140, h:100, shape:'rect',    color:'#F97316', defaultCap:0 },
+    'cashier':      { label:'Caja',          emoji:'💵', w:80, h:60,  shape:'rect',     color:'#16A34A', defaultCap:0 },
+    'plant':        { label:'Planta',        emoji:'🪴', w:30, h:30,  shape:'circle',   color:'#22C55E', defaultCap:0 }
+  };
+  var STATUS_COLORS = {
+    available: '#16A34A', occupied:'#DC2626', reserved:'#F59E0B', cleaning:'#06B6D4', blocked:'#374151'
+  };
+  var TEMPLATES = {
+    blanco:      { name:'Vacío',          layers:[{ id:'l1', name:'Piso 1', visible:true, locked:false, objects:[] }] },
+    restaurante: { name:'Restaurante chico', layers:[{ id:'l1', name:'Salón', visible:true, locked:false, objects:[
+      _t('table-round',  120, 140, {name:'M1', capacity:4}), _t('table-round', 240, 140, {name:'M2', capacity:4}),
+      _t('table-round',  360, 140, {name:'M3', capacity:4}), _t('table-round', 480, 140, {name:'M4', capacity:4}),
+      _t('table-square', 120, 280, {name:'M5', capacity:4}), _t('table-square',240, 280, {name:'M6', capacity:4}),
+      _t('table-square', 360, 280, {name:'M7', capacity:4}), _t('table-square',480, 280, {name:'M8', capacity:4}),
+      _t('bar',  120, 420, {name:'Barra'}), _t('cashier',  400, 420, {name:'Caja'}),
+      _t('door', 50, 40, {name:'Entrada'}), _t('bathroom', 600, 40, {name:'Baños'})
+    ] }] },
+    bar:         { name:'Bar / Antro',    layers:[{ id:'l1', name:'Planta baja', visible:true, locked:false, objects:[
+      _t('bar', 100, 60, {name:'Barra principal', width:300}),
+      _t('table-round', 100, 200, {name:'B1', capacity:4}), _t('table-round', 220, 200, {name:'B2', capacity:4}),
+      _t('table-round', 340, 200, {name:'B3', capacity:4}), _t('table-round', 460, 200, {name:'B4', capacity:4}),
+      _t('stage', 200, 360, {name:'DJ Booth', width:240, height:60}),
+      _t('door', 50, 40, {name:'Entrada'}), _t('bathroom', 540, 40, {name:'Baños'})
+    ] }] },
+    cine:        { name:'Sala de cine',   layers:[{ id:'l1', name:'Sala', visible:true, locked:false, objects:_buildCinemaSeats() }] },
+    salon:       { name:'Salón eventos',  layers:[{ id:'l1', name:'Salón principal', visible:true, locked:false, objects:[
+      _t('stage', 200, 60, {name:'Escenario', width:280, height:80}),
+      _t('table-round', 100, 220, {name:'M1', capacity:8, width:90, height:90}),
+      _t('table-round', 260, 220, {name:'M2', capacity:8, width:90, height:90}),
+      _t('table-round', 420, 220, {name:'M3', capacity:8, width:90, height:90}),
+      _t('table-round', 100, 380, {name:'M4', capacity:8, width:90, height:90}),
+      _t('table-round', 260, 380, {name:'M5', capacity:8, width:90, height:90}),
+      _t('table-round', 420, 380, {name:'M6', capacity:8, width:90, height:90}),
+      _t('bar', 600, 220, {name:'Barra'})
+    ] }] }
+  };
+  function _t(type, x, y, extra){
+    var def = OBJ_TYPES[type];
+    var o = { id:'obj_'+Math.random().toString(36).slice(2,9), type:type, x:x, y:y,
+              width: def.w, height: def.h, rotation:0, name:def.label, color:def.color,
+              capacity: def.defaultCap, status:'available' };
+    if (extra) for (var k in extra) o[k] = extra[k];
+    return o;
+  }
+  function _buildCinemaSeats(){
+    var objs = [_t('screen', 80, 40, {name:'Pantalla', width:500, height:30})];
+    var rows = ['A','B','C','D','E','F'];
+    for (var r=0; r<rows.length; r++){
+      for (var c=0; c<10; c++){
+        objs.push(_t('chair', 100+c*45, 130+r*50, {name:rows[r]+(c+1), capacity:1}));
+      }
+    }
+    return objs;
+  }
+
+  var MapaUI = {
+    mode: 'design', // 'design' | 'operation'
+    selectedLayer: 0,
+    selectedIds: [],
+    zoom: 1,
+    state: null,
+    drag: null, // {type:'move'|'create', startX, startY, objId, offsetX, offsetY, newType}
+
+    load: function(){
+      var raw = null;
+      try { raw = localStorage.getItem(MAPA_STORAGE); } catch(_){}
+      if (raw) {
+        try { this.state = JSON.parse(raw); } catch(_){ this.state = null; }
+      }
+      if (!this.state || !this.state.layers || !this.state.layers.length) {
+        this.state = JSON.parse(JSON.stringify(TEMPLATES.restaurante));
+      }
+    },
+    save: function(){
+      try { localStorage.setItem(MAPA_STORAGE, JSON.stringify(this.state)); } catch(_){}
+    },
+
+    render: function(){
+      if (!this.state) this.load();
+      this.renderToolbox();
+      this.renderLayers();
+      this.renderCanvas();
+      this.renderProps();
+      this.updateZoomLabel();
+    },
+
+    renderToolbox: function(){
+      var el = $('#mapa-toolbox'); if (!el) return;
+      var html = '';
+      Object.keys(OBJ_TYPES).forEach(function(t){
+        var d = OBJ_TYPES[t];
+        html += '<button data-mapa-tool="'+t+'" title="'+esc(d.label)+'" style="padding:8px 4px;border:1px solid #C9C7C3;background:#fff;border-radius:6px;cursor:grab;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:2px;">'
+              +   '<span style="font-size:18px;">'+d.emoji+'</span>'
+              +   '<span style="font-size:9px;color:#57534E;text-align:center;line-height:1.1;">'+esc(d.label.split(' ')[0])+'</span>'
+              + '</button>';
+      });
+      el.innerHTML = html;
+    },
+
+    renderLayers: function(){
+      var el = $('#mapa-layers'); if (!el) return;
+      var self = this;
+      el.innerHTML = this.state.layers.map(function(L, i){
+        var sel = i === self.selectedLayer;
+        return '<div data-mapa-layer="'+i+'" style="padding:8px 12px;display:flex;align-items:center;gap:6px;background:'+(sel?'#FFF7ED':'#fff')+';border-left:3px solid '+(sel?'#EA580C':'transparent')+';cursor:pointer;font-size:13px;">'
+              +   '<span data-mapa-vis="'+i+'" title="Mostrar/ocultar" style="cursor:pointer;width:18px;text-align:center;">'+(L.visible?'👁️':'🙈')+'</span>'
+              +   '<span style="flex:1;'+(L.visible?'':'opacity:.4;')+'">'+esc(L.name)+'</span>'
+              +   '<span data-mapa-lock="'+i+'" title="Bloquear" style="cursor:pointer;">'+(L.locked?'🔒':'🔓')+'</span>'
+              +   (self.state.layers.length>1 ? '<span data-mapa-rm="'+i+'" title="Eliminar capa" style="cursor:pointer;color:#DC2626;">🗑</span>' : '')
+              + '</div>';
+      }).join('');
+    },
+
+    renderCanvas: function(){
+      var c = $('#mapa-canvas'); if (!c) return;
+      var ctx = c.getContext('2d');
+      ctx.save();
+      ctx.clearRect(0, 0, c.width, c.height);
+      // Las capas inferiores se dibujan primero
+      var self = this;
+      this.state.layers.forEach(function(L, li){
+        if (!L.visible) return;
+        var isCurrent = li === self.selectedLayer;
+        L.objects.forEach(function(o){
+          self._drawObject(ctx, o, isCurrent && self.selectedIds.indexOf(o.id) >= 0);
+        });
+      });
+      ctx.restore();
+    },
+
+    _drawObject: function(ctx, o, selected){
+      var def = OBJ_TYPES[o.type] || OBJ_TYPES['table-square'];
+      var w = o.width || def.w;
+      var h = o.height || def.h;
+      var fill = (this.mode === 'operation' && def.defaultCap > 0 && o.status)
+                 ? STATUS_COLORS[o.status] || o.color || def.color
+                 : (o.color || def.color);
+      ctx.save();
+      ctx.translate(o.x + w/2, o.y + h/2);
+      if (o.rotation) ctx.rotate(o.rotation * Math.PI / 180);
+      ctx.fillStyle = fill;
+      ctx.strokeStyle = selected ? '#EA580C' : 'rgba(0,0,0,.3)';
+      ctx.lineWidth = selected ? 3 : 1;
+      var shape = def.shape;
+      if (shape === 'circle') {
+        ctx.beginPath();
+        ctx.ellipse(0, 0, w/2, h/2, 0, 0, Math.PI*2);
+        ctx.fill(); ctx.stroke();
+      } else if (shape === 'area') {
+        ctx.globalAlpha = 0.35;
+        ctx.fillRect(-w/2, -h/2, w, h);
+        ctx.globalAlpha = 1;
+        ctx.setLineDash([6,4]);
+        ctx.strokeRect(-w/2, -h/2, w, h);
+        ctx.setLineDash([]);
+      } else {
+        ctx.fillRect(-w/2, -h/2, w, h);
+        ctx.strokeRect(-w/2, -h/2, w, h);
+      }
+      // Texto: nombre + capacidad
+      ctx.fillStyle = '#fff';
+      ctx.strokeStyle = 'rgba(0,0,0,.5)';
+      ctx.lineWidth = 2;
+      ctx.font = 'bold 11px -apple-system, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      var label = (o.name||'').slice(0,12);
+      if (def.defaultCap > 0 && o.capacity) label += ' ('+o.capacity+')';
+      if (label) {
+        ctx.strokeText(label, 0, 0);
+        ctx.fillText(label, 0, 0);
+      }
+      ctx.restore();
+    },
+
+    renderProps: function(){
+      var el = $('#mapa-props'); if (!el) return;
+      if (!this.selectedIds.length) {
+        el.innerHTML = '<div style="color:#A8A29E;font-size:13px;font-style:italic;">Selecciona un objeto en el canvas para editarlo.</div>'
+                     + '<hr style="margin:14px 0;border:none;border-top:1px solid #E0DEDB;">'
+                     + '<div style="font-size:12px;color:#57534E;line-height:1.6;">'
+                     + '<b>Tips:</b><br>'
+                     + '• Arrastra desde la barra izquierda al canvas para crear<br>'
+                     + '• Click en objeto para seleccionar<br>'
+                     + '• Arrastra objeto para mover<br>'
+                     + '• Modo operación: click cambia estado<br>'
+                     + '• Las capas son como pisos/zonas</div>';
+        return;
+      }
+      var o = this.findObject(this.selectedIds[0]);
+      if (!o) { el.innerHTML = ''; return; }
+      var def = OBJ_TYPES[o.type] || {};
+      var statusOptions = ['available','occupied','reserved','cleaning','blocked'];
+      el.innerHTML =
+          '<div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;"><span style="font-size:22px;">'+def.emoji+'</span><b>'+esc(def.label||o.type)+'</b></div>'
+        + _input('Nombre', o.name, 'mapa-prop-name')
+        + (def.defaultCap > 0 ? _input('Capacidad', o.capacity||0, 'mapa-prop-cap', 'number') : '')
+        + _input('Color', o.color, 'mapa-prop-color', 'color')
+        + _row(_input('X', Math.round(o.x), 'mapa-prop-x', 'number'), _input('Y', Math.round(o.y), 'mapa-prop-y', 'number'))
+        + _row(_input('Ancho', Math.round(o.width||def.w), 'mapa-prop-w', 'number'), _input('Alto', Math.round(o.height||def.h), 'mapa-prop-h', 'number'))
+        + _input('Rotación (°)', o.rotation||0, 'mapa-prop-rot', 'number')
+        + (def.defaultCap > 0
+            ? '<div style="margin-bottom:8px;"><label style="display:block;font-size:11px;color:#57534E;font-weight:600;margin-bottom:3px;">Estado</label><select id="mapa-prop-status" style="width:100%;padding:6px 8px;border:1px solid #C9C7C3;border-radius:5px;font:12px inherit;">'
+              + statusOptions.map(function(s){return '<option value="'+s+'"'+(s===o.status?' selected':'')+'>'+s+'</option>';}).join('')
+              + '</select></div>'
+            : '')
+        + '<div style="display:flex;gap:6px;margin-top:14px;">'
+        +   '<button data-feature="mapa.duplicate" onclick="MapaUI.duplicateSelected()" style="flex:1;padding:6px;background:#fff;border:1px solid #C9C7C3;border-radius:5px;cursor:pointer;font-size:12px;">📋 Duplicar</button>'
+        +   '<button data-feature="mapa.delete" onclick="MapaUI.deleteSelected()" style="flex:1;padding:6px;background:#FEE2E2;border:1px solid #FCA5A5;color:#991B1B;border-radius:5px;cursor:pointer;font-size:12px;">🗑 Eliminar</button>'
+        + '</div>';
+      function _input(label, value, id, type){
+        type = type || 'text';
+        return '<div style="margin-bottom:8px;"><label style="display:block;font-size:11px;color:#57534E;font-weight:600;margin-bottom:3px;">'+label+'</label><input id="'+id+'" type="'+type+'" value="'+esc(value==null?'':value)+'" style="width:100%;padding:6px 8px;border:1px solid #C9C7C3;border-radius:5px;font:12px inherit;'+(type==='color'?'height:32px;':'')+'"></div>';
+      }
+      function _row(a,b){ return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">'+a+b+'</div>'; }
+      // Wire los inputs para apply on change
+      ['name','cap','color','x','y','w','h','rot','status'].forEach(function(k){
+        var i = document.getElementById('mapa-prop-'+k);
+        if (!i) return;
+        i.addEventListener('input', function(){ MapaUI.applyPropEdit(); });
+        i.addEventListener('change', function(){ MapaUI.applyPropEdit(); });
+      });
+    },
+
+    applyPropEdit: function(){
+      if (!this.selectedIds.length) return;
+      var o = this.findObject(this.selectedIds[0]); if (!o) return;
+      function val(id, num){ var el=document.getElementById(id); if(!el) return null; return num ? Number(el.value)||0 : el.value; }
+      var n=val('mapa-prop-name'); if (n!==null) o.name=n;
+      var c=val('mapa-prop-cap', true); if (c!==null) o.capacity=c;
+      var col=val('mapa-prop-color'); if (col) o.color=col;
+      var x=val('mapa-prop-x', true); if (x!==null) o.x=x;
+      var y=val('mapa-prop-y', true); if (y!==null) o.y=y;
+      var w=val('mapa-prop-w', true); if (w!==null) o.width=Math.max(8,w);
+      var h=val('mapa-prop-h', true); if (h!==null) o.height=Math.max(8,h);
+      var r=val('mapa-prop-rot', true); if (r!==null) o.rotation=r;
+      var s=val('mapa-prop-status'); if (s) o.status=s;
+      this.save();
+      this.renderCanvas();
+    },
+
+    findObject: function(id){
+      for (var i=0; i<this.state.layers.length; i++){
+        var L = this.state.layers[i];
+        for (var j=0; j<L.objects.length; j++) if (L.objects[j].id === id) return L.objects[j];
+      }
+      return null;
+    },
+    findObjectAt: function(x, y){
+      // En orden inverso (top-most primero) sobre capas visibles
+      for (var i=this.state.layers.length-1; i>=0; i--){
+        var L = this.state.layers[i]; if (!L.visible) continue;
+        for (var j=L.objects.length-1; j>=0; j--){
+          var o = L.objects[j], def=OBJ_TYPES[o.type]||{};
+          var w = o.width||def.w||50, h = o.height||def.h||50;
+          if (x>=o.x && x<=o.x+w && y>=o.y && y<=o.y+h) return { obj:o, layerIdx:i };
+        }
+      }
+      return null;
+    },
+
+    addObject: function(type, x, y){
+      var L = this.state.layers[this.selectedLayer]; if (!L || L.locked) return null;
+      var o = _t(type, x, y);
+      L.objects.push(o);
+      this.selectedIds = [o.id];
+      this.save();
+      this.render();
+      return o;
+    },
+    duplicateSelected: function(){
+      if (!this.selectedIds.length) return;
+      var o = this.findObject(this.selectedIds[0]); if (!o) return;
+      var L = this.state.layers[this.selectedLayer]; if (!L || L.locked) return;
+      var nu = JSON.parse(JSON.stringify(o));
+      nu.id = 'obj_'+Math.random().toString(36).slice(2,9);
+      nu.x += 20; nu.y += 20; nu.name = (nu.name||'')+' copia';
+      L.objects.push(nu);
+      this.selectedIds = [nu.id];
+      this.save();
+      this.render();
+    },
+    deleteSelected: function(){
+      if (!this.selectedIds.length) return;
+      var ids = this.selectedIds.slice();
+      this.state.layers.forEach(function(L){
+        L.objects = L.objects.filter(function(o){ return ids.indexOf(o.id) < 0; });
+      });
+      this.selectedIds = [];
+      this.save();
+      this.render();
+    },
+    addLayer: function(){
+      var n = prompt('Nombre de la capa (ej: Terraza, Piso 2, VIP):', 'Nueva capa');
+      if (!n) return;
+      this.state.layers.push({ id:'l'+Date.now(), name:n, visible:true, locked:false, objects:[] });
+      this.selectedLayer = this.state.layers.length-1;
+      this.save(); this.render();
+    },
+    removeLayer: function(i){
+      if (this.state.layers.length <= 1) return;
+      if (!confirm('¿Eliminar capa "'+this.state.layers[i].name+'" con '+this.state.layers[i].objects.length+' objetos?')) return;
+      this.state.layers.splice(i, 1);
+      if (this.selectedLayer >= this.state.layers.length) this.selectedLayer = this.state.layers.length-1;
+      this.save(); this.render();
+    },
+    toggleLayerVis: function(i){ this.state.layers[i].visible = !this.state.layers[i].visible; this.save(); this.render(); },
+    toggleLayerLock: function(i){ this.state.layers[i].locked = !this.state.layers[i].locked; this.save(); this.render(); },
+
+    toggleMode: function(){
+      this.mode = (this.mode === 'design') ? 'operation' : 'design';
+      var btn = $('#mapa-mode-toggle');
+      if (btn) btn.textContent = this.mode === 'design' ? '⚙️ Modo diseñador' : '👥 Modo operación';
+      this.renderCanvas();
+      tToast(this.mode === 'design' ? 'Modo diseñador (editar layout)' : 'Modo operación (click = cambiar estado)');
+    },
+
+    openTemplates: function(){
+      var keys = Object.keys(TEMPLATES);
+      var html = '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">'
+        + keys.map(function(k){return '<button type="button" data-mapa-tpl="'+k+'" style="padding:14px;border:1px solid #C9C7C3;background:#fff;border-radius:8px;cursor:pointer;text-align:left;"><div style="font-weight:700;font-size:14px;">'+esc(TEMPLATES[k].name)+'</div><div style="font-size:11px;color:#57534E;margin-top:4px;">'+TEMPLATES[k].layers[0].objects.length+' objetos preconfigurados</div></button>';}).join('')
+        + '</div><p style="font-size:11px;color:#A8A29E;margin-top:10px;">⚠️ Reemplaza el layout actual. Exporta antes si quieres conservar tu diseño.</p>';
+      var self = this;
+      _pdcMiniModal({
+        title: '📐 Plantillas inteligentes',
+        bodyHtml: html,
+        noFields: true,
+        submitLabel: 'Cerrar',
+        onClick: function(ev){
+          var b = ev.target.closest('[data-mapa-tpl]');
+          if (b){
+            var k = b.getAttribute('data-mapa-tpl');
+            if (confirm('¿Cargar plantilla "'+TEMPLATES[k].name+'"? Se reemplazará el layout actual.')){
+              self.state = JSON.parse(JSON.stringify(TEMPLATES[k]));
+              self.selectedLayer = 0; self.selectedIds = [];
+              self.save(); self.render();
+              tToast('✓ Plantilla cargada: '+TEMPLATES[k].name);
+              document.querySelector('#pdc-mini-backdrop').remove();
+            }
+          }
+        },
+        onSubmit: function(){ return true; }
+      });
+    },
+    exportar: function(){
+      var json = JSON.stringify(this.state, null, 2);
+      var blob = new Blob([json], { type:'application/json' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = 'mapa-volvix-'+todayStr()+'.json';
+      document.body.appendChild(a); a.click(); a.remove();
+      tToast('✓ Mapa exportado');
+    },
+    importar: function(){
+      var inp = document.createElement('input'); inp.type='file'; inp.accept='application/json';
+      var self = this;
+      inp.onchange = function(){
+        var f = inp.files && inp.files[0]; if (!f) return;
+        var rd = new FileReader();
+        rd.onload = function(){
+          try {
+            var d = JSON.parse(rd.result);
+            if (!d.layers) throw new Error('JSON inválido: falta "layers"');
+            self.state = d; self.selectedLayer = 0; self.selectedIds = [];
+            self.save(); self.render();
+            tToast('✓ Mapa importado');
+          } catch(e){ tToast('Error: '+e.message); }
+        };
+        rd.readAsText(f);
+      };
+      inp.click();
+    },
+
+    zoomBy: function(d){
+      this.zoom = Math.max(0.25, Math.min(3, this.zoom + d));
+      var c = $('#mapa-canvas'); if (c) c.style.transform = 'scale('+this.zoom+')';
+      if (c) c.style.transformOrigin = '0 0';
+      this.updateZoomLabel();
+    },
+    zoomFit: function(){ this.zoom = 1; var c=$('#mapa-canvas'); if(c){c.style.transform='scale(1)';} this.updateZoomLabel(); },
+    updateZoomLabel: function(){ var el = $('#mapa-zoom-label'); if (el) el.textContent = Math.round(this.zoom*100)+'%'; },
+
+    // Click en operación cambia el status
+    _operationClick: function(o){
+      var seq = ['available','occupied','reserved','cleaning','available'];
+      var i = seq.indexOf(o.status||'available');
+      o.status = seq[(i+1) % seq.length];
+      this.save();
+      this.renderCanvas();
+      tToast(o.name+' → '+o.status);
+    }
+  };
+  window.MapaUI = MapaUI;
+
+  // Cablear eventos del módulo Mapa (drag tools, canvas pointer, layers)
+  function _wireMapaEvents(){
+    var tb = $('#mapa-toolbox'), cv = $('#mapa-canvas'), ly = $('#mapa-layers');
+    if (!tb || !cv || !ly) return;
+
+    // Drag desde toolbox para crear objeto
+    tb.addEventListener('mousedown', function(ev){
+      var btn = ev.target.closest('[data-mapa-tool]'); if (!btn) return;
+      ev.preventDefault();
+      MapaUI.drag = { type:'create', newType: btn.getAttribute('data-mapa-tool') };
+      $('#mapa-status').textContent = 'Suelta sobre el canvas para crear';
+    });
+
+    // Click en capas
+    ly.addEventListener('click', function(ev){
+      var rm = ev.target.closest('[data-mapa-rm]'); if (rm){ ev.stopPropagation(); MapaUI.removeLayer(parseInt(rm.getAttribute('data-mapa-rm'),10)); return; }
+      var vs = ev.target.closest('[data-mapa-vis]'); if (vs){ ev.stopPropagation(); MapaUI.toggleLayerVis(parseInt(vs.getAttribute('data-mapa-vis'),10)); return; }
+      var lk = ev.target.closest('[data-mapa-lock]'); if (lk){ ev.stopPropagation(); MapaUI.toggleLayerLock(parseInt(lk.getAttribute('data-mapa-lock'),10)); return; }
+      var lay = ev.target.closest('[data-mapa-layer]'); if (lay){
+        MapaUI.selectedLayer = parseInt(lay.getAttribute('data-mapa-layer'),10);
+        MapaUI.selectedIds = [];
+        MapaUI.render();
+      }
+    });
+
+    // Canvas pointer events
+    function pos(ev){
+      var rect = cv.getBoundingClientRect();
+      var sx = cv.width / rect.width;  var sy = cv.height / rect.height;
+      return { x: (ev.clientX - rect.left) * sx, y: (ev.clientY - rect.top) * sy };
+    }
+    cv.addEventListener('mousedown', function(ev){
+      var p = pos(ev);
+      if (MapaUI.drag && MapaUI.drag.type === 'create') {
+        MapaUI.addObject(MapaUI.drag.newType, p.x - 30, p.y - 30);
+        MapaUI.drag = null;
+        $('#mapa-status').textContent = 'Objeto creado';
+        return;
+      }
+      var hit = MapaUI.findObjectAt(p.x, p.y);
+      if (hit) {
+        if (MapaUI.mode === 'operation') {
+          if ((OBJ_TYPES[hit.obj.type]||{}).defaultCap > 0) MapaUI._operationClick(hit.obj);
+          return;
+        }
+        MapaUI.selectedIds = [hit.obj.id];
+        MapaUI.selectedLayer = hit.layerIdx;
+        MapaUI.drag = { type:'move', objId: hit.obj.id, offsetX: p.x - hit.obj.x, offsetY: p.y - hit.obj.y };
+        MapaUI.render();
+      } else {
+        MapaUI.selectedIds = [];
+        MapaUI.render();
+      }
+    });
+    cv.addEventListener('mousemove', function(ev){
+      if (!MapaUI.drag || MapaUI.drag.type !== 'move') return;
+      var p = pos(ev);
+      var o = MapaUI.findObject(MapaUI.drag.objId); if (!o) return;
+      o.x = Math.round((p.x - MapaUI.drag.offsetX) / 10) * 10; // snap a grid de 10
+      o.y = Math.round((p.y - MapaUI.drag.offsetY) / 10) * 10;
+      MapaUI.renderCanvas();
+      MapaUI.renderProps();
+    });
+    cv.addEventListener('mouseup', function(){
+      if (MapaUI.drag && MapaUI.drag.type === 'move') { MapaUI.save(); $('#mapa-status').textContent='Listo'; }
+      MapaUI.drag = null;
+    });
+    window.addEventListener('mouseup', function(){
+      if (MapaUI.drag) { MapaUI.drag = null; $('#mapa-status').textContent='Listo'; }
+    });
+  }
+
   // Hook click en tabs de rentas
   document.addEventListener('click', function(ev){
     var t = ev.target.closest('[id^="rentas-tab-"]');
@@ -19922,16 +20467,21 @@ window.addEventListener('volvix:version-loaded', function(e){
 
   // Hook showScreen para inicializar las pantallas al entrar
   var _origShow = window.showScreen;
+  var _mapaWired = false;
   window.showScreen = function(name){
     if (typeof _origShow === 'function') _origShow.apply(this, arguments);
     if (name === 'rentas')        try { RentasUI.render(); } catch(e){ console.error('[rentas]', e); }
     if (name === 'reservaciones') try { ReservacionesUI.render(); } catch(e){ console.error('[resv]', e); }
+    if (name === 'mapa') try {
+      MapaUI.render();
+      if (!_mapaWired) { _wireMapaEvents(); _mapaWired = true; }
+    } catch(e){ console.error('[mapa]', e); }
   };
 
   // Hash routing inicial
   function bootIfHash(){
     var h = (location.hash||'').replace('#','');
-    if (h === 'rentas' || h === 'reservaciones') {
+    if (h === 'rentas' || h === 'reservaciones' || h === 'mapa') {
       if (typeof window.showScreen === 'function') window.showScreen(h);
     }
   }

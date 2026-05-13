@@ -90,7 +90,9 @@
     // por default para todos los giros — el platform owner puede desactivar
     // por tenant en /paneldecontrol.html#permisos > Verticales.
     'module.rentas':        { name: 'Renta de Equipo',    default_status: 'enabled' },
-    'module.reservaciones': { name: 'Reservaciones',      default_status: 'enabled' }
+    'module.reservaciones': { name: 'Reservaciones',      default_status: 'enabled' },
+    // 2026-05-13: motor visual de distribución (layout builder universal)
+    'module.mapa':          { name: 'Mapa del lugar',     default_status: 'enabled' }
   };
 
   function defaultMap() {
