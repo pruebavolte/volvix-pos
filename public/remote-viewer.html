@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Visor de Control Remoto · Volvix POS</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; font:14px/1.5 -apple-system,Segoe UI,sans-serif; background:#0F172A; color:#fff; height:100vh; display:flex; flex-direction:column; }
+  .topbar { padding:10px 16px; background:#1E293B; display:flex; align-items:center; gap:12px; border-bottom:1px solid #334155; }
+  .topbar h1 { margin:0; font-size:14px; font-weight:600; flex:1; }
+  .topbar .stat { font-size:11px; color:#94A3B8; }
+  .topbar .badge { padding:3px 8px; border-radius:999px; font-size:10px; font-weight:700; }
+  .topbar .badge.live { background:#16A34A; color:#fff; }
+  .topbar .badge.wait { background:#F59E0B; color:#fff; }
+  .topbar button { padding:6px 14px; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:12px; }
+  .topbar .btn-end { background:#DC2626; color:#fff; }
+  .main { flex:1; position:relative; background:#000; display:flex; align-items:center; justify-content:center; }
+  video { max-width:100%; max-height:100%; }
+  .placeholder { text-align:center; padding:40px; }
+  .placeholder .emoji { font-size:64px; margin-bottom:14px; }
+  .placeholder p { color:#94A3B8; max-width:520px; margin:8px auto; }
+  .err { color:#FCA5A5; font-size:12px; margin-top:14px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>🖥 Visor de control remoto</h1>
+  <span class="stat">Sesión: <code id="sid" style="font-family:monospace;">—</code></span>
+  <span class="badge wait" id="state">Conectando…</span>
+  <button class="btn-end" onclick="endSession()">🛑 Terminar</button>
+</div>
+
+<div class="main">
+  <div class="placeholder" id="placeholder">
+    <div class="emoji">⏳</div>
+    <h2>Esperando stream del usuario…</h2>
+    <p>El usuario debe abrir su POS y compartir su pantalla cuando aparezca la solicitud.</p>
+    <p style="font-size:11px;color:#64748B;margin-top:24px;">Nota: el control remoto via WebRTC requiere que el usuario use un navegador moderno (Chrome/Edge/Safari) y permita acceso a su pantalla cuando el sistema se lo solicite.</p>
+    <p class="err" id="err"></p>
+  </div>
+  <video id="vid" autoplay playsinline style="display:none;"></video>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  const qs = new URLSearchParams(location.search);
+  const sid = qs.get('session');
+  document.getElementById('sid').textContent = sid || '—';
+  if (!sid) {
+    document.getElementById('err').textContent = 'Falta ?session= en la URL.';
+    return;
+  }
+
+  // Polling: revisa cada 3s el estado de la sesión. Si está 'active' o
+  // 'verified', muestra placeholder hasta que el otro lado conecte WebRTC.
+  // Si está 'ended' o 'rejected', cierra la ventana.
+  let pollIv = null;
+  const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
+  async function poll() {
+    try {
+      const r = await fetch('/api/admin/remote-support/status?session_id=' + encodeURIComponent(sid),
+        { headers: { 'Authorization': 'Bearer ' + tok } });
+      const j = await r.json();
+      if (!j.ok) return;
+      const state = document.getElementById('state');
+      if (j.status === 'verified' || j.status === 'active') {
+        state.className = 'badge live';
+        state.textContent = '● En sesión';
+      } else if (j.status === 'ended' || j.status === 'rejected' || j.status === 'expired') {
+        clearInterval(pollIv);
+        state.className = 'badge wait';
+        state.textContent = 'Sesión terminada';
+        document.getElementById('placeholder').innerHTML =
+          '<div class="emoji">✓</div><h2>Sesión finalizada</h2><p>Puedes cerrar esta ventana.</p>';
+      }
+    } catch (_) {}
+  }
+  poll();
+  pollIv = setInterval(poll, 3000);
+
+  // 2026-05-13 — WebRTC: viewer espera offer del cliente (que comparte
+  // pantalla via getDisplayMedia). Por ahora es proof-of-concept; el
+  // intercambio SDP se hace via long-polling en /api/remote-support/signal
+  // (a implementar). Mientras tanto, mostramos placeholder + estado.
+  // Cuando el cliente envíe su stream, llamamos a:
+  //   const pc = new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});
+  //   pc.ontrack = (ev) => { document.getElementById('vid').srcObject = ev.streams[0]; };
+  //   // ... offer/answer via signal endpoint ...
+
+  window.endSession = function () {
+    if (!sid) return;
+    fetch('/api/remote-support/end', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok },
+      body: JSON.stringify({ session_id: sid })
+    }).finally(() => { window.close(); });
+  };
+})();
+</script>
+
+</body>
+</html>

@@ -7472,11 +7472,11 @@
         + '</td>';
       const nameCell = (userId, name) => cellInput({ rowType: 'user', rowId: userId, field: 'full_name', value: name });
       const inlineTenantActions = (tid, email) => '<td class="u-actions">'
-        + '<button data-pv14-edit-tenant="' + escapeAttr(tid) + '" title="Editar permisos del tenant">✏️</button>'
-        + '<button data-pv14-diff-tenant="' + escapeAttr(tid) + '" title="Ver diff del giro vs estado actual">👁</button>'
-        + '<button data-pv14-apply-tenant="' + escapeAttr(tid) + '" title="Aplicar el preset del giro seleccionado">⚡</button>'
-        + (email ? '<button data-pv14-view-as="' + escapeAttr(email) + '" data-pv14-tid="' + escapeAttr(tid) + '" title="Ver como este usuario">👁‍🗨</button>' : '')
-        + (email ? '<button data-pv14-add-override="' + escapeAttr(email) + '" data-pv14-tid="' + escapeAttr(tid) + '" title="Agregar override individual">+</button>' : '')
+        + '<button data-pv14-edit-tenant="' + escapeAttr(tid) + '" title="Editar permisos">✏️</button>'
+        + '<button data-pv14-diff-tenant="' + escapeAttr(tid) + '" title="Ver diff">👁</button>'
+        + '<button data-pv14-apply-tenant="' + escapeAttr(tid) + '" title="Aplicar preset">⚡</button>'
+        + (email ? '<button data-pv14-view-as="' + escapeAttr(email) + '" data-pv14-tid="' + escapeAttr(tid) + '" title="Ver como">👁‍🗨</button>' : '')
+        + (email ? '<button data-pv14-remote="' + escapeAttr(email) + '" data-pv14-tid="' + escapeAttr(tid) + '" title="Control remoto (soporte tecnico con consentimiento)" style="color:#2563EB;">🖥</button>' : '')
         + '<button data-pv14-delete="' + escapeAttr(tid) + '" data-pv14-deltype="tenant" data-pv14-dellabel="' + escapeAttr((t.name||tid)) + '" title="Eliminar tenant + sus usuarios" style="color:#DC2626;">🗑</button>'
         + '</td>';
 
@@ -7528,6 +7528,7 @@
               : '<td class="u-actions">'
                   + '<button data-pv14-view-as="' + escapeAttr(o.email || '') + '" data-pv14-tid="' + escapeAttr(t.tenant_id) + '" title="Ver como">👁‍🗨</button>'
                   + '<button data-pv14-add-override="' + escapeAttr(o.email || '') + '" data-pv14-tid="' + escapeAttr(t.tenant_id) + '" title="Override">+</button>'
+                  + '<button data-pv14-remote="' + escapeAttr(o.email || '') + '" data-pv14-tid="' + escapeAttr(t.tenant_id) + '" title="Control remoto" style="color:#2563EB;">🖥</button>'
                   + '<button data-pv14-delete="' + escapeAttr(realUid || o.email) + '" data-pv14-deltype="user" data-pv14-dellabel="' + escapeAttr(o.email || '') + '" title="Eliminar usuario" style="color:#DC2626;">🗑</button>'
                 + '</td>')
           + '</tr>';
@@ -7560,6 +7561,7 @@
           + '<td class="u-actions">'
           +   '<button data-pv14-view-as="' + escapeAttr(e.email || '') + '" data-pv14-tid="' + escapeAttr(t.tenant_id) + '" title="Ver como">👁‍🗨</button>'
           +   '<button data-pv14-add-override="' + escapeAttr(e.email || '') + '" data-pv14-tid="' + escapeAttr(t.tenant_id) + '" title="Override">+</button>'
+          +   '<button data-pv14-remote="' + escapeAttr(e.email || '') + '" data-pv14-tid="' + escapeAttr(t.tenant_id) + '" title="Control remoto" style="color:#2563EB;">🖥</button>'
           +   '<button data-pv14-delete="' + escapeAttr(empUid || e.email) + '" data-pv14-deltype="user" data-pv14-dellabel="' + escapeAttr(e.email || '') + '" title="Eliminar empleado" style="color:#DC2626;">🗑</button>'
           + '</td>'
           + '</tr>';
@@ -7703,6 +7705,13 @@
     $$('.pv14-users-cb').forEach(cb => cb.addEventListener('change', refreshBulkBar));
     // Bulk actions handler + Delete individual con doble confirmación
     if (wrap.parentNode) wrap.parentNode.addEventListener('click', (ev) => {
+      // 2026-05-13 — Botón 🖥 Control remoto: inicia solicitud con consentimiento
+      const remBtn = ev.target.closest('[data-pv14-remote]');
+      if (remBtn) {
+        const target = remBtn.getAttribute('data-pv14-remote');
+        if (target) _pv14StartRemoteSupport(target);
+        return;
+      }
       // Delete individual (botón 🗑 en cada fila)
       const del1 = ev.target.closest('[data-pv14-delete]');
       if (del1) {
@@ -7783,6 +7792,112 @@
           return true;
         }
       });
+    }
+
+    // 2026-05-13 — Control remoto: flujo completo con consentimiento + código.
+    // Paso 1: confirm legal del admin antes de molestar al usuario
+    // Paso 2: POST /api/admin/remote-support/request → backend genera código
+    // Paso 3: modal espera mientras el usuario acepta/rechaza (polling 3s)
+    // Paso 4: cuando acepta → admin escribe el código de 6 dígitos que el
+    //         usuario ve en su pantalla (defensa contra suplantación)
+    // Paso 5: verify-code OK → abrir /remote-viewer.html?session=X (WebRTC)
+    async function _pv14StartRemoteSupport(targetEmail){
+      const ok1 = confirm(
+        '¿Solicitar control remoto a ' + targetEmail + '?\n\n' +
+        'El usuario verá un banner en su POS pidiendo consentimiento.\n' +
+        'Solo si ACEPTA podrás ver/controlar su pantalla.\n' +
+        'Todo queda registrado en audit log.'
+      );
+      if (!ok1) return;
+      const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
+      let sess = null;
+      try {
+        const r = await fetch('/api/admin/remote-support/request', {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+tok },
+          body: JSON.stringify({ target_email: targetEmail })
+        });
+        sess = await r.json();
+        if (!sess || !sess.ok) { alert('No se pudo iniciar: '+(sess&&sess.error||'error')); return; }
+      } catch(e){ alert('Error de red: '+e.message); return; }
+
+      _pdcMiniModal({
+        title: '🖥 Solicitud de control remoto · ' + targetEmail,
+        bodyHtml:
+            '<div id="pv14-remote-step1" style="background:#EFF6FF;border:1px solid #BFDBFE;padding:14px;border-radius:8px;margin-bottom:14px;">'
+          +   '<div style="font-size:14px;font-weight:600;color:#1E3A8A;margin-bottom:8px;">⏳ Esperando que el usuario acepte…</div>'
+          +   '<div style="font-size:13px;color:#475569;line-height:1.5;">El usuario está viendo un banner en su POS con la solicitud y el aviso de consentimiento legal. Mientras no acepte, NO puedes ver su pantalla.</div>'
+          +   '<div style="font-size:11px;color:#94A3B8;margin-top:10px;">Sesión: <code style="font-family:monospace;">'+sess.session_id+'</code></div>'
+          + '</div>'
+          + '<div id="pv14-remote-step2" style="display:none;background:#F0FDF4;border:1px solid #BBF7D0;padding:14px;border-radius:8px;margin-bottom:14px;">'
+          +   '<div style="font-size:14px;font-weight:600;color:#14532D;margin-bottom:8px;">✓ Usuario aceptó · pide el código</div>'
+          +   '<div style="font-size:13px;color:#475569;line-height:1.5;">El usuario ve en su pantalla un código de <b>6 dígitos</b>. Pídeselo (por llamada/chat) y escríbelo aquí para confirmar identidad:</div>'
+          + '</div>'
+          + '<div id="pv14-remote-step3" style="display:none;background:#FEF2F2;border:1px solid #FECACA;padding:14px;border-radius:8px;">'
+          +   '<div style="font-size:13px;color:#991B1B;" id="pv14-remote-error"></div>'
+          + '</div>',
+        fields: [
+          { name:'code', label:'Código de 6 dígitos (que el usuario ve)', type:'text', placeholder:'_ _ _ _ _ _', autocomplete:'off' }
+        ],
+        submitLabel: '🖥 Conectar',
+        onSubmit: function(data){
+          const code = String(data.code||'').replace(/\D/g,'').trim();
+          if (code.length !== 6) {
+            const errEl = document.getElementById('pv14-remote-error');
+            const errBox = document.getElementById('pv14-remote-step3');
+            if (errEl) errEl.textContent = 'El código debe tener 6 dígitos';
+            if (errBox) errBox.style.display = 'block';
+            return false;
+          }
+          _pv14VerifyCodeAndOpen(sess.session_id, code);
+          return false; // mantener modal abierto hasta confirmar
+        }
+      });
+
+      // Polling cada 3s para detectar accept/reject
+      const pollIv = setInterval(async () => {
+        try {
+          const r = await fetch('/api/admin/remote-support/status?session_id='+encodeURIComponent(sess.session_id), {
+            headers:{ 'Authorization':'Bearer '+tok }
+          });
+          const j = await r.json();
+          if (!j || !j.ok) { clearInterval(pollIv); return; }
+          if (j.status === 'accepted') {
+            clearInterval(pollIv);
+            document.getElementById('pv14-remote-step1').style.display = 'none';
+            document.getElementById('pv14-remote-step2').style.display = 'block';
+          }
+          if (j.status === 'rejected' || j.status === 'expired' || j.status === 'ended') {
+            clearInterval(pollIv);
+            tToast('Usuario ' + (j.status === 'rejected' ? 'rechazó' : 'no aceptó a tiempo') + ' la solicitud', 'error');
+            const bk = document.getElementById('pdc-mini-backdrop'); if (bk) bk.remove();
+          }
+        } catch(_){}
+      }, 3000);
+      // Cancelar polling si cerrar el modal manualmente
+      setTimeout(() => { if (!document.getElementById('pdc-mini-backdrop')) clearInterval(pollIv); }, 5*60*1000);
+    }
+    async function _pv14VerifyCodeAndOpen(sid, code){
+      const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
+      try {
+        const r = await fetch('/api/admin/remote-support/verify-code', {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+tok },
+          body: JSON.stringify({ session_id: sid, code: code })
+        });
+        const j = await r.json();
+        if (!j.ok) {
+          const errEl = document.getElementById('pv14-remote-error');
+          const errBox = document.getElementById('pv14-remote-step3');
+          if (errEl) errEl.textContent = j.error + (j.attempts_remaining!=null ? ' · '+j.attempts_remaining+' intentos restantes' : '');
+          if (errBox) errBox.style.display = 'block';
+          return;
+        }
+        const bk = document.getElementById('pdc-mini-backdrop'); if (bk) bk.remove();
+        // Abrir visor en nueva ventana
+        const w = window.open('/remote-viewer.html?session='+encodeURIComponent(sid)+'&role=admin', '_blank', 'width=1200,height=800');
+        if (!w) tToast('Permite popups para abrir el visor de control remoto', 'error');
+      } catch(e){ tToast('Error: '+e.message, 'error'); }
     }
 
     async function _pv14DoDelete(items){

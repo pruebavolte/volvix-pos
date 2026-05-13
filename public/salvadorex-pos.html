@@ -2740,6 +2740,130 @@
 </head>
 <body>
 
+<!-- ============ 2026-05-13 — REMOTE SUPPORT (consentimiento + codigo) ============
+     Polea /api/remote-support/incoming cada 5s. Cuando hay solicitud pendiente,
+     muestra modal grande con texto legal de consentimiento. Si acepta, muestra
+     codigo de 6 digitos al usuario para que se lo de al admin (defensa contra
+     suplantacion). El admin verifica el codigo y abre /remote-viewer.html. -->
+<div id="vlx-remote-overlay" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.85);z-index:99999;align-items:center;justify-content:center;padding:18px;">
+  <div style="background:#fff;border-radius:14px;max-width:560px;width:100%;padding:24px;font:14px/1.5 -apple-system,sans-serif;">
+    <div id="vlx-remote-step-consent" style="display:none;">
+      <div style="font-size:48px;text-align:center;margin-bottom:10px;">🖥</div>
+      <h2 style="margin:0 0 12px;font-size:20px;text-align:center;color:#1E293B;">Solicitud de soporte técnico</h2>
+      <p style="margin:0 0 14px;color:#475569;line-height:1.55;">
+        <b id="vlx-remote-from"></b> de Volvix POS quiere brindarte soporte técnico controlando remotamente tu equipo.
+      </p>
+      <div style="background:#FEF3C7;border:1px solid #F59E0B;padding:14px;border-radius:8px;margin:14px 0;font-size:13px;color:#78350F;line-height:1.55;">
+        <b>⚠️ Aviso legal de consentimiento:</b><br>
+        Si aceptas, el técnico podrá <b>ver tu pantalla</b> y controlar tu ratón/teclado en este equipo durante la sesión. Solo verá lo que tengas abierto. Puedes <b>cancelar en cualquier momento</b> cerrando la sesión. Toda la actividad queda <b>registrada en audit log</b>. Volvix POS NO accederá a tus datos sin tu autorización en cada sesión.
+      </div>
+      <p style="font-size:12px;color:#94A3B8;margin:0 0 16px;">Sesión: <code id="vlx-remote-sid" style="font-family:monospace;font-size:11px;"></code></p>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button id="vlx-remote-reject" style="padding:10px 18px;background:#fff;border:1px solid #C9C7C3;border-radius:7px;cursor:pointer;font-weight:600;">✗ Rechazar</button>
+        <button id="vlx-remote-accept" style="padding:10px 18px;background:#16A34A;color:#fff;border:1px solid #16A34A;border-radius:7px;cursor:pointer;font-weight:700;">✓ Acepto · brindar acceso</button>
+      </div>
+    </div>
+    <div id="vlx-remote-step-code" style="display:none;text-align:center;">
+      <div style="font-size:48px;margin-bottom:10px;">🔐</div>
+      <h2 style="margin:0 0 8px;font-size:20px;color:#14532D;">Comparte este código con el técnico</h2>
+      <p style="font-size:13px;color:#475569;margin:0 0 18px;">Léelo por teléfono / chat. Es para confirmar que es el técnico correcto.</p>
+      <div style="font-family:monospace;font-size:48px;font-weight:700;letter-spacing:14px;background:#F0FDF4;border:3px dashed #16A34A;padding:18px;border-radius:10px;color:#14532D;margin-bottom:14px;" id="vlx-remote-code">······</div>
+      <p style="font-size:12px;color:#94A3B8;margin:0 0 16px;">Esperando que el técnico verifique el código…</p>
+      <button id="vlx-remote-end" style="padding:8px 14px;background:#fff;border:1px solid #C9C7C3;border-radius:7px;cursor:pointer;font-size:12px;color:#64748B;">Cancelar sesión</button>
+    </div>
+    <div id="vlx-remote-step-active" style="display:none;text-align:center;">
+      <div style="font-size:48px;margin-bottom:10px;">🟢</div>
+      <h2 style="margin:0 0 8px;font-size:20px;color:#1E40AF;">Soporte activo</h2>
+      <p style="font-size:13px;color:#475569;margin:0 0 16px;">El técnico está conectado a tu equipo. Verás un indicador rojo en la esquina mientras dure la sesión.</p>
+      <button id="vlx-remote-end-active" style="padding:10px 18px;background:#DC2626;color:#fff;border:1px solid #DC2626;border-radius:7px;cursor:pointer;font-weight:600;">🛑 Terminar sesión</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  'use strict';
+  let _rsPollIv = null;
+  let _rsCurrentSid = null;
+  const overlay = document.getElementById('vlx-remote-overlay');
+  function _show(stepId){
+    overlay.style.display = 'flex';
+    ['consent','code','active'].forEach(s => {
+      const el = document.getElementById('vlx-remote-step-'+s);
+      if (el) el.style.display = (s === stepId) ? 'block' : 'none';
+    });
+  }
+  function _hide(){ overlay.style.display = 'none'; }
+  async function _poll(){
+    try {
+      const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
+      if (!tok) return;
+      const r = await fetch('/api/remote-support/incoming', { headers:{ 'Authorization':'Bearer '+tok } });
+      if (!r.ok) return;
+      const j = await r.json();
+      if (!j.ok || !j.sessions || !j.sessions.length) {
+        if (_rsCurrentSid) { _hide(); _rsCurrentSid = null; }
+        return;
+      }
+      const s = j.sessions[0];
+      _rsCurrentSid = s.id;
+      if (s.status === 'pending') {
+        document.getElementById('vlx-remote-from').textContent = s.requester_email || 'Un técnico de soporte';
+        document.getElementById('vlx-remote-sid').textContent = s.id;
+        _show('consent');
+      } else if (s.status === 'verified' || s.status === 'active') {
+        _show('active');
+      }
+    } catch(_){}
+  }
+  document.getElementById('vlx-remote-accept').addEventListener('click', async () => {
+    const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
+    const consentText = document.querySelector('#vlx-remote-step-consent div[style*="FEF3C7"]').innerText;
+    try {
+      const r = await fetch('/api/remote-support/respond', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+tok },
+        body: JSON.stringify({ session_id: _rsCurrentSid, action:'accept', consent_text: consentText.slice(0,300) })
+      });
+      const j = await r.json();
+      if (j.ok && j.show_code_to_user) {
+        document.getElementById('vlx-remote-code').textContent = j.show_code_to_user;
+        _show('code');
+      }
+    } catch(e){ alert('Error: '+e.message); }
+  });
+  document.getElementById('vlx-remote-reject').addEventListener('click', async () => {
+    const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
+    try {
+      await fetch('/api/remote-support/respond', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+tok },
+        body: JSON.stringify({ session_id: _rsCurrentSid, action:'reject' })
+      });
+    } catch(_){}
+    _hide(); _rsCurrentSid = null;
+  });
+  function _endSession(){
+    const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
+    fetch('/api/remote-support/end', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+tok },
+      body: JSON.stringify({ session_id: _rsCurrentSid })
+    }).catch(()=>{});
+    _hide(); _rsCurrentSid = null;
+  }
+  document.getElementById('vlx-remote-end').addEventListener('click', _endSession);
+  document.getElementById('vlx-remote-end-active').addEventListener('click', _endSession);
+  // Iniciar polling cada 5s (solo si hay sesion)
+  function _startPoll(){
+    if (_rsPollIv) return;
+    _poll(); // primera vez inmediato
+    _rsPollIv = setInterval(_poll, 5000);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', _startPoll);
+  else _startPoll();
+})();
+</script>
+
 <!-- ============ 2026-05-13 — BANNER VERIFICACIÓN EMAIL ============
      Si la sesión actual tiene email_verified=false, mostramos un banner
      persistente arriba del POS con mensaje rojo/amarillo: "Verifica tu correo

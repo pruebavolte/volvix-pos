@@ -12014,6 +12014,164 @@ handlers['GET /api/config/public'] = async (req, res) => {
     } catch (_) { sendJSON(res, { ok: true, items: [], total: 0 }); }
   };
   // /api/admin/tenants — list tenants (superadmin only). Bulk POST ya existe.
+  // ================================================================
+  // 2026-05-13 — REMOTE SUPPORT (control remoto con consentimiento)
+  // Sesiones en pos_audit_log (categoria=remote_support) — no requiere tabla
+  // nueva. Estados: pending → accepted (cliente acepta) → verified (admin
+  // ingresa el codigo) → active (stream WebRTC) → ended.
+  // Polling cada 3-5s para notificar al cliente. Codigo de 6 digitos como
+  // verificacion adicional (defensa contra clicks accidentales).
+  // ================================================================
+  function _remoteSupportKey(sid){ return 'remote_support:'+sid; }
+  const _remoteSupportStore = (global.__VOLVIX_RSS = global.__VOLVIX_RSS || new Map());
+  function _rsSet(sid, obj){ _remoteSupportStore.set(sid, Object.assign({}, _remoteSupportStore.get(sid)||{}, obj, { updated_at: Date.now() })); }
+  function _rsGet(sid){ return _remoteSupportStore.get(sid) || null; }
+  function _rsCleanup(){
+    const now = Date.now();
+    for (const [k,v] of _remoteSupportStore.entries()) {
+      // Limpiar sesiones inactivas >15 min
+      if (now - (v.updated_at || 0) > 15*60*1000) _remoteSupportStore.delete(k);
+    }
+  }
+
+  // Admin solicita soporte remoto a un usuario
+  handlers['POST /api/admin/remote-support/request'] = requireAuth(async (req, res) => {
+    const role = String((req.user && req.user.role) || '').toLowerCase();
+    if (role !== 'superadmin' && role !== 'platform_owner') {
+      return sendJSON(res, { ok:false, error:'forbidden' }, 403);
+    }
+    try {
+      _rsCleanup();
+      const body = await readBody(req, { maxBytes: 2*1024 });
+      if (checkBodyError(req, res)) return;
+      const target = String(body.target_email || body.target_id || '').toLowerCase().trim();
+      if (!target) return sendJSON(res, { ok:false, error:'target requerido' }, 400);
+      const sid = crypto.randomBytes(12).toString('hex');
+      const code = Math.floor(100000 + Math.random()*900000).toString(); // 6 dig
+      _rsSet(sid, {
+        id: sid,
+        code: code,
+        requester_email: req.user.email,
+        requester_id: req.user.id,
+        target_email: target,
+        status: 'pending',
+        created_at: Date.now(),
+      });
+      try { logAudit(req, 'remote_support.request', 'pos_users', { target: target, session_id: sid }); } catch(_){}
+      return sendJSON(res, { ok:true, session_id: sid, code: code, target_email: target, status: 'pending' });
+    } catch (err) { sendError(res, err); }
+  }, ['superadmin','platform_owner']);
+
+  // Cliente polea sus solicitudes entrantes (cada 5s)
+  handlers['GET /api/remote-support/incoming'] = requireAuth(async (req, res) => {
+    try {
+      _rsCleanup();
+      const me = String(req.user.email || '').toLowerCase();
+      const sessions = [];
+      for (const v of _remoteSupportStore.values()) {
+        if (v.target_email === me && (v.status === 'pending' || v.status === 'verified' || v.status === 'active')) {
+          sessions.push({
+            id: v.id, status: v.status, requester_email: v.requester_email,
+            created_at: v.created_at, verified_at: v.verified_at || null
+          });
+        }
+      }
+      return sendJSON(res, { ok: true, sessions });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // Cliente responde: accept o reject
+  handlers['POST /api/remote-support/respond'] = requireAuth(async (req, res) => {
+    try {
+      const body = await readBody(req, { maxBytes: 2*1024 });
+      if (checkBodyError(req, res)) return;
+      const sid = String(body.session_id || '');
+      const action = String(body.action || '');
+      const consent = body.consent_text ? String(body.consent_text).slice(0, 500) : '';
+      const s = _rsGet(sid);
+      if (!s) return sendJSON(res, { ok:false, error:'sesion no existe o expiro' }, 404);
+      if (s.target_email !== String(req.user.email || '').toLowerCase()) {
+        return sendJSON(res, { ok:false, error:'no eres el destinatario' }, 403);
+      }
+      if (action === 'accept') {
+        _rsSet(sid, { status:'accepted', accepted_at: Date.now(), consent_text: consent });
+        try { logAudit(req, 'remote_support.accepted', 'pos_users', { session_id: sid, requester: s.requester_email, consent: consent }); } catch(_){}
+        return sendJSON(res, { ok:true, status:'accepted', show_code_to_user: s.code });
+      }
+      if (action === 'reject') {
+        _rsSet(sid, { status:'rejected', rejected_at: Date.now() });
+        try { logAudit(req, 'remote_support.rejected', 'pos_users', { session_id: sid }); } catch(_){}
+        return sendJSON(res, { ok:true, status:'rejected' });
+      }
+      return sendJSON(res, { ok:false, error:'action invalida (accept|reject)' }, 400);
+    } catch (err) { sendError(res, err); }
+  });
+
+  // Admin polea estado de su sesión
+  handlers['GET /api/admin/remote-support/status'] = requireAuth(async (req, res) => {
+    const role = String((req.user && req.user.role) || '').toLowerCase();
+    if (role !== 'superadmin' && role !== 'platform_owner') return sendJSON(res, { ok:false, error:'forbidden' }, 403);
+    try {
+      const u = new URL(req.url, 'http://x');
+      const sid = u.searchParams.get('session_id') || '';
+      const s = _rsGet(sid);
+      if (!s) return sendJSON(res, { ok:false, error:'sesion no existe' }, 404);
+      const out = { ok:true, id:s.id, status:s.status, target_email:s.target_email, created_at:s.created_at };
+      if (s.status === 'accepted' || s.status === 'verified' || s.status === 'active') {
+        out.accepted_at = s.accepted_at; out.consent_text = s.consent_text;
+      }
+      if (s.status === 'verified' || s.status === 'active') out.verified_at = s.verified_at;
+      if (s.status === 'rejected') out.rejected_at = s.rejected_at;
+      return sendJSON(res, out);
+    } catch (err) { sendError(res, err); }
+  }, ['superadmin','platform_owner']);
+
+  // Admin verifica con el codigo de 6 digitos que el usuario le dio
+  handlers['POST /api/admin/remote-support/verify-code'] = requireAuth(async (req, res) => {
+    const role = String((req.user && req.user.role) || '').toLowerCase();
+    if (role !== 'superadmin' && role !== 'platform_owner') return sendJSON(res, { ok:false, error:'forbidden' }, 403);
+    try {
+      const body = await readBody(req, { maxBytes: 1024 });
+      if (checkBodyError(req, res)) return;
+      const sid = String(body.session_id || '');
+      const code = String(body.code || '').trim();
+      const s = _rsGet(sid);
+      if (!s) return sendJSON(res, { ok:false, error:'sesion no existe' }, 404);
+      if (s.status !== 'accepted') return sendJSON(res, { ok:false, error:'sesion no aceptada por el usuario' }, 409);
+      if (String(s.code) !== code) {
+        // Marcar intento fallido (3 intentos máx)
+        const attempts = (s.code_attempts || 0) + 1;
+        _rsSet(sid, { code_attempts: attempts });
+        if (attempts >= 3) {
+          _rsSet(sid, { status: 'expired', expired_reason: 'too_many_attempts' });
+          return sendJSON(res, { ok:false, error:'demasiados intentos. Sesion cancelada.' }, 423);
+        }
+        return sendJSON(res, { ok:false, error:'codigo incorrecto', attempts_remaining: 3 - attempts }, 401);
+      }
+      _rsSet(sid, { status:'verified', verified_at: Date.now() });
+      try { logAudit(req, 'remote_support.verified', 'pos_users', { session_id: sid, target: s.target_email }); } catch(_){}
+      return sendJSON(res, { ok:true, status:'verified', session_id: sid });
+    } catch (err) { sendError(res, err); }
+  }, ['superadmin','platform_owner']);
+
+  // Cierra la sesion (cualquier participante)
+  handlers['POST /api/remote-support/end'] = requireAuth(async (req, res) => {
+    try {
+      const body = await readBody(req, { maxBytes: 1024 });
+      if (checkBodyError(req, res)) return;
+      const sid = String(body.session_id || '');
+      const s = _rsGet(sid);
+      if (!s) return sendJSON(res, { ok:true, status:'not_found' });
+      const me = String((req.user && req.user.email) || '').toLowerCase();
+      if (s.requester_email !== me && s.target_email !== me) {
+        return sendJSON(res, { ok:false, error:'no participas en esta sesion' }, 403);
+      }
+      _rsSet(sid, { status: 'ended', ended_at: Date.now(), ended_by: me });
+      try { logAudit(req, 'remote_support.ended', 'pos_users', { session_id: sid, ended_by: me }); } catch(_){}
+      return sendJSON(res, { ok:true, status:'ended' });
+    } catch (err) { sendError(res, err); }
+  });
+
   // 2026-05-13 — Soft-delete de usuario (superadmin) — desde panel de permisos
   // Marca is_active=false, email_verified=false, agrega notes.deleted_at.
   // No borra row para preservar audit log + posibilidad de restore.
