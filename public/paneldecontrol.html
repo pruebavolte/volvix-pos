@@ -5196,24 +5196,27 @@
   function renderModulesList() {
     const wrap = $('#permv14-modules-list');
     if (!wrap) {
-      // 2026-05-12 fix: DOM aun no listo. Reintentar en 100ms (max 20 retries = 2s).
-      // Antes la funcion retornaba silenciosamente y la lista quedaba vacia
-      // hasta el siguiente trigger (que podia tardar mucho si APIs lentas).
-      renderModulesList._retries = (renderModulesList._retries || 0) + 1;
-      if (renderModulesList._retries < 20) setTimeout(renderModulesList, 100);
+      // 2026-05-12 fix: DOM aun no listo. Reintentar UNA vez en 100ms (NO loop).
+      // Si tras 1 retry sigue sin estar, abandonamos — el bootstrap o el
+      // setActiveNav('modules') re-disparara cuando corresponda. Antes habia
+      // un loop hasta 20 retries que podia acumular setTimeouts si se llamaba
+      // multiples veces concurrentemente -> riesgo de memory pressure.
+      if (!renderModulesList._waitingDOM) {
+        renderModulesList._waitingDOM = true;
+        setTimeout(() => {
+          renderModulesList._waitingDOM = false;
+          renderModulesList();
+        }, 150);
+      }
       return;
     }
-    renderModulesList._retries = 0;
     const MOD = window.MOD_LABELS_PUBLIC || null;
-    // 2026-05-09: cargar catálogo BD en background (no await — render inmediato con
-    // hardcoded, re-render automático cuando llegue BD via setActiveNav re-trigger).
-    // 2026-05-12 fix: tolerar v14 no inicializado todavia (panel aun cargando)
-    if (typeof v14 === 'undefined' || !v14 || !v14.catalogs) {
-      // v14 aun no existe — render con MOD_LABELS_GLOBAL directo
-      // y reintentar render completo cuando v14 este disponible
-      setTimeout(renderModulesList, 200);
-    } else if (!v14.catalogs.modules) {
-      try { loadAllCatalogs().then(() => renderModulesList()).catch(()=>{}); } catch(_){}
+    // 2026-05-12: cargar catalogo BD en background SOLO si no se cargo todavia.
+    // _catalogLoadAttempted previene multiples loadAllCatalogs concurrentes
+    // (cada uno hace 2 fetches y retorna promise -> potencial leak de chains).
+    if (typeof v14 !== 'undefined' && v14 && v14.catalogs && !v14.catalogs.modules && !renderModulesList._catalogLoadAttempted) {
+      renderModulesList._catalogLoadAttempted = true;
+      try { loadAllCatalogs().then(() => { renderModulesList._catalogLoadAttempted = false; renderModulesList(); }).catch(() => { renderModulesList._catalogLoadAttempted = false; }); } catch(_){}
     }
     // Catálogo unificado: BD si disponible, fallback a constante.
     const MOD_LABELS_LOCAL = (typeof getModuleLabelsFromCatalog === 'function')
@@ -7901,59 +7904,55 @@
   }
 
   // Bootstrap: corre cuando entramos a #permisos
+  // 2026-05-12 FIX (memory leak): variables module-scope para evitar setInterval
+  // duplicados y guard idempotente. Antes cada hashchange + load + doble seguro
+  // creaba un setInterval nuevo de 10s. Si el usuario navegaba (o algun handler
+  // del cliente dispara hashchange/showScreen), los intervals se acumulaban y
+  // cada uno mantenia closures grandes → Out of Memory en navegadores con
+  // poca RAM disponible.
+  var _bootstrapInterval = null;
+  var _bootstrapStarted  = false;
   function bootstrap() {
-    // 2026-05-12 FIX (lentitud): render INMEDIATO de la lista de módulos sin
-    // esperar a window.PERM. La lista solo depende de MOD_CATEGORIES + MOD_LABELS_GLOBAL
-    // (constantes locales del IIFE, ya disponibles). Antes esperabamos hasta 3s
-    // a PERM antes de pintar nada — si PERM tardaba más o el IIFE legacy seguía
-    // evaluándose, la lista quedaba vacía y el usuario veía pantalla en blanco.
-    // Render instantáneo → PERM aparece después → upgrade a versión con estado.
+    // Idempotencia dura: si ya esta corriendo o ya completo, NO duplicar.
+    if (_bootstrapStarted) return;
+    _bootstrapStarted = true;
+
+    // Render INMEDIATO (no requiere PERM, solo MOD_CATEGORIES + MOD_LABELS_GLOBAL).
     try { renderModulesList(); } catch(e) { console.warn('[PERMv14] pre-render:', e); }
 
-    // Después, polling normal para enganchar PERM. Timeout extendido a 10s
-    // para tenants con muchos giros/módulos donde el IIFE legacy es lento.
+    // Limpiar cualquier interval previo por si acaso (defensa extra).
+    if (_bootstrapInterval) { clearInterval(_bootstrapInterval); _bootstrapInterval = null; }
+
     let tries = 0;
-    const iv = setInterval(() => {
+    _bootstrapInterval = setInterval(() => {
       tries++;
       if (window.PERM) {
-        clearInterval(iv);
+        clearInterval(_bootstrapInterval); _bootstrapInterval = null;
         if (patchPerm()) {
           initV14();
-          // Re-render con estado del tenant (los modules on/off, features, etc).
-          // El render inmediato ya pintó los módulos sin estado; este re-paint
-          // los muestra con sus pills verdes/grises de activo/oculto.
           renderModulesList(); renderConfigPane(); renderPreview();
         }
-      } else if (tries > 100) { // 100 × 100ms = 10s
-        clearInterval(iv);
-        console.warn('[PERMv14] window.PERM no apareció tras 10s — la lista de módulos sigue funcional sin estado de tenant');
+      } else if (tries > 50) { // 50 × 100ms = 5s (mas razonable, evita interval largo)
+        clearInterval(_bootstrapInterval); _bootstrapInterval = null;
+        console.warn('[PERMv14] window.PERM no apareció en 5s — lista funcional sin estado de tenant');
       }
     }, 100);
   }
 
-  // Hook en showScreen('permisos') y hashchange
+  // Hooks: showScreen, hashchange y load. Como bootstrap es idempotente, multiples
+  // disparos son seguros (segundo+ es no-op).
   const _origShowScreen = window.showScreen;
   if (typeof _origShowScreen === 'function') {
-    const _wrappedShow = window.showScreen;
     window.showScreen = function (name) {
-      _wrappedShow(name);
+      _origShowScreen.apply(this, arguments);
       if (name === 'permisos') setTimeout(bootstrap, 200);
     };
   }
   window.addEventListener('hashchange', () => {
     if ((location.hash || '').replace('#','') === 'permisos') setTimeout(bootstrap, 200);
   });
-  // Si la página arranca ya en #permisos (o sin hash, porque paneldecontrol es
-  // panel-solo, el hash es para retro-compatibilidad)
-  // 2026-05-12 FIX (lentitud): bootstrap más temprano (50ms en vez de 400ms) y
-  // también disparar incluso si no hay hash, porque paneldecontrol.html es la
-  // página dedicada de permisos.
-  const _h = (location.hash || '').replace('#','');
-  if (_h === 'permisos' || _h === '' || !_h) {
-    setTimeout(bootstrap, 50);
-    // Doble seguro: re-disparar a 1s si por alguna razón no corrió
-    setTimeout(() => { if (!initV14._done) bootstrap(); }, 1000);
-  }
+  // Arranque inicial (paneldecontrol.html es la pagina dedicada de permisos)
+  setTimeout(bootstrap, 50);
 })();
 </script>
 
