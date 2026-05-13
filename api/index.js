@@ -704,7 +704,10 @@ async function nonceCheck(res, nonce, endpoint) {
 function setSecurityHeaders(res) {
   res.setHeader('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
   res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'DENY');
+  // 2026-05-12: SAMEORIGIN (no DENY) para permitir que paneldecontrol.html
+  // embeba salvadorex-pos.html como iframe en la vista previa del módulo.
+  // Sitios externos siguen sin poder embebernos (anti-clickjacking se mantiene).
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   // B30.2: Permissions-Policy ampliada (FLoC, interest-cohort, USB, etc)
   res.setHeader('Permissions-Policy',
@@ -719,7 +722,7 @@ function setSecurityHeaders(res) {
   // en producción aunque corriera bien en local.
   res.setHeader(
     'Content-Security-Policy',
-    "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://tessdata.projectnaptha.com https://js.stripe.com; worker-src 'self' blob:; connect-src 'self' blob: https://salvadorexoficial.com https://www.salvadorexoficial.com https://*.supabase.co wss://*.supabase.co https://api.ipify.org https://api.exchangerate.host https://api.anthropic.com https://api.stripe.com https://api.openai.com https://api.sendgrid.com https://api.twilio.com https://api.ocr.space https://corsproxy.io https://api.allorigins.win https://api.codetabs.com https://duckduckgo.com https://*.duckduckgo.com https://commons.wikimedia.org https://en.wikipedia.org https://*.wikipedia.org https://upload.wikimedia.org https://cdn.jsdelivr.net https://tessdata.projectnaptha.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+    "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://tessdata.projectnaptha.com https://js.stripe.com; worker-src 'self' blob:; connect-src 'self' blob: https://salvadorexoficial.com https://www.salvadorexoficial.com https://*.supabase.co wss://*.supabase.co https://api.ipify.org https://api.exchangerate.host https://api.anthropic.com https://api.stripe.com https://api.openai.com https://api.sendgrid.com https://api.twilio.com https://api.ocr.space https://corsproxy.io https://api.allorigins.win https://api.codetabs.com https://duckduckgo.com https://*.duckduckgo.com https://commons.wikimedia.org https://en.wikipedia.org https://*.wikipedia.org https://upload.wikimedia.org https://cdn.jsdelivr.net https://tessdata.projectnaptha.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'"
   );
 }
 
