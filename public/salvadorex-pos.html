@@ -5669,14 +5669,20 @@
       <div class="page-head">
         <div>
           <h1 class="page-title" data-term="mapa_title">🗺️ Mapa del lugar</h1>
-          <p class="page-sub" id="mapa-sub">Diseñador visual de espacios · objetos · capas · plantillas</p>
+          <p class="page-sub" id="mapa-sub">Motor universal de recursos · ocupación · reservas · renta · préstamo · tiempo</p>
         </div>
-        <div style="display:flex;gap:8px;align-items:center;">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <select id="mapa-business-type" onchange="MapaUI && MapaUI.setBusinessType(this.value)" style="padding:7px 10px;border:1px solid var(--border-strong,#C9C7C3);border-radius:7px;font:13px inherit;background:#fff;cursor:pointer;" title="Tipo de negocio (preset de comportamiento)"></select>
           <button class="btn" id="mapa-mode-toggle" onclick="MapaUI && MapaUI.toggleMode()">⚙️ Modo diseñador</button>
           <button class="btn" data-feature="mapa.templates" onclick="MapaUI && MapaUI.openTemplates()">📐 Plantillas</button>
-          <button class="btn" data-feature="mapa.exportar"  onclick="MapaUI && MapaUI.exportar()">⬇️ Exportar JSON</button>
-          <button class="btn" data-feature="mapa.importar"  onclick="MapaUI && MapaUI.importar()">⬆️ Importar JSON</button>
+          <button class="btn" data-feature="mapa.exportar"  onclick="MapaUI && MapaUI.exportar()">⬇️ Exportar</button>
+          <button class="btn" data-feature="mapa.importar"  onclick="MapaUI && MapaUI.importar()">⬆️ Importar</button>
         </div>
+      </div>
+
+      <!-- Dashboard universal: KPIs en vivo del estado de los recursos -->
+      <div class="card card-pad" style="margin-bottom:10px;">
+        <div id="mapa-dashboard" style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;"></div>
       </div>
 
       <!-- Layout 3-cols: toolbox | canvas | properties -->
@@ -19994,8 +20000,63 @@ window.addEventListener('volvix:version-loaded', function(e){
     'cashier':      { label:'Caja',          emoji:'💵', w:80, h:60,  shape:'rect',     color:'#16A34A', defaultCap:0 },
     'plant':        { label:'Planta',        emoji:'🪴', w:30, h:30,  shape:'circle',   color:'#22C55E', defaultCap:0 }
   };
-  var STATUS_COLORS = {
-    available: '#16A34A', occupied:'#DC2626', reserved:'#F59E0B', cleaning:'#06B6D4', blocked:'#374151'
+  // 2026-05-13 — MOTOR DE ESTADOS — universales configurables
+  var STATUS_DEF = {
+    available:     { color:'#16A34A', icon:'✅', label:'Disponible',     transitions:['occupied','reserved','cleaning','maintenance','out_of_service'] },
+    occupied:      { color:'#DC2626', icon:'🔴', label:'Ocupado',        transitions:['available','cleaning','expired','finished'] },
+    reserved:      { color:'#F59E0B', icon:'📅', label:'Reservado',      transitions:['occupied','available','finished'] },
+    cleaning:      { color:'#06B6D4', icon:'🧹', label:'Limpieza',       transitions:['available','out_of_service'] },
+    maintenance:   { color:'#8B5CF6', icon:'🔧', label:'Mantenimiento',  transitions:['available','out_of_service'] },
+    out_of_service:{ color:'#374151', icon:'⛔', label:'Fuera servicio', transitions:['available','maintenance'] },
+    delivered:     { color:'#0EA5E9', icon:'📦', label:'Entregado',      transitions:['returned','overdue','damaged','finished'] },
+    returned:      { color:'#16A34A', icon:'↩️', label:'Devuelto',       transitions:['available','cleaning'] },
+    overdue:       { color:'#B91C1C', icon:'⏰', label:'Vencido',        transitions:['returned','finished'] },
+    expired:       { color:'#7F1D1D', icon:'⌛', label:'Tiempo agotado', transitions:['available','cleaning'] },
+    paused:        { color:'#A1A1AA', icon:'⏸️', label:'Pausado',        transitions:['occupied','available'] },
+    finished:      { color:'#525252', icon:'✓',  label:'Finalizado',     transitions:['available'] }
+  };
+  // Mantenemos STATUS_COLORS como alias para retro-compat (codigo anterior lee de aqui)
+  var STATUS_COLORS = Object.keys(STATUS_DEF).reduce(function(a,k){a[k]=STATUS_DEF[k].color;return a;},{});
+
+  // 2026-05-13 — MOTOR TEMPORAL — 4 tipos de tiempo soportados
+  var TEMPORAL_MODES = {
+    abierto:   { label:'Tiempo abierto',  desc:'Inicia al usar, termina al liberar manualmente (restaurante/barbería)', cycleOnClick:['available','occupied','cleaning','available'] },
+    countdown: { label:'Countdown',       desc:'Comienza al pagar, termina automáticamente (brincolines/videojuegos)',  cycleOnClick:[] },
+    evento:    { label:'Evento programado', desc:'Inicio y fin fijos (cine/conciertos/teatro)',                          cycleOnClick:[] },
+    prestamo:  { label:'Préstamo',        desc:'Entrega+devolución con depósito y daños (autos/trajes/herramientas)',    cycleOnClick:[] }
+  };
+
+  // 2026-05-13 — CONFIGURADOR DE NEGOCIO — presets por tipo de giro
+  // Cada preset define: plantilla inicial + modo temporal default + estados visibles
+  // + documentos requeridos + precio default + tipos de objeto permitidos.
+  var BUSINESS_TYPES = {
+    restaurante: { label:'🍽️ Restaurante',       defaultTemporal:'abierto',   defaultTemplate:'restaurante', docs:[], duracionDefault:0,    requiresDeposit:false },
+    bar:         { label:'🍸 Bar / Antro',       defaultTemporal:'abierto',   defaultTemplate:'bar',         docs:['identificacion'], duracionDefault:0, requiresDeposit:false },
+    cafeteria:   { label:'☕ Cafetería',          defaultTemporal:'abierto',   defaultTemplate:'restaurante', docs:[], duracionDefault:0,    requiresDeposit:false },
+    cine:        { label:'🎬 Cine',               defaultTemporal:'evento',    defaultTemplate:'cine',        docs:[], duracionDefault:7200, requiresDeposit:false },
+    teatro:      { label:'🎭 Teatro',             defaultTemporal:'evento',    defaultTemplate:'cine',        docs:[], duracionDefault:7200, requiresDeposit:false },
+    hotel:       { label:'🏨 Hotel',              defaultTemporal:'prestamo',  defaultTemplate:'blanco',      docs:['ine','firma'], duracionDefault:86400, requiresDeposit:true },
+    motel:       { label:'🏩 Motel',              defaultTemporal:'countdown', defaultTemplate:'blanco',      docs:[], duracionDefault:14400,requiresDeposit:false },
+    renta_autos: { label:'🚗 Renta autos',        defaultTemporal:'prestamo',  defaultTemplate:'blanco',      docs:['ine','licencia','firma'], duracionDefault:86400, requiresDeposit:true },
+    renta_trajes:{ label:'👔 Renta de trajes',    defaultTemporal:'prestamo',  defaultTemplate:'blanco',      docs:['ine','firma','foto'], duracionDefault:259200, requiresDeposit:true },
+    brincolines: { label:'🎈 Brincolines/Juegos', defaultTemporal:'countdown', defaultTemplate:'blanco',      docs:[], duracionDefault:1800, requiresDeposit:false },
+    karaoke:     { label:'🎤 Karaoke / VR rooms', defaultTemporal:'countdown', defaultTemplate:'blanco',      docs:[], duracionDefault:3600, requiresDeposit:false },
+    coworking:   { label:'💻 Coworking',          defaultTemporal:'abierto',   defaultTemplate:'blanco',      docs:[], duracionDefault:0,    requiresDeposit:false },
+    consultorios:{ label:'⚕️ Consultorios',       defaultTemporal:'evento',    defaultTemplate:'blanco',      docs:[],  duracionDefault:1800, requiresDeposit:false },
+    canchas:     { label:'⚽ Canchas deportivas',  defaultTemporal:'evento',    defaultTemplate:'blanco',      docs:[], duracionDefault:3600, requiresDeposit:false },
+    salon:       { label:'🎉 Salón de eventos',   defaultTemporal:'prestamo',  defaultTemplate:'salon',       docs:['ine','firma','contrato'], duracionDefault:14400, requiresDeposit:true },
+    lockers:     { label:'🔐 Lockers',            defaultTemporal:'countdown', defaultTemplate:'blanco',      docs:[], duracionDefault:28800, requiresDeposit:false }
+  };
+
+  // 2026-05-13 — MOTOR DE VALIDACIONES — documentos canónicos requeribles
+  var DOC_TYPES = {
+    ine:           { label:'Identificación oficial (INE/Pasaporte)' },
+    licencia:      { label:'Licencia de conducir' },
+    firma:         { label:'Firma del cliente' },
+    contrato:      { label:'Contrato firmado' },
+    foto:          { label:'Fotografía' },
+    deposito:      { label:'Depósito en garantía' },
+    identificacion:{ label:'Identificación (cualquier oficial)' }
   };
   var TEMPLATES = {
     blanco:      { name:'Vacío',          layers:[{ id:'l1', name:'Piso 1', visible:true, locked:false, objects:[] }] },
@@ -20052,6 +20113,7 @@ window.addEventListener('volvix:version-loaded', function(e){
     zoom: 1,
     state: null,
     drag: null, // {type:'move'|'create', startX, startY, objId, offsetX, offsetY, newType}
+    _tickInterval: null,
 
     load: function(){
       var raw = null;
@@ -20062,18 +20124,126 @@ window.addEventListener('volvix:version-loaded', function(e){
       if (!this.state || !this.state.layers || !this.state.layers.length) {
         this.state = JSON.parse(JSON.stringify(TEMPLATES.restaurante));
       }
+      // Asegurar campos del motor universal en state
+      if (!this.state.businessType) this.state.businessType = 'restaurante';
+      if (!this.state.history) this.state.history = [];   // motor de eventos
+      // Asegurar campos del motor de recursos en cada objeto
+      var btCfg = BUSINESS_TYPES[this.state.businessType] || BUSINESS_TYPES.restaurante;
+      this.state.layers.forEach(function(L){
+        L.objects.forEach(function(o){
+          if (!o.temporal_mode) o.temporal_mode = btCfg.defaultTemporal;
+          if (!o.status) o.status = 'available';
+          if (typeof o.price !== 'number') o.price = 0;
+          if (typeof o.deposit !== 'number') o.deposit = 0;
+          if (!o.docs) o.docs = [];
+          if (!o.history) o.history = [];
+          // Campos para tiempo
+          if (typeof o.duration_sec !== 'number') o.duration_sec = btCfg.duracionDefault || 0;
+          // Campos para préstamo
+          if (!o.serial) o.serial = '';
+          if (!o.size) o.size = '';
+          if (!o.modelo) o.modelo = '';
+        });
+      });
     },
     save: function(){
       try { localStorage.setItem(MAPA_STORAGE, JSON.stringify(this.state)); } catch(_){}
     },
 
+    // Cambiar tipo de negocio aplica preset al state
+    setBusinessType: function(bt){
+      if (!BUSINESS_TYPES[bt]) return;
+      this.state.businessType = bt;
+      this.save();
+      this.renderDashboard();
+      tToast('Tipo de negocio: '+BUSINESS_TYPES[bt].label);
+    },
+
+    // 2026-05-13 — Dashboard universal: KPIs en tiempo real
+    renderDashboard: function(){
+      var el = $('#mapa-dashboard'); if (!el) return;
+      var all = [];
+      this.state.layers.forEach(function(L){ L.objects.forEach(function(o){
+        var def = OBJ_TYPES[o.type] || {};
+        if (def.defaultCap > 0) all.push(o); // solo recursos "operables"
+      }); });
+      var byStatus = {};
+      all.forEach(function(o){ var s=o.status||'available'; byStatus[s]=(byStatus[s]||0)+1; });
+      var totalCap = all.reduce(function(a,o){return a+(o.capacity||0);},0);
+      var occupiedCap = all.filter(function(o){return o.status==='occupied'||o.status==='delivered';}).reduce(function(a,o){return a+(o.capacity||0);},0);
+      var ocupacion = totalCap ? Math.round((occupiedCap/totalCap)*100) : 0;
+      var nowMs = Date.now();
+      var venceProximamente = all.filter(function(o){
+        if (o.temporal_mode !== 'countdown' || (o.status!=='occupied' && o.status!=='delivered')) return false;
+        if (!o.startedAt || !o.duration_sec) return false;
+        var quedaMs = (o.startedAt + o.duration_sec*1000) - nowMs;
+        return quedaMs > 0 && quedaMs < 300000; // <5min
+      }).length;
+      var vencidos = all.filter(function(o){return o.status==='overdue'||o.status==='expired';}).length;
+      var btLabel = (BUSINESS_TYPES[this.state.businessType]||{}).label || 'Genérico';
+      function _kpi(lbl, val, sub, color){
+        return '<div style="background:#fff;border-left:3px solid '+(color||'#EA580C')+';padding:8px 10px;border-radius:6px;">'
+             +   '<div style="font-size:10px;color:#57534E;text-transform:uppercase;letter-spacing:.4px;">'+lbl+'</div>'
+             +   '<div style="font-size:20px;font-weight:700;line-height:1.1;">'+val+'</div>'
+             +   '<div style="font-size:10px;color:#A8A29E;">'+sub+'</div>'
+             + '</div>';
+      }
+      el.innerHTML =
+          _kpi('Recursos', all.length, btLabel, '#EA580C')
+        + _kpi('Disponibles', byStatus.available||0, 'listos', '#16A34A')
+        + _kpi('Ocupados', (byStatus.occupied||0)+(byStatus.delivered||0), 'en uso', '#DC2626')
+        + _kpi('Reservados', byStatus.reserved||0, 'futuros', '#F59E0B')
+        + _kpi('Ocupación', ocupacion+'%', occupiedCap+'/'+totalCap+' pers', '#2563EB')
+        + _kpi('Alertas', vencidos + venceProximamente, vencidos+' vencidos · '+venceProximamente+' próximos', vencidos?'#DC2626':'#A1A1AA');
+    },
+
+    // Selector de tipo de negocio
+    renderBusinessTypeSelect: function(){
+      var sel = $('#mapa-business-type'); if (!sel) return;
+      var current = this.state.businessType;
+      sel.innerHTML = Object.keys(BUSINESS_TYPES).map(function(k){
+        return '<option value="'+k+'"'+(k===current?' selected':'')+'>'+BUSINESS_TYPES[k].label+'</option>';
+      }).join('');
+    },
+
+    // Loop de countdown: tick cada segundo, actualiza recursos con expiración
+    startTickLoop: function(){
+      if (this._tickInterval) return;
+      var self = this;
+      this._tickInterval = setInterval(function(){
+        var now = Date.now();
+        var changed = false;
+        self.state.layers.forEach(function(L){
+          L.objects.forEach(function(o){
+            if (o.temporal_mode === 'countdown' && (o.status==='occupied' || o.status==='delivered') && o.startedAt && o.duration_sec) {
+              var endsAt = o.startedAt + o.duration_sec*1000;
+              if (now >= endsAt && o.status !== 'expired' && o.status !== 'overdue') {
+                o.status = (o.temporal_mode==='prestamo') ? 'overdue' : 'expired';
+                o.expiredAt = now;
+                o.history = o.history || [];
+                o.history.push({action:'expired', ts:now});
+                changed = true;
+                tToast('⏰ '+(o.name||o.type)+' venció');
+              }
+            }
+          });
+        });
+        if (changed) { self.save(); self.renderCanvas(); self.renderDashboard(); }
+        else { self.renderCanvas(); /* solo redibujar para refrescar tiempo restante */ }
+      }, 1000);
+    },
+    stopTickLoop: function(){ if (this._tickInterval){ clearInterval(this._tickInterval); this._tickInterval = null; } },
+
     render: function(){
       if (!this.state) this.load();
+      this.renderBusinessTypeSelect();
+      this.renderDashboard();
       this.renderToolbox();
       this.renderLayers();
       this.renderCanvas();
       this.renderProps();
       this.updateZoomLabel();
+      this.startTickLoop();
     },
 
     renderToolbox: function(){
@@ -20162,6 +20332,22 @@ window.addEventListener('volvix:version-loaded', function(e){
         ctx.strokeText(label, 0, 0);
         ctx.fillText(label, 0, 0);
       }
+      // Tiempo restante si countdown activo
+      if (o.temporal_mode === 'countdown' && (o.status==='occupied'||o.status==='delivered') && o.startedAt && o.duration_sec) {
+        var quedaMs = (o.startedAt + o.duration_sec*1000) - Date.now();
+        if (quedaMs > 0) {
+          var mm = Math.floor(quedaMs/60000), ss = Math.floor((quedaMs%60000)/1000);
+          var t = (mm<10?'0':'')+mm+':'+(ss<10?'0':'')+ss;
+          ctx.font = 'bold 13px monospace';
+          ctx.fillStyle = quedaMs < 60000 ? '#FEE2E2' : '#FEF3C7';
+          ctx.strokeText(t, 0, 14);
+          ctx.fillText(t, 0, 14);
+        } else {
+          ctx.font = 'bold 11px sans-serif';
+          ctx.fillStyle = '#FEE2E2';
+          ctx.fillText('VENCIDO', 0, 14);
+        }
+      }
       ctx.restore();
     },
 
@@ -20182,31 +20368,57 @@ window.addEventListener('volvix:version-loaded', function(e){
       var o = this.findObject(this.selectedIds[0]);
       if (!o) { el.innerHTML = ''; return; }
       var def = OBJ_TYPES[o.type] || {};
-      var statusOptions = ['available','occupied','reserved','cleaning','blocked'];
-      el.innerHTML =
-          '<div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;"><span style="font-size:22px;">'+def.emoji+'</span><b>'+esc(def.label||o.type)+'</b></div>'
-        + _input('Nombre', o.name, 'mapa-prop-name')
-        + (def.defaultCap > 0 ? _input('Capacidad', o.capacity||0, 'mapa-prop-cap', 'number') : '')
-        + _input('Color', o.color, 'mapa-prop-color', 'color')
-        + _row(_input('X', Math.round(o.x), 'mapa-prop-x', 'number'), _input('Y', Math.round(o.y), 'mapa-prop-y', 'number'))
-        + _row(_input('Ancho', Math.round(o.width||def.w), 'mapa-prop-w', 'number'), _input('Alto', Math.round(o.height||def.h), 'mapa-prop-h', 'number'))
-        + _input('Rotación (°)', o.rotation||0, 'mapa-prop-rot', 'number')
-        + (def.defaultCap > 0
-            ? '<div style="margin-bottom:8px;"><label style="display:block;font-size:11px;color:#57534E;font-weight:600;margin-bottom:3px;">Estado</label><select id="mapa-prop-status" style="width:100%;padding:6px 8px;border:1px solid #C9C7C3;border-radius:5px;font:12px inherit;">'
-              + statusOptions.map(function(s){return '<option value="'+s+'"'+(s===o.status?' selected':'')+'>'+s+'</option>';}).join('')
-              + '</select></div>'
-            : '')
-        + '<div style="display:flex;gap:6px;margin-top:14px;">'
-        +   '<button data-feature="mapa.duplicate" onclick="MapaUI.duplicateSelected()" style="flex:1;padding:6px;background:#fff;border:1px solid #C9C7C3;border-radius:5px;cursor:pointer;font-size:12px;">📋 Duplicar</button>'
-        +   '<button data-feature="mapa.delete" onclick="MapaUI.deleteSelected()" style="flex:1;padding:6px;background:#FEE2E2;border:1px solid #FCA5A5;color:#991B1B;border-radius:5px;cursor:pointer;font-size:12px;">🗑 Eliminar</button>'
-        + '</div>';
+      var isResource = def.defaultCap > 0;
+      var mode = o.temporal_mode || 'abierto';
+      var statusKeys = Object.keys(STATUS_DEF);
       function _input(label, value, id, type){
         type = type || 'text';
         return '<div style="margin-bottom:8px;"><label style="display:block;font-size:11px;color:#57534E;font-weight:600;margin-bottom:3px;">'+label+'</label><input id="'+id+'" type="'+type+'" value="'+esc(value==null?'':value)+'" style="width:100%;padding:6px 8px;border:1px solid #C9C7C3;border-radius:5px;font:12px inherit;'+(type==='color'?'height:32px;':'')+'"></div>';
       }
+      function _select(label, id, current, options){
+        return '<div style="margin-bottom:8px;"><label style="display:block;font-size:11px;color:#57534E;font-weight:600;margin-bottom:3px;">'+label+'</label><select id="'+id+'" style="width:100%;padding:6px 8px;border:1px solid #C9C7C3;border-radius:5px;font:12px inherit;background:#fff;">'+
+            options.map(function(o){return '<option value="'+esc(o.value)+'"'+(o.value===current?' selected':'')+'>'+esc(o.label)+'</option>';}).join('')+
+          '</select></div>';
+      }
       function _row(a,b){ return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">'+a+b+'</div>'; }
-      // Wire los inputs para apply on change
-      ['name','cap','color','x','y','w','h','rot','status'].forEach(function(k){
+
+      var html = '<div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;"><span style="font-size:22px;">'+def.emoji+'</span><b>'+esc(def.label||o.type)+'</b></div>'
+        + _input('Nombre', o.name, 'mapa-prop-name')
+        + (isResource ? _input('Capacidad', o.capacity||0, 'mapa-prop-cap', 'number') : '')
+        + _input('Color', o.color, 'mapa-prop-color', 'color')
+        + _row(_input('X', Math.round(o.x), 'mapa-prop-x', 'number'), _input('Y', Math.round(o.y), 'mapa-prop-y', 'number'))
+        + _row(_input('Ancho', Math.round(o.width||def.w), 'mapa-prop-w', 'number'), _input('Alto', Math.round(o.height||def.h), 'mapa-prop-h', 'number'))
+        + _input('Rotación (°)', o.rotation||0, 'mapa-prop-rot', 'number');
+
+      if (isResource) {
+        html += '<hr style="margin:10px 0;border:none;border-top:1px solid #E0DEDB;">'
+              + '<div style="font-size:10px;font-weight:700;color:#57534E;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;">Motor temporal</div>'
+              + _select('Modo temporal', 'mapa-prop-mode', mode, Object.keys(TEMPORAL_MODES).map(function(k){return {value:k, label:TEMPORAL_MODES[k].label};}))
+              + '<div style="font-size:10px;color:#A8A29E;margin:-4px 0 8px;font-style:italic;">'+esc(TEMPORAL_MODES[mode]?TEMPORAL_MODES[mode].desc:'')+'</div>'
+              + _select('Estado', 'mapa-prop-status', o.status||'available', statusKeys.map(function(s){return {value:s, label:STATUS_DEF[s].icon+' '+STATUS_DEF[s].label};}));
+        if (mode === 'countdown' || mode === 'prestamo' || mode === 'evento') {
+          html += _input(mode==='prestamo'?'Duración (horas)':'Duración (minutos)',
+                          mode==='prestamo' ? Math.round((o.duration_sec||86400)/3600) : Math.round((o.duration_sec||1800)/60),
+                          'mapa-prop-dur', 'number');
+        }
+        html += _row(_input('Precio ($)', o.price||0, 'mapa-prop-price', 'number'),
+                     _input('Depósito ($)', o.deposit||0, 'mapa-prop-deposit', 'number'));
+
+        if (mode === 'prestamo') {
+          html += _row(_input('Serie/Placa', o.serial||'', 'mapa-prop-serial'),
+                       _input('Modelo', o.modelo||'', 'mapa-prop-modelo'))
+                + _input('Talla/Color', o.size||'', 'mapa-prop-size');
+        }
+        if (o.cliente_actual) {
+          html += '<div style="background:#F0FDF4;border:1px solid #BBF7D0;padding:6px 8px;border-radius:5px;font-size:11px;color:#14532D;margin:6px 0;"><b>Cliente actual:</b> '+esc(o.cliente_actual)+'</div>';
+        }
+      }
+      html += '<div style="display:flex;gap:6px;margin-top:14px;">'
+            +   '<button data-feature="mapa.duplicate" onclick="MapaUI.duplicateSelected()" style="flex:1;padding:6px;background:#fff;border:1px solid #C9C7C3;border-radius:5px;cursor:pointer;font-size:12px;">📋 Duplicar</button>'
+            +   '<button data-feature="mapa.delete" onclick="MapaUI.deleteSelected()" style="flex:1;padding:6px;background:#FEE2E2;border:1px solid #FCA5A5;color:#991B1B;border-radius:5px;cursor:pointer;font-size:12px;">🗑 Eliminar</button>'
+            + '</div>';
+      el.innerHTML = html;
+      ['name','cap','color','x','y','w','h','rot','status','mode','dur','price','deposit','serial','modelo','size'].forEach(function(k){
         var i = document.getElementById('mapa-prop-'+k);
         if (!i) return;
         i.addEventListener('input', function(){ MapaUI.applyPropEdit(); });
@@ -20227,8 +20439,20 @@ window.addEventListener('volvix:version-loaded', function(e){
       var h=val('mapa-prop-h', true); if (h!==null) o.height=Math.max(8,h);
       var r=val('mapa-prop-rot', true); if (r!==null) o.rotation=r;
       var s=val('mapa-prop-status'); if (s) o.status=s;
+      // Nuevos campos del motor universal
+      var md=val('mapa-prop-mode'); if (md && TEMPORAL_MODES[md]) o.temporal_mode=md;
+      var dur=val('mapa-prop-dur', true); if (dur!==null) {
+        // dur viene en horas si modo prestamo, en minutos si countdown/evento
+        o.duration_sec = (o.temporal_mode==='prestamo') ? dur*3600 : dur*60;
+      }
+      var pr=val('mapa-prop-price', true); if (pr!==null) o.price=pr;
+      var dep=val('mapa-prop-deposit', true); if (dep!==null) o.deposit=dep;
+      var ser=val('mapa-prop-serial'); if (ser!==null) o.serial=ser;
+      var mod=val('mapa-prop-modelo'); if (mod!==null) o.modelo=mod;
+      var sz=val('mapa-prop-size'); if (sz!==null) o.size=sz;
       this.save();
       this.renderCanvas();
+      this.renderDashboard();
     },
 
     findObject: function(id){
@@ -20371,14 +20595,170 @@ window.addEventListener('volvix:version-loaded', function(e){
     zoomFit: function(){ this.zoom = 1; var c=$('#mapa-canvas'); if(c){c.style.transform='scale(1)';} this.updateZoomLabel(); },
     updateZoomLabel: function(){ var el = $('#mapa-zoom-label'); if (el) el.textContent = Math.round(this.zoom*100)+'%'; },
 
-    // Click en operación cambia el status
+    // Click en operación adaptado por modo_temporal del recurso
     _operationClick: function(o){
-      var seq = ['available','occupied','reserved','cleaning','available'];
-      var i = seq.indexOf(o.status||'available');
-      o.status = seq[(i+1) % seq.length];
-      this.save();
-      this.renderCanvas();
-      tToast(o.name+' → '+o.status);
+      var self = this;
+      var mode = o.temporal_mode || 'abierto';
+      // Ciclo simple para "abierto" (restaurante/barbería)
+      if (mode === 'abierto') {
+        var seq = TEMPORAL_MODES.abierto.cycleOnClick;
+        var i = seq.indexOf(o.status||'available');
+        o.status = seq[(i+1) % seq.length] || 'available';
+        o.history = o.history || []; o.history.push({action:'status_change', to:o.status, ts:Date.now()});
+        this.save(); this.renderCanvas(); this.renderDashboard();
+        tToast(o.name+' → '+STATUS_DEF[o.status].label);
+        return;
+      }
+      // Countdown: si está libre, abre modal para iniciar; si está corriendo, modal para finalizar
+      if (mode === 'countdown') {
+        if (o.status === 'available' || o.status === 'expired') return this._startCountdownModal(o);
+        else if (o.status === 'occupied') return this._stopCountdownModal(o);
+        else { o.status = 'available'; this.save(); this.renderCanvas(); this.renderDashboard(); tToast(o.name+' liberado'); return; }
+      }
+      // Préstamo: si libre, modal para entregar; si entregado, modal para devolver
+      if (mode === 'prestamo') {
+        if (o.status === 'available') return this._deliverModal(o);
+        else if (o.status === 'delivered' || o.status === 'overdue') return this._returnModal(o);
+        else { o.status = 'available'; this.save(); this.renderCanvas(); this.renderDashboard(); return; }
+      }
+      // Evento: muestra info del evento
+      if (mode === 'evento') {
+        if (o.status === 'available') return this._reserveEventModal(o);
+        else { o.status = 'available'; o.startedAt=null; o.eventEndAt=null; this.save(); this.renderCanvas(); this.renderDashboard(); return; }
+      }
+    },
+
+    // ── COUNTDOWN — iniciar uso (brincolines/videojuegos/karaoke/lockers) ──
+    _startCountdownModal: function(o){
+      var self = this;
+      var defMin = Math.round((o.duration_sec||1800)/60);
+      _pdcMiniModal({
+        title: '▶️ Iniciar uso de ' + (o.name||o.type),
+        fields: [
+          {name:'cliente',  label:'Nombre del cliente', placeholder:'Juan Pérez'},
+          {name:'minutos',  label:'Duración (minutos)', required:true, type:'number', value:String(defMin), placeholder:'30'},
+          {name:'precio',   label:'Precio ($)', type:'number', value:String(o.price||0)},
+          {name:'notas',    label:'Notas', type:'textarea'}
+        ],
+        submitLabel:'▶️ Iniciar countdown',
+        onSubmit: function(d){
+          var mins = Number(d.minutos)||30;
+          o.status = 'occupied';
+          o.startedAt = Date.now();
+          o.duration_sec = mins * 60;
+          o.cliente_actual = d.cliente||'';
+          if (d.precio) o.price = Number(d.precio)||o.price;
+          o.history = o.history || [];
+          o.history.push({action:'start', client:o.cliente_actual, mins:mins, price:o.price, ts:Date.now()});
+          self.save(); self.renderCanvas(); self.renderDashboard();
+          tToast('▶️ '+(o.name||o.type)+' iniciado · '+mins+' min · $'+(o.price||0));
+          return true;
+        }
+      });
+    },
+    _stopCountdownModal: function(o){
+      var self = this;
+      if (!confirm('¿Finalizar el uso de '+(o.name||o.type)+' antes de tiempo?')) return;
+      o.status = 'cleaning';
+      o.history = o.history || []; o.history.push({action:'stop_early', ts:Date.now()});
+      o.startedAt = null;
+      self.save(); self.renderCanvas(); self.renderDashboard();
+      tToast('Liberado · ahora en limpieza');
+    },
+
+    // ── PRÉSTAMO — entregar recurso (auto/traje/herramienta/habitación) ──
+    _deliverModal: function(o){
+      var self = this;
+      var btCfg = BUSINESS_TYPES[self.state.businessType] || {};
+      var docsRequiredHtml = '';
+      (btCfg.docs||[]).forEach(function(d){
+        docsRequiredHtml += '<label style="display:flex;gap:6px;align-items:center;font-size:12px;margin-bottom:4px;"><input type="checkbox" name="doc_'+d+'" required> '+(DOC_TYPES[d]?DOC_TYPES[d].label:d)+'</label>';
+      });
+      var defHrs = Math.round((o.duration_sec||86400)/3600);
+      _pdcMiniModal({
+        title: '📦 Entregar ' + (o.name||o.type),
+        bodyHtml: docsRequiredHtml ? '<div style="background:#FFF7ED;border:1px solid #FED7AA;padding:10px;border-radius:6px;margin-bottom:12px;"><div style="font-weight:600;font-size:12px;color:#9a3412;margin-bottom:6px;">Documentos requeridos:</div>'+docsRequiredHtml+'</div>' : '',
+        fields: [
+          {name:'cliente',  label:'Nombre del cliente', required:true, placeholder:'Juan Pérez'},
+          {name:'tel',      label:'Teléfono'},
+          {name:'horas',    label:'Duración (horas)', type:'number', value:String(defHrs)},
+          {name:'precio',   label:'Precio total ($)', type:'number', value:String(o.price||0)},
+          {name:'deposito', label:'Depósito en garantía ($)', type:'number', value:String(o.deposit||(btCfg.requiresDeposit?500:0))},
+          {name:'notas',    label:'Notas (estado de entrega, daños previos…)', type:'textarea'}
+        ],
+        submitLabel:'📦 Entregar',
+        onSubmit: function(d){
+          var hrs = Number(d.horas)||24;
+          o.status = 'delivered';
+          o.startedAt = Date.now();
+          o.duration_sec = hrs * 3600;
+          o.cliente_actual = d.cliente;
+          o.tel_cliente = d.tel||'';
+          o.price = Number(d.precio)||o.price;
+          o.deposit = Number(d.deposito)||o.deposit;
+          o.history = o.history || [];
+          o.history.push({action:'deliver', client:d.cliente, hrs:hrs, price:o.price, deposit:o.deposit, ts:Date.now()});
+          self.save(); self.renderCanvas(); self.renderDashboard();
+          tToast('📦 Entregado a '+d.cliente+' · $'+o.price+' + depósito $'+o.deposit);
+          return true;
+        }
+      });
+    },
+    _returnModal: function(o){
+      var self = this;
+      _pdcMiniModal({
+        title: '↩️ Devolver ' + (o.name||o.type),
+        bodyHtml: '<div style="font-size:13px;color:#57534E;margin-bottom:10px;">Cliente: <b>'+esc(o.cliente_actual||'?')+'</b> · Depósito retenido: $'+(o.deposit||0)+'</div>',
+        fields: [
+          {name:'cargos_dano', label:'Cargos por daños ($)', type:'number', value:'0'},
+          {name:'cargos_mora', label:'Cargos por mora ($)', type:'number', value:String(o.status==='overdue'?500:0)},
+          {name:'notas',       label:'Notas (estado de devolución)', type:'textarea'}
+        ],
+        submitLabel:'↩️ Recibir devolución',
+        onSubmit: function(d){
+          var danos = Number(d.cargos_dano)||0;
+          var mora = Number(d.cargos_mora)||0;
+          var devuelto = (o.deposit||0) - danos - mora;
+          o.status = 'cleaning';
+          o.history = o.history || [];
+          o.history.push({action:'return', client:o.cliente_actual, danos:danos, mora:mora, deposito_devuelto:devuelto, ts:Date.now()});
+          o.cliente_actual = ''; o.startedAt = null;
+          self.save(); self.renderCanvas(); self.renderDashboard();
+          tToast('↩️ Recibido · depósito a devolver: $'+devuelto);
+          return true;
+        }
+      });
+    },
+    // ── EVENTO — reservar para hora específica ──
+    _reserveEventModal: function(o){
+      var self = this;
+      _pdcMiniModal({
+        title: '📅 Reservar evento en ' + (o.name||o.type),
+        fields: [
+          {name:'cliente',  label:'Nombre del cliente', required:true},
+          {name:'fecha',    label:'Fecha', required:true, type:'date'},
+          {name:'hora',     label:'Hora inicio (HH:MM)', required:true, placeholder:'19:00'},
+          {name:'minutos',  label:'Duración (minutos)', type:'number', value:String(Math.round((o.duration_sec||3600)/60))},
+          {name:'personas', label:'Personas', type:'number', value:String(o.capacity||1)},
+          {name:'precio',   label:'Precio ($)', type:'number', value:String(o.price||0)}
+        ],
+        submitLabel:'📅 Reservar',
+        onSubmit: function(d){
+          o.status = 'reserved';
+          o.cliente_actual = d.cliente;
+          var inicio = new Date(d.fecha + 'T' + d.hora + ':00').getTime();
+          o.startedAt = inicio;
+          var mins = Number(d.minutos)||60;
+          o.duration_sec = mins*60;
+          o.eventEndAt = inicio + mins*60000;
+          if (d.precio) o.price = Number(d.precio);
+          o.history = o.history || [];
+          o.history.push({action:'event_book', client:d.cliente, date:d.fecha, time:d.hora, mins:mins, ts:Date.now()});
+          self.save(); self.renderCanvas(); self.renderDashboard();
+          tToast('📅 Reservado para '+d.cliente+' el '+d.fecha+' '+d.hora);
+          return true;
+        }
+      });
     }
   };
   window.MapaUI = MapaUI;
