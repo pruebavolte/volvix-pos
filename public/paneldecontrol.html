@@ -7868,10 +7868,12 @@
         clearInterval(iv);
         if (patchPerm()) {
           initV14();
-          // Si ya hay un tenant cargado, render inicial
-          if (window.PERM.selectedTid) {
-            renderModulesList(); renderConfigPane(); renderPreview();
-          }
+          // 2026-05-12 FIX: renderizar la lista de módulos SIEMPRE en bootstrap,
+          // no solo cuando hay tenant cargado. Antes quedaba vacía si el
+          // backend tardaba o devolvía 401 — los módulos son client-side
+          // (MOD_CATEGORIES + MOD_LABELS) así que pueden mostrarse sin tenant.
+          // El estado on/off por módulo aparece cuando el tenant llega.
+          renderModulesList(); renderConfigPane(); renderPreview();
         }
       } else if (tries > 30) {
         clearInterval(iv);
