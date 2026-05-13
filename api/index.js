@@ -1898,6 +1898,36 @@ const handlers = {
     sendJSON(res, { ok: true, message: 'Sesión cerrada' });
   },
 
+  // 2026-05-13 — diagnostico de email: envia un correo de prueba y devuelve
+  // exactamente que respondio el proveedor (codigo http + body del error de
+  // Resend si dominio no verificado / API key invalida / etc).
+  // Uso: GET /api/diag/email-test?to=tu@correo.com
+  'GET /api/diag/email-test': async (req, res) => {
+    try {
+      const u = new URL(req.url, 'http://x');
+      const to = u.searchParams.get('to');
+      if (!to || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(to)) {
+        return sendJSON(res, { ok: false, error: 'Pasa ?to=email@dominio.com' }, 400);
+      }
+      const env = {
+        has_RESEND_API_KEY: !!process.env.RESEND_API_KEY,
+        RESEND_FROM: process.env.RESEND_FROM || '(default: Volvix <noreply@volvix.com>)',
+        has_SENDGRID_API_KEY: !!process.env.SENDGRID_API_KEY,
+        SENDGRID_FROM: process.env.SENDGRID_FROM || null,
+      };
+      const result = await sendEmail({
+        to: to,
+        subject: 'Test Volvix · ' + new Date().toLocaleString('es-MX'),
+        html: '<p>Esto es una prueba del proveedor de correo. Si lo recibes, el provider responde 2xx.</p>',
+        text: 'Prueba Volvix. Si lo recibes, el envío funciona.',
+        template: 'diag_test'
+      });
+      return sendJSON(res, { ok: result.ok === true, env: env, provider_response: result });
+    } catch (err) {
+      return sendJSON(res, { ok: false, error: String(err && err.message || err) }, 500);
+    }
+  },
+
   // FIX R13 (#5): /api/health público
   'GET /api/health': async (req, res) => {
     try {

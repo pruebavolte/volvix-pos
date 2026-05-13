@@ -7232,14 +7232,38 @@
       ? { tag: 'personalizado', label: 'Personalizado' }
       : { tag: 'normal',        label: 'Normal' };
   }
+  // 2026-05-13: formato fecha larga + hora 24h (ejemplo: "lunes 12 de enero del 2027 14:28:56")
   function fmtLastLogin(iso) {
     if (!iso) return '—';
     try {
       const d = new Date(iso);
       const dias = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
       const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-      return dias[d.getDay()] + ' ' + d.getDate() + ' de ' + meses[d.getMonth()] + ' ' + d.getFullYear();
+      const pad = (n) => String(n).padStart(2,'0');
+      return dias[d.getDay()] + ' ' + d.getDate() + ' de ' + meses[d.getMonth()] + ' del ' + d.getFullYear()
+           + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
     } catch(_) { return '—'; }
+  }
+  // 2026-05-13: "En sesión ahora" — verde si actividad < 5 min, amarillo < 30 min, gris > 30 min.
+  // Calculado del ISO timestamp más reciente (last_seen_at o last_login_at).
+  function fmtOnlineStatus(iso) {
+    if (!iso) return '<span style="color:#A1A1AA;">⚫ Sin datos</span>';
+    try {
+      const d = new Date(iso).getTime();
+      const ms = Date.now() - d;
+      const min = Math.floor(ms / 60000);
+      if (min < 5) {
+        return '<span style="display:inline-flex;align-items:center;gap:4px;color:#16A34A;font-weight:600;">'
+             + '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#16A34A;box-shadow:0 0 0 0 rgba(22,163,74,.6);animation:vlxPulseDot 1.4s infinite;"></span>'
+             + 'En sesión</span>';
+      }
+      if (min < 30) return '<span style="color:#CA8A04;">🟡 Hace '+min+'m</span>';
+      if (min < 60) return '<span style="color:#94A3B8;">⚪ Hace '+min+'m</span>';
+      const hr = Math.floor(min / 60);
+      if (hr < 24) return '<span style="color:#A1A1AA;">⚫ Hace '+hr+'h</span>';
+      const dd = Math.floor(hr / 24);
+      return '<span style="color:#A1A1AA;">⚫ Hace '+dd+'d</span>';
+    } catch(_) { return '<span style="color:#A1A1AA;">⚫ —</span>'; }
   }
   async function renderUsersUnified() {
     const wrap = $('#permv14-users-table-wrap');
@@ -7281,23 +7305,56 @@
       +   '<span>👨‍💼 <strong>' + (j.totals && j.totals.employees || 0) + '</strong> empleados</span>'
       + '</div>';
 
-    // Tabla
-    const cols = ['Usuario','Tipo','Giro','Estado','Último uso','Plan','URL landing','URL acceso',''];
-    let html = summary
-      + '<table class="permv14-users-table">'
-      +   '<thead><tr>' + cols.map(c => '<th>' + escapeText(c) + '</th>').join('') + '</tr></thead>'
+    // 2026-05-13: nueva columna ☑ checkbox al inicio + nueva columna "En sesión"
+    // entre Último uso y Plan. Total: 11 columnas.
+    const colDefs = [
+      { label: '<input type="checkbox" id="pv14-users-selall" title="Seleccionar todos">', w: 36 },
+      { label: 'Usuario',     w: null },
+      { label: 'Tipo',        w: 110  },
+      { label: 'Giro',        w: 150  },
+      { label: 'Estado',      w: 110  },
+      { label: 'Último uso',  w: 220  },
+      { label: 'En sesión',   w: 130  },
+      { label: 'Plan',        w: 100  },
+      { label: 'URL landing', w: 200  },
+      { label: 'URL acceso',  w: 220  },
+      { label: '',            w: 160  }
+    ];
+    // Barra de acciones masivas (oculta hasta que haya selección)
+    const bulkBar = '<div id="pv14-users-bulk" style="display:none;padding:8px 14px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;margin-bottom:8px;font-size:13px;color:#9a3412;align-items:center;gap:10px;">'
+      + '<span><b id="pv14-users-bulk-count">0</b> seleccionados</span>'
+      + '<button data-pv14-bulk="suspend"  class="permv14-btn-soft" style="padding:4px 10px;font-size:12px;">🚫 Suspender</button>'
+      + '<button data-pv14-bulk="reactivate" class="permv14-btn-soft" style="padding:4px 10px;font-size:12px;">✓ Reactivar</button>'
+      + '<button data-pv14-bulk="email"     class="permv14-btn-soft" style="padding:4px 10px;font-size:12px;">📧 Enviar email</button>'
+      + '<button data-pv14-bulk="clear"     class="permv14-btn-soft" style="padding:4px 10px;font-size:12px;margin-left:auto;">Limpiar</button>'
+      + '</div>';
+
+    let html = summary + bulkBar
+      + '<table class="permv14-users-table" style="table-layout:fixed;width:100%;">'
+      +   '<colgroup>'
+      +     colDefs.map(c => '<col style="' + (c.w ? 'width:' + c.w + 'px;' : '') + '">').join('')
+      +   '</colgroup>'
+      +   '<thead><tr>' + colDefs.map(c => '<th style="vertical-align:middle;">' + c.label + '</th>').join('') + '</tr></thead>'
       +   '<tbody>';
+
+    function _cbCell(id, type){
+      // type: 'user' | 'tenant' | 'employee'
+      return '<td style="text-align:center;vertical-align:middle;"><input type="checkbox" class="pv14-users-cb" data-pv14-cb="' + escapeAttr(id || '') + '" data-pv14-cbtype="' + escapeAttr(type || 'user') + '"></td>';
+    }
 
     // Platform owners primero (siempre visibles, no dependen de tenant)
     (j.platform_owners || []).forEach(po => {
       const last = fmtLastLogin(po.last_login_at);
+      const online = fmtOnlineStatus(po.last_seen_at || po.last_login_at);
       if (search && !(po.email || '').toLowerCase().includes(search) && !'superadmin'.includes(search)) return;
       html += '<tr class="permv14-users-row-tenant">'
-        + '<td><span class="u-email">👑 ' + escapeText(po.email || '(sin email)') + '</span></td>'
+        + _cbCell(po.id || po.email, 'platform_owner')
+        + '<td style="overflow:hidden;text-overflow:ellipsis;"><span class="u-email">👑 ' + escapeText(po.email || '(sin email)') + '</span></td>'
         + '<td><span class="u-tag marcablanca">SUPERADMIN</span></td>'
         + '<td>—</td>'
         + '<td><span class="u-state active">activo</span></td>'
-        + '<td>' + escapeText(last) + '</td>'
+        + '<td style="font-size:12px;">' + escapeText(last) + '</td>'
+        + '<td style="font-size:12px;">' + online + '</td>'
         + '<td>—</td>'
         + '<td>—</td>'
         + '<td>—</td>'
@@ -7362,43 +7419,44 @@
       if (!ownersFilt.length) {
         // tenant huérfano: mostrar fila stub con info del tenant (giro/estado/plan editables, sin user_id)
         html += '<tr class="permv14-users-row-tenant" data-pv14-row-tid="' + escapeAttr(t.tenant_id) + '">'
-          + '<td><span class="u-email">🏪 (sin owner) — ' + escapeText(t.name || t.tenant_id) + '</span></td>'
+          + _cbCell(t.tenant_id, 'tenant')
+          + '<td style="overflow:hidden;text-overflow:ellipsis;"><span class="u-email">🏪 (sin owner) — ' + escapeText(t.name || t.tenant_id) + '</span></td>'
           + '<td><span class="u-tag normal">—</span></td>'
           + inlineGiroCell(t.tenant_id, giroSlug)
           + inlineStatusCell(t.tenant_id, tenantStatus)
-          + '<td>—</td>'
+          + '<td style="font-size:12px;">—</td>'
+          + '<td style="font-size:12px;">' + fmtOnlineStatus(null) + '</td>'
           + planCell(t.tenant_id, plan)
-          + '<td><a class="u-url" href="https://' + escapeAttr(landing) + '" target="_blank" rel="noopener">' + escapeText(landing) + '</a></td>'
-          + '<td><a class="u-url" href="https://' + escapeAttr(acceso) + '" target="_blank" rel="noopener">' + escapeText(acceso) + '</a></td>'
+          + '<td style="overflow:hidden;text-overflow:ellipsis;"><a class="u-url" href="https://' + escapeAttr(landing) + '" target="_blank" rel="noopener">' + escapeText(landing) + '</a></td>'
+          + '<td style="overflow:hidden;text-overflow:ellipsis;"><a class="u-url" href="https://' + escapeAttr(acceso) + '" target="_blank" rel="noopener">' + escapeText(acceso) + '</a></td>'
           + inlineTenantActions(t.tenant_id, '')
           + '</tr>';
       }
       ownersFilt.forEach((o, idx) => {
         const ut = userTypeFor(o.email || '', meta);
         const last = fmtLastLogin(o.last_login_at);
+        const online = fmtOnlineStatus(o.last_seen_at || o.last_login_at);
         const isFirstOfTenant = (idx === 0);
         const rowClass = (isFirstOfTenant ? 'permv14-users-row-tenant' : 'permv14-users-row-parent');
-        // 2026-05-09 fix CRIT-1: NUNCA usar email como rowId — colisiona con
-        // duplicados y el server hace lookup por UUID. Si no hay id real,
-        // mostrar email como texto plano (no editable).
         const realUid = o.id || o.user_id || null;
         const emailColHtml = realUid
           ? emailCell(realUid, o.email || '')
           : '<span class="u-email" title="Sin UUID — no editable">' + escapeText(o.email || '(sin email)') + '</span>';
         html += '<tr class="' + rowClass + '" data-pv14-row-tid="' + escapeAttr(t.tenant_id) + '" data-pv14-row-uid="' + escapeAttr(realUid || '') + '">'
-          + '<td>👤 ' + emailColHtml + '</td>'
+          + _cbCell(realUid || o.email, 'owner')
+          + '<td style="overflow:hidden;text-overflow:ellipsis;">👤 ' + emailColHtml + '</td>'
           + '<td><span class="u-tag ' + ut.tag + '">' + escapeText(ut.label) + '</span></td>'
-          // Giro y Estado: SELECT inline solo en la primera fila del tenant (heredan del padre)
           + (isFirstOfTenant
               ? inlineGiroCell(t.tenant_id, giroSlug)
               : '<td><span style="opacity:.5;font-size:11px;">' + escapeText(giroLabel) + '</span></td>')
           + (isFirstOfTenant
               ? inlineStatusCell(t.tenant_id, tenantStatus)
               : '<td><span class="u-state ' + tenantStatus + '">' + escapeText(tenantStatus) + '</span></td>')
-          + '<td>' + escapeText(last) + '</td>'
+          + '<td style="font-size:12px;">' + escapeText(last) + '</td>'
+          + '<td style="font-size:12px;">' + online + '</td>'
           + (isFirstOfTenant ? planCell(t.tenant_id, plan) : '<td>' + escapeText(plan) + '</td>')
-          + '<td><a class="u-url" href="https://' + escapeAttr(landing) + '" target="_blank" rel="noopener">' + escapeText(landing) + '</a></td>'
-          + '<td><a class="u-url" href="https://' + escapeAttr(acceso) + '" target="_blank" rel="noopener">' + escapeText(acceso) + '</a></td>'
+          + '<td style="overflow:hidden;text-overflow:ellipsis;"><a class="u-url" href="https://' + escapeAttr(landing) + '" target="_blank" rel="noopener">' + escapeText(landing) + '</a></td>'
+          + '<td style="overflow:hidden;text-overflow:ellipsis;"><a class="u-url" href="https://' + escapeAttr(acceso) + '" target="_blank" rel="noopener">' + escapeText(acceso) + '</a></td>'
           + (isFirstOfTenant
               ? inlineTenantActions(t.tenant_id, o.email || '')
               : '<td class="u-actions">'
@@ -7412,22 +7470,25 @@
       empsFilt.forEach(e => {
         const ut = userTypeFor(e.email || '', meta);
         const empState = e.disabled ? 'disabled' : tenantStatus;
-        // 2026-05-09 fix CRIT-1: idem ownersFilt — empleado sin UUID = read-only
         const empUid = e.id || e.user_id || null;
         const empEmailHtml = empUid ? emailCell(empUid, e.email || '') : '<span class="u-email">' + escapeText(e.email || '(sin email)') + '</span>';
         const empRoleHtml = empUid
           ? cellInput({ rowType: 'user', rowId: empUid, field: 'role', value: e.role || 'cajero', list: 'permv14-dl-roles' })
           : '<span class="u-tag empleado">' + escapeText(e.role || 'empleado') + '</span>';
+        const empLast = fmtLastLogin(e.last_login_at);
+        const empOnline = fmtOnlineStatus(e.last_seen_at || e.last_login_at);
         html += '<tr class="permv14-users-row-child" data-pv14-row-tid="' + escapeAttr(t.tenant_id) + '" data-pv14-row-uid="' + escapeAttr(empUid || '') + '">'
-          + '<td>' + empEmailHtml + '</td>'
+          + _cbCell(empUid || e.email, 'employee')
+          + '<td style="overflow:hidden;text-overflow:ellipsis;">' + empEmailHtml + '</td>'
           + '<td>' + empRoleHtml
           +     ' <span class="u-tag ' + ut.tag + '">' + escapeText(ut.label) + '</span></td>'
           + '<td>' + escapeText(giroLabel) + '</td>'
           + '<td><span class="u-state ' + empState + '">' + escapeText(empState) + '</span></td>'
-          + '<td>—</td>'
+          + '<td style="font-size:12px;">' + escapeText(empLast) + '</td>'
+          + '<td style="font-size:12px;">' + empOnline + '</td>'
           + '<td>' + escapeText(plan) + '</td>'
-          + '<td><a class="u-url" href="https://' + escapeAttr(landing) + '" target="_blank" rel="noopener">' + escapeText(landing) + '</a></td>'
-          + '<td><a class="u-url" href="https://' + escapeAttr(acceso) + '" target="_blank" rel="noopener">' + escapeText(acceso) + '</a></td>'
+          + '<td style="overflow:hidden;text-overflow:ellipsis;"><a class="u-url" href="https://' + escapeAttr(landing) + '" target="_blank" rel="noopener">' + escapeText(landing) + '</a></td>'
+          + '<td style="overflow:hidden;text-overflow:ellipsis;"><a class="u-url" href="https://' + escapeAttr(acceso) + '" target="_blank" rel="noopener">' + escapeText(acceso) + '</a></td>'
           + '<td class="u-actions">'
           +   '<button data-pv14-view-as="' + escapeAttr(e.email || '') + '" data-pv14-tid="' + escapeAttr(t.tenant_id) + '" title="Abrir el POS como lo ve este empleado (modo lectura)">👁 Ver como</button>'
           +   '<button data-pv14-add-override="' + escapeAttr(e.email || '') + '" data-pv14-tid="' + escapeAttr(t.tenant_id) + '" title="Agregar override individual">+ Override</button>'
@@ -7437,7 +7498,7 @@
     });
 
     if (html.indexOf('<tr') === html.lastIndexOf('<tr')) {
-      html += '<tr class="permv14-users-row-empty"><td colspan="' + cols.length + '">Sin resultados con el filtro actual.</td></tr>';
+      html += '<tr class="permv14-users-row-empty"><td colspan="' + colDefs.length + '">Sin resultados con el filtro actual.</td></tr>';
     }
     html += '</tbody></table>';
     // 2026-05-09 fix(H7): footer de paginación. Solo se renderiza si la lista
@@ -7461,6 +7522,70 @@
         + '</div>';
     }
     wrap.innerHTML = html;
+
+    // 2026-05-13 — CSS one-shot para animación de "punto verde pulsando"
+    if (!document.getElementById('pv14-online-pulse-css')) {
+      const s = document.createElement('style');
+      s.id = 'pv14-online-pulse-css';
+      s.textContent = '@keyframes vlxPulseDot { 0%{box-shadow:0 0 0 0 rgba(22,163,74,.6);} 70%{box-shadow:0 0 0 6px rgba(22,163,74,0);} 100%{box-shadow:0 0 0 0 rgba(22,163,74,0);} }';
+      document.head.appendChild(s);
+    }
+
+    // 2026-05-13 — Wiring de checkboxes (uno-por-fila + select-all + bulk actions)
+    const selAll = $('#pv14-users-selall');
+    const bulkBarEl = $('#pv14-users-bulk');
+    const bulkCount = $('#pv14-users-bulk-count');
+    function refreshBulkBar(){
+      const cbs = $$('.pv14-users-cb');
+      const sel = cbs.filter(cb => cb.checked);
+      if (bulkCount) bulkCount.textContent = sel.length;
+      if (bulkBarEl) bulkBarEl.style.display = sel.length > 0 ? 'flex' : 'none';
+      if (selAll) {
+        if (sel.length === 0) { selAll.checked = false; selAll.indeterminate = false; }
+        else if (sel.length === cbs.length) { selAll.checked = true; selAll.indeterminate = false; }
+        else { selAll.checked = false; selAll.indeterminate = true; }
+      }
+    }
+    if (selAll) selAll.addEventListener('change', () => {
+      $$('.pv14-users-cb').forEach(cb => cb.checked = selAll.checked);
+      refreshBulkBar();
+    });
+    $$('.pv14-users-cb').forEach(cb => cb.addEventListener('change', refreshBulkBar));
+    // Bulk actions handler
+    if (wrap.parentNode) wrap.parentNode.addEventListener('click', (ev) => {
+      const b = ev.target.closest('[data-pv14-bulk]'); if (!b) return;
+      const action = b.getAttribute('data-pv14-bulk');
+      const sel = $$('.pv14-users-cb').filter(cb => cb.checked).map(cb => ({ id: cb.getAttribute('data-pv14-cb'), type: cb.getAttribute('data-pv14-cbtype') }));
+      if (!sel.length) return;
+      if (action === 'clear') {
+        $$('.pv14-users-cb').forEach(cb => cb.checked = false);
+        refreshBulkBar();
+        return;
+      }
+      if (action === 'email') {
+        const emails = sel.map(s => s.id).filter(s => s.indexOf('@') !== -1);
+        if (!emails.length) { alert('No hay emails seleccionados (solo IDs).'); return; }
+        location.href = 'mailto:?bcc=' + encodeURIComponent(emails.join(','));
+        return;
+      }
+      if (action === 'suspend' || action === 'reactivate') {
+        const msg = action === 'suspend'
+          ? '¿Suspender ' + sel.length + ' usuario(s)? Quedarán bloqueados de iniciar sesión hasta reactivar.'
+          : '¿Reactivar ' + sel.length + ' usuario(s)?';
+        if (!confirm(msg)) return;
+        // Marcar como dirty para batch save (reusa pipeline existente de v14.usersDirty)
+        sel.forEach(s => {
+          if (s.type === 'tenant') {
+            v14.usersDirty.set('tenant:' + s.id + ':status', { rowType: 'tenant', rowId: s.id, field: 'status', newValue: action === 'suspend' ? 'suspended' : 'active' });
+          } else {
+            v14.usersDirty.set('user:' + s.id + ':is_active', { rowType: 'user', rowId: s.id, field: 'is_active', newValue: action === 'reactivate' });
+          }
+        });
+        // Disparar el save existente
+        const saveBtn = $('#permv14-users-save');
+        if (saveBtn) { saveBtn.disabled = false; saveBtn.click(); }
+      }
+    });
 
     // 2026-05-09 fix(H7): wire de prev/next/perPage. No usamos _pv14Wired
     // porque estos controles se re-crean en cada render (viven dentro de wrap).
