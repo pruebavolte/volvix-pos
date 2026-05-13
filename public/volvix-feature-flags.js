@@ -85,7 +85,12 @@
     'module.sugeridas':     { name: 'Compras Sugeridas',  default_status: 'coming-soon' },
     'module.actualizador':  { name: 'Actualizador',       default_status: 'enabled' },
     'module.marketplace':   { name: 'Marketplace',        default_status: 'enabled' },
-    'module.kds':           { name: 'KDS Cocina',         default_status: 'coming-soon' }
+    'module.kds':           { name: 'KDS Cocina',         default_status: 'coming-soon' },
+    // 2026-05-12: módulos verticales (rentas + reservaciones). Disponibles
+    // por default para todos los giros — el platform owner puede desactivar
+    // por tenant en /paneldecontrol.html#permisos > Verticales.
+    'module.rentas':        { name: 'Renta de Equipo',    default_status: 'enabled' },
+    'module.reservaciones': { name: 'Reservaciones',      default_status: 'enabled' }
   };
 
   function defaultMap() {

@@ -19504,6 +19504,70 @@ window.addEventListener('volvix:version-loaded', function(e){
   function todayStr(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
   function tToast(msg){ if (typeof window.showToast === 'function') return window.showToast(msg); console.log('[toast]', msg); }
 
+  // ─────────────── Mini-modal genérico para CRUD inline ───────────────
+  // Uso: _pdcMiniModal({ title, fields:[{name,label,type,value,placeholder,required,options}],
+  //                      bodyHtml, onSubmit:(data)=>boolOk, onClick:(ev)=>void,
+  //                      submitLabel, noFields })
+  // Si onSubmit retorna true, cierra el modal. Si retorna false, lo deja abierto.
+  function _pdcMiniModal(opts){
+    opts = opts || {};
+    var bk = document.createElement('div');
+    bk.setAttribute('id','pdc-mini-backdrop');
+    bk.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99998;display:flex;align-items:center;justify-content:center;padding:18px;';
+    var inputsHtml = '';
+    (opts.fields || []).forEach(function(f){
+      var lbl = '<label style="display:block;font-size:12px;color:#57534E;font-weight:600;margin-bottom:4px;">'+esc(f.label||f.name)+(f.required?' <span style="color:#DC2626;">*</span>':'')+'</label>';
+      var inp;
+      if (f.type === 'select') {
+        inp = '<select name="'+esc(f.name)+'" '+(f.required?'required':'')+' style="width:100%;padding:8px 10px;border:1px solid #C9C7C3;border-radius:6px;font:13px inherit;background:#fff;">';
+        (f.options || []).forEach(function(o){ inp += '<option value="'+esc(o.value)+'"'+(o.value===f.value?' selected':'')+'>'+esc(o.label)+'</option>'; });
+        inp += '</select>';
+      } else if (f.type === 'textarea') {
+        inp = '<textarea name="'+esc(f.name)+'" '+(f.required?'required':'')+' rows="3" placeholder="'+esc(f.placeholder||'')+'" style="width:100%;padding:8px 10px;border:1px solid #C9C7C3;border-radius:6px;font:13px inherit;resize:vertical;">'+esc(f.value||'')+'</textarea>';
+      } else {
+        inp = '<input name="'+esc(f.name)+'" type="'+esc(f.type||'text')+'" '+(f.required?'required':'')+' placeholder="'+esc(f.placeholder||'')+'" value="'+esc(f.value||'')+'" style="width:100%;padding:8px 10px;border:1px solid #C9C7C3;border-radius:6px;font:13px inherit;">';
+      }
+      inputsHtml += '<div style="margin-bottom:10px;">'+lbl+inp+'</div>';
+    });
+    bk.innerHTML = '<div style="background:#fff;border-radius:10px;max-width:560px;width:100%;max-height:90vh;overflow:auto;box-shadow:0 12px 40px rgba(0,0,0,.25);">'
+      + '<div style="padding:14px 18px;border-bottom:1px solid #E0DEDB;display:flex;justify-content:space-between;align-items:center;">'
+      +   '<h3 style="margin:0;font-size:16px;font-weight:700;">'+esc(opts.title||'')+'</h3>'
+      +   '<button type="button" id="pdc-mm-close" style="border:none;background:none;font-size:22px;cursor:pointer;color:#A8A29E;line-height:1;">×</button>'
+      + '</div>'
+      + '<form id="pdc-mm-form" style="padding:18px;">'
+      +   (opts.bodyHtml || '')
+      +   (opts.noFields ? '' : inputsHtml)
+      +   '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px;border-top:1px solid #E0DEDB;padding-top:14px;">'
+      +     '<button type="button" id="pdc-mm-cancel" class="btn" style="padding:8px 16px;border:1px solid #C9C7C3;background:#fff;border-radius:7px;cursor:pointer;font:13px inherit;">Cancelar</button>'
+      +     '<button type="submit" class="btn accent" style="padding:8px 16px;background:#EA580C;color:#fff;border:1px solid #EA580C;border-radius:7px;cursor:pointer;font:13px inherit;font-weight:600;">'+esc(opts.submitLabel||'Guardar')+'</button>'
+      +   '</div>'
+      + '</form>'
+      + '</div>';
+    document.body.appendChild(bk);
+    function close(){ try { bk.remove(); } catch(_){} document.removeEventListener('keydown', onKey); }
+    function onKey(e){ if (e.key === 'Escape') close(); }
+    document.addEventListener('keydown', onKey);
+    bk.querySelector('#pdc-mm-close').onclick = close;
+    bk.querySelector('#pdc-mm-cancel').onclick = close;
+    bk.addEventListener('click', function(ev){
+      if (ev.target === bk) close();
+      else if (typeof opts.onClick === 'function') opts.onClick(ev);
+    });
+    bk.querySelector('#pdc-mm-form').addEventListener('submit', function(ev){
+      ev.preventDefault();
+      var data = {};
+      (opts.fields || []).forEach(function(f){
+        var el = bk.querySelector('[name="'+f.name+'"]');
+        data[f.name] = el ? el.value.trim() : '';
+      });
+      var ok;
+      try { ok = (typeof opts.onSubmit === 'function') ? opts.onSubmit(data) : true; } catch(e){ console.error('[pdc-mm submit]', e); ok = false; }
+      if (ok !== false) close();
+    });
+    // Auto-focus al primer input
+    setTimeout(function(){ var f = bk.querySelector('input, select, textarea'); if (f) f.focus(); }, 30);
+  }
+
   // ─────────────────────────────── RENTAS ───────────────────────────────
   var RentasUI = {
     seeded: false,
@@ -19597,9 +19661,84 @@ window.addEventListener('volvix:version-loaded', function(e){
       this.renderContratos();
       this.renderMovs();
     },
-    nuevoContrato:       function(){ tToast('Nueva renta · abre modal cliente+equipo+plazo'); },
-    agregarEquipo:       function(){ tToast('Alta equipo · código/nombre/valor/tarifas'); },
-    registrarDevolucion: function(){ tToast('Devolución · selecciona contrato + daños'); },
+    agregarEquipo: function(){
+      var self = this;
+      _pdcMiniModal({
+        title: '📦 Agregar equipo al inventario',
+        fields: [
+          {name:'codigo',    label:'Código (único, ej. EQ-007)', required:true, placeholder:'EQ-007'},
+          {name:'nombre',    label:'Nombre del equipo',           required:true, placeholder:'Sonido Bose L1'},
+          {name:'categoria', label:'Categoría',                   value:'general',  placeholder:'audio/carpas/mobiliario/...'},
+          {name:'ubicacion', label:'Ubicación',                   value:'Bodega A'},
+          {name:'valor',     label:'Valor del equipo ($)',        required:true, type:'number', placeholder:'20000'},
+          {name:'tarifa_dia',label:'Tarifa por día ($)',          required:true, type:'number', placeholder:'1000'},
+          {name:'tarifa_sem',label:'Tarifa por semana ($)',       type:'number', placeholder:'5000'},
+          {name:'tarifa_mes',label:'Tarifa por mes ($)',          type:'number', placeholder:'15000'}
+        ],
+        onSubmit: function(data){
+          try {
+            self.api().registrarEquipo({
+              codigo: data.codigo, nombre: data.nombre,
+              categoria: data.categoria || 'general',
+              valor: Number(data.valor) || 0,
+              tarifas: { hora:0, dia: Number(data.tarifa_dia)||0, semana: Number(data.tarifa_sem)||0, mes: Number(data.tarifa_mes)||0 },
+              ubicacion: data.ubicacion || 'bodega'
+            });
+            tToast('✓ Equipo '+data.codigo+' agregado al inventario');
+            self.render();
+            return true;
+          } catch(e){ tToast('Error: '+e.message); return false; }
+        }
+      });
+    },
+    nuevoContrato: function(){
+      var self = this;
+      var disponibles = self.state().equipos.filter(function(e){return e.estado==='disponible';});
+      if (!disponibles.length) { tToast('No hay equipos disponibles. Agrega uno o espera una devolución.'); return; }
+      _pdcMiniModal({
+        title: '🆕 Nueva renta',
+        fields: [
+          {name:'cliente_nombre',  label:'Nombre del cliente', required:true, placeholder:'Eventos Lupita SA'},
+          {name:'cliente_ident',   label:'RFC o identificación', required:true, placeholder:'EVL890212XX1'},
+          {name:'cliente_tel',     label:'Teléfono', placeholder:'8112345678'},
+          {name:'cliente_email',   label:'Email', type:'email', placeholder:'contacto@cliente.com'},
+          {name:'equipo_codigo',   label:'Código equipo a rentar', required:true, type:'select', options: disponibles.map(function(e){return {value:e.codigo, label:e.codigo+' · '+e.nombre+' (valor '+e.valor.toLocaleString('es-MX')+')'};})},
+          {name:'cantidad',        label:'Cantidad de plazos', required:true, type:'number', value:'1', placeholder:'1'},
+          {name:'unidad',          label:'Unidad de plazo', required:true, type:'select', value:'dia', options:[{value:'hora',label:'Hora'},{value:'dia',label:'Día'},{value:'semana',label:'Semana'},{value:'mes',label:'Mes'}]},
+          {name:'observaciones',   label:'Observaciones',type:'textarea', placeholder:'Detalles, lugar de entrega, etc.'}
+        ],
+        onSubmit: function(data){
+          try {
+            var cli = self.api().registrarCliente({nombre:data.cliente_nombre, identificacion:data.cliente_ident, telefono:data.cliente_tel||'', email:data.cliente_email||''});
+            var c = self.api().crearContrato({clienteId:cli.id, equipoId:data.equipo_codigo, cantidad:Number(data.cantidad)||1, unidad:data.unidad, observaciones:data.observaciones||''});
+            tToast('✓ Renta '+c.id+' creada (depósito $'+c.deposito.toLocaleString('es-MX')+', total $'+c.total.toLocaleString('es-MX')+')');
+            self.render();
+            return true;
+          } catch(e){ tToast('Error: '+e.message); return false; }
+        }
+      });
+    },
+    registrarDevolucion: function(){
+      var self = this;
+      var activos = self.state().contratos.filter(function(c){return c.estado==='activo';});
+      if (!activos.length) { tToast('No hay contratos activos para devolver.'); return; }
+      _pdcMiniModal({
+        title: '↩️ Registrar devolución',
+        fields: [
+          {name:'contrato_id', label:'Contrato a cerrar', required:true, type:'select', options: activos.map(function(c){return {value:c.id, label:c.id+' · '+c.cantidad+' '+c.unidad+'s · total $'+c.total.toLocaleString('es-MX')};})},
+          {name:'cargos_dano', label:'Cargos por daños ($)', type:'number', value:'0', placeholder:'0'},
+          {name:'observaciones', label:'Notas (daños, retraso, etc.)', type:'textarea'}
+        ],
+        onSubmit: function(data){
+          try {
+            var r = self.api().registrarDevolucion({contratoId:data.contrato_id, cargosDano:Number(data.cargos_dano)||0, observaciones:data.observaciones||''});
+            tToast('✓ Devolución registrada · contrato '+data.contrato_id+' cerrado');
+            self.render();
+            return true;
+          } catch(e){ tToast('Error: '+e.message); return false; }
+        }
+      });
+    },
   };
   window.RentasUI = RentasUI;
 
@@ -19677,9 +19816,97 @@ window.addEventListener('volvix:version-loaded', function(e){
     },
     today: function(){ var t=todayStr(); $('#resv-date').value=t; this.refresh(t); },
     render: function(){ if (!$('#resv-date').value) $('#resv-date').value = todayStr(); this.refresh($('#resv-date').value); },
-    nuevaReserva: function(){ tToast('Nueva reserva · modal cliente+fecha+hora+party'); },
-    configMesas:  function(){ tToast('Configurar mesas · agregar/quitar/capacidad'); },
-    waitlist:     function(){ tToast('Waitlist · ver cola y promover'); },
+    nuevaReserva: function(){
+      var self = this;
+      var ts = self.api().tables.list();
+      if (!ts.length){ tToast('Primero configura al menos una mesa.'); self.configMesas(); return; }
+      var curDate = $('#resv-date').value || todayStr();
+      _pdcMiniModal({
+        title: '🆕 Nueva reserva',
+        fields: [
+          {name:'customerName', label:'Nombre del cliente', required:true, placeholder:'Familia Hernández'},
+          {name:'phone',        label:'Teléfono', placeholder:'8112345678'},
+          {name:'email',        label:'Email', type:'email'},
+          {name:'partySize',    label:'Personas', required:true, type:'number', value:'2', placeholder:'2'},
+          {name:'date',         label:'Fecha', required:true, type:'date', value:curDate},
+          {name:'time',         label:'Hora (HH:MM)', required:true, placeholder:'19:30'},
+          {name:'duration',     label:'Duración (min)', type:'number', value:'90'},
+          {name:'tableId',      label:'Mesa (vacío = auto)', type:'select', options:[{value:'',label:'Auto (mejor mesa libre)'}].concat(ts.map(function(t){return {value:t.id, label:t.name+' ('+t.capacity+' personas)'};}))},
+          {name:'notes',        label:'Notas', type:'textarea', placeholder:'Cumpleaños, alergias, silla bebé...'}
+        ],
+        onSubmit: function(data){
+          try {
+            var r = self.api().reservations.create({
+              customerName:data.customerName, phone:data.phone||'', email:data.email||'',
+              partySize:Number(data.partySize)||1, date:data.date, time:data.time,
+              duration:Number(data.duration)||90, tableId:data.tableId||null, notes:data.notes||''
+            });
+            tToast(r && r.id ? '✓ Reserva creada' : (r && r.waitlistId ? 'Sin mesa libre → agregado a waitlist' : '✓ Creada'));
+            self.refresh(data.date);
+            return true;
+          } catch(e){ tToast('Error: '+e.message); return false; }
+        }
+      });
+    },
+    configMesas: function(){
+      var self = this;
+      var ts = self.api().tables.list();
+      var tablesHtml = ts.length
+        ? '<table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:10px;"><thead><tr style="background:#FAFAF9;text-align:left;"><th style="padding:6px 10px;">Nombre</th><th style="padding:6px 10px;">Capacidad</th><th style="padding:6px 10px;text-align:right;">Acción</th></tr></thead><tbody>'
+            + ts.map(function(t){return '<tr style="border-bottom:1px solid #E0DEDB;"><td style="padding:6px 10px;">'+esc(t.name)+'</td><td style="padding:6px 10px;">'+t.capacity+'</td><td style="padding:6px 10px;text-align:right;"><button class="btn ghost" data-pdc-rmtable="'+esc(t.id)+'" type="button" style="font-size:11px;padding:4px 8px;">🗑️ Quitar</button></td></tr>';}).join('')
+            + '</tbody></table>'
+        : '<div style="color:#A8A29E;padding:10px;font-style:italic;">Sin mesas. Agrega la primera abajo.</div>';
+      _pdcMiniModal({
+        title: '🪑 Configurar mesas ('+ts.length+')',
+        bodyHtml: tablesHtml,
+        fields: [
+          {name:'name',     label:'Nombre de la nueva mesa', placeholder:'Mesa 5, Terraza B, Box 1...'},
+          {name:'capacity', label:'Capacidad (personas)', type:'number', value:'4', placeholder:'4'}
+        ],
+        submitLabel:'➕ Agregar mesa',
+        onClick: function(ev){
+          var rm = ev.target.closest('[data-pdc-rmtable]');
+          if (rm){
+            var tid = rm.getAttribute('data-pdc-rmtable');
+            if (confirm('¿Quitar esta mesa? Las reservaciones existentes en ella quedarán sin mesa asignada.')){
+              try { self.api().tables.remove(tid); tToast('Mesa eliminada'); rm.closest('tr').remove(); self.refresh($('#resv-date').value||todayStr()); }
+              catch(e){ tToast('Error: '+e.message); }
+            }
+          }
+        },
+        onSubmit: function(data){
+          if (!data.name) { tToast('El nombre es requerido'); return false; }
+          try { self.api().tables.add(data.name, Number(data.capacity)||2); tToast('✓ Mesa '+data.name+' agregada'); self.refresh($('#resv-date').value||todayStr()); return true; }
+          catch(e){ tToast('Error: '+e.message); return false; }
+        }
+      });
+    },
+    waitlist: function(){
+      var self = this;
+      var w = (self.api().waitlist && self.api().waitlist.list) ? self.api().waitlist.list() : [];
+      var html = w.length
+        ? '<table style="width:100%;border-collapse:collapse;font-size:13px;"><thead><tr style="background:#FAFAF9;text-align:left;"><th style="padding:6px 10px;">Cliente</th><th style="padding:6px 10px;">Personas</th><th style="padding:6px 10px;">Fecha/Hora pedida</th><th style="padding:6px 10px;text-align:right;">Acción</th></tr></thead><tbody>'
+            + w.map(function(it){return '<tr style="border-bottom:1px solid #E0DEDB;"><td style="padding:6px 10px;">'+esc(it.customerName||'(sin nombre)')+'<div style="font-size:11px;color:#A8A29E;">'+esc(it.phone||'')+'</div></td><td style="padding:6px 10px;">'+(it.partySize||0)+'</td><td style="padding:6px 10px;">'+esc(it.date||'')+' '+esc(it.time||'')+'</td><td style="padding:6px 10px;text-align:right;"><button class="btn ghost" data-pdc-rmwl="'+esc(it.id)+'" type="button" style="font-size:11px;padding:4px 8px;">🗑️ Quitar</button></td></tr>';}).join('')
+            + '</tbody></table>'
+        : '<div style="color:#A8A29E;padding:20px;text-align:center;">Lista de espera vacía 🎉</div>';
+      _pdcMiniModal({
+        title: '⏳ Lista de espera ('+w.length+')',
+        bodyHtml: html,
+        submitLabel: 'Cerrar',
+        noFields: true,
+        onClick: function(ev){
+          var rm = ev.target.closest('[data-pdc-rmwl]');
+          if (rm){
+            var id = rm.getAttribute('data-pdc-rmwl');
+            try { if (self.api().waitlist && self.api().waitlist.remove) self.api().waitlist.remove(id); }
+            catch(e){}
+            rm.closest('tr').remove();
+            tToast('Eliminado de waitlist');
+          }
+        },
+        onSubmit: function(){ return true; }
+      });
+    },
   };
   window.ReservacionesUI = ReservacionesUI;
 
