@@ -1909,11 +1909,14 @@ const handlers = {
       if (!to || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(to)) {
         return sendJSON(res, { ok: false, error: 'Pasa ?to=email@dominio.com' }, 400);
       }
+      const effectiveFrom = process.env.RESEND_FROM || 'Volvix POS <onboarding@resend.dev>';
       const env = {
         has_RESEND_API_KEY: !!process.env.RESEND_API_KEY,
-        RESEND_FROM: process.env.RESEND_FROM || '(default: Volvix <noreply@volvix.com>)',
+        RESEND_FROM_env: process.env.RESEND_FROM || '(NOT SET)',
+        effective_from_used: effectiveFrom,
         has_SENDGRID_API_KEY: !!process.env.SENDGRID_API_KEY,
-        SENDGRID_FROM: process.env.SENDGRID_FROM || null,
+        SENDGRID_FROM: process.env.SENDGRID_FROM || '(default: no-reply@volvix-pos.app)',
+        note: 'Si effective_from_used apunta a un dominio que NO has verificado en https://resend.com/domains, Resend rechaza con 403. Solución: setea RESEND_FROM en Vercel env vars apuntando a un dominio verificado.'
       };
       const result = await sendEmail({
         to: to,
@@ -8031,7 +8034,13 @@ function sendEmail({ to, subject, html, text, template }) {
     // a SendGrid como respaldo. Antes solo intentaba SendGrid y silenciaba todo.
     const resendKey = (process.env.RESEND_API_KEY || '').trim();
     if (resendKey) {
-      const resendFrom = process.env.RESEND_FROM || (SENDGRID_FROM_NAME + ' <' + SENDGRID_FROM + '>');
+      // 2026-05-13 FIX: si RESEND_FROM no esta configurado, usar onboarding@resend.dev
+      // (sandbox oficial de Resend que envia correos REALES sin requerir dominio
+      // verificado). Antes el default era no-reply@volvix-pos.app que NO esta
+      // verificado en la cuenta de Resend → Resend rechazaba con 403.
+      // Para producción real el cliente debe verificar su dominio en
+      // https://resend.com/domains y configurar RESEND_FROM=correo@su-dominio.com
+      const resendFrom = process.env.RESEND_FROM || 'Volvix POS <onboarding@resend.dev>';
       const resendBody = JSON.stringify({
         from: resendFrom, to: [to], subject: subject,
         html: html ? String(html) : undefined,
