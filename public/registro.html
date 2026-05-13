@@ -474,14 +474,19 @@
     <div class="step" data-step="3">
       <div class="success-emoji" aria-hidden="true">🎉</div>
       <h2 style="text-align:center;margin:0 0 8px;font-size:22px;color:#1e293b;">¡Tu cuenta está lista!</h2>
-      <p style="text-align:center;color:#64748b;margin:0 0 16px;">
+      <p style="text-align:center;color:#64748b;margin:0 0 12px;">
         Bienvenido a Volvix POS. Tu sistema personalizado se está configurando.
       </p>
       <div class="tenant-id-box" id="tenantIdBox">TNT-XXXXX</div>
-      <p style="text-align:center;font-size:13px;color:#64748b;margin:0 0 12px;">
-        Guarda este identificador. Lo necesitarás para soporte.
+      <p style="text-align:center;font-size:11px;color:#94a3b8;margin:0 0 12px;">
+        ID guardado en tu cuenta · sirve para soporte
       </p>
-      <button class="primary" id="btnGoLauncher">Entrar a mi POS</button>
+      <!-- 2026-05-13: auto-login activo - el boton funciona como FALLBACK por si el
+           auto-redirect falla, pero muestra estado 'entrando' por default. -->
+      <button class="primary" id="btnGoLauncher" style="opacity:.85;cursor:default;">✓ Entrando a tu POS…</button>
+      <p style="text-align:center;font-size:11px;color:#94a3b8;margin:10px 0 0;">
+        Si no entras en 3 segundos, presiona el botón.
+      </p>
     </div>
   </div>
 
@@ -935,14 +940,15 @@
           $('#tenantIdBox').textContent = state.tenant_id || 'TNT-XXXXX';
           state._redirect = res.body.redirect || '/salvadorex-pos.html';
           setStep(3);
-          // 2026-05-06: AUTO-LOGIN — el usuario YA hizo register + OTP + token guardado.
-          // No tiene sentido pedirle un click manual y mucho menos un segundo login.
-          // Mostramos el paso 3 (confetti + tenant_id) por ~1.8s y redirigimos solos.
-          // Asi cumplimos: 1 solo login, automatico, directo a su POS.
+          // 2026-05-13 UX FIX: auto-login INMEDIATO. Usuario pidio que NO tenga que
+          // presionar 'Entrar a mi POS' tras crear cuenta — token YA esta guardado,
+          // redirect debe sentirse como 'apreté un solo botón y entré'. Bajamos delay
+          // de 1800ms -> 250ms (suficiente para que localStorage.setItem flushee y
+          // el navegador vea el flash de 'cuenta lista' pero sin esperar nada).
           setTimeout(function () {
             try { window.location.href = state._redirect || '/salvadorex-pos.html'; }
             catch (_) {}
-          }, 1800);
+          }, 250);
         } else {
           var code2 = res.body && res.body.error_code;
           if (code2 === 'OTP_LOCKOUT') {
