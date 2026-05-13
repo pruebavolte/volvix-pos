@@ -5208,10 +5208,26 @@
     const allModKeys = Object.keys(MOD_LABELS_LOCAL);
     MOD_CATEGORIES.otros.items = allModKeys.filter(k => !catalogedSet.has(k));
     const state = getCombinedState();
-    const search = ($('#permv14-mod-search') && $('#permv14-mod-search').value || '').toLowerCase();
+    const search = ($('#permv14-mod-search') && $('#permv14-mod-search').value || '').toLowerCase().trim();
+    // 2026-05-12 FIX: el filtro ahora busca también por nombre de CATEGORÍA + key,
+    // y normaliza singular/plural (ej: "rentas"→"renta", "vertical"→"verticales").
+    // Antes "rentas" no encontraba "Renta de Equipo" porque buscaba substring
+    // exacto en el label. Y "vertical" no mostraba nada porque las categorías
+    // no formaban parte de la búsqueda.
+    function _matchSearch(catLabel, modKey, modLabel) {
+      if (!search) return true;
+      const blob = (catLabel + ' ' + modKey + ' ' + modLabel).toLowerCase();
+      if (blob.includes(search)) return true;
+      // Plural/singular flexible: si buscas "rentas" encuentra "renta"
+      if (search.endsWith('s') && blob.includes(search.slice(0, -1))) return true;
+      if (!search.endsWith('s') && blob.includes(search + 's')) return true;
+      // Categoría "Verticales" encuentra con "vertical"
+      if (catLabel && catLabel.toLowerCase().includes(search)) return true;
+      return false;
+    }
     let html = '';
     for (const [catKey, cat] of Object.entries(MOD_CATEGORIES)) {
-      const visible = cat.items.filter(k => MOD_LABELS_LOCAL[k] && (!search || MOD_LABELS_LOCAL[k].toLowerCase().includes(search)));
+      const visible = cat.items.filter(k => MOD_LABELS_LOCAL[k] && _matchSearch(cat.label, k, MOD_LABELS_LOCAL[k]));
       if (!visible.length) continue;
       html += '<div class="permv14-split-group-label">' + cat.label + '</div>';
       visible.forEach(k => {
