@@ -7513,7 +7513,12 @@
         const ownerSearchBag = ((o.email||'')+' '+ut.label+' '+giroLabel+' '+tenantStatus+' '+plan+' '+last).toLowerCase();
         html += '<tr class="' + rowClass + '" data-pv14-row-tid="' + escapeAttr(t.tenant_id) + '" data-pv14-row-uid="' + escapeAttr(realUid || '') + '" data-pv14-rowtype="owner" data-pv14-search="' + escapeAttr(ownerSearchBag) + '">'
           + _cbCell(realUid || o.email, 'owner')
-          + '<td>👤 ' + emailColHtml + '</td>'
+          // 2026-05-13 fix: cell USUARIO usa flex porque el input.permv14-cell
+          // tiene width:100% — sin flex, el emoji + input excedian el ancho del
+          // cell y el input wrappeaba a una linea oculta (cell overflow:hidden).
+          // El usuario solo veia "👤 ..." (ellipsis). Con flex el emoji toma su
+          // ancho natural y el input rellena el espacio restante.
+          + '<td><div style="display:flex;align-items:center;gap:6px;min-width:0;"><span style="flex:0 0 auto;">👤</span><span style="flex:1 1 auto;min-width:0;">' + emailColHtml + '</span></div></td>'
           + '<td><span class="u-tag ' + ut.tag + '">' + escapeText(ut.label) + '</span></td>'
           + (isFirstOfTenant
               ? inlineGiroCell(t.tenant_id, giroSlug)
