@@ -7467,9 +7467,12 @@
       const planCell = (tid, currentPlan) => '<td>'
         + cellInput({ rowType: 'tenant', rowId: tid, field: 'plan', value: currentPlan === '—' ? '' : currentPlan, list: 'permv14-dl-plan' })
         + '</td>';
-      const emailCell = (userId, email) => '<td>'
-        + cellInput({ rowType: 'user', rowId: userId, field: 'email', value: email })
-        + '</td>';
+      // 2026-05-13 fix: emailCell NO envuelve en <td> porque los consumidores
+      // (filas owner y empleado) ya hacen su propio wrap '<td>👤 ' + ... + '</td>'.
+      // Antes esto generaba TDs anidados → el navegador creaba 2 celdas y todas
+      // las columnas siguientes se corrían a la derecha (bug reportado por user
+      // con screenshot — usuario, tipo, giro, etc. desplazados una columna).
+      const emailCell = (userId, email) => cellInput({ rowType: 'user', rowId: userId, field: 'email', value: email });
       const nameCell = (userId, name) => cellInput({ rowType: 'user', rowId: userId, field: 'full_name', value: name });
       const inlineTenantActions = (tid, email) => '<td class="u-actions">'
         + '<button data-pv14-edit-tenant="' + escapeAttr(tid) + '" title="Editar permisos">✏️</button>'
