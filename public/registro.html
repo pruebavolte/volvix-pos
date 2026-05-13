@@ -198,17 +198,18 @@
   <div class="card">
     <div id="globalAlert" aria-live="polite" role="status"></div>
 
-    <!-- ============================ -->
     <!-- ============================
-         PASO 1: SIMPLIFICADO 2026-05-06
-         Solo 3 inputs obligatorios: email, telefono, contraseña.
-         business_name + giro se AUTO-FILL desde:
-           - URL params (?giro=...&negocio=...)
-           - sessionStorage volvix_last_search (set en marketplace al buscar)
-           - localStorage volvix_remembered_users (ultimo email usado)
-         password2 (confirmacion) eliminado: 1 solo campo de contraseña.
-         Si los auto-fill estan vacios el usuario puede expandir "mas opciones"
-         para escribir nombre del negocio y giro manualmente.
+         PASO 1: 2026-05-13 — 4 inputs y nada más:
+           1. email
+           2. teléfono
+           3. contraseña
+           4. giro (con autocomplete del catálogo + creación de giros nuevos)
+
+         Si la URL trae ?giro=X (de una landing dinámica o fija), el campo
+         giro se OCULTA y mostramos solo un card verde "Detectamos tu negocio"
+         para que el usuario no tenga que volver a capturar lo que ya eligió.
+
+         business_name se deriva del giro automáticamente.
     ============================ -->
     <div class="step active" data-step="1">
       <div class="field">
@@ -241,40 +242,31 @@
         <div class="err" data-err="password">Mínimo 8 caracteres.</div>
       </div>
 
-      <!-- Detalles del negocio: auto-fill silencioso desde busqueda previa.
-           Se quedan invisibles si el sistema YA los detecto. Si quedaron
-           vacios (acceso directo a /registro.html), aparecen como
-           "Personalizar" expandible. -->
+      <!-- AUTO-FILL CARD: solo se muestra si la URL trae ?giro=...&negocio=...
+           desde una landing (fija o dinámica). Esconde el campo manual abajo. -->
       <div id="autoFillSummary" style="display:none;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:12px 14px;margin:0 0 14px;font-size:13px;color:#14532D;line-height:1.5">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
           <span style="font-size:18px">✓</span>
           <strong>Detectamos tu negocio</strong>
-          <button type="button" id="btnEditBusiness" style="margin-left:auto;background:none;border:none;color:#0B0B0F;font-size:12px;cursor:pointer;text-decoration:underline">Editar</button>
+          <button type="button" id="btnEditBusiness" style="margin-left:auto;background:none;border:none;color:#0B0B0F;font-size:12px;cursor:pointer;text-decoration:underline">Cambiar</button>
         </div>
-        <div><strong>Nombre:</strong> <span id="autoBizName">—</span></div>
-        <div><strong>Giro:</strong> <span id="autoGiroName">—</span></div>
+        <div><strong>Tipo:</strong> <span id="autoGiroName">—</span></div>
+        <div id="autoBizNameRow" style="display:none"><strong>Nombre:</strong> <span id="autoBizName">—</span></div>
       </div>
 
-      <details id="manualBusinessDetails" style="margin-bottom:14px">
-        <summary style="cursor:pointer;font-size:13px;color:#475569;padding:8px 0;user-select:none">¿Quieres personalizar el nombre o giro de tu negocio?</summary>
-        <div style="margin-top:10px;padding:14px;background:#F8FAFC;border-radius:10px;border:1px solid #E2E8F0">
-          <div class="field" style="margin-bottom:14px">
-            <label for="business_name">Nombre del negocio</label>
-            <input id="business_name" name="business_name" type="text"
-                   placeholder="Ej. Tacos Don Pepe" maxlength="100" autocomplete="organization">
-            <div class="err" data-err="business_name">Mínimo 3 caracteres.</div>
-          </div>
-
-          <div class="field giro-autocomplete" style="margin-bottom:0">
-            <label for="giro">¿Qué vendes?</label>
-            <input id="giro" name="giro" type="text" autocomplete="off"
-                   placeholder="Ej. tacos, café, ropa, abarrotes…" maxlength="80">
-            <div class="hint">Escribe lo que vendes y elige un giro de las sugerencias.</div>
-            <div class="err" data-err="giro">Elige un giro de las sugerencias que aparecen al escribir.</div>
-            <div class="giro-suggestions" id="giroSuggestions" role="listbox"></div>
-          </div>
+      <!-- Campo de giro: visible por default. Oculto cuando hay auto-fill desde landing.
+           El campo business_name fue removido — el sistema lo deriva del giro elegido
+           y permite que el usuario lo edite después en su POS. -->
+      <div id="manualBusinessFields">
+        <div class="field giro-autocomplete">
+          <label for="giro">¿Qué vendes? <span class="req">*</span></label>
+          <input id="giro" name="giro" type="text" autocomplete="off"
+                 placeholder="Ej. tacos, café, ropa, abarrotes, barbería…" maxlength="80">
+          <div class="hint">Empieza a escribir tu giro. Elige de las sugerencias o crea uno nuevo.</div>
+          <div class="err" data-err="giro">Escribe o elige tu giro de negocio.</div>
+          <div class="giro-suggestions" id="giroSuggestions" role="listbox"></div>
         </div>
-      </details>
+      </div>
 
       <button class="primary" id="btnRegister">Crear cuenta</button>
     </div>
@@ -396,12 +388,9 @@
 
       if (giro || negocio) {
         setVal('giro', giro);
-        setVal('business_name', negocio);
-        // 2026-05-12 FIX: el giro auto-fill viene de marketplace donde el usuario
-        // YA lo eligió. Marcarlo como slug seleccionado para que validateStep1()
-        // no lo trate como "texto libre" y no caiga el backend con INVALID_GIRO.
-        // Si viene un slug normalizado (ej. "renta-trajes"), lo usamos como slug.
-        // Si viene texto libre, normalizamos.
+        // 2026-05-12 FIX: el giro auto-fill viene de marketplace/landing donde
+        // el usuario YA lo eligió. Marcarlo como slug seleccionado para que
+        // validateStep1() no lo trate como texto libre.
         try {
           var giroEl = document.getElementById('giro');
           if (giroEl && giro) {
@@ -409,26 +398,45 @@
             if (rawSlug) giroEl.dataset.slug = rawSlug;
           }
         } catch(_){}
-        // Mostrar card verde con resumen + ocultar details (no necesita expandir)
+        // 2026-05-13: business_name ya no es campo del paso 1. Lo guardamos en
+        // dataset del giro como hint para que validateStep1 lo lea sin tener que
+        // mostrar input separado.
+        try {
+          var giroEl2 = document.getElementById('giro');
+          if (giroEl2 && negocio) giroEl2.dataset.business = negocio;
+        } catch(_){}
+        // 2026-05-13: si vino de una landing con giro detectado, OCULTAMOS los
+        // campos manuales y mostramos solo el card verde. El usuario puede dar
+        // click en "Cambiar" para volver a mostrarlos.
         var summary = document.getElementById('autoFillSummary');
+        var manualFields = document.getElementById('manualBusinessFields');
         if (summary) summary.style.display = '';
+        if (manualFields) manualFields.style.display = 'none';
         var bn = document.getElementById('autoBizName');
+        var bnRow = document.getElementById('autoBizNameRow');
         var gn = document.getElementById('autoGiroName');
-        if (bn) bn.textContent = negocio || '(no detectado)';
         if (gn) gn.textContent = giro || '(no detectado)';
+        if (bn && negocio) { bn.textContent = negocio; if (bnRow) bnRow.style.display = ''; }
       }
 
       tryFillEmailAndPhone();
       setupContactCapture();
 
-      // Boton "Editar" en card verde -> expande el details + scroll
+      // 2026-05-13: Botón "Cambiar" en card verde → muestra los campos manuales
+      // y oculta el card. El usuario puede entonces escribir otro giro.
       document.addEventListener('click', function (ev) {
         if (ev.target && ev.target.id === 'btnEditBusiness') {
           ev.preventDefault();
-          var det = document.getElementById('manualBusinessDetails');
-          if (det) {
-            det.open = true;
-            try { det.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(e){}
+          var summary = document.getElementById('autoFillSummary');
+          var manual  = document.getElementById('manualBusinessFields');
+          if (summary) summary.style.display = 'none';
+          if (manual)  manual.style.display  = '';
+          var giroEl = document.getElementById('giro');
+          if (giroEl) {
+            try { delete giroEl.dataset.business; } catch(_){}
+            try { delete giroEl.dataset.slug; } catch(_){}
+            giroEl.value = '';
+            setTimeout(function(){ giroEl.focus(); giroEl.scrollIntoView({behavior:'smooth', block:'center'}); }, 50);
           }
         }
       });
@@ -729,42 +737,40 @@
     var ok = true;
     var email = ($('#email').value || '').trim().toLowerCase();
     var phone = ($('#phone').value || '').replace(/\D/g, '');
-    var nameInput = $('#business_name');
     var giroInput = $('#giro');
-    var name = nameInput ? (nameInput.value || '').trim() : '';
     var giroVal = giroInput ? (giroInput.value || '').trim() : '';
     var giroSlug = state.selected_giro || (giroBox && giroBox.dataset && giroBox.dataset.slug) || '';
+    // 2026-05-13: business_name ya no es input visible. Se deriva en este orden:
+    //   1) dataset.business del giro (set por auto-fill desde landing con ?negocio=...)
+    //   2) el texto que escribió el usuario en #giro
+    //   3) fallback "Mi negocio"
+    var businessHint = (giroInput && giroInput.dataset && giroInput.dataset.business) || '';
+    var name = (businessHint || giroVal || 'Mi negocio').slice(0, 100);
     var p1 = $('#password').value;
 
-    // 2026-05-06 form simplificado:
+    // 2026-05-13 form simplificado a 4 campos:
     //   - email (obligatorio)
-    //   - phone (obligatorio, antes opcional)
-    //   - password (obligatorio, sin confirmar)
-    //   - business_name + giro: AUTO-FILL desde marketplace cache.
-    //     Si vienen vacios (acceso directo a /registro), derivar:
-    //       business_name <- giro (si existe) | "Mi negocio"
-    //       giro          <- nombre del giro detectado por search-API si llega
-    //                        a un slug conocido, sino usar el texto crudo
-    //                        como custom giro (genera nuevo).
+    //   - phone (obligatorio)
+    //   - password (obligatorio, 8+ chars)
+    //   - giro (obligatorio si NO viene de landing con ?giro=...)
+    // business_name fue removido del UI - se deriva como se documentó arriba.
     if (!validEmail(email)) { showErr('email'); ok = false; }
-    if (!phone || !validPhone10(phone)) { showErr('phone'); ok = false; } // phone AHORA obligatorio
+    if (!phone || !validPhone10(phone)) { showErr('phone'); ok = false; }
     if (!p1 || p1.length < 8) { showErr('password'); ok = false; }
 
-    // business_name + giro: si el usuario NO los proporciono ni hay cache,
-    // permitir continuar con valores derivados (no bloquear).
-    if (!name) {
-      // Derivar de giro si esta disponible
-      name = giroVal || 'Mi negocio';
+    // Giro: si el campo manual está visible (no hubo auto-fill), es obligatorio.
+    // Si está oculto (auto-fill activo), confiamos en el slug ya seteado por
+    // dataset.slug y/o el texto pre-llenado.
+    var manualVisible = (function(){ var m=document.getElementById('manualBusinessFields'); return m && m.style.display !== 'none'; })();
+    if (manualVisible && !giroVal && !giroSlug) {
+      showErr('giro'); ok = false;
     }
     if (!giroSlug && giroVal) {
-      // Si solo escribieron texto pero no eligieron de la lista,
-      // generar slug custom para giro nuevo
+      // El usuario escribió texto pero no eligió de la lista — generar slug
+      // custom (giro nuevo que se creará al vuelo en el backend).
       giroSlug = giroVal.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
     }
-    if (!giroSlug) {
-      // Sin giro alguno -> usar 'general'
-      giroSlug = 'general';
-    }
+    if (!giroSlug) giroSlug = 'general';
 
     if (ok) {
       // 2026-05-12: si el marketplace ya generó datos personalizados para este giro
