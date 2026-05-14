@@ -297,14 +297,17 @@
     await ensureDB();
     await loadAllToMem();
     lastSync = (await getMeta('last_sync')) || 0;
-    // Sync si pasaron > 5 min desde último sync (o si está vacío)
-    const stale = (Date.now() - lastSync) > 5 * 60 * 1000;
-    if (stale || memCache.size === 0) {
-      sync().catch(() => {});
-    }
-    // Re-sync periódico cada 10 min
+    // 2026-05-14 FIX STALE DATA: SIEMPRE syncar en init.
+    // ANTES: si lastSync < 5min, NO syncaba → si admin cambiaba un precio en DB,
+    // el usuario veia el precio VIEJO de IndexedDB hasta 5 min despues.
+    // AHORA: sync no-bloqueante en cada init. memCache se actualiza en background
+    // (no afecta tiempo de carga inicial — el usuario ve productos de IDB
+    // mientras sync trae lo fresh, y luego se reemplaza). 0% impacto en TTI.
+    sync().catch(() => {});
+    // Re-sync periódico cada 2 min (antes 10 min — datos quedaban viejos demasiado tiempo).
+    // 2 min es un balance: tampoco hammer al server cada minuto en sesiones largas.
     if (opts.autoSync !== false) {
-      setInterval(() => { sync().catch(()=>{}); }, 10 * 60 * 1000);
+      setInterval(() => { sync().catch(()=>{}); }, 2 * 60 * 1000);
     }
     return { ok: true, count: memCache.size, lastSync };
   }

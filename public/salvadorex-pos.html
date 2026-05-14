@@ -7145,8 +7145,13 @@
         stock: Number(p.stock || p.qty || p.cantidad || 0),
       }));
       if (CATEGORIES.length && !selectedCategory) selectedCategory = CATEGORIES[0].key;
-      // Tambien rellenamos CATALOG (usado por el modal de busqueda) si esta vacio
-      if (Array.isArray(CATALOG) && CATALOG.length === 0) {
+      // 2026-05-14 FIX STALE DATA: SIEMPRE refrescar CATALOG entero, no solo si esta vacio.
+      // ANTES: `if (CATALOG.length === 0)` → si loadProductsFromAPI corria 2 veces (ej.
+      // despues de seed-from-giro), CATALOG mantenia entradas viejas con precios anteriores.
+      // AHORA: limpiamos y rellenamos in-place (mantenemos misma referencia para no romper
+      // codigo que la guarda).
+      if (Array.isArray(CATALOG)) {
+        CATALOG.length = 0;
         QUICKPICK.forEach(p => CATALOG.push(p));
       }
     } catch (e) { console.warn('[POS] loadProducts error:', e); }
