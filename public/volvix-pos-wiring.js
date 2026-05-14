@@ -125,7 +125,17 @@
   // INVENTARIO
   // =========================================================
   window.posLoadInventory = async function() {
-    const products = await apiGet('/api/inventory');
+    // 2026-05-14: si el superadmin selecciono un tenant especifico via el dropdown
+    // (id=inv-tenant-select), pasamos ?tenant_id=X al endpoint. Asi mismo tenant
+    // se usa para deteccion+limpieza de duplicados (consistencia).
+    let endpoint = '/api/inventory';
+    try {
+      const sel = document.getElementById('inv-tenant-select');
+      const tid = sel && sel.value ? sel.value.trim() : '';
+      if (tid) endpoint += '?tenant_id=' + encodeURIComponent(tid);
+      window.__invSelectedTenantId = tid || null;
+    } catch (_) {}
+    const products = await apiGet(endpoint);
     if (!products) return;
 
     const tbody = document.querySelector('#inv-body, [data-inventory-body]');
@@ -658,7 +668,39 @@
       setupScreenInterceptor();
     }, 2000);
 
+    // 2026-05-14: Selector de tenant para superadmin (soporte cross-tenant).
+    // Solo se muestra si /api/admin/tenants responde 200 (rol superadmin/platform_owner).
+    setTimeout(() => { initTenantSwitcher(); }, 1500);
+
     console.log('[POS-COMPLETE] ✅ Listo');
+  }
+
+  async function initTenantSwitcher() {
+    try {
+      const wrapper = document.getElementById('inv-tenant-switcher');
+      const select = document.getElementById('inv-tenant-select');
+      if (!wrapper || !select || select.dataset.wired === '1') return;
+      const r = await apiGet('/api/admin/tenants');
+      if (!r || !r.ok || !Array.isArray(r.items)) return;
+      wrapper.style.display = 'inline-flex';
+      // Llenar options ordenados por nombre
+      const opts = r.items
+        .filter(t => t.tenant_id && t.name)
+        .sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')))
+        .map(t => '<option value="' + t.tenant_id.replace(/"/g, '&quot;') + '">' +
+                  String(t.name).replace(/</g, '&lt;') +
+                  ' · ' + String(t.tenant_id).replace(/</g, '&lt;') + '</option>')
+        .join('');
+      select.innerHTML = '<option value="">(mi tenant)</option>' + opts;
+      select.dataset.wired = '1';
+      select.addEventListener('change', () => {
+        // Recargar inventario con el nuevo tenant
+        if (typeof window.posLoadInventory === 'function') {
+          window.posLoadInventory();
+        }
+      });
+      console.log('[POS-COMPLETE] tenant switcher cargado:', r.items.length, 'tenants');
+    } catch (_) { /* not superadmin → swallow */ }
   }
 
   // Exponer API

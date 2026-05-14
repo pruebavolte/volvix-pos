@@ -3859,15 +3859,60 @@ const handlers = {
   // ============ INVENTORY ============
   'GET /api/inventory': requireAuth(async (req, res) => {
     try {
-      // FIX slice_38: filtro por tenant
-      const tenantId = resolveTenant(req);
-      const ownerUserId = resolvePosUserId(req, tenantId);
-      // 2026-05-14: incluir category y min_stock para que la tabla los
-      // pueda mostrar (antes el frontend recibia siempre 'General' y min=20
-      // hardcoded porque el SELECT no los traia).
+      const parsed = url.parse(req.url, true);
+      const q = parsed.query || {};
       const cols = 'id,code,name,stock,cost,price,category,min_stock';
-      let qs = `?pos_user_id=eq.${ownerUserId}&select=${cols}&order=name.asc`;
-      if (req.user.role === 'superadmin') qs = `?select=${cols}&order=name.asc`;
+      const role = String((req.user && req.user.role) || '').toLowerCase();
+
+      // 2026-05-14 FIX SCOPING: por default filtramos siempre por tenant del JWT.
+      // ANTES: si role==='superadmin' devolviamos TODOS los productos del sistema
+      //   sin filtro. Esto causaba que el superadmin viera 1977 productos de otros
+      //   tenants en Inventario, pero NO los podia vender (porque /api/products SI
+      //   filtra por tenant). Inconsistencia confusa reportada por usuario.
+      // AHORA: superadmin puede usar query params explicitos:
+      //   ?all_tenants=1     -> vista global (legacy behavior, requiere opt-in)
+      //   ?tenant_id=TNT-XX  -> vista del tenant especifico (para soporte)
+      //   (default)          -> filtra por su propio tenant (mismo que /api/products)
+
+      const wantsAllTenants = q.all_tenants === '1' || q.all_tenants === 'true';
+      const targetTenantParam = q.tenant_id ? String(q.tenant_id).trim() : null;
+
+      // Solo superadmin/platform_owner pueden ver otros tenants
+      const canCrossTenant = role === 'superadmin' || role === 'platform_owner';
+
+      let qs;
+      if (canCrossTenant && wantsAllTenants) {
+        // Vista global: no filtro
+        qs = `?select=${cols}&order=name.asc&limit=2000`;
+      } else if (canCrossTenant && targetTenantParam) {
+        // Resolver owner del tenant via pos_companies
+        let targetOwner = null;
+        try {
+          if (typeof resolveOwnerPosUserId === 'function') {
+            targetOwner = resolveOwnerPosUserId(targetTenantParam);
+          }
+        } catch (_) {}
+        if (!targetOwner) {
+          try {
+            const cu = await supabaseRequest('GET',
+              '/pos_companies?tenant_id=eq.' + encodeURIComponent(targetTenantParam) + '&select=owner_user_id&limit=1');
+            targetOwner = (Array.isArray(cu) && cu[0] && cu[0].owner_user_id) || null;
+          } catch (_) {}
+        }
+        if (!targetOwner) {
+          return sendJSON(res, { error: 'tenant_not_found', tenant_id: targetTenantParam }, 404);
+        }
+        qs = `?pos_user_id=eq.${targetOwner}&select=${cols}&order=name.asc&limit=2000`;
+      } else {
+        // Filtro normal: solo productos del tenant del usuario.
+        const tenantId = resolveTenant(req);
+        const ownerUserId = resolvePosUserId(req, tenantId);
+        if (!ownerUserId) {
+          return sendJSON(res, []);
+        }
+        qs = `?pos_user_id=eq.${ownerUserId}&select=${cols}&order=name.asc&limit=2000`;
+      }
+
       const products = await supabaseRequest('GET', '/pos_products' + qs);
       sendJSON(res, products || []);
     } catch (err) { sendError(res, err); }
@@ -3879,8 +3924,27 @@ const handlers = {
   // el registro con MAS STOCK (o el mas reciente como tiebreaker).
   'GET /api/inventory/duplicates': requireAuth(async (req, res) => {
     try {
-      const tenantId = resolveTenant(req);
-      const ownerUserId = resolvePosUserId(req, tenantId);
+      // 2026-05-14: aceptar ?tenant_id=X para que superadmin pueda detectar
+      // duplicados de un tenant especifico (alineado con /api/inventory).
+      const parsed = url.parse(req.url, true);
+      const q = parsed.query || {};
+      const role = String((req.user && req.user.role) || '').toLowerCase();
+      const canCrossTenant = role === 'superadmin' || role === 'platform_owner';
+      const targetTenantParam = q.tenant_id ? String(q.tenant_id).trim() : null;
+      let ownerUserId = null;
+      if (canCrossTenant && targetTenantParam) {
+        try { ownerUserId = resolveOwnerPosUserId(targetTenantParam); } catch (_) {}
+        if (!ownerUserId) {
+          try {
+            const cu = await supabaseRequest('GET',
+              '/pos_companies?tenant_id=eq.' + encodeURIComponent(targetTenantParam) + '&select=owner_user_id&limit=1');
+            ownerUserId = (Array.isArray(cu) && cu[0] && cu[0].owner_user_id) || null;
+          } catch (_) {}
+        }
+      } else {
+        const tenantId = resolveTenant(req);
+        ownerUserId = resolvePosUserId(req, tenantId);
+      }
       if (!ownerUserId) return sendJSON(res, { groups: [], total_dupes: 0, no_code: 0 });
 
       // Traer TODOS los productos del tenant
@@ -3964,8 +4028,27 @@ const handlers = {
       if (!['owner','admin','superadmin','manager'].includes(role)) {
         return sendJSON(res, { error: 'forbidden' }, 403);
       }
-      const tenantId = resolveTenant(req);
-      const ownerUserId = resolvePosUserId(req, tenantId);
+      // 2026-05-14: superadmin puede dedupar tenant especifico
+      const parsedUrl = url.parse(req.url, true);
+      const qParams = parsedUrl.query || {};
+      const targetTenantParam = (qParams.tenant_id || body.tenant_id) ? String(qParams.tenant_id || body.tenant_id).trim() : null;
+      const canCrossTenant = role === 'superadmin' || role === 'platform_owner';
+      let tenantId = null;
+      let ownerUserId = null;
+      if (canCrossTenant && targetTenantParam) {
+        tenantId = targetTenantParam;
+        try { ownerUserId = resolveOwnerPosUserId(targetTenantParam); } catch (_) {}
+        if (!ownerUserId) {
+          try {
+            const cu = await supabaseRequest('GET',
+              '/pos_companies?tenant_id=eq.' + encodeURIComponent(targetTenantParam) + '&select=owner_user_id&limit=1');
+            ownerUserId = (Array.isArray(cu) && cu[0] && cu[0].owner_user_id) || null;
+          } catch (_) {}
+        }
+      } else {
+        tenantId = resolveTenant(req);
+        ownerUserId = resolvePosUserId(req, tenantId);
+      }
       if (!ownerUserId) return sendJSON(res, { error: 'tenant not provisioned' }, 400);
 
       const dryRun = !!body.dry_run;

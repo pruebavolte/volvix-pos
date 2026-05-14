@@ -4373,6 +4373,15 @@
           <label class="btn" style="display:inline-flex;gap:6px;align-items:center;cursor:pointer;" title="Filtrar productos con caducidad ≤30 días">
             <input type="checkbox" id="inv-only-expiry" style="margin:0;"> Por caducar
           </label>
+          <!-- 2026-05-14: Selector de tenant (solo superadmin). Permite ver
+               inventario de un negocio especifico para hacer soporte. Inicialmente
+               oculto; se muestra si /api/admin/tenants responde 200 (rol ok). -->
+          <div id="inv-tenant-switcher" style="display:none;align-items:center;gap:4px;">
+            <label style="font-size:11px;color:var(--text-3);white-space:nowrap;">👁️ Ver tenant:</label>
+            <select id="inv-tenant-select" style="padding:6px 8px;border:1px solid var(--bord);border-radius:6px;font-size:12px;max-width:180px;">
+              <option value="">(mi tenant)</option>
+            </select>
+          </div>
           <button class="btn" id="btn-export-prod">📤 Exportar</button>
           <button class="btn" id="btn-import-prod">📥 Importar</button>
           <input type="file" id="inv-import-file" accept=".csv" style="display:none;">
@@ -10478,7 +10487,12 @@
       btnDedupe.textContent = '🔍 Analizando...';
       try {
         const headers = _authHeaders({ 'Content-Type': 'application/json' });
-        const r = await fetch('/api/inventory/duplicates', { headers });
+        // 2026-05-14: si superadmin selecciono otro tenant en el dropdown, dedupar
+        // ese tenant. Si no, su propio tenant.
+        const sel = document.getElementById('inv-tenant-select');
+        const tid = sel && sel.value ? sel.value.trim() : '';
+        const dupUrl = '/api/inventory/duplicates' + (tid ? ('?tenant_id=' + encodeURIComponent(tid)) : '');
+        const r = await fetch(dupUrl, { headers });
         if (!r.ok) { alert('No pude analizar duplicados. Status ' + r.status); return; }
         const data = await r.json();
         const totalGroups = (data.groups || []).length + (data.no_code_groups || []).length;
@@ -10513,14 +10527,16 @@
         if (finalConfirm !== 'ELIMINAR') { alert('Cancelado. No se borro nada.'); return; }
 
         btnDedupe.textContent = '🧹 Limpiando...';
+        const dedupeBody = {
+          confirm: 'DELETE_DUPLICATES',
+          consolidate_stock: consolidate,
+          dedupe_no_code: includeNoCode,
+          dry_run: false
+        };
+        if (tid) dedupeBody.tenant_id = tid;
         const dedupeR = await fetch('/api/inventory/dedupe', {
           method: 'POST', headers,
-          body: JSON.stringify({
-            confirm: 'DELETE_DUPLICATES',
-            consolidate_stock: consolidate,
-            dedupe_no_code: includeNoCode,
-            dry_run: false
-          })
+          body: JSON.stringify(dedupeBody)
         });
         const dedupeData = await dedupeR.json();
         if (!dedupeR.ok) { alert('Error: ' + (dedupeData.error || dedupeR.status)); return; }
