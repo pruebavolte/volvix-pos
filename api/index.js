@@ -26740,14 +26740,11 @@ if (process.env.NODE_ENV === 'test') {
       var userId = req.user && req.user.id;
       var jti = req.user && req.user.jti;
       if (!jti) {
-        // Tokens legacy sin jti — fail-soft, retornar ok pero sin update
         return sendJSON(res, { ok: true, no_jti: true });
       }
-      // Rate-limit: 4/min/user (cliente envía cada 30s = 2/min holgura)
       if (!rateLimit('r8b:hb:' + userId, 4, 60000)) {
         return send429(res, rateLimitRetryMs('r8b:hb:' + userId, 60000));
       }
-      // Verificar que la sesión NO esté revocada (sweep_zombie pudo haberla matado)
       var sessRows = await supabaseRequest('GET',
         '/pos_active_sessions?jti=eq.' + encodeURIComponent(jti) +
         '&select=revoked_at,revoked_reason&limit=1'
@@ -26760,18 +26757,72 @@ if (process.env.NODE_ENV === 'test') {
           revoked_reason: sessRows[0].revoked_reason || 'unknown'
         }, 401);
       }
-      // Actualizar last_seen_at
+      // 2026-05-14: el cliente puede enviar info de plataforma + version para
+      // que el admin vea en la tabla de usuarios donde esta logueado (Win/Android/Web)
+      // y que version de la app tiene instalada. Se guarda como JSON en device_info.
+      var body = {};
+      try { body = await readBody(req, { maxBytes: 2*1024 }); } catch(_){}
+      var deviceInfo = null;
+      if (body && (body.platform || body.version || body.os)) {
+        var dinfo = {
+          platform: String(body.platform || '').slice(0, 30),    // 'windows'|'web'|'android'|'ios'|'mac'|'linux'
+          version: String(body.version || '').slice(0, 30),      // '1.0.182'
+          os: String(body.os || '').slice(0, 30),                // 'Windows'|'macOS'|'Android'|etc
+          mode: String(body.mode || '').slice(0, 30),            // 'electron'|'capacitor-android'|'web'
+          browser: String(body.browser || '').slice(0, 30),      // 'Chrome'|'Firefox'|'Electron'|etc
+          pwa: !!body.pwa,
+          ua: String(body.ua || (req.headers['user-agent'] || '')).slice(0, 240),
+          updated_at: new Date().toISOString()
+        };
+        deviceInfo = JSON.stringify(dinfo);
+      }
+      var patch = { last_seen_at: new Date().toISOString() };
+      if (deviceInfo) patch.device_info = deviceInfo;
       await supabaseRequest('PATCH',
         '/pos_active_sessions?jti=eq.' + encodeURIComponent(jti) + '&revoked_at=is.null',
-        { last_seen_at: new Date().toISOString() }
+        patch
       ).catch(function () {});
       sendJSON(res, {
         ok: true,
         last_seen_at: new Date().toISOString(),
-        server_time: Date.now()
+        server_time: Date.now(),
+        device_recorded: !!deviceInfo
       });
     } catch (err) { sendError(res, err); }
   });
+
+  // 2026-05-14: GET /api/admin/users/devices — devuelve sesiones activas (con plataforma + version)
+  // agrupadas por user_id, para alimentar las columnas "Versiones" y "Sesion activa" del panel.
+  // Solo superadmin/platform_owner. Devuelve mapa { [user_id]: [{ platform, version, os, last_seen_at }] }
+  handlers['GET /api/admin/users/devices'] = requireAuth(async (req, res) => {
+    var role = String((req.user && req.user.role) || '').toLowerCase();
+    if (role !== 'superadmin' && role !== 'platform_owner') return sendJSON(res, { ok:false, error:'forbidden' }, 403);
+    try {
+      var rows = await supabaseRequest('GET',
+        '/pos_active_sessions?revoked_at=is.null&select=user_id,device_info,last_seen_at,login_at&order=last_seen_at.desc&limit=2000'
+      );
+      var byUser = {};
+      (rows || []).forEach(r => {
+        var info = null;
+        try { info = r.device_info && typeof r.device_info === 'string' ? JSON.parse(r.device_info) : (r.device_info || null); } catch(_) {}
+        var entry = {
+          platform: (info && info.platform) || 'unknown',
+          version: (info && info.version) || null,
+          os: (info && info.os) || null,
+          browser: (info && info.browser) || null,
+          mode: (info && info.mode) || null,
+          pwa: !!(info && info.pwa),
+          last_seen_at: r.last_seen_at,
+          login_at: r.login_at
+        };
+        if (!byUser[r.user_id]) byUser[r.user_id] = [];
+        // Deduplicar por (platform, version): mantener la mas reciente
+        var existing = byUser[r.user_id].find(d => d.platform === entry.platform);
+        if (!existing) byUser[r.user_id].push(entry);
+      });
+      return sendJSON(res, { ok: true, devices: byUser });
+    } catch (err) { sendError(res, err); }
+  }, ['superadmin','platform_owner']);
 
   // -------------------------------------------------------------------------
   // FIX-R2b: POST /api/auth/sweep-zombies — cron-friendly sweep

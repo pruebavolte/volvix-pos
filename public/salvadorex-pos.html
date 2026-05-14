@@ -8690,12 +8690,70 @@
   }
 
   // ---------------- FIX-R2: heartbeat ----------------
+  // 2026-05-14: heartbeat envia info de plataforma + version para que el admin
+  // vea en la tabla de usuarios donde tienen sesion activa (Win/Android/Web)
+  // y que version de la app tienen instalada.
+  function __r8bDetectClientInfo() {
+    var ua = navigator.userAgent || '';
+    var isElectron = !!(typeof window.process === 'object' && window.process.versions && window.process.versions.electron) || /Electron/i.test(ua);
+    var isCapacitor = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform());
+    var capPlatform = isCapacitor && window.Capacitor.getPlatform ? window.Capacitor.getPlatform() : null;
+    var os = 'unknown';
+    if (/Android/i.test(ua) || capPlatform === 'android') os = 'android';
+    else if (/iPhone|iPad|iPod/i.test(ua) || capPlatform === 'ios') os = 'ios';
+    else if (/Windows/i.test(ua)) os = 'windows';
+    else if (/Mac OS X|Macintosh/i.test(ua)) os = 'mac';
+    else if (/Linux/i.test(ua)) os = 'linux';
+    var browser = 'other';
+    if (isElectron) browser = 'Electron';
+    else if (/Edg\//i.test(ua)) browser = 'Edge';
+    else if (/Chrome\//.test(ua)) browser = 'Chrome';
+    else if (/Firefox\//.test(ua)) browser = 'Firefox';
+    else if (/Safari\//.test(ua)) browser = 'Safari';
+    var mode = isElectron ? 'electron' : (isCapacitor ? ('capacitor-' + (capPlatform || '?')) : 'web');
+    var platform = isElectron ? 'windows-exe' : (isCapacitor ? ('android' === capPlatform ? 'android' : 'ios') : 'web');
+    var version = '';
+    try {
+      // Web/PWA: leer del /version.json cacheado en window.__volvixVersion
+      // Electron .exe: window.volvixElectron.version (Electron runtime)
+      // Capacitor: window.Capacitor.appVersion si disponible
+      version = (window.VOLVIX_APP_VERSION) ||
+                (window.__volvixVersion && window.__volvixVersion.version) ||
+                (window.volvixElectron && window.volvixElectron.version) ||
+                (window.Capacitor && window.Capacitor.appVersion) ||
+                '';
+    } catch(_){}
+    // Lazy-load /version.json una vez para tener la version web disponible.
+    // No bloqueamos el heartbeat actual; el proximo lo enviara con la version.
+    if (!version && !window.__volvixVersionFetching) {
+      window.__volvixVersionFetching = true;
+      fetch('/version.json', { cache: 'no-cache' })
+        .then(r => r.ok ? r.json() : null)
+        .then(j => { if (j) window.__volvixVersion = j; })
+        .catch(() => {});
+    }
+    var isStandalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
+    return {
+      platform: platform,
+      os: os,
+      browser: browser,
+      mode: mode,
+      version: String(version || ''),
+      pwa: !!(isStandalone && !isElectron && !isCapacitor),
+      ua: ua.slice(0, 200)
+    };
+  }
   async function __r8bHeartbeat() {
     try {
       var token = '';
       try { token = (typeof _vToken === 'function') ? _vToken() : ''; } catch (_) {}
       if (!token) return;
-      var r = await __r8bAuthFetch('/api/auth/heartbeat', { method: 'POST', body: '{}' });
+      var info = __r8bDetectClientInfo();
+      var r = await __r8bAuthFetch('/api/auth/heartbeat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(info)
+      });
       if (r.status === 401) {
         // Sesión revocada por sweep zombie o admin
         var data = await r.json().catch(function () { return {}; });

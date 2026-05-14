@@ -7263,6 +7263,71 @@
       return _usersHierarchyCache;
     } catch (e) { console.warn('[PERMv14 Users] hierarchy fail', e); return { ok: false, error: String(e) }; }
   }
+
+  // 2026-05-14: fetch de dispositivos/sesiones activas por user_id.
+  // Devuelve { [user_id]: [{platform, version, os, browser, last_seen_at, ...}] }
+  // para alimentar las columnas "Versiones" y "Sesion en" de la tabla.
+  let _usersDevicesCache = null;
+  async function fetchDevices(force) {
+    if (_usersDevicesCache && !force) return _usersDevicesCache;
+    try {
+      const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+      const r = await fetch('/api/admin/users/devices', { headers: { 'Authorization': 'Bearer ' + tok }});
+      if (!r.ok) { _usersDevicesCache = { ok: false, devices: {} }; return _usersDevicesCache; }
+      _usersDevicesCache = await r.json();
+      return _usersDevicesCache;
+    } catch (e) { return { ok: false, devices: {} }; }
+  }
+  // Render del badge "Sesion activa en X" para la columna nueva.
+  // Si no hay devices → ⚫ Ninguna. Si hay → muestra el mas reciente con tiempo.
+  function fmtSessionPlatform(devices) {
+    if (!devices || !devices.length) return '<span class="u-empty">—</span>';
+    // Ordenar por last_seen_at desc, tomar el mas reciente activo (<30 min)
+    const sorted = devices.slice().sort((a, b) =>
+      new Date(b.last_seen_at || 0) - new Date(a.last_seen_at || 0)
+    );
+    const top = sorted[0];
+    const ts = new Date(top.last_seen_at || 0).getTime();
+    const mins = Math.floor((Date.now() - ts) / 60000);
+    const recent = mins < 5;
+    const emoji = ({
+      'windows-exe': '🪟', windows: '🪟',
+      android: '🤖', ios: '🍎',
+      mac: '🍏', linux: '🐧',
+      web: '🌐'
+    })[top.platform] || '🌐';
+    const label = ({
+      'windows-exe': 'Win .exe', windows: 'Windows',
+      android: 'Android', ios: 'iOS',
+      mac: 'Mac', linux: 'Linux',
+      web: 'Web'
+    })[top.platform] || (top.os || 'Web');
+    const color = recent ? '#16A34A' : (mins < 30 ? '#CA8A04' : '#94A3B8');
+    const dot = recent ? '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#16A34A;margin-right:4px;"></span>' : '';
+    return '<span style="color:' + color + ';font-weight:600;" title="Visto hace ' + mins + ' min">'
+      + dot + emoji + ' ' + label + '</span>';
+  }
+  // Render del badge "Versiones instaladas" (varios platforms = varios badges)
+  function fmtVersions(devices) {
+    if (!devices || !devices.length) return '<span class="u-empty">—</span>';
+    const seen = new Set();
+    const badges = [];
+    devices.forEach(d => {
+      const key = d.platform + ':' + d.version;
+      if (seen.has(key)) return;
+      seen.add(key);
+      const emoji = ({
+        'windows-exe': '🪟', windows: '🪟',
+        android: '🤖', ios: '🍎',
+        mac: '🍏', linux: '🐧',
+        web: '🌐'
+      })[d.platform] || '🌐';
+      const v = d.version || '?';
+      badges.push('<span style="display:inline-block;padding:1px 6px;background:#F3F4F6;border-radius:4px;font-size:11px;margin:1px 2px;font-family:ui-monospace,monospace;" title="' + (d.os || '') + ' · ' + (d.browser || '') + '">'
+        + emoji + ' ' + escapeText(v) + '</span>');
+    });
+    return badges.join(' ') || '<span class="u-empty">—</span>';
+  }
   function getOverridesByEmail(email) {
     try {
       const k = 'volvix:overrides:' + email;
@@ -7322,6 +7387,9 @@
     }
     // 2026-05-09: cargar catálogo de giros desde BD para poblar datalist
     const giroCatalog = await fetchGiroCatalog();
+    // 2026-05-14: cargar mapa de dispositivos/versiones por user_id en paralelo
+    const devicesResp = await fetchDevices();
+    const devicesMap = (devicesResp && devicesResp.devices) || {};
     const dlGiros = $('#permv14-dl-giros');
     if (dlGiros && giroCatalog.length && !dlGiros._pv14Filled) {
       dlGiros._pv14Filled = true;
@@ -7351,19 +7419,21 @@
       +   '<span>👨‍💼 <strong>' + (j.totals && j.totals.employees || 0) + '</strong> empleados</span>'
       + '</div>';
 
-    // 2026-05-13: nueva columna ☑ checkbox al inicio + nueva columna "En sesión"
-    // entre Último uso y Plan. Total: 11 columnas.
+    // 2026-05-14: 2 columnas nuevas — "Versiones" y "Sesion en"
+    // Total ahora: 13 columnas.
     const colDefs = [
       { label: '<input type="checkbox" id="pv14-users-selall" title="Seleccionar todos">', w: 36 },
       { label: 'Usuario',     w: null },
-      { label: 'Tipo',        w: 110  },
-      { label: 'Giro',        w: 150  },
-      { label: 'Estado',      w: 110  },
-      { label: 'Último uso',  w: 220  },
-      { label: 'En sesión',   w: 130  },
-      { label: 'Plan',        w: 100  },
-      { label: 'URL landing', w: 200  },
-      { label: 'URL acceso',  w: 220  },
+      { label: 'Tipo',        w: 100  },
+      { label: 'Giro',        w: 130  },
+      { label: 'Estado',      w: 100  },
+      { label: 'Último uso',  w: 190  },
+      { label: 'En sesión',   w: 110  },
+      { label: 'Plan',        w: 90  },
+      { label: 'Versiones',   w: 150  },   // 🪟 1.0.182 · 🤖 1.0.180 · 🌐 live
+      { label: 'Sesión en',   w: 130  },   // 🪟 Windows · 2 min
+      { label: 'URL landing', w: 180  },
+      { label: 'URL acceso',  w: 200  },
       { label: '',            w: 160  }
     ];
     // Barra de acciones masivas (oculta hasta que haya selección)
@@ -7388,6 +7458,8 @@
       '<input type="text" data-pv14-filter="ultimo" placeholder="🔍 fecha…">',
       '<select data-pv14-filter="online"><option value="">— todos —</option><option value="online">🟢 En sesión</option><option value="recent">🟡 Reciente</option><option value="offline">⚫ Inactivo</option></select>',
       '<select data-pv14-filter="plan"><option value="">— todos —</option><option value="trial">Trial</option><option value="pro">Pro</option><option value="enterprise">Enterprise</option><option value="marca_blanca">Marca blanca</option></select>',
+      '<select data-pv14-filter="versiones"><option value="">— todas —</option><option value="windows">🪟 Windows .exe</option><option value="android">🤖 Android</option><option value="ios">🍎 iOS</option><option value="web">🌐 Web</option></select>',
+      '<select data-pv14-filter="sesionen"><option value="">— todas —</option><option value="windows">🪟 Windows</option><option value="android">🤖 Android</option><option value="ios">🍎 iOS</option><option value="web">🌐 Web</option><option value="none">⚫ Ninguna</option></select>',
       '<input type="text" data-pv14-filter="landing" placeholder="🔍 url…">',
       '<input type="text" data-pv14-filter="acceso" placeholder="🔍 url…">',
       '' // acciones col, no filter
@@ -7417,6 +7489,7 @@
     (j.platform_owners || []).forEach(po => {
       const last = fmtLastLogin(po.last_login_at);
       const online = fmtOnlineStatus(po.last_seen_at || po.last_login_at);
+      const poDevices = devicesMap[po.id] || devicesMap[po.user_id] || [];
       if (search && !(po.email || '').toLowerCase().includes(search) && !'superadmin'.includes(search)) return;
       html += '<tr class="permv14-users-row-tenant" data-pv14-rowtype="superadmin" data-pv14-search="' + escapeAttr((po.email||'').toLowerCase() + ' superadmin') + '">'
         + _cbCell(po.id || po.email, 'platform_owner')
@@ -7427,6 +7500,8 @@
         + '<td style="font-size:11px;">' + escapeText(last) + '</td>'
         + '<td style="font-size:11px;">' + online + '</td>'
         + '<td>' + _DASH + '</td>'
+        + '<td style="font-size:11px;">' + fmtVersions(poDevices) + '</td>'
+        + '<td style="font-size:11px;">' + fmtSessionPlatform(poDevices) + '</td>'
         + '<td>' + _DASH + '</td>'
         + '<td>' + _DASH + '</td>'
         + '<td class="u-actions">' + _DASH + '</td>'
@@ -7505,6 +7580,8 @@
           + '<td>' + _DASH + '</td>'
           + '<td style="font-size:11px;">' + fmtOnlineStatus(null) + '</td>'
           + planCell(t.tenant_id, plan)
+          + '<td>' + _DASH + '</td>'
+          + '<td>' + _DASH + '</td>'
           + '<td><a class="u-url" href="https://' + escapeAttr(landing) + '" target="_blank" rel="noopener">' + escapeText(landing) + '</a></td>'
           + '<td><a class="u-url" href="https://' + escapeAttr(acceso) + '" target="_blank" rel="noopener">' + escapeText(acceso) + '</a></td>'
           + inlineTenantActions(t.tenant_id, '')
@@ -7520,6 +7597,8 @@
         const emailColHtml = realUid
           ? emailCell(realUid, o.email || '')
           : '<span class="u-email" title="Sin UUID — no editable">' + escapeText(o.email || '(sin email)') + '</span>';
+        // 2026-05-14: devices del owner (Win/Android/Web + version)
+        const ownerDevices = devicesMap[realUid] || [];
         const ownerSearchBag = ((o.email||'')+' '+ut.label+' '+giroLabel+' '+tenantStatus+' '+plan+' '+last).toLowerCase();
         html += '<tr class="' + rowClass + '" data-pv14-row-tid="' + escapeAttr(t.tenant_id) + '" data-pv14-row-uid="' + escapeAttr(realUid || '') + '" data-pv14-rowtype="owner" data-pv14-search="' + escapeAttr(ownerSearchBag) + '">'
           + _cbCell(realUid || o.email, 'owner')
@@ -7539,6 +7618,8 @@
           + '<td style="font-size:11px;">' + escapeText(last) + '</td>'
           + '<td style="font-size:11px;">' + online + '</td>'
           + (isFirstOfTenant ? planCell(t.tenant_id, plan) : '<td>' + escapeText(plan) + '</td>')
+          + '<td style="font-size:11px;">' + fmtVersions(ownerDevices) + '</td>'
+          + '<td style="font-size:11px;">' + fmtSessionPlatform(ownerDevices) + '</td>'
           + '<td><a class="u-url" href="https://' + escapeAttr(landing) + '" target="_blank" rel="noopener">' + escapeText(landing) + '</a></td>'
           + '<td><a class="u-url" href="https://' + escapeAttr(acceso) + '" target="_blank" rel="noopener">' + escapeText(acceso) + '</a></td>'
           + (isFirstOfTenant
@@ -7563,6 +7644,8 @@
           : '<span class="u-tag empleado">' + escapeText(e.role || 'empleado') + '</span>';
         const empLast = fmtLastLogin(e.last_login_at);
         const empOnline = fmtOnlineStatus(e.last_seen_at || e.last_login_at);
+        // 2026-05-14: devices del empleado (Win/Android/Web + version)
+        const empDevices = devicesMap[empUid] || [];
         const empSearchBag = ((e.email||'')+' '+(e.role||'')+' '+ut.label+' '+giroLabel+' '+empState+' '+plan+' '+empLast).toLowerCase();
         html += '<tr class="permv14-users-row-child" data-pv14-row-tid="' + escapeAttr(t.tenant_id) + '" data-pv14-row-uid="' + escapeAttr(empUid || '') + '" data-pv14-rowtype="empleado" data-pv14-search="' + escapeAttr(empSearchBag) + '">'
           + _cbCell(empUid || e.email, 'employee')
@@ -7574,6 +7657,8 @@
           + '<td style="font-size:11px;">' + escapeText(empLast) + '</td>'
           + '<td style="font-size:11px;">' + empOnline + '</td>'
           + '<td>' + escapeText(plan) + '</td>'
+          + '<td style="font-size:11px;">' + fmtVersions(empDevices) + '</td>'
+          + '<td style="font-size:11px;">' + fmtSessionPlatform(empDevices) + '</td>'
           + '<td><a class="u-url" href="https://' + escapeAttr(landing) + '" target="_blank" rel="noopener">' + escapeText(landing) + '</a></td>'
           + '<td><a class="u-url" href="https://' + escapeAttr(acceso) + '" target="_blank" rel="noopener">' + escapeText(acceso) + '</a></td>'
           + '<td class="u-actions">'
@@ -7661,17 +7746,36 @@
           else if (fs.online === 'offline' && (t.indexOf('en sesión') !== -1)) ok = false;
         }
         if (ok && fs.plan && _txt(7).indexOf(fs.plan) === -1) ok = false;
-        if (ok && fs.landing && _txt(8).indexOf(fs.landing) === -1) ok = false;
-        if (ok && fs.acceso && _txt(9).indexOf(fs.acceso) === -1) ok = false;
+        // 2026-05-14: cols 8 = Versiones, 9 = Sesion en, 10 = landing, 11 = acceso
+        if (ok && fs.versiones) {
+          const t = _txt(8);
+          // Mapear plataforma del filtro a su emoji para buscar en el texto del badge
+          const emojiMap = { windows: '🪟', android: '🤖', ios: '🍎', mac: '🍏', linux: '🐧', web: '🌐' };
+          const e = emojiMap[fs.versiones];
+          if (e && t.indexOf(e) === -1) ok = false;
+        }
+        if (ok && fs.sesionen) {
+          const t = _txt(9);
+          const emojiMap = { windows: '🪟', android: '🤖', ios: '🍎', mac: '🍏', linux: '🐧', web: '🌐' };
+          if (fs.sesionen === 'none') {
+            // Sin sesion = celda muestra el u-empty dash
+            if (t.replace(/\s/g, '') !== '—') ok = false;
+          } else {
+            const e = emojiMap[fs.sesionen];
+            if (e && t.indexOf(e) === -1) ok = false;
+          }
+        }
+        if (ok && fs.landing && _txt(10).indexOf(fs.landing) === -1) ok = false;
+        if (ok && fs.acceso && _txt(11).indexOf(fs.acceso) === -1) ok = false;
         tr.style.display = ok ? '' : 'none';
         if (ok) visibleCount++;
       });
-      // Mostrar "sin resultados" si nada quedó visible
+      // Mostrar "sin resultados" si nada quedó visible (13 cols ahora)
       let emptyTr = tbody.querySelector('tr.permv14-users-row-empty');
       if (visibleCount === 0 && !emptyTr) {
         emptyTr = document.createElement('tr');
         emptyTr.className = 'permv14-users-row-empty';
-        emptyTr.innerHTML = '<td colspan="11">Sin resultados con los filtros aplicados.</td>';
+        emptyTr.innerHTML = '<td colspan="13">Sin resultados con los filtros aplicados.</td>';
         tbody.appendChild(emptyTr);
       } else if (emptyTr) {
         emptyTr.style.display = visibleCount === 0 ? '' : 'none';
