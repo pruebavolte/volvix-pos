@@ -3485,9 +3485,21 @@
     })();
 
     document.getElementById('impersonation-close').addEventListener('click', function(){
+      // 2026-05-14 BUG FIX #2: confirmacion para evitar perder sesion impersonada
+      // por click accidental durante uso intensivo (reported via stress test).
+      var sure = confirm(
+        '¿Cerrar vista impersonada?\n\n' +
+        'Vas a salir del modo "Viendo como ' + (imEmail || 'usuario') + '".\n' +
+        'Tendrias que volver al panel admin y abrir "Ver como" otra vez.'
+      );
+      if (!sure) return;
       var u = new URL(location.href);
       u.searchParams.delete('impersonate');
       u.searchParams.delete('tid');
+      u.searchParams.delete('imp_giro');
+      u.searchParams.delete('imp_plan');
+      u.searchParams.delete('imp_name');
+      try { sessionStorage.removeItem('volvix_impersonation_token'); } catch(_){}
       // Limpiar todo: flag, fetch, stylesheet, clase
       try { delete window.IMPERSONATING; } catch(_){}
       window.fetch = origFetch;
@@ -10870,7 +10882,15 @@
       if (el) el.textContent = label;
       var fab = document.getElementById('vista-fab-label');
       if (fab) fab.textContent = label;
-      try { localStorage.setItem('salvx_vista', v); } catch(_) {}
+      // 2026-05-14 BUG FIX #3: en modo impersonacion, NO contaminar localStorage
+      // del dominio (que contagia a otras tabs). Usar sessionStorage (per-tab).
+      try {
+        if (window.IMPERSONATING && window.IMPERSONATING.email) {
+          sessionStorage.setItem('salvx_vista', v);
+        } else {
+          localStorage.setItem('salvx_vista', v);
+        }
+      } catch(_) {}
     }
     window.toggleVista = function() {
       var cur = parseInt(document.body.getAttribute('data-vista') || '1', 10);
@@ -10879,9 +10899,16 @@
       var names = { '1': 'Vista estándar', '2': 'Vista Loyverse (Verde)', '3': 'Terminal OXXO (Oscuro)' };
       showToast('🎨 ' + (names[String(next)] || 'Vista ' + next));
     };
-    // Restore from localStorage
+    // Restore vista preference:
+    //   - Modo impersonacion: SOLO de sessionStorage (per-tab). Si no hay, vista 1.
+    //     No leer localStorage para evitar que el admin vea la vista del usuario
+    //     impersonado o viceversa.
+    //   - Modo normal: de localStorage (persiste entre sesiones del mismo user).
     try {
-      var saved = localStorage.getItem('salvx_vista');
+      var isImpersonating = !!(window.IMPERSONATING && window.IMPERSONATING.email);
+      var saved = isImpersonating
+        ? sessionStorage.getItem('salvx_vista')
+        : localStorage.getItem('salvx_vista');
       if (saved && ['1','2','3'].includes(saved)) _applyVista(saved);
     } catch(_) {}
   })();
