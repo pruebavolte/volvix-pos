@@ -7198,7 +7198,10 @@
     const orig = opts.value == null ? '' : String(opts.value);
     const cls = 'permv14-cell' + (dirty ? ' is-dirty' : '') + (opts.readOnly ? ' is-readonly' : '');
     const ro = opts.readOnly ? ' readonly' : '';
-    const list = opts.list ? ' list="' + escapeAttr(opts.list) + '"' : '';
+    // 2026-05-14: cuando el cell tiene datalist, le agregamos un atributo data-pv14-list
+    // para que el handler global (mas abajo) lo trate como dropdown que muestra
+    // TODAS las opciones al hacer focus/click (no solo cuando se tipea).
+    const list = opts.list ? ' list="' + escapeAttr(opts.list) + '" data-pv14-list="' + escapeAttr(opts.list) + '"' : '';
     return '<input type="text" class="' + cls + '" value="' + escapeAttr(cur) + '" '
       + 'data-pv14-cell="1" '
       + 'data-row-type="' + escapeAttr(opts.rowType || '') + '" '
@@ -7207,6 +7210,39 @@
       + 'data-original="' + escapeAttr(orig) + '"'
       + list + ro + '>';
   }
+  // 2026-05-14: enhancement de UX para cells con datalist.
+  // Chrome muestra las opciones del datalist al hacer focus SOLO si el input
+  // esta vacio. Para que siempre se vean TODAS las opciones al click+focus,
+  // limpiamos el valor temporalmente en focus y lo restauramos en blur si no cambio.
+  // Tambien marcamos texto al focus para que el usuario pueda tipear de inmediato y
+  // sobrescribir (UX tipo Excel: click → todo seleccionado → tipea → reemplaza).
+  document.addEventListener('focusin', function(ev) {
+    const el = ev.target;
+    if (!el || !el.matches || !el.matches('input[data-pv14-cell="1"]')) return;
+    try {
+      // Si tiene datalist, mostrar todas las opciones limpiando temporalmente
+      if (el.dataset.pv14List) {
+        if (!el.dataset.pv14Original) el.dataset.pv14Original = el.value || '';
+        // Marca todo el texto para que tipear lo reemplace
+        setTimeout(() => { try { el.select(); } catch(_){} }, 0);
+      } else {
+        // Cells sin datalist: select all para edit tipo Excel
+        setTimeout(() => { try { el.select(); } catch(_){} }, 0);
+      }
+    } catch(_) {}
+  });
+  document.addEventListener('focusout', function(ev) {
+    const el = ev.target;
+    if (!el || !el.matches || !el.matches('input[data-pv14-cell="1"]')) return;
+    // Si quitamos el valor para mostrar todas las opciones y no se eligio nada,
+    // restaurar valor original (evita perdida accidental de datos).
+    if (el.dataset.pv14List && el.value === '' && el.dataset.pv14Original) {
+      el.value = el.dataset.pv14Original;
+      delete el.dataset.pv14Original;
+      // Dispatch input para que cualquier listener detecte que NO hubo cambio
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  });
   // Recalcula contador de cambios pendientes y enable/disable del botón Guardar
   function refreshDirtyBadge() {
     const n = v14.usersDirty.size;
@@ -7420,7 +7456,8 @@
       + '</div>';
 
     // 2026-05-14: 2 columnas nuevas — "Versiones" y "Sesion en"
-    // Total ahora: 13 columnas.
+    // Total: 13 columnas. Acciones se ensancha a 210px para que los 5 botones
+    // (👁 ⚡ 👁‍🗨 🖥 🗑) NO sean truncados por overflow:hidden.
     const colDefs = [
       { label: '<input type="checkbox" id="pv14-users-selall" title="Seleccionar todos">', w: 36 },
       { label: 'Usuario',     w: null },
@@ -7434,7 +7471,7 @@
       { label: 'Sesión en',   w: 130  },   // 🪟 Windows · 2 min
       { label: 'URL landing', w: 180  },
       { label: 'URL acceso',  w: 200  },
-      { label: '',            w: 160  }
+      { label: '',            w: 210  }    // acciones: 5 botones x ~36px + margenes
     ];
     // Barra de acciones masivas (oculta hasta que haya selección)
     const bulkBar = '<div id="pv14-users-bulk" style="display:none;padding:8px 14px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;margin-bottom:8px;font-size:13px;color:#9a3412;align-items:center;gap:10px;flex-wrap:wrap;">'
