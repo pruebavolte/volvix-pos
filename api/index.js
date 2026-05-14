@@ -12022,16 +12022,34 @@ handlers['GET /api/config/public'] = async (req, res) => {
   // Polling cada 3-5s para notificar al cliente. Codigo de 6 digitos como
   // verificacion adicional (defensa contra clicks accidentales).
   // ================================================================
-  function _remoteSupportKey(sid){ return 'remote_support:'+sid; }
-  const _remoteSupportStore = (global.__VOLVIX_RSS = global.__VOLVIX_RSS || new Map());
-  function _rsSet(sid, obj){ _remoteSupportStore.set(sid, Object.assign({}, _remoteSupportStore.get(sid)||{}, obj, { updated_at: Date.now() })); }
-  function _rsGet(sid){ return _remoteSupportStore.get(sid) || null; }
-  function _rsCleanup(){
-    const now = Date.now();
-    for (const [k,v] of _remoteSupportStore.entries()) {
-      // Limpiar sesiones inactivas >15 min
-      if (now - (v.updated_at || 0) > 15*60*1000) _remoteSupportStore.delete(k);
-    }
+  // 2026-05-13 — Persistencia via Supabase (tabla volvix_remote_sessions).
+  // Antes era un Map in-memory que se perdia entre lambdas en Vercel. Ahora la
+  // tabla es la fuente de verdad. Las funciones helper son async.
+  // Ver db/R16_REMOTE_SUPPORT.sql para el schema.
+  async function _rsGet(sid){
+    if (!sid) return null;
+    try {
+      const rows = await supabaseRequest('GET', '/volvix_remote_sessions?id=eq.' + encodeURIComponent(sid) + '&limit=1');
+      return (rows && rows[0]) || null;
+    } catch(_) { return null; }
+  }
+  async function _rsSet(sid, obj){
+    if (!sid) return;
+    const patch = Object.assign({}, obj, { updated_at: Date.now() });
+    try {
+      const existing = await _rsGet(sid);
+      if (existing) {
+        await supabaseRequest('PATCH', '/volvix_remote_sessions?id=eq.' + encodeURIComponent(sid), patch);
+      } else {
+        await supabaseRequest('POST', '/volvix_remote_sessions', Object.assign({ id: sid, created_at: Date.now() }, patch));
+      }
+    } catch(e) { try { console.log('[_rsSet] error', e.message); } catch(_){} }
+  }
+  async function _rsCleanup(){
+    try {
+      const cutoff = Date.now() - 15*60*1000;
+      await supabaseRequest('DELETE', '/volvix_remote_sessions?updated_at=lt.' + cutoff);
+    } catch(_){}
   }
 
   // Admin solicita soporte remoto a un usuario
@@ -12041,18 +12059,18 @@ handlers['GET /api/config/public'] = async (req, res) => {
       return sendJSON(res, { ok:false, error:'forbidden' }, 403);
     }
     try {
-      _rsCleanup();
+      await _rsCleanup();
       const body = await readBody(req, { maxBytes: 2*1024 });
       if (checkBodyError(req, res)) return;
       const target = String(body.target_email || body.target_id || '').toLowerCase().trim();
       if (!target) return sendJSON(res, { ok:false, error:'target requerido' }, 400);
       const sid = crypto.randomBytes(12).toString('hex');
       const code = Math.floor(100000 + Math.random()*900000).toString(); // 6 dig
-      _rsSet(sid, {
+      await _rsSet(sid, {
         id: sid,
         code: code,
         requester_email: req.user.email,
-        requester_id: req.user.id,
+        requester_id: req.user.id || null,
         target_email: target,
         status: 'pending',
         created_at: Date.now(),
@@ -12065,18 +12083,15 @@ handlers['GET /api/config/public'] = async (req, res) => {
   // Cliente polea sus solicitudes entrantes (cada 5s)
   handlers['GET /api/remote-support/incoming'] = requireAuth(async (req, res) => {
     try {
-      _rsCleanup();
+      await _rsCleanup();
       const me = String(req.user.email || '').toLowerCase();
-      const sessions = [];
-      for (const v of _remoteSupportStore.values()) {
-        if (v.target_email === me && (v.status === 'pending' || v.status === 'verified' || v.status === 'active')) {
-          sessions.push({
-            id: v.id, status: v.status, requester_email: v.requester_email,
-            created_at: v.created_at, verified_at: v.verified_at || null
-          });
-        }
-      }
-      return sendJSON(res, { ok: true, sessions });
+      // Query Supabase for pending/verified/active sessions targeting me
+      const path = '/volvix_remote_sessions?target_email=eq.' + encodeURIComponent(me)
+        + '&status=in.(pending,verified,active)'
+        + '&select=id,status,requester_email,created_at,verified_at'
+        + '&order=created_at.desc';
+      const rows = await supabaseRequest('GET', path);
+      return sendJSON(res, { ok: true, sessions: rows || [] });
     } catch (err) { sendError(res, err); }
   });
 
@@ -12088,18 +12103,18 @@ handlers['GET /api/config/public'] = async (req, res) => {
       const sid = String(body.session_id || '');
       const action = String(body.action || '');
       const consent = body.consent_text ? String(body.consent_text).slice(0, 500) : '';
-      const s = _rsGet(sid);
+      const s = await _rsGet(sid);
       if (!s) return sendJSON(res, { ok:false, error:'sesion no existe o expiro' }, 404);
       if (s.target_email !== String(req.user.email || '').toLowerCase()) {
         return sendJSON(res, { ok:false, error:'no eres el destinatario' }, 403);
       }
       if (action === 'accept') {
-        _rsSet(sid, { status:'accepted', accepted_at: Date.now(), consent_text: consent });
+        await _rsSet(sid, { status:'accepted', accepted_at: Date.now(), consent_text: consent });
         try { logAudit(req, 'remote_support.accepted', 'pos_users', { session_id: sid, requester: s.requester_email, consent: consent }); } catch(_){}
         return sendJSON(res, { ok:true, status:'accepted', show_code_to_user: s.code });
       }
       if (action === 'reject') {
-        _rsSet(sid, { status:'rejected', rejected_at: Date.now() });
+        await _rsSet(sid, { status:'rejected', rejected_at: Date.now() });
         try { logAudit(req, 'remote_support.rejected', 'pos_users', { session_id: sid }); } catch(_){}
         return sendJSON(res, { ok:true, status:'rejected' });
       }
@@ -12114,7 +12129,7 @@ handlers['GET /api/config/public'] = async (req, res) => {
     try {
       const u = new URL(req.url, 'http://x');
       const sid = u.searchParams.get('session_id') || '';
-      const s = _rsGet(sid);
+      const s = await _rsGet(sid);
       if (!s) return sendJSON(res, { ok:false, error:'sesion no existe' }, 404);
       const out = { ok:true, id:s.id, status:s.status, target_email:s.target_email, created_at:s.created_at };
       if (s.status === 'accepted' || s.status === 'verified' || s.status === 'active') {
@@ -12135,20 +12150,20 @@ handlers['GET /api/config/public'] = async (req, res) => {
       if (checkBodyError(req, res)) return;
       const sid = String(body.session_id || '');
       const code = String(body.code || '').trim();
-      const s = _rsGet(sid);
+      const s = await _rsGet(sid);
       if (!s) return sendJSON(res, { ok:false, error:'sesion no existe' }, 404);
       if (s.status !== 'accepted') return sendJSON(res, { ok:false, error:'sesion no aceptada por el usuario' }, 409);
       if (String(s.code) !== code) {
         // Marcar intento fallido (3 intentos máx)
         const attempts = (s.code_attempts || 0) + 1;
-        _rsSet(sid, { code_attempts: attempts });
+        await _rsSet(sid, { code_attempts: attempts });
         if (attempts >= 3) {
-          _rsSet(sid, { status: 'expired', expired_reason: 'too_many_attempts' });
+          await _rsSet(sid, { status: 'expired', expired_reason: 'too_many_attempts' });
           return sendJSON(res, { ok:false, error:'demasiados intentos. Sesion cancelada.' }, 423);
         }
         return sendJSON(res, { ok:false, error:'codigo incorrecto', attempts_remaining: 3 - attempts }, 401);
       }
-      _rsSet(sid, { status:'verified', verified_at: Date.now() });
+      await _rsSet(sid, { status:'verified', verified_at: Date.now() });
       try { logAudit(req, 'remote_support.verified', 'pos_users', { session_id: sid, target: s.target_email }); } catch(_){}
       return sendJSON(res, { ok:true, status:'verified', session_id: sid });
     } catch (err) { sendError(res, err); }
@@ -12158,9 +12173,9 @@ handlers['GET /api/config/public'] = async (req, res) => {
   // Cada sesion almacena 2 colas de mensajes (offer/answer/ice-candidates).
   // El lado admin POSTea mensajes para el cliente, el cliente POSTea para el admin.
   // Long-polling: GET espera hasta 20s si no hay mensaje, después responde [].
-  const _rsSignals = (global.__VOLVIX_RSS_SIG = global.__VOLVIX_RSS_SIG || new Map());
-  function _sigQueue(sid, role){ const k=sid+':'+role; if(!_rsSignals.has(k)) _rsSignals.set(k,[]); return _rsSignals.get(k); }
-
+  // 2026-05-13 — Signals via Supabase (tabla volvix_remote_signals).
+  // POST agrega un mensaje a la cola del destinatario. GET drena los pendientes
+  // (consumed_at IS NULL) marcandolos como consumidos para que no se devuelvan dos veces.
   handlers['POST /api/remote-support/signal'] = requireAuth(async (req, res) => {
     try {
       const body = await readBody(req, { maxBytes: 32*1024 });
@@ -12168,21 +12183,24 @@ handlers['GET /api/config/public'] = async (req, res) => {
       const sid = String(body.session_id || '');
       const to = String(body.to || '');  // 'admin' | 'client'
       const msg = body.message;
-      const s = _rsGet(sid);
+      const s = await _rsGet(sid);
       if (!s) return sendJSON(res, { ok:false, error:'sesion no existe' }, 404);
       if (s.status !== 'verified' && s.status !== 'active' && s.status !== 'accepted') {
         return sendJSON(res, { ok:false, error:'sesion no esta activa' }, 409);
       }
       const me = String((req.user && req.user.email) || '').toLowerCase();
-      // Validar identidad: admin solo puede mandar a client, client solo a admin
       const isAdmin = (s.requester_email === me);
       const isClient = (s.target_email === me);
       if (!isAdmin && !isClient) return sendJSON(res, { ok:false, error:'no participas' }, 403);
       if (to !== 'admin' && to !== 'client') return sendJSON(res, { ok:false, error:'to invalido' }, 400);
-      // Push a la cola del destinatario
-      _sigQueue(sid, to).push({ from: isAdmin?'admin':'client', message: msg, ts: Date.now() });
-      // Marcar sesion como active si llegó el primer mensaje SDP
-      if (s.status === 'verified') _rsSet(sid, { status:'active' });
+      // Insert mensaje en la tabla
+      try {
+        await supabaseRequest('POST', '/volvix_remote_signals', {
+          session_id: sid, to_role: to, message: msg || {}, created_at: Date.now()
+        });
+      } catch(e){ try { console.log('[signal] insert error', e.message); } catch(_){} }
+      // Marcar sesion como active si llego el primer mensaje SDP
+      if (s.status === 'verified') await _rsSet(sid, { status:'active' });
       return sendJSON(res, { ok:true });
     } catch (err) { sendError(res, err); }
   });
@@ -12192,14 +12210,27 @@ handlers['GET /api/config/public'] = async (req, res) => {
       const u = new URL(req.url, 'http://x');
       const sid = u.searchParams.get('session_id') || '';
       const role = u.searchParams.get('role') || '';  // 'admin' | 'client'
-      const s = _rsGet(sid);
+      const s = await _rsGet(sid);
       if (!s) return sendJSON(res, { ok:false, error:'sesion no existe' }, 404);
       const me = String((req.user && req.user.email) || '').toLowerCase();
       const expected = (role === 'admin') ? s.requester_email : s.target_email;
       if (expected !== me) return sendJSON(res, { ok:false, error:'no eres '+role+' de esta sesion' }, 403);
-      // Drain cola (long-polling corto: 1 intento, sin espera real para no bloquear lambda)
-      const q = _sigQueue(sid, role);
-      const msgs = q.splice(0);
+      // Drain: traer mensajes pendientes para el rol y marcarlos consumidos
+      const path = '/volvix_remote_signals?session_id=eq.' + encodeURIComponent(sid)
+        + '&to_role=eq.' + encodeURIComponent(role)
+        + '&consumed_at=is.null'
+        + '&select=id,message,created_at'
+        + '&order=id.asc&limit=50';
+      const rows = await supabaseRequest('GET', path);
+      const msgs = (rows || []).map(r => ({ from: role === 'admin' ? 'client' : 'admin', message: r.message, ts: r.created_at }));
+      // Marcar como consumidos
+      if (rows && rows.length) {
+        const ids = rows.map(r => r.id);
+        const inList = '(' + ids.join(',') + ')';
+        try {
+          await supabaseRequest('PATCH', '/volvix_remote_signals?id=in.' + encodeURIComponent(inList), { consumed_at: Date.now() });
+        } catch(_){}
+      }
       return sendJSON(res, { ok:true, messages: msgs, session_status: s.status });
     } catch (err) { sendError(res, err); }
   });
@@ -12215,7 +12246,7 @@ handlers['GET /api/config/public'] = async (req, res) => {
       if (checkBodyError(req, res)) return;
       const sid = String(body.session_id || '');
       const provider = String(body.provider || 'teamviewer'); // 'teamviewer' | 'anydesk'
-      const s = _rsGet(sid);
+      const s = await _rsGet(sid);
       if (!s) return sendJSON(res, { ok:false, error:'sesion no existe' }, 404);
       const links = {
         teamviewer: 'https://download.teamviewer.com/download/TeamViewerQS.exe',
@@ -12223,7 +12254,7 @@ handlers['GET /api/config/public'] = async (req, res) => {
         anydesk: 'https://download.anydesk.com/AnyDesk.exe',
         anydesk_mac: 'https://download.anydesk.com/anydesk.dmg'
       };
-      _rsSet(sid, { quicksupport_requested: true, quicksupport_provider: provider });
+      await _rsSet(sid, { quicksupport_requested: true, quicksupport_provider: provider });
       try { logAudit(req, 'remote_support.quicksupport_requested', 'pos_users', { session_id: sid, provider: provider, target: s.target_email }); } catch(_){}
       return sendJSON(res, {
         ok: true,
@@ -12243,13 +12274,13 @@ handlers['GET /api/config/public'] = async (req, res) => {
       const body = await readBody(req, { maxBytes: 1024 });
       if (checkBodyError(req, res)) return;
       const sid = String(body.session_id || '');
-      const s = _rsGet(sid);
+      const s = await _rsGet(sid);
       if (!s) return sendJSON(res, { ok:true, status:'not_found' });
       const me = String((req.user && req.user.email) || '').toLowerCase();
       if (s.requester_email !== me && s.target_email !== me) {
         return sendJSON(res, { ok:false, error:'no participas en esta sesion' }, 403);
       }
-      _rsSet(sid, { status: 'ended', ended_at: Date.now(), ended_by: me });
+      await _rsSet(sid, { status: 'ended', ended_at: Date.now() });
       try { logAudit(req, 'remote_support.ended', 'pos_users', { session_id: sid, ended_by: me }); } catch(_){}
       return sendJSON(res, { ok:true, status:'ended' });
     } catch (err) { sendError(res, err); }
