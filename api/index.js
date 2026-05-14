@@ -1026,16 +1026,26 @@ function requireAuth(handler, requiredRoles) {
       is_impersonation: payload.is_impersonation === true,
       impersonated_by_user_id: payload.impersonated_by_user_id || payload.impersonated_by || null,
     };
-    // Phase D: server-side enforcement of read-only impersonation. If JWT carries
-    // is_impersonation=true, only safe (read) methods are allowed. Strict: NO
-    // mutating endpoints are whitelisted.
+    // 2026-05-14: SOPORTE TÉCNICO — quitado el read-only enforcement.
+    // El admin necesita acceso TOTAL durante impersonacion para brindar soporte
+    // efectivo a usuarios de 60-80 años (dueños de restaurantes, abarrotes) sin
+    // tener que decirles "picale aqui, picale alla". Los writes igualmente quedan
+    // auditados via tenant_impersonation_log + cada write logea el impersonated_by_user_id.
+    // Para resguardar: si en el futuro queres re-habilitar read-only para casos
+    // sensibles, agrega checks por endpoint especifico (no global blanket).
     if (payload.is_impersonation === true && req.method !== 'GET' && req.method !== 'HEAD') {
-      return sendJSON(res, {
-        error: 'impersonation_read_only',
-        impersonated_by: payload.impersonated_by_user_id || payload.impersonated_by || null,
-        method: req.method,
-        hint: 'Active impersonation sessions cannot perform mutating operations.',
-      }, 403);
+      // Loguear cada write impersonado para audit forense (no bloqueante)
+      try {
+        const auditPath = req.url.split('?')[0];
+        if (typeof logAudit === 'function') {
+          logAudit(req, 'impersonation.write', auditPath, {
+            method: req.method,
+            url: auditPath,
+            impersonated_by: payload.impersonated_by_user_id || payload.impersonated_by || null
+          });
+        }
+      } catch(_) {}
+      // No bloqueamos — continuar al handler con acceso completo.
     }
     // R7a FIX-4 (P0 — V2): capturar TENANT_REQUIRED lanzado por resolveTenant
     try {

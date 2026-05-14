@@ -3312,19 +3312,12 @@
     + '#r8a-offline-banner { top: 50px !important; }';
   (document.head || document.documentElement).appendChild(styleEl);
 
-  // 1) Fetch interceptor: bloquea writes (POST/PUT/PATCH/DELETE) excepto los del propio bootstrap.
+  // 2026-05-14: ACCESO TOTAL — quitado el interceptor que bloqueaba writes.
+  // El admin necesita poder hacer todo lo que el usuario haria normalmente
+  // (vender, modificar productos, etc.) para brindar soporte efectivo.
+  // El servidor sigue audit-logueando cada write impersonado (auto en requireAuth).
+  // Conservamos la variable origFetch por compat con el storage event listener (~line 3334).
   var origFetch = window.fetch;
-  window.fetch = function(input, init){
-    var method = ((init && init.method) || (typeof input === 'object' && input && input.method) || 'GET').toUpperCase();
-    var url = (typeof input === 'string') ? input : (input && input.url) || '';
-    if (method !== 'GET' && method !== 'HEAD') {
-      // Permitir el endpoint que carga los flags del tenant para impersonar (siempre es GET, así que esto es sólo defensivo)
-      console.warn('[IMPERSONATING] BLOQUEADO ' + method + ' ' + url);
-      try { if (window.toast) window.toast('🔒 Modo lectura: acción bloqueada (impersonando ' + imEmail + ')', 'warn'); } catch(_){}
-      return Promise.resolve(new Response(JSON.stringify({error:'impersonation_read_only',email:imEmail}), {status:403,statusText:'IMPERSONATING'}));
-    }
-    return origFetch.apply(this, arguments);
-  };
 
   // 2026-05-09 fix(C2): cleanup cross-tab cuando el super-admin se desloguea.
   // Si en otra pestaña desaparece el token de auth (ambos keys), este tab queda
@@ -3377,7 +3370,7 @@
       +   (impGiro ? '<span style="background:#3b82f6;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;">🎯 ' + esc(impGiro) + '</span>' : '')
       +   (impPlan ? '<span style="background:#7c3aed;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;">💎 ' + esc(impPlan).toUpperCase() + '</span>' : '')
       +   (imTid ? '<code style="background:#fff;padding:1px 6px;border-radius:4px;border:1px solid #f59e0b;font-size:10.5px;color:#92400e;">' + esc(imTid) + '</code>' : '')
-      +   '<span style="background:#dc2626;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;letter-spacing:.5px;">🔒 SOLO LECTURA</span>'
+      +   '<span style="background:#dc2626;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;letter-spacing:.5px;" title="Tienes acceso completo igual que el usuario. Toda accion queda auditada.">🛠 MODO SOPORTE · ACCESO TOTAL</span>'
       +   '<span id="impersonation-timer" style="background:#fff;color:#78350f;padding:2px 8px;border-radius:4px;border:1px solid #f59e0b;font-size:11px;font-weight:600;font-family:ui-monospace,Menlo,Consolas,monospace;">⏱ --:--</span>'
       + '</div>'
       + '<button id="impersonation-close" style="background:#fff;border:1px solid #f59e0b;padding:5px 14px;border-radius:5px;cursor:pointer;font-weight:600;color:#78350f;font-size:12.5px;flex-shrink:0;">✕ Cerrar vista</button>';
