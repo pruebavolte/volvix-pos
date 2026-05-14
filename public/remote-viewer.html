@@ -76,6 +76,11 @@
     <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" class="code-input" id="code-input" placeholder="______" autocomplete="off">
     <button class="code-btn" id="code-btn" onclick="submitCode()">🖥 Conectar</button>
     <div class="err" id="code-err"></div>
+    <!-- Platform info que el cliente reporto -->
+    <div id="platform-info" style="display:none;margin-top:18px;padding:10px 14px;background:#0F172A;border:1px solid #334155;border-radius:8px;text-align:left;font-size:12px;">
+      <div style="color:#94A3B8;margin-bottom:6px;">📱 Cliente conectado desde:</div>
+      <div style="color:#fff;font-family:monospace;line-height:1.6;" id="platform-info-body">—</div>
+    </div>
   </div>
 
   <!-- STATE 3: STREAM — recibiendo video -->
@@ -180,6 +185,23 @@
       if (currentState === 'pending' && j.status === 'accepted') {
         setState('code');
         document.getElementById('code-input').focus();
+        // Mostrar info de plataforma del cliente (Win/Android/Web + browser + pwa)
+        if (j.client_platform && j.client_platform.os) {
+          const p = j.client_platform;
+          const info = document.getElementById('platform-info');
+          const body = document.getElementById('platform-info-body');
+          if (info && body) {
+            const osEmoji = p.os === 'windows' ? '🪟' : p.os === 'android' ? '🤖' : p.os === 'ios' ? '🍎' : p.os === 'mac' ? '🍏' : '🌐';
+            const lines = [
+              osEmoji + ' OS: ' + (p.os || '?').toUpperCase(),
+              '🌐 Navegador: ' + (p.browser || '?'),
+              (p.pwa ? '📲 Modo PWA' : '🪟 Modo regular'),
+              'UA: ' + ((p.ua || '?').slice(0, 60) + '…')
+            ];
+            body.innerHTML = lines.join('<br>');
+            info.style.display = 'block';
+          }
+        }
       }
       if (j.status === 'verified' || j.status === 'active') {
         // ya verificado: pasar a esperar stream (si no estamos ya)
