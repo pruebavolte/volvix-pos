@@ -2453,32 +2453,21 @@
 <link rel="stylesheet" href="volvix-modals.css">
 <script defer src="volvix-modals.js"></script>
 <script defer src="volvix-ai-assistant.js"></script>
-<script src="volvix-pos-wiring.js" defer></script>
-<script src="volvix-pos-extra-wiring.js" defer></script>
-<!-- B19: búsqueda inteligente offline-first + barcode cascade -->
-<script src="volvix-product-search.js" defer></script>
-<script src="volvix-barcode-resolver.js" defer></script>
-<!-- 2026-05-10 user-request: wizard de migración cero-teclas (Excel/PDF/imagen
-     OCR/cámara/SQL/Eleventa/Parrot/MyBusinessPOS/SoftRestaurant). Auto-abre si
-     CATALOG está vacío. Solo lee — nunca ejecuta. -->
-<script src="volvix-import-wizard.js" defer></script>
-<!-- 2026-05-10 user-request: Pedidos de Plataformas (Tu app + Uber/Didi/Rappi
-     gris). Polling /api/pos/app-orders, modal rojo + sonido si Ticket 1 vacío,
-     parpadeo rojo↔amarillo si Ticket 1 ocupado. Aceptar = Ticket 2 + cliente. -->
-<script src="volvix-platform-orders.js" defer></script>
-<!-- 2026-05-11 fix móvil: tap-delay, modales cortados, sidebar derecho stuck,
-     botón Importar que no abría el wizard. CSS al final del head con !important
-     para vencer specificity de scripts previos. -->
-<link rel="stylesheet" href="/volvix-mobile-fixes.css">
-<script src="/volvix-mobile-fixes.js" defer></script>
-<script defer>
-  // Auto-trigger del wizard si el tenant no tiene productos
-  document.addEventListener('DOMContentLoaded', function () {
-    setTimeout(function () {
-      try { if (window.VolvixImport && window.VolvixImport.openWizardIfEmpty) window.VolvixImport.openWizardIfEmpty(); } catch (e) {}
-    }, 4500); // esperar que loadCatalogReal corra primero
-  });
-</script>
+<!-- 2026-05-14: PANEL DE CONTROL — quitados scripts POS-especificos que causaban
+     fuga de RAM (90%+) y trababan el navegador. La pagina NO los necesita:
+     - volvix-pos-wiring.js: setInterval(wireAllButtons, 2000) en todo el DOM
+     - volvix-pos-extra-wiring.js: setInterval con screen interceptor
+     - volvix-product-search.js: indexa catalogo de productos en RAM (heavy)
+     - volvix-barcode-resolver.js: barcode lookup (no aplica al panel)
+     - volvix-import-wizard.js: auto-abre wizard a los 4.5s si CATALOG vacio
+     - volvix-platform-orders.js: polling cada 30s a /api/pos/app-orders
+     - volvix-mobile-fixes.js: tap-delay y modales POS (no aplica al panel)
+     ESTOS scripts SI SE CARGAN en salvadorex-pos.html donde si tienen sentido.
+     2026-05-12 18:42 — pre-extraccion el panel era PARTE de salvadorex-pos.html,
+     por eso heredo todos esos scripts. Ahora son archivos separados. -->
+
+<!-- Auto-trigger del wizard REMOVED — no hay catalogo en el panel -->
+
 <!-- R12-O-3-B FIX-O3-B-2: auto-trigger welcome wizard en first_login + banner pendiente -->
 <script src="volvix-onboarding-tour-wiring.js" defer></script>
 <script defer>
