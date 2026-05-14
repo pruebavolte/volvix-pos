@@ -3873,6 +3873,186 @@ const handlers = {
     } catch (err) { sendError(res, err); }
   }),
 
+  // 2026-05-14: Deteccion y limpieza de productos duplicados.
+  // Usuario reporto inventario con: 7501011150207 x3, code='null' x188, AUTO-xxx x?.
+  // Estos endpoints permiten al owner ver y eliminar duplicados, manteniendo
+  // el registro con MAS STOCK (o el mas reciente como tiebreaker).
+  'GET /api/inventory/duplicates': requireAuth(async (req, res) => {
+    try {
+      const tenantId = resolveTenant(req);
+      const ownerUserId = resolvePosUserId(req, tenantId);
+      if (!ownerUserId) return sendJSON(res, { groups: [], total_dupes: 0, no_code: 0 });
+
+      // Traer TODOS los productos del tenant
+      const cols = 'id,code,name,stock,cost,price,category,min_stock,created_at,updated_at';
+      const rows = await supabaseRequest('GET',
+        `/pos_products?pos_user_id=eq.${ownerUserId}&select=${cols}&order=name.asc&limit=10000`);
+
+      // Agrupar por code normalizado (case-insensitive, trim)
+      const byCode = {};
+      const noCode = []; // code null, '', 'null' literal, o AUTO-xxx
+      (rows || []).forEach(p => {
+        const raw = (p.code === null || p.code === undefined) ? '' : String(p.code).trim();
+        const isPlaceholder = raw === '' || raw.toLowerCase() === 'null' || /^auto-/i.test(raw);
+        if (isPlaceholder) {
+          noCode.push({ ...p, _reason: raw === '' || raw.toLowerCase() === 'null' ? 'sin_codigo' : 'auto_generated' });
+        } else {
+          const key = raw.toLowerCase();
+          if (!byCode[key]) byCode[key] = [];
+          byCode[key].push(p);
+        }
+      });
+
+      // Solo grupos con 2+ entradas son duplicados reales
+      const groups = Object.entries(byCode)
+        .filter(([k, items]) => items.length > 1)
+        .map(([code, items]) => {
+          // Sort: mas stock primero, luego mas reciente
+          const sorted = items.slice().sort((a, b) => {
+            const sa = Number(a.stock || 0), sb = Number(b.stock || 0);
+            if (sb !== sa) return sb - sa;
+            const ta = new Date(a.updated_at || a.created_at || 0).getTime();
+            const tb = new Date(b.updated_at || b.created_at || 0).getTime();
+            return tb - ta;
+          });
+          return {
+            code: items[0].code,
+            count: items.length,
+            keep: sorted[0],       // el que sobrevive si se aplica dedupe
+            duplicates: sorted.slice(1),
+            total_stock_to_consolidate: sorted.slice(1).reduce((s, p) => s + Number(p.stock || 0), 0)
+          };
+        })
+        .sort((a, b) => b.count - a.count);
+
+      // Tambien agrupar productos sin codigo POR NOMBRE para deteccion
+      const byName = {};
+      noCode.forEach(p => {
+        const k = String(p.name || '').toLowerCase().trim();
+        if (!k) return;
+        if (!byName[k]) byName[k] = [];
+        byName[k].push(p);
+      });
+      const noCodeGroups = Object.entries(byName)
+        .filter(([k, items]) => items.length > 1)
+        .map(([name, items]) => ({ name: items[0].name, count: items.length, items }))
+        .sort((a, b) => b.count - a.count);
+
+      sendJSON(res, {
+        groups,                       // duplicados por codigo de barras
+        no_code_groups: noCodeGroups, // duplicados por nombre (sin codigo)
+        total_dupe_rows: groups.reduce((s, g) => s + g.duplicates.length, 0),
+        no_code_total: noCode.length,
+        no_code_consolidatable: noCodeGroups.reduce((s, g) => s + (g.count - 1), 0),
+        total_products: (rows || []).length
+      });
+    } catch (err) { sendError(res, err); }
+  }),
+
+  // POST /api/inventory/dedupe — Elimina duplicados con confirmacion explicita.
+  // Body: { confirm: 'DELETE_DUPLICATES', codes?: [string], consolidate_stock?: bool,
+  //         dry_run?: bool, dedupe_no_code?: bool }
+  // Si codes vacio -> aplica a TODOS los grupos. Si dry_run=true, solo simula.
+  'POST /api/inventory/dedupe': requireAuth(async (req, res) => {
+    try {
+      const body = await readBody(req);
+      if (body.confirm !== 'DELETE_DUPLICATES') {
+        return sendJSON(res, { error: 'confirm field must equal "DELETE_DUPLICATES"' }, 400);
+      }
+      // Solo owner/manager/superadmin
+      const role = (req.user && req.user.role) || '';
+      if (!['owner','admin','superadmin','manager'].includes(role)) {
+        return sendJSON(res, { error: 'forbidden' }, 403);
+      }
+      const tenantId = resolveTenant(req);
+      const ownerUserId = resolvePosUserId(req, tenantId);
+      if (!ownerUserId) return sendJSON(res, { error: 'tenant not provisioned' }, 400);
+
+      const dryRun = !!body.dry_run;
+      const consolidate = !!body.consolidate_stock;
+      const dedupeNoCode = !!body.dedupe_no_code;
+      const filterCodes = Array.isArray(body.codes) ? body.codes.map(c => String(c).toLowerCase()) : null;
+
+      // Reutilizar logica del GET para obtener grupos
+      const cols = 'id,code,name,stock,cost,price,category,min_stock,created_at,updated_at';
+      const rows = await supabaseRequest('GET',
+        `/pos_products?pos_user_id=eq.${ownerUserId}&select=${cols}&limit=10000`);
+
+      const byCode = {};
+      const byName = {};
+      (rows || []).forEach(p => {
+        const raw = (p.code === null || p.code === undefined) ? '' : String(p.code).trim();
+        const isPlaceholder = raw === '' || raw.toLowerCase() === 'null' || /^auto-/i.test(raw);
+        if (isPlaceholder) {
+          if (dedupeNoCode) {
+            const k = String(p.name || '').toLowerCase().trim();
+            if (k) { if (!byName[k]) byName[k] = []; byName[k].push(p); }
+          }
+        } else {
+          const key = raw.toLowerCase();
+          if (filterCodes && !filterCodes.includes(key)) return;
+          if (!byCode[key]) byCode[key] = [];
+          byCode[key].push(p);
+        }
+      });
+
+      const targets = []; // {keep, victims: [...], code/name, group_type}
+
+      function pickKeep(items, type) {
+        const sorted = items.slice().sort((a, b) => {
+          const sa = Number(a.stock || 0), sb = Number(b.stock || 0);
+          if (sb !== sa) return sb - sa;
+          const ta = new Date(a.updated_at || a.created_at || 0).getTime();
+          const tb = new Date(b.updated_at || b.created_at || 0).getTime();
+          return tb - ta;
+        });
+        return { keep: sorted[0], victims: sorted.slice(1), group_type: type, identifier: type === 'code' ? sorted[0].code : sorted[0].name };
+      }
+
+      Object.values(byCode).forEach(items => { if (items.length > 1) targets.push(pickKeep(items, 'code')); });
+      Object.values(byName).forEach(items => { if (items.length > 1) targets.push(pickKeep(items, 'name')); });
+
+      const summary = { dry_run: dryRun, groups_affected: targets.length, deleted_ids: [], kept_ids: [], stock_consolidated: 0, errors: [] };
+
+      for (const t of targets) {
+        const victimIds = t.victims.map(v => v.id);
+        summary.kept_ids.push(t.keep.id);
+        if (consolidate) {
+          const extraStock = t.victims.reduce((s, v) => s + Number(v.stock || 0), 0);
+          summary.stock_consolidated += extraStock;
+          if (!dryRun && extraStock > 0) {
+            try {
+              await supabaseRequest('PATCH', `/pos_products?id=eq.${t.keep.id}`,
+                { stock: Number(t.keep.stock || 0) + extraStock });
+            } catch (e) { summary.errors.push({ id: t.keep.id, action: 'consolidate', error: e.message }); }
+          }
+        }
+        if (!dryRun) {
+          for (const vid of victimIds) {
+            try {
+              await supabaseRequest('DELETE', `/pos_products?id=eq.${vid}`);
+              summary.deleted_ids.push(vid);
+            } catch (e) { summary.errors.push({ id: vid, action: 'delete', error: e.message }); }
+          }
+        } else {
+          summary.deleted_ids.push(...victimIds);
+        }
+      }
+
+      // Audit log
+      try {
+        await supabaseRequest('POST', '/audit_logs', {
+          user_id: req.user && req.user.id,
+          tenant_id: tenantId,
+          action: 'inventory.dedupe',
+          payload: { dry_run: dryRun, groups: targets.length, deleted: summary.deleted_ids.length, consolidated: summary.stock_consolidated }
+        });
+      } catch (_) {}
+
+      sendJSON(res, summary);
+    } catch (err) { sendError(res, err); }
+  }),
+
   'POST /api/inventory/adjust': requireAuth(async (req, res) => {
     try {
       const body = await readBody(req);

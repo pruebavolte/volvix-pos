@@ -4376,6 +4376,7 @@
           <button class="btn" id="btn-export-prod">📤 Exportar</button>
           <button class="btn" id="btn-import-prod">📥 Importar</button>
           <input type="file" id="inv-import-file" accept=".csv" style="display:none;">
+          <button class="btn" id="btn-dedupe-prod" title="Detectar productos duplicados y consolidar">🧹 Limpiar duplicados</button>
           <button class="btn accent" id="btn-new-prod">+ Nuevo producto</button>
         </div>
       </div>
@@ -10468,6 +10469,75 @@
     if (btnNew) btnNew.addEventListener('click', async () => { const d = await promptProductForm(); if (d) await saveProduct(d); });
     const btnExp = document.getElementById('btn-export-prod');
     if (btnExp) btnExp.addEventListener('click', exportProductsCSV);
+
+    // 2026-05-14: Limpiar duplicados — flujo en 2 pasos con confirmacion estricta.
+    const btnDedupe = document.getElementById('btn-dedupe-prod');
+    if (btnDedupe) btnDedupe.addEventListener('click', async () => {
+      btnDedupe.disabled = true;
+      const origLabel = btnDedupe.textContent;
+      btnDedupe.textContent = '🔍 Analizando...';
+      try {
+        const headers = _authHeaders({ 'Content-Type': 'application/json' });
+        const r = await fetch('/api/inventory/duplicates', { headers });
+        if (!r.ok) { alert('No pude analizar duplicados. Status ' + r.status); return; }
+        const data = await r.json();
+        const totalGroups = (data.groups || []).length + (data.no_code_groups || []).length;
+        if (totalGroups === 0) {
+          alert('✓ Ningun duplicado detectado.\n\nTotal productos analizados: ' + (data.total_products || 0));
+          return;
+        }
+        // Preview
+        let preview = '🧹 DUPLICADOS DETECTADOS\n\n';
+        preview += 'Productos totales: ' + (data.total_products || 0) + '\n';
+        preview += 'Grupos con codigo duplicado: ' + (data.groups || []).length + '\n';
+        preview += 'Filas duplicadas (a eliminar): ' + (data.total_dupe_rows || 0) + '\n';
+        preview += 'Productos sin codigo: ' + (data.no_code_total || 0) + '\n';
+        preview += 'Sin codigo consolidables por nombre: ' + (data.no_code_consolidatable || 0) + '\n\n';
+        preview += '— Top 5 por codigo —\n';
+        (data.groups || []).slice(0, 5).forEach(g => {
+          preview += '  ' + g.code + ' (' + g.name + '?): ' + g.count + ' copias\n';
+        });
+        preview += '\n— Top 3 sin codigo (por nombre) —\n';
+        (data.no_code_groups || []).slice(0, 3).forEach(g => {
+          preview += '  "' + g.name + '": ' + g.count + ' copias\n';
+        });
+        preview += '\n¿Continuar al paso de confirmacion?';
+        if (!confirm(preview)) return;
+
+        // Paso 2: opciones
+        const consolidate = confirm('¿Consolidar stock?\n\n[OK] Si: el sobreviviente sumara el stock de los duplicados antes de eliminarlos.\n[Cancelar] No: solo elimina los duplicados, stock se pierde.\n\nRecomendado: SI (no pierdes inventario).');
+        const includeNoCode = confirm('¿Tambien fusionar productos SIN CODIGO con mismo nombre?\n\nEj: 3 "Aceite Barba" sin codigo se fusionarian en 1.\n\n[OK] Si  [Cancelar] No');
+
+        // Confirm final estricto
+        const finalConfirm = prompt('FINAL: Escribe ELIMINAR para proceder.\n\nSe eliminaran ' + (data.total_dupe_rows || 0) + ' filas duplicadas' + (includeNoCode ? ' + ' + (data.no_code_consolidatable || 0) + ' sin-codigo' : '') + '.\nEsta accion NO se puede deshacer.');
+        if (finalConfirm !== 'ELIMINAR') { alert('Cancelado. No se borro nada.'); return; }
+
+        btnDedupe.textContent = '🧹 Limpiando...';
+        const dedupeR = await fetch('/api/inventory/dedupe', {
+          method: 'POST', headers,
+          body: JSON.stringify({
+            confirm: 'DELETE_DUPLICATES',
+            consolidate_stock: consolidate,
+            dedupe_no_code: includeNoCode,
+            dry_run: false
+          })
+        });
+        const dedupeData = await dedupeR.json();
+        if (!dedupeR.ok) { alert('Error: ' + (dedupeData.error || dedupeR.status)); return; }
+        alert('✓ Limpieza completa\n\nGrupos afectados: ' + dedupeData.groups_affected +
+              '\nFilas eliminadas: ' + (dedupeData.deleted_ids||[]).length +
+              '\nStock consolidado: ' + dedupeData.stock_consolidated +
+              ((dedupeData.errors||[]).length ? '\nErrores: ' + dedupeData.errors.length : ''));
+        // Refresh tabla
+        if (typeof window.posLoadInventory === 'function') await window.posLoadInventory();
+        if (typeof renderInv === 'function') renderInv();
+      } catch (e) {
+        alert('Error: ' + e.message);
+      } finally {
+        btnDedupe.disabled = false;
+        btnDedupe.textContent = origLabel;
+      }
+    });
     // 2026-05-10 user-request: el botón "📥 Importar" abre el WIZARD nuevo
     // (volvix-import-wizard.js) que soporta Excel, PDF, Word, PowerPoint, imagen
     // OCR, cámara en vivo, CSV, SQL, archivos Eleventa/Parrot/MyBusinessPOS/etc.
