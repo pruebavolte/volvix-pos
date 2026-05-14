@@ -6623,13 +6623,34 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
   });
 
   // Productos genérico (algunos HTMLs llaman /api/productos en lugar de /api/products)
-  handlers['GET /api/productos'] = async (req, res) => {
+  // 2026-05-14: tenant-scope + barcode/code en SELECT.
+  // ANTES: SELECT solo traia (id,name,price,category,icon,stock) -> el frontend
+  //        no podia matchear codigos de barras al hacer scan (code/barcode no venian).
+  //        Sin filtro de tenant -> data leak cross-tenant.
+  // AHORA: incluye code,barcode. Si hay JWT con tenant -> filtra. Si no, ya
+  //        no devolvemos productos de otros (evita leak). Soporta ?q= para
+  //        busqueda PostgREST ilike en name/code/barcode (es lo que el cliente
+  //        legacy esperaba via or=(...) sin saber que se ignoraban los params).
+  handlers['GET /api/productos'] = requireAuth(async (req, res) => {
     try {
-      const rows = await supabaseRequest('GET',
-        '/pos_products?select=id,name,price,category,icon,stock&order=name.asc&limit=500').catch(() => []);
+      const parsed = url.parse(req.url, true);
+      const q = parsed.query.q ? String(parsed.query.q).trim() : '';
+      const cols = 'id,name,code,barcode,price,category,icon,stock';
+      const tnt = resolveTenant(req, parsed.query.tenant_id);
+      const ownerUserId = resolvePosUserId(req, tnt);
+      if (!ownerUserId) {
+        // Tenant no provisionado -> empty (NO leak cross-tenant)
+        return ok(res, []);
+      }
+      let qs = `/pos_products?pos_user_id=eq.${ownerUserId}&select=${cols}&order=name.asc&limit=500`;
+      if (q) {
+        const safe = q.replace(/[*,()]/g, '').slice(0, 80);
+        qs += `&or=(name.ilike.*${encodeURIComponent(safe)}*,code.ilike.*${encodeURIComponent(safe)}*,barcode.ilike.*${encodeURIComponent(safe)}*)`;
+      }
+      const rows = await supabaseRequest('GET', qs).catch(() => []);
       ok(res, rows || []);
     } catch (err) { sendError(res, err); }
-  };
+  });
 })();
 
 // =============================================================

@@ -7147,6 +7147,14 @@
       });
       CATEGORIES = Array.from(catMap.values());
       QUICKPICK = products.map(p => ({
+        // 2026-05-14 BUG CRITICO FIX: ANTES no incluiamos `id` -> cuando el
+        // cajero clickaba un quick-pick, CART recibia el producto SIN id ->
+        // al cobrar, backend filter `isUuid(it.id)` lo excluia -> stock NO
+        // decrementaba. Usuario reporto "se vende algo no se rebaja de
+        // inventario". MISMO bug aplicaba a CATALOG (que se llena desde
+        // QUICKPICK). Ahora cargamos id REAL para que decrement_stock_atomic
+        // funcione.
+        id: p.id,
         cat: __slugifyCat(p.category || p.department || 'General'),
         icon: p.icon || __iconForCategory(p.category || ''),
         name: p.name || p.title || 'Producto sin nombre',
@@ -11836,7 +11844,11 @@
     if (!p) return;
     const existing = CART.find(c => c.code === code);
     if (existing) existing.qty++;
-    else CART.push({code:p.code, name:p.name, price:p.price, qty:1, stock:p.stock});
+    // 2026-05-14 BUG FIX: incluir id:p.id (UUID del producto). Sin esto, el
+    // backend (api/index.js:2638 decrement_stock_atomic) filtra el item por
+    // !isUuid(it.id) y NUNCA decrementa stock. Bug que causaba "vendo pero
+    // no se rebaja inventario".
+    else CART.push({id: p.id, code:p.code, name:p.name, price:p.price, qty:1, stock:p.stock});
     renderCart();
     // Cerrar panel en móvil después de agregar
     if (window.innerWidth < 880) {
