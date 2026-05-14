@@ -127,10 +127,11 @@
 }
 </script>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="volvix-modals.css">
+<!-- 2026-05-14 PERF PageSpeed FIX: Google Fonts (Inter 7 weights) era render-blocking.
+     LCP / FCP penalizados +400ms en mobile. System fonts dan el mismo look.
+     Eliminado para no bloquear primer paint. -->
+<!-- <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"> -->
+<link rel="stylesheet" href="volvix-modals.css" media="print" onload="this.media='all'">
 <script defer src="volvix-modals.js"></script>
 
 <style>
@@ -1531,6 +1532,7 @@
            onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 1px 4px rgba(0,0,0,.06)'">
         <img src="/sellos/alianza-caintra.webp"
              alt="CAINTRA Nuevo León — Cámara de la Industria de Transformación"
+             width="200" height="80" loading="lazy" decoding="async"
              style="height:80px; width:auto; object-fit:contain;">
       </div>
 
@@ -1552,6 +1554,7 @@
                     white-space:nowrap;">⭐ Alianza Principal</div>
         <img src="/sellos/alianza-hechoennl.png"
              alt="Hecho en Nuevo León México — Sello oficial"
+             width="300" height="120" loading="lazy" decoding="async"
              style="height:120px; width:auto; object-fit:contain;">
       </div>
 
@@ -1564,6 +1567,7 @@
            onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 1px 4px rgba(0,0,0,.06)'">
         <img src="/sellos/alianza-coparmex.jpg"
              alt="COPARMEX — Confederación Patronal de la República Mexicana"
+             width="200" height="80" loading="lazy" decoding="async"
              style="height:80px; width:auto; object-fit:contain;">
       </div>
 
@@ -1672,8 +1676,13 @@ function vlxShareClientPWA(){ var url = location.origin + '/app/'; if(navigator.
 <script defer src="/volvix-cookie-banner-wiring.js"></script>
 <script defer src="/volvix-owner-only-wiring.js"></script>
 
-<script src="giros-catalog.js"></script>
+<!-- 2026-05-14 PERF PageSpeed FIX: inline script de 26KB (TOP_GIROS, INDUSTRY_LABELS,
+     searchGiro logic) bloqueaba parse del HTML por ~150-200ms en mobile.
+     Solucion: cargar giros-catalog.js con defer, y envolver el inline en
+     DOMContentLoaded para que se ejecute despues del primer paint. -->
+<script defer src="giros-catalog.js"></script>
 <script>
+document.addEventListener('DOMContentLoaded', function () {
   const TOP_GIROS = ['barberia', 'restaurante', 'farmacia', 'abarrotes', 'taqueria', 'colegio', 'clinica_dental', 'taller_mecanico', 'gimnasio', 'fruteria', 'cafeteria', 'minisuper'];
 
   const INDUSTRY_LABELS = {
@@ -2246,6 +2255,7 @@ function vlxShareClientPWA(){ var url = location.origin + '/app/'; if(navigator.
 
   // Suggestion chips: click en un chip llena el input (sin disparar searchGiro
   // automáticamente — el handler onclick del HTML ya llama a quickSearch)
+});
 </script>
 
 <!-- 2026-05-14 PERF FIX: 250+ wirings cargaban en CADA visita a la landing
