@@ -20197,8 +20197,11 @@ window.addEventListener('volvix:version-loaded', function(e){
      y screen-reservaciones. Sigue convención: render se dispara cuando
      showScreen las hace visibles. Hash routing #rentas / #reservaciones.
      ============================================================ -->
-<script src="/volvix-vertical-rentaequipo.js" defer></script>
-<script src="/volvix-reservations-wiring.js" defer></script>
+<!-- 2026-05-14 DEDUPE: estos 2 scripts ya estaban declarados arriba en
+     lineas 16635 y 16788 (sin leading slash). Comentados para evitar
+     duplicado en DOM (-2 scripts cargados, -2 parses). -->
+<!-- <script src="/volvix-vertical-rentaequipo.js" defer></script> -->
+<!-- <script src="/volvix-reservations-wiring.js" defer></script> -->
 <script>
 (function () {
   'use strict';
