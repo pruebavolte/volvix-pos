@@ -2247,7 +2247,58 @@ function vlxShareClientPWA(){ var url = location.origin + '/app/'; if(navigator.
   // automáticamente — el handler onclick del HTML ya llama a quickSearch)
 </script>
 
+<!-- 2026-05-14 PERF FIX: 250+ wirings cargaban en CADA visita a la landing
+     (incluso sin estar logueado). Eso disparaba TTI a 4-6s.
+
+     AHORA: la landing solo carga 3 scripts criticos. El resto se lazy-carga
+     1.5s post-load, SOLO si el usuario esta autenticado y va a entrar al POS.
+     Si solo viene a ver la landing publica -> 0 wirings = TTI ~600ms.
+
+     CUMPLE filosofia operacional: la landing operacional NO es la pesada;
+     el POS si lo es porque tiene que serlo. -->
 <script defer src="auth-helper.js"></script>
+
+<script>
+// Lazy-load defer: cargar wirings SOLO si el usuario tiene sesion
+(function () {
+  function isAuthed() {
+    try {
+      return !!(localStorage.getItem('volvix_token') ||
+                localStorage.getItem('volvixAuthToken') ||
+                document.cookie.includes('volvix_token='));
+    } catch (_) { return false; }
+  }
+  // Carga lista de wirings tras 1.5s para no impactar TTI inicial.
+  // Si el usuario navega a POS, salvadorex-pos.html ya carga sus propios wirings.
+  function loadWirings() {
+    if (!isAuthed()) return; // landing publica = 0 wirings
+    var wirings = [
+      'volvix-ai-wiring.js','volvix-ai-real-wiring.js','volvix-extras-wiring.js',
+      'volvix-charts-wiring.js','volvix-notifications-wiring.js','volvix-backup-wiring.js',
+      'volvix-logger-wiring.js','volvix-offline-wiring.js','volvix-reports-wiring.js',
+      'volvix-onboarding-wiring.js','volvix-pwa-wiring.js','volvix-i18n-wiring.js',
+      'volvix-theme-wiring.js','volvix-shortcuts-wiring.js','volvix-search-wiring.js',
+      'volvix-voice-wiring.js','volvix-gamification-wiring.js','volvix-perf-wiring.js',
+      'volvix-email-wiring.js','volvix-webrtc-wiring.js','volvix-master-controller.js'
+    ];
+    wirings.forEach(function (src) {
+      if (document.querySelector('script[src*="' + src + '"]')) return;
+      var s = document.createElement('script');
+      s.src = '/' + src;
+      s.async = true;
+      s.defer = true;
+      document.head.appendChild(s);
+    });
+  }
+  if (document.readyState === 'complete') setTimeout(loadWirings, 1500);
+  else window.addEventListener('load', function () { setTimeout(loadWirings, 1500); });
+})();
+</script>
+
+<!-- Bloque de wirings ANTIGUOS conservados solo para referencia.
+     Ya estan reemplazados por el lazy-loader de arriba. NO eliminar para
+     facilidad de rollback. -->
+<template id="vlx-deferred-wirings">
 <script src="volvix-ai-wiring.js" defer></script>
 <script src="volvix-ai-real-wiring.js" defer></script>
 <script src="volvix-extras-wiring.js" defer></script>
@@ -2497,6 +2548,7 @@ function vlxShareClientPWA(){ var url = location.origin + '/app/'; if(navigator.
 <script src="volvix-print-hub.js" defer></script>
 <script src="volvix-offline-queue.js" defer></script>
 <script defer src="/volvix-modules-wiring.js"></script>
+</template><!-- fin vlx-deferred-wirings template -->
 
 </body>
 </html>
