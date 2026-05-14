@@ -3292,9 +3292,11 @@
         if (this === localStorage && _PATCH_ALLOWLIST.has(k)) {
           return imToken;
         }
-        if (this === localStorage && typeof k === 'string' && /^(volvix|volvixAuth)/i.test(k) && !_PATCH_ALLOWLIST.has(k)) {
-          try { console.warn('[IMPERSONATING] getItem("' + k + '") NO interceptado (no está en allowlist)'); } catch(_){}
-        }
+        // 2026-05-14 PERF: el console.warn por cada localStorage.getItem('volvix*')
+        // disparaba miles de logs en consola — Chrome DevTools acumula esos logs
+        // en memoria y eventualmente hace que la pagina no responda (90% RAM).
+        // Hay 385+ llamadas a getItem('volvix...') en wirings + cada render del
+        // POS dispara cientos mas. Logueo removido.
         return origGetItem.call(this, k);
       };
     }
@@ -3303,16 +3305,18 @@
   console.warn('[IMPERSONATING] vista como:', imEmail, '@', imTid, 'token:', imToken ? 'YES (full access JWT)' : 'NO (fallback to super JWT)');
 
   // 2026-05-14: Global error handler para impersonation.
-  // El usuario reporto crashes del browser. Logueamos cualquier error a sessionStorage
-  // para poder debuggear despues. Tambien capturamos 401/403 storms.
+  // Logueamos errores en memoria (window.__impErrs). sessionStorage solo se
+  // persiste lazy via window.__impLogReader() — el setItem en cada error
+  // causaba freeze (JSON.stringify+set sincronos miles de veces).
+  // TAMBIEN no monkey-patcheamos console.error porque eso interceptaba TODOS
+  // los logs internos del POS (cada wiring que loguea un error contribuia al
+  // memory pressure). Solo capturamos errores reales del window.
   (function setupImpErrorTrap(){
-    var errs = [];
-    var origConsoleErr = console.error;
+    window.__impErrs = window.__impErrs || [];
     function logErr(type, info) {
       try {
-        errs.push({ type: type, ts: Date.now(), info: String(info).slice(0, 500) });
-        if (errs.length > 50) errs.shift();
-        sessionStorage.setItem('__imp_error_log', JSON.stringify(errs));
+        window.__impErrs.push({ type: type, ts: Date.now(), info: String(info).slice(0, 300) });
+        if (window.__impErrs.length > 30) window.__impErrs.shift();
       } catch(_){}
     }
     window.addEventListener('error', function(e){
@@ -3321,12 +3325,10 @@
     window.addEventListener('unhandledrejection', function(e){
       logErr('promise', String(e.reason).slice(0, 200));
     });
-    console.error = function() {
-      try { logErr('console.error', Array.from(arguments).map(a => String(a).slice(0,80)).join(' ')); } catch(_){}
-      return origConsoleErr.apply(console, arguments);
-    };
     window.__impLogReader = function() {
-      try { return JSON.parse(sessionStorage.getItem('__imp_error_log') || '[]'); } catch(_) { return []; }
+      // Lazy persist: cuando el user lo invoque, guarda + retorna
+      try { sessionStorage.setItem('__imp_error_log', JSON.stringify(window.__impErrs)); } catch(_){}
+      return window.__impErrs.slice();
     };
   })();
 
