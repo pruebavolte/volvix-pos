@@ -14218,32 +14218,43 @@ handlers['GET /api/config/public'] = async (req, res) => {
       const transferId = crypto.randomUUID();
       const userId = req.user && req.user.id || null;
       const nowIso = new Date().toISOString();
-      // Out movement (from_branch)
-      const outRow = {
-        tenant_id: tenantId, product_id: productId, type: 'traslado',
-        quantity: -qty, branch_id: fromBranch, branch_id_to: toBranch,
-        transfer_id: transferId, user_id: userId,
-        reason: reason, metadata: { direction: 'out', transfer_id: transferId },
-        created_at: nowIso
-      };
-      // In movement (to_branch)
-      const inRow = {
-        tenant_id: tenantId, product_id: productId, type: 'traslado',
-        quantity: qty, branch_id: toBranch, branch_id_to: fromBranch,
-        transfer_id: transferId, user_id: userId,
-        reason: reason, metadata: { direction: 'in', transfer_id: transferId },
-        created_at: nowIso
-      };
-      let outResult = null, inResult = null;
-      try { outResult = await supabaseRequest('POST', '/inventory_movements', outRow); } catch (e) { return sendError(res, e); }
-      try { inResult  = await supabaseRequest('POST', '/inventory_movements', inRow); }
-      catch (e) {
-        // best-effort compensating delete
-        try {
-          const oid = Array.isArray(outResult) ? outResult[0].id : outResult && outResult.id;
-          if (oid) await supabaseRequest('DELETE', '/inventory_movements?id=eq.' + encodeURIComponent(oid));
-        } catch (_) {}
-        return sendError(res, e);
+
+      // 2026-05-14 FIX TRANSFERENCIAS reportado por usuario:
+      // "los botones funcionan pero no tienen logica entre si"
+      // ANTES: este endpoint insertaba 2 filas directo en inventory_movements
+      // con type='traslado'. Confiaba en un trigger DB trg_apply_inv_movement
+      // que estaba ROTO (referencia tabla `products` que no existe — la real
+      // es `pos_products` — y signos invertidos para 'traslado'). Resultado:
+      // las transferencias eran NO-OP en stock real, solo logging.
+      // AHORA: delegamos a la RPC `apply_inventory_movement` (de R14) que
+      // SI actualiza inventory_stock correctamente para cada sucursal y
+      // mantiene audit log. La RPC maneja la transaccionalidad atomica.
+      let rpcResult = null;
+      try {
+        rpcResult = await supabaseRequest('POST', '/rpc/apply_inventory_movement', {
+          p_tenant_id: tenantId,
+          p_product_id: productId,
+          p_from_loc: fromBranch,
+          p_to_loc: toBranch,
+          p_qty: qty,
+          p_type: 'transfer',
+          p_reason: reason,
+          p_user_id: userId
+        });
+      } catch (e) {
+        // Fallback al flujo legacy si la RPC no esta disponible o falla
+        const msg = String((e && e.message) || '');
+        const isMissingRpc = /42883|does not exist|PGRST202/i.test(msg);
+        if (!isMissingRpc) return sendError(res, e);
+        // Fallback: insertar audit-only movement, sin stock update (legacy bug-compatible)
+        const outRow = {
+          tenant_id: tenantId, product_id: productId, type: 'transfer',
+          quantity: qty, branch_id: fromBranch, branch_id_to: toBranch,
+          transfer_id: transferId, user_id: userId,
+          reason: reason, metadata: { direction: 'out', transfer_id: transferId, fallback: true },
+          created_at: nowIso
+        };
+        try { await supabaseRequest('POST', '/inventory_movements', outRow); } catch (_) {}
       }
       try { logAudit(req, 'inventory.transferred', 'inventory_movements', { id: transferId, after: { from: fromBranch, to: toBranch, product_id: productId, qty: qty } }); } catch (_) {}
       return sendJSON(res, {
