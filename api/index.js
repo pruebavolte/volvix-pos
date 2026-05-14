@@ -13071,11 +13071,24 @@ handlers['GET /api/config/public'] = async (req, res) => {
 
       // -----------------------------------------------------------------------
       // CHECK 13: descuentos excesivos (>50% del total)
+      // 2026-05-14: pos_sales puede no tener columnas discount_amount/pct
+      // como top-level. Intentamos SELECT sin filter; si la columna no existe,
+      // tratamos como table_missing y saltamos (no es bug del cliente).
       // -----------------------------------------------------------------------
       await safeQuery('excessive_discount', async () => {
-        const rows = await supabaseRequest('GET',
-          `/pos_sales?pos_user_id=eq.${ownerUserId}&created_at=gte.${encodeURIComponent(sinceIso)}` +
-          `&status=not.in.(void,cancelled)&discount_amount=gt.0&select=id,folio,total,discount_amount,discount_pct&limit=200`);
+        let rows;
+        try {
+          rows = await supabaseRequest('GET',
+            `/pos_sales?pos_user_id=eq.${ownerUserId}&created_at=gte.${encodeURIComponent(sinceIso)}` +
+            `&status=not.in.(void,cancelled)&discount_amount=gt.0&select=id,folio,total,discount_amount,discount_pct&limit=200`);
+        } catch (e) {
+          const msg = String((e && e.message) || '');
+          if (/42703|column .* does not exist/i.test(msg)) {
+            stats.excessive_discount = 'columns_not_present';
+            return; // tu schema no usa discount_amount, OK
+          }
+          throw e;
+        }
         const flagged = (rows || []).filter(r => {
           const d = Number(r.discount_amount || 0);
           const t = Number(r.total || 0);
@@ -13106,10 +13119,15 @@ handlers['GET /api/config/public'] = async (req, res) => {
             'Pago sin venta asociada', { id: r.id, amount: r.amount, method: r.method, created_at: r.created_at }
           ));
         } catch (e) {
-          // Tabla pos_payments no existe o PostgREST no expone: tratar como info, no warn
-          stats.orphan_payments = 'table_not_present';
-          // re-throw para que safeQuery lo capture como table_missing si aplica
-          throw e;
+          // 2026-05-14: tabla pos_payments puede no existir en este schema
+          // (pagos viven dentro de pos_sales.payment_method). Detectar y
+          // silenciar SIN re-throw, para que no marque warn 'query_failed'.
+          const msg = String((e && e.message) || '');
+          if (/42P01|PGRST205|does not exist|not in the schema cache/i.test(msg)) {
+            stats.orphan_payments = 'table_not_present';
+            return; // silencioso: tu schema no usa tabla separada de pagos
+          }
+          throw e; // otro error genuino, reportar como warn
         }
       });
 
