@@ -13091,16 +13091,26 @@ handlers['GET /api/config/public'] = async (req, res) => {
 
       // -----------------------------------------------------------------------
       // CHECK 14: pagos huerfanos (pagos sin sale_id)
+      // 2026-05-14: pos_payments puede no existir como tabla separada (en este
+      // tenant los pagos viven dentro de pos_sales.payment_method). Si no existe
+      // saltamos el check con info, no warn.
       // -----------------------------------------------------------------------
       await safeQuery('orphan_payments', async () => {
-        const rows = await supabaseRequest('GET',
-          `/pos_payments?tenant_id=eq.${encodeURIComponent(tenantId)}` +
-          `&created_at=gte.${encodeURIComponent(sinceIso)}&sale_id=is.null&select=id,amount,method,created_at&limit=50`);
-        stats.orphan_payments = (rows || []).length;
-        (rows || []).forEach(r => add(
-          'high', 'orphan', 'payment_without_sale',
-          'Pago sin venta asociada', { id: r.id, amount: r.amount, method: r.method, created_at: r.created_at }
-        ));
+        try {
+          const rows = await supabaseRequest('GET',
+            `/pos_payments?tenant_id=eq.${encodeURIComponent(tenantId)}` +
+            `&created_at=gte.${encodeURIComponent(sinceIso)}&sale_id=is.null&select=id,amount,method,created_at&limit=50`);
+          stats.orphan_payments = (rows || []).length;
+          (rows || []).forEach(r => add(
+            'high', 'orphan', 'payment_without_sale',
+            'Pago sin venta asociada', { id: r.id, amount: r.amount, method: r.method, created_at: r.created_at }
+          ));
+        } catch (e) {
+          // Tabla pos_payments no existe o PostgREST no expone: tratar como info, no warn
+          stats.orphan_payments = 'table_not_present';
+          // re-throw para que safeQuery lo capture como table_missing si aplica
+          throw e;
+        }
       });
 
       // -----------------------------------------------------------------------
@@ -13212,7 +13222,10 @@ handlers['GET /api/config/public'] = async (req, res) => {
           if (st === 'void') totalVoid++;
         });
         const totalRefunds = (refunds || []).reduce((s, r) => s + Number(r.total || r.refund_amount || 0), 0);
-        const completed = (sumByStatus['completed'] || 0) + (sumByStatus['partially_refunded'] || 0);
+        // 2026-05-14: aceptar tanto 'completed' como 'paid' (status realmente
+        // usado en pos_sales) ademas de 'partially_refunded'. Sin esto el
+        // gross_completed se reportaba como $0 aunque hubiera ventas reales.
+        const completed = (sumByStatus['completed'] || 0) + (sumByStatus['paid'] || 0) + (sumByStatus['partially_refunded'] || 0);
         const net = completed - totalRefunds;
         stats.global_balance = {
           sales_count: totalCount,
@@ -13225,6 +13238,83 @@ handlers['GET /api/config/public'] = async (req, res) => {
         };
         if (net < 0) add('critical', 'integrity', 'negative_net_revenue',
           'Net revenue negativo (mas devoluciones que ventas)', stats.global_balance);
+      });
+
+      // -----------------------------------------------------------------------
+      // CHECK 21: ventas fuera de session de corte (no cubiertas por cut)
+      // Si una venta ocurre despues de cerrar cut y antes de abrir nuevo cut,
+      // queda 'huerfana' sin cobertura financiera. Para tenants con cortes activos.
+      // -----------------------------------------------------------------------
+      await safeQuery('sales_outside_cut_window', async () => {
+        const cuts = await supabaseRequest('GET',
+          `/cuts?tenant_id=eq.${encodeURIComponent(tenantId)}` +
+          `&opened_at=gte.${encodeURIComponent(sinceIso)}` +
+          `&select=id,opened_at,closed_at,cashier_id&order=opened_at.asc&limit=500`).catch(() => []);
+        if (!cuts || !cuts.length) {
+          stats.sales_outside_cut_window = 'no_cuts_in_window';
+          return;
+        }
+        // Para cada venta, verificar si esta dentro de algun cut
+        const sales = await supabaseRequest('GET',
+          `/pos_sales?pos_user_id=eq.${ownerUserId}` +
+          `&created_at=gte.${encodeURIComponent(sinceIso)}` +
+          `&status=not.in.(void,cancelled,pending)` +
+          `&select=id,created_at,total,folio,pos_user_id&order=created_at.asc&limit=2000`).catch(() => []);
+        let outside = 0;
+        const examples = [];
+        (sales || []).forEach(s => {
+          const sTime = new Date(s.created_at).getTime();
+          const covered = cuts.some(c => {
+            const open = new Date(c.opened_at).getTime();
+            const close = c.closed_at ? new Date(c.closed_at).getTime() : Date.now();
+            return sTime >= open && sTime <= close;
+          });
+          if (!covered) {
+            outside++;
+            if (examples.length < 10) examples.push({ id: s.id, folio: s.folio, total: s.total, created_at: s.created_at });
+          }
+        });
+        stats.sales_outside_cut_window = outside;
+        if (outside > 0) add('warn', 'cash_register', 'sales_not_in_any_cut',
+          'Ventas fuera de ventana de algun corte (caja cerrada al momento de venta)',
+          { count: outside, sample: examples });
+      });
+
+      // -----------------------------------------------------------------------
+      // CHECK 22: items con precio override no auditado
+      // Detecta items dentro de ventas donde el price difiere del catalogo
+      // sin que exista entrada en pos_price_overrides (posible cambio frontend).
+      // -----------------------------------------------------------------------
+      await safeQuery('unauthorized_price_overrides', async () => {
+        const recentSales = await supabaseRequest('GET',
+          `/pos_sales?pos_user_id=eq.${ownerUserId}` +
+          `&created_at=gte.${encodeURIComponent(sinceIso)}` +
+          `&status=not.in.(void,cancelled)` +
+          `&select=id,items,folio&order=created_at.desc&limit=100`).catch(() => []);
+        let suspicious = 0;
+        for (const s of (recentSales || [])) {
+          const items = Array.isArray(s.items) ? s.items
+            : (typeof s.items === 'string' ? (() => { try { return JSON.parse(s.items); } catch(_) { return []; } })() : []);
+          for (const it of items.slice(0, 20)) {
+            const pid = it.id || it.product_id;
+            if (!pid || !isUuid(String(pid))) continue;
+            // Sample only first 5 sales' items per check for perf
+            if (suspicious >= 5) break;
+            try {
+              const p = await supabaseRequest('GET',
+                `/pos_products?id=eq.${pid}&select=price&limit=1`);
+              const catalogPrice = (Array.isArray(p) && p[0] && Number(p[0].price)) || 0;
+              const itemPrice = Number(it.price || it.unit_price || 0);
+              if (catalogPrice > 0 && itemPrice > 0 && Math.abs(catalogPrice - itemPrice) / catalogPrice > 0.5) {
+                suspicious++;
+                add('warn', 'pricing', 'large_price_override',
+                  'Precio en venta difiere >50% del catalogo (override sospechoso)',
+                  { sale_id: s.id, folio: s.folio, product_id: pid, catalog_price: catalogPrice, sale_price: itemPrice });
+              }
+            } catch (_) { /* product deleted? skip */ }
+          }
+        }
+        stats.unauthorized_price_overrides = suspicious;
       });
 
       // -----------------------------------------------------------------------
