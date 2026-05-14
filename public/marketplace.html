@@ -131,6 +131,14 @@
      LCP / FCP penalizados +400ms en mobile. System fonts dan el mismo look.
      Eliminado para no bloquear primer paint. -->
 <!-- <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"> -->
+
+<!-- 2026-05-14 PRELOAD critical LCP images (alianzas movidas above-fold).
+     Browser empieza a descargar las 3 imagenes en paralelo con el HTML
+     en lugar de esperar a que el parser llegue al <img>. -300ms LCP. -->
+<link rel="preload" as="image" href="/sellos/alianza-caintra.webp" fetchpriority="high">
+<link rel="preload" as="image" href="/sellos/alianza-hechoennl.png" fetchpriority="high">
+<link rel="preload" as="image" href="/sellos/alianza-coparmex.jpg" fetchpriority="high">
+
 <link rel="stylesheet" href="volvix-modals.css" media="print" onload="this.media='all'">
 <script defer src="volvix-modals.js"></script>
 
