@@ -1086,6 +1086,70 @@
 })();
 </script>
 
+
+<!-- 2026-05-14 UX: Alianzas movidas arriba del selector de giro (request usuario) -->
+<section id="alianzas" style="background:#f8f9fa; padding:28px 0 24px; text-align:center; border-top:1px solid #e5e7eb;">
+  <div class="row" style="max-width:900px; margin:0 auto; padding:0 24px;">
+    <p style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#9ca3af; text-transform:uppercase; margin:0 0 6px;">Tenemos alianzas con</p>
+    <h2 style="font-size:18px; font-weight:700; color:#1a1a1a; margin:0 0 20px; letter-spacing:-.01em;">Nuestras Alianzas</h2>
+
+    <!-- 3 logos: CAINTRA izquierda · Hecho en NL centro elevado · COPARMEX derecha -->
+    <div style="display:flex; align-items:center; justify-content:center; gap:48px; flex-wrap:wrap;">
+
+      <!-- IZQUIERDA: CAINTRA -->
+      <div style="display:flex; align-items:center; justify-content:center;
+                  background:#fff; border:1px solid #e5e7eb; border-radius:16px;
+                  padding:18px 24px; box-shadow:0 1px 4px rgba(0,0,0,.06);
+                  transition:transform .2s, box-shadow .2s;"
+           onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.1)'"
+           onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 1px 4px rgba(0,0,0,.06)'">
+        <img src="/sellos/alianza-caintra.webp"
+             alt="CAINTRA Nuevo León — Cámara de la Industria de Transformación"
+             width="200" height="80" loading="lazy" decoding="async"
+             style="height:80px; width:auto; object-fit:contain;">
+      </div>
+
+      <!-- CENTRO ELEVADO: Hecho en Nuevo León -->
+      <div style="display:flex; align-items:center; justify-content:center;
+                  background:#fff; border:2px solid #fb923c; border-radius:20px;
+                  padding:20px 30px;
+                  box-shadow:0 12px 40px rgba(249,115,22,.22), 0 0 0 4px rgba(249,115,22,.08);
+                  transform:translateY(-14px);
+                  position:relative;
+                  transition:transform .2s, box-shadow .2s;"
+           onmouseover="this.style.transform='translateY(-18px)';this.style.boxShadow='0 18px 50px rgba(249,115,22,.32), 0 0 0 6px rgba(249,115,22,.10)'"
+           onmouseout="this.style.transform='translateY(-14px)';this.style.boxShadow='0 12px 40px rgba(249,115,22,.22), 0 0 0 4px rgba(249,115,22,.08)'">
+        <!-- Etiqueta "Alianza Principal" -->
+        <div style="position:absolute; top:-13px; left:50%; transform:translateX(-50%);
+                    background:linear-gradient(90deg,#f97316,#ea580c); color:#fff;
+                    font-size:10px; font-weight:700; letter-spacing:.08em;
+                    text-transform:uppercase; padding:3px 10px; border-radius:20px;
+                    white-space:nowrap;">⭐ Alianza Principal</div>
+        <img src="/sellos/alianza-hechoennl.png"
+             alt="Hecho en Nuevo León México — Sello oficial"
+             width="300" height="120" loading="lazy" decoding="async"
+             style="height:120px; width:auto; object-fit:contain;">
+      </div>
+
+      <!-- DERECHA: COPARMEX -->
+      <div style="display:flex; align-items:center; justify-content:center;
+                  background:#fff; border:1px solid #e5e7eb; border-radius:16px;
+                  padding:18px 24px; box-shadow:0 1px 4px rgba(0,0,0,.06);
+                  transition:transform .2s, box-shadow .2s;"
+           onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.1)'"
+           onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 1px 4px rgba(0,0,0,.06)'">
+        <img src="/sellos/alianza-coparmex.jpg"
+             alt="COPARMEX — Confederación Patronal de la República Mexicana"
+             width="200" height="80" loading="lazy" decoding="async"
+             style="height:80px; width:auto; object-fit:contain;">
+      </div>
+
+    </div>
+    <p style="margin:40px 0 0; font-size:13px; color:#9ca3af; line-height:1.6;">
+    </p>
+  </div>
+</section>
+
 <!-- HERO (Tendero design + marketplace IDs/handlers) -->
 <section class="hero" aria-labelledby="hero-title">
   <div>
@@ -1515,68 +1579,6 @@
 </section>
 
 <!-- ===== SECCIÓN ALIANZAS ===== -->
-<section id="alianzas" style="background:#f8f9fa; padding:64px 0 52px; text-align:center; border-top:1px solid #e5e7eb;">
-  <div class="row" style="max-width:900px; margin:0 auto; padding:0 24px;">
-    <p style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#9ca3af; text-transform:uppercase; margin:0 0 6px;">Tenemos alianzas con</p>
-    <h2 style="font-size:26px; font-weight:700; color:#1a1a1a; margin:0 0 44px; letter-spacing:-.01em;">Nuestras Alianzas</h2>
-
-    <!-- 3 logos: CAINTRA izquierda · Hecho en NL centro elevado · COPARMEX derecha -->
-    <div style="display:flex; align-items:center; justify-content:center; gap:48px; flex-wrap:wrap;">
-
-      <!-- IZQUIERDA: CAINTRA -->
-      <div style="display:flex; align-items:center; justify-content:center;
-                  background:#fff; border:1px solid #e5e7eb; border-radius:16px;
-                  padding:18px 24px; box-shadow:0 1px 4px rgba(0,0,0,.06);
-                  transition:transform .2s, box-shadow .2s;"
-           onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.1)'"
-           onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 1px 4px rgba(0,0,0,.06)'">
-        <img src="/sellos/alianza-caintra.webp"
-             alt="CAINTRA Nuevo León — Cámara de la Industria de Transformación"
-             width="200" height="80" loading="lazy" decoding="async"
-             style="height:80px; width:auto; object-fit:contain;">
-      </div>
-
-      <!-- CENTRO ELEVADO: Hecho en Nuevo León -->
-      <div style="display:flex; align-items:center; justify-content:center;
-                  background:#fff; border:2px solid #fb923c; border-radius:20px;
-                  padding:20px 30px;
-                  box-shadow:0 12px 40px rgba(249,115,22,.22), 0 0 0 4px rgba(249,115,22,.08);
-                  transform:translateY(-14px);
-                  position:relative;
-                  transition:transform .2s, box-shadow .2s;"
-           onmouseover="this.style.transform='translateY(-18px)';this.style.boxShadow='0 18px 50px rgba(249,115,22,.32), 0 0 0 6px rgba(249,115,22,.10)'"
-           onmouseout="this.style.transform='translateY(-14px)';this.style.boxShadow='0 12px 40px rgba(249,115,22,.22), 0 0 0 4px rgba(249,115,22,.08)'">
-        <!-- Etiqueta "Alianza Principal" -->
-        <div style="position:absolute; top:-13px; left:50%; transform:translateX(-50%);
-                    background:linear-gradient(90deg,#f97316,#ea580c); color:#fff;
-                    font-size:10px; font-weight:700; letter-spacing:.08em;
-                    text-transform:uppercase; padding:3px 10px; border-radius:20px;
-                    white-space:nowrap;">⭐ Alianza Principal</div>
-        <img src="/sellos/alianza-hechoennl.png"
-             alt="Hecho en Nuevo León México — Sello oficial"
-             width="300" height="120" loading="lazy" decoding="async"
-             style="height:120px; width:auto; object-fit:contain;">
-      </div>
-
-      <!-- DERECHA: COPARMEX -->
-      <div style="display:flex; align-items:center; justify-content:center;
-                  background:#fff; border:1px solid #e5e7eb; border-radius:16px;
-                  padding:18px 24px; box-shadow:0 1px 4px rgba(0,0,0,.06);
-                  transition:transform .2s, box-shadow .2s;"
-           onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.1)'"
-           onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 1px 4px rgba(0,0,0,.06)'">
-        <img src="/sellos/alianza-coparmex.jpg"
-             alt="COPARMEX — Confederación Patronal de la República Mexicana"
-             width="200" height="80" loading="lazy" decoding="async"
-             style="height:80px; width:auto; object-fit:contain;">
-      </div>
-
-    </div>
-    <p style="margin:40px 0 0; font-size:13px; color:#9ca3af; line-height:1.6;">
-      Orgullosamente Hecho en Nuevo León, México 🦁 · Miembro de CAINTRA y COPARMEX
-    </p>
-  </div>
-</section>
 
 <!-- ===== SECCIÓN DESCARGAS ===== -->
 <section id="descargas" style="background:#fff; padding:60px 0 56px; border-top:1px solid #e5e7eb;">

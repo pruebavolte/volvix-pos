@@ -25,7 +25,10 @@
     appName: 'Volvix POS',
     installButtonText: 'Instalar app',
     installButtonIcon: '⬇',          // ⬇
-    splashDuration: 1200,
+    // 2026-05-14 PERF: usuario reporto que el splash negro retrasa la pagina.
+    // splashDuration=0 deshabilita la pantalla negra de loading.
+    // (Solo en PWA installed habria justificacion para mostrarlo brevemente).
+    splashDuration: 0,
     updateCheckInterval: 60 * 60 * 1000,  // 1h
     storageKeys: {
       installDismissed: 'volvix_install_dismissed_at',
@@ -110,6 +113,8 @@
 
   // -------------------------- Splash Screen --------------------------------
   function showSplash() {
+    // 2026-05-14 PERF: splash deshabilitado. Early return.
+    if (CFG.splashDuration <= 0) return;
     if (sessionStorage.getItem('volvix_splash_shown') === '1') return;
     sessionStorage.setItem('volvix_splash_shown', '1');
 
