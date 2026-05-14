@@ -48,7 +48,8 @@
   "crons": [
     { "path": "/api/cron/daily-summary",   "schedule": "0 8 * * *" },
     { "path": "/api/cron/weekly-report",   "schedule": "0 9 * * 1" },
-    { "path": "/api/cron/monthly-billing", "schedule": "0 10 1 * *" }
+    { "path": "/api/cron/monthly-billing", "schedule": "0 10 1 * *" },
+    { "path": "/api/admin/integrity-check?days=30", "schedule": "0 6 * * *" }
   ],
   "headers": [
     {

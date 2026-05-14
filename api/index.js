@@ -12806,12 +12806,46 @@ handlers['GET /api/config/public'] = async (req, res) => {
   //   GET /api/admin/integrity-check?days=30          -> ventana de tiempo (default 90)
   //   GET /api/admin/integrity-check?severity=high    -> filtra por severidad
   // ===========================================================================
-  handlers['GET /api/admin/integrity-check'] = requireAuth(async (req, res) => {
+  handlers['GET /api/admin/integrity-check'] = async (req, res) => {
     try {
-      const role = String((req.user && req.user.role) || '').toLowerCase();
-      if (!['owner','admin','superadmin','manager'].includes(role)) {
-        return sendJSON(res, { error: 'forbidden', need_role: 'manager+' }, 403);
+      // 2026-05-14: Auth dual: requireAuth (manager+) OR cron secret header.
+      // Esto permite ejecutar el motor desde Vercel Cron sin necesitar un
+      // endpoint /api/cron/* dedicado (cumple "no URLs nuevas si no requiere").
+      const cronHdr = req.headers && (req.headers['x-vercel-cron'] || req.headers['x-cron-secret']);
+      const isCron = (req.headers && req.headers['x-vercel-cron']) ||
+                     (cronHdr && cronSecretMatches(cronHdr));
+      if (!isCron) {
+        // Auth normal: validar token JWT/API-Key inline (no usamos requireAuth
+        // wrapper porque ya estamos dentro del handler para hacer la dual auth).
+        const apiKey = req.headers['x-api-key'];
+        let payload = null;
+        if (apiKey) {
+          const row = await lookupApiKey(String(apiKey).trim());
+          if (!row) return sendJSON(res, { error: 'unauthorized' }, 401);
+          payload = { id: null, role: row.scopes.includes('admin') ? 'admin' : 'user', tenant_id: row.tenant_id };
+        } else {
+          const auth = req.headers['authorization'] || '';
+          const m = auth.match(/^Bearer\s+(.+)$/i);
+          let tok = m ? m[1] : null;
+          if (!tok) {
+            const cookies = parseCookies(req);
+            if (cookies.volvix_token) tok = cookies.volvix_token;
+          }
+          if (!tok) return sendJSON(res, { error: 'unauthorized' }, 401);
+          payload = verifyJWT(tok);
+          if (!payload) return sendJSON(res, { error: 'unauthorized' }, 401);
+        }
+        req.user = payload;
+        const role = String((payload && payload.role) || '').toLowerCase();
+        if (!['owner','admin','superadmin','manager'].includes(role)) {
+          return sendJSON(res, { error: 'forbidden', need_role: 'manager+' }, 403);
+        }
+      } else {
+        // Cron-invoked: usar superadmin role para acceso global
+        req.user = { id: 'cron', role: 'superadmin', tenant_id: null, via: 'cron' };
       }
+      // (role ya verificado arriba en el bloque de auth normal)
+      const role = String((req.user && req.user.role) || '').toLowerCase();
       const parsed = url.parse(req.url, true);
       const q = parsed.query || {};
       const requestedTenant = q.tenant_id ? String(q.tenant_id).trim() : null;
@@ -12984,22 +13018,34 @@ handlers['GET /api/config/public'] = async (req, res) => {
 
       // -----------------------------------------------------------------------
       // CHECK 9: folios duplicados
+      // 2026-05-14: folio es un counter local del cajero/sesion (TKT-N) que se
+      // reinicia. Globalmente PUEDE repetirse legitimamente entre dias/cajeros.
+      // La unicidad real esta en pos_sales.id (UUID). Solo reportar como
+      // duplicado si MISMO folio en MISMO DIA y MISMO CAJERO (eso si seria un
+      // double-cobro). Aun asi, marcamos como 'warn' no 'high' porque puede ser
+      // legitimo en sistemas multi-caja con contador compartido.
       // -----------------------------------------------------------------------
       await safeQuery('duplicate_folios', async () => {
         const rows = await supabaseRequest('GET',
           `/pos_sales?pos_user_id=eq.${ownerUserId}&created_at=gte.${encodeURIComponent(sinceIso)}` +
-          `&folio=not.is.null&select=folio,id&limit=5000`);
+          `&folio=not.is.null&select=folio,id,created_at,cashier_id&limit=5000`);
         const seen = {};
         (rows || []).forEach(r => {
           const f = String(r.folio || '');
-          if (!f || f === '—') return;
-          (seen[f] = seen[f] || []).push(r.id);
+          if (!f || f === '—' || f === 'null') return;
+          // Agrupar por (folio, fecha YYYY-MM-DD, cashier_id). Solo es duplicado
+          // real si los 3 coinciden.
+          const day = String(r.created_at || '').slice(0, 10);
+          const cashier = r.cashier_id || 'unknown';
+          const key = f + '|' + day + '|' + cashier;
+          (seen[key] = seen[key] || []).push({ id: r.id, folio: f, day, cashier });
         });
-        const dups = Object.entries(seen).filter(([, ids]) => ids.length > 1);
+        const dups = Object.entries(seen).filter(([, items]) => items.length > 1);
         stats.duplicate_folios = dups.length;
-        dups.slice(0, 20).forEach(([folio, ids]) => add(
-          'high', 'folio', 'duplicate_folio',
-          'Folio duplicado entre ventas', { folio, count: ids.length, sale_ids: ids }
+        dups.slice(0, 20).forEach(([key, items]) => add(
+          'warn', 'folio', 'duplicate_folio_same_day_cashier',
+          'Folio duplicado en mismo dia + mismo cajero (posible double-cobro)',
+          { folio: items[0].folio, day: items[0].day, cashier_id: items[0].cashier, count: items.length, sale_ids: items.map(i => i.id) }
         ));
       });
 
@@ -13369,7 +13415,7 @@ handlers['GET /api/config/public'] = async (req, res) => {
         generated_at: new Date().toISOString()
       });
     } catch (err) { sendError(res, err); }
-  });
+  };
 
   // 2026-05-13 — Signals via Supabase (tabla volvix_remote_signals).
   // POST agrega un mensaje a la cola del destinatario. GET drena los pendientes
