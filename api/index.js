@@ -12022,54 +12022,190 @@ handlers['GET /api/config/public'] = async (req, res) => {
   // Polling cada 3-5s para notificar al cliente. Codigo de 6 digitos como
   // verificacion adicional (defensa contra clicks accidentales).
   // ================================================================
-  // 2026-05-13 — Persistencia via Supabase (tabla volvix_remote_sessions).
-  // Antes era un Map in-memory que se perdia entre lambdas en Vercel. Ahora la
-  // tabla es la fuente de verdad. Las funciones helper son async.
-  // Ver db/R16_REMOTE_SUPPORT.sql para el schema.
+  // 2026-05-13 — Persistencia via Supabase. Adaptado a tabla EXISTENTE
+  // pos_remote_sessions (FIX-N5-A3 schema r10e), evitando crear tabla nueva.
+  //
+  // Mapping:
+  //   sid (hex 24 chars)        → token_hash (UNIQUE)
+  //   status (mi enum)          → meta.flow_status (flexible) + status (table enum restricto)
+  //   code, code_attempts,
+  //   consent_text, platform,
+  //   signals_admin/client[]    → meta JSONB
+  //   requester_email           → requested_by_email
+  //   target_email              → target_user_email
+  //
+  // status table enum: pending_consent | active | ended | revoked | expired | auto_revoked
+  // status flow (mi enum): pending | accepted | verified | active | ended | rejected | expired
+  function _tableStatusFor(flow) {
+    switch (flow) {
+      case 'pending':
+      case 'accepted':   return 'pending_consent';
+      case 'verified':
+      case 'active':     return 'active';
+      case 'rejected':   return 'revoked';
+      case 'expired':    return 'expired';
+      case 'ended':      return 'ended';
+      default:           return 'pending_consent';
+    }
+  }
+  function _rowToSession(row) {
+    if (!row) return null;
+    const meta = (row.meta && typeof row.meta === 'object') ? row.meta : {};
+    return {
+      id: row.token_hash,
+      code: meta.code,
+      requester_email: row.requested_by_email,
+      requester_id: row.requested_by,
+      target_email: row.target_user_email,
+      status: meta.flow_status || 'pending',
+      code_attempts: meta.code_attempts || 0,
+      consent_text: meta.consent_text,
+      accepted_at: row.consented_at ? Date.parse(row.consented_at) : null,
+      verified_at: meta.verified_at || null,
+      rejected_at: meta.rejected_at || null,
+      ended_at: row.ended_at ? Date.parse(row.ended_at) : null,
+      created_at: row.created_at ? Date.parse(row.created_at) : Date.now(),
+      updated_at: meta.updated_at || (row.created_at ? Date.parse(row.created_at) : Date.now()),
+      expired_reason: meta.expired_reason || row.ended_reason || null,
+      quicksupport_requested: meta.quicksupport_requested || false,
+      quicksupport_provider: meta.quicksupport_provider || null,
+      client_platform_os: meta.client_platform_os || null,
+      client_platform_browser: meta.client_platform_browser || null,
+      client_platform_pwa: meta.client_platform_pwa || false,
+      client_platform_ua: meta.client_platform_ua || null,
+      _row_uuid: row.id,
+      _meta: meta
+    };
+  }
   async function _rsGet(sid){
     if (!sid) return null;
     try {
-      const rows = await supabaseRequest('GET', '/volvix_remote_sessions?id=eq.' + encodeURIComponent(sid) + '&limit=1');
-      return (rows && rows[0]) || null;
+      const rows = await supabaseRequest('GET',
+        '/pos_remote_sessions?token_hash=eq.' + encodeURIComponent(sid) + '&limit=1');
+      return _rowToSession(rows && rows[0]);
     } catch(_) { return null; }
   }
-  async function _rsSet(sid, obj){
+  // Crea o actualiza la sesion. patch puede traer cualquier campo del schema
+  // virtual; aqui los mapeamos a columnas reales + meta jsonb.
+  async function _rsSet(sid, patch){
     if (!sid) return;
-    const patch = Object.assign({}, obj, { updated_at: Date.now() });
     try {
       const existing = await _rsGet(sid);
-      if (existing) {
-        await supabaseRequest('PATCH', '/volvix_remote_sessions?id=eq.' + encodeURIComponent(sid), patch);
-      } else {
-        await supabaseRequest('POST', '/volvix_remote_sessions', Object.assign({ id: sid, created_at: Date.now() }, patch));
+      // Construir nueva meta merging existing._meta con cambios
+      const newMeta = Object.assign({}, existing ? existing._meta : {}, { updated_at: Date.now() });
+      const colPatch = {};
+      const fields = patch || {};
+
+      // Campos que viven en columnas
+      if (fields.requester_email !== undefined) colPatch.requested_by_email = fields.requester_email;
+      if (fields.requester_id !== undefined) colPatch.requested_by = String(fields.requester_id || fields.requester_email || 'unknown');
+      if (fields.target_email !== undefined) {
+        colPatch.target_user_email = fields.target_email;
+        colPatch.target_user_id = fields.target_email; // proxy
       }
-    } catch(e) { try { console.log('[_rsSet] error', e.message); } catch(_){} }
+      if (fields.accepted_at !== undefined) colPatch.consented_at = new Date(fields.accepted_at).toISOString();
+      if (fields.ended_at !== undefined) colPatch.ended_at = new Date(fields.ended_at).toISOString();
+      if (fields.status !== undefined) {
+        colPatch.status = _tableStatusFor(fields.status);
+        newMeta.flow_status = fields.status;
+      }
+      // Campos que viven en meta
+      ['code','code_attempts','consent_text','verified_at','rejected_at','expired_reason',
+       'quicksupport_requested','quicksupport_provider',
+       'client_platform_os','client_platform_browser','client_platform_pwa','client_platform_ua'
+      ].forEach(k => { if (fields[k] !== undefined) newMeta[k] = fields[k]; });
+
+      colPatch.meta = newMeta;
+
+      if (existing) {
+        await supabaseRequest('PATCH',
+          '/pos_remote_sessions?token_hash=eq.' + encodeURIComponent(sid), colPatch);
+      } else {
+        // INSERT — requiere campos NOT NULL: tenant_id, requested_by, target_user_id, token_hash, expires_at
+        const now = new Date();
+        const expires = new Date(now.getTime() + 30 * 60 * 1000); // 30 min
+        const row = Object.assign({
+          tenant_id: '__platform__',          // sesiones admin-platform
+          token_hash: sid,
+          requested_by: colPatch.requested_by || 'platform_owner',
+          requested_by_email: colPatch.requested_by_email || null,
+          target_user_id: colPatch.target_user_id || colPatch.target_user_email || 'unknown',
+          target_user_email: colPatch.target_user_email || null,
+          status: colPatch.status || 'pending_consent',
+          expires_at: expires.toISOString(),
+          allowed_actions: [],
+          meta: newMeta
+        }, colPatch);
+        await supabaseRequest('POST', '/pos_remote_sessions', row);
+      }
+    } catch(e) { try { console.log('[_rsSet] error', String(e.message || e).slice(0, 200)); } catch(_){} }
   }
   async function _rsCleanup(){
     try {
-      const cutoff = Date.now() - 15*60*1000;
-      await supabaseRequest('DELETE', '/volvix_remote_sessions?updated_at=lt.' + cutoff);
+      const cutoff = new Date(Date.now() - 15*60*1000).toISOString();
+      // Cierra (no borra) sesiones expiradas para preservar audit log
+      await supabaseRequest('PATCH',
+        '/pos_remote_sessions?created_at=lt.' + encodeURIComponent(cutoff) + '&status=in.(pending_consent,active)',
+        { status: 'expired', ended_at: new Date().toISOString(), ended_reason: 'timeout' });
     } catch(_){}
   }
 
-  // 2026-05-13 — Diagnostico: verifica si las tablas de remote-support existen
+  // Signals: embebidos en pos_remote_sessions.meta (signals_admin[] y signals_client[])
+  // como cola de mensajes. Cada signal_pull los lee + los borra del array.
+  async function _signalPush(sid, toRole, msg) {
+    const s = await _rsGet(sid);
+    if (!s) return false;
+    const meta = Object.assign({}, s._meta || {});
+    const key = 'signals_' + toRole; // signals_admin | signals_client
+    const arr = Array.isArray(meta[key]) ? meta[key].slice() : [];
+    arr.push({ id: crypto.randomBytes(6).toString('hex'), message: msg, ts: Date.now() });
+    meta[key] = arr.slice(-50); // cap a 50 mensajes
+    await supabaseRequest('PATCH',
+      '/pos_remote_sessions?token_hash=eq.' + encodeURIComponent(sid),
+      { meta });
+    return true;
+  }
+  async function _signalDrain(sid, role) {
+    const s = await _rsGet(sid);
+    if (!s) return { messages: [], session_status: null };
+    const meta = Object.assign({}, s._meta || {});
+    const key = 'signals_' + role;
+    const arr = Array.isArray(meta[key]) ? meta[key].slice() : [];
+    if (arr.length === 0) return { messages: [], session_status: s.status };
+    // Limpiar la cola
+    meta[key] = [];
+    await supabaseRequest('PATCH',
+      '/pos_remote_sessions?token_hash=eq.' + encodeURIComponent(sid),
+      { meta });
+    return {
+      messages: arr.map(m => ({ from: role === 'admin' ? 'client' : 'admin', message: m.message, ts: m.ts })),
+      session_status: s.status
+    };
+  }
+
+  // 2026-05-13 — Diagnostico: verifica que pos_remote_sessions este accesible
   handlers['GET /api/admin/remote-support/_diag'] = requireAuth(async (req, res) => {
     const role = String((req.user && req.user.role) || '').toLowerCase();
     if (role !== 'superadmin' && role !== 'platform_owner') return sendJSON(res, { ok:false, error:'forbidden' }, 403);
-    const out = { ok: true, tables: {} };
-    // Test sessions table
+    const out = { ok: true, store: 'pos_remote_sessions (existing, schema r10e)', tables: {} };
     try {
-      const rows = await supabaseRequest('GET', '/volvix_remote_sessions?limit=1');
-      out.tables.sessions = { exists: true, sample_count: (rows || []).length };
+      const rows = await supabaseRequest('GET', '/pos_remote_sessions?limit=1');
+      out.tables.pos_remote_sessions = { exists: true, sample_count: (rows || []).length };
     } catch (e) {
-      out.tables.sessions = { exists: false, error: String(e.message || e).slice(0, 300) };
+      out.tables.pos_remote_sessions = { exists: false, error: String(e.message || e).slice(0, 300) };
     }
-    // Test signals table
+    // Probe write capability
     try {
-      const rows = await supabaseRequest('GET', '/volvix_remote_signals?limit=1');
-      out.tables.signals = { exists: true, sample_count: (rows || []).length };
+      const probeSid = '__diag_probe_' + crypto.randomBytes(4).toString('hex');
+      await _rsSet(probeSid, { code: '000000', requester_email: 'diag@platform', target_email: 'diag@platform', status: 'pending' });
+      const s = await _rsGet(probeSid);
+      out.write_probe = { ok: !!s, status_persists: s ? s.status : null };
+      if (s) {
+        // cleanup
+        try { await supabaseRequest('DELETE', '/pos_remote_sessions?token_hash=eq.' + encodeURIComponent(probeSid)); } catch(_){}
+      }
     } catch (e) {
-      out.tables.signals = { exists: false, error: String(e.message || e).slice(0, 300) };
+      out.write_probe = { ok: false, error: String(e.message || e).slice(0, 300) };
     }
     return sendJSON(res, out);
   }, ['superadmin','platform_owner']);
@@ -12107,13 +12243,23 @@ handlers['GET /api/config/public'] = async (req, res) => {
     try {
       await _rsCleanup();
       const me = String(req.user.email || '').toLowerCase();
-      // Query Supabase for pending/verified/active sessions targeting me
-      const path = '/volvix_remote_sessions?target_email=eq.' + encodeURIComponent(me)
-        + '&status=in.(pending,verified,active)'
-        + '&select=id,status,requester_email,created_at,verified_at'
-        + '&order=created_at.desc';
+      // Query pos_remote_sessions para sesiones target=me + table status pending_consent o active
+      const path = '/pos_remote_sessions?target_user_email=eq.' + encodeURIComponent(me)
+        + '&status=in.(pending_consent,active)'
+        + '&select=token_hash,status,requested_by_email,created_at,consented_at,meta'
+        + '&order=created_at.desc&limit=10';
       const rows = await supabaseRequest('GET', path);
-      return sendJSON(res, { ok: true, sessions: rows || [] });
+      const sessions = (rows || []).map(r => {
+        const s = _rowToSession(r);
+        return {
+          id: s.id,
+          status: s.status,                          // mi flow_status
+          requester_email: s.requester_email,
+          created_at: s.created_at,
+          verified_at: s.verified_at
+        };
+      });
+      return sendJSON(res, { ok: true, sessions });
     } catch (err) { sendError(res, err); }
   });
 
@@ -12233,12 +12379,8 @@ handlers['GET /api/config/public'] = async (req, res) => {
       const isClient = (s.target_email === me);
       if (!isAdmin && !isClient) return sendJSON(res, { ok:false, error:'no participas' }, 403);
       if (to !== 'admin' && to !== 'client') return sendJSON(res, { ok:false, error:'to invalido' }, 400);
-      // Insert mensaje en la tabla
-      try {
-        await supabaseRequest('POST', '/volvix_remote_signals', {
-          session_id: sid, to_role: to, message: msg || {}, created_at: Date.now()
-        });
-      } catch(e){ try { console.log('[signal] insert error', e.message); } catch(_){} }
+      // Signal queue embebida en meta.signals_{role}
+      await _signalPush(sid, to, msg || {});
       // Marcar sesion como active si llego el primer mensaje SDP
       if (s.status === 'verified') await _rsSet(sid, { status:'active' });
       return sendJSON(res, { ok:true });
@@ -12255,23 +12397,8 @@ handlers['GET /api/config/public'] = async (req, res) => {
       const me = String((req.user && req.user.email) || '').toLowerCase();
       const expected = (role === 'admin') ? s.requester_email : s.target_email;
       if (expected !== me) return sendJSON(res, { ok:false, error:'no eres '+role+' de esta sesion' }, 403);
-      // Drain: traer mensajes pendientes para el rol y marcarlos consumidos
-      const path = '/volvix_remote_signals?session_id=eq.' + encodeURIComponent(sid)
-        + '&to_role=eq.' + encodeURIComponent(role)
-        + '&consumed_at=is.null'
-        + '&select=id,message,created_at'
-        + '&order=id.asc&limit=50';
-      const rows = await supabaseRequest('GET', path);
-      const msgs = (rows || []).map(r => ({ from: role === 'admin' ? 'client' : 'admin', message: r.message, ts: r.created_at }));
-      // Marcar como consumidos
-      if (rows && rows.length) {
-        const ids = rows.map(r => r.id);
-        const inList = '(' + ids.join(',') + ')';
-        try {
-          await supabaseRequest('PATCH', '/volvix_remote_signals?id=in.' + encodeURIComponent(inList), { consumed_at: Date.now() });
-        } catch(_){}
-      }
-      return sendJSON(res, { ok:true, messages: msgs, session_status: s.status });
+      const drained = await _signalDrain(sid, role);
+      return sendJSON(res, { ok:true, messages: drained.messages, session_status: drained.session_status });
     } catch (err) { sendError(res, err); }
   });
 
