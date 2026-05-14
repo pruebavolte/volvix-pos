@@ -12341,15 +12341,68 @@ handlers['GET /api/config/public'] = async (req, res) => {
 
   // ---- AUDIT 2026-05-01: cabling missing endpoints (status report) ----
   // /api/version — public meta + build info
-  handlers['GET /api/version'] = (req, res) => {
+  // 2026-05-14: ahora lee public/version.json + opcionalmente compara contra
+  // GitHub Releases para que el cliente sepa si hay actualizacion disponible.
+  // Cache GitHub query 10min para no agotar rate-limit (60req/h sin auth).
+  let __versionCache = { ts: 0, data: null };
+  handlers['GET /api/version'] = async (req, res) => {
+    let installed = { version: '1.0.0', commit: null, built_at: null };
+    try {
+      const vp = path.join(__dirname, '..', 'public', 'version.json');
+      const content = fs.readFileSync(vp, 'utf8');
+      installed = JSON.parse(content);
+    } catch (_) {}
+
+    const q = url.parse(req.url, true).query || {};
+    const wantsLatest = q.check_updates === '1' || q.check_updates === 'true';
+    let latest = null;
+    if (wantsLatest) {
+      const now = Date.now();
+      if (__versionCache.data && (now - __versionCache.ts) < 10 * 60 * 1000) {
+        latest = __versionCache.data;
+      } else {
+        try {
+          const r = await fetchWithTimeout(
+            'https://api.github.com/repos/pruebavolte/volvix-pos/releases/latest',
+            { headers: { 'User-Agent': 'volvix-pos-version-check', 'Accept': 'application/vnd.github.v3+json' } },
+            5000
+          );
+          if (r && r.ok) {
+            const rel = await r.json();
+            const exeAsset = (rel.assets || []).find(a => /\.exe$/.test(a.name));
+            const apkAsset = (rel.assets || []).find(a => /\.apk$/.test(a.name) && !/-/.test(a.name.replace(/^VolvixPOS-?\.apk$/, 'VolvixPOS.apk')));
+            latest = {
+              version: String(rel.tag_name || rel.name || '').replace(/^v/, ''),
+              published_at: rel.published_at,
+              release_url: rel.html_url,
+              exe_url: exeAsset ? exeAsset.browser_download_url : null,
+              apk_url: apkAsset ? apkAsset.browser_download_url : (rel.assets || []).find(a => /\.apk$/.test(a.name))?.browser_download_url || null
+            };
+            __versionCache = { ts: now, data: latest };
+          }
+        } catch (_) {}
+      }
+    }
+
+    function cmpVer(a, b) {
+      const pa = String(a || '0.0.0').split('.').map(n => parseInt(n, 10) || 0);
+      const pb = String(b || '0.0.0').split('.').map(n => parseInt(n, 10) || 0);
+      for (let i = 0; i < 3; i++) { if (pa[i] !== pb[i]) return pa[i] - pb[i]; }
+      return 0;
+    }
+    const updateAvailable = !!(latest && cmpVer(latest.version, installed.version) > 0);
+
     sendJSON(res, {
       ok: true,
       service: 'volvix-pos',
-      version: '1.0.0',
-      commit: process.env.VERCEL_GIT_COMMIT_SHA || null,
+      version: installed.version,
+      installed,
+      commit: installed.commit || process.env.VERCEL_GIT_COMMIT_SHA || null,
       branch: process.env.VERCEL_GIT_COMMIT_REF || null,
       env: process.env.NODE_ENV || 'development',
-      ts: new Date().toISOString()
+      ts: new Date().toISOString(),
+      latest,
+      update_available: updateAvailable
     });
   };
   // /api/giros/list — list catalog (alias to giros search w/o q)
@@ -12811,9 +12864,29 @@ handlers['GET /api/config/public'] = async (req, res) => {
       // 2026-05-14: Auth dual: requireAuth (manager+) OR cron secret header.
       // Esto permite ejecutar el motor desde Vercel Cron sin necesitar un
       // endpoint /api/cron/* dedicado (cumple "no URLs nuevas si no requiere").
+      //
+      // 2026-05-14 SECURITY FIX: el header x-vercel-cron es trivial de falsificar.
+      // Si CRON_SECRET esta configurado en env, REQUERIMOS que coincida ademas
+      // del header de Vercel. Asi atacantes externos no pueden ejecutar el motor.
       const cronHdr = req.headers && (req.headers['x-vercel-cron'] || req.headers['x-cron-secret']);
-      const isCron = (req.headers && req.headers['x-vercel-cron']) ||
-                     (cronHdr && cronSecretMatches(cronHdr));
+      const hasVercelCronHdr = !!(req.headers && req.headers['x-vercel-cron']);
+      const cronSecretEnv = process.env.CRON_SECRET || process.env.VERCEL_CRON_SECRET;
+      let isCron = false;
+      if (hasVercelCronHdr) {
+        // Vercel inyecta este header automaticamente desde su infraestructura.
+        // Si esta configurado CRON_SECRET, ADEMAS verificamos Authorization Bearer.
+        if (cronSecretEnv) {
+          const auth = req.headers['authorization'] || '';
+          const m = auth.match(/^Bearer\s+(.+)$/i);
+          const bearer = m ? m[1] : null;
+          isCron = bearer && cronSecretMatches(bearer);
+        } else {
+          // Sin CRON_SECRET configurado, confiamos en el header solo (legacy)
+          isCron = true;
+        }
+      } else if (cronHdr) {
+        isCron = cronSecretMatches(cronHdr);
+      }
       if (!isCron) {
         // Auth normal: validar token JWT/API-Key inline (no usamos requireAuth
         // wrapper porque ya estamos dentro del handler para hacer la dual auth).
@@ -13423,6 +13496,76 @@ handlers['GET /api/config/public'] = async (req, res) => {
   // Patron: cada modulo expone GET (list), POST (create), PATCH (update), DELETE.
   // Todos requieren auth manager+ y filtran/scopean por tenant_id automaticamente.
   // ===========================================================================
+
+  // --- SETUP-DEFAULTS: pre-llena tax_rates + features default al onboarding ---
+  // Idempotente: solo crea filas si no existen. Llamable manualmente o por
+  // el endpoint de provisionamiento de tenants nuevos.
+  handlers['POST /api/admin/setup-defaults'] = requireAuth(async (req, res) => {
+    try {
+      const role = String((req.user && req.user.role) || '').toLowerCase();
+      if (!['owner','admin','superadmin'].includes(role)) {
+        return sendJSON(res, { error: 'forbidden', need_role: 'owner' }, 403);
+      }
+      const tnt = resolveTenant(req);
+      if (!tnt) return sendJSON(res, { error: 'tenant_required' }, 400);
+
+      const created = { tax_rates: [], features: [] };
+      const skipped = { tax_rates: [], features: [] };
+
+      // 1. TAX_RATES MX default
+      const taxDefaults = [
+        { code: 'IVA16',  name: 'IVA 16%',      rate_pct: 16.0000, type: 'trasladado', is_default: true,  sat_code: '002' },
+        { code: 'IVA8',   name: 'IVA 8% Frontera', rate_pct: 8.0000, type: 'trasladado', is_default: false, sat_code: '002' },
+        { code: 'IVA0',   name: 'IVA 0%',       rate_pct: 0.0000,  type: 'trasladado', is_default: false, sat_code: '002' },
+        { code: 'EXENTO', name: 'Exento',       rate_pct: 0.0000,  type: 'exento',     is_default: false },
+        { code: 'IEPS8',  name: 'IEPS 8% (bebidas)', rate_pct: 8.0000, type: 'trasladado', is_default: false, sat_code: '003' }
+      ];
+      for (const td of taxDefaults) {
+        try {
+          const existing = await supabaseRequest('GET',
+            `/tax_rates?tenant_id=eq.${encodeURIComponent(tnt)}&code=eq.${td.code}&select=id&limit=1`);
+          if (existing && existing.length) {
+            skipped.tax_rates.push(td.code);
+            continue;
+          }
+          const row = { tenant_id: tnt, active: true, ...td };
+          const result = await supabaseRequest('POST', '/tax_rates', row);
+          created.tax_rates.push(td.code);
+        } catch (_) { /* duplicate or table missing */ }
+      }
+
+      // 2. FEATURES default (off por defecto, owner activa lo que necesite)
+      const featureDefaults = [
+        { feature_key: 'cfdi_billing',      enabled: false },
+        { feature_key: 'integrity_engine',  enabled: true  }, // recomendado activo
+        { feature_key: 'dark_mode',         enabled: true  },
+        { feature_key: 'barcode_scanner',   enabled: true  },
+        { feature_key: 'thermal_printer',   enabled: false }
+      ];
+      for (const fd of featureDefaults) {
+        try {
+          const existing = await supabaseRequest('GET',
+            `/pos_features?tenant_id=eq.${encodeURIComponent(tnt)}&feature_key=eq.${fd.feature_key}&select=id&limit=1`);
+          if (existing && existing.length) {
+            skipped.features.push(fd.feature_key);
+            continue;
+          }
+          const row = {
+            tenant_id: tnt,
+            feature_key: fd.feature_key,
+            enabled: fd.enabled,
+            enabled_by: req.user.id,
+            enabled_at: fd.enabled ? new Date().toISOString() : null
+          };
+          await supabaseRequest('POST', '/pos_features', row);
+          created.features.push(fd.feature_key);
+        } catch (_) {}
+      }
+
+      try { logAudit(req, 'tenant.defaults_setup', 'multiple', { created, skipped }); } catch(_){}
+      sendJSON(res, { ok: true, tenant_id: tnt, created, skipped });
+    } catch (err) { sendError(res, err); }
+  });
 
   // --- PRODUCT_LOTS (lotes/caducidades) ---
   handlers['GET /api/product-lots'] = requireAuth(async (req, res) => {

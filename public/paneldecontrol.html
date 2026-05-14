@@ -2748,6 +2748,10 @@
             <button class="permv14-nav-icon" data-permv14-nav="versions" title="Control de versiones" aria-label="Control de versiones">
               📲<span class="permv14-nav-tooltip">Versiones</span>
             </button>
+            <!-- 2026-05-14: Toggle de features por tenant (24 modulos opcionales) -->
+            <button class="permv14-nav-icon" data-permv14-nav="features" title="Features (toggle modulos)" aria-label="Features">
+              🎛️<span class="permv14-nav-tooltip">Features</span>
+            </button>
             <!-- 2026-05-09: ⚙ Modo de desactivación REMOVIDO del sidebar.
                  Ahora cada módulo/botón tiene su propio 3-state (Activo/Oculto/Bloqueado)
                  directamente en su select. El pane settings sigue existiendo
@@ -2777,6 +2781,146 @@
                mismas; lo que cambia es QUÉ renderizamos dentro según
                v14.selectedNav. Esto evita duplicar layout y mantiene la UX
                consistente con Modules. -->
+
+          <!-- 2026-05-14: Pane Features — toggle de 24 modulos opcionales por tenant -->
+          <section class="permv14-side-pane permv14-side-pane-wide" data-permv14-pane="features" hidden>
+            <div class="permv14-pane-head">
+              <h3>🎛️ Features del Negocio</h3>
+              <p class="permv14-pane-help">Activa o desactiva modulos por tenant. Algunos requieren config adicional (ej. CFDI requiere RFC + cert SAT).</p>
+              <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap;">
+                <input id="features-search" type="search" placeholder="Buscar feature..." class="permv14-input" style="flex:1;min-width:180px;">
+                <button class="permv14-btn-soft" id="features-refresh" title="Refrescar">🔄</button>
+                <button class="permv14-btn-soft" id="features-setup-defaults" title="Pre-cargar tax_rates MX + features recomendados">⚡ Setup Default</button>
+              </div>
+            </div>
+            <div id="features-list" style="padding:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;">
+              <!-- populated by JS -->
+              <div style="color:#888;padding:20px;text-align:center;grid-column:1/-1;">Cargando features...</div>
+            </div>
+            <script>
+              (function() {
+                if (window.__featuresInit) return;
+                window.__featuresInit = true;
+                async function loadFeatures() {
+                  const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+                  const headers = { 'Authorization': 'Bearer ' + tok };
+                  const list = document.getElementById('features-list');
+                  if (!list) return;
+                  list.innerHTML = '<div style="color:#888;padding:20px;text-align:center;grid-column:1/-1;">Cargando...</div>';
+                  try {
+                    const [catR, curR] = await Promise.all([
+                      fetch('/api/admin/features/catalog', { headers }),
+                      fetch('/api/admin/features', { headers })
+                    ]);
+                    const cat = await catR.json();
+                    const cur = await curR.json();
+                    const enabledMap = {};
+                    (cur.features || []).forEach(f => { enabledMap[f.feature_key] = f.enabled; });
+                    const features = cat.features || [];
+                    if (!features.length) { list.innerHTML = '<div style="color:#888;padding:20px;text-align:center;">No hay features.</div>'; return; }
+                    const byCategory = {};
+                    features.forEach(f => { (byCategory[f.category] = byCategory[f.category] || []).push(f); });
+                    list.innerHTML = '';
+                    Object.keys(byCategory).sort().forEach(cat => {
+                      const h = document.createElement('div');
+                      h.style.cssText = 'grid-column:1/-1;font-size:11px;font-weight:600;color:#666;text-transform:uppercase;margin-top:8px;letter-spacing:0.5px;';
+                      h.textContent = cat.toUpperCase();
+                      list.appendChild(h);
+                      byCategory[cat].forEach(f => {
+                        const isOn = !!enabledMap[f.key];
+                        const card = document.createElement('div');
+                        card.className = 'feature-card';
+                        card.dataset.key = f.key;
+                        card.dataset.name = (f.name + ' ' + f.description).toLowerCase();
+                        card.style.cssText = 'background:#fff;border:1px solid #e5e5ea;border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:6px;transition:border-color 0.2s;' + (isOn ? 'border-color:#10b981;' : '');
+                        card.innerHTML =
+                          '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">' +
+                            '<div style="font-weight:600;font-size:13px;color:#1c1917;">' + escapeHtml(f.name) + '</div>' +
+                            '<label class="switch" style="position:relative;display:inline-block;width:38px;height:22px;cursor:pointer;flex-shrink:0;">' +
+                              '<input type="checkbox" data-feature="' + escapeHtml(f.key) + '" ' + (isOn ? 'checked' : '') + ' style="opacity:0;width:0;height:0;">' +
+                              '<span class="slider" style="position:absolute;inset:0;background:' + (isOn ? '#10b981' : '#ccc') + ';border-radius:22px;transition:0.3s;"></span>' +
+                              '<span style="position:absolute;top:2px;left:' + (isOn ? '18px' : '2px') + ';width:18px;height:18px;background:#fff;border-radius:50%;transition:0.3s;"></span>' +
+                            '</label>' +
+                          '</div>' +
+                          '<div style="font-size:11px;color:#78716c;line-height:1.4;">' + escapeHtml(f.description) + '</div>' +
+                          '<div style="font-size:10px;color:#a8a29e;font-family:monospace;">' + escapeHtml(f.key) + '</div>';
+                        list.appendChild(card);
+                      });
+                    });
+                    // Wire toggle handlers
+                    list.querySelectorAll('input[data-feature]').forEach(inp => {
+                      inp.addEventListener('change', async e => {
+                        const key = e.target.dataset.feature;
+                        const enabled = e.target.checked;
+                        const card = e.target.closest('.feature-card');
+                        try {
+                          const r = await fetch('/api/admin/features', {
+                            method: 'POST', headers: Object.assign(headers, {'Content-Type':'application/json'}),
+                            body: JSON.stringify({ feature_key: key, enabled })
+                          });
+                          if (!r.ok) throw new Error('http ' + r.status);
+                          // Visual feedback
+                          if (card) card.style.borderColor = enabled ? '#10b981' : '#e5e5ea';
+                          const slider = card && card.querySelector('.slider');
+                          if (slider) slider.style.background = enabled ? '#10b981' : '#ccc';
+                          const knob = card && card.querySelector('label.switch > span:last-child');
+                          if (knob) knob.style.left = enabled ? '18px' : '2px';
+                        } catch (err) {
+                          alert('Error: ' + err.message);
+                          e.target.checked = !enabled; // revert
+                        }
+                      });
+                    });
+                  } catch (e) {
+                    list.innerHTML = '<div style="color:#dc2626;padding:20px;text-align:center;grid-column:1/-1;">Error: ' + e.message + '</div>';
+                  }
+                }
+                function escapeHtml(s) {
+                  return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+                }
+                // Auto-load when pane becomes visible
+                const observer = new MutationObserver(() => {
+                  const pane = document.querySelector('[data-permv14-pane="features"]');
+                  if (pane && !pane.hidden && !pane.dataset.loaded) {
+                    pane.dataset.loaded = '1';
+                    loadFeatures();
+                  }
+                });
+                document.querySelectorAll('[data-permv14-pane="features"]').forEach(p => observer.observe(p, { attributes: true, attributeFilter: ['hidden'] }));
+                // Search filter
+                document.addEventListener('input', e => {
+                  if (e.target.id === 'features-search') {
+                    const q = e.target.value.toLowerCase().trim();
+                    document.querySelectorAll('.feature-card').forEach(c => {
+                      c.style.display = (!q || c.dataset.name.includes(q)) ? '' : 'none';
+                    });
+                  }
+                });
+                document.addEventListener('click', async e => {
+                  if (e.target.id === 'features-refresh') {
+                    const p = document.querySelector('[data-permv14-pane="features"]');
+                    if (p) { p.dataset.loaded = ''; loadFeatures(); }
+                  }
+                  if (e.target.id === 'features-setup-defaults') {
+                    if (!confirm('Pre-cargar tax_rates MX (IVA 16/8/0, EXENTO, IEPS) + features recomendados? Idempotente, no sobrescribe.')) return;
+                    const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+                    try {
+                      const r = await fetch('/api/admin/setup-defaults', {
+                        method: 'POST', headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' }, body: '{}'
+                      });
+                      const d = await r.json();
+                      alert((r.ok ? 'OK\n' : 'Error\n') +
+                        'tax_rates creados: ' + (d.created?.tax_rates||[]).join(', ') + '\n' +
+                        'tax_rates ya existian: ' + (d.skipped?.tax_rates||[]).join(', ') + '\n' +
+                        'features creados: ' + (d.created?.features||[]).join(', '));
+                      const p = document.querySelector('[data-permv14-pane="features"]');
+                      if (p) { p.dataset.loaded = ''; loadFeatures(); }
+                    } catch (e) { alert('Error: ' + e.message); }
+                  }
+                });
+              })();
+            </script>
+          </section>
 
           <!-- Pane: Usuarios (unificado: jerarquía padre→empleados + tipo según override) -->
           <section class="permv14-side-pane permv14-side-pane-wide" data-permv14-pane="users" hidden>

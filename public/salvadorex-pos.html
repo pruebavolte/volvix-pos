@@ -11871,6 +11871,70 @@
     try { if (typeof renderInv === 'function') renderInv(); } catch (_) {}
     try { if (typeof renderCategories === 'function') renderCategories(); } catch (_) {}
   });
+  // 2026-05-14: Notificacion in-app de nueva version disponible.
+  // Aplica a TODAS las plataformas (Web, PWA, .exe via main.js, APK Capacitor).
+  // Para .exe la notificacion es informativa porque electron-updater ya
+  // descarga automatico al cerrar. Para APK es CRITICA porque sin esto el
+  // usuario nunca sabe que hay actualizacion.
+  async function __checkVersionUpdate() {
+    try {
+      // Detectar plataforma actual para enlace correcto
+      const ua = navigator.userAgent || '';
+      const isAndroid = /Android/i.test(ua) || (window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatform() === 'android');
+      const isWindows = /Windows/i.test(ua) && !isAndroid;
+      const isElectron = /Electron/i.test(ua) || (window.process && window.process.versions && window.process.versions.electron);
+
+      // Suprimir banner si ya se mostro en las ultimas 6h
+      const dismissedKey = 'volvix_update_dismissed_at';
+      const lastDismissed = parseInt(localStorage.getItem(dismissedKey) || '0', 10);
+      if (Date.now() - lastDismissed < 6 * 60 * 60 * 1000) return;
+
+      const r = await fetch('/api/version?check_updates=1', { cache: 'no-store' });
+      if (!r.ok) return;
+      const d = await r.json();
+      if (!d.update_available || !d.latest) return;
+
+      // Construir banner
+      const latestV = d.latest.version;
+      const installedV = (d.installed && d.installed.version) || d.version;
+      // Download URL segun plataforma
+      let downloadUrl = d.latest.release_url;
+      let platformLabel = 'Web';
+      if (isAndroid && d.latest.apk_url) { downloadUrl = d.latest.apk_url; platformLabel = 'Android (APK)'; }
+      else if (isElectron) { platformLabel = 'Windows (.exe)'; } // electron-updater auto
+      else if (isWindows && d.latest.exe_url) { downloadUrl = d.latest.exe_url; platformLabel = 'Windows (.exe)'; }
+
+      // Crear banner solo si no existe
+      if (document.getElementById('volvix-update-banner')) return;
+      const banner = document.createElement('div');
+      banner.id = 'volvix-update-banner';
+      banner.style.cssText = [
+        'position:fixed','top:0','left:0','right:0','z-index:99999',
+        'background:linear-gradient(90deg,#1d4ed8,#7c3aed)','color:#fff',
+        'padding:10px 16px','font-family:system-ui,sans-serif','font-size:13px',
+        'display:flex','align-items:center','gap:12px','justify-content:center',
+        'box-shadow:0 2px 8px rgba(0,0,0,0.2)','animation:slideDown 0.4s ease'
+      ].join(';');
+      banner.innerHTML =
+        '<span>🔔 <strong>Nueva versión disponible</strong>: v' + latestV +
+        ' &middot; <span style="opacity:0.85">Tu versión: v' + installedV + '</span></span>' +
+        (isElectron
+          ? '<span style="opacity:0.85">Se actualizará automáticamente al cerrar la app</span>'
+          : '<a href="' + downloadUrl + '" target="_blank" rel="noopener" style="background:#fff;color:#1d4ed8;padding:6px 14px;border-radius:6px;font-weight:600;text-decoration:none;white-space:nowrap;">⬇ Descargar ' + platformLabel + '</a>'
+        ) +
+        '<button id="volvix-update-dismiss" style="background:transparent;border:1px solid rgba(255,255,255,0.4);color:#fff;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:12px;">Después</button>';
+      document.body.appendChild(banner);
+      document.getElementById('volvix-update-dismiss').addEventListener('click', function () {
+        localStorage.setItem(dismissedKey, String(Date.now()));
+        banner.remove();
+      });
+      // Auto-shift content below banner
+      try { document.body.style.paddingTop = (banner.offsetHeight + 'px'); } catch (_) {}
+    } catch (_) { /* fail-soft: si falla, no banner pero la app sigue */ }
+  }
+  // Check 5s despues del load para no impactar TTI
+  window.addEventListener('load', () => setTimeout(__checkVersionUpdate, 5000));
+
   window.addEventListener('DOMContentLoaded', async () => {
     // Render inicial con placeholders (mientras carga el API)
     renderCart();
