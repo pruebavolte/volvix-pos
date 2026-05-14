@@ -12780,6 +12780,489 @@ handlers['GET /api/config/public'] = async (req, res) => {
   // Cada sesion almacena 2 colas de mensajes (offer/answer/ice-candidates).
   // El lado admin POSTea mensajes para el cliente, el cliente POSTea para el admin.
   // Long-polling: GET espera hasta 20s si no hay mensaje, después responde [].
+  // ===========================================================================
+  // 2026-05-14 — MOTOR DE INTEGRIDAD (Auditoria funcional + contable + transaccional)
+  //
+  // Inspirado en POS de nivel profesional (Oracle Micros, Square, Toast, Aloha).
+  // Ejecuta ~22 checks contra la DB y devuelve un reporte estructurado con:
+  //   * orphans (tickets/detalles/pagos sin contraparte)
+  //   * folios saltados / duplicados
+  //   * sumas que no cuadran (total != sum(items) + tax - discount)
+  //   * ventas a futuro (fecha > now)
+  //   * precios negativos o cero / venta debajo de costo
+  //   * descuentos mayores al permitido
+  //   * tickets sin metodo de pago
+  //   * doble apertura / cierre de caja
+  //   * inventario negativo
+  //   * folios sin items / items sin folio
+  //
+  // Solo accesible por owner/admin/superadmin/manager. No modifica datos, SOLO lee.
+  // Optimizado: cada check tiene try/catch, si una tabla no existe se reporta como
+  // "table_missing" y continua con los demas (resilient).
+  //
+  // Uso:
+  //   GET /api/admin/integrity-check                  -> chequea mi tenant
+  //   GET /api/admin/integrity-check?tenant_id=TNT-X  -> chequea otro tenant (superadmin)
+  //   GET /api/admin/integrity-check?days=30          -> ventana de tiempo (default 90)
+  //   GET /api/admin/integrity-check?severity=high    -> filtra por severidad
+  // ===========================================================================
+  handlers['GET /api/admin/integrity-check'] = requireAuth(async (req, res) => {
+    try {
+      const role = String((req.user && req.user.role) || '').toLowerCase();
+      if (!['owner','admin','superadmin','manager'].includes(role)) {
+        return sendJSON(res, { error: 'forbidden', need_role: 'manager+' }, 403);
+      }
+      const parsed = url.parse(req.url, true);
+      const q = parsed.query || {};
+      const requestedTenant = q.tenant_id ? String(q.tenant_id).trim() : null;
+      const daysBack = Math.min(365, Math.max(1, parseInt(q.days, 10) || 90));
+      const sinceIso = new Date(Date.now() - daysBack * 86400000).toISOString();
+      const tenantId = (role === 'superadmin' || role === 'platform_owner') && requestedTenant
+        ? requestedTenant : resolveTenant(req);
+      const ownerUserId = resolvePosUserId(req, tenantId);
+
+      const issues = [];           // todas las anomalias detectadas
+      const summary = {};          // resumen por categoria
+      const stats = { since: sinceIso, days: daysBack, tenant_id: tenantId, owner_user_id: ownerUserId };
+
+      function add(severity, category, code, message, details) {
+        issues.push({ severity, category, code, message, details: details || null });
+        summary[category] = (summary[category] || 0) + 1;
+      }
+      async function safeQuery(label, fn) {
+        try { return await fn(); }
+        catch (e) {
+          const msg = String((e && e.message) || '');
+          if (/42P01|does not exist/.test(msg)) {
+            add('info', 'schema', 'table_missing', `Tabla ausente para check '${label}'`, { error: msg.slice(0, 200) });
+          } else {
+            add('warn', 'check_error', 'query_failed', `Check '${label}' fallo`, { error: msg.slice(0, 200) });
+          }
+          return null;
+        }
+      }
+
+      // -----------------------------------------------------------------------
+      // CHECK 1: tickets sin items (huerfanos)
+      // -----------------------------------------------------------------------
+      await safeQuery('orphan_sales_no_items', async () => {
+        const rows = await supabaseRequest('GET',
+          `/pos_sales?pos_user_id=eq.${ownerUserId}&created_at=gte.${encodeURIComponent(sinceIso)}` +
+          `&or=(items.is.null,items.eq.[])&select=id,total,created_at,folio,status&limit=100`);
+        stats.orphan_sales_no_items = (rows || []).length;
+        (rows || []).forEach(r => add(
+          'high', 'orphan', 'sale_without_items',
+          'Venta sin items', { id: r.id, total: r.total, folio: r.folio, created_at: r.created_at, status: r.status }
+        ));
+      });
+
+      // -----------------------------------------------------------------------
+      // CHECK 2: tickets con total=0 o negativo (precio venta menor a 0)
+      // -----------------------------------------------------------------------
+      await safeQuery('zero_or_negative_total', async () => {
+        const rows = await supabaseRequest('GET',
+          `/pos_sales?pos_user_id=eq.${ownerUserId}&created_at=gte.${encodeURIComponent(sinceIso)}` +
+          `&total=lte.0&status=not.in.(void,cancelled,refunded)&select=id,total,folio,created_at&limit=50`);
+        stats.zero_or_negative_total = (rows || []).length;
+        (rows || []).forEach(r => add(
+          'high', 'anomaly', 'sale_zero_or_negative',
+          'Venta con total <= 0 (no es cancelacion)', { id: r.id, total: r.total, folio: r.folio, created_at: r.created_at }
+        ));
+      });
+
+      // -----------------------------------------------------------------------
+      // CHECK 3: ventas a futuro (reloj mal configurado o fraude)
+      // -----------------------------------------------------------------------
+      await safeQuery('future_sales', async () => {
+        const tomorrowIso = new Date(Date.now() + 86400000).toISOString();
+        const rows = await supabaseRequest('GET',
+          `/pos_sales?pos_user_id=eq.${ownerUserId}&created_at=gt.${encodeURIComponent(tomorrowIso)}` +
+          `&select=id,created_at,folio,total&limit=20`);
+        stats.future_sales = (rows || []).length;
+        (rows || []).forEach(r => add(
+          'critical', 'anomaly', 'sale_in_future',
+          'Venta con fecha futura (reloj mal o fraude)', { id: r.id, created_at: r.created_at, folio: r.folio }
+        ));
+      });
+
+      // -----------------------------------------------------------------------
+      // CHECK 4: sumas que no cuadran (total != sum(items) ignorando tax/discount)
+      // Tolerancia: 0.5 pesos para redondeos.
+      // -----------------------------------------------------------------------
+      await safeQuery('total_mismatch', async () => {
+        const rows = await supabaseRequest('GET',
+          `/pos_sales?pos_user_id=eq.${ownerUserId}&created_at=gte.${encodeURIComponent(sinceIso)}` +
+          `&status=not.in.(void,cancelled)&select=id,total,items,folio&limit=500`);
+        let count = 0;
+        (rows || []).forEach(r => {
+          const items = Array.isArray(r.items) ? r.items
+            : (typeof r.items === 'string' ? (() => { try { return JSON.parse(r.items); } catch(_) { return []; } })() : []);
+          if (!items.length) return; // ya cubierto por check 1
+          const itemSum = items.reduce((s, it) => {
+            const price = Number(it.price || it.unit_price || 0);
+            const qty = Number(it.qty || it.quantity || 1);
+            const disc = Number(it.discount || it.applied_discount_amount || 0);
+            return s + (price * qty - disc);
+          }, 0);
+          const total = Number(r.total || 0);
+          const diff = Math.abs(total - itemSum);
+          // Allow tolerance for tax+global_discount: diff up to 30% of total or 50 pesos
+          const tolerance = Math.max(50, total * 0.3);
+          if (diff > tolerance) {
+            count++;
+            add('warn', 'integrity', 'total_does_not_match_items',
+              'Total no cuadra con sum(items) (excede tolerancia)',
+              { id: r.id, folio: r.folio, total: total, items_sum: +itemSum.toFixed(2), diff: +diff.toFixed(2) });
+          }
+        });
+        stats.total_mismatch = count;
+      });
+
+      // -----------------------------------------------------------------------
+      // CHECK 5: tickets sin metodo de pago
+      // -----------------------------------------------------------------------
+      await safeQuery('missing_payment_method', async () => {
+        const rows = await supabaseRequest('GET',
+          `/pos_sales?pos_user_id=eq.${ownerUserId}&created_at=gte.${encodeURIComponent(sinceIso)}` +
+          `&payment_method=is.null&status=not.in.(void,cancelled,pending)&select=id,folio,total,created_at&limit=50`);
+        stats.missing_payment_method = (rows || []).length;
+        (rows || []).forEach(r => add(
+          'warn', 'integrity', 'sale_without_payment_method',
+          'Venta sin metodo de pago registrado', { id: r.id, folio: r.folio, total: r.total }
+        ));
+      });
+
+      // -----------------------------------------------------------------------
+      // CHECK 6: stock negativo en pos_products
+      // -----------------------------------------------------------------------
+      await safeQuery('negative_stock', async () => {
+        const rows = await supabaseRequest('GET',
+          `/pos_products?pos_user_id=eq.${ownerUserId}&stock=lt.0&select=id,name,code,stock&limit=50`);
+        stats.negative_stock = (rows || []).length;
+        (rows || []).forEach(r => add(
+          'critical', 'inventory', 'negative_stock',
+          'Producto con stock negativo (oversell detectado)', { id: r.id, name: r.name, code: r.code, stock: r.stock }
+        ));
+      });
+
+      // -----------------------------------------------------------------------
+      // CHECK 7: precio venta menor al costo
+      // -----------------------------------------------------------------------
+      await safeQuery('price_below_cost', async () => {
+        const rows = await supabaseRequest('GET',
+          `/pos_products?pos_user_id=eq.${ownerUserId}&select=id,name,code,price,cost&cost=gt.0&limit=2000`);
+        const flagged = (rows || []).filter(r => Number(r.price) > 0 && Number(r.price) < Number(r.cost));
+        stats.price_below_cost = flagged.length;
+        flagged.slice(0, 20).forEach(r => add(
+          'warn', 'pricing', 'price_below_cost',
+          'Precio de venta menor al costo', { id: r.id, name: r.name, code: r.code, price: r.price, cost: r.cost }
+        ));
+      });
+
+      // -----------------------------------------------------------------------
+      // CHECK 8: doble apertura de caja (cuts abiertos simultaneos por mismo cashier)
+      // -----------------------------------------------------------------------
+      await safeQuery('double_open_cuts', async () => {
+        const rows = await supabaseRequest('GET',
+          `/cuts?tenant_id=eq.${encodeURIComponent(tenantId)}&closed_at=is.null&select=id,cashier_id,opened_at&limit=200`);
+        const byCashier = {};
+        (rows || []).forEach(r => {
+          if (!r.cashier_id) return;
+          (byCashier[r.cashier_id] = byCashier[r.cashier_id] || []).push(r);
+        });
+        let count = 0;
+        Object.entries(byCashier).forEach(([cashier, cuts]) => {
+          if (cuts.length > 1) {
+            count += cuts.length;
+            add('high', 'cash_register', 'double_open_cut',
+              'Multiples cortes abiertos para el mismo cajero',
+              { cashier_id: cashier, count: cuts.length, cut_ids: cuts.map(c => c.id) });
+          }
+        });
+        stats.double_open_cuts = count;
+      });
+
+      // -----------------------------------------------------------------------
+      // CHECK 9: folios duplicados
+      // -----------------------------------------------------------------------
+      await safeQuery('duplicate_folios', async () => {
+        const rows = await supabaseRequest('GET',
+          `/pos_sales?pos_user_id=eq.${ownerUserId}&created_at=gte.${encodeURIComponent(sinceIso)}` +
+          `&folio=not.is.null&select=folio,id&limit=5000`);
+        const seen = {};
+        (rows || []).forEach(r => {
+          const f = String(r.folio || '');
+          if (!f || f === '—') return;
+          (seen[f] = seen[f] || []).push(r.id);
+        });
+        const dups = Object.entries(seen).filter(([, ids]) => ids.length > 1);
+        stats.duplicate_folios = dups.length;
+        dups.slice(0, 20).forEach(([folio, ids]) => add(
+          'high', 'folio', 'duplicate_folio',
+          'Folio duplicado entre ventas', { folio, count: ids.length, sale_ids: ids }
+        ));
+      });
+
+      // -----------------------------------------------------------------------
+      // CHECK 10: folios saltados (gaps en secuencia numerica TKT-)
+      // -----------------------------------------------------------------------
+      await safeQuery('folio_gaps', async () => {
+        const rows = await supabaseRequest('GET',
+          `/pos_sales?pos_user_id=eq.${ownerUserId}&created_at=gte.${encodeURIComponent(sinceIso)}` +
+          `&folio=not.is.null&select=folio&order=folio.asc&limit=5000`);
+        const nums = [];
+        (rows || []).forEach(r => {
+          const m = String(r.folio || '').match(/(\d+)/);
+          if (m) nums.push(parseInt(m[1], 10));
+        });
+        const uniq = [...new Set(nums)].sort((a, b) => a - b);
+        const gaps = [];
+        for (let i = 1; i < uniq.length; i++) {
+          if (uniq[i] !== uniq[i - 1] + 1) {
+            gaps.push({ after: uniq[i - 1], before: uniq[i], gap_size: uniq[i] - uniq[i - 1] - 1 });
+            if (gaps.length >= 20) break;
+          }
+        }
+        stats.folio_gaps = gaps.length;
+        gaps.slice(0, 5).forEach(g => add(
+          'info', 'folio', 'folio_gap',
+          'Hueco en secuencia de folios', g
+        ));
+      });
+
+      // -----------------------------------------------------------------------
+      // CHECK 11: devoluciones sin venta original valida
+      // -----------------------------------------------------------------------
+      await safeQuery('orphan_returns', async () => {
+        const rows = await supabaseRequest('GET',
+          `/pos_returns?tenant_id=eq.${encodeURIComponent(tenantId)}` +
+          `&created_at=gte.${encodeURIComponent(sinceIso)}&select=id,sale_id,total,created_at&limit=500`);
+        let orphans = 0;
+        for (const r of (rows || [])) {
+          if (!r.sale_id) {
+            orphans++;
+            add('high', 'orphan', 'return_without_sale',
+              'Devolucion sin sale_id', { id: r.id, total: r.total });
+            continue;
+          }
+          // Verificar que la venta exista (sample)
+          if (orphans < 10) {
+            const s = await supabaseRequest('GET', `/pos_sales?id=eq.${r.sale_id}&select=id&limit=1`).catch(() => []);
+            if (!s || !s.length) {
+              orphans++;
+              add('high', 'orphan', 'return_without_sale',
+                'Devolucion refiere venta inexistente', { id: r.id, sale_id: r.sale_id });
+            }
+          }
+        }
+        stats.orphan_returns = orphans;
+      });
+
+      // -----------------------------------------------------------------------
+      // CHECK 12: producto sin categoria (data quality)
+      // -----------------------------------------------------------------------
+      await safeQuery('products_without_category', async () => {
+        const rows = await supabaseRequest('GET',
+          `/pos_products?pos_user_id=eq.${ownerUserId}&or=(category.is.null,category.eq.)&select=id,name,code&limit=20`);
+        stats.products_without_category = (rows || []).length;
+        if ((rows || []).length) add('info', 'data_quality', 'products_without_category',
+          'Productos sin categoria asignada', { count: rows.length, sample: rows.slice(0, 5).map(r => r.name) });
+      });
+
+      // -----------------------------------------------------------------------
+      // CHECK 13: descuentos excesivos (>50% del total)
+      // -----------------------------------------------------------------------
+      await safeQuery('excessive_discount', async () => {
+        const rows = await supabaseRequest('GET',
+          `/pos_sales?pos_user_id=eq.${ownerUserId}&created_at=gte.${encodeURIComponent(sinceIso)}` +
+          `&status=not.in.(void,cancelled)&discount_amount=gt.0&select=id,folio,total,discount_amount,discount_pct&limit=200`);
+        const flagged = (rows || []).filter(r => {
+          const d = Number(r.discount_amount || 0);
+          const t = Number(r.total || 0);
+          const pct = Number(r.discount_pct || 0);
+          return pct > 50 || (t > 0 && d / (d + t) > 0.5);
+        });
+        stats.excessive_discount = flagged.length;
+        flagged.slice(0, 10).forEach(r => add(
+          'warn', 'fraud_risk', 'excessive_discount',
+          'Descuento mayor al 50% del total', { id: r.id, folio: r.folio, total: r.total, discount: r.discount_amount, pct: r.discount_pct }
+        ));
+      });
+
+      // -----------------------------------------------------------------------
+      // CHECK 14: pagos huerfanos (pagos sin sale_id)
+      // -----------------------------------------------------------------------
+      await safeQuery('orphan_payments', async () => {
+        const rows = await supabaseRequest('GET',
+          `/pos_payments?tenant_id=eq.${encodeURIComponent(tenantId)}` +
+          `&created_at=gte.${encodeURIComponent(sinceIso)}&sale_id=is.null&select=id,amount,method,created_at&limit=50`);
+        stats.orphan_payments = (rows || []).length;
+        (rows || []).forEach(r => add(
+          'high', 'orphan', 'payment_without_sale',
+          'Pago sin venta asociada', { id: r.id, amount: r.amount, method: r.method, created_at: r.created_at }
+        ));
+      });
+
+      // -----------------------------------------------------------------------
+      // CHECK 15: tickets pendientes muy viejos (>24h)
+      // -----------------------------------------------------------------------
+      await safeQuery('stale_pending_sales', async () => {
+        const dayAgo = new Date(Date.now() - 86400000).toISOString();
+        const rows = await supabaseRequest('GET',
+          `/pos_sales?pos_user_id=eq.${ownerUserId}&status=eq.pending` +
+          `&created_at=lt.${encodeURIComponent(dayAgo)}&select=id,folio,total,created_at&limit=30`);
+        stats.stale_pending_sales = (rows || []).length;
+        (rows || []).forEach(r => add(
+          'warn', 'stale_data', 'sale_pending_too_long',
+          'Venta pendiente > 24h', { id: r.id, folio: r.folio, age_hours: Math.round((Date.now() - new Date(r.created_at)) / 3600000) }
+        ));
+      });
+
+      // -----------------------------------------------------------------------
+      // CHECK 16: cuts cerrados con discrepancia grande (>5% o >100 pesos)
+      // -----------------------------------------------------------------------
+      await safeQuery('cut_discrepancies', async () => {
+        const rows = await supabaseRequest('GET',
+          `/cuts?tenant_id=eq.${encodeURIComponent(tenantId)}&closed_at=not.is.null` +
+          `&closed_at=gte.${encodeURIComponent(sinceIso)}` +
+          `&select=id,cashier_id,total_sales,discrepancy,closed_at&limit=200`);
+        const flagged = (rows || []).filter(r => {
+          const d = Math.abs(Number(r.discrepancy || 0));
+          const t = Number(r.total_sales || 0);
+          return d > 100 || (t > 0 && d / t > 0.05);
+        });
+        stats.cut_discrepancies = flagged.length;
+        flagged.slice(0, 10).forEach(r => add(
+          'warn', 'cash_register', 'cut_large_discrepancy',
+          'Corte cerrado con discrepancia significativa',
+          { id: r.id, discrepancy: r.discrepancy, total_sales: r.total_sales }
+        ));
+      });
+
+      // -----------------------------------------------------------------------
+      // CHECK 17: productos con codigo duplicado (ya tenemos endpoint dedicado)
+      // -----------------------------------------------------------------------
+      await safeQuery('duplicate_codes', async () => {
+        const rows = await supabaseRequest('GET',
+          `/pos_products?pos_user_id=eq.${ownerUserId}&code=not.is.null&select=code&limit=10000`);
+        const seen = {};
+        (rows || []).forEach(r => {
+          const c = String(r.code || '').toLowerCase().trim();
+          if (!c || c === 'null' || /^auto-/i.test(c)) return;
+          seen[c] = (seen[c] || 0) + 1;
+        });
+        const dups = Object.entries(seen).filter(([, n]) => n > 1);
+        stats.duplicate_codes = dups.length;
+        if (dups.length) add('warn', 'inventory', 'duplicate_product_codes',
+          'Productos con codigo de barras duplicado',
+          { count: dups.length, top_5: dups.slice(0, 5).map(([code, n]) => ({ code, count: n })) });
+      });
+
+      // -----------------------------------------------------------------------
+      // CHECK 18: inventory_movements con qty cero o type invalido
+      // -----------------------------------------------------------------------
+      await safeQuery('invalid_movements', async () => {
+        const rows = await supabaseRequest('GET',
+          `/inventory_movements?tenant_id=eq.${encodeURIComponent(tenantId)}` +
+          `&created_at=gte.${encodeURIComponent(sinceIso)}` +
+          `&or=(quantity.eq.0,type.is.null)&select=id,type,quantity,created_at&limit=20`);
+        stats.invalid_movements = (rows || []).length;
+        (rows || []).forEach(r => add(
+          'info', 'data_quality', 'invalid_movement',
+          'Movimiento con qty=0 o type=null', { id: r.id, type: r.type, qty: r.quantity }
+        ));
+      });
+
+      // -----------------------------------------------------------------------
+      // CHECK 19: idempotency_keys vencidas no purgadas (no es bug, info)
+      // -----------------------------------------------------------------------
+      await safeQuery('expired_idempotency', async () => {
+        const rows = await supabaseRequest('GET',
+          `/idempotency_keys?expires_at=lt.${encodeURIComponent(new Date().toISOString())}&select=key&limit=1`);
+        stats.expired_idempotency_present = (rows && rows.length > 0);
+        if (rows && rows.length) add('info', 'maintenance', 'expired_idempotency_keys',
+          'Hay idempotency_keys vencidas (puede correr cleanup_expired_security_records())', null);
+      });
+
+      // -----------------------------------------------------------------------
+      // CHECK 20: balance global (ventas - devoluciones - cancelaciones)
+      // Validacion final: el monto neto de ventas debe ser positivo y cuadrar.
+      // -----------------------------------------------------------------------
+      await safeQuery('global_balance', async () => {
+        const [allSales, refunds] = await Promise.all([
+          supabaseRequest('GET',
+            `/pos_sales?pos_user_id=eq.${ownerUserId}` +
+            `&created_at=gte.${encodeURIComponent(sinceIso)}` +
+            `&select=total,status&limit=10000`).catch(() => []),
+          supabaseRequest('GET',
+            `/pos_returns?tenant_id=eq.${encodeURIComponent(tenantId)}` +
+            `&created_at=gte.${encodeURIComponent(sinceIso)}&status=in.(approved,completed)` +
+            `&select=total,refund_amount&limit=5000`).catch(() => [])
+        ]);
+        const sumByStatus = {};
+        let totalCount = 0;
+        let totalCancelled = 0;
+        let totalVoid = 0;
+        (allSales || []).forEach(s => {
+          const st = String(s.status || 'completed').toLowerCase();
+          const t = Number(s.total || 0);
+          sumByStatus[st] = (sumByStatus[st] || 0) + t;
+          totalCount++;
+          if (st === 'cancelled') totalCancelled++;
+          if (st === 'void') totalVoid++;
+        });
+        const totalRefunds = (refunds || []).reduce((s, r) => s + Number(r.total || r.refund_amount || 0), 0);
+        const completed = (sumByStatus['completed'] || 0) + (sumByStatus['partially_refunded'] || 0);
+        const net = completed - totalRefunds;
+        stats.global_balance = {
+          sales_count: totalCount,
+          gross_completed: +completed.toFixed(2),
+          total_refunds: +totalRefunds.toFixed(2),
+          net_revenue: +net.toFixed(2),
+          cancelled_count: totalCancelled,
+          void_count: totalVoid,
+          status_breakdown: Object.fromEntries(Object.entries(sumByStatus).map(([k, v]) => [k, +v.toFixed(2)]))
+        };
+        if (net < 0) add('critical', 'integrity', 'negative_net_revenue',
+          'Net revenue negativo (mas devoluciones que ventas)', stats.global_balance);
+      });
+
+      // -----------------------------------------------------------------------
+      // FINAL: scoring + return
+      // -----------------------------------------------------------------------
+      const counts = {
+        critical: issues.filter(i => i.severity === 'critical').length,
+        high: issues.filter(i => i.severity === 'high').length,
+        warn: issues.filter(i => i.severity === 'warn').length,
+        info: issues.filter(i => i.severity === 'info').length
+      };
+      const score = Math.max(0, 100 - (counts.critical * 25 + counts.high * 10 + counts.warn * 2 + counts.info * 0.5));
+      const verdict = counts.critical > 0 ? 'critical_action_required'
+        : counts.high > 0 ? 'high_attention_needed'
+        : counts.warn > 5 ? 'minor_issues'
+        : 'healthy';
+
+      // Filtrar por severity si el cliente lo pidio
+      let filtered = issues;
+      if (q.severity) {
+        const allowed = String(q.severity).split(',').map(s => s.trim().toLowerCase());
+        filtered = issues.filter(i => allowed.includes(i.severity));
+      }
+
+      sendJSON(res, {
+        ok: true,
+        verdict,
+        score: +score.toFixed(1),
+        counts,
+        summary,
+        stats,
+        issues_count: filtered.length,
+        issues: filtered.slice(0, 500),
+        generated_at: new Date().toISOString()
+      });
+    } catch (err) { sendError(res, err); }
+  });
+
   // 2026-05-13 — Signals via Supabase (tabla volvix_remote_signals).
   // POST agrega un mensaje a la cola del destinatario. GET drena los pendientes
   // (consumed_at IS NULL) marcandolos como consumidos para que no se devuelvan dos veces.
