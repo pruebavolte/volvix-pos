@@ -2650,7 +2650,15 @@
     tryMount();
   });
 </script>
-  <script src="/volvix-uplift-wiring.js" defer></script>
+  <!-- 2026-05-14 PERF FIX: volvix-uplift-wiring.js REMOVED del panel.
+       Tiene MutationObserver que en cada nodo añadido hace setTimeout(50ms) +
+       window.getComputedStyle() (forza reflow). Al renderizar 180 usuarios
+       (miles de nodos), dispara miles de getComputedStyle SINCRONOS = freeze
+       del browser (sintoma: 'La pagina no responde' + RAM 90%).
+       Tambien tiene un _sweep() que itera 'body *' y getComputedStyle por
+       elemento — O(n²) reflow cascade.
+       El script es para limpiar floaters en landings, NO aplica al panel admin.
+       SIGUE cargado en salvadorex-pos.html y landings donde si tiene sentido. -->
   <script src="/volvix-error-reporter.js" defer></script>
   <script defer src="volvix-intro-tour-wiring.js"></script>
 <!-- Override título y canonical para paneldecontrol -->
