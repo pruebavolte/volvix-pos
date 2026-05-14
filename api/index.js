@@ -12052,6 +12052,28 @@ handlers['GET /api/config/public'] = async (req, res) => {
     } catch(_){}
   }
 
+  // 2026-05-13 — Diagnostico: verifica si las tablas de remote-support existen
+  handlers['GET /api/admin/remote-support/_diag'] = requireAuth(async (req, res) => {
+    const role = String((req.user && req.user.role) || '').toLowerCase();
+    if (role !== 'superadmin' && role !== 'platform_owner') return sendJSON(res, { ok:false, error:'forbidden' }, 403);
+    const out = { ok: true, tables: {} };
+    // Test sessions table
+    try {
+      const rows = await supabaseRequest('GET', '/volvix_remote_sessions?limit=1');
+      out.tables.sessions = { exists: true, sample_count: (rows || []).length };
+    } catch (e) {
+      out.tables.sessions = { exists: false, error: String(e.message || e).slice(0, 300) };
+    }
+    // Test signals table
+    try {
+      const rows = await supabaseRequest('GET', '/volvix_remote_signals?limit=1');
+      out.tables.signals = { exists: true, sample_count: (rows || []).length };
+    } catch (e) {
+      out.tables.signals = { exists: false, error: String(e.message || e).slice(0, 300) };
+    }
+    return sendJSON(res, out);
+  }, ['superadmin','platform_owner']);
+
   // Admin solicita soporte remoto a un usuario
   handlers['POST /api/admin/remote-support/request'] = requireAuth(async (req, res) => {
     const role = String((req.user && req.user.role) || '').toLowerCase();
