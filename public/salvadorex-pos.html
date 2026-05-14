@@ -2850,11 +2850,13 @@
   async function _rsStartWebRTC(sid){
     const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
     try {
-      // 1) Permiso de compartir pantalla (popup nativo del browser — no se puede skip)
-      const stream = await navigator.mediaDevices.getDisplayMedia({
-        video: { displaySurface: 'monitor' },
-        audio: false
-      });
+      // 1) Permiso de compartir pantalla — multiplataforma:
+      //    - Web/Chrome desktop: getDisplayMedia (popup nativo del browser)
+      //    - Electron (Windows .exe): electronAPI.captureScreen() si esta expuesto
+      //    - Capacitor Android: plugin ScreenSharing si instalado, sino getDisplayMedia
+      //    - iOS: Safari 15+ soporta getDisplayMedia
+      const platform = _rsDetectPlatform();
+      const stream = await _rsAcquireStream(platform);
       _rsLocalStream = stream;
       const preview = document.getElementById('vlx-remote-preview');
       if (preview) { preview.srcObject = stream; preview.style.display = 'block'; }
@@ -2927,18 +2929,69 @@
     const preview = document.getElementById('vlx-remote-preview');
     if (preview) { preview.srcObject = null; preview.style.display = 'none'; }
   }
-  // 2026-05-13: detecta plataforma para que el admin sepa Win/Android/iOS/Web
+  // 2026-05-13: detecta plataforma + capacidades para que el admin sepa que
+  // metodo de captura puede usar. Funciona en Web, Electron (.exe), Capacitor.
   function _rsDetectPlatform(){
     const ua = navigator.userAgent || '';
-    let os = 'web';
-    if (/Android/i.test(ua)) os = 'android';
-    else if (/iPhone|iPad|iPod/i.test(ua)) os = 'ios';
+    // Detectar entorno: web, electron, capacitor-android, capacitor-ios
+    const isElectron = !!((typeof window.process === 'object' && window.process.versions && window.process.versions.electron) || /Electron/i.test(ua));
+    const isCapacitor = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform());
+    const capPlatform = isCapacitor && window.Capacitor.getPlatform ? window.Capacitor.getPlatform() : null;
+    let mode = 'web';
+    if (isElectron) mode = 'electron';
+    else if (isCapacitor) mode = 'capacitor-' + (capPlatform || 'unknown');
+
+    let os = 'unknown';
+    if (/Android/i.test(ua) || capPlatform === 'android') os = 'android';
+    else if (/iPhone|iPad|iPod/i.test(ua) || capPlatform === 'ios') os = 'ios';
     else if (/Windows/i.test(ua)) os = 'windows';
     else if (/Mac OS X|Macintosh/i.test(ua)) os = 'mac';
     else if (/Linux/i.test(ua)) os = 'linux';
+
+    let browser = 'other';
+    if (isElectron) browser = 'Electron';
+    else if (/Edg\//i.test(ua)) browser = 'Edge';
+    else if (/Chrome\//.test(ua)) browser = 'Chrome';
+    else if (/Firefox\//.test(ua)) browser = 'Firefox';
+    else if (/Safari\//.test(ua)) browser = 'Safari';
+
     const isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
-    const browser = /Chrome\//.test(ua) ? 'chrome' : /Firefox\//.test(ua) ? 'firefox' : /Safari\//.test(ua) ? 'safari' : 'other';
-    return { os, browser, pwa: isStandalone, ua: ua.slice(0, 200) };
+
+    return {
+      os, browser, mode,
+      pwa: isStandalone && !isElectron && !isCapacitor,
+      ua: ua.slice(0, 200),
+      // Capacidades: que metodos de captura disponibles + control
+      capabilities: {
+        getDisplayMedia: !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia),
+        webRTC: typeof RTCPeerConnection !== 'undefined',
+        electronCapture: isElectron && !!(window.electronAPI && window.electronAPI.captureScreen),
+        electronControl: isElectron && !!(window.electronAPI && window.electronAPI.simulateInput),  // mouse/teclado nativo via electronAPI
+        capacitorScreen: isCapacitor && !!(window.Capacitor.Plugins && (window.Capacitor.Plugins.ScreenSharing || window.Capacitor.Plugins.ScreenCapture))
+      }
+    };
+  }
+  // 2026-05-13: elegir mejor metodo de captura segun plataforma.
+  // Web: getDisplayMedia (popup eleccion ventana). Solo VIEW.
+  // Electron (.exe): electronAPI.captureScreen() si esta expuesto via preload,
+  //                  da MediaStream completo sin popup. Si tiene simulateInput,
+  //                  permite control de mouse/teclado nativo via robotjs.
+  // Capacitor Android: plugin ScreenSharing / ScreenCapture si esta instalado.
+  //                    Si no, fallback a getDisplayMedia (Chrome Android 11+).
+  // Capacitor iOS: getDisplayMedia (Safari/iOS 15+) — limitado.
+  async function _rsAcquireStream(platform){
+    const cap = platform.capabilities || {};
+    if (cap.electronCapture && window.electronAPI) {
+      try { return await window.electronAPI.captureScreen(); } catch(_){}
+    }
+    if (cap.capacitorScreen && window.Capacitor && window.Capacitor.Plugins) {
+      const plug = window.Capacitor.Plugins.ScreenSharing || window.Capacitor.Plugins.ScreenCapture;
+      try { return await plug.startCapture(); } catch(_){}
+    }
+    if (cap.getDisplayMedia) {
+      return await navigator.mediaDevices.getDisplayMedia({ video: { displaySurface: 'monitor' }, audio: false });
+    }
+    throw new Error('Plataforma ' + platform.os + ' / ' + platform.mode + ' no soporta compartir pantalla');
   }
 
   document.getElementById('vlx-remote-accept').addEventListener('click', async () => {
