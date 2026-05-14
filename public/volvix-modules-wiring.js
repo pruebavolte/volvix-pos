@@ -839,6 +839,14 @@
   function loadNotificationsCenter() {
     if (window.__vlxNotifWiringLoaded) return;
     if (document.querySelector('script[data-vlx-notif]')) return;
+    // 2026-05-14 FIX DUPLICATE: tambien chequear por src path. uplift-wiring
+    // o el HTML estatico pueden haberlo cargado sin nuestro data-attr.
+    var allScripts = document.querySelectorAll('script[src]');
+    for (var i = 0; i < allScripts.length; i++) {
+      var src = allScripts[i].getAttribute('src') || '';
+      var bare = src.replace(/^\//, '').split('?')[0].split('#')[0];
+      if (bare === 'volvix-notifications-wiring.js') return;
+    }
     try {
       var s = document.createElement('script');
       s.src = '/volvix-notifications-wiring.js';
