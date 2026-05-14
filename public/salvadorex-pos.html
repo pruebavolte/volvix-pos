@@ -3300,7 +3300,35 @@
     }
   } catch(e) { console.warn('[IMPERSONATING] token bootstrap fail', e); }
   window.IMPERSONATING = { email: imEmail, tid: imTid || null, since: Date.now(), hasToken: !!imToken };
-  console.warn('[IMPERSONATING] vista como:', imEmail, '@', imTid, 'token:', imToken ? 'YES (read-only JWT)' : 'NO (fallback to super JWT)');
+  console.warn('[IMPERSONATING] vista como:', imEmail, '@', imTid, 'token:', imToken ? 'YES (full access JWT)' : 'NO (fallback to super JWT)');
+
+  // 2026-05-14: Global error handler para impersonation.
+  // El usuario reporto crashes del browser. Logueamos cualquier error a sessionStorage
+  // para poder debuggear despues. Tambien capturamos 401/403 storms.
+  (function setupImpErrorTrap(){
+    var errs = [];
+    var origConsoleErr = console.error;
+    function logErr(type, info) {
+      try {
+        errs.push({ type: type, ts: Date.now(), info: String(info).slice(0, 500) });
+        if (errs.length > 50) errs.shift();
+        sessionStorage.setItem('__imp_error_log', JSON.stringify(errs));
+      } catch(_){}
+    }
+    window.addEventListener('error', function(e){
+      logErr('error', (e.message || '') + ' @ ' + (e.filename || '') + ':' + (e.lineno || ''));
+    });
+    window.addEventListener('unhandledrejection', function(e){
+      logErr('promise', String(e.reason).slice(0, 200));
+    });
+    console.error = function() {
+      try { logErr('console.error', Array.from(arguments).map(a => String(a).slice(0,80)).join(' ')); } catch(_){}
+      return origConsoleErr.apply(console, arguments);
+    };
+    window.__impLogReader = function() {
+      try { return JSON.parse(sessionStorage.getItem('__imp_error_log') || '[]'); } catch(_) { return []; }
+    };
+  })();
 
   // 0) Stylesheet inyectado — resistente a manipulaciones inline. El !important
   //    en body padding evita que otros wirings de Volvix lo sobreescriban.
@@ -9005,6 +9033,17 @@
     var token = '';
     try { token = (typeof _vToken === 'function') ? _vToken() : ''; } catch (_) {}
     if (!token) return false; // aún no hay login
+    // 2026-05-14: en modo IMPERSONATION (admin actuando como otro usuario):
+    //   - Heartbeat: no necesario (imp_token tiene TTL 30min server-side)
+    //   - Inactivity tracker: si dispara, fuerza reload que pierde imp_token del
+    //     hash y deja la tab en login screen sin contexto. MUY MALO para soporte.
+    //   - Polling de eventos: puede traer eventos de session_revoked que dispara
+    //     forceLogout y bota la sesion impersonada.
+    // Por seguridad NO inicializamos estos en modo impersonacion.
+    if (window.IMPERSONATING && window.IMPERSONATING.email) {
+      console.warn('[R8B] Bootstrap SKIPPED — modo IMPERSONATION (sin heartbeat/inactivity/polling)');
+      return true;
+    }
     __r8bLoadSessionConfig().then(function () {
       __r8bStartHeartbeat();
       __r8bStartInactivityTracker();
