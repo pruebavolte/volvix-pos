@@ -13613,6 +13613,279 @@ handlers['GET /api/config/public'] = async (req, res) => {
     } catch (err) { sendError(res, err); }
   });
 
+  // ===========================================================================
+  // 2026-05-14 — R29: CRUD endpoints para Motor de Perifericos
+  // 8 modulos: printers, printer_routes, print_queue, print_history,
+  //            fingerprint_enrollments, fingerprint_logs, printer_status, module_terminology
+  // ===========================================================================
+
+  // Helper generico para CRUD basico tenant-scoped
+  function _r29Crud(table, opts) {
+    const allowed = (opts && opts.allowedFields) || [];
+    const writeRole = (opts && opts.writeRole) || ['owner','admin','superadmin','manager'];
+    return {
+      list: requireAuth(async (req, res) => {
+        try {
+          const tnt = resolveTenant(req);
+          const q = url.parse(req.url, true).query || {};
+          let qs = `?tenant_id=eq.${encodeURIComponent(tnt)}&select=*&order=created_at.desc&limit=500`;
+          ['active','status','type','printer_id','customer_id','user_id','document_type','event_type'].forEach(f => {
+            if (q[f] !== undefined) qs += `&${f}=eq.${encodeURIComponent(q[f])}`;
+          });
+          const rows = await supabaseRequest('GET', '/' + table + qs);
+          sendJSON(res, rows || []);
+        } catch (err) { sendError(res, err); }
+      }),
+      create: requireAuth(async (req, res) => {
+        try {
+          const role = String((req.user && req.user.role) || '').toLowerCase();
+          if (!writeRole.includes(role)) return sendJSON(res, { error: 'forbidden' }, 403);
+          const body = await readBody(req);
+          const row = { tenant_id: resolveTenant(req) };
+          allowed.forEach(f => { if (f in body) row[f] = body[f]; });
+          const result = await supabaseRequest('POST', '/' + table, row);
+          try { logAudit(req, table + '.created', table, { id: (result && result[0] && result[0].id) }); } catch(_){}
+          sendJSON(res, (result && result[0]) || result, 201);
+        } catch (err) { sendError(res, err); }
+      }),
+      update: requireAuth(async (req, res, params) => {
+        try {
+          const role = String((req.user && req.user.role) || '').toLowerCase();
+          if (!writeRole.includes(role)) return sendJSON(res, { error: 'forbidden' }, 403);
+          if (!isUuid(params.id)) return sendJSON(res, { error: 'invalid id' }, 400);
+          const body = await readBody(req);
+          const patch = {};
+          allowed.forEach(f => { if (f in body) patch[f] = body[f]; });
+          patch.updated_at = new Date().toISOString();
+          const tnt = resolveTenant(req);
+          const result = await supabaseRequest('PATCH',
+            `/${table}?id=eq.${params.id}&tenant_id=eq.${encodeURIComponent(tnt)}`, patch);
+          try { logAudit(req, table + '.updated', table, { id: params.id, patch }); } catch(_){}
+          sendJSON(res, (result && result[0]) || result);
+        } catch (err) { sendError(res, err); }
+      }),
+      remove: requireAuth(async (req, res, params) => {
+        try {
+          const role = String((req.user && req.user.role) || '').toLowerCase();
+          if (!writeRole.includes(role)) return sendJSON(res, { error: 'forbidden' }, 403);
+          if (!isUuid(params.id)) return sendJSON(res, { error: 'invalid id' }, 400);
+          const tnt = resolveTenant(req);
+          // Soft-delete preferido (active=false) si la tabla tiene columna active
+          try {
+            await supabaseRequest('PATCH',
+              `/${table}?id=eq.${params.id}&tenant_id=eq.${encodeURIComponent(tnt)}`,
+              { active: false, updated_at: new Date().toISOString() });
+          } catch (_) {
+            await supabaseRequest('DELETE', `/${table}?id=eq.${params.id}&tenant_id=eq.${encodeURIComponent(tnt)}`);
+          }
+          try { logAudit(req, table + '.deleted', table, { id: params.id }); } catch(_){}
+          sendJSON(res, { ok: true });
+        } catch (err) { sendError(res, err); }
+      })
+    };
+  }
+
+  // PRINTERS CRUD
+  const _printersCrud = _r29Crud('printers', {
+    allowedFields: ['name','device_name','type','connection','paper_size','config','is_default','active','capabilities']
+  });
+  handlers['GET /api/printers'] = _printersCrud.list;
+  handlers['POST /api/printers'] = _printersCrud.create;
+  handlers['PATCH /api/printers/:id'] = _printersCrud.update;
+  handlers['DELETE /api/printers/:id'] = _printersCrud.remove;
+
+  // PRINTER_ROUTES CRUD
+  const _routesCrud = _r29Crud('printer_routes', {
+    allowedFields: ['priority','rule_type','match_value','printer_id','format','copies','active']
+  });
+  handlers['GET /api/printer-routes'] = _routesCrud.list;
+  handlers['POST /api/printer-routes'] = _routesCrud.create;
+  handlers['PATCH /api/printer-routes/:id'] = _routesCrud.update;
+  handlers['DELETE /api/printer-routes/:id'] = _routesCrud.remove;
+
+  // PRINT_QUEUE: agregar a la cola
+  handlers['GET /api/print-queue'] = _r29Crud('print_queue').list;
+  handlers['POST /api/print-queue'] = requireAuth(async (req, res) => {
+    try {
+      const body = await readBody(req);
+      if (!body.document_type || !body.payload) {
+        return sendValidation(res, 'document_type y payload requeridos', 'document_type');
+      }
+      const row = {
+        tenant_id: resolveTenant(req),
+        printer_id: isUuid(body.printer_id) ? body.printer_id : null,
+        document_type: String(body.document_type).slice(0, 40),
+        reference_id: isUuid(body.reference_id) ? body.reference_id : null,
+        payload: body.payload,
+        format: body.format ? String(body.format).slice(0, 40) : null,
+        copies: Math.min(99, Math.max(1, parseInt(body.copies, 10) || 1)),
+        max_attempts: Math.min(10, Math.max(1, parseInt(body.max_attempts, 10) || 3)),
+        status: 'pending',
+        user_id: req.user && req.user.id
+      };
+      const result = await supabaseRequest('POST', '/print_queue', row);
+      sendJSON(res, (result && result[0]) || result, 201);
+    } catch (err) { sendError(res, err); }
+  });
+  // Marcar item como impreso (cliente reporta exito/fallo)
+  handlers['POST /api/print-queue/:id/complete'] = requireAuth(async (req, res, params) => {
+    try {
+      if (!isUuid(params.id)) return sendJSON(res, { error: 'invalid id' }, 400);
+      const body = await readBody(req);
+      const success = !!body.success;
+      const tnt = resolveTenant(req);
+      const patch = {
+        status: success ? 'done' : 'failed',
+        attempts: body.attempts || 1,
+        last_error: body.error || null,
+        completed_at: new Date().toISOString()
+      };
+      const result = await supabaseRequest('PATCH',
+        `/print_queue?id=eq.${params.id}&tenant_id=eq.${encodeURIComponent(tnt)}`, patch);
+      // Log en print_history
+      try {
+        await supabaseRequest('POST', '/print_history', {
+          tenant_id: tnt,
+          queue_id: params.id,
+          printer_id: body.printer_id || null,
+          printer_name: body.printer_name || null,
+          document_type: body.document_type || null,
+          reference_id: body.reference_id || null,
+          status: success ? 'success' : 'failed',
+          copies: body.copies || 1,
+          user_id: req.user && req.user.id,
+          error: body.error || null,
+          duration_ms: body.duration_ms || null
+        });
+      } catch (_) {}
+      sendJSON(res, { ok: true, item: (result && result[0]) || result });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // PRINT_HISTORY (read-only)
+  handlers['GET /api/print-history'] = _r29Crud('print_history').list;
+
+  // FINGERPRINT enrollments
+  handlers['GET /api/fingerprints'] = _r29Crud('fingerprint_enrollments').list;
+  handlers['POST /api/fingerprints/enroll'] = requireAuth(async (req, res) => {
+    try {
+      const body = await readBody(req);
+      if (!body.template_b64) return sendValidation(res, 'template_b64 requerido', 'template_b64');
+      const tnt = resolveTenant(req);
+      // Hash para detectar duplicados
+      const hash = crypto.createHash('sha256').update(body.template_b64).digest('hex');
+      const row = {
+        tenant_id: tnt,
+        customer_id: isUuid(body.customer_id) ? body.customer_id : null,
+        user_id: isUuid(body.user_id) ? body.user_id : null,
+        finger_index: Math.min(9, Math.max(0, parseInt(body.finger_index, 10) || 0)),
+        template_b64: String(body.template_b64),
+        template_hash: hash,
+        quality_score: body.quality_score ? Math.min(100, Math.max(0, parseInt(body.quality_score, 10))) : null,
+        device_model: body.device_model ? String(body.device_model).slice(0, 60) : null,
+        enrolled_by: req.user && req.user.id
+      };
+      const result = await supabaseRequest('POST', '/fingerprint_enrollments', row);
+      // Log
+      try {
+        await supabaseRequest('POST', '/fingerprint_logs', {
+          tenant_id: tnt,
+          enrollment_id: (result && result[0] && result[0].id),
+          event_type: 'enroll',
+          customer_id: row.customer_id,
+          user_id: row.user_id,
+          device_model: row.device_model,
+          ip: req.headers['x-forwarded-for'] || req.socket && req.socket.remoteAddress
+        });
+      } catch (_) {}
+      sendJSON(res, (result && result[0]) || result, 201);
+    } catch (err) {
+      const msg = String((err && err.message) || '');
+      if (/23505|duplicate key/i.test(msg)) {
+        return sendJSON(res, { error: 'duplicate_template', message: 'Esta huella ya esta registrada' }, 409);
+      }
+      sendError(res, err);
+    }
+  });
+  // Verificacion: cliente manda template_hash, server busca match
+  handlers['POST /api/fingerprints/verify'] = requireAuth(async (req, res) => {
+    try {
+      const body = await readBody(req);
+      if (!body.template_hash) return sendValidation(res, 'template_hash requerido', 'template_hash');
+      const tnt = resolveTenant(req);
+      const rows = await supabaseRequest('GET',
+        `/fingerprint_enrollments?tenant_id=eq.${encodeURIComponent(tnt)}` +
+        `&template_hash=eq.${encodeURIComponent(body.template_hash)}` +
+        `&active=eq.true&select=*&limit=1`);
+      const found = rows && rows[0];
+      // Log
+      try {
+        await supabaseRequest('POST', '/fingerprint_logs', {
+          tenant_id: tnt,
+          enrollment_id: found ? found.id : null,
+          event_type: found ? 'verify_ok' : 'verify_fail',
+          customer_id: found ? found.customer_id : null,
+          user_id: found ? found.user_id : null,
+          device_model: body.device_model || null,
+          match_score: body.match_score || (found ? 100 : 0),
+          ip: req.headers['x-forwarded-for'] || req.socket && req.socket.remoteAddress
+        });
+      } catch (_) {}
+      sendJSON(res, { found: !!found, enrollment: found || null });
+    } catch (err) { sendError(res, err); }
+  });
+  handlers['GET /api/fingerprints/logs'] = _r29Crud('fingerprint_logs').list;
+
+  // PRINTER_STATUS (upsert)
+  handlers['POST /api/printer-status'] = requireAuth(async (req, res) => {
+    try {
+      const body = await readBody(req);
+      if (!isUuid(body.printer_id)) return sendValidation(res, 'printer_id requerido', 'printer_id');
+      const tnt = resolveTenant(req);
+      // Upsert via DELETE+INSERT (PostgREST limitation)
+      try { await supabaseRequest('DELETE', `/printer_status?printer_id=eq.${body.printer_id}`); } catch(_){}
+      const row = {
+        tenant_id: tnt,
+        printer_id: body.printer_id,
+        status: body.status || 'unknown',
+        last_seen: new Date().toISOString(),
+        last_error: body.last_error || null,
+        paper_level: body.paper_level || null
+      };
+      const result = await supabaseRequest('POST', '/printer_status', row);
+      sendJSON(res, (result && result[0]) || result);
+    } catch (err) { sendError(res, err); }
+  });
+  handlers['GET /api/printer-status'] = _r29Crud('printer_status').list;
+
+  // MODULE_TERMINOLOGY (customizar etiquetas por giro)
+  handlers['GET /api/module-terminology'] = _r29Crud('module_terminology').list;
+  handlers['POST /api/module-terminology'] = requireAuth(async (req, res) => {
+    try {
+      const role = String((req.user && req.user.role) || '').toLowerCase();
+      if (!['owner','admin','superadmin'].includes(role)) {
+        return sendJSON(res, { error: 'forbidden' }, 403);
+      }
+      const body = await readBody(req);
+      if (!body.module_key || !body.custom_label) {
+        return sendValidation(res, 'module_key y custom_label requeridos', 'module_key');
+      }
+      const tnt = resolveTenant(req);
+      // Upsert
+      try { await supabaseRequest('DELETE',
+        `/module_terminology?tenant_id=eq.${encodeURIComponent(tnt)}&module_key=eq.${encodeURIComponent(body.module_key)}`); } catch(_){}
+      const row = {
+        tenant_id: tnt,
+        module_key: String(body.module_key).slice(0, 60),
+        custom_label: String(body.custom_label).slice(0, 120),
+        giro: body.giro ? String(body.giro).slice(0, 30) : null,
+        active: body.active !== false
+      };
+      const result = await supabaseRequest('POST', '/module_terminology', row);
+      sendJSON(res, (result && result[0]) || result);
+    } catch (err) { sendError(res, err); }
+  });
+
   // --- PRODUCT_LOTS (lotes/caducidades) ---
   handlers['GET /api/product-lots'] = requireAuth(async (req, res) => {
     try {
@@ -13876,6 +14149,13 @@ handlers['GET /api/config/public'] = async (req, res) => {
         { key: 'fingerprint_hid',   name: 'Lector Huella HID',    category: 'hardware',  description: 'HID U.are.U 4500 / Ingressio U.R.U. 4500 (gimnasio check-in)' },
         { key: 'auto_print_format', name: 'Formato Imprimible Auto', category: 'pricing', description: 'Ticket 58/80mm o Nota 1/4 1/2 hoja completa o Cotizacion' },
         { key: 'print_copies_multi',name: 'Multi-Copias Ticket',  category: 'hardware',  description: 'Imprimir 1-99 copias por venta. Marca ORIGINAL/COPIA' },
+        { key: 'print_queue_offline', name: 'Cola Impresion Offline', category: 'hardware', description: 'Cola con retry automatico, sobrevive offline + reintenta al reconectar' },
+        { key: 'print_history_log', name: 'Historial Impresiones',  category: 'hardware', description: 'Log inmutable: quien, cuando, que impresora, exito/fallo' },
+        { key: 'printer_status_realtime', name: 'Estado Impresoras Tiempo Real', category: 'hardware', description: 'Detecta offline / paper out / error / bateria baja por impresora' },
+        { key: 'labels_printing',   name: 'Etiquetas (Labels)',     category: 'hardware', description: 'Impresion de etiquetas codigos de barras, precios, productos' },
+        { key: 'comandas_cocina',   name: 'Comandas Cocina/Barra',  category: 'restaurant', description: 'Imprime comandas separadas por area (cocina/barra/almacen/reparto/produccion)' },
+        { key: 'fingerprint_gym',   name: 'Modulo Gimnasio Huella', category: 'crm',      description: 'Check-in/check-out por huella + validacion membresia activa' },
+        { key: 'module_terminology', name: 'Terminologia Personalizable', category: 'admin', description: 'Renombra "clientes" -> "socios", "ventas" -> "cobros", etc. por giro' },
         { key: 'voice_search',      name: 'Busqueda por Voz',     category: 'ui',        description: 'Web Speech API para buscar productos' },
         { key: 'dark_mode',         name: 'Tema Oscuro',          category: 'ui',        description: 'Tema dark/light switch' },
         { key: 'multi_currency',    name: 'Multi-Moneda',         category: 'pricing',   description: 'USD/MXN/EUR con tipo de cambio' },
