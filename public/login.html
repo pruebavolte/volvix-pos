@@ -23,9 +23,11 @@
   <meta name="twitter:image" content="https://salvadorexoficial.com/og-default.png">
 
   <!-- Fuentes -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- 2026-05-14 PERF: Google Fonts era render-blocking. Eliminado. Usamos system fonts
+       (Apple/Windows/Linux nativos). Stack ya estaba en CSS como fallback. -->
+  <!-- <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"> -->
+
 
 <style>
 /* ── BASE ── */
@@ -102,7 +104,12 @@ html, body {
   justify-content: center;
   font-size: 26px;
   box-shadow: 0 0 0 1px rgba(251,191,36,0.3), 0 8px 24px rgba(251,191,36,0.35);
-  animation: bounce 3s ease-in-out infinite;
+  /* 2026-05-14 PERF: bounce 3s infinite gastaba CPU/GPU sin razon. Eliminado.
+     El logo se ve igual de bien estatico. */
+}
+@media (prefers-reduced-motion: no-preference) {
+  /* Solo si el usuario NO tiene prefiere-menos-movimiento: animacion sutil de entrada */
+  .logo-badge { animation: fadeIn 0.4s ease-out; }
 }
 
 @keyframes bounce {
@@ -982,35 +989,6 @@ document.getElementById('passwordInput').addEventListener('keydown', e => {
 <script src="auth-helper.js"></script>
 <link rel="stylesheet" href="volvix-modals.css">
 <script defer src="volvix-modals.js"></script>
-<script src="volvix-pwa-wiring.js" defer></script>
-<script src="volvix-i18n-wiring.js" defer></script>
-<script src="volvix-theme-wiring.js" defer></script>
-<script src="volvix-email-wiring.js" defer></script>
-<script src="volvix-webrtc-wiring.js" defer></script>
-<script src="volvix-master-controller.js" defer></script>
-<script src="volvix-calendar-wiring.js" defer></script>
-<script src="volvix-payments-wiring.js" defer></script>
-<script src="volvix-gamification-wiring.js" defer></script>
-<script src="volvix-perf-wiring.js" defer></script>
-<script src="volvix-realtime-wiring.js" defer></script>
-<script src="volvix-currency-wiring.js" defer></script>
-<script src="volvix-loyalty-wiring.js" defer></script>
-<script src="volvix-tax-wiring.js" defer></script>
-<script src="volvix-webhooks-wiring.js" defer></script>
-<script src="volvix-audit-wiring.js" defer></script>
-<script src="volvix-cache-wiring.js" defer></script>
-<script src="volvix-queue-wiring.js" defer></script>
-<script src="volvix-fulltext-wiring.js" defer></script>
-<script src="volvix-recommendations-wiring.js" defer></script>
-<script src="volvix-subscriptions-wiring.js" defer></script>
-<script src="volvix-plugins-wiring.js" defer></script>
-<script src="volvix-compliance-wiring.js" defer></script>
-<script src="volvix-cs-wiring.js" defer></script>
-<script src="volvix-ratelimit-wiring.js" defer></script>
-<script src="volvix-workflow-wiring.js" defer></script>
-<script src="volvix-ab-testing-wiring.js" defer></script>
-<script src="volvix-feedback-wiring.js" defer></script>
-<script src="volvix-inventory-ai-wiring.js" defer></script>
 
 <!-- R12b FIX-LEGAL-5: footer legal -->
 <footer style="text-align:center;padding:20px 16px;font-size:12px;color:#8a93a6;border-top:1px solid #1f2740;margin-top:24px;background:transparent;">
