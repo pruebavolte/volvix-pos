@@ -6988,12 +6988,19 @@
     wireDeviceTabs();
     wireSearch();
     refreshNavCounts();
-    // Por default mostrar 'modules' y, si hay tenant, seleccionar 'pos'
-    setActiveNav('modules');
+    // 2026-05-14: Default a 'users' (el caso de uso mas comun del panel).
+    // Otros tabs (modules/giros/audit/versions) siguen accesibles via sidebar.
+    // Si querras volver al default modules, usa #permisos:modules en la URL.
+    const hash = location.hash || '';
+    const subTab = (hash.match(/#permisos:?(\w+)?/) || [])[1];
+    const defaultPane = subTab || 'users';
+    setActiveNav(defaultPane);
     if (!v14.selectedMod) v14.selectedMod = 'pos';
-    renderModulesList();
-    renderConfigPane();
-    renderPreview();
+    if (defaultPane === 'modules') {
+      renderModulesList();
+      renderConfigPane();
+      renderPreview();
+    }
     console.log('[PERMv14] layout listo');
   }
 
@@ -7474,12 +7481,15 @@
       // con screenshot — usuario, tipo, giro, etc. desplazados una columna).
       const emailCell = (userId, email) => cellInput({ rowType: 'user', rowId: userId, field: 'email', value: email });
       const nameCell = (userId, name) => cellInput({ rowType: 'user', rowId: userId, field: 'full_name', value: name });
+      // 2026-05-14: SIMPLIFICACION
+      // - Quitamos ✏️ Editar: las celdas ya son editables tipo Excel (click → escribir)
+      // - 👁‍🗨 Ver como y 🖥 Control remoto siempre visibles (si no hay email del owner,
+      //   usamos el tenant_id como proxy — abre el portal del tenant impersonado)
       const inlineTenantActions = (tid, email) => '<td class="u-actions">'
-        + '<button data-pv14-edit-tenant="' + escapeAttr(tid) + '" title="Editar permisos">✏️</button>'
-        + '<button data-pv14-diff-tenant="' + escapeAttr(tid) + '" title="Ver diff">👁</button>'
-        + '<button data-pv14-apply-tenant="' + escapeAttr(tid) + '" title="Aplicar preset">⚡</button>'
-        + (email ? '<button data-pv14-view-as="' + escapeAttr(email) + '" data-pv14-tid="' + escapeAttr(tid) + '" title="Ver como">👁‍🗨</button>' : '')
-        + (email ? '<button data-pv14-remote="' + escapeAttr(email) + '" data-pv14-tid="' + escapeAttr(tid) + '" title="Control remoto (soporte tecnico con consentimiento)" style="color:#2563EB;">🖥</button>' : '')
+        + '<button data-pv14-diff-tenant="' + escapeAttr(tid) + '" title="Ver qué cambia si aplico el giro de la fila">👁</button>'
+        + '<button data-pv14-apply-tenant="' + escapeAttr(tid) + '" title="Aplicar preset del giro de esta fila">⚡</button>'
+        + '<button data-pv14-view-as="' + escapeAttr(email || '') + '" data-pv14-tid="' + escapeAttr(tid) + '" title="Ver como este usuario (abrir su portal sin password)" style="color:#7c3aed;">👁‍🗨</button>'
+        + '<button data-pv14-remote="' + escapeAttr(email || '') + '" data-pv14-tid="' + escapeAttr(tid) + '" title="Control remoto · soporte técnico con consentimiento" style="color:#2563EB;">🖥</button>'
         + '<button data-pv14-delete="' + escapeAttr(tid) + '" data-pv14-deltype="tenant" data-pv14-dellabel="' + escapeAttr((t.name||tid)) + '" title="Eliminar tenant + sus usuarios" style="color:#DC2626;">🗑</button>'
         + '</td>';
 
@@ -8184,15 +8194,30 @@
       });
     }
 
-    // ⚡ Aplicar perfil: usa el giro elegido en el mismo row
+    // 2026-05-14: helper para leer el giro del row actual (input cell, no select).
+    // Antes buscabamos select[data-pv14-row-giro] que NO existe; los cells ahora
+    // son input[data-pv14-cell][data-field="business_type"]. Si tampoco hay,
+    // intenta leer el primer texto de la celda GIRO (columna 3) como fallback.
+    function _getRowGiro(tr){
+      if (!tr) return '';
+      const input = tr.querySelector('input[data-pv14-cell][data-field="business_type"]');
+      if (input && input.value) return input.value.trim().toLowerCase();
+      const cells = tr.querySelectorAll('td');
+      const giroCell = cells[3];
+      if (giroCell) {
+        const inp = giroCell.querySelector('input');
+        if (inp && inp.value) return inp.value.trim().toLowerCase();
+        return (giroCell.innerText || '').trim().toLowerCase().replace(/—/g, '');
+      }
+      return '';
+    }
+
+    // ⚡ Aplicar perfil: lee giro del row, no pide nada
     wrap.querySelectorAll('button[data-pv14-apply-tenant]').forEach(btn => {
       btn.addEventListener('click', async () => {
         const tid = btn.dataset.pv14ApplyTenant;
-        const tr = btn.closest('tr');
-        const giroSel = tr && tr.querySelector('select[data-pv14-row-giro]');
-        const slug = giroSel && giroSel.value;
-        if (!slug) { alert('Elige un giro en el dropdown de esta fila antes de aplicar.'); return; }
-        // 2026-05-09 fix(M5): modal estilizado en vez de confirm() nativo
+        const slug = _getRowGiro(btn.closest('tr'));
+        if (!slug) { alert('Esta fila no tiene giro asignado. Escribe uno en la columna GIRO primero.'); return; }
         const ok = await permv14Modal({
           title: '⚡ Aplicar perfil',
           body: 'Aplicar perfil "' + slug + '" a ' + tid + '?\n\nVa a setear los módulos al estado base del giro.',
@@ -8207,51 +8232,62 @@
       });
     });
 
-    // 👁 Ver diff: muestra qué cambia si aplico el giro elegido
+    // 👁 Ver diff: lee giro del row, no pide nada
     wrap.querySelectorAll('button[data-pv14-diff-tenant]').forEach(btn => {
       btn.addEventListener('click', async () => {
         const tid = btn.dataset.pv14DiffTenant;
-        const tr = btn.closest('tr');
-        const giroSel = tr && tr.querySelector('select[data-pv14-row-giro]');
-        const slug = giroSel && giroSel.value;
-        if (!slug) { alert('Elige un giro en el dropdown antes de ver el diff.'); return; }
+        const slug = _getRowGiro(btn.closest('tr'));
+        if (!slug) { alert('Esta fila no tiene giro asignado. Escribe uno en la columna GIRO primero.'); return; }
         await switchToTenant(tid);
         if (window.PERM && window.PERM.previewProfile) await window.PERM.previewProfile(slug);
       });
     });
-    // 👁 Ver como — abre el POS en una nueva pestaña con ?impersonate=<email>&tid=<tid>
-    // El boot del POS detecta los params, muestra banner amarillo, bloquea writes,
-    // y aplica los flags del tenant + overrides locales del usuario.
+    // 👁‍🗨 Ver como — abre el POS DEL CLIENTE (salvadorex-pos.html) en nueva
+    // pestaña con su sesión (JWT read-only) ya cargada. El admin ve EXACTAMENTE
+    // lo que vería ese usuario: sus productos, su giro, su plan, etc.
+    // 2026-05-14: cambio importante:
+    //   - ANTES abria paneldecontrol.html (misma url) con impersonate params
+    //   - AHORA abre /salvadorex-pos.html (el POS real del cliente)
+    //   - Pasamos nombre, giro y plan en query params para que el banner los muestre
     wrap.querySelectorAll('button[data-pv14-view-as]').forEach(btn => {
       btn.addEventListener('click', async () => {
         const email = btn.dataset.pv14ViewAs;
         const tid = btn.dataset.pv14Tid;
-        if (!email || !tid) { alert('Faltan datos para impersonar.'); return; }
-        // 2026-05-09: ANTES de abrir la pestaña, mintear un JWT read-only via
-        // POST /api/admin/tenant/:tid/impersonate. El JWT lleva is_impersonation:true
-        // y el server bloquea TODO write con ese JWT (defensa real, no solo client).
-        // El token viaja por URL fragment (#imp_token=...) — fragmentos NO viajan al
-        // server ni quedan en logs/referers. La nueva pestaña lo lee del fragment
-        // y lo guarda en sessionStorage (per-tab, no contamina la sesión del super).
+        if (!tid) { alert('Faltan datos del tenant para impersonar.'); return; }
+        // Lectura del row para enriquecer el banner del impersonado
+        const tr = btn.closest('tr');
+        const cells = tr ? tr.querySelectorAll('td') : [];
+        const nameOrEmail = email || (cells[1] && cells[1].innerText.replace(/^[👤🏪👑]\s*/, '').trim()) || tid;
+        const giro = _getRowGiro(tr) || '';
+        const plan = (function(){
+          const planCell = cells[7];
+          if (!planCell) return '';
+          const inp = planCell.querySelector('input');
+          if (inp && inp.value) return inp.value;
+          return (planCell.innerText || '').trim().replace(/—/g, '');
+        })();
+
         btn.disabled = true; const origLabel = btn.textContent; btn.textContent = '⏳';
         try {
           const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
           const r = await fetch('/api/admin/tenant/' + encodeURIComponent(tid) + '/impersonate', {
             method: 'POST',
             headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ reason: 'view_as_user:' + email }),
+            body: JSON.stringify({ reason: 'view_as_user:' + (email || tid) }),
           });
           const j = await r.json();
           if (!r.ok || !j.token) {
             alert('No se pudo crear sesión de impersonación: ' + (j.error || r.status));
             return;
           }
-          const url = new URL(location.href);
-          url.search = ''; url.hash = '';
-          url.searchParams.set('_v', '14h');
-          url.searchParams.set('impersonate', email);
+          // URL absoluta al POS REAL del cliente (no al panel)
+          const url = new URL('/salvadorex-pos.html', location.origin);
+          url.searchParams.set('impersonate', email || tid);
           url.searchParams.set('tid', tid);
-          // Token va en fragment — NO logs, NO referers, NO query strings
+          if (giro) url.searchParams.set('imp_giro', giro);
+          if (plan) url.searchParams.set('imp_plan', plan);
+          if (nameOrEmail && nameOrEmail !== email) url.searchParams.set('imp_name', nameOrEmail);
+          // Token via URL fragment — NO logs, NO referers, NO query strings
           url.hash = 'imp_token=' + encodeURIComponent(j.token);
           window.open(url.toString(), '_blank', 'noopener');
         } catch (e) {
