@@ -6074,6 +6074,34 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
         status: 'completada',
       };
       await supabaseRequest('POST', '/volvix_devoluciones', dev);
+      // 2026-05-14 BUG FIX: el sistema legacy /api/devoluciones (vs el moderno
+      // /api/returns con approve flow) NUNCA restockeaba inventario. Si alguien
+      // llama este endpoint (integraciones externas, scripts), el stock NO se
+      // ajustaba. Ahora intentamos restock automatico igual que el approve flow.
+      try {
+        var devStockItems = items
+          .filter(function (it) { return it && (it.id || it.product_id) && /^[0-9a-f-]{36}$/i.test(String(it.id || it.product_id)); })
+          .map(function (it) { return { id: String(it.id || it.product_id), qty: Math.abs(Number(it.cantidad || it.qty) || 0) }; })
+          .filter(function (it) { return it.qty > 0; });
+        if (devStockItems.length) {
+          try {
+            await supabaseRequest('POST', '/rpc/restock_atomic', { items: devStockItems });
+          } catch (rpcErr) {
+            // Fallback PATCH si la RPC no existe
+            for (var k = 0; k < devStockItems.length; k++) {
+              var ditem = devStockItems[k];
+              try {
+                var dRow = await supabaseRequest('GET',
+                  '/pos_products?id=eq.' + encodeURIComponent(ditem.id) + '&select=stock&limit=1');
+                var dStock = (Array.isArray(dRow) && dRow[0] && Number(dRow[0].stock)) || 0;
+                await supabaseRequest('PATCH',
+                  '/pos_products?id=eq.' + encodeURIComponent(ditem.id),
+                  { stock: dStock + ditem.qty });
+              } catch (_) {}
+            }
+          }
+        }
+      } catch (_) { /* no bloquear creacion de devolucion */ }
       // Crear nota de crédito si aplica
       if (dev.tipo_reembolso === 'nota_credito') {
         try {
@@ -6914,7 +6942,45 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
         '/inventory_counts?id=eq.' + params.id,
         { status: 'finalized', finished_at: new Date().toISOString() });
 
-      sendJSON(res, { ok: true, applied, count: result });
+      // 2026-05-14 BUG FIX reportado por usuario:
+      // "los botones funcionan pero no tienen logica entre si"
+      // Conteo fisico finalize escribia en inventory_stock (tabla branch-aware)
+      // pero NO en pos_products.stock (la tabla GLOBAL que lee /api/products,
+      // /api/inventory, decrement_stock_atomic, etc.). Resultado: ajustar via
+      // conteo fisico no reflejaba el cambio en Inventario ni en Vender.
+      // FIX: tras finalizar el conteo, sync pos_products.stock = sum de
+      // inventory_stock.qty por producto del tenant. Best-effort; si falla,
+      // no bloquea la respuesta del conteo.
+      var sync_pos_products = { attempted: 0, updated: 0, errors: 0 };
+      try {
+        var productIds = (lines || [])
+          .filter(function (l) { return l && l.product_id; })
+          .map(function (l) { return l.product_id; });
+        if (productIds.length) {
+          var uniq = Array.from(new Set(productIds));
+          var idChunk = uniq.slice(0, 500).map(encodeURIComponent).join(',');
+          // Lee stock por sucursal de los productos contados
+          var invRows = await supabaseRequest('GET',
+            '/inventory_stock?tenant_id=eq.' + encodeURIComponent(tenant) +
+            '&product_id=in.(' + idChunk + ')&select=product_id,qty').catch(function () { return []; });
+          var sumByProduct = {};
+          (invRows || []).forEach(function (r) {
+            var k = String(r.product_id);
+            sumByProduct[k] = (sumByProduct[k] || 0) + (Number(r.qty) || 0);
+          });
+          for (var pid in sumByProduct) {
+            sync_pos_products.attempted++;
+            try {
+              await supabaseRequest('PATCH',
+                '/pos_products?id=eq.' + encodeURIComponent(pid),
+                { stock: Math.round(sumByProduct[pid]) });
+              sync_pos_products.updated++;
+            } catch (_) { sync_pos_products.errors++; }
+          }
+        }
+      } catch (_) { /* fail-soft, conteo ya quedo finalizado */ }
+
+      sendJSON(res, { ok: true, applied, count: result, sync_pos_products: sync_pos_products });
     } catch (err) { sendError(res, err); }
   });
 })();
@@ -24534,13 +24600,50 @@ if (process.env.NODE_ENV === 'test') {
       var items = Array.isArray(cur.items) ? cur.items
                 : (Array.isArray(cur.items_returned) ? cur.items_returned : []);
       var restocked = 0;
+      var restock_errors = [];
       try {
+        // 2026-05-14 BUG FIX CRITICO reportado por usuario "si se devuelve no se
+        // regresa al inventario":
+        // ANTES: llamaba decrement_stock_atomic con qty NEGATIVA -> esa RPC
+        //   rechaza qty<=0 con EXCEPTION 'invalid_qty' (R22 linea 67) -> el catch
+        //   tragaba el error -> restock NUNCA ejecutaba -> contaba como exitoso.
+        // AHORA: llama nueva RPC restock_atomic (qty positiva). Si no existe
+        //   (migracion R24 pendiente), fallback a PATCH manual (lectura+update
+        //   por item, no atomico pero correcto). Tracking de errores.
         var stockItems = items
           .filter(function (it) { return it && it.product_id && b43mIsUuid(String(it.product_id)); })
-          .map(function (it) { return { id: it.product_id, qty: -Math.abs(Number(it.qty || it.quantity) || 0) }; });
+          .map(function (it) { return { id: it.product_id, qty: Math.abs(Number(it.qty || it.quantity) || 0) }; })
+          .filter(function (it) { return it.qty > 0; });
         if (stockItems.length) {
-          await supabaseRequest('POST', '/rpc/decrement_stock_atomic', { items: stockItems }).catch(function () {});
-          restocked = stockItems.length;
+          var rpcOk = false;
+          try {
+            await supabaseRequest('POST', '/rpc/restock_atomic', { items: stockItems });
+            rpcOk = true;
+            restocked = stockItems.length;
+          } catch (rpcErr) {
+            var rpcMsg = String((rpcErr && rpcErr.message) || '');
+            // 42883 = function does not exist; otros errores genuinos los logueamos
+            if (!/42883|does not exist/i.test(rpcMsg)) {
+              restock_errors.push({ rpc: 'restock_atomic', error: rpcMsg.slice(0, 200) });
+            }
+          }
+          if (!rpcOk) {
+            // Fallback: PATCH manual por item (no atomico pero correcto).
+            for (var i = 0; i < stockItems.length; i++) {
+              var item = stockItems[i];
+              try {
+                var curRow = await supabaseRequest('GET',
+                  '/pos_products?id=eq.' + encodeURIComponent(item.id) + '&select=stock&limit=1');
+                var curStock = (Array.isArray(curRow) && curRow[0] && Number(curRow[0].stock)) || 0;
+                await supabaseRequest('PATCH',
+                  '/pos_products?id=eq.' + encodeURIComponent(item.id),
+                  { stock: curStock + item.qty });
+                restocked++;
+              } catch (patchErr) {
+                restock_errors.push({ id: item.id, error: String((patchErr && patchErr.message) || '').slice(0, 200) });
+              }
+            }
+          }
         }
       } catch (_) {}
       // 2. Credit customer balance if store_credit refund_method
@@ -24570,11 +24673,12 @@ if (process.env.NODE_ENV === 'test') {
             approved_at: new Date().toISOString()
           });
       } catch (e) { return sendError(res, e); }
-      try { logAudit(req, 'return.approved', 'pos_returns', { id: id, after: { status: 'approved', amount: amount, restocked: restocked, credit_applied: creditApplied } }); } catch (_) {}
+      try { logAudit(req, 'return.approved', 'pos_returns', { id: id, after: { status: 'approved', amount: amount, restocked: restocked, restock_errors: restock_errors.length, credit_applied: creditApplied } }); } catch (_) {}
       sendJSON(res, {
         ok: true,
         return: (upd && upd[0]) || upd,
         restocked_items: restocked,
+        restock_errors: restock_errors,
         credit_applied: creditApplied
       });
     } catch (err) { sendError(res, err); }
