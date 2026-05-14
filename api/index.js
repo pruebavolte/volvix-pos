@@ -13417,6 +13417,318 @@ handlers['GET /api/config/public'] = async (req, res) => {
     } catch (err) { sendError(res, err); }
   };
 
+  // ===========================================================================
+  // 2026-05-14 — R27 CRUD endpoints para las 5 tablas nuevas
+  //
+  // Patron: cada modulo expone GET (list), POST (create), PATCH (update), DELETE.
+  // Todos requieren auth manager+ y filtran/scopean por tenant_id automaticamente.
+  // ===========================================================================
+
+  // --- PRODUCT_LOTS (lotes/caducidades) ---
+  handlers['GET /api/product-lots'] = requireAuth(async (req, res) => {
+    try {
+      const tnt = resolveTenant(req);
+      const q = url.parse(req.url, true).query || {};
+      let qs = `?tenant_id=eq.${encodeURIComponent(tnt)}&select=*&order=expiry_date.asc.nullslast&limit=500`;
+      if (q.product_id) qs += `&product_id=eq.${encodeURIComponent(q.product_id)}`;
+      if (q.active === 'true') qs += `&active=eq.true`;
+      if (q.expiring_in_days) {
+        const future = new Date(Date.now() + parseInt(q.expiring_in_days, 10) * 86400000).toISOString().slice(0, 10);
+        qs += `&expiry_date=lte.${encodeURIComponent(future)}`;
+      }
+      const rows = await supabaseRequest('GET', '/product_lots' + qs);
+      sendJSON(res, rows || []);
+    } catch (err) { sendError(res, err); }
+  });
+  handlers['POST /api/product-lots'] = requireAuth(async (req, res) => {
+    try {
+      const role = String((req.user && req.user.role) || '').toLowerCase();
+      if (!['owner','admin','superadmin','manager'].includes(role)) {
+        return sendJSON(res, { error: 'forbidden', need_role: 'manager+' }, 403);
+      }
+      const body = await readBody(req);
+      if (!isUuid(body.product_id)) return sendValidation(res, 'product_id (uuid) requerido', 'product_id');
+      if (!body.lot_number) return sendValidation(res, 'lot_number requerido', 'lot_number');
+      const row = {
+        tenant_id: resolveTenant(req),
+        product_id: body.product_id,
+        lot_number: String(body.lot_number).slice(0, 80),
+        qty: Number(body.qty) || 0,
+        expiry_date: body.expiry_date || null,
+        cost: Number(body.cost) || null,
+        supplier_id: isUuid(body.supplier_id) ? body.supplier_id : null,
+        notes: body.notes ? String(body.notes).slice(0, 500) : null,
+        active: body.active !== false
+      };
+      const result = await supabaseRequest('POST', '/product_lots', row);
+      try { logAudit(req, 'product_lot.created', 'product_lots', { id: (result && result[0] && result[0].id), product_id: body.product_id }); } catch(_){}
+      sendJSON(res, (result && result[0]) || result, 201);
+    } catch (err) { sendError(res, err); }
+  });
+  handlers['PATCH /api/product-lots/:id'] = requireAuth(async (req, res, params) => {
+    try {
+      const role = String((req.user && req.user.role) || '').toLowerCase();
+      if (!['owner','admin','superadmin','manager'].includes(role)) {
+        return sendJSON(res, { error: 'forbidden' }, 403);
+      }
+      if (!isUuid(params.id)) return sendJSON(res, { error: 'invalid id' }, 400);
+      const body = await readBody(req);
+      const allowed = ['lot_number','qty','expiry_date','cost','supplier_id','notes','active'];
+      const patch = {};
+      allowed.forEach(k => { if (k in body) patch[k] = body[k]; });
+      patch.updated_at = new Date().toISOString();
+      const tnt = resolveTenant(req);
+      const result = await supabaseRequest('PATCH',
+        `/product_lots?id=eq.${params.id}&tenant_id=eq.${encodeURIComponent(tnt)}`, patch);
+      try { logAudit(req, 'product_lot.updated', 'product_lots', { id: params.id, patch }); } catch(_){}
+      sendJSON(res, (result && result[0]) || result);
+    } catch (err) { sendError(res, err); }
+  });
+  handlers['DELETE /api/product-lots/:id'] = requireAuth(async (req, res, params) => {
+    try {
+      const role = String((req.user && req.user.role) || '').toLowerCase();
+      if (!['owner','admin','superadmin'].includes(role)) {
+        return sendJSON(res, { error: 'forbidden' }, 403);
+      }
+      if (!isUuid(params.id)) return sendJSON(res, { error: 'invalid id' }, 400);
+      const tnt = resolveTenant(req);
+      // Soft-delete: set active=false (no DELETE fisico para conservar historico)
+      await supabaseRequest('PATCH',
+        `/product_lots?id=eq.${params.id}&tenant_id=eq.${encodeURIComponent(tnt)}`,
+        { active: false, updated_at: new Date().toISOString() });
+      try { logAudit(req, 'product_lot.deleted', 'product_lots', { id: params.id }); } catch(_){}
+      sendJSON(res, { ok: true, soft_deleted: true });
+    } catch (err) { sendError(res, err); }
+  });
+
+  // --- PRODUCT_SERIALS (series/IMEI) ---
+  handlers['GET /api/product-serials'] = requireAuth(async (req, res) => {
+    try {
+      const tnt = resolveTenant(req);
+      const q = url.parse(req.url, true).query || {};
+      let qs = `?tenant_id=eq.${encodeURIComponent(tnt)}&select=*&order=created_at.desc&limit=500`;
+      if (q.product_id) qs += `&product_id=eq.${encodeURIComponent(q.product_id)}`;
+      if (q.status) qs += `&status=eq.${encodeURIComponent(q.status)}`;
+      if (q.serial) qs += `&serial_number=eq.${encodeURIComponent(q.serial)}`;
+      const rows = await supabaseRequest('GET', '/product_serials' + qs);
+      sendJSON(res, rows || []);
+    } catch (err) { sendError(res, err); }
+  });
+  handlers['POST /api/product-serials'] = requireAuth(async (req, res) => {
+    try {
+      const role = String((req.user && req.user.role) || '').toLowerCase();
+      if (!['owner','admin','superadmin','manager'].includes(role)) {
+        return sendJSON(res, { error: 'forbidden' }, 403);
+      }
+      const body = await readBody(req);
+      if (!isUuid(body.product_id)) return sendValidation(res, 'product_id (uuid) requerido', 'product_id');
+      if (!body.serial_number) return sendValidation(res, 'serial_number requerido', 'serial_number');
+      const row = {
+        tenant_id: resolveTenant(req),
+        product_id: body.product_id,
+        serial_number: String(body.serial_number).slice(0, 80),
+        imei: body.imei ? String(body.imei).slice(0, 30) : null,
+        status: ['available','sold','reserved','returned','defective'].includes(body.status) ? body.status : 'available',
+        cost: Number(body.cost) || null,
+        notes: body.notes ? String(body.notes).slice(0, 500) : null
+      };
+      const result = await supabaseRequest('POST', '/product_serials', row);
+      try { logAudit(req, 'product_serial.created', 'product_serials', { id: (result && result[0] && result[0].id) }); } catch(_){}
+      sendJSON(res, (result && result[0]) || result, 201);
+    } catch (err) { sendError(res, err); }
+  });
+  handlers['PATCH /api/product-serials/:id'] = requireAuth(async (req, res, params) => {
+    try {
+      if (!isUuid(params.id)) return sendJSON(res, { error: 'invalid id' }, 400);
+      const body = await readBody(req);
+      const allowed = ['status','imei','sale_id','notes','sold_at'];
+      const patch = {};
+      allowed.forEach(k => { if (k in body) patch[k] = body[k]; });
+      patch.updated_at = new Date().toISOString();
+      const tnt = resolveTenant(req);
+      const result = await supabaseRequest('PATCH',
+        `/product_serials?id=eq.${params.id}&tenant_id=eq.${encodeURIComponent(tnt)}`, patch);
+      try { logAudit(req, 'product_serial.updated', 'product_serials', { id: params.id, patch }); } catch(_){}
+      sendJSON(res, (result && result[0]) || result);
+    } catch (err) { sendError(res, err); }
+  });
+
+  // --- TAX_RATES (impuestos configurables) ---
+  handlers['GET /api/tax-rates'] = requireAuth(async (req, res) => {
+    try {
+      const tnt = resolveTenant(req);
+      const rows = await supabaseRequest('GET',
+        `/tax_rates?tenant_id=eq.${encodeURIComponent(tnt)}&select=*&order=is_default.desc,name.asc&limit=200`);
+      sendJSON(res, rows || []);
+    } catch (err) { sendError(res, err); }
+  });
+  handlers['POST /api/tax-rates'] = requireAuth(async (req, res) => {
+    try {
+      const role = String((req.user && req.user.role) || '').toLowerCase();
+      if (!['owner','admin','superadmin'].includes(role)) {
+        return sendJSON(res, { error: 'forbidden', need_role: 'admin' }, 403);
+      }
+      const body = await readBody(req);
+      if (!body.code) return sendValidation(res, 'code requerido', 'code');
+      if (!body.name) return sendValidation(res, 'name requerido', 'name');
+      const ratePct = Number(body.rate_pct);
+      if (!Number.isFinite(ratePct) || ratePct < 0 || ratePct > 100) {
+        return sendValidation(res, 'rate_pct debe estar entre 0 y 100', 'rate_pct');
+      }
+      const row = {
+        tenant_id: resolveTenant(req),
+        code: String(body.code).slice(0, 40).toUpperCase(),
+        name: String(body.name).slice(0, 100),
+        rate_pct: ratePct,
+        type: ['trasladado','retenido','exento'].includes(body.type) ? body.type : 'trasladado',
+        is_default: !!body.is_default,
+        active: body.active !== false,
+        sat_code: body.sat_code ? String(body.sat_code).slice(0, 20) : null,
+        description: body.description ? String(body.description).slice(0, 200) : null
+      };
+      const result = await supabaseRequest('POST', '/tax_rates', row);
+      try { logAudit(req, 'tax_rate.created', 'tax_rates', { code: body.code, rate_pct: ratePct }); } catch(_){}
+      sendJSON(res, (result && result[0]) || result, 201);
+    } catch (err) { sendError(res, err); }
+  });
+  handlers['PATCH /api/tax-rates/:id'] = requireAuth(async (req, res, params) => {
+    try {
+      const role = String((req.user && req.user.role) || '').toLowerCase();
+      if (!['owner','admin','superadmin'].includes(role)) {
+        return sendJSON(res, { error: 'forbidden' }, 403);
+      }
+      if (!isUuid(params.id)) return sendJSON(res, { error: 'invalid id' }, 400);
+      const body = await readBody(req);
+      const allowed = ['name','rate_pct','type','is_default','active','sat_code','description'];
+      const patch = {};
+      allowed.forEach(k => { if (k in body) patch[k] = body[k]; });
+      patch.updated_at = new Date().toISOString();
+      const tnt = resolveTenant(req);
+      const result = await supabaseRequest('PATCH',
+        `/tax_rates?id=eq.${params.id}&tenant_id=eq.${encodeURIComponent(tnt)}`, patch);
+      try { logAudit(req, 'tax_rate.updated', 'tax_rates', { id: params.id, patch }); } catch(_){}
+      sendJSON(res, (result && result[0]) || result);
+    } catch (err) { sendError(res, err); }
+  });
+
+  // --- AIRTIME_PURCHASES (recargas telefonia) ---
+  handlers['GET /api/airtime-purchases'] = requireAuth(async (req, res) => {
+    try {
+      const tnt = resolveTenant(req);
+      const q = url.parse(req.url, true).query || {};
+      let qs = `?tenant_id=eq.${encodeURIComponent(tnt)}&select=*&order=created_at.desc&limit=200`;
+      if (q.carrier) qs += `&carrier=eq.${encodeURIComponent(q.carrier)}`;
+      if (q.status) qs += `&status=eq.${encodeURIComponent(q.status)}`;
+      if (q.phone) qs += `&phone_number=eq.${encodeURIComponent(q.phone)}`;
+      const rows = await supabaseRequest('GET', '/airtime_purchases' + qs);
+      sendJSON(res, rows || []);
+    } catch (err) { sendError(res, err); }
+  });
+  handlers['POST /api/airtime-purchases'] = requireAuth(async (req, res) => {
+    try {
+      const body = await readBody(req);
+      if (!body.carrier) return sendValidation(res, 'carrier requerido', 'carrier');
+      if (!body.phone_number || !/^\d{8,15}$/.test(String(body.phone_number).replace(/\D/g, ''))) {
+        return sendValidation(res, 'phone_number debe tener 8-15 digitos', 'phone_number');
+      }
+      const amt = Number(body.amount);
+      if (!Number.isFinite(amt) || amt <= 0) return sendValidation(res, 'amount > 0', 'amount');
+      const row = {
+        tenant_id: resolveTenant(req),
+        carrier: String(body.carrier).slice(0, 20).toLowerCase(),
+        phone_number: String(body.phone_number).replace(/\D/g, ''),
+        amount: amt,
+        cost: Number(body.cost) || null,
+        commission: Number(body.commission) || null,
+        reference: body.reference ? String(body.reference).slice(0, 60) : null,
+        auth_code: body.auth_code ? String(body.auth_code).slice(0, 40) : null,
+        status: ['pending','completed','failed','reversed'].includes(body.status) ? body.status : 'pending',
+        user_id: req.user && req.user.id,
+        sale_id: isUuid(body.sale_id) ? body.sale_id : null
+      };
+      const result = await supabaseRequest('POST', '/airtime_purchases', row);
+      try { logAudit(req, 'airtime.created', 'airtime_purchases', { id: (result && result[0] && result[0].id), carrier: body.carrier, amount: amt }); } catch(_){}
+      sendJSON(res, (result && result[0]) || result, 201);
+    } catch (err) { sendError(res, err); }
+  });
+
+  // --- POS_FEATURES (toggle de modulos por tenant - Panel de Control) ---
+  // GET /api/admin/features          -> lista features del tenant + estado
+  // POST /api/admin/features         -> body: { feature_key, enabled, config? }
+  // GET /api/admin/features/catalog  -> lista de TODOS los features disponibles (constants)
+  handlers['GET /api/admin/features/catalog'] = requireAuth(async (req, res) => {
+    // Catalogo estatico de features disponibles
+    sendJSON(res, {
+      ok: true,
+      features: [
+        { key: 'restaurant_mode',   name: 'Modo Restaurante',     category: 'mode',      description: 'Mesas, comandas, KDS' },
+        { key: 'pharmacy_mode',     name: 'Modo Farmacia',        category: 'mode',      description: 'Lotes obligatorios, caducidades, receta medica' },
+        { key: 'veterinary_mode',   name: 'Modo Veterinaria',     category: 'mode',      description: 'Expediente mascotas, dosis kg' },
+        { key: 'product_lots',      name: 'Lotes y Caducidades',  category: 'inventory', description: 'Tracking de stock por lote con fecha de caducidad' },
+        { key: 'product_serials',   name: 'Series / IMEI',        category: 'inventory', description: 'Tracking individual por numero de serie' },
+        { key: 'multi_branch',      name: 'Multi-Sucursal',       category: 'arch',      description: 'Inventario por branch + transferencias' },
+        { key: 'cfdi_billing',      name: 'Facturacion CFDI',     category: 'compliance',description: 'Timbrado SAT, descarga XML/PDF' },
+        { key: 'kitchen_display',   name: 'KDS Cocina',           category: 'restaurant',description: 'Display de pedidos en cocina' },
+        { key: 'loyalty_points',    name: 'Puntos / Fidelidad',   category: 'crm',       description: 'Sistema de puntos por compra' },
+        { key: 'customer_credit',   name: 'Credito a Clientes',   category: 'crm',       description: 'Ventas a credito, limites, plazos' },
+        { key: 'airtime_recharges', name: 'Recargas Telcel',      category: 'integrations',description: 'Venta de tiempo aire telefonia' },
+        { key: 'online_orders',     name: 'Pedidos en Linea',     category: 'integrations',description: 'Uber Eats, Rappi, DiDi Food' },
+        { key: 'employee_clock',    name: 'Reloj Checador',       category: 'hr',        description: 'Entrada/salida empleados' },
+        { key: 'commissions',       name: 'Comisiones',           category: 'hr',        description: 'Comisiones por venta a empleados' },
+        { key: 'inventory_count',   name: 'Conteo Fisico',        category: 'inventory', description: 'Ciclo de conteo con discrepancias' },
+        { key: 'wholesale_pricing', name: 'Precio Mayoreo',       category: 'pricing',   description: 'Lista de precios mayoreo + condicion qty' },
+        { key: 'cash_drawer',       name: 'Cajon Monedero',       category: 'hardware',  description: 'Apertura automatica al cobrar' },
+        { key: 'barcode_scanner',   name: 'Scanner Codigo Barras',category: 'hardware',  description: 'Lectura por dispositivo USB/Bluetooth' },
+        { key: 'thermal_printer',   name: 'Impresora Termica',    category: 'hardware',  description: 'Impresion tickets 58/80mm' },
+        { key: 'voice_search',      name: 'Busqueda por Voz',     category: 'ui',        description: 'Web Speech API para buscar productos' },
+        { key: 'dark_mode',         name: 'Tema Oscuro',          category: 'ui',        description: 'Tema dark/light switch' },
+        { key: 'multi_currency',    name: 'Multi-Moneda',         category: 'pricing',   description: 'USD/MXN/EUR con tipo de cambio' },
+        { key: 'integrity_engine',  name: 'Motor de Integridad',  category: 'admin',     description: 'Auditoria automatica diaria' },
+        { key: 'whatsapp_tickets',  name: 'Tickets WhatsApp',     category: 'integrations',description: 'Enviar ticket por WhatsApp al cliente' }
+      ]
+    });
+  });
+
+  handlers['GET /api/admin/features'] = requireAuth(async (req, res) => {
+    try {
+      const tnt = resolveTenant(req);
+      const rows = await supabaseRequest('GET',
+        `/pos_features?tenant_id=eq.${encodeURIComponent(tnt)}&select=*&order=feature_key.asc&limit=200`);
+      sendJSON(res, { ok: true, tenant_id: tnt, features: rows || [] });
+    } catch (err) { sendError(res, err); }
+  });
+
+  handlers['POST /api/admin/features'] = requireAuth(async (req, res) => {
+    try {
+      const role = String((req.user && req.user.role) || '').toLowerCase();
+      if (!['owner','admin','superadmin'].includes(role)) {
+        return sendJSON(res, { error: 'forbidden', need_role: 'owner' }, 403);
+      }
+      const body = await readBody(req);
+      if (!body.feature_key) return sendValidation(res, 'feature_key requerido', 'feature_key');
+      const tnt = resolveTenant(req);
+      const featureKey = String(body.feature_key).slice(0, 80).toLowerCase().replace(/[^a-z0-9_]/g, '');
+      const enabled = !!body.enabled;
+      const config = (body.config && typeof body.config === 'object') ? body.config : null;
+      // Upsert via DELETE+INSERT
+      try {
+        await supabaseRequest('DELETE',
+          `/pos_features?tenant_id=eq.${encodeURIComponent(tnt)}&feature_key=eq.${encodeURIComponent(featureKey)}`);
+      } catch(_){}
+      const row = {
+        tenant_id: tnt,
+        feature_key: featureKey,
+        enabled: enabled,
+        config: config,
+        enabled_by: req.user.id,
+        enabled_at: enabled ? new Date().toISOString() : null
+      };
+      const result = await supabaseRequest('POST', '/pos_features', row);
+      try { logAudit(req, 'feature.toggled', 'pos_features', { key: featureKey, enabled }); } catch(_){}
+      sendJSON(res, { ok: true, feature: (result && result[0]) || result });
+    } catch (err) { sendError(res, err); }
+  });
+
   // 2026-05-13 — Signals via Supabase (tabla volvix_remote_signals).
   // POST agrega un mensaje a la cola del destinatario. GET drena los pendientes
   // (consumed_at IS NULL) marcandolos como consumidos para que no se devuelvan dos veces.
