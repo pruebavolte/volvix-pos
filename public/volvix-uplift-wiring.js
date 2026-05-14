@@ -286,8 +286,17 @@
   // ---------------------------------------------------------------------------
   function loadScript(src) {
     return new Promise(function (resolve) {
-      // Si ya está
-      if (document.querySelector('script[src="' + src + '"]')) return resolve(true);
+      // 2026-05-14 FIX DUPLICATES: checkear con y sin leading slash.
+      // ANTES: solo `src="/foo.js"` exacto → si HTML tenia `src="foo.js"`, no
+      // hacia match y se cargaba 2x. Resultado: 23 scripts duplicados en POS.
+      // AHORA: comparamos pathname normalizado contra todos los <script src=>.
+      var bare = src.replace(/^\//, '');
+      var existing = document.querySelectorAll('script[src]');
+      for (var i = 0; i < existing.length; i++) {
+        var existingSrc = existing[i].getAttribute('src') || '';
+        var existingBare = existingSrc.replace(/^\//, '').split('?')[0].split('#')[0];
+        if (existingBare === bare) return resolve(true);
+      }
       var s = document.createElement('script');
       s.src = src;
       s.defer = true;
