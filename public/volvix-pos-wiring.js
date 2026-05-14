@@ -130,20 +130,43 @@
 
     const tbody = document.querySelector('#inv-body, [data-inventory-body]');
     if (tbody) {
-      tbody.innerHTML = products.map((p, i) => `
+      // 2026-05-14 FIX TABLA DESCUADRADA: el <thead> declara 10 columnas
+      // (checkbox, Codigo, Producto, Categoria, Costo, Precio, Stock, Min,
+      //  Estado, Acciones). ANTES esta funcion solo generaba 7 <td>, por lo
+      //  que las celdas se desplazaban: "General" caia bajo "Producto",
+      //  "$169.00" bajo "Categoria", etc. Usuario reporto el desfase.
+      // AHORA: emitir las 10 celdas matching el header.
+      tbody.innerHTML = products.map((p) => {
+        // Normalizar: si code es string "null" o vacio, mostrar "—"
+        const codeRaw = (p.code === null || p.code === 'null' || p.code === undefined) ? '' : String(p.code);
+        const codeDisplay = codeRaw ? codeRaw : '<span style="color:var(--danger);font-style:italic;">sin codigo</span>';
+        const minSt = Number(p.min_stock || p.minimo || 20);
+        const stock = Number(p.stock || 0);
+        const cost = Number(p.cost || 0);
+        const price = Number(p.price || 0);
+        const stateChip = stock <= 0
+          ? '<span class="chip err"><span class="dot"></span>Agotado</span>'
+          : stock <= minSt
+          ? '<span class="chip warn"><span class="dot"></span>Bajo minimo</span>'
+          : '<span class="chip ok"><span class="dot"></span>OK</span>';
+        const idAttr = String(p.id || codeRaw || '').replace(/'/g, "\\'");
+        return `
         <tr>
-          <td class="mono" style="font-size:11px;color:var(--text-3);">${p.code}</td>
-          <td class="primary-col">${p.name}</td>
+          <td><input type="checkbox" class="inv-row-check" data-rowid="${idAttr}"></td>
+          <td class="mono" style="font-size:11px;color:var(--text-3);">${codeDisplay}</td>
+          <td class="primary-col">${p.name || ''}</td>
           <td><span class="chip">${p.category || 'General'}</span></td>
-          <td class="num">$${parseFloat(p.price).toFixed(2)}</td>
-          <td class="num">${p.stock}</td>
-          <td>${p.stock < 20 ? '<span class="chip warn"><span class="dot"></span>Stock bajo</span>' : '<span class="chip ok"><span class="dot"></span>OK</span>'}</td>
-          <td style="text-align:right;">
-            <button class="btn sm" onclick="posEditProduct('${p.id}')">Editar</button>
-            <button class="btn sm" onclick="posAdjustStock('${p.id}', ${p.stock})">📦</button>
+          <td class="num" style="color:var(--text-3);font-size:11px;">$${cost.toFixed(2)}</td>
+          <td class="num">$${price.toFixed(2)}</td>
+          <td class="num"><strong>${stock}</strong></td>
+          <td class="num" style="color:var(--text-3);font-size:11px;">${minSt}</td>
+          <td>${stateChip}</td>
+          <td style="text-align:right;white-space:nowrap;">
+            <button class="btn sm" onclick="posEditProduct('${idAttr}')" title="Editar">Editar</button>
+            <button class="btn sm" onclick="posAdjustStock('${idAttr}', ${stock})" title="Ajustar stock">📦</button>
           </td>
-        </tr>
-      `).join('');
+        </tr>`;
+      }).join('');
     }
 
     return products;
