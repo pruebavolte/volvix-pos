@@ -2894,6 +2894,28 @@
         if (ev.candidate) _rsSignalSend(sid, 'admin', { type:'ice', candidate: ev.candidate });
       };
 
+      // 2.5) DATACHANNEL para control nativo de mouse/teclado (solo Electron .exe)
+      // El admin manda comandos como {type:'mouse-click', x:N, y:N}; el cliente
+      // (si esta en Electron con nut-js disponible) los ejecuta como input REAL
+      // de Windows/Mac/Linux. En web browser estos comandos se ignoran (sandbox).
+      _rsPC.ondatachannel = (ev) => {
+        const dc = ev.channel;
+        if (dc.label !== 'control') return;
+        dc.onopen = () => console.log('[volvix-remote] datachannel control abierto');
+        dc.onmessage = async (e) => {
+          let cmd; try { cmd = JSON.parse(e.data); } catch(_) { return; }
+          // Solo ejecutar si estamos en Electron con nut-js cargado
+          if (window.volvixElectron && typeof window.volvixElectron.simulateInput === 'function') {
+            try {
+              const res = await window.volvixElectron.simulateInput(cmd);
+              if (cmd.ack) dc.send(JSON.stringify({ ack: cmd.ack, result: res }));
+            } catch (err) {
+              console.warn('[volvix-remote] simulateInput error:', err.message);
+            }
+          }
+        };
+      };
+
       // 3) Crear offer
       const offer = await _rsPC.createOffer();
       await _rsPC.setLocalDescription(offer);
@@ -2984,8 +3006,8 @@
       capabilities: {
         getDisplayMedia: !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia),
         webRTC: typeof RTCPeerConnection !== 'undefined',
-        electronCapture: isElectron && !!(window.electronAPI && window.electronAPI.captureScreen),
-        electronControl: isElectron && !!(window.electronAPI && window.electronAPI.simulateInput),  // mouse/teclado nativo via electronAPI
+        electronCapture: isElectron && !!(window.volvixElectron && typeof window.volvixElectron.captureScreen === 'function'),
+        electronControl: isElectron && !!(window.volvixElectron && typeof window.volvixElectron.simulateInput === 'function'),
         capacitorScreen: isCapacitor && !!(window.Capacitor.Plugins && (window.Capacitor.Plugins.ScreenSharing || window.Capacitor.Plugins.ScreenCapture))
       }
     };
@@ -3000,13 +3022,17 @@
   // Capacitor iOS: getDisplayMedia (Safari/iOS 15+) — limitado.
   async function _rsAcquireStream(platform){
     const cap = platform.capabilities || {};
-    if (cap.electronCapture && window.electronAPI) {
-      try { return await window.electronAPI.captureScreen(); } catch(_){}
+    // PREFERIDO: Electron con desktopCapturer (sin popup, captura instantanea)
+    if (window.volvixElectron && typeof window.volvixElectron.captureScreen === 'function') {
+      try { return await window.volvixElectron.captureScreen(); }
+      catch(e){ console.warn('[volvix] electron captureScreen fallo, fallback web:', e.message); }
     }
+    // Capacitor Android: plugin nativo si esta instalado
     if (cap.capacitorScreen && window.Capacitor && window.Capacitor.Plugins) {
       const plug = window.Capacitor.Plugins.ScreenSharing || window.Capacitor.Plugins.ScreenCapture;
       try { return await plug.startCapture(); } catch(_){}
     }
+    // Web (Chrome/Firefox/Edge/Safari): getDisplayMedia con popup eleccion
     if (cap.getDisplayMedia) {
       return await navigator.mediaDevices.getDisplayMedia({ video: { displaySurface: 'monitor' }, audio: false });
     }

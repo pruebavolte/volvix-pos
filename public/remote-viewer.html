@@ -270,9 +270,112 @@
         s.className = 'badge err'; s.textContent = 'Desconectado';
       }
     };
+    // 2026-05-13: DataChannel para control nativo de mouse/teclado.
+    // Lo creamos del lado admin (el cliente lo recibe en ondatachannel).
+    // Si el cliente esta en Electron con nut-js cargado, ejecutara los comandos
+    // como input REAL de Windows/Mac/Linux. Si esta en web browser, los ignora.
+    controlChannel = pc.createDataChannel('control', { ordered: true });
+    controlChannel.onopen = () => { setupInputCapture(); };
+    controlChannel.onclose = () => { teardownInputCapture(); };
     // Iniciar polling de signaling (espera del offer del cliente)
     if (!signalIv) signalIv = setInterval(signalPoll, 1500);
     return pc;
+  }
+
+  // 2026-05-13 — CONTROL NATIVO DE MOUSE/TECLADO (cliente Electron .exe)
+  // Capturamos eventos sobre el <video> y los traducimos a coordenadas reales
+  // de la pantalla del cliente. nut-js los ejecuta como input REAL del SO.
+  let controlChannel = null;
+  let inputCaptureActive = false;
+  let _onVidMove = null, _onVidDown = null, _onVidUp = null, _onVidWheel = null, _onVidDbl = null;
+  let _onKeyDown = null;
+  // Resolucion REAL del cliente (la conocemos por el stream)
+  function _getClientRes() {
+    const v = document.getElementById('vid');
+    if (v && v.videoWidth && v.videoHeight) return { w: v.videoWidth, h: v.videoHeight };
+    return { w: 1920, h: 1080 };
+  }
+  // Convertir coords del video DOM a coords reales del SO del cliente
+  function _toClientCoords(ev, vid) {
+    const rect = vid.getBoundingClientRect();
+    const x = ev.clientX - rect.left;
+    const y = ev.clientY - rect.top;
+    const res = _getClientRes();
+    return {
+      x: Math.round((x / rect.width) * res.w),
+      y: Math.round((y / rect.height) * res.h)
+    };
+  }
+  function _send(cmd) {
+    if (controlChannel && controlChannel.readyState === 'open') {
+      try { controlChannel.send(JSON.stringify(cmd)); } catch(_){}
+    }
+  }
+  function setupInputCapture() {
+    if (inputCaptureActive) return;
+    inputCaptureActive = true;
+    const vid = document.getElementById('vid');
+    if (!vid) return;
+    vid.style.cursor = 'crosshair';
+    _onVidMove = (e) => { const c = _toClientCoords(e, vid); _send({ type:'mouse-move', x: c.x, y: c.y }); };
+    _onVidDown = (e) => {
+      const c = _toClientCoords(e, vid);
+      const btnMap = { 0:'left', 1:'middle', 2:'right' };
+      _send({ type:'mouse-click', button: btnMap[e.button] || 'left', x: c.x, y: c.y });
+      e.preventDefault();
+    };
+    _onVidDbl  = (e) => {
+      const c = _toClientCoords(e, vid);
+      _send({ type:'mouse-click', button:'left', double:true, x: c.x, y: c.y });
+      e.preventDefault();
+    };
+    _onVidWheel = (e) => { _send({ type:'mouse-wheel', dy: e.deltaY > 0 ? 3 : -3 }); e.preventDefault(); };
+    _onKeyDown = (e) => {
+      if (!inputCaptureActive) return;
+      // Solo capturar cuando el viewer tiene foco
+      const mods = [];
+      if (e.ctrlKey) mods.push('ctrl');
+      if (e.shiftKey) mods.push('shift');
+      if (e.altKey) mods.push('alt');
+      if (e.metaKey) mods.push('meta');
+      // Mapear teclas comunes
+      const k = e.key;
+      let keyName = null;
+      if (k.length === 1) keyName = k;
+      else if (k === 'Enter') keyName = 'Enter';
+      else if (k === 'Backspace') keyName = 'Backspace';
+      else if (k === 'Tab') keyName = 'Tab';
+      else if (k === 'Escape') keyName = 'Escape';
+      else if (k === 'ArrowUp') keyName = 'Up';
+      else if (k === 'ArrowDown') keyName = 'Down';
+      else if (k === 'ArrowLeft') keyName = 'Left';
+      else if (k === 'ArrowRight') keyName = 'Right';
+      else if (k === ' ') keyName = 'Space';
+      else if (k.startsWith('F') && k.length <= 3) keyName = k;
+      else keyName = k;
+      _send({ type:'key', key: keyName, modifiers: mods });
+      e.preventDefault();
+    };
+    vid.addEventListener('mousemove', _onVidMove);
+    vid.addEventListener('mousedown', _onVidDown);
+    vid.addEventListener('dblclick',  _onVidDbl);
+    vid.addEventListener('wheel',     _onVidWheel, { passive: false });
+    vid.addEventListener('contextmenu', (e) => e.preventDefault());
+    document.addEventListener('keydown', _onKeyDown);
+    console.log('[remote-viewer] Control nativo HABILITADO — mouse/teclado se envian al cliente');
+  }
+  function teardownInputCapture() {
+    if (!inputCaptureActive) return;
+    const vid = document.getElementById('vid');
+    if (vid) {
+      if (_onVidMove) vid.removeEventListener('mousemove', _onVidMove);
+      if (_onVidDown) vid.removeEventListener('mousedown', _onVidDown);
+      if (_onVidDbl)  vid.removeEventListener('dblclick',  _onVidDbl);
+      if (_onVidWheel) vid.removeEventListener('wheel',    _onVidWheel);
+      vid.style.cursor = '';
+    }
+    if (_onKeyDown) document.removeEventListener('keydown', _onKeyDown);
+    inputCaptureActive = false;
   }
 
   function signalSend(message) {

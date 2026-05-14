@@ -8,11 +8,29 @@
 //
 // Antes el .exe cargaba PROD_URL directo → si la red tardaba, congelaba PC.
 
-const { app, BrowserWindow, Menu, shell, dialog } = require('electron');
+const { app, BrowserWindow, Menu, shell, dialog, ipcMain, desktopCapturer, screen: electronScreen } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const http = require('http');
 const https = require('https');
+
+// 2026-05-13 — Control remoto nativo: nut-js para input real de Win/Mac/Linux.
+// Lo cargamos lazy + opcional para que la app NO falle si el modulo no esta.
+// Si no se instalo nut-js, captureScreen funciona (solo VIEW), pero simulateInput retorna error.
+let _nut = null;
+let _nutLoadAttempted = false;
+function _loadNut() {
+  if (_nutLoadAttempted) return _nut;
+  _nutLoadAttempted = true;
+  try {
+    _nut = require('@nut-tree-fork/nut-js');
+    console.log('[volvix] nut-js cargado — control nativo HABILITADO');
+  } catch (e) {
+    console.warn('[volvix] nut-js no disponible (control nativo deshabilitado):', e.message);
+    _nut = null;
+  }
+  return _nut;
+}
 const url = require('url');
 
 // Auto-updater (electron-updater) — descarga solo el diff binario desde GitHub Releases
@@ -347,4 +365,122 @@ app.whenReady().then(async () => {
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
+});
+
+// ============================================================================
+// 2026-05-13 — IPC HANDLERS PARA CONTROL REMOTO NATIVO
+// ============================================================================
+// Estos handlers son llamados desde el renderer (web app) via preload.js
+// cuando hay una sesion de soporte tecnico activa con consentimiento del usuario.
+// La autorizacion del usuario se hizo a nivel web (botones Acepto + codigo 6 digitos);
+// aqui no agregamos validacion adicional porque el web ya verifico todo.
+// ============================================================================
+
+// Lista las pantallas/ventanas disponibles para captura
+ipcMain.handle('volvix:capture:list-sources', async (event, opts) => {
+  try {
+    const types = (opts && opts.types) || ['screen'];
+    const sources = await desktopCapturer.getSources({
+      types,
+      thumbnailSize: { width: 200, height: 150 }
+    });
+    return sources.map(s => ({
+      id: s.id,
+      name: s.name,
+      display_id: s.display_id || null,
+      thumbnail_dataurl: s.thumbnail && !s.thumbnail.isEmpty() ? s.thumbnail.toDataURL() : null
+    }));
+  } catch (e) {
+    console.error('[volvix:capture:list-sources] error:', e.message);
+    return [];
+  }
+});
+
+// Indica si nut-js esta disponible (es decir, control nativo posible)
+ipcMain.handle('volvix:input:available', async () => {
+  return !!_loadNut();
+});
+
+// Ejecuta un comando de input nativo (mouse o teclado).
+// El renderer manda comandos que vienen del admin via WebRTC datachannel.
+ipcMain.handle('volvix:input:execute', async (event, cmd) => {
+  const nut = _loadNut();
+  if (!nut) {
+    return { ok: false, error: 'nut-js no instalado; control nativo deshabilitado' };
+  }
+  try {
+    const { mouse, keyboard, Button, Key, Point } = nut;
+    // Setear delays minimos para que sea responsivo
+    if (mouse && typeof mouse.config !== 'undefined') mouse.config.mouseSpeed = 1500;
+    if (keyboard && typeof keyboard.config !== 'undefined') keyboard.config.autoDelayMs = 5;
+
+    switch (cmd.type) {
+      case 'mouse-move': {
+        // coordenadas absolutas en pixels del SO
+        await mouse.setPosition(new Point(Math.round(cmd.x || 0), Math.round(cmd.y || 0)));
+        return { ok: true };
+      }
+      case 'mouse-click': {
+        const btnMap = { left: Button.LEFT, right: Button.RIGHT, middle: Button.MIDDLE };
+        const b = btnMap[cmd.button || 'left'] || Button.LEFT;
+        if (cmd.x != null && cmd.y != null) {
+          await mouse.setPosition(new Point(Math.round(cmd.x), Math.round(cmd.y)));
+        }
+        if (cmd.double) await mouse.doubleClick(b);
+        else await mouse.click(b);
+        return { ok: true };
+      }
+      case 'mouse-down': {
+        const btnMap = { left: Button.LEFT, right: Button.RIGHT, middle: Button.MIDDLE };
+        await mouse.pressButton(btnMap[cmd.button || 'left'] || Button.LEFT);
+        return { ok: true };
+      }
+      case 'mouse-up': {
+        const btnMap = { left: Button.LEFT, right: Button.RIGHT, middle: Button.MIDDLE };
+        await mouse.releaseButton(btnMap[cmd.button || 'left'] || Button.LEFT);
+        return { ok: true };
+      }
+      case 'mouse-wheel': {
+        if (typeof cmd.dy === 'number') {
+          if (cmd.dy > 0) await mouse.scrollDown(Math.round(cmd.dy));
+          else await mouse.scrollUp(Math.round(-cmd.dy));
+        }
+        return { ok: true };
+      }
+      case 'key': {
+        // tecla individual con modifiers opcionales
+        const keyName = String(cmd.key || '').trim();
+        const mods = Array.isArray(cmd.modifiers) ? cmd.modifiers : [];
+        const modKeys = [];
+        for (const m of mods) {
+          const mm = m.toLowerCase();
+          if (mm === 'ctrl' || mm === 'control') modKeys.push(Key.LeftControl);
+          else if (mm === 'shift') modKeys.push(Key.LeftShift);
+          else if (mm === 'alt') modKeys.push(Key.LeftAlt);
+          else if (mm === 'meta' || mm === 'cmd' || mm === 'win') modKeys.push(Key.LeftSuper);
+        }
+        // Resolver Key.X dinamicamente
+        let targetKey = null;
+        const lookup = keyName.length === 1 ? keyName.toUpperCase() : keyName;
+        if (Key[lookup] !== undefined) targetKey = Key[lookup];
+        else if (Key[keyName] !== undefined) targetKey = Key[keyName];
+        if (targetKey == null) return { ok: false, error: 'tecla desconocida: ' + keyName };
+        await keyboard.pressKey(...modKeys, targetKey);
+        await keyboard.releaseKey(...modKeys, targetKey);
+        return { ok: true };
+      }
+      case 'type': {
+        const text = String(cmd.text || '');
+        if (text.length === 0) return { ok: true };
+        if (text.length > 500) return { ok: false, error: 'texto muy largo (max 500)' };
+        await keyboard.type(text);
+        return { ok: true };
+      }
+      default:
+        return { ok: false, error: 'cmd.type desconocido: ' + cmd.type };
+    }
+  } catch (e) {
+    console.error('[volvix:input:execute] error:', e.message);
+    return { ok: false, error: e.message };
+  }
 });
