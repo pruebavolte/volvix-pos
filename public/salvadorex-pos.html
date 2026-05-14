@@ -4879,7 +4879,198 @@
           </div>
 
           <div id="cfg-impresion" class="card card-pad hidden">
-            <h3 style="margin: 0 0 14px; font-size: 14px;">🖨️ Configuración de impresora</h3>
+            <h3 style="margin: 0 0 14px; font-size: 14px;">🖨️ Configuración de impresoras + periféricos</h3>
+
+            <!-- 2026-05-14: SISTEMA UNICO con toggle. Configuracion universal. -->
+            <div style="background:#EFF6FF;border:1px solid #93C5FD;border-radius:8px;padding:10px;margin-bottom:14px;font-size:11px;color:#1E40AF;">
+              💡 <strong>Configura una vez, funciona en TODAS las plataformas</strong>: Windows (.exe), Android (APK), Web, PWA. Se puede activar/desactivar cada periférico desde aquí.
+            </div>
+
+            <!-- ──── PESTAÑAS DE PERIFERICOS ──── -->
+            <div style="display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap;border-bottom:2px solid var(--bord);padding-bottom:0;">
+              <button class="config-tab active" data-perif-tab="printers" onclick="vlxPerifTab('printers',this)">🖨️ Impresoras</button>
+              <button class="config-tab" data-perif-tab="copies" onclick="vlxPerifTab('copies',this)">📑 Copias / Formato</button>
+              <button class="config-tab" data-perif-tab="routing" onclick="vlxPerifTab('routing',this)">🔀 Ruteo Multi-Impresora</button>
+              <button class="config-tab" data-perif-tab="drawer" onclick="vlxPerifTab('drawer',this)">💵 Cajón Monedero</button>
+              <button class="config-tab" data-perif-tab="scale" onclick="vlxPerifTab('scale',this)">⚖️ Báscula</button>
+              <button class="config-tab" data-perif-tab="fingerprint" onclick="vlxPerifTab('fingerprint',this)">👆 Huella Digital</button>
+            </div>
+
+            <!-- ──── TAB: COPIAS / FORMATO ──── -->
+            <div id="perif-tab-copies" class="perif-tab-pane" style="display:none;">
+              <div class="input-group">
+                <label class="input-label">Número de copias por venta</label>
+                <select class="input-field" id="cfg-print-copies" onchange="vlxPerifSave()">
+                  <option value="1">1 copia (cliente)</option>
+                  <option value="2">2 copias (cliente + control)</option>
+                  <option value="3">3 copias (cliente + caja + cocina)</option>
+                  <option value="4">4 copias</option>
+                  <option value="5">5 copias</option>
+                  <option value="custom">Personalizado</option>
+                </select>
+              </div>
+              <div class="input-group" id="cfg-print-copies-custom" style="display:none;">
+                <label class="input-label">Cantidad personalizada (1-99)</label>
+                <input class="input-field" type="number" id="cfg-print-copies-num" min="1" max="99" value="1" onchange="vlxPerifSave()">
+              </div>
+              <div class="input-group">
+                <label class="input-label">Formato del documento</label>
+                <select class="input-field" id="cfg-print-format" onchange="vlxPerifSave()">
+                  <option value="ticket58">🎫 Ticket 58mm (impresora térmica chica)</option>
+                  <option value="ticket80" selected>🎫 Ticket 80mm (impresora térmica estándar)</option>
+                  <option value="quarter">📄 1/4 de hoja (nota de remisión chica)</option>
+                  <option value="half">📄 1/2 hoja (nota de remisión mediana)</option>
+                  <option value="full">📄 Hoja completa A4 (factura/cotización/nota grande)</option>
+                </select>
+              </div>
+              <div class="input-group">
+                <label class="input-label">Documento por defecto al cobrar</label>
+                <select class="input-field" id="cfg-default-doc" onchange="vlxPerifSave()">
+                  <option value="ticket" selected>🎫 Ticket de venta</option>
+                  <option value="nota">📄 Nota de remisión</option>
+                  <option value="factura">🧾 Factura CFDI</option>
+                  <option value="cotizacion">📋 Cotización</option>
+                  <option value="ask">❓ Preguntar al cliente cada vez</option>
+                </select>
+              </div>
+              <label style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;">
+                <input type="checkbox" id="cfg-print-original-copy" onchange="vlxPerifSave()" checked>
+                Marcar "ORIGINAL" en la primera y "COPIA" en las siguientes
+              </label>
+            </div>
+
+            <!-- ──── TAB: RUTEO MULTI-IMPRESORA ──── -->
+            <div id="perif-tab-routing" class="perif-tab-pane" style="display:none;">
+              <p style="font-size:12px;color:var(--text-2);">
+                Cada categoría puede ir a una impresora distinta. Ej: comida → cocina, bebidas → barra, ticket → caja.
+                Hasta 4 impresoras simultáneas.
+              </p>
+              <div id="cfg-routing-list">
+                <div style="text-align:center;padding:14px;color:var(--text-3);font-size:12px;">
+                  No hay categorías configuradas.<br>
+                  <button class="btn sm" onclick="vlxRoutingAdd()">+ Agregar regla de ruteo</button>
+                </div>
+              </div>
+              <button class="btn sm accent" onclick="vlxRoutingAdd()" style="margin-top:10px;">+ Nueva regla</button>
+              <div style="margin-top:14px;padding:10px;background:#FEF3C7;border-radius:6px;font-size:11px;color:#92400E;">
+                ⚠️ Si una categoría no tiene regla, se imprime en la impresora predeterminada.
+              </div>
+            </div>
+
+            <!-- ──── TAB: CAJON MONEDERO ──── -->
+            <div id="perif-tab-drawer" class="perif-tab-pane" style="display:none;">
+              <div class="input-group">
+                <label class="input-label">Comportamiento al cobrar</label>
+                <select class="input-field" id="cfg-drawer-mode" onchange="vlxPerifSave()">
+                  <option value="print_and_open" selected>🖨️ + 💵 Imprimir ticket Y abrir cajón</option>
+                  <option value="print_only">🖨️ Solo imprimir ticket (no abrir cajón)</option>
+                  <option value="open_only">💵 Solo abrir cajón (no imprimir)</option>
+                  <option value="ask">❓ Preguntar cada vez</option>
+                  <option value="never">🚫 Nunca abrir cajón automáticamente</option>
+                </select>
+              </div>
+              <label style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;">
+                <input type="checkbox" id="cfg-drawer-cash-only" onchange="vlxPerifSave()" checked>
+                Solo abrir cajón cuando el pago es en EFECTIVO
+              </label>
+              <label style="display:flex;align-items:center;gap:6px;font-size:12px;">
+                <input type="checkbox" id="cfg-drawer-corte" onchange="vlxPerifSave()">
+                Abrir cajón también al hacer corte de caja
+              </label>
+              <div style="margin-top:14px;">
+                <button class="btn sm" onclick="vlxDrawerOpen()">💵 Probar apertura de cajón</button>
+                <span id="cfg-drawer-status" style="font-size:12px;color:var(--text-2);margin-left:8px;"></span>
+              </div>
+              <div style="margin-top:14px;padding:10px;background:#F4F4F7;border-radius:6px;font-size:11px;color:var(--text-2);">
+                💡 El cajón se abre con el comando ESC/POS <code>ESC p 0 0x32 0xFA</code> a través de la impresora.<br>
+                Compatible con: cajones RJ-11/RJ-12 conectados a la impresora térmica (POS 58/80, Epson TM-T20, etc.).
+              </div>
+            </div>
+
+            <!-- ──── TAB: BASCULA ──── -->
+            <div id="perif-tab-scale" class="perif-tab-pane" style="display:none;">
+              <p style="font-size:12px;color:var(--text-2);">
+                Báscula electrónica conectada por USB (RS-232 con adaptador) o Bluetooth.<br>
+                Marcas soportadas: Torrey (PCR/L-EQ/LSQ), Rhino (BAR-8), Aclas, Acom, OHAUS, CAS.
+              </p>
+              <div class="input-group" style="margin-top:10px;">
+                <label class="input-label">Modelo / Marca</label>
+                <select class="input-field" id="cfg-scale-model" onchange="vlxPerifSave()">
+                  <option value="generic">Genérica (auto-detect)</option>
+                  <option value="torrey_pcr">Torrey PCR (continua, 4800 baud)</option>
+                  <option value="torrey_leq">Torrey L-EQ (request, 9600 baud)</option>
+                  <option value="torrey_lsq">Torrey LSQ-5/40 (continua)</option>
+                  <option value="rhino_bar8">Rhino BAR-8 (continua, 9600 baud)</option>
+                  <option value="aclas">Aclas (RS-232 9600 8N1)</option>
+                  <option value="ohaus">OHAUS (SCP-01 protocol)</option>
+                  <option value="cas">CAS (PD-II, ER series)</option>
+                </select>
+              </div>
+              <div class="input-group">
+                <label class="input-label">Tipo de conexión</label>
+                <select class="input-field" id="cfg-scale-conn" onchange="vlxPerifSave()">
+                  <option value="serial_auto">USB (Web Serial auto-detect)</option>
+                  <option value="bluetooth">Bluetooth (BLE)</option>
+                  <option value="manual">Manual (escribir peso)</option>
+                </select>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px;">
+                <button class="btn sm" onclick="vlxScaleConnect()" id="btn-scale-connect">🔌 Conectar</button>
+                <button class="btn sm" onclick="vlxScaleRead()" id="btn-scale-read" disabled>⚖️ Leer peso ahora</button>
+                <span id="cfg-scale-status" style="font-size:12px;color:var(--text-2);">Sin conexión</span>
+              </div>
+              <div id="cfg-scale-weight" style="margin-top:14px;padding:14px;background:#F0FDF4;border:1px solid #86EFAC;border-radius:6px;text-align:center;font-size:24px;font-weight:700;color:#166534;display:none;">
+                — kg
+              </div>
+              <div style="margin-top:14px;padding:10px;background:#F4F4F7;border-radius:6px;font-size:11px;color:var(--text-2);">
+                💡 La mayoría usan protocolo Toledo/Mettler ASCII: <code>STX SI _ peso EOT</code> a 9600 baud 8N1. Auto-detect prueba 4800/9600 baud.
+              </div>
+            </div>
+
+            <!-- ──── TAB: HUELLA DIGITAL (gimnasio) ──── -->
+            <div id="perif-tab-fingerprint" class="perif-tab-pane" style="display:none;">
+              <p style="font-size:12px;color:var(--text-2);">
+                Lector biométrico USB para check-in de socios en gimnasio, escuelas, oficinas.
+              </p>
+              <div class="input-group" style="margin-top:10px;">
+                <label class="input-label">Modelo del lector</label>
+                <select class="input-field" id="cfg-fp-model" onchange="vlxPerifSave()">
+                  <option value="">— Selecciona modelo —</option>
+                  <option value="hid_uareu_4500">HID U.are.U 4500 (DigitalPersona)</option>
+                  <option value="ingressio_uru_4500">Ingressio U.R.U. 4500 (idéntico al HID)</option>
+                  <option value="zk_fingerkeeper">ZKTeco FingerKeeper</option>
+                  <option value="suprema_biomini">Suprema BioMini Slim 2/3</option>
+                  <option value="futronic_fs88">Futronic FS88H/FS80</option>
+                </select>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px;">
+                <button class="btn sm" onclick="vlxFpDetect()" id="btn-fp-detect">🔍 Detectar lector USB</button>
+                <button class="btn sm" onclick="vlxFpEnroll()" id="btn-fp-enroll" disabled>👆 Registrar huella</button>
+                <button class="btn sm" onclick="vlxFpVerify()" id="btn-fp-verify" disabled>✓ Verificar huella</button>
+              </div>
+              <span id="cfg-fp-status" style="font-size:12px;color:var(--text-2);display:block;margin-top:8px;">Sin lector conectado</span>
+              <div style="margin-top:14px;padding:10px;background:#FEF3C7;border-radius:6px;font-size:11px;color:#92400E;">
+                ⚠️ <strong>Requiere driver de fabricante</strong>: el U.are.U 4500 y compatibles necesitan el SDK de DigitalPersona o equivalente instalado en Windows. La detección USB funciona en .exe vía Electron.<br>
+                Las huellas se almacenan en <code>fingerprint_enrollments</code> como template encriptado.
+              </div>
+              <div style="margin-top:10px;font-size:11px;color:var(--text-2);">
+                <strong>Para qué sirve:</strong> Check-in/check-out de socios en gimnasio. Cuando el cliente entra, pone el dedo y el sistema:
+                <ul style="margin:4px 0;padding-left:18px;">
+                  <li>Verifica que tenga membresía activa</li>
+                  <li>Registra hora de entrada/salida</li>
+                  <li>Si está vencido, muestra alerta para renovar</li>
+                  <li>Si es la 1ra vez, abre modal de enrolamiento</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- ──── TAB: IMPRESORAS (default) ──── -->
+            <div id="perif-tab-printers" class="perif-tab-pane">
+              <!-- Toggle activar/desactivar modulo de impresion -->
+              <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:14px;padding:10px;background:#F4F4F7;border-radius:6px;">
+                <input type="checkbox" id="cfg-print-enabled" onchange="vlxPerifSave()" checked>
+                <strong>Imprimir tickets automáticamente al cobrar</strong>
+              </label>
 
             <!-- Tipo de conexión -->
             <div class="input-group">
@@ -5022,6 +5213,7 @@
               <button class="btn sm secondary" onclick="vlxPrinterSaveConfig()">💾 Guardar configuración</button>
             </div>
             <div id="cfg-printer-msg" style="font-size:12px; margin-top:8px; color:var(--text-2);"></div>
+            </div><!-- fin perif-tab-printers -->
           </div>
 
           <div id="cfg-modulos" class="hidden">
@@ -12420,6 +12612,247 @@
       window.vlxPrinterSystemRefresh();
     }
   };
+
+  // ========================================================================
+  // 2026-05-14 — SISTEMA UNICO DE PERIFERICOS (regla de oro: 1 sistema, toggle)
+  // Tabs: printers / copies / routing / drawer / scale / fingerprint
+  // Persistencia en localStorage `volvix_perif_config`
+  // ========================================================================
+
+  // Cambio de tab
+  window.vlxPerifTab = function (tabId, btn) {
+    document.querySelectorAll('.perif-tab-pane').forEach(p => p.style.display = 'none');
+    const pane = document.getElementById('perif-tab-' + tabId);
+    if (pane) pane.style.display = 'block';
+    document.querySelectorAll('[data-perif-tab]').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+  };
+
+  // Guardar config
+  window.vlxPerifSave = function () {
+    const config = {};
+    document.querySelectorAll('#cfg-impresion input, #cfg-impresion select').forEach(el => {
+      if (el.id) config[el.id] = el.type === 'checkbox' ? el.checked : el.value;
+    });
+    try { localStorage.setItem('volvix_perif_config', JSON.stringify(config)); } catch(_){}
+    // Toggle visibility de inputs condicionales
+    const copies = document.getElementById('cfg-print-copies');
+    const copiesCustom = document.getElementById('cfg-print-copies-custom');
+    if (copies && copiesCustom) copiesCustom.style.display = (copies.value === 'custom') ? 'block' : 'none';
+  };
+
+  // Restore on load
+  (function __perifRestore(){
+    try {
+      const c = JSON.parse(localStorage.getItem('volvix_perif_config') || '{}');
+      Object.keys(c).forEach(k => {
+        const el = document.getElementById(k);
+        if (el) { if (el.type === 'checkbox') el.checked = !!c[k]; else el.value = c[k]; }
+      });
+    } catch(_){}
+  })();
+
+  // ── CASH DRAWER ── ESC/POS standard pulse command
+  window.vlxDrawerOpen = async function () {
+    const status = document.getElementById('cfg-drawer-status');
+    if (status) status.textContent = '💵 Enviando comando...';
+    // ESC p m t1 t2 = pulse cash drawer (m=0 pin 2, t1=50ms, t2=250ms)
+    const drawerCmd = String.fromCharCode(0x1B, 0x70, 0x00, 0x32, 0xFA);
+    try {
+      // Intentar via BT primero
+      if (VLX_BT.characteristic) {
+        const bytes = __vlxStrToBytes(drawerCmd);
+        if (VLX_BT.plugin) {
+          const b64 = btoa(String.fromCharCode.apply(null, bytes));
+          await VLX_BT.plugin.write({
+            deviceId: VLX_BT.device.deviceId,
+            service: VLX_BT.characteristic.serviceUuid,
+            characteristic: VLX_BT.characteristic.characteristicUuid,
+            value: b64
+          });
+        } else if (typeof VLX_BT.characteristic.writeValueWithoutResponse === 'function') {
+          await VLX_BT.characteristic.writeValueWithoutResponse(bytes);
+        }
+        if (status) status.textContent = '✅ Cajón abierto (BT)';
+        return;
+      }
+      // Fallback Electron system printer
+      if (window.volvixElectron && window.volvixElectron.printToSystem) {
+        const printer = localStorage.getItem('volvix_system_printer');
+        if (printer) {
+          await window.volvixElectron.printToSystem({
+            html: '<pre style="font-size:1px;line-height:1px;">' + drawerCmd + '</pre>',
+            printerName: printer,
+            silent: true,
+            margins: { marginType: 'none' }
+          });
+          if (status) status.textContent = '✅ Cajón abierto (Sistema)';
+          return;
+        }
+      }
+      if (status) status.textContent = '❌ Conecta una impresora primero';
+    } catch (e) {
+      if (status) status.textContent = '❌ Error: ' + e.message;
+    }
+  };
+
+  // ── BASCULA via Web Serial API (Torrey/Rhino/Aclas) ──
+  const VLX_SCALE = { port: null, reader: null, weight: null, reading: false };
+
+  window.vlxScaleConnect = async function () {
+    const status = document.getElementById('cfg-scale-status');
+    const readBtn = document.getElementById('btn-scale-read');
+    if (status) status.textContent = '🔌 Solicitando puerto serial...';
+    try {
+      if (!navigator.serial) {
+        if (status) status.textContent = '❌ Web Serial no disponible. Usa Chrome/Edge desktop o app .exe.';
+        return;
+      }
+      const port = await navigator.serial.requestPort();
+      const model = (document.getElementById('cfg-scale-model') || {}).value || 'generic';
+      // Auto-detect baud según modelo
+      const baudByModel = {
+        torrey_pcr: 4800, torrey_leq: 9600, torrey_lsq: 9600,
+        rhino_bar8: 9600, aclas: 9600, ohaus: 9600, cas: 9600, generic: 9600
+      };
+      const baudRate = baudByModel[model] || 9600;
+      await port.open({ baudRate, dataBits: 8, stopBits: 1, parity: 'none' });
+      VLX_SCALE.port = port;
+      if (status) status.textContent = '✅ Conectada a ' + baudRate + ' baud';
+      if (readBtn) readBtn.disabled = false;
+      __vlxScaleStartReading();
+    } catch (e) {
+      if (status) status.textContent = '❌ ' + e.message;
+    }
+  };
+
+  async function __vlxScaleStartReading() {
+    if (!VLX_SCALE.port || VLX_SCALE.reading) return;
+    VLX_SCALE.reading = true;
+    try {
+      const reader = VLX_SCALE.port.readable.getReader();
+      VLX_SCALE.reader = reader;
+      let buffer = '';
+      while (VLX_SCALE.reading) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        const text = new TextDecoder().decode(value);
+        buffer += text;
+        // Parse: la mayoria envia ej "   1.250kg\r\n" o "ST,GS, 1.250kg"
+        const m = buffer.match(/(-?\d+\.?\d*)\s*(kg|g)?/);
+        if (m) {
+          VLX_SCALE.weight = parseFloat(m[1]);
+          const wEl = document.getElementById('cfg-scale-weight');
+          if (wEl) { wEl.style.display = 'block'; wEl.textContent = VLX_SCALE.weight.toFixed(3) + ' kg'; }
+          buffer = buffer.slice(buffer.indexOf(m[0]) + m[0].length).slice(-200);
+        }
+      }
+    } catch (_) {} finally {
+      VLX_SCALE.reading = false;
+      try { VLX_SCALE.reader.releaseLock(); } catch (_) {}
+    }
+  }
+
+  window.vlxScaleRead = function () {
+    const w = VLX_SCALE.weight;
+    if (w !== null && w !== undefined) {
+      alert('Peso actual: ' + w.toFixed(3) + ' kg');
+      return w;
+    }
+    alert('Sin lectura. Verifica que la báscula esté conectada y mande datos.');
+  };
+
+  // ── FINGERPRINT (HID U.are.U / Ingressio) ──
+  window.vlxFpDetect = async function () {
+    const status = document.getElementById('cfg-fp-status');
+    if (status) status.textContent = '🔍 Buscando lectores USB...';
+    try {
+      // En .exe: usar Electron USB
+      if (window.volvixElectron) {
+        if (status) status.textContent = '⚠️ Detección USB de huella requiere SDK fabricante (DigitalPersona). Solo activable en .exe Windows con el SDK instalado.';
+        return;
+      }
+      // En navegador: WebUSB para HID U.are.U 4500 (vendorId 0x05ba, productId 0x000a)
+      if (!navigator.usb) {
+        if (status) status.textContent = '❌ WebUSB no disponible. Usa Chrome desktop o app .exe.';
+        return;
+      }
+      const device = await navigator.usb.requestDevice({
+        filters: [
+          { vendorId: 0x05ba }, // HID Global
+          { vendorId: 0x1c7a }, // Egis (algunos Ingressio)
+        ]
+      });
+      if (status) status.textContent = '✅ Detectado: ' + (device.productName || 'lector USB');
+      document.getElementById('btn-fp-enroll').disabled = false;
+      document.getElementById('btn-fp-verify').disabled = false;
+    } catch (e) {
+      if (status) status.textContent = '❌ ' + e.message;
+    }
+  };
+  window.vlxFpEnroll = function () {
+    alert('Enrolamiento de huella: requiere SDK del fabricante.\nEn .exe se conectará a DigitalPersona SDK para capturar template + guardar en tabla fingerprint_enrollments (encriptado).\nPlaceholder por ahora.');
+  };
+  window.vlxFpVerify = function () {
+    alert('Verificación: pone el dedo en el lector.\nSi match → check-in registrado.\nSi no → "no encontrado, registra primero".\nPlaceholder por ahora.');
+  };
+
+  // ── RUTEO multi-impresora ──
+  window.vlxRoutingAdd = function () {
+    const list = document.getElementById('cfg-routing-list');
+    if (!list) return;
+    // Eliminar el placeholder si existe
+    if (list.children.length === 1 && list.firstElementChild.querySelector('button')) list.innerHTML = '';
+    const idx = list.children.length + 1;
+    const row = document.createElement('div');
+    row.style.cssText = 'display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-bottom:6px;align-items:end;padding:8px;background:#F4F4F7;border-radius:6px;';
+    row.innerHTML =
+      '<div><label style="font-size:11px;color:var(--text-2);">Categoría #' + idx + '</label>' +
+      '<select class="input-field" data-routing="category"><option value="">— Selecciona —</option>' +
+      (CATEGORIES || []).map(c => '<option value="' + escapeAttr(c.key||c) + '">' + escapeHtml(c.name||c) + '</option>').join('') +
+      '<option value="*">Todas las demás</option></select></div>' +
+      '<div><label style="font-size:11px;color:var(--text-2);">Va a impresora</label>' +
+      '<select class="input-field" data-routing="printer"><option value="default">Predeterminada</option>' +
+      '<option value="kitchen">🍳 Cocina</option><option value="bar">🍹 Barra</option>' +
+      '<option value="bt">📶 Bluetooth</option><option value="custom">Personalizada...</option></select></div>' +
+      '<button class="btn sm" onclick="this.parentElement.remove();vlxRoutingSave()" title="Eliminar regla">❌</button>';
+    list.appendChild(row);
+    row.querySelectorAll('select').forEach(s => s.addEventListener('change', vlxRoutingSave));
+  };
+  window.vlxRoutingSave = function () {
+    const rules = [];
+    document.querySelectorAll('#cfg-routing-list > div').forEach(row => {
+      const cat = row.querySelector('[data-routing="category"]');
+      const prn = row.querySelector('[data-routing="printer"]');
+      if (cat && prn && cat.value) rules.push({ category: cat.value, printer: prn.value });
+    });
+    try { localStorage.setItem('volvix_routing_rules', JSON.stringify(rules)); } catch(_){}
+  };
+
+  // Restore routing rules on load
+  (function __routingRestore(){
+    try {
+      const rules = JSON.parse(localStorage.getItem('volvix_routing_rules') || '[]');
+      // Esperar a que CATEGORIES esté lista
+      const tryRender = () => {
+        if (typeof CATEGORIES === 'undefined' || !CATEGORIES.length) return setTimeout(tryRender, 500);
+        const list = document.getElementById('cfg-routing-list');
+        if (!list || !rules.length) return;
+        list.innerHTML = '';
+        rules.forEach(r => {
+          vlxRoutingAdd();
+          const lastRow = list.lastElementChild;
+          if (lastRow) {
+            const cat = lastRow.querySelector('[data-routing="category"]');
+            const prn = lastRow.querySelector('[data-routing="printer"]');
+            if (cat) cat.value = r.category;
+            if (prn) prn.value = r.printer;
+          }
+        });
+      };
+      setTimeout(tryRender, 1500);
+    } catch(_){}
+  })();
 
   // 2026-05-14: Notificacion in-app de nueva version disponible.
   // Aplica a TODAS las plataformas (Web, PWA, .exe via main.js, APK Capacitor).
