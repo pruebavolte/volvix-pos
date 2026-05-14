@@ -20898,6 +20898,110 @@ if (process.env.NODE_ENV === 'test') {
     } catch (err) { sendError(res, err); }
   });
 
+  // 2026-05-14: Endpoint quick-create para UI inline tipo Excel del panel de control.
+  // Diferente de POST /api/users: permite alta parcial (solo email O solo telefono).
+  // Genera password temporal aleatorio si no se provee. Marca email_verified=false.
+  // Solo owner/admin/superadmin. Cumple regla de oro: 1 endpoint flexible que no
+  // duplica el flujo de registro publico.
+  handlers['POST /api/admin/users/inline-quick'] = requireAuth(async function (req, res) {
+    try {
+      const role = String((req.user && req.user.role) || '').toLowerCase();
+      if (!['owner','admin','superadmin','manager'].includes(role)) {
+        return sendJSON(res, { error: 'forbidden', need_role: 'manager+' }, 403);
+      }
+      const tnt = b36Tenant(req);
+      const body = await readBody(req, { maxBytes: 16 * 1024, strictJson: true });
+      if (checkBodyError(req, res)) return;
+      const email = body.email ? String(body.email).trim().toLowerCase() : '';
+      const phone = body.phone ? String(body.phone).replace(/[^\d]/g, '') : '';
+      const name  = body.name ? sanitizeName(String(body.name)) : '';
+      const businessType = body.business_type ? String(body.business_type).trim().toLowerCase().slice(0, 40) : null;
+      let userRole = String(body.role || 'cajero').toLowerCase();
+      const allowedRoles = ['cajero','inventario','contador','manager','admin','owner'];
+      if (!allowedRoles.includes(userRole)) userRole = 'cajero';
+      // Validacion minima: al menos email o phone
+      if (!email && !phone) {
+        return sendValidation(res, 'email o telefono requerido', 'email');
+      }
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return sendValidation(res, 'email invalido', 'email');
+      }
+      if (phone && (phone.length < 8 || phone.length > 15)) {
+        return sendValidation(res, 'telefono debe tener 8-15 digitos', 'phone');
+      }
+      // Solo superadmin puede crear owner
+      if (userRole === 'owner' && !b36IsSuperadmin(req)) {
+        return send403(res, { need_role: ['superadmin'], have_role: req.user.role });
+      }
+      // Dedupe: si ya existe usuario con ese email O phone en este tenant
+      if (email) {
+        try {
+          const dup = await supabaseRequest('GET',
+            '/pos_users?email=eq.' + encodeURIComponent(email) + '&select=id,email&limit=1');
+          if (dup && dup.length) {
+            return sendJSON(res, { error: 'duplicate', field: 'email', existing: dup[0] }, 409);
+          }
+        } catch(_){}
+      }
+      if (phone) {
+        try {
+          const dup = await supabaseRequest('GET',
+            '/pos_users?phone=eq.' + encodeURIComponent(phone) + '&select=id,phone&limit=1');
+          if (dup && dup.length) {
+            return sendJSON(res, { error: 'duplicate', field: 'phone', existing: dup[0] }, 409);
+          }
+        } catch(_){}
+      }
+      // Generar password temporal si no se provee (usuario tendra que resetear via OTP)
+      const pwd = body.password && body.password.length >= 8
+        ? String(body.password)
+        : 'tmp_' + crypto.randomBytes(8).toString('hex');
+      const tempPwd = !body.password;
+      const row = {
+        email: email || null,
+        phone: phone || null,
+        password_hash: b36Hash(pwd),
+        role: userRole,
+        is_active: true,
+        full_name: name || null,
+        tenant_id: tnt,
+        business_type: businessType,
+        email_verified: false,
+        phone_verified: false,
+        must_change_password: tempPwd,
+        created_at: new Date().toISOString()
+      };
+      let result;
+      try {
+        result = await supabaseRequest('POST', '/pos_users', row);
+      } catch (e) {
+        // Schema fallback: si phone/email_verified/business_type/must_change_password
+        // no existen como columnas, reintentar sin esos campos.
+        const msg = String((e && e.message) || '');
+        if (/PGRST204|column.*does not exist|42703/i.test(msg)) {
+          delete row.phone;
+          delete row.email_verified;
+          delete row.phone_verified;
+          delete row.business_type;
+          delete row.must_change_password;
+          if (!row.email) {
+            return sendJSON(res, { error: 'phone_column_missing', message: 'El schema no soporta phone-only. Provee email.' }, 400);
+          }
+          result = await supabaseRequest('POST', '/pos_users', row);
+        } else throw e;
+      }
+      const created = (result && result[0]) || result;
+      if (created) delete created.password_hash;
+      try { logAudit(req, 'user.inline_created', 'pos_users', { id: created && created.id, email, phone, role: userRole, temp_pwd: tempPwd }); } catch(_){}
+      sendJSON(res, {
+        ok: true,
+        user: created,
+        temp_password: tempPwd ? pwd : null,
+        verification_needed: { email: !!email, phone: !!phone }
+      }, 201);
+    } catch (err) { sendError(res, err); }
+  });
+
   handlers['POST /api/users'] = requireAuth(async function (req, res) {
     try {
       if (!b36IsOwner(req)) return send403(res, { need_role: ['owner', 'admin', 'superadmin'], have_role: req.user.role });

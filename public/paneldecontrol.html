@@ -7643,6 +7643,53 @@
       '' // acciones col, no filter
     ];
 
+    // 2026-05-14: filas inline tipo Excel al inicio del tbody. Permite dar de alta
+    // usuarios manualmente. Conforme se escribe en una fila, otra fila vacia
+    // aparece arriba. POST a /api/admin/users/inline-quick que acepta partial
+    // (email O telefono). Auto-crea con password temporal si no se provee.
+    function _inlineRow(rowId) {
+      const giroOpts = (giroCatalog || []).map(g =>
+        '<option value="' + escapeAttr(g.slug) + '">' + escapeText(g.name||g.slug) + '</option>').join('');
+      return ''
+        + '<tr class="pv14-inline-add" data-rowid="' + rowId + '" style="background:#FFFBEB;border-bottom:2px dashed #FBBF24;">'
+        +   '<td style="text-align:center;font-size:11px;color:#92400E;font-weight:600;">+</td>'
+        +   '<td style="padding:4px;"><div style="display:flex;gap:4px;flex-direction:column;">'
+        +     '<input type="email" data-inline="email" placeholder="email@negocio.com" style="border:1px solid #FCD34D;padding:4px 6px;border-radius:4px;font-size:12px;width:100%;background:#fff;">'
+        +     '<input type="tel" data-inline="phone" placeholder="📞 8112345678" style="border:1px solid #FCD34D;padding:4px 6px;border-radius:4px;font-size:11px;width:100%;background:#fff;">'
+        +     '<input type="text" data-inline="name" placeholder="Nombre completo" style="border:1px solid #FCD34D;padding:4px 6px;border-radius:4px;font-size:11px;width:100%;background:#fff;">'
+        +   '</div></td>'
+        +   '<td style="padding:4px;">'
+        +     '<select data-inline="role" style="border:1px solid #FCD34D;padding:4px;border-radius:4px;font-size:11px;width:100%;">'
+        +       '<option value="cajero">Cajero</option>'
+        +       '<option value="owner">Owner</option>'
+        +       '<option value="manager">Manager</option>'
+        +       '<option value="inventario">Inventario</option>'
+        +       '<option value="contador">Contador</option>'
+        +       '<option value="admin">Admin</option>'
+        +     '</select>'
+        +   '</td>'
+        +   '<td style="padding:4px;">'
+        +     '<input list="permv14-dl-giros" data-inline="business_type" placeholder="abarrotes..." style="border:1px solid #FCD34D;padding:4px 6px;border-radius:4px;font-size:11px;width:100%;background:#fff;">'
+        +   '</td>'
+        +   '<td style="padding:4px;text-align:center;">'
+        +     '<span data-inline-status style="font-size:10px;color:#92400E;">📝 Sin guardar</span>'
+        +   '</td>'
+        +   '<td style="padding:4px;font-size:10px;color:#92400E;" data-inline="fecha">' + (new Date()).toLocaleString('es-MX',{dateStyle:'short',timeStyle:'short'}) + '</td>'
+        +   '<td style="padding:4px;text-align:center;" data-inline="verified">'
+        +     '<span style="font-size:14px;" title="No verificado">⏳</span>'
+        +   '</td>'
+        +   '<td style="padding:4px;">'
+        +     '<input type="password" data-inline="password" placeholder="(auto-temp)" style="border:1px solid #FCD34D;padding:4px 6px;border-radius:4px;font-size:11px;width:100%;background:#fff;" autocomplete="new-password">'
+        +   '</td>'
+        +   '<td style="text-align:center;" colspan="4">'
+        +     '<button type="button" data-inline-save style="background:#10B981;color:#fff;border:0;padding:5px 10px;border-radius:4px;font-size:11px;cursor:pointer;font-weight:600;">💾 Guardar</button> '
+        +     '<button type="button" data-inline-clear style="background:#fff;color:#78716C;border:1px solid #D6D3D1;padding:5px 8px;border-radius:4px;font-size:11px;cursor:pointer;">✕</button>'
+        +   '</td>'
+        +   '<td></td>'
+        + '</tr>';
+    }
+    const initialInlineRow = _inlineRow('row_' + Date.now());
+
     let html = summary + bulkBar
       + '<table class="permv14-users-table" style="table-layout:fixed;width:100%;">'
       +   '<colgroup>'
@@ -7652,7 +7699,8 @@
       +     '<tr>' + colDefs.map(c => '<th style="vertical-align:middle;">' + c.label + '</th>').join('') + '</tr>'
       +     '<tr class="filter-row">' + filterCells.map(c => '<th>' + (c || '') + '</th>').join('') + '</tr>'
       +   '</thead>'
-      +   '<tbody>';
+      +   '<tbody id="pv14-users-tbody-main">'
+      +   initialInlineRow;
 
     // Helper "—" centrado para celdas sin dato (cuando un tipo de usuario no
     // tiene info que otro sí). Reemplaza el "—" suelto que dejaba huecos.
@@ -7874,6 +7922,85 @@
         + '</div>';
     }
     wrap.innerHTML = html;
+
+    // 2026-05-14: Wire inline row creation (Excel-like). Permite alta manual
+    // de usuarios desde el panel. Cumple regla de oro: 1 endpoint flexible.
+    function _wireInlineRow(row) {
+      if (!row || row._wired) return;
+      row._wired = true;
+      let _typedOnce = false;
+      // Trigger: al escribir en CUALQUIER input se crea otra fila vacia arriba
+      row.querySelectorAll('input,select').forEach(inp => {
+        inp.addEventListener('input', function () {
+          if (_typedOnce) return;
+          _typedOnce = true;
+          const newRowId = 'row_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+          const tbody = row.parentNode;
+          const tpl = document.createElement('tbody');
+          tpl.innerHTML = _inlineRow(newRowId);
+          const newRow = tpl.firstChild;
+          tbody.insertBefore(newRow, row);
+          _wireInlineRow(newRow);
+        });
+      });
+      // Guardar via POST
+      const saveBtn = row.querySelector('[data-inline-save]');
+      if (saveBtn) saveBtn.addEventListener('click', async function () {
+        const data = {};
+        row.querySelectorAll('[data-inline]').forEach(inp => {
+          const k = inp.getAttribute('data-inline');
+          if (k === 'fecha' || k === 'verified') return;
+          if (inp.value) data[k] = inp.value;
+        });
+        if (!data.email && !data.phone) {
+          alert('Necesitas al menos email o telefono');
+          return;
+        }
+        const status = row.querySelector('[data-inline-status]');
+        if (status) { status.textContent = '⏳ Guardando...'; status.style.color = '#3B82F6'; }
+        saveBtn.disabled = true;
+        try {
+          const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+          const r = await fetch('/api/admin/users/inline-quick', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok },
+            body: JSON.stringify(data)
+          });
+          const j = await r.json();
+          if (!r.ok) {
+            if (status) { status.textContent = '❌ ' + (j.error || r.status); status.style.color = '#DC2626'; }
+            saveBtn.disabled = false;
+            return;
+          }
+          // Exito: marcar fila como guardada + mostrar verified status
+          row.style.background = '#F0FDF4';
+          row.style.borderBottom = '2px solid #10B981';
+          if (status) { status.textContent = '✅ Guardado'; status.style.color = '#059669'; }
+          row.querySelectorAll('input,select').forEach(i => i.disabled = true);
+          saveBtn.style.display = 'none';
+          row.querySelector('[data-inline-clear]').textContent = '✕ Cerrar';
+          // Mostrar temp password si lo genero
+          if (j.temp_password) {
+            const pwdInp = row.querySelector('[data-inline="password"]');
+            if (pwdInp) {
+              pwdInp.value = j.temp_password;
+              pwdInp.type = 'text';
+              pwdInp.title = 'Password temporal generado. El usuario debe cambiarlo al primer login.';
+            }
+          }
+          // Refrescar lista despues de 1.5s para que aparezca en el listado normal
+          setTimeout(() => { if (typeof renderUsersUnified === 'function') renderUsersUnified(); }, 1500);
+        } catch (e) {
+          if (status) { status.textContent = '❌ ' + e.message; status.style.color = '#DC2626'; }
+          saveBtn.disabled = false;
+        }
+      });
+      const clearBtn = row.querySelector('[data-inline-clear]');
+      if (clearBtn) clearBtn.addEventListener('click', function () { row.remove(); });
+    }
+    // Wire la fila inline inicial
+    const initialRow = wrap.querySelector('.pv14-inline-add');
+    if (initialRow) _wireInlineRow(initialRow);
 
     // 2026-05-13 — Filtros por columna (typeahead). Cada input/select filtra
     // las filas que NO matchean su columna (substring case-insensitive).
