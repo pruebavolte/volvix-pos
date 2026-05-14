@@ -4886,10 +4886,33 @@
               <label class="input-label">Tipo de conexión</label>
               <select class="input-field" id="cfg-printer-type" onchange="vlxPrinterTypeChange(this.value)">
                 <option value="browser">🌐 Navegador (PDF / diálogo del sistema)</option>
+                <option value="system">🖥️ Sistema (Windows .exe - detecta instaladas)</option>
                 <option value="bluetooth">📶 Bluetooth (iOS · Android · Web BT)</option>
                 <option value="network">🌐 Red — IP / Ethernet (LAN)</option>
                 <option value="usb">🔌 USB (Chrome en escritorio)</option>
               </select>
+            </div>
+
+            <!-- 2026-05-14: Panel sistema (solo .exe / Electron) -->
+            <div id="cfg-printer-system" style="display:none; margin-top:8px;">
+              <p style="font-size:12px; color:var(--text-2); margin:0 0 10px;">Impresoras instaladas en este sistema (Windows/Mac/Linux). Solo visible en la app .exe.</p>
+              <div class="input-group" style="margin:0;">
+                <label class="input-label">Impresora del sistema</label>
+                <select class="input-field" id="cfg-printer-system-name" onchange="vlxPrinterSaveConfig()">
+                  <option value="">— Selecciona impresora —</option>
+                </select>
+              </div>
+              <div style="display:flex; gap:8px; align-items:center; margin-top:8px; flex-wrap:wrap;">
+                <button class="btn sm" onclick="vlxPrinterSystemRefresh()">🔄 Refrescar lista</button>
+                <button class="btn sm" onclick="vlxPrinterSystemTest()">🖨️ Imprimir prueba</button>
+                <span id="cfg-printer-system-status" style="font-size:12px; color:var(--text-2);">Sin impresora seleccionada</span>
+              </div>
+              <p id="cfg-printer-system-note" style="font-size:11px;color:#92400E;margin:8px 0 0;display:none;">⚠️ Requiere la app .exe de Volvix POS. En navegador no se detectan impresoras del SO por seguridad.</p>
+            </div>
+
+            <!-- 2026-05-14: Preview de ticket -->
+            <div class="input-group" style="margin-top:14px;">
+              <button class="btn" onclick="vlxTicketPreview()" style="width:100%;">👁️ Vista previa del ticket</button>
             </div>
 
             <!-- Panel Bluetooth -->
@@ -11871,6 +11894,156 @@
     try { if (typeof renderInv === 'function') renderInv(); } catch (_) {}
     try { if (typeof renderCategories === 'function') renderCategories(); } catch (_) {}
   });
+  // 2026-05-14 GAP #5 + #6: Version footer + Ticket preview + Printer system detect.
+
+  // ── Version footer visible (esquina inferior derecha del POS) ──
+  async function __renderVersionFooter() {
+    if (document.getElementById('volvix-version-footer')) return;
+    let version = '?';
+    try {
+      const r = await fetch('/api/version', { cache: 'no-cache' });
+      const d = await r.json();
+      version = (d.installed && d.installed.version) || d.version || '?';
+    } catch (_) {}
+    const isElectron = !!(window.volvixElectron && window.volvixElectron.isElectron);
+    const isCapacitor = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+    let platform = '🌐 Web';
+    if (isElectron) platform = '🖥️ Windows';
+    else if (isCapacitor) platform = '📱 Android';
+    else if ('serviceWorker' in navigator) platform = '🌐 PWA';
+    const el = document.createElement('div');
+    el.id = 'volvix-version-footer';
+    el.style.cssText = [
+      'position:fixed','right:8px','bottom:6px','z-index:9000',
+      'font-family:system-ui,sans-serif','font-size:10px','color:rgba(0,0,0,0.4)',
+      'padding:3px 8px','background:rgba(255,255,255,0.85)','border-radius:4px',
+      'border:1px solid rgba(0,0,0,0.06)','pointer-events:none','user-select:none'
+    ].join(';');
+    el.textContent = platform + ' · v' + version;
+    document.body.appendChild(el);
+  }
+  window.addEventListener('load', () => setTimeout(__renderVersionFooter, 1500));
+
+  // ── Vista previa del ticket ──
+  window.vlxTicketPreview = function () {
+    try {
+      const session = JSON.parse(localStorage.getItem('volvixSession') || '{}');
+      const tenant = session.business_name || 'Mi Negocio';
+      const sample = (typeof CART !== 'undefined' && CART.length > 0)
+        ? CART.slice(0, 5)
+        : [
+            { name: 'Producto demo 1', qty: 2, price: 25 },
+            { name: 'Producto demo 2', qty: 1, price: 50 }
+          ];
+      const total = sample.reduce((s, i) => s + (Number(i.price)||0) * (Number(i.qty)||1), 0);
+      const html = (
+        '<!doctype html><html><head><meta charset="utf-8"><title>Vista previa ticket</title>' +
+        '<style>body{font-family:monospace;width:280px;margin:20px auto;padding:14px;background:#fff;border:1px dashed #999;font-size:11px;line-height:1.4}' +
+        '.head{text-align:center;font-weight:bold;font-size:13px;margin-bottom:6px}' +
+        '.line{border-top:1px dashed #999;margin:6px 0}' +
+        '.row{display:flex;justify-content:space-between}' +
+        '.tot{font-size:13px;font-weight:bold}</style></head><body>' +
+        '<div class="head">' + (tenant) + '</div>' +
+        '<div style="text-align:center;font-size:10px;color:#666">' + new Date().toLocaleString('es-MX') + '</div>' +
+        '<div class="line"></div>' +
+        sample.map(it => (
+          '<div class="row"><span>' + (it.qty||1) + 'x ' + (it.name||'') + '</span>' +
+          '<span>$' + ((Number(it.price)||0)*(Number(it.qty)||1)).toFixed(2) + '</span></div>'
+        )).join('') +
+        '<div class="line"></div>' +
+        '<div class="row tot"><span>TOTAL</span><span>$' + total.toFixed(2) + '</span></div>' +
+        '<div style="margin-top:14px;text-align:center;font-size:10px;color:#666">¡Gracias por su compra!</div>' +
+        '<div style="margin-top:14px;text-align:center"><button onclick="window.print()" style="padding:6px 14px;background:#1d4ed8;color:#fff;border:0;border-radius:4px;cursor:pointer">🖨️ Imprimir</button> ' +
+        '<button onclick="window.close()" style="padding:6px 14px;background:#666;color:#fff;border:0;border-radius:4px;cursor:pointer">Cerrar</button></div>' +
+        '</body></html>'
+      );
+      const w = window.open('', '_blank', 'width=360,height=600');
+      if (w) { w.document.write(html); w.document.close(); }
+      else { alert('Bloqueado por popup blocker. Permite popups para ver el preview.'); }
+    } catch (e) {
+      alert('Error al generar preview: ' + e.message);
+    }
+  };
+
+  // ── Detección impresoras sistema (solo .exe) ──
+  window.vlxPrinterSystemRefresh = async function () {
+    const sel = document.getElementById('cfg-printer-system-name');
+    const status = document.getElementById('cfg-printer-system-status');
+    const note = document.getElementById('cfg-printer-system-note');
+    if (!sel) return;
+    if (!window.volvixElectron || !window.volvixElectron.listSystemPrinters) {
+      sel.innerHTML = '<option value="">No disponible en navegador</option>';
+      if (note) note.style.display = 'block';
+      if (status) status.textContent = 'Requiere .exe';
+      return;
+    }
+    if (status) status.textContent = '🔄 Detectando impresoras...';
+    try {
+      const printers = await window.volvixElectron.listSystemPrinters();
+      sel.innerHTML = '<option value="">— Selecciona impresora —</option>';
+      (printers || []).forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.name;
+        const isDefault = p.isDefault ? ' ✓' : '';
+        const status = p.status === 0 ? '' : ' (' + (p.status === 3 ? 'inactiva' : 'error') + ')';
+        opt.textContent = (p.displayName || p.name) + isDefault + status;
+        sel.appendChild(opt);
+      });
+      const saved = localStorage.getItem('volvix_system_printer');
+      if (saved) sel.value = saved;
+      if (status) status.textContent = (printers || []).length + ' impresoras detectadas';
+    } catch (e) {
+      if (status) status.textContent = 'Error: ' + e.message;
+    }
+  };
+  window.vlxPrinterSystemTest = async function () {
+    const sel = document.getElementById('cfg-printer-system-name');
+    const status = document.getElementById('cfg-printer-system-status');
+    const name = sel && sel.value;
+    if (!name) { alert('Selecciona una impresora primero'); return; }
+    if (!window.volvixElectron || !window.volvixElectron.printToSystem) {
+      alert('Requiere la app .exe de Volvix POS');
+      return;
+    }
+    if (status) status.textContent = '🖨️ Imprimiendo prueba...';
+    const testHtml = '<!doctype html><html><body style="font-family:monospace;font-size:11px;padding:14px;width:280px;">' +
+      '<div style="text-align:center;font-weight:bold;font-size:13px;">PRUEBA DE IMPRESION</div>' +
+      '<div style="text-align:center;font-size:10px;color:#666;">' + new Date().toLocaleString('es-MX') + '</div>' +
+      '<div style="border-top:1px dashed #999;margin:10px 0;"></div>' +
+      '<div>Impresora: ' + name + '</div>' +
+      '<div>Volvix POS v1.0.x</div>' +
+      '<div style="border-top:1px dashed #999;margin:10px 0;"></div>' +
+      '<div style="text-align:center;margin-top:8px;">✓ Configuración OK</div>' +
+      '</body></html>';
+    try {
+      const result = await window.volvixElectron.printToSystem({
+        html: testHtml,
+        printerName: name,
+        silent: true,
+        copies: 1
+      });
+      if (result.ok) {
+        if (status) status.textContent = '✓ Prueba enviada a ' + name;
+        localStorage.setItem('volvix_system_printer', name);
+      } else {
+        if (status) status.textContent = '✗ Error: ' + (result.error || 'desconocido');
+      }
+    } catch (e) {
+      if (status) status.textContent = 'Error: ' + e.message;
+    }
+  };
+
+  // Auto-refresh la lista de printers cuando se selecciona "system"
+  const __origPrinterTypeChange = window.vlxPrinterTypeChange;
+  window.vlxPrinterTypeChange = function (type) {
+    if (typeof __origPrinterTypeChange === 'function') __origPrinterTypeChange(type);
+    const sysPanel = document.getElementById('cfg-printer-system');
+    if (sysPanel) sysPanel.style.display = (type === 'system') ? 'block' : 'none';
+    if (type === 'system' && typeof window.vlxPrinterSystemRefresh === 'function') {
+      window.vlxPrinterSystemRefresh();
+    }
+  };
+
   // 2026-05-14: Notificacion in-app de nueva version disponible.
   // Aplica a TODAS las plataformas (Web, PWA, .exe via main.js, APK Capacitor).
   // Para .exe la notificacion es informativa porque electron-updater ya

@@ -13476,6 +13476,52 @@ handlers['GET /api/config/public'] = async (req, res) => {
         filtered = issues.filter(i => allowed.includes(i.severity));
       }
 
+      // 2026-05-14 GAP #4: Email notification cuando hay issues critical o high.
+      // Se manda solo desde cron (no en cada query manual), y solo si RESEND_API_KEY
+      // esta configurado + el tenant tiene un owner_email.
+      if (isCron && (counts.critical > 0 || counts.high > 0) && process.env.RESEND_API_KEY) {
+        try {
+          // Resolver owner del tenant para enviar el email
+          const tenantOwner = await supabaseRequest('GET',
+            '/pos_companies?tenant_id=eq.' + encodeURIComponent(tenantId) +
+            '&select=owner_email,name&limit=1').catch(() => []);
+          const recipient = tenantOwner && tenantOwner[0] && tenantOwner[0].owner_email;
+          if (recipient) {
+            const criticalIssues = issues.filter(i => i.severity === 'critical' || i.severity === 'high');
+            const issuesList = criticalIssues.slice(0, 10).map(i =>
+              `<li><strong>[${i.severity.toUpperCase()}] ${i.category}/${i.code}</strong>: ${i.message}</li>`
+            ).join('');
+            const businessName = (tenantOwner[0].name) || tenantId;
+            sendEmail({
+              to: recipient,
+              subject: `[Volvix POS] Alerta integridad: ${counts.critical} critical, ${counts.high} high — ${businessName}`,
+              html: `
+                <div style="font-family:system-ui;max-width:600px;margin:0 auto;padding:20px;">
+                  <h2 style="color:${counts.critical > 0 ? '#dc2626' : '#ea580c'};">
+                    ${counts.critical > 0 ? '🔥 Critical' : '⚠️ Atención'}: Tu sistema necesita revisión
+                  </h2>
+                  <p>El motor de integridad detectó <strong>${counts.critical} criticos</strong> y <strong>${counts.high} altos</strong> en tu sistema <strong>${businessName}</strong>.</p>
+                  <p><strong>Score: ${score.toFixed(1)}/100</strong> · Verdict: ${verdict}</p>
+                  <h3>Top issues:</h3>
+                  <ul>${issuesList}</ul>
+                  <p style="background:#f5f5f5;padding:12px;border-radius:6px;margin-top:20px;">
+                    Entra a tu panel de control y ejecuta el motor de integridad para ver detalles completos.<br>
+                    Endpoint: <code>GET /api/admin/integrity-check?days=30</code>
+                  </p>
+                  <p style="color:#666;font-size:12px;margin-top:30px;">
+                    Esta alerta se genera automaticamente desde el cron diario.
+                    Si crees que es un error, contacta soporte.
+                  </p>
+                </div>
+              `,
+              text: `Motor de integridad: ${counts.critical} criticos, ${counts.high} altos en ${businessName}. Score ${score.toFixed(1)}/100.`,
+              template: 'integrity_alert'
+            }).catch(() => {});
+            stats.email_sent_to = recipient;
+          }
+        } catch (_) { /* fail-soft: no bloquear response por error de email */ }
+      }
+
       sendJSON(res, {
         ok: true,
         verdict,

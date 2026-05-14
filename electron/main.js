@@ -401,6 +401,55 @@ ipcMain.handle('volvix:input:available', async () => {
   return !!_loadNut();
 });
 
+// 2026-05-14: listar impresoras instaladas en el OS via Electron webContents.
+// Devuelve array de {name, displayName, description, status, isDefault, options}.
+ipcMain.handle('volvix:printers:list', async () => {
+  try {
+    if (!mainWindow || !mainWindow.webContents) return [];
+    if (typeof mainWindow.webContents.getPrintersAsync === 'function') {
+      const printers = await mainWindow.webContents.getPrintersAsync();
+      return printers || [];
+    }
+    // Fallback Electron <= 21
+    if (typeof mainWindow.webContents.getPrinters === 'function') {
+      return mainWindow.webContents.getPrinters() || [];
+    }
+    return [];
+  } catch (e) {
+    console.warn('[volvix] listSystemPrinters fallo:', e.message);
+    return [];
+  }
+});
+
+// Imprime un HTML directo a una impresora del sistema.
+ipcMain.handle('volvix:printers:print', async (event, opts) => {
+  try {
+    if (!opts || !opts.html) return { ok: false, error: 'html required' };
+    // Crear ventana oculta para imprimir
+    const { BrowserWindow } = require('electron');
+    const printWin = new BrowserWindow({
+      show: false,
+      webPreferences: { nodeIntegration: false, contextIsolation: true }
+    });
+    await printWin.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(opts.html));
+    const printOpts = {
+      silent: opts.silent !== false,
+      printBackground: opts.printBackground !== false,
+      copies: opts.copies || 1,
+      deviceName: opts.printerName || undefined,
+      margins: opts.margins || { marginType: 'default' }
+    };
+    return await new Promise((resolve) => {
+      printWin.webContents.print(printOpts, (success, errorType) => {
+        try { printWin.close(); } catch (_) {}
+        resolve({ ok: !!success, error: success ? null : (errorType || 'unknown') });
+      });
+    });
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+});
+
 // Ejecuta un comando de input nativo (mouse o teclado).
 // El renderer manda comandos que vienen del admin via WebRTC datachannel.
 ipcMain.handle('volvix:input:execute', async (event, cmd) => {

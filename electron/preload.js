@@ -60,5 +60,18 @@ contextBridge.exposeInMainWorld('volvixElectron', {
 
   hasNativeControl: async function () {
     return await ipcRenderer.invoke('volvix:input:available');
+  },
+
+  // 2026-05-14: detectar impresoras instaladas en Windows/Mac/Linux.
+  // Usa webContents.getPrintersAsync() via IPC al main process.
+  // Devuelve array: [{ name, displayName, description, status, isDefault, ... }]
+  listSystemPrinters: async function () {
+    return await ipcRenderer.invoke('volvix:printers:list');
+  },
+
+  // Imprime un HTML directo a una impresora del sistema.
+  // opts: { html, printerName, silent (no dialog), copies, printBackground, ... }
+  printToSystem: async function (opts) {
+    return await ipcRenderer.invoke('volvix:printers:print', opts || {});
   }
 });
