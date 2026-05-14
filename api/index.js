@@ -3862,8 +3862,12 @@ const handlers = {
       // FIX slice_38: filtro por tenant
       const tenantId = resolveTenant(req);
       const ownerUserId = resolvePosUserId(req, tenantId);
-      let qs = `?pos_user_id=eq.${ownerUserId}&select=id,code,name,stock,cost,price&order=name.asc`;
-      if (req.user.role === 'superadmin') qs = '?select=id,code,name,stock,cost,price&order=name.asc';
+      // 2026-05-14: incluir category y min_stock para que la tabla los
+      // pueda mostrar (antes el frontend recibia siempre 'General' y min=20
+      // hardcoded porque el SELECT no los traia).
+      const cols = 'id,code,name,stock,cost,price,category,min_stock';
+      let qs = `?pos_user_id=eq.${ownerUserId}&select=${cols}&order=name.asc`;
+      if (req.user.role === 'superadmin') qs = `?select=${cols}&order=name.asc`;
       const products = await supabaseRequest('GET', '/pos_products' + qs);
       sendJSON(res, products || []);
     } catch (err) { sendError(res, err); }
