@@ -14,7 +14,7 @@
 // que clientes carguen los fixes acumulados de R1-R6a.
 // Cuando exista build pipeline (esbuild/vite), reemplazar por hash generado.
 // Mientras tanto: bumpear VERSION manualmente en cada deploy con cambios.
-const VERSION   = 'v1.14.0-offline-reload-fix';
+const VERSION   = 'v1.15.0-panel-perf-2026-05-14';
 const CACHE     = `volvix-${VERSION}`;
 const API_CACHE = `volvix-api-${VERSION}`;
 const RT_CACHE  = `volvix-rt-${VERSION}`;
