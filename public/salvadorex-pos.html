@@ -2772,9 +2772,21 @@
       <button id="vlx-remote-end" style="padding:8px 14px;background:#fff;border:1px solid #C9C7C3;border-radius:7px;cursor:pointer;font-size:12px;color:#64748B;">Cancelar sesión</button>
     </div>
     <div id="vlx-remote-step-active" style="display:none;text-align:center;">
-      <div style="font-size:48px;margin-bottom:10px;">🟢</div>
-      <h2 style="margin:0 0 8px;font-size:20px;color:#1E40AF;">Soporte activo</h2>
-      <p style="font-size:13px;color:#475569;margin:0 0 14px;">El técnico está viendo tu pantalla. Verás un indicador rojo arriba mientras dure la sesión.</p>
+      <!-- ESTADO PRE-STREAM: usuario debe clickear para compartir (user gesture obligatorio) -->
+      <div id="vlx-remote-prestream" style="display:block;">
+        <div style="font-size:48px;margin-bottom:10px;">📺</div>
+        <h2 style="margin:0 0 8px;font-size:20px;color:#1E3A8A;">Listo para compartir pantalla</h2>
+        <p style="font-size:13px;color:#475569;margin:0 0 8px;">El técnico ya confirmó tu identidad. Solo falta que <b>compartas tu pantalla</b>.</p>
+        <p style="font-size:12px;color:#94A3B8;margin:0 0 14px;">Al presionar el botón, tu navegador te preguntará qué pantalla compartir.</p>
+        <button id="vlx-remote-share-screen" style="padding:12px 24px;background:#16A34A;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:700;font-size:15px;margin-bottom:10px;">📺 Compartir mi pantalla ahora</button>
+        <div id="vlx-remote-share-err" style="font-size:12px;color:#DC2626;margin-top:8px;min-height:14px;"></div>
+      </div>
+      <!-- ESTADO STREAMING: ya esta compartiendo -->
+      <div id="vlx-remote-streaming" style="display:none;">
+        <div style="font-size:48px;margin-bottom:10px;">🟢</div>
+        <h2 style="margin:0 0 8px;font-size:20px;color:#1E40AF;">Soporte activo</h2>
+        <p style="font-size:13px;color:#475569;margin:0 0 14px;">El técnico está viendo tu pantalla. Verás un indicador rojo arriba mientras dure la sesión.</p>
+      </div>
       <div id="vlx-remote-qs-area" style="display:none;background:#FFF7ED;border:1px solid #FED7AA;padding:14px;border-radius:8px;margin-bottom:14px;text-align:left;">
         <div style="font-weight:700;color:#9a3412;margin-bottom:6px;">🔧 El técnico solicita CONTROL TOTAL</div>
         <p style="font-size:13px;color:#78350F;margin:0 0 10px;line-height:1.5;">Para que pueda controlar tu mouse y teclado (mover archivos, configurar impresora, etc.) necesitas <b>descargar y ejecutar</b> esta herramienta. No la instala — solo se abre y al cerrarla se quita el control.</p>
@@ -2829,8 +2841,15 @@
       } else if (s.status === 'verified' || s.status === 'active') {
         _show('active');
         document.getElementById('vlx-remote-bar').style.display = 'block';
-        // Iniciar WebRTC al pasar a verified (una sola vez)
-        if (!_rsPC) _rsStartWebRTC(s.id);
+        // NO llamamos a _rsStartWebRTC desde aqui — Chrome requiere user gesture
+        // para getDisplayMedia. El usuario debe presionar "Compartir pantalla".
+        // Si ya hay stream activo, mostrar UI streaming en lugar de prestream.
+        if (_rsPC) {
+          const pre = document.getElementById('vlx-remote-prestream');
+          const str = document.getElementById('vlx-remote-streaming');
+          if (pre) pre.style.display = 'none';
+          if (str) str.style.display = 'block';
+        }
       } else if (s.status === 'ended' || s.status === 'rejected' || s.status === 'expired') {
         _rsCleanupWebRTC();
         _hide();
@@ -2883,8 +2902,8 @@
       // 4) Iniciar polling para recibir answer + ICE del admin
       _rsSignalIv = setInterval(() => _rsSignalPoll(sid, 'client'), 1500);
     } catch (err) {
-      console.warn('[remote-support] getDisplayMedia falló:', err.message);
-      if (err.name === 'NotAllowedError') alert('Necesitas darle permiso para compartir tu pantalla. Si lo bloqueaste, recarga la página y vuelve a aceptar.');
+      console.warn('[remote-support] captura de pantalla fallo:', err.name, err.message);
+      throw err; // propagar para que el boton "Compartir" muestre el error
     }
   }
   function _rsSignalSend(sid, to, message){
@@ -3057,6 +3076,31 @@
   document.getElementById('vlx-remote-end').addEventListener('click', _endSession);
   document.getElementById('vlx-remote-end-active').addEventListener('click', _endSession);
   document.getElementById('vlx-remote-bar-end').addEventListener('click', _endSession);
+
+  // 2026-05-13 FIX: getDisplayMedia requiere user gesture activation.
+  // Antes lo llamabamos desde el polling _poll() y Chrome lo bloqueaba.
+  // Ahora el usuario presiona "Compartir mi pantalla ahora" → garantiza gesture.
+  const shareBtn = document.getElementById('vlx-remote-share-screen');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', async () => {
+      if (!_rsCurrentSid) return;
+      const errEl = document.getElementById('vlx-remote-share-err');
+      if (errEl) errEl.textContent = '';
+      shareBtn.disabled = true; shareBtn.textContent = '⏳ Esperando que elijas pantalla…';
+      try {
+        await _rsStartWebRTC(_rsCurrentSid);
+        // Si llego hasta aqui sin throw, el stream esta vivo → cambiar UI
+        const pre = document.getElementById('vlx-remote-prestream');
+        const str = document.getElementById('vlx-remote-streaming');
+        if (pre) pre.style.display = 'none';
+        if (str) str.style.display = 'block';
+      } catch (e) {
+        if (errEl) errEl.textContent = 'No se pudo compartir: ' + (e.message || 'desconocido');
+        shareBtn.disabled = false;
+        shareBtn.textContent = '📺 Compartir mi pantalla ahora';
+      }
+    });
+  }
   // Polling adaptativo: rapido cuando hay banner activo (1.5s), lento idle (8s)
   // 2026-05-13: usuario reporto que tardaba "demasiado" en notar consentimiento
   // y en mandar el mensaje. Antes: 5s fijo. Ahora 1.5s mientras hay sesion activa.
