@@ -1551,22 +1551,28 @@ function serveStaticFile(res, pathname, fullUrl) {
       '.js':   'application/javascript; charset=utf-8',
       '.css':  'text/css; charset=utf-8',
       '.json': 'application/json; charset=utf-8',
-      '.png':  'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml',
+      '.png':  'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
+      '.webp': 'image/webp', '.gif': 'image/gif', '.svg': 'image/svg+xml',
       '.ico':  'image/x-icon', '.woff': 'font/woff', '.woff2':'font/woff2',
+      '.ttf':  'font/ttf', '.otf': 'font/otf',
     };
     const mime = mimeTypes[ext] || 'application/octet-stream';
     res.statusCode = 200;
     setSecurityHeaders(res); // R14
     res.setHeader('Content-Type', mime);
     // CACHE STRATEGY (cero stale + cero requests innecesarios):
-    //   HTML        → max-age=0, must-revalidate (siempre revalida vía ETag)
+    //   HTML                → max-age=0, must-revalidate (siempre revalida vía ETag)
     //   /volvix-*.js?v=HASH → max-age=1y immutable (URL única por deploy)
     //   /volvix-*.js sin ?v → max-age=0, must-revalidate (back-compat)
-    //   resto       → max-age=3600 (imagenes, fonts, etc.)
+    //   imágenes/fonts      → max-age=1y immutable (PageSpeed-friendly)
+    //   CSS                 → max-age=1d + stale-while-revalidate=7d
+    //   resto               → max-age=3600
     // hasCacheBust se determina del fullUrl (req.url) porque pathname ya no
     // tiene el query string. fullUrl viene del caller; si no se pasa, fallback.
     const isWiring = /\/volvix-[\w-]+\.js$/.test(pathname);
     const hasCacheBust = !!(fullUrl && /[?&]v=[a-f0-9]/i.test(fullUrl));
+    const isImageOrFont = /\.(webp|png|jpe?g|gif|svg|ico|woff2?|ttf|otf)$/i.test(pathname);
+    const isCss = ext === '.css';
     if (ext === '.html') {
       res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
     } else if (isWiring && hasCacheBust) {
@@ -1574,6 +1580,11 @@ function serveStaticFile(res, pathname, fullUrl) {
       res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
     } else if (isWiring) {
       res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+    } else if (isImageOrFont) {
+      // PageSpeed espera immutable para assets estáticos (mejora LCP/FCP)
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    } else if (isCss) {
+      res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
     } else {
       res.setHeader('Cache-Control', 'public, max-age=3600');
     }
