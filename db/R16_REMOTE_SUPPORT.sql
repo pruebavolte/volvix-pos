@@ -7,24 +7,34 @@
 -- Ejecutar UNA VEZ en el SQL editor de Supabase.
 
 CREATE TABLE IF NOT EXISTS volvix_remote_sessions (
-  id                      TEXT PRIMARY KEY,
-  code                    TEXT NOT NULL,
-  requester_email         TEXT NOT NULL,
-  requester_id            TEXT,
-  target_email            TEXT NOT NULL,
-  status                  TEXT NOT NULL DEFAULT 'pending',
-  consent_text            TEXT,
-  code_attempts           INTEGER DEFAULT 0,
-  expired_reason          TEXT,
-  quicksupport_requested  BOOLEAN DEFAULT FALSE,
-  quicksupport_provider   TEXT,
-  created_at              BIGINT NOT NULL,
-  updated_at              BIGINT NOT NULL,
-  accepted_at             BIGINT,
-  verified_at             BIGINT,
-  rejected_at             BIGINT,
-  ended_at                BIGINT
+  id                       TEXT PRIMARY KEY,
+  code                     TEXT NOT NULL,
+  requester_email          TEXT NOT NULL,
+  requester_id             TEXT,
+  target_email             TEXT NOT NULL,
+  status                   TEXT NOT NULL DEFAULT 'pending',
+  consent_text             TEXT,
+  code_attempts            INTEGER DEFAULT 0,
+  expired_reason           TEXT,
+  quicksupport_requested   BOOLEAN DEFAULT FALSE,
+  quicksupport_provider    TEXT,
+  client_platform_os       TEXT,
+  client_platform_browser  TEXT,
+  client_platform_pwa      BOOLEAN DEFAULT FALSE,
+  client_platform_ua       TEXT,
+  created_at               BIGINT NOT NULL,
+  updated_at               BIGINT NOT NULL,
+  accepted_at              BIGINT,
+  verified_at              BIGINT,
+  rejected_at              BIGINT,
+  ended_at                 BIGINT
 );
+
+-- Idempotent: agregar columnas si la tabla ya existia sin platform info
+ALTER TABLE volvix_remote_sessions ADD COLUMN IF NOT EXISTS client_platform_os TEXT;
+ALTER TABLE volvix_remote_sessions ADD COLUMN IF NOT EXISTS client_platform_browser TEXT;
+ALTER TABLE volvix_remote_sessions ADD COLUMN IF NOT EXISTS client_platform_pwa BOOLEAN DEFAULT FALSE;
+ALTER TABLE volvix_remote_sessions ADD COLUMN IF NOT EXISTS client_platform_ua TEXT;
 
 CREATE INDEX IF NOT EXISTS idx_remote_sessions_target
   ON volvix_remote_sessions(target_email, status);

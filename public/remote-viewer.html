@@ -50,7 +50,7 @@
 
 <div class="topbar">
   <h1>🖥 Visor de control remoto</h1>
-  <span class="target">Cliente: <b id="target-email">—</b></span>
+  <span class="target">Cliente: <b id="target-email">—</b> <span id="target-platform" style="margin-left:6px;font-size:11px;color:#FBBF24;"></span></span>
   <span class="stat">Sesión: <code id="sid" style="font-family:monospace;">—</code></span>
   <span class="badge wait" id="state">Conectando…</span>
   <button class="btn-qs" onclick="askQuickSupport()" id="btn-qs" style="display:none;" title="Solicitar control total con TeamViewer/AnyDesk">🔧 Solicitar control total</button>
@@ -171,6 +171,12 @@
         { headers: { 'Authorization': 'Bearer ' + tok } });
       const j = await r.json();
       if (!j || !j.ok) return;
+      // 2026-05-13: Mostrar plataforma del cliente apenas conozcamos (Win/Android/iOS/Web)
+      if (j.client_platform && j.client_platform.os) {
+        const cp = j.client_platform;
+        const flag = cp.os === 'windows' ? '🪟' : cp.os === 'android' ? '🤖' : cp.os === 'ios' ? '📱' : cp.os === 'mac' ? '🍎' : '🌐';
+        document.getElementById('target-platform').textContent = flag + ' ' + cp.os + (cp.pwa ? ' (PWA)' : '') + ' · ' + cp.browser;
+      }
       if (currentState === 'pending' && j.status === 'accepted') {
         setState('code');
         document.getElementById('code-input').focus();
@@ -192,7 +198,9 @@
     } catch (_) {}
   }
   pollStatus();
-  pollIv = setInterval(pollStatus, 3000);
+  // 2026-05-13: polling rapido (1.5s) durante pending/code/waiting-stream
+  // para que el admin vea el accept del usuario casi instantaneamente.
+  pollIv = setInterval(pollStatus, 1500);
 
   // Code submit
   window.submitCode = async function () {

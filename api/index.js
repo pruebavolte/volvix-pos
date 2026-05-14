@@ -12109,8 +12109,18 @@ handlers['GET /api/config/public'] = async (req, res) => {
         return sendJSON(res, { ok:false, error:'no eres el destinatario' }, 403);
       }
       if (action === 'accept') {
-        await _rsSet(sid, { status:'accepted', accepted_at: Date.now(), consent_text: consent });
-        try { logAudit(req, 'remote_support.accepted', 'pos_users', { session_id: sid, requester: s.requester_email, consent: consent }); } catch(_){}
+        // 2026-05-13: client envia platform info (windows/android/ios/web + pwa flag)
+        // para que el admin sepa donde esta el cliente y diagnostique problemas.
+        const platform = body.platform || null;
+        const patch = { status:'accepted', accepted_at: Date.now(), consent_text: consent };
+        if (platform) {
+          patch.client_platform_os = String(platform.os || '').slice(0, 30);
+          patch.client_platform_browser = String(platform.browser || '').slice(0, 30);
+          patch.client_platform_pwa = !!platform.pwa;
+          patch.client_platform_ua = String(platform.ua || '').slice(0, 300);
+        }
+        await _rsSet(sid, patch);
+        try { logAudit(req, 'remote_support.accepted', 'pos_users', { session_id: sid, requester: s.requester_email, consent: consent, platform: platform }); } catch(_){}
         return sendJSON(res, { ok:true, status:'accepted', show_code_to_user: s.code });
       }
       if (action === 'reject') {
@@ -12134,9 +12144,17 @@ handlers['GET /api/config/public'] = async (req, res) => {
       const out = { ok:true, id:s.id, status:s.status, target_email:s.target_email, created_at:s.created_at };
       if (s.status === 'accepted' || s.status === 'verified' || s.status === 'active') {
         out.accepted_at = s.accepted_at; out.consent_text = s.consent_text;
+        // Expone platform info al admin (Win/Android/iOS/Web + browser + pwa)
+        out.client_platform = {
+          os: s.client_platform_os || null,
+          browser: s.client_platform_browser || null,
+          pwa: s.client_platform_pwa || false,
+          ua: s.client_platform_ua || null
+        };
       }
       if (s.status === 'verified' || s.status === 'active') out.verified_at = s.verified_at;
       if (s.status === 'rejected') out.rejected_at = s.rejected_at;
+      if (s.status === 'expired') out.expired_reason = s.expired_reason || null;
       return sendJSON(res, out);
     } catch (err) { sendError(res, err); }
   }, ['superadmin','platform_owner']);

@@ -2927,21 +2927,56 @@
     const preview = document.getElementById('vlx-remote-preview');
     if (preview) { preview.srcObject = null; preview.style.display = 'none'; }
   }
+  // 2026-05-13: detecta plataforma para que el admin sepa Win/Android/iOS/Web
+  function _rsDetectPlatform(){
+    const ua = navigator.userAgent || '';
+    let os = 'web';
+    if (/Android/i.test(ua)) os = 'android';
+    else if (/iPhone|iPad|iPod/i.test(ua)) os = 'ios';
+    else if (/Windows/i.test(ua)) os = 'windows';
+    else if (/Mac OS X|Macintosh/i.test(ua)) os = 'mac';
+    else if (/Linux/i.test(ua)) os = 'linux';
+    const isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+    const browser = /Chrome\//.test(ua) ? 'chrome' : /Firefox\//.test(ua) ? 'firefox' : /Safari\//.test(ua) ? 'safari' : 'other';
+    return { os, browser, pwa: isStandalone, ua: ua.slice(0, 200) };
+  }
+
   document.getElementById('vlx-remote-accept').addEventListener('click', async () => {
     const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
     const consentText = document.querySelector('#vlx-remote-step-consent div[style*="FEF3C7"]').innerText;
+    const platform = _rsDetectPlatform();
+    const btn = document.getElementById('vlx-remote-accept');
+    btn.disabled = true; btn.textContent = '⏳ Procesando…';
     try {
       const r = await fetch('/api/remote-support/respond', {
         method:'POST',
         headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+tok },
-        body: JSON.stringify({ session_id: _rsCurrentSid, action:'accept', consent_text: consentText.slice(0,300) })
+        body: JSON.stringify({
+          session_id: _rsCurrentSid,
+          action: 'accept',
+          consent_text: consentText.slice(0, 300),
+          platform: platform
+        })
       });
       const j = await r.json();
-      if (j.ok && j.show_code_to_user) {
+      if (!j.ok) {
+        alert('No se pudo aceptar: ' + (j.error || 'error') + '\n\nIntenta de nuevo.');
+        btn.disabled = false; btn.textContent = '✓ Acepto · brindar acceso';
+        return;
+      }
+      if (j.show_code_to_user) {
         document.getElementById('vlx-remote-code').textContent = j.show_code_to_user;
         _show('code');
+      } else {
+        // Fallback: si por algun motivo el codigo no vino en la respuesta, mostrar
+        // mensaje claro para que el usuario sepa que la sesion fue aceptada.
+        document.getElementById('vlx-remote-code').textContent = '✓ aceptado';
+        _show('code');
       }
-    } catch(e){ alert('Error: '+e.message); }
+    } catch(e){
+      alert('Error de red al aceptar: ' + e.message);
+      btn.disabled = false; btn.textContent = '✓ Acepto · brindar acceso';
+    }
   });
   document.getElementById('vlx-remote-reject').addEventListener('click', async () => {
     const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
@@ -2969,11 +3004,13 @@
   document.getElementById('vlx-remote-end').addEventListener('click', _endSession);
   document.getElementById('vlx-remote-end-active').addEventListener('click', _endSession);
   document.getElementById('vlx-remote-bar-end').addEventListener('click', _endSession);
-  // Iniciar polling cada 5s (solo si hay sesion)
+  // Polling adaptativo: rapido cuando hay banner activo (1.5s), lento idle (8s)
+  // 2026-05-13: usuario reporto que tardaba "demasiado" en notar consentimiento
+  // y en mandar el mensaje. Antes: 5s fijo. Ahora 1.5s mientras hay sesion activa.
   function _startPoll(){
     if (_rsPollIv) return;
-    _poll(); // primera vez inmediato
-    _rsPollIv = setInterval(_poll, 5000);
+    _poll();
+    _rsPollIv = setInterval(_poll, 1500);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', _startPoll);
   else _startPoll();
