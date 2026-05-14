@@ -12183,29 +12183,86 @@ handlers['GET /api/config/public'] = async (req, res) => {
     };
   }
 
-  // 2026-05-13 — Diagnostico: verifica que pos_remote_sessions este accesible
+  // 2026-05-13 — Diagnostico completo: verifica el flow ENTERO internamente
+  // sin necesitar navegador. Util para CI/CD y testing automatico.
   handlers['GET /api/admin/remote-support/_diag'] = requireAuth(async (req, res) => {
     const role = String((req.user && req.user.role) || '').toLowerCase();
     if (role !== 'superadmin' && role !== 'platform_owner') return sendJSON(res, { ok:false, error:'forbidden' }, 403);
-    const out = { ok: true, store: 'pos_remote_sessions (existing, schema r10e)', tables: {} };
+    const out = { ok: true, store: 'pos_remote_sessions (schema r10e)', steps: [] };
+    const myEmail = String(req.user.email || '').toLowerCase();
+    let probeSid = null;
+
     try {
+      // STEP 1: Verify table is accessible
       const rows = await supabaseRequest('GET', '/pos_remote_sessions?limit=1');
-      out.tables.pos_remote_sessions = { exists: true, sample_count: (rows || []).length };
-    } catch (e) {
-      out.tables.pos_remote_sessions = { exists: false, error: String(e.message || e).slice(0, 300) };
-    }
-    // Probe write capability
-    try {
-      const probeSid = '__diag_probe_' + crypto.randomBytes(4).toString('hex');
-      await _rsSet(probeSid, { code: '000000', requester_email: 'diag@platform', target_email: 'diag@platform', status: 'pending' });
-      const s = await _rsGet(probeSid);
-      out.write_probe = { ok: !!s, status_persists: s ? s.status : null };
-      if (s) {
-        // cleanup
-        try { await supabaseRequest('DELETE', '/pos_remote_sessions?token_hash=eq.' + encodeURIComponent(probeSid)); } catch(_){}
+      out.steps.push({ step:1, name:'table_accessible', ok: true, sample_count: (rows || []).length });
+
+      // STEP 2: Create a session (admin to self)
+      probeSid = '__diag_' + crypto.randomBytes(8).toString('hex');
+      const code = Math.floor(100000 + Math.random()*900000).toString();
+      await _rsSet(probeSid, {
+        code, requester_email: myEmail, requester_id: req.user.id || 'diag',
+        target_email: myEmail, status: 'pending', created_at: Date.now()
+      });
+      const s2 = await _rsGet(probeSid);
+      out.steps.push({ step:2, name:'create_session', ok: !!s2, status: s2 ? s2.status : null });
+      if (!s2) throw new Error('create_session_failed');
+
+      // STEP 3: Simulate client accept with platform
+      await _rsSet(probeSid, {
+        status:'accepted', accepted_at: Date.now(), consent_text:'diag test',
+        client_platform_os:'Linux', client_platform_browser:'CurlBot',
+        client_platform_pwa: false, client_platform_ua:'diag-test/1.0'
+      });
+      const s3 = await _rsGet(probeSid);
+      out.steps.push({ step:3, name:'accept_with_platform', ok: s3 && s3.status==='accepted', platform_persists: s3 && s3.client_platform_os==='Linux' });
+
+      // STEP 4: Verify code
+      if (s3 && s3.code === code) {
+        await _rsSet(probeSid, { status:'verified', verified_at: Date.now() });
+        const s4 = await _rsGet(probeSid);
+        out.steps.push({ step:4, name:'verify_code', ok: s4 && s4.status==='verified' });
       }
+
+      // STEP 5: Signal push (client→admin offer)
+      const fakeOffer = { type:'offer', sdp:'v=0\r\ndiag-test\r\n' };
+      await _signalPush(probeSid, 'admin', fakeOffer);
+      out.steps.push({ step:5, name:'signal_push_offer', ok: true });
+
+      // STEP 6: Signal push (client→admin ICE)
+      const fakeIce = { type:'ice', candidate:{candidate:'candidate:diag', sdpMid:'0', sdpMLineIndex:0} };
+      await _signalPush(probeSid, 'admin', fakeIce);
+      out.steps.push({ step:6, name:'signal_push_ice', ok: true });
+
+      // STEP 7: Admin drains queue (should get offer + ice)
+      const drain = await _signalDrain(probeSid, 'admin');
+      const drainTypes = (drain.messages || []).map(m => m.message && m.message.type);
+      out.steps.push({
+        step:7, name:'admin_drain',
+        ok: drainTypes.includes('offer') && drainTypes.includes('ice'),
+        msg_count: drain.messages.length, types: drainTypes
+      });
+
+      // STEP 8: Second drain should be empty (queue cleared)
+      const drain2 = await _signalDrain(probeSid, 'admin');
+      out.steps.push({ step:8, name:'admin_drain_empty', ok: drain2.messages.length === 0 });
+
+      // STEP 9: Admin push answer back to client
+      const fakeAnswer = { type:'answer', sdp:'v=0\r\nanswer\r\n' };
+      await _signalPush(probeSid, 'client', fakeAnswer);
+      const clientDrain = await _signalDrain(probeSid, 'client');
+      out.steps.push({
+        step:9, name:'roundtrip_answer',
+        ok: clientDrain.messages.length === 1 && clientDrain.messages[0].message.type === 'answer'
+      });
+
+      out.all_ok = out.steps.every(s => s.ok);
     } catch (e) {
-      out.write_probe = { ok: false, error: String(e.message || e).slice(0, 300) };
+      out.error = String(e.message || e).slice(0, 300);
+      out.all_ok = false;
+    } finally {
+      // Cleanup
+      if (probeSid) try { await supabaseRequest('DELETE', '/pos_remote_sessions?token_hash=eq.' + encodeURIComponent(probeSid)); } catch(_){}
     }
     return sendJSON(res, out);
   }, ['superadmin','platform_owner']);
