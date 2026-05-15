@@ -21127,8 +21127,10 @@ window.addEventListener('volvix:version-loaded', function(e){
       renderRecetas();
     }
     async function cargarProductosSel(){
-      if(!productos.length){ try{ var r=await fetch('/api/productos'); if(r.ok)productos=await r.json(); }catch(_){} if(!productos.length)productos=[{id:'P1',nombre:'Taco de bistec',precio:25},{id:'P2',nombre:'Quesadilla',precio:35}]; }
-      var sel=document.getElementById('ing-rec-producto'); if(sel) sel.innerHTML='<option value="">Selecciona...</option>'+productos.map(function(p){return '<option value="'+p.id+'">'+p.nombre+'</option>';}).join('');
+      if(!productos.length){ try{ var r=await _f('/api/productos'); if(r.ok)productos=await r.json(); }catch(_){} if(!productos.length)productos=[{id:'P1',nombre:'Taco de bistec',precio:25},{id:'P2',nombre:'Quesadilla',precio:35}]; }
+      var _sE=function(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');};
+      var _sA=function(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');};
+      var sel=document.getElementById('ing-rec-producto'); if(sel) sel.innerHTML='<option value="">Selecciona...</option>'+productos.map(function(p){return '<option value="'+_sA(String(p.id||''))+'">'+_sE(p.nombre||'')+'</option>';}).join('');
     }
     function renderIngredientes(filtro){
       var ings=filtro?ingredientes.filter(function(i){return i.nombre.toLowerCase().includes(filtro.toLowerCase());}):ingredientes;
