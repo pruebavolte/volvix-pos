@@ -394,16 +394,52 @@ function schedule3amRestart(version) {
   }, next3am);
 }
 
+// 2026-05-14: Auto-setup de impresora térmica al arrancar (adulto mayor no toca nada)
+let _printerAutoSetup = null;
+try { _printerAutoSetup = require('./printer-auto-setup'); }
+catch (e) { console.warn('[volvix] printer-auto-setup no disponible:', e.message); }
+
+function runPrinterAutoSetupBackground() {
+  if (!_printerAutoSetup || process.platform !== 'win32') return;
+  // Esperar 3s tras arrancar para no competir con servidor local y ventana
+  setTimeout(async () => {
+    try {
+      console.log('[volvix] printer auto-setup: starting…');
+      const report = await _printerAutoSetup.runAutoSetup();
+      console.log('[volvix] printer auto-setup report:', JSON.stringify(report, null, 2));
+      // Avisar al renderer si hubo cambios significativos (no-bloqueante)
+      if (mainWindow && report.success && report.final_printer) {
+        mainWindow.webContents.executeJavaScript(
+          `try{showToast&&showToast('🖨 Impresora lista: ${report.final_printer}','success',5000);}catch(_){}`
+        ).catch(()=>{});
+      }
+    } catch (e) {
+      console.error('[volvix] printer auto-setup failed:', e);
+    }
+  }, 3000);
+}
+
 app.whenReady().then(async () => {
   Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
   // Arrancar servidor local ANTES de crear ventana — es rápido (~10ms)
   await startLocalServer();
   createWindow();
   setupAutoUpdater();
+  runPrinterAutoSetupBackground();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
+});
+
+// IPC: el renderer puede triggerar manualmente desde Configuración → "Detectar impresora"
+ipcMain.handle('volvix:printer:auto-setup', async () => {
+  if (!_printerAutoSetup) return { ok: false, error: 'module not loaded' };
+  return await _printerAutoSetup.runAutoSetup();
+});
+ipcMain.handle('volvix:printer:status', async () => {
+  if (!_printerAutoSetup) return { ok: false };
+  return await _printerAutoSetup.getStatus();
 });
 
 app.on('window-all-closed', () => {

@@ -73,5 +73,15 @@ contextBridge.exposeInMainWorld('volvixElectron', {
   // opts: { html, printerName, silent (no dialog), copies, printBackground, ... }
   printToSystem: async function (opts) {
     return await ipcRenderer.invoke('volvix:printers:print', opts || {});
+  },
+
+  // 2026-05-14 — Auto-setup de impresora térmica (corre como admin, sin UAC adicional)
+  // Detecta hardware USB térmico, instala driver Generic, crea "Volvix-Thermal", la marca default.
+  // Devuelve { actions:[], hardware_found:[], final_printer, success, elapsed_ms }.
+  autoSetupPrinter: async function () {
+    return await ipcRenderer.invoke('volvix:printer:auto-setup');
+  },
+  printerStatus: async function () {
+    return await ipcRenderer.invoke('volvix:printer:status');
   }
 });
