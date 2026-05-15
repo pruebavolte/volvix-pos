@@ -60,6 +60,12 @@ nsis:
   # differentialPackage activado → genera .blockmap para que electron-updater
   # descargue SOLO el diff binario (no el .exe completo) en próximas updates
   differentialPackage: true
+  # 2026-05-14: NSIS custom hook que escribe AppCompatFlags RUNASADMIN
+  # en HKLM al instalar. Esto fuerza a Windows a SIEMPRE arrancar Volvix POS
+  # como administrador (UAC inicial automático, sin que el usuario configure
+  # "Ejecutar como administrador" en propiedades del .exe). Necesario para
+  # que el módulo printer-auto-setup pueda gestionar impresoras / Spooler.
+  include: build/installer.nsh
 mac:
   target:
     - dmg

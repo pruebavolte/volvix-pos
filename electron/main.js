@@ -295,6 +295,21 @@ const menuTemplate = [
           }
         } catch (e) { console.warn('[updater] check manual falló:', e.message); }
       }},
+      // 2026-05-14: DevTools accesible para debug. Atajos: F12 o Ctrl+Shift+I
+      { label: 'Herramientas de desarrollo', accelerator: 'F12', click: () => {
+        if (mainWindow) mainWindow.webContents.openDevTools({ mode: 'detach' });
+      }},
+      { label: 'Detectar impresora térmica (manual)', click: async () => {
+        if (!_printerAutoSetup) return;
+        try {
+          const r = await _printerAutoSetup.runAutoSetup();
+          if (mainWindow) {
+            mainWindow.webContents.executeJavaScript(
+              `try{showToast&&showToast('🖨 ${r.success ? 'Impresora lista: ' + r.final_printer : 'No se encontró impresora'}','${r.success ? 'success' : 'warning'}',6000);}catch(_){}`
+            ).catch(()=>{});
+          }
+        } catch (e) { console.error('[printer manual] error:', e.message); }
+      }},
       { type: 'separator' },
       { label: 'Salir', accelerator: 'CmdOrCtrl+Q', click: () => app.quit() }
     ]
