@@ -10152,6 +10152,7 @@
             <button class="btn sm" data-action="quick-add" data-code="${codeAttr}" data-id="${idAttr}" title="Sumar stock" aria-label="Sumar stock">+Stock</button>
             <button class="btn sm" data-action="quick-sub" data-code="${codeAttr}" data-id="${idAttr}" title="Restar stock" aria-label="Restar stock">−Stock</button>
             <button class="btn sm" data-action="kardex" data-code="${codeAttr}" data-id="${idAttr}" title="Ver Kardex" aria-label="Ver Kardex">📜 Kardex</button>
+            <button class="btn sm" data-action="print-barcode" data-code="${codeAttr}" data-name="${escapeHtml(p.name || p.nombre || '')}" data-price="${p.price || 0}" title="Imprimir código de barras (Bluetooth)" aria-label="Imprimir código de barras">🏷️ Etiqueta</button>
             <button class="btn sm" data-action="edit-prod" data-code="${codeAttr}" title="Editar producto" aria-label="Editar producto">✏️ Editar</button>
             <button class="btn sm" data-action="del-prod" data-code="${codeAttr}" data-id="${idAttr}" style="color:var(--danger);" title="Eliminar producto" aria-label="Eliminar producto">🗑️</button>
           </td>
@@ -14614,6 +14615,18 @@
       if (action === 'quick-add') openStockAdjustModal(prod, '+');
       else if (action === 'quick-sub') openStockAdjustModal(prod, '-');
       else if (action === 'kardex') openKardexModal(prod.id || prod.code);
+      else if (action === 'print-barcode') {
+        // 2026-05-14: Imprimir código de barras en impresora BT de etiquetas
+        if (window.VolvixBarcode && typeof window.VolvixBarcode.showBarcodeDialog === 'function') {
+          window.VolvixBarcode.showBarcodeDialog(
+            prod.code || prod.id || '0000000000000',
+            prod.name || prod.nombre || '',
+            prod.price || 0
+          );
+        } else {
+          alert('Módulo de código de barras no cargado. Recarga la página.');
+        }
+      }
     });
 
     // Movements
@@ -22755,6 +22768,8 @@ window.addEventListener('volvix:version-loaded', function(e){
 <!-- R31 v1: Modal de Cobro v1 (state machine + wiring) -->
 <script src="/volvix-cobro-state.js" defer></script>
 <script src="/volvix-cobro-modal.js" defer></script>
+<!-- 2026-05-14: Print código de barras via Bluetooth (etiquetadora) -->
+<script src="/volvix-barcode-print.js" defer></script>
 
 </body>
 </html>
