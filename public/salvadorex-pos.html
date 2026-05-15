@@ -4611,7 +4611,11 @@
     <section id="screen-clientes" class="screen-pad hidden">
       <div class="page-head">
         <div><h1 class="page-title">Clientes</h1><p class="page-sub" id="cli-sub">0 clientes registrados</p></div>
-        <button class="btn accent" onclick="openNewCustomerModal()">+ Nuevo cliente</button>
+        <div class="btn-row">
+          <!-- SDD AP-C5 (DT-C4): buscador inline para tabla de clientes -->
+          <input id="cli-search" type="search" placeholder="🔍 Buscar por nombre, teléfono, RFC…" oninput="filterClientes(this.value)" style="padding:8px 12px;border:1px solid var(--border,#e5e5ea);border-radius:8px;min-width:280px;font-size:13px" autocomplete="off" />
+          <button class="btn accent" onclick="openNewCustomerModal()">+ Nuevo cliente</button>
+        </div>
       </div>
       <div class="card">
         <div class="tbl-wrap">
@@ -7468,6 +7472,9 @@
         }
       } catch (e) { console.warn('[DataLoader] productos:', e); }
       // Clientes
+      // SDD AP-C2 (DT-C5): normalizar campo deuda — backend devuelve `debt`,
+      // `credit_balance`, o `deuda` según endpoint; aceptar todos para no mostrar $0 falso
+      // SDD AP-V4 (DT-V6): toast visible cuando falla la carga (antes solo console.warn)
       try {
         var rc = await fetch('/api/customers?limit=500', { headers: headers, credentials: 'include' });
         if (rc.ok) {
@@ -7479,15 +7486,22 @@
               String(c.name || c.nombre || ''),
               String(c.phone || c.telefono || ''),
               Number(c.credit_limit || 0),
-              Number(c.debt || c.deuda || 0),
+              Number(c.debt != null ? c.debt : (c.credit_balance != null ? c.credit_balance : (c.deuda || 0))),
               Number(c.purchases_count || 0),
-              c.last_purchase_at || c.last_visit || '—',
+              c.last_purchase_at || c.last_purchase || c.last_visit || '—',
             ]);
           });
           try { document.dispatchEvent(new CustomEvent('volvix:customers-loaded', { detail: { count: CUSTOMERS.length } })); } catch (_) {}
+        } else {
+          console.warn('[DataLoader] clientes HTTP', rc.status);
+          try { if (typeof showToast === 'function') showToast('⚠ No se pudieron cargar clientes (' + rc.status + ')', 'warn', 4000); } catch(_){}
         }
-      } catch (e) { console.warn('[DataLoader] clientes:', e); }
+      } catch (e) {
+        console.warn('[DataLoader] clientes:', e);
+        try { if (typeof showToast === 'function') showToast('⚠ Error cargando clientes: ' + (e.message || 'sin conexión'), 'warn', 4000); } catch(_){}
+      }
       // Ventas (historial)
+      // SDD AP-V4 (DT-V6): toast visible al fallar (antes silencioso → tabla vacía sin explicación)
       try {
         var rs = await fetch('/api/sales?limit=200', { headers: headers, credentials: 'include' });
         if (rs.ok) {
@@ -7506,8 +7520,14 @@
             ]);
           });
           try { document.dispatchEvent(new CustomEvent('volvix:sales-loaded', { detail: { count: SALES.length } })); } catch (_) {}
+        } else {
+          console.warn('[DataLoader] ventas HTTP', rs.status);
+          try { if (typeof showToast === 'function') showToast('⚠ No se pudo cargar el historial de ventas (' + rs.status + ')', 'warn', 4000); } catch(_){}
         }
-      } catch (e) { console.warn('[DataLoader] ventas:', e); }
+      } catch (e) {
+        console.warn('[DataLoader] ventas:', e);
+        try { if (typeof showToast === 'function') showToast('⚠ Error cargando ventas: ' + (e.message || 'sin conexión'), 'warn', 4000); } catch(_){}
+      }
     }
   };
   // Disparar carga cuando el SSO confirme login
@@ -8093,11 +8113,22 @@
               const rr = await fetch('/api/customers', { headers: tok2 ? { Authorization: 'Bearer ' + tok2 } : {} });
               if (rr.ok) {
                 const list = await rr.json();
-                if (Array.isArray(list)) {
+                const arr = Array.isArray(list) ? list : (list && Array.isArray(list.customers) ? list.customers : null);
+                if (arr) {
                   CUSTOMERS.length = 0;
-                  list.forEach(c => CUSTOMERS.push([c.name||'', c.phone||'', c.credit_limit||0, c.credit_balance||0, c.points||0, c.last_purchase||'—']));
+                  // SDD AP-C2 (DT-C5): normalizar mapeo de campos — aceptar debt/credit_balance/deuda
+                  // y last_purchase_at/last_purchase/last_visit. Antes solo c.credit_balance ⇒ inconsistencia
+                  // contra el DataLoader principal que usa c.debt.
+                  arr.forEach(c => CUSTOMERS.push([
+                    String(c.name || c.nombre || ''),
+                    String(c.phone || c.telefono || ''),
+                    Number(c.credit_limit || 0),
+                    Number(c.debt != null ? c.debt : (c.credit_balance != null ? c.credit_balance : (c.deuda || 0))),
+                    Number(c.purchases_count != null ? c.purchases_count : (c.points || 0)),
+                    c.last_purchase_at || c.last_purchase || c.last_visit || '—'
+                  ]));
                   const sub = document.getElementById('cli-sub');
-                  if (sub) sub.textContent = list.length + ' clientes registrados';
+                  if (sub) sub.textContent = CUSTOMERS.length + ' clientes registrados';
                   renderClientes();
                 }
               }
@@ -11075,8 +11106,24 @@
     // Cuts wiring
     if (typeof initCutsModule === 'function') initCutsModule();
   });
+  // SDD AP-C5 (DT-C4): filtro inline persistido entre renders
+  var _cliFilter = '';
+  window.filterClientes = function (q) {
+    _cliFilter = (q || '').trim().toLowerCase();
+    renderClientes();
+  };
   function renderClientes() {
-    $('#cli-body').innerHTML = CUSTOMERS.map(c => `
+    var body = $('#cli-body');
+    if (!body) return;
+    var list = CUSTOMERS;
+    if (_cliFilter) {
+      list = CUSTOMERS.filter(function (c) {
+        // c[0]=nombre, c[1]=telefono. Permitimos coincidencia parcial en cualquiera.
+        return String(c[0] || '').toLowerCase().indexOf(_cliFilter) >= 0 ||
+               String(c[1] || '').toLowerCase().indexOf(_cliFilter) >= 0;
+      });
+    }
+    body.innerHTML = list.map(c => `
       <tr>
         <td class="primary-col">${escapeHtml(c[0]||'')}</td>
         <td style="color: var(--text-3);">${escapeHtml(c[1]||'')}</td>
@@ -11090,7 +11137,11 @@
     // se actualizaba dentro del fetch try-catch, dejando "0 clientes" si
     // CUSTOMERS se llenaba via otro path (volvix-real-data-loader, demo seed, etc.)
     var sub = document.getElementById('cli-sub');
-    if (sub) sub.textContent = CUSTOMERS.length + ' clientes registrados';
+    if (sub) {
+      sub.textContent = _cliFilter
+        ? (list.length + ' de ' + CUSTOMERS.length + ' clientes (filtro: "' + _cliFilter + '")')
+        : (CUSTOMERS.length + ' clientes registrados');
+    }
   }
   // FIX A2: Historial de compras por cliente — antes el botón "Ver" no tenía handler
   window.verHistorialCliente = async function (nombre, telefono) {
