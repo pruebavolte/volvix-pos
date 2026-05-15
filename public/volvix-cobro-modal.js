@@ -618,36 +618,85 @@
       var total = (cobroResult && cobroResult.total) || 0;
       var nowStr = new Date().toLocaleString('es-MX');
       var items = (window.CART || []).slice();
-      var businessName = '';
-      try {
-        var sess = JSON.parse(localStorage.getItem('volvix:session') || localStorage.getItem('volvixSession') || 'null');
-        businessName = (sess && (sess.business_name || sess.tenant_name)) || '';
-      } catch (_) {}
-      var ticketHtml = [
-        '<!doctype html><html><head><meta charset="utf-8"><style>',
-        '*{margin:0;padding:0;box-sizing:border-box}',
-        'body{font-family:"Courier New",monospace;font-size:11px;width:280px;padding:8px;color:#000}',
-        '.ctr{text-align:center}.b{font-weight:bold}.sep{border-top:1px dashed #000;margin:6px 0}',
-        'table{width:100%;font-size:10.5px}td{padding:1px 0}.r{text-align:right}',
-        '@media print{@page{size:58mm auto;margin:0}body{width:58mm;padding:4mm 3mm}}',
-        '</style></head><body>',
-        businessName ? '<div class="ctr b" style="font-size:13px">' + businessName + '</div>' : '',
-        '<div class="ctr" style="font-size:10px">' + nowStr + '</div>',
-        '<div class="ctr" style="font-size:10px">Ticket: ' + (saleNum || saleId.slice(0,8)) + '</div>',
-        '<div class="sep"></div>',
-        '<table>',
-        items.map(function (i) {
-          return '<tr><td>' + (i.qty || 1) + 'x ' + (i.name || '') + '</td>' +
-                 '<td class="r">$' + ((i.price || 0) * (i.qty || 1)).toFixed(2) + '</td></tr>';
-        }).join(''),
-        '</table>',
-        '<div class="sep"></div>',
-        '<table><tr><td class="b">TOTAL</td><td class="r b" style="font-size:14px">$' + Number(total).toFixed(2) + '</td></tr></table>',
-        '<div class="sep"></div>',
-        '<div class="ctr" style="font-size:10px">¡Gracias por su compra!</div>',
-        '<div class="ctr" style="font-size:9px;color:#666;margin-top:4px">Volvix POS</div>',
-        '</body></html>'
-      ].join('');
+
+      // 2026-05-15 v1.0.315: USAR el customizer del usuario si está disponible
+      // Esto garantiza que el ticket impreso refleje EXACTAMENTE lo que se ve
+      // en el preview en vivo del tab Configuración → Impresión.
+      var ticketHtml;
+      if (window.VolvixTicketCustomizer && window.VolvixTicketCustomizer.renderText) {
+        var cfg = window.VolvixTicketCustomizer.getConfig();
+        // Construir data desde el cobro real
+        var realData = {
+          folio: saleNum || (saleId ? saleId.slice(0, 8) : ''),
+          date: new Date().toLocaleDateString('es-MX'),
+          time: new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
+          cashier: (function () {
+            try {
+              var s = JSON.parse(localStorage.getItem('volvix:session') || localStorage.getItem('volvixSession') || 'null');
+              return (s && (s.full_name || s.name || s.email)) || 'Cajero';
+            } catch (_) { return 'Cajero'; }
+          })(),
+          customer: window.__volvixSelectedCustomerName || 'Público en general',
+          items: items.map(function (i) {
+            return {
+              qty: i.qty || 1,
+              code: i.code || i.id,
+              name: i.name || '',
+              price: i.price || 0,
+              total: (i.price || 0) * (i.qty || 1),
+              tax: 0
+            };
+          }),
+          itemsCount: items.reduce(function (s, i) { return s + (i.qty || 1); }, 0),
+          subtotal: total,
+          total: total,
+          discount: 0,
+          tip: 0,
+          tax: 0,
+          payment: {
+            method: (window.__volvixSelectedPayMethod || 'efectivo').toUpperCase(),
+            received: parseFloat((document.getElementById('pay-recibido') || {}).value || '0') || total,
+            change: 0
+          }
+        };
+        realData.payment.change = Math.max(0, realData.payment.received - total);
+        var ticketText = window.VolvixTicketCustomizer.renderText(realData, cfg);
+        ticketHtml = '<!doctype html><html><head><meta charset="utf-8"><style>' +
+          '*{margin:0;padding:0;box-sizing:border-box}' +
+          'body{font-family:"Courier New",monospace;font-size:' + (cfg.fontSize || 11) + 'px;width:' + (cfg.paperWidth === 48 ? '380px' : '280px') + ';padding:8px;color:#000;line-height:1.3;white-space:pre-wrap}' +
+          '@media print{@page{size:' + (cfg.paperWidth === 48 ? '80mm' : '58mm') + ' auto;margin:0}body{width:' + (cfg.paperWidth === 48 ? '80mm' : '58mm') + ';padding:4mm 3mm}}' +
+          '</style></head><body>' +
+          ticketText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/\n/g, '<br>') +
+          '</body></html>';
+      } else {
+        // Fallback al ticket simple
+        var businessName = '';
+        try {
+          var sess = JSON.parse(localStorage.getItem('volvix:session') || localStorage.getItem('volvixSession') || 'null');
+          businessName = (sess && (sess.business_name || sess.tenant_name)) || '';
+        } catch (_) {}
+        ticketHtml = '<!doctype html><html><head><meta charset="utf-8"><style>' +
+          '*{margin:0;padding:0;box-sizing:border-box}' +
+          'body{font-family:"Courier New",monospace;font-size:11px;width:280px;padding:8px;color:#000}' +
+          '.ctr{text-align:center}.b{font-weight:bold}.sep{border-top:1px dashed #000;margin:6px 0}' +
+          'table{width:100%;font-size:10.5px}td{padding:1px 0}.r{text-align:right}' +
+          '@media print{@page{size:58mm auto;margin:0}body{width:58mm;padding:4mm 3mm}}' +
+          '</style></head><body>' +
+          (businessName ? '<div class="ctr b" style="font-size:13px">' + businessName + '</div>' : '') +
+          '<div class="ctr" style="font-size:10px">' + nowStr + '</div>' +
+          '<div class="ctr" style="font-size:10px">Ticket: ' + (saleNum || saleId.slice(0,8)) + '</div>' +
+          '<div class="sep"></div><table>' +
+          items.map(function (i) {
+            return '<tr><td>' + (i.qty || 1) + 'x ' + (i.name || '') + '</td>' +
+                   '<td class="r">$' + ((i.price || 0) * (i.qty || 1)).toFixed(2) + '</td></tr>';
+          }).join('') +
+          '</table><div class="sep"></div>' +
+          '<table><tr><td class="b">TOTAL</td><td class="r b" style="font-size:14px">$' + Number(total).toFixed(2) + '</td></tr></table>' +
+          '<div class="sep"></div>' +
+          '<div class="ctr" style="font-size:10px">¡Gracias por su compra!</div>' +
+          '<div class="ctr" style="font-size:9px;color:#666;margin-top:4px">Volvix POS</div>' +
+          '</body></html>';
+      }
       // 3) Imprimir silencioso (sin diálogo Windows)
       var result = await window.volvixElectron.printToSystem({
         html: ticketHtml,

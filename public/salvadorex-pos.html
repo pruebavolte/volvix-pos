@@ -4902,6 +4902,39 @@
               <button class="btn" onclick="window.volvixElectron && window.volvixElectron.repairPrinter && window.volvixElectron.repairPrinter().then(r=>{if(typeof showToast==='function')showToast(r.success?'✅ '+(r.message||'OK'):'⚠ '+(r.error||'falló'),r.success?'success':'warning',5000)})" style="padding:10px;font-size:12px">🔧 Reparar (USB cambió de puerto)</button>
             </div>
 
+            <!-- 2026-05-15 v1.0.315: Editor de ticket EN VIVO embebido -->
+            <div style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:14px;margin-top:16px">
+              <h3 style="margin:0 0 14px;font-size:14px;color:#0B0B0F">🎨 Personalización del ticket (vista previa en vivo)</h3>
+              <div id="vlx-ticket-editor-embed" style="min-height:600px"></div>
+            </div>
+            <script>
+              // Inicializar el editor cuando se haga tab 'impresion'
+              (function () {
+                var _vlxTicketEditorInit = false;
+                function _initTicketEditor() {
+                  if (_vlxTicketEditorInit) return;
+                  var c = document.getElementById('vlx-ticket-editor-embed');
+                  if (c && window.VolvixTicketEditor && window.VolvixTicketEditor.renderInto) {
+                    window.VolvixTicketEditor.renderInto(c);
+                    _vlxTicketEditorInit = true;
+                  }
+                }
+                // Hook al showCfg para detectar cuando se activa el tab Impresion
+                var _origShowCfg = window.showCfg;
+                window.showCfg = function (tab, btn) {
+                  if (typeof _origShowCfg === 'function') _origShowCfg(tab, btn);
+                  if (tab === 'impresion') setTimeout(_initTicketEditor, 50);
+                };
+                // Si ya está visible al cargar, inicializar
+                document.addEventListener('DOMContentLoaded', function () {
+                  setTimeout(function () {
+                    var p = document.getElementById('cfg-impresion');
+                    if (p && !p.classList.contains('hidden')) _initTicketEditor();
+                  }, 600);
+                });
+              })();
+            </script>
+
             <!-- ──── PESTAÑAS DE PERIFERICOS ──── -->
             <div style="display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap;border-bottom:2px solid var(--bord);padding-bottom:0;">
               <button class="config-tab active" data-perif-tab="printers" onclick="vlxPerifTab('printers',this)">🖨️ Impresoras</button>
@@ -22792,6 +22825,9 @@ window.addEventListener('volvix:version-loaded', function(e){
 <script src="/volvix-print-config.js" defer></script>
 <!-- 2026-05-15: Errores de impresora con modal rojo grande -->
 <script src="/volvix-printer-errors.js" defer></script>
+<!-- 2026-05-15 v1.0.315: Customización del ticket + preview en vivo + combobox impresoras -->
+<script src="/volvix-ticket-customizer.js" defer></script>
+<script src="/volvix-ticket-editor.js" defer></script>
 
 </body>
 </html>
