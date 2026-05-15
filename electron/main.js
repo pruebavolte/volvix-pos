@@ -419,6 +419,11 @@ let _printerBluetooth = null;
 try { _printerBluetooth = require('./printer-bluetooth'); }
 catch (e) { console.warn('[volvix] printer-bluetooth no disponible:', e.message); }
 
+// 2026-05-15: Impresión por IP (TCP raw socket JetDirect 9100)
+let _printerNetwork = null;
+try { _printerNetwork = require('./printer-network'); }
+catch (e) { console.warn('[volvix] printer-network no disponible:', e.message); }
+
 function runPrinterAutoSetupBackground() {
   if (!_printerAutoSetup || process.platform !== 'win32') return;
   // Esperar 3s tras arrancar para no competir con servidor local y ventana
@@ -470,6 +475,20 @@ ipcMain.handle('volvix:bt:list-printers', async () => {
 ipcMain.handle('volvix:bt:print', async (event, opts) => {
   if (!_printerBluetooth) return { ok: false, error: 'BT module not loaded' };
   return await _printerBluetooth.printTicketBT(opts || {});
+});
+
+// 2026-05-15: IPC Network printing (TCP raw socket port 9100)
+ipcMain.handle('volvix:net:print', async (event, opts) => {
+  if (!_printerNetwork) return { ok: false, error: 'Network module not loaded' };
+  return await _printerNetwork.printTicketIP(opts || {});
+});
+ipcMain.handle('volvix:net:ping', async (event, ip, port) => {
+  if (!_printerNetwork) return { ok: false, error: 'Network module not loaded' };
+  return await _printerNetwork.pingIP(ip, port || 9100);
+});
+ipcMain.handle('volvix:net:scan', async (event, subnet, opts) => {
+  if (!_printerNetwork) return { ok: false, error: 'Network module not loaded' };
+  return await _printerNetwork.scanSubnet(subnet, opts || {});
 });
 
 app.on('window-all-closed', () => {

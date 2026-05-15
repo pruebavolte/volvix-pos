@@ -532,15 +532,37 @@
         return false;
       }
 
-      // 2026-05-14 BT: leer modo elegido por usuario (config UI o default auto)
-      var printMode = 'auto';
+      // Leer config impresora (mode + targets)
+      var printMode = 'auto';   // 'auto' | 'usb' | 'bluetooth' | 'ip'
       try { printMode = localStorage.getItem('volvix_printer_mode') || 'auto'; } catch (_) {}
-      var btMac = null;
+      var btMac = null, networkIP = null, networkPort = 9100;
       try { btMac = localStorage.getItem('volvix_bt_printer_mac'); } catch (_) {}
+      try { networkIP = localStorage.getItem('volvix_printer_ip'); } catch (_) {}
+      try { networkPort = parseInt(localStorage.getItem('volvix_printer_port') || '9100', 10) || 9100; } catch (_) {}
+
+      // 2026-05-15: si modo 'ip' o ('auto' + IP configurada), probar IP primero
+      if (printMode === 'ip' || (printMode === 'auto' && networkIP)) {
+        if (window.volvixElectron.printNetwork) {
+          try {
+            var ipResult = await tryNetworkPrint(cobroResult, networkIP, networkPort);
+            if (ipResult && ipResult.ok) {
+              log('✅ Printed via IP:', networkIP + ':' + networkPort);
+              return true;
+            }
+            if (printMode === 'ip') {
+              log('IP print failed in IP mode:', ipResult && ipResult.error);
+              if (typeof window.showToast === 'function') {
+                window.showToast('⚠ Impresora IP no respondió (' + networkIP + ')', 'warning', 6000);
+              }
+              return false;
+            }
+            log('IP failed, trying next:', ipResult && ipResult.error);
+          } catch (e) { log('IP print exception:', e); }
+        }
+      }
 
       // 2026-05-14 v1.0.311: si modo es 'auto' Y hay impresora BT emparejada,
       // PROMOVER a 'bluetooth' exclusivo (NO caer a USB si BT falla).
-      // El usuario espera que si tiene BT, se use BT.
       var btPrintersAvailable = [];
       if (printMode === 'auto' && window.volvixElectron.listBluetoothPrinters) {
         try {
@@ -639,6 +661,48 @@
     } catch (e) {
       console.error('[vlx-cobro] autoPrintTicket error:', e);
       return false;
+    }
+  }
+
+  // Auxiliar: imprimir vía IP (TCP socket JetDirect 9100)
+  async function tryNetworkPrint(cobroResult, ip, port) {
+    try {
+      var saleNum = (cobroResult && cobroResult.sale_number) || '';
+      var saleId = (cobroResult && cobroResult.sale_id) || '';
+      var total = (cobroResult && cobroResult.total) || 0;
+      var nowStr = new Date().toLocaleString('es-MX');
+      var items = (window.CART || []).slice();
+      var businessName = '';
+      try {
+        var sess = JSON.parse(localStorage.getItem('volvix:session') || localStorage.getItem('volvixSession') || 'null');
+        businessName = (sess && (sess.business_name || sess.tenant_name)) || '';
+      } catch (_) {}
+
+      var lines = [];
+      if (businessName) lines.push(businessName);
+      lines.push(nowStr);
+      lines.push('Ticket: ' + (saleNum || saleId.slice(0,8)));
+      lines.push('--------------------------------');
+      items.forEach(function (i) {
+        var name = (i.name || '').slice(0, 22).padEnd(22);
+        var amt = '$' + ((i.price || 0) * (i.qty || 1)).toFixed(2);
+        lines.push((i.qty || 1) + 'x ' + name + amt.padStart(8));
+      });
+      lines.push('--------------------------------');
+      lines.push('TOTAL  $' + Number(total).toFixed(2));
+      lines.push('--------------------------------');
+      lines.push('Gracias por su compra!');
+      lines.push('Volvix POS');
+
+      return await window.volvixElectron.printNetwork({
+        ip: ip,
+        port: port || 9100,
+        text: lines.join('\n'),
+        cut: true,
+        timeout: 10000
+      });
+    } catch (e) {
+      return { ok: false, error: e.message };
     }
   }
 

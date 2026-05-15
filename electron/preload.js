@@ -94,5 +94,19 @@ contextBridge.exposeInMainWorld('volvixElectron', {
   // opts: { html, text, printerName?, mac?, baudRate? }
   printBluetooth: async function (opts) {
     return await ipcRenderer.invoke('volvix:bt:print', opts || {});
+  },
+
+  // 2026-05-15 — Network printing (TCP raw socket JetDirect 9100)
+  // opts: { ip (required), port? (default 9100), html?, text?, bytes?, cut?, timeout? }
+  printNetwork: async function (opts) {
+    return await ipcRenderer.invoke('volvix:net:print', opts || {});
+  },
+  // Verificar conectividad sin imprimir
+  pingNetworkPrinter: async function (ip, port) {
+    return await ipcRenderer.invoke('volvix:net:ping', ip, port);
+  },
+  // Escanear subnet en busca de impresoras (ej: '192.168.1')
+  scanNetworkPrinters: async function (subnet, opts) {
+    return await ipcRenderer.invoke('volvix:net:scan', subnet, opts);
   }
 });

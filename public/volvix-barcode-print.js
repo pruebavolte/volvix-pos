@@ -128,26 +128,49 @@
 
   /**
    * Imprimir código de barras
-   * Si window.volvixElectron disponible → manda via BT IPC
-   * Si no → muestra error (en web no se puede sin extensión)
+   * Soporta 3 destinos:
+   *   - Bluetooth (mac/printerName)
+   *   - IP/red (ip + port)
+   *   - USB (printerName del sistema)
    */
   async function printBarcode(opts) {
     const ve = global.volvixElectron;
-    if (!ve || !ve.printBluetooth) {
-      return { ok: false, error: 'Imprimir código de barras requiere la app .exe de Volvix POS (BT)' };
+    if (!ve) {
+      return { ok: false, error: 'Imprimir código de barras requiere la app .exe de Volvix POS' };
     }
 
     // Encoder
     const { dialect, body } = encodeBarcodeJob(opts);
 
-    // Mandar como texto al BT (sin parsing HTML, raw bytes)
-    const result = await ve.printBluetooth({
-      text: body,
-      mac: opts.mac,
-      baudRate: opts.baudRate || 9600
-    });
+    // Elegir destino
+    if (opts.ip && ve.printNetwork) {
+      const r = await ve.printNetwork({
+        ip: opts.ip,
+        port: opts.port || 9100,
+        text: body,
+        cut: dialect === 'ESCPOS',
+        timeout: opts.timeout || 10000
+      });
+      return Object.assign({ dialect, method: 'ip' }, r);
+    }
 
-    return Object.assign({ dialect }, result);
+    if ((opts.mac || opts.printerName) && ve.printBluetooth) {
+      const r = await ve.printBluetooth({
+        text: body,
+        mac: opts.mac,
+        printerName: opts.printerName,
+        baudRate: opts.baudRate || 9600
+      });
+      return Object.assign({ dialect, method: 'bluetooth' }, r);
+    }
+
+    // Default: BT auto-detect
+    if (ve.printBluetooth) {
+      const r = await ve.printBluetooth({ text: body, baudRate: opts.baudRate || 9600 });
+      return Object.assign({ dialect, method: 'bluetooth-auto' }, r);
+    }
+
+    return { ok: false, error: 'No print method available' };
   }
 
   /**
@@ -208,10 +231,20 @@
           </div>
         </div>
         <div style="margin-bottom:12px">
-          <label style="display:block;font-size:12px;color:#666;margin-bottom:4px">Impresora Bluetooth de etiquetas</label>
-          <select id="vlx-bc-printer" style="width:100%;padding:8px;border:1px solid #E5E7EB;border-radius:6px;font-size:13px">
-            <option value="">-- Auto-detectar --</option>
-          </select>
+          <label style="display:block;font-size:12px;color:#666;margin-bottom:4px">Conexión</label>
+          <div style="display:flex;gap:6px;margin-bottom:6px">
+            <label style="flex:1;padding:8px;border:1px solid #E5E7EB;border-radius:6px;cursor:pointer;font-size:13px"><input type="radio" name="vlx-bc-conn" value="bluetooth" checked style="margin-right:4px"> 📶 Bluetooth</label>
+            <label style="flex:1;padding:8px;border:1px solid #E5E7EB;border-radius:6px;cursor:pointer;font-size:13px"><input type="radio" name="vlx-bc-conn" value="ip" style="margin-right:4px"> 🌐 IP / Red</label>
+          </div>
+          <div id="vlx-bc-bt-row">
+            <select id="vlx-bc-printer" style="width:100%;padding:8px;border:1px solid #E5E7EB;border-radius:6px;font-size:13px">
+              <option value="">-- Auto-detectar Bluetooth --</option>
+            </select>
+          </div>
+          <div id="vlx-bc-ip-row" style="display:none;grid-template-columns:2fr 1fr;gap:6px">
+            <input id="vlx-bc-ip" type="text" placeholder="192.168.1.100" style="padding:8px;border:1px solid #E5E7EB;border-radius:6px;font-size:13px;font-family:monospace">
+            <input id="vlx-bc-port" type="number" placeholder="9100" value="9100" style="padding:8px;border:1px solid #E5E7EB;border-radius:6px;font-size:13px;font-family:monospace">
+          </div>
         </div>
         <div style="margin-bottom:16px">
           <label style="display:block;font-size:12px;color:#666;margin-bottom:4px">Cantidad de etiquetas</label>
@@ -237,11 +270,29 @@
       });
     });
 
+    // Persistir y restaurar IP previa
+    try {
+      const savedIP = localStorage.getItem('volvix_label_printer_ip');
+      const savedPort = localStorage.getItem('volvix_label_printer_port');
+      if (savedIP) document.getElementById('vlx-bc-ip').value = savedIP;
+      if (savedPort) document.getElementById('vlx-bc-port').value = savedPort;
+    } catch (_) {}
+
+    // Toggle BT vs IP rows
+    modal.querySelectorAll('input[name="vlx-bc-conn"]').forEach((r) => {
+      r.onchange = () => {
+        document.getElementById('vlx-bc-bt-row').style.display = (r.value === 'bluetooth' && r.checked) ? 'block' : 'none';
+        document.getElementById('vlx-bc-ip-row').style.display = (r.value === 'ip' && r.checked) ? 'grid' : 'none';
+      };
+    });
+
     document.getElementById('vlx-bc-close').onclick = () => modal.remove();
     document.getElementById('vlx-bc-cancel').onclick = () => modal.remove();
     document.getElementById('vlx-bc-print').onclick = async () => {
       const status = document.getElementById('vlx-bc-status');
       const qty = parseInt(document.getElementById('vlx-bc-qty').value, 10) || 1;
+      const connEl = modal.querySelector('input[name="vlx-bc-conn"]:checked');
+      const conn = connEl ? connEl.value : 'bluetooth';
       const opts = {
         code: document.getElementById('vlx-bc-code').value,
         name: document.getElementById('vlx-bc-name').value,
@@ -249,8 +300,17 @@
         symbology: document.getElementById('vlx-bc-sym').value,
         width_mm: parseFloat(document.getElementById('vlx-bc-w').value) || 40,
         height_mm: parseFloat(document.getElementById('vlx-bc-h').value) || 30,
-        mac: document.getElementById('vlx-bc-printer').value || null
+        mac: conn === 'bluetooth' ? (document.getElementById('vlx-bc-printer').value || null) : null,
+        ip: conn === 'ip' ? document.getElementById('vlx-bc-ip').value.trim() : null,
+        port: conn === 'ip' ? (parseInt(document.getElementById('vlx-bc-port').value, 10) || 9100) : null
       };
+      // Persistir IP para próxima vez
+      if (conn === 'ip' && opts.ip) {
+        try {
+          localStorage.setItem('volvix_label_printer_ip', opts.ip);
+          localStorage.setItem('volvix_label_printer_port', String(opts.port));
+        } catch (_) {}
+      }
       status.textContent = '🔄 Imprimiendo...';
       let ok = 0, fail = 0, errors = [];
       for (let i = 0; i < qty; i++) {
