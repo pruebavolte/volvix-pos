@@ -202,12 +202,19 @@
     async findBestThermalPrinter() {
       try {
         const all = await this.detectPrinters();
+        // 2026-05-15: Prioridad exacta:
+        //   1. Volvix-Thermal (la creada por nuestro auto-setup)
+        //   2. Cualquier térmica que sea default del SO
+        //   3. Cualquier térmica
+        //   4. Default del SO no-térmica
+        const volvix = all.find((p) => /volvix.?thermal/i.test(p.name || ''));
+        if (volvix) return volvix;
+
         const thermal = all.filter((p) => p.isThermal);
         if (thermal.length) {
           const def = thermal.find((p) => p.isDefault) || thermal[0];
           return def;
         }
-        // No hay térmica detectada → usar default del SO si existe
         const sysDef = all.find((p) => p.type === 'system' && p.isDefault);
         return sysDef || all[0] || null;
       } catch (e) {

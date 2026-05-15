@@ -164,6 +164,131 @@ function startLocalServer() {
       res.setHeader('Access-Control-Allow-Origin', '*');
       if (req.method === 'OPTIONS') { res.writeHead(204); return res.end(); }
 
+      // 2026-05-15 DEBUG: direct local print-raw endpoint to test winspool
+      // API without going through the renderer/SW caching layer.
+      // POST /__local/print-raw  body: {text, printerName?}
+      if (req.url === '/__local/print-raw' && req.method === 'POST') {
+        let body = '';
+        req.on('data', (c) => body += c);
+        req.on('end', async () => {
+          try {
+            const opts = JSON.parse(body || '{}');
+            const path2 = require('path');
+            const fs2 = require('fs');
+            const os2 = require('os');
+            const { spawn } = require('child_process');
+            // Auto-detect printer if not given
+            let printerName = opts.printerName;
+            if (!printerName) {
+              try {
+                let printers = [];
+                if (mainWindow && mainWindow.webContents && typeof mainWindow.webContents.getPrintersAsync === 'function') {
+                  printers = await mainWindow.webContents.getPrintersAsync() || [];
+                }
+                const vt = printers.find(p => /volvix.?thermal/i.test(p.name || ''));
+                const def = printers.find(p => p.isDefault);
+                printerName = (vt && vt.name) || (def && def.name) || (printers[0] && printers[0].name);
+              } catch (_) {}
+            }
+            if (!printerName) {
+              res.writeHead(400, { 'Content-Type': 'application/json' });
+              return res.end(JSON.stringify({ ok: false, error: 'no printer' }));
+            }
+            // 2026-05-15: respetar la configuración del editor (logo/barcode/QR/drawer)
+            // Si opts.cfg viene del editor, lo aplicamos como comandos ESC/POS reales
+            // (no solo texto). Esto hace que el botón "Imprimir ticket de prueba" honre
+            // los toggles del usuario.
+            const ESC = String.fromCharCode(27);
+            const GS  = String.fromCharCode(29);
+            const init = ESC + '@';
+            const left = ESC + 'a' + String.fromCharCode(0);
+            const center = ESC + 'a' + String.fromCharCode(1);
+            const big = GS + '!' + String.fromCharCode(17);   // doble ancho + alto
+            const norm = GS + '!' + String.fromCharCode(0);   // normal
+            const cut  = GS + 'V' + String.fromCharCode(66) + String.fromCharCode(0);
+            const feed = '\n\n\n\n';
+
+            const cfg = opts.cfg || {};
+            let head = init + left;
+
+            // LOGO (texto magnificado) si cfg.showLogo y cfg.businessName
+            if (cfg.showLogo && cfg.businessName) {
+              head += center + big + cfg.businessName.toUpperCase() + '\n' + norm + left;
+            }
+
+            // ESC/POS BARCODE (GS k 73 = CODE128) si cfg.showBarcode y data.folio
+            let extras = '';
+            if (cfg.showBarcode && cfg.folio) {
+              const folio = String(cfg.folio);
+              // HRI debajo (GS H 2 = debajo del barcode)
+              extras += GS + 'H' + String.fromCharCode(2);
+              // Altura del barcode (GS h N) — 60 dots ~7.5mm
+              extras += GS + 'h' + String.fromCharCode(60);
+              // Width módulo (GS w N) — 2 = thin
+              extras += GS + 'w' + String.fromCharCode(2);
+              // GS k 73 (CODE128) m=73 n=length data
+              extras += center + GS + 'k' + String.fromCharCode(73) + String.fromCharCode(folio.length) + folio + '\n' + left;
+            }
+
+            // ESC/POS QR CODE si cfg.showQR
+            if (cfg.showQR && cfg.folio) {
+              const qrData = cfg.qrUrl || ('https://volvix.app/t/' + cfg.folio);
+              // Model (GS ( k pL pH cn fn n1 n2): pL=4,pH=0,cn=49,fn=65,n1=50,n2=0
+              extras += GS + '(' + 'k' + '\x04\x00\x31\x41\x32\x00';
+              // Size (GS ( k pL pH cn fn n): pL=3,pH=0,cn=49,fn=67,n=6
+              extras += GS + '(' + 'k' + '\x03\x00\x31\x43\x06';
+              // Error correction (GS ( k pL pH cn fn n): pL=3,pH=0,cn=49,fn=69,n=48 (L)
+              extras += GS + '(' + 'k' + '\x03\x00\x31\x45\x30';
+              // Store data (GS ( k pL pH cn fn 50 0 data...)
+              const len = qrData.length + 3;
+              extras += GS + '(' + 'k' + String.fromCharCode(len & 0xFF) + String.fromCharCode((len >> 8) & 0xFF) + '\x31\x50\x30' + qrData;
+              // Print (GS ( k 3 0 49 81 48)
+              extras += center + GS + '(' + 'k' + '\x03\x00\x31\x51\x30' + '\n' + left;
+            }
+
+            // OPEN CASH DRAWER si cfg.autoOpenDrawer
+            let drawer = '';
+            if (cfg.autoOpenDrawer || opts.openDrawer) {
+              drawer = ESC + 'p' + String.fromCharCode(0) + String.fromCharCode(25) + String.fromCharCode(250);
+            }
+
+            const text = opts.text || '';
+            const payload = head + text + extras + feed + cut + drawer;
+            const tmpFile = path2.join(os2.tmpdir(), 'volvix-loctest-' + Date.now() + '.bin');
+            const buf = Buffer.alloc(payload.length);
+            for (let i = 0; i < payload.length; i++) buf[i] = payload.charCodeAt(i) & 0xFF;
+            fs2.writeFileSync(tmpFile, buf);
+            const psScript = '$bytes=[System.IO.File]::ReadAllBytes(\'' + tmpFile.replace(/\\/g, '\\\\') + '\')\n' +
+              'Add-Type @"\nusing System;using System.Runtime.InteropServices;\npublic class RPx2{\n' +
+              '[StructLayout(LayoutKind.Sequential,CharSet=CharSet.Unicode)]public class DI{[MarshalAs(UnmanagedType.LPWStr)]public string n;[MarshalAs(UnmanagedType.LPWStr)]public string o;[MarshalAs(UnmanagedType.LPWStr)]public string d;}\n' +
+              '[DllImport("winspool.Drv",EntryPoint="OpenPrinterW",SetLastError=true,CharSet=CharSet.Unicode)]public static extern bool OpenPrinter(string s,out IntPtr h,IntPtr p);\n' +
+              '[DllImport("winspool.Drv",EntryPoint="ClosePrinter")]public static extern bool ClosePrinter(IntPtr h);\n' +
+              '[DllImport("winspool.Drv",EntryPoint="StartDocPrinterW",CharSet=CharSet.Unicode)]public static extern bool StartDocPrinter(IntPtr h,int l,[In,MarshalAs(UnmanagedType.LPStruct)]DI di);\n' +
+              '[DllImport("winspool.Drv")]public static extern bool EndDocPrinter(IntPtr h);\n' +
+              '[DllImport("winspool.Drv")]public static extern bool StartPagePrinter(IntPtr h);\n' +
+              '[DllImport("winspool.Drv")]public static extern bool EndPagePrinter(IntPtr h);\n' +
+              '[DllImport("winspool.Drv")]public static extern bool WritePrinter(IntPtr h,byte[] b,int c,out int w);}\n"@\n' +
+              '$h=[IntPtr]::Zero\nif(-not [RPx2]::OpenPrinter(\'' + String(printerName).replace(/'/g, "''") + '\',[ref]$h,[IntPtr]::Zero)){Write-Host "OPEN_FAIL";exit 1}\n' +
+              '$di=New-Object RPx2+DI;$di.n="Volvix Local Test";$di.d="RAW"\n[RPx2]::StartDocPrinter($h,1,$di)|Out-Null\n' +
+              '[RPx2]::StartPagePrinter($h)|Out-Null\n$w=0\n[RPx2]::WritePrinter($h,$bytes,$bytes.Length,[ref]$w)|Out-Null\n' +
+              '[RPx2]::EndPagePrinter($h)|Out-Null\n[RPx2]::EndDocPrinter($h)|Out-Null\n[RPx2]::ClosePrinter($h)|Out-Null\nWrite-Host "OK:$w"';
+            const ps = spawn('powershell.exe', ['-NoProfile','-ExecutionPolicy','Bypass','-Command', psScript], { windowsHide: true });
+            let stdout = '';
+            ps.stdout.on('data', (d) => stdout += d.toString());
+            ps.on('exit', (code) => {
+              try { fs2.unlinkSync(tmpFile); } catch (_) {}
+              res.writeHead(200, { 'Content-Type': 'application/json' });
+              const m = stdout.match(/OK:(\d+)/);
+              res.end(JSON.stringify({ ok: !!m, written: m ? parseInt(m[1], 10) : 0, printer: printerName, stdout: stdout.trim() }));
+            });
+          } catch (e) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ ok: false, error: e.message }));
+          }
+        });
+        return;
+      }
+
       if (req.url && req.url.startsWith('/api/')) {
         return proxyToVercel(req, res);
       }
@@ -659,10 +784,112 @@ ipcMain.handle('volvix:printers:list', async () => {
 });
 
 // Imprime un HTML directo a una impresora del sistema.
+// 2026-05-15 FIX: cuando silent:true, Electron's webContents.print() puede mostrar
+// dialogo de todas formas. Bypaseamos extrayendo el texto del HTML y enviando RAW
+// via winspool API (que SI es 100% silencioso).
 ipcMain.handle('volvix:printers:print', async (event, opts) => {
   try {
     if (!opts || !opts.html) return { ok: false, error: 'html required' };
-    // Crear ventana oculta para imprimir
+
+    // Si es silent + win32, usar la ruta RAW que ES verdaderamente silenciosa.
+    // Auto-detectar printer si no se especificó.
+    if (opts.silent !== false && process.platform === 'win32') {
+      // Auto-detect printerName si está vacío
+      if (!opts.printerName) {
+        try {
+          let printers = [];
+          if (mainWindow && mainWindow.webContents) {
+            if (typeof mainWindow.webContents.getPrintersAsync === 'function') {
+              printers = await mainWindow.webContents.getPrintersAsync() || [];
+            } else if (typeof mainWindow.webContents.getPrinters === 'function') {
+              printers = mainWindow.webContents.getPrinters() || [];
+            }
+          }
+          // Prefer Volvix-Thermal, then default, then first
+          const vt = printers.find(p => p.name === 'Volvix-Thermal' || /volvix.?thermal/i.test(p.name || ''));
+          const def = printers.find(p => p.isDefault);
+          opts.printerName = (vt && vt.name) || (def && def.name) || (printers[0] && printers[0].name);
+        } catch (_) {}
+      }
+      if (!opts.printerName) {
+        return { ok: false, error: 'No printer detected' };
+      }
+      console.log('[print-raw] Using printer:', opts.printerName);
+      // Extraer texto del HTML (quita tags, recupera <br>)
+      let text = String(opts.html)
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<\/p>/gi, '\n')
+        .replace(/<[^>]+>/g, '')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&quot;/g, '"');
+
+      const path = require('path');
+      const fs = require('fs');
+      const os = require('os');
+      const { spawn } = require('child_process');
+
+      const ESC = String.fromCharCode(27);
+      const GS  = String.fromCharCode(29);
+      const init = ESC + '@';
+      const left = ESC + 'a' + String.fromCharCode(0);
+      const cut  = GS + 'V' + String.fromCharCode(66) + String.fromCharCode(0);
+      const feed = '\n\n\n\n';
+      const payload = init + left + text + feed + cut;
+
+      const tmpFile = path.join(os.tmpdir(), 'volvix-print-' + Date.now() + '.bin');
+      const buf = Buffer.alloc(payload.length);
+      for (let i = 0; i < payload.length; i++) buf[i] = payload.charCodeAt(i) & 0xFF;
+      fs.writeFileSync(tmpFile, buf);
+
+      const psScript = `
+        $bytes = [System.IO.File]::ReadAllBytes('${tmpFile.replace(/\\/g, '\\\\')}')
+        Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+public class RPx {
+  [StructLayout(LayoutKind.Sequential, CharSet=CharSet.Unicode)]
+  public class DIx { [MarshalAs(UnmanagedType.LPWStr)] public string n; [MarshalAs(UnmanagedType.LPWStr)] public string o; [MarshalAs(UnmanagedType.LPWStr)] public string d; }
+  [DllImport("winspool.Drv", EntryPoint="OpenPrinterW", SetLastError=true, CharSet=CharSet.Unicode)] public static extern bool OpenPrinter(string s, out IntPtr h, IntPtr p);
+  [DllImport("winspool.Drv", EntryPoint="ClosePrinter")] public static extern bool ClosePrinter(IntPtr h);
+  [DllImport("winspool.Drv", EntryPoint="StartDocPrinterW", CharSet=CharSet.Unicode)] public static extern bool StartDocPrinter(IntPtr h, int l, [In, MarshalAs(UnmanagedType.LPStruct)] DIx di);
+  [DllImport("winspool.Drv")] public static extern bool EndDocPrinter(IntPtr h);
+  [DllImport("winspool.Drv")] public static extern bool StartPagePrinter(IntPtr h);
+  [DllImport("winspool.Drv")] public static extern bool EndPagePrinter(IntPtr h);
+  [DllImport("winspool.Drv")] public static extern bool WritePrinter(IntPtr h, byte[] b, int c, out int w);
+}
+"@
+        $h = [IntPtr]::Zero
+        if (-not [RPx]::OpenPrinter('${String(opts.printerName).replace(/'/g, "''")}', [ref]$h, [IntPtr]::Zero)) { Write-Host 'OPEN_FAIL'; exit 1 }
+        $di = New-Object RPx+DIx; $di.n='Volvix Ticket'; $di.d='RAW'
+        [RPx]::StartDocPrinter($h, 1, $di) | Out-Null
+        [RPx]::StartPagePrinter($h) | Out-Null
+        $w = 0
+        [RPx]::WritePrinter($h, $bytes, $bytes.Length, [ref]$w) | Out-Null
+        [RPx]::EndPagePrinter($h) | Out-Null
+        [RPx]::EndDocPrinter($h) | Out-Null
+        [RPx]::ClosePrinter($h) | Out-Null
+        Write-Host "OK:$w"
+      `;
+      const ps = spawn('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', psScript], { windowsHide: true });
+      let stdout = '';
+      ps.stdout.on('data', (d) => stdout += d.toString());
+      return await new Promise((resolve) => {
+        ps.on('exit', (code) => {
+          try { fs.unlinkSync(tmpFile); } catch (_) {}
+          if (code === 0 && stdout.includes('OK:')) {
+            const written = parseInt(stdout.match(/OK:(\d+)/)[1], 10);
+            resolve({ ok: true, written });
+          } else {
+            resolve({ ok: false, error: 'ps exit ' + code });
+          }
+        });
+      });
+    }
+
+    // Path original (cuando NO es silent o no es win32 o no hay deviceName)
     const { BrowserWindow } = require('electron');
     const printWin = new BrowserWindow({
       show: false,
@@ -680,6 +907,133 @@ ipcMain.handle('volvix:printers:print', async (event, opts) => {
       printWin.webContents.print(printOpts, (success, errorType) => {
         try { printWin.close(); } catch (_) {}
         resolve({ ok: !!success, error: success ? null : (errorType || 'unknown') });
+      });
+    });
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+});
+
+// 2026-05-15 FIX: webContents.print({silent:true}) muestra dialogo cuando hay
+// cualquier problema. Imprimir RAW ESC/POS bytes via PowerShell winspool API
+// es 100% silencioso y funciona con cualquier impresora "Generic / Text Only".
+// opts: { text, printerName, openDrawer }
+ipcMain.handle('volvix:printers:print-raw', async (event, opts) => {
+  if (process.platform !== 'win32') return { ok: false, error: 'win32 only' };
+  if (!opts) return { ok: false, error: 'opts required' };
+  opts.text = opts.text || '';
+
+  // 2026-05-15: Auto-detect printer si no se proporciona (preferir Volvix-Thermal)
+  if (!opts.printerName) {
+    try {
+      let printers = [];
+      if (mainWindow && mainWindow.webContents && typeof mainWindow.webContents.getPrintersAsync === 'function') {
+        printers = await mainWindow.webContents.getPrintersAsync() || [];
+      }
+      const vt = printers.find(p => /volvix.?thermal/i.test(p.name || ''));
+      const def = printers.find(p => p.isDefault);
+      opts.printerName = (vt && vt.name) || (def && def.name) || (printers[0] && printers[0].name);
+    } catch (_) {}
+  }
+  if (!opts.printerName) return { ok: false, error: 'no printer detected' };
+
+  // Convertir texto a bytes ESC/POS (CP437)
+  // 2026-05-15: respeta cfg.showLogo, cfg.showBarcode, cfg.showQR, cfg.autoOpenDrawer
+  const ESC = String.fromCharCode(27);
+  const GS  = String.fromCharCode(29);
+  const init = ESC + '@';
+  const left = ESC + 'a' + String.fromCharCode(0);
+  const center = ESC + 'a' + String.fromCharCode(1);
+  const big = GS + '!' + String.fromCharCode(17);
+  const norm = GS + '!' + String.fromCharCode(0);
+  const cut  = GS + 'V' + String.fromCharCode(66) + String.fromCharCode(0);
+  const feed = '\n\n\n\n';
+
+  const cfg = opts.cfg || {};
+  let head = init + left;
+  if (cfg.showLogo && cfg.businessName) {
+    head += center + big + cfg.businessName.toUpperCase() + '\n' + norm + left;
+  }
+
+  let extras = '';
+  if (cfg.showBarcode && cfg.folio) {
+    const folio = String(cfg.folio);
+    extras += GS + 'H' + String.fromCharCode(2);
+    extras += GS + 'h' + String.fromCharCode(60);
+    extras += GS + 'w' + String.fromCharCode(2);
+    extras += center + GS + 'k' + String.fromCharCode(73) + String.fromCharCode(folio.length) + folio + '\n' + left;
+  }
+  if (cfg.showQR && cfg.folio) {
+    const qrData = cfg.qrUrl || ('https://volvix.app/t/' + cfg.folio);
+    extras += GS + '(' + 'k' + '\x04\x00\x31\x41\x32\x00';
+    extras += GS + '(' + 'k' + '\x03\x00\x31\x43\x06';
+    extras += GS + '(' + 'k' + '\x03\x00\x31\x45\x30';
+    const len = qrData.length + 3;
+    extras += GS + '(' + 'k' + String.fromCharCode(len & 0xFF) + String.fromCharCode((len >> 8) & 0xFF) + '\x31\x50\x30' + qrData;
+    extras += center + GS + '(' + 'k' + '\x03\x00\x31\x51\x30' + '\n' + left;
+  }
+
+  let drawer = '';
+  if (opts.openDrawer || cfg.autoOpenDrawer) {
+    drawer = ESC + 'p' + String.fromCharCode(0) + String.fromCharCode(25) + String.fromCharCode(250);
+  }
+  const payload = head + opts.text + extras + feed + cut + drawer;
+
+  try {
+    const path = require('path');
+    const fs = require('fs');
+    const os = require('os');
+    const { spawn } = require('child_process');
+    // Write payload to temp file (binary)
+    const tmpFile = path.join(os.tmpdir(), 'volvix-print-' + Date.now() + '.bin');
+    // Convert to CP437 bytes (single-byte encoding, just use chars 0-255 as bytes)
+    const buf = Buffer.alloc(payload.length);
+    for (let i = 0; i < payload.length; i++) buf[i] = payload.charCodeAt(i) & 0xFF;
+    fs.writeFileSync(tmpFile, buf);
+
+    // PowerShell script that reads the file + sends to printer via winspool RAW
+    const psScript = `
+      $bytes = [System.IO.File]::ReadAllBytes('${tmpFile.replace(/\\/g, '\\\\')}')
+      Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+public class RP {
+  [StructLayout(LayoutKind.Sequential, CharSet=CharSet.Unicode)]
+  public class DI { [MarshalAs(UnmanagedType.LPWStr)] public string n; [MarshalAs(UnmanagedType.LPWStr)] public string o; [MarshalAs(UnmanagedType.LPWStr)] public string d; }
+  [DllImport("winspool.Drv", EntryPoint="OpenPrinterW", SetLastError=true, CharSet=CharSet.Unicode)] public static extern bool OpenPrinter(string s, out IntPtr h, IntPtr p);
+  [DllImport("winspool.Drv", EntryPoint="ClosePrinter")] public static extern bool ClosePrinter(IntPtr h);
+  [DllImport("winspool.Drv", EntryPoint="StartDocPrinterW", CharSet=CharSet.Unicode)] public static extern bool StartDocPrinter(IntPtr h, int l, [In, MarshalAs(UnmanagedType.LPStruct)] DI di);
+  [DllImport("winspool.Drv")] public static extern bool EndDocPrinter(IntPtr h);
+  [DllImport("winspool.Drv")] public static extern bool StartPagePrinter(IntPtr h);
+  [DllImport("winspool.Drv")] public static extern bool EndPagePrinter(IntPtr h);
+  [DllImport("winspool.Drv")] public static extern bool WritePrinter(IntPtr h, byte[] b, int c, out int w);
+}
+"@
+      $h = [IntPtr]::Zero
+      if (-not [RP]::OpenPrinter('${opts.printerName.replace(/'/g, "''")}', [ref]$h, [IntPtr]::Zero)) { Write-Host 'OPEN_FAIL'; exit 1 }
+      $di = New-Object RP+DI; $di.n='Volvix Ticket'; $di.d='RAW'
+      [RP]::StartDocPrinter($h, 1, $di) | Out-Null
+      [RP]::StartPagePrinter($h) | Out-Null
+      $w = 0
+      [RP]::WritePrinter($h, $bytes, $bytes.Length, [ref]$w) | Out-Null
+      [RP]::EndPagePrinter($h) | Out-Null
+      [RP]::EndDocPrinter($h) | Out-Null
+      [RP]::ClosePrinter($h) | Out-Null
+      Write-Host "OK:$w"
+    `;
+    const ps = spawn('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', psScript], { windowsHide: true });
+    let stdout = '', stderr = '';
+    ps.stdout.on('data', (d) => stdout += d.toString());
+    ps.stderr.on('data', (d) => stderr += d.toString());
+    return await new Promise((resolve) => {
+      ps.on('exit', (code) => {
+        try { fs.unlinkSync(tmpFile); } catch (_) {}
+        if (code === 0 && stdout.includes('OK:')) {
+          const written = parseInt(stdout.match(/OK:(\d+)/)[1], 10);
+          resolve({ ok: true, written, printer: opts.printerName });
+        } else {
+          resolve({ ok: false, error: 'powershell exit ' + code + ' stdout=' + stdout + ' stderr=' + stderr });
+        }
       });
     });
   } catch (e) {

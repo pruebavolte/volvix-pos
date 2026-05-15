@@ -69,10 +69,45 @@ contextBridge.exposeInMainWorld('volvixElectron', {
     return await ipcRenderer.invoke('volvix:printers:list');
   },
 
-  // Imprime un HTML directo a una impresora del sistema.
-  // opts: { html, printerName, silent (no dialog), copies, printBackground, ... }
+  // 2026-05-15 v1.0.316: printToSystem REDIRIGE a print-raw (winspool) cuando
+  // silent:true, para que NUNCA aparezca el diálogo de Electron (fricción al
+  // cobrar). Si necesitas el dialog (silent:false explícito), llama
+  // printToSystemWithDialog en su lugar.
   printToSystem: async function (opts) {
-    return await ipcRenderer.invoke('volvix:printers:print', opts || {});
+    opts = opts || {};
+    // Extraer texto del HTML para enviar como RAW al winspool API
+    if (opts.silent !== false) {
+      let text = String(opts.html || opts.text || '')
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<\/p>/gi, '\n')
+        .replace(/<[^>]+>/g, '')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&quot;/g, '"');
+      const rawResult = await ipcRenderer.invoke('volvix:printers:print-raw', {
+        text: text,
+        printerName: opts.printerName,
+        openDrawer: !!opts.openDrawer,
+        cfg: opts.cfg || {}
+      });
+      if (rawResult && rawResult.ok) return rawResult;
+      // Si el RAW falla, NO caer al dialog — devolver error
+      return rawResult || { ok: false, error: 'raw-failed' };
+    }
+    return await ipcRenderer.invoke('volvix:printers:print', opts);
+  },
+
+  // 2026-05-15: Imprime RAW ESC/POS text via Win32 winspool API (100% silent)
+  // opts: { text, printerName, openDrawer, cfg }
+  printRawText: async function (opts) {
+    return await ipcRenderer.invoke('volvix:printers:print-raw', opts || {});
+  },
+
+  // Si específicamente necesitas el diálogo de Electron, usa esta función.
+  printToSystemWithDialog: async function (opts) {
+    return await ipcRenderer.invoke('volvix:printers:print', Object.assign({}, opts || {}, { silent: false }));
   },
 
   // 2026-05-14 — Auto-setup de impresora térmica (corre como admin, sin UAC adicional)

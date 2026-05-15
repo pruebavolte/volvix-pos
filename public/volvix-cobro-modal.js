@@ -698,14 +698,53 @@
           '</body></html>';
       }
       // 3) Imprimir silencioso (sin diálogo Windows)
-      var result = await window.volvixElectron.printToSystem({
+      // 2026-05-15 v1.0.316: PREFERIR printRawText (winspool API directo) que es
+      // 100% silencioso. printToSystem usa webContents.print() que en muchos
+      // entornos muestra el diálogo de Electron — eso es lo que queremos evitar
+      // (fricción con el cliente). Si printRawText falla, fallback a printToSystem.
+      var result = null;
+      if (window.volvixElectron.printRawText &&
+          window.VolvixTicketCustomizer && window.VolvixTicketCustomizer.renderText) {
+        // Re-render text usando la cfg del usuario + data del cobro real
+        var cfgForRaw = window.VolvixTicketCustomizer.getConfig();
+        var textForRaw = window.VolvixTicketCustomizer.renderText(realData, cfgForRaw);
+        // Filtrar printer "POS-58C" feo del driver genérico — preferimos Volvix-Thermal
+        // si la lista incluye ambas, pero respetamos la elección del usuario si la guardó.
+        var chosenPrinter = printerName;
+        if (!chosenPrinter || /pos-?58/i.test(chosenPrinter)) {
+          // Intentar Volvix-Thermal primero
+          try {
+            var sysList = await window.volvixElectron.listSystemPrinters();
+            var vt = (sysList || []).find(function (p) { return /volvix.?thermal/i.test(p.name || ''); });
+            if (vt && vt.name) {
+              chosenPrinter = vt.name;
+              try { localStorage.setItem('volvix_system_printer', chosenPrinter); } catch (_) {}
+            }
+          } catch (_) {}
+        }
+        var rawCfg = Object.assign({}, cfgForRaw, {
+          folio: realData.folio,
+          qrUrl: 'https://volvix.app/t/' + (realData.folio || '')
+        });
+        result = await window.volvixElectron.printRawText({
+          text: textForRaw,
+          printerName: chosenPrinter,
+          openDrawer: !!(cfgForRaw && cfgForRaw.autoOpenDrawer && realData.payment && /efectivo/i.test(realData.payment.method || '')),
+          cfg: rawCfg
+        });
+        log('autoPrint RAW result:', result, 'printer:', chosenPrinter);
+        if (result && result.ok) return true;
+        log('RAW failed, falling back to printToSystem:', result && result.error);
+      }
+      // Fallback: HTML print (puede mostrar diálogo)
+      result = await window.volvixElectron.printToSystem({
         html: ticketHtml,
-        printerName: printerName || undefined,  // undefined → impresora default del SO
+        printerName: printerName || undefined,
         silent: true,
         copies: 1,
         printBackground: false
       });
-      log('autoPrint result:', result);
+      log('autoPrint HTML result:', result);
       return !!(result && result.ok);
     } catch (e) {
       console.error('[vlx-cobro] autoPrintTicket error:', e);
@@ -930,8 +969,18 @@
     }
 
     window.completePay = async function () {
+      // 2026-05-15 SAFETY: si el flag lleva stuck >30s, asumimos que el anterior
+      // cobro se quedó colgado (red, error JS) y permitimos reintentar.
+      if (window.__volvixSaleInFlight && window.__volvixSaleInFlightTs) {
+        if (Date.now() - window.__volvixSaleInFlightTs > 30000) {
+          console.warn('[vlx-cobro] saleInFlight stuck >30s, clearing flag');
+          window.__volvixSaleInFlight = false;
+          window.__volvixSaleInFlightTs = null;
+        }
+      }
       // Fix S-1: anti double-submit global (también protege el flujo nuevo)
       if (window.__volvixSaleInFlight) { console.warn('[vlx-cobro] sale in flight, ignored'); return; }
+      window.__volvixSaleInFlightTs = Date.now();
 
       // Verificación bancaria humana — mantener guard legacy
       var method = window.__volvixSelectedPayMethod || 'efectivo';
@@ -1036,45 +1085,108 @@
         // Fix SEC-3: Idempotency-Key determinista
         var idemKey = await deterministicIdemKey(payload);
 
-        var resp = await fetch('/api/cobro', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Idempotency-Key': idemKey,
-            Authorization: token ? ('Bearer ' + token) : ''
-          },
-          body: JSON.stringify(payload)
-        });
+        // 2026-05-15 v1.0.316: offline-first cobro
+        // 1) Cobro RÁPIDO con timeout corto. Si responde rápido → OK.
+        // 2) Si timeout o error red → guardar localmente, cerrar modal, imprimir
+        //    igual. La sync ocurre en background sin bloquear al cajero.
+        // El adulto mayor NUNCA se queda esperando o viendo errores.
+        const FAST_TIMEOUT_MS = 3500;
+        var ctrl = new AbortController();
+        var timeoutTimer = setTimeout(function(){ ctrl.abort(); }, FAST_TIMEOUT_MS);
+        var resp = null;
+        var fetchErr = null;
+        try {
+          resp = await fetch('/api/cobro', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Idempotency-Key': idemKey,
+              Authorization: token ? ('Bearer ' + token) : ''
+            },
+            body: JSON.stringify(payload),
+            signal: ctrl.signal
+          });
+        } catch (e) {
+          fetchErr = e;
+        } finally {
+          clearTimeout(timeoutTimer);
+        }
 
-        if (resp.ok) {
-          var data = await resp.json();
+        // ─── PATH A: respuesta OK del servidor ───
+        if (resp && resp.ok) {
+          var data = null;
+          try { data = await resp.json(); } catch (_) { data = {}; }
           log('/api/cobro OK:', data);
           window.__vlxLastCobroResult = data;
-          // Fix S-1: cleanup manual, NO llamar origComplete (que dispararía /api/sales)
           postSuccessCleanup(data);
           return;
-        } else if (resp.status === 404) {
-          // Endpoint no desplegado → fallback al legacy (debe ser único path que llame /api/sales)
-          log('FALLBACK to /api/sales (endpoint /api/cobro not deployed)');
-          return origComplete.apply(this, arguments);
-        } else if (resp.status === 409) {
-          // Duplicate (idempotency caught it) → tratarlo como éxito silencioso
+        }
+        // ─── PATH B: 409 duplicate (idempotency) — tratarlo como éxito ───
+        if (resp && resp.status === 409) {
           try { var dupData = await resp.json(); postSuccessCleanup(dupData); }
           catch (_) { postSuccessCleanup({}); }
           return;
-        } else {
-          var errBody = await resp.text();
-          console.error('[vlx-cobro] /api/cobro failed:', resp.status, errBody);
-          alert('Error al guardar el cobro (' + resp.status + '). Reintenta o llama a soporte.');
-          window.__volvixSaleInFlight = false;
-          if (payBtn) { payBtn.disabled = false; payBtn.textContent = origText || '✓ F12 - Completar cobro'; }
-          return;
         }
+        // ─── PATH C: 404 endpoint no desplegado — fallback legacy ───
+        if (resp && resp.status === 404) {
+          log('FALLBACK to /api/sales (endpoint /api/cobro not deployed)');
+          return origComplete.apply(this, arguments);
+        }
+
+        // ─── PATH D: TIMEOUT / OFFLINE / ERROR — modo offline-first ───
+        // Guardamos local, cerramos modal, imprimimos. La cola de sync legacy
+        // (que ya existe en volvix-sync.js) se encarga de subir cuando haya red.
+        var reason = fetchErr ? (fetchErr.name === 'AbortError' ? 'timeout' : 'network') : ('http-' + (resp ? resp.status : '?'));
+        log('cobro offline path:', reason);
+
+        // Generar sale_number/folio local (será reemplazado por el del server al sync)
+        var localSaleId = 'local-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+        var localSaleNum = (window.__volvixLastFolio || 0) + 1;
+        try { window.__volvixLastFolio = localSaleNum; } catch (_) {}
+        try { localStorage.setItem('volvix_last_folio', String(localSaleNum)); } catch (_) {}
+
+        // Guardar en cola offline para sync posterior
+        try {
+          var queueKey = 'volvix_cobro_offline_queue';
+          var queue = [];
+          try { queue = JSON.parse(localStorage.getItem(queueKey) || '[]'); } catch (_) { queue = []; }
+          queue.push({
+            ts: Date.now(),
+            idemKey: idemKey,
+            payload: payload,
+            localSaleId: localSaleId,
+            localSaleNum: localSaleNum
+          });
+          localStorage.setItem(queueKey, JSON.stringify(queue.slice(-100))); // keep last 100
+        } catch (e) { console.warn('queue persist failed:', e); }
+
+        // Construir cobroResult sintético para el postSuccessCleanup
+        var fakeResult = {
+          ok: true,
+          offline: true,
+          sale_id: localSaleId,
+          sale_number: localSaleNum,
+          total: payload.total,
+          subtotal: payload.subtotal,
+          items: payload.items,
+          payments: payload.payments
+        };
+        window.__vlxLastCobroResult = fakeResult;
+
+        // Mostrar toast informativo (NO alert que bloquea)
+        if (typeof window.showToast === 'function') {
+          window.showToast('✅ Venta guardada (offline · se sincroniza al recuperar conexión)', 'success', 4000);
+        }
+
+        // Cierre + impresión del ticket — igual que en éxito online
+        postSuccessCleanup(fakeResult);
+        return;
       } catch (e) {
-        console.error('[vlx-cobro] /api/cobro exception:', e);
-        // Fix S-4: NO caer al legacy en caso de red (legacy tiene su propia cola offline
-        // que escribiría una segunda venta). Mostrar error y permitir reintento manual.
-        alert('Sin conexión. Verifica internet e intenta de nuevo. (El cobro NO se duplicará.)');
+        // Solo errores de código (no de red — esos los manejamos arriba)
+        console.error('[vlx-cobro] cobro unexpected exception:', e);
+        if (typeof window.showToast === 'function') {
+          window.showToast('⚠ Error: ' + (e.message || 'desconocido'), 'error', 4000);
+        }
         window.__volvixSaleInFlight = false;
         if (payBtn) { payBtn.disabled = false; payBtn.textContent = origText || '✓ F12 - Completar cobro'; }
       }

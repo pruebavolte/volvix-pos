@@ -125,7 +125,7 @@
       el('button', {
         style: { width: '100%', padding: '12px', background: '#10B981', color: '#fff', border: '0', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' },
         onClick: doTestPrint
-      }, '🖨 Imprimir ticket de prueba (sin diálogo)')
+      }, '🖨 Imprimir ticket de prueba (RAW v2)')
     ));
 
     return panel;
@@ -244,18 +244,62 @@
       if (typeof global.showToast === 'function') global.showToast('⚠ Solo disponible en la app .exe', 'warning');
       return;
     }
-    const printerName = (() => { try { return localStorage.getItem('volvix_system_printer') || null; } catch (_) { return null; } })();
-    const html = '<!doctype html><html><body style="font-family:monospace;font-size:11px;white-space:pre-wrap;width:' + (cfg.paperWidth === 48 ? '80mm' : '58mm') + ';padding:0;margin:0">' +
-      text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/\n/g, '<br>') +
-      '</body></html>';
-    const r = await global.volvixElectron.printToSystem({
-      html: html,
-      printerName: printerName || undefined,
-      silent: true,
-      copies: 1
+    // 2026-05-15 FIX: silent:true REQUIRES an explicit deviceName, otherwise
+    // Electron shows the native print dialog. Read selection from localStorage,
+    // and if empty, query the printer list and pick Volvix-Thermal/default.
+    let printerName = null;
+    try { printerName = localStorage.getItem('volvix_system_printer') || null; } catch (_) {}
+    if (!printerName && global.volvixElectron.listSystemPrinters) {
+      try {
+        const list = await global.volvixElectron.listSystemPrinters();
+        if (list && list.length) {
+          // Prefer Volvix-Thermal, then default, then first
+          const vt = list.find(p => p.name === 'Volvix-Thermal' || /volvix.?thermal/i.test(p.name));
+          const def = list.find(p => p.isDefault);
+          printerName = (vt && vt.name) || (def && def.name) || list[0].name;
+        }
+      } catch (_) {}
+    }
+    if (!printerName) {
+      if (typeof global.showToast === 'function') global.showToast('⚠ No hay impresora detectada', 'warning');
+      return;
+    }
+    // 2026-05-15 FIX: usar printRawText (winspool API) en vez de printToSystem
+    // (que muestra dialogo). Esto envia ESC/POS bytes directos al spooler.
+    // Pasamos la cfg COMPLETA para que el main process aplique los toggles
+    // (showLogo magnifica el header, showBarcode imprime CODE128 real,
+    //  showQR imprime QR ESC/POS real, autoOpenDrawer abre el cajón).
+    const fullCfgForPrint = Object.assign({}, cfg, {
+      folio: data.folio,
+      qrUrl: data.qrUrl || ('https://volvix.app/t/' + data.folio)
     });
+    let r;
+    const hasRaw = !!(global.volvixElectron && global.volvixElectron.printRawText);
+    // DEBUG: mostrar qué path tomamos
     if (typeof global.showToast === 'function') {
-      global.showToast(r.ok ? '✅ Ticket de prueba enviado' : '⚠ Error: ' + (r.error || 'desconocido'), r.ok ? 'success' : 'error', 4000);
+      global.showToast(hasRaw ? '⚙ Usando RAW path (printRawText)' : '⚙ Usando HTML path (NO hay printRawText)', hasRaw ? 'success' : 'warning', 2500);
+    }
+    if (hasRaw) {
+      r = await global.volvixElectron.printRawText({
+        text: text,
+        printerName: printerName,
+        openDrawer: !!cfg.autoOpenDrawer,
+        cfg: fullCfgForPrint
+      });
+    } else {
+      // Fallback: vieja API HTML
+      const html = '<!doctype html><html><body style="font-family:monospace;font-size:11px;white-space:pre-wrap;width:' + (cfg.paperWidth === 48 ? '80mm' : '58mm') + ';padding:0;margin:0">' +
+        text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/\n/g, '<br>') +
+        '</body></html>';
+      r = await global.volvixElectron.printToSystem({
+        html: html,
+        printerName: printerName,
+        silent: true,
+        copies: 1
+      });
+    }
+    if (typeof global.showToast === 'function') {
+      global.showToast(r.ok ? ('✅ Ticket enviado a ' + printerName + (r.written ? ' (' + r.written + ' bytes)' : '')) : '⚠ Error: ' + (r.error || 'desconocido'), r.ok ? 'success' : 'error', 4000);
     }
   }
 

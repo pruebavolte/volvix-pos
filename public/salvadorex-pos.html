@@ -4909,29 +4909,66 @@
             </div>
             <script>
               // Inicializar el editor cuando se haga tab 'impresion'
+              // 2026-05-15 FIX: wrap showCfg DESPUES de que esté definido (window.load),
+              // y además observar visibilidad del panel impresion con MutationObserver
+              // por si showCfg se redefine después.
               (function () {
                 var _vlxTicketEditorInit = false;
                 function _initTicketEditor() {
                   if (_vlxTicketEditorInit) return;
                   var c = document.getElementById('vlx-ticket-editor-embed');
                   if (c && window.VolvixTicketEditor && window.VolvixTicketEditor.renderInto) {
-                    window.VolvixTicketEditor.renderInto(c);
-                    _vlxTicketEditorInit = true;
+                    try {
+                      window.VolvixTicketEditor.renderInto(c);
+                      _vlxTicketEditorInit = true;
+                      console.log('[ticket-editor] rendered into embed');
+                    } catch (e) {
+                      console.error('[ticket-editor] renderInto error:', e);
+                    }
+                  } else {
+                    console.warn('[ticket-editor] not ready: container=' + !!c +
+                                 ' editor=' + !!(window.VolvixTicketEditor) +
+                                 ' renderInto=' + !!(window.VolvixTicketEditor && window.VolvixTicketEditor.renderInto));
                   }
                 }
-                // Hook al showCfg para detectar cuando se activa el tab Impresion
-                var _origShowCfg = window.showCfg;
-                window.showCfg = function (tab, btn) {
-                  if (typeof _origShowCfg === 'function') _origShowCfg(tab, btn);
-                  if (tab === 'impresion') setTimeout(_initTicketEditor, 50);
-                };
-                // Si ya está visible al cargar, inicializar
-                document.addEventListener('DOMContentLoaded', function () {
-                  setTimeout(function () {
-                    var p = document.getElementById('cfg-impresion');
-                    if (p && !p.classList.contains('hidden')) _initTicketEditor();
-                  }, 600);
-                });
+                function _installShowCfgHook() {
+                  if (typeof window.showCfg !== 'function') {
+                    setTimeout(_installShowCfgHook, 200);
+                    return;
+                  }
+                  if (window.showCfg._vlxHooked) return;
+                  var _orig = window.showCfg;
+                  var _wrap = function (tab, btn) {
+                    _orig(tab, btn);
+                    if (tab === 'impresion') setTimeout(_initTicketEditor, 50);
+                  };
+                  _wrap._vlxHooked = true;
+                  window.showCfg = _wrap;
+                  console.log('[ticket-editor] showCfg hooked');
+                }
+                // Triple-defense: hook ASAP, on DOM ready, and on full load
+                _installShowCfgHook();
+                document.addEventListener('DOMContentLoaded', _installShowCfgHook);
+                window.addEventListener('load', _installShowCfgHook);
+
+                // MutationObserver: si el panel cfg-impresion pierde la clase 'hidden'
+                // (o se vuelve display:block), renderizar
+                function _watchPanel() {
+                  var p = document.getElementById('cfg-impresion');
+                  if (!p) { setTimeout(_watchPanel, 300); return; }
+                  // Render inicial si ya visible
+                  var visible = !p.classList.contains('hidden') &&
+                                getComputedStyle(p).display !== 'none';
+                  if (visible) _initTicketEditor();
+                  var obs = new MutationObserver(function () {
+                    var v = !p.classList.contains('hidden') &&
+                            getComputedStyle(p).display !== 'none';
+                    if (v) setTimeout(_initTicketEditor, 30);
+                  });
+                  obs.observe(p, { attributes: true, attributeFilter: ['class', 'style'] });
+                }
+                document.addEventListener('DOMContentLoaded', _watchPanel);
+                if (document.readyState !== 'loading') _watchPanel();
               })();
             </script>
 
@@ -22826,8 +22863,53 @@ window.addEventListener('volvix:version-loaded', function(e){
 <!-- 2026-05-15: Errores de impresora con modal rojo grande -->
 <script src="/volvix-printer-errors.js" defer></script>
 <!-- 2026-05-15 v1.0.315: Customización del ticket + preview en vivo + combobox impresoras -->
-<script src="/volvix-ticket-customizer.js" defer></script>
-<script src="/volvix-ticket-editor.js" defer></script>
+<script src="/volvix-ticket-customizer.js?v=2026-05-15-rawprint" defer></script>
+<script src="/volvix-ticket-editor.js?v=2026-05-15-rawprint" defer></script>
+
+<!-- 2026-05-15 v1.0.316: NUCLEAR FIX — override window.print() en TODOS los
+     contextos para que NUNCA muestre el diálogo de Electron. Todas las llamadas
+     se redirigen a printRawText (winspool API silencioso). El usuario adulto
+     mayor jamás debe ver un diálogo del sistema al cobrar. -->
+<script>
+(function () {
+  if (typeof window === 'undefined') return;
+  var origPrint = window.print;
+  window.print = function () {
+    console.log('[volvix] window.print() interceptado — redirigiendo a printRawText');
+    try {
+      if (window.volvixElectron && window.volvixElectron.printRawText) {
+        var text = '';
+        try {
+          if (window.VolvixTicketCustomizer && window.VolvixTicketCustomizer.renderText) {
+            text = window.VolvixTicketCustomizer.renderText(
+              window.VolvixTicketCustomizer.getSampleData(),
+              window.VolvixTicketCustomizer.getConfig()
+            );
+          } else {
+            // Fallback: capturar texto visible del body actual
+            text = (document.body && document.body.innerText) || 'Ticket Volvix';
+          }
+        } catch (_) { text = 'Ticket Volvix'; }
+        var cfg = (window.VolvixTicketCustomizer && window.VolvixTicketCustomizer.getConfig)
+          ? window.VolvixTicketCustomizer.getConfig() : {};
+        window.volvixElectron.printRawText({
+          text: text,
+          openDrawer: !!(cfg && cfg.autoOpenDrawer),
+          cfg: cfg
+        }).then(function (r) {
+          if (typeof window.showToast === 'function') {
+            window.showToast(r && r.ok ? '✅ Ticket impreso (silencioso)' : '⚠ Error: ' + (r && r.error || 'desconocido'), r && r.ok ? 'success' : 'error', 3000);
+          }
+        });
+        return;
+      }
+    } catch (e) { console.error('[volvix] window.print override error:', e); }
+    // Si NO estamos en Electron, comportamiento original
+    return origPrint.apply(window, arguments);
+  };
+  console.log('[volvix] window.print() overridden — silent only');
+})();
+</script>
 
 </body>
 </html>

@@ -185,8 +185,17 @@
     const dsep = '='.repeat(w);
     const fmt$ = (n) => '$' + Number(n || 0).toFixed(2);
 
+    // ─── LOGO (texto grande / ASCII si Generic/Text-Only) ───
+    // 2026-05-15: showLogo activa un "header magnificado" con doble tamaño visual
+    // (en ESC/POS real será GS!17; aquí en texto ponemos *** alrededor del nombre).
+    if (cfg.showLogo && cfg.businessName) {
+      lines.push(center('*** ' + cfg.businessName.toUpperCase() + ' ***'));
+      lines.push('');
+    }
+
     // ─── HEADER ───
-    if (cfg.businessName) {
+    if (cfg.businessName && !cfg.showLogo) {
+      // Si showLogo está off, el nombre va normal arriba
       lines.push(cfg.centerHeader ? center(cfg.businessName.toUpperCase()) : cfg.businessName.toUpperCase());
     }
     (cfg.headerLines || []).forEach((l) => {
@@ -197,6 +206,22 @@
     // ─── INFO TICKET ───
     if (cfg.showFolio && data.folio) {
       lines.push(center('TICKET No. ' + data.folio));
+    }
+    // ─── BARCODE (representación ASCII para Generic/Text-Only) ───
+    // 2026-05-15: showBarcode renderiza el folio como texto con barras |||
+    // (la versión RAW ESC/POS real está en print-raw IPC con GS k)
+    if (cfg.showBarcode && data.folio) {
+      const code = String(data.folio);
+      lines.push(center('|' + '||'.repeat(Math.min(code.length, 14)) + '|'));
+      lines.push(center('[' + code + ']'));
+    }
+    // ─── QR (representación texto para Generic/Text-Only) ───
+    // 2026-05-15: showQR imprime el contenido como URL/JSON; en RAW ESC/POS
+    // real usa GS ( k para QR Code (modelo 2)
+    if (cfg.showQR && data.folio) {
+      const qrUrl = (data.qrUrl || 'https://volvix.app/t/' + data.folio);
+      lines.push(center('[QR]'));
+      lines.push(center(qrUrl));
     }
     if (cfg.showDate) {
       lines.push(pad('Fecha: ' + data.date, w / 2) + pad('Hora: ' + data.time, w / 2, 'right'));
