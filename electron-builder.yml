@@ -38,10 +38,21 @@ win:
   signAndEditExecutable: false
   signtoolOptions:
     sign: null
+  # 2026-05-14: la app siempre arranca elevada (admin) para que impresoras térmicas,
+  # cajón de dinero y servicios de Windows funcionen sin pedir UAC en cada acción.
+  # El UAC sale UNA vez al inicio y luego no molesta al adulto mayor.
+  requestedExecutionLevel: requireAdministrator
 nsis:
-  oneClick: false
-  perMachine: false
-  allowToChangeInstallationDirectory: true
+  # 2026-05-14 — INSTALADOR SILENCIOSO PARA ADULTOS MAYORES (60-75 años):
+  # oneClick=true elimina el wizard completo. NO sale la pantalla de
+  # "¿Para quién instalar?". No sale "Siguiente / Cancelar". Solo el UAC
+  # del sistema operativo (que NO podemos saltarnos por seguridad de Windows)
+  # y luego la app abre sola al terminar.
+  oneClick: true
+  perMachine: true                     # instala para todos los usuarios → sin pregunta
+  allowElevation: true                 # auto-elevación UAC (un solo "Sí" del usuario)
+  runAfterFinish: true                 # abre la app automáticamente al terminar
+  deleteAppDataOnUninstall: false      # preserva datos del usuario al actualizar
   createDesktopShortcut: true
   createStartMenuShortcut: true
   shortcutName: Volvix POS

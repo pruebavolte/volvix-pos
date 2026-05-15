@@ -1,0 +1,65 @@
+name: Build Windows .exe + Release
+
+# Dispara cuando se sube un tag v* (ej: v1.0.302).
+# El workflow:
+#   1. Compila el .exe con electron-builder en Windows
+#   2. Lo sube como release de GitHub con el .blockmap (diff binario)
+#   3. electron-updater en las copias instaladas detecta latest.yml y
+#      descarga SOLO el diff (no la app completa) silenciosamente.
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'   # ej: v1.0.302
+  workflow_dispatch:  # botón manual desde GitHub Actions UI
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write   # necesario para crear releases
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install deps
+        run: |
+          npm ci --no-audit --no-fund
+        shell: bash
+
+      - name: Build Electron .exe (publish to GitHub Releases)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # No firmamos por ahora — el usuario aceptará el SmartScreen una vez
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+        run: |
+          npx electron-builder --win --config electron-builder.yml --publish always
+        shell: bash
+
+      - name: List build artifacts
+        if: always()
+        run: |
+          ls -la dist-electron/ || echo "no dist-electron folder"
+        shell: bash
+
+      - name: Upload setup as workflow artifact (debug)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: volvix-pos-windows-setup
+          path: |
+            dist-electron/VolvixPOS-Setup-*.exe
+            dist-electron/*.blockmap
+            dist-electron/latest.yml
+          if-no-files-found: warn
+          retention-days: 14

@@ -141,29 +141,43 @@
     }
 
     async _detectSystem() {
-      // Electron: webContents.getPrinters
+      // 2026-05-14 FIX: el módulo Electron `remote` fue ELIMINADO en Electron 14+.
+      // El POS instalado nunca podía enumerar impresoras del sistema → fallaba
+      // a "Diálogo del sistema" forzando al adulto mayor a apretar Imprimir
+      // manualmente. Ahora usamos window.volvixElectron (expuesto por preload.js
+      // via contextBridge + IPC handler 'volvix:printers:list').
       try {
-        if (isElectron) {
-          const { remote } = require('electron'); // eslint-disable-line
-          const wc =
-            (remote && remote.getCurrentWindow().webContents) ||
-            (global.electronAPI && global.electronAPI.webContents);
-          if (wc && typeof wc.getPrinters === 'function') {
-            const list = wc.getPrinters() || [];
-            return list.map((p) => ({
-              id: 'sys:' + (p.name || uid()),
-              name: p.displayName || p.name,
-              type: 'system',
-              status: p.status === 0 ? 'ready' : 'busy',
-              capabilities: this._capsFromOptions(p.options || {}),
-              raw: p,
-            }));
+        const ve = global.volvixElectron || (typeof window !== 'undefined' && window.volvixElectron);
+        if (ve && typeof ve.listSystemPrinters === 'function') {
+          const list = await ve.listSystemPrinters();
+          if (Array.isArray(list) && list.length) {
+            return list.map((p) => {
+              const name = p.displayName || p.name || 'Impresora sin nombre';
+              const isThermal58 = /58|pos-?58|pos58|thermal.*58|generic.*pos/i.test(name);
+              const isThermal80 = /80|pos-?80|pos80|thermal.*80|TM-?T?\d+|EPSON.*TM|XPrinter|XP-?\d+/i.test(name);
+              return {
+                id: 'sys:' + (p.name || uid()),
+                name: name,
+                type: 'system',
+                status: p.status === 0 ? 'ready' : 'ready', // tratamos cualquier estado como ready
+                isDefault: !!p.isDefault,
+                // Detectar tipo de impresora por nombre para auto-config
+                isThermal: isThermal58 || isThermal80,
+                paperWidth: isThermal58 ? 58 : isThermal80 ? 80 : null,
+                capabilities: Object.assign(
+                  this._capsFromOptions(p.options || {}),
+                  isThermal58 ? { paperSizes: ['58mm'], color: false } :
+                  isThermal80 ? { paperSizes: ['80mm'], color: false } : {}
+                ),
+                raw: p,
+              };
+            });
           }
         }
       } catch (e) {
-        warn('Electron getPrinters fallo', e);
+        warn('listSystemPrinters fallo', e);
       }
-      // Browser: no API estándar, devolvemos placeholder "Sistema (diálogo)"
+      // Browser puro (no Electron) o IPC falló: placeholder "Sistema (diálogo)"
       return [
         {
           id: 'sys:browser-dialog',
@@ -180,6 +194,26 @@
           raw: null,
         },
       ];
+    }
+
+    // 2026-05-14: helper para que la app encuentre AUTOMÁTICAMENTE la mejor
+    // impresora térmica (58/80mm) sin que el adulto mayor configure nada.
+    // Prioridad: térmica default > térmica disponible > default del SO > primera
+    async findBestThermalPrinter() {
+      try {
+        const all = await this.detectPrinters();
+        const thermal = all.filter((p) => p.isThermal);
+        if (thermal.length) {
+          const def = thermal.find((p) => p.isDefault) || thermal[0];
+          return def;
+        }
+        // No hay térmica detectada → usar default del SO si existe
+        const sysDef = all.find((p) => p.type === 'system' && p.isDefault);
+        return sysDef || all[0] || null;
+      } catch (e) {
+        warn('findBestThermalPrinter fallo:', e);
+        return null;
+      }
     }
 
     async _detectUSB() {

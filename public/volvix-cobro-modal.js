@@ -520,12 +520,97 @@
     return 'idem_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10);
   }
 
+  // 2026-05-14 — Auto-print ticket térmico al completar cobro.
+  // Pensado para adultos mayores: NO requiere click ni configuración.
+  // 1) Si el usuario configuró una impresora (volvix_system_printer en localStorage), úsala
+  // 2) Si no, PrintHub.findBestThermalPrinter() detecta la 58mm/80mm automáticamente
+  // 3) Imprime silencioso (sin diálogo) usando window.volvixElectron.printToSystem
+  async function autoPrintTicket(cobroResult) {
+    try {
+      // Sólo si estamos en la app .exe Electron — en navegador web puro fallback a window.print
+      if (!window.volvixElectron || !window.volvixElectron.printToSystem) {
+        log('autoPrint skipped (no Electron) — use config to enable web print');
+        return false;
+      }
+      // 1) Resolver impresora
+      var printerName = null;
+      try { printerName = localStorage.getItem('volvix_system_printer'); } catch (_) {}
+      if (!printerName && window.PrintHub && typeof window.PrintHub.findBestThermalPrinter === 'function') {
+        try {
+          var best = await window.PrintHub.findBestThermalPrinter();
+          if (best && best.name) {
+            printerName = best.name;
+            // Auto-guardar para próximos cobros (adulto mayor no tiene que configurar nada)
+            try { localStorage.setItem('volvix_system_printer', printerName); } catch (_) {}
+            log('auto-selected thermal printer:', printerName);
+          }
+        } catch (e) { warn('findBestThermalPrinter fail', e); }
+      }
+      // 2) Construir HTML del ticket — 58mm = ~280px ancho a 203dpi
+      var saleNum = (cobroResult && cobroResult.sale_number) || '';
+      var saleId = (cobroResult && cobroResult.sale_id) || '';
+      var total = (cobroResult && cobroResult.total) || 0;
+      var nowStr = new Date().toLocaleString('es-MX');
+      var items = (window.CART || []).slice();
+      var businessName = '';
+      try {
+        var sess = JSON.parse(localStorage.getItem('volvix:session') || localStorage.getItem('volvixSession') || 'null');
+        businessName = (sess && (sess.business_name || sess.tenant_name)) || '';
+      } catch (_) {}
+      var ticketHtml = [
+        '<!doctype html><html><head><meta charset="utf-8"><style>',
+        '*{margin:0;padding:0;box-sizing:border-box}',
+        'body{font-family:"Courier New",monospace;font-size:11px;width:280px;padding:8px;color:#000}',
+        '.ctr{text-align:center}.b{font-weight:bold}.sep{border-top:1px dashed #000;margin:6px 0}',
+        'table{width:100%;font-size:10.5px}td{padding:1px 0}.r{text-align:right}',
+        '@media print{@page{size:58mm auto;margin:0}body{width:58mm;padding:4mm 3mm}}',
+        '</style></head><body>',
+        businessName ? '<div class="ctr b" style="font-size:13px">' + businessName + '</div>' : '',
+        '<div class="ctr" style="font-size:10px">' + nowStr + '</div>',
+        '<div class="ctr" style="font-size:10px">Ticket: ' + (saleNum || saleId.slice(0,8)) + '</div>',
+        '<div class="sep"></div>',
+        '<table>',
+        items.map(function (i) {
+          return '<tr><td>' + (i.qty || 1) + 'x ' + (i.name || '') + '</td>' +
+                 '<td class="r">$' + ((i.price || 0) * (i.qty || 1)).toFixed(2) + '</td></tr>';
+        }).join(''),
+        '</table>',
+        '<div class="sep"></div>',
+        '<table><tr><td class="b">TOTAL</td><td class="r b" style="font-size:14px">$' + Number(total).toFixed(2) + '</td></tr></table>',
+        '<div class="sep"></div>',
+        '<div class="ctr" style="font-size:10px">¡Gracias por su compra!</div>',
+        '<div class="ctr" style="font-size:9px;color:#666;margin-top:4px">Volvix POS</div>',
+        '</body></html>'
+      ].join('');
+      // 3) Imprimir silencioso (sin diálogo Windows)
+      var result = await window.volvixElectron.printToSystem({
+        html: ticketHtml,
+        printerName: printerName || undefined,  // undefined → impresora default del SO
+        silent: true,
+        copies: 1,
+        printBackground: false
+      });
+      log('autoPrint result:', result);
+      return !!(result && result.ok);
+    } catch (e) {
+      console.error('[vlx-cobro] autoPrintTicket error:', e);
+      return false;
+    }
+  }
+
   // Post-success cleanup — replica el path final del completePay legacy SIN llamarlo
   // de nuevo (evita double-write a /api/sales). Fix S-1.
   function postSuccessCleanup(cobroResult) {
     try {
       var saleId = cobroResult && cobroResult.sale_id;
       var saleNum = cobroResult && cobroResult.sale_number;
+      // 2026-05-14: AUTO-IMPRIMIR ticket sin que el adulto mayor haga nada.
+      // Fire-and-forget: no bloquea el cleanup si la impresión falla/tarda.
+      if (typeof window.volvixElectron !== 'undefined') {
+        // Pasar snapshot del CART (que se va a limpiar en seguida)
+        autoPrintTicket(Object.assign({ cart: (window.CART || []).slice() }, cobroResult || {}))
+          .catch(function (e) { console.warn('[vlx-cobro] autoPrint failed silently', e); });
+      }
       if (typeof window.showToast === 'function') {
         window.showToast('✓ Venta ' + (saleNum || saleId || '') + ' guardada');
       }

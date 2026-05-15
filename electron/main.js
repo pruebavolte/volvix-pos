@@ -323,25 +323,33 @@ function setupAutoUpdater() {
   autoUpdater.on('download-progress', (p) => {
     console.log(`[updater] descarga ${Math.round(p.percent)}% (${Math.round(p.bytesPerSecond/1024)} KB/s)`);
   });
+  // 2026-05-14 — AUTO-INSTALL SILENCIOSO PARA ADULTOS MAYORES (60-75 años):
+  // El usuario NO sabe qué hacer con un dialog "¿Reiniciar ahora?". Antes lo
+  // ignoraba o lo cerraba sin saber. Ahora:
+  //   1) La actualización se descarga sola en background (autoDownload=true)
+  //   2) Mostramos un toast NO-BLOQUEANTE en la app diciendo "Actualización lista"
+  //   3) Se instala SOLA en 2 momentos:
+  //      a) Cuando el usuario cierre la app (autoInstallOnAppQuit=true)
+  //      b) Después de 4h de inactividad (idle detection) → quitAndInstall(true)
+  //   4) Si el usuario no cierra la app en 24h, se reinicia automáticamente
+  //      a las 3am (hora muerta del POS, sin clientes).
   autoUpdater.on('update-downloaded', (info) => {
-    console.log('[updater] update descargada:', info.version);
+    console.log('[updater] update descargada:', info.version, '— programando install silencioso');
     if (mainWindow) {
-      dialog.showMessageBox(mainWindow, {
-        type: 'info',
-        title: 'Actualización lista',
-        message: `Nueva versión ${info.version} descargada.`,
-        detail: 'Se aplicará al cerrar la aplicación. ¿Reiniciar ahora?',
-        buttons: ['Reiniciar ahora', 'Después'],
-        defaultId: 0
-      }).then(r => {
-        if (r.response === 0) autoUpdater.quitAndInstall();
-      }).catch(() => {});
+      // Toast informativo, NO bloqueante (no requiere click del usuario)
+      mainWindow.webContents.executeJavaScript(
+        `try{showToast&&showToast('✓ Actualización ${info.version} lista — se aplicará al cerrar','success',6000);}catch(_){}`
+      ).catch(()=>{});
     }
+    // Programar reinicio automático en idle largo (4h sin actividad)
+    scheduleSilentUpdate(info.version);
+    // Y backup: reinicio forzado a las 3am siguiente (si POS sigue abierto)
+    schedule3amRestart(info.version);
   });
 
   // Chequear updates 5s después de arrancar (no bloquear UI)
   setTimeout(() => {
-    autoUpdater.checkForUpdatesAndNotify().catch(err => {
+    autoUpdater.checkForUpdates().catch(err => {
       console.warn('[updater] check falló:', err.message);
     });
   }, 5000);
@@ -349,6 +357,41 @@ function setupAutoUpdater() {
   setInterval(() => {
     autoUpdater.checkForUpdates().catch(() => {});
   }, 30 * 60 * 1000);
+}
+
+// Helpers para auto-install silencioso (2026-05-14)
+let __vlxIdleTimer = null;
+let __vlx3amTimer = null;
+function scheduleSilentUpdate(version) {
+  if (__vlxIdleTimer) return;
+  // 4h sin actividad de mouse/teclado en la ventana → instalar
+  let lastActivity = Date.now();
+  const onActivity = () => { lastActivity = Date.now(); };
+  if (mainWindow) {
+    mainWindow.webContents.on('before-input-event', onActivity);
+  }
+  __vlxIdleTimer = setInterval(() => {
+    const idleMs = Date.now() - lastActivity;
+    if (idleMs > 4 * 60 * 60 * 1000) {
+      console.log('[updater] 4h sin actividad — instalando update', version, 'silencioso');
+      clearInterval(__vlxIdleTimer);
+      try { autoUpdater.quitAndInstall(true, true); } catch (e) { console.error('[updater] quitAndInstall err:', e); }
+    }
+  }, 5 * 60 * 1000); // check cada 5min
+}
+
+function schedule3amRestart(version) {
+  if (__vlx3amTimer) return;
+  const next3am = (() => {
+    const d = new Date();
+    d.setHours(3, 0, 0, 0);
+    if (d <= new Date()) d.setDate(d.getDate() + 1); // siguiente 3am
+    return d.getTime() - Date.now();
+  })();
+  __vlx3amTimer = setTimeout(() => {
+    console.log('[updater] 3am cron — instalando update', version, 'silencioso (hora muerta del POS)');
+    try { autoUpdater.quitAndInstall(true, true); } catch (e) { console.error('[updater] 3am quitAndInstall err:', e); }
+  }, next3am);
 }
 
 app.whenReady().then(async () => {
