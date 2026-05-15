@@ -334,17 +334,18 @@ async function runAutoSetup(options = {}) {
       }
     }
 
-    // Si hay térmica existente con jobs colgados, indicador de driver/port roto
-    let needRebuild = false;
+    // 2026-05-14 BUGFIX: si encontramos hardware térmico Y NO existe "Volvix-Thermal",
+    // SIEMPRE reconstruir. La existencia de POS-58C, POS-80C u otra no es garantía
+    // de que el driver/puerto estén bien mapeados al hardware actual — frecuentemente
+    // son fantasmas de instalaciones anteriores con USB001/USB002 huérfanos que cuelgan
+    // los jobs sin error visible (status "Normal" pero el papel nunca sale).
+    // La solución determinista: rehacer la impresora con driver Generic / Text Only
+    // (built-in Windows, no requiere descarga) sobre puerto USB fresco re-enumerado.
+    let needRebuild = true;  // siempre que llegamos aquí con hardware presente, reconstruir
     if (existingThermal) {
-      const hung = await isPrinterHung(existingThermal.Name);
-      if (hung) {
-        track(`${existingThermal.Name} has stuck jobs — driver/port broken, will rebuild`);
-        needRebuild = true;
-      }
+      track(`found existing thermal "${existingThermal.Name}" but it's not Volvix-Thermal — rebuilding to ensure proper port binding`);
     } else {
       track('no thermal printer installed — will create Volvix-Thermal');
-      needRebuild = true;
     }
 
     if (needRebuild) {
