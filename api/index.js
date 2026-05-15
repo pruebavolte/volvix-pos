@@ -21013,6 +21013,216 @@ if (process.env.NODE_ENV === 'test') {
     } catch (err) { sendError(res, err); }
   });
 
+  // 2026-05-14 R31: Endpoint maestro Modal de Cobro v1.
+  // Recibe state completo del modal y escribe en 1 transacción lógica:
+  //   sales + N payments + (opcional) cfdi_invoices pending
+  // El cliente envía: tenant_id, customer_id, ticket_number, subtotal, items[],
+  //   payments[]{method,amount,details}, cfdi|null, tip, discount, rounding,
+  //   delivery, notes, total
+  handlers['POST /api/cobro'] = requireAuth(async function (req, res) {
+    try {
+      const tnt = b36Tenant(req);
+      const body = await readBody(req, { maxBytes: 64 * 1024, strictJson: true });
+      if (checkBodyError(req, res)) return;
+
+      const userId = (req.user && req.user.id) || null;
+      const subtotal = Number(body.subtotal || 0);
+      const total    = Number(body.total || 0);
+      const items    = Array.isArray(body.items) ? body.items : [];
+      const payments = Array.isArray(body.payments) ? body.payments : [];
+      const cfdi     = body.cfdi || null;
+      const tip      = body.tip || { amount: 0 };
+      const discount = body.discount || { amount: 0 };
+      const rounding = body.rounding || { amount: 0 };
+      const delivery = body.delivery || { method: 'PRINT' };
+      const notes    = String(body.notes || '').slice(0, 500);
+
+      // Validaciones
+      if (total <= 0) return sendValidation(res, 'total debe ser > 0', 'total');
+      if (payments.length === 0) return sendValidation(res, 'al menos 1 pago requerido', 'payments');
+      const paymentsSum = payments.reduce(function (s, p) { return s + Number(p.amount || 0); }, 0);
+      if (Math.abs(paymentsSum - total) > 0.01) {
+        return sendJSON(res, { error: 'payments_total_mismatch', expected: total, got: paymentsSum }, 400);
+      }
+
+      // 1) Insert sale
+      const saleRow = {
+        tenant_id: tnt,
+        customer_id: body.customer_id || null,
+        user_id: userId,
+        cashier_id: userId,
+        sale_number: body.ticket_number || ('TKT-' + Date.now()),
+        subtotal: subtotal,
+        discount: discount.amount || 0,
+        discount_reason: discount.reason || null,
+        discount_authorized_by: discount.authorized_by || null,
+        tip_amount: tip.amount || 0,
+        tip_percent: tip.percent || null,
+        rounding_amount: rounding.amount || 0,
+        rounding_destination: rounding.destination || null,
+        total: total,
+        status: 'paid',
+        payment_method: payments.length > 1 ? 'mixto' : String(payments[0].method || '').toLowerCase(),
+        payment_methods_summary: payments.map(function (p) { return p.method; }).join('+'),
+        delivery_method: delivery.method || 'PRINT',
+        delivery_target: delivery.target || null,
+        notes: notes,
+        device_id: body.device_id || null,
+        app_version: body.app_version || null,
+        created_at: new Date().toISOString()
+      };
+
+      let sale, saleId;
+      try {
+        const saleResult = await supabaseRequest('POST', '/sales', saleRow);
+        sale = (saleResult && saleResult[0]) || saleResult;
+        saleId = sale && sale.id;
+      } catch (e) {
+        // Schema fallback si alguna columna nueva aún no existe
+        const msg = String((e && e.message) || '');
+        if (/PGRST204|column.*does not exist|42703/i.test(msg)) {
+          console.warn('[/api/cobro] schema fallback applied:', msg.slice(0, 200));
+          delete saleRow.tip_amount; delete saleRow.tip_percent;
+          delete saleRow.rounding_amount; delete saleRow.rounding_destination;
+          delete saleRow.delivery_method; delete saleRow.delivery_target;
+          delete saleRow.discount_authorized_by; delete saleRow.discount_reason;
+          delete saleRow.payment_methods_summary; delete saleRow.device_id;
+          delete saleRow.app_version;
+          const saleResult2 = await supabaseRequest('POST', '/sales', saleRow);
+          sale = (saleResult2 && saleResult2[0]) || saleResult2;
+          saleId = sale && sale.id;
+        } else throw e;
+      }
+
+      if (!saleId) {
+        return sendJSON(res, { error: 'sale_insert_failed' }, 500);
+      }
+
+      // 2) Insert payments (N filas)
+      const paymentRows = payments.map(function (p) {
+        const details = p.details || {};
+        return {
+          sale_id: saleId,
+          tenant_id: tnt,
+          method_type: p.method,
+          amount_cents: Math.round(Number(p.amount) * 100),
+          provider: p.method,
+          status: 'completed',
+          currency: 'MXN',
+          card_last4: details.last4 || null,
+          card_brand: details.brand || null,
+          auth_code: details.auth_code || null,
+          terminal_id: details.terminal_id || null,
+          reference_number: details.reference || null,
+          bank_origin: details.bank_origin || null,
+          vale_provider: details.vale_provider || null,
+          vale_folio: details.vale_folio || null,
+          usd_amount: details.usd_amount || null,
+          usd_rate: details.usd_rate || null,
+          cashier_id: userId,
+          raw: details,
+          created_at: new Date().toISOString()
+        };
+      });
+
+      let paymentsInserted = 0;
+      try {
+        const pr = await supabaseRequest('POST', '/payments', paymentRows);
+        paymentsInserted = Array.isArray(pr) ? pr.length : paymentRows.length;
+      } catch (e) {
+        const msg = String((e && e.message) || '');
+        if (/PGRST204|column.*does not exist|42703/i.test(msg)) {
+          // Schema fallback: remover columnas nuevas
+          const minimal = paymentRows.map(function (r) {
+            return {
+              sale_id: r.sale_id, tenant_id: r.tenant_id,
+              provider: r.provider, status: r.status,
+              amount_cents: r.amount_cents, currency: r.currency,
+              raw: r.raw, created_at: r.created_at
+            };
+          });
+          try {
+            const pr2 = await supabaseRequest('POST', '/payments', minimal);
+            paymentsInserted = Array.isArray(pr2) ? pr2.length : minimal.length;
+          } catch (e2) {
+            console.error('[/api/cobro] payments fallback also failed:', e2.message);
+          }
+        } else {
+          console.error('[/api/cobro] payments insert failed:', e.message);
+        }
+      }
+
+      // 3) Insert CFDI invoice pending si aplica
+      let cfdiPending = false, cfdiId = null;
+      if (cfdi && cfdi.rfc) {
+        try {
+          const cfdiRow = {
+            tenant_id: tnt,
+            ticket_id: saleId,
+            customer_rfc: String(cfdi.rfc).toUpperCase(),
+            customer_name: cfdi.razon_social || null,
+            customer_email: cfdi.email_facturacion || null,
+            receiver_zipcode: cfdi.codigo_postal || null,
+            receiver_fiscal_regime: cfdi.regimen_fiscal || null,
+            receiver_cfdi_use: cfdi.uso_cfdi || 'G03',
+            forma_pago: cfdi.forma_pago || '99',
+            metodo_pago: cfdi.metodo_pago || 'PUE',
+            moneda: 'MXN',
+            tipo_cambio: 1.0,
+            subtotal: subtotal,
+            descuento: discount.amount || 0,
+            total: total,
+            status: 'pending',
+            pac_provider: 'FACTURAMA',
+            created_by: userId,
+            issued_at: null,
+            retry_count: 0
+          };
+          const cr = await supabaseRequest('POST', '/cfdi_invoices', cfdiRow);
+          const ci = (cr && cr[0]) || cr;
+          cfdiId = ci && ci.id;
+          cfdiPending = true;
+        } catch (e) {
+          console.error('[/api/cobro] cfdi insert failed:', e.message);
+        }
+      }
+
+      try {
+        logAudit(req, 'sale.created', 'sales', {
+          id: saleId, total: total, payments_count: payments.length,
+          cfdi_pending: cfdiPending, methods: payments.map(function (p) { return p.method; })
+        });
+      } catch(_){}
+
+      sendJSON(res, {
+        ok: true,
+        sale_id: saleId,
+        sale_number: sale.sale_number,
+        payments_inserted: paymentsInserted,
+        cfdi_pending: cfdiPending,
+        cfdi_id: cfdiId,
+        total: total
+      }, 201);
+    } catch (err) { sendError(res, err); }
+  });
+
+  // 2026-05-14 R31: Tipo de cambio Banxico (cache localStorage + server fallback)
+  // GET /api/fx/banxico → { rate, date, source }
+  handlers['GET /api/fx/banxico'] = async function (req, res) {
+    try {
+      // Fallback hardcoded para no bloquear UI si Banxico falla
+      const FALLBACK_RATE = 17.50;
+      const today = new Date().toISOString().slice(0, 10);
+      // TODO: integrar con SIE Banxico serie SF43718 cuando haya BANXICO_TOKEN
+      sendJSON(res, {
+        rate: FALLBACK_RATE,
+        date: today,
+        source: 'fallback_hardcoded',
+        note: 'Configurar BANXICO_TOKEN para datos reales SIE serie SF43718'
+      });
+    } catch (err) { sendError(res, err); }
+  };
+
   handlers['POST /api/users'] = requireAuth(async function (req, res) {
     try {
       if (!b36IsOwner(req)) return send403(res, { need_role: ['owner', 'admin', 'superadmin'], have_role: req.user.role });

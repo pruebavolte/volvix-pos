@@ -6563,19 +6563,117 @@
         <div style="font-size: 11px; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px;">Total a cobrar</div>
         <div style="font-size: 38px; font-weight: 800; margin-top: 4px; letter-spacing: -1px;" id="pay-total">$0.00</div>
       </div>
-      <!-- FIX-N5-B1/B2: data-method para que setPayMethod identifique método y dispare modal de verificación cuando aplique -->
+      <!-- R31 v1: Métodos de pago México (CFDI 4.0) — atajos F1-F8 -->
       <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 8px;">
-        <button class="btn" data-method="efectivo" onclick="setPayMethod(this)" style="flex-direction: column; height: 64px; border-color: var(--accent); background: var(--accent-soft); color: var(--accent);">💵<span style="font-size: 10px; margin-top: 2px;">Efectivo</span></button>
-        <button class="btn" data-method="tarjeta" onclick="setPayMethod(this)" style="flex-direction: column; height: 64px;">💳<span style="font-size: 10px; margin-top: 2px;">Tarjeta</span></button>
-        <button class="btn" data-method="transferencia" onclick="setPayMethod(this)" style="flex-direction: column; height: 64px;">📱<span style="font-size: 10px; margin-top: 2px;">Transfer</span></button>
-        <button class="btn" data-method="mixto" onclick="setPayMethod(this)" style="flex-direction: column; height: 64px;">✂️<span style="font-size: 10px; margin-top: 2px;">Mixto</span></button>
+        <button class="btn" data-method="efectivo" data-shortcut="F1" onclick="setPayMethod(this)" style="flex-direction: column; height: 64px; border-color: var(--accent); background: var(--accent-soft); color: var(--accent);" title="F1 - Efectivo">💵<span style="font-size: 10px; margin-top: 2px;">Efectivo</span><span style="font-size: 8px; opacity: 0.6;">F1</span></button>
+        <button class="btn" data-method="tarjeta_debito" data-shortcut="F2" onclick="setPayMethod(this)" style="flex-direction: column; height: 64px;" title="F2 - Tarjeta débito">💳<span style="font-size: 10px; margin-top: 2px;">Tarj. Débito</span><span style="font-size: 8px; opacity: 0.6;">F2</span></button>
+        <button class="btn" data-method="tarjeta_credito" data-shortcut="F3" onclick="setPayMethod(this)" style="flex-direction: column; height: 64px;" title="F3 - Tarjeta crédito">💳<span style="font-size: 10px; margin-top: 2px;">Tarj. Crédito</span><span style="font-size: 8px; opacity: 0.6;">F3</span></button>
+        <button class="btn" data-method="spei" data-shortcut="F4" onclick="setPayMethod(this)" style="flex-direction: column; height: 64px;" title="F4 - SPEI / Transferencia">🏦<span style="font-size: 10px; margin-top: 2px;">SPEI</span><span style="font-size: 8px; opacity: 0.6;">F4</span></button>
       </div>
-      <!-- FIX-N5-B1/B2: métodos adicionales que requieren verificación -->
-      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 14px;">
-        <button class="btn" data-method="sinpe" onclick="setPayMethod(this)" style="flex-direction: column; height: 56px;">📲<span style="font-size: 10px; margin-top: 2px;">SINPE</span></button>
-        <button class="btn" data-method="oxxo" onclick="setPayMethod(this)" style="flex-direction: column; height: 56px;">🏪<span style="font-size: 10px; margin-top: 2px;">OXXO</span></button>
-        <button class="btn" data-method="app-pago" onclick="setPayMethod(this)" style="flex-direction: column; height: 56px;">💸<span style="font-size: 10px; margin-top: 2px;">App pago</span></button>
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 8px;">
+        <button class="btn" data-method="codi" data-shortcut="F5" onclick="setPayMethod(this)" style="flex-direction: column; height: 56px;" title="F5 - CoDi (QR Banxico)">📱<span style="font-size: 10px; margin-top: 2px;">CoDi</span><span style="font-size: 8px; opacity: 0.6;">F5</span></button>
+        <button class="btn" data-method="mercado_pago" data-shortcut="F6" onclick="setPayMethod(this)" style="flex-direction: column; height: 56px;" title="F6 - Mercado Pago">💛<span style="font-size: 10px; margin-top: 2px;">Mercado Pago</span><span style="font-size: 8px; opacity: 0.6;">F6</span></button>
+        <button class="btn" data-method="vale_despensa" data-shortcut="F7" onclick="setPayMethod(this)" style="flex-direction: column; height: 56px;" title="F7 - Vale despensa (Sí Vale, Edenred, Pluxee)">🎟️<span style="font-size: 10px; margin-top: 2px;">Vale</span><span style="font-size: 8px; opacity: 0.6;">F7</span></button>
+        <button class="btn" data-method="mixto" data-shortcut="F8" onclick="setPayMethod(this); window.__vlxOpenMixtoBreakdown && window.__vlxOpenMixtoBreakdown();" style="flex-direction: column; height: 56px;" title="F8 - Pago mixto (varios métodos)">✂️<span style="font-size: 10px; margin-top: 2px;">Mixto</span><span style="font-size: 8px; opacity: 0.6;">F8</span></button>
       </div>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px;">
+        <button class="btn" data-method="monedero_electronico" onclick="setPayMethod(this)" style="flex-direction: column; height: 48px;" title="Monedero electrónico del negocio">💰<span style="font-size: 10px; margin-top: 2px;">Monedero</span></button>
+        <button class="btn" data-method="usd_efectivo" onclick="setPayMethod(this); window.__vlxOpenUsdModal && window.__vlxOpenUsdModal();" style="flex-direction: column; height: 48px;" title="Dólares en efectivo (frontera NL)">💵<span style="font-size: 10px; margin-top: 2px;">USD</span></button>
+        <button class="btn" data-method="credito_cliente" onclick="setPayMethod(this)" style="flex-direction: column; height: 48px;" title="Crédito al cliente (CFDI PPD)">📅<span style="font-size: 10px; margin-top: 2px;">Crédito</span></button>
+      </div>
+
+      <!-- R31 v1: Botones de toggle para secciones extra (factura, propina, descuento, entrega, notas) -->
+      <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-bottom: 12px; padding: 8px; background: #F8FAFC; border-radius: 8px; border: 1px solid #E5E7EB;">
+        <button type="button" class="vlx-section-toggle" data-section="cfdi" onclick="window.__vlxToggleSection && window.__vlxToggleSection('cfdi', this)" style="padding:6px 4px;border:1px solid #E5E7EB;background:#FFF;border-radius:6px;cursor:pointer;font-size:10.5px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:2px" title="Generar factura CFDI 4.0">🧾<span>Factura</span></button>
+        <button type="button" class="vlx-section-toggle" data-section="tip" onclick="window.__vlxToggleSection && window.__vlxToggleSection('tip', this)" style="padding:6px 4px;border:1px solid #E5E7EB;background:#FFF;border-radius:6px;cursor:pointer;font-size:10.5px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:2px" title="Propina (10/15/20/custom)">💰<span>Propina</span></button>
+        <button type="button" class="vlx-section-toggle" data-section="discount" onclick="window.__vlxToggleSection && window.__vlxToggleSection('discount', this)" style="padding:6px 4px;border:1px solid #E5E7EB;background:#FFF;border-radius:6px;cursor:pointer;font-size:10.5px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:2px" title="Descuento de último momento">🏷️<span>Descuento</span></button>
+        <button type="button" class="vlx-section-toggle" data-section="delivery" onclick="window.__vlxToggleSection && window.__vlxToggleSection('delivery', this)" style="padding:6px 4px;border:1px solid #E5E7EB;background:#FFF;border-radius:6px;cursor:pointer;font-size:10.5px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:2px" title="Cómo entregar el ticket">📨<span>Entrega</span></button>
+        <button type="button" class="vlx-section-toggle" data-section="notes" onclick="window.__vlxToggleSection && window.__vlxToggleSection('notes', this)" style="padding:6px 4px;border:1px solid #E5E7EB;background:#FFF;border-radius:6px;cursor:pointer;font-size:10.5px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:2px" title="Notas / observaciones">📝<span>Notas</span></button>
+      </div>
+
+      <!-- R31 v1: Mixto breakdown — visible cuando method=mixto -->
+      <div id="vlx-mixto-section" data-section="mixto" style="display:none;margin-bottom:12px;padding:10px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <strong style="font-size:12.5px;color:#9A3412">✂️ Desglose pago mixto</strong>
+          <span id="vlx-mixto-missing" style="font-size:11.5px;color:#9A3412;font-weight:600">Falta: $0.00</span>
+        </div>
+        <div id="vlx-mixto-rows" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px"></div>
+        <button type="button" onclick="window.__vlxMixtoAddRow && window.__vlxMixtoAddRow()" style="width:100%;padding:8px;border:1px dashed #FB923C;background:#FFFBEB;color:#9A3412;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600">+ Agregar método</button>
+      </div>
+
+      <!-- R31 v1: CFDI inline (oculto por default) -->
+      <div id="vlx-cfdi-section" data-section="cfdi" style="display:none;margin-bottom:12px;padding:10px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <strong style="font-size:12.5px;color:#1E40AF">🧾 Factura CFDI 4.0</strong>
+          <label style="font-size:11px;display:flex;align-items:center;gap:4px;cursor:pointer">
+            <input type="checkbox" id="vlx-cfdi-enabled" onchange="window.__vlxToggleCfdi && window.__vlxToggleCfdi(this.checked)"> Generar factura
+          </label>
+        </div>
+        <div id="vlx-cfdi-fields" style="display:none;display:grid;grid-template-columns:repeat(2,1fr);gap:6px;font-size:11.5px">
+          <div style="grid-column:span 2"><label style="display:block;color:#1E3A8A;font-weight:600;margin-bottom:2px">RFC del receptor *</label>
+            <input type="text" id="vlx-cfdi-rfc" maxlength="13" style="width:100%;padding:6px 8px;border:1px solid #BFDBFE;border-radius:4px;font-family:monospace;text-transform:uppercase" placeholder="XAXX010101000" oninput="this.value=this.value.toUpperCase(); window.__vlxValidateCfdi && window.__vlxValidateCfdi()"></div>
+          <div style="grid-column:span 2"><label style="display:block;color:#1E3A8A;font-weight:600;margin-bottom:2px">Razón social</label>
+            <input type="text" id="vlx-cfdi-razon" style="width:100%;padding:6px 8px;border:1px solid #BFDBFE;border-radius:4px" placeholder="PÚBLICO EN GENERAL"></div>
+          <div><label style="display:block;color:#1E3A8A;font-weight:600;margin-bottom:2px">Código Postal *</label>
+            <input type="text" id="vlx-cfdi-cp" maxlength="5" pattern="\d{5}" style="width:100%;padding:6px 8px;border:1px solid #BFDBFE;border-radius:4px;font-family:monospace" placeholder="64720" oninput="window.__vlxValidateCfdi && window.__vlxValidateCfdi()"></div>
+          <div><label style="display:block;color:#1E3A8A;font-weight:600;margin-bottom:2px">Régimen fiscal *</label>
+            <select id="vlx-cfdi-regimen" style="width:100%;padding:6px 8px;border:1px solid #BFDBFE;border-radius:4px"><option value="">-- Seleccionar --</option></select></div>
+          <div><label style="display:block;color:#1E3A8A;font-weight:600;margin-bottom:2px">Uso CFDI</label>
+            <select id="vlx-cfdi-uso" style="width:100%;padding:6px 8px;border:1px solid #BFDBFE;border-radius:4px"><option value="G03">G03 - Gastos en general</option></select></div>
+          <div><label style="display:block;color:#1E3A8A;font-weight:600;margin-bottom:2px">Método pago</label>
+            <select id="vlx-cfdi-metodo" style="width:100%;padding:6px 8px;border:1px solid #BFDBFE;border-radius:4px"><option value="PUE" selected>PUE - Pago una exhibición</option><option value="PPD">PPD - Parcialidades / diferido</option></select></div>
+          <div style="grid-column:span 2"><label style="display:block;color:#1E3A8A;font-weight:600;margin-bottom:2px">Email facturación</label>
+            <input type="email" id="vlx-cfdi-email" style="width:100%;padding:6px 8px;border:1px solid #BFDBFE;border-radius:4px" placeholder="cliente@email.com"></div>
+          <div id="vlx-cfdi-error" style="grid-column:span 2;font-size:10.5px;color:#DC2626;display:none;padding:4px 6px;background:#FEF2F2;border-radius:4px;border:1px solid #FECACA"></div>
+        </div>
+      </div>
+
+      <!-- R31 v1: Propina (oculto por default) -->
+      <div id="vlx-tip-section" data-section="tip" style="display:none;margin-bottom:12px;padding:10px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <strong style="font-size:12.5px;color:#166534">💰 Propina</strong>
+          <span id="vlx-tip-amount" style="font-size:13px;color:#166534;font-weight:700">$0.00</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px">
+          <button type="button" data-tip="10" onclick="window.__vlxSetTipPercent && window.__vlxSetTipPercent(10, this)" style="padding:6px;border:1px solid #BBF7D0;background:#FFF;border-radius:4px;cursor:pointer;font-size:11.5px;font-weight:600">10%</button>
+          <button type="button" data-tip="15" onclick="window.__vlxSetTipPercent && window.__vlxSetTipPercent(15, this)" style="padding:6px;border:1px solid #BBF7D0;background:#FFF;border-radius:4px;cursor:pointer;font-size:11.5px;font-weight:600">15%</button>
+          <button type="button" data-tip="20" onclick="window.__vlxSetTipPercent && window.__vlxSetTipPercent(20, this)" style="padding:6px;border:1px solid #BBF7D0;background:#FFF;border-radius:4px;cursor:pointer;font-size:11.5px;font-weight:600">20%</button>
+          <input type="number" id="vlx-tip-custom" placeholder="Custom %" step="0.5" min="0" max="50" style="padding:6px;border:1px solid #BBF7D0;border-radius:4px;font-size:11px" oninput="window.__vlxSetTipPercent && window.__vlxSetTipPercent(parseFloat(this.value)||0, null)">
+          <button type="button" onclick="window.__vlxSetTipPercent && window.__vlxSetTipPercent(0, null)" style="padding:6px;border:1px solid #FCA5A5;background:#FEF2F2;color:#991B1B;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600">Sin</button>
+        </div>
+      </div>
+
+      <!-- R31 v1: Descuento (oculto por default) -->
+      <div id="vlx-discount-section" data-section="discount" style="display:none;margin-bottom:12px;padding:10px;background:#FEF3C7;border:1px solid #FDE68A;border-radius:8px">
+        <strong style="font-size:12.5px;color:#92400E;display:block;margin-bottom:6px">🏷️ Descuento de último momento</strong>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font-size:11.5px">
+          <div><label style="display:block;color:#78350F;font-weight:600;margin-bottom:2px">Monto $</label>
+            <input type="number" id="vlx-discount-amount" step="0.01" min="0" style="width:100%;padding:6px;border:1px solid #FDE68A;border-radius:4px" oninput="window.__vlxApplyDiscount && window.__vlxApplyDiscount('amount', parseFloat(this.value)||0)"></div>
+          <div><label style="display:block;color:#78350F;font-weight:600;margin-bottom:2px">% Porcentaje</label>
+            <input type="number" id="vlx-discount-percent" step="0.5" min="0" max="100" style="width:100%;padding:6px;border:1px solid #FDE68A;border-radius:4px" oninput="window.__vlxApplyDiscount && window.__vlxApplyDiscount('percent', parseFloat(this.value)||0)"></div>
+          <div><label style="display:block;color:#78350F;font-weight:600;margin-bottom:2px">Razón</label>
+            <select id="vlx-discount-reason" style="width:100%;padding:6px;border:1px solid #FDE68A;border-radius:4px"><option value="">-- Seleccionar --</option><option value="cortesia">Cortesía</option><option value="pieza_danada">Pieza dañada</option><option value="cliente_frecuente">Cliente frecuente</option><option value="ajuste">Ajuste manual</option><option value="otro">Otro</option></select></div>
+        </div>
+      </div>
+
+      <!-- R31 v1: Selector entrega ticket -->
+      <div id="vlx-delivery-section" data-section="delivery" style="display:none;margin-bottom:12px;padding:10px;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px">
+        <strong style="font-size:12.5px;color:#991B1B;display:block;margin-bottom:6px">📨 Entrega del ticket</strong>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:8px">
+          <button type="button" data-delivery="PRINT" onclick="window.__vlxSetDelivery && window.__vlxSetDelivery('PRINT', this)" style="padding:6px;border:1px solid #FECACA;background:#FFF;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600;display:flex;flex-direction:column;align-items:center">🖨️<span>Imprimir</span></button>
+          <button type="button" data-delivery="EMAIL" onclick="window.__vlxSetDelivery && window.__vlxSetDelivery('EMAIL', this)" style="padding:6px;border:1px solid #FECACA;background:#FFF;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600;display:flex;flex-direction:column;align-items:center">📧<span>Email</span></button>
+          <button type="button" data-delivery="WHATSAPP" onclick="window.__vlxSetDelivery && window.__vlxSetDelivery('WHATSAPP', this)" style="padding:6px;border:1px solid #FECACA;background:#FFF;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600;display:flex;flex-direction:column;align-items:center">💬<span>WhatsApp</span></button>
+          <button type="button" data-delivery="NONE" onclick="window.__vlxSetDelivery && window.__vlxSetDelivery('NONE', this)" style="padding:6px;border:1px solid #FECACA;background:#FFF;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600;display:flex;flex-direction:column;align-items:center">🚫<span>Ninguno</span></button>
+        </div>
+        <input type="text" id="vlx-delivery-target" style="display:none;width:100%;padding:6px 8px;border:1px solid #FECACA;border-radius:4px;font-size:12px" placeholder="cliente@email.com o +52 55 1234 5678">
+      </div>
+
+      <!-- R31 v1: Notas -->
+      <div id="vlx-notes-section" data-section="notes" style="display:none;margin-bottom:12px">
+        <label style="font-size:11.5px;color:#374151;font-weight:600;display:block;margin-bottom:4px">📝 Notas / observaciones</label>
+        <textarea id="vlx-notes-text" rows="2" style="width:100%;padding:6px 8px;border:1px solid #E5E7EB;border-radius:4px;font-size:12px;resize:vertical" placeholder="Sin cebolla, entregar a las 6pm, para mi mamá..."></textarea>
+      </div>
+
       <div class="input-group"><label class="input-label">Recibido del cliente</label><input class="input-field" id="pay-recibido" type="text" value="$0.00" style="font-size: 18px; font-weight: 600;" oninput="calcChange()" onkeydown="if(event.key==='Enter'){event.preventDefault();completePay();}"></div>
 
       <!-- BILLETES MX rápidos: el cajero da clic al billete que recibió -->
@@ -22653,6 +22751,10 @@ window.addEventListener('volvix:version-loaded', function(e){
   window.addEventListener('hashchange', bootIfHash);
 })();
 </script>
+
+<!-- R31 v1: Modal de Cobro v1 (state machine + wiring) -->
+<script src="/volvix-cobro-state.js" defer></script>
+<script src="/volvix-cobro-modal.js" defer></script>
 
 </body>
 </html>
