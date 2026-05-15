@@ -995,71 +995,203 @@
       var total = parseCur($('#pay-total') && $('#pay-total').textContent || '0');
 
       // ════════════════════════════════════════════════════════════════════
-      // 2026-05-15 v1.0.317 — FASE 0: PRINT INSTANTÁNEO (<10ms)
-      // Disparar el print AHORA con cart actual + customizer config.
-      // NO esperar validación, NO esperar payload, NO esperar API.
-      // El cajero ve la impresora activarse a la velocidad de click.
+      // 2026-05-15 v1.0.318 — ARQUITECTURA OFFLINE-FIRST CORRECTA
+      //
+      // ORDEN OBLIGATORIO (best practice POS multi-caja):
+      //   1. GUARDAR LOCAL (atómico) ← si falla, NO IMPRIMIR (cliente no
+      //      puede tener ticket sin venta registrada)
+      //   2. VERIFICAR persistencia ← read-back para confirmar
+      //   3. IMPRIMIR ticket ← solo si paso 1+2 OK
+      //   4. SINCRONIZAR servidor (background, no bloquea) ← cola persistente
+      //      con idempotency-key, retry exponencial. Multi-caja safe.
+      //
+      // Si la luz/internet se va: la venta YA está guardada local.
+      // Cuando vuelva la conexión, el sync engine la sube con la idem-key
+      // (Vercel /api/cobro deduplica si llega 2 veces).
+      //
+      // Multi-caja: cada caja tiene un caja_id único (device fingerprint).
+      // Los folios locales incluyen prefijo caja para no colisionar.
+      // El server asigna el folio canónico al recibir; lo guardamos
+      // cuando llega para mostrar al usuario.
       // ════════════════════════════════════════════════════════════════════
+
+      // ─── Caja ID único de este dispositivo ───
+      var cajaId = (function(){
+        try {
+          var id = localStorage.getItem('volvix_caja_id');
+          if (!id) {
+            id = 'C' + Math.random().toString(36).slice(2, 8).toUpperCase();
+            localStorage.setItem('volvix_caja_id', id);
+          }
+          return id;
+        } catch (_) { return 'C0'; }
+      })();
+
+      // ─── FASE 1: CONSTRUIR la venta local (sync, <5ms) ───
+      var fastNow = new Date();
+      var fastCfg = (window.VolvixTicketCustomizer && window.VolvixTicketCustomizer.getConfig)
+        ? window.VolvixTicketCustomizer.getConfig() : {};
+      var localFolioNum = (function(){
+        try {
+          var f = parseInt(localStorage.getItem('volvix_local_folio_counter') || '0', 10) || 0;
+          localStorage.setItem('volvix_local_folio_counter', String(f + 1));
+          return f + 1;
+        } catch (_) { return Date.now() % 100000; }
+      })();
+      var fastFolio = cajaId + '-' + String(localFolioNum).padStart(5, '0');
+      var fastSaleId = 'local-' + cajaId + '-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+      var fastSubtotal = subtotalCache || (Array.isArray(window.CART)
+        ? window.CART.reduce(function(s,i){ return s + (i.price * i.qty); }, 0) : total);
+      var fastRecibido = parseCur($('#pay-recibido') && $('#pay-recibido').value || total);
+      var fastSession = (function(){
+        try { return JSON.parse(localStorage.getItem('volvix:session') || localStorage.getItem('volvixSession') || 'null'); }
+        catch(_) { return null; }
+      })();
+
+      var localSale = {
+        // Identificadores
+        local_sale_id: fastSaleId,
+        local_folio: fastFolio,
+        caja_id: cajaId,
+        tenant_id: (fastSession && fastSession.tenant_id) || null,
+        cashier_id: (fastSession && fastSession.id) || null,
+        cashier_name: (fastSession && (fastSession.full_name || fastSession.name || fastSession.email)) || 'Cajero',
+        // Datos del ticket
+        ts: Date.now(),
+        ts_iso: fastNow.toISOString(),
+        date: fastNow.toLocaleDateString('es-MX'),
+        time: fastNow.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
+        customer_id: window.__volvixSelectedCustomerId || null,
+        customer_name: window.__volvixSelectedCustomerName || 'Público en general',
+        items: (window.CART || []).map(function(i){
+          return { id: i.id, code: i.code || i.id, name: i.name || '',
+                   qty: i.qty || 1, price: i.price || 0,
+                   total: (i.price || 0) * (i.qty || 1), tax: 0 };
+        }),
+        items_count: (window.CART || []).reduce(function(s,i){ return s + (i.qty || 1); }, 0),
+        subtotal: fastSubtotal,
+        total: total,
+        discount: window.__vlxDiscountAmount || 0,
+        tip: window.__vlxTipAmount || 0,
+        tax: 0,
+        payment_method: method.toUpperCase(),
+        payment_received: fastRecibido,
+        payment_change: Math.max(0, fastRecibido - total),
+        // Estado del registro
+        synced: false,
+        printed: false,
+        sync_attempts: 0,
+        server_sale_id: null,
+        server_sale_number: null,
+        server_folio: null,
+        error: null
+      };
+
+      // ─── FASE 2: PERSISTIR ATÓMICO en localStorage con verificación ───
+      var saveOK = false;
+      var saveError = null;
+      try {
+        var SALES_KEY = 'volvix_sales_local_v1';
+        var sales = [];
+        try { sales = JSON.parse(localStorage.getItem(SALES_KEY) || '[]'); } catch (_) { sales = []; }
+        sales.push(localSale);
+        // Mantener solo las últimas 1000 ventas para evitar overflow (~5MB localStorage limit)
+        if (sales.length > 1000) sales = sales.slice(-1000);
+        localStorage.setItem(SALES_KEY, JSON.stringify(sales));
+        // VERIFICAR la persistencia con read-back
+        var verify = JSON.parse(localStorage.getItem(SALES_KEY) || '[]');
+        saveOK = verify.some(function(s){ return s.local_sale_id === fastSaleId; });
+        if (!saveOK) saveError = 'verification-failed: la venta no se encontró tras escribir';
+      } catch (e) {
+        saveError = (e && e.message) || 'error desconocido al guardar';
+        saveOK = false;
+      }
+
+      // ─── FASE 3: SI NO SE GUARDÓ, ABORTAR (NO imprimir) ───
+      if (!saveOK) {
+        if (typeof window.showToast === 'function') {
+          window.showToast('❌ NO se guardó la venta — NO se imprimió ticket. Reintenta. ' + (saveError || ''), 'error', 8000);
+        } else {
+          alert('Error al guardar la venta: ' + (saveError || 'desconocido') + '\nNO se imprimió el ticket. Por favor reintenta.');
+        }
+        // Restaurar botón para que pueda reintentar
+        if (payBtn) { payBtn.disabled = false; payBtn.textContent = origText || '✓ F12 - Completar cobro'; }
+        window.__volvixSaleInFlight = false;
+        return;
+      }
+
+      // ─── FASE 4: IMPRIMIR ticket (la venta YA está garantizada en local) ───
       try {
         if (window.volvixElectron && window.volvixElectron.printRawText &&
             window.VolvixTicketCustomizer && window.VolvixTicketCustomizer.renderText) {
-          var fastCfg = window.VolvixTicketCustomizer.getConfig();
-          var fastNow = new Date();
-          var fastFolio = (function(){
-            var f = ($('#currentFolio') && $('#currentFolio').textContent) || '';
-            return f || ('T-' + Date.now().toString(36).toUpperCase().slice(-6));
-          })();
-          var fastSubtotal = subtotalCache || (Array.isArray(window.CART)
-            ? window.CART.reduce(function(s,i){ return s + (i.price * i.qty); }, 0) : total);
-          var fastRecibido = parseCur($('#pay-recibido') && $('#pay-recibido').value || total);
-          var fastData = {
+          var fastText = window.VolvixTicketCustomizer.renderText({
             folio: fastFolio,
-            date: fastNow.toLocaleDateString('es-MX'),
-            time: fastNow.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
-            cashier: (function(){
-              try { var s = JSON.parse(localStorage.getItem('volvix:session') || localStorage.getItem('volvixSession') || 'null');
-                return (s && (s.full_name || s.name || s.email)) || 'Cajero';
-              } catch(_) { return 'Cajero'; }
-            })(),
-            customer: window.__volvixSelectedCustomerName || 'Público en general',
-            items: (window.CART || []).map(function(i){
-              return { qty: i.qty || 1, code: i.code || i.id, name: i.name || '',
-                       price: i.price || 0, total: (i.price || 0) * (i.qty || 1), tax: 0 };
-            }),
-            itemsCount: (window.CART || []).reduce(function(s,i){ return s + (i.qty || 1); }, 0),
-            subtotal: fastSubtotal, total: total,
-            discount: window.__vlxDiscountAmount || 0, tip: window.__vlxTipAmount || 0, tax: 0,
-            payment: { method: method.toUpperCase(), received: fastRecibido,
-                       change: Math.max(0, fastRecibido - total) }
-          };
-          var fastText = window.VolvixTicketCustomizer.renderText(fastData, fastCfg);
+            date: localSale.date, time: localSale.time,
+            cashier: localSale.cashier_name,
+            customer: localSale.customer_name,
+            items: localSale.items, itemsCount: localSale.items_count,
+            subtotal: localSale.subtotal, total: localSale.total,
+            discount: localSale.discount, tip: localSale.tip, tax: localSale.tax,
+            payment: { method: localSale.payment_method, received: localSale.payment_received,
+                       change: localSale.payment_change }
+          }, fastCfg);
           var fastFullCfg = Object.assign({}, fastCfg, {
-            folio: fastData.folio,
-            qrUrl: 'https://volvix.app/t/' + fastData.folio
+            folio: fastFolio,
+            qrUrl: 'https://volvix.app/t/' + fastFolio
           });
-          // FIRE AND FORGET — sin await, modal cierra antes de que esto termine
+          // Fire and forget — el ticket sale mientras seguimos
           window.volvixElectron.printRawText({
             text: fastText,
             openDrawer: !!(fastCfg.autoOpenDrawer && /efectivo/i.test(method)),
             cfg: fastFullCfg
-          }).catch(function(e){ console.warn('[vlx-cobro] fast-print bg error:', e); });
-          // Persist last ticket para "Reimprimir"
-          try { window.__vlxLastCobroResult = { sale_id: 'fast-'+Date.now(), sale_number: fastFolio,
-                                                  total: total, items: fastData.items,
-                                                  payments: [{method: method, amount: total}] }; } catch(_) {}
+          }).then(function(r){
+            // Marcar como impreso en local
+            try {
+              var SALES_KEY2 = 'volvix_sales_local_v1';
+              var ss = JSON.parse(localStorage.getItem(SALES_KEY2) || '[]');
+              for (var i = 0; i < ss.length; i++) {
+                if (ss[i].local_sale_id === fastSaleId) {
+                  ss[i].printed = !!(r && r.ok);
+                  if (r && !r.ok) ss[i].print_error = r.error;
+                  break;
+                }
+              }
+              localStorage.setItem(SALES_KEY2, JSON.stringify(ss));
+            } catch (_) {}
+          }).catch(function(e){
+            console.warn('[vlx-cobro] print bg error:', e);
+            // Marcar como print failed pero la venta sí está guardada
+            try {
+              var SALES_KEY3 = 'volvix_sales_local_v1';
+              var ss = JSON.parse(localStorage.getItem(SALES_KEY3) || '[]');
+              for (var i = 0; i < ss.length; i++) {
+                if (ss[i].local_sale_id === fastSaleId) {
+                  ss[i].printed = false;
+                  ss[i].print_error = e.message || 'unknown';
+                  break;
+                }
+              }
+              localStorage.setItem(SALES_KEY3, JSON.stringify(ss));
+            } catch (_) {}
+            if (typeof window.showToast === 'function') {
+              window.showToast('⚠ Venta guardada pero impresora no respondió. Usa "Reimprimir Último Ticket".', 'warning', 6000);
+            }
+          });
+          // Persist para "Reimprimir"
+          window.__vlxLastCobroResult = {
+            sale_id: fastSaleId, sale_number: fastFolio,
+            total: total, items: localSale.items,
+            payments: [{ method: method, amount: total }]
+          };
         }
-      } catch (fastErr) { console.warn('[vlx-cobro] fast-print pre-error:', fastErr); }
+      } catch (printErr) { console.warn('[vlx-cobro] print pre-error:', printErr); }
 
-      // ════════════════════════════════════════════════════════════════════
-      // FASE 1: cierre INSTANTÁNEO del modal + limpieza UI
-      // (mientras la impresora ya está recibiendo bytes)
-      // ════════════════════════════════════════════════════════════════════
+      // ─── FASE 5: cierre INSTANTÁNEO del modal + limpieza UI ───
       try {
         if (typeof window.closeModal === 'function') window.closeModal('modal-pay');
         if (Array.isArray(window.CART)) window.CART.length = 0;
         if (typeof window.renderCart === 'function') window.renderCart();
         if (typeof window.__volvixResetCartToken === 'function') window.__volvixResetCartToken();
-        // Incrementar folio mostrado
         var cf = document.getElementById('currentFolio');
         if (cf) {
           var newF = (parseInt(cf.textContent, 10) || 0) + 1;
@@ -1067,8 +1199,9 @@
           var pf = document.getElementById('pay-folio');
           if (pf) pf.textContent = String(newF);
         }
-        // Toast inmediato
-        if (typeof window.showToast === 'function') window.showToast('✓ Cobrado', 'success', 2000);
+        if (typeof window.showToast === 'function') {
+          window.showToast('✓ Venta ' + fastFolio + ' guardada', 'success', 2000);
+        }
       } catch (uiErr) { console.warn('[vlx-cobro] ui-fast-close error:', uiErr); }
 
       // Fix S-2: subtotal sanity check antes de cualquier cosa
