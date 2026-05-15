@@ -4886,6 +4886,22 @@
               💡 <strong>Configura una vez, funciona en TODAS las plataformas</strong>: Windows (.exe), Android (APK), Web, PWA. Se puede activar/desactivar cada periférico desde aquí.
             </div>
 
+            <!-- 2026-05-15: Botón GRANDE para abrir el wizard USB/BT/IP completo -->
+            <div style="background:linear-gradient(135deg,#10B981,#059669);border-radius:12px;padding:18px;margin-bottom:18px;color:#fff;display:flex;align-items:center;gap:14px;cursor:pointer;box-shadow:0 4px 12px rgba(16,185,129,0.3)" onclick="window.VolvixPrintConfig && window.VolvixPrintConfig.openConfig()">
+              <div style="font-size:42px;line-height:1">🖨</div>
+              <div style="flex:1">
+                <div style="font-size:17px;font-weight:700;margin-bottom:3px">Configurar impresora (Recomendado)</div>
+                <div style="font-size:12px;opacity:0.95">USB · Bluetooth · IP / Red — auto-detección inteligente multi-subnet</div>
+              </div>
+              <div style="font-size:24px">→</div>
+            </div>
+
+            <!-- Botones de acción rápida -->
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px">
+              <button class="btn" onclick="window.volvixElectron && window.volvixElectron.autoSetupPrinter && window.volvixElectron.autoSetupPrinter().then(r=>{if(typeof showToast==='function')showToast(r.success?'✅ Impresora '+r.final_printer:'⚠ '+(r.actions&&r.actions.length?r.actions[r.actions.length-1].msg:'No encontrada'),r.success?'success':'warning',5000)})" style="padding:10px;font-size:12px">🔍 Auto-detectar impresora térmica</button>
+              <button class="btn" onclick="window.volvixElectron && window.volvixElectron.repairPrinter && window.volvixElectron.repairPrinter().then(r=>{if(typeof showToast==='function')showToast(r.success?'✅ '+(r.message||'OK'):'⚠ '+(r.error||'falló'),r.success?'success':'warning',5000)})" style="padding:10px;font-size:12px">🔧 Reparar (USB cambió de puerto)</button>
+            </div>
+
             <!-- ──── PESTAÑAS DE PERIFERICOS ──── -->
             <div style="display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap;border-bottom:2px solid var(--bord);padding-bottom:0;">
               <button class="config-tab active" data-perif-tab="printers" onclick="vlxPerifTab('printers',this)">🖨️ Impresoras</button>
@@ -22774,6 +22790,8 @@ window.addEventListener('volvix:version-loaded', function(e){
 <script src="/volvix-print-universal.js" defer></script>
 <!-- 2026-05-15: UI configuración impresoras (modo + IP/BT/USB) -->
 <script src="/volvix-print-config.js" defer></script>
+<!-- 2026-05-15: Errores de impresora con modal rojo grande -->
+<script src="/volvix-printer-errors.js" defer></script>
 
 </body>
 </html>

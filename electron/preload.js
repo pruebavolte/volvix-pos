@@ -85,6 +85,26 @@ contextBridge.exposeInMainWorld('volvixElectron', {
     return await ipcRenderer.invoke('volvix:printer:status');
   },
 
+  // 2026-05-15: Reparar config impresora (USB en otro puerto, etc.)
+  repairPrinter: async function () {
+    return await ipcRenderer.invoke('volvix:printer:repair');
+  },
+  // Status REAL: papel out, tapa abierta, offline, jam
+  queryPrinterRealStatus: async function (name) {
+    return await ipcRenderer.invoke('volvix:printer:real-status', name);
+  },
+
+  // 2026-05-15: Auto-pair Bluetooth thermal printers sin clicks
+  scanAndPairBT: async function () {
+    return await ipcRenderer.invoke('volvix:bt:scan-and-pair');
+  },
+  scanDiscoverableBT: async function () {
+    return await ipcRenderer.invoke('volvix:bt:scan-discoverable');
+  },
+  pairBTDevice: async function (deviceId) {
+    return await ipcRenderer.invoke('volvix:bt:pair-device', deviceId);
+  },
+
   // 2026-05-14 — Bluetooth printing via SPP (virtual COM port)
   // Lista impresoras BT emparejadas: [{name, mac, com, isPrinter}]
   listBluetoothPrinters: async function () {

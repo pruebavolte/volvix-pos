@@ -429,6 +429,11 @@ let _printerDiscovery = null;
 try { _printerDiscovery = require('./printer-discovery'); }
 catch (e) { console.warn('[volvix] printer-discovery no disponible:', e.message); }
 
+// 2026-05-15: Auto-pair Bluetooth (sin click usuario)
+let _btAutoPair = null;
+try { _btAutoPair = require('./bluetooth-auto-pair'); }
+catch (e) { console.warn('[volvix] bluetooth-auto-pair no disponible:', e.message); }
+
 function runPrinterAutoSetupBackground() {
   if (!_printerAutoSetup || process.platform !== 'win32') return;
   // Esperar 3s tras arrancar para no competir con servidor local y ventana
@@ -458,11 +463,14 @@ app.whenReady().then(async () => {
   runPrinterAutoSetupBackground();
 
   // 2026-05-15: Discovery de impresoras de red al primer arranque (10s después)
-  // Solo si NO hay impresora IP configurada
   setTimeout(() => {
-    // No bloquear si el discovery falla
     tryAutoConfigNetworkPrinter().catch(() => {});
   }, 10000);
+
+  // 2026-05-15: Auto-pair Bluetooth thermal printers (15s después)
+  setTimeout(() => {
+    tryAutoPairBluetoothPrinters().catch(() => {});
+  }, 15000);
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
@@ -477,6 +485,18 @@ ipcMain.handle('volvix:printer:auto-setup', async () => {
 ipcMain.handle('volvix:printer:status', async () => {
   if (!_printerAutoSetup) return { ok: false };
   return await _printerAutoSetup.getStatus();
+});
+
+// 2026-05-15: Auto-reparar USB (busca nuevo puerto si cambió)
+ipcMain.handle('volvix:printer:repair', async () => {
+  if (!_printerAutoSetup) return { ok: false, error: 'module not loaded' };
+  return await _printerAutoSetup.repairAfterPrintFailure();
+});
+
+// 2026-05-15: Status real del Spooler (papel, tapa, offline)
+ipcMain.handle('volvix:printer:real-status', async (event, name) => {
+  if (!_printerAutoSetup) return { ok: false };
+  return await _printerAutoSetup.queryPrinterRealStatus(name);
 });
 
 // IPC Bluetooth printing
@@ -522,6 +542,38 @@ ipcMain.handle('volvix:printer:discover-all', async (event, opts) => {
     return { ok: false, error: e.message };
   }
 });
+
+// 2026-05-15: Auto-pair Bluetooth thermal printers detectadas
+ipcMain.handle('volvix:bt:scan-and-pair', async () => {
+  if (!_btAutoPair) return { ok: false, error: 'BT auto-pair module not loaded' };
+  return await _btAutoPair.scanAndPairThermalPrinters();
+});
+ipcMain.handle('volvix:bt:scan-discoverable', async () => {
+  if (!_btAutoPair) return { ok: false, error: 'BT auto-pair module not loaded' };
+  return await _btAutoPair.scanDiscoverableDevices();
+});
+ipcMain.handle('volvix:bt:pair-device', async (event, deviceId) => {
+  if (!_btAutoPair) return { ok: false, error: 'BT auto-pair module not loaded' };
+  return await _btAutoPair.pairDevice(deviceId);
+});
+
+// Background auto-pair al arrancar (silencioso)
+async function tryAutoPairBluetoothPrinters() {
+  if (!_btAutoPair) return;
+  try {
+    console.log('[volvix] BT auto-pair: starting...');
+    const result = await _btAutoPair.scanAndPairThermalPrinters();
+    console.log('[volvix] BT auto-pair result:', JSON.stringify(result));
+    if (result.paired && result.paired.length > 0 && mainWindow) {
+      const names = result.paired.map(p => p.name).join(', ');
+      mainWindow.webContents.executeJavaScript(
+        'try{showToast&&showToast("📶 Impresora BT emparejada automaticamente: ' + names + '","success",6000);}catch(_){}'
+      ).catch(() => {});
+    }
+  } catch (e) {
+    console.warn('[volvix] BT auto-pair error:', e.message);
+  }
+}
 
 // 2026-05-15: Auto-config al primer arranque — si encuentra UNA impresora IP, la usa
 async function tryAutoConfigNetworkPrinter() {

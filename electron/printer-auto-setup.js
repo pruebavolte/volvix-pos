@@ -494,4 +494,100 @@ async function getStatus() {
   };
 }
 
-module.exports = { runAutoSetup, getStatus };
+/**
+ * 2026-05-15: Re-detección de USB en runtime cuando falla un print.
+ * Si la impresora USB se desconectó y reconectó en otro puerto, busca
+ * el puerto actual y reconfigura Volvix-Thermal sin admin.
+ */
+async function repairAfterPrintFailure() {
+  const report = { started_at: new Date().toISOString(), actions: [], success: false };
+  function track(msg) { report.actions.push(msg); log(msg); }
+
+  try {
+    // 1) Buscar el puerto USB actual del hardware térmico
+    const hardwarePort = await findHardwareUsbPort();
+    if (!hardwarePort) {
+      track('No USB thermal hardware detected (printer disconnected/off)');
+      report.error = 'USB_NOT_CONNECTED';
+      return report;
+    }
+    track('Hardware found on ' + hardwarePort);
+
+    // 2) Verificar si Volvix-Thermal existe y en qué puerto
+    const printers = await listPrinters();
+    const volvix = printers.find((p) => p && p.Name === 'Volvix-Thermal');
+    if (!volvix) {
+      track('Volvix-Thermal no existe, ejecutando auto-setup completo');
+      return await runAutoSetup();
+    }
+
+    if (volvix.PortName === hardwarePort) {
+      track('Volvix-Thermal ya está en el puerto correcto (' + hardwarePort + ')');
+      report.success = true;
+      report.final_printer = 'Volvix-Thermal';
+      report.message = 'already_ok';
+      return report;
+    }
+
+    // 3) Asegurar puerto destino existe
+    await runPowerShell(
+      `if (-not (Get-PrinterPort -Name '${hardwarePort}' -ErrorAction SilentlyContinue)) { try { Add-PrinterPort -Name '${hardwarePort}' -ErrorAction SilentlyContinue } catch {} }`,
+      5000
+    );
+
+    // 4) Set-Printer (no requiere admin)
+    const setRes = await runPowerShell(
+      `try { Set-Printer -Name 'Volvix-Thermal' -PortName '${hardwarePort}' -ErrorAction Stop; Write-Output "OK" } catch { Write-Output "ERR|$($_.Exception.Message)" }`,
+      8000
+    );
+    if (setRes.ok && setRes.stdout.startsWith('OK')) {
+      track('Volvix-Thermal port updated to ' + hardwarePort);
+      // Cancelar jobs colgados
+      await runPowerShell(`Get-PrintJob -PrinterName 'Volvix-Thermal' -ErrorAction SilentlyContinue | Remove-PrintJob -ErrorAction SilentlyContinue`, 5000);
+      report.success = true;
+      report.final_printer = 'Volvix-Thermal';
+      report.message = 'port_changed';
+      report.new_port = hardwarePort;
+      report.old_port = volvix.PortName;
+    } else {
+      track('Set-Printer failed: ' + setRes.stdout);
+      report.error = 'SET_PRINTER_FAILED';
+    }
+  } catch (e) {
+    track('Exception: ' + e.message);
+    report.error = e.message;
+  }
+  return report;
+}
+
+/**
+ * Query del status real del Spooler para detectar errores específicos
+ * Returns: { state: 'ok'|'paused'|'error', errorReason?, isOffline?, paperOut? }
+ */
+async function queryPrinterRealStatus(printerName) {
+  printerName = printerName || 'Volvix-Thermal';
+  const r = await runPowerShell(
+    `$p = Get-WmiObject Win32_Printer -Filter "Name='${printerName.replace(/'/g, "''")}'"; if ($p) { "$($p.PrinterStatus)|$($p.PrinterState)|$($p.WorkOffline)" } else { 'NOT_FOUND' }`,
+    5000
+  );
+  if (!r.ok || r.stdout === 'NOT_FOUND') return { ok: false, error: 'printer not found' };
+  const [status, state, offline] = r.stdout.split('|');
+  // Win32_Printer PrinterState bitmask:
+  //   0x80000 = Paper Out
+  //   0x40000 = Paper Jam
+  //   0x10    = Door Open
+  //   0x80    = Out of Paper
+  //   0x2000  = Out of Memory
+  const stateInt = parseInt(state, 10) || 0;
+  return {
+    ok: true,
+    status: parseInt(status, 10),
+    paperOut: (stateInt & 0x80000) !== 0 || (stateInt & 0x80) !== 0,
+    paperJam: (stateInt & 0x40000) !== 0,
+    coverOpen: (stateInt & 0x10) !== 0,
+    offline: offline === 'True',
+    rawState: stateInt
+  };
+}
+
+module.exports = { runAutoSetup, getStatus, repairAfterPrintFailure, queryPrinterRealStatus, findHardwareUsbPort };

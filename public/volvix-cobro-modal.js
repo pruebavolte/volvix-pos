@@ -748,6 +748,77 @@
     }
   }
 
+  // 2026-05-15: Wrapper que detecta errores, repara USB automáticamente,
+  // y muestra modal rojo grande si falla irrecuperable
+  async function autoPrintTicketWithErrorHandling(cobroResult) {
+    var snapshot = Object.assign({ cart: (window.CART || []).slice() }, cobroResult || {});
+
+    // Intento 1
+    var r1 = await autoPrintTicket(snapshot);
+    if (r1 === true || (r1 && r1.ok)) return r1;
+
+    // Falló — verificar status real Y reparar USB si aplica
+    var errorMsg = (r1 && r1.error) || 'No se pudo imprimir';
+    log('Print failed (intento 1):', errorMsg);
+
+    // ¿Es problema de Spooler/USB (no es BT ni IP)? → intentar reparar
+    var canRepairUSB = window.volvixElectron && window.volvixElectron.repairPrinter;
+    if (canRepairUSB) {
+      try {
+        var repair = await window.volvixElectron.repairPrinter();
+        log('USB repair:', repair);
+        if (repair && repair.success) {
+          // Reintentar después de reparar
+          log('Reintentando print tras repair...');
+          var r2 = await autoPrintTicket(snapshot);
+          if (r2 === true || (r2 && r2.ok)) {
+            if (typeof window.showToast === 'function') {
+              window.showToast('✅ Impresora reconfigurada y ticket impreso (puerto cambió de ' + (repair.old_port || '?') + ' a ' + (repair.new_port || '?') + ')', 'success', 5000);
+            }
+            return r2;
+          }
+        }
+      } catch (e) { log('Repair exception:', e); }
+    }
+
+    // Aún falla — verificar status real para mensaje específico
+    var statusError = null;
+    if (window.volvixElectron && window.volvixElectron.queryPrinterRealStatus) {
+      try {
+        var st = await window.volvixElectron.queryPrinterRealStatus();
+        if (st && st.ok) {
+          if (st.paperOut) statusError = 'NO_PAPER';
+          else if (st.coverOpen) statusError = 'COVER_OPEN';
+          else if (st.offline) statusError = 'PRINTER_OFF';
+        }
+      } catch (e) { log('Status query failed:', e); }
+    }
+
+    // Mostrar modal rojo grande con auto-reintento disponible
+    if (window.VolvixPrinterErrors && window.VolvixPrinterErrors.handlePrintResult) {
+      var displayResult = {
+        ok: false,
+        error: errorMsg,
+        method: (r1 && r1.method) || 'print',
+        statusByte: statusError
+      };
+      // Force el tipo si vino del status query
+      if (statusError) {
+        window.VolvixPrinterErrors.showErrorModal(statusError, {
+          ctx: errorMsg,
+          retry: async () => await autoPrintTicket(snapshot)
+        });
+      } else {
+        window.VolvixPrinterErrors.handlePrintResult(displayResult, {
+          retry: async () => await autoPrintTicket(snapshot)
+        });
+      }
+    } else if (typeof window.showToast === 'function') {
+      window.showToast('⚠ Error al imprimir: ' + errorMsg, 'error', 6000);
+    }
+    return r1;
+  }
+
   // Post-success cleanup — replica el path final del completePay legacy SIN llamarlo
   // de nuevo (evita double-write a /api/sales). Fix S-1.
   function postSuccessCleanup(cobroResult) {
@@ -755,10 +826,9 @@
       var saleId = cobroResult && cobroResult.sale_id;
       var saleNum = cobroResult && cobroResult.sale_number;
       // 2026-05-14: AUTO-IMPRIMIR ticket sin que el adulto mayor haga nada.
-      // Fire-and-forget: no bloquea el cleanup si la impresión falla/tarda.
+      // 2026-05-15: con error handling completo + auto-repair USB.
       if (typeof window.volvixElectron !== 'undefined') {
-        // Pasar snapshot del CART (que se va a limpiar en seguida)
-        autoPrintTicket(Object.assign({ cart: (window.CART || []).slice() }, cobroResult || {}))
+        autoPrintTicketWithErrorHandling(cobroResult)
           .catch(function (e) { console.warn('[vlx-cobro] autoPrint failed silently', e); });
       }
       if (typeof window.showToast === 'function') {
