@@ -348,17 +348,50 @@ async function runAutoSetup(options = {}) {
       p && p.Name && /POS-?58|POS-?80|VOLVIX-?THERMAL|THERMAL|TM-T|END-80/i.test(p.Name)
     );
 
-    // Si Volvix-Thermal ya existe Y no tiene jobs colgados, todo bien
+    // 2026-05-14 NEW FAST PATH: si Volvix-Thermal ya existe Y el puerto USB-bound
+    // del hardware actual coincide con su puerto Y no hay jobs colgados, todo bien.
+    // Si difiere (USB001 huérfano vs USB003 real), CAMBIAR el puerto via Set-Printer
+    // (NO requiere admin) en lugar de Remove+Add (sí requiere admin). Esto permite
+    // auto-fix incluso cuando la app NO corre elevada.
     if (existingThermal && existingThermal.Name === 'Volvix-Thermal') {
+      const hardwarePort = await findHardwareUsbPort();
       const hung = await isPrinterHung('Volvix-Thermal');
-      if (!hung) {
-        track('Volvix-Thermal exists and is healthy');
+      const currentPort = existingThermal.PortName;
+      const needsPortFix = hardwarePort && currentPort !== hardwarePort;
+
+      if (!hung && !needsPortFix) {
+        track('Volvix-Thermal exists, port matches hardware, no stuck jobs');
         await setDefaultPrinter('Volvix-Thermal');
         report.final_printer = 'Volvix-Thermal';
         report.success = true;
         report.elapsed_ms = Date.now() - start;
         return report;
-      } else {
+      }
+
+      if (needsPortFix) {
+        track(`Volvix-Thermal port mismatch: ${currentPort} → ${hardwarePort}. Fixing via Set-Printer (no admin needed)…`);
+        // Cancelar jobs colgados primero
+        if (hung) {
+          await runPowerShell(`Get-PrintJob -PrinterName 'Volvix-Thermal' -ErrorAction SilentlyContinue | Remove-PrintJob -ErrorAction SilentlyContinue`, 5000);
+          track('cancelled stuck jobs');
+        }
+        // Asegurar puerto destino existe (no requiere admin si ya existe)
+        await runPowerShell(`if (-not (Get-PrinterPort -Name '${hardwarePort}' -ErrorAction SilentlyContinue)) { try { Add-PrinterPort -Name '${hardwarePort}' -ErrorAction SilentlyContinue } catch {} }`, 5000);
+        // Cambiar puerto (Set-Printer NO requiere admin para impresoras locales del usuario)
+        const setRes = await runPowerShell(`try { Set-Printer -Name 'Volvix-Thermal' -PortName '${hardwarePort}' -ErrorAction Stop; Write-Output "OK" } catch { Write-Output "ERR|$($_.Exception.Message)" }`, 8000);
+        if (setRes.ok && setRes.stdout.startsWith('OK')) {
+          track(`✅ Set-Printer port → ${hardwarePort} succeeded`);
+          await setDefaultPrinter('Volvix-Thermal');
+          report.final_printer = 'Volvix-Thermal';
+          report.actions_taken_no_admin = true;
+          report.success = true;
+          report.elapsed_ms = Date.now() - start;
+          return report;
+        } else {
+          track(`Set-Printer failed: ${setRes.stdout || setRes.error} — falling back to Remove+Add (needs admin)`);
+          // Falla = sin admin probablemente. Caer al flujo de rebuild.
+        }
+      } else if (hung) {
         track('Volvix-Thermal exists but has stuck jobs — will rebuild');
       }
     }
