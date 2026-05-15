@@ -2524,7 +2524,7 @@
         '<div style="font-size:28px">🎉</div>' +
         '<div style="flex:1">' +
           '<div style="font-weight:700;font-size:14px;margin-bottom:2px">¡Bienvenido a Volvix POS!</div>' +
-          '<div style="color:#475569">Tu cuenta de <strong>' + name + '</strong> está lista. Empieza cargando tu primer producto o haz tu primera venta.</div>' +
+          '<div style="color:#475569">Tu cuenta de <strong>' + String(name).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</strong> está lista. Empieza cargando tu primer producto o haz tu primera venta.</div>' +
         '</div>' +
         '<button id="vlx-welcome-load" style="padding:8px 14px;border:none;border-radius:8px;background:#2563EB;color:#fff;font-weight:600;cursor:pointer;font-size:13px">Cargar productos</button>' +
         '<button id="vlx-welcome-dismiss" style="padding:8px 10px;border:none;background:transparent;color:#64748B;cursor:pointer;font-size:18px;line-height:1">×</button>';
@@ -2632,8 +2632,12 @@
 <script defer>
   // Wire autocomplete al input cuando todo cargue
   document.addEventListener('DOMContentLoaded', function() {
+    let _mountRetries = 0;
     function tryMount() {
-      if (!window.VolvixProductSearch) return setTimeout(tryMount, 200);
+      if (!window.VolvixProductSearch) {
+        if (++_mountRetries > 30) return; // máx 30 intentos = 6 segundos
+        return setTimeout(tryMount, 200);
+      }
       const inp = document.getElementById('barcode-input');
       if (!inp) return;
       window.VolvixProductSearch.mountAutocomplete(inp, {
@@ -3019,11 +3023,11 @@
             </div>
             <div class="permv14-pane-body">
               <label class="permv14-radio-line">
-                <input type="radio" name="perm-mode" value="hide" checked onchange="window.PERM.setMode(this.value)">
+                <input type="radio" name="perm-mode" value="hide" checked onchange="if(window.PERM)window.PERM.setMode(this.value)">
                 🙈 Ocultar (desaparece del POS)
               </label>
               <label class="permv14-radio-line">
-                <input type="radio" name="perm-mode" value="disable" onchange="window.PERM.setMode(this.value)">
+                <input type="radio" name="perm-mode" value="disable" onchange="if(window.PERM)window.PERM.setMode(this.value)">
                 🔒 Deshabilitar (queda en gris, no clickeable)
               </label>
             </div>
@@ -4371,13 +4375,15 @@
   }
 
   function isPlatformOwner() {
-    const r = getCurrentRole();
-    return r === 'superadmin' || r === 'platform_owner';
+    const r = getCurrentRole(); // ya normalizado: 'superadmin' si era platform_owner
+    return r === 'superadmin';
   }
 
   // PERM API
   const PERM = {
     init() {
+      if (this._initialized) return;
+      this._initialized = true;
       const denied = document.getElementById('perm-denied');
       const content = document.getElementById('perm-content');
       if (!denied || !content) return;
@@ -4559,7 +4565,7 @@
       // Helper: id real del tenant en cada row (puede venir como tenant_id o id)
       const slugOf = t => String(t.tenant_id || t.id || '').trim();
       // 1. Empuja el actual primero
-      opts.push('<option value="' + currentTid + '" data-current="1">📍 ' + currentName + ' (' + currentTid + ') · ACTUAL</option>');
+      opts.push('<option value="' + escapeAttr(currentTid) + '" data-current="1">📍 ' + escapeText(currentName) + ' (' + escapeAttr(currentTid) + ') · ACTUAL</option>');
       seen.add(currentTid);
       // 2. Empuja el resto, ordenados por nombre
       tenants
@@ -4568,7 +4574,7 @@
         .sort((a, b) => a.name.localeCompare(b.name, 'es'))
         .forEach(t => {
           seen.add(t.slug);
-          opts.push('<option value="' + t.slug + '">' + (t.active ? '🟢 ' : '⛔ ') + t.name + ' (' + t.slug + ')</option>');
+          opts.push('<option value="' + escapeAttr(t.slug) + '">' + (t.active ? '🟢 ' : '⛔ ') + escapeText(t.name || t.slug || '') + ' (' + escapeAttr(t.slug) + ')</option>');
         });
       // Si todavía existe el select legacy (compat / tests), poblarlo.
       if (sel) {
@@ -4651,7 +4657,7 @@
       if (!state.id) state.id = state.tenantId || 'TNT001';
       if (!state.name) state.name = state.tenantName || 'Mi negocio';
       if (!state.status) state.status = 'active';
-      VOLVIX.setState(state);
+      if (window.VOLVIX && typeof VOLVIX.setState === 'function') VOLVIX.setState(state);
       return state;
     },
 
@@ -4687,8 +4693,8 @@
       const banner = document.getElementById('perm-tenant-banner');
       if (banner) {
         banner.innerHTML = isOwnTenant
-          ? '<span style="background:#dbeafe;color:#1e40af;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;">📍 Editando MI propio negocio (' + view.id + ')</span>'
-          : '<span style="background:#fef3c7;color:#92400e;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;">⚠️ Editando OTRO tenant: ' + view.name + ' (' + view.id + ')</span>';
+          ? '<span style="background:#dbeafe;color:#1e40af;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;">📍 Editando MI propio negocio (' + escapeText(view.id || '') + ')</span>'
+          : '<span style="background:#fef3c7;color:#92400e;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;">⚠️ Editando OTRO tenant: ' + escapeText(view.name || '') + ' (' + escapeText(view.id || '') + ')</span>';
       }
       // Auto-seleccionar el giro del tenant en el dropdown de perfiles
       const activeProfile = this.getActiveProfile();
@@ -4765,9 +4771,9 @@
     // 2026-05-08 FIX C: usar this.selectedTid (no state.id) para que el toggle
     // afecte al tenant seleccionado en el dropdown, no siempre al del usuario.
     async toggleModule(key) {
-      const tid = this.selectedTid || (VOLVIX.getState && VOLVIX.getState().id);
+      const tid = this.selectedTid || (window.VOLVIX && VOLVIX.getState && VOLVIX.getState().id);
       if (!tid) return;
-      const localState = VOLVIX.getState();
+      const localState = (window.VOLVIX && typeof VOLVIX.getState === 'function') ? VOLVIX.getState() : {};
       const isOwnTenant = (tid === localState.id);
       // Calcular nuevo valor desde la cache o state local
       const cur = isOwnTenant
@@ -4778,22 +4784,22 @@
       if (isOwnTenant) {
         if (!localState.modules) localState.modules = {};
         localState.modules[key] = newVal;
-        VOLVIX.setState(localState);
-        VOLVIX.applyState(localState);
+        if (window.VOLVIX && typeof VOLVIX.setState === 'function') VOLVIX.setState(localState);
+        if (window.VOLVIX && typeof VOLVIX.applyState === 'function') VOLVIX.applyState(localState);
       } else if (this._flagCache[tid]) {
         this._flagCache[tid].modules[key] = newVal;
       }
       this.renderForTenant(tid);
       // Persistir
-      this._apiCall('POST', '/api/admin/tenant/' + encodeURIComponent(tid) + '/module',
+      await this._apiCall('POST', '/api/admin/tenant/' + encodeURIComponent(tid) + '/module',
         { module_key: key, enabled: newVal });
       console.log('[PERM] modulo', key, '→', newVal, '(tid=' + tid + ')');
     },
 
     async toggleFeature(key) {
-      const tid = this.selectedTid || (VOLVIX.getState && VOLVIX.getState().id);
+      const tid = this.selectedTid || (window.VOLVIX && VOLVIX.getState && VOLVIX.getState().id);
       if (!tid) return;
-      const localState = VOLVIX.getState();
+      const localState = (window.VOLVIX && typeof VOLVIX.getState === 'function') ? VOLVIX.getState() : {};
       const isOwnTenant = (tid === localState.id);
       const cur = isOwnTenant
         ? (localState.features && localState.features[key] !== false)
@@ -4802,13 +4808,13 @@
       if (isOwnTenant) {
         if (!localState.features) localState.features = {};
         localState.features[key] = newVal;
-        VOLVIX.setState(localState);
-        VOLVIX.applyState(localState);
+        if (window.VOLVIX && typeof VOLVIX.setState === 'function') VOLVIX.setState(localState);
+        if (window.VOLVIX && typeof VOLVIX.applyState === 'function') VOLVIX.applyState(localState);
       } else if (this._flagCache[tid]) {
         this._flagCache[tid].features[key] = newVal;
       }
       this.renderForTenant(tid);
-      this._apiCall('POST', '/api/admin/tenant/' + encodeURIComponent(tid) + '/button',
+      await this._apiCall('POST', '/api/admin/tenant/' + encodeURIComponent(tid) + '/button',
         { button_key: key, enabled: newVal });
       console.log('[PERM] feature', key, '→', newVal, '(tid=' + tid + ')');
     },
@@ -4816,7 +4822,7 @@
     async loadAudit() {
       const wrap = document.getElementById('perm-audit-list');
       if (!wrap) return;
-      const tid = this.selectedTid || (VOLVIX.getState && VOLVIX.getState().id) || 'TNT001';
+      const tid = this.selectedTid || (window.VOLVIX && VOLVIX.getState && VOLVIX.getState().id) || 'TNT001';
       wrap.innerHTML = 'Cargando…';
       const j = await this._apiCall('GET', '/api/admin/tenant/' + encodeURIComponent(tid) + '/audit');
       if (!j || !j.audit || j.audit.length === 0) {
@@ -4885,12 +4891,12 @@
     async changeStatus(newStatus) {
       const tid = this.selectedTid || (VOLVIX.getState && VOLVIX.getState().id);
       if (!tid) return;
-      const localState = VOLVIX.getState();
+      const localState = (window.VOLVIX && typeof VOLVIX.getState === 'function') ? VOLVIX.getState() : {};
       const isOwnTenant = (tid === localState.id);
       if (isOwnTenant) {
         localState.status = newStatus;
-        VOLVIX.setState(localState);
-        VOLVIX.applyState(localState);
+        if (window.VOLVIX && typeof VOLVIX.setState === 'function') VOLVIX.setState(localState);
+        if (window.VOLVIX && typeof VOLVIX.applyState === 'function') VOLVIX.applyState(localState);
       } else if (this._flagCache[tid]) {
         this._flagCache[tid].status = newStatus;
       }
@@ -5010,8 +5016,8 @@
     },
 
     broadcastNow() {
-      const state = VOLVIX.getState();
-      if (VOLVIX.channel) {
+      const state = (window.VOLVIX && typeof VOLVIX.getState === 'function') ? VOLVIX.getState() : {};
+      if (window.VOLVIX && VOLVIX.channel) {
         VOLVIX.channel.postMessage({ type: 'state-update', tenantId: state.id, state });
       }
       if (window.toast) window.toast('Estado broadcast a tabs abiertas', 'ok');
@@ -5036,7 +5042,7 @@
       const status = document.getElementById('perm-user-status').value;
       if (!email) { alert('Email requerido'); return; }
       const modKey = key.replace(/^module\./, '');
-      const tid = this.selectedTid || (VOLVIX.getState && VOLVIX.getState().id);
+      const tid = this.selectedTid || (window.VOLVIX && VOLVIX.getState && VOLVIX.getState().id);
       // ── Resolver email → user_id (UUID). OBLIGATORIO; si falla, abort.
       let resolvedUserId = null;
       let resolveError = null;
@@ -5105,10 +5111,10 @@
       }
       wrap.innerHTML = '<table class="tbl"><thead><tr><th>Email</th><th>Permiso</th><th>Estado</th><th></th></tr></thead><tbody>' +
         items.map(it => '<tr>' +
-          '<td>' + it.email + '</td>' +
-          '<td><code style="font-size:11px;">' + it.featKey + '</code></td>' +
+          '<td>' + escapeText(it.email || '') + '</td>' +
+          '<td><code style="font-size:11px;">' + escapeText(it.featKey || '') + '</code></td>' +
           '<td>' + (it.status === 'allow' ? '<span class="chip ok">✅ Permitido</span>' : '<span class="chip err">❌ Bloqueado</span>') + '</td>' +
-          '<td><button class="btn sm" onclick="window.PERM.removeOverride(\'' + it.email + '\',\'' + it.featKey + '\')">🗑️</button></td>' +
+          '<td><button class="btn sm" data-override-email="' + escapeAttr(it.email || '') + '" data-override-key="' + escapeAttr(it.featKey || '') + '" onclick="window.PERM.removeOverride(this.dataset.overrideEmail,this.dataset.overrideKey)">🗑️</button></td>' +
         '</tr>').join('') + '</tbody></table>';
     },
 
@@ -5117,7 +5123,7 @@
     // Antes solo se borraba el cache local y el override seguía aplicándose
     // al usuario en el server. Acepta 404 como éxito (ya no existía en BD).
     async removeOverride(email, featKey) {
-      const tid = this.selectedTid || (VOLVIX.getState && VOLVIX.getState().id);
+      const tid = this.selectedTid || (window.VOLVIX && VOLVIX.getState && VOLVIX.getState().id);
       const modKey = String(featKey || '').replace(/^module\./, '');
       // Resolver email → user_id
       let resolvedUserId = null;
@@ -7493,8 +7499,8 @@
     })[top.platform] || (top.os || 'Web');
     const color = recent ? '#16A34A' : (mins < 30 ? '#CA8A04' : '#94A3B8');
     const dot = recent ? '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#16A34A;margin-right:4px;"></span>' : '';
-    return '<span style="color:' + color + ';font-weight:600;" title="Visto hace ' + mins + ' min">'
-      + dot + emoji + ' ' + label + '</span>';
+    return '<span style="color:' + color + ';font-weight:600;" title="Visto hace ' + escapeAttr(String(mins)) + ' min">'
+      + dot + emoji + ' ' + escapeText(label) + '</span>';
   }
   // Render del badge "Versiones instaladas" (varios platforms = varios badges)
   function fmtVersions(devices) {
@@ -7512,7 +7518,7 @@
         web: '🌐'
       })[d.platform] || '🌐';
       const v = d.version || '?';
-      badges.push('<span style="display:inline-block;padding:1px 6px;background:#F3F4F6;border-radius:4px;font-size:11px;margin:1px 2px;font-family:ui-monospace,monospace;" title="' + (d.os || '') + ' · ' + (d.browser || '') + '">'
+      badges.push('<span style="display:inline-block;padding:1px 6px;background:#F3F4F6;border-radius:4px;font-size:11px;margin:1px 2px;font-family:ui-monospace,monospace;" title="' + escapeAttr(d.os || '') + ' · ' + escapeAttr(d.browser || '') + '">'
         + emoji + ' ' + escapeText(v) + '</span>');
     });
     return badges.join(' ') || '<span class="u-empty">—</span>';

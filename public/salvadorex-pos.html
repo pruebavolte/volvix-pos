@@ -7932,6 +7932,10 @@
     const el = $('#screen-' + name);
     if (el) el.classList.remove('hidden');
     $$('.menu-btn').forEach(b => b.classList.toggle('active', b.dataset.menu === name));
+    // Cargar datos de crédito al navegar a la pantalla
+    if (name === 'credito') {
+      try { if (typeof loadCreditReal === 'function') loadCreditReal(); } catch (_) {}
+    }
     // 2026-05: actualizar fecha dinamica en Dashboard al activar (era hardcoded)
     if (name === 'dashboard') {
       try {
@@ -8138,18 +8142,20 @@
       } catch (_) {}
 
       // Construir HTML del ticket
+      const _rptE = v => String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const _rptA = v => String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
       const items = (sale.items || []);
       const html = `
         <div style="font-family:'Courier New',monospace;font-size:12px;width:280px;padding:12px;background:#fff;color:#000;">
           <div style="text-align:center;font-weight:bold;margin-bottom:8px;">
             <div style="font-size:14px;">VOLVIX POS</div>
-            <div style="font-size:10px;">Ticket: ${sale.id || 'N/A'}</div>
+            <div style="font-size:10px;">Ticket: ${_rptE(sale.id || 'N/A')}</div>
             <div style="font-size:10px;">${new Date(sale.created_at || Date.now()).toLocaleString('es-MX')}</div>
           </div>
           <div style="border-top:1px dashed #000;border-bottom:1px dashed #000;padding:6px 0;margin:6px 0;">
             ${items.map(it => `
               <div style="display:flex;justify-content:space-between;font-size:11px;">
-                <span>${(it.qty || 1)}x ${it.name || it.code || 'Item'}</span>
+                <span>${Number(it.qty || 1)}x ${_rptE(it.name || it.code || 'Item')}</span>
                 <span>$${Number((it.price || 0) * (it.qty || 1)).toFixed(2)}</span>
               </div>
             `).join('')}
@@ -8165,8 +8171,9 @@
       // Vista previa en ventana nueva con opción de imprimir
       const w = window.open('', '_blank', 'width=400,height=600');
       if (w) {
+        const safeId = _rptA(String(sale.id || ''));
         w.document.write(`
-          <!DOCTYPE html><html><head><title>Ticket #${sale.id || ''}</title>
+          <!DOCTYPE html><html><head><title>Ticket #${_rptE(sale.id || '')}</title>
           <style>body{margin:0;display:flex;flex-direction:column;align-items:center;background:#f3f4f6;padding:20px;}
           .actions{margin-top:12px;display:flex;gap:8px;}
           button{padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-weight:600;}
@@ -8178,7 +8185,7 @@
           ${html}
           <div class="actions">
             <button class="btn-print" onclick="window.print()">🖨 Imprimir</button>
-            <button class="btn-thermal" onclick="window.opener && window.opener.enviarAImpresora('${sale.id || ''}', { reprint: true }); window.close();">🧾 Térmica (COPIA)</button>
+            <button class="btn-thermal" onclick="window.opener && window.opener.enviarAImpresora(&quot;${safeId}&quot;, { reprint: true }); window.close();">🧾 Térmica (COPIA)</button>
             <button class="btn-close" onclick="window.close()">Cerrar</button>
           </div>
           </body></html>
@@ -9573,8 +9580,8 @@
       if (SELECTED_CART_INDEX >= CART.length) SELECTED_CART_INDEX = CART.length - 1;
       body.innerHTML = CART.map((item, i) => `
         <tr onclick="selectCartRow(${i})" style="cursor:pointer; ${i===SELECTED_CART_INDEX?'background:var(--accent-soft);outline:2px solid var(--accent);':''}">
-          <td class="mono">${item.code}</td>
-          <td class="desc">${item.name}</td>
+          <td class="mono">${htmlEsc(item.code||'')}</td>
+          <td class="desc">${htmlEsc(item.name||'')}</td>
           <td class="num">${fmt(item.price)}</td>
           <td class="center">${item.qty}</td>
           <td class="importe">${fmt(item.price * item.qty)}</td>
@@ -10368,7 +10375,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     setTimeout(_fetchTopSellersAndSync, 3000);
     // Refresh cada 30 min
-    setInterval(_fetchTopSellersAndSync, 30 * 60 * 1000);
+    window._topSellerInterval = setInterval(_fetchTopSellersAndSync, 30 * 60 * 1000);
   });
 
   // 2026-05-10 Motor inteligencia: log fire-and-forget de búsquedas para
@@ -10477,10 +10484,12 @@
     if (!rows.length) { showToast('CSV vacío','error'); return; }
     const items = rows.map(r => ({ code:r.code||r['código']||'', name:r.name||r.nombre||'', price:Number(r.price||r.precio||0), cost:Number(r.cost||r.costo||0), stock:Number(r.stock||0) })).filter(p => p.code && p.name);
     try {
-      const r = await fetch('/api/products/import', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ tenant_id:_vTenant(), items }) });
+      const _importTok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
+      const _importHeaders = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _importTok };
+      const r = await fetch('/api/products/import', { method:'POST', headers: _importHeaders, body: JSON.stringify({ tenant_id:_vTenant(), items }) });
       if (!r.ok) {
         // Fallback: POST uno por uno
-        let ok=0; for (const it of items){ const rr = await fetch('/api/products',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({tenant_id:_vTenant()},it))}); if (rr.ok) ok++; }
+        let ok=0; for (const it of items){ const rr = await fetch('/api/products',{method:'POST',headers: _importHeaders,body:JSON.stringify(Object.assign({tenant_id:_vTenant()},it))}); if (rr.ok) ok++; }
         await loadCatalogReal(); showToast('Importados ' + ok + '/' + items.length); return;
       }
       await loadCatalogReal();
@@ -11069,12 +11078,12 @@
   function renderClientes() {
     $('#cli-body').innerHTML = CUSTOMERS.map(c => `
       <tr>
-        <td class="primary-col">${c[0]}</td>
-        <td style="color: var(--text-3);">${c[1]}</td>
+        <td class="primary-col">${escapeHtml(c[0]||'')}</td>
+        <td style="color: var(--text-3);">${escapeHtml(c[1]||'')}</td>
         <td class="num">${fmt(c[2])}</td>
         <td class="num" style="color: ${c[3]>0?'var(--danger)':'inherit'};">${fmt(c[3])}</td>
-        <td class="num">${c[4]}</td>
-        <td style="color: var(--text-3); font-size: 11px;">${c[5]}</td>
+        <td class="num">${escapeHtml(String(c[4]||''))}</td>
+        <td style="color: var(--text-3); font-size: 11px;">${escapeHtml(c[5]||'')}</td>
         <td style="text-align: right;"><button class="btn sm" onclick="verHistorialCliente(${JSON.stringify(c[0])},${JSON.stringify(c[1])})">Ver historial</button></td>
       </tr>`).join('');
     // 2026-05: mantener contador sincronizado en cada render — antes solo
@@ -11094,7 +11103,7 @@
     modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:99995;padding:14px;';
     modal.innerHTML = '<div style="background:#fff;border-radius:12px;width:640px;max-width:96vw;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 22px 60px rgba(0,0,0,.32);overflow:hidden;">' +
       '<div style="padding:20px 24px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;">' +
-      '<h3 style="margin:0;font-size:16px;">📋 Historial de ' + (nombre||'cliente') + '</h3>' +
+      '<h3 style="margin:0;font-size:16px;">📋 Historial de ' + escapeHtml(nombre||'cliente') + '</h3>' +
       '<button onclick="document.getElementById(\'vlx-hist-cliente-modal\').remove()" style="border:none;background:none;cursor:pointer;font-size:20px;color:#6b7280;">✕</button>' +
       '</div>' +
       '<div id="vlx-hist-cli-body" style="overflow-y:auto;flex:1;padding:20px;">⏳ Cargando…</div></div>';
@@ -11131,10 +11140,26 @@
         }).join('') + '</tbody></table>';
     } catch(e) {
       var b = document.getElementById('vlx-hist-cli-body');
-      if (b) b.innerHTML = '<p style="color:#dc2626;">Error: ' + (e.message||'desconocido') + '</p>';
+      if (b) { var _emE=function(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}; b.innerHTML = '<p style="color:#dc2626;">Error: ' + _emE(e.message||'desconocido') + '</p>'; }
     }
   };
   window.verHistorialCliente = window.verHistorialCliente;
+
+  async function loadCreditReal() {
+    try {
+      const token = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
+      const r = await fetch('/api/customers/credit', {
+        headers: { 'Authorization': 'Bearer ' + token },
+        credentials: 'include'
+      });
+      if (!r.ok) return;
+      const data = await r.json();
+      const list = Array.isArray(data) ? data : (data.items || data.customers || []);
+      CREDIT.length = 0;
+      list.forEach(function (c) { CREDIT.push(c); });
+      renderCredito();
+    } catch (e) { console.warn('[loadCreditReal]', e); }
+  }
 
   function renderCredito() {
     // 2026-05: contador dinamico (era hardcoded "6 clientes con credito · $4,810")
@@ -11156,10 +11181,29 @@
         <td class="num" style="color: var(--success);">${fmt(c[3])}</td>
         <td style="color: var(--text-3); font-size: 11px;">${c[4]}</td>
         <td><span class="chip ${chip}"><span class="dot"></span>${lbl}</span></td>
-        <td style="text-align: right;"><button class="btn sm">💵 Abonar</button></td>
+        <td style="text-align: right;"><button class="btn sm" onclick="abonarCredito(${JSON.stringify(c[0])},${JSON.stringify(c[5])})">💵 Abonar</button></td>
       </tr>`;
     }).join('');
   }
+  window.abonarCredito = async function (nombre, deuda) {
+    var monto = parseFloat(prompt('Abonar a ' + (nombre || 'cliente') + '\nDeuda actual: $' + (Number(deuda) || 0).toFixed(2) + '\n\nMonto del abono:'));
+    if (isNaN(monto) || monto <= 0) { showToast('Monto inválido'); return; }
+    try {
+      var token = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
+      var r = await fetch('/api/customers/credit/payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ customer_name: nombre, amount: monto })
+      });
+      var j = await r.json().catch(function () { return {}; });
+      if (r.ok && j.ok !== false) {
+        showToast('✓ Abono registrado: $' + monto.toFixed(2));
+        if (typeof loadCreditReal === 'function') loadCreditReal();
+      } else {
+        showToast('Error: ' + (j.error || j.message || 'No se pudo registrar'));
+      }
+    } catch (e) { showToast('Error: ' + (e.message || e)); }
+  };
   // 2026-05 adversarial fix A3+N2: escape para HTML attribute y text-content.
   // Antes solo se reemplazaba ' por \', dejando " < > etc. crudos. Si un sale_id
   // venia con caracteres raros (import malformado, attack), inyectaba HTML.
@@ -11193,7 +11237,7 @@
         <td><span class="chip">${htmlEsc(s[4])}</span></td>
         <td class="num" style="font-weight: 600;">${fmt(s[5])}</td>
         <td><span class="chip ${chip}"><span class="dot"></span>${lbl}</span></td>
-        <td style="text-align: right;"><button class="btn sm" title="Ver detalle">👁️</button> ${devolverBtn}</td>
+        <td style="text-align: right;"><button class="btn sm" title="Ver detalle" onclick="r10aShowSaleDetail && r10aShowSaleDetail('${sIdAttr}')">👁️</button> ${devolverBtn}</td>
       </tr>`;
     }).join('');
   }
@@ -11259,15 +11303,18 @@
       const roleChip = u[1]==='Administrador'?'info':u[1]==='Gerente'?'accent':'ok';
       const ss = u[4]==='online'?'ok':'';
       return `<tr>
-        <td><div style="display: flex; align-items: center; gap: 10px;"><div class="tb-btn perfil" style="pointer-events:none;"><div class="ava" style="width:26px;height:26px;font-size:9px;background:linear-gradient(135deg,#3B82F6,#1E40AF);">${u[0].substring(0,2).toUpperCase()}</div></div><strong>${u[0]}</strong></div></td>
-        <td><span class="chip ${roleChip}">${u[1]}</span></td>
-        <td style="color: var(--text-3); font-size: 11px;">${u[2]}</td>
-        <td style="color: var(--text-3); font-size: 11px;">${u[3]}</td>
+        <td><div style="display: flex; align-items: center; gap: 10px;"><div class="tb-btn perfil" style="pointer-events:none;"><div class="ava" style="width:26px;height:26px;font-size:9px;background:linear-gradient(135deg,#3B82F6,#1E40AF);">${escapeHtml(u[0]||'').substring(0,2).toUpperCase()}</div></div><strong>${escapeHtml(u[0]||'')}</strong></div></td>
+        <td><span class="chip ${roleChip}">${escapeHtml(u[1]||'')}</span></td>
+        <td style="color: var(--text-3); font-size: 11px;">${escapeHtml(u[2]||'')}</td>
+        <td style="color: var(--text-3); font-size: 11px;">${escapeHtml(u[3]||'')}</td>
         <td><span class="chip ${ss}"><span class="dot"></span>${u[4]==='online'?'Activo':'Inactivo'}</span></td>
-        <td style="text-align: right;"><button class="btn sm">Editar</button></td>
+        <td style="text-align: right;"><button class="btn sm" data-uid="${escapeHtml(u[0]||'')}" onclick="editarUsuario(this)">Editar</button></td>
       </tr>`;
     }).join('');
   }
+  window.editarUsuario = function (btn) {
+    showToast('⚠️ Edición de usuarios disponible en Panel de Control');
+  };
   function renderFFTree() {
     $('#ff-tree').innerHTML = FF_TREE.map(m => {
       const children = m.children ? `
@@ -11930,10 +11977,10 @@
           html += '<tr>' +
             '<td style="padding:6px;border-bottom:1px solid #eee;">' + hora + '</td>' +
             '<td style="padding:6px;border-bottom:1px solid #eee;text-align:right;">$' + Number(it.amount).toFixed(2) + '</td>' +
-            '<td style="padding:6px;border-bottom:1px solid #eee;font-family:monospace;font-size:11px;">' + (it.terminal_ref || '-') + '</td>' +
+            '<td style="padding:6px;border-bottom:1px solid #eee;font-family:monospace;font-size:11px;">' + htmlEsc(it.terminal_ref || '-') + '</td>' +
             '<td style="padding:6px;border-bottom:1px solid #eee;text-align:center;">' + (it.attempts || 0) + '/10</td>' +
             '<td style="padding:6px;border-bottom:1px solid #eee;text-align:center;">' +
-            '<button class="btn primary" onclick="r10aManualVerify(\'' + it.id + '\')" style="padding:4px 10px;">Verificar ahora</button>' +
+            '<button class="btn primary" data-pid="' + htmlEsc(String(it.id||'')) + '" onclick="r10aManualVerify(this.dataset.pid)" style="padding:4px 10px;">Verificar ahora</button>' +
             '</td></tr>';
         });
         html += '</tbody></table>';
@@ -12009,10 +12056,10 @@
         items.forEach(function (it) {
           html += '<tr>' +
             '<td style="padding:6px;">' + new Date(it.enqueued_at).toLocaleTimeString() + '</td>' +
-            '<td style="padding:6px;font-family:monospace;font-size:11px;">' + (it.sale_id || '-') + '</td>' +
+            '<td style="padding:6px;font-family:monospace;font-size:11px;">' + htmlEsc(it.sale_id || '-') + '</td>' +
             '<td style="padding:6px;text-align:center;">' + (it.attempts || 0) + '</td>' +
             '<td style="padding:6px;text-align:center;">' +
-            '<button class="btn success" onclick="r10aRetryPrint(\'' + it.id + '\')" style="padding:4px 10px;">Reintentar</button>' +
+            '<button class="btn success" data-qid="' + htmlEsc(String(it.id||'')) + '" onclick="r10aRetryPrint(this.dataset.qid)" style="padding:4px 10px;">Reintentar</button>' +
             '</td></tr>';
         });
         html += '</tbody></table>';
@@ -12162,19 +12209,19 @@
       if (!sale) { showToast('No se encontro la venta'); return; }
       var items = sale.items || [];
       var rows = items.map(function (i) {
-        return '<tr><td style="padding:4px;border-bottom:1px solid #eee;">' + (i.name || i.code || '-') +
-          '</td><td style="padding:4px;text-align:center;">' + (i.qty || 1) +
+        return '<tr><td style="padding:4px;border-bottom:1px solid #eee;">' + htmlEsc(i.name || i.code || '-') +
+          '</td><td style="padding:4px;text-align:center;">' + Number(i.qty || 1) +
           '</td><td style="padding:4px;text-align:right;">$' + Number(i.price || 0).toFixed(2) + '</td></tr>';
       }).join('');
       var html = '<div style="border:1px solid #ddd;padding:15px;border-radius:6px;font-family:monospace;font-size:13px;">' +
-        '<p><strong>Folio:</strong> ' + (sale.folio || sale.id) + '</p>' +
-        '<p><strong>Fecha:</strong> ' + new Date(sale.created_at).toLocaleString() + '</p>' +
-        '<p><strong>Pago:</strong> ' + (sale.payment_method || '-') + '</p>' +
+        '<p><strong>Folio:</strong> ' + htmlEsc(String(sale.folio || sale.id || '')) + '</p>' +
+        '<p><strong>Fecha:</strong> ' + htmlEsc(new Date(sale.created_at).toLocaleString()) + '</p>' +
+        '<p><strong>Pago:</strong> ' + htmlEsc(sale.payment_method || '-') + '</p>' +
         '<table style="width:100%;border-collapse:collapse;margin-top:10px;"><thead><tr><th style="text-align:left;padding:4px;">Producto</th><th style="text-align:center;padding:4px;">Cant</th><th style="text-align:right;padding:4px;">Precio</th></tr></thead><tbody>' + rows + '</tbody></table>' +
         '<p style="text-align:right;margin-top:10px;"><strong>TOTAL: $' + Number(sale.total || 0).toFixed(2) + '</strong></p>' +
         '</div>' +
         '<p style="margin-top:15px;text-align:center;color:#10B981;"><strong>Muestra esto al cliente.</strong> Confirma fecha, hora, productos y total.</p>';
-      r10aShowModal('Detalle de venta ' + (sale.folio || sale.id), html);
+      r10aShowModal('Detalle de venta ' + htmlEsc(String(sale.folio || sale.id || '')), html);
     } catch (err) { showToast('Error: ' + err.message, 'error'); }
   };
 
@@ -13534,14 +13581,32 @@
     $('#modal-cash').classList.add('open');
     setTimeout(() => $('#cash-concept').focus(), 100);
   }
-  function registerCash() {
+  async function registerCash() {
     const concept = $('#cash-concept').value.trim();
     const amount = parseFloat($('#cash-amount').value);
     if (!concept) { showToast('Falta concepto'); return; }
     if (isNaN(amount) || amount <= 0) { showToast('Monto inválido'); return; }
-    closeModal('modal-cash');
     const label = cashMode === 'in' ? 'Entrada' : 'Salida';
-    showToast('✓ ' + label + ' registrada · ' + concept + ' · ' + fmt(amount));
+    const token = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
+    try {
+      const r = await fetch('/api/cuts/movements', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({ type: label, amount: amount, concept: concept })
+      });
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({}));
+        showToast('Error al registrar: ' + (err.error || err.message || r.status));
+        return;
+      }
+      closeModal('modal-cash');
+      showToast('✓ ' + label + ' registrada · ' + concept + ' · ' + fmt(amount));
+    } catch (e) {
+      showToast('Error al registrar movimiento: ' + (e.message || e));
+    }
   }
 
   // VERIFICADOR DE PRECIOS
@@ -16209,6 +16274,8 @@
     rows.forEach(function (r) {
       csv += headers.map(function (h) {
         var v = r[h] != null ? String(r[h]) : '';
+        // CSV injection: prefix formulas with single-quote
+        if (/^[=+\-@\t\r]/.test(v)) v = "'" + v;
         if (/[",\n]/.test(v)) v = '"' + v.replace(/"/g, '""') + '"';
         return v;
       }).join(',') + '\n';
@@ -16349,8 +16416,8 @@
       var from = sessionStorage.getItem('vlx:hist:from') || '';
       var to = sessionStorage.getItem('vlx:hist:to') || '';
       var qs = '?limit=1000';
-      if (from) qs += '&from=' + from;
-      if (to) qs += '&to=' + to;
+      if (from) qs += '&from=' + encodeURIComponent(from);
+      if (to) qs += '&to=' + encodeURIComponent(to);
       var res = await fetch('/api/sales' + qs, { headers: token ? { Authorization: 'Bearer ' + token } : {} });
       var data = await res.json();
       var sales = Array.isArray(data) ? data : (data.sales || data.data || data.items || []);
@@ -18929,20 +18996,21 @@
         tbody.innerHTML = '<tr><td colspan="7" style="padding:24px;text-align:center;color:#94A3B8">Sin movimientos aún. Los movimientos se registran automáticamente al vender, devolver, ajustar o trasladar inventario.</td></tr>';
         return;
       }
+      var _kEsc = function(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
       tbody.innerHTML = rows.map(function (m) {
         var d = m.created_at ? new Date(m.created_at).toLocaleString('es-MX') : '—';
         var typeColor = m.type === 'venta' ? '#DC2626' : m.type === 'entrada' ? '#10B981' : '#64748B';
         var qty = Number(m.qty || m.quantity || 0);
         return '<tr style="border-top:1px solid #F4F4F7"><td style="padding:10px">' + d + '</td>' +
-          '<td>' + (m.product_name || m.sku || m.product_id || '—') + '</td>' +
-          '<td><span style="background:' + typeColor + '15;color:' + typeColor + ';padding:2px 8px;border-radius:6px;font-size:12px;font-weight:600">' + (m.type || '—') + '</span></td>' +
+          '<td>' + _kEsc(m.product_name || m.sku || m.product_id || '—') + '</td>' +
+          '<td><span style="background:' + typeColor + '15;color:' + typeColor + ';padding:2px 8px;border-radius:6px;font-size:12px;font-weight:600">' + _kEsc(m.type || '—') + '</span></td>' +
           '<td style="text-align:right;font-weight:600;color:' + (qty < 0 ? '#DC2626' : '#10B981') + '">' + (qty > 0 ? '+' : '') + qty + '</td>' +
           '<td style="text-align:right">' + (m.unit_cost != null ? _money(m.unit_cost) : '—') + '</td>' +
-          '<td>' + (m.user_email || m.user_id || '—') + '</td>' +
-          '<td style="color:#64748B;font-size:12px">' + (m.notes || '') + '</td></tr>';
+          '<td>' + _kEsc(m.user_email || m.user_id || '—') + '</td>' +
+          '<td style="color:#64748B;font-size:12px">' + _kEsc(m.notes || '') + '</td></tr>';
       }).join('');
     } catch (e) {
-      tbody.innerHTML = '<tr><td colspan="7" style="padding:24px;text-align:center;color:#DC2626">Error al cargar movimientos: ' + (e.message || e) + '</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" style="padding:24px;text-align:center;color:#DC2626">Error al cargar movimientos: ' + (typeof htmlEsc==='function'?htmlEsc(e.message||''):String(e.message||'').replace(/</g,'&lt;')) + '</td></tr>';
     }
   };
   window.kardexExportCSV = function () {
@@ -18978,14 +19046,16 @@
         $('#prov-sub').textContent = '0 proveedores';
         return;
       }
+      var _pEsc = function(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+      var _pAttr = function(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
       tbody.innerHTML = list.map(function (s) {
-        return '<tr style="border-top:1px solid #F4F4F7"><td style="padding:10px;font-weight:600">' + (s.name || '—') + '</td>' +
-          '<td>' + (s.rfc || '—') + '</td><td>' + (s.phone || '—') + '</td><td>' + (s.email || '—') + '</td>' +
-          '<td style="text-align:right"><button class="btn sm" onclick="proveedorEdit(\'' + s.id + '\')">Editar</button></td></tr>';
+        return '<tr style="border-top:1px solid #F4F4F7"><td style="padding:10px;font-weight:600">' + _pEsc(s.name || '—') + '</td>' +
+          '<td>' + _pEsc(s.rfc || '—') + '</td><td>' + _pEsc(s.phone || '—') + '</td><td>' + _pEsc(s.email || '—') + '</td>' +
+          '<td style="text-align:right"><button class="btn sm" data-sid="' + _pAttr(String(s.id||'')) + '" onclick="proveedorEdit(this.dataset.sid)">Editar</button></td></tr>';
       }).join('');
       $('#prov-sub').textContent = list.length + ' proveedores';
     } catch (e) {
-      tbody.innerHTML = '<tr><td colspan="5" style="padding:24px;text-align:center;color:#DC2626">Error: ' + (e.message || e) + '</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" style="padding:24px;text-align:center;color:#DC2626">Error: ' + String(e.message||e).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</td></tr>';
     }
   };
   window.proveedorNuevo = function () {
@@ -19052,17 +19122,20 @@
         tbody.innerHTML = '<tr><td colspan="7" style="padding:24px;text-align:center;color:#94A3B8">Sin facturas aún.</td></tr>';
         return;
       }
+      var _fEsc = function(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+      var _fAttr = function(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
       tbody.innerHTML = list.map(function (f) {
         var statusColor = f.status === 'cancelled' ? '#DC2626' : '#10B981';
-        return '<tr style="border-top:1px solid #F4F4F7"><td style="padding:10px;font-family:monospace">' + (f.folio || '—') + '</td>' +
-          '<td>' + (f.customer_name || '—') + '</td><td style="font-family:monospace">' + (f.customer_rfc || '—') + '</td>' +
+        var fid = _fAttr(String(f.facturama_id || f.id || ''));
+        return '<tr style="border-top:1px solid #F4F4F7"><td style="padding:10px;font-family:monospace">' + _fEsc(f.folio || '—') + '</td>' +
+          '<td>' + _fEsc(f.customer_name || '—') + '</td><td style="font-family:monospace">' + _fEsc(f.customer_rfc || '—') + '</td>' +
           '<td>' + _money(f.total || 0) + '</td>' +
-          '<td><span style="background:' + statusColor + '15;color:' + statusColor + ';padding:2px 8px;border-radius:6px;font-size:12px;font-weight:600">' + (f.status || 'issued') + '</span></td>' +
-          '<td style="font-family:monospace;font-size:11px">' + (f.uuid_sat || '—') + '</td>' +
-          '<td style="text-align:right"><button class="btn sm" onclick="cfdiPDF(\'' + (f.facturama_id || f.id) + '\')">PDF</button> <button class="btn sm" onclick="cfdiCancel(\'' + (f.facturama_id || f.id) + '\')">Cancelar</button></td></tr>';
+          '<td><span style="background:' + statusColor + '15;color:' + statusColor + ';padding:2px 8px;border-radius:6px;font-size:12px;font-weight:600">' + _fEsc(f.status || 'issued') + '</span></td>' +
+          '<td style="font-family:monospace;font-size:11px">' + _fEsc(f.uuid_sat || '—') + '</td>' +
+          '<td style="text-align:right"><button class="btn sm" data-fid="' + fid + '" onclick="cfdiPDF(this.dataset.fid)">PDF</button> <button class="btn sm" data-fid="' + fid + '" onclick="cfdiCancel(this.dataset.fid)">Cancelar</button></td></tr>';
       }).join('');
     } catch (e) {
-      tbody.innerHTML = '<tr><td colspan="7" style="padding:24px;text-align:center;color:#DC2626">Error: ' + (e.message || e) + '</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" style="padding:24px;text-align:center;color:#DC2626">Error: ' + String(e.message||e).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</td></tr>';
     }
   };
   window.cfdiNueva = function () { window.location.href = '/volvix-cfdi-templates.html'; };
@@ -19093,7 +19166,7 @@
       _api('/api/recargas/history?limit=50').then(function(r){return r.json();}).then(function (j) {
         var list = (j && j.items) || [];
         $('#rec-list').innerHTML = list.length
-          ? list.map(function(i){return '<div style="padding:10px;border-top:1px solid #F4F4F7;display:flex;justify-content:space-between"><span>' + (i.carrier||'') + ' · ' + (i.phone||'') + '</span><strong>' + _money(i.amount||0) + '</strong></div>';}).join('')
+          ? list.map(function(i){var _rE=function(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');};return '<div style="padding:10px;border-top:1px solid #F4F4F7;display:flex;justify-content:space-between"><span>' + _rE(i.carrier||'') + ' · ' + _rE(i.phone||'') + '</span><strong>' + _money(i.amount||0) + '</strong></div>';}).join('')
           : '<div style="padding:18px;color:#94A3B8;text-align:center">Sin recargas aún.</div>';
       });
     }
@@ -19150,7 +19223,7 @@
         }).join('');
       })
       .catch(function (e) {
-        if (list) list.innerHTML = '<div style="padding:18px;color:#DC2626;text-align:center">Error: ' + (e.message || e) + '</div>';
+        if (list) list.innerHTML = '<div style="padding:18px;color:#DC2626;text-align:center">Error: ' + String(e.message||e).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>';
       });
   };
 
@@ -19166,11 +19239,13 @@
         $('#dep-sub').textContent = '0 departamentos';
         return;
       }
+      var _dEsc = function(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+      var _dAttr = function(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
       tbody.innerHTML = list.map(function (d) {
-        return '<tr style="border-top:1px solid #F4F4F7"><td style="padding:10px;font-weight:600">' + (d.name || d) + '</td>' +
-          '<td>' + (d.description || '—') + '</td><td style="text-align:right">' + (d.product_count || 0) + '</td>' +
-          '<td>' + (d.iva || '16%') + '</td>' +
-          '<td style="text-align:right"><button class="btn sm" onclick="depEdit(\'' + (d.id || d.name) + '\')">Editar</button></td></tr>';
+        return '<tr style="border-top:1px solid #F4F4F7"><td style="padding:10px;font-weight:600">' + _dEsc(d.name || d) + '</td>' +
+          '<td>' + _dEsc(d.description || '—') + '</td><td style="text-align:right">' + Number(d.product_count || 0) + '</td>' +
+          '<td>' + _dEsc(d.iva || '16%') + '</td>' +
+          '<td style="text-align:right"><button class="btn sm" data-did="' + _dAttr(String(d.id || d.name || '')) + '" onclick="depEdit(this.dataset.did)">Editar</button></td></tr>';
       }).join('');
       $('#dep-sub').textContent = list.length + ' departamentos';
     } catch (e) { tbody.innerHTML = '<tr><td colspan="5" style="padding:24px;text-align:center;color:#DC2626">Error</td></tr>'; }
@@ -19183,7 +19258,25 @@
         else _toast('No se pudo crear', 'error');
       });
   };
-  window.depEdit = function (id) { _toast('Editar departamento: ' + id, 'info'); };
+  window.depEdit = async function (id) {
+    if (!id) return;
+    var name = prompt('Nuevo nombre del departamento (deja en blanco para no cambiar):');
+    if (name === null) return; // user cancelled
+    var desc = prompt('Descripción (opcional):');
+    if (desc === null) return;
+    try {
+      var body = {};
+      if (name.trim()) body.name = name.trim();
+      if (desc.trim()) body.description = desc.trim();
+      var r = await _api('/api/products/categories/' + encodeURIComponent(id), {
+        method: 'PATCH',
+        body: JSON.stringify(body)
+      });
+      var j = await r.json().catch(function(){return null;});
+      if (r.ok) { _toast('Departamento actualizado', 'ok'); window.depsLoad(); }
+      else _toast('No se pudo actualizar: ' + ((j && j.error) || r.status), 'error');
+    } catch (e) { _toast('Error editando departamento', 'error'); }
+  };
 
   // ── ACTUALIZADOR MASIVO ────────────────────────────────────
   window.bulkPreview = function () {
@@ -19605,7 +19698,7 @@
   function vistaIs(v){ return document.body.getAttribute('data-vista') === String(v); }
 
   // Clock (only ticks while in Vista 3)
-  setInterval(function() {
+  window._oxxoClockInterval = setInterval(function() {
     if (!vistaIs(3)) return;
     var el = document.getElementById('oxxo-clock');
     if (!el) return;
@@ -21009,6 +21102,7 @@ window.addEventListener('volvix:version-loaded', function(e){
   // ============ INGREDIENTES Y RECETAS ============
   // 2026-05-07 merge-ing: portado desde pos-ingredientes.html
   var ingApp = (function(){
+    function _f(url,opts){var o=opts||{};o.headers=o.headers||{};if(!o.headers['Content-Type']&&o.body)o.headers['Content-Type']='application/json';try{var t=localStorage.getItem('volvix_token')||'';if(t)o.headers['Authorization']='Bearer '+t;}catch(_){}return fetch(url,o);}
     var ingredientes=[],recetas=[],productos=[],editingIngId=null,sugeridos=[],recetaItems=[],initialized=false;
     function openModal(id){ var m=document.getElementById(id); if(m)m.classList.add('open'); }
     function closeModal(id){ var m=document.getElementById(id); if(m)m.classList.remove('open'); }
@@ -21021,13 +21115,13 @@ window.addEventListener('volvix:version-loaded', function(e){
     }
     async function cargarTodo(){ await Promise.all([cargarIngredientes(),cargarRecetas()]); }
     async function cargarIngredientes(){
-      try{ var r=await fetch('/api/ingredientes'); if(r.ok)ingredientes=await r.json(); }catch(_){
+      try{ var r=await _f('/api/ingredientes'); if(r.ok)ingredientes=await r.json(); }catch(_){
         try{ ingredientes=JSON.parse(localStorage.getItem('si_ingredientes')||'[]'); }catch(__){}
       }
       renderIngredientes(); updateKPIs();
     }
     async function cargarRecetas(){
-      try{ var r=await fetch('/api/recetas'); if(r.ok)recetas=await r.json(); }catch(_){
+      try{ var r=await _f('/api/recetas'); if(r.ok)recetas=await r.json(); }catch(_){
         try{ recetas=JSON.parse(localStorage.getItem('si_recetas')||'[]'); }catch(__){}
       }
       renderRecetas();
@@ -21041,19 +21135,23 @@ window.addEventListener('volvix:version-loaded', function(e){
       var tb=document.getElementById('ing-tbody-ings'); if(!tb)return;
       if(!ings.length){ tb.innerHTML='<tr><td colspan="6"><div class="ing-empty"><div style="font-size:40px">📦</div><div>Sin ingredientes. Agrega el primero.</div></div></td></tr>'; return; }
       tb.innerHTML=ings.map(function(ing){
+        var _iE=function(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');};
+        var _iA=function(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');};
         var stockClass=ing.stock<=0?'ing-badge-out':ing.stock<=(ing.minimo||5)?'ing-badge-low':'ing-badge-ok';
         var stockLabel=ing.stock<=0?'Sin stock':ing.stock<=(ing.minimo||5)?'Bajo':'OK';
-        return '<tr><td><strong>'+ing.nombre+'</strong>'+(ing.proveedor?'<br><span style="font-size:11px;color:#64748B">'+ing.proveedor+'</span>':'')+'</td><td>'+ing.unidad+'</td><td><span class="ing-badge-stock '+stockClass+'">'+stockLabel+'</span> '+ing.stock+'</td><td>'+money(ing.costo)+'</td><td>'+ing.minimo+'</td><td style="text-align:right"><button class="ing-icon-btn" onclick="ingApp.editarIng(\''+ing.id+'\')" title="Editar">✏</button><button class="ing-icon-btn danger" onclick="ingApp.eliminarIng(\''+ing.id+'\')" title="Eliminar">🗑</button></td></tr>';
+        return '<tr><td><strong>'+_iE(ing.nombre)+'</strong>'+(ing.proveedor?'<br><span style="font-size:11px;color:#64748B">'+_iE(ing.proveedor)+'</span>':'')+'</td><td>'+_iE(ing.unidad)+'</td><td><span class="ing-badge-stock '+stockClass+'">'+stockLabel+'</span> '+Number(ing.stock||0)+'</td><td>'+money(ing.costo)+'</td><td>'+Number(ing.minimo||0)+'</td><td style="text-align:right"><button class="ing-icon-btn" data-iid="'+_iA(String(ing.id||''))+'" onclick="ingApp.editarIng(this.dataset.iid)" title="Editar">✏</button><button class="ing-icon-btn danger" data-iid="'+_iA(String(ing.id||''))+'" onclick="ingApp.eliminarIng(this.dataset.iid)" title="Eliminar">🗑</button></td></tr>';
       }).join('');
     }
     function renderRecetas(){
       var tb=document.getElementById('ing-tbody-recetas'); if(!tb)return;
       if(!recetas.length){ tb.innerHTML='<tr><td colspan="6"><div class="ing-empty"><div style="font-size:40px">📋</div><div>Sin recetas. Crea la primera.</div></div></td></tr>'; return; }
       tb.innerHTML=recetas.map(function(r){
+        var _rE=function(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');};
+        var _rA=function(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');};
         var prod=productos.find(function(p){return p.id===r.producto_id;})||{nombre:r.producto_nombre||'—',precio:0};
         var costo=(r.items||[]).reduce(function(s,i){return s+(i.costo_unitario||0)*(i.cantidad||0);},0);
         var margen=prod.precio>0?Math.round(((prod.precio-costo)/prod.precio)*100):0;
-        return '<tr><td><strong>'+prod.nombre+'</strong></td><td style="font-size:12px;color:#64748B">'+(r.items||[]).map(function(i){return i.nombre+' ('+i.cantidad+i.unidad+')';}).join(', ')+'</td><td>'+money(costo)+'</td><td>'+money(prod.precio)+'</td><td><span class="ing-badge-stock '+(margen>40?'ing-badge-ok':margen>20?'ing-badge-low':'ing-badge-out')+'">'+margen+'%</span></td><td style="text-align:right"><button class="ing-icon-btn danger" onclick="ingApp.eliminarReceta(\''+r.id+'\')" title="Eliminar">🗑</button></td></tr>';
+        return '<tr><td><strong>'+_rE(prod.nombre)+'</strong></td><td style="font-size:12px;color:#64748B">'+(r.items||[]).map(function(i){return _rE(i.nombre)+' ('+Number(i.cantidad||0)+_rE(i.unidad||'')+')';}).join(', ')+'</td><td>'+money(costo)+'</td><td>'+money(prod.precio)+'</td><td><span class="ing-badge-stock '+(margen>40?'ing-badge-ok':margen>20?'ing-badge-low':'ing-badge-out')+'">'+margen+'%</span></td><td style="text-align:right"><button class="ing-icon-btn danger" data-rid="'+_rA(String(r.id||''))+'" onclick="ingApp.eliminarReceta(this.dataset.rid)" title="Eliminar">🗑</button></td></tr>';
       }).join('');
     }
     function filtrarIng(val){ renderIngredientes(val); }
@@ -21081,10 +21179,10 @@ window.addEventListener('volvix:version-loaded', function(e){
       var data={nombre:nombre,unidad:document.getElementById('ing-unidad').value,costo:parseFloat(document.getElementById('ing-costo').value||0),stock:parseInt(document.getElementById('ing-stock').value||0),minimo:parseInt(document.getElementById('ing-minimo').value||0),proveedor:document.getElementById('ing-proveedor').value.trim()};
       try{
         if(editingIngId){
-          await fetch('/api/ingredientes/'+editingIngId,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+          await _f('/api/ingredientes/'+editingIngId,{method:'PATCH',body:JSON.stringify(data)});
           var idx=ingredientes.findIndex(function(i){return i.id===editingIngId;}); if(idx>=0)Object.assign(ingredientes[idx],data);
         } else {
-          var r=await fetch('/api/ingredientes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+          var r=await _f('/api/ingredientes',{method:'POST',body:JSON.stringify(data)});
           var d=await r.json(); if(d.ingrediente)ingredientes.push(d.ingrediente);
         }
       }catch(_){
@@ -21100,7 +21198,7 @@ window.addEventListener('volvix:version-loaded', function(e){
     }
     async function eliminarIng(id){
       if(!confirm('¿Eliminar este ingrediente?'))return;
-      try{ await fetch('/api/ingredientes/'+id,{method:'DELETE'}); }catch(_){}
+      try{ await _f('/api/ingredientes/'+id,{method:'DELETE'}); }catch(_){}
       ingredientes=ingredientes.filter(function(i){return i.id!==id;}); renderIngredientes(); updateKPIs();
       _toast('Ingrediente eliminado');
     }
@@ -21127,7 +21225,7 @@ window.addEventListener('volvix:version-loaded', function(e){
       var items=recetaItems.map(function(item){ var ing=ingredientes.find(function(i){return i.id===item.ing_id;}); return {ing_id:item.ing_id,nombre:ing&&ing.nombre||'',unidad:ing&&ing.unidad||'',cantidad:item.cantidad,costo_unitario:ing&&ing.costo||0}; }).filter(function(i){return i.ing_id;});
       var prod=productos.find(function(p){return p.id===prodId;});
       var data={producto_id:prodId,producto_nombre:prod&&prod.nombre||'',items:items};
-      try{ var r=await fetch('/api/recetas',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}); var d=await r.json(); if(d.receta)recetas.push(d.receta); }catch(_){
+      try{ var r=await _f('/api/recetas',{method:'POST',body:JSON.stringify(data)}); var d=await r.json(); if(d.receta)recetas.push(d.receta); }catch(_){
         var rec=Object.assign({},data,{id:'REC-'+Date.now(),created_at:new Date().toISOString()}); recetas.push(rec);
       }
       closeModal('ing-modalReceta'); recetaItems=[]; renderRecetas(); updateKPIs();
@@ -21135,7 +21233,7 @@ window.addEventListener('volvix:version-loaded', function(e){
     }
     async function eliminarReceta(id){
       if(!confirm('¿Eliminar esta receta?'))return;
-      try{ await fetch('/api/recetas/'+id,{method:'DELETE'}); }catch(_){}
+      try{ await _f('/api/recetas/'+id,{method:'DELETE'}); }catch(_){}
       recetas=recetas.filter(function(r){return r.id!==id;}); renderRecetas();
       _toast('Receta eliminada');
     }
@@ -21145,7 +21243,7 @@ window.addEventListener('volvix:version-loaded', function(e){
       if(!nombre){ _toast('Escribe el nombre del producto','err'); return; }
       var btn=document.getElementById('ing-btnSuggest'); btn.disabled=true; btn.textContent='✨ Pensando...';
       var ings=[];
-      try{ var r=await fetch('/api/recetas/suggest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({producto_nombre:nombre})}); var d=await r.json(); if(d.ingredientes)ings=d.ingredientes; }catch(_){}
+      try{ var r=await _f('/api/recetas/suggest',{method:'POST',body:JSON.stringify({producto_nombre:nombre})}); var d=await r.json(); if(d.ingredientes)ings=d.ingredientes; }catch(_){}
       btn.disabled=false; btn.textContent='✨ Sugerir con IA';
       if(!ings.length){ _toast('No se pudieron generar sugerencias','err'); return; }
       sugeridos=ings;
@@ -21164,7 +21262,7 @@ window.addEventListener('volvix:version-loaded', function(e){
         var ya=ingredientes.find(function(ing){return ing.nombre.toLowerCase()===s.nombre.toLowerCase();});
         if(!ya){
           var data={nombre:s.nombre,unidad:s.unidad||'g',costo:s.costo_estimado||0,stock:0,minimo:5};
-          try{ var r=await fetch('/api/ingredientes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}); var d=await r.json(); if(d.ingrediente)ingredientes.push(d.ingrediente); }catch(_){ ingredientes.push(Object.assign({},data,{id:'ING-'+Date.now()})); }
+          try{ var r=await _f('/api/ingredientes',{method:'POST',body:JSON.stringify(data)}); var d=await r.json(); if(d.ingrediente)ingredientes.push(d.ingrediente); }catch(_){ ingredientes.push(Object.assign({},data,{id:'ING-'+Date.now()})); }
         }
       }
       closeModal('ing-modalSuggest'); renderIngredientes(); updateKPIs();
@@ -21178,12 +21276,15 @@ window.addEventListener('volvix:version-loaded', function(e){
   // ============ MENÚ DIGITAL ============
   // 2026-05-07 merge-menu: portado desde pos-menu-digital.html
   var menuApp = (function(){
+    function _f(url,opts){var o=opts||{};o.headers=o.headers||{};if(!o.headers['Content-Type']&&o.body)o.headers['Content-Type']='application/json';try{var t=localStorage.getItem('volvix_token')||'';if(t)o.headers['Authorization']='Bearer '+t;}catch(_){}return fetch(url,o);}
+    function _mE(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+    function _mA(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
     var todosProductos=[],catActual='',digitalizados=[],langActual='es',menuUrl='',initialized=false;
     function openModal(id){ var m=document.getElementById(id); if(m){m.classList.add('open'); generarQRModal(id);} }
     function closeModal(id){ var m=document.getElementById(id); if(m)m.classList.remove('open'); }
     async function cargarProductos(){
       var prods=[];
-      try{ var r=await fetch('/api/menu-digital?tenant_id='+tenantId()); if(r.ok)prods=await r.json(); }catch(_){
+      try{ var r=await _f('/api/menu-digital?tenant_id='+encodeURIComponent(tenantId())); if(r.ok)prods=await r.json(); }catch(_){
         try{ prods=window.volvix&&window.volvix.offline&&window.volvix.offline.list&&window.volvix.offline.list('productos')||[]; }catch(__){}
       }
       if(!prods.length){
@@ -21202,7 +21303,7 @@ window.addEventListener('volvix:version-loaded', function(e){
       var cats=Array.from(new Set(todosProductos.map(function(p){return p.categoria;}).filter(Boolean)));
       var el=document.getElementById('menu-cat-filter'); if(!el)return;
       el.innerHTML='<div class="menu-cat-chip active" onclick="menuApp.filtrarCat(\'\',this)">Todos</div>';
-      cats.forEach(function(cat){ el.innerHTML+='<div class="menu-cat-chip" onclick="menuApp.filtrarCat(\''+cat+'\',this)">'+cat+'</div>'; });
+      cats.forEach(function(cat){ el.innerHTML+='<div class="menu-cat-chip" data-cat="'+_mA(cat)+'" onclick="menuApp.filtrarCat(this.dataset.cat,this)">'+_mE(cat)+'</div>'; });
     }
     function filtrarCat(cat,el){ catActual=cat; document.querySelectorAll('.menu-cat-chip').forEach(function(c){c.classList.remove('active');}); el.classList.add('active'); renderProductos(); }
     function renderProductos(){
@@ -21212,9 +21313,9 @@ window.addEventListener('volvix:version-loaded', function(e){
       grid.innerHTML=prods.map(function(p){
         var vis=p.visible_menu!==false;
         return '<div class="menu-prod-card '+(vis?'visible':'oculto')+'">'+
-          '<button class="menu-toggle-vis '+(vis?'on':'off')+'" onclick="menuApp.toggleVisibilidad(\''+p.id+'\',event)" title="'+(vis?'Visible':'Oculto')+'"></button>'+
-          (p.imagen?'<img class="menu-prod-img" src="'+p.imagen+'" alt="'+p.nombre+'" onerror="this.style.display=\'none\'" style="width:100%;height:100px;object-fit:cover;background:#F4F4F7">':'<div class="menu-prod-img-placeholder">🍽</div>')+
-          '<div class="menu-prod-body"><div class="menu-prod-name" title="'+p.nombre+'">'+p.nombre+'</div><div class="menu-prod-price">'+money(p.precio)+'</div>'+(p.categoria?'<div class="menu-prod-cat">'+p.categoria+'</div>':'')+'</div></div>';
+          '<button class="menu-toggle-vis '+(vis?'on':'off')+'" data-pid="'+_mA(String(p.id||''))+'" onclick="menuApp.toggleVisibilidad(this.dataset.pid,event)" title="'+(vis?'Visible':'Oculto')+'"></button>'+
+          (p.imagen?'<img class="menu-prod-img" src="'+_mA(p.imagen)+'" alt="'+_mA(p.nombre||'')+'" onerror="this.style.display=\'none\'" style="width:100%;height:100px;object-fit:cover;background:#F4F4F7">':'<div class="menu-prod-img-placeholder">🍽</div>')+
+          '<div class="menu-prod-body"><div class="menu-prod-name" title="'+_mA(p.nombre||'')+'">'+_mE(p.nombre||'')+'</div><div class="menu-prod-price">'+money(p.precio)+'</div>'+(p.categoria?'<div class="menu-prod-cat">'+_mE(p.categoria)+'</div>':'')+'</div></div>';
       }).join('');
       updateStats();
     }
@@ -21222,7 +21323,7 @@ window.addEventListener('volvix:version-loaded', function(e){
       evt.stopPropagation();
       var prod=todosProductos.find(function(p){return p.id===id;}); if(!prod)return;
       prod.visible_menu=!prod.visible_menu;
-      try{ await fetch('/api/menu-digital/'+id+'/toggle',{method:'PATCH'}); }catch(_){}
+      try{ await _f('/api/menu-digital/'+encodeURIComponent(id)+'/toggle',{method:'PATCH'}); }catch(_){}
       renderProductos();
       _toast((prod.visible_menu?'✅ Visible':'❌ Oculto')+': '+prod.nombre);
     }
@@ -21261,14 +21362,14 @@ window.addEventListener('volvix:version-loaded', function(e){
       if(!texto){ _toast('Escribe el texto del menú','err'); return; }
       var btn=document.getElementById('menu-btnDigitalizar'); btn.disabled=true; btn.textContent='✨ Procesando...';
       var prods=[];
-      try{ var r=await fetch('/api/menu-digital/digitalize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({texto_menu:texto,tenant_id:tenantId()})}); var d=await r.json(); if(d.productos)prods=d.productos; }catch(_){}
+      try{ var r=await _f('/api/menu-digital/digitalize',{method:'POST',body:JSON.stringify({texto_menu:texto,tenant_id:tenantId()})}); var d=await r.json(); if(d.productos)prods=d.productos; }catch(_){}
       if(!prods.length){
         texto.split('\n').forEach(function(linea){ linea=linea.trim(); if(!linea)return; var m=linea.match(/^(.+?)\s*\$?(\d+(?:\.\d{2})?)$/); if(m)prods.push({nombre:m[1].trim(),precio:parseFloat(m[2]),categoria:'General'}); });
       }
       btn.disabled=false; btn.textContent='✨ Digitalizar con IA';
       if(!prods.length){ _toast('No se encontraron productos','err'); return; }
       digitalizados=prods;
-      var itemsHtml=prods.map(function(p,i){ return '<div class="menu-import-item"><input type="checkbox" id="menu-dig-'+i+'" checked style="width:16px;height:16px"><label for="menu-dig-'+i+'" style="flex:1"><strong>'+p.nombre+'</strong> — '+money(p.precio)+(p.categoria?' · '+p.categoria:'')+'</label></div>'; }).join('');
+      var itemsHtml=prods.map(function(p,i){ return '<div class="menu-import-item"><input type="checkbox" id="menu-dig-'+i+'" checked style="width:16px;height:16px"><label for="menu-dig-'+i+'" style="flex:1"><strong>'+_mE(p.nombre||'')+'</strong> — '+money(p.precio)+(p.categoria?' · '+_mE(p.categoria):'')+'</label></div>'; }).join('');
       document.getElementById('menu-digitalizar-items').innerHTML=itemsHtml;
       document.getElementById('menu-digitalizar-result').style.display='';
       document.getElementById('menu-btnImportarDig').style.display='';
@@ -21279,7 +21380,7 @@ window.addEventListener('volvix:version-loaded', function(e){
       if(!sel.length){ _toast('Selecciona al menos uno','err'); return; }
       var btn=document.getElementById('menu-btnImportarDig'); btn.disabled=true; btn.textContent='Importando...';
       var importados=0;
-      for(var i=0;i<sel.length;i++){ var p=sel[i]; try{ await fetch('/api/productos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nombre:p.nombre,precio:p.precio,categoria:p.categoria||'General',visible_menu:true,stock:99,minimo:5,tenant_id:tenantId()})}); importados++; }catch(_){} }
+      for(var i=0;i<sel.length;i++){ var p=sel[i]; try{ await _f('/api/productos',{method:'POST',body:JSON.stringify({nombre:p.nombre,precio:p.precio,categoria:p.categoria||'General',visible_menu:true,stock:99,minimo:5,tenant_id:tenantId()})}); importados++; }catch(_){} }
       btn.disabled=false; btn.textContent='⬆ Importar productos';
       closeModal('menu-modalDigitalizar');
       _toast('✅ '+importados+' importados','ok');
@@ -21293,32 +21394,39 @@ window.addEventListener('volvix:version-loaded', function(e){
   // ============ MARKETING SOCIAL ============
   // 2026-05-07 merge-mkt: portado desde pos-marketing-social.html
   var mktApp = (function(){
+    function _f(url,opts){var o=opts||{};o.headers=o.headers||{};if(!o.headers['Content-Type']&&o.body)o.headers['Content-Type']='application/json';try{var t=localStorage.getItem('volvix_token')||'';if(t)o.headers['Authorization']='Bearer '+t;}catch(_){}return fetch(url,o);}
     var posts=[],platActual='',tonoActual='amigable',initialized=false;
     var platIcons={instagram:'📸',facebook:'👥',tiktok:'🎵',whatsapp:'💬'};
     var platColors={instagram:'mkt-plat-ig',facebook:'mkt-plat-fb',tiktok:'mkt-plat-tt',whatsapp:'mkt-plat-ig'};
     function setTono(tono,el){ tonoActual=tono; document.querySelectorAll('.mkt-tono-btn').forEach(function(b){b.classList.remove('active');}); el.classList.add('active'); }
     function filtrarPlat(plat,el){ platActual=plat; document.querySelectorAll('.mkt-plat-tab').forEach(function(t){t.classList.remove('active');}); el.classList.add('active'); renderPosts(); }
-    async function cargarPosts(){ try{ var r=await fetch('/api/marketing/posts'); if(r.ok)posts=await r.json(); }catch(_){ try{ posts=JSON.parse(localStorage.getItem('si_posts')||'[]'); }catch(__){} } renderPosts(); }
+    async function cargarPosts(){ try{ var r=await _f('/api/marketing/posts'); if(r.ok)posts=await r.json(); }catch(_){ try{ posts=JSON.parse(localStorage.getItem('si_posts')||'[]'); }catch(__){} } renderPosts(); }
     function renderPosts(){
       var filtered=platActual?posts.filter(function(p){return p.plataforma===platActual;}):posts;
       var c=document.getElementById('mkt-cnt-posts'); if(c)c.textContent=filtered.length;
       var el=document.getElementById('mkt-posts-list'); if(!el)return;
       if(!filtered.length){ el.innerHTML='<div class="mkt-empty"><div style="font-size:40px;margin-bottom:10px">📱</div><div style="font-size:14px;font-weight:600;color:#374151;margin-bottom:6px">Sin publicaciones</div><div style="font-size:12px">Genera tu primer post con IA</div></div>'; return; }
       el.innerHTML=filtered.map(function(p){
+        var _mE=function(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');};
+        var _mA=function(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');};
         var icon=platIcons[p.plataforma]||'📱';
         var color=platColors[p.plataforma]||'';
         var statusClass='mkt-s-'+(p.status||'borrador');
         var statusLabel=p.status==='programado'?'📅 Programado':p.status==='publicado'?'✅ Publicado':'📝 Borrador';
+        var platLabel=_mE((p.plataforma||'Post').charAt(0).toUpperCase()+(p.plataforma||'post').slice(1));
+        var prodLabel=p.producto?' · '+_mE(p.producto):'';
+        var textoSafe=_mE((p.texto||'').substring(0,200))+(p.texto&&p.texto.length>200?'...':'');
+        var pid=_mA(String(p.id||''));
         return '<div class="mkt-post-card">'+
           '<div class="mkt-post-header"><div class="mkt-plat-icon '+color+'">'+icon+'</div>'+
-          '<div class="mkt-post-meta"><div class="mkt-post-title">'+(p.plataforma||'Post').charAt(0).toUpperCase()+(p.plataforma||'post').slice(1)+(p.producto?' · '+p.producto:'')+'</div>'+
+          '<div class="mkt-post-meta"><div class="mkt-post-title">'+platLabel+prodLabel+'</div>'+
           '<div class="mkt-post-sub">'+(p.fecha_programada?'📅 '+new Date(p.fecha_programada).toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'Sin fecha')+'</div></div>'+
           '<span class="mkt-post-status '+statusClass+'">'+statusLabel+'</span></div>'+
-          '<div class="mkt-post-body">'+(p.texto||'').substring(0,200)+(p.texto&&p.texto.length>200?'...':'')+'</div>'+
+          '<div class="mkt-post-body">'+textoSafe+'</div>'+
           '<div class="mkt-post-actions">'+
-            '<button class="btn" style="font-size:12px;padding:5px 10px" onclick="mktApp.copiarTexto(\''+p.id+'\')">📋 Copiar</button>'+
-            (p.status==='borrador'?'<button class="btn" style="font-size:12px;padding:5px 10px" onclick="mktApp.cambiarStatus(\''+p.id+'\',\'publicado\')">✅ Publicado</button>':'')+
-            '<button class="btn" style="font-size:12px;padding:5px 10px;color:#DC2626" onclick="mktApp.eliminarPost(\''+p.id+'\')">🗑</button>'+
+            '<button class="btn" style="font-size:12px;padding:5px 10px" data-pid="'+pid+'" onclick="mktApp.copiarTexto(this.dataset.pid)">📋 Copiar</button>'+
+            (p.status==='borrador'?'<button class="btn" style="font-size:12px;padding:5px 10px" data-pid="'+pid+'" onclick="mktApp.cambiarStatus(this.dataset.pid,\'publicado\')">✅ Publicado</button>':'')+
+            '<button class="btn" style="font-size:12px;padding:5px 10px;color:#DC2626" data-pid="'+pid+'" onclick="mktApp.eliminarPost(this.dataset.pid)">🗑</button>'+
           '</div></div>';
       }).join('');
     }
@@ -21330,7 +21438,7 @@ window.addEventListener('volvix:version-loaded', function(e){
       if(!producto){ _toast('Escribe qué quieres promocionar','err'); return; }
       var btn=document.getElementById('mkt-btnGenerar'); btn.disabled=true; btn.textContent='✨ Generando...';
       var texto='';
-      try{ var r=await fetch('/api/marketing/generar-post',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({producto:producto,plataforma:plat,tono:tonoActual})}); var d=await r.json(); if(d.post)texto=d.post; }catch(_){}
+      try{ var r=await _f('/api/marketing/generar-post',{method:'POST',body:JSON.stringify({producto:producto,plataforma:plat,tono:tonoActual})}); var d=await r.json(); if(d.post)texto=d.post; }catch(_){}
       if(!texto){
         var tonos={amigable:'¡Prueba nuestro delicioso',profesional:'Te presentamos',divertido:'¡No te puedes perder',urgente:'⚡ ¡OFERTA HOY SOLO!'};
         texto=(tonos[tonoActual]||'Descubre')+' '+producto+'! 🌟\n\nVen y disfruta de lo mejor.\n\n#'+producto.replace(/\s+/g,'').toLowerCase()+' #'+plat;
@@ -21347,7 +21455,7 @@ window.addEventListener('volvix:version-loaded', function(e){
       var fecha=document.getElementById('mkt-gen-fecha').value;
       if(!texto){ _toast('El post no puede estar vacío','err'); return; }
       var data={plataforma:plat,texto:texto,producto:document.getElementById('mkt-gen-producto').value,status:status,fecha_programada:fecha||null,created_at:new Date().toISOString()};
-      try{ var r=await fetch('/api/marketing/posts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}); var d=await r.json(); if(d.post)posts.unshift(d.post); }catch(_){
+      try{ var r=await _f('/api/marketing/posts',{method:'POST',body:JSON.stringify(data)}); var d=await r.json(); if(d.post)posts.unshift(d.post); }catch(_){
         var p=Object.assign({},data,{id:'POST-'+Date.now()}); posts.unshift(p);
         try{ var saved=JSON.parse(localStorage.getItem('si_posts')||'[]'); saved.unshift(p); localStorage.setItem('si_posts',JSON.stringify(saved)); }catch(__){}
       }
