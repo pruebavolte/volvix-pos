@@ -511,27 +511,24 @@
     }
 
     async _printViaSystem(printer, job) {
-      // Electron: webContents.print
-      if (isElectron && printer.raw) {
-        return new Promise((resolve, reject) => {
-          try {
-            const { remote } = require('electron'); // eslint-disable-line
-            const win = remote.getCurrentWindow();
-            win.webContents.print(
-              {
-                silent: true,
-                deviceName: printer.raw.name,
-                color: !!job.options.color,
-                duplexMode: job.options.duplex || 'simplex',
-                copies: job.options.copies || 1,
-                pageSize: job.options.paperSize || 'A4',
-              },
-              (ok, reason) => (ok ? resolve() : reject(new Error(reason || 'print fail')))
-            );
-          } catch (e) {
-            reject(e);
-          }
+      // 2026-05-14 FIX: `remote` module fue eliminado en Electron 14+.
+      // Usar window.volvixElectron.printToSystem (preload bridge → IPC main).
+      const ve = global.volvixElectron || (typeof window !== 'undefined' && window.volvixElectron);
+      if (ve && typeof ve.printToSystem === 'function' && printer.raw) {
+        const html = job.contentType === 'text/html'
+          ? String(job.content || '')
+          : '<pre style="font-family:monospace;white-space:pre-wrap">' +
+            String(job.content || '').replace(/[<&]/g, c => c === '<' ? '&lt;' : '&amp;') +
+            '</pre>';
+        const result = await ve.printToSystem({
+          html: html,
+          printerName: printer.raw.name || printer.name,
+          silent: true,
+          copies: job.options.copies || 1,
+          printBackground: true
         });
+        if (result && result.ok) return;
+        throw new Error((result && result.error) || 'print fail');
       }
       // Browser: abrir ventana oculta y window.print()
       return new Promise((resolve, reject) => {
