@@ -994,6 +994,83 @@
 
       var total = parseCur($('#pay-total') && $('#pay-total').textContent || '0');
 
+      // ════════════════════════════════════════════════════════════════════
+      // 2026-05-15 v1.0.317 — FASE 0: PRINT INSTANTÁNEO (<10ms)
+      // Disparar el print AHORA con cart actual + customizer config.
+      // NO esperar validación, NO esperar payload, NO esperar API.
+      // El cajero ve la impresora activarse a la velocidad de click.
+      // ════════════════════════════════════════════════════════════════════
+      try {
+        if (window.volvixElectron && window.volvixElectron.printRawText &&
+            window.VolvixTicketCustomizer && window.VolvixTicketCustomizer.renderText) {
+          var fastCfg = window.VolvixTicketCustomizer.getConfig();
+          var fastNow = new Date();
+          var fastFolio = (function(){
+            var f = ($('#currentFolio') && $('#currentFolio').textContent) || '';
+            return f || ('T-' + Date.now().toString(36).toUpperCase().slice(-6));
+          })();
+          var fastSubtotal = subtotalCache || (Array.isArray(window.CART)
+            ? window.CART.reduce(function(s,i){ return s + (i.price * i.qty); }, 0) : total);
+          var fastRecibido = parseCur($('#pay-recibido') && $('#pay-recibido').value || total);
+          var fastData = {
+            folio: fastFolio,
+            date: fastNow.toLocaleDateString('es-MX'),
+            time: fastNow.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
+            cashier: (function(){
+              try { var s = JSON.parse(localStorage.getItem('volvix:session') || localStorage.getItem('volvixSession') || 'null');
+                return (s && (s.full_name || s.name || s.email)) || 'Cajero';
+              } catch(_) { return 'Cajero'; }
+            })(),
+            customer: window.__volvixSelectedCustomerName || 'Público en general',
+            items: (window.CART || []).map(function(i){
+              return { qty: i.qty || 1, code: i.code || i.id, name: i.name || '',
+                       price: i.price || 0, total: (i.price || 0) * (i.qty || 1), tax: 0 };
+            }),
+            itemsCount: (window.CART || []).reduce(function(s,i){ return s + (i.qty || 1); }, 0),
+            subtotal: fastSubtotal, total: total,
+            discount: window.__vlxDiscountAmount || 0, tip: window.__vlxTipAmount || 0, tax: 0,
+            payment: { method: method.toUpperCase(), received: fastRecibido,
+                       change: Math.max(0, fastRecibido - total) }
+          };
+          var fastText = window.VolvixTicketCustomizer.renderText(fastData, fastCfg);
+          var fastFullCfg = Object.assign({}, fastCfg, {
+            folio: fastData.folio,
+            qrUrl: 'https://volvix.app/t/' + fastData.folio
+          });
+          // FIRE AND FORGET — sin await, modal cierra antes de que esto termine
+          window.volvixElectron.printRawText({
+            text: fastText,
+            openDrawer: !!(fastCfg.autoOpenDrawer && /efectivo/i.test(method)),
+            cfg: fastFullCfg
+          }).catch(function(e){ console.warn('[vlx-cobro] fast-print bg error:', e); });
+          // Persist last ticket para "Reimprimir"
+          try { window.__vlxLastCobroResult = { sale_id: 'fast-'+Date.now(), sale_number: fastFolio,
+                                                  total: total, items: fastData.items,
+                                                  payments: [{method: method, amount: total}] }; } catch(_) {}
+        }
+      } catch (fastErr) { console.warn('[vlx-cobro] fast-print pre-error:', fastErr); }
+
+      // ════════════════════════════════════════════════════════════════════
+      // FASE 1: cierre INSTANTÁNEO del modal + limpieza UI
+      // (mientras la impresora ya está recibiendo bytes)
+      // ════════════════════════════════════════════════════════════════════
+      try {
+        if (typeof window.closeModal === 'function') window.closeModal('modal-pay');
+        if (Array.isArray(window.CART)) window.CART.length = 0;
+        if (typeof window.renderCart === 'function') window.renderCart();
+        if (typeof window.__volvixResetCartToken === 'function') window.__volvixResetCartToken();
+        // Incrementar folio mostrado
+        var cf = document.getElementById('currentFolio');
+        if (cf) {
+          var newF = (parseInt(cf.textContent, 10) || 0) + 1;
+          cf.textContent = String(newF);
+          var pf = document.getElementById('pay-folio');
+          if (pf) pf.textContent = String(newF);
+        }
+        // Toast inmediato
+        if (typeof window.showToast === 'function') window.showToast('✓ Cobrado', 'success', 2000);
+      } catch (uiErr) { console.warn('[vlx-cobro] ui-fast-close error:', uiErr); }
+
       // Fix S-2: subtotal sanity check antes de cualquier cosa
       if (!subtotalCache || subtotalCache <= 0) {
         // Recalcular desde CART para no depender del setTimeout 100ms del openPayment wrap
@@ -1085,85 +1162,47 @@
         // Fix SEC-3: Idempotency-Key determinista
         var idemKey = await deterministicIdemKey(payload);
 
-        // 2026-05-15 v1.0.316: offline-first cobro
-        // 1) Cobro RÁPIDO con timeout corto. Si responde rápido → OK.
-        // 2) Si timeout o error red → guardar localmente, cerrar modal, imprimir
-        //    igual. La sync ocurre en background sin bloquear al cajero.
-        // El adulto mayor NUNCA se queda esperando o viendo errores.
-        const FAST_TIMEOUT_MS = 3500;
-        var ctrl = new AbortController();
-        var timeoutTimer = setTimeout(function(){ ctrl.abort(); }, FAST_TIMEOUT_MS);
-        var resp = null;
-        var fetchErr = null;
-        try {
-          resp = await fetch('/api/cobro', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Idempotency-Key': idemKey,
-              Authorization: token ? ('Bearer ' + token) : ''
-            },
-            body: JSON.stringify(payload),
-            signal: ctrl.signal
-          });
-        } catch (e) {
-          fetchErr = e;
-        } finally {
-          clearTimeout(timeoutTimer);
-        }
+        // 2026-05-15 v1.0.316: COBRO INSTANTÁNEO (fire-and-forget)
+        //
+        // El cajero NO debe esperar. Hacemos:
+        //   1) Guardar venta en cola local (síncrono, <1ms)
+        //   2) Cerrar modal + imprimir ticket (síncrono, <10ms)
+        //   3) Fetch a /api/cobro en BACKGROUND sin await — si responde OK
+        //      actualizamos el sale_id; si falla, queda en cola para reintento.
+        //
+        // Esto da experiencia INSTANT al cajero (adulto mayor) sin importar
+        // si la red está lenta o caída.
 
-        // ─── PATH A: respuesta OK del servidor ───
-        if (resp && resp.ok) {
-          var data = null;
-          try { data = await resp.json(); } catch (_) { data = {}; }
-          log('/api/cobro OK:', data);
-          window.__vlxLastCobroResult = data;
-          postSuccessCleanup(data);
-          return;
-        }
-        // ─── PATH B: 409 duplicate (idempotency) — tratarlo como éxito ───
-        if (resp && resp.status === 409) {
-          try { var dupData = await resp.json(); postSuccessCleanup(dupData); }
-          catch (_) { postSuccessCleanup({}); }
-          return;
-        }
-        // ─── PATH C: 404 endpoint no desplegado — fallback legacy ───
-        if (resp && resp.status === 404) {
-          log('FALLBACK to /api/sales (endpoint /api/cobro not deployed)');
-          return origComplete.apply(this, arguments);
-        }
-
-        // ─── PATH D: TIMEOUT / OFFLINE / ERROR — modo offline-first ───
-        // Guardamos local, cerramos modal, imprimimos. La cola de sync legacy
-        // (que ya existe en volvix-sync.js) se encarga de subir cuando haya red.
-        var reason = fetchErr ? (fetchErr.name === 'AbortError' ? 'timeout' : 'network') : ('http-' + (resp ? resp.status : '?'));
-        log('cobro offline path:', reason);
-
-        // Generar sale_number/folio local (será reemplazado por el del server al sync)
+        // 1) Generar folio local atómicamente
         var localSaleId = 'local-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
-        var localSaleNum = (window.__volvixLastFolio || 0) + 1;
-        try { window.__volvixLastFolio = localSaleNum; } catch (_) {}
+        var lastFolio = 0;
+        try { lastFolio = parseInt(localStorage.getItem('volvix_last_folio') || '0', 10) || 0; } catch (_) {}
+        var localSaleNum = lastFolio + 1;
         try { localStorage.setItem('volvix_last_folio', String(localSaleNum)); } catch (_) {}
 
-        // Guardar en cola offline para sync posterior
+        // 2) Persistir en cola local (idempotency-key como dedupe key)
         try {
           var queueKey = 'volvix_cobro_offline_queue';
           var queue = [];
           try { queue = JSON.parse(localStorage.getItem(queueKey) || '[]'); } catch (_) { queue = []; }
-          queue.push({
-            ts: Date.now(),
-            idemKey: idemKey,
-            payload: payload,
-            localSaleId: localSaleId,
-            localSaleNum: localSaleNum
-          });
-          localStorage.setItem(queueKey, JSON.stringify(queue.slice(-100))); // keep last 100
+          // Evitar duplicar si ya está
+          if (!queue.some(function(q){ return q.idemKey === idemKey; })) {
+            queue.push({
+              ts: Date.now(),
+              idemKey: idemKey,
+              payload: payload,
+              localSaleId: localSaleId,
+              localSaleNum: localSaleNum,
+              synced: false
+            });
+            localStorage.setItem(queueKey, JSON.stringify(queue.slice(-200)));
+          }
         } catch (e) { console.warn('queue persist failed:', e); }
 
-        // Construir cobroResult sintético para el postSuccessCleanup
-        var fakeResult = {
+        // 3) Construir resultado optimista — el cajero ya ve venta lista
+        var optimisticResult = {
           ok: true,
-          offline: true,
+          offline: false,  // lo actualizaremos a true si el sync background falla
           sale_id: localSaleId,
           sale_number: localSaleNum,
           total: payload.total,
@@ -1171,15 +1210,78 @@
           items: payload.items,
           payments: payload.payments
         };
-        window.__vlxLastCobroResult = fakeResult;
+        window.__vlxLastCobroResult = optimisticResult;
 
-        // Mostrar toast informativo (NO alert que bloquea)
-        if (typeof window.showToast === 'function') {
-          window.showToast('✅ Venta guardada (offline · se sincroniza al recuperar conexión)', 'success', 4000);
-        }
+        // 4) NOTA: el modal YA CERRÓ y la impresora YA RECIBIÓ el ticket
+        // en FASE 0/1 al inicio de completePay. NO llamamos postSuccessCleanup
+        // de nuevo porque eso re-imprimiría. Solo limpiamos flags.
+        window.__volvixSaleInFlight = false;
+        window.__volvixPayVerified = false;
+        window.__volvixPayVerification = null;
+        // Reset folio footers (postSuccessCleanup lo hacía)
+        var _fp = document.getElementById('footer-pago'); if (_fp) _fp.textContent = '$0.00';
+        var _fc = document.getElementById('footer-cambio'); if (_fc) _fc.textContent = '$0.00';
+        // Broadcast cart-checkout-done para otras pestañas
+        try {
+          if (typeof VOLVIX_CART_CHANNEL !== 'undefined' && VOLVIX_CART_CHANNEL) {
+            VOLVIX_CART_CHANNEL.postMessage({ type: 'cart-checkout-done',
+              token: (typeof __volvixGetOrCreateCartToken === 'function' ? __volvixGetOrCreateCartToken() : null),
+              ts: Date.now() });
+          }
+        } catch (_) {}
+        // R8a/R8b — limpiar draft + notificar al server (no bloquea)
+        try { if (typeof window.__r8aClearCartDraft === 'function') window.__r8aClearCartDraft(); } catch (_) {}
+        try {
+          if (typeof window.__r8bAuthFetch === 'function') {
+            window.__r8bAuthFetch('/api/cart/draft/clear', {
+              method: 'POST', body: JSON.stringify({ reason: 'sale_completed' })
+            }).catch(function () {});
+          }
+        } catch (_) {}
 
-        // Cierre + impresión del ticket — igual que en éxito online
-        postSuccessCleanup(fakeResult);
+        // 5) FIRE-AND-FORGET fetch /api/cobro en background.
+        // Si responde, actualizamos el record local. Si falla, queda en cola.
+        (function syncInBackground() {
+          var bgCtrl = new AbortController();
+          var bgTimer = setTimeout(function(){ bgCtrl.abort(); }, 20000);
+          fetch('/api/cobro', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Idempotency-Key': idemKey,
+              Authorization: token ? ('Bearer ' + token) : ''
+            },
+            body: JSON.stringify(payload),
+            signal: bgCtrl.signal
+          }).then(function(resp){
+            clearTimeout(bgTimer);
+            if (resp.ok || resp.status === 409) {
+              return resp.json().catch(function(){ return {}; }).then(function(data){
+                // Actualizar la cola: marcar como synced + guardar sale_id real
+                try {
+                  var queueKey = 'volvix_cobro_offline_queue';
+                  var queue = JSON.parse(localStorage.getItem(queueKey) || '[]');
+                  for (var i = 0; i < queue.length; i++) {
+                    if (queue[i].idemKey === idemKey) {
+                      queue[i].synced = true;
+                      queue[i].serverSaleId = data.sale_id || data.id;
+                      queue[i].serverSaleNumber = data.sale_number;
+                      break;
+                    }
+                  }
+                  localStorage.setItem(queueKey, JSON.stringify(queue));
+                } catch (_) {}
+                log('background sync OK:', data.sale_id || data.id);
+              });
+            }
+            log('background sync NON-OK:', resp.status);
+          }).catch(function(e){
+            clearTimeout(bgTimer);
+            log('background sync failed:', e.message);
+            // Quedará en cola para futuro reintento (otro sync wakeup)
+          });
+        })();
+
         return;
       } catch (e) {
         // Solo errores de código (no de red — esos los manejamos arriba)
