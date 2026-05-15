@@ -408,6 +408,14 @@
     if (rec) {
       rec.addEventListener('input', refreshCompleteButton);
     }
+    // 2b) Hook calcChange (legacy) — se dispara desde billetes, EXACTO, numpad
+    var origCalcChange = window.calcChange;
+    if (typeof origCalcChange === 'function') {
+      window.calcChange = function () {
+        try { origCalcChange.apply(this, arguments); } catch (e) { console.warn('[vlx] calcChange err', e); }
+        try { refreshCompleteButton(); } catch (e) {}
+      };
+    }
     // 3) F1-F8 shortcuts (only when modal-pay is open)
     document.addEventListener('keydown', function (e) {
       var modal = document.getElementById('modal-pay');
