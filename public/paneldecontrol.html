@@ -2501,7 +2501,8 @@
       if (user.is_first_login === true) return true;
       if (user.first_login === true) return true;
       // Fallback: si nunca ha completado wizard y rol owner
-      if ((user.role === 'owner' || user.role === 'admin') && !user.first_login_completed_at) {
+      var _flRole = typeof _pdcNormalizeRole !== 'undefined' ? _pdcNormalizeRole(user.role || '') : (user.role || '').toLowerCase();
+      if ((_flRole === 'owner' || _flRole === 'admin') && !user.first_login_completed_at) {
         return user.is_first_login !== false;
       }
       return false;
@@ -2872,7 +2873,7 @@
                       });
                     });
                   } catch (e) {
-                    list.innerHTML = '<div style="color:#dc2626;padding:20px;text-align:center;grid-column:1/-1;">Error: ' + e.message + '</div>';
+                    list.innerHTML = '<div style="color:#dc2626;padding:20px;text-align:center;grid-column:1/-1;">Error: ' + escapeHtml(e.message) + '</div>';
                   }
                 }
                 function escapeHtml(s) {
@@ -4349,12 +4350,23 @@
   window.INDUSTRY_LABELS = INDUSTRY_LABELS;     // 2026-05-09: usado por panel #permisos > Giros
   window.applyIndustryTerminology = applyIndustryTerminology;
 
+  // FIX: normalizador de roles — mismo mapa que salvadorex-pos.html
+  function _pdcNormalizeRole(role) {
+    var r = String(role || '').toLowerCase().trim();
+    if (r === 'cajero') return 'cashier';
+    if (r === 'dueño' || r === 'dueno') return 'owner';
+    if (r === 'gerente') return 'manager';
+    if (r === 'superadmin' || r === 'super_admin' || r === 'platform_owner') return 'superadmin';
+    if (r === 'business_owner') return 'owner';
+    return r;
+  }
+
   function getCurrentRole() {
     try {
       const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
       if (!tok) return '';
       const p = JSON.parse(atob(tok.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
-      return String(p.role || '').toLowerCase();
+      return _pdcNormalizeRole(p.role || '');
     } catch(_) { return ''; }
   }
 
@@ -8988,12 +9000,16 @@
                      : '<span style="background:#fff7ed;color:#c2410c;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">⚠️ v'+ r.version +'</span>')
         : '<span style="background:#f3f4f6;color:#6b7280;padding:2px 8px;border-radius:10px;font-size:11px;">❓ Sin datos</span>';
       var lastSeen = r.last_seen ? new Date(r.last_seen).toLocaleDateString('es-MX', {day:'2-digit',month:'short',year:'numeric'}) : '—';
+      var safeEmail = escapeAttr(r.email || '');
+      var safePlatform = escapeAttr(r.platform || '');
+      var safeBusiness = escapeText(r.business || '—');
+      var safeEmailText = escapeText(r.email || '—');
       var action = !isUpdated && hasData
-        ? '<button onclick="vlxVersionsNotify(\'' + (r.email||'').replace(/'/g,"\\'")+'\', \'' + r.platform + '\')" style="font-size:11px;background:#2563eb;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;">📣 Notificar</button>'
+        ? '<button data-vlx-email="' + safeEmail + '" data-vlx-platform="' + safePlatform + '" onclick="vlxVersionsNotify(this.dataset.vlxEmail,this.dataset.vlxPlatform)" style="font-size:11px;background:#2563eb;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;">📣 Notificar</button>'
         : '<span style="font-size:11px;color:#9ca3af;">—</span>';
-      return '<tr><td style="font-size:12.5px;"><div style="font-weight:600;color:#1a1a1a;">' + (r.business||'—') + '</div><div style="color:#6b7280;font-size:11.5px;">' + (r.email||'—') + '</div></td>'
-           + '<td style="font-size:13px;">' + (platIcon[r.platform]||'') + ' ' + (r.platform||'—') + '</td>'
-           + '<td style="font-family:monospace;font-size:12.5px;color:#374151;">v' + (r.version||'—') + '</td>'
+      return '<tr><td style="font-size:12.5px;"><div style="font-weight:600;color:#1a1a1a;">' + safeBusiness + '</div><div style="color:#6b7280;font-size:11.5px;">' + safeEmailText + '</div></td>'
+           + '<td style="font-size:13px;">' + (platIcon[safePlatform]||'') + ' ' + safePlatform + '</td>'
+           + '<td style="font-family:monospace;font-size:12.5px;color:#374151;">v' + escapeText(r.version||'—') + '</td>'
            + '<td style="font-size:12px;color:#6b7280;">' + lastSeen + '</td>'
            + '<td>' + badge + '</td>'
            + '<td>' + action + '</td></tr>';
