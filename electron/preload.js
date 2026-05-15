@@ -108,5 +108,14 @@ contextBridge.exposeInMainWorld('volvixElectron', {
   // Escanear subnet en busca de impresoras (ej: '192.168.1')
   scanNetworkPrinters: async function (subnet, opts) {
     return await ipcRenderer.invoke('volvix:net:scan', subnet, opts);
+  },
+
+  // 2026-05-15: Discovery AGRESIVO multi-protocolo (encuentra impresoras
+  // incluso en OTROS subnets / IP ranges). Combina mDNS + SSDP + ARP +
+  // escaneo de TODAS las interfaces de red + subnets comunes (192.168.0-2,
+  // 10.0.0, 172.16). Útil cuando PC y impresora están en subnets diferentes
+  // pero conectadas al mismo router/switch.
+  discoverAllPrinters: async function (opts) {
+    return await ipcRenderer.invoke('volvix:printer:discover-all', opts || {});
   }
 });

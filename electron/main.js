@@ -424,6 +424,11 @@ let _printerNetwork = null;
 try { _printerNetwork = require('./printer-network'); }
 catch (e) { console.warn('[volvix] printer-network no disponible:', e.message); }
 
+// 2026-05-15: Discovery agresivo de impresoras (mDNS + SSDP + ARP + multi-subnet)
+let _printerDiscovery = null;
+try { _printerDiscovery = require('./printer-discovery'); }
+catch (e) { console.warn('[volvix] printer-discovery no disponible:', e.message); }
+
 function runPrinterAutoSetupBackground() {
   if (!_printerAutoSetup || process.platform !== 'win32') return;
   // Esperar 3s tras arrancar para no competir con servidor local y ventana
@@ -451,6 +456,13 @@ app.whenReady().then(async () => {
   createWindow();
   setupAutoUpdater();
   runPrinterAutoSetupBackground();
+
+  // 2026-05-15: Discovery de impresoras de red al primer arranque (10s después)
+  // Solo si NO hay impresora IP configurada
+  setTimeout(() => {
+    // No bloquear si el discovery falla
+    tryAutoConfigNetworkPrinter().catch(() => {});
+  }, 10000);
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
@@ -490,6 +502,51 @@ ipcMain.handle('volvix:net:scan', async (event, subnet, opts) => {
   if (!_printerNetwork) return { ok: false, error: 'Network module not loaded' };
   return await _printerNetwork.scanSubnet(subnet, opts || {});
 });
+
+// 2026-05-15: Discovery agresivo multi-protocolo (mDNS+SSDP+ARP+multi-subnet)
+// Encuentra impresoras INCLUSO en otros subnets / IP ranges no obvios
+ipcMain.handle('volvix:printer:discover-all', async (event, opts) => {
+  if (!_printerDiscovery) return { ok: false, error: 'Discovery module not loaded' };
+  try {
+    const result = await _printerDiscovery.discoverPrinters(Object.assign({
+      timeout: 500,
+      concurrency: 50,
+      includeMDNS: true,
+      includeSSDP: true,
+      includeArp: true,
+      includeCommon: true,
+      maxIPs: 2000
+    }, opts || {}));
+    return { ok: true, ...result };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+});
+
+// 2026-05-15: Auto-config al primer arranque — si encuentra UNA impresora IP, la usa
+async function tryAutoConfigNetworkPrinter() {
+  if (!_printerDiscovery) return;
+  try {
+    console.log('[volvix] network printer discovery: starting...');
+    const result = await _printerDiscovery.discoverPrinters({
+      timeout: 400,
+      concurrency: 40,
+      includeMDNS: true,
+      includeSSDP: true,
+      includeArp: true,
+      includeCommon: false  // primer pass: no scanear commons, ya hay USB
+    });
+    console.log('[volvix] discovery found:', result.found.length, 'printers,', result.stats.elapsed_ms, 'ms');
+    if (result.found.length > 0 && mainWindow) {
+      // Avisar al renderer (no auto-configurar, solo informar)
+      mainWindow.webContents.executeJavaScript(
+        'try{showToast&&showToast("🌐 ' + result.found.length + ' impresora(s) de red detectada(s). Ve a Configuración para usarla.","info",7000);}catch(_){}'
+      ).catch(() => {});
+    }
+  } catch (e) {
+    console.warn('[volvix] discovery error:', e.message);
+  }
+}
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();

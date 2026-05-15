@@ -223,19 +223,37 @@
     ipBtnRow.appendChild(el('button', {
       style: { padding: '6px 12px', border: '1px solid #BFDBFE', background: '#EFF6FF', color: '#1E40AF', borderRadius: '6px', cursor: 'pointer', fontSize: '12px' },
       onClick: async () => {
-        const subnet = (ipInput.value.trim().split('.').slice(0, 3).join('.')) || '192.168.1';
-        statusEl.textContent = '🔍 Escaneando ' + subnet + '.0/24 (puerto 9100)… ~30s';
-        if (global.volvixElectron && global.volvixElectron.scanNetworkPrinters) {
-          const found = await global.volvixElectron.scanNetworkPrinters(subnet, { startIP: 1, endIP: 254, concurrency: 30, timeout: 400 });
-          if (Array.isArray(found) && found.length) {
-            statusEl.textContent = '✅ Encontradas: ' + found.map(f => f.ip).join(', ');
-            if (found.length === 1) ipInput.value = found[0].ip;
+        statusEl.textContent = '🔍 Búsqueda inteligente (mDNS+SSDP+ARP+multi-subnet)… ~30-60s';
+        if (global.volvixElectron && global.volvixElectron.discoverAllPrinters) {
+          const result = await global.volvixElectron.discoverAllPrinters({
+            timeout: 500, concurrency: 50, includeCommon: true
+          });
+          if (result.ok && Array.isArray(result.found) && result.found.length) {
+            const list = result.found.map(f => {
+              const tag = f.likelyPrinter ? '⭐' : (f.mdns || f.ssdp ? '📡' : '');
+              return tag + ' ' + f.ip + (f.mac ? ' [' + f.mac + ']' : '') + ' (' + f.source + ', ' + f.latency_ms + 'ms)';
+            }).join('\n');
+            statusEl.style.whiteSpace = 'pre-wrap';
+            statusEl.textContent = '✅ ' + result.found.length + ' device(s) en puerto 9100:\n' + list;
+            // Si solo hay 1, auto-llenar
+            if (result.found.length === 1) {
+              ipInput.value = result.found[0].ip;
+            } else {
+              // Si hay 'likelyPrinter' priorizarla
+              const printer = result.found.find(f => f.likelyPrinter);
+              if (printer) ipInput.value = printer.ip;
+            }
           } else {
-            statusEl.textContent = '✗ Ninguna impresora encontrada en ' + subnet + '.0/24:9100';
+            statusEl.textContent = '✗ Ninguna impresora encontrada (' + (result.stats ? result.stats.total_ips_probed + ' IPs probadas en ' + result.stats.elapsed_ms + 'ms' : '') + ')';
           }
+        } else if (global.volvixElectron && global.volvixElectron.scanNetworkPrinters) {
+          // Fallback al scan viejo
+          const subnet = (ipInput.value.trim().split('.').slice(0, 3).join('.')) || '192.168.1';
+          const found = await global.volvixElectron.scanNetworkPrinters(subnet, { concurrency: 30, timeout: 400 });
+          statusEl.textContent = (found && found.length) ? '✅ ' + found.map(f => f.ip).join(', ') : '✗ No encontradas';
         }
       }
-    }, '🔍 Escanear red'));
+    }, '🔍 Escanear red (todo)'));
     ipPanel.appendChild(ipBtnRow);
     card.appendChild(ipPanel);
 
