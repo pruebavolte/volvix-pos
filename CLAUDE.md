@@ -3,6 +3,10 @@
 > Lee este archivo COMPLETO antes de tocar cualquier cosa.
 > SOBREVIVE a la compactación de contexto. Si vuelves a este proyecto y NO recuerdas nada, lee esto PRIMERO.
 
+> **⚠️ HANDOFF MÁS RECIENTE: `docs/HANDOFF_2026-05-15.md`** ← lee ese ANTES que este.
+> Contiene: versión actual (v1.0.315), estado del sistema de impresión completo,
+> arquitectura de 5,500 LOC nuevas, pendientes priorizados, comandos para continuar.
+
 ---
 
 ## 0. COMPORTAMIENTO GENERAL
