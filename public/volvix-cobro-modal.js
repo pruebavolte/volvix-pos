@@ -538,6 +538,21 @@
       var btMac = null;
       try { btMac = localStorage.getItem('volvix_bt_printer_mac'); } catch (_) {}
 
+      // 2026-05-14 v1.0.311: si modo es 'auto' Y hay impresora BT emparejada,
+      // PROMOVER a 'bluetooth' exclusivo (NO caer a USB si BT falla).
+      // El usuario espera que si tiene BT, se use BT.
+      var btPrintersAvailable = [];
+      if (printMode === 'auto' && window.volvixElectron.listBluetoothPrinters) {
+        try {
+          btPrintersAvailable = await window.volvixElectron.listBluetoothPrinters();
+          var btPrinters = (btPrintersAvailable || []).filter(function (p) { return p && p.isPrinter; });
+          if (btPrinters.length > 0) {
+            printMode = 'bluetooth';
+            log('Auto-mode: BT printer detected (' + btPrinters[0].name + '), using BT exclusivamente');
+          }
+        } catch (e) { log('Error listing BT printers:', e.message); }
+      }
+
       // BT mode: probar Bluetooth primero si el modo lo permite
       if (printMode === 'bluetooth' || printMode === 'auto') {
         if (window.volvixElectron.printBluetooth) {
@@ -548,14 +563,13 @@
               return true;
             }
             if (printMode === 'bluetooth') {
-              // Modo BT explícito + falló → reportar
+              // Modo BT explícito + falló → reportar y NO fallback (el usuario quiere BT)
               log('BT print failed in BT mode:', btResult && btResult.error);
               if (typeof window.showToast === 'function') {
-                window.showToast('⚠ Impresora BT no respondió: ' + (btResult && btResult.error || ''), 'warning', 5000);
+                window.showToast('⚠ Impresora BT no respondió. Verifica que esté encendida y con papel.', 'warning', 6000);
               }
               return false;
             }
-            // Modo auto + BT falló → continuar con USB
             log('BT failed, falling back to USB:', btResult && btResult.error);
           } catch (e) {
             log('BT print exception:', e);
