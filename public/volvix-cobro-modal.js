@@ -521,16 +521,46 @@
   }
 
   // 2026-05-14 — Auto-print ticket térmico al completar cobro.
-  // Pensado para adultos mayores: NO requiere click ni configuración.
-  // 1) Si el usuario configuró una impresora (volvix_system_printer en localStorage), úsala
-  // 2) Si no, PrintHub.findBestThermalPrinter() detecta la 58mm/80mm automáticamente
-  // 3) Imprime silencioso (sin diálogo) usando window.volvixElectron.printToSystem
+  // Soporta dos modos: USB (impresora del SO) y BLUETOOTH (SPP / virtual COM).
+  // El usuario elige en Configuración: localStorage.volvix_printer_mode = 'usb' | 'bluetooth' | 'auto'
+  // Default 'auto': prueba BT primero (si hay BT paired) si no usa USB.
   async function autoPrintTicket(cobroResult) {
     try {
       // Sólo si estamos en la app .exe Electron — en navegador web puro fallback a window.print
       if (!window.volvixElectron || !window.volvixElectron.printToSystem) {
         log('autoPrint skipped (no Electron) — use config to enable web print');
         return false;
+      }
+
+      // 2026-05-14 BT: leer modo elegido por usuario (config UI o default auto)
+      var printMode = 'auto';
+      try { printMode = localStorage.getItem('volvix_printer_mode') || 'auto'; } catch (_) {}
+      var btMac = null;
+      try { btMac = localStorage.getItem('volvix_bt_printer_mac'); } catch (_) {}
+
+      // BT mode: probar Bluetooth primero si el modo lo permite
+      if (printMode === 'bluetooth' || printMode === 'auto') {
+        if (window.volvixElectron.printBluetooth) {
+          try {
+            var btResult = await tryBluetoothPrint(cobroResult, btMac);
+            if (btResult && btResult.ok) {
+              log('✅ Printed via Bluetooth:', btResult.printer, btResult.com);
+              return true;
+            }
+            if (printMode === 'bluetooth') {
+              // Modo BT explícito + falló → reportar
+              log('BT print failed in BT mode:', btResult && btResult.error);
+              if (typeof window.showToast === 'function') {
+                window.showToast('⚠ Impresora BT no respondió: ' + (btResult && btResult.error || ''), 'warning', 5000);
+              }
+              return false;
+            }
+            // Modo auto + BT falló → continuar con USB
+            log('BT failed, falling back to USB:', btResult && btResult.error);
+          } catch (e) {
+            log('BT print exception:', e);
+          }
+        }
       }
       // 1) Resolver impresora
       var printerName = null;
@@ -595,6 +625,48 @@
     } catch (e) {
       console.error('[vlx-cobro] autoPrintTicket error:', e);
       return false;
+    }
+  }
+
+  // Auxiliar: imprimir vía Bluetooth (SPP / virtual COM)
+  async function tryBluetoothPrint(cobroResult, preferredMac) {
+    try {
+      var saleNum = (cobroResult && cobroResult.sale_number) || '';
+      var saleId = (cobroResult && cobroResult.sale_id) || '';
+      var total = (cobroResult && cobroResult.total) || 0;
+      var nowStr = new Date().toLocaleString('es-MX');
+      var items = (window.CART || []).slice();
+      var businessName = '';
+      try {
+        var sess = JSON.parse(localStorage.getItem('volvix:session') || localStorage.getItem('volvixSession') || 'null');
+        businessName = (sess && (sess.business_name || sess.tenant_name)) || '';
+      } catch (_) {}
+
+      // Construir texto plano para BT (la conversión HTML→ESC/POS está en main.js)
+      var lines = [];
+      if (businessName) lines.push(businessName);
+      lines.push(nowStr);
+      lines.push('Ticket: ' + (saleNum || saleId.slice(0,8)));
+      lines.push('--------------------------------');
+      items.forEach(function (i) {
+        var name = (i.name || '').slice(0, 22).padEnd(22);
+        var amt = '$' + ((i.price || 0) * (i.qty || 1)).toFixed(2);
+        lines.push((i.qty || 1) + 'x ' + name + amt.padStart(8));
+      });
+      lines.push('--------------------------------');
+      lines.push('TOTAL  $' + Number(total).toFixed(2));
+      lines.push('--------------------------------');
+      lines.push('Gracias por su compra!');
+      lines.push('Volvix POS');
+
+      var text = lines.join('\n');
+      return await window.volvixElectron.printBluetooth({
+        text: text,
+        mac: preferredMac,
+        baudRate: 9600
+      });
+    } catch (e) {
+      return { ok: false, error: e.message };
     }
   }
 

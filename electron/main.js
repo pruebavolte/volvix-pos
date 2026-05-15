@@ -414,6 +414,11 @@ let _printerAutoSetup = null;
 try { _printerAutoSetup = require('./printer-auto-setup'); }
 catch (e) { console.warn('[volvix] printer-auto-setup no disponible:', e.message); }
 
+// 2026-05-14: Impresión Bluetooth (SPP / virtual COM port)
+let _printerBluetooth = null;
+try { _printerBluetooth = require('./printer-bluetooth'); }
+catch (e) { console.warn('[volvix] printer-bluetooth no disponible:', e.message); }
+
 function runPrinterAutoSetupBackground() {
   if (!_printerAutoSetup || process.platform !== 'win32') return;
   // Esperar 3s tras arrancar para no competir con servidor local y ventana
@@ -455,6 +460,16 @@ ipcMain.handle('volvix:printer:auto-setup', async () => {
 ipcMain.handle('volvix:printer:status', async () => {
   if (!_printerAutoSetup) return { ok: false };
   return await _printerAutoSetup.getStatus();
+});
+
+// IPC Bluetooth printing
+ipcMain.handle('volvix:bt:list-printers', async () => {
+  if (!_printerBluetooth) return [];
+  return await _printerBluetooth.listBluetoothPrinters();
+});
+ipcMain.handle('volvix:bt:print', async (event, opts) => {
+  if (!_printerBluetooth) return { ok: false, error: 'BT module not loaded' };
+  return await _printerBluetooth.printTicketBT(opts || {});
 });
 
 app.on('window-all-closed', () => {

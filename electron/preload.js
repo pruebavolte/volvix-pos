@@ -83,5 +83,16 @@ contextBridge.exposeInMainWorld('volvixElectron', {
   },
   printerStatus: async function () {
     return await ipcRenderer.invoke('volvix:printer:status');
+  },
+
+  // 2026-05-14 — Bluetooth printing via SPP (virtual COM port)
+  // Lista impresoras BT emparejadas: [{name, mac, com, isPrinter}]
+  listBluetoothPrinters: async function () {
+    return await ipcRenderer.invoke('volvix:bt:list-printers');
+  },
+  // Manda HTML/texto a impresora BT (auto-detect o forzar mac/name)
+  // opts: { html, text, printerName?, mac?, baudRate? }
+  printBluetooth: async function (opts) {
+    return await ipcRenderer.invoke('volvix:bt:print', opts || {});
   }
 });
