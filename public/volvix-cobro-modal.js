@@ -205,13 +205,14 @@
     refreshCompleteButton();
   };
 
-  window.__vlxValidateCfdi = function () {
+  // Validador PURO de CFDI: NO llama a refreshCompleteButton (evita recursión).
+  // refreshCompleteButton llama a éste internamente para checar validez.
+  function cfdiIsValid() {
     var enabled = $('#vlx-cfdi-enabled') && $('#vlx-cfdi-enabled').checked;
-    if (!enabled) return true;
+    if (!enabled) return { ok: true, errors: [] };
     var rfc = ($('#vlx-cfdi-rfc') && $('#vlx-cfdi-rfc').value || '').toUpperCase().trim();
     var cp = ($('#vlx-cfdi-cp') && $('#vlx-cfdi-cp').value || '').trim();
     var regimen = $('#vlx-cfdi-regimen') && $('#vlx-cfdi-regimen').value;
-    var errBox = document.getElementById('vlx-cfdi-error');
     var errors = [];
     if (window.VolvixCobro && window.VolvixCobro.validators) {
       if (!window.VolvixCobro.validators.isValidRFC(rfc)) errors.push('RFC inválido (formato: XAXX010101000)');
@@ -221,12 +222,20 @@
       if (!/^\d{5}$/.test(cp)) errors.push('CP inválido');
     }
     if (!regimen) errors.push('Régimen fiscal requerido');
+    return { ok: errors.length === 0, errors: errors };
+  }
+
+  // Handler público: actualiza UI de errores y refresca botón Completar.
+  // SAFE — no recursión porque refreshCompleteButton llama a cfdiIsValid (puro).
+  window.__vlxValidateCfdi = function () {
+    var res = cfdiIsValid();
+    var errBox = document.getElementById('vlx-cfdi-error');
     if (errBox) {
-      errBox.style.display = errors.length ? 'block' : 'none';
-      errBox.textContent = errors.join(' · ');
+      errBox.style.display = res.errors.length ? 'block' : 'none';
+      errBox.textContent = res.errors.join(' · ');
     }
     refreshCompleteButton();
-    return errors.length === 0;
+    return res.ok;
   };
 
   // ============================================================================
@@ -364,7 +373,8 @@
       paid = parseCur($('#pay-recibido') && $('#pay-recibido').value || '0');
     }
     var sufficient = paid >= total - 0.005;
-    var cfdiOk = !($('#vlx-cfdi-enabled') && $('#vlx-cfdi-enabled').checked) || window.__vlxValidateCfdi();
+    // Llamar al validador PURO (cfdiIsValid), NO al handler público (recursión!)
+    var cfdiOk = !($('#vlx-cfdi-enabled') && $('#vlx-cfdi-enabled').checked) || cfdiIsValid().ok;
     var canComplete = sufficient && cfdiOk;
     btn.disabled = !canComplete;
     if (canComplete) {
