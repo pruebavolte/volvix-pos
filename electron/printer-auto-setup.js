@@ -189,6 +189,35 @@ async function ensureGenericDriver() {
 }
 
 /**
+ * 6.5. Detectar el puerto USB que está REALMENTE vinculado al hardware térmico actual.
+ * Lee USBPRINT registry para encontrar el InstanceId del hardware vivo, que tiene
+ * formato "6&xxx&0&USBNNN". Extrae el USBNNN.
+ * Esto es crítico porque Windows asigna USB001, USB002, USB003... según orden histórico
+ * de conexiones, NO según el hardware actual. Puertos viejos sobreviven como huérfanos.
+ */
+async function findHardwareUsbPort() {
+  const r = await runPowerShell(`
+    $entries = @()
+    $usbprint = "HKLM:\\SYSTEM\\CurrentControlSet\\Enum\\USBPRINT"
+    if (Test-Path $usbprint) {
+      Get-ChildItem $usbprint | ForEach-Object {
+        $hw = $_.PSChildName
+        Get-ChildItem "$usbprint\\$hw" -ErrorAction SilentlyContinue | ForEach-Object {
+          $inst = $_.PSChildName
+          if ($inst -match 'USB(\\d+)$') {
+            $entries += "$($matches[0])"
+          }
+        }
+      }
+    }
+    $entries -join ','
+  `, 5000);
+  if (!r.ok) return null;
+  const ports = (r.stdout || '').split(',').filter(Boolean);
+  return ports[0] || null;  // primer puerto vinculado al hardware
+}
+
+/**
  * 7. Re-enumerar hardware USB para forzar puerto fresco
  */
 async function recycleUsbDevice(instanceId) {
@@ -349,17 +378,40 @@ async function runAutoSetup(options = {}) {
     }
 
     if (needRebuild) {
+      // 2026-05-14 FIX: PRIMERO detectar el puerto USB del hardware ACTUAL via
+      // USBPRINT registry. Windows guarda el binding hardware↔puerto en
+      // HKLM\SYSTEM\CurrentControlSet\Enum\USBPRINT\<HW_ID>\<inst&USBNNN>.
+      // Esto evita usar USB001/USB002 fantasmas de instalaciones viejas.
+      let hardwarePort = await findHardwareUsbPort();
+      if (hardwarePort) {
+        track(`hardware-bound USB port detected: ${hardwarePort}`);
+      } else {
+        track('no hardware-bound USB port in registry yet, will recycle first');
+      }
+
       // Step 7: Re-enumerar hardware para forzar puerto fresco
       for (const hw of hardware) {
         await recycleUsbDevice(hw.InstanceId);
       }
       track('USB hardware recycled');
 
-      // Step 8: Eliminar puertos USB huérfanos
-      await removeOrphanedUsbPorts();
-      track('orphaned USB ports cleaned');
+      // Re-detectar el puerto después del cycle (Windows pudo haberlo reasignado)
+      if (!hardwarePort) {
+        hardwarePort = await findHardwareUsbPort();
+        if (hardwarePort) track(`hardware port detected after recycle: ${hardwarePort}`);
+      }
 
-      // Step 9: Listar puertos USB después del recycle
+      // Step 8: Eliminar puertos USB huérfanos (NUNCA el hardwarePort)
+      const orphanRes = await runPowerShell(`
+        $printerPorts = (Get-Printer | Select-Object -ExpandProperty PortName) -as [string[]]
+        $protect = '${hardwarePort || ''}'
+        $orphans = Get-PrinterPort | Where-Object { $_.Name -match '^USB\\d+$' -and $printerPorts -notcontains $_.Name -and $_.Name -ne $protect }
+        foreach ($p in $orphans) { try { Remove-PrinterPort -Name $p.Name -ErrorAction SilentlyContinue } catch {} }
+        ($orphans | Measure-Object).Count
+      `, 8000);
+      if (orphanRes.ok) track(`orphaned ports removed: ${orphanRes.stdout}`);
+
+      // Step 9: Listar puertos USB después del cleanup
       const portsRes = await runPowerShell(
         `Get-PrinterPort | Where-Object Name -match '^USB' | Select-Object -ExpandProperty Name`,
         5000
@@ -367,8 +419,9 @@ async function runAutoSetup(options = {}) {
       const usbPorts = portsRes.ok ? portsRes.stdout.split(/\r?\n/).filter(Boolean) : [];
       track(`USB ports available: ${usbPorts.join(', ') || 'none'}`);
 
-      // Elegir el primer puerto USB disponible (Windows lo creó al re-enumerar)
-      const targetPort = usbPorts[0] || 'USB001';
+      // Priorizar el puerto vinculado al hardware. Si no, primer USB disponible.
+      const targetPort = hardwarePort || usbPorts[0] || 'USB001';
+      track(`target port: ${targetPort}`);
 
       // Step 10: Crear Volvix-Thermal
       const created = await createVolvixThermalPrinter(targetPort);
