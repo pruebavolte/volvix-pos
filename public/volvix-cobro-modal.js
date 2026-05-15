@@ -464,13 +464,136 @@
   // ============================================================================
   // SUBMIT — sobrescribir completePay con versión que envía state completo
   // ============================================================================
+  // Sanitiza texto libre antes de mandarlo al backend (defensa-en-profundidad
+  // contra XSS stored en reportes que rendereen con innerHTML).
+  function sanitizeFreeText(s) {
+    if (!s) return '';
+    return String(s)
+      .replace(/[<>]/g, '')       // elimina < y > para impedir cualquier tag
+      .replace(/javascript:/gi, '')
+      .replace(/on\w+=/gi, '')
+      .slice(0, 500);
+  }
+
+  // Token unificado (fix SEC-6): UN solo source-of-truth.
+  // Prioridad: VolvixAuth.getToken → 'volvix:session' (auth-gate.js spec) → legacy keys.
+  function getAuthToken() {
+    try {
+      if (window.VolvixAuth && typeof window.VolvixAuth.getToken === 'function') {
+        var t = window.VolvixAuth.getToken();
+        if (t) return t;
+      }
+      // auth-gate.js usa 'volvix:session' como key oficial
+      var sessRaw = localStorage.getItem('volvix:session') || localStorage.getItem('volvixSession');
+      if (sessRaw) {
+        var sess = JSON.parse(sessRaw);
+        if (sess && sess.token) return sess.token;
+      }
+      return localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
+    } catch (_) { return ''; }
+  }
+
+  // Idempotency-key determinista (fix SEC-3): SHA-256 de items + total + cashier + ticket.
+  // Si el cliente reintenta (red intermitente, doble-submit, refresh), el server detecta dup.
+  async function deterministicIdemKey(payload) {
+    try {
+      var src = JSON.stringify({
+        items: (payload.items || []).map(function (i) { return [i.id || i.code, i.qty, i.price]; }),
+        total: payload.total,
+        ticket: payload.ticket_number,
+        tenant: payload.tenant_id || ''
+      });
+      if (window.crypto && window.crypto.subtle) {
+        var buf = new TextEncoder().encode(src);
+        var hash = await window.crypto.subtle.digest('SHA-256', buf);
+        return Array.from(new Uint8Array(hash)).map(function (b) { return b.toString(16).padStart(2,'0'); }).join('').slice(0, 32);
+      }
+    } catch (_) {}
+    return 'idem_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10);
+  }
+
+  // Post-success cleanup — replica el path final del completePay legacy SIN llamarlo
+  // de nuevo (evita double-write a /api/sales). Fix S-1.
+  function postSuccessCleanup(cobroResult) {
+    try {
+      var saleId = cobroResult && cobroResult.sale_id;
+      var saleNum = cobroResult && cobroResult.sale_number;
+      if (typeof window.showToast === 'function') {
+        window.showToast('✓ Venta ' + (saleNum || saleId || '') + ' guardada');
+      }
+      if (typeof window.closeModal === 'function') window.closeModal('modal-pay');
+      // GAP-2 — broadcast cart-checkout-done para otras pestañas
+      try {
+        if (typeof VOLVIX_CART_CHANNEL !== 'undefined' && VOLVIX_CART_CHANNEL) {
+          VOLVIX_CART_CHANNEL.postMessage({ type: 'cart-checkout-done', token: (typeof __volvixGetOrCreateCartToken === 'function' ? __volvixGetOrCreateCartToken() : null), ts: Date.now() });
+        }
+      } catch (_) {}
+      if (typeof window.__volvixResetCartToken === 'function') window.__volvixResetCartToken();
+      if (Array.isArray(window.CART)) window.CART.length = 0;
+      if (typeof window.renderCart === 'function') window.renderCart();
+      // R8a/R8b — limpiar draft + notificar al server
+      try { if (typeof window.__r8aClearCartDraft === 'function') window.__r8aClearCartDraft(); } catch (_) {}
+      try {
+        if (typeof window.__r8bAuthFetch === 'function') {
+          window.__r8bAuthFetch('/api/cart/draft/clear', {
+            method: 'POST', body: JSON.stringify({ reason: 'sale_completed' })
+          }).catch(function () {});
+        }
+      } catch (_) {}
+      // Reset footers
+      var fp = document.getElementById('footer-pago'); if (fp) fp.textContent = '$0.00';
+      var fc = document.getElementById('footer-cambio'); if (fc) fc.textContent = '$0.00';
+      // Incrementar folio
+      var cf = document.getElementById('currentFolio');
+      var pf = document.getElementById('pay-folio');
+      if (cf) {
+        var newF = (parseInt(cf.textContent, 10) || 0) + 1;
+        cf.textContent = String(newF);
+        if (pf) pf.textContent = String(newF);
+      }
+    } catch (e) {
+      console.error('[vlx-cobro] postSuccessCleanup error:', e);
+    } finally {
+      window.__volvixSaleInFlight = false;
+      window.__volvixPayVerified = false;
+      window.__volvixPayVerification = null;
+    }
+  }
+
   function setupCompletePayWrapper() {
     var origComplete = window.completePay;
-    if (typeof origComplete !== 'function') return;
+    if (typeof origComplete !== 'function') {
+      console.warn('[vlx-cobro] completePay no existe al momento del wrap — fallback al legacy más tarde');
+      return;
+    }
 
     window.completePay = async function () {
+      // Fix S-1: anti double-submit global (también protege el flujo nuevo)
+      if (window.__volvixSaleInFlight) { console.warn('[vlx-cobro] sale in flight, ignored'); return; }
+
+      // Verificación bancaria humana — mantener guard legacy
       var method = window.__volvixSelectedPayMethod || 'efectivo';
+      var needsBankVerify = (method === 'transferencia' || method === 'spei' || method === 'oxxo');
+      if (needsBankVerify && !window.__volvixPayVerified) {
+        if (typeof window.__vlxOpenPayVerifyModal === 'function') {
+          window.__vlxOpenPayVerifyModal(method, parseCur($('#pay-total') && $('#pay-total').textContent || '0'));
+        }
+        return;
+      }
+
       var total = parseCur($('#pay-total') && $('#pay-total').textContent || '0');
+
+      // Fix S-2: subtotal sanity check antes de cualquier cosa
+      if (!subtotalCache || subtotalCache <= 0) {
+        // Recalcular desde CART para no depender del setTimeout 100ms del openPayment wrap
+        if (Array.isArray(window.CART) && window.CART.length > 0) {
+          subtotalCache = window.CART.reduce(function (s, i) { return s + (i.price * i.qty); }, 0);
+        }
+      }
+      if (!subtotalCache || subtotalCache <= 0 || total <= 0) {
+        alert('No se puede cobrar: subtotal/total = 0. Verifica el carrito.');
+        return;
+      }
 
       // 1) Construir payments array
       var payments = [];
@@ -478,13 +601,9 @@
         payments = getMixtoRows().filter(function (r) { return r.amount > 0; }).map(function (r) {
           return { method: r.method, amount: r.amount, details: { reference: r.reference } };
         });
-        if (payments.length === 0) {
-          alert('Mixto requiere al menos 1 método con monto > 0');
-          return;
-        }
+        if (payments.length === 0) { alert('Mixto requiere al menos 1 método con monto > 0'); return; }
       } else {
         var recibido = parseCur($('#pay-recibido') && $('#pay-recibido').value || '0');
-        // Mapear método legacy → enum
         var methodMap = {
           'efectivo': 'EFECTIVO', 'tarjeta': 'TARJETA_CREDITO', 'tarjeta_debito': 'TARJETA_DEBITO',
           'tarjeta_credito': 'TARJETA_CREDITO', 'transferencia': 'SPEI', 'spei': 'SPEI',
@@ -493,7 +612,7 @@
           'credito_cliente': 'CREDITO_CLIENTE'
         };
         var enumMethod = methodMap[method] || 'EFECTIVO';
-        var paymentAmount = recibido > 0 ? Math.min(recibido, total) : total;  // si es exacto, total; si cambio, total (no más)
+        var paymentAmount = recibido > 0 ? Math.min(recibido, total) : total;
         var details = {};
         if (enumMethod === 'USD_EFECTIVO' && window.__vlxUsdAmount) {
           details.usd_amount = window.__vlxUsdAmount;
@@ -502,16 +621,13 @@
         payments.push({ method: enumMethod, amount: paymentAmount, details: details });
       }
 
-      // 2) Construir CFDI si está enabled
+      // 2) Construir CFDI
       var cfdi = null;
       if ($('#vlx-cfdi-enabled') && $('#vlx-cfdi-enabled').checked) {
-        if (!window.__vlxValidateCfdi()) {
-          alert('Datos CFDI incompletos o inválidos');
-          return;
-        }
+        if (!window.__vlxValidateCfdi()) { alert('Datos CFDI incompletos o inválidos'); return; }
         cfdi = {
           rfc: ($('#vlx-cfdi-rfc') && $('#vlx-cfdi-rfc').value || '').toUpperCase().trim(),
-          razon_social: ($('#vlx-cfdi-razon') && $('#vlx-cfdi-razon').value || '').trim(),
+          razon_social: sanitizeFreeText($('#vlx-cfdi-razon') && $('#vlx-cfdi-razon').value || ''),
           codigo_postal: ($('#vlx-cfdi-cp') && $('#vlx-cfdi-cp').value || '').trim(),
           regimen_fiscal: $('#vlx-cfdi-regimen') && $('#vlx-cfdi-regimen').value,
           uso_cfdi: $('#vlx-cfdi-uso') && $('#vlx-cfdi-uso').value || 'G03',
@@ -521,64 +637,84 @@
         };
       }
 
-      // 3) Inyectar extras al global usado por /api/sales (legacy) para retro-compat
-      window.__vlxCobroExtras = {
-        payments: payments,
-        cfdi: cfdi,
-        tip: { amount: window.__vlxTipAmount || 0, percent: window.__vlxTipPercent },
-        discount: { amount: window.__vlxDiscountAmount || 0, reason: $('#vlx-discount-reason') && $('#vlx-discount-reason').value || null },
-        rounding: { amount: window.__vlxRoundingAmount || 0, destination: null },
-        delivery: { method: window.__vlxDeliveryMethod || 'PRINT', target: $('#vlx-delivery-target') && $('#vlx-delivery-target').value || null },
-        notes: $('#vlx-notes-text') && $('#vlx-notes-text').value || ''
-      };
+      // 3) UI lock — disable button + show processing
+      var payBtn = document.getElementById('modal-pay-confirm');
+      var origText = payBtn && (payBtn.dataset.originalText || payBtn.textContent);
+      if (payBtn) {
+        payBtn.disabled = true;
+        payBtn.dataset.originalText = origText;
+        payBtn.textContent = 'Procesando…';
+      }
+      window.__volvixSaleInFlight = true;
 
-      // 4) Llamar a /api/cobro PRIMERO (escribe sales + payments + cfdi en una transacción)
       try {
-        var session = JSON.parse(localStorage.getItem('volvixSession') || 'null');
-        var token = (window.VolvixAuth && window.VolvixAuth.getToken && window.VolvixAuth.getToken())
-          || localStorage.getItem('volvix_token')
-          || localStorage.getItem('volvixAuthToken') || '';
+        var session = (function(){ try { return JSON.parse(localStorage.getItem('volvix:session') || localStorage.getItem('volvixSession') || 'null'); } catch(_){ return null; } })();
+        var token = getAuthToken();
         var folio = ($('#currentFolio') && $('#currentFolio').textContent) || '';
-        var items = (window.CART || []).map(function (i) { return { id: i.id, code: i.code, name: i.name, price: i.price, qty: i.qty }; });
+        var ticketNum = 'TKT-' + folio;
+        var items = (window.CART || []).map(function (i) {
+          return { id: i.id, code: i.code, name: i.name, price: i.price, qty: i.qty };
+        });
+
+        var payload = {
+          tenant_id: session && session.tenant_id || null,
+          customer_id: window.__volvixSelectedCustomerId || null,
+          ticket_number: ticketNum,
+          subtotal: subtotalCache,
+          items: items,
+          payments: payments,
+          cfdi: cfdi,
+          tip: { amount: window.__vlxTipAmount || 0, percent: window.__vlxTipPercent },
+          discount: { amount: window.__vlxDiscountAmount || 0, reason: $('#vlx-discount-reason') && $('#vlx-discount-reason').value || null },
+          rounding: { amount: window.__vlxRoundingAmount || 0, destination: null },
+          delivery: { method: window.__vlxDeliveryMethod || 'PRINT', target: ($('#vlx-delivery-target') && $('#vlx-delivery-target').value || null) },
+          notes: sanitizeFreeText($('#vlx-notes-text') && $('#vlx-notes-text').value || ''),
+          total: total
+        };
+        // Fix SEC-3: Idempotency-Key determinista
+        var idemKey = await deterministicIdemKey(payload);
+
         var resp = await fetch('/api/cobro', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: token ? ('Bearer ' + token) : '' },
-          body: JSON.stringify({
-            tenant_id: session && session.tenant_id || null,
-            customer_id: window.__volvixSelectedCustomerId || null,
-            ticket_number: 'TKT-' + folio,
-            subtotal: subtotalCache,
-            items: items,
-            payments: payments,
-            cfdi: cfdi,
-            tip: window.__vlxCobroExtras.tip,
-            discount: window.__vlxCobroExtras.discount,
-            rounding: window.__vlxCobroExtras.rounding,
-            delivery: window.__vlxCobroExtras.delivery,
-            notes: window.__vlxCobroExtras.notes,
-            total: total
-          })
+          headers: {
+            'Content-Type': 'application/json',
+            'Idempotency-Key': idemKey,
+            Authorization: token ? ('Bearer ' + token) : ''
+          },
+          body: JSON.stringify(payload)
         });
+
         if (resp.ok) {
           var data = await resp.json();
-          log('cobro response:', data);
+          log('/api/cobro OK:', data);
           window.__vlxLastCobroResult = data;
-          // Continue with original completePay() that updates UI + closes modal
-          return origComplete.apply(this, arguments);
+          // Fix S-1: cleanup manual, NO llamar origComplete (que dispararía /api/sales)
+          postSuccessCleanup(data);
+          return;
         } else if (resp.status === 404) {
-          // /api/cobro no desplegado todavía → fallback a /api/sales (legacy)
-          log('FALLBACK to /api/sales (no /api/cobro yet)');
+          // Endpoint no desplegado → fallback al legacy (debe ser único path que llame /api/sales)
+          log('FALLBACK to /api/sales (endpoint /api/cobro not deployed)');
           return origComplete.apply(this, arguments);
+        } else if (resp.status === 409) {
+          // Duplicate (idempotency caught it) → tratarlo como éxito silencioso
+          try { var dupData = await resp.json(); postSuccessCleanup(dupData); }
+          catch (_) { postSuccessCleanup({}); }
+          return;
         } else {
           var errBody = await resp.text();
           console.error('[vlx-cobro] /api/cobro failed:', resp.status, errBody);
-          alert('Error al guardar el cobro: ' + resp.status);
+          alert('Error al guardar el cobro (' + resp.status + '). Reintenta o llama a soporte.');
+          window.__volvixSaleInFlight = false;
+          if (payBtn) { payBtn.disabled = false; payBtn.textContent = origText || '✓ F12 - Completar cobro'; }
           return;
         }
       } catch (e) {
         console.error('[vlx-cobro] /api/cobro exception:', e);
-        // Si red falla, dejar que el legacy intente (que tiene offline queue)
-        return origComplete.apply(this, arguments);
+        // Fix S-4: NO caer al legacy en caso de red (legacy tiene su propia cola offline
+        // que escribiría una segunda venta). Mostrar error y permitir reintento manual.
+        alert('Sin conexión. Verifica internet e intenta de nuevo. (El cobro NO se duplicará.)');
+        window.__volvixSaleInFlight = false;
+        if (payBtn) { payBtn.disabled = false; payBtn.textContent = origText || '✓ F12 - Completar cobro'; }
       }
     };
   }

@@ -21016,14 +21016,49 @@ if (process.env.NODE_ENV === 'test') {
   // 2026-05-14 R31: Endpoint maestro Modal de Cobro v1.
   // Recibe state completo del modal y escribe en 1 transacción lógica:
   //   sales + N payments + (opcional) cfdi_invoices pending
-  // El cliente envía: tenant_id, customer_id, ticket_number, subtotal, items[],
-  //   payments[]{method,amount,details}, cfdi|null, tip, discount, rounding,
-  //   delivery, notes, total
+  // Hardened per adversarial review:
+  //   SEC-1 rate limit · SEC-2 RFC server-side · SEC-3 idempotency · SEC-4 total verify
+  //   SEC-5 sanitize notes · N-2 discount-50% authorization
+  // In-memory idempotency cache (sirve dentro de un mismo lambda warm)
+  const __vlxCobroIdemCache = handlers.__vlxCobroIdemCache || new Map();
+  handlers.__vlxCobroIdemCache = __vlxCobroIdemCache;
+  // Sanitize free-text: drop tags + JS schemes (defense-in-depth vs XSS stored)
+  function __vlxSanitize(s, maxLen) {
+    if (!s) return '';
+    return String(s)
+      .replace(/[<>]/g, '')
+      .replace(/javascript:/gi, '')
+      .replace(/\bon\w+\s*=/gi, '')
+      .slice(0, maxLen || 500);
+  }
+  // RFC México: 12 (PM) ó 13 (PF) chars. Incluye genéricos XAXX010101000 / XEXX010101000.
+  function __vlxValidRfc(rfc) {
+    if (!rfc) return false;
+    const r = String(rfc).toUpperCase().trim();
+    if (r === 'XAXX010101000' || r === 'XEXX010101000') return true;
+    return /^([A-ZÑ&]{3,4})\d{6}([A-Z\d]{3})$/.test(r);
+  }
   handlers['POST /api/cobro'] = requireAuth(async function (req, res) {
     try {
       const tnt = b36Tenant(req);
+      // Fix SEC-1: rate limit por tenant — 60 cobros/min es ya muy holgado para un POS humano
+      if (typeof rateLimit === 'function' && !rateLimit('cobro:create:' + tnt, 60, 60000)) {
+        return send429(res, rateLimitRetryMs('cobro:create:' + tnt, 60000));
+      }
       const body = await readBody(req, { maxBytes: 64 * 1024, strictJson: true });
       if (checkBodyError(req, res)) return;
+
+      // Fix SEC-3: idempotency-key — si el cliente reintenta (red intermitente, doble-submit),
+      // devolvemos respuesta cacheada en lugar de crear venta duplicada.
+      const idemHeader = (req.headers && (req.headers['idempotency-key'] || req.headers['Idempotency-Key'])) || '';
+      const idemKey = String(idemHeader).slice(0, 64).trim();
+      if (idemKey) {
+        const cached = __vlxCobroIdemCache.get(tnt + ':' + idemKey);
+        if (cached && (Date.now() - cached.ts) < 10 * 60 * 1000) {
+          // Replay dentro de ventana de 10min → respuesta cacheada
+          return sendJSON(res, Object.assign({ replayed: true }, cached.body), 201);
+        }
+      }
 
       const userId = (req.user && req.user.id) || null;
       const subtotal = Number(body.subtotal || 0);
@@ -21035,14 +21070,53 @@ if (process.env.NODE_ENV === 'test') {
       const discount = body.discount || { amount: 0 };
       const rounding = body.rounding || { amount: 0 };
       const delivery = body.delivery || { method: 'PRINT' };
-      const notes    = String(body.notes || '').slice(0, 500);
+      // Fix SEC-5: sanitize notes
+      const notes    = __vlxSanitize(body.notes, 500);
 
-      // Validaciones
+      // Validaciones básicas
       if (total <= 0) return sendValidation(res, 'total debe ser > 0', 'total');
+      if (subtotal <= 0) return sendValidation(res, 'subtotal debe ser > 0', 'subtotal');
       if (payments.length === 0) return sendValidation(res, 'al menos 1 pago requerido', 'payments');
+
+      // Fix SEC-4: verificar que total == subtotal - discount + tip + rounding (±0.01)
+      const tipAmt = Math.max(0, Number(tip.amount || 0));
+      const discAmt = Math.max(0, Number(discount.amount || 0));
+      const roundAmt = Number(rounding.amount || 0);
+      const expectedTotal = Math.round((subtotal - discAmt + tipAmt + roundAmt) * 100) / 100;
+      if (Math.abs(expectedTotal - total) > 0.01) {
+        return sendJSON(res, {
+          error: 'total_math_mismatch',
+          expected: expectedTotal,
+          received: total,
+          formula: 'subtotal - discount + tip + rounding'
+        }, 400);
+      }
+
+      // Fix N-2: descuento >50% requiere authorized_by
+      if (discAmt > 0 && discAmt > subtotal * 0.5 && !discount.authorized_by) {
+        return sendJSON(res, {
+          error: 'discount_authorization_required',
+          message: 'Descuento >50% requiere campo authorized_by (UUID del manager)',
+          discount: discAmt, subtotal: subtotal
+        }, 403);
+      }
+
       const paymentsSum = payments.reduce(function (s, p) { return s + Number(p.amount || 0); }, 0);
       if (Math.abs(paymentsSum - total) > 0.01) {
         return sendJSON(res, { error: 'payments_total_mismatch', expected: total, got: paymentsSum }, 400);
+      }
+
+      // Fix SEC-2: validar RFC server-side antes de aceptar CFDI
+      if (cfdi && cfdi.rfc) {
+        if (!__vlxValidRfc(cfdi.rfc)) {
+          return sendValidation(res, 'RFC inválido (formato SAT)', 'cfdi.rfc');
+        }
+        if (cfdi.codigo_postal && !/^\d{5}$/.test(String(cfdi.codigo_postal))) {
+          return sendValidation(res, 'Código postal inválido (5 dígitos)', 'cfdi.codigo_postal');
+        }
+        if (cfdi.email_facturacion && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cfdi.email_facturacion)) {
+          return sendValidation(res, 'Email facturación inválido', 'cfdi.email_facturacion');
+        }
       }
 
       // 1) Insert sale
@@ -21160,7 +21234,7 @@ if (process.env.NODE_ENV === 'test') {
             tenant_id: tnt,
             ticket_id: saleId,
             customer_rfc: String(cfdi.rfc).toUpperCase(),
-            customer_name: cfdi.razon_social || null,
+            customer_name: __vlxSanitize(cfdi.razon_social || '', 250),
             customer_email: cfdi.email_facturacion || null,
             receiver_zipcode: cfdi.codigo_postal || null,
             receiver_fiscal_regime: cfdi.regimen_fiscal || null,
@@ -21194,7 +21268,7 @@ if (process.env.NODE_ENV === 'test') {
         });
       } catch(_){}
 
-      sendJSON(res, {
+      const responseBody = {
         ok: true,
         sale_id: saleId,
         sale_number: sale.sale_number,
@@ -21202,15 +21276,32 @@ if (process.env.NODE_ENV === 'test') {
         cfdi_pending: cfdiPending,
         cfdi_id: cfdiId,
         total: total
-      }, 201);
+      };
+
+      // Fix SEC-3: cachear respuesta para idempotency replays.
+      // TTL 10min — limpieza por eviction natural si cache crece > 200 entradas.
+      if (idemKey) {
+        if (__vlxCobroIdemCache.size > 200) {
+          // Evict oldest 50
+          const keys = Array.from(__vlxCobroIdemCache.keys()).slice(0, 50);
+          keys.forEach(function (k) { __vlxCobroIdemCache.delete(k); });
+        }
+        __vlxCobroIdemCache.set(tnt + ':' + idemKey, { ts: Date.now(), body: responseBody });
+      }
+
+      sendJSON(res, responseBody, 201);
     } catch (err) { sendError(res, err); }
   });
 
   // 2026-05-14 R31: Tipo de cambio Banxico (cache localStorage + server fallback)
   // GET /api/fx/banxico → { rate, date, source }
-  handlers['GET /api/fx/banxico'] = async function (req, res) {
+  // Fix SEC-7: requireAuth + rate limit para impedir scraping anónimo
+  handlers['GET /api/fx/banxico'] = requireAuth(async function (req, res) {
     try {
-      // Fallback hardcoded para no bloquear UI si Banxico falla
+      const tnt = b36Tenant(req);
+      if (typeof rateLimit === 'function' && !rateLimit('fx:banxico:' + tnt, 30, 60000)) {
+        return send429(res, rateLimitRetryMs('fx:banxico:' + tnt, 60000));
+      }
       const FALLBACK_RATE = 17.50;
       const today = new Date().toISOString().slice(0, 10);
       // TODO: integrar con SIE Banxico serie SF43718 cuando haya BANXICO_TOKEN
@@ -21221,7 +21312,7 @@ if (process.env.NODE_ENV === 'test') {
         note: 'Configurar BANXICO_TOKEN para datos reales SIE serie SF43718'
       });
     } catch (err) { sendError(res, err); }
-  };
+  });
 
   handlers['POST /api/users'] = requireAuth(async function (req, res) {
     try {
