@@ -4236,7 +4236,7 @@
           <span>Asignar cliente</span>
         </button>
 
-        <button class="btn-cobrar" data-vlx-button="F12_cobrar" data-feature="pos.cobrar" onclick="openPayment()">
+        <button class="btn-cobrar" id="btn-cobrar-f12" data-vlx-button="F12_cobrar" data-feature="pos.cobrar" onclick="openPayment()" disabled title="Agrega productos al carrito para cobrar">
           <svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="#27AE60" stroke="#27AE60" stroke-width="2"><circle cx="12" cy="12" r="10" fill="#27AE60"/><path d="M12 6v12M9 9h6M9 15h6" stroke="white" fill="none" stroke-width="2"/></svg>
           <span>F12 - Cobrar</span>
         </button>
@@ -8017,6 +8017,19 @@
       ok = confirm('¿Cerrar sesión?');
     }
     if (!ok) return;
+    // AGENTE 9 (C-37) — Logout server-side ANTES de borrar localStorage.
+    // Inserta el JWT en pos_revoked_tokens. Si red falla, sigue con logout local.
+    try {
+      const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
+      if (tok) {
+        await fetch('/api/auth/logout-server', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: '{}'
+        }).catch(function () { /* tolerar fallo de red */ });
+      }
+    } catch (_) {}
     // Cerrar BroadcastChannels para evitar memory leaks
     try { if (window.VOLVIX_CART_CHANNEL && typeof window.VOLVIX_CART_CHANNEL.close === 'function') { window.VOLVIX_CART_CHANNEL.close(); } } catch(_) {}
     try { if (window.VOLVIX && window.VOLVIX.channel && typeof window.VOLVIX.channel.close === 'function') { window.VOLVIX.channel.close(); } } catch(_) {}
@@ -9829,6 +9842,15 @@
     }
     // Cache para que completePay() use los mismos numeros
     window.__volvixLastTotals = totals;
+    // AGENTE 10 — C-18: F12 Cobrar disabled si carrito vacio
+    var btnF12 = document.getElementById('btn-cobrar-f12');
+    if (btnF12) {
+      var hasItems = CART.length > 0 && totals.total > 0;
+      btnF12.disabled = !hasItems;
+      btnF12.style.opacity = hasItems ? '' : '0.5';
+      btnF12.style.cursor = hasItems ? 'pointer' : 'not-allowed';
+      btnF12.title = hasItems ? 'F12 - Cobrar ticket actual' : 'Agrega productos al carrito para cobrar';
+    }
   }
 
   /* ============ GAP-2: MULTI-TAB CART SYNC ============ */
@@ -10391,7 +10413,23 @@
       } catch (_) {}
       $('#footer-pago').textContent = '$0.00';
       $('#footer-cambio').textContent = '$0.00';
-      const newFolio = folio + 1;
+      // AGENTE 10 (C-19) — folio server-side, evita colisiones entre cajeros simultáneos.
+      // Si el endpoint falla (red, sin tabla), fallback al increment client-side.
+      let newFolio = folio + 1;
+      try {
+        const tokF = (window.VolvixAuth && window.VolvixAuth.getToken && window.VolvixAuth.getToken())
+          || localStorage.getItem('volvix_token') || '';
+        const rFolio = await fetch('/api/sales/next-folio', {
+          headers: tokF ? { Authorization: 'Bearer ' + tokF } : {},
+          credentials: 'include'
+        });
+        if (rFolio.ok) {
+          const jFolio = await rFolio.json();
+          if (jFolio && jFolio.ok && Number(jFolio.next_folio_hint) > 0) {
+            newFolio = Number(jFolio.next_folio_hint);
+          }
+        }
+      } catch (_) { /* fallback ya seteado */ }
       $('#currentFolio').textContent = newFolio;
       $('#pay-folio').textContent = newFolio;
     } finally {
@@ -18651,6 +18689,8 @@
 <script src="volvix-theme-wiring.js" defer></script>
 <!-- AGENTE 8 (ADR-001 Fase 1) — VolvixState debe cargar ANTES de cualquier wiring -->
 <script src="volvix-state.js"></script>
+<!-- ADR-003 — VolvixTabs unificado (idempotente, no rompe los 6 sistemas legacy) -->
+<script src="volvix-tabs.js"></script>
 <script src="volvix-shortcuts-wiring.js" defer></script>
 <script src="volvix-search-wiring.js" defer></script>
 <script src="volvix-voice-wiring.js" defer></script>

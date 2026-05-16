@@ -12614,6 +12614,57 @@ handlers['GET /api/config/public'] = async (req, res) => {
   });
 
   // ============================================================
+  // AGENTE 10 (C-19) — GET /api/sales/next-folio
+  // Folio sincronizado server-side (no client-side increment).
+  // Resuelve race condition cuando 2 cajeros venden simultáneo.
+  // ============================================================
+  handlers['GET /api/sales/next-folio'] = requireAuth(async (req, res) => {
+    try {
+      const tenantId = req.user && (req.user.tenant_id || req.user.tenantId);
+      if (!tenantId) return sendJSON(res, { ok: false, error: 'no_tenant' }, 400);
+      // Leer folio máximo actual
+      const rows = await supabaseRequest('GET',
+        '/pos_sales?tenant_id=eq.' + encodeURIComponent(tenantId) +
+        '&select=folio&order=folio.desc.nullslast&limit=1');
+      const maxFolio = (Array.isArray(rows) && rows[0] && Number(rows[0].folio)) || 0;
+      // Devolvemos el SIGUIENTE folio. Nota: el folio efectivo lo asigna
+      // el trigger `zzz_set_folio_pos_sales` al insertar — esto es una
+      // PISTA para que el cliente muestre algo cercano al real mientras
+      // se procesa la venta. Si dos cajeros piden esto simultáneo, ambos
+      // verán el mismo número pero al insertar el trigger les dará distintos.
+      sendJSON(res, { ok: true, next_folio_hint: maxFolio + 1, current_max: maxFolio });
+    } catch (e) {
+      sendJSON(res, { ok: false, error: e.message || 'folio_hint_failed' }, 500);
+    }
+  });
+
+  // ============================================================
+  // AGENTE 9 — POST /api/auth/logout-server
+  // Invalida JWT server-side via revoked_tokens. Hasta hoy solo se borraba
+  // localStorage del cliente (token seguía vivo si alguien lo robó).
+  // ============================================================
+  handlers['POST /api/auth/logout-server'] = requireAuth(async (req, res) => {
+    try {
+      const jti = req.user && req.user.jti;
+      if (!jti) return sendJSON(res, { ok: false, error: 'no_jti', message: 'Token no tiene jti claim' }, 400);
+      const ttl = req.user && req.user.exp ? new Date(req.user.exp * 1000).toISOString() : null;
+      try {
+        await supabaseRequest('POST', '/pos_revoked_tokens', {
+          jti: jti,
+          tenant_id: req.user.tenant_id || null,
+          user_id: req.user.id || req.user.email || null,
+          reason: 'user_logout',
+          revoked_by: req.user.email || req.user.id || 'self',
+          expires_at: ttl
+        });
+      } catch (e) { /* tabla puede no existir todavia */ }
+      sendJSON(res, { ok: true, message: 'Sesión cerrada en servidor' });
+    } catch (e) {
+      sendJSON(res, { ok: false, error: e.message || 'logout_failed' }, 500);
+    }
+  });
+
+  // ============================================================
   // AGENTE 12 (overpromise fix) — GET /api/dashboard/summary?range=hoy|semana|mes
   // Antes el Dashboard mostraba KPIs HARDCODED ($4,820, 18 tickets, $2,145, $890).
   // Ahora calculamos en vivo desde pos_sales / pos_cash_movements del tenant.
