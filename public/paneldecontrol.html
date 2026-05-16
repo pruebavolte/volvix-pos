@@ -4282,6 +4282,17 @@
 (function () {
   'use strict';
 
+  // V6 FIX (B-X-8): escapeAttr / escapeText estaban definidos en otra IIFE
+  // (permv14-wiring linea ~5391), inaccesibles desde aqui. PERM.loadTenants
+  // los usa al renderizar el dropdown y fallaba con ReferenceError. Definidos
+  // aqui local al IIFE actual para que loadTenants funcione.
+  function escapeText(s) {
+    return String(s == null ? '' : s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  }
+  function escapeAttr(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
   // Etiquetas amigables para cada modulo y feature
   const MOD_LABELS = {
     pos: '🛒 Punto de Venta', dashboard: '📊 Dashboard', apertura: '🔓 Apertura caja',
