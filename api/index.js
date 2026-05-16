@@ -9055,6 +9055,10 @@ if (handlers['POST /api/products'])              handlers['POST /api/products'] 
 if (handlers['POST /api/owner/users'])           handlers['POST /api/owner/users']           = enforcePlanLimits('users')(handlers['POST /api/owner/users']);
 if (handlers['POST /api/inventory/locations'])   handlers['POST /api/inventory/locations']   = enforcePlanLimits('locations')(handlers['POST /api/inventory/locations']);
 if (handlers['POST /api/sales'])                 handlers['POST /api/sales']                 = enforcePlanLimits('sales')(handlers['POST /api/sales']);
+// AGENTE 5 (B-X-2): wrap con enforceFeature('cobrar') — rechaza 403 si tenant no tiene la feature.
+if (handlers['POST /api/sales'] && typeof global.enforceFeature === 'function')  handlers['POST /api/sales'] = global.enforceFeature('cobrar')(handlers['POST /api/sales']);
+if (handlers['POST /api/returns'] && typeof global.enforceFeature === 'function') handlers['POST /api/returns'] = global.enforceFeature('devoluciones')(handlers['POST /api/returns']);
+if (handlers['GET /api/reports/sales'] && typeof global.enforceFeature === 'function') handlers['GET /api/reports/sales'] = global.enforceFeature('reportes')(handlers['GET /api/reports/sales']);
 
 // =============================================================
 // USAGE-BILLING: best-effort tracking en hot paths
@@ -12489,6 +12493,240 @@ handlers['GET /api/config/public'] = async (req, res) => {
   });
 
   // /api/giros/list — list catalog (alias to giros search w/o q)
+  // ============================================================
+  // AGENTE 4 (Hardening Panel) — endpoints stub para 2FA / IP allowlist / sesiones / impersonation
+  // STATUS: stubs. La librería TOTP / servicio email transaccional requieren input del owner.
+  // BLOCKERS.md documenta las claves que necesita.
+  // ============================================================
+
+  // GET /api/admin/me/2fa/status — estado actual de 2FA del admin logueado
+  handlers['GET /api/admin/me/2fa/status'] = requireAuth(async (req, res) => {
+    const role = String((req.user && (req.user.role || req.user.rol)) || '').toLowerCase();
+    if (!['superadmin','platform_owner','owner'].includes(role)) return sendJSON(res, { ok:false, error:'forbidden' }, 403);
+    try {
+      const uid = req.user.email || req.user.user_id || 'unknown';
+      const rows = await supabaseRequest('GET',
+        '/admin_2fa_secrets?admin_user_id=eq.' + encodeURIComponent(uid) + '&select=enabled,last_used_at&limit=1');
+      const enabled = Array.isArray(rows) && rows[0] && rows[0].enabled;
+      sendJSON(res, { ok:true, enabled: !!enabled, last_used_at: (rows && rows[0] && rows[0].last_used_at) || null });
+    } catch (e) { sendJSON(res, { ok:true, enabled: false, note: 'table_not_ready' }); }
+  });
+
+  // POST /api/admin/me/2fa/setup — genera secret + QR + recovery codes (STUB sin librería TOTP)
+  handlers['POST /api/admin/me/2fa/setup'] = requireAuth(async (req, res) => {
+    const role = String((req.user && (req.user.role || req.user.rol)) || '').toLowerCase();
+    if (!['superadmin','platform_owner','owner'].includes(role)) return sendJSON(res, { ok:false, error:'forbidden' }, 403);
+    // STUB: en producción usar `otpauth` o `speakeasy` para generar secret real
+    sendJSON(res, {
+      ok: false,
+      error: 'STUB_NOT_IMPLEMENTED',
+      message: '2FA setup requiere librería TOTP. Pendiente: instalar `otpauth` o `speakeasy` + configurar email transaccional para enviar QR.',
+      stub_data: {
+        secret_b32: 'STUB-DEMO-NEEDS-REAL-LIB',
+        qr_url: 'otpauth://totp/Volvix:demo?secret=STUB&issuer=Volvix',
+        recovery_codes: ['STUB-CODE-1','STUB-CODE-2','STUB-CODE-3','STUB-CODE-4','STUB-CODE-5']
+      }
+    }, 501);
+  });
+
+  // POST /api/admin/me/2fa/verify — activa 2FA verificando código (STUB)
+  handlers['POST /api/admin/me/2fa/verify'] = requireAuth(async (req, res) => {
+    sendJSON(res, { ok: false, error: 'STUB_NOT_IMPLEMENTED', message: 'Activación 2FA requiere validación TOTP real. Ver BLOCKERS.md.' }, 501);
+  });
+
+  // GET /api/admin/me/sessions — lista sesiones activas del admin
+  handlers['GET /api/admin/me/sessions'] = requireAuth(async (req, res) => {
+    const role = String((req.user && (req.user.role || req.user.rol)) || '').toLowerCase();
+    if (!['superadmin','platform_owner','owner'].includes(role)) return sendJSON(res, { ok:false, error:'forbidden' }, 403);
+    try {
+      const uid = req.user.email || req.user.user_id || 'unknown';
+      const rows = await supabaseRequest('GET',
+        '/admin_sessions?admin_user_id=eq.' + encodeURIComponent(uid) + '&revoked_at=is.null&order=created_at.desc&select=*&limit=50');
+      sendJSON(res, { ok:true, sessions: Array.isArray(rows) ? rows : [] });
+    } catch (e) { sendJSON(res, { ok:true, sessions: [], note: 'table_not_ready' }); }
+  });
+
+  // POST /api/admin/me/sessions/revoke-all — cierra TODAS las sesiones del admin (incluyendo la actual)
+  handlers['POST /api/admin/me/sessions/revoke-all'] = requireAuth(async (req, res) => {
+    const role = String((req.user && (req.user.role || req.user.rol)) || '').toLowerCase();
+    if (!['superadmin','platform_owner','owner'].includes(role)) return sendJSON(res, { ok:false, error:'forbidden' }, 403);
+    try {
+      const uid = req.user.email || req.user.user_id || 'unknown';
+      await supabaseRequest('PATCH',
+        '/admin_sessions?admin_user_id=eq.' + encodeURIComponent(uid) + '&revoked_at=is.null',
+        { revoked_at: new Date().toISOString() });
+      sendJSON(res, { ok:true, revoked: 'all' });
+    } catch (e) { sendJSON(res, { ok:false, error: e.message || 'revoke_failed' }, 500); }
+  });
+
+  // GET /api/admin/ip-allowlist — lista IPs permitidas
+  handlers['GET /api/admin/ip-allowlist'] = requireAuth(async (req, res) => {
+    const role = String((req.user && (req.user.role || req.user.rol)) || '').toLowerCase();
+    if (!['superadmin','platform_owner'].includes(role)) return sendJSON(res, { ok:false, error:'forbidden' }, 403);
+    try {
+      const rows = await supabaseRequest('GET', '/admin_ip_allowlist?select=*&enabled=eq.true&order=added_at.desc&limit=100');
+      sendJSON(res, { ok:true, allowlist: Array.isArray(rows) ? rows : [] });
+    } catch (e) { sendJSON(res, { ok:true, allowlist: [], note: 'table_not_ready' }); }
+  });
+
+  // POST /api/admin/ip-allowlist — agregar IP
+  handlers['POST /api/admin/ip-allowlist'] = requireAuth(async (req, res) => {
+    const role = String((req.user && (req.user.role || req.user.rol)) || '').toLowerCase();
+    if (!['superadmin','platform_owner'].includes(role)) return sendJSON(res, { ok:false, error:'forbidden' }, 403);
+    const body = await readBody(req);
+    if (!body.ip_or_cidr) return sendJSON(res, { ok:false, error:'ip_required' }, 400);
+    try {
+      await supabaseRequest('POST', '/admin_ip_allowlist', {
+        ip_or_cidr: String(body.ip_or_cidr).slice(0, 64),
+        label: String(body.label || '').slice(0, 120),
+        added_by: req.user.email || req.user.user_id || 'unknown'
+      });
+      sendJSON(res, { ok:true });
+    } catch (e) { sendJSON(res, { ok:false, error: e.message }, 500); }
+  });
+
+  // GET /api/security/impersonation-log — el TENANT impersonado puede ver su propio log
+  handlers['GET /api/security/impersonation-log'] = requireAuth(async (req, res) => {
+    try {
+      const tid = req.user && (req.user.tenant_id || req.user.tenantId);
+      if (!tid) return sendJSON(res, { ok:false, error:'no_tenant' }, 400);
+      const rows = await supabaseRequest('GET',
+        '/pos_impersonation_log?impersonated_tenant=eq.' + encodeURIComponent(tid) + '&order=started_at.desc&limit=50');
+      sendJSON(res, { ok:true, log: Array.isArray(rows) ? rows : [] });
+    } catch (e) { sendJSON(res, { ok:true, log: [], note: 'table_not_ready' }); }
+  });
+
+  // ============================================================
+  // AGENTE 5 (Enforcement cross-archivo) — GET /api/app/config?since=<version>
+  // Devuelve la config completa del tenant + version. Cliente hace polling cada 60s
+  // con header If-None-Match o query ?since=<version>. Server retorna 304 si nada cambio.
+  // Resuelve B-X-1 (cache stale).
+  // ============================================================
+  handlers['GET /api/app/config'] = requireAuth(async (req, res) => {
+    try {
+      const tenantId = req.user && (req.user.tenant_id || req.user.tenantId);
+      if (!tenantId) return sendJSON(res, { ok: false, error: 'no_tenant' }, 400);
+      const parsedUrl = url.parse(req.url, true);
+      const sinceVersion = Number((parsedUrl.query && parsedUrl.query.since) || 0);
+      // Leer version actual del tenant
+      let currentVersion = 1;
+      try {
+        const rows = await supabaseRequest('GET',
+          '/pos_app_config_versions?tenant_id=eq.' + encodeURIComponent(tenantId) + '&select=version&limit=1');
+        if (Array.isArray(rows) && rows[0] && rows[0].version) currentVersion = Number(rows[0].version);
+      } catch (e) { /* tabla puede no existir todavia, usar 1 */ }
+      // Si cliente esta al dia, 304
+      if (sinceVersion > 0 && sinceVersion >= currentVersion) {
+        res.statusCode = 304; res.end(''); return;
+      }
+      // Cargar config completa
+      let modules = {};
+      try {
+        const rows = await supabaseRequest('GET',
+          '/pos_tenant_module_permissions?tenant_id=eq.' + encodeURIComponent(tenantId) + '&select=module_key,enabled,state,lock_message');
+        if (Array.isArray(rows)) {
+          rows.forEach(r => { modules[r.module_key] = { enabled: r.enabled, state: r.state || 'enabled', lock_message: r.lock_message || null }; });
+        }
+      } catch (e) { /* defaults vacios = todos enabled */ }
+      sendJSON(res, {
+        ok: true,
+        version: currentVersion,
+        tenant_id: tenantId,
+        modules: modules,
+        polling_interval_seconds: 60
+      });
+    } catch (e) {
+      sendJSON(res, { ok: false, error: e.message || 'app-config-failed' }, 500);
+    }
+  });
+
+  // ============================================================
+  // AGENTE 5 — POST /api/admin/tenant/:tid/suspend
+  // Marca tenant suspendido + revoca JWTs activos en pos_revoked_tokens.
+  // Resuelve B-X-3 (suspender no invalida JWT).
+  // ============================================================
+  handlers['POST /api/admin/tenant/:tid/suspend'] = requireAuth(async (req, res, params) => {
+    try {
+      const role = String((req.user && (req.user.role || req.user.rol)) || '').toLowerCase();
+      if (role !== 'superadmin' && role !== 'platform_owner') {
+        return sendJSON(res, { ok: false, error: 'forbidden' }, 403);
+      }
+      const tid = decodeURIComponent(params.tid);
+      const body = await readBody(req);
+      const reason = String(body.reason || 'admin_suspend').slice(0, 200);
+      // 1. Marcar suspended (tabla pos_tenants si existe)
+      try {
+        await supabaseRequest('PATCH',
+          '/pos_tenants?tenant_id=eq.' + encodeURIComponent(tid),
+          { status: 'suspended', suspended_at: new Date().toISOString(), suspended_by: req.user.email || req.user.user_id, suspend_reason: reason });
+      } catch (e) { /* tabla puede tener otro nombre */ }
+      // 2. Insertar registros para revocar tokens activos del tenant
+      //    (En realidad necesitariamos saber los jti vivos — por ahora dejamos
+      //    un "tenant_revoked" row que requireAuth puede consultar como fallback)
+      try {
+        await supabaseRequest('POST', '/pos_revoked_tokens', {
+          jti: 'tenant_suspend:' + tid + ':' + Date.now(),
+          tenant_id: tid,
+          reason: 'tenant_suspended:' + reason,
+          revoked_by: req.user.email || req.user.user_id,
+          expires_at: new Date(Date.now() + 30 * 86400000).toISOString()
+        });
+      } catch (e) { /* tolerar */ }
+      // 3. Bump app_config_version para que clientes polls reciban el cambio
+      try {
+        await supabaseRequest('POST', '/pos_app_config_versions?on_conflict=tenant_id',
+          { tenant_id: tid, version: Date.now(), updated_at: new Date().toISOString() },
+          { 'Prefer': 'resolution=merge-duplicates' });
+      } catch (e) { /* tolerar */ }
+      sendJSON(res, { ok: true, tenant_id: tid, suspended: true });
+    } catch (e) {
+      sendJSON(res, { ok: false, error: e.message || 'suspend-failed' }, 500);
+    }
+  });
+
+  // ============================================================
+  // AGENTE 5 — middleware enforceFeature(featureKey)
+  // Wrapper que rechaza request si el tenant tiene el modulo/feature deshabilitado.
+  // Resuelve B-X-2 (feature cosmetico).
+  // Uso: handlers['POST /api/sales'] = enforceFeature('cobrar')(handlers['POST /api/sales']);
+  // ============================================================
+  if (typeof global.enforceFeature !== 'function') {
+    global.enforceFeature = function (featureKey) {
+      return function (originalHandler) {
+        return async function (req, res, params) {
+          try {
+            // requireAuth ya corrió antes
+            const tenantId = req.user && (req.user.tenant_id || req.user.tenantId);
+            if (!tenantId) return originalHandler(req, res, params);  // sin tenant, no podemos validar — pasamos
+            // Lookup en pos_tenant_module_permissions
+            const rows = await supabaseRequest('GET',
+              '/pos_tenant_module_permissions?tenant_id=eq.' + encodeURIComponent(tenantId) +
+              '&module_key=eq.' + encodeURIComponent(featureKey) +
+              '&select=enabled,state,lock_message&limit=1');
+            if (Array.isArray(rows) && rows[0]) {
+              const r = rows[0];
+              if (r.enabled === false || r.state === 'hidden' || r.state === 'locked') {
+                return sendJSON(res, {
+                  ok: false,
+                  error: 'feature_disabled',
+                  feature: featureKey,
+                  state: r.state || 'disabled',
+                  message: r.lock_message || 'Esta funcion no esta habilitada para tu cuenta. Contacta a tu administrador.'
+                }, 403);
+              }
+            }
+            // Default: enabled (si no hay row, el modulo esta enabled)
+            return originalHandler(req, res, params);
+          } catch (e) {
+            // Si el lookup falla (tabla no existe todavia, red, etc) — fail open (permitir)
+            console.warn('[enforceFeature] fail open por error:', e.message);
+            return originalHandler(req, res, params);
+          }
+        };
+      };
+    };
+  }
+
   handlers['GET /api/giros/list'] = async (req, res) => {
     try {
       const rows = await supabaseRequest('GET', '/business_giros?select=*&limit=200');

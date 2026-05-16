@@ -80,7 +80,52 @@
 
 ---
 
-## 6. Resumen y plan ajustado por evidencia
+## 7. Hallazgos durante ejecucion de agentes
+
+### 7.1 — B-PNL-4 (banner impersonation) ERA FALSO POSITIVO
+El banner YA EXISTE en salvadorex-pos.html linea 3385. Es muy completo (muestra nombre, giro, plan, tid, "MODO SOPORTE", timer, boton "Cerrar vista"). No hizo falta implementarlo.
+
+### 7.2 — B-PNL-5 (notif al cliente) PARCIAL
+El handler /api/admin/tenant/:id/impersonate (linea 39850) YA tiene audit log obligatorio
+en `tenant_impersonation_log` con fail-closed. Lo que FALTA:
+- Notificacion activa al cliente (email a su correo registrado)
+- Necesita: cuenta de email transaccional (Resend, SendGrid, Postmark, SES)
+- Implementacion: trigger PostgreSQL o cron que detecta nuevos rows y envia email
+
+### 7.3 — AGENTE 4 2FA stubs entregados
+- Tabla admin_2fa_secrets creada en R34_PANEL_HARDENING.sql
+- Endpoints stub /api/admin/me/2fa/{status,setup,verify} retornan 501 NOT_IMPLEMENTED
+- Para activacion real necesito:
+  * Libreria TOTP en Node: `otpauth` (recomendado) o `speakeasy`
+  * Modulo qrcode para generar QR del setup
+  * Servicio email transaccional para enviar QR al admin
+
+### 7.4 — AGENTE 4 IP allowlist + Sesiones — endpoints entregados
+- Tablas admin_ip_allowlist y admin_sessions creadas en R34
+- Endpoints GET/POST /api/admin/ip-allowlist funcionales
+- Endpoints GET /api/admin/me/sessions + POST /revoke-all funcionales
+- UI en /paneldecontrol.html (tab Seguridad) PENDIENTE — diseno simple lista para conectar
+
+### 7.5 — AGENTE 5 enforceFeature middleware entregado
+- Tabla pos_tenant_module_permissions creada en R33_ENFORCEMENT_CROSS.sql
+- Funcion global.enforceFeature(featKey)(handler) registrada
+- Aplicada a POST /api/sales (feature 'cobrar'), POST /api/returns (feature 'devoluciones'),
+  GET /api/reports/sales (feature 'reportes')
+- Fail-open: si tabla no existe o consulta falla, permite la request (no rompe sistema actual)
+
+### 7.6 — Cliente POS poll /api/app/config cada 60s
+- Implementado en salvadorex-pos.html
+- Primer poll al volvix:login + setInterval cada 60s
+- Maneja 304 Not Modified (eficiente)
+- Aplica state hidden/locked/enabled a elementos con data-feature
+
+### 7.7 — Captcha en /api/auth/register-simple
+PENDIENTE de claves del owner:
+- CAPTCHA_SITE_KEY (publica, inyectable en HTML)
+- CAPTCHA_SECRET_KEY (privada, .env de Vercel)
+- Provider sugerido: Cloudflare Turnstile (gratis, sin friction al usuario)
+
+## 8. Resumen y plan ajustado por evidencia
 
 De los 16 Bloqueantes inferidos: **3 DESCARTADOS** (B-MKT-1/2/3), **7 CONFIRMADOS por código**, **6 PARCIALES** (requieren verificación física/owner).
 

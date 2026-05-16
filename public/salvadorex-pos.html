@@ -20168,6 +20168,63 @@
   function vistaIs(v){ return document.body.getAttribute('data-vista') === String(v); }
 
   // Clock (only ticks while in Vista 3)
+  // ============================================================
+  // AGENTE 5 — Polling de app config cada 60s (B-X-1 cache stale fix)
+  // Cliente consulta /api/app/config?since=<version> con If-None-Match.
+  // Si server retorna 304 — sin cambio. Si retorna 200 con modules — invalida UI.
+  // ============================================================
+  window._volvixAppConfig = window._volvixAppConfig || { version: 0, modules: {} };
+  window._volvixConfigPollInterval = window._volvixConfigPollInterval || null;
+  async function _volvixPollAppConfig() {
+    try {
+      var tok = (window.VolvixAuth && window.VolvixAuth.getToken && window.VolvixAuth.getToken())
+        || localStorage.getItem('volvix_token') || '';
+      if (!tok) return;
+      var since = Number(window._volvixAppConfig.version || 0);
+      var r = await fetch('/api/app/config?since=' + since, {
+        headers: tok ? { Authorization: 'Bearer ' + tok } : {},
+        credentials: 'include'
+      });
+      if (r.status === 304) return;  // sin cambio — eficiente
+      if (!r.ok) return;
+      var j = await r.json();
+      if (!j || !j.ok) return;
+      // Aplicar cambios
+      var prevVersion = window._volvixAppConfig.version;
+      window._volvixAppConfig = { version: j.version || 0, modules: j.modules || {} };
+      if (prevVersion > 0 && prevVersion !== j.version) {
+        // El platform_owner cambió algo — aplicar al UI
+        Object.keys(j.modules || {}).forEach(function (k) {
+          var m = j.modules[k];
+          if (!m) return;
+          // Buscar botones con data-feature que coincidan y aplicar estado
+          document.querySelectorAll('[data-feature^="' + k + '"], [data-feature="' + k + '"]').forEach(function (el) {
+            if (m.state === 'hidden' || m.enabled === false) {
+              el.style.display = 'none';
+            } else if (m.state === 'locked') {
+              el.style.opacity = '0.5'; el.style.pointerEvents = 'none';
+              if (m.lock_message) el.title = m.lock_message;
+            } else {
+              el.style.display = ''; el.style.opacity = ''; el.style.pointerEvents = '';
+            }
+          });
+        });
+        try { showToast('🔄 Configuración actualizada — algunos módulos cambiaron', 'info', 4000); } catch(_) {}
+      }
+    } catch (e) { /* silent fail — siguiente poll lo intenta de nuevo */ }
+  }
+  // Primer poll al login + interval cada 60s
+  document.addEventListener('volvix:login', function () {
+    try { _volvixPollAppConfig(); } catch(_) {}
+    if (window._volvixConfigPollInterval) clearInterval(window._volvixConfigPollInterval);
+    window._volvixConfigPollInterval = setInterval(_volvixPollAppConfig, 60000);
+  });
+  // Si ya hay sesión al cargar, también poll
+  setTimeout(function () { try { _volvixPollAppConfig(); } catch(_) {} }, 3000);
+  if (!window._volvixConfigPollInterval) {
+    window._volvixConfigPollInterval = setInterval(_volvixPollAppConfig, 60000);
+  }
+
   window._oxxoClockInterval = setInterval(function() {
     if (!vistaIs(3)) return;
     var el = document.getElementById('oxxo-clock');
