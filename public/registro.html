@@ -6,6 +6,8 @@
   <!-- 2026-05-12 BUG #5 FIX: bridge para APK Capacitor.
        2026-05-14 PERF: agregado defer para no bloquear render del wizard. -->
   <script defer src="/volvix-capacitor-bridge.js"></script>
+  <!-- 2026-05-16 SEC: Cloudflare Turnstile (CAPTCHA). Site key publico. -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <title>Registro · Volvix POS — Crea tu cuenta en 60 segundos</title>
 <meta name="description" content="Regístrate en Volvix POS con tu correo. Sin tarjeta, sin compromiso, listo en menos de 1 minuto.">
 <meta name="theme-color" content="#2D5F8F">
@@ -268,6 +270,9 @@
           <div class="giro-suggestions" id="giroSuggestions" role="listbox"></div>
         </div>
       </div>
+
+      <!-- 2026-05-16 SEC: widget Turnstile (CAPTCHA) — site key publico embebido. -->
+      <div class="cf-turnstile" data-sitekey="0x4AAAAAADQl0S9UlQgcmAQg" data-theme="light" data-size="normal" style="margin: 16px 0;"></div>
 
       <button class="primary" id="btnRegister">Crear cuenta</button>
     </div>
