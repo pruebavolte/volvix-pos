@@ -125,7 +125,54 @@ PENDIENTE de claves del owner:
 - CAPTCHA_SECRET_KEY (privada, .env de Vercel)
 - Provider sugerido: Cloudflare Turnstile (gratis, sin friction al usuario)
 
-## 8. Resumen y plan ajustado por evidencia
+## 9. PASOS HUMANOS pendientes (decisiones del owner ya tomadas, falta acción humana)
+
+> Estado actualizado tras ejecución del bloque "procede con todo".
+
+### 9.1 — Variables de entorno en Vercel
+Owner debe ir a Vercel → Project Settings → Environment Variables y agregar:
+
+| Variable | Valor | Para qué |
+|---|---|---|
+| `RESEND_API_KEY` | (generar en resend.com) | Email transaccional para notificar impersonation |
+| `RESEND_FROM` | `Volvix <no-reply@systeminternational.app>` | Dirección remitente (requiere DNS verificado en Resend) |
+| `TURNSTILE_SITE_KEY` | (generar en cloudflare.com → Turnstile) | Captcha en registro.html |
+| `TURNSTILE_SECRET_KEY` | (idem, secret) | Validación server-side de Turnstile |
+| `CAPTCHA_ENABLED` | `true` | Activar el middleware de captcha (default `false` = fail-open) |
+| `ALLOW_TEST_TENANTS` | `true` durante pruebas, `false` después | Habilita endpoint admin de test-tenant |
+
+### 9.2 — Crear cuenta en Resend (humano, ~3 min)
+1. Ir a https://resend.com/signup
+2. Crear cuenta con email del owner
+3. Verificar email
+4. Domains → Add Domain → `systeminternational.app`
+5. Copiar registros DNS que muestra (4 registros: SPF, DKIM x2, MX)
+6. **Pegar registros en Cloudflare DNS** del dominio (zona DNS del owner)
+7. Esperar verificación (5-30 min)
+8. API Keys → Create → copiar key, pegar en Vercel como `RESEND_API_KEY`
+
+### 9.3 — Crear cuenta en Cloudflare Turnstile (humano, ~3 min)
+1. Ir a https://dash.cloudflare.com → Turnstile (si no tiene cuenta, crear primero)
+2. Add Site → Domain: `systeminternational.app`
+3. Widget type: "Managed" (recomendado)
+4. Copiar Site Key + Secret Key
+5. Pegar en Vercel: `TURNSTILE_SITE_KEY` (pública, va al HTML) y `TURNSTILE_SECRET_KEY` (secret)
+6. Setear `CAPTCHA_ENABLED=true` en Vercel
+7. Agregar widget al HTML de `registro.html` (yo ya dejé `body.captcha_token` en el POST; solo falta agregar `<div class="cf-turnstile" data-sitekey="${TURNSTILE_SITE_KEY}"></div>` antes del botón submit — owner puede hacerlo en 1 línea)
+
+### 9.4 — Ejecutar migración SQL en Supabase
+Owner debe ejecutar en Supabase SQL Editor:
+1. `db/R32_TAX_CONFIG.sql` (AGENTE 6)
+2. `db/R33_ENFORCEMENT_CROSS.sql` (AGENTE 5)
+3. `db/R34_PANEL_HARDENING.sql` (AGENTE 4)
+4. `db/R35_ADR-004_DROP_LEGACY.sql` (AGENTE 11 / ADR-004)
+
+Sin estas migraciones aplicadas, los endpoints retornan datos vacíos (fail-open intencional para no romper sistema actual).
+
+### 9.5 — npm install otpauth qrcode resend
+En Vercel build, el `package.json` ahora incluye estas dependencias. El siguiente deploy las instalará automáticamente. No requiere acción manual del owner.
+
+## 10. Resumen y plan ajustado por evidencia
 
 De los 16 Bloqueantes inferidos: **3 DESCARTADOS** (B-MKT-1/2/3), **7 CONFIRMADOS por código**, **6 PARCIALES** (requieren verificación física/owner).
 

@@ -12494,6 +12494,126 @@ handlers['GET /api/config/public'] = async (req, res) => {
 
   // /api/giros/list — list catalog (alias to giros search w/o q)
   // ============================================================
+  // AGENTE 4-real — wrapper Resend para emails transaccionales.
+  // RESEND_API_KEY en env. Si no existe, log-only. Si existe, envía real.
+  // ============================================================
+  global._volvixSendEmail = async function (opts) {
+    opts = opts || {};
+    const key = process.env.RESEND_API_KEY;
+    if (!key) {
+      console.log('[email] RESEND_API_KEY no set — skipping send to', opts.to, 'subject:', opts.subject);
+      return { ok: false, skipped: true, reason: 'no_api_key' };
+    }
+    try {
+      let Resend;
+      try { Resend = require('resend').Resend; }
+      catch (e) {
+        console.warn('[email] resend NPM no instalado:', e.message);
+        return { ok: false, error: 'lib_missing' };
+      }
+      const resend = new Resend(key);
+      const fromAddr = process.env.RESEND_FROM || 'Volvix <no-reply@systeminternational.app>';
+      const result = await resend.emails.send({
+        from: fromAddr,
+        to: opts.to,
+        subject: opts.subject || '(sin asunto)',
+        html: opts.html || opts.text || '',
+        text: opts.text || undefined
+      });
+      return { ok: true, id: result && result.id };
+    } catch (e) {
+      console.warn('[email] send failed:', e.message);
+      return { ok: false, error: e.message };
+    }
+  };
+
+  // ============================================================
+  // AGENTE 0 ext — endpoint admin para crear tenants de prueba sin OTP.
+  // PROHIBIDO en producción salvo que ALLOW_TEST_TENANTS=true en env.
+  // Solo superadmin / platform_owner.
+  // ============================================================
+  handlers['POST /api/admin/test-tenant/create'] = requireAuth(async (req, res) => {
+    const role = String((req.user && (req.user.role || req.user.rol)) || '').toLowerCase();
+    if (!['superadmin', 'platform_owner'].includes(role)) {
+      return sendJSON(res, { ok: false, error: 'forbidden' }, 403);
+    }
+    if (String(process.env.ALLOW_TEST_TENANTS || 'false').toLowerCase() !== 'true') {
+      return sendJSON(res, { ok: false, error: 'test_tenants_disabled', message: 'Setear ALLOW_TEST_TENANTS=true en env para habilitar.' }, 403);
+    }
+    try {
+      const body = await readBody(req);
+      const slug = String(body.slug || ('test-' + Date.now())).slice(0, 60);
+      const giro = String(body.giro || 'abarrotes');
+      const tenantId = 'TEST-' + slug + '-' + crypto.randomBytes(4).toString('hex');
+      const email = 'test-' + slug + '@test.volvix.local';
+      // Insertar tenant + admin user
+      try {
+        await supabaseRequest('POST', '/pos_tenants', {
+          tenant_id: tenantId,
+          slug: slug,
+          name: 'Test Tenant ' + slug,
+          giro: giro,
+          status: 'active',
+          is_test: true,
+          created_at: new Date().toISOString()
+        });
+      } catch (e) { /* tabla puede no tener todas las columnas */ }
+      try {
+        await supabaseRequest('POST', '/pos_users', {
+          user_id: 'u_' + tenantId,
+          tenant_id: tenantId,
+          email: email,
+          role: 'owner',
+          status: 'active',
+          is_test: true,
+          created_at: new Date().toISOString()
+        });
+      } catch (e) { /* tolerar */ }
+      // Generar JWT del owner para testing
+      const now = Math.floor(Date.now() / 1000);
+      const jti = crypto.randomBytes(8).toString('hex');
+      const payload = {
+        id: 'u_' + tenantId, email, role: 'owner', tenant_id: tenantId,
+        jti, iat: now, exp: now + 3600
+      };
+      const header = { alg: 'HS256', typ: 'JWT' };
+      const h = b64url(JSON.stringify(header));
+      const p = b64url(JSON.stringify(payload));
+      const sig = b64url(crypto.createHmac('sha256', JWT_SECRET).update(`${h}.${p}`).digest());
+      const token = `${h}.${p}.${sig}`;
+      sendJSON(res, { ok: true, tenant_id: tenantId, email, token, slug, giro });
+    } catch (e) {
+      sendJSON(res, { ok: false, error: e.message || 'create_failed' }, 500);
+    }
+  });
+
+  // DELETE /api/admin/test-tenant/:tenant_id — limpieza al terminar pruebas
+  handlers['DELETE /api/admin/test-tenant/:tenant_id'] = requireAuth(async (req, res, params) => {
+    const role = String((req.user && (req.user.role || req.user.rol)) || '').toLowerCase();
+    if (!['superadmin', 'platform_owner'].includes(role)) {
+      return sendJSON(res, { ok: false, error: 'forbidden' }, 403);
+    }
+    const tid = decodeURIComponent(params.tenant_id);
+    if (!tid.startsWith('TEST-')) return sendJSON(res, { ok: false, error: 'only_test_tenants' }, 400);
+    try {
+      // Cascada manual sobre las tablas conocidas
+      const tables = ['pos_sales', 'pos_products', 'pos_customers', 'pos_users', 'pos_tax_config',
+                       'pos_tenant_module_permissions', 'pos_revoked_tokens', 'pos_app_config_versions',
+                       'pos_tenants'];
+      const results = {};
+      for (const t of tables) {
+        try {
+          await supabaseRequest('DELETE', `/${t}?tenant_id=eq.${encodeURIComponent(tid)}`);
+          results[t] = 'ok';
+        } catch (e) { results[t] = e.message; }
+      }
+      sendJSON(res, { ok: true, tenant_id: tid, cleanup: results });
+    } catch (e) {
+      sendJSON(res, { ok: false, error: e.message || 'delete_failed' }, 500);
+    }
+  });
+
+  // ============================================================
   // AGENTE 12 (overpromise fix) — GET /api/dashboard/summary?range=hoy|semana|mes
   // Antes el Dashboard mostraba KPIs HARDCODED ($4,820, 18 tickets, $2,145, $890).
   // Ahora calculamos en vivo desde pos_sales / pos_cash_movements del tenant.
@@ -12608,26 +12728,118 @@ handlers['GET /api/config/public'] = async (req, res) => {
     } catch (e) { sendJSON(res, { ok:true, enabled: false, note: 'table_not_ready' }); }
   });
 
-  // POST /api/admin/me/2fa/setup — genera secret + QR + recovery codes (STUB sin librería TOTP)
+  // POST /api/admin/me/2fa/setup — genera secret + QR + recovery codes (REAL con otpauth)
   handlers['POST /api/admin/me/2fa/setup'] = requireAuth(async (req, res) => {
     const role = String((req.user && (req.user.role || req.user.rol)) || '').toLowerCase();
     if (!['superadmin','platform_owner','owner'].includes(role)) return sendJSON(res, { ok:false, error:'forbidden' }, 403);
-    // STUB: en producción usar `otpauth` o `speakeasy` para generar secret real
-    sendJSON(res, {
-      ok: false,
-      error: 'STUB_NOT_IMPLEMENTED',
-      message: '2FA setup requiere librería TOTP. Pendiente: instalar `otpauth` o `speakeasy` + configurar email transaccional para enviar QR.',
-      stub_data: {
-        secret_b32: 'STUB-DEMO-NEEDS-REAL-LIB',
-        qr_url: 'otpauth://totp/Volvix:demo?secret=STUB&issuer=Volvix',
-        recovery_codes: ['STUB-CODE-1','STUB-CODE-2','STUB-CODE-3','STUB-CODE-4','STUB-CODE-5']
+    try {
+      // Lazy require — si otpauth no está instalado en producción, fail-graceful
+      let OTPAuth;
+      try { OTPAuth = require('otpauth'); }
+      catch (e) {
+        return sendJSON(res, {
+          ok: false,
+          error: 'lib_missing',
+          message: 'otpauth no instalado. Ejecutar npm install otpauth qrcode resend.',
+          install: 'npm install otpauth@^9.3.2 qrcode@^1.5.4 resend@^4.0.1'
+        }, 503);
       }
-    }, 501);
+      const uid = req.user.email || req.user.user_id || 'unknown';
+      // Generar secret aleatorio (160 bits, base32) — estándar TOTP
+      const secret = new OTPAuth.Secret({ size: 20 });
+      const totp = new OTPAuth.TOTP({
+        issuer: 'Volvix',
+        label: uid,
+        algorithm: 'SHA1',
+        digits: 6,
+        period: 30,
+        secret: secret
+      });
+      const otpauthUrl = totp.toString();
+      // Recovery codes (10 códigos de 1 uso, 8 chars cada uno)
+      const recoveryCodes = [];
+      for (let i = 0; i < 10; i++) {
+        recoveryCodes.push(crypto.randomBytes(6).toString('base64').replace(/[+/=]/g, '').slice(0, 8).toUpperCase());
+      }
+      // Hashear recovery codes antes de guardar (no plaintext en BD)
+      const hashedRecovery = recoveryCodes.map(c =>
+        crypto.createHash('sha256').update(c + ':' + uid).digest('hex')
+      );
+      // Cifrar secret con JWT_SECRET (rudimentario AES via HMAC; en prod usar libsodium)
+      const cipher = crypto.createCipheriv('aes-256-cbc',
+        crypto.createHash('sha256').update(JWT_SECRET || 'fallback-key').digest(),
+        Buffer.alloc(16, 0)
+      );
+      const secretEnc = cipher.update(secret.base32, 'utf8', 'base64') + cipher.final('base64');
+      // Guardar en admin_2fa_secrets (estado pending hasta verify exitoso)
+      try {
+        await supabaseRequest('POST', '/admin_2fa_secrets?on_conflict=admin_user_id', {
+          admin_user_id: uid,
+          totp_secret_enc: secretEnc,
+          enabled: false, // se activa solo después de verify exitoso
+          recovery_codes: hashedRecovery
+        }, { 'Prefer': 'resolution=merge-duplicates' });
+      } catch (e) {
+        return sendJSON(res, { ok: false, error: 'db_save_failed', detail: e.message }, 503);
+      }
+      // Generar QR (data URL)
+      let qrDataUrl = null;
+      try {
+        const qrcode = require('qrcode');
+        qrDataUrl = await qrcode.toDataURL(otpauthUrl, { errorCorrectionLevel: 'M', width: 240 });
+      } catch (e) { /* sin qrcode lib aún, retornar solo URL */ }
+      sendJSON(res, {
+        ok: true,
+        otpauth_url: otpauthUrl,
+        qr_data_url: qrDataUrl,
+        recovery_codes: recoveryCodes,
+        warning: 'Guarda los recovery codes en lugar seguro. NO se mostrarán de nuevo.'
+      });
+    } catch (e) {
+      sendJSON(res, { ok: false, error: e.message || '2fa_setup_failed' }, 500);
+    }
   });
 
-  // POST /api/admin/me/2fa/verify — activa 2FA verificando código (STUB)
+  // POST /api/admin/me/2fa/verify — verifica código TOTP y activa 2FA (REAL)
   handlers['POST /api/admin/me/2fa/verify'] = requireAuth(async (req, res) => {
-    sendJSON(res, { ok: false, error: 'STUB_NOT_IMPLEMENTED', message: 'Activación 2FA requiere validación TOTP real. Ver BLOCKERS.md.' }, 501);
+    const role = String((req.user && (req.user.role || req.user.rol)) || '').toLowerCase();
+    if (!['superadmin','platform_owner','owner'].includes(role)) return sendJSON(res, { ok:false, error:'forbidden' }, 403);
+    try {
+      let OTPAuth;
+      try { OTPAuth = require('otpauth'); }
+      catch (e) { return sendJSON(res, { ok: false, error: 'lib_missing', install: 'npm install otpauth' }, 503); }
+      const body = await readBody(req);
+      const code = String(body.code || '').replace(/\s/g, '').trim();
+      if (!/^\d{6}$/.test(code)) return sendJSON(res, { ok: false, error: 'code_format', message: 'Código debe tener 6 dígitos' }, 400);
+      const uid = req.user.email || req.user.user_id || 'unknown';
+      // Leer secret cifrado
+      const rows = await supabaseRequest('GET',
+        '/admin_2fa_secrets?admin_user_id=eq.' + encodeURIComponent(uid) + '&select=totp_secret_enc,enabled,recovery_codes&limit=1');
+      if (!Array.isArray(rows) || !rows[0]) return sendJSON(res, { ok: false, error: 'no_setup', message: 'Primero llama a /api/admin/me/2fa/setup' }, 404);
+      const row = rows[0];
+      // Descifrar
+      const decipher = crypto.createDecipheriv('aes-256-cbc',
+        crypto.createHash('sha256').update(JWT_SECRET || 'fallback-key').digest(),
+        Buffer.alloc(16, 0)
+      );
+      const secretB32 = decipher.update(row.totp_secret_enc, 'base64', 'utf8') + decipher.final('utf8');
+      const totp = new OTPAuth.TOTP({
+        issuer: 'Volvix', label: uid, algorithm: 'SHA1', digits: 6, period: 30,
+        secret: OTPAuth.Secret.fromBase32(secretB32)
+      });
+      // Validar — tolera ±1 ventana (30s antes/después)
+      const delta = totp.validate({ token: code, window: 1 });
+      if (delta === null) {
+        return sendJSON(res, { ok: false, error: 'invalid_code', message: 'Código inválido o expirado' }, 401);
+      }
+      // Activar 2FA
+      await supabaseRequest('PATCH',
+        '/admin_2fa_secrets?admin_user_id=eq.' + encodeURIComponent(uid),
+        { enabled: true, last_used_at: new Date().toISOString() });
+      sendJSON(res, { ok: true, enabled: true });
+    } catch (e) {
+      sendJSON(res, { ok: false, error: e.message || '2fa_verify_failed' }, 500);
+    }
   });
 
   // GET /api/admin/me/sessions — lista sesiones activas del admin
@@ -36410,9 +36622,9 @@ if (process.env.NODE_ENV === 'test') {
       const body = await readBody(req, { maxBytes: 8 * 1024 });
       if (checkBodyError(req, res)) return;
 
-      // AGENTE 1 (reducido) — Captcha stub. Si CAPTCHA_ENABLED=true en .env,
-      // valida token contra Cloudflare Turnstile. Si está OFF, solo log warning.
-      // Owner debe inyectar CAPTCHA_SITE_KEY (cliente) + CAPTCHA_SECRET_KEY (server).
+      // AGENTE 1 (real) — Cloudflare Turnstile verification.
+      // Usa TURNSTILE_SECRET_KEY si está, o CAPTCHA_SECRET_KEY (alias).
+      // Si CAPTCHA_ENABLED no es 'true', pasa libre (fail-open para flag OFF).
       if (String(process.env.CAPTCHA_ENABLED || 'false').toLowerCase() === 'true') {
         const captchaToken = body.captcha_token || body['cf-turnstile-response'] || null;
         if (!captchaToken) {
@@ -36421,19 +36633,19 @@ if (process.env.NODE_ENV === 'test') {
         try {
           const verifyUrl = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
           const fd = new URLSearchParams();
-          fd.append('secret', process.env.CAPTCHA_SECRET_KEY || '');
+          fd.append('secret', process.env.TURNSTILE_SECRET_KEY || process.env.CAPTCHA_SECRET_KEY || '');
           fd.append('response', captchaToken);
           fd.append('remoteip', ip);
           const vr = await fetch(verifyUrl, { method: 'POST', body: fd });
           const vj = await vr.json();
           if (!vj.success) {
-            return sendJSON(res, { ok: false, error: 'captcha_invalid', message: 'Verificación de captcha fallida' }, 400);
+            console.warn('[turnstile] verify rejected:', vj['error-codes']);
+            return sendJSON(res, { ok: false, error: 'captcha_invalid', message: 'Verificación de captcha fallida', codes: vj['error-codes'] }, 400);
           }
         } catch (e) {
-          console.warn('[captcha] verify failed (fail-open):', e.message);
+          console.warn('[turnstile] verify failed (fail-open):', e.message);
         }
       }
-      // /AGENTE 1 (stub) — sin keys queda en modo log-only
 
       const business_name = String(body.business_name || '').trim();
       const giro = String(body.giro || body.business_type || '').trim();
@@ -40014,6 +40226,39 @@ if (process.env.NODE_ENV === 'test') {
           hint: 'Impersonation requires successful audit log insert (fail-closed).',
         }, 503);
       }
+
+      // AGENTE 4 (B-PNL-5 real) — Notificar al cliente impersonado por email
+      // Fire-and-forget: si falla el email NO bloquea la impersonation
+      (async () => {
+        try {
+          const ownerRows = await supabaseRequest('GET',
+            '/pos_users?tenant_id=eq.' + encodeURIComponent(tid) + '&role=eq.owner&select=email,name&limit=1');
+          if (Array.isArray(ownerRows) && ownerRows[0] && ownerRows[0].email && global._volvixSendEmail) {
+            const ownerEmail = ownerRows[0].email;
+            const ownerName = ownerRows[0].name || ownerEmail;
+            await global._volvixSendEmail({
+              to: ownerEmail,
+              subject: '🛡️ Sesión de soporte iniciada en tu cuenta Volvix',
+              html: `
+                <div style="font-family:sans-serif;max-width:560px;margin:auto">
+                  <h2 style="color:#92400e">Sesión de soporte iniciada</h2>
+                  <p>Hola ${ownerName},</p>
+                  <p>Te informamos que un miembro del equipo de soporte de Volvix accedió a tu cuenta para asistirte. Datos:</p>
+                  <ul>
+                    <li><strong>Administrador:</strong> ${req.user.email || 'soporte@systeminternational.app'}</li>
+                    <li><strong>Hora:</strong> ${new Date().toLocaleString('es-MX', { timeZone: 'America/Mexico_City' })}</li>
+                    <li><strong>Motivo:</strong> ${reason}</li>
+                    <li><strong>Duración máxima:</strong> 30 minutos</li>
+                  </ul>
+                  <p>Si NO solicitaste soporte y crees que este acceso es indebido, responde este email o reporta en <a href="https://systeminternational.app/login.html">tu panel</a>.</p>
+                  <p style="font-size:12px;color:#6b7280;margin-top:24px">Este email es automático. Volvix audita cada acceso por seguridad.</p>
+                </div>`
+            });
+          }
+        } catch (mailErr) {
+          console.warn('[impersonate] notif email failed (non-blocking):', mailErr.message);
+        }
+      })();
 
       // Mint token only AFTER audit log is durable
       const header = { alg: 'HS256', typ: 'JWT' };

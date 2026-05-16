@@ -361,7 +361,8 @@ function svgPieChart(items, opts = {}) {
 // ---------- Data fetch helpers ----------
 async function fetchSales(supa, tenantId, from, to) {
   if (!supa) return [];
-  const q = supa.from('sales').select('*').eq('tenant_id', tenantId);
+  // ADR-004 (2026-05-16): canonicalizado a pos_sales (DROP de tabla legacy `sales`)
+  const q = supa.from('pos_sales').select('*').eq('tenant_id', tenantId);
   if (from) q.gte('created_at', from);
   if (to) q.lte('created_at', to);
   q.order('created_at', { ascending: true }).limit(20000);
@@ -495,7 +496,7 @@ async function reportInventory(req, res, parsedUrl, ctx) {
   if (!tenantId) return sendJSON(res, 400, { error: 'tenant_id_required' });
 
   const tenant = await getTenant(supa, tenantId);
-  const { data: products } = await supa.from('products').select('*').eq('tenant_id', tenantId).limit(20000);
+  const { data: products } = await supa.from('pos_products').select('*').eq('tenant_id', tenantId).limit(20000);
   const list = products || [];
 
   let totalValue = 0;
@@ -737,7 +738,7 @@ async function reportProfit(req, res, parsedUrl, ctx) {
 
   const tenant = await getTenant(supa, tenantId);
   const items = await fetchSaleItems(supa, tenantId, from, to + 'T23:59:59');
-  const { data: products } = await supa.from('products').select('id,cost,category,category_name').eq('tenant_id', tenantId).limit(20000);
+  const { data: products } = await supa.from('pos_products').select('id,cost,category,category_name').eq('tenant_id', tenantId).limit(20000);
   const costMap = new Map();
   const catMap = new Map();
   for (const p of (products || [])) {
@@ -828,7 +829,7 @@ async function reportKardex(req, res, parsedUrl, ctx) {
   const to = q.to || new Date().toISOString().slice(0, 10);
   if (!productId) return sendJSON(res, 400, { error: 'product_id_required' });
 
-  const { data: product } = await supa.from('products').select('*').eq('id', productId).single();
+  const { data: product } = await supa.from('pos_products').select('*').eq('id', productId).single();
   if (!product) return sendJSON(res, 404, { error: 'not_found' });
   const tenant = await getTenant(supa, product.tenant_id);
 
