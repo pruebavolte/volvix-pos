@@ -12761,16 +12761,22 @@ handlers['GET /api/config/public'] = async (req, res) => {
       for (let i = 0; i < 10; i++) {
         recoveryCodes.push(crypto.randomBytes(6).toString('base64').replace(/[+/=]/g, '').slice(0, 8).toUpperCase());
       }
-      // Hashear recovery codes antes de guardar (no plaintext en BD)
-      const hashedRecovery = recoveryCodes.map(c =>
-        crypto.createHash('sha256').update(c + ':' + uid).digest('hex')
-      );
-      // Cifrar secret con JWT_SECRET (rudimentario AES via HMAC; en prod usar libsodium)
+      // Hashear recovery codes con sal aleatoria por code (fix convergencia ciclo-1: sal=uid era predecible)
+      // Storage format: <salt_hex>:<hash_hex>
+      const hashedRecovery = recoveryCodes.map(c => {
+        const salt = crypto.randomBytes(16);
+        const hash = crypto.createHash('sha256').update(salt).update(c).update(uid).digest('hex');
+        return salt.toString('hex') + ':' + hash;
+      });
+      // Cifrar secret con JWT_SECRET + IV ALEATORIO (fix convergencia ciclo-1: IV=0 era débil)
+      // Storage format: <iv_base64>:<ciphertext_base64>
+      const iv = crypto.randomBytes(16);
       const cipher = crypto.createCipheriv('aes-256-cbc',
         crypto.createHash('sha256').update(JWT_SECRET || 'fallback-key').digest(),
-        Buffer.alloc(16, 0)
+        iv
       );
-      const secretEnc = cipher.update(secret.base32, 'utf8', 'base64') + cipher.final('base64');
+      const ciphertext = cipher.update(secret.base32, 'utf8', 'base64') + cipher.final('base64');
+      const secretEnc = iv.toString('base64') + ':' + ciphertext;
       // Guardar en admin_2fa_secrets (estado pending hasta verify exitoso)
       try {
         await supabaseRequest('POST', '/admin_2fa_secrets?on_conflict=admin_user_id', {
@@ -12817,12 +12823,22 @@ handlers['GET /api/config/public'] = async (req, res) => {
         '/admin_2fa_secrets?admin_user_id=eq.' + encodeURIComponent(uid) + '&select=totp_secret_enc,enabled,recovery_codes&limit=1');
       if (!Array.isArray(rows) || !rows[0]) return sendJSON(res, { ok: false, error: 'no_setup', message: 'Primero llama a /api/admin/me/2fa/setup' }, 404);
       const row = rows[0];
-      // Descifrar
+      // Descifrar — formato nuevo: <iv_base64>:<ciphertext_base64>
+      // Fallback: si no tiene ':' es formato viejo (IV=0) — soportar para no romper rows pre-fix
+      let iv, ctext;
+      if (row.totp_secret_enc.includes(':')) {
+        const parts = row.totp_secret_enc.split(':');
+        iv = Buffer.from(parts[0], 'base64');
+        ctext = parts[1];
+      } else {
+        iv = Buffer.alloc(16, 0);
+        ctext = row.totp_secret_enc;
+      }
       const decipher = crypto.createDecipheriv('aes-256-cbc',
         crypto.createHash('sha256').update(JWT_SECRET || 'fallback-key').digest(),
-        Buffer.alloc(16, 0)
+        iv
       );
-      const secretB32 = decipher.update(row.totp_secret_enc, 'base64', 'utf8') + decipher.final('utf8');
+      const secretB32 = decipher.update(ctext, 'base64', 'utf8') + decipher.final('utf8');
       const totp = new OTPAuth.TOTP({
         issuer: 'Volvix', label: uid, algorithm: 'SHA1', digits: 6, period: 30,
         secret: OTPAuth.Secret.fromBase32(secretB32)

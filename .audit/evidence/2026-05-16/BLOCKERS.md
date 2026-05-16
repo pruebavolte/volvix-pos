@@ -172,7 +172,76 @@ Sin estas migraciones aplicadas, los endpoints retornan datos vacíos (fail-open
 ### 9.5 — npm install otpauth qrcode resend
 En Vercel build, el `package.json` ahora incluye estas dependencias. El siguiente deploy las instalará automáticamente. No requiere acción manual del owner.
 
-## 10. Resumen y plan ajustado por evidencia
+## 11. BLOCKER CRÍTICO — 7 verificaciones experimentales NO ejecutadas
+
+**Situación**: el owner autorizó crear T_A y T_B en producción. Implementé el endpoint admin `/api/admin/test-tenant/create` que crea tenants sin OTP, gated por:
+- Header `Authorization: Bearer <JWT_superadmin>` (requiere JWT del owner)
+- Variable env `ALLOW_TEST_TENANTS=true` (debe setearse en Vercel)
+
+**Yo NO tengo**:
+- JWT del platform_owner (las credenciales `grupovolvix@gmail.com` / `123456789` que el owner mencionó antes son del browser interactivo; no me las puede pasar para uso programático sin que las exponga, y por política de seguridad NO debo recibir/usar passwords aunque me las pasen)
+- Acceso al dashboard de Vercel para setear `ALLOW_TEST_TENANTS=true`
+
+**Opciones para desbloquear** (decisión del owner):
+
+**A) Owner provee un JWT de service-account creado para esta tarea**:
+   - En Vercel env: setear `ALLOW_TEST_TENANTS=true` por 24h
+   - Generar JWT manualmente con `node -e "console.log(require('jsonwebtoken').sign({role:'superadmin',email:'test@volvix.local',tenant_id:null}, process.env.JWT_SECRET, {expiresIn:'2h'}))"`
+   - Pegármelo en chat para que yo ejecute curl
+   - Rotar JWT_SECRET después de las pruebas (invalida el JWT temp)
+
+**B) Owner ejecuta las 7 pruebas él mismo** con instrucciones que dejo abajo, y me pega los resultados.
+
+**C) Aceptar que las 7 quedan como "confirmadas por inspección de código" (lo que ya hice en AGENTE 0)** y avanzar.
+
+### Las 7 pruebas (curl listos para ejecutar manualmente)
+
+```bash
+# Prerequisito: setear $TOKEN_A y $TOKEN_B (JWTs de los 2 tenants test)
+# 1. Crear T_A
+TOK_ADMIN=<jwt-superadmin>
+T_A=$(curl -X POST https://systeminternational.app/api/admin/test-tenant/create \
+  -H "Authorization: Bearer $TOK_ADMIN" -H "Content-Type: application/json" \
+  -d '{"slug":"a","giro":"abarrotes"}')
+TOKEN_A=$(echo $T_A | jq -r .token)
+TID_A=$(echo $T_A | jq -r .tenant_id)
+# Idem T_B
+T_B=$(curl -X POST https://systeminternational.app/api/admin/test-tenant/create \
+  -H "Authorization: Bearer $TOK_ADMIN" -H "Content-Type: application/json" \
+  -d '{"slug":"b","giro":"cafe"}')
+TOKEN_B=$(echo $T_B | jq -r .token)
+TID_B=$(echo $T_B | jq -r .tenant_id)
+
+# TEST 1: ¿Token T_B puede leer datos de T_A?
+curl https://systeminternational.app/api/sales -H "Authorization: Bearer $TOKEN_B" | grep -i "$TID_A" && echo "FUGA!" || echo "OK aislado"
+
+# TEST 2: Suspender T_A, ¿sigue cobrando?
+curl -X POST https://systeminternational.app/api/admin/tenant/$TID_A/suspend \
+  -H "Authorization: Bearer $TOK_ADMIN" -d '{"reason":"test"}'
+sleep 5
+curl -X POST https://systeminternational.app/api/sales \
+  -H "Authorization: Bearer $TOKEN_A" -d '{}'  # Debe ser 403 (token revoked)
+
+# TEST 3: Deshabilitar feature 'cobrar' para T_A, ¿endpoint rechaza?
+curl -X POST https://systeminternational.app/api/admin/tenants/$TID_A/modules \
+  -H "Authorization: Bearer $TOK_ADMIN" \
+  -d '{"modules":{"cobrar":{"enabled":false}}}'
+sleep 5
+curl -X POST https://systeminternational.app/api/sales \
+  -H "Authorization: Bearer $TOKEN_A"  # Debe ser 403 feature_disabled
+
+# TEST 4: Override 'deny' para usuario X, ¿aplica al instante?
+# (requiere endpoint /api/admin/user-override)
+
+# TEST 5-7: Token de impersonación read-only
+# (requiere endpoint /api/admin/tenant/:id/impersonate del owner real)
+
+# CLEANUP siempre:
+curl -X DELETE https://systeminternational.app/api/admin/test-tenant/$TID_A -H "Authorization: Bearer $TOK_ADMIN"
+curl -X DELETE https://systeminternational.app/api/admin/test-tenant/$TID_B -H "Authorization: Bearer $TOK_ADMIN"
+```
+
+## 12. Resumen y plan ajustado por evidencia
 
 De los 16 Bloqueantes inferidos: **3 DESCARTADOS** (B-MKT-1/2/3), **7 CONFIRMADOS por código**, **6 PARCIALES** (requieren verificación física/owner).
 

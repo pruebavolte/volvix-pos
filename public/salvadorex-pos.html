@@ -20224,6 +20224,10 @@
   // ============================================================
   window._volvixAppConfig = window._volvixAppConfig || { version: 0, modules: {} };
   window._volvixConfigPollInterval = window._volvixConfigPollInterval || null;
+  // Fix convergencia ciclo-1: backoff exponencial cuando server falla (5xx).
+  // Default 60s. Si falla, multiplica por 2 hasta máx 15 min. Reset a 60s al success.
+  window._volvixPollBackoffMs = 60000;
+  window._volvixPollFailCount = 0;
   async function _volvixPollAppConfig() {
     try {
       var tok = (window.VolvixAuth && window.VolvixAuth.getToken && window.VolvixAuth.getToken())
@@ -20234,8 +20238,31 @@
         headers: tok ? { Authorization: 'Bearer ' + tok } : {},
         credentials: 'include'
       });
-      if (r.status === 304) return;  // sin cambio — eficiente
-      if (!r.ok) return;
+      if (r.status === 304) {
+        // Reset backoff
+        window._volvixPollBackoffMs = 60000;
+        window._volvixPollFailCount = 0;
+        return;
+      }
+      if (!r.ok) {
+        // Backoff exponencial: 60s, 2min, 4min, 8min, 15min cap
+        if (r.status >= 500) {
+          window._volvixPollFailCount++;
+          window._volvixPollBackoffMs = Math.min(15 * 60000, 60000 * Math.pow(2, window._volvixPollFailCount));
+          if (window._volvixConfigPollInterval) {
+            clearInterval(window._volvixConfigPollInterval);
+            window._volvixConfigPollInterval = setInterval(_volvixPollAppConfig, window._volvixPollBackoffMs);
+          }
+        }
+        return;
+      }
+      // Success — reset backoff
+      window._volvixPollBackoffMs = 60000;
+      window._volvixPollFailCount = 0;
+      if (window._volvixConfigPollInterval) {
+        clearInterval(window._volvixConfigPollInterval);
+        window._volvixConfigPollInterval = setInterval(_volvixPollAppConfig, 60000);
+      }
       var j = await r.json();
       if (!j || !j.ok) return;
       // Aplicar cambios
