@@ -2926,7 +2926,7 @@ const handlers = {
       }
       let customers;
       try {
-        customers = await supabaseRequest('GET', '/customers' + baseQs);
+        customers = await supabaseRequest('GET', '/pos_customers' + baseQs);
       } catch (e) {
         // fallback: si la columna deleted_at o tenant_id no existe (schema legacy)
         // intentamos sin el filtro de deleted_at, luego sin tenant_id.
@@ -2936,12 +2936,12 @@ const handlers = {
             : (tntUuid
                 ? `?tenant_id=eq.${encodeURIComponent(tntUuid)}&select=*&order=created_at.desc&limit=${limit}&offset=${offset}`
                 : `?user_id=eq.${encodeURIComponent(req.user.id)}&select=*&order=created_at.desc&limit=${limit}&offset=${offset}`);
-          customers = await supabaseRequest('GET', '/customers' + noSoftQs);
+          customers = await supabaseRequest('GET', '/pos_customers' + noSoftQs);
         } catch (_e2) {
           const fbQs = req.user.role === 'superadmin'
             ? `?select=*&order=created_at.desc&limit=${limit}&offset=${offset}`
             : `?user_id=eq.${encodeURIComponent(req.user.id)}&select=*&order=created_at.desc&limit=${limit}&offset=${offset}`;
-          customers = await supabaseRequest('GET', '/customers' + fbQs);
+          customers = await supabaseRequest('GET', '/pos_customers' + fbQs);
         }
       }
       // Set Content-Range-like header for pagination introspection
@@ -2990,7 +2990,7 @@ const handlers = {
       if (safe.credit_limit !== undefined && safe.credit_limit !== null && (!Number.isFinite(cl) || cl < 0)) {
         return sendValidation(res, 'credit_limit debe ser número >= 0', 'credit_limit');
       }
-      const result = await supabaseRequest('POST', '/customers', {
+      const result = await supabaseRequest('POST', '/pos_customers', {
         name: safe.name, email: safe.email, phone: safe.phone,
         address: safe.address, credit_limit: safe.credit_limit || 0,
         credit_balance: safe.credit_balance || 0,
@@ -3350,7 +3350,7 @@ const handlers = {
         supabaseRequest('GET', '/pos_companies?select=id,plan,is_active'),
         supabaseRequest('GET', '/pos_sales?select=total,created_at'),
         supabaseRequest('GET', '/pos_products?select=id,stock'),
-        supabaseRequest('GET', '/customers?select=id,active'),
+        supabaseRequest('GET', '/pos_customers?select=id,active'),
       ]);
 
       const totalRevenue = (sales || []).reduce((s, x) => s + parseFloat(x.total || 0), 0);
@@ -4220,7 +4220,7 @@ const handlers = {
           } else if (item.type === 'customer' && item.data) {
             const safe = pickFields(item.data, ALLOWED_FIELDS_CUSTOMERS);
             safe.user_id = req.user.id;
-            const r = await supabaseRequest('POST', '/customers', safe);
+            const r = await supabaseRequest('POST', '/pos_customers', safe);
             results.push({ type: 'customer', success: true, id: r[0]?.id });
           }
         } catch (err) {
@@ -7212,7 +7212,7 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
 
       let inserted = 0, fellbackTo = null;
       try {
-        const r = await supabaseRequest('POST', '/products', clean);
+        const r = await supabaseRequest('POST', '/pos_products', clean);
         inserted = Array.isArray(r) ? r.length : clean.length;
       } catch (e) {
         // Fallback: insertar en pos_products (tabla real del POS)
@@ -7650,7 +7650,7 @@ global.dispatchWebhook = dispatchWebhook;
   handlers['GET /api/ml/inventory/reorder-suggestions'] = requireAuth(async (req, res) => {
     try {
       const tenantId = req.user && req.user.tenant_id;
-      let q = '/products?select=id,name,sku,stock,min_stock&limit=500';
+      let q = '/pos_products?select=id,name,sku,stock,min_stock&limit=500';
       if (tenantId) q += '&tenant_id=eq.' + tenantId;
       const products = await supabaseRequest('GET', q) || [];
       const out = [];
@@ -7711,7 +7711,7 @@ global.dispatchWebhook = dispatchWebhook;
   handlers['POST /api/ml/products/cluster'] = requireAuth(async (req, res) => {
     try {
       const tenantId = req.user && req.user.tenant_id;
-      let q = '/products?select=id,name,sku,stock,price&limit=500';
+      let q = '/pos_products?select=id,name,sku,stock,price&limit=500';
       if (tenantId) q += '&tenant_id=eq.' + tenantId;
       const products = await supabaseRequest('GET', q) || [];
       const features = [];
@@ -8333,10 +8333,10 @@ try {
         api_base: `${baseUrl}/api`,
         endpoints: {
           auth: '/auth/login',
-          products: '/products',
-          sales: '/sales',
+          products: '/pos_products',
+          sales: '/pos_sales',
           inventory: '/inventory',
-          customers: '/customers',
+          customers: '/pos_customers',
           push_register: '/push/register',
         },
         feature_flags: {
@@ -11331,7 +11331,7 @@ handlers['GET /api/config/public'] = async (req, res) => {
     try {
       const safe = pickFields(body, ALLOWED_FIELDS_CUSTOMERS);
       if (safe.rfc) safe.rfc = String(safe.rfc).trim().toUpperCase();
-      const result = await supabaseRequest('POST', '/customers', {
+      const result = await supabaseRequest('POST', '/pos_customers', {
         name: safe.name, email: safe.email, phone: safe.phone,
         address: safe.address, credit_limit: safe.credit_limit || 0,
         credit_balance: safe.credit_balance || 0,
@@ -18703,7 +18703,7 @@ handlers['POST /api/telegram/webhook'] = async (req, res) => {
     if (!customerId) return false;
     try {
       const qs = `?id=eq.${customerId}&select=created_at,total_purchases&limit=1`;
-      const rows = await supabaseRequest('GET', '/customers' + qs);
+      const rows = await supabaseRequest('GET', '/pos_customers' + qs);
       const c = rows && rows[0];
       if (!c) return true;
       const ageDays = (Date.now() - new Date(c.created_at).getTime()) / 86400000;
@@ -21547,7 +21547,7 @@ if (process.env.NODE_ENV === 'test') {
       if (ids.length) {
         try {
           var custs = await supabaseRequest('GET',
-            '/customers?id=in.(' + ids.map(encodeURIComponent).join(',') + ')&select=id,name');
+            '/pos_customers?id=in.(' + ids.map(encodeURIComponent).join(',') + ')&select=id,name');
           (custs || []).forEach(function (c) { if (agg[c.id]) agg[c.id].name = c.name; });
         } catch (_) {}
       }
@@ -21908,7 +21908,7 @@ if (process.env.NODE_ENV === 'test') {
 
       let sale, saleId;
       try {
-        const saleResult = await supabaseRequest('POST', '/sales', saleRow);
+        const saleResult = await supabaseRequest('POST', '/pos_sales', saleRow);
         sale = (saleResult && saleResult[0]) || saleResult;
         saleId = sale && sale.id;
       } catch (e) {
@@ -21922,7 +21922,7 @@ if (process.env.NODE_ENV === 'test') {
           delete saleRow.discount_authorized_by; delete saleRow.discount_reason;
           delete saleRow.payment_methods_summary; delete saleRow.device_id;
           delete saleRow.app_version;
-          const saleResult2 = await supabaseRequest('POST', '/sales', saleRow);
+          const saleResult2 = await supabaseRequest('POST', '/pos_sales', saleRow);
           sale = (saleResult2 && saleResult2[0]) || saleResult2;
           saleId = sale && sale.id;
         } else throw e;
@@ -22814,7 +22814,7 @@ if (process.env.NODE_ENV === 'test') {
       var tnt = b36Tenant(req);
       // Tenant ownership of customer
       var c = await supabaseRequest('GET',
-        '/customers?id=eq.' + encodeURIComponent(params.id) + '&select=id,user_id,tenant_id');
+        '/pos_customers?id=eq.' + encodeURIComponent(params.id) + '&select=id,user_id,tenant_id');
       if (!c || !c.length) return send404(res, 'customers', params.id);
       if (!b36IsSuperadmin(req)) {
         var allowed = false;
@@ -22853,7 +22853,7 @@ if (process.env.NODE_ENV === 'test') {
       var idemKey = req.headers['idempotency-key'] ? String(req.headers['idempotency-key']).slice(0, 200) : null;
       // Tenant + ownership of customer + version (para CAS-like update)
       var c = await supabaseRequest('GET',
-        '/customers?id=eq.' + encodeURIComponent(params.id) +
+        '/pos_customers?id=eq.' + encodeURIComponent(params.id) +
         '&select=id,user_id,tenant_id,credit_balance,balance,version,deleted_at');
       if (!c || !c.length) return send404(res, 'customers', params.id);
       if (c[0].deleted_at) {
@@ -22880,7 +22880,7 @@ if (process.env.NODE_ENV === 'test') {
       var balUpdResult = null;
       try {
         balUpdResult = await supabaseRequest('PATCH',
-          '/customers?id=eq.' + encodeURIComponent(params.id) +
+          '/pos_customers?id=eq.' + encodeURIComponent(params.id) +
           '&version=eq.' + encodeURIComponent(currentVersion),
           { credit_balance: newBalance });
         if (Array.isArray(balUpdResult) && balUpdResult.length > 0) balanceUpdated = true;
@@ -22889,7 +22889,7 @@ if (process.env.NODE_ENV === 'test') {
         // Fallback: schema legacy puede no tener credit_balance ni version; intenta `balance` sin CAS.
         try {
           balUpdResult = await supabaseRequest('PATCH',
-            '/customers?id=eq.' + encodeURIComponent(params.id) +
+            '/pos_customers?id=eq.' + encodeURIComponent(params.id) +
             '&version=eq.' + encodeURIComponent(currentVersion),
             { balance: newBalance });
           if (Array.isArray(balUpdResult) && balUpdResult.length > 0) balanceUpdated = true;
@@ -22900,7 +22900,7 @@ if (process.env.NODE_ENV === 'test') {
         var cur2 = null;
         try {
           cur2 = await supabaseRequest('GET',
-            '/customers?id=eq.' + encodeURIComponent(params.id) +
+            '/pos_customers?id=eq.' + encodeURIComponent(params.id) +
             '&select=version,credit_balance,balance');
         } catch (_) {}
         // Si la versión sigue igual, el problema fue otro (intentar un PATCH no-CAS).
@@ -22908,13 +22908,13 @@ if (process.env.NODE_ENV === 'test') {
           // schema sin column version: hacer update plano.
           try {
             await supabaseRequest('PATCH',
-              '/customers?id=eq.' + encodeURIComponent(params.id),
+              '/pos_customers?id=eq.' + encodeURIComponent(params.id),
               { credit_balance: newBalance });
             balanceUpdated = true;
           } catch (_) {
             try {
               await supabaseRequest('PATCH',
-                '/customers?id=eq.' + encodeURIComponent(params.id),
+                '/pos_customers?id=eq.' + encodeURIComponent(params.id),
                 { balance: newBalance });
               balanceUpdated = true;
             } catch (_) {}
@@ -23004,7 +23004,7 @@ if (process.env.NODE_ENV === 'test') {
       var notes = body.notes ? sanitizeText(String(body.notes)).slice(0, 500) : null;
       var idemKey = req.headers['idempotency-key'] ? String(req.headers['idempotency-key']).slice(0, 200) : null;
       var c = await supabaseRequest('GET',
-        '/customers?id=eq.' + encodeURIComponent(customerId) +
+        '/pos_customers?id=eq.' + encodeURIComponent(customerId) +
         '&select=id,user_id,tenant_id,credit_balance,balance,version,deleted_at');
       if (!c || !c.length) return send404(res, 'customers', customerId);
       if (c[0].deleted_at) {
@@ -23025,7 +23025,7 @@ if (process.env.NODE_ENV === 'test') {
       var balanceUpdated = false;
       try {
         var r = await supabaseRequest('PATCH',
-          '/customers?id=eq.' + encodeURIComponent(customerId) +
+          '/pos_customers?id=eq.' + encodeURIComponent(customerId) +
           '&version=eq.' + encodeURIComponent(currentVersion),
           { credit_balance: newBalance });
         if (Array.isArray(r) && r.length > 0) balanceUpdated = true;
@@ -25105,7 +25105,7 @@ if (process.env.NODE_ENV === 'test') {
           // PostgREST in.()
           var inList = custIds.map(encodeURIComponent).join(',');
           var customers = await supabaseRequest('GET',
-            '/customers?id=in.(' + inList + ')&select=id,name,rfc');
+            '/pos_customers?id=in.(' + inList + ')&select=id,name,rfc');
           (customers || []).forEach(function (c) { custMap[c.id] = c; });
         } catch (_) {}
       }
@@ -25992,7 +25992,7 @@ if (process.env.NODE_ENV === 'test') {
         // Customers
         try {
           snap.customers = await supabaseRequest('GET',
-            '/customers?or=(tenant_id.eq.' + encodeURIComponent(tnt) +
+            '/pos_customers?or=(tenant_id.eq.' + encodeURIComponent(tnt) +
             ',user_id.eq.' + encodeURIComponent(req.user.id || '') + ')' +
             '&select=*&limit=20000') || [];
         } catch (_) { snap.customers = []; }
@@ -26274,7 +26274,7 @@ if (process.env.NODE_ENV === 'test') {
           } else if (key === 'POST /api/customers') {
             var custBody = op.body || {};
             try {
-              await supabaseRequest('POST', '/customers', {
+              await supabaseRequest('POST', '/pos_customers', {
                 tenant_id: tnt,
                 user_id: req.user.id || null,
                 name: sanitizeName(String(custBody.name || '')).slice(0, 200),
@@ -30230,7 +30230,7 @@ if (process.env.NODE_ENV === 'test') {
           // Si volvix_clientes no tiene columna tenant_id (legacy), supabaseRequest
           // devolverá error → fallback a customers/pos_customers (R4b) que sí tienen tenant_id
           if (clientes === null) {
-            var fallbackQs = '/customers?select=id,name,phone,rfc' +
+            var fallbackQs = '/pos_customers?select=id,name,phone,rfc' +
                              '&tenant_id=eq.' + encodeURIComponent(tnt) +
                              '&deleted_at=is.null' +
                              '&limit=200';
@@ -41935,7 +41935,7 @@ if (process.env.NODE_ENV === 'test') {
             `/customers?tenant_id=eq.${encodeURIComponent(tenantUuid)}&email=eq.${ee}&select=id&limit=1`
           ).catch(() => []);
           if (!existing || !existing.length) {
-            await supabaseRequest('POST', '/customers', {
+            await supabaseRequest('POST', '/pos_customers', {
               tenant_id: tenantUuid,
               name, email, phone,
               source: 'app',
