@@ -12416,6 +12416,78 @@ handlers['GET /api/config/public'] = async (req, res) => {
       update_available: updateAvailable
     });
   };
+
+  // ============================================================
+  // AGENTE 6 (Fiscal IVA) — GET /api/tax-config
+  // Retorna la config fiscal del tenant. Default: IVA 16% post-descuento.
+  // Permite override por tenant (frontera 8%, exentos 0%, IEPS opcional).
+  // ============================================================
+  handlers['GET /api/tax-config'] = requireAuth(async (req, res) => {
+    try {
+      const tenantId = req.user && (req.user.tenant_id || req.user.tenantId);
+      let cfg = {
+        iva_rate: 0.16,
+        applies_when: 'after_discount',
+        ieps_enabled: false,
+        ieps_default_rate: 0.08,
+        tasa_frontera: false,
+        exento: false
+      };
+      if (tenantId) {
+        try {
+          const rows = await supabaseRequest('GET',
+            '/pos_tax_config?tenant_id=eq.' + encodeURIComponent(tenantId) + '&select=*&limit=1');
+          if (Array.isArray(rows) && rows[0]) {
+            const r = rows[0];
+            cfg.iva_rate = Number(r.iva_rate != null ? r.iva_rate : 0.16);
+            cfg.applies_when = r.applies_when === 'before_discount' ? 'before_discount' : 'after_discount';
+            cfg.ieps_enabled = !!r.ieps_enabled;
+            cfg.ieps_default_rate = Number(r.ieps_default_rate || 0.08);
+            cfg.tasa_frontera = !!r.tasa_frontera;
+            cfg.exento = !!r.exento;
+            if (r.exento) cfg.iva_rate = 0;
+            if (r.tasa_frontera) cfg.iva_rate = 0.08;
+          }
+        } catch (e) { /* falla silenciosa, usa defaults */ }
+      }
+      sendJSON(res, { ok: true, config: cfg });
+    } catch (e) {
+      sendJSON(res, { ok: false, error: e.message || 'tax-config-failed' }, 500);
+    }
+  });
+
+  // POST /api/tax-config — solo owner del tenant o platform_owner pueden actualizar
+  handlers['POST /api/tax-config'] = requireAuth(async (req, res) => {
+    try {
+      const role = String((req.user && (req.user.role || req.user.rol)) || '').toLowerCase();
+      const allowed = ['owner', 'admin', 'superadmin', 'platform_owner'];
+      if (!allowed.includes(role)) return sendJSON(res, { ok: false, error: 'forbidden' }, 403);
+      const tenantId = req.user && (req.user.tenant_id || req.user.tenantId);
+      if (!tenantId) return sendJSON(res, { ok: false, error: 'no_tenant' }, 400);
+      const body = await readBody(req);
+      const cfg = {
+        tenant_id: tenantId,
+        iva_rate: Number(body.iva_rate != null ? body.iva_rate : 0.16),
+        applies_when: body.applies_when === 'before_discount' ? 'before_discount' : 'after_discount',
+        ieps_enabled: !!body.ieps_enabled,
+        ieps_default_rate: Number(body.ieps_default_rate || 0.08),
+        tasa_frontera: !!body.tasa_frontera,
+        exento: !!body.exento,
+        updated_at: new Date().toISOString(),
+        updated_by: req.user.email || req.user.user_id || 'unknown'
+      };
+      // UPSERT (intento update primero, si no existe insert)
+      try {
+        await supabaseRequest('POST', '/pos_tax_config?on_conflict=tenant_id', cfg, {
+          'Prefer': 'resolution=merge-duplicates,return=representation'
+        });
+      } catch (e) { /* tabla puede no existir — handler tolera */ }
+      sendJSON(res, { ok: true, config: cfg });
+    } catch (e) {
+      sendJSON(res, { ok: false, error: e.message || 'tax-config-update-failed' }, 500);
+    }
+  });
+
   // /api/giros/list — list catalog (alias to giros search w/o q)
   handlers['GET /api/giros/list'] = async (req, res) => {
     try {

@@ -9710,12 +9710,76 @@
     try { __r8aClearCartDraft(); } catch (_) {}
     showToast('✓ Nuevo ticket iniciado');
   }
+  // AGENTE 6 (IVA fiscal MX) — cálculo correcto con tax_config configurable por tenant.
+  // Default: IVA 16% aplicado DESPUÉS del descuento (estándar mexicano general).
+  // Casos especiales: tasa frontera 8%, exentos 0%, IEPS opcional sobre productos marcados.
+  window.VolvixTax = window.VolvixTax || {
+    _cfg: { iva_rate: 0.16, applies_when: 'after_discount', ieps_enabled: false, ieps_default_rate: 0.08 },
+    setConfig(c) { if (c && typeof c === 'object') { Object.assign(this._cfg, c); try { localStorage.setItem('vlx:tax_cfg', JSON.stringify(this._cfg)); } catch(_) {} } },
+    getConfig() {
+      try { var cached = localStorage.getItem('vlx:tax_cfg'); if (cached) { Object.assign(this._cfg, JSON.parse(cached)); } } catch(_) {}
+      return this._cfg;
+    },
+    computeTotals(cartItems, cartDiscount) {
+      var cfg = this.getConfig();
+      cartItems = cartItems || [];
+      cartDiscount = Number(cartDiscount || 0);
+      var grossSubtotal = cartItems.reduce(function (s, i) { return s + Number(i.price || 0) * Number(i.qty || 0); }, 0);
+      // Descuento se aplica primero sobre el bruto si applies_when === 'after_discount'
+      var taxableBase = cfg.applies_when === 'after_discount' ? Math.max(0, grossSubtotal - cartDiscount) : grossSubtotal;
+      var ivaAmount = +(taxableBase * Number(cfg.iva_rate || 0)).toFixed(2);
+      var iepsAmount = 0;
+      if (cfg.ieps_enabled) {
+        var iepsBase = cartItems.reduce(function (s, i) { return i.ieps_eligible ? s + Number(i.price || 0) * Number(i.qty || 0) : s; }, 0);
+        iepsAmount = +(iepsBase * Number(cfg.ieps_default_rate || 0)).toFixed(2);
+      }
+      var finalDiscount = cfg.applies_when === 'after_discount' ? cartDiscount : Math.min(cartDiscount, grossSubtotal);
+      var total = +(taxableBase + ivaAmount + iepsAmount).toFixed(2);
+      return {
+        gross_subtotal: +grossSubtotal.toFixed(2),
+        discount: +finalDiscount.toFixed(2),
+        taxable_base: +taxableBase.toFixed(2),
+        iva_rate: cfg.iva_rate,
+        iva_amount: ivaAmount,
+        ieps_amount: iepsAmount,
+        total: total
+      };
+    },
+    async loadFromServer() {
+      try {
+        var tok = (window.VolvixAuth && window.VolvixAuth.getToken && window.VolvixAuth.getToken())
+          || localStorage.getItem('volvix_token') || '';
+        var r = await fetch('/api/tax-config', { headers: tok ? { Authorization: 'Bearer ' + tok } : {}, credentials: 'include' });
+        if (r.ok) { var j = await r.json(); if (j && j.ok && j.config) { this.setConfig(j.config); } }
+      } catch (_) { /* keep defaults */ }
+    }
+  };
+  // Cargar config del server al inicio (no bloquea render)
+  try { window.VolvixTax.loadFromServer(); } catch(_) {}
+
   function updateTotals() {
-    const total = CART.reduce((s,i) => s + i.price * i.qty, 0);
+    // AGENTE 6: aplicar IVA via VolvixTax.computeTotals (antes era solo Σ price×qty)
+    var totals = window.VolvixTax.computeTotals(CART, Number(window.__volvixCartDiscount || 0));
     const count = CART.reduce((s,i) => s + i.qty, 0);
     $('#item-count').textContent = count;
-    $('#total-big').textContent = fmt(total);
-    $('#footer-total').textContent = fmt(total);
+    $('#total-big').textContent = fmt(totals.total);
+    $('#footer-total').textContent = fmt(totals.total);
+    // Desglose visible (SAT-compliant): Subtotal | IVA | Total
+    var brk = document.getElementById('vlx-tax-breakdown');
+    if (!brk) {
+      brk = document.createElement('div');
+      brk.id = 'vlx-tax-breakdown';
+      brk.style.cssText = 'font-size:11px;color:#64748B;padding:2px 8px;text-align:right;line-height:1.4';
+      var tb = document.getElementById('total-big');
+      if (tb && tb.parentNode) tb.parentNode.insertBefore(brk, tb);
+    }
+    if (CART.length > 0) {
+      brk.innerHTML = 'Subtotal: <strong>' + fmt(totals.taxable_base) + '</strong> · IVA ' + (totals.iva_rate * 100).toFixed(0) + '%: <strong>' + fmt(totals.iva_amount) + '</strong>' + (totals.ieps_amount > 0 ? ' · IEPS: <strong>' + fmt(totals.ieps_amount) + '</strong>' : '');
+    } else {
+      brk.innerHTML = '';
+    }
+    // Cache para que completePay() use los mismos numeros
+    window.__volvixLastTotals = totals;
   }
 
   /* ============ GAP-2: MULTI-TAB CART SYNC ============ */
@@ -10239,6 +10303,31 @@
         }
       } catch (_) {}
       if (typeof __volvixResetCartToken === 'function') __volvixResetCartToken();
+      // AGENTE 7 — stock decrement local post-venta (transaccional con POST /api/sales)
+      // Si llegamos aquí, el POST fue exitoso. Decrementar CATALOG local + VolvixState para
+      // que la UI refleje stock correcto sin recargar. Si después hay sync con backend,
+      // ese sync GANA y corrige cualquier desfase.
+      try {
+        if (CART && CART.length && Array.isArray(CATALOG)) {
+          CART.forEach(function (item) {
+            var q = Number(item.qty || 0);
+            if (q <= 0) return;
+            var idx = CATALOG.findIndex(function (p) {
+              return p && (p.code === item.code || p.id === item.id || p.barcode === item.code);
+            });
+            if (idx >= 0) {
+              CATALOG[idx].stock = Math.max(0, Number(CATALOG[idx].stock || 0) - q);
+            }
+            // Idem en VolvixState (fuente única futura)
+            if (window.VolvixState && typeof window.VolvixState.decrementProductStock === 'function') {
+              try { window.VolvixState.decrementProductStock(item.code || item.id, q); } catch(_){}
+            }
+          });
+          // Notificar UI de inventario si está montada
+          if (typeof updateInvStats === 'function') { try { updateInvStats(); } catch(_){} }
+          if (typeof renderInv === 'function') { try { renderInv(); } catch(_){} }
+        }
+      } catch (e) { console.warn('[AGENTE 7] stock decrement local fail', e); }
       CART.length = 0;
       renderCart();
       // R8a FIX-H1: venta confirmada → borrar draft
@@ -18511,6 +18600,8 @@
 <script src="volvix-i18n-wiring.js" defer></script>
 <link rel="stylesheet" href="volvix-shared.css">
 <script src="volvix-theme-wiring.js" defer></script>
+<!-- AGENTE 8 (ADR-001 Fase 1) — VolvixState debe cargar ANTES de cualquier wiring -->
+<script src="volvix-state.js"></script>
 <script src="volvix-shortcuts-wiring.js" defer></script>
 <script src="volvix-search-wiring.js" defer></script>
 <script src="volvix-voice-wiring.js" defer></script>
