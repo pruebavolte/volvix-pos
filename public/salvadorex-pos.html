@@ -4319,6 +4319,12 @@
           <p class="page-sub" id="dash-sub">Resumen del día</p>
         </div>
         <div class="btn-row">
+          <!-- SDD: filtro de fecha para dashboard (antes solo mostraba el día sin selector) -->
+          <div class="btn-group" role="group" aria-label="Rango de fechas">
+            <button class="btn" data-dash-range="today" onclick="setDashboardRange('today', this)" title="Hoy">Hoy</button>
+            <button class="btn" data-dash-range="week" onclick="setDashboardRange('week', this)" title="Esta semana">Semana</button>
+            <button class="btn" data-dash-range="month" onclick="setDashboardRange('month', this)" title="Este mes">Mes</button>
+          </div>
           <button class="btn" onclick="exportDashboardCSV()">📤 Exportar</button>
           <button class="btn primary" onclick="printDashboardSummary()">🖨️ Imprimir resumen</button>
         </div>
@@ -4663,6 +4669,19 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             Buscar venta
           </button>
+          <!-- SDD: filtros chip para historial — estado y método de pago -->
+          <select id="vnt-filter-status" onchange="window._ventasStatusFilter=this.value; renderVentas();" style="padding:7px 10px;border:1px solid var(--border,#e5e5ea);border-radius:7px;font-size:12px" title="Filtrar por estado">
+            <option value="">Todos los estados</option>
+            <option value="completed">Solo completadas</option>
+            <option value="cancelled">Solo canceladas</option>
+            <option value="returned">Solo devueltas</option>
+          </select>
+          <select id="vnt-filter-pay" onchange="window._ventasPayFilter=this.value; renderVentas();" style="padding:7px 10px;border:1px solid var(--border,#e5e5ea);border-radius:7px;font-size:12px" title="Filtrar por método de pago">
+            <option value="">Todos los pagos</option>
+            <option value="Efectivo">Efectivo</option>
+            <option value="Tarjeta">Tarjeta</option>
+            <option value="Transferencia">Transferencia</option>
+          </select>
           <button class="btn" onclick="openHistorialDateFilter()">📅 Filtrar fecha</button>
           <!-- SDD C5 constitution: defualt = ultimas 24h. Boton para expandir explicitamente. -->
           <button class="btn" onclick="toggleVentasShowAll()" id="btn-ventas-show-all" title="Cambia entre 'últimas 24h' (default) y 'todas las ventas cargadas'">📂 Ver todas</button>
@@ -4740,6 +4759,9 @@
       <div class="page-head">
         <div><h1 class="page-title">Corte de caja</h1><p class="page-sub" id="corte-sub">Cierre del turno</p></div>
         <div class="btn-row">
+          <!-- SDD QW-6: operaciones de fin de turno faltantes (consistencia con kardex/proveedores) -->
+          <button class="btn" id="btn-cuts-print" onclick="printCorteSummary()" title="Imprimir resumen del corte actual">🖨️ Imprimir corte</button>
+          <button class="btn" id="btn-cuts-export" onclick="exportCorteCSV()" title="Descargar resumen como CSV">📤 Exportar</button>
           <button class="btn" id="btn-cuts-history">📜 Historial</button>
           <button class="btn" id="btn-cuts-refresh">🔄 Actualizar</button>
         </div>
@@ -5500,6 +5522,11 @@
     <section id="screen-apertura" class="screen-pad hidden">
       <div class="page-head">
         <div><h1 class="page-title">Apertura de caja</h1><p class="page-sub" id="apertura-sub">Registra el efectivo inicial del turno</p></div>
+        <!-- SDD QW-7: operaciones de turno faltantes en header -->
+        <div class="btn-row">
+          <button class="btn" onclick="printAperturaSummary()" title="Imprimir comprobante de apertura">🖨️ Imprimir comprobante</button>
+          <button class="btn" onclick="showScreen('corte')" title="Ver historial de cortes anteriores (incluye aperturas)">📜 Aperturas anteriores</button>
+        </div>
       </div>
       <div id="apertura-active" class="card card-pad hidden" style="max-width:480px;">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
@@ -5903,8 +5930,18 @@
     <!-- ============ PANEL DE SALUD · LIVE SYNC ============ -->
     <section id="screen-salud" class="screen-pad hidden">
       <div class="page-head">
-        <div><h1 class="page-title">💚 Panel de Salud</h1><p class="page-sub">Estado en tiempo real del sistema</p></div>
-        <div class="btn-row"><button class="btn" onclick="healthLoad()">🔄 Refrescar</button></div>
+        <div>
+          <h1 class="page-title">💚 Panel de Salud</h1>
+          <p class="page-sub" id="salud-sub">Estado en tiempo real del sistema</p>
+        </div>
+        <div class="btn-row">
+          <!-- SDD: auto-refresh con indicador visible -->
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-2);cursor:pointer;">
+            <input type="checkbox" id="salud-auto" onchange="toggleSaludAutoRefresh(this.checked)" />
+            Auto-refresh 60s
+          </label>
+          <button class="btn" onclick="healthLoad()">🔄 Refrescar</button>
+        </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:18px">
         <div class="card" style="padding:18px"><div style="font-size:12px;color:#64748B;text-transform:uppercase;letter-spacing:.05em">Backend API</div><div id="hl-api" style="font-size:24px;font-weight:700;margin-top:6px">—</div><div id="hl-api-detail" style="color:#94A3B8;font-size:12px"></div></div>
@@ -11204,6 +11241,142 @@
     _vlxDownloadCSV(fn, ['nombre', 'telefono', 'credito_autorizado', 'saldo', 'puntos', 'ultima_compra'], rows);
     showToast('✓ Exportados ' + rows.length + ' clientes: ' + fn);
   };
+  // SDD QW-6: imprimir resumen del corte (lee los DOM elements del Resumen del turno)
+  window.printCorteSummary = function () {
+    const fields = [
+      ['Apertura', document.getElementById('cs-opening')],
+      ['Ventas efectivo', document.getElementById('cs-cash')],
+      ['Ventas tarjeta', document.getElementById('cs-card')],
+      ['Transferencia', document.getElementById('cs-transfer')],
+      ['Abonos', document.getElementById('cs-credits')],
+      ['Gastos', document.getElementById('cs-expenses')],
+      ['Efectivo esperado', document.getElementById('cs-expected')]
+    ];
+    const cutId = (document.getElementById('cs-cut-id') || {}).textContent || '—';
+    const openedAt = (document.getElementById('cs-opened-at') || {}).textContent || '—';
+    const html = `<!DOCTYPE html><html><head><title>Corte de caja</title>
+      <style>body{font-family:Courier New,monospace;font-size:12px;padding:20px;max-width:320px;}
+      h2{text-align:center;margin:0 0 10px;}
+      .row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dashed #ccc;}
+      .total{font-weight:bold;font-size:14px;border-top:2px solid #000;margin-top:10px;padding-top:8px;}
+      .meta{font-size:10px;color:#666;margin-top:14px;text-align:center;}
+      @media print{button{display:none}}
+      </style></head><body>
+      <h2>📋 CORTE DE CAJA</h2>
+      <div class="meta">Cut ID: ${cutId}<br>Apertura: ${openedAt}<br>Impreso: ${new Date().toLocaleString('es-MX')}</div>
+      <hr>
+      ${fields.map(([lbl, el], i) => {
+        const val = (el && el.textContent) || '$0.00';
+        const cls = (i === fields.length - 1) ? 'row total' : 'row';
+        return `<div class="${cls}"><span>${lbl}</span><span>${val}</span></div>`;
+      }).join('')}
+      <div class="meta">Salvadorex POS · ${new Date().getFullYear()}</div>
+      <button onclick="window.print()" style="margin-top:20px;padding:8px 16px;width:100%;">🖨 Imprimir</button>
+      </body></html>`;
+    const w = window.open('', '_blank', 'width=400,height=600');
+    if (w) { w.document.write(html); w.document.close(); }
+    else { showToast('Permite ventanas emergentes para imprimir'); }
+  };
+  // SDD: auto-refresh para Panel de Salud (60s)
+  window._saludAutoInterval = null;
+  window.toggleSaludAutoRefresh = function (enable) {
+    if (window._saludAutoInterval) { clearInterval(window._saludAutoInterval); window._saludAutoInterval = null; }
+    if (enable) {
+      window._saludAutoInterval = setInterval(function () {
+        if (typeof healthLoad === 'function') {
+          try { healthLoad(); } catch (_) {}
+          const sub = document.getElementById('salud-sub');
+          if (sub) sub.textContent = 'Auto-refresh activo · última: ' + new Date().toLocaleTimeString('es-MX');
+        }
+      }, 60000);
+      if (typeof showToast === 'function') showToast('Auto-refresh activado (60s)');
+    } else {
+      const sub = document.getElementById('salud-sub');
+      if (sub) sub.textContent = 'Estado en tiempo real del sistema';
+      if (typeof showToast === 'function') showToast('Auto-refresh desactivado');
+    }
+  };
+  // SDD: filtro de rango para Dashboard. Default = today si nunca se eligió.
+  window._dashRange = (function(){ try { return sessionStorage.getItem('vlx:dash:range') || 'today'; } catch(_){ return 'today'; } })();
+  window.setDashboardRange = function (range, btn) {
+    window._dashRange = range;
+    try { sessionStorage.setItem('vlx:dash:range', range); } catch(_){}
+    if (btn) {
+      const siblings = btn.parentNode.querySelectorAll('[data-dash-range]');
+      siblings.forEach(b => b.classList.remove('primary'));
+      btn.classList.add('primary');
+    }
+    const sub = document.getElementById('dash-sub');
+    if (sub) {
+      sub.textContent = range === 'today' ? 'Resumen del día'
+        : range === 'week' ? 'Resumen de los últimos 7 días'
+        : 'Resumen de los últimos 30 días';
+    }
+    // Disparar evento para que módulos custom recarguen KPIs con el nuevo rango.
+    try { document.dispatchEvent(new CustomEvent('volvix:dashboard-range-changed', { detail: { range } })); } catch(_){}
+    if (typeof showToast === 'function') showToast('Rango: ' + (range === 'today' ? 'Hoy' : range === 'week' ? 'Esta semana' : 'Este mes'));
+  };
+  // Marcar "Hoy" como activo al cargar la página
+  document.addEventListener('DOMContentLoaded', function(){
+    setTimeout(function(){
+      const initial = window._dashRange || 'today';
+      const btn = document.querySelector('[data-dash-range="' + initial + '"]');
+      if (btn) btn.classList.add('primary');
+    }, 500);
+  });
+  // SDD QW-7: imprimir comprobante de apertura
+  window.printAperturaSummary = function () {
+    const cashier = (document.getElementById('ap-cashier') || {}).value || '—';
+    const shift = (document.getElementById('ap-shift') || {}).value || '—';
+    const balance = (document.getElementById('ap-balance') || {}).value || '0';
+    const b500 = (document.getElementById('ap-b500') || {}).value || '0';
+    const b200 = (document.getElementById('ap-b200') || {}).value || '0';
+    const b100 = (document.getElementById('ap-b100') || {}).value || '0';
+    const coins = (document.getElementById('ap-coins') || {}).value || '0';
+    const notes = (document.getElementById('ap-notes') || {}).value || '';
+    const html = `<!DOCTYPE html><html><head><title>Apertura de caja</title>
+      <style>body{font-family:Courier New,monospace;font-size:12px;padding:20px;max-width:320px;}
+      h2{text-align:center;margin:0 0 10px;}
+      .row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dashed #ccc;}
+      .meta{font-size:10px;color:#666;margin-top:14px;text-align:center;}
+      @media print{button{display:none}}
+      </style></head><body>
+      <h2>📋 APERTURA DE CAJA</h2>
+      <div class="meta">Impreso: ${new Date().toLocaleString('es-MX')}</div>
+      <hr>
+      <div class="row"><span>Cajero</span><span>${cashier}</span></div>
+      <div class="row"><span>Turno</span><span>${shift}</span></div>
+      <div class="row"><span>Saldo inicial</span><span>$${Number(balance).toFixed(2)}</span></div>
+      <div class="row"><span>Billetes $500</span><span>${b500}</span></div>
+      <div class="row"><span>Billetes $200</span><span>${b200}</span></div>
+      <div class="row"><span>Billetes $100</span><span>${b100}</span></div>
+      <div class="row"><span>Monedas</span><span>$${Number(coins).toFixed(2)}</span></div>
+      ${notes ? `<div style="margin-top:10px;font-size:11px;"><b>Notas:</b><br>${String(notes).replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>` : ''}
+      <div class="meta">Salvadorex POS · ${new Date().getFullYear()}</div>
+      <button onclick="window.print()" style="margin-top:20px;padding:8px 16px;width:100%;">🖨 Imprimir</button>
+      </body></html>`;
+    const w = window.open('', '_blank', 'width=400,height=600');
+    if (w) { w.document.write(html); w.document.close(); }
+    else { showToast('Permite ventanas emergentes para imprimir'); }
+  };
+  // SDD QW-6: exportar resumen del corte a CSV
+  window.exportCorteCSV = function () {
+    if (typeof _vlxDownloadCSV !== 'function') { showToast('Helper de CSV no disponible'); return; }
+    const get = id => (document.getElementById(id) || {}).textContent || '$0.00';
+    const rows = [
+      { concepto: 'Apertura', monto: get('cs-opening') },
+      { concepto: 'Ventas efectivo', monto: get('cs-cash') },
+      { concepto: 'Ventas tarjeta', monto: get('cs-card') },
+      { concepto: 'Transferencia', monto: get('cs-transfer') },
+      { concepto: 'Abonos', monto: get('cs-credits') },
+      { concepto: 'Gastos', monto: get('cs-expenses') },
+      { concepto: 'Efectivo esperado', monto: get('cs-expected') }
+    ];
+    const cutId = get('cs-cut-id').replace(/[^a-zA-Z0-9-]/g, '');
+    const fn = 'corte-' + (cutId || 'sin-id') + '-' + new Date().toISOString().slice(0,10) + '.csv';
+    _vlxDownloadCSV(fn, ['concepto', 'monto'], rows);
+    showToast('✓ Corte exportado: ' + fn);
+  };
   // FIX A2: Historial de compras por cliente — antes el botón "Ver" no tenía handler
   window.verHistorialCliente = async function (nombre, telefono) {
     var token = (window.VolvixAuth && window.VolvixAuth.getToken && window.VolvixAuth.getToken()) ||
@@ -11337,20 +11510,28 @@
     if (typeof renderVentas === 'function') renderVentas();
   };
   function _filterSalesByDefaultRange(sales) {
-    // Si hay filtro de fecha activo en sessionStorage o el usuario pidió "ver todas", no filtramos.
+    var result = sales;
+    // Filtro de fecha (default ultimas 24h salvo override)
     try {
       var hasUserFilter = !!(sessionStorage.getItem('vlx:hist:from') && sessionStorage.getItem('vlx:hist:to'));
-      if (hasUserFilter || window._ventasShowAll) return sales;
+      if (!hasUserFilter && !window._ventasShowAll) {
+        var cutoff = Date.now() - 24 * 60 * 60 * 1000;
+        result = result.filter(function (s) {
+          var d = new Date(s[1]);
+          var t = d.getTime();
+          if (!t || isNaN(t)) return true;
+          return t >= cutoff;
+        });
+      }
     } catch (_) {}
-    // Default: últimas 24h.
-    var cutoff = Date.now() - 24 * 60 * 60 * 1000;
-    return sales.filter(function (s) {
-      var d = new Date(s[1]);
-      var t = d.getTime();
-      // Si la fecha no parsea o es del futuro, lo dejamos pasar (no romper renderizado).
-      if (!t || isNaN(t)) return true;
-      return t >= cutoff;
-    });
+    // SDD: chips estado y método de pago
+    if (window._ventasStatusFilter) {
+      result = result.filter(function (s) { return String(s[6] || '') === window._ventasStatusFilter; });
+    }
+    if (window._ventasPayFilter) {
+      result = result.filter(function (s) { return String(s[4] || '').toLowerCase().indexOf(window._ventasPayFilter.toLowerCase()) >= 0; });
+    }
+    return result;
   }
   function renderVentas() {
     var visible = _filterSalesByDefaultRange(SALES);
@@ -15932,18 +16113,22 @@
         btn.title = 'Precio mayoreo';
       }
     }
-    // SDD QW-5: chip visible al lado del total grande para que el cajero
-    // sepa de un vistazo si está aplicando precios de mayoreo.
+    // SDD QW-5: chip MAYOREO posicionado de forma fija arriba del banner del POS
+    // (antes lo insertabamos en .pos-bottom donde el flex container lo colapsaba).
     let chip = document.getElementById('vlx-mayoreo-chip');
     if (PRICE_TIER === 'mayoreo') {
       if (!chip) {
-        chip = document.createElement('span');
+        chip = document.createElement('div');
         chip.id = 'vlx-mayoreo-chip';
-        chip.style.cssText = 'display:inline-flex;flex-shrink:0;align-items:center;align-self:center;margin-right:12px;padding:6px 14px;background:#F39C12;color:#fff;border-radius:8px;font-size:13px;font-weight:700;letter-spacing:0.5px;box-shadow:0 2px 8px rgba(243,156,18,0.4);white-space:nowrap;z-index:10';
-        chip.textContent = '🏷️ MAYOREO';
-        const totalBig = document.getElementById('total-big');
-        if (totalBig && totalBig.parentNode) {
-          totalBig.parentNode.insertBefore(chip, totalBig);
+        chip.style.cssText = 'position:fixed;top:50px;left:50%;transform:translateX(-50%);z-index:9999;padding:8px 20px;background:#F39C12;color:#fff;border-radius:0 0 12px 12px;font-size:14px;font-weight:700;letter-spacing:1px;box-shadow:0 4px 12px rgba(243,156,18,0.5);white-space:nowrap;pointer-events:none;animation:pulse 2s ease-in-out infinite';
+        chip.textContent = '🏷️ MODO MAYOREO ACTIVO';
+        document.body.appendChild(chip);
+        // Inyectar keyframes pulse si no existen
+        if (!document.getElementById('vlx-mayoreo-keyframes')) {
+          const sty = document.createElement('style');
+          sty.id = 'vlx-mayoreo-keyframes';
+          sty.textContent = '@keyframes pulse{0%,100%{opacity:1;transform:translateX(-50%) scale(1)}50%{opacity:0.85;transform:translateX(-50%) scale(1.03)}}';
+          document.head.appendChild(sty);
         }
       }
     } else if (chip) {

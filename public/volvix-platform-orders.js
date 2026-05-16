@@ -167,6 +167,17 @@
 
   function _mountSection() {
     if (document.getElementById('volvix-plat-section')) return;
+    // SDD QW-8: feature flag — ocultar widget si tenant lo deshabilita o si
+    // ningún carrier está realmente integrado. Default: visible (compat),
+    // pero el owner puede setear localStorage.volvix_show_platforms='0' o
+    // un campo en config para esconderlo.
+    try {
+      var hide = localStorage.getItem('volvix_show_platforms');
+      if (hide === '0' || hide === 'false') return;
+      // También oculta si la sesión declara que no hay integraciones reales
+      var sess = JSON.parse(localStorage.getItem('volvixSession') || 'null');
+      if (sess && sess.features && sess.features.hide_platform_orders === true) return;
+    } catch (_) {}
     // Buscar contenedor adecuado: el lateral del POS o crear uno
     const target = document.querySelector('.pos-cart-side, .pos-sidebar, #screen-pos .pos-main-area, #screen-pos');
     if (!target) return;
