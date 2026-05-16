@@ -10299,7 +10299,22 @@
       }).join('');
     }
     const sub = document.getElementById('inv-sub');
-    if (sub) sub.textContent = CATALOG.length + ' productos · ' + list.length + ' visibles';
+    // SDD C7 (SST): si CATALOG aún está vacío evitamos sobreescribir el subtítulo
+    // con "0 productos · 0 visibles" cuando volvix-real-data-loader.js ya escribió
+    // el conteo real. Race condition resuelta: solo actualizamos cuando hay datos
+    // O cuando el usuario claramente cargó la pantalla sin productos.
+    if (sub) {
+      if (CATALOG.length === 0) {
+        // Mantener "Cargando..." durante boot, o "Sin productos" si ya hubo evento
+        if (window.__catalogLoadAttempted) {
+          sub.textContent = 'Sin productos en este tenant';
+        } else {
+          sub.textContent = 'Cargando productos…';
+        }
+      } else {
+        sub.textContent = CATALOG.length + ' productos · ' + list.length + ' visibles';
+      }
+    }
     _updateBulkBar();
     if (typeof updateInvStats === 'function') updateInvStats();
   }
@@ -12522,6 +12537,8 @@
     try { if (typeof renderCredito === 'function') renderCredito(); } catch (_) {}
   });
   document.addEventListener('volvix:products-loaded', () => {
+    // SDD C7: marca que la carga ya se intentó, para distinguir "boot inicial" de "tenant vacío"
+    window.__catalogLoadAttempted = true;
     try { if (typeof renderInv === 'function') renderInv(); } catch (_) {}
     try { if (typeof renderCategories === 'function') renderCategories(); } catch (_) {}
   });
