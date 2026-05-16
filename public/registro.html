@@ -815,10 +815,18 @@
   function submitRegister() {
     var btn = $('#btnRegister');
     btn.disabled = true; btn.textContent = 'Enviando código a tu correo...';
+    // AGENTE 1 (stub) — incluir captcha_token si existe widget Turnstile renderizado
+    // (cuando CAPTCHA_SITE_KEY este presente). Si no existe, el backend lo permite
+    // por la flag CAPTCHA_ENABLED=false.
+    var payload = Object.assign({}, state.formData);
+    try {
+      var tw = document.querySelector('input[name="cf-turnstile-response"]');
+      if (tw && tw.value) payload.captcha_token = tw.value;
+    } catch(_) {}
     fetch('/api/auth/register-simple', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(state.formData)
+      body: JSON.stringify(payload)
     })
       .then(function (r) { return r.json().then(function (j) { return { status: r.status, body: j }; }); })
       .then(function (res) {

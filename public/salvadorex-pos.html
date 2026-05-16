@@ -4330,12 +4330,61 @@
         </div>
       </div>
 
+      <!-- AGENTE 12 (overpromise fix) — KPIs ahora se cargan del backend.
+           Si /api/dashboard/summary no responde, mostramos "—" (no demo data). -->
       <div class="kpi-grid">
-        <div class="kpi"><div class="kpi-label">Ventas hoy</div><div class="kpi-value">$4,820</div><div class="kpi-sub"><span class="trend-up">▲ 12%</span> vs ayer</div></div>
-        <div class="kpi"><div class="kpi-label">Tickets</div><div class="kpi-value">18</div><div class="kpi-sub">Promedio $267.78</div></div>
-        <div class="kpi"><div class="kpi-label">Efectivo en caja</div><div class="kpi-value">$2,145</div><div class="kpi-sub">Falta cortar</div></div>
-        <div class="kpi"><div class="kpi-label">Crédito otorgado</div><div class="kpi-value">$890</div><div class="kpi-sub">3 clientes</div></div>
+        <div class="kpi"><div class="kpi-label">Ventas hoy</div><div class="kpi-value" id="dash-kpi-sales">—</div><div class="kpi-sub" id="dash-kpi-sales-sub">Cargando…</div></div>
+        <div class="kpi"><div class="kpi-label">Tickets</div><div class="kpi-value" id="dash-kpi-tickets">—</div><div class="kpi-sub" id="dash-kpi-tickets-sub">Cargando…</div></div>
+        <div class="kpi"><div class="kpi-label">Efectivo en caja</div><div class="kpi-value" id="dash-kpi-cash">—</div><div class="kpi-sub" id="dash-kpi-cash-sub">Cargando…</div></div>
+        <div class="kpi"><div class="kpi-label">Crédito otorgado</div><div class="kpi-value" id="dash-kpi-credit">—</div><div class="kpi-sub" id="dash-kpi-credit-sub">Cargando…</div></div>
       </div>
+      <script>
+      (function () {
+        // AGENTE 12 — wiring real al backend del Dashboard
+        async function loadDashboardKPIs() {
+          var range = (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('vlx:dash:range')) || 'hoy';
+          try {
+            var tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
+            var r = await fetch('/api/dashboard/summary?range=' + encodeURIComponent(range), {
+              headers: tok ? { Authorization: 'Bearer ' + tok } : {},
+              credentials: 'include'
+            });
+            if (!r.ok) {
+              // Mostrar honesto si no hay endpoint
+              ['sales','tickets','cash','credit'].forEach(function (k) {
+                var el = document.getElementById('dash-kpi-' + k + '-sub');
+                if (el) el.textContent = r.status === 404 ? 'Endpoint pendiente' : 'Error ' + r.status;
+              });
+              return;
+            }
+            var j = await r.json();
+            var fmt = function (n) { return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(Number(n || 0)); };
+            if (j && j.ok && j.data) {
+              var d = j.data;
+              document.getElementById('dash-kpi-sales').textContent = fmt(d.sales_total || 0);
+              document.getElementById('dash-kpi-sales-sub').textContent = (d.sales_change_pct != null ? (d.sales_change_pct >= 0 ? '▲ ' : '▼ ') + Math.abs(d.sales_change_pct).toFixed(0) + '% vs anterior' : '—');
+              document.getElementById('dash-kpi-tickets').textContent = (d.tickets_count || 0);
+              document.getElementById('dash-kpi-tickets-sub').textContent = 'Promedio ' + fmt(d.avg_ticket || 0);
+              document.getElementById('dash-kpi-cash').textContent = fmt(d.cash_on_hand || 0);
+              document.getElementById('dash-kpi-cash-sub').textContent = (d.cut_pending ? 'Falta cortar' : 'Corte al día');
+              document.getElementById('dash-kpi-credit').textContent = fmt(d.credit_outstanding || 0);
+              document.getElementById('dash-kpi-credit-sub').textContent = (d.credit_clients_count || 0) + ' clientes';
+            }
+          } catch (e) {
+            ['sales','tickets','cash','credit'].forEach(function (k) {
+              var el = document.getElementById('dash-kpi-' + k + '-sub');
+              if (el) el.textContent = 'Sin conexión';
+            });
+          }
+        }
+        // Cargar al mostrar screen-dashboard y al cambiar el rango
+        document.addEventListener('volvix:dashboard-range-changed', loadDashboardKPIs);
+        document.addEventListener('volvix:login', function () { setTimeout(loadDashboardKPIs, 500); });
+        // Primer poll
+        if (document.readyState !== 'loading') setTimeout(loadDashboardKPIs, 2000);
+        else document.addEventListener('DOMContentLoaded', function () { setTimeout(loadDashboardKPIs, 2000); });
+      })();
+      </script>
 
       <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px;" id="dash-grid">
         <div class="card">
