@@ -4661,6 +4661,8 @@
             Buscar venta
           </button>
           <button class="btn" onclick="openHistorialDateFilter()">📅 Filtrar fecha</button>
+          <!-- SDD C5 constitution: defualt = ultimas 24h. Boton para expandir explicitamente. -->
+          <button class="btn" onclick="toggleVentasShowAll()" id="btn-ventas-show-all" title="Cambia entre 'últimas 24h' (default) y 'todas las ventas cargadas'">📂 Ver todas</button>
           <button class="btn" onclick="exportHistorialCSV()">📤 Exportar</button>
         </div>
       </div>
@@ -11266,8 +11268,46 @@
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
   }
+  // SDD C5 (constitution): "Rango de fecha por defecto: últimas 24 horas"
+  // Anti-patrón: "Mostrar tickets desde hace 3 semanas como default". Fix: filtrar
+  // SALES en render para mostrar solo las últimas 24h salvo que el usuario haya
+  // expandido el rango con "📅 Filtrar fecha" o tocado el botón "Ver todas".
+  window._ventasShowAll = false;
+  window.toggleVentasShowAll = function () {
+    window._ventasShowAll = !window._ventasShowAll;
+    if (typeof renderVentas === 'function') renderVentas();
+  };
+  function _filterSalesByDefaultRange(sales) {
+    // Si hay filtro de fecha activo en sessionStorage o el usuario pidió "ver todas", no filtramos.
+    try {
+      var hasUserFilter = !!(sessionStorage.getItem('vlx:hist:from') && sessionStorage.getItem('vlx:hist:to'));
+      if (hasUserFilter || window._ventasShowAll) return sales;
+    } catch (_) {}
+    // Default: últimas 24h.
+    var cutoff = Date.now() - 24 * 60 * 60 * 1000;
+    return sales.filter(function (s) {
+      var d = new Date(s[1]);
+      var t = d.getTime();
+      // Si la fecha no parsea o es del futuro, lo dejamos pasar (no romper renderizado).
+      if (!t || isNaN(t)) return true;
+      return t >= cutoff;
+    });
+  }
   function renderVentas() {
-    $('#vnt-body').innerHTML = SALES.map(s => {
+    var visible = _filterSalesByDefaultRange(SALES);
+    var sub = document.querySelector('#screen-ventas .page-sub');
+    if (sub) {
+      var hasUserFilter = false;
+      try { hasUserFilter = !!(sessionStorage.getItem('vlx:hist:from') && sessionStorage.getItem('vlx:hist:to')); } catch(_){}
+      if (window._ventasShowAll) {
+        sub.textContent = 'Mostrando todas las ventas (' + SALES.length + ' tickets) · usa "📅 Filtrar fecha" para acotar';
+      } else if (hasUserFilter) {
+        sub.textContent = 'Mostrando ' + visible.length + ' tickets · filtro activo: ' + sessionStorage.getItem('vlx:hist:from') + ' → ' + sessionStorage.getItem('vlx:hist:to');
+      } else {
+        sub.textContent = 'Mostrando últimas 24h (' + visible.length + ' de ' + SALES.length + ' tickets) · usa "📅 Filtrar fecha" para expandir rango';
+      }
+    }
+    $('#vnt-body').innerHTML = visible.map(s => {
       const chip = s[6]==='completed'?'ok':'warn';
       const lbl = s[6]==='completed'?'Completada':'Devuelta';
       // 2026-05 ia-arquitectura R2 (flujo de tarea): el boton "Devolver" vive
