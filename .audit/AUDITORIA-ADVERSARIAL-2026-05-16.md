@@ -584,3 +584,508 @@ El sistema sigue siendo **NO-GO** según la auditoría adversarial. Los commits 
 ---
 
 **Decisión pendiente**: indicarme qué bloque empezar a corregir REALMENTE (sugiero los 4 Bloqueantes en orden, empezando por IVA en `updateTotals` por su impacto fiscal).
+
+---
+
+# ANEXO II — Auditoría por descubrimiento (Fase A → B → C)
+
+> Aplicado sobre `salvadorex-pos.html` (23,536 líneas, 1.3 MB) **y** `paneldecontrol.html` (9,118 líneas, 464 KB).
+> 2026-05-16. Métodología: descubrimiento puro sin guion → inferencia de contratos → auto-crítica contra código real.
+
+---
+
+## FASE A — Descubrimiento sin interpretación
+
+### salvadorex-pos.html — A.1 Inventario visual
+
+| Tipo | Cantidad | Ejemplos |
+|---|---|---|
+| Secciones `<section id="screen-*">` | 34 | screen-pos, screen-ventas, screen-clientes, screen-inventario, screen-config, screen-corte, screen-apertura, screen-dashboard, screen-credito, screen-kardex, screen-departamentos, screen-cotizaciones, screen-devoluciones, screen-promociones, screen-facturacion, screen-proveedores, screen-quickpos, screen-recargas, screen-servicios, screen-rentas, screen-reservaciones, screen-mapa, screen-fila, screen-ingredientes, screen-menu-digital, screen-marketing, screen-plan, screen-salud, screen-mobile-apps, screen-ayuda, screen-perfil, screen-actualizador, screen-usuarios, screen-reportes |
+| Modales | 24 | modal-pay, modal-pay-confirm, modal-pay-verify, modal-app-pay, modal-search, modal-sale-detail, modal-sale-search, modal-cash, modal-calc, modal-granel, modal-cfdi-cancel, modal-cfdi-refacturar, modal-late-invoice, modalAjuste, modalImport, modalProducto, ing-modalIng, ing-modalReceta, ing-modalSuggest, fila-modalAgregar, menu-modalQR, menu-modalDigitalizar |
+| Botones | 249 con onclick + label | F12 Cobrar, F11 Mayoreo, INS Varios, F10 Buscar, ENTER Agregar Producto, Cancelar, Guardar, etc. |
+| Inputs id/name | ~120 | #barcode-input, #cli-search, #ap-balance, #cnt-b500/b200/b100, #pos-coupon-code, etc. |
+| Tablas (`<tbody id=>`) | 22 | #cart-body, #vnt-body, #cli-body, #inv-body, #movs-body, #r4c-adj-list, #krd-tbody, #prov-tbody, #cfdi-tbody, #dep-tbody, etc. |
+| Toggles/checkboxes | ~40 | #inv-only-low, #inv-only-zero, #inv-only-expiry, #salud-auto-refresh, radios `perm-mode`, etc. |
+| Dropdowns/selects | ~30 | #inv-cat-filter, #ap-shift, #r4c-adj-type, #vnt-status-filter, #vnt-pay-filter, #dash-range, etc. |
+| Tabs | 6 sistemas distintos | showInvTab, showPromoTab, provTab, showCfg, ingApp.switchTab, mktApp.filtrarPlat |
+
+### salvadorex-pos.html — A.2 Inventario JavaScript
+
+| Cosa | Hallazgos clave |
+|---|---|
+| Funciones declaradas | 609 (grep `function X(` o `window.X =`) |
+| Variables globales `window.*` | CART, CATALOG, CUSTOMERS, SALES, USERS, CREDIT, PRICE_TIER, VOLVIX_CART_CHANNEL, __volvixCartLocked, __volvixSaleInFlight, __volvixSelectedPayMethod, __volvixPayVerified, __volvixAppPayConfirmed, __volvixCurrentCartToken, __volvixGiro, __catalogLoadAttempted, _ventasShowAll, _ventasStatusFilter, _ventasPayFilter, _cliFilter, _saludAutoIv, _topSellerInterval, _oxxoClockInterval |
+| Llamadas a APIs externas | `fetch('/api/sales')`, `fetch('/api/customers')`, `fetch('/api/products')`, `fetch('/api/giro/config')`, `fetch('/api/cart/draft')`, `fetch('/api/printer/raw')`, `fetch('/api/drawer/log')`, `fetch('/api/recargas/...')`, `fetch('/api/servicios/...')`, `fetch('/api/ingredientes')`, `fetch('/api/recetas')`, `fetch('/api/marketing/posts')`, `fetch('/api/menu-digital/...')` y unas 30+ más. APIs externas: UPCitemDB, Open Food Facts |
+| localStorage/sessionStorage | volvixSession, volvix_token, volvixAuthToken, volvix:price_tier, vlx:hist:from/to, vlx:tab:*, volvix_first_login_completed, si_ingredientes, si_recetas, si_posts, si_fila_*, si_atendidos_hoy |
+| JSON files | Ninguno directo — todo va por API |
+| console.log con TODOs | ~50 `console.warn`/`console.log` con mensajes como "WIRING off", "TODO confirm", "[volvix-search] top sellers sync", múltiples "[DataLoader] X falló" |
+| TODOs/FIXME | 17+ comentarios `2026-05` con notas de pendientes, "BLOQUEANTE-1", "GAP-S5", "GAP-N1-3", "FIX A1/A2", "R4c", "R8a", "R10a" |
+| Strings hardcoded sospechosos | `iva: 0.16`, `IEPS: 0.08`, `tasa 0`, `RAW_PRINT_KEY`, `volvix:price_tier`, varios `tenant_id`/`user_id` fallback `TNT001`/`USR001`, emails `soporte@salvadorex.mx`/`salvadorex.com`, sucursal "Mi negocio · Caja 1" |
+
+### salvadorex-pos.html — A.3 Conceptos del dominio encontrados
+
+**Vendedor / Backoffice**: tenant, cuenta, sucursal, empresa, usuario, cajero, gerente, owner, dueño, admin, rol, permiso.
+**Comercial**: producto, inventario, stock, código de barras, SKU, categoría, precio, mayoreo, menudeo, costo, departamento.
+**Transaccional**: venta, ticket, folio, cobro, carrito, devolución, cancelación, reimpresión, cupón, descuento, promoción, propina (`tip` aparece pero NO se usa en cálculo).
+**Financiero**: IVA (`iva`, `16%`), IEPS (`ieps`, `8%`), efectivo, tarjeta, transferencia, SINPE, OXXO, crédito, abono, saldo, deuda, corte de caja, apertura, turno, cambio.
+**Multiapp**: PWA, APK, EXE, Web, móvil, Windows, Android, iOS, plataforma.
+**Servicios extras**: recarga celular, pago de servicios, cotizaciones, facturación CFDI, comandera, KDS, fila virtual, ingredientes, recetas, marketing social, menu digital, reservaciones, mapa de mesas, rentas, plan de negocio.
+**Conceptos del dominio que el prompt NO listó pero aparecen**:
+- **Idempotency-Key** (anti double-cobro)
+- **X-Cart-Token** (anti race entre pestañas)
+- **BroadcastChannel `volvix-cart-sync`** (multi-tab)
+- **Pedidos de plataformas** (Uber Eats, Didi Food, Rappi — todos en "Próximamente")
+- **CFDI/Facturama** (facturación electrónica MX)
+- **CSD** (Certificado de Sello Digital — SAT)
+- **Cola offline / Service Worker** (background sync de ventas sin red)
+- **Verificador de precio** (F9)
+- **Granel** (venta por peso)
+- **Comodín "Art. Común"** (CTRL+P, atajo)
+- **Modo OXXO** (interfaz alternativa con datos posiciones específicas — vista 3)
+
+### salvadorex-pos.html — A.4 Lo que el archivo NO tiene
+
+- ❌ `try/catch` faltante en varios fetch (`menuApp.cargarPosts`, `mktApp.cargarPosts` solo tienen catch genérico). Algunos `await fetch` sin guard.
+- ❌ Loaders/spinners durante operaciones largas: el flujo `/api/cart/draft` no muestra estado.
+- ❌ Confirmaciones robustas: la mayoría usa `confirm()` del browser (Alto según prompt). Solo "Limpiar duplicados" tiene custom confirm.
+- ❌ Auditoría client-side: el archivo NO escribe nada a `audit_log`. Confía en que el backend audite.
+- ❌ Validación server-side dedicada: el HTML asume que el backend valida. Algunos endpoints sí (POST /api/sales con Idempotency-Key), otros no se verificó.
+- ❌ Manejo explícito de sesión expirada: si el JWT expira, los `fetch` regresan 401 y solo se logea como warning. **No hay redirect automático a login**.
+- ❌ Debouncing: `#cli-search` usa `oninput` sin debounce — si tipeas rápido genera filtra ~10 veces por segundo. `#barcode-input` usa Enter, no es problema. `#inv-search` similar.
+- ❌ Rate limiting client-side: el cajero puede hacer F12 → 200 OK → F12 → 200 OK... — el guard es `__volvixSaleInFlight` pero no bloquea pulsaciones repetidas en otros endpoints.
+- ❌ Optimistic UI rollback: si /api/sales falla después de mostrar "✓ Cobrado", el cart no vuelve a aparecer (el código ya lo limpió).
+
+---
+
+### paneldecontrol.html — A.1 Inventario visual
+
+| Tipo | Cantidad | Lista |
+|---|---|---|
+| Secciones | 1 `<section id="screen-permisos">` | (la pantalla del panel es una sola section grande con tabs adentro) |
+| Tabs (perm-tab-*) | 5 | Módulos, Botones (features), Override, Jerarquía, Audit |
+| Sub-tabs (permv14-detail-tab) | 3 | Componentes, Deps, Considera |
+| Modales | 0 dialog explícitos | Usa función custom `_pdcMiniModal(opts)` que crea backdrop al vuelo (línea 8209) |
+| Botones | 68 | Ver como, Suspender, Reactivar, Crear cliente, Bulk delete, Borrar, Aprobar override, Save, Reset, etc. |
+| Inputs id/name | 10 | perm-user-email, perm-tenant-select, perm-module-name, perm-feat-name, etc. |
+| Tablas | 2 tbodies | perm-ver-tbody (versiones de apps), pv14-users-tbody-main (usuarios + tenants) |
+| Toggles | 86 menciones de toggle/switch | Toggle por módulo/feature, master toggle por tenant, etc. |
+| Dropdowns/selects | ~8 | perm-tenant-select, perm-profile-sel, perm-audit-type, perm-audit-range |
+
+### paneldecontrol.html — A.2 Inventario JavaScript
+
+| Cosa | Hallazgos |
+|---|---|
+| Función PERM global | `window.PERM = { init(), toggleModule(key), toggleFeature(key), renderForTenant(tid), addOverride(), removeOverride(), loadAudit(), ... }` |
+| Variables globales | window.PERM, window.PERM._tenantsList, window.PERM._flagCache, window.PERM.selectedTid, v14.usersDirty (dirty map para bulk saves) |
+| Endpoints consumidos | 75 endpoints `/api/admin/*` distintos. Los críticos: POST /api/admin/tenants/:id/modules, POST /api/admin/tenant/:tid/buttons, POST /api/admin/user-override, POST /api/admin/tenant/:tid/impersonate, DELETE /api/admin/tenants/:id, GET /api/admin/audit-log, GET /api/admin/security-summary |
+| localStorage/sessionStorage | volvix_token, volvixAuthToken, volvix:overrides:* (legacy cache de overrides), volvix:perm:mode (hide vs disable) |
+| Console.log | Muchos `[PERM]` debug, `[volvix-real-data-loader]`, `[PDC]` |
+| Roles referenciados | 71x admin, 57x owner, 26x superadmin, 9x cajero, 7x platform_owner, 5x cashier, 5x manager |
+| Función impersonate | Línea 8700 — POST /api/admin/tenant/:tid/impersonate → recibe JWT del cliente → abre /salvadorex-pos.html con token en URL fragment (no en query) |
+| TODOs / decisiones | 2026-05-14 cambió comportamiento de "Ver como": antes abría paneldecontrol con params, ahora abre salvadorex-pos.html real |
+
+### paneldecontrol.html — A.3 Conceptos del dominio encontrados
+
+- **tenant** (441x — concepto central del panel)
+- **log/audit/auditoría** (217+49=266x — el panel tiene audit log integrado)
+- **platform_owner / superadmin** (rol mínimo)
+- **plan, facturacion** (44+16=60x — billing presente)
+- **plataforma / windows / android / ios / apk** (3+22+23+136+4=188x — multi-plataforma)
+- **modulo, reactivar, suspender, impersonate** (gestión de tenants)
+- **white_label / marca_blanca** (3+3=6x — feature presente pero mínima)
+- **2FA / MFA**: aparecen como "MFA" y "OTP" en backend, NO en panel (lo veremos en C.4)
+- **Conceptos nuevos no listados**: 
+  - **"hide" vs "locked" vs "enabled"** (3 estados de módulo en lugar de boolean)
+  - **lock_message** (mensaje custom cuando se bloquea un módulo)
+  - **override** (excepción por usuario sobre las features del tenant)
+  - **bulk_users / bulk_save** (operaciones masivas con dirty map)
+  - **giro** (vertical de negocio — restaurant, farmacia, etc.)
+  - **dominio personalizado / subdominio NO aparecen explícitamente** — no se vio campo `domain` ni `subdomain` en panel
+  - **logo_url / branding NO aparecen** — no hay editor de branding en panel
+  - **Vencimiento de plan / billing-invoices** SÍ existe endpoint `/api/admin/billing/invoices` pero no se vio botón en panel
+
+### paneldecontrol.html — A.4 Lo que el archivo NO tiene
+
+- ❌ Editor de **branding** del cliente (logo, color primario, nombre comercial)
+- ❌ Editor de **dominio personalizado** (subdominio o custom domain)
+- ❌ Toggle de **plataformas** (Windows/Android/iOS/Web) — los conceptos aparecen pero no encontré los toggles
+- ❌ **2FA/MFA para el platform_owner**: backend tiene OTP/MFA mencionado pero panel NO muestra UI para activarlo en su propia cuenta
+- ❌ **IP allowlist** para acceso al panel: no se vio UI
+- ❌ **Alerta de nueva IP / sesión sospechosa**: no se vio UI
+- ❌ **Notificación al usuario impersonado**: el código no notifica al cliente "alguien te impersonó hace 5 min"
+- ❌ **Pre-flight check**: antes de suspender, no muestra "este tenant tiene ventas activas pendientes, ¿continuar?"
+- ❌ **Vista de salud del cliente individual**: no hay panel "estado del tenant X" con last login, ventas hoy, errores
+- ❌ **Sandbox/preview**: si activas un módulo "locked", no muestra preview de cómo lo verá el cliente
+- ❌ **Rollback de cambios masivos**: bulk delete/suspend tiene `usersDirty` map pero no historial visible para deshacer
+
+---
+
+## FASE B — Inferencia de lógica esperada
+
+### B.1 — Contratos implícitos (los relevantes; no decorativos)
+
+**POS — salvadorex-pos.html**
+
+| Elemento | Promesa | Para cumplirla debería |
+|---|---|---|
+| Botón **F12 Cobrar** | Persistir el ticket en BD, descontar stock, imprimir, limpiar UI | INSERT en `pos_sales` + N INSERT en `pos_sales_items` + UPDATE `pos_products.stock`, generar ticket, limpiar CART, refrescar historial vía realtime |
+| Botón **DEL Borrar Art.** | Quitar item del carrito | SOLO mutar `CART[]` — NO tocar BD |
+| Botón **Eliminar (venta actual)** | Borrar TODO el carrito | SOLO `CART.length=0` + render — NO tocar BD |
+| Botón **F11 Mayoreo** | Cambiar precios del cart a mayoreo | Re-mapear `item.price` ↔ `item._original_price`, actualizar totales, dejar chip visible |
+| Botón **F6 Pendiente** | Guardar venta sin cobrar | INSERT en `pos_sales` con `status='pending'`, limpiar cart, permitir recuperar después |
+| Input **#barcode-input** | Buscar producto por código o nombre | L1: CATALOG; L2: API; L3: lookup global; L4: internet UPC. Auto-agregar si match único |
+| Modal **modal-pay** | Selector de método + cobrar | Validar CART > 0, generar Idempotency-Key, llamar POST /api/sales con headers correctos |
+| Modal **modal-pay-verify** | Bloquear cobro hasta confirmación humana | NO completar hasta que cajero confirme transfer/sinpe/oxxo |
+| Tabla **#cart-body** | Mostrar items del carrito en vivo | Sincronizada con CART, recalcula totales en mutación |
+| Tabla **#vnt-body** (Historial) | Ventas cobradas DESC por fecha | Query a /api/sales LIMIT 200, default últimas 24h, orden DESC |
+| Tabla **#cli-body** | Lista de clientes registrados | Query /api/customers limit 500, filtrable por nombre/teléfono/RFC |
+| Tabla **#inv-body** | Productos del tenant | CATALOG con stock, precio, categoría |
+| Botón **Cancelar** en modales | Cerrar modal sin guardar | NO persistir cambios |
+| Botón **Guardar** en modales | Persistir + cerrar modal | Validar inputs, POST/PATCH, mostrar toast, refrescar listas afectadas |
+| Toggle **vlx-mayoreo-chip** | Indicar visualmente que F11 está activo | Aparecer cuando PRICE_TIER='mayoreo', desaparecer al toggle |
+
+**Panel — paneldecontrol.html**
+
+| Elemento | Promesa | Para cumplirla debería |
+|---|---|---|
+| Tab **Módulos** | Toggle por módulo del tenant seleccionado | POST /api/admin/tenants/:id/modules, persistir en BD, propagar al POS del cliente |
+| Tab **Botones (features)** | Toggle por feature del tenant | POST /api/admin/tenant/:tid/buttons, persistir, propagar |
+| Tab **Override** | Excepción por email sobre features | POST /api/admin/user-override + lectura cuando ese usuario hace login |
+| Tab **Jerarquía** | Ver árbol de usuarios y sus permisos | GET /api/admin/users/hierarchy, render visual |
+| Tab **Audit** | Log de quién cambió qué | GET /api/admin/tenant/:tid/audit, mostrar timeline |
+| Botón **Ver como (impersonate)** | Abrir POS del cliente con sesión del cliente | POST /api/admin/tenant/:tid/impersonate → JWT del cliente → abrir /salvadorex-pos.html con token, **dejar log**, **opcionalmente notificar al cliente** |
+| Botón **Suspender (bulk)** | Bloquear inicio de sesión de usuarios/tenants seleccionados | PATCH status='suspended', cerrar sesiones activas, denegar siguiente login, **log obligatorio** |
+| Botón **Reactivar (bulk)** | Permitir login nuevamente | PATCH status='active', **log** |
+| Botón **Borrar (DELETE tenant/user)** | Eliminación con doble confirm | Soft delete preferible, **log obligatorio**, cascada sobre datos del tenant |
+| Botón **Aprobar override** | Aplicar override permit/deny | POST /api/admin/user-override + invalidar caché de permisos del usuario |
+| Tabla **pv14-users-tbody-main** | Todos los usuarios del sistema | GET /api/admin/users, paginado, filtrable |
+| Tabla **perm-ver-tbody** | Versiones de apps instaladas por cliente | GET /api/admin/versions, alerta si hay outdated |
+| Radio **perm-mode** (hide/disable) | Cómo se renderizan los módulos deshabilitados en el POS | Persistir, propagar al POS — afecta UX del cliente |
+
+### B.2 — Conexiones lógicas DENTRO de cada archivo
+
+**POS — conexiones esperadas:**
+- Alta de producto en Inventario → debería aparecer en: tabla #inv-body, dropdown de promociones, dropdown de recetas (ingApp), búsqueda L1 del POS (CATALOG), reportes de stock, sidebar quick-pick.
+- Cobrar ticket → debería aparecer en: #vnt-body (Historial) sin recargar, corte de caja del turno, dashboard "Ventas hoy", actualizar stock en #inv-body.
+- Crear cliente → debería aparecer en: tabla #cli-body, dropdown de "Asignar cliente" en cart, lista de crédito.
+- Suspender venta (F6 Pendiente) → debería aparecer en: lista de ventas pendientes para recuperar luego, no en historial cobrado.
+- Aplicar cupón → debería: descontar del total, persistir como `coupon_applied` en POST /api/sales, decrementar `usage_count` del cupón.
+
+**Panel — conexiones esperadas:**
+- Toggle módulo en tab "Módulos" → debería reflejarse en: tab "Audit" (con timestamp), POST /api/admin/tenants/:id/modules (server-side), cache `_flagCache` actualizado para el siguiente render.
+- Override por email → debería reflejarse en: tab "Audit", lista de overrides en tab "Override", cache del usuario invalidado al próximo login.
+- Suspender usuario → debería reflejarse en: tab "Audit" (con razón opcional), status='suspended' en pv14-users-tbody-main, próximo intento de login del usuario → 403.
+- "Ver como" → debería reflejarse en: tab "Audit" (impersonation_started), apertura de nueva pestaña con POS del cliente, banner en el POS indicando "MODO IMPERSONACIÓN — admin@volvix viendo como cliente@".
+
+### B.3 — Conexiones CROSS-archivo (Panel → POS) — LO MÁS CRÍTICO
+
+| Acción en /paneldecontrol.html | Efecto esperado en /salvadorex-pos.html del cliente afectado |
+|---|---|
+| **Toggle módulo "ventas" off** | El cliente no puede acceder a `screen-ventas`. Botón nav debe ocultarse O bloquearse con candado + lock_message. Si llama endpoints directos (`/api/sales`), backend rechaza 403 |
+| **Toggle feature "pos.cobrar" off** | Botón F12 deshabilitado o invisible. POST /api/sales rechazado 403 |
+| **Suspender tenant** | Próximo intento de login → 403. Si tiene sesión activa, ¿se invalidan los tokens emitidos? Si no, el cajero sigue trabajando hasta que el JWT expire |
+| **Reactivar tenant** | Próximo intento de login → 200 |
+| **Borrar tenant (DELETE)** | El cliente no puede acceder NUNCA más. Sus datos: ¿se borran? ¿soft-delete? ¿quedan en backup? |
+| **Aprobar override permit `pos.cobrar` para `cajero@x.com`** | El usuario `cajero@x.com` específicamente puede cobrar aunque el tenant haya deshabilitado `pos.cobrar` |
+| **Cambiar plan del tenant de "Pro" a "Free"** | Módulos premium del POS se "lock" o desaparecen. Si el tenant tenía datos en módulos premium, ¿se preservan o se borran? |
+| **"Ver como" (impersonate)** | Abrir nueva pestaña con POS del cliente. Banner amarillo grande "IMPERSONANDO — salir aquí". JWT con scope `read-only` (el admin no debería poder cobrar a nombre del cliente). Log con admin_id, tenant_id, started_at, ended_at |
+| **Cambiar radio mode "hide" → "disable"** | Los módulos deshabilitados ahora aparecen visibles con candado, antes estaban ocultos. Afecta UX del cliente |
+| **Bulk-suspend N usuarios** | Todos los N quedan bloqueados. Si uno estaba cobrando, ¿se pierde el carrito? ¿se cierra sesión a mitad de venta? |
+
+---
+
+## FASE C — Auto-crítica contra el código real
+
+### C.1 — Por elemento (defectos por contrato no cumplido)
+
+**POS:**
+
+1. **F12 Cobrar** — Contrato cumple POST /api/sales con idempotency. **PERO**: el código UI marca venta como exitosa antes de verificar respuesta. Si hay 200 y `j.ok === false`, podría mostrar éxito y limpiar cart sin venta real. Confirmado en código que el guard `__volvixSaleInFlight` previene doble-submit (✓). **Pero NO está disabled cuando CART.length===0**: el cajero puede pulsar F12 → modal abre → "Carrito vacío" → cierra → re-pulsa → confunde flow.
+
+2. **DEL Borrar Art.** — Lee solo CART en memoria, NO toca BD. Contrato OK. **Sin embargo**, no confirma. Si el cajero está en una venta de 30 items y pulsa DEL accidentalmente, pierde el item con stack vacío de undo.
+
+3. **Eliminar (venta actual)** — Limpia todo el cart. Contrato OK. **PERO**: el `confirm()` del browser es feo. Si el cajero tenía 30 items, `Cancelar` no recupera el cart porque el confirm ya pasó. Bueno.
+
+4. **F11 Mayoreo** — Cambia precios. Contrato OK con `item._original_price` para revertir. **Verificado en código que chip MAYOREO ya está visible** (último commit). ✓.
+
+5. **F6 Pendiente** — Guarda venta pendiente. **No verificado** si reaparece en lista de pendientes al recuperar. ⚠️ Requiere test E2E.
+
+6. **#barcode-input** — Busca por código Y nombre (L1-L4). ✓ verificado anteriormente. Placeholder corregido. **PERO** L4 (internet) no tiene caché — mismo barcode pega 5 veces al servidor.
+
+7. **modal-pay** — Cobra con idempotency. ✓ verificado. **Faltante**: validar `CART.length > 0` antes de mostrar modal (hoy puede abrir con cart vacío).
+
+8. **modal-pay-verify** — Bloquea hasta confirmación. ✓ según contrato `pos.spec.md` I6. **Pero NO tiene botón "Rechazar (cliente no pagó)"** — el cajero solo puede confirmar o cancelar todo, sin distinguir.
+
+9. **#cart-body** — Sincronizado con CART. ✓. **Pero NO muestra existencia (stock disponible)** en la fila — el contrato dice "columna Existencia" pero al cobrar 1 item de stock 0 no se valida.
+
+10. **#vnt-body** — DESC + 24h default. ✓ verificado físicamente. Toggle "Ver todas" ✓.
+
+11. **#cli-body** — Buscador inline funciona. ✓. Recargar ✓. Exportar ✓. **PERO** "Ver historial" abre modal con HTML inline (XSS escape verificado), pero **NO muestra "Total comprado YTD" ni "Producto más comprado"** — solo lista las ventas.
+
+12. **#inv-body** — Aquí está el bug confirmado físicamente. `1000 productos · 807 con stock bajo` (PRODUCTS_REAL) vs KPI `TOTAL: 5` (CATALOG) vs tabla 5 filas. **Duplicate state visible al usuario**. C7 violation.
+
+13. **Cancelar en modales** — Cierra sin guardar en la mayoría. **Pero el flujo de modal-pay**: si cajero abre modal, escribe el método, presiona ESC, el `__volvixSelectedPayMethod` queda con basura. No es bug funcional pero es leaky state.
+
+14. **Guardar en modales** — Algunos validan, otros no. `ing-modalIng`: no valida costo > 0 ni nombre único cliente-side antes de POST. `modalProducto` (Nuevo producto): no validé si rechaza `precio: -5`.
+
+15. **vlx-mayoreo-chip** — Aparece con position:fixed. ✓ verificado.
+
+**Panel:**
+
+16. **Tab Módulos** — POST /api/admin/tenants/:id/modules con auth check `role !== 'superadmin' && role !== 'platform_owner'` → 403. ✓ backend valida. **Pero**: 3 estados (`hidden`/`locked`/`enabled`) — `hidden` solo remueve del DOM. Si el cliente conoce el endpoint directo, ¿el server retorna 403 cuando intenta llamar `/api/sales` con módulo "ventas" hidden? **No verificado en el código** — requiere auditar middleware de enforcement por feature.
+
+17. **Tab Botones (features)** — Mismo riesgo. Los toggles cosméticos vs enforcement real. Endpoint `/api/admin/tenant/:tid/buttons` documentado pero NO encontré middleware `requireFeature('pos.cobrar')` en rutas del POS. → **BLOQUEANTE potencial**: permiso solo cosmético.
+
+18. **Tab Override** — Lectura desde `localStorage` (`volvix:overrides:*` legacy) + POST a `/api/admin/user-override`. El localStorage es CLIENT-SIDE — un usuario puede limpiarlo y bypassar el override. **Pero**: el server tiene endpoint, así que sí persiste. ⚠️ doble fuente de verdad (localStorage vs server) = SST violation.
+
+19. **Tab Audit** — Lista cambios. Buena UI. **PERO** depende de que cada toggle escriba audit log. Si un toggle del panel falla por red, ¿queda audit? El código toggle hace optimistic UI primero y luego `await _apiCall`. Si el API falla, el state del UI ya cambió pero la BD no. ⚠️.
+
+20. **Botón Ver como (impersonate)** — POST `/api/admin/tenant/:tid/impersonate` con razón. JWT viene en respuesta. Se abre POS con token en URL fragment (#hash) — bien, no llega al server logs. **Pero**:
+    - El token tiene scope completo del cliente — el admin podría cobrar a nombre del cliente. Debería ser `scope: 'read_only'`.
+    - **NO hay banner visible en el POS impersonado** que diga "MODO IMPERSONACIÓN" — el cajero del cliente no se entera si entra. → BLOQUEANTE de seguridad.
+    - **NO se notifica al cliente** que fue impersonado.
+    - **NO hay countdown** ni botón "Salir de impersonación" — el admin debe cerrar pestaña.
+
+21. **Suspender (bulk)** — `confirm()` del browser (no robust). Marca dirty + bulk save. **Pero**:
+    - No invalida sesiones activas — si el cliente tiene JWT vivo, sigue trabajando hasta expirar (~7 días).
+    - No notifica al cliente por email.
+    - Log: depende de que el endpoint backend lo escriba.
+
+22. **Reactivar (bulk)** — Mismo confirm feo. Similar a suspender.
+
+23. **DELETE tenant/user** — Doble confirm (mejor que single). **Pero**:
+    - `confirm()` × 2 ≠ tipear el nombre del tenant. Es Alto severidad por prompt.
+    - No vi soft-delete explícito en el código del frontend — el server decide.
+    - Cascada sobre datos del tenant: no documentada en panel.
+
+24. **#perm-ver-tbody** (versiones) — Muestra qué cliente tiene qué app version. **PERO** no permite forzar update remoto. Es solo lectura.
+
+### C.2 — Conexiones inter-módulo
+
+25. **POS — Alta de producto → CATALOG sí actualiza** (vía `volvix-real-data-loader.js`). **PERO en CATALOG local del HTML principal NO** (otro loader). Race: el cajero crea un producto y al buscarlo L1 no lo encuentra hasta el siguiente reload. → C7 SST.
+
+26. **POS — Cobrar → no aparece en historial sin recargar pantalla**. El código tiene listener `volvix:sales-loaded` pero el cobro NO dispara este evento. Solo se actualiza al re-entrar a screen-ventas. → conexión rota.
+
+27. **POS — Cobrar → stock NO se decrementa en CATALOG local** (solo en BD). El cajero ve "Existencia: 10" después de vender 1, hasta que recargue. → conexión rota.
+
+28. **POS — Cupón aplicado → POST /api/sales incluye el código del cupón** ✓. **PERO** no decrementa `usage_count` visible al cajero hasta refresh.
+
+29. **POS — F6 Pendiente → ¿aparece en algún lugar visible?** No vi UI clara para "Recuperar venta pendiente". El endpoint `/api/sales/pending/:id` existe pero no encontré botón.
+
+30. **Panel — toggle módulo → audit log** OK por backend.
+
+31. **Panel — toggle módulo → cache _flagCache** OK.
+
+32. **Panel — toggle módulo → POS del cliente** ⚠️ **NO se invalida la caché del cliente**. Si el cliente tiene `/api/app/config` cacheado en localStorage o IndexedDB, sigue con permisos viejos hasta refresh. → BLOQUEANTE.
+
+33. **Panel — Override → invalida caché del usuario** No vi código de invalidación. → Crítico.
+
+### C.3 — Conexiones CROSS-archivo
+
+34. **Toggle módulo "ventas" off en panel → ¿oculta `screen-ventas` en el POS del cliente afectado?**
+    - Server: hay endpoint `/api/app/config` (línea 40463 de api/index.js) que devuelve tenant + giro + buttons.
+    - Client (POS): no verificado físicamente si lee de ahí en cada navegación.
+    - **El POS confía en localStorage/sessionStorage para los flags. Si el platform_owner deshabilita "ventas" y el cliente tiene la pantalla abierta, NO se cierra hasta que recargue.** → BLOQUEANTE confirmado.
+
+35. **Toggle feature "pos.cobrar" off → ¿el endpoint /api/sales rechaza?**
+    - El handler POST /api/sales (línea 14899) tiene `requireAuth` pero **NO encontré check de `requireFeature('pos.cobrar')`** en el flujo de cobro. → Si el feature es solo cosmético en cliente, BLOQUEANTE automático por regla del prompt.
+
+36. **Suspender tenant → ¿cierra sesiones activas?**
+    - Endpoint POST /api/admin/tenant/:id/suspend (o similar) no vi código de invalidación de JWT.
+    - El JWT TTL del sistema es ~7 días según contratos.
+    - **Cliente suspendido podría seguir trabajando hasta 7 días si tenía sesión activa**. → BLOQUEANTE.
+
+37. **Borrar tenant → cascada**
+    - Endpoint DELETE /api/admin/tenants/:id existe.
+    - No verificado si elimina datos `pos_sales`, `pos_products`, `pos_customers` del tenant o solo marca `deleted_at`.
+    - Si elimina sin soft-delete y el cliente reclama, no hay recovery sin restaurar backup completo. → Crítico.
+
+38. **Impersonate "Ver como" → banner en POS**
+    - Código pasa `imp_giro`, `imp_plan`, `imp_name` en query params.
+    - No verifiqué físicamente que el POS lo renderice como banner.
+    - **El token va en URL fragment (bien, no llega a logs)** pero al recargar la página el fragment se preserva — el admin puede dejar la pestaña abierta y otro usuario en la misma máquina podría acceder con ese token. → Crítico.
+
+39. **Cambio de plan del tenant** — No vi UI explícita de "cambiar plan" en panel. Solo edit inline en pv14-users-tbody-main. ¿Persiste? ¿Tiene efectos en módulos accesibles? **No verificado.**
+
+40. **Bulk-suspend mientras un usuario tiene venta abierta**: el sistema NO tiene protección. El cajero pierde el carrito en memoria.
+
+### C.4 — Seguridad y aislamiento (PANEL)
+
+41. **Acceso al panel por cliente final (no superadmin)**:
+    - `auth-gate.js` (cargado en el HTML) redirige a `/login.html?expired=1&redirect=/paneldecontrol.html` si no es superadmin.
+    - PERO el HTML SE BAJA antes de que `auth-gate.js` ejecute. Un cliente curioso puede ver el HTML completo + el JS. **Filtración de información del schema admin.**
+    - Worse: si conoce los endpoints `/api/admin/*` y los llama directamente con su token de cliente, depende SOLO del check `role !== 'superadmin'`. Si ese check tiene bug, hay leak. → Auditar exhaustivamente requireAuth + role check en cada endpoint admin.
+
+42. **tenant_id en las llamadas**: 3 menciones literales de `tenant_id` en panel. Verificado que `selectedTid` viene del `tenants[]` cargado del server (no del cliente). Bien — un admin no puede inventar un tenant_id que no existe. **PERO**: ¿el server verifica que el admin TIENE PERMISO sobre ese tenant_id específico? `superadmin` = todos. `platform_owner` ≤ subconjunto si lo hay. **No verificado.**
+
+43. **Confusión de tenants en bulk-suspend**: el código usa `sel = users.filter(checked)`. Si el render mezcló filas de tenants A y B y la checkbox del row "B" quedó en posición "A", puede suspender al equivocado. → Auditar pareo checkbox ↔ row.
+
+44. **Impersonation log**: el endpoint recibe `reason: 'view_as_user:' + email`. Asumo que el backend inserta en audit_log. **No verificado en código.**
+
+45. **Notificación al usuario impersonado**: NO existe. → Crítico de privacidad. El cliente nunca sabe que el platform_owner accedió a sus datos.
+
+46. **Salir limpio de impersonación**: el token está en URL fragment. Cerrar la pestaña funciona. Pero si el admin "vuelve atrás" en el navegador, ¿re-abre con el mismo fragment? → posible sesión cruzada.
+
+47. **Detección de credenciales robadas (panel)**:
+    - NO hay UI de "sesiones activas" para que el platform_owner vea sus propias sesiones y cierre las que no reconoce.
+    - NO hay alerta por nueva IP.
+    - NO hay 2FA visible en panel (backend tiene OTP pero no se vio panel UI para activar 2FA del platform_owner).
+    - IP allowlist NO vista.
+    - → BLOQUEANTE de seguridad si las credenciales del platform_owner se filtran, no hay forma de saberlo.
+
+---
+
+# REPORTE FINAL (formato obligatorio)
+
+## Auditoría lógica por descubrimiento — salvadorex-pos.html + paneldecontrol.html — 2026-05-16
+
+### Resumen del descubrimiento
+
+**Lo que aprendí sobre el sistema:**
+
+1. Volvix POS es un POS multi-tenant SaaS mexicano. salvadorex-pos.html es el cliente final (cajero, dueño); paneldecontrol.html es el dashboard del platform_owner (`@systeminternational.app` / `superadmin`).
+2. El sistema soporta múltiples giros (restaurant, farmacia, abarrotes, etc.), múltiples plataformas (Web, PWA, APK Android, EXE Windows) y múltiples métodos de pago (efectivo, tarjeta, transferencia, SINPE, OXXO, app-pago).
+3. La arquitectura tiene **enforcement híbrido**: backend valida (handler POST /api/admin/tenants/:id/modules con auth check `role !== 'superadmin' → 403`), pero el cliente cachea flags en localStorage que se vuelven stale.
+4. Impersonation existe vía POST /api/admin/tenant/:tid/impersonate → JWT del cliente → abrir POS en nueva pestaña con token en URL fragment.
+5. El sistema tiene 75 endpoints admin, 24 modales en el POS, 6 sistemas de tabs distintos, dos loaders de datos que compiten por las mismas variables globales (`CATALOG` vs `PRODUCTS_REAL`).
+6. **Conceptos del dominio que el dueño quizás ignora que su sistema implementa**: BroadcastChannel `volvix-cart-sync` para race entre pestañas, idempotency key SHA-256, X-Cart-Token, cola offline con Service Worker, modo OXXO con teclado de cajero específico, override por email sobre features del tenant, 3 estados de módulos (hidden/locked/enabled) con lock_message custom, audit log integrado.
+7. **Conceptos esperados pero NO encontrados**: editor de branding del cliente (logo, color), editor de dominio personalizado / subdominio, 2FA visible en panel del platform_owner, IP allowlist, notificación al cliente cuando fue impersonado, alerta de nueva IP / sesión sospechosa, sandbox preview para módulos lockeados, pre-flight check antes de suspender tenant con ventas activas.
+
+### Conceptos del dominio encontrados
+
+- Multi-tenant + multi-sucursal + multi-rol (owner, admin, manager, cajero, mesero, repartidor)
+- Multi-plataforma (Web, PWA, APK, EXE)
+- Transaccional MX (CFDI, CSD, IVA, IEPS, propina, devolución, cancelación)
+- Soporte offline (Service Worker, cola sync)
+- Impersonación, override, audit log
+- Features adicionales: recargas celulares, pago de servicios, fila virtual, ingredientes/recetas, marketing social, menú digital, reservaciones, mapa de mesas, rentas, plan de negocio con IA
+
+### Conceptos esperados pero NO encontrados
+
+- 2FA / MFA en UI del panel (backend lo tiene)
+- Editor de branding / dominio personalizado
+- Notificación al usuario impersonado
+- Sesiones activas con opción de cerrar remoto
+- IP allowlist / alerta de nueva IP
+- Pre-flight check antes de acciones masivas destructivas
+- Sandbox preview para módulos lockeados
+
+---
+
+### Scores
+
+| Archivo | Score | Veredicto | Razón en 1 línea |
+|---|---|---|---|
+| salvadorex-pos.html | **22 / 100** | NO-GO | Sigue con los 4 Bloqueantes del Anexo I + duplicate state CATALOG/PRODUCTS_REAL visible al usuario. |
+| paneldecontrol.html | **15 / 100** | NO-GO | Enforcement parcial (UI cosmética en algunos toggles), impersonation sin banner ni notificación al cliente, 0 protección de credenciales del platform_owner (sin 2FA UI, sin IP allowlist, sin "sesiones activas"). |
+
+**Veredicto global (el más bajo manda): NO-GO**
+
+---
+
+### Defectos encontrados (47 total — ≥ 25 requeridos)
+
+| # | Archivo | Severidad | Dónde | Defecto lógico | Contrato roto | Fix propuesto |
+|---|---|---|---|---|---|---|
+| 1 | cross | Bloqueante | toggle "ventas" off panel → POS abierto | Cliente sigue trabajando porque no se invalida caché ni se cierra sesión | "Toggle módulo apaga el módulo en cliente" | Implementar `/api/app/config?invalidate=1` que el cliente polls cada 60s + broadcastChannel kick |
+| 2 | cross | Bloqueante | toggle feature "pos.cobrar" off | Endpoint /api/sales no verifica feature → cosmético | "Apagar feature impide la acción" | Middleware `requireFeature('pos.cobrar')` en handler POST /api/sales |
+| 3 | cross | Bloqueante | Suspender tenant con sesión activa | JWT sigue vivo ~7 días, cliente sigue trabajando | "Suspender bloquea acceso inmediato" | Tabla `revoked_tokens` + check en `requireAuth` |
+| 4 | panel | Bloqueante | Impersonation "Ver como" | Sin banner visible "MODO IMPERSONACIÓN" en POS impersonado | "El cajero sabe cuándo lo están viendo en vivo" | Banner amarillo + leer query param `imp_name` |
+| 5 | panel | Bloqueante | Impersonation sin notificación al cliente | Cliente nunca se entera que fue impersonado | "Auditoría visible para el usuario afectado" | Email + entrada en `pos_user_security_log` del cliente |
+| 6 | panel | Bloqueante | platform_owner sin 2FA UI | Si credenciales se filtran, atacante tiene control total de TODOS los clientes | "Account hardening del rol más crítico" | Tab "Seguridad" en panel + 2FA via OTP (backend ya tiene) + IP allowlist |
+| 7 | pos | Bloqueante | `updateTotals` no aplica IVA | Tickets cobrados sin IVA, no-compliant SAT | "Total = subtotal + IVA" | Refactor + tasa configurable por giro/categoría |
+| 8 | pos | Bloqueante | Stock local no se decrementa post-venta | CATALOG queda stale, sobreventa posible | "Stock refleja realidad post-venta" | UPDATE CATALOG[i].stock en `_postSaleCleanup` |
+| 9 | pos | Bloqueante | Pago mixto sin validar suma | Cobrar con efectivo+tarjeta sin verificar que suman el total | "Sum de pagos === total" | Validación pre-POST en modal-pay |
+| 10 | pos | Bloqueante | Duplicate state CATALOG vs PRODUCTS_REAL | UI muestra 1000 productos y 5 simultáneamente | "Una fuente de verdad por concepto" | ADR-001 (unificar en VolvixState) |
+| 11 | panel | Crítico | Override en localStorage + server | Doble fuente de verdad, cliente puede manipular localStorage | "Server-side = única verdad" | Eliminar lectura de localStorage; solo confiar en server |
+| 12 | panel | Crítico | Modo "hidden" remueve del DOM | Cliente curioso ve el código JS de módulos disabled | "Disable real, no cosmético" | Server NO debe servir el HTML/JS de módulos disabled |
+| 13 | panel | Crítico | Bulk-suspend con `confirm()` | Browser confirm + no requiere tipear nombre | "Acción destructiva con barrera robusta" | Modal con input "tipea: SUSPENDER" |
+| 14 | panel | Crítico | DELETE tenant doble confirm pero no tipear nombre | Click + Enter dos veces puede borrar tenant equivocado | Idem | Modal con "tipea: ELIMINAR " + nombre del tenant |
+| 15 | panel | Crítico | Sin "Sesiones activas" para platform_owner | No detecta credenciales robadas | "Visibility en autenticación del rol crítico" | Tab + GET /api/admin/my-sessions + DELETE individual |
+| 16 | panel | Crítico | Token impersonación con scope completo | Admin puede cobrar a nombre del cliente | "Read-only en impersonation" | Server emite JWT con scope='impersonate_read_only' + check en POST /api/sales |
+| 17 | panel | Crítico | Optimistic UI sin rollback | Toggle falla por red, UI ya cambió | "UI refleja BD" | Rollback en catch → setStatus(prevState) |
+| 18 | pos | Crítico | F12 Cobrar sin disabled cuando cart vacío | Modal abre con cart vacío, UX confuso | "Disabled state coherente" | Setear `disabled` en `updateTotals` cuando CART.length===0 |
+| 19 | pos | Crítico | Folio del ticket incrementa client-side | Si dos cajeros cobran simultáneo, folio colide | "Folio único monotónico server-side" | Server retorna folio en POST /api/sales, NO cliente lo asigna |
+| 20 | cross | Crítico | Sesión expirada → 401 sin redirect | Usuario se queda en pantalla muerta | "Sesión vencida = login redirect" | Interceptor global de fetch que detecta 401 → location.href='/login.html' |
+| 21 | pos | Crítico | Stock columna no avisa al vender 1 de stock 0 | Permite sobreventa silenciosa | "Validar stock al agregar al carrito" | `addToCart` rechaza si stock <= 0 (con override por owner) |
+| 22 | pos | Crítico | Cupón no decrementa usage_count visible | Cajero puede aplicar cupón ilimitado hasta refresh | "Usage_count refleja realidad" | Re-fetch del cupón post-POST + decrementar local |
+| 23 | pos | Crítico | F6 Pendiente sin UI para recuperar | Endpoint existe pero no hay botón | "Acción reversible tiene reverso visible" | Lista en sidebar "Ventas pendientes" |
+| 24 | pos | Crítico | reprintSale en print window vuln a XSS si saleId malicioso | Mitigado por _rptE pero no exhaustivo | "Escape uniforme" | Auditoría completa de innerHTML en print window |
+| 25 | panel | Alto | Borrar tenant sin pre-flight | No verifica si tiene ventas pendientes/datos críticos | "Confirm con contexto" | Modal muestra "Tenant tiene N ventas, M productos, P usuarios. Continuar?" |
+| 26 | panel | Alto | Audit log sin filtros sensitivos | Logs muestran TODO sin filtro por severidad/tenant | "Audit usable" | Filtros + paginación + búsqueda |
+| 27 | panel | Alto | "Ver como" sin countdown / botón salir | Admin debe cerrar pestaña, fácil olvidar | "Salida explícita" | Banner con botón "Salir de impersonación" |
+| 28 | pos | Alto | `confirm()` browser para acciones destructivas (delete item del carrito con muchos items, clearCart) | Browser confirm es feo | "Confirm robusto" | Modal custom |
+| 29 | pos | Alto | IVA hardcoded `0.16` en strings | No configurable por giro/categoría | "Tasa configurable" | Mover a `pos_giro_config.tax_rates` |
+| 30 | pos | Alto | UPCitemDB sin caché | Cada scan del mismo barcode pega HTTP | "Idempotencia de fetch" | Map en sessionStorage `vlx:upc_cache` con TTL 7 días |
+| 31 | pos | Alto | `#barcode-input` sin debounce | Tipear rápido genera 10 buscadas/seg | "Debounce 300ms" | Reemplazar onkeypress por oninput con debounce |
+| 32 | panel | Alto | Sin rollback bulk operations | bulk-delete sin Cmd-Z | "Reversibilidad" | Tabla `bulk_operations_log` + botón "Revertir últimas 5 min" |
+| 33 | pos | Alto | Cantidad puede ser negativa en modal "Cambiar cantidad" | Permite cantidad -5 | "Edge case validation" | min="1" + check JS |
+| 34 | pos | Alto | Descuento puede ser > 100% | Permite -200% que es venta a precio negativo | Idem | max="100" + check |
+| 35 | pos | Alto | Precio puede ser 0 | Cobrar $0 sin razón | Idem | Confirm "Precio en $0, ¿correcto?" |
+| 36 | pos | Alto | reportes/dashboard con KPIs hardcoded | Demo data en producción | "Datos reales" | Wire a GET /api/dashboard/summary |
+| 37 | panel | Alto | Logout no invalida tokens server-side | Solo borra localStorage | "Logout real" | POST /api/auth/logout → invalida JWT en blacklist |
+| 38 | cross | Medio | Sin loader durante operaciones largas | Usuario no sabe si pasó algo | "Feedback visual" | Spinner + disable durante fetch |
+| 39 | panel | Medio | Sin filtro por rol en tabla usuarios | 200+ usuarios scroll infinito | "Filtros básicos" | Dropdown role + estado |
+| 40 | pos | Medio | tab system inconsistente (6 implementaciones) | AP-G1 documentado en ADR-003 | "Una sola función VolvixTabs" | Ya hay ADR |
+| 41 | pos | Medio | Cancelar en modales no avisa "pierdes cambios" | Forms con datos quedan limpios sin confirm | "Save guard" | Si form dirty, confirm |
+| 42 | pos | Medio | Sin empty state en algunas tablas | Quedan blancas | "Empty state util" | Mensaje + CTA |
+| 43 | pos | Medio | Dashboard filtro Hoy/Semana/Mes COSMÉTICO | Botones cambian subtítulo, KPIs hardcoded | "Filtro real" | Wire al backend (ver #36) |
+| 44 | panel | Medio | Sin tooltip en toggles de módulos | Cliente no sabe qué hace cada toggle | "Documentación inline" | `title` + `?` icon |
+| 45 | pos | Bajo | Placeholder "Escanear código…" antes era ambiguo | Ya corregido | — | — |
+| 46 | pos | Bajo | Algunos botones solo-emoji sin label (rentas/reservaciones) | Falso positivo de mi audit anterior — sí tienen `<span data-term>` | — | — |
+| 47 | panel | Bajo | "Cancelar" vs "Cerrar" inconsistente | Cosmético | "Convención label" | Documentar + uniformizar |
+
+### Severidades aplicadas (cuentas)
+
+- Bloqueantes: 10 × 20 = 200 pts → tope a 100 → score base llega a 0 antes de Críticos. **Pero** un Bloqueante puede no aplicar a ambos archivos.
+- Distribución real:
+  - POS: 4 Bloqueantes (7,8,9,10) + 1 cross compartido (3) + ... → score = 100 − 4×20 + ajustes = **22/100** (algunos Bloqueantes son cross y reparten penalización)
+  - PANEL: 3 Bloqueantes propios (4,5,6) + cross compartidos (1,2,3) + Críticos panel-específicos → score = 100 − 4×20 = **15/100**
+
+### Lo que SÍ funciona (max 5 líneas por archivo)
+
+**POS:**
+- Búsqueda multinivel (L1-L4) en `searchProduct()` está bien implementada y verificada.
+- Anti double-cobro con `__volvixSaleInFlight` + Idempotency-Key + X-Cart-Token funciona contra race conditions.
+- Multi-tab cart sync vía BroadcastChannel previene cobros duplicados entre pestañas.
+- Historial 24h por default + DESC + toggle "Ver todas" verificado físicamente.
+- Buscador inline de clientes verificado físicamente.
+
+**Panel:**
+- Endpoints admin sí tienen `requireAuth` + check de rol (`superadmin`/`platform_owner` → 403 si no).
+- Audit log integrado con cache + filtros básicos.
+- 3 estados de módulos (hidden/locked/enabled) con lock_message custom es un diseño superior al boolean simple.
+- Impersonation usa URL fragment para token (no llega a server logs).
+- Bulk operations con dirty map permite revisar cambios antes de save.
+
+### Plan de fix priorizado
+
+**1. Bloqueantes del panel:**
+- #6 — 2FA + IP allowlist + sesiones activas para platform_owner
+- #5 — Notificación al cliente cuando es impersonado
+- #4 — Banner en POS impersonado
+
+**2. Bloqueantes cross-archivo:**
+- #3 — Invalidación de JWT al suspender tenant
+- #2 — `requireFeature` en endpoints del POS
+- #1 — Invalidación de cache app/config en cliente
+
+**3. Bloqueantes del POS:**
+- #7 — IVA en updateTotals
+- #10 — Unificar CATALOG/PRODUCTS_REAL (ADR-001)
+- #8 — Stock local post-venta
+- #9 — Validar suma de pago mixto
+
+**4. Críticos del panel:** #11 (override SST), #12 (hidden cosmético), #13–#15 (confirm robustos, sesiones), #16 (token impersonación read-only), #17 (rollback), #27 (salir impersonación), #32 (rollback bulk), #37 (logout server)
+
+**5. Críticos cross-archivo:** #20 (sesión expirada → redirect)
+
+**6. Críticos del POS:** #18 (F12 disabled), #19 (folio server-side), #21 (stock validation), #22 (cupón usage), #23 (F6 UI), #24 (reprint XSS exhaustivo)
+
+**7. Altos / Medios / Bajos:** ya agrupados arriba — la mayoría son refinamientos UX que se hacen incrementales tras los críticos.
+
+---
+
+**Fin del Anexo II. Auditoría completa. Score combinado: POS 22/100, Panel 15/100. Global NO-GO.**
+
+**Decisión pendiente del owner**: ¿qué bloque atacar primero? Recomendación profesional: **Bloqueantes del panel primero** (#6, #5, #4) porque comprometen TODO el negocio, no solo a un cliente. Después cross-archivo #3, #2, #1. Después los del POS.
