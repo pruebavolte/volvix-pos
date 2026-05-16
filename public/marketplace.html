@@ -1790,6 +1790,10 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('giro-input').value = text;
     searchGiro();
   }
+  // V6 FIX: expose to window scope so onclick HTML handlers can find them.
+  // Antes el DOMContentLoaded callback envolvia las funciones, dejandolas locales.
+  // Esto rompia "Buscar mi sistema" y los chips de giros populares.
+  window.quickSearch = quickSearch;
 
   function searchGiro() {
     const q = document.getElementById('giro-input').value.trim();
@@ -2265,6 +2269,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Suggestion chips: click en un chip llena el input (sin disparar searchGiro
   // automáticamente — el handler onclick del HTML ya llama a quickSearch)
+  // V6 FIX: expose searchGiro to window (onclick HTML lo necesita global)
+  window.searchGiro = searchGiro;
 });
 </script>
 
