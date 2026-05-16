@@ -2546,7 +2546,12 @@ const handlers = {
     try {
       const parsed = url.parse(req.url, true);
       // FIX slice_38: filtrar SIEMPRE por tenant (vía pos_user_id derivado).
-      // Solo superadmin puede pasar user_id arbitrario.
+      // FIX cross-tenant leak 2026-05-16: filtrar TAMBIÉN por tenant_id explicito.
+      // Antes: si resolvePosUserId devolvía fallback genérico (uuid placeholder),
+      // el handler devolvía TODAS las ventas del tenant cuyo pos_user_id coincidía
+      // con el placeholder (típicamente TNT001 demo). Fix: agregar &tenant_id=eq.<X>
+      // en la query siempre que tenantId exista, así Postgres rechaza cualquier row
+      // que no pertenezca al tenant del JWT.
       const tenantId = resolveTenant(req);
       const ownerUserId = resolvePosUserId(req, tenantId);
       let posUserId = ownerUserId;
@@ -2562,6 +2567,11 @@ const handlers = {
         }
       } catch (_) {}
       let qs = `?pos_user_id=eq.${posUserId}&select=*&order=created_at.desc&limit=100`;
+      // FIX cross-tenant 2026-05-16: filtro defensivo por tenant_id si está en JWT.
+      // Sin esto, un JWT con role=owner pero pos_user_id no-UUID podia ver TNT001 demo.
+      if (tenantId && !(req.user.role === 'superadmin' || req.user.role === 'platform_owner')) {
+        qs += '&tenant_id=eq.' + encodeURIComponent(tenantId);
+      }
       if (branchFilter && isUuid(branchFilter)) {
         qs += '&branch_id=eq.' + encodeURIComponent(branchFilter);
       } else if (userBranchScope && userBranchScope.length) {
