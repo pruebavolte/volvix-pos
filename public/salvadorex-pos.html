@@ -23796,5 +23796,71 @@ window.addEventListener('volvix:version-loaded', function(e){
 })();
 </script>
 
+<!-- 2026-05-16 R38: Pilot feedback floating button (solo visible si tenant.is_pilot=true) -->
+<script>
+(function(){
+  function getToken(){ try { return localStorage.getItem('volvix_token') || ''; } catch(_) { return ''; } }
+  function getSession(){ try { return JSON.parse(localStorage.getItem('volvix_session') || '{}'); } catch(_) { return {}; } }
+  function isPilot(){
+    try {
+      var s = getSession();
+      return !!(s && (s.is_pilot === true || (s.tenant && s.tenant.is_pilot === true)));
+    } catch(_) { return false; }
+  }
+  if (!isPilot()) return;
+
+  var css = '#pilot-fb-btn{position:fixed;bottom:20px;right:20px;background:#2D5F8F;color:#fff;border:none;border-radius:50px;padding:12px 18px;font-size:14px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.2);z-index:9998;}'
+    + '#pilot-fb-modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;}'
+    + '#pilot-fb-modal.show{display:flex;}'
+    + '#pilot-fb-modal .box{background:#fff;border-radius:10px;padding:24px;max-width:480px;width:90%;}'
+    + '#pilot-fb-modal h3{margin:0 0 16px;}'
+    + '#pilot-fb-modal label{display:block;margin:10px 0 4px;font-size:13px;font-weight:600;}'
+    + '#pilot-fb-modal select,#pilot-fb-modal textarea{width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;font-size:14px;box-sizing:border-box;}'
+    + '#pilot-fb-modal textarea{min-height:100px;}'
+    + '#pilot-fb-modal .actions{margin-top:16px;text-align:right;}'
+    + '#pilot-fb-modal button{padding:8px 16px;border-radius:6px;border:none;cursor:pointer;margin-left:8px;font-size:14px;}'
+    + '#pilot-fb-send{background:#2D5F8F;color:#fff;}'
+    + '#pilot-fb-cancel{background:#eee;color:#333;}';
+  var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
+
+  var btn = document.createElement('button');
+  btn.id = 'pilot-fb-btn'; btn.textContent = '💬 Reportar algo';
+  document.body.appendChild(btn);
+
+  var modal = document.createElement('div');
+  modal.id = 'pilot-fb-modal';
+  modal.innerHTML = '<div class="box">'
+    + '<h3>Cuentanos que paso</h3>'
+    + '<label>Tipo</label>'
+    + '<select id="pfb-type"><option value="bug">Bug / no funciona algo</option><option value="sugerencia" selected>Sugerencia</option><option value="pregunta">Pregunta</option></select>'
+    + '<label>Severidad</label>'
+    + '<select id="pfb-sev"><option value="poco_importante">Poco importante</option><option value="importante" selected>Importante</option><option value="urgente">Urgente</option></select>'
+    + '<label>Descripcion</label>'
+    + '<textarea id="pfb-desc" placeholder="Que intentaste? Que paso? Que esperabas?"></textarea>'
+    + '<div class="actions">'
+    + '<button id="pilot-fb-cancel">Cancelar</button>'
+    + '<button id="pilot-fb-send">Enviar</button>'
+    + '</div></div>';
+  document.body.appendChild(modal);
+
+  btn.addEventListener('click', function(){ modal.classList.add('show'); });
+  document.getElementById('pilot-fb-cancel').addEventListener('click', function(){ modal.classList.remove('show'); });
+  document.getElementById('pilot-fb-send').addEventListener('click', function(){
+    var type = document.getElementById('pfb-type').value;
+    var sev  = document.getElementById('pfb-sev').value;
+    var desc = (document.getElementById('pfb-desc').value || '').trim();
+    if (!desc) { alert('Por favor describe brevemente que paso.'); return; }
+    fetch('/api/pilot/feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+      body: JSON.stringify({ type: type, severity: sev, description: desc, page_url: location.href, user_agent: navigator.userAgent })
+    }).then(function(r){ return r.json(); }).then(function(j){
+      if (j && j.ok) { alert('Gracias! Tu feedback ya nos llego.'); modal.classList.remove('show'); document.getElementById('pfb-desc').value = ''; }
+      else { alert('No pudimos enviar. Intentalo otra vez o mandanos WhatsApp.'); }
+    }).catch(function(){ alert('Sin conexion. Intentalo mas tarde.'); });
+  });
+})();
+</script>
+
 </body>
 </html>

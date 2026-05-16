@@ -12675,6 +12675,71 @@ handlers['GET /api/config/public'] = async (req, res) => {
   });
 
   // ============================================================
+  // R38 V4 Fase 2.5 — POST /api/pilot/feedback
+  // Recibe feedback de clientes piloto desde el boton flotante en POS.
+  // Body: { type, severity, description, page_url, user_agent, screenshot_url? }
+  // ============================================================
+  handlers['POST /api/pilot/feedback'] = requireAuth(async (req, res) => {
+    try {
+      const body = req.body || {};
+      const description = String(body.description || '').trim().slice(0, 2000);
+      if (!description) return sendJSON(res, { ok: false, error: 'description_required' }, 400);
+      const type = ['bug','sugerencia','pregunta'].includes(body.type) ? body.type : 'sugerencia';
+      const severity = ['poco_importante','importante','urgente'].includes(body.severity) ? body.severity : 'importante';
+      const tenantId = req.user && req.user.tenant_id;
+      if (!tenantId) return sendJSON(res, { ok: false, error: 'no_tenant' }, 400);
+      try {
+        await supabaseRequest('POST', '/pilot_feedback', {
+          tenant_id: tenantId,
+          user_id: (req.user && (req.user.id || req.user.email)) || null,
+          type: type,
+          severity: severity,
+          description: description,
+          screenshot_url: body.screenshot_url || null,
+          page_url: String(body.page_url || '').slice(0, 500) || null,
+          user_agent: String(body.user_agent || '').slice(0, 500) || null
+        });
+      } catch (e) {
+        return sendJSON(res, { ok: false, error: 'storage_failed', message: e.message }, 500);
+      }
+      sendJSON(res, { ok: true, message: 'Feedback recibido' });
+    } catch (e) {
+      sendJSON(res, { ok: false, error: e.message || 'feedback_failed' }, 500);
+    }
+  });
+
+  // GET /api/admin/pilots — lista de tenants piloto con sus stats
+  handlers['GET /api/admin/pilots'] = requireAuth(async (req, res) => {
+    try {
+      const role = String((req.user && req.user.role) || '').toLowerCase();
+      if (role !== 'superadmin' && role !== 'platform_owner') {
+        return sendJSON(res, { ok: false, error: 'platform_admin_required' }, 403);
+      }
+      const tenants = await supabaseRequest('GET',
+        '/pos_tenants?is_pilot=eq.true&select=tenant_id,name,owner_email,giro,plan,pilot_started_at,pilot_converted_at,pilot_feedback_count,created_at&order=pilot_started_at.desc');
+      sendJSON(res, { ok: true, pilots: tenants || [] });
+    } catch (e) {
+      sendJSON(res, { ok: false, error: e.message || 'pilots_list_failed' }, 500);
+    }
+  });
+
+  // GET /api/admin/pilots/:tenant/feedback — feedback de un piloto específico
+  handlers['GET /api/admin/pilots/:tenant/feedback'] = requireAuth(async (req, res, params) => {
+    try {
+      const role = String((req.user && req.user.role) || '').toLowerCase();
+      if (role !== 'superadmin' && role !== 'platform_owner') {
+        return sendJSON(res, { ok: false, error: 'platform_admin_required' }, 403);
+      }
+      const tid = params.tenant;
+      const feedback = await supabaseRequest('GET',
+        '/pilot_feedback?tenant_id=eq.' + encodeURIComponent(tid) + '&select=*&order=created_at.desc&limit=100');
+      sendJSON(res, { ok: true, feedback: feedback || [] });
+    } catch (e) {
+      sendJSON(res, { ok: false, error: e.message || 'feedback_list_failed' }, 500);
+    }
+  });
+
+  // ============================================================
   // AGENTE 12 (overpromise fix) — GET /api/dashboard/summary?range=hoy|semana|mes
   // Antes el Dashboard mostraba KPIs HARDCODED ($4,820, 18 tickets, $2,145, $890).
   // Ahora calculamos en vivo desde pos_sales / pos_cash_movements del tenant.
