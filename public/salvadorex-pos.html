@@ -10299,20 +10299,20 @@
       }).join('');
     }
     const sub = document.getElementById('inv-sub');
-    // SDD C7 (SST): si CATALOG aún está vacío evitamos sobreescribir el subtítulo
-    // con "0 productos · 0 visibles" cuando volvix-real-data-loader.js ya escribió
-    // el conteo real. Race condition resuelta: solo actualizamos cuando hay datos
-    // O cuando el usuario claramente cargó la pantalla sin productos.
+    // SDD C7 (SST): inv-sub tiene 2 writers — volvix-real-data-loader.js (PRODUCTS_REAL)
+    // y renderInv (CATALOG). Si CATALOG está vacío pero PRODUCTS_REAL tiene datos,
+    // significa que el data-loader ganó y debemos respetar su escritura, no pisarla.
     if (sub) {
-      if (CATALOG.length === 0) {
-        // Mantener "Cargando..." durante boot, o "Sin productos" si ya hubo evento
-        if (window.__catalogLoadAttempted) {
-          sub.textContent = 'Sin productos en este tenant';
-        } else {
-          sub.textContent = 'Cargando productos…';
-        }
-      } else {
+      const realCount = (window.PRODUCTS_REAL && window.PRODUCTS_REAL.length) || 0;
+      if (CATALOG.length > 0) {
         sub.textContent = CATALOG.length + ' productos · ' + list.length + ' visibles';
+      } else if (realCount > 0) {
+        // El data-loader ya tiene datos; no sobreescribimos su mensaje.
+        // (volvix-real-data-loader.js linea 136 ya puso "N productos · M con stock bajo")
+      } else if (window.__catalogLoadAttempted) {
+        sub.textContent = 'Sin productos en este tenant';
+      } else {
+        sub.textContent = 'Cargando productos…';
       }
     }
     _updateBulkBar();
