@@ -4104,7 +4104,7 @@
         <label>Código del Producto:</label>
         <div class="pos-code-input-wrap">
           <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5v14"/><path d="M8 5v14"/><path d="M12 5v14"/><path d="M17 5v14"/><path d="M21 5v14"/></svg>
-          <input id="barcode-input" aria-label="Código del producto" class="pos-code-input" type="text" placeholder="Escanear o escribir código…" onkeypress="if(event.key==='Enter')searchProduct(this.value)">
+          <input id="barcode-input" aria-label="Código del producto" class="pos-code-input" type="text" placeholder="Escanear código O escribir nombre del producto…" onkeypress="if(event.key==='Enter')searchProduct(this.value)">
         </div>
         <button class="btn-enter" onclick="searchProduct(document.getElementById('barcode-input').value)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
@@ -4614,6 +4614,9 @@
         <div class="btn-row">
           <!-- SDD AP-C5 (DT-C4): buscador inline para tabla de clientes -->
           <input id="cli-search" type="search" placeholder="🔍 Buscar por nombre, teléfono, RFC…" oninput="filterClientes(this.value)" style="padding:8px 12px;border:1px solid var(--border,#e5e5ea);border-radius:8px;min-width:280px;font-size:13px" autocomplete="off" />
+          <!-- SDD QW-2: consistencia con kardex/proveedores/promociones — patrón Recargar+Exportar -->
+          <button class="btn" onclick="reloadCustomers()" title="Refrescar lista de clientes">🔄 Recargar</button>
+          <button class="btn" onclick="exportCustomersCSV()" title="Descargar clientes en CSV">📤 Exportar</button>
           <button class="btn accent" onclick="openNewCustomerModal()">+ Nuevo cliente</button>
         </div>
       </div>
@@ -4663,6 +4666,8 @@
           <button class="btn" onclick="openHistorialDateFilter()">📅 Filtrar fecha</button>
           <!-- SDD C5 constitution: defualt = ultimas 24h. Boton para expandir explicitamente. -->
           <button class="btn" onclick="toggleVentasShowAll()" id="btn-ventas-show-all" title="Cambia entre 'últimas 24h' (default) y 'todas las ventas cargadas'">📂 Ver todas</button>
+          <!-- SDD QW-2: consistencia con kardex / proveedores / cotizaciones — patrón Recargar -->
+          <button class="btn" onclick="reloadHistorial()" title="Recargar historial de ventas">🔄 Recargar</button>
           <button class="btn" onclick="exportHistorialCSV()">📤 Exportar</button>
         </div>
       </div>
@@ -11160,6 +11165,45 @@
         : (CUSTOMERS.length + ' clientes registrados');
     }
   }
+  // SDD QW-2: Recargar lista de clientes desde la API y refrescar tabla en vivo.
+  window.reloadCustomers = async function () {
+    showToast('Recargando clientes…');
+    try {
+      const tok = (window.VolvixAuth && window.VolvixAuth.getToken && window.VolvixAuth.getToken())
+        || localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
+      const r = await fetch('/api/customers?limit=500', { headers: tok ? { Authorization: 'Bearer ' + tok } : {}, credentials: 'include' });
+      if (!r.ok) { showToast('⚠ HTTP ' + r.status, 'warn'); return; }
+      const j = await r.json();
+      const arr = (j && Array.isArray(j.customers)) ? j.customers : (Array.isArray(j) ? j : []);
+      CUSTOMERS.length = 0;
+      arr.forEach(c => CUSTOMERS.push([
+        String(c.name || c.nombre || ''),
+        String(c.phone || c.telefono || ''),
+        Number(c.credit_limit || 0),
+        Number(c.debt != null ? c.debt : (c.credit_balance != null ? c.credit_balance : (c.deuda || 0))),
+        Number(c.purchases_count != null ? c.purchases_count : (c.points || 0)),
+        c.last_purchase_at || c.last_purchase || c.last_visit || '—'
+      ]));
+      renderClientes();
+      showToast('✓ ' + CUSTOMERS.length + ' clientes cargados', 'ok');
+    } catch (e) { showToast('⚠ Error: ' + (e.message || 'sin conexión'), 'warn'); }
+  };
+  // SDD QW-2: Exportar clientes a CSV (incluye RFC y todos los campos relevantes para contabilidad)
+  window.exportCustomersCSV = function () {
+    if (!CUSTOMERS.length) { showToast('No hay clientes para exportar'); return; }
+    if (typeof _vlxDownloadCSV !== 'function') { showToast('Helper de CSV no disponible'); return; }
+    const rows = CUSTOMERS.map(c => ({
+      nombre: c[0] || '',
+      telefono: c[1] || '',
+      credito_autorizado: Number(c[2] || 0),
+      saldo: Number(c[3] || 0),
+      puntos: Number(c[4] || 0),
+      ultima_compra: c[5] || ''
+    }));
+    const fn = 'clientes-' + new Date().toISOString().slice(0, 10) + '.csv';
+    _vlxDownloadCSV(fn, ['nombre', 'telefono', 'credito_autorizado', 'saldo', 'puntos', 'ultima_compra'], rows);
+    showToast('✓ Exportados ' + rows.length + ' clientes: ' + fn);
+  };
   // FIX A2: Historial de compras por cliente — antes el botón "Ver" no tenía handler
   window.verHistorialCliente = async function (nombre, telefono) {
     var token = (window.VolvixAuth && window.VolvixAuth.getToken && window.VolvixAuth.getToken()) ||
@@ -15877,15 +15921,33 @@
   let PRICE_TIER = (function(){ try { return sessionStorage.getItem('volvix:price_tier') || 'menudeo'; } catch(e){ return 'menudeo'; } })();
   function _applyTierVisual() {
     const btn = document.getElementById('btn-mayoreo');
-    if (!btn) return;
+    if (btn) {
+      if (PRICE_TIER === 'mayoreo') {
+        btn.style.background = 'rgba(243,156,18,0.15)';
+        btn.style.outline = '2px solid #F39C12';
+        btn.title = 'Mayoreo ACTIVO · clic para volver a menudeo';
+      } else {
+        btn.style.background = '';
+        btn.style.outline = '';
+        btn.title = 'Precio mayoreo';
+      }
+    }
+    // SDD QW-5: chip visible al lado del total grande para que el cajero
+    // sepa de un vistazo si está aplicando precios de mayoreo.
+    let chip = document.getElementById('vlx-mayoreo-chip');
     if (PRICE_TIER === 'mayoreo') {
-      btn.style.background = 'rgba(243,156,18,0.15)';
-      btn.style.outline = '2px solid #F39C12';
-      btn.title = 'Mayoreo ACTIVO · clic para volver a menudeo';
-    } else {
-      btn.style.background = '';
-      btn.style.outline = '';
-      btn.title = 'Precio mayoreo';
+      if (!chip) {
+        chip = document.createElement('span');
+        chip.id = 'vlx-mayoreo-chip';
+        chip.style.cssText = 'display:inline-block;margin-right:10px;padding:4px 10px;background:#F39C12;color:#fff;border-radius:6px;font-size:11px;font-weight:700;letter-spacing:0.5px;vertical-align:middle;animation:pulse 2s ease-in-out infinite';
+        chip.textContent = '🏷️ MAYOREO';
+        const totalBig = document.getElementById('total-big');
+        if (totalBig && totalBig.parentNode) {
+          totalBig.parentNode.insertBefore(chip, totalBig);
+        }
+      }
+    } else if (chip) {
+      chip.remove();
     }
   }
   window.togglePriceTier = function () {
@@ -16517,6 +16579,30 @@
     }
   };
 
+  // SDD QW-2: Recargar historial desde la API y refrescar tabla en vivo.
+  window.reloadHistorial = async function () {
+    showToast('Recargando ventas…');
+    try {
+      const tok = (window.VolvixAuth && window.VolvixAuth.getToken && window.VolvixAuth.getToken())
+        || localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
+      const r = await fetch('/api/sales?limit=200', { headers: tok ? { Authorization: 'Bearer ' + tok } : {}, credentials: 'include' });
+      if (!r.ok) { showToast('⚠ HTTP ' + r.status, 'warn'); return; }
+      const j = await r.json();
+      const arr = (j && Array.isArray(j.sales)) ? j.sales : (Array.isArray(j) ? j : []);
+      SALES.length = 0;
+      arr.forEach(s => SALES.push([
+        String('#' + (s.folio || s.id || '').toString().padStart(6, '0')),
+        s.created_at || s.fecha || '',
+        String(s.customer_name || s.cliente || 'Público general'),
+        String(s.cashier || s.cajero || ''),
+        String(s.payment_method || s.metodo || 'Efectivo'),
+        Number(s.total || 0),
+        s.status || 'completed'
+      ]));
+      if (typeof renderVentas === 'function') renderVentas();
+      showToast('✓ ' + SALES.length + ' ventas cargadas', 'ok');
+    } catch (e) { showToast('⚠ Error: ' + (e.message || 'sin conexión'), 'warn'); }
+  };
   window.exportHistorialCSV = async function () {
     showToast('Exportando historial…');
     try {
