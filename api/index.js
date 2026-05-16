@@ -12537,7 +12537,7 @@ handlers['GET /api/config/public'] = async (req, res) => {
     if (!['superadmin', 'platform_owner'].includes(role)) {
       return sendJSON(res, { ok: false, error: 'forbidden' }, 403);
     }
-    if (String(process.env.ALLOW_TEST_TENANTS || 'false').toLowerCase() !== 'true') {
+    if (String(process.env.ALLOW_TEST_TENANTS || 'false').trim().toLowerCase() !== 'true') {
       return sendJSON(res, { ok: false, error: 'test_tenants_disabled', message: 'Setear ALLOW_TEST_TENANTS=true en env para habilitar.' }, 403);
     }
     try {
@@ -36692,7 +36692,7 @@ if (process.env.NODE_ENV === 'test') {
       // AGENTE 1 (real) — Cloudflare Turnstile verification.
       // Usa TURNSTILE_SECRET_KEY si está, o CAPTCHA_SECRET_KEY (alias).
       // Si CAPTCHA_ENABLED no es 'true', pasa libre (fail-open para flag OFF).
-      if (String(process.env.CAPTCHA_ENABLED || 'false').toLowerCase() === 'true') {
+      if (String(process.env.CAPTCHA_ENABLED || 'false').trim().toLowerCase() === 'true') {
         const captchaToken = body.captcha_token || body['cf-turnstile-response'] || null;
         if (!captchaToken) {
           return sendJSON(res, { ok: false, error: 'captcha_required', message: 'Verifica el captcha para continuar' }, 400);
