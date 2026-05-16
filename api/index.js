@@ -12709,6 +12709,7 @@ handlers['GET /api/config/public'] = async (req, res) => {
   });
 
   // GET /api/admin/pilots — lista de tenants piloto con sus stats
+  // V6 FIX: query pos_companies (donde viven los tenants reales), no pos_tenants (vacio).
   handlers['GET /api/admin/pilots'] = requireAuth(async (req, res) => {
     try {
       const role = String((req.user && req.user.role) || '').toLowerCase();
@@ -12716,7 +12717,7 @@ handlers['GET /api/config/public'] = async (req, res) => {
         return sendJSON(res, { ok: false, error: 'platform_admin_required' }, 403);
       }
       const tenants = await supabaseRequest('GET',
-        '/pos_tenants?is_pilot=eq.true&select=tenant_id,name,owner_email,giro,plan,pilot_started_at,pilot_converted_at,pilot_feedback_count,created_at&order=pilot_started_at.desc');
+        '/pos_companies?is_pilot=eq.true&select=id,tenant_id,name,business_type,plan,is_pilot,pilot_started_at,pilot_converted_at,pilot_feedback_count,created_at&order=created_at.desc');
       sendJSON(res, { ok: true, pilots: tenants || [] });
     } catch (e) {
       sendJSON(res, { ok: false, error: e.message || 'pilots_list_failed' }, 500);
