@@ -480,6 +480,324 @@ const BRAND_TENDITO = {
 
 
 // =============================================================
+// BRAND_ESPUMA — Cafetería (warmCozy vibe)
+// =============================================================
+const BRAND_ESPUMA = {
+  slug:'espuma', brand:'Espuma', tagline:'El sistema para cafeterías que conocen a cada cliente por su nombre',
+  giro:'cafetería', giroPlural:'cafeterías', vibe:'warmCozy',
+  palette:{bg:'#F6EFE5', surface:'#FFFFFF', paper:'#EDE3D2', ink:'#2A1810', ink2:'#4A2F1F', muted:'#7A5C44', line:'#D9C9B0', accent:'#9C5B2E', accent2:'#C57843'},
+  fonts:{display:'Lora', body:'Inter', script:'Caveat', mono:'JetBrains Mono'},
+  hero:{eyebrow:'El sistema para cafeterías mexicanas · 2026', h1:'Cada <em>taza</em>,<br>cada <em>cliente</em>,<br>recordado.', deck:'El POS hecho para que tu barista se acuerde de los gustos de cada cliente, tu inventario de granos no se quede sin café, y cada propina llegue a quien la mereció.', ctaPrimary:'Empezar gratis', ctaSecondary:'Ver el menú vivo', metaLine:'$0 inicial · sin tarjeta · setup en 5 min'},
+  images:{
+    hero:'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=1200&h=1600&fit=crop&q=85', heroAlt:'Barista preparando latte art',
+    showcase:[
+      {url:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1200&h=900&fit=crop&q=80',tag:'Latte art',size:'lg'},
+      {url:'https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=900&h=1200&fit=crop&q=80',tag:'Espresso shot',size:'md'},
+      {url:'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=900&h=1200&fit=crop&q=80',tag:'Pour over',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=900&h=1200&fit=crop&q=80',tag:'Cold brew',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1517256064527-09c73fc73e38?w=900&h=1200&fit=crop&q=80',tag:'Granos artesanales',size:'md'},
+      {url:'https://images.unsplash.com/photo-1494314671902-399b18174975?w=900&h=1200&fit=crop&q=80',tag:'Pastel del día',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1521017432531-fbd92d768814?w=1200&h=900&fit=crop&q=80',tag:'Mesa con libro',size:'md'},
+      {url:'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=900&h=1200&fit=crop&q=80',tag:'Croissant',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1521017432531-fbd92d768814?w=1200&h=900&fit=crop&q=80',tag:'Interior cálido',size:'md'},
+    ],
+    context:[
+      {url:'https://images.unsplash.com/photo-1521017432531-fbd92d768814?w=800&h=600&fit=crop&q=80',caption:'Barista toma orden con tablet'},
+      {url:'https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=800&h=600&fit=crop&q=80',caption:'Pedido por QR desde la mesa'},
+      {url:'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=800&h=600&fit=crop&q=80',caption:'Stock de granos al instante'},
+    ],
+  },
+  liveDemo:{
+    type:'kds', eyebrow:'Cocina · barra · en vivo',
+    title:'Tu barra, <em>orden por orden</em>, sin gritos',
+    deck:'El barista ve las órdenes en pantalla. Latte para Carmen, mesa 4. Cuando lo entrega, marca listo con un toque. Cliente recibe notificación. Cero confusión.',
+    secondary:'En las cafeterías chicas, los gritos "¿para quién va el capuchino?" cuestan tiempo y errores. Espuma elimina ese caos.',
+    data:{orders:[{table:'M04', name:'Carmen R.', state:'urgent', items:['Latte vainilla|leche entera','Pan dulce'], waitMin:8},{table:'M11', name:'Don Luis', state:'prep', items:['Cappuccino|deslactosado','Croissant tostado'], waitMin:5},{table:'M02', name:'Tina S.', state:'queue', items:['Americano grande'], waitMin:2},{table:'M07', name:'Patricia', state:'ready', items:['Cold brew','Brownie'], waitMin:0}]}
+  },
+  features:[
+    {ico:'archive', h:'Inventario de granos en tiempo real', d:'Sabes cuántos kilos de cada origen tienes. Te avisa cuando bajas de 2 kg. Cero "ya no hay etíope".'},
+    {ico:'bookmark', h:'Clientes con memoria', d:'Carmen siempre pide latte vainilla. El sistema lo recuerda. Tu barista le dice "¿lo de siempre?" sin esfuerzo.'},
+    {ico:'percent', h:'Propinas digitales por barista', d:'Cliente paga con tarjeta y agrega propina en pantalla. Se reparte por turno. Cero pelea con monedas.'},
+    {ico:'camera', h:'Foto del pedido para entrega', d:'Cuando el latte sale a domicilio, foto obligatoria del vaso. Si llega derramado, sabes en qué punto fue.'},
+    {ico:'barcode', h:'Menú QR con foto', d:'Cliente escanea, pide desde su mesa, paga sin levantarse. Tu barista lo ve en KDS instantáneo.'},
+    {ico:'truck', h:'Pedidos rápidos para llevar', d:'App separada para grab-and-go: cliente paga desde celular, llega y lo recoge en la barra "to-go". 3 minutos.'},
+  ],
+  stats:[{v:'87', l:'Tazas servidas hoy'},{v:'4.2', l:'Kg de café esta semana'},{v:'5', l:'Min de setup', suffix:'min'},{v:'0', l:'Costo inicial', prefix:'$'}],
+  quote:{text:'Antes mi barista <span class="hl">olvidaba quién pedía qué</span> y los clientes regulares se ofendían. Con Espuma, hasta el nuevo trainee recuerda a cada cliente. Las ventas a regulares subieron 30%.', sig:'Lucia R.', role:'Cafetería Café del Centro, Querétaro'},
+  thefts:[
+    {title:'Café "para personal" sin registro', rob:'Empleados se sirven lattes y postres "porque es para mí" sin marcarlo. En una cafetería promedio son 200-400 pesos diarios — $6-12k al mes.', fix:'Cada bebida pasa por sistema. Empleados tienen su <strong>código personal con límite diario</strong>. Si excede, alerta al gerente.'},
+    {title:'Propina "que se perdió en el cambio"', rob:'Cliente deja $20 de propina en efectivo. Cajero los toma "para repartir después" y no lo hace. Los baristas dejan de poner cuidado.', fix:'Propina se <strong>digitaliza al pago</strong>. Se reparte automáticamente por turno trabajado. Visible en celular del barista.'},
+    {title:'Reventa de granos "vencidos"', rob:'Empleado se lleva 1kg de café diciendo "iba a vencer" y lo vende a otra cafetería. En verdad estaba bueno.', fix:'Cada kilo tiene <strong>etiqueta de lote con fecha</strong>. Si sale del inventario sin venta, alerta. Auditoría cada cierre.'},
+  ],
+};
+
+
+// =============================================================
+// BRAND_PATA — Veterinaria (playful vibe)
+// =============================================================
+const BRAND_PATA = {
+  slug:'pata', brand:'Pata', tagline:'El sistema para clínicas veterinarias que sí recuerdan cada vacuna',
+  giro:'veterinaria', giroPlural:'veterinarias', vibe:'playful',
+  palette:{bg:'#EEF7FC', surface:'#FFFFFF', paper:'#E0EFF7', ink:'#0A2540', ink2:'#1A3A5C', muted:'#5A7BA0', line:'#C2D8E8', accent:'#FF6B35', accent2:'#FFA45C'},
+  fonts:{display:'Quicksand', body:'Inter', script:'Pacifico', mono:'JetBrains Mono'},
+  hero:{eyebrow:'El sistema para veterinarias mexicanas · 2026', h1:'Cada <em>vacuna</em>,<br>cada <em>peludito</em>,<br>al día.', deck:'El POS hecho para que ninguna vacuna se vuelva tarde, cada paciente tenga su historial completo, y el dueño reciba recordatorio antes de que lo olvide.', ctaPrimary:'Empezar gratis', ctaSecondary:'Ver agenda de hoy', metaLine:'$0 inicial · sin tarjeta · setup en 5 min'},
+  images:{
+    hero:'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=1200&h=1600&fit=crop&q=85', heroAlt:'Veterinario revisando perro',
+    showcase:[
+      {url:'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=1200&h=900&fit=crop&q=80',tag:'Consulta general',size:'lg'},
+      {url:'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=900&h=1200&fit=crop&q=80',tag:'Cachorro feliz',size:'md'},
+      {url:'https://images.unsplash.com/photo-1548767797-d8c844163c4c?w=900&h=1200&fit=crop&q=80',tag:'Gato examinado',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=900&h=1200&fit=crop&q=80',tag:'Vacunación',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1606214174585-fe31582dc6ee?w=900&h=1200&fit=crop&q=80',tag:'Cirugía menor',size:'md'},
+      {url:'https://images.unsplash.com/photo-1517423440428-a5a00ad493e8?w=900&h=1200&fit=crop&q=80',tag:'Estética canina',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=1200&h=900&fit=crop&q=80',tag:'Cuidado dental',size:'md'},
+      {url:'https://images.unsplash.com/photo-1530281700549-e82e7bf110d6?w=900&h=1200&fit=crop&q=80',tag:'Pet shop',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1551717743-49959800b1f6?w=1200&h=900&fit=crop&q=80',tag:'Consultorio',size:'md'},
+    ],
+    context:[
+      {url:'https://images.unsplash.com/photo-1606214174585-fe31582dc6ee?w=800&h=600&fit=crop&q=80',caption:'Historial digital al instante'},
+      {url:'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=800&h=600&fit=crop&q=80',caption:'Recordatorio de vacuna por WhatsApp'},
+      {url:'https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=800&h=600&fit=crop&q=80',caption:'Receta digital firmada'},
+    ],
+  },
+  liveDemo:{
+    type:'booking', eyebrow:'Agenda · veterinarios · hoy',
+    title:'Tu agenda, <em>peludito por peludito</em>',
+    deck:'Cada vet con sus citas del día. Vacunas, consultas, estéticas. El dueño recibe recordatorio 1 hora antes. Llega con su mascota a la hora. Cero overbooking.',
+    secondary:'En las vets chicas, las citas se pierden, los dueños no llegan, las vacunas se vuelven tarde. Pata coordina todo.',
+    data:{barberos:[{name:'Dra. Sofía', role:'titular'},{name:'Dr. Andrés', role:'cirujano'},{name:'Lic. Karla', role:'estética'}], slots:['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30'], taken:[0,1,3,5,6,8,12], active:13, total:14, next:'15:00'}
+  },
+  features:[
+    {ico:'archive', h:'Historial clínico por peludito', d:'Cada mascota con expediente: vacunas, alergias, cirugías. Cualquier vet de tu clínica abre y entiende todo.'},
+    {ico:'bookmark', h:'Recordatorios automáticos de vacuna', d:'7 días antes te avisa, 1 día antes le mandas WhatsApp al dueño con foto del peludito. Vacunas al día = 95%.'},
+    {ico:'percent', h:'Comisiones por veterinario', d:'Cada vet ve sus consultas y comisiones del mes en vivo. Sin peleas al fin de mes.'},
+    {ico:'camera', h:'Receta digital firmada', d:'Receta sale del sistema con firma electrónica del vet. Cliente la recibe en WhatsApp. Cero "se me perdió la receta".'},
+    {ico:'barcode', h:'Inventario de medicamentos', d:'Cada dosis de vacuna se descuenta automático. Te avisa cuando bajas de 5 ampollas. Cero compras de emergencia.'},
+    {ico:'truck', h:'Servicio a domicilio', d:'Vet va a casa del cliente con tablet. Cobra, factura, registra cirugía en sistema. Como si estuviera en clínica.'},
+  ],
+  stats:[{v:'18', l:'Mascotas atendidas hoy'},{v:'93', l:'Vacunas al día (%)'},{v:'5', l:'Min de setup', suffix:'min'},{v:'0', l:'Costo inicial', prefix:'$'}],
+  quote:{text:'Antes <span class="hl">se nos olvidaban las vacunas de los pacientes</span> y perdíamos clientes que iban a otra vet. Con Pata, el WhatsApp se manda solo y los dueños vuelven cada año. Citas subieron 40%.', sig:'Dra. Mónica T.', role:'Clínica Veterinaria Patitas, Mérida, YUC'},
+  thefts:[
+    {title:'Vacunas "que se rompieron"', rob:'Empleado dice "se rompió la ampolla" y se queda con la vacuna para venderla aparte. En una vet son 3-5 ampollas/mes — $1,500-3,000 perdidos.', fix:'Cada ampolla con <strong>número de lote único</strong>. Si dice "se rompió" debe subir foto con timestamp. Auditoría diaria.'},
+    {title:'Consulta "de cortesía" a conocidos', rob:'Vet le hace consulta al amigo "gratis" pero cobra al dueño. Se queda con el dinero. Tú nunca te enteras.', fix:'Toda consulta entra al sistema. <strong>Si no hay registro, no hubo consulta</strong>. Vet sin registro no cobra comisión.'},
+    {title:'Medicamentos "para mascota propia"', rob:'Empleado se lleva medicamentos diciendo "es para mi perro" y no los registra. En suma son cientos al mes.', fix:'Cada unidad sale por <strong>receta firmada digital</strong>. Empleados con descuento, sí, pero registrado y deducido de salario.'},
+  ],
+};
+
+
+// =============================================================
+// BRAND_REFACCIONA — Taller mecánico (industrial vibe)
+// =============================================================
+const BRAND_REFACCIONA = {
+  slug:'refacciona', brand:'Refacciona', tagline:'El sistema para talleres mecánicos que cobran lo que arreglan',
+  giro:'taller mecánico', giroPlural:'talleres mecánicos', vibe:'industrial',
+  palette:{bg:'#1A1A1A', surface:'#252525', paper:'#2E2E2E', ink:'#F5F5F5', ink2:'#D0D0D0', muted:'#8A8A8A', line:'#3D3D3D', accent:'#FFB800', accent2:'#FFCC33'},
+  fonts:{display:'Saira Condensed', body:'Inter', script:'Caveat', mono:'JetBrains Mono'},
+  hero:{eyebrow:'El sistema para talleres mecánicos mexicanos · 2026', h1:'Cada <em>servicio</em>,<br>cada <em>refacción</em>,<br>cobrado.', deck:'El POS hecho para que ninguna chamba se haga "por fuera", cada refacción se descuente del inventario, y el cliente firme orden de servicio digital. Sin papelitos, sin discusiones.', ctaPrimary:'Empezar gratis', ctaSecondary:'Ver órdenes activas', metaLine:'$0 inicial · sin tarjeta · setup en 5 min'},
+  images:{
+    hero:'https://images.unsplash.com/photo-1486006920555-c77dcf18193c?w=1200&h=1600&fit=crop&q=85', heroAlt:'Mecánico trabajando en motor',
+    showcase:[
+      {url:'https://images.unsplash.com/photo-1486006920555-c77dcf18193c?w=1200&h=900&fit=crop&q=80',tag:'Reparación motor',size:'lg'},
+      {url:'https://images.unsplash.com/photo-1632823469850-2f77dd9c7f93?w=900&h=1200&fit=crop&q=80',tag:'Herramientas',size:'md'},
+      {url:'https://images.unsplash.com/photo-1632823471565-1ecdf66f0186?w=900&h=1200&fit=crop&q=80',tag:'Diagnóstico',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98?w=900&h=1200&fit=crop&q=80',tag:'Cambio aceite',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1632823469850-2f77dd9c7f93?w=900&h=1200&fit=crop&q=80',tag:'Refacciones',size:'md'},
+      {url:'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=900&h=1200&fit=crop&q=80',tag:'Llantas',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1486754735734-325b5831c3ad?w=1200&h=900&fit=crop&q=80',tag:'Taller industrial',size:'md'},
+      {url:'https://images.unsplash.com/photo-1597007028828-cd1cd66e7c50?w=900&h=1200&fit=crop&q=80',tag:'Soldadura',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1597007028828-cd1cd66e7c50?w=1200&h=900&fit=crop&q=80',tag:'Mecánica fina',size:'md'},
+    ],
+    context:[
+      {url:'https://images.unsplash.com/photo-1486006920555-c77dcf18193c?w=800&h=600&fit=crop&q=80',caption:'Orden de servicio con firma digital'},
+      {url:'https://images.unsplash.com/photo-1632823469850-2f77dd9c7f93?w=800&h=600&fit=crop&q=80',caption:'Refacciones escaneadas al usarse'},
+      {url:'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=800&h=600&fit=crop&q=80',caption:'Cliente recibe presupuesto por WhatsApp'},
+    ],
+  },
+  liveDemo:{
+    type:'kds', eyebrow:'Órdenes · taller · en vivo',
+    title:'Tus chambas, <em>una por una</em>, sin perderse',
+    deck:'Cada auto en el taller con su estado en pantalla. Diagnóstico, espera de pieza, en reparación, listo para entrega. Cliente recibe foto del proceso. Cero "te hablo cuando esté".',
+    secondary:'En los talleres chicos, los autos se quedan días sin que el dueño sepa qué pasa. Refacciona transparenta todo.',
+    data:{orders:[{table:'O-2847', name:'Sr. Pérez · Tsuru 2018', state:'urgent', items:['Diagnóstico motor|gasoline','Falla en bujías'], waitMin:45},{table:'O-2848', name:'Sra. López · Aveo', state:'prep', items:['Cambio frenos delanteros','Pads originales'], waitMin:30},{table:'O-2849', name:'Don Carlos · Tundra', state:'queue', items:['Servicio mayor 60k'], waitMin:120},{table:'O-2846', name:'Lic. Ortiz · BMW', state:'ready', items:['Cambio aceite Mobil 1'], waitMin:0}]}
+  },
+  features:[
+    {ico:'archive', h:'Órdenes de servicio digitales', d:'Cliente firma con dedo en tablet. Foto del auto antes, foto después. Cero "no autoricé eso".'},
+    {ico:'bookmark', h:'Historial por auto', d:'Cuando regresa el Tsuru del Sr. Pérez, ves todo: cambios anteriores, fechas, fallas recurrentes. Diagnóstico más rápido.'},
+    {ico:'percent', h:'Comisiones por mecánico', d:'Cada mecánico ve su productividad en vivo. $ por servicio. Si no hay orden, no hay comisión. Sin papelitos.'},
+    {ico:'camera', h:'Presupuesto con fotos', d:'Mandas presupuesto con fotos del daño por WhatsApp. Cliente autoriza o rechaza. Todo queda en chat oficial.'},
+    {ico:'barcode', h:'Inventario de refacciones', d:'Cada refacción escaneada al usarse. Sabes qué te queda sin caminar al almacén. Te avisa al pedir.'},
+    {ico:'truck', h:'Grúa coordinada', d:'Cliente pide servicio desde donde quedó varado. Grúa llega con ubicación exacta. Orden ya creada en sistema.'},
+  ],
+  stats:[{v:'14', l:'Autos en taller'},{v:'8', l:'Listos para entrega'},{v:'5', l:'Min de setup', suffix:'min'},{v:'0', l:'Costo inicial', prefix:'$'}],
+  quote:{text:'Mis mecánicos hacían <span class="hl">trabajos "por fuera"</span> en el taller los sábados — cobraban en efectivo y se quedaban con todo. Con Refacciona el taller solo abre con sistema activo, no hay forma. Mis ingresos subieron 35%.', sig:'Manuel R.', role:'Taller Mecánico Don Manuel, Naucalpan, EDOMEX'},
+  thefts:[
+    {title:'Trabajo "por fuera" los fines de semana', rob:'Mecánico abre el taller en sábado, atiende al amigo del primo, cobra $2,000, se queda con todo. Tú no te enteras. Mes a mes son $10-15k.', fix:'Taller se abre solo con <strong>código del dueño activado</strong>. Si entran sin activar, alerta en tu celular. Cámaras conectadas.'},
+    {title:'Refacciones "de regalo"', rob:'Mecánico instala una refacción nueva pero la registra como "no se necesitó". Se la guarda. Al mes acumula 5-10 refacciones — $5,000-15,000.', fix:'Cada refacción se escanea al usarse. <strong>Si sale del almacén sin servicio asociado</strong>, alerta. Inventario revisado en cada cierre.'},
+    {title:'Cobro "incompleto" en efectivo', rob:'Servicio cuesta $3,500 pero al cliente le dicen "te lo dejo en $3,000 si pagas en efectivo". Se quedan con $500. Tú nunca lo ves.', fix:'Precios se <strong>fijan desde sistema</strong>. Descuentos requieren autorización tuya por WhatsApp. Sin tu OK, no hay descuento.'},
+  ],
+};
+
+
+// =============================================================
+// BRAND_PETALO — Florería (romantic vibe)
+// =============================================================
+const BRAND_PETALO = {
+  slug:'petalo', brand:'Pétalo', tagline:'El sistema para florerías que entregan a la hora y al lugar correcto',
+  giro:'florería', giroPlural:'florerías', vibe:'romantic',
+  palette:{bg:'#FAF3F4', surface:'#FFFFFF', paper:'#F2E8EA', ink:'#3A1F2A', ink2:'#5A3947', muted:'#8A6976', line:'#E0CFD4', accent:'#C24B6E', accent2:'#D77394'},
+  fonts:{display:'Cormorant Garamond', body:'Inter', script:'Dancing Script', mono:'JetBrains Mono'},
+  hero:{eyebrow:'El sistema para florerías mexicanas · 2026', h1:'Cada <em>ramo</em>,<br>cada <em>aniversario</em>,<br>recordado.', deck:'El POS hecho para que ningún arreglo se entregue tarde, cada aniversario tenga recordatorio, y tus flores frescas no se vuelvan basura por falta de control.', ctaPrimary:'Empezar gratis', ctaSecondary:'Ver pedidos del día', metaLine:'$0 inicial · sin tarjeta · setup en 5 min'},
+  images:{
+    hero:'https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=1200&h=1600&fit=crop&q=85', heroAlt:'Florería con arreglos coloridos',
+    showcase:[
+      {url:'https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=1200&h=900&fit=crop&q=80',tag:'Ramo de novia',size:'lg'},
+      {url:'https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=900&h=1200&fit=crop&q=80',tag:'Centro de mesa',size:'md'},
+      {url:'https://images.unsplash.com/photo-1457089328389-e25cb7409e90?w=900&h=1200&fit=crop&q=80',tag:'Rosas rojas',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=900&h=1200&fit=crop&q=80',tag:'Tulipanes',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=900&h=1200&fit=crop&q=80',tag:'Coronas',size:'md'},
+      {url:'https://images.unsplash.com/photo-1462530260150-162092dbf011?w=900&h=1200&fit=crop&q=80',tag:'Plantas',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=1200&h=900&fit=crop&q=80',tag:'Taller florista',size:'md'},
+      {url:'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=900&h=1200&fit=crop&q=80',tag:'Detalle delicado',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=1200&h=900&fit=crop&q=80',tag:'Interior florería',size:'md'},
+    ],
+    context:[
+      {url:'https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=800&h=600&fit=crop&q=80',caption:'Pedido con foto de referencia'},
+      {url:'https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=800&h=600&fit=crop&q=80',caption:'Repartidor entrega y manda foto'},
+      {url:'https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=800&h=600&fit=crop&q=80',caption:'Recordatorio de aniversario'},
+    ],
+  },
+  liveDemo:{
+    type:'kds', eyebrow:'Pedidos · entregas · hoy',
+    title:'Tus arreglos, <em>uno por uno</em>, a la hora exacta',
+    deck:'Cada pedido con hora exacta de entrega, dirección y mensaje del remitente. El repartidor lo ve en su celular. Foto al entregar. Cliente recibe confirmación.',
+    secondary:'En las florerías, llegar 30 min tarde a un aniversario destruye la venta. Pétalo cronometra todo.',
+    data:{orders:[{table:'P-189', name:'Sra. Vega · Aniversario', state:'urgent', items:['Ramo rojo 12 rosas','Tarjeta: feliz aniversario amor'], waitMin:20},{table:'P-190', name:'Diana M. · Cumpleaños mamá', state:'prep', items:['Centro mesa girasoles','Globo Mylar'], waitMin:45},{table:'P-191', name:'Sr. Cortés · Funeral', state:'queue', items:['Corona blanca grande'], waitMin:90},{table:'P-188', name:'Lic. Romero · Cliente VIP', state:'ready', items:['Ramo tulipanes morados'], waitMin:0}]}
+  },
+  features:[
+    {ico:'archive', h:'Fechas memorables guardadas', d:'Cada cliente con sus aniversarios, cumpleaños, día de las madres. El sistema te avisa 1 semana antes. Vende solo.'},
+    {ico:'bookmark', h:'Catálogo con foto', d:'Cliente ve catálogo en WhatsApp, elige modelo, paga. Llega a tu florería ya pagado. Cero "no me gustó".'},
+    {ico:'percent', h:'Comisiones por florista', d:'Cada arreglo tiene una florista asignada. Su comisión se calcula sola. Cero peleas al fin de mes.'},
+    {ico:'camera', h:'Foto al entregar', d:'Repartidor entrega el ramo y manda foto del cliente recibiéndolo. Cliente que pagó lo recibe en WhatsApp. Cero "no llegó".'},
+    {ico:'barcode', h:'Control de frescura', d:'Cada tipo de flor con fecha de llegada. Te avisa cuando está cerca de marchitarse. Las usas en arreglos económicos antes.'},
+    {ico:'truck', h:'Rutas de entrega optimizadas', d:'Sistema agrupa entregas por zona. Tu repartidor hace 8 entregas en lugar de 4 por hora. Cero vueltas perdidas.'},
+  ],
+  stats:[{v:'24', l:'Pedidos del día'},{v:'18', l:'Entregados puntual'},{v:'5', l:'Min de setup', suffix:'min'},{v:'0', l:'Costo inicial', prefix:'$'}],
+  quote:{text:'Antes <span class="hl">llegábamos tarde al 30% de los aniversarios</span> y perdíamos al cliente para siempre. Con Pétalo, cada repartidor sabe la hora exacta. Mis clientes regresan cada año.', sig:'Rosa M.', role:'Florería Pétalos del Sur, Coyoacán, CDMX'},
+  thefts:[
+    {title:'Flores "que no llegaron buenas"', rob:'Empleado dice "estas rosas llegaron marchitas" y las separa "para tirar". En realidad están bien — se las lleva a vender aparte. Son 30-50 flores/semana.', fix:'Cada caja de flor llega con <strong>foto al ingreso</strong>. Se compara con foto a los 3 días. Si dice marchita pero está bien, alerta.'},
+    {title:'Ramo "regalo" a conocidos', rob:'Florista le hace un ramo "para mi prima" sin cobrarlo. Sale por la puerta como si nada. Al mes son 5-8 ramos.', fix:'Cada ramo se <strong>arma con orden de venta</strong>. Sin orden, no sale. Empleados con descuento sí pueden, pero registrado.'},
+    {title:'Entrega "cobrada" pero no realizada', rob:'Repartidor cobra entrega en efectivo, va y la entrega rápido sin avisar, se queda con el cobro. Tú piensas que fue entrega gratis.', fix:'Repartidor debe <strong>marcar entregado con foto</strong> en su app. Sin foto, no hay comisión.'},
+  ],
+};
+
+
+// =============================================================
+// BRAND_REPE — Gimnasio (athletic vibe)
+// =============================================================
+const BRAND_REPE = {
+  slug:'repe', brand:'Repe', tagline:'El sistema para gimnasios que sí cobran cada mes a cada socio',
+  giro:'gimnasio', giroPlural:'gimnasios', vibe:'athletic',
+  palette:{bg:'#0F1015', surface:'#1A1B22', paper:'#22232C', ink:'#FFFFFF', ink2:'#D5D6E0', muted:'#8E909E', line:'#2E2F38', accent:'#33FF77', accent2:'#88FFAA'},
+  fonts:{display:'Anton', body:'Inter', script:'Caveat', mono:'JetBrains Mono'},
+  hero:{eyebrow:'El sistema para gimnasios mexicanos · 2026', h1:'CADA <em>SOCIO</em>,<br>CADA <em>MENSUALIDAD</em>,<br>COBRADA.', deck:'El POS hecho para que ningún socio se quede sin pagar, cada clase se ocupe al máximo, y el trainer sepa quién falló a la rutina sin que tú revises.', ctaPrimary:'Empezar gratis', ctaSecondary:'Ver clases hoy', metaLine:'$0 inicial · sin tarjeta · setup en 5 min'},
+  images:{
+    hero:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1200&h=1600&fit=crop&q=85', heroAlt:'Crossfit gym con barras',
+    showcase:[
+      {url:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1200&h=900&fit=crop&q=80',tag:'Crossfit funcional',size:'lg'},
+      {url:'https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=900&h=1200&fit=crop&q=80',tag:'Mancuernas',size:'md'},
+      {url:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=900&h=1200&fit=crop&q=80',tag:'Cardio',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=900&h=1200&fit=crop&q=80',tag:'Spinning',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1605296867304-46d5465a13f1?w=900&h=1200&fit=crop&q=80',tag:'Yoga',size:'md'},
+      {url:'https://images.unsplash.com/photo-1538805060514-97d9cc17730c?w=900&h=1200&fit=crop&q=80',tag:'Pilates',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1534258936925-c58bed479fcb?w=1200&h=900&fit=crop&q=80',tag:'Pesas libres',size:'md'},
+      {url:'https://images.unsplash.com/photo-1554344728-77cf90d9ed26?w=900&h=1200&fit=crop&q=80',tag:'Boxeo',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=1200&h=900&fit=crop&q=80',tag:'Sala completa',size:'md'},
+    ],
+    context:[
+      {url:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&h=600&fit=crop&q=80',caption:'Socio entra con huella'},
+      {url:'https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&h=600&fit=crop&q=80',caption:'Reserva clase desde app'},
+      {url:'https://images.unsplash.com/photo-1605296867304-46d5465a13f1?w=800&h=600&fit=crop&q=80',caption:'Trainer ve asistencia diaria'},
+    ],
+  },
+  liveDemo:{
+    type:'booking', eyebrow:'Clases · hoy · en vivo',
+    title:'Tus clases, <em>cupo por cupo</em>',
+    deck:'Cada clase con su trainer y sus cupos. Socio reserva desde celular. Si no llega, sistema libera el lugar 5 min después. Cero clases vacías.',
+    secondary:'En gimnasios chicos, las clases se llenan o quedan vacías por nadie sabe quién va a llegar. Repe coordina todo.',
+    data:{barberos:[{name:'Daniel C.', role:'crossfit'},{name:'Lucia P.', role:'yoga'},{name:'Marco F.', role:'spinning'}], slots:['06:00','07:00','08:00','09:00','10:00','11:00','17:00','18:00','19:00','20:00','21:00'], taken:[0,1,3,6,7,9], active:8, total:11, next:'18:00'}
+  },
+  features:[
+    {ico:'archive', h:'Membresías con cobro automático', d:'Socio paga el 1 del mes con tarjeta guardada. Si falla, sistema le manda link de pago. Reduces morosidad a 5%.'},
+    {ico:'bookmark', h:'Reserva de clases por app', d:'Socio reserva su lugar en spinning del jueves desde el celular. Si no asiste, pierde el lugar 5 min después.'},
+    {ico:'percent', h:'Comisiones por trainer', d:'Trainer cobra por clase dada con asistencia mínima. Si la clase queda vacía, no se paga. Justo y transparente.'},
+    {ico:'camera', h:'Acceso con huella o QR', d:'Socio entra con huella o código QR. Sistema sabe quién está adentro. Cero amigos colados.'},
+    {ico:'barcode', h:'Punto de venta de suplementos', d:'Vende proteína, creatina, ropa del gym. Stock controlado. Comisión para entrenadores que venden.'},
+    {ico:'truck', h:'Coach 1-a-1 calendarizado', d:'Sesiones personalizadas reservadas, pagadas y registradas. Trainer ve su agenda completa. Cero "se me olvidó".'},
+  ],
+  stats:[{v:'247', l:'Socios activos'},{v:'18', l:'Clases hoy'},{v:'5', l:'Min de setup', suffix:'min'},{v:'0', l:'Costo inicial', prefix:'$'}],
+  quote:{text:'Tenía <span class="hl">40% de morosidad</span> porque nadie hacía cobranza. Con Repe, cobro automático cada mes, mensajes de WhatsApp si falla la tarjeta. Bajé a 5% en 3 meses.', sig:'Marco D.', role:'Gimnasio MD Fit, Tuxtla Gutiérrez, CHIS'},
+  thefts:[
+    {title:'Socios "que no pagan pero entran"', rob:'Empleado deja entrar al amigo "gratis hoy" porque "es buena onda". El amigo entra 3 veces a la semana — al año son $5,000-8,000 perdidos.', fix:'Acceso por <strong>huella o QR individual</strong>. Sin pago, no abre la puerta. Cero excepciones humanas.'},
+    {title:'Clases "que se canceló pero se cobró"', rob:'Trainer cancela la clase porque "nadie llegó" pero la cobra completa. En verdad fue floja o tenía otra cosa.', fix:'Sistema requiere <strong>foto de la clase comenzada</strong>. Sin foto, no se paga. Trainer pone más empeño.'},
+    {title:'Productos de tienda "sin pasar por caja"', rob:'Empleado le da una proteína al socio amigo a "precio especial" en efectivo. Se queda con el dinero. Stock sigue mostrando que está.', fix:'Cada venta de tienda con <strong>código de producto escaneado</strong>. Descuentos solo con autorización del dueño.'},
+  ],
+};
+
+
+// =============================================================
+// BRAND_BURBUJA — Lavandería (fresh vibe)
+// =============================================================
+const BRAND_BURBUJA = {
+  slug:'burbuja', brand:'Burbuja', tagline:'El sistema para lavanderías que sí saben de quién es cada prenda',
+  giro:'lavandería', giroPlural:'lavanderías', vibe:'fresh',
+  palette:{bg:'#F0F8FE', surface:'#FFFFFF', paper:'#E3F0FA', ink:'#0D2942', ink2:'#1F3F5C', muted:'#5C7C99', line:'#C5DCEE', accent:'#2B9AE3', accent2:'#5BB5F0'},
+  fonts:{display:'Quicksand', body:'Inter', script:'Comfortaa', mono:'JetBrains Mono'},
+  hero:{eyebrow:'El sistema para lavanderías mexicanas · 2026', h1:'Cada <em>prenda</em>,<br>cada <em>cliente</em>,<br>identificada.', deck:'El POS hecho para que ninguna camisa se confunda, cada pedido se entregue a tiempo, y el cliente reciba WhatsApp cuando esté listo. Sin libretas, sin "perdimos su saco".', ctaPrimary:'Empezar gratis', ctaSecondary:'Ver pedidos hoy', metaLine:'$0 inicial · sin tarjeta · setup en 5 min'},
+  images:{
+    hero:'https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=1200&h=1600&fit=crop&q=85', heroAlt:'Lavandería con prendas dobladas',
+    showcase:[
+      {url:'https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=1200&h=900&fit=crop&q=80',tag:'Lavandería pulcra',size:'lg'},
+      {url:'https://images.unsplash.com/photo-1469504512102-900f29606341?w=900&h=1200&fit=crop&q=80',tag:'Ropa doblada',size:'md'},
+      {url:'https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=900&h=1200&fit=crop&q=80',tag:'Plancha vapor',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1604335399105-a0c585fd81a1?w=900&h=1200&fit=crop&q=80',tag:'Camisas colgadas',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=900&h=1200&fit=crop&q=80',tag:'Tintorería fina',size:'md'},
+      {url:'https://images.unsplash.com/photo-1469504512102-900f29606341?w=900&h=1200&fit=crop&q=80',tag:'Lavadora industrial',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=1200&h=900&fit=crop&q=80',tag:'Sala de máquinas',size:'md'},
+      {url:'https://images.unsplash.com/photo-1604335399105-a0c585fd81a1?w=900&h=1200&fit=crop&q=80',tag:'Etiquetas',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1469504512102-900f29606341?w=1200&h=900&fit=crop&q=80',tag:'Bolsas listas',size:'md'},
+    ],
+    context:[
+      {url:'https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=800&h=600&fit=crop&q=80',caption:'Cada prenda con tag QR único'},
+      {url:'https://images.unsplash.com/photo-1469504512102-900f29606341?w=800&h=600&fit=crop&q=80',caption:'Cliente recibe WhatsApp cuando está listo'},
+      {url:'https://images.unsplash.com/photo-1604335399105-a0c585fd81a1?w=800&h=600&fit=crop&q=80',caption:'Foto antes/después de tratamiento'},
+    ],
+  },
+  liveDemo:{
+    type:'expiry', eyebrow:'Pedidos · listos · para recoger',
+    title:'Tus prendas, <em>identificadas y listas</em>',
+    deck:'Cada prenda con tag QR único. Cliente sabe en qué etapa está su pedido: recibido, lavando, planchando, listo. Cero "creo que ya está pero no estoy seguro".',
+    secondary:'En las lavanderías chicas, las prendas se confunden, se pierden, se entregan tarde. Burbuja le pone nombre a cada cosa.',
+    data:{products:[{name:'Saco gris (Sr. Vega)', lot:'LB-2847', stock:1, daysToExpire:0, status:'urgent', tag:'LISTO PARA RECOGER'},{name:'5 camisas blancas (Lic. Ortiz)', lot:'LB-2848', stock:5, daysToExpire:1, status:'urgent', tag:'Mañana'},{name:'Vestido novia (Sra. López)', lot:'LB-2849', stock:1, daysToExpire:3, status:'warning', tag:'En 3 días'},{name:'Edredón king (Don Carlos)', lot:'LB-2850', stock:1, daysToExpire:5, status:'normal', tag:'5 días'},{name:'Uniforme escolar (Niño Pérez)', lot:'LB-2851', stock:3, daysToExpire:7, status:'safe', tag:'1 semana'}]}
+  },
+  features:[
+    {ico:'archive', h:'Cada prenda con tag QR', d:'Cliente entrega 5 camisas, cada una recibe su tag único. Cero confusiones. Cero "esa no es mi camisa".'},
+    {ico:'bookmark', h:'Estado del pedido en vivo', d:'Cliente abre app y ve: recibido → lavando → planchando → listo. WhatsApp automático cuando esté.'},
+    {ico:'percent', h:'Comisiones por planchadora', d:'Cada empleado ve cuántas piezas trabajó. Comisión por cantidad y calidad (sin quejas). Sistema lo paga solo.'},
+    {ico:'camera', h:'Foto antes y después', d:'Saco entra con mancha → foto. Sale limpio → foto. Cliente recibe ambas. Cero "lo dañaron".'},
+    {ico:'barcode', h:'Tratamientos especiales', d:'Marcas qué prenda requiere lavado a mano, plancha al vapor, etc. Planchadora lo ve antes de empezar.'},
+    {ico:'truck', h:'Recolección a domicilio', d:'Cliente pide recolección desde app. Repartidor llega, escanea bolsa, se la lleva. Cliente sigue el proceso.'},
+  ],
+  stats:[{v:'128', l:'Prendas en proceso'},{v:'34', l:'Listas para entrega'},{v:'5', l:'Min de setup', suffix:'min'},{v:'0', l:'Costo inicial', prefix:'$'}],
+  quote:{text:'Antes <span class="hl">perdíamos prendas</span> al menos 2 veces por semana. Una vez perdimos un saco de cashmere de $4,000 y tuvimos que reponer. Con Burbuja cada prenda tiene su QR. Cero pérdidas en 6 meses.', sig:'Patricia R.', role:'Tintorería La Burbuja, San Luis Potosí'},
+  thefts:[
+    {title:'Prendas "perdidas" que se vendieron', rob:'Empleado se lleva una camisa o saco "porque nadie lo reclamó". En verdad el cliente lo iba a recoger en una semana. Tú repones de tu bolsa.', fix:'Cada prenda con <strong>tag QR único y foto al recibirla</strong>. Si "se pierde", hay evidencia. Empleado responsable.'},
+    {title:'Servicios "premium" cobrados pero hechos básico', rob:'Cliente paga lavado a mano de blusa fina ($120). Empleado la mete a la lavadora normal ($30). Se queda con la diferencia × muchas prendas/semana.', fix:'Tratamientos especiales con <strong>foto del proceso obligatoria</strong>. Sin foto, se paga como básico.'},
+    {title:'Cobro extra "por mancha difícil"', rob:'Empleado le dice al cliente "tu prenda tenía mancha extra, son $50 más" en efectivo. Se queda con todo. Tú no te enteras.', fix:'Recargos por <strong>autorización por WhatsApp del dueño</strong>. Sin OK, no hay extra.'},
+  ],
+};
+
+
+// =============================================================
 // SOCIAL PROOF — toasts que rotan en todas las landings
 // =============================================================
 const SOCIAL_PROOF = [
@@ -491,6 +809,12 @@ const SOCIAL_PROOF = [
   {brand:'Comandero', biz:'Sushi Ko',          city:'Mérida, YUC',       when:'hace 1 hr'},
   {brand:'Navaja',    biz:'Barber Diego',      city:'Tijuana, BC',       when:'hace 2 hr'},
   {brand:'Tendito',   biz:'La Esquinita',      city:'Puebla, PUE',       when:'hace 2 hr'},
+  {brand:'Espuma',    biz:'Café del Centro',   city:'Querétaro, QRO',    when:'hace 8 min'},
+  {brand:'Pata',      biz:'Veterinaria Patitas', city:'Mérida, YUC',     when:'hace 19 min'},
+  {brand:'Refacciona',biz:'Taller Don Manuel', city:'Naucalpan, EDOMEX', when:'hace 35 min'},
+  {brand:'Pétalo',    biz:'Pétalos del Sur',   city:'Coyoacán, CDMX',    when:'hace 52 min'},
+  {brand:'Repe',      biz:'MD Fit',            city:'Tuxtla Gtz, CHIS',  when:'hace 1 hr'},
+  {brand:'Burbuja',   biz:'La Burbuja',        city:'San Luis Potosí',   when:'hace 1 hr'},
 ];
 
 
@@ -498,11 +822,17 @@ const SOCIAL_PROOF = [
 // REGISTRO DE TODAS LAS MARCAS
 // =============================================================
 const BRANDS = {
-  pareo:     BRAND_PAREO,
-  comandero: BRAND_COMANDERO,
-  navaja:    BRAND_NAVAJA,
-  receta:    BRAND_RECETA,
-  tendito:   BRAND_TENDITO,
+  pareo:      BRAND_PAREO,
+  comandero:  BRAND_COMANDERO,
+  navaja:     BRAND_NAVAJA,
+  receta:     BRAND_RECETA,
+  tendito:    BRAND_TENDITO,
+  espuma:     BRAND_ESPUMA,
+  pata:       BRAND_PATA,
+  refacciona: BRAND_REFACCIONA,
+  petalo:     BRAND_PETALO,
+  repe:       BRAND_REPE,
+  burbuja:    BRAND_BURBUJA,
 };
 
 if (typeof module !== 'undefined' && module.exports) {
