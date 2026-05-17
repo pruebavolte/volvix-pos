@@ -723,7 +723,7 @@
 
 <script>
   // SSG: pre-pick this brand
-  window.location.search = window.location.search || '?b=brillo';
+  // V8.2 motor fix: removed reload-loop line
   if (!new URLSearchParams(window.location.search).get('b')) {
     history.replaceState(null, '', '?b=brillo');
   }

@@ -1,17 +1,16 @@
 {
-  "version": "1.0.347",
+  "version": "1.0.348",
   "major": 1,
   "minor": 0,
-  "patch": 347,
+  "patch": 348,
   "commit": "pending",
   "branch": "main",
-  "date": "2026-05-17T21:00:00.000Z",
-  "built_at": "2026-05-17T21:00:00.000Z",
+  "date": "2026-05-17T22:00:00.000Z",
+  "built_at": "2026-05-17T22:00:00.000Z",
   "changelog": [
-    "V8.1 FIX router: aliases viejos V6 corregidos - 'dental'/'dentista'/'clinica' iban a Receta (farmacia) cuando deberían ir a Pulso (salud). 'estetica'/'salon'/'spa' iban a Navaja (barberia hombres) cuando deberían ir a Brillo (belleza/spa)",
-    "V8.1 FIX: Bug detectado físicamente con Chrome MCP - usuario escribió 'dentista' y fue a Receta (farmacia) en vez de Pulso. Root cause: mi script V8 hizo seenAliases.add() de aliases viejos sin sobrescribir, respetando mappings V6 incorrectos.",
-    "V8.1 FIX: actualizadas líneas 34-42 de VLX_BRANDS + líneas 289-352 de VLX_ALIASES con remappings correctos",
-    "V8 motor-v3 ZIP integrado: 5 marcas hero nuevas (pulso/brillo/folio/forja/tarima)",
+    "V8.2 FIX motor reload-loop: los 5 HTMLs del ZIP V8 (pulso/brillo/folio/forja/tarima) tenían el Bug #1 historico (window.location.search = ...) que causa body vacío. Sintoma confirmado físicamente con Chrome MCP: title carga correctamente pero document.body es null. Fix aplicado idéntico al V6 motor fix.",
+    "V8.1 FIX router: aliases V6 corregidos - dental/dentista/clinica → Pulso, estetica/salon/spa → Brillo",
+    "V8 motor-v3 ZIP integrado: 5 marcas hero nuevas",
     "V7 motor: 200 marcas premium auto-generadas",
     "V6 motor v3: 6 marcas premium nuevas"
   ]
