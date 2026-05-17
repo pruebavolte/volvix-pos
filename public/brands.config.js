@@ -36601,6 +36601,531 @@ const BRAND_CERTIFICA = {
 
 
 // =============================================================
+// BRAND_PULSO (from motor-v3 ZIP)
+// =============================================================
+const BRAND_PULSO = {
+  slug:'pulso', brand:'Pulso',
+  tagline:'El sistema para clínicas y consultorios que sí cobran cada consulta',
+  giro:'clínica y consultorio',
+  giroPlural:'clínicas y consultorios',
+  vibe:'clinical',
+
+  palette:{
+    bg:'#F4FAF7', surface:'#FFFFFF', paper:'#E6F2EC',
+    ink:'#052E1F', ink2:'#0F3C2C', muted:'#6B8278',
+    line:'#D1E2DA', accent:'#047857', accent2:'#DC2626',
+  },
+  fonts:{display:'Plus Jakarta Sans', body:'Inter', script:'Caveat', mono:'JetBrains Mono'},
+
+  hero:{
+    eyebrow:'Sistema POS para clínicas y consultorios mexicanos',
+    h1:'Cada <em>consulta</em>.<br>Cada <em>paciente</em>.<br>En su expediente.',
+    deck:'Agenda por especialista, expediente clínico digital, recordatorios por WhatsApp y control de cobros. Para que tu clínica no pierda ni una consulta ni un copago.',
+    ctaPrimary:'Empezar gratis',
+    ctaSecondary:'Ver agenda en vivo',
+    metaLine:'$0 inicial · setup en 5 min · cumple NOM-024',
+  },
+
+  images:{
+    hero:'https://images.unsplash.com/photo-1666214280391-8ff5bd3c0bf0?w=1200&h=1600&fit=crop&q=85',
+    heroAlt:'Consultorio médico moderno',
+    showcase:[
+      {url:'https://images.unsplash.com/photo-1631815589968-fdb09a223b1e?w=1200&h=900&fit=crop&q=80',tag:'Consultorio moderno',size:'lg'},
+      {url:'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=900&h=1200&fit=crop&q=80',tag:'Doctor con paciente',size:'md'},
+      {url:'https://images.unsplash.com/photo-1551884170-09fb70a3a2ed?w=900&h=1200&fit=crop&q=80',tag:'Consulta dental',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=900&h=1200&fit=crop&q=80',tag:'Receta médica',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=900&h=1200&fit=crop&q=80',tag:'Médico en consulta',size:'md'},
+      {url:'https://images.unsplash.com/photo-1606811971618-4486d14f3f99?w=900&h=1200&fit=crop&q=80',tag:'Recepción clínica',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200&h=900&fit=crop&q=80',tag:'Doctor con tablet',size:'md'},
+      {url:'https://images.unsplash.com/photo-1583912267550-d6c2f3d05b48?w=900&h=1200&fit=crop&q=80',tag:'Instrumentos',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=1200&h=900&fit=crop&q=80',tag:'Especialista',size:'md'},
+    ],
+    context:[
+      {url:'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&h=600&fit=crop&q=80',caption:'Doctor confirma cita desde su tablet'},
+      {url:'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&h=600&fit=crop&q=80',caption:'Recordatorio por WhatsApp 1hr antes'},
+      {url:'https://images.unsplash.com/photo-1583912267550-d6c2f3d05b48?w=800&h=600&fit=crop&q=80',caption:'Cobro y expediente automáticos al cierre'},
+    ],
+  },
+
+  features:[
+    {ico:'calendar', h:'Agenda por especialista', d:'Cada doctor con su calendario. Paciente reserva por WhatsApp, sin doble cita, sin "se me olvidó".'},
+    {ico:'edit',     h:'Expediente clínico digital', d:'Historial, alergias, medicamentos, signos vitales. Buscas por paciente en 2 segundos.'},
+    {ico:'message',  h:'Recordatorios por WhatsApp', d:'Confirmación obligatoria 1 hr antes. Si no confirma, la cita se libera automáticamente.'},
+    {ico:'percent',  h:'Comisiones por consulta', d:'Define el % por doctor y por tipo de consulta. Se calculan solas al cierre del día.'},
+    {ico:'shield',   h:'Cumplimiento NOM-024', d:'Expedientes con los campos obligatorios. Reportes para auditorías de COFEPRIS/Salubridad.'},
+    {ico:'star',     h:'Historial del paciente', d:'Qué tratamiento, qué dosis, qué fecha. Próxima consulta sale lista sin que el paciente lo recuerde.'},
+  ],
+
+  stats:[
+    {v:'312', l:'Consultas este mes'},
+    {v:'94',  l:'Citas que llegaron', suffix:'%'},
+    {v:'5',   l:'Min de setup', suffix:'min'},
+    {v:'0',   l:'Costo inicial', prefix:'$'},
+  ],
+
+  quote:{
+    text:'Mi recepcionista cobraba la consulta y a veces "se le olvidaba" registrar. <span class="hl">Detecté $12,400 al mes que no entraban a caja</span>. Con Pulso, cada cobro pasa por sistema. Ya no hay magia.',
+    sig:'Dr. Manuel Garza',
+    role:'Clínica de medicina general · Apodaca, NL',
+  },
+
+  thefts:[
+    {
+      title:'Cobros que no pasan por caja',
+      rob:'Recepcionista cobra al paciente en efectivo, no genera ticket, se queda con el dinero. En consultorios chicos: $5,000 a $12,000 al mes.',
+      fix:'Toda consulta exige <strong>ticket digital antes de que el paciente salga</strong>. Si el doctor cierra consulta sin pago registrado, alerta al gerente.',
+    },
+    {
+      title:'Recetas vendidas sin consulta',
+      rob:'Asistente vende medicamentos por fuera del consultorio sin que el paciente vea al doctor. Tú pagas el inventario, otros se llevan la utilidad.',
+      fix:'Cada salida de medicamento requiere <strong>folio de consulta válido</strong>. Sin consulta registrada, no hay venta. Reporte semanal cruza ambos.',
+    },
+    {
+      title:'Cancelaciones de último minuto sin sanción',
+      rob:'Paciente cancela 30 min antes, el espacio se pierde. En clínicas con agenda llena: 10-15% de ingresos perdidos por slots vacíos.',
+      fix:'Confirmación obligatoria 1 hr antes por WhatsApp. <strong>Si no confirma, el slot se ofrece a la lista de espera</strong>. Cargo por no-show configurable.',
+    },
+  ],
+
+  liveDemo:{
+    type:'booking',
+    eyebrow:'Agenda en vivo · Hoy',
+    title:'Tu agenda, <em>doctor por doctor</em>',
+    deck:'Cada especialista con su calendario. Paciente reserva por WhatsApp o web, recordatorio 1 hora antes, confirmación obligatoria.',
+    secondary:'Si confirma → llega. Si no confirma → el slot se ofrece automáticamente al siguiente paciente en lista de espera.',
+    data:{
+      barberos:[
+        {name:'Dr. Manuel', role:'general', taken:[0,1,3,4,6,7,9,11,13], active:12},
+        {name:'Dra. Adriana', role:'pediatra', taken:[0,2,5,7,10,13], active:14},
+        {name:'Dra. Sofía', role:'dental', taken:[0,1,2,3,4,5,6,9,11,13,15], active:7},
+      ],
+      slots:['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30'],
+    },
+  },
+};
+
+
+// =============================================================
+// BRAND_BRILLO (from motor-v3 ZIP)
+// =============================================================
+const BRAND_BRILLO = {
+  slug:'brillo', brand:'Brillo',
+  tagline:'El sistema para estéticas y salones donde cada cliente sale brillando',
+  giro:'estética',
+  giroPlural:'estéticas y salones de belleza',
+  vibe:'editorial',
+
+  palette:{
+    bg:'#FAF6EE', surface:'#FFFFFF', paper:'#F5EAD7',
+    ink:'#1A1410', ink2:'#3D2E1F', muted:'#8B7355',
+    line:'#E8D9BB', accent:'#B45309', accent2:'#E11D48',
+  },
+  fonts:{display:'Bodoni Moda', body:'Manrope', script:'Italianno', mono:'JetBrains Mono'},
+
+  hero:{
+    eyebrow:'Sistema POS para estéticas y salones mexicanos',
+    h1:'Cada <em>cliente</em>.<br>Cada <em>servicio</em>.<br>Cada propina.',
+    deck:'Agenda por estilista, paquetes prepagados, control de productos y propinas digitales con reparto justo. Para que tu estética se enfoque en hacer brillar, no en contar dinero.',
+    ctaPrimary:'Empezar gratis',
+    ctaSecondary:'Ver agenda en vivo',
+    metaLine:'$0 inicial · setup en 5 min · funciona offline',
+  },
+
+  images:{
+    hero:'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=1200&h=1600&fit=crop&q=85',
+    heroAlt:'Salón de belleza elegante',
+    showcase:[
+      {url:'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=1200&h=900&fit=crop&q=80',tag:'Hair styling',size:'lg'},
+      {url:'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=900&h=1200&fit=crop&q=80',tag:'Brochas maquillaje',size:'md'},
+      {url:'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=900&h=1200&fit=crop&q=80',tag:'Manicure detalle',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1571646034647-52e6ea84b28c?w=900&h=1200&fit=crop&q=80',tag:'Spa facial',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1559599101-f09722fb4948?w=900&h=1200&fit=crop&q=80',tag:'Tratamiento facial',size:'md'},
+      {url:'https://images.unsplash.com/photo-1610992015732-2449b76344bc?w=900&h=1200&fit=crop&q=80',tag:'Detalle ceja',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1607103058027-4c5e2a9a8f6f?w=1200&h=900&fit=crop&q=80',tag:'Labial premium',size:'md'},
+      {url:'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=900&h=1200&fit=crop&q=80',tag:'Sillón estilista',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1633681926022-84c23e8cb2d6?w=1200&h=900&fit=crop&q=80',tag:'Salón interior',size:'md'},
+    ],
+    context:[
+      {url:'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&h=600&fit=crop&q=80',caption:'Estilista atendiendo a cliente'},
+      {url:'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=800&h=600&fit=crop&q=80',caption:'Paquete prepagado canjeándose'},
+      {url:'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=800&h=600&fit=crop&q=80',caption:'Producto registrado al cierre'},
+    ],
+  },
+
+  features:[
+    {ico:'calendar', h:'Agenda por estilista', d:'Cada estilista con su calendario. Cliente reserva por WhatsApp, recordatorio automático.'},
+    {ico:'gift',     h:'Paquetes prepagados', d:'5 manicures con descuento. Se descuentan automático cuando la cliente regresa. Lealtad real.'},
+    {ico:'package',  h:'Inventario de productos', d:'Esmaltes, tintes, cremas. Cada uso se registra. Sabes qué se mueve y qué se va.'},
+    {ico:'percent',  h:'Comisiones por servicio', d:'Senior 60%, junior 40%. Define % por servicio Y estilista. Se calcula solo al cierre.'},
+    {ico:'star',     h:'Historial del cliente', d:'Qué color, qué fórmula, qué corte. La próxima visita sale igual sin que la cliente lo recuerde.'},
+    {ico:'message',  h:'Reparto justo de propinas', d:'Propina con tarjeta se reparte automático: estilista 60%, auxiliar 30%, shampoo 10%. Sin discusiones.'},
+  ],
+
+  stats:[
+    {v:'247', l:'Servicios este mes'},
+    {v:'96',  l:'Citas que llegaron', suffix:'%'},
+    {v:'5',   l:'Min de setup', suffix:'min'},
+    {v:'0',   l:'Costo inicial', prefix:'$'},
+  ],
+
+  quote:{
+    text:'Cuando mi propina se cobraba en efectivo no había drama. Cuando empezamos con tarjeta, <span class="hl">una estilista se quedaba con toda la propina del equipo</span>. Con Brillo, el reparto es automático. Mi gente se quedó. Mi salón creció.',
+    sig:'Sofía Reynoso',
+    role:'Salón de belleza · San Pedro Garza García, NL',
+  },
+
+  thefts:[
+    {
+      title:'Productos "para una clienta"',
+      rob:'Estilista se lleva esmaltes, tintes, cremas premium para "usarlos en una clienta especial". En realidad se los lleva a casa. Una estética chica pierde $2,000-5,000 al mes.',
+      fix:'Inventario <strong>obligatorio al cierre de cada turno</strong>. Cada producto usado registra cliente y servicio. Si falta sin registro, alguien firma. Comparativo semanal por estilista.',
+    },
+    {
+      title:'Servicios "regalados" sin facturar',
+      rob:'"Es mi prima", "le hice manicure de paso", "fue una cortesía". Servicios ejecutados pero no facturados. La utilidad se va con las amistades del personal.',
+      fix:'Comisiones se pagan <strong>solo sobre tickets registrados</strong>. Si no captura el servicio, gana 0%. Reporte cruzado: tiempo en sillón vs servicios cobrados.',
+    },
+    {
+      title:'Propinas que no se reparten',
+      rob:'Cliente deja propina con tarjeta para "todo el equipo". Estilista se queda con todo, no comparte con shampoo ni auxiliar. Genera resentimiento y rotación constante.',
+      fix:'Propinas digitales con <strong>reparto automático configurable</strong>. Estilista 60%, auxiliar 30%, shampoo 10%. Cada quien ve su corte real al cierre.',
+    },
+  ],
+
+  liveDemo:{
+    type:'booking',
+    eyebrow:'Agenda en vivo · Hoy',
+    title:'Tu agenda, <em>estilista por estilista</em>',
+    deck:'Cada estilista con su calendario. Cliente reserva por WhatsApp, confirma 1 hr antes, llega lista.',
+    secondary:'Cuando se sienta en el sillón, marcas "iniciado". Esa marca registra el servicio: si se inició, se cobra.',
+    data:{
+      barberos:[
+        {name:'Sofía', role:'senior', taken:[0,1,3,4,6,7,9,11,12], active:13},
+        {name:'Karla', role:'junior', taken:[0,2,5,7,10,13], active:14},
+        {name:'Ileana', role:'color', taken:[0,1,2,3,4,5,6,9,11,13,15], active:7},
+      ],
+      slots:['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30'],
+    },
+  },
+};
+
+
+// =============================================================
+// BRAND_FOLIO (from motor-v3 ZIP)
+// =============================================================
+const BRAND_FOLIO = {
+  slug:'folio', brand:'Folio',
+  tagline:'El sistema para despachos profesionales que sí facturan cada hora',
+  giro:'despacho profesional',
+  giroPlural:'despachos y servicios profesionales',
+  vibe:'editorial',
+
+  palette:{
+    bg:'#F8F7F4', surface:'#FFFFFF', paper:'#EFECE2',
+    ink:'#0F172A', ink2:'#1E293B', muted:'#64748B',
+    line:'#E2E8F0', accent:'#1E3A8A', accent2:'#B45309',
+  },
+  fonts:{display:'Bodoni Moda', body:'Manrope', script:'Italianno', mono:'JetBrains Mono'},
+
+  hero:{
+    eyebrow:'Sistema POS para despachos profesionales mexicanos',
+    h1:'Cada <em>hora</em>.<br>Cada <em>expediente</em>.<br>Facturado.',
+    deck:'Agenda por profesional, control de retainer, cronómetro por caso y facturación SAT/CFDI 4.0. Para despachos que cobran lo que valen.',
+    ctaPrimary:'Empezar gratis',
+    ctaSecondary:'Ver agenda en vivo',
+    metaLine:'$0 inicial · CFDI 4.0 · setup en 5 min',
+  },
+
+  images:{
+    hero:'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200&h=1600&fit=crop&q=85',
+    heroAlt:'Despacho profesional moderno',
+    showcase:[
+      {url:'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=1200&h=900&fit=crop&q=80',tag:'Escritorio',size:'lg'},
+      {url:'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=900&h=1200&fit=crop&q=80',tag:'Reunión',size:'md'},
+      {url:'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=900&h=1200&fit=crop&q=80',tag:'Calculadora',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=900&h=1200&fit=crop&q=80',tag:'Apretón de manos',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1554224154-26032cdc0c4e?w=900&h=1200&fit=crop&q=80',tag:'Documentos',size:'md'},
+      {url:'https://images.unsplash.com/photo-1553877522-43269d4ea984?w=900&h=1200&fit=crop&q=80',tag:'Laptop trabajo',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1200&h=900&fit=crop&q=80',tag:'Oficina',size:'md'},
+      {url:'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=900&h=1200&fit=crop&q=80',tag:'Equipo',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=1200&h=900&fit=crop&q=80',tag:'Trabajo serio',size:'md'},
+    ],
+    context:[
+      {url:'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800&h=600&fit=crop&q=80',caption:'Reunión con cliente registrada'},
+      {url:'https://images.unsplash.com/photo-1554224154-26032cdc0c4e?w=800&h=600&fit=crop&q=80',caption:'Cronómetro por expediente activo'},
+      {url:'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&h=600&fit=crop&q=80',caption:'Factura CFDI generada automática'},
+    ],
+  },
+
+  features:[
+    {ico:'calendar', h:'Agenda por profesional', d:'Cada lic./CP con su calendario. Cliente reserva consulta, sistema confirma.'},
+    {ico:'edit',     h:'Expedientes digitales', d:'Cada caso con sus documentos, sus tiempos y sus notas. Sin papeles, sin "lo perdí".'},
+    {ico:'shield',   h:'Facturación SAT / CFDI 4.0', d:'Factura electrónica con tu sello, tu RFC, tus conceptos. Timbrada al instante.'},
+    {ico:'percent',  h:'Cronómetro por caso', d:'Cada acción en el expediente suma tiempo. Cobras lo que trabajaste, no lo que recuerdas.'},
+    {ico:'star',     h:'Retainer y abonados', d:'Cliente prepaga $10k/mes. El sistema descuenta horas conforme se trabajan. Reporte mensual al cliente.'},
+    {ico:'archive',  h:'Trazabilidad por caso', d:'Quién hizo qué, cuándo, en qué expediente. Logs auditables para casos sensibles.'},
+  ],
+
+  stats:[
+    {v:'187', l:'Horas facturables', suffix:'h'},
+    {v:'94',  l:'Cobranza al mes', suffix:'%'},
+    {v:'5',   l:'Min de setup', suffix:'min'},
+    {v:'0',   l:'Costo inicial', prefix:'$'},
+  ],
+
+  quote:{
+    text:'Yo "trabajaba" 60 horas a la semana. Cuando vi el reporte de Folio, <span class="hl">solo había facturado 31</span>. Las demás se las regalé al cliente o se me perdieron en café. Hoy facturo 52 con la misma chamba. La diferencia es contabilidad real.',
+    sig:'Lic. Andrea Mendoza',
+    role:'Despacho jurídico · San Pedro Garza García, NL',
+  },
+
+  thefts:[
+    {
+      title:'Horas trabajadas sin facturar',
+      rob:'Abogado/contador trabaja 12 horas en un caso pero solo registra 8. Las 4 horas "se las regaló" al cliente — o le pagaron en efectivo por fuera y se las queda el asociado.',
+      fix:'Cronómetro integrado al expediente. <strong>Cada acción en el caso suma tiempo automáticamente</strong>. Reporte semanal: horas registradas vs documentos modificados.',
+    },
+    {
+      title:'Retainer cobrado, servicios no entregados',
+      rob:'Cliente paga $10,000 de retainer mensual. Mes ocupado, no le hacen nada. Cliente no se queja por meses, después se va con todo y peor reputación pública.',
+      fix:'Reporte automático al cliente cada mes: <strong>horas consumidas del retainer, expediente actualizado, próximas acciones</strong>. Email + WhatsApp automáticos.',
+    },
+    {
+      title:'Casos vendidos "por fuera"',
+      rob:'Asociado junior contacta al cliente directamente, le ofrece servicio a la mitad del precio, no pasa por el despacho. El cliente Y los honorarios se van.',
+      fix:'Acceso a expedientes con <strong>permisos jerárquicos y logs auditables</strong>. Datos del cliente solo visibles si el caso está activo y asignado. Quién accedió queda registrado.',
+    },
+  ],
+
+  liveDemo:{
+    type:'booking',
+    eyebrow:'Agenda en vivo · Hoy',
+    title:'Tu agenda, <em>cliente por cliente</em>',
+    deck:'Cada profesional con su calendario, cada cita con su expediente. Cliente reserva consulta, sistema confirma 1 hr antes.',
+    secondary:'Cuando inicia la junta, marcas "comenzada". El cronómetro arranca. Cobras lo que trabajaste — no lo que recordaste.',
+    data:{
+      barberos:[
+        {name:'Lic. Mendoza', role:'jurídico', taken:[0,1,3,4,6,7,9,11], active:12},
+        {name:'CP. Ortega', role:'contable', taken:[0,2,5,7,10,13], active:14},
+        {name:'Lic. Robles', role:'asesor', taken:[0,1,2,3,4,5,6,9,11,13,15], active:7},
+      ],
+      slots:['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30'],
+    },
+  },
+};
+
+
+// =============================================================
+// BRAND_FORJA (from motor-v3 ZIP)
+// =============================================================
+const BRAND_FORJA = {
+  slug:'forja', brand:'Forja',
+  tagline:'El sistema para gimnasios y centros deportivos donde nadie entra de gratis',
+  giro:'gimnasio',
+  giroPlural:'gimnasios y centros deportivos',
+  vibe:'vibrant',
+
+  palette:{
+    bg:'#FAF8F3', surface:'#FFFFFF', paper:'#F5EBD8',
+    ink:'#1A0F0A', ink2:'#3D2614', muted:'#8B6F47',
+    line:'#E7C9A5', accent:'#EA580C', accent2:'#0F766E',
+  },
+  fonts:{display:'Archivo Black', body:'Inter', script:'Caveat', mono:'Space Mono'},
+
+  hero:{
+    eyebrow:'Sistema POS para gimnasios y centros deportivos mexicanos',
+    h1:'Cada <em>repe</em>.<br>Cada <em>clase</em>.<br>Contada.',
+    deck:'Membresías por huella, agenda de clases, control de acceso por torniquete y comisiones por instructor. Para gyms donde nadie entra de gratis.',
+    ctaPrimary:'Empezar gratis',
+    ctaSecondary:'Ver agenda en vivo',
+    metaLine:'$0 inicial · setup en 5 min · compatible con torniquete',
+  },
+
+  images:{
+    hero:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1200&h=1600&fit=crop&q=85',
+    heroAlt:'Gimnasio moderno con equipo',
+    showcase:[
+      {url:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=1200&h=900&fit=crop&q=80',tag:'Pesas libres',size:'lg'},
+      {url:'https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=900&h=1200&fit=crop&q=80',tag:'Kettlebell',size:'md'},
+      {url:'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=900&h=1200&fit=crop&q=80',tag:'Entrenamiento',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=900&h=1200&fit=crop&q=80',tag:'Coach atento',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1605296867424-35fc25c9212a?w=900&h=1200&fit=crop&q=80',tag:'Yoga clase',size:'md'},
+      {url:'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=900&h=1200&fit=crop&q=80',tag:'Cardio outdoor',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1593079831268-3381b0db4a77?w=1200&h=900&fit=crop&q=80',tag:'CrossFit box',size:'md'},
+      {url:'https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=900&h=1200&fit=crop&q=80',tag:'Pilates',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1200&h=900&fit=crop&q=80',tag:'Gym amplio',size:'md'},
+    ],
+    context:[
+      {url:'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=800&h=600&fit=crop&q=80',caption:'Coach registra sesión privada'},
+      {url:'https://images.unsplash.com/photo-1605296867424-35fc25c9212a?w=800&h=600&fit=crop&q=80',caption:'Cliente check-in por huella'},
+      {url:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&h=600&fit=crop&q=80',caption:'Reservación de clase vía app'},
+    ],
+  },
+
+  features:[
+    {ico:'shield',   h:'Acceso por huella', d:'Solo tu huella te deja pasar. Sin colarse con la credencial del amigo. Doble entrada dispara alerta.'},
+    {ico:'calendar', h:'Agenda de clases', d:'Yoga, CrossFit, boxing, spinning. Cliente reserva, sistema confirma cupo. Cero peleas en recepción.'},
+    {ico:'percent',  h:'Comisiones por instructor', d:'Coach personal cobra su % por sesión registrada. Sin sesión en sistema, sin comisión. Sin excepciones.'},
+    {ico:'star',     h:'Membresías y paquetes', d:'Mensual, trimestral, anual, pase libre, 10 entradas. Cada paquete con su precio y sus reglas.'},
+    {ico:'message',  h:'Recordatorios por WhatsApp', d:'1 hr antes de tu clase. Si no confirma, el lugar se libera para la lista de espera.'},
+    {ico:'gift',     h:'Programa de referidos', d:'Trae a un amigo, te ganas 1 mes gratis. Cuando el amigo paga, automático se aplica tu crédito.'},
+  ],
+
+  stats:[
+    {v:'247', l:'Miembros activos'},
+    {v:'92',  l:'Asistencia promedio', suffix:'%'},
+    {v:'5',   l:'Min de setup', suffix:'min'},
+    {v:'0',   l:'Costo inicial', prefix:'$'},
+  ],
+
+  quote:{
+    text:'Tenía 180 miembros pagados. <span class="hl">Pero entraban 240 personas al día</span>. Cuando puse Forja con huellas, en 1 semana caché 47 "entradas de gratis" por mes. Mis miembros legítimos no me dejaron porque el ambiente mejoró: ya no había mareo.',
+    sig:'Coach Carlos Vázquez',
+    role:'Gym de CrossFit · Apodaca, NL',
+  },
+
+  thefts:[
+    {
+      title:'Cliente metió a su amigo sin pase',
+      rob:'Miembro avienta a su amigo por encima del torniquete o le presta su credencial. Sin huella obligatoria, no hay manera de saber. $1,000 a $3,000 al mes en accesos no pagados.',
+      fix:'Acceso por <strong>huella obligatoria, no por credencial</strong>. Si la misma huella intenta entrar 2 veces en 5 minutos, sistema avisa. Reporte diario de patrones raros.',
+    },
+    {
+      title:'Instructor cobra clase por fuera',
+      rob:'Instructor le dice al alumno "yo te entreno por mi cuenta, ahorras dinero". Sale del horario del gym, se lleva al cliente. Con 3 instructores: $15,000-30,000 al mes.',
+      fix:'Comisiones de instructor pagadas <strong>solo sobre sesiones que pasaron por el sistema</strong>. Si no captura, gana 0%. Reporte cruzado: alumnos del gym vs historial del instructor.',
+    },
+    {
+      title:'Membresías vencidas que siguen entrando',
+      rob:'Cliente renovó hace 2 meses, su membresía venció hace 1, pero el sistema viejo sigue dejándolo pasar porque "ya tiene huella". Tú pierdes la oportunidad de cobrarle.',
+      fix:'Control de acceso <strong>sincronizado en tiempo real con el estado de la membresía</strong>. Si está vencida, el torniquete se traba. Notificación inmediata al gerente.',
+    },
+  ],
+
+  liveDemo:{
+    type:'booking',
+    eyebrow:'Agenda de clases · Hoy',
+    title:'Tu agenda, <em>clase por clase</em>',
+    deck:'Cada instructor con su calendario. Miembro reserva por app, confirma 1 hr antes, llega listo. Sin cupos perdidos.',
+    secondary:'Si no llega a la reservación, el lugar se libera 5 minutos antes para lista de espera. Cero asientos vacíos.',
+    data:{
+      barberos:[
+        {name:'Coach Carlos', role:'CrossFit', taken:[0,1,3,4,6,7,9,11,13], active:12},
+        {name:'Mtra. Adriana', role:'Yoga', taken:[0,2,5,7,10,13], active:14},
+        {name:'Coach Diego', role:'Boxing', taken:[0,1,2,3,4,5,6,9,11,13,15], active:7},
+      ],
+      slots:['06:00','06:30','07:00','07:30','08:00','08:30','09:00','09:30','17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30'],
+    },
+  },
+};
+
+
+// =============================================================
+// BRAND_TARIMA (from motor-v3 ZIP)
+// =============================================================
+const BRAND_TARIMA = {
+  slug:'tarima', brand:'Tarima',
+  tagline:'El sistema para bares y salones de eventos donde no se pierde una sola comanda',
+  giro:'bar y salón de eventos',
+  giroPlural:'bares y salones de eventos',
+  vibe:'darkPremium',
+
+  palette:{
+    bg:'#0A0612', surface:'#14081F', paper:'#1F0F2E',
+    ink:'#F5F0E4', ink2:'#C4B8D6', muted:'#8B7B9E',
+    line:'rgba(217,70,239,.25)', accent:'#D946EF', accent2:'#FACC15',
+  },
+  fonts:{display:'Oswald', body:'Inter', script:'Italianno', mono:'JetBrains Mono'},
+
+  hero:{
+    eyebrow:'Sistema POS para bares, antros y salones de eventos',
+    h1:'Cada <em>copa</em>.<br>Cada <em>mesa</em>.<br>Cada <em>cover</em>.',
+    deck:'Comandera por mesero, control de barra con KDS, reservas con depósito, división de cuenta múltiple. Para bares que cobran todo lo que sirven.',
+    ctaPrimary:'Empezar gratis',
+    ctaSecondary:'Ver barra en vivo',
+    metaLine:'$0 inicial · setup en 5 min · cumple SAT y CFDI 4.0',
+  },
+
+  images:{
+    hero:'https://images.unsplash.com/photo-1571266028243-d220bc1c5be9?w=1200&h=1600&fit=crop&q=85',
+    heroAlt:'Bar moderno con iluminación neón',
+    showcase:[
+      {url:'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1200&h=900&fit=crop&q=80',tag:'Concierto en vivo',size:'lg'},
+      {url:'https://images.unsplash.com/photo-1518972559570-7cc1309f3229?w=900&h=1200&fit=crop&q=80',tag:'Bar nocturno',size:'md'},
+      {url:'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=900&h=1200&fit=crop&q=80',tag:'Luces y humo',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=900&h=1200&fit=crop&q=80',tag:'Cocktail premium',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=900&h=1200&fit=crop&q=80',tag:'Fiesta animada',size:'md'},
+      {url:'https://images.unsplash.com/photo-1543349689-9a4d426bee8e?w=900&h=1200&fit=crop&q=80',tag:'Salón eventos',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1543007630-9710e4a00a20?w=1200&h=900&fit=crop&q=80',tag:'DJ en cabina',size:'md'},
+      {url:'https://images.unsplash.com/photo-1572116469696-31de0f17cc34?w=900&h=1200&fit=crop&q=80',tag:'Cocktail bar',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1572116469696-31de0f17cc34?w=1200&h=900&fit=crop&q=80',tag:'Mixología',size:'md'},
+    ],
+    context:[
+      {url:'https://images.unsplash.com/photo-1518972559570-7cc1309f3229?w=800&h=600&fit=crop&q=80',caption:'Mesero toma orden con tablet'},
+      {url:'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800&h=600&fit=crop&q=80',caption:'KDS de barra muestra órdenes'},
+      {url:'https://images.unsplash.com/photo-1543007630-9710e4a00a20?w=800&h=600&fit=crop&q=80',caption:'Cover cobrado con pulsera RFID'},
+    ],
+  },
+
+  features:[
+    {ico:'monitor',  h:'KDS de barra', d:'Cada bebida pedida cae directo a la barra. Sin papelitos, sin gritos, sin "se me olvidó".'},
+    {ico:'grid',     h:'Plano de mesas con reservas', d:'Mesa 4 ocupada por X, mesa 7 reservada para fulano. Visual, drag-and-drop.'},
+    {ico:'bookmark', h:'Reservas con depósito', d:'Cliente reserva mesa VIP con 50% de anticipo. No paga, no hay mesa. Cero no-shows que matan tu noche.'},
+    {ico:'split',    h:'División de cuenta múltiple', d:'Por persona, por mesa, por consumo, por bote. Sin calculadora, sin discusiones a las 3am.'},
+    {ico:'shield',   h:'Cover y pulseras RFID', d:'Cover cobrado en la entrada genera pulsera. Sin pulsera, sin barra. Sin escapatorias.'},
+    {ico:'gift',     h:'Cortesías con autorización', d:'VIPs y cortesías exigen PIN del gerente desde su celular. Reporte mensual de cortesías por turno.'},
+  ],
+
+  stats:[
+    {v:'47',  l:'Mesas operando'},
+    {v:'92',  l:'Reservas confirmadas', suffix:'%'},
+    {v:'5',   l:'Min de setup', suffix:'min'},
+    {v:'0',   l:'Costo inicial', prefix:'$'},
+  ],
+
+  quote:{
+    text:'Las noches buenas hacíamos $80,000 en barra. <span class="hl">Pero faltaban 30 botellas al final del mes que nadie cobró</span>. Con Tarima, cada bebida sale solo con folio. La merma bajó de 15% a 2% en 3 semanas.',
+    sig:'Jorge Macedo',
+    role:'Bar en Calzada del Valle · San Pedro, NL',
+  },
+
+  thefts:[
+    {
+      title:'Comandas que la barra "no recibió"',
+      rob:'Mesero pide 5 cervezas, la barra sirve 6 (una se la lleva el mesero). O la barra sirve 5 pero solo cobra 4. En bares ocupados: $3,000-8,000 al mes en bebidas que nadie cobró.',
+      fix:'<strong>Cada bebida sale solo con folio del KDS</strong>. Barra no sirve sin orden registrada. Cada noche se cuentan botellas vs comandas. Diferencia dispara alerta.',
+    },
+    {
+      title:'Cover cobrado sin registrar',
+      rob:'El que cobra cover en la puerta se queda con efectivo, deja entrar al cliente sin pulsera. Tú no sabes cuánta gente entró realmente. Pérdidas: $5,000-15,000 por noche buena.',
+      fix:'Cover se cobra con <strong>terminal portátil que genera pulsera con código único</strong>. Pulsera obligatoria para barra. Sin pulsera, no hay servicio. Conteo automático en puerta.',
+    },
+    {
+      title:'Cortesías a "amigos del dueño" sin autorización',
+      rob:'"Es amigo del dueño, déjame entrar a la mesa VIP". Cliente consume $4,000 y se va porque "era cortesía". Tú no autorizaste nada. Pasa una vez a la semana.',
+      fix:'VIPs y cortesías exigen <strong>autorización del gerente vía WhatsApp con foto del cliente</strong>. Sin código de autorización, mesa VIP cobra normal. Reporte mensual.',
+    },
+  ],
+
+  liveDemo:{
+    type:'kds',
+    eyebrow:'En vivo desde tu barra',
+    title:'Tu KDS de barra, <em>servida</em> en tiempo real',
+    deck:'Cada orden cae directo a la barra. Con su cronómetro, sus mods, su mesa. Barra sirve lo que ve, no lo que recuerda.',
+    secondary:'Mesa 04 esperando 3 minutos? Roja. Mesa 7 lista? Verde. Cero "se me chispoteó", cero comandas perdidas.',
+    data:{
+      orders:[
+        {mesa:4, time:'23:42', state:'urgent', wait:'03:24', items:['3× Cerveza Modelo','2× Tequila Reposado','1× Margarita|+ sal']},
+        {mesa:12, time:'23:44', state:'prep', wait:'01:08', items:['1× Mezcal Doble','2× Vodka Tonic','1× Whisky en las rocas']},
+        {mesa:7, time:'23:38', state:'ready', wait:'SERVIR', items:['2× Cocktail Especial','1× Cerveza|+ limón y sal']},
+        {mesa:15, time:'23:44', state:'queue', wait:'00:42', items:['1× Botella Tequila','4× Chasers']},
+      ],
+    },
+  },
+};
+
+
+// =============================================================
 // SOCIAL PROOF — toasts que rotan en todas las landings
 // =============================================================
 const SOCIAL_PROOF = [
@@ -36818,6 +37343,11 @@ const SOCIAL_PROOF = [
   {brand:'Corporativo', biz:'Universidad Corporativa', city:'Grupo Bimbo, CDMX', when:'hace 7 min'},
   {brand:'Capacita', biz:'Capacita Soluciones', city:'Monterrey, NL', when:'hace 3 min'},
   {brand:'Certifica', biz:'Centro Certifica', city:'Guadalajara, JAL', when:'hace 25 min'},
+  {brand:'Pulso',  biz:'Clínica San Ángel',     city:'San Ángel, CDMX',   when:'hace 5 min'},
+  {brand:'Brillo', biz:'Salón Estética Vivian', city:'Polanco, CDMX',     when:'hace 11 min'},
+  {brand:'Folio',  biz:'Despacho Hernández',    city:'Monterrey, NL',     when:'hace 18 min'},
+  {brand:'Forja',  biz:'CrossFit Vallarta',     city:'Vallarta, JAL',     when:'hace 26 min'},
+  {brand:'Tarima', biz:'Salón La Hacienda',     city:'San Pedro, NL',     when:'hace 34 min'},
 ];
 
 
@@ -37036,6 +37566,11 @@ const BRANDS = {
   'corporativo': BRAND_CORPORATIVO,
   'capacita': BRAND_CAPACITA,
   'certifica': BRAND_CERTIFICA,
+  pulso: BRAND_PULSO,
+  brillo: BRAND_BRILLO,
+  folio: BRAND_FOLIO,
+  forja: BRAND_FORJA,
+  tarima: BRAND_TARIMA,
 };
 
 if (typeof module !== 'undefined' && module.exports) {
