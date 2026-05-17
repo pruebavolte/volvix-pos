@@ -535,7 +535,7 @@
 
 <script>
   // SSG: pre-pick this brand
-  window.location.search = window.location.search || '?b=pareo';
+  // V6 motor fix: removed line that caused reload loop on querystring assign
   if (!new URLSearchParams(window.location.search).get('b')) {
     history.replaceState(null, '', '?b=pareo');
   }
