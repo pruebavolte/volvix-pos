@@ -1,20 +1,21 @@
 {
-  "version": "1.0.340",
+  "version": "1.0.341",
   "major": 1,
   "minor": 0,
-  "patch": 340,
-  "commit": "7c7ff22",
+  "patch": 341,
+  "commit": "pending",
   "branch": "main",
-  "date": "2026-05-17T00:00:00.000Z",
-  "built_at": "2026-05-17T00:00:00.000Z",
+  "date": "2026-05-17T00:30:00.000Z",
+  "built_at": "2026-05-17T00:30:00.000Z",
   "changelog": [
-    "V6 Step2+Step1: nuevo brand router (volvix-brand-router.js) intercepta quickSearch/searchGiro y redirige a landings de marca segun giro",
-    "V6 Step1: nueva landing navaja.html (barberias) - dark premium, dorado + oxblood, Oswald + Italianno",
-    "V6 Step1: nueva landing comandero.html (restaurantes) - amarillo + ink, Archivo Black",
-    "V6 fix CTAs: corrigir href='#' muertos en navaja + comandero (Empezar gratis -> /registro.html?giro=X, Acceder -> /login.html, Soporte -> mailto, Hablar con humano -> wa.me)",
-    "V6 CSP fix: agregar challenges.cloudflare.com al CSP - Turnstile widget renderiza visualmente",
-    "V6 visual audit: fix marketplace search broken + paneldecontrol escapeAttr + /api/admin/pilots query",
-    "V5: ADR-004 5/5 - 28 refs legacy migradas a pos_*, R35 ejecutada",
-    "V4: kit comercial entregado"
+    "V6 Step 3 motor: 5 landings de marca image-rich con galerías Unsplash — pareo (zapateria), comandero (restaurante), navaja (barberia), receta (farmacia), tendito (abarrotes)",
+    "V6 Step 3 fix CTAs: arreglar todos los href='#' muertos en 5 landings (Empezar gratis -> /registro.html?giro=X, Acceder -> /login.html, Soporte -> mailto, Hablar con humano -> wa.me)",
+    "V6 Step 3 router: actualizado brand-router para que URLs sin landing existente (espuma, pata, bloque, etc.) caigan a landing-*.html generica como fallback",
+    "V6 Step 2: brand router fix con window.load para que el override gane orden vs marketplace DOMContentLoaded",
+    "V6 Step 2: brand router + landings Navaja + Comandero (CTAs reales)",
+    "V6 CSP fix: agregar challenges.cloudflare.com al CSP",
+    "V6 visual audit: fix marketplace search + paneldecontrol escapeAttr + /api/admin/pilots",
+    "V5: ADR-004 5/5",
+    "V4: kit comercial"
   ]
 }

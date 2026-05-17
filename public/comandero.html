@@ -3,1359 +3,944 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Comandero · El POS hecho para que tu cocina nunca pare</title>
-<meta name="description" content="Comandero es el sistema de punto de venta para restaurantes mexicanos. Comandera digital, KDS, división de cuenta, propinas. Sin papelitos. Sin platillos perdidos.">
+<title>Comandero — El POS hecho para que tu cocina nunca pare</title>
+<meta name="description" content="El POS hecho para que tu cocina nunca pare.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&family=Caveat:wght@500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<!-- TODAS las fuentes necesarias para cualquier marca -->
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;1,400;1,500&family=Bodoni+Moda:ital,wght@0,500;0,700;1,500&family=Archivo+Black&family=Oswald:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;700;800&family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&family=Italianno&family=Caveat:wght@500;700&family=JetBrains+Mono:wght@500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#FFFCF0;
-    --bg-warm:#FAF3DD;
-    --surface:#FFFFFF;
-    --ink:#0A0908;
-    --ink-2:#1F1D18;
-    --muted:#6B6963;
-    --muted-2:#9C9988;
-    --line:#E8E2C8;
-    --line-2:#D4CCA8;
-    --yellow:#F9C829;
-    --yellow-bright:#FDD835;
-    --yellow-soft:#FFF3B8;
-    --red:#DC2626;
-    --red-dark:#991B1B;
-    --green:#16A34A;
-    --display:"Archivo Black",sans-serif;
-    --sans:"Inter",system-ui,sans-serif;
-    --hand:"Caveat",cursive;
-    --mono:"Space Mono",monospace;
-  }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
   body{
-    font-family:var(--sans);
+    font-family:var(--body-font);
     background:var(--bg);
     color:var(--ink);
     -webkit-font-smoothing:antialiased;
-    line-height:1.5;
+    line-height:1.55;
     overflow-x:hidden;
     font-size:15px;
+    transition:background-color .4s ease,color .4s ease;
   }
   a{color:inherit;text-decoration:none}
-  button{font-family:inherit;cursor:pointer;border:none;background:none}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
   img{max-width:100%;display:block}
-  ::selection{background:var(--yellow);color:var(--ink)}
+  ::selection{background:var(--accent);color:var(--bg)}
 
-  .container{max-width:1320px;margin:0 auto;padding:0 32px}
+  .container{max-width:1280px;margin:0 auto;padding:0 28px;position:relative;z-index:2}
 
   /* ============================================
-     NAV — dark, yellow CTA
+     PICKER (cuando no hay ?b= en la URL)
      ============================================ */
-  .nav{
+  #picker{
+    min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:64px 28px;
+    background:#FAFAF7;
+    color:#0A0908;
+  }
+  #picker h1{font-family:Fraunces,serif;font-size:48px;font-weight:400;letter-spacing:-.03em;margin-bottom:14px}
+  #picker h1 em{font-style:italic;color:#C2410C}
+  #picker p{font-size:17px;color:#6B6B68;margin-bottom:36px;max-width:560px;text-align:center}
+  .picker-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;max-width:980px;width:100%}
+  .picker-card{
+    background:#fff;border:1px solid #E3E0D6;padding:24px;
+    border-radius:14px;transition:all .25s ease;cursor:pointer;
+    display:flex;flex-direction:column;gap:6px;text-decoration:none;color:inherit;
+  }
+  .picker-card:hover{transform:translateY(-3px);box-shadow:0 12px 24px -8px rgba(0,0,0,.1);border-color:#0A0908}
+  .picker-brand{font-family:Fraunces,serif;font-size:24px;letter-spacing:-.02em;font-weight:500}
+  .picker-giro{font-size:13px;color:#6B6B68}
+
+  #app{display:none}
+  body.loaded #app{display:block}
+  body.loaded #picker{display:none}
+
+  /* ============================================
+     NAV
+     ============================================ */
+  .vmotor-nav{
     position:sticky;top:0;z-index:50;
-    background:var(--ink);
-    color:var(--bg);
-    border-bottom:3px solid var(--yellow);
+    background:color-mix(in srgb, var(--bg) 90%, transparent);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--line);
   }
   .nav-inner{display:flex;align-items:center;justify-content:space-between;padding:14px 0}
-  .logo{
+  .v-logo{
     display:flex;align-items:center;gap:10px;
-    font-family:var(--display);font-size:22px;
-    letter-spacing:-.02em;color:var(--yellow);
+    font-family:var(--display-font);font-weight:500;font-size:22px;
+    color:var(--ink);letter-spacing:-.02em;
   }
-  .logo-mark{
-    width:32px;height:32px;
-    background:var(--yellow);color:var(--ink);
+  .v-logo-mark{
+    width:34px;height:34px;background:var(--accent);color:var(--bg);
     display:grid;place-items:center;
-    font-family:var(--display);font-size:18px;
-    border-radius:6px;
-    transition:transform .25s ease;
+    font-family:var(--display-font);font-weight:600;font-size:18px;
+    border-radius:6px;transition:transform .3s ease;
   }
-  .logo:hover .logo-mark{transform:rotate(-8deg)}
-  .nav-links{display:flex;gap:24px;align-items:center;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,252,240,.7)}
-  .nav-links a:hover{color:var(--yellow)}
-  .nav-cta{display:flex;gap:10px;align-items:center}
-  .btn{
+  .v-logo:hover .v-logo-mark{transform:rotate(-6deg)}
+  .v-nav-links{display:flex;gap:28px;align-items:center;font-size:14px;color:var(--muted);font-weight:500}
+  .v-nav-links a:hover{color:var(--ink)}
+  .v-nav-cta{display:flex;gap:10px;align-items:center}
+  .v-btn{
     display:inline-flex;align-items:center;gap:8px;
-    padding:11px 20px;
-    font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
-    transition:all .2s ease;
-    cursor:pointer;border:2px solid transparent;
-    font-family:var(--sans);
-    text-decoration:none;
+    padding:11px 20px;border-radius:10px;
+    font-size:14px;font-weight:600;
+    border:1px solid transparent;transition:all .25s ease;
+    text-decoration:none;cursor:pointer;
   }
-  .btn-yellow{background:var(--yellow);color:var(--ink);border-color:var(--yellow)}
-  .btn-yellow:hover{background:var(--yellow-bright);transform:translateY(-2px) rotate(-1deg);box-shadow:0 8px 0 var(--red-dark)}
-  .btn-ghost-dark{background:transparent;color:var(--bg);border-color:rgba(255,252,240,.3)}
-  .btn-ghost-dark:hover{background:var(--bg);color:var(--ink);border-color:var(--bg)}
-  .btn-ghost{background:transparent;color:var(--ink);border-color:var(--ink)}
-  .btn-ghost:hover{background:var(--ink);color:var(--yellow)}
-  .btn-lg{padding:16px 28px;font-size:14px}
+  .v-btn-primary{background:var(--ink);color:var(--bg)}
+  .v-btn-primary:hover{background:var(--accent);transform:translateY(-1px)}
+  .v-btn-ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .v-btn-ghost:hover{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .v-btn-lg{padding:15px 28px;font-size:15px;border-radius:12px}
 
   /* ============================================
-     HERO — DRAMATIC dark with HUGE yellow type
+     HERO (split: copy + hero image)
      ============================================ */
-  .hero{
-    background:var(--ink);
-    color:var(--bg);
-    padding:64px 0 0;
+  .v-hero{
+    padding:64px 0 80px;
     position:relative;
-    overflow:hidden;
-    min-height:88vh;
-    display:flex;flex-direction:column;justify-content:space-between;
   }
-  /* Yellow grid background pattern */
-  .hero::before{
-    content:"";
-    position:absolute;inset:0;
-    background-image:
-      linear-gradient(rgba(249,200,41,.03) 1px,transparent 1px),
-      linear-gradient(90deg,rgba(249,200,41,.03) 1px,transparent 1px);
-    background-size:40px 40px;
-    pointer-events:none;
+  .v-hero-grid{
+    display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;
   }
-  /* Red glow */
-  .hero::after{
-    content:"";
-    position:absolute;top:-20%;right:-10%;
-    width:600px;height:600px;
-    background:radial-gradient(circle,rgba(220,38,38,.18) 0%,transparent 60%);
-    pointer-events:none;
-    animation:pulseGlow 4s ease-in-out infinite;
-  }
-  @keyframes pulseGlow{
-    0%,100%{transform:scale(1);opacity:.6}
-    50%{transform:scale(1.1);opacity:1}
-  }
-
-  .hero-content{
-    position:relative;z-index:2;
-    padding:32px 0;
-  }
-  .hero-tag-row{
-    display:flex;align-items:center;justify-content:space-between;
-    margin-bottom:48px;flex-wrap:wrap;gap:14px;
-  }
-  .hero-eyebrow{
+  .v-hero-eyebrow{
     display:inline-flex;align-items:center;gap:10px;
-    padding:7px 14px;background:rgba(249,200,41,.1);
-    border:1px solid rgba(249,200,41,.3);
-    border-radius:999px;
-    font-family:var(--mono);
-    font-size:11px;font-weight:700;
-    color:var(--yellow);
-    letter-spacing:.12em;text-transform:uppercase;
+    padding:7px 14px;background:var(--surface);
+    border:1px solid var(--line);border-radius:999px;
+    font-size:12px;color:var(--muted);font-weight:500;margin-bottom:28px;
   }
-  .hero-eyebrow .dot{
-    width:7px;height:7px;border-radius:50%;background:var(--red);
-    animation:blinkLive 1.5s infinite;
-    box-shadow:0 0 8px var(--red);
+  .v-hero-eyebrow::before{
+    content:"";width:7px;height:7px;border-radius:50%;background:var(--accent);
+    animation:pulse 2s infinite;
   }
-  @keyframes blinkLive{0%,100%{opacity:1}50%{opacity:.3}}
-
-  .hero-volvix-tag{
-    font-family:var(--mono);
-    font-size:11px;
-    color:rgba(255,252,240,.4);
-    text-transform:uppercase;letter-spacing:.15em;
+  @keyframes pulse{
+    0%,100%{box-shadow:0 0 0 0 color-mix(in srgb, var(--accent) 60%, transparent)}
+    50%{box-shadow:0 0 0 10px transparent}
   }
-  .hero-volvix-tag b{color:rgba(255,252,240,.7)}
-
-  h1.hero-h{
-    font-family:var(--display);
-    font-size:clamp(60px,15vw,220px);
-    font-weight:400;
-    line-height:.82;
-    letter-spacing:-.045em;
-    color:var(--yellow);
-    margin-bottom:32px;
-    word-break:break-word;
-  }
-  h1.hero-h .underline{
-    background:linear-gradient(180deg,transparent 60%,var(--red) 60%,var(--red) 88%,transparent 88%);
-    padding:0 4px;
-    display:inline-block;
-  }
-  h1.hero-h .small{
-    font-size:.55em;
-    color:var(--bg);
-    display:block;
-    letter-spacing:-.04em;
-    margin-top:8px;
-  }
-
-  .hero-sub-row{
-    display:grid;grid-template-columns:1.4fr 1fr;gap:48px;align-items:end;
-    padding-bottom:48px;
-  }
-  .hero-deck{
-    font-size:20px;line-height:1.45;
-    color:rgba(255,252,240,.8);
-    max-width:520px;
-  }
-  .hero-deck strong{color:var(--yellow);font-weight:600}
-  .hero-ctas{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:24px}
-
-  .hero-meta{
-    display:flex;flex-direction:column;align-items:flex-end;
-    font-family:var(--mono);font-size:11px;color:rgba(255,252,240,.5);
-    text-align:right;
-    text-transform:uppercase;letter-spacing:.12em;
-    gap:6px;
-  }
-  .hero-meta-val{
-    font-family:var(--display);
-    font-size:36px;color:var(--yellow);
-    letter-spacing:-.03em;line-height:1;
-  }
-
-  /* FLOATING FOOD IMAGES */
-  .hero-food{
-    position:absolute;
-    border-radius:14px;
-    overflow:hidden;
-    box-shadow:0 24px 48px -8px rgba(0,0,0,.5);
-    z-index:1;
-    border:4px solid var(--yellow);
-  }
-  .hero-food img{width:100%;height:100%;object-fit:cover}
-  .hero-food-1{
-    width:200px;height:200px;
-    top:80px;right:8%;
-    transform:rotate(8deg);
-    animation:float1 6s ease-in-out infinite;
-  }
-  .hero-food-2{
-    width:140px;height:140px;
-    bottom:120px;right:28%;
-    transform:rotate(-12deg);
-    animation:float2 7s ease-in-out infinite;
-    border-color:var(--red);
-  }
-  @keyframes float1{
-    0%,100%{transform:rotate(8deg) translateY(0)}
-    50%{transform:rotate(10deg) translateY(-12px)}
-  }
-  @keyframes float2{
-    0%,100%{transform:rotate(-12deg) translateY(0)}
-    50%{transform:rotate(-14deg) translateY(-8px)}
-  }
-
-  /* ORDER UP NOTIFICATION */
-  .order-up{
-    position:fixed;
-    top:24px;right:24px;
-    background:var(--red);color:#fff;
-    padding:14px 18px;
-    border:2px solid var(--yellow);
-    border-radius:10px;
-    font-family:var(--display);font-size:14px;
-    z-index:100;
-    box-shadow:0 16px 32px -8px rgba(0,0,0,.4);
-    display:flex;align-items:center;gap:10px;
-    transform:translateX(120%);
-    transition:transform .5s cubic-bezier(.34,1.56,.64,1);
-  }
-  .order-up.show{transform:translateX(0)}
-  .order-up .bell{
-    animation:shake .5s ease-in-out infinite;
-    display:inline-block;
-    font-size:18px;
-  }
-  @keyframes shake{
-    0%,100%{transform:rotate(0)}
-    25%{transform:rotate(-15deg)}
-    75%{transform:rotate(15deg)}
-  }
-
-  /* ============================================
-     YELLOW STRIP DIVIDER
-     ============================================ */
-  .strip{
-    background:var(--yellow);color:var(--ink);
-    padding:14px 0;
-    overflow:hidden;
-    border-top:3px solid var(--ink);
-    border-bottom:3px solid var(--ink);
-  }
-  .strip-marquee{
-    display:flex;gap:48px;
-    animation:marquee 25s linear infinite;
-    width:max-content;
-    font-family:var(--display);
-    font-size:24px;
-    white-space:nowrap;
-  }
-  @keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-  .strip-item{display:flex;align-items:center;gap:14px}
-  .strip-dot{
-    width:10px;height:10px;border-radius:50%;background:var(--red);
-    flex-shrink:0;
-  }
-
-  /* ============================================
-     HOY EN LA COCINA — Menu-styled features
-     ============================================ */
-  .menu-section{padding:96px 0;background:var(--bg)}
-  .menu-head{
-    display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:end;
-    margin-bottom:64px;
-    border-bottom:3px solid var(--ink);padding-bottom:32px;
-  }
-  .menu-tag{
-    font-family:var(--mono);font-size:12px;font-weight:700;
-    color:var(--red);text-transform:uppercase;letter-spacing:.15em;
-    margin-bottom:14px;
-  }
-  .menu-title{
-    font-family:var(--display);
-    font-size:clamp(40px,6vw,80px);
-    line-height:.92;letter-spacing:-.035em;
-    color:var(--ink);
-  }
-  .menu-title em{
-    font-style:normal;color:var(--red);
-    background:linear-gradient(180deg,transparent 60%,var(--yellow) 60%,var(--yellow) 88%,transparent 88%);
-    padding:0 4px;
-  }
-  .menu-credit{
-    font-family:var(--hand);
-    font-size:28px;color:var(--ink-2);
-    transform:rotate(-2deg);
-    align-self:flex-end;
-  }
-  .menu-credit::before{content:"— ";}
-
-  .menu-categories{display:grid;grid-template-columns:1fr 1fr;gap:64px}
-  .menu-cat-head{
-    font-family:var(--display);
-    font-size:32px;
-    color:var(--red);
-    border-bottom:2px dotted var(--ink);
-    padding-bottom:12px;margin-bottom:20px;
-    letter-spacing:-.02em;
-    display:flex;justify-content:space-between;align-items:baseline;
-  }
-  .menu-cat-head span{
-    font-family:var(--mono);font-size:13px;color:var(--muted);
-    letter-spacing:.1em;
-  }
-  .menu-item{
-    display:grid;
-    grid-template-columns:1fr auto;
-    gap:14px;padding:18px 0;
-    border-bottom:1px dashed var(--line-2);
-    align-items:baseline;
-  }
-  .menu-item:last-child{border-bottom:none}
-  .menu-item-name{
-    font-family:var(--display);
-    font-size:22px;letter-spacing:-.01em;
-    color:var(--ink);
-    line-height:1.15;
-  }
-  .menu-item-desc{
-    font-size:14px;color:var(--muted);
-    line-height:1.5;margin-top:4px;
-    max-width:340px;
-  }
-  .menu-item-price{
-    font-family:var(--display);
-    font-size:20px;color:var(--red);
-    background:var(--yellow);
-    padding:4px 12px;
-    transform:rotate(-2deg);
-    white-space:nowrap;
-  }
-
-  /* ============================================
-     KDS DEMO — Live kitchen orders
-     ============================================ */
-  .kds-section{
-    background:var(--ink);color:var(--bg);
-    padding:96px 0;
-    border-top:6px solid var(--yellow);
-    border-bottom:6px solid var(--yellow);
-    position:relative;overflow:hidden;
-  }
-  .kds-section::before{
-    content:"";position:absolute;top:0;left:0;right:0;height:1px;
-    background:repeating-linear-gradient(90deg,var(--yellow) 0,var(--yellow) 16px,transparent 16px,transparent 32px);
-  }
-  .kds-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:64px;align-items:start}
-  .kds-text-tag{
-    font-family:var(--mono);font-size:12px;font-weight:700;
-    color:var(--yellow);text-transform:uppercase;letter-spacing:.15em;
-    margin-bottom:18px;
-    display:inline-flex;align-items:center;gap:10px;
-  }
-  .kds-text-tag .pulse{
-    width:8px;height:8px;border-radius:50%;background:var(--green);
-    box-shadow:0 0 12px var(--green);
-    animation:blinkLive 1.5s infinite;
-  }
-  .kds-text h2{
-    font-family:var(--display);
-    font-size:clamp(36px,5vw,68px);
-    line-height:.92;letter-spacing:-.035em;
+  .v-h1{
+    font-family:var(--display-font);
+    font-size:clamp(48px,7vw,96px);
+    font-weight:500;line-height:.95;
+    letter-spacing:-.035em;color:var(--ink);
     margin-bottom:24px;
   }
-  .kds-text h2 em{
-    font-style:normal;color:var(--yellow);
+  .v-h1 em{font-style:italic;color:var(--accent);font-weight:400}
+  .v-deck{
+    font-size:18px;color:var(--ink2);
+    line-height:1.55;margin-bottom:36px;max-width:520px;
+    padding-left:14px;border-left:2px solid var(--accent);
   }
-  .kds-text p{
-    font-size:17px;line-height:1.55;
-    color:rgba(255,252,240,.75);
-    margin-bottom:14px;max-width:480px;
+  .v-ctas{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:32px}
+  .v-meta-line{
+    font-family:var(--mono-font);font-size:12px;
+    color:var(--muted);letter-spacing:.08em;text-transform:uppercase;
   }
-  .kds-text p strong{color:var(--yellow);font-weight:600}
 
-  /* The actual KDS mockup */
-  .kds-screen{
-    background:#000;
-    border:3px solid var(--yellow);
-    border-radius:14px;
-    padding:14px;
-    box-shadow:0 24px 64px -16px rgba(0,0,0,.6),0 0 0 6px rgba(249,200,41,.15);
-  }
-  .kds-bar{
-    background:var(--yellow);color:var(--ink);
-    padding:8px 14px;
-    display:flex;align-items:center;gap:10px;
-    font-family:var(--mono);font-size:11px;font-weight:700;
-    text-transform:uppercase;letter-spacing:.1em;
-    margin-bottom:12px;
-    border-radius:6px;
-  }
-  .kds-bar .ml-auto{margin-left:auto}
-  .kds-bar .red-dot{
-    width:8px;height:8px;border-radius:50%;background:var(--red);
-    animation:blinkLive 1.2s infinite;
-  }
-  .kds-orders{
-    display:grid;grid-template-columns:1fr 1fr;gap:8px;
-    min-height:340px;
-  }
-  .kds-card{
-    background:#1A1815;
-    border:2px solid var(--yellow);
-    border-radius:8px;
-    padding:12px;
-    font-family:var(--mono);
-    color:#F5F1E0;
+  .v-hero-image{
+    aspect-ratio:3/4;
+    overflow:hidden;
+    background:var(--paper);
+    border:1px solid var(--line);
     position:relative;
-    animation:slideInRight .5s cubic-bezier(.34,1.56,.64,1) both;
   }
-  .kds-card.urgent{
-    border-color:var(--red);
-    box-shadow:0 0 0 2px rgba(220,38,38,.3);
+  .v-hero-image img{
+    width:100%;height:100%;object-fit:cover;
+    filter:contrast(1.05) saturate(.95);
   }
-  .kds-card.ready{
-    border-color:var(--green);
-    opacity:.65;
-  }
-  @keyframes slideInRight{
-    from{opacity:0;transform:translateX(30px)}
-    to{opacity:1;transform:translateX(0)}
-  }
-  .kds-card-h{
-    display:flex;justify-content:space-between;
-    font-size:11px;color:#A1A189;
-    margin-bottom:6px;font-weight:700;
-  }
-  .kds-card-h .mesa{color:var(--yellow)}
-  .kds-card.urgent .mesa{color:var(--red)}
-  .kds-card.ready .mesa{color:var(--green)}
-  .kds-card-time{font-size:10px;color:#766F58}
-  .kds-card ul{list-style:none;font-size:13px;line-height:1.6}
-  .kds-card li{padding:3px 0;border-bottom:1px dashed #333;color:#F5F1E0}
-  .kds-card li:last-child{border-bottom:none}
-  .kds-card .mod{color:#A1A189;font-size:11px;margin-left:10px;display:block}
-  .kds-card .countdown{
-    font-family:var(--display);
-    color:var(--yellow);font-size:14px;
-    margin-top:8px;padding-top:8px;
-    border-top:1px solid #333;
-    display:flex;justify-content:space-between;align-items:center;
-  }
-  .kds-card.urgent .countdown{color:var(--red);animation:flashRed 1s infinite}
-  @keyframes flashRed{0%,100%{opacity:1}50%{opacity:.5}}
-  .kds-card.ready .countdown{color:var(--green)}
-
-  /* ============================================
-     STATS — chunky big numbers
-     ============================================ */
-  .stats{
-    background:var(--yellow);color:var(--ink);
-    padding:80px 0;
-    border-top:4px solid var(--ink);
-    border-bottom:4px solid var(--ink);
-  }
-  .stats-h{
-    font-family:var(--display);
-    font-size:clamp(36px,5vw,64px);
-    line-height:.92;letter-spacing:-.035em;
-    text-align:center;margin-bottom:56px;max-width:880px;margin-left:auto;margin-right:auto;
-  }
-  .stats-h em{font-style:normal;color:var(--red);text-decoration:underline;text-decoration-thickness:6px;text-underline-offset:8px}
-  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:32px;text-align:center}
-  .stat-v{
-    font-family:var(--display);
-    font-size:clamp(56px,8vw,108px);
-    line-height:.85;letter-spacing:-.05em;
-    color:var(--ink);
-    margin-bottom:14px;
-    font-variant-numeric:tabular-nums;
-  }
-  .stat-l{
-    font-family:var(--mono);font-size:13px;
-    color:var(--ink-2);
-    text-transform:uppercase;letter-spacing:.1em;
-    line-height:1.4;font-weight:700;
-  }
-
-  /* ============================================
-     PULL QUOTE — chef testimonial
-     ============================================ */
-  .quote-section{
-    background:var(--bg);padding:96px 0;
-    text-align:center;position:relative;
-  }
-  .quote-bg{
-    font-family:var(--display);
-    font-size:clamp(120px,30vw,400px);
-    color:rgba(249,200,41,.2);
-    position:absolute;
-    top:50%;left:50%;
-    transform:translate(-50%,-50%);
-    line-height:.7;
-    z-index:0;
-    user-select:none;
+  .v-hero-image::after{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(180deg,transparent 50%,color-mix(in srgb, var(--ink) 20%, transparent) 100%);
     pointer-events:none;
   }
-  .quote-inner{position:relative;z-index:1;max-width:880px;margin:0 auto;padding:0 32px}
-  .quote-text{
-    font-family:var(--display);
-    font-size:clamp(28px,3.5vw,46px);
-    line-height:1.15;letter-spacing:-.025em;
-    color:var(--ink);margin-bottom:32px;
+  .v-hero-pricing{
+    position:absolute;top:24px;right:24px;
+    background:var(--bg);border:1px solid var(--ink);
+    padding:14px 18px;text-align:center;z-index:2;
   }
-  .quote-text .hl{
-    background:var(--yellow);padding:0 6px;
-    display:inline;
+  .v-hero-pricing-tag{font-family:var(--mono-font);font-size:10px;color:var(--muted);letter-spacing:.18em;text-transform:uppercase}
+  .v-hero-pricing-v{font-family:var(--display-font);font-weight:500;font-size:32px;line-height:1;color:var(--ink);margin:4px 0}
+  .v-hero-pricing-sub{font-family:var(--mono-font);font-size:10px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase}
+
+  /* ============================================
+     GALLERY — masonry rica de imágenes del giro
+     ============================================ */
+  .v-gallery{
+    padding:96px 0;background:var(--paper);
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line);
   }
-  .quote-sig{
-    font-family:var(--hand);font-size:36px;
-    color:var(--red);transform:rotate(-3deg);display:inline-block;
-    margin-bottom:8px;
+  .v-gallery-head{display:grid;grid-template-columns:1fr auto;gap:32px;align-items:end;margin-bottom:40px;border-bottom:1px solid var(--line);padding-bottom:24px}
+  .v-section-tag{
+    font-family:var(--mono-font);font-size:11px;
+    color:var(--accent);text-transform:uppercase;letter-spacing:.18em;
+    margin-bottom:12px;display:flex;align-items:center;gap:10px;
   }
-  .quote-attr{
-    font-family:var(--mono);font-size:13px;
-    text-transform:uppercase;letter-spacing:.12em;
-    color:var(--muted);
+  .v-section-tag::before{content:"";width:24px;height:1px;background:var(--accent)}
+  .v-section-h{
+    font-family:var(--display-font);
+    font-size:clamp(36px,5vw,64px);
+    font-weight:500;line-height:1;letter-spacing:-.03em;
+    color:var(--ink);
+  }
+  .v-section-h em{font-style:italic;color:var(--accent);font-weight:400}
+  .v-gallery-credits{
+    font-family:var(--mono-font);font-size:11px;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.15em;text-align:right;line-height:1.7;
+  }
+  .v-gallery-credits b{color:var(--ink);font-weight:600}
+
+  .v-gallery-grid{
+    display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:140px;gap:12px;
+  }
+  .v-gallery-item{
+    position:relative;overflow:hidden;border-radius:12px;
+    background:var(--surface);cursor:pointer;
+    transition:transform .35s cubic-bezier(.2,.8,.2,1);
+  }
+  .v-gallery-item:hover{transform:translateY(-4px)}
+  .v-gallery-item img{
+    width:100%;height:100%;object-fit:cover;
+    transition:transform .7s ease;
+  }
+  .v-gallery-item:hover img{transform:scale(1.07)}
+  .v-gallery-item::after{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(180deg,transparent 55%,rgba(0,0,0,.55) 100%);
+    opacity:0;transition:opacity .3s ease;
+  }
+  .v-gallery-item:hover::after{opacity:1}
+  .v-gallery-item .tag{
+    position:absolute;bottom:14px;left:14px;
+    color:#fff;font-size:13px;font-weight:500;
+    background:rgba(0,0,0,.55);padding:5px 12px;border-radius:6px;
+    backdrop-filter:blur(4px);
+    opacity:0;transform:translateY(8px);
+    transition:all .3s ease;z-index:1;
+  }
+  .v-gallery-item:hover .tag{opacity:1;transform:translateY(0)}
+  .v-gallery-item.lg{grid-column:span 2;grid-row:span 2}
+  .v-gallery-item.md{grid-column:span 2;grid-row:span 1}
+  .v-gallery-item.sm{grid-column:span 1;grid-row:span 1}
+
+  /* ============================================
+     CONTEXT IMAGES — 3 fotos con caption
+     ============================================ */
+  .v-context{padding:96px 0;background:var(--bg)}
+  .v-context-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:24px;
+    margin-top:40px;
+  }
+  .v-context-card{
+    background:var(--surface);border:1px solid var(--line);
+    border-radius:14px;overflow:hidden;
+    transition:all .3s ease;
+  }
+  .v-context-card:hover{transform:translateY(-4px);box-shadow:0 16px 32px -12px rgba(0,0,0,.1)}
+  .v-context-img{
+    aspect-ratio:4/3;background:var(--paper);position:relative;overflow:hidden;
+  }
+  .v-context-img img{width:100%;height:100%;object-fit:cover;transition:transform .6s ease}
+  .v-context-card:hover .v-context-img img{transform:scale(1.05)}
+  .v-context-card-body{padding:22px 24px}
+  .v-context-num{
+    font-family:var(--display-font);font-style:italic;font-size:14px;
+    color:var(--accent);margin-bottom:6px;
+  }
+  .v-context-cap{
+    font-family:var(--display-font);font-weight:500;
+    font-size:18px;letter-spacing:-.01em;color:var(--ink);
+    line-height:1.3;
   }
 
   /* ============================================
-     ROBOS — dark with red accents
+     FEATURES — 6 funciones específicas
      ============================================ */
-  .robos{
-    background:var(--ink);color:var(--bg);
-    padding:96px 0;
+  .v-features{padding:96px 0;background:var(--paper);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .v-features-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+    background:var(--line);border:1px solid var(--line);
+    border-radius:16px;overflow:hidden;margin-top:40px;
+  }
+  .v-feat{background:var(--surface);padding:32px 28px;transition:background .25s ease}
+  .v-feat:hover{background:var(--paper)}
+  .v-feat-ico{
+    width:44px;height:44px;background:var(--ink);color:var(--bg);
+    border-radius:10px;display:grid;place-items:center;margin-bottom:18px;
+    transition:all .25s ease;
+  }
+  .v-feat:hover .v-feat-ico{background:var(--accent);transform:rotate(-4deg)}
+  .v-feat h3{
+    font-family:var(--display-font);font-size:20px;font-weight:500;
+    letter-spacing:-.01em;margin-bottom:8px;color:var(--ink);
+  }
+  .v-feat p{font-size:14px;color:var(--muted);line-height:1.55}
+
+  /* ============================================
+     STATS
+     ============================================ */
+  .v-stats{
+    padding:80px 0;background:var(--ink);color:var(--bg);
     position:relative;overflow:hidden;
   }
-  .robos::before{
+  .v-stats::before{
+    content:"";position:absolute;top:-40%;right:-15%;
+    width:600px;height:600px;
+    background:radial-gradient(circle,color-mix(in srgb, var(--accent) 25%, transparent) 0%,transparent 60%);
+    pointer-events:none;
+    animation:slowRotate 30s linear infinite;
+  }
+  @keyframes slowRotate{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+  .v-stats-inner{position:relative;z-index:1}
+  .v-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid rgba(255,255,255,.15)}
+  .v-stat{padding:32px 24px 0 0;border-right:1px solid rgba(255,255,255,.15)}
+  .v-stat:last-child{border-right:none}
+  .v-stat:not(:first-child){padding-left:24px}
+  .v-stat-v{
+    font-family:var(--display-font);font-weight:500;
+    font-size:clamp(48px,6vw,76px);line-height:1;letter-spacing:-.03em;
+    color:var(--bg);margin-bottom:8px;font-variant-numeric:tabular-nums;
+  }
+  .v-stat-l{font-size:13px;color:rgba(255,255,255,.65);line-height:1.45}
+
+  /* ============================================
+     PULL QUOTE
+     ============================================ */
+  .v-quote{padding:120px 0;text-align:center;background:var(--bg);position:relative}
+  .v-quote::before{
+    content:"\201C";
+    position:absolute;top:50%;left:50%;
+    font-family:var(--display-font);font-size:280px;font-weight:500;
+    color:color-mix(in srgb, var(--accent) 12%, transparent);
+    transform:translate(-50%,-50%);line-height:.5;
+    pointer-events:none;
+  }
+  .v-quote-inner{position:relative;z-index:1;max-width:880px;margin:0 auto}
+  .v-quote-text{
+    font-family:var(--display-font);font-weight:400;font-style:italic;
+    font-size:clamp(24px,2.8vw,40px);line-height:1.25;letter-spacing:-.015em;
+    color:var(--ink);margin-bottom:32px;
+  }
+  .v-quote-text .hl{
+    background:color-mix(in srgb, var(--accent) 25%, transparent);
+    padding:0 4px;
+  }
+  .v-quote-sig{
+    font-family:var(--script-font);font-size:36px;color:var(--accent);
+    transform:rotate(-2deg);display:inline-block;margin-bottom:8px;line-height:1;
+  }
+  .v-quote-attr{
+    font-family:var(--mono-font);font-size:11px;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.18em;
+  }
+
+  /* ============================================
+     ROBOS — dark section
+     ============================================ */
+  .v-thefts{
+    background:#0A0908;color:#F5F1E8;padding:96px 0;
+    position:relative;overflow:hidden;
+    border-top:1px solid var(--line);
+  }
+  .v-thefts::before{
     content:"";position:absolute;inset:0;
     background-image:repeating-linear-gradient(0deg,transparent 0,transparent 2px,rgba(255,255,255,.015) 2px,rgba(255,255,255,.015) 4px);
     pointer-events:none;
   }
-  .robos-head{text-align:center;margin-bottom:64px;position:relative;z-index:1}
-  .robos-tag{
+  .v-thefts::after{
+    content:"";position:absolute;top:-30%;right:-15%;
+    width:600px;height:600px;
+    background:radial-gradient(circle,rgba(220,38,38,.18) 0%,transparent 60%);
+    pointer-events:none;
+  }
+  .v-thefts-inner{position:relative;z-index:1}
+  .v-thefts-head{text-align:center;margin-bottom:56px}
+  .v-thefts-tag{
     display:inline-flex;align-items:center;gap:10px;
-    padding:6px 14px;
-    background:rgba(220,38,38,.15);
-    color:#FCA5A5;
+    padding:6px 14px;background:rgba(220,38,38,.15);color:#FCA5A5;
     border:1px solid rgba(220,38,38,.4);
-    font-family:var(--mono);font-size:11px;font-weight:700;
-    text-transform:uppercase;letter-spacing:.15em;
-    margin-bottom:24px;
+    font-family:var(--mono-font);font-size:11px;font-weight:600;
+    text-transform:uppercase;letter-spacing:.18em;margin-bottom:20px;
   }
-  .robos-tag .dot{
-    width:8px;height:8px;border-radius:50%;background:var(--red);
-    animation:blinkLive 1.2s infinite;
-    box-shadow:0 0 10px var(--red);
+  .v-thefts-tag .dot{
+    width:8px;height:8px;border-radius:50%;background:#EF4444;
+    animation:blinkRed 1.4s infinite;box-shadow:0 0 10px #EF4444;
   }
-  .robos h2{
-    font-family:var(--display);
-    font-size:clamp(36px,5vw,68px);
-    line-height:.92;letter-spacing:-.035em;
-    color:var(--bg);margin-bottom:14px;
+  @keyframes blinkRed{0%,100%{opacity:1}50%{opacity:.4}}
+  .v-thefts-h{
+    font-family:var(--display-font);font-weight:500;
+    font-size:clamp(34px,4.5vw,60px);line-height:1.05;letter-spacing:-.025em;
+    color:#F5F1E8;margin-bottom:14px;
   }
-  .robos h2 em{font-style:normal;color:var(--red);text-decoration:underline;text-decoration-thickness:5px;text-underline-offset:6px}
-  .robos-lead{
-    font-size:17px;color:rgba(255,252,240,.65);
-    max-width:560px;margin:0 auto;line-height:1.55;
-  }
-  .robos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;position:relative;z-index:1}
-  .robo{
-    background:rgba(255,255,255,.03);
-    border:2px solid rgba(220,38,38,.25);
-    overflow:hidden;
+  .v-thefts-h em{font-style:italic;color:#FCA5A5;font-weight:400}
+  .v-thefts-lead{font-size:16px;color:#A1A1A1;max-width:580px;margin:0 auto;line-height:1.6}
+
+  .v-theft-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .v-theft{
+    background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);
+    border-radius:14px;overflow:hidden;
     transition:all .3s ease;
   }
-  .robo:hover{border-color:var(--red);transform:translateY(-4px)}
-  .robo-h{padding:24px 24px 20px;border-bottom:2px solid rgba(255,255,255,.08)}
-  .robo-num{
-    font-family:var(--display);
-    font-size:14px;color:var(--red);
+  .v-theft:hover{transform:translateY(-4px);border-color:rgba(220,38,38,.4)}
+  .v-theft-rob{padding:24px 24px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
+  .v-theft-tag{
+    font-family:var(--mono-font);font-size:11px;color:#FCA5A5;
     text-transform:uppercase;letter-spacing:.15em;
-    margin-bottom:12px;
-    display:flex;align-items:center;gap:8px;
+    margin-bottom:14px;display:flex;align-items:center;gap:8px;font-weight:600;
   }
-  .robo h3{
-    font-family:var(--display);
-    font-size:22px;line-height:1.15;letter-spacing:-.02em;
-    color:var(--bg);margin-bottom:10px;
+  .v-theft h4{
+    font-family:var(--display-font);font-size:20px;font-weight:500;
+    color:#fff;margin-bottom:10px;letter-spacing:-.01em;line-height:1.15;
   }
-  .robo p{font-size:14.5px;color:#D4D4D4;line-height:1.55}
-  .robo-fix{
-    padding:20px 24px 24px;
-    background:rgba(22,163,74,.08);
+  .v-theft-rob p{font-size:14px;color:#D4D4D4;line-height:1.6}
+  .v-theft-fix{padding:20px 24px 24px;background:rgba(34,197,94,.06)}
+  .v-theft-fix-tag{
+    font-family:var(--mono-font);font-size:11px;color:#86EFAC;
+    text-transform:uppercase;letter-spacing:.15em;
+    margin-bottom:10px;display:flex;align-items:center;gap:8px;font-weight:600;
   }
-  .robo-fix-tag{
-    font-family:var(--mono);font-size:11px;font-weight:700;
-    color:#86EFAC;text-transform:uppercase;letter-spacing:.15em;
-    margin-bottom:10px;
-    display:flex;align-items:center;gap:8px;
-  }
-  .robo-fix p{font-size:13.5px;color:#E5E5E5;line-height:1.55}
-  .robo-fix p strong{color:#86EFAC;font-weight:600}
+  .v-theft-fix p{font-size:13.5px;color:#E5E5E5;line-height:1.6}
+  .v-theft-fix p strong{color:#86EFAC;font-weight:600}
 
   /* ============================================
-     PRICING / DESCARGAS
+     CTA FINAL
      ============================================ */
-  .download-section{
-    background:var(--bg-warm);
-    padding:96px 0;
-    border-top:6px solid var(--ink);
-    border-bottom:6px solid var(--ink);
+  .v-cta{padding:120px 0;text-align:center;background:var(--bg)}
+  .v-cta-inner{max-width:880px;margin:0 auto}
+  .v-cta-tag{
+    font-family:var(--mono-font);font-size:12px;color:var(--accent);
+    text-transform:uppercase;letter-spacing:.2em;margin-bottom:18px;
+    display:flex;align-items:center;justify-content:center;gap:14px;
   }
-  .dl-head{text-align:center;margin-bottom:48px}
-  .dl-head .menu-tag{display:block}
-  .dl-head h2{
-    font-family:var(--display);
-    font-size:clamp(36px,5vw,64px);
-    line-height:.95;letter-spacing:-.03em;
-    margin-bottom:14px;
+  .v-cta-tag::before,.v-cta-tag::after{content:"";width:40px;height:1px;background:var(--accent)}
+  .v-cta-h{
+    font-family:var(--display-font);font-weight:500;
+    font-size:clamp(42px,5.5vw,76px);line-height:1;letter-spacing:-.03em;
+    color:var(--ink);margin-bottom:20px;
   }
-  .dl-head p{font-size:17px;color:var(--muted);max-width:520px;margin:0 auto}
-  .dl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:920px;margin:0 auto}
-  .dl-card{
-    background:var(--surface);
-    border:3px solid var(--ink);
-    padding:32px 24px;text-align:center;
-    transition:all .25s ease;
-    cursor:pointer;text-decoration:none;color:var(--ink);
-    display:flex;flex-direction:column;align-items:center;gap:10px;
+  .v-cta-h em{font-style:italic;color:var(--accent);font-weight:400}
+  .v-cta-p{font-size:18px;color:var(--muted);max-width:520px;margin:0 auto 32px;line-height:1.55}
+  .v-cta-ctas{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:32px}
+  .v-cta-checks{
+    display:flex;gap:28px;justify-content:center;flex-wrap:wrap;
+    padding-top:28px;border-top:1px solid var(--line);
+    font-family:var(--mono-font);font-size:11px;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.18em;
   }
-  .dl-card:hover{
-    background:var(--yellow);
-    transform:translate(-4px,-4px);
-    box-shadow:8px 8px 0 var(--ink);
-  }
-  .dl-card-ico{
-    font-size:36px;line-height:1;
-  }
-  .dl-card-name{
-    font-family:var(--display);font-size:20px;letter-spacing:-.01em;
-  }
-  .dl-card-meta{font-size:12px;color:var(--muted);line-height:1.45}
-  .dl-card-badge{
-    background:var(--ink);color:var(--yellow);
-    padding:8px 14px;
-    font-family:var(--mono);font-size:11px;font-weight:700;
-    text-transform:uppercase;letter-spacing:.1em;
-    margin-top:8px;
-  }
-  .dl-card:hover .dl-card-badge{background:var(--red);color:#fff}
-
-  /* ============================================
-     CTA FINAL — yellow takeover
-     ============================================ */
-  .cta-final{
-    background:var(--yellow);color:var(--ink);
-    padding:120px 0;
-    position:relative;overflow:hidden;
-    border-top:6px solid var(--ink);
-  }
-  .cta-final::before{
-    content:"COMANDERO COMANDERO COMANDERO";
-    font-family:var(--display);
-    font-size:180px;
-    position:absolute;bottom:-60px;left:-100px;right:-100px;
-    color:rgba(10,9,8,.05);
-    line-height:1;letter-spacing:-.04em;
-    white-space:nowrap;overflow:hidden;
-    pointer-events:none;user-select:none;
-  }
-  .cta-inner{position:relative;z-index:1;text-align:center;max-width:880px;margin:0 auto}
-  .cta-tag{
-    display:inline-block;
-    font-family:var(--mono);font-size:12px;font-weight:700;
-    color:var(--ink);text-transform:uppercase;letter-spacing:.15em;
-    margin-bottom:24px;
-    padding:6px 14px;background:var(--ink);color:var(--yellow);
-  }
-  .cta-final h2{
-    font-family:var(--display);
-    font-size:clamp(48px,7vw,108px);
-    line-height:.88;letter-spacing:-.04em;
-    margin-bottom:24px;
-  }
-  .cta-final h2 em{
-    font-style:normal;color:var(--red);
-  }
-  .cta-final p{
-    font-size:20px;line-height:1.45;
-    max-width:520px;margin:0 auto 36px;
-    color:var(--ink-2);
-  }
-  .cta-final p strong{font-weight:700}
-  .cta-ctas{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:32px}
-  .cta-final .btn-ink{
-    background:var(--ink);color:var(--yellow);
-    border-color:var(--ink);
-  }
-  .cta-final .btn-ink:hover{
-    background:var(--red);color:#fff;border-color:var(--red);
-  }
-  .cta-final .btn-ghost{border-width:2px}
-
-  .cta-checks{
-    display:flex;gap:24px;justify-content:center;flex-wrap:wrap;
-    font-family:var(--mono);font-size:12px;font-weight:700;
-    color:var(--ink-2);text-transform:uppercase;letter-spacing:.1em;
-  }
-  .cta-checks div{display:flex;align-items:center;gap:6px}
-  .cta-checks svg{color:var(--red)}
+  .v-cta-checks div{display:flex;align-items:center;gap:8px}
+  .v-cta-checks svg{color:var(--accent)}
 
   /* ============================================
      FOOTER
      ============================================ */
-  footer{
-    background:var(--ink);color:var(--bg);
-    padding:48px 0 32px;
+  .v-footer{
+    background:var(--paper);border-top:1px solid var(--line);
+    padding:48px 0 28px;
   }
-  .foot-grid{
-    display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:48px;
-    margin-bottom:36px;
+  .v-foot-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:32px}
+  .v-foot-brand p{font-size:14px;color:var(--muted);line-height:1.6;max-width:300px;margin-top:14px}
+  .v-foot-powered{
+    margin-top:18px;padding-top:14px;border-top:1px solid var(--line);
+    font-family:var(--mono-font);font-size:10px;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.2em;
   }
-  .foot-brand .logo{color:var(--yellow);margin-bottom:14px}
-  .foot-brand p{
-    font-size:14px;color:rgba(255,252,240,.6);
-    line-height:1.55;max-width:300px;
+  .v-foot-powered b{color:var(--ink)}
+  .v-foot-col h5{
+    font-family:var(--mono-font);font-size:11px;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.15em;margin-bottom:14px;font-weight:600;
   }
-  .foot-powered{
-    margin-top:18px;padding-top:14px;
-    border-top:1px solid rgba(255,255,255,.15);
-    font-family:var(--mono);font-size:10px;
-    color:rgba(255,252,240,.4);
-    text-transform:uppercase;letter-spacing:.18em;
-  }
-  .foot-powered b{color:var(--yellow);font-weight:700}
-  .foot-col h5{
-    font-family:var(--mono);font-size:11px;
-    color:var(--yellow);font-weight:700;
-    text-transform:uppercase;letter-spacing:.15em;
-    margin-bottom:16px;
-  }
-  .foot-col ul{list-style:none;display:flex;flex-direction:column;gap:9px}
-  .foot-col a{
-    font-size:14px;color:rgba(255,252,240,.7);
-    transition:color .15s ease;
-  }
-  .foot-col a:hover{color:var(--yellow)}
-  .foot-bottom{
-    padding-top:24px;border-top:1px solid rgba(255,255,255,.1);
+  .v-foot-col ul{list-style:none;display:flex;flex-direction:column;gap:8px}
+  .v-foot-col a{font-size:14px;color:var(--ink2)}
+  .v-foot-col a:hover{color:var(--accent)}
+  .v-foot-bottom{
+    padding-top:24px;border-top:1px solid var(--line);
     display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;
-    font-family:var(--mono);font-size:11px;
-    color:rgba(255,252,240,.4);
+    font-family:var(--mono-font);font-size:11px;color:var(--muted);
     text-transform:uppercase;letter-spacing:.12em;
   }
 
+  /* ============================================
+     VIBES — overrides por familia
+     ============================================ */
+  /* DARK PREMIUM (Navaja, etc.) */
+  body[data-vibe="darkPremium"] .v-h1{text-transform:uppercase;letter-spacing:.01em;font-weight:500}
+  body[data-vibe="darkPremium"] .v-h1 em{font-style:normal;text-decoration:underline;text-decoration-color:var(--accent);text-decoration-thickness:4px;text-underline-offset:6px}
+  body[data-vibe="darkPremium"] .v-section-h,
+  body[data-vibe="darkPremium"] .v-thefts-h,
+  body[data-vibe="darkPremium"] .v-cta-h{text-transform:uppercase;letter-spacing:.01em}
+  body[data-vibe="darkPremium"] .v-section-h em,
+  body[data-vibe="darkPremium"] .v-cta-h em{font-style:normal}
+  body[data-vibe="darkPremium"] .v-feat h3,
+  body[data-vibe="darkPremium"] .v-theft h4,
+  body[data-vibe="darkPremium"] .v-context-cap{text-transform:uppercase;letter-spacing:.04em}
+  body[data-vibe="darkPremium"] ::selection{color:var(--ink)}
+
+  /* VIBRANT (Comandero) — bold chunky */
+  body[data-vibe="vibrant"] .v-h1{text-transform:uppercase;letter-spacing:-.04em}
+  body[data-vibe="vibrant"] .v-h1 em{
+    font-style:normal;
+    background:linear-gradient(180deg,transparent 60%,var(--accent2) 60%);
+    padding:0 4px;color:var(--ink);
+  }
+  body[data-vibe="vibrant"] .v-section-h{text-transform:uppercase}
+  body[data-vibe="vibrant"] .v-section-h em{
+    font-style:normal;
+    background:linear-gradient(180deg,transparent 60%,var(--accent) 60%);
+    padding:0 4px;color:var(--ink);
+  }
+  body[data-vibe="vibrant"] .v-cta-h em{
+    font-style:normal;color:var(--accent2);
+  }
+
+  /* CLINICAL (Receta) — clean modern */
+  body[data-vibe="clinical"] .v-h1{font-weight:700;letter-spacing:-.04em}
+  body[data-vibe="clinical"] .v-h1 em{font-style:normal;color:var(--accent);font-weight:800}
+  body[data-vibe="clinical"] .v-section-h em{font-style:normal;color:var(--accent);font-weight:700}
+  body[data-vibe="clinical"] .v-feat h3{font-weight:700}
+
+  /* WARM LOCAL (Tendito) — friendly serif italic accents */
+  body[data-vibe="warmLocal"] .v-h1 em{font-family:var(--script-font);font-weight:400;font-size:1.15em}
+  body[data-vibe="warmLocal"] .v-section-h em{font-family:var(--script-font);font-weight:400;font-size:1.1em}
+
+  /* EDITORIAL (Pareo) — italic refined, default */
+  /* (no overrides needed - default styles handle this) */
+
+  /* ============================================
+     RESPONSIVE
+     ============================================ */
   @media (max-width:980px){
-    .nav-links{display:none}
-    h1.hero-h{font-size:64px}
-    .hero-food-1,.hero-food-2{display:none}
-    .hero-sub-row{grid-template-columns:1fr;gap:24px}
-    .hero-meta{align-items:flex-start;text-align:left}
-    .menu-head{grid-template-columns:1fr;gap:18px}
-    .menu-categories{grid-template-columns:1fr;gap:40px}
-    .kds-grid{grid-template-columns:1fr;gap:40px}
-    .kds-orders{grid-template-columns:1fr 1fr}
-    .stats-grid{grid-template-columns:1fr 1fr;gap:32px}
-    .robos-grid{grid-template-columns:1fr}
-    .dl-grid{grid-template-columns:1fr}
-    .foot-grid{grid-template-columns:1fr 1fr;gap:32px}
+    .v-nav-links{display:none}
+    .v-hero-grid{grid-template-columns:1fr;gap:32px}
+    .v-hero-image{aspect-ratio:4/3}
+    .v-gallery-grid{grid-template-columns:repeat(2,1fr);grid-auto-rows:120px}
+    .v-gallery-item.lg,.v-gallery-item.md{grid-column:span 2}
+    .v-gallery-item.sm{grid-column:span 1}
+    .v-context-grid{grid-template-columns:1fr}
+    .v-features-grid{grid-template-columns:1fr}
+    .v-stats-grid{grid-template-columns:1fr 1fr}
+    .v-stat:nth-child(2){border-right:none}
+    .v-stat:nth-child(3),.v-stat:nth-child(4){border-top:1px solid rgba(255,255,255,.15);padding-top:32px}
+    .v-theft-grid{grid-template-columns:1fr}
+    .v-foot-grid{grid-template-columns:1fr 1fr}
+    .v-gallery-head{grid-template-columns:1fr;gap:14px}
+    .v-gallery-credits{text-align:left}
+  }
+  @media (max-width:640px){
+    .v-stats-grid{grid-template-columns:1fr}
+    .v-stat{border-right:none!important;padding-left:0!important;border-top:1px solid rgba(255,255,255,.15);padding-top:24px}
+    .v-stat:first-child{border-top:none}
+    .v-foot-grid{grid-template-columns:1fr}
     .container{padding:0 20px}
   }
 </style>
+
+<script>
+  // SSG: pre-pick this brand
+  window.location.search = window.location.search || '?b=comandero';
+  if (!new URLSearchParams(window.location.search).get('b')) {
+    history.replaceState(null, '', '?b=comandero');
+  }
+</script>
 </head>
 <body>
 
-<!-- Order up notification (toggled by JS) -->
-<div class="order-up" id="order-up">
-  <span class="bell">🔔</span>
-  <span>¡ORDER UP! Mesa <b id="ou-mesa">12</b></span>
+<!-- PICKER (default state when no ?b= param) -->
+<div id="picker">
+  <h1>Motor de marcas <em>Volvix</em></h1>
+  <p>Elige una marca para ver su landing. La misma estructura, identidades completamente distintas — cambian fuentes, paleta, copy e imágenes según el giro.</p>
+  <div class="picker-grid" id="picker-grid"></div>
 </div>
 
-<!-- NAV -->
-<nav class="nav">
-  <div class="container nav-inner">
-    <a href="#" class="logo">
-      <div class="logo-mark">C</div>
-      Comandero
-    </a>
-    <div class="nav-links">
-      <a href="#sistema">Sistema</a>
-      <a href="#cocina">Cocina</a>
-      <a href="#perdidas">Pérdidas</a>
-      <a href="#descargas">Descargas</a>
-    </div>
-    <div class="nav-cta">
-      <a href="/login.html" class="btn btn-ghost-dark">Acceder</a>
-      <a href="/registro.html?giro=restaurante" class="btn btn-yellow">Empezar gratis →</a>
-    </div>
-  </div>
-</nav>
+<!-- APP — rendered dynamically once brand is selected -->
+<div id="app"></div>
 
-<!-- HERO -->
-<section class="hero">
-  <div class="container hero-content">
-    <div class="hero-tag-row">
-      <div class="hero-eyebrow">
-        <span class="dot"></span>
-        Sistema POS para restaurantes mexicanos
-      </div>
-      <div class="hero-volvix-tag">
-        Powered by <b>Volvix</b> · MX · 2026
-      </div>
-    </div>
-
-    <h1 class="hero-h">
-      Sírvelo<br>
-      <span class="underline">caliente.</span><br>
-      <span class="small">Cobra rápido.</span>
-    </h1>
-
-    <div class="hero-sub-row">
-      <div>
-        <p class="hero-deck">
-          El sistema de punto de venta que reemplaza los <strong>papelitos</strong>, los gritos y los platillos olvidados. Comandera digital, KDS, división de cuenta y propinas — para que tu cocina no pare ni un segundo.
-        </p>
-        <div class="hero-ctas">
-          <a href="#cta" class="btn btn-yellow btn-lg">
-            Empezar gratis
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-          </a>
-          <a href="#cocina" class="btn btn-ghost-dark btn-lg">Ver cocina en vivo</a>
-        </div>
-      </div>
-      <div class="hero-meta">
-        <div class="hero-meta-val">$0</div>
-        <div>Costo inicial · sin tarjeta · setup en 5 min</div>
-      </div>
-    </div>
-
-    <!-- Floating food -->
-    <div class="hero-food hero-food-1">
-      <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=400&fit=crop&q=80" alt="">
-    </div>
-    <div class="hero-food hero-food-2">
-      <img src="https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=400&h=400&fit=crop&q=80" alt="">
-    </div>
-  </div>
-</section>
-
-<!-- YELLOW STRIP -->
-<div class="strip">
-  <div class="strip-marquee">
-    <span class="strip-item">SIN PAPELITOS <span class="strip-dot"></span></span>
-    <span class="strip-item">SIN GRITOS <span class="strip-dot"></span></span>
-    <span class="strip-item">SIN PLATILLOS OLVIDADOS <span class="strip-dot"></span></span>
-    <span class="strip-item">CUENTA CLARA <span class="strip-dot"></span></span>
-    <span class="strip-item">PROPINA JUSTA <span class="strip-dot"></span></span>
-    <span class="strip-item">COCINA RÁPIDA <span class="strip-dot"></span></span>
-    <!-- duplicate for seamless loop -->
-    <span class="strip-item">SIN PAPELITOS <span class="strip-dot"></span></span>
-    <span class="strip-item">SIN GRITOS <span class="strip-dot"></span></span>
-    <span class="strip-item">SIN PLATILLOS OLVIDADOS <span class="strip-dot"></span></span>
-    <span class="strip-item">CUENTA CLARA <span class="strip-dot"></span></span>
-    <span class="strip-item">PROPINA JUSTA <span class="strip-dot"></span></span>
-    <span class="strip-item">COCINA RÁPIDA <span class="strip-dot"></span></span>
-  </div>
-</div>
-
-<!-- MENU SECTION — Features as restaurant menu -->
-<section class="menu-section" id="sistema">
-  <div class="container">
-    <div class="menu-head">
-      <div>
-        <div class="menu-tag">— Hoy en la carta</div>
-        <h1 class="menu-title">Lo que <em>servimos</em>.</h1>
-      </div>
-      <div class="menu-credit">recomendado por el chef</div>
-    </div>
-
-    <div class="menu-categories">
-      <div>
-        <div class="menu-cat-head">
-          Para empezar
-          <span>EN 5 MIN</span>
-        </div>
-        <div class="menu-item">
-          <div>
-            <div class="menu-item-name">Plano de mesas visual</div>
-            <div class="menu-item-desc">Arrastra y suelta. La mesera ve qué mesa está libre, ocupada, esperando cuenta o disponible.</div>
-          </div>
-          <div class="menu-item-price">INCLUIDO</div>
-        </div>
-        <div class="menu-item">
-          <div>
-            <div class="menu-item-name">Comandera por mesera</div>
-            <div class="menu-item-desc">Cada mesera con su tablet o celular. Toma la orden, va directo a cocina. Sin papelitos.</div>
-          </div>
-          <div class="menu-item-price">INCLUIDO</div>
-        </div>
-        <div class="menu-item">
-          <div>
-            <div class="menu-item-name">Modificadores y notas</div>
-            <div class="menu-item-desc">"Sin cebolla", "término medio", combos. Cocina lo ve todo.</div>
-          </div>
-          <div class="menu-item-price">INCLUIDO</div>
-        </div>
-      </div>
-
-      <div>
-        <div class="menu-cat-head">
-          Plato fuerte
-          <span>EL ALMA</span>
-        </div>
-        <div class="menu-item">
-          <div>
-            <div class="menu-item-name">Pantalla de cocina (KDS)</div>
-            <div class="menu-item-desc">La orden va directo a la pantalla. Cocina ve qué prepara, en qué orden, cuánto tiempo lleva. Sin gritos.</div>
-          </div>
-          <div class="menu-item-price">INCLUIDO</div>
-        </div>
-        <div class="menu-item">
-          <div>
-            <div class="menu-item-name">División de cuenta</div>
-            <div class="menu-item-desc">Por persona, por consumo, por mitades. Sin calculadora ni discusiones en la mesa.</div>
-          </div>
-          <div class="menu-item-price">INCLUIDO</div>
-        </div>
-        <div class="menu-item">
-          <div>
-            <div class="menu-item-name">Propinas digitales</div>
-            <div class="menu-item-desc">QR para propina. Se reparte automático según las reglas. Sin sobres, sin drama.</div>
-          </div>
-          <div class="menu-item-price">INCLUIDO</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- KDS LIVE DEMO -->
-<section class="kds-section" id="cocina">
-  <div class="container">
-    <div class="kds-grid">
-      <div class="kds-text">
-        <div class="kds-text-tag">
-          <span class="pulse"></span>
-          En vivo desde tu cocina
-        </div>
-        <h2>Tu cocina, <em>sin papel</em>. Tu mesera, <em>sin estrés</em>.</h2>
-        <p>El KDS (Kitchen Display System) muestra cada orden con su cronómetro. La cocina prepara en orden, no en confusión.</p>
-        <p>Modificadores visibles (<strong>"sin cebolla"</strong>, <strong>"término medio"</strong>), prioridad por tiempo de espera, y alerta visual cuando una mesa lleva más de 18 minutos sin recibir.</p>
-        <p>Y si una mesera no captura la orden? <strong>Cocina no la prepara.</strong> Punto. Sin excepciones. Esa regla sola te ahorra miles al mes.</p>
-        <div style="display:flex;gap:12px;margin-top:28px;flex-wrap:wrap">
-          <a href="#cta" class="btn btn-yellow btn-lg">Probar Comandero gratis →</a>
-        </div>
-      </div>
-
-      <div class="kds-screen">
-        <div class="kds-bar">
-          <span class="red-dot"></span>
-          Cocina · Sábado 21:45
-          <span class="ml-auto" id="kds-clock">21:45:12</span>
-        </div>
-        <div class="kds-orders" id="kds-orders">
-          <div class="kds-card urgent" style="animation-delay:.1s">
-            <div class="kds-card-h">
-              <span class="mesa">▸ MESA 04</span>
-              <span class="kds-card-time">21:42</span>
-            </div>
-            <ul>
-              <li>2× Tacos al pastor</li>
-              <li>1× Quesadilla<span class="mod">+ extra queso</span></li>
-              <li>3× Coca-Cola</li>
-            </ul>
-            <div class="countdown">
-              <span>EN ESPERA</span>
-              <span>03:24</span>
-            </div>
-          </div>
-          <div class="kds-card" style="animation-delay:.25s">
-            <div class="kds-card-h">
-              <span class="mesa">▸ MESA 07</span>
-              <span class="kds-card-time">21:44</span>
-            </div>
-            <ul>
-              <li>1× Pizza pepperoni</li>
-              <li>2× Ensalada César</li>
-              <li>2× Té helado</li>
-            </ul>
-            <div class="countdown">
-              <span>PREPARANDO</span>
-              <span>01:08</span>
-            </div>
-          </div>
-          <div class="kds-card ready" style="animation-delay:.4s">
-            <div class="kds-card-h">
-              <span class="mesa">▸ MESA 11</span>
-              <span class="kds-card-time">21:38</span>
-            </div>
-            <ul>
-              <li>1× Hamburguesa<span class="mod">+ extra queso</span></li>
-              <li>1× Papas francesas</li>
-              <li>1× Limonada</li>
-            </ul>
-            <div class="countdown">
-              <span>✓ LISTO</span>
-              <span>SERVIR</span>
-            </div>
-          </div>
-          <div class="kds-card" style="animation-delay:.55s">
-            <div class="kds-card-h">
-              <span class="mesa">▸ MESA 02</span>
-              <span class="kds-card-time">21:44</span>
-            </div>
-            <ul>
-              <li>3× Tacos campechanos<span class="mod">- sin cebolla</span></li>
-              <li>1× Guacamole</li>
-            </ul>
-            <div class="countdown">
-              <span>EN COLA</span>
-              <span>00:42</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- STATS -->
-<section class="stats">
-  <div class="container">
-    <h2 class="stats-h">En números, <em>tu cocina con Comandero</em>.</h2>
-    <div class="stats-grid">
-      <div>
-        <div class="stat-v" data-target="18">0</div>
-        <div class="stat-l">Min promedio<br>orden → mesa</div>
-      </div>
-      <div>
-        <div class="stat-v" data-target="100" data-suffix="%">0%</div>
-        <div class="stat-l">Comandas<br>sin perderse</div>
-      </div>
-      <div>
-        <div class="stat-v" data-target="5" data-suffix="min">0min</div>
-        <div class="stat-l">Setup para<br>arrancar</div>
-      </div>
-      <div>
-        <div class="stat-v">$0</div>
-        <div class="stat-l">Para empezar<br>sin tarjeta</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- PULL QUOTE -->
-<section class="quote-section">
-  <div class="quote-bg">"</div>
-  <div class="quote-inner">
-    <p class="quote-text">
-      "Antes los sábados eran un infierno. <span class="hl">Cocina con cinco papelitos</span> al mismo tiempo y la mesera gritando. Con Comandero todo va a la pantalla. <span class="hl">El sábado pasado servimos 92 mesas sin un error.</span>"
-    </p>
-    <div class="quote-sig">— Chef Roberto</div>
-    <div class="quote-attr">Taquería en San Pedro · Monterrey, NL</div>
-  </div>
-</section>
-
-<!-- ROBOS -->
-<section class="robos" id="perdidas">
-  <div class="container">
-    <div class="robos-head">
-      <div class="robos-tag">
-        <span class="dot"></span>
-        Pérdidas invisibles
-      </div>
-      <h2>Así te roban en <em>tu restaurante</em>.</h2>
-      <p class="robos-lead">Es incómodo decirlo, pero todo dueño lo vive. Los tres robos más comunes en restaurantes mexicanos — y cómo Comandero los corta de raíz.</p>
-    </div>
-
-    <div class="robos-grid">
-      <article class="robo">
-        <div class="robo-h">
-          <div class="robo-num">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            Robo 01
-          </div>
-          <h3>Comanda fantasma</h3>
-          <p>Mesera no captura la orden, cocina la prepara igual, cliente paga en efectivo, mesera se queda con todo. En un restaurante de 30 mesas son $4,000 a $8,000 al mes mínimo.</p>
-        </div>
-        <div class="robo-fix">
-          <div class="robo-fix-tag">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>
-            Cómo Comandero lo evita
-          </div>
-          <p>Cocina solo prepara <strong>lo que está en el KDS</strong>. Si no está en el sistema, no sale del calor. Cero excepciones. La regla la conoce todo el equipo desde el primer día.</p>
-        </div>
-      </article>
-
-      <article class="robo">
-        <div class="robo-h">
-          <div class="robo-num">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            Robo 02
-          </div>
-          <h3>Cancelaciones tras el cobro</h3>
-          <p>Mesera cobra al cliente, después "cancela" el ticket en el sistema diciendo que se equivocó, y se queda con el dinero. Tú ves el ticket cancelado y no preguntas.</p>
-        </div>
-        <div class="robo-fix">
-          <div class="robo-fix-tag">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>
-            Cómo Comandero lo evita
-          </div>
-          <p>Cancelar requiere <strong>PIN del gerente + razón escrita</strong>. Reporte semanal de cancelaciones por mesero. Si Pedro cancela 8 tickets a la semana y María 1, sabes algo está raro.</p>
-        </div>
-      </article>
-
-      <article class="robo">
-        <div class="robo-h">
-          <div class="robo-num">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            Robo 03
-          </div>
-          <h3>Cortesías sin autorización</h3>
-          <p>"Eran amigos de mi prima", "se quejó del platillo y le regalé el postre". Empleados regalan comida para hacer amigos o quedar bien. Tú pagas la materia prima.</p>
-        </div>
-        <div class="robo-fix">
-          <div class="robo-fix-tag">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>
-            Cómo Comandero lo evita
-          </div>
-          <p>Cortesías exigen <strong>PIN del gerente + motivo + foto del cliente</strong>. Reporte mensual: cortesías por mesero. Patrones raros saltan solos.</p>
-        </div>
-      </article>
-    </div>
-  </div>
-</section>
-
-<!-- DESCARGAS -->
-<section class="download-section" id="descargas">
-  <div class="container">
-    <div class="dl-head">
-      <div class="menu-tag">— Disponible para</div>
-      <h2>Instala Comandero<br>en cualquier dispositivo.</h2>
-      <p>Funciona offline — guarda local primero, sincroniza después. Sin conexión perdiste ventas? Nunca más.</p>
-    </div>
-    <div class="dl-grid">
-      <a href="#" class="dl-card">
-        <div class="dl-card-ico">🖥️</div>
-        <div class="dl-card-name">Windows</div>
-        <div class="dl-card-meta">Aplicación de escritorio · 107 MB</div>
-        <div class="dl-card-badge">Descargar .EXE</div>
-      </a>
-      <a href="#" class="dl-card">
-        <div class="dl-card-ico">🤖</div>
-        <div class="dl-card-name">Android</div>
-        <div class="dl-card-meta">Tablet o celular Android</div>
-        <div class="dl-card-badge">Descargar .APK</div>
-      </a>
-      <a href="#" class="dl-card">
-        <div class="dl-card-ico">🌐</div>
-        <div class="dl-card-name">Web / PWA</div>
-        <div class="dl-card-meta">Agrega a inicio desde el navegador</div>
-        <div class="dl-card-badge">Instalar PWA</div>
-      </a>
-    </div>
-  </div>
-</section>
-
-<!-- CTA FINAL -->
-<section class="cta-final" id="cta">
-  <div class="container cta-inner">
-    <div class="cta-tag">¡Pasa la orden!</div>
-    <h2>Tu siguiente <em>servicio</em>, sin papelitos.</h2>
-    <p>Crea tu cuenta, descarga Comandero, conecta tu impresora térmica y empieza a vender hoy mismo. <strong>Sin tarjeta. Sin compromiso. Sin tonterías.</strong></p>
-    <div class="cta-ctas">
-      <a href="/registro.html?giro=restaurante" class="btn btn-ink btn-lg">
-        Empezar gratis
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-      </a>
-      <a href="https://wa.me/528112345678?text=Hola%20vengo%20de%20Comandero%2C%20quiero%20hablar%20con%20alguien" class="btn btn-ghost btn-lg" target="_blank" rel="noopener">Hablar con humano</a>
-    </div>
-    <div class="cta-checks">
-      <div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Sin tarjeta</div>
-      <div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Setup 5 min</div>
-      <div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Funciona offline</div>
-      <div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Soporte en español</div>
-    </div>
-  </div>
-</section>
-
-<!-- FOOTER -->
-<footer>
-  <div class="container">
-    <div class="foot-grid">
-      <div class="foot-brand">
-        <div class="logo">
-          <div class="logo-mark">C</div>
-          Comandero
-        </div>
-        <p>El sistema de punto de venta hecho para que tu cocina nunca pare. Diseñado en Monterrey, NL para restaurantes mexicanos.</p>
-        <div class="foot-powered">Powered by <b>Volvix Systems</b></div>
-      </div>
-      <div class="foot-col">
-        <h5>Sistema</h5>
-        <ul>
-          <li><a href="#sistema">El sistema</a></li>
-          <li><a href="#cocina">KDS en vivo</a></li>
-          <li><a href="#descargas">Descargas</a></li>
-          <li><a href="#perdidas">Pérdidas</a></li>
-        </ul>
-      </div>
-      <div class="foot-col">
-        <h5>Empezar</h5>
-        <ul>
-          <li><a href="/registro.html?giro=restaurante">Crear cuenta</a></li>
-          <li><a href="/marketplace.html#pricing">Precios</a></li>
-          <li><a href="#cocina">Demo en vivo</a></li>
-          <li><a href="mailto:soporte@salvadorex.mx">Soporte</a></li>
-        </ul>
-      </div>
-      <div class="foot-col">
-        <h5>Volvix</h5>
-        <ul>
-          <li><a href="#">Otros giros</a></li>
-          <li><a href="#">Nosotros</a></li>
-          <li><a href="#">Privacidad</a></li>
-          <li><a href="#">Términos</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="foot-bottom">
-      <span>© 2026 Comandero · Una marca de Volvix Systems</span>
-      <span>Hecho en México 🇲🇽 · MX · NL · 2026</span>
-    </div>
-  </div>
-</footer>
+<!-- Brand config (sourced from brands.config.js) -->
+<script src="brands.config.js"></script>
 
 <script>
+'use strict';
+
+// ============================================================
+// MOTOR — render any brand from config
+// ============================================================
 (function(){
-  'use strict';
 
-  // ============ Order Up notification cycling ============
-  var orderUp = document.getElementById('order-up');
-  var mesaEl = document.getElementById('ou-mesa');
-  var mesas = [4, 7, 11, 2, 14, 9, 6, 3, 15, 8];
-  var mesaIdx = 0;
-  function fireOrderUp(){
-    mesaEl.textContent = mesas[mesaIdx % mesas.length];
-    mesaIdx++;
-    orderUp.classList.add('show');
-    setTimeout(function(){ orderUp.classList.remove('show'); }, 3500);
+  // ICONS (Tabler-style, line)
+  const ICONS = {
+    archive:  '<path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"/>',
+    bookmark: '<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>',
+    percent:  '<line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>',
+    camera:   '<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>',
+    barcode:  '<path d="M3 5v14M7 5v14M11 5v14M15 5v14M19 5v14"/>',
+    truck:    '<rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>',
+    grid:     '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>',
+    monitor:  '<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
+    split:    '<polyline points="22 12 18 8 18 16 22 12"/><polyline points="2 12 6 16 6 8 2 12"/>',
+    edit:     '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z"/>',
+    gift:     '<polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/>',
+    calendar: '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+    message:  '<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/>',
+    package:  '<path d="M16.5 9.4L7.5 4.21M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16zM3.27 6.96L12 12.01l8.73-5.05M12 22.08V12"/>',
+    star:     '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+    bell:     '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/>',
+    shuffle:  '<polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/>',
+    shield:   '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+    phone:    '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>',
+  };
+  function icon(name){
+    return '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + (ICONS[name] || ICONS.star) + '</svg>';
   }
-  // Fire first one after 4s, then every 8s
-  setTimeout(function(){
-    fireOrderUp();
-    setInterval(fireOrderUp, 8000);
-  }, 4000);
 
-  // ============ KDS Clock ============
-  var clock = document.getElementById('kds-clock');
-  function tick(){
-    var d = new Date();
-    var h = String(d.getHours()).padStart(2,'0');
-    var m = String(d.getMinutes()).padStart(2,'0');
-    var s = String(d.getSeconds()).padStart(2,'0');
-    if (clock) clock.textContent = h + ':' + m + ':' + s;
+  // ============================================
+  // APPLY PALETTE + FONTS TO CSS VARS
+  // ============================================
+  function applyTheme(brand){
+    const r = document.documentElement;
+    const p = brand.palette;
+    r.style.setProperty('--bg',      p.bg);
+    r.style.setProperty('--surface', p.surface);
+    r.style.setProperty('--paper',   p.paper);
+    r.style.setProperty('--ink',     p.ink);
+    r.style.setProperty('--ink2',    p.ink2);
+    r.style.setProperty('--muted',   p.muted);
+    r.style.setProperty('--line',    p.line);
+    r.style.setProperty('--accent',  p.accent);
+    r.style.setProperty('--accent2', p.accent2 || p.accent);
+    r.style.setProperty('--display-font', '"' + brand.fonts.display + '", serif');
+    r.style.setProperty('--body-font',    '"' + brand.fonts.body + '", system-ui, sans-serif');
+    r.style.setProperty('--script-font',  '"' + brand.fonts.script + '", cursive');
+    r.style.setProperty('--mono-font',    '"' + brand.fonts.mono + '", monospace');
+    document.body.setAttribute('data-vibe', brand.vibe);
+
+    // SEO
+    document.title = brand.brand + ' — ' + brand.tagline;
+    const desc = document.querySelector('meta[name="description"]');
+    if (desc) desc.setAttribute('content', brand.tagline);
   }
-  tick(); setInterval(tick, 1000);
 
-  // ============ KDS countdown for cards ============
-  var countdowns = document.querySelectorAll('.kds-card .countdown span:last-child');
-  var kdsValues = countdowns.length ? Array.from(countdowns).map(function(el){
-    var t = el.textContent.trim();
-    if (t.includes(':')) {
-      var p = t.split(':');
-      return parseInt(p[0])*60 + parseInt(p[1]);
-    }
-    return null;
-  }) : [];
-  setInterval(function(){
-    countdowns.forEach(function(el, i){
-      if (kdsValues[i] === null) return;
-      kdsValues[i]++;
-      var m = String(Math.floor(kdsValues[i] / 60)).padStart(2,'0');
-      var s = String(kdsValues[i] % 60).padStart(2,'0');
-      el.textContent = m + ':' + s;
+  // ============================================
+  // RENDER SECTIONS
+  // ============================================
+  function renderNav(b){
+    return `<nav class="vmotor-nav">
+      <div class="container nav-inner">
+        <a href="#" class="v-logo">
+          <div class="v-logo-mark">${b.brand[0]}</div>
+          ${b.brand}
+        </a>
+        <div class="v-nav-links">
+          <a href="#galeria">Galería</a>
+          <a href="#contexto">Sistema</a>
+          <a href="#funciones">Funciones</a>
+          <a href="#perdidas">Pérdidas</a>
+        </div>
+        <div class="v-nav-cta">
+          <a href="/login.html" class="v-btn v-btn-ghost">Acceder</a>
+          <a href="#cta" class="v-btn v-btn-primary">Empezar gratis</a>
+        </div>
+      </div>
+    </nav>`;
+  }
+
+  function renderHero(b){
+    return `<section class="v-hero">
+      <div class="container v-hero-grid">
+        <div>
+          <div class="v-hero-eyebrow">${b.hero.eyebrow}</div>
+          <h1 class="v-h1">${b.hero.h1}</h1>
+          <p class="v-deck">${b.hero.deck}</p>
+          <div class="v-ctas">
+            <a href="#cta" class="v-btn v-btn-primary v-btn-lg">
+              ${b.hero.ctaPrimary}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            </a>
+            <a href="#galeria" class="v-btn v-btn-ghost v-btn-lg">${b.hero.ctaSecondary}</a>
+          </div>
+          <div class="v-meta-line">${b.hero.metaLine}</div>
+        </div>
+        <div class="v-hero-image">
+          <div class="v-hero-pricing">
+            <div class="v-hero-pricing-tag">Desde</div>
+            <div class="v-hero-pricing-v">$0</div>
+            <div class="v-hero-pricing-sub">MXN / mes</div>
+          </div>
+          <img src="${b.images.hero}" alt="${b.images.heroAlt || b.brand}" onerror="this.style.opacity=.3">
+        </div>
+      </div>
+    </section>`;
+  }
+
+  function renderGallery(b){
+    const items = b.images.showcase.map((img, i) => `
+      <div class="v-gallery-item ${img.size || 'md'}">
+        <img src="${img.url}" alt="${img.tag}" loading="lazy" onerror="this.style.opacity=.2">
+        <span class="tag">${img.tag}</span>
+      </div>
+    `).join('');
+    return `<section class="v-gallery" id="galeria">
+      <div class="container">
+        <div class="v-gallery-head">
+          <div>
+            <div class="v-section-tag">— Catálogo</div>
+            <h2 class="v-section-h">Así se ve ${b.brand} en <em>${b.giroPlural}</em></h2>
+          </div>
+          <div class="v-gallery-credits">
+            ${b.images.showcase.length} imágenes<br>
+            <b>Catálogo en vivo</b><br>
+            Hecho para ${b.giro}
+          </div>
+        </div>
+        <div class="v-gallery-grid">${items}</div>
+      </div>
+    </section>`;
+  }
+
+  function renderContext(b){
+    const cards = b.images.context.map((c, i) => `
+      <div class="v-context-card">
+        <div class="v-context-img">
+          <img src="${c.url}" alt="${c.caption}" loading="lazy" onerror="this.style.opacity=.2">
+        </div>
+        <div class="v-context-card-body">
+          <div class="v-context-num">No. 0${i+1}</div>
+          <div class="v-context-cap">${c.caption}</div>
+        </div>
+      </div>
+    `).join('');
+    return `<section class="v-context" id="contexto">
+      <div class="container">
+        <div class="v-section-tag">— Sistema en uso</div>
+        <h2 class="v-section-h">Así funciona en <em>tu ${b.giro}</em></h2>
+        <div class="v-context-grid">${cards}</div>
+      </div>
+    </section>`;
+  }
+
+  function renderFeatures(b){
+    const cards = b.features.map(f => `
+      <div class="v-feat">
+        <div class="v-feat-ico">${icon(f.ico)}</div>
+        <h3>${f.h}</h3>
+        <p>${f.d}</p>
+      </div>
+    `).join('');
+    return `<section class="v-features" id="funciones">
+      <div class="container">
+        <div class="v-section-tag">— Funciones específicas</div>
+        <h2 class="v-section-h">6 herramientas para <em>${b.giroPlural}</em></h2>
+        <div class="v-features-grid">${cards}</div>
+      </div>
+    </section>`;
+  }
+
+  function renderStats(b){
+    const cells = b.stats.map(s => `
+      <div class="v-stat">
+        <div class="v-stat-v" data-target="${s.v}" data-prefix="${s.prefix||''}" data-suffix="${s.suffix||''}">${s.prefix||''}0${s.suffix||''}</div>
+        <div class="v-stat-l">${s.l}</div>
+      </div>
+    `).join('');
+    return `<section class="v-stats">
+      <div class="container v-stats-inner">
+        <div class="v-stats-grid">${cells}</div>
+      </div>
+    </section>`;
+  }
+
+  function renderQuote(b){
+    return `<section class="v-quote">
+      <div class="container v-quote-inner">
+        <p class="v-quote-text">${b.quote.text}</p>
+        <div class="v-quote-sig">— ${b.quote.sig}</div>
+        <div class="v-quote-attr">${b.quote.role}</div>
+      </div>
+    </section>`;
+  }
+
+  function renderThefts(b){
+    const cards = b.thefts.map((t, i) => `
+      <article class="v-theft">
+        <div class="v-theft-rob">
+          <div class="v-theft-tag">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Robo 0${i+1}
+          </div>
+          <h4>${t.title}</h4>
+          <p>${t.rob}</p>
+        </div>
+        <div class="v-theft-fix">
+          <div class="v-theft-fix-tag">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>
+            Cómo ${b.brand} lo evita
+          </div>
+          <p>${t.fix}</p>
+        </div>
+      </article>
+    `).join('');
+    return `<section class="v-thefts" id="perdidas">
+      <div class="container v-thefts-inner">
+        <div class="v-thefts-head">
+          <div class="v-thefts-tag"><span class="dot"></span>Pérdidas invisibles</div>
+          <h2 class="v-thefts-h">Así te roban en <em>tu ${b.giro}</em></h2>
+          <p class="v-thefts-lead">Es incómodo decirlo, pero todos los dueños de ${b.giroPlural} lo viven. Estos son los 3 más comunes y cómo ${b.brand} los corta de raíz.</p>
+        </div>
+        <div class="v-theft-grid">${cards}</div>
+      </div>
+    </section>`;
+  }
+
+  function renderCTA(b){
+    return `<section class="v-cta" id="cta">
+      <div class="container v-cta-inner">
+        <div class="v-cta-tag">Empezar hoy</div>
+        <h2 class="v-cta-h">Tu siguiente <em>venta</em>, más rápida.</h2>
+        <p class="v-cta-p">Crea tu cuenta, descarga ${b.brand}, configura tu ${b.giro} y empieza a vender hoy mismo. <strong>Sin tarjeta. Sin compromiso.</strong></p>
+        <div class="v-cta-ctas">
+          <a href="/registro.html?giro=restaurante" class="v-btn v-btn-primary v-btn-lg">
+            Empezar gratis →
+          </a>
+          <a href="https://wa.me/528112345678?text=Hola%20vengo%20de%20Volvix%2C%20quiero%20hablar%20con%20alguien" class="v-btn v-btn-ghost v-btn-lg" target="_blank" rel="noopener">Hablar con humano</a>
+        </div>
+        <div class="v-cta-checks">
+          <div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Sin tarjeta</div>
+          <div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Setup 5 min</div>
+          <div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Offline 100%</div>
+          <div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Soporte MX</div>
+        </div>
+      </div>
+    </section>`;
+  }
+
+  function renderFooter(b){
+    return `<footer class="v-footer">
+      <div class="container">
+        <div class="v-foot-grid">
+          <div class="v-foot-brand">
+            <a href="#" class="v-logo">
+              <div class="v-logo-mark">${b.brand[0]}</div>
+              ${b.brand}
+            </a>
+            <p>${b.tagline}.</p>
+            <div class="v-foot-powered">Powered by <b>Volvix Systems</b></div>
+          </div>
+          <div class="v-foot-col"><h5>Sistema</h5><ul>
+            <li><a href="#galeria">Catálogo</a></li>
+            <li><a href="#contexto">En uso</a></li>
+            <li><a href="#funciones">Funciones</a></li>
+            <li><a href="#perdidas">Pérdidas</a></li>
+          </ul></div>
+          <div class="v-foot-col"><h5>Empezar</h5><ul>
+            <li><a href="/registro.html?giro=restaurante">Crear cuenta</a></li>
+            <li><a href="/marketplace.html#pricing">Precios</a></li>
+            <li><a href="#galeria">Demo</a></li>
+            <li><a href="mailto:soporte@salvadorex.mx">Soporte</a></li>
+          </ul></div>
+          <div class="v-foot-col"><h5>Volvix</h5><ul>
+            <li><a href="../motor.html">Otros giros</a></li>
+            <li><a href="/marketplace.html#nosotros">Nosotros</a></li>
+            <li><a href="/aviso-privacidad.html">Privacidad</a></li>
+            <li><a href="/terminos.html">Términos</a></li>
+          </ul></div>
+        </div>
+        <div class="v-foot-bottom">
+          <span>© 2026 ${b.brand} · Una marca de Volvix Systems</span>
+          <span>MX · NL · Hecho en México</span>
+        </div>
+      </div>
+    </footer>`;
+  }
+
+  // ============================================
+  // MAIN RENDER
+  // ============================================
+  function renderBrand(b){
+    applyTheme(b);
+    const app = document.getElementById('app');
+    app.innerHTML = [
+      renderNav(b),
+      renderHero(b),
+      renderGallery(b),
+      renderContext(b),
+      renderFeatures(b),
+      renderStats(b),
+      renderQuote(b),
+      renderThefts(b),
+      renderCTA(b),
+      renderFooter(b),
+    ].join('\n');
+
+    document.body.classList.add('loaded');
+
+    // Count-up animation on stats
+    const so = new IntersectionObserver(es => {
+      es.forEach(e => {
+        if (e.isIntersecting && !e.target.dataset.counted) {
+          e.target.dataset.counted = '1';
+          countUp(e.target);
+        }
+      });
+    }, {threshold:.5});
+    document.querySelectorAll('.v-stat-v[data-target]').forEach(el => so.observe(el));
+
+    // Reveal on scroll
+    const ro = new IntersectionObserver(es => {
+      es.forEach(e => { if (e.isIntersecting) { e.target.style.opacity='1'; e.target.style.transform='translateY(0)'; } });
+    }, {threshold:.1});
+    ['.v-gallery','.v-context','.v-features','.v-stats','.v-quote','.v-thefts','.v-cta'].forEach(sel => {
+      const el = document.querySelector(sel);
+      if (el) {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(24px)';
+        el.style.transition = 'opacity .8s cubic-bezier(.2,.8,.2,1), transform .8s cubic-bezier(.2,.8,.2,1)';
+        ro.observe(el);
+      }
     });
-  }, 1000);
+  }
 
-  // ============ Count-up stats ============
   function countUp(el){
-    var target = parseFloat(el.dataset.target || '0');
-    if (!target) return;
-    var suffix = el.dataset.suffix || '';
-    var start = performance.now();
-    var dur = 1800;
+    const target = parseFloat(el.dataset.target);
+    if (isNaN(target) || target === 0) {
+      el.textContent = (el.dataset.prefix||'') + el.dataset.target + (el.dataset.suffix||'');
+      return;
+    }
+    const prefix = el.dataset.prefix || '';
+    const suffix = el.dataset.suffix || '';
+    const start = performance.now();
+    const dur = 1600;
     function step(now){
-      var p = Math.min((now-start)/dur, 1);
-      var eased = 1 - Math.pow(1-p, 3);
-      var val = Math.round(target * eased);
-      el.textContent = val + suffix;
+      const p = Math.min((now-start)/dur, 1);
+      const eased = 1 - Math.pow(1-p, 3);
+      const v = Math.round(target * eased);
+      const formatted = target >= 1000 ? v.toLocaleString('es-MX') : v;
+      el.textContent = prefix + formatted + suffix;
       if (p < 1) requestAnimationFrame(step);
     }
     requestAnimationFrame(step);
   }
-  var statObs = new IntersectionObserver(function(es){
-    es.forEach(function(e){
-      if (e.isIntersecting && !e.target.dataset.counted) {
-        e.target.dataset.counted = '1';
-        countUp(e.target);
-      }
-    });
-  }, {threshold:.4});
-  document.querySelectorAll('.stat-v[data-target]').forEach(function(el){ statObs.observe(el); });
 
-  // ============ Reveal on scroll ============
-  var revealObs = new IntersectionObserver(function(es){
-    es.forEach(function(e){
-      if (e.isIntersecting) {
-        e.target.style.opacity = '1';
-        e.target.style.transform = 'translateY(0)';
-      }
-    });
-  }, {threshold:.1});
-  document.querySelectorAll('.menu-section,.kds-section,.stats,.quote-section,.robos,.download-section,.cta-final').forEach(function(el){
-    el.style.opacity = '0';
-    el.style.transform = 'translateY(24px)';
-    el.style.transition = 'opacity .8s cubic-bezier(.2,.8,.2,1), transform .8s cubic-bezier(.2,.8,.2,1)';
-    revealObs.observe(el);
-  });
+  // ============================================
+  // PICKER (default home)
+  // ============================================
+  function renderPicker(){
+    const grid = document.getElementById('picker-grid');
+    if (!grid) return;
+    grid.innerHTML = Object.entries(BRANDS).map(([slug, b]) => `
+      <a class="picker-card" href="?b=${slug}">
+        <div class="picker-brand" style="color:${b.palette.accent}">${b.brand}</div>
+        <div class="picker-giro">Sistema para ${b.giroPlural}</div>
+      </a>
+    `).join('');
+  }
+
+  // ============================================
+  // BOOT
+  // ============================================
+  const params = new URLSearchParams(window.location.search);
+  const slug = params.get('b') || params.get('brand');
+  if (slug && BRANDS[slug]) {
+    renderBrand(BRANDS[slug]);
+  } else {
+    renderPicker();
+  }
 
 })();
 </script>

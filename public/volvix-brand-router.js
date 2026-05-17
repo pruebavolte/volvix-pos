@@ -24,8 +24,9 @@
     'restaurante':     { brand: 'Comandero',  url: 'comandero.html'   },
     'taqueria':        { brand: 'Comandero',  url: 'comandero.html'   },
     'pizzeria':        { brand: 'Comandero',  url: 'comandero.html'   },
-    'cafeteria':       { brand: 'Espuma',     url: 'espuma.html'      },
-    'panaderia':       { brand: 'Espuma',     url: 'espuma.html'      },
+    // V6 motor — landings que apuntan a marcas-motor existentes (genericas si missing usan landing-*.html)
+    'cafeteria':       { brand: 'Espuma',     url: 'landing-cafeteria.html' }, // TODO: motor.html?b=espuma cuando este
+    'panaderia':       { brand: 'Espuma',     url: 'landing-panaderia.html' }, // TODO
     'fonda':           { brand: 'Comandero',  url: 'comandero.html'   },
     // BELLEZA
     'barberia':        { brand: 'Navaja',     url: 'navaja.html'      },
@@ -34,7 +35,7 @@
     'spa':             { brand: 'Navaja',     url: 'navaja.html'      },
     // SALUD
     'farmacia':        { brand: 'Receta',     url: 'receta.html'      },
-    'veterinaria':     { brand: 'Pata',       url: 'pata.html'        },
+    'veterinaria':     { brand: 'Pata',       url: 'landing-veterinaria.html' }, // TODO: pata.html cuando motor genere
     'clinica_dental':  { brand: 'Receta',     url: 'receta.html'      },
     'clinica':         { brand: 'Receta',     url: 'receta.html'      },
     // RETAIL
@@ -45,16 +46,16 @@
     'carniceria':      { brand: 'Tendito',    url: 'tendito.html'     },
     'zapateria':       { brand: 'Pareo',      url: 'pareo.html'       },
     'boutique':        { brand: 'Pareo',      url: 'pareo.html'       },
-    'papeleria':       { brand: 'Bloque',     url: 'bloque.html'      },
-    'floreria':        { brand: 'Pétalo',     url: 'petalo.html'      },
+    'papeleria':       { brand: 'Bloque',     url: 'landing-papeleria.html' }, // TODO
+    'floreria':        { brand: 'Pétalo',     url: '/marketplace.html?giro=floreria' }, // TODO: landing-floreria.html not yet
     // SERVICIOS
-    'taller_mecanico': { brand: 'Refacciona', url: 'refacciona.html'  },
-    'lavanderia':      { brand: 'Burbuja',    url: 'burbuja.html'     },
-    'carwash':         { brand: 'Burbuja',    url: 'burbuja.html'     },
-    'gimnasio':        { brand: 'Repe',       url: 'repe.html'        },
+    'taller_mecanico': { brand: 'Refacciona', url: 'landing-taller-mecanico.html' }, // TODO
+    'lavanderia':      { brand: 'Burbuja',    url: 'landing-lavanderia.html' }, // TODO
+    'carwash':         { brand: 'Burbuja',    url: 'landing-carwash.html' }, // TODO
+    'gimnasio':        { brand: 'Repe',       url: 'landing-gimnasio.html' }, // TODO
     // EDUCACION
-    'colegio':         { brand: 'Bloque',     url: 'bloque.html'      },
-    'escuela':         { brand: 'Bloque',     url: 'bloque.html'      },
+    'colegio':         { brand: 'Bloque',     url: 'landing-colegio.html' }, // TODO
+    'escuela':         { brand: 'Bloque',     url: 'landing-colegio.html' }, // TODO
   };
 
   // ---- Aliases (lo que el usuario escribe) → key -------------
