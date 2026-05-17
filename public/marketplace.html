@@ -1556,6 +1556,7 @@ function vlxShareClientPWA(){ var url = location.origin + '/app/'; if(navigator.
      Solucion: cargar giros-catalog.js con defer, y envolver el inline en
      DOMContentLoaded para que se ejecute despues del primer paint. -->
 <script defer src="giros-catalog.js"></script>
+<script defer src="/volvix-brand-router.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   const TOP_GIROS = ['barberia', 'restaurante', 'farmacia', 'abarrotes', 'taqueria', 'colegio', 'clinica_dental', 'taller_mecanico', 'gimnasio', 'fruteria', 'cafeteria', 'minisuper'];
