@@ -1,23 +1,18 @@
 {
-  "version": "1.0.346",
+  "version": "1.0.347",
   "major": 1,
   "minor": 0,
-  "patch": 346,
+  "patch": 347,
   "commit": "pending",
   "branch": "main",
-  "date": "2026-05-17T20:00:00.000Z",
-  "built_at": "2026-05-17T20:00:00.000Z",
+  "date": "2026-05-17T21:00:00.000Z",
+  "built_at": "2026-05-17T21:00:00.000Z",
   "changelog": [
-    "V8 motor-v3 ZIP integrado: 5 marcas hero nuevas (pulso/brillo/folio/forja/tarima) que cubren los 200 giros 'identitarios' que el usuario iba a generar manualmente",
-    "V8: pulso → Salud y bienestar (clínicas, consultorios, dental, óptica, fisio, nutriólogo, psicólogo) - vibe clinical - liveDemo booking",
-    "V8: brillo → Belleza y estética (salones, spa, uñas, depilación, masajes, tatuajes) - vibe editorial - liveDemo booking",
-    "V8: folio → Servicios profesionales (despachos, abogados, contadores, notarios, asesores, marketing, diseño) - vibe editorial - liveDemo booking",
-    "V8: forja → Deporte y recreación (gimnasios, crossfit, yoga, pilates, danza, artes marciales, natación) - vibe vibrant - liveDemo booking",
-    "V8: tarima → Entretenimiento y eventos (bares, antros, salones eventos, banquetes, dj, karaoke, fotografía eventos) - vibe darkPremium - liveDemo kds",
-    "V8: 292 aliases nuevos en volvix-brand-router.js para fuzzy matching de los 200 giros a las 5 marcas",
-    "V8: total ahora 216 marcas premium activas (11 hero V6 + 200 auto V7 + 5 hero V8 del motor-v3)",
-    "V8: NO sobrescritas las 5 marcas existentes (pareo/comandero/navaja/receta/tendito) - se mantienen versiones V6 con galleries Unsplash + sticky CTA + social proof toast",
-    "V7 motor: 200 marcas premium auto-generadas - alimentos + retail + servicios técnicos + educación",
-    "V6 motor v3: 6 marcas premium nuevas (Espuma, Pata, Refacciona, Pétalo, Repe, Burbuja)"
+    "V8.1 FIX router: aliases viejos V6 corregidos - 'dental'/'dentista'/'clinica' iban a Receta (farmacia) cuando deberían ir a Pulso (salud). 'estetica'/'salon'/'spa' iban a Navaja (barberia hombres) cuando deberían ir a Brillo (belleza/spa)",
+    "V8.1 FIX: Bug detectado físicamente con Chrome MCP - usuario escribió 'dentista' y fue a Receta (farmacia) en vez de Pulso. Root cause: mi script V8 hizo seenAliases.add() de aliases viejos sin sobrescribir, respetando mappings V6 incorrectos.",
+    "V8.1 FIX: actualizadas líneas 34-42 de VLX_BRANDS + líneas 289-352 de VLX_ALIASES con remappings correctos",
+    "V8 motor-v3 ZIP integrado: 5 marcas hero nuevas (pulso/brillo/folio/forja/tarima)",
+    "V7 motor: 200 marcas premium auto-generadas",
+    "V6 motor v3: 6 marcas premium nuevas"
   ]
 }

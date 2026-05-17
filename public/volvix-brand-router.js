@@ -31,15 +31,15 @@
     'fonda':           { brand: 'Comandero',  url: 'comandero.html'   },
     // BELLEZA
     'barberia':        { brand: 'Navaja',     url: 'navaja.html'      },
-    'estetica':        { brand: 'Navaja',     url: 'navaja.html'      },
-    'salon':           { brand: 'Navaja',     url: 'navaja.html'      },
-    'spa':             { brand: 'Navaja',     url: 'navaja.html'      },
+    'estetica':        { brand: 'Brillo',    url: 'brillo.html'      }, // V8 fix
+    'salon':           { brand: 'Brillo',    url: 'brillo.html'      }, // V8 fix
+    'spa':             { brand: 'Brillo',    url: 'brillo.html'      }, // V8 fix
     // SALUD
     'farmacia':        { brand: 'Receta',     url: 'receta.html'      },
     'veterinaria':     { brand: 'Pata',       url: 'pata.html'        }, // NUEVO premium
     'vet':             { brand: 'Pata',       url: 'pata.html'        }, // NUEVO
-    'clinica_dental':  { brand: 'Receta',     url: 'receta.html'      },
-    'clinica':         { brand: 'Receta',     url: 'receta.html'      },
+    'clinica_dental':  { brand: 'Pulso',      url: 'pulso.html'       }, // V8 fix (Receta es farmacia, no dental)
+    'clinica':         { brand: 'Pulso',      url: 'pulso.html'       }, // V8 fix (Receta es farmacia, no clinica)
     // RETAIL
     'abarrotes':       { brand: 'Tendito',    url: 'tendito.html'     },
     'fruteria':        { brand: 'Tendito',    url: 'tendito.html'     },
@@ -286,10 +286,13 @@
     'cafeteria':        'cafeteria',
     'cafe':             'cafeteria',
     'coffee':           'cafeteria',
-    'estetica':         'estetica',
-    'salon de belleza': 'salon',
-    'salon':            'salon',
-    'spa':              'spa',
+    'estetica':         'brillo',
+    'estética':         'brillo',
+    'salon de belleza': 'brillo',
+    'salón de belleza': 'brillo',
+    'salon':            'brillo',
+    'salón':            'brillo',
+    'spa':              'brillo',
     'farmacia':         'farmacia',
     'botica':           'farmacia',
     'restaurante':      'restaurante',
@@ -343,9 +346,13 @@
     'super':            'minisuper',
     'carniceria':       'carniceria',
     'carnes':           'carniceria',
-    'clinica':          'clinica',
-    'dental':           'clinica_dental',
-    'dentista':         'clinica_dental',
+    'clinica':          'pulso',
+    'clínica':          'pulso',
+    'dental':           'pulso',
+    'dentista':         'pulso',
+    'clinica dental':   'pulso',
+    'clínica dental':   'pulso',
+    'consultorio dental': 'pulso',
     // V7 — aliases de las 200 marcas premium (4 sectores)
     'taqueria al pastor'                         : 'trompo',
     'taquería al pastor'                         : 'trompo',
