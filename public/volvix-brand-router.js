@@ -260,9 +260,26 @@
     }
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
+  // V6 FIX: el marketplace.html dentro de su DOMContentLoaded callback hace
+  // `window.quickSearch = quickSearch (local)` en la linea 1662 y `window.searchGiro = ...`
+  // en la 2138. Si el router instala sus overrides durante DOMContentLoaded
+  // tambien, el orden de listeners hace que el marketplace SOBREESCRIBA el
+  // override del router. Para evitarlo, instalamos en `window.load` que dispara
+  // DESPUES de TODOS los DOMContentLoaded callbacks. Adicionalmente reaplicamos
+  // 50ms despues por si algun otro script tardio toca window.quickSearch.
+  function safeInit(){
     init();
+    setTimeout(function(){
+      // Re-aplicar override si algun otro script lo reemplazo despues
+      var qs = String(window.quickSearch || '');
+      if (qs.indexOf('VLX_BRANDS') === -1 && qs.indexOf('brand') === -1) {
+        installOverrides();
+      }
+    }, 50);
+  }
+  if (document.readyState === 'complete') {
+    safeInit();
+  } else {
+    window.addEventListener('load', safeInit);
   }
 })();
