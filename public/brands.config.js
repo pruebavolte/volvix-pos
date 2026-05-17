@@ -1,14 +1,5 @@
 /* ============================================================
-   VOLVIX · BRANDS CONFIG
-   ----------------------------------------------------------------
-   Cada marca = un objeto. El motor (motor.html) toma esto y
-   renderiza la landing completa.
-
-   Para agregar una marca nueva:
-   1. Copia un objeto entero (ej. pareo) y dale nuevo slug
-   2. Cambia paleta, fuentes, copy, imágenes
-   3. Lista la marca nueva en BRANDS al final
-   4. Visita motor.html?b=nuevo-slug
+   VOLVIX · BRANDS CONFIG (v2 — con liveDemo por giro)
    ============================================================ */
 
 const BRAND_PAREO = {
@@ -17,39 +8,29 @@ const BRAND_PAREO = {
   tagline: 'El sistema para zapaterías que sí cuentan cada par',
   giro: 'zapatería',
   giroPlural: 'zapaterías',
-  vibe: 'editorial', // cream/burgundy refined
+  vibe: 'editorial',
 
   palette: {
-    bg:      '#F5EFE4',
-    surface: '#FFFFFF',
-    paper:   '#FAF6EC',
-    ink:     '#100E0A',
-    ink2:    '#2A2520',
-    muted:   '#6B6359',
-    line:    '#D9D1BD',
-    accent:  '#7A1818',
-    accent2: '#A82828',
+    bg:'#F5EFE4', surface:'#FFFFFF', paper:'#FAF6EC',
+    ink:'#100E0A', ink2:'#2A2520', muted:'#6B6359',
+    line:'#D9D1BD', accent:'#7A1818', accent2:'#A82828',
   },
   fonts: {
-    display: 'Bodoni Moda',
-    body:    'Manrope',
-    script:  'Italianno',
-    mono:    'JetBrains Mono',
+    display:'Bodoni Moda', body:'Manrope', script:'Italianno', mono:'JetBrains Mono',
   },
 
   hero: {
-    eyebrow: 'El sistema para zapaterías mexicanas · 2026',
-    h1: 'Cada <em>par</em>.<br>Cada <em>talla</em>.<br>Contado.',
-    deck: 'El punto de venta hecho para que en tu zapatería no se pierda un solo par. Inventario por talla, apartados con anticipo, devoluciones con foto, comisiones por vendedor.',
-    ctaPrimary: 'Empezar gratis',
-    ctaSecondary: 'Ver el lookbook',
-    metaLine: '$0 inicial · sin tarjeta · setup en 5 min',
+    eyebrow:'El sistema para zapaterías mexicanas · 2026',
+    h1:'Cada <em>par</em>.<br>Cada <em>talla</em>.<br>Contado.',
+    deck:'El punto de venta hecho para que en tu zapatería no se pierda un solo par. Inventario por talla, apartados con anticipo, devoluciones con foto, comisiones por vendedor.',
+    ctaPrimary:'Empezar gratis', ctaSecondary:'Ver el lookbook',
+    metaLine:'$0 inicial · sin tarjeta · setup en 5 min',
   },
 
   images: {
-    hero: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&h=1600&fit=crop&q=85',
-    heroAlt: 'Tenis modernos sobre fondo amarillo',
-    showcase: [
+    hero:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&h=1600&fit=crop&q=85',
+    heroAlt:'Tenis modernos sobre fondo amarillo',
+    showcase:[
       {url:'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=1200&h=900&fit=crop&q=80',tag:'Sneakers urbanos',size:'lg'},
       {url:'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=900&h=1200&fit=crop&q=80',tag:'Botas dama',size:'md'},
       {url:'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=900&h=1200&fit=crop&q=80',tag:'Sneakers blancos',size:'sm'},
@@ -60,11 +41,29 @@ const BRAND_PAREO = {
       {url:'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=900&h=1200&fit=crop&q=80',tag:'Detalle',size:'sm'},
       {url:'https://images.unsplash.com/photo-1571245840739-7e8d65116c8a?w=1200&h=900&fit=crop&q=80',tag:'Niños',size:'md'},
     ],
-    context: [
-      {url:'https://images.unsplash.com/photo-1607522370275-f14206abe5d3?w=800&h=600&fit=crop&q=80', caption:'Stock por talla visible al instante'},
-      {url:'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=800&h=600&fit=crop&q=80', caption:'Vendedor escanea y confirma'},
-      {url:'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=800&h=600&fit=crop&q=80', caption:'Devolución con foto obligatoria'},
+    context:[
+      {url:'https://images.unsplash.com/photo-1607522370275-f14206abe5d3?w=800&h=600&fit=crop&q=80',caption:'Stock por talla visible al instante'},
+      {url:'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=800&h=600&fit=crop&q=80',caption:'Vendedor escanea y confirma'},
+      {url:'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=800&h=600&fit=crop&q=80',caption:'Devolución con foto obligatoria'},
     ],
+  },
+
+  liveDemo: {
+    type:'stock',
+    eyebrow:'Inventario en vivo',
+    title:'Tu stock, <em>por talla y color</em>, ahora mismo',
+    deck:'Ningún par se "pierde mágicamente". Cada combinación tallaxcolor tiene su contador. Cuando una talla cae a 2 o menos, te avisa por WhatsApp. Cuando se acaba, se quita del catálogo digital solo.',
+    secondary:'En las zapaterías chicas, perder el control de tallas significa decirle "no tengo" al cliente cuando sí tienes, o ofrecer un par que ya no existe. Pareo elimina ambos errores.',
+    data:{
+      product:'Nike Air Max 90',
+      tallas:[23, 24, 25, 26, 27, 28, 29, 30],
+      stock:[
+        {color:'Negro', vals:[0, 2, 5, 8, 3, 1, 0, 0]},
+        {color:'Blanco', vals:[1, 3, 7, 4, 6, 0, 0, 0]},
+        {color:'Gris', vals:[2, 4, 6, 5, 2, 1, 0, 0]},
+      ],
+      lowThreshold:2,
+    },
   },
 
   features: [
@@ -77,92 +76,87 @@ const BRAND_PAREO = {
   ],
 
   stats: [
-    {v:'247',  l:'Pares en stock'},
-    {v:'42',   l:'Pares vendidos hoy'},
-    {v:'5',    l:'Min de setup', suffix:'min'},
-    {v:'0',    l:'Costo inicial', prefix:'$'},
+    {v:'247', l:'Pares en stock'},
+    {v:'42', l:'Pares vendidos hoy'},
+    {v:'5', l:'Min de setup', suffix:'min'},
+    {v:'0', l:'Costo inicial', prefix:'$'},
   ],
 
   quote: {
-    text: 'Antes cerraba caja con calculadora y un cuaderno. <span class="hl">Las comisiones eran un drama cada quincena</span>. Con Pareo mi vendedor ve sus ventas en vivo y yo me voy a dormir tranquilo.',
-    sig: 'Roberto M.',
-    role: 'Zapatería en Apodaca, NL',
+    text:'Antes cerraba caja con calculadora y un cuaderno. <span class="hl">Las comisiones eran un drama cada quincena</span>. Con Pareo mi vendedor ve sus ventas en vivo y yo me voy a dormir tranquilo.',
+    sig:'Roberto M.',
+    role:'Zapatería en Apodaca, NL',
   },
 
   thefts: [
-    {
-      title: 'Pares que "desaparecen" en mermas',
-      rob: 'El empleado mete pares a "mermas" o "regalo" sin justificar y se los lleva. En una zapatería promedio son 4 a 6 pares al mes — entre $1,500 y $3,000 perdidos.',
-      fix: 'Cada par tiene su <strong>número de serie único</strong>. Si sale del inventario sin venta registrada, te llega notificación al WhatsApp. Auditoría automática cada turno.',
-    },
-    {
-      title: '"Cambio de talla" con par usado',
-      rob: 'Cliente compra unos tenis, los usa el fin de semana, los regresa diciendo "no me quedaron" y se lleva otros. Tú revendes los usados como nuevos sin saber.',
-      fix: 'Devolución exige <strong>foto obligatoria del par y la etiqueta</strong> con timestamp. Si fueron usados, alerta al gerente. Bloquea cambios después de 7 días sin foto de etiqueta intacta.',
-    },
-    {
-      title: 'Venta "por fuera" sin pasar por caja',
-      rob: 'Vendedor le hace "precio especial" a un conocido, cobra en efectivo y se queda con todo. Nunca pasó por el sistema, tú nunca te enteras del par perdido.',
-      fix: 'Comisiones se pagan <strong>solo sobre ventas registradas</strong>. Si no captura, no gana. Reporte diario: pares fuera de stock vs tickets emitidos.',
-    },
+    {title:'Pares que "desaparecen" en mermas',
+     rob:'El empleado mete pares a "mermas" o "regalo" sin justificar y se los lleva. En una zapatería promedio son 4 a 6 pares al mes — entre $1,500 y $3,000 perdidos.',
+     fix:'Cada par tiene su <strong>número de serie único</strong>. Si sale del inventario sin venta registrada, te llega notificación al WhatsApp. Auditoría automática cada turno.'},
+    {title:'"Cambio de talla" con par usado',
+     rob:'Cliente compra unos tenis, los usa el fin de semana, los regresa diciendo "no me quedaron" y se lleva otros. Tú revendes los usados como nuevos sin saber.',
+     fix:'Devolución exige <strong>foto obligatoria del par y la etiqueta</strong> con timestamp. Si fueron usados, alerta al gerente. Bloquea cambios después de 7 días sin foto de etiqueta intacta.'},
+    {title:'Venta "por fuera" sin pasar por caja',
+     rob:'Vendedor le hace "precio especial" a un conocido, cobra en efectivo y se queda con todo. Nunca pasó por el sistema, tú nunca te enteras del par perdido.',
+     fix:'Comisiones se pagan <strong>solo sobre ventas registradas</strong>. Si no captura, no gana. Reporte diario: pares fuera de stock vs tickets emitidos.'},
   ],
 };
 
 
 const BRAND_COMANDERO = {
-  slug: 'comandero',
-  brand: 'Comandero',
-  tagline: 'El POS hecho para que tu cocina nunca pare',
-  giro: 'restaurante',
-  giroPlural: 'restaurantes',
-  vibe: 'vibrant',
+  slug:'comandero', brand:'Comandero',
+  tagline:'El POS hecho para que tu cocina nunca pare',
+  giro:'restaurante', giroPlural:'restaurantes', vibe:'vibrant',
 
   palette: {
-    bg:      '#FFFCF0',
-    surface: '#FFFFFF',
-    paper:   '#FAF3DD',
-    ink:     '#0A0908',
-    ink2:    '#1F1D18',
-    muted:   '#6B6963',
-    line:    '#E8E2C8',
-    accent:  '#F9C829',
-    accent2: '#DC2626',
+    bg:'#FFFCF0', surface:'#FFFFFF', paper:'#FAF3DD',
+    ink:'#0A0908', ink2:'#1F1D18', muted:'#6B6963',
+    line:'#E8E2C8', accent:'#F9C829', accent2:'#DC2626',
   },
-  fonts: {
-    display: 'Archivo Black',
-    body:    'Inter',
-    script:  'Caveat',
-    mono:    'Space Mono',
-  },
+  fonts: { display:'Archivo Black', body:'Inter', script:'Caveat', mono:'Space Mono' },
 
   hero: {
-    eyebrow: 'Sistema POS para restaurantes mexicanos',
-    h1: 'Sírvelo <em>caliente</em>.<br>Cobra <em>rápido</em>.',
-    deck: 'El sistema que reemplaza los papelitos, los gritos y los platillos olvidados. Comandera digital, KDS, división de cuenta y propinas para que tu cocina no pare ni un segundo.',
-    ctaPrimary: 'Empezar gratis',
-    ctaSecondary: 'Ver cocina en vivo',
-    metaLine: '$0 inicial · setup en 5 min · funciona offline',
+    eyebrow:'Sistema POS para restaurantes mexicanos',
+    h1:'Sírvelo <em>caliente</em>.<br>Cobra <em>rápido</em>.',
+    deck:'El sistema que reemplaza los papelitos, los gritos y los platillos olvidados. Comandera digital, KDS, división de cuenta y propinas para que tu cocina no pare ni un segundo.',
+    ctaPrimary:'Empezar gratis', ctaSecondary:'Ver cocina en vivo',
+    metaLine:'$0 inicial · setup en 5 min · funciona offline',
   },
 
   images: {
-    hero: 'https://images.unsplash.com/photo-1599974579688-8dbdd335c77f?w=1200&h=1600&fit=crop&q=85',
-    heroAlt: 'Tacos al pastor mexicanos',
-    showcase: [
+    hero:'https://images.unsplash.com/photo-1599974579688-8dbdd335c77f?w=1200&h=1600&fit=crop&q=85',
+    heroAlt:'Tacos al pastor mexicanos',
+    showcase:[
       {url:'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=1200&h=900&fit=crop&q=80',tag:'Pizza artesanal',size:'lg'},
       {url:'https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=900&h=1200&fit=crop&q=80',tag:'Burger gourmet',size:'md'},
       {url:'https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=900&h=1200&fit=crop&q=80',tag:'Al pastor',size:'sm'},
       {url:'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=900&h=1200&fit=crop&q=80',tag:'Mariscos',size:'sm'},
       {url:'https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=900&h=1200&fit=crop&q=80',tag:'Bowl saludable',size:'md'},
-      {url:'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=900&h=1200&fit=crop&q=80',tag:'Ensalada fresca',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=900&h=1200&fit=crop&q=80',tag:'Ensalada',size:'sm'},
       {url:'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=1200&h=900&fit=crop&q=80',tag:'Desayuno',size:'md'},
       {url:'https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=900&h=1200&fit=crop&q=80',tag:'Carne asada',size:'sm'},
       {url:'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&h=900&fit=crop&q=80',tag:'Steak premium',size:'md'},
     ],
-    context: [
-      {url:'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&h=600&fit=crop&q=80', caption:'Mesera con tablet captura órdenes'},
-      {url:'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&h=600&fit=crop&q=80', caption:'KDS muestra órdenes a cocina'},
-      {url:'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&h=600&fit=crop&q=80', caption:'Pago con QR en la mesa'},
+    context:[
+      {url:'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&h=600&fit=crop&q=80',caption:'Mesera con tablet captura órdenes'},
+      {url:'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&h=600&fit=crop&q=80',caption:'KDS muestra órdenes a cocina'},
+      {url:'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&h=600&fit=crop&q=80',caption:'Pago con QR en la mesa'},
     ],
+  },
+
+  liveDemo: {
+    type:'kds',
+    eyebrow:'En vivo desde tu cocina',
+    title:'Tu KDS, <em>operando</em> en tiempo real',
+    deck:'Cada orden cae directo a la pantalla de cocina. Con su cronómetro, sus modificadores, su mesa. Cocina prepara lo que ve, no lo que recuerda. Si no está en el KDS, no sale del calor.',
+    secondary:'En sábados ocupados, el KDS le salva la cocina al chef. Mesa 04 esperando 3 minutos? Roja. Mesa 11 lista? Verde. Sin gritos, sin papelitos, sin platillos perdidos.',
+    data:{
+      orders:[
+        {mesa:4, time:'21:42', state:'urgent', wait:'03:24', items:['2× Tacos al pastor','1× Quesadilla|+ extra queso','3× Coca-Cola']},
+        {mesa:7, time:'21:44', state:'prep', wait:'01:08', items:['1× Pizza pepperoni','2× Ensalada César','2× Té helado']},
+        {mesa:11, time:'21:38', state:'ready', wait:'SERVIR', items:['1× Hamburguesa|+ extra queso','1× Papas francesas','1× Limonada']},
+        {mesa:2, time:'21:44', state:'queue', wait:'00:42', items:['3× Tacos campechanos|- sin cebolla','1× Guacamole']},
+      ],
+    },
   },
 
   features: [
@@ -176,76 +170,55 @@ const BRAND_COMANDERO = {
 
   stats: [
     {v:'18', l:'Min orden → mesa', suffix:'min'},
-    {v:'100',l:'Comandas sin perderse', suffix:'%'},
-    {v:'5',  l:'Min de setup', suffix:'min'},
-    {v:'0',  l:'Costo inicial', prefix:'$'},
+    {v:'100', l:'Comandas sin perderse', suffix:'%'},
+    {v:'5', l:'Min de setup', suffix:'min'},
+    {v:'0', l:'Costo inicial', prefix:'$'},
   ],
 
   quote: {
-    text: 'Antes los sábados eran un infierno. <span class="hl">Cocina con cinco papelitos al mismo tiempo y la mesera gritando</span>. Con Comandero todo va a la pantalla. El sábado pasado servimos 92 mesas sin un error.',
-    sig: 'Chef Roberto',
-    role: 'Taquería en San Pedro · Monterrey, NL',
+    text:'Antes los sábados eran un infierno. <span class="hl">Cocina con cinco papelitos al mismo tiempo y la mesera gritando</span>. Con Comandero todo va a la pantalla. El sábado pasado servimos 92 mesas sin un error.',
+    sig:'Chef Roberto',
+    role:'Taquería en San Pedro · Monterrey, NL',
   },
 
   thefts: [
-    {
-      title: 'Comanda fantasma',
-      rob: 'Mesera no captura la orden, cocina la prepara igual, cliente paga en efectivo, mesera se queda con todo. En un restaurante de 30 mesas son $4,000 a $8,000 al mes mínimo.',
-      fix: 'Cocina solo prepara <strong>lo que está en el KDS</strong>. Si no está en el sistema, no sale del calor. Cero excepciones. La regla la conoce todo el equipo desde el día 1.',
-    },
-    {
-      title: 'Cancelaciones tras el cobro',
-      rob: 'Mesera cobra al cliente, después "cancela" el ticket diciendo que se equivocó, y se queda con el dinero. Tú ves el ticket cancelado y no preguntas.',
-      fix: 'Cancelar requiere <strong>PIN del gerente + razón escrita</strong>. Reporte semanal de cancelaciones por mesero. Si Pedro cancela 8 a la semana y María 1, sabes algo está raro.',
-    },
-    {
-      title: 'Cortesías sin autorización',
-      rob: '"Eran amigos de mi prima", "se quejó del platillo y le regalé el postre". Empleados regalan comida para hacer amigos. Tú pagas la materia prima.',
-      fix: 'Cortesías exigen <strong>PIN del gerente + motivo + foto del cliente</strong>. Reporte mensual de cortesías por mesero. Patrones raros saltan solos.',
-    },
+    {title:'Comanda fantasma',
+     rob:'Mesera no captura la orden, cocina la prepara igual, cliente paga en efectivo, mesera se queda con todo. En un restaurante de 30 mesas son $4,000 a $8,000 al mes mínimo.',
+     fix:'Cocina solo prepara <strong>lo que está en el KDS</strong>. Si no está en el sistema, no sale del calor. Cero excepciones.'},
+    {title:'Cancelaciones tras el cobro',
+     rob:'Mesera cobra al cliente, después "cancela" el ticket diciendo que se equivocó, y se queda con el dinero.',
+     fix:'Cancelar requiere <strong>PIN del gerente + razón escrita</strong>. Reporte semanal de cancelaciones por mesero.'},
+    {title:'Cortesías sin autorización',
+     rob:'"Eran amigos de mi prima", "se quejó del platillo y le regalé el postre". Empleados regalan comida para hacer amigos.',
+     fix:'Cortesías exigen <strong>PIN del gerente + motivo + foto del cliente</strong>. Reporte mensual por mesero.'},
   ],
 };
 
 
 const BRAND_NAVAJA = {
-  slug: 'navaja',
-  brand: 'Navaja',
-  tagline: 'El sistema para barberías que sí cobran lo que cortan',
-  giro: 'barbería',
-  giroPlural: 'barberías',
-  vibe: 'darkPremium',
+  slug:'navaja', brand:'Navaja',
+  tagline:'El sistema para barberías que sí cobran lo que cortan',
+  giro:'barbería', giroPlural:'barberías', vibe:'darkPremium',
 
   palette: {
-    bg:      '#080706',
-    surface: '#141210',
-    paper:   '#1E1B17',
-    ink:     '#F5F0E4',
-    ink2:    '#D9D2BC',
-    muted:   '#8A8377',
-    line:    'rgba(201,162,76,.25)',
-    accent:  '#C9A24C',
-    accent2: '#8B1F1F',
+    bg:'#080706', surface:'#141210', paper:'#1E1B17',
+    ink:'#F5F0E4', ink2:'#D9D2BC', muted:'#8A8377',
+    line:'rgba(201,162,76,.25)', accent:'#C9A24C', accent2:'#8B1F1F',
   },
-  fonts: {
-    display: 'Oswald',
-    body:    'Inter',
-    script:  'Italianno',
-    mono:    'JetBrains Mono',
-  },
+  fonts: { display:'Oswald', body:'Inter', script:'Italianno', mono:'JetBrains Mono' },
 
   hero: {
-    eyebrow: 'El sistema para barberías mexicanas · 2026',
-    h1: 'Cada <em>corte</em>,<br>cobrado.<br>Cada <em>propina</em>,<br>repartida.',
-    deck: 'Navaja es el punto de venta hecho para barberías serias. Agenda por barbero, comisiones automáticas, propinas digitales y control de productos — para que nada se cobre por fuera.',
-    ctaPrimary: 'Empezar gratis',
-    ctaSecondary: 'Ver agenda en vivo',
-    metaLine: '$0 inicial · setup en 5 min · 100% offline',
+    eyebrow:'El sistema para barberías mexicanas · 2026',
+    h1:'Cada <em>corte</em>,<br>cobrado.<br>Cada <em>propina</em>,<br>repartida.',
+    deck:'Navaja es el punto de venta hecho para barberías serias. Agenda por barbero, comisiones automáticas, propinas digitales y control de productos — para que nada se cobre por fuera.',
+    ctaPrimary:'Empezar gratis', ctaSecondary:'Ver agenda en vivo',
+    metaLine:'$0 inicial · setup en 5 min · 100% offline',
   },
 
   images: {
-    hero: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=1200&h=1600&fit=crop&q=85',
-    heroAlt: 'Sillón de barbería clásica',
-    showcase: [
+    hero:'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=1200&h=1600&fit=crop&q=85',
+    heroAlt:'Sillón de barbería clásica',
+    showcase:[
       {url:'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?w=1200&h=900&fit=crop&q=80',tag:'Corte clásico',size:'lg'},
       {url:'https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=900&h=1200&fit=crop&q=80',tag:'En acción',size:'md'},
       {url:'https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=900&h=1200&fit=crop&q=80',tag:'Barba',size:'sm'},
@@ -256,11 +229,27 @@ const BRAND_NAVAJA = {
       {url:'https://images.unsplash.com/photo-1593702275687-f8b402bf1c14?w=900&h=1200&fit=crop&q=80',tag:'Maestro',size:'sm'},
       {url:'https://images.unsplash.com/photo-1605497788044-5a32c7078486?w=1200&h=900&fit=crop&q=80',tag:'Atmósfera',size:'md'},
     ],
-    context: [
-      {url:'https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=800&h=600&fit=crop&q=80', caption:'Barbero marca cita iniciada'},
-      {url:'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=800&h=600&fit=crop&q=80', caption:'Sillón con cliente activo'},
-      {url:'https://images.unsplash.com/photo-1580618864180-f6d7d39b8ff6?w=800&h=600&fit=crop&q=80', caption:'Inventario de productos al cierre'},
+    context:[
+      {url:'https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=800&h=600&fit=crop&q=80',caption:'Barbero marca cita iniciada'},
+      {url:'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=800&h=600&fit=crop&q=80',caption:'Sillón con cliente activo'},
+      {url:'https://images.unsplash.com/photo-1580618864180-f6d7d39b8ff6?w=800&h=600&fit=crop&q=80',caption:'Inventario de productos al cierre'},
     ],
+  },
+
+  liveDemo: {
+    type:'booking',
+    eyebrow:'Agenda en vivo · Hoy',
+    title:'Tu agenda, <em>cita por cita</em>',
+    deck:'Cada barbero con su calendario, sus citas y sus comisiones. Cliente reserva por WhatsApp, sistema confirma, recordatorio 1 hora antes. Sin doble cita, sin "se me olvidó", sin pelea por el turno.',
+    secondary:'Y cuando el cliente se sienta en el sillón, marcas "iniciado" con un toque. Esa marca es la prueba: si se inició, se cobró.',
+    data:{
+      barberos:[
+        {name:'Roberto', role:'senior', taken:[0,1,3,4,6,7,9,11], active:12},
+        {name:'Diego', role:'junior', taken:[0,2,5,7,10,13], active:14},
+        {name:'Manuel', role:'maestro', taken:[0,1,2,3,4,5,6,9,11,13,15], active:7},
+      ],
+      slots:['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30'],
+    },
   },
 
   features: [
@@ -274,76 +263,55 @@ const BRAND_NAVAJA = {
 
   stats: [
     {v:'247', l:'Cortes este mes'},
-    {v:'92',  l:'Citas que llegaron', suffix:'%'},
-    {v:'5',   l:'Min de setup', suffix:'min'},
-    {v:'0',   l:'Costo inicial', prefix:'$'},
+    {v:'92', l:'Citas que llegaron', suffix:'%'},
+    {v:'5', l:'Min de setup', suffix:'min'},
+    {v:'0', l:'Costo inicial', prefix:'$'},
   ],
 
   quote: {
-    text: 'Antes los lunes eran <span class="hl">drama de comisiones</span>. Quién atendió a quién, qué cobré yo, qué cobró Diego. Con Navaja, cada quien ve sus cortes en su pantalla. Nunca más pizarrita de gises.',
-    sig: 'Roberto Méndez',
-    role: 'Barbería en San Pedro Garza García · NL',
+    text:'Antes los lunes eran <span class="hl">drama de comisiones</span>. Quién atendió a quién, qué cobré yo, qué cobró Diego. Con Navaja, cada quien ve sus cortes en su pantalla. Nunca más pizarrita de gises.',
+    sig:'Roberto Méndez',
+    role:'Barbería en San Pedro Garza García · NL',
   },
 
   thefts: [
-    {
-      title: 'Cliente paga directo al barbero',
-      rob: 'Cliente conocido le paga al barbero en la mano. No pasa por caja. Tú no te enteras. En barberías chicas: $1,500 a $4,000 al mes por barbero.',
-      fix: 'Comisiones se pagan <strong>solo sobre tickets registrados</strong>. Si no captura, gana 0%. Reporte: corte registrado vs cita confirmada.',
-    },
-    {
-      title: 'Productos que "se gastan"',
-      rob: 'Cera, pomada, gel premium. El barbero "se llevó la muestra" o "se la regalé al cliente". En realidad la vendió afuera por la mitad.',
-      fix: 'Inventario obligatorio <strong>al inicio y al cierre del turno</strong>. Si falta producto, alguien firma. Comparativo semanal por barbero.',
-    },
-    {
-      title: 'Citas que sí se atendieron, "no llegaron"',
-      rob: 'El cliente llegó, le cortaron, pero el barbero dice "no llegó" porque ya cobró en efectivo. La cita aparece como ausente.',
-      fix: 'Cita confirmada se marca <strong>al iniciar el servicio con foto del cliente en el sillón</strong>. Si se inició, se cobró.',
-    },
+    {title:'Cliente paga directo al barbero',
+     rob:'Cliente conocido le paga al barbero en la mano. No pasa por caja. Tú no te enteras. En barberías chicas: $1,500 a $4,000 al mes por barbero.',
+     fix:'Comisiones se pagan <strong>solo sobre tickets registrados</strong>. Si no captura, gana 0%. Reporte: corte registrado vs cita confirmada.'},
+    {title:'Productos que "se gastan"',
+     rob:'Cera, pomada, gel premium. El barbero "se llevó la muestra" o "se la regalé al cliente". En realidad la vendió afuera por la mitad.',
+     fix:'Inventario obligatorio <strong>al inicio y al cierre del turno</strong>. Si falta producto, alguien firma. Comparativo semanal por barbero.'},
+    {title:'Citas que sí se atendieron, "no llegaron"',
+     rob:'El cliente llegó, le cortaron, pero el barbero dice "no llegó" porque ya cobró en efectivo. La cita aparece como ausente.',
+     fix:'Cita confirmada se marca <strong>al iniciar el servicio con foto del cliente en el sillón</strong>. Si se inició, se cobró.'},
   ],
 };
 
 
 const BRAND_RECETA = {
-  slug: 'receta',
-  brand: 'Receta',
-  tagline: 'El sistema para farmacias que rastrea cada lote y cada caducidad',
-  giro: 'farmacia',
-  giroPlural: 'farmacias',
-  vibe: 'clinical',
+  slug:'receta', brand:'Receta',
+  tagline:'El sistema para farmacias que rastrea cada lote y cada caducidad',
+  giro:'farmacia', giroPlural:'farmacias', vibe:'clinical',
 
   palette: {
-    bg:      '#F8FAFC',
-    surface: '#FFFFFF',
-    paper:   '#F1F5F9',
-    ink:     '#0F172A',
-    ink2:    '#1E293B',
-    muted:   '#64748B',
-    line:    '#E2E8F0',
-    accent:  '#1D4ED8',
-    accent2: '#0EA5E9',
+    bg:'#F8FAFC', surface:'#FFFFFF', paper:'#F1F5F9',
+    ink:'#0F172A', ink2:'#1E293B', muted:'#64748B',
+    line:'#E2E8F0', accent:'#1D4ED8', accent2:'#0EA5E9',
   },
-  fonts: {
-    display: 'Plus Jakarta Sans',
-    body:    'Inter',
-    script:  'Caveat',
-    mono:    'JetBrains Mono',
-  },
+  fonts: { display:'Plus Jakarta Sans', body:'Inter', script:'Caveat', mono:'JetBrains Mono' },
 
   hero: {
-    eyebrow: 'Sistema POS para farmacias mexicanas',
-    h1: 'Cada <em>lote</em>.<br>Cada <em>caducidad</em>.<br>Bajo control.',
-    deck: 'Receta es el punto de venta hecho para farmacias. Control por lote, alertas de caducidad, recetas digitales y sustitutos sugeridos. Nada se vence en tu anaquel sin que lo sepas.',
-    ctaPrimary: 'Empezar gratis',
-    ctaSecondary: 'Ver demo',
-    metaLine: '$0 inicial · setup en 5 min · COFEPRIS-friendly',
+    eyebrow:'Sistema POS para farmacias mexicanas',
+    h1:'Cada <em>lote</em>.<br>Cada <em>caducidad</em>.<br>Bajo control.',
+    deck:'Receta es el punto de venta hecho para farmacias. Control por lote, alertas de caducidad, recetas digitales y sustitutos sugeridos. Nada se vence en tu anaquel sin que lo sepas.',
+    ctaPrimary:'Empezar gratis', ctaSecondary:'Ver demo',
+    metaLine:'$0 inicial · setup en 5 min · COFEPRIS-friendly',
   },
 
   images: {
-    hero: 'https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=1200&h=1600&fit=crop&q=85',
-    heroAlt: 'Estantes de farmacia',
-    showcase: [
+    hero:'https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=1200&h=1600&fit=crop&q=85',
+    heroAlt:'Estantes de farmacia',
+    showcase:[
       {url:'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=1200&h=900&fit=crop&q=80',tag:'Interior farmacia',size:'lg'},
       {url:'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=900&h=1200&fit=crop&q=80',tag:'Medicamentos',size:'md'},
       {url:'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=900&h=1200&fit=crop&q=80',tag:'Frascos',size:'sm'},
@@ -354,11 +322,28 @@ const BRAND_RECETA = {
       {url:'https://images.unsplash.com/photo-1551601651-2a8555f1a136?w=900&h=1200&fit=crop&q=80',tag:'Lab',size:'sm'},
       {url:'https://images.unsplash.com/photo-1576602976047-174e57a47881?w=1200&h=900&fit=crop&q=80',tag:'Inventario',size:'md'},
     ],
-    context: [
-      {url:'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=800&h=600&fit=crop&q=80', caption:'Despachador verifica receta'},
-      {url:'https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?w=800&h=600&fit=crop&q=80', caption:'Sistema alerta caducidad a 60 días'},
-      {url:'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&h=600&fit=crop&q=80', caption:'Sustituto genérico sugerido'},
+    context:[
+      {url:'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=800&h=600&fit=crop&q=80',caption:'Despachador verifica receta'},
+      {url:'https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?w=800&h=600&fit=crop&q=80',caption:'Sistema alerta caducidad a 60 días'},
+      {url:'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&h=600&fit=crop&q=80',caption:'Sustituto genérico sugerido'},
     ],
+  },
+
+  liveDemo: {
+    type:'expiry',
+    eyebrow:'Alerta de caducidades · En vivo',
+    title:'Tus medicamentos, <em>antes que venzan</em>',
+    deck:'El sistema escanea tu inventario cada noche. Cuando un lote está por vencer a 90, 60 o 30 días, te avisa. Y los pone en promoción automática para moverlos antes de que sean basura.',
+    secondary:'Una farmacia chica pierde entre $8,000 y $15,000 al año en medicamentos vencidos que nadie notó. Receta convierte ese desperdicio en venta de descuento.',
+    data:{
+      meds:[
+        {name:'Ibuprofeno 400mg', lote:'C9', days:12, state:'critical', stock:18},
+        {name:'Amoxicilina 250mg', lote:'B2', days:28, state:'warning', stock:24},
+        {name:'Paracetamol 500mg', lote:'A7', days:47, state:'soon', stock:62},
+        {name:'Loratadina 10mg', lote:'D3', days:73, state:'ok', stock:35},
+        {name:'Omeprazol 20mg', lote:'E1', days:120, state:'ok', stock:88},
+      ],
+    },
   },
 
   features: [
@@ -372,76 +357,55 @@ const BRAND_RECETA = {
 
   stats: [
     {v:'247', l:'SKU activos'},
-    {v:'14',  l:'Por caducar (60d)'},
-    {v:'5',   l:'Min de setup', suffix:'min'},
-    {v:'0',   l:'Costo inicial', prefix:'$'},
+    {v:'14', l:'Por caducar (60d)'},
+    {v:'5', l:'Min de setup', suffix:'min'},
+    {v:'0', l:'Costo inicial', prefix:'$'},
   ],
 
   quote: {
-    text: 'Tenía $18,000 en medicamentos vencidos por no llevar el control. <span class="hl">El primer mes con Receta detecté 14 medicamentos próximos a vencer</span> y los puse en promoción. Recuperé $9,400 que iban a la basura.',
-    sig: 'Lic. Andrea',
-    role: 'Farmacia en Escobedo, NL',
+    text:'Tenía $18,000 en medicamentos vencidos por no llevar el control. <span class="hl">El primer mes con Receta detecté 14 medicamentos próximos a vencer</span> y los puse en promoción. Recuperé $9,400 que iban a la basura.',
+    sig:'Lic. Andrea',
+    role:'Farmacia en Escobedo, NL',
   },
 
   thefts: [
-    {
-      title: 'Medicamentos vencidos sin alerta',
-      rob: 'Productos caros vencen en el anaquel sin que nadie note. Una farmacia chica pierde $8,000 a $15,000 al año en vencimientos invisibles.',
-      fix: '<strong>Alerta automática 90 / 60 / 30 días antes</strong> de caducidad. El sistema mueve a promoción solo. Cero pérdidas por descuido.',
-    },
-    {
-      title: '"Mermas" sin justificar',
-      rob: 'Empleado registra medicamento como "merma" o "se rompió" y se lo lleva. Sin trazabilidad por lote, no puedes probar nada.',
-      fix: '<strong>Cada unidad rastreada por lote</strong>. Toda merma exige foto + autorización del gerente. Comparativo semanal: si suben las mermas de Juan, lo sabes.',
-    },
-    {
-      title: 'Venta "por fuera" de mostrador',
-      rob: 'Despachador cobra en efectivo, no registra la venta, se queda con el dinero. El stock baja "por arte de magia".',
-      fix: 'Inventario auditado <strong>al cierre de cada turno</strong>. Diferencia stock físico vs sistema dispara alerta. Reporte por despachador.',
-    },
+    {title:'Medicamentos vencidos sin alerta',
+     rob:'Productos caros vencen en el anaquel sin que nadie note. Una farmacia chica pierde $8,000 a $15,000 al año en vencimientos invisibles.',
+     fix:'<strong>Alerta automática 90 / 60 / 30 días antes</strong> de caducidad. El sistema mueve a promoción solo. Cero pérdidas por descuido.'},
+    {title:'"Mermas" sin justificar',
+     rob:'Empleado registra medicamento como "merma" o "se rompió" y se lo lleva. Sin trazabilidad por lote, no puedes probar nada.',
+     fix:'<strong>Cada unidad rastreada por lote</strong>. Toda merma exige foto + autorización del gerente.'},
+    {title:'Venta "por fuera" de mostrador',
+     rob:'Despachador cobra en efectivo, no registra la venta, se queda con el dinero. El stock baja "por arte de magia".',
+     fix:'Inventario auditado <strong>al cierre de cada turno</strong>. Diferencia stock físico vs sistema dispara alerta.'},
   ],
 };
 
 
 const BRAND_TENDITO = {
-  slug: 'tendito',
-  brand: 'Tendito',
-  tagline: 'La tiendita de la esquina, con tecnología',
-  giro: 'abarrotes',
-  giroPlural: 'tiendas de abarrotes',
-  vibe: 'warmLocal',
+  slug:'tendito', brand:'Tendito',
+  tagline:'La tiendita de la esquina, con tecnología',
+  giro:'abarrotes', giroPlural:'tiendas de abarrotes', vibe:'warmLocal',
 
   palette: {
-    bg:      '#FEF3E2',
-    surface: '#FFFFFF',
-    paper:   '#FED7AA',
-    ink:     '#7C2D12',
-    ink2:    '#5C3815',
-    muted:   '#92715C',
-    line:    '#E7C9A5',
-    accent:  '#C2410C',
-    accent2: '#16A34A',
+    bg:'#FEF3E2', surface:'#FFFFFF', paper:'#FED7AA',
+    ink:'#7C2D12', ink2:'#5C3815', muted:'#92715C',
+    line:'#E7C9A5', accent:'#C2410C', accent2:'#16A34A',
   },
-  fonts: {
-    display: 'Fraunces',
-    body:    'Inter',
-    script:  'Caveat',
-    mono:    'JetBrains Mono',
-  },
+  fonts: { display:'Fraunces', body:'Inter', script:'Caveat', mono:'JetBrains Mono' },
 
   hero: {
-    eyebrow: 'El sistema para tiendas de abarrotes mexicanas',
-    h1: 'Tu <em>tiendita</em>.<br>Más rápida.<br>Más <em>al día</em>.',
-    deck: 'Tendito es el punto de venta hecho para abarrotes, fruterías y minisúpers mexicanos. Báscula, fiado, recargas, recibos por WhatsApp — pensado para la tienda de la esquina.',
-    ctaPrimary: 'Empezar gratis',
-    ctaSecondary: 'Ver demo',
-    metaLine: '$0 inicial · funciona en cualquier impresora · gratis para tiendas chicas',
+    eyebrow:'El sistema para tiendas de abarrotes mexicanas',
+    h1:'Tu <em>tiendita</em>.<br>Más rápida.<br>Más <em>al día</em>.',
+    deck:'Tendito es el punto de venta hecho para abarrotes, fruterías y minisúpers mexicanos. Báscula, fiado, recargas, recibos por WhatsApp — pensado para la tienda de la esquina.',
+    ctaPrimary:'Empezar gratis', ctaSecondary:'Ver demo',
+    metaLine:'$0 inicial · funciona en cualquier impresora · gratis para tiendas chicas',
   },
 
   images: {
-    hero: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200&h=1600&fit=crop&q=85',
-    heroAlt: 'Tienda de abarrotes mexicana',
-    showcase: [
+    hero:'https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200&h=1600&fit=crop&q=85',
+    heroAlt:'Tienda de abarrotes mexicana',
+    showcase:[
       {url:'https://images.unsplash.com/photo-1601598851547-4302969d0614?w=1200&h=900&fit=crop&q=80',tag:'Mostrador',size:'lg'},
       {url:'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=900&h=1200&fit=crop&q=80',tag:'Estantes',size:'md'},
       {url:'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=900&h=1200&fit=crop&q=80',tag:'Productos',size:'sm'},
@@ -452,11 +416,31 @@ const BRAND_TENDITO = {
       {url:'https://images.unsplash.com/photo-1542838132-92c53300491e?w=900&h=1200&fit=crop&q=80',tag:'Local',size:'sm'},
       {url:'https://images.unsplash.com/photo-1584006515920-c4ad8a738fd0?w=1200&h=900&fit=crop&q=80',tag:'Anaquel',size:'md'},
     ],
-    context: [
-      {url:'https://images.unsplash.com/photo-1601598851547-4302969d0614?w=800&h=600&fit=crop&q=80', caption:'Doña cobra con báscula integrada'},
-      {url:'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=800&h=600&fit=crop&q=80', caption:'Fiado registrado, recordatorio por WhatsApp'},
-      {url:'https://images.unsplash.com/photo-1542838686-37da4a9fd1b3?w=800&h=600&fit=crop&q=80', caption:'Recargas de tiempo aire al instante'},
+    context:[
+      {url:'https://images.unsplash.com/photo-1601598851547-4302969d0614?w=800&h=600&fit=crop&q=80',caption:'Doña cobra con báscula integrada'},
+      {url:'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=800&h=600&fit=crop&q=80',caption:'Fiado registrado, recordatorio por WhatsApp'},
+      {url:'https://images.unsplash.com/photo-1542838686-37da4a9fd1b3?w=800&h=600&fit=crop&q=80',caption:'Recargas de tiempo aire al instante'},
     ],
+  },
+
+  liveDemo: {
+    type:'fiado',
+    eyebrow:'Pizarra digital de fiado',
+    title:'Tu libreta, <em>digital</em>. Tu cobranza, automática.',
+    deck:'Doña Carmen no te va a pagar este viernes? El sistema le manda recordatorio por WhatsApp solo. Don Pedro lleva 2 semanas sin pasar? Recibe foto del fiado y mensaje amable. Sin que tú tengas que hacer nada incómodo.',
+    secondary:'Y al cliente nuevo lo registras con foto desde tu celular. Fiado con prueba, no con confianza ciega.',
+    data:{
+      total:4820,
+      customers:[
+        {name:'Doña Carmen', amount:185, days:3, photo:'C'},
+        {name:'Don Pedro', amount:240, days:7, photo:'P'},
+        {name:'Tía Bertha', amount:89, days:1, photo:'B'},
+        {name:'Lupita Reyes', amount:312, days:14, photo:'L'},
+        {name:'Sra. Martha', amount:156, days:2, photo:'M'},
+        {name:'Don Jorge', amount:478, days:9, photo:'J'},
+        {name:'Vecina Lucía', amount:223, days:5, photo:'L'},
+      ],
+    },
   },
 
   features: [
@@ -470,35 +454,44 @@ const BRAND_TENDITO = {
 
   stats: [
     {v:'230', l:'Tickets hoy'},
-    {v:'48',  l:'Mil en ventas hoy', prefix:'$', suffix:'k'},
-    {v:'5',   l:'Min de setup', suffix:'min'},
-    {v:'0',   l:'Costo inicial', prefix:'$'},
+    {v:'48', l:'Mil en ventas hoy', prefix:'$', suffix:'k'},
+    {v:'5', l:'Min de setup', suffix:'min'},
+    {v:'0', l:'Costo inicial', prefix:'$'},
   ],
 
   quote: {
-    text: 'Tengo 30 años con mi tiendita y nunca había visto algo tan fácil. <span class="hl">Mi nieto me lo configuró en 5 minutos</span>. Ahora cobro recargas de Telcel, fío con foto y mando recibos por WhatsApp. Mi tiendita en serio cambió.',
-    sig: 'Doña Carmen',
-    role: 'Abarrotes en la colonia · Apodaca, NL',
+    text:'Tengo 30 años con mi tiendita y nunca había visto algo tan fácil. <span class="hl">Mi nieto me lo configuró en 5 minutos</span>. Ahora cobro recargas de Telcel, fío con foto y mando recibos por WhatsApp. Mi tiendita en serio cambió.',
+    sig:'Doña Carmen',
+    role:'Abarrotes en la colonia · Apodaca, NL',
   },
 
   thefts: [
-    {
-      title: 'Caja con menos de lo cobrado',
-      rob: 'Empleado cobra $200 al cliente, registra $150 en el sistema, se queda con $50. Sin conciliación diaria, no lo detectas hasta que faltan miles.',
-      fix: '<strong>Corte de caja obligatorio al cierre</strong>. Diferencia entre cobrado y registrado dispara alerta. Reporte por empleado.',
-    },
-    {
-      title: 'Fiados inventados que nunca cobran',
-      rob: 'Empleado dice "fulano se llevó esto a fiado", pero fulano no existe o nunca pagó. La mercancía se la llevó el empleado.',
-      fix: 'Fiados exigen <strong>foto del cliente + firma digital</strong>. Cliente recibe SMS confirmando el monto. Si no existe, no hay fiado.',
-    },
-    {
-      title: 'Recargas vendidas afuera del sistema',
-      rob: 'Empleado vende tiempo aire con su propio crédito y se queda la comisión. La tienda no se entera porque "no pasó por el sistema".',
-      fix: 'Recargas se hacen <strong>desde el sistema con tu saldo</strong>. Sin sistema, no hay recarga. Comisiones registradas por turno.',
-    },
+    {title:'Caja con menos de lo cobrado',
+     rob:'Empleado cobra $200 al cliente, registra $150 en el sistema, se queda con $50. Sin conciliación diaria, no lo detectas hasta que faltan miles.',
+     fix:'<strong>Corte de caja obligatorio al cierre</strong>. Diferencia entre cobrado y registrado dispara alerta. Reporte por empleado.'},
+    {title:'Fiados inventados que nunca cobran',
+     rob:'Empleado dice "fulano se llevó esto a fiado", pero fulano no existe o nunca pagó. La mercancía se la llevó el empleado.',
+     fix:'Fiados exigen <strong>foto del cliente + firma digital</strong>. Cliente recibe SMS confirmando el monto.'},
+    {title:'Recargas vendidas afuera del sistema',
+     rob:'Empleado vende tiempo aire con su propio crédito y se queda la comisión. La tienda no se entera.',
+     fix:'Recargas se hacen <strong>desde el sistema con tu saldo</strong>. Sin sistema, no hay recarga.'},
   ],
 };
+
+
+// =============================================================
+// SOCIAL PROOF — toasts que rotan en todas las landings
+// =============================================================
+const SOCIAL_PROOF = [
+  {brand:'Comandero', biz:'Taquería El Pastor', city:'Guadalajara, JAL', when:'hace 3 min'},
+  {brand:'Navaja',    biz:'Barbershop Cuts',   city:'San Pedro, NL',     when:'hace 12 min'},
+  {brand:'Pareo',     biz:'Calzado La Bota',   city:'Apodaca, NL',       when:'hace 28 min'},
+  {brand:'Receta',    biz:'Farmacia Salud+',   city:'Escobedo, NL',      when:'hace 45 min'},
+  {brand:'Tendito',   biz:'Abarrotes Doña Mary', city:'León, GTO',       when:'hace 1 hr'},
+  {brand:'Comandero', biz:'Sushi Ko',          city:'Mérida, YUC',       when:'hace 1 hr'},
+  {brand:'Navaja',    biz:'Barber Diego',      city:'Tijuana, BC',       when:'hace 2 hr'},
+  {brand:'Tendito',   biz:'La Esquinita',      city:'Puebla, PUE',       when:'hace 2 hr'},
+];
 
 
 // =============================================================
@@ -510,16 +503,8 @@ const BRANDS = {
   navaja:    BRAND_NAVAJA,
   receta:    BRAND_RECETA,
   tendito:   BRAND_TENDITO,
-  // Próximas marcas (agregar config arriba y registrar aquí):
-  // espuma:    BRAND_ESPUMA,    // cafetería
-  // petalo:    BRAND_PETALO,    // florería
-  // pata:      BRAND_PATA,      // veterinaria
-  // refacciona:BRAND_REFACCIONA,// taller
-  // repe:      BRAND_REPE,      // gimnasio
-  // bloque:    BRAND_BLOQUE,    // papelería
-  // burbuja:   BRAND_BURBUJA,   // lavandería
 };
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { BRANDS };
+  module.exports = { BRANDS, SOCIAL_PROOF };
 }
