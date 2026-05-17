@@ -1,0 +1,149 @@
+{
+  "// ============================================================": "",
+  "// 🎨 IDENTIDAD DE LA MARCA (obligatorio)": "",
+  "// ============================================================": "",
+  "slug": "joyeria",
+  "brand": "Karat",
+  "tagline": "El sistema para joyerías que sí saben de quién es cada pieza",
+  "giro": "joyería",
+  "giroPlural": "joyerías",
+  "vibe": "luxury",
+
+  "// vibes válidos: editorial | vibrant | darkPremium | clinical | warmLocal | warmCozy | playful | industrial | romantic | athletic | fresh | luxury | minimalist | scholar | artisan": "",
+
+  "// ============================================================": "",
+  "// 🎨 PALETA (8 colores obligatorios)": "",
+  "// ============================================================": "",
+  "palette": {
+    "bg": "#0F0A05",
+    "surface": "#1A130C",
+    "paper": "#221A11",
+    "ink": "#FAF3E0",
+    "ink2": "#D9CCB0",
+    "muted": "#8A7960",
+    "line": "#2F2519",
+    "accent": "#D4AF37",
+    "accent2": "#E8C760"
+  },
+
+  "// ============================================================": "",
+  "// 🔤 FUENTES (4 obligatorias, deben estar en Google Fonts)": "",
+  "// ============================================================": "",
+  "fonts": {
+    "display": "Cormorant Garamond",
+    "body": "Inter",
+    "script": "Italianno",
+    "mono": "JetBrains Mono"
+  },
+
+  "// ============================================================": "",
+  "// 🎬 HERO (sección principal)": "",
+  "// ============================================================": "",
+  "hero": {
+    "eyebrow": "El sistema para joyerías mexicanas · 2026",
+    "h1": "Cada <em>quilate</em>,<br>cada <em>certificado</em>,<br>rastreado.",
+    "deck": "El POS hecho para que ninguna pieza salga sin certificado, cada metal se pese al gramo, y los apartados de Día de las Madres se cobren completos.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver inventario en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+
+  "// ============================================================": "",
+  "// 🖼 IMÁGENES (1 hero + 9 showcase + 3 context, URLs Unsplash)": "",
+  "// ============================================================": "",
+  "images": {
+    "hero": "https://images.unsplash.com/photo-XXX?w=1200&h=1600&fit=crop&q=85",
+    "heroAlt": "Anillos de oro y diamantes en aparador",
+    "showcase": [
+      {"url": "https://images.unsplash.com/photo-XXX?w=1200&h=900&fit=crop&q=80", "tag": "Anillos compromiso", "size": "lg"},
+      {"url": "https://images.unsplash.com/photo-XXX?w=900&h=1200&fit=crop&q=80", "tag": "Aretes diamante", "size": "md"},
+      {"url": "https://images.unsplash.com/photo-XXX?w=900&h=1200&fit=crop&q=80", "tag": "Pulsera oro", "size": "sm"},
+      {"url": "https://images.unsplash.com/photo-XXX?w=900&h=1200&fit=crop&q=80", "tag": "Cadena hombre", "size": "sm"},
+      {"url": "https://images.unsplash.com/photo-XXX?w=900&h=1200&fit=crop&q=80", "tag": "Collar perlas", "size": "md"},
+      {"url": "https://images.unsplash.com/photo-XXX?w=900&h=1200&fit=crop&q=80", "tag": "Reloj suizo", "size": "sm"},
+      {"url": "https://images.unsplash.com/photo-XXX?w=1200&h=900&fit=crop&q=80", "tag": "Taller orfebre", "size": "md"},
+      {"url": "https://images.unsplash.com/photo-XXX?w=900&h=1200&fit=crop&q=80", "tag": "Reparación", "size": "sm"},
+      {"url": "https://images.unsplash.com/photo-XXX?w=1200&h=900&fit=crop&q=80", "tag": "Vitrina exhibición", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://images.unsplash.com/photo-XXX?w=800&h=600&fit=crop&q=80", "caption": "Cada pieza con certificado digital"},
+      {"url": "https://images.unsplash.com/photo-XXX?w=800&h=600&fit=crop&q=80", "caption": "Vendedora muestra a cliente VIP"},
+      {"url": "https://images.unsplash.com/photo-XXX?w=800&h=600&fit=crop&q=80", "caption": "Báscula calibrada al gramo"}
+    ]
+  },
+
+  "// ============================================================": "",
+  "// 🎮 LIVE DEMO (tipo del widget interactivo)": "",
+  "// Tipos válidos: stock | kds | booking | expiry | fiado": "",
+  "// ============================================================": "",
+  "liveDemo": {
+    "type": "stock",
+    "eyebrow": "Inventario en vivo",
+    "title": "Tu inventario, <em>pieza por pieza</em>",
+    "deck": "Cada anillo, cadena o aretes con su número de serie único. Cuando una pieza se vende, sale del inventario. Cuando una se devuelve, regresa con foto del estado.",
+    "secondary": "En las joyerías chicas, una pieza perdida es $5-50k de pérdida.",
+    "data": {
+      "product": "Anillo solitario 14k",
+      "tallas": [4, 5, 6, 7, 8, 9, 10, 11],
+      "stock": [
+        {"color": "Oro amarillo", "vals": [0, 2, 5, 8, 3, 1, 0, 0]},
+        {"color": "Oro blanco", "vals": [1, 3, 7, 4, 6, 0, 0, 0]},
+        {"color": "Plata fina", "vals": [2, 4, 6, 5, 2, 1, 0, 0]}
+      ],
+      "lowThreshold": 2
+    }
+  },
+
+  "// ============================================================": "",
+  "// ✨ FEATURES (exactamente 6, del oficio, NO POS-genéricas)": "",
+  "// Iconos válidos: archive | bookmark | percent | camera | barcode | truck | grid | monitor | gift | calendar | edit | split": "",
+  "// ============================================================": "",
+  "features": [
+    {"ico": "archive", "h": "Inventario por serie y quilate", "d": "Cada anillo de 14k con su número de serie. Sabes qué piezas se mueven, cuáles llevan años en vitrina."},
+    {"ico": "bookmark", "h": "Apartados día de las madres", "d": "Cliente aparta con $500, paga en 6 meses. Notificación al 10, al 5 y al día. Si no llega, regresa a vitrina."},
+    {"ico": "percent", "h": "Comisiones por vendedora", "d": "Cada pieza tiene comisión calculada. Vendedora ve en vivo lo que gana. Cero pleitos al cierre."},
+    {"ico": "camera", "h": "Certificado digital de pureza", "d": "Sale del sistema con foto, peso al gramo, ley del metal, firma del orfebre. Cliente lo recibe en WhatsApp."},
+    {"ico": "barcode", "h": "Etiqueta con QR único", "d": "Cada pieza con su tag. Si reaparece en otra tienda, su número la identifica. Cero piezas robadas que vuelvan."},
+    {"ico": "truck", "h": "Servicio a domicilio VIP", "d": "Cliente premium pide piezas a su casa. Vendedora va con maletín de 5 piezas, cliente firma cuál quiere."}
+  ],
+
+  "// ============================================================": "",
+  "// 📊 STATS (exactamente 4 números mostrados en hero)": "",
+  "// ============================================================": "",
+  "stats": [
+    {"v": "847", "l": "Piezas en inventario"},
+    {"v": "12", "l": "Vendidas hoy"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+
+  "// ============================================================": "",
+  "// 💬 QUOTE (1 testimonial mexicano real)": "",
+  "// ============================================================": "",
+  "quote": {
+    "text": "Antes <span class=\"hl\">perdíamos piezas en mermas</span> y nunca sabíamos cuáles. Con Karat cada anillo tiene su número de serie. Cero piezas perdidas en 8 meses.",
+    "sig": "Lic. María Esther R.",
+    "role": "Joyería Karat, Polanco, CDMX"
+  },
+
+  "// ============================================================": "",
+  "// 🚨 THEFTS (exactamente 3 robos típicos del oficio + cómo el sistema los evita)": "",
+  "// ============================================================": "",
+  "thefts": [
+    {
+      "title": "Pieza 'extraviada' que se revendió",
+      "rob": "Empleado dice 'la pieza se perdió' y se la lleva. Una sola cadena de oro son $8-15k. En joyería son 1-2 al año si no hay control.",
+      "fix": "Cada pieza con <strong>número de serie único en BD</strong>. Si sale sin venta, alerta inmediata. Imposible 'extraviar' sin que sepas."
+    },
+    {
+      "title": "Diferencia en pureza del metal",
+      "rob": "Joyería compra oro de 18k y lo vende como 14k. Diferencia de $200-500 por gramo. Tú no te enteras porque no pesas cada pieza.",
+      "fix": "Báscula conectada al sistema. <strong>Cada pieza con su peso y ley registrados</strong>. Diferencias requieren autorización."
+    },
+    {
+      "title": "Apartado 'cobrado' pero no devuelto",
+      "rob": "Cliente aparta una pieza con $500, no regresa por ella. Vendedora se queda con el adelanto en efectivo. Tú nunca lo ves.",
+      "fix": "Apartados con <strong>fecha límite en el sistema</strong>. Vence → la pieza regresa solo. Adelanto va a crédito del cliente, no a efectivo."
+    }
+  ]
+}
