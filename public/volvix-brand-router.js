@@ -3208,6 +3208,66 @@
     if (/venta de regalos|tienda de regalos|detalles de regalo|arreglos para regalo|canasta de regalo/.test(n))
       return VLX_BRANDS.ramillete || { brand:'Ramillete', url:'ramillete.html' };
 
+    // ═══════════════════════════════════════════════════════════════
+    // V9.6 STRESS TEST 100 — 13 críticos a frutería + 5 categóricos
+    // ═══════════════════════════════════════════════════════════════
+
+    // COMIDA MEXICANA — enchiladas, flautas, empanadas
+    if (/^enchiladas?$|^flautas?$|^empanadas?$|^picadas?$|^huaraches?$|^memelas?$/.test(n))
+      return VLX_BRANDS.comandero || { brand:'Comandero', url:'comandero.html' };
+
+    // CALDOS — caldo de res/pollo, sopa
+    if (/^caldo de (res|pollo|gallina|camaron|mariscos)?\b|sopa de tortilla|consome de pollo/.test(n))
+      return VLX_BRANDS.consome || { brand:'Consomé', url:'consome.html' };
+
+    // BEBIDAS DE AGUA — horchata, jamaica, tamarindo (con o sin "agua de")
+    if (/horchata|jamaica|tamarindo|chia con limon|cebada$|tepache|aguas frescas/.test(n))
+      return VLX_BRANDS.limonero || { brand:'Limonero', url:'limonero.html' };
+
+    // NIEVES / RASPADOS — paletas, raspados, nieves
+    if (/^paletas?$|^paleta(s)? heladas?$|^paleter(i|í)a$|^raspados?$|^raspado$|^nieves?$|^helados?$|^heladeria/.test(n))
+      return VLX_BRANDS.nieve || { brand:'Nieve', url:'nieve.html' };
+
+    // ALCOHOL / BARES — michelada, mezcal, cerveza, vinos
+    if (/^michelada(s)?$|^cerveza(s)? artesanal|^cerveza(s)?$|^mezcal(es)?$|^vinater(i|í)a$|^cantina(s)?$|venta de cervezas/.test(n))
+      return VLX_BRANDS.tarima || { brand:'Tarima', url:'tarima.html' };
+
+    // BAÑO TURCO / SAUNA / SPA — son belleza
+    if (/^bano turco$|^sauna(s)?$|temazcal|spa premium/.test(n))
+      return VLX_BRANDS.brillo || { brand:'Brillo', url:'brillo.html' };
+
+    // LIMPIEZA HOGAR — extender más allá del regex existente
+    if (/^limpieza de hogar$|^limpieza domestica$|^servicio de limpieza$|aseo de casa(s)?/.test(n))
+      return VLX_BRANDS.trapeador || { brand:'Trapeador', url:'trapeador.html' };
+
+    // PINTOR DE CASAS — específico
+    if (/pintor de casas?|pintura de casas?|servicio de pintura/.test(n))
+      return VLX_BRANDS.barniz || { brand:'Barniz', url:'barniz.html' };
+
+    // CERRAJERO A DOMICILIO
+    if (/cerrajer[oa] a domicilio|servicio de cerrajer/.test(n))
+      return VLX_BRANDS.yunque || { brand:'Yunque', url:'yunque.html' };
+
+    // TYPOS COMUNES — usuarios escriben mal: kafeteria, estetik, lavadero
+    if (/^kafeter[ií]a$|^cafeter[ií]a$/.test(n))
+      return VLX_BRANDS.espuma || { brand:'Espuma', url:'espuma.html' };
+    if (/^estetik$|^estetica(s)? unisex/.test(n))
+      return VLX_BRANDS.brillo || { brand:'Brillo', url:'brillo.html' };
+    if (/^lavadero(s)?$/.test(n))
+      return VLX_BRANDS.burbuja || { brand:'Burbuja', url:'burbuja.html' };
+
+    // ROPA DE BEBÉ / INFANTIL
+    if (/ropa (de )?bebes?|ropa (de )?bebes?|ropa para bebes?|ropita de bebe/.test(n))
+      return VLX_BRANDS.mochila || { brand:'Mochila', url:'mochila.html' };
+
+    // ACCESORIOS / BOCINAS / AUDÍFONOS — venta de bocinas
+    if (/venta de bocinas?|venta de audifonos?|venta de auriculares?|accesorios para celular/.test(n))
+      return VLX_BRANDS.funda || { brand:'Funda', url:'funda.html' };
+
+    // BOUTIQUE INFANTIL
+    if (/boutique infantil|tienda infantil de ropa|ropa infantil de marca/.test(n))
+      return VLX_BRANDS.mochila || { brand:'Mochila', url:'mochila.html' };
+
     // 1. Exact match en alias
     if (VLX_ALIASES[n] && VLX_BRANDS[VLX_ALIASES[n]]) {
       return VLX_BRANDS[VLX_ALIASES[n]];
