@@ -23862,40 +23862,5 @@ window.addEventListener('volvix:version-loaded', function(e){
 })();
 </script>
 
-<!-- ============================================================
-     SCHEMA-DRIVEN UI por giro de negocio
-     Branch: feature/ampliacion-modulos (NO mergeada en pre-pitch)
-     ============================================================ -->
-<script src="/js/applyGiroConfig.js" defer></script>
-<script>
-  // Auto-aplicar config del giro del tenant al cargar
-  window.addEventListener('vlx:giro-applied', function(ev) {
-    console.log('[salvadorex-pos] Giro aplicado:', ev.detail.giroSlug, ev.detail.result);
-  });
-
-  // Helper: obtener giro del tenant desde sessionStorage o localStorage
-  window.vlxGetTenantGiro = function() {
-    try {
-      const session = JSON.parse(sessionStorage.getItem('volvix_session') || '{}');
-      if (session.giro_slug) return session.giro_slug;
-      const tenant = JSON.parse(localStorage.getItem('volvix_tenant_config') || '{}');
-      if (tenant.giro_slug) return tenant.giro_slug;
-    } catch (e) {}
-    return null;
-  };
-
-  // Auto-apply en DOMContentLoaded si hay giro
-  document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(function() {
-      if (typeof window.applyGiroConfig !== 'function') return;
-      const giro = window.vlxGetTenantGiro();
-      if (giro) {
-        console.log('[salvadorex-pos] Auto-applying giro:', giro);
-        window.applyGiroConfig(giro);
-      }
-    }, 500);
-  });
-</script>
-
 </body>
 </html>
