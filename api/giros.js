@@ -199,7 +199,7 @@ async function searchGiros(ctx, req, res, parsedUrl) {
       '/landing-zapateria.html': '/pareo.html',
       '/landing-ropa.html': '/pareo.html',
       '/landing-muebleria.html': '/mueble.html',
-      '/landing-ferreteria.html': '/tendito.html',
+      '/landing-ferreteria.html': '/yunque.html',
       '/landing-papeleria.html': '/bloque.html',
       '/landing-colegio.html': '/bloque.html',
       '/landing-minisuper.html': '/tendito.html',
