@@ -1,0 +1,482 @@
+[
+  {
+    "giro": "navaja",
+    "result": {
+      "applyOk": true,
+      "activeGiro": "navaja",
+      "demos": [
+        {
+          "text": "data-module=\"core\" — Siempre visible (es módulo core)",
+          "module": "core",
+          "giros_attr": null,
+          "hidden": false,
+          "hiddenReason": null
+        },
+        {
+          "text": "data-module=\"kitchen\" — Solo visible si el giro tiene kitchen activo (restaurant",
+          "module": "kitchen",
+          "giros_attr": null,
+          "hidden": true,
+          "hiddenReason": "module:kitchen"
+        },
+        {
+          "text": "data-module=\"medical\" — Solo visible si el giro tiene medical activo (pulso, pat",
+          "module": "medical",
+          "giros_attr": null,
+          "hidden": true,
+          "hiddenReason": "module:medical"
+        },
+        {
+          "text": "data-module=\"gym\" — Solo visible para gimnasios (forja)",
+          "module": "gym",
+          "giros_attr": null,
+          "hidden": true,
+          "hiddenReason": "module:gym"
+        },
+        {
+          "text": "data-giros=\"navaja,brillo\" — Solo visible para barbería/estética",
+          "module": null,
+          "giros_attr": "navaja,brillo",
+          "hidden": false,
+          "hiddenReason": null
+        },
+        {
+          "text": "data-giros=\"pulso,receta,pata\" — Solo visible para salud/veterinaria/farmacia",
+          "module": null,
+          "giros_attr": "pulso,receta,pata",
+          "hidden": true,
+          "hiddenReason": "giro:navaja"
+        },
+        {
+          "text": "Texto fijo: cliente · servicio · barbero · corte",
+          "module": null,
+          "giros_attr": null,
+          "hidden": false,
+          "hiddenReason": null
+        }
+      ],
+      "terms": [
+        {
+          "key": "cliente",
+          "currentText": "cliente"
+        },
+        {
+          "key": "producto",
+          "currentText": "servicio"
+        },
+        {
+          "key": "empleado",
+          "currentText": "barbero"
+        },
+        {
+          "key": "venta",
+          "currentText": "corte"
+        }
+      ],
+      "placeholder": "cliente",
+      "fabPresent": true,
+      "drawerPresent": true
+    },
+    "errors": []
+  },
+  {
+    "giro": "pulso",
+    "result": {
+      "applyOk": true,
+      "activeGiro": "pulso",
+      "demos": [
+        {
+          "text": "data-module=\"core\" — Siempre visible (es módulo core)",
+          "module": "core",
+          "giros_attr": null,
+          "hidden": false,
+          "hiddenReason": null
+        },
+        {
+          "text": "data-module=\"kitchen\" — Solo visible si el giro tiene kitchen activo (restaurant",
+          "module": "kitchen",
+          "giros_attr": null,
+          "hidden": true,
+          "hiddenReason": "module:kitchen"
+        },
+        {
+          "text": "data-module=\"medical\" — Solo visible si el giro tiene medical activo (pulso, pat",
+          "module": "medical",
+          "giros_attr": null,
+          "hidden": false,
+          "hiddenReason": null
+        },
+        {
+          "text": "data-module=\"gym\" — Solo visible para gimnasios (forja)",
+          "module": "gym",
+          "giros_attr": null,
+          "hidden": true,
+          "hiddenReason": "module:gym"
+        },
+        {
+          "text": "data-giros=\"navaja,brillo\" — Solo visible para barbería/estética",
+          "module": null,
+          "giros_attr": "navaja,brillo",
+          "hidden": true,
+          "hiddenReason": "giro:pulso"
+        },
+        {
+          "text": "data-giros=\"pulso,receta,pata\" — Solo visible para salud/veterinaria/farmacia",
+          "module": null,
+          "giros_attr": "pulso,receta,pata",
+          "hidden": false,
+          "hiddenReason": null
+        },
+        {
+          "text": "Texto fijo: paciente · servicio · doctor · consulta",
+          "module": null,
+          "giros_attr": null,
+          "hidden": false,
+          "hiddenReason": null
+        }
+      ],
+      "terms": [
+        {
+          "key": "cliente",
+          "currentText": "paciente"
+        },
+        {
+          "key": "producto",
+          "currentText": "servicio"
+        },
+        {
+          "key": "empleado",
+          "currentText": "doctor"
+        },
+        {
+          "key": "venta",
+          "currentText": "consulta"
+        }
+      ],
+      "placeholder": "paciente",
+      "fabPresent": true,
+      "drawerPresent": true
+    },
+    "errors": []
+  },
+  {
+    "giro": "comandero",
+    "result": {
+      "applyOk": true,
+      "activeGiro": "comandero",
+      "demos": [
+        {
+          "text": "data-module=\"core\" — Siempre visible (es módulo core)",
+          "module": "core",
+          "giros_attr": null,
+          "hidden": false,
+          "hiddenReason": null
+        },
+        {
+          "text": "data-module=\"kitchen\" — Solo visible si el giro tiene kitchen activo (restaurant",
+          "module": "kitchen",
+          "giros_attr": null,
+          "hidden": true,
+          "hiddenReason": "module:kitchen"
+        },
+        {
+          "text": "data-module=\"medical\" — Solo visible si el giro tiene medical activo (pulso, pat",
+          "module": "medical",
+          "giros_attr": null,
+          "hidden": true,
+          "hiddenReason": "module:medical"
+        },
+        {
+          "text": "data-module=\"gym\" — Solo visible para gimnasios (forja)",
+          "module": "gym",
+          "giros_attr": null,
+          "hidden": true,
+          "hiddenReason": "module:gym"
+        },
+        {
+          "text": "data-giros=\"navaja,brillo\" — Solo visible para barbería/estética",
+          "module": null,
+          "giros_attr": "navaja,brillo",
+          "hidden": true,
+          "hiddenReason": "giro:comandero"
+        },
+        {
+          "text": "data-giros=\"pulso,receta,pata\" — Solo visible para salud/veterinaria/farmacia",
+          "module": null,
+          "giros_attr": "pulso,receta,pata",
+          "hidden": true,
+          "hiddenReason": "giro:comandero"
+        },
+        {
+          "text": "Texto fijo: cliente · producto · empleado · venta",
+          "module": null,
+          "giros_attr": null,
+          "hidden": false,
+          "hiddenReason": null
+        }
+      ],
+      "terms": [
+        {
+          "key": "cliente",
+          "currentText": "cliente"
+        },
+        {
+          "key": "producto",
+          "currentText": "producto"
+        },
+        {
+          "key": "empleado",
+          "currentText": "empleado"
+        },
+        {
+          "key": "venta",
+          "currentText": "venta"
+        }
+      ],
+      "placeholder": "cliente",
+      "fabPresent": true,
+      "drawerPresent": true
+    },
+    "errors": []
+  },
+  {
+    "giro": "forja",
+    "result": {
+      "applyOk": true,
+      "activeGiro": "forja",
+      "demos": [
+        {
+          "text": "data-module=\"core\" — Siempre visible (es módulo core)",
+          "module": "core",
+          "giros_attr": null,
+          "hidden": false,
+          "hiddenReason": null
+        },
+        {
+          "text": "data-module=\"kitchen\" — Solo visible si el giro tiene kitchen activo (restaurant",
+          "module": "kitchen",
+          "giros_attr": null,
+          "hidden": true,
+          "hiddenReason": "module:kitchen"
+        },
+        {
+          "text": "data-module=\"medical\" — Solo visible si el giro tiene medical activo (pulso, pat",
+          "module": "medical",
+          "giros_attr": null,
+          "hidden": true,
+          "hiddenReason": "module:medical"
+        },
+        {
+          "text": "data-module=\"gym\" — Solo visible para gimnasios (forja)",
+          "module": "gym",
+          "giros_attr": null,
+          "hidden": false,
+          "hiddenReason": null
+        },
+        {
+          "text": "data-giros=\"navaja,brillo\" — Solo visible para barbería/estética",
+          "module": null,
+          "giros_attr": "navaja,brillo",
+          "hidden": true,
+          "hiddenReason": "giro:forja"
+        },
+        {
+          "text": "data-giros=\"pulso,receta,pata\" — Solo visible para salud/veterinaria/farmacia",
+          "module": null,
+          "giros_attr": "pulso,receta,pata",
+          "hidden": true,
+          "hiddenReason": "giro:forja"
+        },
+        {
+          "text": "Texto fijo: miembro · membresía · instructor · inscripción",
+          "module": null,
+          "giros_attr": null,
+          "hidden": false,
+          "hiddenReason": null
+        }
+      ],
+      "terms": [
+        {
+          "key": "cliente",
+          "currentText": "miembro"
+        },
+        {
+          "key": "producto",
+          "currentText": "membresía"
+        },
+        {
+          "key": "empleado",
+          "currentText": "instructor"
+        },
+        {
+          "key": "venta",
+          "currentText": "inscripción"
+        }
+      ],
+      "placeholder": "miembro",
+      "fabPresent": true,
+      "drawerPresent": true
+    },
+    "errors": []
+  },
+  {
+    "giro": "discreto",
+    "result": {
+      "applyOk": true,
+      "activeGiro": "discreto",
+      "demos": [
+        {
+          "text": "data-module=\"core\" — Siempre visible (es módulo core)",
+          "module": "core",
+          "giros_attr": null,
+          "hidden": false,
+          "hiddenReason": null
+        },
+        {
+          "text": "data-module=\"kitchen\" — Solo visible si el giro tiene kitchen activo (restaurant",
+          "module": "kitchen",
+          "giros_attr": null,
+          "hidden": true,
+          "hiddenReason": "module:kitchen"
+        },
+        {
+          "text": "data-module=\"medical\" — Solo visible si el giro tiene medical activo (pulso, pat",
+          "module": "medical",
+          "giros_attr": null,
+          "hidden": true,
+          "hiddenReason": "module:medical"
+        },
+        {
+          "text": "data-module=\"gym\" — Solo visible para gimnasios (forja)",
+          "module": "gym",
+          "giros_attr": null,
+          "hidden": true,
+          "hiddenReason": "module:gym"
+        },
+        {
+          "text": "data-giros=\"navaja,brillo\" — Solo visible para barbería/estética",
+          "module": null,
+          "giros_attr": "navaja,brillo",
+          "hidden": true,
+          "hiddenReason": "giro:discreto"
+        },
+        {
+          "text": "data-giros=\"pulso,receta,pata\" — Solo visible para salud/veterinaria/farmacia",
+          "module": null,
+          "giros_attr": "pulso,receta,pata",
+          "hidden": true,
+          "hiddenReason": "giro:discreto"
+        },
+        {
+          "text": "Texto fijo: cliente · producto · asesor · venta",
+          "module": null,
+          "giros_attr": null,
+          "hidden": false,
+          "hiddenReason": null
+        }
+      ],
+      "terms": [
+        {
+          "key": "cliente",
+          "currentText": "cliente"
+        },
+        {
+          "key": "producto",
+          "currentText": "producto"
+        },
+        {
+          "key": "empleado",
+          "currentText": "asesor"
+        },
+        {
+          "key": "venta",
+          "currentText": "venta"
+        }
+      ],
+      "placeholder": "cliente",
+      "fabPresent": true,
+      "drawerPresent": true
+    },
+    "errors": []
+  },
+  {
+    "giro": "default",
+    "result": {
+      "applyOk": true,
+      "activeGiro": "default",
+      "demos": [
+        {
+          "text": "data-module=\"core\" — Siempre visible (es módulo core)",
+          "module": "core",
+          "giros_attr": null,
+          "hidden": false,
+          "hiddenReason": null
+        },
+        {
+          "text": "data-module=\"kitchen\" — Solo visible si el giro tiene kitchen activo (restaurant",
+          "module": "kitchen",
+          "giros_attr": null,
+          "hidden": true,
+          "hiddenReason": "module:kitchen"
+        },
+        {
+          "text": "data-module=\"medical\" — Solo visible si el giro tiene medical activo (pulso, pat",
+          "module": "medical",
+          "giros_attr": null,
+          "hidden": true,
+          "hiddenReason": "module:medical"
+        },
+        {
+          "text": "data-module=\"gym\" — Solo visible para gimnasios (forja)",
+          "module": "gym",
+          "giros_attr": null,
+          "hidden": true,
+          "hiddenReason": "module:gym"
+        },
+        {
+          "text": "data-giros=\"navaja,brillo\" — Solo visible para barbería/estética",
+          "module": null,
+          "giros_attr": "navaja,brillo",
+          "hidden": true,
+          "hiddenReason": "giro:default"
+        },
+        {
+          "text": "data-giros=\"pulso,receta,pata\" — Solo visible para salud/veterinaria/farmacia",
+          "module": null,
+          "giros_attr": "pulso,receta,pata",
+          "hidden": true,
+          "hiddenReason": "giro:default"
+        },
+        {
+          "text": "Texto fijo: cliente · producto · empleado · venta",
+          "module": null,
+          "giros_attr": null,
+          "hidden": false,
+          "hiddenReason": null
+        }
+      ],
+      "terms": [
+        {
+          "key": "cliente",
+          "currentText": "cliente"
+        },
+        {
+          "key": "producto",
+          "currentText": "producto"
+        },
+        {
+          "key": "empleado",
+          "currentText": "empleado"
+        },
+        {
+          "key": "venta",
+          "currentText": "venta"
+        }
+      ],
+      "placeholder": "cliente",
+      "fabPresent": true,
+      "drawerPresent": true
+    },
+    "errors": []
+  }
+]

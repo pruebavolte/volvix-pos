@@ -1,0 +1,56 @@
+[
+  {
+    "test": "paneldecontrol.html — script + drawer cargados",
+    "applyGiroConfig_loaded": false,
+    "fab_present": false,
+    "drawer_present": false,
+    "consoleErrors": [
+      "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "consoleLog_relevant": []
+  },
+  {
+    "test": "drawer open",
+    "error": "window.vlxOpenGiroConfig is not a function"
+  },
+  {
+    "test": "applyGiroConfig(\"navaja\")",
+    "error": "applyGiroConfig not loaded"
+  },
+  {
+    "test": "applyGiroConfig(\"pulso\")",
+    "error": "applyGiroConfig not loaded"
+  },
+  {
+    "test": "applyGiroConfig(\"comandero\")",
+    "error": "applyGiroConfig not loaded"
+  },
+  {
+    "test": "applyGiroConfig(\"forja\")",
+    "error": "applyGiroConfig not loaded"
+  },
+  {
+    "test": "applyGiroConfig(\"discreto\")",
+    "error": "applyGiroConfig not loaded"
+  },
+  {
+    "test": "giros-terminologias.json válido",
+    "http": 200,
+    "total_giros": 28,
+    "sample": [
+      "restaurante",
+      "cafeteria",
+      "taqueria",
+      "navaja",
+      "brillo"
+    ],
+    "has_meta": true
+  },
+  {
+    "test": "salvadorex-pos.html — script cargado",
+    "applyGiroConfig_loaded": false,
+    "vlxGetTenantGiro_loaded": false
+  }
+]
