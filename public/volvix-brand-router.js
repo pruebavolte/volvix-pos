@@ -3256,8 +3256,8 @@
     if (/^lavadero(s)?$/.test(n))
       return VLX_BRANDS.burbuja || { brand:'Burbuja', url:'burbuja.html' };
 
-    // ROPA DE BEBÉ / INFANTIL
-    if (/ropa (de )?bebes?|ropa (de )?bebes?|ropa para bebes?|ropita de bebe/.test(n))
+    // ROPA DE BEBÉ / INFANTIL — norm() quita acento, "bebé" → "bebe"
+    if (/^ropa de bebe$|ropa para bebe|ropita|ropa para niñ|ropa de niñ|ropa para nino|ropa de nino|ropa infantil|ropa recien nacido/.test(n))
       return VLX_BRANDS.mochila || { brand:'Mochila', url:'mochila.html' };
 
     // ACCESORIOS / BOCINAS / AUDÍFONOS — venta de bocinas
